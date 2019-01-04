@@ -4,6 +4,11 @@
 	
 AS
 
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+
 BEGIN TRY
 	
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -98,16 +103,16 @@ BEGIN TRY
 	SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
 
 	SELECT	@intContractHeaderId = intContractHeaderId
-	FROM	tblCTSequenceAmendmentLog   
+	FROM	tblCTSequenceAmendmentLog   WITH (NOLOCK)
 	WHERE	intSequenceAmendmentLogId = (SELECT MIN(intSequenceAmendmentLogId) FROM @tblSequenceHistoryId)
 
-	SELECT @intScreenId=intScreenId FROM tblSMScreen WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'--ContractManagement.view.ContractAmendment
-	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
+	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'--ContractManagement.view.ContractAmendment
+	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
 	SELECT	@strCommodityCode	=	CM.strCommodityCode,
 			@ysnPrinted			=	CH.ysnPrinted
-	FROM	tblCTContractHeader CH
-	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
+	FROM	tblCTContractHeader CH WITH (NOLOCK)
+	JOIN	tblICCommodity		CM WITH (NOLOCK) ON	CM.intCommodityId		=	CH.intCommodityId
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
 	IF @IsFullApproved = 1	
@@ -120,21 +125,21 @@ BEGIN TRY
 	IF @strCommodityCode = 'Tea'
 		SET @strApprovalText = NULL
 
-    SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
-	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId AND ISNULL(intApproverGroupId,0) <> @intApproverGroupId ORDER BY intApprovalId
+    SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WITH (NOLOCK) WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
+	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WITH (NOLOCK) WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId AND ISNULL(intApproverGroupId,0) <> @intApproverGroupId ORDER BY intApprovalId
 
 	SELECT @FirstApprovalSign =  Sig.blbDetail 
-								 FROM tblSMSignature Sig 
+								 FROM tblSMSignature Sig WITH (NOLOCK) 
 								 --JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
 								 WHERE Sig.intEntityId=@FirstApprovalId
 
 	SELECT @SecondApprovalSign =Sig.blbDetail 
-								FROM tblSMSignature Sig 
+								FROM tblSMSignature Sig WITH (NOLOCK) 
 								--JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
 								WHERE Sig.intEntityId=@SecondApprovalId
 	
-	SELECT @FirstApprovalFullName  = strName FROM tblEMEntity WHERE intEntityId = @FirstApprovalId
-	SELECT @SecondApprovalFullName = strName FROM tblEMEntity WHERE intEntityId = @SecondApprovalId
+	SELECT @FirstApprovalFullName  = strName FROM tblEMEntity WITH (NOLOCK) WHERE intEntityId = @FirstApprovalId
+	SELECT @SecondApprovalFullName = strName FROM tblEMEntity WITH (NOLOCK) WHERE intEntityId = @SecondApprovalId
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(strAddress)) END,
@@ -143,60 +148,60 @@ BEGIN TRY
 			@strState		=	CASE WHEN LTRIM(RTRIM(strState)) = '' THEN NULL ELSE LTRIM(RTRIM(strState)) END,
 			@strZip			=	CASE WHEN LTRIM(RTRIM(strZip)) = '' THEN NULL ELSE LTRIM(RTRIM(strZip)) END,
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
-	FROM	tblSMCompanySetup
+	FROM	tblSMCompanySetup WITH (NOLOCK) 
 
 	SELECT	@strContractDocuments = STUFF(								
 			   (SELECT			
 					CHAR(13)+CHAR(10) + DM.strDocumentName	
-					FROM tblCTContractDocument CD	
-					JOIN tblICDocument DM ON DM.intDocumentId = CD.intDocumentId	
+					FROM tblCTContractDocument CD WITH (NOLOCK) 	
+					JOIN tblICDocument DM WITH (NOLOCK) ON DM.intDocumentId = CD.intDocumentId	
 					WHERE CD.intContractHeaderId=CH.intContractHeaderId	
 					ORDER BY DM.strDocumentName		
 					FOR XML PATH(''), TYPE				
 			   ).value('.','varchar(max)')
 			   ,1,2, ''						
 		  )  				
-	FROM tblCTContractHeader CH						
+	FROM tblCTContractHeader CH	WITH (NOLOCK) 					
 	WHERE CH.intContractHeaderId = @intContractHeaderId
 
 	SELECT	@strContractConditions = STUFF(								
 			(
 					SELECT	CHAR(13)+CHAR(10) + DM.strConditionDesc
-					FROM	tblCTContractCondition	CD	
-					JOIN	tblCTCondition			DM	ON DM.intConditionId = CD.intConditionId	
+					FROM	tblCTContractCondition	CD WITH (NOLOCK) 	
+					JOIN	tblCTCondition			DM WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	
 					ORDER BY DM.strConditionName		
 					FOR XML PATH(''), TYPE				
 			   ).value('.','varchar(max)')
 			   ,1,2, ''						
 			)  				
-	FROM	tblCTContractHeader CH						
+	FROM	tblCTContractHeader CH	WITH (NOLOCK) 					
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
 	IF EXISTS
 	(
 				SELECT	TOP 1 1 
-				FROM	tblCTContractCertification	CC
-				JOIN	tblCTContractDetail			CH	ON	CC.intContractDetailId	=	CH.intContractDetailId
-				JOIN	tblICCertification			CF	ON	CF.intCertificationId	=	CC.intCertificationId	
+				FROM	tblCTContractCertification	CC  WITH (NOLOCK) 
+				JOIN	tblCTContractDetail			CH	WITH (NOLOCK) ON	CC.intContractDetailId	=	CH.intContractDetailId
+				JOIN	tblICCertification			CF	WITH (NOLOCK) ON	CF.intCertificationId	=	CC.intCertificationId	
 				WHERE	UPPER(CF.strCertificationName) = 'FAIRTRADE' AND CH.intContractHeaderId = @intContractHeaderId
 	)
 	BEGIN
 		SET @ysnFairtrade = 1
 	END
 
-	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId
 
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 		SELECT @intPrevApprovedContractId = NULL, @intLastApprovedContractId = NULL
 		SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@dtmApproved = dtmApproved 
-		FROM   tblCTApprovedContract 
+		FROM   tblCTApprovedContract WITH (NOLOCK) 
 		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Contract Amendment ') AND ysnApproved = 1
 		ORDER BY intApprovedContractId DESC
 
 		SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
-		FROM   tblCTApprovedContract 
+		FROM   tblCTApprovedContract WITH (NOLOCK) 
 		WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId < @intLastApprovedContractId AND ysnApproved = 1
 		ORDER BY intApprovedContractId DESC
 
@@ -207,15 +212,15 @@ BEGIN TRY
 			intSubLocationId,intStorageLocationId,intPurchasingGroupId,strApprovalType,strVendorLotID,ysnApproved,intCertificationId,intLoadingPortId', @strAmendedColumns OUTPUT
 		END
 		 
-		 SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
+		 SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	 END
 
 	IF @strAmendedColumns IS NULL AND EXISTS(SELECT 1 FROM @tblSequenceHistoryId)
 	BEGIN
 		 SELECT  @strAmendedColumns= STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
-											FROM tblCTAmendmentApproval AAP
-											JOIN tblCTSequenceAmendmentLog AL ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
+											FROM tblCTAmendmentApproval AAP WITH (NOLOCK) 
+											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK)  ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
 											JOIN @tblSequenceHistoryId SH ON SH.intSequenceAmendmentLogId  = AL.intSequenceAmendmentLogId  
 											WHERE ISNULL(AAP.ysnAmendment,0) =1
 											FOR XML PATH('')
@@ -224,7 +229,7 @@ BEGIN TRY
 		SELECT @strDetailAmendedColumns = STUFF((
 										  		SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
 										  		FROM tblCTAmendmentApproval AAP
-										  		JOIN tblCTSequenceAmendmentLog AL ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
+										  		JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
 										  		JOIN @tblSequenceHistoryId SH ON SH.intSequenceAmendmentLogId  = AL.intSequenceAmendmentLogId 
 										  		WHERE ISNULL(AAP.ysnAmendment,0) =1 AND AAP.intAmendmentApprovalId BETWEEN 7 AND 19
 										  		FOR XML PATH('')
@@ -241,9 +246,9 @@ BEGIN TRY
 								END,
 			@TotalLots		=	SUM(CD.dblNoOfLots)
 
-	FROM	tblCTContractDetail CD
-	JOIN	tblICItemUOM		UOM ON	UOM.intItemUOMId		=	CD.intItemUOMId
-	JOIN	tblRKFutureMarket	MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId
+	FROM	tblCTContractDetail CD  WITH (NOLOCK) 
+	JOIN	tblICItemUOM		UOM WITH (NOLOCK) ON	UOM.intItemUOMId		=	CD.intItemUOMId
+	JOIN	tblRKFutureMarket	MA	WITH (NOLOCK) ON	MA.intFutureMarketId	=	CD.intFutureMarketId
 	WHERE	CD.intContractHeaderId = @intContractHeaderId
 		
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
@@ -358,27 +363,27 @@ BEGIN TRY
 		     
 
 	FROM	tblCTContractHeader CH
-	JOIN	tblICCommodity		CM	ON	CM.intCommodityId		=	CH.intCommodityId
-	JOIN	tblCTContractType	TP	ON	TP.intContractTypeId	=	CH.intContractTypeId
-	JOIN	vyuCTEntity			EY	ON	EY.intEntityId			=	CH.intEntityId	AND
+	JOIN	tblICCommodity		CM	WITH (NOLOCK) ON	CM.intCommodityId		=	CH.intCommodityId
+	JOIN	tblCTContractType	TP	WITH (NOLOCK) ON	TP.intContractTypeId	=	CH.intContractTypeId
+	JOIN	vyuCTEntity			EY	WITH (NOLOCK) ON	EY.intEntityId			=	CH.intEntityId	AND
 										EY.strEntityType		=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
-	JOIN	tblCTCropYear		CY	ON	CY.intCropYearId		=	CH.intCropYearId		LEFT
-	JOIN	tblCTContractBasis	CB	ON	CB.intContractBasisId	=	CH.intContractBasisId	LEFT
-	JOIN	tblCTWeightGrade	W1	ON	W1.intWeightGradeId		=	CH.intWeightId			LEFT
-	JOIN	tblCTWeightGrade	W2	ON	W2.intWeightGradeId		=	CH.intGradeId			LEFT
-	JOIN	tblCTContractText	TX	ON	TX.intContractTextId	=	CH.intContractTextId	LEFT
-	JOIN	tblCTAssociation	AN	ON	AN.intAssociationId		=	CH.intAssociationId		LEFT
-	JOIN	tblSMTerm			TM	ON	TM.intTermID			=	CH.intTermId			LEFT
-	JOIN	tblSMCity			AB	ON	AB.intCityId			=	CH.intArbitrationId		LEFT
-	JOIN	tblSMCountry		RY	ON	RY.intCountryID			=	AB.intCountryId			LEFT
-	JOIN	tblCTInsuranceBy	IB	ON	IB.intInsuranceById		=	CH.intInsuranceById		LEFT	
-	JOIN	tblEMEntity			PR	ON	PR.intEntityId			=	CH.intProducerId		LEFT
-	JOIN	tblCTPosition		PO	ON	PO.intPositionId		=	CH.intPositionId		LEFT
-	JOIN	tblSMCountry		CO	ON	CO.intCountryID			=	CH.intCountryId			LEFT
-	JOIN	tblAPVendor			VR	ON	VR.intEntityId			=	CH.intEntityId			LEFT
-	JOIN	tblARCustomer		CR	ON	CR.intEntityId			=	CH.intEntityId			LEFT	
-	JOIN	tblSMCity			CT	ON	CT.intCityId			=	CH.intINCOLocationTypeId	LEFT
-	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId LEFT
+	JOIN	tblCTCropYear		CY	WITH (NOLOCK) ON	CY.intCropYearId		=	CH.intCropYearId		LEFT
+	JOIN	tblCTContractBasis	CB	WITH (NOLOCK) ON	CB.intContractBasisId	=	CH.intContractBasisId	LEFT
+	JOIN	tblCTWeightGrade	W1	WITH (NOLOCK) ON	W1.intWeightGradeId		=	CH.intWeightId			LEFT
+	JOIN	tblCTWeightGrade	W2	WITH (NOLOCK) ON	W2.intWeightGradeId		=	CH.intGradeId			LEFT
+	JOIN	tblCTContractText	TX	WITH (NOLOCK) ON	TX.intContractTextId	=	CH.intContractTextId	LEFT
+	JOIN	tblCTAssociation	AN	WITH (NOLOCK) ON	AN.intAssociationId		=	CH.intAssociationId		LEFT
+	JOIN	tblSMTerm			TM	WITH (NOLOCK) ON	TM.intTermID			=	CH.intTermId			LEFT
+	JOIN	tblSMCity			AB	WITH (NOLOCK) ON	AB.intCityId			=	CH.intArbitrationId		LEFT
+	JOIN	tblSMCountry		RY	WITH (NOLOCK) ON	RY.intCountryID			=	AB.intCountryId			LEFT
+	JOIN	tblCTInsuranceBy	IB	WITH (NOLOCK) ON	IB.intInsuranceById		=	CH.intInsuranceById		LEFT	
+	JOIN	tblEMEntity			PR	WITH (NOLOCK) ON	PR.intEntityId			=	CH.intProducerId		LEFT
+	JOIN	tblCTPosition		PO	WITH (NOLOCK) ON	PO.intPositionId		=	CH.intPositionId		LEFT
+	JOIN	tblSMCountry		CO	WITH (NOLOCK) ON	CO.intCountryID			=	CH.intCountryId			LEFT
+	JOIN	tblAPVendor			VR	WITH (NOLOCK) ON	VR.intEntityId			=	CH.intEntityId			LEFT
+	JOIN	tblARCustomer		CR	WITH (NOLOCK) ON	CR.intEntityId			=	CH.intEntityId			LEFT	
+	JOIN	tblSMCity			CT	WITH (NOLOCK) ON	CT.intCityId			=	CH.intINCOLocationTypeId	LEFT
+	JOIN	tblSMCompanyLocationSubLocation		SL	WITH (NOLOCK) ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId LEFT
 	JOIN	(
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
 							CD.intContractHeaderId,
@@ -396,20 +401,20 @@ BEGIN TRY
 						    CL.strContractPrintSignOff              AS strContractPrintSignOff,
 							CD.strERPPONumber,
 							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots
-				FROM		tblCTContractDetail		CD
-				JOIN		tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
-				JOIN		tblSMCity				LP	ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
-				JOIN		tblSMCity				DP	ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
-				JOIN		tblEMEntity				TT	ON	TT.intEntityId				=	CD.intShipperId				LEFT
-				JOIN		tblSMCurrency			CY	ON	CY.intCurrencyID			=	CD.intCurrencyId			LEFT
-				JOIN		tblRKFutureMarket		MA	ON	MA.intFutureMarketId		=	CD.intFutureMarketId		
+				FROM		tblCTContractDetail		CD  WITH (NOLOCK)
+				JOIN		tblSMCompanyLocation	CL	WITH (NOLOCK) ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
+				JOIN		tblSMCity				LP	WITH (NOLOCK) ON	LP.intCityId				=	CD.intLoadingPortId			LEFT
+				JOIN		tblSMCity				DP	WITH (NOLOCK) ON	DP.intCityId				=	CD.intDestinationPortId		LEFT
+				JOIN		tblEMEntity				TT	WITH (NOLOCK) ON	TT.intEntityId				=	CD.intShipperId				LEFT
+				JOIN		tblSMCurrency			CY	WITH (NOLOCK) ON	CY.intCurrencyID			=	CD.intCurrencyId			LEFT
+				JOIN		tblRKFutureMarket		MA	WITH (NOLOCK) ON	MA.intFutureMarketId		=	CD.intFutureMarketId		
 			)					SQ	ON	SQ.intContractHeaderId	=	CH.intContractHeaderId	AND  SQ.intRowNum = 1
 	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
 
-	IF @IsFullApproved=1  OR ISNULL(@ysnFeedOnApproval,0) = 0
-		UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
+	--IF @IsFullApproved=1  OR ISNULL(@ysnFeedOnApproval,0) = 0
+	--	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
 
 END TRY
 
