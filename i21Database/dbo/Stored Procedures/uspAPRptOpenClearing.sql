@@ -78,7 +78,8 @@ BEGIN
 		0 AS dblQtyToVoucher,
 		0 AS dblAmountToVoucher,
 		0 AS dblChargeAmount, 
-		NULL as dtmCurrentDate
+		NULL as dtmCurrentDate,
+		NULL AS strLocationName
 
 END
 
@@ -146,6 +147,7 @@ SET @innerQuery = 'SELECT DISTINCT
 						,strBillOfLading
 						,dblVoucherQty
 						,dblReceiptQty
+						,strLocationName
 				  FROM dbo.vyuAPClearables'
 
 IF @dateFrom IS NOT NULL
@@ -270,6 +272,7 @@ SELECT * FROM (
 	,tmpAgingSummaryTotal.dtmReceiptDate
 	,tmpAgingSummaryTotal.strReceiptNumber
 	,tmpAgingSummaryTotal.strBillOfLading
+	,tmpAgingSummaryTotal.strLocationName
 	,tmpAgingSummaryTotal.strOrderNumber AS strOrderNumber
 	,tmpAgingSummaryTotal.dtmDate
 	,tmpAgingSummaryTotal.dtmBillDate
@@ -319,6 +322,7 @@ SELECT * FROM (
 		,tmpAPClearables.strTerm
 		,tmpAPClearables.dtmReceiptDate
 		,tmpAPClearables.strBillOfLading
+		,tmpAPClearables.strLocationName
 		,SUM(tmpAPClearables.dblVoucherAmount) as dblVoucherAmount
 		,SUM(tmpAPClearables.dblTotal) AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
@@ -333,7 +337,7 @@ SELECT * FROM (
 				+ @innerQuery +
 			   ') tmpAPClearables 
 		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue,strVendorIdName,strContainer,
-				 strVendorId, strBillId ,strOrderNumber,dtmDate,dtmDueDate,dtmReceiptDate,strTerm,strReceiptNumber,strBillOfLading, dtmBillDate 
+				 strVendorId, strBillId ,strOrderNumber,dtmDate,dtmDueDate,dtmReceiptDate,strTerm,strReceiptNumber,strBillOfLading ,strLocationName
 	) AS tmpAgingSummaryTotal
 	--LEFT JOIN vyuICGetInventoryReceipt IR
 	--	ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
