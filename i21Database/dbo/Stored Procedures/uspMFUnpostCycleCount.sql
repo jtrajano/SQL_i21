@@ -697,7 +697,7 @@ BEGIN TRY
 		JOIN tblICItemLocation IL ON IL.intItemId = WI.intItemId
 			AND IL.intLocationId = @intLocationId
 			AND WI.ysnConsumptionReversed = 0
-		JOIN tblICLot L ON L.intLotId = WI.intLotId
+		LEFT JOIN tblICLot L ON L.intLotId = WI.intLotId
 		WHERE intWorkOrderId = @intWorkOrderId
 		GROUP BY WI.intItemId
 			,IL.intItemLocationId
