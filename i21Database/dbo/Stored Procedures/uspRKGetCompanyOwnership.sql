@@ -20,6 +20,10 @@ DECLARE @tblResult TABLE (
 	,intReceiptId INT
 	)
 
+	
+DECLARE @intCommodityUnitMeasureId INT= NULL
+SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
+
 
 INSERT INTO @tblResult (
 	dblUnpaidBalance
@@ -323,6 +327,64 @@ FROM (
 	
 
 )t
+
+UNION
+SELECT 
+	strItemNo
+	,dtmDate
+	,0 AS dblUnpaidIn
+	,0 AS dblUnpaidOut
+	,0 AS dblUnpaidBalance
+	,dblAdjustmentQty as dblPaidBalance
+	,'ADJ' as strDistributionOption
+	,strAdjustmentNo as strReceiptNumber
+	,intInventoryAdjustmentId as intReceiptId
+			
+	FROM(
+		--Own
+		SELECT  
+			CONVERT(VARCHAR(10),IT.dtmDate,110) dtmDate
+			,round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,IT.dblQty) ,6) dblAdjustmentQty
+			,IT.strTransactionId strAdjustmentNo
+			,IT.intTransactionId intInventoryAdjustmentId
+			,strItemNo
+		FROM tblICInventoryTransaction IT 	
+			INNER JOIN tblICItem Itm ON IT.intItemId = Itm.intItemId
+			INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+			INNER JOIN tblICItemUOM u on Itm.intItemId=u.intItemId and u.ysnStockUnit=1
+			INNER JOIN tblICItemLocation il on IT.intItemLocationId=il.intItemLocationId
+											AND  il.intLocationId  IN (
+														SELECT intCompanyLocationId FROM tblSMCompanyLocation
+														WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+														WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+														ELSE isnull(ysnLicensed, 0) END)
+		WHERE IT.intTransactionTypeId IN (10,15,47)
+			AND IT.ysnIsUnposted = 0
+			AND convert(DATETIME, CONVERT(VARCHAR(10), IT.dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND C.intCommodityId = @intCommodityId 
+			AND IT.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN IT.intItemId ELSE @intItemId END 
+			AND il.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
+
+		--Storage
+		UNION ALL
+		SELECT
+			CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
+			,round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
+			,IA.strAdjustmentNo strAdjustmentNo
+			,IA.intInventoryAdjustmentId intInventoryAdjustmentId
+			,strItemNo
+		FROM tblICInventoryAdjustment IA
+			INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+			INNER JOIN tblICItem Itm ON IAD.intItemId = Itm.intItemId
+			INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+		WHERE IAD.intOwnershipType = 2 --Storage
+			AND IA.ysnPosted = 1
+			AND convert(DATETIME, CONVERT(VARCHAR(10), IA.dtmPostedDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND C.intCommodityId = @intCommodityId 
+			AND IAD.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN IAD.intItemId ELSE @intItemId END 
+			--AND Itm.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
+
+		)a
 
 UNION 
 SELECT --Delivery Sheet
