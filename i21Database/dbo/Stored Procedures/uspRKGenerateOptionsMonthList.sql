@@ -22,11 +22,6 @@ BEGIN TRY
 		, @Count    INT
 		, @Top    INT
 	
-	SELECT @OptMonthsToOpen = @intOptMonthsToOpen
-		, @Date = GETDATE()
-		, @CurrentMonthCode = MONTH(@Date)
-		, @Count = 0
-	
 	IF OBJECT_ID('tempdb..##AllowedOptMonths') IS NOT NULL DROP TABLE ##AllowedOptMonths
 	
 	SELECT *, intRowId = ROW_NUMBER() OVER (ORDER BY intMonthCode) 
@@ -99,37 +94,29 @@ BEGIN TRY
 		WHERE ysnSelect = 1
 		ORDER BY intMonthCode
 	) tblMonths
-	
-	DECLARE @CurrentOptionMonthsCount INT
-	SELECT @CurrentOptionMonthsCount = COUNT(*) FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId;
 
-	IF(ISNULL(@OptMonthsToOpen,0) < @CurrentOptionMonthsCount)
+	SELECT @OptMonthsToOpen = @intOptMonthsToOpen
+		, @Date = GETDATE()
+		, @CurrentMonthCode = MONTH(@Date)
+		, @Count = 0
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId)
 	BEGIN
-		DECLARE @ValidateCurrentOptionMonth TABLE(
-		  intOptionMonthId INT
-		, strOptionMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS);
-
-		INSERT INTO @ValidateCurrentOptionMonth(intOptionMonthId, strOptionMonth)
-		SELECT intMonthId, strMonth FROM dbo.fnRKGetFutureOptionMonthsNotInUse(@FutureMarketId, @OptMonthsToOpen, 0)
-	
-		IF NOT EXISTS(SELECT TOP 1 1 FROM @ValidateCurrentOptionMonth)
-		BEGIN
-			DELETE FROM tblRKOptionsMonth 
-			WHERE intFutureMarketId = @FutureMarketId 
-			AND strOptionMonth NOT IN (
-				SELECT strOptionMonth FROM vyuRKGetOptionTradingMonthsInUse WHERE intFutureMarketId = @FutureMarketId
-			)
-			AND intOptionMonthId NOT IN(
-				SELECT TOP(@OptMonthsToOpen) intOptionMonthId FROM tblRKOptionsMonth
-				ORDER BY CONVERT(DATETIME, REPLACE(strOptionMonth, ' ',  ' 1, '),103)  ASC
-			)
-		END
-		ELSE
-		BEGIN
-			RAISERROR('You cannot generate Option Trading Months. Current Option Trading Months already in use.', 16, 1);
-		END
+		SELECT TOP 1 @Date = CASE WHEN ISNULL(AOM.strMonth, '') <> '' 
+				THEN DATEADD(MONTH,-1, CONVERT(DATETIME,'01 ' + strOptionMonth))
+			END
+			,@CurrentMonthCode = CASE WHEN ISNULL(AOM.strMonth, '') <> '' 
+				THEN MONTH(DATEADD(MONTH,-1, CONVERT(DATETIME,'01 ' + strOptionMonth)))
+			END
+		FROM tblRKOptionsMonth OM
+		OUTER APPLY (
+			SELECT TOP 1 * FROM ##AllowedOptMonths
+			ORDER BY intMonthCode ASC
+		) AOM
+		WHERE OM.intFutureMarketId = @FutureMarketId
+		ORDER BY CONVERT(DATETIME,'01 ' + strOptionMonth) DESC
 	END
-	
+
 	IF OBJECT_ID('tempdb..##FinalOptMonths') IS NOT NULL DROP TABLE ##FinalOptMonths
 	
 	CREATE TABLE ##FinalOptMonths(
@@ -174,6 +161,7 @@ BEGIN TRY
 		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, ysnProcessed BIT DEFAULT 0);
+
 	SELECT @intCountAllowedMonths = COUNT(*) FROM ##AllowedOptMonths
 
 	DECLARE @intIndex1 int = 0;
@@ -183,15 +171,22 @@ BEGIN TRY
 	WHILE (SELECT COUNT(*) FROM @ProjectedOptionMonths) < (@OptMonthsToOpen * 2)
 	BEGIN
 		SET @intIndex1 = @intIndex1 + 1;
-
+		
 		SELECT @ProjectedMonthName= strMonth
 		FROM ##AllowedOptMonths
 		WHERE intRowId = @intIndex1;
 
-		SELECT TOP(1) @ProjectedMonth = strMonth
+		SELECT TOP(1) @ProjectedMonth = strOptionMonth
 		FROM ##FinalOptMonths
 		WHERE strMonthName = @ProjectedMonthName
-		AND strMonth NOT IN(SELECT strMonth FROM @ProjectedOptionMonths)
+	
+		IF EXISTS(SELECT TOP 1 * FROM @ProjectedOptionMonths WHERE strMonth = @ProjectedMonth)
+		BEGIN
+			SELECT TOP(1) @ProjectedMonth = strOptionMonth
+			FROM ##FinalOptMonths
+			WHERE strMonthName = @ProjectedMonthName
+			AND strOptionMonth NOT IN(SELECT strMonth FROM @ProjectedOptionMonths)
+		END
 
 		INSERT INTO @ProjectedOptionMonths(strMonthName,strMonth)
 		SELECT @ProjectedMonthName, @ProjectedMonth
@@ -202,32 +197,17 @@ BEGIN TRY
 		END
 	END
 
-	UPDATE ##FinalOptMonths
-	SET intSeqNo = PM.intRowId
-	FROM ##FinalOptMonths FM
-	INNER JOIN @ProjectedOptionMonths PM ON FM.strMonth = PM.strMonth
+	IF EXISTS(SELECT * FROM ##FinalOptMonths WHERE strOptionMonth IN (SELECT strOptionMonth FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId))
+	BEGIN
+		DELETE FROM ##FinalOptMonths
+		WHERE strOptionMonth IN (SELECT strOptionMonth FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId)
+	END
 
-	IF @OptMonthsToOpen >= (SELECT COUNT(*) FROM ##AllowedOptMonths) 
-	BEGIN
-		DELETE FROM ##FinalOptMonths
-		WHERE strMonth NOT IN (SELECT strMonth FROM @ProjectedOptionMonths)
-	END
-	ELSE 
-	BEGIN
-		DELETE FROM ##FinalOptMonths
-		WHERE strMonth NOT IN (SELECT TOP(@OptMonthsToOpen) strMonth FROM ##FinalOptMonths ORDER BY CONVERT(DATETIME, REPLACE(strMonth, ' ', '') + '-01') ASC)
-	END
-	
-	IF @OptMonthsToOpen >= (SELECT COUNT(*) FROM ##AllowedOptMonths) 
-	BEGIN
-		DELETE FROM ##FinalOptMonths
-		WHERE intSeqNo NOT IN (SELECT TOP(@OptMonthsToOpen) intSeqNo FROM ##FinalOptMonths ORDER BY intSeqNo ASC)
-	END
-	ELSE 
-	BEGIN
-		DELETE FROM ##FinalOptMonths
-		WHERE strMonth NOT IN (SELECT TOP(@OptMonthsToOpen) strMonth FROM ##FinalOptMonths ORDER BY CONVERT(DATETIME, REPLACE(strMonth, ' ', '') + '-01') ASC)
-	END
+	DELETE FROM @ProjectedOptionMonths
+	WHERE strMonth IN (SELECT strOptionMonth FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId)
+
+	DELETE FROM ##FinalOptMonths
+	WHERE strOptionMonth NOT IN (SELECT TOP(@OptMonthsToOpen) strMonth FROM @ProjectedOptionMonths)
 
 	DECLARE @MissingFutureMonths VARCHAR(4000)
 	SELECT @MissingFutureMonths = COALESCE(@MissingFutureMonths + ', ', '') + strFuturesMonth 
@@ -264,15 +244,6 @@ BEGIN TRY
 		AND ISNULL(intFutureMonthId,0) <> 0
 	ORDER BY strMonth
 
-	BEGIN TRY
-		DELETE FROM tblRKOptionsMonth
-		WHERE intFutureMarketId = @FutureMarketId 
-		AND strOptionMonth NOT IN(SELECT strOMonth = LTRIM(RTRIM(strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(strYear, 2) FROM #OptTemp)
-	END TRY
-	BEGIN CATCH
-		RAISERROR('You cannot generate Option Trading Months. Current Option Trading Months already in use.', 16, 1);
-	END CATCH
-	
 	DECLARE @strOptSymbol NVARCHAR(5)
 	SELECT @strOptSymbol = strOptSymbol FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
 	

@@ -7229,6 +7229,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetPriceContractSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixation.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
