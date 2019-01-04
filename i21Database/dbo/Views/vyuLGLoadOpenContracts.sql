@@ -18,13 +18,13 @@ SELECT CD.intContractDetailId
 	,CH.intEntityId
 	,CH.strContractNumber
 	,CH.dtmContractDate
-	,EY.strEntityName
+	,strEntityName = EY.strName
 	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) COLLATE Latin1_General_CI_AS AS strStartDate
 	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) COLLATE Latin1_General_CI_AS AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
-	,EY.intDefaultLocationId
+	,intDefaultLocationId = EYL.intEntityLocationId
 	,ISNULL(CD.dblScheduleQty, 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
@@ -90,19 +90,13 @@ SELECT CD.intContractDetailId
 	,intShipmentType = 1
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
-	,CO.strCountry AS strOrigin
+	,strOrigin = ISNULL(CO.strCountry, CO2.strCountry)
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
-	AND EY.strEntityType = (
-		CASE 
-			WHEN CH.intContractTypeId = 1
-				THEN 'Vendor'
-			ELSE 'Customer'
-			END
-		)
+JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId
+JOIN tblEMEntityLocation EYL ON EYL.intEntityId = CH.intEntityId AND ysnDefaultLocation = 1
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -113,15 +107,9 @@ LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTy
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
-LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
-	AND CD.intItemContractId = ICI.intItemContractId
-LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
-		CASE 
-			WHEN ISNULL(ICI.intCountryId, 0) = 0
-				THEN ISNULL(CA.intCountryID, 0)
-			ELSE ICI.intCountryId
-			END
-		)
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
+LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -168,13 +156,13 @@ SELECT CD.intContractDetailId
 	,CH.intEntityId
 	,CH.strContractNumber
 	,CH.dtmContractDate
-	,EY.strEntityName
+	,strEntityName = EY.strName
 	,CONVERT(NVARCHAR(100), CD.dtmStartDate, 101) COLLATE Latin1_General_CI_AS AS strStartDate
 	,CONVERT(NVARCHAR(100), CD.dtmEndDate, 101) COLLATE Latin1_General_CI_AS AS strEndDate
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
-	,EY.intDefaultLocationId
+	,intDefaultLocationId = EYL.intEntityLocationId
 	,ISNULL(CD.dblShippingInstructionQty, 0) AS dblScheduleQty
 	,CH.strCustomerContract
 	,ISNULL(CD.dblBalance, 0) AS dblBalance
@@ -242,13 +230,13 @@ SELECT CD.intContractDetailId
 	,intShipmentType = 2
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
-	,CO.strCountry AS strOrigin
+	,strOrigin = ISNULL(CO.strCountry, CO2.strCountry)
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
-	AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId
+JOIN tblEMEntityLocation EYL ON EYL.intEntityId = EY.intEntityId AND ysnDefaultLocation = 1
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
@@ -259,15 +247,9 @@ LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTy
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
-LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
-	AND CD.intItemContractId = ICI.intItemContractId
-LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
-		CASE 
-			WHEN ISNULL(ICI.intCountryId, 0) = 0
-				THEN ISNULL(CA.intCountryID, 0)
-			ELSE ICI.intCountryId
-			END
-		)
+LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
+LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -312,11 +294,11 @@ GROUP BY CD.intContractDetailId
 	,CH.intEntityId
 	,CH.strContractNumber
 	,CH.dtmContractDate
-	,EY.strEntityName
+	,EY.strName
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
-	,EY.intDefaultLocationId
+	,EYL.intEntityLocationId
 	,CH.strCustomerContract
 	,CD.intContractStatusId
 	,CH.ysnUnlimitedQuantity
@@ -355,3 +337,4 @@ GROUP BY CD.intContractDetailId
 	,WG.ysnSample
 	,CD.dblShippingInstructionQty
 	,CO.strCountry
+	,CO2.strCountry
