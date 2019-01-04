@@ -217,8 +217,8 @@ BEGIN TRY
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
 			SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt
 			IF(@dblRemainingUnits > ISNULL(@dblRemainingQuantity,0))
-				BEGIN
-					INSERT INTO @ItemsForItemReceipt (
+			BEGIN
+				INSERT INTO @ItemsForItemReceipt (
 					intItemId
 					,intItemLocationId
 					,intItemUOMId
@@ -244,14 +244,12 @@ BEGIN TRY
 					,@strSourceType
 					,@intUserId
 					,@dblRemainingUnits
-					,@dblCost
+					,0
 					,@intEntityId
 					,@intContractId
 					,'SPT'
 					,@LineItems
-				END
-			--IF (@dblRemainingUnits = @dblNetUnits)
-			--RETURN
+			END
 		END
 			UPDATE @LineItems set intTicketId = @intTicketId
 			--DELETE FROM @ItemsForItemReceipt
@@ -287,7 +285,6 @@ BEGIN TRY
 				,@intContractId
 				,@strDistributionOption
 				,@LineItems
-
 		-- Validate the items to receive 
 		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 

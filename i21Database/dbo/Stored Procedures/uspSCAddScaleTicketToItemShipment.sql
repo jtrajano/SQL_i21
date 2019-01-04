@@ -133,8 +133,9 @@ BEGIN
 		,strChargesLink
 		,dblGross
 		,dblTare
-		)
-		SELECT
+		,ysnAllowInvoice
+	)
+	SELECT
 		intOrderType				= @intOrderType
 		,intEntityCustomerId		= @intEntityId
 		,intCurrencyId				= CASE
@@ -247,6 +248,11 @@ BEGIN
 		,dblTare					= CASE
 										WHEN SC.intLotId > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, ICL.intItemUOMId, SC.dblShrink)
 										ELSE SC.dblShrink 
+									END
+		,ysnAllowInvoice			= CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
+										CASE  
+											WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 ELSE CASE WHEN LI.dblCost > 0 THEN 1 ELSE 0 END 
+										END
 									END
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
 		LEFT JOIN (
