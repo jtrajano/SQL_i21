@@ -42,7 +42,7 @@ SELECT l.intLotId
 						WHEN l.intOwnershipType = 2 THEN 'Storage'
 						WHEN l.intOwnershipType = 3 THEN 'Consigned Purchase'
 						WHEN l.intOwnershipType = 4 THEN 'Consigned Sale'
-						END)
+						END) COLLATE Latin1_General_CI_AS
 	,l.intGradeId
 	,l.intCreatedUserId
 	,l.intConcurrencyId
@@ -65,8 +65,8 @@ SELECT l.intLotId
 	,pl.strParentLotNumber
 	,e2.strEntityNo + ' - ' + e2.strName AS strOwner
 	,e2.intEntityId AS intEntityId
-	,'' AS strCurrency
-	,'' AS strCostUOM
+	,'' COLLATE Latin1_General_CI_AS AS strCurrency
+	,'' COLLATE Latin1_General_CI_AS AS strCostUOM
 	,0 AS intContainerId
 	,l.strContainerNo AS strContainerNo
 	,ISNULL(S.dblWeight, 0) AS dblReservedQty

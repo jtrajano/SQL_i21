@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetOverAndUnderWeight
 AS
-SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) AS [Production Date]
+SELECT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) COLLATE Latin1_General_CI_AS AS [Production Date]
 	,I.strItemNo AS Item
 	,I.strDescription AS Description
 	,W.strWorkOrderNo AS [Work Order #]
