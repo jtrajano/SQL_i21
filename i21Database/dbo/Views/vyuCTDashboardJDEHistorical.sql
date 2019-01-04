@@ -124,44 +124,44 @@ SELECT 	 SQ.intContractDetailId
 		,SQ.strLocationName
 		,CH.dtmContractDate
 
-	FROM 		vyuCTContractSequence			 	SQ			
-	JOIN 		tblCTContractDetail				 	CD	ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId NOT IN (1,2,4)
-	JOIN 		tblCTContractHeader				 	CH	ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
-	LEFT JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=	CH.intContractBasisId
-	LEFT JOIN	tblICItem						 	IM	ON	IM.intItemId						=	SQ.intItemId
-	LEFT JOIN 	tblEMEntity						 	PR	ON	PR.intEntityId						=	CD.intProducerId
-	LEFT JOIN 	tblSMCity						 	LP	ON	LP.intCityId						=	CD.intLoadingPortId
-	LEFT JOIN 	tblSMCity						 	DP	ON	DP.intCityId						=	CD.intDestinationPortId
-	LEFT JOIN 	tblSMCity						 	DC	ON	DC.intCityId						=	CD.intDestinationCityId
-	LEFT JOIN 	tblICItemContract				 	IC	ON	IC.intItemContractId				=	CD.intItemContractId
-	LEFT JOIN 	tblSMCountry					 	RY	ON	RY.intCountryID						=	IC.intCountryId
-	LEFT JOIN 	tblICCommodityAttribute			 	CA	ON	CA.intCommodityAttributeId			=	IM.intOriginId
+	FROM 		vyuCTContractSequence			 	SQ	WITH (NOLOCK)		
+	JOIN 		tblCTContractDetail				 	CD	WITH (NOLOCK) ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId NOT IN (1,2,4)
+	JOIN 		tblCTContractHeader				 	CH	WITH (NOLOCK) ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
+	LEFT JOIN	tblCTContractBasis					CB	WITH (NOLOCK) ON	CB.intContractBasisId				=	CH.intContractBasisId
+	LEFT JOIN	tblICItem						 	IM	WITH (NOLOCK) ON	IM.intItemId						=	SQ.intItemId
+	LEFT JOIN 	tblEMEntity						 	PR	WITH (NOLOCK) ON	PR.intEntityId						=	CD.intProducerId
+	LEFT JOIN 	tblSMCity						 	LP	WITH (NOLOCK) ON	LP.intCityId						=	CD.intLoadingPortId
+	LEFT JOIN 	tblSMCity						 	DP	WITH (NOLOCK) ON	DP.intCityId						=	CD.intDestinationPortId
+	LEFT JOIN 	tblSMCity						 	DC	WITH (NOLOCK) ON	DC.intCityId						=	CD.intDestinationCityId
+	LEFT JOIN 	tblICItemContract				 	IC	WITH (NOLOCK) ON	IC.intItemContractId				=	CD.intItemContractId
+	LEFT JOIN 	tblSMCountry					 	RY	WITH (NOLOCK) ON	RY.intCountryID						=	IC.intCountryId
+	LEFT JOIN 	tblICCommodityAttribute			 	CA	WITH (NOLOCK) ON	CA.intCommodityAttributeId			=	IM.intOriginId
 														AND	CA.strType							=	'Origin'
-	LEFT JOIN 	tblSMCountry					 	OG	ON	OG.intCountryID						=	CA.intCountryID
-	LEFT JOIN 	tblLGContainerType				 	CT	ON	CT.intContainerTypeId				=	CD.intContainerTypeId
-	LEFT JOIN 	tblSMCompanyLocationSubLocation	 	SB	ON	SB.intCompanyLocationSubLocationId	=	CD.intSubLocationId
-	LEFT JOIN 	tblICStorageLocation			 	SL	ON	SL.intStorageLocationId				=	CD.intStorageLocationId
-	LEFT JOIN 	tblCTContractStatus				 	CS	ON	CS.intContractStatusId				=	SQ.intContractStatusId
-	LEFT JOIN 	tblSMFreightTerms				 	FT	ON	FT.intFreightTermId					=	CD.intFreightTermId
-	LEFT JOIN 	tblSMShipVia					 	SV	ON	SV.intEntityId						=	CD.intShipViaId
-	LEFT JOIN 	tblEMEntity						 	ES	ON	ES.intEntityId						=	CD.intShippingLineId
-	LEFT JOIN 	tblEMEntity						 	EP	ON	EP.intEntityId						=	CD.intShipperId
-	LEFT JOIN 	tblSMPurchasingGroup			 	PG	ON	PG.intPurchasingGroupId				=	CD.intPurchasingGroupId
-	LEFT JOIN 	tblICCommodityAttribute			 	PT	ON	PT.intCommodityAttributeId			=	IM.intProductTypeId
-	LEFT JOIN 	tblCTBook						 	BK	ON	BK.intBookId						=	SQ.intBookId
-	LEFT JOIN 	tblCTSubBook					 	SK	ON	SK.intSubBookId						=	SQ.intSubBookId
-	LEFT JOIN 	tblICItemUOM					 	WU	ON	WU.intItemUOMId						=	SQ.intNetWeightUOMId
-	LEFT JOIN 	tblICUnitMeasure				 	U7	ON	U7.intUnitMeasureId					=	WU.intUnitMeasureId
-	LEFT JOIN 	tblICUnitMeasure				 	U8	ON	1 = 1
+	LEFT JOIN 	tblSMCountry					 	OG	WITH (NOLOCK) ON	OG.intCountryID						=	CA.intCountryID
+	LEFT JOIN 	tblLGContainerType				 	CT	WITH (NOLOCK) ON	CT.intContainerTypeId				=	CD.intContainerTypeId
+	LEFT JOIN 	tblSMCompanyLocationSubLocation	 	SB	WITH (NOLOCK) ON	SB.intCompanyLocationSubLocationId	=	CD.intSubLocationId
+	LEFT JOIN 	tblICStorageLocation			 	SL	WITH (NOLOCK) ON	SL.intStorageLocationId				=	CD.intStorageLocationId
+	LEFT JOIN 	tblCTContractStatus				 	CS	WITH (NOLOCK) ON	CS.intContractStatusId				=	SQ.intContractStatusId
+	LEFT JOIN 	tblSMFreightTerms				 	FT	WITH (NOLOCK) ON	FT.intFreightTermId					=	CD.intFreightTermId
+	LEFT JOIN 	tblSMShipVia					 	SV	WITH (NOLOCK) ON	SV.intEntityId						=	CD.intShipViaId
+	LEFT JOIN 	tblEMEntity						 	ES	WITH (NOLOCK) ON	ES.intEntityId						=	CD.intShippingLineId
+	LEFT JOIN 	tblEMEntity						 	EP	WITH (NOLOCK) ON	EP.intEntityId						=	CD.intShipperId
+	LEFT JOIN 	tblSMPurchasingGroup			 	PG	WITH (NOLOCK) ON	PG.intPurchasingGroupId				=	CD.intPurchasingGroupId
+	LEFT JOIN 	tblICCommodityAttribute			 	PT	WITH (NOLOCK) ON	PT.intCommodityAttributeId			=	IM.intProductTypeId
+	LEFT JOIN 	tblCTBook						 	BK	WITH (NOLOCK) ON	BK.intBookId						=	SQ.intBookId
+	LEFT JOIN 	tblCTSubBook					 	SK	WITH (NOLOCK) ON	SK.intSubBookId						=	SQ.intSubBookId
+	LEFT JOIN 	tblICItemUOM					 	WU	WITH (NOLOCK) ON	WU.intItemUOMId						=	SQ.intNetWeightUOMId
+	LEFT JOIN 	tblICUnitMeasure				 	U7	WITH (NOLOCK) ON	U7.intUnitMeasureId					=	WU.intUnitMeasureId
+	LEFT JOIN 	tblICUnitMeasure				 	U8	WITH (NOLOCK) ON	1 = 1
 														AND U8.strUnitMeasure					=	'Ton'
 	LEFT JOIN 	
 	(
 		SELECT 	intPContractDetailId,
 				SUM(LD.dblQuantity)	 dblQuantity
-		FROM 	tblLGLoad		 	LO	
-		JOIN 	tblLGLoadDetail	 	LD	 ON LO.intLoadId = LD.intLoadId
+		FROM 	tblLGLoad		 	LO	 WITH (NOLOCK)
+		JOIN 	tblLGLoadDetail	 	LD	 WITH (NOLOCK) ON LO.intLoadId = LD.intLoadId
 		WHERE	LO.intShipmentType = 2
 		GROUP BY intPContractDetailId
-	)										 		LG	ON	LG.intPContractDetailId				=	CD.intContractDetailId
-	LEFT JOIN	vyuCTLoadView						LV	ON	LV.intContractDetailId				=	CD.intContractDetailId
-	LEFT JOIN	vyuCTQualityApprovedRejected		QA	ON	QA.intContractDetailId				=	CD.intContractDetailId
+	)										 		LG				  ON	LG.intPContractDetailId				=	CD.intContractDetailId
+	LEFT JOIN	vyuCTLoadView						LV	WITH (NOLOCK) ON	LV.intContractDetailId				=	CD.intContractDetailId
+	LEFT JOIN	vyuCTQualityApprovedRejected		QA	WITH (NOLOCK) ON	QA.intContractDetailId				=	CD.intContractDetailId
