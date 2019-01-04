@@ -23,10 +23,10 @@
 	,intInventoryAdjustmentId int
 	,intOldItemOwnerId INT
 	,intNewItemOwnerId INT
-	,strOldLotAlias nvarchar(50)
-	,strNewLotAlias nvarchar(50)
-	,strOldVendorLotNumber nvarchar(50)
-	,strNewVendorLotNumber nvarchar(50)
+	,strOldLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strNewLotAlias nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strOldVendorLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strNewVendorLotNumber nvarchar(50) COLLATE Latin1_General_CI_AS
 	,intCompanyId INT NULL
 	,dtmOldDueDate DATETIME NULL
 	,dtmNewDueDate DATETIME NULL

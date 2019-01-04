@@ -63,7 +63,7 @@ SELECT W.strWorkOrderNo
 				ELSE 0
 				END
 			) * 100) AS dblYield
-	,'CONSUME' AS strTransactionName
+	,'CONSUME' COLLATE Latin1_General_CI_AS AS strTransactionName
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId

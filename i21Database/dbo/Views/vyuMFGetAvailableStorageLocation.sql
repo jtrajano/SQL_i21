@@ -6,7 +6,7 @@ SELECT DISTINCT SL.strName
 		WHEN L.intLotId IS NULL
 			THEN 'Yes'
 		ELSE 'No'
-		END AS strAvailable
+		END COLLATE Latin1_General_CI_AS AS strAvailable
 		,LS.strSubLocationName 
 FROM tblICStorageLocation SL
 JOIN tblSMCompanyLocationSubLocation LS On LS.intCompanyLocationSubLocationId =SL.intSubLocationId 
