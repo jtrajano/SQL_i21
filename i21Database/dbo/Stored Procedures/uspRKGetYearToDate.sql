@@ -11,6 +11,7 @@ DECLARE @NetValue NUMERIC(18,6),
 		@SoldValue NUMERIC(18,6),
 		@PaidValue NUMERIC(18,6),
 		@NetPayablesValue NUMERIC(18,6),
+		@NetReceivablesValue NUMERIC(18,6),
 		@intCommodityId AS INT
 
 
@@ -522,13 +523,13 @@ BEGIN
 		SELECT @NetValue = dblTotal FROM #tmpSourceSales WHERE FieldName = 'Net' AND intCommodityId = @intCommodityId
 		SELECT @SoldValue = dblTotal FROM #tmpSourceSales WHERE FieldName = 'Sold' AND intCommodityId = @intCommodityId
 		SELECT @PaidValue = dblTotal FROM #tmpSourceSales WHERE FieldName = 'Paid' AND intCommodityId = @intCommodityId
-		SET @NetPayablesValue = (SELECT SUM(dblTotal) FROM #tmpSourceSales WHERE FieldName NOT IN ('Sold','Paid','W.A.P','Gross Dollars','Discounts','Tax','Storage','Fees') AND intCommodityId = @intCommodityId)
+		SET @NetReceivablesValue = (SELECT SUM(dblTotal) FROM #tmpSourceSales WHERE FieldName NOT IN ('Sold','Paid','W.A.P','Gross Dollars','Discounts','Tax','Storage','Fees') AND intCommodityId = @intCommodityId)
 	
 		INSERT INTO #tmpSourceSales (intEntityId,intCommodityId,FieldName,dblTotal,intSorting)
 		VALUES(@intEntityId,@intCommodityId,'W.A.P',@NetValue/@SoldValue,8)
 
 		INSERT INTO #tmpSourceSales (intEntityId,intCommodityId,FieldName,dblTotal,intSorting)
-		VALUES(@intEntityId,@intCommodityId,'Net Payables',@NetPayablesValue,99)
+		VALUES(@intEntityId,@intCommodityId,'Net Receivables',@NetReceivablesValue,99)
 	
 		INSERT INTO #tmpSourceSales (intEntityId,intCommodityId,FieldName,dblTotal,intSorting)
 		VALUES(@intEntityId,@intCommodityId,'Unpaid Qty',ABS(@SoldValue - @PaidValue),100)
