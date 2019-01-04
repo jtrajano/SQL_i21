@@ -69,6 +69,7 @@ Type the overview for the table here.
 		[intPurchaseDetailId] INT NULL, -- Purchase Order Detail Id
 		[intContractHeaderId] INT NULL, -- Contract Header Id
 		[intContractDetailId] INT NULL, -- Contract Detail Id
+		[ysnAllowVoucher] BIT NULL,
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

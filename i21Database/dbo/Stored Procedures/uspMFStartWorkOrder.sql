@@ -22,7 +22,7 @@ BEGIN TRY
 		,@intManufacturingCellId INT
 		,@intManufacturingProcessId INT
 		,@strSampleTypeName NVARCHAR(50)
-		,@intRecipeTypeId int
+		,@intRecipeTypeId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -245,7 +245,8 @@ BEGIN TRY
 
 		IF @strWIPSampleMandatory = 'True'
 		BEGIN
-		SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
+			SELECT @intSampleStatusId = NULL
+				,@dtmSampleCreated = NULL
 
 			SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
 				,@dtmSampleCreated = S.dtmCreated
@@ -253,18 +254,17 @@ BEGIN TRY
 			JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 			WHERE S.intProductTypeId = 12
 				AND S.intProductValueId = @intWorkOrderId
-				AND ST.intControlPointId = 11--WIP Sample
+				AND ST.intControlPointId = 11 --WIP Sample
 			ORDER BY S.dtmLastModified DESC
 
-			if @intSampleStatusId is null
-			Select @intSampleStatusId=0
+			IF @intSampleStatusId IS NULL
+				SELECT @intSampleStatusId = 0
 
-
-			IF @intSampleStatusId<>3
+			IF @intSampleStatusId <> 3
 			BEGIN
-				Select @strSampleTypeName =strSampleTypeName 
-				from tblQMSampleType
-				Where intControlPointId = 11
+				SELECT @strSampleTypeName = strSampleTypeName
+				FROM tblQMSampleType
+				WHERE intControlPointId = 11
 
 				SELECT @strCellName = strCellName
 				FROM tblMFManufacturingCell
@@ -279,7 +279,8 @@ BEGIN TRY
 						)
 			END
 
-			SELECT  @intSampleStatusId=NULL,@dtmSampleCreated=NULL
+			SELECT @intSampleStatusId = NULL
+				,@dtmSampleCreated = NULL
 
 			SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
 				,@dtmSampleCreated = S.dtmCreated
@@ -290,15 +291,14 @@ BEGIN TRY
 				AND ST.intControlPointId = 12 --WIP Sample
 			ORDER BY S.dtmLastModified DESC
 
-			if @intSampleStatusId is null
-			Select @intSampleStatusId=0
+			IF @intSampleStatusId IS NULL
+				SELECT @intSampleStatusId = 0
 
-
-			IF @intSampleStatusId<>3
+			IF @intSampleStatusId <> 3
 			BEGIN
-				Select @strSampleTypeName =strSampleTypeName 
-				from tblQMSampleType
-				Where intControlPointId = 12
+				SELECT @strSampleTypeName = strSampleTypeName
+				FROM tblQMSampleType
+				WHERE intControlPointId = 12
 
 				SELECT @strCellName = strCellName
 				FROM tblMFManufacturingCell
@@ -308,17 +308,37 @@ BEGIN TRY
 						'%s is not taken for the line %s. Please take the sample and then start the work order'
 						,11
 						,1
-						,@strSampleTypeName,@strCellName
+						,@strSampleTypeName
+						,@strCellName
 						)
 			END
 		END
 	END
 
-	SELECT @intRecipeTypeId=intRecipeTypeId
-			FROM tblMFRecipe
-			WHERE intItemId = @intItemId
-				AND intLocationId = @intLocationId
-				AND ysnActive = 1
+	IF EXISTS (
+			SELECT 1
+			FROM tblMFRecipe R
+			JOIN tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
+			WHERE R.intItemId = @intItemId
+				AND R.intLocationId = @intLocationId
+				AND R.ysnActive = 1
+				AND RI.ysnConsumptionRequired = 1
+				AND IsNULL(RI.dblCostAllocationPercentage, 0) <> 0
+			HAVING Sum(IsNULL(RI.dblCostAllocationPercentage, 0)) <> 100
+			)
+	BEGIN
+		RAISERROR (
+				'Cost distribution is not matching with 100 percentage in the recipe configuration.'
+				,11
+				,1
+				)
+	END
+
+	SELECT @intRecipeTypeId = intRecipeTypeId
+	FROM tblMFRecipe
+	WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+		AND ysnActive = 1
 
 	UPDATE dbo.tblMFWorkOrder
 	SET intStatusId = 10
@@ -326,7 +346,7 @@ BEGIN TRY
 		,intConcurrencyId = intConcurrencyId + 1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
-		,intRecipeTypeId=@intRecipeTypeId
+		,intRecipeTypeId = @intRecipeTypeId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE dbo.tblMFScheduleWorkOrder
