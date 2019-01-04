@@ -7128,7 +7128,6 @@
     <Build Include="dbo\Tables\tblIPEntityTermStage.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicMN.sql" />
     <Build Include="dbo\Functions\fnRKGetFutureOptionMonthsNotInUse.sql" />
-    <Build Include="dbo\Functions\fnRKGetClosestFutureMonth.sql" />
     <Build Include="dbo\Views\vyuARInvoiceScaleDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptCashRequirementsByCommodity.sql" />
     <Build Include="dbo\Views\vyuAPRptCashRequirementsByCommodity.sql" />
