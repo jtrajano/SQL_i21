@@ -13,7 +13,7 @@
     [strMessage]            [text] COLLATE Latin1_General_CI_AS NULL,
     [intTotalColumns]       [int] NULL,
     [intTotalRecords]       [int] NULL,
-    [dblExecutionTime]      DECIMAL(18, 4) NULL,
+    [dblExecutionTime]      [float] NULL,
     [dtmCreated]            [datetime] NULL DEFAULT (GETUTCDATE()),
     [dtmStarted]            [datetime] NULL,
     [dtmProcessed]          [datetime] NULL,
