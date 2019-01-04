@@ -387,7 +387,7 @@ BEGIN
 	END
 
 	INSERT INTO @Balance (intContractTypeId,strType,intContractHeaderId,intContractDetailId,dblQuantity,intNoOfLoad)
-	SELECT intContractTypeId,'PriceFixation',intContractHeaderId,intContractDetailId,dblQuantity * -1,intNoOfLoad FROM @PriceFixation 
+	SELECT intContractTypeId,'PriceFixation',intContractHeaderId,intContractDetailId,dblQuantity * -1,intNoOfLoad = 0 FROM @PriceFixation 
 
 	INSERT INTO @Balance (intContractTypeId,strType,intContractHeaderId,intContractDetailId,dblQuantity,intNoOfLoad)
 	SELECT intContractTypeId,'Shipment',intContractHeaderId,intContractDetailId,(dblQuantity - dblAllocatedQuantity) * -1,ISNULL(intNoOfLoad,0)intNoOfLoad 
@@ -480,7 +480,11 @@ BEGIN
 									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 									ELSE
-										(CD.intNoOfLoad - ISNULL(BL.intNoOfLoad,0)- ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
+										(
+											CD.intNoOfLoad 
+										  -- ISNULL(BL.intNoOfLoad,0)
+										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
+										) * CD.dblQuantityPerLoad
 							  END
 	,strQuantityUOM			= IUM.strUnitMeasure
 	,dblCashPrice			= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)	
@@ -490,7 +494,11 @@ BEGIN
 							  		WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 							  		ELSE
-							  			(CD.intNoOfLoad - ISNULL(BL.intNoOfLoad,0)- ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
+							  			(
+											CD.intNoOfLoad 
+										  -- ISNULL(BL.intNoOfLoad,0)
+										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
+										) * CD.dblQuantityPerLoad
 							    END
 
 	,dblAmount				= (
@@ -498,8 +506,12 @@ BEGIN
 										WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 											ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 										ELSE
-											(CD.intNoOfLoad - ISNULL(BL.intNoOfLoad,0)- ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
-								  END
+											(
+												CD.intNoOfLoad 
+											  -- ISNULL(BL.intNoOfLoad,0)
+											  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
+										    ) * CD.dblQuantityPerLoad
+								END
 							  ) 
 							  * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
 	,CD.intUnitMeasureId
@@ -514,7 +526,7 @@ BEGIN
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
 	AND												   CD.intContractDetailId          =    BL.intContractDetailId
 	LEFT JOIN(
-			SELECT intContractDetailId,SUM(intShippedNoOfLoad) intShippedNoOfLoad FROM @PriceFixation
+			SELECT intContractDetailId,SUM(dblQuantity) dblQuantity FROM @PriceFixation
 			GROUP BY intContractDetailId
 		) 												PF  ON  PF.intContractDetailId  =   CD.intContractDetailId
 												AND     PF.intContractDetailId          =   BL.intContractDetailId
@@ -659,30 +671,16 @@ BEGIN
 	,dblFutures				= ISNULL(PF.dblFutures,0)
 	,dblBasis				= ISNULL(PF.dblBasis,0)
 	,strBasisUOM			= BUOM.strUnitMeasure
-	,dblQuantity			= CASE 
-							  	WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
-							  		ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)) ,0) - ISNULL(PF.dblShippedQty,0)
-							  	ELSE
-							  		(CD.intNoOfLoad - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
-							  END
+	,dblQuantity			= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)- ISNULL(PF.dblShippedQty,0)) ,0) 
 	,strQuantityUOM			= IUM.strUnitMeasure
 	,dblCashPrice			= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
 	,strPriceUOM			=  PUOM.strUnitMeasure
 	,strStockUOM			= StockUM.strUnitMeasure
-	,dblAvailableQty		=  CASE 
-							  		WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
-							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)) ,0) - ISNULL(PF.dblShippedQty,0)
-							  		ELSE
-							  			(CD.intNoOfLoad - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
-							   END
+	,dblAvailableQty		=  ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)- ISNULL(PF.dblShippedQty,0)) ,0) 
 	,dblAmount				= (
-								CASE 
-									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
-										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)) ,0) - ISNULL(PF.dblShippedQty,0)
-									ELSE
-										(CD.intNoOfLoad - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
-								END
-							  ) * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
+								ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)- ISNULL(PF.dblShippedQty,0)) ,0) 
+							  ) 
+							   * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
 	,CD.intUnitMeasureId
 	,CD.intContractStatusId
 	,Cur.strCurrency
