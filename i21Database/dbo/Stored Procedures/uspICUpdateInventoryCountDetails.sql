@@ -122,7 +122,7 @@ BEGIN
 		, intSubLocationId = stock.intSubLocationId
 		, intStorageLocationId = stock.intStorageLocationId
 		, intLotId = NULL
-		, dblSystemCount = ISNULL(dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
+		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
 			---- Convert the last cost from Stock UOM to stock.intItemUOMId
 			CASE 
@@ -180,6 +180,30 @@ BEGIN
 		) stock ON stock.intItemId = i.intItemId
 			AND stockUOM.intItemUOMId = stock.intItemUOMId
 			AND stock.intItemLocationId = il.intItemLocationId
+		LEFT JOIN (
+			SELECT	 st.intItemId
+					,st.intItemLocationId
+					,st.intSubLocationId
+					,st.intStorageLocationId
+					,st.intLocationId
+					--,st.ysnStockUnit
+					,dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(st.intItemUOMId, suom.intItemUOMId, ISNULL(st.dblOnHand, 0.00)))
+					,dblLastCost = MAX(dblLastCost)
+			FROM	vyuICGetItemStockSummary st
+				LEFT OUTER JOIN tblICItemUOM suom ON suom.intItemId = st.intItemId
+					AND suom.ysnStockUnit = 1
+			WHERE	dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+			GROUP BY 
+					st.intItemId,
+					st.intItemLocationId,
+					st.intSubLocationId,
+					st.intStorageLocationId,
+					--st.ysnStockUnit,
+					st.intLocationId
+		) stockUnit ON stockUnit.intItemId = i.intItemId
+			--AND ISNULL(stockUnit.ysnStockUnit, 0) = 0
+			AND stockUnit.intItemLocationId = il.intItemLocationId
+			AND stockUnit.intLocationId = il.intLocationId
 		OUTER APPLY(
 			SELECT TOP 1
 					dblCost
