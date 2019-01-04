@@ -234,7 +234,7 @@ BEGIN TRY
 			SELECT @InvoiceDetailId = intInvoiceDetailId FROM @TFTransaction WHERE intId = @Count
 			
 			
-			SELECT @TaxAmount = tblARInvoiceDetailTax.dblTax, @TaxExempt = CASE WHEN tblARInvoiceDetailTax.dblTax > 0 THEN 0 ELSE tblARInvoiceDetail.dblQtyShipped END
+			SELECT @TaxAmount = tblARInvoiceDetailTax.dblAdjustedTax, @TaxExempt = CASE WHEN tblARInvoiceDetailTax.dblAdjustedTax > 0 THEN 0 ELSE tblARInvoiceDetail.dblQtyShipped END
 			FROM tblSMTaxCode
 			INNER JOIN tblTFTaxCategory ON tblSMTaxCode.intTaxCategoryId = tblTFTaxCategory.intTaxCategoryId
 			INNER JOIN tblARInvoiceDetailTax ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
