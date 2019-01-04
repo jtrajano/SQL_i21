@@ -64,7 +64,6 @@ AS
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intCurrencyId
 	LEFT JOIN vyuARGetItemAccount ARIA ON LD.[intItemId] = ARIA.[intItemId]
 		AND LD.intSCompanyLocationId = ARIA.[intLocationId]
-	LEFT JOIN tblARInvoiceDetail ARID ON LD.intLoadDetailId = ARID.[intInventoryShipmentItemId]
 		GROUP BY L.[strLoadNumber],LD.intLoadDetailId,EME.[strName],
 			 L.dtmScheduledDate,L.intLoadId,SMCL.[strLocationName],ICI.strItemNo,
 			 ICI.strDescription,
