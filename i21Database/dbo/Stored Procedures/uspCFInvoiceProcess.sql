@@ -405,6 +405,7 @@ BEGIN TRY
 		,strGuid
 		,strUserId
 		,strInvoiceNumberHistory
+		,dtmDueDateBaseOnTermsHistory
 	)
 	SELECT 
 		intCustomerGroupId
@@ -550,6 +551,7 @@ BEGIN TRY
 		,strGuid
 		,strUserId
 		,strTempInvoiceReportNumber
+		,dbo.fnGetDueDateBasedOnTerm(dtmInvoiceDate, intTermID)
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username
@@ -639,6 +641,7 @@ BEGIN TRY
 	,strComment
 	,strCFInvoiceNumber
 	,strInvoiceNumberHistory
+	,dtmDueDateBaseOnTermsHistory
 	)
 	SELECT 
 	intEntityCustomerId
@@ -722,6 +725,7 @@ BEGIN TRY
 	,strComment
 	,strCFTempInvoiceReportNumber
 	,strCFTempInvoiceReportNumber
+	,dbo.fnGetDueDateBasedOnTerm(dtmCFInvoiceDate, intCFTermID)
 	FROM
 	tblARCustomerStatementStagingTable
 	WHERE intEntityUserId = @entityId
