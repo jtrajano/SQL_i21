@@ -18,6 +18,7 @@
     [dtmStarted]            [datetime] NULL,
     [dtmProcessed]          [datetime] NULL,
     [dtmCompleted]          [datetime] NULL,
+	[strFilter]				[nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]      [int] NOT NULL DEFAULT (1),
     CONSTRAINT [FK_tblSMExportLog_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]) ON DELETE CASCADE
 )
