@@ -18,4 +18,5 @@ LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId = CH.intInvoiceId
 INNER JOIN tblSTCheckoutDepartmetTotals CDT ON CDT.intCheckoutId = CH.intCheckoutId 
 INNER JOIN tblICItem IT ON IT.intItemId = CDT.intItemId 
 INNER JOIN tblICCategory CAT ON CAT.intCategoryId = IT.intCategoryId
-WHERE CDT.dblTotalSalesAmountComputed > 0
+WHERE (CDT.dblTotalSalesAmountComputed <> 0	
+	OR CDT.intTotalSalesCount <> 0)

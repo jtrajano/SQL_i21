@@ -56,5 +56,13 @@
 	[dtmLastRun] DATETIME NULL,
 	[ysnDeleted] BIT DEFAULT((0)) NULL,
 	[intConcurrencyId] INT DEFAULT((1)) NULL,
-    CONSTRAINT [PK_tblTFException] PRIMARY KEY ([intExceptionId]) 
+	[intUserEntityId] INT NULL,
+	[dtmCreatedDate] DATETIME NULL,
+    CONSTRAINT [PK_tblTFException] PRIMARY KEY ([intExceptionId]),
+	CONSTRAINT [FK_tblTFException_tblEMEntity] FOREIGN KEY ([intUserEntityId]) REFERENCES [tblEMEntity]([intEntityId]) 
 )
+GO
+
+CREATE INDEX [IX_tblTFException_intUserEntityId] ON [dbo].[tblTFException] ([intUserEntityId])
+
+GO

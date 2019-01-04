@@ -223,8 +223,8 @@ BEGIN TRY
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
 			SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt
 			IF(@dblRemainingUnits > ISNULL(@dblRemainingQuantity,0))
-				BEGIN
-					INSERT INTO @ItemsForItemReceipt (
+			BEGIN
+				INSERT INTO @ItemsForItemReceipt (
 					intItemId
 					,intItemLocationId
 					,intItemUOMId
@@ -249,48 +249,46 @@ BEGIN TRY
 					 @intTicketId
 					,@intUserId
 					,@dblRemainingUnits
-					,@dblCost
+					,0
 					,@intEntityId
 					,@intContractId
 					,'SPT'
 					,@LineItems
-				END
-			--IF (@dblRemainingUnits = @dblNetUnits)
-			--RETURN
+			END
 		END
-			UPDATE @LineItems set intTicketId = @intTicketId
-			--DELETE FROM @ItemsForItemReceipt
-			-- Get the items to process
-			INSERT INTO @ItemsForItemReceipt (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,intTransactionDetailId
-				,strTransactionId
-				,intTransactionTypeId
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsStorage
-				,strSourceTransactionId  
-			)
-			EXEC dbo.uspSCGetScaleItemForItemReceipt 
-				 @intTicketId
-				,@intUserId
-				,@dblNetUnits
-				,@dblCost
-				,@intEntityId
-				,@intContractId
-				,@strDistributionOption
-				,@LineItems
+		
+		UPDATE @LineItems set intTicketId = @intTicketId
+		-- Get the items to process
+		INSERT INTO @ItemsForItemReceipt (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,dtmDate
+			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+			,ysnIsStorage
+			,strSourceTransactionId  
+		)
+		EXEC dbo.uspSCGetScaleItemForItemReceipt 
+			@intTicketId
+			,@intUserId
+			,@dblNetUnits
+			,@dblCost
+			,@intEntityId
+			,@intContractId
+			,@strDistributionOption
+			,@LineItems
 
 		-- Validate the items to receive 
 		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 

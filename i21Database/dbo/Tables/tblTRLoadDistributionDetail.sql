@@ -2,6 +2,7 @@
 (
 	[intLoadDistributionDetailId] INT NOT NULL IDENTITY,
 	[intLoadDistributionHeaderId] INT NOT NULL,
+	[strBillOfLading] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] INT NOT NULL,	
 	[intContractDetailId] INT NULL,
 	[dblUnits] DECIMAL(18, 6) NULL DEFAULT 0, 
