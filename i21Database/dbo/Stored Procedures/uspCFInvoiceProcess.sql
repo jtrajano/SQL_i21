@@ -553,8 +553,8 @@ BEGIN TRY
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username
-	AND strStatementType = @statementType
 	AND LOWER(strStatementType) = @statementType
+	
 	
 	INSERT INTO tblCFCustomerStatementHistoryStagingTable
 	(

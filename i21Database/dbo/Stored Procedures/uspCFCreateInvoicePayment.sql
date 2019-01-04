@@ -98,7 +98,7 @@ BEGIN
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		WHERE ISNULL(I.intInvoiceId,0) != 0
 		AND strUserId = @username
-		AND strStatementType = @statementType
+		AND LOWER(strStatementType) = @statementType
 	
 	
 		-------------INVOICE LIST-------------
@@ -166,7 +166,7 @@ BEGIN
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		WHERE ISNULL(I.intInvoiceId,0) != 0
 		AND strUserId = @username
-		AND strStatementType = @statementType
+		AND LOWER(strStatementType) = @statementType
 		--------------------------------------
 
 		--select * From @EntriesForPayment

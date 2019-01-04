@@ -218,7 +218,7 @@ BEGIN
 		FROM tblCFInvoiceStagingTable
 		WHERE ISNULL(intInvoiceId,0) != 0
 		AND strUserId = @username
-		AND strStatementType = @statementType
+		AND LOWER(strStatementType) = @statementType
 		GROUP BY 
 		intCustomerId
 		,strTempInvoiceReportNumber
@@ -684,7 +684,7 @@ BEGIN
 			FROM tblCFInvoiceStagingTable 
 			WHERE intCustomerId = @intEntityCustomerId AND ISNULL(intInvoiceId,0) != 0
 			AND strUserId = @username
-			AND strStatementType = @statementType
+			AND LOWER(strStatementType) = @statementType
 			GROUP BY
 			 intCustomerId
 			,strTempInvoiceReportNumber
