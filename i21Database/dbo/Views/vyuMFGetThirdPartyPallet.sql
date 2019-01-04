@@ -40,7 +40,7 @@ SELECT L.dtmDateCreated
 					ELSE 'Shipped out'
 					END
 				)
-		END AS strPalletStatus
+		END COLLATE Latin1_General_CI_AS AS strPalletStatus
 	,L1.strLotNumber AS strUsedIn
 FROM dbo.tblICLot AS L
 JOIN dbo.tblICItem AS I ON I.intItemId = L.intItemId

@@ -12,8 +12,8 @@
 	l.strLotNumber strConsumedLotNumber,
 	l.strLotAlias strConsumedLotAlias,
 	l.strGarden,
-	'' strGrade,
-	'' strChop,
+	'' COLLATE Latin1_General_CI_AS AS strGrade,
+	'' COLLATE Latin1_General_CI_AS AS strChop,
 	i1.strItemNo strConsumedItemNo,
 	i1.strDescription strConsumedItemDesc,
 	wc.dblQuantity dblConsumedQuantity,
@@ -35,10 +35,10 @@
 	m.strName AS strMachineName,
 	Case When w.dtmCompletedDate>w.dtmStartedDate THEN 
 			LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmCompletedDate) / 60) )+ ':' + REPLACE(STR(LTRIM(STR( DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmCompletedDate) % 60)),2), ' ', '0' )
-	ELSE '' End dtmStageDuration,
+	ELSE '' End COLLATE Latin1_General_CI_AS AS dtmStageDuration,
 	Case When w.dtmActualProductionEndDate>w.dtmStartedDate THEN 
 			LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmActualProductionEndDate) / 60) )+ ':' + REPLACE(STR(LTRIM(STR(DATEDIFF(MINUTE,w.dtmStartedDate,w.dtmActualProductionEndDate) % 60)),2), ' ', '0')
-	ELSE '' End dtmBlendDuration,	wc1.dblStagedQty,
+	ELSE '' End COLLATE Latin1_General_CI_AS AS dtmBlendDuration,	wc1.dblStagedQty,
 	((wp.dblQuantity - w.dblQuantity) / w.dblQuantity) * 100 AS dblWeightDiff,
 	pl.strParentLotNumber strConsumedParentLotNumber
 	from tblMFWorkOrder w

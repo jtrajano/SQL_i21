@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetPMUsage
 AS
-SELECT DISTINCT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) [Dump Date]
+SELECT DISTINCT Rtrim(Convert(CHAR, W.dtmPlannedDate, 101)) COLLATE Latin1_General_CI_AS AS [Dump Date]
 	,I.strItemNo [Product]
 	,I.strDescription [Product Description]
 	,(

@@ -59,7 +59,7 @@ SELECT DISTINCT I.strItemNo
 	,C.strCategoryCode
 	,E.strName AS strItemOwner
 	,AC.[intEntityId] AS intItemOwnerId
-	,CONVERT(NVARCHAR, 1) AS strAutoManual
+	,CONVERT(NVARCHAR, 1) COLLATE Latin1_General_CI_AS AS strAutoManual
 	,(
 		SELECT TOP 1 intPickPreferenceId
 		FROM tblMFPickPreference
