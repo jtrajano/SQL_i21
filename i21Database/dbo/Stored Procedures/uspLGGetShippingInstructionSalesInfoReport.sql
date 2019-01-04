@@ -42,17 +42,20 @@ BEGIN
 
 SELECT L.intLoadId,
 	   LD.intPContractDetailId AS intContractDetailId,
-	   CT.strContractNumber,
-	   CT.intContractSeq,
+	   CH.strContractNumber,
+	   CD.intContractSeq,
 	   LD.dblQuantity,
 	   UM.strUnitMeasure,
-	   CASE WHEN ISNULL(CT.strContractItemName,'') = '' THEN CT.strItemDescription ELSE CT.strContractItemName END AS strItemDescription,	   
-	   CT.strCustomerContract AS strSCustomerContract
+	   CASE WHEN ISNULL(IC.strContractItemName,'') = '' THEN I.strDescription ELSE IC.strContractItemName END AS strItemDescription,
+	   CH.strCustomerContract AS strSCustomerContract
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intSContractDetailId
 WHERE L.intLoadId = @xmlParam and L.intPurchaseSale IN (2,3)
 END
 
