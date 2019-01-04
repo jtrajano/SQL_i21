@@ -104,6 +104,23 @@ FROM (
 		,CONI.strContractItemNo
 		,CONI.strContractItemName
 		,OG.strCountry AS strOrigin
+		,dblSeqPriceConversionFactoryWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM((
+				SELECT TOP (1) IU.intItemUOMId
+				FROM tblICItemUOM IU
+				WHERE IU.intItemId = CD.intItemId
+					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+				), AD.intSeqPriceUOMId, 1)
+		,CH.intContractBasisId
+		,CB.strContractBasis
+		,CD.strERPPONumber
+		,CD.strERPItemNumber
+		,(SELECT CLSL.strSubLocationName
+		  FROM tblLGLoadWarehouse LW
+		  JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
+		  WHERE LW.intLoadId = L.intLoadId) strSublocation
+		,CD.intPurchasingGroupId
+		,PG.strName AS strPurchasingGroupName
+		,PG.strDescription AS strPurchasingGroupDesc
 	FROM tblLGLoad L
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
@@ -121,6 +138,7 @@ FROM (
 	LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 	LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId AND CA.strType = 'Origin'
+	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 	LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 	LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
 	LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
@@ -140,6 +158,7 @@ FROM (
 		AND RI.intOrderId = CH.intContractHeaderId
 		AND L.intPurchaseSale = 1
 	LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = L.intLoadId
+	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	CROSS APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
 	CROSS APPLY (SELECT dblIRNet = SUM(IRI.dblNet) FROM tblICInventoryReceipt IR 
 					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
