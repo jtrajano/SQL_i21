@@ -2,7 +2,7 @@
 AS
 
 SELECT
-CAST(ROW_NUMBER() OVER(ORDER BY intInventoryShipmentItemId, intInventoryReceiptItemId, intPurchaseDetailId) AS INT) AS intReceivedItemId
+CAST(ROW_NUMBER() OVER(ORDER BY (SELECT 1)) AS INT) AS intReceivedItemId
 ,Items.*
 FROM
 (
@@ -102,8 +102,8 @@ FROM
 				,dbo.fnCalculateQtyBetweenUOM(B1.intUnitMeasureId, B.intUnitOfMeasureId, SUM(ISNULL(B1.dblOpenReceive,0))) dblPOOpenReceive
 				,SUM(ISNULL(B1.dblOpenReceive,0)) dblOpenReceive
 				,intAccountId = [dbo].[fnGetItemGLAccount](B1.intItemId, loc.intItemLocationId, 'AP Clearing')
-				,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
-				,strAccountDesc = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
+				,strAccountId = apClearing.strAccountId
+				,strAccountDesc = apClearing.strDescription
 				,dblQuantityBilled = SUM(ISNULL(B1.dblBillQty, 0))
 				,ISNULL(B1.dblTax,0) AS dblTax
 				,ISNULL(NULLIF(B1.dblForexRate,0),1) AS dblRate
@@ -137,7 +137,7 @@ FROM
 				,B1.intStorageLocationId
 				,ISL.strName AS strStorageLocationName
 				,intLocationId = A1.intLocationId
-				,strReceiptLocation = (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A1.intLocationId)
+				,strReceiptLocation = compLoc.strLocationName
 				,B1.intTaxGroupId
 				,TG.strTaxGroup
 			FROM tblICInventoryReceipt A1
@@ -158,8 +158,13 @@ FROM
 				LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A1.intCurrencyId AND SubCurrency.ysnSubCurrency = 1
 				LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B1.intStorageLocationId
 				LEFT JOIN dbo.tblSMCompanyLocationSubLocation subLoc ON B1.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+				LEFT JOIN dbo.tblSMCompanyLocation compLoc ON compLoc.intCompanyLocationId = A1.intLocationId
 				LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B1.intForexRateTypeId
 				LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B1.intTaxGroupId
+				OUTER APPLY 
+				(
+					SELECT TOP 1 intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing')
+				) apClearing
 			WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty 
 			AND B1.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 			AND B.intPurchaseDetailId = B1.intLineNo
@@ -169,6 +174,7 @@ FROM
 				A1.strReceiptNumber
 				,A1.strBillOfLading
 				,B1.intInventoryReceiptItemId
+				,compLoc.strLocationName
 				,B1.intItemId 
 				,B1.dblUnitCost
 				,intLineNo
@@ -183,6 +189,9 @@ FROM
 				,B1.dblNet
 				,CostUOM.strUnitMeasure	
 				,WeightUOM.strUnitMeasure
+				,apClearing.strAccountId
+				,apClearing.strDescription
+				,apClearing.intAccountId
 				,ItemCostUOM.dblUnitQty
 				,ItemWeightUOM.dblUnitQty
 				,ItemUOM.dblUnitQty
@@ -247,13 +256,15 @@ FROM
 	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
 	,[ysnSubCurrency]			=	0
 	,[intSubCurrencyCents]		=	0
-	,[intAccountId]				=	CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense') END
-	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = 
-										CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Other Charge Expense') END
-									)
-	,[strAccountDesc]			=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = 
-										CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Other Charge Expense') END
-									)
+	,[intAccountId]				=	CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE otherCharge.intAccountId END
+	,[strAccountId]				=	CASE WHEN B.intItemId IS NULL THEN vendorExpense.strAccountId ELSE otherCharge.strAccountId END
+									-- (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = 
+									-- 	CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Other Charge Expense') END
+									-- )
+	,[strAccountDesc]			=	CASE WHEN B.intItemId IS NULL THEN vendorExpense.strDescription ELSE otherCharge.strDescription END
+									-- (SELECT strDescription FROM tblGLAccount WHERE intAccountId = 
+									-- 	CASE WHEN B.intItemId IS NULL THEN D1.intGLAccountExpenseId ELSE dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Other Charge Expense') END
+									-- )
 	,[strName]					=	D2.strName
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
@@ -279,9 +290,9 @@ FROM
 	,[dblCostUnitQty]			=	1
 	,[dblUnitQty]				=	1
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,0)
-	,[strCurrency]				=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+	,[strCurrency]				=	cur.strCurrency
 	,[intCostCurrencyId]		=	ISNULL(A.intCurrencyId,0)
-	,[strCostCurrency]			=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+	,[strCostCurrency]			=	cur.strCurrency
 	,[strVendorLocation]		=	EL.strLocationName
 	,[str1099Form]				=	D2.str1099Form			 
 	,[str1099Type]				=	D2.str1099Type
@@ -294,7 +305,7 @@ FROM
 	,[dblFranchiseWeight]		=	0.00 
 	,[dblClaimAmount]			=	0.00
 	,[intLocationId]			=	A.intShipToId
-	,[strReceiptLocation]		= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
+	,[strReceiptLocation]		=  compLoc.strLocationName
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	,[intTaxGroupId]							=	B.intTaxGroupId
@@ -312,6 +323,10 @@ FROM
 		LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
 		LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 		LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B.intTaxGroupId
+		LEFT JOIN dbo.tblGLAccount otherCharge ON otherCharge.intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense')
+		LEFT JOIN dbo.tblGLAccount vendorExpense ON vendorExpense.intAccountId = D1.intGLAccountExpenseId 
+		LEFT JOIN dbo.tblSMCompanyLocation compLoc ON compLoc.intCompanyLocationId = A.intLocationId
+		LEFT JOIN dbo.tblSMCurrency cur ON A.intCurrencyId = cur.intCurrencyID
 		OUTER APPLY
 		(
 			SELECT SUM(ISNULL(G.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail G WHERE G.intPurchaseDetailId = B.intPurchaseDetailId
@@ -363,9 +378,9 @@ FROM
 	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
 	,[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END
 	,[intSubCurrencyCents]		=	ISNULL(A.intSubCurrencyCents, 0)
-	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
-	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing'))
-	,[strAccountDesc]			=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing'))
+	,[intAccountId]				=	apClearing.intAccountId
+	,[strAccountId]				=	apClearing.strAccountId
+	,[strAccountDesc]			=	apClearing.strDescription
 	,[strName]					=	D2.strName
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
@@ -395,13 +410,13 @@ FROM
 	,[dblWeightUnitQty]			=	CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
 	,[dblCostUnitQty]			=	ISNULL(ItemCostUOM.dblUnitQty,1)
 	,[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
-	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))
+	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,compPref.intDefaultCurrencyId)
 	,[strCurrency]				=   H1.strCurrency
 	,[intCostCurrencyId]		=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
-										 ELSE ISNULL(A.intCurrencyId,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) 
+										 ELSE ISNULL(A.intCurrencyId,compPref.intDefaultCurrencyId) 
 									END	
 	,[strCostCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
-									ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+										ELSE H1.strCurrency
 									END
 	,[strVendorLocation]		=	EL.strLocationName
 	,[str1099Form]				=	D2.str1099Form			 
@@ -423,7 +438,7 @@ FROM
 										) ELSE 0.00 END)
 									ELSE 0 END
 	,[intLocationId]			=	A.intLocationId
-	,[strReceiptLocation]		= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
+	,[strReceiptLocation]		= compLoc.strLocationName
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	,[intTaxGroupId]							=	B.intTaxGroupId
@@ -435,6 +450,7 @@ FROM
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
+	CROSS APPLY dbo.tblSMCompanyPreference compPref
 	LEFT JOIN (tblCTContractHeader CH INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId)  ON CH.intEntityId = A.intEntityVendorId 
 																															AND CH.intContractHeaderId = B.intOrderId 
 																															AND CD.intContractDetailId = B.intLineNo 
@@ -456,9 +472,14 @@ FROM
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	LEFT JOIN dbo.tblICStorageLocation ISL ON ISL.intStorageLocationId = B.intStorageLocationId 
 	LEFT JOIN dbo.tblSMCompanyLocationSubLocation subLoc ON B.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+	LEFT JOIN dbo.tblSMCompanyLocation compLoc ON compLoc.intCompanyLocationId = A.intLocationId
 	LEFT JOIN dbo.tblCTWeightGrade J ON CH.intWeightId = J.intWeightGradeId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 	LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B.intTaxGroupId
+	OUTER APPLY 
+	(
+		SELECT TOP 1 intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing')
+	) apClearing
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -524,9 +545,9 @@ FROM
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,0)
-		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
-		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[intAccountId]								=	apClearing.intAccountId
+		,[strAccountId]								=	apClearing.strAccountId
+		,[strAccountDesc]							=	apClearing.strDescription
 		,[strName]									=	A.strName
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
@@ -552,15 +573,15 @@ FROM
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
-															 THEN (SELECT ISNULL(intMainCurrencyId,A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
+															 THEN ISNULL(H1.intMainCurrencyId,A.intCurrencyId)
 															 ELSE  ISNULL(A.intCurrencyId,0)
 														END	
 		,[strCurrency]								=	CASE WHEN A.ysnSubCurrency > 0 
-															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT ISNULL(intMainCurrencyId, A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0)))
-															 ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+															 THEN ISNULL(SubCurrency.strCurrency, H1.strCurrency)
+															 ELSE H1.strCurrency
 														END
 		,[intCostCurrencyId]						=	ISNULL(A.intCurrencyId,0)		
-		,[strCostCurrency]							=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)	
+		,[strCostCurrency]							=	H1.strCurrency
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type
@@ -573,7 +594,7 @@ FROM
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
-		,[strReceiptLocation]						= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
+		,[strReceiptLocation]						= 	compLoc.strLocationName
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
@@ -584,13 +605,18 @@ FROM
 	--																																					   THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
 	--																																					   ELSE  ISNULL(A.intCurrencyId,0) END) 
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
-	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
+	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = H1.intMainCurrencyId 
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
 	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId 
 		 AND ItemLoc.intLocationId = A.intLocationId
-	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId		 
+	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId	
+	LEFT JOIN dbo.tblSMCompanyLocation compLoc ON compLoc.intCompanyLocationId = A.intLocationId
+	OUTER APPLY 
+	(
+		SELECT TOP 1 intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+	) apClearing	 
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -660,9 +686,9 @@ FROM
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
-		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
-		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[intAccountId]								=	apClearing.intAccountId
+		,[strAccountId]								=	apClearing.strAccountId
+		,[strAccountDesc]							=	apClearing.strDescription
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
@@ -688,15 +714,15 @@ FROM
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
-															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
+															 THEN CU.intMainCurrencyId
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
 														END		
 		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
-															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
-															 ELSE  ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
+															 THEN SubCur.strCurrency
+															 ELSE CU.strCurrency
 														END	
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
-		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
+		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ISNULL(SubCur.strCurrency,CU.strCurrency))
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type 
@@ -721,6 +747,7 @@ FROM
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 	LEFT JOIN   tblSMTerm					TM	ON  TM.intTermID			=	CH.intTermId
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
+	LEFT JOIN	tblSMCurrency				SubCur ON CU.intMainCurrencyId	=	SubCur.intCurrencyID
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
 	LEFT JOIN	tblICInventoryReceiptCharge RC	ON	RC.intContractId		=	CC.intContractHeaderId	AND 
@@ -734,6 +761,10 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
+	OUTER APPLY 
+	(
+		SELECT TOP 1 intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+	) apClearing
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
@@ -780,9 +811,9 @@ FROM
 		,[intCurrencyExchangeRateTypeId]			=	NULL
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
-		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
-		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[intAccountId]								=	apClearing.intAccountId
+		,[strAccountId]								=	apClearing.strAccountId
+		,[strAccountDesc]							=	apClearing.strDescription
 		,[strName]									=	CC.strVendorName
 		,[strVendorId]								=	LTRIM(CC.intVendorId)
 		,[strShipVia]								=	NULL
@@ -808,15 +839,15 @@ FROM
 		,[dblCostUnitQty]							=	1
 		,[dblUnitQty]								=	1
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
-															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
+															 THEN SubCur.intCurrencyID
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
 														END		
 		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
-															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
-															 ELSE  ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
+															 THEN SubCur.strCurrency
+															 ELSE  ISNULL(CC.strCurrency, ISNULL(SubCur.strCurrency,CU.strCurrency))
 														END	
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
-		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
+		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ISNULL(SubCur.strCurrency,CU.strCurrency))
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	D2.str1099Form			 
 		,[str1099Type]								=	D2.str1099Type 
@@ -842,6 +873,7 @@ FROM
 	JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 	LEFT JOIN   tblSMTerm					TM	ON  TM.intTermID			=	CH.intTermId
 	LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
+	LEFT JOIN	tblSMCurrency				SubCur ON CU.intMainCurrencyId = SubCur.intCurrencyID
 	LEFT JOIN	tblICItemLocation		ItemLoc ON	ItemLoc.intItemId		=	CC.intItemId			AND 
 													ItemLoc.intLocationId	=	CD.intCompanyLocationId
 	LEFT JOIN	tblICInventoryReceiptCharge RC	ON	RC.intContractId		=	CC.intContractHeaderId	AND 
@@ -855,6 +887,10 @@ FROM
 	LEFT JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	CC.intCurrencyId
 	LEFT JOIN	tblSMCurrencyExchangeRate Rate ON  (Rate.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND Rate.intToCurrencyId = CU.intMainCurrencyId) 
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
+	OUTER APPLY 
+	(
+		SELECT TOP 1 intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = [dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
+	) apClearing
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId]  
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
