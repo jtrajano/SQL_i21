@@ -56,6 +56,7 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.intTaxGroupId
 	, TaxGroup.strTaxGroup
 	, Receipt.ysnPosted
+	, Receipt.ysnCostOutdated
 	, Receipt.intEntityId
 	, strEntityName = Entity.strName
 	, Receipt.strActualCostId

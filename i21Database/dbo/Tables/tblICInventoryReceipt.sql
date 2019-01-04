@@ -46,6 +46,7 @@ Type the overview for the table here.
 		[intShipmentId] INT NULL,
 		[intTaxGroupId] INT NULL,
 		[ysnPosted] [bit] NULL DEFAULT ((0)),
+		[ysnCostOutdated] [bit] NULL DEFAULT ((0)),
 		[intCreatedUserId] [int] NULL,
 		[intEntityId] [int] NULL,
 		[intConcurrencyId] [int] NULL DEFAULT ((0)),
