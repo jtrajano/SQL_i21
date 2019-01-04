@@ -220,8 +220,8 @@ BEGIN TRY
 			,[intCostUOMId] = t.[intItemUOMId]
 			,[dblNewValue] = t.dblValue
 			,[intCurrencyId]
-			,[intTransactionId] = pl.intBatchId
-			,[intTransactionDetailId] = pl.intWorkOrderProducedLotId
+			,[intTransactionId] = t.intRelatedTransactionId
+			,[intTransactionDetailId] = t.intTransactionDetailId
 			,[strTransactionId]
 			,[intTransactionTypeId] = 9
 			,t.[intLotId]
@@ -229,21 +229,16 @@ BEGIN TRY
 			,t.[intStorageLocationId]
 			,[ysnIsStorage] = 0
 			,[strActualCostId]
-			,[intSourceTransactionId] = pl.intBatchId --t.intTransactionId
-			,[intSourceTransactionDetailId] = pl.intWorkOrderProducedLotId --t.intTransactionDetailId
+			,[intSourceTransactionId] = t.intRelatedTransactionId
+			,[intSourceTransactionDetailId] = t.intTransactionDetailId --t.intTransactionDetailId
 			,[strSourceTransactionId] = t.strTransactionId
 			,intFobPointId
 			,dblVoucherCost = NULL
 		FROM tblICInventoryTransaction t
-		INNER JOIN (
-			tblMFWorkOrderProducedLot pl LEFT JOIN tblMFWorkOrder wo ON pl.intWorkOrderId = wo.intWorkOrderId
-				AND pl.ysnProductionReversed = 0
-			) ON t.strTransactionId = wo.strWorkOrderNo
-			AND t.intLotId = ISNULL(pl.intProducedLotId, pl.intLotId)
 		WHERE t.strBatchId = @strCostAdjustmentBatchId
-			AND t.strTransactionId = t.strRelatedTransactionId
 			AND t.ysnIsUnposted = 0
-			AND t.intTransactionTypeId = 26
+			AND t.intTransactionTypeId = 26 and t.strTransactionId=t.strRelatedTransactionId 
+			AND t.strTransactionId=@strWorkOrderNo 
 
 		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust = @unpostCostAdjustment
 			,@strBatchId = @strBatchIdForUnpost
