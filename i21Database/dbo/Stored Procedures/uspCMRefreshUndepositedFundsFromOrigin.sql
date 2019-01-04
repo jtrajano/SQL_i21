@@ -105,9 +105,9 @@ UNION SELECT DISTINCT
 	strName,
 	strSourceSystem,
 	strPaymentMethod,
-	intCreatedUserId = @intUserId,
+	intCreatedUserId = intEntityEnteredById,
 	dtmCreated = GETDATE(),
-	intLastModifiedUserId = @intUserId,
+	intLastModifiedUserId = intEntityEnteredById,
 	dtmLastModified = GETDATE()
 FROM vyuARUndepositedPayment v LEFT JOIN tblCMBankAccount b
 			ON b.intBankAccountId = v.intBankAccountId --OR ISNULL(v.intBankAccountId,0) = 0 --Include payments without bank account
