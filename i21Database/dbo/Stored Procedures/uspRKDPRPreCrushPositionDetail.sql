@@ -115,6 +115,7 @@ BEGIN
 		, ysnPreCrush BIT)
 	DECLARE @InventoryStock AS TABLE (strCommodityCode NVARCHAR(100)
 		, strItemNo NVARCHAR(100)
+		, strCategory NVARCHAR(100)
 		, dblTotal numeric(24,10)
 		, strLocationName nvarchar(100)
 		, intCommodityId int
@@ -462,6 +463,7 @@ BEGIN
 			-- inventory
 			INSERT INTO @InventoryStock(strCommodityCode
 				, strItemNo
+				, strCategory
 				, dblTotal
 				, strLocationName
 				, intCommodityId
@@ -469,6 +471,7 @@ BEGIN
 				, strInventoryType)
 			SELECT strCommodityCode
 				, strItemNo
+				, strCategoryCode
 				, dblTotal = SUM(dblTotal)
 				, strLocationName
 				, intCommodityId
@@ -477,6 +480,7 @@ BEGIN
 			FROM (
 				SELECT strCommodityCode
 					, i.strItemNo
+					, Category.strCategoryCode
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(s.dblQuantity, 0))
 					, strLocationName
 					, intCommodityId = @intCommodityId
@@ -501,6 +505,7 @@ BEGIN
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
 				, strItemNo
+				, strCategoryCode
 			
 			-- inventory basis
 			SELECT strCommodityCode
@@ -1089,6 +1094,8 @@ WHERE strContractEndMonth <> 'Near By' and strType in('Purchase Priced' ,'Sale P
 ORDER BY CONVERT(DATETIME, '01 ' + strContractEndMonth) ASC
 
 INSERT INTO @List (strCommodityCode
+	, strItemNo
+	, strCategory
 	, dblTotal
 	, strContractEndMonth
 	, strLocationName
@@ -1098,6 +1105,8 @@ INSERT INTO @List (strCommodityCode
 	, strType
 	, strInventoryType)
 SELECT strCommodityCode
+	, strItemNo
+	, strCategory
 	, dblTotal
 	, 'Near By'
 	, strLocationName
