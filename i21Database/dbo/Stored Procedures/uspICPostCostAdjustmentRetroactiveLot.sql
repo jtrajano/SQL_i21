@@ -114,6 +114,8 @@ BEGIN
 			,@strNewCost AS NVARCHAR(50) 
 			,@IsSourceTransaction AS BIT 
 			,@strItemNo AS NVARCHAR(50) 
+			,@dblNewCbCost AS NUMERIC(38, 20)
+			,@intInventoryLotId AS INT
 
     DECLARE @strReceiptType AS NVARCHAR(50)
 			,@self AS INT 
@@ -496,14 +498,17 @@ BEGIN
 		-- Get the original cost bucket value
 		IF @IsSourceTransaction = 1
 		BEGIN 
+			SET @intInventoryLotId = NULL 
 			SELECT	@CostBucketOriginalValue = cbo.dblValue
 					,@CostBucketOriginalCost = cbo.dblCost
+					,@intInventoryLotId = cb.intInventoryLotId
 			FROM	tblICInventoryLot cb INNER JOIN #tmpCostBucketOriginal cbo
 						ON cb.intInventoryLotId = cbo.intInventoryLotId
 			WHERE	cbo.intLotId = @t_intLotId
 					AND cb.intItemId = @t_intItemId
 					AND cb.intItemLocationId = @t_intItemLocationId
-					AND cb.intItemUOMId = @t_intItemUOMId					
+					AND cb.intItemUOMId = @t_intItemUOMId
+					AND cb.dblStockIn = @t_dblQty 
 		END 
 
 		-- Calculate the Cost Bucket cost 
@@ -520,7 +525,7 @@ BEGIN
 						@CostAdjustmentPerLot * @t_dblQty 
 					WHEN 
 						@t_dblQty < 0 
-						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN 							
+						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN
 							@t_dblQty * @CostBucketNewCost
 							+ (-@t_dblQty * @t_NegativeStockCost) 
 
@@ -534,7 +539,7 @@ BEGIN
 		IF  @IsSourceTransaction = 1
 		BEGIN 
 			-- Validate if the cost is going to be negative. 
-			IF (@CostBucketOriginalValue + @CostAdjustment) < 0 
+			IF (@CostBucketOriginalValue + (@CostAdjustmentPerLot * @t_dblQty)) < 0 
 			BEGIN 
 				SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
 				FROM	tblICItem 
@@ -546,25 +551,26 @@ BEGIN
 			END 
 
 			UPDATE  cb
-			SET		cb.dblCost = 
-						dbo.fnDivide(
-							(@CostBucketOriginalValue + @CostAdjustment) 
-							,cb.dblStockIn 
-						) 
+			SET		cb.dblCost = @CostBucketNewCost
+						--dbo.fnDivide(
+						--	(@CostBucketOriginalValue + @CostAdjustment) 
+						--	,cb.dblStockIn 
+						--) 
+						--dbo.fnDivide(
+						--	(dbo.fnMultiply(cb.dblStockIn, cb.dblCost) + dbo.fnMultiply(@CostAdjustmentPerLot, cb.dblStockIn)) 
+						--	,cb.dblStockIn 
+						--) 
 			FROM	tblICInventoryLot cb
-			WHERE	cb.intLotId = @t_intLotId
-					AND cb.ysnIsUnposted = 0 
-					AND cb.intTransactionId = @t_intTransactionId
-					AND cb.intTransactionDetailId = @t_intTransactionDetailId
-					AND cb.strTransactionId = @t_strTransactionId	
+			WHERE	cb.intInventoryLotId = @intInventoryLotId
 
 			UPDATE	l
-			SET		l.dblLastCost = dbo.fnCalculateUnitCost(cb.dblCost, iu.dblUnitQty) -- cb.dblCost
+			SET		l.dblLastCost = dbo.fnCalculateCostBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblCost) -- cb.dblCost
 			FROM	tblICLot l INNER JOIN tblICInventoryLot cb
 						ON l.intLotId = cb.intLotId
-					INNER JOIN tblICItemUOM iu
-						ON iu.intItemUOMId = cb.intItemUOMId
-			WHERE	l.intLotId = @t_intLotId
+					INNER JOIN tblICItemUOM stockUOM
+						ON stockUOM.intItemId = l.intItemId
+						AND stockUOM.ysnStockUnit = 1
+			WHERE	cb.intInventoryLotId = @intInventoryLotId
 		END 
 
 		-- Check if there is a transaction where the cost change needs escalation. 
