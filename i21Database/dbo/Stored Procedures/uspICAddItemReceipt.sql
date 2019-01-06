@@ -887,7 +887,7 @@ BEGIN
 					AND RawData.strReceiptType = 'Purchase Order'
 
 				-- 2. Contracts
-				LEFT JOIN vyuCTContractDetailView ContractView
+				LEFT JOIN vyuCTCompactContractDetailView ContractView
 					ON ContractView.intContractDetailId = ISNULL(RawData.intContractDetailId, 0) -- intLineNo
 					AND RawData.strReceiptType = 'Purchase Contract'
 
