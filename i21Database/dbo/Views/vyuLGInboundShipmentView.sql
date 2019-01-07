@@ -44,7 +44,7 @@ SELECT
 		InsCur.strCurrency as strInsuranceCurrency,
 		L.dtmDocsToBroker,
 		L.dtmScheduledDate,
-		CASE WHEN L.ysnPosted = 1 THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END AS ysnInventorized,
+		CASE WHEN (L.ysnPosted = 1 AND ISNULL(L.ysnCancelled, 0) <> 1) THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END AS ysnInventorized,
 		L.dtmPostedDate,
 		L.dtmDocsReceivedDate,
 		L.dtmETAPOL,
