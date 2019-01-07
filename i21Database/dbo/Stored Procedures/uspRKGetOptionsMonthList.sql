@@ -111,16 +111,15 @@ BEGIN
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '11' THEN 'Nov' 
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '12' THEN 'Dec' 
 			END  AS strMonthName
+			,intMonthCode
 		INTO #Temp	
 			
 	FROM
 	(
-		SELECT strMonth FROM ##FinalMonths 
+		SELECT strMonth, intMonthCode FROM ##FinalMonths 
 	)t
 	WHERE ISNULL(strMonth,'') <> ''
 	ORDER BY strMonth	
-	SELECT DISTINCT strMonthName into #temp1 FROM #Temp 
-	SELECT strMonthName as strOptionMonth FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
-END 
-
-
+	SELECT DISTINCT strMonthName, intMonthCode into #temp1 FROM #Temp 
+	SELECT strMonthName as strOptionMonth, intMonthCode FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
+END
