@@ -14,7 +14,7 @@ BEGIN
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
-	SET XACT_ABORT ON
+	SET XACT_ABORT OFF -- http://jira.irelyserver.com/browse/ST-1152
 	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
@@ -3047,7 +3047,7 @@ BEGIN
 
 									-- ROLLBACK
 									GOTO ExitWithRollback
-									RETURN
+									-- RETURN
 								END
 							ELSE
 								BEGIN
@@ -3344,7 +3344,7 @@ BEGIN
 
 												-- ROLLBACK
 												GOTO ExitWithRollback
-												RETURN
+												-- RETURN
 											END
 									END
 								ELSE
@@ -3353,7 +3353,7 @@ BEGIN
 
 										-- ROLLBACK
 										GOTO ExitWithRollback
-										RETURN
+										-- RETURN
 									END
 
 										---- POST Invoice
@@ -3478,7 +3478,7 @@ BEGIN
 
 										-- ROLLBACK
 										GOTO ExitWithRollback
-										RETURN
+										-- RETURN
 										-- ********************************************************
 										
 									END CATCH
@@ -3531,7 +3531,7 @@ BEGIN
 
 								-- ROLLBACK
 								GOTO ExitWithRollback
-								RETURN
+								-- RETURN
 							END
 					END
 				ELSE 
@@ -3541,7 +3541,7 @@ BEGIN
 
 						-- ROLLBACK
 						GOTO ExitWithRollback
-						RETURN
+						-- RETURN
 					END
 				----------------------------------------------------------------------
 				------------------ END POST TO AR SALES INVOICE ----------------------
@@ -3728,7 +3728,7 @@ BEGIN
 
 										-- ROLLBACK
 										GOTO ExitWithRollback
-								RETURN
+								-- -- RETURN
 									END
 							END
 						ELSE
@@ -3737,7 +3737,7 @@ BEGIN
 
 								-- ROLLBACK
 								GOTO ExitWithRollback
-								RETURN
+								-- -- RETURN
 							END
 					END
 				----------------------------------------------------------------------
@@ -3905,7 +3905,7 @@ BEGIN
 
 							-- ROLLBACK
 							GOTO ExitWithRollback
-							RETURN
+							-- -- RETURN
 
 						END CATCH
 
@@ -3961,7 +3961,7 @@ BEGIN
 
 											-- ROLLBACK
 											GOTO ExitWithRollback
-											RETURN
+											-- RETURN
 
 										END CATCH
 
@@ -3995,7 +3995,7 @@ BEGIN
 
 											-- ROLLBACK
 											GOTO ExitWithRollback
-											RETURN
+											-- RETURN
 
 										END CATCH
 
@@ -4012,7 +4012,7 @@ BEGIN
 
 						-- ROLLBACK
 						GOTO ExitWithRollback
-						RETURN
+						-- RETURN
 					END
 				----------------------------------------------------------------------
 				---------------- END UN-POST SALES INVOICE ---------------------------
@@ -4216,7 +4216,7 @@ BEGIN
 
 															-- ROLLBACK
 															GOTO ExitWithRollback
-															RETURN
+															-- RETURN
 														END
 												END
 											ELSE
@@ -4225,7 +4225,7 @@ BEGIN
 
 													-- ROLLBACK
 													GOTO ExitWithRollback
-													RETURN
+													-- RETURN
 												END
 
 											-- ROLLBACK Transaction if theres error on UnPosting from Receive Payments
@@ -4363,6 +4363,7 @@ ExitWithRollback:
     -- Rollback Transaction here
 	IF @@TRANCOUNT > 0
 		BEGIN
+			-- PRINT 'Will Rollback'
 			ROLLBACK TRANSACTION 
 		END
 	
