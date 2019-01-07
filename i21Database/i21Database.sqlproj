@@ -6411,6 +6411,12 @@
     <Build Include="dbo\Stored Procedures\uspCTGetPriceContractSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixation.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqDisplayField.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqPriceFixationInfo.sql" />
+    <Build Include="dbo\Functions\fnCTIsMultiAllocationExists.sql" />
+    <Build Include="dbo\Functions\fnCTIsMultiDerivativesExists.sql" />
+    <Build Include="dbo\Functions\fnCTGetLastApprovalStatus.sql" />
+    <Build Include="dbo\Functions\fnCTGetSeqContainerInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
