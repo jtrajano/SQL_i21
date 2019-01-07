@@ -450,10 +450,7 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 				DEALLOCATE cursor_postdate
 
 				SELECT @intErrorCount = COUNT(1) FROM @tblLog
-				IF(@intErrorCount > 0 ) 
-					THROW 51000, ''Error occurred during importing.'', 1;    
 				
-
 				IF @importLogId = 0
     				EXEC dbo.uspGLCreateImportLogHeader 
 					@msg=''Successful Transaction'', 
