@@ -65,10 +65,7 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOTCOST) 
-					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
-					AND 
+					ON  
 					(
 						-- Link to the main transaction
 						(	
@@ -82,6 +79,9 @@ FROM	(
 							AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId
 						)
 					)
+					AND ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
+					AND inventory_transaction.intCostingMethod IN (@LOTCOST) -- dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOTCOST) 
+					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
