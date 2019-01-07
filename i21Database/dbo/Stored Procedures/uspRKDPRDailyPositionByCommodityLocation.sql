@@ -4,6 +4,7 @@
 	,@strPositionIncludes NVARCHAR(100) = NULL
 	,@dtmToDate datetime = NULL
 	,@strByType nvarchar(50) = null
+	,@strPositionBy nvarchar(50) = NULL
 AS
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @FinalTable AS TABLE (
@@ -17,7 +18,7 @@ DECLARE @FinalTable AS TABLE (
 )
 
 INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId,strLocationName)
-exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= @intCommodityId,@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByLocation'
+exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= @intCommodityId,@intLocationId = NULL,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByLocation', @strPositionBy = @strPositionBy
 
 INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId,strLocationName)
 exec uspRKDPRSubInvPositionByCommodity  @intCommodityId= @intCommodityId,@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByLocation'

@@ -6,16 +6,18 @@ CREATE PROCEDURE [dbo].[uspRKDPRSubHedgePositionByCommodity]
 		,@strPositionIncludes NVARCHAR(200) = NULL
 		,@dtmToDate datetime = NULL
 		,@strByType NVARCHAR(200) = null
+		,@strPositionBy NVARCHAR(50) = NULL
 AS
 
 --DECLARE
---		 @intCommodityId nvarchar(max)= '01,'
+--		 @intCommodityId nvarchar(max)= null
 --		,@intLocationId int = null
 --		,@intVendorId int = null
---		,@strPurchaseSales NVARCHAR(200) = null
+--		,@strPurchaseSales NVARCHAR(200) = 'Purchase'
 --		,@strPositionIncludes NVARCHAR(200) = 'All Storage'
 --		,@dtmToDate datetime = getDate()
 --		,@strByType NVARCHAR(200) = 'ByCommodity'
+--		,@strPositionBy NVARCHAR(50) = 'Delivery Month'
 
 DECLARE @strCommodityCode NVARCHAR(max)
 IF ISNULL(@strPurchaseSales,'') <> ''
@@ -30,8 +32,11 @@ BEGIN
 	END
 END
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
-DECLARE @ysnIncludeDPPurchasesInCompanyTitled bit
-SELECT @ysnIncludeDPPurchasesInCompanyTitled = isnull(ysnIncludeDPPurchasesInCompanyTitled,0) from tblRKCompanyPreference
+DECLARE @ysnIncludeDPPurchasesInCompanyTitled bit,
+		@ysnPreCrush BIT
+SELECT @ysnIncludeDPPurchasesInCompanyTitled = isnull(ysnIncludeDPPurchasesInCompanyTitled,0)
+	, @ysnPreCrush = ISNULL(ysnPreCrush, 0)
+FROM tblRKCompanyPreference
 
 DECLARE @Commodity AS TABLE 
 (
@@ -246,7 +251,7 @@ SELECT ROW_NUMBER() OVER (
 	INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 	WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-		AND ISNULL(FOT.ysnPreCrush, 0) = 0
+		--AND ISNULL(FOT.ysnPreCrush, 0) = 0
 			
 	UNION ALL
 	--Futures Sell
@@ -276,7 +281,7 @@ SELECT ROW_NUMBER() OVER (
 	INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 	WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-		AND ISNULL(FOT.ysnPreCrush, 0) = 0
+		--AND ISNULL(FOT.ysnPreCrush, 0) = 0
 			
 	UNION ALL
 	--Options Buy
@@ -306,7 +311,7 @@ SELECT ROW_NUMBER() OVER (
 	INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 	WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-		AND ISNULL(FOT.ysnPreCrush, 0) = 0
+		--AND ISNULL(FOT.ysnPreCrush, 0) = 0
 				
 	UNION ALL
 	--Options Sell
@@ -336,7 +341,7 @@ SELECT ROW_NUMBER() OVER (
 	INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 	WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-		AND ISNULL(FOT.ysnPreCrush, 0) = 0
+		--AND ISNULL(FOT.ysnPreCrush, 0) = 0
 
 )t2 )t3 WHERE t3.intRowNum = 1
 
@@ -584,12 +589,12 @@ BEGIN
 
 	INSERT INTO @tempFinal (strCommodityCode,intContractHeaderId,strContractNumber,strType,strContractType,strLocationName,strContractEndMonth,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,intCompanyLocationId,strCurrency,intContractTypeId)
 	SELECT * FROM 
-	(SELECT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,cd.strType [strType],'Physical Contract' strContractType,strLocationName,
+	(SELECT DISTINCT cd.strCommodityCode,cd.intContractHeaderId,strContractNumber,cd.strType [strType],'Physical Contract' strContractType,strLocationName,
 		RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth,
 		isnull((cd.dblBalance),0) AS dblTotal
 	   ,cd.intUnitMeasureId,@intCommodityId as intCommodityId,cd.intCompanyLocationId,strCurrency,intContractTypeId 
 	FROM @tblGetOpenContractDetail cd
-	WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId =@intCommodityId
+	WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId = @intCommodityId
 	AND cd.intCompanyLocationId= CASE WHEN ISNULL(@intLocationId,0)=0 THEN cd.intCompanyLocationId ELSE @intLocationId END)t
 		WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
@@ -634,7 +639,8 @@ BEGIN
 									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
 									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
-									)		
+									)	
+			AND ISNULL(t.ysnPreCrush, 0) = 0	
 		) t	
 		
 --	-- Option Net Hedge
@@ -679,7 +685,83 @@ BEGIN
 									WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 									ELSE isnull(ysnLicensed, 0) END
 									)
+	AND ISNULL(t.ysnPreCrush, 0) = 0
 
+
+	IF @ysnPreCrush = 1 AND ISNULL(@strPositionBy,'') <> ''
+	BEGIN
+		--Crush Records
+		INSERT INTO @tempFinal(strCommodityCode
+			, strInternalTradeNo
+			, intFutOptTransactionHeaderId
+			, strType
+			, strContractType
+			, strLocationName
+			, strContractEndMonth
+			, dblTotal
+			, intFromCommodityUnitMeasureId
+			, intCommodityId
+			, strAccountNumber
+			, strTranType
+			, intBrokerageAccountId
+			, strInstrumentType
+			, dblNoOfLot)
+		SELECT strCommodityCode
+			, strInternalTradeNo
+			, intFutOptTransactionHeaderId
+			, 'Price Risk'
+			, strContractType = 'Crush'
+			, strLocationName
+			, strFutureMonth
+			, HedgedQty
+			, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+			, intCommodityId = @intCommodityId
+			, strAccountNumber
+			, strTranType
+			, intBrokerageAccountId
+			, strInstrumentType
+			, dblNoOfLot
+		FROM (
+			SELECT oc.strCommodityCode
+				, oc.strInternalTradeNo
+				, oc.intFutOptTransactionHeaderId
+				, f.intCommodityId
+				, cuc1.intCommodityUnitMeasureId
+				, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
+						else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end dtmFutureMonthsDate
+				, dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0)
+																																ELSE ISNULL(intOpenContract, 0) END * m.dblContractSize) AS HedgedQty
+				, l.strLocationName
+				, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
+						else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end strFutureMonth
+				, m.intUnitMeasureId
+				, e.strName + '-' + ba.strAccountNumber strAccountNumber
+				, strBuySell AS strTranType
+				, f.intBrokerageAccountId
+				,CASE WHEN f.intInstrumentTypeId = 1 THEN 'Futures' ELSE 'Options ' END AS strInstrumentType
+				,CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END dblNoOfLot
+				, f.intFutureMarketId
+				, oc.strFutureMarket
+				, f.intFutureMonthId
+				, oc.strBrokerTradeNo
+				, oc.strNotes
+				, oc.ysnPreCrush
+			FROM @tblGetOpenFutureByDate oc
+			JOIN tblRKFutOptTransaction f ON oc.intFutOptTransactionId = f.intFutOptTransactionId AND oc.intOpenContract <> 0 and isnull(f.ysnPreCrush,0)=1
+			INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId
+			JOIN tblICCommodityUnitMeasure cuc1 ON f.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
+			INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = f.intFutureMonthId
+			INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
+			AND intCompanyLocationId IN (
+				SELECT intCompanyLocationId
+				FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END)
+			INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
+			INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
+			WHERE f.intCommodityId = @intCommodityId
+				AND f.intLocationId = ISNULL(@intLocationId, f.intLocationId)
+		) t
+	END
 
 
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intInventoryReceiptId,strReceiptNumber,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
@@ -704,22 +786,70 @@ BEGIN
 						ELSE isnull(ysnLicensed, 0) END)
 	GROUP BY intInventoryReceiptId,strReceiptNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency						
 	
-	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intCommodityId,strLocationName,strCurrency)
-	SELECT strCommodityCode,'Price Risk' [strType],'Open Contract' strContractType,
-	CASE WHEN intContractTypeId =1 then sum(dblTotal) else -sum(dblTotal) end dblTotal,intContractHeaderId,strContractNumber,intCommodityId,strLocationName ,strCurrency
-		FROM (SELECT strCommodityCode,			
-				isnull(cd.dblBalance,0) dblTotal,
-				intContractHeaderId,strContractNumber,intCommodityId,strLocationName,intCompanyLocationId,intContractTypeId,strCurrency
-				FROM @tblGetOpenContractDetail cd
-				WHERE intContractTypeId in(1,2) and intPricingTypeId IN (1,3) AND cd.intCommodityId  = @intCommodityId 
-				AND cd.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then cd.intCompanyLocationId else @intLocationId end 
-				)t	
-				WHERE  intCompanyLocationId  IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
-						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intContractHeaderId,strContractNumber,intCommodityId,strLocationName,strCurrency,intItemId)
+	SELECT strCommodityCode
+			, strType = 'Price Risk'
+			, strContractType = 'Open Contract'
+			, dblTotal = CASE WHEN intContractTypeId = 1 THEN SUM(dblTotal) ELSE - SUM(dblTotal) END
+			, intContractHeaderId
+			, strContractNumber
+			, intCommodityId
+			, strLocationName
+			, strCurrency
+			, intItemId
+			--, strItemNo
+			--, strCategory
+			--, intFutureMarketId
+			--, strFutMarketName
+			--, intFutureMonthId
+			--, strFutureMonth
+			--, strEntityName
+			--, strDeliveryDate
+		FROM (
+			SELECT strCommodityCode
+				, dblTotal = ISNULL(cd.dblTotal, 0)
+				, intContractHeaderId
+				, strContractNumber
+				, cd.intCommodityId
+				, strLocationName
+				, intCompanyLocationId
+				, intContractTypeId
+				, strCurrency
+				, intItemId
+				--, strItemNo
+				--, strCategory
+				--, intFutureMarketId
+				--, strFutMarketName
+				--, intFutureMonthId
+				--, strFutureMonth
+				--, strEntityName
+				--, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmTicketDateTime, 106), 8)
+			FROM @tempFinal cd
+			WHERE cd.intCommodityId = @intCommodityId and strType IN('Sale Priced', 'Purchase Priced') 
+				AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
+		) t	WHERE  intCompanyLocationId  IN (
+				SELECT intCompanyLocationId FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+								WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 						ELSE isnull(ysnLicensed, 0) END)
-				 group by strCommodityCode,intContractHeaderId,strContractNumber,intCommodityId,strLocationName,intContractTypeId,strCurrency	
+		GROUP BY strCommodityCode
+			, intContractHeaderId
+			, strContractNumber
+			, intCommodityId
+			, strLocationName
+			, intContractTypeId
+			, strCurrency
+			, intItemId
+			--, strItemNo
+			--, strCategory
+			--, intFutureMarketId
+			--, strFutMarketName
+			--, intFutureMonthId
+			--, strFutureMonth
+			--, strEntityName
+			--, strDeliveryDate	
 
+	
 	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,intFromCommodityUnitMeasureId,intCommodityId,strLocationName)
 	SELECT @strCommodityCode,'Price Risk' [strType],'Collateral' strContractType,sum(isnull(dblRemainingQuantity,0)) dblTotal,intFromCommodityUnitMeasureId,
 	intCommodityId,strLocationName  from(
@@ -730,36 +860,36 @@ BEGIN
 					WHERE c1.intLocationId= case when isnull(@intLocationId,0)=0 then c1.intLocationId else @intLocationId end and intCommodityId = @intCommodityId)t 
 	GROUP BY intCommodityId,intFromCommodityUnitMeasureId,intCommodityId,strLocationName	
 
-	INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,strShipmentNumber,intInventoryShipmentId,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
-	SELECT distinct 
-		strCommodityCode
-		,'Price Risk' as strType
-		,'Sales Basis Deliveries' as strContractType
-		,isnull(ri.dblQuantity, 0) AS dblTotal
-		,r.strShipmentNumber
-		,r.intInventoryShipmentId
-		,ium.intCommodityUnitMeasureId as intFromCommodityUnitMeasureId
-		,cd.intCommodityId
-		,cl.strLocationName
-		,cd.strCurrency
-	FROM vyuRKGetInventoryValuation v 
-	JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
-	INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-	INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
-	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
-	INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
-	LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
-	INNER JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
-	WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
-	AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
-	and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
-	and ISNULL(inv.ysnPosted,0) = 0
-	and cl.intCompanyLocationId IN (
-		SELECT intCompanyLocationId FROM tblSMCompanyLocation
-		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
-						WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
-						ELSE isnull(ysnLicensed, 0) END
-		)  
+	--INSERT INTO @tempFinal(strCommodityCode,strType,strContractType,dblTotal,strShipmentNumber,intInventoryShipmentId,intFromCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency)
+	--SELECT distinct 
+	--	strCommodityCode
+	--	,'Price Risk' as strType
+	--	,'Sales Basis Deliveries' as strContractType
+	--	,isnull(ri.dblQuantity, 0) AS dblTotal
+	--	,r.strShipmentNumber
+	--	,r.intInventoryShipmentId
+	--	,ium.intCommodityUnitMeasureId as intFromCommodityUnitMeasureId
+	--	,cd.intCommodityId
+	--	,cl.strLocationName
+	--	,cd.strCurrency
+	--FROM vyuRKGetInventoryValuation v 
+	--JOIN tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
+	--INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
+	--INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2	and cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
+	--JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId 
+	--INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
+	--LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
+	--INNER JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
+	--WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType ='Inventory Shipment'
+	--AND cl.intCompanyLocationId  = case when isnull(@intLocationId,0)=0 then cl.intCompanyLocationId else @intLocationId end
+	--and convert(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+	--and ISNULL(inv.ysnPosted,0) = 0
+	--and cl.intCompanyLocationId IN (
+	--	SELECT intCompanyLocationId FROM tblSMCompanyLocation
+	--	WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+	--					WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+	--					ELSE isnull(ysnLicensed, 0) END
+	--	)  
 				
 	--If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0)
 	--BEGIN
