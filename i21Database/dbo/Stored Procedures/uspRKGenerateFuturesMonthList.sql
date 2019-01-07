@@ -120,30 +120,6 @@ BEGIN TRY
 		, intSeqNo INT
 		, strFutureMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS)
 
-	DECLARE @intTempFutMonthsToOpen INT
-	SET @intTempFutMonthsToOpen = @FutMonthsToOpen * 2
-
-	WHILE (SELECT COUNT(*) FROM ##FinalFutMonths) < @intTempFutMonthsToOpen
-	BEGIN
-		SELECT @Top = @intTempFutMonthsToOpen - COUNT(*) FROM ##FinalFutMonths
-		
-		INSERT INTO ##FinalFutMonths(
-			 intYear
-			,strMonth
-			,strMonthName
-			,strMonthCode
-			,strSymbol
-			,intMonthCode
-			,strFutureMonth
-		)
-		SELECT TOP (@Top) YEAR(@Date) + @Count, LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode, strMonth, strMonthCode, strSymbol, intMonthCode, strMonth + ' ' + RIGHT(CONVERT(NVARCHAR, YEAR(@Date) + @Count),2)
-		FROM ##AllowedFutMonth
-		WHERE intMonthCode > (CASE WHEN @Count = 0 THEN @CurrentMonthCode ELSE 0 END)
-		ORDER BY intMonthCode
-		
-		SET @Count = @Count + 1
-	END
-
 	DECLARE @intCountAllowedMonths INT
 	DECLARE @ProjectedFutureMonths TABLE(
 		  intRowId INT IDENTITY(1,1)
@@ -157,7 +133,7 @@ BEGIN TRY
 	DECLARE @ProjectedMonthName NVARCHAR(10)
 	DECLARE @ProjectedMonth NVARCHAR(10)
 	DECLARE @ProjectedMonthSymbol NVARCHAR(10)
-	DECLARE @tmp@ProjectedMonth DATE
+	DECLARE @tmpProjectedMonth DATE
 
 	WHILE (SELECT COUNT(*) FROM @ProjectedFutureMonths) < (@FutMonthsToOpen)
 	BEGIN
@@ -181,10 +157,10 @@ BEGIN TRY
 		END
 		ELSE IF(ISNULL(@ProjectedMonth, '') = '')
 		BEGIN
-			SELECT @tmp@ProjectedMonth = CONVERT(DATE,@ProjectedMonthName + ' 1 ' + CONVERT(VARCHAR, YEAR(GETDATE())))
+			SELECT @tmpProjectedMonth = CONVERT(DATE,@ProjectedMonthName + ' 1 ' + CONVERT(VARCHAR, YEAR(GETDATE())))
 		
-			SELECT @ProjectedMonth = CASE WHEN DATEDIFF(MONTH, GETDATE(), @tmp@ProjectedMonth) <= 0 THEN FORMAT(DATEADD(YEAR,1,@tmp@ProjectedMonth), 'MMM yy')
-				ELSE FORMAT(@tmp@ProjectedMonth, 'MMM yy')
+			SELECT @ProjectedMonth = CASE WHEN DATEDIFF(MONTH, GETDATE(), @tmpProjectedMonth) <= 0 THEN FORMAT(DATEADD(YEAR,1,@tmpProjectedMonth), 'MMM yy')
+				ELSE FORMAT(@tmpProjectedMonth, 'MMM yy')
 			END
 
 			IF EXISTS(SELECT TOP 1 * FROM @ProjectedFutureMonths WHERE strMonth = @ProjectedMonth)
@@ -201,9 +177,6 @@ BEGIN TRY
 			SET @intIndex1 = 0;
 		END
 	END
-
-	DELETE FROM ##FinalFutMonths
-	WHERE strFutureMonth NOT IN (SELECT TOP(@FutMonthsToOpen) strMonth FROM @ProjectedFutureMonths)
 
 	SELECT RowNumber = ROW_NUMBER() OVER (ORDER BY strMonth)
 		, intConcurrencyId = 1
@@ -275,7 +248,7 @@ BEGIN TRY
 	END
 
 	DROP TABLE ##AllowedFutMonth
-	DROP TABLE ##FinalFutMonths
+	--DROP TABLE ##FinalFutMonths
 	DROP TABLE #FutTemp
 
 	SELECT * FROM @GenerateOptionMonthResult

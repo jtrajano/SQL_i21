@@ -134,150 +134,138 @@ BEGIN TRY
 	DECLARE @intTempOptMonthsToOpen INT
 	SET @intTempOptMonthsToOpen = @OptMonthsToOpen * 2
 
-	WHILE (SELECT COUNT(*) FROM ##FinalOptMonths) < @intTempOptMonthsToOpen
-	BEGIN
-		SELECT @Top = @intTempOptMonthsToOpen - COUNT(*) FROM ##FinalOptMonths
+	--WHILE (SELECT COUNT(*) FROM ##FinalOptMonths) < @intTempOptMonthsToOpen
+	--BEGIN
+	--	SELECT @Top = @intTempOptMonthsToOpen - COUNT(*) FROM ##FinalOptMonths
 		
-		INSERT INTO ##FinalOptMonths(intYear, strMonth, strMonthName, strMonthCode, strSymbol, intMonthCode, strFuturesMonth, intFutureMonthId, strOptionMonth)
-		SELECT TOP (@Top) YEAR(@Date) + @Count
-				,LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode
-				,strMonth
-				,strMonthCode
-				,strSymbol
-				,intMonthCode
-				,dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode)
-				,dbo.fnRKGetFutureMonthId(@FutureMarketId, dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode))
-				,LTRIM(RTRIM(strMonth)) + ' ' + Right(LTRIM(YEAR(@Date) + @Count),2)
-		FROM ##AllowedOptMonths
-		WHERE intMonthCode > (CASE WHEN @Count = 0 THEN @CurrentMonthCode ELSE 0 END)
-		ORDER BY intMonthCode
+	--	INSERT INTO ##FinalOptMonths(intYear, strMonth, strMonthName, strMonthCode, strSymbol, intMonthCode, strFuturesMonth, intFutureMonthId, strOptionMonth)
+	--	SELECT TOP (@Top) YEAR(@Date) + @Count
+	--			,LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode
+	--			,strMonth
+	--			,strMonthCode
+	--			,strSymbol
+	--			,intMonthCode
+	--			,dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode)
+	--			,dbo.fnRKGetFutureMonthId(@FutureMarketId, dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode))
+	--			,LTRIM(RTRIM(strMonth)) + ' ' + Right(LTRIM(YEAR(@Date) + @Count),2)
+	--	FROM ##AllowedOptMonths
+	--	WHERE intMonthCode > (CASE WHEN @Count = 0 THEN @CurrentMonthCode ELSE 0 END)
+	--	ORDER BY intMonthCode
 		
-		SET @Count = @Count + 1
-	END
+	--	SET @Count = @Count + 1
+	--END
 
 	DECLARE @intCountAllowedMonths INT
 	DECLARE @ProjectedOptionMonths TABLE(
 		  intRowId INT IDENTITY(1,1)
 		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
-		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
-		, ysnProcessed BIT DEFAULT 0);
+		, strOptionMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, strSymbol NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, strFutureMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, intFutureMonthId INT);
 
 	SELECT @intCountAllowedMonths = COUNT(*) FROM ##AllowedOptMonths
 
 	DECLARE @intIndex1 int = 0;
 	DECLARE @ProjectedMonthName NVARCHAR(10)
 	DECLARE @ProjectedMonth NVARCHAR(10)
+	DECLARE @ProjectedMonthSymbol NVARCHAR(10)
+	DECLARE @ProjectedOptFutureMonth NVARCHAR(10)
+	DECLARE @tmpProjectedMonth DATE
 
-	WHILE (SELECT COUNT(*) FROM @ProjectedOptionMonths) < (@OptMonthsToOpen * 2)
+	DECLARE @strOptSymbol NVARCHAR(5)
+	SELECT @strOptSymbol = strOptSymbol FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
+
+	WHILE (SELECT COUNT(*) FROM @ProjectedOptionMonths) < @OptMonthsToOpen
 	BEGIN
 		SET @intIndex1 = @intIndex1 + 1;
-		
+		SET @ProjectedMonth = NULL
+
 		SELECT @ProjectedMonthName= strMonth
+			,@ProjectedMonthSymbol = strSymbol
 		FROM ##AllowedOptMonths
 		WHERE intRowId = @intIndex1;
 
-		SELECT TOP(1) @ProjectedMonth = strOptionMonth
-		FROM ##FinalOptMonths
-		WHERE strMonthName = @ProjectedMonthName
-	
-		IF EXISTS(SELECT TOP 1 * FROM @ProjectedOptionMonths WHERE strMonth = @ProjectedMonth)
+		SELECT TOP(1) @ProjectedMonth = FORMAT(DATEADD(YEAR,1,CONVERT(DATETIME,'01 ' + strOptionMonth)), 'MMM yy')
+		FROM tblRKOptionsMonth
+		WHERE LEFT(LTRIM(RTRIM(strOptionMonth)),3) = @ProjectedMonthName
+			AND intFutureMarketId = @FutureMarketId
+		ORDER BY CONVERT(DATETIME,'01 ' + strOptionMonth) DESC
+
+		IF(ISNULL(@ProjectedMonth, '') <> '') AND EXISTS(SELECT TOP 1 * FROM @ProjectedOptionMonths WHERE strOptionMonth = @ProjectedMonth)
 		BEGIN
-			SELECT TOP(1) @ProjectedMonth = strOptionMonth
-			FROM ##FinalOptMonths
-			WHERE strMonthName = @ProjectedMonthName
-			AND strOptionMonth NOT IN(SELECT strMonth FROM @ProjectedOptionMonths)
+			SET @ProjectedMonth = FORMAT(DATEADD(YEAR, 1,CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
+		END
+		ELSE IF(ISNULL(@ProjectedMonth, '') = '')
+		BEGIN
+			SELECT @tmpProjectedMonth = CONVERT(DATE,@ProjectedMonthName + ' 1 ' + CONVERT(VARCHAR, YEAR(GETDATE())))
+		
+			SELECT @ProjectedMonth = CASE WHEN DATEDIFF(MONTH, GETDATE(), @tmpProjectedMonth) <= 0 THEN FORMAT(DATEADD(YEAR,1,@tmpProjectedMonth), 'MMM yy')
+				ELSE FORMAT(@tmpProjectedMonth, 'MMM yy')
+			END
+
+			IF EXISTS(SELECT TOP 1 * FROM @ProjectedOptionMonths WHERE strOptionMonth = @ProjectedMonth)
+			BEGIN
+				SET @ProjectedMonth = FORMAT(DATEADD(YEAR, 1, CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
+			END
 		END
 
-		INSERT INTO @ProjectedOptionMonths(strMonthName,strMonth)
-		SELECT @ProjectedMonthName, @ProjectedMonth
-		 
+		SET @ProjectedOptFutureMonth = dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, YEAR(CONVERT(DATETIME,'01 ' + @ProjectedMonth)), MONTH(CONVERT(DATETIME,'01 ' + @ProjectedMonth)))
+
+		INSERT INTO @ProjectedOptionMonths(strMonthName,strOptionMonth, strSymbol, strFutureMonth, intFutureMonthId)
+		SELECT @ProjectedMonthName
+			, @ProjectedMonth
+			,(@strOptSymbol + @ProjectedMonthSymbol + RIGHT(CONVERT(NVARCHAR, YEAR(CONVERT(DATETIME,'01 ' + @ProjectedMonth))),2))
+			, @ProjectedOptFutureMonth
+			,dbo.fnRKGetFutureMonthId(@FutureMarketId, @ProjectedOptFutureMonth)
+
 		IF(@intIndex1 = @intCountAllowedMonths)
 		BEGIN
 			SET @intIndex1 = 0;
 		END
 	END
 
-	IF EXISTS(SELECT * FROM ##FinalOptMonths WHERE strOptionMonth IN (SELECT strOptionMonth FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId))
-	BEGIN
-		DELETE FROM ##FinalOptMonths
-		WHERE strOptionMonth IN (SELECT strOptionMonth FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId)
-	END
-
-	DELETE FROM @ProjectedOptionMonths
-	WHERE strMonth IN (SELECT strOptionMonth FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId)
-
-	DELETE FROM ##FinalOptMonths
-	WHERE strOptionMonth NOT IN (SELECT TOP(@OptMonthsToOpen) strMonth FROM @ProjectedOptionMonths)
-
 	DECLARE @MissingFutureMonths VARCHAR(4000)
-	SELECT @MissingFutureMonths = COALESCE(@MissingFutureMonths + ', ', '') + strFuturesMonth 
-	FROM ##FinalOptMonths
+	SELECT @MissingFutureMonths = COALESCE(@MissingFutureMonths + ', ', '') + strFutureMonth 
+	FROM @ProjectedOptionMonths
 	WHERE intFutureMonthId IS NULL
-	GROUP BY strFuturesMonth
+	GROUP BY strFutureMonth
 
 	DECLARE @OrphanOptionMonths VARCHAR(4000)
 	SELECT @OrphanOptionMonths = COALESCE(@OrphanOptionMonths + ', ', '') + strOptionMonth 
-	FROM ##FinalOptMonths
+	FROM @ProjectedOptionMonths
 	WHERE intFutureMonthId IS NULL
 	GROUP BY strOptionMonth
 
 	IF OBJECT_ID('tempdb..#OptTemp') IS NOT NULL DROP TABLE #OptTemp
 	
-	SELECT RowNumber = ROW_NUMBER() OVER (ORDER BY strMonth)
-		, intConcurrencyId = 1,strMonth
-		, dtmOptionMonthsDate = REPLACE(strMonth, ' ', '') + '-01'
-		, intFutureMarketId = @FutureMarketId
-		, strSymbol
-		, strMonthName
-		, strMonthCode
-		, LEFT(strMonth, 4) AS strYear
-		, dtmFirstNoticeDate = NULL
-		, dtmLastNoticeDate = NULL
-		, dtmLastTradingDate = NULL
-		, dtmSpotDate = CONVERT(DATETIME, NULL) 
-		, ysnExpired = 0
-		, intMonthCode
-		, intFutureMonthId
-	INTO #OptTemp
-	FROM  ##FinalOptMonths
-	WHERE ISNULL(strMonth,'') <> ''
-		AND ISNULL(intFutureMonthId,0) <> 0
-	ORDER BY strMonth
-
-	DECLARE @strOptSymbol NVARCHAR(5)
-	SELECT @strOptSymbol = strOptSymbol FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
-	
 	INSERT INTO tblRKOptionsMonth(intConcurrencyId
-			, intFutureMarketId
-			, intCommodityMarketId
-			, strOptionMonth
-			, intYear
-			, intFutureMonthId
-			, ysnMonthExpired
-			, dtmExpirationDate
-			, strOptMonthSymbol)
-		SELECT * FROM (
-			SELECT DISTINCT t.intConcurrencyId
-				, t.intFutureMarketId
-				, intCommodityMarketId = @intCommodityMarketId
-				, strOMonth = LTRIM(RTRIM(t.strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(t.strYear,2)
-				, strYear = Right(strYear,2)
-				, t.intFutureMonthId
-				, ysnExpired = 0
-				, dtmExpirationDate = NULL
-				, strSymbol = @strOptSymbol + '' + strSymbol + '' + Right(strYear,2)
-			FROM #OptTemp t)t
-		WHERE t.strOMonth NOT IN (SELECT strOptionMonth COLLATE Latin1_General_CI_AS
-								FROM tblRKOptionsMonth
-								WHERE intCommodityMarketId =@intCommodityMarketId)
-		ORDER BY CONVERT(DATETIME,'01 ' + strOMonth) ASC
+		, intFutureMarketId
+		, intCommodityMarketId
+		, strOptionMonth
+		, intYear
+		, intFutureMonthId
+		, ysnMonthExpired
+		, dtmExpirationDate
+		, strOptMonthSymbol)
+	SELECT 1
+		, @FutureMarketId
+		, @intCommodityMarketId
+		,strOptionMonth
+		,RIGHT(CONVERT(NVARCHAR, YEAR(CONVERT(DATETIME,'01 ' + strOptionMonth))), 2)
+		,intFutureMonthId
+		,0
+		,NULL
+		,strSymbol
+	FROM @ProjectedOptionMonths
+	WHERE ISNULL(intFutureMonthId, '') <> '' 
 
 	SELECT MissingFutureMonths = @MissingFutureMonths
 		,OrphanOptionMonths = @OrphanOptionMonths;
 
 	DROP TABLE ##AllowedOptMonths
 	DROP TABLE ##FinalOptMonths
-	DROP TABLE #OptTemp
+	--DROP TABLE #OptTemp
 
 END TRY
 BEGIN CATCH
