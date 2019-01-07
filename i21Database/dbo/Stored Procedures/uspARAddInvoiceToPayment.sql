@@ -9,6 +9,7 @@
 	,@CurrencyExchangeRateId		INT				= NULL
 	,@CurrencyExchangeRate			NUMERIC(18,6)	= 1.000000
 	,@AllowOverpayment				BIT				= 0
+	,@InvoicePrepayment				BIT				= 0
 	,@RaiseError					BIT				= 0
 	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@NewPaymentDetailId			INT				= NULL			OUTPUT 	
@@ -116,14 +117,14 @@ WHERE
 	[intPaymentId] = @PaymentId
 
 SELECT
-	 @InvoiceTotal			= [dblInvoiceTotal] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-	,@BaseInvoiceTotal		= [dblBaseInvoiceTotal] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-	,@InvoiceAmountDue		= [dblAmountDue] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-	,@BaseInvoiceAmountDue	= [dblBaseAmountDue] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-	,@TermDiscount			= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-	,@BaseTermDiscount		= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblBaseInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-	,@AvailableDiscount		= [dblDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-	,@BaseAvailableDiscount	= [dblBaseDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+	 @InvoiceTotal			= CASE WHEN @InvoicePrepayment = 1 THEN [dblInvoiceTotal] ELSE [dblInvoiceTotal] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
+	,@BaseInvoiceTotal		= CASE WHEN @InvoicePrepayment = 1 THEN [dblBaseInvoiceTotal] ELSE [dblBaseInvoiceTotal] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
+	,@InvoiceAmountDue		= CASE WHEN @InvoicePrepayment = 1 THEN [dblAmountDue] ELSE [dblAmountDue] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
+	,@BaseInvoiceAmountDue	= CASE WHEN @InvoicePrepayment = 1 THEN [dblBaseAmountDue] ELSE [dblBaseAmountDue] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
+	,@TermDiscount			= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * CASE WHEN @InvoicePrepayment = 1 THEN 1 ELSE dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
+	,@BaseTermDiscount		= [dbo].fnRoundBanker(ISNULL(dbo.[fnGetDiscountBasedOnTerm](@PaymentDate, [dtmDate], [intTermId], [dblBaseInvoiceTotal]), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * CASE WHEN @InvoicePrepayment = 1 THEN 1 ELSE dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
+	,@AvailableDiscount		= CASE WHEN @InvoicePrepayment = 1 THEN [dblDiscountAvailable] ELSE [dblDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
+	,@BaseAvailableDiscount	= CASE WHEN @InvoicePrepayment = 1 THEN [dblBaseDiscountAvailable] ELSE [dblBaseDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
 	,@InvoiceNumber			= [strInvoiceNumber]
 	,@TransactionType		= [strTransactionType]
 	,@dtmDiscountDate		= [dtmDiscountDate]
@@ -166,7 +167,7 @@ IF ISNULL(@AllowOverpayment,0) = 0 AND (CASE WHEN EXISTS(SELECT TOP 1 * FROM tbl
 		RETURN 0;
 	END
 
-IF dbo.fnARGetInvoiceAmountMultiplier(@TransactionType) = -1 AND @Payment > 0
+IF dbo.fnARGetInvoiceAmountMultiplier(@TransactionType) = -1 AND @Payment > 0 AND @InvoicePrepayment = 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('Positive payment amount is not allowed for invoice of type %s.', 16, 1, @TransactionType);
@@ -227,8 +228,8 @@ BEGIN TRY
 		,[dblBaseInvoiceTotal]		= @BaseInvoiceTotal 
 		,[dblDiscount]				= (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END)
 		,[dblBaseDiscount]			= (CASE WHEN @ApplyTermDiscount = 1 THEN @BaseTermDiscount ELSE @BaseDiscount END)
-		,[dblDiscountAvailable]		= ARI.[dblDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
-		,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable] * dbo.fnARGetInvoiceAmountMultiplier([strTransactionType])
+		,[dblDiscountAvailable]		= ARI.[dblDiscountAvailable] * CASE WHEN @InvoicePrepayment = 1 THEN 1 ELSE dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
+		,[dblBaseDiscountAvailable]	= ARI.[dblBaseDiscountAvailable] * CASE WHEN @InvoicePrepayment = 1 THEN 1 ELSE dbo.fnARGetInvoiceAmountMultiplier([strTransactionType]) END
 		,[dblInterest]				= @Interest
 		,[dblBaseInterest]			= @BaseInterest
 		,[dblAmountDue]				= (@InvoiceAmountDue + @Interest) - @Payment + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END)
