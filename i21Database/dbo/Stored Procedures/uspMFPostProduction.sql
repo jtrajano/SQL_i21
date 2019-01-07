@@ -832,6 +832,13 @@ BEGIN
 
 		UPDATE @GLEntries
 		SET strBatchId = @strBatchId
+
+		UPDATE t
+		SET t.strBatchId = @strBatchId
+		FROM tblICInventoryStockMovement t
+		WHERE t.intTransactionId = @intTransactionId
+			AND t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strProduceBatchId
 	END
 
 	IF ISNULL(@ysnRecap, 0) = 0
