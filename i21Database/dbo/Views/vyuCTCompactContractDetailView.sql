@@ -19,6 +19,7 @@ AS
 			,strOrigin = ISNULL(RY.strCountry,OG.strCountry)
 			,strPurchasingGroup = PG.strName 
 			,strINCOShipTerm = CB.strContractBasis
+			,CD.intCompanyLocationId
 	FROM	tblCTContractDetail					CD	
 	CROSS APPLY tblCTCompanyPreference			CP	
 	LEFT JOIN	tblCTContractHeader			    CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
