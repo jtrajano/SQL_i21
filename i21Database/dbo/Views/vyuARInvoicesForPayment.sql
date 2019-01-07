@@ -110,6 +110,8 @@ FROM (
 														THEN CONVERT(BIT, 1)
 													WHEN ARI.[strType] = 'CF Tran'
 														THEN CONVERT(BIT, 1)
+													WHEN ARI.[strTransactionType] = 'Customer Prepayment' AND ISNULL(PREPAY.intPaymentId, 0) = 0
+														THEN CONVERT(BIT, 1)
 													ELSE CONVERT(BIT, 0) 
 													END)
 			,[intPaymentMethodId]				= ARC.[intPaymentMethodId]
@@ -156,6 +158,12 @@ FROM (
 				 , ysnActive
 			FROM dbo.tblEMEntityEFTInformation WITH (NOLOCK)
 		) EFT ON CE.intEntityId = EFT.intEntityId
+		LEFT JOIN (
+			SELECT intPaymentId
+			FROM dbo.tblARPayment WITH (NOLOCK)
+			WHERE ysnPosted = 1
+			  AND ysnProcessedToNSF = 0
+		) PREPAY ON ARI.intPaymentId = PREPAY.intPaymentId
 		LEFT JOIN (
 			SELECT B.[intInvoiceId]
 				 , A.[intCurrencyExchangeRateTypeId]
