@@ -58,7 +58,7 @@
 	[ysnPreCrush] BIT NULL,
 	[ysnHideNetPayableAndReceivable] BIT NULL,
 	[ysnM2MAllowExpiredMonth] BIT DEFAULT((0)) NULL,
-	[ysnSubTotalByBook] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[ysnSubTotalByBook] BIT DEFAULT((0)) NULL,
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
     CONSTRAINT [FK_tblRKCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
