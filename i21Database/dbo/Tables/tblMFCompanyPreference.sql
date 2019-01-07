@@ -77,5 +77,6 @@
 	ysnMergeOnMove Bit CONSTRAINT [DF_tblMFCompanyPreference_ysnMergeOnMove] DEFAULT 0,
 	ysnWorkOrderPlannedDateByBusinessDate BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnWorkOrderPlannedDateByBusinessDate] DEFAULT 1,
 	ysnConcatenateParentLotonProduction BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnConcatenateParentLotonProduction] DEFAULT 0,
+	ysnEnableInventoryAsOfDateBySnapshot BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnEnableInventoryAsOfDateBySnapshot] DEFAULT 0,
     CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

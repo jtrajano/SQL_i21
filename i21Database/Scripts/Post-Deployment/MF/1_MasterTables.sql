@@ -3579,4 +3579,8 @@ FROM tblMFWorkOrder W
 JOIN @tblMFWorkOrderProducedLot WI ON W.intWorkOrderId = WI.intWorkOrderId
 WHERE W.dtmPostDate IS NULL
 
-Go
+GO
+UPDATE tblMFCompanyPreference
+SET ysnEnableInventoryAsOfDateBySnapshot =0
+Where ysnEnableInventoryAsOfDateBySnapshot IS NULL
+GO
