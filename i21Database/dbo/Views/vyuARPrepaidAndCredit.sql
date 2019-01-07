@@ -101,6 +101,7 @@ INNER JOIN
 	tblARPayment ARP
 		ON ARI.[intPaymentId] = ARP.[intPaymentId]
 		AND ARP.[ysnPosted] = 1
+		AND ARP.ysnProcessedToNSF = 0
 LEFT OUTER JOIN
 	vyuCTContractHeaderView CTCHV
 		ON ARID.[intContractHeaderId] = CTCHV.[intContractHeaderId]
@@ -221,6 +222,7 @@ INNER JOIN
 	tblARPayment ARP
 		ON ARI.[intPaymentId] = ARP.[intPaymentId]
 		AND ARP.[ysnPosted] = 1
+		AND ARP.ysnProcessedToNSF = 0
 LEFT OUTER JOIN
 	vyuCTContractHeaderView CTCHV
 		ON ARID.[intContractHeaderId] = CTCHV.[intContractHeaderId]
