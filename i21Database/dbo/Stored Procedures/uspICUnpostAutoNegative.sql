@@ -48,11 +48,12 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0			
-					AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+					ON 
+					inventory_transaction.intTransactionId = Source_Query.intTransactionId
 					AND inventory_transaction.strTransactionId = Source_Query.strTransactionId
 					AND inventory_transaction.intTransactionTypeId = @AUTO_NEGATIVE
-					
+					AND ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0			
+
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
 					UPDATE 
