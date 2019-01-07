@@ -126,6 +126,7 @@ BEGIN TRY
 		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strSymbol NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, dtmSpotDate DATE
 		, ysnProcessed BIT DEFAULT 0);
 	SELECT @intCountAllowedMonths = COUNT(*) FROM ##AllowedFutMonth
 
@@ -134,11 +135,13 @@ BEGIN TRY
 	DECLARE @ProjectedMonth NVARCHAR(10)
 	DECLARE @ProjectedMonthSymbol NVARCHAR(10)
 	DECLARE @tmpProjectedMonth DATE
+	DECLARE @tmpSpothDate DATE
 
 	WHILE (SELECT COUNT(*) FROM @ProjectedFutureMonths) < (@FutMonthsToOpen)
 	BEGIN
 		SET @intIndex1 = @intIndex1 + 1;
 		SET @ProjectedMonth = NULL
+		SET @tmpSpothDate = NULL
 
 		SELECT @ProjectedMonthName= strMonth
 			,@ProjectedMonthSymbol = strSymbol
@@ -169,8 +172,20 @@ BEGIN TRY
 			END
 		END
 
-		INSERT INTO @ProjectedFutureMonths(strMonthName,strMonth, strSymbol)
-		SELECT @ProjectedMonthName, @ProjectedMonth, @ProjectedMonthSymbol
+		IF(@intIndex1 = 1)
+		BEGIN
+			SELECT TOP 1 @tmpSpothDate = CONVERT(DATETIME, '1-' + strMonth + '-' + CONVERT(NVARCHAR, CONVERT(INT, YEAR(CONVERT(DATETIME,'01 ' + @ProjectedMonth))) - 1))
+			FROM ##AllowedFutMonth ORDER BY intMonthCode DESC
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @tmpSpothDate = CONVERT(DATETIME, '1-' + strMonth + '-' + CONVERT(NVARCHAR, CONVERT(INT, YEAR(CONVERT(DATETIME,'01 ' + @ProjectedMonth)))))
+			FROM ##AllowedFutMonth
+			WHERE intRowId = (@intIndex1 - 1);
+		END
+
+		INSERT INTO @ProjectedFutureMonths(strMonthName,strMonth, strSymbol, dtmSpotDate)
+		SELECT @ProjectedMonthName, @ProjectedMonth, @ProjectedMonthSymbol, @tmpSpothDate
 		 
 		IF(@intIndex1 = @intCountAllowedMonths)
 		BEGIN
@@ -189,23 +204,12 @@ BEGIN TRY
 		, dtmFirstNoticeDate = NULL
 		, dtmLastNoticeDate = NULL
 		, dtmLastTradingDate = NULL
-		, dtmSpotDate = CONVERT(DATETIME, NULL)
+		, dtmSpotDate = dtmSpotDate
 		, ysnExpired = 0
 		, intMonthCode = P.strMonth
 	INTO #FutTemp
 	FROM @ProjectedFutureMonths P
 	WHERE ISNULL(strMonth,'') <> ''
-
-	UPDATE a SET dtmSpotDate = CONVERT(DATETIME, '1-' + b.strMonth + '-' + CONVERT(NVARCHAR, CONVERT(INT, a.strYear) - 1))
-	FROM #FutTemp a
-	OUTER APPLY(
-		SELECT TOP 1 * FROM ##AllowedFutMonth ORDER BY intMonthCode DESC
-	)b
-	WHERE a.RowNumber = 1
-
-	UPDATE a SET dtmSpotDate = CONVERT(DATE, b.dtmFutureMonthsDate) FROM #FutTemp a
-	LEFT JOIN #FutTemp b ON a.RowNumber - 1 = b.RowNumber
-	WHERE a.RowNumber <> 1
 
 	INSERT INTO tblRKFuturesMonth(intConcurrencyId
 		, strFutureMonth
