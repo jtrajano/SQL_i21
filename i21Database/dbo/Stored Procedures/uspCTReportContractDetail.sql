@@ -23,25 +23,25 @@ BEGIN TRY
 
 	DECLARE @Amend TABLE (intContractDetailId INT, strAmendedColumns NVARCHAR(MAX))
 
-	SELECT @IntNoOFUniFormItemUOM=COUNT(DISTINCT intItemUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
-	SELECT @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT intNetWeightUOMId)  FROM tblCTContractDetail WHERE intContractHeaderId= @intContractHeaderId
+	SELECT @IntNoOFUniFormItemUOM=COUNT(DISTINCT intItemUOMId)  FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId= @intContractHeaderId
+	SELECT @IntNoOFUniFormNetWeightUOM=COUNT(DISTINCT intNetWeightUOMId)  FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId= @intContractHeaderId
 
-	SELECT  @dblNoOfLots = dblNoOfLots FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
-	SELECT  @TotalQuantity = dblQuantity FROM tblCTContractHeader WHERE intContractHeaderId=@intContractHeaderId
-	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WHERE intContractHeaderId=@intContractHeaderId AND intContractStatusId <> 3
+	SELECT  @dblNoOfLots = dblNoOfLots FROM tblCTContractHeader WITH (NOLOCK) WHERE intContractHeaderId=@intContractHeaderId
+	SELECT  @TotalQuantity = dblQuantity FROM tblCTContractHeader WITH (NOLOCK) WHERE intContractHeaderId=@intContractHeaderId
+	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId=@intContractHeaderId AND intContractStatusId <> 3
 
-	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId
 
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 		SELECT @strAmendedColumns = ''
 		SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId
-		FROM   tblCTApprovedContract 
+		FROM   tblCTApprovedContract WITH (NOLOCK)
 		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Contract Amendment ') AND ysnApproved = 1
 		ORDER BY intApprovedContractId DESC
 
 		SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
-		FROM   tblCTApprovedContract 
+		FROM   tblCTApprovedContract WITH (NOLOCK)
 		WHERE  intContractDetailId = @intContractDetailId AND intApprovedContractId < @intLastApprovedContractId  AND ysnApproved = 1
 		ORDER BY intApprovedContractId DESC
              
@@ -55,7 +55,7 @@ BEGIN TRY
 		INSERT INTO @Amend
 		SELECT @intContractDetailId,@strAmendedColumns
 
-		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
+		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetailWITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 	
 
@@ -121,26 +121,26 @@ BEGIN TRY
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY') 
 
-	FROM	tblCTContractDetail CD	
-	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
-	JOIN	tblICCommodity		CO	ON	CO.intCommodityId		=	CH.intCommodityId		LEFT
-	JOIN	tblICItemUOM		QM	ON	QM.intItemUOMId			=	CD.intItemUOMId			LEFT
-	JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	QM.intUnitMeasureId		LEFT
-	JOIN	tblICItemUOM		PM	ON	PM.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
-	JOIN	tblICUnitMeasure	PU	ON	PU.intUnitMeasureId		=	PM.intUnitMeasureId		LEFT
-	JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT
-	JOIN	tblRKFutureMarket	MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId	LEFT
-	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId		LEFT
-	JOIN	tblICItem			IM	ON	IM.intItemId			=	CD.intItemId			LEFT
-	JOIN	[tblEMEntityFarm]	EF	ON	EF.intFarmFieldId		=	CD.intFarmFieldId		LEFT
-	JOIN	tblCTBagMark		BM	ON	BM.intContractDetailId	=	CD.intContractDetailId	
+	FROM	tblCTContractDetail CD	WITH (NOLOCK)
+	JOIN	tblCTContractHeader	CH	WITH (NOLOCK) ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
+	JOIN	tblICCommodity		CO	WITH (NOLOCK) ON	CO.intCommodityId		=	CH.intCommodityId		LEFT
+	JOIN	tblICItemUOM		QM	WITH (NOLOCK) ON	QM.intItemUOMId			=	CD.intItemUOMId			LEFT
+	JOIN	tblICUnitMeasure	UM	WITH (NOLOCK) ON	UM.intUnitMeasureId		=	QM.intUnitMeasureId		LEFT
+	JOIN	tblICItemUOM		PM	WITH (NOLOCK) ON	PM.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
+	JOIN	tblICUnitMeasure	PU	WITH (NOLOCK) ON	PU.intUnitMeasureId		=	PM.intUnitMeasureId		LEFT
+	JOIN	tblSMCurrency		CY	WITH (NOLOCK) ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT
+	JOIN	tblRKFutureMarket	MA	WITH (NOLOCK) ON	MA.intFutureMarketId	=	CD.intFutureMarketId	LEFT
+	JOIN	tblRKFuturesMonth	MO	WITH (NOLOCK) ON	MO.intFutureMonthId		=	CD.intFutureMonthId		LEFT
+	JOIN	tblICItem			IM	WITH (NOLOCK) ON	IM.intItemId			=	CD.intItemId			LEFT
+	JOIN	[tblEMEntityFarm]	EF	WITH (NOLOCK) ON	EF.intFarmFieldId		=	CD.intFarmFieldId		LEFT
+	JOIN	tblCTBagMark		BM	WITH (NOLOCK) ON	BM.intContractDetailId	=	CD.intContractDetailId	
 									AND	BM.ysnDefault			=	1						LEFT
-	JOIN	tblICItemUOM		NM	ON	NM.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
-	JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
-	JOIN	tblICUnitMeasure	U7	ON	U7.intUnitMeasureId		=	WU.intUnitMeasureId		LEFT
-	JOIN	tblICUnitMeasure	NU	ON	NU.intUnitMeasureId		=	NM.intUnitMeasureId		LEFT
+	JOIN	tblICItemUOM		NM	WITH (NOLOCK) ON	NM.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
+	JOIN	tblICItemUOM		WU	WITH (NOLOCK) ON	WU.intItemUOMId			=	CD.intNetWeightUOMId	LEFT
+	JOIN	tblICUnitMeasure	U7	WITH (NOLOCK) ON	U7.intUnitMeasureId		=	WU.intUnitMeasureId		LEFT
+	JOIN	tblICUnitMeasure	NU	WITH (NOLOCK) ON	NU.intUnitMeasureId		=	NM.intUnitMeasureId		LEFT
 	JOIN	@Amend				AM	ON	AM.intContractDetailId	=	CD.intContractDetailId	LEFT
-	JOIN	tblICItemContract	IC	ON	IC.intItemContractId	=	CD.intItemContractId
+	JOIN	tblICItemContract	IC	WITH (NOLOCK) ON	IC.intItemContractId	=	CD.intItemContractId
 	CROSS JOIN tblCTCompanyPreference   CP
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractStatusId <> 3
