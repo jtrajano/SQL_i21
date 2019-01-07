@@ -257,9 +257,9 @@ BEGIN
 		INNER JOIN dbo.tblSTStore S 
 			ON S.intCompanyLocationId = CL.intCompanyLocationId
 		WHERE S.intStoreId = @intStoreId
-		AND I.strLotTracking = 'No'
-		AND ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) <> P.dblSalePrice
-
+			AND I.strLotTracking = 'No'
+			--AND ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0) <> P.dblSalePrice
+			AND (ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.SalesQuantity as int),0)) != P.dblSalePrice
 
 		-- Get MUD- next Batch number
 		DECLARE @strMUDbatchId AS NVARCHAR(1000)

@@ -65,11 +65,11 @@ BEGIN TRY
 								,dtmDate				= GETDATE()
 
 								-- Item Manage
-								,dblQty					= MUD.dblQty		-- 0 -- Required field so specify zero. 
-								,dblUOMQty				= MUD.dblQty		-- 0 -- Required field so specify zero.
-								,dblCost				= MUD.dblAmount		-- 0 -- Required field so specify zero.
-								,dblValue				= MUD.dblRetailUnit	-- 0 -- Required field so specify zero.
-								,dblSalesPrice			= MUD.dblRetailUnit	-- Required field so specify zero or the sales price used when selling the item. 
+								,dblQty					= ISNULL(MUD.dblQty, 0)		    -- 0 -- Required field so specify zero. 
+								,dblUOMQty				= ISNULL(MUD.dblQty, 0)		    -- 0 -- Required field so specify zero.
+								,dblCost				= ISNULL(MUD.dblAmount, 0)		-- 0 -- Required field so specify zero.
+								,dblValue				= ISNULL(MUD.dblRetailUnit, 0)	-- 0 -- Required field so specify zero.
+								,dblSalesPrice			= ISNULL(MUD.dblRetailUnit, 0)	-- Required field so specify zero or the sales price used when selling the item. 
 			
 								,intTransactionId		= @intCheckoutId -- Parent Id
 								,intTransactionDetailId	= MUD.intCheckoutMarkUpDownId -- Child Id
