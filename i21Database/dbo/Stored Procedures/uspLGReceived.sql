@@ -106,7 +106,8 @@ SET ANSI_WARNINGS OFF
 			,[strTransactionId]
 			,[intTransactionTypeId] 		 	
 		)	
-		SELECT LD.intItemId
+		SELECT 
+			LD.intItemId
 			,IL.intItemLocationId
 			,LD.intItemUOMId
 			,NULL
@@ -117,8 +118,8 @@ SET ANSI_WARNINGS OFF
 			,CAST(L.strLoadNumber AS VARCHAR(100))
 			,22
 		FROM tblLGLoadDetail LD	INNER JOIN tblLGLoad L 
-				ON L.intLoadId = LD.intLoadId
-			LEFT JOIN vyuCTContractDetailView CT 
+				ON L.intLoadId = LD.intLoadId			
+			LEFT JOIN vyuCTCompactContractDetailView CT --LEFT JOIN vyuCTContractDetailView CT 
 				ON CT.intContractDetailId = LD.intPContractDetailId
 			LEFT JOIN tblICItemLocation IL 
 				ON IL.intLocationId = CT.intCompanyLocationId 
