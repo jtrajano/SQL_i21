@@ -7233,6 +7233,8 @@
     <Build Include="dbo\Functions\fnRKFormatDate.sql" />
     <Build Include="dbo\Functions\fnSTGenerateCheckDigit.sql" />
     <Build Include="dbo\Views\vyuICItemStockUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedItemStock.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedItemStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
