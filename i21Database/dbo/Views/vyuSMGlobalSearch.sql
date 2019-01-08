@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSMGlobalSearch] WITH SCHEMABINDING
 AS
-SELECT ROW_NUMBER() over(order by Id) as intGSIndexId, strNamespace, strDisplayTitle COLLATE Latin1_General_CI_AS as strDisplayTitle, strValueField COLLATE Latin1_General_CI_AS as strValueField, strValueData, strDisplayData, strTag, strSearchCommand
+SELECT ROW_NUMBER() over(order by Id) as intGSIndexId, strNamespace, strDisplayTitle COLLATE Latin1_General_CI_AS as strDisplayTitle, strValueField COLLATE Latin1_General_CI_AS as strValueField, strValueData, strDisplayData, strTag, strSearchCommand COLLATE Latin1_General_CI_AS as strSearchCommand
 FROM
 (	
 	--ENTITY--
@@ -305,7 +305,8 @@ FROM
 		CONVERT(NVARCHAR(MAX), ISNULL([strMenuName],'')) as strDisplayData,
 		CONVERT(NVARCHAR(MAX), ISNULL([strMenuName],'')) as strTag,		
 		CASE WHEN (CHARINDEX('searchCommand', strCommand, 0) > 0) THEN 
-		REPLACE(SUBSTRING(strCommand, CHARINDEX('searchCommand=', strCommand, 0), LEN(strCommand)) COLLATE Latin1_General_BIN,'searchCommand=','') ELSE
+		REPLACE(SUBSTRING(strCommand, CHARINDEX('searchCommand=', strCommand, 0), LEN(strCommand)),'searchCommand=','') ELSE
+		--REPLACE(SUBSTRING(strCommand, CHARINDEX('searchCommand=', strCommand, 0), LEN(strCommand)) COLLATE Latin1_General_BIN,'searchCommand=','') ELSE
 		'' END as strSearchCommand
 	from [dbo].[tblSMMasterMenu] as mm where strType = 'Screen'
 
