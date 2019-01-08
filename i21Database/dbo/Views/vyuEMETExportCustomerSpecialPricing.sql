@@ -4,7 +4,7 @@
 	patr_no = b.strCustomerNumber,   
 	item_no = ICItems.strItemNo,  
 	patr_price = c.dblPrice  
-	,c.strPricing
+	,c.strPricing  COLLATE Latin1_General_CI_AS AS strPricing
 	  
 	from tblARCustomerSpecialPrice a  
 	join tblARCustomer b  
