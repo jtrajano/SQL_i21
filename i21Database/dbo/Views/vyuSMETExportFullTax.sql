@@ -4,109 +4,109 @@ AS
 SELECT ItemNumber
 , [state]
 , Authority1
-, Authority1Description
-, Authority2
-, Authority2Description
+, Authority1Description COLLATE Latin1_General_CI_AS AS Authority1Description
+, Authority2 COLLATE Latin1_General_CI_AS AS Authority2 
+, Authority2Description COLLATE Latin1_General_CI_AS AS Authority2Description
 , [Description]
 , ISNULL(MAX(FETRatePerUnit), 0.000000) AS FETRatePerUnit
-, FETGLAccount
-, EFTonFET
+, FETGLAccount COLLATE Latin1_General_CI_AS AS FETGLAccount
+, EFTonFET COLLATE Latin1_General_CI_AS AS EFTonFET
 , ISNULL(MAX(SETRatePerUnit), 0.000000) AS SETRatePerUnit
-, SETGLAccount
-, EFTonSET
+, SETGLAccount COLLATE Latin1_General_CI_AS AS SETGLAccount
+, EFTonSET COLLATE Latin1_General_CI_AS AS EFTonSET 
 , CASE WHEN ISNULL(MAX(SSTMethod), 'P') = 'U' THEN ISNULL(MAX(SSTRatePerUnit), 0.000000) ELSE ISNULL(MAX(SSTRatePerUnit), 0.000000) / 100 END AS SSTRatePerUnit
-, SSTGLAccount
-, ISNULL(MAX(SSTMethod), 'P') AS SSTMethod
-, ISNULL(MAX(SSTOnFET), 'N') AS SSTOnFET
-, ISNULL(MAX(SSTOnSET), 'N') AS SSTOnSET
-, EFTOnSST
+, SSTGLAccount COLLATE Latin1_General_CI_AS AS SSTGLAccount
+, ISNULL(MAX(SSTMethod), 'P') COLLATE Latin1_General_CI_AS AS SSTMethod
+, ISNULL(MAX(SSTOnFET), 'N') COLLATE Latin1_General_CI_AS AS SSTOnFET
+, ISNULL(MAX(SSTOnSET), 'N') COLLATE Latin1_General_CI_AS AS SSTOnSET
+, EFTOnSST COLLATE Latin1_General_CI_AS AS EFTOnSST 
 , CASE WHEN ISNULL(MAX(PSTMethod), 'U') = 'U' THEN ISNULL(MAX(PSTRatePerUnit), 0.000000) ELSE ISNULL(MAX(PSTRatePerUnit), 0.000000) / 100 END AS PSTRatePerUnit
-, PSTGLAccount
-, ISNULL(MAX(PSTMethod), 'U') AS PSTMethod
+, PSTGLAccount  COLLATE Latin1_General_CI_AS AS PSTGLAccount
+, ISNULL(MAX(PSTMethod), 'U') COLLATE Latin1_General_CI_AS AS PSTMethod
 , ISNULL(MAX(Locale1Description), 'Locale 1 Tax') AS Locale1Description
 , CASE WHEN ISNULL(MAX(Locale1Method), 'U') = 'U' THEN ISNULL(MAX(Locale1Rate), 0.000000) ELSE ISNULL(MAX(Locale1Rate), 0.000000) / 100 END AS Locale1Rate
-, Locale1GLAccount
-, ISNULL(MAX(Locale1Method), 'U') AS Locale1Method
-, Locale1EFT
-, ISNULL(MAX(Locale1SSTOnLC1), 'N') AS Locale1SSTOnLC1
-, Locale1LC1OnFET
+, Locale1GLAccount COLLATE Latin1_General_CI_AS AS Locale1GLAccount
+, ISNULL(MAX(Locale1Method), 'U') COLLATE Latin1_General_CI_AS AS Locale1Method
+, Locale1EFT COLLATE Latin1_General_CI_AS AS Locale1EFT
+, ISNULL(MAX(Locale1SSTOnLC1), 'N') COLLATE Latin1_General_CI_AS AS Locale1SSTOnLC1
+, Locale1LC1OnFET COLLATE Latin1_General_CI_AS AS Locale1LC1OnFET
 , ISNULL(MAX(Locale2Description), 'Locale 2 Tax') AS Locale2Description
 , CASE WHEN ISNULL(MAX(Locale2Method), 'U') = 'U' THEN ISNULL(MAX(Locale2Rate), 0.000000) ELSE ISNULL(MAX(Locale2Rate), 0.000000) / 100 END AS Locale2Rate
-, Locale2GLAccount
-, ISNULL(MAX(Locale2Method), 'U') AS Locale2Method
-, Locale2EFT
-, ISNULL(MAX(Locale2SSTOnLC2), 'N') AS Locale2SSTOnLC2
-, Locale2LC2OnFET
+, Locale2GLAccount COLLATE Latin1_General_CI_AS AS Locale2GLAccount 
+, ISNULL(MAX(Locale2Method), 'U') COLLATE Latin1_General_CI_AS AS Locale2Method
+, Locale2EFT COLLATE Latin1_General_CI_AS AS Locale2EFT
+, ISNULL(MAX(Locale2SSTOnLC2), 'N') COLLATE Latin1_General_CI_AS AS Locale2SSTOnLC2
+, Locale2LC2OnFET COLLATE Latin1_General_CI_AS AS Locale2LC2OnFET
 , ISNULL(MAX(Locale3Description), 'Locale 3 Tax') AS Locale3Description
 , CASE WHEN ISNULL(MAX(Locale3Method), 'U') = 'U' THEN ISNULL(MAX(Locale3Rate), 0.000000) ELSE ISNULL(MAX(Locale3Rate), 0.000000) / 100 END AS Locale3Rate
-, Locale3GLAccount
-, ISNULL(MAX(Locale3Method), 'U') AS Locale3Method
-, Locale3EFT
-, ISNULL(MAX(Locale3SSTOnLC3), 'N') AS Locale3SSTOnLC3
-, Locale3LC3OnFET
+, Locale3GLAccount COLLATE Latin1_General_CI_AS AS Locale3GLAccount
+, ISNULL(MAX(Locale3Method), 'U') COLLATE Latin1_General_CI_AS AS Locale3Method
+, Locale3EFT COLLATE Latin1_General_CI_AS AS Locale3EFT
+, ISNULL(MAX(Locale3SSTOnLC3), 'N') COLLATE Latin1_General_CI_AS AS Locale3SSTOnLC3
+, Locale3LC3OnFET COLLATE Latin1_General_CI_AS AS Locale3LC3OnFET
 , ISNULL(MAX(Locale4Description), 'Locale 4 Tax') AS Locale4Description
 , CASE WHEN ISNULL(MAX(Locale4Method), 'U') = 'U' THEN ISNULL(MAX(Locale4Rate), 0.000000) ELSE ISNULL(MAX(Locale4Rate), 0.000000) / 100 END AS Locale4Rate
-, Locale4GLAccount
-, ISNULL(MAX(Locale4Method), 'U') AS Locale4Method
-, Locale4EFT
-, ISNULL(MAX(Locale4SSTOnLC4), 'N') AS Locale4SSTOnLC4
-, Locale4LC4OnFET
+, Locale4GLAccount COLLATE Latin1_General_CI_AS AS Locale4GLAccount
+, ISNULL(MAX(Locale4Method), 'U') COLLATE Latin1_General_CI_AS AS Locale4Method
+, Locale4EFT COLLATE Latin1_General_CI_AS AS Locale4EFT
+, ISNULL(MAX(Locale4SSTOnLC4), 'N') COLLATE Latin1_General_CI_AS AS Locale4SSTOnLC4
+, Locale4LC4OnFET COLLATE Latin1_General_CI_AS AS Locale4LC4OnFET
 , ISNULL(MAX(Locale5Description), 'Locale 5 Tax') AS Locale5Description
 , CASE WHEN ISNULL(MAX(Locale5Method), 'U') = 'U' THEN ISNULL(MAX(Locale5Rate), 0.000000) ELSE ISNULL(MAX(Locale5Rate), 0.000000) / 100 END AS Locale5Rate
-, Locale5GLAccount
-, ISNULL(MAX(Locale5Method), 'U') AS Locale5Method
-, Locale5EFT
-, ISNULL(MAX(Locale5SSTOnLC5), 'N') AS Locale5SSTOnLC5
-, Locale5LC5OnFET
+, Locale5GLAccount COLLATE Latin1_General_CI_AS AS Locale5GLAccount
+, ISNULL(MAX(Locale5Method), 'U') COLLATE Latin1_General_CI_AS AS Locale5Method
+, Locale5EFT COLLATE Latin1_General_CI_AS AS Locale5EFT
+, ISNULL(MAX(Locale5SSTOnLC5), 'N') COLLATE Latin1_General_CI_AS AS Locale5SSTOnLC5
+, Locale5LC5OnFET COLLATE Latin1_General_CI_AS AS Locale5LC5OnFET
 , ISNULL(MAX(Locale6Description), 'Locale 6 Tax') AS Locale6Description
 , CASE WHEN ISNULL(MAX(Locale6Method), 'U') = 'U' THEN ISNULL(MAX(Locale6Rate), 0.000000) ELSE ISNULL(MAX(Locale6Rate), 0.000000) / 100 END AS Locale6Rate
-, Locale6GLAccount
-, ISNULL(MAX(Locale6Method), 'U') AS Locale6Method
-, Locale6EFT
-, ISNULL(MAX(Locale6SSTOnLC6), 'N') AS Locale6SSTOnLC6
-, Locale6LC6OnFET
+, Locale6GLAccount COLLATE Latin1_General_CI_AS AS Locale6GLAccount
+, ISNULL(MAX(Locale6Method), 'U') COLLATE Latin1_General_CI_AS AS Locale6Method
+, Locale6EFT COLLATE Latin1_General_CI_AS AS Locale6EFT
+, ISNULL(MAX(Locale6SSTOnLC6), 'N') COLLATE Latin1_General_CI_AS AS Locale6SSTOnLC6
+, Locale6LC6OnFET COLLATE Latin1_General_CI_AS AS Locale6LC6OnFET
 , ISNULL(MAX(Locale7Description), 'Locale 7 Tax') AS Locale7Description
 , CASE WHEN ISNULL(MAX(Locale7Method), 'U') = 'U' THEN ISNULL(MAX(Locale7Rate), 0.000000) ELSE ISNULL(MAX(Locale7Rate), 0.000000) / 100 END AS Locale7Rate
-, Locale7GLAccount
-, ISNULL(MAX(Locale7Method), 'U') AS Locale7Method
-, Locale7EFT
-, ISNULL(MAX(Locale7SSTOnLC7), 'N') AS Locale7SSTOnLC7
-, Locale7LC7OnFET
+, Locale7GLAccount COLLATE Latin1_General_CI_AS AS Locale7GLAccount
+, ISNULL(MAX(Locale7Method), 'U') COLLATE Latin1_General_CI_AS AS Locale7Method
+, Locale7EFT COLLATE Latin1_General_CI_AS AS Locale7EFT
+, ISNULL(MAX(Locale7SSTOnLC7), 'N') COLLATE Latin1_General_CI_AS AS Locale7SSTOnLC7
+, Locale7LC7OnFET COLLATE Latin1_General_CI_AS AS Locale7LC7OnFET
 , ISNULL(MAX(Locale8Description), 'Locale 8 Tax') AS Locale8Description
 , CASE WHEN ISNULL(MAX(Locale8Method), 'U') = 'U' THEN ISNULL(MAX(Locale8Rate), 0.000000) ELSE ISNULL(MAX(Locale8Rate), 0.000000) / 100 END AS Locale8Rate
-, Locale8GLAccount
-, ISNULL(MAX(Locale8Method), 'U') AS Locale8Method
-, Locale8EFT
-, ISNULL(MAX(Locale8SSTOnLC8), 'N') AS Locale8SSTOnLC8
-, Locale8LC8OnFET
+, Locale8GLAccount COLLATE Latin1_General_CI_AS AS Locale8GLAccount
+, ISNULL(MAX(Locale8Method), 'U') COLLATE Latin1_General_CI_AS AS Locale8Method
+, Locale8EFT COLLATE Latin1_General_CI_AS AS Locale8EFT
+, ISNULL(MAX(Locale8SSTOnLC8), 'N') COLLATE Latin1_General_CI_AS AS Locale8SSTOnLC8
+, Locale8LC8OnFET COLLATE Latin1_General_CI_AS AS Locale8LC8OnFET
 , ISNULL(MAX(Locale9Description), 'Locale 9 Tax') AS Locale9Description
 , CASE WHEN ISNULL(MAX(Locale9Method), 'U') = 'U' THEN ISNULL(MAX(Locale9Rate), 0.000000) ELSE ISNULL(MAX(Locale9Rate), 0.000000) / 100 END AS Locale9Rate
-, Locale9GLAccount
-, ISNULL(MAX(Locale9Method), 'U') AS Locale9Method
-, Locale9EFT
-, ISNULL(MAX(Locale9SSTOnLC9), 'N') AS Locale9SSTOnLC9
-, Locale9LC9OnFET
+, Locale9GLAccount COLLATE Latin1_General_CI_AS AS Locale9GLAccount
+, ISNULL(MAX(Locale9Method), 'U') COLLATE Latin1_General_CI_AS AS Locale9Method
+, Locale9EFT COLLATE Latin1_General_CI_AS AS Locale9EFT
+, ISNULL(MAX(Locale9SSTOnLC9), 'N') COLLATE Latin1_General_CI_AS AS Locale9SSTOnLC9
+, Locale9LC9OnFET COLLATE Latin1_General_CI_AS AS Locale9LC9OnFET
 , ISNULL(MAX(Locale10Description), 'Locale 10 Tax') AS Locale10Description
 , CASE WHEN ISNULL(MAX(Locale10Method), 'U') = 'U' THEN ISNULL(MAX(Locale10Rate), 0.000000) ELSE ISNULL(MAX(Locale10Rate), 0.000000) / 100 END AS Locale10Rate
-, Locale10GLAccount
-, ISNULL(MAX(Locale10Method), 'U') AS Locale10Method
-, Locale10EFT
-, ISNULL(MAX(Locale10SSTOnLC10), 'N') AS Locale10SSTOnLC10
-, Locale10LC10OnFET
+, Locale10GLAccount COLLATE Latin1_General_CI_AS AS Locale10GLAccount 
+, ISNULL(MAX(Locale10Method), 'U') COLLATE Latin1_General_CI_AS AS Locale10Method
+, Locale10EFT COLLATE Latin1_General_CI_AS AS Locale10EFT 
+, ISNULL(MAX(Locale10SSTOnLC10), 'N') COLLATE Latin1_General_CI_AS AS Locale10SSTOnLC10
+, Locale10LC10OnFET COLLATE Latin1_General_CI_AS AS Locale10LC10OnFET 
 , ISNULL(MAX(Locale11Description), 'Locale 11 Tax') AS Locale11Description
 , CASE WHEN ISNULL(MAX(Locale11Method), 'U') = 'U' THEN ISNULL(MAX(Locale11Rate), 0.000000) ELSE ISNULL(MAX(Locale11Rate), 0.000000) / 110 END AS Locale11Rate
-, Locale11GLAccount
-, ISNULL(MAX(Locale11Method), 'U') AS Locale11Method
-, Locale11EFT
-, ISNULL(MAX(Locale11SSTOnLC11), 'N') AS Locale11SSTOnLC11
-, Locale11LC11OnFET
+, Locale11GLAccount COLLATE Latin1_General_CI_AS AS Locale11GLAccount
+, ISNULL(MAX(Locale11Method), 'U') COLLATE Latin1_General_CI_AS AS Locale11Method
+, Locale11EFT COLLATE Latin1_General_CI_AS AS Locale11EFT 
+, ISNULL(MAX(Locale11SSTOnLC11), 'N') COLLATE Latin1_General_CI_AS AS Locale11SSTOnLC11
+, Locale11LC11OnFET COLLATE Latin1_General_CI_AS AS Locale11LC11OnFET 
 , ISNULL(MAX(Locale12Description), 'Locale 12 Tax') AS Locale12Description
 , CASE WHEN ISNULL(MAX(Locale12Method), 'U') = 'U' THEN ISNULL(MAX(Locale12Rate), 0.000000) ELSE ISNULL(MAX(Locale12Rate), 0.000000) / 120 END AS Locale12Rate
-, Locale12GLAccount
-, ISNULL(MAX(Locale12Method), 'U') AS Locale12Method
-, Locale12EFT
-, ISNULL(MAX(Locale12SSTOnLC12), 'N') AS Locale12SSTOnLC12
-, Locale12LC12OnFET
+, Locale12GLAccount COLLATE Latin1_General_CI_AS AS Locale12GLAccount 
+, ISNULL(MAX(Locale12Method), 'U') COLLATE Latin1_General_CI_AS AS Locale12Method
+, Locale12EFT COLLATE Latin1_General_CI_AS AS Locale12EFT 
+, ISNULL(MAX(Locale12SSTOnLC12), 'N') COLLATE Latin1_General_CI_AS AS Locale12SSTOnLC12
+, Locale12LC12OnFET COLLATE Latin1_General_CI_AS AS Locale12LC12OnFET 
 ,MAX(FETTaxCodeId) FETTaxCodeId
 ,MAX(SETTaxCodeId) SETTaxCodeId
 ,MAX(SSTTaxCodeId) SSTTaxCodeId
