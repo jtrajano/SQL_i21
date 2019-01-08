@@ -81,7 +81,7 @@ BEGIN
 							SELECT DISTINCT
 								ST.intStoreNo AS [StoreLocationID]
 								, 'iRely' AS [VendorName]  	
-								, 'Rel. 13.2.0' AS [VendorModelVersion]
+								, (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion]
 								, 'addchange' AS [RecordActionType] 
 								, CASE PSL.ysnDeleteFromRegister 
 									WHEN 0 

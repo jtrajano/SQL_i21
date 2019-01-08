@@ -7262,6 +7262,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetContractBalance.sql" />
     <Build Include="dbo\Functions\fnCTGetContractBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveCertification.sql" />
+    <Build Include="dbo\Functions\fnSTGenerateCheckDigit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

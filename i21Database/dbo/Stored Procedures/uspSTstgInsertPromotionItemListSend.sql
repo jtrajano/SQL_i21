@@ -137,13 +137,13 @@ BEGIN
 									WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
 										THEN CASE
 												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-													THEN RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
-												ELSE RIGHT('0000' + ISNULL(IUOM.strLongUPCCode,''),4)
+													THEN IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
+												ELSE IUOM.strLongUPCCode
 												END
 									WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
 										THEN CASE
 												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-													THEN RIGHT('0000000000000' + ISNULL(IUOM.strUpcCode,''),13) 
+													THEN IUOM.strUpcCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strUpcCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strUpcCode,''),13) 
 												ELSE RIGHT('0000' + ISNULL(IUOM.strUpcCode,''),4) 
 												END 
 									ELSE '0000' 
@@ -188,6 +188,10 @@ BEGIN
 						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
 							-- AND R.intRegisterId = @intRegisterId 
 							AND ST.intStoreId = @intStoreId
+							AND IUOM.strLongUPCCode IS NOT NULL
+							AND IUOM.strLongUPCCode <> ''
+							AND IUOM.strLongUPCCode <> '0'
+							AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
 						ORDER BY PIL.intPromoItemListNo ASC
 							-- AND PIL.intPromoItemListId BETWEEN @BeginningItemListId AND @EndingItemListId
 
