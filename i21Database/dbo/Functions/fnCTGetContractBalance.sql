@@ -18,6 +18,7 @@ RETURNS @FinalResult TABLE
 	,strDate				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
 	,strContractType		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intCommodityId			INT
+	,strCommodityCode		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strCommodity			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intItemId				INT
 	,strItemNo				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -408,7 +409,8 @@ BEGIN
 	  ,strDate		
 	  ,intContractTypeId		
 	  ,strContractType		
-	  ,intCommodityId			
+	  ,intCommodityId
+	  ,strCommodityCode			
 	  ,strCommodity
 	  ,intItemId
 	  ,strItemNo			
@@ -451,6 +453,7 @@ BEGIN
 	,intContractTypeId		= CH.intContractTypeId
 	,strContractType		= TP.strContractType
 	,intCommodityId			= CH.intCommodityId
+	,strCommodityCode		= CM.strCommodityCode
 	,strCommodity			= CM.strDescription
 	,intItemId				= CD.intItemId
 	,strItemNo				= IM.strItemNo
@@ -610,6 +613,7 @@ BEGIN
 	,intContractTypeId		
 	,strContractType		
 	,intCommodityId			
+	,strCommodityCode
 	,strCommodity
 	,intItemId		
 	,strItemNo					
@@ -652,6 +656,7 @@ BEGIN
 	,intContractTypeId		= CH.intContractTypeId
 	,strContractType		= TP.strContractType
 	,intCommodityId			= CH.intCommodityId
+	,strCommodityCode		= CM.strCommodityCode
 	,strCommodity			= CM.strDescription 
 	,intItemId				= CD.intItemId
 	,strItemNo				= IM.strItemNo
