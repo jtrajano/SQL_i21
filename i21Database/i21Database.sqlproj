@@ -7231,6 +7231,7 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonth.sql" />
     <Build Include="dbo\Functions\fnRKFormatDate.sql" />
+    <Build Include="dbo\Functions\fnSTGenerateCheckDigit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
