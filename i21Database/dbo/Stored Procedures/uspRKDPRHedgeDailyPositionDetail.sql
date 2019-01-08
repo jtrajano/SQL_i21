@@ -659,7 +659,7 @@ BEGIN
 						, strContractType = 'Physical Contract'
 						, strLocationName
 						, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8)
-						, dblTotal =  ISNULL((cd.dblBalance), 0)
+						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((cd.dblBalance), 0))
 						, cd.intUnitMeasureId
 						, intCommodityId = @intCommodityId
 						, cd.intCompanyLocationId
@@ -676,6 +676,7 @@ BEGIN
 						, strEntityName
 						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
 					FROM @tblGetOpenContractDetail cd
+					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId 
 					WHERE cd.intContractTypeId IN (1,2) AND cd.intCommodityId = @intCommodityId
 						AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN cd.intCompanyLocationId ELSE @intLocationId END
 				) t WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
