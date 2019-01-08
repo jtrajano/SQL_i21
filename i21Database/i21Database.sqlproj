@@ -7235,6 +7235,7 @@
     <Build Include="dbo\Views\vyuICItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedItemStock.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedItemStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateInvoiceFromShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
