@@ -1270,7 +1270,7 @@ BEGIN
 				--	, cd.strFutMarketName
 				--	, cd.intFutureMonthId
 				--	, cd.strFutureMonth
-				--	, FORMAT(cd.dtmEndDate, 'MMM yyyy')
+				--	, dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 				--FROM vyuRKGetInventoryValuation v
 				--JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
 				--INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
@@ -2582,7 +2582,7 @@ BEGIN
 	UPDATE @Final SET intSeqNo = 11 WHERE strType = 'Avail for Spot Sale'
 	
 	UPDATE @Final SET strFutureMonth = CASE 
-		WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
+		WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN dbo.fnRKFormatDate(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
 		WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) > 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN LTRIM(RTRIM(F.strFutureMonth))
 		WHEN ISNULL(F.intFutOptTransactionHeaderId, '') <> '' AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') = '' THEN FOT.strFutureMonth
 	END COLLATE Latin1_General_CI_AS
@@ -2590,7 +2590,7 @@ BEGIN
 	LEFT JOIN (
 		SELECT intFutOptTransactionHeaderId
 			,strInternalTradeNo
-			,strFutureMonth = ISNULL(FORMAT(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS
+			,strFutureMonth = ISNULL(dbo.fnRKFormatDate(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS
 		FROM vyuRKFutOptTransaction
 	)FOT ON FOT.intFutOptTransactionHeaderId = F.intFutOptTransactionHeaderId AND FOT.strInternalTradeNo COLLATE Latin1_General_CI_AS = F.strInternalTradeNo COLLATE Latin1_General_CI_AS
 	

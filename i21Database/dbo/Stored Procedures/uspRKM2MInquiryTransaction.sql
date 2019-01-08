@@ -1067,7 +1067,7 @@ SELECT *  into #tempIntransit FROM (	SELECT intLineNo = (SELECT TOP 1 intLineNo 
 					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
 					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
 					OUTER APPLY (
-						SELECT ch.intContractHeaderId, strFutureMonth, strDeliveryDate = FORMAT(dtmEndDate, 'MMM yyyy')
+						SELECT ch.intContractHeaderId, strFutureMonth, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
 						FROM @GetContractDetailView ch						
 						WHERE ch.intContractHeaderId = (
 							SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL

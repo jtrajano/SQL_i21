@@ -748,7 +748,7 @@ BEGIN
 					, cd.strFutMarketName
 					, cd.intFutureMonthId
 					, cd.strFutureMonth
-					, strDeliveryDate = FORMAT(det.dtmEndDate, 'MMM yyyy')
+					, strDeliveryDate = dbo.fnRKFormatDate(det.dtmEndDate, 'MMM yyyy')
 					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
 					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
 					, ri.intSourceId
@@ -840,7 +840,7 @@ BEGIN
 					, cd.strFutMarketName
 					, cd.intFutureMonthId
 					, cd.strFutureMonth
-					, strDeliveryDate = FORMAT(det.dtmEndDate, 'MMM yyyy')
+					, strDeliveryDate = dbo.fnRKFormatDate(det.dtmEndDate, 'MMM yyyy')
 					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
 					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
 				FROM vyuRKGetInventoryValuation v
@@ -1759,7 +1759,7 @@ FROM @List
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') and strContractEndMonth not in ( 'Near By') order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
 
 UPDATE @ListFinal SET strFutureMonth = CASE 
-	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
+	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN dbo.fnRKFormatDate(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
 	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) > 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN LTRIM(RTRIM(F.strFutureMonth))
 	WHEN ISNULL(F.intFutOptTransactionHeaderId, '') <> '' AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') = '' THEN FOT.strFutureMonth
 END COLLATE Latin1_General_CI_AS
@@ -1768,14 +1768,14 @@ FROM @ListFinal F
 LEFT JOIN (
 	SELECT intFutOptTransactionHeaderId
 		,strInternalTradeNo
-		,strFutureMonth = ISNULL(FORMAT(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS
+		,strFutureMonth = ISNULL(dbo.fnRKFormatDate(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS
 	FROM vyuRKFutOptTransaction
 )FOT ON FOT.intFutOptTransactionHeaderId = F.intFutOptTransactionHeaderId AND FOT.strInternalTradeNo COLLATE Latin1_General_CI_AS = F.strInternalTradeNo COLLATE Latin1_General_CI_AS
 LEFT JOIN (
 	SELECT intContractHeaderId
 	,REPLACE(strSequenceNumber,' ','') COLLATE Latin1_General_CI_AS AS strContractNumber
-	,FORMAT(dtmEndDate, 'MMM yyyy') COLLATE Latin1_General_CI_AS AS strDeliveryDate
-	,ISNULL(FORMAT(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS AS strFutureMonth
+	,dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') COLLATE Latin1_General_CI_AS AS strDeliveryDate
+	,ISNULL(dbo.fnRKFormatDate(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS AS strFutureMonth
 	,strContractType
 	FROM vyuCTContractDetailView
 )CT ON CT.intContractHeaderId = F.intContractHeaderId

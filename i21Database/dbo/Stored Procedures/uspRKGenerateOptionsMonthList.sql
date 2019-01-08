@@ -186,7 +186,7 @@ BEGIN TRY
 		FROM ##AllowedOptMonths
 		WHERE intRowId = @intIndex1;
 
-		SELECT TOP(1) @ProjectedMonth = FORMAT(DATEADD(YEAR,1,CONVERT(DATETIME,'01 ' + strOptionMonth)), 'MMM yy')
+		SELECT TOP(1) @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR,1,CONVERT(DATETIME,'01 ' + strOptionMonth)), 'MMM yy')
 		FROM tblRKOptionsMonth
 		WHERE LEFT(LTRIM(RTRIM(strOptionMonth)),3) = @ProjectedMonthName
 			AND intFutureMarketId = @FutureMarketId
@@ -194,19 +194,19 @@ BEGIN TRY
 
 		IF(ISNULL(@ProjectedMonth, '') <> '') AND EXISTS(SELECT TOP 1 * FROM @ProjectedOptionMonths WHERE strOptionMonth = @ProjectedMonth)
 		BEGIN
-			SET @ProjectedMonth = FORMAT(DATEADD(YEAR, 1,CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
+			SET @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR, 1,CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
 		END
 		ELSE IF(ISNULL(@ProjectedMonth, '') = '')
 		BEGIN
 			SELECT @tmpProjectedMonth = CONVERT(DATE,@ProjectedMonthName + ' 1 ' + CONVERT(VARCHAR, YEAR(GETDATE())))
 		
-			SELECT @ProjectedMonth = CASE WHEN DATEDIFF(MONTH, GETDATE(), @tmpProjectedMonth) <= 0 THEN FORMAT(DATEADD(YEAR,1,@tmpProjectedMonth), 'MMM yy')
-				ELSE FORMAT(@tmpProjectedMonth, 'MMM yy')
+			SELECT @ProjectedMonth = CASE WHEN DATEDIFF(MONTH, GETDATE(), @tmpProjectedMonth) <= 0 THEN dbo.fnRKFormatDate(DATEADD(YEAR,1,@tmpProjectedMonth), 'MMM yy')
+				ELSE dbo.fnRKFormatDate(@tmpProjectedMonth, 'MMM yy')
 			END
 
 			IF EXISTS(SELECT TOP 1 * FROM @ProjectedOptionMonths WHERE strOptionMonth = @ProjectedMonth)
 			BEGIN
-				SET @ProjectedMonth = FORMAT(DATEADD(YEAR, 1, CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
+				SET @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR, 1, CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
 			END
 		END
 

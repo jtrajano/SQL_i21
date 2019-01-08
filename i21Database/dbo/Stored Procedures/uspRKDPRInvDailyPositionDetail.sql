@@ -556,7 +556,7 @@ BEGIN
 					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
 					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
 					OUTER APPLY (
-						SELECT intContractHeaderId, strFutureMonth, strDeliveryDate = FORMAT(dtmEndDate, 'MMM yyyy')
+						SELECT intContractHeaderId, strFutureMonth, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
 						FROM vyuCTContractDetailView
 						WHERE intContractHeaderId = (
 							SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL
@@ -2459,7 +2459,7 @@ BEGIN
 END
 
 UPDATE @FinalTable SET strFutureMonth = CASE 
-	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
+	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN dbo.fnRKFormatDate(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
 	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) > 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN LTRIM(RTRIM(F.strFutureMonth))
 END COLLATE Latin1_General_CI_AS
 FROM @FinalTable F
