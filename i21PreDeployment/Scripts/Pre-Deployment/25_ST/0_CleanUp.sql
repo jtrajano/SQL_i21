@@ -233,4 +233,32 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTSto
 -- End: Rename tblSTStoreAppUploadHistory
 ----------------------------------------------------------------------------------------------------------------------------------
 
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: tblSTCheckoutMarkUpDowns Clean Up
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTCheckoutMarkUpDowns') 
+	BEGIN
+		EXEC('
+				IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMarkUpDowns
+						  WHERE dblRetailUnit IS NULL
+							AND dblAmount IS NULL
+							AND dblShrink IS NULL
+							AND strUpDownNotes IS NULL)
+					BEGIN
+						DELETE FROM tblSTCheckoutMarkUpDowns
+						WHERE dblRetailUnit IS NULL
+							AND dblAmount IS NULL
+							AND dblShrink IS NULL
+							AND strUpDownNotes IS NULL
+					END
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: tblSTCheckoutMarkUpDowns Clean Up
+----------------------------------------------------------------------------------------------------------------------------------
+
+
 PRINT('ST Cleanup - End')
