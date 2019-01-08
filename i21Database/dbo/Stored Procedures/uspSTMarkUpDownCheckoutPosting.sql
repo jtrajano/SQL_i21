@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTMarkUpDownCheckoutPosting]
-@intCheckoutId INT
-,@intCurrentUserId INT
-,@ysnPost BIT
-,@strStatusMsg NVARCHAR(1000) OUTPUT
-,@strBatchId NVARCHAR(1000) OUTPUT
-,@ysnIsPosted BIT OUTPUT
+	@intCheckoutId INT
+	,@intCurrentUserId INT
+	,@ysnPost BIT
+	,@strStatusMsg NVARCHAR(1000) OUTPUT
+	,@strBatchId NVARCHAR(1000) OUTPUT
+	,@ysnIsPosted BIT OUTPUT
 AS
 BEGIN TRY
 	
@@ -65,11 +65,11 @@ BEGIN TRY
 								,dtmDate				= GETDATE()
 
 								-- Item Manage
-								,dblQty					= ISNULL(MUD.dblQty, 0)		    -- 0 -- Required field so specify zero. 
-								,dblUOMQty				= ISNULL(MUD.dblQty, 0)		    -- 0 -- Required field so specify zero.
-								,dblCost				= ISNULL(MUD.dblAmount, 0)		-- 0 -- Required field so specify zero.
-								,dblValue				= ISNULL(MUD.dblRetailUnit, 0)	-- 0 -- Required field so specify zero.
-								,dblSalesPrice			= ISNULL(MUD.dblRetailUnit, 0)	-- Required field so specify zero or the sales price used when selling the item. 
+								,dblQty					= MUD.dblQty		    -- 0 -- Required field so specify zero. 
+								,dblUOMQty				= MUD.dblQty	        -- 0 -- Required field so specify zero.
+								,dblCost				= MUD.dblAmount			-- 0 -- Required field so specify zero.
+								,dblValue				= MUD.dblRetailUnit		-- 0 -- Required field so specify zero.
+								,dblSalesPrice			= MUD.dblRetailUnit		-- Required field so specify zero or the sales price used when selling the item. 
 			
 								,intTransactionId		= @intCheckoutId -- Parent Id
 								,intTransactionDetailId	= MUD.intCheckoutMarkUpDownId -- Child Id
@@ -86,13 +86,20 @@ BEGIN TRY
 								,dblAdjustRetailValue	= 0
 
 						FROM tblSTCheckoutMarkUpDowns MUD
-						INNER JOIN tblICItemUOM UOM ON MUD.intItemUOMId = UOM.intItemUOMId
-						INNER JOIN tblICItem i ON UOM.intItemId = i.intItemId
-						INNER JOIN tblICItemLocation il ON i.intItemId = il.intItemId 
-						LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId 
-						INNER JOIN tblICItemUOM iu ON iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+						INNER JOIN tblICItemUOM UOM 
+							ON MUD.intItemUOMId = UOM.intItemUOMId
+						INNER JOIN tblICItem i 
+							ON UOM.intItemId = i.intItemId
+						INNER JOIN tblICItemLocation il 
+							ON i.intItemId = il.intItemId 
+						LEFT JOIN tblSMCompanyLocation cl 
+							ON cl.intCompanyLocationId = il.intLocationId 
+						INNER JOIN tblICItemUOM iu 
+							ON iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
 						WHERE MUD.intCheckoutId = @intCheckoutId
-						AND il.intLocationId = @intLocationId
+							AND il.intLocationId = @intLocationId
+							AND MUD.strUpDownNotes IS NOT NULL
+							AND MUD.dblShrink IS NOT NULL
 						
 						IF EXISTS(SELECT * FROM @ItemsForPost)
 							BEGIN
