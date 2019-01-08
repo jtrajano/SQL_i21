@@ -306,7 +306,7 @@ BEGIN
 	 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = Audi.intContractHeaderId
 	 WHERE Audi.strFieldName = 'Quantity'
 	 AND Audi.intSequenceUsageHistoryId <> -3	
-	 AND dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) >= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) END
+	 AND dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) > CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) END
 	 GROUP BY CH.intContractTypeId,Audi.intContractHeaderId
 	 	,Audi.intContractDetailId    
 	
