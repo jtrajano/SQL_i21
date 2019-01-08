@@ -7232,6 +7232,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonth.sql" />
     <Build Include="dbo\Functions\fnRKFormatDate.sql" />
     <Build Include="dbo\Functions\fnSTGenerateCheckDigit.sql" />
+    <Build Include="dbo\Views\vyuICItemStockUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
