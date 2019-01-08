@@ -3,7 +3,7 @@ AS
 
 SELECT
 	 [strDocumentId]						= ARSI.[strShippedItemId]
-	,[strDocumentDetailId]					= 'icis:' + CAST(ARSI.[intInventoryShipmentItemId] AS NVARCHAR(250))
+	,[strDocumentDetailId]					= 'icis:' + CAST(ARSI.[intInventoryShipmentItemId] AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[intShipmentId]						= NULL
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[intLoadDetailId]						= ARSI.[intLoadDetailId] 
@@ -63,7 +63,7 @@ UNION ALL
 
 SELECT
 	 [strDocumentId]						= ARSID.[strShippedItemId]
-	,[strDocumentDetailId]					= CAST(ARSID.[strShippedItemDetailId] AS NVARCHAR(250))
+	,[strDocumentDetailId]					= CAST(ARSID.[strShippedItemDetailId] AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[intShipmentId]						= ARSID.[intShipmentId]
 	,[intShipmentPurchaseSalesContractId]	= NULL 
 	,[intLoadDetailId]						= ARSID.[intLoadDetailId] 
@@ -94,7 +94,7 @@ SELECT
 	,[intStorageLocationId]					= ARSID.[intStorageLocationId]
 	,[strStorageLocationName]				= ARSID.[strStorageLocationName]
 	,[intTaxGroupId]						= ARSID.[intTaxGroupId]
-	,[strTaxGroup]							= CAST(ARSID.[strTaxGroup] AS NVARCHAR(250))
+	,[strTaxGroup]							= CAST(ARSID.[strTaxGroup] AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblWeight]							= ARSID.[dblWeight]
 	,[intWeightUOMId]						= ARSID.[intWeightUOMId]
 	,[strWeightUnitMeasure]					= ARSID.[strWeightUnitMeasure]

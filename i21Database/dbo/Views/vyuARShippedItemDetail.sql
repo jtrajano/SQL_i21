@@ -2,8 +2,8 @@
 AS
 
 SELECT
-	 [strShippedItemId]				= 'lgis:' + CAST(LS.[intLoadId] AS NVARCHAR(250))
-	,[strShippedItemDetailId]		= 'lgis:' + CAST(LS.[intLoadDetailId] AS NVARCHAR(250))
+	 [strShippedItemId]				= 'lgis:' + CAST(LS.[intLoadId] AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
+	,[strShippedItemDetailId]		= 'lgis:' + CAST(LS.[intLoadDetailId] AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[intShipmentId]				= LS.[intLoadId]
 	,[intShipmentPurchaseSalesContractId] = NULL 
 	,[intLoadDetailId]				= LS.[intLoadDetailId] 
