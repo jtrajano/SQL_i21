@@ -7226,6 +7226,7 @@
     <Build Include="dbo\Tables\tblMFInventoryAsOnDate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryAsOnDate.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateInvoiceFromShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
