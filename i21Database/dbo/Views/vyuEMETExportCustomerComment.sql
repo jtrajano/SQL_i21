@@ -2,9 +2,9 @@
 	AS 
 	select 
 		cust_id  = b.strEntityNo,
-		comment_type = 'ETC',
-		line_no = Right('0000' + cast(c.RecordKey as nvarchar), 4),
-		comment = cast(c.Record as nvarchar(80))
+		comment_type = 'ETC' COLLATE Latin1_General_CI_AS,
+		line_no = Right('0000' + cast(c.RecordKey as nvarchar), 4) COLLATE Latin1_General_CI_AS,
+		comment = cast(c.Record as nvarchar(80)) COLLATE Latin1_General_CI_AS
 	 from tblEMEntityMessage a
 	join tblEMEntity b
 		on a.intEntityId = b.intEntityId and a.strMessageType = 'Energy Trac'
