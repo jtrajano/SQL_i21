@@ -21,6 +21,15 @@ BEGIN
 			SET @strPurchaseSales = 'Purchase'
 		END
 	END
+
+	IF ISNULL(@intLocationId, 0) = 0
+	BEGIN
+		SET @intLocationId = NULL
+	END
+	IF ISNULL(@intVendorId, 0) = 0
+	BEGIN
+		SET @intVendorId = NULL
+	END
 	
 	DECLARE @strCommodityCode NVARCHAR(50)
 

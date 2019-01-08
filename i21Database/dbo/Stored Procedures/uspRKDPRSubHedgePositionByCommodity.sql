@@ -9,16 +9,6 @@ CREATE PROCEDURE [dbo].[uspRKDPRSubHedgePositionByCommodity]
 		,@strPositionBy NVARCHAR(50) = NULL
 AS
 
---DECLARE
---		 @intCommodityId nvarchar(max)= null
---		,@intLocationId int = null
---		,@intVendorId int = null
---		,@strPurchaseSales NVARCHAR(200) = 'Purchase'
---		,@strPositionIncludes NVARCHAR(200) = 'All Storage'
---		,@dtmToDate datetime = getDate()
---		,@strByType NVARCHAR(200) = 'ByCommodity'
---		,@strPositionBy NVARCHAR(50) = 'Delivery Month'
-
 DECLARE @strCommodityCode NVARCHAR(max)
 IF ISNULL(@strPurchaseSales,'') <> ''
 BEGIN
@@ -31,6 +21,16 @@ BEGIN
 		SELECT @strPurchaseSales='Purchase'
 	END
 END
+
+IF ISNULL(@intLocationId, 0) = 0
+	BEGIN
+		SET @intLocationId = NULL
+	END
+	IF ISNULL(@intVendorId, 0) = 0
+	BEGIN
+		SET @intVendorId = NULL
+	END
+
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @ysnIncludeDPPurchasesInCompanyTitled bit,
 		@ysnPreCrush BIT
