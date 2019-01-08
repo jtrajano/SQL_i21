@@ -401,6 +401,7 @@ BEGIN
 		ELSE IF (@strTransactionType = 'F')
 		BEGIN
 			SET @strTransactionType = 'Foreign Sale'
+			SET @intCustomerId = @intForeignCustomerId
 		END
 		ELSE IF (@strTransactionType = 'E')
 		BEGIN
