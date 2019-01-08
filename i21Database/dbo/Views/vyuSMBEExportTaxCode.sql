@@ -4,7 +4,7 @@ AS
 SELECT 
 	 category = A.intTaxCodeId
 	 ,tax = B.dblRate
-	 ,header = ''
+	 ,header = '' COLLATE Latin1_General_CI_AS
 	 ,"type" = A.strTaxCode
 FROM tblSMTaxCode A
 CROSS APPLY (SELECT * FROM fnGetTaxCodeRateDetails(A.intTaxCodeId,GETDATE(), NULL, NULL, NULL, NULL)) B
