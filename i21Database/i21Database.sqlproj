@@ -6439,6 +6439,7 @@
     <Build Include="dbo\Functions\fnCTGetLastApprovalStatus.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqContainerInfo.sql" />
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
+    <Build Include="dbo\Functions\fnRKFormatDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
