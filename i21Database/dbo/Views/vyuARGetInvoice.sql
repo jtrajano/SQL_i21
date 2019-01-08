@@ -111,7 +111,7 @@ SELECT
     strComments = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strComments END,
 	strDocumentCode = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE ISNULL(DOC.strCode, '') END,
 	strCode = ISNULL(DOC.strCode, ''),
-    strTitle = CASE WHEN INV.strType = 'POS' THEN ISNULL(INV.strComments, '') ELSE ISNULL(DOC.strTitle, '') END,
+    strTitle = CASE WHEN INV.strType = 'POS' THEN ISNULL(POS.strComment, '') ELSE ISNULL(DOC.strTitle, '') END,
 	strLineOfBusiness = LOB.strLineOfBusiness,
 
 	strCustomerNumber = CUS.strCustomerNumber,
@@ -232,6 +232,7 @@ LEFT JOIN (
     SELECT intInvoiceId
          , strReceiptNumber
          , strEODNo
+		 , POS.strComment
     FROM dbo.tblARPOS POS WITH (NOLOCK)
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
