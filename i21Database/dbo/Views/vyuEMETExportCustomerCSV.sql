@@ -4,8 +4,8 @@
 	select
 		account = a.strEntityNo,
 		fullname = a.strName,
-		address1 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),1),
-		address2 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),2),
+		address1 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),1) COLLATE Latin1_General_CI_AS,
+		address2 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),2) COLLATE Latin1_General_CI_AS,
 		city = c.strCity,
 		[state] = c.strState,
 		zip = c.strZipCode,

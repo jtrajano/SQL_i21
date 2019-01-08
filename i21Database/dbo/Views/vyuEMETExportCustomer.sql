@@ -5,12 +5,12 @@ AS
 		Entity.intEntityId  
 		,Entity.intConcurrencyId 
 		,Entity.strName AS lname
-		,'' AS fname
-		,'' AS mname
+		,'' COLLATE Latin1_General_CI_AS AS fname
+		,'' COLLATE Latin1_General_CI_AS AS mname
 		,EMPhone.strPhone as phone
-		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 1),1,50) as addr1
-		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 2),1,50) as addr2 
-		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 3),1,50) as addr3
+		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 1),1,50) COLLATE Latin1_General_CI_AS as addr1
+		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 2),1,50) COLLATE Latin1_General_CI_AS as addr2 
+		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 3),1,50) COLLATE Latin1_General_CI_AS as addr3
 		,Loc.strZipCode zip
 		,Loc.strState [state]
 		,Loc.strCity [city]
@@ -22,8 +22,8 @@ AS
 		--,CASE WHEN Cus.ysnTaxExempt = 1 THEN 'Y' ELSE 'N' END AS tax
 
 		,CASE WHEN Cus.strCustomerNumber = '' THEN Entity.strEntityNo ELSE Cus.strCustomerNumber END AS cust_id
-		,'' AS lien
-		,'N' AS cshonl
+		,'' COLLATE Latin1_General_CI_AS AS lien
+		,'N' COLLATE Latin1_General_CI_AS AS cshonl
 		,Entity.strName AS alphasort		
 		,Con.strPhone2 AS SecondPhoneNo
 		--,Con.ysnActive AS active
@@ -32,7 +32,7 @@ AS
 		,active = Cus.ysnActive
 		,tax = case when Cus.ysnApplyPrepaidTax = 1 then 'P' 
 				when Cus.ysnApplySalesTax = 1 then 'Y'
-				else 'N' END
+				else 'N' END COLLATE Latin1_General_CI_AS
 			
  	FROM tblEMEntity AS Entity  
 		INNER JOIN tblEMEntityType as EntType

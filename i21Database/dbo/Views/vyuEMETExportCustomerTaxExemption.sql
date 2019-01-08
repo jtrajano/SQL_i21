@@ -4,18 +4,18 @@
 SELECT 
 	CustomerNumber	= CustomerNumber,
 	ItemNumber		= ItemNumber,
-	State			= State,
+	State			= State COLLATE Latin1_General_CI_AS,
 	Authority1		= Authority1,
-	Authority2		= Authority2,	
-	FETCharge		= CASE WHEN SUM(ISNULL(FETCharge,0)) > 0 THEN 'Y' ELSE 'N' END,
-	SETCharge		= CASE WHEN SUM(ISNULL(SETCharge,0)) > 0 THEN 'Y' ELSE 'N' END,
-	SSTCharge		= CASE WHEN SUM(ISNULL(SSTCharge,0)) > 0 THEN 'Y' ELSE 'N' END,
-	Locale1Charge	= CASE WHEN SUM(ISNULL(Locale1Charge,0)) > 0 THEN 'Y' ELSE 'N' END,
-	Locale2Charge	= CASE WHEN SUM(ISNULL(Locale2Charge,0)) > 0 THEN 'Y' ELSE 'N' END,
-	Locale3Charge	= CASE WHEN SUM(ISNULL(Locale3Charge,0)) > 0 THEN 'Y' ELSE 'N' END,
-	Locale4Charge	= CASE WHEN SUM(ISNULL(Locale4Charge,0)) > 0 THEN 'Y' ELSE 'N' END,
-	Locale5Charge	= CASE WHEN SUM(ISNULL(Locale5Charge,0)) > 0 THEN 'Y' ELSE 'N' END,
-	Locale6Charge	= CASE WHEN SUM(ISNULL(Locale6Charge,0)) > 0 THEN 'Y' ELSE 'N' END
+	Authority2		= Authority2 COLLATE Latin1_General_CI_AS,	
+	FETCharge		= CASE WHEN SUM(ISNULL(FETCharge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS,
+	SETCharge		= CASE WHEN SUM(ISNULL(SETCharge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS,
+	SSTCharge		= CASE WHEN SUM(ISNULL(SSTCharge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS,
+	Locale1Charge	= CASE WHEN SUM(ISNULL(Locale1Charge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS,
+	Locale2Charge	= CASE WHEN SUM(ISNULL(Locale2Charge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS,
+	Locale3Charge	= CASE WHEN SUM(ISNULL(Locale3Charge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS,
+	Locale4Charge	= CASE WHEN SUM(ISNULL(Locale4Charge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS,
+	Locale5Charge	= CASE WHEN SUM(ISNULL(Locale5Charge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS,
+	Locale6Charge	= CASE WHEN SUM(ISNULL(Locale6Charge,0)) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
 FROM
 (
 SELECT
