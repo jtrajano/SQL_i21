@@ -2,8 +2,8 @@
 AS
 
 SELECT
-	 [strDocumentId]						= ARSI.[strShippedItemId]  COLLATE Latin1_General_CI_AS 
-	,[strDocumentDetailId]					= 'icis:' + CAST(ARSI.[intInventoryShipmentItemId] AS NVARCHAR(250))  COLLATE Latin1_General_CI_AS
+	 [strDocumentId]						= ARSI.[strShippedItemId]
+	,[strDocumentDetailId]					= 'icis:' + CAST(ARSI.[intInventoryShipmentItemId] AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[intShipmentId]						= NULL
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[intLoadDetailId]						= ARSI.[intLoadDetailId] 
@@ -15,12 +15,12 @@ SELECT
 	,[intContractDetailId]					= NULL 
 	,[intContractSeq]						= NULL 
 	,[intItemId]							= ARSI.[intItemId]
-	,[strItemNo]							= ARSI.[strItemNo]  COLLATE Latin1_General_CI_AS
-	,[strItemDescription]					= ARSI.[strItemDescription]  COLLATE Latin1_General_CI_AS
+	,[strItemNo]							= ARSI.[strItemNo]
+	,[strItemDescription]					= ARSI.[strItemDescription]
 	,[intItemUOMId]							= ARSI.[intItemUOMId]
-	,[strUnitMeasure]						= ARSI.[strUnitMeasure]  COLLATE Latin1_General_CI_AS
+	,[strUnitMeasure]						= ARSI.[strUnitMeasure]
 	,[intShipmentItemUOMId]					= ARSI.[intShipmentItemUOMId]
-	,[strShipmentUnitMeasure]				= ARSI.[strShipmentUnitMeasure]  COLLATE Latin1_General_CI_AS
+	,[strShipmentUnitMeasure]				= ARSI.[strShipmentUnitMeasure]
 	,[dblQtyShipped]						= ARSI.[dblQtyShipped]
 	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered]
 	,[dblShipmentQuantity]					= ARSI.[dblShipmentQuantity]	
@@ -32,26 +32,26 @@ SELECT
 	,[dblTotalTax]							= ARSI.[dblTotalTax]
 	,[dblTotal]								= ARSI.[dblTotal]
 	,[intStorageLocationId]					= ARSI.[intStorageLocationId]
-	,[strStorageLocationName]				= ARSI.[strStorageLocationName]  COLLATE Latin1_General_CI_AS
+	,[strStorageLocationName]				= ARSI.[strStorageLocationName]
 	,[intTaxGroupId]						= ARSI.[intTaxGroupId]
-	,[strTaxGroup]							= ARSI.[strTaxGroup]  COLLATE Latin1_General_CI_AS
+	,[strTaxGroup]							= ARSI.[strTaxGroup]
 	,[dblWeight]							= ARSI.[dblWeight]
 	,[intWeightUOMId]						= ARSI.[intWeightUOMId]
-	,[strWeightUnitMeasure]					= ARSI.[strWeightUnitMeasure]  COLLATE Latin1_General_CI_AS
+	,[strWeightUnitMeasure]					= ARSI.[strWeightUnitMeasure]
 	,[dblGrossWt]							= ARSI.[dblGrossWt] 
 	,[dblTareWt]							= ARSI.[dblTareWt]
 	,[dblNetWt]								= ARSI.[dblNetWt]
 	,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId]
-	,[strCurrencyExchangeRateType]			= ARSI.[strCurrencyExchangeRateType]  COLLATE Latin1_General_CI_AS
+	,[strCurrencyExchangeRateType]			= ARSI.[strCurrencyExchangeRateType]
 	,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId]
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
-	,[strSubCurrency]						= ARSI.[strSubCurrency] COLLATE Latin1_General_CI_AS 
+	,[strSubCurrency]						= ARSI.[strSubCurrency]
 	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
-	,[strDestinationGrade]					= ARSI.[strDestinationGrade] COLLATE Latin1_General_CI_AS
+	,[strDestinationGrade]					= ARSI.[strDestinationGrade]
 	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
-	,[strDestinationWeight]					= ARSI.[strDestinationWeight] COLLATE Latin1_General_CI_AS
+	,[strDestinationWeight]					= ARSI.[strDestinationWeight]
 FROM
 	vyuARShippedItems ARSI
 WHERE
@@ -62,7 +62,7 @@ UNION ALL
 
 
 SELECT
-	 [strDocumentId]						= ARSID.[strShippedItemId] COLLATE Latin1_General_CI_AS
+	 [strDocumentId]						= ARSID.[strShippedItemId]
 	,[strDocumentDetailId]					= CAST(ARSID.[strShippedItemDetailId] AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[intShipmentId]						= ARSID.[intShipmentId]
 	,[intShipmentPurchaseSalesContractId]	= NULL 
@@ -71,16 +71,16 @@ SELECT
 	,[intInventoryShipmentId]				= ARSID.[intInventoryShipmentId]
 	,[intInventoryShipmentItemId]			= ARSID.[intInventoryShipmentItemId]
 	,[intContractHeaderId]					= ARSID.[intContractHeaderId]
-	,[strContractNumber]					= ARSID.[strContractNumber] COLLATE Latin1_General_CI_AS 
+	,[strContractNumber]					= ARSID.[strContractNumber] 
 	,[intContractDetailId]					= ARSID.[intContractDetailId] 
 	,[intContractSeq]						= ARSID.[intContractSeq] 
 	,[intItemId]							= ARSID.[intItemId]
-	,[strItemNo]							= ARSID.[strItemNo] COLLATE Latin1_General_CI_AS
-	,[strItemDescription]					= ARSID.[strItemDescription] COLLATE Latin1_General_CI_AS
+	,[strItemNo]							= ARSID.[strItemNo]
+	,[strItemDescription]					= ARSID.[strItemDescription]
 	,[intItemUOMId]							= ARSID.[intItemUOMId]
-	,[strUnitMeasure]						= ARSID.[strUnitMeasure] COLLATE Latin1_General_CI_AS
+	,[strUnitMeasure]						= ARSID.[strUnitMeasure]
 	,[intShipmentItemUOMId]					= ARSID.[intShipmentItemUOMId]
-	,[strShipmentUnitMeasure]				= ARSID.[strShipmentUnitMeasure] COLLATE Latin1_General_CI_AS
+	,[strShipmentUnitMeasure]				= ARSID.[strShipmentUnitMeasure]
 	,[dblQtyShipped]						= ARSID.[dblQtyShipped]
 	,[dblQtyOrdered]						= ARSID.[dblQtyOrdered]
 	,[dblShipmentQuantity]					= ARSID.[dblShipmentQuantity]	
@@ -92,26 +92,26 @@ SELECT
 	,[dblTotalTax]							= ARSID.[dblTotalTax]
 	,[dblTotal]								= ARSID.[dblTotal]
 	,[intStorageLocationId]					= ARSID.[intStorageLocationId]
-	,[strStorageLocationName]				= ARSID.[strStorageLocationName] COLLATE Latin1_General_CI_AS
+	,[strStorageLocationName]				= ARSID.[strStorageLocationName]
 	,[intTaxGroupId]						= ARSID.[intTaxGroupId]
 	,[strTaxGroup]							= CAST(ARSID.[strTaxGroup] AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,[dblWeight]							= ARSID.[dblWeight]
 	,[intWeightUOMId]						= ARSID.[intWeightUOMId]
-	,[strWeightUnitMeasure]					= ARSID.[strWeightUnitMeasure] COLLATE Latin1_General_CI_AS
+	,[strWeightUnitMeasure]					= ARSID.[strWeightUnitMeasure]
 	,[dblGrossWt]							= ARSID.[dblGrossWt] 
 	,[dblTareWt]							= ARSID.[dblTareWt]
 	,[dblNetWt]								= ARSID.[dblNetWt]
 	,[intCurrencyExchangeRateTypeId]		= ARSID.[intCurrencyExchangeRateTypeId]
-	,[strCurrencyExchangeRateType]			= ARSID.[strCurrencyExchangeRateType] COLLATE Latin1_General_CI_AS
+	,[strCurrencyExchangeRateType]			= ARSID.[strCurrencyExchangeRateType]
 	,[intCurrencyExchangeRateId]			= ARSID.[intCurrencyExchangeRateId]
 	,[dblCurrencyExchangeRate]				= ARSID.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSID.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSID.[dblSubCurrencyRate]
-	,[strSubCurrency]						= ARSID.[strSubCurrency] COLLATE Latin1_General_CI_AS
+	,[strSubCurrency]						= ARSID.[strSubCurrency]
 	,[intDestinationGradeId]				= ARSID.[intDestinationGradeId]
-	,[strDestinationGrade]					= ARSID.[strDestinationGrade] COLLATE Latin1_General_CI_AS
+	,[strDestinationGrade]					= ARSID.[strDestinationGrade]
 	,[intDestinationWeightId]				= ARSID.[intDestinationWeightId]
-	,[strDestinationWeight]					= ARSID.[strDestinationWeight] COLLATE Latin1_General_CI_AS
+	,[strDestinationWeight]					= ARSID.[strDestinationWeight]
 FROM
 	vyuARShippedItemDetail ARSID
 	

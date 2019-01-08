@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
 SELECT id							= NEWID()
-	 , strTransactionType			= SHIPPEDITEMS.strTransactionType
+	 , strTransactionType			= SHIPPEDITEMS.strTransactionType COLLATE Latin1_General_CI_AS
 	 , strTransactionNumber			= SHIPPEDITEMS.strTransactionNumber
 	 , strShippedItemId				= SHIPPEDITEMS.strShippedItemId
 	 , intEntityCustomerId			= SHIPPEDITEMS.intEntityCustomerId
