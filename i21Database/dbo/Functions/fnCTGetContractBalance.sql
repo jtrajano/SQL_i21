@@ -771,6 +771,12 @@ BEGIN
 	dtmHistoryCreated
 	FROM CTE WHERE Row_Num = 1
 
+	UPDATE FR
+	SET FR.intContractStatusId = SH.intContractStatusId
+	FROM @FinalResult FR
+	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
+	
+
 	DELETE FR
 	FROM @FinalResult FR
 	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
