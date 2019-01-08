@@ -7,11 +7,11 @@ SELECT
 										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intTicketId
 										ELSE TSS.intTransferStorageId
 									END
-	,strTransactionCode			  = CASE 
+	,CASE 
 										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'DS' --DELIVERY SHEET
 										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'SC' --SCALE TICKET
 										ELSE 'TS' --TRANSFER STORAGE
-									END
+									END COLLATE Latin1_General_CI_AS as strTransactionCode
 	,strTransaction			  	  = CASE 
 										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
 										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber

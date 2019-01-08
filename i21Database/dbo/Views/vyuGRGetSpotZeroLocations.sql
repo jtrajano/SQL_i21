@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSpotZeroLocations]
 AS   
 SELECT DISTINCT
- strInOutIndicator		= CASE WHEN TicketType.strInOutIndicator='I' THEN 'Inbound' ELSE 'Outbound' END
+ CASE WHEN TicketType.strInOutIndicator='I' THEN 'Inbound' ELSE 'Outbound' END COLLATE Latin1_General_CI_AS as strInOutIndicator
 ,intItemId				= SC.intItemId
 ,strItemNo				= Item.strItemNo
 ,intCompanyLocationId	= SC.intProcessingLocationId
