@@ -123,7 +123,7 @@ SELECT
 	,[intCurrencyId]						= POS.intCurrencyId
 	,[dtmDate]								= POS.dtmDate
 	,[dtmShipDate]							= POS.dtmDate
-	,[strComments]							= POS.strComment
+	,[strComments]							= '<p><span style="font-family: Arial;">' + POS.strComment + '</span></p>'
 	,[intEntityId]							= POS.intEntityUserId
 	,[ysnPost]								= 1
 	,[intItemId]							= DETAILS.intItemId
@@ -160,7 +160,7 @@ SELECT TOP 1
 	,[intCurrencyId]						= POS.intCurrencyId
 	,[dtmDate]								= POS.dtmDate
 	,[dtmShipDate]							= POS.dtmDate
-	,[strComments]							= POS.strComment
+	,[strComments]							= '<p><span style="font-family: Arial;">' + POS.strComment + '</span></p>'
 	,[intEntityId]							= POS.intEntityUserId
 	,[ysnPost]								= 1
 	,[intItemId]							= NULL
