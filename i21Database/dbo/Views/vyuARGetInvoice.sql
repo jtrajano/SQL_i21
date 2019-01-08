@@ -147,6 +147,8 @@ SELECT
 	intPurchaseSale	= LG.intPurchaseSale,
     strReceiptNumber = POS.strReceiptNumber,
     strEODNumber = POS.strEODNo,
+	strEODStatus = CASE WHEN POS.ysnClosed = 1 THEN 'Completed' ELSE 'Open' END,
+	strEODPOSDrawerName = POS.strPOSDrawerName,
 	intCreditLimitReached = CUS.intCreditLimitReached,
 	dtmCreditLimitReached = CUS.dtmCreditLimitReached
 FROM 
@@ -232,9 +234,12 @@ LEFT JOIN (
     SELECT intInvoiceId
          , strReceiptNumber
          , strEODNo
+		 , EOD.ysnClosed
 		 , POS.strComment
+		 , DRAWER.strPOSDrawerName
     FROM dbo.tblARPOS POS WITH (NOLOCK)
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
+	INNER JOIN dbo.tblSMCompanyLocationPOSDrawer DRAWER WITH (NOLOCK) ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId 
 ) POS ON INV.intInvoiceId = POS.intInvoiceId 
      AND INV.strType = 'POS'
