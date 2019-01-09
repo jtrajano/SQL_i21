@@ -285,8 +285,10 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = I.[intAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] - I.[dblBaseProvisionalAmount] ELSE @ZeroDecimal END
-    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] - I.[dblBaseProvisionalAmount] END
+    --,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] - I.[dblBaseProvisionalAmount] ELSE @ZeroDecimal END
+    --,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] - I.[dblBaseProvisionalAmount] END
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] END
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
@@ -307,10 +309,14 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] - I.[dblProvisionalAmount] ELSE @ZeroDecimal END
-    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] - I.[dblProvisionalAmount] ELSE @ZeroDecimal END
-    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] - I.[dblProvisionalAmount] END
-    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] - I.[dblProvisionalAmount] END
+    --,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] - I.[dblProvisionalAmount] ELSE @ZeroDecimal END
+    --,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] - I.[dblProvisionalAmount] ELSE @ZeroDecimal END
+    --,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] - I.[dblProvisionalAmount] END
+    --,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] - I.[dblProvisionalAmount] END
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] END
     ,[dblReportingRate]             = I.[dblAverageExchangeRate]
     ,[dblForeignRate]               = I.[dblAverageExchangeRate]
     ,[strRateType]                  = NULL
@@ -340,13 +346,121 @@ LEFT OUTER JOIN
 WHERE
     I.[intPeriodsToAccrue] <= 1
     AND I.[ysnFromProvisional] = 1
-    AND ((I.[dblInvoiceTotal] - I.[dblProvisionalAmount]) <> @ZeroDecimal)
-    AND
-        (
-        (I.[dblInvoiceTotal] - I.[dblProvisionalAmount]) <> @ZeroDecimal
-        OR
-        EXISTS(SELECT NULL FROM #ARPostInvoiceDetail ARID WHERE ARID.[intItemId] IS NOT NULL AND ARID.[strItemType] <> 'Comment' AND ARID.intInvoiceId  = I.[intInvoiceId])
-        )
+	AND I.[dblInvoiceTotal] <> @ZeroDecimal
+	AND I.[dblProvisionalAmount] = @ZeroDecimal
+    --AND ((I.[dblInvoiceTotal] - I.[dblProvisionalAmount]) <> @ZeroDecimal)
+    --AND
+    --    (
+    --    (I.[dblInvoiceTotal] - I.[dblProvisionalAmount]) <> @ZeroDecimal
+    --    OR
+    --    EXISTS(SELECT NULL FROM #ARPostInvoiceDetail ARID WHERE ARID.[intItemId] IS NOT NULL AND ARID.[strItemType] <> 'Comment' AND ARID.intInvoiceId  = I.[intInvoiceId])
+    --    )
+
+INSERT #ARInvoiceGLEntries
+    ([dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[strDocument]
+    ,[strComments]
+    ,[strSourceDocumentId]
+    ,[intSourceLocationId]
+    ,[intSourceUOMId]
+    ,[dblSourceUnitDebit]
+    ,[dblSourceUnitCredit]
+    ,[intCommodityId]
+    ,[intSourceEntityId]
+    ,[ysnRebuild])
+SELECT
+     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = I.[intAccountId]
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'Provisional Amount'
+    ,[intJournalLineNo]             = I.[intInvoiceId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN  @ZeroDecimal ELSE I.[dblInvoiceTotal] END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN  @ZeroDecimal ELSE I.[dblInvoiceTotal] END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblReportingRate]             = I.[dblAverageExchangeRate]
+    ,[dblForeignRate]               = I.[dblAverageExchangeRate]
+    ,[strRateType]                  = NULL
+    ,[strDocument]                  = NULL
+    ,[strComments]                  = NULL
+    ,[strSourceDocumentId]          = NULL
+    ,[intSourceLocationId]          = NULL
+    ,[intSourceUOMId]               = NULL
+    ,[dblSourceUnitDebit]           = NULL
+    ,[dblSourceUnitCredit]          = NULL
+    ,[intCommodityId]               = NULL
+    ,[intSourceEntityId]            = NULL
+    ,[ysnRebuild]                   = NULL
+FROM
+    #ARPostInvoiceHeader I
+LEFT OUTER JOIN
+    (
+    SELECT
+         [dblUnitQtyShipped]    = SUM([dblUnitQtyShipped])
+        ,[intInvoiceId]         = [intInvoiceId]
+    FROM
+        #ARPostInvoiceDetail
+    GROUP BY
+        [intInvoiceId]
+    ) ARID
+        ON I.[intInvoiceId] = ARID.[intInvoiceId]
+WHERE
+    I.[intPeriodsToAccrue] <= 1
+    AND I.[ysnFromProvisional] = 1
+	AND I.[dblInvoiceTotal] <> @ZeroDecimal
+	AND I.[dblProvisionalAmount] <> @ZeroDecimal
+
 
 INSERT #ARInvoiceGLEntries
     ([dtmDate]
@@ -762,7 +876,7 @@ WHERE
         (
             I.[intItemId] IS NOT NULL
             AND
-            (I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.ysnFromProvisional = 0))
+            (I.[strTransactionType] <> 'Debit Memo' OR (I.strTransactionType = 'Debit Memo' AND I.ysnFromProvisional = 0) OR (I.strTransactionType = 'Credit Memo' AND I.ysnFromProvisional = 1))
 			AND 
 			I.[strItemType] IN ('Non-Inventory','Service','Other Charge')
         )		
@@ -1215,8 +1329,10 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = I.[intSalesAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] - I.[dblBaseProvisionalAmount] END
-    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] - I.[dblBaseProvisionalAmount] ELSE @ZeroDecimal END
+    --,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] - I.[dblBaseProvisionalAmount] END
+    --,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] - I.[dblBaseProvisionalAmount] ELSE @ZeroDecimal END
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
@@ -1237,10 +1353,14 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] - I.[dblProvisionalAmount] END
-    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] - I.[dblProvisionalAmount] END
-    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] - I.[dblProvisionalAmount] ELSE @ZeroDecimal END
-    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] - I.[dblProvisionalAmount] ELSE @ZeroDecimal END
+    --,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] - I.[dblProvisionalAmount] END
+    --,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] - I.[dblProvisionalAmount] END
+    --,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] - I.[dblProvisionalAmount] ELSE @ZeroDecimal END
+    --,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] - I.[dblProvisionalAmount] ELSE @ZeroDecimal END
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblInvoiceTotal] END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblInvoiceTotal] ELSE @ZeroDecimal END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
@@ -1259,7 +1379,106 @@ FROM
 WHERE
     I.[intPeriodsToAccrue] <= 1
 	AND I.[ysnFromProvisional] = 1
-    AND ((I.[dblInvoiceTotal] - I.[dblProvisionalAmount]) <> @ZeroDecimal)
+    --AND ((I.[dblInvoiceTotal] - I.[dblProvisionalAmount]) <> @ZeroDecimal)
+	AND I.[dblInvoiceTotal] <> @ZeroDecimal
+	AND I.[dblProvisionalAmount] = @ZeroDecimal
+    AND I.[intItemId] IS NOT NULL
+    AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+    AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
+
+INSERT #ARInvoiceGLEntries
+    ([dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[strDocument]
+    ,[strComments]
+    ,[strSourceDocumentId]
+    ,[intSourceLocationId]
+    ,[intSourceUOMId]
+    ,[dblSourceUnitDebit]
+    ,[dblSourceUnitCredit]
+    ,[intCommodityId]
+    ,[intSourceEntityId]
+    ,[ysnRebuild])
+SELECT
+     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = I.[intSalesAccountId]
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = I.[strItemDescription]
+    ,[intJournalLineNo]             = I.[intInvoiceDetailId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]
+    ,[strDocument]                  = NULL
+    ,[strComments]                  = NULL
+    ,[strSourceDocumentId]          = NULL
+    ,[intSourceLocationId]          = NULL
+    ,[intSourceUOMId]               = NULL
+    ,[dblSourceUnitDebit]           = NULL
+    ,[dblSourceUnitCredit]          = NULL
+    ,[intCommodityId]               = NULL
+    ,[intSourceEntityId]            = NULL
+    ,[ysnRebuild]                   = NULL
+FROM
+    #ARPostInvoiceDetail I
+WHERE
+    I.[intPeriodsToAccrue] <= 1
+	AND I.[ysnFromProvisional] = 1
+	AND I.[dblBaseLineItemGLAmount] <> @ZeroDecimal
+	AND I.[dblProvisionalAmount] <> @ZeroDecimal
     AND I.[intItemId] IS NOT NULL
     AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
     AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
