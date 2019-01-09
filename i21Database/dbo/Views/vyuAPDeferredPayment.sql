@@ -32,7 +32,7 @@ FROM (
 		A.dtmDate,
 		term.strTerm,
 		A.dtmDueDate,
-		ticket.strTicketNumber,
+		ticket.strTicketNumber COLLATE Latin1_General_CI_AS AS strTicketNumber,
 		0.00 AS dblDeferred,
 		A.dtmInterestAccruedThru AS dtmLastDeferred, --date of last interest date calculation, if there's no voucher interest yet, this should be blank
 		A.dblAmountDue,

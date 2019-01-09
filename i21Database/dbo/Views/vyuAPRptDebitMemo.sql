@@ -2,10 +2,10 @@
 AS 
 
 SELECT 
-	(SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
-	,(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
-	,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone))
-	,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone))
+	compSetup.strCompanyName AS strCompanyName
+	,dbo.[fnAPFormatAddress](compSetup.strCompanyName, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) COLLATE Latin1_General_CI_AS AS strCompanyAddress
+	,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone) COLLATE Latin1_General_CI_AS )
+	,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,compSetup.strCompanyName, A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone) COLLATE Latin1_General_CI_AS )
 	,A.intBillId
 	,A.strBillId
 	,E.strAccountId
@@ -50,6 +50,7 @@ FROM tblAPBill A
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.[intEntityId] = B2.intEntityId) ON A.intEntityVendorId = B.[intEntityId]
 INNER JOIN tblAPBillDetail C2 ON A.intBillId = C2.intBillId
 INNER JOIN tblGLAccount E ON C2.intAccountId = E.intAccountId
+CROSS JOIN tblSMCompanySetup compSetup
 LEFT JOIN tblICItem H ON C2.intItemId = H.intItemId
 LEFT JOIN tblICInventoryReceipt M INNER JOIN tblICInventoryReceiptItem M2 ON M.intInventoryReceiptId = M2.intInventoryReceiptId
 	ON C2.intInventoryReceiptItemId = M2.intInventoryReceiptItemId

@@ -44,7 +44,7 @@ SELECT TOP 100 PERCENT * FROM (
                     * (ISNULL(basisCommodity.dblPercentage,0.00) / 100))
                     - ISNULL(priorAdvances.dblPriorAdvance,0.00) AS DECIMAL(18,2)) END AS dblAmountToAdvance
         ,ISNULL(priorAdvances.dblPriorAdvance,0.00) AS dblPriorAdvance
-        ,priorAdvances.strBillIds
+        ,priorAdvances.strBillIds COLLATE Latin1_General_CI_AS
         ,uom.strUnitMeasure
         ,ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intBasisUOMId, itemUOM.intItemUOMId, ctd.dblBasis),0) AS dblUnitBasis
         ,CASE WHEN staging.intBasisAdvanceStagingId IS NULL THEN 0 ELSE ISNULL(basisFutures.dblPrice, 0) END AS dblFuturesPrice
