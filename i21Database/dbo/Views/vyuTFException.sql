@@ -13,7 +13,7 @@ SELECT A.intExceptionId
 	, CASE WHEN A.intTransactionNumberId IS NULL THEN A.strBillOfLading ELSE Trans.strBillOfLading END strTransactionNumber
     , A.intProductCodeId
     , E.strProductCode
-    , E.strDescription strProductCodeDescriptione
+    , E.strDescription strProductCodeDescription
     , A.intItemId
 	, F.strItemNo strItemNo
     , A.dblReceived
