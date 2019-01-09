@@ -306,7 +306,7 @@ BEGIN
 				, ysnPreCrush
 				, strNotes
 				, strBrokerTradeNo)
-			EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
+			SELECT * FROM  fnRKGetOpenFutureByDate( @intCommodityId, @dtmToDate)
 
 			INSERT INTO @List (strCommodityCode
 				, intCommodityId

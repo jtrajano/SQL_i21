@@ -7238,6 +7238,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateInvoiceFromShipment.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCeToUPCa.sql" />
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
+    <Build Include="dbo\Functions\fnRKGetOpenFutureByDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
