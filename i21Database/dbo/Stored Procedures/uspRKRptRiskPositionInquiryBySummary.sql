@@ -959,110 +959,11 @@ SELECT row_number() over(order by intRowNumber) intRowNumFinal, intRowNumber ,st
             dblQuantity ,
             intOrderByHeading ,
             intContractHeaderId ,
-            intFutOptTransactionHeaderId
-			,ysnDummy = 0 into #temp1  FROM #temp 
+            intFutOptTransactionHeaderId into #temp1  FROM #temp 
 ORDER BY strGroup,PriceStatus,
 CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
   WHEN  strFutureMonth ='Total' THEN '01/01/9999'
 else CONVERT(DATETIME,'01 '+strFutureMonth) END
-
------Create Dummy Month-------
-DECLARE @intDummyMonthCount INT
-
-DECLARE @AvailMonth TABLE(
-	intRowNum INT
-	,strDummyFutureMonth NVARCHAR(10)
-	,dtmFutureMonth DATE
-)
-
-DECLARE @ProjectedDummyMonth TABLE(
-	intRowNum INT IDENTITY(1,1)
-	,strDummyFutureMonth NVARCHAR(10)
-)
-DECLARE @intIndex1 int = 0;
-DECLARE @ProjectedDummyMonthName NVARCHAR(10)
-
-INSERT INTO @AvailMonth(
-	intRowNum
-	,strDummyFutureMonth
-	,dtmFutureMonth
-)
-SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY CONVERT(DATETIME,'01 '+ LTRIM(RTRIM(ISNULL(strFutureMonth,'')))) ASC))
-	,LEFT(strFutureMonth,3)
-	,dtmFutureMonth
-FROM
-(SELECT DISTINCT strFutureMonth
-	,CONVERT(DATETIME,'01 '+ LTRIM(RTRIM(ISNULL(strFutureMonth,'')))) AS dtmFutureMonth
-FROM #temp1
-WHERE LEFT(LTRIM(RTRIM(ISNULL(strFutureMonth,''))),3) IN ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')) T
-		
-SELECT @intDummyMonthCount = CASE WHEN 12 - COUNT(*) > 0 THEN 12 - COUNT(*) ELSE 0 END 
-FROM @AvailMonth
-
-IF(@intDummyMonthCount > 0)
-BEGIN
-	WHILE (SELECT COUNT(*) FROM @ProjectedDummyMonth) < @intDummyMonthCount
-	BEGIN
-		SET @intIndex1 = @intIndex1 + 1;
-		SET @ProjectedDummyMonthName = ''
-
-		IF(SELECT COUNT(*) FROM @ProjectedDummyMonth) <> 0
-		BEGIN
-			SELECT TOP 1 @ProjectedDummyMonthName = dbo.fnRKFormatDate(DATEADD(YEAR, 1, CONVERT(DATETIME,'01 ' + strDummyFutureMonth)), 'MMM yy')
-			FROM @ProjectedDummyMonth
-			WHERE LEFT(strDummyFutureMonth,3) IN(
-				SELECT strDummyFutureMonth 
-				FROM @AvailMonth
-				WHERE intRowNum = @intIndex1
-			)
-			ORDER BY CONVERT(DATETIME,'01 ' + strDummyFutureMonth) DESC
-		END
-
-		IF(ISNULL(@ProjectedDummyMonthName,'') = '')
-		BEGIN
-			SELECT @ProjectedDummyMonthName = dbo.fnRKFormatDate(DATEADD(YEAR, 1, dtmFutureMonth), 'MMM yy')
-			FROM @AvailMonth
-			WHERE intRowNum = @intIndex1
-		END
-
-		INSERT INTO @ProjectedDummyMonth(
-			strDummyFutureMonth
-		)
-		SELECT @ProjectedDummyMonthName
-
-		IF(@intIndex1 = (SELECT COUNT(*) FROM @AvailMonth))
-		BEGIN
-			SET @intIndex1 = 0;
-		END
-	END
-END
-
-IF EXISTS(SELECT TOP 1 * FROM @ProjectedDummyMonth)
-BEGIN
-	INSERT INTO #temp1(
-		strGroup
-		,Selection
-		,PriceStatus
-		,strAccountNumber
-		,dblNoOfContract
-		,strFutureMonth
-		,ysnDummy
-	)
-	SELECT strGroup
-		,Selection
-		,PriceStatus
-		,strAccountNumber
-		,NULL
-		,strDummyFutureMonth
-		,1
-	FROM @ProjectedDummyMonth
-	OUTER APPLY(
-		SELECT TOP 1 *
-		FROM #temp1
-		where dblNoOfContract <> 0
-	)T
-END
------End Create Dummy Month---
 
 if @strReportName='Outright Coverage'
 		SELECT  intRowNumber ,replace(strGroup,'1.','') 	strGroup   ,Selection,PriceStatus,strFutureMonth,strAccountNumber,
@@ -1072,7 +973,7 @@ if @strReportName='Outright Coverage'
    (PARTITION BY NULL ORDER BY 
    CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
    ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook,@dtmPositionAsOf dtmPositionAsOf 
-  FROM #temp1  where strGroup='1.Outright Coverage' and (dblNoOfContract <> 0 OR ysnDummy = 1)
+  FROM #temp1  where strGroup='1.Outright Coverage' and dblNoOfContract <>0
 ELSE IF @strReportName='Futures Required'
 		SELECT  intRowNumber ,	replace(strGroup,'2.','') 	strGroup    ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
             		case when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
@@ -1081,15 +982,14 @@ ELSE IF @strReportName='Futures Required'
 		   (PARTITION BY NULL ORDER BY 
 		   CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
 	,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook ,@dtmPositionAsOf dtmPositionAsOf 
-		  FROM #temp1  where strGroup='2.Futures Required' and (dblNoOfContract <> 0 OR ysnDummy = 1)
+		  FROM #temp1  where strGroup='2.Futures Required' and dblNoOfContract <>0
 ELSE
 		SELECT  intRowNumber ,	strGroup   ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
    		case when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
-			WHEN ysnDummy = 1 THEN NULL
 			else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  end dblNoOfContract,  
 		   CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
 		   (PARTITION BY NULL ORDER BY 
 		   CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
 		   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook ,@dtmPositionAsOf dtmPositionAsOf 
-		  FROM #temp1 where dblNoOfContract <>0 OR ysnDummy = 1
+		  FROM #temp1 where dblNoOfContract <>0
 END
