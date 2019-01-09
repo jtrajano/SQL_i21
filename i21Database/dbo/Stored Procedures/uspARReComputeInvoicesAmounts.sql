@@ -111,6 +111,10 @@ SET
 	,ARID.[ysnTermDiscountExempt]			= ISNULL(ARID.[ysnTermDiscountExempt], 0)
 	,ARID.[intSubCurrencyId]				= ISNULL(ARID.[intSubCurrencyId], ARI.[intCurrencyId])
 	,ARID.[dblSubCurrencyRate]				= CASE WHEN ISNULL(ARID.[dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE ARID.[dblSubCurrencyRate] END
+	,ARID.[dblLicenseAmount]				= ISNULL(ARID.[dblLicenseAmount], @ZeroDecimal)
+	,ARID.[dblBaseLicenseAmount]			= ISNULL(ISNULL(ARID.[dblLicenseAmount], @ZeroDecimal) * ARID.[dblCurrencyExchangeRate], @ZeroDecimal)
+	,ARID.[dblMaintenanceAmount]			= ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal)
+	,ARID.[dblBaseMaintenanceAmount]		= ISNULL(ISNULL(ARID.[dblMaintenanceAmount], @ZeroDecimal) * ARID.[dblCurrencyExchangeRate], @ZeroDecimal)
 FROM
 	tblARInvoiceDetail ARID
 INNER JOIN
