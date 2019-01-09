@@ -30,7 +30,7 @@ SELECT	DISTINCT
 			,ysnPosted
 			,ysnPaid
 			,(CASE WHEN bill.ysnPosted = 1 THEN bill.strTerm ELSE '' END) AS strTerm
-			,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+			,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) COLLATE Latin1_General_CI_AS as strCompanyAddress
 			,dblQtyToReceive = CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN ABS(dblReceiptQty) ELSE dblReceiptQty END
 			,dblQtyVouchered = CASE WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
 			,dblQtyToVoucher = CASE WHEN bill.intTransactionType = 3 OR bill.intTransactionType IS NULL THEN ABS(dblOpenQty) ELSE dblOpenQty END 
@@ -44,6 +44,7 @@ SELECT	DISTINCT
 			,dblReceiptQty = 0
 	FROM	tblAPVendor vendor INNER JOIN tblEMEntity entity
 				ON entity.intEntityId = vendor.intEntityId
+			CROSS JOIN tblSMCompanySetup compSetup
 			CROSS APPLY (
 				SELECT	intInventoryReceiptId
 						,intInventoryReceiptItemId
