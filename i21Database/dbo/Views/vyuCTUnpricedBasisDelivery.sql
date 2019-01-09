@@ -25,7 +25,7 @@ SELECT CAST(ROW_NUMBER() OVER (ORDER BY intContractDetailId ASC) AS INT) intUniq
 	  , strInvoiceVoucher
 	  , intContractBasisId
 	  , strContractType
-FROM (SELECT	   
+FROM (SELECT DISTINCT
 		  intPricingTypeId = CH.intPricingTypeId
 		 ,intEntityId = EME.intEntityId
 		 ,strCustomerVendor = EME.strName
@@ -54,9 +54,9 @@ FROM (SELECT
 	INNER JOIN tblSCTicketContractUsed SCTC
 		ON SCTC.intTicketId = SC.intTicketId
 	INNER JOIN tblCTContractDetail CD
-		ON SCTC.intContractDetailId = CD.intContractDetailId and CD.intPricingTypeId = 2
+		ON SCTC.intContractDetailId = CD.intContractDetailId and CD.intPricingTypeId IN (1,2)
 	INNER JOIN tblCTContractHeader CH
-		ON CD.intContractHeaderId = CH.intContractHeaderId and CH.intPricingTypeId = 2
+		ON CD.intContractHeaderId = CH.intContractHeaderId and CH.intPricingTypeId IN(1,2)
 	INNER JOIN tblEMEntity EME
 		ON EME.intEntityId = SC.intEntityId
 	INNER JOIN vyuCTGetPriceContractSequence PCS
