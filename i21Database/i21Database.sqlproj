@@ -7266,6 +7266,7 @@
     <Build Include="dbo\Views\vyuICItemStockUOM.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCeToUPCa.sql" />
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
+	<Build Include="dbo\Views\vyuTFException.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
