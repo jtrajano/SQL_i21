@@ -95,8 +95,6 @@ GO
 CREATE INDEX [IX_tblTFException_intTransporterId] ON [dbo].[tblTFException] ([intTransporterId])
 GO
 
-CREATE INDEX [IX_tblTFException_intUserEntityId] ON [dbo].[tblTFException] ([intUserEntityId])
-GO
 
 
 
