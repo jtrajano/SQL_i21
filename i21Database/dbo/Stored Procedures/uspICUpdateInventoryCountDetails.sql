@@ -225,6 +225,7 @@ BEGIN
 		AND (i.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
 		AND ((@intSubLocationId IS NULL) OR (stock.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))
 		AND ((@intStorageLocationId IS NULL) OR (stock.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))
+		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND i.strLotTracking = 'No'
 
 END
