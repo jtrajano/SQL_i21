@@ -65,7 +65,6 @@
 	tblSCTicket.strLoadNumber,
 	tblSCTicket.intLoadLocationId,
 	tblSCTicket.intAxleCount,
-	tblSCTicket.strBinNumber,
 	tblSCTicket.strPitNumber,
 	tblSCTicket.intGradingFactor,
 	tblSCTicket.strVarietyType,
