@@ -151,6 +151,11 @@ BEGIN
     DROP TABLE #POSTEDINVOICES
 END
 
+IF(OBJECT_ID('tempdb..#CASHREFUNDS') IS NOT NULL)
+BEGIN
+	DROP TABLE #CASHREFUNDS
+END
+
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -199,6 +204,7 @@ INNER JOIN (
 WHERE ysnPosted = 1
 	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
 	AND ysnCancelled = 0
+	AND strTransactionType <> 'Cash Refund'
 	AND ((strType = 'Service Charge' AND  @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate)))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
 	AND I.intAccountId IN (
 		SELECT A.intAccountId
@@ -226,7 +232,18 @@ WHERE ysnPosted = 1
 	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
-	
+
+--#CASHREFUNDS
+SELECT strDocumentNumber	= ID.strDocumentNumber
+     , dblRefundTotal		= SUM(I.dblInvoiceTotal) 
+INTO #CASHREFUNDS
+FROM tblARInvoiceDetail ID
+INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+WHERE I.strTransactionType = 'Cash Refund'
+  AND I.ysnPosted = 1
+  AND ISNULL(ID.strDocumentNumber, '') <> ''
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
+GROUP BY ID.strDocumentNumber	
 
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 INSERT INTO tblARCustomerAgingStagingTable (
@@ -395,7 +412,7 @@ SELECT I.intInvoiceId
 	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	 , dtmDatePaid			= NULL
 	 , I.intEntityCustomerId
-	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+	 , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
 	 , dblPrepayments		= 0
 	 , I.strType
 	 , strRecordNumber		= P.strRecordNumber
@@ -406,7 +423,8 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 			 , PD.intInvoiceId
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 		GROUP BY PD.intInvoiceId
-	) PD ON I.intInvoiceId = PD.intInvoiceId		
+	) PD ON I.intInvoiceId = PD.intInvoiceId
+	LEFT JOIN #CASHREFUNDS CR ON I.strInvoiceNumber = CR.strDocumentNumber
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 
 UNION ALL
