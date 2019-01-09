@@ -131,7 +131,9 @@ BEGIN TRY
 				SI.strDescription				AS	strDiscountScheduleCode,
 				CASE WHEN CH.intPricingTypeId = 8 THEN 'Ratio' ELSE CD.strPricingType END AS strPricingType,
 				CD.dblRatio,
-				CD.dblAppliedQty
+				CD.dblAppliedQty,
+				CD.strBook,
+				CD.strSubBook
 		
 
 		FROM	#tblCTPriceFixation			PF
@@ -203,7 +205,9 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				SI.strDescription				AS	strDiscountScheduleCode,
 				CASE WHEN CH.intPricingTypeId = 8 THEN 'Ratio' ELSE CD.strPricingType END AS strPricingType,
 				CD.dblRatio,
-				CD.dblAppliedQty
+				CD.dblAppliedQty,
+				BK.strBook,
+				SB.strSubBook
 
 		FROM	#tblCTPriceFixation			PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
@@ -218,6 +222,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 		JOIN	tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
 		JOIN	tblICUnitMeasure			QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId
 		CROSS APPLY fnCTGetTopOneSequence(CH.intContractHeaderId,0)	CD
+LEFT	JOIN	tblCTBook					BK	ON	BK.intBookId			=	CH.intBookId						
+LEFT	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId			=	CH.intSubBookId	
 LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
 LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 		WHERE	ISNULL(CH.ysnMultiplePriceFixation,0) = 1
