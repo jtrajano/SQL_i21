@@ -53,6 +53,8 @@
 	[strFeedbackComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strResolution] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strResolutionHelpManualLink] [nvarchar](1000) COLLATE Latin1_General_CI_AS NULL,
+	[strResolutionYoutubeLink] [nvarchar](1000) COLLATE Latin1_General_CI_AS NULL,
 	[strImageId] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
 	[intUpgradeTypeId] [int] null,
 	[strUpgradeEnvironmentId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
