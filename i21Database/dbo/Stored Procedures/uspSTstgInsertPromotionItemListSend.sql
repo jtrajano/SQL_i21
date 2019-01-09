@@ -137,15 +137,21 @@ BEGIN
 									WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
 										THEN CASE
 												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-													THEN IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
-												ELSE IUOM.strLongUPCCode
-												END
-									WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
-										THEN CASE
-												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-													THEN IUOM.strUpcCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strUpcCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strUpcCode,''),13) 
-												ELSE RIGHT('0000' + ISNULL(IUOM.strUpcCode,''),4) 
-												END 
+														THEN CASE
+																WHEN LEN(IUOM.strLongUPCCode) = 6
+																	THEN RIGHT('0000000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 13) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+																WHEN LEN(IUOM.strLongUPCCode) > 6	
+																	THEN RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''), 13) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+																	-- IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
+														END
+													ELSE IUOM.strLongUPCCode
+											END
+									--WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
+									--	THEN CASE
+									--			WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
+									--				THEN IUOM.strUpcCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strUpcCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strUpcCode,''),13) 
+									--			ELSE RIGHT('0000' + ISNULL(IUOM.strUpcCode,''),4) 
+									--		END 
 									ELSE '0000' 
 							END [POSCode]
 							--, CASE 
