@@ -2,18 +2,18 @@
 AS
 	SELECT
 	 APV.[intEntityId]
-	,strMainCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)  
+	,strMainCompanyName = compSetup.strCompanyName
 	,APB.intTransactionType AS intTransactionId
-	,APV.strVendorId + ' - ' + (SELECT strName FROM tblEMEntity WHERE intEntityId = APV.[intEntityId]) AS strVendorID
+	,APV.strVendorId + ' - ' + E.strName AS strVendorID
     ,ISNULL(APV.strVendorId, '') + ' - ' + isnull(E.strName,'''') as strVendorIdName 
-	,strCompanyName = ( SELECT strName FROM tblEMEntity WHERE intEntityId = APV.[intEntityId])
+	,strCompanyName = E.strName
 	,APB.strVendorOrderNumber 
 	,APB.strVendorOrderNumber AS strInvoiceNumber
 	,APB.intBillId
 	,APB.strBillId 
-	,strAccountID = (SELECT strAccountId  FROM tblGLAccount WHERE intAccountId = APB.intAccountId)
-	,strDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = APB.intAccountId)
-	,strAccount = (SELECT strAccountId  FROM tblGLAccount WHERE intAccountId = APB.intAccountId) + ' - ' + (SELECT strDescription FROM tblGLAccount WHERE intAccountId = APB.intAccountId)
+	,strAccountID = accnt.strAccountId
+	,strDescription = accnt.strDescription
+	,strAccount = accnt.strAccountId + ' - ' + accnt.strDescription
 	,strTerms = (SELECT strTerm FROM tblSMTerm WHERE intTermID = APB.intTermsId)
 	,APB.strReference
 	,APB.strBillId AS strBillBatchNumber
@@ -47,14 +47,15 @@ AS
 	,APD.dblCost AS dblDetailCost
 	,APD.dblTotal AS dblDetailTotalCost
 	,APD.dblDiscount AS dblDetailDiscount
-	,strDetailAccountID = (SELECT strAccountId  FROM tblGLAccount WHERE intAccountId = APD.intAccountId)
-	,strDetailDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = APD.intAccountId)
+	,strDetailAccountID = accntDetail.strAccountId
+	,strDetailDescription = accntDetail.strDescription
 	,strtPrepaidAccountId = (SELECT TOP 1
-									(SELECT strDescription FROM tblGLAccount WHERE intAccountId = C.intAccountId) 
+									prepaidAccnt.strDescription
 							 FROM tblAPAppliedPrepaidAndDebit B
 							 INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+							 LEFT JOIN tblGLAccount prepaidAccnt ON prepaidAccnt.intAccountId = C.intAccountId
 							 WHERE B.ysnApplied = 1 AND APB.intBillId = B.intBillId)
-	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
+	,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) COLLATE Latin1_General_CI_AS as strCompanyAddress
 	,APB.ysnPaid AS ysnPaid
 	--,strSegment = ISNULL((Select strSegmentCode from tblGLAccount where strAccountID = tblAPBatchDetail.strAccountID),'')
 	,Payment.strPaymentInfo	
@@ -63,6 +64,9 @@ AS
 	INNER JOIN dbo.tblAPBillDetail APD ON APB.intBillId = APD.intBillId
 	INNER JOIN tblAPVendor APV
 		ON APB.intEntityVendorId = APV.[intEntityId]
+	CROSS JOIN tblSMCompanySetup compSetup
+	LEFT JOIN tblGLAccount accntDetail ON accntDetail.intAccountId = APD.intAccountId
+	LEFT JOIN tblGLAccount accnt ON accnt.intAccountId = APB.intAccountId
 	LEFT JOIN dbo.tblEMEntity E
 		ON E.intEntityId = APV.[intEntityId]
 	OUTER APPLY
