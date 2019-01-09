@@ -67,6 +67,7 @@
 					,strVersionNo
 					,strProduct
 					,intProductId
+					,dtmGoLive
 		from 
 				(
 				select
@@ -120,6 +121,7 @@
 					,tv.strVersionNo
 					,strProduct = (select prod.strProduct from tblHDTicketProduct prod where prod.intTicketProductId = (select top 1 prodver.intProductId from tblARCustomerProductVersion prodver where prodver.intCustomerId = proj.intCustomerId))
 					,intProductId = (select top 1 prodver.intProductId from tblARCustomerProductVersion prodver where prodver.intCustomerId = proj.intCustomerId)
+					,proj.dtmGoLive
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId
