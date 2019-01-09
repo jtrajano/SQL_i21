@@ -1,6 +1,6 @@
-﻿CREATE FUNCTION [dbo].[fnSTGenerateCheckDigit]
+﻿CREATE FUNCTION dbo.fnSTGenerateCheckDigit
 (
-  @CheckDigitString AS VARCHAR(14)
+  @strUpcCode AS VARCHAR(14)
 )
 
 -- To validate check here https://www.gs1.org/services/check-digit-calculator
@@ -9,35 +9,41 @@ RETURNS INT
 AS BEGIN
 	
 	DECLARE @intCheckDigit AS INT
+	--DECLARE @strProcessUpcCode AS NVARCHAR(14)
 
-	IF(LEN(@CheckDigitString) < 11)
+	IF(LEN(@strUpcCode) <= 5)
 		BEGIN
 			SET @intCheckDigit = NULL
 		END
-	ELSE IF(@CheckDigitString IS NULL)
+	ELSE IF(@strUpcCode IS NULL)
 		BEGIN
 			SET @intCheckDigit = NULL
 		END
 	ELSE
 		BEGIN
+			IF(LEN(@strUpcCode) = 6)
+				BEGIN
+					-- Convert Short Upc(UPC-E) to Long Upc(UPC-A)
+					SET @strUpcCode = dbo.fnSTConvertUPCeToUPCa(@strUpcCode)
+				END
+			ELSE IF(LEN(@strUpcCode) >= 7 AND LEN(@strUpcCode) <= 12)
+				BEGIN
+					SET @strUpcCode = RIGHT('0000000000000' + ISNULL(@strUpcCode,''),13)
+				END
+
 			-- Remove 1st Leading Zero
-			SELECT @CheckDigitString =
+			SELECT @strUpcCode =
 				CASE 
-					WHEN @CheckDigitString LIKE '0%'
-						THEN RIGHT(@CheckDigitString,LEN(@CheckDigitString)-1)
+					WHEN @strUpcCode LIKE '0%'
+						THEN RIGHT(@strUpcCode,LEN(@strUpcCode)-1)
 					ELSE
-						@CheckDigitString
+						@strUpcCode
 				END
 
 
 			SET @intCheckDigit = 
 			(
 				SELECT 
-					--CASE 
-					--	WHEN SUM(A.intTotal) > ROUND(SUM(A.intTotal), -1)
-					--		THEN SUM(A.intTotal) - ROUND(SUM(A.intTotal), -1)
-					--	ELSE ROUND(SUM(A.intTotal), -1) - SUM(A.intTotal)
-					--END AS intCheckDigit
 					CASE 
 						WHEN SUM(A.intTotal) > ROUND(SUM(A.intTotal), -1)
 							THEN (ROUND(SUM(A.intTotal), -1) + 10) - SUM(A.intTotal)
@@ -55,12 +61,12 @@ AS BEGIN
 					--	 , intDigitToCheck = SUBSTRING(@CheckString, n, 1)
 					SELECT CASE	
 							WHEN (B.n % 2) = 0
-								THEN SUBSTRING(@CheckDigitString, B.n, 1) * 3
-							ELSE SUBSTRING(@CheckDigitString, B.n, 1) * 1
+								THEN SUBSTRING(@strUpcCode, B.n, 1) * 3
+							ELSE SUBSTRING(@strUpcCode, B.n, 1) * 1
 					   END intTotal
 					FROM 
 					(
-						SELECT TOP (LEN(@CheckDigitString))
+						SELECT TOP (LEN(@strUpcCode))
 							ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
 						FROM (VALUES (0),(0),(0),(0),(0),(0),(0),(0)) a(n)
 						CROSS JOIN (VALUES (0),(0),(0),(0),(0),(0),(0),(0),(0),(0)) b(n)
