@@ -6,10 +6,11 @@
 RETURNS DATETIME
 AS 
 BEGIN
-    DECLARE @dtmNeedDate DATETIME
-       SET @dtmNeedDate = DATEADD(YEAR, @intYear - 1900, 0)
-       SET @dtmNeedDate =DATEADD(DAY, (@@DATEFIRST - DATEPART(WEEKDAY, @dtmNeedDate) + (8 - @@DATEFIRST) * 2) % 7, @dtmNeedDate)
-       SET @dtmNeedDate=@dtmNeedDate+(@intWeek-1)*7  
-       
+	   DECLARE @dtmNeedDate DATETIME       
+       SET @dtmNeedDate = DATEADD(WEEK, @intWeek, DATEADD(YEAR, @intYear - 1900, 0)) 
+						  - 4 
+						  - DATEPART(dw, DATEADD(WEEK, @intWeek, DATEADD(YEAR, @intYear - 1900, 0)) - 4) 
+						  + 1
+      
 RETURN @dtmNeedDate; 
 END
