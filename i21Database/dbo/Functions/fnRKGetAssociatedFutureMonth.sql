@@ -1,9 +1,8 @@
-﻿CREATE FUNCTION [dbo].[fnRKGetAssociatedFutureMonth]
-(
+﻿CREATE FUNCTION [dbo].[fnRKGetAssociatedFutureMonth] (
 	@FutureMarketId INT
-	,@Year NVARCHAR(10)
-	,@Month NVARCHAR(10)
-)
+	, @Year NVARCHAR(10)
+	, @Month NVARCHAR(10))
+
 RETURNS NVARCHAR(10)
 
 AS
@@ -13,17 +12,17 @@ BEGIN
 	DECLARE @TempFutureMonth NVARCHAR(10)
 	DECLARE @ExpectedFutureMonth DATE
 
-	SELECT TOP 1 @TempFutureMonth = DATEPART(mm,dtmFutureMonthsDate) FROM tblRKFuturesMonth 
-		WHERE intFutureMarketId = @FutureMarketId
-			AND DATEPART(mm,dtmFutureMonthsDate) > @Month
-		ORDER BY DATEPART(mm,dtmFutureMonthsDate) ASC
+	SELECT TOP 1 @TempFutureMonth = DATEPART(mm,dtmFutureMonthsDate)
+	FROM tblRKFuturesMonth
+	WHERE intFutureMarketId = @FutureMarketId AND DATEPART(mm,dtmFutureMonthsDate) > @Month
+	ORDER BY DATEPART(mm,dtmFutureMonthsDate) ASC
 
 	IF(ISNULL(@TempFutureMonth, '') <> '')
 	BEGIN
-		IF EXISTS(SELECT TOP 1 * FROM tblRKFuturesMonth 
-			WHERE intFutureMarketId = @FutureMarketId
-				AND DATEPART(mm,dtmFutureMonthsDate) = @TempFutureMonth
-				AND DATEPART(YYYY,dtmFutureMonthsDate) = CONVERT(INT, @Year))
+		IF EXISTS(SELECT TOP 1 * FROM tblRKFuturesMonth
+				WHERE intFutureMarketId = @FutureMarketId
+					AND DATEPART(mm,dtmFutureMonthsDate) = @TempFutureMonth
+					AND DATEPART(YYYY,dtmFutureMonthsDate) = CONVERT(INT, @Year))
 		BEGIN
 			SELECT TOP 1 @FutureMonth = strFutureMonth FROM tblRKFuturesMonth 
 			WHERE intFutureMarketId = @FutureMarketId
@@ -33,7 +32,7 @@ BEGIN
 		ELSE 
 		BEGIN
 		    SET @ExpectedFutureMonth = CONVERT(DATE, @TempFutureMonth + '-1-' + @Year);
-			SET @FutureMonth = LEFT(CONVERT(NVARCHAR, DATENAME(month, @ExpectedFutureMonth)),3) + ' ' + RIGHT(@Year, 2);
+			SET @FutureMonth = (LEFT(CONVERT(NVARCHAR, DATENAME(month, @ExpectedFutureMonth)),3) + ' ' + RIGHT(@Year, 2)) COLLATE Latin1_General_CI_AS
 		END
 	END
 	ELSE
@@ -45,7 +44,7 @@ BEGIN
 
 		SET @Year = CONVERT(NVARCHAR, CONVERT(INT, @Year) + 1);
 		SET @ExpectedFutureMonth = CONVERT(DATE, @TempFutureMonth + '-1-' + @Year);
-		SET @FutureMonth = LEFT(CONVERT(NVARCHAR, DATENAME(month, @ExpectedFutureMonth)),3) + ' ' + RIGHT(CONVERT(NVARCHAR, DATEPART(YYYY, @ExpectedFutureMonth)),2);
+		SET @FutureMonth = (LEFT(CONVERT(NVARCHAR, DATENAME(month, @ExpectedFutureMonth)),3) + ' ' + RIGHT(CONVERT(NVARCHAR, DATEPART(YYYY, @ExpectedFutureMonth)),2)) COLLATE Latin1_General_CI_AS
 	END
 
 	RETURN @FutureMonth
