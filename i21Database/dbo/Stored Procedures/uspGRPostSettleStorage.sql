@@ -975,7 +975,7 @@ BEGIN TRY
 					,dblUOMQty					=  @dblUOMQty
 					,dblCost					=  CASE 
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
-														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
+														ELSE ISNULL(@dblFutureMarkePrice,0) + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
@@ -1035,7 +1035,7 @@ BEGIN TRY
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= CASE 
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
-														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
+														ELSE ISNULL(@dblFutureMarkePrice,0) + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
