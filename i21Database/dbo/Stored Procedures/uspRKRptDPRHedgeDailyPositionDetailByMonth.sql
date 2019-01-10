@@ -182,7 +182,7 @@ END
 			, strNotes
 			, ysnPreCrush
 		)
-		EXEC uspRKDPRPreCrushPositionDetail 1, null, null, '', 'All Storage', @dtmToDate 
+		EXEC uspRKDPRPreCrushPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate 
 
 	END
 	ELSE
