@@ -360,7 +360,7 @@ BEGIN
 		, Category.intCategoryId
 		, Category.strCategoryCode
 	FROM tblCTContractDetail CD
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderI = CD.intContractHeaderId
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal  BL ON CH.intContractHeaderI = BL.intContractHeaderId AND CD.intContractDetailId = BL.intContractDetailId
 	JOIN tblICCommodity CM ON CM.intCommodityId = CH.intCommodityId
 	JOIN tblICCommodityUnitMeasure C1 ON C1.intCommodityId = CH.intCommodityId AND C1.intCommodityId = CM.intCommodityId AND C1.ysnStockUnit=1
