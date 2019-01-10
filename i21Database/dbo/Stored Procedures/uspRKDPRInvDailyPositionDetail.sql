@@ -2114,7 +2114,7 @@ BEGIN
 			--=========================================
 			-- Includes DP based on Company Preference
 			--========================================
-			IF ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled FROM tblRKCompanyPreference) = 1)
+			If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0)--DP is already included in Inventory we are going to subtract it here (reverse logic in including DP)
 			BEGIN
 				INSERT INTO @Final(intSeqId
 					, strSeqHeader
@@ -2136,7 +2136,7 @@ BEGIN
 					, 'Company Titled Stock'
 					, @strCommodityCode
 					, 'DP'
-					, dblTotal = sum(dblTotal)
+					, dblTotal = -sum(dblTotal)
 					, intTicketId
 					, strTicketType
 					, strTicketNumber
