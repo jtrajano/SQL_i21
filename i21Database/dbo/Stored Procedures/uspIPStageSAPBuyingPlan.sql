@@ -63,6 +63,8 @@ BEGIN TRY
 
 	--Delete From Stg table (Previous Data)
 	Delete From tblRKStgBlendDemand
+	
+	SET DATEFIRST 1
 
 	--Add to Staging tables
 	Insert into tblRKStgBlendDemand(strItemName,strSubLocation,intYear,intWeek,dblQuantity,dblTotalDemand,strUOM,dtmNeedDate,strPeriod,intConcurrencyId)
