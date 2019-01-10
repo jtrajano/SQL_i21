@@ -33,7 +33,7 @@ ysnPayeeEFTInfoActive = ISNULL((
 strPayeeEFTInfoEffective = ISNULL((
 		SELECT TOP 1 (CASE WHEN dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) THEN 'EFFECTIVE' ELSE 'INEFFECTIVE' END)  FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc
-),'INVALID'),
+),'INVALID') COLLATE Latin1_General_CI_AS,
 ysnPrenoteSent = ISNULL((
 		SELECT TOP 1 ysnPrenoteSent FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc
