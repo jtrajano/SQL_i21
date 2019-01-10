@@ -204,6 +204,8 @@ BEGIN
 			--AND ISNULL(stockUnit.ysnStockUnit, 0) = 0
 			AND stockUnit.intItemLocationId = il.intItemLocationId
 			AND stockUnit.intLocationId = il.intLocationId
+			AND (stockUnit.intSubLocationId = stock.intSubLocationId OR (stockUnit.intSubLocationId IS NULL AND stock.intSubLocationId IS NULL))
+			AND (stockUnit.intStorageLocationId = stock.intStorageLocationId OR (stockUnit.intStorageLocationId IS NULL AND stock.intStorageLocationId IS NULL))
 		OUTER APPLY(
 			SELECT TOP 1
 					dblCost
