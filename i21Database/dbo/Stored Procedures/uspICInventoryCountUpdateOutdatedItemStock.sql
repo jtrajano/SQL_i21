@@ -38,19 +38,20 @@ FROM tblICInventoryCountDetail cd
 	LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = cd.intLotId AND Item.strLotTracking <> 'No'
 	LEFT JOIN dbo.tblICItemUOM StockUOM ON cd.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
 	OUTER APPLY (
-			SELECT intItemId
-					, intItemUOMId
-					, intItemLocationId
-					, intSubLocationId
-					, intStorageLocationId
-					, dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
-					, dblLastCost = MAX(ISNULL(dblLastCost, 0))
-	FROM vyuICGetItemStockSummary
-	WHERE	intItemId = cd.intItemId
-		AND intItemLocationId = cd.intItemLocationId
-		AND intItemUOMId = cd.intItemUOMId
-		AND ((cd.intSubLocationId IS NULL) OR (cd.intSubLocationId = intSubLocationId OR ISNULL(intSubLocationId, 0) = 0))
-		AND ((cd.intStorageLocationId IS NULL) OR (cd.intStorageLocationId = intStorageLocationId OR ISNULL(intStorageLocationId, 0) = 0))
+				SELECT 
+					  ss.intItemId
+					, ss.intItemUOMId
+					, ss.intItemLocationId
+					, ss.intSubLocationId
+					, ss.intStorageLocationId
+					, dblOnHand =  SUM(COALESCE(ss.dblOnHand, 0.00))
+					, dblLastCost = MAX(ISNULL(ss.dblLastCost, 0))
+		FROM vyuICGetItemStockSummary ss
+		WHERE ss.intItemId = cd.intItemId
+			AND ss.intItemLocationId = cd.intItemLocationId
+			AND ss.intItemUOMId = cd.intItemUOMId
+			AND (cd.intSubLocationId = ss.intSubLocationId OR (ss.intSubLocationId IS NULL AND cd.intSubLocationId IS NULL))
+			AND (cd.intStorageLocationId = ss.intStorageLocationId OR (ss.intStorageLocationId IS NULL AND cd.intSubLocationId IS NULL))
 		AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
 	GROUP BY 
 					intItemId,
