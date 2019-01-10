@@ -104,7 +104,7 @@ CROSS APPLY (
 				AND SC.intSettleStorageId = SS.intSettleStorageId
 		INNER JOIN tblCTContractHeader CH
 			ON CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE SS.intParentSettleStorageId IS NOT NULL AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
+		WHERE SS.intParentSettleStorageId IS NOT NULL AND CASE WHEN (CD.intPricingTypeId IN (1,2) AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
 		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strContractNumbers
 ) AS _strContractNumbers
 CROSS APPLY (
