@@ -54,7 +54,9 @@ CREATE TABLE #SELECTEDPAYMENTS (
 	, intNSFAccountId		INT				NULL
 	, dtmDate				DATETIME		NOT NULL
 	, dblNSFBankCharge		NUMERIC(18, 6)	NULL
+	, dblUnappliedAmount	NUMERIC(18, 6)	NULL
 	, ysnInvoiceToCustomer	BIT				NULL
+	, ysnInvoicePrepayment	BIT				NULL
 	, strRecordNumber		NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NOT NULL
 	, intEntityCustomerId	INT				NOT NULL
 	, intCurrencyId			INT				NOT NULL
@@ -66,7 +68,9 @@ SELECT NSF.intPaymentId
 	 , NSF.intNSFAccountId
 	 , NSF.dtmDate
 	 , NSF.dblNSFBankCharge
+	 , P.dblUnappliedAmount
 	 , NSF.ysnInvoiceToCustomer
+	 , P.ysnInvoicePrepayment
 	 , P.strRecordNumber
 	 , P.intEntityCustomerId
 	 , P.intCurrencyId
@@ -77,7 +81,9 @@ INNER JOIN (
 		 , intEntityCustomerId
 		 , intCurrencyId
 		 , intLocationId
-		 , strRecordNumber		 
+		 , strRecordNumber
+		 , dblUnappliedAmount
+		 , ysnInvoicePrepayment
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentMethodID
@@ -321,7 +327,22 @@ UPDATE tblARNSFStagingTableDetail
 SET ysnProcessed = 1 
 WHERE intNSFTransactionId = @intNSFTransactionId
 
-
+--UPDATE CUSTOMER BALANCE
+UPDATE CUSTOMER
+SET dblARBalance = dblARBalance + ISNULL(PAYMENT.dblTotalPayment, 0)
+FROM tblARCustomer CUSTOMER
+INNER JOIN (
+    SELECT intEntityCustomerId
+         , dblTotalPayment = SUM(ISNULL(PD.dblTotalPayment, 0) + CASE WHEN P.ysnInvoicePrepayment = 0 THEN ISNULL(P.dblUnappliedAmount, 0)ELSE 0 END)
+    FROM #SELECTEDPAYMENTS P
+    LEFT JOIN (
+        SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount)) - SUM(PD.dblInterest)
+             , intPaymentId
+        FROM dbo.tblARPaymentDetail PD
+        GROUP BY intPaymentId
+    ) PD ON PD.intPaymentId = P.intPaymentId
+    GROUP BY intEntityCustomerId
+) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
 SELECT @strMessage = 
  CASE WHEN ysnInvoiceToCustomer = 1 THEN
