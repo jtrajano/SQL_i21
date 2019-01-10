@@ -185,6 +185,43 @@ BEGIN
 		, [strTransactionId]
 END 
 
+IF @ysnPost = 0 
+BEGIN
+	-- Create a new transaction if it is missing. 
+	IF ISNULL(@TransCount, 0) = 0 
+	BEGIN 
+		BEGIN TRANSACTION 
+	END 
+
+	--------------------------------------------------------------
+	-- Update the ysnIsUnposted flag for the item transactions
+	--------------------------------------------------------------
+	UPDATE	t
+	SET		ysnIsUnposted = 1
+	FROM	dbo.tblICInventoryTransaction t 
+			CROSS APPLY (
+				SELECT	DISTINCT 
+						adjust.strTransactionId
+				FROM	@ItemsToAdjust adjust
+				WHERE	adjust.strTransactionId = t.strTransactionId
+			) m
+	WHERE	ISNULL(t.ysnIsUnposted, 0) = 0
+
+	--------------------------------------------------------------
+	-- Update the ysnIsUnposted flag for the LOT transactions 
+	--------------------------------------------------------------
+	UPDATE	t
+	SET		ysnIsUnposted = 1
+	FROM	dbo.tblICInventoryLotTransaction t 
+			CROSS APPLY (
+				SELECT	DISTINCT 
+						adjust.strTransactionId
+				FROM	@ItemsToAdjust adjust
+				WHERE	adjust.strTransactionId = t.strTransactionId
+			) m
+	WHERE	ISNULL(t.ysnIsUnposted, 0) = 0
+END
+
 ESCALATE_COST_ADJUSTMENT:
 
 -----------------------------------------------------------------------------------------------------------------------------
