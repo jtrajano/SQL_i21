@@ -12,7 +12,7 @@ BEGIN TRY
 				@strCategoryId             NVARCHAR(MAX),
 				@strFamilyId	           NVARCHAR(MAX),
 				@strClassId                NVARCHAR(MAX),
-				@intUpcCode                INT,
+				@intItemUOMId               INT,
 				@strDescription            NVARCHAR(250),
 				@dblPriceBetween1             DECIMAL (18,6),
 				@dblPriceBetween2             DECIMAL (18,6),
@@ -115,10 +115,10 @@ BEGIN TRY
 		FROM @temp_xml_table
 		WHERE [fieldname] = 'strClassId'
 
-		--intUpcCode
-		SELECT @intUpcCode = [from]
+		--intItemUOMId
+		SELECT @intItemUOMId = [from]
 		FROM @temp_xml_table
-		WHERE [fieldname] = 'intUpcCode'
+		WHERE [fieldname] = 'intItemUOMId'
 
 		--strDescription
 		SELECT @strDescription = [from]
@@ -643,7 +643,7 @@ BEGIN TRY
 																WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' THEN strLongUPCCode ELSE strUpcCode
 														   END AS strUpcCode
 													FROM tblICItemUOM 
-													WHERE intItemUOMId = @intUpcCode
+													WHERE intItemUOMId = @intItemUOMId
 												  )
 
 			BEGIN 
@@ -777,12 +777,18 @@ BEGIN TRY
 				, [Changes].strCountCode_New
 				, [Changes].strDescription_New
 			FROM #tmpUpdateItemForCStore_itemAuditLog [Changes]
-			JOIN tblICCategory CatOld ON [Changes].intCategoryId_Original = CatOld.intCategoryId
-			JOIN tblICCategory CatNew ON [Changes].intCategoryId_New = CatNew.intCategoryId
-			JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-			JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
-			JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
-			JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+			INNER JOIN tblICCategory CatOld 
+				ON [Changes].intCategoryId_Original = CatOld.intCategoryId
+			INNER JOIN tblICCategory CatNew 
+				ON [Changes].intCategoryId_New = CatNew.intCategoryId
+			INNER JOIN tblICItem I 
+				ON [Changes].intItemId = I.intItemId
+			INNER JOIN tblICItemLocation IL 
+				ON I.intItemId = IL.intItemId 
+			INNER JOIN tblICItemUOM UOM 
+				ON IL.intItemId = UOM.intItemId
+			INNER JOIN tblSMCompanyLocation CL 
+				ON IL.intLocationId = CL.intCompanyLocationId
 
 
 			-- ITEM ACCOUNT
@@ -811,14 +817,22 @@ BEGIN TRY
 				, GL_New.strAccountId
 				, GL_New.intAccountId
 			FROM #tmpUpdateItemAccountForCStore_itemAuditLog [Changes]
-			JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-			JOIN tblICItemAccount IA ON [Changes].intItemAccountId = IA.intItemAccountId
-			JOIN tblGLAccountCategory AC ON IA.intAccountCategoryId = AC.intAccountCategoryId
-			JOIN tblGLAccount GL_Old ON [Changes].intAccountId_Original = GL_Old.intAccountId
-			JOIN tblGLAccount GL_New ON [Changes].intAccountId_New = GL_New.intAccountId
-			JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
-			JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
-			JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+			INNER JOIN tblICItem I 
+				ON [Changes].intItemId = I.intItemId
+			INNER JOIN tblICItemAccount IA 
+				ON [Changes].intItemAccountId = IA.intItemAccountId
+			INNER JOIN tblGLAccountCategory AC 
+				ON IA.intAccountCategoryId = AC.intAccountCategoryId
+			INNER JOIN tblGLAccount GL_Old 
+				ON [Changes].intAccountId_Original = GL_Old.intAccountId
+			INNER JOIN tblGLAccount GL_New 
+				ON [Changes].intAccountId_New = GL_New.intAccountId
+			INNER JOIN tblICItemLocation IL 
+				ON I.intItemId = IL.intItemId 
+			INNER JOIN tblICItemUOM UOM 
+				ON IL.intItemId = UOM.intItemId
+			INNER JOIN tblSMCompanyLocation CL 
+				ON IL.intLocationId = CL.intCompanyLocationId
 
 
 			-- ITEM LOCATION
@@ -1043,8 +1057,11 @@ BEGIN TRY
 				, ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_New), '')
 
 			FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
-			JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-			JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
+			INNER JOIN tblICItem I 
+				ON [Changes].intItemId = I.intItemId
+			INNER JOIN tblICItemLocation IL 
+				ON I.intItemId = IL.intItemId
+				AND [Changes].intItemLocationId = IL.intItemLocationId
 
 			--JOIN 
 			--(
@@ -1119,11 +1136,16 @@ BEGIN TRY
 				WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
 			) [Changes]
 			--FROM #tmpUpdateItemForCStore_itemAuditLog [Changes]
-			JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-			JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
-			JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
-			JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
-			JOIN tblICCategory Cat ON I.intCategoryId = Cat.intCategoryId
+			INNER JOIN tblICItem I 
+				ON [Changes].intItemId = I.intItemId
+			INNER JOIN tblICItemLocation IL 
+				ON I.intItemId = IL.intItemId 
+			INNER JOIN tblICItemUOM UOM 
+				ON IL.intItemId = UOM.intItemId
+			INNER JOIN tblSMCompanyLocation CL 
+				ON IL.intLocationId = CL.intCompanyLocationId
+			INNER JOIN tblICCategory Cat 
+				ON I.intCategoryId = Cat.intCategoryId
 			WHERE 
 			(
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
@@ -1131,8 +1153,8 @@ BEGIN TRY
 			)
 			--AND 
 			--(
-			--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-			--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+			--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+			--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMIdAND intItemUOMId = UOM.intItemUOMId) 		
 			--)
 
 
@@ -1176,14 +1198,22 @@ BEGIN TRY
 				) n
 				WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
 			) [Changes]
-			JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-			JOIN tblICItemAccount IA ON [Changes].intItemAccountId = IA.intItemAccountId
-			JOIN tblGLAccountCategory AC ON IA.intAccountCategoryId = AC.intAccountCategoryId
-			JOIN tblGLAccount GL_Old ON [Changes].intAccountId_Original = GL_Old.intAccountId
-			JOIN tblGLAccount GL_New ON [Changes].intAccountId_New = GL_New.intAccountId
-			JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId 
-			JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
-			JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+			INNER JOIN tblICItem I 
+				ON [Changes].intItemId = I.intItemId
+			INNER JOIN tblICItemAccount IA 
+				ON [Changes].intItemAccountId = IA.intItemAccountId
+			INNER JOIN tblGLAccountCategory AC 
+				ON IA.intAccountCategoryId = AC.intAccountCategoryId
+			INNER JOIN tblGLAccount GL_Old 
+				ON [Changes].intAccountId_Original = GL_Old.intAccountId
+			INNER JOIN tblGLAccount GL_New 
+				ON [Changes].intAccountId_New = GL_New.intAccountId
+			INNER JOIN tblICItemLocation IL 
+				ON I.intItemId = IL.intItemId 
+			INNER JOIN tblICItemUOM UOM 
+				ON IL.intItemId = UOM.intItemId
+			INNER JOIN tblSMCompanyLocation CL 
+				ON IL.intLocationId = CL.intCompanyLocationId
 			WHERE 
 			(
 				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
@@ -1191,8 +1221,8 @@ BEGIN TRY
 			)
 			--AND 
 			--(
-			--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-			--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+			--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+			--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMIdAND intItemUOMId = UOM.intItemUOMId) 		
 			--)
 
 
@@ -1270,15 +1300,16 @@ BEGIN TRY
 				) n
 				WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
 			) [Changes]
-			JOIN tblICItem I 
+			INNER JOIN tblICItem I 
 				ON [Changes].intItemId = I.intItemId
-			JOIN tblICItemPricing P
+			INNER JOIN tblICItemPricing P
 				ON I.intItemId = P.intItemId
-			JOIN tblICItemLocation IL 
+			INNER JOIN tblICItemLocation IL 
 				ON I.intItemId = IL.intItemId 
-			JOIN tblICItemUOM UOM
+				AND [Changes].intItemLocationId = IL.intItemLocationId
+			INNER JOIN tblICItemUOM UOM
 				ON IL.intItemId = UOM.intItemId
-			JOIN tblSMCompanyLocation CL 
+			INNER JOIN tblSMCompanyLocation CL 
 				ON IL.intLocationId = CL.intCompanyLocationId
 			WHERE 	 
 			(
@@ -1303,8 +1334,8 @@ BEGIN TRY
 			AND 
 			(
 				-- http://jira.irelyserver.com/browse/ST-846 
-				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 			)
 
 
