@@ -237,7 +237,7 @@ BEGIN
 				, strCategory
 				, strFutMarketName)
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC)
-				, strCommodityCode = CD.strCommodity
+				, strCommodityCode = CD.strCommodityCode
 				, intCommodityId
 				, intContractHeaderId
 				, strContractNumber = CD.strContract
