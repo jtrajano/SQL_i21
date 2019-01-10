@@ -264,7 +264,7 @@ BEGIN
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/100));
 			ELSE
-				SET @ItemTaxAmount = (@Quantity * @Rate) * CAST(ISNULL(@TaxOnly,0) AS NUMERIC(18,6));
+				SET @ItemTaxAmount = CASE WHEN @TaxOnly = 1 THEN @ZeroDecimal ELSE (@Quantity * @Rate) END;
 				
 			IF(@TaxExempt = 1)
 				SET @ItemTaxAmount = 0.00;

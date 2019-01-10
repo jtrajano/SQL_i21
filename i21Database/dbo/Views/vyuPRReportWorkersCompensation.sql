@@ -28,7 +28,7 @@ FROM
 		strName = ENT.strName,
 		intPaycheckId,
 		dtmPayDate = PE.dtmPayDate,
-		strCalculationType = PE.strCalculationType,
+		strCalculationType = CASE WHEN (PE.strCalculationType = 'Rate Factor') THEN EL.strCalculationType ELSE PE.strCalculationType END,
 		strDepartment = ISNULL(PE.strDepartment, '(No Department)'),
 		dblHours = PE.dblHours,
 		dblTotal = PE.dblTotal,
@@ -45,12 +45,16 @@ FROM
 						AS NUMERIC(18, 6))
 					 END
 	FROM 
-		(SELECT * FROM vyuPRPaycheckEarning 
-			WHERE intWorkersCompensationId IS NOT NULL AND strCalculationType IN ('Hourly Rate', 'Salary', 'Overtime', 'Shift Differential')) PE
+		(SELECT intPaycheckId, dtmPayDate, intEntityEmployeeId, intEmployeeEarningId, 
+				strCalculationType, strDepartment, dblHours, dblTotal, intWorkersCompensationId
+			FROM vyuPRPaycheckEarning 
+			WHERE intWorkersCompensationId IS NOT NULL AND strCalculationType IN ('Hourly Rate', 'Salary', 'Overtime', 'Rate Factor', 'Shift Differential')) PE
 		INNER JOIN tblPREmployeeEarning EE ON EE.intEmployeeEarningId = PE.intEmployeeEarningId
 		INNER JOIN tblPREmployee EMP ON PE.intEntityEmployeeId = EMP.intEntityId
 		INNER JOIN tblEMEntity ENT ON EMP.intEntityId = ENT.intEntityId
 		INNER JOIN tblPRWorkersCompensation WC ON PE.intWorkersCompensationId = WC.intWorkersCompensationId
+		LEFT JOIN tblPREmployeeEarning EL ON EE.intEntityEmployeeId = EL.intEntityEmployeeId 
+			AND EE.intEmployeeEarningLinkId = EL.intTypeEarningId AND EL.strCalculationType IN ('Hourly Rate', 'Salary')
 	) AS MAIN
 	PIVOT
 	(

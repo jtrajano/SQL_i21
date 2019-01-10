@@ -12,8 +12,8 @@ SELECT	DISTINCT
 								THEN DS.strDeliverySheetNumber ELSE  ISNULL(SC.strTicketNumber, Scale.strTicketNumber) END
 			,APB.strVendorOrderNumber
 			--,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, APB.strShipFromCity, APB.strShipFromState, NULL, NULL, NULL)),'N/A')
-			,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, EL.strCity, EL.strState, NULL, NULL, NULL)),'N/A')
-			,Location = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, NULL, APB.strShipToCity, APB.strShipToState,NULL, NULL, NULL))
+			,StateOfOrigin = ISNULL((SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL,NULL,NULL, EL.strCity, EL.strState, NULL, NULL, NULL)),'N/A') COLLATE Latin1_General_CI_AS
+			,Location = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, NULL, APB.strShipToCity, APB.strShipToState,NULL, NULL, NULL)) COLLATE Latin1_General_CI_AS
 			,BillDate = APB.dtmBillDate
 			,PostDate = APB.dtmBillDate
 			,PaymentDate = Payment.dtmDatePaid
