@@ -2296,3 +2296,14 @@ SELECT
 		,dblReportingRate
 		,dblForeignRate 
 FROM	@GLEntries
+
+IF @ysnPost = 0 
+BEGIN 
+	-- Update the ysnPostedFlag 
+	UPDATE	GLEntries
+	SET		ysnIsUnposted = 1
+	FROM	dbo.tblGLDetail GLEntries
+	WHERE	GLEntries.strTransactionId = @strTransactionId
+			AND GLEntries.strCode = 'ICA'
+			AND ysnIsUnposted = 0 
+END 
