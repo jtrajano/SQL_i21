@@ -51,7 +51,7 @@ FROM tblICInventoryCountDetail cd
 			AND ss.intItemLocationId = cd.intItemLocationId
 			AND ss.intItemUOMId = cd.intItemUOMId
 			AND (cd.intSubLocationId = ss.intSubLocationId OR (ss.intSubLocationId IS NULL AND cd.intSubLocationId IS NULL))
-			AND (cd.intStorageLocationId = ss.intStorageLocationId OR (ss.intStorageLocationId IS NULL AND cd.intSubLocationId IS NULL))
+			AND (cd.intStorageLocationId = ss.intStorageLocationId OR (ss.intStorageLocationId IS NULL AND cd.intStorageLocationId IS NULL))
 		AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
 	GROUP BY 
 					intItemId,
