@@ -969,6 +969,8 @@ BEGIN
 	END
 END --End Begin
 
+DROP TABLE #LicensedLocation
+
 IF (@strByType = 'ByLocation')
 BEGIN
 	SELECT c.strCommodityCode

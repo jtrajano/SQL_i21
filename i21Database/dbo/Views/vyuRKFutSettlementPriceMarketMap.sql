@@ -19,8 +19,3 @@ FROM tblRKFutSettlementPriceMarketMap SPMM
 INNER JOIN tblRKFuturesMonth FM ON SPMM.intFutureMonthId = FM.intFutureMonthId
 LEFT JOIN tblRKM2MInquiryLatestMarketPrice ILMP ON SPMM.intFutSettlementPriceMonthId = ILMP.intFutSettlementPriceMonthId
 LEFT JOIN tblRKM2MInquiry M2M ON ILMP.intM2MInquiryId = M2M.intM2MInquiryId
-
-
-
-
-
