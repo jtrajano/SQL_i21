@@ -375,7 +375,11 @@ BEGIN TRY
 					,intContractHeaderId		= NULL
 					,intContractDetailId		= NULL
 					,dblUnits					= CASE
-													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN ROUND(((SST.dblUnits / CS.dblOpenBalance) * CS.dblGrossQuantity),@intDecimalPrecision)
+													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
+														CASE WHEN CS.dblGrossQuantity IS NULL THEN SST.dblUnits
+														ELSE
+															ROUND(((SST.dblUnits / CS.dblOpenBalance) * CS.dblGrossQuantity),@intDecimalPrecision)
+														END
 													ELSE SST.dblUnits
 												END
 					,dblCashPrice				= CASE 
