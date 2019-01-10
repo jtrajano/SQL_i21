@@ -40,6 +40,7 @@ BEGIN
 		0 AS intBillId,
 		NULL AS strBillId,
 		NULL AS strCompanyName,
+		NULL AS strCompanyAddress,
 		NULL AS strVendorIdName,
 		NULL AS strAge,
 		0 AS dblTotal,
@@ -140,6 +141,7 @@ SET @query = '
 	SELECT 
 		 strVendorIdName
 		,(SELECT TOP 1strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
+		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,SUM(dblCurrent) dblCurrent
 		,SUM(dbl1) dbl1
 		,SUM(dbl30) dbl30
