@@ -23,13 +23,12 @@ DECLARE @validPayablesTax AS VoucherDetailTax
 DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
 
---uncomment this after all modules have been implemented
 --VALIDATE
--- INSERT INTO @invalidPayables
--- SELECT 
--- 	intVoucherPayableId
--- 	,strError
--- FROM dbo.fnAPValidateVoucherPayableQty(@voucherPayable)
+INSERT INTO @invalidPayables
+SELECT 
+	intVoucherPayableId
+	,strError
+FROM dbo.fnAPValidateVoucherPayableQty(@voucherPayable)
 
 SET @invalidCount = @@ROWCOUNT;
 
