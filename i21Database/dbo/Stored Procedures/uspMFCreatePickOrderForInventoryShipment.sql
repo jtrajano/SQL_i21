@@ -22,7 +22,7 @@ BEGIN TRY
 
 	SELECT @strInventoryShipmentNo = strShipmentNumber
 		,@intShipFromLocationId = intShipFromLocationId
-		,@dtmCurrentDate = GETDATE()
+		,@dtmCurrentDate = Case When GETDATE()>dtmShipDate then dtmShipDate else GETDATE() End
 		,@strReferenceNo = CASE 
 			WHEN strReferenceNumber <> ''
 				THEN 'Ref. # ' + strReferenceNumber
