@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuCMMultiCurrencyRevalue]
 AS
 SELECT DISTINCT
-	strTransactionType		=	'Cash Balances',
+	strTransactionType		=	'Cash Balances' COLLATE Latin1_General_CI_AS,
 	strTransactionId		=	BA.strBankAccountNo,
 	strTransactionDate		=	replace(convert( varchar(10), EOP.Value, 102),'.', '-'),
 	strTransactionDueDate	=	NULL,
