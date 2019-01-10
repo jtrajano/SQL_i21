@@ -44,6 +44,11 @@ BEGIN
     DROP TABLE #SELECTEDPAYMENTS
 END
 
+IF(OBJECT_ID('tempdb..#NSFWITHOVERPAYMENTS') IS NOT NULL)
+BEGIN
+    DROP TABLE #NSFWITHOVERPAYMENTS
+END
+
 CREATE TABLE #SELECTEDPAYMENTS (
 	  intPaymentId			INT				NOT NULL
 	, intNSFAccountId		INT				NULL
@@ -84,6 +89,17 @@ INNER JOIN (
 ) P ON NSF.intPaymentId = P.intPaymentId
 WHERE NSF.ysnProcessed = 0
 
+SELECT intPaymentId		= NSF.intPaymentId
+	 , intInvoiceId		= I.intInvoiceId
+     , strRecordNumber	= NSF.strRecordNumber
+	 , strInvoiceNumber	= I.strInvoiceNumber
+     , ysnPaid			= I.ysnPaid
+INTO #NSFWITHOVERPAYMENTS
+FROM #SELECTEDPAYMENTS NSF
+INNER JOIN tblARInvoice I ON NSF.intPaymentId = I.intPaymentId
+WHERE I.strTransactionType = 'Overpayment'
+  AND I.ysnPosted = 1
+
 IF NOT EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS)
 	BEGIN
 		DELETE FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId
@@ -95,6 +111,18 @@ IF ISNULL(@intUserId, 0) = 0
 	BEGIN
 		DELETE FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId
 		RAISERROR('User Id is required when processing to NSF.', 16, 1) 
+		RETURN 0;
+	END
+
+IF EXISTS(SELECT TOP 1 NULL FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1)
+	BEGIN
+		DECLARE @strErrorMsgOverpayment		NVARCHAR(500) = ''
+
+		SELECT TOP 1 @strErrorMsgOverpayment = 'Cannot process ' + strRecordNumber + ' to NSF. It has Overpayment (' + strInvoiceNumber + ') that was already used.'
+		FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1
+
+		DELETE FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId
+		RAISERROR(@strErrorMsgOverpayment, 16, 1) 
 		RETURN 0;
 	END
 
@@ -215,6 +243,14 @@ INNER JOIN (
 	INNER JOIN #SELECTEDPAYMENTS P ON PD.intPaymentId = P.intPaymentId
 ) PAYMENTS ON I.intInvoiceId = PAYMENTS.intInvoiceId
 WHERE I.ysnPosted = 1
+
+--UPDATE OVERPAYMENTS
+UPDATE I
+SET ysnPosted 			= 0
+  , ysnProcessedToNSF 	= 1
+  , strComments 		= 'NSF Processed'
+FROM tblARInvoice I
+INNER JOIN #NSFWITHOVERPAYMENTS NSF ON I.intInvoiceId = NSF.intInvoiceId
 
 --INVOICE TO CUSTOMER
 IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer = 1)
