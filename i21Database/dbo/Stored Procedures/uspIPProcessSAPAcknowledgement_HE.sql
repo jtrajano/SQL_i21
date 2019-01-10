@@ -279,25 +279,20 @@ BEGIN TRY
 
 			IF @strStatus IN (53) --Success
 			BEGIN
-				IF (
-						SELECT ISNULL(strERPPONumber, '')
-						FROM tblCTContractDetail
-						WHERE intContractHeaderId = @intContractHeaderId
-							AND intContractSeq = @strTrackingNo
-						) <> @strParam
-					UPDATE tblCTContractDetail
-					SET strERPPONumber = @strParam
-						,strERPItemNumber = @strPOItemNo
-						,intConcurrencyId = intConcurrencyId + 1
-					WHERE intContractHeaderId = @intContractHeaderId
-						AND intContractSeq = (
-							CASE 
-								WHEN ISNULL(@ysnMaxPrice, 0) = 0
-									THEN @strTrackingNo
-								ELSE intContractSeq
-								END
-							)
-						AND intItemId = @intItemId
+				UPDATE tblCTContractDetail
+				SET strERPPONumber = @strParam
+					,strERPItemNumber = @strPOItemNo
+					,intConcurrencyId = intConcurrencyId + 1
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intContractSeq = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractSeq
+							END
+						)
+					AND intItemId = @intItemId
+					AND ISNULL(strERPPONumber, '') <> @strParam
 
 				-- To update Item Change, Delete entries
 				UPDATE tblCTContractFeed
