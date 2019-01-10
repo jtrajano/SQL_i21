@@ -10,7 +10,7 @@ BEGIN
 			DROP VIEW vyuCMOriginUndepositedFund
 	')
 
-	EXEC(
+EXEC(
 'CREATE VIEW [dbo].[vyuCMOriginUndepositedFund]
 AS
 
@@ -26,14 +26,14 @@ WITH AR AS (
 				+ CAST(v.aptrx_chk_no AS NVARCHAR(8))  COLLATE Latin1_General_CI_AS strSourceTransactionId 
 				,'''' strType
 	FROM	apeglmst gl INNER JOIN vyuCMOriginDepositEntry v
-	ON gl.apegl_cbk_no = v.aptrx_cbk_no
-	AND gl.apegl_vnd_no = v.aptrx_vnd_no
-	AND gl.apegl_ivc_no = v.aptrx_ivc_no
+	ON gl.apegl_cbk_no COLLATE Latin1_General_CI_AS = v.aptrx_cbk_no
+	AND gl.apegl_vnd_no COLLATE Latin1_General_CI_AS = v.aptrx_vnd_no
+	AND gl.apegl_ivc_no COLLATE Latin1_General_CI_AS = v.aptrx_ivc_no
 	OUTER APPLY (
 		SELECT TOP 1 intDefaultCurrencyId Val FROM tblSMCompanyPreference
 	)DefaultCurrency
 	UNION
-	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intPaymentId intSourceTransactionId, strRecordNumber strSourceTransactionId, ''Payment'' strType FROM tblARPayment UNION
+	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intPaymentId intSourceTransactionId, strRecordNumber strSourceTransactionId , ''Payment''  strType FROM tblARPayment UNION
 	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intInvoiceId intSourceTransactionId, strInvoiceNumber strSourceTransactionId, ''Invoice'' strType FROM tblARInvoice UNION
 	SELECT intUndepositedFundsId intAccountId,intEntityId intEntityCustomerId,intCurrencyId, intPOSEndOfDayId intSourceTransactionId, strEODNo strSourceTransactionId, ''EndOfDay'' strType FROM tblARPOSEndOfDay
 ),
