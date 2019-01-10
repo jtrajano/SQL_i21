@@ -111,6 +111,11 @@ BEGIN TRY
 	BEGIN
 		SELECT @dtmDate = GETDATE()
 	End
+	 If @dtmDate > GETDATE()
+	 Begin
+		Raiserror('Please select ''Order date'' on or before current date.',16,1)
+		Return
+	 End
 
 	SELECT @intDefaultShipmentDockDoorLocation = intDefaultInboundDockDoorUnitId--intDefaultOutboundDockDoorUnitId
 	FROM tblSMCompanyLocation
