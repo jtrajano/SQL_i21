@@ -7,8 +7,7 @@ DECLARE @ErrorMessage NVARCHAR(4000)
 DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
 
-BEGIN TRY
-	
+BEGIN TRY	
 	DECLARE @ysnIncludeInventoryM2M BIT
 		, @ysnIncludeBasisDifferentialsInResults BIT
 		, @ysnValueBasisAndDPDeliveries BIT
@@ -24,23 +23,22 @@ BEGIN TRY
 		, @strEvaluationByZone = strEvaluationByZone
 	FROM tblRKCompanyPreference
 	
-	DECLARE @tempBasis TABLE(
-		strCommodityCode NVARCHAR(50)
-		, strItemNo NVARCHAR(50)
-		, strOriginDest NVARCHAR(50)
-		, strFutMarketName NVARCHAR(50)
-		, strFutureMonth NVARCHAR(50)
+	DECLARE @tempBasis TABLE (strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strOriginDest NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strFutMarketName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strFutureMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		, strPeriodTo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		, strLocationName NVARCHAR(50)
-		, strMarketZoneCode NVARCHAR(50)
-		, strCurrency NVARCHAR(50)
-		, strPricingType NVARCHAR(50)
-		, strContractInventory NVARCHAR(50)
-		, strContractType NVARCHAR(50)
+		, strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strMarketZoneCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strPricingType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strContractInventory NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strContractType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		, dblCashOrFuture NUMERIC(16, 10)
 		, dblBasisOrDiscount NUMERIC(16, 10)
 		, dblRatio NUMERIC(16, 10)
-		, strUnitMeasure NVARCHAR(50)
+		, strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		, intCommodityId INT
 		, intItemId INT
 		, intOriginId INT
@@ -53,7 +51,7 @@ BEGIN TRY
 		, intContractTypeId INT
 		, intUnitMeasureId  INT
 		, intConcurrencyId INT
-		, strMarketValuation NVARCHAR(250))
+		, strMarketValuation NVARCHAR(250) COLLATE Latin1_General_CI_AS)
 	
 	IF (@strEvaluationBy = 'Commodity')
 	BEGIN

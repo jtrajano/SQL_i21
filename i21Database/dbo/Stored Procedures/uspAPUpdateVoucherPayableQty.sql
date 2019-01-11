@@ -23,8 +23,8 @@ DECLARE @validPayablesTax AS VoucherDetailTax
 DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
 
---uncomment this after all modules have been implemented
---VALIDATE
+--uncomment if integrated modules already implemented the new approach
+-- --VALIDATE
 -- INSERT INTO @invalidPayables
 -- SELECT 
 -- 	intVoucherPayableId

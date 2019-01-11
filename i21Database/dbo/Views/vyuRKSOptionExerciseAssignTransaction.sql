@@ -1,25 +1,27 @@
 ﻿CREATE VIEW vyuRKSOptionExerciseAssignTransaction
+
 AS
-SELECT m.intOptionsPnSExercisedAssignedId,
-	   convert(int,strTranNo) strTranNo,
-	   dtmTranDate,
-	   t.strInternalTradeNo,
-	   t.dtmFilledDate as dtmTransactionDate,
-	   case when t.strBuySell = 'Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell,
-	   m.intLots,
-	   om.strOptionMonth, 
-	   fm.strFutMarketName,
-	   t.dblStrike,
-       t.strOptionType,
-       t.dblPrice AS dblPremiumRate,
-       (t.dblPrice*dblContractSize*intLots)/ case when ysnSubCurrency = 'true' then intCent else 1 end AS dblPremiumTotal,
-	   e.strName,
-	   b.strAccountNumber,
-	   strCommodityCode,
-	   scl.strLocationName,
-	   cb.strBook,
-	   csb.strSubBook
-	   ,t.intFutOptTransactionHeaderId
+
+SELECT m.intOptionsPnSExercisedAssignedId
+	, convert(int,strTranNo) strTranNo
+	, dtmTranDate
+	, t.strInternalTradeNo
+	, t.dtmFilledDate as dtmTransactionDate
+	, case when t.strBuySell = 'Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell
+	, m.intLots
+	, om.strOptionMonth
+	, fm.strFutMarketName
+	, t.dblStrike
+	, t.strOptionType
+	, t.dblPrice AS dblPremiumRate
+	, (t.dblPrice*dblContractSize*intLots)/ case when ysnSubCurrency = 'true' then intCent else 1 end AS dblPremiumTotal
+	, e.strName
+	, b.strAccountNumber
+	, strCommodityCode
+	, scl.strLocationName
+	, cb.strBook
+	, csb.strSubBook
+	, t.intFutOptTransactionHeaderId
 FROM tblRKOptionsPnSExercisedAssigned m
 Join tblRKFutOptTransaction t on t.intFutOptTransactionId= m.intFutOptTransactionId
 Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId

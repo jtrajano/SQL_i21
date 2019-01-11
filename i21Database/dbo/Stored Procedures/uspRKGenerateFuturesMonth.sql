@@ -41,7 +41,7 @@ BEGIN TRY
 				WHEN strMonth = 'ysnFutSep' THEN '09'
 				WHEN strMonth = 'ysnFutOct' THEN '10'
 				WHEN strMonth = 'ysnFutNov' THEN '11'
-				WHEN strMonth = 'ysnFutDec' THEN '12' END)
+				WHEN strMonth = 'ysnFutDec' THEN '12' END) COLLATE Latin1_General_CI_AS
 			, intMonthCode = (CASE WHEN strMonth = 'ysnFutJan' THEN 1
 				WHEN strMonth = 'ysnFutFeb' THEN 2
 				WHEN strMonth = 'ysnFutMar' THEN 3
@@ -65,7 +65,7 @@ BEGIN TRY
 				WHEN strMonth = 'ysnFutSep' THEN 'U'
 				WHEN strMonth = 'ysnFutOct' THEN 'V'
 				WHEN strMonth = 'ysnFutNov' THEN 'X'
-				WHEN strMonth = 'ysnFutDec' THEN 'Z' END)
+				WHEN strMonth = 'ysnFutDec' THEN 'Z' END) COLLATE Latin1_General_CI_AS
 		FROM (SELECT ysnFutJan
 				, ysnFutFeb
 				, ysnFutMar
@@ -145,7 +145,7 @@ BEGIN TRY
 		, @intCommodityMarketId
 		, CONVERT(DATETIME, '1' + LTRIM(RTRIM(@strFutureMonth)))
 		, @strSymbol
-		, RIGHT(LTRIM(RTRIM(@strFutureMonth)), 2)
+		, RIGHT(LTRIM(RTRIM(@strFutureMonth)), 2) COLLATE Latin1_General_CI_AS
 		, NULL
 		, NULL
 		, NULL

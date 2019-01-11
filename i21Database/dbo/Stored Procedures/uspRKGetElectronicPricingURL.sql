@@ -1,10 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGetElectronicPricingURL]
-	 @FutureMarketId INT
-	,@FutureMonthId INT
-	,@strFutSymbol Nvarchar(5) = NULL
-	,@strSymbolPrefix Nvarchar(5) = NULL
-	,@intUserId INT
+	@FutureMarketId INT
+	, @FutureMonthId INT
+	, @strFutSymbol Nvarchar(5) = NULL
+	, @strSymbolPrefix Nvarchar(5) = NULL
+	, @intUserId INT
+
 AS
+
 BEGIN TRY
 	SET NOCOUNT ON
 
@@ -19,12 +21,11 @@ BEGIN TRY
 	DECLARE @URL NVARCHAR(1000)
 	DECLARE @SymbolPrefix NVARCHAR(5)
 
-	SET @strFutSymbol=ISNULL(@strFutSymbol,'')
-	SET @strSymbolPrefix=ISNULL(@strSymbolPrefix,'')
+	SET @strFutSymbol = ISNULL(@strFutSymbol,'')
+	SET @strSymbolPrefix = ISNULL(@strSymbolPrefix,'')
 
-	SELECT 
-	 @Commoditycode = CASE WHEN @strFutSymbol='' THEN strFutSymbol ELSE @strFutSymbol END
-	,@SymbolPrefix=   CASE WHEN @strSymbolPrefix='' THEN strSymbolPrefix ELSE @strSymbolPrefix END
+	SELECT @Commoditycode = CASE WHEN @strFutSymbol = '' THEN strFutSymbol ELSE @strFutSymbol END
+		, @SymbolPrefix = CASE WHEN @strSymbolPrefix = '' THEN strSymbolPrefix ELSE @strSymbolPrefix END
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId
 
@@ -37,60 +38,49 @@ BEGIN TRY
 		SELECT TOP 1 @FutureMonthId =ISNULL(intFutureMonthId,0)	
 		FROM tblRKFuturesMonth
 		WHERE intFutureMarketId = @FutureMarketId AND ysnExpired=0
-		AND ISNULL(dtmLastTradingDate, CONVERT(DATETIME, SUBSTRING(LTRIM(year(GETDATE())), 1, 2) + LTRIM(intYear) + '-' + SUBSTRING(strFutureMonth, 1, 3) + '-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+			AND ISNULL(dtmLastTradingDate, CONVERT(DATETIME, SUBSTRING(LTRIM(year(GETDATE())), 1, 2) + LTRIM(intYear) + '-' + SUBSTRING(strFutureMonth, 1, 3) + '-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
 		ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME, SUBSTRING(LTRIM(year(GETDATE())), 1, 2) + LTRIM(intYear) + '-' + SUBSTRING(strFutureMonth, 1, 3) + '-01')) ASC
-		
 	END
-
-	IF @FutureMonthId >0
+	
+	IF @FutureMonthId > 0
 	BEGIN
-		SELECT @StrTradedMonthSymbol=strSymbol+RIGHT(intYear,1) from tblRKFuturesMonth Where  intFutureMonthId=@FutureMonthId
+		SELECT @StrTradedMonthSymbol = (strSymbol + RIGHT(intYear, 1)) COLLATE Latin1_General_CI_AS FROM tblRKFuturesMonth Where intFutureMonthId = @FutureMonthId
 	END
 	
-	SELECT @URL = strInterfaceWebServicesURL FROM tblSMCompanyPreference
-
-	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
-	
-	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId  
-
-	SELECT @IntinterfaceSystem = intInterfaceSystemId FROM   tblSMCompanyPreference
+	SELECT TOP 1 @URL = strInterfaceWebServicesURL, @IntinterfaceSystem = intInterfaceSystemId FROM tblSMCompanyPreference
+	SELECT TOP 1 @strUserName = strProviderUserId, @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 
 
 	IF @IntinterfaceSystem = 1
 	BEGIN
 		IF @strPassword = ''
+		BEGIN
 			SET @strPassword = '?&Type=F'
-			
+		END
 		IF ISNULL(@MarketExchangeCode,'')=''
 		BEGIN
-			SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword + '&Symbol='+@SymbolPrefix + @Commoditycode + @StrTradedMonthSymbol
+			SELECT @URL = (@URL + 'UserID=' + @strUserName + '&Password=' + @strPassword + '&Symbol='+@SymbolPrefix + @Commoditycode + @StrTradedMonthSymbol) COLLATE Latin1_General_CI_AS
 		END
 		ELSE
 		BEGIN
-		SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword +'&Market='+@MarketExchangeCode+'&Symbol='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol			
+			SELECT @URL = (@URL + 'UserID=' + @strUserName + '&Password=' + @strPassword +'&Market='+@MarketExchangeCode+'&Symbol='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol) COLLATE Latin1_General_CI_AS
 		END
-		
 	END
 	ELSE IF @IntinterfaceSystem = 2
 	BEGIN
 		IF ISNULL(@MarketExchangeCode,'')=''
 		BEGIN
-			SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword + '&symbols='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol
+			SELECT @URL = (@URL + 'username=' + @strUserName + '&password=' + @strPassword + '&symbols='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol) COLLATE Latin1_General_CI_AS
 		END
 		ELSE
 		BEGIN
-			SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword +'&Market='+@MarketExchangeCode+ '&symbols='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol
-		END
-		
+			SELECT @URL = (@URL + 'username=' + @strUserName + '&password=' + @strPassword +'&Market='+@MarketExchangeCode+ '&symbols='+@SymbolPrefix+ @Commoditycode + @StrTradedMonthSymbol) COLLATE Latin1_General_CI_AS
+		END		
 	END
 
-	SELECT @URL AS URL
-	
+	SELECT @URL AS URL	
 END TRY
-
 BEGIN CATCH
-
 	SET @ErrMsg = ERROR_MESSAGE()
 	SET @ErrMsg = 'uspRKGetElectronicPricingURL: ' + @ErrMsg
-	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
-	
+	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')	
 END CATCH

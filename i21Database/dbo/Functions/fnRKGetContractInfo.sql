@@ -1,14 +1,10 @@
-﻿CREATE FUNCTION [dbo].[fnRKGetContractInfo]
-(
+﻿CREATE FUNCTION [dbo].[fnRKGetContractInfo] (
 	@intContractHeader INT
-	,@strContractNumbers NVARCHAR(4000)
-)
-RETURNS @returntable TABLE
-(
-	intContractHeaderId INT
-	,strDeliveryDates NVARCHAR(1500)
-	,strFutureMonth NVARCHAR(1500)
-)
+	, @strContractNumbers NVARCHAR(4000))
+
+RETURNS @returntable TABLE (intContractHeaderId INT
+	, strDeliveryDates NVARCHAR(1500) COLLATE Latin1_General_CI_AS
+	, strFutureMonth NVARCHAR(1500) COLLATE Latin1_General_CI_AS)
 
 AS
 
@@ -16,11 +12,10 @@ BEGIN
 	DECLARE @intContractNumber INT
 	DECLARE @strDeliveryDates NVARCHAR(1000)
 	DECLARE @strFutureMonth NVARCHAR(1000)
-
 	
 	SELECT @intContractNumber = CT.intContractHeaderId 
-		, @strDeliveryDates = COALESCE(@strDeliveryDates + ', ', '') + CT.strDeliveryDate
-		, @strFutureMonth = COALESCE(@strFutureMonth + ', ', '') + CT.strFutureMonth
+		, @strDeliveryDates = (COALESCE(@strDeliveryDates + ', ', '') + CT.strDeliveryDate) COLLATE Latin1_General_CI_AS
+		, @strFutureMonth = (COALESCE(@strFutureMonth + ', ', '') + CT.strFutureMonth) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT intContractHeaderId
 		, strContractIds = strContractNumber + '-' + CONVERT(nvarchar(4000), intContractSeq) COLLATE Latin1_General_CI_AS

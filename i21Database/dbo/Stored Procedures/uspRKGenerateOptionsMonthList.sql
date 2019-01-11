@@ -39,7 +39,7 @@ BEGIN TRY
 				WHEN strMonth = 'ysnOptSep' THEN '09'
 				WHEN strMonth = 'ysnOptOct' THEN '10'
 				WHEN strMonth = 'ysnOptNov' THEN '11'
-				WHEN strMonth = 'ysnOptDec' THEN '12' END)
+				WHEN strMonth = 'ysnOptDec' THEN '12' END) COLLATE Latin1_General_CI_AS
 			, intMonthCode = (CASE WHEN strMonth = 'ysnOptJan' THEN 1
 				WHEN strMonth = 'ysnOptFeb' THEN 2
 				WHEN strMonth = 'ysnOptMar' THEN 3
@@ -63,7 +63,7 @@ BEGIN TRY
 				WHEN strMonth = 'ysnOptSep' THEN 'U'
 				WHEN strMonth = 'ysnOptOct' THEN 'V'
 				WHEN strMonth = 'ysnOptNov' THEN 'X'
-				WHEN strMonth = 'ysnOptDec' THEN 'Z' END)
+				WHEN strMonth = 'ysnOptDec' THEN 'Z' END) COLLATE Latin1_General_CI_AS
 		 FROM (SELECT ysnOptJan
 					, ysnOptFeb
 					, ysnOptMar
@@ -133,27 +133,6 @@ BEGIN TRY
 	
 	DECLARE @intTempOptMonthsToOpen INT
 	SET @intTempOptMonthsToOpen = @OptMonthsToOpen * 2
-
-	--WHILE (SELECT COUNT(*) FROM ##FinalOptMonths) < @intTempOptMonthsToOpen
-	--BEGIN
-	--	SELECT @Top = @intTempOptMonthsToOpen - COUNT(*) FROM ##FinalOptMonths
-		
-	--	INSERT INTO ##FinalOptMonths(intYear, strMonth, strMonthName, strMonthCode, strSymbol, intMonthCode, strFuturesMonth, intFutureMonthId, strOptionMonth)
-	--	SELECT TOP (@Top) YEAR(@Date) + @Count
-	--			,LTRIM(YEAR(@Date) + @Count) + ' - ' + strMonthCode
-	--			,strMonth
-	--			,strMonthCode
-	--			,strSymbol
-	--			,intMonthCode
-	--			,dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode)
-	--			,dbo.fnRKGetFutureMonthId(@FutureMarketId, dbo.fnRKGetAssociatedFutureMonth(@FutureMarketId, (YEAR(@Date) + @Count), intMonthCode))
-	--			,LTRIM(RTRIM(strMonth)) + ' ' + Right(LTRIM(YEAR(@Date) + @Count),2)
-	--	FROM ##AllowedOptMonths
-	--	WHERE intMonthCode > (CASE WHEN @Count = 0 THEN @CurrentMonthCode ELSE 0 END)
-	--	ORDER BY intMonthCode
-		
-	--	SET @Count = @Count + 1
-	--END
 
 	DECLARE @intCountAllowedMonths INT
 	DECLARE @ProjectedOptionMonths TABLE(
@@ -252,7 +231,7 @@ BEGIN TRY
 		, @FutureMarketId
 		, @intCommodityMarketId
 		,strOptionMonth
-		,RIGHT(CONVERT(NVARCHAR, YEAR(CONVERT(DATETIME,'01 ' + strOptionMonth))), 2)
+		,RIGHT(CONVERT(NVARCHAR, YEAR(CONVERT(DATETIME,'01 ' + strOptionMonth))), 2) COLLATE Latin1_General_CI_AS
 		,intFutureMonthId
 		,0
 		,NULL

@@ -83,6 +83,7 @@
 	[ysnExported]						BIT												NULL,
 	[ysnCancelled]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCancelled] DEFAULT ((0)),
 	[ysnRejected]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnRejected] DEFAULT ((0)),
+	[ysnProcessedToNSF]					BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnProcessedToNSF] DEFAULT ((0)),	
 	[intPaymentId]						INT												NULL,
 	[intSplitId]						INT												NULL,
 	[intDistributionHeaderId]			INT												NULL,

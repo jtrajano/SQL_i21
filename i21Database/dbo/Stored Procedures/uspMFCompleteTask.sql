@@ -2,6 +2,7 @@
 	,@intUserId INT
 	,@strTaskId NVARCHAR(MAX) = NULL
 	,@ysnLoad BIT = 0
+	,@ysnScannerClient BIT=0
 AS
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
@@ -78,9 +79,6 @@ BEGIN TRY
 	IF @strTaskId = ''
 		SELECT @strTaskId = NULL
 
-
-	SELECT @dtmDate = GETDATE()
-
 	DECLARE @tblTasks TABLE (
 		intTaskRecordId INT Identity(1, 1)
 		,intTaskId INT
@@ -104,9 +102,20 @@ BEGIN TRY
 		,@intOrderId = intOrderHeaderId
 		,@intLocationId = intLocationId
 		,@intOrderDirectionId = intOrderDirectionId
+		,@dtmDate=dtmOrderDate
 	FROM tblMFOrderHeader OH
 	JOIN tblMFOrderType OT ON OT.intOrderTypeId = OH.intOrderTypeId
 	WHERE intOrderHeaderId = @intOrderHeaderId
+	
+	If @dtmDate IS NULL Or @ysnScannerClient=1
+	BEGIN
+		SELECT @dtmDate = GETDATE()
+	End
+	 If @dtmDate > GETDATE()
+	 Begin
+		Raiserror('Please select ''Order date'' on or before current date.',16,1)
+		Return
+	 End
 
 	SELECT @intDefaultShipmentDockDoorLocation = intDefaultInboundDockDoorUnitId--intDefaultOutboundDockDoorUnitId
 	FROM tblSMCompanyLocation
@@ -447,6 +456,7 @@ BEGIN TRY
 					,@blnInventoryMove = @blnInventoryMove
 					,@strNotes = @strDescription
 					,@intNewLotId = @intNewLotId
+					,@dtmDate=@dtmDate
 
 				IF @intNewLotId IS NULL
 				BEGIN

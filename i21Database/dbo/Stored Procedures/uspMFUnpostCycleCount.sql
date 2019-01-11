@@ -63,6 +63,7 @@ BEGIN TRY
 		,@strCostAdjustmentBatchId = strCostAdjustmentBatchId
 		,@intLocationId = intLocationId
 		,@intWOItemUOMId=intItemUOMId
+		,@strWorkOrderNo =strWorkOrderNo 
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 

@@ -549,7 +549,7 @@ BEGIN
 	END
 
 	--Print Site Address
-	IF(@strPrintSiteAddress NOT IN ('All','Remote','None','Network + State/City'))
+	IF(@strPrintSiteAddress NOT IN ('All','Remote','None','Network + State/City','All - Separate Line'))
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Invalid print site address value '+ @strPrintSiteAddress +'. Value should be All, Remote, None only')

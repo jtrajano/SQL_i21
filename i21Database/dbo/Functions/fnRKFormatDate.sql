@@ -35,5 +35,5 @@ BEGIN
 	ELSE IF @strFormat = 'M/d/yy'
 		SELECT @strFormatedDate = LTRIM(DATEPART(mm,@dtmDate)) + '/' + LTRIM(DATEPART(dd,@dtmDate)) + '/' + RIGHT(LTRIM(DATEPART(yyyy,@dtmDate)),2)
 
-	RETURN ISNULL(@strFormatedDate, '');
+	RETURN ISNULL(@strFormatedDate, '') COLLATE Latin1_General_CI_AS;
 END
