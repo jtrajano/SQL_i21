@@ -137,17 +137,19 @@ BEGIN TRY
 	  ,COUNT(DISTINCT Shipment.intInventoryShipmentId)
 	  ,Shipment.intInventoryShipmentId	  
 	   FROM tblICInventoryTransaction InvTran
-	   JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = InvTran.intTransactionId
-	   	AND intOrderType = 1
-	   JOIN tblICInventoryShipmentItem ON tblICInventoryShipmentItem.intInventoryShipmentItemId = InvTran.intTransactionDetailId
-	   JOIN tblCTContractHeader CH ON CH.intContractHeaderId = intOrderId
-	   JOIN tblCTContractDetail CD ON CD.intContractDetailId = intLineNo
-	   WHERE strTransactionForm = 'Inventory Shipment'
+	   JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = InvTran.intTransactionId AND Shipment.intOrderType = 1
+	   JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentId = InvTran.intTransactionId
+	   AND Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+	   AND ShipmentItem.intInventoryShipmentItemId = InvTran.intTransactionDetailId
+	   JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
+	   JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo 
+	   AND CD.intContractHeaderId = CH.intContractHeaderId
+	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'
 	   	AND InvTran.ysnIsUnposted = 0
 	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND intContractTypeId = 2
-	   	AND intInTransitSourceLocationId IS NULL
+	   	AND InvTran.intInTransitSourceLocationId IS NULL
 	   GROUP BY 
 	     CH.intContractTypeId
 		,CH.intContractHeaderId
@@ -186,6 +188,7 @@ BEGIN TRY
 	  JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId
 	  JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	  JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+	  AND CD.intContractHeaderId = CH.intContractHeaderId
 	  WHERE
 	  	ysnIsUnposted = 0
 	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
@@ -222,9 +225,12 @@ BEGIN TRY
 	  FROM tblICInventoryTransaction InvTran
 	  JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = InvTran.intTransactionId
 	  	AND strReceiptType = 'Purchase Contract'
-	  JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = InvTran.intTransactionDetailId
-	  JOIN tblCTContractHeader CH ON CH.intContractHeaderId = intOrderId
-	  JOIN tblCTContractDetail CD ON CD.intContractDetailId = intLineNo
+	  JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = InvTran.intTransactionId
+	  AND ReceiptItem.intInventoryReceiptItemId = InvTran.intTransactionDetailId
+	  AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	  JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ReceiptItem.intOrderId
+	  JOIN tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
+	  AND CD.intContractHeaderId = CH.intContractHeaderId
 	  WHERE strTransactionForm = 'Inventory Receipt'
 	  	AND ysnIsUnposted = 0
 	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
@@ -262,6 +268,7 @@ BEGIN TRY
 		JOIN tblGRSettleStorage  SS ON SS.intSettleStorageId = SC.intSettleStorageId
 		JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
 		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		AND CD.intContractHeaderId = CH.intContractHeaderId
 		WHERE SS.ysnPosted = 1
 			AND SS.intParentSettleStorageId IS NOT NULL
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
