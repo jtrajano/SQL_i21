@@ -148,7 +148,7 @@ SELECT I.intInvoiceId
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
      , dblAvailableCredit	= 0
-	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0) - ISNULL(CR.dblRefundTotal, 0)
 	 , I.strType
 FROM (
 	SELECT I.intInvoiceId
@@ -157,6 +157,7 @@ FROM (
 		 , I.intEntityCustomerId
 		 , I.strType
 		 , I.intPaymentId
+		 , I.strInvoiceNumber
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	WHERE I.ysnPosted = 1
 		AND I.ysnCancelled = 0
@@ -218,7 +219,18 @@ LEFT JOIN (
 	FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK) 
 	WHERE ysnApplied = 1
 	GROUP BY intPrepaymentId
-) PC ON I.intInvoiceId = PC.intPrepaymentId 
+) PC ON I.intInvoiceId = PC.intPrepaymentId
+LEFT JOIN (
+	SELECT strDocumentNumber	= ID.strDocumentNumber
+		 , dblRefundTotal		= SUM(I.dblInvoiceTotal) 
+	FROM tblARInvoiceDetail ID
+	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+	WHERE I.strTransactionType = 'Cash Refund'
+	AND I.ysnPosted = 1
+	AND ISNULL(ID.strDocumentNumber, '') <> ''
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
+	GROUP BY ID.strDocumentNumber
+) CR ON I.strInvoiceNumber = CR.strDocumentNumber 
 	                                          
 UNION ALL
             
