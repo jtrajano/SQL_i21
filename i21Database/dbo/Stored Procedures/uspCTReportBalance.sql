@@ -147,14 +147,14 @@ BEGIN TRY
  */
 
 	EXEC uspCTGetContractBalance
-		 @intContractTypeId		
-		,@intEntityId			
-		,@IntCommodityId			
-		,@dtmStartDate			
-		,@dtmEndDate				
-		,@intCompanyLocationId 
-		,@IntFutureMarketId    
-		,@IntFutureMonthId     
+		 @intContractTypeId	   = 	@intContractTypeId
+		,@intEntityId		   =	@intEntityId
+		,@IntCommodityId	   =    @IntCommodityId		
+		,@dtmStartDate		   =    @dtmStartDate	
+		,@dtmEndDate		   =    @dtmEndDate		
+		,@intCompanyLocationId =	@intCompanyLocationId
+		,@IntFutureMarketId    =    @IntFutureMarketId
+		,@IntFutureMonthId     =    @IntFutureMonthId
 
 END TRY
 
