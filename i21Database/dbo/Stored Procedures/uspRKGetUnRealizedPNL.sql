@@ -114,7 +114,7 @@ BEGIN TRY
 		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strInternalCompany NVARCHAR(20) COLLATE Latin1_General_CI_AS
 		, dblQuantity NUMERIC(38,20)
-		, intQuantityUOMI INT							---ItemUOM
+		, intQuantityUOMId INT							---ItemUOM
 		, intQuantityUnitMeasureId INT							---UnitMeasure
 		, strQuantityUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dblWeight NUMERIC(38,20)
@@ -182,7 +182,7 @@ BEGIN TRY
 		, dblNetM2MPrice NUMERIC(38,20)
 		, dblSettlementPrice NUMERIC(38,20)
 		, intCompanyId INT
-		, strCompanyName NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+		, strCompanyName NVARCHAR(200) COLLATE Latin1_General_CI_AS);
 		
 	WITH CTE AS (
 		SELECT Row_Number() OVER (PARTITION BY intFutureMarketId ORDER BY intFutureMonthId DESC) AS Row_Num
@@ -192,7 +192,7 @@ BEGIN TRY
 		WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE())
 	
 	INSERT INTO @tblFutureMonthByMarket(Row_Num,intFutureMarketId,intFutureMonthId)
-	SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE WHERE Row_Num = 1
+	SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE WHERE Row_Num = 1;
 	
 	WITH CTE1 AS (
 		SELECT ROW_NUMBER() OVER (PARTITION BY intFutureMarketId ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC) AS Row_Num
@@ -202,7 +202,7 @@ BEGIN TRY
 		WHERE ysnExpired = 0 AND CONVERT(DATETIME,'01 '+strFutureMonth) > GETDATE())
 	
 	INSERT INTO @tblFutureSettlementMonth (Row_Num,intFutureMarketId,intFutureMonthId)
-	SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE1 WHERE Row_Num = 1
+	SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE1 WHERE Row_Num = 1;
 	
 	WITH CTE AS (
 		SELECT ROW_NUMBER() OVER(PARTITION BY CERD.intCurrencyExchangeRateId ORDER BY  dtmValidFromDate DESC) AS RowNum
