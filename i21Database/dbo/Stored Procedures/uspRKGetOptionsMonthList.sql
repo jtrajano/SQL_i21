@@ -49,7 +49,7 @@ BEGIN
 				WHEN strMonth = 'ysnOptSep' THEN 9
 				WHEN strMonth = 'ysnOptOct' THEN 10
 				WHEN strMonth = 'ysnOptNov' THEN 11
-				WHEN strMonth = 'ysnOptDec' THEN 12 END COLLATE Latin1_General_CI_AS AS intMonthCode
+				WHEN strMonth = 'ysnOptDec' THEN 12 END AS intMonthCode
 	INTO ##AllowedMonths
 	FROM (
 		SELECT ysnOptJan
