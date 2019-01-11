@@ -1,15 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMCSVDynamicImportProcess]
-@ImportId	INT,
+	@ImportId	INT,
 	@LogId		INT
 AS
 BEGIN
-	
-	--SET QUOTED_IDENTIFIER OFF
-	--SET ANSI_NULLS ON
-	SET NOCOUNT ON
-	--SET ANSI_WARNINGS OFF
-	--SET XACT_ABORT ON
 
+	SET NOCOUNT ON
 	
 
 	DECLARE @Header  table
@@ -54,7 +49,18 @@ BEGIN
 	SELECT RecordKey, REPLACE(Record, '"', '')
 		FROM dbo.fnCFSplitString(@HeaderValue, ',')
 
+	
+	if not exists(SELECT top 1 1 from tblSMCSVDynamicImportParameter B join @Header C on B.strDisplayName = C.sv)
+	begin		
+		update tblSMCSVDynamicImportLogDetail 
+					set strResult = ' Failed.The header file does not match any column in our configuration. Please make sure that the csv used is the same with the csv from the Template.'
+				WHERE intCSVDynamicImportLogId = @LogId and intSort = 0
 
+		update tblSMCSVDynamicImportLogDetail set strResult = '' WHERE intCSVDynamicImportLogId = @LogId and intSort > 0
+
+		return 0;
+	end
+	
 	DECLARE @CurrentImportData		INT
 	DECLARE @CurrentImportLinked	INT
 	DECLARE @CurrentValue			NVARCHAR(MAX)

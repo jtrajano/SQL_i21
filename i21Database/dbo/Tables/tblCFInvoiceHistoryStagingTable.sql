@@ -142,6 +142,7 @@
     [strGuid]                      NVARCHAR (MAX)  NULL,
     [strUserId]                    NVARCHAR (100)  NULL,
     [strInvoiceNumberHistory]      NVARCHAR (MAX)  NULL,
+    [dtmDueDateBaseOnTermsHistory] DATETIME NULL, 
     CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC)
 );
 

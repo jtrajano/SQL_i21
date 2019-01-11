@@ -33,6 +33,8 @@ BEGIN
 		DECLARE @strCreateGuidBatch AS NVARCHAR(200)
 		DECLARE @intIntegrationLogId AS INT
 		
+		DECLARE @strAllowMarkUpDown NVARCHAR(1)
+
 		DECLARE @intEntityCustomerId INT
 		DECLARE @intCompanyLocationId INT
 		DECLARE @intTaxGroupId INT
@@ -52,6 +54,7 @@ BEGIN
 			   , @intEntityCustomerId = intCheckoutCustomerId
 			   , @intTaxGroupId = intTaxGroupId
 			   , @intStoreId = intStoreId
+			   , @strAllowMarkUpDown = strAllowRegisterMarkUpDown 
 		FROM tblSTStore 
 		WHERE intStoreId = (
 				SELECT intStoreId FROM tblSTCheckoutHeader
@@ -3504,16 +3507,28 @@ BEGIN
 								-----------------------------------------------------------------------
 								------------- START POST MArk Up / Down -------------------------------
 								-----------------------------------------------------------------------
+								IF (@strAllowMarkUpDown = 'I' OR @strAllowMarkUpDown = 'D')
+									BEGIN
+										BEGIN TRY
+											-- POST
+											EXEC uspSTMarkUpDownCheckoutPosting
+														@intCheckoutId		= @intCheckoutId
+														,@intCurrentUserId	= @intCurrentUserId
+														,@ysnPost			= 1 -- POST
+														,@strStatusMsg		= @strMarkUpDownPostingStatusMsg OUTPUT
+														,@strBatchId		= @strBatchId OUTPUT
+														,@ysnIsPosted		= @ysnIsPosted OUTPUT
+										END TRY
 
-								-- POST
-								EXEC uspSTMarkUpDownCheckoutPosting
-											@intCheckoutId		= @intCheckoutId
-											,@intCurrentUserId	= @intCurrentUserId
-											,@ysnPost			= 1 -- POST
-											,@strStatusMsg		= @strMarkUpDownPostingStatusMsg OUTPUT
-											,@strBatchId		= @strBatchId OUTPUT
-											,@ysnIsPosted		= @ysnIsPosted OUTPUT
+										BEGIN CATCH
+											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+											SET @ysnSuccess = CAST(0 AS BIT)
+											SET @strStatusMsg = 'Post Mark Up/Down error: ' + ERROR_MESSAGE()
 
+											-- ROLLBACK
+											GOTO ExitWithRollback
+										END CATCH
+									END
 								-----------------------------------------------------------------------
 								------------- END POST MArk Up / Down ---------------------------------
 								-----------------------------------------------------------------------
@@ -3979,13 +3994,16 @@ BEGIN
 									BEGIN
 										-- UNPOST	
 										BEGIN TRY
-											EXEC uspSTMarkUpDownCheckoutPosting
-													@intCheckoutId
-													,@intCurrentUserId
-													,0 -- UNPOST
-													,@strMarkUpDownPostingStatusMsg OUTPUT
-													,@strBatchId OUTPUT
-													,@ysnIsPosted OUTPUT
+											IF (@strAllowMarkUpDown = 'I' OR @strAllowMarkUpDown = 'D')
+												BEGIN
+													EXEC uspSTMarkUpDownCheckoutPosting
+															@intCheckoutId
+															,@intCurrentUserId
+															,0 -- UNPOST
+															,@strMarkUpDownPostingStatusMsg OUTPUT
+															,@strBatchId OUTPUT
+															,@ysnIsPosted OUTPUT
+												END
 										END TRY
 
 										BEGIN CATCH
@@ -4369,5 +4387,3 @@ ExitWithRollback:
 	
 		
 ExitPost:
-GO
-

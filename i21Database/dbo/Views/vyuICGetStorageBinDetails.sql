@@ -24,8 +24,9 @@ SELECT
 	, dtmReadingDate			= smr.dtmReadingDate
 	, strDiscountCode			= grd.strDiscountId
 	, strDiscountDescription	= grd.strDiscountDescription
+	, intItemUOMId				= im.intItemUOMId
 	, strUOM					= um.strUnitMeasure
-FROM tblICItemStockUOM sm
+FROM vyuICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
 	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId
 	INNER JOIN tblICUnitMeasure um ON um.intUnitMeasureId = im.intUnitMeasureId	

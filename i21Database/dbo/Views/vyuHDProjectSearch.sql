@@ -61,6 +61,7 @@
 					,dblNonBillableHours
 					,ysnReceivedDownPayment
 					,dblTotalOverShort = (dblQuotedHours - (dblActualHours + dblNonBillableHours))
+					,dtmGoLive
 		from 
 				(
 				select
@@ -108,6 +109,7 @@
 					,strParentProjectName = pp.strProjectName
 					,pnb.dblNonBillableHours
 					,proj.ysnReceivedDownPayment
+					,proj.dtmGoLive
 				from
 					tblHDProject proj
 					left outer join tblARCustomer cus on cus.[intEntityId] = proj.intCustomerId

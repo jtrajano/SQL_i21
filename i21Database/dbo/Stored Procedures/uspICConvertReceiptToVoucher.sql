@@ -2,7 +2,8 @@
 	@intReceiptId INT,
 	@intEntityUserSecurityId INT,
 	@intBillId INT OUTPUT,
-	@strBillIds NVARCHAR(MAX) = NULL OUTPUT
+	@strBillIds NVARCHAR(MAX) = NULL OUTPUT,
+	@intScreenId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -16,6 +17,7 @@ DECLARE @intEntityVendorId AS INT
 		,@type_DebitMemo AS INT = 3
 		,@billTypeToUse AS INT 
 		,@intSourceType AS INT 
+		,@strReceiptNumber AS NVARCHAR(50)
 		,@dtmReceiptDate AS DATETIME
 
 		,@voucherItems AS VoucherDetailReceipt 
@@ -43,6 +45,8 @@ DECLARE @Own AS INT = 1
 		,@Storage AS INT = 2
 		,@ConsignedPurchase AS INT = 3
 
+DECLARE @intScreenId_InventoryReceipt AS INT = 1
+
 SELECT	@intEntityVendorId = intEntityVendorId
 		,@billTypeToUse = 
 				CASE 
@@ -57,6 +61,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 		,@strVendorRefNo = r.strVendorRefNo
 		,@intCurrencyId = r.intCurrencyId
 		,@intSourceType = r.intSourceType
+		,@strReceiptNumber = r.strReceiptNumber
 		,@dtmReceiptDate = r.dtmReceiptDate
 FROM	tblICInventoryReceipt r
 WHERE	r.ysnPosted = 1
@@ -102,6 +107,13 @@ BEGIN
 				AND ri.intOwnershipType = @Own
 				AND Item.strType <> 'Bundle'
 				AND ISNULL(r.strReceiptType, '') <> 'Transfer Order'
+				AND 1 = 
+					CASE 
+						WHEN @intScreenId = @intScreenId_InventoryReceipt AND ri.ysnAllowVoucher = 0 THEN 
+							0
+						ELSE 
+							1
+					END 
 	END 
 
 	-- Assemble the Other Charges
@@ -146,6 +158,60 @@ BEGIN
 						AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
 					)
 				)
+				AND 1 = 
+					CASE 
+						WHEN @intScreenId = @intScreenId_InventoryReceipt AND rc.ysnAllowVoucher = 0 THEN 
+							0
+						ELSE 
+							1
+					END
+	END 
+
+	-- Check if we can convert the IR Items to Voucher
+	IF (
+		EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryReceiptItem ri INNER JOIN tblICItem i
+						ON ri.intItemId = i.intItemId
+			WHERE	ri.intInventoryReceiptId = @intReceiptId
+					AND ri.dblBillQty < ri.dblOpenReceive 
+					AND ri.intOwnershipType = @Own
+					AND i.strType <> 'Bundle'
+		)
+		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems) 
+	) 
+	BEGIN 
+		-- 'The items in {Receipt Number} are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
+		EXEC uspICRaiseError 80226, @strReceiptNumber; 
+		RETURN -80226; 
+	END 
+
+	-- Check if we can convert the IR Other Charges to Voucher
+	IF (
+		EXISTS (
+			SELECT	TOP 1 1 
+			FROM	tblICInventoryReceiptCharge rc INNER JOIN tblICInventoryReceipt r
+						ON rc.intInventoryReceiptId = r.intInventoryReceiptId
+			WHERE	rc.intInventoryReceiptId = @intReceiptId
+					AND 
+					(
+						(
+							rc.ysnPrice = 1
+							AND ISNULL(-rc.dblAmountPriced, 0) < rc.dblAmount
+						)
+						OR (
+							rc.ysnAccrue = 1 
+							AND r.intEntityVendorId = ISNULL(rc.intEntityVendorId, r.intEntityVendorId) 
+							AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
+						)
+					)
+		)
+		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherOtherCharges) 
+	) 
+	BEGIN 
+		-- 'The other charges in {Receipt Number} are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
+		EXEC uspICRaiseError 80227, @strReceiptNumber; 
+		RETURN -80227; 
 	END 
 
 	-- Check if we can convert the IR to Voucher

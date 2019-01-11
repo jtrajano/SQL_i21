@@ -1,83 +1,99 @@
-﻿CREATE PROCEDURE uspRKGetOptionsMonthList 
-	@FutureMarketId		INT
+﻿CREATE PROCEDURE uspRKGetOptionsMonthList
+	@FutureMarketId INT
+
 AS
+
 BEGIN
-
-	DECLARE @FutMonthsToOpen	INT,
-			@AllowedMonthsCount	INT,
-			@CurrentMonthCode	INT,
-			@SQL				NVARCHAR(MAX),
-			@Date				DATETIME,
-			@Count				INT,
-			@RowCount			INT,
-			@Top				INT 		
-			
-	SELECT	@FutMonthsToOpen = intFutMonthsToOpen, 
-			@Date = GETDATE(),
-			@CurrentMonthCode = MONTH(@Date),
-			@Count = 0
-	FROM	tblRKFutureMarket 
-	WHERE	intFutureMarketId = @FutureMarketId
+	DECLARE @FutMonthsToOpen INT
+		, @AllowedMonthsCount INT
+		, @CurrentMonthCode INT
+		, @SQL NVARCHAR(MAX)
+		, @Date DATETIME
+		, @Count INT
+		, @RowCount INT
+		, @Top INT
+		
+	SELECT	@FutMonthsToOpen = intFutMonthsToOpen
+		, @Date = GETDATE()
+		, @CurrentMonthCode = MONTH(@Date)
+		, @Count = 0
+	FROM tblRKFutureMarket
+	WHERE intFutureMarketId = @FutureMarketId
 	
-	IF	OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
+	IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
+	BEGIN
 		DROP TABLE ##AllowedMonths
-		
-	SELECT	REPLACE(strMonth,'ysnOpt' ,'') strMonth,
-			CASE	WHEN strMonth = 'ysnOptJan' THEN '01'
-					WHEN strMonth = 'ysnOptFeb' THEN '02'
-					WHEN strMonth = 'ysnOptMar' THEN '03'
-					WHEN strMonth = 'ysnOptApr' THEN '04'
-					WHEN strMonth = 'ysnOptMay' THEN '05'
-					WHEN strMonth = 'ysnOptJun' THEN '06'
-					WHEN strMonth = 'ysnOptJul' THEN '07'
-					WHEN strMonth = 'ysnOptAug' THEN '08'
-					WHEN strMonth = 'ysnOptSep' THEN '09'
-					WHEN strMonth = 'ysnOptOct' THEN '10'
-					WHEN strMonth = 'ysnOptNov' THEN '11'
-					WHEN strMonth = 'ysnOptDec' THEN '12'
-			END AS strMonthCode,
-			CASE	WHEN strMonth = 'ysnOptJan' THEN 1
-					WHEN strMonth = 'ysnOptFeb' THEN 2
-					WHEN strMonth = 'ysnOptMar' THEN 3
-					WHEN strMonth = 'ysnOptApr' THEN 4
-					WHEN strMonth = 'ysnOptMay' THEN 5
-					WHEN strMonth = 'ysnOptJun' THEN 6
-					WHEN strMonth = 'ysnOptJul' THEN 7
-					WHEN strMonth = 'ysnOptAug' THEN 8
-					WHEN strMonth = 'ysnOptSep' THEN 9
-					WHEN strMonth = 'ysnOptOct' THEN 10
-					WHEN strMonth = 'ysnOptNov' THEN 11
-					WHEN strMonth = 'ysnOptDec' THEN 12
-			END AS intMonthCode	
-	INTO	##AllowedMonths		
-	FROM	(	SELECT	ysnOptJan,	ysnOptFeb,	ysnOptMar,	ysnOptApr,	ysnOptMay,	ysnOptJun,
-						ysnOptJul,	ysnOptAug,	ysnOptSep,	ysnOptOct,	ysnOptNov,	ysnOptDec
-				FROM	tblRKFutureMarket
-				WHERE	intFutureMarketId = @FutureMarketId
-			) p
-			UNPIVOT
-			(
-				ysnSelect FOR strMonth IN 
-				(
-					ysnOptJan,	ysnOptFeb,	ysnOptMar,	ysnOptApr,	ysnOptMay,	ysnOptJun,
-					ysnOptJul,	ysnOptAug,	ysnOptSep,	ysnOptOct,	ysnOptNov,	ysnOptDec
-				)
-			)AS unpvt
-	WHERE	ysnSelect = 1
+	END
+
+	SELECT REPLACE(strMonth,'ysnOpt' ,'') COLLATE Latin1_General_CI_AS strMonth
+		, CASE WHEN strMonth = 'ysnOptJan' THEN '01'
+				WHEN strMonth = 'ysnOptFeb' THEN '02'
+				WHEN strMonth = 'ysnOptMar' THEN '03'
+				WHEN strMonth = 'ysnOptApr' THEN '04'
+				WHEN strMonth = 'ysnOptMay' THEN '05'
+				WHEN strMonth = 'ysnOptJun' THEN '06'
+				WHEN strMonth = 'ysnOptJul' THEN '07'
+				WHEN strMonth = 'ysnOptAug' THEN '08'
+				WHEN strMonth = 'ysnOptSep' THEN '09'
+				WHEN strMonth = 'ysnOptOct' THEN '10'
+				WHEN strMonth = 'ysnOptNov' THEN '11'
+				WHEN strMonth = 'ysnOptDec' THEN '12' END COLLATE Latin1_General_CI_AS AS strMonthCode
+		, CASE WHEN strMonth = 'ysnOptJan' THEN 1
+				WHEN strMonth = 'ysnOptFeb' THEN 2
+				WHEN strMonth = 'ysnOptMar' THEN 3
+				WHEN strMonth = 'ysnOptApr' THEN 4
+				WHEN strMonth = 'ysnOptMay' THEN 5
+				WHEN strMonth = 'ysnOptJun' THEN 6
+				WHEN strMonth = 'ysnOptJul' THEN 7
+				WHEN strMonth = 'ysnOptAug' THEN 8
+				WHEN strMonth = 'ysnOptSep' THEN 9
+				WHEN strMonth = 'ysnOptOct' THEN 10
+				WHEN strMonth = 'ysnOptNov' THEN 11
+				WHEN strMonth = 'ysnOptDec' THEN 12 END COLLATE Latin1_General_CI_AS AS intMonthCode
+	INTO ##AllowedMonths
+	FROM (
+		SELECT ysnOptJan
+			, ysnOptFeb
+			, ysnOptMar
+			, ysnOptApr
+			, ysnOptMay
+			, ysnOptJun
+			, ysnOptJul
+			, ysnOptAug
+			, ysnOptSep
+			, ysnOptOct
+			, ysnOptNov
+			, ysnOptDec
+		FROM tblRKFutureMarket
+		WHERE intFutureMarketId = @FutureMarketId
+	) p
+	UNPIVOT (ysnSelect FOR strMonth IN (ysnOptJan
+										, ysnOptFeb
+										, ysnOptMar
+										, ysnOptApr
+										, ysnOptMay
+										, ysnOptJun
+										, ysnOptJul
+										, ysnOptAug
+										, ysnOptSep
+										, ysnOptOct
+										, ysnOptNov
+										, ysnOptDec)
+	) AS unpvt
+	WHERE ysnSelect = 1
 	ORDER BY intMonthCode
-
+	
 	SELECT	@AllowedMonthsCount = COUNT(*) FROM ##AllowedMonths
-
+	
 	IF	OBJECT_ID('tempdb..##FinalMonths') IS NOT NULL
+	BEGIN
 		DROP TABLE ##FinalMonths
-		
-	CREATE TABLE ##FinalMonths
-	(
-		intYear		INT,
-		strMonth	NVARCHAR(10) COLLATE Latin1_General_CI_AS,
-		intMonthCode	INT
-	)
-
+	END
+	
+	CREATE TABLE ##FinalMonths (intYear INT
+		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, intMonthCode INT)
+	
 	WHILE (SELECT  COUNT(*) FROM ##FinalMonths) < @FutMonthsToOpen
 	BEGIN
 		IF @AllowedMonthsCount > @FutMonthsToOpen
@@ -88,7 +104,7 @@ BEGIN
 		SET @SQL = 
 		'
 			INSERT	INTO ##FinalMonths 
-			SELECT	TOP '+LTRIM(@Top)+' YEAR(@Date)+@Count,LTRIM(YEAR(@Date)+@Count)+'' - ''+strMonthCode,intMonthCode
+			SELECT	TOP '+LTRIM(@Top)+' YEAR(@Date)+@Count,LTRIM(YEAR(@Date)+@Count)+'' - ''+strMonthCode COLLATE Latin1_General_CI_AS,intMonthCode
 			FROM	##AllowedMonths
 			WHERE	intMonthCode > CASE WHEN @Count = 0 THEN  @CurrentMonthCode ELSE 0 END
 			ORDER BY intMonthCode
@@ -110,17 +126,16 @@ BEGIN
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '10' THEN 'Oct' 
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '11' THEN 'Nov' 
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '12' THEN 'Dec' 
-			END  AS strMonthName
+			END COLLATE Latin1_General_CI_AS AS strMonthName
+			,intMonthCode
 		INTO #Temp	
 			
 	FROM
 	(
-		SELECT strMonth FROM ##FinalMonths 
+		SELECT strMonth, intMonthCode FROM ##FinalMonths 
 	)t
 	WHERE ISNULL(strMonth,'') <> ''
 	ORDER BY strMonth	
-	SELECT DISTINCT strMonthName into #temp1 FROM #Temp 
-	SELECT strMonthName as strOptionMonth FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
-END 
-
-
+	SELECT DISTINCT strMonthName, intMonthCode into #temp1 FROM #Temp 
+	SELECT strMonthName as strOptionMonth, intMonthCode FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
+END

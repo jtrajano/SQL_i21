@@ -71,7 +71,7 @@ BEGIN
 												WHEN UPPER(RTRIM(LTRIM(P.[strPaymentMethod]))) = UPPER('CF Invoice') THEN ISNULL(P.[intWriteOffAccountId], P.[intCFAccountId])
 												ELSE P.[intAccountId]
 										  END)
-		,[dblDebit]                     = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+		,[dblDebit]                     = P.[dblBaseAmountPaid]
 		,[dblCredit]                    = @ZeroDecimal
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
@@ -93,8 +93,8 @@ BEGIN
 		,[strTransactionForm]           = @SCREEN_NAME
 		,[strModuleName]                = @MODULE_NAME
 		,[intConcurrencyId]             = 1
-		,[dblDebitForeign]              = P.[dblAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-		,[dblDebitReport]               = P.[dblBaseAmountPaid] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+		,[dblDebitForeign]              = P.[dblAmountPaid]
+		,[dblDebitReport]               = P.[dblBaseAmountPaid]
 		,[dblCreditForeign]             = @ZeroDecimal
 		,[dblCreditReport]              = @ZeroDecimal
 		,[dblReportingRate]             = P.[dblExchangeRate]
@@ -541,7 +541,7 @@ BEGIN
 		,[strBatchId]                   = P.[strBatchId]
 		,[intAccountId]                 = P.[intTransactionAccountId]
 		,[dblDebit]                     = @ZeroDecimal
-		,[dblCredit]                    = (P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+		,[dblCredit]                    = P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)
 		,[dblDebitUnit]                 = @ZeroDecimal
 		,[dblCreditUnit]                = @ZeroDecimal
 		,[strDescription]               = 'Payment for ' + P.strTransactionNumber
@@ -564,8 +564,8 @@ BEGIN
 		,[intConcurrencyId]             = 1
 		,[dblDebitForeign]              = @ZeroDecimal
 		,[dblDebitReport]               = @ZeroDecimal
-		,[dblCreditForeign]             = P.[dblPayment] * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
-		,[dblCreditReport]              = (P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)) * (CASE WHEN ISNULL(P.[ysnInvoicePrepayment],0) = 1 THEN -1 ELSE 1 END)
+		,[dblCreditForeign]             = P.[dblPayment]
+		,[dblCreditReport]              = P.[dblBasePayment] - ISNULL(GL.[dblGainLossAmount], @ZeroDecimal)
 		,[dblReportingRate]             = P.[dblCurrencyExchangeRate]
 		,[dblForeignRate]               = P.[dblCurrencyExchangeRate]
 		,[strRateType]                  = P.[strRateType]

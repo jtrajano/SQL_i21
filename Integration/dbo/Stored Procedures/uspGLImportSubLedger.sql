@@ -111,7 +111,10 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			WHERE glije_period between @startingPeriod and @endingPeriod
     			
 
-    		IF EXISTS (SELECT * FROM @tmpID WHERE isnull(glije_date,0) < 19000000 or isnull(glije_date,0) > 21000000)
+    		BEGIN TRY
+    		BEGIN TRANSACTION
+
+			IF EXISTS (SELECT * FROM @tmpID WHERE isnull(glije_date,0) < 19000000 or isnull(glije_date,0) > 21000000)
     		BEGIN
     			--EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
     			BEGIN
@@ -158,18 +161,13 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 						FROM glijemst A JOIN @tmpID B 
     					ON A.A4GLIdentity = B.ID
     					WHERE isnull(B.glije_date,0) < 19000000 or isnull(B.glije_date,0) > 21000000
-    			END
-				-- INSERT TO COA IMPORT LOG TABLE HERE
+    			END;
 				
-    			--RETURN
+				THROW 51000, ''Invalid Date found.'', 1;    
     		END
 
-    		BEGIN TRY
-    		BEGIN TRANSACTION
     		DECLARE @uid UNIQUEIDENTIFIER, @beforePosting INT = 0
     		SELECT @uid =NEWID()
-    		
-
 			INSERT INTO tblGLIjemst(
 				glije_period,
 				glije_acct_no,
@@ -451,9 +449,8 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			CLOSE cursor_postdate
 				DEALLOCATE cursor_postdate
 
-				set @success = 1
 				SELECT @intErrorCount = COUNT(1) FROM @tblLog
-
+				
 				IF @importLogId = 0
     				EXEC dbo.uspGLCreateImportLogHeader 
 					@msg=''Successful Transaction'', 
@@ -530,12 +527,15 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     		BEGIN CATCH
 				IF @@TRANCOUNT > 0
     			ROLLBACK TRANSACTION
-				INSERT INTO @tblLog (strEventDescription) SELECT  ERROR_MESSAGE()
+				DECLARE @strError NVARCHAR(100) = ''''
+
+				SELECT @strError = ISNULL(ERROR_MESSAGE(),''Failed Transaction'')
+				
 				SELECT @intErrorCount = COUNT(1) FROM @tblLog
 
 				IF @importLogId = 0
     				EXEC dbo.uspGLCreateImportLogHeader 
-					@msg=''Failed Transaction'', 
+					@msg=@strError, 
 					@user = @intUserId,
 					@version= @version,
 					@intSuccessCount= 0,

@@ -24,7 +24,7 @@ INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
 INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
 LEFT JOIN  dbo.tblSMCurrency SMC ON SMC.intCurrencyID = APB.intCurrencyId
 OUTER APPLY (SELECT TOP 1 strCompanyName
-						, strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+						, strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 			 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) C
 INNER JOIN (

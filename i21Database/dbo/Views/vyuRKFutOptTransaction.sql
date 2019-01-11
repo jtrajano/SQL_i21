@@ -10,7 +10,7 @@ FROM (
 		, ft.intFutOptTransactionHeaderId
 		, fom.strFutMarketName
 		, ft.dtmTransactionDate
-		, strFutureMonthYear = LEFT(CONVERT(DATE, '01 ' + fm.strFutureMonth), 7) + ' (' + fm.strFutureMonth + ')'
+		, strFutureMonthYear = (LEFT(CONVERT(DATE, '01 ' + fm.strFutureMonth), 7) + ' (' + fm.strFutureMonth + ')') COLLATE Latin1_General_CI_AS
 		, strOptionMonthYear = om.strOptionMonth
 		, ft.strOptionType
 		, strInstrumentType = CASE WHEN (ft.[intInstrumentTypeId] = 1) THEN N'Futures'

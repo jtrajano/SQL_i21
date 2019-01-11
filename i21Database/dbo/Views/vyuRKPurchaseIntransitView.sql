@@ -19,7 +19,7 @@ SELECT PCT.intCompanyLocationId intCompanyLocationId
 	, e.strName
 	, CH.intContractHeaderId
 	, PCT.intContractDetailId
-	, strContractNumber = CH.strContractNumber + '-' + CONVERT(NVARCHAR, PCT.intContractSeq)
+	, strContractNumber = (CH.strContractNumber + '-' + CONVERT(NVARCHAR, PCT.intContractSeq)) COLLATE Latin1_General_CI_AS
 	, PCT.dtmStartDate
 	, PCT.dtmEndDate
 	, intUnitMeasureId = intCommodityUnitMeasureId

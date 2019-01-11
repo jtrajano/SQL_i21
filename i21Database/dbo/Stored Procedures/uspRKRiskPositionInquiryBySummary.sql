@@ -597,9 +597,9 @@ SELECT intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumb
   
   SELECT  DISTINCT 6 intRowNumber,'2.Futures Required' strGroup,'Futures Required' Selection,'1.Unpriced - (Balance to be Priced)' PriceStatus,
    case when CONVERT(DATETIME,'01 '+strFutureMonth) < @dtmFutureMonthsDate then  'Previous' else strFutureMonth end strFutureMonth
-   , strAccountNumber, abs(case when strContractType='Purchase' then dblQuantity else -(abs(dblQuantity)) end)  as dblNoOfContract,
+   , strAccountNumber, (case when strContractType='Purchase' then dblQuantity else -(abs(dblQuantity)) end)  as dblNoOfContract,
   strTradeNo, TransactionDate,  TranType, CustVendor,  
-  dblNoOfLot  dblNoOfLot,  
+  (case when strContractType='Purchase' then dblNoOfLot else -(abs(dblNoOfLot)) end)   dblNoOfLot,  
   case when strContractType='Purchase' then dblQuantity else -(abs(dblQuantity)) end as dblQuantity, 
   intContractHeaderId,
   NULL as intFutOptTransactionHeaderId  

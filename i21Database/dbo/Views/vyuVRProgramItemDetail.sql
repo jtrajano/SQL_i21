@@ -21,7 +21,7 @@ FROM(
 		,B.dtmBeginDate
 		,B.dtmEndDate
 		,B.intConcurrencyId
-		,strCategoryCode = ''
+		,strCategoryCode = '' COLLATE Latin1_General_CI_AS
 	FROM tblVRProgram A
 	LEFT JOIN (
 		SELECT 
@@ -59,8 +59,8 @@ FROM(
 		,A.strProgram
 		,A.strProgramDescription
 		,A.strVendorProgram
-		,strItemNumber = ''
-		,strItemDescription = ''
+		,strItemNumber = '' COLLATE Latin1_General_CI_AS
+		,strItemDescription = '' COLLATE Latin1_General_CI_AS
 		,strUnitMeasure = I.strUnitMeasure
 		,0
 		,B.strRebateBy
@@ -93,16 +93,16 @@ FROM(
 		,A.strProgram
 		,A.strProgramDescription
 		,A.strVendorProgram
-		,strItemNumber = ''
-		,strItemDescription = ''
-		,strUnitMeasure = ''
+		,strItemNumber = '' COLLATE Latin1_General_CI_AS
+		,strItemDescription = '' COLLATE Latin1_General_CI_AS
+		,strUnitMeasure = '' COLLATE Latin1_General_CI_AS
 		,dblUnitQty = 0.0
 		,B.strRebateBy
 		,B.dblRebateRate
 		,B.dtmBeginDate
 		,B.dtmEndDate
 		,intConcurrencyId = 0
-		,strCategoryCode = ''
+		,strCategoryCode = '' COLLATE Latin1_General_CI_AS
 	FROM tblVRProgram A
 	LEFT JOIN tblVRProgramItem B
 		ON A.intProgramId = B.intProgramId

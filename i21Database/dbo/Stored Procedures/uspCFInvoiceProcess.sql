@@ -85,13 +85,14 @@ BEGIN TRY
 	----------------------------------------
 	DECLARE @ysnHasError BIT = 0
 	DECLARE @dtmInvoiceDate DATETIME
+	DECLARE @statementType NVARCHAR(10)= 'invoice'
 
 	-------------INVOICE LIST-------------
 	--INSERT INTO #tblCFInvoice
 	--EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
 	--------------------------------------
 
-	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
 	SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
 
 	------------GROUP BY CUSTOMER-----------
@@ -404,6 +405,7 @@ BEGIN TRY
 		,strGuid
 		,strUserId
 		,strInvoiceNumberHistory
+		,dtmDueDateBaseOnTermsHistory
 	)
 	SELECT 
 		intCustomerGroupId
@@ -549,9 +551,12 @@ BEGIN TRY
 		,strGuid
 		,strUserId
 		,strTempInvoiceReportNumber
+		,dbo.fnGetDueDateBasedOnTerm(dtmInvoiceDate, intTermID)
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username
+	AND LOWER(strStatementType) = @statementType
+	
 	
 	INSERT INTO tblCFCustomerStatementHistoryStagingTable
 	(
@@ -636,6 +641,7 @@ BEGIN TRY
 	,strComment
 	,strCFInvoiceNumber
 	,strInvoiceNumberHistory
+	,dtmDueDateBaseOnTermsHistory
 	)
 	SELECT 
 	intEntityCustomerId
@@ -719,6 +725,7 @@ BEGIN TRY
 	,strComment
 	,strCFTempInvoiceReportNumber
 	,strCFTempInvoiceReportNumber
+	,dbo.fnGetDueDateBasedOnTerm(dtmCFInvoiceDate, intCFTermID)
 	FROM
 	tblARCustomerStatementStagingTable
 	WHERE intEntityUserId = @entityId
@@ -744,10 +751,12 @@ BEGIN TRY
 		,dis.intDiscountSchedDetailId
 		,inv.strTempInvoiceReportNumber
 	FROM vyuCFDiscountSchedule as dis 
-	INNER JOIN (SELECT DISTINCT strTempInvoiceReportNumber, intDiscountScheduleId , intAccountId, strUserId FROM tblCFInvoiceStagingTable) as inv
+	INNER JOIN (SELECT DISTINCT strTempInvoiceReportNumber, intDiscountScheduleId , intAccountId, strUserId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) as inv
 	ON dis.intDiscountScheduleId = inv.intDiscountScheduleId
 	AND dis.intAccountId = inv.intAccountId
 	WHERE strUserId = @username
+
+
 
 	INSERT INTO tblCFInvoiceFeeHistoryStagingTable
 	(
@@ -820,9 +829,10 @@ BEGIN TRY
 		,intAccountId
 		,intLastOdometer
 		,dtmMinDate
-		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId)
+		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId AND strUserId = @username AND LOWER(strStatementType) = @statementType)
 	FROM
 	vyuCFInvoiceGroupByCardOdometer as vyu
+	WHERE strUserId = @username AND LOWER(strStatementType) = @statementType 
 	
 	--vyuCFInvoiceGroupByDeptOdometer
 	INSERT INTO tblCFInvoiceGroupByDeptOdometerHistory(
@@ -837,9 +847,10 @@ BEGIN TRY
 		,intAccountId
 		,intLastOdometer
 		,dtmMinDate
-		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId)
+		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId AND strUserId = @username AND LOWER(strStatementType) = @statementType)
 	FROM
 	vyuCFInvoiceGroupByDeptOdometer as vyu
+	WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
 
 	--vyuCFInvoiceGroupByMiscOdometer
 	INSERT INTO tblCFInvoiceGroupByMiscOdometerHistory(
@@ -854,9 +865,10 @@ BEGIN TRY
 		,intAccountId
 		,intLastOdometer
 		,dtmMinDate
-		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId)
+		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId AND strUserId = @username AND LOWER(strStatementType) = @statementType)
 	FROM
 	vyuCFInvoiceGroupByMiscOdometer as vyu
+	WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
 
 	--vyuCFInvoiceGroupByVehicleOdometer
 	INSERT INTO tblCFInvoiceGroupByVehicleOdometerHistory(
@@ -871,9 +883,10 @@ BEGIN TRY
 		,intAccountId
 		,intLastOdometer
 		,dtmMinDate
-		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId)
+		,(SELECT TOP 1 strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE intAccountId = vyu.intAccountId AND strUserId = @username AND LOWER(strStatementType) = @statementType)
 	FROM
 	vyuCFInvoiceGroupByVehicleOdometer as vyu
+	WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
 
 
 	-------HISTORY----------
@@ -881,7 +894,7 @@ BEGIN TRY
 	
 	UPDATE tblCFTransaction 
 	SET ysnInvoiced = 1
-	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username) 
+	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) 
 
 
 	----------DROP TEMPORARY TABLE----------

@@ -7222,12 +7222,25 @@
     <Build Include="dbo\Functions\fnSCGetTicketDetailsFromLG.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractBalance.sql" />
     <Build Include="dbo\Functions\fnCTGetContractBalance.sql" />
-	<Build Include="dbo\tblSRReportLog.sql" />
+    <Build Include="dbo\Tables\tblSRReportLog.sql" />
     <Build Include="dbo\Tables\tblMFInventoryAsOnDate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInventoryAsOnDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveCertification.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetPriceContractSequence.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonth.sql" />
+    <Build Include="dbo\Functions\fnRKFormatDate.sql" />
+    <Build Include="dbo\Functions\fnSTGenerateCheckDigit.sql" />
+    <Build Include="dbo\Views\vyuICItemStockUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedItemStock.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedItemStock.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateInvoiceFromShipment.sql" />
+    <Build Include="dbo\Functions\fnSTConvertUPCeToUPCa.sql" />
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
+    <Build Include="dbo\Functions\fnRKGetOpenFutureByDate.sql" />
+    <Build Include="dbo\Tables\tblCTContractBalance.sql" />
+    <Build Include="dbo\tblSRReportLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7428,6 +7441,11 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
     <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1t_InsertTrialBalanceData.sql" />
+    <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099BYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099PATRYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

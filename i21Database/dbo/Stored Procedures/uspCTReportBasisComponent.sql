@@ -17,7 +17,8 @@ AS
 			@dtmFromContractDate	DATETIME,
 			@dtmToContractDate		DATETIME,
 			@strProductType			NVARCHAR(100),
-			@strReportLogId			NVARCHAR(50)
+			@strReportLogId			NVARCHAR(50),
+			@strPosition			NVARCHAR(200)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -103,6 +104,11 @@ AS
 	WHERE	[fieldname] = 'ProductType'
 			AND	condition = 'Equal To'
 
+	SELECT	@strPosition = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'Position'
+	AND		condition = 'Equal To'
+
 	SELECT	@strReportLogId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strReportLogId'
@@ -169,6 +175,7 @@ AS
 	LEFT	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
 												AND	CA.strType					=	'ProductType'
 	WHERE	CA.strDescription = ISNULL(@strProductType,CA.strDescription)
+	AND		PO.strPosition = ISNULL(@strPosition,PO.strPosition)
 	)
 
 	SELECT	* 
@@ -287,7 +294,7 @@ AS
 		<mapping><fieldname>ContractDate</fieldname><fromField>dtmContractDate</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>StartDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>EndDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
-		<mapping><fieldname>Position</fieldname><fromField>Position</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
+		<mapping><fieldname>Position</fieldname><fromField>strPosition</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>Vendor</fieldname><fromField>strCustomerVendor</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>ProductType</fieldname><fromField>strProductType</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 	</mappings>'

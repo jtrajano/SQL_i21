@@ -5,8 +5,7 @@
 RETURNS NVARCHAR(50)
 
 AS 
-BEGIN 	
-
+BEGIN
 	DECLARE @strCurrencyExchangeRateType nvarchar(50)
 
 	SELECT TOP 1 @strCurrencyExchangeRateType=strCurrencyExchangeRateType
@@ -18,7 +17,4 @@ BEGIN
 	ORDER BY rd.dtmValidFromDate DESC
 
 	RETURN @strCurrencyExchangeRateType
-	
 END
-
-

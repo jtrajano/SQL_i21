@@ -5,7 +5,7 @@ AS
 SELECT 
 	   rectrans.intRecurringId
 	  ,strName = case when rectrans.strTransactionType = 'Sales Order' then oent.strName else ent.strName end
-	  ,'' as strAssignedUser
+	  ,'' COLLATE Latin1_General_CI_AS as strAssignedUser
       ,rectrans.intTransactionId
       ,rectrans.strTransactionNumber
       ,rectrans.strTransactionType

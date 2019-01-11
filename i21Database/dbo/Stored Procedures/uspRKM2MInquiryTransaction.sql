@@ -10,7 +10,8 @@
                   @intLocationId int= null,
                   @intMarketZoneId int= null
 AS
-      
+
+     
 DECLARE @ysnIncludeBasisDifferentialsInResults bit
 DECLARE @dtmPriceDate DATETIME    
 DECLARE @dtmSettlemntPriceDate DATETIME  
@@ -470,7 +471,7 @@ INSERT INTO @GetContractDetailView (
 	,dblPricedAmount
 	,strMarketZoneCode
 )
-SELECT     
+SELECT     distinct
 	CH.intCommodityUOMId intCommodityUnitMeasureId,    
 	CL.strLocationName,    
 	CY.strDescription strCommodityDescription,    
@@ -486,7 +487,7 @@ SELECT
 	CY.strCommodityCode,    
 	CH.intCommodityId,    
 	PO.strPosition strPosition,    
-	convert(datetime,convert(varchar, OCD.dtmContractDate, 101),101) dtmContractDate,      
+	convert(datetime,convert(varchar, OCD.dtmContractDate, 101),101)  ,  
 	CH.intContractBasisId,    
 	CD.intContractSeq,    
 	CD.dtmStartDate,         
@@ -501,10 +502,7 @@ SELECT
 	CD.intFutureMarketId,    
 	CD.intFutureMonthId,    
 	CD.intItemId,    
-	CASE WHEN OCD.dblBalance IS NULL THEN
-		CD.dblBalance
-		ELSE OCD.dblBalance
-	 END as dblBalance,    
+	CD.dblBalance  dblBalance,    
 	CD.intCurrencyId,              
 	CD.dblRate,					
 	CD.intMarketZoneId,      
@@ -560,16 +558,17 @@ FROM tblCTContractHeader				CH
 	INNER JOIN tblICCommodity			CY	ON	CY.intCommodityId			=	CH.intCommodityId        
 	INNER JOIN tblCTContractType		TP	ON	TP.intContractTypeId		=	CH.intContractTypeId    
 	INNER JOIN tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId  
-	INNER JOIN tblCTContractDetail		CD	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-	LEFT JOIN @tblGetOpenContractDetail OCD ON CD.intContractDetailId		=	OCD.intContractDetailId  
-	LEFT  JOIN tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId           
-	LEFT  JOIN tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId  
+	INNER JOIN tblCTContractDetail		CD	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	
 	INNER JOIN tblSMCurrency			CU	ON	CU.intCurrencyID			=	CD.intCurrencyId     
 	INNER JOIN tblICItem				IM	ON	IM.intItemId				=	CD.intItemId                          
 	INNER JOIN tblICItemUOM				IU	ON	IU.intItemUOMId				=	CD.intItemUOMId          
-	INNER JOIN tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId  AND CL.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CL.intCompanyLocationId else @intLocationId end   
+	INNER JOIN tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId  
+							AND CL.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CL.intCompanyLocationId else @intLocationId end   
 	INNER JOIN tblCTPricingType			PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId 
 	INNER JOIN tblICItemUOM				PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId
+	LEFT  JOIN @tblGetOpenContractDetail OCD ON CD.intContractDetailId		=	OCD.intContractDetailId  
+	LEFT  JOIN tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId           
+	LEFT  JOIN tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId  
 	LEFT JOIN tblCTPosition				PO	ON	PO.intPositionId			=	CH.intPositionId   
 	LEFT JOIN tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId  =	IM.intOriginId                 
 	LEFT JOIN tblARMarketZone			MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId                        
@@ -590,7 +589,6 @@ WHERE  CH.intCommodityId= @intCommodityId
 	AND CD.intContractStatusId not in(2,3,6) 
 	AND convert(datetime,convert(varchar, OCD.dtmContractDate, 101),101)  <= @dtmTransactionDateUpTo
 
-	
 DECLARE @tblContractCost TABLE (     
        intContractDetailId int 
        ,dblCosts NUMERIC(24, 10)  
@@ -710,27 +708,26 @@ DECLARE @tblContractFuture TABLE (
 )
 
 INSERT INTO @tblContractFuture
-SELECT intContractDetailId
+SELECT 
+	intContractDetailId
 	,(avgLot / intTotLot)
 FROM (
-	SELECT sum(isnull(pfd.[dblNoOfLots], 0)*
-	dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,PUOM.intCommodityUnitMeasureId,isnull(dblFixationPrice, 0)))
-	/max(CASE WHEN c.ysnSubCurrency = 1 then 100 else 1 end) +	((max(isnull(CASE WHEN ISNULL(ysnMultiplePriceFixation, 0) = 1 
-							THEN ch.dblNoOfLots ELSE cdv.dblNoOfLots END, 0)) - sum(isnull(pfd.[dblNoOfLots], 0))) 
-	* max(dblFuturePrice)) avgLot,max(CASE WHEN ISNULL(ysnMultiplePriceFixation, 0) = 1 THEN ch.dblNoOfLots ELSE cdv.dblNoOfLots END)intTotLot
+	SELECT 
+		sum(isnull(pfd.[dblNoOfLots], 0) * dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cdv.intPriceUnitMeasureId,isnull(dblFixationPrice, 0)))
+			/ max(CASE WHEN cdv.ysnSubCurrency = 1 then 100 else 1 end) +	((max(isnull(CASE WHEN ISNULL(cdv.ysnMultiplePriceFixation, 0) = 1 THEN cdv.dblNoOfLots ELSE cdv.dblNoOfLots END, 0)) - sum(isnull(pfd.[dblNoOfLots], 0))) 
+			* max(dblFuturePrice)) avgLot
+		,max(CASE WHEN ISNULL(cdv.ysnMultiplePriceFixation, 0) = 1 THEN cdv.dblNoOfLots ELSE cdv.dblNoOfLots END) intTotLot
 		,cdv.intContractDetailId
-	FROM tblCTContractDetail cdv
-	JOIN @tblSettlementPrice p ON cdv.intContractDetailId = p.intContractDetailId
-	JOIN tblSMCurrency c on cdv.intCurrencyId=c.intCurrencyID
-	JOIN tblCTContractHeader ch ON cdv.intContractHeaderId = ch.intContractHeaderId AND ch.intCommodityId = @intCommodityId AND cdv.dblBalance > 0
-	JOIN tblCTPriceFixation pf ON CASE WHEN isnull(ch.ysnMultiplePriceFixation, 0) = 1 THEN pf.intContractHeaderId ELSE pf.intContractDetailId END = CASE WHEN isnull(ch.ysnMultiplePriceFixation, 0) = 1 THEN cdv.intContractHeaderId ELSE cdv.intContractDetailId END
-	JOIN tblCTPriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId AND cdv.intPricingTypeId <> 1 AND cdv.intFutureMarketId = pfd.intFutureMarketId AND cdv.intFutureMonthId = pfd.intFutureMonthId AND cdv.intContractStatusId NOT IN (2, 3, 6)
+	FROM @GetContractDetailView cdv
+		JOIN @tblSettlementPrice p ON cdv.intContractDetailId = p.intContractDetailId
+		JOIN tblCTPriceFixation pf ON CASE WHEN isnull(cdv.ysnMultiplePriceFixation, 0) = 1 THEN pf.intContractHeaderId ELSE pf.intContractDetailId END = CASE WHEN isnull(cdv.ysnMultiplePriceFixation, 0) = 1 THEN cdv.intContractHeaderId ELSE cdv.intContractDetailId END
+		JOIN tblCTPriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId AND cdv.intPricingTypeId <> 1
+		 AND cdv.intFutureMarketId = pfd.intFutureMarketId AND cdv.intFutureMonthId = pfd.intFutureMonthId AND cdv.intContractStatusId NOT IN (2, 3, 6)
 		JOIN tblICCommodityUnitMeasure cu on cu.intCommodityId=@intCommodityId and cu.intUnitMeasureId=@intPriceUOMId
-	JOIN   tblICItemUOM                             PU     ON     PU.intItemUOMId                   =      cdv.intPriceItemUOMId   
-	JOIN tblICCommodityUnitMeasure PUOM on ch.intCommodityId=PUOM.intCommodityId and PUOM.intUnitMeasureId=PU.intUnitMeasureId 
-	
 	GROUP BY cdv.intContractDetailId
-	) t
+) t
+
+
 
 DECLARE @tblOpenContractList TABLE (     
                  intContractHeaderId int,
@@ -794,6 +791,7 @@ DECLARE @tblOpenContractList TABLE (
 				 ,dblPriceWORollArb numeric(24,10)
 				 ,dblCashPrice numeric(24,10)
 )
+
 
 INSERT INTO @tblOpenContractList (
 	intContractHeaderId
@@ -1035,8 +1033,8 @@ FROM(
 			,cd.dblLotsFixed
 			,cd.dblPriceWORollArb
 		FROM @GetContractDetailView  cd			
-			JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId and  cd.intCommodityId= @intCommodityId --and dblBalance>0
-			JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId=@intQuantityUOMId
+			JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId=cd.intUnitMeasureId 
+			JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId = @intQuantityUOMId
 			JOIN tblICCommodityUnitMeasure cuc2 on cd.intCommodityId=cuc2.intCommodityId and  cuc2.intUnitMeasureId  = @intPriceUOMId
 			LEFT JOIN @tblSettlementPrice p on cd.intContractDetailId=p.intContractDetailId
 			LEFT JOIN @tblContractCost cc on cd.intContractDetailId=cc.intContractDetailId
@@ -1045,6 +1043,61 @@ FROM(
 			LEFT JOIN tblRKFuturesMonth ffm on ffm.intFutureMonthId= cd.intFutureMonthId 
 		WHERE   cd.intCommodityId= @intCommodityId 
 )t
+
+
+SELECT *  into #tempIntransit FROM (	SELECT intLineNo = (SELECT TOP 1 intLineNo FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)						
+						,dblBalanceToInvoice = SUM(Inv.dblQuantity)
+						+ ISNULL((SELECT SUM(iv.dblQty)
+											FROM tblARInvoiceDetail id 
+												JOIN tblARInvoice i on id.intInvoiceId = i.intInvoiceId
+												JOIN tblICInventoryTransaction iv ON id.intInvoiceDetailId = iv.intTransactionDetailId
+											WHERE 
+												iv.intInTransitSourceLocationId IS NOT NULL 
+												AND intTransactionTypeId = 33 --'Invoice'
+												and iv.intItemId = Inv.intItemId
+												and id.strDocumentNumber = Inv.strTransactionId
+												and CONVERT(DATETIME,@dtmTransactionDateUpTo) = CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
+												, 0)
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmTransactionDateUpTo) = CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 THEN 1 ELSE 0 END )
+						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
+	
+					FROM vyuRKGetInventoryValuation Inv
+					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
+					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
+					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
+					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
+					OUTER APPLY (
+						SELECT ch.intContractHeaderId, strFutureMonth, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
+						FROM @GetContractDetailView ch						
+						WHERE ch.intContractHeaderId = (
+							SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL
+						) AND intContractSeq = (SELECT TOP 1  intContractSeq FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)
+					)CT
+					WHERE Inv.ysnInTransit = 1  
+						AND Inv.strTransactionType = 'Inventory Shipment'
+						AND C.intCommodityId = @intCommodityId
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmTransactionDateUpTo)
+
+					GROUP BY 
+						 Inv.strTransactionId
+						,Inv.intTransactionId
+						,Inv.dtmDate
+						,Inv.intLocationId
+						,Inv.strLocationName
+						,Inv.strUOM
+						,Inv.intEntityId
+						,Inv.strEntity
+						,C.intCommodityId
+						,Inv.intItemId
+						,Inv.strItemNo
+						,Inv.strCategory
+						,Inv.intCategoryId
+						,i.ysnPosted
+						,i.dtmPostDate
+						,CT.strFutureMonth
+						,CT.strDeliveryDate
+				) tbl
+				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
 
 -- intransit
 INSERT INTO @tblFinalDetail (
@@ -1204,10 +1257,10 @@ FROM(
                                                                 -(isnull(convert(decimal(24,6),case when isnull(intCommodityUnitMeasureId,0) = 0 then dblInvoicedQuantity else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when isnull(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,isnull(dblInvoicedQuantity,0))end),0))
                                                 as dblOpenQty
                                 FROM (
-                                                SELECT  distinct  
-                                                                cd.intContractHeaderId
-                                                                ,cd.intContractDetailId
-                                                                ,'In-transit'+'(S)'  as strContractOrInventoryType
+SELECT  distinct  
+                cd.intContractHeaderId
+                ,cd.intContractDetailId
+                ,'In-transit'+'(S)'  as strContractOrInventoryType
                 ,cd.strContractSeq
                 ,cd.strEntityName
                 ,cd.intEntityId
@@ -1240,16 +1293,11 @@ FROM(
                                                                 ,cd.intFuturePriceCurrencyId
                 ,cd.dblFuturesClosingPrice1                         
                 ,cd.intContractTypeId 
-                                                                ,0 as intConcurrencyId 
-                                                                
+                                                                ,0 as intConcurrencyId                                                                 
                                                                 
 
-                                                                ,sum(it.dblQty) over (partition By cd.intContractDetailId) -
-                                                                ISNULL((SELECT  SUM(ad.dblQtyShipped) FROM tblARInvoice ia
-                                                                JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId 
-                                                                WHERE ad.strDocumentNumber= b.strShipmentNumber and ysnPosted=1 and intInventoryShipmentChargeId IS NULL),0)
-                                                                
-                                                                dblOpenQty1
+                ,sum(it.dblBalanceToInvoice) over (partition By cd.intContractDetailId)	 dblOpenQty1
+
                 ,cd.dblRate
                 ,cd.intCommodityUnitMeasureId
                                                                 ,cd.intQuantityUOMId
@@ -1269,19 +1317,13 @@ FROM(
                                                                 ,cd.dblNoOfLots
                                                                 ,cd.dblLotsFixed
                                                                 ,cd.dblPriceWORollArb ,dblCashPrice
-                                                FROM tblICInventoryTransaction it
-                                JOIN tblICInventoryShipment b on b.strShipmentNumber=it.strTransactionId  
-                                JOIN tblICInventoryShipmentItem c on c.intInventoryShipmentId=b.intInventoryShipmentId and b.ysnPosted=1 
-                                join tblICItem i on c.intItemId=i.intItemId
+                                                FROM #tempIntransit it
+								JOIN @tblOpenContractList cd on cd.intContractDetailId = it.intLineNo  
+                                join tblICItem i on cd.intItemId=i.intItemId
                                 JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1 
                                 JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-                                JOIN tblICItemLocation il ON it.intItemId = i.intItemId and it.intItemLocationId=il.intItemLocationId and il.strDescription='In-Transit'                
-                                JOIN tblEMEntity e on b.intEntityCustomerId=e.intEntityId
-                                JOIN tblSMCompanyLocation l on b.intShipFromLocationId = l.intCompanyLocationId       
-                                JOIN @tblOpenContractList cd on cd.intContractDetailId = c.intLineNo                                                     
-                                LEFT JOIN tblSCTicket t ON c.intSourceId = t.intTicketId AND b.intSourceType = 1 --Source Type is Scale
 
-                                
+
                                 )t       
                 )t
 )t2

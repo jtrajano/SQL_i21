@@ -398,12 +398,8 @@ BEGIN
 											-- PRICE
 											, CASE 
 												WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
-													-- THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
-													-- THEN (TR.dblTrlUnitPrice - TR.dblTrlMatchLineTrlPromoAmount)
 													THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
 												WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
-													-- THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
-													-- THEN (TR.dblTrlUnitPrice - TR.dblTrlMatchLineTrlPromoAmount)
 													THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
 												WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
 													THEN (TR.dblTrlUnitPrice - TR.dblTrpAmt)
@@ -430,7 +426,9 @@ BEGIN
 												ELSE 'N' 	
 											  END as strPromotionFlag
 
-											  -- Multi-Pack Discount
+											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+											----------------------------------------------------------------- START: OUTLET Multi-Pack Discount ----------------------------------------------------------------------------------
+											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 											, CASE 
 												WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
 													THEN 'Y' -- 2 Can Deal
@@ -441,8 +439,8 @@ BEGIN
 												ELSE 'N' 
 											  END as strOutletMultipackFlag
 											, CASE 
-												WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
-													THEN 2
+												WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
+													THEN 2 -- 2 Can Deal
 												WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 													THEN 0 	
 												WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
@@ -450,14 +448,17 @@ BEGIN
 												ELSE 0 
 											  END as intOutletMultipackQuantity
 											, CASE 
-												WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
-														THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
+												WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
+													THEN (TR.dblTrlMatchLineTrlPromoAmount / 2) / 4 -- 2 Can Deal
 												WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 													THEN 0 
 												WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
 													THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
 												ELSE 0 
 											  END as dblOutletMultipackDiscountAmount
+											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+											----------------------------------------------------------------- END: OUTLET Multi-Pack Discount ----------------------------------------------------------------------------------
+											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 											, '' as strAccountPromotionName --21
 											, 0 as dblAccountDiscountAmount --22
@@ -480,19 +481,53 @@ BEGIN
 												ELSE 0 
 											END as dblCouponAmount --25 COUPON
 
-											, 'N' as strManufacturerMultipackFlag
-											, 0 as intManufacturerMultipackQuantity
-											, 0 as dblManufacturerMultipackDiscountAmount
-
+											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+											----------------------------------------------------------------- START: MANUFACTURER Multi-Pack Discount -----------------------------------------------------------------------------
+											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 											, CASE 
-												WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
-													THEN CRP.strManufacturerPromotionDescription 
+												WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2  
+													THEN 'Y' -- 2 Can Deal
+												ELSE 'N' 
+											END AS strManufacturerMultipackFlag
+											, CASE 
+												WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+													THEN 2 -- 2 Can Deal
+												ELSE 0 
+											END AS intManufacturerMultipackQuantity
+											, CASE 
+												WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+													THEN (TR.dblTrlMatchLineTrlPromoAmount / 2) / 4 -- 2 Can Deal
+												ELSE 0 
+											END AS dblManufacturerMultipackDiscountAmount
+											, CASE 
+												WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+													THEN 'Two Can Deal' -- 2 Can Deal
+												WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') -- This part is relaated to column 'dblManufacturerDiscountAmount'
+													THEN CRP.strManufacturerPromotionDescription
 												ELSE '' 
-											  END as strManufacturerPromotionDescription
+											END AS strManufacturerPromotionDescription
+											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+											------------------------------------------------------------------ END: MANUFACTURER Multi-Pack Discount ------------------------------------------------------------------------------
+											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+											--, 'N' as strManufacturerMultipackFlag
+											--, 0 as intManufacturerMultipackQuantity
+											--, 0 as dblManufacturerMultipackDiscountAmount
+											--, CASE 
+											--	WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
+											--		THEN CRP.strManufacturerPromotionDescription 
+											--	ELSE '' 
+											--  END as strManufacturerPromotionDescription
 
 											, REPLACE(CRP.strProgramName, ',','') as strManufacturerBuydownDescription
 											, CRP.dblManufacturerBuyDownAmount as dblManufacturerBuydownAmount
-											, '' as strManufacturerMultiPackDescription
+
+											--, '' as strManufacturerMultiPackDescription
+											, CASE 
+												WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+													THEN 'Two Can Deal' -- 2 Can Deal
+												ELSE '' 
+											END AS strManufacturerMultiPackDescription
+
 											, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
 								
 											, '' as strCouponDescription
@@ -507,7 +542,8 @@ BEGIN
 									AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
 								) TR
 								JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-								LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
+								LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
+									ON (TR.strTrlUPC = CRP.strLongUPCCode OR TR.strTrlUPC = CRP.intLongUpcCode)
 									AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
 								LEFT JOIN
 								(

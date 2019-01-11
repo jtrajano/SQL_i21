@@ -48,7 +48,8 @@ BEGIN TRY
 			@intUnitMeasureId			INT,
 			@intCurrencyId				INT,
 			@intHeaderPricingTypeId		INT,
-			@intProducerId				INT
+			@intProducerId				INT,
+			@strCertificationName		NVARCHAR(MAX)
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -284,6 +285,20 @@ BEGIN TRY
 			FROM	tblICItem		IM
 			JOIN	tblICItemUOM	IU ON IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
 			WHERE	ysnBasisContract = 1
+		END
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractCertification WHERE intContractDetailId = @intContractDetailId)
+		BEGIN 
+			SELECT	@strCertificationName = COALESCE(@strCertificationName + ', ', '') + CAST(strCertificationName AS NVARCHAR(100))
+			FROM	tblCTContractCertification	CF
+			JOIN	tblICCertification			IC	ON	IC.intCertificationId	=	CF.intCertificationId
+			WHERE	intContractDetailId = @intContractDetailId
+
+			UPDATE	tblCTContractDetail SET	strCertifications = @strCertificationName WHERE	intContractDetailId	= @intContractDetailId 
+		END
+		ELSE
+		BEGIN
+			UPDATE	tblCTContractDetail SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
 		END
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId

@@ -47,7 +47,7 @@ BEGIN TRY
 				WHEN strMonth = 'ysnFutSep' THEN '09'
 				WHEN strMonth = 'ysnFutOct' THEN '10'
 				WHEN strMonth = 'ysnFutNov' THEN '11'
-				WHEN strMonth = 'ysnFutDec' THEN '12' END)
+				WHEN strMonth = 'ysnFutDec' THEN '12' END) COLLATE Latin1_General_CI_AS
 			, intMonthCode = (CASE WHEN strMonth = 'ysnFutJan' THEN 1
 				WHEN strMonth = 'ysnFutFeb' THEN 2
 				WHEN strMonth = 'ysnFutMar' THEN 3
@@ -71,7 +71,7 @@ BEGIN TRY
 				WHEN strMonth = 'ysnFutSep' THEN 'U'
 				WHEN strMonth = 'ysnFutOct' THEN 'V'
 				WHEN strMonth = 'ysnFutNov' THEN 'X'
-				WHEN strMonth = 'ysnFutDec' THEN 'Z' END)
+				WHEN strMonth = 'ysnFutDec' THEN 'Z' END) COLLATE Latin1_General_CI_AS
 		FROM (SELECT ysnFutJan
 				, ysnFutFeb
 				, ysnFutMar
@@ -126,6 +126,7 @@ BEGIN TRY
 		, strMonthName NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
 		, strSymbol NVARCHAR(10) COLLATE Latin1_General_CI_AS
+		, dtmSpotDate DATE
 		, ysnProcessed BIT DEFAULT 0);
 	SELECT @intCountAllowedMonths = COUNT(*) FROM ##AllowedFutMonth
 
@@ -134,18 +135,20 @@ BEGIN TRY
 	DECLARE @ProjectedMonth NVARCHAR(10)
 	DECLARE @ProjectedMonthSymbol NVARCHAR(10)
 	DECLARE @tmpProjectedMonth DATE
+	DECLARE @tmpSpothDate DATE
 
 	WHILE (SELECT COUNT(*) FROM @ProjectedFutureMonths) < (@FutMonthsToOpen)
 	BEGIN
 		SET @intIndex1 = @intIndex1 + 1;
 		SET @ProjectedMonth = NULL
+		SET @tmpSpothDate = NULL
 
 		SELECT @ProjectedMonthName= strMonth
 			,@ProjectedMonthSymbol = strSymbol
 		FROM ##AllowedFutMonth
 		WHERE intRowId = @intIndex1;
 
-		SELECT TOP(1) @ProjectedMonth = FORMAT(DATEADD(YEAR,1,CONVERT(DATETIME,'01 ' + strFutureMonth)), 'MMM yy')
+		SELECT TOP(1) @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR,1,CONVERT(DATETIME,'01 ' + strFutureMonth)), 'MMM yy')
 		FROM tblRKFuturesMonth
 		WHERE LEFT(LTRIM(RTRIM(strFutureMonth)),3) = @ProjectedMonthName
 			AND intFutureMarketId = @FutureMarketId
@@ -153,24 +156,36 @@ BEGIN TRY
 
 		IF(ISNULL(@ProjectedMonth, '') <> '') AND EXISTS(SELECT TOP 1 * FROM @ProjectedFutureMonths WHERE strMonth = @ProjectedMonth)
 		BEGIN
-			SET @ProjectedMonth = FORMAT(DATEADD(YEAR, 1,CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
+			SET @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR, 1,CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
 		END
 		ELSE IF(ISNULL(@ProjectedMonth, '') = '')
 		BEGIN
 			SELECT @tmpProjectedMonth = CONVERT(DATE,@ProjectedMonthName + ' 1 ' + CONVERT(VARCHAR, YEAR(GETDATE())))
 		
-			SELECT @ProjectedMonth = CASE WHEN DATEDIFF(MONTH, GETDATE(), @tmpProjectedMonth) <= 0 THEN FORMAT(DATEADD(YEAR,1,@tmpProjectedMonth), 'MMM yy')
-				ELSE FORMAT(@tmpProjectedMonth, 'MMM yy')
+			SELECT @ProjectedMonth = CASE WHEN DATEDIFF(MONTH, GETDATE(), @tmpProjectedMonth) <= 0 THEN dbo.fnRKFormatDate(DATEADD(YEAR,1,@tmpProjectedMonth), 'MMM yy')
+				ELSE dbo.fnRKFormatDate(@tmpProjectedMonth, 'MMM yy')
 			END
 
 			IF EXISTS(SELECT TOP 1 * FROM @ProjectedFutureMonths WHERE strMonth = @ProjectedMonth)
 			BEGIN
-				SET @ProjectedMonth = FORMAT(DATEADD(YEAR, 1, CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
+				SET @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR, 1, CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
 			END
 		END
 
-		INSERT INTO @ProjectedFutureMonths(strMonthName,strMonth, strSymbol)
-		SELECT @ProjectedMonthName, @ProjectedMonth, @ProjectedMonthSymbol
+		IF(@intIndex1 = 1)
+		BEGIN
+			SELECT TOP 1 @tmpSpothDate = CONVERT(DATETIME, '1-' + strMonth + '-' + CONVERT(NVARCHAR, CONVERT(INT, YEAR(CONVERT(DATETIME,'01 ' + @ProjectedMonth))) - 1))
+			FROM ##AllowedFutMonth ORDER BY intMonthCode DESC
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @tmpSpothDate = CONVERT(DATETIME, '1-' + strMonth + '-' + CONVERT(NVARCHAR, CONVERT(INT, YEAR(CONVERT(DATETIME,'01 ' + @ProjectedMonth)))))
+			FROM ##AllowedFutMonth
+			WHERE intRowId = (@intIndex1 - 1);
+		END
+
+		INSERT INTO @ProjectedFutureMonths(strMonthName,strMonth, strSymbol, dtmSpotDate)
+		SELECT @ProjectedMonthName, @ProjectedMonth, @ProjectedMonthSymbol, @tmpSpothDate
 		 
 		IF(@intIndex1 = @intCountAllowedMonths)
 		BEGIN
@@ -189,23 +204,12 @@ BEGIN TRY
 		, dtmFirstNoticeDate = NULL
 		, dtmLastNoticeDate = NULL
 		, dtmLastTradingDate = NULL
-		, dtmSpotDate = CONVERT(DATETIME, NULL)
+		, dtmSpotDate = dtmSpotDate
 		, ysnExpired = 0
 		, intMonthCode = P.strMonth
 	INTO #FutTemp
 	FROM @ProjectedFutureMonths P
 	WHERE ISNULL(strMonth,'') <> ''
-
-	UPDATE a SET dtmSpotDate = CONVERT(DATETIME, '1-' + b.strMonth + '-' + CONVERT(NVARCHAR, CONVERT(INT, a.strYear) - 1))
-	FROM #FutTemp a
-	OUTER APPLY(
-		SELECT TOP 1 * FROM ##AllowedFutMonth ORDER BY intMonthCode DESC
-	)b
-	WHERE a.RowNumber = 1
-
-	UPDATE a SET dtmSpotDate = CONVERT(DATE, b.dtmFutureMonthsDate) FROM #FutTemp a
-	LEFT JOIN #FutTemp b ON a.RowNumber - 1 = b.RowNumber
-	WHERE a.RowNumber <> 1
 
 	INSERT INTO tblRKFuturesMonth(intConcurrencyId
 		, strFutureMonth
@@ -221,7 +225,7 @@ BEGIN TRY
 		, ysnExpired)
 		SELECT * FROM (            
 	SELECT DISTINCT t.intConcurrencyId
-		, strFMonth = LTRIM(RTRIM(t.strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(t.strYear, 2)
+		, strFMonth = LTRIM(RTRIM(t.strMonthName COLLATE Latin1_General_CI_AS)) + ' ' + Right(t.strYear, 2) COLLATE Latin1_General_CI_AS
 		, t.intFutureMarketId
 		, intCommodityMarketId = @intCommodityMarketId
 		, t.dtmFutureMonthsDate

@@ -106,7 +106,7 @@ Else
 Begin
 	if @ysnShowAllPallets=0
 	Begin
-		Select * from #tempLot where intParentLotId=@intParentLotId
+		Select * from #tempLot --where intParentLotId=@intParentLotId
 	End
 	Else
 	Begin

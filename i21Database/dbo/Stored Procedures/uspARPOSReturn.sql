@@ -473,7 +473,7 @@ AS
 				WHERE intPOSId = @intPOSId
 
 				UPDATE tblARInvoice
-				SET strComments = (SELECT strComment from tblARPOS WHERE intInvoiceId = @createdCreditMemoId)
+				SET strComments = '<p><span style="font-family: Arial;">' + (SELECT strComment from tblARPOS WHERE intInvoiceId = @createdCreditMemoId) + '</span></p>'
 				WHERE intInvoiceId = @createdCreditMemoId
 
 			END

@@ -451,7 +451,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,intItemId
 				,@ItemPrepayTypeId
 				,@ItemPrepayRate 
-				,@ItemDescription
+				,ISNULL(ISNULL(@ItemDescription, strDescription),'')
 				,@ItemDocumentNumber
 				,@ItemOrderUOMId
 				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))

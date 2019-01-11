@@ -107,7 +107,6 @@ BEGIN
 	,strLoadNumber
 	,intLoadLocationId
 	,intAxleCount
-	,strBinNumber
 	,strPitNumber
 	,intGradingFactor
 	,strVarietyType
@@ -195,7 +194,6 @@ BEGIN
 	,strLoadNumber			   = NULL
 	,intLoadLocationId		   = CL.intCompanyLocationId
 	,intAxleCount			   = NULL
-	,strBinNumber			   = NULL
 	,strPitNumber			   = NULL
 	,intGradingFactor		   = NULL
 	,strVarietyType			   = NULL
