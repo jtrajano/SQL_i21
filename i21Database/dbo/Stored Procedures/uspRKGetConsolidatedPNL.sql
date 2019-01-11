@@ -146,6 +146,7 @@ BEGIN TRY
 		, dtmInvoicePostedDate DATETIME
 		, strContract NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strAllocationRefNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strInternalCompany NVARCHAR(20) COLLATE Latin1_General_CI_AS
 		, dblQuantity NUMERIC(38,20)
 		, intQuantityUOMId INT
