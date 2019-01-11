@@ -121,4 +121,4 @@ FROM
 			AND lotted.strLotNumber = cd.strLotNo
 	WHERE c.ysnPosted != 1
 ) x
-WHERE ((x.dblNewOnHand - x.dblCountOnHand != 0) OR (x.dblNewCost - x.dblCost != 0))
+WHERE ((ROUND(x.dblNewOnHand - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
