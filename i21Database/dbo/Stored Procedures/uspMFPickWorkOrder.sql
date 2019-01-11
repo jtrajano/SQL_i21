@@ -10,6 +10,7 @@
 	,@ysnFillPartialPallet BIT = 0
 	,@dblProducePartialQty NUMERIC(38, 20) = 0
 	,@intMachineId INT = NULL
+	,@dtmCurrentDateTime DATETIME = NULL
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -34,7 +35,6 @@ BEGIN TRY
 		,@dblMaxSubstituteRatio NUMERIC(18, 6)
 		,@intStorageLocationId INT
 		,@dtmCurrentDate DATETIME
-		,@dtmCurrentDateTime DATETIME
 		,@intDayOfYear INT
 		,@intConsumptionMethodId INT
 		,@intWeightUOMId INT
@@ -109,7 +109,10 @@ BEGIN TRY
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
-	SELECT @dtmCurrentDateTime = GETDATE()
+	IF @dtmCurrentDateTime IS NULL
+	BEGIN
+		SELECT @dtmCurrentDateTime = GETDATE()
+	END
 
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
