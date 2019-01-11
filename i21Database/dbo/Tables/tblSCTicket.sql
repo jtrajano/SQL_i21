@@ -83,7 +83,6 @@
     [intAxleCount] INT NULL, 
     [intAxleCount1] INT NULL, 
     [intAxleCount2] INT NULL, 
-    [strBinNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [strPitNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intGradingFactor] INT NULL, 
     [strVarietyType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
@@ -746,15 +745,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = 'intAxleCount'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Bin Number',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicket',
-    @level2type = N'COLUMN',
-    @level2name = N'strBinNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Pit Number',

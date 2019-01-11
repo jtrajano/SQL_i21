@@ -1,51 +1,57 @@
-﻿CREATE PROC uspRKExpiredPSTransaction
-			@intTypeId int,
-			@intEntityId int,
-			@intFutureMarketId int,
-			@intCommodityId int,
-			@intOptionMonthId int,
-			@dblStrike int,
-			@dtmPositionAsOf datetime
+﻿CREATE PROCEDURE uspRKExpiredPSTransaction
+	@intTypeId int
+	, @intEntityId int
+	, @intFutureMarketId int
+	, @intCommodityId int
+	, @intOptionMonthId int
+	, @dblStrike int
+	, @dtmPositionAsOf datetime
+
 AS
 
 SET @dtmPositionAsOf = convert(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
 
 SELECT * FROM (
-SELECT m.intOptionsPnSExpiredId,
-	   convert(int,strTranNo) strTranNo,
-	   dtmExpiredDate,
-	   t.strInternalTradeNo,
-	   intLots,
-	   m.intFutOptTransactionId,
-	   (case when t.strBuySell='Buy' THEN -isnull(t.dblPrice,0)* m.intLots * fm.dblContractSize else isnull(t.dblPrice,0)* m.intLots * fm.dblContractSize end)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblImpact,
-       fm.strFutMarketName,
-       om.strOptionMonth, 
-       t.dblStrike,
-       t.strOptionType,
-       t.dblPrice AS dblPremiumRate,
-       (Case WHEN t.strBuySell='Buy' THEN -isnull(t.dblPrice*dblContractSize*intLots,0) else isnull(t.dblPrice*dblContractSize*intLots,0) end)/ case when ysnSubCurrency = 'true' then intCent else 1 end AS dblPremiumTotal,
-	   e.strName,
-	   b.strAccountNumber,
-	   strCommodityCode,
-	   scl.strLocationName,
-	   cb.strBook,
-	   csb.strSubBook,t.intFutOptTransactionHeaderId,
-	   intTypeId= (case when t.strOptionType='Put' then 1 else 2 end),t.intEntityId,t.intFutureMarketId,t.intCommodityId,t.intOptionMonthId
-FROM tblRKOptionsPnSExpired m
-Join tblRKFutOptTransaction t on t.intFutOptTransactionId= m.intFutOptTransactionId
-Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId
-JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId  
-JOIN tblRKOptionsMonth om on om.intOptionMonthId=t.intOptionMonthId
-Join tblEMEntity e on e.intEntityId=t.intEntityId
-Join tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId
-join tblICCommodity ic on ic.intCommodityId=t.intCommodityId
-JOIN tblSMCompanyLocation scl on scl.intCompanyLocationId=t.intLocationId
-LEFT JOIN tblCTBook cb on cb.intBookId= t.intBookId
-LEFT JOIN tblCTSubBook csb on csb.intSubBookId=t.intSubBookId)t
-WHERE   isnull(intTypeId,0)=case when isnull(@intTypeId,0) =0 then isnull(intTypeId,0) else @intTypeId end
-		 AND isnull(intEntityId,0)=case when isnull(@intEntityId,0) =0 then isnull(intEntityId,0) else @intEntityId end  
-		 AND isnull(intFutureMarketId,0)=case when isnull(@intFutureMarketId,0) =0 then isnull(intFutureMarketId,0) else @intFutureMarketId end   
-		 AND isnull(intCommodityId,0)=case when isnull(@intCommodityId,0) =0 then isnull(intCommodityId,0) else @intCommodityId end  
-		 AND isnull(intOptionMonthId,0)=case when isnull(@intOptionMonthId,0) =0 then isnull(intOptionMonthId,0) else @intOptionMonthId end   
-		 AND isnull(dblStrike,0)=case when isnull(@dblStrike,0) =0 then isnull(dblStrike,0) else @dblStrike end  
-		 and dtmExpiredDate<=@dtmPositionAsOf
+	SELECT m.intOptionsPnSExpiredId
+		, convert(int,strTranNo) strTranNo
+		, dtmExpiredDate
+		, t.strInternalTradeNo
+		, intLots
+		, m.intFutOptTransactionId
+		, (case when t.strBuySell='Buy' THEN -isnull(t.dblPrice,0)* m.intLots * fm.dblContractSize else isnull(t.dblPrice,0)* m.intLots * fm.dblContractSize end)/ case when ysnSubCurrency = 'true' then intCent else 1 end as dblImpact
+		, fm.strFutMarketName
+		, om.strOptionMonth
+		, t.dblStrike
+		, t.strOptionType
+		, t.dblPrice AS dblPremiumRate
+		, (Case WHEN t.strBuySell='Buy' THEN -isnull(t.dblPrice*dblContractSize*intLots,0) else isnull(t.dblPrice*dblContractSize*intLots,0) end)/ case when ysnSubCurrency = 'true' then intCent else 1 end AS dblPremiumTotal
+		, e.strName
+		, b.strAccountNumber
+		, strCommodityCode
+		, scl.strLocationName
+		, cb.strBook
+		, csb.strSubBook,t.intFutOptTransactionHeaderId
+		, intTypeId= (case when t.strOptionType='Put' then 1 else 2 end)
+		, t.intEntityId
+		, t.intFutureMarketId
+		, t.intCommodityId
+		, t.intOptionMonthId
+	FROM tblRKOptionsPnSExpired m
+	Join tblRKFutOptTransaction t on t.intFutOptTransactionId= m.intFutOptTransactionId
+	Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId
+	JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId  
+	JOIN tblRKOptionsMonth om on om.intOptionMonthId=t.intOptionMonthId
+	Join tblEMEntity e on e.intEntityId=t.intEntityId
+	Join tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId
+	join tblICCommodity ic on ic.intCommodityId=t.intCommodityId
+	JOIN tblSMCompanyLocation scl on scl.intCompanyLocationId=t.intLocationId
+	LEFT JOIN tblCTBook cb on cb.intBookId= t.intBookId
+	LEFT JOIN tblCTSubBook csb on csb.intSubBookId=t.intSubBookId
+) t
+WHERE isnull(intTypeId,0) = isnull(@intTypeId, isnull(intTypeId,0))
+	AND isnull(intEntityId,0) = isnull(@intEntityId, isnull(intEntityId,0))
+	AND isnull(intFutureMarketId,0) = isnull(@intFutureMarketId, isnull(intFutureMarketId,0))
+	AND isnull(intCommodityId,0) = isnull(@intCommodityId, isnull(intCommodityId,0))
+	AND isnull(intOptionMonthId,0) = isnull(@intOptionMonthId, isnull(intOptionMonthId,0))
+	AND isnull(dblStrike,0) = isnull(@dblStrike, isnull(dblStrike,0))
+	and dtmExpiredDate <= @dtmPositionAsOf

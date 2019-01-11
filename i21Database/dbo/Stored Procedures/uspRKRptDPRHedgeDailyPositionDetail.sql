@@ -9,6 +9,8 @@ DECLARE @idoc INT
 		,@strPurchaseSales nvarchar(50) = NULL
 		,@strPositionIncludes nvarchar(50) = NULL
 		,@dtmToDate datetime = null
+		,@ysnIsCrushPosition bit = NULL
+		,@strPositionBy NVARCHAR(50) = NULL
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
@@ -62,6 +64,10 @@ SELECT *
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'dtmToDate'
 
+	SELECT @ysnIsCrushPosition = [from]
+	FROM @temp_xml_table	
+	WHERE [fieldname] = 'ysnIsCrushPosition'
+
 IF isnull(@strPurchaseSales,'') <> ''
 BEGIN
                 if @strPurchaseSales='Purchase'
@@ -74,6 +80,11 @@ BEGIN
                 END
 END
 
+IF @ysnIsCrushPosition = 1 
+BEGIN
+	SET @strPositionBy = 'Delivery Month'
+END
+
 DECLARE @Commodity AS TABLE 
 (
 intCommodityIdentity int IDENTITY(1,1) PRIMARY KEY , 
@@ -82,4 +93,4 @@ intCommodity  INT
 INSERT INTO @Commodity(intCommodity)
 SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')  
                  
-EXEC uspRKDPRHedgeDailyPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate
+EXEC uspRKDPRHedgeDailyPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate, '',@strPositionBy

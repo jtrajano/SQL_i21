@@ -71,7 +71,6 @@
     ,SCTicket.strLoadNumber
     ,SCTicket.intLoadLocationId
     ,SCTicket.intAxleCount
-    ,SCTicket.strBinNumber
     ,SCTicket.strPitNumber
     ,SCTicket.intGradingFactor
     ,SCTicket.strVarietyType

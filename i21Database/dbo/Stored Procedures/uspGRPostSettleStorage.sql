@@ -996,7 +996,7 @@ BEGIN TRY
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
-					,intTransactionDetailId		= @intSettleStorageId
+					,intTransactionDetailId		= @intSettleStorageTicketId
 					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
@@ -1056,7 +1056,7 @@ BEGIN TRY
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
-					,intTransactionDetailId		= @intSettleStorageId
+					,intTransactionDetailId		= @intSettleStorageTicketId
 					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId

@@ -87,7 +87,6 @@ AS SELECT
 	,SC.intAxleCount
 	,SC.intAxleCount1
 	,SC.intAxleCount2
-	,SC.strBinNumber
 	,SC.strPitNumber
 	,SC.intGradingFactor
 	,SC.strVarietyType
@@ -180,6 +179,7 @@ AS SELECT
 	,tblICInventoryShipment.intInventoryShipmentId
 	,tblICInventoryShipment.strShipmentNumber
 	,ICLot.strLotNumber
+	,tblICStorageLocation.strName AS strBinNumber
 
 	,SO.strSalesOrderNumber
 

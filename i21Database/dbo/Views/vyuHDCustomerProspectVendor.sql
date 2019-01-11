@@ -32,8 +32,8 @@
 																								  or h.strType is not null or LTRIM(RTRIM(h.strType)) <> '' then ',' + i.strType else i.strType end)
 						 
 				,ysnActive = a.ysnActive
-				,strLinesOfBusinessId = dbo.fnCRMCoalesceLinesOfBusinessId(a.intEntityId) COLLATE Latin1_General_CI_AS
-				,strLinesOfBusiness = dbo.fnCRMCoalesceLinesOfBusiness(a.intEntityId) COLLATE Latin1_General_CI_AS
+				,strLinesOfBusinessId = dbo.fnCRMCoalesceLinesOfBusinessId(a.intEntityId) COLLATE Latin1_General_CI_AS 
+				,strLinesOfBusiness = dbo.fnCRMCoalesceLinesOfBusiness(a.intEntityId) COLLATE Latin1_General_CI_AS 
 			from
 				tblEMEntity a
 				left join tblEMEntityType d on d.intEntityId = a.intEntityId and d.strType = 'Customer'

@@ -7,7 +7,7 @@ WITH Pricing AS
     SELECT c.strCommodityCode
 		, c.intCommodityId
 		, ch.intContractHeaderId
-		, strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR, intContractSeq)
+		, strContractNumber = (strContractNumber + '-' + CONVERT(NVARCHAR, intContractSeq)) COLLATE Latin1_General_CI_AS
 		, strLocationName
 		, dtmEndDate
 		, FM.strFutureMonth
@@ -110,7 +110,7 @@ WITH Pricing AS
 			, intEntityId
 			, intCurrencyId
 			, strCurrency
-			, strType = strContractType + ' Priced'
+			, strType = (strContractType + ' Priced') COLLATE Latin1_General_CI_AS
 			, intItemId
 			, strItemNo
 			, dtmContractDate
@@ -127,7 +127,7 @@ WITH Pricing AS
 		SELECT c.strCommodityCode
 			, c.intCommodityId
 			, ch.intContractHeaderId
-			, strContractNumber = ch.strContractNumber + '-' + CONVERT(NVARCHAR, intContractSeq)
+			, strContractNumber = (ch.strContractNumber + '-' + CONVERT(NVARCHAR, intContractSeq)) COLLATE Latin1_General_CI_AS
 			, cl.strLocationName
 			, CDT.dtmEndDate
 			, FM.strFutureMonth
@@ -145,7 +145,7 @@ WITH Pricing AS
 			, ch.intEntityId
 			, CDT.intCurrencyId
 			, CUR.strCurrency
-			, strType = ct.strContractType + ' Basis'
+			, strType = (ct.strContractType + ' Basis') COLLATE Latin1_General_CI_AS
 			, IM.intItemId
 			, IM.strItemNo
 			, ch.dtmContractDate
@@ -180,7 +180,7 @@ WITH Pricing AS
 		SELECT c.strCommodityCode
 			, c.intCommodityId
 			, ch.intContractHeaderId
-			, strContractNumber = ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq)
+			, strContractNumber = (ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq)) COLLATE Latin1_General_CI_AS
 			, cl.strLocationName
 			, CDT.dtmEndDate
 			, FM.strFutureMonth
@@ -198,7 +198,7 @@ WITH Pricing AS
 			, ch.intEntityId
 			, CDT.intCurrencyId
 			, CUR.strCurrency
-			, strType = ct.strContractType+' Priced'
+			, strType = (ct.strContractType+' Priced')
 			, IM.intItemId
 			, IM.strItemNo
 			, ch.dtmContractDate
@@ -233,7 +233,7 @@ WITH Pricing AS
 		SELECT c.strCommodityCode
 			, c.intCommodityId
 			, ch.intContractHeaderId
-			, strContractNumber = ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq)
+			, strContractNumber = (ch.strContractNumber +'-' +Convert(nvarchar,intContractSeq))
 			, cl.strLocationName
 			, CDT.dtmEndDate
 			, FM.strFutureMonth
@@ -251,7 +251,7 @@ WITH Pricing AS
 			, ch.intEntityId
 			, CDT.intCurrencyId
 			, CUR.strCurrency
-			, strType = ct.strContractType + ' Basis'
+			, strType = (ct.strContractType + ' Basis') COLLATE Latin1_General_CI_AS
 			, IM.intItemId
 			, IM.strItemNo
 			, ch.dtmContractDate
@@ -286,7 +286,7 @@ WITH Pricing AS
 		SELECT c.strCommodityCode
 			, c.intCommodityId
 			, ch.intContractHeaderId
-			, strContractNumber = strContractNumber +'-' +Convert(nvarchar,intContractSeq)
+			, strContractNumber = (strContractNumber +'-' +Convert(nvarchar,intContractSeq)) COLLATE Latin1_General_CI_AS
 			, strLocationName
 			, dtmEndDate
 			, FM.strFutureMonth
@@ -304,7 +304,7 @@ WITH Pricing AS
 			, EY.intEntityId
 			, CDT.intCurrencyId
 			, CUR.strCurrency
-			, strType = ct.strContractType + ' ' + pt.strPricingType
+			, strType = (ct.strContractType + ' ' + pt.strPricingType) COLLATE Latin1_General_CI_AS
 			, IM.intItemId
 			, IM.strItemNo
 			, ch.dtmContractDate
@@ -338,7 +338,7 @@ WITH Pricing AS
 		SELECT c.strCommodityCode
 			, c.intCommodityId
 			, ch.intContractHeaderId
-			, strContractNumber = strContractNumber +'-' +Convert(nvarchar,intContractSeq)
+			, strContractNumber = (strContractNumber +'-' +Convert(nvarchar,intContractSeq)) COLLATE Latin1_General_CI_AS
 			, strLocationName
 			, dtmEndDate
 			, FM.strFutureMonth
@@ -356,7 +356,7 @@ WITH Pricing AS
 			, EY.intEntityId
 			, CDT.intCurrencyId
 			, CUR.strCurrency
-			, strType = ct.strContractType + ' ' + strPricingType
+			, strType = (ct.strContractType + ' ' + strPricingType) COLLATE Latin1_General_CI_AS
 			, IM.intItemId
 			, IM.strItemNo
 			, ch.dtmContractDate

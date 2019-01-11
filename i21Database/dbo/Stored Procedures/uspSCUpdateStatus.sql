@@ -12,7 +12,8 @@ BEGIN
 
 	CREATE TABLE #tmpSC(intTicketId INT)
 	DECLARE @intContractDetailId INT
-			,@intFromItemUOMId INT;
+			,@intFromItemUOMId INT
+			,@intStorageScheduleTypeId INT;
 
 	IF @status IS NOT NULL
 	BEGIN
@@ -23,12 +24,12 @@ BEGIN
 		FROM tblSCTicket A
 		WHERE A.intTicketId = @scId
 
-		SELECT @intContractDetailId = intContractId, @intFromItemUOMId = intItemUOMIdTo FROM tblSCTicket where intTicketId = @scId
+		SELECT @intContractDetailId = intContractId, @intFromItemUOMId = intItemUOMIdTo, @intStorageScheduleTypeId = intStorageScheduleTypeId FROM tblSCTicket where intTicketId = @scId
 
-		IF ISNULL(@intContractDetailId, 0) > 0
+		IF ISNULL(@intContractDetailId, 0) > 0 AND @intStorageScheduleTypeId = -2
 		BEGIN
-			UPDATE vyuCTContractDetailView set dblScheduleQty = (CT.dblScheduleQty - dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,CT.intItemUOMId,SC.dblScheduleQty))
-			FROM vyuCTContractDetailView CT 
+			UPDATE CT set CT.dblScheduleQty = (CT.dblScheduleQty - dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,CT.intItemUOMId,SC.dblScheduleQty))
+			FROM tblCTContractDetail CT 
 			LEFT JOIN tblSCTicketContractUsed SC ON SC.intContractDetailId = CT.intContractDetailId
 			WHERE SC.intTicketId = @scId AND SC.intContractDetailId != ISNULL(@intContractDetailId,0)
 

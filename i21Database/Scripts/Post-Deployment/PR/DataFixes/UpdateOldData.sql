@@ -381,3 +381,18 @@ BEGIN
 	WHERE dblTaxableAmount IS NULL OR dblTaxableAmountYTD IS NULL
 	')
 END
+
+/*
+* Timecards
+* 1. Populate Timecard Workers Compensation Id
+* 2...
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblPRTimecard') AND name = 'intWorkersCompensationId')
+BEGIN
+	EXEC ('
+	UPDATE tblPRTimecard
+	SET intWorkersCompensationId = (SELECT TOP 1 intWorkersCompensationId 
+									FROM tblPREmployee WHERE intEntityId = tblPRTimecard.intEntityEmployeeId)
+	WHERE intWorkersCompensationId IS NULL
+	')
+END

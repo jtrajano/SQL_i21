@@ -81,6 +81,9 @@ BEGIN TRY
 		   ,@dblProvisionalInvoicePct		=   dblProvisionalInvoicePct
 		   ,@dblQuantityPerLoad				=   dblQuantityPerLoad
 		   ,@intNoOfLoad					=   intNoOfLoad
+		   ,@intFutureMarketId				=	intFutureMarketId
+		   ,@intFutureMonthId				=	intFutureMonthId
+		   ,@dblFutures						=	dblFutures
 
 	FROM	OPENXML(@idoc, 'tblCTContractHeaders/tblCTContractHeader',2)
 	WITH
@@ -114,7 +117,10 @@ BEGIN TRY
 			dblTolerancePct				NUMERIC(18,6),
 			dblProvisionalInvoicePct	NUMERIC(18,6),
 			dblQuantityPerLoad			NUMERIC(18,6),
-			intNoOfLoad					INT
+			intNoOfLoad					INT,
+			intFutureMarketId			INT,
+			intFutureMonthId			INT,
+			dblFutures					INT
 			
 	);  
 

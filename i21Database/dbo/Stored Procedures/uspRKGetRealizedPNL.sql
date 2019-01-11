@@ -1,362 +1,343 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGetRealizedPNL]
-	 @inBookId		   INT = 0	
-	,@intCurrencyId    INT = 0
-	
+	@inBookId INT = 0
+	, @intCurrencyId INT = 0
+
 AS
+
 BEGIN TRY
+	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @DefaultCompanyId INT
+	DECLARE @DefaultCompanyName NVARCHAR(200)
+	
+	IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
+	BEGIN
+		SELECT @DefaultCompanyId = intMultiCompanyId
+			, @DefaultCompanyName = strCompanyName 
+		FROM tblSMMultiCompany
+	END
+	
+	DECLARE @tblRealizedPNL AS TABLE (intRealizedPNL INT IDENTITY(1,1)
+		, intContractTypeId INT
+		, intContractDetailId INT	
+		, intBookId INT
+		, strBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strSubBook NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, intCommodityId INT
+		, strCommodity NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strProductType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strRealizedType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dtmContractDate DATETIME
+		, strTransactionType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dtmInvoicePostedDate DATETIME
+		, strContract NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strAllocationRefNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strInternalCompany NVARCHAR(20) COLLATE Latin1_General_CI_AS
+		, dblQuantity NUMERIC(38,20)
+		, intQuantityUOMId INT							---ItemUOM
+		, intQuantityUnitMeasureId INT							---UnitMeasure
+		, strQuantityUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dblWeight NUMERIC(38,20)
+		, intWeightUOMId INT							---ItemUOM		
+		, strWeightUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, intOriginId INT
+		, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strItemDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strGrade NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strCropYear NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strProductionLine NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCertification NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strTerms NVARCHAR(200) COLLATE Latin1_General_CI_AS	
+		, strPosition NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, dtmStartDate DATETIME
+		, dtmEndDate DATETIME
+		, strPriceTerms NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strIncoTermLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dblContractDifferential NUMERIC(38,20)
+		, strContractDifferentialUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dblFuturesPrice NUMERIC(38,20)
+		, strFuturesPriceUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dblCashPrice NUMERIC(38,20)
+		, intPriceUOMId INT							---ItemUOM
+		, intPriceUnitMeasureId INT							---UnitMeasure
+		, strContractPriceUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strFixationDetails NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dblFixedLots NUMERIC(38,20)
+		, dblUnFixedLots NUMERIC(38,20)
+		, dblContractInvoiceValue NUMERIC(38,20)
+		, dblSecondaryCosts NUMERIC(38,20)
+		, dblCOGSOrNetSaleValue NUMERIC(38,20)
+		, intFutureMarketId INT
+		, strFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intFutureMarketUOMId INT
+		, intFutureMarketUnitMeasureId INT
+		, strFutureMarketUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, intMarketCurrencyId INT
+		, intFutureMonthId INT
+		, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, dtmRealizedDate DATETIME
+		, dblRealizedQty NUMERIC(38,20)
+		, dblRealizedPNLValue NUMERIC(38,20)
+		, dblPNLPreDayValue NUMERIC(38,20)
+		, dblProfitOrLossValue NUMERIC(38,20)
+		, dblPNLChange NUMERIC(38,20)
+		, strFixedBy NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strInvoiceStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, dblNetFuturesValue NUMERIC(38,20)
+		, dblRealizedFuturesPNLValue NUMERIC(38,20)
+		, dblNetPNLValue NUMERIC(38,20)
+		, dblFXValue NUMERIC(38,20)
+		, dblFXConvertedValue NUMERIC(38,20)
+		, strSalesReturnAdjustment NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, intCompanyId INT
+		, strCompany NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+	
+	INSERT INTO @tblRealizedPNL (intContractTypeId
+		, intContractDetailId
+		, intBookId
+		, strBook
+		, strSubBook
+		, intCommodityId
+		, strCommodity
+		, strProductType
+		, strRealizedType
+		, dtmContractDate
+		, strTransactionType
+		, dtmInvoicePostedDate
+		, strContract
+		, strAllocationRefNo
+		, strEntityName
+		, intQuantityUOMId
+		, strInternalCompany
+		, dblQuantity
+		, intQuantityUnitMeasureId
+		, strQuantityUOM
+		, dblWeight
+		, intWeightUOMId
+		, strWeightUOM
+		, intOriginId
+		, strOrigin
+		, strItemDescription
+		, strGrade
+		, strCropYear
+		, strProductionLine
+		, strCertification
+		, strTerms
+		, strPosition
+		, dtmStartDate
+		, dtmEndDate
+		, strPriceTerms
+		, strIncoTermLocation
+		, dblContractDifferential
+		, strContractDifferentialUOM
+		, dblFuturesPrice
+		, strFuturesPriceUOM
+		, dblCashPrice
+		, intPriceUOMId
+		, intPriceUnitMeasureId
+		, strContractPriceUOM
+		, strFixationDetails
+		, dblFixedLots
+		, dblUnFixedLots
+		, dblContractInvoiceValue
+		, dblSecondaryCosts
+		, dblCOGSOrNetSaleValue
+		, intFutureMarketId
+		, strFutureMarket
+		, intFutureMarketUOMId
+		, intFutureMarketUnitMeasureId
+		, strFutureMarketUOM
+		, intMarketCurrencyId
+		, intFutureMonthId
+		, strFutureMonth
+		, dtmRealizedDate
+		, dblRealizedQty
+		, dblRealizedPNLValue
+		, dblPNLPreDayValue
+		, dblProfitOrLossValue
+		, dblPNLChange
+		, strFixedBy
+		, strPricingType
+		, strInvoiceStatus
+		, dblNetFuturesValue
+		, dblRealizedFuturesPNLValue
+		, dblNetPNLValue
+		, dblFXValue
+		, dblFXConvertedValue
+		, strSalesReturnAdjustment
+		, intCompanyId
+		, strCompany)
+	SELECT intContractTypeId
+		, intContractDetailId
+		, intBookId
+		, strBook
+		, strSubBook
+		, intCommodityId
+		, strCommodity
+		, strProductType
+		, strRealizedType
+		, dtmContractDate
+		, strTransactionType
+		, dtmInvoicePostedDate
+		, strContract
+		, strAllocationRefNo
+		, strEntityName
+		, intQuantityUOMId
+		, strInternalCompany
+		, dblQuantity = SUM(dblQuantity)
+		, intQuantityUnitMeasureId
+		, strQuantityUOM
+		, dblWeight = SUM(dblWeight)
+		, intWeightUOMId
+		, strWeightUOM
+		, intOriginId
+		, strOrigin
+		, strItemDescription
+		, strGrade
+		, strCropYear
+		, strProductionLine
+		, strCertification
+		, strTerms
+		, strPosition
+		, dtmStartDate
+		, dtmEndDate
+		, strPriceTerms
+		, strIncoTermLocation
+		, dblContractDifferential
+		, strContractDifferentialUOM
+		, dblFuturesPrice
+		, strFuturesPriceUOM
+		, dblCashPrice
+		, intPriceUOMId
+		, intPriceUnitMeasureId
+		, strContractPriceUOM
+		, strFixationDetails
+		, dblFixedLots
+		, dblUnFixedLots
+		, dblContractInvoiceValue = SUM(dblContractInvoiceValue)
+		, dblSecondaryCosts = SUM(dblSecondaryCosts)
+		, dblCOGSOrNetSaleValue
+		, intFutureMarketId
+		, strFutureMarket
+		, intFutureMarketUOMId
+		, intFutureMarketUnitMeasureId
+		, strFutureMarketUOM
+		, intMarketCurrencyId
+		, intFutureMonthId
+		, strFutureMonth
+		, dtmRealizedDate
+		, dblRealizedQty = SUM(dblRealizedQty)
+		, dblRealizedPNLValue
+		, dblPNLPreDayValue
+		, dblProfitOrLossValue
+		, dblPNLChange
+		, strFixedBy
+		, strPricingType
+		, strInvoiceStatus
+		, dblNetFuturesValue = SUM(CASE WHEN intContractTypeId = 1 THEN dblNetFuturesValue ELSE - dblNetFuturesValue END)
+		, dblRealizedFuturesPNLValue
+		, dblNetPNLValue
+		, dblFXValue
+		, dblFXConvertedValue = SUM(dblFXConvertedValue)
+		, strSalesReturnAdjustment
+		, intCompanyId
+		, strCompany
+	FROM (
+		SELECT intContractTypeId					= CH.intContractTypeId
+			,intContractDetailId					= CD.intContractDetailId
+			,intBookId								= Book.intBookId
+			,strBook								= Book.strBook
+			,strSubBook								= SubBook.strSubBook
+			,intCommodityId							= Commodity.intCommodityId
+			,strCommodity							= Commodity.strDescription
+			,strProductType							= CA1.strDescription
+			,strRealizedType						= 'Realized' COLLATE Latin1_General_CI_AS
+			,dtmContractDate						= CONVERT(DATETIME, CONVERT(VARCHAR, CH.dtmContractDate, 101), 101)
+			,strTransactionType						= ('Contract(' + CASE WHEN CH.intContractTypeId=1 THEN 'P'
+																		WHEN CH.intContractTypeId=2 THEN 'S' END + ')') COLLATE Latin1_General_CI_AS
+			,dtmInvoicePostedDate					= Invoice.dtmPostDate			
+			,strContract							= (CH.strContractNumber+ '-' + LTRIM(CD.intContractSeq)) COLLATE Latin1_General_CI_AS
+			,strAllocationRefNo						= AllocationDetail.strAllocationDetailRefNo
+			,strEntityName							= Entity.strEntityName
+			,intQuantityUOMId						= InvoiceDetail.intOrderUOMId
+			,strInternalCompany						= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+			,dblQuantity							= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)		
+			,intQuantityUnitMeasureId				= OrderUOM.intUnitMeasureId
+			,strQuantityUOM							= IUM.strUnitMeasure
+			,dblWeight								= InvoiceDetail.dblShipmentNetWt
+			,intWeightUOMId							= LoadDetail.intWeightItemUOMId 
+			,strWeightUOM							= WUM.strUnitMeasure
+			,intOriginId							= Item.intOriginId
+			,strOrigin								= ISNULL(RY.strCountry, OG.strCountry)
+			,strItemDescription						= Item.strDescription
+			,strGrade								= CA2.strDescription
+			,strCropYear							= CropYear.strCropYear
+			,strProductionLine						= CPL.strDescription
+			,strCertification						= NULL
+			,strTerms								= (ISNULL(CB.strContractBasis,'')+','+ISNULL(Term.strTerm,'')+','+ISNULL(WG.strWeightGradeDesc,'')) COLLATE Latin1_General_CI_AS
+			,strPosition							= PO.strPosition
+			,dtmStartDate							= CD.dtmStartDate
+			,dtmEndDate								= CD.dtmEndDate
+			,strPriceTerms							= CASE WHEN CD.intPricingTypeId =2 THEN 'Unfixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth
+																										+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
 
-DECLARE @ErrMsg NVARCHAR(MAX)
-
-DECLARE @DefaultCompanyId	 INT
-DECLARE @DefaultCompanyName	 NVARCHAR(200)
-  
-  IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
-  BEGIN
-		 SELECT 
-		 @DefaultCompanyId = intMultiCompanyId
-		,@DefaultCompanyName = strCompanyName 
-		 FROM tblSMMultiCompany
-
-  END
-
-	 DECLARE @tblRealizedPNL AS TABLE 
-	 (
-		 intRealizedPNL                         INT IDENTITY(1,1)
-		,intContractTypeId						INT
-		,intContractDetailId					INT	
-		,intBookId								INT
-		,strBook								NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strSubBook								NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,intCommodityId							INT
-		,strCommodity							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strProductType							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strRealizedType						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dtmContractDate						DATETIME
-		,strTransactionType						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dtmInvoicePostedDate					DATETIME
-		,strContract							NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,strAllocationRefNo						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strEntityName							NVARCHAR(100)
-		,strInternalCompany						NVARCHAR(20)
-		,dblQuantity							NUMERIC(38,20)
-		,intQuantityUOMId						INT							---ItemUOM
-		,intQuantityUnitMeasureId				INT							---UnitMeasure
-		,strQuantityUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblWeight								NUMERIC(38,20)
-		,intWeightUOMId							INT							---ItemUOM		
-		,strWeightUOM							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,intOriginId							INT
-		,strOrigin								NVARCHAR(100)
-		,strItemDescription						NVARCHAR(100)
-		,strGrade								NVARCHAR(100)
-		,strCropYear							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strProductionLine						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strCertification						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strTerms								NVARCHAR(200) COLLATE Latin1_General_CI_AS	
-		,strPosition							NVARCHAR(100)
-		,dtmStartDate							DATETIME
-		,dtmEndDate								DATETIME
-		,strPriceTerms							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strIncoTermLocation					NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblContractDifferential				NUMERIC(38,20)
-		,strContractDifferentialUOM				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFuturesPrice						NUMERIC(38,20)
-		,strFuturesPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblCashPrice							NUMERIC(38,20)
-		,intPriceUOMId							INT							---ItemUOM
-		,intPriceUnitMeasureId					INT							---UnitMeasure
-		,strContractPriceUOM					NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strFixationDetails						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblFixedLots							NUMERIC(38,20)
-		,dblUnFixedLots							NUMERIC(38,20)
-		,dblContractInvoiceValue				NUMERIC(38,20)
-		,dblSecondaryCosts						NUMERIC(38,20)
-		,dblCOGSOrNetSaleValue					NUMERIC(38,20)
-		,intFutureMarketId						INT
-		,strFutureMarket						NVARCHAR(100)
-		,intFutureMarketUOMId					INT
-		,intFutureMarketUnitMeasureId			INT
-		,strFutureMarketUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,intMarketCurrencyId					INT
-		,intFutureMonthId						INT
-		,strFutureMonth							NVARCHAR(100)
-		,dtmRealizedDate						DATETIME
-		,dblRealizedQty							NUMERIC(38,20)
-		,dblRealizedPNLValue					NUMERIC(38,20)
-		,dblPNLPreDayValue						NUMERIC(38,20)
-		,dblProfitOrLossValue					NUMERIC(38,20)
-		,dblPNLChange							NUMERIC(38,20)
-		,strFixedBy								NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strPricingType							NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,strInvoiceStatus						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,dblNetFuturesValue					    NUMERIC(38,20)
-		,dblRealizedFuturesPNLValue			    NUMERIC(38,20)
-		,dblNetPNLValue						    NUMERIC(38,20)
-		,dblFXValue							    NUMERIC(38,20)
-		,dblFXConvertedValue				    NUMERIC(38,20)
-		,strSalesReturnAdjustment				NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,intCompanyId							INT
-		,strCompany								NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	    )  
-
-		INSERT INTO @tblRealizedPNL
-		(
-			 intContractTypeId
-			,intContractDetailId
-			,intBookId
-			,strBook						
-			,strSubBook						
-			,intCommodityId					
-			,strCommodity					
-			,strProductType					
-			,strRealizedType				
-			,dtmContractDate				
-			,strTransactionType				
-			,dtmInvoicePostedDate			
-			,strContract					
-			,strAllocationRefNo				
-			,strEntityName					
-			,intQuantityUOMId				
-			,strInternalCompany				
-			,dblQuantity					
-			,intQuantityUnitMeasureId		
-			,strQuantityUOM					
-			,dblWeight						
-			,intWeightUOMId					
-			,strWeightUOM					
-			,intOriginId					
-			,strOrigin
-			,strItemDescription
-			,strGrade						
-			,strCropYear					
-			,strProductionLine				
-			,strCertification				
-			,strTerms						
-			,strPosition					
-			,dtmStartDate					
-			,dtmEndDate						
-			,strPriceTerms					
-			,strIncoTermLocation			
-			,dblContractDifferential		
-			,strContractDifferentialUOM		
-			,dblFuturesPrice				
-			,strFuturesPriceUOM				
-			,dblCashPrice					
-			,intPriceUOMId					
-			,intPriceUnitMeasureId			
-			,strContractPriceUOM			
-			,strFixationDetails				
-			,dblFixedLots					
-			,dblUnFixedLots					
-			,dblContractInvoiceValue		
-			,dblSecondaryCosts				
-			,dblCOGSOrNetSaleValue			
-			,intFutureMarketId				
-			,strFutureMarket				
-			,intFutureMarketUOMId			
-			,intFutureMarketUnitMeasureId	
-			,strFutureMarketUOM				
-			,intMarketCurrencyId			
-			,intFutureMonthId				
-			,strFutureMonth					
-			,dtmRealizedDate				
-			,dblRealizedQty
-			,dblRealizedPNLValue					
-			,dblPNLPreDayValue				
-			,dblProfitOrLossValue			
-			,dblPNLChange					
-			,strFixedBy						
-			,strPricingType					
-			,strInvoiceStatus				
-			,dblNetFuturesValue				
-			,dblRealizedFuturesPNLValue		
-			,dblNetPNLValue					
-			,dblFXValue						
-			,dblFXConvertedValue			
-			,strSalesReturnAdjustment
-			,intCompanyId	
-			,strCompany				
-		)
-		  SELECT
-		  intContractTypeId					
-		 ,intContractDetailId				
-		 ,intBookId							
-		 ,strBook							
-		 ,strSubBook							
-		 ,intCommodityId						
-		 ,strCommodity						
-		 ,strProductType						
-		 ,strRealizedType					
-		 ,dtmContractDate					
-		 ,strTransactionType				
-		 ,dtmInvoicePostedDate				
-		 ,strContract						
-		 ,strAllocationRefNo					
-		 ,strEntityName						
-		 ,intQuantityUOMId					
-		 ,strInternalCompany					
-		 ,dblQuantity				= SUM(dblQuantity)						
-		 ,intQuantityUnitMeasureId			
-		 ,strQuantityUOM
-		 ,dblWeight					= SUM(dblWeight)							
-		 ,intWeightUOMId
-		 ,strWeightUOM						
-		 ,intOriginId						
-		 ,strOrigin							
-		 ,strItemDescription					
-		 ,strGrade							
-		 ,strCropYear						
-		 ,strProductionLine					
-		 ,strCertification					
-		 ,strTerms							
-		 ,strPosition						
-		 ,dtmStartDate						
-		 ,dtmEndDate							
-		 ,strPriceTerms						
-		 ,strIncoTermLocation				
-		 ,dblContractDifferential			
-		 ,strContractDifferentialUOM			
-		 ,dblFuturesPrice					
-		 ,strFuturesPriceUOM					
-		 ,dblCashPrice						
-		 ,intPriceUOMId						
-		 ,intPriceUnitMeasureId				
-		 ,strContractPriceUOM				
-		 ,strFixationDetails					
-		 ,dblFixedLots						
-		 ,dblUnFixedLots						
-		 ,dblContractInvoiceValue = SUM(dblContractInvoiceValue)	
-		 ,dblSecondaryCosts       = SUM(dblSecondaryCosts)			
-		 ,dblCOGSOrNetSaleValue				
-		 ,intFutureMarketId					
-		 ,strFutureMarket					
-		 ,intFutureMarketUOMId				
-		 ,intFutureMarketUnitMeasureId		
-		 ,strFutureMarketUOM					
-		 ,intMarketCurrencyId				
-		 ,intFutureMonthId					
-		 ,strFutureMonth						
-		 ,dtmRealizedDate					
-		 ,dblRealizedQty		 = SUM(dblRealizedQty)			
-		 ,dblRealizedPNLValue				
-		 ,dblPNLPreDayValue					
-		 ,dblProfitOrLossValue				
-		 ,dblPNLChange						
-		 ,strFixedBy							
-		 ,strPricingType						
-		 ,strInvoiceStatus					
-		 ,dblNetFuturesValue	= SUM(CASE WHEN intContractTypeId = 1 THEN dblNetFuturesValue ELSE - dblNetFuturesValue END)				
-		 ,dblRealizedFuturesPNLValue			
-		 ,dblNetPNLValue						
-		 ,dblFXValue							
-		 ,dblFXConvertedValue		= SUM(dblFXConvertedValue)		
-		 ,strSalesReturnAdjustment			
-		 ,intCompanyId						
-		 ,strCompany							
-		  FROM
-	   (
-		 SELECT
-		 intContractTypeId							= CH.intContractTypeId 
-		,intContractDetailId						= CD.intContractDetailId
-		,intBookId									= Book.intBookId
-		,strBook									= Book.strBook
-		,strSubBook									= SubBook.strSubBook
-		,intCommodityId								= Commodity.intCommodityId
-		,strCommodity								= Commodity.strDescription
-		,strProductType								= CA1.strDescription
-		,strRealizedType							= 'Realized'							
-		,dtmContractDate							= CONVERT(DATETIME, CONVERT(VARCHAR, CH.dtmContractDate, 101), 101)
-		,strTransactionType							= 'Contract('+CASE 
-																	  WHEN CH.intContractTypeId=1 THEN 'P'
-																	  WHEN CH.intContractTypeId=2 THEN 'S'
-																  END
-															 +')'
-		,dtmInvoicePostedDate						= Invoice.dtmPostDate			
-		,strContract								= CH.strContractNumber+ '-' + LTRIM(CD.intContractSeq)
-		,strAllocationRefNo							= AllocationDetail.strAllocationDetailRefNo
-		,strEntityName								= Entity.strEntityName
-		,intQuantityUOMId							= InvoiceDetail.intOrderUOMId
-		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
-		,dblQuantity								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)		
-		,intQuantityUnitMeasureId					= OrderUOM.intUnitMeasureId
-		,strQuantityUOM								= IUM.strUnitMeasure
+																ELSE 'Fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)
+																+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure+' '
+																+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure END COLLATE Latin1_General_CI_AS
+			,strIncoTermLocation					= CB.strContractBasis + ISNULL(CASE WHEN CB.strINCOLocationType IN('City','Port') THEN CT.strCity+','+CO.strCountry ELSE SL.strSubLocationName END,'')
+			,dblContractDifferential				= CD.dblBasis
+			,strContractDifferentialUOM				= (BCY.strCurrency+'/'+BUOM.strUnitMeasure) COLLATE Latin1_General_CI_AS
+			,dblFuturesPrice						= CD.dblFutures
+			,strFuturesPriceUOM						= (MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure) COLLATE Latin1_General_CI_AS
+			,dblCashPrice							= CD.dblCashPrice
+			,intPriceUOMId							= CD.intPriceItemUOMId
+			,intPriceUnitMeasureId					= PriceUOM.intUnitMeasureId
+			,strContractPriceUOM					= PUOM.strUnitMeasure	
+			,strFixationDetails						= NULL
+			,dblFixedLots							= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
+			,dblUnFixedLots							= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
+			,dblContractInvoiceValue				= (BillDetail.dblTotal * ISNULL(BillDetail.dblRate,1)) *
+														  (InvoiceDetail.dblQtyShipped
+														  /dbo.fnCTConvertQuantityToTargetItemUOM(BillDetail.intItemId,BillUOM.intUnitMeasureId,ShipUOM.intUnitMeasureId,BillDetail.dblQtyReceived))
 		
-		,dblWeight									= InvoiceDetail.dblShipmentNetWt
-		,intWeightUOMId								= LoadDetail.intWeightItemUOMId 
+			,dblSecondaryCosts						= ISNULL((BillCost.dblTotal)*
+														  (InvoiceDetail.dblQtyShipped
+														  /dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,ItemUOM.intUnitMeasureId,ShipUOM.intUnitMeasureId,CD.dblQuantity)),0)
 		
-		,strWeightUOM								= WUM.strUnitMeasure
-		,intOriginId								= Item.intOriginId
-		,strOrigin									= ISNULL(RY.strCountry, OG.strCountry)
-		,strItemDescription							= Item.strDescription
-		,strGrade									= CA2.strDescription
-		,strCropYear								= CropYear.strCropYear
-		,strProductionLine							= CPL.strDescription
-		,strCertification							= NULL
-		,strTerms									= ISNULL(CB.strContractBasis,'')+','+ISNULL(Term.strTerm,'')+','+ISNULL(WG.strWeightGradeDesc,'') 
-		,strPosition								= PO.strPosition
-		,dtmStartDate								= CD.dtmStartDate
-		,dtmEndDate									= CD.dtmEndDate
-		,strPriceTerms								= CASE 
-															WHEN CD.intPricingTypeId =2 THEN 'Unfixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth
-																									+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
-
-															ELSE 'Fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)
-															+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure+' '
-															+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
-													  END
-		,strIncoTermLocation						= CB.strContractBasis + ISNULL(CASE WHEN CB.strINCOLocationType IN('City','Port') THEN CT.strCity+','+CO.strCountry ELSE SL.strSubLocationName END,'')
-		,dblContractDifferential					= CD.dblBasis
-		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
-		,dblFuturesPrice							= CD.dblFutures
-		,strFuturesPriceUOM							= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
-		,dblCashPrice								= CD.dblCashPrice
-		,intPriceUOMId								= CD.intPriceItemUOMId
-		,intPriceUnitMeasureId						= PriceUOM.intUnitMeasureId
-		,strContractPriceUOM						= PUOM.strUnitMeasure	
-		,strFixationDetails							= NULL
-		,dblFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL(PF.dblLotsFixed,0) ELSE 0 END
-		,dblUnFixedLots								= CASE WHEN CH.intPricingTypeId =2 THEN ISNULL((ISNULL(CD.[dblNoOfLots],0) -ISNULL(PF.dblLotsFixed,0)),0) ELSE 0 END
-		,dblContractInvoiceValue					= (BillDetail.dblTotal * ISNULL(BillDetail.dblRate,1)) *
-													  (InvoiceDetail.dblQtyShipped
-													  /dbo.fnCTConvertQuantityToTargetItemUOM(BillDetail.intItemId,BillUOM.intUnitMeasureId,ShipUOM.intUnitMeasureId,BillDetail.dblQtyReceived))
-		
-		,dblSecondaryCosts							= ISNULL((BillCost.dblTotal)*
-													  (InvoiceDetail.dblQtyShipped
-													  /dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,ItemUOM.intUnitMeasureId,ShipUOM.intUnitMeasureId,CD.dblQuantity)),0)
-		
-		,dblCOGSOrNetSaleValue						= NULL---dblContractInvoiceValue+dblCOGSOrNetSaleValue		
-		,intFutureMarketId							= CD.intFutureMarketId
-		,strFutureMarket							= Market.strFutMarketName
-		,intFutureMarketUOMId						= NULL
-		,intFutureMarketUnitMeasureId				= Market.intUnitMeasureId
-		,strFutureMarketUOM							= MarketUOM.strUnitMeasure
-		,intMarketCurrencyId						= Market.intCurrencyId
-		,intFutureMonthId							= FMonth.intFutureMonthId
-		,strFutureMonth								= FMonth.strFutureMonth
-		,dtmRealizedDate							= CONVERT(DATETIME, CONVERT(VARCHAR, Invoice.dtmPostDate, 101), 101)	
-		,dblRealizedQty								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)		
-		,dblRealizedPNLValue						= NULL
-		,dblPNLPreDayValue							= NULL
-		,dblProfitOrLossValue						= NULL
-		,dblPNLChange								= NULL
-		,strFixedBy									= CD.strFixationBy
-		,strPricingType								= PT.strPricingType
-		,strInvoiceStatus							= Invoice.strType
-		,dblNetFuturesValue							= dbo.fnCTConvertQuantityToTargetItemUOM
-																							(
-																							 InvoiceDetail.intItemId
-																							,ShipUOM.intUnitMeasureId
-																							,Market.intUnitMeasureId
-																							,InvoiceDetail.dblQtyShipped
-																							)
-													  * CD.dblFutures /(CASE WHEN MarketCY.ysnSubCurrency = 1 THEN MarketCY.intCent ELSE 1 END)
-		,dblRealizedFuturesPNLValue					= 0
-		,dblNetPNLValue								= 0
-		,dblFXValue									= NULL
-		,dblFXConvertedValue						= InvoiceDetail.dblTotal * InvoiceDetail.dblCurrencyExchangeRate
-		,strSalesReturnAdjustment					= NULL
-		,intCompanyId								= Company.intMultiCompanyId
-		,strCompany									= Company.strCompanyName
+			,dblCOGSOrNetSaleValue					= NULL---dblContractInvoiceValue+dblCOGSOrNetSaleValue		
+			,intFutureMarketId						= CD.intFutureMarketId
+			,strFutureMarket						= Market.strFutMarketName
+			,intFutureMarketUOMId					= NULL
+			,intFutureMarketUnitMeasureId			= Market.intUnitMeasureId
+			,strFutureMarketUOM						= MarketUOM.strUnitMeasure
+			,intMarketCurrencyId					= Market.intCurrencyId
+			,intFutureMonthId						= FMonth.intFutureMonthId
+			,strFutureMonth							= FMonth.strFutureMonth
+			,dtmRealizedDate						= CONVERT(DATETIME, CONVERT(VARCHAR, Invoice.dtmPostDate, 101), 101)	
+			,dblRealizedQty							= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)		
+			,dblRealizedPNLValue					= NULL
+			,dblPNLPreDayValue						= NULL
+			,dblProfitOrLossValue					= NULL
+			,dblPNLChange							= NULL
+			,strFixedBy								= CD.strFixationBy
+			,strPricingType							= PT.strPricingType
+			,strInvoiceStatus						= Invoice.strType
+			,dblNetFuturesValue						= dbo.fnCTConvertQuantityToTargetItemUOM
+																								(
+																								 InvoiceDetail.intItemId
+																								,ShipUOM.intUnitMeasureId
+																								,Market.intUnitMeasureId
+																								,InvoiceDetail.dblQtyShipped
+																								)
+														  * CD.dblFutures /(CASE WHEN MarketCY.ysnSubCurrency = 1 THEN MarketCY.intCent ELSE 1 END)
+			,dblRealizedFuturesPNLValue				= 0
+			,dblNetPNLValue							= 0
+			,dblFXValue								= NULL
+			,dblFXConvertedValue					= InvoiceDetail.dblTotal * InvoiceDetail.dblCurrencyExchangeRate
+			,strSalesReturnAdjustment				= NULL
+			,intCompanyId							= Company.intMultiCompanyId
+			,strCompany								= Company.strCompanyName
 
 		FROM tblARInvoiceDetail InvoiceDetail
 		JOIN tblARInvoice Invoice					ON Invoice.intInvoiceId= InvoiceDetail.intInvoiceId AND Invoice.strType = 'Standard'
@@ -444,26 +425,21 @@ DECLARE @DefaultCompanyName	 NVARCHAR(200)
 		,intCommodityId								= Commodity.intCommodityId
 		,strCommodity								= Commodity.strDescription
 		,strProductType								= CA1.strDescription
-		,strRealizedType							= 'Realized'							
+		,strRealizedType							= 'Realized' COLLATE Latin1_General_CI_AS
 		,dtmContractDate							= CONVERT(DATETIME, CONVERT(VARCHAR, CH.dtmContractDate, 101), 101)
-		,strTransactionType							= 'Contract('+CASE 
-																	  WHEN CH.intContractTypeId=1 THEN 'P'
-																	  WHEN CH.intContractTypeId=2 THEN 'S'
-																  END
-															 +')'
+		,strTransactionType							= ('Contract('+CASE WHEN CH.intContractTypeId=1 THEN 'P'
+																		WHEN CH.intContractTypeId=2 THEN 'S' END +')') COLLATE Latin1_General_CI_AS
 		,dtmInvoicePostedDate						= Invoice.dtmPostDate			
-		,strContract								= CH.strContractNumber+ '-' + LTRIM(CD.intContractSeq)
+		,strContract								= (CH.strContractNumber+ '-' + LTRIM(CD.intContractSeq)) COLLATE Latin1_General_CI_AS
 		,strAllocationRefNo							= AllocationDetail.strAllocationDetailRefNo
 		,strEntityName								= Entity.strEntityName
 		,intQuantityUOMId							= InvoiceDetail.intOrderUOMId
-		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END
+		,strInternalCompany							= CASE WHEN ISNULL(BVE.intEntityId,0) >0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
 		,dblQuantity								= dbo.fnCTConvertQuantityToTargetItemUOM(InvoiceDetail.intItemId,ShipUOM.intUnitMeasureId,OrderUOM.intUnitMeasureId,InvoiceDetail.dblQtyShipped)		
 		,intQuantityUnitMeasureId					= OrderUOM.intUnitMeasureId
-		,strQuantityUOM								= IUM.strUnitMeasure
-		
+		,strQuantityUOM								= IUM.strUnitMeasure		
 		,dblWeight									= InvoiceDetail.dblShipmentNetWt
-		,intWeightUOMId								= LoadDetail.intWeightItemUOMId 
-		
+		,intWeightUOMId								= LoadDetail.intWeightItemUOMId 		
 		,strWeightUOM								= WUM.strUnitMeasure
 		,intOriginId								= Item.intOriginId
 		,strOrigin									= ISNULL(RY.strCountry, OG.strCountry)
@@ -472,23 +448,21 @@ DECLARE @DefaultCompanyName	 NVARCHAR(200)
 		,strCropYear								= CropYear.strCropYear
 		,strProductionLine							= CPL.strDescription
 		,strCertification							= NULL
-		,strTerms									= ISNULL(CB.strContractBasis,'')+','+ISNULL(Term.strTerm,'')+','+ISNULL(WG.strWeightGradeDesc,'') 
+		,strTerms									= (ISNULL(CB.strContractBasis,'')+','+ISNULL(Term.strTerm,'')+','+ISNULL(WG.strWeightGradeDesc,'')) COLLATE Latin1_General_CI_AS
 		,strPosition								= PO.strPosition
 		,dtmStartDate								= CD.dtmStartDate
 		,dtmEndDate									= CD.dtmEndDate
-		,strPriceTerms								= CASE 
-															WHEN CD.intPricingTypeId =2 THEN 'Unfixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth
+		,strPriceTerms								= CASE WHEN CD.intPricingTypeId =2 THEN 'Unfixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth
 																									+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblBasis)+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure
 
 															ELSE 'Fixed: '+Market.strFutMarketName+' '+FMonth.strFutureMonth+' '+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)
 															+' '+ BCY.strCurrency+' / '+BUOM.strUnitMeasure+' '
-															+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)+' '+ MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
-													  END
-		,strIncoTermLocation						= CB.strContractBasis + ISNULL(CASE WHEN CB.strINCOLocationType IN('City','Port') THEN CT.strCity+','+CO.strCountry ELSE SL.strSubLocationName END,'')
+															+[dbo].[fnRemoveTrailingZeroes](CD.dblFutures)+' '+ MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure END COLLATE Latin1_General_CI_AS
+		,strIncoTermLocation						= CB.strContractBasis + ISNULL(CASE WHEN CB.strINCOLocationType IN('City','Port') THEN CT.strCity+','+CO.strCountry ELSE SL.strSubLocationName END,'') COLLATE Latin1_General_CI_AS
 		,dblContractDifferential					= CD.dblBasis
-		,strContractDifferentialUOM					= BCY.strCurrency+'/'+BUOM.strUnitMeasure
+		,strContractDifferentialUOM					= (BCY.strCurrency+'/'+BUOM.strUnitMeasure) COLLATE Latin1_General_CI_AS
 		,dblFuturesPrice							= CD.dblFutures
-		,strFuturesPriceUOM							= MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure
+		,strFuturesPriceUOM							= (MarketCY.strCurrency+'/'+MarketUOM.strUnitMeasure) COLLATE Latin1_General_CI_AS
 		,dblCashPrice								= CD.dblCashPrice
 		,intPriceUOMId								= CD.intPriceItemUOMId
 		,intPriceUnitMeasureId						= PriceUOM.intUnitMeasureId

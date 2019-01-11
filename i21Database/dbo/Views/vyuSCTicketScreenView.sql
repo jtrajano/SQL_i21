@@ -78,7 +78,6 @@
 	,SCT.intAxleCount
 	,SCT.intAxleCount1
 	,SCT.intAxleCount2
-	,SCT.strBinNumber
 	,SCT.strPitNumber
 	,SCT.intGradingFactor
 	,SCT.strVarietyType

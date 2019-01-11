@@ -30,7 +30,12 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.st
 		,dblValue					= ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)   --ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2) 
 		,dblRunningBalance			= CAST(0 AS NUMERIC(38, 20))
 		,t.strBatchId
-		,intBatchId					= CAST(SUBSTRING(t.strBatchId, CHARINDEX('-',t.strBatchId) + 1, LEN(t.strBatchId) - CHARINDEX('-',t.strBatchId)) AS INT)
+		,intBatchId					= CAST(CASE 
+										WHEN CHARINDEX('-',t.strBatchId, PATINDEX('%[0-9]%', t.strBatchId)) = 0 THEN
+											SUBSTRING(t.strBatchId, PATINDEX('%[0-9]%',t.strBatchId), LEN(t.strBatchId) - CHARINDEX('-',t.strBatchId))
+										ELSE 
+											SUBSTRING(t.strBatchId, PATINDEX('%[0-9]%',t.strBatchId), LEN(t.strBatchId) - CHARINDEX('-',t.strBatchId) - CHARINDEX('-', REVERSE(t.strBatchId)))
+									END AS INT)
 		,CostingMethod.strCostingMethod
 		,strUOM						= umTransUOM.strUnitMeasure
 		,strStockUOM				= iuStock.strUnitMeasure

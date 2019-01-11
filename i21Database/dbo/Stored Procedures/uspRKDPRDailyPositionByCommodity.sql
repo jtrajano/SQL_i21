@@ -2,8 +2,10 @@ CREATE PROC [dbo].[uspRKDPRDailyPositionByCommodity]
 	 @intVendorId INT = NULL
 	,@strPositionIncludes NVARCHAR(100) = NULL
 	,@dtmToDate datetime = NULL
-	,@strByType nvarchar(50)
+	,@strByType nvarchar(50) = NULL
+	,@strPositionBy nvarchar(50) = NULL
 AS
+
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 DECLARE @FinalTable AS TABLE (
 		 strCommodityCode NVARCHAR(200),
@@ -15,7 +17,7 @@ DECLARE @FinalTable AS TABLE (
 
 
 INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)
-exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= '',@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity'
+exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= '',@intLocationId = null,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity', @strPositionBy = @strPositionBy
 
 INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)
 exec uspRKDPRSubInvPositionByCommodity  @intCommodityId= '',@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity'

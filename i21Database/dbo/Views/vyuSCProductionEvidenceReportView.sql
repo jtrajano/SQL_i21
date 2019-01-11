@@ -50,7 +50,6 @@
 	SC.ysnFarmerPaysFreight,
 	SC.strLoadNumber,
 	SC.intLoadLocationId,
-	SC.strBinNumber,
 	SC.strPitNumber,
 	SC.strFarmNumber,
 	SC.strFieldNumber,

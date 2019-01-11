@@ -1,88 +1,85 @@
 ﻿CREATE PROC uspRKGetPositionAnalysisReportDetail
-	@strFilterBy nvarchar(20)= NULL,
-	@strCondition nvarchar(20),
-	@dtmDateFrom nvarchar(30) = NULL,
-	@dtmDateTo nvarchar(30) = NULL,
-	@intFutureMarketId int= NULL,
-	@intCommodityId int= NULL,
-	@intQtyUOMId int = NULL,
-	@intCurrencyId int= NULL,
-	@intPriceUOMId int = NULL
-AS	
+	@strFilterBy nvarchar(20)= NULL
+	, @strCondition nvarchar(20)
+	, @dtmDateFrom nvarchar(30) = NULL
+	, @dtmDateTo nvarchar(30) = NULL
+	, @intFutureMarketId int= NULL
+	, @intCommodityId int= NULL
+	, @intQtyUOMId int = NULL
+	, @intCurrencyId int= NULL
+	, @intPriceUOMId int = NULL
 
+AS
 
-DECLARE @outrightQuery AS  NVARCHAR(max) = '',
-		@pricingQuery AS  NVARCHAR(max) = '',
-		@futuresQuery AS  NVARCHAR(max) = '',
-		@date nvarchar(50),
-		@dateFilter nvarchar(max)
+DECLARE @outrightQuery AS  NVARCHAR(max) = ''
+	, @pricingQuery AS  NVARCHAR(max) = ''
+	, @futuresQuery AS  NVARCHAR(max) = ''
+	, @date nvarchar(50)
+	, @dateFilter nvarchar(max)
 
 IF @strFilterBy = 'Transaction Date'
 BEGIN
 	SET @date = 'dtmTransactionDate'
 END
 ELSE
+BEGIN
 	SET @date = 'dtmEntryDate'
-
+END
 
 --Compose the date filter
 IF @strCondition = 'Between' 
 BEGIN
 	SET @dateFilter = @date + ' BETWEEN ''' + @dtmDateFrom + ''' AND ''' + @dtmDateTo + ''''
 END
-ELSE IF @strCondition = 'Equal' 
+ELSE IF @strCondition = 'Equal'
+BEGIN
 	SET @dateFilter =  @date + ' = ''' + @dtmDateFrom + ''''
-ELSE IF @strCondition = 'After' 
-	SET @dateFilter =  @date + ' > ''' + @dtmDateFrom + ''''	
-ELSE IF @strCondition = 'Before' 
+END
+ELSE IF @strCondition = 'After'
+BEGIN
+	SET @dateFilter =  @date + ' > ''' + @dtmDateFrom + ''''
+END
+ELSE IF @strCondition = 'Before'
+BEGIN
 	SET @dateFilter =  @date + ' < ''' + @dtmDateFrom + ''''
+END
 
 SET @outrightQuery = N'
-	SELECT 
-	 CONVERT(INT,ROW_NUMBER() OVER(ORDER BY dtmTransactionDate ASC)) AS intRowNum 
-	,intFutureMarketId
-	,intCommodityId
-	,intCurrencyId
-	,strActivity
-	,strBuySell
-	,strTransactionId
-	,intTransactionId
-	,dtmEntryDate
-	,dtmTransactionDate
-	,strItemNo
-	,CONVERT(VARCHAR(50), CAST(dblOriginalQty AS MONEY), 1) + '' '' + strSymbol as strOriginalQtyUOM
-	,CASE WHEN strBuySell = ''Buy'' THEN
-			dblQty
-		 ELSE --Sell
-			dblQty * -1
-	 END AS dblQty 
-	,CASE WHEN strBuySell = ''Buy'' THEN
-			ISNULL(dblDeltaQty,0)
-		 ELSE --Sell
-			ISNULL(dblDeltaQty,0) * -1
-	 END AS dblDeltaQty	
-	,dblNoOfLots
-	,strPosition
-	,strFutureMonth
-	,dblPrice
-	,ISNULL(dblValue,0) as dblValue
-	,intPriceFixationId
-	
+	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY dtmTransactionDate ASC)) AS intRowNum
+		,intFutureMarketId
+		,intCommodityId
+		,intCurrencyId
+		,strActivity
+		,strBuySell
+		,strTransactionId
+		,intTransactionId
+		,dtmEntryDate
+		,dtmTransactionDate
+		,strItemNo
+		,(CONVERT(VARCHAR(50), CAST(dblOriginalQty AS MONEY), 1) + '' '' + strSymbol) COLLATE Latin1_General_CI_AS as strOriginalQtyUOM
+		,CASE WHEN strBuySell = ''Buy'' THEN dblQty
+			ELSE dblQty * -1 END AS dblQty
+		,CASE WHEN strBuySell = ''Buy'' THEN ISNULL(dblDeltaQty,0)
+			ELSE ISNULL(dblDeltaQty,0) * -1 END AS dblDeltaQty
+		,dblNoOfLots
+		,strPosition
+		,strFutureMonth
+		,dblPrice
+		,ISNULL(dblValue,0) as dblValue
+		,intPriceFixationId
 	FROM (
-
 		--=========================================
 		-- Outright Physicals
 		--=========================================
-		SELECT 
-			 CD.intFutureMarketId
+		SELECT CD.intFutureMarketId
 			,CH.intCommodityId
 			,CD.intCurrencyId
-			,''Outright'' AS strActivity
+			,''Outright'' COLLATE Latin1_General_CI_AS AS strActivity
 			,CASE WHEN CH.intContractTypeId = 1 THEN --Purchase
 				''Buy''
 				ELSE --Sale
 				''Sell''
-			 END AS strBuySell
+			 END COLLATE Latin1_General_CI_AS AS strBuySell
 			,CH.strContractNumber AS strTransactionId
 			,CH.intContractHeaderId AS intTransactionId
 			,CONVERT(date,CH.dtmCreated,101) AS dtmEntryDate
@@ -129,12 +126,12 @@ SET @outrightQuery = N'
 			 CD.intFutureMarketId
 			,CH.intCommodityId
 			,CD.intCurrencyId
-			,''Price Fixing'' AS strActivity
+			,''Price Fixing'' COLLATE Latin1_General_CI_AS AS strActivity
 			,CASE WHEN CH.intContractTypeId = 1 THEN --Purchase
 				''Buy''
 				ELSE --Sale
 				''Sell''
-			 END AS strBuySell
+			 END COLLATE Latin1_General_CI_AS AS strBuySell
 			,CH.strContractNumber AS strTransactionId
 			,CH.intContractHeaderId AS intTransactionId
 			,CONVERT(date,CH.dtmCreated,101) AS dtmEntryDate
@@ -146,8 +143,7 @@ SET @outrightQuery = N'
 			,CD.intItemUOMId
 			,UM.strSymbol
 			,CASE WHEN ITM.intProductLineId IS NOT NULL THEN 
-				ISNULL(PFD.dblQuantity,0) * (ISNULL(CPL.dblDeltaPercent,0) /100)
-				
+				ISNULL(PFD.dblQuantity,0) * (ISNULL(CPL.dblDeltaPercent,0) /100)				
 			 ELSE
 				ISNULL(PFD.dblQuantity,0)
 			 END AS dblDeltaQty
@@ -183,13 +179,13 @@ SET @outrightQuery = N'
 			 DD.intFutureMarketId
 			,DD.intCommodityId
 			,DD.intCurrencyId
-			,''Futures'' AS strActivity
+			,''Futures'' COLLATE Latin1_General_CI_AS AS strActivity
 			,DD.strBuySell
 			,DD.strInternalTradeNo AS strTransactionId
 			,DD.intFutOptTransactionHeaderId AS intTransactionId
 			,CONVERT(date,DD.dtmTransactionDate,101) AS dtmEntryDate
 			,CONVERT(date,DD.dtmFilledDate,101) AS dtmTransactionDate
-			,'''' AS strItemNo
+			,'''' COLLATE Latin1_General_CI_AS AS strItemNo
 			,0 AS intItemId
 			,ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0)  AS dblOriginalQty
 			,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +',ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0) ) AS dblQty
@@ -197,8 +193,8 @@ SET @outrightQuery = N'
 			,UM.strSymbol
 			,ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0)  AS dblDeltaQty
 			,DD.intNoOfContract
-			,'''' AS strPosition
-			,'''' AS strFutureMonth
+			,'''' COLLATE Latin1_General_CI_AS AS strPosition
+			,'''' COLLATE Latin1_General_CI_AS AS strFutureMonth
 			,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,' + CASE WHEN @intPriceUOMId IS NULL THEN '0' ELSE CAST(@intPriceUOMId AS NVARCHAR(10)) END  +',FM.intUnitMeasureId,ISNULL(DD.dblPrice,0)) AS dblPrice 
 			,(ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * DD.dblPrice AS strValue
 			,null AS intPriceFixationId

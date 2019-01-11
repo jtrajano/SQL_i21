@@ -59,18 +59,6 @@ OR EXISTS(
 )
 OR EXISTS(
 	SELECT 1
-	FROM tblRKOptionsMonth OM WITH(NOLOCK)
-	INNER JOIN (
-		SELECT intFutureMonthId
-			,strMonth = strFutureMonth 
-		FROM tblRKFuturesMonth WITH(NOLOCK)
-	)FM ON OM.intFutureMonthId = FM.intFutureMonthId
-	WHERE OM.intFutureMonthId IS NOT NULL 
-		AND OM.intFutureMarketId = MARKET.intFutureMarketId
-		AND FM.strMonth = FUTM.strFutureMonth
-)
-OR EXISTS(
-	SELECT 1
 	FROM tblRKM2MInquiryTransaction MM WITH(NOLOCK)
 	INNER JOIN (
 		SELECT intFutureMonthId

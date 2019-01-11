@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPSalesForPayables]
 AS 
 
+
 SELECT 
 	A.dtmDate	
 	, A.intInvoiceId 
@@ -62,3 +63,36 @@ LEFT JOIN dbo.tblGLAccount accnt ON B.intAccountId = accnt.intAccountId
 	AND C.ysnPosted = 1
 	AND C.strTransactionType = 'Cash Refund'
 	AND A.ysnPrepay = 0
+UNION
+SELECT 
+	A.dtmDate
+	,A.intInvoiceId
+	,A.strInvoiceNumber
+	,0 as dblAmountPaid
+	,B.dblBaseInvoiceTotal as dblTotal
+	,0 as dblAmountDue
+	,0 as dblWithheld
+	,0 as dblDiscount
+	,0 as dblInterest
+	,0 as dblPrepaidAmount
+	,D.strVendorId
+	, ISNULL(D.strVendorId,'') + ' - ' + ISNULL(D2.strName,'') as strVendorIdName 
+	,A.dtmDueDate
+	,A.ysnPosted
+	,A.ysnPaid
+	,intAPAccount AS intAccountId
+	,accnt.strAccountId
+	, EC.strClass
+FROM tblARInvoice A
+INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+ 	ON A.[intEntityCustomerId] = D.[intEntityId]
+INNER JOIN tblARPrepaidAndCredit A2 ON A.intInvoiceId = A2.intInvoiceId
+INNER JOIN tblARInvoice B ON B.intInvoiceId = A2.intPrepaymentId
+INNER JOIN tblSMCompanyLocation SC ON SC.intCompanyLocationId = A.intCompanyLocationId
+LEFT JOIN dbo.tblGLAccount accnt ON A.intAccountId = accnt.intAccountId	
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
+WHERE A.strTransactionType = 'Invoice'
+AND B.strTransactionType = 'Customer Prepayment'
+AND A.ysnPosted = 1
+AND A2.ysnApplied = 1
+GO

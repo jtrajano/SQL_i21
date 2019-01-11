@@ -903,7 +903,7 @@ FROM (
 			END strConsigneeZipCode
 		,LC.strMarks
 		,L.strMarkingInstructions
-		,L.strComments
+		,strComments = L.strComments + CHAR(13) + CHAR(13)
 		,L.dblDemurrage
 		,DemCurrency.strCurrency AS strDemurrageCurrency
 		,L.dblDespatch
