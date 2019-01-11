@@ -460,7 +460,7 @@ BEGIN
 					1
 				FROM tblAPPaymentDetail prepayDetail
 				INNER JOIN tblAPPayment prepay
-					ON prepayDetail.intPaymentId = prepay.intPaymentId AND prepay.ysnPosted = 1 AND prepay.ysnPrepay = 1
+					ON prepayDetail.intPaymentId = prepay.intPaymentId AND prepay.ysnPosted = 1
 				INNER JOIN tblCMBankTransaction bankTran
 					ON prepay.strPaymentRecordNum = bankTran.strTransactionId AND bankTran.ysnCheckVoid = 0
 				WHERE prepayDetail.intBillId = voucher.intBillId
