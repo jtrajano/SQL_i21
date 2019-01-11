@@ -63,7 +63,7 @@ BEGIN TRY
 			,intUserId INT
 			)
 
-	SELECT @dtmCurrentDateTime = Max(dtmActualInputDateTime)
+	SELECT @dtmCurrentDateTime = Max(dtmProductionDate)
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND ysnConsumptionReversed = 0
@@ -319,6 +319,7 @@ BEGIN TRY
 								,@dblUnitQty = NULL
 								,@dblProducePartialQty = @dblProduceQty1
 								,@intMachineId = @intMachineId
+								,@dtmCurrentDateTime=@dtmCurrentDateTime
 						END
 					END
 					ELSE
@@ -333,6 +334,7 @@ BEGIN TRY
 							,@dblUnitQty = NULL
 							,@dblProducePartialQty = 0
 							,@intMachineId = @intMachineId
+							,@dtmCurrentDateTime=@dtmCurrentDateTime
 					END
 
 					EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
@@ -413,6 +415,7 @@ BEGIN TRY
 								,@dblUnitQty = NULL
 								,@dblProducePartialQty = @dblPhysicalCount1
 								,@intMachineId = @intMachineId
+								,@dtmCurrentDateTime=@dtmCurrentDateTime
 						END
 					END
 					ELSE
@@ -427,6 +430,7 @@ BEGIN TRY
 							,@dblUnitQty = NULL
 							,@dblProducePartialQty = 0
 							,@intMachineId = @intMachineId
+							,@dtmCurrentDateTime=@dtmCurrentDateTime
 					END
 
 					EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
