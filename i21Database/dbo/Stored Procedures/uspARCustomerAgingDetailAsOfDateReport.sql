@@ -436,12 +436,13 @@ SELECT I.intInvoiceId
 	 , dtmDatePaid			= P.dtmDatePaid
 	 , I.intEntityCustomerId
 	 , dblAvailableCredit	= 0
-	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0)
+	 , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0)
 	 , I.strType
 	 , strRecordNumber		= P.strRecordNumber
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
+	LEFT JOIN #CASHREFUNDS CR ON I.strInvoiceNumber = CR.strDocumentNumber
 WHERE I.strTransactionType = 'Customer Prepayment'
 						      
 UNION ALL      

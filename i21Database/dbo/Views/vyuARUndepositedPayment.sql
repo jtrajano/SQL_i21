@@ -27,6 +27,7 @@ FROM (
 										   AND PAYMENT.strRecordNumber = CM.strSourceTransactionId 
 										   AND CM.strSourceSystem = 'AR'	
 	WHERE PAYMENT.ysnPosted = 1
+	  AND PAYMENT.ysnProcessedToNSF = 0
 	  AND PAYMENT.intAccountId IS NOT NULL
 	  AND (PAYMENT.ysnImportedFromOrigin <> 1 AND PAYMENT.ysnImportedAsPosted <> 1)
 	  AND CM.intSourceTransactionId IS NULL
