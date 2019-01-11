@@ -408,17 +408,18 @@ BEGIN
 	SELECT *
 	INTO #tblGetStorageDetailByDate
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY a.intCustomerStorageId ORDER BY a.intCustomerStorageId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intStorageHistoryId ASC)
 			, a.intCustomerStorageId
 			, a.intCompanyLocationId
 			, c.strLocationName
-			, dtmDeliveryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), a.dtmDeliveryDate, 110), 110)
+			, strContractEndMonth = (CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+			, strDeliveryDate = (CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
 			, a.intEntityId
 			, strCustomerName = E.strName
-			, strReceipt = a.strDPARecieptNumber
-			, a.dblDiscountsDue
+			, a.strDPARecieptNumber [Receipt]
+			, dblDiscDue = a.dblDiscountsDue
 			, a.dblStorageDue
-			, dblBalance = (CASE WHEN gh.strType = 'Reduced By Inventory Shipment' THEN - gh.dblUnits ELSE gh.dblUnits END)
+			, dblBalance = (CASE WHEN gh.strType ='Reduced By Inventory Shipment' OR gh.strType = 'Settlement' THEN - gh.dblUnits ELSE gh.dblUnits END)
 			, a.intStorageTypeId
 			, strStorageType = b.strStorageTypeDescription
 			, a.intCommodityId
@@ -428,15 +429,16 @@ BEGIN
 			, b.ysnReceiptedStorage
 			, b.ysnDPOwnedType
 			, b.ysnGrainBankType
-			, ysnCustomerStorage = b.ysnActive
+			, b.ysnActive ysnCustomerStorage
 			, a.strCustomerReference
 			, a.dtmLastStorageAccrueDate
 			, c1.strScheduleId
-			, ium.intCommodityUnitMeasureId
 			, i.intItemId
 			, i.strItemNo
-			, Category.intCategoryId
+			, i.intCategoryId
 			, strCategory = Category.strCategoryCode
+			, ium.intCommodityUnitMeasureId
+			, t.dtmTicketDateTime
 			, intTicketId = (CASE WHEN gh.intTransactionTypeId = 1 THEN gh.intTicketId
 								WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
 								WHEN gh.intTransactionTypeId = 3 THEN gh.intTransferStorageId
@@ -449,6 +451,12 @@ BEGIN
 								WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
 								WHEN gh.intTransactionTypeId = 3 THEN gh.strTransferTicket
 								ELSE a.strStorageTicketNumber END)
+			, gh.intInventoryReceiptId
+			, gh.intInventoryShipmentId
+			, strReceiptNumber = ISNULL((SELECT strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = gh.intInventoryReceiptId), '')
+			, strShipmentNumber = ISNULL((SELECT strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = gh.intInventoryShipmentId), '')
+			, b.intStorageScheduleTypeId
+			, strFutureMonth = '' COLLATE Latin1_General_CI_AS
 		FROM tblGRStorageHistory gh
 		JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 		JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -460,23 +468,25 @@ BEGIN
 		JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
 		JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 		JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
-		JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
-		WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V'
+		LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
+		WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
-	
+			AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+				
 		UNION ALL
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY a.intCustomerStorageId ORDER BY a.intCustomerStorageId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intStorageHistoryId ASC)
 			, a.intCustomerStorageId
 			, a.intCompanyLocationId
 			, c.strLocationName
-			, dtmDeliveryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), a.dtmDeliveryDate, 110), 110)
+			, strContractEndMonth = (CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+			, strDeliveryDate = (CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
 			, a.intEntityId
 			, strCustomerName = E.strName
-			, strReceipt = a.strDPARecieptNumber
-			, dblDiscDue = a.dblDiscountsDue
-			, dblStorageDue = a.dblStorageDue
-			, dblBalance = (CASE WHEN gh.strType = 'Reduced By Inventory Shipment' THEN - gh.dblUnits ELSE gh.dblUnits END)
+			, [Receipt] = a.strDPARecieptNumber
+			, dblDiscDue = a.dblDiscountsDue 
+			, a.dblStorageDue
+			, dblBalance = (CASE WHEN gh.strType ='Reduced By Inventory Shipment' OR gh.strType = 'Settlement' THEN - gh.dblUnits ELSE gh.dblUnits END)
 			, a.intStorageTypeId
 			, strStorageType = b.strStorageTypeDescription
 			, a.intCommodityId
@@ -486,15 +496,16 @@ BEGIN
 			, b.ysnReceiptedStorage
 			, b.ysnDPOwnedType
 			, b.ysnGrainBankType
-			, ysnCustomerStorage = b.ysnActive
+			, b.ysnActive ysnCustomerStorage
 			, a.strCustomerReference
 			, a.dtmLastStorageAccrueDate
 			, c1.strScheduleId
-			, ium.intCommodityUnitMeasureId
 			, i.intItemId
 			, i.strItemNo
-			, Category.intCategoryId
+			, i.intCategoryId
 			, strCategory = Category.strCategoryCode
+			, ium.intCommodityUnitMeasureId
+			, dtmTicketDateTime = NULL
 			, intTicketId = (CASE WHEN gh.intTransactionTypeId = 1 THEN gh.intTicketId
 								WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
 								WHEN gh.intTransactionTypeId = 3 THEN gh.intTransferStorageId
@@ -507,6 +518,13 @@ BEGIN
 								WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
 								WHEN gh.intTransactionTypeId = 3 THEN gh.strTransferTicket
 								ELSE a.strStorageTicketNumber END)
+			, intInventoryReceiptId = (CASE WHEN gh.strType = 'From Inventory Adjustment' THEN gh.intInventoryAdjustmentId ELSE gh.intInventoryReceiptId END)
+			, gh.intInventoryShipmentId
+			, strReceiptNumber = (CASE WHEN gh.strType ='From Inventory Adjustment' THEN gh.strTransactionId
+									ELSE ISNULL((SELECT strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = gh.intInventoryReceiptId), '') END)
+			, strShipmentNumber = ISNULL((SELECT strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = gh.intInventoryShipmentId), '')
+			, b.intStorageScheduleTypeId
+			, strFutureMonth = '' COLLATE Latin1_General_CI_AS
 		FROM tblGRStorageHistory gh
 		JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 		JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -518,10 +536,11 @@ BEGIN
 		JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
 		JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 		JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
-		WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0
+		WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
-	) t
+			AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+	)t
 	
 	SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
 		, t.strTicketNumber
@@ -547,7 +566,7 @@ BEGIN
 		AND ysnInTransit = 0 AND ISNULL(s.dblQuantity, 0) <> 0
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 		AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-		AND ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END
+		--AND ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END
 	
 	SELECT * INTO #tempCollateral
 	FROM (
@@ -995,6 +1014,64 @@ BEGIN
 					, intCommodityId
 					, strCurrency
 
+				--=========================================
+				-- Includes DP based on Company Preference
+				--========================================
+				If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0)--DP is already included in Inventory we are going to subtract it here (reverse logic in including DP)
+				BEGIN
+					INSERT INTO @tempFinal(strCommodityCode
+						, strType
+						, strContractType
+						, dblTotal
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, strCurrency)
+					SELECT @strCommodityCode
+						, strType = 'Price Risk'
+						, strContractType = 'Inventory'
+						, dblTotal = -SUM(dblTotal)
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, strCurrency = NULL
+					FROM (
+						SELECT intTicketId
+							, strTicketType
+							, strTicketNumber
+							, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(dblBalance,0)))
+							, ch.intCompanyLocationId
+							, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
+							, intCommodityId
+							, strLocationName
+							, intItemId
+							, strItemNo
+							, intCategoryId
+							, strCategory
+						FROM #tblGetStorageDetailByDate ch
+						WHERE ch.intCommodityId  = @intCommodityId
+							AND ysnDPOwnedType = 1
+							AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
+						)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					GROUP BY intTicketId
+						, strTicketType
+						, strTicketNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+				END
 
 				--Net Hedge Derivative Entry (Futures AND Options)
 				INSERT INTO @tempFinal(strCommodityCode
@@ -1156,7 +1233,7 @@ BEGIN
 						, strEntityName
 						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmTicketDateTime, 106), 8) COLLATE Latin1_General_CI_AS
 					FROM @tempFinal cd
-					WHERE cd.intCommodityId = @intCommodityId and strType IN('Sale Priced', 'Purchase Priced') 
+					WHERE cd.intCommodityId = @intCommodityId and strType IN('Sale Priced', 'Purchase Priced', 'Purchase HTA', 'Sale HTA') 
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
 				) t	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 				GROUP BY strCommodityCode

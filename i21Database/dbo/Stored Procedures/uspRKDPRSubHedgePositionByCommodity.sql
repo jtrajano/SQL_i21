@@ -386,7 +386,7 @@ BEGIN
 		, a.strDPARecieptNumber [Receipt]
 		, a.dblDiscountsDue [Disc Due]
 		, a.dblStorageDue   [Storage Due]
-		, (case when gh.strType ='Reduced By Inventory Shipment' then -gh.dblUnits else gh.dblUnits   end) [Balance]
+		, [Balance] = (CASE WHEN gh.strType ='Reduced By Inventory Shipment' OR gh.strType = 'Settlement' THEN - gh.dblUnits ELSE gh.dblUnits END)
 		, a.intStorageTypeId
 		, b.strStorageTypeDescription [Storage Type]
 		, a.intCommodityId
@@ -405,17 +405,18 @@ BEGIN
 		, ium.intCommodityUnitMeasureId as intCommodityUnitMeasureId
 		, i.intItemId as intItemId  ,t.intTicketId,t.strTicketNumber
 	FROM tblGRStorageHistory gh
-	JOIN tblGRCustomerStorage a  on gh.intCustomerStorageId=a.intCustomerStorageId
+	JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 	JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
-	JOIN tblICItem i on i.intItemId=a.intItemId
-	JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
-	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-	LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId  
-	JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
-	JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
-	JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
-	join tblSCTicket t on t.intTicketId=gh.intTicketId
-	WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) =0 and isnull(strTicketStatus,'') <> 'V'
+	JOIN tblICItem i ON i.intItemId = a.intItemId
+	JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
+	JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
+	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
+	LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
+	JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
+	JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
+	JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
+	LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
+	WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
 	and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
 	and i.intCommodityId in (select intCommodity from @Commodity)
 
@@ -430,7 +431,7 @@ BEGIN
 		, a.strDPARecieptNumber [Receipt]
 		, a.dblDiscountsDue [Disc Due]
 		, a.dblStorageDue   [Storage Due]
-		, (case when gh.strType ='Reduced By Inventory Shipment' then -gh.dblUnits else gh.dblUnits   end) [Balance]
+		, [Balance] = (CASE WHEN gh.strType ='Reduced By Inventory Shipment' OR gh.strType = 'Settlement' THEN - gh.dblUnits ELSE gh.dblUnits END)
 		, a.intStorageTypeId
 		, b.strStorageTypeDescription [Storage Type]
 		, a.intCommodityId
@@ -451,16 +452,17 @@ BEGIN
 		, null intTicketId
 		, '' strTicketNumber
 	FROM tblGRStorageHistory gh
-	JOIN tblGRCustomerStorage a  on gh.intCustomerStorageId=a.intCustomerStorageId
+	JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 	JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
-	JOIN tblICItem i on i.intItemId=a.intItemId
-	JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
-	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-	LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId  
-	JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
-	JOIN tblEMEntity E ON E.intEntityId=a.intEntityId
-	JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
-	WHERE ISNULL(a.strStorageType,'') <> 'ITR'  and isnull(a.intDeliverySheetId,0) <>0
+	JOIN tblICItem i ON i.intItemId = a.intItemId
+	JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
+	JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
+	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
+	LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
+	JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
+	JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
+	JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
+	WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
 	and convert(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= convert(datetime,@dtmToDate) 
 	and i.intCommodityId in (select intCommodity from @Commodity)
 
@@ -501,7 +503,7 @@ BEGIN
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 		AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
 		AND ysnInTransit = 0
-		AND ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END 
+		--AND ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END 
 
 	DECLARE @tempCollateral TABLE (intRowNum int
 		, intCollateralId int
@@ -625,6 +627,53 @@ BEGIN
 				FROM @invQty where intCommodityId=@intCommodityId
 				GROUP BY intItemId, strItemNo, intFromCommodityUnitMeasureId, strLocationName, intCommodityId
 				
+				--=========================================
+				-- Includes DP based on Company Preference
+				--========================================
+				If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0)--DP is already included in Inventory we are going to subtract it here (reverse logic in including DP)
+				BEGIN
+					INSERT INTO @tempFinal(strCommodityCode
+						, strType
+						, strContractType
+						, dblTotal
+						, intItemId
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, strCurrency)
+					SELECT @strCommodityCode
+						, strType = 'Price Risk'
+						, strContractType = 'Inventory'
+						, dblTotal = -SUM(dblTotal)
+						, intItemId
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, strCurrency = NULL
+					FROM (
+						SELECT intTicketId
+							, strTicketNumber
+							, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL([Balance],0)))
+							, ch.intCompanyLocationId
+							, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
+							, intCommodityId
+							, strLocationName
+							, intItemId
+							, strItemNo
+						FROM @tblGetStorageDetailByDate ch
+						WHERE ch.intCommodityId  = @intCommodityId
+							AND ysnDPOwnedType = 1
+							AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
+						)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					GROUP BY intTicketId
+						, strTicketNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intItemId
+						, strItemNo
+				END
+
 				--Net Hedge Derivative Entry (Futures and Options)
 				-- Hedge
 				INSERT INTO @tempFinal (strCommodityCode
@@ -899,7 +948,7 @@ BEGIN
 						, strCurrency
 						, intItemId
 					FROM @tempFinal cd
-					WHERE cd.intCommodityId = @intCommodityId and strType IN('Sale Priced', 'Purchase Priced')
+					WHERE cd.intCommodityId = @intCommodityId and strType IN('Sale Priced', 'Purchase Priced', 'Purchase HTA', 'Sale HTA')
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
 				) t	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				GROUP BY strCommodityCode
