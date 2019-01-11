@@ -242,7 +242,7 @@ BEGIN
 					, strContractNumber = strContract
 					, strLocationName
 					, strContractEndMonth = (RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)) COLLATE Latin1_General_CI_AS
-					, dtmEndDate = (CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE CD.dtmEndDate END) COLLATE Latin1_General_CI_AS
+					, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE CD.dtmEndDate END
 					, dblBalance = CD.dblQuantity
 					, intUnitMeasureId
 					, intPricingTypeId
