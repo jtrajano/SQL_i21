@@ -9,28 +9,26 @@ AS
 BEGIN
 	DECLARE @dblTotalQty AS NUMERIC(38, 20)
 			,@dblTotalInventoryValue AS NUMERIC(38, 20) 
+			,@newAverageCost AS NUMERIC(38, 20) 
 	 
 	SELECT	@dblTotalQty = SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)) 
 			,@dblTotalInventoryValue = SUM(
-					dbo.fnMultiply(
-						dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)
-						,dbo.fnCalculateUnitCost(dblCost, dblUOMQty)
-					)
+					dbo.fnMultiply(dblQty, dblCost)
 					+ ISNULL(dblValue, 0)			
 				)
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	intItemId = @intItemId
 			AND intItemLocationId = @intItemLocationId
 
-	RETURN (
+	SET @newAverageCost = 
 		CASE	WHEN @dblTotalQty <> 0 AND @dblTotalInventoryValue > 0 THEN 
 					dbo.fnDivide(@dblTotalInventoryValue, @dblTotalQty) 
 				WHEN @dblTotalInventoryValue <= 0 THEN 
 					NULL 
 				ELSE 
 					NULL 
-		END 	
-		
-	)
-
+		END 
+	
+	IF @newAverageCost < 0 SET @newAverageCost = NULL 
+	RETURN @newAverageCost;
 END
