@@ -326,7 +326,7 @@ BEGIN
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/@HundredDecimal));
 			ELSE
-				SET @ItemTaxAmount = (@QtyShipped * @Rate) * CAST(ISNULL(@TaxOnly,0) AS NUMERIC(18,6));
+				SET @ItemTaxAmount = CASE WHEN @TaxOnly = 1 THEN @ZeroDecimal ELSE (@QtyShipped * @Rate) END;
 				
 			IF(@TaxExempt = 1 AND @ExemptionPercent = @ZeroDecimal)
 				SET @ItemTaxAmount = @ZeroDecimal;

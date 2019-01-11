@@ -1015,6 +1015,14 @@ IF NOT EXISTS (
 		WHERE ISNULL(strFeedStatus, '') = ''
 		)
 BEGIN
+	SELECT IsNULL(strContractFeedIds, '0') AS id
+		,IsNULL(strXml, '') AS strXml
+		,IsNULL(strContractNo, '') AS strInfo1
+		,IsNULL(strPONo, '') AS strInfo2
+		,'' AS strOnFailureCallbackSql
+	FROM @tblOutput
+	ORDER BY intRowNo
+
 	RETURN
 END
 

@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateVoucherInvoiceForPartialPricing]
 		
 	@intContractDetailId	INT,
-	@intUserId			INT = NULL
+	@intUserId				INT = NULL
 	
 AS
 
@@ -63,14 +63,14 @@ BEGIN TRY
 			@intInvoiceQtyUOMId				INT,
 			@dblInvoicePrice				NUMERIC(18,6),
 			@dblVoucherPrice				NUMERIC(18,6),
-			@dblTotalIVForPFQty					NUMERIC(18,6),
+			@dblTotalIVForPFQty				NUMERIC(18,6),
 			@batchIdUsed					NVARCHAR(MAX),
 			@dblQtyShipped					NUMERIC(18,6),
 			@dblQtyReceived					NUMERIC(18,6),
 			@intPriceFixationDetailAPARId	INT,
 			@dblPriceFxdQty					NUMERIC(18,6),
 			@dblRemainingQty				NUMERIC(18,6),
-			@dblTotalIVForSHQty						NUMERIC(18,6),
+			@dblTotalIVForSHQty				NUMERIC(18,6),
 			@intPFDetailId					INT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
@@ -485,53 +485,33 @@ BEGIN TRY
 				BEGIN
 					SELECT	@intInventoryShipmentId = intInventoryId,@dblQtyToInvoice = dblQty,@intInventoryShipmentItemId = intInventoryItemId,@intPFDetailId = intPFDetailId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId							
 
-					IF EXISTS(SELECT * FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId)
+					IF EXISTS(	SELECT TOP 1 1 FROM tblARInvoiceDetail AD 
+								JOIN tblARInvoice IV ON IV.intInvoiceId	=	AD.intInvoiceId
+								WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId
+								AND	 ISNULL(IV.ysnPosted,0) = 0	)
 					BEGIN
-						SELECT	@intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId
+						SELECT	@intInvoiceId = AD.intInvoiceId 
+						FROM	tblARInvoiceDetail	AD 
+						JOIN	tblARInvoice		IV ON IV.intInvoiceId	=	AD.intInvoiceId
+						WHERE	intInventoryShipmentItemId = @intInventoryShipmentItemId
+						AND		ISNULL(IV.ysnPosted,0) = 0	
 
 						SELECT	@strShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intInventoryShipmentId
 
-						SELECT  @ysnInvoicePosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
-
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId,@dblQtyShipped = dblQtyShipped FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
-
-						/*CT-2672
-						IF ISNULL(@ysnInvoicePosted,0) = 1
-						BEGIN
-							EXEC	uspARPostInvoice
-									@param				= @intInvoiceId
-									,@post				= 0
-									,@userId			= @intUserId
-									,@raiseError		= 1
-						END
-						*/
 						
 						EXEC	[uspCTCreateInvoiceDetail] @intInvoiceDetailId, @intInventoryShipmentId, @dblQtyToInvoice, @dblFinalPrice, @intUserId,@intInvoiceDetailId OUTPUT
 						
-						/*CT-2672
-						IF ISNULL(@ysnInvoicePosted,0) = 1
-						BEGIN
-							EXEC	uspARPostInvoice
-									@param				= @intInvoiceId
-									,@post				= 1
-									,@userId			= @intUserId
-									,@raiseError		= 1
-						END		
-						*/
-
-						--SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
 						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
 						SELECT @intPFDetailId,@intInvoiceId,@intInvoiceDetailId,1
-						
-						--UPDATE	tblCTPriceFixationDetail SET intInvoiceId = @intInvoiceId, intInvoiceDetailId = @intInvoiceDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+												
 					END
 					ELSE
 					BEGIN
 
-						EXEC	uspARCreateInvoiceFromShipment 
-								@ShipmentId			=	@intInventoryShipmentId
+						EXEC	uspCTCreateInvoiceFromShipment 
+								@ShipmentId				=	@intInventoryShipmentId
 								,@UserId				=	@intUserId
-								,@OnlyUseShipmentPrice	=	1
 								,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
 				
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL

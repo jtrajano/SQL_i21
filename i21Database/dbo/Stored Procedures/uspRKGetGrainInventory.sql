@@ -403,65 +403,69 @@ FROM (
 		INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
 		INNER JOIN tblICItemUOM u on Itm.intItemId=u.intItemId and u.ysnStockUnit=1
 		WHERE S.ysnPosted = 1
-			AND convert(DATETIME, CONVERT(VARCHAR(10), S.dtmShipDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-			AND C.intCommodityId = @intCommodityId
-			AND Itm.intItemId = isnull(@intItemId, Itm.intItemId)
-			AND S.intShipFromLocationId = isnull(@intLocationId, s.intShipFromLocationId)
-			AND S.intShipFromLocationId IN (SELECT intCompanyLocationId
-											FROM tblSMCompanyLocation
-											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END)
-			AND SI.intOwnershipType = 1
-			AND S.intSourceType = 0
-	) a
-	
-	UNION ALL --Direct Invoice
-	SELECT dtmDate
-		, '' strDistributionOption
-		, strDistributionOption strShipDistributionOption
-		, '' as strAdjDistributionOption
-		, '' as strCountDistributionOption
-		, strShipmentNumber tranShipmentNumber
-		, dblOutQty tranShipQty
-		, '' tranReceiptNumber
-		, 0.0 tranRecQty
-		, '' tranAdjNumber
-		, 0.0 dblAdjustmentQty
-		, '' tranCountNumber
-		, 0.0 dblCountQty
-		, '' tranInvoiceNumber
-		, 0.0 dblInvoiceQty
-		, null intInventoryReceiptId
-		, null intInventoryShipmentId
-		, null intInventoryAdjustmentId
-		, null intInventoryCountId
-		, intInvoiceId
-		, null intDeliverySheetId
-		, '' AS deliverySheetNumber
-		, null intTicketId
-		, '' AS ticketNumber
-	FROM (
-		SELECT CONVERT(VARCHAR(10),I.dtmPostDate,110) dtmDate
-			, round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ID.dblQtyShipped) ,6) dblOutQty
-			, I.strInvoiceNumber strShipmentNumber
-			, '' strDistributionOption
-			, I.intInvoiceId
-		FROM tblARInvoice I
+		AND convert(DATETIME, CONVERT(VARCHAR(10), S.dtmShipDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+		AND C.intCommodityId = @intCommodityId 
+		AND Itm.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN Itm.intItemId ELSE @intItemId END 
+		AND S.intShipFromLocationId = case when isnull(@intLocationId,0)=0 then S.intShipFromLocationId else @intLocationId end 
+		AND S.intShipFromLocationId IN (
+				SELECT intCompanyLocationId
+				FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+				)
+		AND SI.intOwnershipType = 1
+		AND S.intSourceType = 0 
+	)a
+
+UNION ALL --Direct Invoice
+SELECT dtmDate,'' strDistributionOption,strDistributionOption strShipDistributionOption,
+		'' as strAdjDistributionOption,
+		'' as strCountDistributionOption,
+		strShipmentNumber tranShipmentNumber,
+		CASE WHEN strTransactionType = 'Credit Memo' THEN 0.0 ELSE  isnull(dblOutQty, 0) END  tranShipQty,
+		'' tranReceiptNumber,
+		CASE WHEN strTransactionType = 'Credit Memo' THEN isnull(dblOutQty, 0) ELSE 0.0 END tranRecQty,
+		'' tranAdjNumber,
+		0.0 dblAdjustmentQty,
+		'' tranCountNumber,
+		0.0 dblCountQty,
+		'' tranInvoiceNumber,
+		0.0 dblInvoiceQty,
+		null intInventoryReceiptId,
+		null intInventoryShipmentId,
+		null intInventoryAdjustmentId,
+		null intInventoryCountId,
+		intInvoiceId,
+		null intDeliverySheetId,
+		'' AS deliverySheetNumber,
+		null intTicketId,
+		'' AS ticketNumber    
+FROM(
+	SELECT  
+		CONVERT(VARCHAR(10),I.dtmPostDate,110) dtmDate
+		,round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ID.dblQtyShipped) ,6) dblOutQty
+		,I.strInvoiceNumber strShipmentNumber
+		,'' strDistributionOption 
+		,I.intInvoiceId
+		,I.strTransactionType
+	FROM tblARInvoice I
 		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 		INNER JOIN tblICItem Itm ON ID.intItemId = Itm.intItemId
 		INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
 		INNER JOIN tblICItemUOM u on Itm.intItemId=u.intItemId and u.ysnStockUnit=1
-		WHERE I.ysnPosted = 1
-			AND ID.intInventoryShipmentItemId IS NULL
-			AND ID.strShipmentNumber = ''
-			AND convert(DATETIME, CONVERT(VARCHAR(10), I.dtmPostDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110)
-			AND C.intCommodityId = @intCommodityId
-			AND ID.intItemId = isnull(@intItemId, ID.intItemId)
-			AND I.intCompanyLocationId = isnull(@intLocationId, I.intCompanyLocationId)
-			AND I.intCompanyLocationId IN (SELECT intCompanyLocationId
-											FROM tblSMCompanyLocation
-											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END)
-	) a
-	
+	WHERE I.ysnPosted = 1
+		AND ID.intInventoryShipmentItemId IS NULL
+		AND ISNULL(ID.strShipmentNumber,'') = ''
+		AND convert(DATETIME, CONVERT(VARCHAR(10), I.dtmPostDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+		AND C.intCommodityId = @intCommodityId 
+		AND ID.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ID.intItemId ELSE @intItemId END 
+		AND I.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then I.intCompanyLocationId else @intLocationId end 
+		AND I.intCompanyLocationId IN (
+				SELECT intCompanyLocationId
+				FROM tblSMCompanyLocation
+				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+				)
+	)a
+
 	UNION ALL --Consume, Produce and Outbound Shimpment
 	SELECT dtmDate
 		, '' strDistributionOption
@@ -561,7 +565,67 @@ FROM (
 			AND CS.intCompanyLocationId = isnull(@intLocationId, CS.intCompanyLocationId)
 			AND strType IN ('From Transfer','Transfer')
 	) a
-) t
+
+	UNION ALL --Storage Settlement 
+	SELECT dtmDate,strDistributionOption,strDistributionOption strShipDistributionOption,
+			'' as strAdjDistributionOption,
+			'' as strCountDistributionOption,
+			strSettleTicket tranShipmentNumber,
+			dblOutQty tranShipQty,
+			strSettleTicket tranReceiptNumber,
+			dblInQty tranRecQty,
+			'' tranAdjNumber,
+			0.0 dblAdjustmentQty,
+			'' tranCountNumber,
+			0.0 dblCountQty,
+			'' tranInvoiceNumber,
+			0.0 dblInvoiceQty,
+			intSettleStorageId intInventoryReceiptId,
+			intSettleStorageId intInventoryShipmentId,
+			null intInventoryAdjustmentId,
+			null intInventoryCountId,
+			null intInvoiceId,
+			null intDeliverySheetId,
+			'' AS deliverySheetNumber,
+			null intTicketId,
+			'' AS ticketNumber    
+	FROM(
+
+		select
+				CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+				,S.strStorageTypeCode strDistributionOption
+				, 0  AS dblInQty
+				,CASE WHEN strType = 'Settlement' THEN
+					ABS(dblUnits)
+					WHEN  strType = 'Reverse Settlement'  THEN
+					ABS(dblUnits) * -1
+					ELSE 0 END AS dblOutQty
+				,S.intStorageScheduleTypeId
+				,SH.intSettleStorageId
+				,SH.strSettleTicket
+
+			from 
+			tblGRCustomerStorage CS
+			INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+
+			WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
+									convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+								AND CS.intCommodityId= @intCommodityId
+								and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
+								AND  CS.intCompanyLocationId  IN (
+																			SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																			WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																			ELSE isnull(ysnLicensed, 0) END)
+				
+								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
+								AND strType IN ('Settlement','Reverse Settlement')
+	) a
+
+	
+
+ )t
 
 SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum
 	, *

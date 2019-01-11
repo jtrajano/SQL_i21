@@ -74,92 +74,90 @@ BEGIN
 
 	INSERT INTO tblSCTicket
 	(
-	 intConcurrencyId
-	,intTicketId
-	,strTicketStatus
-	,strTicketNumber
-	,intScaleSetupId
-	,intTicketPoolId
-	,intTicketLocationId
-	,intTicketType
-	,intTicketTypeId
-	,strInOutFlag
-	,dtmTicketDateTime
-	,dtmTicketTransferDateTime
-	,dtmTicketVoidDateTime
-	,intProcessingLocationId
-	,strScaleOperatorUser
-	,intEntityScaleOperatorId
-	,strTruckName
-	,strDriverName
-	,ysnDriverOff
-	,ysnSplitWeightTicket
-	,ysnGrossManual
-	,dblGrossWeight
-	,dblGrossWeightOriginal
-	,dblGrossWeightSplit1
-	,dblGrossWeightSplit2
-	,dtmGrossDateTime
-	,intGrossUserId
-	,ysnTareManual
-	,dblTareWeight
-	,dblTareWeightOriginal
-	,dblTareWeightSplit1
-	,dblTareWeightSplit2
-	,dtmTareDateTime
-	,intTareUserId
-	,dblGrossUnits
-	,dblNetUnits
-	,strItemUOM
-	,intCustomerId
-	,strDistributionOption
-	,intStorageScheduleTypeId
-	,intDiscountSchedule
-	,strDiscountLocation
-	,dtmDeferDate
-	,strContractNumber
-	,intContractSequence
-	,strContractLocation
-	,dblUnitPrice
-	,dblUnitBasis
-	,dblTicketFees
-	,intCurrencyId
-	,dblCurrencyRate
-	,strTicketComment
-	,strCustomerReference
-	,ysnTicketPrinted
-	,ysnPlantTicketPrinted
-	,ysnGradingTagPrinted
-	,intHaulerId
-	,intFreightCarrierId
-	,dblFreightRate
-	,dblFreightAdjustment
-	,intFreightCurrencyId
-	,dblFreightCurrencyRate
-	,strFreightCContractNumber
-	,ysnFarmerPaysFreight
-	,strLoadNumber
-	,intLoadLocationId
-	,intAxleCount
-	,strBinNumber
-	,strPitNumber
-	,intGradingFactor
-	,strVarietyType
-	,strFarmNumber
-	,strFieldNumber
-	,strDiscountComment
-	,intCommodityId
-	,intDiscountId
-	,intContractId
-	,intDiscountLocationId
-	,intItemId
-	,intEntityId
-	,intItemUOMIdFrom
-	,intItemUOMIdTo
-	,ysnCusVenPaysFees
+		 intConcurrencyId
+		,intTicketId
+		,strTicketStatus
+		,strTicketNumber
+		,intScaleSetupId
+		,intTicketPoolId
+		,intTicketLocationId
+		,intTicketType
+		,intTicketTypeId
+		,strInOutFlag
+		,dtmTicketDateTime
+		,dtmTicketTransferDateTime
+		,dtmTicketVoidDateTime
+		,intProcessingLocationId
+		,strScaleOperatorUser
+		,intEntityScaleOperatorId
+		,strTruckName
+		,strDriverName
+		,ysnDriverOff
+		,ysnSplitWeightTicket
+		,ysnGrossManual
+		,dblGrossWeight
+		,dblGrossWeightOriginal
+		,dblGrossWeightSplit1
+		,dblGrossWeightSplit2
+		,dtmGrossDateTime
+		,intGrossUserId
+		,ysnTareManual
+		,dblTareWeight
+		,dblTareWeightOriginal
+		,dblTareWeightSplit1
+		,dblTareWeightSplit2
+		,dtmTareDateTime
+		,intTareUserId
+		,dblGrossUnits
+		,dblNetUnits
+		,strItemUOM
+		,intCustomerId
+		,strDistributionOption
+		,intStorageScheduleTypeId
+		,intDiscountSchedule
+		,strDiscountLocation
+		,dtmDeferDate
+		,strContractNumber
+		,intContractSequence
+		,strContractLocation
+		,dblUnitPrice
+		,dblUnitBasis
+		,dblTicketFees
+		,intCurrencyId
+		,dblCurrencyRate
+		,strTicketComment
+		,strCustomerReference
+		,ysnTicketPrinted
+		,ysnPlantTicketPrinted
+		,ysnGradingTagPrinted
+		,intHaulerId
+		,intFreightCarrierId
+		,dblFreightRate
+		,dblFreightAdjustment
+		,intFreightCurrencyId
+		,dblFreightCurrencyRate
+		,strFreightCContractNumber
+		,ysnFarmerPaysFreight
+		,strLoadNumber
+		,intLoadLocationId
+		,intAxleCount
+		,strPitNumber
+		,intGradingFactor
+		,strVarietyType
+		,strFarmNumber
+		,strFieldNumber
+		,strDiscountComment
+		,intCommodityId
+		,intDiscountId
+		,intContractId
+		,intDiscountLocationId
+		,intItemId
+		,intEntityId
+		,intItemUOMIdFrom
+		,intItemUOMIdTo
+		,ysnCusVenPaysFees
+		,intStorageLocationId
 	)
-	
-
 	SELECT	
 	 intConcurrencyId 		   = 1
 	,intTicketId       		   = A4GLIdentity
@@ -238,7 +236,6 @@ BEGIN
 	,strLoadNumber			   = LTRIM(RTRIM(gasct_load_no))
 	,intLoadLocationId		   = CL.intCompanyLocationId
 	,intAxleCount			   = NULL
-	,strBinNumber			   = LTRIM(RTRIM(gasct_bin_no))
 	,strPitNumber			   = LTRIM(RTRIM(gasct_pit_no))
 	,intGradingFactor		   = gasct_grade
 	,strVarietyType			   = LTRIM(RTRIM(gasct_variety))
@@ -254,6 +251,7 @@ BEGIN
 	,intItemUOMIdFrom		   = IU.intItemUOMId
 	,intItemUOMIdTo			   = IU.intItemUOMId
 	,ysnCusVenPaysFees		   = CAST(0 AS BIT)
+	,intStorageLocationId	   =ICSL.intStorageLocationId
 	FROM	gasctmst GT
 			JOIN	tblSCScaleSetup			SS	ON	LTRIM(RTRIM(SS.strStationShortDescription)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))
 			JOIN    tblSCTicketPool         TP  ON TP.intTicketPoolId=SS.intTicketPoolId --AND TP.strTicketPool  collate Latin1_General_CI_AS =LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))---Added
@@ -283,6 +281,7 @@ BEGIN
 	LEFT	JOIN	tblGRDiscountSchedule	DS	ON	DS.strDiscountDescription collate Latin1_General_CI_AS =  CASE WHEN LTRIM(RTRIM(GT.gasct_disc_schd_no))='0' THEN CO.strDescription +' Discount' ELSE LTRIM(RTRIM(GT.gasct_disc_schd_no)) END AND DS.intCommodityId = CO.intCommodityId
 	LEFT	JOIN	tblSMCurrency			CY	ON	LTRIM(RTRIM(CY.strCurrency)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_currency))
 	LEFT	JOIN	tblSMCurrency			FY	ON	LTRIM(RTRIM(FY.strCurrency)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_frt_currency))		
+	LEFT	JOIN	tblICStorageLocation	ICSL ON LTRIM(RTRIM(ICSL.strName)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_bin_no))
 	LEFT JOIN
 			 (
 				SELECT CH.[intContractTypeId]

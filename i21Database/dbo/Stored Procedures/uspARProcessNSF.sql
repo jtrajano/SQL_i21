@@ -44,12 +44,19 @@ BEGIN
     DROP TABLE #SELECTEDPAYMENTS
 END
 
+IF(OBJECT_ID('tempdb..#NSFWITHOVERPAYMENTS') IS NOT NULL)
+BEGIN
+    DROP TABLE #NSFWITHOVERPAYMENTS
+END
+
 CREATE TABLE #SELECTEDPAYMENTS (
 	  intPaymentId			INT				NOT NULL
 	, intNSFAccountId		INT				NULL
 	, dtmDate				DATETIME		NOT NULL
 	, dblNSFBankCharge		NUMERIC(18, 6)	NULL
+	, dblUnappliedAmount	NUMERIC(18, 6)	NULL
 	, ysnInvoiceToCustomer	BIT				NULL
+	, ysnInvoicePrepayment	BIT				NULL
 	, strRecordNumber		NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NOT NULL
 	, intEntityCustomerId	INT				NOT NULL
 	, intCurrencyId			INT				NOT NULL
@@ -61,7 +68,9 @@ SELECT NSF.intPaymentId
 	 , NSF.intNSFAccountId
 	 , NSF.dtmDate
 	 , NSF.dblNSFBankCharge
+	 , P.dblUnappliedAmount
 	 , NSF.ysnInvoiceToCustomer
+	 , P.ysnInvoicePrepayment
 	 , P.strRecordNumber
 	 , P.intEntityCustomerId
 	 , P.intCurrencyId
@@ -72,7 +81,9 @@ INNER JOIN (
 		 , intEntityCustomerId
 		 , intCurrencyId
 		 , intLocationId
-		 , strRecordNumber		 
+		 , strRecordNumber
+		 , dblUnappliedAmount
+		 , ysnInvoicePrepayment
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentMethodID
@@ -83,6 +94,17 @@ INNER JOIN (
 	  AND ysnProcessedToNSF = 0
 ) P ON NSF.intPaymentId = P.intPaymentId
 WHERE NSF.ysnProcessed = 0
+
+SELECT intPaymentId		= NSF.intPaymentId
+	 , intInvoiceId		= I.intInvoiceId
+     , strRecordNumber	= NSF.strRecordNumber
+	 , strInvoiceNumber	= I.strInvoiceNumber
+     , ysnPaid			= I.ysnPaid
+INTO #NSFWITHOVERPAYMENTS
+FROM #SELECTEDPAYMENTS NSF
+INNER JOIN tblARInvoice I ON NSF.intPaymentId = I.intPaymentId
+WHERE I.strTransactionType = 'Overpayment'
+  AND I.ysnPosted = 1
 
 IF NOT EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS)
 	BEGIN
@@ -95,6 +117,18 @@ IF ISNULL(@intUserId, 0) = 0
 	BEGIN
 		DELETE FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId
 		RAISERROR('User Id is required when processing to NSF.', 16, 1) 
+		RETURN 0;
+	END
+
+IF EXISTS(SELECT TOP 1 NULL FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1)
+	BEGIN
+		DECLARE @strErrorMsgOverpayment		NVARCHAR(500) = ''
+
+		SELECT TOP 1 @strErrorMsgOverpayment = 'Cannot process ' + strRecordNumber + ' to NSF. It has Overpayment (' + strInvoiceNumber + ') that was already used.'
+		FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1
+
+		DELETE FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId
+		RAISERROR(@strErrorMsgOverpayment, 16, 1) 
 		RETURN 0;
 	END
 
@@ -216,6 +250,14 @@ INNER JOIN (
 ) PAYMENTS ON I.intInvoiceId = PAYMENTS.intInvoiceId
 WHERE I.ysnPosted = 1
 
+--UPDATE OVERPAYMENTS
+UPDATE I
+SET ysnPosted 			= 0
+  , ysnProcessedToNSF 	= 1
+  , strComments 		= 'NSF Processed'
+FROM tblARInvoice I
+INNER JOIN #NSFWITHOVERPAYMENTS NSF ON I.intInvoiceId = NSF.intInvoiceId
+
 --INVOICE TO CUSTOMER
 IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer = 1)
 	BEGIN
@@ -285,7 +327,22 @@ UPDATE tblARNSFStagingTableDetail
 SET ysnProcessed = 1 
 WHERE intNSFTransactionId = @intNSFTransactionId
 
-
+--UPDATE CUSTOMER BALANCE
+UPDATE CUSTOMER
+SET dblARBalance = dblARBalance + ISNULL(PAYMENT.dblTotalPayment, 0)
+FROM tblARCustomer CUSTOMER
+INNER JOIN (
+    SELECT intEntityCustomerId
+         , dblTotalPayment = SUM(ISNULL(PD.dblTotalPayment, 0) + CASE WHEN P.ysnInvoicePrepayment = 0 THEN ISNULL(P.dblUnappliedAmount, 0)ELSE 0 END)
+    FROM #SELECTEDPAYMENTS P
+    LEFT JOIN (
+        SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount)) - SUM(PD.dblInterest)
+             , intPaymentId
+        FROM dbo.tblARPaymentDetail PD
+        GROUP BY intPaymentId
+    ) PD ON PD.intPaymentId = P.intPaymentId
+    GROUP BY intEntityCustomerId
+) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
 SELECT @strMessage = 
  CASE WHEN ysnInvoiceToCustomer = 1 THEN

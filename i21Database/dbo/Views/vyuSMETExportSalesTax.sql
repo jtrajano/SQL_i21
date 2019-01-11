@@ -8,7 +8,7 @@ SELECT
 	,sales_tax = dblRate
 	,st_acct = tblGLAccount.strAccountId
 	,use_tax = 0.000000 --0.00
-	,ut_acct = '00000000'
+	,ut_acct = '00000000' COLLATE Latin1_General_CI_AS
 	,chrTaxCode = LEFT(tblSMTaxGroup.strTaxGroup, 2) + cast(tblSMTaxGroup.intTaxGroupId as nvarchar) --REPLACE(tblSMTaxCode.strTaxCode, ' ', '')
 FROM tblSMTaxCode
 INNER JOIN 

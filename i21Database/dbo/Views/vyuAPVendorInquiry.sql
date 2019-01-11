@@ -9,7 +9,7 @@ SELECT
 	,entityContact.strEmail
 	,entityContact.strMobile
 	,entityContact.strName AS strContactName
-	,fi.strLastVoucher
+	,fi.strLastVoucher COLLATE Latin1_General_CI_AS AS strLastVoucher
 	,fi.intLastBillId
 	,fi.dtmLastPaymentDate
 	,fi.intLastPaymentId

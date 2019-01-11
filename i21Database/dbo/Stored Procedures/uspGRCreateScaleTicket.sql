@@ -225,7 +225,6 @@ BEGIN TRY
 			,[ysnFarmerPaysFreight]				BIT
 			,[ysnCusVenPaysFees]				BIT
 			,[intAxleCount]						INT
-			,[strBinNumber]						NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[strDiscountComment]				NVARCHAR(400) COLLATE Latin1_General_CI_AS
 			,[intCommodityId]					INT
 			,[intDiscountId] 					INT
@@ -305,7 +304,6 @@ BEGIN TRY
 			,[ysnFarmerPaysFreight]
 			,[ysnCusVenPaysFees]
 			,[intAxleCount]
-			,[strBinNumber]
 			,[strDiscountComment]	
 			,[intCommodityId]
 			,[intDiscountId] 
@@ -368,7 +366,6 @@ BEGIN TRY
 			,[ysnFarmerPaysFreight]		 = CI.ysnFarmerPaysFreight
 			,[ysnCusVenPaysFees]		 = CI.ysnCusVenPaysFees
 			,[intAxleCount]				 = CI.intAxleCount
-			,[strBinNumber]				 = CI.strBinNumber
 			,[strDiscountComment]		 = NULL
 			,[intCommodityId]			 = IM.intCommodityId
 			,[intDiscountId] 			 = DiscountId.intDiscountId

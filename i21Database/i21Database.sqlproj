@@ -7230,6 +7230,16 @@
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonth.sql" />
+    <Build Include="dbo\Functions\fnRKFormatDate.sql" />
+    <Build Include="dbo\Functions\fnSTGenerateCheckDigit.sql" />
+    <Build Include="dbo\Views\vyuICItemStockUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedItemStock.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedItemStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateInvoiceFromShipment.sql" />
+    <Build Include="dbo\Functions\fnSTConvertUPCeToUPCa.sql" />
+    <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
+    <Build Include="dbo\Functions\fnRKGetOpenFutureByDate.sql" />
+    <Build Include="dbo\Tables\tblCTContractBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

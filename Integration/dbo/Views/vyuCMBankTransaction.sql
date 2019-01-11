@@ -4,9 +4,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCMBankTransaction')
 	DROP VIEW vyuCMBankTransaction
-
-	EXEC ('
-		CREATE VIEW [dbo].[vyuCMBankTransaction]
+EXEC (' CREATE VIEW [dbo].[vyuCMBankTransaction]
 		AS 
 
 		SELECT 
@@ -19,7 +17,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 		strPayeeEFTInfoEffective = ISNULL((
 				SELECT TOP 1 (CASE WHEN dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) THEN ''EFFECTIVE'' ELSE ''INEFFECTIVE'' END)  FROM tblEMEntityEFTInformation EFTInfo 
 				WHERE intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-		),''INVALID''),
+		),''INVALID'')  COLLATE Latin1_General_CI_AS,
 		ysnPrenoteSent = ISNULL((
 				SELECT TOP 1 ysnPrenoteSent FROM tblEMEntityEFTInformation EFTInfo 
 				WHERE intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
@@ -27,30 +25,30 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 		strAccountType = ISNULL((
 				SELECT TOP 1 strAccountType FROM tblEMEntityEFTInformation EFTInfo 
 				WHERE intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-		),''),
+		),''''),
 		strPayeeBankName = ISNULL((
 				SELECT TOP 1 strBankName FROM tblEMEntityEFTInformation EFTInfo 
 				WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-		),''),
+		),''''),
 		strPayeeBankAccountNumber  = ISNULL((
 				SELECT TOP 1 strAccountNumber FROM tblEMEntityEFTInformation EFTInfo 
 				WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-		),''),
+		),''''),
 		strPayeeBankRoutingNumber = ISNULL((
 				SELECT TOP 1 strRTN FROM tblEMEntityEFTInformation EFTInfo 
 				INNER JOIN tblCMBank BANK ON EFTInfo.intBankId = BANK.intBankId
 				WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-		),''),
+		),''''),
 		strEntityNo = ISNULL((
 				SELECT strEntityNo FROM tblEMEntity
 				WHERE intEntityId = intPayeeId
-		),''),
+		),''''),
 		strSocialSecurity = ISNULL((
 				SELECT Emp.strSocialSecurity FROM 
 				tblPRPaycheck PayCheck  INNER JOIN
-				tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.intEntityEmployeeId
+				tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.intEntityId
 				WHERE PayCheck.strPaycheckId = tblCMBankTransaction.strTransactionId 
-		),'')
+		),'''')
 		FROM tblCMBankTransaction
 		WHERE --dbo.fnIsDepositEntry(strLink) = 0
 		strLink NOT IN (
@@ -66,9 +64,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 										AND a.apchk_trx_ind = b.aptrx_trans_type			
 										AND a.apchk_rev_dt = b.aptrx_chk_rev_dt
 										AND a.apchk_vnd_no = b.aptrx_vnd_no
-							WHERE	 b.aptrx_trans_type = ''O'' -- Other CW transactions
-					)
+							WHERE	 b.aptrx_trans_type = ''O'' 
+							)
 		')
-
 END
 GO

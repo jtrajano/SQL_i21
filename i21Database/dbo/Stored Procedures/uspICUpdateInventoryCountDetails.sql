@@ -204,6 +204,8 @@ BEGIN
 			--AND ISNULL(stockUnit.ysnStockUnit, 0) = 0
 			AND stockUnit.intItemLocationId = il.intItemLocationId
 			AND stockUnit.intLocationId = il.intLocationId
+			AND (stockUnit.intSubLocationId = stock.intSubLocationId OR (stockUnit.intSubLocationId IS NULL AND stock.intSubLocationId IS NULL))
+			AND (stockUnit.intStorageLocationId = stock.intStorageLocationId OR (stockUnit.intStorageLocationId IS NULL AND stock.intStorageLocationId IS NULL))
 		OUTER APPLY(
 			SELECT TOP 1
 					dblCost
@@ -225,6 +227,7 @@ BEGIN
 		AND (i.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
 		AND ((@intSubLocationId IS NULL) OR (stock.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))
 		AND ((@intStorageLocationId IS NULL) OR (stock.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))
+		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND i.strLotTracking = 'No'
 
 END

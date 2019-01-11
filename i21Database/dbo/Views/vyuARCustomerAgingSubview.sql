@@ -54,7 +54,7 @@ SELECT I.intInvoiceId
      , dblAmountDue			= 0    
      , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
      , I.intEntityCustomerId
-     , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+     , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0) - ISNULL(CR.dblRefundTotal, 0)
 	 , dblPrepayments		= 0
 	 , I.strType
 FROM (
@@ -64,6 +64,7 @@ FROM (
 		 , I.intEntityCustomerId
 		 , I.strType
 		 , I.intPaymentId
+		 , I.strInvoiceNumber
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	WHERE I.ysnPosted = 1
 		AND I.ysnCancelled = 0
@@ -100,6 +101,7 @@ LEFT JOIN (
 		 , ysnInvoicePrepayment
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	WHERE P.ysnPosted = 1
+	  AND P.ysnProcessedToNSF = 0
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= GETDATE()
 ) P ON I.intPaymentId = P.intPaymentId
 LEFT JOIN (
@@ -113,6 +115,7 @@ LEFT JOIN (
 			 , ysnInvoicePrepayment
 		FROM dbo.tblARPayment P WITH (NOLOCK)
 		WHERE P.ysnPosted = 1
+		  AND P.ysnProcessedToNSF = 0
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= GETDATE()
 	) P ON PD.intPaymentId = P.intPaymentId 
 	GROUP BY PD.intInvoiceId
@@ -124,6 +127,17 @@ LEFT JOIN (
 	WHERE ysnApplied = 1
 	GROUP BY intPrepaymentId
 ) PC ON I.intInvoiceId = PC.intPrepaymentId
+LEFT JOIN (
+	SELECT strDocumentNumber	= ID.strDocumentNumber
+		 , dblRefundTotal		= SUM(I.dblInvoiceTotal) 
+	FROM tblARInvoiceDetail ID
+	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+	WHERE I.strTransactionType = 'Cash Refund'
+	AND I.ysnPosted = 1
+	AND ISNULL(ID.strDocumentNumber, '') <> ''
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
+	GROUP BY ID.strDocumentNumber
+) CR ON I.strInvoiceNumber = CR.strDocumentNumber
 
 UNION ALL
 
@@ -179,6 +193,7 @@ INNER JOIN (
 		 , ysnInvoicePrepayment
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	WHERE P.ysnPosted = 1
+	  AND P.ysnProcessedToNSF = 0
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= GETDATE()
 ) P ON I.intPaymentId = P.intPaymentId 
 LEFT JOIN (
@@ -192,6 +207,7 @@ LEFT JOIN (
 			 , ysnInvoicePrepayment
 		FROM dbo.tblARPayment P WITH (NOLOCK)
 		WHERE P.ysnPosted = 1
+			AND P.ysnProcessedToNSF = 0
 			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= GETDATE()
 	) P ON PD.intPaymentId = P.intPaymentId AND P.ysnInvoicePrepayment = 0
 	GROUP BY PD.intInvoiceId
@@ -234,6 +250,7 @@ LEFT JOIN (
 			 , ysnInvoicePrepayment
 		FROM dbo.tblARPayment P WITH (NOLOCK)
 		WHERE P.ysnPosted = 1
+			AND P.ysnProcessedToNSF = 0
 			AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= GETDATE()
 	) P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY PD.intInvoiceId

@@ -18,6 +18,7 @@ RETURNS @FinalResult TABLE
 	,strDate				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
 	,strContractType		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intCommodityId			INT
+	,strCommodityCode		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strCommodity			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,intItemId				INT
 	,strItemNo				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -304,8 +305,9 @@ BEGIN
 	 ,SUM(Audi.dblTransactionQuantity*-1) AS dblQuantity
 	 FROM vyuCTSequenceAudit Audi
 	 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = Audi.intContractHeaderId
-	 WHERE Audi.strFieldName = 'Quantity'	
-	 AND dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) >= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) END
+	 WHERE Audi.strFieldName = 'Quantity'
+	 AND Audi.intSequenceUsageHistoryId <> -3	
+	 AND dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) > CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) END
 	 GROUP BY CH.intContractTypeId,Audi.intContractHeaderId
 	 	,Audi.intContractDetailId    
 	
@@ -407,7 +409,8 @@ BEGIN
 	  ,strDate		
 	  ,intContractTypeId		
 	  ,strContractType		
-	  ,intCommodityId			
+	  ,intCommodityId
+	  ,strCommodityCode			
 	  ,strCommodity
 	  ,intItemId
 	  ,strItemNo			
@@ -450,6 +453,7 @@ BEGIN
 	,intContractTypeId		= CH.intContractTypeId
 	,strContractType		= TP.strContractType
 	,intCommodityId			= CH.intCommodityId
+	,strCommodityCode		= CM.strCommodityCode
 	,strCommodity			= CM.strDescription
 	,intItemId				= CD.intItemId
 	,strItemNo				= IM.strItemNo
@@ -609,6 +613,7 @@ BEGIN
 	,intContractTypeId		
 	,strContractType		
 	,intCommodityId			
+	,strCommodityCode
 	,strCommodity
 	,intItemId		
 	,strItemNo					
@@ -651,6 +656,7 @@ BEGIN
 	,intContractTypeId		= CH.intContractTypeId
 	,strContractType		= TP.strContractType
 	,intCommodityId			= CH.intCommodityId
+	,strCommodityCode		= CM.strCommodityCode
 	,strCommodity			= CM.strDescription 
 	,intItemId				= CD.intItemId
 	,strItemNo				= IM.strItemNo
@@ -769,6 +775,12 @@ BEGIN
 	intContractStatusId,
 	dtmHistoryCreated
 	FROM CTE WHERE Row_Num = 1
+
+	UPDATE FR
+	SET FR.intContractStatusId = SH.intContractStatusId
+	FROM @FinalResult FR
+	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
+	
 
 	DELETE FR
 	FROM @FinalResult FR

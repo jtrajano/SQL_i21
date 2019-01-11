@@ -3,7 +3,7 @@ AS
 SELECT 
 	 code = A.intTaxGroupId
 	 ,name = strTaxGroup
-	 ,header = ''
+	 ,header = '' COLLATE Latin1_General_CI_AS
 	 ,category01 = (SELECT TOP 1 X.intTaxCodeId FROM (SELECT Z.intTaxCodeId ,Z.intTaxGroupId ,intRow = ROW_NUMBER() OVER (PARTITION BY intTaxGroupId ORDER BY intTaxGroupCodeId)
 										FROM tblSMTaxGroupCode Z) X WHERE X.intTaxGroupId = A.intTaxGroupId AND X.intRow = 1)
 	 ,category02 = (SELECT TOP 1 X.intTaxCodeId FROM (SELECT Z.intTaxCodeId ,Z.intTaxGroupId ,intRow = ROW_NUMBER() OVER (PARTITION BY intTaxGroupId ORDER BY intTaxGroupCodeId)

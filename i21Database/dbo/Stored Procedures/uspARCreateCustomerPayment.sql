@@ -253,9 +253,10 @@ BEGIN
 			,@Discount				= @Discount	
 			,@Interest				= @Interest
 			,@AllowOverpayment		= @AllowOverpayment
+			,@InvoicePrepayment		= @InvoicePrepayment
 			,@RaiseError			= @RaiseError
 			,@ErrorMessage			= @AddDetailError	OUTPUT
-			,@NewPaymentDetailId	= @NewDetailId		OUTPUT
+			,@NewPaymentDetailId	= @NewDetailId		OUTPUT			
 			
 
 			IF LEN(ISNULL(@AddDetailError,'')) > 0

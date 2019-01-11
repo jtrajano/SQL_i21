@@ -519,13 +519,18 @@ END
 			CREATE TABLE #tmpContractPrepay (
 				[intPrepayId] INT
 			);
+
+			DECLARE @Ids as Id
+			
+			INSERT INTO @Ids(intId)
+			SELECT CT.intContractHeaderId FROM #tmpReceiptItem tmp 
+			INNER JOIN tblCTContractDetail CT ON CT.intContractDetailId = tmp.intContractDetailId
+			GROUP BY CT.intContractHeaderId 
+
 			INSERT INTO #tmpContractPrepay(
 				[intPrepayId]
 			) 
-			SELECT ISNULL(dbo.fnCTGetPrepaidIds(CT.intContractHeaderId),0)
-			FROM #tmpReceiptItem tmp 
-			INNER JOIN tblCTContractDetail CT ON CT.intContractDetailId = tmp.intContractDetailId
-			GROUP BY CT.intContractHeaderId
+			SELECT intTransactionId FROM dbo.fnSCGetPrepaidIds(@Ids)
 		
 			SELECT @total = COUNT(intPrepayId) FROM #tmpContractPrepay where intPrepayId > 0;
 			IF (@total > 0)

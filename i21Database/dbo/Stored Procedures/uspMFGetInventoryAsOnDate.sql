@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetInventoryAsOnDate @dtmFromDate AS DATETIME
 	,@dtmToDate AS DATETIME
-	,@guidSessionId UNIQUEIDENTIFIER 
-	,@intUserId INT 
+	,@guidSessionId UNIQUEIDENTIFIER
+	,@intUserId INT
 	,@ysnInventoryByParentLot INT = 0
 	,@intLocationId INT
 AS
@@ -97,7 +97,8 @@ SELECT t.intTransactionId
 	,t.intInTransitSourceLocationId
 	,1
 FROM tblICInventoryTransaction t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.ysnIsUnposted <> 1
 	AND dbo.fnRemoveTimeOnDate(t.dtmDate) >= @dtmFromDate
 	AND dbo.fnRemoveTimeOnDate(t.dtmDate) <= @dtmToDate
@@ -123,7 +124,8 @@ SELECT t.intTransactionId
 	,NULL
 	,0
 FROM tblICInventoryTransactionStorage t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.ysnIsUnposted <> 1
 	AND dbo.fnRemoveTimeOnDate(t.dtmDate) >= @dtmFromDate
 	AND dbo.fnRemoveTimeOnDate(t.dtmDate) <= @dtmToDate
@@ -149,7 +151,8 @@ SELECT 1
 	,t.intInTransitSourceLocationId
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 FROM tblICInventoryTransaction t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.ysnIsUnposted <> 1
 	AND t.dtmDate < @dtmFromDate
 GROUP BY t.intItemId
@@ -168,7 +171,8 @@ SELECT 1
 	,NULL
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 FROM tblICInventoryTransactionStorage t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.ysnIsUnposted <> 1
 	AND t.dtmDate < @dtmFromDate
 GROUP BY t.intItemId
@@ -186,7 +190,8 @@ SELECT 2
 	,t.intInTransitSourceLocationId
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 FROM @Transactions t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId = @InventoryReceipt
 	AND t.intInTransitSourceLocationId IS NULL
 GROUP BY t.intItemId
@@ -205,7 +210,8 @@ SELECT 3
 	,t.intInTransitSourceLocationId
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, - t.dblQty))
 FROM @Transactions t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId) and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId = @Invoice
 GROUP BY t.intItemId
 	,ItemLocation.intLocationId
@@ -223,7 +229,8 @@ SELECT 4
 	,t.intInTransitSourceLocationId
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 FROM @Transactions t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId  and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId IN (
 		@InventoryAdjustmentQuantityChange
 		,@InventoryAdjustmentUOMChange
@@ -255,7 +262,8 @@ FROM @Transactions t
 INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId
 	AND InvTransfer.strTransferType = 'Location to Location'
 INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
-	AND InvTransfer.intToLocationId = ItemLocation.intLocationId  and ItemLocation.intLocationId=@intLocationId
+	AND InvTransfer.intToLocationId = ItemLocation.intLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId = @InventoryTransfer
 	AND t.intInTransitSourceLocationId IS NULL
 GROUP BY t.intItemId
@@ -277,7 +285,8 @@ FROM @Transactions t
 INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId
 	AND InvTransfer.strTransferType = 'Location to Location'
 INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
-	AND InvTransfer.intFromLocationId = ItemLocation.intLocationId  and ItemLocation.intLocationId=@intLocationId
+	AND InvTransfer.intFromLocationId = ItemLocation.intLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId = @InventoryTransfer
 	AND t.intInTransitSourceLocationId IS NULL
 GROUP BY t.intItemId
@@ -296,7 +305,8 @@ SELECT 7
 	,t.intInTransitSourceLocationId
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 FROM @Transactions t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId  and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId IN (@InboundShipments)
 	AND t.intInTransitSourceLocationId IS NOT NULL
 GROUP BY t.intItemId
@@ -318,7 +328,8 @@ FROM @Transactions t
 INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId
 	AND InvTransfer.ysnShipmentRequired = 1
 INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = t.intItemId
-	AND ItemLocation.intLocationId = InvTransfer.intToLocationId  and ItemLocation.intLocationId=@intLocationId
+	AND ItemLocation.intLocationId = InvTransfer.intToLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId IN (@InventoryTransferwithShipment)
 	AND t.intInTransitSourceLocationId IS NOT NULL
 GROUP BY t.intItemId
@@ -337,7 +348,8 @@ SELECT 8
 	,t.intInTransitSourceLocationId
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 FROM @Transactions t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId  and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intInTransitSourceLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId IN (
 		@InventoryShipment
 		,@OutboundShipment
@@ -361,7 +373,8 @@ SELECT 9
 	,t.intInTransitSourceLocationId
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, - t.dblQty))
 FROM @Transactions t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId  and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId IN (@Consume)
 	AND t.intInTransitSourceLocationId IS NULL
 GROUP BY t.intItemId
@@ -380,7 +393,8 @@ SELECT 10
 	,t.intInTransitSourceLocationId
 	,dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
 FROM @Transactions t
-INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId  and ItemLocation.intLocationId=@intLocationId
+INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	AND ItemLocation.intLocationId = @intLocationId
 WHERE t.intTransactionTypeId = @Produce
 	AND t.intInTransitSourceLocationId IS NULL
 GROUP BY t.intItemId
@@ -471,7 +485,46 @@ WHERE dblOpeningQty = 0
 
 IF @ysnInventoryByParentLot = 0
 BEGIN
-	INSERT INTO tblMFInventoryAsOnDate
+	INSERT INTO tblMFInventoryAsOnDate (
+		guidSessionId
+		,intKey
+		,intCommodityId
+		,strCommodityCode
+		,dtmFromDate
+		,dtmToDate
+		,intCategoryId
+		,strCategoryCode
+		,intLocationId
+		,strLocationName
+		,intItemId
+		,strItemNo
+		,strDescription
+		,intParentLotId
+		,strParentLotNumber
+		,strLotNumber
+		,strLotAlias
+		,strSecondaryStatus
+		,intItemUOMId
+		,strItemUOM
+		,dblOpeningQty
+		,dblReceivedQty
+		,dblInvoicedQty
+		,dblAdjustments
+		,dblTransfersReceived
+		,dblTransfersShipped
+		,dblInTransitInbound
+		,dblInTransitOutbound
+		,dblConsumed
+		,dblProduced
+		,dblClosingQty
+		,intConcurrencyId
+		,dtmDateCreated
+		,intCreatedByUserId
+		,strVendorRefNo
+		,strWarehouseRefNo
+		,strBondStatus
+		,strContainerNo
+		)
 	SELECT guidSessionId = @guidSessionId
 		,intKey = CAST(ROW_NUMBER() OVER (
 				ORDER BY Item.intCommodityId
@@ -490,30 +543,29 @@ BEGIN
 		,strDescription = Item.strDescription
 		,intParentLotId = PL.intParentLotId
 		,strParentLotNumber = PL.strParentLotNumber
-		,intLotId = L.intLotId
 		,strLotNumber = L.strLotNumber
 		,strLotAlias = L.strLotAlias
 		,strSecondaryStatus = LS.strSecondaryStatus
 		,intItemUOMId = StockUOM.intItemUOMId
 		,strItemUOM = sUOM.strUnitMeasure
-		,dblOpeningQty = ISNULL(FL.dblOpeningQty, 0)
-		,dblReceivedQty = ISNULL(FL.dblReceivedQty, 0)
-		,dblInvoicedQty = ISNULL(FL.dblInvoicedQty, 0)
-		,dblAdjustments = ISNULL(FL.dblAdjustments, 0)
-		,dblTransfersReceived = ISNULL(FL.dblTransfersReceived, 0)
-		,dblTransfersShipped = ISNULL(FL.dblTransfersShipped, 0)
-		,dblInTransitInbound = ISNULL(FL.dblInTransitInbound, 0)
-		,dblInTransitOutbound = ISNULL(FL.dblInTransitOutbound, 0)
-		,dblConsumed = ISNULL(FL.dblConsumedQty, 0)
-		,dblProduced = ISNULL(FL.dblProduced, 0)
-		,dblClosingQty = FL.dblOpeningQty + FL.dblReceivedQty - FL.dblInvoicedQty + FL.dblAdjustments + FL.dblTransfersReceived - FL.dblTransfersShipped + FL.dblInTransitInbound - FL.dblInTransitOutbound - FL.dblConsumedQty + FL.dblProduced
+		,dblOpeningQty = ISNULL(SUM(FL.dblOpeningQty), 0)
+		,dblReceivedQty = ISNULL(SUM(FL.dblReceivedQty), 0)
+		,dblInvoicedQty = ISNULL(SUM(FL.dblInvoicedQty), 0)
+		,dblAdjustments = ISNULL(SUM(FL.dblAdjustments), 0)
+		,dblTransfersReceived = ISNULL(SUM(FL.dblTransfersReceived), 0)
+		,dblTransfersShipped = ISNULL(SUM(FL.dblTransfersShipped), 0)
+		,dblInTransitInbound = ISNULL(SUM(FL.dblInTransitInbound), 0)
+		,dblInTransitOutbound = ISNULL(SUM(FL.dblInTransitOutbound), 0)
+		,dblConsumed = ISNULL(SUM(FL.dblConsumedQty), 0)
+		,dblProduced = ISNULL(SUM(FL.dblProduced), 0)
+		,dblClosingQty = IsNULL(SUM(FL.dblOpeningQty + FL.dblReceivedQty - FL.dblInvoicedQty + FL.dblAdjustments + FL.dblTransfersReceived - FL.dblTransfersShipped + FL.dblInTransitInbound - FL.dblInTransitOutbound - FL.dblConsumedQty + FL.dblProduced), 0)
 		,intConcurrencyId = 1
 		,dtmDateCreated = GETDATE()
 		,intCreatedByUserId = @intUserId
-		,strVendorRefNo = strVendorRefNo
-		,strWarehouseRefNo = LI.strWarehouseRefNo
-		,strBondStatus = BS.strSecondaryStatus
-		,strContainerNo = L.strContainerNo
+		,strVendorRefNo = IsNULL(strVendorRefNo, '')
+		,strWarehouseRefNo = IsNULl(LI.strWarehouseRefNo, '')
+		,strBondStatus = IsNULL(BS.strSecondaryStatus, '')
+		,strContainerNo = IsNULL(L.strContainerNo, '')
 	FROM #tmpFinalInventoryAsOnDate FL
 	JOIN tblICLot L ON L.intLotId = FL.intLotId
 	JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
@@ -527,6 +579,26 @@ BEGIN
 	INNER JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = FL.intLocationId
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	LEFT JOIN tblICLotStatus BS ON BS.intLotStatusId = LI.intBondStatusId
+	GROUP BY Item.intCommodityId
+		,IsNULL(Commodity.strCommodityCode, '')
+		,Item.intCategoryId
+		,IsNULL(Category.strCategoryCode, '')
+		,FL.intLocationId
+		,Loc.strLocationName
+		,Item.intItemId
+		,Item.strItemNo
+		,Item.strDescription
+		,PL.intParentLotId
+		,PL.strParentLotNumber
+		,L.strLotNumber
+		,L.strLotAlias
+		,LS.strSecondaryStatus
+		,StockUOM.intItemUOMId
+		,sUOM.strUnitMeasure
+		,IsNULL(strVendorRefNo, '')
+		,IsNULL(LI.strWarehouseRefNo, '')
+		,IsNULL(BS.strSecondaryStatus, '')
+		,IsNULL(L.strContainerNo, '')
 END
 ELSE
 BEGIN
@@ -659,10 +731,10 @@ BEGIN
 		,intConcurrencyId
 		,MAX(dtmDateCreated)
 		,intCreatedByUserId
-		,strVendorRefNo
-		,strWarehouseRefNo
-		,strBondStatus
-		,strContainerNo
+		,IsNULL(strVendorRefNo, '')
+		,IsNULL(strWarehouseRefNo, '')
+		,IsNULL(strBondStatus, '')
+		,IsNULL(strContainerNo, '')
 	FROM #tmpInventoryByParentLot
 	GROUP BY guidSessionId
 		,intCommodityId
@@ -684,9 +756,8 @@ BEGIN
 		,strItemUOM
 		,intConcurrencyId
 		,intCreatedByUserId
-		,strVendorRefNo
-		,strWarehouseRefNo
-		,strBondStatus
-		,strContainerNo
+		,IsNULL(strVendorRefNo, '')
+		,IsNULL(strWarehouseRefNo, '')
+		,IsNULL(strBondStatus, '')
+		,IsNULL(strContainerNo, '')
 END
-

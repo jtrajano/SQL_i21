@@ -552,21 +552,23 @@ BEGIN
 	DECLARE @mRowNumber INT
 	DECLARE @intCommodityId1 INT
 	DECLARE @strDescription NVARCHAR(200)
-	DECLARE @intOneCommodityId int
-	DECLARE @intCommodityUnitMeasureId int
+	declare @intOneCommodityId int
+	declare @intCommodityUnitMeasureId int
 	DECLARE @intUnitMeasureId int
 	DECLARE @ysnExchangeTraded bit
 	DECLARE @strUnitMeasure NVARCHAR(200)
-
+	
 	SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity
+
 	WHILE @mRowNumber >0
 	BEGIN
 		SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
 		SELECT @strDescription = strCommodityCode, @ysnExchangeTraded = ysnExchangeTraded FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
 		SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
+		
 		IF  @intCommodityId >0 --AND @ysnExchangeTraded = 1
-		BEGIN	
-			IF ISNULL(@intVendorId, 0) = 0
+		BEGIN
+			IF ISNULL(@intVendorId,0) = 0
 			BEGIN
 				INSERT INTO @tempFinal (strCommodityCode
 					, intContractHeaderId
@@ -588,18 +590,20 @@ BEGIN
 						, cd.strType [strType]
 						, 'Physical Contract' COLLATE Latin1_General_CI_AS strContractType
 						, strLocationName
-						, RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth
-						, isnull((cd.dblBalance),0) AS dblTotal
+						, RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS strContractEndMonth
+						, dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((cd.dblBalance), 0)) AS dblTotal
 						, cd.intUnitMeasureId
 						, @intCommodityId as intCommodityId
 						, cd.intCompanyLocationId
 						, strCurrency
 						, intContractTypeId
 					FROM @tblGetOpenContractDetail cd
-					WHERE cd.intContractTypeId in (1, 2) and cd.intCommodityId = @intCommodityId
+					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
+					WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId = @intCommodityId
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
-				) a WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-		
+				) t
+				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				
 				INSERT INTO @tempFinal(strCommodityCode
 					, strType
 					, strContractType
@@ -618,10 +622,9 @@ BEGIN
 					, intFromCommodityUnitMeasureId
 					, intCommodityId
 					, strLocationName
-				FROM @invQty
-				WHERE intCommodityId = @intCommodityId
-				GROUP BY intItemId,strItemNo,intFromCommodityUnitMeasureId,strLocationName,intCommodityId
-		
+				FROM @invQty where intCommodityId=@intCommodityId
+				GROUP BY intItemId, strItemNo, intFromCommodityUnitMeasureId, strLocationName, intCommodityId
+				
 				--Net Hedge Derivative Entry (Futures and Options)
 				-- Hedge
 				INSERT INTO @tempFinal (strCommodityCode
@@ -657,19 +660,19 @@ BEGIN
 					, dblNoOfLot
 					, strCurrency
 				FROM (
-					SELECT distinct t.strCommodityCode
+					SELECT DISTINCT t.strCommodityCode
 						, strInternalTradeNo
 						, t.intFutOptTransactionHeaderId
 						, th.intCommodityId
 						, dtmFutureMonthsDate
 						, dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, intOpenContract * t.dblContractSize) AS HedgedQty
 						, l.strLocationName
-						, (LEFT(t.strFutureMonth,4) +  '20' + CONVERT(NVARCHAR(2), intYear)) COLLATE Latin1_General_CI_AS strFutureMonth
+						, (left(t.strFutureMonth, 4) + '20' + convert(nvarchar(2),intYear)) COLLATE Latin1_General_CI_AS strFutureMonth
 						, m.intUnitMeasureId
 						, (t.strBroker + '-' + t.strBrokerAccount) COLLATE Latin1_General_CI_AS strAccountNumber
 						, strNewBuySell as strTranType
 						, ba.intBrokerageAccountId
-						, 'Future' COLLATE Latin1_General_CI_AS as strInstrumentType
+						, 'Future' COLLATE Latin1_General_CI_AS strInstrumentType
 						, intOpenContract dblNoOfLot
 						, cu.strCurrency
 					FROM @tblGetOpenFutureByDate t
@@ -679,13 +682,13 @@ BEGIN
 					join tblSMCurrency cu on cu.intCurrencyID=m.intCurrencyId
 					LEFT join tblRKBrokerageAccount ba on ba.strAccountNumber=t.strBrokerAccount
 					INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType= 'Futures'
-					JOIN tblICCommodityUnitMeasure cuc1 on cuc1.intCommodityId=@intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId	
+					JOIN tblICCommodityUnitMeasure cuc1 on cuc1.intCommodityId=@intCommodityId and m.intUnitMeasureId=cuc1.intUnitMeasureId
 					INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
 					WHERE th.intCommodityId = @intCommodityId
 						AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
-						and intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)	
-						AND ISNULL(t.ysnPreCrush, 0) = 0	
-				) t
+						and intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+						AND ISNULL(t.ysnPreCrush, 0) = 0
+				) t	
 		
 				-- Option Net Hedge
 				INSERT INTO @tempFinal (strCommodityCode
@@ -1113,10 +1116,10 @@ BEGIN
 					SELECT cd.strCommodityCode
 						, cd.intContractHeaderId
 						, strContractNumber
-						, 'Avail for Spot Sale' [strType]
+						, 'Avail for Spot Sale' COLLATE Latin1_General_CI_AS [strType]
 						, strContractType
 						, strLocationName
-						, RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) strContractEndMonth
+						, RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS strContractEndMonth
 						, -(cd.dblBalance) AS dblTotal
 						, cd.intUnitMeasureId
 						, @intCommodityId as intCommodityId

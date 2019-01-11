@@ -246,7 +246,7 @@ BEGIN
 				, strCategory
 				, strFutMarketName)
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC)
-				, strCommodityCode = CD.strCommodity
+				, strCommodityCode = CD.strCommodityCode
 				, intCommodityId
 				, intContractHeaderId
 				, strContractNumber = CD.strContract
@@ -315,7 +315,7 @@ BEGIN
 				, ysnPreCrush
 				, strNotes
 				, strBrokerTradeNo)
-			EXEC uspRKGetOpenContractByDate @intCommodityId, @dtmToDate
+			SELECT * FROM  fnRKGetOpenFutureByDate( @intCommodityId, @dtmToDate)
 
 			INSERT INTO @List (strCommodityCode
 				, intCommodityId
@@ -490,18 +490,19 @@ BEGIN
 				SELECT strCommodityCode
 					, i.strItemNo
 					, Category.strCategoryCode
-					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(s.dblQuantity, 0))
+					, dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
 					, strLocationName
 					, intCommodityId = @intCommodityId
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
-				FROM vyuICGetInventoryValuation s
+				FROM vyuRKGetInventoryValuation s
 				JOIN tblICItem i ON i.intItemId = s.intItemId
-				JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
+				JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+				JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+				JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
 				JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
 				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
-				WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity,0) <> 0 AND ysnInTransit = 0
+				WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity,0) <> 0 AND ysnInTransit = 0
 					AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND s.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -538,7 +539,7 @@ BEGIN
 					, intPricingTypeId
 					, i.intCategoryId
 					, strCategory = Category.strCategoryCode
-				FROM vyuICGetInventoryValuation s
+				FROM vyuRKGetInventoryValuation s
 				JOIN tblICItem i ON i.intItemId = s.intItemId
 				JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
@@ -757,7 +758,7 @@ BEGIN
 					, cd.strFutMarketName
 					, cd.intFutureMonthId
 					, cd.strFutureMonth
-					, strDeliveryDate = FORMAT(det.dtmEndDate, 'MMM yyyy')
+					, strDeliveryDate = dbo.fnRKFormatDate(det.dtmEndDate, 'MMM yyyy')
 					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
 					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
 					, ri.intSourceId
@@ -849,7 +850,7 @@ BEGIN
 					, cd.strFutMarketName
 					, cd.intFutureMonthId
 					, cd.strFutureMonth
-					, strDeliveryDate = FORMAT(det.dtmEndDate, 'MMM yyyy')
+					, strDeliveryDate = dbo.fnRKFormatDate(det.dtmEndDate, 'MMM yyyy')
 					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
 					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
 				FROM vyuRKGetInventoryValuation v
@@ -1768,7 +1769,7 @@ FROM @List
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') and strContractEndMonth not in ( 'Near By') order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
 
 UPDATE @ListFinal SET strFutureMonth = CASE 
-	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN FORMAT(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
+	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) = 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN dbo.fnRKFormatDate(CONVERT(DATETIME, '1' + LTRIM(RTRIM(F.strFutureMonth))), 'MMM yyyy')
 	WHEN LEN(LTRIM(RTRIM(F.strFutureMonth))) > 6 AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') <> '' THEN LTRIM(RTRIM(F.strFutureMonth))
 	WHEN ISNULL(F.intFutOptTransactionHeaderId, '') <> '' AND ISNULL(LTRIM(RTRIM(F.strFutureMonth)), '') = '' THEN FOT.strFutureMonth
 END COLLATE Latin1_General_CI_AS
@@ -1777,14 +1778,14 @@ FROM @ListFinal F
 LEFT JOIN (
 	SELECT intFutOptTransactionHeaderId
 		,strInternalTradeNo
-		,strFutureMonth = ISNULL(FORMAT(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS
+		,strFutureMonth = ISNULL(dbo.fnRKFormatDate(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS
 	FROM vyuRKFutOptTransaction
 )FOT ON FOT.intFutOptTransactionHeaderId = F.intFutOptTransactionHeaderId AND FOT.strInternalTradeNo COLLATE Latin1_General_CI_AS = F.strInternalTradeNo COLLATE Latin1_General_CI_AS
 LEFT JOIN (
 	SELECT intContractHeaderId
 	,REPLACE(strSequenceNumber,' ','') COLLATE Latin1_General_CI_AS AS strContractNumber
-	,FORMAT(dtmEndDate, 'MMM yyyy') COLLATE Latin1_General_CI_AS AS strDeliveryDate
-	,ISNULL(FORMAT(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS AS strFutureMonth
+	,dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') COLLATE Latin1_General_CI_AS AS strDeliveryDate
+	,ISNULL(dbo.fnRKFormatDate(CONVERT(DATETIME,'01 '+ strFutureMonth), 'MMM yyyy'),'Near By') COLLATE Latin1_General_CI_AS AS strFutureMonth
 	,strContractType
 	FROM vyuCTContractDetailView
 )CT ON CT.intContractHeaderId = F.intContractHeaderId

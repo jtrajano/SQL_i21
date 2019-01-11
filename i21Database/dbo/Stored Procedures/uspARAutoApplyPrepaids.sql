@@ -102,11 +102,18 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 					WHERE CREDITS.intInvoiceId = ID.intInvoiceId
 					  AND ISNULL(ID.intContractDetailId, 0) <> 0
 				) CD
+				LEFT JOIN (
+					SELECT intPaymentId
+					FROM dbo.tblARPayment WITH (NOLOCK)
+					WHERE ysnPosted = 1
+					AND ysnProcessedToNSF = 0
+				) PREPAY ON CREDITS.intPaymentId = PREPAY.intPaymentId
 				WHERE CREDITS.ysnPosted = 1
 				  AND CREDITS.ysnCancelled = 0
 				  AND CREDITS.ysnPaid = 0
 				  AND CREDITS.dblAmountDue > 0
 				  AND CREDITS.strTransactionType IN ('Customer Prepayment', 'Credit Memo', 'Overpayment')
+				  AND ((CREDITS.strTransactionType = 'Customer Prepayment' AND ISNULL(PREPAY.intPaymentId, 0) <> 0) OR CREDITS.strTransactionType IN ('Credit Memo', 'Overpayment'))
 				  AND CREDITS.intEntityCustomerId = @intEntityCustomerId
 				  AND CREDITS.dtmPostDate <= @dtmPostDate
 				  AND ISNULL(CD.intContractCount, 0) = 0
@@ -124,11 +131,18 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 					WHERE CREDITS.intInvoiceId = ID.intInvoiceId
 					  AND ID.intContractDetailId IN (SELECT intContractDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
 				) CD
+				LEFT JOIN (
+					SELECT intPaymentId
+					FROM dbo.tblARPayment WITH (NOLOCK)
+					WHERE ysnPosted = 1
+					AND ysnProcessedToNSF = 0
+				) PREPAY ON CREDITS.intPaymentId = PREPAY.intPaymentId
 				WHERE CREDITS.ysnPosted = 1
 				  AND CREDITS.ysnCancelled = 0
 				  AND CREDITS.ysnPaid = 0
 				  AND CREDITS.dblAmountDue > 0
 				  AND CREDITS.strTransactionType IN ('Customer Prepayment', 'Credit Memo', 'Overpayment')
+				  AND ((CREDITS.strTransactionType = 'Customer Prepayment' AND ISNULL(PREPAY.intPaymentId, 0) <> 0) OR CREDITS.strTransactionType IN ('Credit Memo', 'Overpayment'))
 				  AND CREDITS.intEntityCustomerId = @intEntityCustomerId
 				  AND CREDITS.dtmPostDate <= @dtmPostDate
 				  AND ISNULL(CD.intContractCount, 0) > 0

@@ -171,7 +171,7 @@ BEGIN TRY
 		,SS.strStationShortDescription
 		,SS.strStationDescription
 		,SS.strPhone
-		,SC.strBinNumber
+		,ICStorageLocation.strName AS strBinNumber
 		,NULL AS strBoxNoOfSample
 		,' Scale record in '+ @strItemStockUOM AS ScaleLabel
 		,[dbo].[fnGRConvertNumberToWords](@dblUnloadedGrain) 
@@ -213,6 +213,7 @@ BEGIN TRY
 	JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId
 	JOIN tblICItem Item ON Item.intItemId = SC.intItemId
 	JOIN tblSCScaleSetup SS ON SS.intScaleSetupId = SC.intScaleSetupId
+	LEFT JOIN tblICStorageLocation ICStorageLocation on ICStorageLocation.intStorageLocationId = SC.intStorageLocationId
 	LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId=SC.intCommodityAttributeId
 	WHERE SC.intTicketId = @intScaleTicketId
 END TRY

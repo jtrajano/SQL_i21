@@ -168,9 +168,11 @@ BEGIN
 			AND [ysnFromProvisional] = 1
 			AND [ysnProvisionalWithGL] = 1 
             AND [ysnPost] = 1
-			AND [strTransactionType] <> 'Credit Memo'
-			AND [dblBaseInvoiceTotal] = 0.000000
-			AND [dblInvoiceTotal] = 0.000000
+			AND (
+                ([strTransactionType] <> 'Credit Memo'	AND [dblBaseInvoiceTotal] = 0.000000 AND [dblInvoiceTotal] = 0.000000)
+                OR
+                ([strTransactionType] = 'Credit Memo' AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000)
+				)
     ) P
     INNER JOIN (
         SELECT 

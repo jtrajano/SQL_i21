@@ -57,6 +57,7 @@ BEGIN TRY
 			,@intUserId = @intUserId
 			,@strTaskId = @intTaskId
 			,@ysnLoad=1
+			,@ysnScannerClient=1
 
 		SELECT @intTaskId = MIN(intTaskId)
 		FROM @tblMFTask

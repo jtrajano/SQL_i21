@@ -120,6 +120,10 @@ SET
 	,[ysnTermDiscountExempt]			= ISNULL([ysnTermDiscountExempt], 0)
 	,[intSubCurrencyId]					= ISNULL([intSubCurrencyId], @CurrencyId)
 	,[dblSubCurrencyRate]				= CASE WHEN ISNULL([dblSubCurrencyRate], @ZeroDecimal) = @ZeroDecimal THEN 1.000000 ELSE [dblSubCurrencyRate] END
+	,[dblLicenseAmount]					= ISNULL([dblLicenseAmount], @ZeroDecimal)
+	,[dblBaseLicenseAmount]				= ISNULL(ISNULL([dblLicenseAmount], @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
+	,[dblMaintenanceAmount]				= ISNULL([dblMaintenanceAmount], @ZeroDecimal)
+	,[dblBaseMaintenanceAmount]			= ISNULL(ISNULL([dblMaintenanceAmount], @ZeroDecimal) * [dblCurrencyExchangeRate], @ZeroDecimal)
 WHERE
 	[intInvoiceId] = @InvoiceIdLocal
 	

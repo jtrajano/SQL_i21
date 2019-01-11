@@ -15,15 +15,15 @@ BEGIN
 		CREATE VIEW [dbo].[vyuCMOriginDepositEntry]
 		AS
 
-		SELECT  o.aptrx_vnd_no
-				,o.aptrx_ivc_no
+		SELECT  o.aptrx_vnd_no COLLATE Latin1_General_CI_AS  aptrx_vnd_no
+				,o.aptrx_ivc_no  COLLATE Latin1_General_CI_AS aptrx_ivc_no
 				,o.aptrx_sys_rev_dt
 				,o.aptrx_sys_time
-				,o.aptrx_cbk_no
-				,o.aptrx_chk_no
-				,o.aptrx_trans_type
+				,o.aptrx_cbk_no COLLATE Latin1_General_CI_AS aptrx_cbk_no
+				,o.aptrx_chk_no COLLATE Latin1_General_CI_AS aptrx_chk_no
+				,o.aptrx_trans_type COLLATE Latin1_General_CI_AS aptrx_trans_type
 				,o.aptrx_batch_no
-				,o.aptrx_pur_ord_no
+				,o.aptrx_pur_ord_no COLLATE Latin1_General_CI_AS aptrx_pur_ord_no
 				,o.aptrx_po_rcpt_seq
 				,o.aptrx_ivc_rev_dt
 				,o.aptrx_disc_rev_dt
@@ -36,17 +36,17 @@ BEGIN
 				,o.aptrx_wthhld_amt
 				,o.aptrx_net_amt
 				,o.aptrx_1099_amt
-				,o.aptrx_comment
-				,o.aptrx_orig_type
-				,o.aptrx_name
-				,o.aptrx_recur_yn
-				,o.aptrx_currency
+				,o.aptrx_comment COLLATE Latin1_General_CI_AS aptrx_comment
+				,o.aptrx_orig_type COLLATE Latin1_General_CI_AS aptrx_orig_type
+				,o.aptrx_name COLLATE Latin1_General_CI_AS aptrx_name
+				,o.aptrx_recur_yn COLLATE Latin1_General_CI_AS aptrx_recur_yn
+				,o.aptrx_currency COLLATE Latin1_General_CI_AS aptrx_currency
 				,o.aptrx_currency_rt
-				,o.aptrx_currency_cnt
-				,o.aptrx_user_id
+				,o.aptrx_currency_cnt COLLATE Latin1_General_CI_AS aptrx_currency_cnt
+				,o.aptrx_user_id COLLATE Latin1_General_CI_AS aptrx_user_id
 				,o.aptrx_user_rev_dt
 		FROM	dbo.aptrxmst o
-		WHERE	aptrx_trans_type = ''O''    
+		WHERE	aptrx_trans_type = ''O''
 	')
 END
 

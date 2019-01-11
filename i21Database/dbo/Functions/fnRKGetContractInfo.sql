@@ -19,7 +19,7 @@ BEGIN
 	FROM (
 		SELECT intContractHeaderId
 		, strContractIds = strContractNumber + '-' + CONVERT(nvarchar(4000), intContractSeq) COLLATE Latin1_General_CI_AS
-		, strDeliveryDate = (FORMAT(dtmEndDate, 'MMM yyyy')) COLLATE Latin1_General_CI_AS
+		, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
 		, strFutureMonth
 		FROM vyuCTContractDetailView
 	) CT

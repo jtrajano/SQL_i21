@@ -84,6 +84,7 @@ BEGIN TRY
 			SELECT intPaymentId 
 			FROM dbo.tblARPayment WITH (NOLOCK)
 			WHERE ysnPosted = 1
+			  AND ysnProcessedToNSF = 0
 		) AS P ON I.intPaymentId = P.intPaymentId
 		WHERE I.strTransactionType = 'Customer Prepayment'
 		AND I.intInvoiceId <> @InvoiceId
@@ -137,6 +138,7 @@ BEGIN TRY
 			SELECT intPaymentId 
 			FROM dbo.tblARPayment WITH (NOLOCK)
 			WHERE ysnPosted = 1
+			  AND ysnProcessedToNSF = 0
 		) AS P ON I.intPaymentId = P.intPaymentId
 		INNER JOIN (
 			SELECT intInvoiceDetailId, intItemId, intInvoiceId 

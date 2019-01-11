@@ -101,22 +101,22 @@ CustomerNumber
 ,ItemNumber		
 ,State			
 ,Authority1		
-,Authority2 
-,FETCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'FET' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,SETCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'SET' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,SSTCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'SST' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale1Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC1' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale2Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC2' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale3Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC3' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale4Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC4' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale5Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC5' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale6Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC6' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale7Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC7' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale8Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC8' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale9Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC9' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale10Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC10' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale11Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC11' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
-,Locale12Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC12' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END
+,Authority2  COLLATE Latin1_General_CI_AS AS Authority2
+,FETCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'FET' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,SETCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'SET' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,SSTCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'SST' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale1Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC1' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale2Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC2' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale3Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC3' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale4Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC4' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale5Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC5' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale6Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC6' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale7Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC7' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale8Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC8' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale9Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC9' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale10Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC10' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale11Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC11' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale12Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC12' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
 
 --,SETCharge		= CASE WHEN SUM(ISNULL(SETCharge,0)) > 0 THEN 'Y' ELSE 'N' END
 --,SSTCharge		= CASE WHEN SUM(ISNULL(SSTCharge,0)) > 0 THEN 'Y' ELSE 'N' END

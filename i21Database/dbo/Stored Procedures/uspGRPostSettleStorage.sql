@@ -104,6 +104,7 @@ BEGIN TRY
 
 	DECLARE @intShipFrom INT
 	DECLARE @shipFromEntityId INT	
+	DECLARE @strCommodityCode NVARCHAR(50)
 
 	DECLARE @SettleStorage AS TABLE 
 	(
@@ -220,6 +221,7 @@ BEGIN TRY
 			@intFutureMarketId 	= ISNULL(Com.intFutureMarketId,0)
 			,@strItemNo 		= Item.strItemNo
 			,@ItemLocationId	= IL.intItemLocationId
+			,@strCommodityCode	= Com.strCommodityCode
 		FROM tblICItem Item
 		JOIN tblICCommodity Com 
 			ON Com.intCommodityId = Item.intCommodityId
@@ -241,6 +243,19 @@ BEGIN TRY
 				ON d.intFutureMarketId = b.intFutureMarketId
 			WHERE b.intFutureMarketId = @intFutureMarketId 
 			ORDER by b.dtmPriceDate DESC
+		END
+		ELSE
+		BEGIN
+			SET @ErrMsg = 'There is no <b>Futures Market</b> setup yet in Risk Management for <b>' + @strCommodityCode + '</b> commodity.'
+			RAISERROR(@ErrMsg,16,1,1)
+			RETURN;
+		END
+
+		IF ISNULL(@dblFutureMarkePrice,0) <= 0
+		BEGIN
+			SET @ErrMsg = 'There is no <b>Futures Price</b> yet in Risk Management for <b>' + @strCommodityCode + '</b> commodity.'
+			RAISERROR(@ErrMsg,16,1,1)
+			RETURN;
 		END
 
 		SET @intCurrencyId = ISNULL(
@@ -375,7 +390,11 @@ BEGIN TRY
 					,intContractHeaderId		= NULL
 					,intContractDetailId		= NULL
 					,dblUnits					= CASE
-													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN ROUND(((SST.dblUnits / CS.dblOpenBalance) * CS.dblGrossQuantity),@intDecimalPrecision)
+													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
+														CASE WHEN CS.dblGrossQuantity IS NULL THEN SST.dblUnits
+														ELSE
+															ROUND(((SST.dblUnits / CS.dblOpenBalance) * CS.dblGrossQuantity),@intDecimalPrecision)
+														END
 													ELSE SST.dblUnits
 												END
 					,dblCashPrice				= CASE 

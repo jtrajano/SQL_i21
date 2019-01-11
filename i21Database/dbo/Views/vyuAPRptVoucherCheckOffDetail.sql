@@ -7,7 +7,7 @@ SELECT	DISTINCT
 			,APB.strBillId
 			,V.strVendorId
 			,strVendorName =  E.strName
-			,strVendorAddress = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, NULL))
+			,strVendorAddress = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, NULL)) COLLATE Latin1_General_CI_AS
 			,ISNULL(TC.strCity, 'N/A') AS strVendorCity
 			,ISNULL(TC.strState, 'N/A') AS strVendorState
 			,ISNULL(TC.strZipCode,'N/A') AS strVendorZipCode
