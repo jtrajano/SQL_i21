@@ -791,7 +791,8 @@ BEGIN TRY
   END	
 
 	SELECT 
-	 intContractHeaderId	
+	 intContractBalanceId
+	,intContractHeaderId	
 	,strType				
 	,intContractDetailId	
 	,strCompanyName			= @strCompanyName
