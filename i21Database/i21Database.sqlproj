@@ -7240,7 +7240,6 @@
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenFutureByDate.sql" />
     <Build Include="dbo\Tables\tblCTContractBalance.sql" />
-    <Build Include="dbo\tblSRReportLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
