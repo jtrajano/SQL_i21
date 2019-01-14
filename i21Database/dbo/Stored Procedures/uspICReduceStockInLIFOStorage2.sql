@@ -60,27 +60,29 @@ BEGIN
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
 			OUTER APPLY (
-				SELECT	TOP 1 *
+				SELECT	intInventoryLIFOStorageId = MIN(cb.intInventoryLIFOStorageId) 
 				FROM	tblICInventoryLIFOStorage cb
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intItemUOMId = @intItemUOMId
-						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
+						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
 						AND dbo.fnDateGreaterThanEquals(cb.dtmDate, @dtmDate) = 1
+				HAVING 
+					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 			) cb 
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN 
 		-- Get the available stock in the cost bucket. 
 		DECLARE @strCostBucketDate AS VARCHAR(20) 
-		SELECT	TOP 1 
-				@strCostBucketDate = CONVERT(NVARCHAR(20), cb.dtmDate, 101)  
+		SELECT	@strCostBucketDate = CONVERT(NVARCHAR(20), MIN(cb.dtmDate), 101)
 		FROM	tblICInventoryLIFOStorage cb
 		WHERE	cb.intItemId = @intItemId
 				AND cb.intItemLocationId = @intItemLocationId
 				AND cb.intItemUOMId = @intItemUOMId
 				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-		ORDER BY cb.dtmDate DESC, cb.intItemId ASC, cb.intItemLocationId ASC, cb.intInventoryLIFOStorageId DESC
+		HAVING 
+			SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 
 		IF @UnitsOnStorage > 0 AND @strCostBucketDate IS NOT NULL 
 		BEGIN 
