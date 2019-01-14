@@ -68,7 +68,7 @@ FROM (
 			WHEN ISNULL([dblLotsFixed], 0) = 0
 				THEN 'Unpriced'
 			ELSE 'Partially Priced'
-			END AS strPriceFixStatus
+			END COLLATE Latin1_General_CI_AS AS strPriceFixStatus
 		,CB.strContractBasis AS strIncoTerms
 		,CO.strCountry AS strOrigin
 		,FMA.strFutMarketName

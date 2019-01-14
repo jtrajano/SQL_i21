@@ -8,7 +8,7 @@ SELECT LWS.intLoadWarehouseServicesId
 	,strType = CASE (LWS.intType)
 				WHEN 2 THEN 'Inbound'
 				WHEN 3 THEN 'Outbound'
-				ELSE 'General' END
+				ELSE 'General' END COLLATE Latin1_General_CI_AS
 	,WMD.intCalculateQty
 	,strCalculateQty = CASE (WMD.intCalculateQty) 
 							WHEN 1 THEN 'By Shipped Net Wt'
@@ -18,7 +18,7 @@ SELECT LWS.intLoadWarehouseServicesId
 							WHEN 5 THEN 'By Delivered Net Wt'
 							WHEN 6 THEN 'By Delivered Gross Wt'
 							WHEN 7 THEN 'By Quantity'
-							ELSE 'Manual Entry' END
+							ELSE 'Manual Entry' END COLLATE Latin1_General_CI_AS
 	,LWS.intItemId
 	,I.strItemNo
 	,LWS.dblUnitRate
