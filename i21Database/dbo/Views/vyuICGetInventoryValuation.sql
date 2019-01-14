@@ -8,6 +8,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strItemDescription			= i.strDescription
 		,i.intCategoryId
 		,strCategory				= c.strCategoryCode
+		,i.intCommodityId
+		,strCommodity				= commodity.strCommodityCode
 		,intLocationId				= ISNULL(InTransitLocation.intCompanyLocationId, [Location].intCompanyLocationId) 
 		,t.intItemLocationId
 		,strLocationName			= ISNULL(InTransitLocation.strLocationName, [Location].strLocationName) --ISNULL([Location].strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
@@ -101,6 +103,8 @@ FROM 	tblICItem i
 		) iuStock
 		LEFT JOIN tblICCategory c 
 			ON c.intCategoryId = i.intCategoryId
+		LEFT JOIN tblICCommodity commodity
+			ON commodity.intCommodityId = i.intCommodityId
 		LEFT JOIN tblICInventoryTransaction t 
 			ON i.intItemId = t.intItemId
 		LEFT JOIN tblICInventoryTransactionType ty 
