@@ -105,7 +105,7 @@ SELECT
 	,ysnDelivered = CONVERT(BIT, CASE WHEN (ALD.dblSAllocatedQty > ISNULL(LS.dblQuantity, 0)) THEN 0 ELSE 1 END)
 	,dblSDeliveredQty = ISNULL(LS.dblQuantity, 0)
 	,dblBalanceToDeliver = ALD.dblSAllocatedQty - ISNULL(LS.dblQuantity, 0)
-	,strInvoiceStatus = CASE WHEN (ISNULL(PCT.dblInvoicedQty, 0) = 0 AND ISNULL(SCT.dblInvoicedQty, 0) = 0) THEN 'Not Invoiced' ELSE 'Partially Invoiced' END
+	,strInvoiceStatus = CASE WHEN (ISNULL(PCT.dblInvoicedQty, 0) = 0 AND ISNULL(SCT.dblInvoicedQty, 0) = 0) THEN 'Not Invoiced' ELSE 'Partially Invoiced' END COLLATE Latin1_General_CI_AS 
 	
 	--Load Shipment
 	,strLoadNumber = LS.strLoadNumber

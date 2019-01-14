@@ -33,7 +33,7 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Picked Lots'
 		WHEN 6
 			THEN 'Pick Lots'
-		END AS strCreateShipmentDefaultSourceType
+		END COLLATE Latin1_General_CI_AS AS strCreateShipmentDefaultSourceType
 	,CP.intDefaultTransportationMode
 	,CASE CP.intDefaultTransportationMode
 		WHEN 1
@@ -169,7 +169,7 @@ SELECT CP.intCompanyPreferenceId
 	,CASE CP.intPreArrivalNotificationReportFormat
 		WHEN 1
 			THEN 'Pre Arrival Notification Report Format - 1'
-		END strPreArrivalNotificationReportFormat
+		END COLLATE Latin1_General_CI_AS strPreArrivalNotificationReportFormat
 	,CP.intBOLReportFormat
 	,CASE CP.intBOLReportFormat
 		WHEN 1
