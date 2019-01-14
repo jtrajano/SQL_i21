@@ -18,6 +18,7 @@ SELECT IA.guidSessionId
 	,IA.strDescription
 	,IV.intParentLotId
 	,IV.strParentLotNumber
+	,IA.intLotId
 	,IV.strLotNumber
 	,IV.strLotAlias
 	,IV.strSecondaryStatus
@@ -48,6 +49,7 @@ SELECT IA.guidSessionId
 	,IV.strProducer
 	,IV.strGrade
 	,IV.strNotes
+	,IV.strMarkings
 	,IV.dtmManufacturedDate
 	,IV.strOwner
 	,IV.strOwnershipType
@@ -55,6 +57,7 @@ SELECT IA.guidSessionId
 	,IV.strRestrictionType
 	,IV.strSubLocationName
 	,IV.dtmExpiryDate
+	,IV.intStorageLocationId 
 	,IV.strStorageLocationName
 	,IV.strTrackingNumber
 	,IV.intUnitPallet

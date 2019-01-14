@@ -53,6 +53,7 @@ SELECT IA.guidSessionId
 	,IV.strRestrictionType
 	,IV.strSubLocationName
 	,IV.dtmExpiryDate
+	,IV.intStorageLocationId 
 	,IV.strStorageLocationName
 	,IV.strTrackingNumber
 	,IV.intUnitPallet
@@ -99,6 +100,7 @@ GROUP BY IA.guidSessionId
 	,IV.strRestrictionType
 	,IV.strSubLocationName
 	,IV.dtmExpiryDate
+	,IV.intStorageLocationId 
 	,IV.strStorageLocationName
 	,IV.strTrackingNumber
 	,IV.intUnitPallet
