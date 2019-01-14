@@ -232,6 +232,7 @@
 	,Basis.intBillId AS intBasisAdvancedId
 	,Basis.ysnRestricted AS ysnBasisAdvancedRestricted
 	,APPayment.dblPayment
+	,intSourceType as intLoadSourceType
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -297,6 +298,7 @@
 				,CEL.intEntityLocationId AS intCustomerLocationId
 				,CEL.strLocationName AS strShipTo
 				,L.intTicketId
+				,L.intSourceType
 			FROM tblLGLoad L
 			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId 
 			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
