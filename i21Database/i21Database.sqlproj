@@ -7241,6 +7241,7 @@
     <Build Include="dbo\Functions\fnRKGetOpenFutureByDate.sql" />
     <Build Include="dbo\Tables\tblCTContractBalance.sql" />
     <Build Include="dbo\Tables\tblSTUpdateItemDataPreview.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateItemPricingPreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
