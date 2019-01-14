@@ -48,8 +48,8 @@ SELECT IA.guidSessionId
 	,IV.intCropYear
 	,IV.strProducer
 	,IV.strGrade
-	,IV.strNotes
 	,IV.strMarkings
+	,IV.strNotes
 	,IV.dtmManufacturedDate
 	,IV.strOwner
 	,IV.strOwnershipType
@@ -66,4 +66,4 @@ SELECT IA.guidSessionId
 	,IV.dblWeightPerQty
 FROM dbo.tblMFInventoryAsOnDate IA
 JOIN dbo.vyuMFInventoryView IV ON IV.intLotId = IA.intLotId
-	--Select *from vyuMFInventoryAsOnDate
+
