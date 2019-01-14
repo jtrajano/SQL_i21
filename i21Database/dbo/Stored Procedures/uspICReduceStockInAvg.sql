@@ -59,21 +59,47 @@ BEGIN
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
 			OUTER APPLY (
-				SELECT	TOP 1 *
+				SELECT	intInventoryFIFOId = MIN(cb.intInventoryFIFOId) 
 				FROM	tblICInventoryFIFO cb
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intItemUOMId = @intItemUOMId
-						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
+						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+				HAVING 
+					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 			) cb 
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN  
-		SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, NULL, NULL)
+		-- Get the available stock in the cost bucket. 
+		DECLARE @strCostBucketDate AS VARCHAR(20) 
+		SELECT	@strCostBucketDate = CONVERT(NVARCHAR(20), MIN(cb.dtmDate), 101)
+		FROM	tblICInventoryFIFO cb
+		WHERE	cb.intItemId = @intItemId
+				AND cb.intItemLocationId = @intItemLocationId
+				AND cb.intItemUOMId = @intItemUOMId
+				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0 
+		HAVING 
+			SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 
-		--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
-		EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
-		RETURN -80003
+		IF @strCostBucketDate IS NOT NULL 
+		BEGIN 
+			--'Stock is not available for {Item} at {Location} as of {Transaction Date}. Use the nearest stock available date of {Cost Bucket Date} or later.'
+			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
+
+			SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, NULL, NULL)
+			EXEC uspICRaiseError 80096, @strItemNo, @strLocationName, @strDate, @strCostBucketDate;
+			RETURN -80096;
+		END 
+		ELSE 
+		BEGIN
+			SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, NULL, NULL)
+			
+			--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
+			EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
+			RETURN -80003;
+		END 
 	END 
 END 
 
