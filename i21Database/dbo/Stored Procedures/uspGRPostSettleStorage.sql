@@ -1223,7 +1223,11 @@ BEGIN TRY
 											WHEN ISNULL(a.dblSettleContractUnits,0) > 0 THEN a.dblSettleContractUnits
 											ELSE ISNULL(b.dblSettleUnits,0)
 										END
-									ELSE a.dblUnits									
+									ELSE 
+										CASE 
+											WHEN ISNULL(a.dblSettleContractUnits,0) > 0 THEN ROUND((a.dblSettleContractUnits / CS.dblOpenBalance) * a.dblUnits, @intDecimalPrecision)
+											ELSE ROUND((ISNULL(b.dblSettleUnits,0) / CS.dblOriginalBalance) * a.dblUnits, @intDecimalPrecision)
+										END
 								END
 				FROM @SettleVoucherCreate a
 				LEFT JOIN 
@@ -1236,6 +1240,8 @@ BEGIN TRY
 						AND (intPricingTypeId = 1 OR intPricingTypeId IS NULL)
 					GROUP BY intCustomerStorageId
 				)b ON b.intCustomerStorageId = a.intCustomerStorageId
+				INNER JOIN tblGRCustomerStorage CS
+					ON CS.intCustomerStorageId = a.intCustomerStorageId
 				WHERE a.intItemType = 3
 		     
 			 IF EXISTS(SELECT 1 FROM @SettleVoucherCreate WHERE ISNULL(dblCashPrice,0) <> 0 AND ISNULL(dblUnits,0) <> 0 )
