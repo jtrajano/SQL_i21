@@ -483,8 +483,7 @@ WHERE dblOpeningQty = 0
 	AND dblConsumedQty = 0
 	AND dblProduced = 0
 
-IF @ysnInventoryByParentLot = 0
-BEGIN
+
 	INSERT INTO tblMFInventoryAsOnDate (
 		guidSessionId
 		,intKey
@@ -492,18 +491,12 @@ BEGIN
 		,strCommodityCode
 		,dtmFromDate
 		,dtmToDate
-		,intCategoryId
-		,strCategoryCode
 		,intLocationId
 		,strLocationName
 		,intItemId
 		,strItemNo
 		,strDescription
-		,intParentLotId
-		,strParentLotNumber
-		,strLotNumber
-		,strLotAlias
-		,strSecondaryStatus
+		,intLotId
 		,intItemUOMId
 		,strItemUOM
 		,dblOpeningQty
@@ -520,107 +513,19 @@ BEGIN
 		,intConcurrencyId
 		,dtmDateCreated
 		,intCreatedByUserId
-		,strVendorRefNo
-		,strWarehouseRefNo
-		,strBondStatus
-		,strContainerNo
 		)
 	SELECT guidSessionId = @guidSessionId
-		,intKey = CAST(ROW_NUMBER() OVER (
-				ORDER BY Item.intCommodityId
-					,Item.intItemId
-				) AS INT)
+		,intKey=0
 		,intCommodityId = Item.intCommodityId
 		,strCommodityCode = ISNULL(Commodity.strCommodityCode, '')
 		,dtmFromDate = CAST(CONVERT(VARCHAR(10), @dtmFromDate, 112) AS DATETIME)
 		,dtmToDate = CAST(CONVERT(VARCHAR(10), @dtmToDate, 112) AS DATETIME)
-		,intCategoryId = Item.intCategoryId
-		,strCategoryCode = ISNULL(Category.strCategoryCode, '')
 		,intLocationId = FL.intLocationId
 		,strLocationName = Loc.strLocationName
 		,intItemId = Item.intItemId
 		,strItemNo = Item.strItemNo
 		,strDescription = Item.strDescription
-		,intParentLotId = PL.intParentLotId
-		,strParentLotNumber = PL.strParentLotNumber
-		,strLotNumber = L.strLotNumber
-		,strLotAlias = L.strLotAlias
-		,strSecondaryStatus = LS.strSecondaryStatus
-		,intItemUOMId = StockUOM.intItemUOMId
-		,strItemUOM = sUOM.strUnitMeasure
-		,dblOpeningQty = ISNULL(SUM(FL.dblOpeningQty), 0)
-		,dblReceivedQty = ISNULL(SUM(FL.dblReceivedQty), 0)
-		,dblInvoicedQty = ISNULL(SUM(FL.dblInvoicedQty), 0)
-		,dblAdjustments = ISNULL(SUM(FL.dblAdjustments), 0)
-		,dblTransfersReceived = ISNULL(SUM(FL.dblTransfersReceived), 0)
-		,dblTransfersShipped = ISNULL(SUM(FL.dblTransfersShipped), 0)
-		,dblInTransitInbound = ISNULL(SUM(FL.dblInTransitInbound), 0)
-		,dblInTransitOutbound = ISNULL(SUM(FL.dblInTransitOutbound), 0)
-		,dblConsumed = ISNULL(SUM(FL.dblConsumedQty), 0)
-		,dblProduced = ISNULL(SUM(FL.dblProduced), 0)
-		,dblClosingQty = IsNULL(SUM(FL.dblOpeningQty + FL.dblReceivedQty - FL.dblInvoicedQty + FL.dblAdjustments + FL.dblTransfersReceived - FL.dblTransfersShipped + FL.dblInTransitInbound - FL.dblInTransitOutbound - FL.dblConsumedQty + FL.dblProduced), 0)
-		,intConcurrencyId = 1
-		,dtmDateCreated = GETDATE()
-		,intCreatedByUserId = @intUserId
-		,strVendorRefNo = IsNULL(strVendorRefNo, '')
-		,strWarehouseRefNo = IsNULl(LI.strWarehouseRefNo, '')
-		,strBondStatus = IsNULL(BS.strSecondaryStatus, '')
-		,strContainerNo = IsNULL(L.strContainerNo, '')
-	FROM #tmpFinalInventoryAsOnDate FL
-	JOIN tblICLot L ON L.intLotId = FL.intLotId
-	JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
-	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-	JOIN tblICItem Item ON L.intItemId = Item.intItemId
-	INNER JOIN tblICItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId
-		AND StockUOM.ysnStockUnit = 1
-	INNER JOIN tblICUnitMeasure sUOM ON StockUOM.intUnitMeasureId = sUOM.intUnitMeasureId
-	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
-	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
-	INNER JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = FL.intLocationId
-	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-	LEFT JOIN tblICLotStatus BS ON BS.intLotStatusId = LI.intBondStatusId
-	GROUP BY Item.intCommodityId
-		,IsNULL(Commodity.strCommodityCode, '')
-		,Item.intCategoryId
-		,IsNULL(Category.strCategoryCode, '')
-		,FL.intLocationId
-		,Loc.strLocationName
-		,Item.intItemId
-		,Item.strItemNo
-		,Item.strDescription
-		,PL.intParentLotId
-		,PL.strParentLotNumber
-		,L.strLotNumber
-		,L.strLotAlias
-		,LS.strSecondaryStatus
-		,StockUOM.intItemUOMId
-		,sUOM.strUnitMeasure
-		,IsNULL(strVendorRefNo, '')
-		,IsNULL(LI.strWarehouseRefNo, '')
-		,IsNULL(BS.strSecondaryStatus, '')
-		,IsNULL(L.strContainerNo, '')
-END
-ELSE
-BEGIN
-	SELECT guidSessionId = @guidSessionId
-		,intKey = 0
-		,intCommodityId = Item.intCommodityId
-		,strCommodityCode = ISNULL(Commodity.strCommodityCode, '')
-		,dtmFromDate = CAST(CONVERT(VARCHAR(10), @dtmFromDate, 112) AS DATETIME)
-		,dtmToDate = CAST(CONVERT(VARCHAR(10), @dtmToDate, 112) AS DATETIME)
-		,intCategoryId = Item.intCategoryId
-		,strCategoryCode = ISNULL(Category.strCategoryCode, '')
-		,intLocationId = FL.intLocationId
-		,strLocationName = Loc.strLocationName
-		,intItemId = Item.intItemId
-		,strItemNo = Item.strItemNo
-		,strDescription = Item.strDescription
-		,intParentLotId = PL.intParentLotId
-		,strParentLotNumber = PL.strParentLotNumber
-		,intLotId = L.intLotId
-		,strLotNumber = L.strLotNumber
-		,strLotAlias = L.strLotAlias
-		,strSecondaryStatus = LS.strSecondaryStatus
+		,intLotId=FL.intLotId
 		,intItemUOMId = StockUOM.intItemUOMId
 		,strItemUOM = sUOM.strUnitMeasure
 		,dblOpeningQty = ISNULL(FL.dblOpeningQty, 0)
@@ -633,131 +538,17 @@ BEGIN
 		,dblInTransitOutbound = ISNULL(FL.dblInTransitOutbound, 0)
 		,dblConsumed = ISNULL(FL.dblConsumedQty, 0)
 		,dblProduced = ISNULL(FL.dblProduced, 0)
-		,dblClosingQty = FL.dblOpeningQty + FL.dblReceivedQty - FL.dblInvoicedQty + FL.dblAdjustments + FL.dblTransfersReceived - FL.dblTransfersShipped + FL.dblInTransitInbound - FL.dblInTransitOutbound - FL.dblConsumedQty + FL.dblProduced
+		,dblClosingQty = IsNULL((FL.dblOpeningQty + FL.dblReceivedQty - FL.dblInvoicedQty + FL.dblAdjustments + FL.dblTransfersReceived - FL.dblTransfersShipped + FL.dblInTransitInbound - FL.dblInTransitOutbound - FL.dblConsumedQty + FL.dblProduced), 0)
 		,intConcurrencyId = 1
 		,dtmDateCreated = GETDATE()
 		,intCreatedByUserId = @intUserId
-		,strVendorRefNo = strVendorRefNo
-		,strWarehouseRefNo = LI.strWarehouseRefNo
-		,strBondStatus = BS.strSecondaryStatus
-		,strContainerNo = L.strContainerNo
-	INTO #tmpInventoryByParentLot
 	FROM #tmpFinalInventoryAsOnDate FL
-	JOIN tblICLot L ON L.intLotId = FL.intLotId
-	JOIN tblMFLotInventory LI ON LI.intLotId = L.intLotId
-	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
-	JOIN tblICItem Item ON L.intItemId = Item.intItemId
+	JOIN tblICItem Item ON FL.intItemId = Item.intItemId
 	INNER JOIN tblICItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId
 		AND StockUOM.ysnStockUnit = 1
 	INNER JOIN tblICUnitMeasure sUOM ON StockUOM.intUnitMeasureId = sUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
-	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 	INNER JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = FL.intLocationId
-	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-	LEFT JOIN tblICLotStatus BS ON BS.intLotStatusId = LI.intBondStatusId
 
-	INSERT INTO tblMFInventoryAsOnDate (
-		guidSessionId
-		,intKey
-		,intCommodityId
-		,strCommodityCode
-		,dtmFromDate
-		,dtmToDate
-		,intCategoryId
-		,strCategoryCode
-		,intLocationId
-		,strLocationName
-		,intItemId
-		,strItemNo
-		,strDescription
-		,intParentLotId
-		,strParentLotNumber
-		,strLotAlias
-		,strSecondaryStatus
-		,intItemUOMId
-		,strItemUOM
-		,dblOpeningQty
-		,dblReceivedQty
-		,dblInvoicedQty
-		,dblAdjustments
-		,dblTransfersReceived
-		,dblTransfersShipped
-		,dblInTransitInbound
-		,dblInTransitOutbound
-		,dblConsumed
-		,dblProduced
-		,dblClosingQty
-		,intConcurrencyId
-		,dtmDateCreated
-		,intCreatedByUserId
-		,strVendorRefNo
-		,strWarehouseRefNo
-		,strBondStatus
-		,strContainerNo
-		)
-	SELECT guidSessionId
-		,intKey = CAST(ROW_NUMBER() OVER (
-				ORDER BY intCommodityId
-					,intItemId
-				) AS INT)
-		,intCommodityId
-		,strCommodityCode
-		,dtmFromDate
-		,dtmToDate
-		,intCategoryId
-		,strCategoryCode
-		,intLocationId
-		,strLocationName
-		,intItemId
-		,strItemNo
-		,strDescription
-		,intParentLotId
-		,strParentLotNumber
-		,strLotAlias
-		,strSecondaryStatus
-		,intItemUOMId
-		,strItemUOM
-		,SUM(dblOpeningQty)
-		,SUM(dblReceivedQty)
-		,SUM(dblInvoicedQty)
-		,SUM(dblAdjustments)
-		,SUM(dblTransfersReceived)
-		,SUM(dblTransfersShipped)
-		,SUM(dblInTransitInbound)
-		,SUM(dblInTransitOutbound)
-		,SUM(dblConsumed)
-		,SUM(dblProduced)
-		,SUM(dblClosingQty)
-		,intConcurrencyId
-		,MAX(dtmDateCreated)
-		,intCreatedByUserId
-		,IsNULL(strVendorRefNo, '')
-		,IsNULL(strWarehouseRefNo, '')
-		,IsNULL(strBondStatus, '')
-		,IsNULL(strContainerNo, '')
-	FROM #tmpInventoryByParentLot
-	GROUP BY guidSessionId
-		,intCommodityId
-		,strCommodityCode
-		,dtmFromDate
-		,dtmToDate
-		,intCategoryId
-		,strCategoryCode
-		,intLocationId
-		,strLocationName
-		,intItemId
-		,strItemNo
-		,strDescription
-		,intParentLotId
-		,strParentLotNumber
-		,strLotAlias
-		,strSecondaryStatus
-		,intItemUOMId
-		,strItemUOM
-		,intConcurrencyId
-		,intCreatedByUserId
-		,IsNULL(strVendorRefNo, '')
-		,IsNULL(strWarehouseRefNo, '')
-		,IsNULL(strBondStatus, '')
-		,IsNULL(strContainerNo, '')
-END
+	
+
