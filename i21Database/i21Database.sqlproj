@@ -7243,6 +7243,8 @@
     <Build Include="dbo\Tables\tblSTUpdateItemDataPreview.sql" />
     <Build Include="dbo\Tables\tblSTUpdateItemPricingPreview.sql" />
     <Build Include="dbo\Tables\tblSTUpdateRebateOrDiscountPreview.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryAsOnDate.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryAsOnDateByParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
