@@ -961,19 +961,19 @@ BEGIN
 		[dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
 													THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
 																	THEN 
-																		(CAST(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) 
-																				* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) 
+																		CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
+																				* ISNULL(NULLIF(B.dblRate,0), 1) AS DECIMAL(18,2))
 																			- 
-																			CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))) 
+																			CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 																		* -1
 														WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
 															THEN 
-																(CAST(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) 
+																(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
 																		* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 																	 - CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
 														END) 
 												ELSE 
-													(CAST(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) 
+													(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
 																* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) 
 															- CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
 												END
