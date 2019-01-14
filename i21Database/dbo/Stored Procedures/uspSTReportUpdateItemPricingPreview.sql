@@ -327,7 +327,8 @@ BEGIN TRY
 					, strTableName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 					, strColumnName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 					, strColumnDataType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				)
+				
+			)
 
 
 
@@ -630,7 +631,8 @@ BEGIN TRY
 					COMMIT TRANSACTION
 			END
 		END
-
+	
+		DELETE FROM @tblPreview
 END TRY
 
 BEGIN CATCH

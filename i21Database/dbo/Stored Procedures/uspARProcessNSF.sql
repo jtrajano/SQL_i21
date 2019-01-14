@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessNSF]
 	  @intNSFTransactionId	INT
 	, @intUserId			INT
-	, @strCreatedIvoices VARCHAR(500) = NULL OUTPUT
-	, @strMessage	VARCHAR(500)	= NULL OUTPUT
+	, @strCreatedIvoices 	VARCHAR(500) = NULL OUTPUT
+	, @strMessage			VARCHAR(500) = NULL OUTPUT
 
 
 AS
@@ -12,13 +12,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intNSFPaymentMethodId INT = NULL
-DECLARE @intPaymentId INT = NULL
+DECLARE @intNSFPaymentMethodId 	INT = NULL
+DECLARE @intPaymentId 			INT = NULL
+DECLARE @strErrorMsg			NVARCHAR(MAX) = NULL
 
 SELECT TOP 1 @intNSFPaymentMethodId = intPaymentMethodID
 FROM dbo.tblSMPaymentMethod 
 WHERE strPaymentMethod = 'NSF'
 
+--INSERT DEFAULT NSF PAYMENT METHOD
 IF ISNULL(@intNSFPaymentMethodId, 0) = 0
 	BEGIN
 		INSERT INTO tblSMPaymentMethod (
@@ -54,6 +56,7 @@ CREATE TABLE #SELECTEDPAYMENTS (
 	, intNSFAccountId		INT				NULL
 	, dtmDate				DATETIME		NOT NULL
 	, dblNSFBankCharge		NUMERIC(18, 6)	NULL
+	, dblAmountPaid			NUMERIC(18, 6)	NULL
 	, dblUnappliedAmount	NUMERIC(18, 6)	NULL
 	, ysnInvoiceToCustomer	BIT				NULL
 	, ysnInvoicePrepayment	BIT				NULL
@@ -61,6 +64,8 @@ CREATE TABLE #SELECTEDPAYMENTS (
 	, intEntityCustomerId	INT				NOT NULL
 	, intCurrencyId			INT				NOT NULL
 	, intCompanyLocationId	INT				NOT NULL
+	, intBankDepositId		INT				NULL
+	, intAccountId			INT				NULL
 )
 
 INSERT INTO #SELECTEDPAYMENTS
@@ -68,30 +73,44 @@ SELECT NSF.intPaymentId
 	 , NSF.intNSFAccountId
 	 , NSF.dtmDate
 	 , NSF.dblNSFBankCharge
+	 , P.dblAmountPaid
 	 , P.dblUnappliedAmount
 	 , NSF.ysnInvoiceToCustomer
 	 , P.ysnInvoicePrepayment
 	 , P.strRecordNumber
 	 , P.intEntityCustomerId
 	 , P.intCurrencyId
-	 , P.intLocationId	 
+	 , P.intLocationId
+	 , P.intBankDepositId
+	 , P.intAccountId
 FROM dbo.tblARNSFStagingTableDetail NSF WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
 		 , intEntityCustomerId
 		 , intCurrencyId
-		 , intLocationId
+		 , intLocationId		 
 		 , strRecordNumber
+		 , dblAmountPaid
 		 , dblUnappliedAmount
 		 , ysnInvoicePrepayment
+		 , intBankDepositId
+		 , intAccountId
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentMethodID
 		FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
 		WHERE strPaymentMethod IN ('Check', 'eCheck', 'ACH')
 	) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
-	WHERE ysnPosted = 1
-	  AND ysnProcessedToNSF = 0
+	LEFT JOIN (
+		SELECT intSourceTransactionId
+			 , intBankDepositId
+			 , intUndepositedFundId
+			 , strSourceTransactionId
+		FROM dbo.tblCMUndepositedFund WITH (NOLOCK)
+	) UF ON UF.intSourceTransactionId = P.intPaymentId
+		AND UF.strSourceTransactionId = P.strRecordNumber
+	WHERE P.ysnPosted = 1
+	  AND P.ysnProcessedToNSF = 0
 ) P ON NSF.intPaymentId = P.intPaymentId
 WHERE NSF.ysnProcessed = 0
 
@@ -326,6 +345,107 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 UPDATE tblARNSFStagingTableDetail 
 SET ysnProcessed = 1 
 WHERE intNSFTransactionId = @intNSFTransactionId
+
+--CREATE NSF BANK TRANSACTION FOR DEPOSITED PAYMENTS
+IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ISNULL(intBankDepositId, 0) <> 0)
+	BEGIN
+		DECLARE @strTransactionId					NVARCHAR(100) = ''
+			  , @STARTING_NUMBER_BANK_WITHDRAWAL 	NVARCHAR(100) = 'Bank Withdrawal'
+			  , @intStartingNumberId				INT = NULL
+			  , @intNewBankTransactionId			INT = NULL
+			  , @ysnSuccess							BIT = 0
+			  , @BankTransaction					BankTransactionTable
+			  , @BankTransactionDetail				BankTransactionDetailTable
+
+		BEGIN TRY
+			SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
+			FROM dbo.tblSMStartingNumber 
+			WHERE strTransactionType = @STARTING_NUMBER_BANK_WITHDRAWAL
+
+			EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
+
+			INSERT INTO @BankTransaction (
+				  [intBankAccountId]
+				, [strTransactionId]
+				, [intCurrencyId]
+				, [intBankTransactionTypeId] 
+				, [dtmDate]
+				, [dblAmount]
+				, [strMemo]			
+				, [intCompanyLocationId]
+				, [intEntityId]
+				, [intCreatedUserId]
+				, [intLastModifiedUserId])
+			SELECT 
+				 [intBankAccountId]				= UF.intBankAccountId
+				,[strTransactionId]				= @strTransactionId
+				,[intCurrencyId]				= SP.intCurrencyId
+				,[intBankTransactionTypeId]		= 2
+				,[dtmDate]						= SP.dtmDate
+				,[dblAmount]					= SUM(UF.dblAmount)
+				,[strMemo]						= 'Reversal for ' + SP.strRecordNumber
+				,[intCompanyLocationId]			= UF.intLocationId
+				,[intEntityId]					= @intUserId
+				,[intCreatedUserId]				= @intUserId
+				,[intLastModifiedUserId]		= @intUserId
+			FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
+			INNER JOIN #SELECTEDPAYMENTS SP ON UF.intSourceTransactionId = SP.intPaymentId
+	  									   AND UF.strSourceTransactionId = SP.strRecordNumber
+			WHERE SP.intBankDepositId IS NOT NULL
+			GROUP BY UF.intBankAccountId, SP.intCurrencyId, UF.intLocationId, SP.strRecordNumber, SP.dtmDate
+
+			INSERT INTO @BankTransactionDetail(
+				  [intTransactionId]
+				, [intUndepositedFundId]
+				, [dtmDate]
+				, [intGLAccountId]
+				, [strDescription]
+				, [dblDebit]
+				, [dblCredit]
+				, [intEntityId]
+			)
+			SELECT 
+				  [intTransactionId]	= 0
+				, [intUndepositedFundId] = UF.intUndepositedFundId
+				, [dtmDate]				= UF.dtmDate
+				, [intGLAccountId]		= SP.intAccountId
+				, [strDescription]		= GL.strDescription
+				, [dblDebit]			= 0
+				, [dblCredit]			= ABS(ISNULL(SP.dblAmountPaid, 0))
+				, [intEntityId]			= SP.intEntityCustomerId
+			FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
+			INNER JOIN #SELECTEDPAYMENTS SP ON UF.intSourceTransactionId = SP.intPaymentId
+	  									   AND UF.strSourceTransactionId = SP.strRecordNumber
+			LEFT JOIN tblGLAccount GL ON SP.intAccountId = GL.intAccountId
+			WHERE SP.intBankDepositId IS NOT NULL
+
+			EXEC dbo.uspCMCreateBankTransactionEntries @BankTransactionEntries			= @BankTransaction
+													 , @BankTransactionDetailEntries	= @BankTransactionDetail
+													 , @intTransactionId				= @intNewBankTransactionId OUT
+
+			IF ISNULL(@intNewBankTransactionId, 0) > 0
+				BEGIN
+					EXEC dbo.uspCMPostBankTransaction @ysnPost			= 1
+													, @ysnRecap			= 0
+													, @strTransactionId = @strTransactionId
+													, @strBatchId		= NULL
+													, @intUserId		= @intUserId
+													, @intEntityId		= @intUserId
+													, @isSuccessful		= @ysnSuccess OUT
+				END
+			ELSE
+				BEGIN
+					RAISERROR('Failed to Create Bank Transaction Entry', 11, 1)
+					RETURN;
+				END
+		END TRY
+		BEGIN CATCH
+			SELECT @strErrorMsg = ERROR_MESSAGE()
+			ROLLBACK TRANSACTION
+			RAISERROR(@strErrorMsg, 11, 1)
+			RETURN;
+		END CATCH
+	END
 
 --UPDATE CUSTOMER BALANCE
 UPDATE CUSTOMER
