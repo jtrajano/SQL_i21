@@ -283,6 +283,14 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpd
 			')
 	END
 
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateRebateOrDiscountPreview') 
+	BEGIN
+		PRINT(N'Remove all records from tblSTUpdateRebateOrDiscountPreview')
+		EXEC('
+				DELETE FROM tblSTUpdateRebateOrDiscountPreview
+			')
+	END
+	
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateRegisterItemReport') 
 	BEGIN
 		PRINT(N'Remove all records from tblSTUpdateRegisterItemReport')
