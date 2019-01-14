@@ -553,9 +553,9 @@ BEGIN
 												AND intTransactionTypeId = 33 --'Invoice'
 												and iv.intItemId = Inv.intItemId
 												and id.strDocumentNumber = Inv.strTransactionId
-												and CONVERT(DATETIME,@dtmToDate) = CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
+												and CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
 												, 0)
-						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) = CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 THEN 1 ELSE 0 END )
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 THEN 1 ELSE 0 END )
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
 						,CT.strFutureMonth
 						,CT.strDeliveryDate
