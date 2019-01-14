@@ -286,11 +286,17 @@ BEGIN TRY
 			) n
 			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
 		) [Changes]
-		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-		JOIN tblICItemPricing IP ON [Changes].intItemPricingId = IP.intItemPricingId
-		JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
-		JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
-		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+		INNER JOIN tblICItem I 
+			ON [Changes].intItemId = I.intItemId
+		INNER JOIN tblICItemPricing IP 
+			ON [Changes].intItemPricingId = IP.intItemPricingId
+		INNER JOIN tblICItemUOM UOM 
+			ON IP.intItemId = UOM.intItemId
+		INNER JOIN tblICItemLocation IL 
+			ON IP.intItemLocationId = IL.intItemLocationId 
+			AND [Changes].intItemId = IL.intItemId
+		INNER JOIN tblSMCompanyLocation CL 
+			ON IL.intLocationId = CL.intCompanyLocationId
 		WHERE 
 		(
 			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
@@ -354,11 +360,17 @@ BEGIN TRY
 			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
 		
 		) [Changes]
-		JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-		JOIN tblICItemSpecialPricing IP ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
-		JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
-		JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
-		JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+		INNER JOIN tblICItem I 
+			ON [Changes].intItemId = I.intItemId
+		INNER JOIN tblICItemSpecialPricing IP 
+			ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
+		INNER JOIN tblICItemUOM UOM 
+			ON IP.intItemId = UOM.intItemId
+		INNER JOIN tblICItemLocation IL 
+			ON IP.intItemLocationId = IL.intItemLocationId 
+			AND [Changes].intItemId = IL.intItemId
+		INNER JOIN tblSMCompanyLocation CL 
+			ON IL.intLocationId = CL.intCompanyLocationId
 		WHERE 
 		(
 			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
@@ -374,25 +386,7 @@ BEGIN TRY
 
 	   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
 	END
-   -------------------------------------------------------------------------------------------------
-	----------- Count Items -------------------------------------------------------------------------
-	-------------------------------------------------------------------------------------------------
 
-
-	--SET @RecCount = @RecCount + (SELECT COUNT(*) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE dblOldSalePrice != dblNewSalePrice OR dblOldStandardCost != dblNewStandardCost)
-	--SET @RecCount = @RecCount + (SELECT COUNT(*) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog WHERE dblOldUnitAfterDiscount != dblNewUnitAfterDiscount OR dtmOldBeginDate != dtmNewBeginDate OR dtmOldEndDate != dtmNewEndDate)
-
-	--SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemPricingId) FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog)
-	--SET @UpdateCount = @UpdateCount + (SELECT COUNT(DISTINCT intItemSpecialPricingId) FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog)
-
-
-	--DECLARE @RecCount AS INT = 0
-	--DECLARE @UpdateCount AS INT = 0
-
-	--SET @UpdateCount = (SELECT COUNT(*) FROM @tblPreview)
-	--SET @RecCount = (SELECT COUNT(DISTINCT intChildId) FROM @tblPreview)
-
-	--SELECT @UpdateCount as UpdateItemPrcicingCount, @RecCount as RecCount
 
 
 	---------------------------------------------------------------------------------------
@@ -440,6 +434,7 @@ BEGIN TRY
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL  
 			DROP TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
 	END
+
 END TRY
 
 BEGIN CATCH  
