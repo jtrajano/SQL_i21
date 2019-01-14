@@ -3,6 +3,16 @@
 ************************/
 
 /*
+* Payroll Company Preferences 
+* 1. Insert initial row if table is empty
+* 2..
+*/
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRCompanyPreference'))
+BEGIN
+	EXEC ('IF NOT EXISTS (SELECT TOP 1 1 FROM tblPRCompanyPreference) INSERT INTO tblPRCompanyPreference DEFAULT VALUES')
+END
+
+/*
 * Employee Workers Compensation 
 * 1. Change Rate Type from "Amount" to "Per Dollar"
 * 2..
