@@ -7277,6 +7277,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateInvoiceFromShipment.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenFutureByDate.sql" />
     <Build Include="dbo\Tables\tblCTContractBalance.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateItemDataPreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
