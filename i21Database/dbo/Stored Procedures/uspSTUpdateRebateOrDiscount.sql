@@ -90,6 +90,7 @@ BEGIN TRY
 		)
 	END 
 
+
 	IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_AuditLog') IS NULL  
 		CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_AuditLog (
 			intItemId INT
@@ -202,7 +203,7 @@ BEGIN TRY
 				SET @dblDiscount = @DiscAmountUnit
 
 				-- SP
-					EXEC [uspICUpdateItemSpecialPricingForCStore]
+				EXEC [uspICUpdateItemSpecialPricingForCStore]
 						-- filter params
 						@strUpcCode = NULL 
 						,@strDescription = NULL 
@@ -307,11 +308,17 @@ BEGIN TRY
 		WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
 		
 	) [Changes]
-	JOIN tblICItem I ON [Changes].intItemId = I.intItemId
-	JOIN tblICItemSpecialPricing IP ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
-	JOIN tblICItemUOM UOM ON IP.intItemId = UOM.intItemId
-	JOIN tblICItemLocation IL ON IP.intItemLocationId = IL.intItemLocationId AND IP.intItemLocationId = IL.intItemLocationId
-	JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+	INNER JOIN tblICItem I 
+		ON [Changes].intItemId = I.intItemId
+	INNER JOIN tblICItemSpecialPricing IP 
+		ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
+	INNER JOIN tblICItemUOM UOM 
+		ON IP.intItemId = UOM.intItemId
+	INNER JOIN tblICItemLocation IL 
+		ON IP.intItemLocationId = IL.intItemLocationId 
+		AND [Changes].intItemId = IL.intItemId
+	INNER JOIN tblSMCompanyLocation CL 
+		ON IL.intLocationId = CL.intCompanyLocationId
 	WHERE 
 	(
 		NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Location)
