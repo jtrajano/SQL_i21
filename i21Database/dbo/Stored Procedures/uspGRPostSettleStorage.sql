@@ -133,6 +133,7 @@ BEGIN TRY
 		,dblBasis DECIMAL(24, 10)
 		,intContractUOMId INT
 		,dblCostUnitQty DECIMAL(24, 10)
+		,strPricingType NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 	)
 	
 	DECLARE @tblDepletion AS TABLE 
@@ -244,19 +245,6 @@ BEGIN TRY
 			WHERE b.intFutureMarketId = @intFutureMarketId 
 			ORDER by b.dtmPriceDate DESC
 		END
-		ELSE
-		BEGIN
-			SET @ErrMsg = 'There is no <b>Futures Market</b> setup yet in Risk Management for <b>' + @strCommodityCode + '</b> commodity.'
-			RAISERROR(@ErrMsg,16,1,1)
-			RETURN;
-		END
-
-		IF ISNULL(@dblFutureMarkePrice,0) <= 0
-		BEGIN
-			SET @ErrMsg = 'There is no <b>Futures Price</b> yet in Risk Management for <b>' + @strCommodityCode + '</b> commodity.'
-			RAISERROR(@ErrMsg,16,1,1)
-			RETURN;
-		END
 
 		SET @intCurrencyId = ISNULL(
 										(
@@ -331,23 +319,42 @@ BEGIN TRY
 				,dblBasis
 				,intContractUOMId
 				,dblCostUnitQty
+				,strPricingType
 			)
 			SELECT 
-				 intSettleContractId = SSC.intSettleContractId 
-				,intContractDetailId = SSC.intContractDetailId 
-				,dblContractUnits    = SSC.dblUnits
-				,ContractEntityId    = CD.intEntityId
-				,dblCashPrice		 = CD.dblCashPrice
-				,intPricingTypeId    = CD.intPricingTypeId
-				,dblBasis			 = CD.dblBasisInItemStockUOM
-				,intContractUOMId	 = CD.intContractUOMId
-				,dblCostUnitQty		 = CD.dblCostUnitQty
+				 intSettleContractId 	= SSC.intSettleContractId 
+				,intContractDetailId 	= SSC.intContractDetailId 
+				,dblContractUnits    	= SSC.dblUnits
+				,ContractEntityId    	= CD.intEntityId
+				,dblCashPrice		 	= CD.dblCashPrice
+				,intPricingTypeId    	= CD.intPricingTypeId
+				,dblBasis			 	= CD.dblBasisInItemStockUOM
+				,intContractUOMId	 	= CD.intContractUOMId
+				,dblCostUnitQty		 	= CD.dblCostUnitQty
+				,strPricingType			= CD.strPricingType
 			FROM tblGRSettleContract SSC
 			JOIN vyuGRGetContracts CD 
 				ON CD.intContractDetailId = SSC.intContractDetailId
 			WHERE intSettleStorageId = @intSettleStorageId 
 				AND SSC.dblUnits > 0
 			ORDER BY SSC.intSettleContractId
+
+			IF EXISTS(SELECT TOP 1 1 FROM @SettleContract WHERE strPricingType <> 'Cash')
+			BEGIN
+				IF @intFutureMarketId = 0
+				BEGIN
+					SET @ErrMsg = 'There is no <b>Futures Market</b> setup yet in Risk Management for <b>' + @strCommodityCode + '</b> commodity.'
+					RAISERROR(@ErrMsg,16,1,1)
+					RETURN;
+				END
+
+				IF @dblFutureMarkePrice <= 0
+				BEGIN
+					SET @ErrMsg = 'There is no <b>Futures Price</b> yet in Risk Management for <b>' + @strCommodityCode + '</b> commodity.'
+					RAISERROR(@ErrMsg,16,1,1)
+					RETURN;
+				END
+			END			
 
 			SELECT TOP 1 
 				@intStorageChargeItemId = intItemId
@@ -989,7 +996,7 @@ BEGIN TRY
 												  END			
 					,dblUOMQty					=  @dblUOMQty
 					,dblCost					=  CASE 
-														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+														WHEN @intFutureMarketId = 0 THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
@@ -1049,7 +1056,7 @@ BEGIN TRY
 												  END
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= CASE 
-														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+														WHEN @intFutureMarketId = 0 THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
