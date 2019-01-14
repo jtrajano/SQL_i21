@@ -1,8 +1,5 @@
 ﻿GO
-IF EXISTS (SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblSMBuildNumber')
-BEGIN
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBName = db_name()) = 1 and
-    (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gasctmst') = 1
+IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gasctmst') = 1
 	BEGIN
 		PRINT 'Begin creating vyuSCTicketLVControlView '
 		EXEC ('
@@ -27,7 +24,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				END ) AS dtmTicketDateTime
 				,gasct_open_close_ind  COLLATE Latin1_General_CI_AS  as strTicketStatus
 				,gasct_cus_no COLLATE Latin1_General_CI_AS AS strEntityNo
-				,gasct_itm_no COLLATE Latin1_General_CI_AS AS strItemNo
+				,gasct_com_cd COLLATE Latin1_General_CI_AS AS strItemNo
 				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
 				,gasct_gross_wgt AS dblGrossWeight
 				,(CASE 
@@ -86,7 +83,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,gasct_pit_no COLLATE Latin1_General_CI_AS AS strPitNumber
 				,gasct_tic_pool COLLATE Latin1_General_CI_AS AS strTicketPool
 				,gasct_spl_no COLLATE Latin1_General_CI_AS AS strSplitNumber
-				,gasct_scale_id COLLATE Latin1_General_CI_AS AS strStationShortDescription
+				,gasct_loc_no + '''' + gasct_scale_id COLLATE Latin1_General_CI_AS AS strStationShortDescription
 				,CAST(
 				CASE WHEN gasct_split_wgt_yn = ''Y'' THEN 1
 				ELSE 0 END
@@ -222,7 +219,7 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 				,0
 				,0
 				,SC.intTicketId
-				,UOM.dblUnitQty
+				,ICUOM.dblUnitQty
 				,UOM.intItemUOMId
 				,ICUOM.intItemUOMId
 				,UM.strUnitMeasure
@@ -359,5 +356,4 @@ IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNam
 		')
 		PRINT 'End creating trigger'
 	END
-END
 GO

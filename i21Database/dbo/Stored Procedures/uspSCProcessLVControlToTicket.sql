@@ -140,7 +140,7 @@ BEGIN TRY
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,1
-				FROM [dbo].[tblSCTicketLVStaging] WHERE intTicketLVStagingId = 1
+				FROM [dbo].[tblSCTicketLVStaging] WHERE intTicketLVStagingId = @intTicketLVStagingId
 
 				SELECT @intTicketId = SCOPE_IDENTITY()
 
@@ -178,7 +178,7 @@ BEGIN TRY
 					,[strSourceType]
 					,[strDiscountChargeType]
 					,1
-				FROM [dbo].[tblSCTicketDiscountLVStaging] WHERE intTicketId = 1 and strSourceType = 'Scale'
+				FROM [dbo].[tblSCTicketDiscountLVStaging] WHERE intTicketId = @intTicketLVStagingId and strSourceType = 'Scale'
 
 					--Audit Log
 				EXEC dbo.uspSMAuditLog 

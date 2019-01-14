@@ -18,5 +18,6 @@
 	[strDiscountChargeType] NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL,
 	[intOriginTicketDiscountId] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT((1)), 
-	CONSTRAINT [PK_tblSCTicketDiscountLVStaging_intTicketDiscountLVStagingId] PRIMARY KEY ([intTicketDiscountLVStagingId])
+	CONSTRAINT [PK_tblSCTicketDiscountLVStaging_intTicketDiscountLVStagingId] PRIMARY KEY ([intTicketDiscountLVStagingId]),
+	CONSTRAINT [UK_tblSCTicketDiscountLVStaging_intTicketId_intTicketFileId_strSourceType_intDiscountScheduleCodeId] UNIQUE ([intTicketId],[intTicketFileId],[strSourceType],[intDiscountScheduleCodeId])
 )
