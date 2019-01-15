@@ -64,114 +64,118 @@ INSERT INTO @tblInventoryTransaction
 	,dblCost
 	,intOwnershipType
 	)
--- Get the company-owned stocks
-	SELECT
-		t.intItemId
-	, intItemUOMId		= t.intItemUOMId 
-	, intItemLocationId	= t.intItemLocationId 
-	, intSubLocationId	= 
+-- begin: Get the company-owned stocks
+SELECT
+	t.intItemId
+	,intItemUOMId		= t.intItemUOMId 
+	,intItemLocationId	= t.intItemLocationId 
+	,intSubLocationId	= 
 		CASE 
 			WHEN Lot.intLotId IS NULL THEN t.intSubLocationId 
 			ELSE Lot.intSubLocationId 
 		END
-	, intStorageLocationId = 
+	,intStorageLocationId = 
 		CASE 
 			WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId 
 			ELSE Lot.intStorageLocationId 
 		END
-	, Lot.intLotId
-	, intCostingMethod	= dbo.fnGetCostingMethod(t.intItemId, t.intItemLocationId)
-	, dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
-	, dblQty				= t.dblQty
-	, dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
-	, dblCost
-	, intOwnershipType	= 1
-	FROM
-		tblICInventoryTransaction t INNER JOIN tblICItemLocation IL
+	,Lot.intLotId
+	,intCostingMethod	= dbo.fnGetCostingMethod(t.intItemId, t.intItemLocationId)
+	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
+	,dblQty				= t.dblQty
+	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
+	,dblCost
+	,intOwnershipType	= 1
+FROM
+	tblICInventoryTransaction t INNER JOIN tblICItemLocation IL
 		ON IL.intItemLocationId = t.intItemLocationId
-		LEFT JOIN tblICLot Lot
+	LEFT JOIN tblICLot Lot
 		ON Lot.intLotId = t.intLotId
-	WHERE 
+WHERE 
 	t.intItemId = @intItemId
-		AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
-		AND t.intInTransitSourceLocationId IS NULL
-		AND ISNULL(t.ysnIsUnposted, 0) = 0
-		AND IL.intLocationId = @intLocationId
-		AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
-		AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
-		AND @intOwnershipType = 1
-	-- Company-Owned Stocks
+	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND t.intInTransitSourceLocationId IS NULL
+	AND ISNULL(t.ysnIsUnposted, 0) = 0
+	AND IL.intLocationId = @intLocationId
+	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
+	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
+	AND @intOwnershipType = 1
+-- end: Get the company-owned stocks
 
-	-- Get the customer-owned (aka Storage) stocks
+-- begin: Get the customer-owned (aka Storage) stocks
 UNION ALL
-	SELECT
-		t.intItemId
-	, intItemUOMId		= t.intItemUOMId 
-	, intItemLocationId	= t.intItemLocationId 
-	, intSubLocationId	= 
+SELECT
+	t.intItemId
+	,intItemUOMId		= t.intItemUOMId 
+	,intItemLocationId	= t.intItemLocationId 
+	,intSubLocationId	= 
 		CASE 
 			WHEN Lot.intLotId IS NULL THEN t.intSubLocationId 
 			ELSE Lot.intSubLocationId 
 		END
-	, intStorageLocationId = 
+	,intStorageLocationId = 
 		CASE 
 			WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId 
 			ELSE Lot.intStorageLocationId 
 		END	, Lot.intLotId
-	, intCostingMethod	= dbo.fnGetCostingMethod(t.intItemId, t.intItemLocationId)
-	, dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
-	, dblQty				= CAST(0 AS NUMERIC(38, 20))
-	, dblUnitStorage		= t.dblQty
-	, dblCost
-	, intOwnershipType	= 2
-	FROM
-		tblICInventoryTransactionStorage t INNER JOIN tblICItemLocation IL
+	,intCostingMethod	= dbo.fnGetCostingMethod(t.intItemId, t.intItemLocationId)
+	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
+	,dblQty				= CAST(0 AS NUMERIC(38, 20))
+	,dblUnitStorage		= t.dblQty
+	,dblCost
+	,intOwnershipType	= 2
+FROM
+	tblICInventoryTransactionStorage t INNER JOIN tblICItemLocation IL
 		ON IL.intItemLocationId = t.intItemLocationId
 		LEFT JOIN tblICLot Lot
 		ON Lot.intLotId = t.intLotId
-	WHERE 
+WHERE 
 	t.intItemId = @intItemId
-		AND IL.intLocationId = @intLocationId
-		AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
-		AND ISNULL(t.ysnIsUnposted, 0) = 0
-		AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
-		AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
-		AND @intOwnershipType = 2
--- Storage Stocks
+	AND IL.intLocationId = @intLocationId
+	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND ISNULL(t.ysnIsUnposted, 0) = 0
+	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
+	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
+	AND @intOwnershipType = 2
+-- end: Get the customer-owned (aka Storage) stocks
 
 -- If transaction does not exists, add a dummy record. 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @tblInventoryTransaction)
 BEGIN
 	INSERT INTO @tblInventoryTransaction
-	SELECT i.intItemId,
-		intItemUOMId		= ItemUOMStock.intItemUOMId,
-		intItemLocationId	= DefaultLocation.intItemLocationId,
-		intSubLocationId	= @intSubLocationId,
-		intStorageLocationId= @intStorageLocationId,
-		intLotId			= NULL,
-		intCostingMethod	= DefaultLocation.intCostingMethod,
-		dtmDate				= CAST(CONVERT(VARCHAR(10),@dtmDate,112) AS datetime),
-		dblQty				= CAST(0 AS NUMERIC(38, 20)) ,
-		dblUnitStorage		= CAST(0 AS NUMERIC(38, 20)) ,
-		dblCost				= ItemPricing.dblLastCost,
-		intOwnershipType	= 1
-	FROM tblICItem i
-	CROSS APPLY(
-		SELECT intItemUOMId
-		FROM tblICItemUOM iuStock
-		WHERE iuStock.intItemId = i.intItemId AND iuStock.ysnStockUnit = 1
-	) ItemUOMStock
-	CROSS APPLY (
-		SELECT ItemLocation.intItemLocationId, ItemLocation.intCostingMethod
-		FROM tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location]
-			ON [Location].intCompanyLocationId = ItemLocation.intLocationId
-		WHERE ItemLocation.intItemId = i.intItemId
-			AND [Location].intCompanyLocationId = @intLocationId
-	) DefaultLocation
+	SELECT 
+		i.intItemId
+		,intItemUOMId		= ItemUOMStock.intItemUOMId
+		,intItemLocationId	= DefaultLocation.intItemLocationId
+		,intSubLocationId	= @intSubLocationId
+		,intStorageLocationId= @intStorageLocationId
+		,intLotId			= NULL
+		,intCostingMethod	= DefaultLocation.intCostingMethod
+		,dtmDate				= CAST(CONVERT(VARCHAR(10),@dtmDate,112) AS datetime)
+		,dblQty				= CAST(0 AS NUMERIC(38, 20))
+		,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
+		,dblCost			= ItemPricing.dblLastCost
+		,intOwnershipType	= 1
+	FROM 
+		tblICItem i INNER JOIN tblICItemUOM ItemUOMStock
+			ON ItemUOMStock.intItemId = i.intItemId 
+			AND ItemUOMStock.ysnStockUnit = 1
+		CROSS APPLY (
+			SELECT 
+				ItemLocation.intItemLocationId
+				, ItemLocation.intCostingMethod
+			FROM 
+				tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location]
+					ON [Location].intCompanyLocationId = ItemLocation.intLocationId
+			WHERE 
+				ItemLocation.intItemId = i.intItemId
+				AND [Location].intCompanyLocationId = @intLocationId
+		) DefaultLocation
 		LEFT JOIN tblICItemPricing ItemPricing
-		ON i.intItemId = ItemPricing.intItemId
-			AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
-	WHERE i.intItemId = @intItemId
+			ON i.intItemId = ItemPricing.intItemId
+				AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
+	WHERE 
+		i.intItemId = @intItemId
 		AND i.strLotTracking = 'No'
 END
 
@@ -215,11 +219,11 @@ SELECT
 	intKey							= CAST(ROW_NUMBER() OVER(ORDER BY i.intItemId, ItemLocation.intLocationId) AS INT)
 	, i.intItemId
 	, i.strItemNo 
-	, intItemUOMId = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END
-	, strItemUOM = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.strUnitMeasure ELSE iUOM.strUnitMeasure END
-	, strItemUOMType = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.strUnitType ELSE iUOM.strUnitType END
-	, ysnStockUnit = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.ysnStockUnit ELSE ItemUOM.ysnStockUnit END
-	, dblUnitQty = CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.dblUnitQty ELSE ItemUOM.dblUnitQty END
+	, intItemUOMId = ItemUOM.intItemUOMId 
+	, strItemUOM = iUOM.strUnitMeasure 
+	, strItemUOMType = iUOM.strUnitType 
+	, ysnStockUnit = ItemUOM.ysnStockUnit 
+	, dblUnitQty = ItemUOM.dblUnitQty 
 	, CostMethod.strCostingMethod
 	, CostMethod.intCostingMethodId
 	, ItemLocation.intLocationId
@@ -227,11 +231,11 @@ SELECT
 	, t.intSubLocationId
 	, SubLocation.strSubLocationName
 	, t.intStorageLocationId
-	, strStorageLocationName			= strgLoc.strName
+	, strStorageLocationName		= strgLoc.strName
 	, intOwnershipType				= @intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
-	, dblRunningAvailableQty			= t.dblQty 
-	, dblStorageAvailableQty			= t.dblUnitStorage
+	, dblRunningAvailableQty		= t.dblQty 
+	, dblStorageAvailableQty		= t.dblUnitStorage
 	, dblCost = CASE 
 				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END)
 				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
@@ -264,8 +268,8 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 				ON u.intUnitMeasureId = i.intUnitMeasureId
 		WHERE 
 			s.intItemId = @intItemId
-			AND (s.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
-			AND (s.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)
+			AND (@intSubLocationId IS NULL OR s.intSubLocationId = @intSubLocationId)
+			AND (@intStorageLocationId IS NULL OR s.intStorageLocationId = @intStorageLocationId)
 			AND s.intItemLocationId = t.intItemLocationId
 		GROUP BY 
 			s.intItemId
