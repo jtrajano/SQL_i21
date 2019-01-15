@@ -7245,6 +7245,7 @@
     <Build Include="dbo\Tables\tblSTUpdateRebateOrDiscountPreview.sql" />
     <Build Include="dbo\Views\vyuMFInventoryAsOnDate.sql" />
     <Build Include="dbo\Views\vyuMFInventoryAsOnDateByParentLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSMixedTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
