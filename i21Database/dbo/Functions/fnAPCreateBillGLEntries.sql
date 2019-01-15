@@ -764,7 +764,7 @@ BEGIN
 		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	(SUM(ISNULL(NULLIF(D.dblAdjustedTax,0), D.dblTax)) - SUM(D.dblTax)),
+		[dblDebitForeign]				=	(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)),
 		--[dblDebitForeign]				=	(CASE WHEN B.dblOldCost IS NOT NULL 
 		--										 THEN  																				
 		--										    CASE WHEN B.dblOldCost = 0 THEN 0 
