@@ -127,6 +127,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId  
+								,ysnAllowVoucher
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -147,6 +148,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption 
+								,ysnAllowVoucher
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -171,7 +173,8 @@ OPEN intListCursor;
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
-								,strSourceTransactionId  
+								,strSourceTransactionId
+								,ysnAllowVoucher  
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -192,6 +195,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption 
+								,ysnAllowVoucher
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -236,25 +240,26 @@ OPEN intListCursor;
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
 							INSERT INTO @ItemsForItemReceipt (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,intTransactionDetailId
-							,strTransactionId
-							,intTransactionTypeId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage
-							,strSourceTransactionId  
+								intItemId
+								,intItemLocationId
+								,intItemUOMId
+								,dtmDate
+								,dblQty
+								,dblUOMQty
+								,dblCost
+								,dblSalesPrice
+								,intCurrencyId
+								,dblExchangeRate
+								,intTransactionId
+								,intTransactionDetailId
+								,strTransactionId
+								,intTransactionTypeId
+								,intLotId
+								,intSubLocationId
+								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+								,ysnIsStorage
+								,strSourceTransactionId
+								,ysnAllowVoucher  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @intEntityId, @ysnIsStorage;
@@ -268,25 +273,26 @@ OPEN intListCursor;
 				ELSE
 					BEGIN
 					INSERT INTO @ItemsForItemReceipt (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,intTransactionDetailId
-							,strTransactionId
-							,intTransactionTypeId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage
-							,strSourceTransactionId
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+						,ysnIsStorage
+						,strSourceTransactionId
+						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
 					END
@@ -429,7 +435,8 @@ END
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId AND ri.dblUnitCost > 0
 		LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
 		LEFT JOIN tblCTPriceFixation CTP ON CTP.intContractDetailId = CT.intContractDetailId
-		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1 AND CTP.intPriceFixationId IS NULL
+		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1 
+		AND CTP.intPriceFixationId IS NULL AND ri.ysnAllowVoucher = 1
 		-- Assemble the voucher items 
 		BEGIN 
 			INSERT INTO @voucherItems (
