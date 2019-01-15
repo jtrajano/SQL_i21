@@ -1021,7 +1021,7 @@ SELECT * FROM (
 						SELECT TOP 1 intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = [dbo].[fnGetItemGLAccount](CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		) apClearing
 		WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
-		AND ysnBilled = 0
+		AND ysnBilled = 0  AND CC.ysnPrice = 0
 		UNION ALL
 
 		SELECT
