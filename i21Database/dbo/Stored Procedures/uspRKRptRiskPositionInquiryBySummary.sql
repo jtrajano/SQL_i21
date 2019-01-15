@@ -112,7 +112,6 @@ DECLARE @temp as Table (
      Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
      PriceStatus  nvarchar(50) COLLATE Latin1_General_CI_AS,  
      strFutureMonth  nvarchar(20) COLLATE Latin1_General_CI_AS,  
-	 strFutureMonthOrder  nvarchar(20) COLLATE Latin1_General_CI_AS,  
      strAccountNumber  nvarchar(200) COLLATE Latin1_General_CI_AS,  
      dblNoOfContract  decimal(24,10),  
      strTradeNo  nvarchar(200) COLLATE Latin1_General_CI_AS,  
@@ -122,9 +121,18 @@ DECLARE @temp as Table (
      dblNoOfLot decimal(24,10),  
      dblQuantity decimal(24,10),
      intOrderByHeading int,
+	   intOrderBySubHeading int,
      intContractHeaderId int ,
-     intFutOptTransactionHeaderId int       
-     )
+     intFutOptTransactionHeaderId int
+    ,strProductType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+    ,strProductLine NVARCHAR(200) COLLATE Latin1_General_CI_AS
+    ,strShipmentPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS
+    ,strLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS
+    ,strOrigin NVARCHAR(200) COLLATE Latin1_General_CI_AS
+    ,intItemId INT
+    ,strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
+    ,strItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+
 DECLARE @strRiskView nvarchar(100)
 SELECT TOP 1 @strRiskView = strRiskView from tblRKCompanyPreference
 
@@ -132,19 +140,41 @@ SELECT TOP 1 @strRiskView = strRiskView from tblRKCompanyPreference
 if(@strRiskView='Trader/Elevator') 
 BEGIN
 
-INSERT INTO @temp (intRowNumber,Selection,PriceStatus,strFutureMonth,strFutureMonthOrder,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
-     TranType, CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
-Exec uspRKRiskPositionInquiry  @intCommodityId=@intCommodityId,  
-        @intCompanyLocationId=@intCompanyLocationId,  
+INSERT INTO @temp (intRowNumber
+	,Selection
+	,PriceStatus
+	,strFutureMonth
+	,strAccountNumber
+	,dblNoOfContract
+	,strTradeNo
+	,TransactionDate
+	,TranType
+	,CustVendor
+	,dblNoOfLot
+	,dblQuantity
+	,intOrderByHeading
+	,intOrderBySubHeading
+	,intContractHeaderId
+	,intFutOptTransactionHeaderId
+	,strProductType
+	,strProductLine
+	,strShipmentPeriod
+	,strLocation
+	,strOrigin
+	,intItemId
+	,strItemNo
+	,strItemDescription)
+Exec uspRKRiskPositionInquiry @intCommodityId = @intCommodityId,  
+        @intCompanyLocationId = @intCompanyLocationId,  
         @intFutureMarketId = @intFutureMarketId,  
         @intFutureMonthId = @intFutureMonthId,  
         @intUOMId = @intUOMId,  
         @intDecimal = @intDecimal,
-        @intForecastWeeklyConsumption  =@intForecastWeeklyConsumption ,
-        @intForecastWeeklyConsumptionUOMId =@intForecastWeeklyConsumptionUOMId,
-		@intBookId=@intBookId,
-		@intSubBookId=@intSubBookId,
-		@strPositionBy=@strPositionBy
+        @intForecastWeeklyConsumption = @intForecastWeeklyConsumption,
+        @intForecastWeeklyConsumptionUOMId = @intForecastWeeklyConsumptionUOMId,
+        @intBookId = @intBookId,
+        @intSubBookId = @intSubBookId,
+        @strPositionBy = @strPositionBy
 		
 UPDATE @temp
 SET strGroup =  case when Selection IN ('Physical position / Differential cover', 'Physical position / Basis risk') then '01.'+ Selection
@@ -160,14 +190,27 @@ SET strGroup =  case when Selection IN ('Physical position / Differential cover'
 					 when Selection IN ('Switch position', 'Futures required') then  '11.'+ Selection 
 					 end
 					 		
-SELECT  intRowNumber ,
-	strGroup
-   ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
-            CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  dblNoOfContract,
-   CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
-   (PARTITION BY NULL ORDER BY 
-   CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
-  FROM @temp 
+SELECT intRowNumber
+	,strGroup
+	,Selection
+	,PriceStatus
+	,strFutureMonth
+	,strAccountNumber
+	,CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  dblNoOfContract
+	,CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER (PARTITION BY NULL ORDER BY 
+      CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  
+          WHEN  strFutureMonth ='Total' THEN '01/01/9999' 
+          ELSE CONVERT(DATETIME,'01 '+strFutureMonth) 
+      END ))+ '.1234567890') AS [Rank]
+	,@strCommodityCodeH strCommodityCode
+	,@strFutureMarketH strFutureMarket
+	,@strFutureMonthH strFutureMonth1
+	,@strUnitMeasureH strUnitMeasure
+	,@strLocationH strLocation
+	,@strBookH strBook
+	,@strSubBookH strSubBook
+	,@dtmPositionAsOf dtmPositionAsOf
+FROM @temp  
 
 END
 
