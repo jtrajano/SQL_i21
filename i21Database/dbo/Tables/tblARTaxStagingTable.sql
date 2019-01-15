@@ -57,4 +57,7 @@
 	[dblTaxCollected]					NUMERIC(18, 6)	NULL DEFAULT 0,	
 	[dblQtyTonShipped]					NUMERIC(18, 6)	NULL DEFAULT 0,
 	[ysnTaxExempt]						BIT				NULL DEFAULT ((0)),
+
+	[strFederalTaxId]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strStateTaxId]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 )
