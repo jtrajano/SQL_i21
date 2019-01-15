@@ -196,6 +196,7 @@ BEGIN TRY
 				SELECT @intTicketId = intTicketId FROM tblSCTicket WHERE intTicketLVStagingId = @intTicketLVStagingId AND strTicketStatus = 'O'
 				IF ISNULL(@intTicketId, 0) > 0
 				BEGIN
+					UPDATE tblSCTicket SET ysnHasGeneratedTicketNumber = 0 WHERE intTicketId = @intTicketId
 					DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strSourceType = 'Scale'
 					DELETE FROM tblSCTicket where intTicketLVStagingId = @intTicketLVStagingId
 
