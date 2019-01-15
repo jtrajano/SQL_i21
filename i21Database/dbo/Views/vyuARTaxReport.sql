@@ -82,6 +82,8 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , intCategoryId			= DETAIL.intCategoryId
 	 , intTonnageTaxUOMId		= DETAIL.intTonnageTaxUOMId
 	 , dblQtyTonShipped			= DETAIL.dblQtyTonShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , strFederalTaxId 			= CUSTOMER.strFederalTaxId
+	 , strStateTaxId			= CUSTOMER.strStateTaxId
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId				= ID.intInvoiceId
@@ -213,6 +215,8 @@ INNER JOIN (
 		 , strCustomerNumber	= CASE WHEN C.strCustomerNumber = '' THEN ENTITY.strEntityNo ELSE C.strCustomerNumber END
 		 , strCustomerName		= ENTITY.strName
 		 , strDisplayName		= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(ENTITY.strName, '')
+		 , strStateTaxId  		= ENTITY.strStateTaxId
+		 , strFederalTaxId		= ENTITY.strFederalTaxId
 	FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
 	INNER JOIN (
 		SELECT intEntityId

@@ -284,6 +284,8 @@ INSERT INTO tblARTaxStagingTable (
 	, dblTaxCollected
 	, dblQtyTonShipped
 	, ysnTaxExempt
+	, strFederalTaxId
+	, strStateTaxId
 )
 SELECT TAX.intEntityCustomerId
 	, TAX.intCurrencyId
@@ -337,6 +339,8 @@ SELECT TAX.intEntityCustomerId
 	, TAX.dblTaxCollected
 	, TAX.dblQtyTonShipped
 	, TAX.ysnTaxExempt
+	, TAX.strFederalTaxId
+	, TAX.strStateTaxId
 FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
