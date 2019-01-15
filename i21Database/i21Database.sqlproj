@@ -7246,6 +7246,7 @@
     <Build Include="dbo\Views\vyuMFInventoryAsOnDate.sql" />
     <Build Include="dbo\Views\vyuMFInventoryAsOnDateByParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSMixedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateInventoryPhysicalCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
