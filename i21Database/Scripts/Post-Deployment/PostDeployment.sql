@@ -465,6 +465,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\01_TaxAuthority.sql
 :r .\TF\DefaultData\02_TerminalControl.sql
 :r .\TF\DefaultData\03_TaxCategory.sql
+:r .\TF\DefaultData\04_TransactionSource.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\IL_Illinois.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
