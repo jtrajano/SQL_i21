@@ -173,7 +173,7 @@ BEGIN
 			AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
 			AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
 			AND strCheckNo BETWEEN @strCheckStartingNo AND @strCheckEndingNo
-			AND strRemarks <> 'Generated from origin.'
+			AND ISNULL(strRemarks,'') <> 'Generated from origin.'
 	ORDER BY strCheckNo
 	
 	IF @@ERROR <> 0 GOTO _ROLLBACK	
