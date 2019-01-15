@@ -9,6 +9,7 @@
     [str1099Form]			NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [str1099Type]			NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,
     [strFederalTaxId]		NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [strStateTaxId]         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dtmW9Signed]			DATETIME        NULL,
     [imgPhoto]				VARBINARY (MAX) NULL,
 	[strContactNumber]		NVARCHAR (20)   COLLATE Latin1_General_CI_AS NOT NULL,
