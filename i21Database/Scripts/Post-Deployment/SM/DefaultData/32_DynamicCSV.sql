@@ -254,6 +254,7 @@ UPDATE tblSMCSVDynamicImport SET
 	declare @email									nvarchar(100)
 	declare @mobileno								nvarchar(100)
 	declare @locationname							nvarchar(100)
+	declare @freightterm							nvarchar(100)
 
 
 	declare @printedname							nvarchar(100)
@@ -348,7 +349,9 @@ UPDATE tblSMCSVDynamicImport SET
 	declare @patronagestockstatus					nvarchar(100)
 	declare @patronagedeceaseddate					nvarchar(100)
 	declare @patronagelastactivitydate				nvarchar(100)
-
+	
+	declare @genfederaltaxid						nvarchar(50)
+	declare @genstatetaxid							nvarchar(50)
 	SELECT 
 		@entityno = ''@entityno@'',														@name = ''@name@'',
 		@phone = ''@phone@'',																@contactname= ''@contactname@'',
@@ -414,6 +417,7 @@ UPDATE tblSMCSVDynamicImport SET
 		@patronagemembershipdate = ''@patronagemembershipdate@'',
 		@patronagebirthdate = ''@patronagebirthdate@'',									@patronagestockstatus = ''@patronagestockstatus@'',
 		@patronagedeceaseddate = ''@patronagedeceaseddate@'',								@patronagelastactivitydate = ''@patronagelastactivitydate@'',
+		@genstatetaxid = ''@genstatetaxid@'', @genfederaltaxid = ''@genfederaltaxid@'', @freightterm = ''@freightterm@'',
 
 
 		@IsValid = 1
@@ -450,6 +454,7 @@ UPDATE tblSMCSVDynamicImport SET
 		declare @approvalcommisionid				int
 		declare @approvalpastdueid					int
 		declare @approvalpricechargeid				int
+		declare @freighttermid						int
 
 		if @entityno <> '''' 
 		begin
@@ -866,6 +871,16 @@ UPDATE tblSMCSVDynamicImport SET
 			end
 		end	
 		
+		if @freightterm <> ''''
+		begin
+			select @freighttermid = intFreightTermId from tblSMFreightTerms where strFreightTerm = @freightterm
+
+			if isnull(@freighttermid, 0) <= 0
+			begin
+				set @ValidationMessage = @ValidationMessage + '', Freight Term (''+  @freightterm +'') does not exists.''
+				set @IsValid = 0
+			end
+		end
 
 
 		if isnull(@printedname, '''') = ''''
@@ -876,8 +891,8 @@ UPDATE tblSMCSVDynamicImport SET
 		if @IsValid = 1 
 		begin
 
-			insert into tblEMEntity(strEntityNo, strName, strContactNumber, dtmOriginationDate, strDocumentDelivery, strExternalERPId)
-			select @entityno, @name, '''', @originationdated, @documentdelivery, @externalerpid
+			insert into tblEMEntity(strEntityNo, strName, strContactNumber, dtmOriginationDate, strDocumentDelivery, strExternalERPId, strFederalTaxId, strStateTaxId)
+			select @entityno, @name, '''', @originationdated, @documentdelivery, @externalerpid, @genfederaltaxid, @genstatetaxid
 
 			set @entityId = @@IDENTITY
 
@@ -886,8 +901,8 @@ UPDATE tblSMCSVDynamicImport SET
 
 			set @contactId = @@IDENTITY
 
-			insert into tblEMEntityLocation(intEntityId, strLocationName, strCheckPayeeName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, intDefaultCurrencyId, intTermsId, intShipViaId, ysnDefaultLocation)
-			select @entityId, @locationname, @printedname, @address, @city, @state, @zip, @country, @timezone, @defaultCurId, @detailTermsId, @detailShipViaId, 1
+			insert into tblEMEntityLocation(intEntityId, strLocationName, strCheckPayeeName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, intDefaultCurrencyId, intTermsId, intShipViaId, ysnDefaultLocation, intFreightTermId)
+			select @entityId, @locationname, @printedname, @address, @city, @state, @zip, @country, @timezone, @defaultCurId, @detailTermsId, @detailShipViaId, 1, @freighttermid
 
 			set @locationId = @@IDENTITY
 
@@ -1092,6 +1107,8 @@ UPDATE tblSMCSVDynamicImport SET
 	UNION All
 	SELECT @NewHeaderId, 'detailterms', 'DetailTerms*', 1
 	Union All
+	SELECT @NewHeaderId, 'freightterm', 'Freight Term*', 1
+	Union All
 	SELECT @NewHeaderId, 'phone', 'Phone', 0
 	Union All
 	SELECT @NewHeaderId, 'suffix', 'Suffix', 0
@@ -1276,6 +1293,15 @@ UPDATE tblSMCSVDynamicImport SET
 	SELECT @NewHeaderId, 'patronagedeceaseddate', 'Patronage Deceased Date', 0
 	Union All
 	SELECT @NewHeaderId, 'patronagelastactivitydate', 'Patronage Last Activity Date', 0
+	--General Tab
+	Union All
+	SELECT @NewHeaderId, 'genfederaltaxid', 'GEN FEDTAX ID', 0
+	Union All
+	SELECT @NewHeaderId, 'genstatetaxid', 'GEN STATE TAX ID', 0
+
+	--General Tab
+
+
 --Customer Import End
 -- Customer Special Taxing Import Begin
 SET @NewHeaderId = 3
