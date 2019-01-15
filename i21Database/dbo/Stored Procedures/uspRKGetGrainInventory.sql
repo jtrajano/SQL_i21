@@ -214,7 +214,7 @@ FROM (
 			AND IT.ysnIsUnposted = 0
 			AND convert(DATETIME, CONVERT(VARCHAR(10), IT.dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
 			AND C.intCommodityId = @intCommodityId 
-			AND IT.intItemId = isnull(@intItemId, IT.intItemId) AND il.intLocationId = isnull(@intLocationId, il.intItemId)
+			AND IT.intItemId = isnull(@intItemId, IT.intItemId) AND il.intLocationId = isnull(@intLocationId, il.intLocationId)
 		
 		--Storage
 		UNION ALL SELECT CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
