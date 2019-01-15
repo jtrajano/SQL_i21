@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Evidence' AND strDescription = 'Production Evidence Description' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Ticket Management'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Purchase Order' AND strModuleName = 'Accounts Payable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Accounts Payable'))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -1690,6 +1690,8 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @AccountsPayableCreateParentMenuId 
 
 /* START OF RENAMING  */
 UPDATE tblSMMasterMenu SET strMenuName = 'New Payment', strDescription = 'New Payment' WHERE strMenuName = 'New Payable' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+UPDATE tblSMMasterMenu SET strMenuName = 'New Purchase Order', strDescription = 'New Purchase Order' WHERE strMenuName = 'New Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+UPDATE tblSMMasterMenu SET strMenuName = 'New Voucher', strDescription = 'New Voucher' WHERE strMenuName = 'New Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
 /* END OF RENAMING  */
 
 /* Start of Moving */
@@ -1846,17 +1848,17 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Voucher C
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=VoucherCheckOff&direct=true&showCriteria=true', intSort = 10, strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'Voucher Checkoff' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Purchase Order' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Purchase Orders', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Purchase Orders', N'Create', N'Screen', N'AccountsPayable.view.PurchaseOrder?action=new', N'small-menu-create', 1, 0, 0, 1, 0, 1)
+	VALUES (N'New Purchase Order', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Purchase Order', N'Create', N'Screen', N'AccountsPayable.view.PurchaseOrder?action=new', N'small-menu-create', 1, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PurchaseOrder?action=new', intSort = 0, strDescription = 'New Purchase Orders', strCategory = 'Create' WHERE strMenuName = 'New Purchase Orders' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PurchaseOrder?action=new', intSort = 0, strDescription = 'New Purchase Order', strCategory = 'Create' WHERE strMenuName = 'New Purchase Order' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Voucher' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'New Vouchers', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Vouchers', N'Create', N'Screen', N'AccountsPayable.view.Voucher?action=new', N'small-menu-create', 0, 0, 0, 1, 1, 1)
+	VALUES (N'New Voucher', N'Accounts Payable', @AccountsPayableCreateParentMenuId, N'New Voucher', N'Create', N'Screen', N'AccountsPayable.view.Voucher?action=new', N'small-menu-create', 0, 0, 0, 1, 1, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Voucher?action=new', intSort = 1 WHERE strMenuName = 'New Vouchers' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Voucher?action=new', intSort = 1 WHERE strMenuName = 'New Voucher' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Voucher Batch Entry' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
