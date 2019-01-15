@@ -695,7 +695,7 @@ BEGIN TRY
 		FROM
 		tblCFInvoiceStagingTable 
 		AS cfInv
-		WHERE strUserId = @UserId
+		WHERE strUserId = @UserId and LOWER(strStatementType) =  LOWER(@StatementType)
 		GROUP BY 
 		intCustomerId
 		,dtmInvoiceDate
@@ -778,6 +778,7 @@ BEGIN TRY
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
 		AND cfInv.strUserId = @UserId
 		AND intEntityUserId = @intEntityUserId
+		AND LOWER(cfInv.strStatementType) =  LOWER(@StatementType)
 
 		UPDATE tblARCustomerStatementStagingTable
 		SET
@@ -958,6 +959,7 @@ BEGIN TRY
 			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
 			AND cfInv.strUserId = @UserId
 			AND tblARCustomerStatementStagingTable.intEntityUserId = @intEntityUserId
+			AND LOWER(cfInv.strStatementType) =  LOWER(@StatementType)
 
 
 			DELETE FROM tblARCustomerStatementStagingTable 
