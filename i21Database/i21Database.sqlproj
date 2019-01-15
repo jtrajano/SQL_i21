@@ -7266,8 +7266,8 @@
     <Build Include="dbo\Views\vyuICItemStockUOM.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCeToUPCa.sql" />
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
-	<Build Include="dbo\Views\vyuTFException.sql" />
-	<Build Include="dbo\Stored Procedures\uspCTGetPriceContractSequence.sql" />
+    <Build Include="dbo\Views\vyuTFException.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetPriceContractSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonth.sql" />
@@ -7282,7 +7282,10 @@
     <Build Include="dbo\Tables\tblSTUpdateRebateOrDiscountPreview.sql" />
     <Build Include="dbo\Views\vyuMFInventoryAsOnDate.sql" />
     <Build Include="dbo\Views\vyuMFInventoryAsOnDateByParentLot.sql" />
-	<Build Include="dbo\Tables\tblTFTransactionSource.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionSource.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponentTransactionSource.sql" />
+    <Build Include="dbo\Functions\fnTFCoalesceTransactionSource.sql" />
+    <Build Include="dbo\Views\vyuTFGetReportingComponentTransactionSource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
