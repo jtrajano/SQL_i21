@@ -244,6 +244,8 @@ BEGIN TRY
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage 
 					,strSourceTransactionId 
+					,intStorageScheduleTypeId
+					,ysnAllowVoucher
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
@@ -279,6 +281,8 @@ BEGIN TRY
 			,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 			,ysnIsStorage
 			,strSourceTransactionId  
+			,intStorageScheduleTypeId
+			,ysnAllowVoucher
 		)
 		EXEC dbo.uspSCGetScaleItemForItemReceipt 
 			@intTicketId
@@ -324,6 +328,8 @@ BEGIN TRY
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage
 					,strSourceTransactionId 
+					,intStorageScheduleTypeId
+					,ysnAllowVoucher
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
@@ -564,6 +570,7 @@ BEGIN TRY
 		LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
 		LEFT JOIN tblCTPriceFixation CTP ON CTP.intContractDetailId = CT.intContractDetailId
 		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1 AND CTP.intPriceFixationId IS NULL
+		AND ri.ysnAllowVoucher = 1
 		-- Assemble the voucher items 
 		BEGIN 
 			INSERT INTO @voucherItems (
@@ -586,7 +593,7 @@ BEGIN TRY
 			FROM	tblICInventoryReceiptItem ri
 					INNER JOIN #tmpReceiptItem tmp ON tmp.intInventoryReceiptItemId = ri.intInventoryReceiptItemId AND tmp.intPricingTypeId IN (0,1,6)
 			WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
-					AND tmp.intOwnershipType = 1		
+					AND tmp.intOwnershipType = 1
 		END 
 
 		-- Assemble the Other Charges

@@ -41,6 +41,8 @@ BEGIN TRY
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 0
 						,strSourceTransactionId = @strDistributionOption
+						,intStorageScheduleTypeId = ScaleTicket.intStorageScheduleTypeId
+						,ysnAllowVoucher = CASE WHEN LI.dblCost = 0 THEN 0 ELSE 1 END
 				FROM	@LineItems LI 
 				INNER JOIN dbo.tblSCTicket ScaleTicket On ScaleTicket.intTicketId = LI.intTicketId
 				INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
@@ -78,6 +80,8 @@ BEGIN TRY
 					,intStorageLocationId = ScaleTicket.intStorageLocationId
 					,ysnIsStorage = 0
 					,strSourceTransactionId = @strDistributionOption
+					,intStorageScheduleTypeId = ScaleTicket.intStorageScheduleTypeId
+					,ysnAllowVoucher = CASE WHEN @dblCost = 0 THEN 0 ELSE 1 END
 			FROM	dbo.tblSCTicket ScaleTicket
 					INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
 					INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId

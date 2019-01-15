@@ -228,6 +228,7 @@ BEGIN TRY
 						END
 					END
 					,strSourceTransactionId  = @strDistributionOption
+					,ysnAllowVoucher = 0
 			FROM	dbo.tblSCTicket ScaleTicket
 					INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
 					INNER JOIN tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
