@@ -177,61 +177,6 @@ BEGIN TRY
 						) AS BIT) = 0
 				AND L.intLoadId = @intLoadId
 			ORDER BY LDCL.intLoadDetailContainerLinkId
-
-			INSERT INTO @LotEntries(
-				[strReceiptType]
-				,[intItemId]
-				,[intLotId]
-				,[strLotNumber]
-				,[intLocationId]
-				,[intShipFromId]
-				,[intShipViaId]	
-				,[intSubLocationId]
-				,[intStorageLocationId] 
-				,[intCurrencyId]
-				,[intItemUnitMeasureId]
-				,[dblQuantity]
-				,[dblGrossWeight]
-				,[dblTareWeight]
-				,[dblCost]
-				,[intEntityVendorId]
-				,[dtmManufacturedDate]
-				,[strBillOfLadding]
-				,[intSourceType]
-				,[intContractHeaderId]
-				,[intContractDetailId]
-				,[strMarkings]
-				,[strContainerNo]
-			)
-			SELECT 
-				[strReceiptType]		= RE.strReceiptType
-				,[intItemId]			= RE.intItemId
-				,[intLotId]				= RE.intLotId
-				,[strLotNumber]			= LC.strLotNumber
-				,[intLocationId]		= RE.intLocationId
-				,[intShipFromId]		= RE.intShipFromId
-				,[intShipViaId]			= RE.intShipViaId
-				,[intSubLocationId]		= RE.intSubLocationId
-				,[intStorageLocationId] = RE.intStorageLocationId
-				,[intCurrencyId]		= RE.intCurrencyId
-				,[intItemUnitMeasureId] = RE.intItemUOMId
-				,[dblQuantity]			= RE.dblQty
-				,[dblGrossWeight]		= RE.dblGross 
-				,[dblTareWeight]		= (RE.dblGross - RE.dblNet)
-				,[dblCost]				= RE.dblCost
-				,[intEntityVendorId]	= RE.intEntityVendorId
-				,[dtmManufacturedDate]	= RE.dtmDate
-				,[strBillOfLadding]		= L.strBLNumber
-				,[intSourceType]		= RE.intSourceType
-				,[intContractHeaderId]	= RE.intContractHeaderId
-				,[intContractDetailId]	= RE.intContractDetailId
-				,[strMarkings]			= LC.strMarks
-				,[strContainerNo]		= LC.strContainerNumber
-			FROM @ReceiptStagingTable RE
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RE.intContainerId
-			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId 
-			INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-			INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 		END
 		ELSE
 		BEGIN
@@ -484,6 +429,67 @@ BEGIN TRY
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
 		WHERE L.intLoadId = @intLoadId
 
+		INSERT INTO @LotEntries (
+			[intLotId]
+			,[strLotNumber]
+			,[strLotAlias]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[intContractHeaderId] 
+			,[intContractDetailId]
+			,[intItemUnitMeasureId]
+			,[intItemId]
+			,[dblQuantity]
+			,[dblGrossWeight]
+			,[dblTareWeight]
+			,[strContainerNo]
+			,[intSort]
+			,[strMarkings]
+			,[intEntityVendorId]
+			,[strReceiptType]
+			,[intLocationId]
+			,[intShipViaId]
+			,[intShipFromId]
+			,[intCurrencyId]
+			,[intSourceType]
+			,[strBillOfLadding]
+			)
+		SELECT NULL
+			,NULL
+			,NULL
+			,ISNULL(LW.intSubLocationId,LD.intPSubLocationId)
+			,LW.intStorageLocationId
+			,NULL
+			,NULL
+			,LD.intItemUOMId
+			,LD.intItemId
+			,ISNULL(LC.dblQuantity, LD.dblQuantity)
+			,ISNULL(LC.dblGrossWt, LD.dblGross)
+			,ISNULL(LC.dblTareWt, LD.dblTare)
+			,LC.strContainerNumber
+			,ISNULL(LC.intLoadContainerId,0)
+			,LC.strMarks
+			,LD.intVendorEntityId
+			,'Direct'
+			,LD.intPCompanyLocationId
+			,NULL
+			,EL.intEntityLocationId
+			,ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
+			,0
+			,L.strBLNumber
+		FROM tblLGLoad L  
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId 
+			AND IL.intLocationId = LD.intPCompanyLocationId 
+		JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId 
+			AND EL.ysnDefaultLocation = 1 
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId		
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
+		WHERE LD.intLoadId = @intLoadId
+
 		IF NOT EXISTS (
 				SELECT 1
 				FROM @ReceiptStagingTable
@@ -681,61 +687,6 @@ BEGIN TRY
 						) AS BIT) = 0
 				AND L.intLoadId = @intLoadId
 			ORDER BY LDCL.intLoadDetailContainerLinkId
-
-			INSERT INTO @LotEntries(
-				[strReceiptType]
-				,[intItemId]
-				,[intLotId]
-				,[strLotNumber]
-				,[intLocationId]
-				,[intShipFromId]
-				,[intShipViaId]	
-				,[intSubLocationId]
-				,[intStorageLocationId] 
-				,[intCurrencyId]
-				,[intItemUnitMeasureId]
-				,[dblQuantity]
-				,[dblGrossWeight]
-				,[dblTareWeight]
-				,[dblCost]
-				,[intEntityVendorId]
-				,[dtmManufacturedDate]
-				,[strBillOfLadding]
-				,[intSourceType]
-				,[intContractHeaderId]
-				,[intContractDetailId]
-				,[strMarkings]
-				,[strContainerNo]
-			)
-			SELECT 
-				[strReceiptType]		= RE.strReceiptType
-				,[intItemId]			= RE.intItemId
-				,[intLotId]				= RE.intLotId
-				,[strLotNumber]			= LC.strLotNumber
-				,[intLocationId]		= RE.intLocationId
-				,[intShipFromId]		= RE.intShipFromId
-				,[intShipViaId]			= RE.intShipViaId
-				,[intSubLocationId]		= RE.intSubLocationId
-				,[intStorageLocationId] = RE.intStorageLocationId
-				,[intCurrencyId]		= RE.intCurrencyId
-				,[intItemUnitMeasureId] = RE.intItemUOMId
-				,[dblQuantity]			= RE.dblQty
-				,[dblGrossWeight]		= RE.dblGross 
-				,[dblTareWeight]		= (RE.dblGross - RE.dblNet)
-				,[dblCost]				= RE.dblCost
-				,[intEntityVendorId]	= RE.intEntityVendorId
-				,[dtmManufacturedDate]	= RE.dtmDate
-				,[strBillOfLadding]		= L.strBLNumber
-				,[intSourceType]		= RE.intSourceType
-				,[intContractHeaderId]	= RE.intContractHeaderId
-				,[intContractDetailId]	= RE.intContractDetailId
-				,[strMarkings]			= LC.strMarks
-				,[strContainerNo]		= LC.strContainerNumber
-			FROM @ReceiptStagingTable RE
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RE.intContainerId
-			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId 
-			INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
-			INNER JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 		END
 		ELSE
 		BEGIN
@@ -990,6 +941,67 @@ BEGIN TRY
 		JOIN tblICItem I ON I.intItemId = LWS.intItemId
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = L.intCurrencyId
 		WHERE L.intLoadId = @intLoadId
+
+		INSERT INTO @LotEntries (
+			[intLotId]
+			,[strLotNumber]
+			,[strLotAlias]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[intContractHeaderId] 
+			,[intContractDetailId]
+			,[intItemUnitMeasureId]
+			,[intItemId]
+			,[dblQuantity]
+			,[dblGrossWeight]
+			,[dblTareWeight]
+			,[strContainerNo]
+			,[intSort]
+			,[strMarkings]
+			,[intEntityVendorId]
+			,[strReceiptType]
+			,[intLocationId]
+			,[intShipViaId]
+			,[intShipFromId]
+			,[intCurrencyId]
+			,[intSourceType]
+			,[strBillOfLadding]
+			)
+		SELECT NULL
+			,NULL
+			,NULL
+			,LW.intSubLocationId
+			,LW.intStorageLocationId
+			,CD.intContractHeaderId
+			,CD.intContractDetailId
+			,LD.intItemUOMId
+			,LD.intItemId
+			,ISNULL(LC.dblQuantity, LD.dblQuantity)
+			,ISNULL(LC.dblGrossWt, LD.dblGross)
+			,ISNULL(LC.dblTareWt, LD.dblTare)
+			,LC.strContainerNumber
+			,ISNULL(LC.intLoadContainerId,0)
+			,LC.strMarks
+			,LD.intVendorEntityId
+			,'Purchase Contract'
+			,CD.intCompanyLocationId
+			,NULL
+			,EL.intEntityLocationId
+			,ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
+			,2
+			,L.strBLNumber
+		FROM tblLGLoad L  
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId 
+			AND IL.intLocationId = LD.intPCompanyLocationId 
+		JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId 
+			AND EL.ysnDefaultLocation = 1 
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouse LW ON LD.intLoadId = LW.intLoadId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
+		WHERE LD.intLoadId = @intLoadId
 
 		IF NOT EXISTS (
 				SELECT 1
