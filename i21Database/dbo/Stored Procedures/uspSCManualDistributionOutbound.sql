@@ -71,7 +71,7 @@ DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38,20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher
 FROM @LineItem;
 
 OPEN intListCursor;
@@ -111,7 +111,8 @@ OPEN intListCursor;
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
-								,strSourceTransactionId  
+								,strSourceTransactionId
+								,ysnAllowVoucher  
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -131,7 +132,8 @@ OPEN intListCursor;
 								,intSubLocationId
 								,intStorageLocationId
 								,ysnIsStorage
-								,strDistributionOption 
+								,strDistributionOption
+								,ysnAllowVoucher   
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -156,7 +158,8 @@ OPEN intListCursor;
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
-								,strSourceTransactionId  
+								,strSourceTransactionId
+								,ysnAllowVoucher  
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -176,7 +179,8 @@ OPEN intListCursor;
 								,intSubLocationId
 								,intStorageLocationId
 								,ysnIsStorage
-								,strDistributionOption 
+								,strDistributionOption
+								,ysnAllowVoucher 
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -221,25 +225,26 @@ OPEN intListCursor;
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
 							INSERT INTO @ItemsForItemShipment (
-							intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,dtmDate
-							,dblQty
-							,dblUOMQty
-							,dblCost
-							,dblSalesPrice
-							,intCurrencyId
-							,dblExchangeRate
-							,intTransactionId
-							,intTransactionDetailId
-							,strTransactionId
-							,intTransactionTypeId
-							,intLotId
-							,intSubLocationId
-							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-							,ysnIsStorage
-							,strSourceTransactionId  
+								intItemId
+								,intItemLocationId
+								,intItemUOMId
+								,dtmDate
+								,dblQty
+								,dblUOMQty
+								,dblCost
+								,dblSalesPrice
+								,intCurrencyId
+								,dblExchangeRate
+								,intTransactionId
+								,intTransactionDetailId
+								,strTransactionId
+								,intTransactionTypeId
+								,intLotId
+								,intSubLocationId
+								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+								,ysnIsStorage
+								,strSourceTransactionId
+								,ysnAllowVoucher  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblDPContractUnits, @intEntityId, @ysnIsStorage;
@@ -273,6 +278,7 @@ OPEN intListCursor;
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
 						,intStorageScheduleTypeId
+						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
 					END
