@@ -2,6 +2,7 @@
 	@strFilePrefix NVARCHAR(50)
 	, @intStoreId INT
 	, @intRegisterId INT
+	, @ysnClearRegisterPromotion BIT
 	, @strGeneratedXML NVARCHAR(MAX) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
 	, @ysnSuccessResult BIT OUTPUT
@@ -83,7 +84,10 @@ BEGIN
 							ST.intStoreNo AS [StoreLocationID]
 							, 'iRely' AS [VendorName] 
 							, 'Rel. 10.2.0' AS [VendorModelVersion] 
-							, 'update' AS [TableActionType]
+							, CASE
+									WHEN @ysnClearRegisterPromotion = CAST(1 AS BIT) THEN 'initialize'
+									WHEN @ysnClearRegisterPromotion = CAST(0 AS BIT) THEN 'update'
+							END AS [TableActionType]
 							, 'addchange' AS [RecordActionType] 
 							, CASE 
 								WHEN PSL.ysnDeleteFromRegister = CAST(0 AS BIT) 
