@@ -2,6 +2,7 @@
 	@strFilePrefix NVARCHAR(50)
 	, @intStoreId INT
 	, @intRegisterId INT
+	, @ysnClearRegisterPromotion BIT
 	, @strGeneratedXML NVARCHAR(MAX) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
 	, @ysnSuccessResult BIT OUTPUT
@@ -63,6 +64,7 @@ BEGIN
 								[StoreLocationID], 
 								[VendorName], 
 								[VendorModelVersion], 
+								[TableActionType], 
 								[RecordActionType], 
 								[MMTDetailRecordActionType], 
 								[PromotionID], 
@@ -82,6 +84,10 @@ BEGIN
 								ST.intStoreNo AS [StoreLocationID]
 								, 'iRely' AS [VendorName]  	
 								, (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion]
+								, CASE
+									WHEN @ysnClearRegisterPromotion = CAST(1 AS BIT) THEN 'initialize'
+									WHEN @ysnClearRegisterPromotion = CAST(0 AS BIT) THEN 'update'
+								END AS [TableActionType]
 								, 'addchange' AS [RecordActionType] 
 								, CASE PSL.ysnDeleteFromRegister 
 									WHEN 0 
@@ -99,8 +105,10 @@ BEGIN
 								, CONVERT(varchar, CAST('0:00:01' AS TIME), 108) AS [StartTime]
 								, CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126) AS [StopDate]
 								, CONVERT(varchar, CAST('23:59:59' AS TIME), 108) AS [StopTime] 
-								, PSLD.intQuantity [MixMatchUnits]
-								, PSLD.dblPrice [MixMatchPrice]
+								, PSL.intPromoUnits [MixMatchUnits]
+								, PSL.dblPromoPrice [MixMatchPrice]
+								--, PSLD.intQuantity [MixMatchUnits]
+								--, PSLD.dblPrice [MixMatchPrice]
 								, @strUniqueGuid AS [strUniqueGuid]
 							FROM tblICItem I
 							JOIN tblICItemLocation IL 
@@ -126,7 +134,7 @@ BEGIN
 							AND PSL.strPromoType = 'M' -- <--- 'M' = Mix and Match
 							-- AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId	
 
-							IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookMixMatchMMT33 WHERE strUniqueGuid = @strUniqueGuid)
+							IF EXISTS(SELECT TOP 1 1 FROM tblSTstgPassportPricebookMixMatchMMT33 WHERE strUniqueGuid = @strUniqueGuid)
 								BEGIN
 									--Generate XML for the pricebook data availavle in staging table
 									EXEC dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGeneratedXML OUTPUT
