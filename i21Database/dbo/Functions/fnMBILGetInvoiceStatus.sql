@@ -22,7 +22,7 @@ BEGIN
 		SELECT TOP 1 @CustomerNo = strEntityNo FROM tblEMEntity WHERE intEntityId = @CustomerId
 		SET @Status = (CASE WHEN ISNULL(@CustomerNo, '') = '' THEN 'Customer does not exist!'
 							WHEN LEFT(@CustomerNo, LEN(@DefaultCustomer)) = @DefaultCustomer THEN 'Customer needs review.'
-							ELSE '' END)
+							ELSE '' END) COLLATE Latin1_General_CI_AS
 	END
 
 	IF (ISNULL(@SiteId, 0) != 0)
@@ -30,7 +30,7 @@ BEGIN
 		SELECT TOP 1 @Site = strDescription FROM tblTMSite WHERE intSiteID = @SiteId
 		SET @Status = (CASE WHEN ISNULL(@Site, '') = '' THEN 'Site does not exist!'
 							WHEN LEFT(@Site, LEN(@DefaultSite)) = @DefaultSite THEN 'Site needs review.'
-							ELSE '' END)
+							ELSE '' END) COLLATE Latin1_General_CI_AS
 	END
 	
 	RETURN @Status

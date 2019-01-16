@@ -8,8 +8,8 @@ CREATE TABLE [dbo].[tblMBILOrderTaxCode](
 	,[intTaxGroupId]				INT
 	,[intTaxCodeId]					INT
 	,[intTaxClassId]				INT
-	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-	,[strCalculationMethod]			NVARCHAR(MAX)
+	,[strTaxableByOtherTaxes]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,[strCalculationMethod]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,[dblRate]						NUMERIC(18, 6)
 	,[dblExemptionPercent]			NUMERIC(18, 6)
 	,[dblTax]						NUMERIC(18, 6)
@@ -18,14 +18,14 @@ CREATE TABLE [dbo].[tblMBILOrderTaxCode](
 	,[intSalesTaxAccountId]			INT
 	,[ysnSeparateOnInvoice]			BIT
 	,[ysnCheckoffTax]				BIT
-	,[strTaxCode]					NVARCHAR(MAX)
+	,[strTaxCode]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,[ysnTaxExempt]					BIT
 	,[ysnTaxOnly]					BIT
 	,[ysnInvalidSetup]				BIT
-	,[strTaxGroup]					NVARCHAR(MAX)
-	,[strNotes]						NVARCHAR(MAX)
+	,[strTaxGroup]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,[strNotes]						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,[intUnitMeasureId]				INT
-	,[strUnitMeasure]				NVARCHAR(MAX)
+	,[strUnitMeasure]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,[intConcurrencyId]				INT				DEFAULT 1 NOT NULL
 	CONSTRAINT [PK_tblMBILOrderTaxCode] PRIMARY KEY CLUSTERED ([intOrderTaxId] ASC),
 	CONSTRAINT [FK_tblMBILOrderTaxCode_tblMBILOrderItem] FOREIGN KEY([intOrderItemId]) REFERENCES [dbo].[tblMBILOrderItem] ([intOrderItemId]) ON DELETE CASCADE
