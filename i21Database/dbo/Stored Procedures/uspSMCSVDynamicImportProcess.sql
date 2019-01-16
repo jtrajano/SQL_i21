@@ -155,7 +155,7 @@ BEGIN
 
 				IF ISNULL(@ValidationMessageOut, '') <> ''
 				BEGIN
-					SET @ResultMessage = @ResultMessage + ' but with some invalid value : ' + @ValidationMessageOut
+					SET @ResultMessage = 'Failed. Invalid value : ' + @ValidationMessageOut
 				END
 
 				if @trancount = 0   
