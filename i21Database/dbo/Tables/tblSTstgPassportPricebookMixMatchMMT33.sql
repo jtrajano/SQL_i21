@@ -4,6 +4,7 @@
 	[StoreLocationID] INT NULL, 
     [VendorName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [VendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[TableActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [RecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [MMTDetailRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [PromotionID] INT NULL, 
