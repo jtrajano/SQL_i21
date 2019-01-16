@@ -16,7 +16,7 @@ SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHe
        ,[strXMLType] = 'Outbound'
        ,[strXMLInitiater] = '<?xml version="1.0"?>'
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 8
+       ,[intConcurrencyId] = 11
   WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 ----DELETE FROM dbo.tblSMXMLTagAttribute
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Passport Pricebook Item List - ILT','XML',NULL,'Outbound','<?xml version="1.0"?>',1,8)
+      ('Passport Pricebook Item List - ILT','XML',NULL,'Outbound','<?xml version="1.0"?>',1,11)
 END
 --END CHECK HEADER
 
@@ -208,7 +208,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,7,1,'RecordAction',NULL,NULL,NULL,6,NULL,1,1)
+      (@intImportFileHeaderId,NULL,7,1,'TableAction',NULL,NULL,NULL,6,NULL,1,2)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 7 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -218,14 +218,14 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 7
        ,[intPosition] = 1
-       ,[strXMLTag] = 'RecordAction'
+       ,[strXMLTag] = 'TableAction'
        ,[strTable] = NULL
        ,[strColumnName] = NULL
        ,[strDataType] = NULL
        ,[intLength] = 6
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 2
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -235,7 +235,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,8,2,'ILTDetail','tblSTstgPassportPricebookItemListILT33',NULL,NULL,6,NULL,1,1)
+      (@intImportFileHeaderId,NULL,8,2,'RecordAction',NULL,NULL,NULL,6,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 8 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -245,8 +245,8 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 8
        ,[intPosition] = 2
-       ,[strXMLTag] = 'ILTDetail'
-       ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
+       ,[strXMLTag] = 'RecordAction'
+       ,[strTable] = NULL
        ,[strColumnName] = NULL
        ,[strDataType] = NULL
        ,[intLength] = 6
@@ -262,7 +262,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,9,1,'ItemListID','tblSTstgPassportPricebookItemListILT33','ItemListID',NULL,8,NULL,1,1)
+      (@intImportFileHeaderId,NULL,9,3,'ILTDetail','tblSTstgPassportPricebookItemListILT33',NULL,'Header',6,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 9 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -271,12 +271,12 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 9
-       ,[intPosition] = 1
-       ,[strXMLTag] = 'ItemListID'
+       ,[intPosition] = 3
+       ,[strXMLTag] = 'ILTDetail'
        ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
-       ,[strColumnName] = 'ItemListID'
-       ,[strDataType] = NULL
-       ,[intLength] = 8
+       ,[strColumnName] = NULL
+       ,[strDataType] = 'Header'
+       ,[intLength] = 6
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
        ,[intConcurrencyId] = 1
@@ -289,7 +289,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,10,2,'ItemListDescription','tblSTstgPassportPricebookItemListILT33','ItemListDescription',NULL,8,NULL,1,1)
+      (@intImportFileHeaderId,NULL,10,1,'ItemListID','tblSTstgPassportPricebookItemListILT33','ItemListID',NULL,9,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 10 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -298,12 +298,12 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 10
-       ,[intPosition] = 2
-       ,[strXMLTag] = 'ItemListDescription'
+       ,[intPosition] = 1
+       ,[strXMLTag] = 'ItemListID'
        ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
-       ,[strColumnName] = 'ItemListDescription'
+       ,[strColumnName] = 'ItemListID'
        ,[strDataType] = NULL
-       ,[intLength] = 8
+       ,[intLength] = 9
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
        ,[intConcurrencyId] = 1
@@ -316,7 +316,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,11,3,'ItemListEntry','tblSTstgPassportPricebookItemListILT33',NULL,'Header',8,NULL,1,1)
+      (@intImportFileHeaderId,NULL,11,2,'ItemListDescription','tblSTstgPassportPricebookItemListILT33','ItemListDescription',NULL,9,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 11 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -325,12 +325,12 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 11
-       ,[intPosition] = 3
-       ,[strXMLTag] = 'ItemListEntry'
+       ,[intPosition] = 2
+       ,[strXMLTag] = 'ItemListDescription'
        ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
-       ,[strColumnName] = NULL
-       ,[strDataType] = 'Header'
-       ,[intLength] = 8
+       ,[strColumnName] = 'ItemListDescription'
+       ,[strDataType] = NULL
+       ,[intLength] = 9
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
        ,[intConcurrencyId] = 1
@@ -343,7 +343,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,12,1,'ItemCode','tblSTstgPassportPricebookItemListILT33',NULL,'Header',11,NULL,1,1)
+      (@intImportFileHeaderId,NULL,12,3,'ItemListEntry','tblSTstgPassportPricebookItemListILT33',NULL,'Header',9,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -352,12 +352,12 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 12
-       ,[intPosition] = 1
-       ,[strXMLTag] = 'ItemCode'
+       ,[intPosition] = 3
+       ,[strXMLTag] = 'ItemListEntry'
        ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
        ,[strColumnName] = NULL
        ,[strDataType] = 'Header'
-       ,[intLength] = 11
+       ,[intLength] = 9
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
        ,[intConcurrencyId] = 1
@@ -370,7 +370,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,13,1,'POSCodeFormat',NULL,NULL,NULL,12,NULL,1,1)
+      (@intImportFileHeaderId,NULL,13,1,'ItemCode','tblSTstgPassportPricebookItemListILT33',NULL,'Header',12,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 13 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -380,10 +380,10 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 13
        ,[intPosition] = 1
-       ,[strXMLTag] = 'POSCodeFormat'
-       ,[strTable] = NULL
+       ,[strXMLTag] = 'ItemCode'
+       ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
        ,[strColumnName] = NULL
-       ,[strDataType] = NULL
+       ,[strDataType] = 'Header'
        ,[intLength] = 12
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
@@ -397,7 +397,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,14,2,'POSCode','tblSTstgPassportPricebookItemListILT33','POSCode',NULL,12,NULL,1,2)
+      (@intImportFileHeaderId,NULL,14,1,'POSCodeFormat','tblSTstgPassportPricebookItemListILT33',NULL,NULL,13,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 14 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -406,20 +406,47 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 14
+       ,[intPosition] = 1
+       ,[strXMLTag] = 'POSCodeFormat'
+       ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
+       ,[strColumnName] = NULL
+       ,[strDataType] = NULL
+       ,[intLength] = 13
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
+END
+
+--LEVEL 15
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+  INSERT INTO [dbo].[tblSMImportFileColumnDetail]
+      ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileHeaderId,NULL,15,2,'POSCode','tblSTstgPassportPricebookItemListILT33','POSCode',NULL,13,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 15
+  UPDATE [dbo].[tblSMImportFileColumnDetail]
+  SET [intImportFileHeaderId] = @intImportFileHeaderId
+       ,[intImportFileRecordMarkerId] = NULL
+       ,[intLevel] = 15
        ,[intPosition] = 2
        ,[strXMLTag] = 'POSCode'
        ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
        ,[strColumnName] = 'POSCode'
        ,[strDataType] = NULL
-       ,[intLength] = 12
+       ,[intLength] = 13
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 2
+       ,[intConcurrencyId] = 1
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
 --Delete Rows Not Included
-DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel NOT IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14)
+DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel NOT IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
 
 
 
@@ -452,13 +479,13 @@ DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportF
 
 
 --LEVEL 7   Attributes(1x)
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 7 AND strXMLTag = 'RecordAction'
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 7 AND strXMLTag = 'TableAction'
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileColumnDetailId,1,'type','tblSTstgPassportPricebookItemListILT33','ItemListMaintenanceRecordActionType',' ',1,1)
+      (@intImportFileColumnDetailId,1,'type','tblSTstgPassportPricebookItemListILT33','TableActionType',' ',1,2)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
@@ -468,10 +495,10 @@ BEGIN
        ,[intSequence] = 1
        ,[strTagAttribute] = 'type'
        ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
-       ,[strColumnName] = 'ItemListMaintenanceRecordActionType'
+       ,[strColumnName] = 'TableActionType'
        ,[strDefaultValue] = ' '
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 1
+       ,[intConcurrencyId] = 2
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
@@ -479,14 +506,14 @@ END
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
 
 
---LEVEL 13   Attributes(1x)
-SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 13 AND strXMLTag = 'POSCodeFormat'
+--LEVEL 8   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 8 AND strXMLTag = 'RecordAction'
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
   INSERT INTO [dbo].[tblSMXMLTagAttribute]
       ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileColumnDetailId,1,'format','tblSTstgPassportPricebookItemListILT33','POSCodeFormatFormat',' ',1,1)
+      (@intImportFileColumnDetailId,1,'type','tblSTstgPassportPricebookItemListILT33','RecordActionType',' ',1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
 BEGIN
@@ -494,7 +521,35 @@ BEGIN
   UPDATE[dbo].[tblSMXMLTagAttribute]
   SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
        ,[intSequence] = 1
-       ,[strTagAttribute] = 'format'
+       ,[strTagAttribute] = 'type'
+       ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
+       ,[strColumnName] = 'RecordActionType'
+       ,[strDefaultValue] = ' '
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 8   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 14   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 14 AND strXMLTag = 'POSCodeFormat'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'type','tblSTstgPassportPricebookItemListILT33','POSCodeFormatFormat',' ',1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'type'
        ,[strTable] = 'tblSTstgPassportPricebookItemListILT33'
        ,[strColumnName] = 'POSCodeFormatFormat'
        ,[strDefaultValue] = ' '
@@ -503,7 +558,7 @@ BEGIN
   WHERE intTagAttributeId = @intTagAttributeId
 END
 
---Delete Rows Not Included in LEVEL 13   Attributes(1x)
+--Delete Rows Not Included in LEVEL 14   Attributes(1x)
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
 
 
