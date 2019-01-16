@@ -15,5 +15,3 @@ BEGIN
 	
 	RETURN @strValue
 END
-
-
