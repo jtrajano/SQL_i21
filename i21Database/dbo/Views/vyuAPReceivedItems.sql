@@ -513,7 +513,7 @@ FROM
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
-									AND F1.intPricingTypeId NOT IN (2, 3, 4,5) --AP-4971
+									AND F2.intPricingTypeId NOT IN (2, 3, 4,5) --AP-4971
 							THEN 1 ELSE 0 END
 					ELSE 1 END)
 	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
@@ -639,6 +639,7 @@ FROM
 	LEFT JOIN tblICItem item ON item.intItemId = A.intItemId
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intEntityVendorId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = A.intContractHeaderId      
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -668,9 +669,9 @@ FROM
 	--) Qty
 	WHERE  
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
-		AND 1 =  CASE WHEN CH.intPricingTypeId IS NOT NULL AND CH.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
+		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
 		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId 
-						AND CH.intPricingTypeId IS NOT NULL AND CH.intPricingTypeId = 5) THEN 0--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+						AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 				ELSE 1 END
 	UNION ALL
 
