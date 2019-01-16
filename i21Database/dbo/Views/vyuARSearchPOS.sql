@@ -6,6 +6,7 @@ SELECT intPOSId					= POS.intPOSId
 	 , intShipToId				= CUSTOMER.intShipToId
 	 , intCompanyLocationId		= POS.intCompanyLocationId
 	 , dtmDate					= POS.dtmDate
+	 , strCreditCode			= CUSTOMER.strCreditCode
 	 , strReceiptNumber			= POS.strReceiptNumber
 	 , strCustomerName			= CUSTOMER.strName
 	 , strUserName				= USERNAME.strName
@@ -31,6 +32,7 @@ INNER JOIN (
 		 , intShipToId
 		 , dblCreditLimit
 		 , dblARBalance
+		 , strCreditCode
 		 , strName
 		 , strBillToLocationName
 		 , strBillToAddress
