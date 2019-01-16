@@ -1829,13 +1829,13 @@ BEGIN
 				, strContractNumber
 				, intContractHeaderId
 			FROM @Final f
-			LEFT JOIN (
-				SELECT strStorageTypeCode,ysnDPOwnedType, intInventoryReceiptId 
-				FROM tblGRStorageHistory SH
-				INNER JOIN tblGRCustomerStorage CS ON SH.intCustomerStorageId = CS.intCustomerStorageId
-				INNER JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
-			) Strg ON f.intInventoryReceiptId = Strg.intInventoryReceiptId AND f.strReceiptNumber NOT LIKE 'STR%'
-			WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId AND isnull(Strg.ysnDPOwnedType,0) = 0
+			--LEFT JOIN (
+			--	SELECT strStorageTypeCode,ysnDPOwnedType, intInventoryReceiptId 
+			--	FROM tblGRStorageHistory SH
+			--	INNER JOIN tblGRCustomerStorage CS ON SH.intCustomerStorageId = CS.intCustomerStorageId
+			--	INNER JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
+			--) Strg ON f.intInventoryReceiptId = Strg.intInventoryReceiptId AND f.strReceiptNumber NOT LIKE 'STR%'
+			WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId --AND isnull(Strg.ysnDPOwnedType,0) = 0
 				--AND strReceiptNumber NOT IN (SELECT strShipmentNumber FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries')
 		
 			
