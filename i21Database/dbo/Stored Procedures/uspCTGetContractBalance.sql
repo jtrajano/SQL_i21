@@ -463,11 +463,11 @@ BEGIN TRY
 									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 									ELSE
-										(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+										ISNULL(dbo.fnICConvertUOMtoStockUnit(
+																				 CD.intItemId
+																				,CD.intItemUOMId,
+																				(CD.intNoOfLoad - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)) * CD.dblQuantityPerLoad
+																			),0) + ISNULL(BL.dblQuantity,0)
 							  END
 	,strQuantityUOM			= IUM.strUnitMeasure
 	,dblCashPrice			= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)	
@@ -477,11 +477,11 @@ BEGIN TRY
 							  		WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 							  		ELSE
-							  			(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(
+																				 CD.intItemId
+																				,CD.intItemUOMId,
+																				(CD.intNoOfLoad - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)) * CD.dblQuantityPerLoad
+																			),0) + ISNULL(BL.dblQuantity,0)
 							    END
 
 	,dblAmount				= (
@@ -489,11 +489,11 @@ BEGIN TRY
 									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 									ELSE
-										(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+										ISNULL(dbo.fnICConvertUOMtoStockUnit(
+																				 CD.intItemId
+																				,CD.intItemUOMId,
+																				(CD.intNoOfLoad - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)) * CD.dblQuantityPerLoad
+																			),0) + ISNULL(BL.dblQuantity,0)
 							    END
 							  ) 
 							  * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
