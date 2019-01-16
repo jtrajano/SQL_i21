@@ -2,6 +2,7 @@
 	@strFilePrefix NVARCHAR(50)
 	, @intStoreId INT
 	, @intRegisterId INT
+	, @ysnClearRegisterPromotion BIT
 	, @dtmBeginningChangeDate DATETIME
 	, @dtmEndingChangeDate DATETIME
 	, @strGeneratedXML VARCHAR(MAX) OUTPUT
@@ -96,6 +97,7 @@ BEGIN
 							[StoreLocationID] , 
 							[VendorName], 
 							[VendorModelVersion], 
+							[TableActionType], 
 							[RecordActionType], 
 							[ItemListMaintenanceRecordActionType], 
 							[ItemListID], 
@@ -108,6 +110,10 @@ BEGIN
 							ST.intStoreNo AS [StoreLocationID]
 							, 'iRely' AS [VendorName]  	
 							, (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion]
+							, CASE
+									WHEN @ysnClearRegisterPromotion = CAST(1 AS BIT) THEN 'initialize'
+									WHEN @ysnClearRegisterPromotion = CAST(0 AS BIT) THEN 'update'
+							END AS [TableActionType]
 							, 'addchange' AS [RecordActionType] 
 							, CASE PIL.ysnDeleteFromRegister 
 								WHEN 0 
@@ -225,7 +231,8 @@ BEGIN
 											)
 											,(
 												SELECT TOP (1)
-													RecordActionType AS 'RecordAction/@type'
+													TableActionType AS 'TableAction/@type'
+													, RecordActionType AS 'RecordAction/@type'
 													,(
 														SELECT
 															A.ItemListID
