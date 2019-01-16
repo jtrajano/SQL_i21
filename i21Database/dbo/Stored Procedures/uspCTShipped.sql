@@ -35,7 +35,8 @@ BEGIN TRY
 				@dblLoadQuantity				NUMERIC(18,6),
 				@intLoadDetailId				INT,
 				@dblReduceSchQty				NUMERIC(18,6),
-				@dblReverseSchQty				NUMERIC(18,6)
+				@dblReverseSchQty				NUMERIC(18,6),
+				@intSContractDetailId			INT
 
 	SELECT @intOrderType = intOrderType,@intSourceType = intSourceType,@strShipmentId= strShipmentId FROM @ItemsFromInventoryShipment
 	SELECT @ysnReduceScheduleByLogisticsLoad = ysnReduceScheduleByLogisticsLoad FROM tblCTCompanyPreference
@@ -143,8 +144,8 @@ BEGIN TRY
 				IF	@ysnReduceScheduleByLogisticsLoad = 1 AND @intSourceType = 1 AND @intOrderType = 1
 				BEGIN
 					SELECT @intLoadId = intLoadId from tblSCTicket WHERE intTicketId = @intSourceId
-					SELECT @intLoadDetailId = intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId AND intSContractDetailId = @intContractDetailId
-					IF @intLoadId IS NOT NULL
+					SELECT @intLoadDetailId = intLoadDetailId,@intSContractDetailId = intSContractDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId AND intSContractDetailId = @intContractDetailId
+					IF @intLoadId IS NOT NULL AND @intSContractDetailId = @intContractDetailId
 					BEGIN
 						SELECT @dblLoadQuantity = dblQuantity FROM tblLGLoadDetail WHERE intLoadId = @intLoadId
 						IF ABS(@dblSchQuantityToUpdate) < @dblLoadQuantity AND @dblSchQuantityToUpdate < 0
