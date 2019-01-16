@@ -771,10 +771,12 @@ BEGIN
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
 				LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
 				LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
+				LEFT JOIN tblCTPriceFixationDetail pfd ON invD.intInvoiceDetailId = pfd.intInvoiceDetailId
 				WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
 					AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND inv.intInvoiceId IS NULL
+					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,getDate())), 110), 110)
+					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,getDate())), 110), 110)
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
 																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
