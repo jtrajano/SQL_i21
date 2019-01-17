@@ -6,6 +6,7 @@
 	,@ItemId						INT
 	,@ShipFromLocationId			INT
 	,@IncludeExemptedCodes			BIT
+	,@IncludeInvalidCodes			BIT             = 0
 	,@UOMId							INT				= NULL
 	,@CurrencyId					INT				= NULL
 	,@CurrencyExchangeRateTypeId	INT				= NULL
@@ -42,8 +43,12 @@ BEGIN
 			,@ItemCategoryId INT
 			,@ItemLocationId INT
 			,@ExpenseAccountId INT
+			,@ZeroBit BIT
+			,@OneBit BIT
 
 	SET @ZeroDecimal = 0.000000
+	SET @ZeroBit = CAST(0 AS BIT)
+	SET @OneBit = CAST(1 AS BIT)
 	SELECT @ItemCategoryId = [intCategoryId] FROM tblICItem WHERE [intItemId] = @ItemId 
 	SELECT @ItemLocationId = [intItemLocationId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId
 	SELECT @ExpenseAccountId = dbo.fnGetItemGLAccount(@ItemId, @ItemLocationId, 'Other Charge Expense')
@@ -64,15 +69,15 @@ BEGIN
 		,[dblBaseRate]					= R.[dblBaseRate]
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
-		,[intTaxAccountId]				= CASE WHEN TC.[ysnExpenseAccountOverride] = 1 THEN ISNULL(@ExpenseAccountId,TC.[intPurchaseTaxAccountId]) ELSE TC.[intPurchaseTaxAccountId] END
-		,[ysnSeparateOnInvoice]			= 0
-		,[ysnCheckoffTax]				= TC.[ysnCheckoffTax]
+		,[intTaxAccountId]				= CASE WHEN TC.[ysnExpenseAccountOverride] = @OneBit THEN ISNULL(@ExpenseAccountId,TC.[intPurchaseTaxAccountId]) ELSE TC.[intPurchaseTaxAccountId] END
+		,[ysnSeparateOnInvoice]			= @ZeroBit
+		,[ysnCheckoffTax]				= ISNULL(TC.[ysnCheckoffTax], @ZeroBit)
 		,[strTaxCode]					= TC.[strTaxCode]
-		,[ysnTaxExempt]					= E.[ysnTaxExempt]
-		,[ysnTaxOnly]					= ISNULL(TC.[ysnTaxOnly], 0)
-		,[ysnInvalidSetup]				= E.[ysnInvalidSetup]
+		,[ysnTaxExempt]					= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN @OneBit ELSE ISNULL(E.[ysnTaxExempt], @ZeroBit) END
+		,[ysnTaxOnly]					= ISNULL(TC.[ysnTaxOnly], @ZeroBit)
+		,[ysnInvalidSetup]				= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN @OneBit ELSE ISNULL(E.[ysnInvalidSetup], @ZeroBit) END
 		,[strTaxGroup]					= TG.[strTaxGroup]
-		,[strNotes]						= E.[strExemptionNotes] 
+		,[strNotes]						= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN 'No Valid Tax Code Detail!' ELSE E.[strExemptionNotes] END
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN
@@ -87,7 +92,8 @@ BEGIN
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @UOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) R		
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
-		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)
+		AND (ISNULL(E.ysnTaxExempt, @ZeroBit) = @ZeroBit OR ISNULL(@IncludeExemptedCodes, @ZeroBit) = @OneBit)
+		AND ((ISNULL(E.[ysnInvalidSetup], @ZeroBit) = @ZeroBit AND ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @ZeroBit) OR ISNULL(@IncludeInvalidCodes, @ZeroBit) = @OneBit)
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
 

@@ -24,6 +24,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTotalAdjustedTax		= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTotalTax				= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , ysnTaxExempt				= DETAIL.ysnTaxExempt
+	 , ysnInvalidSetup			= DETAIL.ysnInvalidSetup
 	 , dblTaxDifference			= (DETAIL.dblAdjustedTax - DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
@@ -105,6 +106,7 @@ INNER JOIN (
 		 , dblTax					= IDT.dblTax		 
 		 , dblTotalAdjustedTax		= ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0)		 
 		 , ysnTaxExempt				= IDT.ysnTaxExempt		
+		 , ysnInvalidSetup			= IDT.ysnInvalidSetup		
 		 , strTaxGroup				= TAXGROUP.strTaxGroup
 		 , strTaxAgency				= TAXCODE.strTaxAgency
 		 , strTaxCode				= TAXCODE.strTaxCode
@@ -136,6 +138,7 @@ INNER JOIN (
 			 , dblAdjustedTax		= CASE WHEN ysnTaxExempt = 1 THEN 0 ELSE dblAdjustedTax end
 			 , dblTax				
 			 , ysnTaxExempt
+			 , ysnInvalidSetup
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	INNER JOIN (

@@ -18,6 +18,7 @@
 	[ysnSeparateOnInvoice]      BIT NULL DEFAULT ((0)), 
 	[ysnCheckoffTax]            BIT NULL DEFAULT ((0)), 
 	[ysnTaxExempt]              BIT NULL DEFAULT ((0)),
+	[ysnInvalidSetup]           BIT NULL DEFAULT ((0)), 
 	[ysnTaxOnly]				BIT	NOT NULL DEFAULT 0,
 	[strNotes]                  NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
 	[intUnitMeasureId]			INT NULL,

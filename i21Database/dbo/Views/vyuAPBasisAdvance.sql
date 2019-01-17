@@ -300,6 +300,7 @@ SELECT TOP 100 PERCENT * FROM (
             ,receipt.intLocationId
             ,receipt.intShipFromId
             ,1
+			,0
             ,receipt.intFreightTermId
             ,0
             ,CASE WHEN receiptItem.intWeightUOMId > 0 THEN receiptItem.intWeightUOMId ELSE receiptItem.intUnitMeasureId END

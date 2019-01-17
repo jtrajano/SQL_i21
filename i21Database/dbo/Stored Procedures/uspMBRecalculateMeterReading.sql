@@ -57,6 +57,7 @@ BEGIN
 			, @TransactionDate
 			, NULL
 			, 1
+			,0			--@IncludeInvalidCodes
 			, NULL
 			, NULL
 			, NULL

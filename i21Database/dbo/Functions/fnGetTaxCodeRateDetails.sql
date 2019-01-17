@@ -14,7 +14,7 @@ RETURNS @returntable TABLE
 	,[dblRate]				NUMERIC(18,6)
 	,[dblBaseRate]			NUMERIC(18,6)
 	,[strUnitMeasure]		NVARCHAR(30) COLLATE Latin1_General_CI_AS
-
+    ,[ysnInvalidSetup]      BIT
 )
 AS
 BEGIN
@@ -85,7 +85,8 @@ BEGIN
 		,[intUnitMeasureId]		= SMTCR.[intUnitMeasureId]
 		,[dblRate]				= CASE WHEN SMTCR.[strCalculationMethod] <> 'Unit' THEN SMTCR.[dblRate] ELSE (CASE WHEN @ToBse = 1 THEN SMTCR.[dblRate] / @ExchangeRate ELSE SMTCR.[dblRate] * @ExchangeRate END) END
 		,[dblBaseRate]			= SMTCR.[dblRate]
-		,[strUnitMeasure]		= UOM.[strUnitMeasure]
+        ,[strUnitMeasure]		= UOM.[strUnitMeasure]
+        ,[ysnInvalidSetup]      = CAST(0 AS BIT)
 	FROM 
 		tblSMTaxCodeRate SMTCR
 	LEFT OUTER JOIN
@@ -119,7 +120,18 @@ BEGIN
 			ELSE 1
 		 END) DESC
 		,SMTCR.[dtmEffectiveDate] DESC
-		,SMTCR.[dblRate] DESC					
+		,SMTCR.[dblRate] DESC	
+		
+		
+	IF NOT EXISTS(SELECT NULL FROM @returntable)
+		INSERT INTO @returntable
+		SELECT
+			 [strCalculationMethod]	= ''
+			,[intUnitMeasureId]		= NULL
+			,[dblRate]				= 0.000000
+			,[dblBaseRate]			= 0.000000
+			,[strUnitMeasure]		= ''
+			,[ysnInvalidSetup]      = CAST(1 AS BIT)	
 		
 	RETURN
 			
