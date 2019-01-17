@@ -85,7 +85,7 @@ BEGIN
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
 					,@intCurrencyId = @intCurrencyId
-					,@dblExchangeRate = @dblExchangeRate
+					-- ,@dblExchangeRate = @dblExchangeRate
 					,@intTransactionId = @intTransactionId
 					,@intTransactionDetailId = @intTransactionDetailId
 					,@strTransactionId = @strTransactionId
