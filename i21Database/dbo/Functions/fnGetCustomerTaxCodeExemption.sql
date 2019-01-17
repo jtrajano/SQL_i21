@@ -117,7 +117,7 @@ BEGIN
 
 
 	SELECT TOP 1
-		@TaxCodeExemption =  'Tax Code - ' + SMTC.[strTaxCode] +  ' under Tax Group  ' + SMTG.strTaxGroup + ' has an exemption set for item category - ' + ICC.[strCategoryCode] 
+		@TaxCodeExemption =  'Tax Code ''' + SMTC.[strTaxCode] +  ''' under Tax Group  ''' + SMTG.strTaxGroup + ''' has an exemption set for item category ''' + ICC.[strCategoryCode] + ''''
 	FROM
 		tblSMTaxGroupCodeCategoryExemption SMTGCE
 	INNER JOIN
@@ -167,8 +167,8 @@ BEGIN
 					)
 		--AND ISNULL(@ItemId,0) <> 0
 	BEGIN
-		SET @TaxCodeExemption	= ISNULL('Tax Class - ' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
-								+ ISNULL(' is not included in Item Category - ' + (SELECT TOP 1 [strCategoryCode] FROM tblICCategory WHERE [intCategoryId] = @ItemCategoryId) + ' tax class setup.', '') 	
+		SET @TaxCodeExemption	= ISNULL('Tax Class ''' + (SELECT TOP 1 [strTaxClass] FROM tblSMTaxClass WHERE [intTaxClassId] = @TaxClassId), '')
+								+ ISNULL(''' is not included in Item Category ''' + (SELECT TOP 1 [strCategoryCode] FROM tblICCategory WHERE [intCategoryId] = @ItemCategoryId) + ''' tax class setup.', '') 	
 		SET @InvalidSetup = 1
 	END
 		
@@ -311,7 +311,7 @@ BEGIN
 		
 	--Sales Tax Account
 	SELECT TOP 1
-		@TaxCodeExemption = 'Invalid Sales Tax Account for Tax Code ' + TC.[strTaxCode]
+		@TaxCodeExemption = 'Invalid Sales Tax Account for Tax Code ''' + TC.[strTaxCode] + ''''
 	FROM
 		tblSMTaxCode TC
 	WHERE
