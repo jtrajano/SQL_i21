@@ -316,6 +316,7 @@ BEGIN
 																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
+																			, 0			                            --@IncludeInvalidCodes
 																			, NULL
 																			, vC.intFreightTermId					-- FreightTermId
 																			, NULL
@@ -1876,6 +1877,7 @@ BEGIN
 																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
+																			, 0			                            --@IncludeInvalidCodes
 																			, NULL
 																			, vC.intFreightTermId					-- FreightTermId
 																			, NULL
@@ -2592,6 +2594,7 @@ BEGIN
 																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
+																			, 0			                            --@IncludeInvalidCodes
 																			, NULL
 																			, vC.intFreightTermId					-- FreightTermId
 																			, NULL

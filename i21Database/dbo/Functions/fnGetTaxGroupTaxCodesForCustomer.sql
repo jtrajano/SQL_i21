@@ -6,10 +6,11 @@
 	,@ItemId						INT
 	,@ShipToLocationId				INT
 	,@IncludeExemptedCodes			BIT
+	,@IncludeInvalidCodes			BIT
 	,@IsCustomerSiteTaxable			BIT
 	,@CardId						INT
 	,@VehicleId						INT
-	,@SiteId					INT
+	,@SiteId					    INT
 	,@DisregardExemptionSetup		BIT
 	,@ItemUOMId						INT = NULL
 	,@CompanyLocationId				INT
@@ -52,8 +53,12 @@ BEGIN
 
 	DECLARE @ZeroDecimal NUMERIC(18, 6)
 			,@ItemCategoryId INT
+			,@ZeroBit BIT
+			,@OneBit BIT
 
 	SET @ZeroDecimal = 0.000000
+	SET @ZeroBit = CAST(0 AS BIT)
+	SET @OneBit = CAST(1 AS BIT)
 	SELECT @ItemCategoryId = intCategoryId FROM tblICItem WHERE intItemId = @ItemId
 
 	-- IF (ISNULL(@ItemUOMId,0) = 0)
@@ -98,14 +103,14 @@ BEGIN
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
 		,[intTaxAccountId]				= TC.[intSalesTaxAccountId]
-		,[ysnSeparateOnInvoice]			= CAST(0 AS BIT)
-		,[ysnCheckoffTax]				= ISNULL(TC.[ysnCheckoffTax], CAST(0 AS BIT))
+		,[ysnSeparateOnInvoice]			= @ZeroBit
+		,[ysnCheckoffTax]				= ISNULL(TC.[ysnCheckoffTax], @ZeroBit)
 		,[strTaxCode]					= TC.[strTaxCode]
-		,[ysnTaxExempt]					= ISNULL(E.[ysnTaxExempt], CAST(0 AS BIT))
-		,[ysnTaxOnly]					= ISNULL(TC.[ysnTaxOnly], CAST(0 AS BIT))
-		,[ysnInvalidSetup]				= ISNULL(E.[ysnInvalidSetup], CAST(0 AS BIT))
+		,[ysnTaxExempt]					= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN @OneBit ELSE ISNULL(E.[ysnTaxExempt], @ZeroBit) END
+		,[ysnTaxOnly]					= ISNULL(TC.[ysnTaxOnly], @ZeroBit)
+		,[ysnInvalidSetup]				= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN @OneBit ELSE ISNULL(E.[ysnInvalidSetup], @ZeroBit) END
 		,[strTaxGroup]					= TG.[strTaxGroup]
-		,[strNotes]						= E.[strExemptionNotes]
+		,[strNotes]						= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN 'No Valid Tax Code Detail!' ELSE E.[strExemptionNotes] END
 		,[intUnitMeasureId]				= R.[intUnitMeasureId]
 		,[strUnitMeasure]				= R.[strUnitMeasure]
 	FROM
@@ -122,7 +127,8 @@ BEGIN
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) R			
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
-		AND (ISNULL(E.ysnTaxExempt,0) = 0 OR ISNULL(@IncludeExemptedCodes,0) = 1)
+		AND (ISNULL(E.ysnTaxExempt, @ZeroBit) = @ZeroBit OR ISNULL(@IncludeExemptedCodes, @ZeroBit) = @OneBit)
+		AND ((ISNULL(E.[ysnInvalidSetup], @ZeroBit) = @ZeroBit AND ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @ZeroBit) OR ISNULL(@IncludeInvalidCodes, @ZeroBit) = @OneBit)
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
 
