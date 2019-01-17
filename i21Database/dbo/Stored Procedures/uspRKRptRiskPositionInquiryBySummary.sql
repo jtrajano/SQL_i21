@@ -90,7 +90,8 @@ IF (ISNULL(@xmlParam ,'') = '')
 			'' strBook,
 			'' strSubBook,
 			'' dtmPositionAsOf,
-			'' strUomType
+			'' strUomType,
+      0 intOrderByHeading
 
 	END
 
@@ -121,7 +122,7 @@ DECLARE @temp as Table (
      dblNoOfLot decimal(24,10),  
      dblQuantity decimal(24,10),
      intOrderByHeading int,
-	   intOrderBySubHeading int,
+     intOrderBySubHeading int,
      intContractHeaderId int ,
      intFutOptTransactionHeaderId int
     ,strProductType NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -177,29 +178,52 @@ Exec uspRKRiskPositionInquiry @intCommodityId = @intCommodityId,
         @strPositionBy = @strPositionBy
 		
 UPDATE @temp
-SET strGroup =  case when Selection IN ('Physical position / Differential cover', 'Physical position / Basis risk') then '01.'+ Selection
-				     when Selection = 'Specialities & Low grades' then  '02.'+ Selection 
-					 when Selection = 'Total speciality delta fixed' then  '03.'+ Selection 
-					 when Selection = 'Terminal position (a. in lots )' then  '04.'+ Selection 
-					 when Selection = 'Terminal position (Avg Long Price)' then  '05.'+ Selection 
-					 when Selection LIKE ('%Terminal position (b.%') then  '06.'+ Selection 
-					 when Selection = 'Delta options' then  '07.'+ Selection 
-					 when Selection = 'F&O' then  '08.'+ Selection 
-					 when Selection LIKE ('%Total F&O(b. in%') then  '09.'+ Selection 
-					 when Selection IN ('Outright coverage', 'Net market risk') then  '10.'+ Selection 
-					 when Selection IN ('Switch position', 'Futures required') then  '11.'+ Selection 
-					 end
-					 		
-SELECT intRowNumber
-	,strGroup
+SET strGroup =  case when Selection IN ('Physical position / Differential cover', 'Physical position / Basis risk') then Selection
+          when Selection = 'Specialities & Low grades' then Selection 
+          when Selection = 'Total speciality delta fixed' then Selection 
+          when Selection = 'Terminal position (a. in lots )' then Selection 
+          when Selection = 'Terminal position (Avg Long Price)' then Selection 
+          when Selection LIKE ('%Terminal position (b.%') then Selection 
+          when Selection = 'Delta options' then Selection 
+          when Selection = 'F&O' then  '8.'+ Selection 
+          when Selection LIKE ('%Total F&O(b. in%') then Selection 
+          when Selection IN ('Outright coverage', 'Net market risk') then Selection 
+          when Selection IN ('Switch position', 'Futures required') then Selection 
+	end
+
+INSERT INTO @temp(strGroup
 	,Selection
 	,PriceStatus
 	,strFutureMonth
 	,strAccountNumber
-	,CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  dblNoOfContract
+	,dblNoOfContract
+	,intOrderByHeading
+)
+SELECT strGroup
+	,Selection
+	,PriceStatus
+	,strFutureMonth = 'Total'
+	,strAccountNumber
+	,SUM(CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))) dblNoOfContract
+	,intOrderByHeading
+FROM @temp
+GROUP BY strGroup
+	,Selection
+	,PriceStatus
+	,strAccountNumber
+	,intOrderByHeading
+ORDER BY strGroup,PriceStatus
+					 		
+SELECT strGroup
+	,Selection
+	,PriceStatus
+	,strFutureMonth
+	,strAccountNumber
+	,SUM(CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))) dblNoOfContract
 	,CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER (PARTITION BY NULL ORDER BY 
       CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  
-          WHEN  strFutureMonth ='Total' THEN '01/01/9999' 
+          WHEN  strFutureMonth ='Total' THEN '01/01/9999'
+          WHEN  ISNULL(strFutureMonth, '') = '' THEN '01/01/1901' 
           ELSE CONVERT(DATETIME,'01 '+strFutureMonth) 
       END ))+ '.1234567890') AS [Rank]
 	,@strCommodityCodeH strCommodityCode
@@ -210,7 +234,16 @@ SELECT intRowNumber
 	,@strBookH strBook
 	,@strSubBookH strSubBook
 	,@dtmPositionAsOf dtmPositionAsOf
-FROM @temp  
+	,intOrderByHeading
+FROM @temp
+WHERE ISNULL(dblNoOfContract,0) <> 0
+GROUP BY strGroup
+	,Selection
+	,PriceStatus
+	,strFutureMonth
+	,strAccountNumber
+	,intOrderByHeading
+ORDER BY intOrderByHeading
 
 END
 
@@ -1015,7 +1048,7 @@ if @strReportName='Outright Coverage'
    CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
    (PARTITION BY NULL ORDER BY 
    CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
-   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook,@dtmPositionAsOf dtmPositionAsOf 
+   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook,@dtmPositionAsOf dtmPositionAsOf,intOrderByHeading = 1
   FROM #temp1  where strGroup='1.Outright Coverage' and dblNoOfContract <>0
 ELSE IF @strReportName='Futures Required'
 		SELECT  intRowNumber ,	replace(strGroup,'2.','') 	strGroup    ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
@@ -1024,7 +1057,7 @@ ELSE IF @strReportName='Futures Required'
 		   CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
 		   (PARTITION BY NULL ORDER BY 
 		   CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
-	,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook ,@dtmPositionAsOf dtmPositionAsOf 
+	,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook ,@dtmPositionAsOf dtmPositionAsOf,intOrderByHeading = 2
 		  FROM #temp1  where strGroup='2.Futures Required' and dblNoOfContract <>0
 ELSE
 		SELECT  intRowNumber ,	strGroup   ,Selection,PriceStatus,strFutureMonth,strAccountNumber,  
@@ -1033,6 +1066,9 @@ ELSE
 		   CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
 		   (PARTITION BY NULL ORDER BY 
 		   CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
-		   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook ,@dtmPositionAsOf dtmPositionAsOf 
+		   ,@strCommodityCodeH strCommodityCode,@strFutureMarketH strFutureMarket,@strFutureMonthH strFutureMonth1,@strUnitMeasureH strUnitMeasure,@strLocationH strLocation ,@strBookH strBook ,@strSubBookH strSubBook ,@dtmPositionAsOf dtmPositionAsOf
+		   ,intOrderByHeading = CASE WHEN strGroup = '1.Outright Coverage' THEN 1
+				ELSE 2
+		    END
 		  FROM #temp1 where dblNoOfContract <>0
 END
