@@ -9,7 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Purchase Order' AND strModuleName = 'Accounts Payable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Accounts Payable'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Request Order (Portal)' AND strDescription = 'Request Order Description (Portal)' AND strModuleName = 'Tank Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Tank Management (Portal)' AND strModuleName = 'Tank Management' AND intParentMenuID = 0))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -6647,9 +6647,9 @@ END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Request Order (Portal)' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Request Order (Portal)', N'Tank Management', @TankManagementPortalParentMenuId, N'Request Order (Portal)', N'Portal Menu', N'Screen', N'TankManagement.view.Order?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 1, 1)
+	VALUES (N'Request Order (Portal)', N'Tank Management', @TankManagementPortalParentMenuId, N'Request Order Description (Portal)', N'Portal Menu', N'Screen', N'TankManagement.view.Order?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 1, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'TankManagement.view.Order?showSearch=true' WHERE strMenuName = 'Request Order (Portal)' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'TankManagement.view.Order?showSearch=true', strDescription = N'Request Order Description (Portal)' WHERE strMenuName = 'Request Order (Portal)' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementPortalParentMenuId
 
 DECLARE @TMRequestOrderMenuId INT
 SELECT  @TMRequestOrderMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Request Order (Portal)' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementPortalParentMenuId
