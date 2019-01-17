@@ -228,7 +228,7 @@ BEGIN
 	--PREPAY, DEBIT MEMO ENTRIES AP SIDE
 	UNION ALL
 	SELECT
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, C.dtmDate), 0),
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	CAST(B.dblAmountApplied AS DECIMAL(18,2)) * ISNULL(NULLIF(ForexRate.dblRate,0),1),
@@ -292,7 +292,7 @@ BEGIN
 	--PREPAY, DEBIT MEMO ENTRIES
 	UNION ALL
 	SELECT
-		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, C.dtmDate), 0),
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	C.intAccountId,
 		[dblDebit]						=	0,
