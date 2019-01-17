@@ -102,7 +102,7 @@ BEGIN
 								, 9999 AS [TransactionLimit]
 								, PIL.intPromoItemListNo AS [ItemListID]
 								, CONVERT(nvarchar(10), PSL.dtmPromoBegPeriod, 126) AS [StartDate]
-								, CONVERT(varchar, CAST('0:00:01' AS TIME), 108) AS [StartTime]
+								, CONVERT(varchar, CAST('0:00:00' AS TIME), 108) AS [StartTime]
 								, CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126) AS [StopDate]
 								, CONVERT(varchar, CAST('23:59:59' AS TIME), 108) AS [StopTime] 
 								, PSL.intPromoUnits [MixMatchUnits]
@@ -110,26 +110,39 @@ BEGIN
 								--, PSLD.intQuantity [MixMatchUnits]
 								--, PSLD.dblPrice [MixMatchPrice]
 								, @strUniqueGuid AS [strUniqueGuid]
-							FROM tblICItem I
-							JOIN tblICItemLocation IL 
-								ON IL.intItemId = I.intItemId
-							JOIN tblSMCompanyLocation L 
-								ON L.intCompanyLocationId = IL.intLocationId
-							JOIN tblICItemUOM IUOM 
-								ON IUOM.intItemId = I.intItemId 
-							JOIN tblICUnitMeasure IUM 
-								ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-							JOIN tblSTStore ST 
-								ON ST.intCompanyLocationId = L.intCompanyLocationId 
-							JOIN tblSTRegister R 
-								ON R.intStoreId = ST.intStoreId
-							JOIN tblSTPromotionItemList PIL 
-								ON PIL.intStoreId = ST.intStoreId
-							JOIN tblSTPromotionSalesList PSL 
-								ON PSL.intStoreId = ST.intStoreId
-							JOIN tblSTPromotionSalesListDetail PSLD 
+							FROM tblSTPromotionSalesListDetail PSLD
+							INNER JOIN tblSTPromotionSalesList PSL
 								ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
-							WHERE R.intRegisterId = @intRegisterId 
+							INNER JOIN tblSTPromotionItemList PIL 
+								ON PSLD.intPromoItemListId = PIL.intPromoItemListId
+							INNER JOIN tblSTStore ST 
+								ON PSL.intStoreId = ST.intStoreId
+							INNER JOIN tblSTRegister R 
+								ON R.intRegisterId = ST.intRegisterId
+							INNER JOIN tblSMCompanyLocation CL 
+								ON ST.intCompanyLocationId = CL.intCompanyLocationId
+							INNER JOIN tblICItemLocation IL
+								ON CL.intCompanyLocationId = IL.intLocationId
+							--FROM tblICItem I
+							--JOIN tblICItemLocation IL 
+							--	ON IL.intItemId = I.intItemId
+							--JOIN tblSMCompanyLocation L 
+							--	ON L.intCompanyLocationId = IL.intLocationId
+							--JOIN tblICItemUOM IUOM 
+							--	ON IUOM.intItemId = I.intItemId 
+							--JOIN tblICUnitMeasure IUM 
+							--	ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+							--JOIN tblSTStore ST 
+							--	ON ST.intCompanyLocationId = L.intCompanyLocationId 
+							--JOIN tblSTRegister R 
+							--	ON R.intStoreId = ST.intStoreId
+							--JOIN tblSTPromotionItemList PIL 
+							--	ON PIL.intStoreId = ST.intStoreId
+							--JOIN tblSTPromotionSalesList PSL 
+							--	ON PSL.intStoreId = ST.intStoreId
+							--JOIN tblSTPromotionSalesListDetail PSLD 
+							--	ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
+							--WHERE R.intRegisterId = @intRegisterId 
 							AND ST.intStoreId = @intStoreId
 							AND PSL.strPromoType = 'M' -- <--- 'M' = Mix and Match
 							-- AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId	
