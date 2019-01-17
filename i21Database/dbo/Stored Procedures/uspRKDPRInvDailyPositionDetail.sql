@@ -1767,7 +1767,67 @@ BEGIN
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
 					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries')
-					)t
+				
+				UNION ALL
+				SELECT dblBalanceToInvoice
+						, strLocationName
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, strContractNumber
+						, intContractHeaderId
+						, strShipmentNumber
+						, intInventoryShipmentId
+						, strCustomerReference
+						, intCompanyLocationId
+						, dtmTicketDateTime 
+						, intTicketId
+						, strTicketNumber 
+						, strContractEndMonth
+						, strFutureMonth
+						, strDeliveryDate 
+				FROM (
+					SELECT dblBalanceToInvoice = invD.dblQtyShipped
+						, strLocationName = ''
+						, i.intItemId
+						, i.strItemNo
+						, i.intCategoryId
+						, strCategory = ''
+						, CT.strContractNumber
+						, CT.intContractHeaderId
+						, s.strShipmentNumber
+						, s.intInventoryShipmentId
+						, strCustomerReference = ''
+						, iv.intCompanyLocationId
+						, dtmTicketDateTime = s.dtmShipDate
+						, intTicketId
+						, strTicketNumber = ''
+						, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
+						, CT.strFutureMonth
+						, CT.strDeliveryDate
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME, @dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), iv.dtmPostDate, 110), 110) AND iv.ysnPosted = 1 THEN 1 ELSE 0 END )
+					FROM tblICInventoryShipment s
+					INNER JOIN tblICInventoryShipmentItem si ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					INNER JOIN tblICItem i ON si.intItemId = i.intItemId
+					INNER JOIN tblICCommodity c on i.intCommodityId = c.intCommodityId
+					INNER JOIN tblARInvoiceDetail invD ON  si.intInventoryShipmentItemId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = s.strShipmentNumber 
+					INNER JOIN tblARInvoice iv ON invD.intInvoiceId = iv.intInvoiceId
+					OUTER APPLY (
+						SELECT intContractHeaderId, strFutureMonth, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy'),strContractNumber
+						FROM vyuCTContractDetailView
+						WHERE intContractHeaderId = (
+							SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = s.intInventoryShipmentId AND intOrderId IS NOT NULL
+						) AND intContractSeq = (SELECT TOP 1  intContractSeq FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = s.intInventoryShipmentId AND intOrderId IS NOT NULL)
+					)CT
+					WHERE c.intCommodityId = @intCommodityId
+						AND iv.intCompanyLocationId = ISNULL(@intLocationId, iv.intCompanyLocationId)
+						AND s.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM #tblGetSalesIntransitWOPickLot )
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmShipDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+						AND s.intFreightTermId = 8 --FOB Origin
+				) a WHERE ysnInvoicePosted = 0
+					
+			)t
 
 			--Company Title from Inventory Valuation
 			INSERT INTO @Final(intSeqId
@@ -1840,7 +1900,7 @@ BEGIN
 		
 			
 			--Company Title from DP Settlement
-			--Comment it refere to 
+			--Comment it refer to RM-2518
 			--INSERT INTO @Final(intSeqId
 			--	, strSeqHeader
 			--	, strCommodityCode
