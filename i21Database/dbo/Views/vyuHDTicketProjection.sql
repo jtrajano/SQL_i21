@@ -39,6 +39,9 @@
 		,strScreenConnectLink = a2.strScreenConnectLink
 		,a3.strRootCause
 		,a4.strSubcause
+		,intCustomerCurrencyId = a2.intCurrencyId
+		,intCustomerShipToLocationId = a2.intShipToId
+		,intCustomerLocationId = (select top 1 intWarehouseId from tblEMEntityLocation where intEntityId = a.intCustomerId)
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
