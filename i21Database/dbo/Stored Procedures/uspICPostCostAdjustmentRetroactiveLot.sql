@@ -714,7 +714,8 @@ BEGIN
 					CASE	WHEN @IsSourceTransaction = 1 THEN 
 								@t_dblQty * @CostAdjustmentPerLot
 							WHEN @t_dblQty < 0 THEN 
-								(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+								@t_dblQty * @CostAdjustmentPerLot
 							ELSE 
 								0
 					END 
@@ -731,7 +732,8 @@ BEGIN
 				CASE	WHEN @IsSourceTransaction = 1 THEN 
 							@t_dblQty * @CostAdjustmentPerLot
 						WHEN @t_dblQty < 0 THEN 
-							(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							@t_dblQty * @CostAdjustmentPerLot
 						ELSE 
 							0
 				END <> 0 
