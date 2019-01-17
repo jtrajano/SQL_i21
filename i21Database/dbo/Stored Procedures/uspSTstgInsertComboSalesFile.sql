@@ -83,7 +83,7 @@ BEGIN
 						SELECT DISTINCT
 							ST.intStoreNo AS [StoreLocationID]
 							, 'iRely' AS [VendorName] 
-							, 'Rel. 10.2.0' AS [VendorModelVersion] 
+							, (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion] 
 							, CASE
 									WHEN @ysnClearRegisterPromotion = CAST(1 AS BIT) THEN 'initialize'
 									WHEN @ysnClearRegisterPromotion = CAST(0 AS BIT) THEN 'update'
@@ -104,7 +104,7 @@ BEGIN
 							, PSLD.intQuantity AS [ComboItemQuantity]
 							, PSLD.dblPrice AS [ComboItemUnitPrice]
 							, CONVERT(nvarchar(10), PSL.dtmPromoBegPeriod, 126) AS [StartDate]
-							, CONVERT(varchar, CAST('0:00:01' AS TIME), 108) AS [StartTime]
+							, CONVERT(varchar, CAST('0:00:00' AS TIME), 108) AS [StartTime]
 							, CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126) AS [StopDate]
 							, CONVERT(varchar, CAST('23:59:59' AS TIME), 108) AS [StopTime] 
 							, @strUniqueGuid AS [strUniqueGuid]
