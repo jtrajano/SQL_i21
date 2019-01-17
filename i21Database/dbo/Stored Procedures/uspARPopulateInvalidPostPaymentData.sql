@@ -599,6 +599,38 @@ BEGIN
         AND ISNULL(P.[ysnProcessCreditCard], 0) = 0
         AND @Recap = 0
 
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Processed Credit Card but didn't reached Vantiv
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = NULL
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Credit card payment was marked processed but didn''t hit Vantiv.'
+	FROM
+		#ARPostPaymentHeader P
+    OUTER APPLY (
+        SELECT TOP 1 intPaymentId
+        FROM tblSMPayment SM
+        WHERE SM.intTransactionId = P.intTransactionId
+          AND SM.strTransactionNo = P.strTransactionId
+          AND SM.strPaymentMethod = 'Credit Card'
+    ) SMPAY
+    WHERE
+            P.[ysnPost] = 1
+        AND P.[intTransactionDetailId] IS NULL
+        AND ISNULL(P.[intEntityCardInfoId], 0) <> 0 
+        AND ISNULL(P.[ysnProcessCreditCard], 0) = 1
+        AND ISNULL(SMPAY.intPaymentId, 0) = 0
+        AND @Recap = 0
+
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
