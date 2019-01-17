@@ -7454,6 +7454,7 @@
     <Build Include="dbo\Views\vyuAP1099BYear.sql" />
     <Build Include="dbo\Views\vyuAP1099PATRYear.sql" />
     <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
