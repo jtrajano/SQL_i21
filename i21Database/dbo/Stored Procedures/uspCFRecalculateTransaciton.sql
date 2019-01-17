@@ -1312,6 +1312,7 @@ BEGIN
 						,@dtmTransactionDate
 						,NULL
 						,1
+						,0			--@IncludeInvalidCodes
 						,NULL
 						,@companyConfigFreightTermId
 						,@intCardId		
@@ -1374,6 +1375,7 @@ BEGIN
 						,@dtmTransactionDate
 						,NULL
 						,1
+						,0			--@IncludeInvalidCodes
 						,NULL
 						,@companyConfigFreightTermId
 						,@intCardId		
@@ -1444,6 +1446,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -1506,6 +1509,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -1571,7 +1575,8 @@ BEGIN
 					,0													 
 					,@dtmTransactionDate								 
 					,NULL												 
-					,1													 
+					,1	
+					,0			--@IncludeInvalidCodes												 
 					,NULL												 
 					,@companyConfigFreightTermId												 
 					,@intCardId												 
@@ -1633,7 +1638,8 @@ BEGIN
 					,0													 
 					,@dtmTransactionDate								 
 					,NULL												 
-					,1													 
+					,1		
+					,0			--@IncludeInvalidCodes											 
 					,NULL												 
 					,@companyConfigFreightTermId												 
 					,@intCardId												 
@@ -1710,6 +1716,7 @@ BEGIN
                         ,@dtmTransactionDate
                         ,NULL
                         ,1
+						,0			--@IncludeInvalidCodes
                         ,NULL
                         ,@companyConfigFreightTermId
                         ,@intCardId		
@@ -1770,6 +1777,7 @@ BEGIN
 						,@dtmTransactionDate
 						,NULL
 						,1
+						,0			--@IncludeInvalidCodes
 						,NULL
 						,@companyConfigFreightTermId
 						,@intCardId		
@@ -1840,6 +1848,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -1902,6 +1911,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -1968,6 +1978,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2030,6 +2041,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2302,6 +2314,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2364,6 +2377,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2427,6 +2441,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2489,6 +2504,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2554,6 +2570,7 @@ BEGIN
                             ,@dtmTransactionDate
                             ,NULL
                             ,1
+							,0			--@IncludeInvalidCodes
                             ,NULL
                             ,@companyConfigFreightTermId
                             ,@intCardId		
@@ -2616,6 +2633,7 @@ BEGIN
                             ,@dtmTransactionDate
                             ,NULL
                             ,1
+							,0			--@IncludeInvalidCodes
                             ,NULL
                             ,@companyConfigFreightTermId
                             ,@intCardId		
@@ -2697,6 +2715,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2759,6 +2778,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2822,6 +2842,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -2884,6 +2905,7 @@ BEGIN
                             ,@dtmTransactionDate
                             ,NULL
                             ,1
+							,0			--@IncludeInvalidCodes
                             ,NULL
                             ,@companyConfigFreightTermId
                             ,@intCardId		
@@ -2947,6 +2969,7 @@ BEGIN
 							,@dtmTransactionDate
 							,NULL
 							,1
+							,0			--@IncludeInvalidCodes
 							,NULL
 							,@companyConfigFreightTermId
 							,@intCardId		
@@ -3007,6 +3030,7 @@ BEGIN
 							,@dtmTransactionDate
 							,NULL
 							,1
+							,0			--@IncludeInvalidCodes
 							,NULL
 							,@companyConfigFreightTermId
 							,@intCardId		
@@ -3081,6 +3105,7 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -3143,6 +3168,7 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -3206,6 +3232,7 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -3268,6 +3295,7 @@ BEGIN
                             ,@dtmTransactionDate
                             ,@intLocationId
                             ,1
+							,0			--@IncludeInvalidCodes
                             ,NULL
                             ,@companyConfigFreightTermId
                             ,@intCardId		
@@ -3331,6 +3359,7 @@ BEGIN
 							,@dtmTransactionDate
 							,@intLocationId
 							,1
+							,0			--@IncludeInvalidCodes
 							,NULL
 							,@companyConfigFreightTermId
 							,@intCardId		
@@ -3391,6 +3420,7 @@ BEGIN
 							,@dtmTransactionDate
 							,@intLocationId
 							,1
+							,0			--@IncludeInvalidCodes
 							,NULL
 							,@companyConfigFreightTermId
 							,@intCardId		
@@ -3619,6 +3649,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -3681,6 +3712,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -3745,6 +3777,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -3807,6 +3840,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -3873,6 +3907,7 @@ BEGIN
 							,@dtmTransactionDate
 							,NULL
 							,1
+							,0			--@IncludeInvalidCodes
 							,NULL
 							,@companyConfigFreightTermId
 							,@intCardId		
@@ -3935,6 +3970,7 @@ BEGIN
 							,@dtmTransactionDate
 							,NULL
 							,1
+							,0			--@IncludeInvalidCodes
 							,NULL
 							,@companyConfigFreightTermId
 							,@intCardId		
@@ -4019,6 +4055,7 @@ BEGIN
 						,@dtmTransactionDate
 						,NULL
 						,1
+						,0			--@IncludeInvalidCodes
 						,NULL
 						,@companyConfigFreightTermId
 						,@intCardId		
@@ -4081,6 +4118,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -4146,6 +4184,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -4208,6 +4247,7 @@ BEGIN
 					,@dtmTransactionDate
 					,NULL
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -4271,6 +4311,7 @@ BEGIN
                             ,@dtmTransactionDate
                             ,NULL
                             ,1
+							,0			--@IncludeInvalidCodes
                             ,NULL
                             ,@companyConfigFreightTermId
                             ,@intCardId		
@@ -4331,6 +4372,7 @@ BEGIN
 							,@dtmTransactionDate
 							,NULL
 							,1
+							,0			--@IncludeInvalidCodes
 							,NULL
 							,@companyConfigFreightTermId
 							,@intCardId		
@@ -4405,6 +4447,7 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -4467,6 +4510,7 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -4530,6 +4574,7 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -4592,6 +4637,7 @@ BEGIN
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
+					,0			--@IncludeInvalidCodes
 					,NULL
 					,@companyConfigFreightTermId
 					,@intCardId		
@@ -4655,6 +4701,7 @@ BEGIN
 							,@dtmTransactionDate
 							,@intLocationId
 							,1
+							,0			--@IncludeInvalidCodes
 							,NULL
 							,@companyConfigFreightTermId
 							,@intCardId		
@@ -4715,6 +4762,7 @@ BEGIN
                             ,@dtmTransactionDate
                             ,@intLocationId
                             ,1
+							,0			--@IncludeInvalidCodes
                             ,NULL
                             ,@companyConfigFreightTermId
                             ,@intCardId		

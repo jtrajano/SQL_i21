@@ -129,6 +129,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intCompanyLocationId
 		,intVendorLocationId
 		,ysnIncludeExemptedCodes
+		,0 --@IncludeInvalidCodes
 		,intFreightTermId
 		,ysnExcludeCheckOff
 		,intItemUOMId
