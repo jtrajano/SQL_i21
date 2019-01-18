@@ -427,6 +427,7 @@ BEGIN
 								,[ysnSeparateOnInvoice]
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
+								,[ysnInvalidSetup]
 								,[strNotes] 
 								,[intConcurrencyId])
 							SELECT @NewInvoiceDetailId
@@ -444,6 +445,7 @@ BEGIN
 								,[ysnSeparateOnInvoice]
 								,[ysnCheckoffTax]
 								,@ysnTaxExempt
+								,[ysnInvalidSetup]
 								,[strNotes] 
 								,1
 							FROM tblARInvoiceDetailTax 

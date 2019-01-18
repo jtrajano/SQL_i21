@@ -635,30 +635,17 @@ dblQuantity,7,intContractHeaderId,intFutOptTransactionHeaderId  FROM @ListFinal 
 
 
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, dblNoOfLot,  dblQuantity,intOrderByHeading)
-SELECT 9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,strFutureMonth,'Net Position',sum(dblNoOfContract),sum(dblNoOfLot),sum(dblQuantity),9 intOrderByHeading  
+SELECT 9 intRowNumber,'2.Futures Required','Futures Required' Selection,'4.Net Position' PriceStatus,strFutureMonth,'Net Position',
+sum(dblNoOfContract1)-sum(dblNoOfContract),sum(dblNoOfLot1)-sum(dblNoOfLot),sum(dblQuantity1)-sum(dblQuantity),9 intOrderByHeading  
 FROM(
-SELECT @strParamFutureMonth strFutureMonth,strAccountNumber, -abs(dblQuantity) as dblNoOfContract,dblNoOfLot, dblQuantity  FROM @ListFinal 
-		WHERE intRowNumber in(7) and strFutureMonth = 'Previous'
+SELECT case when strFutureMonth = 'Previous' then @strParamFutureMonth else strFutureMonth end strFutureMonth,0 dblNoOfContract1,0 dblNoOfLot1 ,0 dblQuantity1, 
+sum(dblQuantity) as dblNoOfContract, sum(dblNoOfLot) dblNoOfLot, sum(dblQuantity) dblQuantity  FROM @ListFinal WHERE intRowNumber in(6,7)
+group by strFutureMonth
+UNION all
 
-UNION ALL
-
-SELECT strFutureMonth,strAccountNumber,-abs(dblQuantity) as dblNoOfContract,
-case when dblNoOfLot<0 then abs(dblNoOfLot) else -abs(dblNoOfLot) end dblNoOfLot,dblQuantity FROM @ListFinal WHERE intRowNumber in(7) and strFutureMonth <> 'Previous' 
-
-UNION ALL
-
-SELECT strFutureMonth,strAccountNumber, -abs(dblQuantity) as dblNoOfContract, -abs(dblNoOfLot) dblNoOfLot, dblQuantity FROM @ListFinal WHERE intRowNumber in(6) and strFutureMonth <> 'Previous'
-
-
-UNION ALL
-
-SELECT @strParamFutureMonth,strAccountNumber, case when dblQuantity<0 then abs(dblQuantity) else -abs(dblQuantity) end as dblNoOfContract,
-case when dblNoOfLot<0 then abs(dblNoOfLot) else -abs(dblNoOfLot) end dblNoOfLot, dblQuantity FROM @ListFinal WHERE intRowNumber in(6) and strFutureMonth = 'Previous'
-
-UNION ALL
-
-SELECT strFutureMonth,strAccountNumber,dblQuantity as dblNoOfContract,dblNoOfLot, dblQuantity FROM @ListFinal WHERE intRowNumber in(2) 
-
+SELECT strFutureMonth,sum(dblQuantity) as dblNoOfContract1, sum(dblNoOfLot) dblNoOfLot1, sum(dblQuantity) dblQuantity1,0 dblNoOfContract,0 dblNoOfLot,0 dblQuantity 
+ FROM @ListFinal WHERE intRowNumber in(8) 
+ group by strFutureMonth
 
 )t group by strFutureMonth
 

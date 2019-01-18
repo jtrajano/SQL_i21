@@ -71,7 +71,8 @@ BEGIN TRY
 			@dblPriceFxdQty					NUMERIC(18,6),
 			@dblRemainingQty				NUMERIC(18,6),
 			@dblTotalIVForSHQty				NUMERIC(18,6),
-			@intPFDetailId					INT
+			@intPFDetailId					INT,
+			@ysnDestinationWeightsAndGrades	BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -392,7 +393,8 @@ BEGIN TRY
 						SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
 						FROM	tblARInvoiceDetail ID 
 						WHERE	intInventoryShipmentItemId = RI.intInventoryShipmentItemId AND intInventoryShipmentChargeId IS NULL
-					) AS dblTotalIVForSHQty
+					) AS dblTotalIVForSHQty,
+					ysnDestinationWeightsAndGrades
 
 			INTO    #tblShipment
 			FROM    tblICInventoryShipmentItem  RI
@@ -414,7 +416,8 @@ BEGIN TRY
 
 				SELECT	@dblTotalIVForSHQty		= ISNULL(dblTotalIVForSHQty,0),
 						@dblShipped				= dblShipped,
-						@intInventoryShipmentId = intInventoryShipmentId 
+						@intInventoryShipmentId = intInventoryShipmentId,
+						@ysnDestinationWeightsAndGrades	=	ysnDestinationWeightsAndGrades
 				FROM	#tblShipment 
 				WHERE	intInventoryShipmentItemId = @intInventoryShipmentItemId
 
@@ -424,6 +427,15 @@ BEGIN TRY
 				WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
 
 				SELECT	@dblTotalIVForPFQty = ISNULL(@dblTotalIVForPFQty,0)
+
+				IF @ysnDestinationWeightsAndGrades = 1 
+				BEGIN
+					IF EXISTS(SELECT TOP 1 1 FROM tblSCTicket WHERE ISNULL(ysnDestinationWeightGradePost,0) = 0 AND intInventoryShipmentId = @intInventoryShipmentId)
+					BEGIN
+						SELECT	@intInventoryShipmentItemId = MIN(intInventoryShipmentItemId)  FROM #tblShipment WHERE intInventoryShipmentItemId > @intInventoryShipmentItemId
+						CONTINUE
+					END
+				END
 
 				IF @dblTotalIVForPFQty = @dblPriceFxdQty
 				BEGIN

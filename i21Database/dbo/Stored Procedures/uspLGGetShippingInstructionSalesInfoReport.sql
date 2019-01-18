@@ -47,7 +47,12 @@ SELECT L.intLoadId,
 	   LD.dblQuantity,
 	   UM.strUnitMeasure,
 	   CASE WHEN ISNULL(IC.strContractItemName,'') = '' THEN I.strDescription ELSE IC.strContractItemName END AS strItemDescription,
-	   CH.strCustomerContract AS strSCustomerContract
+	   CD.strItemSpecification,
+	   CH.strCustomerContract AS strSCustomerContract,
+	   CH.strContractNumber + ' / ' + LTRIM(CD.intContractSeq) AS strContractNumberWithSeq,
+	   LTRIM(dbo.fnRemoveTrailingZeroes(LD.dblQuantity)) + ' ' + UM.strUnitMeasure AS strQtyInformation,
+	   CD.dtmStartDate,
+	   CD.dtmEndDate
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId

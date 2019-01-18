@@ -1767,7 +1767,67 @@ BEGIN
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
 					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries')
-					)t
+				
+				UNION ALL
+				SELECT dblBalanceToInvoice
+						, strLocationName
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, strContractNumber
+						, intContractHeaderId
+						, strShipmentNumber
+						, intInventoryShipmentId
+						, strCustomerReference
+						, intCompanyLocationId
+						, dtmTicketDateTime 
+						, intTicketId
+						, strTicketNumber 
+						, strContractEndMonth
+						, strFutureMonth
+						, strDeliveryDate 
+				FROM (
+					SELECT dblBalanceToInvoice = invD.dblQtyShipped
+						, strLocationName = ''
+						, i.intItemId
+						, i.strItemNo
+						, i.intCategoryId
+						, strCategory = ''
+						, CT.strContractNumber
+						, CT.intContractHeaderId
+						, s.strShipmentNumber
+						, s.intInventoryShipmentId
+						, strCustomerReference = ''
+						, iv.intCompanyLocationId
+						, dtmTicketDateTime = s.dtmShipDate
+						, intTicketId
+						, strTicketNumber = ''
+						, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
+						, CT.strFutureMonth
+						, CT.strDeliveryDate
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME, @dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), iv.dtmPostDate, 110), 110) AND iv.ysnPosted = 1 THEN 1 ELSE 0 END )
+					FROM tblICInventoryShipment s
+					INNER JOIN tblICInventoryShipmentItem si ON s.intInventoryShipmentId = si.intInventoryShipmentId
+					INNER JOIN tblICItem i ON si.intItemId = i.intItemId
+					INNER JOIN tblICCommodity c on i.intCommodityId = c.intCommodityId
+					INNER JOIN tblARInvoiceDetail invD ON  si.intInventoryShipmentItemId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = s.strShipmentNumber 
+					INNER JOIN tblARInvoice iv ON invD.intInvoiceId = iv.intInvoiceId
+					OUTER APPLY (
+						SELECT intContractHeaderId, strFutureMonth, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy'),strContractNumber
+						FROM vyuCTContractDetailView
+						WHERE intContractHeaderId = (
+							SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = s.intInventoryShipmentId AND intOrderId IS NOT NULL
+						) AND intContractSeq = (SELECT TOP 1  intContractSeq FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = s.intInventoryShipmentId AND intOrderId IS NOT NULL)
+					)CT
+					WHERE c.intCommodityId = @intCommodityId
+						AND iv.intCompanyLocationId = ISNULL(@intLocationId, iv.intCompanyLocationId)
+						AND s.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM #tblGetSalesIntransitWOPickLot )
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmShipDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+						AND s.intFreightTermId = 8 --FOB Origin
+				) a WHERE ysnInvoicePosted = 0
+					
+			)t
 
 			--Company Title from Inventory Valuation
 			INSERT INTO @Final(intSeqId
@@ -1840,67 +1900,68 @@ BEGIN
 		
 			
 			--Company Title from DP Settlement
-			INSERT INTO @Final(intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, strLocationName
-				, intItemId
-				, strItemNo
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, intCompanyLocationId
-				, strReceiptNumber
-				, intInventoryReceiptId
-				, intTicketId
-				, strTicketNumber
-				, dtmTicketDateTime)
-			SELECT intSeqId = 15
-				, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
-				, @strCommodityCode
-				, strType = 'DP Settlement' COLLATE Latin1_General_CI_AS
-				, dblTotal 
-				, strLocationName
-				, intItemId
-				, strItemNo
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, intCompanyLocationId
-				, strReceiptNumber
-				, intInventoryReceiptId
-				, intTicketId
-				, strTicketNumber
-				, dtmTicketDateTime 
-			FROM(
-				SELECT null as intTicketId
-					, '' COLLATE Latin1_General_CI_AS as strTicketNumber
-					, CS.intItemId
-					, strItemNo
-					, strSettleTicket as strReceiptNumber
-					, intSettleStorageId as intInventoryReceiptId
-					, dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,(isnull(dblUnits,0))) dblTotal
-					, CS.intCompanyLocationId
-					, intUnitMeasureId intFromCommodityUnitMeasureId
-					, CS.intCommodityId
-					, strLocationName
-					, dtmHistoryDate as dtmTicketDateTime
-				FROM tblGRCustomerStorage CS
-					inner join vyuGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
-					inner join tblICItem I ON CS.intItemId = I.intItemId
-				WHERE CS.intStorageTypeId = 2 
-					AND intTransactionTypeId = 4 --Settlement & Reverse Settlement
-					AND CS.intCommodityId  = @intCommodityId
-					AND CS.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId else @intLocationId end
-					AND ISNULL(SH.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(SH.intEntityId, 0))
-					AND SH.intSettleStorageId IS NOT NULL
-				)t
-					WHERE intCompanyLocationId  IN (
-							SELECT intCompanyLocationId FROM tblSMCompanyLocation
-							WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
-							WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
-							ELSE isnull(ysnLicensed, 0) END
-			)
+			--Comment it refer to RM-2518
+			--INSERT INTO @Final(intSeqId
+			--	, strSeqHeader
+			--	, strCommodityCode
+			--	, strType
+			--	, dblTotal
+			--	, strLocationName
+			--	, intItemId
+			--	, strItemNo
+			--	, intCommodityId
+			--	, intFromCommodityUnitMeasureId
+			--	, intCompanyLocationId
+			--	, strReceiptNumber
+			--	, intInventoryReceiptId
+			--	, intTicketId
+			--	, strTicketNumber
+			--	, dtmTicketDateTime)
+			--SELECT intSeqId = 15
+			--	, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
+			--	, @strCommodityCode
+			--	, strType = 'DP Settlement' COLLATE Latin1_General_CI_AS
+			--	, dblTotal 
+			--	, strLocationName
+			--	, intItemId
+			--	, strItemNo
+			--	, intCommodityId
+			--	, intFromCommodityUnitMeasureId
+			--	, intCompanyLocationId
+			--	, strReceiptNumber
+			--	, intInventoryReceiptId
+			--	, intTicketId
+			--	, strTicketNumber
+			--	, dtmTicketDateTime 
+			--FROM(
+			--	SELECT null as intTicketId
+			--		, '' COLLATE Latin1_General_CI_AS as strTicketNumber
+			--		, CS.intItemId
+			--		, strItemNo
+			--		, strSettleTicket as strReceiptNumber
+			--		, intSettleStorageId as intInventoryReceiptId
+			--		, dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,(isnull(dblUnits,0))) dblTotal
+			--		, CS.intCompanyLocationId
+			--		, intUnitMeasureId intFromCommodityUnitMeasureId
+			--		, CS.intCommodityId
+			--		, strLocationName
+			--		, dtmHistoryDate as dtmTicketDateTime
+			--	FROM tblGRCustomerStorage CS
+			--		inner join vyuGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			--		inner join tblICItem I ON CS.intItemId = I.intItemId
+			--	WHERE CS.intStorageTypeId = 2 
+			--		AND intTransactionTypeId = 4 --Settlement & Reverse Settlement
+			--		AND CS.intCommodityId  = @intCommodityId
+			--		AND CS.intCompanyLocationId= case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId else @intLocationId end
+			--		AND ISNULL(SH.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(SH.intEntityId, 0))
+			--		AND SH.intSettleStorageId IS NOT NULL
+			--	)t
+			--		WHERE intCompanyLocationId  IN (
+			--				SELECT intCompanyLocationId FROM tblSMCompanyLocation
+			--				WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+			--				WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+			--				ELSE isnull(ysnLicensed, 0) END
+			--)
 
 			INSERT INTO @Final(intSeqId
 				, strSeqHeader
