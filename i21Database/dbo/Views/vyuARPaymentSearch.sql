@@ -15,7 +15,7 @@ SELECT
 	,dblAmountPaid			= P.dblAmountPaid
     ,dblDiscount            = ISNULL(PD.dblDiscount, 0)
 	,P.ysnPosted
-	,strPaymentType			= 'Payment'
+	,strPaymentType			= 'Payment' COLLATE Latin1_General_CI_AS
 	,strInvoices			= TRANSACTIONS.strTransactionId
 	,P.intLocationId 
 	,CL.strLocationName
@@ -94,7 +94,7 @@ LEFT OUTER JOIN (SELECT intCurrencyID
 LEFT OUTER JOIN vyuARPaymentBankTransaction ARP
 	ON ARP.intPaymentId = P.intPaymentId
 OUTER APPLY (
-	SELECT strTransactionId = LEFT(strTransactionId, LEN(strTransactionId) - 1)
+	SELECT strTransactionId = LEFT(strTransactionId, LEN(strTransactionId) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(T.strTransactionId AS VARCHAR(200))  + ', '
 		FROM (
@@ -122,7 +122,7 @@ OUTER APPLY (
 	) TRANS (strTransactionId)
 ) TRANSACTIONS
 OUTER APPLY (
-	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
+	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
 		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)
@@ -141,7 +141,7 @@ OUTER APPLY (
 	) INV (strTicketNumber)
 ) SCALETICKETS
 OUTER APPLY (
-	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1)
+	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
 		FROM dbo.tblARInvoiceDetail ID WITH(NOLOCK)

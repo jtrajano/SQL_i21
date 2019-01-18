@@ -36,7 +36,7 @@ SELECT
 	B1.strName,
 	C.strAccountId,
 	Payment.strPaymentInfo,
-	Payment.strBankAccountNo,
+	Payment.strBankAccountNo COLLATE Latin1_General_CI_AS AS strBankAccountNo,
 	Payment.ysnCleared,
 	Payment.dtmDateReconciled,
 	Payment.ysnPrinted,

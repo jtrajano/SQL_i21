@@ -128,7 +128,7 @@ INNER JOIN (
 			 , ysnTaxExempt
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
-	LEFT JOIN (
+	INNER JOIN (
 		SELECT intInvoiceDetailId
 			 , dblTotalAdjustedTax	= SUM(dblAdjustedTax)			 
 			 , intTaxCodeCount		= COUNT(intInvoiceDetailTaxId)
@@ -143,13 +143,13 @@ INNER JOIN (
 			 , strItemNo
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
-	INNER JOIN (
+	LEFT JOIN (
 		SELECT intTaxClassId
 			 , intCategoryId
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 	) ITEMTAXCATEGORY ON ITEMTAXCATEGORY.intTaxClassId = IDT.intTaxClassId
 					 AND ITEMTAXCATEGORY.intCategoryId = ITEM.intCategoryId
-	CROSS APPLY (
+	OUTER APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 		WHERE ICT.intCategoryId = ITEM.intCategoryId
@@ -232,7 +232,7 @@ LEFT OUTER JOIN (
 ) CURRENCY ON INVOICE.intCurrencyId = CURRENCY.intCurrencyID
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 WHERE INVOICE.ysnPosted = 1

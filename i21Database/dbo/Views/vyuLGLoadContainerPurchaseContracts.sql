@@ -40,7 +40,7 @@ SELECT
                             ELSE
                             'Drop Ship'
                             END
-                        END
+                        END COLLATE Latin1_General_CI_AS
     ,Item.intLifeTime
 	,Item.strLifeTimeType
 	,UOM.strUnitMeasure

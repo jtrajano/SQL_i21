@@ -1,8 +1,8 @@
 ﻿CREATE VIEW vyuLGLoadCostForVendor
 AS 
-	  SELECT [strTransactionType] = 'Load Schedule'
+	  SELECT [strTransactionType] = 'Load Schedule' COLLATE Latin1_General_CI_AS
 			,[strTransactionNumber] = L.[strLoadNumber]
-			,[strShippedItemId] = 'ld:' + CAST(LD.intLoadDetailId AS NVARCHAR(250))
+			,[strShippedItemId] = 'ld:' + CAST(LD.intLoadDetailId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 			,[intEntityVendorId] = LC.intVendorId
 			,[strCustomerName] = EME.[strName]
 			,[intLoadCostId] = LC.intLoadCostId
@@ -64,7 +64,6 @@ AS
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intCurrencyId
 	LEFT JOIN vyuARGetItemAccount ARIA ON LD.[intItemId] = ARIA.[intItemId]
 		AND LD.intSCompanyLocationId = ARIA.[intLocationId]
-	LEFT JOIN tblARInvoiceDetail ARID ON LD.intLoadDetailId = ARID.[intInventoryShipmentItemId]
 		GROUP BY L.[strLoadNumber],LD.intLoadDetailId,EME.[strName],
 			 L.dtmScheduledDate,L.intLoadId,SMCL.[strLocationName],ICI.strItemNo,
 			 ICI.strDescription,

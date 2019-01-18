@@ -306,9 +306,9 @@ BEGIN
 					,GETDATE()  
 					,uf.intUndepositedFundId  
 			FROM	apchkmst chk INNER JOIN vyuCMOriginDepositEntry v  
-						ON chk.apchk_cbk_no = v.aptrx_cbk_no  
-						AND chk.apchk_chk_no = v.aptrx_chk_no  
-						AND chk.apchk_vnd_no = v.aptrx_vnd_no  
+						ON chk.apchk_cbk_no  COLLATE Latin1_General_CI_AS  = v.aptrx_cbk_no  
+						AND chk.apchk_chk_no  COLLATE Latin1_General_CI_AS  = v.aptrx_chk_no  
+						AND chk.apchk_vnd_no COLLATE Latin1_General_CI_AS  = v.aptrx_vnd_no  
 						AND chk.apchk_rev_dt = v.aptrx_chk_rev_dt  
 					INNER JOIN tblCMUndepositedFund uf   
 						ON uf.strSourceTransactionId = (   
@@ -353,9 +353,9 @@ BEGIN
 					,GETDATE()  
 					,uf.intUndepositedFundId  
 			FROM	apeglmst gl INNER JOIN vyuCMOriginDepositEntry v  
-						ON v.aptrx_cbk_no = gl.apegl_cbk_no  
-						AND v.aptrx_ivc_no = gl.apegl_ivc_no  
-						AND v.aptrx_vnd_no = gl.apegl_vnd_no  
+						ON v.aptrx_cbk_no = gl.apegl_cbk_no   COLLATE Latin1_General_CI_AS 
+						AND v.aptrx_ivc_no = gl.apegl_ivc_no   COLLATE Latin1_General_CI_AS 
+						AND v.aptrx_vnd_no = gl.apegl_vnd_no   COLLATE Latin1_General_CI_AS 
 					INNER JOIN tblCMUndepositedFund uf   
 						ON uf.strSourceTransactionId = (   
 							CAST(v.aptrx_vnd_no AS NVARCHAR(10))   
@@ -389,9 +389,9 @@ BEGIN
 			WHERE	apchkmst.A4GLIdentity IN (
 				SELECT	chk.A4GLIdentity
 				FROM	apchkmst chk INNER JOIN vyuCMOriginDepositEntry v  
-							ON chk.apchk_cbk_no = v.aptrx_cbk_no  
-							AND chk.apchk_chk_no = v.aptrx_chk_no  
-							AND chk.apchk_vnd_no = v.aptrx_vnd_no  
+							ON chk.apchk_cbk_no  COLLATE Latin1_General_CI_AS  = v.aptrx_cbk_no  
+							AND chk.apchk_chk_no COLLATE Latin1_General_CI_AS  = v.aptrx_chk_no  
+							AND chk.apchk_vnd_no COLLATE Latin1_General_CI_AS  = v.aptrx_vnd_no  
 							AND chk.apchk_rev_dt = v.aptrx_chk_rev_dt  
 						INNER JOIN tblCMUndepositedFund uf   
 							ON uf.strSourceTransactionId = (   
@@ -411,9 +411,9 @@ BEGIN
 
 			DELETE	apeglmst  
 			FROM	apeglmst gl INNER JOIN vyuCMOriginDepositEntry v  
-						ON v.aptrx_cbk_no = gl.apegl_cbk_no  
-						AND v.aptrx_ivc_no = gl.apegl_ivc_no  
-						AND v.aptrx_vnd_no = gl.apegl_vnd_no  
+						ON v.aptrx_cbk_no = gl.apegl_cbk_no COLLATE Latin1_General_CI_AS 
+						AND v.aptrx_ivc_no = gl.apegl_ivc_no COLLATE Latin1_General_CI_AS 
+						AND v.aptrx_vnd_no = gl.apegl_vnd_no COLLATE Latin1_General_CI_AS 
 					INNER JOIN tblCMUndepositedFund uf   
 						ON uf.strSourceTransactionId = (   
 							CAST(v.aptrx_vnd_no AS NVARCHAR(10))   

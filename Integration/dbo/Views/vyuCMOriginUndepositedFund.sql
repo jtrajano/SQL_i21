@@ -24,9 +24,9 @@ BEGIN
 				,intEntityCustomerId = null
 				,uf.dtmDate
 		FROM	apeglmst gl INNER JOIN vyuCMOriginDepositEntry v
-					ON gl.apegl_cbk_no = v.aptrx_cbk_no
-					AND gl.apegl_vnd_no = v.aptrx_vnd_no
-					AND gl.apegl_ivc_no = v.aptrx_ivc_no
+					ON gl.apegl_cbk_no COLLATE Latin1_General_CI_AS = v.aptrx_cbk_no
+					AND gl.apegl_vnd_no COLLATE Latin1_General_CI_AS = v.aptrx_vnd_no
+					AND gl.apegl_ivc_no COLLATE Latin1_General_CI_AS = v.aptrx_ivc_no
 				INNER JOIN tblCMUndepositedFund uf
 					ON uf.strSourceTransactionId = ( 
 						CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 

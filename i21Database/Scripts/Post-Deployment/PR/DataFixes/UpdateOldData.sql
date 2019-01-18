@@ -3,6 +3,16 @@
 ************************/
 
 /*
+* Payroll Company Preferences 
+* 1. Insert initial row if table is empty
+* 2..
+*/
+IF EXISTS(SELECT * FROM sys.tables WHERE object_id = object_id('tblPRCompanyPreference'))
+BEGIN
+	EXEC ('IF NOT EXISTS (SELECT TOP 1 1 FROM tblPRCompanyPreference) INSERT INTO tblPRCompanyPreference DEFAULT VALUES')
+END
+
+/*
 * Employee Workers Compensation 
 * 1. Change Rate Type from "Amount" to "Per Dollar"
 * 2..
@@ -189,19 +199,8 @@ BEGIN
 EXEC ('
 	IF EXISTS(SELECT TOP 1 1 FROM tblPRCompanyPreference WHERE dtmLastTimeOffAdjustmentReset IS NULL)
 	BEGIN
-		UPDATE ETO
-		SET 
-			ETO.dblHoursUsed = CASE WHEN (ETO.dblHoursUsed >= ISNULL(YTD.dblHoursUsed, 0)) THEN
-										ETO.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)
-									ELSE
-										ETO.dblHoursUsed
-									END
-		FROM 
-			tblPREmployeeTimeOff ETO
-			LEFT JOIN vyuPREmployeeTimeOffUsedYTD YTD
-				ON ETO.intEntityEmployeeId = YTD.intEntityEmployeeId
-				AND ETO.intTypeTimeOffId = YTD.intTypeTimeOffId
-				AND YTD.intYear = YEAR(GETDATE())
+		UPDATE tblPREmployeeTimeOff
+		SET dblHoursUsed = 0
 
 		UPDATE tblPRCompanyPreference SET dtmLastTimeOffAdjustmentReset = GETDATE()
 	END

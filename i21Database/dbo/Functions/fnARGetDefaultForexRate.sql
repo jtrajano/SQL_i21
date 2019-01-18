@@ -7,7 +7,7 @@
 RETURNS @returntable TABLE
 (
 	 [intCurrencyExchangeRateTypeId]	INT
-	,[strCurrencyExchangeRateType]		NVARCHAR(20)
+	,[strCurrencyExchangeRateType]		NVARCHAR(20) COLLATE Latin1_General_CI_AS
 	,[intCurrencyExchangeRateId]		INT
 	,[dblCurrencyExchangeRate]			NUMERIC(18,6)	
 )

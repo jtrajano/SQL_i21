@@ -2,7 +2,7 @@
 	AS 
 SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY strStatus)) as intKeyColumn,*  FROM (
 SELECT
-	'In-transit' as strStatus
+	'In-transit' COLLATE Latin1_General_CI_AS as strStatus
 	,Shipment.strContractNumber
 	,Shipment.intContractSeq
 	,Shipment.intContractDetailId
@@ -68,7 +68,7 @@ WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractRe
 UNION ALL
 
 SELECT 
-	'Spot'
+	'Spot' COLLATE Latin1_General_CI_AS
 	,Spot.strContractNumber
 	,Spot.intContractSeq
 	,Spot.intContractDetailId

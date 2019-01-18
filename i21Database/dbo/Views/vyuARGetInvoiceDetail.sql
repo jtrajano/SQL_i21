@@ -132,7 +132,7 @@ SELECT
 						WHEN INV.intPrepayTypeId = 2 THEN 'Unit' 
 						WHEN INV.intPrepayTypeId = 3 THEN 'Percentage' 
 					ELSE '0'
-					END,
+					END COLLATE Latin1_General_CI_AS,
     strStorageTypeDescription = GRSTYPE.strStorageTypeDescription,
     strCurrency = CUR.strCurrency,
     dblDefaultFull = ISNULL( ITMNO.dblDefaultFull, 0.0),
@@ -180,7 +180,7 @@ FROM  ( SELECT intInvoiceId, intCompanyLocationId
 					A.intEntityId = B.[intEntityId]) SPER
 		ON INV.intEntitySalespersonId = SPER.intEntityId
 	LEFT JOIN ( SELECT intSiteID, 
-						[strSiteNumber] = REPLACE(STR([intSiteNumber], 4), SPACE(1), '0') 
+						[strSiteNumber] = REPLACE(STR([intSiteNumber], 4), SPACE(1), '0') COLLATE Latin1_General_CI_AS
 				FROM tblTMSite  WITH(NOLOCK)) CSITE
 		ON INV.intSiteId = CSITE.intSiteID
 	LEFT JOIN ( SELECT intContractDetailId, strContractNumber, intContractSeq,

@@ -6439,6 +6439,12 @@
     <Build Include="dbo\Functions\fnCTIsMultiDerivativesExists.sql" />
     <Build Include="dbo\Functions\fnCTGetLastApprovalStatus.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqContainerInfo.sql" />
+    <Build Include="dbo\Functions\fnRKFormatDate.sql" />
+    <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099BYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099PATRYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -7,7 +7,7 @@ SELECT   Load.intLoadId
         ,strSContractNumber = SHeader.strContractNumber
         ,intSContractSeq = SDetail.intContractSeq
 		,Lot.strLotNumber
-		,'' AS strWarehouseCargo
+		,'' COLLATE Latin1_General_CI_AS AS strWarehouseCargo
 
 		,LoadDetail.dblQuantity
 		,LoadDetail.intItemUOMId

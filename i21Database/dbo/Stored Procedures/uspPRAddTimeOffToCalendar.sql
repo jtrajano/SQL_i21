@@ -249,12 +249,15 @@ SELECT @intTimeOffRequestId = @intTransactionId
 								ON PGD.intEmployeeEarningId = EL.intEmployeeEarningId
 							INNER JOIN tblPREmployeeEarning EE 
 								ON EL.intTypeEarningId = EE.intEmployeeEarningLinkId AND EL.intEntityEmployeeId = EE.intEntityEmployeeId
+							INNER JOIN tblPREmployee EMP 
+								ON EMP.intEntityId = EL.intEntityEmployeeId
 							INNER JOIN tblPRTimeOffRequest TOR
 								ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
 									AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 									AND EL.intPayGroupId IS NOT NULL
 									AND PGD.dtmDateFrom <= ISNULL(TOR.dtmDateFrom, PGD.dtmDateFrom) AND PGD.dtmDateTo >= ISNULL(TOR.dtmDateFrom, PGD.dtmDateTo)
 									AND intSource IN (0, 3)
+							WHERE PGD.intWorkersCompensationId = EMP.intWorkersCompensationId
 
 				IF (@intPayGroupDetail IS NULL)
 					INSERT INTO tblPRPayGroupDetail (
@@ -263,6 +266,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,intEmployeeEarningId
 						,intTypeEarningId
 						,intDepartmentId
+						,intWorkersCompensationId
 						,strCalculationType
 						,dblDefaultHours
 						,dblHoursToProcess
@@ -280,6 +284,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,EL.intEmployeeEarningId
 						,EL.intTypeEarningId
 						,TOR.intDepartmentId
+						,EMP.intWorkersCompensationId
 						,EL.strCalculationType
 						,EL.dblDefaultHours
 						,CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END
@@ -321,6 +326,8 @@ SELECT @intTimeOffRequestId = @intTransactionId
 							ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
 								AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 								AND EL.intPayGroupId IS NOT NULL
+						INNER JOIN tblPREmployee EMP
+							ON EMP.intEntityId = EL.intEntityEmployeeId
 				ELSE
 					UPDATE tblPRPayGroupDetail
 						SET tblPRPayGroupDetail.dblHoursToProcess = tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest,

@@ -5,10 +5,10 @@ SELECT strCommissionEntityName	= E.strName
      , CP.strCommissionPlanName
 	 , CS.strCommissionScheduleName
 	 , CP.dblHurdle
-	 , strDateRange				= CONVERT(NVARCHAR(20), C.dtmStartDate, 101) + ' - ' + CONVERT(NVARCHAR(20), C.dtmEndDate, 101)
+	 , strDateRange				= CONVERT(NVARCHAR(20), C.dtmStartDate, 101) + ' - ' + CONVERT(NVARCHAR(20), C.dtmEndDate, 101) COLLATE Latin1_General_CI_AS
 	 , C.*
 	 , strCompanyName			= (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-	 , strCompanyAddress		= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup)
+	 , strCompanyAddress		= (SELECT TOP 1 dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) FROM tblSMCompanySetup) COLLATE Latin1_General_CI_AS
 FROM tblARCommission C
 	LEFT JOIN tblEMEntity E ON C.intEntityId = E.intEntityId
 	LEFT JOIN tblARCommissionPlan CP ON C.intCommissionPlanId = CP.intCommissionPlanId

@@ -4,14 +4,14 @@ SELECT strCompanyName		= (CASE WHEN CL.strUseLocationAddress = 'Letterhead'
 										THEN ''
 									ELSE
 										(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
-								END)
+								END) COLLATE Latin1_General_CI_AS
 	, strCompanyAddress		= (CASE WHEN CL.strUseLocationAddress IS NULL OR CL.strUseLocationAddress = 'No' OR CL.strUseLocationAddress = '' OR CL.strUseLocationAddress = 'Always'
 										THEN (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, ysnIncludeEntityName) FROM tblSMCompanySetup)
 									WHEN CL.strUseLocationAddress = 'Yes'
 										THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CL.strAddress, CL.strCity, CL.strStateProvince, CL.strZipPostalCode, CL.strCountry, NULL, ysnIncludeEntityName)
 									WHEN CL.strUseLocationAddress = 'Letterhead'
 										THEN ''
-								END)
+								END) COLLATE Latin1_General_CI_AS
   , I.intCompanyLocationId
   , CL.strLocationName
   , ICI.intCategoryId
@@ -26,7 +26,7 @@ SELECT strCompanyName		= (CASE WHEN CL.strUseLocationAddress = 'Letterhead'
   , I.intEntityCustomerId
   , C.strCustomerNumber
   , E.strName
-  , strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, I.strBillToLocationName, I.strBillToAddress, I.strBillToCity, I.strBillToState, I.strBillToZipCode, I.strBillToCountry, E.strName, C.ysnIncludeEntityName)
+  , strCustomerAddress	= [dbo].fnARFormatCustomerAddress(NULL, NULL, I.strBillToLocationName, I.strBillToAddress, I.strBillToCity, I.strBillToState, I.strBillToZipCode, I.strBillToCountry, E.strName, C.ysnIncludeEntityName) COLLATE Latin1_General_CI_AS
   , I.dtmDate
   , I.intInvoiceId
   , I.strInvoiceNumber

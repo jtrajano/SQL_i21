@@ -45,6 +45,7 @@ IF EXISTS(
       AND INVRCPTITEM.intSourceId IS NOT NULL 
       AND PYMT.strPaymentRecordNum IN  (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds)) --('PAY-153')
       AND PYMT.intEntityVendorId = INVRCPT.intEntityVendorId
+	  AND INVRCPT.intSourceType = 1 -- originated from scale transaction
 
 				UNION ALL
 				SELECT TOP 1 1 

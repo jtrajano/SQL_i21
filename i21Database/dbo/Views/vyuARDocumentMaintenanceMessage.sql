@@ -12,7 +12,7 @@ SELECT A.intDocumentMaintenanceId
 	 , B.intDocumentMaintenanceMessageId
 	 , B.strHeaderFooter
 	 , B.intCharacterLimit
-	 , strMessage								= REPLACE(REPLACE(REPLACE(dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), 0), '<p>', ''), '</p>',''), '&nbsp;', ' ')
+	 , strMessage								= REPLACE(REPLACE(REPLACE(dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), 0), '<p>', ''), '</p>',''), '&nbsp;', ' ') COLLATE Latin1_General_CI_AS
 	 , B.ysnRecipe
 	 , B.ysnQuote
 	 , B.ysnSalesOrder

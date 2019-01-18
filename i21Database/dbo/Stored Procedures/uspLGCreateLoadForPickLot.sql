@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspLGCreateLoadForPickLot @intPickLotHeaderId INT
+﻿CREATE PROCEDURE uspLGCreateLoadForPickLot 
+	@intPickLotHeaderId INT
 	,@intEntityUserSecurityId INT
 	,@intLoadId INT OUTPUT
 AS
@@ -14,6 +15,7 @@ BEGIN TRY
 
 	--DECLARE @intLoadId INT
 	DECLARE @intLoadDetailId INT
+	DECLARE @intPickLotDetailId INT
 	DECLARE @intPurchaseSaleId INT
 	DECLARE @intCurrencyId INT
 	DECLARE @intPositionId INT
@@ -65,7 +67,7 @@ BEGIN TRY
 		,@strLoadNumber OUTPUT
 
 	INSERT INTO @tblAllocationInfo
-	SELECT AD.intAllocationHeaderId
+	SELECT DISTINCT AD.intAllocationHeaderId
 		,PLD.intAllocationDetailId
 		,AH.strAllocationNumber
 	FROM tblLGPickLotHeader PLH
@@ -109,6 +111,8 @@ BEGIN TRY
 	SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
 	FROM @tblAllocationInfo
 
+	DECLARE @outputLoadDetails TABLE (intLoadDetailId int, intPickLotDetailId int, ysnProcessed bit)
+
 	WHILE (ISNULL(@intMinAllocationRecordId, 0) > 0)
 	BEGIN
 		SET @intSContractDetailId = NULL
@@ -146,6 +150,7 @@ BEGIN TRY
 			,intSContractDetailId
 			,intWeightItemUOMId
 			)
+		OUTPUT inserted.intLoadDetailId, inserted.intPickLotDetailId, 0 INTO @outputLoadDetails
 		SELECT PLD.dblGrossWt
 			,PLD.dblNetWt
 			,PLD.dblSalePickedQty
@@ -168,52 +173,65 @@ BEGIN TRY
 		WHERE AD.intAllocationDetailId = @intAllocationDetailId
 			AND PLD.intPickLotHeaderId = @intPickLotHeaderId
 
-		SELECT @intLoadDetailId = SCOPE_IDENTITY()
-
-		SELECT @dblScheduledQty = dblQuantity
-		FROM tblLGLoadDetail
-		WHERE intLoadDetailId = @intLoadDetailId
-
-		IF (ISNULL(@intLoadDetailId,0) <> 0  )
+		WHILE EXISTS (SELECT TOP 1 1 FROM @outputLoadDetails WHERE ysnProcessed = 0)
 		BEGIN
-			EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
-				,@dblQuantityToUpdate = @dblScheduledQty
-				,@intUserId = @intEntityUserSecurityId
-				,@intExternalId = @intLoadDetailId
-				,@strScreenName = 'Load Schedule'
+			SELECT TOP 1 
+				@intLoadDetailId = intLoadDetailId
+				,@intPickLotDetailId = intPickLotDetailId 
+			FROM @outputLoadDetails WHERE ysnProcessed = 0
+
+			SELECT @dblScheduledQty = dblQuantity
+			FROM tblLGLoadDetail
+			WHERE intLoadDetailId = @intLoadDetailId
+
+			IF (ISNULL(@intLoadDetailId,0) <> 0  )
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
+					,@dblQuantityToUpdate = @dblScheduledQty
+					,@intUserId = @intEntityUserSecurityId
+					,@intExternalId = @intLoadDetailId
+					,@strScreenName = 'Load Schedule'
+			END
+
+			INSERT INTO tblLGLoadDetailLot (
+				dblGross
+				,dblLotQuantity
+				,dblNet
+				,dblTare
+				,intConcurrencyId
+				,intItemUOMId
+				,intLoadDetailId
+				,intLotId
+				,intWeightUOMId
+				,strWarehouseCargoNumber
+				)
+			SELECT dblGrossWt
+				,dblLotPickedQty
+				,dblNetWt
+				,dblTareWt
+				,1
+				,CD.intItemUOMId
+				,@intLoadDetailId
+				,PLD.intLotId
+				,@intWeightItemUOMId
+				,''
+			FROM tblLGPickLotDetail PLD
+			JOIN tblLGAllocationDetail AD ON PLD.intAllocationDetailId = AD.intAllocationDetailId
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intPContractDetailId
+			WHERE AD.intAllocationDetailId = @intAllocationDetailId
+				AND PLD.intPickLotHeaderId = @intPickLotHeaderId
+				AND PLD.intPickLotDetailId = @intPickLotDetailId
+
+			SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
+			FROM @tblAllocationInfo
+			WHERE intAllocationRecordId > @intMinAllocationRecordId
+
+			UPDATE @outputLoadDetails SET ysnProcessed = 1
+			WHERE intLoadDetailId = @intLoadDetailId 
+			AND intPickLotDetailId = @intPickLotDetailId
+
 		END
 
-		INSERT INTO tblLGLoadDetailLot (
-			dblGross
-			,dblLotQuantity
-			,dblNet
-			,dblTare
-			,intConcurrencyId
-			,intItemUOMId
-			,intLoadDetailId
-			,intLotId
-			,intWeightUOMId
-			,strWarehouseCargoNumber
-			)
-		SELECT dblGrossWt
-			,dblLotPickedQty
-			,dblNetWt
-			,dblTareWt
-			,1
-			,CD.intItemUOMId
-			,@intLoadDetailId
-			,PLD.intLotId
-			,@intWeightItemUOMId
-			,''
-		FROM tblLGPickLotDetail PLD
-		JOIN tblLGAllocationDetail AD ON PLD.intAllocationDetailId = AD.intAllocationDetailId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intPContractDetailId
-		WHERE AD.intAllocationDetailId = @intAllocationDetailId
-			AND PLD.intPickLotHeaderId = @intPickLotHeaderId
-
-		SELECT @intMinAllocationRecordId = MIN(intAllocationRecordId)
-		FROM @tblAllocationInfo
-		WHERE intAllocationRecordId > @intMinAllocationRecordId
 	END
 
 	EXEC uspLGReserveStockForInventoryShipment @intLoadId = @intLoadId
