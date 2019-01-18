@@ -1352,6 +1352,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Interest')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 140
+			,[strTransactionType]	= N'Bank Loan'
+			,[strPrefix]			= N'LN-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Loan')
 	
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
