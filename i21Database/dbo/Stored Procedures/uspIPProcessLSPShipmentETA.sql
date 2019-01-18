@@ -27,6 +27,17 @@ Declare @intMinRowNo int,
 		@strLoadNumber NVARCHAR(100),
 		@strFinalErrMsg NVARCHAR(MAX)=''
 
+DECLARE @tblLoadDetail TABLE (
+	intDetailRecordId INT IDENTITY(1, 1)
+	,intContractDetailId INT
+	,intContractHeaderId INT
+	)
+
+DECLARE @intMinLoadDetailRecordId INT
+DECLARE @intContractDetailId INT
+DECLARE @intContractHeaderId INT
+DECLARE @intApprovedById INT
+
 If ISNULL(@strSessionId,'')=''
 	Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
 Else
@@ -66,6 +77,54 @@ Begin
 		Begin Tran
 
 		Update tblLGLoad Set dtmETAPOD=@dtmETA,dtmPlannedAvailabilityDate=@dtmETA,intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+
+		-- Set planned availability date and send a feed to SAP
+		DELETE
+		FROM @tblLoadDetail
+
+		INSERT INTO @tblLoadDetail (
+			intContractDetailId
+			,intContractHeaderId
+			)
+		SELECT CD.intContractDetailId
+			,CD.intContractHeaderId
+		FROM tblCTContractDetail CD
+		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+			AND LD.intLoadId = @intLoadId
+			AND CD.dtmPlannedAvailabilityDate <> @dtmETA
+
+		SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId)
+		FROM @tblLoadDetail
+
+		WHILE (ISNULL(@intMinLoadDetailRecordId, 0) > 0)
+		BEGIN
+			SET @intContractDetailId = NULL
+			SET @intContractHeaderId = NULL
+			SET @intApprovedById = NULL
+
+			SELECT @intContractDetailId = intContractDetailId
+				,@intContractHeaderId = intContractHeaderId
+			FROM @tblLoadDetail
+			WHERE intDetailRecordId = @intMinLoadDetailRecordId
+
+			SELECT TOP 1 @intApprovedById = intApprovedById
+			FROM tblCTApprovedContract
+			WHERE intContractDetailId = @intContractDetailId
+			ORDER BY 1 DESC
+
+			UPDATE tblCTContractDetail
+			SET dtmPlannedAvailabilityDate = @dtmETA
+				,intConcurrencyId = intConcurrencyId + 1
+			WHERE intContractDetailId = @intContractDetailId
+
+			EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId
+				,@intApprovedById = @intApprovedById
+				,@intContractDetailId = @intContractDetailId
+
+			SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId)
+			FROM @tblLoadDetail
+			WHERE intDetailRecordId > @intMinLoadDetailRecordId
+		END
 
 		Insert Into tblLGETATracking(intLoadId,strTrackingType,dtmETAPOD,dtmModifiedOn)
 		Values(@intLoadId,'ETA POD',@dtmETA,GETDATE()) 
