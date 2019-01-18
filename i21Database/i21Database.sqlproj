@@ -7249,6 +7249,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryPhysicalCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICCleanupStrayItemLocationTransactions.sql" />
     <Build Include="dbo\Views\vyuICItemLocationTransactions.sql" />
+    <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
