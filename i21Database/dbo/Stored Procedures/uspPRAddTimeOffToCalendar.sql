@@ -257,6 +257,8 @@ SELECT @intTimeOffRequestId = @intTransactionId
 								ON PGD.intEmployeeEarningId = EL.intEmployeeEarningId
 							INNER JOIN tblPREmployeeEarning EE 
 								ON EL.intTypeEarningId = EE.intEmployeeEarningLinkId AND EL.intEntityEmployeeId = EE.intEntityEmployeeId
+							INNER JOIN tblPREmployee EMP 
+								ON EMP.intEntityId = EL.intEntityEmployeeId
 							INNER JOIN tblPRTimeOffRequest TOR
 								ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
 									AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
@@ -264,6 +266,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 									AND PGD.dtmDateFrom <= ISNULL(TOR.dtmDateFrom, PGD.dtmDateFrom) AND PGD.dtmDateTo >= ISNULL(TOR.dtmDateFrom, PGD.dtmDateTo)
 									AND ISNULL(PGD.intDepartmentId, 0) = ISNULL(TOR.intDepartmentId, 0)
 									AND intSource IN (0, 3)
+							WHERE PGD.intWorkersCompensationId = EMP.intWorkersCompensationId
 
 				IF (@intPayGroupDetail IS NULL)
 					INSERT INTO tblPRPayGroupDetail (
