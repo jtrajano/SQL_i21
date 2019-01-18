@@ -405,8 +405,8 @@ SELECT
     ,[intAccountId]                 = I.[intAccountId]
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] ELSE @ZeroDecimal END
-    ,[dblDebitUnit]                 = @ZeroDecimal
-    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[dblDebitUnit]                 = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARID.[dblUnitQtyShipped] END
+    ,[dblCreditUnit]                = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARID.[dblUnitQtyShipped] ELSE @ZeroDecimal END
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]
@@ -451,6 +451,8 @@ LEFT OUTER JOIN
         ,[intInvoiceId]         = [intInvoiceId]
     FROM
         #ARPostInvoiceDetail
+    WHERE
+		[intOriginalInvoiceDetailId] IS NULL
     GROUP BY
         [intInvoiceId]
     ) ARID
