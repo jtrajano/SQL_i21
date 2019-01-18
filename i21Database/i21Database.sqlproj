@@ -6428,17 +6428,23 @@
     <Build Include="dbo\Views\vyuAPGetInventoryClearingReceiptVoucherItems.sql" />
     <Build Include="dbo\Tables\tblSMExportLog.sql" />
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
+    <Build Include="dbo\Tables\tblSRReportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveCertification.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetPriceContractSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLoadPriceContractFixation.sql" />
-    <Build Include="dbo\Tables\tblSRReportLog.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqDisplayField.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqPriceFixationInfo.sql" />
     <Build Include="dbo\Functions\fnCTIsMultiAllocationExists.sql" />
     <Build Include="dbo\Functions\fnCTIsMultiDerivativesExists.sql" />
     <Build Include="dbo\Functions\fnCTGetLastApprovalStatus.sql" />
     <Build Include="dbo\Functions\fnCTGetSeqContainerInfo.sql" />
+    <Build Include="dbo\Functions\fnRKFormatDate.sql" />
+    <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099BYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099PATRYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -6609,6 +6615,11 @@
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
     <None Include="Scripts\Post-Deployment\PAT\18.3\VolumeSchemaFix.sql" />
     <None Include="Scripts\Post-Deployment\GR\2_ScaleTrigger.sql" />
+    <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099BYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099PATRYear.sql" />
+    <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -76,7 +76,7 @@ INNER JOIN (
 		 , strCustomerNumber	= C.strCustomerNumber
 		 , strCustomerName		= E.strName
 		 , strDisplayName       = RTRIM(C.strCustomerNumber) + ' - ' + E.strName
-		 , strContact			= [dbo].fnARFormatCustomerAddress(CONTACT.strPhone, CONTACT.strEmail, BILLTO.strLocationName, BILLTO.strAddress, BILLTO.strCity, BILLTO.strState, BILLTO.strZipCode, BILLTO.strCountry, NULL, 0)
+		 , strContact			= [dbo].fnARFormatCustomerAddress(CONTACT.strPhone, CONTACT.strEmail, BILLTO.strLocationName, BILLTO.strAddress, BILLTO.strCity, BILLTO.strState, BILLTO.strZipCode, BILLTO.strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblARCustomer C WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intEntityId
@@ -114,6 +114,6 @@ INNER JOIN (
 ) LOCATION ON CREDITS.intCompanyLocationId = LOCATION.intCompanyLocationId
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY

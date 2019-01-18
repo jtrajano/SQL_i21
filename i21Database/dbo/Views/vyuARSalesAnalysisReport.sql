@@ -64,7 +64,7 @@ SELECT
 	 , strSalespersonName		= ESP.strName
 	 , strBillTo				= RTRIM(SAR.strBillToLocationName)
 	 , strShipTo				= RTRIM(SAR.strShipToLocationName)
-	 , strSiteNumber			= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0')
+	 , strSiteNumber			= REPLACE(STR(TMS.intSiteNumber, 4), SPACE(1), '0') COLLATE Latin1_General_CI_AS
 	 , strSiteDescription		= TMS.strDescription
 	 , strTicketNumber			= SCT.strTicketNumber
 	 , strCustomerReference		= SCT.strCustomerReference

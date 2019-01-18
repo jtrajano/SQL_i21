@@ -6,7 +6,7 @@ SELECT
 	,AC.[strCustomerNumber]
 	,TMS.[intSiteID]
 	,TMS.[intSiteNumber]
-	,REPLACE(STR(TMS.[intSiteNumber], 4), SPACE(1), '0') AS [strSiteNumber]
+	,REPLACE(STR(TMS.[intSiteNumber], 4), SPACE(1), '0') COLLATE Latin1_General_CI_AS AS [strSiteNumber]
 	,TMS.[strDescription] 
 	,TMS.[strBillingBy] 
 	,TMS.[dblLastMeterReading] 
@@ -15,7 +15,7 @@ SELECT
 		INNER JOIN tblTMDeviceType DT ON D.[intDeviceTypeId] = DT.[intDeviceTypeId] 
 		INNER JOIN tblTMMeterType MT ON D.[intMeterTypeId] = MT.[intMeterTypeId]
 		WHERE SD.[intSiteID] = TMS.[intSiteID] AND DT.strDeviceType = 'Flow Meter'
-		ORDER BY intSiteDeviceID ASC)
+		ORDER BY intSiteDeviceID ASC) COLLATE Latin1_General_CI_AS
 		AS [strMeterType]
 	,(SELECT TOP 1 MT.[dblConversionFactor] FROM tblTMSiteDevice SD
 		INNER JOIN tblTMDevice D ON SD.[intDeviceId] = D.[intDeviceId]  

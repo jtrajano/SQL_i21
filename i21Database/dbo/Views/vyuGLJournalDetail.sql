@@ -4,23 +4,23 @@ CREATE VIEW [dbo].[vyuGLJournalDetail]
        SELECT
        A.intJournalId
        ,A.dtmReverseDate
-       ,A.strJournalId
-       ,A.strTransactionType
+       ,A.strJournalId COLLATE Latin1_General_CI_AS strJournalId
+       ,A.strTransactionType COLLATE Latin1_General_CI_AS strTransactionType
        ,A.dtmDate
-       ,A.strReverseLink
+       ,A.strReverseLink COLLATE Latin1_General_CI_AS strReverseLink
        ,A.intCurrencyId
        ,A.dblExchangeRate
        ,A.dtmPosted
-       ,A.strDescription AS strHeaderDescription
+       ,A.strDescription COLLATE Latin1_General_CI_AS AS strHeaderDescription
        ,A.ysnPosted
        ,A.intConcurrencyId
        ,A.dtmDateEntered
        ,A.intUserId
        ,A.intEntityId
-       ,A.strSourceId
-       ,A.strJournalType
-       ,A.strRecurringStatus
-       ,A.strSourceType
+       ,A.strSourceId COLLATE Latin1_General_CI_AS strSourceId
+       ,A.strJournalType COLLATE Latin1_General_CI_AS strJournalType
+       ,A.strRecurringStatus COLLATE Latin1_General_CI_AS strRecurringStatus
+       ,A.strSourceType COLLATE Latin1_General_CI_AS strSourceType
        ,A.intFiscalYearId
        ,A.intFiscalPeriodId
        ,A.intJournalIdToReverse
@@ -33,25 +33,25 @@ CREATE VIEW [dbo].[vyuGLJournalDetail]
        ,B.dblCreditRate
        ,B.dblDebitUnit
        ,B.dblCreditUnit
-       ,B.strDescription AS strTransactionDescription
+       ,B.strDescription COLLATE Latin1_General_CI_AS AS strTransactionDescription
        ,B.dblUnitsInLBS
-       ,B.strDocument
-       ,B.strComments
-       ,B.strReference
+       ,B.strDocument COLLATE Latin1_General_CI_AS strDocument
+       ,B.strComments COLLATE Latin1_General_CI_AS strComments
+       ,B.strReference COLLATE Latin1_General_CI_AS strReference
        ,B.dblDebitUnitsInLBS
-       ,B.strCorrecting
-       ,B.strSourcePgm
-       ,B.strCheckBookNo
-       ,B.strWorkArea
-       ,B.strSourceKey
+       ,B.strCorrecting COLLATE Latin1_General_CI_AS strCorrecting
+       ,B.strSourcePgm COLLATE Latin1_General_CI_AS strSourcePgm
+       ,B.strCheckBookNo COLLATE Latin1_General_CI_AS strCheckBookNo
+       ,B.strWorkArea COLLATE Latin1_General_CI_AS strWorkArea
+       ,B.strSourceKey COLLATE Latin1_General_CI_AS strSourceKey
        ,B.dblDebitForeign
        ,B.dblDebitReport
        ,B.dblCreditForeign
        ,B.dblCreditReport
-       ,C.strAccountId
+       ,C.strAccountId COLLATE Latin1_General_CI_AS strAccountId
        ,C.intAccountId
-       ,C.strDescription AS strAccountDescription
-       ,S.strCurrency
+       ,C.strDescription COLLATE Latin1_General_CI_AS AS strAccountDescription
+       ,S.strCurrency COLLATE Latin1_General_CI_AS strCurrency
 
        FROM tblGLJournal A
        INNER JOIN tblGLJournalDetail B

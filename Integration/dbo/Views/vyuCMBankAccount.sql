@@ -5,8 +5,7 @@ BEGIN
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCMBankAccount')
 	DROP VIEW vyuCMBankAccount
 
-	EXEC ('
-		CREATE VIEW [dbo].vyuCMBankAccount
+	EXEC('CREATE VIEW [dbo].vyuCMBankAccount
 		WITH SCHEMABINDING
 		AS 
 
@@ -106,19 +105,19 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.strCbkNo
 				,i21.intConcurrencyId
 				-- The following fields are from the origin system		
-				,origin.apcbk_comment				-- CHAR (30)
-				,apcbk_password = ISNULL(origin.apcbk_password, '''')	-- CHAR (16)
-				,origin.apcbk_show_bal_yn			-- Y/N
-				,origin.apcbk_prompt_align_yn		-- Y/N
-				,origin.apcbk_chk_clr_ord_dn		-- Y/N
-				,origin.apcbk_import_export_yn		-- Y/N
-				,origin.apcbk_export_cbk_no			-- CHAR (2)
+				,apcbk_comment = origin.apcbk_comment COLLATE Latin1_General_CI_AS			-- CHAR (30) 
+				,apcbk_password =  ISNULL(origin.apcbk_password, '''') COLLATE Latin1_General_CI_AS	-- CHAR (16)
+				,apcbk_show_bal_yn = origin.apcbk_show_bal_yn COLLATE Latin1_General_CI_AS	-- Y/N
+				,apcbk_prompt_align_yn = origin.apcbk_prompt_align_yn  COLLATE Latin1_General_CI_AS -- Y/N
+				,apcbk_chk_clr_ord_dn = origin.apcbk_chk_clr_ord_dn  COLLATE Latin1_General_CI_AS -- Y/N
+				,apcbk_import_export_yn = origin.apcbk_import_export_yn  COLLATE Latin1_General_CI_AS -- Y/N
+				,apcbk_export_cbk_no = origin.apcbk_export_cbk_no COLLATE Latin1_General_CI_AS -- CHAR (2)
 				,origin.apcbk_stmt_lock_rev_dt		-- INT yyyymmdd
 				,origin.apcbk_gl_close_rev_dt		-- INT yyyymmdd
-				,origin.apcbk_check_format_cs		-- CHAR (2)
+				,apcbk_check_format_cs = origin.apcbk_check_format_cs COLLATE Latin1_General_CI_AS -- CHAR (2)
 				,origin.apcbk_laser_down_lines		-- INT
-				,origin.apcbk_prtr_checks			-- CHAR (80)
-				,origin.apcbk_auto_assign_trx_yn	-- Y/N
+				,apcbk_prtr_checks = origin.apcbk_prtr_checks COLLATE Latin1_General_CI_AS -- CHAR (80)
+				,apcbk_auto_assign_trx_yn = origin.apcbk_auto_assign_trx_yn COLLATE Latin1_General_CI_AS -- Y/N
 
 				-- convert value suitable for checkbox for apcbk_show_bal_yn,apcbk_import_export_yn,apcbk_prompt_align_yn,apcbk_auto_assign_trx_yn
 				,cast (case when ISNULL(origin.apcbk_show_bal_yn,''N'') = ''N'' THEN 0 ELSE 1 end as bit) ysnShowRunningBalance
@@ -136,7 +135,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 						) tbl),0) AS bit)
 		FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_origin origin
 					ON i21.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
-		')
+					')
+		
 
 	EXEC('
 		CREATE TRIGGER trg_delete_vyuCMBankAccount

@@ -12,7 +12,7 @@ SELECT RECIPEITEMS.strTransactionType
 	 , dblTotalPrice	 = SUM(RECIPEITEMS.dblTotal)
 	 , strUnitMeasure	 = ISNULL(UOM.strUnitMeasure, RUOM.strUnitMeasure)
 FROM
-(SELECT strTransactionType		= 'Sales Order'
+(SELECT strTransactionType		= 'Sales Order' COLLATE Latin1_General_CI_AS
 	 , intTransactionId			= intSalesOrderId	 
 	 , intRecipeId
 	 , dblQtyOrdered
@@ -26,7 +26,7 @@ FROM tblSOSalesOrderDetail
 
 UNION ALL
 
-SELECT strTransactionType		= 'Invoice'
+SELECT strTransactionType		= 'Invoice' COLLATE Latin1_General_CI_AS
 	 , intTransactionId			= intInvoiceId
 	 , intRecipeId
 	 , dblQtyOrdered

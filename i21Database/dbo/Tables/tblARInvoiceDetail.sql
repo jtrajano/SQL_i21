@@ -101,10 +101,10 @@
 	[intDestinationGradeId]					INT												NULL,
 	[intDestinationWeightId]				INT												NULL,
 	[intSpecialPriceId]						INT												NULL,
-	[strRebateSubmitted]					NVARCHAR(1)		CONSTRAINT [DF_tblARInvoiceDetail_strRebateSubmitted] DEFAULT (N'N') NOT NULL,
+	[strRebateSubmitted]					NVARCHAR(1)		COLLATE Latin1_General_CI_AS CONSTRAINT [DF_tblARInvoiceDetail_strRebateSubmitted] DEFAULT (N'N') NOT NULL,
 	[dblRebateAmount]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblRebateAmount] DEFAULT ((0)) NULL,
 	[dblBaseRebateAmount]					NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBaseRebateAmount] DEFAULT ((0)) NULL,
-	[strBuybackSubmitted]					NVARCHAR(1)		CONSTRAINT [DF_tblARInvoiceDetail_strBuybackSubmitted] DEFAULT (N'N') NOT NULL,
+	[strBuybackSubmitted]					NVARCHAR(1)		COLLATE Latin1_General_CI_AS CONSTRAINT [DF_tblARInvoiceDetail_strBuybackSubmitted] DEFAULT (N'N') NOT NULL,
 	[dblBuybackAmount]						NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBuybackAmount] DEFAULT ((0)) NULL,
 	[dblBaseBuybackAmount]					NUMERIC(18, 6)	CONSTRAINT [DF_tblARInvoiceDetail_dblBaseBuybackAmount] DEFAULT ((0)) NULL,
 

@@ -14,7 +14,7 @@ SELECT intTransactionId		= TRANSACTIONS.intTransactionId
 FROM (
 	SELECT intTransactionId		= SOD.intSalesOrderDetailId
 		 , intCompanyLocationId = SO.intCompanyLocationId
-		 , strTransactionType	= 'Sales Order'
+		 , strTransactionType	= 'Sales Order' COLLATE Latin1_General_CI_AS
 		 , intItemId			= SOD.intItemId
 		 , dblQuantity			= SOD.dblQtyOrdered
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
@@ -29,7 +29,7 @@ FROM (
  
 	SELECT intTransactionId		= ID.intInvoiceDetailId
 	     , intCompanyLocationId = I.intCompanyLocationId
-		 , strTransactionType	= 'Invoice'
+		 , strTransactionType	= 'Invoice' COLLATE Latin1_General_CI_AS
 		 , intItemId			= ID.intItemId
 		 , dblQuantity			= ID.dblQtyShipped
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)

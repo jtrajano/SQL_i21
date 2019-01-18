@@ -6,10 +6,10 @@
 		account = a.strEntityNo,
 		code =  a.strEntityNo,
 		fullname = a.strName,
-		lastname = '',
-		firstname = '',
-		address1 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),1),
-		address2 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),2),
+		lastname = '' COLLATE Latin1_General_CI_AS,
+		firstname = '' COLLATE Latin1_General_CI_AS,
+		address1 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),1) COLLATE Latin1_General_CI_AS,
+		address2 = dbo.fnEMSplitWithGetByIdx(c.strAddress,char(10),2) COLLATE Latin1_General_CI_AS,
 		city = c.strCity,
 		[state] = c.strState,
 		zip = c.strZipCode,
@@ -17,11 +17,11 @@
 		zone = 0,
 		phone = f.strPhone,
 		email = e.strEmail,
-		applications = 'FFFF',	
+		applications = 'FFFF' COLLATE Latin1_General_CI_AS,	
 		longitude = c.dblLongitude,
 		latitude = c.dblLatitude,
 		altitude = 0,
-		directions = ''
+		directions = '' COLLATE Latin1_General_CI_AS
 	from tblEMEntity a
 		join tblEMEntityType b
 			on a.intEntityId = b.intEntityId and b.strType = 'Customer'

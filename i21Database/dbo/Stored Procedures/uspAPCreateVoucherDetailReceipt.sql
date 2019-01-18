@@ -105,14 +105,16 @@ SELECT
 														A.dblQtyReceived > (B.dblOpenReceive - B.dblBillQty) --handle over paying
 												THEN B.dblOpenReceive - B.dblBillQty
 												ELSE A.dblQtyReceived END),
-	[dblCost]						=	CASE WHEN contractDetail.dblSeqPrice > 0 
+	[dblCost]						=	CASE WHEN C.strReceiptType = 'Inventory Return' THEN B.dblUnitCost ELSE -- USE THE RECEIPT COST IF TRANSACTION IS NOT A VOUCHER
+														CASE WHEN contractDetail.dblSeqPrice > 0 
 														THEN contractDetail.dblSeqPrice
 														ELSE 
 															(CASE WHEN B.dblUnitCost = 0 AND contractDetail.dblSeqPrice > 0
 																THEN contractDetail.dblSeqPrice
 																ELSE B.dblUnitCost
 																END)
-													END, --use cash price of contract if unit cost of receipt item is 0,
+														END --use cash price of contract if unit cost of receipt item is 0,
+										END,
 	[dblCostUnitQty]				=	ISNULL(CASE WHEN contractDetail.intContractDetailId IS NOT NULL 
 											THEN contractDetail.dblCostUnitQty
 											ELSE ItemCostUOM.dblUnitQty END, 1),

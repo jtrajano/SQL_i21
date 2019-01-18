@@ -15,7 +15,7 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 	 , dblPrice					= dbo.fnICConvertUOMtoStockUnit(RECIPE.intComponentId, RECIPE.intItemUOMId, 1) * I.dblSalePrice
 	 , dblNewPrice				= dbo.fnICConvertUOMtoStockUnit(RECIPE.intComponentId, RECIPE.intItemUOMId, 1) * I.dblSalePrice	 
 	 , strItemType				= I.strType
-	 , strType					= 'Finished Good'
+	 , strType					= 'Finished Good' COLLATE Latin1_General_CI_AS
 	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	 
 	 , dblUnitQty				= UOM.dblUnitQty 
 	 , strVFDDocumentNumber		= RECIPE.strDocumentNo

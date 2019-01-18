@@ -1,23 +1,19 @@
 ﻿CREATE VIEW [dbo].[vyuARDocumentMaintenanceMessageDetails]
-	AS 
-	SELECT 
-		intDocumentMaintenanceId, 
-		strCode, 
-		strTitle,
-		ISNULL(Header,'') AS strHeader, 
-		ISNULL(Footer,'') AS strFooter FROM
-(
-	SELECT 
-			intDocumentMaintenanceId,
-			strCode,
-			strTitle,
-			strHeaderFooter,
-			strMessage
+AS 
+SELECT intDocumentMaintenanceId
+	 , strCode
+	 , strTitle
+	 , strHeader	= ISNULL(Header,'') COLLATE Latin1_General_CI_AS
+	 , strFooter	= ISNULL(Footer,'') COLLATE Latin1_General_CI_AS
+FROM (
+	SELECT intDocumentMaintenanceId
+		 , strCode
+		 , strTitle
+		 , strHeaderFooter
+		 , strMessage
 	FROM vyuARDocumentMaintenanceMessage
-)
-AS tblARMessages
-PIVOT
-(
+) tblARMessages
+PIVOT (
 	MAX(strMessage)
 	FOR strHeaderFooter
 	IN (Header, Footer)--, strHeaderFooter)

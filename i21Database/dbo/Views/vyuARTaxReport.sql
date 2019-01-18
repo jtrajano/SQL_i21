@@ -232,7 +232,7 @@ LEFT OUTER JOIN (
 ) CURRENCY ON INVOICE.intCurrencyId = CURRENCY.intCurrencyID
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 WHERE INVOICE.ysnPosted = 1
