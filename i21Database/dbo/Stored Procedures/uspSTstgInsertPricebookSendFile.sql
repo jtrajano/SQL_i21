@@ -228,9 +228,9 @@ BEGIN
 													WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
 														THEN CASE
 																WHEN LEN(IUOM.strLongUPCCode) = 6
-																	THEN RIGHT('0000000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 13) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+																	THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
 																WHEN LEN(IUOM.strLongUPCCode) > 6	
-																	THEN RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''), 13) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+																	THEN RIGHT('00000000000' + ISNULL(IUOM.strLongUPCCode,''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
 																	-- IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
 														END
 													ELSE IUOM.strLongUPCCode
@@ -474,9 +474,9 @@ BEGIN
 													WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
 														THEN CASE
 																WHEN LEN(IUOM.strLongUPCCode) = 6
-																	THEN RIGHT('0000000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 13) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+																	THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
 																WHEN LEN(IUOM.strLongUPCCode) > 6	
-																	THEN RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''), 13) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+																	THEN RIGHT('00000000000' + ISNULL(IUOM.strLongUPCCode,''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
 																	-- IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
 														END
 													ELSE IUOM.strLongUPCCode
