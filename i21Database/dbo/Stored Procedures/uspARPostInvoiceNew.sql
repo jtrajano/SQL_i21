@@ -198,6 +198,7 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[dblCurrencyExchangeRate]              NUMERIC(18,6)   NULL
     ,[strCurrencyExchangeRateType]          NVARCHAR(20)    COLLATE Latin1_General_CI_AS    NULL
     ,[intLotId]                             INT             NULL
+    ,[intOriginalInvoiceDetailId]           INT             NULL
     ,[strMaintenanceType]                   NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strFrequency]                         NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[dtmMaintenanceDate]                   DATETIME        NULL
@@ -352,6 +353,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[dblCurrencyExchangeRate]              NUMERIC(18,6)   NULL
     ,[strCurrencyExchangeRateType]          NVARCHAR(20)    COLLATE Latin1_General_CI_AS    NULL
     ,[intLotId]                             INT             NULL
+    ,[intOriginalInvoiceDetailId]           INT             NULL
     ,[strMaintenanceType]                   NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strFrequency]                         NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[dtmMaintenanceDate]                   DATETIME        NULL
