@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation]
 	,@isPeriodic AS BIT = 1
 	,@ysnRegenerateBillGLEntries AS BIT = 0
 	,@intUserId AS INT = NULL
+	,@ysnRebuildShipmentAndInvoiceAsInTransit AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -2122,6 +2123,12 @@ BEGIN
 					END 
 				END 
 
+				-- Force rebuild as in-transit if @ysnRebuildShipmentAndInvoiceAsInTransit set to true. 
+				IF @ysnRebuildShipmentAndInvoiceAsInTransit = 1
+				BEGIN 
+					SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
+				END
+
 				-- Check the freight terms if posting scenario is freight-based
 				IF @ShipmentPostScenario = @ShipmentPostScenario_FreightBased
 				BEGIN 
@@ -2646,9 +2653,13 @@ BEGIN
 							ON RebuildInvTrans.intItemId = i.intItemId 
 						INNER JOIN tblICItemLocation ItemLocation
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
-						LEFT JOIN dbo.tblARInvoice Invoice
-							ON Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
-							AND Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
+						LEFT JOIN (
+							dbo.tblARInvoice Invoice INNER JOIN tblARInvoiceDetail InvoiceItems
+								ON Invoice.intInvoiceId = InvoiceItems.intInvoiceId
+						)
+							ON Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
+							AND Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
+							AND InvoiceItems.intInvoiceDetailId = RebuildInvTrans.intTransactionDetailId 
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
@@ -2659,6 +2670,18 @@ BEGIN
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
 						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
+						AND (
+							1 = 
+								CASE 
+									WHEN 
+										@ysnRebuildShipmentAndInvoiceAsInTransit = 1 
+										AND ISNULL(InvoiceItems.intInventoryShipmentItemId, InvoiceItems.intLoadDetailId) IS NOT NULL 
+									THEN 
+										0
+									ELSE 
+										1
+								END 
+						)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				BEGIN 
@@ -2769,7 +2792,13 @@ BEGIN
 						,[strSourceTransactionId]		= ISNULL(s.strShipmentNumber, l.strLoadNumber)
 						,[intSourceTransactionDetailId] = ISNULL(si.intInventoryShipmentItemId, ld.intLoadDetailId) 
 						--,[intFobPointId]				= t.intFobPointId
-						,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
+						,[intInTransitSourceLocationId]	= 
+							CASE 
+								WHEN @ysnRebuildShipmentAndInvoiceAsInTransit = 1 AND t.intInTransitSourceLocationId IS NULL THEN 
+									t.intItemLocationId
+								ELSE 
+									t.intInTransitSourceLocationId
+							END 
 				FROM	
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
@@ -2796,10 +2825,17 @@ BEGIN
 							ON ld.intLoadDetailId = id.intLoadDetailId
 							AND l.ysnPosted = 1
 
-				WHERE	i.strInvoiceNumber = @strTransactionId
-						AND t.intInTransitSourceLocationId IS NOT NULL 
+				WHERE	i.strInvoiceNumber = @strTransactionId						
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
 						AND ISNULL(item.intCategoryId, 0) = COALESCE(@intCategoryId, item.intCategoryId, 0)
+						AND (
+							1 = 
+							CASE 
+								WHEN t.intInTransitSourceLocationId IS NOT NULL THEN 1
+								WHEN @ysnRebuildShipmentAndInvoiceAsInTransit  = 1 AND t.intInTransitSourceLocationId IS NULL THEN 1
+								ELSE 0
+							END
+						)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 				BEGIN 
