@@ -293,9 +293,7 @@ SELECT @intTimeOffRequestId = @intTransactionId
 						,EL.intEmployeeEarningId
 						,EL.intTypeEarningId
 						,TOR.intDepartmentId
-						,intWorkersCompensationId = CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime', 'Salary')) 
-											THEN (SELECT TOP 1 intWorkersCompensationId FROM tblPREmployee WHERE [intEntityId] = EE.intEntityEmployeeId) 
-											ELSE NULL END
+						,EMP.intWorkersCompensationId
 						,EL.strCalculationType
 						,EL.dblDefaultHours
 						,CASE WHEN (EL.dblDefaultHours - TOR.dblRequest) < 0 THEN 0 ELSE EL.dblDefaultHours - TOR.dblRequest END
@@ -337,6 +335,8 @@ SELECT @intTimeOffRequestId = @intTransactionId
 							ON TOR.intTimeOffRequestId = @intTimeOffRequestId AND EE.intEntityEmployeeId = TOR.intEntityEmployeeId
 								AND EE.intEmployeeTimeOffId = TOR.intTypeTimeOffId
 								AND EL.intPayGroupId IS NOT NULL
+						INNER JOIN tblPREmployee EMP
+							ON EMP.intEntityId = EL.intEntityEmployeeId
 				ELSE
 					UPDATE tblPRPayGroupDetail
 						SET tblPRPayGroupDetail.dblHoursToProcess = tblPRPayGroupDetail.dblHoursToProcess - TOR.dblRequest,
