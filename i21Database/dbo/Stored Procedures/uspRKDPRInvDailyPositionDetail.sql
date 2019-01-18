@@ -555,7 +555,7 @@ BEGIN
 												and id.strDocumentNumber = Inv.strTransactionId
 												and CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
 												, 0)
-						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 THEN 1 ELSE 0 END )
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 OR i.dtmPostDate IS NULL THEN 1 ELSE 0 END )
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
 						,CT.strFutureMonth
 						,CT.strDeliveryDate
@@ -1607,42 +1607,47 @@ BEGIN
 					, strCommodityCode = @strCommodityCode 
 					, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))
-					, cd.intCommodityId
+					, ch.intCommodityId
 					, cl.strLocationName
 					, cd.intItemId
-					, cd.strItemNo
-					, cd.strCategory
+					, i.strItemNo
+					, strCategory = cat.strCategoryCode
 					, intTicketId = cd.intContractDetailId
-					, strTicketNumber = cd.strContractNumber
-					, dtmTicketDateTime = cd.dtmContractDate
+					, strTicketNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
+					, dtmTicketDateTime = ch.dtmContractDate
 					, strDistributionOption = 'CNT' COLLATE Latin1_General_CI_AS
 					, cd.intUnitMeasureId
 					, cl.intCompanyLocationId
 					, r.strShipmentNumber
 					, cd.intContractHeaderId
-					, cd.strContractNumber
+					, strContractNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
 					, r.intInventoryShipmentId
 					, ri.intSourceId
 					, cd.intFutureMarketId
 					, cd.intFutureMonthId
-					, cd.strFutMarketName
-					, cd.strFutureMonth
+					, fm.strFutMarketName
+					, mnt.strFutureMonth
 					, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
-					, cd.strDeliveryDate
+					, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
 				INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-				INNER JOIN #tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.strPricingType = 'Basis' AND cd.intContractStatusId <> 3 AND cd.intContractTypeId = 2
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+				INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
+				INNER JOIN tblICItem i on cd.intItemId = i.intItemId
+				INNER JOIN tblICCategory cat on i.intCategoryId = cat.intCategoryId
+				INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
+				INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
+				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
 				LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
 				LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
 				LEFT JOIN tblCTPriceFixationDetail pfd ON invD.intInvoiceDetailId = pfd.intInvoiceDetailId
-				WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
+				WHERE ch.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
 					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,getDate())), 110), 110)
-					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,getDate())), 110), 110)
+					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
+					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		
 			INSERT INTO @Final(intSeqId
