@@ -413,9 +413,9 @@ BEGIN
 			-- Validate if the cost is going to be negative. 
 			IF (
 				1 = CASE 
-						WHEN ISNULL(@dblNewAverageCost, 0) < 0 THEN 1
-						WHEN (@CostBucketOriginalValue + @CostAdjustment) < 0 THEN 1
-						ELSE 0
+						WHEN ISNULL(@dblNewAverageCost, 0) > 0 THEN 0
+						WHEN (@CostBucketOriginalValue + @CostAdjustment) > 0 THEN 0
+						ELSE 1
 					END 
 			)
 			BEGIN 
