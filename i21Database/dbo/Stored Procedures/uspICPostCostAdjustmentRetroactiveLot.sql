@@ -539,7 +539,8 @@ BEGIN
 		IF  @IsSourceTransaction = 1
 		BEGIN 
 			-- Validate if the cost is going to be negative. 
-			IF (@CostBucketOriginalValue + (@CostAdjustmentPerLot * @t_dblQty)) < 0 
+			--IF ROUND(@CostBucketOriginalValue + (@CostAdjustmentPerLot * @t_dblQty), 2) < 0 
+			IF ROUND(@CostBucketNewCost, 2) < 0 
 			BEGIN 
 				SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
 				FROM	tblICItem 
@@ -551,7 +552,11 @@ BEGIN
 			END 
 
 			UPDATE  cb
-			SET		cb.dblCost = @CostBucketNewCost
+			SET		cb.dblCost = 
+						CASE 
+							WHEN NOT (ROUND(@CostBucketNewCost, 2) < 0) AND @CostBucketNewCost < 0 THEN 0 
+							ELSE @CostBucketNewCost
+						END 
 						--dbo.fnDivide(
 						--	(@CostBucketOriginalValue + @CostAdjustment) 
 						--	,cb.dblStockIn 
