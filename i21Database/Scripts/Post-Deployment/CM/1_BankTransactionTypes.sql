@@ -18,6 +18,7 @@ GO
 			SELECT id = 3,		name = 'Misc Checks'			UNION ALL 
 			SELECT id = 4,		name = 'Bank Transfer'			UNION ALL 
 			SELECT id = 5,		name = 'Bank Transaction'		UNION ALL 
+			SELECT id = 51,		name = 'Bank Interest'	 		UNION ALL 
 			SELECT id = 6,		name = 'Credit Card Charge'		UNION ALL 
 			SELECT id = 7,		name = 'Credit Card Returns'	UNION ALL 
 			SELECT id = 8,		name = 'Credit Card Payments'	UNION ALL 
@@ -42,7 +43,8 @@ GO
 			SELECT id = 116,	name = 'Void AP Payment'		UNION ALL 
 			SELECT id = 121,	name = 'Void Paycheck'			UNION ALL 
 			SELECT id = 122,	name = 'Void ACH'				UNION ALL 
-			SELECT id = 123,	name = 'Void Direct Deposit'
+			SELECT id = 123,	name = 'Void Direct Deposit'	UNION ALL
+			SELECT id = 124,	name = 'NSF'
 	) AS BankTransactionTypeHardCodedValues
 		ON  BankTransactionTypeTable.intBankTransactionTypeId = BankTransactionTypeHardCodedValues.id
 
