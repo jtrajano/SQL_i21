@@ -349,7 +349,6 @@ BEGIN
 			SET
 				intInvoiceId = @intNewInvoiceId
 				,intCreditMemoId = @intNewCreditMemoId
-				,ysnReturn = 1
 			WHERE intPOSId = @intPOSId
 			
 			DECLARE @EntriesForExchange		PaymentIntegrationStagingTable
