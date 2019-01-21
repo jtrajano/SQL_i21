@@ -51,6 +51,7 @@ CREATE TABLE #InvoiceDetailTax
 	,[ysnSeparateOnInvoice]		BIT												NULL
 	,[ysnCheckoffTax]			BIT												NULL
 	,[ysnTaxExempt]				BIT												NULL                                 	
+	,[ysnInvalidSetup]			BIT												NULL                                 	
 	,[ysnTaxOnly]				BIT												NULL
 	,[strNotes]					NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
 	,[intConcurrencyId]			INT												NULL)
@@ -130,6 +131,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[ysnTaxOnly]
 		,[strNotes]
 		,[intConcurrencyId])
@@ -150,6 +152,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[ysnTaxOnly]
 		,[strNotes]
 		,[intConcurrencyId]
