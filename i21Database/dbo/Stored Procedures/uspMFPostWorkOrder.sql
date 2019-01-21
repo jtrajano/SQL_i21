@@ -1343,8 +1343,7 @@ BEGIN TRY
 						JOIN tblGLAccountSegmentMapping gs ON gs.intAccountId = ga.intAccountId
 						JOIN tblGLAccountSegment gm ON gm.intAccountSegmentId = gs.intAccountSegmentId
 						JOIN tblGLAccountCategory ac ON ac.intAccountCategoryId = gm.intAccountCategoryId
-						WHERE gd.ysnIsUnposted = 0
-							AND ac.strAccountCategory IN ('Work In Progress')
+						WHERE ac.strAccountCategory IN ('Work In Progress')
 							AND gd.strTransactionId = @strWorkOrderNo
 						HAVING abs(sum(gd.dblDebit - gd.dblCredit)) > 1
 						)
