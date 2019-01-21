@@ -3,7 +3,7 @@
     [strTransactionId]         NVARCHAR (40)    COLLATE Latin1_General_CI_AS NOT NULL,
     [intBankTransactionTypeId] INT              NOT NULL,
     [intBankAccountId]         INT              NOT NULL,
-
+	[intBankLoanId]			   INT              NULL,
 	[intCurrencyId]            INT              NULL,
     [dblExchangeRate]          DECIMAL (38, 20) DEFAULT 1 NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
@@ -54,6 +54,7 @@
     CONSTRAINT [FK_tblCMBankTransactiontblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] (intCurrencyID),
 	CONSTRAINT [FK_tblCMBankTransactiontblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] (intCompanyLocationId),
 	CONSTRAINT [FK_tblCMBankTransactiontblGLAccount] FOREIGN KEY ([intShortGLAccountId]) REFERENCES [dbo].[tblGLAccount] (intAccountId),
+	CONSTRAINT [FK_tblCMBankTransaction_tblCMBankLoan] FOREIGN KEY ([intBankLoanId]) REFERENCES [dbo].[tblCMBankLoan] (intBankLoanId),
     UNIQUE NONCLUSTERED ([strTransactionId] ASC)
 );
 
