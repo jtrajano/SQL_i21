@@ -222,6 +222,8 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND strCheckNo >= @strNextCheckNumber
 		AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
 		AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
+		AND strCheckNo BETWEEN @strCheckStartingNo AND @strCheckEndingNo
+		AND ISNULL(strRemarks,'') <> 'Generated from origin.'
 ORDER BY strCheckNo
 
 -- Increment the next check number 
