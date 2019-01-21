@@ -182,7 +182,7 @@ BEGIN TRY
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 
-			EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId
+			EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId, 'Pricing Delete'
 
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
