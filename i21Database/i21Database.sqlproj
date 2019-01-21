@@ -7287,6 +7287,8 @@
     <Build Include="dbo\Functions\fnTFCoalesceTransactionSource.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentTransactionSource.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSMixedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
+    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
