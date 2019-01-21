@@ -1056,6 +1056,7 @@ BEGIN
 							,[ysnSeparateOnInvoice]
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
+							,[ysnInvalidSetup]
 							,[ysnTaxOnly]
 							,[strNotes])
 						SELECT
@@ -1075,6 +1076,7 @@ BEGIN
 							,[ysnSeparateOnInvoice]
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
+							,[ysnInvalidSetup]
 							,[ysnTaxOnly]
 							,[strNotes]
 						FROM
@@ -1811,6 +1813,7 @@ BEGIN TRY
 								,[ysnSeparateOnInvoice]
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
+								,[ysnInvalidSetup]
 								,[ysnTaxOnly]
 								,[strNotes])
 							SELECT
@@ -1830,6 +1833,7 @@ BEGIN TRY
 								,[ysnSeparateOnInvoice]
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
+								,[ysnInvalidSetup]
 								,[ysnTaxOnly]
 								,[strNotes]
 							FROM
@@ -2176,6 +2180,7 @@ BEGIN TRY
 						,[ysnSeparateOnInvoice]
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
+						,[ysnInvalidSetup]
 						,[ysnTaxOnly]
 						,[strNotes])
 					SELECT
@@ -2195,6 +2200,7 @@ BEGIN TRY
 						,[ysnSeparateOnInvoice]
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
+						,[ysnInvalidSetup]
 						,[ysnTaxOnly]
 						,[strNotes]
 					FROM
