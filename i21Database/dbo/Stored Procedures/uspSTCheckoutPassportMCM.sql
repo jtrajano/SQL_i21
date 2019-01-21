@@ -125,10 +125,11 @@ BEGIN
 					, (
 						CASE 
 							WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
+								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
 							WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-								-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
-								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
+								THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) 
+																					  + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0) 
+																					  + ISNULL(CAST(Chk.RefundAmount AS DECIMAL(18,6)),0) --// - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
 					    END
 					  ) [dblTotalSalesAmountComputed]
 					, 0 [dblRegisterSalesAmountComputed]
@@ -165,10 +166,12 @@ BEGIN
 					, [dblTotalSalesAmountComputed] = (
 											CASE 
 												WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0)
+													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
 												WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-													-- THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0)
-													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
+													THEN ISNULL(CAST(Chk.SalesAmount AS DECIMAL(18,6)),0) + ( ISNULL(CAST(Chk.DiscountAmount AS DECIMAL(18,6)),0) 
+																									      + ISNULL(CAST(Chk.PromotionAmount AS DECIMAL(18,6)),0) 
+																										  + ISNULL(CAST(Chk.RefundAmount AS DECIMAL(18,6)),0) )
+																										  --// - (ABS(CAST(ISNULL(Chk.DiscountAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.RefundAmount, 0) AS DECIMAL(18,6))) + ABS(CAST(ISNULL(Chk.PromotionAmount, 0) AS DECIMAL(18,6))))
 											END
 										  )
 					, [intPromotionalDiscountsCount] = ISNULL(CAST(Chk.PromotionCount AS INT),0) 
