@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateDetailHistory]
 	@intContractHeaderId	   INT,
-    @intContractDetailId	   INT = NULL
+    @intContractDetailId	   INT = NULL,
+	@strComment				   NVARCHAR(100) = NULL
 AS	   
 
 BEGIN TRY
@@ -144,11 +145,28 @@ BEGIN TRY
 			,intContractStatusId,			CD.intCompanyLocationId,		intItemId,							CD.intPricingTypeId,	    CD.intFutureMarketId
 			,CD.intFutureMonthId,			intCurrencyId,					QU.intCommodityUnitMeasureId,		CD.intUnitMeasureId,	    CD.intCurrencyExchangeRateId
 			,dtmStartDate,					dtmEndDate,						CD.dblQuantity,						dblBalance,					CD.dblFutures
-			,dblBasis,						PF.dblLotsFixed,				CD.dblNoOfLots - PF.dblLotsFixed,	FD.dblQuantity,				CD.dblQuantity - FD.dblQuantity
+			,dblBasis					
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblNoOfLots 
+					WHEN    @strComment = 'Pricing Delete' THEN 0 
+					ELSE	ISNULL(PF.dblLotsFixed,0)
+			 END
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
+					WHEN    @strComment = 'Pricing Delete' THEN CD.dblNoOfLots 
+					ELSE	CD.dblNoOfLots - ISNULL(PF.dblLotsFixed,0) 
+			 END
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblQuantity 
+					WHEN    @strComment = 'Pricing Delete' THEN 0 
+					ELSE	ISNULL(FD.dblQuantity,0) 
+			 END
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
+					WHEN    @strComment = 'Pricing Delete' THEN CD.dblQuantity
+					ELSE	CD.dblQuantity - ISNULL(FD.dblQuantity,0)
+			 END
 			,dblFinalPrice,					dtmFXValidFrom,					dtmFXValidTo,						dblRate,					CO.strCommodityCode
 			,strContractNumber,				intContractSeq,					CL.strLocationName,					strContractType,		    strPricingType
 			,CD.dblScheduleQty,				GETDATE(),						dblCashPrice
-			,CASE   WHEN	ISNULL(CD.dblNoOfLots,0) = ISNULL(PF.dblLotsFixed,0) AND CD.intPricingTypeId NOT IN (2,8)	   THEN	 'Fully Priced' 
+			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN	 'Fully Priced' 
+					WHEN	ISNULL(CD.dblNoOfLots,0) = ISNULL(PF.dblLotsFixed,0) AND CD.intPricingTypeId NOT IN (2,8)	   THEN	 'Fully Priced' 
 					WHEN	ISNULL(CD.dblNoOfLots,0) - ISNULL(PF.dblLotsFixed,0) > 0 
 							AND PF.intPriceFixationId IS NOT NULL THEN	 'Parially Priced'
 					ELSE	'Unpriced'
