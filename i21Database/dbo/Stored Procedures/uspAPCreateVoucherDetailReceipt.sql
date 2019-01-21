@@ -800,7 +800,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Form],
 		[int1099Category],
 		[intLoadDetailId],
-		[dbl1099],
+		-- [dbl1099],
 		[strBillOfLading],
 		[intScaleTicketId],
 		[intLocationId]
@@ -840,7 +840,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Form],
 		[int1099Category],
 		[intLoadDetailId],
-		[dbl1099],
+		-- [dbl1099],
 		[strBillOfLading],
 		[intScaleTicketId],
 		[intLocationId]
@@ -883,7 +883,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	UPDATE voucherDetails
 		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0) / (CASE WHEN voucherDetails.ysnSubCurrency = 1 THEN ISNULL(currency.intSubCurrencyCents,1) ELSE 1 END)
-		,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
+		-- ,voucherDetails.dbl1099 = CASE WHEN voucherDetails.int1099Form > 0 THEN voucherDetails.dblTotal ELSE 0 END
 	FROM tblAPBillDetail voucherDetails
 	OUTER APPLY (
 		SELECT SUM(ISNULL(NULLIF(dblAdjustedTax,0), dblTax)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
