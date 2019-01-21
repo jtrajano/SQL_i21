@@ -943,7 +943,7 @@ BEGIN
 											--										(ISNULL(IM.dblDiscountAmount, 0) / (ISNULL(IM.dblTotalSales, 0) + ISNULL(IM.dblDiscountAmount, 0))) * 100 --((((ISNULL(IM.dblTotalSales, 0) + ISNULL(IM.dblDiscountAmount, 0)) / ISNULL(IM.intQtySold, 0)) * ISNULL(IM.intQtySold, 0)) * ISNULL(IM.dblDiscountAmount, 0) / 100)
 											--									ELSE 0
 											--							  END
-											,[dblPrice]					= ( ISNULL(IM.dblTotalSales, 0) + ISNULL(IM.dblDiscountAmount, 0) ) / ISNULL(NULLIF(IM.intQtySold, 0), 0)
+											,[dblPrice]					= ISNULL( ( ISNULL(IM.dblTotalSales, 0) + ISNULL(IM.dblDiscountAmount, 0) ) / ISNULL(NULLIF(IM.intQtySold, 0), 0) ,0 )
 											--,[dblPrice]					= (ISNULL(IM.dblTotalSales, 0) + ISNULL(IM.dblDiscountAmount, 0)) / ISNULL(IM.intQtySold, 0)
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
