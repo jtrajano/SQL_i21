@@ -62,9 +62,9 @@ GO
 			BankTransactionTypeHardCodedValues.id
 			,BankTransactionTypeHardCodedValues.name
 			,1
-		);
-	--WHEN NOT MATCHED BY SOURCE THEN
-	--DELETE;
+		)
+	WHEN NOT MATCHED BY SOURCE THEN
+	DELETE;
 GO
 PRINT('/*******************  END Populate Bank Transaction Types *******************/')
 GO
