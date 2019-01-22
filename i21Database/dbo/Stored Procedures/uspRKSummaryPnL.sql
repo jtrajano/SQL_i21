@@ -93,7 +93,8 @@ DECLARE @Relaized AS TABLE (
  intLFutOptTransactionHeaderId int,  
  intSFutOptTransactionHeaderId int,  
  strBook nvarchar(100),  
- strSubBook nvarchar(100)  
+ strSubBook nvarchar(100),  
+ dblClosing NUMERIC(24, 10)
  )  
   
 INSERT INTO @UnRelaized (  
@@ -193,6 +194,19 @@ EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
  @strBuySell = @strBuySell,  
  @intBookId = @intBookId,  
  @intSubBookId = @intSubBookId  
+
+UPDATE r
+SET r.dblClosing = LS.dblLastSettle
+FROM  @Relaized r
+OUTER APPLY (
+	SELECT TOP 1 dblLastSettle, intFutureMarketId, intFutureMonthId
+	FROM tblRKFuturesSettlementPrice p
+	INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+	WHERE p.intFutureMarketId = r.intFutureMarketId
+		AND pm.intFutureMonthId = r.intFutureMonthId
+		AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmToDate, 111)
+	ORDER BY dtmPriceDate DESC
+) LS
   
 BEGIN  
   
@@ -283,7 +297,8 @@ DECLARE @Summary AS TABLE (
     t.intCommodityId,  
     t.intFutureMarketId,  
     t.dtmMatchDate,  
-    ISNULL(dbo.fnRKGetLatestClosingPrice(intFutureMarketId, intFutureMonthId, @dtmToDate), 0) AS dblClosing,  
+    --ISNULL(dbo.fnRKGetLatestClosingPrice(intFutureMarketId, intFutureMonthId, @dtmToDate), 0) AS dblClosing,  
+	dblClosing,
     t.dblSPrice as dblPrice,  
     null dblNetPnL,  
     null dblVariationMargin,      
