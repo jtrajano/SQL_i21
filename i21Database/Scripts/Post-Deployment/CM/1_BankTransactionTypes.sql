@@ -38,7 +38,6 @@ GO
 			SELECT id = 22,		name = 'ACH'					UNION ALL 
 			SELECT id = 23,		name = 'Direct Deposit'			UNION ALL 
 			SELECT id = 24,		name = 'Write Off'				UNION ALL 
-			SELECT id = 25,		name = 'NSF'					UNION ALL 
 			SELECT id = 103,	name = 'Void Misc Check'		UNION ALL 
 			SELECT id = 116,	name = 'Void AP Payment'		UNION ALL 
 			SELECT id = 121,	name = 'Void Paycheck'			UNION ALL 
