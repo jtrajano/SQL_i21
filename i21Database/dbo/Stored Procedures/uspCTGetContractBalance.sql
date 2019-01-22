@@ -28,6 +28,7 @@ BEGIN TRY
 	(
 		intContractDetailId INT,
 		intContractStatusId INT,
+		intPricingTypeId	INT,
 		dtmHistoryCreated   DATETIME
 	)
 	DECLARE @Balance TABLE 
@@ -448,8 +449,10 @@ BEGIN TRY
 								  WHEN CD.intPricingTypeId = 2 THEN 'B' 
 								  WHEN CD.intPricingTypeId = 3 THEN 'H'
 								  WHEN CD.intPricingTypeId = 4 THEN 'U'
+								  WHEN CD.intPricingTypeId = 5 THEN 'D'
 								  WHEN CD.intPricingTypeId = 6 THEN 'C'
 								  WHEN CD.intPricingTypeId = 7 THEN 'I'
+								  WHEN CD.intPricingTypeId = 8 THEN 'R'
 							 END
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 	,strShipMethod			= FT.strFreightTerm
@@ -565,8 +568,10 @@ BEGIN TRY
 								  WHEN SH.intPricingTypeId = 2 THEN 'B' 
 								  WHEN SH.intPricingTypeId = 3 THEN 'H'
 								  WHEN SH.intPricingTypeId = 4 THEN 'U'
+								  WHEN SH.intPricingTypeId = 5 THEN 'D'
 								  WHEN SH.intPricingTypeId = 6 THEN 'C'
 								  WHEN SH.intPricingTypeId = 7 THEN 'I'
+								  WHEN SH.intPricingTypeId = 8 THEN 'R'
 						 END
        ,intPricingTypeId   = SH.intPricingTypeId
        ,strPricingTypeDesc = CASE 
@@ -574,8 +579,10 @@ BEGIN TRY
 								  WHEN SH.intPricingTypeId = 2 THEN 'Basis' 
 								  WHEN SH.intPricingTypeId = 3 THEN 'HTA'
 								  WHEN SH.intPricingTypeId = 4 THEN 'Unit'
+								  WHEN SH.intPricingTypeId = 5 THEN 'DP'
 								  WHEN SH.intPricingTypeId = 6 THEN 'Cash'
 								  WHEN SH.intPricingTypeId = 7 THEN 'Index'
+								  WHEN SH.intPricingTypeId = 8 THEN 'Ratio'
 						 END
        ,dblFutures        = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0)
 	   ,dblBasis          = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0)
@@ -742,6 +749,7 @@ BEGIN TRY
 		SELECT Row_Number() OVER (PARTITION BY SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC) AS Row_Num
 		,SH.intContractDetailId
 		,SH.intContractStatusId
+		,SH.intPricingTypeId
 		,SH.dtmHistoryCreated
 		FROM tblCTSequenceHistory SH
 		JOIN  tblCTContractBalance FR ON SH.intContractDetailId = FR.intContractDetailId
@@ -755,19 +763,30 @@ BEGIN TRY
 	(
 		intContractDetailId,
 		intContractStatusId,
+		intPricingTypeId,
 		dtmHistoryCreated
 	)
 	SELECT 
 	intContractDetailId,
 	intContractStatusId,
+	intPricingTypeId,
 	dtmHistoryCreated
 	FROM CTE WHERE Row_Num = 1
 
 	UPDATE FR
-	SET FR.intContractStatusId = SH.intContractStatusId
+	SET 
+		 FR.intContractStatusId = SH.intContractStatusId
+		,FR.intPricingTypeId	= SH.intPricingTypeId
 	FROM tblCTContractBalance FR
 	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
 	WHERE FR.dtmEndDate = @dtmEndDate
+
+	UPDATE FR
+	SET FR.strPricingType	  = LEFT(PT.strPricingType,1),
+		FR.strPricingTypeDesc = PT.strPricingType
+	FROM tblCTContractBalance FR
+	JOIN tblCTPricingType PT ON PT.intPricingTypeId = FR.intPricingTypeId
+	WHERE FR.dtmEndDate = @dtmEndDate AND (FR.strPricingType IS NULL OR FR.strPricingTypeDesc IS NULL)
 
 	DELETE FR
 	FROM tblCTContractBalance FR
