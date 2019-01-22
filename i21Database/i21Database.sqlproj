@@ -7252,6 +7252,8 @@
     <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
     <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailUpdateDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

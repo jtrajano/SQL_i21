@@ -72,7 +72,10 @@ BEGIN TRY
 			@dblRemainingQty				NUMERIC(18,6),
 			@dblTotalIVForSHQty				NUMERIC(18,6),
 			@intPFDetailId					INT,
-			@ysnDestinationWeightsAndGrades	BIT
+			@ysnDestinationWeightsAndGrades	BIT,
+			@strInvoiceNumber				NVARCHAR(100),
+			@strBillId						NVARCHAR(100),
+			@strPostedAPAR					NVARCHAR(MAX)
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -329,7 +332,7 @@ BEGIN TRY
 
 				SELECT  @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillDetailId = @intBillDetailId
 				
-				SELECT  @ysnBillPosted = ysnPosted FROM tblAPBill WHERE intBillId = @intBillId
+				SELECT  @ysnBillPosted = ysnPosted, @strBillId = strBillId FROM tblAPBill WHERE intBillId = @intBillId
 				
 				SELECT  @intBillQtyUOMId = intUnitOfMeasureId,
 						@dblTotalBillQty = dblQtyReceived,
@@ -338,9 +341,16 @@ BEGIN TRY
 				FROM    tblAPBillDetail 
 				WHERE   intBillDetailId = @intBillDetailId AND intInventoryReceiptChargeId IS NULL
 
+				
+
 				IF  @dblVoucherPrice	<>	@dblFinalPrice
 					
 				BEGIN
+					IF @ysnBillPosted = 1
+					BEGIN
+						SELECT @strPostedAPAR = ISNULL(@strPostedAPAR + ',','') + @strBillId
+					END
+
 					EXEC	[dbo].[uspSMTransactionCheckIfRequiredApproval]
 									@type					=	N'AccountsPayable.view.Voucher',
 									@transactionEntityId	=	@intEntityId,
@@ -574,7 +584,7 @@ BEGIN TRY
 
 				SELECT  @dblTotal = SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
 				
-				SELECT  @ysnInvoicePosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
+				SELECT  @ysnInvoicePosted = ysnPosted,@strInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId
 				
 				SELECT  @intInvoiceQtyUOMId =	intItemUOMId,
 						@dblTotalInvoiceQty =	dblQtyShipped,
@@ -584,10 +594,17 @@ BEGIN TRY
 
 				FROM    tblARInvoiceDetail 
 				WHERE   intInvoiceDetailId = @intInvoiceDetailId AND intInventoryShipmentChargeId IS NULL
+				
+				IF	@dblInvoicePrice	<>	@dblFinalPrice
+				BEGIN
+					IF @ysnInvoicePosted = 1
+					BEGIN
+						SELECT @strPostedAPAR = ISNULL(@strPostedAPAR + ',','') + @strInvoiceNumber
+					END
+				END
 
 				IF	@dblInvoicePrice	<>	@dblFinalPrice AND ISNULL(@ysnInvoicePosted,0) = 0
 				BEGIN
-					
 					/*CT-2672
 					IF ISNULL(@ysnInvoicePosted,0) = 1
 					BEGIN
@@ -629,6 +646,12 @@ BEGIN TRY
 
 	   SELECT @intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
     END
+
+	IF ISNULL(@strPostedAPAR,'') <> ''
+	BEGIN
+		SET @ErrMsg = 'Cannot Update price as following posted Invoice/Vouchers are available. ' + @strPostedAPAR +'. Unpost those Invoice/Vocuher to continue update the price.'
+		RAISERROR(@ErrMsg,16,1)
+	END
 
 END TRY
 
