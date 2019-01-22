@@ -1,4 +1,4 @@
-﻿ALTER VIEW [dbo].[vyuAPClearablesOnly]
+﻿CREATE VIEW [dbo].[vyuAPClearablesOnly]
 
 AS
 
