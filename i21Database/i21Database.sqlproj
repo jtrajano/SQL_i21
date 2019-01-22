@@ -7290,6 +7290,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
     <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
     <Build Include="dbo\Tables\tblCMBankLoan.sql" />
+    <Build Include="dbo\Tables\tblCMDataFixLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
