@@ -376,11 +376,13 @@ INNER JOIN (
 		SELECT intInvoiceId
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE ysnPosted = 1
-			AND strType <> ''CF Tran''
+		  AND ISNULL(ysnProcessedToNSF, 0) = 0
+		  AND strType <> ''CF Tran''
 	) I ON I.intInvoiceId = PD.intInvoiceId
 ) PD ON P.intPaymentId = PD.intPaymentId
 WHERE ysnInvoicePrepayment = 0
   AND ysnPosted = 1
+  AND ISNULL(P.ysnProcessedToNSF, 0) = 0
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'  
 GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, strNotes
 
@@ -416,13 +418,15 @@ INNER JOIN (
 		SELECT intInvoiceId
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE ysnPosted = 1
-			AND strType <> ''CF Tran''
+		  AND ISNULL(ysnProcessedToNSF, 0) = 0
+		  AND strType <> ''CF Tran''
 	) I ON I.intInvoiceId = PD.intInvoiceId
 	WHERE dblDiscount > 0
 	GROUP BY intPaymentId
 ) PD ON P.intPaymentId = PD.intPaymentId
 WHERE ysnInvoicePrepayment = 0
   AND ysnPosted = 1
+  AND ISNULL(P.ysnProcessedToNSF, 0) = 0
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.dblDiscountTaken, strNotes'
 
@@ -476,12 +480,14 @@ LEFT JOIN (
 		FROM dbo.tblARPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 		  AND ysnInvoicePrepayment = 0 
+		  AND ISNULL(ysnProcessedToNSF, 0) = 0
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
 	) P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY intInvoiceId
 ) TOTALPAYMENT ON PD.intInvoiceId = TOTALPAYMENT.intInvoiceId
 WHERE ysnInvoicePrepayment = 0
   AND ysnPosted = 1
+  AND ISNULL(P.ysnProcessedToNSF, 0) = 0
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
   AND PD.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0
   ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND P.intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
@@ -571,7 +577,8 @@ FROM vyuARCustomerSearch C
 				SELECT intPaymentId
 				FROM dbo.tblARPayment WITH (NOLOCK)
 				WHERE ysnPosted = 1
-				  AND ysnInvoicePrepayment = 0 
+				  AND ysnInvoicePrepayment = 0
+				  AND ISNULL(ysnProcessedToNSF, 0) = 0 
 				  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
 				  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 			) P ON PD.intPaymentId = P.intPaymentId
@@ -584,7 +591,8 @@ FROM vyuARCustomerSearch C
 				 , dtmDatePaid
 			FROM dbo.tblARPayment WITH (NOLOCK)
 			WHERE ysnPosted = 1
-				AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+			  AND ISNULL(ysnProcessedToNSF, 0) = 0
+			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 		) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 		WHERE ysnPosted = 1
 			AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
@@ -597,7 +605,8 @@ FROM vyuARCustomerSearch C
 																SELECT intPaymentId
 																FROM dbo.tblARPayment WITH (NOLOCK)
 																WHERE ysnPosted = 1
-																	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'																	
+																  AND ISNULL(ysnProcessedToNSF, 0) = 0
+																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'																	
 															) P ON PD.intPaymentId = P.intPaymentId))
 				OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId 
 															FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
@@ -605,7 +614,8 @@ FROM vyuARCustomerSearch C
 																SELECT intPaymentId
 																FROM dbo.tblARPayment WITH (NOLOCK)
 																WHERE ysnPosted = 1
-																	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'																	
+																  AND ISNULL(ysnProcessedToNSF, 0) = 0
+																  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'																	
 															) P ON PD.intPaymentId = P.intPaymentId))))
 		AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))
 
