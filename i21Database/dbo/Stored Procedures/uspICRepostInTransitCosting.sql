@@ -151,7 +151,8 @@ BEGIN
 	IF @intLotId IS NOT NULL 
 	BEGIN 
 		EXEC @intReturnValue = dbo.uspICPostLotInTransit
-			@intItemId
+			@strSourceTransactionId -- @strActualCostId 
+			,@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
 			,@dtmDate

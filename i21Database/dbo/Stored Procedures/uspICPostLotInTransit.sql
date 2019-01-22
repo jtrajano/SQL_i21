@@ -3,7 +3,8 @@
 */
 
 CREATE PROCEDURE [dbo].[uspICPostLotInTransit]
-	@intItemId AS INT
+	@strActualCostId AS NVARCHAR(50)
+	,@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT
 	,@dtmDate AS DATETIME
@@ -85,15 +86,16 @@ BEGIN
 
 			IF EXISTS (
 				SELECT	TOP 1 1 
-				FROM	dbo.tblICInventoryLot CostingLot INNER JOIN dbo.tblICLot Lot
-							ON CostingLot.intLotId = Lot.intLotId
-				WHERE	CostingLot.intLotId = @intLotId
-						AND CostingLot.intItemLocationId = @intItemLocationId
-						AND CostingLot.intItemUOMId = Lot.intWeightUOMId
-						AND CostingLot.intItemUOMId <> @intItemUOMId
+				FROM	dbo.tblICInventoryLot cb INNER JOIN dbo.tblICLot Lot
+							ON cb.intLotId = Lot.intLotId
+				WHERE	cb.intLotId = @intLotId
+						AND cb.intItemLocationId = @intItemLocationId
+						AND cb.intItemUOMId = Lot.intWeightUOMId
+						AND cb.intItemUOMId <> @intItemUOMId
 						AND Lot.intWeightUOMId IS NOT NULL 
-						AND ISNULL(CostingLot.ysnIsUnposted, 0) = 0 
-						AND (ISNULL(CostingLot.dblStockIn, 0) - ISNULL(CostingLot.dblStockOut, 0)) > 0 
+						AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+						AND (ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)) > 0 
+						AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId) 
 						--AND (
 						--	Lot.intLotId = @intLotId
 						--	AND Lot.intItemLocationId = @intItemLocationId
@@ -128,7 +130,8 @@ BEGIN
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
 			EXEC @intReturnValue = dbo.uspICReduceStockInLotInTransit
-				@intItemId
+				@strActualCostId
+				,@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
 				,@dtmDate
@@ -185,6 +188,7 @@ BEGIN
 					,@intInTransitSourceLocationId = @intInTransitSourceLocationId
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@strActualCostId = @strActualCostId
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -285,7 +289,7 @@ BEGIN
 				,@intItemLocationId = @intItemLocationId
 				,@intItemUOMId = @intItemUOMId
 				,@intSubLocationId = NULL -- @intSubLocationId
-				,@intStorageLocationId = NULL -- @intStorageLocationId				
+				,@intStorageLocationId = NULL -- @intStorageLocationId
 				,@dtmDate = @dtmDate
 				,@dblQty = @FullQty
 				,@dblUOMQty = @dblUOMQty
@@ -311,6 +315,7 @@ BEGIN
 				,@intInTransitSourceLocationId = @intInTransitSourceLocationId	
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
+				,@strActualCostId = @strActualCostId
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -406,6 +411,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
+							,@strActualCostId = @strActualCostId
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END 
