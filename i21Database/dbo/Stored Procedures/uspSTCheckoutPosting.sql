@@ -1172,7 +1172,7 @@ BEGIN
 																																	AND CATT.intCategoryId = DT.intCategoryId
 																															   ),0)
 																								) AS NUMERIC(18, 6))
-																							) >= 1 
+																							) > 0 
 																						THEN 1
 																				ELSE -1 -- If not match on Pump Totals and Item Movements
 																		  END
@@ -1313,8 +1313,8 @@ BEGIN
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE DT.intCheckoutId = @intCheckoutId
-								AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
-								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+									AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
+									AND UOM.ysnStockUnit = CAST(1 AS BIT)
 					END
 				----------------------------------------------------------------------
 				--------------------- END DEPARTMENT TOTALS --------------------------
@@ -3528,6 +3528,59 @@ BEGIN
 								-- Invoice MAIN Checkout
 								SET @intCreatedInvoiceId = (SELECT TOP 1 intInvoiceId FROM #tmpCustomerInvoiceIdList ORDER BY intInvoiceId ASC)
 
+
+								------------------------------------------------------------------------------------------------------
+                                ---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
+                                ------------------------------------------------------------------------------------------------------
+                                DECLARE @ysnEqual AS BIT
+                                DECLARE @strRemark AS NVARCHAR(500)
+                                SELECT @ysnEqual = A.ysnEqual
+                                       , @strRemark = A.strRemark
+                                FROM
+                                (
+									SELECT
+                                         CASE
+                                            WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments)
+                                               THEN CAST(1 AS BIT)
+                                            WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments)
+                                                THEN CAST(0 AS BIT)
+                                            WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments)
+                                                THEN CAST(0 AS BIT)
+                                         END AS ysnEqual
+                                       , CASE
+                                             WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments)
+                                                 THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments'
+                                             WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments)
+                                                 THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments. Posting will not continue.<br>'
+                                                              + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+                                                              + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
+                                                              + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+                                             WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments)
+                                                 THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments. Posting will not continue.<br>'
+                                                               + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+                                                               + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
+                                                               + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+                                       END AS strRemark
+                                    FROM tblARInvoice Inv
+                                    OUTER APPLY dbo.tblSTCheckoutHeader CH
+                                    WHERE CH.intCheckoutId = @intCheckoutId
+                                        AND Inv.intInvoiceId = @intCreatedInvoiceId
+								) AS A
+                                
+								IF(@ysnEqual = CAST(0 AS BIT))
+									BEGIN
+										SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+                                        SET @ysnSuccess = CAST(0 AS BIT)
+                                        SET @strStatusMsg = 'Invoice and Checkout Total Validation: ' + @strRemark
+
+                                        -- ROLLBACK
+                                        GOTO ExitWithRollback
+                                END
+								------------------------------------------------------------------------------------------------------
+                                -------------------------------------- VALIDATION ENDED ----------------------------------------------
+                                ------------------------------------------------------------------------------------------------------
+
+
 								-- Invoice remaining will be used for Customer CHarges
 								DELETE FROM #tmpCustomerInvoiceIdList WHERE intInvoiceId = @intCreatedInvoiceId
 
@@ -3797,7 +3850,7 @@ BEGIN
 				----------------------------------------------------------------------
 				--------------- START UN-POST SALES INVOICE --------------------------
 				----------------------------------------------------------------------
-
+--PRINT 'START UN-POST SALES INVOICE'
 				SET @strCurrentAllInvoiceIdList = NULL
 
 				-- Insert to Temp Table
@@ -3815,7 +3868,7 @@ BEGIN
 												FROM tblSTCheckoutHeader
 												WHERE intCheckoutId =  @intCheckoutId
 											)
-
+--PRINT 'Populate variable with Invoice Ids'
 				-- Populate variable with Invoice Ids
 				SELECT @strCurrentAllInvoiceIdList = COALESCE(@strCurrentAllInvoiceIdList + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
 				FROM @tblTempInvoiceIds
@@ -3827,7 +3880,7 @@ BEGIN
 						SET @ysnSuccess = 1
 
 						BEGIN TRY
-
+--PRINT 'Un-Post from AR Invoice'
 							EXEC [dbo].[uspARPostInvoice]
 											@batchId			= NULL,
 											@post				= 0, -- 0 = UnPost
@@ -3967,7 +4020,7 @@ BEGIN
 								------------------- START DELETE Invoice  -----------------------------
 								-----------------------------------------------------------------------
 								DECLARE @tblInvoiceIds TABLE ([intInvoiceId] INT NULL)
-
+--PRINT 'START DELETE Invoice'
 								-- Insert to temp table
 								INSERT INTO @tblInvoiceIds(intInvoiceId)
 								SELECT CAST(intID AS INT) AS intInvoiceId 
@@ -3988,7 +4041,7 @@ BEGIN
 										WHERE intCheckoutId = @intCheckoutId
 									END
 								
-
+--PRINT 'Start While Loop'
 								WHILE EXISTS (SELECT TOP (1) 1 FROM @tblInvoiceIds)
 									BEGIN
 										SELECT TOP 1 @intCurrentInvoiceLoop = CAST(intInvoiceId AS INT)
@@ -4016,7 +4069,7 @@ BEGIN
 								-----------------------------------------------------------------------
 								-------------------- END DELETE Invoice -------------------------------
 								-----------------------------------------------------------------------
-
+--PRINT 'START UNPOST MArk Up / Down'
 								SET @ysnInvoiceStatus = 0
 								-----------------------------------------------------------------------
 								------------- START UNPOST MArk Up / Down -----------------------------
@@ -4047,8 +4100,16 @@ BEGIN
 											-- RETURN
 
 										END CATCH
-
-										SET @strStatusMsg = @strMarkUpDownPostingStatusMsg
+--PRINT '@strStatusMsg: ' + ISNULL(@strMarkUpDownPostingStatusMsg, 'NULL')
+										IF(@strMarkUpDownPostingStatusMsg = '')
+											BEGIN
+												SET @strStatusMsg = 'Success' -- Should return to 'Success'
+											END
+										ELSE
+											BEGIN
+												SET @strStatusMsg = @strMarkUpDownPostingStatusMsg
+											END
+										
 									END
 								-----------------------------------------------------------------------
 								------------- END UNPOST MArk Up / Down -------------------------------
