@@ -20,8 +20,7 @@
 	[intCurrencyExchangeRateTypeId] INT NULL,
     CONSTRAINT [PK_tblCMBankTransactionDetail] PRIMARY KEY CLUSTERED ([intTransactionDetailId] ASC),
     CONSTRAINT [FK_tblCMBankTransactiontblCMBankTransactionDetail] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblCMBankTransaction] ([intTransactionId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblGLAccounttblCMBankTransactionDetail] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblCMBankTransactionDetail_tblCMUndepositedFund] FOREIGN KEY ([intUndepositedFundId])  REFERENCES [dbo].[tblCMUndepositedFund] ([intUndepositedFundId])
+	CONSTRAINT [FK_tblGLAccounttblCMBankTransactionDetail] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
 
 
