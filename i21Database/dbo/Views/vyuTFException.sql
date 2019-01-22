@@ -10,7 +10,7 @@ SELECT A.intExceptionId
 	, A.strExceptionType
 	, A.strTransactionType
 	, A.dtmDate 
-	, A.strBillOfLading strTransactionNumber
+	, CASE WHEN A.strTransactionSource = 'Transport Delivery' THEN A.strTransportNumber ELSE A.strBillOfLading END strTransactionNumber
     , A.intProductCodeId
     , E.strProductCode
     , E.strDescription strProductCodeDescription
@@ -26,7 +26,8 @@ SELECT A.intExceptionId
 	, A.strReason
 	, A.intUserEntityId
 	, UserEntity.strName strUserEntityName
-	, A.dtmCreatedDate	  
+	, A.dtmCreatedDate
+	, A.strTransactionSource
  FROM tblTFException A
 INNER JOIN tblTFTaxAuthority B ON B.intTaxAuthorityId = A.intTaxAuthorityId
 INNER JOIN tblTFReportingComponent C ON C.intReportingComponentId = A.intReportingComponentId

@@ -117,7 +117,8 @@ BEGIN TRY
 				, ysnDiversion
 				, strContactName
 				, strEmail
-				, strTransactionSource)
+				, strTransactionSource
+				, strTransportNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -179,6 +180,7 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strTransactionSource = tblARInvoice.strType
+					, tblTRLoadHeader.strTransaction
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -317,7 +319,8 @@ BEGIN TRY
 				, ysnDiversion
 				, strContactName
 				, strEmail
-				, strTransactionSource)
+				, strTransactionSource
+				, strTransportNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -379,6 +382,7 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strTransactionSource = tblARInvoice.strType
+					, tblTRLoadHeader.strTransaction
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -680,7 +684,8 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strContactName
-				, strEmail)
+				, strEmail
+				, strTransportNumber)
 			SELECT DISTINCT (ROW_NUMBER() OVER(ORDER BY intTaxAuthorityId) + @intMaxId) AS intId, *
 			FROM (SELECT DISTINCT NULL AS intTransactionDetailId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -739,6 +744,7 @@ BEGIN TRY
 					, intTransactionNumberId = tblICInventoryTransferDetail.intInventoryTransferDetailId
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
+					, strTransportNumber = tblTRLoadHeader.strTransaction
 				FROM tblTFReportingComponent
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -854,7 +860,8 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strContactName
 				, strEmail
-				, strTransactionSource)
+				, strTransactionSource
+				, strTransportNumber)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
@@ -919,6 +926,7 @@ BEGIN TRY
 				, strContactName
 				, strEmail
 				, strTransactionSource
+				, strTransportNumber
 			FROM @tmpTransaction Trans
 		END
 		

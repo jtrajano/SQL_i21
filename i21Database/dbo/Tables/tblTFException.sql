@@ -61,10 +61,11 @@
 	[dtmCreatedDate] DATETIME NULL,
     [intVendorId] INT NULL, 
     [intCustomerId] INT NULL, 
-    [intTransporterId] INT NULL, 
+    [intTransporterId] INT NULL,
+	[strTransactionSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
+	[strTransportNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTFException] PRIMARY KEY ([intExceptionId]),
-	CONSTRAINT [FK_tblTFException_tblEMEntity] FOREIGN KEY ([intUserEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
-	CONSTRAINT [FK_tblTFException_tblTFReportingComponent_intReportingComponentId] FOREIGN KEY ([intReportingComponentId]) REFERENCES [tblTFReportingComponent]([intReportingComponentId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblTFException_tblEMEntity] FOREIGN KEY ([intUserEntityId]) REFERENCES [tblEMEntity]([intEntityId])
 )
 GO
 
