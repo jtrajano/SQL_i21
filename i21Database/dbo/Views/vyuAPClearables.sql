@@ -93,9 +93,9 @@ SELECT	DISTINCT
 				GROUP BY intInventoryReceiptItemId 
 			) totalVouchered
 			CROSS APPLY (
-				SELECT EL.strLocationName FROM tblEMEntityLocation EL
+				SELECT CL.strLocationName FROM tblSMCompanyLocation CL
 				INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-				WHERE EL.intEntityLocationId = IR.intShipFromId
+				WHERE CL.intCompanyLocationId = IR.intLocationId
 			) loc
 WHERE receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 AND dblVoucherQty <> 0  --TO AVOID MULTIPLE TOTAL
@@ -182,9 +182,9 @@ SELECT	DISTINCT
 				GROUP BY intInventoryReceiptItemId 
 			) totalVouchered
 			CROSS APPLY (
-				SELECT EL.strLocationName FROM tblEMEntityLocation EL
+				SELECT CL.strLocationName FROM tblSMCompanyLocation CL
 				INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-				WHERE EL.intEntityLocationId = IR.intShipFromId
+				WHERE CL.intCompanyLocationId = IR.intLocationId
 			) loc
 WHERE 
 --((ABS(dblReceiptQty) - ABS(dblVoucherQty))) != 0 --HANDLE RETURN AND RECEIPT TRANSACTION
@@ -231,11 +231,11 @@ SELECT DISTINCT
 	, ''AS strContainer
 	,dblVoucherQty = ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 	,dblReceiptQty = 0
-	,EL.strLocationName
+	,CL.strLocationName
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnAccrue = 1 AND ReceiptCharge.ysnPrice = 0
 										AND ReceiptCharge.intEntityVendorId = Receipt.intEntityVendorId
-INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Receipt.intShipFromId
+INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
 LEFT JOIN vyuAPVendor Vendor
 			ON Vendor.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
@@ -317,11 +317,11 @@ SELECT DISTINCT
 	, ''AS strContainer
 	,dblVoucherQty = 0
 	,dblReceiptQty = ABS( ReceiptCharge.dblQuantity)
-	,EL.strLocationName
+	,CL.strLocationName
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnAccrue = 1 AND ReceiptCharge.ysnPrice = 0
 										AND ReceiptCharge.intEntityVendorId = Receipt.intEntityVendorId
-INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Receipt.intShipFromId
+INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
 LEFT JOIN vyuAPVendor Vendor
 			ON Vendor.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
@@ -402,10 +402,10 @@ SELECT DISTINCT
 	, ''AS strContainer
 	,dblVoucherQty = ABS(ISNULL(ReceiptCharge.dblQuantityPriced, 0))
 	,dblReceiptQty = 0
-	,EL.strLocationName
+	,CL.strLocationName
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnPrice = 1
-INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Receipt.intShipFromId
+INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
 LEFT JOIN vyuAPVendor Vendor
 			ON Vendor.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
@@ -486,10 +486,10 @@ SELECT DISTINCT
 	, ''AS strContainer
 	,dblVoucherQty = 0
 	,dblReceiptQty = ABS(ReceiptCharge.dblQuantity)
-	,EL.strLocationName
+	,CL.strLocationName
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnPrice = 1
-INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Receipt.intShipFromId
+INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
 LEFT JOIN vyuAPVendor Vendor
 			ON Vendor.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
@@ -569,13 +569,13 @@ SELECT DISTINCT
 	, ''AS strContainer
 	,dblVoucherQty = ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 	,dblReceiptQty = 0
-	,EL.strLocationName
+	,CL.strLocationName
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt 
 	ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.intEntityVendorId NOT IN (Receipt.intEntityVendorId)
 LEFT JOIN dbo.tblICInventoryReceiptChargeTax ReceiptChargeTax 
 	ON ReceiptChargeTax.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Receipt.intShipFromId
+INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
 LEFT JOIN vyuAPVendor Vendor
 			ON Vendor.intEntityId = ReceiptCharge.intEntityVendorId
 	LEFT JOIN (
@@ -654,7 +654,7 @@ SELECT DISTINCT
 	, ''AS strContainer
 	,dblVoucherQty = 0
 	,dblReceiptQty = ABS( ReceiptCharge.dblQuantity)
-	,EL.strLocationName
+	,CL.strLocationName
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt 
 	ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.intEntityVendorId NOT IN (Receipt.intEntityVendorId)
@@ -662,7 +662,7 @@ LEFT JOIN dbo.tblICInventoryReceiptChargeTax ReceiptChargeTax
 	ON ReceiptChargeTax.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 LEFT JOIN vyuAPVendor Vendor
 			ON Vendor.intEntityId = ReceiptCharge.intEntityVendorId
-INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Receipt.intShipFromId
+INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
@@ -736,13 +736,13 @@ SELECT DISTINCT
 	, ''AS strContainer
 	,dblVoucherQty = ISNULL(ShipmentCharge.dblQuantityBilled, 0)
 	,dblReceiptQty = ABS(ShipmentCharge.dblQuantity)
-	,EL.strLocationName
+	,CL.strLocationName
 FROM dbo.tblICInventoryShipmentCharge ShipmentCharge
 INNER JOIN tblICInventoryShipment Shipment 
 	ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId AND ShipmentCharge.intEntityVendorId NOT IN (Shipment.intEntityCustomerId)
 LEFT JOIN vyuAPVendor Vendor
 			ON Vendor.intEntityId = ShipmentCharge.intEntityVendorId
-INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = Shipment.intShipFromLocationId
+INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Shipment.intShipFromLocationId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
