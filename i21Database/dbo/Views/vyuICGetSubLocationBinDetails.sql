@@ -16,7 +16,7 @@ SELECT
 	, dblAvailable				= SUM((sl.dblEffectiveDepth *  sl.dblUnitPerFoot) - (sm.dblOnHand + sm.dblUnitStorage))
 	, strCommodityCode			= cd.strCommodityCode
 FROM tblICItemStockUOM sm
-	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
+	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId AND im.ysnStockUnit = 1
 	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId
 	INNER JOIN tblICItemLocation il ON il.intItemId = sm.intItemId
 		AND il.intItemLocationId = sm.intItemLocationId
