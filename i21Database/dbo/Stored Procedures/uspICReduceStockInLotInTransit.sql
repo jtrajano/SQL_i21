@@ -5,7 +5,8 @@
 */
 
 CREATE PROCEDURE [dbo].[uspICReduceStockInLotInTransit]
-	@intItemId AS INT
+	@strActualCostId AS NVARCHAR(50)
+	,@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME	
@@ -72,8 +73,9 @@ BEGIN
 						AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
 						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+						AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId) 
 				HAVING 
-					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
+					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)						
 			) cb 
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
@@ -119,10 +121,11 @@ AS		cb
 USING (
 	SELECT	intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
-			,intItemUOMId = @intItemUOMId							
+			,intItemUOMId = @intItemUOMId
 			,intLotId = @intLotId
 			,intSubLocationId = @intSubLocationId
 			,intStorageLocationId = @intStorageLocationId
+			,strActualCostId = @strActualCostId
 ) AS Source_Query 
 	ON cb.intItemId = Source_Query.intItemId
 	AND cb.intItemLocationId = Source_Query.intItemLocationId
@@ -132,6 +135,7 @@ USING (
 	AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
 	AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  -- Round out the remaining stock. If it becomes zero, then stock bucket is considered fully consumed already. 
 	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	AND (cb.strTransactionId = Source_Query.strActualCostId OR Source_Query.strActualCostId IS NULL) 
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 
