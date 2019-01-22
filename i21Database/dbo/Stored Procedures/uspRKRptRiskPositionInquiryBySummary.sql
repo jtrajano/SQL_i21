@@ -58,7 +58,7 @@ SELECT @intBookId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intBookId'
 SELECT @intSubBookId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intSubBookId'
 SELECT @strPositionBy = [from] FROM @temp_xml_table WHERE [fieldname] = 'strPositionBy'
 
-DECLARE @temp as Table (  
+DECLARE @temp as Table (  intRowNumFinal int,
      intRowNumber int,
      strGroup  nvarchar(200) COLLATE Latin1_General_CI_AS, 
      Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
@@ -124,7 +124,7 @@ END
 ELSE
 
 BEGIN
-INSERT INTO @temp (intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
+INSERT INTO @temp (intRowNumFinal,intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
      TranType, CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 Exec uspRKRiskPositionInquiryBySummary  @intCommodityId=@intCommodityId,  
         @intCompanyLocationId=@intCompanyLocationId,  
