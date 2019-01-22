@@ -7250,6 +7250,8 @@
     <Build Include="dbo\Stored Procedures\uspICCleanupStrayItemLocationTransactions.sql" />
     <Build Include="dbo\Views\vyuICItemLocationTransactions.sql" />
     <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
+    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

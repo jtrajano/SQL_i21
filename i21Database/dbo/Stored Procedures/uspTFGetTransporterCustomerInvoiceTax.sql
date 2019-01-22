@@ -633,7 +633,7 @@ BEGIN TRY
 			VALUES (@Guid
 				, @RCId
 				, 'No record found.'
-				, GETDATE()
+				, @DateFrom
 				, @DateFrom
 				, @DateTo
 				, 'Invoice')

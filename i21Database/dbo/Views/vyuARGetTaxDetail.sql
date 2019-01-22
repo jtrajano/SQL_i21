@@ -16,6 +16,7 @@ FROM (
 		 , ysnTaxExempt				= IDT.ysnTaxExempt
 		 , strTransactionType		= 'Invoice' COLLATE Latin1_General_CI_AS
 		 , dblAdjustedTax			= ISNULL(IDT.dblAdjustedTax, 0.00)
+		 , ysnInvalidSetup	 		= IDT.ysnInvalidSetup
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInvoiceDetailId
@@ -23,6 +24,7 @@ FROM (
 			 , intTaxCodeId
 			 , ysnTaxExempt
 			 , dblAdjustedTax
+			 , ysnInvalidSetup	 
 		FROM dbo.tblARInvoiceDetailTax IDT WITH (NOLOCK)
 	) IDT ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
 
@@ -36,13 +38,15 @@ FROM (
 		 , ysnTaxExempt				= SODT.ysnTaxExempt
 		 , strTransactionType		= 'Sales Order' COLLATE Latin1_General_CI_AS
 		 , dblAdjustedTax			= ISNULL(SODT.dblAdjustedTax, 0.00)
+		 , ysnInvalidSetup			= SODT.ysnInvalidSetup
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intSalesOrderDetailId
 			 , intTaxClassId
 			 , intTaxCodeId
 			 , ysnTaxExempt
-			 , dblAdjustedTax		 
+			 , dblAdjustedTax	
+			 , ysnInvalidSetup	 
 		FROM dbo.tblSOSalesOrderDetailTax WITH (NOLOCK)
 	) SODT ON SOD.intSalesOrderDetailId = SODT.intSalesOrderDetailId
 ) TRANSACTIONS	
