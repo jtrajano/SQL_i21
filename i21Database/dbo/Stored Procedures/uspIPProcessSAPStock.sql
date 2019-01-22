@@ -63,7 +63,8 @@ Begin
 		From @tblStock Where intRowNo=@intMinRowNo
 
 		Select TOP 1 @dblInspectionQuantity=ISNULL(dblInspectionQuantity,0),@dblUnrestrictedQuantity=ISNULL(dblUnrestrictedQuantity,0),
-		@dblInTransitQuantity=ISNULL(dblInTransitQuantity,0),@strStockType=strStockType 
+		@dblInTransitQuantity=ISNULL(dblInTransitQuantity,0),@strStockType=strStockType,
+		@dblBlockedQuantity = ISNULL(dblBlockedQuantity,0)
 		From tblIPStockStage 
 		Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
@@ -73,10 +74,10 @@ Begin
 		End
 
 		If @strStockType='WB'
-			Set @dblQuantity = @dblQuantity + @dblInTransitQuantity
+			Set @dblQuantity = @dblQuantity + @dblInTransitQuantity + @dblBlockedQuantity
 
 		--Add Qty from LK,KB
-		Select @dblQuantity = @dblQuantity + SUM(ISNULL(dblQuantity,0)) 
+		Select @dblQuantity = @dblQuantity + SUM(ISNULL(dblQuantity,0)) + SUM(ISNULL(dblBlockedQuantity,0)) 
 		From tblIPStockStage 
 		Where strSessionId=@strSessionId AND strStockType<>'WB'
 		Group By strItemNo,strSubLocation,strSessionId
