@@ -184,12 +184,12 @@ BEGIN
 				, strFutMarketName
 				, strDeliveryDate)
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC)
-				, strCommodityCode = CD.strCommodity
+				, strCommodityCode = CD.strCommodityCode
 				, intCommodityId
 				, intContractHeaderId
 				, strContractNumber = CD.strContract
 				, strLocationName
-				, dtmEndDate
+				, dtmEndDate = dtmSeqEndDate
 				, strFutureMonth
 				, dblBalance = CD.dblQuantity
 				, intUnitMeasureId
@@ -197,12 +197,12 @@ BEGIN
 				, intContractTypeId
 				, intCompanyLocationId
 				, strContractType
-				, strPricingType
+				, strPricingType = CD.strPricingTypeDesc
 				, CD.intContractDetailId
 				, intContractStatusId
 				, intEntityId
 				, intCurrencyId
-				, strType = (CD.strContractType + ' ' + CD.strPricingType) COLLATE Latin1_General_CI_AS
+				, strType = (CD.strContractType + ' ' + CD.strPricingTypeDesc) COLLATE Latin1_General_CI_AS
 				, intItemId
 				, strItemNo
 				, dtmContractDate
@@ -211,10 +211,11 @@ BEGIN
 				, intFutureMonthId
 				, strCategory
 				, strFutMarketName
-				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-			FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
+				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmSeqEndDate, 106), 8)
+			FROM tblCTContractBalance CD
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 				AND intCommodityId = @intCommodityId
+				AND CD.dblQuantity <> 0
 
 			DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
 				, dtmTransactionDate DATETIME

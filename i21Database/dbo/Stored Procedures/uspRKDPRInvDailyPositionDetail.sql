@@ -236,24 +236,24 @@ BEGIN
 			FROM (
 				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC)
 					, dtmContractDate
-					, strCommodityCode = strCommodity
+					, strCommodityCode = strCommodityCode
 					, intCommodityId
 					, intContractHeaderId
 					, strContractNumber = strContract
 					, strLocationName
-					, strContractEndMonth = (RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)) COLLATE Latin1_General_CI_AS
-					, dtmEndDate = CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE CD.dtmEndDate END
+					, strContractEndMonth = (RIGHT(CONVERT(VARCHAR(11), CD.dtmSeqEndDate, 106), 8)) COLLATE Latin1_General_CI_AS
+					, dtmEndDate = CD.dtmSeqEndDate
 					, dblBalance = CD.dblQuantity
 					, intUnitMeasureId
 					, intPricingTypeId
 					, intContractTypeId
 					, intCompanyLocationId
 					, strContractType
-					, strPricingType
+					, strPricingType = CD.strPricingTypeDesc
 					, CD.intContractDetailId
 					, intContractStatusId
 					, intCurrencyId
-					, strType = (CD.strContractType + ' ' + CD.strPricingType) COLLATE Latin1_General_CI_AS
+					, strType = (CD.strContractType + ' ' + CD.strPricingTypeDesc) COLLATE Latin1_General_CI_AS
 					, intItemId
 					, strItemNo
 					, intEntityId
@@ -264,8 +264,8 @@ BEGIN
 					, strFutMarketName
 					, strFutureMonth
 					, strCurrency
-					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-				FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
+					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmSeqEndDate, 106), 8)
+				FROM tblCTContractBalance CD
 				WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 			)t
 
