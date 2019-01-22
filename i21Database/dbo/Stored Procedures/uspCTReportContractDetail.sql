@@ -55,7 +55,7 @@ BEGIN TRY
 		INSERT INTO @Amend
 		SELECT @intContractDetailId,@strAmendedColumns
 
-		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetailWITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
+		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 	
 
