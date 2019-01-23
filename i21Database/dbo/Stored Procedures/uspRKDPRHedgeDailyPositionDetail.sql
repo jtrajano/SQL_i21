@@ -230,7 +230,7 @@ BEGIN
 		, strLocationName
 		--, dtmEndDate = (CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END)
 		, dtmEndDate = dtmSeqEndDate
-		, dblBalance = CD.dblQuantity
+		, dblBalance = CD.dblQtyinCommodityStockUOM
 		, intUnitMeasureId
 		, intPricingTypeId
 		, intContractTypeId
@@ -253,6 +253,7 @@ BEGIN
 		, strCurrency
 	FROM tblCTContractBalance CD
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
+	AND CD.dtmStartDate = '01-01-1900' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 	
 	DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
 		, dtmTransactionDate DATETIME
@@ -678,7 +679,7 @@ BEGIN
 						, strContractType = 'Physical Contract' COLLATE Latin1_General_CI_AS
 						, strLocationName
 						, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8)
-						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((cd.dblBalance), 0))
+						, dblTotal = cd.dblBalance
 						, cd.intUnitMeasureId
 						, intCommodityId = @intCommodityId
 						, cd.intCompanyLocationId
@@ -695,7 +696,6 @@ BEGIN
 						, strEntityName
 						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 					FROM @tblGetOpenContractDetail cd
-					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId 
 					WHERE cd.intContractTypeId IN (1,2) AND cd.intCommodityId = @intCommodityId
 						AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN cd.intCompanyLocationId ELSE @intLocationId END
 				) t WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
