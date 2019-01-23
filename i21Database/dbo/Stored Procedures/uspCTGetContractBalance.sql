@@ -139,7 +139,7 @@ BEGIN TRY
 	   AND CD.intContractHeaderId = CH.intContractHeaderId
 	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'
 	   	AND InvTran.ysnIsUnposted = 0
-	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
+	   	--AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND intContractTypeId = 2
 	   	AND InvTran.intInTransitSourceLocationId IS NULL
@@ -184,7 +184,7 @@ BEGIN TRY
 	  AND CD.intContractHeaderId = CH.intContractHeaderId
 	  WHERE
 	  	ysnIsUnposted = 0
-	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
+	  	--AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END	
 	  	AND InvTran.intTransactionTypeId = 46
 	  	AND InvTran.intInTransitSourceLocationId IS NULL
@@ -226,7 +226,7 @@ BEGIN TRY
 	  AND CD.intContractHeaderId = CH.intContractHeaderId
 	  WHERE strTransactionForm = 'Inventory Receipt'
 	  	AND ysnIsUnposted = 0
-	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
+	  	--AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	  	AND intContractTypeId = 1
 	  	AND InvTran.intTransactionTypeId = 4
@@ -264,7 +264,7 @@ BEGIN TRY
 		AND CD.intContractHeaderId = CH.intContractHeaderId
 		WHERE SS.ysnPosted = 1
 			AND SS.intParentSettleStorageId IS NOT NULL
-			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
+			--AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 		GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 			,CD.intContractDetailId,SS.dtmCreated,SS.intSettleStorageId
@@ -318,7 +318,7 @@ BEGIN TRY
 	JOIN	tblCTPriceFixation		 PF	ON	PF.intPriceFixationId =	FD.intPriceFixationId
 	JOIN tblCTContractHeader		 CH ON CH.intContractHeaderId = PF.intContractHeaderId
 	JOIN tblCTContractDetail		 CD ON CD.intContractDetailId = PF.intContractDetailId
-	WHERE   dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
+	--WHERE   dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
 	AND     dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
 	GROUP BY CH.intContractTypeId,PF.intContractHeaderId,PF.intContractDetailId,FD.dtmFixationDate,FD.dblFutures,FD.dblBasis,FD.dblCashPrice,CD.dblQuantityPerLoad
 	
