@@ -8,7 +8,7 @@ AS
 			NM.intPriceContractId,
 			NM.ysnSpreadAvailable,
 			NM.dblCommodityUOMConversionFactor,
-			NM.strPrepaidIds,
+			NM.strPrepaidIds  COLLATE Latin1_General_CI_AS AS strPrepaidIds,
 			NM.ysnExchangeTraded,						
 			NM.strINCOLocationType,			
 			NM.ysnPrepaid,			
