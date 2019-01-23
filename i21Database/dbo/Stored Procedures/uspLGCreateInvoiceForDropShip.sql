@@ -30,7 +30,7 @@ BEGIN
 				tblCTContractDetail CD
 				JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
 				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1))
+				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
 	BEGIN
 		SELECT TOP 1 
 			@strInvoiceNumber = CH.strContractNumber,
