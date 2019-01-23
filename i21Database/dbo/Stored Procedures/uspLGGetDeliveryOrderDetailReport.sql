@@ -20,8 +20,8 @@ BEGIN
 		  ,WU.strUnitMeasure AS strWeightUOM
 		  ,WU.strSymbol AS strWeightUOMSymbol
 		  ,IRIL.strContainerNo AS strContainerNumber
-		  ,strMarks = ISNULL(IRIL.strMarkings, LC.strMarks)
-		  ,LC.strCustomsComments
+		  ,strMarks = ISNULL(IRIL.strMarkings, LC2.strMarks)
+		  ,strCustomsComments = ISNULL(LC.strCustomsComments, LC2.strCustomsComments)
 		  ,LW.strDeliveryNoticeNumber
 		  ,CLSL.strSubLocationName
 		  ,LDL.strWarehouseCargoNumber
@@ -46,5 +46,7 @@ BEGIN
 	LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = IRI.intLineNo
 	LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
+	LEFT JOIN tblLGLoadContainer LC2 ON LC2.intLoadId = L.intLoadId
+	INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC2.intLoadContainerId = LDCL.intLoadContainerId
 	WHERE strLoadNumber = @strLoadNumber 
 END
