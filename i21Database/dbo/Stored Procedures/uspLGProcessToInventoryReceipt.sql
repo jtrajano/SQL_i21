@@ -484,9 +484,9 @@ BEGIN TRY
 			,NULL
 			,LD.intItemUOMId
 			,LD.intItemId
-			,ISNULL(LC.dblQuantity, LD.dblQuantity)
-			,ISNULL(LC.dblGrossWt, LD.dblGross)
-			,ISNULL(LC.dblTareWt, LD.dblTare)
+			,ISNULL(LDCL.dblQuantity, ISNULL(LC.dblQuantity, LD.dblQuantity))
+			,ISNULL(LDCL.dblLinkGrossWt, ISNULL(LC.dblGrossWt, LD.dblGross))
+			,ISNULL(LDCL.dblLinkTareWt, ISNULL(LC.dblTareWt, LD.dblTare))
 			,LC.strContainerNumber
 			,ISNULL(LC.intLoadContainerId,0)
 			,LC.strMarks
@@ -1027,9 +1027,9 @@ BEGIN TRY
 			,CD.intContractDetailId
 			,LD.intItemUOMId
 			,LD.intItemId
-			,ISNULL(LC.dblQuantity, LD.dblQuantity)
-			,ISNULL(LC.dblGrossWt, LD.dblGross)
-			,ISNULL(LC.dblTareWt, LD.dblTare)
+			,ISNULL(LDCL.dblQuantity, ISNULL(LC.dblQuantity, LD.dblQuantity))
+			,ISNULL(LDCL.dblLinkGrossWt, ISNULL(LC.dblGrossWt, LD.dblGross))
+			,ISNULL(LDCL.dblLinkTareWt, ISNULL(LC.dblTareWt, LD.dblTare))
 			,LC.strContainerNumber
 			,ISNULL(LC.intLoadContainerId,0)
 			,LC.strMarks
