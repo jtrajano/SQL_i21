@@ -660,11 +660,11 @@ BEGIN
 	FROM dbo.fnAPReverseGLEntries(@Ids, 'Bill', DEFAULT, @userId, @batchId)
 
 	--NEGATE THE COST
-	UPDATE @adjustedEntries
-	SET dblNewValue = -dblNewValue
+	-- UPDATE @adjustedEntries
+	-- SET dblNewValue = -dblNewValue
 
-	UPDATE @ChargesToAdjust
-	SET dblNewValue = -dblNewValue
+	-- UPDATE @ChargesToAdjust
+	-- SET dblNewValue = -dblNewValue
 	-- Call the Item's Cost Adjustment
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN	
