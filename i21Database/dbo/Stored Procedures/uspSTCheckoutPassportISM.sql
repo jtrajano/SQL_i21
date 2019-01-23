@@ -194,6 +194,7 @@ BEGIN
 				, intQtySold
 				, dblCurrentPrice
 				, dblDiscountAmount
+				, dblGrossSales
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
@@ -206,6 +207,7 @@ BEGIN
 			  , intQtySold			= ISNULL(CAST(Chk.SalesQuantity as int),0)
 			  , dblCurrentPrice		= ISNULL(NULLIF(CAST(Chk.SalesAmount as decimal(18,6)),0) / NULLIF(CAST(Chk.SalesQuantity as int),0),0) --ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
 			  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)
+			  , dblGrossSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) 
 			  , dblTotalSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) --// + (ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)  )
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost as decimal(18,6)),0)
 			  , intConcurrencyId	= 1
