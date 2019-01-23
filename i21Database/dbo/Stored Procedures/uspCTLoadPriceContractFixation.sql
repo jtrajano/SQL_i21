@@ -64,7 +64,9 @@ BEGIN TRY
 			[strDiscountScheduleCode] [nvarchar](250) NULL,
 			[strPricingType] [nvarchar](100) NULL,
 			[dblRatio] [numeric](18, 6) NULL,
-			[dblAppliedQty] [numeric](18, 6) NULL
+			[dblAppliedQty] [numeric](18, 6) NULL,
+			strBook  [nvarchar](250) NULL,
+			strSubBook  [nvarchar](250) NULL
 		) 
 
 		SELECT * INTO #tblCTPriceFixation FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId
