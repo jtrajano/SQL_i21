@@ -194,6 +194,7 @@ BEGIN
 				, intQtySold
 				, dblCurrentPrice
 				, dblDiscountAmount
+				, dblGrossSales
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
@@ -204,11 +205,9 @@ BEGIN
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
 			  , intQtySold			= ISNULL(CAST(Chk.SalesQuantity as int),0)
-									  -- (Total - (DiscountAmount + PromotionAmount)) / Qty
 			  , dblCurrentPrice		= ISNULL(NULLIF(CAST(Chk.SalesAmount as decimal(18,6)),0) / NULLIF(CAST(Chk.SalesQuantity as int),0),0) --ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
-									  -- (DiscountAmount + PromotionAmount)
 			  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)
-									  -- (Total - (DiscountAmount + PromotionAmount))
+			  , dblGrossSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) 
 			  , dblTotalSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) --// + (ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)  )
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost as decimal(18,6)),0)
 			  , intConcurrencyId	= 1

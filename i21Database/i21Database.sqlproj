@@ -7254,6 +7254,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailDelete.sql" />
+    <None Include="Scripts\Post-Deployment\ST\25_DataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
