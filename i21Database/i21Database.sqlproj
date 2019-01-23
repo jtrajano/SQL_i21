@@ -7256,7 +7256,6 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateFuturesMonth.sql" />
     <Build Include="dbo\Functions\fnRKGetContractInfo.sql" />
     <Build Include="dbo\Tables\tblICStagingDailyStockPosition.sql" />
-    <None Include="Scripts\Post-Deployment\GR\GR_GrossQuantityInStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_FarmField.sql" />
     <Build Include="dbo\Functions\fnSCGetTicketDetailsFromLG.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractBalance.sql" />

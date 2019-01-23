@@ -244,7 +244,6 @@ BEGIN TRY
 
 				UPDATE CS
 				SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnit
-					,CS.dblGrossQuantity = CS.dblGrossQuantity + ISNULL(GS.dblGrossSettledUnits,0)
 				FROM tblGRCustomerStorage CS
 				JOIN (
 						SELECT intCustomerStorageId
@@ -253,12 +252,6 @@ BEGIN TRY
 						WHERE intSettleStorageId = @intSettleStorageId
 						GROUP BY intCustomerStorageId
 					) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
-				OUTER APPLY (
-					SELECT dblGrossSettledUnits
-					FROM tblGRSettleStorageTicket
-					WHERE intSettleStorageId = @intSettleStorageId
-						AND intCustomerStorageId = CS.intCustomerStorageId
-				) GS
 			END
 
 			--3. OnHand and OnStore Increment

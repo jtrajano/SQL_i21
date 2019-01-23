@@ -400,7 +400,7 @@ BEGIN TRY
 													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
 														CASE WHEN CS.dblGrossQuantity IS NULL THEN SST.dblUnits
 														ELSE
-															ROUND(((SST.dblUnits / CS.dblOpenBalance) * CS.dblGrossQuantity),@intDecimalPrecision)
+															ROUND(((SST.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity),@intDecimalPrecision)
 														END
 													ELSE SST.dblUnits
 												END
@@ -428,8 +428,8 @@ BEGIN TRY
 						AND SST.dblUnits > 0
 				JOIN tblGRSettleStorage SS
 					ON SS.intSettleStorageId = SST.intSettleStorageId
-				JOIN tblICCommodityUnitMeasure CU 
-					ON CU.intCommodityId = CS.intCommodityId 
+				JOIN tblICCommodityUnitMeasure CU
+					ON CU.intCommodityId = CS.intCommodityId
 						AND CU.ysnStockUnit = 1
 				JOIN tblQMTicketDiscount QM 
 					ON QM.intTicketFileId = CS.intCustomerStorageId 
@@ -1223,11 +1223,7 @@ BEGIN TRY
 											WHEN ISNULL(a.dblSettleContractUnits,0) > 0 THEN a.dblSettleContractUnits
 											ELSE ISNULL(b.dblSettleUnits,0)
 										END
-									ELSE 
-										CASE 
-											WHEN ISNULL(a.dblSettleContractUnits,0) > 0 THEN ROUND((a.dblSettleContractUnits / CS.dblOpenBalance) * a.dblUnits, @intDecimalPrecision)
-											ELSE ROUND((ISNULL(b.dblSettleUnits,0) / CS.dblOriginalBalance) * a.dblUnits, @intDecimalPrecision)
-										END
+									ELSE a.dblUnits
 								END
 				FROM @SettleVoucherCreate a
 				LEFT JOIN 
@@ -1716,10 +1712,14 @@ BEGIN TRY
 				UPDATE CS
 				SET CS.dblOpenBalance = CASE 
 											WHEN ROUND(CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),4,1) > 0.0009 
-													THEN ROUND(CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),4)
+													THEN ROUND(CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),@intDecimalPrecision)
 											ELSE 0
 									   END
-					,CS.dblGrossQuantity = CS.dblGrossQuantity - (SELECT TOP 1 dblUnits FROM @SettleVoucherCreate WHERE intItemType = 3 AND ysnDiscountFromGrossWeight = 1)
+					-- ,CS.dblGrossQuantity = CASE 
+					-- 						WHEN ROUND(CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),4,1) > 0.0009 
+					-- 								THEN ROUND((CS.dblOpenBalance - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,CU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit)) / CS.dblOpenBalance) * CS.dblGrossQuantity, @intDecimalPrecision)
+					-- 						ELSE 0
+					-- 				   END
 				FROM tblGRCustomerStorage CS
 				JOIN tblICCommodityUnitMeasure CU 
 					ON CU.intCommodityId = CS.intCommodityId 
@@ -1731,10 +1731,6 @@ BEGIN TRY
 						WHERE intItemType = 1
 						GROUP BY intCustomerStorageId
 					 ) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
-
-				UPDATE tblGRSettleStorageTicket 
-				SET dblGrossSettledUnits = (SELECT TOP 1 dblUnits FROM @SettleVoucherCreate WHERE intItemType = 3 AND ysnDiscountFromGrossWeight = 1) 
-				WHERE intSettleStorageTicketId = @intSettleStorageTicketId
 			END
 
 			--7. HiStory Creation
