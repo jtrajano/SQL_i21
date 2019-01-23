@@ -31,7 +31,8 @@ BEGIN
 			,@ORIGIN_EFT AS INT = 13
 			,@ORIGIN_WITHDRAWAL AS INT = 14
 			,@ORIGIN_WIRE AS INT = 15
-			,@NSF INT = 25;
+			,@NSF INT = 124
+			,@BANK_INTEREST INT = 51;
 
 	WITH PagedBankTransactions AS 
 	(
@@ -51,7 +52,7 @@ BEGIN
 				)
 				AND (
 					-- Filter for all the bank payments and debits:
-					intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+					intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@BANK_INTEREST,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 					OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 				)
 	)
@@ -77,7 +78,7 @@ BEGIN
 			)
 			AND (
 				-- Filter for all the bank payments and debits:
-				intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
+				intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @NSF, @BANK_INTEREST, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE)
 				OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 			)
 END

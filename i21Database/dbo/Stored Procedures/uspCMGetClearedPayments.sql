@@ -36,10 +36,10 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@PAYCHECK AS INT = 21
 		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
-		,@NSF INT = 25
-		,@LastReconDate AS DATETIME
+		,@NSF AS INT = 124
+		,@LastReconDate AS DATETIME;
 
-		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
+SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
 		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ABS(ISNULL(dblAmount, 0))), 0)
@@ -59,7 +59,7 @@ WHERE	ysnPosted = 1
 		)
 		AND (
 			-- Filter for all the bank payments and debits:
-			intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
+			intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@BANK_INTEREST,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
 			OR ( dblAmount < 0 AND intBankTransactionTypeId in ( @BANK_TRANSACTION, @BANK_INTEREST ))
 		)
 		AND 1 = CASE 

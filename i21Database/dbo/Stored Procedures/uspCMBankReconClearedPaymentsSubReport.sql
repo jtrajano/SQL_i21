@@ -33,7 +33,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@PAYCHECK AS INT = 21
 		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
-		,@NSF INT = 25
+		,@NSF INT = 124
+		,@BANK_INTEREST INT = 51;
 
 --SET @xmlparam = '
 --<xmlparam>
@@ -170,7 +171,7 @@ WHERE	BankTrans.ysnPosted = 1
 		AND ISNULL(BankTrans.dtmDateReconciled, @dtmStatementDate) >= ISNULL(@dtmStatementDate,BankTrans.dtmDateReconciled)
 		AND (
 			-- Filter for all the bank payments and debits:
-			BankTrans.intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
+			BankTrans.intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@BANK_INTEREST,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
 			OR ( BankTrans.dblAmount < 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
 		AND @ysnCheckVoid = (CASE WHEN ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled THEN 1 ELSE 0 END )

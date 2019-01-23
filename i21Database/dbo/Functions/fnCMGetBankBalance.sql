@@ -31,7 +31,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@PAYCHECK AS INT = 21
 		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
-		,@NSF INT = 25
+		,@NSF INT = 124
+		,@BANK_INTEREST INT = 51
 		,@VOID_MISC_CHECKS INT = 103
 		,@VOID_AP_PAYMENT AS INT = 116
 		,@VOID_PAYCHECK AS INT = 121
@@ -86,7 +87,7 @@ WHERE	A.ysnPosted = 1
 		AND A.ysnCheckVoid = 0
 		AND A.intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, A.dtmDate) AS FLOAT)) AS DATETIME)		
-		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL,@NSF)
+		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL,@NSF, @BANK_INTEREST)
 HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0) <> 0
 
 -- Get bank amounts for the rest of the transactions like deposits, transfer (dep), and etc.
@@ -97,7 +98,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @NSF, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT, @ACH)
+		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @NSF, @BANK_INTEREST, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT, @ACH)
 
 -- Add the opening balance to the return balance. 
 SELECT @returnBalance = ISNULL(@openingBalance, 0) + @returnBalance
