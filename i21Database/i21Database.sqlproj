@@ -7255,6 +7255,7 @@
     <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailDelete.sql" />
     <None Include="Scripts\Post-Deployment\ST\25_DataFix.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutOptTransactionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
