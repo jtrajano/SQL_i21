@@ -113,6 +113,8 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Delivery Order Report Format - 1'
 		WHEN 2
 			THEN 'Delivery Order Report Format - 2'
+		WHEN 3
+			THEN 'Delivery Order Report Format - 3'
 		END COLLATE Latin1_General_CI_AS strDeliveryOrderReportFormat
 	,CP.intInStoreLetterReportFormat
 	,CASE CP.intInStoreLetterReportFormat

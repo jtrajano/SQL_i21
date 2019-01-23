@@ -21,12 +21,12 @@ BEGIN
 		  ,WU.strSymbol AS strWeightUOMSymbol
 		  ,IRIL.strContainerNo AS strContainerNumber
 		  ,strMarks = ISNULL(IRIL.strMarkings, LC.strMarks)
+		  ,LC.strCustomsComments
 		  ,LW.strDeliveryNoticeNumber
 		  ,CLSL.strSubLocationName
 		  ,LDL.strWarehouseCargoNumber
 		  ,PCH.strContractNumber + '/' + CONVERT(NVARCHAR,PCD.intContractSeq) strOurRef
 		  ,R.strWarehouseRefNo
-
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
@@ -45,7 +45,6 @@ BEGIN
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = IRI.intInventoryReceiptId
 	LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = IRI.intLineNo
 	LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
-
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
 	WHERE strLoadNumber = @strLoadNumber 
 END
