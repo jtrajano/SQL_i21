@@ -141,7 +141,7 @@ BEGIN TRY
 						@intExternalId			=	@intInventoryShipmentItemId,
 						@strScreenName			=	@strScreenName
 
-				IF	@ysnReduceScheduleByLogisticsLoad = 1 AND @intSourceType = 1 AND @intOrderType = 1
+				IF	@ysnReduceScheduleByLogisticsLoad = 1 AND @intSourceType = 1 AND @intOrderType = 1 AND ISNULL(@ysnLoad,0) = 0
 				BEGIN
 					SELECT @intLoadId = intLoadId from tblSCTicket WHERE intTicketId = @intSourceId
 					SELECT @intLoadDetailId = intLoadDetailId,@intSContractDetailId = intSContractDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId AND intSContractDetailId = @intContractDetailId
