@@ -32,9 +32,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, dblNetWgt = ReceiptItem.dblNet
 	, Item.strLotTracking
 	, Item.intCommodityId
-	, Commodity.strCommodityCode
-	, Item.intCategoryId
-	, Category.strCategoryCode
+
 	, ReceiptItem.intContainerId
 	, ReceiptItemSource.strContainer
 	, ReceiptItem.intSubLocationId

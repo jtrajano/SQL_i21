@@ -27,6 +27,10 @@ SELECT
 	, AdjDetail.intNewItemId
 	, strNewItemNo = NewItem.strItemNo
 	, strNewItemDescription = NewItem.strDescription
+	, intNewCommodityId = NewItem.intCommodityId
+	, strNewCommodity = NewCommodity.strCommodityCode
+	, intNewCategoryId = NewItem.intCategoryId
+	, strNewCategory = NewCategory.strCategoryCode
 	, strNewLotTracking = NewItem.strLotTracking
 	, AdjDetail.intLotId
 	, Lot.strLotNumber
@@ -93,6 +97,8 @@ LEFT JOIN tblICItem Item ON Item.intItemId = AdjDetail.intItemId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICItem NewItem ON NewItem.intItemId = AdjDetail.intNewItemId
+LEFT JOIN tblICCommodity NewCommodity ON Commodity.intCommodityId = NewItem.intCommodityId
+LEFT JOIN tblICCategory NewCategory ON Category.intCategoryId = NewItem.intCategoryId
 LEFT JOIN tblICLot Lot ON Lot.intLotId = AdjDetail.intLotId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
 LEFT JOIN vyuICGetItemUOM NewItemUOM ON NewItemUOM.intItemUOMId = AdjDetail.intNewItemUOMId
