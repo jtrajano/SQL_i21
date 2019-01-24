@@ -26,6 +26,9 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
 	, Item.intCommodityId
+	, strCommodity = Commodity.strCommodityCode
+	, Item.intCategoryId
+	, strCategory = Category.strCategoryCode
 	, ShipmentItem.intSubLocationId
 	, SubLocation.strSubLocationName
 	, ShipmentItem.intStorageLocationId
@@ -81,6 +84,8 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ShipmentItem.intItemId
+	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
+	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ShipmentItem.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ShipmentItem.intStorageLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId

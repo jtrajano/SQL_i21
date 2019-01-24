@@ -23,10 +23,18 @@ SELECT
 	, AdjDetail.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
+	, Item.intCommodityId
+	, strCommodity = Commodity.strCommodityCode
+	, Item.intCategoryId
+	, strCategory = Category.strCategoryCode
 	, Item.strLotTracking
 	, AdjDetail.intNewItemId
 	, strNewItemNo = NewItem.strItemNo
 	, strNewItemDescription = NewItem.strDescription
+	, intNewCommodityId = NewItem.intCommodityId
+	, strNewCommodity = NewCommodity.strCommodityCode
+	, intNewCategoryId = NewItem.intCategoryId
+	, strNewCategory = NewCategory.strCategoryCode
 	, strNewLotTracking = NewItem.strLotTracking
 	, AdjDetail.intLotId
 	, Lot.strLotNumber
@@ -84,7 +92,11 @@ LEFT JOIN tblSMCompanyLocationSubLocation NewSubLocation ON NewSubLocation.intCo
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = AdjDetail.intStorageLocationId
 LEFT JOIN tblICStorageLocation NewStorageLocation ON NewStorageLocation.intStorageLocationId = AdjDetail.intNewStorageLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = AdjDetail.intItemId
+LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
+LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 LEFT JOIN tblICItem NewItem ON NewItem.intItemId = AdjDetail.intNewItemId
+LEFT JOIN tblICCommodity NewCommodity ON Commodity.intCommodityId = NewItem.intCommodityId
+LEFT JOIN tblICCategory NewCategory ON Category.intCategoryId = NewItem.intCategoryId
 LEFT JOIN tblICLot Lot ON Lot.intLotId = AdjDetail.intLotId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
 LEFT JOIN vyuICGetItemUOM NewItemUOM ON NewItemUOM.intItemUOMId = AdjDetail.intNewItemUOMId
