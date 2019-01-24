@@ -34,6 +34,7 @@
 	,@intEntryCode					INT				 =	 0
 	,@strProductAuthorization		NVARCHAR(MAX)	 =	 ''
 	,@strComment					NVARCHAR(MAX)	 =	 ''
+	,@strDefaultDriverPrin			NVARCHAR(MAX)	 =	 ''
 
 AS
 BEGIN
@@ -51,6 +52,7 @@ BEGIN
 	DECLARE @intCardTypeId							  INT = 0
 	DECLARE @intCardId								  INT = 0
 	DECLARE @intProductAuthId						  INT = 0
+	DECLARE @intDriverPinId							  INT = 0
 	---------------------------------------------------------
 
 
@@ -190,6 +192,7 @@ BEGIN
 		SELECT @intDefaultFixVehicleNumber = intVehicleId 
 		FROM tblCFVehicle 
 		WHERE strVehicleNumber = @strDefaultFixVehicleNumber
+		AND intAccountId =  @intAccountId
 		IF (@intDefaultFixVehicleNumber = 0)
 		BEGIN
 			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
@@ -257,6 +260,28 @@ BEGIN
 	BEGIN
 		SET @intCardTypeId = NULL
 	END
+
+
+	IF (@strDefaultDriverPrin != '')
+	BEGIN 
+		SELECT @intDriverPinId = intDriverPinId 
+		FROM tblCFDriverPin 
+		WHERE strDriverPinNumber = @strDefaultDriverPrin AND intAccountId = @intAccountId
+
+		IF (@intDriverPinId = 0)
+		BEGIN
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCardNumber,'Unable to find match for '+ @strDefaultDriverPrin +' on driver pin list')
+			SET @ysnHasError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SET @intDriverPinId = NULL
+	END
+
+
+	
 	---------------------------------------------------------
 	
 	IF(@ysnHasError = 1)
@@ -371,6 +396,7 @@ BEGIN
 			 ,intEntryCode
 			 ,strComment
 			 ,intProductAuthId
+			 ,intDefaultDriverPin
 			 )
 			VALUES(
 			  @intNetworkId					
@@ -399,6 +425,7 @@ BEGIN
 			 ,@intEntryCode
 			 ,@strComment
 			 ,@intProductAuthId
+			 ,@intDriverPinId
 			 )
 
 			COMMIT TRANSACTION
