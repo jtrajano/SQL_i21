@@ -37,8 +37,8 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LOT.intItemUOMId
 	JOIN tblICUnitMeasure IU ON IU.intUnitMeasureId = IUOM.intUnitMeasureId
-	JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = LOT.intWeightUOMId
-	JOIN tblICUnitMeasure WU ON WU.intUnitMeasureId = WUOM.intUnitMeasureId
+	--JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = LDL.intWeightUOMId
+	JOIN tblICUnitMeasure WU ON WU.intUnitMeasureId = L.intWeightUnitMeasureId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LOT.intLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
