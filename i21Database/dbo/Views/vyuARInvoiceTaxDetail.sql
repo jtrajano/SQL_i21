@@ -20,6 +20,7 @@ SELECT
 	,D.dblTotal
 	,ITX.ysnCheckoffTax 
 	,ITX.ysnTaxExempt 
+	,ITX.ysnInvalidSetup
 	,ITX.ysnTaxOnly 
 	,ITX.dblTax 
 	,ITX.dblAdjustedTax 
