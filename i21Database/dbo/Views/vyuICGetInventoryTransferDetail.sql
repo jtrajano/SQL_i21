@@ -39,6 +39,7 @@ AS
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
 	, Item.intCommodityId
+	, Item.intCategoryId
 	, TransferDetail.intLotId
 	, Lot.strLotNumber
 	, ParentLot.intParentLotId
@@ -148,10 +149,16 @@ AS
 	, TransferDetail.strNewWarehouseRefNo
 	, strCostingMethod = ISNULL(CostingMethod.strCostingMethod, '')
 	, TransferDetail.intConcurrencyId
+	, Commodity.strCommodityCode
+	, Commodity.strDescription strCommodity
+	, Category.strCategoryCode
+	, Category.strDescription strCategory
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
 		LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
+		LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
+		LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 		LEFT JOIN tblICStatus stat ON stat.intStatusId = [Transfer].intStatusId
 		LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = TransferDetail.intLotId
 		LEFT JOIN tblSMCompanyLocation FromLoc ON FromLoc.intCompanyLocationId = [Transfer].intFromLocationId

@@ -88,12 +88,17 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.strOrigin
 	, ReceiptItemSource.strPurchasingGroup
 	, ReceiptItemSource.strINCOShipTerm
+	, Commodity.strCommodityCode
+	, Commodity.strDescription strCommodity
+	, Category.strCategoryCode
+	, Category.strDescription strCategory
+	, Category.intCategoryId
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
-	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
+	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ReceiptItem.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ReceiptItem.intStorageLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId

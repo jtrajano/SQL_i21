@@ -76,6 +76,12 @@ SELECT
 	, strCostingMethod = ISNULL(CostingMethod.strCostingMethod, '')
 	, strOwnershipType = CASE AdjDetail.intOwnershipType WHEN 1 THEN 'Own' WHEN 2 THEN 'Storage' WHEN 3 THEN 'Consigned Purchase' WHEN 4 THEN 'Consigned Sale' ELSE NULL END
 	, AdjDetail.intConcurrencyId
+	, Commodity.strCommodityCode
+	, Commodity.strDescription strCommodity
+	, Category.strCategoryCode
+	, Category.strDescription strCategory
+	, Category.intCategoryId
+	, Commodity.intCommodityId
 FROM tblICInventoryAdjustmentDetail AdjDetail
 LEFT JOIN vyuICGetInventoryAdjustment Adj ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation NewLocation ON NewLocation.intCompanyLocationId = AdjDetail.intNewLocationId
@@ -84,6 +90,8 @@ LEFT JOIN tblSMCompanyLocationSubLocation NewSubLocation ON NewSubLocation.intCo
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = AdjDetail.intStorageLocationId
 LEFT JOIN tblICStorageLocation NewStorageLocation ON NewStorageLocation.intStorageLocationId = AdjDetail.intNewStorageLocationId
 LEFT JOIN tblICItem Item ON Item.intItemId = AdjDetail.intItemId
+LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
+LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICItem NewItem ON NewItem.intItemId = AdjDetail.intNewItemId
 LEFT JOIN tblICLot Lot ON Lot.intLotId = AdjDetail.intLotId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
