@@ -97,7 +97,7 @@ SELECT
 	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
 	,[strTransactionId]				= ARID.[strInvoiceNumber]
 	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
-	,[intLotId]						= ICIT.[intLotId]
+	,[intLotId]						= ISNULL(ARID.[intLotId], ICIT.[intLotId])
 	,[intSourceTransactionId]		= ICIT.[intTransactionId]
 	,[strSourceTransactionId]		= ICIT.[strTransactionId]
 	,[intSourceTransactionDetailId]	= ICIT.[intTransactionDetailId]
@@ -163,7 +163,7 @@ SELECT
 	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
 	,[strTransactionId]				= ARID.[strInvoiceNumber]
 	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
-	,[intLotId]						= ICIT.[intLotId]
+	,[intLotId]						= ISNULL(ARID.[intLotId], ICIT.[intLotId])
 	,[intSourceTransactionId]		= ICIT.[intTransactionId]
 	,[strSourceTransactionId]		= ICIT.[strTransactionId]
 	,[intSourceTransactionDetailId]	= ICIT.[intTransactionDetailId]
@@ -245,7 +245,7 @@ SELECT
 	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
 	,[strTransactionId]				= ARID.[strInvoiceNumber]
 	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
-	,[intLotId]						= ICIT.[intLotId]
+	,[intLotId]						= ISNULL(ARID.[intLotId], ICIT.[intLotId])
 	,[intSourceTransactionId]		= ICIT.[intTransactionId]
 	,[strSourceTransactionId]		= ICIT.[strTransactionId]
 	,[intSourceTransactionDetailId]	= ICIT.[intTransactionDetailId]
@@ -320,7 +320,7 @@ SELECT
 	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
 	,[strTransactionId]				= ARI.[strInvoiceNumber]
 	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
-	,[intLotId]						= ICIT.[intLotId]
+	,[intLotId]						= ISNULL(ARID.[intLotId], ICIT.[intLotId])
 	,[intSourceTransactionId]		= ICIT.[intTransactionId]
 	,[strSourceTransactionId]		= ICIT.[strTransactionId]
 	,[intSourceTransactionDetailId]	= ICIT.[intTransactionDetailId]
