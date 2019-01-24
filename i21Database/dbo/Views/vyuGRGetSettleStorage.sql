@@ -59,8 +59,10 @@ SELECT DISTINCT
 											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'DS' --DELIVERY SHEET
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'SC' --SCALE TICKET
 											ELSE 'TS' --TRANSFER STORAGE
-										END 
+										END
 								END COLLATE Latin1_General_CI_AS AS strTransactionCode
+	, strCommodityCode
+	, strCategoryCode	= Category.strCategoryCode
 FROM tblGRSettleStorage SS
 JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
@@ -75,6 +77,10 @@ JOIN ( tblICItem Item
 		INNER JOIN tblICUnitMeasure UOM
 			ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	) ON Item.intItemId = SS.intItemId
+JOIN tblICCommodity Commodity
+	ON Item.intCommodityId = Commodity.intCommodityId
+JOIN tblICCategory Category
+	ON Item.intCategoryId = Category.intCategoryId
 JOIN tblSMUserSecurity Entity 
 	ON Entity.intEntityId = SS.intCreatedUserId
 LEFT JOIN tblSMCompanyLocation L 

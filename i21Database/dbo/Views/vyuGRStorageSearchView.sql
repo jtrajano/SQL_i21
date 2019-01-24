@@ -72,6 +72,7 @@ SELECT
 											ELSE 0
 										END AS BIT
 									)
+	,Category.strCategoryCode
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
@@ -81,6 +82,8 @@ JOIN tblICItem Item
 	ON Item.intItemId = CS.intItemId
 JOIN tblICCommodity Commodity
     ON Commodity.intCommodityId = CS.intCommodityId
+JOIN tblICCategory Category
+	ON Item.intCategoryId = Category.intCategoryId
 JOIN tblICItemUOM ItemUOM
 	ON ItemUOM.intItemId = Item.intItemId
 		AND ItemUOM.ysnStockUnit = 1
