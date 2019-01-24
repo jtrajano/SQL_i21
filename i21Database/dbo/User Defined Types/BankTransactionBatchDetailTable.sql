@@ -1,19 +1,19 @@
 ﻿CREATE TYPE [dbo].[BankTransactionBatchDetailTable] AS TABLE(
-	[intBankTransactionBatchId] [int] NULL,
-	[intTransactionId] [int] NOT NULL,
-	[intBankLoanId] [int] NULL,
-	[strBankLoanId] [NVARCHAR](40),
-	[strTransactionId] [nvarchar](40) NULL,
-	[dtmDate] [datetime] NULL,
-	[intGLAccountId] [int] NOT NULL,
-	[strAccountId] [nvarchar](40) NULL,
-	[strDescription] [nvarchar](255) NULL,
-	[strName] [nvarchar](50) NULL,
+	[intBankTransactionBatchId] [INT] NULL,
+	[intTransactionId] [INT] NOT NULL,
+	[intBankLoanId] [INT] NULL,
+	[strBankLoanId] [NVARCHAR](40) COLLATE Latin1_General_CI_AS NULL,
+	[strTransactionId] [NVARCHAR](40) COLLATE Latin1_General_CI_AS NULL,
+	[dtmDate] [DATETIME] NULL,
+	[intGLAccountId] [INT] NOT NULL,
+	[strAccountId] [NVARCHAR](40) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription] [NVARCHAR](255) COLLATE Latin1_General_CI_AS NULL,
+	[strName] [NVARCHAR](50) COLLATE Latin1_General_CI_AS NULL,
 	[dblCredit] [decimal](18, 6) NOT NULL DEFAULT ((0)),
 	[dblDebit] [decimal](18, 6) NOT NULL DEFAULT ((0)),
-	[ysnPosted] [bit] NULL,
-	[strRowState] [nvarchar](20) NULL,
-	[intConcurrencyId] [int] NOT NULL
+	[ysnPosted] [BIT] NULL,
+	[strRowState] [NVARCHAR](20) COLLATE Latin1_General_CI_AS NULL,
+	[intConcurrencyId] [INT] NOT NULL
 )
 GO
 
