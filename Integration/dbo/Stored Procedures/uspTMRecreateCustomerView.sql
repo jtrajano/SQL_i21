@@ -201,7 +201,7 @@ BEGIN
 														CAST('''' AS CHAR(2))
 													END) COLLATE Latin1_General_CI_AS 
 				,vwcus_addr    = ISNULL(A.ptcus_addr,'''')  COLLATE Latin1_General_CI_AS   
-				,vwcus_addr2   = ISNULL(CAST(RTRIM(A.ptcus_addr2) AS CHAR(30)),'''')    
+				,vwcus_addr2   = ISNULL(CAST(RTRIM(A.ptcus_addr2) AS CHAR(30)),'''') COLLATE Latin1_General_CI_AS       
 				,vwcus_city    = ISNULL(A.ptcus_city,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_state   = ISNULL(A.ptcus_state,'''')   COLLATE Latin1_General_CI_AS 
 				,vwcus_zip    = CAST(ISNULL(A.ptcus_zip,'''') AS CHAR(10))  COLLATE Latin1_General_CI_AS   
