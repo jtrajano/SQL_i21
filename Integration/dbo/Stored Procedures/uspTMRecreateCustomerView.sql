@@ -68,7 +68,7 @@ BEGIN
 				,vwcus_addr2   = ISNULL(A.agcus_addr2,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_city    = ISNULL(A.agcus_city,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_state   = ISNULL(A.agcus_state,'''') COLLATE Latin1_General_CI_AS    
-				,vwcus_zip    = ISNULL(A.agcus_zip,'''')    
+				,vwcus_zip    = ISNULL(A.agcus_zip,'''')  COLLATE Latin1_General_CI_AS   
 				,vwcus_phone   = ISNULL(A.agcus_phone,'''')    
 				,vwcus_phone_ext  = ISNULL(A.agcus_phone_ext,'''')    
 				,vwcus_bill_to   = ISNULL(A.agcus_bill_to,'''') COLLATE Latin1_General_CI_AS     
@@ -204,7 +204,7 @@ BEGIN
 				,vwcus_addr2   = ISNULL(CAST(RTRIM(A.ptcus_addr2) AS CHAR(30)),'''')    
 				,vwcus_city    = ISNULL(A.ptcus_city,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_state   = ISNULL(A.ptcus_state,'''')   COLLATE Latin1_General_CI_AS 
-				,vwcus_zip    = CAST(ISNULL(A.ptcus_zip,'''') AS CHAR(10))    
+				,vwcus_zip    = CAST(ISNULL(A.ptcus_zip,'''') AS CHAR(10))  COLLATE Latin1_General_CI_AS   
 				,vwcus_phone   = CAST(ISNULL(A.ptcus_phone,'''') AS CHAR(15))    
 				,vwcus_phone_ext  = ISNULL(A.ptcus_phone_ext,'''')
 				,vwcus_bill_to   = ISNULL(A.ptcus_bill_to,'''') COLLATE Latin1_General_CI_AS     
