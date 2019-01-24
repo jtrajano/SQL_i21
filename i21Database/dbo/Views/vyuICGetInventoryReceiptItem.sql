@@ -32,6 +32,9 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, dblNetWgt = ReceiptItem.dblNet
 	, Item.strLotTracking
 	, Item.intCommodityId
+	, strCommodity = Commodity.strCommodityCode
+	, Item.intCategoryId
+	, strCategory = Category.strCategoryCode
 	, ReceiptItem.intContainerId
 	, ReceiptItemSource.strContainer
 	, ReceiptItem.intSubLocationId
@@ -89,6 +92,8 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
+	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
+	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ReceiptItem.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ReceiptItem.intStorageLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
