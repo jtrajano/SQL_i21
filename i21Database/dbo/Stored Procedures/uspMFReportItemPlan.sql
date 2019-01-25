@@ -21,28 +21,10 @@ BEGIN
 		,@strTargetItemNo NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
 		,@intItemId INT
+		,@strProcessName NVARCHAR(50)
+		,@intManufacturingProcessId INT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
-
-	SELECT @intBlendAttributeId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Category for Ingredient Demand Report'
-
-	SELECT @strBlendAttributeValue = ''
-
-	SELECT @strBlendAttributeValue = @strBlendAttributeValue + strAttributeValue + ','
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intAttributeId = @intBlendAttributeId
-		AND strAttributeValue <> ''
-
-	IF @strBlendAttributeValue IS NULL
-		OR @strBlendAttributeValue = ''
-	BEGIN
-		SELECT @strBlendAttributeValue = ''
-
-		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
-		FROM tblICCategory
-	END
 
 	SELECT @strPackagingCategory = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -198,6 +180,40 @@ BEGIN
 	IF @strShowStorage IS NULL
 	BEGIN
 		SELECT @strShowStorage = ''
+	END
+
+	SELECT @strProcessName = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strProcessName'
+
+	IF IsNULL(@strProcessName, '') <> ''
+	BEGIN
+		SELECT @strBlendAttributeValue = ''
+
+		SELECT @intManufacturingProcessId = intManufacturingProcessId
+		FROM tblMFManufacturingProcess
+		WHERE strProcessName = @strProcessName
+
+		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strAttributeValue + ','
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intAttributeId = 78 --Category for Ingredient Demand Report
+			AND intManufacturingProcessId = @intManufacturingProcessId
+
+		IF @strBlendAttributeValue IS NULL
+			OR @strBlendAttributeValue = ''
+		BEGIN
+			SELECT @strBlendAttributeValue = ''
+
+			SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
+			FROM tblICCategory
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT @strBlendAttributeValue = ''
+
+		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
+		FROM tblICCategory
 	END
 
 	DECLARE @strShowShrtgWithAvlblUnblendedTea NVARCHAR(50)
@@ -517,8 +533,6 @@ BEGIN
 		END
 	END
 
-	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
-
 	SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
 	FROM dbo.tblSMCompanyLocation
 	WHERE strLocationName = CASE 
@@ -526,6 +540,8 @@ BEGIN
 				THEN strLocationName
 			ELSE @strCompanyLocationName
 			END
+	
+	SET @dtmCurrentDate = dbo.fnGetBusinessDate(GETDATE(), @intCompanyLocationId)
 
 	WHILE @intCompanyLocationId > 0
 	BEGIN
