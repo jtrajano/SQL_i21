@@ -53,14 +53,14 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (
 	,intFutOptTransactionHeaderId
 	,intCommodityId
 	,ysnExpired
-	,dblVariationMargin
+	,dblVariationMargin = intNet * VM.dblVariationMargin1
 	,0.0 dblInitialMargin
 	,LongWaitedPrice / case when isnull(dblLongTotalLotByMonth,0)=0 then 1 else dblLongTotalLotByMonth end LongWaitedPrice
 	,ShortWaitedPrice / case when isnull(dblShortTotalLotByMonth,0)=0 then 1 else dblShortTotalLotByMonth end ShortWaitedPrice
 FROM (
 	SELECT *
 		,(GrossPnL1 * (dblClosing - dblPrice) - dblFutCommission2) NetPnL
-		,intNet * dblVariationMargin1 dblVariationMargin
+		--,intNet * dblVariationMargin1 dblVariationMargin
 		,GrossPnL1 * (dblClosing - dblPrice) GrossPnL
 		,- dblFutCommission2 dblFutCommission
 		,sum(dblShort) OVER (PARTITION BY intFutureMonthId,strName) dblShortTotalLotByMonth
@@ -80,7 +80,8 @@ FROM (
 				ELSE 1
 				END AS dblFutCommission2
 			,convert(INT, isnull((Long1 - MatchLong), 0) - isnull(Sell1 - MatchShort, 0)) AS intNet
-			,ISNULL(dbo.fnRKGetLatestClosingPrice(intFutureMarketId, intFutureMonthId, @dtmToDate), 0) AS dblClosing
+			--,ISNULL(dbo.fnRKGetLatestClosingPrice(intFutureMarketId, intFutureMonthId, @dtmToDate), 0) AS dblClosing
+			,dblLastSettle AS dblClosing
 			,*
 		FROM (
 			SELECT intFutOptTransactionId
@@ -159,7 +160,9 @@ FROM (
 				,ysnExpired
 				,c.intCent ComCent
 				,c.ysnSubCurrency ComSubCurrency
-				,IsNull(dbo.fnRKGetVariationMargin(ot.intFutOptTransactionId, @dtmToDate, ot.dtmFilledDate), 0.0) * fm.dblContractSize dblVariationMargin1
+				--,IsNull(dbo.fnRKGetVariationMargin(ot.intFutOptTransactionId, @dtmToDate, ot.dtmFilledDate), 0.0) * fm.dblContractSize dblVariationMargin1
+				,LS.dblLastSettle
+				,ot.dtmFilledDate
 			FROM tblRKFutOptTransaction ot
 			JOIN tblRKFuturesMonth om ON om.intFutureMonthId = ot.intFutureMonthId
 				AND ot.strStatus = 'Filled'
@@ -172,6 +175,15 @@ FROM (
 			JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
 			LEFT JOIN tblCTBook cb ON cb.intBookId = ot.intBookId
 			LEFT JOIN tblCTSubBook csb ON csb.intSubBookId = ot.intSubBookId
+			OUTER APPLY (
+				SELECT TOP 1 dblLastSettle, intFutureMarketId, intFutureMonthId
+				FROM tblRKFuturesSettlementPrice p
+				INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+				WHERE p.intFutureMarketId = ot.intFutureMarketId
+					AND pm.intFutureMonthId = ot.intFutureMonthId
+					AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmToDate, 111)
+				ORDER BY dtmPriceDate DESC
+			) LS
 			WHERE isnull(ot.intCommodityId, 0) = CASE 
 					WHEN ISNULL(@intCommodityId, 0) = 0
 						THEN isnull(ot.intCommodityId, 0)
@@ -223,6 +235,9 @@ FROM (
 			) t1
 		) t1
 	) t1
+OUTER APPLY(
+	SELECT dblVariationMargin1 = ISNULL(dbo.fnRKGetVariationMargin(intFutOptTransactionId, @dtmToDate, dtmFilledDate), 0.0) * dblContractSize
+) VM
 WHERE (
 		dblLong <> 0
 		OR dblShort <> 0

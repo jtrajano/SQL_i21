@@ -1,56 +1,40 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTReportUpdateRebateOrDiscountPreview]
-	@xmlParam NVARCHAR(MAX) = NULL  
-	
+	@xmlParam NVARCHAR(MAX) = NULL,
+	@strGuid NVARCHAR(100)
 AS
-
 BEGIN TRY
+	
+	IF(@strGuid IS NOT NULL AND @strGuid <> '')
+		BEGIN
+			
+			BEGIN TRANSACTION
 
-	BEGIN TRANSACTION
+			DECLARE @ErrMsg NVARCHAR(MAX)
 
-		DECLARE @ErrMsg NVARCHAR(MAX)
+			--START Handle xml Param
+			DECLARE @strCompanyLocationId	NVARCHAR(MAX)
+					, @strVendorId			NVARCHAR(MAX)
+					, @strCategoryId		NVARCHAR(MAX)
+					, @strFamilyId			NVARCHAR(MAX)
+					, @strClassId			NVARCHAR(MAX)
+					, @strPromotionType     NVARCHAR(50)
+					, @dtmBeginDate   	    NVARCHAR(50)   
+					, @dtmEndDate		 	NVARCHAR(50)    
+					, @dblRebateAmount      DECIMAL (18,6)
+					, @dblAccumlatedQty     DECIMAL (18,6)
+					, @dblAccumAmount       DECIMAL (18,6)
+					, @dblDiscThroughAmount DECIMAL (18,6)
+					, @dblDiscThroughQty    DECIMAL (18,6)
+					, @dblDiscAmountUnit    DECIMAL (18,6)
+					, @ysnPreview           NVARCHAR(1)
+					, @intCurrentUserId		INT
 
-		--START Handle xml Param
-		DECLARE @strCompanyLocationId	NVARCHAR(MAX)
-				, @strVendorId			NVARCHAR(MAX)
-				, @strCategoryId		NVARCHAR(MAX)
-				, @strFamilyId			NVARCHAR(MAX)
-				, @strClassId			NVARCHAR(MAX)
-				, @strPromotionType     NVARCHAR(50)
-				, @dtmBeginDate   	    NVARCHAR(50)   
-				, @dtmEndDate		 	NVARCHAR(50)    
-				, @dblRebateAmount      DECIMAL (18,6)
-				, @dblAccumlatedQty     DECIMAL (18,6)
-				, @dblAccumAmount       DECIMAL (18,6)
-				, @dblDiscThroughAmount DECIMAL (18,6)
-				, @dblDiscThroughQty    DECIMAL (18,6)
-				, @dblDiscAmountUnit    DECIMAL (18,6)
-				, @ysnPreview           NVARCHAR(1)
-				, @intCurrentUserId		INT
+			IF LTRIM(RTRIM(@xmlParam)) = ''
+				SET @xmlParam = NULL
 
-		IF LTRIM(RTRIM(@xmlParam)) = ''
-			SET @xmlParam = NULL
-
-		--Declare xmlParam holder
-		DECLARE @temp_xml_table TABLE 
-		(  
-				[fieldname]		NVARCHAR(MAX),  
-				condition		NVARCHAR(20),        
-				[from]			NVARCHAR(MAX), 
-				[to]			NVARCHAR(50),  
-				[join]			NVARCHAR(10),  
-				[begingroup]	NVARCHAR(50),  
-				[endgroup]		NVARCHAR(50),  
-				[datatype]		NVARCHAR(50) 
-		)  
-
-		DECLARE @xmlDocumentId INT
-
-		EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT ,@xmlParam
-
-		INSERT INTO @temp_xml_table  
-		SELECT	*  
-		FROM	OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
-		WITH (  
+			--Declare xmlParam holder
+			DECLARE @temp_xml_table TABLE 
+			(  
 					[fieldname]		NVARCHAR(MAX),  
 					condition		NVARCHAR(20),        
 					[from]			NVARCHAR(MAX), 
@@ -58,405 +42,514 @@ BEGIN TRY
 					[join]			NVARCHAR(10),  
 					[begingroup]	NVARCHAR(50),  
 					[endgroup]		NVARCHAR(50),  
-					[datatype]		NVARCHAR(50)  
-		)  
+					[datatype]		NVARCHAR(50) 
+			)  
 
-		--strCompanyLocationId
-		SELECT @strCompanyLocationId = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'strCompanyLocationId'
+			DECLARE @xmlDocumentId INT
+
+			EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT ,@xmlParam
+
+			INSERT INTO @temp_xml_table  
+			SELECT	*  
+			FROM	OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
+			WITH (  
+						[fieldname]		NVARCHAR(MAX),  
+						condition		NVARCHAR(20),        
+						[from]			NVARCHAR(MAX), 
+						[to]			NVARCHAR(50),  
+						[join]			NVARCHAR(10),  
+						[begingroup]	NVARCHAR(50),  
+						[endgroup]		NVARCHAR(50),  
+						[datatype]		NVARCHAR(50)  
+			)  
+
+			--strCompanyLocationId
+			SELECT @strCompanyLocationId = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'strCompanyLocationId'
 	
-		--strVendorId
-		SELECT @strVendorId = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'strVendorId'
+			--strVendorId
+			SELECT @strVendorId = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'strVendorId'
 
-		--strCategoryId
-		SELECT @strCategoryId = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'strCategoryId'
+			--strCategoryId
+			SELECT @strCategoryId = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'strCategoryId'
 
-		--strFamilyId
-		SELECT @strFamilyId = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'strFamilyId'
+			--strFamilyId
+			SELECT @strFamilyId = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'strFamilyId'
 
-		--strClassId
-		SELECT @strClassId = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'strClassId'
+			--strClassId
+			SELECT @strClassId = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'strClassId'
 
-		--strPromotionType
-		SELECT @strPromotionType = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'strPromotionType'
+			--strPromotionType
+			SELECT @strPromotionType = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'strPromotionType'
 
-		--dtmBeginDate
-		SELECT @dtmBeginDate = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'dtmBeginDate'
+			--dtmBeginDate
+			SELECT @dtmBeginDate = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'dtmBeginDate'
 
-		--dtmEndDate
-		SELECT @dtmEndDate = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'dtmEndDate'
+			--dtmEndDate
+			SELECT @dtmEndDate = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'dtmEndDate'
 
-		--dblRebateAmount
-		SELECT @dblRebateAmount = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'dblRebateAmount'
+			--dblRebateAmount
+			SELECT @dblRebateAmount = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'dblRebateAmount'
 
-		--dblAccumlatedQty
-		SELECT @dblAccumlatedQty = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'dblAccumlatedQty'
+			--dblAccumlatedQty
+			SELECT @dblAccumlatedQty = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'dblAccumlatedQty'
 
-		--dblAccumAmount
-		SELECT @dblAccumAmount = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'dblAccumAmount'
+			--dblAccumAmount
+			SELECT @dblAccumAmount = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'dblAccumAmount'
 
-		--dblDiscThroughAmount
-		SELECT @dblDiscThroughAmount = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'dblDiscThroughAmount'
+			--dblDiscThroughAmount
+			SELECT @dblDiscThroughAmount = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'dblDiscThroughAmount'
 
-		--dblDiscThroughQty
-		SELECT @dblDiscThroughQty = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'dblDiscThroughQty'
+			--dblDiscThroughQty
+			SELECT @dblDiscThroughQty = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'dblDiscThroughQty'
 
-		--dblDiscAmountUnit
-		SELECT @dblDiscAmountUnit = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'dblDiscAmountUnit'
+			--dblDiscAmountUnit
+			SELECT @dblDiscAmountUnit = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'dblDiscAmountUnit'
 
-		--ysnPreview
-		SELECT @ysnPreview = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'ysnPreview'
+			--ysnPreview
+			SELECT @ysnPreview = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'ysnPreview'
 
-		--intCurrentUserId
-		SELECT @intCurrentUserId = [from]
-		FROM @temp_xml_table
-		WHERE [fieldname] = 'intCurrentUserId'
-		--END Handle xml Param
+			--intCurrentUserId
+			SELECT @intCurrentUserId = [from]
+			FROM @temp_xml_table
+			WHERE [fieldname] = 'intCurrentUserId'
+			--END Handle xml Param
 
 	
-		--DECLARE @UpdateCount INT
-		--DECLARE @RecCount INT
+			--DECLARE @UpdateCount INT
+			--DECLARE @RecCount INT
 
-		--SET @UpdateCount = 0
-		--SET @RecCount = 0
-
-
-
-		-- Create the filter tables
-		BEGIN
-			CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Location (
-				intLocationId INT 
-			)
-
-			CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Vendor (
-				intVendorId INT 
-			)
-
-			CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Category (
-				intCategoryId INT 
-			)
-
-			CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Family (
-				intFamilyId INT 
-			)
-
-			CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Class (
-				intClassId INT 
-			)
-		END 
-
-		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_AuditLog') IS NULL  
-			CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_AuditLog (
-				intItemId INT
-				,intItemSpecialPricingId INT 
-				,dtmBeginDate_Original DATETIME 
-				,dtmEndDate_Original DATETIME 
-				,dblDiscount_Original NUMERIC(18, 6) 
-				,dblAccumulatedAmount_Original NUMERIC(18, 6) 
-				,dblAccumulatedQty_Original NUMERIC(18, 6) 
-				,dblDiscountThruAmount_Original NUMERIC(18, 6) 
-				,dblDiscountThruQty_Original NUMERIC(18, 6) 
-
-				,dtmBeginDate_New DATETIME 
-				,dtmEndDate_New DATETIME 
-				,dblDiscount_New NUMERIC(18, 6) 
-				,dblAccumulatedAmount_New NUMERIC(18, 6) 
-				,dblAccumulatedQty_New NUMERIC(18, 6) 
-				,dblDiscountThruAmount_New NUMERIC(18, 6) 
-				,dblDiscountThruQty_New NUMERIC(18, 6) 
-			)
+			--SET @UpdateCount = 0
+			--SET @RecCount = 0
 
 
-		-- Add the filter records
-		BEGIN
-			IF(@strCompanyLocationId IS NOT NULL AND @strCompanyLocationId != '')
-				BEGIN
-					INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Location (
-						intLocationId
-					)
-					--SELECT intLocationId = CAST(@strCompanyLocationId AS INT)
-					SELECT [intID] AS intLocationId
-					FROM [dbo].[fnGetRowsFromDelimitedValues](@strCompanyLocationId)
-				END
+
+			-- Create the filter tables
+			BEGIN
+				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Location (
+					intLocationId INT 
+				)
+
+				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Vendor (
+					intVendorId INT 
+				)
+
+				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Category (
+					intCategoryId INT 
+				)
+
+				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Family (
+					intFamilyId INT 
+				)
+
+				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Class (
+					intClassId INT 
+				)
+			END 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_AuditLog') IS NULL  
+				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_AuditLog (
+					intItemId INT
+					,intItemSpecialPricingId INT 
+					,dtmBeginDate_Original DATETIME 
+					,dtmEndDate_Original DATETIME 
+					,dblDiscount_Original NUMERIC(18, 6) 
+					,dblAccumulatedAmount_Original NUMERIC(18, 6) 
+					,dblAccumulatedQty_Original NUMERIC(18, 6) 
+					,dblDiscountThruAmount_Original NUMERIC(18, 6) 
+					,dblDiscountThruQty_Original NUMERIC(18, 6) 
+
+					,dtmBeginDate_New DATETIME 
+					,dtmEndDate_New DATETIME 
+					,dblDiscount_New NUMERIC(18, 6) 
+					,dblAccumulatedAmount_New NUMERIC(18, 6) 
+					,dblAccumulatedQty_New NUMERIC(18, 6) 
+					,dblDiscountThruAmount_New NUMERIC(18, 6) 
+					,dblDiscountThruQty_New NUMERIC(18, 6) 
+				)
+
+
+			-- Add the filter records
+			BEGIN
+				IF(@strCompanyLocationId IS NOT NULL AND @strCompanyLocationId != '')
+					BEGIN
+						INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Location (
+							intLocationId
+						)
+						--SELECT intLocationId = CAST(@strCompanyLocationId AS INT)
+						SELECT [intID] AS intLocationId
+						FROM [dbo].[fnGetRowsFromDelimitedValues](@strCompanyLocationId)
+					END
 		
-			IF(@strVendorId IS NOT NULL AND @strVendorId != '')
-				BEGIN
-					INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Vendor (
-						intVendorId
-					)
-					--SELECT intVendorId = CAST(@strVendorId AS INT)
-					SELECT [intID] AS intVendorId
-					FROM [dbo].[fnGetRowsFromDelimitedValues](@strVendorId)
-				END
+				IF(@strVendorId IS NOT NULL AND @strVendorId != '')
+					BEGIN
+						INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Vendor (
+							intVendorId
+						)
+						--SELECT intVendorId = CAST(@strVendorId AS INT)
+						SELECT [intID] AS intVendorId
+						FROM [dbo].[fnGetRowsFromDelimitedValues](@strVendorId)
+					END
 
-			IF(@strCategoryId IS NOT NULL AND @strCategoryId != '')
-				BEGIN
-					INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Category (
-						intCategoryId
-					)
-					--SELECT intCategoryId = CAST(@strCategoryId AS INT)
-					SELECT [intID] AS intCategoryId
-					FROM [dbo].[fnGetRowsFromDelimitedValues](@strCategoryId)
-				END
+				IF(@strCategoryId IS NOT NULL AND @strCategoryId != '')
+					BEGIN
+						INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Category (
+							intCategoryId
+						)
+						--SELECT intCategoryId = CAST(@strCategoryId AS INT)
+						SELECT [intID] AS intCategoryId
+						FROM [dbo].[fnGetRowsFromDelimitedValues](@strCategoryId)
+					END
 
-			IF(@strFamilyId IS NOT NULL AND @strFamilyId != '')
-				BEGIN
-					INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Family (
-						intFamilyId
-					)
-					--SELECT intFamilyId = CAST(@strFamilyId AS INT)
-					SELECT [intID] AS intFamilyId
-					FROM [dbo].[fnGetRowsFromDelimitedValues](@strFamilyId)
-				END
+				IF(@strFamilyId IS NOT NULL AND @strFamilyId != '')
+					BEGIN
+						INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Family (
+							intFamilyId
+						)
+						--SELECT intFamilyId = CAST(@strFamilyId AS INT)
+						SELECT [intID] AS intFamilyId
+						FROM [dbo].[fnGetRowsFromDelimitedValues](@strFamilyId)
+					END
 
-			IF(@strClassId IS NOT NULL AND @strClassId != '')
-				BEGIN
-					INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Class (
-						intClassId
-					)
-					--SELECT intClassId = CAST(@strClassId AS INT)
-					SELECT [intID] AS intClassId
-					FROM [dbo].[fnGetRowsFromDelimitedValues](@strClassId)
-				END
-		END
+				IF(@strClassId IS NOT NULL AND @strClassId != '')
+					BEGIN
+						INSERT INTO #tmpUpdateItemSpecialPricingForCStore_Class (
+							intClassId
+						)
+						--SELECT intClassId = CAST(@strClassId AS INT)
+						SELECT [intID] AS intClassId
+						FROM [dbo].[fnGetRowsFromDelimitedValues](@strClassId)
+					END
+			END
 
 
-		BEGIN
+			BEGIN
 		
-			DECLARE @dtmBeginDateConv AS DATE = CAST(@dtmBeginDate AS DATE)
-			DECLARE @dtmEndDateConv AS DATE = CAST(@dtmEndDate AS DATE)
-			DECLARE @dblDiscount AS DECIMAL(18,6) = 0
+				DECLARE @dtmBeginDateConv AS DATE = CAST(@dtmBeginDate AS DATE)
+				DECLARE @dtmEndDateConv AS DATE = CAST(@dtmEndDate AS DATE)
+				DECLARE @dblDiscount AS DECIMAL(18,6) = 0
 
-			IF(@strPromotionType = 'Vendor Rebate')
-				BEGIN
-					SET @dblDiscount = @dblRebateAmount
-					SET @strPromotionType = 'Rebate'
+				IF(@strPromotionType = 'Vendor Rebate')
+					BEGIN
+						SET @dblDiscount = @dblRebateAmount
+						SET @strPromotionType = 'Rebate'
 
-					-- SP
-					EXEC [uspICUpdateItemSpecialPricingForCStore]
-						-- filter params
-						@strUpcCode = NULL 
-						,@strDescription = NULL 
-						,@intItemId = NULL 
-						,@strPromotionType = @strPromotionType
-						-- update params
-						,@dtmBeginDate = @dtmBeginDateConv
-						,@dtmEndDate = @dtmEndDateConv
-						,@dblDiscount = @dblDiscount
+						-- SP
+						EXEC [uspICUpdateItemSpecialPricingForCStore]
+							-- filter params
+							@strUpcCode = NULL 
+							,@strDescription = NULL 
+							,@intItemId = NULL 
+							,@strPromotionType = @strPromotionType
+							-- update params
+							,@dtmBeginDate = @dtmBeginDateConv
+							,@dtmEndDate = @dtmEndDateConv
+							,@dblDiscount = @dblDiscount
 
-						,@dblAccumulatedAmount = @dblAccumAmount
-						,@dblAccumulatedQty = @dblAccumlatedQty
+							,@dblAccumulatedAmount = @dblAccumAmount
+							,@dblAccumulatedQty = @dblAccumlatedQty
 
-						,@dblDiscountThruAmount = NULL
-						,@dblDiscountThruQty = NULL
+							,@dblDiscountThruAmount = NULL
+							,@dblDiscountThruQty = NULL
 
-						,@intEntityUserSecurityId = @intCurrentUserId
-				END
-			ELSE IF(@strPromotionType = 'Vendor Discount')
-				BEGIN
-					SET @dblDiscount = @dblDiscAmountUnit
+							,@intEntityUserSecurityId = @intCurrentUserId
+					END
+				ELSE IF(@strPromotionType = 'Vendor Discount')
+					BEGIN
+						SET @dblDiscount = @dblDiscAmountUnit
 
-					-- SP
-					EXEC [uspICUpdateItemSpecialPricingForCStore]
-						-- filter params
-						@strUpcCode = NULL 
-						,@strDescription = NULL 
-						,@intItemId = NULL 
-						,@strPromotionType = @strPromotionType
-						-- update params
-						,@dtmBeginDate = @dtmBeginDateConv
-						,@dtmEndDate = @dtmEndDateConv
-						,@dblDiscount = @dblDiscount
+						-- SP
+						EXEC [uspICUpdateItemSpecialPricingForCStore]
+							-- filter params
+							@strUpcCode = NULL 
+							,@strDescription = NULL 
+							,@intItemId = NULL 
+							,@strPromotionType = @strPromotionType
+							-- update params
+							,@dtmBeginDate = @dtmBeginDateConv
+							,@dtmEndDate = @dtmEndDateConv
+							,@dblDiscount = @dblDiscount
 
-						,@dblAccumulatedAmount = NULL
-						,@dblAccumulatedQty = NULL
+							,@dblAccumulatedAmount = NULL
+							,@dblAccumulatedQty = NULL
 
-						,@dblDiscountThruAmount = @dblDiscThroughAmount
-						,@dblDiscountThruQty = @dblDiscThroughQty
+							,@dblDiscountThruAmount = @dblDiscThroughAmount
+							,@dblDiscountThruQty = @dblDiscThroughQty
 
-						,@intEntityUserSecurityId = @intCurrentUserId
-				END
-		END
-
-
-
-		-- Handle preview using Table variable
-		DECLARE @tblPreview TABLE (
-			intCompanyLocationId INT
-			, strLocation NVARCHAR(250)
-			, strUpc NVARCHAR(50)
-			, strItemDescription NVARCHAR(250)
-			, strChangeDescription NVARCHAR(100)
-			, strOldData NVARCHAR(MAX)
-			, strNewData NVARCHAR(MAX)
-			, intParentId INT
-			, intChildId INT
-		)
+							,@intEntityUserSecurityId = @intCurrentUserId
+					END
+			END
 
 
-		-- ITEM SPECIAL PRICING
-		INSERT INTO @tblPreview (
-			intCompanyLocationId
-			, strLocation
-			, strUpc
-			, strItemDescription
-			, strChangeDescription
-			, strOldData
-			, strNewData
-			, intParentId
-			, intChildId
-		)
-		SELECT	CL.intCompanyLocationId
-				,CL.strLocationName
-				,UOM.strLongUPCCode
-				,I.strDescription
-				,CASE
-					WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
-					WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
-					WHEN [Changes].oldColumnName = 'strDiscount_Original' THEN 'Discount'
-					WHEN [Changes].oldColumnName = 'strAccumulatedAmount_Original' THEN 'Accumulated Amount'
-					WHEN [Changes].oldColumnName = 'strAccumulatedQty_Original' THEN 'Accumulated Quantity'
-					WHEN [Changes].oldColumnName = 'strDiscountThruAmount_Original' THEN 'Discount Through Amount'
-					WHEN [Changes].oldColumnName = 'strDiscountThruQty_Original' THEN 'Discount Through Quantity'
-				END
-				,[Changes].strOldData
-				,[Changes].strNewData
-				,[Changes].intItemId 
-				,[Changes].intItemSpecialPricingId
-		FROM 
-		(
-			SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData
+
+
+			-- Handle preview using Table variable
+			DECLARE @tblPreview TABLE (
+					intCompanyLocationId INT
+					, strLocation NVARCHAR(250)
+					, strUpc NVARCHAR(50)
+					, strItemDescription NVARCHAR(250)
+					, strChangeDescription NVARCHAR(100)
+					, strOldData NVARCHAR(MAX)
+					, strNewData NVARCHAR(MAX)
+					
+					-- For Item Validation
+					, intItemId INT
+					, intItemUOMId INT NULL
+					, intItemLocationId INT NULL
+
+					-- For generating Update script 
+					, intTableIdentityId INT
+					, strTableName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+					, strColumnName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+					, strColumnDataType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				
+			)
+
+
+
+			-- ITEM SPECIAL PRICING
+			INSERT INTO @tblPreview (
+				intCompanyLocationId
+				, strLocation
+				, strUpc
+				, strItemDescription
+				, strChangeDescription
+				, strOldData
+				, strNewData
+				--, intParentId
+				--, intChildId
+
+				-- For Item Validation
+				, intItemId
+				, intItemUOMId
+				, intItemLocationId
+
+				-- For generating Update script 
+				, intTableIdentityId
+				, strTableName
+				, strColumnName
+				, strColumnDataType
+			)
+			SELECT	CL.intCompanyLocationId
+					,CL.strLocationName
+					,UOM.strLongUPCCode
+					,I.strDescription
+					,CASE
+						WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
+						WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
+						WHEN [Changes].oldColumnName = 'strDiscount_Original' THEN 'Discount'
+						WHEN [Changes].oldColumnName = 'strAccumulatedAmount_Original' THEN 'Accumulated Amount'
+						WHEN [Changes].oldColumnName = 'strAccumulatedQty_Original' THEN 'Accumulated Quantity'
+						WHEN [Changes].oldColumnName = 'strDiscountThruAmount_Original' THEN 'Discount Through Amount'
+						WHEN [Changes].oldColumnName = 'strDiscountThruQty_Original' THEN 'Discount Through Quantity'
+					END
+					,[Changes].strOldData
+					,[Changes].strNewData
+					
+					,I.intItemId 
+					,UOM.intItemUOMId
+					,IL.intItemLocationId
+
+					,IP.intItemSpecialPricingId 
+					,'tblICItemSpecialPricing'
+					,CASE
+						WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'dtmBeginDate'
+						WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'dtmEndDate'
+						WHEN [Changes].oldColumnName = 'strDiscount_Original' THEN 'dblDiscount'
+						WHEN [Changes].oldColumnName = 'strAccumulatedAmount_Original' THEN 'dblAccumulatedAmount'
+						WHEN [Changes].oldColumnName = 'strAccumulatedQty_Original' THEN 'dblAccumulatedQty'
+						WHEN [Changes].oldColumnName = 'strDiscountThruAmount_Original' THEN 'dblDiscountThruAmount'
+						WHEN [Changes].oldColumnName = 'strDiscountThruQty_Original' THEN 'dblDiscountThruQty'
+					END
+					,CASE
+						WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'DATETIME'
+						WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'DATETIME'
+						WHEN [Changes].oldColumnName = 'strDiscount_Original' THEN 'DECIMAL'
+						WHEN [Changes].oldColumnName = 'strAccumulatedAmount_Original' THEN 'DECIMAL'
+						WHEN [Changes].oldColumnName = 'strAccumulatedQty_Original' THEN 'DECIMAL'
+						WHEN [Changes].oldColumnName = 'strDiscountThruAmount_Original' THEN 'DECIMAL'
+						WHEN [Changes].oldColumnName = 'strDiscountThruQty_Original' THEN 'DECIMAL'
+					END
 			FROM 
 			(
-				SELECT intItemId
-						,intItemSpecialPricingId 
-						,CAST(CAST(dtmBeginDate_Original AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
-						,CAST(CAST(dtmEndDate_Original AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
-						,CAST(CAST(dblDiscount_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscount_Original
-						,CAST(CAST(dblAccumulatedAmount_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strAccumulatedAmount_Original
-						,CAST(CAST(dblAccumulatedQty_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strAccumulatedQty_Original
-						,CAST(CAST(dblDiscountThruAmount_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscountThruAmount_Original
-						,CAST(CAST(dblDiscountThruQty_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscountThruQty_Original
+				SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData
+				FROM 
+				(
+					SELECT intItemId
+							,intItemSpecialPricingId 
+							,CAST(CAST(dtmBeginDate_Original AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
+							,CAST(CAST(dtmEndDate_Original AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
+							,CAST(CAST(dblDiscount_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscount_Original
+							,CAST(CAST(dblAccumulatedAmount_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strAccumulatedAmount_Original
+							,CAST(CAST(dblAccumulatedQty_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strAccumulatedQty_Original
+							,CAST(CAST(dblDiscountThruAmount_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscountThruAmount_Original
+							,CAST(CAST(dblDiscountThruQty_Original AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscountThruQty_Original
 
-						,CAST(CAST(dtmBeginDate_New AS DATE) AS NVARCHAR(50)) AS strBeginDate_New
-						,CAST(CAST(dtmEndDate_New AS DATE) AS NVARCHAR(50)) AS strEndDate_New
-						,CAST(CAST(dblDiscount_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscount_New
-						,CAST(CAST(dblAccumulatedAmount_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strAccumulatedAmount_New
-						,CAST(CAST(dblAccumulatedQty_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strAccumulatedQty_New
-						,CAST(CAST(dblDiscountThruAmount_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscountThruAmount_New
-						,CAST(CAST(dblDiscountThruQty_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscountThruQty_New
-				FROM #tmpUpdateItemSpecialPricingForCStore_AuditLog
-			) t
-			unpivot
-			(
-				strOldData for oldColumnName in (strBeginDate_Original, strEndDate_Original, strDiscount_Original, strAccumulatedAmount_Original, strAccumulatedQty_Original, strDiscountThruAmount_Original, strDiscountThruQty_Original)
-			) o
-			unpivot
-			(
-				strNewData for newColumnName in (strBeginDate_New, strEndDate_New, strDiscount_New, strAccumulatedAmount_New, strAccumulatedQty_New, strDiscountThruAmount_New, strDiscountThruQty_New)
-			) n
-			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
+							,CAST(CAST(dtmBeginDate_New AS DATE) AS NVARCHAR(50)) AS strBeginDate_New
+							,CAST(CAST(dtmEndDate_New AS DATE) AS NVARCHAR(50)) AS strEndDate_New
+							,CAST(CAST(dblDiscount_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscount_New
+							,CAST(CAST(dblAccumulatedAmount_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strAccumulatedAmount_New
+							,CAST(CAST(dblAccumulatedQty_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strAccumulatedQty_New
+							,CAST(CAST(dblDiscountThruAmount_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscountThruAmount_New
+							,CAST(CAST(dblDiscountThruQty_New AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strDiscountThruQty_New
+					FROM #tmpUpdateItemSpecialPricingForCStore_AuditLog
+				) t
+				unpivot
+				(
+					strOldData for oldColumnName in (strBeginDate_Original, strEndDate_Original, strDiscount_Original, strAccumulatedAmount_Original, strAccumulatedQty_Original, strDiscountThruAmount_Original, strDiscountThruQty_Original)
+				) o
+				unpivot
+				(
+					strNewData for newColumnName in (strBeginDate_New, strEndDate_New, strDiscount_New, strAccumulatedAmount_New, strAccumulatedQty_New, strDiscountThruAmount_New, strDiscountThruQty_New)
+				) n
+				WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
 		
-		) [Changes]
-		INNER JOIN tblICItem I 
-			ON [Changes].intItemId = I.intItemId
-		INNER JOIN tblICItemSpecialPricing IP 
-			ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
-		INNER JOIN tblICItemUOM UOM 
-			ON IP.intItemId = UOM.intItemId
-		INNER JOIN tblICItemLocation IL 
-			ON IP.intItemLocationId = IL.intItemLocationId 
-			AND IP.intItemLocationId = IL.intItemLocationId
-		INNER JOIN tblSMCompanyLocation CL 
-			ON IL.intLocationId = CL.intCompanyLocationId
-		WHERE 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Location)
-			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-		)
+			) [Changes]
+			INNER JOIN tblICItem I 
+				ON [Changes].intItemId = I.intItemId
+			INNER JOIN tblICItemSpecialPricing IP 
+				ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
+			INNER JOIN tblICItemUOM UOM 
+				ON IP.intItemId = UOM.intItemId
+			INNER JOIN tblICItemLocation IL 
+				ON IP.intItemLocationId = IL.intItemLocationId 
+				AND [Changes].intItemId = IL.intItemId
+			INNER JOIN tblSMCompanyLocation CL 
+				ON IL.intLocationId = CL.intCompanyLocationId
+			WHERE 
+			(
+				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Location)
+				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+			)
 
 
 
-		DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+			DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
 
-	   -- Query Preview display
-	   SELECT DISTINCT
-			  strLocation
-			  , strUpc
-			  , strItemDescription
-			  , strChangeDescription
-			  , strOldData
-			  , strNewData
-	   FROM @tblPreview
-	   ORDER BY strItemDescription, strChangeDescription ASC
+
+
+		   ---- Query Preview display
+		   --SELECT DISTINCT
+				 -- strLocation
+				 -- , strUpc
+				 -- , strItemDescription
+				 -- , strChangeDescription
+				 -- , strOldData
+				 -- , strNewData
+		   --FROM @tblPreview
+		   --ORDER BY strItemDescription, strChangeDescription ASC
     
-	   DELETE FROM @tblPreview
+		   --DELETE FROM @tblPreview
 
 
 
-	   -- Clean up 
-		BEGIN
-			IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Location') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Location 
+		   -- Clean up 
+			BEGIN
+				IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Location') IS NOT NULL  
+					DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Location 
 
-			IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Vendor') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Vendor 
+				IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Vendor') IS NOT NULL  
+					DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Vendor 
 
-			IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Category') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Category 
+				IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Category') IS NOT NULL  
+					DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Category 
 
-			IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Family') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Family 
+				IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Family') IS NOT NULL  
+					DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Family 
 
-			IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Class') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Class 
+				IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Class') IS NOT NULL  
+					DROP TABLE #tmpUpdateItemSpecialPricingForCStore_Class 
 
-			-- Create the temp table for the audit log. 
-			IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_AuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemSpecialPricingForCStore_AuditLog 
-		END 
+				-- Create the temp table for the audit log. 
+				IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_AuditLog') IS NOT NULL  
+					DROP TABLE #tmpUpdateItemSpecialPricingForCStore_AuditLog 
+			END 
 
-	-- Rollback if Preview
-	IF(@ysnPreview = 'Y')
-		BEGIN
-			IF @@TRANCOUNT > 0 
-				ROLLBACK TRANSACTION
+		-- Rollback if Preview
+		IF(@ysnPreview = 'Y')
+			BEGIN
+				IF @@TRANCOUNT > 0 
+					ROLLBACK TRANSACTION
+
+					-- INSERT TO PREVIEW TABLE
+					INSERT INTO tblSTUpdateRebateOrDiscountPreview
+					(
+						strGuid,
+						strLocation,
+						strUpc,
+						strDescription,
+						strChangeDescription,
+						strOldData,
+						strNewData,
+
+						intItemId,
+						intItemUOMId,
+						intItemLocationId,
+						intTableIdentityId,
+						strTableName,
+						strColumnName,
+						strColumnDataType,
+						intConcurrencyId
+					)
+					SELECT DISTINCT 
+						  @strGuid
+						, strLocation
+			 		    , strUpc
+						, strItemDescription
+						, strChangeDescription
+						, strOldData
+						, strNewData
+
+						, intItemId
+						, intItemUOMId
+						, intItemLocationId
+						, intTableIdentityId
+						, strTableName
+						, strColumnName
+						, strColumnDataType
+						, 1
+					FROM @tblPreview
+					ORDER BY strItemDescription, strChangeDescription ASC
+
+			END
+		ELSE
+			BEGIN
+				IF @@TRANCOUNT > 0 
+					COMMIT TRANSACTION
+			END
 		END
-	ELSE
-		BEGIN
-			IF @@TRANCOUNT > 0 
-				COMMIT TRANSACTION
-		END
-
+		
+		DELETE FROM @tblPreview
 END TRY
 
 BEGIN CATCH

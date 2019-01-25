@@ -29,7 +29,7 @@ SELECT strTransactionType
 	,intInventoryAccountId
 	,ysnPosted
 FROM (
-	SELECT [strTransactionType] = 'Load Schedule'
+	SELECT [strTransactionType] = 'Load Schedule' COLLATE Latin1_General_CI_AS
 		,[strTransactionNumber] = L.[strLoadNumber]
 		,[strShippedItemId] = NULL
 		,[intEntityCustomerId] = ARC.intEntityId

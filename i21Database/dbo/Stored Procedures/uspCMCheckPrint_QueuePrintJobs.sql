@@ -5,7 +5,7 @@
 	3. It creates new audit log records for manually entered check numbers. 
 	4. It updates the next check number. 
 */
-CREATE PROCEDURE uspCMCheckPrint_QueuePrintJobs
+CREATE PROCEDURE [dbo].[uspCMCheckPrint_QueuePrintJobs]
 	@intBankAccountId INT = NULL,
 	@strTransactionIds NVARCHAR(max) = NULL,
 	@strBatchId NVARCHAR(20) = NULL,
@@ -124,11 +124,15 @@ BEGIN
 END 
 
 -- Get the next check number from the bank account table
-SELECT TOP 1 
-		@strNextCheckNumber = dbo.fnAddZeroPrefixes(intCheckNextNo,intCheckNoLength),	
-		@intCheckNoLength = intCheckNoLength	
-FROM	dbo.tblCMBankAccount
-WHERE	intBankAccountId = @intBankAccountId
+
+DECLARE @strCheckStartingNo NVARCHAR(50), @strCheckEndingNo NVARCHAR(50)
+
+SELECT @strCheckStartingNo = dbo.fnAddZeroPrefixes(CAST(intCheckStartingNo AS NVARCHAR(50)), intCheckNoLength),
+@strCheckEndingNo = dbo.fnAddZeroPrefixes(CAST(intCheckEndingNo AS NVARCHAR(50)), intCheckNoLength),
+@intCheckNoLength = intCheckNoLength,
+@strNextCheckNumber = dbo.fnAddZeroPrefixes(intCheckNextNo,intCheckNoLength)	
+from tblCMBankAccount where intBankAccountId = @intBankAccountId
+
 
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
@@ -168,7 +172,10 @@ BEGIN
 			AND strCheckNo >= @strNextCheckNumber
 			AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
 			AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
+			AND strCheckNo BETWEEN @strCheckStartingNo AND @strCheckEndingNo
+			AND ISNULL(strRemarks,'') <> 'Generated from origin.'
 	ORDER BY strCheckNo
+	
 	IF @@ERROR <> 0 GOTO _ROLLBACK	
 
 	-- If there is NO more available check numbers to complete the print job, abort the process. 
@@ -215,6 +222,8 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND strCheckNo >= @strNextCheckNumber
 		AND intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
 		AND strCheckNo NOT IN (SELECT strCheckNo FROM #tmpManuallyAssignedCheckNumbers)
+		AND strCheckNo BETWEEN @strCheckStartingNo AND @strCheckEndingNo
+		AND ISNULL(strRemarks,'') <> 'Generated from origin.'
 ORDER BY strCheckNo
 
 -- Increment the next check number 

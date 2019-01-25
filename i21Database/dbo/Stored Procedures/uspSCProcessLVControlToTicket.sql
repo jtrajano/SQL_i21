@@ -140,7 +140,7 @@ BEGIN TRY
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,1
-				FROM [dbo].[tblSCTicketLVStaging] WHERE intTicketLVStagingId = 1
+				FROM [dbo].[tblSCTicketLVStaging] WHERE intTicketLVStagingId = @intTicketLVStagingId
 
 				SELECT @intTicketId = SCOPE_IDENTITY()
 
@@ -178,7 +178,7 @@ BEGIN TRY
 					,[strSourceType]
 					,[strDiscountChargeType]
 					,1
-				FROM [dbo].[tblSCTicketDiscountLVStaging] WHERE intTicketId = 1 and strSourceType = 'Scale'
+				FROM [dbo].[tblSCTicketDiscountLVStaging] WHERE intTicketId = @intTicketLVStagingId and strSourceType = 'Scale'
 
 					--Audit Log
 				EXEC dbo.uspSMAuditLog 
@@ -196,6 +196,7 @@ BEGIN TRY
 				SELECT @intTicketId = intTicketId FROM tblSCTicket WHERE intTicketLVStagingId = @intTicketLVStagingId AND strTicketStatus = 'O'
 				IF ISNULL(@intTicketId, 0) > 0
 				BEGIN
+					UPDATE tblSCTicket SET ysnHasGeneratedTicketNumber = 0 WHERE intTicketId = @intTicketId
 					DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strSourceType = 'Scale'
 					DELETE FROM tblSCTicket where intTicketLVStagingId = @intTicketLVStagingId
 

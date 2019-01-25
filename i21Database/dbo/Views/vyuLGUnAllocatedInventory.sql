@@ -36,7 +36,7 @@ FROM (
 					,'Spot'
 					)
 				THEN 'W'
-			END
+			END COLLATE Latin1_General_CI_AS
 		,CO.strCountry AS strOrigin
 		,PT.strDescription AS strProductType
 		,IM.strItemNo

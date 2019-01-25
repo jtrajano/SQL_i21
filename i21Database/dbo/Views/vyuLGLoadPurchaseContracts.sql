@@ -68,7 +68,7 @@ FROM (
 				WHERE ysnStockUnit = 1
 					AND ItemUOM.intItemUOMId = CT.intItemUOMId
 				), 0)
-		,strSubLocationName = ''
+		,strSubLocationName = '' COLLATE Latin1_General_CI_AS
 		,intCompanyLocationId = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
 		,CT.dblCashPrice
 		,dbo.fnCTConvertQtyToTargetItemUOM(CT.intItemUOMId, CT.intPriceItemUOMId, CT.dblCashPrice) AS dblCashPriceInQtyUOM

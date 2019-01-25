@@ -17,7 +17,7 @@ SELECT TOP 100 PERCENT Convert(INT, ROW_NUMBER() OVER (
 FROM 
 	--Inbound/Drop Ship side
 	(SELECT intPurchaseSale = 1 
-		,strType = 'Inbound' 
+		,strType = 'Inbound' COLLATE Latin1_General_CI_AS
 		,strContractNumber = CH.strContractNumber
 		,intContractTypeId = CH.intContractTypeId
 		,intContractSeq = CD.intContractSeq
@@ -185,7 +185,7 @@ FROM
 
 	--Outbound/Dropship Side
 	SELECT intPurchaseSale = 2 
-		,strType = 'Outbound' 
+		,strType = 'Outbound' COLLATE Latin1_General_CI_AS
 		,strContractNumber = CH.strContractNumber
 		,intContractTypeId = CH.intContractTypeId
 		,intContractSeq = CD.intContractSeq
@@ -220,7 +220,7 @@ FROM
 			WHEN LOAD.intPurchaseSale = 1
 				THEN 'Truck'
 			ELSE 'Ocean Vessel'
-			END
+			END COLLATE Latin1_General_CI_AS
 		,dtmETAPOD = LOAD.dtmETAPOD
 		,dtmLastWeighingDate = LOAD.dtmETAPOD + ISNULL(ASN.intLastWeighingDays, 0)
 		,dtmClaimValidTill = NULL

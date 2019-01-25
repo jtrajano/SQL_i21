@@ -1,26 +1,76 @@
 ﻿CREATE PROCEDURE uspGLUpdateTrialBalance 
 	@GLEntries RecapTableType READONLY
 AS
-DECLARE @intGLFiscalYearPeriodId INT, @intAccountId INT,@MTDBalance numeric(38,6), @YTDBalance numeric(38,6)
-
-DECLARE @temp TABLE
-(
-  intAccountId int, 
-  dblAmount numeric(18,6),
-  intGLFiscalYearPeriodId int
-)
-INSERT INTO @temp
-select intAccountId, sum(dblDebit-dblCredit) dblAmount , F.intGLFiscalYearPeriodId  FROM  @GLEntries
-JOIN tblGLFiscalYearPeriod F on dtmDate between F.dtmStartDate and F.dtmEndDate
-GROUP BY intAccountId, intGLFiscalYearPeriodId
-
-
-UPDATE tblGLTrialBalance set 
-	MTDBalance = MTDBalance + T.dblAmount, 
-	YTDBalance= YTDBalance + T.dblAmount,
-	dtmDateModified = GETDATE(), 
-	intConcurrencyId = ISNULL(intConcurrencyId,0) +1
-FROM tblGLTrialBalance TB JOIN
-@temp T ON T.intAccountId = TB.intAccountId AND T.intGLFiscalYearPeriodId = TB.intGLFiscalYearPeriodId
+DECLARE @dtmDate DATETIME = GETDATE();
+MERGE 
+	INTO	dbo.tblGLTrialBalance
+	WITH	(HOLDLOCK) 
+	AS		TrialBalanceTable
+	USING	(
+		SELECT intAccountId, 
+		sum(dblDebit-dblCredit) dblAmount,
+		F.intGLFiscalYearPeriodId  intGLFiscalYearPeriodId
+		FROM  @GLEntries,  tblGLFiscalYearPeriod F 
+		JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = F.intFiscalYearId
+		where dtmDate < F.dtmEndDate
+		GROUP BY intAccountId, intGLFiscalYearPeriodId
+	) AS TrialBalanceUpdateEntry
+	ON TrialBalanceUpdateEntry.intGLFiscalYearPeriodId = TrialBalanceTable .intGLFiscalYearPeriodId
+	AND TrialBalanceUpdateEntry.intAccountId = TrialBalanceTable.intAccountId
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET 	TrialBalanceTable.YTDBalance = TrialBalanceTable.YTDBalance + TrialBalanceUpdateEntry.dblAmount,
+		TrialBalanceTable.dtmDateModified = @dtmDate,
+		TrialBalanceTable.intConcurrencyId = TrialBalanceTable.intConcurrencyId + 1
+	WHEN NOT MATCHED BY TARGET THEN
+		INSERT (
+			intAccountId
+			,intGLFiscalYearPeriodId
+			,YTDBalance
+			,dtmDateModified
+			,intConcurrencyId
+		)
+		VALUES (
+			TrialBalanceUpdateEntry.intAccountId
+			,TrialBalanceUpdateEntry.intGLFiscalYearPeriodId
+			,TrialBalanceUpdateEntry.dblAmount
+			,@dtmDate
+			,1
+		);
+MERGE 
+	INTO	dbo.tblGLTrialBalance
+	WITH	(HOLDLOCK) 
+	AS		TrialBalanceTable
+	USING	(
+		select intAccountId, 
+		sum(dblDebit-dblCredit) dblAmount,
+		F.intGLFiscalYearPeriodId  intGLFiscalYearPeriodId
+		FROM  @GLEntries G JOIN  tblGLFiscalYearPeriod F ON
+		dtmDate BETWEEN F.dtmStartDate AND F.dtmEndDate
+		GROUP BY intAccountId, intGLFiscalYearPeriodId
+	) AS TrialBalanceUpdateEntry
+	ON TrialBalanceUpdateEntry.intGLFiscalYearPeriodId = TrialBalanceTable .intGLFiscalYearPeriodId
+	AND TrialBalanceUpdateEntry.intAccountId = TrialBalanceTable.intAccountId
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET TrialBalanceTable.MTDBalance = TrialBalanceTable.MTDBalance + TrialBalanceUpdateEntry.dblAmount,
+		TrialBalanceTable.dtmDateModified = @dtmDate,
+		TrialBalanceTable.intConcurrencyId = ISNULL(TrialBalanceTable.intConcurrencyId,0) + CASE WHEN dtmDateModified = @dtmDate THEN 0 ELSE  1 END
+		
+	WHEN NOT MATCHED BY TARGET THEN
+		INSERT (
+			intAccountId
+			,intGLFiscalYearPeriodId
+			,MTDBalance
+			,dtmDateModified
+			,intConcurrencyId
+		)
+		VALUES (
+			TrialBalanceUpdateEntry.intAccountId
+			,TrialBalanceUpdateEntry.intGLFiscalYearPeriodId
+			,TrialBalanceUpdateEntry.dblAmount
+			,@dtmDate
+			,1
+		);
 
 GO

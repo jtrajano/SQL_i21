@@ -160,7 +160,7 @@ BEGIN TRY
 				,L.intFreightTermId
 				,L.intBookId
 				,L.intSubBookId
-				,LC.intLoadContainerId
+				,ISNULL(LC.intLoadContainerId, 0)
 			FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId 
@@ -265,7 +265,7 @@ BEGIN TRY
 				,L.intFreightTermId
 				,L.intBookId
 				,L.intSubBookId
-				,0
+				,NULL
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
@@ -799,7 +799,7 @@ BEGIN TRY
 				,L.intFreightTermId
 				,L.intBookId
 				,L.intSubBookId
-				,0
+				,NULL
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId

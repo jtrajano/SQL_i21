@@ -261,4 +261,45 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTChe
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Preview and Report table Clean Up 
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateItemDataPreview') 
+	BEGIN
+		PRINT(N'Remove all records from tblSTUpdateItemDataPreview')
+		EXEC('
+				DELETE FROM tblSTUpdateItemDataPreview
+			')
+	END
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateItemPricingPreview') 
+	BEGIN
+		PRINT(N'Remove all records from tblSTUpdateItemPricingPreview')
+		EXEC('
+				DELETE FROM tblSTUpdateItemPricingPreview
+			')
+	END
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateRebateOrDiscountPreview') 
+	BEGIN
+		PRINT(N'Remove all records from tblSTUpdateRebateOrDiscountPreview')
+		EXEC('
+				DELETE FROM tblSTUpdateRebateOrDiscountPreview
+			')
+	END
+	
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateRegisterItemReport') 
+	BEGIN
+		PRINT(N'Remove all records from tblSTUpdateRegisterItemReport')
+		EXEC('
+				DELETE FROM tblSTUpdateRegisterItemReport
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Preview and Report table Clean Up
+----------------------------------------------------------------------------------------------------------------------------------
+
 PRINT('ST Cleanup - End')

@@ -142,6 +142,7 @@ BEGIN
 			SalesQuantity INT,
 			DiscountAmount DECIMAL(18, 6),
 			PromotionAmount DECIMAL(18, 6),
+			RefundAmount DECIMAL(18, 6),
 			SalesAmount DECIMAL(18, 6),
 			ActualSalesPrice DECIMAL(18, 6),
 			POSCode NVARCHAR(15),
@@ -155,6 +156,7 @@ BEGIN
 			DiscountAmount,
 			PromotionAmount,
 			SalesAmount,
+			RefundAmount,
 			ActualSalesPrice,
 			POSCode,
 			dblAveragePrice,
@@ -165,10 +167,11 @@ BEGIN
 			DiscountAmount,
 			PromotionAmount,
 			SalesAmount,
+			CAST(ISNULL(RefundAmount, 0) as decimal(18,6)),
 			ActualSalesPrice,
 			POSCode,
 			(ISNULL(NULLIF(CAST(SalesAmount as decimal(18,6)),0) / NULLIF(CAST(SalesQuantity as int),0),0)) AS dblAveragePrice,
-			(ISNULL(( NULLIF(CAST(SalesAmount as decimal(18,6)),0) + ( CAST(ISNULL(DiscountAmount, 0) as decimal(18,6)) + CAST(ISNULL(PromotionAmount, 0) as decimal(18,6)) ) ) / NULLIF(CAST(SalesQuantity as int),0),0)) AS dblAveragePriceWthDiscounts
+			(ISNULL(( NULLIF(CAST(SalesAmount as decimal(18,6)),0) + ( CAST(ISNULL(DiscountAmount, 0) as decimal(18,6)) + CAST(ISNULL(PromotionAmount, 0) as decimal(18,6)) + CAST(ISNULL(RefundAmount, 0) as decimal(18,6)) ) ) / NULLIF(CAST(SalesQuantity as int),0),0)) AS dblAveragePriceWthDiscounts
 		FROM #tempCheckoutInsert
 		-- ==================================================================================================================
 		-- End: Insert to temporary table
@@ -191,6 +194,7 @@ BEGIN
 				, intQtySold
 				, dblCurrentPrice
 				, dblDiscountAmount
+				, dblGrossSales
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
@@ -201,12 +205,10 @@ BEGIN
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
 			  , intQtySold			= ISNULL(CAST(Chk.SalesQuantity as int),0)
-									  -- (Total - (DiscountAmount + PromotionAmount)) / Qty
 			  , dblCurrentPrice		= ISNULL(NULLIF(CAST(Chk.SalesAmount as decimal(18,6)),0) / NULLIF(CAST(Chk.SalesQuantity as int),0),0) --ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
-									  -- (DiscountAmount + PromotionAmount)
-			  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0)
-									  -- (Total - (DiscountAmount + PromotionAmount))
-			  , dblTotalSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) + (ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0))
+			  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)
+			  , dblGrossSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) 
+			  , dblTotalSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) --// + (ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)  )
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost as decimal(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM @tblTempForCalculation Chk

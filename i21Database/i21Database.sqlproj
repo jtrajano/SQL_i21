@@ -7239,9 +7239,24 @@
     <Build Include="dbo\Functions\fnSCGetPrepaidIds.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenFutureByDate.sql" />
     <Build Include="dbo\Tables\tblCTContractBalance.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateItemDataPreview.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateItemPricingPreview.sql" />
+    <Build Include="dbo\Tables\tblSTUpdateRebateOrDiscountPreview.sql" />
     <Build Include="dbo\Views\vyuMFInventoryAsOnDate.sql" />
     <Build Include="dbo\Views\vyuMFInventoryAsOnDateByParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSMixedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateInventoryPhysicalCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCleanupStrayItemLocationTransactions.sql" />
+    <Build Include="dbo\Views\vyuICItemLocationTransactions.sql" />
+    <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
+    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailUpdateDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailDelete.sql" />
+    <Build Include="dbo\Functions\fnICGeneratePayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessPayables.sql" />
+    <None Include="Scripts\Post-Deployment\ST\25_DataFix.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutOptTransactionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7448,7 +7463,6 @@
     <Build Include="dbo\Views\vyuAP1099PATRYear.sql" />
     <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql" />
-    <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

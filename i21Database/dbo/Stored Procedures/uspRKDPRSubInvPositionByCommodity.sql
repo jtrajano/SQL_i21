@@ -201,33 +201,34 @@ BEGIN
 		, intFutureMonthId
 		, strCurrency)
 	SELECT ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC) intRowNum
-		, strCommodityCode = CD.strCommodity
+		, strCommodityCode = CD.strCommodityCode
 		, intCommodityId
 		, intContractHeaderId
 		, strContractNumber = CD.strContract
 		, strLocationName
 		, dtmEndDate
-		, dblBalance = CD.dblQuantity
+		, dblBalance = CD.dblQtyinCommodityStockUOM
 		, intUnitMeasureId
 		, intPricingTypeId
 		, intContractTypeId
 		, intCompanyLocationId
 		, strContractType
-		, strPricingType
+		, strPricingType = CD.strPricingTypeDesc
 		, CD.intContractDetailId
 		, intContractStatusId
 		, intEntityId
 		, intCurrencyId
-		, strType = (CD.strContractType + ' ' + CD.strPricingType) COLLATE Latin1_General_CI_AS
+		, strType = (CD.strContractType + ' ' + CD.strPricingTypeDesc) COLLATE Latin1_General_CI_AS
 		, intItemId
 		, strItemNo
 		, strEntityName = CD.strCustomer
 		, NULL intFutureMarketId
 		, NULL intFutureMonthId
 		, strCurrency 
-	FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
+	FROM tblCTContractBalance CD
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
 		AND CD.intCommodityId in (select intCommodity from @Commodity)
+		AND CD.dtmStartDate = '01-01-1900' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 
 	--=============================================================
 	-- STORAGE

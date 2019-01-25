@@ -58,30 +58,28 @@ BEGIN
 	SELECT	@strItemNo = i.strItemNo
 			,@CostBucketId = cb.intInventoryLotStorageId
 			,@AllowNegativeInventory = il.intAllowNegativeInventory
-			--,@strLocationName = cl.strLocationName
 	FROM	tblICItem i INNER JOIN tblICItemLocation il
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
-			--INNER JOIN tblSMCompanyLocation cl
-			--	ON cl.intCompanyLocationId = il.intLocationId
 			OUTER APPLY (
-				SELECT	TOP 1 *
+				SELECT	intInventoryLotStorageId = MIN(cb.intInventoryLotStorageId)
 				FROM	tblICInventoryLotStorage cb
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intLotId = @intLotId
 						AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 						AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
+						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
 						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+				HAVING 
+					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 			) cb 
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN 
 		-- Get the available stock in the cost bucket. 
 		DECLARE @strCostBucketDate AS VARCHAR(20) 
-		SELECT	TOP 1 
-				@strCostBucketDate = CONVERT(NVARCHAR(20), cb.dtmDate, 101)  
+		SELECT	@strCostBucketDate = CONVERT(NVARCHAR(20), MIN(cb.dtmDate), 101)
 		FROM	tblICInventoryLotStorage cb
 		WHERE	cb.intItemId = @intItemId
 				AND cb.intItemLocationId = @intItemLocationId
@@ -89,9 +87,10 @@ BEGIN
 				AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-		ORDER BY cb.dtmDate ASC, cb.intInventoryLotStorageId ASC, cb.intItemId ASC, cb.intItemLocationId ASC, cb.intLotId ASC, cb.intItemUOMId ASC
+		HAVING 
+			SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 
-		IF @UnitsOnStorage > 0 AND @strCostBucketDate IS NOT NULL 
+		IF @strCostBucketDate IS NOT NULL 
 		BEGIN 
 			--'Stock is not available for {Item} at {Location} as of {Transaction Date}. Use the nearest stock available date of {Cost Bucket Date} or later.'
 			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 

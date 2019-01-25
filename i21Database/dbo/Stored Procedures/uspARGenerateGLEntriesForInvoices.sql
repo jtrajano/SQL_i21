@@ -713,7 +713,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = CASE WHEN ARPAC.[strTransactionType] IN('Customer Prepayment','Credit Memo') THEN I.[intAPAccount] ELSE ARPAC.[intAccountId] END
+    ,[intAccountId]                 = ARPAC.[intAccountId]
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
     ,[dblDebitUnit]                 = @ZeroDecimal
