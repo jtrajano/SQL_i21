@@ -8,9 +8,9 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @strLotNumber NVARCHAR(50)
+	DECLARE @strLotNumber NVARCHAR(MAX)
 	DECLARE @xmlDocumentId INT
-	DECLARE @strReceiptNo NVARCHAR(50)
+	DECLARE @strReceiptNo NVARCHAR(MAX)
 	DECLARE @variable1 VARBINARY(max)
 	DECLARE @variable2 VARBINARY(max)
 	DECLARE @variable3 VARBINARY(max)
@@ -25,7 +25,7 @@ BEGIN TRY
 	DECLARE @temp_xml_table TABLE (
 		[fieldname] NVARCHAR(50)
 		,condition NVARCHAR(20)
-		,[from] NVARCHAR(50)
+		,[from] NVARCHAR(MAX)
 		,[to] NVARCHAR(50)
 		,[join] NVARCHAR(10)
 		,[begingroup] NVARCHAR(50)
@@ -41,7 +41,7 @@ BEGIN TRY
 	FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH (
 			[fieldname] NVARCHAR(50)
 			,condition NVARCHAR(20)
-			,[from] NVARCHAR(50)
+			,[from] NVARCHAR(MAX)
 			,[to] NVARCHAR(50)
 			,[join] NVARCHAR(10)
 			,[begingroup] NVARCHAR(50)
