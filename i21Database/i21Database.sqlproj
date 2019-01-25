@@ -7293,6 +7293,8 @@
     <Build Include="dbo\Stored Procedures\uspCFImportDriverPin.sql" />
     <Build Include="dbo\Tables\tblCFImportDriverPinResult.sql" />
     <None Include="Scripts\Post-Deployment\ST\25_DataFix.sql" />
+    <Build Include="dbo\Functions\fnICGeneratePayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
