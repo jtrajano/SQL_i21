@@ -60,7 +60,7 @@ BEGIN TRY
 	INSERT INTO @tblCTExcelAndTableColumnMap
 	SELECT T.* FROM 
 	tblCTExcelAndTableColumnMap T
-	JOIN (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @TableFromImport) H ON H.COLUMN_NAME = T.strExcelColumnName
+	JOIN (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @TableFromImport) H ON H.COLUMN_NAME COLLATE Latin1_General_CI_AS = T.strExcelColumnName COLLATE Latin1_General_CI_AS
 	WHERE T.strTableName = @TableToImport
 
     SELECT @intExcelAndTableColumnMapId = MIN(intExcelAndTableColumnMapId) FROM @tblCTExcelAndTableColumnMap WHERE strTableName = @TableToImport
