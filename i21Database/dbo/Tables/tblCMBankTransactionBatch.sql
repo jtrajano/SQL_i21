@@ -7,7 +7,7 @@
     [dtmBatchDate]              DATETIME        NULL,
     [dblTotal]                  DECIMAL (18, 6) NOT NULL,
     [intCompanyLocationId]      INT             NOT NULL,
-    [strDescription]            NVARCHAR (250)  NULL,
+    [strDescription]            NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPosted]                 BIT             DEFAULT ((0)) NULL,
     [intEntityUserId]           INT             NULL,
     [ysnDeleted]                BIT             DEFAULT ((0)) NULL,
