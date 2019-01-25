@@ -112,7 +112,7 @@ BEGIN
 		,[intTermId]						
 		,[strBillOfLading]					
 		,[ysnReturn]	 
-	FROM dbo.fnICGeneratePayables (@intReceiptId)
+	FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost)
 	
 	IF @ysnPost = 1
 	BEGIN
