@@ -7295,6 +7295,7 @@
     <None Include="Scripts\Post-Deployment\ST\25_DataFix.sql" />
     <Build Include="dbo\Functions\fnICGeneratePayables.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessPayables.sql" />
+    <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

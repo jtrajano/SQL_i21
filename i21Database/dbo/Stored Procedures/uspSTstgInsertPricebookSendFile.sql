@@ -207,42 +207,62 @@ BEGIN
 											THEN 'delete' 
 										ELSE 'addchange' 
 									END AS [ITTDetailRecordActionType], 
-									CASE 
-										WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-											THEN CASE
-													WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-														THEN 'upcA'
-													ELSE 'plu'
-												 END
-										WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
-											THEN CASE
-													WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-														THEN 'upcA'
-													ELSE 'plu'
-												 END 
-										ELSE 'plu' 
-									END AS [POSCodeFormatFormat], 
-									CASE 
-										WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-											THEN CASE
-													WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-														THEN CASE
-																WHEN LEN(IUOM.strLongUPCCode) = 6
-																	THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-																WHEN LEN(IUOM.strLongUPCCode) > 6	
-																	THEN RIGHT('00000000000' + ISNULL(IUOM.strLongUPCCode,''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-																	-- IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
-														END
-													ELSE IUOM.strLongUPCCode
-												 END
-										--WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
-										--	THEN CASE
-										--			WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-										--				THEN IUOM.strUpcCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strUpcCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strUpcCode,''),13) 
-										--			ELSE RIGHT('0000' + ISNULL(IUOM.strUpcCode,''),4) 
-										--		 END 
-										ELSE '0000' 
-									END [POSCode], 
+									PCF.strPosCodeFormat AS [POSCodeFormatFormat],
+									PCF.dblUPCwthOrwthOutCheckDigit AS [POSCode],
+									--CASE 
+										
+									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
+									--		THEN CASE
+									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) <= 89999 -- ISNULL(ST.intMaxPlu,0)
+									--					THEN 'plu'
+
+									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > 89999 --ISNULL(ST.intMaxPlu,0)
+									--					THEN CASE
+									--							-- UPC-A
+									--							WHEN LEN(IUOM.strLongUPCWOLeadingZero) = 6 
+									--								THEN 'upcA'
+									--							WHEN IUOM.strUPCwithCheckDigit > 89999 AND IUOM.strUPCwithCheckDigit <= 99999999999
+									--								THEN 'upcA'
+																
+									--							-- EAN13
+									--							WHEN IUOM.strUPCwithCheckDigit > 99999999999 AND IUOM.strUPCwithCheckDigit <= 999999999999
+									--								THEN 'ean13'
+
+									--							-- GTIN
+									--							WHEN IUOM.strUPCwithCheckDigit > 999999999999
+									--								THEN 'gtin'
+									--					END
+									--				ELSE ''
+									--			 END
+									--	ELSE 'plu' 
+									--END AS [POSCodeFormatFormat], 
+									--CASE 
+									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
+									--		THEN CASE
+									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) <= 89999 -- ISNULL(ST.intMaxPlu,0)
+									--					THEN IUOM.strLongUPCCode -- (plu)
+
+									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > 89999 --ISNULL(ST.intMaxPlu,0)
+									--					THEN CASE
+									--							-- UPC-A
+									--							WHEN LEN(IUOM.strLongUPCWOLeadingZero) = 6 
+									--								-- Convert to UPC-E + Check Digit
+									--								THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+									--							WHEN IUOM.strUPCwithCheckDigit > 89999 AND IUOM.strUPCwithCheckDigit <= 99999999999
+									--								THEN RIGHT('000000000000' + IUOM.strUPCwithCheckDigit, 12)
+																
+									--							-- EAN13
+									--							WHEN IUOM.strUPCwithCheckDigit > 99999999999 AND IUOM.strUPCwithCheckDigit <= 999999999999
+									--								THEN RIGHT('0000000000000' + IUOM.strUPCwithCheckDigit, 13)
+
+									--							-- GTIN
+									--							WHEN IUOM.strUPCwithCheckDigit > 999999999999
+									--								THEN IUOM.strUPCwithCheckDigit
+									--					END
+									--				ELSE IUOM.strLongUPCCode
+									--			 END
+									--	ELSE '0000' 
+									--END [POSCode], 
 									'0' AS [PosCodeModifier],
 									CASE 
 										WHEN I.strStatus = 'Active' 
@@ -310,8 +330,10 @@ BEGIN
 									AND CatLoc.intLocationId = ST.intCompanyLocationId
 								INNER JOIN tblSMCompanyLocation L 
 									ON L.intCompanyLocationId = ST.intCompanyLocationId
-								INNER JOIN tblICItemUOM IUOM 
+								INNER JOIN tblICItemUOM AS IUOM 
 									ON IUOM.intItemId = I.intItemId 
+								INNER JOIN vyuSTItemUOMPosCodeFormat PCF
+									ON IUOM.intItemUOMId = PCF.intItemUOMId
 								INNER JOIN tblICUnitMeasure IUM 
 									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 								INNER JOIN tblSTRegister R 
@@ -321,13 +343,14 @@ BEGIN
 								LEFT JOIN tblICItemSpecialPricing SplPrc 
 									ON SplPrc.intItemId = I.intItemId
 								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-									--AND R.intRegisterId = @intRegisterId 
 									AND ST.intStoreId = @intStoreId
-
 									AND IUOM.strLongUPCCode IS NOT NULL
-									AND IUOM.strLongUPCCode <> ''
-									AND IUOM.strLongUPCCode <> '0'
+									--AND IUOM.strLongUPCCode <> ''
+									--AND IUOM.strLongUPCCode <> '0'
 									AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+									AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
+
+
 
 								-- INSERT TO UPDATE REGISTER PREVIEW TABLE
 								INSERT INTO tblSTUpdateRegisterItemReport
@@ -397,13 +420,12 @@ BEGIN
 											LEFT JOIN tblICItemSpecialPricing SplPrc 
 												ON SplPrc.intItemId = I.intItemId
 											WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-												--AND R.intRegisterId = @intRegisterId 
 												AND ST.intStoreId = @intStoreId
-
 												AND IUOM.strLongUPCCode IS NOT NULL
-												AND IUOM.strLongUPCCode <> ''
-												AND IUOM.strLongUPCCode <> '0'
+												--AND IUOM.strLongUPCCode <> ''
+												--AND IUOM.strLongUPCCode <> '0'
 												AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+												AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
 										) as t
 								) t1
 								WHERE rn = 1
@@ -453,42 +475,62 @@ BEGIN
 											THEN 'delete' 
 										ELSE 'addchange' 
 									END AS [ITTDetailRecordActionType], 
-									CASE 
-										WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-											THEN CASE
-													WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-														THEN 'upcA'
-													ELSE 'plu'
-												 END
-										WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
-											THEN CASE
-													WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-														THEN 'upcA'
-													ELSE 'plu'
-												 END 
-										ELSE 'plu' 
-									END AS [POSCodeFormatFormat], 
-									CASE 
-										WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-											THEN CASE
-													WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-														THEN CASE
-																WHEN LEN(IUOM.strLongUPCCode) = 6
-																	THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-																WHEN LEN(IUOM.strLongUPCCode) > 6	
-																	THEN RIGHT('00000000000' + ISNULL(IUOM.strLongUPCCode,''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-																	-- IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
-														END
-													ELSE IUOM.strLongUPCCode
-												 END
-										--WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
-										--	THEN CASE
-										--			WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-										--				THEN IUOM.strUpcCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strUpcCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strUpcCode,''),13) 
-										--			ELSE RIGHT('0000' + ISNULL(IUOM.strUpcCode,''),4) 
-										--		 END 
-										ELSE '0000' 
-									END [POSCode], 
+									PCF.strPosCodeFormat AS [POSCodeFormatFormat],
+									PCF.dblUPCwthOrwthOutCheckDigit AS [POSCode],
+									--CASE 
+										
+									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
+									--		THEN CASE
+									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) <= 89999 -- ISNULL(ST.intMaxPlu,0)
+									--					THEN 'plu'
+
+									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > 89999 --ISNULL(ST.intMaxPlu,0)
+									--					THEN CASE
+									--							-- UPC-A
+									--							WHEN LEN(IUOM.strLongUPCWOLeadingZero) = 6 
+									--								THEN 'upcA'
+									--							WHEN IUOM.strUPCwithCheckDigit > 89999 AND IUOM.strUPCwithCheckDigit <= 99999999999
+									--								THEN 'upcA'
+																
+									--							-- EAN13
+									--							WHEN IUOM.strUPCwithCheckDigit > 99999999999 AND IUOM.strUPCwithCheckDigit <= 999999999999
+									--								THEN 'ean13'
+
+									--							-- GTIN
+									--							WHEN IUOM.strUPCwithCheckDigit > 999999999999
+									--								THEN 'gtin'
+									--					END
+									--				ELSE ''
+									--			 END
+									--	ELSE 'plu' 
+									--END AS [POSCodeFormatFormat], 
+									--CASE 
+									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
+									--		THEN CASE
+									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) <= 89999 -- ISNULL(ST.intMaxPlu,0)
+									--					THEN IUOM.strLongUPCCode -- (plu)
+
+									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > 89999 --ISNULL(ST.intMaxPlu,0)
+									--					THEN CASE
+									--							-- UPC-A
+									--							WHEN LEN(IUOM.strLongUPCWOLeadingZero) = 6 
+									--								-- Convert to UPC-E + Check Digit
+									--								THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+									--							WHEN IUOM.strUPCwithCheckDigit > 89999 AND IUOM.strUPCwithCheckDigit <= 99999999999
+									--								THEN RIGHT('000000000000' + IUOM.strUPCwithCheckDigit, 12)
+																
+									--							-- EAN13
+									--							WHEN IUOM.strUPCwithCheckDigit > 99999999999 AND IUOM.strUPCwithCheckDigit <= 999999999999
+									--								THEN RIGHT('0000000000000' + IUOM.strUPCwithCheckDigit, 13)
+
+									--							-- GTIN
+									--							WHEN IUOM.strUPCwithCheckDigit > 999999999999
+									--								THEN IUOM.strUPCwithCheckDigit
+									--					END
+									--				ELSE IUOM.strLongUPCCode
+									--			 END
+									--	ELSE '0000' 
+									--END [POSCode], 
 									'0' AS [PosCodeModifier],
 									CASE 
 										WHEN I.strStatus = 'Active' 
@@ -556,8 +598,10 @@ BEGIN
 									AND CatLoc.intLocationId = ST.intCompanyLocationId
 								INNER JOIN tblSMCompanyLocation L 
 									ON L.intCompanyLocationId = ST.intCompanyLocationId
-								INNER JOIN tblICItemUOM IUOM 
+								INNER JOIN tblICItemUOM AS IUOM 
 									ON IUOM.intItemId = I.intItemId 
+								INNER JOIN vyuSTItemUOMPosCodeFormat PCF
+									ON IUOM.intItemUOMId = PCF.intItemUOMId
 								INNER JOIN tblICUnitMeasure IUM 
 									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 								INNER JOIN tblSTRegister R 
@@ -567,13 +611,12 @@ BEGIN
 								LEFT JOIN tblICItemSpecialPricing SplPrc 
 									ON SplPrc.intItemId = I.intItemId
 								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-									--AND R.intRegisterId = @intRegisterId 
 									AND ST.intStoreId = @intStoreId
-
 									AND IUOM.strLongUPCCode IS NOT NULL
-									AND IUOM.strLongUPCCode <> ''
-									AND IUOM.strLongUPCCode <> '0'
+									--AND IUOM.strLongUPCCode <> ''
+									--AND IUOM.strLongUPCCode <> '0'
 									AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+									AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
 
 								AND (
 										(
@@ -660,18 +703,29 @@ BEGIN
 											LEFT JOIN tblICItemSpecialPricing SplPrc 
 												ON SplPrc.intItemId = I.intItemId
 											WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-											AND R.intRegisterId = @intRegisterId 
-											AND ST.intStoreId = @intStoreId
+												AND ST.intStoreId = @intStoreId
+												AND IUOM.strLongUPCCode IS NOT NULL
+												--AND IUOM.strLongUPCCode <> ''
+												--AND IUOM.strLongUPCCode <> '0'
+												AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+												AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
 
-											AND IUOM.strLongUPCCode IS NOT NULL
-											AND IUOM.strLongUPCCode <> ''
-											AND IUOM.strLongUPCCode <> '0'
-											AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-
-											AND ((@strCategoryCode <>'whitespaces' 
-											AND Cat.intCategoryId IN(select * from dbo.fnSplitString(@strCategoryCode,',')))
-											OR (@strCategoryCode ='whitespaces'  
-											AND Cat.intCategoryId = Cat.intCategoryId))
+											AND (
+													(
+														@strCategoryCode <>'whitespaces' 
+														AND 
+														Cat.intCategoryId IN(
+																				SELECT * 
+																				FROM dbo.fnSplitString(@strCategoryCode,',')
+																			)
+													)
+													OR 
+													(
+														@strCategoryCode ='whitespaces'  
+														AND 
+														Cat.intCategoryId = Cat.intCategoryId
+													)
+											)
 										) as t
 								) t1
 								WHERE rn = 1
