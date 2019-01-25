@@ -13,7 +13,7 @@ Unde.strName,
 Inv.intEntityCustomerId,
 BT.intBankTransactionTypeId, 
 Unde.dblAmount, 
-dbo.fnConvertNumberToWord(Unde.dblAmount) AS strAmountInWords,
+dbo.fnConvertNumberToWord(Unde.dblAmount) COLLATE Latin1_General_CI_AS AS strAmountInWords,
 BT.intCurrencyId, 
 BT.dblExchangeRate, 
 BT.intEntityId, 
@@ -50,12 +50,12 @@ strPayeeBankName = ISNULL((
 strPayeeBankAccountNumber  = ISNULL((
 		SELECT TOP 1 dbo.fnAESDecryptASym(strAccountNumber) FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = Inv.intEntityCustomerId ORDER BY dtmEffectiveDate desc
-),''),
+),'')COLLATE Latin1_General_CI_AS,
 strPayeeBankRoutingNumber = ISNULL((
 		SELECT TOP 1 dbo.fnAESDecryptASym(strRTN) FROM [tblEMEntityEFTInformation] EFTInfo 
 		INNER JOIN tblCMBank BANK ON EFTInfo.intBankId = BANK.intBankId
 		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = Inv.intEntityCustomerId ORDER BY dtmEffectiveDate desc
-),''),
+),'')COLLATE Latin1_General_CI_AS,
 strEntityNo = ISNULL((
 		SELECT strEntityNo FROM tblEMEntity
 		WHERE intEntityId = Inv.intEntityCustomerId
