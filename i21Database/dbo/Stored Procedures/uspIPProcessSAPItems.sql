@@ -589,6 +589,30 @@ BEGIN TRY
 							WHERE intItemId = @intItemId
 							)
 
+					IF EXISTS (
+							SELECT 1
+							FROM tblICItemUOM iu
+							JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+							JOIN tblIPSAPUOM su ON um.strSymbol = su.stri21UOM
+							JOIN tblIPItemUOMStage st ON st.strUOM = su.strSAPUOM
+							JOIN tblICLot L ON L.intItemId = iu.intItemId
+								AND L.dblQty > 0
+								AND (
+									L.intItemUOMId = iu.intItemUOMId
+									OR L.intWeightUOMId = iu.intItemUOMId
+									)
+							WHERE iu.intItemId = @intItemId
+								AND st.intStageItemId = @intStageItemId
+								AND iu.dblUnitQty <> st.dblNumerator / st.dblDenominator
+							)
+					BEGIN
+						RAISERROR (
+								'When UOM has a transaction, Unit or Unit Qty is not allowed to change.'
+								,16
+								,1
+								)
+					END
+
 					UPDATE iu
 					SET iu.dblUnitQty = st.dblNumerator / st.dblDenominator
 					FROM tblICItemUOM iu
