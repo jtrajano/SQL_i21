@@ -126,11 +126,23 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
-	, CAST(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND abs(B.dblDiscount) > 0 
-				THEN B.dblDiscount * -1 ELSE B.dblDiscount 
+	, CAST(CASE 
+				WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblDiscount) > 0 
+				THEN B.dblDiscount * -1 
+			ELSE 
+			(
+				--Honor only the discount if full payment, consider only for voucher
+				CASE 
+					WHEN B.dblAmountDue = 0
+					THEN B.dblDiscount 
+				ELSE 0
+				END
+			)
 			END * A.dblExchangeRate AS DECIMAL(18,2)) AS dblDiscount
-	, CAST(CASE WHEN C.intTransactionType NOT IN (1,2,14) AND abs(B.dblInterest) > 0 
-				THEN B.dblInterest * -1 ELSE B.dblInterest 
+	, CAST(CASE 
+			WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblInterest) > 0 
+			THEN B.dblInterest * -1 
+			ELSE B.dblInterest
 			END * A.dblExchangeRate AS DECIMAL(18,2)) AS dblInterest 
 	, dblPrepaidAmount = 0 
 	, D.strVendorId 
