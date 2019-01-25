@@ -7253,6 +7253,8 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailDelete.sql" />
+    <Build Include="dbo\Functions\fnICGeneratePayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessPayables.sql" />
     <None Include="Scripts\Post-Deployment\ST\25_DataFix.sql" />
     <Build Include="dbo\Views\vyuRKGetFutOptTransactionHistory.sql" />
   </ItemGroup>

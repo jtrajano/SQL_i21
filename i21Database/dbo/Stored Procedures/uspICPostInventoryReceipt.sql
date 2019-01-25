@@ -2130,6 +2130,8 @@ BEGIN
 		,@intTransactionId
 		,@intEntityUserSecurityId
 
+	EXEC dbo.uspICProcessPayables @intTransactionId, @ysnPost, @intEntityUserSecurityId
+	
 	COMMIT TRAN @TransactionName
 END 
     
