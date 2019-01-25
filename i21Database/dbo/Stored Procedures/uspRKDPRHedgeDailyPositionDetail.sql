@@ -255,156 +255,46 @@ BEGIN
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 	AND CD.dtmStartDate = '01-01-1900' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 	
-	DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
-		, dtmTransactionDate DATETIME
-		, intFutOptTransactionId INT
+	DECLARE @tblGetOpenFutureByDate TABLE (intFutOptTransactionId INT
 		, intOpenContract INT
-		, strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblContractSize NUMERIC(24,10)
-		, strFutureMarket NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strFutureMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strOptionMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strOptionMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblStrike NUMERIC(24,10)
-		, strOptionType NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strInstrumentType NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strBrokerAccount NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strBroker NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strNewBuySell NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intFutOptTransactionHeaderId INT
-		, intFutureMarketId INT
-		, intFutureMonthId INT
-		, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, ysnPreCrush BIT)
+		, strOptionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strInstrumentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strBrokerAccount NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strBroker NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strNewBuySell NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intFutOptTransactionHeaderId int
+		, ysnPreCrush BIT
+		, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+		, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 	
-	INSERT INTO @tblGetOpenFutureByDate
-	SELECT *
-	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intFutOptTransactionId ORDER BY dtmTransactionDate DESC)
-			, *
-		FROM (
-			--Futures Buy
-			SELECT FOT.dtmTransactionDate
-				, intFutOptTransactionId
-				, intOpenContract
-				, FOT.strCommodityCode
-				, strInternalTradeNo
-				, strLocationName
-				, FOT.dblContractSize
-				, FOT.strFutMarketName
-				, FOT.strFutureMonth AS strFutureMonth
-				, FOT.strOptionMonthYear AS strOptionMonth
-				, dblStrike
-				, strOptionType
-				, FOT.strInstrumentType
-				, FOT.strBrokerageAccount AS strBrokerAccount
-				, FOT.strName AS strBroker
-				, strBuySell
-				, FOTH.intFutOptTransactionHeaderId
-				, FOT.intFutureMarketId
-				, FOT.intFutureMonthId
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-			FROM tblRKFutOptTransactionHeader FOTH
-			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-			WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-				--AND ISNULL(FOT.ysnPreCrush, 0) = 0
-			
-			UNION ALL
-			--Futures Sell
-			SELECT FOT.dtmTransactionDate
-				, intFutOptTransactionId
-				, intOpenContract
-				, FOT.strCommodityCode
-				, strInternalTradeNo
-				, strLocationName
-				, FOT.dblContractSize
-				, FOT.strFutMarketName
-				, FOT.strFutureMonth AS strFutureMonth
-				, FOT.strOptionMonthYear AS strOptionMonth
-				, dblStrike
-				, strOptionType
-				, FOT.strInstrumentType
-				, FOT.strBrokerageAccount AS strBrokerAccount
-				, FOT.strName AS strBroker
-				, strBuySell
-				, FOTH.intFutOptTransactionHeaderId
-				, FOT.intFutureMarketId
-				, FOT.intFutureMonthId
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-			FROM tblRKFutOptTransactionHeader FOTH
-			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-			WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-				--AND ISNULL(FOT.ysnPreCrush, 0) = 0
-			
-			UNION ALL
-			--Options Buy
-			SELECT FOT.dtmTransactionDate
-				, intFutOptTransactionId
-				, intOpenContract
-				, FOT.strCommodityCode
-				, strInternalTradeNo
-				, strLocationName
-				, FOT.dblContractSize
-				, FOT.strFutMarketName
-				, FOT.strFutureMonth AS strFutureMonth
-				, FOT.strOptionMonthYear AS strOptionMonth
-				, dblStrike
-				, strOptionType
-				, FOT.strInstrumentType
-				, FOT.strBrokerageAccount AS strBrokerAccount
-				, FOT.strName AS strBroker
-				, strBuySell
-				, FOTH.intFutOptTransactionHeaderId
-				, FOT.intFutureMarketId
-				, FOT.intFutureMonthId
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-			FROM tblRKFutOptTransactionHeader FOTH
-			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-			WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-				--AND ISNULL(FOT.ysnPreCrush, 0) = 0
-				
-			UNION ALL
-			--Options Sell
-			SELECT FOT.dtmTransactionDate
-				, intFutOptTransactionId
-				, intOpenContract
-				, FOT.strCommodityCode
-				, strInternalTradeNo
-				, strLocationName
-				, FOT.dblContractSize
-				, FOT.strFutMarketName
-				, FOT.strFutureMonth AS strFutureMonth
-				, FOT.strOptionMonthYear AS strOptionMonth
-				, dblStrike
-				, strOptionType
-				, FOT.strInstrumentType
-				, FOT.strBrokerageAccount AS strBrokerAccount
-				, FOT.strName AS strBroker
-				, strBuySell
-				, FOTH.intFutOptTransactionHeaderId
-				, FOT.intFutureMarketId
-				, FOT.intFutureMonthId
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-			FROM tblRKFutOptTransactionHeader FOTH
-			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-			WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-				--AND ISNULL(FOT.ysnPreCrush, 0) = 0
-		)t2 
-	)t3 WHERE t3.intRowNum = 1
+	INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId
+		, intOpenContract
+		, strCommodityCode
+		, strInternalTradeNo
+		, strLocationName
+		, dblContractSize
+		, strFutureMarket
+		, strFutureMonth
+		, strOptionMonth
+		, dblStrike
+		, strOptionType
+		, strInstrumentType
+		, strBrokerAccount
+		, strBroker
+		, strNewBuySell
+		, intFutOptTransactionHeaderId
+		, ysnPreCrush
+		, strNotes
+		, strBrokerTradeNo)
+	SELECT * FROM  fnRKGetOpenFutureByDate( @intCommodityId, @dtmToDate)
 
 	SELECT *
 	INTO #tblGetStorageDetailByDate
