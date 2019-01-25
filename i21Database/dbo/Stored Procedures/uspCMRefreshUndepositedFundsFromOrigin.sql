@@ -48,22 +48,9 @@ WHERE strSourceSystem = 'AR'
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
 -- Insert records from the Deposit Entry
-INSERT INTO tblCMUndepositedFund (
-		intBankAccountId
-		,strSourceTransactionId
-		,intSourceTransactionId
-		,intLocationId
-		,dtmDate
-		,dblAmount
-		,strName
-		,strSourceSystem
-		,strPaymentMethod
-		,intCreatedUserId
-		,dtmCreated
-		,intLastModifiedUserId
-		,dtmLastModified
-)
-SELECT	@intBankAccountId
+;WITH CTE AS (
+SELECT	
+		intBankAccountId = @intBankAccountId
 		,strSourceTransactionId = (
 				CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
 				+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
@@ -71,7 +58,7 @@ SELECT	@intBankAccountId
 				+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
 			) COLLATE Latin1_General_CI_AS
 		,intSourceTransactionId = NULL
-		,NULL
+		,intLocationId = NULL
 		,dtmDate = dbo.fnConvertOriginDateToSQLDateTime(v.aptrx_chk_rev_dt) -- Use aptrx_chk_rev_dt because this is the deposit entry date. 
 		,dblAmount = ABS(v.aptrx_net_amt)
 		,strName = v.aptrx_name COLLATE Latin1_General_CI_AS
@@ -84,6 +71,7 @@ SELECT	@intBankAccountId
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
 WHERE	b.intBankAccountId = @intBankAccountId
+
 		AND NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
@@ -96,7 +84,7 @@ WHERE	b.intBankAccountId = @intBankAccountId
 		)
 
 UNION SELECT DISTINCT
-	@intBankAccountId,
+	intBankAccountId = @intBankAccountId,
 	strSourceTransactionId,
 	intSourceTransactionId,
 	intLocationId,
@@ -117,6 +105,40 @@ WHERE	v.intBankAccountId = @intBankAccountId
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
 			WHERE	f.strSourceTransactionId = v.strSourceTransactionId)
+)
+
+INSERT INTO tblCMUndepositedFund (
+		intBankAccountId
+		,strSourceTransactionId
+		,intSourceTransactionId
+		,intLocationId
+		,dtmDate
+		,dblAmount
+		,strName
+		,strSourceSystem
+		,strPaymentMethod
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+)
+SELECT 
+intBankAccountId
+		,strSourceTransactionId
+		,intSourceTransactionId
+		,intLocationId
+		,dtmDate
+		,dblAmount
+		,strName
+		,strSourceSystem
+		,strPaymentMethod
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+FROM CTE
+WHERE dblAmount <> 0
+
 
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
