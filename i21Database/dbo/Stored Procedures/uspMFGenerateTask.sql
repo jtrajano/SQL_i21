@@ -62,6 +62,8 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intOwnershipType INT
 		,@intDefaultConsumptionLocationId INT
+		,@intLotWeightUOMId int
+		,@dblSplitAndPickWeight NUMERIC(18, 6)
 
 	SELECT @ysnPickByQty = 1
 
@@ -85,6 +87,7 @@ BEGIN TRY
 		,@intLocationId INT
 		,@strInventoryTracking NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
+		,@intRequiredWeightUOMId int
 
 	SELECT @strOrderType = OT.strOrderType
 		,@strOrderNo = OH.strOrderNo
@@ -317,6 +320,8 @@ BEGIN TRY
 
 			SELECT @intDefaultConsumptionLocationId = NULL
 
+			Select @intRequiredWeightUOMId=NULL
+
 			DELETE
 			FROM @tblLot
 
@@ -325,6 +330,7 @@ BEGIN TRY
 				,@dblRequiredQty = dblRequiredQty
 				,@dblRequiredWeight = dblRequiredWeight
 				,@intRequiredUOMId = intItemUOMId
+				,@intRequiredWeightUOMId=intWeightUOMId
 				,@ysnStrictTracking = ysnStrictTracking
 				,@intLineItemLotId = intLotId
 				,@intCategoryId = intCategoryId
@@ -911,6 +917,7 @@ BEGIN TRY
 				SELECT @dblRemainingLotWeight = NULL
 
 				SELECT @intLotItemUOMId = NULL
+				Select @intLotWeightUOMId=NULL
 
 				SELECT @dblQty = dblQty
 					,@intLotId = intLotId
@@ -931,6 +938,7 @@ BEGIN TRY
 						)
 					,@intLotItemUOMId = intItemUOMId
 					,@intStorageLocationId = intStorageLocationId
+					,@intLotWeightUOMId = intWeightUOMId
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
@@ -956,10 +964,6 @@ BEGIN TRY
 				ELSE IF (
 						@strOrderType = 'INVENTORY SHIPMENT STAGING'
 						AND @ysnPickByQty = 1
-						)
-					OR (
-						@strPickByFullPallet = 'False'
-						AND @strOrderType = 'WO PROD STAGING'
 						)
 				BEGIN
 					SELECT @dblSplitAndPickQty = NULL
@@ -991,6 +995,44 @@ BEGIN TRY
 							)
 
 					IF @dblRequiredQty <= 0
+					BEGIN
+						BREAK;
+					END
+				END
+				ELSE IF (
+						@strPickByFullPallet = 'False'
+						AND @strOrderType = 'WO PROD STAGING'
+						)
+				BEGIN
+					SELECT @dblSplitAndPickWeight = NULL
+
+					SELECT @dblSplitAndPickWeight = (
+							CASE 
+								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotWeightUOMId, @intRequiredWeightUOMId, @dblRemainingLotWeight) >= @dblRequiredWeight
+									THEN dbo.fnMFConvertQuantityToTargetItemUOM(@intRequiredWeightUOMId, @intLotWeightUOMId, @dblRequiredWeight)
+								ELSE @dblRemainingLotWeight
+								END
+							)
+
+					EXEC uspMFCreateSplitAndPickTask @intOrderHeaderId = @intOrderHeaderId
+						,@intLotId = @intLotId
+						,@intEntityUserSecurityId = @intEntityUserSecurityId
+						,@dblSplitAndPickWeight = @dblSplitAndPickWeight
+						,@intTaskTypeId = 2
+						,@intItemId = @intItemId
+						,@intOrderDetailId = @intOrderDetailId
+						,@intFromStorageLocationId = @intStorageLocationId
+						,@intItemUOMId = @intLotWeightUOMId
+
+					SET @dblRequiredWeight = @dblRequiredWeight - (
+							CASE 
+								WHEN dbo.fnMFConvertQuantityToTargetItemUOM(@intLotWeightUOMId, @intRequiredWeightUOMId, @dblRemainingLotWeight) >= @dblRequiredWeight
+									THEN @dblRequiredWeight
+								ELSE dbo.fnMFConvertQuantityToTargetItemUOM(@intLotWeightUOMId, @intRequiredWeightUOMId, @dblRemainingLotWeight) 
+								END
+							)
+
+					IF @dblRequiredWeight <= 0
 					BEGIN
 						BREAK;
 					END

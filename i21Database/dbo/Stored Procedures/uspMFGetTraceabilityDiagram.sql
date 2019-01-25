@@ -1958,7 +1958,7 @@ BEGIN
 	BEGIN
 		DECLARE @RCUR CURSOR SET @RCUR = CURSOR
 		FOR
-		SELECT TOP 1 intLotId
+		SELECT intLotId
 			,intRecordId
 			,strType
 			,strTransactionName
@@ -2202,7 +2202,7 @@ BEGIN
 			IF @strType = 'CN'
 			BEGIN
 				SELECT TOP 1 @intShipmentId = intLoadId
-				FROM vyuLGLoadContainerReceiptContracts
+				FROM tblLGLoadContainer
 				WHERE intLoadContainerId = @intId
 
 				INSERT INTO @tblData (
@@ -2228,8 +2228,9 @@ BEGIN
 			--Get Contract From In Shipment
 			IF @strType = 'IS'
 			BEGIN
-				SELECT TOP 1 @intContractId = intPContractHeaderId
-				FROM vyuLGLoadContainerReceiptContracts
+				SELECT TOP 1 @intContractId = CD.intContractHeaderId
+				FROM tblLGLoadDetail ld
+				JOIN tblCTContractDetail CD on CD.intContractDetailId =ld.intPContractDetailId 
 				WHERE intLoadId = @intId
 
 				INSERT INTO @tblData (

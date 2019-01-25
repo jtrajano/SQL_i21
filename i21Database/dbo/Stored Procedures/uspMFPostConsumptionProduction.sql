@@ -255,12 +255,41 @@ BEGIN
 	DECLARE @dblOtherCharges NUMERIC(18, 6)
 		,@ysnConsumptionRequired BIT
 		,@dblTotalOtherCharges NUMERIC(18, 6)
+		,@intOutItemUOMId INT
+		,@intInItemUOMId INT
+		,@intOutUnitMeasureId INT
+		,@intInUnitMeasureId INT
 
 	SELECT @ysnConsumptionRequired = ysnConsumptionRequired
+		,@intOutItemUOMId = intItemUOMId
 	FROM tblMFWorkOrderRecipeItem RI
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND RI.intRecipeItemTypeId = 2
 		AND RI.intItemId = @intItemId
+
+	DECLARE @intRecipeTypeId INT
+
+	SELECT @intRecipeTypeId = intRecipeTypeId
+	FROM tblMFWorkOrderRecipe R
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	IF @intRecipeTypeId = 2
+	BEGIN
+		SELECT TOP 1 @intInItemUOMId = intItemUOMId
+		FROM tblMFWorkOrderRecipeItem RI
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND RI.intRecipeItemTypeId = 1
+
+		SELECT @intOutUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intOutItemUOMId
+
+		SELECT @intInUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intInItemUOMId
+
+		SELECT @dblNewUnitCost = dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @intOutUnitMeasureId, @intInUnitMeasureId, @dblNewUnitCost)
+	END
 
 	DECLARE @tblMFOtherChargeItem TABLE (
 		intRecipeItemId INT
@@ -486,7 +515,6 @@ BEGIN
 		SELECT TOP 1 @intLotId = intLotId
 		FROM #GeneratedLotItems
 		WHERE intDetailId = @intBatchId
-
 	END
 
 	DECLARE @intRecipeItemId INT
