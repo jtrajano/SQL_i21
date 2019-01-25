@@ -190,7 +190,8 @@ BEGIN TRY
 		AND R.strReceiptNumber IN (
 			SELECT x.Item COLLATE DATABASE_DEFAULT
 			FROM dbo.fnSplitString(@strReceiptNo, '^') x
-			)
+			) 
+	Order by RL.strLotNumber
 END TRY
 
 BEGIN CATCH
