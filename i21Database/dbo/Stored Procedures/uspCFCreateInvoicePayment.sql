@@ -98,7 +98,7 @@ BEGIN
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		WHERE ISNULL(I.intInvoiceId,0) != 0
 		AND strUserId = @username
-		AND strStatementType = @statementType
+		AND LOWER(strStatementType) = @statementType
 	
 	
 		-------------INVOICE LIST-------------
@@ -143,6 +143,7 @@ BEGIN
 			ON cfTrans.intInvoiceId = si.intInvoiceId
 			WHERE ISNULL(si.intInvoiceId,0) != 0
 			AND strUserId = @username
+			AND LOWER(strStatementType) = @statementType
 			AND ISNULL(ysnExpensed,0) = 0) 
 		,(SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'CF Invoice')
 		,'CF Invoice'
@@ -171,7 +172,7 @@ BEGIN
 		ON cfTrans.intInvoiceId = I.intInvoiceId
 		WHERE ISNULL(I.intInvoiceId,0) != 0
 		AND strUserId = @username
-		AND strStatementType = @statementType
+		AND LOWER(strStatementType) = @statementType
 		AND ISNULL(ysnExpensed,0) = 0
 		--------------------------------------
 

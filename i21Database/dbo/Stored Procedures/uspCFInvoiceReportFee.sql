@@ -336,6 +336,7 @@ BEGIN
 			WHERE ISNULL(intInvoiceId,0) != 0
 			AND cfInv.strUserId = @UserId
 			AND ISNULL(cfInv.ysnExpensed,0) = 0
+			AND LOWER(cfInv.strStatementType) = 'invoice'
 
 
 			--SELECT * FROM @tblCFInvoiceFeesTemp

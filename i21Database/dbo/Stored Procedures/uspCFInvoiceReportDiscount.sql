@@ -442,10 +442,10 @@ BEGIN
 			,ysnActive					BIT
 			,ysnEnergyTrac				BIT
 			,ysnShowOnCFInvoice			BIT
-			,dblAPR						NUMERIC
-			,dblDiscountEP				NUMERIC
-			,dblTotalAmount				NUMERIC
-			,dblQuantity				NUMERIC
+			,dblAPR						NUMERIC(18,6)
+			,dblDiscountEP				NUMERIC(18,6)
+			,dblTotalAmount				NUMERIC(18,6)
+			,dblQuantity				NUMERIC(18,6)
 			,dtmDiscountDate			DATETIME
 			,dtmDueDate					DATETIME
 			,dtmPostedDate				DATETIME

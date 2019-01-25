@@ -5820,17 +5820,13 @@ BEGIN
 	------------------------------------------------------
 	-------------- End Zero Dollar Transaction
 	------------------------------------------------------
-	
-
-
-
 
 
 
 	IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 )
 	BEGIN
 		SET @intVehicleId = NULL
-		IF(@ysnVehicleRequire = 1)
+		IF(ISNULL(@ysnVehicleRequire,0) = 1)
 		BEGIN
 			IF((ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
 			BEGIN
