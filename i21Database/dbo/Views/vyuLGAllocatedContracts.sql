@@ -106,11 +106,7 @@ SELECT
 	,dblSDeliveredQty = ISNULL(LS.dblQuantity, 0)
 	,dblBalanceToDeliver = ALD.dblSAllocatedQty - ISNULL(LS.dblQuantity, 0)
 	,strInvoiceStatus = CASE WHEN (ISNULL(PCT.dblInvoicedQty, 0) = 0 AND ISNULL(SCT.dblInvoicedQty, 0) = 0) THEN 'Not Invoiced' ELSE 'Partially Invoiced' END COLLATE Latin1_General_CI_AS 
-	
-	--Load Shipment
-	,strLoadNumber = LS.strLoadNumber
-	,strDestinationCity = LS.strDestinationCity
-	,dtmETAPOD = LS.dtmETAPOD
+
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
 LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = ALH.intCommodityId
@@ -161,6 +157,7 @@ LEFT JOIN tblCTPricingType SPT ON SPT.intPricingTypeId = SCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate SFR ON SFR.intFreightRateId = SCT.intFreightRateId
 LEFT JOIN tblCTBook BO ON BO.intBookId = ALH.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId
-OUTER APPLY (SELECT L.strLoadNumber, L.dtmETAPOD, L.strDestinationCity, dblQuantity = SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1
-			GROUP BY L.strLoadNumber, L.dtmETAPOD, L.strDestinationCity) LS
+OUTER APPLY (SELECT dblQuantity = SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1) LS
+
+
