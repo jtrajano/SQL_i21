@@ -16,7 +16,7 @@ declare @names varchar(max) = ''
 DECLARE @MyTable TABLE
 (
   Id int identity,
-  Name varchar(max)
+  Name varchar(max) COLLATE Latin1_General_CI_AS
 )
 
 if @Type = 'strBillOfLading'
