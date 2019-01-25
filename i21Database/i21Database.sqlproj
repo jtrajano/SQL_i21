@@ -7501,6 +7501,7 @@
     <Build Include="dbo\Views\vyuAP1099PATRYear.sql" />
     <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql" />
+	<Build Include="dbo\Stored Procedures\uspGLRecalcTrialBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
