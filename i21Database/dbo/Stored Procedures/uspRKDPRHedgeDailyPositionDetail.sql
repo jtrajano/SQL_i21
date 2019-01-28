@@ -253,7 +253,7 @@ BEGIN
 		, strCurrency
 	FROM tblCTContractBalance CD
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
-	AND CD.dtmStartDate = '01-01-1900' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
+	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 	
 	DECLARE @tblGetOpenFutureByDate TABLE (intFutOptTransactionId INT
 		, intOpenContract INT

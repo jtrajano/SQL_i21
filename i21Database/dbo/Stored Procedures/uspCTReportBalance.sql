@@ -10,8 +10,7 @@ BEGIN TRY
 	DECLARE @intContractTypeId		INT
 	DECLARE @intEntityId			INT
 	DECLARE @IntCommodityId			INT
-	DECLARE @intUnitMeasureId		INT
-	DECLARE @dtmStartDate			DATE
+	DECLARE @intUnitMeasureId		INT	
 	DECLARE @dtmEndDate				DATE
 	DECLARE @intCompanyLocationId	INT
 	DECLARE @IntFutureMarketId		INT
@@ -75,10 +74,6 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intUnitMeasureId'
 
-	SELECT	@dtmStartDate = [from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'dtmStartDate'
-
 	SELECT	@dtmEndDate = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'dtmEndDate'
@@ -94,63 +89,11 @@ BEGIN TRY
 	SELECT	@IntFutureMonthId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intFutureMonthId'
-
-  /*
-	SELECT  
-	 CB.intContractHeaderId
-	,CB.strType
-	,CB.intContractDetailId
-	,strCompanyName = @strCompanyName		
-	,blbHeaderLogo	= @blbHeaderLogo		
-	,CB.strDate				
-	,CB.strContractType		
-	,CB.intCommodityId			
-	,strCommodity = CB.strCommodity  +' '+UOM.strUnitMeasure
-	,CB.intItemId		
-	,CB.strItemNo					
-	,CB.intCompanyLocationId	
-	,CB.strLocationName		
-	,CB.strCustomer			
-	,CB.strContract			
-	,strPricingType = LEFT(CB.strPricingType,1)
-	,CB.strContractDate		
-	,CB.strShipMethod			
-	,CB.strShipmentPeriod		
-	,CB.intFutureMarketId      
-	,CB.intFutureMonthId       
-	,CB.strFutureMonth			
-	,CB.dblFutures				
-	,CB.dblBasis
-	,CB.strBasisUOM				
-	,CB.dblQuantity
-	,CB.strQuantityUOM			
-	,CB.dblCashPrice
-	,CB.strPriceUOM
-	,CB.strStockUOM					
-	,CB.dblAvailableQty		
-	,CB.dblAmount		
-	FROM 
-	[dbo].[fnCTGetContractBalance]
-	(
-		 @intContractTypeId		
-		,@intEntityId			
-		,@IntCommodityId		
-		,@dtmStartDate			
-		,@dtmEndDate			
-		,@intCompanyLocationId
-		,@IntFutureMarketId   
-		,@IntFutureMonthId    
-		,NULL 
-	) CB
-	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CB.intCommodityId AND C1.ysnStockUnit=1
-	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
- */
-
+	
 	EXEC uspCTGetContractBalance
 		 @intContractTypeId	   = 	@intContractTypeId
 		,@intEntityId		   =	@intEntityId
-		,@IntCommodityId	   =    @IntCommodityId		
-		,@dtmStartDate		   =    @dtmStartDate	
+		,@IntCommodityId	   =    @IntCommodityId	
 		,@dtmEndDate		   =    @dtmEndDate		
 		,@intCompanyLocationId =	@intCompanyLocationId
 		,@IntFutureMarketId    =    @IntFutureMarketId

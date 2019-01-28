@@ -17,15 +17,14 @@ DECLARE @FinalTable AS TABLE (
 
 
 	EXEC uspCTGetContractBalance
-		@intContractTypeId    =  NULL
-		,@intEntityId    = NULL
-		,@IntCommodityId    =    NULL 
-		,@dtmStartDate    =    '01-01-1900' 
-		,@dtmEndDate    =    @dtmToDate
+		 @intContractTypeId    = NULL
+		,@intEntityId		   = NULL
+		,@IntCommodityId	   = NULL 		 
+		,@dtmEndDate		   = @dtmToDate
 		,@intCompanyLocationId = NULL
-		,@IntFutureMarketId    =    NULL
-		,@IntFutureMonthId     =    NULL
-		,@strPositionIncludes  =    NULL
+		,@IntFutureMarketId    = NULL
+		,@IntFutureMonthId     = NULL
+		,@strPositionIncludes  = NULL
 		,@strCallingApp    =    'DPR'
 
 --Comment it temporarily: Refer to RM-2491
