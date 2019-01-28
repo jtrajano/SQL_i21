@@ -383,7 +383,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ISNULL(intBankDepositI
 				,[intCurrencyId]				= SP.intCurrencyId
 				,[intBankTransactionTypeId]		= 2
 				,[dtmDate]						= SP.dtmDate
-				,[dblAmount]					= SUM(UF.dblAmount)
+				,[dblAmount]					= SUM(UF.dblAmount) * -1
 				,[strMemo]						= 'Reversal for ' + SP.strRecordNumber
 				,[intCompanyLocationId]			= UF.intLocationId
 				,[intEntityId]					= @intUserId
@@ -411,8 +411,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ISNULL(intBankDepositI
 				, [dtmDate]				= UF.dtmDate
 				, [intGLAccountId]		= SP.intAccountId
 				, [strDescription]		= GL.strDescription
-				, [dblDebit]			= 0
-				, [dblCredit]			= ABS(ISNULL(SP.dblAmountPaid, 0))
+				, [dblDebit]			= ABS(ISNULL(SP.dblAmountPaid, 0))
+				, [dblCredit]			= 0
 				, [intEntityId]			= SP.intEntityCustomerId
 			FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 			INNER JOIN #SELECTEDPAYMENTS SP ON UF.intSourceTransactionId = SP.intPaymentId
