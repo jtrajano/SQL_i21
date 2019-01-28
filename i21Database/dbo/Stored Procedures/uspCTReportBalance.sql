@@ -16,6 +16,7 @@ BEGIN TRY
 	DECLARE @IntFutureMarketId		INT
 	DECLARE @IntFutureMonthId		INT
 	DECLARE @strCompanyName			NVARCHAR(500)
+	DECLARE @strPrintOption			NVARCHAR(500)	
 
 	SELECT	@strCompanyName	=	CASE 
 									WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL 
@@ -89,6 +90,10 @@ BEGIN TRY
 	SELECT	@IntFutureMonthId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intFutureMonthId'
+
+	SELECT	@strPrintOption = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strPrintOption'
 	
 	EXEC uspCTGetContractBalance
 		 @intContractTypeId	   = 	@intContractTypeId
@@ -98,6 +103,7 @@ BEGIN TRY
 		,@intCompanyLocationId =	@intCompanyLocationId
 		,@IntFutureMarketId    =    @IntFutureMarketId
 		,@IntFutureMonthId     =    @IntFutureMonthId
+		,@strPrintOption	   =    @strPrintOption
 
 END TRY
 
