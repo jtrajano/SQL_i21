@@ -20,7 +20,7 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will not use Inventory Adjustment. 
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
+DECLARE @InventoryTransactionTypeId_AutoVariance AS INT = 1;
 DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
 DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 DECLARE @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock AS INT = 35;
@@ -73,6 +73,19 @@ FROM	(
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 						AND t.intInTransitSourceLocationId IS NOT NULL
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+				UNION ALL 
+				SELECT	DISTINCT 
+						t.intItemId
+						, t.intItemLocationId 
+						, @InventoryTransactionTypeId_AutoVariance
+				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
+							ON t.intItemId = i.intItemId
+				WHERE	t.strBatchId = @strBatchId
+						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+						AND t.intItemLocationId IS NOT NULL
+						AND t.intInTransitSourceLocationId IS NULL
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 			) InnerQuery
 		) Query
@@ -163,7 +176,7 @@ BEGIN
 						INNER JOIN tblICItem i 
 							ON i.intItemId = t.intItemId 
 				WHERE	t.strBatchId = @strBatchId
-						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
+						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoVariance, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 						AND t.intItemId = Item.intItemId
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
@@ -333,6 +346,161 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+	UNION ALL 
+	SELECT	
+			dtmDate = t.dtmDate
+			,intItemId = t.intItemId
+			,intItemLocationId  = t.intItemLocationId
+			,intInTransitSourceLocationId = NULL 
+			,intTransactionId = t.intTransactionId
+			,strTransactionId = t.strTransactionId 
+			,dblQty = 0
+			,dblUOMQty = 0 
+			,dblCost = 0 
+			,dblValue = 
+				-- Cost Bucket Value
+				(
+					t.dblQty * t.dblCost 
+				)
+				- 
+				-- Less Return Value
+				(
+					t.dblQty *
+					dbo.fnCalculateReceiptUnitCost(
+						ri.intItemId
+						,ri.intUnitMeasureId		
+						,ri.intCostUOMId
+						,ri.intWeightUOMId
+						,ri.dblUnitCost
+						,ri.dblNet
+						,t.intLotId
+						,t.intItemUOMId
+						,AggregrateItemLots.dblTotalNet
+						,ri.ysnSubCurrency
+						,r.intSubCurrencyCents
+					)
+				)
+			,intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
+			,dblExchangeRate = t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = TransType.strTransactionForm
+			,strDescription = 
+					-- 'Returning {Qty} for {Item No}. Return cost is {IR Cost} and cb cost is at {Cb Cost}. The inventory adjustment value is {Adjustment Value}.'
+					dbo.fnFormatMessage(
+						'Returning %f %s for %s. Return cost is %f and the costing method is at %f. The inventory adjustment value is %f.'
+						, ABS(t.dblQty) 
+						, u.strUnitMeasure
+						, i.strItemNo
+						, dbo.fnCalculateReceiptUnitCost(
+							ri.intItemId
+							,ri.intUnitMeasureId		
+							,ri.intCostUOMId
+							,ri.intWeightUOMId
+							,ri.dblUnitCost
+							,ri.dblNet
+							,t.intLotId
+							,t.intItemUOMId
+							,AggregrateItemLots.dblTotalNet
+							,ri.ysnSubCurrency
+							,r.intSubCurrencyCents
+						)	
+						, t.dblCost
+						, (
+							-- Cost Bucket Value
+							(
+								t.dblQty * t.dblCost 
+							)
+							- 
+							-- Less Return Value
+							(
+								t.dblQty *
+								dbo.fnCalculateReceiptUnitCost(
+									ri.intItemId
+									,ri.intUnitMeasureId		
+									,ri.intCostUOMId
+									,ri.intWeightUOMId
+									,ri.dblUnitCost
+									,ri.dblNet
+									,t.intLotId
+									,t.intItemUOMId
+									,AggregrateItemLots.dblTotalNet
+									,ri.ysnSubCurrency
+									,r.intSubCurrencyCents
+								)
+							)
+						)
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+					)
+			,dblForexRate = t.dblForexRate
+			,strItemNo = i.strItemNo 
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
+			,dblLineTotal = NULL 
+	FROM	dbo.tblICInventoryTransaction t 
+			INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+			INNER JOIN tblICItem i
+				ON i.intItemId = t.intItemId
+			INNER JOIN tblICInventoryReceipt r
+				ON  r.strReceiptNumber = t.strTransactionId
+				AND r.intInventoryReceiptId = t.intTransactionId
+			INNER JOIN (
+				tblICItemUOM iu INNER JOIN tblICUnitMeasure u
+					ON iu.intUnitMeasureId = u.intUnitMeasureId
+			)
+				ON iu.intItemUOMId = t.intItemUOMId
+			LEFT JOIN tblICInventoryReceiptItem ri
+				ON  ri.intInventoryReceiptId = r.intInventoryReceiptId
+				AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+			OUTER APPLY (
+				SELECT  dblTotalNet = SUM(
+							CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+										ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+									ELSE 
+										ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+							END 
+						)
+				FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+							ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+				WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+			) AggregrateItemLots
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON 
+				currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+
+	WHERE	t.strBatchId = @strBatchId
+			AND t.intInTransitSourceLocationId IS NULL
+			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+			AND t.dblQty < 0 
+			AND 
+				-- Cost Bucket Value
+				(
+					t.dblQty * t.dblCost 
+				)
+				- 
+				-- Less Return Value
+				(
+					t.dblQty *
+					dbo.fnCalculateReceiptUnitCost(
+						ri.intItemId
+						,ri.intUnitMeasureId		
+						,ri.intCostUOMId
+						,ri.intWeightUOMId
+						,ri.dblUnitCost
+						,ri.dblNet
+						,t.intLotId
+						,t.intItemUOMId
+						,AggregrateItemLots.dblTotalNet
+						,ri.ysnSubCurrency
+						,r.intSubCurrencyCents
+					)
+				)
+				<> 0 	
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for the Receipt Line Total
@@ -402,31 +570,11 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
 
-
-		-- CROSS APPLY dbo.fnGetDebit(
-		-- 	ISNULL(dblLineTotal, 0)
-		-- ) Debit
-		-- CROSS APPLY dbo.fnGetCredit(
-		-- 	ISNULL(dblLineTotal, 0) 			
-		-- ) Credit
-		-- CROSS APPLY dbo.fnGetDebitForeign(
-		-- 	ISNULL(dblLineTotal, 0)	
-		-- 	,ForGLEntries_CTE.intCurrencyId
-		-- 	,@intFunctionalCurrencyId
-		-- 	,ForGLEntries_CTE.dblForexRate
-		-- ) DebitForeign
-		-- CROSS APPLY dbo.fnGetCreditForeign(
-		-- 	ISNULL(dblLineTotal, 0) 			
-		-- 	,ForGLEntries_CTE.intCurrencyId
-		-- 	,@intFunctionalCurrencyId
-		-- 	,ForGLEntries_CTE.dblForexRate
-		-- ) CreditForeign 
-
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				@InventoryTransactionTypeId_WriteOffSold
 				, @InventoryTransactionTypeId_RevalueSold
-				, @InventoryTransactionTypeId_AutoNegative
+				, @InventoryTransactionTypeId_AutoVariance
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
 
@@ -496,30 +644,11 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
 
-		-- CROSS APPLY dbo.fnGetDebit(
-		-- 	ISNULL(dblLineTotal, 0)			
-		-- ) Debit
-		-- CROSS APPLY dbo.fnGetCredit(
-		-- 	ISNULL(dblLineTotal, 0) 			
-		-- ) Credit
-		-- CROSS APPLY dbo.fnGetDebitForeign(
-		-- 	ISNULL(dblLineTotal, 0)			
-		-- 	,ForGLEntries_CTE.intCurrencyId
-		-- 	,@intFunctionalCurrencyId
-		-- 	,ForGLEntries_CTE.dblForexRate
-		-- ) DebitForeign
-		-- CROSS APPLY dbo.fnGetCreditForeign(
-		-- 	ISNULL(dblLineTotal, 0) 			
-		-- 	,ForGLEntries_CTE.intCurrencyId
-		-- 	,@intFunctionalCurrencyId
-		-- 	,ForGLEntries_CTE.dblForexRate
-		-- ) CreditForeign
-
 WHERE	ForGLEntries_CTE.dblQty <> 0 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				@InventoryTransactionTypeId_WriteOffSold
 				, @InventoryTransactionTypeId_RevalueSold
-				, @InventoryTransactionTypeId_AutoNegative
+				, @InventoryTransactionTypeId_AutoVariance
 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 			)
 
@@ -591,7 +720,7 @@ WHERE	ForGLEntries_CTE.dblQty <> 0
 -- 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
 -- 				@InventoryTransactionTypeId_WriteOffSold
 -- 				, @InventoryTransactionTypeId_RevalueSold
--- 				, @InventoryTransactionTypeId_AutoNegative
+-- 				, @InventoryTransactionTypeId_AutoVariance
 -- 				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 -- 			)
 
@@ -659,7 +788,7 @@ WHERE	ForGLEntries_CTE.dblQty <> 0
 --		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
 --				@InventoryTransactionTypeId_WriteOffSold
 --				, @InventoryTransactionTypeId_RevalueSold
---				, @InventoryTransactionTypeId_AutoNegative
+--				, @InventoryTransactionTypeId_AutoVariance
 --				, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 --			)
 
@@ -817,7 +946,9 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= DebitUnit.Value
 		,dblCreditUnit				= CreditUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
+										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+										+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -874,7 +1005,7 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
 
-WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 
 UNION ALL 
@@ -886,7 +1017,9 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= CreditUnit.Value
 		,dblCreditUnit				= DebitUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
+									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+									+ ' ' + ForGLEntries_CTE.strDescription 
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -943,6 +1076,6 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
 
-WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_AutoNegative
+WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_AutoVariance
 		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 ;

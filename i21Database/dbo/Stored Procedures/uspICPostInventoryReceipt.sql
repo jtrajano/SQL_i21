@@ -1362,17 +1362,7 @@ BEGIN
 						-- WHERE	t.dblQty > 0 
 						-- 		AND UDT.intInTransitSourceLocationId IS NOT NULL 
 					END 
-					ELSE 
-					BEGIN 
-						-- Create an auto-variance for inventory returns posted in IR. 
-						EXEC @intReturnValue = [uspICPostInventoryReceiptVarianceForReturns]
-							@intTransactionId 
-							,@strTransactionId
-							,@strBatchId
-							,@intEntityUserSecurityId
 
-						IF @intReturnValue < 0 GOTO With_Rollback_Exit
-					END
 					-- Create the GL entries specific for Inventory Receipt
 					INSERT INTO @GLEntries (
 							[dtmDate] 
@@ -1414,6 +1404,18 @@ BEGIN
 							,@intEntityUserSecurityId
 
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+					--BEGIN 
+					--	-- Create an auto-variance for inventory returns posted in IR. 
+					--	EXEC @intReturnValue = [uspICCreateReceiptGLEntriesForReturnVariance]
+					--		@intTransactionId 
+					--		,@strTransactionId
+					--		,@strBatchId
+					--		,@intEntityUserSecurityId
+
+					--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					--END
+
 				END 			
 			END
 		END
