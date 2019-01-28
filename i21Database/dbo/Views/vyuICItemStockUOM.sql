@@ -72,7 +72,7 @@ OUTER APPLY (
 	WHERE ItemUOM_StockUnit.ysnStockUnit <> 1
 		AND ItemUOM_StockUnit.intItemId = ItemUOM.intItemId
 		AND StockUOM_StockUnit.intItemLocationId = StockUOM.intItemLocationId
-		AND StockUOM_StockUnit.intSubLocationId = StockUOM.intSubLocationId
-		AND StockUOM_StockUnit.intStorageLocationId = StockUOM.intStorageLocationId
+		AND (ISNULL(StockUOM_StockUnit.intSubLocationId, '') = ISNULL(StockUOM.intSubLocationId, '')  OR StockUOM_StockUnit.intSubLocationId = StockUOM.intSubLocationId)
+		AND (ISNULL(StockUOM_StockUnit.intStorageLocationId, '') = ISNULL(StockUOM.intStorageLocationId,'') OR StockUOM_StockUnit.intStorageLocationId = StockUOM.intStorageLocationId)
 	GROUP BY ItemUOM_StockUnit.intItemId, ItemLocation_StockUnit.intItemLocationId, StockUOM_StockUnit.intStorageLocationId, StockUOM_StockUnit.intSubLocationId
 ) StockUnit
