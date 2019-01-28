@@ -7296,6 +7296,7 @@
     <Build Include="dbo\Functions\fnICGeneratePayables.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessPayables.sql" />
     <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptVarianceForReturns.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
