@@ -300,6 +300,7 @@ FROM (
 														SELECT intPaymentId
 														FROM dbo.tblARPayment WITH (NOLOCK)
 														WHERE ysnPosted = 1
+															AND ISNULL(ysnProcessedToNSF, 0) = 0
 															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'																	
 													) P ON PD.intPaymentId = P.intPaymentId))
 		OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId 
@@ -308,6 +309,7 @@ FROM (
 														SELECT intPaymentId
 														FROM dbo.tblARPayment WITH (NOLOCK)
 														WHERE ysnPosted = 1
+															AND ISNULL(ysnProcessedToNSF, 0) = 0
 															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'																	
 													) P ON PD.intPaymentId = P.intPaymentId))))
 		AND intAccountId IN (SELECT intAccountId FROM dbo.vyuGLAccountDetail WITH (NOLOCK) WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))
@@ -316,6 +318,7 @@ FROM (
 		SELECT intPaymentId	
 		FROM dbo.tblARPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1 
+		  AND ISNULL(ysnProcessedToNSF, 0) = 0
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 		  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 	) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
@@ -328,6 +331,7 @@ FROM (
 			FROM dbo.tblARPayment WITH (NOLOCK) 
 			WHERE ysnPosted = 1
 			  AND ysnInvoicePrepayment = 0
+			  AND ISNULL(ysnProcessedToNSF, 0) = 0
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
 			  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 		) P ON PD.intPaymentId = P.intPaymentId
