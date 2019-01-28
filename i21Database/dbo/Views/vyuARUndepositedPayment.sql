@@ -75,7 +75,7 @@ FROM (
 		FROM tblSMCompanyLocationPOSDrawer
 	) DRAWER ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 	WHERE EOD.ysnClosed = 1
-	 AND (EOD.dblFinalEndingBalance - (EOD.dblOpeningBalance + ISNULL(EOD.dblExpectedEndingBalance,0))) <> 0
+	 AND intCashOverShortId IS NOT NULL
 ) TRANSACTIONS
 INNER JOIN tblEMEntity CUSTOMER ON TRANSACTIONS.intEntityCustomerId = CUSTOMER.intEntityId
 LEFT JOIN tblEMEntity ENTEREDBY ON TRANSACTIONS.intEntityId = ENTEREDBY.intEntityId
