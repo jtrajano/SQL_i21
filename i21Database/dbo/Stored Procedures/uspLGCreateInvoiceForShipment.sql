@@ -394,7 +394,7 @@ DECLARE
 				tblCTContractDetail CD
 				JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
 				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1))
+				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
 	BEGIN
 		SELECT TOP 1 
 			@InvoiceNumber = CH.strContractNumber,
@@ -404,7 +404,7 @@ DECLARE
 		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1)
+		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)
 
 		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
 

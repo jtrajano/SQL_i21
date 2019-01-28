@@ -199,7 +199,7 @@ BEGIN
 			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
 			,[dblQuantity]						= TransferStorageSplit.dblUnits
-			,[dtmDeliveryDate]					= GETDATE()
+			,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
 			,[dtmLastStorageAccrueDate]			= CS.dtmLastStorageAccrueDate	

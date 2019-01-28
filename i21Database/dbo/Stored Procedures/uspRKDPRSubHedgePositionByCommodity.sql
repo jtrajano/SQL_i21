@@ -168,33 +168,34 @@ BEGIN
 		, intFutureMonthId
 		, strCurrency)
 	SELECT ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC) intRowNum
-		, strCommodityCode = CD.strCommodity
+		, strCommodityCode = CD.strCommodityCode
 		, intCommodityId
 		, intContractHeaderId
 		, strContractNumber = CD.strContract
 		, strLocationName
 		, dtmEndDate
-		, dblBalance = CD.dblQuantity
+		, dblBalance = CD.dblQtyinCommodityStockUOM
 		, intUnitMeasureId
 		, intPricingTypeId
 		, intContractTypeId
 		, intCompanyLocationId
 		, strContractType
-		, strPricingType
+		, strPricingType = CD.strPricingTypeDesc
 		, CD.intContractDetailId
 		, intContractStatusId
 		, intEntityId
 		, intCurrencyId
-		, strType = (CD.strContractType + ' ' + CD.strPricingType) Collate Latin1_General_CI_AS
+		, strType = (CD.strContractType + ' ' + CD.strPricingTypeDesc) Collate Latin1_General_CI_AS
 		, intItemId
 		, strItemNo
 		, strEntityName = CD.strCustomer
 		, NULL intFutureMarketId
 		, NULL intFutureMonthId
 		, strCurrency 
-	FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
+	FROM tblCTContractBalance CD
 	WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
 	AND CD.intCommodityId in (select intCommodity from @Commodity)
+	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 
 	DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
 		, dtmTransactionDate DATETIME
@@ -593,14 +594,13 @@ BEGIN
 						, 'Physical Contract' COLLATE Latin1_General_CI_AS strContractType
 						, strLocationName
 						, RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS strContractEndMonth
-						, dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((cd.dblBalance), 0)) AS dblTotal
+						, ISNULL(cd.dblBalance, 0) AS dblTotal
 						, cd.intUnitMeasureId
 						, @intCommodityId as intCommodityId
 						, cd.intCompanyLocationId
 						, strCurrency
 						, intContractTypeId
 					FROM @tblGetOpenContractDetail cd
-					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 					WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId = @intCommodityId
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
 				) t

@@ -29,9 +29,17 @@ BEGIN TRY
 				@strShipmentId					NVARCHAR(50),
 				@strTicketNumber				NVARCHAR(50),
 				@intSequenceUsageHistoryId		INT,
-				@strScreenName					NVARCHAR(50) =	'Inventory Shipment'
+				@strScreenName					NVARCHAR(50) =	'Inventory Shipment',
+				@ysnReduceScheduleByLogisticsLoad BIT,
+				@intLoadId						INT,
+				@dblLoadQuantity				NUMERIC(18,6),
+				@intLoadDetailId				INT,
+				@dblReduceSchQty				NUMERIC(18,6),
+				@dblReverseSchQty				NUMERIC(18,6),
+				@intSContractDetailId			INT
 
 	SELECT @intOrderType = intOrderType,@intSourceType = intSourceType,@strShipmentId= strShipmentId FROM @ItemsFromInventoryShipment
+	SELECT @ysnReduceScheduleByLogisticsLoad = ysnReduceScheduleByLogisticsLoad FROM tblCTCompanyPreference
 
 	IF @intSourceType = -1
 	BEGIN
@@ -132,6 +140,46 @@ BEGIN TRY
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInventoryShipmentItemId,
 						@strScreenName			=	@strScreenName
+
+				IF	@ysnReduceScheduleByLogisticsLoad = 1 AND @intSourceType = 1 AND @intOrderType = 1 AND ISNULL(@ysnLoad,0) = 0
+				BEGIN
+					SELECT @intLoadId = intLoadId from tblSCTicket WHERE intTicketId = @intSourceId
+					SELECT @intLoadDetailId = intLoadDetailId,@intSContractDetailId = intSContractDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId AND intSContractDetailId = @intContractDetailId
+					IF @intLoadId IS NOT NULL AND @intSContractDetailId = @intContractDetailId
+					BEGIN
+						SELECT @dblLoadQuantity = dblQuantity FROM tblLGLoadDetail WHERE intLoadId = @intLoadId
+						IF ABS(@dblSchQuantityToUpdate) < @dblLoadQuantity AND @dblSchQuantityToUpdate < 0
+						BEGIN
+							
+							SELECT  @dblReduceSchQty = (@dblLoadQuantity - ABS(@dblSchQuantityToUpdate)) * -1
+							EXEC	uspCTUpdateScheduleQuantity 
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblReduceSchQty,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intLoadDetailId,
+							@strScreenName			=	'Auto - Load Schedule'
+						END
+
+						IF	EXISTS(SELECT TOP 1 1 FROM tblCTSequenceUsageHistory WHERE intContractDetailId = @intContractDetailId AND strScreenName = 'Auto - Load Schedule' AND intExternalId = @intLoadDetailId) AND
+						@dblSchQuantityToUpdate > 0
+						BEGIN
+							SELECT @strTicketNumber = strLoadNumber FROM tblLGLoad WHERE intLoadId = @intLoadId
+							IF @strTicketNumber IS NOT NULL
+							BEGIN
+								SELECT @intSequenceUsageHistoryId = intSequenceUsageHistoryId FROM tblCTSequenceUsageHistory WHERE intContractDetailId = @intContractDetailId AND strScreenName = 'Auto - Load Schedule' AND intExternalId = @intLoadDetailId
+								UPDATE tblCTSequenceUsageHistory SET  strScreenName =  strScreenName + ' - ' + @strTicketNumber WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
+								SELECT @dblReverseSchQty = dblTransactionQuantity * -1,@strTicketNumber = 'Reverse ' + strScreenName FROM tblCTSequenceUsageHistory WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
+
+								EXEC	uspCTUpdateScheduleQuantity
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblReverseSchQty,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intSourceId,
+										@strScreenName			=	@strTicketNumber
+							END
+						END
+					END
+				END
 			END
 			
 			IF	@intSourceType = 1 AND 

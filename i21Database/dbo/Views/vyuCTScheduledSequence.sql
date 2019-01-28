@@ -4,7 +4,7 @@ AS
 
     SELECT ROW_NUMBER() OVER(ORDER BY CD.intContractDetailId DESC) intUniqueId,t.*,CD.intContractSeq,CD.intContractHeaderId FROM
     (
-		SELECT  'Inventory Receipt' strScreenName,RI.intLineNo AS intContractDetailId, IR.strReceiptNumber AS strNumber,IR.intInventoryReceiptId AS intExternalHeaderId,'intInventoryReceiptId' AS strHeaderIdColumn
+		SELECT  'Inventory Receipt' COLLATE Latin1_General_CI_AS AS strScreenName,RI.intLineNo AS intContractDetailId, IR.strReceiptNumber AS strNumber,IR.intInventoryReceiptId AS intExternalHeaderId,'intInventoryReceiptId'  COLLATE Latin1_General_CI_AS AS strHeaderIdColumn 
 		FROM	tblICInventoryReceiptItem	 RI
 		JOIN	tblICInventoryReceipt		 IR ON IR.intInventoryReceiptId = RI.intInventoryReceiptId
 		WHERE	IR.strReceiptType = 'Purchase Contract' 

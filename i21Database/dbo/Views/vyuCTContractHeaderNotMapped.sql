@@ -18,7 +18,7 @@ AS
 						END		AS		ysnSpreadAvailable,
 
 						dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intLoadUOMId,CH.intCommodityUOMId,1)	AS	dblCommodityUOMConversionFactor,
-						dbo.fnCTGetPrepaidIds(CH.intContractHeaderId) strPrepaidIds,
+						dbo.fnCTGetPrepaidIds(CH.intContractHeaderId)  COLLATE Latin1_General_CI_AS AS strPrepaidIds,
 						
 						EY.strName					AS	strEntityName,
 						SP.strName					AS	strSalesperson,

@@ -38,6 +38,24 @@ BEGIN
 END
 GO
 
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKDPRHedgeDailyPositionDetail')
+BEGIN
+	EXEC ('DROP VIEW vyuRKDPRHedgeDailyPositionDetail')
+END
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKDPRInvDailyPositionDetail')
+BEGIN
+	EXEC ('DROP VIEW vyuRKDPRInvDailyPositionDetail')
+END
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKGetSequenceMonth')
+BEGIN
+	EXEC ('DROP VIEW vyuRKGetSequenceMonth')
+END
+GO
+
 PRINT ('/*******************  START Syncing Commodity Attributes to RM *******************/')
 GO
 EXEC uspRKSyncCommodityMarketAttribute -- saving to an RM table with constraint to disallow deletion of commodity attributes in IC

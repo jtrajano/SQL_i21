@@ -7296,6 +7296,13 @@
     <Build Include="dbo\Functions\fnICGeneratePayables.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessPayables.sql" />
     <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateInventoryPhysicalCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCleanupStrayItemLocationTransactions.sql" />
+    <Build Include="dbo\Views\vyuICItemLocationTransactions.sql" />
+    <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailUpdateDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailDelete.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutOptTransactionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

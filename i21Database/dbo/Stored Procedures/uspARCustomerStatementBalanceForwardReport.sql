@@ -736,7 +736,7 @@ IF @ysnPrintFromCFLocal = 1
 			WHERE strType = 'CF Tran'
 			AND ysnPaid = 0
 			AND ysnPosted = 1
-			AND intInvoiceId IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable WHERE strUserId = @strUserId)
+			AND intInvoiceId IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable WHERE strUserId = @strUserId and LOWER(strStatementType) = 'invoice')
 			GROUP BY intEntityCustomerId
 		) CF ON AGINGREPORT.intEntityCustomerId = CF.intEntityCustomerId
 

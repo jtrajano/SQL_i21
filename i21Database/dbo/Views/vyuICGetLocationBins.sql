@@ -44,16 +44,7 @@ SELECT
 	,dblInTransitInbound = ISNULL(ItemStockUOM.dblInTransitInbound, 0.00)
 	,dblUnitOnHand = CAST(ISNULL(ItemStockUOM.dblOnHand, 0.00) AS NUMERIC(38, 7))
 	,dblInTransitOutbound = ISNULL(ItemStockUOM.dblInTransitOutbound, 0)
-	,dblBackOrder =	CASE	-- Compute the back order qty when committed > available Qty. 
-							WHEN	ISNULL(ItemStockUOM.dblOrderCommitted, 0.00) > ((ISNULL(ItemStockUOM.dblOnHand, 0.000) - (ISNULL(ItemStockUOM.dblUnitReserved, 0.00) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0.00) + ISNULL(ItemStockUOM.dblConsignedSale, 0.00))) )
-									AND ((ISNULL(ItemStockUOM.dblOnHand, 0.00) - (ISNULL(ItemStockUOM.dblUnitReserved, 0.00) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0.00) + ISNULL(ItemStockUOM.dblConsignedSale, 0.00))) ) > 0 THEN 
-										ABS(
-											ISNULL(ItemStockUOM.dblOrderCommitted, 0.00)
-											- ((ISNULL(ItemStockUOM.dblOnHand, 0.00) - (ISNULL(ItemStockUOM.dblUnitReserved, 0.00) + ISNULL(ItemStockUOM.dblInTransitOutbound, 0.00) + ISNULL(ItemStockUOM.dblConsignedSale, 0.00))) )										
-										)
-							ELSE 
-								0
-					END
+	,dblBackOrder =	dbo.fnMaxNumeric(ISNULL(ItemStockUOM.dblOrderCommitted, 0.00) - (ISNULL(ItemStockUOM.dblOnHand, 0.00) - (ISNULL(ItemStockUOM.dblUnitReserved, 0.00) + ISNULL(ItemStockUOM.dblConsignedSale, 0.00))), 0)
 	,dblOrderCommitted = ISNULL(ItemStockUOM.dblOrderCommitted, 0.00)
 	,dblUnitStorage = ISNULL(ItemStockUOM.dblUnitStorage, 0.00)
 	,dblConsignedPurchase = ISNULL(ItemStockUOM.dblConsignedPurchase, 0.00)

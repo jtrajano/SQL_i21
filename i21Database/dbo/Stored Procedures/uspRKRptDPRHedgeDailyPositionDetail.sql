@@ -68,6 +68,10 @@ SELECT *
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'ysnIsCrushPosition'
 
+	SELECT @strPositionBy = [from]
+	FROM @temp_xml_table	
+	WHERE [fieldname] = 'strPositionBy'
+
 IF isnull(@strPurchaseSales,'') <> ''
 BEGIN
                 if @strPurchaseSales='Purchase'
@@ -80,10 +84,6 @@ BEGIN
                 END
 END
 
-IF @ysnIsCrushPosition = 1 
-BEGIN
-	SET @strPositionBy = 'Delivery Month'
-END
 
 DECLARE @Commodity AS TABLE 
 (

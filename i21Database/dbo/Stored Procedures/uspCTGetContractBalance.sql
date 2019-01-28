@@ -381,7 +381,7 @@ BEGIN TRY
      intContractTypeId		
 	,intEntityId			
 	,intCommodityId			
-	,dtmStartDate			
+	--,dtmStartDate			
 	,dtmEndDate				
 	,intCompanyLocationId	
 	,intFutureMarketId      
@@ -427,7 +427,7 @@ BEGIN TRY
 	 intContractTypeId		= CH.intContractTypeId
 	,intEntityId		   = CH.intEntityId
 	,intCommodityId			= CH.intCommodityId
-	,dtmStartDate			= CASE WHEN @dtmStartDate IS NOT NULL	THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
+	--,dtmStartDate			= CASE WHEN @dtmStartDate IS NOT NULL	THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
 	,dtmEndDate			    = @dtmEndDate
 	,intCompanyLocationId	= CD.intCompanyLocationId
 	,intFutureMarketId      = CD.intFutureMarketId
@@ -607,7 +607,7 @@ BEGIN TRY
      intContractTypeId		
 	,intEntityId			
 	,intCommodityId			
-	,dtmStartDate			
+	--,dtmStartDate			
 	,dtmEndDate				
 	,intCompanyLocationId	
 	,intFutureMarketId      
@@ -652,7 +652,7 @@ BEGIN TRY
      intContractTypeId		= CH.intContractTypeId
 	,intEntityId		   = CH.intEntityId
 	,intCommodityId			= CH.intCommodityId
-	,dtmStartDate			= CASE WHEN @dtmStartDate IS NOT NULL	THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
+	--,dtmStartDate			= CASE WHEN @dtmStartDate IS NOT NULL	THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
 	,dtmEndDate			    = @dtmEndDate
 	,intCompanyLocationId	= CD.intCompanyLocationId
 	,intFutureMarketId      = CD.intFutureMarketId

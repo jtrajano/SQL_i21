@@ -16,19 +16,46 @@ DECLARE @FinalTable AS TABLE (
 )
 
 
-INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)
-exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= '',@intLocationId = null,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity', @strPositionBy = @strPositionBy
+	EXEC uspCTGetContractBalance
+		 @intContractTypeId    = NULL
+		,@intEntityId		   = NULL
+		,@IntCommodityId	   = NULL 		 
+		,@dtmEndDate		   = @dtmToDate
+		,@intCompanyLocationId = NULL
+		,@IntFutureMarketId    = NULL
+		,@IntFutureMonthId     = NULL
+		,@strPositionIncludes  = NULL
+		,@strCallingApp    =    'DPR'
 
-INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)
-exec uspRKDPRSubInvPositionByCommodity  @intCommodityId= '',@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity'
+--Comment it temporarily: Refer to RM-2491
+
+--INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)
+--exec uspRKDPRSubHedgePositionByCommodity  @intCommodityId= '',@intLocationId = null,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity', @strPositionBy = @strPositionBy
+
+--INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)
+--exec uspRKDPRSubInvPositionByCommodity  @intCommodityId= '',@intLocationId = 0,@intVendorId = @intVendorId,@strPurchaseSales = 'Purchase',@strPositionIncludes =@strPositionIncludes,@dtmToDate =  @dtmToDate,@strByType='ByCommodity'
 
 
 
-SELECT distinct strCommodityCode,strUnitMeasure,intCommodityId,
-(SELECT distinct sum(dblTotal) dblInHouse FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='In-House' and t.strCommodityCode=f.strCommodityCode ) dblInHouse,
-	(SELECT sum(dblTotal) dblCompanyTitled FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Company Titled Stock' and t.strCommodityCode=f.strCommodityCode ) dblCompanyTitled,
-	(SELECT sum(dblTotal) dblCaseExposure FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Price Risk'  and t.strCommodityCode=f.strCommodityCode) dblCaseExposure,
-	(SELECT sum(dblTotal) dblBasisExposure FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Basis Risk' and t.strCommodityCode=f.strCommodityCode  ) dblBasisExposure,
-	(SELECT sum(dblTotal) dblAvailForSale FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Avail for Spot Sale' and t.strCommodityCode=f.strCommodityCode ) dblAvailForSale
- FROM @FinalTable f
- WHERE dblTotal IS NOT NULL
+--SELECT distinct strCommodityCode,strUnitMeasure,intCommodityId,
+--(SELECT distinct sum(dblTotal) dblInHouse FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='In-House' and t.strCommodityCode=f.strCommodityCode ) dblInHouse,
+--	(SELECT sum(dblTotal) dblCompanyTitled FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Company Titled Stock' and t.strCommodityCode=f.strCommodityCode ) dblCompanyTitled,
+--	(SELECT sum(dblTotal) dblCaseExposure FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Price Risk'  and t.strCommodityCode=f.strCommodityCode) dblCaseExposure,
+--	(SELECT sum(dblTotal) dblBasisExposure FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Basis Risk' and t.strCommodityCode=f.strCommodityCode  ) dblBasisExposure,
+--	(SELECT sum(dblTotal) dblAvailForSale FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Avail for Spot Sale' and t.strCommodityCode=f.strCommodityCode ) dblAvailForSale
+-- FROM @FinalTable f
+-- WHERE dblTotal IS NOT NULL
+
+SELECT DISTINCT 
+	  C.intCommodityId
+	, C.strCommodityCode
+	, UOM.strUnitMeasure 
+	, NULL AS dblInHouse
+	, NULL AS dblCompanyTitled
+	, NULL AS dblCaseExposure
+	, NULL AS dblBasisExposure
+	, NULL AS dblAvailForSale
+FROM tblICCommodity C
+INNER JOIN tblICCommodityUnitMeasure CUOM ON C.intCommodityId = CUOM.intCommodityId
+INNER JOIN tblICUnitMeasure UOM ON CUOM.intUnitMeasureId = UOM.intUnitMeasureId
+WHERE ysnDefault = 1

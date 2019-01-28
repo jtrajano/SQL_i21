@@ -79,47 +79,62 @@ FROM (
 		, *
 	FROM (
 		--Futures Buy
-		SELECT FOT.dtmTransactionDate
-			, intFutOptTransactionId
-			, intOpenContract
+		SELECT dtmTransactionDate = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dtmTransactionDate
+										ELSE History.dtmTransactionDate END
+			, FOT.intFutOptTransactionId
+			, intOpenContract = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.intOpenContract
+									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
-			, strInternalTradeNo
-			, strLocationName
-			, FOT.dblContractSize
+			, FOT.strInternalTradeNo
+			, FOT.strLocationName
+			, dblContractSize = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dblContractSize
+									ELSE History.dblContractSize END
 			, FOT.strFutMarketName
 			, FOT.strFutureMonth AS strFutureMonth
 			, FOT.strOptionMonthYear AS strOptionMonth
-			, dblStrike
-			, strOptionType
+			, FOT.dblStrike
+			, FOT.strOptionType
 			, FOT.strInstrumentType
 			, FOT.strBrokerageAccount AS strBrokerAccount
 			, FOT.strName AS strBroker
-			, strBuySell
+			, FOT.strBuySell
 			, FOTH.intFutOptTransactionHeaderId
 			, FOT.intFutureMarketId
 			, FOT.intFutureMonthId
-			, strBrokerTradeNo
-			, strNotes
-			, ysnPreCrush
+			, FOT.strBrokerTradeNo
+			, FOT.strNotes
+			, FOT.ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+		OUTER APPLY (
+			SELECT * FROM (
+				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
+					, *
+				FROM vyuRKGetFutOptTransactionHistory History 
+				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
+					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
+			) t WHERE intRowNum = 1
+		) History
 		WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			
 		UNION ALL
 		--Futures Sell
-		SELECT FOT.dtmTransactionDate
-			, intFutOptTransactionId
-			, intOpenContract
+		SELECT dtmTransactionDate = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dtmTransactionDate
+										ELSE History.dtmTransactionDate END
+			, FOT.intFutOptTransactionId
+			, intOpenContract = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.intOpenContract
+									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
-			, strInternalTradeNo
-			, strLocationName
-			, FOT.dblContractSize
+			, FOT.strInternalTradeNo
+			, FOT.strLocationName
+			, dblContractSize = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dblContractSize
+									ELSE History.dblContractSize END
 			, FOT.strFutMarketName
 			, FOT.strFutureMonth AS strFutureMonth
 			, FOT.strOptionMonthYear AS strOptionMonth
-			, dblStrike
-			, strOptionType
+			, FOT.dblStrike
+			, FOT.strOptionType
 			, FOT.strInstrumentType
 			, FOT.strBrokerageAccount AS strBrokerAccount
 			, FOT.strName AS strBroker
@@ -127,28 +142,40 @@ FROM (
 			, FOTH.intFutOptTransactionHeaderId
 			, FOT.intFutureMarketId
 			, FOT.intFutureMonthId
-			, strBrokerTradeNo
+			, FOT.strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+		OUTER APPLY (
+			SELECT * FROM (
+				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
+					, *
+				FROM vyuRKGetFutOptTransactionHistory History 
+				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
+					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
+			) t WHERE intRowNum = 1
+		) History
 		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			
 		UNION ALL
 		--Options Buy
-		SELECT FOT.dtmTransactionDate
-			, intFutOptTransactionId
-			, intOpenContract
+		SELECT dtmTransactionDate = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dtmTransactionDate
+										ELSE History.dtmTransactionDate END
+			, FOT.intFutOptTransactionId
+			, intOpenContract = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.intOpenContract
+									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
-			, strInternalTradeNo
-			, strLocationName
-			, FOT.dblContractSize
+			, FOT.strInternalTradeNo
+			, FOT.strLocationName
+			, dblContractSize = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dblContractSize
+									ELSE History.dblContractSize END
 			, FOT.strFutMarketName
 			, FOT.strFutureMonth AS strFutureMonth
 			, FOT.strOptionMonthYear AS strOptionMonth
-			, dblStrike
-			, strOptionType
+			, FOT.dblStrike
+			, FOT.strOptionType
 			, FOT.strInstrumentType
 			, FOT.strBrokerageAccount AS strBrokerAccount
 			, FOT.strName AS strBroker
@@ -156,28 +183,40 @@ FROM (
 			, FOTH.intFutOptTransactionHeaderId
 			, FOT.intFutureMarketId
 			, FOT.intFutureMonthId
-			, strBrokerTradeNo
+			, FOT.strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+		OUTER APPLY (
+			SELECT * FROM (
+				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
+					, *
+				FROM vyuRKGetFutOptTransactionHistory History 
+				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
+					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
+			) t WHERE intRowNum = 1
+		) History
 		WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 				
 		UNION ALL
 		--Options Sell
-		SELECT FOT.dtmTransactionDate
-			, intFutOptTransactionId
-			, intOpenContract
+		SELECT dtmTransactionDate = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dtmTransactionDate
+										ELSE History.dtmTransactionDate END
+			, FOT.intFutOptTransactionId
+			, intOpenContract = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.intOpenContract
+									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
-			, strInternalTradeNo
-			, strLocationName
-			, FOT.dblContractSize
+			, FOT.strInternalTradeNo
+			, FOT.strLocationName
+			, dblContractSize = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dblContractSize
+									ELSE History.dblContractSize END
 			, FOT.strFutMarketName
 			, FOT.strFutureMonth AS strFutureMonth
 			, FOT.strOptionMonthYear AS strOptionMonth
-			, dblStrike
-			, strOptionType
+			, FOT.dblStrike
+			, FOT.strOptionType
 			, FOT.strInstrumentType
 			, FOT.strBrokerageAccount AS strBrokerAccount
 			, FOT.strName AS strBroker
@@ -185,11 +224,20 @@ FROM (
 			, FOTH.intFutOptTransactionHeaderId
 			, FOT.intFutureMarketId
 			, FOT.intFutureMonthId
-			, strBrokerTradeNo
+			, FOT.strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
+		OUTER APPLY (
+			SELECT * FROM (
+				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
+					, *
+				FROM vyuRKGetFutOptTransactionHistory History 
+				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
+					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
+			) t WHERE intRowNum = 1
+		) History
 		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 	) t2

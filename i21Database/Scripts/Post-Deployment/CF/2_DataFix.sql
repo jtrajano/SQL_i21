@@ -39,3 +39,10 @@ AND ISNULL(tblCFTransaction.intCustomerId,0) = 0
  UPDATE tblCFTransaction SET ysnInvoiced = 1 WHERE strInvoiceReportNumber IS NOT NULL
 
 
+
+--CF-2122
+UPDATE tblCFInvoiceStagingTable SET strStatementType = 'Invoice' WHERE ISNULL(strStatementType,'') = ''
+UPDATE tblCFInvoiceReportTempTable SET strStatementType = 'Invoice' WHERE ISNULL(strStatementType,'') = ''
+UPDATE tblCFInvoiceSummaryTempTable SET strStatementType = 'Invoice' WHERE ISNULL(strStatementType,'') = ''
+
+

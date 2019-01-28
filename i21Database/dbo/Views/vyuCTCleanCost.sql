@@ -3,7 +3,7 @@
 AS
 	
 	SELECT	RI.intCleanCostId,
-			'' strReceiptNumber,
+			''  COLLATE Latin1_General_CI_AS AS strReceiptNumber,
 			CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber,
 			SH.strLoadNumber,
 			EY.strName	AS strEntityName

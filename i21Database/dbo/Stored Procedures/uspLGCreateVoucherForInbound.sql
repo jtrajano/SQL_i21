@@ -15,6 +15,7 @@ BEGIN TRY
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
+	DECLARE @intCurrencyId INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intItemRecordId INT Identity(1, 1)
@@ -73,6 +74,7 @@ BEGIN TRY
 	END
 
 	SELECT TOP 1 @intShipTo = CD.intCompanyLocationId
+				,@intCurrencyId = L.intCurrencyId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intPContractDetailId,LD.intSContractDetailId)
@@ -233,6 +235,7 @@ BEGIN TRY
 			,@vendorId = @intVendorEntityId
 			,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 			,@shipTo = @intShipTo
+			,@currencyId = @intCurrencyId
 			,@billId = @intBillId OUTPUT
 
 		DELETE

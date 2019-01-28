@@ -11,6 +11,7 @@ BEGIN
 		,@strPositionIncludes nvarchar(50) = NULL
 		,@dtmToDate datetime = null
 		,@ysnIsCrushPosition bit = NULL
+		,@strPositionBy nvarchar(50) = NULL
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
@@ -69,6 +70,10 @@ SELECT *
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'ysnIsCrushPosition'
 
+	SELECT @strPositionBy = [from]
+	FROM @temp_xml_table	
+	WHERE [fieldname] = 'strPositionBy'
+	
 
 DECLARE @strCommodityCode NVARCHAR(50)
 
@@ -182,7 +187,7 @@ END
 			, strNotes
 			, ysnPreCrush
 		)
-		EXEC uspRKDPRPreCrushPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate 
+		EXEC uspRKDPRPreCrushPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate, NULL, NULL, @strPositionBy 
 
 	END
 	ELSE
@@ -288,12 +293,19 @@ END
 
 				END
 			
+			IF @ysnIsCrushPosition = 1
+			BEGIN
+				SET @colstry = SUBSTRING(@colstry,0,LEN(@colstry))
+			END
+			ELSE
+			BEGIN
 				SET @colstry = @colstry + '''Position''as col' +  cast(@colCtr + 1 as nvarchar(20)) +' '
-
+				SET @cols = @cols + ',[Position]'
+			END
 	
 			set @query = N'
 
-					SELECT 1 as col1 ,strContractEndMonth,' + @cols + N',Position into ##tmpTry from 
+					SELECT 1 as col1 ,strContractEndMonth,' + @cols + N' into ##tmpTry from 
 					 (
                			select * from (
 							select strCommodityCode, strType, sum(dblTotal) as dblTotal, strContractEndMonth
@@ -304,7 +316,7 @@ END
 					pivot 
 					(
 						sum(dblTotal)
-						for strType in (' + @cols + N',Position)
+						for strType in (' + @cols + N')
 					) p  order by CASE WHEN  strContractEndMonth not in(''Near By'',''Total'') THEN CONVERT(DATETIME,''01 ''+strContractEndMonth) END
 			 
 
@@ -313,7 +325,7 @@ END
 		exec (@query)
 
 
-		exec ('select 0 as col1,''Year'' as col2, '+ @colstry +'into ##tmpTry2')
+		exec ('select 0 as col1,''Year'' as col2, '+ @colstry +' into ##tmpTry2')
 
 
 		 DECLARE @colCAST AS NVARCHAR(MAX)

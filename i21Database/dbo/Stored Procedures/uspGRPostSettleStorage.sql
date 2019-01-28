@@ -445,7 +445,6 @@ BEGIN TRY
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = SC.intContractDetailId
 				WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
-					AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
 			END
 
 			--Unpaid Fee		
@@ -1265,7 +1264,7 @@ BEGIN TRY
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
-					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@LocationId, CASE WHEN DSC.strDiscountChargeType = 'Dollar' THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
+					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@LocationId, CASE WHEN DSC.strDiscountChargeType = 'Dollar' OR a.intItemType = 2 THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
 					,[dblQtyReceived]			= CASE 
 													WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),2) 
 													ELSE a.dblUnits 
@@ -1569,7 +1568,6 @@ BEGIN TRY
 					ON UOM.intItemUOMId = CC.intItemUOMId
 				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = CC.[intItemId]
 				 WHERE ItemLocation.intLocationId = @LocationId
-					AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
 
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived * -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0

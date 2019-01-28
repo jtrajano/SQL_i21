@@ -20,31 +20,7 @@ SELECT	StockUOM.intItemStockUOMId
 		,StockUOM.dblOrderCommitted
 		,StockUOM.dblOnOrder
 		,StockUOM.dblUnitReserved
-		,dblBackOrder = 
-			CASE	
-					-- Compute the back order qty when committed > available Qty. 
-					WHEN	
-						ISNULL(StockUOM.dblOrderCommitted, 0.00) > (
-							ISNULL(StockUOM.dblOnHand, 0.000) 
-							- ISNULL(StockUOM.dblUnitReserved, 0.00) 
-							- ISNULL(StockUOM.dblConsignedSale, 0.00)
-						)
-						AND (
-							ISNULL(StockUOM.dblOnHand, 0.00) 
-							- ISNULL(StockUOM.dblUnitReserved, 0.00) 
-							- ISNULL(StockUOM.dblConsignedSale, 0.00) 
-						) > 0 THEN 
-								ABS(
-									ISNULL(StockUOM.dblOrderCommitted, 0.00)
-									- (
-										ISNULL(StockUOM.dblOnHand, 0.00) 
-										- ISNULL(StockUOM.dblUnitReserved, 0.00) 
-										- ISNULL(StockUOM.dblConsignedSale, 0.00)
-									) 
-								)
-					ELSE 
-						0
-			END
+		,dblBackOrder = dbo.fnMaxNumeric(ISNULL(StockUOM.dblOrderCommitted, 0.00) - (ISNULL(StockUOM.dblOnHand, 0.00) - (ISNULL(StockUOM.dblUnitReserved, 0.00) + ISNULL(StockUOM.dblConsignedSale, 0.00))), 0)
 		,dblAvailableQty = 
 				ISNULL(StockUOM.dblOnHand, 0.00) 
 				- ISNULL(StockUOM.dblUnitReserved, 0.00) 

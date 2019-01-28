@@ -6,7 +6,7 @@ DROP TYPE VoucherDetailTax
 */
 CREATE TYPE [dbo].[VoucherDetailTax] AS TABLE
 (
-    [intVoucherPayableId]       INT NOT NULL PRIMARY KEY,
+    [intVoucherPayableId]       INT NOT NULL,
     [intTaxGroupId]				INT NOT NULL, 
     [intTaxCodeId]				INT NOT NULL, 
     [intTaxClassId]				INT NOT NULL, 

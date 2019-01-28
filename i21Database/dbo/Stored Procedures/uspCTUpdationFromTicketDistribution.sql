@@ -44,7 +44,8 @@ BEGIN TRY
 			@ysnLoad				BIT,
 			@dblBalanceLoad			NUMERIC(18,6),
 			@ysnAutoIncreaseQty		BIT = 0,
-			@ysnAutoIncreaseSchQty	BIT = 0
+			@ysnAutoIncreaseSchQty	BIT = 0,
+			@intTicketContractDetailId INT
 	
 	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
 					LTRIM(@intTicketId) +',' + 
@@ -66,7 +67,7 @@ BEGIN TRY
 	)			
 	
 	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
-	SELECT  @intStorageScheduleTypeId = intStorageScheduleTypeId, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
+	SELECT  @intTicketContractDetailId = intContractId, @intStorageScheduleTypeId = intStorageScheduleTypeId, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 	IF @ysnDeliverySheet = 0
 		BEGIN
@@ -291,7 +292,7 @@ BEGIN TRY
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 		BEGIN
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
-			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnits
+			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnits AND @intTicketContractDetailId = @intContractDetailId
 			BEGIN
 				SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
 				EXEC	uspCTUpdateScheduleQuantity 

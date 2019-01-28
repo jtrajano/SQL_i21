@@ -158,6 +158,12 @@ BEGIN
 				@strNumber						=	'',
 				@strHeaderIdColumn				=	''
 	END
+	ELSE IF @strScreenName = 'Load Schedule'
+	BEGIN
+		SELECT	@intExternalHeaderId			=	-1,
+				@strNumber						=	'',
+				@strHeaderIdColumn				=	''
+	END
 
 	IF ISNULL(@strNumber,'')  = ''
 	BEGIN
