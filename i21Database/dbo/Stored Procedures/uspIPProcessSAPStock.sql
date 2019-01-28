@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPStock]
 @strSessionId NVARCHAR(50)='',
 @strInfo1 NVARCHAR(MAX)='' OUT,
-@strInfo2 NVARCHAR(MAX)='' OUT
+@strInfo2 NVARCHAR(MAX)='' OUT,
+@ysnProcessDeadLockEntry BIT=0
 AS
 BEGIN TRY
 
@@ -36,6 +37,13 @@ DECLARE @tblStock TABLE (
 [dblQuantity] NUMERIC(38,20),
 [strSessionId] NVARCHAR(50)
 )
+
+if @ysnProcessDeadLockEntry=1
+Begin
+	Insert Into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,ysnDeadlockError)
+	Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,ysnDeadlockError
+	From tblIPStockError Where isNULL(ysnDeadlockError,0)=1
+End
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
@@ -149,8 +157,8 @@ Begin
 		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 		--Move to Error
-		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
-		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,'Failed',@ErrMsg
+		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage,ysnDeadlockError)
+		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,'Failed',@ErrMsg,(Case When ERROR_NUMBER() = 1205 and IsNULL(ysnDeadlockError,0)=0 Then 1 else 0 end)
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
