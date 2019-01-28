@@ -6445,6 +6445,8 @@
     <Build Include="dbo\Views\vyuAP1099BYear.sql" />
     <Build Include="dbo\Views\vyuAP1099PATRYear.sql" />
     <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
+    <Build Include="dbo\Functions\fnAPGetIRPartialStatus.sql" />
+    <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
