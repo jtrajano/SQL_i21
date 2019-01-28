@@ -4,6 +4,7 @@
     [dtmDate]			 DATETIME         NOT NULL,
     [intEntityId]        INT               NULL,
 	[intTransactionId]	 INT			  NULL,
+	[strRoute]			 NVARCHAR(MAX)	  NULL,
     [intConcurrencyId]   INT              NOT NULL,
 	CONSTRAINT [FK_dbo.tblSMLog_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE,
     CONSTRAINT [FK_dbo.tblSMLog_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),

@@ -65,24 +65,157 @@ WHILE EXISTS (SELECT TOP (1) 1 FROM #tmpAuditEntries)
 BEGIN
 	SELECT TOP 1 @singleValue = CAST([intId] AS NVARCHAR(50)) FROM #tmpAuditEntries
 
-	INSERT INTO tblSMAuditLog (
-		strActionType,
-		strDescription,
-		strJsonData,
-		strRecordNo,
-		strTransactionType,
+	DECLARE @intTransactionID INT = NULL;
+	DECLARE @intScreenId INT = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = @screenName)
+	SET @intTransactionID = (SELECT intTransactionId FROM tblSMTransaction WHERE intScreenId = @intScreenId AND intRecordId = CAST(@singleValue AS INT))
+
+	INSERT INTO tblSMLog(
+		strType,
 		intEntityId,
-		intConcurrencyId,
-		dtmDate
-	) SELECT 
-		@actionType,
-		'',
-		@jsonData,
-		@singleValue,
-		@screenName,
-		@entityId,
-		1,
-		GETUTCDATE()
+		intTransactionId,
+		strRoute,
+		dtmDate,
+		intConcurrencyId
+		) SELECT
+			'Audit',
+			@entityId,
+			@intTransactionID,
+			NULL,
+			GETUTCDATE(),
+			1
+
+	 DECLARE @intLogId INT = (SELECT SCOPE_IDENTITY())
+	 IF (@actionType != 'Created')
+		BEGIN
+
+
+			DECLARE @json AS NVARCHAR(MAX);
+			SET @json = @jsonData;
+
+			IF OBJECT_ID('tempdb..#tempSMAudit') IS NOT NULL
+			DROP TABLE #tempSMAudit
+
+			CREATE TABLE #tempSMAudit
+			(
+				[row] INT,
+				[parent] INT,
+				[strAction] NVARCHAR(MAX),
+				[strChange] NVARCHAR(MAX),
+				[strKeyValue] NVARCHAR(MAX),
+				[strFrom] NVARCHAR(MAX),
+				[strTo] NVARCHAR(MAX),
+				[strAlias] NVARCHAR(MAX),
+				[ysnField] BIT,
+				[ysnHidden] BIT,
+				[realId] INT NULL
+			);
+
+WITH Audit_CTE AS (
+	SELECT 
+	  ROW_NUMBER() OVER (ORDER BY parent asc) as [row], 
+	--  min(case SourceTable.[name] when 'children' then id end) as [id]
+	--, 
+	  SourceTable.parent
+	, min(case SourceTable.[name]  when 'action' then value end) as [strAction]
+	, min(case SourceTable.[name]  when 'change' then value end) as [strChange]
+	, min(case SourceTable.[name]  when 'keyValue' then value end) as [strKeyValue]
+	, min(case SourceTable.[name]  when 'from' then value end) as [strFrom]
+	, min(case SourceTable.[name] when 'to' then value end) as [strTo]
+	, min(case SourceTable.[name] when 'changeDescription' then value end) as [strAlias]
+	, min(case SourceTable.[name] when 'hidden' then value end) as [ysnHidden]
+	, min(case SourceTable.[name] when 'isField' then value end) as [ysnField]
+	from (
+		select * from json_Parse(REPLACE(@json, ':null', ':"null"')) where [name] NOT IN ('leaf', 'iconCls') AND ([kind] <> 'OBJECT')
+	) SourceTable 
+	group by SourceTable.parent
+)
+INSERT INTO #tempSMAudit --INSERT STATEMENT
+SELECT
+	A.[row],
+	C.[row] AS [parent],
+	A.[strAction],
+	A.[strChange],
+	A.[strKeyValue],
+	A.[strFrom],
+	A.[strTo],
+	A.[strAlias],
+	A.[ysnField],
+	A.[ysnHidden],
+	NULL
+FROM Audit_CTE A 
+OUTER APPLY (
+	SELECT TOP 1 *
+	FROM Audit_CTE B
+	WHERE  B.[row] < A.[row] AND 
+	1 = CASE WHEN ISNULL(A.[strAction], '') = '' AND ISNULL(B.[strAction], '') = 'Updated' THEN 1 ELSE 
+			CASE WHEN ISNULL(A.[strAction], '') IN ('Updated', 'Created', 'Deleted') AND ISNULL(B.[strAction], '') = '' AND ISNULL(B.[strFrom], '') = '' AND ISNULL(B.[strTo], '') = '' 
+				THEN 1 ELSE 0  
+			END
+		END 
+	ORDER BY B.[row] DESC
+) C
+
+
+WHILE EXISTS(SELECT TOP (1) 1 FROM #tempSMAudit WHERE realId IS NULL)
+	BEGIN
+		DECLARE @rowId INT;
+		DECLARE @newId INT;
+		DECLARE @parent INT;
+
+		SELECT TOP 1 @rowId = [row] , @parent = parent
+		FROM #tempSMAudit WHERE realId IS NULL
+
+		INSERT INTO tblSMAudit(intLogId, intKeyValue, strAction,strChange, strFrom, strTo, strAlias, ysnField, ysnHidden, intParentAuditId, intConcurrencyId)
+			SELECT @intLogId, 
+					strKeyValue, 
+					strAction,
+					strChange,
+					strFrom,
+					strTo,
+					strAlias,
+					ysnField,
+					ysnHidden,
+					NULL,
+					1 
+					FROM #tempSMAudit WHERE [row] = @rowId
+
+		SET @newId = (SELECT SCOPE_IDENTITY())
+
+					UPDATE #tempSMAudit SET realId = @newId WHERE [row] = @rowId
+
+		IF(@parent IS NOT NULL) 
+			BEGIN
+				DECLARE @realId INT = (SELECT realId FROM #tempSMAudit WHERE [row] = @parent)
+					UPDATE tblSMAudit SET intParentAuditId = @realId WHERE intAuditId = @newId
+			END
+
+	END
+
+
+END
+	ELSE
+		BEGIN
+			INSERT INTO tblSMAudit(intLogId, intKeyValue, strAction, intConcurrencyId)
+				VALUES(@intLogId, @keyValue,@actionType, 1)
+		END
+	--INSERT INTO tblSMAuditLog (
+	--	strActionType,
+	--	strDescription,
+	--	strJsonData,
+	--	strRecordNo,
+	--	strTransactionType,
+	--	intEntityId,
+	--	intConcurrencyId,
+	--	dtmDate
+	--) SELECT 
+	--	@actionType,
+	--	'',
+	--	@jsonData,
+	--	@singleValue,
+	--	@screenName,
+	--	@entityId,
+	--	1,
+	--	GETUTCDATE()
 
 	DELETE TOP (1) FROM #tmpAuditEntries
 END
