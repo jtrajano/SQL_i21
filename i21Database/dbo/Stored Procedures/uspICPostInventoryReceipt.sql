@@ -1342,6 +1342,7 @@ BEGIN
 
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
+
 					-- Retain this code for Transfer Orders that was posted not using the In-Transit costing. 
 					IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 					BEGIN 
@@ -1361,7 +1362,17 @@ BEGIN
 						-- WHERE	t.dblQty > 0 
 						-- 		AND UDT.intInTransitSourceLocationId IS NOT NULL 
 					END 
+					ELSE 
+					BEGIN 
+						-- Create an auto-variance for inventory returns posted in IR. 
+						EXEC @intReturnValue = [uspICPostInventoryReceiptVarianceForReturns]
+							@intTransactionId 
+							,@strTransactionId
+							,@strBatchId
+							,@intEntityUserSecurityId
 
+						IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					END
 					-- Create the GL entries specific for Inventory Receipt
 					INSERT INTO @GLEntries (
 							[dtmDate] 
