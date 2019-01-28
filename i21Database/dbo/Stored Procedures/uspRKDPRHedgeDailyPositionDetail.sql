@@ -275,26 +275,41 @@ BEGIN
 		, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 		, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 	
-	INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId
-		, intOpenContract
-		, strCommodityCode
-		, strInternalTradeNo
-		, strLocationName
-		, dblContractSize
-		, strFutureMarket
-		, strFutureMonth
-		, strOptionMonth
-		, dblStrike
-		, strOptionType
-		, strInstrumentType
-		, strBrokerAccount
-		, strBroker
-		, strNewBuySell
-		, intFutOptTransactionHeaderId
-		, ysnPreCrush
-		, strNotes
-		, strBrokerTradeNo)
-	SELECT * FROM  fnRKGetOpenFutureByDate( @intCommodityId, @dtmToDate)
+	DECLARE @tempCommId INT
+	SELECT DISTINCT intCommodity
+	INTO #tempCommodity
+	FROM @Commodity
+	WHERE ISNULL(intCommodity, '') <> ''
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tempCommodity)
+	BEGIN
+		SELECT TOP 1 @tempCommId = intCommodity FROM #tempCommodity
+
+		INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId
+			, intOpenContract
+			, strCommodityCode
+			, strInternalTradeNo
+			, strLocationName
+			, dblContractSize
+			, strFutureMarket
+			, strFutureMonth
+			, strOptionMonth
+			, dblStrike
+			, strOptionType
+			, strInstrumentType
+			, strBrokerAccount
+			, strBroker
+			, strNewBuySell
+			, intFutOptTransactionHeaderId
+			, ysnPreCrush
+			, strNotes
+			, strBrokerTradeNo)
+		SELECT * FROM fnRKGetOpenFutureByDate( @tempCommId, @dtmToDate)
+
+		DELETE FROM #tempCommodity WHERE intCommodity = @tempCommId
+	END
+
+	DROP TABLE #tempCommodity
 
 	SELECT *
 	INTO #tblGetStorageDetailByDate
@@ -591,6 +606,7 @@ BEGIN
 				) t WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				
 				-- Hedge
+				
 				INSERT INTO @tempFinal (strCommodityCode
 					, strInternalTradeNo
 					, intFutOptTransactionHeaderId
@@ -653,9 +669,9 @@ BEGIN
 						, strInstrumentType = 'Future' COLLATE Latin1_General_CI_AS
 						, dblNoOfLot = intOpenContract
 						, cu.strCurrency
-						, t.intFutureMarketId
+						, m.intFutureMarketId
 						, t.strFutureMarket
-						, t.intFutureMonthId
+						, fm.intFutureMonthId
 						, t.strBrokerTradeNo
 						, t.strNotes
 						, t.ysnPreCrush
@@ -726,9 +742,9 @@ BEGIN
 					, ba.intBrokerageAccountId
 					, strInstrumentType = 'Option' COLLATE Latin1_General_CI_AS
 					, strCurrency 
-					, t.intFutureMarketId
+					, m.intFutureMarketId
 					, t.strFutureMarket
-					, t.intFutureMonthId
+					, fm.intFutureMonthId
 					, t.strFutureMonth
 					, t.strBrokerTradeNo
 					, t.strNotes
