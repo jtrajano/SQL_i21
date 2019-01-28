@@ -4,7 +4,6 @@
 	 intContractTypeId					INT	
 	,intEntityId						INT
 	,intCommodityId						INT
-	,dtmStartDate						DATETIME
 	,dtmEndDate							DATETIME
 	,intCompanyLocationId				INT
 	,intFutureMarketId					INT

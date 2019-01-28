@@ -228,7 +228,7 @@ BEGIN
 	FROM tblCTContractBalance CD
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
 		AND CD.intCommodityId in (select intCommodity from @Commodity)
-		AND CD.dtmStartDate = '01-01-1900' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 
 	--=============================================================
 	-- STORAGE
