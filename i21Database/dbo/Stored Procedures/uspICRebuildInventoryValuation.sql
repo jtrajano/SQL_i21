@@ -3444,22 +3444,6 @@ BEGIN
 						GOTO _EXIT_WITH_ERROR
 					END 	
 
-					-- Create the auto-variance when item was returned via IR. 
-					BEGIN 
-						SET @intReturnValue = NULL 
-						EXEC @intReturnValue = [uspICPostInventoryReceiptVarianceForReturns]
-							@intTransactionId 
-							,@strTransactionId
-							,@strBatchId
-							,@intEntityUserSecurityId
-
-						IF @intReturnValue <> 0 
-						BEGIN 
-							--PRINT 'Error found in uspICRepostCosting - Inventory Receipt'
-							GOTO _EXIT_WITH_ERROR
-						END 	
-					END 
-
 					SET @intReturnValue = NULL 
 					INSERT INTO @GLEntries (
 							[dtmDate] 
@@ -3509,7 +3493,23 @@ BEGIN
 					BEGIN 
 						--PRINT 'Error found in uspICCreateReceiptGLEntries'
 						GOTO _EXIT_WITH_ERROR
-					END 				
+					END
+
+					---- Create the auto-variance when item was returned via IR. 
+					--BEGIN 
+					--	SET @intReturnValue = NULL 
+					--	EXEC @intReturnValue = [uspICCreateReceiptGLEntriesForReturnVariance]
+					--		@intTransactionId 
+					--		,@strTransactionId
+					--		,@strBatchId
+					--		,@intEntityUserSecurityId
+
+					--	IF @intReturnValue <> 0 
+					--	BEGIN 
+					--		--PRINT 'Error found in uspICRepostCosting - Inventory Receipt'
+					--		GOTO _EXIT_WITH_ERROR
+					--	END 	
+					--END 
 				END
 
 				ELSE IF @strTransactionType = 'Inventory Receipt' AND @strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
