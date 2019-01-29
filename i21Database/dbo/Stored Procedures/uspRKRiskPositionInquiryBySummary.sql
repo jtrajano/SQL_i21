@@ -1653,8 +1653,9 @@ SELECT ROW_NUMBER() OVER(ORDER BY intRowNumber) intRowNumFinal
 	, PriceStatus
 	, strFutureMonth
 	, strAccountNumber
-	, case when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then  (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
-			else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))  end dblNoOfContract
+	, case when @strUomType='By Lot' and PriceStatus = '4.Market Coverage(Weeks)' THEN (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))/@intForecastWeeklyConsumption
+		when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
+		else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) end dblNoOfContract
 	, strTradeNo
 	, TransactionDate
 	, TranType
