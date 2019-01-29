@@ -145,7 +145,7 @@ BEGIN TRY
 				LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
 				LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Invoice.intCompanyLocationId
 				LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
-					LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
+					--LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
 				LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
 					LEFT JOIN tblCFCard ON tblCFCard.intCardId = tblCFTransaction.intCardId
 					LEFT JOIN tblCFVehicle ON tblCFVehicle.intVehicleId = tblCFTransaction.intVehicleId
