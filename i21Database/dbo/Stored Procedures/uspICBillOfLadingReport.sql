@@ -8,7 +8,8 @@ BEGIN TRY
 	IF ISNULL(@xmlParam, '') = ''
 	BEGIN
 		SELECT '' AS 'intInventoryShipmentId'
-			 ,'' AS 'strShipToLocation'
+			,'' AS 'strShipToFullAddress'
+			,'' AS 'strShipToLocation'
 			,'' AS 'strShipToAddress'
 			,'' AS 'strShipToCity'
 			,'' AS 'strShipToZip'
@@ -17,6 +18,7 @@ BEGIN TRY
 			,'' AS 'strShipToCountry'
 			,'' AS 'strShipToStateCountry'
 		 	,'' AS 'strShipmentNumber'
+			,'' AS 'strShipFromFullAddress'
 			,'' AS 'strShipFromLocation'
 			,'' AS 'strShipFromAddress'
 			,'' AS 'strShipFromCity'
@@ -99,6 +101,8 @@ BEGIN TRY
 		FROM (
 			SELECT Shipment.intInventoryShipmentId
 				,Shipment.strShipmentNumber
+				,Shipment.strShipFromAddress AS strShipFromFullAddress
+				,Shipment.strShipToAddress AS strShipToFullAddress
 				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strLocationName ELSE shipTo.strLocationName END AS [strShipToLocation]
 				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strAddress ELSE shipTo.strAddress END AS [strShipToAddress]
 				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strCity ELSE shipTo.strCity END AS [strShipToCity]
