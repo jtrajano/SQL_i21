@@ -3,10 +3,10 @@
 SELECT	A.intEntityId, 
 		D.strName,
 		D.strEntityNo,
-		strEntityAddress = [dbo].[fnARFormatCustomerAddress](NULL, NULL, NULL, Loc.strAddress, Loc.strCity, Loc.strState, Loc.strZipCode, Loc.strCountry, NULL, NULL),
-		strEntityCity = ISNULL(Loc.strCity,''),
-		strAccountStatus = [dbo].[fnARGetCustomerAccountStatusCodes](A.intEntityId),
-		strStockStatus = ISNULL(C.strStockStatus,''),
+		strEntityAddress = [dbo].[fnARFormatCustomerAddress](NULL, NULL, NULL, Loc.strAddress, Loc.strCity, Loc.strState, Loc.strZipCode, Loc.strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS,
+		strEntityCity = ISNULL(Loc.strCity,'') COLLATE Latin1_General_CI_AS,
+		strAccountStatus = [dbo].[fnARGetCustomerAccountStatusCodes](A.intEntityId) COLLATE Latin1_General_CI_AS,
+		strStockStatus = ISNULL(C.strStockStatus,'') COLLATE Latin1_General_CI_AS,
 		ysnStockStatusQualified = CASE 
 									WHEN Patronage.strRefund = 'V' AND C.strStockStatus = 'Voting' THEN 1
 									WHEN Patronage.strRefund = 'S' AND (C.strStockStatus = 'Voting' OR C.strStockStatus = 'Non-Voting') THEN 1
@@ -30,7 +30,7 @@ SELECT	A.intEntityId,
 					WHEN Patronage.strRefund = 'A' THEN 'All Patrons' 
 					WHEN Patronage.strRefund = 'S' THEN 'Stockholders' 
 					WHEN Patronage.strRefund = 'V' THEN 'Voting Only' 
-				END,
+				END COLLATE Latin1_General_CI_AS,
 		Patronage.dblMinimumRefund,
 		Patronage.dblServiceFee,
 		Patronage.dblCutoffAmount,
