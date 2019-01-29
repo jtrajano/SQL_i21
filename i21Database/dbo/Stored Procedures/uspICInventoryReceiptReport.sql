@@ -105,7 +105,7 @@ SELECT
 	, strVendor = e.strName
 	, strShipFrom = el.strLocationName
 	, strItemNo = i.strItemNo
-	, ri.intInventoryReceiptItemId
+	, intInventoryReceiptItemId = ISNULL(ri.intInventoryReceiptItemId, 0)
 	, i.intItemId
 	, dblGross = ri.dblGrossWgt
 	, dblNet = ri.dblNetWgt
