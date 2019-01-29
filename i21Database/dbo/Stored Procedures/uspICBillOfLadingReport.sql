@@ -8,9 +8,23 @@ BEGIN TRY
 	IF ISNULL(@xmlParam, '') = ''
 	BEGIN
 		SELECT '' AS 'intInventoryShipmentId'
-		     ,'' AS 'strShipToAddress'
+			 ,'' AS 'strShipToLocation'
+			,'' AS 'strShipToAddress'
+			,'' AS 'strShipToCity'
+			,'' AS 'strShipToZip'
+			,'' AS 'strShipToCityZip'
+			,'' AS 'strShipToState'
+			,'' AS 'strShipToCountry'
+			,'' AS 'strShipToStateCountry'
 		 	,'' AS 'strShipmentNumber'
+			,'' AS 'strShipFromLocation'
 			,'' AS 'strShipFromAddress'
+			,'' AS 'strShipFromCity'
+			,'' AS 'strShipFromZip'
+			,'' AS 'strShipFromCityZip'
+			,'' AS 'strShipFromState'
+			,'' AS 'strShipFromCountry'
+			,'' AS 'strShipFromStateCountry'
 			,'' AS 'strBOLNumber'
 			,'' AS 'strOrderNumber'
 			,'' AS 'strCustomerPO'
@@ -85,8 +99,22 @@ BEGIN TRY
 		FROM (
 			SELECT Shipment.intInventoryShipmentId
 				,Shipment.strShipmentNumber
-				,strShipFromAddress = Shipment.strShipFromAddress 
-				,strShipToAddress = Shipment.strShipToAddress
+				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strLocationName ELSE shipTo.strLocationName END AS [strShipToLocation]
+				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strAddress ELSE shipTo.strAddress END AS [strShipToAddress]
+				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strCity ELSE shipTo.strCity END AS [strShipToCity]
+				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strZipCode ELSE shipTo.strZipPostalCode END AS [strShipToZip]
+				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strCity ELSE shipTo.strCity END + ', ' + CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strZipCode ELSE shipTo.strZipPostalCode END AS [strShipToCityZip]
+				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strState ELSE shipTo.strStateProvince END AS [strShipToState]
+				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strCountry ELSE shipTo.strCountry END AS [strShipToCountry]
+				,CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strState ELSE shipTo.strStateProvince END + ', ' + CASE WHEN Shipment.intOrderType <> 3 THEN shipToTransfer.strCountry ELSE shipTo.strCountry END AS [strShipToStateCountry]
+				,shipFrom.strLocationName AS [strShipFromLocation]
+				,shipFrom.strAddress AS [strShipFromAddress]
+				,shipFrom.strCity AS [strShipFromCity]
+				,shipFrom.strZipPostalCode AS [strShipFromZip]
+				,shipFrom.strCity + ', ' + shipFrom.strZipPostalCode AS [strShipFromCityZip]
+				,shipFrom.strStateProvince AS [strShipFromState]
+				,shipFrom.strCountry AS [strShipFromCountry]
+				,shipFrom.strStateProvince + ', ' + shipFrom.strCountry AS [strShipFromStateCountry]
 				,Shipment.strBOLNumber
 				,ShipmentItem.strOrderNumber
 				,strCustomerPO = SO.strPONumber
@@ -107,8 +135,7 @@ BEGIN TRY
 				,Shipment.strCompanyAddress
 				,ParentLot.strParentLotNumber
 				,Shipment.strCustomerName
-				,strShipFromLocation = Shipment.strShipFromLocation
-				,Shipment.strReferenceNumber
+				,Shipment.strReferenceNumber, Shipment.intShipToCompanyLocationId, Shipment.intShipToLocationId
 			FROM vyuICGetInventoryShipmentBillOfLading Shipment
 			LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			LEFT JOIN vyuICGetInventoryShipmentItemLot ShipmentItemLot ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
@@ -118,7 +145,9 @@ BEGIN TRY
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Shipment.intFreightTermId
 			LEFT JOIN tblLGWarehouseInstructionHeader WarehouseInstruction ON WarehouseInstruction.intInventoryShipmentId = Shipment.intInventoryShipmentId
 		    LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = ShipmentItem.intOrderId AND ShipmentItem.strOrderType = 'Sales Order'
-				
+			LEFT JOIN tblSMCompanyLocation shipFrom ON shipFrom.intCompanyLocationId = Shipment.intShipFromLocationId
+			LEFT JOIN tblSMCompanyLocation shipTo ON shipTo.intCompanyLocationId = Shipment.intShipToCompanyLocationId
+			LEFT JOIN [tblEMEntityLocation] shipToTransfer ON shipToTransfer.intEntityLocationId = Shipment.intShipToLocationId
 			) AS a
 		WHERE strShipmentNumber = @strShipmentNo 
 	END
