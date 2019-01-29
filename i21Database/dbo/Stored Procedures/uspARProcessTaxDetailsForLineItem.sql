@@ -179,7 +179,7 @@ BEGIN TRY
 			,@SeparateOnInvoice		= [ysnSeparateOnInvoice]
 			,@CheckoffTax			= [ysnCheckoffTax]
 			,@TaxExempt				= [ysnTaxExempt]
-			,@InvalidSetup			= @InvalidSetup
+			,@InvalidSetup			= [ysnInvalidSetup]
 			,@Notes					= [strNotes]
 		FROM
 			@EntriesForProcessing 
