@@ -19,7 +19,7 @@ MERGE
 	AND TrialBalanceUpdateEntry.intAccountId = TrialBalanceTable.intAccountId
 	WHEN MATCHED THEN 
 		UPDATE 
-		SET 	TrialBalanceTable.YTDBalance = TrialBalanceTable.YTDBalance + TrialBalanceUpdateEntry.dblAmount,
+		SET TrialBalanceTable.YTDBalance = ISNULL(TrialBalanceTable.YTDBalance,0) + ISNULL(TrialBalanceUpdateEntry.dblAmount,0),
 		TrialBalanceTable.dtmDateModified = @dtmDate,
 		TrialBalanceTable.intConcurrencyId = TrialBalanceTable.intConcurrencyId + 1
 	WHEN NOT MATCHED BY TARGET THEN
@@ -33,13 +33,13 @@ MERGE
 		VALUES (
 			TrialBalanceUpdateEntry.intAccountId
 			,TrialBalanceUpdateEntry.intGLFiscalYearPeriodId
-			,TrialBalanceUpdateEntry.dblAmount
+			,ISNULL(TrialBalanceUpdateEntry.dblAmount,0)
 			,@dtmDate
 			,1
 		);
 MERGE 
 	INTO	dbo.tblGLTrialBalance
-	WITH	(HOLDLOCK) 
+	WITH	(HOLDLOCK)
 	AS		TrialBalanceTable
 	USING	(
 		select intAccountId, 
@@ -53,7 +53,7 @@ MERGE
 	AND TrialBalanceUpdateEntry.intAccountId = TrialBalanceTable.intAccountId
 	WHEN MATCHED THEN 
 		UPDATE 
-		SET TrialBalanceTable.MTDBalance = TrialBalanceTable.MTDBalance + TrialBalanceUpdateEntry.dblAmount,
+		SET TrialBalanceTable.MTDBalance = ISNULL(TrialBalanceTable.MTDBalance,0) + ISNULL(TrialBalanceUpdateEntry.dblAmount,0),
 		TrialBalanceTable.dtmDateModified = @dtmDate,
 		TrialBalanceTable.intConcurrencyId = ISNULL(TrialBalanceTable.intConcurrencyId,0) + CASE WHEN dtmDateModified = @dtmDate THEN 0 ELSE  1 END
 		
@@ -68,7 +68,7 @@ MERGE
 		VALUES (
 			TrialBalanceUpdateEntry.intAccountId
 			,TrialBalanceUpdateEntry.intGLFiscalYearPeriodId
-			,TrialBalanceUpdateEntry.dblAmount
+			,ISNULL(TrialBalanceUpdateEntry.dblAmount,0)
 			,@dtmDate
 			,1
 		);
