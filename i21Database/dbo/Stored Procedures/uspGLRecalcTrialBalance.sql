@@ -33,8 +33,8 @@ MERGE
 		VALUES (
 			VTB.intAccountId
 			,VTB.intGLFiscalYearPeriodId
-			,VTB.YTDBalance
-			,VTB.MTDBalance
+			,ISNULL(VTB.YTDBalance,0)
+			,ISNULL(VTB.MTDBalance,0)
 			,@dtmDate
 			,1
 		);
