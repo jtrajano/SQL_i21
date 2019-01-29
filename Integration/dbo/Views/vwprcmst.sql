@@ -87,8 +87,8 @@ BEGIN
 			,vwprc_lc4_yn   = ptpdv_lc4_yn  COLLATE Latin1_General_CI_AS        
 			,vwprc_lc5_yn   = ptpdv_lc5_yn  COLLATE Latin1_General_CI_AS        
 			,vwprc_lc6_yn   = ptpdv_lc6_yn  COLLATE Latin1_General_CI_AS        
-			,vwprc_user_id   = NULL  COLLATE Latin1_General_CI_AS            
-			,vwprc_user_rev_dt  = NULL  COLLATE Latin1_General_CI_AS           
+			,vwprc_user_id   = ''''  COLLATE Latin1_General_CI_AS            
+			,vwprc_user_rev_dt  = ''''  COLLATE Latin1_General_CI_AS           
 			,A4GLIdentity = CAST(A4GLIdentity   AS INT)
 			,vwprc_rack_vnd_no  = ptpdv_rack_vnd_no COLLATE Latin1_General_CI_AS         
 			,vwprc_rack_itm_no  = ptpdv_rack_itm_no  COLLATE Latin1_General_CI_AS        
