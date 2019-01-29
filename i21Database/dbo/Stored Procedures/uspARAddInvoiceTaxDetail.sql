@@ -102,7 +102,7 @@ WHERE
 	[intTaxCodeId] = @TaxCodeId
 	AND [ysnInvalidSetup] = 0
 
-IF UPPER(LTRIM(RTRIM(ISNULL(@CalculationMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND UPPER(LTRIM(RTRIM(ISNULL(@CalcMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage'))
+IF UPPER(LTRIM(RTRIM(ISNULL(@CalculationMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND UPPER(LTRIM(RTRIM(ISNULL(@CalcMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND ISNULL(@InvalidSetup, 0) = 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('%s is not a valid calculation method!', 16, 1, @CalculationMethod);
