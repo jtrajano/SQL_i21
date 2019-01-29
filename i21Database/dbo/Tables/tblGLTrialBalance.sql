@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblGLTrialBalance](
 	[intTrialBalanceId] [int] IDENTITY(1,1) NOT NULL,
 	[intAccountId] [int] NOT NULL,
-	[MTDBalance] [numeric](38, 6) NOT NULL,
-	[YTDBalance] [numeric](38, 6) NOT NULL,
+	[MTDBalance] [numeric](38, 6) NULL,
+	[YTDBalance] [numeric](38, 6) NULL,
 	[intGLFiscalYearPeriodId] [int] NULL,
 	[intConcurrencyId] [int] NULL,
 	[dtmDateModified] [datetime] NULL,
