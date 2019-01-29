@@ -86,7 +86,7 @@ BEGIN TRY
 			SELECT Shipment.intInventoryShipmentId
 				,Shipment.strShipmentNumber
 				,strShipFromAddress = Shipment.strShipFromAddress 
-				,strShipToAddress = Shipment.strShipToLocation + ' ' + Shipment.strShipToAddress
+				,strShipToAddress = Shipment.strShipToAddress
 				,Shipment.strBOLNumber
 				,ShipmentItem.strOrderNumber
 				,strCustomerPO = SO.strPONumber
