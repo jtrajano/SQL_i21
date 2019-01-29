@@ -17,7 +17,7 @@ SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
-DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will not use Inventory Adjustment. 
+DECLARE @AccountCategory_Adjustment AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will now use Inventory Adjustment. 
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @InventoryTransactionTypeId_AutoVariance AS INT = 1;
@@ -44,7 +44,7 @@ SELECT	Query.intItemId
 		,Query.intItemLocationId
 		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
 		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraInventory) 
-		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Auto_Variance) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Adjustment) 
 		,intTransactionTypeId
 FROM	(
 			SELECT	DISTINCT 
@@ -196,7 +196,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Auto_Variance;
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_Adjustment;
 		RETURN -1;
 	END 
 END 
@@ -359,12 +359,13 @@ AS
 			,dblCost = 0 
 			,dblValue = 
 				-- Cost Bucket Value
-				(
+				ROUND(
 					t.dblQty * t.dblCost 
+					, 2
 				)
 				- 
 				-- Less Return Value
-				(
+				ROUND(
 					t.dblQty *
 					dbo.fnCalculateReceiptUnitCost(
 						ri.intItemId
@@ -379,8 +380,9 @@ AS
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
 					)
+					,2
 				)
-			,intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+			,intTransactionTypeId = t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
 			,dblExchangeRate = t.dblExchangeRate
 			,t.intInventoryTransactionId
@@ -409,12 +411,13 @@ AS
 						, t.dblCost
 						, (
 							-- Cost Bucket Value
-							(
+							ROUND(
 								t.dblQty * t.dblCost 
+								,2
 							)
 							- 
 							-- Less Return Value
-							(
+							ROUND(
 								t.dblQty *
 								dbo.fnCalculateReceiptUnitCost(
 									ri.intItemId
@@ -429,6 +432,7 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 								)
+								,2
 							)
 						)
 						, DEFAULT
@@ -442,7 +446,7 @@ AS
 			,dblLineTotal = NULL 
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
+				ON TransType.intTransactionTypeId = t.intTransactionTypeId
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId
 			INNER JOIN tblICInventoryReceipt r
@@ -479,12 +483,13 @@ AS
 			AND t.dblQty < 0 
 			AND 
 				-- Cost Bucket Value
-				(
+				ROUND(
 					t.dblQty * t.dblCost 
+					,2
 				)
 				- 
 				-- Less Return Value
-				(
+				ROUND(
 					t.dblQty *
 					dbo.fnCalculateReceiptUnitCost(
 						ri.intItemId
@@ -499,6 +504,7 @@ AS
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
 					)
+					,2 
 				)
 				<> 0 	
 )
@@ -1076,6 +1082,161 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
 
-WHERE	ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_AutoVariance
+WHERE	ForGLEntries_CTE.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
 		AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
+
+-----------------------------------------------------------------------------------
+-- This part is for variance because of the stock returns. 
+-----------------------------------------------------------------------------------
+UNION ALL  
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
+		,dblDebitUnit				= DebitUnit.Value
+		,dblCreditUnit				= CreditUnit.Value
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
+										+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+										+ ' ' + ForGLEntries_CTE.strDescription 
+		,strCode					= 'IC' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= NULL
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType 
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
+WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
+			@InventoryTransactionTypeId_AutoVariance
+			,@InventoryTransactionTypeId_WriteOffSold
+			,@InventoryTransactionTypeId_RevalueSold
+			,@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+		)
+		AND ISNULL(dblValue, 0) <> 0 
+
+UNION ALL 
+SELECT	
+		dtmDate						= ForGLEntries_CTE.dtmDate
+		,strBatchId					= @strBatchId
+		,intAccountId				= tblGLAccount.intAccountId
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
+		,dblDebitUnit				= CreditUnit.Value
+		,dblCreditUnit				= DebitUnit.Value
+		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) 
+									+ ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+									+ ' ' + ForGLEntries_CTE.strDescription 
+		,strCode					= 'IC' 
+		,strReference				= '' 
+		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
+		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
+		,dtmDateEntered				= GETDATE()
+		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
+        ,strJournalLineDescription  = '' 
+		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
+		,ysnIsUnposted				= 0
+		,intUserId					= @intEntityUserSecurityId 
+		,intEntityId				= NULL
+		,strTransactionId			= ForGLEntries_CTE.strTransactionId
+		,intTransactionId			= ForGLEntries_CTE.intTransactionId
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ISNULL(ForGLEntries_CTE.strTransactionForm, @strTransactionForm)
+		,strModuleName				= @ModuleName
+		,intConcurrencyId			= 1
+		,dblDebitForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE CreditForeign.Value END
+		,dblDebitReport				= NULL 
+		,dblCreditForeign			= CASE WHEN intCurrencyId = @intFunctionalCurrencyId THEN 0 ELSE DebitForeign.Value END
+		,dblCreditReport			= NULL 
+		,dblReportingRate			= NULL 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,strRateType				= ForGLEntries_CTE.strRateType 
+FROM	ForGLEntries_CTE 
+		INNER JOIN @GLAccounts GLAccounts
+			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
+			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
+		INNER JOIN dbo.tblGLAccount
+			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
+		CROSS APPLY dbo.fnGetDebit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+		) Debit
+		CROSS APPLY dbo.fnGetCredit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+		) Credit
+		CROSS APPLY dbo.fnGetDebitForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0)			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) DebitForeign
+		CROSS APPLY dbo.fnGetCreditForeign(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)) + ISNULL(dblValue, 0) 			
+			,ForGLEntries_CTE.intCurrencyId
+			,@intFunctionalCurrencyId
+			,ForGLEntries_CTE.dblForexRate
+		) CreditForeign
+		CROSS APPLY dbo.fnGetDebitUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) DebitUnit
+		CROSS APPLY dbo.fnGetCreditUnit(
+			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
+		) CreditUnit 
+
+WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
+			@InventoryTransactionTypeId_AutoVariance
+			,@InventoryTransactionTypeId_WriteOffSold
+			,@InventoryTransactionTypeId_RevalueSold
+			,@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
+		)
+		AND ISNULL(dblValue, 0) <> 0 
 ;
