@@ -11,8 +11,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		AS
 		SELECT
 		vwtic_ship_total	= CAST(0 AS DECIMAL(18,6))
-		,vwtic_cus_no	= CAST('' AS CHAR(10))
-		,vwtic_type	= CAST('' AS CHAR(1))
+		,vwtic_cus_no	= CAST('' AS CHAR(10))  COLLATE Latin1_General_CI_AS      
+		,vwtic_type	= CAST('' AS CHAR(1))  COLLATE Latin1_General_CI_AS      
 	')
 GO
 
@@ -25,8 +25,8 @@ BEGIN
 		AS
 		SELECT
 		vwtic_ship_total	= pttic_ship_total
-		,vwtic_cus_no	= pttic_cus_no
-		,vwtic_type	= pttic_type
+		,vwtic_cus_no	= pttic_cus_no  COLLATE Latin1_General_CI_AS      
+		,vwtic_type	= pttic_type  COLLATE Latin1_General_CI_AS      
 		,vwtic_line = pttic_line_no
 		FROM
 		ptticmst

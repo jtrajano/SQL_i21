@@ -23,7 +23,7 @@ BEGIN
 
 				SELECT 
 					C.strEntityNo CustomerNumber
-					,REPLICATE(''0'',4-LEN(CAST(A.intSiteNumber  AS NVARCHAR(20)))) + CAST(A.intSiteNumber  AS NVARCHAR(20)) ConsumptionSiteNumber
+					,REPLICATE(''0'',4-LEN(CAST(A.intSiteNumber  AS NVARCHAR(20)))) + CAST(A.intSiteNumber  AS NVARCHAR(20)) COLLATE Latin1_General_CI_AS ConsumptionSiteNumber
 					,ISNULL(A.strBillingBy,'''') BillingBy
 					,ISNULL(A.strDescription,'''') [SiteDescription]
 					,ISNULL(A.strSiteAddress,'''') [Address]
@@ -42,10 +42,10 @@ BEGIN
 					,ISNULL(A.dblTotalCapacity,0) TotalCapacity
 					,ROUND(ISNULL(A.dblTotalReserve,0),2) TotalReserve
 					,ISNULL(RTRIM(LTRIM(F.strItemNo)),'''') Product
-					,CASE ISNULL(A.ysnTaxable,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END SalesTax
+					,CASE ISNULL(A.ysnTaxable,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END COLLATE Latin1_General_CI_AS  SalesTax
 					,ISNULL(G.strTaxGroup,'''') TaxStateID
-					,'''' TaxLocale1
-					,'''' TaxLocale2
+					,''''  COLLATE Latin1_General_CI_AS TaxLocale1
+					,''''  COLLATE Latin1_General_CI_AS TaxLocale2
 					,CASE A.intDeliveryTermID WHEN NULL THEN
 							ISNULL(C.strTermCode,'''')
 						WHEN 0 THEN
@@ -63,23 +63,23 @@ BEGIN
 					,ISNULL(A.dblPriceAdjustment,0) PriceReduction
 					,ISNULL(A.strClassFillOption,'''') ClassFill
 					,ISNULL(CAST(A.strRecurringPONumber AS NVARCHAR(50)),'' '') RecurringPONumber
-					,CASE ISNULL(A.ysnPrintARBalance,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END PrintARBalance
+					,CASE ISNULL(A.ysnPrintARBalance,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END COLLATE Latin1_General_CI_AS  PrintARBalance
 					,ISNULL(H.strFillMethod,'''') FillMethod
 					,ISNULL(A.strFillGroup,'''') FillGroup
 					,ISNULL(A.dblDegreeDayBetweenDelivery,0) DegreeDaysBetweenDelivery
-					,ISNULL(CONVERT(VARCHAR(10), A.dtmNextDeliveryDate , 101),'''') NextJulianDeliveryDate
+					,ISNULL(CONVERT(VARCHAR(10), A.dtmNextDeliveryDate , 101),'''') COLLATE Latin1_General_CI_AS NextJulianDeliveryDate
 					,ISNULL(A.dblSummerDailyUse,0) SummerDailyUse
 					,ISNULL(A.dblWinterDailyUse,0) WinterDailyUse
 					,ROUND(ISNULL(A.dblBurnRate,0),2) BurnRate
 					,ROUND(ISNULL(A.dblPreviousBurnRate,0),2) PreviousBurnRate
-					,CASE ISNULL(A.ysnPromptForPercentFull,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END PromptForPercentFull
-					,CASE ISNULL(A.ysnAdjustBurnRate,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END AdjustBurnRate
-					,CASE ISNULL(A.ysnOnHold,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END OnHold
+					,CASE ISNULL(A.ysnPromptForPercentFull,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END   COLLATE Latin1_General_CI_AS PromptForPercentFull
+					,CASE ISNULL(A.ysnAdjustBurnRate,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END  COLLATE Latin1_General_CI_AS AdjustBurnRate
+					,CASE ISNULL(A.ysnOnHold,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END  COLLATE Latin1_General_CI_AS OnHold
 					,ISNULL(I.strHoldReason,'''') OnHoldReason
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmOnHoldStartDate, 101),'''') OnHoldStart
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmOnHoldEndDate, 101),'''') OnHoldEnd
-					,CASE ISNULL(A.ysnHoldDDCalculations,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END HoldDDCalculation
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmLastDeliveryDate , 101),'''') LastDeliveryDate
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmOnHoldStartDate, 101),'''')  COLLATE Latin1_General_CI_AS OnHoldStart
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmOnHoldEndDate, 101),'''')  COLLATE Latin1_General_CI_AS OnHoldEnd
+					,CASE ISNULL(A.ysnHoldDDCalculations,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END COLLATE Latin1_General_CI_AS HoldDDCalculation
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmLastDeliveryDate , 101),'''')  COLLATE Latin1_General_CI_AS LastDeliveryDate
 					,ISNULL(A.intLastDeliveryDegreeDay,0) LastDeliveryDegreeDay
 					,ISNULL(A.dblLastDeliveredGal,0) LastDeliveredGallons
 					,ISNULL(A.intNextDeliveryDegreeDay,0) NextDeliveryDegreeDay
@@ -91,10 +91,10 @@ BEGIN
 					,ISNULL(HH.dblTotalSales,0) YTDSalesThisSeason
 					,ISNULL(II.dblTotalSales,0) YTDSalesLastSeason
 					,ISNULL(JJ.dblTotalSales,0) YTDSales2SeasonsAgo
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmRunOutDate , 101),'''') RunOutDate
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmForecastedDelivery , 101),'''') ForecastedDeliveryDate
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmRunOutDate , 101),'''') COLLATE Latin1_General_CI_AS  RunOutDate
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmForecastedDelivery , 101),'''') COLLATE Latin1_General_CI_AS ForecastedDeliveryDate
 					,ISNULL(J.strTankTownship,'''') TankTownShip
-					,CASE ISNULL(A.ysnPrintDeliveryTicket,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END PrintDeliveryTicket
+					,CASE ISNULL(A.ysnPrintDeliveryTicket,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END COLLATE Latin1_General_CI_AS  PrintDeliveryTicket
 					,ISNULL(A.strInstruction,'''') Instructions
 					,ISNULL(A.strComment,'''') Comments
 				FROM tblTMSite A
@@ -192,7 +192,7 @@ BEGIN
 
 				SELECT 
 					C.strEntityNo CustomerNumber
-					,REPLICATE(''0'',4-LEN(CAST(A.intSiteNumber  AS NVARCHAR(20)))) + CAST(A.intSiteNumber  AS NVARCHAR(20)) ConsumptionSiteNumber
+					,REPLICATE(''0'',4-LEN(CAST(A.intSiteNumber  AS NVARCHAR(20)))) + CAST(A.intSiteNumber  AS NVARCHAR(20)) COLLATE Latin1_General_CI_AS ConsumptionSiteNumber
 					,ISNULL(A.strBillingBy,'''') BillingBy
 					,ISNULL(A.strDescription,'''') [SiteDescription]
 					,ISNULL(A.strSiteAddress,'''') [Address]
@@ -211,10 +211,10 @@ BEGIN
 					,ISNULL(A.dblTotalCapacity,0) TotalCapacity
 					,ROUND(ISNULL(A.dblTotalReserve,0),2) TotalReserve
 					,ISNULL(RTRIM(LTRIM(F.strItemNo)),'''') Product
-					,CASE ISNULL(A.ysnTaxable,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END SalesTax
+					,CASE ISNULL(A.ysnTaxable,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END  COLLATE Latin1_General_CI_AS  SalesTax
 					,ISNULL(LEFT(G.strTaxGroup,2),'''') TaxStateID
-					,ISNULL(G.intTaxGroupId,'''') TaxLocale1
-					,'''' TaxLocale2
+					,ISNULL(G.intTaxGroupId,'''')  COLLATE Latin1_General_CI_AS TaxLocale1
+					,''''  COLLATE Latin1_General_CI_AS TaxLocale2
 					,CASE A.intDeliveryTermID WHEN NULL THEN
 							ISNULL(C.strTermCode,'''')
 						WHEN 0 THEN
@@ -232,23 +232,23 @@ BEGIN
 					,ISNULL(A.dblPriceAdjustment,0) PriceReduction
 					,ISNULL(A.strClassFillOption,'''') ClassFill
 					,ISNULL(CAST(A.strRecurringPONumber AS NVARCHAR(50)),'' '') RecurringPONumber
-					,CASE ISNULL(A.ysnPrintARBalance,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END PrintARBalance
+					,CASE ISNULL(A.ysnPrintARBalance,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END  COLLATE Latin1_General_CI_AS  PrintARBalance
 					,ISNULL(H.strFillMethod,'''') FillMethod
 					,ISNULL(A.strFillGroup,'''') FillGroup
 					,ISNULL(A.dblDegreeDayBetweenDelivery,0) DegreeDaysBetweenDelivery
-					,ISNULL(CONVERT(VARCHAR(10), A.dtmNextDeliveryDate , 101),'''') NextJulianDeliveryDate
+					,ISNULL(CONVERT(VARCHAR(10), A.dtmNextDeliveryDate , 101),'''') COLLATE Latin1_General_CI_AS NextJulianDeliveryDate
 					,ISNULL(A.dblSummerDailyUse,0) SummerDailyUse
 					,ISNULL(A.dblWinterDailyUse,0) WinterDailyUse
 					,ROUND(ISNULL(A.dblBurnRate,0),2) BurnRate
 					,ROUND(ISNULL(A.dblPreviousBurnRate,0),2) PreviousBurnRate
-					,CASE ISNULL(A.ysnPromptForPercentFull,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END PromptForPercentFull
-					,CASE ISNULL(A.ysnAdjustBurnRate,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END AdjustBurnRate
-					,CASE ISNULL(A.ysnOnHold,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END OnHold
+					,CASE ISNULL(A.ysnPromptForPercentFull,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END   COLLATE Latin1_General_CI_AS PromptForPercentFull
+					,CASE ISNULL(A.ysnAdjustBurnRate,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END  COLLATE Latin1_General_CI_AS AdjustBurnRate
+					,CASE ISNULL(A.ysnOnHold,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END  COLLATE Latin1_General_CI_AS OnHold
 					,ISNULL(I.strHoldReason,'''') OnHoldReason
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmOnHoldStartDate, 101),'''') OnHoldStart
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmOnHoldEndDate, 101),'''') OnHoldEnd
-					,CASE ISNULL(A.ysnHoldDDCalculations,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END HoldDDCalculation
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmLastDeliveryDate , 101),'''') LastDeliveryDate
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmOnHoldStartDate, 101),'''')  COLLATE Latin1_General_CI_AS OnHoldStart
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmOnHoldEndDate, 101),'''')  COLLATE Latin1_General_CI_AS OnHoldEnd
+					,CASE ISNULL(A.ysnHoldDDCalculations,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END COLLATE Latin1_General_CI_AS HoldDDCalculation
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmLastDeliveryDate , 101),'''') COLLATE Latin1_General_CI_AS LastDeliveryDate
 					,ISNULL(A.intLastDeliveryDegreeDay,0) LastDeliveryDegreeDay
 					,ISNULL(A.dblLastDeliveredGal,0) LastDeliveredGallons
 					,ISNULL(A.intNextDeliveryDegreeDay,0) NextDeliveryDegreeDay
@@ -260,10 +260,10 @@ BEGIN
 					,ISNULL(HH.dblTotalSales,0) YTDSalesThisSeason
 					,ISNULL(II.dblTotalSales,0) YTDSalesLastSeason
 					,ISNULL(JJ.dblTotalSales,0) YTDSales2SeasonsAgo
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmRunOutDate , 101),'''') RunOutDate
-					,ISNULL(CONVERT(VARCHAR(10),A.dtmForecastedDelivery , 101),'''') ForecastedDeliveryDate
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmRunOutDate , 101),'''') COLLATE Latin1_General_CI_AS  RunOutDate
+					,ISNULL(CONVERT(VARCHAR(10),A.dtmForecastedDelivery , 101),'''') COLLATE Latin1_General_CI_AS ForecastedDeliveryDate
 					,ISNULL(J.strTankTownship,'''') TankTownShip
-					,CASE ISNULL(A.ysnPrintDeliveryTicket,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END PrintDeliveryTicket
+					,CASE ISNULL(A.ysnPrintDeliveryTicket,0) WHEN 1 THEN ''Yes'' ELSE ''No'' END COLLATE Latin1_General_CI_AS  PrintDeliveryTicket
 					,ISNULL(A.strInstruction,'''') Instructions
 					,ISNULL(A.strComment,'''') Comments
 				FROM tblTMSite A

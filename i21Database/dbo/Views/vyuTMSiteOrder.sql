@@ -6,10 +6,10 @@ SELECT
 	A.intSiteID 
 	,C.strEntityNo AS strCustomerNumber
 	,C.strName AS strCustomerName
-	,RIGHT('000'+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) AS strSiteNumber
+	,RIGHT('000'+ CAST(A.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS  AS strSiteNumber
 	,(A.strSiteAddress + CHAR(10) + A.strCity + ', ' + A.strState +  ' ' +  A.strZipCode) AS strSiteAddress
 	,A.strLocation
-	,E.strEntityNo AS strDriverName
+	,E.strEntityNo AS  COLLATE Latin1_General_CI_AS  strDriverName
 	,D.strItemNo AS strItemNo
 	,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
 	,CAST(ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(D.dblDefaultFull,0) = 0 THEN 100 ELSE D.dblDefaultFull END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS INT) AS intCalculatedQuantity

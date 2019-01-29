@@ -3,8 +3,8 @@ AS
 
 SELECT
 	ISNULL(D.strEntityNo,'') CustomerNumber
-	,REPLICATE('0',4-LEN(CAST(B.intSiteNumber  AS NVARCHAR(20)))) + CAST(B.intSiteNumber  AS NVARCHAR(20)) ConsumptionSiteNumber   
-	,ISNULL(CONVERT(VARCHAR(10),A.dtmDate, 101),'') EventDate
+	,REPLICATE('0',4-LEN(CAST(B.intSiteNumber  AS NVARCHAR(20)))) + CAST(B.intSiteNumber  AS NVARCHAR(20)) COLLATE Latin1_General_CI_AS  ConsumptionSiteNumber   
+	,ISNULL(CONVERT(VARCHAR(10),A.dtmDate, 101),'') COLLATE Latin1_General_CI_AS  EventDate
 	,ISNULL(E.strDescription,'') EventTypeDescription
 	,ISNULL(A.strDeviceType,'') DeviceType
 	,ISNULL(A.strDeviceSerialNumber,'') DeviceSerialNumber

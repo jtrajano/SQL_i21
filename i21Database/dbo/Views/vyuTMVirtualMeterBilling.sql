@@ -3,7 +3,7 @@ AS
 SELECT   
 	strSiteCustomerNo = C.strEntityNo
 	,strSiteCustomerName = C.strName
-	,strSiteNumber =  RIGHT('0000'+CAST(A.intSiteNumber AS VARCHAR(4)),4)
+	,strSiteNumber =  RIGHT('0000'+CAST(A.intSiteNumber AS VARCHAR(4)),4) COLLATE Latin1_General_CI_AS 
 	,strSiteDescription = A.strDescription
 	,strSiteAddress = A.strSiteAddress
 	,strSiteLocation = D.strLocationName

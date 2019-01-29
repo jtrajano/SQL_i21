@@ -125,8 +125,8 @@ BEGIN
 					,dtmDateCreated = DATEADD(DAY, DATEDIFF(DAY, 0, WRK.dtmDateCreated), 0)
 					,dtmDateScheduled = WRK.dtmDateScheduled
 					,strAdditonalInfo = WRK.strAdditionalInfo
-					,strPerformer = PRF.vwsls_name
-					,strPerformerId = PRF.vwsls_slsmn_id
+					,strPerformer = PRF.vwsls_name COLLATE Latin1_General_CI_AS
+					,strPerformerId = PRF.vwsls_slsmn_id COLLATE Latin1_General_CI_AS
 					,C.strWorkStatus
 					,Z.strCompanyName
 					,strLocationName = loc.vwloc_loc_no
@@ -242,8 +242,8 @@ BEGIN
 				,dtmDateCreated = DATEADD(DAY, DATEDIFF(DAY, 0, WRK.dtmDateCreated), 0)
 				,dtmDateScheduled = WRK.dtmDateScheduled
 				,strAdditonalInfo = WRK.strAdditionalInfo
-				,strPerformer = PRF.strName
-				,strPerformerId = PRF.strEntityNo
+				,strPerformer = PRF.strName COLLATE Latin1_General_CI_AS
+				,strPerformerId = PRF.strEntityNo COLLATE Latin1_General_CI_AS
 				,C.strWorkStatus
 				,Z.strCompanyName
 				,loc.strLocationName

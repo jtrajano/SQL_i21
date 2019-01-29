@@ -16,7 +16,7 @@ SELECT
 	,K.strRouteId
 	,strItemNo = ISNULL(O.strItemNo, I.strItemNo)
 	,J.dtmRequestedDate
-	,strTerm = ISNULL(L.strTerm ,'')
+	,strTerm = ISNULL(L.strTerm ,'')  COLLATE Latin1_General_CI_AS 
 	,dblARBalance = ISNULL(Cus.dblARBalance,0.0)
 	,dblPrice = ISNULL(J.dblPrice,0.0)
 	,dblTaxRate = ISNULL(dbo.[fnGetItemTotalTaxForCustomer](
@@ -62,7 +62,7 @@ SELECT
 	,J.dtmCallInDate
 	,strUserCreated = P.strUserName
 	,strSerialNumber = ISNULL(Q.strSerialNumber,'')
-	,strTaxGroup = ISNULL(R.strTaxGroup,'')
+	,strTaxGroup = ISNULL(R.strTaxGroup,'')  COLLATE Latin1_General_CI_AS 
 	,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 	,ysnTaxable = ISNULL(A.ysnTaxable,0)
 	,strSiteDescription = ISNULL(A.strDescription,'')

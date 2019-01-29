@@ -37,10 +37,10 @@ BEGIN
 						END   
 					END
 					)COLLATE Latin1_General_CI_AS AS strCustomerName
-				,RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) AS strSiteNumber
+				,RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS  AS strSiteNumber
 				,(A.strSiteAddress + CHAR(10) + A.strCity + '', '' + A.strState +  '' '' +  A.strZipCode) AS strSiteAddress
 				,strLocation = Q.vwloc_loc_no COLLATE Latin1_General_CI_AS
-				,E.vwsls_name AS strDriverName
+				,E.vwsls_name  COLLATE Latin1_General_CI_AS  AS strDriverName
 				,F.vwitm_no AS strItemNo
 				,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
 				,CAST(ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(F.vwitm_deflt_percnt,0) = 0 THEN 100 ELSE F.vwitm_deflt_percnt END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS INT) AS intCalculatedQuantity

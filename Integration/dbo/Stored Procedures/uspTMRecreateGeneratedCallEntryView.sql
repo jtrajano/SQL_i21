@@ -38,7 +38,7 @@ BEGIN
 									END) COLLATE Latin1_General_CI_AS 
 				,strSiteDescription = B.strDescription
 				,strSiteAddress = B.strSiteAddress
-				,strSiteNumber = RIGHT(''000''+ CAST(B.intSiteNumber AS NVARCHAR(4)),4)
+				,strSiteNumber = RIGHT(''000''+ CAST(B.intSiteNumber AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS  
 				,strOrderNumber = A.strOrderNumber
 				,strProduct = COALESCE(F.vwitm_desc ,E.vwitm_desc) COLLATE Latin1_General_CI_AS 
 				,strDriverName = G.vwsls_name COLLATE Latin1_General_CI_AS 
@@ -48,7 +48,7 @@ BEGIN
 				,dblPrice = A.dblPrice
 				,dblTotal = A.dblTotal
 				,dtmRequestedDate = A.dtmRequestedDate
-				,strPrinted = CASE WHEN ISNULL(A.ysnCallEntryPrinted,0) = 0 THEN ''No'' ELSE ''YES'' END
+				,strPrinted = CASE WHEN ISNULL(A.ysnCallEntryPrinted,0) = 0 THEN ''No'' ELSE ''YES'' END  COLLATE Latin1_General_CI_AS  
 				,intPriority = A.intPriority
 				,strComments = A.strComments
 				,strOrderStatus = A.strWillCallStatus
@@ -110,7 +110,7 @@ BEGIN
 				,strCustomerName = D.strName
 				,strSiteDescription = B.strDescription
 				,strSiteAddress = B.strSiteAddress
-				,strSiteNumber = RIGHT(''000''+ CAST(B.intSiteNumber AS NVARCHAR(4)),4)
+				,strSiteNumber = RIGHT(''000''+ CAST(B.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS  
 				,strOrderNumber = A.strOrderNumber
 				,strProduct = COALESCE(F.strDescription,E.strDescription)
 				,strDriverName = G.strName
@@ -120,7 +120,7 @@ BEGIN
 				,dblPrice = A.dblPrice
 				,dblTotal = A.dblTotal
 				,dtmRequestedDate = A.dtmRequestedDate
-				,strPrinted = CASE WHEN ISNULL(A.ysnCallEntryPrinted,0) = 0 THEN ''No'' ELSE ''YES'' END
+				,strPrinted = CASE WHEN ISNULL(A.ysnCallEntryPrinted,0) = 0 THEN ''No'' ELSE ''YES'' END COLLATE Latin1_General_CI_AS  
 				,intPriority = A.intPriority
 				,strComments = A.strComments
 				,strOrderStatus = A.strWillCallStatus

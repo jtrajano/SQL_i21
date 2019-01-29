@@ -6,7 +6,7 @@ AS
 		,strManufacturerId = L.strManufacturerId
 		,strManufacturerName = L.strManufacturerName
 		,strInventoryStatusType = E.strInventoryStatusType
-		,strSiteNumber = RIGHT('000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
+		,strSiteNumber = RIGHT('000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 		,strSiteAddress = C.strSiteAddress
 		,strCustomerID = G.strEntityNo
 		,strCustomerName = G.strName

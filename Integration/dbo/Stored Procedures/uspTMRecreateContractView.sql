@@ -49,7 +49,7 @@ BEGIN
 					AS
 					SELECT
 						vwcnt_cus_no=agcnt_cus_no COLLATE Latin1_General_CI_AS
-						,vwcnt_cnt_no= agcnt_cnt_no
+						,vwcnt_cnt_no= agcnt_cnt_no COLLATE Latin1_General_CI_AS
 						,vwcnt_line_no= CAST(agcnt_line_no AS INT)
 						,vwcnt_alt_cus=agcnt_alt_cus COLLATE Latin1_General_CI_AS
 						,vwcnt_itm_or_cls=agcnt_itm_or_cls COLLATE Latin1_General_CI_AS
@@ -63,22 +63,22 @@ BEGIN
 														+ SUBSTRING(CAST(agcnt_due_rev_dt AS NVARCHAR(8)),5,2) + ''/'' 
 														+  SUBSTRING(CAST(agcnt_due_rev_dt AS NVARCHAR(8)),7,2), 101) -- yyy/mm/dd
 											END)
-						,vwcnt_hdr_comments=agcnt_hdr_comments
+						,vwcnt_hdr_comments=agcnt_hdr_comments  COLLATE Latin1_General_CI_AS
 						,vwcnt_un_orig=agcnt_un_orig
 						,vwcnt_un_bal=agcnt_un_bal
-						,vwcnt_lc1_yn=agcnt_lc1_yn
-						,vwcnt_lc2_yn=agcnt_lc2_yn
-						,vwcnt_lc3_yn=agcnt_lc3_yn
-						,vwcnt_lc4_yn =agcnt_lc4_yn
-						,vwcnt_lc5_yn =agcnt_lc5_yn
-						,vwcnt_lc6_yn =agcnt_lc6_yn
+						,vwcnt_lc1_yn=agcnt_lc1_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc2_yn=agcnt_lc2_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc3_yn=agcnt_lc3_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc4_yn =agcnt_lc4_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc5_yn =agcnt_lc5_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc6_yn =agcnt_lc6_yn COLLATE Latin1_General_CI_AS
 						,vwcnt_ppd_yndm = agcnt_ppd_yndm COLLATE Latin1_General_CI_AS
 						,vwcnt_un_prc=agcnt_un_prc
-						,vwcnt_prc_lvl = agcnt_prc_lvl
+						,vwcnt_prc_lvl = agcnt_prc_lvl COLLATE Latin1_General_CI_AS
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
-						,strItemDescription =  ''''
-						,strCustomerName =  ''''
-						,strItemUnitDescription = ''''
+						,strItemDescription =  '''' COLLATE Latin1_General_CI_AS
+						,strCustomerName =  '''' COLLATE Latin1_General_CI_AS
+						,strItemUnitDescription = '''' COLLATE Latin1_General_CI_AS
 						,ysnMaxPrice = CASE WHEN agcnt_ppd_yndm = ''M'' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 					FROM agcntmst
 				
@@ -92,7 +92,7 @@ BEGIN
 					AS
 					SELECT
 						vwcnt_cus_no=ptcnt_cus_no COLLATE Latin1_General_CI_AS
-						,vwcnt_cnt_no= CAST(ptcnt_cnt_no AS CHAR(8))  
+						,vwcnt_cnt_no= CAST(ptcnt_cnt_no AS CHAR(8)) COLLATE Latin1_General_CI_AS 
 						,vwcnt_line_no= CAST(ptcnt_line_no AS INT)
 						,vwcnt_alt_cus=ptcnt_alt_cus_no COLLATE Latin1_General_CI_AS
 						,vwcnt_itm_or_cls=CAST(ptcnt_itm_or_cls AS CHAR(13))  COLLATE Latin1_General_CI_AS
@@ -107,25 +107,25 @@ BEGIN
 														+ SUBSTRING(CAST(ptcnt_due_rev_dt AS NVARCHAR(8)),5,2) + ''/'' 
 														+  SUBSTRING(CAST(ptcnt_due_rev_dt AS NVARCHAR(8)),7,2), 101) -- yyy/mm/dd
 											END)
-						,vwcnt_hdr_comments=ptcnt_hdr_comments
+						,vwcnt_hdr_comments=ptcnt_hdr_comments  COLLATE Latin1_General_CI_AS
 						,vwcnt_un_orig=ptcnt_un_orig
 						,vwcnt_un_bal= (CASE WHEN ptcnt_unlmd_qty_cnt = ''Y''
 										 THEN 999999 
 										 ELSE ptcnt_un_bal 
 										 END)
-						,vwcnt_lc1_yn=ptcnt_lc1_yn
-						,vwcnt_lc2_yn=ptcnt_lc2_yn
-						,vwcnt_lc3_yn=ptcnt_lc3_yn
-						,vwcnt_lc4_yn =ptcnt_lc4_yn
-						,vwcnt_lc5_yn =ptcnt_lc5_yn
-						,vwcnt_lc6_yn =ptcnt_lc6_yn
+						,vwcnt_lc1_yn=ptcnt_lc1_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc2_yn=ptcnt_lc2_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc3_yn=ptcnt_lc3_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc4_yn =ptcnt_lc4_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc5_yn =ptcnt_lc5_yn COLLATE Latin1_General_CI_AS
+						,vwcnt_lc6_yn =ptcnt_lc6_yn COLLATE Latin1_General_CI_AS
 						,vwcnt_ppd_yndm =ptcnt_prepaid_ynd COLLATE Latin1_General_CI_AS
 						,vwcnt_un_prc=CAST(ptcnt_un_prc AS DECIMAL(18,6))  
-						,vwcnt_prc_lvl = ptcnt_prc_lvl
+						,vwcnt_prc_lvl = ptcnt_prc_lvl COLLATE Latin1_General_CI_AS
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
-						,strItemDescription =  ''''
-						,strCustomerName =  ''''
-						,strItemUnitDescription = ''''
+						,strItemDescription =  '''' COLLATE Latin1_General_CI_AS
+						,strCustomerName =  '''' COLLATE Latin1_General_CI_AS
+						,strItemUnitDescription = '''' COLLATE Latin1_General_CI_AS
 						,ysnMaxPrice = CASE WHEN ptcnt_max_prc_yn = ''Y'' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 					FROM ptcntmst
 				
@@ -139,7 +139,7 @@ BEGIN
 			AS
 			SELECT
 				vwcnt_cus_no=C.strEntityNo COLLATE Latin1_General_CI_AS
-				,vwcnt_cnt_no= A.strContractNumber
+				,vwcnt_cnt_no= A.strContractNumber COLLATE Latin1_General_CI_AS
 				,vwcnt_line_no= B.intContractSeq
 				,vwcnt_alt_cus= '''' COLLATE Latin1_General_CI_AS
 				,vwcnt_itm_or_cls= E.strItemNo COLLATE Latin1_General_CI_AS
@@ -148,26 +148,26 @@ BEGIN
 				,vwcnt_amt_orig= ISNULL(B.dblCashPrice,0.0) * ISNULL(B.dblOriginalQty,0.0)
 				,vwcnt_amt_bal= ISNULL(B.dblBalance,0.0) * ISNULL(B.dblCashPrice,0.0)
 				,vwcnt_due_rev_dt= B.dtmEndDate
-				,vwcnt_hdr_comments=A.strInternalComment
+				,vwcnt_hdr_comments=A.strInternalComment COLLATE Latin1_General_CI_AS
 				,vwcnt_un_orig=ISNULL(B.dblOriginalQty,0.0)
 				,vwcnt_un_bal= B.dblBalance
-				,vwcnt_lc1_yn=''''
-				,vwcnt_lc2_yn=''''
-				,vwcnt_lc3_yn=''''
-				,vwcnt_lc4_yn =''''
-				,vwcnt_lc5_yn =''''
-				,vwcnt_lc6_yn =''''
+				,vwcnt_lc1_yn=''''  COLLATE Latin1_General_CI_AS
+				,vwcnt_lc2_yn='''' COLLATE Latin1_General_CI_AS
+				,vwcnt_lc3_yn='''' COLLATE Latin1_General_CI_AS
+				,vwcnt_lc4_yn ='''' COLLATE Latin1_General_CI_AS
+				,vwcnt_lc5_yn ='''' COLLATE Latin1_General_CI_AS
+				,vwcnt_lc6_yn ='''' COLLATE Latin1_General_CI_AS
 				,vwcnt_ppd_yndm = (CASE 
 										WHEN ISNULL(H.ysnPrepaid,0) = 1 THEN ''Y'' 
 										ELSE ''N''
 									END) COLLATE Latin1_General_CI_AS
 						  	
 				,vwcnt_un_prc= ISNULL(B.dblCashPrice,0.0)
-				,vwcnt_prc_lvl = ''''
+				,vwcnt_prc_lvl = '''' COLLATE Latin1_General_CI_AS
 				,A4GLIdentity = CAST(B.intContractDetailId  AS INT)
-				,strItemDescription =  E.strDescription
-				,strCustomerName = C.strName
-				,strItemUnitDescription = G.strUnitMeasure
+				,strItemDescription =  E.strDescription COLLATE Latin1_General_CI_AS
+				,strCustomerName = C.strName COLLATE Latin1_General_CI_AS
+				,strItemUnitDescription = G.strUnitMeasure COLLATE Latin1_General_CI_AS
 				,ysnMaxPrice = CAST(ISNULL(ysnMaxPrice,0) AS BIT)
  			FROM tblCTContractHeader A
 			INNER JOIN vyuCTContractHeaderNotMapped H

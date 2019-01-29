@@ -51,9 +51,9 @@ BEGIN
 					vwitm_no = agitm_no  COLLATE Latin1_General_CI_AS
 					,vwitm_loc_no = agitm_loc_no  COLLATE Latin1_General_CI_AS
 					,vwitm_class = agitm_class  COLLATE Latin1_General_CI_AS
-					,vwitm_search = agitm_search  
+					,vwitm_search = agitm_search COLLATE Latin1_General_CI_AS  
 					,vwitm_desc = RTRIM(ISNULL(agitm_desc,'''')) COLLATE Latin1_General_CI_AS
-					,vwitm_un_desc = CAST(agitm_un_desc AS CHAR(10))  
+					,vwitm_un_desc = CAST(agitm_un_desc AS CHAR(10)) COLLATE Latin1_General_CI_AS 
 					,vwitm_un_prc1 = agitm_un_prc1  
 					,vwitm_un_prc2 = agitm_un_prc2  
 					,vwitm_un_prc3 = agitm_un_prc3  
@@ -65,10 +65,10 @@ BEGIN
 					,vwitm_un_prc9 = agitm_un_prc9  
 					,vwitm_ytd_ivc_cost = agitm_ytd_ivc_cost  
 					,A4GLIdentity  = CAST(A4GLIdentity   AS INT)  
-					,vwitm_avail_tm = CAST(agitm_avail_tm AS CHAR(10))  
-					,vwitm_phys_inv_ynbo = CAST(agitm_phys_inv_ynbo AS CHAR(10)) 
+					,vwitm_avail_tm = CAST(agitm_avail_tm AS CHAR(10))  COLLATE Latin1_General_CI_AS
+					,vwitm_phys_inv_ynbo = CAST(agitm_phys_inv_ynbo AS CHAR(10)) COLLATE Latin1_General_CI_AS
 					,vwitm_deflt_percnt = CAST(ISNULL(agitm_deflt_percnt,0) AS INT)  
-					,vwitm_slstax_rpt_ynha = agitm_slstax_rpt_ynha  
+					,vwitm_slstax_rpt_ynha = agitm_slstax_rpt_ynha COLLATE Latin1_General_CI_AS   
 					,vwitm_last_un_cost = agitm_last_un_cost  
 					,vwitm_avg_un_cost    = agitm_avg_un_cost  
 					,vwitm_std_un_cost    = agitm_std_un_cost  
@@ -87,9 +87,9 @@ BEGIN
 					vwitm_no = CAST(ptitm_itm_no AS CHAR(13)) COLLATE Latin1_General_CI_AS   
 					,vwitm_loc_no = ptitm_loc_no  COLLATE Latin1_General_CI_AS
 					,vwitm_class = ptitm_class  COLLATE Latin1_General_CI_AS
-					,vwitm_search = CAST(''''  AS CHAR(13))    
+					,vwitm_search = CAST(''''  AS CHAR(13))  COLLATE Latin1_General_CI_AS   
 					,vwitm_desc = RTRIM(ISNULL(CAST(ptitm_desc AS CHAR(33)),'''')) COLLATE Latin1_General_CI_AS
-					,vwitm_un_desc = CAST(ptitm_unit  AS CHAR(10))  
+					,vwitm_un_desc = CAST(ptitm_unit  AS CHAR(10)) COLLATE Latin1_General_CI_AS 
 					,vwitm_un_prc1 = CAST(ptitm_prc1  AS DECIMAL(18,6))    
 					,vwitm_un_prc2 = CAST(ptitm_prc2  AS DECIMAL(18,6))   
 					,vwitm_un_prc3 = CAST(ptitm_prc3  AS DECIMAL(18,6))    
@@ -101,10 +101,10 @@ BEGIN
 					,vwitm_un_prc9 = CAST(0.00  AS DECIMAL(18,6))    
 					,vwitm_ytd_ivc_cost = CAST(0.00  AS DECIMAL(18,6))    
 					,A4GLIdentity  = CAST(A4GLIdentity   AS INT)  
-					,vwitm_avail_tm = ISNULL(ptitm_avail_tm,''N'')
-					,vwitm_phys_inv_ynbo = CAST(ptitm_phys_inv_yno AS CHAR(10)) 
+					,vwitm_avail_tm = ISNULL(ptitm_avail_tm,''N'') COLLATE Latin1_General_CI_AS
+					,vwitm_phys_inv_ynbo = CAST(ptitm_phys_inv_yno AS CHAR(10)) COLLATE Latin1_General_CI_AS 
 					,vwitm_deflt_percnt = CAST(ptitm_deflt_percnt  AS INT)
-					,vwitm_slstax_rpt_ynha = ptitm_sst_yn  
+					,vwitm_slstax_rpt_ynha = ptitm_sst_yn   COLLATE Latin1_General_CI_AS   
 					,vwitm_last_un_cost = ISNULL(ptitm_cost1,0.0)  
 					,vwitm_avg_un_cost    = ptitm_avg_cost  
 					,vwitm_std_un_cost    = ptitm_std_cost  
@@ -123,9 +123,9 @@ BEGIN
 				vwitm_no = A.strItemNo COLLATE Latin1_General_CI_AS
 				,vwitm_loc_no = C.strLocationName
 				,vwitm_class = D.strCategoryCode
-				,vwitm_search = CAST(''''  AS CHAR(13))    
+				,vwitm_search = CAST(''''  AS CHAR(13))  COLLATE Latin1_General_CI_AS   
 				,vwitm_desc = A.strDescription COLLATE Latin1_General_CI_AS
-				,vwitm_un_desc = ''''
+				,vwitm_un_desc = '''' COLLATE Latin1_General_CI_AS
 				,vwitm_un_prc1 = ISNULL(E.dblSalePrice,0.0) 
 				,vwitm_un_prc2 = CAST(0.0  AS DECIMAL(18,6))   
 				,vwitm_un_prc3 = CAST(0.0  AS DECIMAL(18,6))    
@@ -137,10 +137,10 @@ BEGIN
 				,vwitm_un_prc9 = CAST(0.00  AS DECIMAL(18,6))    
 				,vwitm_ytd_ivc_cost = CAST(0.00  AS DECIMAL(18,6))    
 				,A4GLIdentity  = A.intItemId
-				,vwitm_avail_tm = (CASE WHEN strType = ''Service'' THEN ''S'' ELSE (CASE WHEN A.ysnAvailableTM = 1 THEN ''Y'' ELSE ''N'' END) END)
-				,vwitm_phys_inv_ynbo = ISNULL(B.strCounted,'''') 
+				,vwitm_avail_tm = (CASE WHEN strType = ''Service'' THEN ''S'' ELSE (CASE WHEN A.ysnAvailableTM = 1 THEN ''Y'' ELSE ''N'' END) END) COLLATE Latin1_General_CI_AS
+				,vwitm_phys_inv_ynbo = ISNULL(B.strCounted,'''')  COLLATE Latin1_General_CI_AS
 				,vwitm_deflt_percnt = CAST(ISNULL(A.dblDefaultFull,0) AS INT)
-				,vwitm_slstax_rpt_ynha = ''N''  
+				,vwitm_slstax_rpt_ynha = ''N''  COLLATE Latin1_General_CI_AS     
 				,vwitm_last_un_cost = ISNULL(E.dblLastCost,0.0)  
 				,vwitm_avg_un_cost = ISNULL(E.dblAverageCost,0.0)  
 				,vwitm_std_un_cost = ISNULL(E.dblStandardCost,0.0)  

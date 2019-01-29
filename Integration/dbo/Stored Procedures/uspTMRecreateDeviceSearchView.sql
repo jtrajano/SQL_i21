@@ -29,7 +29,7 @@ BEGIN
 					,strManufacturerId = L.strManufacturerId
 					,strManufacturerName = L.strManufacturerName
 					,strInventoryStatusType = E.strInventoryStatusType
-					,strSiteNumber = RIGHT(''000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
+					,strSiteNumber = RIGHT(''000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 					,strSiteAddress = C.strSiteAddress
 					,strCustomerID = G.vwcus_key COLLATE Latin1_General_CI_AS 
 					,strCustomerName = (CASE WHEN G.vwcus_co_per_ind_cp = ''C''   
@@ -93,7 +93,7 @@ BEGIN
 					,strManufacturerId = L.strManufacturerId
 					,strManufacturerName = L.strManufacturerName
 					,strInventoryStatusType = E.strInventoryStatusType
-					,strSiteNumber = RIGHT(''000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
+					,strSiteNumber = RIGHT(''000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 					,strSiteAddress = C.strSiteAddress
 					,strCustomerID = G.strEntityNo
 					,strCustomerName = G.strName

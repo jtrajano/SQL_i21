@@ -47,7 +47,7 @@ BEGIN
 				,K.strRouteId
 				,strItemNo = ISNULL(O.vwitm_no, I.vwitm_no) COLLATE Latin1_General_CI_AS
 				,J.dtmRequestedDate
-				,strTerm = ISNULL(CAST(L.vwtrm_desc AS NVARCHAR(20)),'''')
+				,strTerm = ISNULL(CAST(L.vwtrm_desc AS NVARCHAR(20)),'''')  COLLATE Latin1_General_CI_AS 
 				,dblARBalance = C.vwcus_balance 
 				,dblPrice = ISNULL(J.dblPrice,0.0)
 				,dblTaxRate = ISNULL(dbo.[fnTMGetSalesTax](L.vwtrm_key_n,A.intTaxStateID),0.0)
@@ -70,7 +70,7 @@ BEGIN
 				,J.dtmCallInDate
 				,strUserCreated = P.strUserName
 				,strSerialNumber = ISNULL(Q.strSerialNumber,'''')
-				,strTaxGroup = ISNULL(R.vwlcl_tax_state, ISNULL(S.vwlcl_tax_state,''''))
+				,strTaxGroup = ISNULL(R.vwlcl_tax_state, ISNULL(S.vwlcl_tax_state,''''))  COLLATE Latin1_General_CI_AS 
 				,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
 				,strSiteDescription = ISNULL(A.strDescription,'''')
@@ -146,7 +146,7 @@ BEGIN
 				,K.strRouteId
 				,strItemNo = ISNULL(O.strItemNo, I.strItemNo)
 				,J.dtmRequestedDate
-				,strTerm = ISNULL(L.strTerm ,'''')
+				,strTerm = ISNULL(L.strTerm ,'''')  COLLATE Latin1_General_CI_AS 
 				,dblARBalance = ISNULL(Cus.dblARBalance,0.0)
 				,dblPrice = ISNULL(J.dblPrice,0.0)
 				,dblTaxRate = ISNULL(dbo.[fnGetItemTotalTaxForCustomer](
@@ -193,7 +193,7 @@ BEGIN
 				,J.dtmCallInDate
 				,strUserCreated = P.strUserName
 				,strSerialNumber = ISNULL(Q.strSerialNumber,'''')
-				,strTaxGroup = ISNULL(R.strTaxGroup,'''')
+				,strTaxGroup = ISNULL(R.strTaxGroup,'''')  COLLATE Latin1_General_CI_AS 
 				,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 				,ysnTaxable = ISNULL(A.ysnTaxable,0)
 				,strSiteDescription = ISNULL(A.strDescription,'''')

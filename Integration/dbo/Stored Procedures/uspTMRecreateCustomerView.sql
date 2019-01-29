@@ -69,22 +69,22 @@ BEGIN
 				,vwcus_city    = ISNULL(A.agcus_city,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_state   = ISNULL(A.agcus_state,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_zip    = ISNULL(A.agcus_zip,'''')  COLLATE Latin1_General_CI_AS
-				,vwcus_phone   = ISNULL(A.agcus_phone,'''')    
-				,vwcus_phone_ext  = ISNULL(A.agcus_phone_ext,'''')    
+				,vwcus_phone   = ISNULL(A.agcus_phone,'''') COLLATE Latin1_General_CI_AS      
+				,vwcus_phone_ext  = ISNULL(A.agcus_phone_ext,'''') COLLATE Latin1_General_CI_AS     
 				,vwcus_bill_to   = ISNULL(A.agcus_bill_to,'''') COLLATE Latin1_General_CI_AS     
 				,vwcus_contact   = ISNULL(A.agcus_contact,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_comments   = ISNULL(A.agcus_comments,'''') COLLATE Latin1_General_CI_AS  
-				,vwcus_slsmn_id   = ISNULL(A.agcus_slsmn_id,'''')    
+				,vwcus_slsmn_id   = ISNULL(A.agcus_slsmn_id,'''') COLLATE Latin1_General_CI_AS     
 				,vwcus_terms_cd   = CAST(ISNULL(A.agcus_terms_cd,'''') AS INT)    
 				,vwcus_prc_lvl   = CAST(ISNULL(A.agcus_prc_lvl,0) AS INT)   
-				,vwcus_stmt_fmt   = ISNULL(A.agcus_stmt_fmt,'''')    
+				,vwcus_stmt_fmt   = ISNULL(A.agcus_stmt_fmt,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_ytd_pur   = ISNULL(A.agcus_ytd_pur,0.0)    
 				,vwcus_ytd_sls   = ISNULL(A.agcus_ytd_sls,0.0)    
 				,vwcus_ytd_cgs   = ISNULL(A.agcus_ytd_cgs,0.0)    
 				,vwcus_budget_amt  = ISNULL(A.agcus_budget_amt,0.0)    
 				,vwcus_budget_beg_mm = CAST(ISNULL(A.agcus_budget_beg_mm,0) AS INT)   
 				,vwcus_budget_end_mm = CAST(ISNULL(A.agcus_budget_end_mm,0) AS INT)   
-				,vwcus_active_yn  = ISNULL(A.agcus_active_yn,'''')    
+				,vwcus_active_yn  = ISNULL(A.agcus_active_yn,'''') COLLATE Latin1_General_CI_AS      
 				,vwcus_ar_future  = ISNULL(A.agcus_ar_future,0.0)    
 				,vwcus_ar_per1   = ISNULL(A.agcus_ar_per1,0.0)    
 				,vwcus_ar_per2   = ISNULL(A.agcus_ar_per2,0.0)    
@@ -95,8 +95,8 @@ BEGIN
 				,vwcus_cred_reg   = ISNULL(A.agcus_cred_reg,0.0)    
 				,vwcus_pend_pymt  = ISNULL(A.agcus_pend_pymt,0.0)    
 				,vwcus_cred_ga   = ISNULL(A.agcus_cred_ga,0.0)    
-				,vwcus_co_per_ind_cp = CAST(ISNULL(A.agcus_co_per_ind_cp,'''') AS CHAR(4))  
-				,vwcus_bus_loc_no  = ISNULL(A.agcus_bus_loc_no,'''')   
+				,vwcus_co_per_ind_cp = CAST(ISNULL(A.agcus_co_per_ind_cp,'''') AS CHAR(4)) COLLATE Latin1_General_CI_AS       
+				,vwcus_bus_loc_no  = ISNULL(A.agcus_bus_loc_no,'''') COLLATE Latin1_General_CI_AS  
 				,vwcus_cred_limit  = CAST(ISNULL(A.agcus_cred_limit,0.0) AS DECIMAL(18,6)) 
 				,vwcus_last_stmt_bal = ISNULL(A.agcus_last_stmt_bal,0.0)  
 				,vwcus_budget_amt_due = CAST(ISNULL(A.agcus_budget_amt_due,0.0) AS DECIMAL(18,6))  
@@ -111,18 +111,18 @@ BEGIN
 				,vwcus_avg_days_no_ivcs = CAST(ISNULL(A.agcus_avg_days_no_ivcs,0) AS INT)
 				,vwcus_last_stmt_rev_dt = ISNULL(A.agcus_last_stmt_rev_dt,0)  
 				,vwcus_country   = ISNULL(A.agcus_country,'''')  COLLATE Latin1_General_CI_AS
-				,vwcus_termdescription  = ISNULL(C.agtrm_desc,'''')
-				,vwcus_tax_ynp   = ISNULL(A.agcus_tax_ynp,'''')  
-				,vwcus_tax_state  = ISNULL(A.agcus_tax_state,'''')  
+				,vwcus_termdescription  = ISNULL(C.agtrm_desc,'''') COLLATE Latin1_General_CI_AS
+				,vwcus_tax_ynp   = ISNULL(A.agcus_tax_ynp,'''') COLLATE Latin1_General_CI_AS 
+				,vwcus_tax_state  = ISNULL(A.agcus_tax_state,'''') COLLATE Latin1_General_CI_AS 
 				,A4GLIdentity= CAST(A.A4GLIdentity as INT)  
-				,vwcus_phone2   =ISNULL(A.agcus_phone2,'''')  
+				,vwcus_phone2   =ISNULL(A.agcus_phone2,'''') COLLATE Latin1_General_CI_AS 
 				,vwcus_balance = ISNULL(A.agcus_ar_future,0.0) + ISNULL(A.agcus_ar_per1,0.0) + ISNULL(A.agcus_ar_per2,0.0) + ISNULL(A.agcus_ar_per3,0.0) + ISNULL(A.agcus_ar_per4,0.0) + ISNULL(A.agcus_ar_per5,0.0) - ISNULL(A.agcus_cred_reg,0.0) - ISNULL(A.agcus_cred_ga,0.0)  
 				,vwcus_ptd_sls = ISNULL(A.agcus_ptd_sls,0.0) 
 				,vwcus_lyr_sls = ISNULL(A.agcus_lyr_sls,0.0)
-				,vwcus_acct_stat_x_1 = ISNULL(A.agcus_acct_stat_x_1,'''')
+				,vwcus_acct_stat_x_1 = ISNULL(A.agcus_acct_stat_x_1,'''') COLLATE Latin1_General_CI_AS  
 				,dblFutureCurrent = ISNULL(A.agcus_ar_future,0.0) + ISNULL(A.agcus_ar_per1,0.0)
 				,intConcurrencyId = 0
-				,strFullLocation =  ISNULL(B.agloc_loc_no ,'''') + '' '' + ISNULL(agloc_name,'''')
+				,strFullLocation =  (ISNULL(B.agloc_loc_no ,'''') + '' '' + ISNULL(agloc_name,'''')) COLLATE Latin1_General_CI_AS
 				,intTaxId = CAST((SELECT TOP 1 A4GLIdentity 
 								FROM aglclmst 
 								WHERE ISNULL(aglcl_tax_state,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_state,'''') COLLATE Latin1_General_CI_AS
@@ -138,7 +138,7 @@ BEGIN
 													END   
 										 END)COLLATE Latin1_General_CI_AS
 				,intCustomerPricingLevel = CAST(NULL AS INT)
-				,strCustomerContactEmail = ''''
+				,strCustomerContactEmail = '''' COLLATE Latin1_General_CI_AS
 				,dtmLastInvoiceRevisedDate = CASE WHEN ISDATE(A.agcus_last_ivc_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_ivc_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
 				,dtmLastPaymentRevisedDate = CASE WHEN ISDATE(A.agcus_last_pay_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_pay_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END 
 				,dtmLastStatementRevDate = CASE WHEN ISDATE(A.agcus_last_stmt_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.agcus_last_stmt_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END 
@@ -154,7 +154,7 @@ BEGIN
 								ELSE RTRIM(A.agcus_last_name) + '', '' + RTRIM(A.agcus_first_name) 
 								END)  COLLATE Latin1_General_CI_AS
 				,strFullTermName = (CAST(ISNULL(A.agcus_terms_cd,'''') AS NVARCHAR(10)) + '' - '' + ISNULL(C.agtrm_desc,'''')) COLLATE Latin1_General_CI_AS
-				,strCreditNote =''''
+				,strCreditNote ='''' COLLATE Latin1_General_CI_AS
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
@@ -205,22 +205,22 @@ BEGIN
 				,vwcus_city    = ISNULL(A.ptcus_city,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_state   = ISNULL(A.ptcus_state,'''')   COLLATE Latin1_General_CI_AS 
 				,vwcus_zip    = CAST(ISNULL(A.ptcus_zip,'''') AS CHAR(10))  COLLATE Latin1_General_CI_AS   
-				,vwcus_phone   = CAST(ISNULL(A.ptcus_phone,'''') AS CHAR(15))    
-				,vwcus_phone_ext  = ISNULL(A.ptcus_phone_ext,'''')
+				,vwcus_phone   = CAST(ISNULL(A.ptcus_phone,'''') AS CHAR(15)) COLLATE Latin1_General_CI_AS      
+				,vwcus_phone_ext  = ISNULL(A.ptcus_phone_ext,'''') COLLATE Latin1_General_CI_AS  
 				,vwcus_bill_to   = ISNULL(A.ptcus_bill_to,'''') COLLATE Latin1_General_CI_AS     
 				,vwcus_contact   = ISNULL(A.ptcus_contact,'''') COLLATE Latin1_General_CI_AS     
 				,vwcus_comments   = CAST(ISNULL(A.ptcus_comment,'''') AS CHAR(30))  COLLATE Latin1_General_CI_AS   
-				,vwcus_slsmn_id   = ISNULL(A.ptcus_slsmn_id,'''')    
+				,vwcus_slsmn_id   = ISNULL(A.ptcus_slsmn_id,'''') COLLATE Latin1_General_CI_AS      
 				,vwcus_terms_cd   = CAST(ISNULL(A.ptcus_terms_code,0) AS INT)
 				,vwcus_prc_lvl   = CAST(ISNULL(A.ptcus_prc_level,0) AS INT)    
-				,vwcus_stmt_fmt   = ISNULL(A.ptcus_stmt_fmt,'''')    
+				,vwcus_stmt_fmt   = ISNULL(A.ptcus_stmt_fmt,'''') COLLATE Latin1_General_CI_AS   
 				,vwcus_ytd_pur   = CAST(ISNULL(A.ptcus_purchs_ytd,0.0) AS INT)    
 				,vwcus_ytd_sls   = ISNULL(A.ptcus_ytd_sales,0.0)    
 				,vwcus_ytd_cgs   = ISNULL(A.ptcus_ytd_cgs,0.0)    
 				,vwcus_budget_amt  = CAST(ISNULL(A.ptcus_budget_amt,0.0) AS DECIMAL(18,6))    
 				,vwcus_budget_beg_mm = CAST(ISNULL(A.ptcus_budget_beg_mm,0) AS INT)   
 				,vwcus_budget_end_mm = CAST(ISNULL(A.ptcus_budget_end_mm,0) AS INT)   
-				,vwcus_active_yn  = ISNULL(A.ptcus_active_yn,'''')    
+				,vwcus_active_yn  = ISNULL(A.ptcus_active_yn,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_ar_future  = CAST(0 AS DECIMAL(18,6))
 				,vwcus_ar_per1   = ISNULL(A.ptcus_ar_curr,0.0)    
 				,vwcus_ar_per2   = ISNULL(A.ptcus_ar_3160,0.0)    
@@ -229,7 +229,7 @@ BEGIN
 				,vwcus_ar_per5   = ISNULL(A.ptcus_ar_ov120,0.0)    
 				,vwcus_pend_pymt   = ISNULL((SELECT SUM(
 											CASE WHEN vwpye_amt IS NULL THEN 0.00 ELSE vwpye_amt END
-												) FROM vwpyemst WHERE vwpye_cus_no = A.ptcus_cus_no ),0.00)    
+												) FROM vwpyemst WHERE vwpye_cus_no = A.ptcus_cus_no COLLATE Latin1_General_CI_AS),0.00)    
 				,vwcus_cred_reg   = ISNULL(A.ptcus_cred_reg,0.0)    
 				,vwcus_pend_ivc  = ISNULL((SELECT SUM(
 											CASE vwtic_type
@@ -243,10 +243,10 @@ BEGIN
 												ELSE vwtic_ship_total
 											END
 										)		
-									FROM vwticmst WHERE vwtic_cus_no = A.ptcus_cus_no AND vwtic_line = 1),0.00)    
+									FROM vwticmst WHERE vwtic_cus_no = A.ptcus_cus_no COLLATE Latin1_General_CI_AS AND vwtic_line = 1),0.00)    
 				,vwcus_cred_ga   = CAST(0 AS DECIMAL(18,6))    
-				,vwcus_co_per_ind_cp = CAST(ISNULL(A.ptcus_co_per_ind_cp,'''') AS CHAR(4))  
-				,vwcus_bus_loc_no  = ISNULL(A.ptcus_bus_loc_no,'''')   
+				,vwcus_co_per_ind_cp = CAST(ISNULL(A.ptcus_co_per_ind_cp,'''') AS CHAR(4)) COLLATE Latin1_General_CI_AS       
+				,vwcus_bus_loc_no  = ISNULL(A.ptcus_bus_loc_no,'''') COLLATE Latin1_General_CI_AS  
 				,vwcus_cred_limit  = CAST(ISNULL(A.ptcus_credit_limit,0.0) AS DECIMAL(18,6))
 				,vwcus_last_stmt_bal = ISNULL(A.ptcus_last_stmnt_bal,0.0)  
 				,vwcus_budget_amt_due = CAST(ISNULL(A.ptcus_budget_amt,0.0) AS DECIMAL(18,6)) 
@@ -261,18 +261,18 @@ BEGIN
 				,vwcus_avg_days_no_ivcs = CAST(ISNULL(A.ptcus_avg_days_no_ivcs,0) AS INT)  
 				,vwcus_last_stmt_rev_dt = ISNULL(A.ptcus_last_stmnt_rev_dt,0)  
 				,vwcus_country   = CAST('''' as char(3))  COLLATE Latin1_General_CI_AS
-				,vwcus_termdescription  = ISNULL((select top 1 pttrm_desc from pttrmmst where pttrm_code = A.ptcus_terms_code),'''')
-				,vwcus_tax_ynp   = CAST('''' as char(1))  
-				,vwcus_tax_state  = CAST('''' as char(2))  
+				,vwcus_termdescription  = ISNULL((select top 1 pttrm_desc from pttrmmst where pttrm_code = A.ptcus_terms_code),'''') COLLATE Latin1_General_CI_AS
+				,vwcus_tax_ynp   = CAST('''' as char(1))  COLLATE Latin1_General_CI_AS
+				,vwcus_tax_state  = CAST('''' as char(2))  COLLATE Latin1_General_CI_AS
 				,A4GLIdentity= CAST(A.A4GLIdentity as INT)  
-				,vwcus_phone2   =ISNULL(A.ptcus_phone2,'''')  
+				,vwcus_phone2   =ISNULL(A.ptcus_phone2,'''') COLLATE Latin1_General_CI_AS 
 				,vwcus_balance = ISNULL(A.ptcus_ar_curr,0.0) + ISNULL(A.ptcus_ar_3160,0.0) + ISNULL(A.ptcus_ar_6190,0.0) + ISNULL(A.ptcus_ar_91120,0.0) + ISNULL(A.ptcus_ar_ov120,0.0) - ISNULL(A.ptcus_cred_reg,0.0) - ISNULL(A.ptcus_cred_ppd,0.0) 
 				,vwcus_ptd_sls = ISNULL(A.ptcus_ptd_sales,0.0)   
 				,vwcus_lyr_sls = CAST(0 AS DECIMAL)
-				,vwcus_acct_stat_x_1 = ISNULL(A.ptcus_acct_stat_x_1,'''')
+				,vwcus_acct_stat_x_1 = ISNULL(A.ptcus_acct_stat_x_1,'''') COLLATE Latin1_General_CI_AS  
 				,dblFutureCurrent = ISNULL(A.ptcus_ar_curr,0.0)
 				,intConcurrencyId = 0
-				,strFullLocation =  ISNULL(B.ptloc_loc_no ,'''') + '' '' + ISNULL(ptloc_name,'''')
+				,strFullLocation =  (ISNULL(B.ptloc_loc_no ,'''') + '' '' + ISNULL(ptloc_name,'''')) COLLATE Latin1_General_CI_AS
 				,intTaxId = CAST((SELECT TOP 1 A4GLIdentity 
 								FROM ptlclmst 
 								WHERE ISNULL(ptlcl_state,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_state,'''') COLLATE Latin1_General_CI_AS
@@ -288,7 +288,7 @@ BEGIN
 													END   
 										 END)COLLATE Latin1_General_CI_AS
 				,intCustomerPricingLevel = CAST(NULL AS INT)
-				,strCustomerContactEmail = ''''
+				,strCustomerContactEmail = '''' COLLATE Latin1_General_CI_AS
 				,dtmLastInvoiceRevisedDate = CASE WHEN ISDATE(A.ptcus_last_ivc_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_ivc_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
 				,dtmLastPaymentRevisedDate = CASE WHEN ISDATE(A.ptcus_last_pay_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_pay_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
 				,dtmLastStatementRevDate =  CASE WHEN ISDATE(A.ptcus_last_stmnt_rev_dt) = 1 THEN CONVERT(DATETIME, CAST(A.ptcus_last_stmnt_rev_dt AS CHAR(12)), 112) ELSE CONVERT(DATETIME, CAST(''19000101'' AS CHAR(12)), 112) END
@@ -304,7 +304,7 @@ BEGIN
 								ELSE     RTRIM(A.ptcus_last_name) + RTRIM(A.ptcus_name_suffx) + '', '' + RTRIM(A.ptcus_first_name) + RTRIM(A.ptcus_mid_init)
 								END)  COLLATE Latin1_General_CI_AS
 				,strFullTermName = (CAST(ISNULL(A.ptcus_terms_code,'''') AS NVARCHAR(10)) + '' - '' + ISNULL(C.pttrm_desc,'''')) COLLATE Latin1_General_CI_AS
-				,strCreditNote =''''
+				,strCreditNote ='''' COLLATE Latin1_General_CI_AS
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
@@ -348,14 +348,14 @@ BEGIN
 									 WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' 
 									 WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' 
 									 WHEN Cus.strStatementFormat = ''None'' THEN ''N'' 
-									 WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END
+									 WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END COLLATE Latin1_General_CI_AS
 				,vwcus_ytd_pur = 0  
 				,vwcus_ytd_sls = ISNULL(CI.dblYTDSales, 0.0)
 				,vwcus_ytd_cgs = 0.0  
 				,vwcus_budget_amt = Cus.dblMonthlyBudget
 				,vwcus_budget_beg_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),0) AS INT)
 				,vwcus_budget_end_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),0) AS INT)
-				,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END
+				,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END COLLATE Latin1_General_CI_AS 
 				,vwcus_ar_future = CAST(ISNULL(CI.dblFuture,0.0) AS NUMERIC(18,6))
 				,vwcus_ar_per1 = ISNULL(CI.dbl10Days,0.0) +  ISNULL(CI.dbl0Days,0.0)
 				,vwcus_ar_per2 = ISNULL(CI.dbl30Days,0.0)
@@ -366,8 +366,8 @@ BEGIN
 				,vwcus_cred_reg = ISNULL(CI.dblUnappliedCredits,0.0)
 				,vwcus_pend_pymt = ISNULL(CI.dblPendingPayment,0.0)
 				,vwcus_cred_ga = 0.0
-				,vwcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END
-				,vwcus_bus_loc_no = ''''
+				,vwcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END COLLATE Latin1_General_CI_AS      
+				,vwcus_bus_loc_no = '''' COLLATE Latin1_General_CI_AS
 				,vwcus_cred_limit = ISNULL(Cus.dblCreditLimit,0.0)
 				,vwcus_last_stmt_bal = ISNULL(CI.dblLastStatement,0.0)
 				,vwcus_budget_amt_due  = ISNULL(CI.dblBudgetAmount,0.0)
@@ -382,23 +382,23 @@ BEGIN
 				,vwcus_avg_days_no_ivcs = 0
 				,vwcus_last_stmt_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastStatementDate) AS NVARCHAR(4)) + RIGHT(''00'' + CAST(MONTH(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)  + RIGHT(''00'' + CAST(DAY(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)) AS INT),0) 
 				,vwcus_country = Loc.strCountry COLLATE Latin1_General_CI_AS  
-				,vwcus_termdescription = T.strTerm 
-				,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END   
-				,vwcus_tax_state = ''''  
+				,vwcus_termdescription = T.strTerm COLLATE Latin1_General_CI_AS
+				,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END COLLATE Latin1_General_CI_AS  
+				,vwcus_tax_state = ''''  COLLATE Latin1_General_CI_AS
 				,A4GLIdentity = Ent.intEntityId
-				,vwcus_phone2 =  F.strPhone
+				,vwcus_phone2 =  F.strPhone COLLATE Latin1_General_CI_AS
 				,vwcus_balance = ISNULL(CI.dblTotalDue,0.0)
 				,vwcus_ptd_sls = ISNULL(CI.dblYTDSales,0.0)
 				,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
-				,vwcus_acct_stat_x_1 = STATUSCODES.strAccountStatusCode
+				,vwcus_acct_stat_x_1 = STATUSCODES.strAccountStatusCode COLLATE Latin1_General_CI_AS  
 				,dblFutureCurrent = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl0Days,0.0)
 				,intConcurrencyId = 0
-				,strFullLocation =  ISNULL(Loc.strLocationName ,'''')
+				,strFullLocation =  ISNULL(Loc.strLocationName ,'''') COLLATE Latin1_General_CI_AS
 				,intTaxId = CAST(NULL AS INT)
 				,ysnOriginIntegration = CAST(0 AS BIT)
 				,strFullCustomerName = Ent.strName
 				,intCustomerPricingLevel = Cus.intCompanyLocationPricingLevelId
-				,strCustomerContactEmail = Con.strEmail
+				,strCustomerContactEmail = Con.strEmail 
 				,dtmLastInvoiceRevisedDate = (SELECT TOP 1 dtmDate FROM tblARInvoice WHERE intEntityId = Ent.intEntityId AND strTransactionType = ''Invoice'' ORDER BY dtmDate DESC)
 				,dtmLastPaymentRevisedDate = CI.dtmLastPaymentDate
 				,dtmLastStatementRevDate = CI.dtmLastStatementDate
@@ -409,7 +409,7 @@ BEGIN
 				,strFormattedAddress =  ISNULL(Loc.strAddress,'''') COLLATE Latin1_General_CI_AS
 				,strFullName = Ent.strName
 				,strFullTermName = (CAST(ISNULL(T.intTermID,'''') AS NVARCHAR(10)) + '' - '' + ISNULL(T.strTerm,'''')) COLLATE Latin1_General_CI_AS
-				,strCreditNote =''''
+				,strCreditNote ='''' COLLATE Latin1_General_CI_AS
 			FROM tblEMEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityId

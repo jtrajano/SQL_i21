@@ -5,7 +5,7 @@ SELECT
 	,strBillToCustomerName = J.strName
 	,strSiteCustomerNo = F.strEntityNo
 	,strSiteCustomerName = F.strName
-	,intSiteNumber =  RIGHT('0000'+CAST(D.intSiteNumber AS VARCHAR(4)),4)
+	,intSiteNumber =  RIGHT('0000'+CAST(D.intSiteNumber AS VARCHAR(4)),4) COLLATE Latin1_General_CI_AS  
 	,strSiteDescription = D.strDescription
 	,strSiteAddress = D.strSiteAddress
 	,strSiteLocation = K.strLocationName
@@ -28,13 +28,13 @@ SELECT
                 ELSE
                     I.strTaxGroup
                 END)
-	,strSiteLocale1 = ''
-	,strSiteLocale2 = ''
+	,strSiteLocale1 = ''  COLLATE Latin1_General_CI_AS  
+	,strSiteLocale2 = '' COLLATE Latin1_General_CI_AS  
 	,intSiteDeviceId = A.intSiteDeviceID
 	,intConcurrencyId = A.intConcurrencyId
 	,intEntityCustomerId = F.intEntityId
 	,intCompanyLocation = D.intLocationId
-	,strReason = O.strStatus
+	,strReason = O.strStatus  COLLATE Latin1_General_CI_AS  
 	,intItemId = G.intItemId
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B

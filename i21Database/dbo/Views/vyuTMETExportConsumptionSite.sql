@@ -3,7 +3,7 @@ AS
 
 SELECT 
  dmpat = C.strEntityNo 
-,dmtank = REPLICATE('0',4-LEN(CAST(intSiteNumber AS NVARCHAR))) + CAST(intSiteNumber AS NVARCHAR)
+,dmtank = REPLICATE('0',4-LEN(CAST(intSiteNumber AS NVARCHAR))) + CAST(intSiteNumber AS NVARCHAR)  COLLATE Latin1_General_CI_AS 
 ,dbtype = 0
 ,dmdriv = RIGHT(D.strEntityNo, 3)
 ,rmrte =  G.strRouteId
@@ -17,7 +17,7 @@ SELECT
 ,dmusab = ISNULL(A.dblTotalCapacity,0)
 ,ddkfac = ISNULL(A.dblBurnRate,0.00) 
 ,ddwill = LEFT(ISNULL(E.strFillMethod,''), 1)
-,dmdate = ISNULL(CONVERT(VARCHAR,A.dtmLastDeliveryDate,112),'00000000')
+,dmdate = ISNULL(CONVERT(VARCHAR,A.dtmLastDeliveryDate,112),'00000000')  COLLATE Latin1_General_CI_AS 
 ,dmetype =	CASE (SELECT TOP 1 strOwnership FROM tblTMDevice WHERE intDeviceId IN 
 					(SELECT intDeviceId FROM tblTMSiteDevice WHERE intSiteID =A.intSiteID))
 			WHEN 'Company Owned' THEN
@@ -32,7 +32,7 @@ SELECT
 				'R'
 			ELSE
 				''
-			END
+			END  COLLATE Latin1_General_CI_AS 
 ,dmserl = ISNULL((SELECT TOP 1 strSerialNumber FROM tblTMDevice WHERE intDeviceId IN 
 				(SELECT intDeviceId FROM tblTMSiteDevice WHERE intSiteID = A.intSiteID) 
 				and ysnAppliance = 0 
@@ -46,11 +46,11 @@ SELECT
 			ISNULL(CONVERT(VARCHAR,dtmLastDeliveryDate,112),'00000000') 
 		 END
 ,dmuse = LEFT(ISNULL(A.strAcctStatus,''),3)
-,dmprcd = ''
+,dmprcd = ''  COLLATE Latin1_General_CI_AS 
 ,dmcomm = ISNULL(F.strItemNo,'')
 ,dbcoun = ISNULL(A.strCountry,'')
 ,dmtwns = ISNULL((SELECT strTankTownship FROM tblTMTankTownship WHERE intTankTownshipId = A.intTankTownshipId),'')
-,dmrtpr = ''
+,dmrtpr = ''  COLLATE Latin1_General_CI_AS 
 ,dmrtsq = CASE WHEN ISNUMERIC(CAST(A.strSequenceID AS NVARCHAR(50))) = 1 THEN LEFT(CAST(ISNULL(A.strSequenceID,0) AS NUMERIC(18,0)),5) ELSE 0 END
 ,dmtref = 0
 FROM tblTMSite A

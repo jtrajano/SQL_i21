@@ -67,7 +67,7 @@ BEGIN
 					,strPhoneNumber = B.vwcus_phone 
 					,strCustomerNumber = B.vwcus_key 
 					,strCustomerZipCode = B.vwcus_zip 
-					,strTaxState = ISNULL(K.vwlcl_tax_state, B.vwcus_tax_state)
+					,strTaxState = ISNULL(K.vwlcl_tax_state, B.vwcus_tax_state) COLLATE Latin1_General_CI_AS
 					,dblCreditLimit =  CAST(B.vwcus_cred_limit AS NUMERIC(18,6))
 					,dblCustomerPer1 = CAST(B.vwcus_ar_per1 AS NUMERIC(18,6))
 					,dblLastStatementBalance = CAST(B.vwcus_last_stmt_bal AS NUMERIC(18,6))
@@ -109,11 +109,11 @@ BEGIN
 					,dblEstimatedPercentLeft = (C.dblEstimatedPercentLeft / 100)
 					,C.dtmNextDeliveryDate
 					,intNextDeliveryDegreeDay = ISNULL(C.intNextDeliveryDegreeDay, 0)
-					,SiteLabel = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN ''Date'' ELSE ''DD'' END)
+					,SiteLabel = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN ''Date'' ELSE ''DD'' END) COLLATE Latin1_General_CI_AS
 					,SiteDeliveryDD = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL 
 											THEN CONVERT (VARCHAR,C.dtmNextDeliveryDate, 101) 
 											ELSE CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20)) 
-										END)
+										END) COLLATE Latin1_General_CI_AS
 					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
 										THEN ISNULL(C.dblSummerDailyUse,0.0) 
 										ELSE ISNULL(C.dblWinterDailyUse,0.0)
@@ -123,8 +123,8 @@ BEGIN
 					,F.dtmRequestedDate
 					,strDispatchComment = F.strComments
 					,C.intFillMethodId
-					,strDriverName = J.vwsls_name 
-					,strDriverID = J.vwsls_slsmn_id
+					,strDriverName = J.vwsls_name COLLATE Latin1_General_CI_AS
+					,strDriverID = J.vwsls_slsmn_id COLLATE Latin1_General_CI_AS
 					,strFillMethod = O.strFillMethod
 					,strProductID = ISNULL (M.vwitm_no, G.vwitm_no)
 					,strProductDescription = ISNULL(M.vwitm_desc, G.vwitm_desc)
@@ -136,10 +136,10 @@ BEGIN
 					,F.dtmCallInDate
 					,strEnteredBy = N.strUserName 
 					,F.intUserID
-					,strTermDescription = I.vwtrm_desc
+					,strTermDescription = I.vwtrm_desc COLLATE Latin1_General_CI_AS
 					,strTermId = I.vwtrm_key_n 
 					,Z.strCompanyName
-					,strPriceLevelName = CAST(B.vwcus_prc_lvl AS NVARCHAR(50))
+					,strPriceLevelName = CAST(B.vwcus_prc_lvl AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 					,strBetweenDlvry = (CASE WHEN O.strFillMethod = ''Julian Calendar'' THEN R.strDescription
 							ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
 						END)  
@@ -205,7 +205,7 @@ BEGIN
 					,strPhoneNumber = B.vwcus_phone 
 					,strCustomerNumber = B.vwcus_key 
 					,strCustomerZipCode = B.vwcus_zip 
-					,strTaxState = ISNULL(K.strTaxGroup, B.vwcus_tax_state)
+					,strTaxState = ISNULL(K.strTaxGroup, B.vwcus_tax_state) COLLATE Latin1_General_CI_AS
 					,dblCreditLimit =  CAST(B.vwcus_cred_limit AS NUMERIC(18,6))
 					,dblCustomerPer1 = CAST(B.vwcus_ar_per1 AS NUMERIC(18,6))
 					,dblLastStatementBalance = CAST(B.vwcus_last_stmt_bal AS NUMERIC(18,6))
@@ -247,11 +247,11 @@ BEGIN
 					,dblEstimatedPercentLeft = (C.dblEstimatedPercentLeft / 100)
 					,C.dtmNextDeliveryDate
 					,intNextDeliveryDegreeDay = ISNULL(C.intNextDeliveryDegreeDay, 0)
-					,SiteLabel = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN ''Date'' ELSE ''DD'' END)
+					,SiteLabel = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN ''Date'' ELSE ''DD'' END) COLLATE Latin1_General_CI_AS
 					,SiteDeliveryDD = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL 
 											THEN CONVERT (VARCHAR,C.dtmNextDeliveryDate, 101) 
 											ELSE CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20)) 
-										END)
+										END) COLLATE Latin1_General_CI_AS
 					,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
 										THEN ISNULL(C.dblSummerDailyUse,0.0) 
 										ELSE ISNULL(C.dblWinterDailyUse,0.0)

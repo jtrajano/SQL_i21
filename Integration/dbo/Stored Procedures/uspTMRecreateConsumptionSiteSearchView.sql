@@ -55,7 +55,7 @@ BEGIN
 				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
 				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
 				,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
-				,strContactEmailAddress = ''''
+				,strContactEmailAddress = '''' COLLATE Latin1_General_CI_AS      
 				,strFillGroup = K.strFillGroupCode
 				,strFillDescription = K.strDescription
 				,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
@@ -63,13 +63,13 @@ BEGIN
 				,A.dtmOnHoldStartDate
 				,A.dtmOnHoldEndDate
 				,dblCreditLimit = C.vwcus_cred_limit
-				,strTerm = M.vwtrm_desc
+				,strTerm = M.vwtrm_desc COLLATE Latin1_General_CI_AS      
 				,A.strInstruction
-				,strDriverId = O.vwsls_slsmn_id
+				,strDriverId = O.vwsls_slsmn_id COLLATE Latin1_General_CI_AS      
 				,P.strRouteId
 				,A.dblTotalCapacity
 				,A.ysnTaxable
-				,strTaxGroup = Q.vwlcl_tax_state
+				,strTaxGroup = Q.vwlcl_tax_state COLLATE Latin1_General_CI_AS      
 				,strDeviceOwnership = J.strOwnership
 				,A.strZipCode
 				,strGlobalJulianCalendar = R.strDescription
@@ -86,7 +86,7 @@ BEGIN
 				,A.dblSummerDailyUse
 				,A.dblWinterDailyUse
 				,A.ysnAdjustBurnRate
-				,strPricingLevelName = ''''
+				,strPricingLevelName = '''' COLLATE Latin1_General_CI_AS      
 				,A.dblPriceAdjustment
 				,T.strClockNumber
 				,A.strClassFillOption
@@ -167,7 +167,7 @@ BEGIN
 				,dtmLastDeliveryDate = A.dtmLastDeliveryDate
 				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
 				,dblEstimatedPercentLeft = ISNULL(A.dblEstimatedPercentLeft,0.0)
-				,strContactEmailAddress = G.strEmail
+				,strContactEmailAddress = G.strEmail COLLATE Latin1_General_CI_AS      
 				,strFillGroup = K.strFillGroupCode
 				,strFillDescription = K.strDescription
 				,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
@@ -175,13 +175,13 @@ BEGIN
 				,A.dtmOnHoldStartDate
 				,A.dtmOnHoldEndDate
 				,D.dblCreditLimit
-				,strTerm = M.strTerm
+				,strTerm = M.strTerm COLLATE Latin1_General_CI_AS      
 				,A.strInstruction
-				,strDriverId = O.strEntityNo
+				,strDriverId = O.strEntityNo COLLATE Latin1_General_CI_AS      
 				,P.strRouteId
 				,A.dblTotalCapacity
 				,A.ysnTaxable
-				,Q.strTaxGroup
+				,Q.strTaxGroup COLLATE Latin1_General_CI_AS      
 				,strDeviceOwnership = J.strOwnership
 				,A.strZipCode
 				,strGlobalJulianCalendar = R.strDescription
@@ -198,7 +198,7 @@ BEGIN
 				,A.dblSummerDailyUse
 				,A.dblWinterDailyUse
 				,A.ysnAdjustBurnRate
-				,S.strPricingLevelName
+				,S.strPricingLevelName COLLATE Latin1_General_CI_AS      
 				,A.dblPriceAdjustment
 				,T.strClockNumber
 				,A.strClassFillOption

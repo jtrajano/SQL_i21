@@ -50,13 +50,13 @@ BEGIN
 					SELECT
 						A4GLIdentity		=CAST(A4GLIdentity   AS INT)
 						,vwctl_key			=CAST (agctl_key AS INT)
-						,vwcar_per1_desc	=CAST(agcar_per1_desc AS CHAR(20))
-						,vwcar_per2_desc	=CAST(agcar_per2_desc AS CHAR(20))
-						,vwcar_per3_desc	=CAST(agcar_per3_desc AS CHAR(20))
-						,vwcar_per4_desc	=CAST(agcar_per4_desc AS CHAR(20))
-						,vwcar_per5_desc	=CAST(agcar_per5_desc AS CHAR(20))
-						,vwcar_future_desc	=agcar_future_desc	
-						,vwctl_sa_cost_ind	=agctl_sa_cost_ind
+						,vwcar_per1_desc	=CAST(agcar_per1_desc AS CHAR(20)) COLLATE Latin1_General_CI_AS
+						,vwcar_per2_desc	=CAST(agcar_per2_desc AS CHAR(20)) COLLATE Latin1_General_CI_AS
+						,vwcar_per3_desc	=CAST(agcar_per3_desc AS CHAR(20)) COLLATE Latin1_General_CI_AS
+						,vwcar_per4_desc	=CAST(agcar_per4_desc AS CHAR(20)) COLLATE Latin1_General_CI_AS
+						,vwcar_per5_desc	=CAST(agcar_per5_desc AS CHAR(20)) COLLATE Latin1_General_CI_AS
+						,vwcar_future_desc	=agcar_future_desc	COLLATE Latin1_General_CI_AS
+						,vwctl_sa_cost_ind	=agctl_sa_cost_ind COLLATE Latin1_General_CI_AS
 						,vwctl_stmt_close_rev_dt =(SELECT agctl_stmt_close_rev_dt FROM agctlmst WHERE agctl_key=1)
 					FROM agctlmst
 				
@@ -71,13 +71,13 @@ BEGIN
 					SELECT
 						A4GLIdentity		=CAST(A4GLIdentity   AS INT)
 						,vwctl_key			=CAST(ptctl_key AS INT)
-						,vwcar_per1_desc	=CAST(pt4cf_per_desc_1 AS CHAR(20))
-						,vwcar_per2_desc	=CAST(pt4cf_per_desc_2 AS CHAR(20)) 
-						,vwcar_per3_desc	=CAST(pt4cf_per_desc_3 AS CHAR(20))
-						,vwcar_per4_desc	=CAST(pt4cf_per_desc_4 AS CHAR(20))
-						,vwcar_per5_desc	=CAST(pt4cf_per_desc_5 AS CHAR(20))  
-						,vwcar_future_desc	=CAST(NULL AS CHAR(12)) 	
-						,vwctl_sa_cost_ind	=CAST(pt4cf_per_desc_1 AS CHAR(1))
+						,vwcar_per1_desc	=CAST(pt4cf_per_desc_1 AS CHAR(20)) COLLATE Latin1_General_CI_AS
+						,vwcar_per2_desc	=CAST(pt4cf_per_desc_2 AS CHAR(20))  COLLATE Latin1_General_CI_AS
+						,vwcar_per3_desc	=CAST(pt4cf_per_desc_3 AS CHAR(20)) COLLATE Latin1_General_CI_AS
+						,vwcar_per4_desc	=CAST(pt4cf_per_desc_4 AS CHAR(20)) COLLATE Latin1_General_CI_AS
+						,vwcar_per5_desc	=CAST(pt4cf_per_desc_5 AS CHAR(20))  COLLATE Latin1_General_CI_AS 
+						,vwcar_future_desc	=CAST(NULL AS CHAR(12)) COLLATE Latin1_General_CI_AS 	
+						,vwctl_sa_cost_ind	=CAST(pt4cf_per_desc_1 AS CHAR(1))  COLLATE Latin1_General_CI_AS
 						,vwctl_stmt_close_rev_dt =pt3cf_eom_business_rev_dt
 					FROM ptctlmst
 				
@@ -92,13 +92,13 @@ BEGIN
 			SELECT
 				A4GLIdentity		= 1
 				,vwctl_key			= 1
-				,vwcar_per1_desc	= ''Current''
-				,vwcar_per2_desc	= ''11-30 Days''
-				,vwcar_per3_desc	= ''31-60 Days''
-				,vwcar_per4_desc	= ''61-90 Days''
-				,vwcar_per5_desc	= ''Over 90 Days''
-				,vwcar_future_desc	= ''Future''
-				,vwctl_sa_cost_ind	= ''''
+				,vwcar_per1_desc	= ''Current''  COLLATE Latin1_General_CI_AS
+				,vwcar_per2_desc	= ''11-30 Days'' COLLATE Latin1_General_CI_AS
+				,vwcar_per3_desc	= ''31-60 Days'' COLLATE Latin1_General_CI_AS
+				,vwcar_per4_desc	= ''61-90 Days'' COLLATE Latin1_General_CI_AS
+				,vwcar_per5_desc	= ''Over 90 Days'' COLLATE Latin1_General_CI_AS
+				,vwcar_future_desc	= ''Future'' COLLATE Latin1_General_CI_AS
+				,vwctl_sa_cost_ind	= ''''  COLLATE Latin1_General_CI_AS
 				,vwctl_stmt_close_rev_dt = 0
 		')
 	END

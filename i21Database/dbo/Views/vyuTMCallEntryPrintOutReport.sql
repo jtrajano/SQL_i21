@@ -39,7 +39,7 @@ SELECT
 	,strZipCode = (CASE WHEN C.strState IS NOT NULL AND C.strCity IS NOT NULL AND C.strSiteAddress IS NOT NULL
 						THEN ' ' + C.strZipCode 
 						ELSE C.strZipCode 
-				END) 
+				END) COLLATE Latin1_General_CI_AS
 	,strSiteComment = C.strComment
 	,C.strInstruction
 	,C.dblDegreeDayBetweenDelivery
@@ -53,11 +53,11 @@ SELECT
 	,dblEstimatedPercentLeft = (C.dblEstimatedPercentLeft / 100)
 	,C.dtmNextDeliveryDate
 	,intNextDeliveryDegreeDay = ISNULL(C.intNextDeliveryDegreeDay, 0)
-    ,SiteLabel = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN 'Date' ELSE 'DD' END)
+    ,SiteLabel = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN 'Date' ELSE 'DD' END) COLLATE Latin1_General_CI_AS
 	,SiteDeliveryDD = (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL 
 							THEN CONVERT (VARCHAR,C.dtmNextDeliveryDate, 101) 
 							ELSE CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20)) 
-						END)
+						END) COLLATE Latin1_General_CI_AS
     ,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
 						THEN ISNULL(C.dblSummerDailyUse,0.0) 
 						ELSE ISNULL(C.dblWinterDailyUse,0.0)
@@ -81,12 +81,12 @@ SELECT
 	,strEnteredBy = N.strUserName 
 	,F.intUserID
 	,strTermDescription = I.strTerm
-	,strTermId = CAST(I.intTermID AS NVARCHAR(8)) 
+	,strTermId = CAST(I.intTermID AS NVARCHAR(8)) COLLATE Latin1_General_CI_AS
 	,Z.strCompanyName
 	,strPriceLevelName = Q.strPricingLevelName
 	,strBetweenDlvry = (CASE WHEN O.strFillMethod = 'Julian Calendar' THEN R.strDescription
 							ELSE CAST((CONVERT(NUMERIC(18,2),C.dblDegreeDayBetweenDelivery)) AS NVARCHAR(10))
-						END)  
+						END) COLLATE Latin1_General_CI_AS  
 	,dblNextDeliveryGallons = ISNULL(C.dblLastGalsInTank,0.0) - ISNULL(C.dblEstimatedGallonsLeft,0.0)
 	,strRecurringPONumber = C.strRecurringPONumber
 	,ysnOnHold = CAST(ISNULL(C.ysnOnHold,0) AS BIT)

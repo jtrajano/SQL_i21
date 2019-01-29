@@ -3,8 +3,8 @@ AS
 
 SELECT  
 	 dipat = C.strEntityNo
-	,diseq = REPLICATE('0',4 - LEN(CAST(intSiteNumber AS NVARCHAR))) + CAST(intSiteNumber AS NVARCHAR)
-	,ditype = 'S'
+	,diseq = REPLICATE('0',4 - LEN(CAST(intSiteNumber AS NVARCHAR))) + CAST(intSiteNumber AS NVARCHAR) COLLATE Latin1_General_CI_AS 
+	,ditype = 'S' COLLATE Latin1_General_CI_AS 
 	,diinfo = ISNULL(A.strSiteAddress,'') + ' ' + ISNULL(A.strCity,'')+',' + ISNULL(A.strState,'') + ' ' + ISNULL(A.strZipCode,'')
 	
 FROM tblTMSite A	

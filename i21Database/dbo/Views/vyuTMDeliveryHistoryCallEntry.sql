@@ -6,7 +6,7 @@ AS
 		,strCustomerName = D.strName
 		,strSiteDescription = B.strDescription
 		,strSiteAddress = B.strSiteAddress
-		,strSiteNumber = RIGHT('000'+ CAST(B.intSiteNumber AS NVARCHAR(4)),4)
+		,strSiteNumber = RIGHT('000'+ CAST(B.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS
 		,strOrderNumber = A.strWillCallOrderNumber
 		,strProduct = COALESCE(F.strDescription,E.strDescription)
 		,strDriverName = G.strName
@@ -16,10 +16,10 @@ AS
 		,dblPrice = A.dblWillCallPrice
 		,dblTotal = A.dblWillCallTotal
 		,dtmRequestedDate = A.dtmWillCallRequestedDate
-		,strPrinted = CASE WHEN ISNULL(A.ysnWillCallPrinted,0) = 0 THEN 'No' ELSE 'YES' END
+		,strPrinted = CASE WHEN ISNULL(A.ysnWillCallPrinted,0) = 0 THEN 'No' ELSE 'YES' END COLLATE Latin1_General_CI_AS
 		,intPriority = A.intWillCallPriority
 		,strComments = A.strWillCallComments
-		,strOrderStatus = 'Completed'
+		,strOrderStatus = 'Completed'  COLLATE Latin1_General_CI_AS
 		,dtmCallInDate = A.dtmWillCallCallInDate
 		,dtmDispatchedDate = A.dtmWillCallDispatch
 		,intConcurrencyId = A.intConcurrencyId

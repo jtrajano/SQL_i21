@@ -69,12 +69,12 @@ SELECT
 							'Date'
 						ELSE
 							'DD'
-						END)
+						END) COLLATE Latin1_General_CI_AS  
 	,strSiteDeliveryDD= (CASE WHEN C.dtmNextDeliveryDate IS NOT NULL THEN
 							CONVERT(VARCHAR,C.dtmNextDeliveryDate,101)
 						ELSE
 							CAST(C.intNextDeliveryDegreeDay AS NVARCHAR(20))
-						END) 
+						END)  COLLATE Latin1_General_CI_AS  
 	,dblDailyUse = (CASE WHEN MONTH(GETDATE()) >= H.intBeginSummerMonth AND  MONTH(GETDATE()) < H.intBeginWinterMonth
 						THEN ISNULL(C.dblSummerDailyUse,0.0) 
 						ELSE ISNULL(C.dblWinterDailyUse,0.0)

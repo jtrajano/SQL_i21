@@ -3,7 +3,7 @@ AS
 
 SELECT
 	ISNULL(E.strEntityNo,'') CustomerNumber
-	,REPLICATE('0',4-LEN(CAST(C.intSiteNumber  AS NVARCHAR(20)))) + CAST(C.intSiteNumber  AS NVARCHAR(20)) ConsumptionSiteNumber
+	,REPLICATE('0',4-LEN(CAST(C.intSiteNumber  AS NVARCHAR(20)))) + CAST(C.intSiteNumber  AS NVARCHAR(20)) COLLATE Latin1_General_CI_AS  ConsumptionSiteNumber
 	,CASE WHEN ISNULL(C.intSiteID,0)=0  THEN NULL ELSE ROW_NUMBER() OVER (PARTITION BY C.intSiteID ORDER BY A.intDeviceId DESC) END AS DeviceNumber
 	,ISNULL(F.strDeviceType,'') DeviceType
 	,ISNULL((SELECT strInventoryStatusType FROM tblTMInventoryStatusType WHERE intInventoryStatusTypeId=A.intInventoryStatusTypeId),'') InventoryStatus	
@@ -16,9 +16,9 @@ SELECT
 	,ISNULL(A.strComment,'') Comment
 	,ISNULL(A.strOwnership,'') [Ownership]
 	,ISNULL(A.strAssetNumber,'') AssetNumber
-	,ISNULL(CONVERT(VARCHAR(10),A.dtmPurchaseDate, 101),'') PurchaseDate
+	,ISNULL(CONVERT(VARCHAR(10),A.dtmPurchaseDate, 101),'') COLLATE Latin1_General_CI_AS  PurchaseDate
 	,ISNULL(A.dblPurchasePrice,0) PurchasePrice
-	,ISNULL(CONVERT(VARCHAR(10),A.dtmManufacturedDate, 101),'') ManufacturedDate
+	,ISNULL(CONVERT(VARCHAR(10),A.dtmManufacturedDate, 101),'') COLLATE Latin1_General_CI_AS  ManufacturedDate
 	,ISNULL(G.strSerialNumber,'') InstalledonTank
 	,ISNULL(H.strLeaseNumber,'') LeaseNumber
 	,0 TankSize
@@ -26,7 +26,7 @@ SELECT
 	,ISNULL(A.dblTankReserve,0.0) TankReserve
 	,ISNULL(I.strTankType,'') TankType
 	,ISNULL(A.dblEstimatedGalTank,0) EstimatedGallonsinTank
-	,CASE ISNULL(A.ysnUnderground,0) WHEN 1 THEN 'Yes' ELSE 'No' END Underground
+	,CASE ISNULL(A.ysnUnderground,0) WHEN 1 THEN 'Yes' ELSE 'No' END COLLATE Latin1_General_CI_AS  Underground
 	,ISNULL(J.strRegulatorType,'') RegulatorType
 	,ISNULL(K.strMeterType,'') MeterType
 	,ISNULL(A.intMeterCycle,0) MeterCycle

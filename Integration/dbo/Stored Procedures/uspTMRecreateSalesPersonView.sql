@@ -48,15 +48,15 @@ BEGIN
 					CREATE VIEW [dbo].[vwslsmst]  
 					AS  
 					SELECT   	  
-						vwsls_slsmn_id   = agsls_slsmn_id  
-						,vwsls_name    =  RTRIM(ISNULL(agsls_name, ''''))
-						,vwsls_addr1   = agsls_addr1  
-						,vwsls_addr2   = agsls_addr2  
-						,vwsls_city    = agsls_city  
-						,vwsls_state   = agsls_state  
-						,vwsls_zip    = agsls_zip  
-						,vwsls_country   = CAST(agsls_country AS CHAR(4))  
-						,vwsls_phone   = agsls_phone  
+						vwsls_slsmn_id   = agsls_slsmn_id  COLLATE Latin1_General_CI_AS    
+						,vwsls_name    =  RTRIM(ISNULL(agsls_name, '''')) COLLATE Latin1_General_CI_AS    
+						,vwsls_addr1   = agsls_addr1  COLLATE Latin1_General_CI_AS    
+						,vwsls_addr2   = agsls_addr2   COLLATE Latin1_General_CI_AS    
+						,vwsls_city    = agsls_city  COLLATE Latin1_General_CI_AS    
+						,vwsls_state   = agsls_state   COLLATE Latin1_General_CI_AS    
+						,vwsls_zip    = agsls_zip   COLLATE Latin1_General_CI_AS    
+						,vwsls_country   = CAST(agsls_country AS CHAR(4))   COLLATE Latin1_General_CI_AS    
+						,vwsls_phone   = agsls_phone   COLLATE Latin1_General_CI_AS    
 						,vwsls_sales_ty_1  = agsls_sales_ty_1  
 						,vwsls_sales_ty_2  = agsls_sales_ty_2  
 						,vwsls_sales_ty_3  = agsls_sales_ty_3  
@@ -105,10 +105,10 @@ BEGIN
 						,vwsls_profit_ly_10  = agsls_profit_ly_10  
 						,vwsls_profit_ly_11  = agsls_profit_ly_11  
 						,vwsls_profit_ly_12  = agsls_profit_ly_12  
-						,vwsls_email   = agsls_email  
-						,vwsls_textmsg_email = agsls_textmsg_email  
-						,vwsls_dispatch_email = CAST(agsls_dispatch_email AS CHAR(4))  
-						,vwsls_user_id   = agsls_user_id  
+						,vwsls_email   = agsls_email    COLLATE Latin1_General_CI_AS    
+						,vwsls_textmsg_email = agsls_textmsg_email   COLLATE Latin1_General_CI_AS    
+						,vwsls_dispatch_email = CAST(agsls_dispatch_email AS CHAR(4))  COLLATE Latin1_General_CI_AS    
+						,vwsls_user_id   = agsls_user_id   COLLATE Latin1_General_CI_AS    
 						,vwsls_user_rev_dt  = agsls_user_rev_dt  
 						,A4GLIdentity  = CAST(A4GLIdentity   AS INT)
 						,intConcurrencyId = 0
@@ -123,15 +123,15 @@ BEGIN
 					CREATE VIEW [dbo].[vwslsmst]  
 					AS  
 					SELECT  
-						vwsls_slsmn_id   = ptsls_slsmn_id  
-						,vwsls_name    =  RTRIM(ISNULL(ptsls_name, ''''))
-						,vwsls_addr1   = ptsls_addr1  
-						,vwsls_addr2   = ptsls_addr2  
-						,vwsls_city    = ptsls_city  
-						,vwsls_state   = ptsls_state  
-						,vwsls_zip    = ptsls_zip  
-						,vwsls_country   = CAST(NULL AS CHAR(4))
-						,vwsls_phone   = CAST(ptsls_phone AS CHAR(15))  
+						vwsls_slsmn_id   = ptsls_slsmn_id   COLLATE Latin1_General_CI_AS     
+						,vwsls_name    =  RTRIM(ISNULL(ptsls_name, '''')) COLLATE Latin1_General_CI_AS    
+						,vwsls_addr1   = ptsls_addr1  COLLATE Latin1_General_CI_AS    
+						,vwsls_addr2   = ptsls_addr2   COLLATE Latin1_General_CI_AS    
+						,vwsls_city    = ptsls_city  COLLATE Latin1_General_CI_AS    
+						,vwsls_state   = ptsls_state   COLLATE Latin1_General_CI_AS    
+						,vwsls_zip    = ptsls_zip   COLLATE Latin1_General_CI_AS    
+						,vwsls_country   = CAST(NULL AS CHAR(4))  COLLATE Latin1_General_CI_AS    
+						,vwsls_phone   = CAST(ptsls_phone AS CHAR(15))   COLLATE Latin1_General_CI_AS    
 						,vwsls_sales_ty_1  = ptsls_sales_ty_1  
 						,vwsls_sales_ty_2  = ptsls_sales_ty_2  
 						,vwsls_sales_ty_3  = ptsls_sales_ty_3  
@@ -180,10 +180,10 @@ BEGIN
 						,vwsls_profit_ly_10  = ptsls_profit_ly_10  
 						,vwsls_profit_ly_11  = ptsls_profit_ly_11  
 						,vwsls_profit_ly_12  = ptsls_profit_ly_12  
-						,vwsls_email   = CAST(ptsls_email AS CHAR(50))  
-						,vwsls_textmsg_email = CAST(ptsls_textmsg_email AS CHAR(50))  
-						,vwsls_dispatch_email = CAST(ptsls_dispatch_email AS CHAR(4))  
-						,vwsls_user_id   = CAST(NULL AS CHAR(16))  
+						,vwsls_email   = CAST(ptsls_email AS CHAR(50))     COLLATE Latin1_General_CI_AS    
+						,vwsls_textmsg_email = CAST(ptsls_textmsg_email AS CHAR(50))   COLLATE Latin1_General_CI_AS    
+						,vwsls_dispatch_email = CAST(ptsls_dispatch_email AS CHAR(4))  COLLATE Latin1_General_CI_AS    
+						,vwsls_user_id   = CAST(NULL AS CHAR(16))   COLLATE Latin1_General_CI_AS    
 						,vwsls_user_rev_dt  = 0   
 						,A4GLIdentity  = CAST(A4GLIdentity   AS INT)
 						,intConcurrencyId = 0
@@ -198,15 +198,15 @@ BEGIN
 			CREATE VIEW [dbo].[vwslsmst]
 			AS
 			SELECT  
-				vwsls_slsmn_id   = A.strEntityNo
-				,vwsls_name    =  A.strName
-				,vwsls_addr1   = B.strAddress
-				,vwsls_addr2   = ''''
-				,vwsls_city    = B.strCity
-				,vwsls_state   = B.strState
-				,vwsls_zip    = B.strZipCode
-				,vwsls_country   = B.strCountry
-				,vwsls_phone   = B.strPhone  
+				vwsls_slsmn_id   = A.strEntityNo   COLLATE Latin1_General_CI_AS    
+				,vwsls_name    =  A.strName COLLATE Latin1_General_CI_AS    
+				,vwsls_addr1   = B.strAddress COLLATE Latin1_General_CI_AS    
+				,vwsls_addr2   = '''' COLLATE Latin1_General_CI_AS    
+				,vwsls_city    = B.strCity COLLATE Latin1_General_CI_AS    
+				,vwsls_state   = B.strState COLLATE Latin1_General_CI_AS    
+				,vwsls_zip    = B.strZipCode  COLLATE Latin1_General_CI_AS    
+				,vwsls_country   = B.strCountry COLLATE Latin1_General_CI_AS    
+				,vwsls_phone   = B.strPhone   COLLATE Latin1_General_CI_AS    
 				,vwsls_sales_ty_1  = 0.0  
 				,vwsls_sales_ty_2  = 0.0
 				,vwsls_sales_ty_3  = 0.0
@@ -255,10 +255,10 @@ BEGIN
 				,vwsls_profit_ly_10  = 0.0
 				,vwsls_profit_ly_11  = 0.0
 				,vwsls_profit_ly_12  = 0.0
-				,vwsls_email   = E.strEmail
-				,vwsls_textmsg_email = ''''
-				,vwsls_dispatch_email = ''Y''
-				,vwsls_user_id   = ''''
+				,vwsls_email   = E.strEmail  COLLATE Latin1_General_CI_AS    
+				,vwsls_textmsg_email = '''' COLLATE Latin1_General_CI_AS    
+				,vwsls_dispatch_email = ''Y'' COLLATE Latin1_General_CI_AS    
+				,vwsls_user_id   = '''' COLLATE Latin1_General_CI_AS    
 				,vwsls_user_rev_dt  = 0   
 				,A4GLIdentity  = CAST(A.intEntityId   AS INT)
 				,intConcurrencyId = 0

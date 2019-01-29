@@ -13,7 +13,7 @@ BEGIN
 		AS
 		SELECT 
 		vwpye_amt	= agpye_amt
-		,vwpye_cus_no	=agpye_cus_no
+		,vwpye_cus_no	=agpye_cus_no COLLATE Latin1_General_CI_AS    
 		from
 		agpyemst
 		')
@@ -28,7 +28,7 @@ BEGIN
 		AS
 		SELECT 
 			vwpye_amt	= ptpye_amt
-			,vwpye_cus_no	=ptpye_cus_no
+			,vwpye_cus_no	=ptpye_cus_no COLLATE Latin1_General_CI_AS    
 			from
 			ptpyemst
 		')

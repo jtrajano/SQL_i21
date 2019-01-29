@@ -2,7 +2,7 @@
 AS  
 SELECT
 	strCustomerNumber = C.strEntityNo
-	,strSiteNumber = RIGHT('0000' + CAST(ISNULL(C.intSiteNumber,0)AS NVARCHAR(4)),4) 
+	,strSiteNumber = RIGHT('0000' + CAST(ISNULL(C.intSiteNumber,0)AS NVARCHAR(4)),4)  COLLATE Latin1_General_CI_AS 
 	,strItemDescription = C.strItemDescription
 	,strItemNumber = C.strItemNo
 	,strSiteDescription = C.strSiteDescription
