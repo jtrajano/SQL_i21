@@ -24,7 +24,7 @@ SELECT
 	,ISNULL(RTRIM(LTRIM(F.strItemNo)),'') Product
 	,CASE ISNULL(A.ysnTaxable,0) WHEN 1 THEN 'Yes' ELSE 'No' END COLLATE Latin1_General_CI_AS SalesTax
 	,ISNULL(LEFT(G.strTaxGroup,2),'') COLLATE Latin1_General_CI_AS TaxStateID
-	,ISNULL(G.intTaxGroupId,'') COLLATE Latin1_General_CI_AS TaxLocale1
+	,ISNULL(G.intTaxGroupId,'') TaxLocale1
 	,''  COLLATE Latin1_General_CI_AS TaxLocale2
 	,CASE A.intDeliveryTermID WHEN NULL THEN
 			ISNULL(C.strTermCode,'')
