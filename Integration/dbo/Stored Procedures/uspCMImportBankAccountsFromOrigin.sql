@@ -64,6 +64,7 @@ BEGIN
 										INNER JOIN tblGLAccountSegmentMapping ASM ON gl.intAccountId = ASM.intAccountId)
 
 		-- INSERT new records for tblCMBank
+		BEGIN TRY
 		INSERT INTO tblCMBank (
 				strBankName
 				,strContact
@@ -259,7 +260,18 @@ BEGIN
 			SELECT REPLICATE(''0'',  9 -  LEN(substring(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 15))) + 
 			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'',RoutingNumber.Text), 15) Value
 		)LeadingZero
-		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)'
+		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)
+		END TRY
+		BEGIN CATCH
+			DECLARE @intError INT ,@error nvarchar(max) 
+			SELECT @error = ERROR_MESSAGE(), @intError= @@ERROR
+			--INSERT INTO tblCMImportErrorLogs( intEntityId, strDescription, dtmDate,strEvent)
+			--			SELECT 1, @error, GETDATE(),''Importing Bank Accounts''
+			IF @intError = 2627
+				SELECT @error = right(@error,LEN(@error)- CHARINDEX(''.'', @error, 0))
+			
+			RAISERROR (@error,16, 1) 
+		END CATCH'
 	)
 END 
 GO
