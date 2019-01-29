@@ -133,7 +133,7 @@ BEGIN
 		,@EntityCustomerId			= LD.intCustomerEntityId
 		,@CompanyLocationId			= LD.intSCompanyLocationId 	
 		,@AccountId					= NULL
-		,@CurrencyId				= L.intCurrencyId
+		,@CurrencyId				= CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) ELSE L.intCurrencyId END
 		,@TermId					= NULL
 		,@SourceId					= @intLoadId
 		,@PeriodsToAccrue			= 1
@@ -193,6 +193,7 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	INNER JOIN [tblARCustomer] ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
 	WHERE L.intLoadId = @intLoadId
 
