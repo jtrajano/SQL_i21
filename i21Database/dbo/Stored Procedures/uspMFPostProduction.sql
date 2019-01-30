@@ -164,20 +164,20 @@ BEGIN
 
 		SET @dblNewCost = ABS(@dblNewCost)
 
-		--For Blend use WorkOrder Qty
-		IF EXISTS (
-				SELECT 1
-				FROM tblMFWorkOrder w
-				JOIN tblMFManufacturingProcess mp ON w.intManufacturingProcessId = mp.intManufacturingProcessId
-				WHERE w.intWorkOrderId = @intWorkOrderId
-					AND mp.intAttributeTypeId = 2
-				)
-			SET @dblNewUnitCost = ABS(@dblNewCost) / (
-					SELECT dblQuantity
-					FROM tblMFWorkOrder
-					WHERE intWorkOrderId = @intWorkOrderId
-					)
-		ELSE
+		----For Blend use WorkOrder Qty
+		--IF EXISTS (
+		--		SELECT 1
+		--		FROM tblMFWorkOrder w
+		--		JOIN tblMFManufacturingProcess mp ON w.intManufacturingProcessId = mp.intManufacturingProcessId
+		--		WHERE w.intWorkOrderId = @intWorkOrderId
+		--			AND mp.intAttributeTypeId = 2
+		--		)
+		--	SET @dblNewUnitCost = ABS(@dblNewCost) / (
+		--			SELECT dblQuantity
+		--			FROM tblMFWorkOrder
+		--			WHERE intWorkOrderId = @intWorkOrderId
+		--			)
+		--ELSE
 			SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
 	END
 END
