@@ -39,7 +39,7 @@ BEGIN
 		SELECT c.intCollateralId
 			, cl.strLocationName
 			, c.strCustomer
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.strContractNumber
 			, c.dtmOpenDate
 			, isnull(c.dblOriginalQuantity,0.0) dblOriginalQuantity
@@ -57,7 +57,7 @@ BEGIN
 		SELECT c.intCollateralId
 			, cl.strLocationName
 			, c.strCustomer
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.strContractNumber
 			, c.dtmOpenDate
 			, isnull(c.dblOriginalQuantity,0.0) dblOriginalQuantity

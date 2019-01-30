@@ -196,7 +196,7 @@ WITH InHouse AS (
 		, cl.strLocationName
 		, ch.strItemNo
 		, ch.strEntityName
-		, c.intReceiptNo
+		, c.strReceiptNo
 		, ch.intContractHeaderId
 		, strContractNumber
 		, c.dtmOpenDate

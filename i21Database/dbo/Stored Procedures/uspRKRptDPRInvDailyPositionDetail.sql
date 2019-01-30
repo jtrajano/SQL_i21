@@ -94,7 +94,7 @@ DECLARE @FinalTable AS TABLE (intRow INT
 		, intCollateralId INT
 		, strLocationName NVARCHAR(250)
 		, strCustomerName NVARCHAR(250)
-		, intReceiptNo NVARCHAR(250)
+		, strReceiptNo NVARCHAR(250)
 		, intContractHeaderId INT
 		, strContractNumber NVARCHAR(100)
 		, strCustomerReference NVARCHAR(100)
@@ -149,7 +149,7 @@ INSERT INTO @FinalTable(
 			, intCollateralId
 			, strLocationName
 			, strCustomerName
-			, intReceiptNo
+			, strReceiptNo
 			, intContractHeaderId
 			, strContractNumber
 			, dtmOpenDate

@@ -69,7 +69,7 @@ BEGIN
 		, intCollateralId int
 		, strLocationName nvarchar(250) COLLATE Latin1_General_CI_AS
 		, strCustomer nvarchar(250) COLLATE Latin1_General_CI_AS
-		, intReceiptNo nvarchar(250) COLLATE Latin1_General_CI_AS
+		, strReceiptNo nvarchar(250) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId int
 		, strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS
 		, strCustomerReference nvarchar(100) COLLATE Latin1_General_CI_AS
@@ -111,7 +111,7 @@ BEGIN
 		, intCollateralId int
 		, strLocationName nvarchar(250) COLLATE Latin1_General_CI_AS
 		, strCustomer nvarchar(250) COLLATE Latin1_General_CI_AS
-		, intReceiptNo nvarchar(250) COLLATE Latin1_General_CI_AS
+		, strReceiptNo nvarchar(250) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId int
 		, strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS
 		, strCustomerReference nvarchar(100) COLLATE Latin1_General_CI_AS
@@ -371,7 +371,7 @@ BEGIN
 		, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intReceiptNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strReceiptNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId int
 		, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dtmOpenDate datetime
@@ -393,7 +393,7 @@ BEGIN
 			, cl.strLocationName
 			, ch.strItemNo
 			, ch.strEntityName
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.intContractHeaderId
 			, strContractNumber
 			,  c.dtmOpenDate
@@ -666,7 +666,7 @@ BEGIN
 					, strLocationName
 					, strItemNo
 					, strEntityName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -710,7 +710,7 @@ BEGIN
 					, strLocationName
 					, strItemNo
 					, strEntityName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate

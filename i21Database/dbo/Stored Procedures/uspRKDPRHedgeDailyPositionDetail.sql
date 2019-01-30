@@ -483,7 +483,7 @@ BEGIN
 			, ch.strItemNo
 			, ch.strCategory
 			, ch.strEntityName
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.intContractHeaderId
 			, strContractNumber
 			, c.dtmOpenDate

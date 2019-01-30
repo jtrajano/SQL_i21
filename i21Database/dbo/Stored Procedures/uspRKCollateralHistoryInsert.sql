@@ -19,7 +19,7 @@ IF @action = 'ADD' OR @action = 'DELETE'
 BEGIN
 	INSERT INTO tblRKCollateralHistory(
 		 intCollateralId
-		,intReceiptNo
+		,strReceiptNo
 		,dtmOpenDate
 		,strType
 		,intCommodityId
@@ -45,7 +45,7 @@ BEGIN
 	)
 	SELECT
 		 C.intCollateralId
-		,C.intReceiptNo
+		,C.strReceiptNo
 		,C.dtmOpenDate
 		,C.strType
 		,C.intCommodityId
@@ -92,7 +92,7 @@ BEGIN
 	BEGIN
 		INSERT INTO tblRKCollateralHistory(
 			 intCollateralId
-			,intReceiptNo
+			,strReceiptNo
 			,dtmOpenDate
 			,strType
 			,intCommodityId
@@ -118,7 +118,7 @@ BEGIN
 		)
 		SELECT
 			 C.intCollateralId
-			,C.intReceiptNo
+			,C.strReceiptNo
 			,C.dtmOpenDate
 			,C.strType
 			,C.intCommodityId
@@ -152,7 +152,7 @@ BEGIN
 	ELSE --For Update
 		INSERT INTO tblRKCollateralHistory(
 			 intCollateralId
-			,intReceiptNo
+			,strReceiptNo
 			,dtmOpenDate
 			,strType
 			,intCommodityId
@@ -178,7 +178,7 @@ BEGIN
 		)
 		SELECT
 			 C.intCollateralId
-			,C.intReceiptNo
+			,C.strReceiptNo
 			,C.dtmOpenDate
 			,C.strType
 			,C.intCommodityId
