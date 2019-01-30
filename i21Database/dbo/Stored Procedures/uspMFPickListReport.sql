@@ -470,7 +470,7 @@ Begin --Sales Order Pick List
 					,so.dtmDate
 					,so.dtmDueDate
 					,so.strComments AS strSOComments
-					,@strShipTo AS strShipTo
+					,@strShipTo + (CHAR(13) + c.strPhone) AS strShipTo
 					,c.strPhone
 					,@strCustomerComments
 					,@ysnShowCostInSalesOrderPickList
@@ -576,7 +576,7 @@ Begin --Sales Order Pick List
 			,so.dtmDate
 			,so.dtmDueDate
 			,so.strComments AS strSOComments
-			,@strShipTo + (CASE WHEN @intRecipeGuideId>0 THEN CHAR(13) + c.strPhone ELSE '' END) AS strShipTo
+			,@strShipTo + (CHAR(13) + c.strPhone) AS strShipTo
 			,c.strPhone
 			,@strCustomerComments
 			,@ysnShowCostInSalesOrderPickList
@@ -824,7 +824,7 @@ Begin --Sales Order Pick List
 								,so.dtmDate
 								,so.dtmDueDate
 								,so.strComments AS strSOComments
-								,@strShipTo AS strShipTo
+								,@strShipTo + (CHAR(13) + c.strPhone) AS strShipTo
 								,c.strPhone
 								,@strCustomerComments
 								,@ysnShowCostInSalesOrderPickList
@@ -918,7 +918,7 @@ Begin --Sales Order Pick List
 								,so.dtmDate
 								,so.dtmDueDate
 								,so.strComments AS strSOComments
-								,@strShipTo AS strShipTo
+								,@strShipTo + (CHAR(13) + c.strPhone) AS strShipTo
 								,c.strPhone
 								,@strCustomerComments
 								,@ysnShowCostInSalesOrderPickList
