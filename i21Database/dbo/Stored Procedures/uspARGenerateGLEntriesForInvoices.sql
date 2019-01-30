@@ -464,116 +464,117 @@ WHERE
 	AND I.[dblProvisionalAmount] <> @ZeroDecimal
 
 
---INSERT #ARInvoiceGLEntries
---    ([dtmDate]
---    ,[strBatchId]
---    ,[intAccountId]
---    ,[dblDebit]
---    ,[dblCredit]
---    ,[dblDebitUnit]
---    ,[dblCreditUnit]
---    ,[strDescription]
---    ,[strCode]
---    ,[strReference]
---    ,[intCurrencyId]
---    ,[dblExchangeRate]
---    ,[dtmDateEntered]
---    ,[dtmTransactionDate]
---    ,[strJournalLineDescription]
---    ,[intJournalLineNo]
---    ,[ysnIsUnposted]
---    ,[intUserId]
---    ,[intEntityId]
---    ,[strTransactionId]
---    ,[intTransactionId]
---    ,[strTransactionType]
---    ,[strTransactionForm]
---    ,[strModuleName]
---    ,[intConcurrencyId]
---    ,[dblDebitForeign]
---    ,[dblDebitReport]
---    ,[dblCreditForeign]
---    ,[dblCreditReport]
---    ,[dblReportingRate]
---    ,[dblForeignRate]
---    ,[strRateType]
---    ,[strDocument]
---    ,[strComments]
---    ,[strSourceDocumentId]
---    ,[intSourceLocationId]
---    ,[intSourceUOMId]
---    ,[dblSourceUnitDebit]
---    ,[dblSourceUnitCredit]
---    ,[intCommodityId]
---    ,[intSourceEntityId]
---    ,[ysnRebuild])
---SELECT
---     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
---    ,[strBatchId]                   = I.[strBatchId]
---    ,[intAccountId]                 = ARPAC.[intAccountId]
---    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
---    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
---    ,[dblDebitUnit]                 = @ZeroDecimal
---    ,[dblCreditUnit]                = @ZeroDecimal
---    ,[strDescription]               = I.[strDescription]
---    ,[strCode]                      = @CODE
---    ,[strReference]                 = I.[strCustomerNumber]
---    ,[intCurrencyId]                = I.[intCurrencyId]
---    ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
---    ,[dtmDateEntered]               = I.[dtmDatePosted]
---    ,[dtmTransactionDate]           = I.[dtmDate]
---    ,[strJournalLineDescription]    = 'Applied Prepaid - ' + ARPAC.[strInvoiceNumber]
---    ,[intJournalLineNo]             = ARPAC.[intPrepaidAndCreditId]
---    ,[ysnIsUnposted]                = 0
---    ,[intUserId]                    = I.[intUserId]
---    ,[intEntityId]                  = I.[intEntityId]
---    ,[strTransactionId]             = I.[strInvoiceNumber]
---    ,[intTransactionId]             = I.[intInvoiceId]
---    ,[strTransactionType]           = I.[strTransactionType]
---    ,[strTransactionForm]           = @SCREEN_NAME
---    ,[strModuleName]                = @MODULE_NAME
---    ,[intConcurrencyId]             = 1
---    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
---    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
---    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
---    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
---    ,[dblReportingRate]             = I.[dblAverageExchangeRate]
---    ,[dblForeignRate]               = I.[dblAverageExchangeRate]
---    ,[strRateType]                  = NULL
---    ,[strDocument]                  = NULL
---    ,[strComments]                  = NULL
---    ,[strSourceDocumentId]          = NULL
---    ,[intSourceLocationId]          = NULL
---    ,[intSourceUOMId]               = NULL
---    ,[dblSourceUnitDebit]           = NULL
---    ,[dblSourceUnitCredit]          = NULL
---    ,[intCommodityId]               = NULL
---    ,[intSourceEntityId]            = NULL
---    ,[ysnRebuild]                   = NULL
---FROM
---    (
---    SELECT
---         I.[strInvoiceNumber]
---        ,PPC.[intInvoiceId]
---        ,I.[intAccountId]
---        ,[intPrepaidAndCreditId]
---        ,[intPrepaymentId]
---        ,[ysnApplied]
---        ,[dblAppliedInvoiceDetailAmount]
---        ,[dblBaseAppliedInvoiceDetailAmount]
---    FROM
---        tblARPrepaidAndCredit PPC WITH (NOLOCK)
---    INNER JOIN
---        tblARInvoice I
---            ON I.intInvoiceId = PPC.intPrepaymentId
---    ) ARPAC
---INNER JOIN
---    #ARPostInvoiceHeader I
---        ON ARPAC.[intInvoiceId] = I.[intInvoiceId]
---        AND ISNULL(ARPAC.[ysnApplied],0) = 1 
---        AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
---WHERE
---    I.[intPeriodsToAccrue] <= 1
+INSERT #ARInvoiceGLEntries
+   ([dtmDate]
+   ,[strBatchId]
+   ,[intAccountId]
+   ,[dblDebit]
+   ,[dblCredit]
+   ,[dblDebitUnit]
+   ,[dblCreditUnit]
+   ,[strDescription]
+   ,[strCode]
+   ,[strReference]
+   ,[intCurrencyId]
+   ,[dblExchangeRate]
+   ,[dtmDateEntered]
+   ,[dtmTransactionDate]
+   ,[strJournalLineDescription]
+   ,[intJournalLineNo]
+   ,[ysnIsUnposted]
+   ,[intUserId]
+   ,[intEntityId]
+   ,[strTransactionId]
+   ,[intTransactionId]
+   ,[strTransactionType]
+   ,[strTransactionForm]
+   ,[strModuleName]
+   ,[intConcurrencyId]
+   ,[dblDebitForeign]
+   ,[dblDebitReport]
+   ,[dblCreditForeign]
+   ,[dblCreditReport]
+   ,[dblReportingRate]
+   ,[dblForeignRate]
+   ,[strRateType]
+   ,[strDocument]
+   ,[strComments]
+   ,[strSourceDocumentId]
+   ,[intSourceLocationId]
+   ,[intSourceUOMId]
+   ,[dblSourceUnitDebit]
+   ,[dblSourceUnitCredit]
+   ,[intCommodityId]
+   ,[intSourceEntityId]
+   ,[ysnRebuild])
+SELECT
+    [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+   ,[strBatchId]                   = I.[strBatchId]
+   ,[intAccountId]                 = ARPAC.[intAccountId]
+   ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblBaseAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+   ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblBaseAppliedInvoiceDetailAmount] END
+   ,[dblDebitUnit]                 = @ZeroDecimal
+   ,[dblCreditUnit]                = @ZeroDecimal
+   ,[strDescription]               = I.[strDescription]
+   ,[strCode]                      = @CODE
+   ,[strReference]                 = I.[strCustomerNumber]
+   ,[intCurrencyId]                = I.[intCurrencyId]
+   ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
+   ,[dtmDateEntered]               = I.[dtmDatePosted]
+   ,[dtmTransactionDate]           = I.[dtmDate]
+   ,[strJournalLineDescription]    = 'Applied Prepaid - ' + ARPAC.[strInvoiceNumber]
+   ,[intJournalLineNo]             = ARPAC.[intPrepaidAndCreditId]
+   ,[ysnIsUnposted]                = 0
+   ,[intUserId]                    = I.[intUserId]
+   ,[intEntityId]                  = I.[intEntityId]
+   ,[strTransactionId]             = I.[strInvoiceNumber]
+   ,[intTransactionId]             = I.[intInvoiceId]
+   ,[strTransactionType]           = I.[strTransactionType]
+   ,[strTransactionForm]           = @SCREEN_NAME
+   ,[strModuleName]                = @MODULE_NAME
+   ,[intConcurrencyId]             = 1
+   ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+   ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARPAC.[dblAppliedInvoiceDetailAmount] ELSE @ZeroDecimal END
+   ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+   ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARPAC.[dblAppliedInvoiceDetailAmount] END
+   ,[dblReportingRate]             = I.[dblAverageExchangeRate]
+   ,[dblForeignRate]               = I.[dblAverageExchangeRate]
+   ,[strRateType]                  = NULL
+   ,[strDocument]                  = NULL
+   ,[strComments]                  = NULL
+   ,[strSourceDocumentId]          = NULL
+   ,[intSourceLocationId]          = NULL
+   ,[intSourceUOMId]               = NULL
+   ,[dblSourceUnitDebit]           = NULL
+   ,[dblSourceUnitCredit]          = NULL
+   ,[intCommodityId]               = NULL
+   ,[intSourceEntityId]            = NULL
+   ,[ysnRebuild]                   = NULL
+FROM
+   (
+   SELECT
+        I.[strInvoiceNumber]
+       ,PPC.[intInvoiceId]
+       ,I.[intAccountId]
+       ,[intPrepaidAndCreditId]
+       ,[intPrepaymentId]
+       ,[ysnApplied]
+       ,[dblAppliedInvoiceDetailAmount]
+       ,[dblBaseAppliedInvoiceDetailAmount]
+   FROM
+       tblARPrepaidAndCredit PPC WITH (NOLOCK)
+   INNER JOIN
+       tblARInvoice I
+           ON I.intInvoiceId = PPC.intPrepaymentId
+   ) ARPAC
+INNER JOIN
+   #ARPostInvoiceHeader I
+       ON ARPAC.[intInvoiceId] = I.[intInvoiceId]
+       AND ISNULL(ARPAC.[ysnApplied],0) = 1 
+       AND ARPAC.[dblAppliedInvoiceDetailAmount] <> @ZeroDecimal
+       AND I.strTransactionType = 'Cash Refund'
+WHERE
+   I.[intPeriodsToAccrue] <= 1
 
 INSERT #ARInvoiceGLEntries
     ([dtmDate]
