@@ -63,7 +63,6 @@ BEGIN
 										INNER JOIN (SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst ) Q
 											ON gl.intAccountId = Q.intGLAccountId
 										INNER JOIN tblGLAccountSegmentMapping ASM ON gl.intAccountId = ASM.intAccountId)
-		BEGIN TRY
 		-- INSERT new records for tblCMBank
 		INSERT INTO tblCMBank (
 				strBankName
@@ -259,17 +258,6 @@ BEGIN
 			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'',RoutingNumber.Text), 15) Value
 		)LeadingZero
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)
-		END TRY
-		BEGIN CATCH
-			DECLARE @intError INT ,@error nvarchar(max) 
-			SELECT @error = ERROR_MESSAGE(), @intError= @@ERROR
-			--INSERT INTO tblCMImportErrorLogs( intEntityId, strDescription, dtmDate,strEvent)
-			--			SELECT 1, @error, GETDATE(),''Importing Bank Accounts''
-			IF @intError = 2627
-				SELECT @error = right(@error,LEN(@error)- CHARINDEX(''.'', @error, 0))
-			
-			RAISERROR (@error,16, 1) 
-		END CATCH
 	')
 END 
 GO
