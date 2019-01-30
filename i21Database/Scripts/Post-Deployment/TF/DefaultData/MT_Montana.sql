@@ -173,7 +173,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MF-32', strFormName = 'Distributor Report', strScheduleCode = '10Y', strScheduleName = 'Gallons Delivered to Railroads, Tax Exempt', strType = 'Jet Fuel', strNote = '', strTransactionType = 'Invoice', intSort = 820, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 261802, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MF-32', strFormName = 'Distributor Report', strScheduleCode = '10Y', strScheduleName = 'Gallons Delivered to Railroads, Tax Exempt', strType = 'Clear Diesel', strNote = '', strTransactionType = 'Invoice', intSort = 830, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 261803, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MF-32', strFormName = 'Distributor Report', strScheduleCode = '10Y', strScheduleName = 'Gallons Delivered to Railroads, Tax Exempt', strType = 'Dyed Diesel', strNote = '', strTransactionType = 'Invoice', intSort = 840, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 261804, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MF-32', strFormName = 'Distributor Report', strScheduleCode = '', strScheduleName = '', strType = '', strNote = 'Main Form', strTransactionType = '', intSort = 850, strStoredProcedure = '', intMasterId = 261805, intComponentTypeId = 2
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MF-32', strFormName = 'Distributor Report', strScheduleCode = 'MF-32', strScheduleName = '', strType = '', strNote = 'Main Form', strTransactionType = '', intSort = 850, strStoredProcedure = '', intMasterId = 261805, intComponentTypeId = 2
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MT EDI', strFormName = 'MT EDI File', strScheduleCode = '', strScheduleName = '', strType = '', strNote = 'MT EDI File', strTransactionType = '', intSort = 860, strStoredProcedure = '', intMasterId = 261806, intComponentTypeId = 3
 	
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
@@ -2233,7 +2233,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 		, intFrequency
 		, intMasterId
 	)
-	SELECT intFilingPacketId = 0, strFormCode = 'MF-32', strScheduleCode = '', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 262709
+	SELECT intFilingPacketId = 0, strFormCode = 'MF-32', strScheduleCode = 'MF-32', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 262709
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF-32', strScheduleCode = '1', strType = 'Aviation', ysnStatus = 1, intFrequency = 1, intMasterId = 262627
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF-32', strScheduleCode = '1', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 262629
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF-32', strScheduleCode = '1', strType = 'Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 262630
