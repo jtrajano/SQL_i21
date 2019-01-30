@@ -323,6 +323,8 @@ BEGIN
 					, strShipmentNumber = ISNULL((SELECT strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = gh.intInventoryShipmentId), '')
 					, b.intStorageScheduleTypeId
 					, strFutureMonth = '' COLLATE Latin1_General_CI_AS
+					, intContractNumber = t.intContractId
+					, strContractNumber = ISNULL((SELECT strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = t.intContractId), '')
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -391,6 +393,8 @@ BEGIN
 					, strShipmentNumber = ISNULL((SELECT strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = gh.intInventoryShipmentId), '')
 					, b.intStorageScheduleTypeId
 					, strFutureMonth = '' COLLATE Latin1_General_CI_AS
+					, intContractNumber = NULL
+					, strContractNumber = ''
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -815,7 +819,7 @@ BEGIN
 				, strTicketType
 				, strTicketNumber
 				, strContractEndMonth
-				, strDeliveryDate = CT.strDeliveryDates
+				, strDeliveryDate
 				, strLocationName
 				, intItemId
 				, strItemNo
@@ -831,14 +835,10 @@ BEGIN
 				, 'Storage' COLLATE Latin1_General_CI_AS
 				, dtmTicketDateTime
 				, intStorageScheduleTypeId
-				,CT.intContractNumber
-				,CT.strContractNumber
+				,intContractNumber
+				,strContractNumber
 			FROM #tblGetStorageDetailByDate s
 			JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
-			OUTER APPLY(
-				SELECT intContractNumber, strContractIds, strContractNumber = strContractNumbers collate Latin1_General_CS_AS, strDeliveryDates 
-				FROM dbo.fnRKGetContracts(s.intTicketId, s.intItemId, s.strTicketType)
-			) CT
 			WHERE intCommodityId = @intCommodityId
 				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 				AND ysnDPOwnedType <> 1 AND strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
