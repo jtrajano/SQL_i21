@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddInventoryItemToInvoices]
 	 @InvoiceEntries	InvoiceStagingTable	READONLY
-	,@IntegrationLogId	INT
+	,@IntegrationLogId	INT					= NULL
 	,@UserId			INT
 	,@RaiseError		BIT					= 0
 	,@ErrorMessage		NVARCHAR(250)		= NULL	OUTPUT
@@ -155,72 +155,76 @@ END
 	
 DECLARE  @IntegrationLog InvoiceIntegrationLogStagingTable
 DELETE FROM @IntegrationLog
-INSERT INTO @IntegrationLog
-	([intIntegrationLogId]
-	,[dtmDate]
-	,[intEntityId]
-	,[intGroupingOption]
-	,[strMessage]
-	,[strBatchIdForNewPost]
-	,[intPostedNewCount]
-	,[strBatchIdForNewPostRecap]
-	,[intRecapNewCount]
-	,[strBatchIdForExistingPost]
-	,[intPostedExistingCount]
-	,[strBatchIdForExistingRecap]
-	,[intRecapPostExistingCount]
-	,[strBatchIdForExistingUnPost]
-	,[intUnPostedExistingCount]
-	,[strBatchIdForExistingUnPostRecap]
-	,[intRecapUnPostedExistingCount]
-	,[intIntegrationLogDetailId]
-	,[intInvoiceId]
-	,[intInvoiceDetailId]
-	,[intTemporaryDetailIdForTax]
-	,[intId]
-	,[strTransactionType]
-	,[strType]
-	,[strSourceTransaction]
-	,[intSourceId]
-	,[strSourceId]
-	,[ysnPost]
-	,[ysnInsert]
-	,[ysnHeader]
-	,[ysnSuccess])
-SELECT
-	 [intIntegrationLogId]					= @IntegrationLogId
-	,[dtmDate]								= @DateOnly
-	,[intEntityId]							= @UserId
-	,[intGroupingOption]					= 0
-	,[strMessage]							= [strMessage]
-	,[strBatchIdForNewPost]					= ''
-	,[intPostedNewCount]					= 0
-	,[strBatchIdForNewPostRecap]			= ''
-	,[intRecapNewCount]						= 0
-	,[strBatchIdForExistingPost]			= ''
-	,[intPostedExistingCount]				= 0
-	,[strBatchIdForExistingRecap]			= ''
-	,[intRecapPostExistingCount]			= 0
-	,[strBatchIdForExistingUnPost]			= ''
-	,[intUnPostedExistingCount]				= 0
-	,[strBatchIdForExistingUnPostRecap]		= ''
-	,[intRecapUnPostedExistingCount]		= 0
-	,[intIntegrationLogDetailId]			= 0
-	,[intInvoiceId]							= [intInvoiceId]
-	,[intInvoiceDetailId]					= NULL
-	,[intTemporaryDetailIdForTax]			= NULL
-	,[intId]								= [intId]
-	,[strTransactionType]					= [strTransactionType]
-	,[strType]								= [strType]
-	,[strSourceTransaction]					= [strSourceTransaction]
-	,[intSourceId]							= [intSourceId]
-	,[strSourceId]							= [strSourceId]
-	,[ysnPost]								= NULL
-	,[ysnInsert]							= 1
-	,[ysnHeader]							= 0
-	,[ysnSuccess]							= 0
-FROM
-	@InvalidRecords
+
+IF @IntegrationLogId IS NOT NULL
+	BEGIN
+		INSERT INTO @IntegrationLog
+			([intIntegrationLogId]
+			,[dtmDate]
+			,[intEntityId]
+			,[intGroupingOption]
+			,[strMessage]
+			,[strBatchIdForNewPost]
+			,[intPostedNewCount]
+			,[strBatchIdForNewPostRecap]
+			,[intRecapNewCount]
+			,[strBatchIdForExistingPost]
+			,[intPostedExistingCount]
+			,[strBatchIdForExistingRecap]
+			,[intRecapPostExistingCount]
+			,[strBatchIdForExistingUnPost]
+			,[intUnPostedExistingCount]
+			,[strBatchIdForExistingUnPostRecap]
+			,[intRecapUnPostedExistingCount]
+			,[intIntegrationLogDetailId]
+			,[intInvoiceId]
+			,[intInvoiceDetailId]
+			,[intTemporaryDetailIdForTax]
+			,[intId]
+			,[strTransactionType]
+			,[strType]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[ysnPost]
+			,[ysnInsert]
+			,[ysnHeader]
+			,[ysnSuccess])
+		SELECT
+			[intIntegrationLogId]					= @IntegrationLogId
+			,[dtmDate]								= @DateOnly
+			,[intEntityId]							= @UserId
+			,[intGroupingOption]					= 0
+			,[strMessage]							= [strMessage]
+			,[strBatchIdForNewPost]					= ''
+			,[intPostedNewCount]					= 0
+			,[strBatchIdForNewPostRecap]			= ''
+			,[intRecapNewCount]						= 0
+			,[strBatchIdForExistingPost]			= ''
+			,[intPostedExistingCount]				= 0
+			,[strBatchIdForExistingRecap]			= ''
+			,[intRecapPostExistingCount]			= 0
+			,[strBatchIdForExistingUnPost]			= ''
+			,[intUnPostedExistingCount]				= 0
+			,[strBatchIdForExistingUnPostRecap]		= ''
+			,[intRecapUnPostedExistingCount]		= 0
+			,[intIntegrationLogDetailId]			= 0
+			,[intInvoiceId]							= [intInvoiceId]
+			,[intInvoiceDetailId]					= NULL
+			,[intTemporaryDetailIdForTax]			= NULL
+			,[intId]								= [intId]
+			,[strTransactionType]					= [strTransactionType]
+			,[strType]								= [strType]
+			,[strSourceTransaction]					= [strSourceTransaction]
+			,[intSourceId]							= [intSourceId]
+			,[strSourceId]							= [strSourceId]
+			,[ysnPost]								= NULL
+			,[ysnInsert]							= 1
+			,[ysnHeader]							= 0
+			,[ysnSuccess]							= 0
+		FROM
+			@InvalidRecords
+	END
 	
 CREATE TABLE #Pricing(
 	 [intId]							INT
@@ -1182,7 +1186,7 @@ VALUES(
 	,[intConcurrencyId]
 )
 	OUTPUT  
-		@IntegrationLogId						--[intIntegrationLogId]
+		ISNULL(@IntegrationLogId, -9999)						--[intIntegrationLogId]
 		,INSERTED.[intInvoiceId]				--[intInvoiceId]
 		,INSERTED.[intInvoiceDetailId]			--[intInvoiceDetailId]
 		,Source.[intTempDetailIdForTaxes]		--[intTempDetailIdForTaxes]	
