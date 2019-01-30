@@ -64,7 +64,9 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_2] ON [dbo].[tblEMEntity]
 )
 INCLUDE ( 	[strName], [intEntityClassId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 
-
+GO
+CREATE NONCLUSTERED INDEX [IX_tblEMEntity_strName]
+	ON [dbo].[tblEMEntity] ([strName])
 
 
 

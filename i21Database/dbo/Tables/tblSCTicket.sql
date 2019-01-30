@@ -178,6 +178,11 @@ CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intDeliverySheetId] ON [dbo].[tblSCTic
 );
 
 GO
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_strTicketStatus]
+	ON [dbo].[tblSCTicket] ([strTicketStatus],[strDistributionOption])
+	INCLUDE ([strTicketNumber],[strInOutFlag],[dtmTicketDateTime],[intProcessingLocationId],[strTruckName],[strDriverName],[dblNetUnits],[strCustomerReference],[intItemId],[intEntityId],[intDeliverySheetId])
+
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

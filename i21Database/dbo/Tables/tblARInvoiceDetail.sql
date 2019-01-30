@@ -159,3 +159,11 @@ CREATE NONCLUSTERED INDEX [PIndex]
     ON [dbo].[tblARInvoiceDetail]([intInvoiceId] ASC, [intItemId] ASC, [strItemDescription] ASC, [dblQtyOrdered] ASC, [dblQtyShipped] ASC, [dblPrice] ASC, [dblTotal] ASC);
 
 GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_strDocumentNumber]
+	ON [dbo].[tblARInvoiceDetail] ([strDocumentNumber],[intInventoryShipmentItemId])
+	INCLUDE ([intInvoiceId])
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intInventoryShipmentItemId]
+	ON [dbo].[tblARInvoiceDetail] ([intInventoryShipmentItemId])
+	INCLUDE ([intInvoiceId])

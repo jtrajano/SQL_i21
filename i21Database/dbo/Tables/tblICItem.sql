@@ -207,6 +207,15 @@ Type the overview for the table here.
 		ON [dbo].[tblICItem]([strType] ASC)
 	GO
 
+	CREATE NONCLUSTERED INDEX [IX_tblICItem_intCommodity]
+		ON [dbo].[tblICItem] ([intCommodityId])
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICItem_strType_Category]
+		ON [dbo].[tblICItem] ([strType])
+		INCLUDE ([strItemNo],[intCategoryId])
+	GO
+
 	EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Unique key that corresponds to the item number. Origin: agitm-no ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'strItemNo';
 	GO
 	EXECUTE sp_addextendedproperty @name = N'MS_Description', @value = N'Inventory type (e.g. 1=Inventory Item, 2=Service Item, 3=Finished Goods, 4=Bulk, 5=Pre-Mixes, 6=Raw Materials)', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = 'strType';
