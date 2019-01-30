@@ -315,6 +315,19 @@ GO
 
 PRINT('Finished removing Voided prefix in check numbers')
 GO
+PRINT('Begin cleaning up Undeposited Funds table')
+GO
+-- Clean up tblCMUndepositedFund
+BEGIN TRY
+	DELETE FROM tblCMBankTransactionDetail 	WHERE dblDebit = 0 AND dblCredit = 0 
+	DELETE FROM tblCMUndepositedFund WHERE dblAmount = 0
+END TRY
+BEGIN CATCH
+	PRINT ERROR_MESSAGE()
+END CATCH
 
+GO
+PRINT('Finished cleaning up Undeposited Funds table')
+GO
 PRINT('/*******************  END Cash Management Data Fixess *******************/')
 GO
