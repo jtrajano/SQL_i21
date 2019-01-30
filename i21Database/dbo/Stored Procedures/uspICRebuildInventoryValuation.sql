@@ -260,6 +260,7 @@ END
 
 -- Restore the original costs
 BEGIN 
+	-- Lotted
 	UPDATE	CostBucket
 	SET		dblCost = CostAdjustment.dblCost
 	FROM	dbo.tblICInventoryLotCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction t
@@ -274,6 +275,57 @@ BEGIN
 			) = 1
 			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
 			AND CostAdjustment.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+
+	-- FIFO 
+	UPDATE	cb
+	SET		dblCost = costAdjLog.dblCost
+	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog costAdjLog INNER JOIN tblICInventoryTransaction t
+				ON costAdjLog.intInventoryTransactionId = t.intInventoryTransactionId
+			INNER JOIN dbo.tblICInventoryFIFO cb
+				ON cb.intInventoryFIFOId = costAdjLog.intInventoryFIFOId
+			INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+
+	-- LIFO 
+	UPDATE	cb
+	SET		dblCost = costAdjLog.dblCost
+	FROM	dbo.tblICInventoryLIFOCostAdjustmentLog costAdjLog INNER JOIN tblICInventoryTransaction t
+				ON costAdjLog.intInventoryTransactionId = t.intInventoryTransactionId
+			INNER JOIN dbo.tblICInventoryLIFO cb
+				ON cb.intInventoryLIFOId = costAdjLog.intInventoryLIFOId
+			INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+
+	-- Actual  
+	UPDATE	cb
+	SET		dblCost = costAdjLog.dblCost
+	FROM	dbo.tblICInventoryActualCostAdjustmentLog costAdjLog INNER JOIN tblICInventoryTransaction t
+				ON costAdjLog.intInventoryTransactionId = t.intInventoryTransactionId
+			INNER JOIN dbo.tblICInventoryActualCost cb
+				ON cb.intInventoryActualCostId = costAdjLog.intInventoryActualCostId
+			INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
