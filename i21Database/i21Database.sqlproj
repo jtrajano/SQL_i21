@@ -7259,6 +7259,7 @@
     <Build Include="dbo\Views\vyuRKGetFutOptTransactionHistory.sql" />
     <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailForeignRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateOverageContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
