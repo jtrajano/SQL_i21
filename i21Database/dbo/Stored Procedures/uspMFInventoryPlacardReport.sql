@@ -51,7 +51,7 @@ BEGIN TRY
 
 	SELECT @strLotNumber = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strLotNo'
+	WHERE [fieldname] = 'strLotNumber'
 
 	SELECT @strReceiptNo = [from]
 	FROM @temp_xml_table
@@ -182,7 +182,7 @@ BEGIN TRY
 	LEFT JOIN @tblMFCustomValue tbl ON tbl.intItemId = I.intItemId
 	JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
-	WHERE L.strLotNumber IN (
+	WHERE L.intLotId IN (
 			SELECT x.Item COLLATE DATABASE_DEFAULT
 			FROM dbo.fnSplitString(@strLotNumber, '^') x
 			)
