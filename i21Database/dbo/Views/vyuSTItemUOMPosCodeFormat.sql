@@ -8,9 +8,98 @@ SELECT Item.intItemId
 	   , LEN(UOM.strLongUPCCode) AS intOrigUpcLength
 	   , UOM.strLongUPCWOLeadingZero
 	   , LEN(UOM.strLongUPCWOLeadingZero) AS intUpcWOLeadingZeroLength
-	   , UOM.strUPCwthOrwthOutCheckDigit
-	   , LEN(UOM.strUPCwthOrwthOutCheckDigit) AS intUpcWithCheckDigitLength
 	   , UOM.dblUPCwthOrwthOutCheckDigit
+	   
+	   --, LEN(UOM.strUPCwthOrwthOutCheckDigit) AS intUpcWithCheckDigitLength
+	   , CASE
+			WHEN UOM.dblUPCwthOrwthOutCheckDigit <= 99999
+				-- PLU
+				THEN LEN(UOM.strUPCwthOrwthOutCheckDigit)
+
+			WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999
+				THEN CASE
+						-- upcE  =  6-Numeric Digits. "NOT" included the Check digit
+						-- ean8  =  8-Numeric Digits. "NOT" included the Check digit
+						-- plu   =  Less than or equal to 5 digits. "NOT" included the Check digit
+						-- upcA  =  12-Numeric Digits included the Check digit
+						-- ean13 =  13-Numeric Digits included the Check digit
+						-- gtin  =  GTINs may be 8, 12, 13 or 14 digits long. Check digit is included
+
+						-- UPC-A
+						WHEN (LEN(UOM.dblUPCwthOrwthOutCheckDigit) = 6) OR (UOM.dblUPCwthOrwthOutCheckDigit > 99999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 99999999999)
+							THEN CASE 
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 12
+										THEN 12
+									ELSE 
+										LEN(UOM.strUPCwthOrwthOutCheckDigit)
+							END
+																
+						-- EAN13
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999999999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 999999999999
+							THEN CASE 
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 13
+										THEN 13
+									ELSE 
+										LEN(UOM.strUPCwthOrwthOutCheckDigit)
+							END
+
+						-- GTIN
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 999999999999
+							THEN CASE
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 14
+										THEN 14
+									ELSE 
+										LEN(UOM.strUPCwthOrwthOutCheckDigit) 
+							END
+					END
+			ELSE 0
+	   END AS intUpcWithCheckDigitLength
+
+	   -- , UOM.strUPCwthOrwthOutCheckDigit
+	   , CASE
+			WHEN UOM.dblUPCwthOrwthOutCheckDigit <= 99999
+				-- PLU
+				THEN CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(5))
+
+			WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999
+				THEN CASE
+						-- upcE  =  6-Numeric Digits. "NOT" included the Check digit
+						-- ean8  =  8-Numeric Digits. "NOT" included the Check digit
+						-- plu   =  Less than or equal to 5 digits. "NOT" included the Check digit
+						-- upcA  =  12-Numeric Digits included the Check digit
+						-- ean13 =  13-Numeric Digits included the Check digit
+						-- gtin  =  GTINs may be 8, 12, 13 or 14 digits long. Check digit is included
+
+						-- UPC-A
+						WHEN (LEN(UOM.dblUPCwthOrwthOutCheckDigit) = 6) OR (UOM.dblUPCwthOrwthOutCheckDigit > 99999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 99999999999)
+							THEN CASE 
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 12
+										THEN RIGHT(('000000000000' + CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(12))), 12)
+									ELSE 
+										CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(12))
+							END
+																
+						-- EAN13
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999999999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 999999999999
+							THEN CASE 
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 13
+										THEN RIGHT(('0000000000000' + CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(13))), 13)
+									ELSE 
+										CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(13))
+							END
+
+						-- GTIN
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 999999999999
+							THEN CASE
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 14
+										THEN RIGHT(('00000000000000' + CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(14))), 14)
+									ELSE 
+										CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(14)) 
+							END
+					END
+			ELSE ''
+	   END AS strUPCwthOrwthOutCheckDigit
+
 	   , UOM.ysnHasCheckDigit
 	   , UOM.intCheckDigit
 	   , CASE

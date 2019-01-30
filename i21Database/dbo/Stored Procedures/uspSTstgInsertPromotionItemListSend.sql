@@ -125,7 +125,7 @@ BEGIN
 							, PIL.intPromoItemListNo AS [ItemListID]
 							, ISNULL(PIL.strPromoItemListDescription, '') AS [ItemListDescription]
 							, PCF.strPosCodeFormat AS [POSCodeFormatFormat]
-							, PCF.dblUPCwthOrwthOutCheckDigit AS [POSCode]
+							, PCF.strUPCwthOrwthOutCheckDigit AS [POSCode]
 							--, CASE 
 							--		WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
 							--			THEN CASE
