@@ -28,7 +28,7 @@ SELECT DISTINCT intYear 			= YEAR(I.dtmDate)
 	  , dblEndQuantity 				= 0
 	  , dtmBeginDate				= '' COLLATE Latin1_General_CI_AS
 	  , dtmEndingDate 				= '' COLLATE Latin1_General_CI_AS
-	  , dblCost 					= dblCost * (CASE WHEN dblQty < 0 THEN  dblQty * -1 ELSE dblQty END) 
+	  , dblCost 					= ISNULL(dblCost, 0) * (CASE WHEN dblQty < 0 THEN  dblQty * -1 ELSE dblQty END) 
 FROM tblARInvoice I
 	INNER JOIN (tblARCustomer C INNER JOIN tblEMEntity E ON C.intEntityId = E.intEntityId) 
 		ON I.intEntityCustomerId = C.intEntityId
@@ -36,8 +36,11 @@ FROM tblARInvoice I
 		ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN tblICItem ICI
 		ON ICI.intItemId = ID.intItemId
-	INNER JOIN tblICInventoryTransaction Cost
-		ON Cost.intTransactionDetailId = ID.intInvoiceDetailId AND Cost.strTransactionId = I.strInvoiceNumber 
+	LEFT JOIN tblICInventoryTransaction Cost
+		ON Cost.intTransactionDetailId = ID.intInvoiceDetailId 
+		AND Cost.strTransactionId = I.strInvoiceNumber 
+		AND Cost.intTransactionTypeId = 33 
+		AND Cost.ysnIsUnposted = 0
 	LEFT JOIN tblICCategory ICC
 		ON ICC.intCategoryId = ICI.intCategoryId
 	LEFT JOIN tblEMEntity SPerson
@@ -46,6 +49,4 @@ FROM tblARInvoice I
 		ON IIP.intItemId = ID.intItemId AND IIP.intItemLocationId = I.intCompanyLocationId
 WHERE I.ysnPosted = 1 
   AND ID.intItemId IS NOT NULL 
-  AND ICI.strType != 'Comment'
-  AND Cost.intTransactionTypeId = 33 
-  AND Cost.ysnIsUnposted = 0
+  AND ICI.strType != 'Comment'    
