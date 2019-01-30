@@ -17,7 +17,7 @@ MERGE
 	AND VTB.intAccountId = TB.intAccountId
 	WHEN MATCHED THEN 
 		UPDATE 
-		SET TB.YTDBalance = TB.YTDBalance,
+		SET TB.YTDBalance = VTB.YTDBalance,
 		TB.MTDBalance = VTB.MTDBalance,
 		TB.dtmDateModified = @dtmDate,
 		TB.intConcurrencyId = TB.intConcurrencyId + 1
