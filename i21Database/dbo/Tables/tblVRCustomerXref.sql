@@ -2,7 +2,7 @@
 	[intCustomerXrefId] [int] IDENTITY(1,1) NOT NULL,
 	[intEntityId] [int] NOT NULL,
 	[intVendorSetupId] [int] NULL,
-	[strVendorCustomer] [nvarchar](50) NOT NULL,
+	[strVendorCustomer] [nvarchar](50) COLLATE Latin1_General_CI_AS  NOT NULL,
 	[intConcurrencyId] [int] NOT NULL CONSTRAINT [DF_tblVRCustomerXref_intConcurrencyId]  DEFAULT ((0)),
 	CONSTRAINT [PK_tblVRCustomerXref] PRIMARY KEY CLUSTERED([intCustomerXrefId] ASC),
 	CONSTRAINT [UQ_tblVRCustomerXref_intCustomerEntityId_intVendorEntityId] UNIQUE NONCLUSTERED ([intEntityId] ASC,[intVendorSetupId] ASC),
