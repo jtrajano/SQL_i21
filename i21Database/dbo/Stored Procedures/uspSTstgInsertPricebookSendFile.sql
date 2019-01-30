@@ -208,7 +208,7 @@ BEGIN
 										ELSE 'addchange' 
 									END AS [ITTDetailRecordActionType], 
 									PCF.strPosCodeFormat AS [POSCodeFormatFormat],
-									PCF.dblUPCwthOrwthOutCheckDigit AS [POSCode],
+									PCF.strUPCwthOrwthOutCheckDigit AS [POSCode],
 									--CASE 
 										
 									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
@@ -476,7 +476,7 @@ BEGIN
 										ELSE 'addchange' 
 									END AS [ITTDetailRecordActionType], 
 									PCF.strPosCodeFormat AS [POSCodeFormatFormat],
-									PCF.dblUPCwthOrwthOutCheckDigit AS [POSCode],
+									PCF.strUPCwthOrwthOutCheckDigit AS [POSCode],
 									--CASE 
 										
 									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
