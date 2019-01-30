@@ -76,12 +76,21 @@ BEGIN TRY
 			,dtmDate = GETDATE()
 			,dblQty = LD.dblQuantity
 			,IU.dblUnitQty
-			,dblCost = CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)/100 
-							ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END, 0) END
-			,dblValue = CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)/100 
-							ELSE AD.dblQtyToPriceUOMConvFactor * ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END, 0) END * LD.dblQuantity
+			,dblCost = ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN  CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)
+						* AD.dblQtyToPriceUOMConvFactor
+						/ CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END
+						* CASE WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
+			,dblValue = ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN  CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)
+						* AD.dblQtyToPriceUOMConvFactor
+						/ CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END
+						* CASE WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
+						* LD.dblQuantity
 			,0.0
-			,intCurrencyId = CASE WHEN L.intPurchaseSale = 3 AND CD.ysnUseFXPrice = 1 THEN ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) ELSE L.intCurrencyId END
+			,intCurrencyId = CASE WHEN L.intPurchaseSale = 3 AND CD.ysnUseFXPrice = 1 THEN 
+								ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) 
+							ELSE 
+								ISNULL(LD.intForexCurrencyId, L.intCurrencyId) 
+							END
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
 			,L.intLoadId
 			,intLoadDetailId
@@ -134,6 +143,7 @@ BEGIN TRY
 			,CUR.ysnSubCurrency
 			,LD.intForexRateTypeId
 			,LD.dblForexRate
+			,LD.intForexCurrencyId
 			,LD.dblAmount
 			,L.intPurchaseSale
 			,CD.dblTotalCost
