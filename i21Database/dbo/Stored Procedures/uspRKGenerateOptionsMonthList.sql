@@ -171,13 +171,31 @@ BEGIN TRY
 			AND intFutureMarketId = @FutureMarketId
 		ORDER BY CONVERT(DATETIME,'01 ' + strOptionMonth) DESC
 
-		IF(ISNULL(@ProjectedMonth, '') <> '') AND EXISTS(SELECT TOP 1 * FROM @ProjectedOptionMonths WHERE strOptionMonth = @ProjectedMonth)
+		IF(ISNULL(@ProjectedMonth, '') <> '') AND EXISTS(SELECT TOP 1 1 FROM @ProjectedOptionMonths WHERE strOptionMonth = @ProjectedMonth)
 		BEGIN
-			SET @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR, 1,CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
+			IF EXISTS(SELECT TOP 1 1 FROM @ProjectedOptionMonths WHERE strMonthName = @ProjectedMonthName)
+			BEGIN
+				SELECT TOP 1 @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR, 1, CONVERT(DATETIME,'01 ' + strOptionMonth)), 'MMM yy')
+				FROM @ProjectedOptionMonths WHERE strMonthName = @ProjectedMonthName
+				ORDER BY intRowId DESC
+			END
+			ELSE
+			BEGIN
+				SET @ProjectedMonth = dbo.fnRKFormatDate(DATEADD(YEAR, 1,CONVERT(DATETIME,'01 ' + @ProjectedMonth)), 'MMM yy')
+			END
 		END
 		ELSE IF(ISNULL(@ProjectedMonth, '') = '')
 		BEGIN
-			SELECT @tmpProjectedMonth = CONVERT(DATE,@ProjectedMonthName + ' 1 ' + CONVERT(VARCHAR, YEAR(GETDATE())))
+			IF EXISTS(SELECT TOP 1 1 FROM @ProjectedOptionMonths WHERE strMonthName = @ProjectedMonthName)
+			BEGIN
+				SELECT TOP 1 @tmpProjectedMonth = DATEADD(YEAR, 1, CONVERT(DATETIME,'01 ' + strOptionMonth))
+				FROM @ProjectedOptionMonths WHERE strMonthName = @ProjectedMonthName
+				ORDER BY intRowId DESC
+			END
+			ELSE 
+			BEGIN
+				SET @tmpProjectedMonth = CONVERT(DATE,@ProjectedMonthName + ' 1 ' + CONVERT(VARCHAR, YEAR(GETDATE())))
+			END
 		
 			SELECT @ProjectedMonth = CASE WHEN DATEDIFF(MONTH, GETDATE(), @tmpProjectedMonth) <= 0 THEN dbo.fnRKFormatDate(DATEADD(YEAR,1,@tmpProjectedMonth), 'MMM yy')
 				ELSE dbo.fnRKFormatDate(@tmpProjectedMonth, 'MMM yy')
@@ -238,6 +256,7 @@ BEGIN TRY
 		,strSymbol
 	FROM @ProjectedOptionMonths
 	WHERE ISNULL(intFutureMonthId, '') <> '' 
+		AND strOptionMonth NOT IN(SELECT strOptionMonth COLLATE Latin1_General_CI_AS FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId AND intCommodityMarketId = @intCommodityMarketId)
 
 	SELECT MissingFutureMonths = @MissingFutureMonths
 		,OrphanOptionMonths = @OrphanOptionMonths;
