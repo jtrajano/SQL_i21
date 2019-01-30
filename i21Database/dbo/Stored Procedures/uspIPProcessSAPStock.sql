@@ -43,6 +43,7 @@ Begin
 	Insert Into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,ysnDeadlockError)
 	Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,ysnDeadlockError
 	From tblIPStockError Where isNULL(ysnDeadlockError,0)=1
+	Delete From tblIPStockError Where isNULL(ysnDeadlockError,0)=1
 End
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
@@ -140,8 +141,8 @@ Begin
 		End
 
 		--Move to Archive
-		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
-		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,'Success',''
+		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage,ysnDeadlockError)
+		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,'Success','',ysnDeadlockError
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
