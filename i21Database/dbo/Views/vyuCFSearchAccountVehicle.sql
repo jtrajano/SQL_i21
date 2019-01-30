@@ -34,5 +34,5 @@ LEFT JOIN tblCFDepartment cfDept
 	ON cfVehicle.intDepartmentId = cfDept.intDepartmentId
 LEFT JOIN dbo.tblICItem AS icItem ON icItem.intItemId = cfVehicle.intExpenseItemId
 
-
+GO
 

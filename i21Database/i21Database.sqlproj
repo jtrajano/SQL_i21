@@ -7261,6 +7261,8 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailForeignRate.sql" />
     <Build Include="dbo\Stored Procedures\uspSCImportData.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateOverageContracts.sql" />
+    <Build Include="dbo\Views\vyuCFSearchAccount.sql" />
+    <Build Include="dbo\Views\vyuCFSearchAccountCard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
