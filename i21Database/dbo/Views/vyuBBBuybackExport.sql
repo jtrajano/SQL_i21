@@ -8,7 +8,7 @@ AS
 		,A.dtmShipDate
 		,A.strBOLNumber
 		,strItemNumber = ISNULL(H.strVendorProduct,G.strItemNo)
-		,strUnitMeasure = ISNULL(K.strVendorUOM,J.strUnitMeasure)
+		,strUnitMeasure = ISNULL(K.strVendorUOM,J.strUnitMeasure) COLLATE Latin1_General_CI_AS 
 		,A.intInvoiceId
 		,B.dblQtyShipped
 		,D.intBuybackId
