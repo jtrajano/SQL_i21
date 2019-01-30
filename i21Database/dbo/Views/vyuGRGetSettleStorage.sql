@@ -11,7 +11,14 @@ SELECT DISTINCT
 	,dblSpotUnits				= SS.dblSpotUnits
 	,dblFuturesPrice			= SS.dblFuturesPrice
 	,dblFuturesBasis			= SS.dblFuturesBasis
-	,dblCashPrice				= SS.dblCashPrice
+	,dblCashPrice				= CASE 
+									WHEN ISNULL(_dblCashPrice.dblCashPrice,0) > 0 THEN _dblCashPrice.dblCashPrice
+									ELSE
+										CASE 
+											WHEN SS.intParentSettleStorageId IS NOT NULL THEN SS.dblCashPrice
+											ELSE 0
+										END
+								END
 	,strStorageAdjustment		= SS.strStorageAdjustment
 	,dtmCalculateStorageThrough = SS.dtmCalculateStorageThrough
 	,dblAdjustPerUnit			= SS.dblAdjustPerUnit
@@ -111,6 +118,7 @@ CROSS APPLY (
 		INNER JOIN tblCTContractHeader CH
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE SS.intParentSettleStorageId IS NOT NULL
+			AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
 		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strContractNumbers
 ) AS _strContractNumbers
 CROSS APPLY (
@@ -123,5 +131,18 @@ CROSS APPLY (
 		INNER JOIN tblCTContractHeader CH
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE SS.intParentSettleStorageId IS NOT NULL
+			AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
 		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strContractIds
 ) AS _strContractIds
+OUTER APPLY (
+	SELECT 
+		SUM(CD.dblCashPrice) AS dblCashPrice
+	FROM tblCTContractDetail CD
+	INNER JOIN tblGRSettleContract SC
+		ON CD.intContractDetailId = SC.intContractDetailId
+			AND SC.intSettleStorageId = SS.intSettleStorageId
+	INNER JOIN tblCTContractHeader CH
+		ON CH.intContractHeaderId = CD.intContractHeaderId
+	WHERE SS.intParentSettleStorageId IS NOT NULL
+		AND CD.intPricingTypeId <> 2
+) AS _dblCashPrice
