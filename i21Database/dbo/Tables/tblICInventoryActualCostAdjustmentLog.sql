@@ -30,7 +30,7 @@
 		[intCreatedEntityUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryActualCostAdjustmentLog] PRIMARY KEY CLUSTERED ([intId]),
-		CONSTRAINT [FK_tblICInventoryActualCostAdjustmentLog_tblICInventoryLot] FOREIGN KEY ([intInventoryActualCostId]) REFERENCES [tblICInventoryActualCost]([intInventoryActualCostId])
+		CONSTRAINT [FK_tblICInventoryActualCostAdjustmentLog_tblICInventoryActualCost] FOREIGN KEY ([intInventoryActualCostId]) REFERENCES [tblICInventoryActualCost]([intInventoryActualCostId])
 	)
 GO
 

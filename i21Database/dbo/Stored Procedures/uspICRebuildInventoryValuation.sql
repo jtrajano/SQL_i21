@@ -418,7 +418,7 @@ BEGIN
 			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
-	DELETE	cb
+	DELETE	cbLog
 	FROM	tblICInventoryActualCost cb INNER JOIN tblICItem i
 				ON cb.intItemId = i.intItemId
 			INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
