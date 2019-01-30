@@ -2345,8 +2345,9 @@ FROM (
 								ELSE 0 END)
 		--Contract Futures
 		, dblActualFutures = dblCalculatedFutures
-		, dblFutures = (CASE WHEN strPricingType = 'Basis' THEN dblFutures
-								ELSE dblCalculatedFutures END)
+		, dblFutures = (CASE WHEN strPricingType = 'Basis' AND strPriOrNotPriOrParPriced = 'Partially Priced' THEN ((dblLotsFixed * dblPriceWORollArb) + ((dblNoOfLots - dblLotsFixed) * dblFuturePrice)) / dblNoOfLots
+				WHEN strPricingType = 'Basis' THEN dblFutures
+				ELSE dblCalculatedFutures END)
 		, dblCash  --Contract Cash
 		, dblCosts = ABS(dblCosts)
 		--Market Basis
