@@ -638,7 +638,7 @@ BEGIN
 				, strCustomer = ''
 				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
 				--, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
-				, strDeliveryDate = CT.strDeliveryDates
+				, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 				, s.strLocationName
 				, i.intItemId
 				, s.strItemNo
@@ -657,19 +657,18 @@ BEGIN
 				, t.dtmTicketDateTime
 				, t.intTicketId
 				, t.strTicketNumber
-				, intContractHeaderId = CT.intContractNumber
-				, strContractNumber = CT.strContractNumber
-				, strFutureMonth = CT.strFutureMonth
+				, intContractHeaderId = ch.intContractHeaderId
+				, strContractNumber = ch.strContractNumber
+				, strFutureMonth = fmnt.strFutureMonth
 			INTO #invQty
 			FROM vyuRKGetInventoryValuation s
 			JOIN tblICItem i ON i.intItemId = s.intItemId
 			JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
 			JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intCommodityStockUOMId
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
-			OUTER APPLY(
-				SELECT intContractNumber, strContractIds, strContractNumber = strContractNumbers collate Latin1_General_CS_AS, strDeliveryDates, strFutureMonth 
-				FROM dbo.fnRKGetContracts(s.intTransactionId, i.intItemId, s.strTransactionType)
-			) CT 
+			LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = s.intTransactionDetailId 
+			LEFT JOIN tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
+			LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
 			WHERE i.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
 				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
 				AND ISNULL(strTicketStatus, '') <> 'V'
