@@ -333,7 +333,7 @@ BEGIN
 				LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
 				JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
-				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
+				JOIN tblICCommodity CM ON CM.intCommodityId = i.intCommodityId
 				LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
 				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
@@ -401,7 +401,7 @@ BEGIN
 				LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
 				JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
-				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
+				JOIN tblICCommodity CM ON CM.intCommodityId = i.intCommodityId
 				WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
@@ -468,7 +468,7 @@ BEGIN
 				JOIN tblGRStorageHistory sh ON sh.intTicketId = sc.intTicketId
 				JOIN tblGRCustomerStorage a ON a.intCustomerStorageId = sh.intCustomerStorageId
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId AND b.ysnCustomerStorage = 1
-				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
+				JOIN tblICCommodity CM ON CM.intCommodityId = i.intCommodityId
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
@@ -557,20 +557,15 @@ BEGIN
 												, 0)
 						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 OR i.dtmPostDate IS NULL THEN 1 ELSE 0 END )
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
-						,CT.strFutureMonth
-						,CT.strDeliveryDate
+						,fmnt.strFutureMonth
+						,strDeliveryDate =  dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 					FROM vyuRKGetInventoryValuation Inv
 					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
 					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
 					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
 					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
-					OUTER APPLY (
-						SELECT intContractHeaderId, strFutureMonth, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
-						FROM vyuCTContractDetailView
-						WHERE intContractHeaderId = (
-							SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL
-						) AND intContractSeq = (SELECT TOP 1  intContractSeq FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)
-					)CT
+					LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = Inv.intTransactionDetailId 
+					LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
 					WHERE Inv.ysnInTransit = 1  
 						AND Inv.strTransactionType = 'Inventory Shipment'
 						AND C.intCommodityId = @intCommodityId
@@ -592,8 +587,8 @@ BEGIN
 						,Inv.intCategoryId
 						,i.ysnPosted
 						,i.dtmPostDate
-						,CT.strFutureMonth
-						,CT.strDeliveryDate
+						,fmnt.strFutureMonth
+						,cd.dtmEndDate
 				) tbl
 				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
 			)t
