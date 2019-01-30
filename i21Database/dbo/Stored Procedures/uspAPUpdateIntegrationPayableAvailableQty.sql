@@ -253,6 +253,53 @@ BEGIN --MISC PO ITEM
 	END
 END
 
+--INVENTORY RECEIPT
+BEGIN 
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryReceipt')) DROP TABLE #tmpInventoryReceipt
+
+	SELECT * 
+	INTO #tmpInventoryReceipt
+	FROM @voucherPayables 
+	WHERE 
+		(intInventoryReceiptItemId > 0)
+	OR
+		(intInventoryReceiptChargeId > 0)
+	OR
+		(intInventoryShipmentChargeId > 0)
+
+	IF @@ROWCOUNT > 0
+	BEGIN
+		DECLARE @receiptDetails AS InventoryUpdateBillQty
+
+		INSERT INTO @receiptDetails
+		(
+			[intInventoryReceiptItemId],
+			[intInventoryReceiptChargeId],
+			[intInventoryShipmentChargeId],
+			[strSourceTrasactionNo],
+			[intItemId],
+			[intToBillUOMId],
+			[dblToBillQty]
+		)
+		SELECT
+			[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
+			[intInventoryReceiptChargeId]	=	A.intInventoryReceiptChargeId,
+			[intInventoryShipmentChargeId]	=	A.intInventoryShipmentChargeId,
+			[strSourceTrasactionNo]			=	B.strBillId,
+			[intItemId]						=	A.intItemId,
+			[intToBillUOMId]				=	CASE WHEN A.intWeightUOMId > 0 THEN A.intWeightUOMId ELSE A.intQtyToBillUOMId END,
+			[dblToBillQty]					=	CASE WHEN A.intWeightUOMId > 0 THEN A.dblNetWeight ELSE A.dblQuantityToBill END
+												* (CASE WHEN @decreaseQty = 1 
+														THEN -1
+													ELSE 1
+													END)
+		FROM #tmpInventoryReceipt A
+		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+
+		EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
+	END
+END
+
 IF @transCount = 0
 	BEGIN
 		IF (XACT_STATE()) = -1
@@ -299,7 +346,7 @@ BEGIN CATCH
 		END		
 	ELSE
 		BEGIN
-			IF (XACT_STATE()) = -1
+			IF (XACT_STATE()) = -1 AND @transCount > 0
 			BEGIN
 				ROLLBACK TRANSACTION  @SavePoint
 			END
