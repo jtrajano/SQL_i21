@@ -704,7 +704,7 @@ DECLARE @tblGetSettlementPrice TABLE (
 		intFutureMarketId int		
 )
 DECLARE @ysnM2MAllowExpiredMonth bit=0
-SELECT @ysnM2MAllowExpiredMonth=ysnM2MAllowExpiredMonth FROM tblRKCompanyPreference
+SELECT @ysnM2MAllowExpiredMonth=isnull(ysnM2MAllowExpiredMonth,0) FROM tblRKCompanyPreference
 IF (@ysnM2MAllowExpiredMonth=1)
 BEGIN
 
