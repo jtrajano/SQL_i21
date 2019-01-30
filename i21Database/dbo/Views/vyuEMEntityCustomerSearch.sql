@@ -132,5 +132,4 @@ OUTER APPLY (
 -- ) CI
 -- on CI.intEntityCustomerId = CUSTOMER.intEntityId
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
-AND CUSTOMER.ysnActive = 1
 GO
