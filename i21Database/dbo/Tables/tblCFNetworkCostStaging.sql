@@ -5,7 +5,7 @@
 	[strItemNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[dblTransferCost] [numeric](18, 6) NULL,
 	[dblTaxesPerUnit] [numeric](18, 6) NULL,
-	[strGUID] NVARCHAR(50) NULL, 
+	[strGUID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intEntityId] INT NULL, 
 	[intRecordNo] INT NULL, 
 	[intConcurrencyId] INT CONSTRAINT [DF_tblCFNetworkCostStaging_intConcurrencyId] DEFAULT ((1)) NULL,
