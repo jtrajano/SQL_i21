@@ -322,3 +322,47 @@ LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType NOT IN (2)
+UNION ALL
+--BILL PAYMENT TRANSACTION (PAYMENT TRANSACTION FOR DELETE PAY SCENARIO)
+SELECT 
+	  A.dtmDatePaid AS dtmDate 
+	, ISNULL(B.intBillId ,B.intOrigBillId) AS intBillId  
+	, C.strBillId
+	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid     
+	, dblTotal = 0 
+	, dblAmountDue = 0 
+	, dblWithheld = B.dblWithheld
+	, B.dblDiscount AS dblDiscount
+	, B.dblInterest AS dblInterest 
+	, dblPrepaidAmount = 0  
+	, D.strVendorId 
+	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
+	, C.dtmDueDate 
+	, C.ysnPosted 
+	, C.ysnPaid
+	, B.intAccountId
+	, F.strAccountId
+	, EC.strClass
+	, 1
+FROM dbo.tblAPPayment  A
+ INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+ INNER JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
+ LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+ 	ON A.[intEntityVendorId] = D.[intEntityId]
+LEFT JOIN dbo.tblCMBankTransaction E
+	ON A.strPaymentRecordNum = E.strTransactionId
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
+OUTER APPLY (
+	SELECT TOP 1
+		bd.dblRate
+	FROM tblAPBillDetail bd
+	WHERE bd.intBillId = C.intBillId
+) prepaidDetail		
+ WHERE A.ysnPosted = 1  
+	AND C.ysnPosted = 1
+	AND C.intTransactionType IN (1) --BILL TRANSACTION ONLY
+	AND A.ysnPrepay = 1
+	AND NOT EXISTS (
+		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
+	)	
