@@ -19,6 +19,7 @@ GO
 			SELECT id = 4,		name = 'Bank Transfer'			UNION ALL 
 			SELECT id = 5,		name = 'Bank Transaction'		UNION ALL 
 			SELECT id = 51,		name = 'Bank Interest'	 		UNION ALL 
+			SELECT id = 52,		name = 'Bank Loan'		 		UNION ALL 
 			SELECT id = 6,		name = 'Credit Card Charge'		UNION ALL 
 			SELECT id = 7,		name = 'Credit Card Returns'	UNION ALL 
 			SELECT id = 8,		name = 'Credit Card Payments'	UNION ALL 
