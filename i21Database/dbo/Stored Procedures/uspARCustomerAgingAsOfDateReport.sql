@@ -50,6 +50,9 @@ SET @strCustomerNameLocal			= NULLIF(@strCustomerName, '')
 SET @strAccountStatusCodeLocal		= NULLIF(@strAccountStatusCode, '')
 SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')
 
+SET @dtmDateFromLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
+SET @dtmDateToLocal					= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
+
 IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
 	BEGIN
 		INSERT INTO @tblCustomers
