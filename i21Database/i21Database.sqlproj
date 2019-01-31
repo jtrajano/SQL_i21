@@ -7249,6 +7249,17 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryPhysicalCount.sql" />
     <Build Include="dbo\Tables\tblSMLog.sql" />
     <Build Include="dbo\Tables\tblSMAudit.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateAuditLog.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Item.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Message.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Name.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Natural.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Number.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Object.sql" />
+    <Build Include="dbo\Functions\fnSMJson_Parse.sql" />
+    <Build Include="dbo\Functions\fnSMJson_Skip.sql" />
+    <Build Include="dbo\Functions\fnSMJson_SkipUntil.sql" />
+    <Build Include="dbo\Functions\fnSMJson_String.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
