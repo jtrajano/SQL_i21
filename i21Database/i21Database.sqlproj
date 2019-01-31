@@ -7263,6 +7263,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateOverageContracts.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccount.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountCard.sql" />
+    <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
