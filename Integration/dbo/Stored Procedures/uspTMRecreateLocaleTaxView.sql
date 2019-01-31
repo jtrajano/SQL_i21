@@ -109,18 +109,18 @@ BEGIN
 			CREATE VIEW [dbo].[vwlclmst]
 			AS
 			SELECT
-				vwlcl_tax_state	=	strTaxGroupCOLLATE Latin1_General_CI_AS, 
-				vwlcl_tax_auth_id1	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_tax_auth_id2	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_auth_id1_desc	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_auth_id2_desc	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_fet_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS,  
-				vwlcl_set_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_lc1_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_lc2_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_lc3_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_lc4_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS,
-				vwlcl_lc5_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS
+				vwlcl_tax_state	=	strTaxGroup COLLATE Latin1_General_CI_AS 
+				,vwlcl_tax_auth_id1	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_tax_auth_id2	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_auth_id1_desc	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_auth_id2_desc	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_fet_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS  
+				,vwlcl_set_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_lc1_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_lc2_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_lc3_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_lc4_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS
+				,vwlcl_lc5_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS
 				,vwlcl_lc6_ivc_desc	=	'''' COLLATE Latin1_General_CI_AS
 				,vwlcl_user_id	=	'''' COLLATE Latin1_General_CI_AS
 				,vwlcl_user_rev_dt	=	NULL
