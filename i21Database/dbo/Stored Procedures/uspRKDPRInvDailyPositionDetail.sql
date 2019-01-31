@@ -532,10 +532,10 @@ BEGIN
 					SELECT 
 						 Inv.strTransactionId
 						,Inv.intTransactionId
-						,strContractNumber = (SELECT TOP 1 strOrderNumber = strOrderNumber + '-' + CONVERT(NVARCHAR, intContractSeq) COLLATE Latin1_General_CI_AS FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)
-						,intContractHeaderId = (SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)
-						,strTicketNumber = (SELECT TOP 1 strSourceNumber FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intSourceId IS NOT NULL)
-						,intTicketId = (SELECT TOP 1  intSourceId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intSourceId IS NOT NULL)
+						,strContractNumber = SI.strOrderNumber + '-' + CONVERT(NVARCHAR, SI.intContractSeq) COLLATE Latin1_General_CI_AS 
+						,intContractHeaderId = SI.intOrderId 
+						,strTicketNumber = SI.strSourceNumber
+						,intTicketId = SI.intSourceId
 						,Inv.dtmDate
 						,Inv.intLocationId
 						,Inv.strLocationName
@@ -548,7 +548,7 @@ BEGIN
 						,Inv.strCategory
 						,Inv.intCategoryId
 						,dblBalanceToInvoice = SUM(Inv.dblQuantity)
-						+ ISNULL((SELECT SUM(iv.dblQty)
+						 + ISNULL((SELECT SUM(iv.dblQty)
 											FROM tblARInvoiceDetail id 
 												JOIN tblARInvoice i on id.intInvoiceId = i.intInvoiceId
 												JOIN tblICInventoryTransaction iv ON id.intInvoiceDetailId = iv.intTransactionDetailId
@@ -557,18 +557,23 @@ BEGIN
 												AND intTransactionTypeId = 33 --'Invoice'
 												and iv.intItemId = Inv.intItemId
 												and id.strDocumentNumber = Inv.strTransactionId
-												and CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110))
+												and CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110)
+												and iv.ysnIsUnposted = 0
+												and id.intInventoryShipmentItemId = Inv.intTransactionDetailId
+												)
+												
 												, 0)
-						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 OR i.dtmPostDate IS NULL THEN 1 ELSE 0 END )
+						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 OR (i.dtmPostDate IS NULL AND SI.strDestinationWeights <> 'DESTINATION') THEN 1 ELSE 0 END )
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
 						,fmnt.strFutureMonth
 						,strDeliveryDate =  dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 					FROM vyuRKGetInventoryValuation Inv
 					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
 					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
+					LEFT JOIN vyuICGetInventoryShipmentItem SI ON Inv.intTransactionDetailId = SI.intInventoryShipmentItemId
 					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
 					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
-					LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = Inv.intTransactionDetailId 
+					LEFT JOIN tblCTContractDetail cd ON cd.intContractHeaderId = SI.intLineNo 
 					LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
 					WHERE Inv.ysnInTransit = 1  
 						AND Inv.strTransactionType = 'Inventory Shipment'
@@ -593,6 +598,13 @@ BEGIN
 						,i.dtmPostDate
 						,fmnt.strFutureMonth
 						,cd.dtmEndDate
+						,strOrderNumber
+						,SI.intContractSeq
+						,intOrderId
+						,SI.strSourceNumber
+						,SI.intSourceId
+						,Inv.intTransactionDetailId
+						,SI.strDestinationWeights
 				) tbl
 				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
 			)t
