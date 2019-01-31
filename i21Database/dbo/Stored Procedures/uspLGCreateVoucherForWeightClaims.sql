@@ -316,6 +316,7 @@ BEGIN TRY
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
 	WHERE WCD.intContractDetailId = BD.intContractDetailId
 		AND WC.intWeightClaimId = @intWeightClaimId 
+		AND B.intTransactionType = 11
 
 END TRY
 
