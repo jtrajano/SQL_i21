@@ -5,7 +5,13 @@
 	,@intPhysicalCountUOMId INT
 AS
 BEGIN
-	DECLARE @intLocationId INT
+	EXEC dbo.uspICUpdateInventoryPhysicalCount @strCountNo = @strInventoryCountNo
+		,@dblPhysicalCount = @dblPhysicalCount
+		,@intPhysicalCountUOMId = @intPhysicalCountUOMId
+		,@intLotId = @intLotId
+		,@intUserSecurityId = @intUserSecurityId
+
+		/*DECLARE @intLocationId INT
 	DECLARE @intSubLocationId INT
 	DECLARE @intStorageLocationId INT
 	DECLARE @strLotNumber NVARCHAR(50)
@@ -167,5 +173,5 @@ BEGIN
 			WHERE intLotId = @intLotId
 				AND intInventoryCountId = @intInventoryCountId
 		END
-	END
+	END*/
 END
