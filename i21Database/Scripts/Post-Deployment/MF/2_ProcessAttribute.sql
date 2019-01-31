@@ -1705,8 +1705,12 @@ BEGIN
         ,5
         ,1
         ,1
-        ,'SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory'
+        ,'SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory UNION SELECT '''','''''
 END
+Else
+Begin
+	Update tblMFAttribute Set strSQL='SELECT strCategoryCode AS ValueMember,strCategoryCode AS DisplayMember FROM tblICCategory UNION SELECT '''',''''' Where intAttributeId = 78
+End
 GO
 
 IF NOT EXISTS (
