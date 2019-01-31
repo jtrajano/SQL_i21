@@ -143,9 +143,9 @@
     [ysnPostForeignSales]				BIT             NULL,
     [ysnSummaryByDeptVehicleProd]		BIT             NULL,
     [ysnDepartmentGrouping]				BIT             NULL,
-    [strGuid]							NVARCHAR (MAX)  NULL,
-    [strUserId]							NVARCHAR (100)  NULL,
-    [strStatementType]                  NVARCHAR (50)   NULL,
+    [strGuid]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strUserId]							NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strStatementType]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [ysnIncludeSummarySections]         BIT             CONSTRAINT [DF_tblCFInvoiceStagingTable_ysnIncludeSummarySections] DEFAULT ((0)) NULL,
     [strPrimaryTotals]                  NVARCHAR (50)   NULL,
     CONSTRAINT [UserAndTransactionIdAndStatementType]   UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC, [strStatementType] ASC)

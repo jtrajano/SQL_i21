@@ -51,7 +51,7 @@
     [strDownloadFileName]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAllowExemptionsOnExtAndRetailTrans] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPostForeignSales]                   BIT             NULL,
-    [strExportValidURL]                     NVARCHAR (MAX)  NULL,
+    [strExportValidURL]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
     [intAdvanceMappingId]                   INT             NULL,
 	[intNetworkCostMappingId]               INT             NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
