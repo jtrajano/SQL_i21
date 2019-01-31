@@ -637,14 +637,14 @@ BEGIN
             ,[intAccountId]                 = I.[intDeferredRevenueAccountId]
             ,[dblDebit]                     = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                     * I.[dblCurrencyExchangeRate]
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCredit]                    = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                     * I.[dblCurrencyExchangeRate]
@@ -671,25 +671,25 @@ BEGIN
             ,[intConcurrencyId]             = 1
             ,[dblDebitForeign]              = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblDebitReport]               = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCreditForeign]             = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCreditReport]              = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
@@ -734,7 +734,7 @@ BEGIN
             ,[intAccountId]                 = IA.[intGeneralAccountId]
             ,[dblDebit]                     = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                     * I.[dblCurrencyExchangeRate]
@@ -768,25 +768,25 @@ BEGIN
             ,[intConcurrencyId]             = 1
             ,[dblDebitForeign]              = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblDebitReport]               = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCreditForeign]             = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCreditReport]              = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
@@ -831,14 +831,14 @@ BEGIN
             ,[intAccountId]                 = I.[intDeferredRevenueAccountId]
             ,[dblDebit]                     = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                     * I.[dblCurrencyExchangeRate]
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCredit]                    = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                     * I.[dblCurrencyExchangeRate]
@@ -865,25 +865,25 @@ BEGIN
             ,[intConcurrencyId]             = 1
             ,[dblDebitForeign]              = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblDebitReport]               = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCreditForeign]             = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCreditReport]              = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
@@ -927,14 +927,14 @@ BEGIN
             ,[intAccountId]                 = IA.[intMaintenanceSalesAccountId]
             ,[dblDebit]                     = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                     * I.[dblCurrencyExchangeRate]
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCredit]                    = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                     * I.[dblCurrencyExchangeRate]
@@ -961,25 +961,25 @@ BEGIN
             ,[intConcurrencyId]             = 1
             ,[dblDebitForeign]              = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END)
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblDebitReport]               = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END)
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCreditForeign]             = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
             ,[dblCreditReport]              = [dbo].fnRoundBanker((
                                                                     (CASE WHEN I.[intPeriodsToAccrue] > 1
-																	      THEN ARIA.[dblAmount]
+																	      THEN (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN ARIA.[dblAmount] ELSE @ZeroDecimal END) 
 																		  ELSE (CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE ARIA.[dblAmount] END)
 																	END)
                                                                   ), [dbo].[fnARGetDefaultDecimal]())
