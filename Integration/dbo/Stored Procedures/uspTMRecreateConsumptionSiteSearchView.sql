@@ -181,7 +181,7 @@ BEGIN
 				,P.strRouteId
 				,A.dblTotalCapacity
 				,A.ysnTaxable
-				,Q.strTaxGroup COLLATE Latin1_General_CI_AS      
+				,strTaxGroup = Q.strTaxGroup COLLATE Latin1_General_CI_AS      
 				,strDeviceOwnership = J.strOwnership
 				,A.strZipCode
 				,strGlobalJulianCalendar = R.strDescription
@@ -198,7 +198,7 @@ BEGIN
 				,A.dblSummerDailyUse
 				,A.dblWinterDailyUse
 				,A.ysnAdjustBurnRate
-				,S.strPricingLevelName COLLATE Latin1_General_CI_AS      
+				,strPricingLevelName = S.strPricingLevelName COLLATE Latin1_General_CI_AS      
 				,A.dblPriceAdjustment
 				,T.strClockNumber
 				,A.strClassFillOption
