@@ -34,6 +34,7 @@ BEGIN
 			,@DIRECT_DEPOSIT AS INT = 23
 			,@NSF INT = 124
 			,@BANK_INTEREST INT = 51
+			,@BANK_LOAN INT = 52
 			,@LastReconDate AS DATETIME
 
 		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
@@ -55,7 +56,7 @@ BEGIN
 					END	
 			AND (
 				-- Filter for all the bank payments and debits:
-				intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@BANK_INTEREST,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
+				intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@BANK_INTEREST,@BANK_LOAN,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
 				OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 			)
 
