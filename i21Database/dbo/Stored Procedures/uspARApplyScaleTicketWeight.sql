@@ -368,9 +368,14 @@ BEGIN
 						,@intContractHeaderId			INT				= NULL
 						,@intContractDetailId			INT				= NULL
 						,@dblShippedQty					NUMERIC(18,6)				= 0.000000
-
+						,@intParentItemId				INT				= NULL
 					
-					SELECT  @intInvoiceDetailId = intInvoiceDetailId, @intContractDetailId = intContractDetailId, @intContractHeaderId = intContractHeaderId, @dblShippedQty = dblShippedQty FROM #CONTRACTLINEITEMS WHERE Id = @cnt
+					SELECT  @intInvoiceDetailId = intInvoiceDetailId, @intContractDetailId = intContractDetailId, @intContractHeaderId = intContractHeaderId, @dblShippedQty = dblShippedQty FROM #CONTRACTLINEITEMS CT WHERE Id = @cnt
+
+					SELECT TOP 1 @intParentItemId = intItemId
+					FROM tblARInvoiceDetail 
+					WHERE intInvoiceId = @intNewInvoiceId
+					  AND ysnAddonParent = 1
 
 					SELECT TOP 1
 							@ItemId						= intItemId
@@ -379,7 +384,7 @@ BEGIN
 						,@ItemIsBlended					= ysnBlended
 						,@ItemDocumentNumber			= strDocumentNumber
 						,@ItemDescription				= strItemDescription
-						,@ItemQtyShipped				= @dblShippedQty
+						,@ItemQtyShipped				= CASE WHEN intItemId = @intParentItemId OR strAddOnDetailKey IS NOT NULL THEN @dblShippedQty ELSE [dbo].fnRoundBanker((ISNULL(dblQuantity, 0) * @dblShippedQty), [dbo].[fnARGetDefaultDecimal]()) END
 						,@ItemOrderUOMId				= NULL
 						,@ItemPriceUOMId				= intPriceUOMId
 						,@ItemQtyOrdered				= 0.00000000
@@ -448,7 +453,16 @@ BEGIN
 						,@ItemDestinationGradeId		= intDestinationGradeId
 						,@ItemDestinationWeightId		= intDestinationWeightId
 						,@intItemUOMId					= intItemUOMId
-					FROM tblARInvoiceDetail
+					FROM tblARInvoiceDetail ID 					
+					OUTER APPLY (
+						SELECT TOP 1 dblQuantity
+						FROM tblICItemAddOn ADDON
+						WHERE ADDON.intAddOnItemId = ID.intItemId
+						  AND ADDON.intItemUOMId = ID.intItemUOMId
+						  AND ADDON.intItemId = @intParentItemId
+						  AND ISNULL(ID.ysnAddonParent, 0) = 0
+						  AND ID.intItemId <> ADDON.intItemId
+					) ADDON
 					WHERE intInvoiceDetailId = @intInvoiceDetailId
 					  AND intInvoiceId = @intNewInvoiceId
 				
