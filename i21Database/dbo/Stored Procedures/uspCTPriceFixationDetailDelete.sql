@@ -24,6 +24,7 @@ BEGIN TRY
 	SELECT @Id = MIN(Id) FROM #ItemBill
 	WHILE ISNULL(@Id,0) > 0
 	BEGIN
+		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
 		EXEC uspAPDeleteVoucher @Id,@intUserId
 		SELECT @Id = MIN(Id) FROM #ItemBill WHERE Id > @Id
 	END
