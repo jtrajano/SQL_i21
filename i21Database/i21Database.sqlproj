@@ -7258,6 +7258,7 @@
     <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailForeignRate.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateOverageContracts.sql" />
+    <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
