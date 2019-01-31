@@ -63,7 +63,7 @@ FROM (
 	FROM            dbo.tblCFInvoiceFeeStagingTable
 	GROUP BY intAccountId, dblFeeTotalAmount, strUserId) AS cfInvFee 
 	ON cfInv.intAccountId = cfInvFee.intAccountId
-	AND cfInv.strUserId = cfInvFee.strUserId) AS outertable
+	AND cfInv.strUserId  COLLATE Latin1_General_CI_AS = cfInvFee.strUserId) AS outertable
 	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, intTermID, dtmInvoiceDate, dblFeeTotalAmount, 
 	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus, strStatementType
 GO
