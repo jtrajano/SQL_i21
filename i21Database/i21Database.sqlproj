@@ -7304,6 +7304,7 @@
     <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailDelete.sql" />
     <Build Include="dbo\Views\vyuRKGetFutOptTransactionHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateOverageContracts.sql" />
+    <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
