@@ -509,6 +509,9 @@ BEGIN
 					AND cb.intItemLocationId = @t_intItemLocationId
 					AND cb.intItemUOMId = @t_intItemUOMId
 					AND cb.dblStockIn = @t_dblQty 
+
+			DELETE FROM #tmpCostBucketOriginal 
+			WHERE intInventoryLotId = @intInventoryLotId
 		END 
 
 		-- Calculate the Cost Bucket cost 
