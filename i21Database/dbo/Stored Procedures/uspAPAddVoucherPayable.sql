@@ -545,6 +545,7 @@ BEGIN
 			,intCompanyLocationId
 			,intVendorLocationId
 			,ysnIncludeExemptedCodes
+			,0 --@IncludeInvalidCodes
 			,intFreightTermId
 			,ysnExcludeCheckOff
 			,intItemUOMId

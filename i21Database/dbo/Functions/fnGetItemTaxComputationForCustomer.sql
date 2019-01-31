@@ -9,6 +9,7 @@
 	,@CompanyLocationId				INT
 	,@CustomerLocationId			INT	
 	,@IncludeExemptedCodes			BIT
+	,@IncludeInvalidCodes			BIT
 	,@IsCustomerSiteTaxable			BIT
 	,@SiteId						INT
 	,@FreightTermId					INT
@@ -151,7 +152,7 @@ BEGIN
         ,CAST(0 AS BIT)
         ,CAST(0 AS BIT)
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IncludeInvalidCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 															
     DECLARE @TaxableByOtherTaxesTable TABLE
         ([intTaxCodeId] INT

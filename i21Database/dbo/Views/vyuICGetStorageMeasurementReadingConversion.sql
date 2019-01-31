@@ -7,6 +7,8 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, Header.dtmDate
 	, Detail.intCommodityId
 	, strCommodity = Commodity.strCommodityCode
+	, Item.intCategoryId
+	, strCategory = Category.strCategoryCode
 	, Detail.intItemId
 	, Item.strItemNo
 	, Detail.intStorageLocationId
@@ -36,8 +38,9 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, Detail.intConcurrencyId
 FROM tblICStorageMeasurementReadingConversion Detail
 LEFT JOIN tblICStorageMeasurementReading Header ON Header.intStorageMeasurementReadingId = Detail.intStorageMeasurementReadingId
-LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommodityId
 LEFT JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
+LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommodityId
+LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = Detail.intStorageLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = StorageLocation.intSubLocationId
 LEFT JOIN tblGRDiscountId DiscountSchedule ON DiscountSchedule.intDiscountId = Detail.intDiscountSchedule

@@ -184,25 +184,25 @@ BEGIN
 				, strFutMarketName
 				, strDeliveryDate)
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC)
-				, strCommodityCode = CD.strCommodity
+				, strCommodityCode = CD.strCommodityCode
 				, intCommodityId
 				, intContractHeaderId
 				, strContractNumber = CD.strContract
 				, strLocationName
-				, dtmEndDate
+				, dtmEndDate = dtmSeqEndDate
 				, strFutureMonth
-				, dblBalance = CD.dblQuantity
+				, dblBalance = CD.dblQtyinCommodityStockUOM
 				, intUnitMeasureId
 				, intPricingTypeId
 				, intContractTypeId
 				, intCompanyLocationId
 				, strContractType
-				, strPricingType
+				, strPricingType = CD.strPricingTypeDesc
 				, CD.intContractDetailId
 				, intContractStatusId
 				, intEntityId
 				, intCurrencyId
-				, strType = (CD.strContractType + ' ' + CD.strPricingType) COLLATE Latin1_General_CI_AS
+				, strType = (CD.strContractType + ' ' + CD.strPricingTypeDesc) COLLATE Latin1_General_CI_AS
 				, intItemId
 				, strItemNo
 				, dtmContractDate
@@ -211,10 +211,12 @@ BEGIN
 				, intFutureMonthId
 				, strCategory
 				, strFutMarketName
-				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
-			FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
+				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmSeqEndDate, 106), 8)
+			FROM tblCTContractBalance CD
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 				AND intCommodityId = @intCommodityId
+				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
+				AND CD.dblQuantity <> 0
 
 			DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
 				, dtmTransactionDate DATETIME
@@ -414,8 +416,8 @@ BEGIN
 					, strLocationName
 					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
 					, strContractEndMonthNearBy = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
-					, dblTotal = (CASE WHEN intContractTypeId = 1 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0))
-									ELSE - dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0)) END)
+					, dblTotal = (CASE WHEN intContractTypeId = 1 THEN  ISNULL(CD.dblBalance, 0)
+									ELSE - ISNULL(CD.dblBalance, 0) END)
 					, CD.intUnitMeasureId
 					, CD.strEntityName
 					, intItemId
@@ -427,12 +429,12 @@ BEGIN
 					, strFutureMonth
 					, CD.strDeliveryDate
 				FROM @tblGetOpenContractDetail CD
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3
+				WHERE intContractTypeId IN (1,2) AND CD.intCommodityId = @intCommodityId
+					AND CD.intContractStatusId <> 3
 					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
 												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
 																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
 																					ELSE ISNULL(ysnLicensed, 0) END)
-				WHERE intContractTypeId IN (1,2) AND CD.intCommodityId = @intCommodityId
 					AND intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intLocationId END
 					AND  CD.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN CD.intEntityId ELSE @intVendorId END
 				) t

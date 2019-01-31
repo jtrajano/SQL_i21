@@ -16,6 +16,8 @@ BEGIN
 	DECLARE @dblTransferUnits NUMERIC(18,6)
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @intCustomerStorageId INT
+	DECLARE @intDecimalPrecision INT		
+	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTransferCustomerStorage') IS NOT NULL
 		DROP TABLE #tmpTransferCustomerStorage
@@ -167,7 +169,7 @@ BEGIN
 
 		--update the source's customer storage open balance
 		UPDATE A
-		SET A.dblOpenBalance = A.dblOpenBalance + B.dblDeductedUnits
+		SET A.dblOpenBalance 	= ROUND(A.dblOpenBalance + B.dblDeductedUnits,@intDecimalPrecision)
 		FROM tblGRCustomerStorage A 
 		INNER JOIN tblGRTransferStorageSourceSplit B 
 			ON B.intSourceCustomerStorageId = A.intCustomerStorageId

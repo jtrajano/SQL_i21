@@ -26,7 +26,7 @@ BEGIN
 
 		SELECT @intContractDetailId = intContractId, @intFromItemUOMId = intItemUOMIdTo, @intStorageScheduleTypeId = intStorageScheduleTypeId FROM tblSCTicket where intTicketId = @scId
 
-		IF ISNULL(@intContractDetailId, 0) > 0 AND @intStorageScheduleTypeId = -2
+		IF ISNULL(@intContractDetailId, 0) > 0 AND (@intStorageScheduleTypeId IN(-2,-6,-3))
 		BEGIN
 			UPDATE CT set CT.dblScheduleQty = (CT.dblScheduleQty - dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,CT.intItemUOMId,SC.dblScheduleQty))
 			FROM tblCTContractDetail CT 

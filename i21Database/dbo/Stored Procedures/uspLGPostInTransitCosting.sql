@@ -70,16 +70,27 @@ BEGIN TRY
 			,intForexRateTypeId
 			,dblForexRate
 			)
-		SELECT LD.intItemId
-			,IL.intItemLocationId
-			,LD.intItemUOMId
-			,GETDATE()
-			,LD.dblQuantity
+		SELECT intItemId = LD.intItemId
+			,intItemLocationId = IL.intItemLocationId
+			,intItemUOMId = LD.intItemUOMId
+			,dtmDate = GETDATE()
+			,dblQty = LD.dblQuantity
 			,IU.dblUnitQty
-			,CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)/100 ELSE AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0) END dblCost
-			,CASE WHEN AD.ysnSeqSubCurrency = 1 THEN AD.dblQtyToPriceUOMConvFactor * ISNULL(AD.dblSeqPrice, 0)/100 ELSE AD.dblQtyToPriceUOMConvFactor*ISNULL(AD.dblSeqPrice, 0) END * LD.dblQuantity dblValue
+			,dblCost = ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN  CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)
+						* AD.dblQtyToPriceUOMConvFactor
+						/ CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END
+						* CASE WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
+			,dblValue = ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN  CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)
+						* AD.dblQtyToPriceUOMConvFactor
+						/ CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END
+						* CASE WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
+						* LD.dblQuantity
 			,0.0
-			,L.intCurrencyId
+			,intCurrencyId = CASE WHEN L.intPurchaseSale = 3 AND CD.ysnUseFXPrice = 1 THEN 
+								ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) 
+							ELSE 
+								ISNULL(LD.intForexCurrencyId, L.intCurrencyId) 
+							END
 			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
 			,L.intLoadId
 			,intLoadDetailId
@@ -132,9 +143,12 @@ BEGIN TRY
 			,CUR.ysnSubCurrency
 			,LD.intForexRateTypeId
 			,LD.dblForexRate
+			,LD.intForexCurrencyId
 			,LD.dblAmount
 			,L.intPurchaseSale
 			,CD.dblTotalCost
+			,CD.dblCashPrice
+			,AD.intSeqCurrencyId
 
 		BEGIN
 			INSERT INTO @GLEntries (

@@ -2,6 +2,7 @@
 	@strFilePrefix NVARCHAR(50)
 	, @intStoreId INT
 	, @intRegisterId INT
+	, @ysnClearRegisterPromotion BIT
 	, @dtmBeginningChangeDate DATETIME
 	, @dtmEndingChangeDate DATETIME
 	, @strGeneratedXML VARCHAR(MAX) OUTPUT
@@ -96,6 +97,7 @@ BEGIN
 							[StoreLocationID] , 
 							[VendorName], 
 							[VendorModelVersion], 
+							[TableActionType], 
 							[RecordActionType], 
 							[ItemListMaintenanceRecordActionType], 
 							[ItemListID], 
@@ -108,6 +110,10 @@ BEGIN
 							ST.intStoreNo AS [StoreLocationID]
 							, 'iRely' AS [VendorName]  	
 							, (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion]
+							, CASE
+									WHEN @ysnClearRegisterPromotion = CAST(1 AS BIT) THEN 'initialize'
+									WHEN @ysnClearRegisterPromotion = CAST(0 AS BIT) THEN 'update'
+							END AS [TableActionType]
 							, 'addchange' AS [RecordActionType] 
 							, CASE PIL.ysnDeleteFromRegister 
 								WHEN 0 
@@ -118,56 +124,32 @@ BEGIN
 							END as [ItemListMaintenanceRecordActionType] 
 							, PIL.intPromoItemListNo AS [ItemListID]
 							, ISNULL(PIL.strPromoItemListDescription, '') AS [ItemListDescription]
-							, CASE 
-									WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-										THEN CASE
-												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-													THEN 'upcA'
-												ELSE 'plu'
-											END
-									WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
-										THEN CASE
-												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-													THEN 'upcA'
-												ELSE 'plu'
-												END 
-									ELSE 'plu' 
-							END AS [POSCodeFormatFormat]
-							, CASE 
-									WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-										THEN CASE
-												WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-														THEN CASE
-																WHEN LEN(IUOM.strLongUPCCode) = 6
-																	THEN RIGHT('0000000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 13) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-																WHEN LEN(IUOM.strLongUPCCode) > 6	
-																	THEN RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''), 13) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-																	-- IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
-														END
-													ELSE IUOM.strLongUPCCode
-											END
-									--WHEN ISNULL(IUOM.strUpcCode,'') != '' AND ISNULL(IUOM.strUpcCode,'') NOT LIKE '%[^0-9]%'
-									--	THEN CASE
-									--			WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strUpcCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-									--				THEN IUOM.strUpcCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strUpcCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strUpcCode,''),13) 
-									--			ELSE RIGHT('0000' + ISNULL(IUOM.strUpcCode,''),4) 
-									--		END 
-									ELSE '0000' 
-							END [POSCode]
+							, PCF.strPosCodeFormat AS [POSCodeFormatFormat]
+							, PCF.strUPCwthOrwthOutCheckDigit AS [POSCode]
 							--, CASE 
-							--	WHEN ISNUMERIC(IUOM.strUpcCode) = 0
-							--		THEN 'upcA'
-							--	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) 
-							--		THEN 'PLU' 
-							--	ELSE 'upcA' 
-							--END [POSCodeFormatFormat]
-							--, CASE	
-							--	WHEN ISNUMERIC(IUOM.strUpcCode) = 0
-							--		THEN RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
-							--	WHEN ISNULL(ST.intMaxPlu,0) > ISNULL(CAST(IUOM.strUpcCode as bigint),0) 
-							--		THEN RIGHT('0000'+ISNULL(IUOM.strUpcCode,''),4) 
-							--	ELSE RIGHT('00000000000'+ISNULL(IUOM.strLongUPCCode,''),11) 
-							--END [POSCode],
+							--		WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
+							--			THEN CASE
+							--					WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
+							--						THEN 'upcA'
+							--					ELSE 'plu'
+							--				END
+							--		ELSE 'plu' 
+							--END AS [POSCodeFormatFormat]
+							--, CASE 
+							--		WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
+							--			THEN CASE
+							--					WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
+							--							THEN CASE
+							--									WHEN LEN(IUOM.strLongUPCCode) = 6
+							--										THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+							--									WHEN LEN(IUOM.strLongUPCCode) > 6	
+							--										THEN RIGHT('00000000000' + ISNULL(IUOM.strLongUPCCode,''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
+							--										-- IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
+							--							END
+							--						ELSE IUOM.strLongUPCCode
+							--				END
+							--		ELSE '0000' 
+							--END [POSCode]
 							, @strUniqueGuid AS [strUniqueGuid]
 						FROM tblICItem I
 						INNER JOIN tblICItemLocation IL 
@@ -180,6 +162,8 @@ BEGIN
 							ON PIL.intStoreId = ST.intStoreId 
 						INNER JOIN tblICItemUOM IUOM 
 							ON IUOM.intItemId = I.intItemId 
+						INNER JOIN vyuSTItemUOMPosCodeFormat PCF
+							ON IUOM.intItemUOMId = PCF.intItemUOMId
 						INNER JOIN tblSTPromotionItemListDetail ILT
 							ON ILT.intItemUOMId = IUOM.intItemUOMId
 							AND PIL.intPromoItemListId = ILT.intPromoItemListId
@@ -225,7 +209,8 @@ BEGIN
 											)
 											,(
 												SELECT TOP (1)
-													RecordActionType AS 'RecordAction/@type'
+													TableActionType AS 'TableAction/@type'
+													, RecordActionType AS 'RecordAction/@type'
 													,(
 														SELECT
 															A.ItemListID

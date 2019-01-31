@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation]
 	,@isPeriodic AS BIT = 1
 	,@ysnRegenerateBillGLEntries AS BIT = 0
 	,@intUserId AS INT = NULL
+	,@ysnRebuildShipmentAndInvoiceAsInTransit AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -259,6 +260,7 @@ END
 
 -- Restore the original costs
 BEGIN 
+	-- Lotted
 	UPDATE	CostBucket
 	SET		dblCost = CostAdjustment.dblCost
 	FROM	dbo.tblICInventoryLotCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction t
@@ -273,6 +275,57 @@ BEGIN
 			) = 1
 			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
 			AND CostAdjustment.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+
+	-- FIFO 
+	UPDATE	cb
+	SET		dblCost = costAdjLog.dblCost
+	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog costAdjLog INNER JOIN tblICInventoryTransaction t
+				ON costAdjLog.intInventoryTransactionId = t.intInventoryTransactionId
+			INNER JOIN dbo.tblICInventoryFIFO cb
+				ON cb.intInventoryFIFOId = costAdjLog.intInventoryFIFOId
+			INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+
+	-- LIFO 
+	UPDATE	cb
+	SET		dblCost = costAdjLog.dblCost
+	FROM	dbo.tblICInventoryLIFOCostAdjustmentLog costAdjLog INNER JOIN tblICInventoryTransaction t
+				ON costAdjLog.intInventoryTransactionId = t.intInventoryTransactionId
+			INNER JOIN dbo.tblICInventoryLIFO cb
+				ON cb.intInventoryLIFOId = costAdjLog.intInventoryLIFOId
+			INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+
+	-- Actual  
+	UPDATE	cb
+	SET		dblCost = costAdjLog.dblCost
+	FROM	dbo.tblICInventoryActualCostAdjustmentLog costAdjLog INNER JOIN tblICInventoryTransaction t
+				ON costAdjLog.intInventoryTransactionId = t.intInventoryTransactionId
+			INNER JOIN dbo.tblICInventoryActualCost cb
+				ON cb.intInventoryActualCostId = costAdjLog.intInventoryActualCostId
+			INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
+				, @dtmStartDate
+			) = 1
+			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
+			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
@@ -365,7 +418,7 @@ BEGIN
 			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
-	DELETE	cb
+	DELETE	cbLog
 	FROM	tblICInventoryActualCost cb INNER JOIN tblICItem i
 				ON cb.intItemId = i.intItemId
 			INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
@@ -2122,6 +2175,12 @@ BEGIN
 					END 
 				END 
 
+				-- Force rebuild as in-transit if @ysnRebuildShipmentAndInvoiceAsInTransit set to true. 
+				IF @ysnRebuildShipmentAndInvoiceAsInTransit = 1
+				BEGIN 
+					SET @ShipmentPostScenario = @ShipmentPostScenario_InTransitBased
+				END
+
 				-- Check the freight terms if posting scenario is freight-based
 				IF @ShipmentPostScenario = @ShipmentPostScenario_FreightBased
 				BEGIN 
@@ -2646,9 +2705,13 @@ BEGIN
 							ON RebuildInvTrans.intItemId = i.intItemId 
 						INNER JOIN tblICItemLocation ItemLocation
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
-						LEFT JOIN dbo.tblARInvoice Invoice
-							ON Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
-							AND Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
+						LEFT JOIN (
+							dbo.tblARInvoice Invoice INNER JOIN tblARInvoiceDetail InvoiceItems
+								ON Invoice.intInvoiceId = InvoiceItems.intInvoiceId
+						)
+							ON Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
+							AND Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
+							AND InvoiceItems.intInvoiceDetailId = RebuildInvTrans.intTransactionDetailId 
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
@@ -2659,6 +2722,18 @@ BEGIN
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
 						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
+						AND (
+							1 = 
+								CASE 
+									WHEN 
+										@ysnRebuildShipmentAndInvoiceAsInTransit = 1 
+										AND ISNULL(InvoiceItems.intInventoryShipmentItemId, InvoiceItems.intLoadDetailId) IS NOT NULL 
+									THEN 
+										0
+									ELSE 
+										1
+								END 
+						)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				BEGIN 
@@ -2769,7 +2844,13 @@ BEGIN
 						,[strSourceTransactionId]		= ISNULL(s.strShipmentNumber, l.strLoadNumber)
 						,[intSourceTransactionDetailId] = ISNULL(si.intInventoryShipmentItemId, ld.intLoadDetailId) 
 						--,[intFobPointId]				= t.intFobPointId
-						,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
+						,[intInTransitSourceLocationId]	= 
+							CASE 
+								WHEN @ysnRebuildShipmentAndInvoiceAsInTransit = 1 AND t.intInTransitSourceLocationId IS NULL THEN 
+									t.intItemLocationId
+								ELSE 
+									t.intInTransitSourceLocationId
+							END 
 				FROM	
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
@@ -2796,10 +2877,17 @@ BEGIN
 							ON ld.intLoadDetailId = id.intLoadDetailId
 							AND l.ysnPosted = 1
 
-				WHERE	i.strInvoiceNumber = @strTransactionId
-						AND t.intInTransitSourceLocationId IS NOT NULL 
+				WHERE	i.strInvoiceNumber = @strTransactionId						
 						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
 						AND ISNULL(item.intCategoryId, 0) = COALESCE(@intCategoryId, item.intCategoryId, 0)
+						AND (
+							1 = 
+							CASE 
+								WHEN t.intInTransitSourceLocationId IS NOT NULL THEN 1
+								WHEN @ysnRebuildShipmentAndInvoiceAsInTransit  = 1 AND t.intInTransitSourceLocationId IS NULL THEN 1
+								ELSE 0
+							END
+						)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 				BEGIN 
@@ -3457,7 +3545,23 @@ BEGIN
 					BEGIN 
 						--PRINT 'Error found in uspICCreateReceiptGLEntries'
 						GOTO _EXIT_WITH_ERROR
-					END 				
+					END
+
+					---- Create the auto-variance when item was returned via IR. 
+					--BEGIN 
+					--	SET @intReturnValue = NULL 
+					--	EXEC @intReturnValue = [uspICCreateReceiptGLEntriesForReturnVariance]
+					--		@intTransactionId 
+					--		,@strTransactionId
+					--		,@strBatchId
+					--		,@intEntityUserSecurityId
+
+					--	IF @intReturnValue <> 0 
+					--	BEGIN 
+					--		--PRINT 'Error found in uspICRepostCosting - Inventory Receipt'
+					--		GOTO _EXIT_WITH_ERROR
+					--	END 	
+					--END 
 				END
 
 				ELSE IF @strTransactionType = 'Inventory Receipt' AND @strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER

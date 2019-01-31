@@ -14,6 +14,7 @@
 	,@SeparateOnInvoice		BIT				= 0
 	,@CheckoffTax			BIT				= 0 
 	,@TaxExempt				BIT				= 0 
+	,@InvalidSetup			BIT				= 0 
 	,@Notes					NVARCHAR(500)	= NULL
 	,@RaiseError			BIT				= 0			
 	,@ErrorMessage			NVARCHAR(250)	= NULL	OUTPUT
@@ -99,8 +100,9 @@ FROM
 		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) TRD		
 WHERE
 	[intTaxCodeId] = @TaxCodeId
+	AND [ysnInvalidSetup] = 0
 
-IF UPPER(LTRIM(RTRIM(ISNULL(@CalculationMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND UPPER(LTRIM(RTRIM(ISNULL(@CalcMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage'))
+IF UPPER(LTRIM(RTRIM(ISNULL(@CalculationMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND UPPER(LTRIM(RTRIM(ISNULL(@CalcMethod,'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')) AND ISNULL(@InvalidSetup, 0) = 0
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('%s is not a valid calculation method!', 16, 1, @CalculationMethod);
@@ -135,6 +137,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[strNotes]
 		,[intConcurrencyId])
 	SELECT
@@ -154,6 +157,7 @@ BEGIN TRY
 		,ysnSeparateOnInvoice	= ISNULL(@SeparateOnInvoice, 0)
 		,ysnCheckoffTax			= ISNULL(@CheckoffTax, [ysnCheckoffTax])
 		,ysnTaxExempt			= ISNULL(@TaxExempt, 0)
+		,[ysnInvalidSetup]		= ISNULL(@InvalidSetup, 0)
 		,strNotes				= @Notes
 		,1
 	FROM
@@ -161,7 +165,8 @@ BEGIN TRY
 	CROSS APPLY
 		[dbo].[fnGetTaxCodeRateDetails]([intTaxCodeId], @InvoiceDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) TRD		
 	WHERE
-		[intTaxCodeId] = @TaxCodeId 
+		[intTaxCodeId] = @TaxCodeId
+		AND [ysnInvalidSetup] = 0
 			
 END TRY
 BEGIN CATCH

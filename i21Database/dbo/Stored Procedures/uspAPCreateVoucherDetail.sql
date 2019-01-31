@@ -74,6 +74,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		EXEC uspAPCreateVoucherDetailDirectInventory  @billId, @voucherDetailDirect
 	END 
 
+	EXEC uspAPUpdateVoucherDetailForeignRate @voucherId = @billId
+
 	INSERT INTO @voucherIds
 	SELECT @billId
 	EXEC uspAPUpdateVoucherTotal @voucherIds

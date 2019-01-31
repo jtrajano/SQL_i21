@@ -62,7 +62,7 @@
 	[dblConvertedUOMQty] NUMERIC(38, 20) NULL,
 	[ysnProcessedData] BIT NULL DEFAULT((0)),
     [intConcurrencyId] INT NULL DEFAULT((1)),
-	[intTicketId] INT,
+	[intTicketId] INT NULL,
 	[strItemNo] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strLocationNumber] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[strDiscountId] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
@@ -77,7 +77,7 @@
 	[ysnImported] [bit] NULL,
 	[intImportedById] [int] NULL,
 	[dtmImported] [datetime] NULL,
-	[intSession] [bigint],
+	[intSession] [bigint] NULL,
 	[strErrorMsg] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL, 
 	[strScaleStationImport] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
 	CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketLVStagingId]) 

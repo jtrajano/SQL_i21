@@ -8,7 +8,7 @@ AS
 DECLARE @tblTemp TABLE (intCollateralId int
 	, strLocationName nvarchar(50) COLLATE Latin1_General_CI_AS
 	, strCustomer nvarchar(50) COLLATE Latin1_General_CI_AS
-	, intReceiptNo nvarchar(50) COLLATE Latin1_General_CI_AS
+	, strReceiptNo nvarchar(50) COLLATE Latin1_General_CI_AS
 	, strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS
 	, dtmOpenDate datetime
 	, dblOriginalQuantity  numeric(24,10)
@@ -22,7 +22,7 @@ BEGIN
 		INSERT INTO @tblTemp (intCollateralId
 			, strLocationName
 			, strCustomer
-			, intReceiptNo
+			, strReceiptNo
 			, strContractNumber
 			, dtmOpenDate
 			, dblOriginalQuantity
@@ -31,7 +31,7 @@ BEGIN
 		SELECT c.intCollateralId
 			, cl.strLocationName
 			, c.strCustomer
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.strContractNumber
 			, c.dtmOpenDate
 			, isnull(c.dblOriginalQuantity,0.0) dblOriginalQuantity,isnull(c.dblRemainingQuantity,0.0) as dblRemainingQuantity,c.intCommodityId
@@ -45,7 +45,7 @@ BEGIN
 		INSERT INTO @tblTemp (intCollateralId
 			, strLocationName
 			, strCustomer
-			, intReceiptNo
+			, strReceiptNo
 			, strContractNumber
 			, dtmOpenDate
 			, dblOriginalQuantity
@@ -54,7 +54,7 @@ BEGIN
 		SELECT c.intCollateralId
 			, cl.strLocationName
 			, c.strCustomer
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.strContractNumber
 			, c.dtmOpenDate
 			, isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity,c.intCommodityId
@@ -71,7 +71,7 @@ BEGIN
 		INSERT INTO @tblTemp (intCollateralId
 			, strLocationName
 			, strCustomer
-			, intReceiptNo
+			, strReceiptNo
 			, strContractNumber
 			, dtmOpenDate
 			, dblOriginalQuantity
@@ -80,7 +80,7 @@ BEGIN
 		SELECT c.intCollateralId
 			, cl.strLocationName
 			, c.strCustomer
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.strContractNumber
 			, c.dtmOpenDate
 			, isnull(c.dblOriginalQuantity,0.0) dblOriginalQuantity,isnull(c.dblRemainingQuantity,0.0) as dblRemainingQuantity,c.intCommodityId
@@ -94,7 +94,7 @@ BEGIN
 		INSERT INTO @tblTemp (intCollateralId
 			, strLocationName
 			, strCustomer
-			, intReceiptNo
+			, strReceiptNo
 			, strContractNumber
 			, dtmOpenDate
 			, dblOriginalQuantity
@@ -103,7 +103,7 @@ BEGIN
 		SELECT c.intCollateralId
 			, cl.strLocationName
 			, c.strCustomer
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.strContractNumber
 			, c.dtmOpenDate
 			, isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity,c.intCommodityId
@@ -122,7 +122,7 @@ BEGIN
 	SELECT intCollateralId
 		, strLocationName
 		, strCustomer
-		, intReceiptNo
+		, strReceiptNo
 		, strContractNumber
 		, dtmOpenDate
 		, isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,round(dblOriginalQuantity,4)),0) dblOriginalQuantity
@@ -136,7 +136,7 @@ BEGIN
 	SELECT intCollateralId
 		, strLocationName
 		, strCustomer
-		, intReceiptNo
+		, strReceiptNo
 		, strContractNumber
 		, dtmOpenDate
 		, dblOriginalQuantity

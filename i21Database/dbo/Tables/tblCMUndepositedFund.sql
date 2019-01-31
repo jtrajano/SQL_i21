@@ -54,9 +54,10 @@ BEGIN
 	-- 1. ...if undeposited fund is already deposited
 	IF EXISTS (
 		SELECT	TOP 1 1 
-		FROM	deleted d INNER JOIN dbo.tblCMUndepositedFund undep 
-					ON d.intUndepositedFundId = undep.intUndepositedFundId
-		WHERE	d.intBankDepositId IS NOT NULL
+		FROM	deleted d JOIN dbo.tblCMUndepositedFund undep 
+		ON d.intUndepositedFundId = undep.intUndepositedFundId
+		JOIN tblCMBankTransactionDetail CM 
+		ON CM.intUndepositedFundId = d.intUndepositedFundId
 	)
 	BEGIN
 		RAISERROR('Unable to delete undeposited fund because it is used in Bank Deposit transaction.', 11, 1)

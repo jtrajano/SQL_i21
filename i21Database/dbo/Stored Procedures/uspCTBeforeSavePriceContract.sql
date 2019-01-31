@@ -71,6 +71,12 @@ BEGIN TRY
 		FROM	#ProcessFixation 
 		WHERE	intUniqueId				=	 @intUniqueId
 		
+		IF @strRowState = 'Delete'
+		BEGIN
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
+		END
+
 		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
 		
 		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
@@ -113,6 +119,12 @@ BEGIN TRY
 		FROM	tblCTPriceFixationDetail	FD
 		WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
 		
+		IF @strRowState = 'Delete'
+		BEGIN
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
+		END
+
 		IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
 		BEGIN
 			UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId

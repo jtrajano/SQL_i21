@@ -15,6 +15,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @intNSFPaymentMethodId 	INT = NULL
 DECLARE @intPaymentId 			INT = NULL
 DECLARE @strErrorMsg			NVARCHAR(MAX) = NULL
+DECLARE @strInvoiceNumbers		NVARCHAR(MAX) = NULL
 
 SELECT TOP 1 @intNSFPaymentMethodId = intPaymentMethodID
 FROM dbo.tblSMPaymentMethod 
@@ -382,7 +383,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ISNULL(intBankDepositI
 				,[intCurrencyId]				= SP.intCurrencyId
 				,[intBankTransactionTypeId]		= 2
 				,[dtmDate]						= SP.dtmDate
-				,[dblAmount]					= SUM(UF.dblAmount)
+				,[dblAmount]					= SUM(UF.dblAmount) * -1
 				,[strMemo]						= 'Reversal for ' + SP.strRecordNumber
 				,[intCompanyLocationId]			= UF.intLocationId
 				,[intEntityId]					= @intUserId
@@ -410,8 +411,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ISNULL(intBankDepositI
 				, [dtmDate]				= UF.dtmDate
 				, [intGLAccountId]		= SP.intAccountId
 				, [strDescription]		= GL.strDescription
-				, [dblDebit]			= 0
-				, [dblCredit]			= ABS(ISNULL(SP.dblAmountPaid, 0))
+				, [dblDebit]			= ABS(ISNULL(SP.dblAmountPaid, 0))
+				, [dblCredit]			= 0
 				, [intEntityId]			= SP.intEntityCustomerId
 			FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 			INNER JOIN #SELECTEDPAYMENTS SP ON UF.intSourceTransactionId = SP.intPaymentId
@@ -464,18 +465,36 @@ INNER JOIN (
     GROUP BY intEntityCustomerId
 ) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
-SELECT @strMessage = 
- CASE WHEN ysnInvoiceToCustomer = 1 THEN
-			'Invoice created for NSF Charge : ' + @strCreatedIvoices
- ELSE
-	'Bank Deposit: '+ vyu.strTransactionId + ' and Receive Payment: '+  vyu.strRecordNumber+' are reversed'
- END,
- @intPaymentId = NSFDetail.intPaymentId
- FROM 
-vyuARPaymentBankTransaction vyu
-INNER JOIN tblARNSFStagingTableDetail NSFDetail
-	ON vyu.intPaymentId = NSFDetail.intPaymentId
-WHERE intNSFTransactionId = @intNSFTransactionId
+IF ISNULL(@strCreatedIvoices, '') <> ''
+	BEGIN
+		SELECT @strInvoiceNumbers = LEFT(strInvoiceNumber, LEN(strInvoiceNumber) - 1)
+		FROM (
+			SELECT DISTINCT CAST(I.strInvoiceNumber AS VARCHAR(200))  + ', '			
+			FROM tblARInvoice I
+			INNER JOIN (
+				SELECT intID 
+				FROM fnGetRowsFromDelimitedValues(@strCreatedIvoices)
+			) NEWINVOICE ON I.intInvoiceId = NEWINVOICE.intID
+			FOR XML PATH ('')
+		) INV (strInvoiceNumber)
+	END
+
+IF EXISTS (SELECT TOP 1 NULL FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId AND ysnInvoiceToCustomer = 1)
+	BEGIN
+		SET @strMessage = 'Invoice/s created for NSF Charge : ' + @strInvoiceNumbers
+		SELECT TOP 1 @intPaymentId = intPaymentId 
+		FROM tblARNSFStagingTableDetail 
+		WHERE intNSFTransactionId = @intNSFTransactionId
+	END
+ELSE
+	BEGIN
+		SELECT @strMessage = 'Bank Deposit: '+ vyu.strTransactionId + ' and Receive Payment: '+  vyu.strRecordNumber+' are reversed'
+		     , @intPaymentId = NSFDetail.intPaymentId
+		FROM vyuARPaymentBankTransaction vyu
+		INNER JOIN tblARNSFStagingTableDetail NSFDetail
+			ON vyu.intPaymentId = NSFDetail.intPaymentId
+		WHERE intNSFTransactionId = @intNSFTransactionId
+	END
 
 EXEC dbo.uspSMAuditLog 
 		 @keyValue			= @intPaymentId

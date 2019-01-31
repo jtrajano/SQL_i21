@@ -38,6 +38,13 @@ BEGIN
 		SET @intVendorId = NULL
 	END
 
+	SELECT intCompanyLocationId
+	INTO #LicensedLocation
+	FROM tblSMCompanyLocation
+	WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1
+										WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0
+										ELSE isnull(ysnLicensed, 0) END
+
 	DECLARE @strCommodityCode NVARCHAR(50)
 	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
 		, intCommodity INT)
@@ -133,36 +140,6 @@ BEGIN
 		, strInventoryType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intPricingTypeId int)
 
-	DECLARE @tblGetStorageDetailByDate TABLE (intRowNum int
-		, intCustomerStorageId int
-		, intCompanyLocationId int	
-		, [Loc] nvarchar(100) COLLATE Latin1_General_CI_AS
-		, [Delivery Date] datetime
-		, [Ticket] nvarchar(100) COLLATE Latin1_General_CI_AS
-		, intEntityId int
-		, [Customer] nvarchar(100) COLLATE Latin1_General_CI_AS
-		, [Receipt] nvarchar(100) COLLATE Latin1_General_CI_AS
-		, [Disc Due] numeric(24,10)
-		, [Storage Due] numeric(24,10)
-		, [Balance] numeric(24,10)
-		, intStorageTypeId int
-		, [Storage Type] nvarchar(100) COLLATE Latin1_General_CI_AS
-		, intCommodityId int
-		, [Commodity Code] nvarchar(100) COLLATE Latin1_General_CI_AS
-		, [Commodity Description] nvarchar(100) COLLATE Latin1_General_CI_AS
-		, strOwnedPhysicalStock nvarchar(100) COLLATE Latin1_General_CI_AS
-		, ysnReceiptedStorage bit
-		, ysnDPOwnedType bit
-		, ysnGrainBankType bit
-		, ysnCustomerStorage bit
-		, strCustomerReference  nvarchar(100) COLLATE Latin1_General_CI_AS
- 		, dtmLastStorageAccrueDate  datetime
- 		, strScheduleId nvarchar(100) COLLATE Latin1_General_CI_AS
-		, strItemNo nvarchar(100) COLLATE Latin1_General_CI_AS
-		, strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS
-		, intCommodityUnitMeasureId int
-		, intItemId int)
-
 	DECLARE @mRowNumber INT
 	DECLARE @intCommodityId1 INT
 	DECLARE @strDescription NVARCHAR(50)
@@ -251,20 +228,20 @@ BEGIN
 				, intContractHeaderId
 				, strContractNumber = CD.strContract
 				, strLocationName
-				, dtmEndDate --= CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
+				, dtmEndDate = dtmSeqEndDate--= CASE WHEN ISNULL(strFutureMonth,'') <> '' THEN CONVERT(DATETIME, REPLACE(strFutureMonth, ' ', ' 1, ')) ELSE dtmEndDate END
 				, strFutureMonth
-				, dblBalance = CD.dblQuantity
+				, dblBalance = CD.dblQtyinCommodityStockUOM
 				, intUnitMeasureId
 				, intPricingTypeId
 				, intContractTypeId
 				, intCompanyLocationId
 				, strContractType
-				, strPricingType
+				, strPricingType = CD.strPricingTypeDesc
 				, intContractDetailId
 				, intContractStatusId
 				, intEntityId
 				, intCurrencyId
-				, strType = (CD.strContractType + ' ' + CD.strPricingType) COLLATE Latin1_General_CI_AS
+				, strType = (CD.strContractType + ' ' + CD.strPricingTypeDesc) COLLATE Latin1_General_CI_AS
 				, intItemId
 				, strItemNo
 				, dtmContractDate
@@ -273,8 +250,9 @@ BEGIN
 				, intFutureMonthId
 				, strCategory
 				, strFutMarketName
-			FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
+			FROM tblCTContractBalance CD
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
+			AND   CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 						
 			DECLARE @tblGetOpenFutureByDate TABLE (intFutOptTransactionId INT
 				, intOpenContract INT
@@ -366,7 +344,7 @@ BEGIN
 												ELSE (CASE WHEN ISNULL(CD.strFutureMonth, '') = '' THEN RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(CD.strFutureMonth, ' ', ' 1, ')) , 106), 8) END) END COLLATE Latin1_General_CI_AS
 					, strContractEndMonthNearBy = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
 													ELSE (CASE WHEN ISNULL(CD.strFutureMonth, '') = '' THEN RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(CD.strFutureMonth, ' ', ' 1, ')) , 106), 8) END) END COLLATE Latin1_General_CI_AS
-					, dblTotal = CASE WHEN intContractTypeId = 1 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0)) ELSE - dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((CD.dblBalance), 0)) END
+					, dblTotal = CASE WHEN intContractTypeId = 1 THEN  ISNULL(CD.dblBalance, 0) ELSE - ISNULL(CD.dblBalance, 0) END
 					, CD.intUnitMeasureId intFromCommodityUnitMeasureId
 					, CD.strEntityName
 					, CD.intItemId
@@ -380,13 +358,9 @@ BEGIN
 					, CD.intContractDetailId
 				FROM @tblGetOpenContractDetail CD
 				JOIN tblCTContractDetail det ON CD.intContractDetailId = det.intContractDetailId
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CD.intCommodityId AND CD.intUnitMeasureId = ium.intUnitMeasureId AND CD.intContractStatusId <> 3
-					AND CD.intCompanyLocationId IN (SELECT intCompanyLocationId
-													FROM tblSMCompanyLocation
-													WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																						ELSE isnull(ysnLicensed, 0) END)
 				WHERE intContractTypeId IN (1, 2) AND CD.intCommodityId = @intCommodityId
+					AND CD.intContractStatusId <> 3
+					AND CD.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					AND CD.intCompanyLocationId = ISNULL(@intLocationId, CD.intCompanyLocationId)
 					AND CD.intEntityId = ISNULL(@intVendorId, CD.intEntityId)
 			) t WHERE dblTotal <> 0
@@ -469,6 +443,145 @@ BEGIN
 			LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 			WHERE t.intCommodityId = @intCommodityId
 
+			--=============================
+			-- Storage Detail By Date
+			--=============================
+			SELECT * INTO #tblGetStorageDetailByDate
+			FROM (
+				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intStorageHistoryId ASC)
+					, a.intCustomerStorageId
+					, a.intCompanyLocationId
+					, c.strLocationName
+					, strContractEndMonth = (CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+					, strDeliveryDate = (CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+					, a.intEntityId
+					, strCustomerName = E.strName
+					, a.strDPARecieptNumber [Receipt]
+					, dblDiscDue = a.dblDiscountsDue
+					, a.dblStorageDue
+					, dblBalance = (CASE WHEN gh.strType ='Reduced By Inventory Shipment' OR gh.strType = 'Settlement' THEN - gh.dblUnits ELSE gh.dblUnits END)
+					, a.intStorageTypeId
+					, strStorageType = b.strStorageTypeDescription
+					, a.intCommodityId
+					, CM.strCommodityCode
+					, strCommodityDescription = CM.strDescription
+					, b.strOwnedPhysicalStock
+					, b.ysnReceiptedStorage
+					, b.ysnDPOwnedType
+					, b.ysnGrainBankType
+					, b.ysnActive ysnCustomerStorage
+					, a.strCustomerReference
+					, a.dtmLastStorageAccrueDate
+					, c1.strScheduleId
+					, i.intItemId
+					, i.strItemNo
+					, i.intCategoryId
+					, strCategory = Category.strCategoryCode
+					, ium.intCommodityUnitMeasureId
+					, t.dtmTicketDateTime
+					, intTicketId = (CASE WHEN gh.intTransactionTypeId = 1 THEN gh.intTicketId
+										WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
+										WHEN gh.intTransactionTypeId = 3 THEN gh.intTransferStorageId
+										ELSE gh.intCustomerStorageId END)
+					, strTicketType = (CASE WHEN gh.intTransactionTypeId = 1 THEN 'Scale Storage'
+										WHEN gh.intTransactionTypeId = 4 THEN 'Settle Storage'
+										WHEN gh.intTransactionTypeId = 3 THEN 'Transfer Storage'
+										ELSE 'Customer/Maintain Storage' END) COLLATE Latin1_General_CI_AS
+					, strTicketNumber = (CASE WHEN gh.intTransactionTypeId = 1 THEN t.strTicketNumber
+										WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
+										WHEN gh.intTransactionTypeId = 3 THEN gh.strTransferTicket
+										ELSE a.strStorageTicketNumber END)
+					, gh.intInventoryReceiptId
+					, gh.intInventoryShipmentId
+					, strReceiptNumber = ISNULL((SELECT strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = gh.intInventoryReceiptId), '')
+					, strShipmentNumber = ISNULL((SELECT strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = gh.intInventoryShipmentId), '')
+					, b.intStorageScheduleTypeId
+					, strFutureMonth = '' COLLATE Latin1_General_CI_AS
+				FROM tblGRStorageHistory gh
+				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
+				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
+				JOIN tblICItem i ON i.intItemId = a.intItemId
+				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
+				JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
+				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
+				LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
+				JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
+				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
+				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
+				LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
+				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+				
+				UNION ALL
+				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intStorageHistoryId ASC)
+					, a.intCustomerStorageId
+					, a.intCompanyLocationId
+					, c.strLocationName
+					, strContractEndMonth = (CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+					, strDeliveryDate = (CASE WHEN gh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), gh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), a.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+					, a.intEntityId
+					, strCustomerName = E.strName
+					, [Receipt] = a.strDPARecieptNumber
+					, dblDiscDue = a.dblDiscountsDue 
+					, a.dblStorageDue
+					, dblBalance = (CASE WHEN gh.strType ='Reduced By Inventory Shipment' OR gh.strType = 'Settlement' THEN - gh.dblUnits ELSE gh.dblUnits END)
+					, a.intStorageTypeId
+					, strStorageType = b.strStorageTypeDescription
+					, a.intCommodityId
+					, CM.strCommodityCode
+					, strCommodityDescription = CM.strDescription
+					, b.strOwnedPhysicalStock
+					, b.ysnReceiptedStorage
+					, b.ysnDPOwnedType
+					, b.ysnGrainBankType
+					, b.ysnActive ysnCustomerStorage
+					, a.strCustomerReference
+					, a.dtmLastStorageAccrueDate
+					, c1.strScheduleId
+					, i.intItemId
+					, i.strItemNo
+					, i.intCategoryId
+					, strCategory = Category.strCategoryCode
+					, ium.intCommodityUnitMeasureId
+					, dtmTicketDateTime = NULL
+					, intTicketId = (CASE WHEN gh.intTransactionTypeId = 1 THEN gh.intTicketId
+										WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
+										WHEN gh.intTransactionTypeId = 3 THEN gh.intTransferStorageId
+										ELSE gh.intCustomerStorageId END)
+					, strTicketType = (CASE WHEN gh.intTransactionTypeId = 1 THEN 'Scale Storage'
+										WHEN gh.intTransactionTypeId = 4 THEN 'Settle Storage'
+										WHEN gh.intTransactionTypeId = 3 THEN 'Transfer Storage'
+										ELSE 'Customer/Maintain Storage' END) COLLATE Latin1_General_CI_AS
+					, strTicketNumber = (CASE WHEN gh.intTransactionTypeId = 1 THEN NULL
+										WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
+										WHEN gh.intTransactionTypeId = 3 THEN gh.strTransferTicket
+										ELSE a.strStorageTicketNumber END)
+					, intInventoryReceiptId = (CASE WHEN gh.strType = 'From Inventory Adjustment' THEN gh.intInventoryAdjustmentId ELSE gh.intInventoryReceiptId END)
+					, gh.intInventoryShipmentId
+					, strReceiptNumber = (CASE WHEN gh.strType ='From Inventory Adjustment' THEN gh.strTransactionId
+											ELSE ISNULL((SELECT strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = gh.intInventoryReceiptId), '') END)
+					, strShipmentNumber = ISNULL((SELECT strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = gh.intInventoryShipmentId), '')
+					, b.intStorageScheduleTypeId
+					, strFutureMonth = '' COLLATE Latin1_General_CI_AS
+				FROM tblGRStorageHistory gh
+				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
+				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
+				JOIN tblICItem i ON i.intItemId = a.intItemId
+				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
+				JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
+				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
+				LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
+				JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
+				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
+				JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
+				WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+			)t
+
 			-- inventory
 			INSERT INTO @InventoryStock(strCommodityCode
 				, strItemNo
@@ -481,7 +594,7 @@ BEGIN
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
-				, dblTotal = SUM(dblTotal)
+				, dblTotal = dblTotal
 				, strLocationName
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
@@ -505,66 +618,9 @@ BEGIN
 				WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity,0) <> 0 AND ysnInTransit = 0
 					AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND s.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-											WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																				WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																				ELSE ISNULL(ysnLicensed, 0) END)
-			) t GROUP BY strCommodityCode
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType
-				, strItemNo
-				, strCategoryCode
-			
-			-- inventory basis
-			SELECT strCommodityCode
-				, strItemNo
-				, dblTotal = SUM(dblTotal)
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType
-				, intCategoryId
-				, strCategory
-			INTO #tempInvPurBasis
-			FROM (
-				SELECT strCommodityCode
-					, i.strItemNo
-					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(s.dblQuantity,0))
-					, strLocationName
-					, intCommodityId = @intCommodityId
-					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
-					, intPricingTypeId
-					, i.intCategoryId
-					, strCategory = Category.strCategoryCode
-				FROM vyuRKGetInventoryValuation s
-				JOIN tblICItem i ON i.intItemId = s.intItemId
-				JOIN tblICItemUOM iuom ON s.intItemId = iuom.intItemId AND iuom.ysnStockUnit = 1
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
-				JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
-				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
-				LEFT JOIN tblICInventoryReceipt ir ON ir.strReceiptNumber = s.strTransactionId
-				LEFT JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = ir.intInventoryReceiptId
-				LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
-				WHERE i.intCommodityId = @intCommodityId AND iuom.ysnStockUnit = 1 AND ISNULL(s.dblQuantity, 0) <> 0
-					AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND s.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-											WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																				WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																				ELSE isnull(ysnLicensed, 0) END)
-			) t WHERE intPricingTypeId = 2
-			GROUP BY strCommodityCode
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType
-				, strItemNo
-				, intCategoryId
-				, strCategory
-			
+					AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+			) t
+
 			--Collateral
 			INSERT INTO @InventoryStock(strCommodityCode
 				, dblTotal
@@ -609,87 +665,54 @@ BEGIN
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
 			
-			-- OFfSite
-			INSERT INTO @InventoryStock(strCommodityCode
-				, dblTotal
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType)
-			SELECT strCommodityCode
-				, dblTotal = SUM(dblTotal)
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType
-			FROM (
-				SELECT strCommodityCode
+			--=========================================
+			-- Includes DP based on Company Preference
+			--========================================
+			If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0)--DP is already included in Inventory we are going to subtract it here (reverse logic in including DP)
+			BEGIN
+				INSERT INTO @InventoryStock(strCommodityCode
+					, strItemNo
+					, strCategory
 					, dblTotal
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
-					, strInventoryType = 'OffSite' COLLATE Latin1_General_CI_AS
-				FROM (
-					SELECT strCommodityCode
-						, strLocationName
-						, c.intCommodityId
-						, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId,(Balance))
-						, CH.intCompanyLocationId
-					FROM @tblGetStorageDetailByDate CH
-					JOIN tblICCommodity c ON CH.intCommodityId = c.intCommodityId
-					WHERE ysnCustomerStorage = 1 AND strOwnedPhysicalStock = 'Company' AND CH.intCommodityId = @intCommodityId
-						AND CH.intCompanyLocationId = ISNULL(@intLocationId, CH.intCompanyLocationId)
-				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-													WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																						ELSE ISNULL(ysnLicensed, 0) END)
-			) t GROUP BY strCommodityCode
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType
-			
-			-- DP
-			INSERT INTO @InventoryStock(strCommodityCode
-				, dblTotal
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType)
-			SELECT strCommodityCode
-				, dblTotal = SUM(dblTotal)
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType
-			FROM (
+					, strInventoryType)
 				SELECT strCommodityCode
-					, dblTotal
+					, strItemNo
+					, strCategory
+					, dblTotal = -sum(dblTotal)
 					, strLocationName
 					, intCommodityId
-					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-					, strInventoryType = 'DP' COLLATE Latin1_General_CI_AS
+					, intFromCommodityUnitMeasureId
+					, 'Company Titled' COLLATE Latin1_General_CI_AS
 				FROM (
-					SELECT strCommodityCode
-						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(Balance,0)))
-						, strLocationName
-						, c.intCommodityId
+					SELECT intTicketId
+						, strTicketType
+						, strTicketNumber
+						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(dblBalance,0)))
 						, ch.intCompanyLocationId
-					FROM @tblGetStorageDetailByDate ch
-					JOIN tblICCommodity c ON ch.intCommodityId = c.intCommodityId
-					WHERE ch.intCommodityId = @intCommodityId
+						, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, dtmTicketDateTime
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, strCommodityCode
+					FROM #tblGetStorageDetailByDate ch
+					WHERE ch.intCommodityId  = @intCommodityId
 						AND ysnDPOwnedType = 1
 						AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
-					) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-														WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																							WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																							ELSE ISNULL(ysnLicensed, 0) END
-			)) t GROUP BY strCommodityCode
-				, strLocationName
-				, intCommodityId
-				, intFromCommodityUnitMeasureId
-				, strInventoryType
+					)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				GROUP BY strCommodityCode
+					, strItemNo
+					, strCategory
+					, strLocationName
+					, intCommodityId
+					, intFromCommodityUnitMeasureId
+			END
 
 			INSERT INTO @FinalList(intContractHeaderId
 				, strContractNumber
@@ -737,48 +760,53 @@ BEGIN
 				, strDeliveryDate
 			FROM  (
 				SELECT DISTINCT cd.intContractHeaderId
-					, cd.strContractNumber
-					, cd.intCommodityId
-					, cd.strCommodityCode
+					, strContractNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
+					, ch.intCommodityId
+					, com.strCommodityCode
 					, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
 					, cd.intCompanyLocationId
-					, cd.strLocationName
+					, v.strLocationName
 					, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
 					, strContractEndMonthNearBy = 'Near By' COLLATE Latin1_General_CI_AS
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))
 					, intSeqId = 6
 					, um.strUnitMeasure
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-					, cd.strEntityName
+					, strEntityName = v.strEntity
 					, intOrderId = 6
 					, cd.intItemId
-					, cd.strItemNo
-					, cd.strCategory
+					, i.strItemNo
+					, strCategory = cat.strCategoryCode
 					, cd.intFutureMarketId
-					, cd.strFutMarketName
+					, fm.strFutMarketName
 					, cd.intFutureMonthId
-					, cd.strFutureMonth
-					, strDeliveryDate = dbo.fnRKFormatDate(det.dtmEndDate, 'MMM yyyy')
+					, mnt.strFutureMonth
+					, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
 					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
 					, ri.intSourceId
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
 				INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-				INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3 AND cd.intContractTypeId = 2
-				JOIN (SELECT intContractDetailId, dtmEndDate FROM tblCTContractDetail) det ON cd.intContractDetailId = det.intContractDetailId
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+				INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
+				INNER JOIN tblICCommodity com on ch.intCommodityId = com.intCommodityId
+				INNER JOIN tblICItem i on cd.intItemId = i.intItemId
+				INNER JOIN tblICCategory cat on i.intCategoryId = cat.intCategoryId
+				INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
+				INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
+				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
 				LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
 				LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
-				WHERE cd.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
+				LEFT JOIN tblCTPriceFixationDetail pfd ON invD.intInvoiceDetailId = pfd.intInvoiceDetailId
+				WHERE ch.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
 					AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND inv.intInvoiceId IS NULL
-			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																					ELSE ISNULL(ysnLicensed, 0) END)
+					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
+					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
+			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				
 			INSERT INTO @FinalList(intContractHeaderId
 				, strContractNumber
@@ -865,10 +893,7 @@ BEGIN
 				WHERE v.strTransactionType = 'Inventory Receipt' AND cd.intCommodityId = @intCommodityId
 					AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate) AND ISNULL(strTicketStatus, '') <> 'V'
-			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																					ELSE ISNULL(ysnLicensed, 0) END)
+			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			GROUP BY intContractHeaderId
 				, strContractNumber
 				, intCommodityId
@@ -1260,10 +1285,7 @@ FROM (
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = m.intUnitMeasureId
 	INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = f.intFutureMonthId
 	INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
-	AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-								WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																	WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																	ELSE ISNULL(ysnLicensed, 0) END)
+	AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
 	INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
 	WHERE f.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
@@ -1360,10 +1382,7 @@ FROM (
 	JOIN tblICCommodityUnitMeasure cuc1 ON f.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 	JOIN tblRKOptionsMonth om ON om.strOptionMonth = oc.strOptionMonth
 	INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
-	AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-								WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																	WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																	ELSE ISNULL(ysnLicensed, 0) END)
+	AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
 	INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 2
 	WHERE f.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
@@ -1449,10 +1468,7 @@ BEGIN
 		JOIN tblICCommodityUnitMeasure cuc1 ON f.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 		INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = f.intFutureMonthId
 		INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
-		AND intCompanyLocationId IN (
-			SELECT intCompanyLocationId
-			FROM tblSMCompanyLocation
-			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END)
+		AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
 		INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
 		WHERE f.intCommodityId IN (select distinct intCommodity from @Commodity c)

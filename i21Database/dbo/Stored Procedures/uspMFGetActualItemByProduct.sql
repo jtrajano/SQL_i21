@@ -42,7 +42,7 @@ BEGIN
 
 	IF @intRecipeTypeId = 3
 	BEGIN
-		SELECT I.intItemId
+		SELECT Distinct I.intItemId
 			,I.strItemNo
 			,I.strDescription
 			,CASE 
@@ -108,7 +108,7 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SELECT I.intItemId
+		SELECT Distinct I.intItemId
 			,I.strItemNo
 			,I.strDescription
 			,CASE 

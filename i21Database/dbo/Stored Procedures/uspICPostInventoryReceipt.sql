@@ -1342,6 +1342,7 @@ BEGIN
 
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
+
 					-- Retain this code for Transfer Orders that was posted not using the In-Transit costing. 
 					IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 					BEGIN 
@@ -1403,6 +1404,18 @@ BEGIN
 							,@intEntityUserSecurityId
 
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+					--BEGIN 
+					--	-- Create an auto-variance for inventory returns posted in IR. 
+					--	EXEC @intReturnValue = [uspICCreateReceiptGLEntriesForReturnVariance]
+					--		@intTransactionId 
+					--		,@strTransactionId
+					--		,@strBatchId
+					--		,@intEntityUserSecurityId
+
+					--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					--END
+
 				END 			
 			END
 		END
@@ -2130,6 +2143,8 @@ BEGIN
 		,@intTransactionId
 		,@intEntityUserSecurityId
 
+	EXEC dbo.uspICProcessPayables @intTransactionId, @ysnPost, @intEntityUserSecurityId
+	
 	COMMIT TRAN @TransactionName
 END 
     

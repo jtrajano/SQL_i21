@@ -69,7 +69,7 @@ BEGIN
 		, intCollateralId int
 		, strLocationName nvarchar(250) COLLATE Latin1_General_CI_AS
 		, strCustomer nvarchar(250) COLLATE Latin1_General_CI_AS
-		, intReceiptNo nvarchar(250) COLLATE Latin1_General_CI_AS
+		, strReceiptNo nvarchar(250) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId int
 		, strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS
 		, strCustomerReference nvarchar(100) COLLATE Latin1_General_CI_AS
@@ -111,7 +111,7 @@ BEGIN
 		, intCollateralId int
 		, strLocationName nvarchar(250) COLLATE Latin1_General_CI_AS
 		, strCustomer nvarchar(250) COLLATE Latin1_General_CI_AS
-		, intReceiptNo nvarchar(250) COLLATE Latin1_General_CI_AS
+		, strReceiptNo nvarchar(250) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId int
 		, strContractNumber nvarchar(100) COLLATE Latin1_General_CI_AS
 		, strCustomerReference nvarchar(100) COLLATE Latin1_General_CI_AS
@@ -201,33 +201,34 @@ BEGIN
 		, intFutureMonthId
 		, strCurrency)
 	SELECT ROW_NUMBER() OVER (PARTITION BY CD.intContractDetailId ORDER BY dtmContractDate DESC) intRowNum
-		, strCommodityCode = CD.strCommodity
+		, strCommodityCode = CD.strCommodityCode
 		, intCommodityId
 		, intContractHeaderId
 		, strContractNumber = CD.strContract
 		, strLocationName
 		, dtmEndDate
-		, dblBalance = CD.dblQuantity
+		, dblBalance = CD.dblQtyinCommodityStockUOM
 		, intUnitMeasureId
 		, intPricingTypeId
 		, intContractTypeId
 		, intCompanyLocationId
 		, strContractType
-		, strPricingType
+		, strPricingType = CD.strPricingTypeDesc
 		, CD.intContractDetailId
 		, intContractStatusId
 		, intEntityId
 		, intCurrencyId
-		, strType = (CD.strContractType + ' ' + CD.strPricingType) COLLATE Latin1_General_CI_AS
+		, strType = (CD.strContractType + ' ' + CD.strPricingTypeDesc) COLLATE Latin1_General_CI_AS
 		, intItemId
 		, strItemNo
 		, strEntityName = CD.strCustomer
 		, NULL intFutureMarketId
 		, NULL intFutureMonthId
 		, strCurrency 
-	FROM dbo.fnCTGetContractBalance(null,null,null,'01-01-1900',@dtmToDate,NULL,NULL,NULL,NULL) CD
+	FROM tblCTContractBalance CD
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
 		AND CD.intCommodityId in (select intCommodity from @Commodity)
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 
 	--=============================================================
 	-- STORAGE
@@ -370,7 +371,7 @@ BEGIN
 		, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intReceiptNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strReceiptNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId int
 		, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dtmOpenDate datetime
@@ -392,7 +393,7 @@ BEGIN
 			, cl.strLocationName
 			, ch.strItemNo
 			, ch.strEntityName
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.intContractHeaderId
 			, strContractNumber
 			,  c.dtmOpenDate
@@ -665,7 +666,7 @@ BEGIN
 					, strLocationName
 					, strItemNo
 					, strEntityName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -709,7 +710,7 @@ BEGIN
 					, strLocationName
 					, strItemNo
 					, strEntityName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate

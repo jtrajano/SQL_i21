@@ -11,7 +11,7 @@ AS
 	   ':'+SUBSTRING(CAST(intSession AS NVARCHAR(MAX)),11,2) +
 	   ':'+SUBSTRING(CAST(intSession AS NVARCHAR(MAX)),13,2) AS DATETIME) dtmSession,
 	   intSession,
-	   'Contract' AS strType
+	   'Contract' COLLATE Latin1_General_CI_AS AS strType
 	   FROM tblCTContractImport
 
 	   UNION 

@@ -8,9 +8,9 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @strLotNumber NVARCHAR(50)
+	DECLARE @strLotNumber NVARCHAR(MAX)
 	DECLARE @xmlDocumentId INT
-	DECLARE @strReceiptNo NVARCHAR(50)
+	DECLARE @strReceiptNo NVARCHAR(MAX)
 	DECLARE @variable1 VARBINARY(max)
 	DECLARE @variable2 VARBINARY(max)
 	DECLARE @variable3 VARBINARY(max)
@@ -25,7 +25,7 @@ BEGIN TRY
 	DECLARE @temp_xml_table TABLE (
 		[fieldname] NVARCHAR(50)
 		,condition NVARCHAR(20)
-		,[from] NVARCHAR(50)
+		,[from] NVARCHAR(MAX)
 		,[to] NVARCHAR(50)
 		,[join] NVARCHAR(10)
 		,[begingroup] NVARCHAR(50)
@@ -41,7 +41,7 @@ BEGIN TRY
 	FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH (
 			[fieldname] NVARCHAR(50)
 			,condition NVARCHAR(20)
-			,[from] NVARCHAR(50)
+			,[from] NVARCHAR(MAX)
 			,[to] NVARCHAR(50)
 			,[join] NVARCHAR(10)
 			,[begingroup] NVARCHAR(50)
@@ -51,7 +51,7 @@ BEGIN TRY
 
 	SELECT @strLotNumber = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'strLotNo'
+	WHERE [fieldname] = 'strLotNumber'
 
 	SELECT @strReceiptNo = [from]
 	FROM @temp_xml_table
@@ -157,16 +157,16 @@ BEGIN TRY
 
 	SELECT CONVERT(NVARCHAR, LI.dtmReceiptDate, 1) AS dtmReceiptDate
 		,LI.strWarehouseRefNo AS strEntryNo
-		,RL.strContainerNo AS stContainerNo
+		,L.strContainerNo AS stContainerNo
 		,LI.strReceiptNumber AS strOrderNo
-		,RL.strParentLotNumber
-		,RL.strLotNumber
-		,(ISNULL(RL.dblGrossWeight, 0) - ISNULL(RL.dblTareWeight, 0)) AS dblNetWeight
+		,PL.strParentLotNumber
+		,L.strLotNumber
+		,L.dblQty AS dblNetWeight
 		,UOM.strUnitMeasure
 		,I.strItemNo
 		,I.strDescription
-		,RL.strContainerNo AS strCustomerPO
-		,RL.strLotAlias AS strBatchNo
+		,L.strContainerNo AS strCustomerPO
+		,L.strLotAlias AS strBatchNo
 		,Logo1 = strColumn1
 		,Logo2 = strColumn2
 		,Logo3 = strColumn3
@@ -174,23 +174,23 @@ BEGIN TRY
 		,Logo5 = strColumn5
 		,Logo6 = strColumn6
 		,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-		,Ltrim(convert(NUMERIC(24, 2), (ISNULL(RL.dblGrossWeight, 0) - ISNULL(RL.dblTareWeight, 0)))) + ' ' + UOM.strUnitMeasure AS Weight_UOM
+		,Ltrim(convert(NUMERIC(24, 2), L.dblQty)) + ' ' + UOM.strUnitMeasure AS Weight_UOM
 	FROM tblMFLotInventory LI
-	JOIN tblICInventoryReceiptItemLot RL ON RL.intLotId = LI.intLotId
-	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
-	JOIN tblICInventoryReceipt R ON RI.intInventoryReceiptId = R.intInventoryReceiptId
-	JOIN tblICItem I ON I.intItemId = RI.intItemId
+	JOIN tblICLot L ON L.intLotId = LI.intLotId
+	JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+	JOIN tblICItem I ON I.intItemId = L.intItemId
 	LEFT JOIN @tblMFCustomValue tbl ON tbl.intItemId = I.intItemId
-	LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RL.intItemUnitMeasureId
-	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
-	WHERE RL.strLotNumber IN (
+	JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = L.intItemUOMId
+	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+	WHERE L.intLotId IN (
 			SELECT x.Item COLLATE DATABASE_DEFAULT
 			FROM dbo.fnSplitString(@strLotNumber, '^') x
 			)
-		AND R.strReceiptNumber IN (
+		AND LI.strReceiptNumber IN (
 			SELECT x.Item COLLATE DATABASE_DEFAULT
 			FROM dbo.fnSplitString(@strReceiptNo, '^') x
 			)
+	ORDER BY L.strLotNumber
 END TRY
 
 BEGIN CATCH

@@ -4,39 +4,12 @@ BEGIN
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@xmlDocumentId INT
-		,@intBlendAttributeId INT
-		,@strBlendAttributeValue NVARCHAR(50)
-
-	SELECT @intBlendAttributeId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Category for Ingredient Demand Report'
-
-	SELECT @strBlendAttributeValue = ''
-
-	SELECT @strBlendAttributeValue = @strBlendAttributeValue + strAttributeValue + ','
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intAttributeId = @intBlendAttributeId
-	AND strAttributeValue <> ''
-
-	If @strBlendAttributeValue is null or @strBlendAttributeValue=''
-	Begin
-		Select @strBlendAttributeValue=''
-		Select @strBlendAttributeValue=@strBlendAttributeValue+strCategoryCode+','
-		from tblICCategory
-	End
-		
-
-	IF @strBlendAttributeValue = ''
-	BEGIN
-		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
-		FROM tblICCategory
-	END
-
-	IF @strBlendAttributeValue = ''
-	BEGIN
-		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
-		FROM tblICCategory
-	END
+		,@strBlendAttributeValue NVARCHAR(MAX)
+		,@strProcessName NVARCHAR(50)
+		,@intManufacturingProcessId INT
+		,@intCompanyLocationId INT
+		,@strCompanyLocationName NVARCHAR(50)
+		,@intLocationId INT
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -78,8 +51,57 @@ BEGIN
 		SELECT @strItemNo = '%'
 	END
 
-	DECLARE @intLocationId INT
-		,@strSQL NVARCHAR(Max)
+	SELECT @strProcessName = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strProcessName'
+
+	SELECT @strCompanyLocationName = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strLocationName'
+
+	IF @strCompanyLocationName IS NULL
+		SELECT @strCompanyLocationName = ''
+
+	IF IsNULL(@strProcessName, '') <> ''
+	BEGIN
+		SELECT @strBlendAttributeValue = ''
+
+		SELECT @intLocationId = intCompanyLocationId
+		FROM tblSMCompanyLocation
+		WHERE strLocationName = @strCompanyLocationName
+
+		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strAttributeValue + ','
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intAttributeId = 78 --Category for Ingredient Demand Report
+			AND intLocationId = CASE 
+				WHEN @intLocationId IS NOT NULL
+					THEN @intLocationId
+				ELSE intLocationId
+				END
+			AND intManufacturingProcessId IN (
+				SELECT intManufacturingProcessId
+				FROM tblMFManufacturingProcess
+				WHERE strProcessName = @strProcessName
+				)
+
+		IF @strBlendAttributeValue IS NULL
+			OR @strBlendAttributeValue = ''
+		BEGIN
+			SELECT @strBlendAttributeValue = ''
+
+			SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
+			FROM tblICCategory
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT @strBlendAttributeValue = ''
+
+		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
+		FROM tblICCategory
+	END
+
+	DECLARE @strSQL NVARCHAR(Max)
 		,@dtmCurrentDate DATETIME
 		,@dtmCurrentDateTime DATETIME
 		,@intRecordId INT
@@ -137,158 +159,182 @@ BEGIN
 		,strStartingYear NVARCHAR(50)
 		)
 
-	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
 	SET @dtmCurrentDateTime = GetDate()
 
-	IF EXISTS (
-			SELECT *
-			FROM tblMFSchedule
-			WHERE ysnStandard = 1
-			)
-	BEGIN
-		INSERT INTO @tblMFItemPlan
-		SELECT DATEPART(Month, CD.dtmShiftStartTime) intMonthId
-			,DATENAME(Month, CD.dtmShiftStartTime) dtmShiftStartTime
-			,II.strItemNo
-			,II.strDescription
-			,CL.strLocationName
-			,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, IU.intItemUOMId, (RI.dblCalculatedQuantity * SWD.dblPlannedQty))) dblMaxPoundsRequired
-			,II.intItemId
-			,0 dblSafetyStockPounds
-			,0 dblUnPackedPounds
-			,0 dblPoundsAvailable
-			,0 dblTotalPoundsAvailable
-			,'' strWorkInstruction
-			,0 dblRunningTotal
-			,0 dblAvlQtyBreakUp
-			,CL.intCompanyLocationId
-			,0 dblUnpackedBreakUp
-			,0 dblAvlBreakup
-			,DATEPART(YEAR, CD.dtmShiftStartTime) strStartingYear
-		FROM dbo.tblMFSchedule S
-		JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
-			AND SW.intStatusId <> 13
-		JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON SWD.intScheduleWorkOrderId = SW.intScheduleWorkOrderId
-		JOIN dbo.tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
-		JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
-		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
-		JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
-			AND R.intLocationId = W.intLocationId
-			AND R.ysnActive = 1
-		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-			AND RI.intRecipeItemTypeId = 1
-		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
-			AND C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
-				)
-		JOIN tblICItemUOM IU ON IU.intItemId = II.intItemId
-			AND IU.ysnStockUnit = 1
-		WHERE S.ysnStandard = 1
-			AND CD.dtmCalendarDate >= @dtmCurrentDate
-		GROUP BY DATEPART(MONTH, CD.dtmShiftStartTime)
-			,CD.dtmShiftStartTime
-			,II.strItemNo
-			,II.strDescription
-			,CL.strLocationName
-			,II.intItemId
-			--,II.strWorkInstruction
-			,CL.intCompanyLocationId
-			,DATEPART(YEAR, CD.dtmShiftStartTime)
-		ORDER BY strItemNo
-			,strStartingYear
-			,intMonthId
-	END
-	ELSE
-	BEGIN
-		INSERT INTO @tblMFItemPlan
-		SELECT DATEPART(Month, W.dtmPlannedDate) intMonthId
-			,DATENAME(Month, W.dtmPlannedDate) dtmShiftStartTime
-			,II.strItemNo
-			,II.strDescription
-			,CL.strLocationName
-			,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, IU.intItemUOMId, (RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity))) dblMaxPoundsRequired
-			,II.intItemId
-			,0 dblSafetyStockPounds
-			,0 dblUnPackedPounds
-			,0 dblPoundsAvailable
-			,0 dblTotalPoundsAvailable
-			,'' strWorkInstruction
-			,0 dblRunningTotal
-			,0 dblAvlQtyBreakUp
-			,CL.intCompanyLocationId
-			,0 dblUnpackedBreakUp
-			,0 dblAvlBreakup
-			,DATEPART(YEAR, W.dtmPlannedDate) strStartingYear
-		FROM dbo.tblMFManufacturingCell MC
-		JOIN dbo.tblMFWorkOrder W ON MC.intManufacturingCellId = W.intManufacturingCellId
-		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
-		JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
-			AND R.intLocationId = W.intLocationId
-			AND R.ysnActive = 1
-		JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-			AND RI.intRecipeItemTypeId = 1
-		JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
-		JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
-			AND C.strCategoryCode IN (
-				SELECT Item Collate Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
-				)
-		JOIN tblICItemUOM IU ON IU.intItemId = II.intItemId
-			AND IU.ysnStockUnit = 1
-		WHERE W.dtmPlannedDate >= @dtmCurrentDate
-			AND W.dblQuantity - W.dblProducedQuantity > 0
-		GROUP BY DATEPART(MONTH, W.dtmPlannedDate)
-			,W.dtmPlannedDate
-			,II.strItemNo
-			,II.strDescription
-			,CL.strLocationName
-			,II.intItemId
-			--,II.strWorkInstruction
-			,CL.intCompanyLocationId
-			,DATEPART(YEAR, W.dtmPlannedDate)
-		ORDER BY strItemNo
-			,strStartingYear
-			,intMonthId
+	SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
+	FROM dbo.tblSMCompanyLocation
+	WHERE strLocationName = CASE 
+			WHEN LTRIM(RTRIM(@strCompanyLocationName)) = ''
+				THEN strLocationName
+			ELSE @strCompanyLocationName
+			END
 
-		INSERT INTO @tblMFItemPlan
-		SELECT DATEPART(Month, InvS.dtmShipDate) intMonthId
-			,DATENAME(Month, InvS.dtmShipDate) dtmShiftStartTime
-			,I.strItemNo
-			,I.strDescription
-			,CL.strLocationName
-			,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(InvI.intItemUOMId, IU.intItemUOMId, InvI.dblQuantity)) dblMaxPoundsRequired
-			,I.intItemId
-			,0 dblSafetyStockPounds
-			,0 dblUnPackedPounds
-			,0 dblPoundsAvailable
-			,0 dblTotalPoundsAvailable
-			,'' strWorkInstruction
-			,0 dblRunningTotal
-			,0 dblAvlQtyBreakUp
-			,CL.intCompanyLocationId
-			,0 dblUnpackedBreakUp
-			,0 dblAvlBreakup
-			,DATEPART(YEAR, InvS.dtmShipDate) strStartingYear
-		FROM tblICInventoryShipment InvS
-		JOIN tblICInventoryShipmentItem InvI ON InvI.intInventoryShipmentId = InvS.intInventoryShipmentId
-		JOIN dbo.tblICItem I ON I.intItemId = InvI.intItemId
-		JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = InvS.intShipFromLocationId
-		JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-			AND IU.ysnStockUnit = 1
-		WHERE InvS.ysnPosted = 0
-			AND I.strType = 'Raw Material'
-			AND InvS.dtmShipDate >= @dtmCurrentDate
-		GROUP BY DATEPART(Month, InvS.dtmShipDate)
-			,DATENAME(Month, InvS.dtmShipDate)
-			,I.strItemNo
-			,I.strDescription
-			,CL.strLocationName
-			,I.intItemId
-			,CL.intCompanyLocationId
-			,DATEPART(YEAR, InvS.dtmShipDate)
+	SET @dtmCurrentDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intCompanyLocationId)
+
+	WHILE @intCompanyLocationId > 0
+	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM tblMFSchedule
+				WHERE ysnStandard = 1
+				)
+		BEGIN
+			INSERT INTO @tblMFItemPlan
+			SELECT DATEPART(Month, CD.dtmShiftStartTime) intMonthId
+				,DATENAME(Month, CD.dtmShiftStartTime) dtmShiftStartTime
+				,II.strItemNo
+				,II.strDescription
+				,CL.strLocationName
+				,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, IU.intItemUOMId, (RI.dblCalculatedQuantity * SWD.dblPlannedQty))) dblMaxPoundsRequired
+				,II.intItemId
+				,0 dblSafetyStockPounds
+				,0 dblUnPackedPounds
+				,0 dblPoundsAvailable
+				,0 dblTotalPoundsAvailable
+				,'' strWorkInstruction
+				,0 dblRunningTotal
+				,0 dblAvlQtyBreakUp
+				,CL.intCompanyLocationId
+				,0 dblUnpackedBreakUp
+				,0 dblAvlBreakup
+				,DATEPART(YEAR, CD.dtmShiftStartTime) strStartingYear
+			FROM dbo.tblMFSchedule S
+			JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
+				AND SW.intStatusId <> 13
+			JOIN dbo.tblMFScheduleWorkOrderDetail SWD ON SWD.intScheduleWorkOrderId = SW.intScheduleWorkOrderId
+			JOIN dbo.tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCalendarDetailId
+			JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
+			JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = SW.intWorkOrderId
+			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
+			JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
+				AND R.intLocationId = W.intLocationId
+				AND R.ysnActive = 1
+			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				AND RI.intRecipeItemTypeId = 1
+			JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
+			JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
+				AND C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+			JOIN tblICItemUOM IU ON IU.intItemId = II.intItemId
+				AND IU.ysnStockUnit = 1
+				AND S.intLocationId = @intCompanyLocationId
+			WHERE S.ysnStandard = 1
+				AND CD.dtmCalendarDate >= @dtmCurrentDate
+			GROUP BY DATEPART(MONTH, CD.dtmShiftStartTime)
+				,CD.dtmShiftStartTime
+				,II.strItemNo
+				,II.strDescription
+				,CL.strLocationName
+				,II.intItemId
+				--,II.strWorkInstruction
+				,CL.intCompanyLocationId
+				,DATEPART(YEAR, CD.dtmShiftStartTime)
+			ORDER BY strItemNo
+				,strStartingYear
+				,intMonthId
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblMFItemPlan
+			SELECT DATEPART(Month, W.dtmPlannedDate) intMonthId
+				,DATENAME(Month, W.dtmPlannedDate) dtmShiftStartTime
+				,II.strItemNo
+				,II.strDescription
+				,CL.strLocationName
+				,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, IU.intItemUOMId, (RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity))) dblMaxPoundsRequired
+				,II.intItemId
+				,0 dblSafetyStockPounds
+				,0 dblUnPackedPounds
+				,0 dblPoundsAvailable
+				,0 dblTotalPoundsAvailable
+				,'' strWorkInstruction
+				,0 dblRunningTotal
+				,0 dblAvlQtyBreakUp
+				,CL.intCompanyLocationId
+				,0 dblUnpackedBreakUp
+				,0 dblAvlBreakup
+				,DATEPART(YEAR, W.dtmPlannedDate) strStartingYear
+			FROM dbo.tblMFManufacturingCell MC
+			JOIN dbo.tblMFWorkOrder W ON MC.intManufacturingCellId = W.intManufacturingCellId
+			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
+			JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
+				AND R.intLocationId = W.intLocationId
+				AND R.ysnActive = 1
+			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				AND RI.intRecipeItemTypeId = 1
+			JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
+			JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
+				AND C.strCategoryCode IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strBlendAttributeValue, ',')
+					)
+			JOIN tblICItemUOM IU ON IU.intItemId = II.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE W.dtmPlannedDate >= @dtmCurrentDate
+				AND W.dblQuantity - W.dblProducedQuantity > 0
+				AND W.intLocationId = @intCompanyLocationId
+			GROUP BY DATEPART(MONTH, W.dtmPlannedDate)
+				,W.dtmPlannedDate
+				,II.strItemNo
+				,II.strDescription
+				,CL.strLocationName
+				,II.intItemId
+				--,II.strWorkInstruction
+				,CL.intCompanyLocationId
+				,DATEPART(YEAR, W.dtmPlannedDate)
+			ORDER BY strItemNo
+				,strStartingYear
+				,intMonthId
+
+			INSERT INTO @tblMFItemPlan
+			SELECT DATEPART(Month, InvS.dtmShipDate) intMonthId
+				,DATENAME(Month, InvS.dtmShipDate) dtmShiftStartTime
+				,I.strItemNo
+				,I.strDescription
+				,CL.strLocationName
+				,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(InvI.intItemUOMId, IU.intItemUOMId, InvI.dblQuantity)) dblMaxPoundsRequired
+				,I.intItemId
+				,0 dblSafetyStockPounds
+				,0 dblUnPackedPounds
+				,0 dblPoundsAvailable
+				,0 dblTotalPoundsAvailable
+				,'' strWorkInstruction
+				,0 dblRunningTotal
+				,0 dblAvlQtyBreakUp
+				,CL.intCompanyLocationId
+				,0 dblUnpackedBreakUp
+				,0 dblAvlBreakup
+				,DATEPART(YEAR, InvS.dtmShipDate) strStartingYear
+			FROM tblICInventoryShipment InvS
+			JOIN tblICInventoryShipmentItem InvI ON InvI.intInventoryShipmentId = InvS.intInventoryShipmentId
+			JOIN dbo.tblICItem I ON I.intItemId = InvI.intItemId
+			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = InvS.intShipFromLocationId
+			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+				AND IU.ysnStockUnit = 1
+			WHERE InvS.ysnPosted = 0
+				AND I.strType = 'Raw Material'
+				AND InvS.dtmShipDate >= @dtmCurrentDate
+				AND InvS.intShipFromLocationId = @intCompanyLocationId
+			GROUP BY DATEPART(Month, InvS.dtmShipDate)
+				,DATENAME(Month, InvS.dtmShipDate)
+				,I.strItemNo
+				,I.strDescription
+				,CL.strLocationName
+				,I.intItemId
+				,CL.intCompanyLocationId
+				,DATEPART(YEAR, InvS.dtmShipDate)
+		END
+
+		SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
+		FROM dbo.tblSMCompanyLocation
+		WHERE intCompanyLocationId > @intCompanyLocationId
+			AND strLocationName = CASE 
+				WHEN LTRIM(RTRIM(@strCompanyLocationName)) = ''
+					THEN strLocationName
+				ELSE @strCompanyLocationName
+				END
 	END
 
 	INSERT INTO @tblMFItemPlanSummary

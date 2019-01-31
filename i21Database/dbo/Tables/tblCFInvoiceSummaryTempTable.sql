@@ -20,9 +20,9 @@
     [ysnIncludeInQuantityDiscount] BIT             NULL,
     [intAccountId]                 INT             NULL,
     [intTransactionId]             INT             NULL,
-    [strGuid]                      NVARCHAR (MAX)  NULL,
-    [strUserId]                    NVARCHAR (MAX)  NULL,
-    [strStatementType]             NVARCHAR (MAX)  NULL
+    [strGuid]                      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
+    [strUserId]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
+    [strStatementType]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL
 );
 
 

@@ -13,7 +13,7 @@ AS
 DECLARE @intInventoryCountId INT
 DECLARE @ysnPosted BIT
 DECLARE @ysnCountByLots BIT
-DECLARE @msg NVARCHAR(200)
+DECLARE @msg NVARCHAR(600)
 DECLARE @intLocationId INT
 
 SELECT
@@ -212,10 +212,11 @@ BEGIN
 					AND (cd.intStorageLocationId = @intStorageUnitId OR @intStorageUnitId IS NULL)
 			)
 			BEGIN
-				SET @msg = 'The item or item location is invalid.'
+				SET @msg = 'Invalid item. Possible reason(s): (1) the item id is invalid. (2) the item id might not have a reference to the item location id (3) the item location id doesn''t have a reference to the Count''s Location'
 				RAISERROR(@msg, 11, 1)	
+				GOTO _Exit
 			END
-
+			
 			SELECT 
 				@ysnLotWeightsRequired = i.ysnLotWeightsRequired
 			FROM tblICInventoryCountDetail cd
@@ -225,11 +226,11 @@ BEGIN
 				AND cd.intItemLocationId = @intItemLocationId
 				AND (cd.intSubLocationId = @intStorageLocationId OR @intStorageLocationId IS NULL)
 				AND (cd.intStorageLocationId = @intStorageUnitId OR @intStorageUnitId IS NULL)
-
+		
 			IF NOT EXISTS(SELECT u.strUnitMeasure, u.strUnitType
 				FROM tblICItemUOM i
 					INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
-				WHERE i.intItemId = @intItemId) AND @intPhysicalCountUOMId IS NOT NULL
+				WHERE i.intItemId = @intItemId AND i.intItemUOMId = @intPhysicalCountUOMId) AND @intPhysicalCountUOMId IS NOT NULL
 			BEGIN
 				SET @msg = 'Invalid Count UOM Id provided.'
 				RAISERROR(@msg, 11, 1)
@@ -251,18 +252,110 @@ BEGIN
 			--	GOTO _Exit
 			--END
 
-			UPDATE tblICInventoryCountDetail
-			SET
-				  dblPhysicalCount = @dblPhysicalCount
-				, intItemUOMId = @intPhysicalCountUOMId
-				, intEntityUserSecurityId = @intUserSecurityId
-				, dtmDateModified = GETDATE()
-				, intModifiedByUserId = @intUserSecurityId
-			WHERE intItemId = @intItemId
-				AND intItemLocationId = @intItemLocationId
-				AND (intSubLocationId = @intStorageLocationId OR @intStorageLocationId IS NULL)
-				AND (intStorageLocationId = @intStorageUnitId OR @intStorageUnitId IS NULL)
-				AND intInventoryCountId = @intInventoryCountId
+			IF @intStorageLocationId IS NULL AND @intStorageUnitId IS NULL AND NOT EXISTS(
+				SELECT TOP 1 1
+				FROM tblICInventoryCountDetail cd
+					INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+					INNER JOIN tblICItemLocation il ON il.intItemId = cd.intItemId
+				WHERE cd.intInventoryCountId = @intInventoryCountId
+					AND cd.intItemId = @intItemId
+					AND cd.intItemLocationId = @intItemLocationId
+					AND (cd.intSubLocationId IS NULL)
+					AND (cd.intStorageLocationId IS NULL)
+					AND il.intLocationId = @intLocationId
+			)
+			BEGIN
+				SELECT TOP 1 @intDefaultGrossUOMId = i.intItemUOMId
+				FROM tblICItemUOM i
+					INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
+				WHERE i.intItemId = @intItemId
+					AND u.strUnitType = 'Weight'
+				ORDER BY i.ysnStockUnit DESC
+
+				INSERT INTO tblICInventoryCountDetail (
+					intInventoryCountId
+					, intItemId
+					, intItemLocationId
+					, intSubLocationId
+					, intStorageLocationId
+					, intEntityUserSecurityId
+					, dblPhysicalCount
+					, intItemUOMId
+					--, intWeightUOMId
+					--, dblWeightQty
+					--, dblNetQty
+					, intConcurrencyId
+					, dtmDateCreated
+					, intCreatedByUserId
+					, strCountLine
+					, intStockUOMId
+				)
+				SELECT TOP 1
+					  intInventoryCountId = @intInventoryCountId
+					, intItemId = item.intItemId
+					, intItemLocationId = il.intItemLocationId
+					, intSubLocationId = @intStorageLocationId
+					, intStorageLocationId = @intStorageUnitId
+					, intEntityUserSecurityId = @intUserSecurityId
+					, dblPhysicalCount = @dblPhysicalCount
+					, intItemUOMId = @intPhysicalCountUOMId
+					--, intWeightUOMId = CASE WHEN item.ysnLotWeightsRequired = 1 THEN @intDefaultGrossUOMId ELSE NULL END
+					--, dblWeightQty = CASE WHEN item.ysnLotWeightsRequired = 1 
+					--	THEN dbo.fnCalculateQtyBetweenUOM(@intPhysicalCountUOMId, @intDefaultGrossUOMId, @dblPhysicalCount)
+					--	ELSE 0
+					--	END
+					--, dblNetQty = CASE WHEN item.ysnLotWeightsRequired = 1 
+					--	THEN dbo.fnCalculateQtyBetweenUOM(@intPhysicalCountUOMId, @intDefaultGrossUOMId, @dblPhysicalCount)
+					--	ELSE 0
+					--	END
+					, intConcurrencyId = 1
+					, dtmDateCreated = GETDATE()
+					, intCreatedByUserId = @intUserSecurityId
+					, strCountLine = @strCountLine
+					, intStockUOMId = stockUOM.intItemUOMId
+				FROM tblICItem item
+					INNER JOIN tblICItemLocation il ON il.intItemId = item.intItemId
+					LEFT JOIN tblICItemStockUOM stockUOM ON stockUOM.intItemId = item.intItemId
+						AND stockUOM.intItemLocationId = il.intItemLocationId
+						AND (stockUOM.intSubLocationId IS NULL)
+						AND (stockUOM.intStorageLocationId IS NULL)
+				WHERE item.intItemId = @intItemId
+					AND il.intItemLocationId = @intItemLocationId
+					AND il.intLocationId = @intLocationId
+			END
+			ELSE
+			BEGIN
+				IF @intStorageLocationId IS NULL AND @intStorageUnitId IS NULL
+				BEGIN
+					UPDATE tblICInventoryCountDetail
+					SET
+						  dblPhysicalCount = @dblPhysicalCount
+						, intItemUOMId = @intPhysicalCountUOMId
+						, intEntityUserSecurityId = @intUserSecurityId
+						, dtmDateModified = GETDATE()
+						, intModifiedByUserId = @intUserSecurityId
+					WHERE intItemId = @intItemId
+						AND intItemLocationId = @intItemLocationId
+						AND (intSubLocationId IS NULL)
+						AND (intStorageLocationId IS NULL)
+						AND intInventoryCountId = @intInventoryCountId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblICInventoryCountDetail
+					SET
+						  dblPhysicalCount = @dblPhysicalCount
+						, intItemUOMId = @intPhysicalCountUOMId
+						, intEntityUserSecurityId = @intUserSecurityId
+						, dtmDateModified = GETDATE()
+						, intModifiedByUserId = @intUserSecurityId
+					WHERE intItemId = @intItemId
+						AND intItemLocationId = @intItemLocationId
+						AND (intSubLocationId = @intStorageLocationId)
+						AND (intStorageLocationId = @intStorageUnitId)
+						AND intInventoryCountId = @intInventoryCountId
+				END
+			END
 		END
 		ELSE
 		BEGIN
@@ -275,14 +368,15 @@ BEGIN
 					AND il.intLocationId = @intLocationId
 			)
 			BEGIN
-				SET @msg = 'Invalid item.'
-				RAISERROR(@msg, 11, 1)	
+				SET @msg = 'Invalid item. Possible reason(s): (1) the item id is invalid. (2) the item id might not have a reference to the item location id (3) the item location id doesn''t have a reference to the Count''s Location'
+				RAISERROR(@msg, 11, 1)
+				GOTO _Exit
 			END
 
 			IF NOT EXISTS(SELECT u.strUnitMeasure, u.strUnitType
 				FROM tblICItemUOM i
 					INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = i.intUnitMeasureId
-				WHERE i.intItemId = @intItemId) AND @intPhysicalCountUOMId IS NOT NULL
+				WHERE i.intItemId = @intItemId AND i.intItemUOMId = @intPhysicalCountUOMId) AND @intPhysicalCountUOMId IS NOT NULL
 			BEGIN
 				SET @msg = 'Invalid Count UOM Id provided.'
 				RAISERROR(@msg, 11, 1)

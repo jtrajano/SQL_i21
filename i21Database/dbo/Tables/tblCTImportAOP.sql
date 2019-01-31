@@ -29,7 +29,7 @@
 	ysnImported				BIT NULL,
 	intImportedById			INT NULL,
 	dtmImported				DATETIME NULL,
-	strErrorMsg				NVARCHAR(max) NULL,
+	strErrorMsg				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	intSession				BIGINT NULL,
 
 	CONSTRAINT [PK_tblCTImportAOP_intImportAOPId] PRIMARY KEY CLUSTERED (intImportAOPId ASC), 

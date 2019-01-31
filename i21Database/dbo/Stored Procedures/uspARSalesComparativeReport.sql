@@ -13,7 +13,6 @@ DECLARE @dtmBeginningDateTo				DATETIME
 	  , @dtmEndingDateTo				DATETIME
       , @dtmEndingDateFrom				DATETIME
 	  , @intEntityCustomerId			INT	= NULL
-	  , @intEntityUserId				INT	= NULL
 	  , @strSalesperson					NVARCHAR(100)
 	  , @strCustomerName				NVARCHAR(MAX)
 	  , @xmlDocumentId					INT
@@ -65,12 +64,11 @@ WITH (
 -- Gather the variables values from the xml table.
 SELECT  @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strCustomerName'
+WHERE	[fieldname] = 'strName'
 
 SELECT  @strSalesperson = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
-
 
 SELECT  @dtmBeginningDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmBeginningDateTo = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
@@ -81,10 +79,6 @@ SELECT  @dtmEndingDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from]
  	   ,@dtmEndingDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmTransactionDateEnding'
-
-SELECT  @intEntityUserId = NULLIF(CAST(ISNULL([from], '') AS INT), 0)
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'intSrCurrentUserId'
 
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmBeginningDateTo IS NOT NULL
@@ -107,6 +101,66 @@ IF @dtmEndingDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmEndingDateFrom = CAST(-53690 AS DATETIME)
 
-SELECT CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) dtmBeginDate,CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) dtmEndingDate,dtmTransactionDate,dtmTransactionDateEnding,intYear,intMonth,intEntityCustomerId,intCompanyLocationId,strName,strCustomerName,strCustomerNumber,intSourceId,strInvoiceOriginId,intItemId,strItemNo,strDescription,intCategoryId,strCategoryCode,strCategoryDescription,strSalesPersonEntityNo,strSalesPersonName,intSalesPersonId,dblSalesAmount as dblBeginSalesAmount,dblQuantity as dblBeginQuantity,0 as dblEndSalesAmount,0 as dblEndQuantity FROM vyuARTransactionSummary WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
+SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
+     , dtmEndingDate			= CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) 
+	 , dtmTransactionDate		= dtmTransactionDate
+	 , dtmTransactionDateEnding	= dtmTransactionDateEnding
+	 , intYear					= intYear
+	 , intMonth					= intMonth
+	 , intEntityCustomerId		= intEntityCustomerId
+	 , intCompanyLocationId		= intCompanyLocationId
+	 , strName					= strName
+	 , strCustomerName			= strCustomerName
+	 , strCustomerNumber		= strCustomerNumber
+	 , intSourceId				= intSourceId
+	 , strInvoiceOriginId		= strInvoiceOriginId
+	 , intItemId				= intItemId
+	 , strItemNo				= strItemNo
+	 , strDescription			= strDescription
+	 , intCategoryId			= intCategoryId
+	 , strCategoryCode			= strCategoryCode
+	 , strCategoryDescription	= strCategoryDescription
+	 , strSalesPersonEntityNo	= strSalesPersonEntityNo
+	 , strSalesPersonName		= strSalesPersonName
+	 , intSalesPersonId			= intSalesPersonId
+	 , dblBeginSalesAmount		= dblSalesAmount
+	 , dblBeginQuantity			= dblQuantity
+	 , dblEndSalesAmount		= 0
+	 , dblEndQuantity 			= 0
+FROM vyuARTransactionSummary 
+WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
+  AND (@strCustomerName IS NULL OR strCustomerName = @strCustomerName)
+  AND (@strSalesperson IS NULL OR strSalesPersonName = @strSalesperson)
+
 UNION
-SELECT CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) dtmBeginDate,CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) dtmEndingDate,dtmTransactionDate,dtmTransactionDateEnding,intYear,intMonth,intEntityCustomerId,intCompanyLocationId,strName,strCustomerName,strCustomerNumber,intSourceId,strInvoiceOriginId,intItemId,strItemNo,strDescription,intCategoryId,strCategoryCode,strCategoryDescription,strSalesPersonEntityNo,strSalesPersonName,intSalesPersonId,0 as dblBeginSalesAmount,0 as dblBeginQuantity,dblSalesAmount as dblEndSalesAmount,dblQuantity as dblEndQuantity FROM vyuARTransactionSummary WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
+
+SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
+     , dtmEndingDate			= CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101)
+	 , dtmTransactionDate		= dtmTransactionDate
+	 , dtmTransactionDateEnding	= dtmTransactionDateEnding
+	 , intYear					= intYear
+	 , intMonth					= intMonth
+	 , intEntityCustomerId		= intEntityCustomerId
+	 , intCompanyLocationId		= intCompanyLocationId
+	 , strName					= strName
+	 , strCustomerName			= strCustomerName
+	 , strCustomerNumber		= strCustomerNumber
+	 , intSourceId				= intSourceId
+	 , strInvoiceOriginId		= strInvoiceOriginId
+	 , intItemId				= intItemId
+	 , strItemNo				= strItemNo
+	 , strDescription			= strDescription
+	 , intCategoryId			= intCategoryId
+	 , strCategoryCode			= strCategoryCode
+	 , strCategoryDescription	= strCategoryDescription
+	 , strSalesPersonEntityNo	= strSalesPersonEntityNo
+	 , strSalesPersonName		= strSalesPersonName
+	 , intSalesPersonId			= intSalesPersonId
+	 , dblBeginSalesAmount		= 0
+	 , dblBeginQuantity			= 0
+	 , dblEndSalesAmount		= dblSalesAmount
+	 , dblEndQuantity			= dblQuantity 
+FROM vyuARTransactionSummary 
+WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
+  AND (@strCustomerName IS NULL OR strCustomerName = @strCustomerName)
+  AND (@strSalesperson IS NULL OR strSalesPersonName = @strSalesperson)

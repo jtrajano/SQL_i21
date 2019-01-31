@@ -160,6 +160,7 @@ INSERT #ARPostInvoiceHeader
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
     ,[intLotId]
+    ,[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]
     ,[strFrequency]
     ,[dtmMaintenanceDate]
@@ -308,6 +309,7 @@ SELECT
     ,[dblCurrencyExchangeRate]          = @OneDecimal
     ,[strCurrencyExchangeRateType]      = NULL
     ,[intLotId]                         = NULL
+    ,[intOriginalInvoiceDetailId]       = NULL
     ,[strMaintenanceType]               = NULL
     ,[strFrequency]                     = NULL
     ,[dtmMaintenanceDate]               = @ZeroDecimal
@@ -504,6 +506,7 @@ INSERT #ARPostInvoiceHeader
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
     ,[intLotId]
+    ,[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]
     ,[strFrequency]
     ,[dtmMaintenanceDate]
@@ -652,6 +655,7 @@ SELECT
     ,[dblCurrencyExchangeRate]          = @OneDecimal
     ,[strCurrencyExchangeRateType]      = NULL
     ,[intLotId]                         = NULL
+    ,[intOriginalInvoiceDetailId]       = NULL
     ,[strMaintenanceType]               = NULL
     ,[strFrequency]                     = NULL
     ,[dtmMaintenanceDate]               = @ZeroDecimal
@@ -834,6 +838,7 @@ INSERT #ARPostInvoiceHeader
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
     ,[intLotId]
+    ,[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]
     ,[strFrequency]
     ,[dtmMaintenanceDate]
@@ -982,6 +987,7 @@ SELECT
     ,[dblCurrencyExchangeRate]          = @OneDecimal
     ,[strCurrencyExchangeRateType]      = NULL
     ,[intLotId]                         = NULL
+    ,[intOriginalInvoiceDetailId]       = NULL
     ,[strMaintenanceType]               = NULL
     ,[strFrequency]                     = NULL
     ,[dtmMaintenanceDate]               = @ZeroDecimal
@@ -1163,6 +1169,7 @@ INSERT #ARPostInvoiceDetail
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
     ,[intLotId]
+    ,[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]
     ,[strFrequency]
     ,[dtmMaintenanceDate]
@@ -1285,8 +1292,8 @@ SELECT
     ,[intMaintenanceAccountId]          = ARID.[intMaintenanceAccountId]
     ,[intConversionAccountId]           = ARID.[intConversionAccountId]
     ,[dblQtyShipped]                    = ARID.[dblQtyShipped]
-    --,[dblUnitQtyShipped]                = ISNULL(dbo.fnARCalculateQtyBetweenUOM(ARID.[intItemUOMId], ICSUOM.[intItemUOMId], ARID.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)
-    ,[dblUnitQtyShipped]                = ISNULL(ARID.[dblQtyShipped], @ZeroDecimal)
+    ,[dblUnitQtyShipped]                = ISNULL(dbo.fnARCalculateQtyBetweenUOM(ARID.[intItemUOMId], ICSUOM.[intItemUOMId], ARID.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)
+    --,[dblUnitQtyShipped]                = ISNULL(ARID.[dblQtyShipped], @ZeroDecimal)
     ,[dblShipmentNetWt]                 = ARID.[dblShipmentNetWt]
     ,[dblUnitQty]                       = ICIU.[dblUnitQty]
     ,[dblUnitOnHand]                    = ISNULL(ICIS.[dblUnitOnHand], @ZeroDecimal)
@@ -1312,6 +1319,7 @@ SELECT
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
     ,[intLotId]                         = ARID.[intLotId]
+    ,[intOriginalInvoiceDetailId]       = ARID.[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]               = ARID.[strMaintenanceType]
     ,[strFrequency]                     = ARID.[strFrequency]
     ,[dtmMaintenanceDate]               = ARID.[dtmMaintenanceDate]
@@ -1381,11 +1389,11 @@ LEFT OUTER JOIN
     SELECT [intItemId], [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NoLock)
     ) ICIU
         ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
--- LEFT OUTER JOIN
---     (
---     SELECT [intItemId], [intItemUOMId] FROM tblICItemUOM WITH(NoLock) WHERE [ysnStockUnit] = 1
---     ) ICSUOM
---         ON ICI.[intItemId] = ICSUOM.[intItemId]
+ LEFT OUTER JOIN
+     (
+     SELECT [intItemId], [intItemUOMId] FROM tblICItemUOM WITH(NoLock) WHERE [ysnStockUnit] = 1
+     ) ICSUOM
+         ON ICI.[intItemId] = ICSUOM.[intItemId]
 LEFT OUTER JOIN
     (
     SELECT [intItemId], [intItemLocationId], [dblUnitOnHand] FROM tblICItemStock WITH(NoLock)
@@ -1513,6 +1521,7 @@ INSERT #ARPostInvoiceDetail
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
     ,[intLotId]
+    ,[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]
     ,[strFrequency]
     ,[dtmMaintenanceDate]
@@ -1661,6 +1670,7 @@ SELECT
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
     ,[intLotId]                         = ARID.[intLotId]
+    ,[intOriginalInvoiceDetailId]       = ARID.[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]               = ARID.[strMaintenanceType]
     ,[strFrequency]                     = ARID.[strFrequency]
     ,[dtmMaintenanceDate]               = ARID.[dtmMaintenanceDate]
@@ -1916,6 +1926,7 @@ INSERT #ARPostInvoiceDetail
     ,[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]
     ,[intLotId]
+    ,[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]
     ,[strFrequency]
     ,[dtmMaintenanceDate]
@@ -2060,6 +2071,7 @@ SELECT
     ,[dblCurrencyExchangeRate]          = ARID.[dblCurrencyExchangeRate]
     ,[strCurrencyExchangeRateType]      = SMCERT.[strCurrencyExchangeRateType]
     ,[intLotId]                         = ARID.[intLotId]
+    ,[intOriginalInvoiceDetailId]       = ARID.[intOriginalInvoiceDetailId]
     ,[strMaintenanceType]               = ARID.[strMaintenanceType]
     ,[strFrequency]                     = ARID.[strFrequency]
     ,[dtmMaintenanceDate]               = ARID.[dtmMaintenanceDate]

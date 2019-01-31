@@ -142,6 +142,7 @@
 	[ysnDestinationWeightGradePost] BIT NOT NULL DEFAULT 0, 
 	[strSourceType] NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL,
 	[ysnReadyToTransfer] BIT NOT NULL DEFAULT 0, 
+	[ysnExport] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -176,6 +177,11 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intDeliverySheetId] ON [dbo].[tblSCTicket](
 	[intDeliverySheetId] ASC
 );
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_strTicketStatus]
+	ON [dbo].[tblSCTicket] ([strTicketStatus],[strDistributionOption])
+	INCLUDE ([strTicketNumber],[strInOutFlag],[dtmTicketDateTime],[intProcessingLocationId],[strTruckName],[strDriverName],[dblNetUnits],[strCustomerReference],[intItemId],[intEntityId],[intDeliverySheetId])
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

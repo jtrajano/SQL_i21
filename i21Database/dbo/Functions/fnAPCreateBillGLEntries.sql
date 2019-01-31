@@ -212,7 +212,7 @@ BEGIN
 				LEFT JOIN tblICInventoryReceipt receipts
 					ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
-                WHERE R.intBillId = A.intBillId AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
+                WHERE R.intBillId = A.intBillId --AND R.dblTax != 0 AND CAST(R2.dblTax AS DECIMAL(18,2)) != 0
 				-- UNION ALL --discount
 				-- SELECT
 				-- 	(R.dblTotal * (ISNULL(R.dblDiscount,0) / 100)) AS dblTotal
@@ -808,7 +808,8 @@ BEGIN
 				ON B.intItemId = F.intItemId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType IN (1,3)
-	AND D.dblTax != 0
+	--AND D.dblTax != 0 --include zero because we load the exempted tax, we expect that it will be adjusted to non zero
+	AND (B.intInventoryReceiptItemId > 0 OR B.intInventoryShipmentChargeId > 0 OR B.intCustomerStorageId > 0) --create tax adjustment only for integration
 	AND D.ysnTaxAdjusted = 1
 	GROUP BY A.dtmDate
 	,D.ysnTaxAdjusted

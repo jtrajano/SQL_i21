@@ -82,6 +82,7 @@ BEGIN
 
 	DECLARE	
 			@CostAdjustment AS NUMERIC(38, 20)			
+			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
@@ -246,6 +247,23 @@ BEGIN
 	WHERE	cbOut.intInventoryActualCostId = @CostBucketId			
 END 
 
+-- Calculate how much cost adjustment goes for each qty. 
+BEGIN 
+	SELECT	@CostAdjustmentPerQty = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
+	FROM	tblICInventoryActualCost cb
+	WHERE	cb.intItemId = @intItemId
+			AND cb.intItemLocationId = @intItemLocationId
+			AND cb.intTransactionId = @intSourceTransactionId
+			AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+			AND cb.strTransactionId = @strSourceTransactionId
+			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+			AND cb.strActualCostId = @strActualCostId
+
+	-- If value of cost adjustment is zero, then exit immediately. 
+	IF @CostAdjustmentPerQty IS NULL 
+		RETURN; 
+END 
+
 -- Log the original cost
 BEGIN 
 	DECLARE @DummyInventoryTransactionId AS INT 
@@ -395,9 +413,9 @@ BEGIN
 			-- Validate if the cost is going to be negative. 
 			IF (
 				1 = CASE 
-						WHEN ISNULL(@dblNewAverageCost, 0) < 0 THEN 1
-						WHEN (@CostBucketOriginalValue + @CostAdjustment) < 0 THEN 1
-						ELSE 0
+						WHEN ISNULL(@dblNewAverageCost, 0) > 0 THEN 0
+						WHEN (@CostBucketOriginalValue + @CostAdjustment) > 0 THEN 0
+						ELSE 1
 					END 
 			)
 			BEGIN 
@@ -612,7 +630,8 @@ BEGIN
 								--END 
 								@CostAdjustment
 							WHEN @t_dblQty < 0 THEN 
-								(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+								@t_dblQty * @CostAdjustmentPerQty
 							ELSE 
 								0
 					END 
@@ -635,7 +654,8 @@ BEGIN
 							--END 
 							@CostAdjustment
 						WHEN @t_dblQty < 0 THEN 
-							(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							@t_dblQty * @CostAdjustmentPerQty
 						ELSE 
 							0
 				END <> 0 

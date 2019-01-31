@@ -386,8 +386,8 @@ BEGIN TRY
 		BEGIN
 			SELECT @intNewSubLocationId = SL.intSubLocationId
 				,@intNewStorageLocationId = T.intToStorageLocationId
-				,@dblMoveQty = T.dblPickQty
-				,@intMoveItemUOMId = T.intItemUOMId
+				,@dblMoveQty = T.dblWeight
+				,@intMoveItemUOMId = T.intWeightUOMId
 				,@blnValidateLotReservation = 1
 				,@blnInventoryMove = 0
 				,@intLotId = intLotId

@@ -3,7 +3,7 @@
 AS
 
 	SELECT  CC.intContractCostId,
-			SUBSTRING(CONVERT(NVARCHAR(20),dtmContractDate,106),4,10)  AS strContractDate,
+			SUBSTRING(CONVERT(NVARCHAR(20),dtmContractDate,106),4,10) COLLATE Latin1_General_CI_AS AS strContractDate,
 			CH.strContractNumber + ' - ' + CP.strName strContractNumber,
 			ISNULL(BR.dblReqstdAmount,CC.dblRate) * CASE WHEN CC.ysnReceivable = 1 THEN 1 ELSE -1 END dblRate,
 			EY.strName	AS  strEntity,

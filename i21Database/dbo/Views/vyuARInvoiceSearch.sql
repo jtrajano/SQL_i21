@@ -7,7 +7,7 @@ SELECT
 	,strCustomerNumber				= C.strCustomerNumber
 	,intEntityCustomerId			= C.intEntityId
 	,strTransactionType				= I.strTransactionType
-	,strType						= CASE WHEN (I.strType = 'POS' AND POS.intInvoiceId IS NOT NULL) THEN ISNULL(POS.strEODNo,'Standard') ELSE  ISNULL(I.strType, 'Standard') END
+	,strType						= CASE WHEN (I.strType = 'POS' AND (POS.intInvoiceId IS NOT NULL OR POSMixedTransactionCreditMemo.intCreditMemoId IS NOT NULL)) THEN ISNULL(POS.strEODNo,ISNULL(POSMixedTransactionCreditMemo.strEODNo,'Standard')) ELSE  ISNULL(I.strType, 'Standard') END
 	,strPONumber					= I.strPONumber
 	,strTerm						= T.strTerm
 	,strBOLNumber					= I.strBOLNumber
@@ -156,6 +156,18 @@ LEFT OUTER JOIN (
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 ) POS ON I.intInvoiceId = POS.intInvoiceId 
      AND I.strType = 'POS'
+LEFT OUTER JOIN (
+	SELECT intCreditMemoId
+         , strReceiptNumber
+         , strEODNo
+		 , intItemCount
+		 , dblTotal
+    FROM dbo.tblARPOS POS WITH (NOLOCK)
+    INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
+    INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId 
+	WHERE intCreditMemoId IS NOT NULL
+) POSMixedTransactionCreditMemo ON I.intInvoiceId = POSMixedTransactionCreditMemo.intCreditMemoId
+AND I.strType = 'POS'
 OUTER APPLY (
 	SELECT TOP 1 strName
 			   , strEmail

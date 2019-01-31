@@ -128,6 +128,8 @@
 	   ,(SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0)) AS dblTotalTareWeight
 	   ,((SCT.dblGrossWeight + ISNULL(SCT.dblGrossWeight1, 0) + ISNULL(SCT.dblGrossWeight2, 0)) - (SCT.dblTareWeight + ISNULL(SCT.dblTareWeight1, 0) + ISNULL(SCT.dblTareWeight2, 0))) AS dblTotalNetWeight
 	   ,(SCT.dblUnitPrice + SCT.dblUnitBasis) AS dblCashPrice
+	   ,SCT.ysnReadyToTransfer
+	   ,SCT.ysnExport
 	   ,SCD.strDeliverySheetNumber
        ,EMEntity.strName
        ,SCListTicket.strTicketType
@@ -140,7 +142,7 @@
 			WHEN SCT.strDistributionOption = 'SPT' THEN 'Spot Sale'
 			WHEN SCT.strDistributionOption = 'SPL' THEN 'Split'
 			WHEN SCT.strDistributionOption = 'HLD' THEN 'Hold'
-		END) AS strStorageTypeDescription
+		END) COLLATE Latin1_General_CI_AS AS strStorageTypeDescription
 	   ,SCSetup.strStationShortDescription
 	   ,[EMSplit].strSplitNumber
 	   ,SCTPool.strTicketPool

@@ -146,8 +146,8 @@ SELECT
 	intCreditStopDays = CUS.intCreditStopDays,
 	strCreditCode = CUS.strCreditCode,
 	intPurchaseSale	= LG.intPurchaseSale,
-    strReceiptNumber = POS.strReceiptNumber,
-    strEODNumber = POS.strEODNo,
+    strReceiptNumber = ISNULL(POS.strReceiptNumber,POSMixedTransactionCreditMemo.strReceiptNumber),
+    strEODNumber = ISNULL(POS.strEODNo,POSMixedTransactionCreditMemo.strEODNo),
 	intCreditLimitReached = CUS.intCreditLimitReached,
 	dtmCreditLimitReached = CUS.dtmCreditLimitReached
 FROM 
@@ -239,3 +239,15 @@ LEFT JOIN (
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 ) POS ON INV.intInvoiceId = POS.intInvoiceId 
      AND INV.strType = 'POS'
+LEFT OUTER JOIN (
+	SELECT intCreditMemoId
+         , strReceiptNumber
+         , strEODNo
+		 , intItemCount
+		 , dblTotal
+    FROM dbo.tblARPOS POS WITH (NOLOCK)
+    INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
+    INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId 
+	WHERE intCreditMemoId IS NOT NULL
+) POSMixedTransactionCreditMemo ON INV.intInvoiceId = POSMixedTransactionCreditMemo.intCreditMemoId
+AND INV.strType = 'POS'

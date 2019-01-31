@@ -12,6 +12,7 @@
 	,@TransactionDate				DATE							= NULL	
 	,@ShipToLocationId				INT								= NULL
 	,@IncludeExemptedCodes			BIT								= 0
+	,@IncludeInvalidCodes			BIT								= 0
 	,@SiteId						INT								= NULL
 	,@FreightTermId					INT								= NULL
 	,@CardId						INT								= NULL
@@ -133,6 +134,7 @@ BEGIN
 						,@CompanyLocationId		--@CompanyLocationId
 						,@ShipToLocationId		--@CustomerLocationId
 						,@IncludeExemptedCodes	--@IncludeExemptedCodes
+						,@IncludeInvalidCodes	--@IncludeInvalidCodes
 						,NULL					--@IsCustomerSiteTaxable
 						,@SiteId				--@SiteId
 						,@FreightTermId

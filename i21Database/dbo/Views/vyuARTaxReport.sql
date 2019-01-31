@@ -24,6 +24,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTotalAdjustedTax		= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTotalTax				= DETAIL.dblTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , ysnTaxExempt				= DETAIL.ysnTaxExempt
+	 , ysnInvalidSetup			= DETAIL.ysnInvalidSetup
 	 , dblTaxDifference			= (DETAIL.dblAdjustedTax - DETAIL.dblTax) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
@@ -81,6 +82,8 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , intCategoryId			= DETAIL.intCategoryId
 	 , intTonnageTaxUOMId		= DETAIL.intTonnageTaxUOMId
 	 , dblQtyTonShipped			= DETAIL.dblQtyTonShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
+	 , strFederalTaxId 			= CUSTOMER.strFederalTaxId
+	 , strStateTaxId			= CUSTOMER.strStateTaxId
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId				= ID.intInvoiceId
@@ -98,6 +101,7 @@ INNER JOIN (
 		 , dblTax					= IDT.dblTax		 
 		 , dblTotalAdjustedTax		= ISNULL(TAXTOTAL.dblTotalAdjustedTax, 0)		 
 		 , ysnTaxExempt				= IDT.ysnTaxExempt		
+		 , ysnInvalidSetup			= IDT.ysnInvalidSetup		
 		 , strTaxGroup				= TAXGROUP.strTaxGroup
 		 , strTaxAgency				= TAXCODE.strTaxAgency
 		 , strTaxCode				= TAXCODE.strTaxCode
@@ -129,6 +133,7 @@ INNER JOIN (
 			 , dblAdjustedTax		= CASE WHEN ysnTaxExempt = 1 THEN 0 ELSE dblAdjustedTax end
 			 , dblTax				
 			 , ysnTaxExempt
+			 , ysnInvalidSetup
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	LEFT JOIN (
@@ -146,13 +151,13 @@ INNER JOIN (
 			 , strItemNo
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
-	INNER JOIN (
+	LEFT JOIN (
 		SELECT intTaxClassId
 			 , intCategoryId
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 	) ITEMTAXCATEGORY ON ITEMTAXCATEGORY.intTaxClassId = IDT.intTaxClassId
 					 AND ITEMTAXCATEGORY.intCategoryId = ITEM.intCategoryId
-	CROSS APPLY (
+	OUTER APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 		WHERE ICT.intCategoryId = ITEM.intCategoryId
@@ -210,6 +215,8 @@ INNER JOIN (
 		 , strCustomerNumber	= CASE WHEN C.strCustomerNumber = '' THEN ENTITY.strEntityNo ELSE C.strCustomerNumber END
 		 , strCustomerName		= ENTITY.strName
 		 , strDisplayName		= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(ENTITY.strName, '')
+		 , strStateTaxId  		= ENTITY.strStateTaxId
+		 , strFederalTaxId		= ENTITY.strFederalTaxId
 	FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
 	INNER JOIN (
 		SELECT intEntityId

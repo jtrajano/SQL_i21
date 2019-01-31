@@ -1,13 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetContractBalance]
    	@intContractTypeId		INT  = NULL
    ,@intEntityId			INT  = NULL
-   ,@IntCommodityId			INT  = NULL
-   ,@dtmStartDate			DATE = NULL
+   ,@IntCommodityId			INT  = NULL  
    ,@dtmEndDate				DATE = NULL
    ,@intCompanyLocationId   INT  = NULL
    ,@IntFutureMarketId      INT  = NULL
    ,@IntFutureMonthId       INT  = NULL
    ,@strPositionIncludes    NVARCHAR(MAX) = NULL
+   ,@strCallingApp			NVARCHAR(MAX) = NULL
+   ,@strPrintOption			NVARCHAR(MAX) = NULL
 
 AS
 
@@ -27,6 +28,7 @@ BEGIN TRY
 	(
 		intContractDetailId INT,
 		intContractStatusId INT,
+		intPricingTypeId	INT,
 		dtmHistoryCreated   DATETIME
 	)
 	DECLARE @Balance TABLE 
@@ -59,8 +61,7 @@ BEGIN TRY
 			intContractTypeId		INT,
 			intContractHeaderId		INT,  
 			intContractDetailId		INT,        
-			dtmDate					DATETIME, 
-			dtmStartDate			DATETIME,
+			dtmDate					DATETIME,
 			dtmEndDate				DATETIME,
 			dblQuantity				NUMERIC(38,20),
 			dblAllocatedQuantity	NUMERIC(38,20),
@@ -83,8 +84,8 @@ BEGIN TRY
 			intNoOfLoad				INT,
 			intShippedNoOfLoad		INT
 	)
-	IF @dtmStartDate IS NOT NULL
-		SET @dtmStartDate = dbo.fnRemoveTimeOnDate(@dtmStartDate)
+
+	
     
 	IF @dtmEndDate IS NOT NULL
 		SET @dtmEndDate = dbo.fnRemoveTimeOnDate(@dtmEndDate)
@@ -99,26 +100,15 @@ BEGIN TRY
 
 	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 	
-	IF NOT EXISTS(
-					SELECT 1  FROM tblCTContractBalance 
-					WHERE 
-						intContractTypeId    = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId	      ELSE intContractTypeId     END
-					AND intEntityId		     = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE intEntityId		     END
-					AND intCommodityId	     = CASE WHEN ISNULL(@IntCommodityId ,0) > 0			THEN @IntCommodityId	      ELSE intCommodityId	     END
-					AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0	THEN @intCompanyLocationId	  ELSE intCompanyLocationId	 END
-					AND intFutureMarketId	 = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0		THEN @IntFutureMarketId		  ELSE intFutureMarketId	 END
-					AND intFutureMonthId	 = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		  ELSE intFutureMonthId		 END
-					AND dtmEndDate = @dtmEndDate
-				  )
-   BEGIN
+	IF NOT EXISTS( SELECT 1  FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate)
+    BEGIN
 
 	 INSERT INTO @Shipment
 	  (
 	    intContractTypeId
 	   ,intContractHeaderId	
 	   ,intContractDetailId	
-	   ,dtmDate				
-	   ,dtmStartDate		
+	   ,dtmDate	
 	   ,dtmEndDate			
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
@@ -129,8 +119,7 @@ BEGIN TRY
 	   CH.intContractTypeId 
 	  ,CH.intContractHeaderId
 	  ,CD.intContractDetailId
-	  ,InvTran.dtmDate
-	  ,@dtmStartDate AS dtmStartDate 
+	  ,InvTran.dtmDate	  
 	  ,@dtmEndDate  AS dtmEndDate
 	  ,SUM(InvTran.dblQty * - 1) AS dblQuantity
 	  ,0
@@ -146,7 +135,6 @@ BEGIN TRY
 	   AND CD.intContractHeaderId = CH.intContractHeaderId
 	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'
 	   	AND InvTran.ysnIsUnposted = 0
-	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND intContractTypeId = 2
 	   	AND InvTran.intInTransitSourceLocationId IS NULL
@@ -165,8 +153,7 @@ BEGIN TRY
 	    intContractTypeId
 	   ,intContractHeaderId	
 	   ,intContractDetailId	
-	   ,dtmDate				
-	   ,dtmStartDate		
+	   ,dtmDate
 	   ,dtmEndDate			
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
@@ -178,7 +165,6 @@ BEGIN TRY
 	  ,CH.intContractHeaderId
 	  ,CD.intContractDetailId
 	   ,InvTran.dtmDate
-	  ,@dtmStartDate AS dtmStartDate 
 	  ,@dtmEndDate  AS dtmEndDate
 	  ,SUM(InvTran.dblQty)*-1 dblQuantity
 	  ,0
@@ -191,7 +177,6 @@ BEGIN TRY
 	  AND CD.intContractHeaderId = CH.intContractHeaderId
 	  WHERE
 	  	ysnIsUnposted = 0
-	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END	
 	  	AND InvTran.intTransactionTypeId = 46
 	  	AND InvTran.intInTransitSourceLocationId IS NULL
@@ -203,8 +188,7 @@ BEGIN TRY
 	    intContractTypeId
 	   ,intContractHeaderId	
 	   ,intContractDetailId	
-	   ,dtmDate				
-	   ,dtmStartDate		
+	   ,dtmDate
 	   ,dtmEndDate			
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
@@ -216,7 +200,6 @@ BEGIN TRY
 	  ,CH.intContractHeaderId
 	  ,CD.intContractDetailId
 	  ,InvTran.dtmDate
-	  ,@dtmStartDate AS dtmStartDate 
 	  ,@dtmEndDate  AS dtmEndDate
 	  ,SUM(ReceiptItem.dblOpenReceive) dblQuantity
 	  ,0
@@ -233,7 +216,6 @@ BEGIN TRY
 	  AND CD.intContractHeaderId = CH.intContractHeaderId
 	  WHERE strTransactionForm = 'Inventory Receipt'
 	  	AND ysnIsUnposted = 0
-	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	  	AND intContractTypeId = 1
 	  	AND InvTran.intTransactionTypeId = 4
@@ -245,8 +227,7 @@ BEGIN TRY
 	    intContractTypeId
 	   ,intContractHeaderId	
 	   ,intContractDetailId	
-	   ,dtmDate				
-	   ,dtmStartDate		
+	   ,dtmDate
 	   ,dtmEndDate			
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
@@ -258,7 +239,6 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
 		,dbo.fnRemoveTimeOnDate(SS.dtmCreated)
-		,@dtmStartDate AS dtmStartDate 
 	    ,@dtmEndDate  AS dtmEndDate
 		,SUM(SC.dblUnits) AS dblQuantity
 		,0
@@ -271,7 +251,6 @@ BEGIN TRY
 		AND CD.intContractHeaderId = CH.intContractHeaderId
 		WHERE SS.ysnPosted = 1
 			AND SS.intParentSettleStorageId IS NOT NULL
-			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 		GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 			,CD.intContractDetailId,SS.dtmCreated,SS.intSettleStorageId
@@ -325,7 +304,6 @@ BEGIN TRY
 	JOIN	tblCTPriceFixation		 PF	ON	PF.intPriceFixationId =	FD.intPriceFixationId
 	JOIN tblCTContractHeader		 CH ON CH.intContractHeaderId = PF.intContractHeaderId
 	JOIN tblCTContractDetail		 CD ON CD.intContractDetailId = PF.intContractDetailId
-	WHERE   dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
 	AND     dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
 	GROUP BY CH.intContractTypeId,PF.intContractHeaderId,PF.intContractDetailId,FD.dtmFixationDate,FD.dblFutures,FD.dblBasis,FD.dblCashPrice,CD.dblQuantityPerLoad
 	
@@ -387,8 +365,7 @@ BEGIN TRY
 	( 
      intContractTypeId		
 	,intEntityId			
-	,intCommodityId			
-	,dtmStartDate			
+	,intCommodityId
 	,dtmEndDate				
 	,intCompanyLocationId	
 	,intFutureMarketId      
@@ -404,8 +381,10 @@ BEGIN TRY
 	,strItemNo		
 	,strLocationName		
 	,strCustomer			
-	,strContract			
-	,strPricingType			
+	,strContract
+	,intPricingTypeId			
+	,strPricingType
+	,strPricingTypeDesc			
 	,strContractDate		
 	,strShipMethod			
 	,strShipmentPeriod		
@@ -419,14 +398,21 @@ BEGIN TRY
 	,strPriceUOM			
 	,strStockUOM			
 	,dblAvailableQty		
-	,dblAmount				
+	,dblAmount
+	,intUnitMeasureId			
+	,intContractStatusId
+	,intCurrencyId		
+	,strCurrency				
+	,dtmContractDate
+	,dtmSeqEndDate			
+	,strFutMarketName			
+	,strCategory 								
 	)				
 	
 	SELECT				 			
 	 intContractTypeId		= CH.intContractTypeId
 	,intEntityId		   = CH.intEntityId
 	,intCommodityId			= CH.intCommodityId
-	,dtmStartDate			= CASE WHEN @dtmStartDate IS NOT NULL	THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
 	,dtmEndDate			    = @dtmEndDate
 	,intCompanyLocationId	= CD.intCompanyLocationId
 	,intFutureMarketId      = CD.intFutureMarketId
@@ -443,19 +429,15 @@ BEGIN TRY
 	,strLocationName		= L.strLocationName					   
 	,strCustomer			= EY.strEntityName
 	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
-	,strPricingType			= CASE 
-								  WHEN CD.intPricingTypeId = 1 THEN 'P' 
-								  WHEN CD.intPricingTypeId = 2 THEN 'B' 
-								  WHEN CD.intPricingTypeId = 3 THEN 'H'
-								  WHEN CD.intPricingTypeId = 6 THEN 'C'
-								  WHEN CD.intPricingTypeId = 7 THEN 'I'
-							 END
+	,intPricingTypeId		= CD.intPricingTypeId	
+	,strPricingType			= LEFT(PT.strPricingType,1)
+	,strPricingTypeDesc	    = PT.strPricingType
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
 								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
 	
-	,strFutureMonth			= MO.strFutureMonth
+	,strFutureMonth			= ISNULL(MO.strFutureMonth,'None')
 	,dblFutures				= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0)),0)
 	,dblBasis				= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(CD.dblBasis,0)),0)
 	,strBasisUOM			= BUOM.strUnitMeasure
@@ -463,25 +445,28 @@ BEGIN TRY
 									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 									ELSE
-										(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+										ISNULL(dbo.fnICConvertUOMtoStockUnit(
+																				 CD.intItemId
+																				,CD.intItemUOMId,
+																				(CD.intNoOfLoad - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)) * CD.dblQuantityPerLoad
+																			),0) + ISNULL(BL.dblQuantity,0)
 							  END
 	,strQuantityUOM			= IUM.strUnitMeasure
-	,dblCashPrice			= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)	
+	,dblCashPrice			= CASE 
+										WHEN CD.intPricingTypeId IN(1,2) THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
+										ELSE ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblCashPrice,0)),0)
+							  END											
 	,strPriceUOM			= PUOM.strUnitMeasure
 	,strStockUOM			= StockUM.strUnitMeasure
 	,dblAvailableQty		=  CASE 
 							  		WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 							  		ELSE
-							  			(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(
+																				 CD.intItemId
+																				,CD.intItemUOMId,
+																				(CD.intNoOfLoad - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)) * CD.dblQuantityPerLoad
+																			),0) + ISNULL(BL.dblQuantity,0)
 							    END
 
 	,dblAmount				= (
@@ -489,14 +474,22 @@ BEGIN TRY
 									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 									ELSE
-										(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+										ISNULL(dbo.fnICConvertUOMtoStockUnit(
+																				 CD.intItemId
+																				,CD.intItemUOMId,
+																				(CD.intNoOfLoad - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)) * CD.dblQuantityPerLoad
+																			),0) + ISNULL(BL.dblQuantity,0)
 							    END
 							  ) 
 							  * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
+    ,intUnitMeasureId			= CD.intUnitMeasureId
+	,intContractStatusId		= CD.intContractStatusId
+	,intCurrencyId				= CD.intCurrencyId
+	,strCurrency				= Cur.strCurrency
+	,dtmContractDate			= CH.dtmContractDate
+	,dtmSeqEndDate				= CD.dtmEndDate
+	,strFutMarketName			= FM.strFutMarketName
+	,strCategory 				= Category.strCategoryCode
 
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
@@ -509,6 +502,7 @@ BEGIN TRY
 												AND     PF.intContractDetailId          =   BL.intContractDetailId
 	JOIN	tblICCommodity						CM	ON	CM.intCommodityId				=	CH.intCommodityId
 	JOIN	tblICItem                           IM  ON  IM.intItemId					=   CD.intItemId
+	JOIN	tblICCategory						Category  ON Category.intCategoryId			= IM.intCategoryId
 	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CH.intCommodityId AND C1.intCommodityId = CM.intCommodityId AND C1.ysnStockUnit=1
 	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
 
@@ -526,68 +520,55 @@ BEGIN TRY
 
 	JOIN tblICItemUOM						ItemUOM   ON ItemUOM.intItemUOMId			= CD.intItemUOMId
 	JOIN tblICUnitMeasure					IUM		  ON IUM.intUnitMeasureId			= ItemUOM.intUnitMeasureId
+	JOIN tblCTPricingType					PT		  ON PT.intPricingTypeId			= CD.intPricingTypeId
 	LEFT JOIN tblICItemUOM					BASISUOM  ON BASISUOM.intItemUOMId			= CD.intBasisUOMId
 	LEFT JOIN tblICUnitMeasure				BUOM	  ON BUOM.intUnitMeasureId			= BASISUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM					PriceUOM  ON PriceUOM.intItemUOMId		    = CD.intPriceItemUOMId
 	LEFT JOIN tblICUnitMeasure				PUOM	  ON PUOM.intUnitMeasureId			= PriceUOM.intUnitMeasureId
 
 	LEFT JOIN	tblSMFreightTerms			FT		  ON FT.intFreightTermId			=	CD.intFreightTermId
-	JOIN	tblRKFuturesMonth				MO		  ON MO.intFutureMonthId			=	CD.intFutureMonthId
+	LEFT JOIN	tblRKFuturesMonth				MO		  ON MO.intFutureMonthId		=	CD.intFutureMonthId
+	LEFT JOIN   tblSMCurrency						Cur ON Cur.intCurrencyID			=	CD.intCurrencyId
+	LEFT JOIN	tblRKFutureMarket				FM	ON FM.intFutureMarketId				=	CD.intFutureMarketId
 	
-	WHERE CH.intContractTypeId	  = CASE WHEN ISNULL(@intContractTypeId ,0) > 0    THEN @intContractTypeId	  ELSE CH.intContractTypeId                  END
-	AND   CH.intEntityId		  = CASE WHEN ISNULL(@intEntityId ,0) > 0		   THEN @intEntityId		  ELSE CH.intEntityId		                 END
-	AND   CH.intCommodityId		  = CASE WHEN ISNULL(@IntCommodityId ,0) > 0	   THEN @IntCommodityId		  ELSE CH.intCommodityId	                 END
-	AND   dbo.fnRemoveTimeOnDate(CD.dtmCreated)	>= CASE WHEN @dtmStartDate IS NOT NULL	THEN @dtmStartDate	  ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
-	AND   dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL	THEN @dtmEndDate	  ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
-	AND   CD.intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0 THEN @intCompanyLocationId ELSE CD.intCompanyLocationId               END
-	AND   CD.intFutureMarketId    = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0	   THEN @IntFutureMarketId	  ELSE CD.intFutureMarketId	                 END
-	AND   CD.intFutureMonthId     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0     THEN @IntFutureMonthId     ELSE CD.intFutureMonthId                   END
-	AND   ISNULL(L.ysnLicensed, 0) = CASE 
-										WHEN @strPositionIncludes = 'licensed storage'     THEN 1
-										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-										ELSE ISNULL(ysnLicensed, 0) 
-									 END
-	
-	
+	WHERE dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE 
+														WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	  
+														ELSE	 dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
+												   END
+
 	INSERT INTO @tblChange(intSequenceHistoryId,intContractDetailId)
 	SELECT MAX(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 
 	WHERE  dbo.fnRemoveTimeOnDate(dtmHistoryCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) END
 	GROUP BY intContractDetailId
 
 	UPDATE tblCTContractBalance 
-	SET strPricingType = CASE 
-								  WHEN SH.intPricingTypeId = 1 THEN 'P' 
-								  WHEN SH.intPricingTypeId = 2 THEN 'B' 
-								  WHEN SH.intPricingTypeId = 3 THEN 'H'
-								  WHEN SH.intPricingTypeId = 6 THEN 'C'
-								  WHEN SH.intPricingTypeId = 7 THEN 'I'
-						 END
-       ,dblFutures        = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0)
-	   ,dblBasis          = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0)
-	   ,dblCashPrice      = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0)
-							+ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0)
+	SET intPricingTypeId   = SH.intPricingTypeId
+       ,strPricingType	   = LEFT(PT.strPricingType,1)
+       ,strPricingTypeDesc = PT.strPricingType
+       ,dblFutures         = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0)
+	   ,dblBasis           = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0)
+	   ,dblCashPrice       =  CASE 
+										WHEN SH.intPricingTypeId IN(1,2) THEN  ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0)
+																			 + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0)
+										ELSE ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblCashPrice,0)),0)
+							  END	
+	   
+							
 	   ,intFutureMarketId = SH.intFutureMarketId
 	   ,intFutureMonthId  = SH.intFutureMonthId
-	   ,strFutureMonth    = MO.strFutureMonth
+	   ,strFutureMonth    = ISNULL(MO.strFutureMonth,'None')
 	FROM tblCTContractBalance FR 
 	JOIN @tblChange tblChange ON tblChange.intContractDetailId = FR.intContractDetailId
 	JOIN tblCTSequenceHistory SH ON SH.intSequenceHistoryId = tblChange.intSequenceHistoryId
-	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	SH.intFutureMonthId
-	WHERE 
-		FR.intContractTypeId    = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId		  ELSE FR.intContractTypeId     END
-	AND FR.intEntityId		     = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE FR.intEntityId		     END
-	AND FR.intCommodityId	     = CASE WHEN ISNULL(@IntCommodityId ,0) > 0			THEN @IntCommodityId	      ELSE FR.intCommodityId	     END
-	AND FR.intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0	THEN @intCompanyLocationId	  ELSE FR.intCompanyLocationId	 END
-	AND FR.intFutureMarketId	 = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0		THEN @IntFutureMarketId		  ELSE FR.intFutureMarketId	 END
-	AND FR.intFutureMonthId	 = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		  ELSE FR.intFutureMonthId		 END
-	AND FR.dtmEndDate = @dtmEndDate
+	JOIN tblCTPricingType	  PT ON PT.intPricingTypeId		= SH.intPricingTypeId
+	LEFT JOIN	tblRKFuturesMonth MO	ON	MO.intFutureMonthId			=	SH.intFutureMonthId
+	WHERE FR.dtmEndDate = @dtmEndDate
 
 	INSERT INTO tblCTContractBalance
 	( 
      intContractTypeId		
 	,intEntityId			
-	,intCommodityId			
-	,dtmStartDate			
+	,intCommodityId
 	,dtmEndDate				
 	,intCompanyLocationId	
 	,intFutureMarketId      
@@ -604,7 +585,8 @@ BEGIN TRY
 	,strLocationName		
 	,strCustomer			
 	,strContract			
-	,strPricingType			
+	,strPricingType
+	,strPricingTypeDesc			
 	,strContractDate		
 	,strShipMethod			
 	,strShipmentPeriod		
@@ -618,13 +600,20 @@ BEGIN TRY
 	,strPriceUOM			
 	,strStockUOM			
 	,dblAvailableQty		
-	,dblAmount				
+	,dblAmount
+	,intUnitMeasureId			
+	,intContractStatusId
+	,intCurrencyId		
+	,strCurrency				
+	,dtmContractDate
+	,dtmSeqEndDate			
+	,strFutMarketName			
+	,strCategory 				
 	)		
 	SELECT DISTINCT
      intContractTypeId		= CH.intContractTypeId
 	,intEntityId		   = CH.intEntityId
-	,intCommodityId			= CH.intCommodityId
-	,dtmStartDate			= CASE WHEN @dtmStartDate IS NOT NULL	THEN @dtmStartDate ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
+	,intCommodityId			= CH.intCommodityId	
 	,dtmEndDate			    = @dtmEndDate
 	,intCompanyLocationId	= CD.intCompanyLocationId
 	,intFutureMarketId      = CD.intFutureMarketId
@@ -642,6 +631,7 @@ BEGIN TRY
 	,strCustomer			= EY.strEntityName
 	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
 	,strPricingType			= 'P'
+	,strPricingTypeDesc		= 'Priced'
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
@@ -660,6 +650,15 @@ BEGIN TRY
 								ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)- ISNULL(PF.dblShippedQty,0)) ,0)
 							   ) 
 							   * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
+    
+	,intUnitMeasureId			= CD.intUnitMeasureId
+	,intContractStatusId		= CD.intContractStatusId
+	,intCurrencyId				= CD.intCurrencyId
+	,strCurrency				= Cur.strCurrency
+	,dtmContractDate			= CH.dtmContractDate
+	,dtmSeqEndDate				= CD.dtmEndDate
+	,strFutMarketName			= FM.strFutMarketName
+	,strCategory 				= Category.strCategoryCode
 
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
@@ -669,6 +668,7 @@ BEGIN TRY
 												AND     PF.intContractDetailId          =   BL.intContractDetailId
 	JOIN	tblICCommodity						CM	ON	CM.intCommodityId				=	CH.intCommodityId
 	JOIN	tblICItem                           IM  ON  IM.intItemId					=   CD.intItemId
+	JOIN	tblICCategory						Category  ON Category.intCategoryId		= IM.intCategoryId
 	JOIN	tblICCommodityUnitMeasure			C1	ON	C1.intCommodityId				=	CH.intCommodityId AND C1.intCommodityId = CM.intCommodityId AND C1.ysnStockUnit=1
 	JOIN    tblICUnitMeasure					UOM ON  UOM.intUnitMeasureId			=   C1.intUnitMeasureId
 
@@ -692,34 +692,18 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure				PUOM	  ON PUOM.intUnitMeasureId			= PriceUOM.intUnitMeasureId
 	
 	LEFT JOIN	tblSMFreightTerms			FT		  ON	FT.intFreightTermId			=	CD.intFreightTermId
-	JOIN	tblRKFuturesMonth				MO		  ON	MO.intFutureMonthId			=	CD.intFutureMonthId
+	LEFT JOIN	tblRKFuturesMonth				MO		  ON MO.intFutureMonthId		=	CD.intFutureMonthId
+	LEFT JOIN   tblSMCurrency						Cur ON Cur.intCurrencyID			=	CD.intCurrencyId
+	LEFT JOIN	tblRKFutureMarket				FM	ON FM.intFutureMarketId				=	CD.intFutureMarketId
 	
-	WHERE CH.intContractTypeId	  = CASE WHEN ISNULL(@intContractTypeId ,0) > 0    THEN @intContractTypeId	  ELSE CH.intContractTypeId					 END
-	AND   CH.intEntityId		  = CASE WHEN ISNULL(@intEntityId ,0) > 0		   THEN @intEntityId		  ELSE CH.intEntityId						 END
-	AND   CH.intCommodityId		  = CASE WHEN ISNULL(@IntCommodityId ,0) > 0	   THEN @IntCommodityId		  ELSE CH.intCommodityId					 END
-	AND   dbo.fnRemoveTimeOnDate(CD.dtmCreated) >= CASE WHEN @dtmStartDate IS NOT NULL THEN @dtmStartDate	  ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
-	AND   dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate		  ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END
-	AND   CD.intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0 THEN @intCompanyLocationId ELSE CD.intCompanyLocationId				 END
-	AND   CD.intFutureMarketId    = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0	   THEN @IntFutureMarketId	  ELSE CD.intFutureMarketId					 END
-	AND   CD.intFutureMonthId     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0     THEN @IntFutureMonthId     ELSE CD.intFutureMonthId					 END
-	AND   ISNULL(BL.dblQuantity,0) <= 0
-	AND   ISNULL(L.ysnLicensed, 0) = CASE 
-										WHEN @strPositionIncludes = 'licensed storage'     THEN 1
-										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-										ELSE ISNULL(ysnLicensed, 0) 
-									 END
-	
+	WHERE dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE 
+														WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate		  
+														ELSE	   dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
+												   END
 
 	UPDATE tblCTContractBalance 
 	SET dblAmount = ISNULL(dblAvailableQty,0) * (ISNULL(dblFutures,0)+ISNULL(dblBasis,0))
-	WHERE 
-	intContractTypeId    = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		    THEN @intContractTypeId	      ELSE intContractTypeId     END
-	AND intEntityId		     = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE intEntityId		     END
-	AND intCommodityId	     = CASE WHEN ISNULL(@IntCommodityId ,0) > 0			THEN @IntCommodityId	      ELSE intCommodityId	     END
-	AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0	THEN @intCompanyLocationId	  ELSE intCompanyLocationId	 END
-	AND intFutureMarketId	 = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0		THEN @IntFutureMarketId		  ELSE intFutureMarketId	 END
-	AND intFutureMonthId	 = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		  ELSE intFutureMonthId		 END
-	AND dtmEndDate = @dtmEndDate
+	WHERE dtmEndDate = @dtmEndDate
 
 	;WITH CTE
 	AS 
@@ -727,6 +711,7 @@ BEGIN TRY
 		SELECT Row_Number() OVER (PARTITION BY SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC) AS Row_Num
 		,SH.intContractDetailId
 		,SH.intContractStatusId
+		,SH.intPricingTypeId
 		,SH.dtmHistoryCreated
 		FROM tblCTSequenceHistory SH
 		JOIN  tblCTContractBalance FR ON SH.intContractDetailId = FR.intContractDetailId
@@ -734,38 +719,42 @@ BEGIN TRY
 																WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	 
 																ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) 
 															END
-		AND
-			FR.intContractTypeId	 = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId	      ELSE FR.intContractTypeId      END
-		AND FR.intEntityId		     = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE FR.intEntityId		     END
-		AND FR.intCommodityId	     = CASE WHEN ISNULL(@IntCommodityId ,0) > 0			THEN @IntCommodityId	      ELSE FR.intCommodityId	     END
-		AND FR.intCompanyLocationId  = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0	THEN @intCompanyLocationId	  ELSE FR.intCompanyLocationId	 END
-		AND FR.intFutureMarketId	 = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0		THEN @IntFutureMarketId		  ELSE FR.intFutureMarketId		 END
-		AND FR.intFutureMonthId	     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		  ELSE FR.intFutureMonthId		 END
-		AND FR.dtmEndDate =		 @dtmEndDate						  													  
+		AND	FR.dtmEndDate =		 @dtmEndDate						  													  
 	)
 	INSERT INTO @SequenceHistory
 	(
 		intContractDetailId,
 		intContractStatusId,
+		intPricingTypeId,
 		dtmHistoryCreated
 	)
 	SELECT 
 	intContractDetailId,
 	intContractStatusId,
+	intPricingTypeId,
 	dtmHistoryCreated
 	FROM CTE WHERE Row_Num = 1
+
+	UPDATE FR
+	SET 
+		 FR.intContractStatusId = SH.intContractStatusId
+		,FR.intPricingTypeId	= SH.intPricingTypeId
+	FROM tblCTContractBalance FR
+	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
+	WHERE FR.dtmEndDate = @dtmEndDate
+
+	UPDATE FR
+	SET FR.strPricingType	  = LEFT(PT.strPricingType,1),
+		FR.strPricingTypeDesc = PT.strPricingType
+	FROM tblCTContractBalance FR
+	JOIN tblCTPricingType PT ON PT.intPricingTypeId = FR.intPricingTypeId
+	WHERE FR.dtmEndDate = @dtmEndDate AND (FR.strPricingType IS NULL OR FR.strPricingTypeDesc IS NULL)
 
 	DELETE FR
 	FROM tblCTContractBalance FR
 	JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
 	WHERE SH.intContractStatusId IN (3,5,6)
-		AND	FR.intContractTypeId	 = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId	      ELSE FR.intContractTypeId      END
-		AND FR.intEntityId		     = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE FR.intEntityId		     END
-		AND FR.intCommodityId	     = CASE WHEN ISNULL(@IntCommodityId ,0) > 0			THEN @IntCommodityId	      ELSE FR.intCommodityId	     END
-		AND FR.intCompanyLocationId  = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0	THEN @intCompanyLocationId	  ELSE FR.intCompanyLocationId	 END
-		AND FR.intFutureMarketId	 = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0		THEN @IntFutureMarketId		  ELSE FR.intFutureMarketId		 END
-		AND FR.intFutureMonthId	     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		  ELSE FR.intFutureMonthId		 END
-		AND FR.dtmEndDate			 = @dtmEndDate
+		AND FR.dtmEndDate = @dtmEndDate
 
 	UPDATE FR
 	 SET
@@ -779,18 +768,13 @@ BEGIN TRY
 		AND ComStockUOM.ysnStockUnit = 1
 	JOIN tblICItemUOM ItemStockUOM ON ItemStockUOM.intItemId = FR.intItemId 
 		AND ItemStockUOM.ysnStockUnit = 1
-	WHERE
-		FR.intContractTypeId		 = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId	      ELSE FR.intContractTypeId      END
-		AND FR.intEntityId		     = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE FR.intEntityId		     END
-		AND FR.intCommodityId	     = CASE WHEN ISNULL(@IntCommodityId ,0) > 0			THEN @IntCommodityId	      ELSE FR.intCommodityId	     END
-		AND FR.intCompanyLocationId  = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0	THEN @intCompanyLocationId	  ELSE FR.intCompanyLocationId	 END
-		AND FR.intFutureMarketId	 = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0		THEN @IntFutureMarketId		  ELSE FR.intFutureMarketId		 END
-		AND FR.intFutureMonthId	     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		  ELSE FR.intFutureMonthId		 END
-		AND FR.dtmEndDate			 = @dtmEndDate
+	WHERE FR.dtmEndDate = @dtmEndDate
 
   END	
 
-	SELECT 
+    IF ISNULL(@strCallingApp,'') <> 'DPR'
+	BEGIN
+	 SELECT 
 	 intContractBalanceId
 	,intContractHeaderId	
 	,strType				
@@ -829,17 +813,27 @@ BEGIN TRY
 	,dblFuturesinCommodityStockUOM	
 	,dblBasisinCommodityStockUOM	
 	,dblCashPriceinCommodityStockUOM
-	,dblAmountinCommodityStockUOM	
+	,dblAmountinCommodityStockUOM
+	,strPrintOption	= @strPrintOption
 	FROM tblCTContractBalance 
 	WHERE  dblAvailableQty > 0
 	AND
-	intContractTypeId		 = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId	      ELSE intContractTypeId     END
-	AND intEntityId		     = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE intEntityId		     END
-	AND intCommodityId	     = CASE WHEN ISNULL(@IntCommodityId ,0) > 0			THEN @IntCommodityId	      ELSE intCommodityId	     END
-	AND intCompanyLocationId = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0	THEN @intCompanyLocationId	  ELSE intCompanyLocationId	 END
-	AND intFutureMarketId	 = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0		THEN @IntFutureMarketId		  ELSE intFutureMarketId	 END
-	AND intFutureMonthId	 = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		  ELSE intFutureMonthId		 END
-	AND dtmEndDate			=  @dtmEndDate	 	
+	intContractTypeId		  = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId	      ELSE intContractTypeId     END
+	AND intEntityId			  = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE intEntityId		     END
+	AND intCommodityId		  = CASE WHEN ISNULL(@IntCommodityId ,0) > 0		THEN @IntCommodityId	      ELSE intCommodityId	     END
+	AND intCompanyLocationId  = CASE WHEN ISNULL(@intCompanyLocationId ,0) > 0	THEN @intCompanyLocationId	  ELSE intCompanyLocationId	 END
+	
+	AND ISNULL(intFutureMarketId,0)	= CASE 
+											WHEN ISNULL(@IntFutureMarketId ,0) > 0		THEN @IntFutureMarketId		  
+											ELSE ISNULL(intFutureMarketId,0)	 
+									  END
+	AND ISNULL(intFutureMonthId,0)	=  CASE 
+											WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		  
+											ELSE ISNULL(intFutureMonthId,0)		 
+									  END
+	AND dtmEndDate			=  @dtmEndDate
+ END
+ 
 
 END TRY
 

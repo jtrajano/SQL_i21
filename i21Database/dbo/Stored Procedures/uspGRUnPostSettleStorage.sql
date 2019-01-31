@@ -28,10 +28,8 @@ BEGIN TRY
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
-	DECLARE @strOwnedPhysicalStock NVARCHAR(20)
-	
+	DECLARE @strOwnedPhysicalStock NVARCHAR(20)	
 	DECLARE @isParentSettleStorage AS BIT
-
 	DECLARE @intDecimalPrecision INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -244,7 +242,6 @@ BEGIN TRY
 
 				UPDATE CS
 				SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnit
-					,CS.dblGrossQuantity = CS.dblGrossQuantity + ISNULL(GS.dblGrossSettledUnits,0)
 				FROM tblGRCustomerStorage CS
 				JOIN (
 						SELECT intCustomerStorageId
@@ -253,12 +250,6 @@ BEGIN TRY
 						WHERE intSettleStorageId = @intSettleStorageId
 						GROUP BY intCustomerStorageId
 					) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
-				OUTER APPLY (
-					SELECT dblGrossSettledUnits
-					FROM tblGRSettleStorageTicket
-					WHERE intSettleStorageId = @intSettleStorageId
-						AND intCustomerStorageId = CS.intCustomerStorageId
-				) GS
 			END
 
 			--3. OnHand and OnStore Increment
@@ -457,7 +448,34 @@ BEGIN TRY
 			--get first the parent settle storage id before the deletion
 			IF @isParentSettleStorage = 0
 			BEGIN
-				SELECT @intParentSettleStorageId = intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
+				SELECT @intParentSettleStorageId = intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId				
+
+				--if child settle storage; recompute the units settled of the parent settle storage
+				UPDATE SS
+				SET
+					SS.dblStorageDue		= SS.dblStorageDue - CS.dblStorageDue
+					,SS.dblSelectedUnits	= SS.dblSelectedUnits - CS.dblSelectedUnits
+					,SS.dblSettleUnits		= SS.dblSettleUnits - CS.dblSettleUnits
+					,SS.dblDiscountsDue		= SS.dblDiscountsDue - CS.dblDiscountsDue
+					,SS.dblNetSettlement	= SS.dblNetSettlement - CS.dblNetSettlement
+					,SS.dblSpotUnits		= SS.dblSpotUnits - CS.dblSpotUnits
+					,SS.dblCashPrice		= SS.dblCashPrice - CS.dblCashPrice
+				FROM tblGRSettleStorage SS
+				OUTER APPLY (
+					SELECT 
+						dblStorageDue
+						,dblSelectedUnits
+						,dblSettleUnits
+						,dblDiscountsDue
+						,dblNetSettlement
+						,dblSpotUnits
+						,dblCashPrice
+					FROM tblGRSettleStorage
+					WHERE intSettleStorageId = @intSettleStorageId
+				) CS
+				WHERE intSettleStorageId = @intParentSettleStorageId
+
+				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			END
 
 			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
@@ -465,6 +483,11 @@ BEGIN TRY
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+			END
+			ELSE
+			BEGIN
+				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
+				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId
 			END
 
 			--5. Removing Voucher

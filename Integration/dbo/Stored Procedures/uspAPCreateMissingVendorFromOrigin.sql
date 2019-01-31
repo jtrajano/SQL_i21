@@ -14,6 +14,7 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @key NVARCHAR(100) = NEWID()
+DECLARE @vendorId INT;
 DECLARE @missingVendor TABLE(strVendorId NVARCHAR(100));
 DECLARE @missingVendorId NVARCHAR(100);
 DECLARE @missingVendorError NVARCHAR(500);
@@ -51,7 +52,7 @@ BEGIN
 	WHILE EXISTS(SELECT 1 FROM @missingVendor)
 	BEGIN
 		SELECT TOP 1 @missingVendorId = strVendorId FROM @missingVendor;
-		EXEC uspEMCreateEntityById @Id = @missingVendorId, @Type = 'Vendor', @UserId = @UserId, @Message = @missingVendorError OUTPUT
+		EXEC uspEMCreateEntityById @Id = @missingVendorId, @Type = 'Vendor', @UserId = @UserId, @Message = @missingVendorError OUTPUT, @EntityId = @vendorId OUTPUT
 		IF (@missingVendorError IS NOT NULL)
 		BEGIN
 			RAISERROR(@missingVendorError, 16, 1);

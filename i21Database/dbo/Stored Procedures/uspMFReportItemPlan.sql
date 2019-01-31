@@ -21,28 +21,11 @@ BEGIN
 		,@strTargetItemNo NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
 		,@intItemId INT
+		,@strProcessName NVARCHAR(50)
+		,@intManufacturingProcessId INT
+		,@intLocationId INT
 
 	SELECT @dtmCurrentDateTime = GETDATE()
-
-	SELECT @intBlendAttributeId = intAttributeId
-	FROM tblMFAttribute
-	WHERE strAttributeName = 'Category for Ingredient Demand Report'
-
-	SELECT @strBlendAttributeValue = ''
-
-	SELECT @strBlendAttributeValue = @strBlendAttributeValue + strAttributeValue + ','
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intAttributeId = @intBlendAttributeId
-		AND strAttributeValue <> ''
-
-	IF @strBlendAttributeValue IS NULL
-		OR @strBlendAttributeValue = ''
-	BEGIN
-		SELECT @strBlendAttributeValue = ''
-
-		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
-		FROM tblICCategory
-	END
 
 	SELECT @strPackagingCategory = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -179,7 +162,7 @@ BEGIN
 
 	SELECT @strCompanyLocationName = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'Location'
+	WHERE [fieldname] = 'strLocationName'
 
 	IF @strCompanyLocationName IS NULL
 		SELECT @strCompanyLocationName = ''
@@ -198,6 +181,49 @@ BEGIN
 	IF @strShowStorage IS NULL
 	BEGIN
 		SELECT @strShowStorage = ''
+	END
+
+	SELECT @strProcessName = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'strProcessName'
+
+	IF IsNULL(@strProcessName, '') <> ''
+	BEGIN
+		SELECT @strBlendAttributeValue = ''
+
+		SELECT @intLocationId = intCompanyLocationId
+		FROM tblSMCompanyLocation
+		WHERE strLocationName = @strCompanyLocationName
+
+		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strAttributeValue + ','
+		FROM tblMFManufacturingProcessAttribute
+		WHERE intAttributeId = 78 --Category for Ingredient Demand Report
+			AND intLocationId = CASE 
+				WHEN @intLocationId IS NOT NULL
+					THEN @intLocationId
+				ELSE intLocationId
+				END
+			AND intManufacturingProcessId IN (
+				SELECT intManufacturingProcessId
+				FROM tblMFManufacturingProcess
+				WHERE strProcessName = @strProcessName
+				)
+
+		IF @strBlendAttributeValue IS NULL
+			OR @strBlendAttributeValue = ''
+		BEGIN
+			SELECT @strBlendAttributeValue = ''
+
+			SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
+			FROM tblICCategory
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT @strBlendAttributeValue = ''
+
+		SELECT @strBlendAttributeValue = @strBlendAttributeValue + strCategoryCode + ','
+		FROM tblICCategory
 	END
 
 	DECLARE @strShowShrtgWithAvlblUnblendedTea NVARCHAR(50)
@@ -517,8 +543,6 @@ BEGIN
 		END
 	END
 
-	SET @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, GetDate(), 101))
-
 	SELECT @intCompanyLocationId = MIN(intCompanyLocationId)
 	FROM dbo.tblSMCompanyLocation
 	WHERE strLocationName = CASE 
@@ -526,6 +550,8 @@ BEGIN
 				THEN strLocationName
 			ELSE @strCompanyLocationName
 			END
+
+	SET @dtmCurrentDate = dbo.fnGetBusinessDate(GETDATE(), @intCompanyLocationId)
 
 	WHILE @intCompanyLocationId > 0
 	BEGIN
@@ -740,6 +766,7 @@ BEGIN
 			WHERE InvS.ysnPosted = 0
 				AND InvS.dtmShipDate >= @dtmCurrentDate
 				AND InvS.dtmShipDate <= @dtmCalendarDate
+				AND InvS.intShipFromLocationId = @intCompanyLocationId
 			GROUP BY InvS.strShipmentNumber
 				,I.intItemId
 				,I.strItemNo

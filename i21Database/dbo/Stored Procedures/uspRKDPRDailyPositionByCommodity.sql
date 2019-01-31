@@ -15,6 +15,18 @@ DECLARE @FinalTable AS TABLE (
 		 intCommodityId int		 	
 )
 
+
+	EXEC uspCTGetContractBalance
+		 @intContractTypeId    = NULL
+		,@intEntityId		   = NULL
+		,@IntCommodityId	   = NULL 		 
+		,@dtmEndDate		   = @dtmToDate
+		,@intCompanyLocationId = NULL
+		,@IntFutureMarketId    = NULL
+		,@IntFutureMonthId     = NULL
+		,@strPositionIncludes  = NULL
+		,@strCallingApp    =    'DPR'
+
 --Comment it temporarily: Refer to RM-2491
 
 --INSERT INTO @FinalTable(strCommodityCode,strUnitMeasure,strSeqHeader,dblTotal,intCommodityId)

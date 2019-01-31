@@ -4,7 +4,6 @@
 	 intContractTypeId					INT	
 	,intEntityId						INT
 	,intCommodityId						INT
-	,dtmStartDate						DATETIME
 	,dtmEndDate							DATETIME
 	,intCompanyLocationId				INT
 	,intFutureMarketId					INT
@@ -41,4 +40,14 @@
 	,dblBasisinCommodityStockUOM		NUMERIC(38,20)
 	,dblCashPriceinCommodityStockUOM	NUMERIC(38,20)
 	,dblAmountinCommodityStockUOM		NUMERIC(38,20)
+	,intPricingTypeId					INT
+	,strPricingTypeDesc					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,intUnitMeasureId					INT
+	,intContractStatusId				INT
+	,intCurrencyId						INT
+	,strCurrency						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	,dtmContractDate					DATETIME
+	,dtmSeqEndDate						DATETIME	
+	,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 )

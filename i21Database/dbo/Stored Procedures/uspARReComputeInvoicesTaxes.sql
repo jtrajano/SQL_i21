@@ -131,6 +131,7 @@ INSERT INTO [tblARInvoiceDetailTax]
     ,[ysnSeparateOnInvoice]
     ,[ysnCheckoffTax]
     ,[ysnTaxExempt]
+	,[ysnInvalidSetup]
 	,[ysnTaxOnly]
 	,[strNotes] 
 	,[intUnitMeasureId]
@@ -153,6 +154,7 @@ SELECT
 	,[ysnSeparateOnInvoice]		= TD.[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]			= TD.[ysnCheckoffTax]
 	,[ysnTaxExempt]				= TD.[ysnTaxExempt]
+	,[ysnInvalidSetup]          = TD.[ysnInvalidSetup]
 	,[ysnTaxOnly]				= TD.[ysnTaxOnly]
 	,[strNotes]					= TD.[strNotes]
 	,[intUnitMeasureId]			= TD.[intUnitMeasureId]
@@ -160,7 +162,7 @@ SELECT
 FROM
 	@InvoiceDetail IDs
 CROSS APPLY
-	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, 0, IDs.[intItemUOMId], IDs.[intCurrencyId], IDs.[intCurrencyExchangeRateTypeId], IDs.[dblCurrencyExchangeRate]) TD
+	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, 0, IDs.[intItemUOMId], IDs.[intCurrencyId], IDs.[intCurrencyExchangeRateTypeId], IDs.[dblCurrencyExchangeRate]) TD
 WHERE
 	NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 		

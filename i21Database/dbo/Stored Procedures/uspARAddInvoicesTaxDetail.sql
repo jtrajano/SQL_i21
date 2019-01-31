@@ -51,6 +51,7 @@ CREATE TABLE #InvoiceDetailTax
 	,[ysnSeparateOnInvoice]		BIT												NULL
 	,[ysnCheckoffTax]			BIT												NULL
 	,[ysnTaxExempt]				BIT												NULL                                 	
+	,[ysnInvalidSetup]			BIT												NULL                                 	
 	,[ysnTaxOnly]				BIT												NULL
 	,[strNotes]					NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
 	,[intConcurrencyId]			INT												NULL)
@@ -74,6 +75,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[ysnTaxOnly]
 		,[strNotes]
 		,[intConcurrencyId])
@@ -93,7 +95,8 @@ BEGIN TRY
 		,ysnTaxAdjusted			= CASE WHEN ISNULL(TD.[ysnTaxAdjusted], 0) = 1 THEN ISNULL(TD.[ysnTaxAdjusted], 0) ELSE (CASE WHEN ISNULL(TD.[dblTax], @ZeroDecimal) <> ISNULL(TD.[dblAdjustedTax],0) THEN 1 ELSE 0 END) END
 		,ysnSeparateOnInvoice	= ISNULL(TD.[ysnSeparateOnInvoice], 0)
 		,ysnCheckoffTax			= ISNULL(TD.[ysnCheckoffTax], SMTC.[ysnCheckoffTax])
-		,ysnTaxExempt			= ISNULL(TD.[ysnTaxExempt], 0)
+		,ysnTaxExempt			= CASE WHEN ISNULL(TRD.[ysnInvalidSetup], 0) = 1 THEN 1 ELSE ISNULL(TD.[ysnTaxExempt], 0) END
+		,[ysnInvalidSetup]		= CASE WHEN ISNULL(TRD.[ysnInvalidSetup], 0) = 1 THEN 1 ELSE ISNULL(TD.[ysnInvalidSetup], 0) END
 		,[ysnTaxOnly]			= ISNULL(TD.[ysnTaxOnly], 0)
 		,strNotes				= TD.[strNotes]
 		,1
@@ -128,6 +131,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[ysnTaxOnly]
 		,[strNotes]
 		,[intConcurrencyId])
@@ -148,6 +152,7 @@ BEGIN TRY
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[ysnTaxExempt]
+		,[ysnInvalidSetup]
 		,[ysnTaxOnly]
 		,[strNotes]
 		,[intConcurrencyId]

@@ -30,7 +30,7 @@ BEGIN
 				tblCTContractDetail CD
 				JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
 				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1))
+				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
 	BEGIN
 		SELECT TOP 1 
 			@strInvoiceNumber = CH.strContractNumber,
@@ -40,7 +40,7 @@ BEGIN
 		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1)
+		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)
 
 		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
 
@@ -133,7 +133,7 @@ BEGIN
 		,@EntityCustomerId			= LD.intCustomerEntityId
 		,@CompanyLocationId			= LD.intSCompanyLocationId 	
 		,@AccountId					= NULL
-		,@CurrencyId				= L.intCurrencyId
+		,@CurrencyId				= CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) ELSE L.intCurrencyId END
 		,@TermId					= NULL
 		,@SourceId					= @intLoadId
 		,@PeriodsToAccrue			= 1
@@ -193,6 +193,7 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	INNER JOIN [tblARCustomer] ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
 	WHERE L.intLoadId = @intLoadId
 

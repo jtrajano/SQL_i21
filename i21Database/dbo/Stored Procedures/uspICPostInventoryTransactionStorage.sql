@@ -27,6 +27,7 @@
 	,@InventoryTransactionIdentityId INT OUTPUT 
 	,@intForexRateTypeId INT = NULL
 	,@dblForexRate NUMERIC(38, 20) = 1
+	,@strDescription NVARCHAR(255) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF

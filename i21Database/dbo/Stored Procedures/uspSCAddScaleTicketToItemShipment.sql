@@ -264,7 +264,8 @@ BEGIN
 		,intLoadShipped				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
 		,ysnAllowInvoice			= CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
 										CASE  
-											WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 ELSE CASE WHEN LI.dblCost > 0 THEN 1 ELSE 0 END 
+											WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 
+											ELSE LI.ysnAllowInvoiceVoucher 
 										END
 									END
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId

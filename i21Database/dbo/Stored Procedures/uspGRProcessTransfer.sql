@@ -20,7 +20,9 @@ BEGIN
 	DECLARE @dblTransferUnits NUMERIC(18,6)
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @intCustomerStorageId INT --new customer storage id
-	DECLARE @intStorageHistoryId INT = 0	
+	DECLARE @intStorageHistoryId INT = 0
+	DECLARE @intDecimalPrecision INT	
+	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
@@ -67,7 +69,7 @@ BEGIN
 		) AS (
 			SELECT intTransferContractDetailId	= SourceSplit.intContractDetailId,
 				dblTransferUnits				= -(SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits),
-				intSourceItemUOMId			= TransferStorage.intItemUOMId,
+				intSourceItemUOMId				= TransferStorage.intItemUOMId,
 				intCustomerStorageId			= SourceSplit.intSourceCustomerStorageId
 			FROM tblGRTransferStorageSourceSplit SourceSplit
 			INNER JOIN tblGRTransferStorage TransferStorage
@@ -102,7 +104,7 @@ BEGIN
 
 		--update the source's customer storage open balance
 		UPDATE A
-		SET A.dblOpenBalance = B.dblOriginalUnits - B.dblDeductedUnits
+		SET A.dblOpenBalance 	= ROUND(B.dblOriginalUnits - B.dblDeductedUnits,@intDecimalPrecision)
 		FROM tblGRCustomerStorage A 
 		INNER JOIN tblGRTransferStorageSourceSplit B 
 			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
@@ -197,7 +199,7 @@ BEGIN
 			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
 			,[dblQuantity]						= TransferStorageSplit.dblUnits
-			,[dtmDeliveryDate]					= GETDATE()
+			,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
 			,[dtmLastStorageAccrueDate]			= CS.dtmLastStorageAccrueDate	
@@ -226,7 +228,7 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
-			,[dblGrossQuantity]					= CS.dblGrossQuantity
+			,[dblGrossQuantity]					= ROUND((TransferStorageSplit.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity,@intDecimalPrecision)
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -340,7 +342,7 @@ BEGIN
 		FROM tblGRTransferStorageSplit A
 		INNER JOIN @newCustomerStorageIds B
 			ON B.transferSplitId = A.intTransferStorageSplitId
-		
+
 		DELETE FROM @StorageHistoryStagingTable
 		--for new customer storage
 		INSERT INTO @StorageHistoryStagingTable

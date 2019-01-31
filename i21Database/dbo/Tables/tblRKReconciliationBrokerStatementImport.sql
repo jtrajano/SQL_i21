@@ -9,7 +9,7 @@
 	[intNoOfContract] int,
 	[strFutureMonth] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 	[dblPrice] decimal(24,10) ,	
-	[dtmFilledDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[dtmFilledDate] DATETIME NULL,
 	[intConcurrencyId] int,
 	[strImportStatus] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strErrMessage] nvarchar(max) COLLATE Latin1_General_CI_AS NULL

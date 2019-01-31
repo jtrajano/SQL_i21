@@ -20,13 +20,13 @@ BEGIN
 		  ,WU.strUnitMeasure AS strWeightUOM
 		  ,WU.strSymbol AS strWeightUOMSymbol
 		  ,IRIL.strContainerNo AS strContainerNumber
-		  ,strMarks = ISNULL(IRIL.strMarkings, LC.strMarks)
+		  ,strMarks = ISNULL(IRIL.strMarkings, LC2.strMarks)
+		  ,strCustomsComments = ISNULL(LC.strCustomsComments, LC2.strCustomsComments)
 		  ,LW.strDeliveryNoticeNumber
 		  ,CLSL.strSubLocationName
 		  ,LDL.strWarehouseCargoNumber
 		  ,PCH.strContractNumber + '/' + CONVERT(NVARCHAR,PCD.intContractSeq) strOurRef
 		  ,R.strWarehouseRefNo
-
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
@@ -37,15 +37,16 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LOT.intItemUOMId
 	JOIN tblICUnitMeasure IU ON IU.intUnitMeasureId = IUOM.intUnitMeasureId
-	JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = LOT.intWeightUOMId
-	JOIN tblICUnitMeasure WU ON WU.intUnitMeasureId = WUOM.intUnitMeasureId
+	--JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = LDL.intWeightUOMId
+	JOIN tblICUnitMeasure WU ON WU.intUnitMeasureId = L.intWeightUnitMeasureId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LOT.intLotId
 	LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = IRI.intInventoryReceiptId
 	LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = IRI.intLineNo
 	LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
-
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
+	LEFT JOIN tblLGLoadContainer LC2 ON LC2.intLoadId = L.intLoadId
+	INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC2.intLoadContainerId = LDCL.intLoadContainerId
 	WHERE strLoadNumber = @strLoadNumber 
 END

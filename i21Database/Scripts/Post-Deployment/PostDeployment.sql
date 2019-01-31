@@ -245,6 +245,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\33_UpdateSalesOrderQuoteTypes.sql
 :r .\AR\DefaultData\34_UpdateUnitPriceUOM.sql
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
+:r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 
 --Accounts Payable
@@ -345,7 +346,6 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\InsertStorageHistoryTypeTransaction.sql
 :R .\GR\FixStorageHistoryData.sql
 :R .\GR\MigrateTransferStorageData.sql
-:R .\GR\GR_GrossQuantityInStorage.sql
 :R .\GR\GR_InsertReadingRanges.sql
 :R .\GR\GR_FarmField.sql
 
@@ -433,7 +433,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
--- Store Module
+-- C-Store Module
 :r .\ST\01_FileFieldMapping_PricebookSale.sql
 :r .\ST\02_FileFieldMapping_PromotionItemList.sql
 :r .\ST\03_FileFieldMapping_PromotionCombo.sql
@@ -458,7 +458,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\22_FileFieldMapping_Passport_ITT.sql
 :r .\ST\23_FileFieldMapping_Passport_ILT.sql
 :r .\ST\24_FileFieldMapping_Passport_MMT.sql
-
+:r .\ST\25_DataFix.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql

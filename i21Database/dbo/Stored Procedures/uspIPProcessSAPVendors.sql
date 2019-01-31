@@ -374,11 +374,17 @@ BEGIN TRY
 					intEntityVendorId
 					,intTermId
 					)
-				SELECT @intEntityId
+				SELECT DISTINCT @intEntityId
 					,intTermID
 				FROM tblIPEntityTermStage S
 				JOIN tblSMTerm T ON S.strTerm = T.strTermCode
 				WHERE S.intStageEntityId = @intStageEntityId
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblAPVendorTerm VT
+						WHERE VT.intEntityVendorId = @intEntityId
+							AND VT.intTermId = T.intTermID
+						)
 
 				--Add Contacts to Entity table
 				INSERT INTO tblEMEntity (
@@ -671,11 +677,17 @@ BEGIN TRY
 						intEntityVendorId
 						,intTermId
 						)
-					SELECT @intEntityId
+					SELECT DISTINCT @intEntityId
 						,intTermID
 					FROM tblIPEntityTermStage S
 					JOIN tblSMTerm T ON S.strTerm = T.strTermCode
 					WHERE S.intStageEntityId = @intStageEntityId
+						AND NOT EXISTS (
+							SELECT 1
+							FROM tblAPVendorTerm VT
+							WHERE VT.intEntityVendorId = @intEntityId
+								AND VT.intTermId = T.intTermID
+							)
 				END
 
 				--Entity table Update

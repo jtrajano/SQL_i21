@@ -45,6 +45,7 @@ DECLARE @EntriesForProcessing AS TABLE(
 	,[ysnSeparateOnInvoice]			BIT												NULL
 	,[ysnCheckoffTax]				BIT												NULL
 	,[ysnTaxExempt]					BIT												NULL
+	,[ysnInvalidSetup]				BIT												NULL
 	,[ysnTaxOnly]					BIT												NULL
 	,[strNotes]						NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NULL
 	,[ysnAdded]						BIT												NULL	
@@ -77,7 +78,8 @@ INSERT INTO @EntriesForProcessing
 	,[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]
 	,[ysnTaxExempt]
-	,[ysnTaxOnly]
+    ,[ysnInvalidSetup]
+    ,[ysnTaxOnly]
 	,[strNotes]
 	,[ysnAdded]
 	,[ysnUpdated]
@@ -99,6 +101,7 @@ SELECT
 	,[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]
 	,[ysnTaxExempt]
+	,[ysnInvalidSetup]
 	,[ysnTaxOnly]
 	,[strNotes]
 	,0
@@ -149,6 +152,7 @@ DECLARE	@Id					INT
 	,@SeparateOnInvoice		BIT
 	,@CheckoffTax			BIT
 	,@TaxExempt				BIT
+	,@InvalidSetup		      BIT
 	,@Notes					NVARCHAR(15)
 	,@NewInvoiceTaxDetailId	INT
 
@@ -175,6 +179,7 @@ BEGIN TRY
 			,@SeparateOnInvoice		= [ysnSeparateOnInvoice]
 			,@CheckoffTax			= [ysnCheckoffTax]
 			,@TaxExempt				= [ysnTaxExempt]
+			,@InvalidSetup			= [ysnInvalidSetup]
 			,@Notes					= [strNotes]
 		FROM
 			@EntriesForProcessing 
@@ -200,6 +205,7 @@ BEGIN TRY
 				,@SeparateOnInvoice		= @SeparateOnInvoice
 				,@CheckoffTax			= @CheckoffTax
 				,@TaxExempt				= @TaxExempt
+				,@InvalidSetup			= @InvalidSetup
 				,@Notes					= @Notes
 				,@RaiseError			= @RaiseError
 				,@ErrorMessage			= @ErrorMessage				OUTPUT
@@ -253,6 +259,7 @@ BEGIN TRY
 		,ARIDT.[ysnSeparateOnInvoice]	= EFP.[ysnSeparateOnInvoice]
 		,ARIDT.[ysnCheckoffTax]			= EFP.[ysnCheckoffTax]
 		,ARIDT.[ysnTaxExempt]			= EFP.[ysnTaxExempt]
+		,ARIDT.[ysnInvalidSetup]		= EFP.[ysnInvalidSetup]
 		,ARIDT.[strNotes]				= EFP.[strNotes]
 		,ARIDT.[intConcurrencyId]		= ARIDT.[intConcurrencyId] + 1
 	FROM

@@ -56,24 +56,24 @@ BEGIN
 													THEN RTRIM(CAST(ISNULL(A.agcus_last_name,'''') AS CHAR(25))) 
 													ELSE 
 														CAST(ISNULL(A.agcus_last_name,'''') AS CHAR(25))  + CAST(ISNULL(A.agcus_first_name,'''') AS CHAR(25))
-													END)
+													END) COLLATE Latin1_General_CI_AS 
 				,vwcus_first_name =			(CASE WHEN (ISNULL(A.agcus_co_per_ind_cp,'''') = ''P'') 
 													THEN RTRIM(CAST(ISNULL(A.agcus_first_name,'''') AS CHAR(25))) 
 													ELSE 
 														CAST('''' AS CHAR(25))
-													END)   
-				,vwcus_mid_init = CAST('''' AS CHAR(1))
-				,vwcus_name_suffix = CAST('''' AS CHAR(2))
-				,vwcus_addr    = ISNULL(A.agcus_addr,'''')
-				,vwcus_addr2   = ISNULL(A.agcus_addr2,'''')    
-				,vwcus_city    = ISNULL(A.agcus_city,'''')    
-				,vwcus_state   = ISNULL(A.agcus_state,'''')    
-				,vwcus_zip    = ISNULL(A.agcus_zip,'''')    
+													END) COLLATE Latin1_General_CI_AS   
+				,vwcus_mid_init = CAST('''' AS CHAR(1)) COLLATE Latin1_General_CI_AS 
+				,vwcus_name_suffix = CAST('''' AS CHAR(2)) COLLATE Latin1_General_CI_AS 
+				,vwcus_addr    = ISNULL(A.agcus_addr,'''') COLLATE Latin1_General_CI_AS 
+				,vwcus_addr2   = ISNULL(A.agcus_addr2,'''') COLLATE Latin1_General_CI_AS    
+				,vwcus_city    = ISNULL(A.agcus_city,'''') COLLATE Latin1_General_CI_AS    
+				,vwcus_state   = ISNULL(A.agcus_state,'''') COLLATE Latin1_General_CI_AS    
+				,vwcus_zip    = ISNULL(A.agcus_zip,'''')  COLLATE Latin1_General_CI_AS   
 				,vwcus_phone   = ISNULL(A.agcus_phone,'''')    
 				,vwcus_phone_ext  = ISNULL(A.agcus_phone_ext,'''')    
-				,vwcus_bill_to   = ISNULL(A.agcus_bill_to,'''')    
-				,vwcus_contact   = ISNULL(A.agcus_contact,'''')    
-				,vwcus_comments   = ISNULL(A.agcus_comments,'''')    
+				,vwcus_bill_to   = ISNULL(A.agcus_bill_to,'''') COLLATE Latin1_General_CI_AS     
+				,vwcus_contact   = ISNULL(A.agcus_contact,'''') COLLATE Latin1_General_CI_AS    
+				,vwcus_comments   = ISNULL(A.agcus_comments,'''') COLLATE Latin1_General_CI_AS  
 				,vwcus_slsmn_id   = ISNULL(A.agcus_slsmn_id,'''')    
 				,vwcus_terms_cd   = CAST(ISNULL(A.agcus_terms_cd,'''') AS INT)    
 				,vwcus_prc_lvl   = CAST(ISNULL(A.agcus_prc_lvl,0) AS INT)   
@@ -184,32 +184,32 @@ BEGIN
 															+ CAST(ISNULL(A.ptcus_first_name,'''') AS CHAR(22)) 
 															+ CAST(ISNULL(A.ptcus_mid_init,'''') AS CHAR(1)) 
 															+ CAST(ISNULL(A.ptcus_name_suffx,'''') AS CHAR(2))
-													END)
+													END) COLLATE Latin1_General_CI_AS 
 				,vwcus_first_name =			(CASE WHEN (ISNULL(A.ptcus_co_per_ind_cp,'''') = ''P'') 
 													THEN RTRIM(CAST(ISNULL(A.ptcus_first_name,'''') AS CHAR(25))) 
 													ELSE 
 														CAST('''' AS CHAR(25))
-													END)   
+													END)   COLLATE Latin1_General_CI_AS 
 				,vwcus_mid_init = (CASE WHEN (ISNULL(A.ptcus_co_per_ind_cp,'''') = ''P'') 
 													THEN RTRIM(CAST(ISNULL(A.ptcus_mid_init,'''') AS CHAR(1))) 
 													ELSE 
 														CAST('''' AS CHAR(1))
-													END)
+													END) COLLATE Latin1_General_CI_AS 
 				,vwcus_name_suffix = (CASE WHEN (A.ptcus_co_per_ind_cp = ''P'') 
 													THEN RTRIM(CAST(ISNULL(A.ptcus_name_suffx,'''') AS CHAR(2))) 
 													ELSE 
 														CAST('''' AS CHAR(2))
-													END)
-				,vwcus_addr    = ISNULL(A.ptcus_addr,'''')    
-				,vwcus_addr2   = ISNULL(CAST(RTRIM(A.ptcus_addr2) AS CHAR(30)),'''')    
-				,vwcus_city    = ISNULL(A.ptcus_city,'''')    
-				,vwcus_state   = ISNULL(A.ptcus_state,'''')   
-				,vwcus_zip    = CAST(ISNULL(A.ptcus_zip,'''') AS CHAR(10))    
+													END) COLLATE Latin1_General_CI_AS 
+				,vwcus_addr    = ISNULL(A.ptcus_addr,'''')  COLLATE Latin1_General_CI_AS   
+				,vwcus_addr2   = ISNULL(CAST(RTRIM(A.ptcus_addr2) AS CHAR(30)),'''') COLLATE Latin1_General_CI_AS       
+				,vwcus_city    = ISNULL(A.ptcus_city,'''') COLLATE Latin1_General_CI_AS    
+				,vwcus_state   = ISNULL(A.ptcus_state,'''')   COLLATE Latin1_General_CI_AS 
+				,vwcus_zip    = CAST(ISNULL(A.ptcus_zip,'''') AS CHAR(10))  COLLATE Latin1_General_CI_AS   
 				,vwcus_phone   = CAST(ISNULL(A.ptcus_phone,'''') AS CHAR(15))    
 				,vwcus_phone_ext  = ISNULL(A.ptcus_phone_ext,'''')
-				,vwcus_bill_to   = ISNULL(A.ptcus_bill_to,'''')    
-				,vwcus_contact   = ISNULL(A.ptcus_contact,'''')    
-				,vwcus_comments   = CAST(ISNULL(A.ptcus_comment,'''') AS CHAR(30))    
+				,vwcus_bill_to   = ISNULL(A.ptcus_bill_to,'''') COLLATE Latin1_General_CI_AS     
+				,vwcus_contact   = ISNULL(A.ptcus_contact,'''') COLLATE Latin1_General_CI_AS     
+				,vwcus_comments   = CAST(ISNULL(A.ptcus_comment,'''') AS CHAR(30))  COLLATE Latin1_General_CI_AS   
 				,vwcus_slsmn_id   = ISNULL(A.ptcus_slsmn_id,'''')    
 				,vwcus_terms_cd   = CAST(ISNULL(A.ptcus_terms_code,0) AS INT)
 				,vwcus_prc_lvl   = CAST(ISNULL(A.ptcus_prc_level,0) AS INT)    

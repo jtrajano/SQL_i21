@@ -305,4 +305,15 @@ JOIN tblCMBankTransaction Trans ON Trans.intTransactionId = TransDetail.intTrans
 WHERE Trans.intEntityId is null AND Trans.ysnPosted = 0
 GO
 
+-- Clean up tblCMUndepositedFund
+BEGIN TRY
+	DELETE FROM tblCMBankTransactionDetail 	WHERE dblDebit = 0 AND dblCredit = 0 
+	DELETE FROM tblCMUndepositedFund WHERE dblAmount = 0
+END TRY
+BEGIN CATCH
+	PRINT ERROR_MESSAGE()
+END CATCH
+
+GO
 print('/*******************  END Cash Management Data Fixess *******************/')
+GO

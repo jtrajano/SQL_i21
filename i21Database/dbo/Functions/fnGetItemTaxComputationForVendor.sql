@@ -9,6 +9,7 @@
 	,@CompanyLocationId				INT
 	,@VendorLocationId				INT
 	,@IncludeExemptedCodes			BIT
+	,@IncludeInvalidCodes			BIT             = 0
 	,@FreightTermId					INT
 	,@ExcludeCheckOff				BIT
 	,@ItemUOMId						INT				= NULL
@@ -119,7 +120,7 @@ BEGIN
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
-		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @VendorLocationId, @IncludeExemptedCodes, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate, @CompanyLocationId)
+		[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @VendorId, @TransactionDate, @ItemId, @VendorLocationId, @IncludeExemptedCodes, @IncludeInvalidCodes, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate, @CompanyLocationId)
 												
 			
 	-- Calculate Item Tax
