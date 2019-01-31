@@ -27,6 +27,7 @@ SET ANSI_WARNINGS OFF
 --</xmlparam>'
 
 DECLARE @intBillId INT 
+DECLARE @intReportLogoHeight INT, @intReportLogoWidth INT;
 DECLARE @query NVARCHAR(MAX);
 DECLARE @xmlDocumentId AS INT;
 
@@ -73,7 +74,11 @@ END
 
 --SET @intPurchaseId = @intBillId;
 
+SELECT @intReportLogoHeight = intReportLogoHeight,@intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference WITH (NOLOCK)
+
 SELECT 
-* 
-FROM [vyuAPRptVoucher]
+	A.* 
+	,intReportLogoHeight = @intReportLogoHeight
+	,intReportLogoWidth = @intReportLogoWidth
+FROM [vyuAPRptVoucher] A
 WHERE intBillId = (CASE WHEN @intBillId IS NOT NULL THEN @intBillId ELSE 0 END)
