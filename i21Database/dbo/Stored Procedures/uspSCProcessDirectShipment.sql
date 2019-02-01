@@ -165,7 +165,16 @@ BEGIN TRY
 
 			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
 			BEGIN
-				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1;
+				DECLARE @intInvoiceId AS INT;
+				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId OUTPUT, 1;
+				DECLARE @dblNetUnits NUMERIC(18,6)
+				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
+				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
+
+				IF(@intInvoiceId IS NOT NULL)
+				BEGIN
+					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits
+				END
 			END
 		END
 	END
