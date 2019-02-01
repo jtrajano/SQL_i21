@@ -30,7 +30,7 @@ BEGIN
 			MAX(strOtherCurrency)strOtherCurrency
 	FROM 
 	(
-		SELECT	dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, BD.dblNetWeight) dblQuantity,
+		SELECT	dbo.fnCTConvertQuantityToTargetItemUOM(BD.intItemId,IU.intUnitMeasureId, @intCleanCostUOMId, BD.dblQtyReceived) dblQuantity,
 				CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblTotal * -1
 						ELSE	CAST(NULL AS NUMERIC(18,0)) 
 				END		AS		dblValueInCCCurrency,
