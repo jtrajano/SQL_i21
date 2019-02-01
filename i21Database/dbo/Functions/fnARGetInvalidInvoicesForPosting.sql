@@ -1212,6 +1212,239 @@ IF(ISNULL(@Post,0)) = 1
 			AND ISNULL(ARID.[intTicketId],0) = 0
 			AND ISNULL(ARID.[ysnBlended],0) = 0
 			AND ISNULL(I.[intLoadDistributionHeaderId],0) = 0
+
+		-- IC Costing
+		DECLARE @ItemsForCosting [ItemCostingTableType]
+		DELETE FROM @ItemsForCosting
+		INSERT INTO @ItemsForCosting
+			([intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblUOMQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[intTransactionDetailId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[ysnIsStorage]
+			,[strActualCostId]
+			,[intSourceTransactionId]
+			,[strSourceTransactionId]
+			,[intInTransitSourceLocationId]
+			,[intForexRateTypeId]
+			,[dblForexRate])
+		SELECT
+			 [intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblUOMQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[intTransactionDetailId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[ysnIsStorage]
+			,[strActualCostId]
+			,[intSourceTransactionId]
+			,[strSourceTransactionId]
+			,[intInTransitSourceLocationId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
+		FROM
+			[dbo].[fnARGetItemsForCosting](@Invoices, @Post, 1)
+
+		INSERT INTO @returntable(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError])
+
+		SELECT
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError] -- + '[fnICGetInvalidInvoicesForCosting]'
+		FROM 
+			[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @Post)
+
+
+		-- IC In Transit Costing
+		DECLARE @ItemsForInTransitCosting [ItemInTransitCostingTableType]
+		DELETE FROM @ItemsForInTransitCosting
+		INSERT INTO @ItemsForInTransitCosting
+			([intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblUOMQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[intTransactionDetailId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intLotId]
+			,[intSourceTransactionId]
+			,[strSourceTransactionId]
+			,[intSourceTransactionDetailId]
+			,[intFobPointId]
+			,[intInTransitSourceLocationId]
+			,[intForexRateTypeId]
+			,[dblForexRate])
+		SELECT
+			 [intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblUOMQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[intTransactionDetailId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intLotId]
+			,[intSourceTransactionId]
+			,[strSourceTransactionId]
+			,[intSourceTransactionDetailId]
+			,[intFobPointId]
+			,[intInTransitSourceLocationId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
+		FROM
+			[dbo].[fnARGetItemsForInTransitCosting](@Invoices, @Post)
+
+		INSERT INTO @returntable(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError])
+
+		SELECT
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError] -- + '[fnICGetInvalidInvoicesForInTransitCosting]'
+		FROM 
+			[dbo].[fnICGetInvalidInvoicesForInTransitCosting](@ItemsForInTransitCosting, @Post)
+
+
+		-- IC Item Storage
+		DECLARE @ItemsForStoragePosting [ItemCostingTableType]
+		DELETE FROM @ItemsForStoragePosting
+		INSERT INTO @ItemsForStoragePosting
+			([intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblUOMQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[intTransactionDetailId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[ysnIsStorage]
+			,[strActualCostId]
+			,[intSourceTransactionId]
+			,[strSourceTransactionId]
+			,[intInTransitSourceLocationId]
+			,[intForexRateTypeId]
+			,[dblForexRate])
+		SELECT
+			 [intItemId]
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[dtmDate]
+			,[dblQty]
+			,[dblUOMQty]
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[intTransactionDetailId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[intLotId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[ysnIsStorage]
+			,[strActualCostId]
+			,[intSourceTransactionId]
+			,[strSourceTransactionId]
+			,[intInTransitSourceLocationId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
+		FROM
+			[dbo].[fnARGetItemsForStoragePosting](@Invoices, @Post) 
+
+
+		INSERT INTO @returntable(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError])
+
+		SELECT
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError] -- + '[fnICGetInvalidInvoicesForItemStoragePosting]'
+		FROM 
+			[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @Post)
 																																			
 	END
 ELSE
@@ -1754,239 +1987,6 @@ SELECT
 	,[strPostingError] -- + '[fnMFGetInvalidInvoicesForPosting]'
 FROM 
 	[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @Post)
-
--- IC Costing
-DECLARE @ItemsForCosting [ItemCostingTableType]
-DELETE FROM @ItemsForCosting
-INSERT INTO @ItemsForCosting
-	([intItemId]
-	,[intItemLocationId]
-	,[intItemUOMId]
-	,[dtmDate]
-	,[dblQty]
-	,[dblUOMQty]
-	,[dblCost]
-	,[dblValue]
-	,[dblSalesPrice]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[intTransactionId]
-	,[intTransactionDetailId]
-	,[strTransactionId]
-	,[intTransactionTypeId]
-	,[intLotId]
-	,[intSubLocationId]
-	,[intStorageLocationId]
-	,[ysnIsStorage]
-	,[strActualCostId]
-	,[intSourceTransactionId]
-	,[strSourceTransactionId]
-	,[intInTransitSourceLocationId]
-	,[intForexRateTypeId]
-	,[dblForexRate])
-SELECT
-     [intItemId]
-	,[intItemLocationId]
-	,[intItemUOMId]
-	,[dtmDate]
-	,[dblQty]
-	,[dblUOMQty]
-	,[dblCost]
-	,[dblValue]
-	,[dblSalesPrice]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[intTransactionId]
-	,[intTransactionDetailId]
-	,[strTransactionId]
-	,[intTransactionTypeId]
-	,[intLotId]
-	,[intSubLocationId]
-	,[intStorageLocationId]
-	,[ysnIsStorage]
-	,[strActualCostId]
-	,[intSourceTransactionId]
-	,[strSourceTransactionId]
-	,[intInTransitSourceLocationId]
-	,[intForexRateTypeId]
-	,[dblForexRate]
-FROM
-	[dbo].[fnARGetItemsForCosting](@Invoices, @Post, 1)
-
-INSERT INTO @returntable(
-	 [intInvoiceId]
-	,[strInvoiceNumber]
-	,[strTransactionType]
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[strBatchId]
-	,[strPostingError])
-
-SELECT
-	 [intInvoiceId]
-	,[strInvoiceNumber]
-	,[strTransactionType]
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[strBatchId]
-	,[strPostingError] -- + '[fnICGetInvalidInvoicesForCosting]'
-FROM 
-	[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @Post)
-
-
--- IC In Transit Costing
-DECLARE @ItemsForInTransitCosting [ItemInTransitCostingTableType]
-DELETE FROM @ItemsForInTransitCosting
-INSERT INTO @ItemsForInTransitCosting
-	([intItemId]
-	,[intItemLocationId]
-	,[intItemUOMId]
-	,[dtmDate]
-	,[dblQty]
-	,[dblUOMQty]
-	,[dblCost]
-	,[dblValue]
-	,[dblSalesPrice]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[intTransactionId]
-	,[intTransactionDetailId]
-	,[strTransactionId]
-	,[intTransactionTypeId]
-	,[intLotId]
-	,[intSourceTransactionId]
-	,[strSourceTransactionId]
-	,[intSourceTransactionDetailId]
-	,[intFobPointId]
-	,[intInTransitSourceLocationId]
-	,[intForexRateTypeId]
-	,[dblForexRate])
-SELECT
-     [intItemId]
-	,[intItemLocationId]
-	,[intItemUOMId]
-	,[dtmDate]
-	,[dblQty]
-	,[dblUOMQty]
-	,[dblCost]
-	,[dblValue]
-	,[dblSalesPrice]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[intTransactionId]
-	,[intTransactionDetailId]
-	,[strTransactionId]
-	,[intTransactionTypeId]
-	,[intLotId]
-	,[intSourceTransactionId]
-	,[strSourceTransactionId]
-	,[intSourceTransactionDetailId]
-	,[intFobPointId]
-	,[intInTransitSourceLocationId]
-	,[intForexRateTypeId]
-	,[dblForexRate]
-FROM
-	[dbo].[fnARGetItemsForInTransitCosting](@Invoices, @Post)
-
-INSERT INTO @returntable(
-	 [intInvoiceId]
-	,[strInvoiceNumber]
-	,[strTransactionType]
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[strBatchId]
-	,[strPostingError])
-
-SELECT
-	 [intInvoiceId]
-	,[strInvoiceNumber]
-	,[strTransactionType]
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[strBatchId]
-	,[strPostingError] -- + '[fnICGetInvalidInvoicesForInTransitCosting]'
-FROM 
-	[dbo].[fnICGetInvalidInvoicesForInTransitCosting](@ItemsForInTransitCosting, @Post)
-
-
--- IC Item Storage
-DECLARE @ItemsForStoragePosting [ItemCostingTableType]
-DELETE FROM @ItemsForStoragePosting
-INSERT INTO @ItemsForStoragePosting
-	([intItemId]
-	,[intItemLocationId]
-	,[intItemUOMId]
-	,[dtmDate]
-	,[dblQty]
-	,[dblUOMQty]
-	,[dblCost]
-	,[dblValue]
-	,[dblSalesPrice]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[intTransactionId]
-	,[intTransactionDetailId]
-	,[strTransactionId]
-	,[intTransactionTypeId]
-	,[intLotId]
-	,[intSubLocationId]
-	,[intStorageLocationId]
-	,[ysnIsStorage]
-	,[strActualCostId]
-	,[intSourceTransactionId]
-	,[strSourceTransactionId]
-	,[intInTransitSourceLocationId]
-	,[intForexRateTypeId]
-	,[dblForexRate])
-SELECT
-     [intItemId]
-	,[intItemLocationId]
-	,[intItemUOMId]
-	,[dtmDate]
-	,[dblQty]
-	,[dblUOMQty]
-	,[dblCost]
-	,[dblValue]
-	,[dblSalesPrice]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[intTransactionId]
-	,[intTransactionDetailId]
-	,[strTransactionId]
-	,[intTransactionTypeId]
-	,[intLotId]
-	,[intSubLocationId]
-	,[intStorageLocationId]
-	,[ysnIsStorage]
-	,[strActualCostId]
-	,[intSourceTransactionId]
-	,[strSourceTransactionId]
-	,[intInTransitSourceLocationId]
-	,[intForexRateTypeId]
-	,[dblForexRate]
-FROM
-	[dbo].[fnARGetItemsForStoragePosting](@Invoices, @Post) 
-
-
-INSERT INTO @returntable(
-	 [intInvoiceId]
-	,[strInvoiceNumber]
-	,[strTransactionType]
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[strBatchId]
-	,[strPostingError])
-
-SELECT
-	 [intInvoiceId]
-	,[strInvoiceNumber]
-	,[strTransactionType]
-	,[intInvoiceDetailId]
-	,[intItemId]
-	,[strBatchId]
-	,[strPostingError] -- + '[fnICGetInvalidInvoicesForItemStoragePosting]'
-FROM 
-	[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @Post)
 
 
 UPDATE RT
