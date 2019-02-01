@@ -6,7 +6,8 @@ CREATE PROCEDURE uspCTUpdationFromTicketDistribution
 	@intContractDetailId	INT,
 	@intUserId				INT,
 	@ysnDP					BIT,
-	@ysnDeliverySheet		BIT = 0
+	@ysnDeliverySheet		BIT = 0,
+	@ysnAutoDistribution	BIT = 1
 	
 AS
 
@@ -380,7 +381,7 @@ BEGIN TRY
 	IF(		SELECT	MAX(dblUnitsRemaining) 
 			FROM	@Processed	PR
 			JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
-			WHERE	ISNULL(ysnIgnore,0) <> 1) > 0
+			WHERE	ISNULL(ysnIgnore,0) <> 1) > 0 AND @ysnAutoDistribution = 1
 	BEGIN
 		RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT') 
 	END
