@@ -139,8 +139,8 @@
     [ysnPostForeignSales]          BIT             NULL,
     [ysnSummaryByDeptVehicleProd]  BIT             NULL,
     [ysnDepartmentGrouping]        BIT             NULL,
-    [strGuid]                      NVARCHAR (MAX)  NULL,
-    [strUserId]                    NVARCHAR (100)  NULL,
+    [strGuid]                      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
+    [strUserId]                    NVARCHAR (100)  COLLATE Latin1_General_CI_AS  NULL,
     CONSTRAINT [UserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC)
 );
 
