@@ -17,9 +17,7 @@ ISNULL(A.strCashFlow,'')strCashFlow,
 SUBSTRING(A.strAccountId, 1, P.intLength) strCode ,
 ISNULL(A.strComments,'') strComments,
 ISNULL(strCurrency,'') strCurrency,
-ISNULL(coa.strCurrentExternalId,'') strCurrentExternalId,
 ISNULL(A.strDescription,'') strDescription,
-ISNULL(coa.strExternalId,'')strExternalId,
 ISNULL(A.strNote,'')strNote,
 ISNULL(U.strUOMCode,'')strUOMCode,
 ISNULL(A.ysnActive,0) ysnActive,
@@ -27,7 +25,6 @@ period.dtmStartDate dtmDateFrom,
 period.dtmEndDate dtmDateTo,
 B.intGLFiscalYearPeriodId
 FROM tblGLAccount A
-LEFT JOIN tblGLCOACrossReference coa ON A.intAccountId =coa.inti21Id 
 LEFT JOIN BeginningBalance B ON A.intAccountId = B.intAccountId
 LEFT JOIN tblGLFiscalYearPeriod period on period.intGLFiscalYearPeriodId = B.intGLFiscalYearPeriodId
 LEFT JOIN tblSMCurrency C on C.intCurrencyID = A.intCurrencyID
