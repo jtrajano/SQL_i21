@@ -83,8 +83,8 @@
     [ysnPostForeignSales]         BIT             NULL,
     [ysnDepartmentGrouping]       BIT             NULL,
     [ysnSummaryByDeptVehicleProd] BIT             NULL,
-    [strGuid]                     NVARCHAR (MAX)  NULL,
-    [strUserId]                   NVARCHAR (MAX)  NULL
+    [strGuid]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
+    [strUserId]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL
 );
 
 
