@@ -60,7 +60,7 @@ INSERT INTO @Unrealized
 exec uspRKUnrealizedPnL	 @dtmFromDate =@dtmTransactionFromDate
 						,@dtmToDate = @dtmTransactionToDate
 						,@intCommodityId=NULL
-						,@ysnExpired='false'
+						,@ysnExpired=0
 						,@intFutureMarketId  = NULL
 						,@intEntityId  = NULL
 						,@intBrokerageAccountId  = NULL
