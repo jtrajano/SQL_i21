@@ -6,7 +6,11 @@
 	@vendorFrom NVARCHAR(100) = NULL,
 	@vendorTo NVARCHAR(100) = NULL
 )
-RETURNS NVARCHAR(1500)
+RETURNS @returnTable TABLE
+(
+	intINT NVARCHAR(1500)
+	,intCount INT
+)
 AS
 BEGIN
 	
@@ -72,8 +76,8 @@ BEGIN
 
 	SELECT
 		@totalPayees = (SELECT COUNT(*) FROM INT1099)		,
-		@controlTotal1 =  dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dbl1099INT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))) +
-						REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dbl1099INT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))))),
+		@controlTotal1 =  REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dbl1099INT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dbl1099INT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
 		@controlTotal2 = REPLICATE('0',18),
 		@controlTotal3 = REPLICATE('0',18),
 		@controlTotal4 = REPLICATE('0',12),
@@ -94,7 +98,7 @@ BEGIN
 	--PAGE 110
 	SELECT
 		@endOfINT = 'C'
-		+ REPLICATE('0', 8 - LEN(CAST(COUNT(*) AS NVARCHAR(100)))) + CAST(COUNT(*) AS NVARCHAR(100))
+		+ REPLICATE('0', 8 - LEN(CAST(@totalPayees AS NVARCHAR(100)))) + CAST(@totalPayees AS NVARCHAR(100))
 		+ SPACE(6)
 		+ @controlTotal1
 		+ @controlTotal2
@@ -113,10 +117,13 @@ BEGIN
 		+ @controlTotalF
 		+ @controlTotalG
 		+ SPACE(196)
-		+ SPACE(8) --500-507
+		+ REPLICATE('0', 8 - LEN(CAST(@totalPayees AS NVARCHAR(100)))) + CAST(@totalPayees + 3 AS NVARCHAR(100)) --500-507
 		+ SPACE(241)
 		+ CHAR(13) + CHAR(10)
 
-	RETURN @endOfINT;
+	INSERT INTO @returnTable
+	SELECT @endOfINT, @totalPayees
+
+	RETURN;
 
 END
