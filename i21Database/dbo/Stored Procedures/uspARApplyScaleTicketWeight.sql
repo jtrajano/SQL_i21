@@ -384,7 +384,7 @@ BEGIN
 						,@ItemIsBlended					= ysnBlended
 						,@ItemDocumentNumber			= strDocumentNumber
 						,@ItemDescription				= strItemDescription
-						,@ItemQtyShipped				= CASE WHEN intItemId = @intParentItemId OR strAddOnDetailKey IS NOT NULL THEN @dblShippedQty ELSE [dbo].fnRoundBanker((ISNULL(dblQuantity, 0) * @dblShippedQty), [dbo].[fnARGetDefaultDecimal]()) END
+						,@ItemQtyShipped				= CASE WHEN intItemId = @intParentItemId OR strAddonDetailKey IS NOT NULL THEN @dblShippedQty ELSE [dbo].fnRoundBanker((ISNULL(dblQuantity, 0) * @dblShippedQty), [dbo].[fnARGetDefaultDecimal]()) END
 						,@ItemOrderUOMId				= NULL
 						,@ItemPriceUOMId				= intPriceUOMId
 						,@ItemQtyOrdered				= 0.00000000
