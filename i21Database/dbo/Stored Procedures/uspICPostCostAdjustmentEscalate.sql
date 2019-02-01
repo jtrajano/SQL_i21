@@ -173,7 +173,22 @@ BEGIN
 				,[dtmDate]						= @dtmDate
 				,[dblQty]						= t.dblQty
 				,[dblUOMQty]					= t.dblUOMQty
-				,[dblNewValue]					= -dbo.fnMultiply(@dblEscalateValue, dbo.fnDivide(t.dblQty, @totalProduced)) 
+				,[dblNewValue]					= 
+						CASE
+							WHEN recipeAllocation.dblCostAllocation IS NULL THEN 
+								-dbo.fnMultiply(
+									@dblEscalateValue
+									,dbo.fnDivide(t.dblQty, @totalProduced)
+								) 					
+							ELSE
+								-dbo.fnMultiply(
+									dbo.fnMultiply(
+										@dblEscalateValue
+										, dbo.fnDivide(recipeAllocation.dblCostAllocation, 100)
+									) 
+									, dbo.fnDivide(t.dblQty, t2.dblQty)
+								)
+						END
 				,[intCurrencyId]				= t.intCurrencyId
 				,[intTransactionId]				= @intTransactionId
 				,[intTransactionDetailId]		= @intTransactionDetailId
@@ -192,6 +207,25 @@ BEGIN
 				,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
 				,[dblNewAverageCost]			= @dblEscalateAvgCost
 		FROM	dbo.tblICInventoryTransaction t 
+				CROSS APPLY (
+					SELECT 
+						t2.intItemId
+						,t2.strTransactionId
+						,[dblQty] = SUM(t2.dblQty) 
+					FROM					
+						dbo.tblICInventoryTransaction t2 
+					WHERE	
+						@t_dblQty < 0 
+						AND t2.strTransactionId = t.strTransactionId
+						AND ISNULL(t2.ysnIsUnposted, 0) = 0
+						AND ISNULL(t2.dblQty, 0) > 0
+						AND t2.intTransactionTypeId = @INV_TRANS_TYPE_Produce
+						AND t2.intItemId = t.intItemId
+					GROUP BY
+						t2.intItemId
+						,t2.strTransactionId
+				) t2
+				OUTER APPLY dbo.fnMFGetRecipeCostAllocation(t2.strTransactionId) recipeAllocation 
 		WHERE	@t_dblQty < 0 
 				--AND t.strBatchId <> @t_strBatchId 
 				--AND t.intTransactionId = @t_intTransactionId
@@ -199,7 +233,8 @@ BEGIN
 				AND ISNULL(t.ysnIsUnposted, 0) = 0
 				AND ISNULL(t.dblQty, 0) > 0
 				AND t.intTransactionTypeId = @INV_TRANS_TYPE_Produce
-
+				AND t.intItemId = recipeAllocation.intItemId
+				AND t.intItemId = t2.intItemId
 		RETURN; 
 	END	
 END 
