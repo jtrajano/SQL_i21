@@ -180,5 +180,87 @@ BEGIN
 END 
 GO
 
+---- Insert previously created Derivative Entry to tblRKFutOptTransactionHistory ------ RM-2563
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblRKFutOptTransaction') 
+	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblRKFutOptTransactionHistory')
+BEGIN
+	INSERT INTO tblRKFutOptTransactionHistory(intFutOptTransactionHeaderId
+		,strSelectedInstrumentType
+		,intFutOptTransactionId
+		,strInternalTradeNo
+		,strLocationName
+		,dblContractSize
+		,strInstrumentType
+		,strFutureMarket
+		,strCurrency
+		,strCommodity
+		,strBroker
+		,strBrokerAccount
+		,strTrader
+		,strBrokerTradeNo
+		,strFutureMonth
+		,strOptionMonth
+		,strOptionType
+		,dblStrike
+		,dblPrice
+		,strStatus
+		,dtmFilledDate
+		,intOldNoOfContract
+		,intNewNoOfContract
+		,intBalanceContract
+		,strScreenName
+		,strOldBuySell
+		,strNewBuySell
+		,dtmTransactionDate
+		,intBookId
+		,intSubBookId
+		,ysnMonthExpired
+		,strUserName
+		,strAction)
+	SELECT FOTH.intFutOptTransactionHeaderId
+		,FOTH.strSelectedInstrumentType
+		,FOT.intFutOptTransactionId
+		,FOT.strInternalTradeNo
+		,strLocationName = (SELECT TOP 1 strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = FOT.intLocationId)
+		,dblContractSize = (SELECT TOP 1 dblContractSize FROM tblRKFutureMarket WHERE intFutureMarketId = FOT.intFutureMarketId)
+		,strInstrumentType = (CASE WHEN intInstrumentTypeId = 1 THEN 'Futures'
+				WHEN intInstrumentTypeId = 2 THEN 'Options'
+				WHEN intInstrumentTypeId = 3 THEN 'Currency Contract'
+				ELSE ''
+			END)
+		,strFutureMarket = (SELECT TOP 1 strFutMarketName FROM tblRKFutureMarket WHERE intFutureMarketId = FOT.intFutureMarketId)
+		,strCurrency = (SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = FOT.intCurrencyId)
+		,strCommodity = (SELECT TOP 1 strCommodityCode FROM tblICCommodity WHERE intCommodityId = FOT.intCommodityId)
+		,strBroker = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = FOT.intEntityId)
+		,strBrokerAccount = (SELECT TOP 1 strAccountNumber FROM tblRKBrokerageAccount WHERE intBrokerageAccountId = FOT.intBrokerageAccountId)
+		,strTrader = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = FOT.intTraderId)
+		,strBrokerTradeNo
+		,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblRKFuturesMonth WHERE intFutureMonthId = FOT.intFutureMonthId)
+		,strOptionMonth = (SELECT TOP 1 strOptionMonth FROM tblRKOptionsMonth WHERE intOptionMonthId = FOT.intOptionMonthId)
+		,strOptionType
+		,dblStrike
+		,dblPrice
+		,strStatus
+		,dtmFilledDate
+		,NULL--intOldNoOfContract
+		,intNewNoOfContract = FOT.intNoOfContract
+		,intBalanceContract = FOT.intNoOfContract
+		,'FutOptTransaction'
+		,NULL
+		,FOT.strBuySell
+		,GETDATE()
+		,intBookId
+		,intSubBookId
+		,ysnMonthExpired = (SELECT TOP 1 ysnExpired FROM tblRKFuturesMonth a WHERE a.intFutureMonthId = FOT.intFutureMonthId)
+		,strUserName = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = FOT.intEntityId)
+		,'ADD'
+	FROM tblRKFutOptTransaction FOT
+	INNER JOIN tblRKFutOptTransactionHeader FOTH on FOT.intFutOptTransactionHeaderId = FOTH.intFutOptTransactionHeaderId
+	WHERE FOT.intFutOptTransactionId NOT IN(
+		SELECT DISTINCT intFutOptTransactionId FROM tblRKFutOptTransactionHistory
+	)
+END
+GO
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
