@@ -110,7 +110,7 @@ BEGIN
 		+ REPLICATE('0',12) --G
 		-- END-- 235-246
 		+ ' '
-		+ A.strPayeeName + SPACE(40 - LEN(A.strPayeeName))
+		+ dbo.fnTrimX(A.strPayeeName) + SPACE(40 - LEN(dbo.fnTrimX(A.strPayeeName)))
 		+ SPACE(40) -- 288-327
 		+ SPACE(40) -- 328-367
 		+ ISNULL(A.strAddress,'') + SPACE(40 - LEN(ISNULL(A.strAddress,'')))
@@ -130,22 +130,22 @@ BEGIN
 		+ SPACE(12)
 		+ SPACE(12)
 		+ SPACE(2)
-		+ SPACE(2)
+		+ CHAR(13) + CHAR(10)
 	FROM vyuAP1099PATR A
-	OUTER APPLY 
-	(
-		SELECT TOP 1 * FROM tblAP1099History B
-		WHERE A.intYear = B.intYear AND B.int1099Form = 4
-		AND B.intEntityVendorId = A.intEntityVendorId
-		ORDER BY B.dtmDatePrinted DESC
-	) History
+	-- OUTER APPLY 
+	-- (
+	-- 	SELECT TOP 1 * FROM tblAP1099History B
+	-- 	WHERE A.intYear = B.intYear AND B.int1099Form = 4
+	-- 	AND B.intEntityVendorId = A.intEntityVendorId
+	-- 	ORDER BY B.dtmDatePrinted DESC
+	-- ) History
 	WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
 				(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
 			ELSE 1 END)
 	AND A.intYear = @year
-	AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
-			WHEN History.ysnPrinted IS NULL THEN 1
-			WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
-			ELSE 0 END)
+	-- AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
+	-- 		WHEN History.ysnPrinted IS NULL THEN 1
+	-- 		WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
+	-- 		ELSE 0 END)
 	RETURN;
 END
