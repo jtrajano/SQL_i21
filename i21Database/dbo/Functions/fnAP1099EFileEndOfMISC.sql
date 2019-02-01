@@ -6,7 +6,11 @@
 	@vendorFrom NVARCHAR(100) = NULL,
 	@vendorTo NVARCHAR(100) = NULL
 )
-RETURNS NVARCHAR(1500)
+RETURNS @returnTable TABLE
+(
+	C NVARCHAR(1500)
+	,intCount INT
+)
 AS
 BEGIN
 	
@@ -150,10 +154,13 @@ BEGIN
 		+ @controlTotalF
 		+ @controlTotalG
 		+ SPACE(196)
-		+ SPACE(8) --500-507
+		+ REPLICATE('0', 8 - LEN(CAST(@totalPayees AS NVARCHAR(100)))) + CAST(@totalPayees + 3 AS NVARCHAR(100)) --500-507
 		+ SPACE(241)
 		+ CHAR(13) + CHAR(10)
 
-	RETURN @endOfMISC;
+	INSERT INTO @returnTable
+	SELECT @endOfMISC, @totalPayees
+	
+	RETURN;
 
 END
