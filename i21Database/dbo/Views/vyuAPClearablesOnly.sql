@@ -199,7 +199,7 @@ SELECT DISTINCT
 	, dblDiscount = 0 
 	, dblInterest = 0 
 	, Vendor.strVendorId 
-	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor2.strName,'') as strVendorIdName 
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
@@ -220,8 +220,9 @@ SELECT DISTINCT
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnPrice = 1
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
-LEFT JOIN vyuAPVendor Vendor
+LEFT JOIN tblAPVendor Vendor
 			ON Vendor.intEntityId = Receipt.intEntityVendorId
+LEFT JOIN tblEMEntity Vendor2 ON Vendor2.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
