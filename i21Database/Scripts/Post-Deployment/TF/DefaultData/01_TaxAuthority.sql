@@ -207,6 +207,7 @@ UNION ALL SELECT strColumnName = 'strReportingComponentNote'
 UNION ALL SELECT strColumnName = 'strDiversionNumber'
 UNION ALL SELECT strColumnName = 'strDiversionOriginalDestinationState'
 UNION ALL SELECT strColumnName = 'strTransactionType'
+UNION ALL SELECT strColumnName = 'strImportVerificationNumber'
 ) tblPatch
 
 MERGE	

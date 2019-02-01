@@ -97,7 +97,8 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strVendorLicenseNumber
 				, strContactName
-				, strEmail)
+				, strEmail
+				, strImportVerificationNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -150,6 +151,7 @@ BEGIN TRY
 					, tblTRSupplyPoint.strFuelDealerId1
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
+					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -261,7 +263,8 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strVendorLicenseNumber
 				, strContactName
-				, strEmail)
+				, strEmail
+				, strImportVerificationNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -314,6 +317,7 @@ BEGIN TRY
 					, tblTRSupplyPoint.strFuelDealerId1
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
+					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -511,7 +515,8 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, dblQtyShipped
 				, strContactName
-				, strEmail)
+				, strEmail
+				, strImportVerificationNumber)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
@@ -573,6 +578,7 @@ BEGIN TRY
 				, CONVERT(DECIMAL(18), dblGross)
 				, strContactName
 				, strEmail
+				, strImportVerificationNumber
 			FROM @TFTransaction Trans
 		END
 

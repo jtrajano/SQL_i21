@@ -69,6 +69,7 @@
 	[strTransactionSource] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strTransportNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intAccountStatusId] INT NULL,
+	[strImportVerificationNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	PRIMARY KEY CLUSTERED ([intId] ASC) WITH (IGNORE_DUP_KEY = OFF),
 	UNIQUE NONCLUSTERED ([intId] ASC, [intTransactionDetailId] ASC)
 )

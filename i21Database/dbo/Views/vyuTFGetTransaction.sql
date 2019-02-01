@@ -83,7 +83,7 @@ SELECT Trans.intTransactionId
 	, Exception.strReason
 	, strEmail = Trans.strEmail
 	, strTransactionSource = Trans.strTransactionSource
-	, strImportVerificaitonNumber = Trans.strImportVerificaitonNumber
+	, strImportVerificationNumber = Trans.strImportVerificationNumber
 	, strTransportNumber = Trans.strTransportNumber
 FROM tblTFTransaction Trans
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Trans.intReportingComponentId
@@ -178,7 +178,7 @@ SELECT intTransactionId = CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + 
 	, Exception.strReason
 	, strEmail = NULL
 	, strTransactionSource = NULL
-	, strImportVerificaitonNumber = NULL
+	, strImportVerificationNumber = NULL
 	, strTransportNumber = Exception.strTransportNumber
 FROM tblTFException Exception
 LEFT JOIN vyuTFGetReportingComponent RC ON RC.intReportingComponentId = Exception.intReportingComponentId

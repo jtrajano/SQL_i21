@@ -68,7 +68,7 @@
 	[intIntegrationError] INT,
 	[intConcurrencyId] INT NULL DEFAULT ((1)), 
 	[strTransactionSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-    [strImportVerificaitonNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strImportVerificationNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTransportNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTFTransaction] PRIMARY KEY ([intTransactionId]), 
     CONSTRAINT [FK_tblTFTransaction_tblTFReportingComponent] FOREIGN KEY ([intReportingComponentId]) REFERENCES [tblTFReportingComponent]([intReportingComponentId]), 

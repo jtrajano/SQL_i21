@@ -94,7 +94,8 @@ BEGIN TRY
 			, intTransactionNumberId
 			, strVendorLicenseNumber
 			, strContactName
-			, strEmail)
+			, strEmail
+			, strImportVerificationNumber)
 		SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intLoadDistributionDetailId, intTaxAuthorityId DESC) AS intId, *
 		FROM (SELECT DISTINCT tblTRLoadDistributionDetail.intLoadDistributionDetailId
 				, tblTFReportingComponent.intTaxAuthorityId
@@ -149,6 +150,7 @@ BEGIN TRY
 				, tblTRSupplyPoint.strFuelDealerId1
 				, strContactName = tblTFCompanyPreference.strContactName
 				, strEmail = tblTFCompanyPreference.strContactEmail
+				, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 			FROM tblTFReportingComponent 
 			INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 			INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -284,7 +286,8 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strContactName
-				, strEmail)
+				, strEmail
+				, strImportVerificationNumber)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
@@ -349,6 +352,7 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strContactName
 				, strEmail
+				, strImportVerificationNumber
 			FROM @tmpTransaction Trans
 		END
 
