@@ -353,11 +353,11 @@ BEGIN TRY
 																								  WHEN CH.intContractTypeId=1 THEN 'Vendor'
 																								  WHEN CH.intContractTypeId=2 THEN 'Customer'
 																								END
-		JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = CD.intFutureMarketId
-		JOIN tblRKFuturesMonth					FMonth			 ON  FMonth.intFutureMonthId		 = CD.intFutureMonthId
+		LEFT JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = CD.intFutureMarketId
+		LEFT JOIN tblRKFuturesMonth					FMonth			 ON  FMonth.intFutureMonthId		 = CD.intFutureMonthId
 		
-		JOIN tblICUnitMeasure					MarketUOM		 ON	MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId
-		JOIN tblSMCurrency						MarketCY		 ON	MarketCY.intCurrencyID			 = Market.intCurrencyId
+		LEFT JOIN tblICUnitMeasure					MarketUOM		 ON	MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId
+		LEFT JOIN tblSMCurrency						MarketCY		 ON	MarketCY.intCurrencyID			 = Market.intCurrencyId
 		JOIN tblICItem							Item			 ON Item.intItemId					 = CD.intItemId		
 		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
 		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CH.intPricingTypeId
@@ -370,7 +370,7 @@ BEGIN TRY
 		AND	CA2.strType						 = 'Grade'
 		LEFT JOIN tblAPBillDetail BillDetail					 ON BillDetail.intContractDetailId   = CD.intContractDetailId 
 																	AND   BillDetail.intItemId       = CD.intItemId
-		
+																	AND ISNULL(BillDetail.intLoadDetailId,0)   = ISNULL(LoadDetail.intLoadDetailId,0)
 		LEFT JOIN tblAPBill Bill								 ON Bill.intBillId					 = BillDetail.intBillId 
         LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID					 = CA.intCountryID
 		LEFT JOIN tblARMarketZone				MZ				 ON MZ.intMarketZoneId				 = CD.intMarketZoneId
@@ -522,11 +522,11 @@ BEGIN TRY
 																								  WHEN CH.intContractTypeId=1 THEN 'Vendor'
 																								  WHEN CH.intContractTypeId=2 THEN 'Customer'
 																								END
-		JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = CD.intFutureMarketId
-		JOIN tblRKFuturesMonth					FMonth			 ON  FMonth.intFutureMonthId		 = CD.intFutureMonthId
+		LEFT JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = CD.intFutureMarketId
+		LEFT JOIN tblRKFuturesMonth					FMonth			 ON  FMonth.intFutureMonthId		 = CD.intFutureMonthId
 		
-		JOIN tblICUnitMeasure					MarketUOM		 ON	MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId
-		JOIN tblSMCurrency						MarketCY		 ON	MarketCY.intCurrencyID			 = Market.intCurrencyId
+		LEFT JOIN tblICUnitMeasure					MarketUOM		 ON	MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId
+		LEFT JOIN tblSMCurrency						MarketCY		 ON	MarketCY.intCurrencyID			 = Market.intCurrencyId
 		JOIN tblICItem							Item			 ON Item.intItemId					 = CD.intItemId		
 		JOIN tblSMCompanyLocation				CL				 ON CL.intCompanyLocationId			 = CD.intCompanyLocationId
 		JOIN tblCTPricingType					PT				 ON PT.intPricingTypeId				 = CD.intPricingTypeId
