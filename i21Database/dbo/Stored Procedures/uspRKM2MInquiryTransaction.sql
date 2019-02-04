@@ -2109,6 +2109,10 @@ FROM(
 --------------END ---------------
 if isnull(@ysnIncludeInventoryM2M,0) = 1
 BEGIN
+DECLARE @intSpotMonthId int,
+		@strSpotMonth nvarchar(100)
+SELECT TOP 1 @intSpotMonthId=intFutureMonthId,@strSpotMonth= strFutureMonth FROM tblRKFuturesMonth 
+WHERE ysnExpired = 0 AND  convert(DATETIME, CONVERT(VARCHAR(10),dtmSpotDate, 110), 110) <= convert(DATETIME, CONVERT(VARCHAR(10),getdate(), 110), 110) AND intFutureMarketId = 1  ORDER BY dtmSpotDate DESC
 INSERT INTO #Temp (
 	strContractOrInventoryType 
 	,strCommodityCode 
@@ -2134,8 +2138,8 @@ SELECT
 	,strItemNo
 	,intItemId
 	,strLocationName
-	,strFutureMonth
-	,intFutureMonthId
+	,@strSpotMonth strFutureMonth
+	,@intSpotMonthId intFutureMonthId
 	,intFutureMarketId
 	,strFutMarketName
 	,dblNotLotTrackedPrice
@@ -2143,7 +2147,7 @@ SELECT
 												(SELECT TOP 1  dblLastSettle
 												FROM tblRKFuturesSettlementPrice p
 												INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-												WHERE p.intFutureMarketId = t1.intFutureMarketId AND pm.intFutureMonthId = t1.intFutureMonthId													
+												WHERE p.intFutureMarketId = t1.intFutureMarketId AND pm.intFutureMonthId = @intSpotMonthId													
 												ORDER BY dtmPriceDate DESC)) dblInvFuturePrice
 	,dbo.fnCTConvertQuantityToTargetCommodityUOM(intToPriceUOM,PriceSourceUOMId,isnull(dblInvMarketBasis, 0) ) dblInvMarketBasis												
 	,sum(dblOpenQty) dblOpenQty
