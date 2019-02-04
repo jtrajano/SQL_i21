@@ -12,9 +12,9 @@
     [dblDiscountEligibleQuantity] NUMERIC (18, 6) NULL,
     [dblDiscountAmount]           NUMERIC (18, 6) NULL,
     [dtmInvoiceDate]              DATETIME        NULL,
-    [strInvoiceNumberHistory]     NVARCHAR (MAX)  NULL,
+    [strInvoiceNumberHistory]     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnRemittancePage]           BIT             NULL,
-    [strReportName]               NVARCHAR (MAX)  NULL,
+    [strReportName]               NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
     [dtmBalanceForwardDate]       DATETIME        NULL,
     [intConcurrencyId]            INT             CONSTRAINT [DF_tblCFInvoiceProcessHistoryId_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFInvoiceProcessHistoryId] PRIMARY KEY CLUSTERED ([intInvoiceProcessHistoryId] ASC)
