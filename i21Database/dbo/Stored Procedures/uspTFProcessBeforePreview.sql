@@ -273,6 +273,25 @@ BEGIN TRY
 			SELECT trans.intTransactionId, Item.strDescription FROM #tmpTransaction trans INNER JOIN tblICItem Item ON Item.intItemId = trans.intItemId
 		
 		END
+		ELSE IF (@TaxAuthorityCode = 'TX')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicTX
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+			
+			INSERT INTO tblTFTransactionDynamicTX (intTransactionId,strTXPurchaserSignedStatementNumber, intConcurrencyId)
+			SELECT Trans.intTransactionId, tblTRLoadHeader.strPurchaserSignedStatementNumber, 1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
+			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+			WHERE Trans.uniqTransactionGuid = @Guid
+			AND Trans.intReportingComponentId = @ReportingComponentId
+			AND Trans.strTransactionType = 'Invoice'
+			AND Trans.intTransactionId IS NOT NULL
+		END
 
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
 

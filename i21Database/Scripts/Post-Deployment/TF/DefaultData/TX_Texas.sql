@@ -404,7 +404,7 @@ WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 		, ysnOutputDesigner
 		, intMasterId
 	)
-	SELECT intReportTemplateId = 0, strFormCode = '06-168DD', strScheduleCode = '06-160', strType = '', strTemplateItemId = NULL, strReportSection = '', intReportItemSequence = NULL, intTemplateItemNumber = '0', strDescription = 'strTXPurchaserSignedStatementNum', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = NULL, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = NULL, ysnOutputDesigner = 1, intMasterId = 431331
+	SELECT intReportTemplateId = 0, strFormCode = '06-168DD', strScheduleCode = '06-160', strType = '', strTemplateItemId = NULL, strReportSection = '', intReportItemSequence = NULL, intTemplateItemNumber = '0', strDescription = 'strTXPurchaserSignedStatementNumber', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = NULL, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = NULL, ysnOutputDesigner = 1, intMasterId = 431331
 
 	EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
 
@@ -657,7 +657,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId ORDER BY RCF.intMasterId
 	UNION ALL SELECT intScheduleColumnId = 213, strFormCode = '06-168GD', strScheduleCode = '06-159', strType = '', strColumn = 'strBillofLading', strCaption = 'Doc Num', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 4328990
 	UNION ALL SELECT intScheduleColumnId = 214, strFormCode = '06-168GD', strScheduleCode = '06-159', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 4328991
 	UNION ALL SELECT intScheduleColumnId = 215, strFormCode = '06-168DD', strScheduleCode = '06-160', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 4328992
-	UNION ALL SELECT intScheduleColumnId = 216, strFormCode = '06-168DD', strScheduleCode = '06-160', strType = '', strColumn = 'strTXPurchaserSignedStatementNum', strCaption = 'Purchaser Signed Statement Number', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 4328993
+	UNION ALL SELECT intScheduleColumnId = 216, strFormCode = '06-168DD', strScheduleCode = '06-160', strType = '', strColumn = 'strTXPurchaserSignedStatementNumber', strCaption = 'Purchaser Signed Statement Number', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 4328993
 	UNION ALL SELECT intScheduleColumnId = 217, strFormCode = '06-168DD', strScheduleCode = '06-160', strType = '', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 4328994
 	UNION ALL SELECT intScheduleColumnId = 218, strFormCode = '06-168DD', strScheduleCode = '06-161', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 4328995
 	UNION ALL SELECT intScheduleColumnId = 219, strFormCode = '06-168DD', strScheduleCode = '06-161', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 4328996
