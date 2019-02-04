@@ -120,6 +120,7 @@ BEGIN TRY
 	SET @ysnSuccess = CAST(1 AS BIT)
 	SET @strStatusMsg = ''
 END TRY
+
 BEGIN CATCH
 	SELECT 
 		@ErrorMessage = ERROR_MESSAGE(),
