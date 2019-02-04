@@ -141,7 +141,7 @@
     [ysnDepartmentGrouping]        BIT             NULL,
     [strGuid]                      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strUserId]                    NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
-    [strInvoiceNumberHistory]      NVARCHAR (MAX)  NULL,
+    [strInvoiceNumberHistory]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmDueDateBaseOnTermsHistory] DATETIME NULL, 
     CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC)
 );
