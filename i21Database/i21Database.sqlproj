@@ -7264,6 +7264,7 @@
     <Build Include="dbo\Views\vyuCFSearchAccount.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountCard.sql" />
     <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
+    <Build Include="dbo\Views\vyuSTInventoryCountHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
