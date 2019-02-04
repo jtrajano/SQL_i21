@@ -17,7 +17,7 @@ BEGIN TRY
 			@strState				NVARCHAR(500),
 			@strZip					NVARCHAR(500),
 			@strCountry				NVARCHAR(500),
-			@intContractHeaderId	INT,
+			@intContractHeaderId	NVARCHAR(MAX),
 			@xmlDocumentId			INT 
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
@@ -118,9 +118,9 @@ BEGIN TRY
 	FROM	vyuCTContractHeaderView CH
 	LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
-	WHERE	intContractHeaderId	=	@intContractHeaderId
+	WHERE	intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	
-	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
+	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 
 END TRY
 
