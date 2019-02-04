@@ -525,6 +525,9 @@ print 'BEGIN POST DEPLOYMENT'
 -- Vendor rebate
 :r .\VR\1_UpdateColumnTableProgramItem.sql
 
+--MIGRATE AUDIT LOGS
+:r .\SM\1910_MigrateAuditLog.sql
+
 
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS

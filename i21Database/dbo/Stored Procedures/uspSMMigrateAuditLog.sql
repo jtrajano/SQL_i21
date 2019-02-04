@@ -3,8 +3,8 @@
 --  CREATE THE STORED PROCEDURE AFTER DELETING IT  
 ---------------------------------------------------------------------------------------------------------------------------------------  
 CREATE PROCEDURE [dbo].[uspSMMigrateAuditLog]  
- @screenName   AS NVARCHAR(100),  
- @keyValue     AS INT
+ @screenName   AS NVARCHAR(100) = NULL,  
+ @keyValue     AS INT = NULL
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -25,6 +25,7 @@ DECLARE @maxAuditId AS INT
 DECLARE @logId AS INT
 DECLARE @parentAuditId AS INT
 
+DECLARE @queryAll BIT = (CASE WHEN ISNULL(@screenName,'') <> '' and ISNULL(@keyValue,'') <> '' THEN 1 ELSE 0 END)
 --=====================================================================================================================================  
 --  DECLARE TEMPORARY TABLES  
 ---------------------------------------------------------------------------------------------------------------------------------------  
@@ -41,7 +42,8 @@ DECLARE @tblSMAuditLog TABLE (
 --=====================================================================================================================================  
 --  GET ALL AUDIT LOGS BASED ON THE NAMESPACE AND PRIMARY KEY 
 ---------------------------------------------------------------------------------------------------------------------------------------  
-
+IF(@queryAll = 1)
+BEGIN
 INSERT INTO @tblSMAuditLog (
 	intAuditLogId, 
 	strActionType,
@@ -78,6 +80,46 @@ WHERE	ISNULL(A.ysnProcessed, 0) = 0 AND
 		ISNULL(A.strNamespace, '') = @screenName AND 
 		ISNULL(A.strJsonData, '') LIKE '%}' AND 
 		ISNULL(A.strActionType, '') NOT IN ('Created','Deleted')
+END
+ELSE
+	BEGIN
+		INSERT INTO @tblSMAuditLog (
+	intAuditLogId, 
+	strActionType,
+	strJsonData, 
+	dtmDate, 
+	intEntityId,
+	intTransactionId
+)
+SELECT TOP 1000
+	A.intAuditLogId,
+	A.strActionType,
+	A.strJsonData,
+	A.dtmDate,
+	A.intEntityId,
+	B.intTransactionId
+FROM 
+	(  
+		SELECT 
+			E.dtmDate,
+			E.intAuditLogId,
+			E.strActionType,
+			F.intScreenId,
+			E.strRecordNo,
+			E.strJsonData,
+			E.intEntityId,
+			E.ysnProcessed,
+			F.strNamespace
+		FROM tblSMAuditLog E
+		INNER JOIN tblSMScreen F ON E.strTransactionType = F.strNamespace
+	) A LEFT OUTER JOIN 
+	tblSMTransaction B ON A.intScreenId = B.intScreenId AND CAST(A.strRecordNo AS INT) = B.intRecordId
+WHERE	ISNULL(A.ysnProcessed, 0) = 0 AND
+		--ISNULL(B.intRecordId, 0) = @keyValue AND 
+		--ISNULL(A.strNamespace, '') = @screenName AND 
+		ISNULL(A.strJsonData, '') LIKE '%}' AND 
+		ISNULL(A.strActionType, '') NOT IN ('Created','Deleted')
+END
 --=====================================================================================================================================  
 --  INSERT AUDIT ENTRY  
 ---------------------------------------------------------------------------------------------------------------------------------------  

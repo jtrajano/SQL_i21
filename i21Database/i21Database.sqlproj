@@ -7276,6 +7276,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateOverageContracts.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccount.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountCard.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_MigrateAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

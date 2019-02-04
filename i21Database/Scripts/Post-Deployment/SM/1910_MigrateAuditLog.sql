@@ -1,0 +1,85 @@
+﻿PRINT N'START MIGRATE AUDIT LOG INCLUDING TOP 1000'
+BEGIN
+
+INSERT INTO tblSMScreen (strNamespace, strScreenId, strScreenName, strModule)
+	SELECT DISTINCT tblSMAuditLog.strTransactionType, '', '',
+		 REPLACE(tblSMAuditLog.strTransactionType,SUBSTRING(tblSMAuditLog.strTransactionType,charindex('.',tblSMAuditLog.strTransactionType),LEN(tblSMAuditLog.strTransactionType)),'')
+		 FROM tblSMAuditLog tblSMAuditLog
+		 LEFT OUTER JOIN tblSMScreen on tblSMScreen.strNamespace = tblSMAuditLog.strTransactionType
+		 WHERE ISNULL(tblSMScreen.strNamespace,'') = ''
+
+INSERT INTO tblSMTransaction (intScreenId, intRecordId, intConcurrencyId)
+SELECT 
+	DISTINCT 
+	A.intScreenId,
+	CAST(A.strRecordNo AS INT),
+	1
+FROM 
+	(  
+		SELECT 
+			E.strJsonData,
+			F.intScreenId,
+			E.strRecordNo
+		FROM tblSMAuditLog E
+		INNER JOIN tblSMScreen F ON E.strTransactionType = F.strNamespace
+	) A LEFT OUTER JOIN 
+	tblSMTransaction B ON A.intScreenId = B.intScreenId AND CAST(A.strRecordNo AS INT) = B.intRecordId 
+WHERE ISNULL(B.intRecordId, '') = '' AND ISNULL(A.strRecordNo, '') <> ''
+
+
+DECLARE @tblSMAudit TABLE (
+	intLogId			INT,
+	intAuditId			INT,
+	intParentAuditId	INT,
+	intOldAuditLogId	INT,
+	strAction			NVARCHAR(50),
+	strChange			NVARCHAR(255),
+	strKeyValue			NVARCHAR(255),
+	strFrom				NVARCHAR(MAX),
+	strTo				NVARCHAR(MAX),
+	strAlias			NVARCHAR(255)
+)
+ 
+-- Insert to tblSMLog and tblSMAudit for entries that doesn't have JsonData including Created/Deleted records
+MERGE INTO tblSMLog USING (
+	SELECT 
+		A.dtmDate,
+		A.intEntityId,
+		B.intTransactionId,
+		A.strActionType,
+		A.intAuditLogId,
+		A.strRoute
+	FROM 
+		(  
+			SELECT  
+				E.intAuditLogId,
+				E.strJsonData,
+			    F.intScreenId,
+				E.strRecordNo,
+				E.dtmDate,
+				E.intEntityId,
+				E.strActionType,
+				E.ysnInit,
+				E.strRoute
+			FROM tblSMAuditLog E
+			INNER JOIN tblSMScreen F ON E.strTransactionType = F.strNamespace
+		) A LEFT OUTER JOIN 
+		tblSMTransaction B ON A.intScreenId = B.intScreenId AND CAST(A.strRecordNo AS INT) = B.intRecordId  --AND B.intTransactionId = 3716
+	WHERE ISNULL(B.intRecordId, '') <> '' AND ISNULL(A.strRecordNo, '') <> '' AND ISNULL(ysnInit,'') = '' --AND ISNULL(A.strJsonData, '') = '' AND ISNULL(A.strActionType, '') <> 'Updated'
+
+) AS OldLog (dtmDate, intEntityId, intTransactionId, strActionType, intAuditLogId, strRoute) ON 1 = 0
+WHEN NOT MATCHED THEN
+INSERT (strType, dtmDate, intEntityId, intTransactionId, strRoute, intConcurrencyId)
+VALUES ('Audit', OldLog.dtmDate, OldLog.intEntityId, OldLog.intTransactionId, OldLog.strRoute, 1)
+OUTPUT inserted.intLogId,  OldLog.strActionType, OldLog.intAuditLogId
+INTO @tblSMAudit(intLogId, strAction, intOldAuditLogId); 
+
+INSERT INTO tblSMAudit (intLogId, strAction, intOldAuditLogId, intConcurrencyId)
+SELECT intLogId, strAction, intOldAuditLogId, 1 FROM @tblSMAudit
+
+
+
+exec uspSMMigrateAuditLog
+
+END
+PRINT N'END MIGRATE AUDIT LOG INCLUDING TOP 1000'
