@@ -881,6 +881,35 @@ BEGIN
 					FROM @tempFinal
 					WHERE intCommodityId = @intCommodityId AND strType  = 'Crush'
 
+
+					--Include Crush in Net Hedge
+					INSERT INTO @tempFinal(strCommodityCode
+						, strType
+						, strContractType
+						, dblTotal
+						, intContractHeaderId
+						, strContractNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intFutOptTransactionHeaderId
+						, strInternalTradeNo
+
+						)
+					SELECT strCommodityCode
+						, 'Net Hedge' COLLATE Latin1_General_CI_AS
+						, strContractType
+						, dblTotal
+						, intContractHeaderId
+						, strContractNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intFutOptTransactionHeaderId
+						, strInternalTradeNo
+					FROM @tempFinal
+					WHERE intCommodityId = @intCommodityId AND strType  = 'Crush'
+
 				END
 
 				-- Net Hedge option end
