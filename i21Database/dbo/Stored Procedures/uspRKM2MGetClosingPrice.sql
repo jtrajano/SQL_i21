@@ -127,8 +127,14 @@ FROM (
   fm.intFutureMonthId,  
   f.strFutMarketName,  
   fm.strFutureMonth,  
-  dblClosingPrice =
-  			(SELECT top 1 dblLastSettle
+  dblClosingPrice =t.dblLastSettle,     
+  intFutSettlementPriceMonthId =   t.intFutureMonthId,
+  0 as intConcurrencyId,
+  ysnExpired
+ FROM tblRKFutureMarket f  
+ JOIN tblRKFuturesMonth fm ON f.intFutureMarketId = fm.intFutureMarketId --and fm.ysnExpired=0  
+ JOIN tblRKCommodityMarketMapping mm ON fm.intFutureMarketId = mm.intFutureMarketId  
+ join (SELECT  dblLastSettle,fm.intFutureMonthId,fm.intFutureMarketId
 			FROM tblRKFuturesSettlementPrice p
 			INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
 			join tblRKFuturesMonth fm on fm.intFutureMonthId= case when  isnull(fm.ysnExpired,0)=0 then pm.intFutureMonthId
@@ -141,26 +147,10 @@ FROM (
 															  end				
 			WHERE 
 			p.intFutureMarketId =fm.intFutureMarketId  
-				AND CONVERT(Nvarchar, dtmPriceDate, 111) = CONVERT(Nvarchar, @dtmSettlemntPriceDate, 111)	
+				AND CONVERT(Nvarchar, dtmPriceDate, 111) = CONVERT(Nvarchar, @dtmSettlemntPriceDate, 111)
 				AND isnull(p.strPricingType,@strPricingType) = @strPricingType 
-			ORDER BY dtmPriceDate DESC),
-     
-   intFutSettlementPriceMonthId =   
-  (SELECT TOP 1 intFutSettlementPriceMonthId
-			FROM tblRKFuturesSettlementPrice p
-			INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-			WHERE p.intFutureMarketId = f.intFutureMarketId AND pm.intFutureMonthId = (case WHEN fm.ysnExpired = 0 THEN fm.intFutureMonthId else (
-										  SELECT TOP 1  intFutureMonthId
-										FROM tblRKFuturesMonth
-										WHERE ysnExpired = 0  AND intFutureMarketId = f.intFutureMarketId and CONVERT(DATETIME,'01 '+strFutureMonth) > getdate()
-										ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC) end)
-				AND CONVERT(Nvarchar, dtmPriceDate, 111) <= CONVERT(Nvarchar, @dtmPriceDate, 111)
-				AND isnull(p.strPricingType,@strPricingType) = @strPricingType 
-			ORDER BY dtmPriceDate DESC)  
-			,0 as intConcurrencyId,ysnExpired
- FROM tblRKFutureMarket f  
- JOIN tblRKFuturesMonth fm ON f.intFutureMarketId = fm.intFutureMarketId --and fm.ysnExpired=0  
- JOIN tblRKCommodityMarketMapping mm ON fm.intFutureMarketId = mm.intFutureMarketId  
+			)	t on t.intFutureMarketId=fm.intFutureMarketId and t.intFutureMonthId=fm.intFutureMonthId
+
  WHERE mm.intCommodityId = CASE WHEN isnull(@intCommodityId, 0) = 0 THEN mm.intCommodityId ELSE @intCommodityId END AND ISNULL(fm.intFutureMonthId, 0) IN (  
    SELECT CASE WHEN Item = '' THEN 0 ELSE Ltrim(rtrim(Item)) Collate Latin1_General_CI_AS END  
    FROM [dbo].[fnSplitString](@strFutureMonthIds, ',')  

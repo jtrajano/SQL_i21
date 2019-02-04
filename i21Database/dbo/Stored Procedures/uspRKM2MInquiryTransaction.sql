@@ -1011,8 +1011,8 @@ FROM(
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE cd.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
-				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' 
-						THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,cd.dtmEndDate),106),8))  END else isnull(temp.strPeriodTo,'') end
+				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,'')= '' 
+						THEN isnull(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,cd.dtmEndDate),106),8))  END else isnull(temp.strPeriodTo,'') end
 				) AS dblMarketRatio
 			,isnull((SELECT top 1 (isnull(dblBasisOrDiscount,0)+isnull(dblCashOrFuture,0))
 									/ case when c.ysnSubCurrency= 1 then 100 else 1 end FROM tblRKM2MBasisDetail temp 
@@ -1022,8 +1022,8 @@ FROM(
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE cd.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
-				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' 
-						THEN NULL ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,cd.dtmEndDate),106),8))  END else isnull(temp.strPeriodTo,'') end
+				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,'')= '' 
+						THEN isnull(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,cd.dtmEndDate),106),8))  END else isnull(temp.strPeriodTo,'') end
 				),0) AS dblMarketBasis1
 			,isnull((SELECT top 1 intCommodityUnitMeasureId as dblMarketBasisUOM FROM tblRKM2MBasisDetail temp 
 				JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=temp.intCommodityId and temp.intUnitMeasureId=cum.intUnitMeasureId
@@ -1032,7 +1032,7 @@ FROM(
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE cd.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
-				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL 
+				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,'')= '' THEN isnull(temp.strPeriodTo,'') 
 					   ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,cd.dtmEndDate),106),8))  END else isnull(temp.strPeriodTo,'') end
 				),0) AS dblMarketBasisUOM
 			,isnull((SELECT top 1 intCurrencyId as intMarketBasisCurrencyId FROM tblRKM2MBasisDetail temp 
@@ -1042,7 +1042,7 @@ FROM(
 				and isnull(temp.intItemId,0) = CASE WHEN isnull(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
 				and isnull(temp.intContractTypeId,0) = CASE WHEN isnull(temp.intContractTypeId,0)= 0 THEN 0 ELSE cd.intContractTypeId  END
 				AND isnull(temp.intCompanyLocationId,0) = CASE WHEN isnull(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE isnull(cd.intCompanyLocationId,0)  END
-				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,0)= '' THEN NULL 
+				AND isnull(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN isnull(temp.strPeriodTo,'')= '' THEN isnull(temp.strPeriodTo,'') 
 					   ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,cd.dtmEndDate),106),8))  END else isnull(temp.strPeriodTo,'') end
 				),0) AS intMarketBasisCurrencyId
 			,dblFuturePrice as dblFuturePrice1
