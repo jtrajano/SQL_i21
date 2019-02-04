@@ -73,7 +73,7 @@ SELECT	DISTINCT
 				INNER JOIN tblSMTerm C ON C.intTermID = A.intTermsId
 				WHERE 
 				B.intInventoryReceiptChargeId IS NULL AND B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
-				AND  A.ysnPosted = 0
+				--AND  A.ysnPosted = 0
 			) bill
 			OUTER APPLY (
 				SELECT 

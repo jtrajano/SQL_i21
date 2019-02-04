@@ -323,9 +323,9 @@ SELECT * FROM (
 	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 
 		THEN 0 
 		ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
-	,CASE WHEN DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmReceiptDate,GETDATE())<=0 
+	,CASE WHEN DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmDueDate,GETDATE())<=0 
 		THEN 0
-		ELSE ISNULL(DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmReceiptDate,GETDATE()),0) END AS intAging
+		ELSE ISNULL(DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmDueDate,GETDATE()),0) END AS intAging
 	,CASE WHEN DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmDueDate,GETDATE())<=0 
 		THEN tmpAgingSummaryTotal.dblAmountDue 
 		ELSE 0 END AS dblCurrent
