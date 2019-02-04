@@ -1401,8 +1401,9 @@ BEGIN
 	SELECT @total = COUNT(*) FROM @ShipmentStagingTable;
 	IF (@total = 0)
 		RETURN;
+END
 
-	IF @intLotType != 0
+IF @intLotType != 0
 	BEGIN 
 		INSERT INTO @ShipmentItemLotStagingTable(
 			intOrderType
@@ -1439,7 +1440,7 @@ BEGIN
 			INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 			INNER JOIN tblICItem IC ON IC.intItemId = SE.intItemId
 	END
-END
+
 EXEC dbo.uspICAddItemShipment
 		@Items = @ShipmentStagingTable
 		,@Charges = @ShipmentChargeStagingTable
