@@ -91,7 +91,7 @@ ELSE
 	intEntityId,
 	intTransactionId
 )
-SELECT TOP 1000
+SELECT TOP 10000  --top 10k RECORDS
 	A.intAuditLogId,
 	A.strActionType,
 	A.strJsonData,
