@@ -2,8 +2,11 @@
 BEGIN
 
 INSERT INTO tblSMScreen (strNamespace, strScreenId, strScreenName, strModule)
-	SELECT DISTINCT tblSMAuditLog.strTransactionType, '', '',
-		 REPLACE(tblSMAuditLog.strTransactionType,SUBSTRING(tblSMAuditLog.strTransactionType,charindex('.',tblSMAuditLog.strTransactionType),LEN(tblSMAuditLog.strTransactionType)),'')
+	SELECT DISTINCT tblSMAuditLog.strTransactionType, '',
+					REPLACE(SUBSTRING(tblSMAuditLog.strTransactionType,CHARINDEX('.',tblSMAuditLog.strTransactionType), LEN(tblSMAuditLog.strTransactionType)),'.view.',''),
+					CASE WHEN substring(tblSMAuditLog.strTransactionType,0,CHARINDEX('.',tblSMAuditLog.strTransactionType)) = 'i21' THEN 'System Manager'  --module
+	 				ELSE substring(tblSMAuditLog.strTransactionType,0,CHARINDEX('.',tblSMAuditLog.strTransactionType)) END
+		-- REPLACE(tblSMAuditLog.strTransactionType,SUBSTRING(tblSMAuditLog.strTransactionType,charindex('.',tblSMAuditLog.strTransactionType),LEN(tblSMAuditLog.strTransactionType)),'')
 		 FROM tblSMAuditLog tblSMAuditLog
 		 LEFT OUTER JOIN tblSMScreen on tblSMScreen.strNamespace = tblSMAuditLog.strTransactionType
 		 WHERE ISNULL(tblSMScreen.strNamespace,'') = ''
