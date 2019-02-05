@@ -7305,6 +7305,8 @@
     <Build Include="dbo\Views\vyuRKGetFutOptTransactionHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateOverageContracts.sql" />
     <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
+    <Build Include="dbo\Tables\tblQMProductImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportProduct.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
