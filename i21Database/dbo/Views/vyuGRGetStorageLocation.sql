@@ -4,8 +4,14 @@ SELECT DISTINCT
 	 CS.intEntityId 
 	,CS.intCompanyLocationId  
 	,LOC.strLocationName
-	,ST.ysnCustomerStorage
-	,ysnStorageLocationReady = CAST(
+	,ysnCustomerStorage         = CAST(
+                                    CASE
+                                        WHEN ST.ysnCustomerStorage = 0 THEN 1
+                                        WHEN ST.ysnCustomerStorage = 1 AND ST.strOwnedPhysicalStock = 'Customer' THEN 1
+                                        ELSE 0
+                                    END AS BIT
+                                )
+	,ysnStorageLocationReady    = CAST(
                                     CASE
                                         WHEN ysnTransferStorage = 1 THEN 1
                                         ELSE 
