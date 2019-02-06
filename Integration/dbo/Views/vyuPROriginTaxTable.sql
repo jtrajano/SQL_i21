@@ -10,19 +10,19 @@ BEGIN
 	AS
 	SELECT
 		intYear					= CAST(prtax_year AS INT)
-		,strType				= CAST(prtax_tax_type AS NVARCHAR(200))
-		,strTaxCode				= CAST(prtax_code AS NVARCHAR(200))
-		,strDescription			= CAST(prtax_desc AS NVARCHAR(200))
-		,strCheckLiteral		= CAST(prtax_literal AS NVARCHAR(200))
+		,strType				= CAST(prtax_tax_type AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strTaxCode				= CAST(prtax_code AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strDescription			= CAST(prtax_desc AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strCheckLiteral		= CAST(prtax_literal AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dblExemptionAllowance	= CAST(prtax_exmpt_allow AS NUMERIC(18, 6))
 		,dblDeductionAllowance	= CAST(prtax_ded_allow AS NUMERIC(18, 6))
 		,dblExemptionReduce		= CAST(prtax_exmpt_reduce AS NUMERIC(18, 6))
 		,ysnTaxSick				= CAST(CASE prtax_tax_sick WHEN ''Y'' THEN 1 ELSE 0 END AS BIT)
 		,strPaidBy				= CAST(CASE prtax_paid_by WHEN ''C'' THEN ''Company'' ELSE ''Employee'' END AS NVARCHAR(200))
-		,strCompMethod			= CAST(prtax_comp_method_pt AS NVARCHAR(200))
+		,strCompMethod			= CAST(prtax_comp_method_pt AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,ysnCredit				= CAST(CASE prtax_credit_yn WHEN ''Y'' THEN 1 ELSE 0 END AS BIT)
-		,strGLLiability			= CAST(prtax_gl_bs AS NVARCHAR(200))
-		,strGLExpense			= CAST(prtax_gl_exp AS NVARCHAR(200))
+		,strGLLiability			= CAST(prtax_gl_bs AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strGLExpense			= CAST(prtax_gl_exp AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dblTaxPercent			= CAST(prtax_percent AS NUMERIC(18, 6))			
 		,dblWageCutOff			= CAST(prtax_wage_cutoff AS NUMERIC(18, 6))
 		,dblWithholdCutOff		= CAST(prtax_whld_cutoff AS NUMERIC(18, 6))
@@ -78,7 +78,7 @@ BEGIN
 		,dblTaxTablePct16		= CAST(prtax_tbl_pct_16 AS NUMERIC(18, 6))
 		,intMagMediaId			= CAST(prtax_mag_media_id AS INT)
 		,ysnAPTransaction		= CAST(CASE prtax_aptrx_yn WHEN ''Y'' THEN 1 ELSE 0 END AS BIT)
-		,strVendor				= CAST(prtax_vendor AS NVARCHAR(200))
+		,strVendor				= CAST(prtax_vendor AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dblStdDeductionMin		= CAST(prtax_std_ded_min AS NUMERIC(18, 6))
 		,dblStdDeductionMax		= CAST(prtax_std_ded_max AS NUMERIC(18, 6))
 		,dblFwtDeduct			= CAST(prtax_fwt_deduct_9 AS NUMERIC(18, 6))
@@ -88,7 +88,7 @@ BEGIN
 		,dblStatePercent		= CAST(prtax_state_pct AS NUMERIC(18, 6))
 		,ysnRndStateWh			= CAST(CASE prtax_rnd_state_wh_yn WHEN ''Y'' THEN 1 ELSE 0 END AS BIT)
 		,dblMedSuppMin			= CAST(prtax_med_supp_min AS NUMERIC(18, 6))	
-		,strUserId				= CAST(prtax_user_id AS NVARCHAR(200))
+		,strUserId				= CAST(prtax_user_id AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dtmUserRevision		= CAST(CASE WHEN (ISNULL(prtax_user_rev_dt, 0) = 0) THEN NULL
 									ELSE CAST((prtax_user_rev_dt / 10000) AS VARCHAR) + ''-'' + 
 										CAST((prtax_user_rev_dt % 10000) / 100 AS VARCHAR) + ''-'' + 
