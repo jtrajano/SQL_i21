@@ -9,24 +9,24 @@ BEGIN
 	CREATE VIEW [dbo].[vyuPROriginCheckHistoryDeduction]
 	AS
 	SELECT
-		strEmployeeNo		= CAST(prhsd_emp_no AS NVARCHAR(200))
-		,strLastName		= CAST(premp_last_name AS NVARCHAR(200))
-		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200))
-		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200))
-		,strCode			= CAST(prhsd_code AS NVARCHAR(200))
-		,strCheckNumber		= CAST(prhsd_no AS NVARCHAR(200))
-		,strCheckType		= CAST(CASE prhsd_chk_type WHEN ''I'' THEN ''Individual'' ELSE ''Regular'' END AS NVARCHAR(200))
-		,strDeductionCode	= CAST(prhsd_ded AS NVARCHAR(200))
-		,strType			= CAST(prhsd_type AS NVARCHAR(200))
-		,strDepartment		= CAST(prhsd_dept AS NVARCHAR(200))
+		strEmployeeNo		= CAST(prhsd_emp_no AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strLastName		= CAST(premp_last_name AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strCode			= CAST(prhsd_code AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strCheckNumber		= CAST(prhsd_no AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strCheckType		= CAST(CASE prhsd_chk_type WHEN ''I'' THEN ''Individual'' ELSE ''Regular'' END AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strDeductionCode	= CAST(prhsd_ded AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strType			= CAST(prhsd_type AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strDepartment		= CAST(prhsd_dept AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dblAmount			= CAST(prhsd_amt AS NUMERIC(18, 6))
-		,strAccountNo		= CAST(prhsd_acct_no AS NVARCHAR(200))
-		,strBankCode		= CAST(prhsd_ddp_bnk_code AS NVARCHAR(200))
-		,strPaidBy			= CAST(CASE prhsd_co_emp_cd WHEN ''C'' THEN ''Company'' ELSE ''Employee'' END AS NVARCHAR(200))
-		,strCheckLiteral	= CAST(prhsd_literal AS NVARCHAR(200))
-		,strAccountType		= CAST(CASE prhsd_acct_type_cs WHEN ''C'' THEN ''Checking'' ELSE ''Savings'' END AS NVARCHAR(200))
+		,strAccountNo		= CAST(prhsd_acct_no AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strBankCode		= CAST(prhsd_ddp_bnk_code AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strPaidBy			= CAST(CASE prhsd_co_emp_cd WHEN ''C'' THEN ''Company'' ELSE ''Employee'' END AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strCheckLiteral	= CAST(prhsd_literal AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strAccountType		= CAST(CASE prhsd_acct_type_cs WHEN ''C'' THEN ''Checking'' ELSE ''Savings'' END AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dblTaxableEarning	= CAST(prhsd_taxable_earnings AS NUMERIC(18, 6))
-		,strUserId			= CAST(prhsd_user_id AS NVARCHAR(200))
+		,strUserId			= CAST(prhsd_user_id AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dtmUserRevision	= CAST(CASE WHEN (ISNULL(prhsd_user_rev_dt, 0) = 0) THEN NULL
 								ELSE CAST((prhsd_user_rev_dt / 10000) AS VARCHAR) + ''-'' + 
 									CAST((prhsd_user_rev_dt % 10000) / 100 AS VARCHAR) + ''-'' + 
