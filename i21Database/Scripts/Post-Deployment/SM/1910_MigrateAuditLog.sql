@@ -9,7 +9,7 @@ INSERT INTO tblSMScreen (strNamespace, strScreenId, strScreenName, strModule)
 		-- REPLACE(tblSMAuditLog.strTransactionType,SUBSTRING(tblSMAuditLog.strTransactionType,charindex('.',tblSMAuditLog.strTransactionType),LEN(tblSMAuditLog.strTransactionType)),'')
 		 FROM tblSMAuditLog tblSMAuditLog
 		 LEFT OUTER JOIN tblSMScreen on tblSMScreen.strNamespace = tblSMAuditLog.strTransactionType
-		 WHERE ISNULL(tblSMScreen.strNamespace,'') = ''
+		 WHERE ISNULL(tblSMScreen.strNamespace,'') = '' AND ISNULL(tblSMAuditLog.strTransactionType,'') <> ''
 
 INSERT INTO tblSMTransaction (intScreenId, intRecordId, intConcurrencyId)
 SELECT 
