@@ -2105,9 +2105,9 @@ BEGIN
 						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 					FROM @tblGetOpenContractDetail cd
 					WHERE cd.intContractTypeId IN (1, 2)
-						AND cd.intCommodityId IN (SELECT intCommodityId FROM @Commodity)
+						AND cd.intCommodityId = @intCommodityId
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
-						AND intEntityId = @intVendorId
+						AND cd.intEntityId = @intVendorId
 				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				
 				INSERT INTO @tempFinal (strCommodityCode
