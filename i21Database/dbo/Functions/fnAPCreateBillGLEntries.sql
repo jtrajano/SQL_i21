@@ -145,7 +145,7 @@ BEGIN
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[strRateType]                   =    Details.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	D.strName,
+		[strComments]					=	Details.strComment + ' ' + D.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	Details.dblUnits,
 		[dblSourceUnitDebit]			=	0,
@@ -187,7 +187,8 @@ BEGIN
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
 											itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
-								END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END)
+								END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END),
+					R.strComment										
                 FROM dbo.tblAPBillDetail R
 				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
 				LEFT JOIN tblICItemUOM itemUOM ON item.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1
@@ -204,7 +205,8 @@ BEGIN
 				 R.dblRate  AS dblRate, 
 				 exRates.intCurrencyExchangeRateTypeId,
 				  exRates.strCurrencyExchangeRateType,
-				  0
+				  0,
+				  ''
                 FROM dbo.tblAPBillDetail R
 				INNER JOIN tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
 				LEFT JOIN tblICInventoryReceiptCharge charges
@@ -780,7 +782,7 @@ BEGIN
 		[dblForeignRate]				=	ISNULL(NULLIF(B.dblRate,0),1),
 		[strRateType]					=	G.strCurrencyExchangeRateType,
 		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	E.strName,
+		[strComments]                   =   B.strComment + ' ' + E.strName,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	0,
@@ -837,6 +839,7 @@ BEGIN
 	,A.intCommodityId
 	,A.intStoreLocationId
 	,E.strName
+	,B.strComment
 
 	UPDATE A
 		SET A.strDescription = B.strDescription
