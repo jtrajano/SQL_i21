@@ -6,7 +6,7 @@
     [dtmStart] DATETIME NULL, 
     [dtmEnd] DATETIME NULL, 
     [dblRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [strRateType] NVARCHAR(30) NULL DEFAULT (('Per Hour')), 
+    [strRateType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL DEFAULT (('Per Hour')), 
     [intConcurrencyId] INT NULL DEFAULT ((1)),
 	CONSTRAINT [FK_tblPRDepartmentShift_tblPRDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblPRDepartment] ([intDepartmentId]) ON DELETE CASCADE
 )

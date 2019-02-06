@@ -3,19 +3,19 @@ CREATE VIEW [dbo].[vyuPROriginTaxTable]
 AS
 SELECT TOP 0
 	intYear					= CAST(0 AS INT)
-	,strType				= CAST('' AS NVARCHAR(200))
-	,strTaxCode				= CAST('' AS NVARCHAR(200))
-	,strDescription			= CAST('' AS NVARCHAR(200))
-	,strCheckLiteral		= CAST('' AS NVARCHAR(200))
+	,strType				= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+	,strTaxCode				= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+	,strDescription			= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+	,strCheckLiteral		= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 	,dblExemptionAllowance	= CAST(0.000000 AS NUMERIC(18, 6))
 	,dblDeductionAllowance	= CAST(0.000000 AS NUMERIC(18, 6))
 	,dblExemptionReduce		= CAST(0.000000 AS NUMERIC(18, 6))
 	,ysnTaxSick				= CAST(0 AS BIT)
-	,strPaidBy				= CAST('' AS NVARCHAR(200))
-	,strCompMethod			= CAST('' AS NVARCHAR(200))
+	,strPaidBy				= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+	,strCompMethod			= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 	,ysnCredit				= CAST(0 AS BIT)
-	,strGLLiability			= CAST('' AS NVARCHAR(200))
-	,strGLExpense			= CAST('' AS NVARCHAR(200))
+	,strGLLiability			= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+	,strGLExpense			= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 	,dblTaxPercent			= CAST(0.000000 AS NUMERIC(18, 6))		
 	,dblWageCutOff			= CAST(0.000000 AS NUMERIC(18, 6))
 	,dblWithholdCutOff		= CAST(0.000000 AS NUMERIC(18, 6))
@@ -71,7 +71,7 @@ SELECT TOP 0
 	,dblTaxTablePct16		= CAST(0.000000 AS NUMERIC(18, 6))
 	,intMagMediaId			= CAST(0 AS INT)
 	,ysnAPTransaction		= CAST(0 AS BIT)
-	,strVendor				= CAST('' AS NVARCHAR(200))
+	,strVendor				= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 	,dblStdDeductionMin		= CAST(0.000000 AS NUMERIC(18, 6))
 	,dblStdDeductionMax		= CAST(0.000000 AS NUMERIC(18, 6))
 	,dblFwtDeduct			= CAST(0.000000 AS NUMERIC(18, 6))
@@ -81,6 +81,6 @@ SELECT TOP 0
 	,dblStatePercent		= CAST(0.000000 AS NUMERIC(18, 6))
 	,ysnRndStateWh			= CAST(0 AS BIT)
 	,dblMedSuppMin			= CAST(0.000000 AS NUMERIC(18, 6))	
-	,strUserId				= CAST('' AS NVARCHAR(200))
+	,strUserId				= CAST('' AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 	,dtmUserRevision		= CAST(NULL AS DATETIME)
 	,intIdentityKey		= CAST(-999 AS INT)
