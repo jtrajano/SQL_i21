@@ -56,7 +56,7 @@ BEGIN TRY
 		,[intPaymentMethodId]					= 0
 		,[strInvoiceOriginId]					= ''
 		,[strPONumber]							= DH.strPurchaseOrder
-		,[strBOLNumber]							= ISNULL(TR.strBillOfLading, BlendIngredient.strBillOfLading)
+		,[strBOLNumber]							= ISNULL(TR.strBillOfLading, DD.strBillOfLading)
 		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
 														(CASE 
 															WHEN BlendIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(BlendIngredient.strSupplyPoint, ''))
