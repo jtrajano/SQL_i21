@@ -574,7 +574,7 @@ CREATE TABLE #ARItemsForStorageCosting
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
 
 
-IF @Post = 1
+--IF @Post = 1
 	EXEC [dbo].[uspARPostItemResevation]
 
 	EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
