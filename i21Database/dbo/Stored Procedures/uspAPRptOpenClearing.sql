@@ -306,7 +306,7 @@ SELECT * FROM (
 	,tmpAgingSummaryTotal.strBillOfLading
 	,tmpAgingSummaryTotal.strLocationName
 	,tmpAgingSummaryTotal.strOrderNumber AS strOrderNumber
-	,tmpAgingSummaryTotal.dtmDate
+	,APB.dtmDate
 	,tmpAgingSummaryTotal.dtmBillDate
 	,tmpAgingSummaryTotal.dtmDueDate
 	,tmpAgingSummaryTotal.strVendorId
@@ -348,7 +348,7 @@ SELECT * FROM (
 		,tmpAPClearables.strContainer
 		,tmpAPClearables.strVendorId
 		,tmpAPClearables.strReceiptNumber
-		,tmpAPClearables.dtmDate
+		--,tmpAPClearables.dtmDate
 		,tmpAPClearables.dtmBillDate
 		,tmpAPClearables.dtmDueDate
 		,tmpAPClearables.strTerm
@@ -356,21 +356,39 @@ SELECT * FROM (
 		,tmpAPClearables.strBillOfLading
 		,tmpAPClearables.strLocationName
 		,SUM(tmpAPClearables.dblVoucherAmount) as dblVoucherAmount
-		,SUM(tmpAPClearables.dblTotal) AS dblTotal
+		,tmpAPClearables.dblTotal AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
-		,SUM(tmpAPClearables.dblAmountDue) AS dblAmountDue
-		,SUM(tmpAPClearables.dblQtyToReceive) AS dblQtyToReceive
+		,tmpAPClearables.dblAmountDue AS dblAmountDue
+		,tmpAPClearables.dblQtyToReceive AS dblQtyToReceive
 		,SUM(tmpAPClearables.dblQtyVouchered) AS dblQtyVouchered
-		,SUM(tmpAPClearables.dblQtyToVoucher) AS dblQtyToVoucher
-		,SUM(tmpAPClearables.dblAmountToVoucher) AS dblAmountToVoucher
+		,SUM(tmpAPClearables.dblReceiptQty) - SUM(tmpAPClearables.dblVoucherQty) AS dblQtyToVoucher
+		,tmpAPClearables.dblTotal - SUM(tmpAPClearables.dblVoucherAmount)  AS dblAmountToVoucher
 		,SUM(tmpAPClearables.dblChargeAmount) AS dblChargeAmount
 		,(SUM(tmpAPClearables.dblReceiptQty)  -  SUM(tmpAPClearables.dblVoucherQty)) AS dblClearingQty
 		FROM ('
 				+ @innerQuery +
 			   ') tmpAPClearables 
-		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue,strVendorIdName,strContainer,
-				 strVendorId, strBillId ,strOrderNumber,dtmDate,dtmDueDate,dtmReceiptDate,strTerm,strReceiptNumber,strBillOfLading ,strLocationName, dtmBillDate
+		GROUP BY 
+				 dblTotal,
+				 dblQtyToReceive,
+				 dblAmountDue,
+				 intInventoryReceiptId,
+				 intBillId, 
+				 dblAmountDue,
+				 strVendorIdName,
+				 strContainer,
+				 strVendorId, 
+				 strBillId ,
+				 strOrderNumber,
+				 dtmReceiptDate,
+				 strTerm,
+				 strReceiptNumber,
+				 strBillOfLading ,
+				 strLocationName, 
+				 dtmBillDate,
+				 dtmDueDate
 	) AS tmpAgingSummaryTotal
+	LEFT JOIN tblAPBill APB ON APB.intBillId = tmpAgingSummaryTotal.intBillId
 	--LEFT JOIN vyuICGetInventoryReceipt IR
 	--	ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
 	WHERE tmpAgingSummaryTotal.dblClearingQty > 0
