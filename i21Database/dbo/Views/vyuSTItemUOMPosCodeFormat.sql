@@ -26,7 +26,7 @@ SELECT Item.intItemId
 						-- gtin  =  GTINs may be 8, 12, 13 or 14 digits long. Check digit is included
 
 						-- UPC-A
-						WHEN (LEN(UOM.dblUPCwthOrwthOutCheckDigit) = 6) OR (UOM.dblUPCwthOrwthOutCheckDigit > 99999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 99999999999)
+						WHEN (LEN(UOM.dblUPCwthOrwthOutCheckDigit) = 6) OR (UOM.dblUPCwthOrwthOutCheckDigit > 99999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 999999999999)
 							THEN CASE 
 									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 12
 										THEN 12
@@ -35,7 +35,7 @@ SELECT Item.intItemId
 							END
 																
 						-- EAN13
-						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999999999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 999999999999
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 999999999999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 9999999999999
 							THEN CASE 
 									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 13
 										THEN 13
@@ -44,7 +44,7 @@ SELECT Item.intItemId
 							END
 
 						-- GTIN
-						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 999999999999
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 9999999999999
 							THEN CASE
 									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 14
 										THEN 14
@@ -71,7 +71,7 @@ SELECT Item.intItemId
 						-- gtin  =  GTINs may be 8, 12, 13 or 14 digits long. Check digit is included
 
 						-- UPC-A
-						WHEN (LEN(UOM.dblUPCwthOrwthOutCheckDigit) = 6) OR (UOM.dblUPCwthOrwthOutCheckDigit > 99999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 99999999999)
+						WHEN (LEN(UOM.dblUPCwthOrwthOutCheckDigit) = 6) OR (UOM.dblUPCwthOrwthOutCheckDigit > 99999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 999999999999)
 							THEN CASE 
 									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 12
 										THEN RIGHT(('000000000000' + CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(12))), 12)
@@ -80,7 +80,7 @@ SELECT Item.intItemId
 							END
 																
 						-- EAN13
-						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999999999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 999999999999
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 999999999999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 9999999999999
 							THEN CASE 
 									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 13
 										THEN RIGHT(('0000000000000' + CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(13))), 13)
@@ -89,7 +89,7 @@ SELECT Item.intItemId
 							END
 
 						-- GTIN
-						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 999999999999
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 9999999999999
 							THEN CASE
 									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 14
 										THEN RIGHT(('00000000000000' + CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(14))), 14)
@@ -118,15 +118,15 @@ SELECT Item.intItemId
 						-- UPC-A
 						WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) = 6 
 							THEN 'upcA'
-						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 99999999999
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 999999999999
 							THEN 'upcA'
 																
 						-- EAN13
-						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 99999999999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 999999999999
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 999999999999 AND UOM.dblUPCwthOrwthOutCheckDigit <= 9999999999999
 							THEN 'ean13'
 
-						-- GTIN
-						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 999999999999
+						-- GTIN  
+						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 9999999999999
 							THEN 'gtin'
 					END
 			ELSE ''
