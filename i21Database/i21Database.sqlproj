@@ -7267,6 +7267,7 @@
     <Build Include="dbo\Views\vyuSTInventoryCountHeader.sql" />
     <Build Include="dbo\Tables\tblQMProductImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutureTradingMonths.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
