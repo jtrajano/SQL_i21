@@ -584,7 +584,7 @@ CREATE TABLE #ARItemsForStorageCosting
 
 
 
-IF @post = 1
+--IF @post = 1
 	EXEC [dbo].[uspARPostItemResevation]
 	
 
