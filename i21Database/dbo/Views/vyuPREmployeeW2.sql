@@ -10,7 +10,7 @@ SELECT
 	,[COM].strCompanyName		/* box c */
 	,strCompanyAddress =		/* box c_1 */
 						CASE WHEN ISNULL (dbo.fnConvertToFullAddress ([COM].strAddress, [COM].strCity, [COM].strState, [COM].strZip), '') <> '' 
-						THEN dbo.fnConvertToFullAddress ([COM].strAddress, [COM].strCity, [COM].strState, [COM].strZip) ELSE NULL END
+						THEN dbo.fnConvertToFullAddress ([COM].strAddress, [COM].strCity, [COM].strState, [COM].strZip) ELSE NULL END COLLATE Latin1_General_CI_AS 
 	,[W2].strControlNumber		/* box d */
 	,strFirstNameInitial =		/* box e */
 						[EMP].strFirstName + ' ' + [EMP].strMiddleName 
@@ -18,7 +18,7 @@ SELECT
 	,[EMP].strNameSuffix		/* box e_2 */
 	,strEmployeeAddress =		/* box f */
 						CASE WHEN ISNULL (dbo.fnConvertToFullAddress ([EML].strAddress, [EML].strCity, [EML].strState, [EML].strZipCode), '') <> '' 
-						THEN dbo.fnConvertToFullAddress ([EML].strAddress, [EML].strCity, [EML].strState, [EML].strZipCode) ELSE NULL END
+						THEN dbo.fnConvertToFullAddress ([EML].strAddress, [EML].strCity, [EML].strState, [EML].strZipCode) ELSE NULL END COLLATE Latin1_General_CI_AS 
 	,[W2].dblAdjustedGross		/* box 1 */
 	,[W2].dblFIT				/* box 2 */
 	,[W2].dblTaxableSS			/* box 3 */

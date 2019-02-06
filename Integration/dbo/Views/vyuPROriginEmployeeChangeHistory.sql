@@ -9,10 +9,10 @@ BEGIN
 	CREATE VIEW [dbo].[vyuPROriginEmployeeChangeHistory]
 	AS
 	SELECT
-		strEmployeeNo		= CAST(premh_emp AS NVARCHAR(200))
-		,strLastName		= CAST(premp_last_name AS NVARCHAR(200))
-		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200))
-		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200))
+		strEmployeeNo		= CAST(premh_emp AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strLastName		= CAST(premp_last_name AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dtmDate			= CAST(CASE WHEN (ISNULL(premh_period_date, 0) = 0) THEN NULL
 								ELSE CAST((premh_period_date / 10000) AS VARCHAR) + ''-'' + 
 									CAST((premh_period_date % 10000) / 100 AS VARCHAR) + ''-'' + 
@@ -29,10 +29,10 @@ BEGIN
 										CAST((premh_time % 100) AS VARCHAR)
 									END 
 								AS DATETIME)
-		,strFieldName		= CAST(premh_field_id AS NVARCHAR(200))
-		,strOldData			= RTRIM(LTRIM(premh_old_data))
-		,strNewData			= RTRIM(LTRIM(premh_new_data))
-		,strUserId			= CAST(premh_user_id AS NVARCHAR(200))
+		,strFieldName		= CAST(premh_field_id AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strOldData			= RTRIM(LTRIM(premh_old_data)) COLLATE Latin1_General_CI_AS 
+		,strNewData			= RTRIM(LTRIM(premh_new_data)) COLLATE Latin1_General_CI_AS 
+		,strUserId			= CAST(premh_user_id AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dtmUserRevision	= CAST(CASE WHEN (ISNULL(premh_user_rev_dt, 0) = 0) THEN NULL
 								ELSE CAST((premh_user_rev_dt / 10000) AS VARCHAR) + ''-'' + 
 									CAST((premh_user_rev_dt % 10000) / 100 AS VARCHAR) + ''-'' + 
