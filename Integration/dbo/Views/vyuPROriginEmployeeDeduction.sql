@@ -11,13 +11,13 @@ BEGIN
 	SELECT
 		intYear				= CAST(premd_year AS INT)
 		,intQuarter			= CAST(premd_qtrno AS INT)
-		,strEmployeeNo		= CAST(premd_emp AS NVARCHAR(200))
-		,strLastName		= CAST(premp_last_name AS NVARCHAR(200))
-		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200))
-		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200))
-		,strDeductionCode	= CAST(premd_code AS NVARCHAR(200))
-		,strType			= CAST(premd_type AS NVARCHAR(200))
-		,strCheckLiteral	= CAST(premd_literal AS NVARCHAR(200))
+		,strEmployeeNo		= CAST(premd_emp AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strLastName		= CAST(premp_last_name AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strDeductionCode	= CAST(premd_code AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strType			= CAST(premd_type AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strCheckLiteral	= CAST(premd_literal AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dtmLastCheckDate	= CAST(CASE WHEN (ISNULL(premd_last_chk_dt, 0) = 0) THEN NULL
 								ELSE CAST((premd_last_chk_dt / 10000) AS VARCHAR) + ''-'' + 
 									CAST((premd_last_chk_dt % 10000) / 100 AS VARCHAR) + ''-'' + 
@@ -26,7 +26,7 @@ BEGIN
 								AS DATETIME)
 		,dblAmountYTD		= CAST(premd_ytd_amt AS NUMERIC(18, 6))
 		,dblTaxableToDate	= CAST(premd_taxable_earn_to_date AS NUMERIC(18, 6))
-		,strUserId			= CAST(premd_user_id AS NVARCHAR(200))
+		,strUserId			= CAST(premd_user_id AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dtmUserRevision	= CAST(CASE WHEN (ISNULL(premd_user_rev_dt, 0) = 0) THEN NULL
 								ELSE CAST((premd_user_rev_dt / 10000) AS VARCHAR) + ''-'' + 
 									CAST((premd_user_rev_dt % 10000) / 100 AS VARCHAR) + ''-'' + 
