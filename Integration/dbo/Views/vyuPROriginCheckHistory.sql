@@ -9,13 +9,13 @@ BEGIN
 	CREATE VIEW [dbo].[vyuPROriginCheckHistory]
 	AS
 	SELECT
-		strCode				= CAST(prhsm_code AS NVARCHAR(200))
-		,strCheckNumber		= CAST(prhsm_no AS NVARCHAR(200))
-		,strCheckType		= CAST(CASE prhsm_chk_type WHEN ''I'' THEN ''Individual'' ELSE ''Regular'' END AS NVARCHAR(200))
-		,strEmployeeNo		= CAST(prhsm_emp AS NVARCHAR(200))
-		,strLastName		= CAST(premp_last_name AS NVARCHAR(200))
-		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200))
-		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200))
+		strCode				= CAST(prhsm_code AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strCheckNumber		= CAST(prhsm_no AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strCheckType		= CAST(CASE prhsm_chk_type WHEN ''I'' THEN ''Individual'' ELSE ''Regular'' END AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strEmployeeNo		= CAST(prhsm_emp AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strLastName		= CAST(premp_last_name AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strFirstName		= CAST(premp_first_name AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strMiddleName		= CAST(premp_initial AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dtmCheckDate		= CAST(CASE WHEN (ISNULL(prhsm_chk_date, 0) = 0) THEN NULL
 								ELSE CAST((prhsm_chk_date / 10000) AS VARCHAR) + ''-'' + 
 									CAST((prhsm_chk_date % 10000) / 100 AS VARCHAR) + ''-'' + 
@@ -29,8 +29,8 @@ BEGIN
 									CAST((prhsm_period_date % 100) AS VARCHAR)
 								END 
 								AS DATETIME)
-		,strBankCode		= CAST(prhsm_dir_dep_bank AS NVARCHAR(200))
-		,strAccountNo		= CAST(prhsm_dir_dep_acct AS NVARCHAR(200))
+		,strBankCode		= CAST(prhsm_dir_dep_bank AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
+		,strAccountNo		= CAST(prhsm_dir_dep_acct AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dblGrossPay		= CAST(prhsm_gross AS NUMERIC(18, 6))
 		,dblDeductions		= CAST(prhsm_deductions AS NUMERIC(18, 6))
 		,dblTaxes			= CAST(prhsm_taxes AS NUMERIC(18, 6))
@@ -44,9 +44,9 @@ BEGIN
 		,dblCityTaxable		= CAST(prhsm_city_taxable AS NUMERIC(18, 6))
 		,dblCountyTaxable	= CAST(prhsm_cnty_taxable AS NUMERIC(18, 6))
 		,dblSchoolTaxable	= CAST(prhsm_schdist_taxable AS NUMERIC(18, 6))
-		,strDepartment		= CAST(prhsm_dept AS NVARCHAR(200))
+		,strDepartment		= CAST(prhsm_dept AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,ysnPrenoteSent		= CAST(CASE prhsm_prenote_yn WHEN ''Y'' THEN 1 ELSE 0 END AS BIT)
-		,strUserId			= CAST(prhsm_user_id AS NVARCHAR(200))
+		,strUserId			= CAST(prhsm_user_id AS NVARCHAR(200)) COLLATE Latin1_General_CI_AS 
 		,dtmUserRevision	= CAST(CASE WHEN (ISNULL(prhsm_user_rev_dt, 0) = 0) THEN NULL
 								ELSE CAST((prhsm_user_rev_dt / 10000) AS VARCHAR) + ''-'' + 
 									CAST((prhsm_user_rev_dt % 10000) / 100 AS VARCHAR) + ''-'' + 

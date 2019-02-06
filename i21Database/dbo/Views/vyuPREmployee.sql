@@ -21,13 +21,13 @@ SELECT
 								WHERE EMP.intEntityId = ED.intEntityEmployeeId
 								ORDER BY ED.intEmployeeDepartmentId ASC
 								FOR XML PATH ('')
-							), 2, 1000)
+							), 2, 1000) COLLATE Latin1_General_CI_AS 
 	,strSupervisor = SUBSTRING((SELECT ', '+ E.strName AS [text()] FROM tblPREmployeeSupervisor ES
 								INNER JOIN tblEMEntity E ON E.intEntityId = ES.intSupervisorId
 								WHERE EMP.intEntityId = ES.intEntityEmployeeId
 								ORDER BY ES.intEmployeeSupervisorId ASC
 								FOR XML PATH ('')
-							), 2, 1000)
+							), 2, 1000) COLLATE Latin1_General_CI_AS 
 	,EMP.strType
 	,EMP.intRank
 	,EMP.dtmReviewDate
@@ -45,7 +45,7 @@ SELECT
 	,EMP.strTerminatedReason
 	,EMP.ysn1099Employee
 	,strTimeEntryPassword = CASE WHEN ISNULL(EMP.strTimeEntryPassword, '') = '' THEN '' 
-							ELSE '****************' END
+							ELSE '****************' END COLLATE Latin1_General_CI_AS 
 	,EMP.strEmergencyContact
 	,EMP.strEmergencyRelation
 	,EMP.strEmergencyPhone
