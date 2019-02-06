@@ -73,8 +73,8 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
-				, strHeaderFederalTaxID
+				, strHeaderStateTaxId
+				, strHeaderFederalTaxId
 				, strOriginState
 				, strOriginCity
 				, strOriginCounty
@@ -127,7 +127,7 @@ BEGIN TRY
 					, tblTFCompanyPreference.strZipCode
 					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
-					, strHeaderFederalTaxID = tblSMCompanySetup.strEin
+					, strHeaderFederalTaxId = tblSMCompanySetup.strEin
 					, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strState ELSE OriginBulkLoc.strStateProvince END AS strOriginState
 					, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCity ELSE OriginBulkLoc.strCity END AS strOriginCity
 					, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCountry ELSE OriginBulkLoc.strCountry END AS strOriginCounty
@@ -239,8 +239,8 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
-				, strHeaderFederalTaxID
+				, strHeaderStateTaxId
+				, strHeaderFederalTaxId
 				, strOriginState
 				, strOriginCity
 				, strOriginCounty
@@ -293,7 +293,7 @@ BEGIN TRY
 					, tblTFCompanyPreference.strZipCode
 					, tblTFCompanyPreference.strContactPhone
 					, tblSMCompanySetup.strStateTaxID
-					, strHeaderFederalTaxID = tblSMCompanySetup.strEin
+					, strHeaderFederalTaxId = tblSMCompanySetup.strEin
 					, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strState ELSE OriginBulkLoc.strStateProvince END AS strOriginState
 					, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCity ELSE OriginBulkLoc.strCity END AS strOriginCity
 					, CASE WHEN tblTRLoadReceipt.strOrigin = 'Terminal' THEN SupplyPointLoc.strCountry ELSE OriginBulkLoc.strCountry END AS strOriginCounty
@@ -553,8 +553,8 @@ BEGIN TRY
 				, strHeaderState
 				, strHeaderZip
 				, strHeaderPhone
-				, strHeaderStateTaxID
-				, REPLACE(strHeaderFederalTaxID, '-', '')
+				, strHeaderStateTaxId
+				, REPLACE(strHeaderFederalTaxId, '-', '')
 				, strOriginState
 				, strOriginCity
 				, strOriginCounty
