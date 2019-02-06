@@ -1,4 +1,4 @@
-﻿CREATE View vyuLGLoadDetailLotsView
+﻿CREATE VIEW vyuLGLoadDetailLotsView
 AS
 SELECT L.strLoadNumber
 	  ,L.intLoadId
@@ -24,6 +24,6 @@ JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LOT.intItemUOMId, LDL.intItemUO
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN tblICItemUOM WU ON WU.intItemUOMId = ISNULL(LOT.intWeightUOMId, LDL.intWeightUOMId)
 JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WU.intUnitMeasureId
-LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = LOT.intParentLotId
+LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = LOT.intLotId
 LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
