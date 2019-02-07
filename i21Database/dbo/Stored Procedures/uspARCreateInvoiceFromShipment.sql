@@ -109,7 +109,7 @@ LEFT OUTER JOIN
 		ON SO.strSalesOrderNumber = @strReferenceNumber
 		AND ICIS.strReferenceNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
-	AND ((ISNULL(ICISITEM.[ysnAllowInvoice], 0) = 1 AND ICIS.[intSourceType] = 1)
+	AND ((ISNULL(ICISITEM.[ysnAllowInvoice], 1) = 1 AND ICIS.[intSourceType] = 1)
 		OR
 		ICIS.[intSourceType] <> 1
 		)
@@ -611,7 +611,7 @@ WHERE
 	AND ICISI.intOwnershipType = 1
 	AND ICISI.intOrderId IS NULL
 	AND ICISI.intLineNo IS NULL
-	AND ((ISNULL(ICISI.[ysnAllowInvoice], 0) = 1 AND ICIS.[intSourceType] = 1)
+	AND ((ISNULL(ICISI.[ysnAllowInvoice], 1) = 1 AND ICIS.[intSourceType] = 1)
 		OR
 		ICIS.[intSourceType] <> 1
 		)
