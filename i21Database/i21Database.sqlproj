@@ -7268,6 +7268,7 @@
     <Build Include="dbo\Tables\tblQMProductImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFutureTradingMonths.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceDetailReport2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
