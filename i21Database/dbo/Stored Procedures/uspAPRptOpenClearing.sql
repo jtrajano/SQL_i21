@@ -120,7 +120,7 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmReceiptDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SET @innerQuery = 'SELECT DISTINCT
+SET @innerQuery2 = 'SELECT DISTINCT
 						intInventoryReceiptId
 						,strBillId
 						,intBillId
@@ -151,7 +151,7 @@ SET @innerQuery = 'SELECT DISTINCT
 						,strLocationName
 				  FROM dbo.[vyuAPClearablesOnly]'
 
-SET @innerQuery2 = 'SELECT DISTINCT
+SET @innerQuery = 'SELECT DISTINCT
 						intInventoryReceiptId
 						,strBillId
 						,intBillId
@@ -186,11 +186,11 @@ IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery2 + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = @innerQuery2 + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 
@@ -200,13 +200,15 @@ IF @dtmDate IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery2 + CASE WHEN @dateFrom IS NOT NULL THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + '''' 
+		SET @innerQuery = @innerQuery + CASE WHEN @dateFrom IS NOT NULL THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + '''' 
 		ELSE ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + '''' END 
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = @innerQuery2 + CASE WHEN @dateFrom IS NOT NULL THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
-		ELSE ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + '''' END
+		SET @innerQuery = @innerQuery + CASE WHEN @dateFrom IS NOT NULL 
+												THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+										ELSE ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + '''' 
+										END
 	END  
 	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
 	SET @dateTo = @dtmDateTo;
