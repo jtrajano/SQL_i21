@@ -7307,6 +7307,7 @@
     <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
     <Build Include="dbo\Tables\tblQMProductImport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMImportProduct.sql" />
+    <Build Include="dbo\Tables\tblSMExportLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
