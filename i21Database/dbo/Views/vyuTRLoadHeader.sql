@@ -72,7 +72,8 @@ SELECT TL.intLoadHeaderId
 	, Receipts.strFuelSupplier
 	, intVendorLocationId = Receipts.intEntityLocationId
 	, Receipts.strSupplyPoint
-	, strBOL = Receipts.strBillOfLading
+	--, strBOL = Receipts.strBillOfLading
+	, strBOL = DD.strBillOfLading
 	, intReceiptCompanyLocationId = Receipts.intReceiptCompanyLocationId
 	, Receipts.strReceiptCompanyLocation
 	, Item.intItemId
