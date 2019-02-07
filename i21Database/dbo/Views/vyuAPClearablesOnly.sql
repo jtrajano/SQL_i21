@@ -116,7 +116,7 @@ SELECT DISTINCT
 	, dblDiscount = 0 
 	, dblInterest = 0 
 	, Vendor.strVendorId 
-	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor2.strName,'') as strVendorIdName 
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
@@ -138,8 +138,10 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnAccrue = 1 AND ReceiptCharge.ysnPrice = 0
 										AND ReceiptCharge.intEntityVendorId = Receipt.intEntityVendorId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
-LEFT JOIN vyuAPVendor Vendor
-			ON Vendor.intEntityId = Receipt.intEntityVendorId
+LEFT JOIN tblAPVendor Vendor
+   ON Vendor.intEntityId = Receipt.intEntityVendorId
+LEFT JOIN tblEMEntity Vendor2 ON Vendor2.intEntityId = Receipt.intEntityVendorId
+
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
@@ -254,9 +256,9 @@ LEFT JOIN vyuAPVendor Vendor
 		WHERE ISNULL(intInventoryReceiptChargeId, '') <> ''
 	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId = Receipt.intEntityVendorId
 WHERE Receipt.ysnPosted = 1 
-	  --AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
-	  --																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
-	  --AND (ReceiptCharge.dblQuantity - ABS(ISNULL(ReceiptCharge.dblQuantityPriced, 0))) != 0
+	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
+	  																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
+	  AND (ReceiptCharge.dblQuantity - ABS(ISNULL(ReceiptCharge.dblQuantityPriced, 0))) != 0
 	  AND ReceiptCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 UNION ALL  
 
@@ -340,11 +342,12 @@ INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocat
 		WHERE ISNULL(intInventoryReceiptChargeId, '') <> '' 
 	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId NOT IN (Receipt.intEntityVendorId)
 WHERE Receipt.ysnPosted = 1 AND ReceiptCharge.ysnAccrue = 1
-	  --AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
-	  --																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
-      --AND (ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) != 0
+	  AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
+	  																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
+      AND (ReceiptCharge.dblQuantity - ISNULL(ReceiptCharge.dblQuantityBilled, 0)) != 0
 	  AND ReceiptCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 UNION ALL  
+
 --QUERY FOR 3RD PARTY ACRUE VENDOR WITH CHARGES INVENTORY SHIPMENT
 SELECT DISTINCT
 	  dtmReceiptDate = Shipment.dtmShipDate
@@ -420,8 +423,8 @@ INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Shipment.intShip
 		WHERE ISNULL(intInventoryShipmentChargeId, '') <> '' 
 	) Bill ON Bill.intInventoryShipmentChargeId = ShipmentCharge.intInventoryShipmentChargeId AND Bill.intEntityVendorId NOT IN (Shipment.intEntityCustomerId)
 WHERE Shipment.ysnPosted = 1 AND ShipmentCharge.ysnAccrue = 1
-	  --AND ShipmentCharge.intInventoryShipmentChargeId NOT IN (SELECT DISTINCT intInventoryShipmentChargeId FROM tblAPBillDetail A
-	  -- 																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryShipmentChargeId IS NOT NULL AND B.ysnPosted = 1)
+	  AND ShipmentCharge.intInventoryShipmentChargeId NOT IN (SELECT DISTINCT intInventoryShipmentChargeId FROM tblAPBillDetail A
+	   																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryShipmentChargeId IS NOT NULL AND B.ysnPosted = 1)
 	  AND (ShipmentCharge.dblQuantity - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) != 0
 	  AND ShipmentCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 GO
