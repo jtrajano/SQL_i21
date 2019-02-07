@@ -613,7 +613,9 @@ BEGIN
 			,dblPriceBasis NUMERIC(18,6)
 			,dblCustomerPrice NUMERIC(18,6)
 			,strPricing NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,strInvoiceType NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+			,strInvoiceType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			,intIndex INT null default(0)
+			)
 					
 		--Customer Special Pricing
 		INSERT INTO @SpecialPricing (
@@ -665,7 +667,93 @@ BEGIN
 				ON SP.strCustomerGroup = CG.strGroupName
 		WHERE
 			CG.intCustomerGroupId IS NULL
-			
+
+		if @InvoiceType = 'POS'
+		begin
+		
+			delete from @SpecialPricing
+
+			INSERT INTO @SpecialPricing (
+				intSpecialPriceId
+				,intEntityId
+				,intVendorId
+				,intItemId
+				,intCategoryId
+				,strClass
+				,strPriceBasis
+				,strCustomerGroup
+				,strCostToUse
+				,dblDeviation
+				,strLineNote
+				,intRackVendorId
+				,intRackItemId
+				,intRackItemLocationId
+				,intVendorLocationId
+				,intCustomerLocationId
+				,dblPriceBasis 
+				,dblCustomerPrice
+				,strPricing
+				,strInvoiceType
+				,intIndex)
+			select * from (SELECT
+				SP.intSpecialPriceId
+				,SP.intEntityId
+				,SP.intVendorId
+				,SP.intItemId
+				,SP.intCategoryId
+				,SP.strClass
+				,SP.strPriceBasis
+				,SP.strCustomerGroup
+				,SP.strCostToUse
+				,SP.dblDeviation
+				,SP.strLineNote
+				,SP.intRackVendorId
+				,SP.intRackItemId
+				,SP.intRackItemLocationId 
+				,SP.intVendorLocationId
+				,SP.intCustomerLocationId
+				,SP.dblPriceBasis 
+				,SP.dblCustomerPrice
+				,SP.strPricing
+				,SP.strInvoiceType
+				,intIndex = 0
+			FROM
+				@CustomerSpecialPricing SP
+			LEFT OUTER JOIN
+				@CustomerGroup CG
+					ON SP.strCustomerGroup = CG.strGroupName
+			UNION
+
+			SELECT
+				SP.intSpecialPriceId
+				,SP.intEntityId
+				,SP.intVendorId
+				,SP.intItemId
+				,SP.intCategoryId
+				,SP.strClass
+				,SP.strPriceBasis
+				,SP.strCustomerGroup
+				,SP.strCostToUse
+				,SP.dblDeviation
+				,SP.strLineNote
+				,SP.intRackVendorId
+				,SP.intRackItemId
+				,SP.intRackItemLocationId 
+				,SP.intVendorLocationId
+				,SP.intCustomerLocationId
+				,SP.dblPriceBasis 
+				,SP.dblCustomerPrice
+				,SP.strPricing
+				,'POS'
+				,intIndex = 99
+			FROM
+				@CustomerSpecialPricing SP
+			LEFT OUTER JOIN
+				@CustomerGroup CG
+					ON SP.strCustomerGroup = CG.strGroupName
+			WHERE SP.strInvoiceType = 'Standard' )  a order by intIndex
+		end
+
 
 		--Customer - Rack Vendor No + Rack Item No
 		SET @SpecialPriceId = (SELECT TOP 1 SP.intSpecialPriceId FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON (SP.intRackVendorId = TR.intEntityVendorId OR SP.intVendorId = TR.intEntityVendorId) AND (SP.intVendorLocationId = TR.intEntityLocationId OR (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))  WHERE (SP.intRackItemId = @ItemId OR (SP.intItemId = @ItemId OR (SP.intCategoryId = @ItemCategoryId AND ISNULL(SP.intItemId,0) = 0))) AND (SP.intRackVendorId = @ItemVendorId OR SP.intVendorId = @ItemVendorId) AND ISNULL(dblCustomerPrice,0) <> 0)
