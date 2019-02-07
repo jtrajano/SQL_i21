@@ -7277,6 +7277,9 @@
     <Build Include="dbo\Views\vyuCFSearchAccount.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountCard.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_MigrateAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateScheduledAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_CreateAuditLogMigrationPlan.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -533,6 +533,7 @@ print 'BEGIN POST DEPLOYMENT'
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
 :r .\SM\1830_ReIndexTables.sql
 :r .\SM\1830_CreateReIndexMaintenancePlan.sql
+:r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
 
 
