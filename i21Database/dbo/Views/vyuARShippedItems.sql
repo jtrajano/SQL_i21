@@ -509,7 +509,7 @@ FROM (
 			OR
 			ISNULL(LGICSHIPMENT.intShipmentId,0) = 0
 			)
-		AND ((ISNULL(ICISI.ysnAllowInvoice, 0) = 1 AND ICIS.intSourceType = 1)
+		AND ((ISNULL(ICISI.ysnAllowInvoice, 1) = 1 AND ICIS.intSourceType = 1)
 			OR
 			ICIS.intSourceType <> 1
 			)
@@ -630,7 +630,7 @@ FROM (
 		AND ICIS.strShipmentNumber = ID.strDocumentNumber
 	WHERE ISNULL(ICISC.ysnPrice, 0) = 1 
 	  AND ISNULL(ARID.intInventoryShipmentChargeId, 0) = 0
-	  AND ((ISNULL(ICISC.ysnAllowInvoice, 0) = 1 AND ICIS.intSourceType = 1)
+	  AND ((ISNULL(ICISC.ysnAllowInvoice, 1) = 1 AND ICIS.intSourceType = 1)
 			OR
 			ICIS.intSourceType <> 1
 			)
