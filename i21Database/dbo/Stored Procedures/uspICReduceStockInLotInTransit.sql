@@ -75,7 +75,7 @@ BEGIN
 						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
 						AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId) 
 				HAVING 
-					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)						
+					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 			) cb 
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
@@ -136,6 +136,7 @@ USING (
 	AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  -- Round out the remaining stock. If it becomes zero, then stock bucket is considered fully consumed already. 
 	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
 	AND (cb.strTransactionId = Source_Query.strActualCostId OR Source_Query.strActualCostId IS NULL) 
+	AND (cb.intInventoryLotId = @CostBucketId OR @CostBucketId IS NULL) 
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 

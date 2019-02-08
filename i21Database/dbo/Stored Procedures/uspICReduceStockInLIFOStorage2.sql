@@ -60,13 +60,13 @@ BEGIN
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
 			OUTER APPLY (
-				SELECT	intInventoryLIFOStorageId = MIN(cb.intInventoryLIFOStorageId) 
+				SELECT	intInventoryLIFOStorageId = MAX(cb.intInventoryLIFOStorageId) 
 				FROM	tblICInventoryLIFOStorage cb
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intItemUOMId = @intItemUOMId
 						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-						AND dbo.fnDateGreaterThanEquals(cb.dtmDate, @dtmDate) = 1
+						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
 				HAVING 
 					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 			) cb 
@@ -118,6 +118,7 @@ USING (
 	AND cb.intItemUOMId = Source_Query.intItemUOMId
 	AND (cb.dblStockIn - cb.dblStockOut) > 0 
 	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	AND (cb.intInventoryLIFOStorageId = @CostBucketId OR @CostBucketId IS NULL) 
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 
