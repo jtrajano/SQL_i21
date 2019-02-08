@@ -78,16 +78,11 @@ BEGIN TRY
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
-	IF EXISTS (
-			SELECT TOP 1 1
-			FROM tblAPBillDetail BD
-			JOIN tblLGLoadCost LC ON LC.intBillId = BD.intBillId
-			WHERE LC.intLoadId = @intLoadId
-			)
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblLGLoadCost WHERE intLoadId = @intLoadId AND intBillId IS NULL)
 	BEGIN
 		DECLARE @ErrorMessage NVARCHAR(250)
 
-		SET @ErrorMessage = 'Voucher was already created for other charges in ' + @strLoadNumber;
+		SET @ErrorMessage = 'Vouchers were already created for all other charges in ' + @strLoadNumber;
 
 		RAISERROR (@ErrorMessage,16,1);
 	END
@@ -252,7 +247,9 @@ BEGIN TRY
 			SET intBillId = @intBillId
 			WHERE intLoadCostId IN (
 					SELECT intLoadCostId
-					FROM @voucherDetailData)
+					FROM @voucherDetailData
+					WHERE intVendorEntityId = @intVendorEntityId)
+				
 
 			UPDATE tblAPBillDetail 
 			SET intLoadId = @intLoadId 
