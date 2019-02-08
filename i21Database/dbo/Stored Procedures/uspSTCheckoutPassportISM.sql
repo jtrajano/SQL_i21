@@ -173,8 +173,16 @@ BEGIN
 			CAST(ISNULL(RefundCount, 0) AS INT),
 			CAST(ActualSalesPrice AS DECIMAL(18,6)),
 			POSCode,
-			ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) AS dblAveragePrice,
-			ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) + CAST(DiscountAmount AS DECIMAL(18, 6)) + CAST(PromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+			CASE 
+				WHEN ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) = 0
+					THEN 0
+				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+			END AS dblAveragePrice,
+			CASE 
+				WHEN ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) = 0
+					THEN 0
+				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) + CAST(DiscountAmount AS DECIMAL(18, 6)) + CAST(PromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+			END AS dblAveragePriceWthDiscounts
 		FROM #tempCheckoutInsert
 		-- ==================================================================================================================
 		-- End: Insert to temporary table
@@ -208,7 +216,12 @@ BEGIN
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
 			  , intQtySold			= (Chk.SalesQuantity - Chk.RefundCount)
-			  , dblCurrentPrice		= ISNULL( NULLIF( (Chk.SalesAmount + Chk.RefundAmount) , 0), 0)  /  ( Chk.SalesQuantity - Chk.RefundCount )
+			  --, dblCurrentPrice		= ISNULL( NULLIF( (Chk.SalesAmount + Chk.RefundAmount) , 0), 0)  /  ( Chk.SalesQuantity - Chk.RefundCount )
+			  , dblCurrentPrice		= CASE 
+										WHEN (Chk.SalesQuantity - Chk.RefundCount) = 0
+											THEN 0
+										ELSE (Chk.SalesAmount + Chk.RefundAmount)  /  (Chk.SalesQuantity - Chk.RefundCount)
+									END
 			  , dblDiscountAmount	= (Chk.DiscountAmount + Chk.PromotionAmount)
 			  , dblGrossSales		= (Chk.SalesAmount + Chk.RefundAmount)
 			  , dblTotalSales		= (Chk.SalesAmount + Chk.RefundAmount)
