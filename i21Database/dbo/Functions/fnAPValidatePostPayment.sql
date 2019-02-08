@@ -308,6 +308,39 @@ BEGIN
 			(B.intInvoiceId > 0 AND B.dblPayment <> 0 AND D.ysnPaid = 0 AND CAST(D.dblAmountDue AS DECIMAL(18,2)) < (CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2))))
 		)
 
+		--handle over paying on batch posting
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Payment on ' + (CASE WHEN B.intBillId > 0 THEN C.strBillId  WHEN B.intInvoiceId > 0 THEN D.strInvoiceNumber END) + ' will be over on the transaction''s amount due',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			LEFT JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+			LEFT JOIN tblARInvoice D
+				ON B.intInvoiceId = D.intInvoiceId
+			OUTER APPLY 
+			(
+				SELECT
+					SUM(payDetail.dblPayment) AS dblBillPayment
+				FROM tblAPPaymentDetail payDetail
+				WHERE payDetail.intPaymentId IN (SELECT intId FROM @paymentIds)
+				AND payDetail.intBillId = C.intBillId
+			) payment
+			OUTER APPLY 
+			(
+				SELECT
+					SUM(payDetail.dblPayment) AS dblBillPayment
+				FROM tblAPPaymentDetail payDetail
+				WHERE payDetail.intPaymentId IN (SELECT intId FROM @paymentIds)
+				AND payDetail.intInvoiceId = D.intInvoiceId
+			) arPayment
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND (payment.dblBillPayment > C.dblAmountDue OR arPayment.dblBillPayment > D.dblAmountDue)
+
 
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		-- SELECT 
