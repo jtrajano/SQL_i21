@@ -7309,6 +7309,8 @@
     <Build Include="dbo\Stored Procedures\uspQMImportProduct.sql" />
     <Build Include="dbo\Tables\tblSMExportLog.sql" />
 	<Build Include="dbo\Tables\tblCCImportStatus.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailQuantityTotal.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailNoOfLotsTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
