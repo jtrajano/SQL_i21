@@ -229,7 +229,7 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep
 		@step_name=@stepName, 
 		@step_id=@maxStepId,--1, 
 		@cmdexec_success_code=0, 
-		@on_success_action=3,--go to next step 
+		--@on_success_action=3,--go to next step 
 		@on_success_step_id=0, 
 		@on_fail_action=2, 
 		@on_fail_step_id=0, 
@@ -280,9 +280,12 @@ IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 ---------------------------------------------------------
 IF @maxStepId > 1
 BEGIN
-	UPDATE msdb.dbo.sysjobsteps set on_success_action = 1
-	WHERE job_id = @jobId and step_id = @maxStepId
+	UPDATE msdb.dbo.sysjobsteps set on_success_action = 3
+	WHERE job_id = @jobId and step_id <> @maxStepId
+	--UPDATE msdb.dbo.sysjobsteps set on_success_action = 1
+	--WHERE job_id = @jobId and step_id = @maxStepId
 END
+
 --EXEC @ReturnCode = msdb.dbo.sp_add_jobserver 
 --					@job_id = @jobId, 
 --					@server_name = @serverName

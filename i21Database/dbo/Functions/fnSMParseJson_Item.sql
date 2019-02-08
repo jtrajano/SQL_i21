@@ -89,11 +89,11 @@ AS
 				-- Get latest position of readed object
 				select @m=max(pend) from @hierarchy2
 				-- Skip after
-				set @pos = dbo.json_Skip(@json,@m)
+				set @pos = dbo.fnSMJson_Skip(@json,@m)
 				-- If we do not have a [,] then exit loop
 				if (substring(@json,@pos,1)!=',') break
 				-- Move after ,
-				set @pos = dbo.json_Skip(@json,@pos+1)
+				set @pos = dbo.fnSMJson_Skip(@json,@pos+1)
 				end
 
 			insert into @hierarchy(id,parent,name,kind,ppos,pend,value) select id,parent,name,kind,ppos,pend,value from @hierarchy2

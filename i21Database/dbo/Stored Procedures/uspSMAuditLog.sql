@@ -125,7 +125,7 @@ WITH Audit_CTE AS (
 	, min(case SourceTable.[name] when 'hidden' then value end) as [ysnHidden]
 	, min(case SourceTable.[name] when 'isField' then value end) as [ysnField]
 	from (
-		select * from json_Parse(REPLACE(@json, ':null', ':"null"')) where [name] NOT IN ('leaf', 'iconCls') AND ([kind] <> 'OBJECT')
+		select * from fnSMJson_Parse(REPLACE(@json, ':null', ':"null"')) where [name] NOT IN ('leaf', 'iconCls') AND ([kind] <> 'OBJECT')
 	) SourceTable 
 	group by SourceTable.parent
 )

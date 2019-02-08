@@ -153,7 +153,7 @@ BEGIN
 			MIN(CASE SourceTable.[name] WHEN 'changeDescription'	THEN [value] END)	AS [strAlias]
 		FROM (
 			SELECT * 
-			FROM json_Parse(REPLACE(REPLACE(@strJsonData, ':null', ':"null"'), ',"children":[]', ''))
+			FROM fnSMJson_Parse(REPLACE(REPLACE(@strJsonData, ':null', ':"null"'), ',"children":[]', ''))
 			WHERE [name] NOT IN ('leaf', 'iconCls') AND ([kind] <> 'OBJECT')
 		) SourceTable 
 		GROUP BY SourceTable.parent

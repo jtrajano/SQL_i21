@@ -68,7 +68,7 @@ MERGE INTO tblSMLog USING (
 			INNER JOIN tblSMScreen F ON E.strTransactionType = F.strNamespace
 		) A LEFT OUTER JOIN 
 		tblSMTransaction B ON A.intScreenId = B.intScreenId AND CAST(A.strRecordNo AS INT) = B.intRecordId  --AND B.intTransactionId = 3716
-	WHERE ISNULL(B.intRecordId, '') <> '' AND ISNULL(A.strRecordNo, '') <> '' AND ISNULL(ysnInit,'') = '' --AND ISNULL(A.strJsonData, '') = '' AND ISNULL(A.strActionType, '') <> 'Updated'
+	WHERE ISNULL(B.intRecordId, '') <> '' AND ISNULL(A.strRecordNo, '') <> '' AND (ISNULL(ysnInit,'') = '' OR ysnInit = 0) --AND ISNULL(A.strJsonData, '') = '' AND ISNULL(A.strActionType, '') <> 'Updated'
 
 ) AS OldLog (dtmDate, intEntityId, intTransactionId, strActionType, intAuditLogId, strRoute) ON 1 = 0
 WHEN NOT MATCHED THEN
@@ -76,6 +76,9 @@ INSERT (strType, dtmDate, intEntityId, intTransactionId, strRoute, intConcurrenc
 VALUES ('Audit', OldLog.dtmDate, OldLog.intEntityId, OldLog.intTransactionId, OldLog.strRoute, 1)
 OUTPUT inserted.intLogId,  OldLog.strActionType, OldLog.intAuditLogId
 INTO @tblSMAudit(intLogId, strAction, intOldAuditLogId); 
+
+--set true 
+UPDATE tblSMAuditLog set ysnInit = 1 WHERE intAuditLogId = intAuditLogId
 
 INSERT INTO tblSMAudit (intLogId, strAction, intOldAuditLogId, intConcurrencyId)
 SELECT intLogId, strAction, intOldAuditLogId, 1 FROM @tblSMAudit
