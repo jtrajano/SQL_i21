@@ -44,7 +44,14 @@ BEGIN
 		DECLARE @currentDatabaseName varchar(100)
 		DECLARE @jobId BINARY(16)
 		DECLARE @unProcessedCount INT
+		DECLARE @step_name NVARCHAR(100)
+		DECLARE @stepId INT
+		DECLARE @maxStepId INT
 		SET @currentDatabaseName = DB_NAME()
+		SET @step_name = N'Invoke Re-Index Stored Procedure in '+CONVERT(NVARCHAR(100),@currentDatabaseName)
+
+		--set processed true for this created and deleted action type
+		UPDATE tblSMAuditLog SET ysnProcessed = 1  WHERE ISNULL(strActionType,'') IN ('Created', 'Deleted') 
 
 		SET @unProcessedCount = (SELECT COUNT(intAuditLogId) FROM tblSMAuditLog WHERE ysnProcessed = 0)
 		SELECT @jobId = job_id FROM msdb.dbo.sysjobs where [name] = 'i21_AuditLog_Migration_Job'
@@ -53,20 +60,36 @@ BEGIN
 		IF (@unProcessedCount = 0)
 			BEGIN
 				IF(ISNULL(@jobId,'') <> '')
-					EXEC msdb.dbo.sp_delete_job @job_name = 'i21_AuditLog_Migration_Job'
+					BEGIN
+						SELECT @stepId = step_id FROM msdb.dbo.sysjobsteps WHERE step_name = @step_name AND job_id = @jobId
+						
+						exec msdb.dbo.sp_delete_jobstep @job_id = @jobId, @step_id = @stepId --delete job step
+
+						SET @maxStepId = (select max(step_id) from msdb.dbo.sysjobsteps where job_id = @jobId)
+
+						if(@maxStepId = @stepId) --delete job if it is the remaining step
+							begin
+								exec msdb.dbo.sp_delete_job @job_name = @jobId
+							end
+
+					 --finally, update the onsuccess of last step to 'quit the job success'
+					   update msdb.dbo.sysjobsteps set on_success_action = 1 WHERE job_id = @jobId and step_id = @maxStepId 
+							
+					END
+					
 			END
 		
 		ELSE
 			BEGIN
 				IF(ISNULL(@jobId,'') <> '')
 					BEGIN
-						EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 0--questionable
+						EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 0--disable job
 
 						EXEC [uspSMCreateAuditLogMigrationPlan] @currentDatabaseName
 						
+						EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 1--enable the job
 					END
-						--enable the job
-						EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 1
+						
 			END
 					
 	END
