@@ -546,8 +546,10 @@ BEGIN TRY
 					--				), 0)
 					--		)
 					SET @ForecastedConsumption = (
-							SELECT ISNULL(SUM(BD.dblQuantity), 0)
+							--SELECT ISNULL(SUM(BD.dblQuantity), 0)
+							SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, MIN(IUOM.intUnitMeasureId), @TargetUOMKey, ISNULL(SUM(BD.dblQuantity), 0))
 							FROM tblCTBlendDemand BD
+							JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = BD.intItemUOMId
 							WHERE BD.intItemId = @intItemId
 								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 								AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)
@@ -586,8 +588,10 @@ BEGIN TRY
 				--				), 0)
 				--		)
 				SET @ForecastedConsumption = (
-						SELECT ISNULL(SUM(BD.dblQuantity), 0)
+						--SELECT ISNULL(SUM(BD.dblQuantity), 0)
+						SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, MIN(IUOM.intUnitMeasureId), @TargetUOMKey, ISNULL(SUM(BD.dblQuantity), 0))
 						FROM tblCTBlendDemand BD
+						JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = BD.intItemUOMId
 						WHERE BD.intItemId = @intItemId
 							AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
 							AND RIGHT(CONVERT(VARCHAR(11), RTRIM(BD.dtmDemandDate), 106), 4) = RIGHT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 4)

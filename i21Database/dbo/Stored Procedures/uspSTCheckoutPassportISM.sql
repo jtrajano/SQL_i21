@@ -143,6 +143,7 @@ BEGIN
 			DiscountAmount DECIMAL(18, 6),
 			PromotionAmount DECIMAL(18, 6),
 			RefundAmount DECIMAL(18, 6),
+			RefundCount INT,
 			SalesAmount DECIMAL(18, 6),
 			ActualSalesPrice DECIMAL(18, 6),
 			POSCode NVARCHAR(15),
@@ -157,21 +158,31 @@ BEGIN
 			PromotionAmount,
 			SalesAmount,
 			RefundAmount,
+			RefundCount,
 			ActualSalesPrice,
 			POSCode,
 			dblAveragePrice,
 			dblAveragePriceWthDiscounts
 		)
 		SELECT 
-			SalesQuantity,
-			DiscountAmount,
-			PromotionAmount,
-			SalesAmount,
-			CAST(ISNULL(RefundAmount, 0) as decimal(18,6)),
-			ActualSalesPrice,
+			CAST(ISNULL(SalesQuantity ,0) AS INT),
+			CAST(DiscountAmount AS DECIMAL(18,6)),
+			CAST(PromotionAmount AS DECIMAL(18,6)),
+			CAST(SalesAmount AS DECIMAL(18,6)),
+			CAST(ISNULL(RefundAmount, 0) AS DECIMAL(18,6)),
+			CAST(ISNULL(RefundCount, 0) AS INT),
+			CAST(ActualSalesPrice AS DECIMAL(18,6)),
 			POSCode,
-			(ISNULL(NULLIF(CAST(SalesAmount as decimal(18,6)),0) / NULLIF(CAST(SalesQuantity as int),0),0)) AS dblAveragePrice,
-			(ISNULL(( NULLIF(CAST(SalesAmount as decimal(18,6)),0) + ( CAST(ISNULL(DiscountAmount, 0) as decimal(18,6)) + CAST(ISNULL(PromotionAmount, 0) as decimal(18,6)) + CAST(ISNULL(RefundAmount, 0) as decimal(18,6)) ) ) / NULLIF(CAST(SalesQuantity as int),0),0)) AS dblAveragePriceWthDiscounts
+			CASE 
+				WHEN ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) = 0
+					THEN 0
+				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+			END AS dblAveragePrice,
+			CASE 
+				WHEN ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) = 0
+					THEN 0
+				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) + CAST(DiscountAmount AS DECIMAL(18, 6)) + CAST(PromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+			END AS dblAveragePriceWthDiscounts
 		FROM #tempCheckoutInsert
 		-- ==================================================================================================================
 		-- End: Insert to temporary table
@@ -204,11 +215,16 @@ BEGIN
 			  , intItemUPCId		= UOM.intItemUOMId
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
-			  , intQtySold			= ISNULL(CAST(Chk.SalesQuantity as int),0)
-			  , dblCurrentPrice		= ISNULL(NULLIF(CAST(Chk.SalesAmount as decimal(18,6)),0) / NULLIF(CAST(Chk.SalesQuantity as int),0),0) --ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
-			  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)
-			  , dblGrossSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) 
-			  , dblTotalSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) --// + (ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)  )
+			  , intQtySold			= (Chk.SalesQuantity - Chk.RefundCount)
+			  --, dblCurrentPrice		= ISNULL( NULLIF( (Chk.SalesAmount + Chk.RefundAmount) , 0), 0)  /  ( Chk.SalesQuantity - Chk.RefundCount )
+			  , dblCurrentPrice		= CASE 
+										WHEN (Chk.SalesQuantity - Chk.RefundCount) = 0
+											THEN 0
+										ELSE (Chk.SalesAmount + Chk.RefundAmount)  /  (Chk.SalesQuantity - Chk.RefundCount)
+									END
+			  , dblDiscountAmount	= (Chk.DiscountAmount + Chk.PromotionAmount)
+			  , dblGrossSales		= (Chk.SalesAmount + Chk.RefundAmount)
+			  , dblTotalSales		= (Chk.SalesAmount + Chk.RefundAmount)
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost as decimal(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM @tblTempForCalculation Chk
@@ -238,6 +254,60 @@ BEGIN
 			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
+
+			--INSERT INTO dbo.tblSTCheckoutItemMovements
+			--(
+			--	intCheckoutId
+			--	, intItemUPCId
+			--	, strDescription
+			--	, intVendorId
+			--	, intQtySold
+			--	, dblCurrentPrice
+			--	, dblDiscountAmount
+			--	, dblGrossSales
+			--	, dblTotalSales
+			--	, dblItemStandardCost
+			--	, intConcurrencyId
+			--)
+			--SELECT 
+			--	intCheckoutId		= @intCheckoutId
+			--  , intItemUPCId		= UOM.intItemUOMId
+			--  , strDescription		= I.strDescription
+			--  , intVendorId			= IL.intVendorId
+			--  , intQtySold			= ISNULL(CAST(Chk.SalesQuantity as int),0)
+			--  , dblCurrentPrice		= ISNULL(NULLIF(CAST(Chk.SalesAmount as decimal(18,6)),0) / NULLIF(CAST(Chk.SalesQuantity as int),0),0) --ISNULL(CAST(Chk.ActualSalesPrice as decimal(18,6)),0)
+			--  , dblDiscountAmount	= ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)
+			--  , dblGrossSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) 
+			--  , dblTotalSales		= ISNULL(CAST(Chk.SalesAmount as decimal(18,6)),0) --// + (ISNULL(CAST(Chk.DiscountAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.PromotionAmount as decimal(18,6)),0) + ISNULL(CAST(Chk.RefundAmount as decimal(18,6)),0)  )
+			--  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost as decimal(18,6)),0)
+			--  , intConcurrencyId	= 1
+			--FROM @tblTempForCalculation Chk
+			--INNER JOIN
+			--(
+			--	SELECT intItemUOMId
+			--		, intItemId
+			--		, strLongUPCCode
+			--		, CASE 
+			--			WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
+			--				THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
+			--			ELSE NULL
+			--		END AS intLongUpcCode 
+			--	FROM dbo.tblICItemUOM
+			--) AS UOM
+			--	ON Chk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
+			--	OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) = UOM.intLongUpcCode
+
+			--INNER JOIN dbo.tblICItem I 
+			--	ON I.intItemId = UOM.intItemId
+			--INNER JOIN dbo.tblICItemLocation IL 
+			--	ON IL.intItemId = I.intItemId
+			--INNER JOIN dbo.tblICItemPricing P 
+			--	ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
+			--INNER JOIN dbo.tblSMCompanyLocation CL 
+			--	ON CL.intCompanyLocationId = IL.intLocationId
+			--INNER JOIN dbo.tblSTStore S 
+			--	ON S.intCompanyLocationId = CL.intCompanyLocationId
+			--WHERE S.intStoreId = @intStoreId
 		END
 
 

@@ -475,11 +475,11 @@ BEGIN TRY
 
 			SELECT @dblUnpaidUnits = ISNULL(SUM(dblUnits),0)
 			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType AND intPricingTypeId <> 1
+			WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType AND intPricingTypeId NOT IN (1,6)
 
 			SELECT @dblContractAmount = ISNULL(SUM(dblUnits*dblCashPrice),0)
 			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType AND intPricingTypeId = 1
+			WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType AND  intPricingTypeId IN (1,6)
 			
 
 			SET @dblStorageDuePerUnit = 0

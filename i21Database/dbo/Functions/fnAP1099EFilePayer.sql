@@ -149,8 +149,8 @@ BEGIN
 		+ LEFT(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strAddress, CHAR(13) + CHAR(10), ' '))) --Position 134-173
 		+ LEFT(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '), 40) + SPACE(40 - LEN(REPLACE(A.strCity, CHAR(13) + CHAR(10), ' '))) 
 		+ SPACE(2 - LEN(ISNULL(dbo.fnTrimX(A.strState),''))) + dbo.fnTrimX(A.strState)  
-		+ SPACE(9 - LEN(ISNULL(dbo.fnTrimX(A.strZip),'')))+  dbo.fnTrimX(A.strZip) 
-		+ SPACE(15 - LEN(ISNULL(dbo.fnAPRemoveSpecialChars(A.strPhone),''))) + REPLACE(ISNULL(dbo.fnAPRemoveSpecialChars(A.strPhone),''), ' ','') --Position 225-239
+		+ SPACE(9 - LEN(ISNULL(dbo.fnTrimX(A.strZip),''))) +  dbo.fnTrimX(A.strZip) 
+		+ SPACE(15 - LEN(REPLACE(ISNULL(dbo.fnAPRemoveSpecialChars(A.strPhone),''), ' ',''))) + REPLACE(ISNULL(dbo.fnAPRemoveSpecialChars(A.strPhone),''), ' ','') --Position 225-239
 		+ SPACE(260)
 		+ '00000002' --500-507
 		+ SPACE(241)

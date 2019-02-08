@@ -9,30 +9,33 @@ SELECT strInternalTradeNo
 	, strOptionMonth
 	, strName
 	, strAccountNumber
-	, isnull(intTotalLot,0) intTotalLot
-	, isnull(dblOpenLots,0) dblOpenLots
+	, ISNULL(intTotalLot, 0) intTotalLot
+	, ISNULL(dblOpenLots, 0) dblOpenLots
 	, strOptionType
 	, dblStrike
 	, dblPremium
-	, dblPremiumValue as dblPremiumValue
+	, dblPremiumValue
 	, dblCommission
 	, intFutOptTransactionId
-	, (dblPremiumValue+dblCommission) as dblNetPremium
-	, dblMarketPremium as dblMarketPremium
-	, dblMarketValue as dblMarketValue
-	, case when strBuySell='B' then  dblMarketValue-dblPremiumValue else  dblPremiumValue-dblMarketValue end as dblMTM
+	, dblNetPremium = (dblPremiumValue + dblCommission)
+	, dblMarketPremium
+	, dblMarketValue
+	, dblMTM = CASE WHEN strBuySell = 'B' THEN dblMarketValue - dblPremiumValue ELSE dblPremiumValue - dblMarketValue END
 	, strStatus
 	, strCommodityCode
 	, strLocationName
 	, strBook
 	, strSubBook
 	, dblDelta
-	, -(dblOpenLots*dblDelta*dblContractSize) AS dblDeltaHedge
+	, dblDeltaHedge = -(dblOpenLots * dblDelta * dblContractSize)
 	, strHedgeUOM
 	, strBuySell
 	, dblContractSize
 	, intFutOptTransactionHeaderId
 	, intCurrencyId
+	, strCurrency
+	, intMainCurrencyId
+	, strMainCurrency
 	, intCent
 	, ysnSubCurrency
 	, dtmExpirationDate
@@ -43,60 +46,60 @@ SELECT strInternalTradeNo
 	, intCommodityId
 	, intOptionMonthId      
 FROM (
-	SELECT (intTotalLot-dblSelectedLot1-intExpiredLots-intAssignedLots) AS dblOpenLots
-		, '' as dblSelectedLot
-		, ((intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium)/ case when ysnSubCurrency = 'true' then intCent else 1 end  as dblPremiumValue
-		, ((intTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium)/ case when ysnSubCurrency = 'true' then intCent else 1 end  as dblMarketValue
-		, (-dblOptCommission*(intTotalLot-dblSelectedLot1))/ case when ysnSubCurrency = 'true' then intCent else 1 end AS dblCommission
+	SELECT dblOpenLots = (intTotalLot - dblSelectedLot - intExpiredLots - intAssignedLots)
+		, dblPremiumValue = ((intTotalLot - dblSelectedLot) * dblContractSize * dblPremium) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
+		, dblMarketValue = ((intTotalLot - dblSelectedLot) * dblContractSize * dblMarketPremium) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
+		, dblCommission = (- dblOptCommission * (intTotalLot - dblSelectedLot)) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
 		, *
 	FROM (
-		SELECT DISTINCT strInternalTradeNo AS strInternalTradeNo
-			, dtmTransactionDate as dtmTransactionDate
-			, ot.dtmFilledDate as dtmFilledDate
-			, fm.strFutMarketName as strFutMarketName
-			, om.strOptionMonth as strOptionMonth
-			, e.strName as strName
+		SELECT DISTINCT strInternalTradeNo
+			, dtmTransactionDate
+			, ot.dtmFilledDate 
+			, fm.strFutMarketName
+			, om.strOptionMonth
+			, e.strName
 			, ba.strAccountNumber
-			, ot.intNoOfContract as intTotalLot
-			, IsNull((SELECT SUM (AD.intMatchQty) from tblRKOptionsMatchPnS AD Group By AD.intSFutOptTransactionId
-					Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0) As dblSelectedLot1
+			, intTotalLot = ot.intNoOfContract
+			, dblSelectedLot = ISNULL((SELECT SUM (AD.intMatchQty) FROM tblRKOptionsMatchPnS AD
+										GROUP BY AD.intSFutOptTransactionId
+										HAVING ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)
 			, ot.strOptionType
 			, ot.dblStrike
-			, ot.dblPrice as dblPremium
-			, fm.dblContractSize as dblContractSize
-			, isnull(dblOptCommission,0) as dblOptCommission
+			, dblPremium = ot.dblPrice
+			, fm.dblContractSize
+			, dblOptCommission = ISNULL(dblOptCommission,0)
 			, om.dtmExpirationDate
 			, ot.strStatus
 			, ic.strCommodityCode
 			, cl.strLocationName
 			, strBook
 			, strSubBook
-			, isnull((SELECT TOP 1 dblSettle  FROM tblRKFuturesSettlementPrice sp
-					JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId=spm.intFutureSettlementPriceId
-						AND sp.intFutureMarketId=ot.intFutureMarketId AND spm.intOptionMonthId= ot.intOptionMonthId
-						and ot.dblStrike=spm.dblStrike and spm.intTypeId= (case when ot.strOptionType='Put' then 1 else 2 end)
-						ORDER BY sp.dtmPriceDate desc),0) as dblMarketPremium  
-			, '' as MarketValue
-			, '' as MTM
+			, dblMarketPremium = ISNULL((SELECT TOP 1 dblSettle FROM tblRKFuturesSettlementPrice sp
+										JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId=spm.intFutureSettlementPriceId
+											AND sp.intFutureMarketId=ot.intFutureMarketId AND spm.intOptionMonthId= ot.intOptionMonthId
+											and ot.dblStrike=spm.dblStrike and spm.intTypeId= (CASE WHEN ot.strOptionType='Put' THEN 1 ELSE 2 END)
+										ORDER BY sp.dtmPriceDate desc),0)
 			, ot.intOptionMonthId
 			, ot.intFutureMarketId
-			, isnull((SELECT TOP 1 dblDelta  FROM tblRKFuturesSettlementPrice sp
-					JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId=spm.intFutureSettlementPriceId
-						AND sp.intFutureMarketId=ot.intFutureMarketId AND spm.intOptionMonthId= ot.intOptionMonthId
-						and ot.dblStrike=spm.dblStrike and spm.intTypeId= (case when ot.strOptionType='Put' then 1 else 2 end)
-						ORDER BY 1 desc),0) as dblDelta
-			, '' as DeltaHedge
-			, um.strUnitMeasure as strHedgeUOM
-			, CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell
+			, dblDelta = ISNULL((SELECT TOP 1 dblDelta FROM tblRKFuturesSettlementPrice sp
+								JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId=spm.intFutureSettlementPriceId
+									AND sp.intFutureMarketId=ot.intFutureMarketId AND spm.intOptionMonthId= ot.intOptionMonthId
+									and ot.dblStrike=spm.dblStrike and spm.intTypeId= (CASE WHEN ot.strOptionType='Put' THEN 1 ELSE 2 END)
+								ORDER BY 1 desc),0)
+			, strHedgeUOM = um.strUnitMeasure
+			, strBuySell = CASE WHEN strBuySell ='Buy' THEN 'B' ELSE 'S' END COLLATE Latin1_General_CI_AS
 			, intFutOptTransactionId
-			, isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope where  ope.intFutOptTransactionId= ot.intFutOptTransactionId),0) intExpiredLots
-			, isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa where  opa.intFutOptTransactionId= ot.intFutOptTransactionId),0) intAssignedLots
-			, c.intCurrencyID as intCurrencyId
+			, intExpiredLots = ISNULL((Select SUM(intLots) From tblRKOptionsPnSExpired ope where ope.intFutOptTransactionId= ot.intFutOptTransactionId),0)
+			, intAssignedLots = ISNULL((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa where opa.intFutOptTransactionId= ot.intFutOptTransactionId),0)
+			, intCurrencyId = c.intCurrencyID
+			, c.strCurrency
+			, intMainCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE c.intCurrencyID END
+			, strMainCurrency = CASE WHEN c.ysnSubCurrency = 0 THEN c.strCurrency ELSE MainCurrency.strCurrency END
 			, c.intCent
-			, ysnSubCurrency
+			, c.ysnSubCurrency
 			, ot.intFutOptTransactionHeaderId
-			, CASE WHEN CONVERT(VARCHAR(10),dtmExpirationDate,111) < CONVERT(VARCHAR(10),GETDATE(),111) then 1 else 0 end  ysnExpired
-			, case when ot.strOptionType='Put' then 1 else 2 end intTypeId
+			, ysnExpired = CASE WHEN CONVERT(VARCHAR(10),dtmExpirationDate,111) < CONVERT(VARCHAR(10),GETDATE(),111) THEN 1 ELSE 0 END
+			, intTypeId = CASE WHEN ot.strOptionType='Put' THEN 1 ELSE 2 END
 			, ot.intEntityId
 			, ot.intCommodityId
 		FROM tblRKFutOptTransaction ot
@@ -107,8 +110,9 @@ FROM (
 		JOIN tblRKOptionsMonth om on ot.intOptionMonthId=om.intOptionMonthId
 		JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId
 		JOIN tblEMEntity e on e.intEntityId=ot.intEntityId
-		LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId  AND ba.intBrokerageAccountId=bc.intBrokerageAccountId
+		LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId AND ba.intBrokerageAccountId=bc.intBrokerageAccountId
 		LEFT JOIN tblSMCurrency c on c.intCurrencyID=bc.intFutCurrencyId
+		LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId where ot.intInstrumentTypeId=2 and strBuySell='Sell'
 	)t

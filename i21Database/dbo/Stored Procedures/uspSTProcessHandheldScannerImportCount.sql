@@ -2,6 +2,8 @@
 	@HandheldScannerId INT,
 	@UserId INT,
 	@dtmCountDate DATETIME,
+	@intProcessType INT,
+	@strCountNo NVARCHAR(100),
 	@NewInventoryCountId INT OUTPUT,
 	@ysnSuccess BIT OUTPUT,
 	@strStatusMsg NVARCHAR(1000) OUTPUT
@@ -20,6 +22,8 @@ DECLARE @intEntityId int;
 
 BEGIN TRY
 	
+	BEGIN TRANSACTION
+
 	--------------------------------------------------------------------------------------
 	-------------------- Start Validate if has record to Process -------------------------
 	--------------------------------------------------------------------------------------
@@ -37,8 +41,8 @@ BEGIN TRY
 
 	SELECT *
 	INTO #ImportCounts
-	FROM vyuSTGetHandheldScannerImportCount
-	WHERE intHandheldScannerId = @HandheldScannerId
+	FROM vyuSTGetHandheldScannerImportCount ImportCount
+	WHERE ImportCount.intHandheldScannerId = @HandheldScannerId
 
 	DECLARE @NewId INT,
 		--@CountDate DATETIME = @dtmCountDate,
@@ -79,36 +83,124 @@ BEGIN TRY
 	--------- End Validate if items does not have intItemUOMId ---------------------------
 	--------------------------------------------------------------------------------------
 
-	EXEC uspICAddInventoryCount
-	-- Header fields 
-		@intLocationId = @CompanyLocationId
-		,@dtmCountDate = @dtmCountDate
-		,@intCategoryId	= NULL 
-		,@intCommodityId = NULL 
-		,@intCountGroupId = NULL  	
-		,@intSubLocationId = NULL  	
-		,@intStorageLocationId = NULL  	
-		,@strDescription = 'Imported from Handheld Scanner'  	
-		,@ysnIncludeZeroOnHand = 0  	
-		,@ysnIncludeOnHand = NULL  	
-		,@ysnScannedCountEntry = NULL  	
-		,@ysnCountByLots = 0  	
-		,@strCountBy = 'Item' -- Possible values: (1) Item or (2) Pack. 
-		,@ysnCountByPallets	= 0
-		,@ysnRecountMismatch = 0
-		,@ysnExternal = 0
-		,@ysnRecount = 0
-		,@intRecountReferenceId	= NULL  	
-		,@strShiftNo = NULL 
-		,@intImportFlagInternal	= NULL 
-		,@intEntityUserSecurityId = @UserId
-		,@strSourceId = NULL
-		,@strSourceScreenName = NULL
-		,@CountDetails = @CountRecords
-		,@intInventoryCountId = @NewId OUTPUT  
+	-- Process Type
+	-- 1 = 'Create'
+	-- 2 = 'Update'
+
+	IF(@intProcessType = 1)
+		BEGIN
+			-- ======================================================================================================================
+			-- START CREATE COUNT----------------------------------------------------------------------------------------------------
+			-- ======================================================================================================================
+
+			EXEC uspICAddInventoryCount
+			-- Header fields 
+				@intLocationId = @CompanyLocationId
+				,@dtmCountDate = @dtmCountDate
+				,@intCategoryId	= NULL 
+				,@intCommodityId = NULL 
+				,@intCountGroupId = NULL  	
+				,@intSubLocationId = NULL  	
+				,@intStorageLocationId = NULL  	
+				,@strDescription = 'Imported from Handheld Scanner'  	
+				,@ysnIncludeZeroOnHand = 0  	
+				,@ysnIncludeOnHand = NULL  	
+				,@ysnScannedCountEntry = NULL  	
+				,@ysnCountByLots = 0  	
+				,@strCountBy = 'Item' -- Possible values: (1) Item or (2) Pack. 
+				,@ysnCountByPallets	= 0
+				,@ysnRecountMismatch = 0
+				,@ysnExternal = 0
+				,@ysnRecount = 0
+				,@intRecountReferenceId	= NULL  	
+				,@strShiftNo = NULL 
+				,@intImportFlagInternal	= NULL 
+				,@intEntityUserSecurityId = @UserId
+				,@strSourceId = NULL
+				,@strSourceScreenName = NULL
+				,@CountDetails = @CountRecords
+				,@intInventoryCountId = @NewId OUTPUT  
+
+			-- ======================================================================================================================
+			-- END CREATE COUNT----------------------------------------------------------------------------------------------------
+			-- ======================================================================================================================
+		END
+
+	ELSE IF(@intProcessType = 2)
+		BEGIN
+			-- ======================================================================================================================
+			-- START UPDATE COUNT----------------------------------------------------------------------------------------------------
+			-- ======================================================================================================================
+
+			SET @NewId = 0 -- No new id if 'Update'
+			DECLARE @intPrimaryCountId INT
+					, @dblCountQty DECIMAL(18, 6)
+					, @intItemId INT
+					, @intItemLocationId INT
+					, @intItemUOMId INT
+
+			-- Loop here
+			WHILE (SELECT COUNT(*) FROM #ImportCounts) > 0
+				BEGIN
+					-- Get Primary Id
+					SELECT TOP 1 
+						@intPrimaryCountId = intHandheldScannerImportCountId
+						, @dblCountQty = dblCountQty
+						, @intItemId = intItemId
+						, @intItemLocationId = intItemLocationId
+						, @intItemUOMId = intItemUOMId
+					FROM #ImportCounts
+
+					-- Update
+					BEGIN TRY
+						EXEC uspICUpdateInventoryPhysicalCount
+							-- Count No and Physical Count are required
+							@strCountNo = @strCountNo,
+							@dblPhysicalCount = @dblCountQty,
+
+							-- ========================================
+							--    Required for a lotted item
+							-- ========================================
+							-- Set this to NULL for a non-lotted item
+							@intLotId = NULL,
+
+							-- This is also required
+							@intUserSecurityId = @UserId,
+
+							-- ========================================
+							--    Parameters for a non-lotted item
+							-- ========================================
+							-- Required for a non-lotted item
+							@intItemId = @intItemId,
+							@intItemLocationId = @intItemLocationId,
+
+							-- Set this to change the Count UOM 
+							@intItemUOMId = @intItemUOMId,
+							-- Set these to change the storage unit/loc
+							@intStorageLocationId = NULL,
+							@intStorageUnitId = NULL
+					END TRY
+					BEGIN CATCH
+						-- Flag Success
+						SET @ysnSuccess = CAST(0 AS BIT)
+						SET @strStatusMsg = ERROR_MESSAGE()
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END CATCH
+
+					-- Remove record after use
+					DELETE FROM #ImportCounts
+					WHERE intHandheldScannerImportCountId = @intPrimaryCountId
+				END
+
+			-- ======================================================================================================================
+			-- END UPDATE COUNT----------------------------------------------------------------------------------------------------
+			-- ======================================================================================================================
+		END
+	
 
 	DROP TABLE #ImportCounts
-
 
 	SET @NewInventoryCountId = @NewId
 
@@ -119,6 +211,9 @@ BEGIN TRY
 	-- Flag Success
 	SET @ysnSuccess = CAST(1 AS BIT)
 	SET @strStatusMsg = ''
+
+	-- COMMIT
+	GOTO ExitWithCommit
 END TRY
 BEGIN CATCH
 	SELECT 
@@ -139,4 +234,23 @@ BEGIN CATCH
 		@ErrorSeverity, -- Severity.
 		@ErrorState -- State.
 	);
+
+	-- ROLLBACK
+	GOTO ExitWithRollback
 END CATCH
+
+
+ExitWithCommit:
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
+ExitPost:

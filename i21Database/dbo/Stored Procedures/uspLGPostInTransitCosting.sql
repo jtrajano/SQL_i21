@@ -77,14 +77,14 @@ BEGIN TRY
 			,dblQty = LD.dblQuantity
 			,IU.dblUnitQty
 			,dblCost = ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN  CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)
+						/ (CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) 
 						* AD.dblQtyToPriceUOMConvFactor
-						/ CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END
-						* CASE WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
+						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
 			,dblValue = ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN  CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)
-						* AD.dblQtyToPriceUOMConvFactor
-						/ CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END
-						* CASE WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
-						* LD.dblQuantity
+						/ (CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) 
+						* AD.dblQtyToPriceUOMConvFactor 
+						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
+						* LD.dblQuantity 
 			,0.0
 			,intCurrencyId = CASE WHEN L.intPurchaseSale = 3 AND CD.ysnUseFXPrice = 1 THEN 
 								ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) 

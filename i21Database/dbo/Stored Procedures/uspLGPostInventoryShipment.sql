@@ -202,6 +202,11 @@ SAVE TRAN @TransactionName
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1
 BEGIN
+	-- Mark stock reservation as posted (or unposted)
+	EXEC dbo.uspICPostStockReservation
+		@intTransactionId
+		,@INVENTORY_SHIPMENT_TYPE
+		,@ysnPost
 
 	IF @ENABLE_ACCRUALS_FOR_OUTBOUND = 1
 	BEGIN 

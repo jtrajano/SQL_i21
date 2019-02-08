@@ -54,9 +54,9 @@ BEGIN
 	END
 
 	UPDATE A
-		SET A.dblRate = CASE WHEN ctd.intContractDetailId > 0 THEN ctd.dblRate ELSE @rate END, A.intCurrencyExchangeRateTypeId = @rateType 
+		SET A.dblRate = @rate, A.intCurrencyExchangeRateTypeId = @rateType --CASE WHEN ctd.intContractDetailId > 0 THEN ctd.dblRate ELSE @rate END, A.intCurrencyExchangeRateTypeId = @rateType 
 	FROM tblAPBillDetail A
-	LEFT JOIN vyuCTContractDetailView ctd ON A.intContractDetailId = ctd.intContractDetailId
+	-- LEFT JOIN vyuCTContractDetailView ctd ON A.intContractDetailId = ctd.intContractDetailId
 	WHERE A.intBillId = @voucherId
 END
 

@@ -38,6 +38,7 @@ SELECT IC.intHandheldScannerImportCountId
 									 )
 							ELSE 'UPC Not Found!' END
 	, IC.dblCountQty
+	, IL.intItemLocationId
 FROM tblSTHandheldScannerImportCount IC
 LEFT JOIN tblSTHandheldScanner HS 
 	ON HS.intHandheldScannerId = IC.intHandheldScannerId
@@ -45,6 +46,9 @@ LEFT JOIN tblSTStore Store
 	ON Store.intStoreId = HS.intStoreId
 LEFT JOIN tblICItem Item 
 	ON Item.intItemId = IC.intItemId
+LEFT JOIN tblICItemLocation IL
+	ON Item.intItemId = IL.intItemId
+	AND Store.intCompanyLocationId = IL.intLocationId
 LEFT JOIN tblICItemUOM ItemUOM 
 	ON ItemUOM.intItemId = Item.intItemId 
 	AND ItemUOM.strLongUPCCode = IC.strUPCNo

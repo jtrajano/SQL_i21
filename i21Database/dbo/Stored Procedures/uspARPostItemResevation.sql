@@ -23,7 +23,7 @@ INNER JOIN
         AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
         AND ARID.[intItemId] = ICSR.[intItemId]
 WHERE
-	ICSR.[ysnPosted] = 0
+	ICSR.[ysnPosted] <> ARID.[ysnPost]
 UNION
 SELECT
     [intHeaderId]  = ARID.[intInvoiceId]
@@ -38,18 +38,18 @@ INNER JOIN
         AND ARID.[strInvoiceNumber] = ICSR.[strTransactionId]
         AND BDL.[intBundleItemId] = ICSR.[intItemId]
 WHERE
-    ICSR.[ysnPosted] = 0
+    ICSR.[ysnPosted] <> ARID.[ysnPost]
 
 
 WHILE EXISTS(SELECT NULL FROM @InvoiceIds)
 BEGIN
-    DECLARE @InvoiceId INT
-    SELECT TOP 1 @InvoiceId = [intHeaderId] FROM @InvoiceIds
+    DECLARE @InvoiceId INT, @Post BIT
+    SELECT TOP 1 @InvoiceId = [intHeaderId], @Post = [ysnPost] FROM @InvoiceIds
 
     EXEC    [dbo].[uspICPostStockReservation]
                  @intTransactionId		= @InvoiceId
                 ,@intTransactionTypeId	= @TransactionTypeId
-                ,@ysnPosted				= 1
+                ,@ysnPosted				= @Post
 
     DELETE FROM @InvoiceIds WHERE [intHeaderId] = @InvoiceId
 END

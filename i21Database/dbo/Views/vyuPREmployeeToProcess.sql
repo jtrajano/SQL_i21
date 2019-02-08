@@ -10,8 +10,8 @@ SELECT
 	ETP.dtmEndDate,
 	ETP.dtmPayDate,
 	ETP.ysnExcludeDeductions,
-	intPayGroupIds = LEFT(ETP.intPayGroupIds, LEN(ETP.intPayGroupIds)-1),
-	strPayGroupIds = LEFT(ETP.strPayGroupIds, LEN(ETP.strPayGroupIds)-1),
+	intPayGroupIds = LEFT(ETP.intPayGroupIds, LEN(ETP.intPayGroupIds)-1) COLLATE Latin1_General_CI_AS,
+	strPayGroupIds = LEFT(ETP.strPayGroupIds, LEN(ETP.strPayGroupIds)-1) COLLATE Latin1_General_CI_AS,
 	ETP.dblHours,
 	ETP.dblTotal,
 	ETP.intConcurrencyId

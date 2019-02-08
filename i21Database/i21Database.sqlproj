@@ -7280,6 +7280,13 @@
     <Build Include="dbo\Stored Procedures\uspSMMigrateScheduledAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_CreateAuditLogMigrationPlan.sql" />
+    <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
+    <Build Include="dbo\Views\vyuSTInventoryCountHeader.sql" />
+    <Build Include="dbo\Tables\tblQMProductImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutureTradingMonths.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceDetailReport2.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -421,7 +421,8 @@ BEGIN
 						GROUP BY f.strCbkNo					
 					) QUERY INNER JOIN dbo.tblCMBankAccount bk
 						ON QUERY.strCbkNo = bk.strCbkNo
-			WHERE	ISNULL(bk.intCheckNextNo, 0) <= QUERY.apchk_chk_no				
+			WHERE	ISNULL(bk.intCheckNextNo, 0) <= QUERY.apchk_chk_no	
+			AND (QUERY.apchk_chk_no + 1) BETWEEN bk.intCheckStartingNo AND bk.intCheckEndingNo			
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 				
 		EXIT_TRIGGER: 
@@ -795,7 +796,8 @@ BEGIN
 						GROUP BY f.strCbkNo					
 					) QUERY INNER JOIN dbo.tblCMBankAccount bk
 						ON QUERY.strCbkNo = bk.strCbkNo
-			WHERE	ISNULL(bk.intCheckNextNo, 0) <= QUERY.apchk_chk_no				
+			WHERE	ISNULL(bk.intCheckNextNo, 0) <= QUERY.apchk_chk_no		
+			AND (QUERY.apchk_chk_no + 1) BETWEEN bk.intCheckStartingNo AND bk.intCheckEndingNo
 			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 	
 		EXIT_TRIGGER:

@@ -132,6 +132,7 @@ USING (
 	AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
 	AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  -- Round out the remaining stock. If it becomes zero, then stock bucket is considered fully consumed already. 
 	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	AND (cb.intInventoryLotId = @CostBucketId OR @CostBucketId IS NULL)
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 

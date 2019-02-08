@@ -127,6 +127,7 @@ USING (
 	AND cb.intItemUOMId = Source_Query.intItemUOMId
 	AND (cb.dblStockIn - cb.dblStockOut) > 0 
 	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	AND (cb.intInventoryActualCostId = @CostBucketId OR @CostBucketId IS NULL)
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 

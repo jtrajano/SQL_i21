@@ -343,7 +343,7 @@ SELECT
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
-	, 1
+	--, 1
 FROM dbo.tblAPPayment  A
  INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  INNER JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId

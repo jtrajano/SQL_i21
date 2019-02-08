@@ -15,6 +15,7 @@ DECLARE @dtmBeginningDateTo				DATETIME
 	  , @intEntityCustomerId			INT	= NULL
 	  , @strSalesperson					NVARCHAR(100)
 	  , @strCustomerName				NVARCHAR(MAX)
+	  , @strItemNo						NVARCHAR(300)
 	  , @xmlDocumentId					INT
 
 DECLARE @temp_xml_table TABLE (
@@ -69,6 +70,10 @@ WHERE	[fieldname] = 'strName'
 SELECT  @strSalesperson = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
+
+SELECT  @strItemNo = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strItemNo'
 
 SELECT  @dtmBeginningDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmBeginningDateTo = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
@@ -131,6 +136,7 @@ FROM vyuARTransactionSummary
 WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
   AND (@strCustomerName IS NULL OR strCustomerName = @strCustomerName)
   AND (@strSalesperson IS NULL OR strSalesPersonName = @strSalesperson)
+  AND (@strItemNo IS NULL OR strItemNo = @strItemNo)
 
 UNION
 
@@ -164,3 +170,4 @@ FROM vyuARTransactionSummary
 WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
   AND (@strCustomerName IS NULL OR strCustomerName = @strCustomerName)
   AND (@strSalesperson IS NULL OR strSalesPersonName = @strSalesperson)
+  AND (@strItemNo IS NULL OR strItemNo = @strItemNo)
