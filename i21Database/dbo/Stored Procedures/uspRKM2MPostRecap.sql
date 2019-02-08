@@ -182,7 +182,7 @@ DECLARE @Result AS TABLE (
 exec uspRKUnrealizedPnL  @dtmFromDate ='01-01-1900',
 		@dtmToDate = @Todate,
 	@intCommodityId  = @intCommodityId,
-	@ysnExpired ='false',
+	@ysnExpired =0,
 	@intFutureMarketId  = NULL,
 	@intEntityId  = NULL,
 	@intBrokerageAccountId  = NULL,

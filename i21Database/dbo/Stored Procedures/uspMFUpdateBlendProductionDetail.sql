@@ -100,8 +100,7 @@ a.intStorageLocationId=b.intStorageLocationId
 From tblMFWorkOrderConsumedLot a Join @tblLot b  on a.intWorkOrderConsumedLotId=b.intWorkOrderConsumedLotId
 
 Update tblMFWorkOrder 
-Set dblQuantity=(Select sum(dblQuantity) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId),
-intStorageLocationId=@intStorageLocationId
+Set intStorageLocationId=@intStorageLocationId
 Where intWorkOrderId=@intWorkOrderId
 
 Commit Tran

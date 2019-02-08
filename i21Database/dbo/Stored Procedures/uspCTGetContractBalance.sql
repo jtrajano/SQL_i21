@@ -8,6 +8,7 @@
    ,@IntFutureMonthId       INT  = NULL
    ,@strPositionIncludes    NVARCHAR(MAX) = NULL
    ,@strCallingApp			NVARCHAR(MAX) = NULL
+   ,@strPrintOption			NVARCHAR(MAX) = NULL
 
 AS
 
@@ -812,7 +813,8 @@ BEGIN TRY
 	,dblFuturesinCommodityStockUOM	
 	,dblBasisinCommodityStockUOM	
 	,dblCashPriceinCommodityStockUOM
-	,dblAmountinCommodityStockUOM	
+	,dblAmountinCommodityStockUOM
+	,strPrintOption	= @strPrintOption
 	FROM tblCTContractBalance 
 	WHERE  dblAvailableQty > 0
 	AND

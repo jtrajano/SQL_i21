@@ -10,7 +10,7 @@
 	[strBuySell] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intNoOfContract] int,
 	[strFutureMonth] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,	
-	[dblPrice] decimal(24,10) ,
+	[dblPrice] NUMERIC(18, 6) ,
 	[strReference] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[strStatus] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmFilledDate] DATETIME NULL,

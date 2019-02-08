@@ -483,7 +483,7 @@ BEGIN
 			, ch.strItemNo
 			, ch.strCategory
 			, ch.strEntityName
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.intContractHeaderId
 			, strContractNumber
 			, c.dtmOpenDate
@@ -869,6 +869,35 @@ BEGIN
 						)
 					SELECT strCommodityCode
 						, 'Price Risk' COLLATE Latin1_General_CI_AS
+						, strContractType
+						, dblTotal
+						, intContractHeaderId
+						, strContractNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intFutOptTransactionHeaderId
+						, strInternalTradeNo
+					FROM @tempFinal
+					WHERE intCommodityId = @intCommodityId AND strType  = 'Crush'
+
+
+					--Include Crush in Net Hedge
+					INSERT INTO @tempFinal(strCommodityCode
+						, strType
+						, strContractType
+						, dblTotal
+						, intContractHeaderId
+						, strContractNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intFutOptTransactionHeaderId
+						, strInternalTradeNo
+
+						)
+					SELECT strCommodityCode
+						, 'Net Hedge' COLLATE Latin1_General_CI_AS
 						, strContractType
 						, dblTotal
 						, intContractHeaderId
@@ -2076,9 +2105,9 @@ BEGIN
 						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 					FROM @tblGetOpenContractDetail cd
 					WHERE cd.intContractTypeId IN (1, 2)
-						AND cd.intCommodityId IN (SELECT intCommodityId FROM @Commodity)
+						AND cd.intCommodityId = @intCommodityId
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
-						AND intEntityId = @intVendorId
+						AND cd.intEntityId = @intVendorId
 				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				
 				INSERT INTO @tempFinal (strCommodityCode

@@ -11,6 +11,7 @@ SELECT
 	, strStorageLocation		= MAX(sl.strName)
 	, strItemNo					= i.strItemNo
 	, strItemDescription		= i.strDescription
+	, strItemUOM				= um.strUnitMeasure
 	, dblStock					= SUM((ISNULL(sm.dblOnHand, 0) + ISNULL(sm.dblUnitStorage, 0)))
 	, dblCapacity				= SUM(ISNULL(sl.dblEffectiveDepth, 0) *  ISNULL(sl.dblUnitPerFoot, 0))
 	, dblAvailable				= SUM(
@@ -37,4 +38,5 @@ GROUP BY   sm.intItemId
 		 , c.strLocationName
 		 , i.strItemNo
 		 , i.strDescription
+		 , um.strUnitMeasure
 		 , cd.strCommodityCode

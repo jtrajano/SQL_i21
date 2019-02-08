@@ -995,7 +995,7 @@ BEGIN
 													AND CH.intStoreId = ST.intStoreId
 								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE IM.intCheckoutId = @intCheckoutId
-								AND IM.dblTotalSales > 0
+								AND IM.dblTotalSales <> 0
 
 						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END

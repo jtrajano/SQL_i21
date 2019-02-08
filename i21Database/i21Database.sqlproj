@@ -7257,8 +7257,15 @@
     <Build Include="dbo\Views\vyuRKGetFutOptTransactionHistory.sql" />
     <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailForeignRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCImportData.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateOverageContracts.sql" />
+    <Build Include="dbo\Views\vyuCFSearchAccount.sql" />
+    <Build Include="dbo\Views\vyuCFSearchAccountCard.sql" />
     <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
+    <Build Include="dbo\Views\vyuSTInventoryCountHeader.sql" />
+    <Build Include="dbo\Tables\tblQMProductImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMImportProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutureTradingMonths.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceDetailReport2.sql" />
   </ItemGroup>
   <ItemGroup>

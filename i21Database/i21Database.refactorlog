@@ -7119,4 +7119,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3641460f-d61a-4874-ba60-a3998934fad6" ChangeDateTime="01/29/2019 07:17:13">
+    <Property Name="ElementName" Value="[dbo].[tblRKCollateral].[intReceiptNo]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCollateral]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strReceiptNo" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d532a7ad-6e79-494d-b223-111a19b0cb5b" ChangeDateTime="01/29/2019 07:19:14">
+    <Property Name="ElementName" Value="[dbo].[tblRKCollateralHistory].[intReceiptNo]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCollateralHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strReceiptNo" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1b5d63c4-faba-4ad0-93c9-1ef4f43b2ea3" ChangeDateTime="01/29/2019 08:01:00">
+    <Property Name="ElementName" Value="[dbo].[tblRKBroker].[intPhone]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKBroker]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPhone" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="43b68ac0-2bc5-4b44-81ef-87c3a7715d71" ChangeDateTime="01/29/2019 08:01:07">
+    <Property Name="ElementName" Value="[dbo].[tblRKBroker].[intFax]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKBroker]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFax" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="11672a5e-6715-43ac-88f5-b26d1c8085cb" ChangeDateTime="01/29/2019 08:01:11">
+    <Property Name="ElementName" Value="[dbo].[tblRKBroker].[intAltPhone]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKBroker]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strAltPhone" />
+  </Operation>
 </Operations>

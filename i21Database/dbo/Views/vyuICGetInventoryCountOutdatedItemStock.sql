@@ -9,12 +9,12 @@ SELECT
 	, x.intItemId
 	, x.strItemNo
 	, x.dblCountOnHand
-	, x.dblNewOnHand
+	, dblNewOnHand = SUM(x.dblNewOnHand)
 	, x.dblWeightQty
 	, x.dblNewWeightQty
 	, x.dblCost
 	, x.dblNewCost
-	, dblOnHandDiff = x.dblNewOnHand - x.dblCountOnHand
+	, dblOnHandDiff = SUM(x.dblNewOnHand) - x.dblCountOnHand
 	, dblWeightQtyDiff = x.dblNewWeightQty - x.dblWeightQty
 	, dblCostDiff = x.dblNewCost - x.dblCost 
 FROM
@@ -26,7 +26,7 @@ FROM
 		cd.strCountLine,
 		c.strCountNo,
 		c.intInventoryCountId,
-		dblNewOnHand = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN nonLotted.dblOnHand ELSE lotted.dblOnHand END, 0),
+		dblNewOnHand = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand) ELSE lotted.dblOnHand END, 0),
 		dblCountOnHand = cd.dblSystemCount,
 		cd.dblWeightQty,
 		dblNewWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0),
@@ -64,29 +64,30 @@ FROM
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON cd.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = cd.intLotId AND Item.strLotTracking <> 'No'
 		LEFT JOIN dbo.tblICItemUOM StockUOM ON cd.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
-		OUTER APPLY (
-				SELECT 
-					  ss.intItemId
-					, ss.intItemUOMId
-					, ss.intItemLocationId
-					, ss.intSubLocationId
-					, ss.intStorageLocationId
-					, dblOnHand =  SUM(COALESCE(ss.dblOnHand, 0.00))
-					, dblLastCost = MAX(ISNULL(ss.dblLastCost, 0))
-		FROM vyuICGetItemStockSummary ss
-		WHERE ss.intItemId = cd.intItemId
-			AND ss.intItemLocationId = cd.intItemLocationId
-			AND ss.intItemUOMId = cd.intItemUOMId
-			AND (cd.intSubLocationId = ss.intSubLocationId OR (ss.intSubLocationId IS NULL AND cd.intSubLocationId IS NULL))
-			AND (cd.intStorageLocationId = ss.intStorageLocationId OR (ss.intStorageLocationId IS NULL AND cd.intStorageLocationId IS NULL))
-			AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
-		GROUP BY 
-						intItemId,
-						intItemUOMId,
-						intItemLocationId,
-						intSubLocationId,
-						intStorageLocationId
-		) nonLotted
+		LEFT JOIN (
+			SELECT 
+				ss.intItemId
+				, ss.intItemUOMId
+				, ss.intItemLocationId
+				, ss.intSubLocationId
+				, ss.intStorageLocationId
+				, dblOnHand =  SUM(COALESCE(ss.dblOnHand, 0.00))
+				, dblLastCost = MAX(ISNULL(ss.dblLastCost, 0))
+				, dtmDate
+			FROM vyuICGetItemStockSummary ss
+			GROUP BY 
+				ss.intItemId,
+				intItemUOMId,
+				intItemLocationId,
+				intSubLocationId,
+				intStorageLocationId,
+				dtmDate
+		) nonLotted ON nonLotted.intItemId = cd.intItemId
+			AND nonLotted.intItemLocationId = cd.intItemLocationId
+			--AND ss.intItemUOMId = cd.intItemUOMId
+			AND (cd.intSubLocationId = nonLotted.intSubLocationId OR (nonLotted.intSubLocationId IS NULL AND cd.intSubLocationId IS NULL))
+			AND (cd.intStorageLocationId = nonLotted.intStorageLocationId OR (nonLotted.intStorageLocationId IS NULL AND cd.intStorageLocationId IS NULL))
+			AND dbo.fnDateLessThanEquals(nonLotted.dtmDate, c.dtmCountDate) = 1
 		OUTER APPLY(
 			SELECT TOP 1
 			dblCost
@@ -121,4 +122,17 @@ FROM
 			AND lotted.strLotNumber = cd.strLotNo
 	WHERE c.ysnPosted != 1
 ) x
-WHERE ((ROUND(x.dblNewOnHand - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
+--WHERE ((ROUND(x.dblNewOnHand - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
+GROUP BY x.intInventoryCountId
+	, x.intInventoryCountDetailId
+	, x.strCountNo
+	, x.strCountLine
+	, x.intItemId
+	, x.strItemNo
+	, x.dblCountOnHand
+	--, x.dblNewOnHand
+	, x.dblWeightQty
+	, x.dblNewWeightQty
+	, x.dblCost
+	, x.dblNewCost
+HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))

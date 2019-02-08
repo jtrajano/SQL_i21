@@ -9,12 +9,12 @@ FROM (
 	SELECT *
 		, (GrossPnL - dblFutCommission) NetPnL
 	FROM (
-		SELECT (CONVERT(INT, ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0)))*dblContractSize/ case when ysnSubCurrency = 'true' then intCent else 1 end  GrossPnL
+		SELECT (CONVERT(INT, ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0)))*dblContractSize/ case when ysnSubCurrency = 1 then intCent else 1 end  GrossPnL
 			, ISNULL(((Long1-MatchLong)*dblPrice),0) LongWaitedPrice
 			, ISNULL((Long1-MatchLong),0) as dblLong
 			, ISNULL(Sell1-MatchShort,0) as dblShort
 			, ISNULL(((Sell1-MatchShort)*dblPrice),0) ShortWaitedPrice
-			, convert(int,ISNULL((Long1-MatchLong),0)- ISNULL(Sell1-MatchShort,0)) * -dblFutCommission1 / case when ComSubCurrency = 'true' then ComCent else 1 end  AS dblFutCommission
+			, convert(int,ISNULL((Long1-MatchLong),0)- ISNULL(Sell1-MatchShort,0)) * -dblFutCommission1 / case when ComSubCurrency = 1 then ComCent else 1 end  AS dblFutCommission
 			, convert(int,ISNULL((Long1-MatchLong),0)- ISNULL(Sell1-MatchShort,0)) as  intNet
 			, *
 		FROM (

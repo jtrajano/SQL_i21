@@ -136,7 +136,7 @@ INNER JOIN (
 			 , ysnInvalidSetup
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
-	INNER JOIN (
+	LEFT JOIN (
 		SELECT intInvoiceDetailId
 			 , dblTotalAdjustedTax	= SUM(dblAdjustedTax)			 
 			 , intTaxCodeCount		= COUNT(intInvoiceDetailTaxId)

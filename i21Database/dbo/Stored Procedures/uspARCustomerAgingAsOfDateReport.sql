@@ -12,6 +12,7 @@
 	@strAccountStatusCode		NVARCHAR(100) = NULL,
 	@strCustomerIds				NVARCHAR(MAX) = NULL,
 	@ysnFromBalanceForward		BIT = 0,
+	@ysnPrintFromCF				BIT = 0,
 	@dtmBalanceForwardDate		DATETIME = NULL
 AS
 
@@ -24,6 +25,7 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@strCompanyLocationLocal		NVARCHAR(100)	= NULL,
 		@ysnIncludeCreditsLocal			BIT				= 1,
 		@ysnIncludeWriteOffPaymentLocal BIT				= 1,
+		@ysnPrintFromCFLocal			BIT				= 0,
 		@intSalespersonId				INT				= NULL,
 		@intCompanyLocationId			INT				= NULL,
 		@strCustomerNameLocal			NVARCHAR(MAX)	= NULL,
@@ -46,6 +48,7 @@ SET @strSourceTransactionLocal		= NULLIF(@strSourceTransaction, '')
 SET @strCompanyLocationLocal		= NULLIF(@strCompanyLocation, '')
 SET @ysnIncludeCreditsLocal			= @ysnIncludeCredits
 SET @ysnIncludeWriteOffPaymentLocal	= ISNULL(@ysnIncludeWriteOffPayment, 0)
+SET @ysnPrintFromCFLocal			= ISNULL(@ysnPrintFromCF, 0)
 SET @strCustomerNameLocal			= NULLIF(@strCustomerName, '')
 SET @strAccountStatusCodeLocal		= NULLIF(@strAccountStatusCode, '')
 SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')
@@ -274,6 +277,7 @@ WHERE ysnPosted = 1
 	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+	AND (@ysnPrintFromCFLocal = 0 OR (@ysnPrintFromCFLocal = 1 AND I.strType <> 'CF Tran'))
 
 --#CASHREFUNDS
 SELECT strDocumentNumber	= ID.strDocumentNumber

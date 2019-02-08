@@ -1185,7 +1185,7 @@ BEGIN TRY
 							AND IL.intLocationId = @intLocationId
 						))
 				,[intItemUOMId] = PL.intItemUOMId
-				,[dtmDate] = Isnull(PL.dtmProductionDate, @dtmCurrentDateTime)
+				,[dtmDate] = @dtmCurrentDateTime
 				,[dblQty] = PL.dblQuantity
 				,[dblUOMQty] = 1
 				,[intCostUOMId] = PL.intItemUOMId

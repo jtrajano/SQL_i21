@@ -120,7 +120,7 @@ BEGIN TRY
 			intNoOfLoad					INT,
 			intFutureMarketId			INT,
 			intFutureMonthId			INT,
-			dblFutures					INT
+			dblFutures					NUMERIC(18,6)
 			
 	);  
 

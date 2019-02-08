@@ -15,6 +15,7 @@ BEGIN TRY
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
+	DECLARE @intCurrencyId INT
 
 	DECLARE @voucherDetailData TABLE 
 		(intItemRecordId INT Identity(1, 1)
@@ -73,9 +74,11 @@ BEGIN TRY
 	END
 
 	SELECT TOP 1 @intShipTo = CD.intCompanyLocationId
+				,@intCurrencyId = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) ELSE L.intCurrencyId END
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intPContractDetailId,LD.intSContractDetailId)
+	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	WHERE L.intLoadId = @intLoadId
 
 	SELECT @intAPAccount = ISNULL(intAPAccount,0)
@@ -233,6 +236,7 @@ BEGIN TRY
 			,@vendorId = @intVendorEntityId
 			,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 			,@shipTo = @intShipTo
+			,@currencyId = @intCurrencyId
 			,@billId = @intBillId OUTPUT
 
 		DELETE

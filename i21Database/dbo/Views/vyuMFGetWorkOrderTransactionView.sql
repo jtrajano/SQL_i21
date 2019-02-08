@@ -85,6 +85,7 @@ SELECT W.intWorkOrderId
 	,NULL AS [strNewOwnerName]
 	,NULL AS [strReason]
 	,L.dblLastCost 
+	,W.intLocationId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -196,6 +197,7 @@ SELECT W.intWorkOrderId
 	,NULL AS [strNewOwnerName]
 	,NULL AS [strReason]
 	,L.dblLastCost 
+	,W.intLocationId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderConsumedLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -305,6 +307,7 @@ SELECT W.intWorkOrderId
 	,NULL AS [strNewOwnerName]
 	,NULL AS [strReason]
 	,L.dblLastCost 
+	,W.intLocationId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -416,6 +419,7 @@ SELECT W.intWorkOrderId
 	,NULL AS [strNewOwnerName]
 	,NULL AS [strReason]
 	,L.dblLastCost 
+	,W.intLocationId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -528,6 +532,7 @@ SELECT W.intWorkOrderId
 	,NULL AS [strNewOwnerName]
 	,NULL AS [strReason]
 	,L.dblLastCost 
+	,W.intLocationId
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -638,6 +643,7 @@ SELECT -1 As  intWorkOrderId
 	,E2.strName AS [New Owner Name]
 	,IA.strReason AS [Reason]
 	,L1.dblLastCost 
+	,IA.intLocationId
 FROM tblMFInventoryAdjustment IA
 JOIN tblICItem I1 ON I1.intItemId = IA.intItemId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = IA.intItemUOMId

@@ -73,7 +73,7 @@ BEGIN
 		, intCollateralId INT
 		, strLocationName NVARCHAR(250) COLLATE Latin1_General_CI_AS
 		, strCustomerName NVARCHAR(250) COLLATE Latin1_General_CI_AS
-		, intReceiptNo NVARCHAR(250) COLLATE Latin1_General_CI_AS
+		, strReceiptNo NVARCHAR(250) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId INT
 		, strContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -126,7 +126,7 @@ BEGIN
 		, intCollateralId INT
 		, strLocationName NVARCHAR(250) COLLATE Latin1_General_CI_AS
 		, strCustomerName NVARCHAR(250) COLLATE Latin1_General_CI_AS
-		, intReceiptNo NVARCHAR(250) COLLATE Latin1_General_CI_AS
+		, strReceiptNo NVARCHAR(250) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId INT
 		, strContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -619,7 +619,7 @@ BEGIN
 					, ch.strItemNo
 					, ch.strCategory
 					, ch.strEntityName
-					, c.intReceiptNo
+					, c.strReceiptNo
 					, ch.intContractHeaderId
 					, strContractNumber
 					, c.dtmOpenDate
@@ -1169,7 +1169,7 @@ BEGIN
 				, strItemNo
 				, strCategory
 				, strCustomerName
-				, intReceiptNo
+				, strReceiptNo
 				, intContractHeaderId
 				, strContractNumber
 				, dtmOpenDate
@@ -1196,7 +1196,7 @@ BEGIN
 					, strItemNo
 					, strCategory
 					, strEntityName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -1228,7 +1228,7 @@ BEGIN
 				, strItemNo
 				, strCategory
 				, strCustomerName
-				, intReceiptNo
+				, strReceiptNo
 				, intContractHeaderId
 				, strContractNumber
 				, dtmOpenDate
@@ -1253,7 +1253,7 @@ BEGIN
 					, strItemNo
 					, strCategory
 					, strEntityName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -2200,7 +2200,7 @@ BEGIN
 					, intCollateralId
 					, strLocationName
 					, strCustomerName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -2241,7 +2241,7 @@ BEGIN
 					, intCollateralId
 					, strLocationName
 					, strCustomerName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -2291,7 +2291,7 @@ BEGIN
 					, intCollateralId
 					, strLocationName
 					, strCustomerName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -2332,7 +2332,7 @@ BEGIN
 					, intCollateralId
 					, strLocationName
 					, strCustomerName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -2380,7 +2380,7 @@ BEGIN
 					, intCollateralId
 					, strLocationName
 					, strCustomerName
-					, intReceiptNo
+					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
 					, dtmOpenDate
@@ -2488,7 +2488,7 @@ BEGIN
 			, intCollateralId
 			, strLocationName
 			, strCustomerName
-			, intReceiptNo
+			, strReceiptNo
 			, intContractHeaderId
 			, strContractNumber
 			, dtmOpenDate
@@ -2543,7 +2543,7 @@ BEGIN
 			, intCollateralId
 			, strLocationName
 			, strCustomerName
-			, intReceiptNo
+			, strReceiptNo
 			, intContractHeaderId
 			, strContractNumber
 			, dtmOpenDate

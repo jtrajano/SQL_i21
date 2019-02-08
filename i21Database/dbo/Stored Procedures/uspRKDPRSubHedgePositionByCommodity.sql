@@ -511,7 +511,7 @@ BEGIN
 		, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intReceiptNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strReceiptNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intContractHeaderId int
 		, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dtmOpenDate datetime
@@ -531,7 +531,7 @@ BEGIN
 			, cl.strLocationName
 			, ch.strItemNo
 			, ch.strEntityName
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.intContractHeaderId
 			, strContractNumber
 			, c.dtmOpenDate
