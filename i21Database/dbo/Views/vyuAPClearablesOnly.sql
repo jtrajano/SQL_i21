@@ -73,7 +73,7 @@ SELECT	DISTINCT
 				INNER JOIN tblSMTerm C ON C.intTermID = A.intTermsId
 				WHERE 
 				B.intInventoryReceiptChargeId IS NULL AND B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
-				AND  A.ysnPosted = 0
+				--AND  A.ysnPosted = 0
 			) bill
 			OUTER APPLY (
 				SELECT 
@@ -202,7 +202,7 @@ SELECT DISTINCT
 	, dblDiscount = 0 
 	, dblInterest = 0 
 	, Vendor.strVendorId 
-	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor2.strName,'') as strVendorIdName 
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
@@ -223,8 +223,9 @@ SELECT DISTINCT
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnPrice = 1
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
-LEFT JOIN vyuAPVendor Vendor
+LEFT JOIN tblAPVendor Vendor
 			ON Vendor.intEntityId = Receipt.intEntityVendorId
+LEFT JOIN tblEMEntity Vendor2 ON Vendor2.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
@@ -428,5 +429,3 @@ WHERE Shipment.ysnPosted = 1 AND ShipmentCharge.ysnAccrue = 1
 	  AND (ShipmentCharge.dblQuantity - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) != 0
 	  AND ShipmentCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 GO
-
-
