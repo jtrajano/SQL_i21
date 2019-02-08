@@ -15,6 +15,7 @@ BEGIN
 	print @Guid	
 	print @UserId
 	DECLARE @intEntityUserId INT;
+	DECLARE @strStatementFormat NVARCHAR(20) = 'Balance Forward'
 
 	select TOP 1 @intEntityUserId = intEntityId from tblSMUserSecurity where strUserName = @UserId
 	
@@ -29,7 +30,7 @@ BEGIN
 	DELETE FROM tblCFInvoiceStagingTable			WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
 
 	DELETE tblCFInvoiceStagingTable					WHERE strUserId is null
-	DELETE tblARCustomerStatementStagingTable		WHERE intEntityUserId is null
+	DELETE tblARCustomerStatementStagingTable		WHERE intEntityUserId is null AND strStatementFormat = @strStatementFormat
 
 BEGIN TRY
 
@@ -771,19 +772,20 @@ BEGIN TRY
 
 			DELETE FROM tblARCustomerStatementStagingTable 
 			WHERE intEntityUserId = @intEntityUserId
+				AND strStatementFormat = @strStatementFormat
 				AND intEntityCustomerId NOT IN (
-				SELECT cfAC.intCustomerId 
-				FROM tblCFAccount as cfAC
-				INNER JOIN tblCFInvoiceCycle cfIC
-				ON cfAC.intInvoiceCycle = cfIC.intInvoiceCycleId
-				WHERE cfIC.strInvoiceCycle COLLATE Latin1_General_CI_AS IN (
-					SELECT Record FROM fnCFSplitString(@strInvoiceCycle,'|^|')
+					SELECT cfAC.intCustomerId 
+					FROM tblCFAccount as cfAC
+					INNER JOIN tblCFInvoiceCycle cfIC
+					ON cfAC.intInvoiceCycle = cfIC.intInvoiceCycleId
+					WHERE cfIC.strInvoiceCycle COLLATE Latin1_General_CI_AS IN (
+						SELECT Record FROM fnCFSplitString(@strInvoiceCycle,'|^|')
+					)
 				)
-			)
 		END
 		
 
-		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate WHERE intEntityUserId = @intEntityUserId
+		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
 		UPDATE tblARCustomerStatementStagingTable
 		SET 
@@ -797,7 +799,7 @@ BEGIN TRY
 																						WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
 																						AND (strEmailDistributionOption LIKE '%CF Invoice%') 
 																						AND (ISNULL(strEmail, N'') <> ''))	
-		WHERE intEntityUserId = @intEntityUserId
+		WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
 
 		UPDATE tblARCustomerStatementStagingTable
@@ -824,6 +826,7 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.dblCFTotalFuelExpensed			   =		ISNULL(cfInv.dblTotalFuelExpensed,0)
 		FROM tblCFInvoiceStagingTable cfInv
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
+		AND strStatementFormat = @strStatementFormat
 		AND cfInv.strUserId = @UserId
 		AND intEntityUserId = @intEntityUserId
 		AND LOWER(cfInv.strStatementType) =  LOWER(@StatementType)
@@ -849,6 +852,7 @@ BEGIN TRY
 		FROM vyuCFAccountTerm cfAccntTerm
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfAccntTerm.intCustomerId
 		AND intEntityUserId = @intEntityUserId
+		AND strStatementFormat = @strStatementFormat
 		----AR SHOULD HANDLE MULTI USER TOO---
 		
 		DECLARE @strWebsite NVARCHAR(MAX)
@@ -867,6 +871,7 @@ BEGIN TRY
 				HAVING ISNULL(COUNT(*),0) > 0)
 		AND ISNULL(dblTotalAR,0) = 0)
 		AND intEntityUserId = @intEntityUserId
+		AND strStatementFormat = @strStatementFormat
 
 		UPDATE STAGING
 		SET STAGING.dblTotalAR				= STAGING2.dblTotalAR
@@ -941,6 +946,7 @@ BEGIN TRY
 		) STAGING2
 		WHERE STAGING.dblTotalAR IS NULL
 		AND intEntityUserId = @intEntityUserId
+		AND strStatementFormat = @strStatementFormat
 
 		END
 		ELSE
@@ -952,6 +958,7 @@ BEGIN TRY
 				DELETE FROM tblARCustomerStatementStagingTable 
 				WHERE 
 					intEntityUserId = @intEntityUserId 
+					AND strStatementFormat = @strStatementFormat
 					AND intEntityCustomerId NOT IN (
 					SELECT cfAC.intCustomerId 
 					FROM tblCFAccount as cfAC
@@ -964,7 +971,7 @@ BEGIN TRY
 			END
 
 			UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
-			WHERE intEntityUserId = @intEntityUserId
+			WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
 			UPDATE tblARCustomerStatementStagingTable
 			SET 
@@ -978,7 +985,7 @@ BEGIN TRY
 																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
 																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
 																							AND (ISNULL(strEmail, N'') <> ''))	
-			WHERE intEntityUserId = @intEntityUserId
+			WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
 
 			UPDATE tblARCustomerStatementStagingTable
@@ -1007,12 +1014,14 @@ BEGIN TRY
 			FROM tblCFInvoiceStagingTable cfInv
 			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
 			AND cfInv.strUserId = @UserId
+			AND strStatementFormat = @strStatementFormat
 			AND tblARCustomerStatementStagingTable.intEntityUserId = @intEntityUserId
 			AND LOWER(cfInv.strStatementType) =  LOWER(@StatementType)
 
 
 			DELETE FROM tblARCustomerStatementStagingTable 
 				WHERE intEntityUserId = @intEntityUserId
+				AND strStatementFormat = @strStatementFormat
 				AND intEntityCustomerId IN (
 				SELECT intEntityCustomerId FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserId AND intEntityCustomerId not in (
 					SELECT intEntityCustomerId AS intCount FROM tblARCustomerStatementStagingTable
@@ -1030,8 +1039,8 @@ BEGIN TRY
 
 	IF LOWER(@StatementType)  = 'invoice'
 	BEGIN
-		UPDATE tblARCustomerStatementStagingTable SET strCFEmailDistributionOption = '' WHERE strCFEmailDistributionOption IS NULL AND intEntityUserId = @intEntityUserId
-		UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL AND intEntityUserId = @intEntityUserId
+		UPDATE tblARCustomerStatementStagingTable SET strCFEmailDistributionOption = '' WHERE strCFEmailDistributionOption IS NULL AND intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
+		UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL AND intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 	END
 
 	--SELECT * FROM vyuCFAccountTerm
