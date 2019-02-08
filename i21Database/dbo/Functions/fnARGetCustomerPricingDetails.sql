@@ -594,6 +594,7 @@ BEGIN
 			END
 			
 		DECLARE @SpecialPricing TABLE(
+			id int identity(1,1),
 			intSpecialPriceId INT
 			,intEntityId INT
 			,intVendorId INT
