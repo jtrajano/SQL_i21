@@ -116,7 +116,10 @@
 	
 	,@strSiteTaxLocation				NVARCHAR(MAX)	= NULL
 	,@CardNumberForDualCard				NVARCHAR(MAX)	= NULL
+	,@strDriverPin						NVARCHAR(MAX)	= NULL
 
+
+	
 	
 	
 	--,@LC7							NUMERIC(18,6)	= 0.000000
@@ -140,6 +143,8 @@
 
 AS
 BEGIN
+
+	
 	
 	------------------------------------------------------------
 	--			    TRUNCATE IMPORT LOG TABLE 				  --
@@ -1016,6 +1021,25 @@ BEGIN
 								WHERE intSiteId = @intSiteId)
 	
 
+	DECLARE @intDriverPinId INT = NULL
+	DECLARE @ysnWriteDriverPinError BIT = 0
+	IF(ISNULL(@strDriverPin,'') != '' AND ISNULL(@strDriverPin,'') != 0)
+	BEGIN
+		SELECT TOP 1 @intDriverPinId = intDriverPinId FROM tblCFDriverPin
+		WHERE intAccountId = @intAccountId
+		AND strDriverPinNumber = @strDriverPin
+
+		IF(ISNULL(@intDriverPinId,0) = 0)
+		BEGIN
+			SET @ysnWriteDriverPinError = 1
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 @intDriverPinId = intDefaultDriverPin FROM tblCFCard 
+		WHERE intCardId = @intCardId
+	END
+
 
 	--------------------------VEHICLE---------------------------
 	
@@ -1346,6 +1370,7 @@ BEGIN
 			,[ysnOnHold]
 			,[intCustomerId]
 			,[intImportCardId]
+			,[intDriverPinId]
 		)
 		VALUES
 		(
@@ -1396,6 +1421,7 @@ BEGIN
 			,@ysnOnHold
 			,@intCustomerId
 			,@intCardId
+			,@intDriverPinId
 		)			
 	
 		DECLARE @Pk	INT		
@@ -1406,42 +1432,52 @@ BEGIN
 		------------------------------------------------------------
 		--				INSERT IMPORT ERROR LOGS				  --
 		------------------------------------------------------------
-		IF(@intARItemId = 0 OR @intARItemId IS NULL)
+		
+		
+		IF(ISNULL(@ysnWriteDriverPinError,0) = 1)
+		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find driver pin number ' + @strDriverPin + ' into i21 driver pin list')
+
+			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find driver pin number ' + @strDriverPin + ' into i21 driver pin list')
+		END
+
+		IF(ISNULL(@intARItemId,0) = 0)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
 		END
-		IF((@intPrcCustomerId = 0 OR @intPrcCustomerId IS NULL) AND @strTransactionType != 'Foreign Sale')
+		IF(ISNULL(@intPrcCustomerId,0) = 0 AND @strTransactionType != 'Foreign Sale')
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find customer number using card number ' + @strCardId + ' into i21 card account list')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find customer number using card number ' + @strCardId + ' into i21 card account list')
 		END
-		IF(@intARItemLocationId = 0 OR @intARItemLocationId IS NULL)
+		IF(ISNULL(@intARItemLocationId,0) = 0)
 		BEGIN
 			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid location for site ' + @strSiteId)
 			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid location for site ' + @strSiteId)
 		END
-		IF(@intPrcItemUOMId = 0 OR @intPrcItemUOMId IS NULL)
+		IF(ISNULL(@intPrcItemUOMId,0) = 0)
 		BEGIN
 			--INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			--VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid Item Location UOM')
 			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Invalid UOM for product number ' + @strProductId)
 		END
-		IF(@intNetworkId = 0 OR @intNetworkId IS NULL)
+		IF(ISNULL(@intNetworkId,0) = 0)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find network ' + @strNetworkId + ' into i21 network list')
 			
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find network ' + @strNetworkId + ' into i21 network list')
 		END
-		IF(@intSiteId = 0 OR @intSiteId IS NULL)
+		IF(ISNULL(@intSiteId,0) = 0)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find site ' + @strSiteId + ' into i21 site list')
@@ -1455,14 +1491,14 @@ BEGIN
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Site ' + @strSiteId + ' has been automatically created')
 		END
-		IF((@intCardId = 0 OR @intCardId IS NULL) AND @strTransactionType != 'Foreign Sale')
+		IF((ISNULL(@intCardId,0) = 0) AND @strTransactionType != 'Foreign Sale')
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find card number ' + @strCardId + ' into i21 card list')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find card number ' + @strCardId + ' into i21 card list')
 		END
-		IF(@dblQuantity = 0 OR @dblQuantity IS NULL)
+		IF(ISNULL(@dblQuantity,0) = 0)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Invalid quantity - ' + Str(@dblQuantity, 16, 8))
