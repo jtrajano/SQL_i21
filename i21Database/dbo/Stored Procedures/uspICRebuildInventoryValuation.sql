@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation]
 	,@ysnRegenerateBillGLEntries AS BIT = 0
 	,@intUserId AS INT = NULL
 	,@ysnRebuildShipmentAndInvoiceAsInTransit AS BIT = 0
+	,@ysnForceClearTheCostBuckets AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -490,6 +491,35 @@ BEGIN
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 END 
 
+-- Force the clearing of the cost bucket if the flagged
+IF @ysnForceClearTheCostBuckets = 1
+BEGIN 
+	-- Clear the cost buckets if running qty before Nov 2018 is already zero. 
+	UPDATE cb
+	SET	
+		cb.dblStockOut = cb.dblStockIn 
+	FROM 
+		tblICItem i inner join tblICInventoryFIFO cb 
+			on i.intItemId = cb.intItemId
+		OUTER APPLY (
+			SELECT 
+				dblQty = SUM(t.dblQty)
+			FROM	
+				tblICInventoryTransaction t 
+			WHERE	
+				t.intItemId = i.intItemId
+				AND t.intItemLocationId = cb.intItemLocationId
+				AND t.intItemUOMId = cb.intItemUOMId 
+				AND dbo.fnDateLessThan(t.dtmDate, @dtmStartDate) = 1
+			HAVING 
+				SUM(t.dblQty) <> 0 	
+		) t
+	WHERE 
+		(cb.dblStockIn - cb.dblStockOut) <> 0 
+		AND (ROUND(t.dblQty, 6) = 0 OR t.dblQty IS NULL) 
+		AND dbo.fnDateLessThan(cb.dtmDate, @dtmStartDate) = 1
+END 
+
 -- Create the temp table. 
 BEGIN 
 	IF OBJECT_ID('tempdb..#tmpStockDiscrepancies') IS NOT NULL  
@@ -497,13 +527,21 @@ BEGIN
 
 	CREATE TABLE #tmpStockDiscrepancies (
 		id INT IDENTITY(1, 1) PRIMARY KEY 
-		,strType NVARCHAR(500) 
+		,strType NVARCHAR(500) COLLATE Latin1_General_CI_AS 
 		,intItemId INT
-		,strTransactionId NVARCHAR(50)
-		,strBatchId NVARCHAR(50) 
+		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
+		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS  
 		,intItemUOMId INT 
 		,dblOnHand NUMERIC(38, 20)
 		,dblTransaction NUMERIC(38, 20)
+	)
+END 
+
+-- Create the priority rebuild table
+IF OBJECT_ID('tempdb..#tmpPriorityTransactions') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpPriorityTransactions (
+		strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 	)
 END 
 
@@ -618,16 +656,23 @@ BEGIN
 			ON #tmpICInventoryTransaction(dtmDate ASC, id ASC, intSortByQty ASC);
 
 		INSERT INTO #tmpICInventoryTransaction
-		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+		SELECT	id = 
+					CASE 
+						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
+							-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+						ELSE
+							CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+					END 
 				,id2 = intInventoryTransactionId
 				,intSortByQty = 
 					CASE 
-						WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 1 
-						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 2
-						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 4
-						WHEN dblValue <> 0 THEN 5
-						ELSE 6
+						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
+						WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
+						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
+						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
+						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
+						WHEN dblValue <> 0 THEN 6
+						ELSE 7
 					END    
 				,intItemId
 				,intItemLocationId
@@ -644,7 +689,7 @@ BEGIN
 				,intCurrencyId
 				,dblExchangeRate
 				,intTransactionId
-				,strTransactionId
+				,t.strTransactionId
 				,intTransactionDetailId
 				,strBatchId
 				,intTransactionTypeId
@@ -667,20 +712,26 @@ BEGIN
 				,dblUnitRetail
 				,dblCategoryCostValue
 				,dblCategoryRetailValue
-		FROM	#tmpUnOrderedICTransaction
+		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
+					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
-			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC
-			,CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
-			,
-			CASE 
-				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 1 
-				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 2
-				WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 4
-				WHEN dblValue <> 0 THEN 5
-				ELSE 6
+			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
+			,CASE 
+				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
+					-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+				ELSE
+					CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+			END ASC 
+			,CASE 
+				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
+				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
+				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
+				WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
+				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
+				WHEN dblValue <> 0 THEN 6
+				ELSE 7
 			END   
-			ASC 
+			ASC 			
 	END
 	ELSE 
 	BEGIN 
@@ -693,9 +744,10 @@ BEGIN
 				,id2 = intInventoryTransactionId
 				,intSortByQty = 
 					CASE 
-						WHEN dblQty > 0 THEN 1 
-						WHEN dblValue <> 0 THEN 2
-						ELSE 3
+						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1
+						WHEN dblQty > 0 THEN 2
+						WHEN dblValue <> 0 THEN 3
+						ELSE 4
 					END
 				,intItemId
 				,intItemLocationId
@@ -712,7 +764,7 @@ BEGIN
 				,intCurrencyId
 				,dblExchangeRate
 				,intTransactionId
-				,strTransactionId
+				,t.strTransactionId
 				,intTransactionDetailId
 				,strBatchId
 				,intTransactionTypeId
@@ -735,7 +787,8 @@ BEGIN
 				,dblUnitRetail
 				,dblCategoryCostValue
 				,dblCategoryRetailValue
-		FROM	#tmpUnOrderedICTransaction
+		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
+					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
 			intInventoryTransactionId ASC 
 	END
@@ -3704,7 +3757,7 @@ BEGIN
 						,NULL 
 						,@intItemId -- This is only used when rebuilding the stocks.
 						,@strTransactionId -- This is only used when rebuilding the stocks.
-						,@intCategoryId -- This is only used when rebuilding the stocks.
+						--,@intCategoryId -- This is only used when rebuilding the stocks.
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -4348,21 +4401,24 @@ BEGIN
 	GOTO _CLEAN_UP
 END
 
+_CLEAN_UP: 
 -- Flag the rebuild as done. 
 BEGIN 
 	UPDATE	tblICBackup 
 	SET		ysnRebuilding = 0
 			,dtmEnd = GETDATE()
 	WHERE intBackupId = @intBackupId
-END 
+END
 
-_CLEAN_UP: 
 BEGIN 
 	IF OBJECT_ID('tempdb..#tmpICInventoryTransaction') IS NOT NULL  
 		DROP TABLE #tmpICInventoryTransaction
 
 	IF OBJECT_ID('tempdb..#tmpUnOrderedICTransaction') IS NOT NULL  
 		DROP TABLE #tmpUnOrderedICTransaction
+
+	IF OBJECT_ID('tempdb..#tmpPriorityTransactions') IS NOT NULL  
+		DROP TABLE #tmpPriorityTransactions
 END 
 
 RETURN @intReturnValue; 

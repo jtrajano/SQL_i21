@@ -60,7 +60,7 @@ BEGIN
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
 			OUTER APPLY (
-				SELECT	intInventoryLIFOId = MIN(intInventoryLIFOId) 
+				SELECT	intInventoryLIFOId = MAX(intInventoryLIFOId) 
 				FROM	tblICInventoryLIFO cb
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
@@ -120,6 +120,7 @@ USING (
 	AND cb.intItemUOMId = Source_Query.intItemUOMId
 	AND (cb.dblStockIn - cb.dblStockOut) > 0 
 	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	AND (cb.intInventoryLIFOId = @CostBucketId OR @CostBucketId IS NULL)
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 
