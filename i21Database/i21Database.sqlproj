@@ -2625,6 +2625,7 @@
     <Build Include="dbo\Tables\tblRKM2MInquiryLatestMarketPrice.sql" />
     <Build Include="dbo\Views\vyuCTFuturesMonth.sql" />
     <Build Include="dbo\Stored Procedures\uspICLockInventoryCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemRunningStockQty.sql" />
     <Build Include="dbo\Views\vyuEMEmployeeEarningLink.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAddVoucherPayable.sql" />
