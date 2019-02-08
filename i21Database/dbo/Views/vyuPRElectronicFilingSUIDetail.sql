@@ -35,9 +35,9 @@ SELECT
 		AND DATEADD(DD, 12 -1, 
 			DATEADD(MM, (CASE SUI.intQuarter WHEN 1 THEN 3 WHEN 2 THEN 6 WHEN 3 THEN 9 WHEN 4 THEN 12 END) - 1, 
 			DATEADD(YY, SUI.intYear - 1900, 0))) BETWEEN dtmDateFrom AND dtmDateTo), 0) AS BIT)
-	,strQuarterYear = RIGHT('000000'+ CONVERT(nvarchar(10), CASE SUI.intQuarter WHEN 1 THEN 3 WHEN 2 THEN 6 WHEN 3 THEN 9 WHEN 4 THEN 12 END) + CONVERT(nvarchar(10), SUI.intYear), 6)
-	,strMonthYearHired = ISNULL(RIGHT('000000'+ CONVERT(nvarchar(10), MONTH(EMP.dtmOriginalDateHired)) + CONVERT(nvarchar(10), YEAR(EMP.dtmOriginalDateHired)), 6), '')
-	,strMonthYearTerminated = ISNULL(RIGHT('000000'+ CONVERT(nvarchar(10), MONTH(EMP.dtmTerminated)) + CONVERT(nvarchar(10), YEAR(EMP.dtmTerminated)), 6), '')
+	,strQuarterYear = RIGHT('000000'+ CONVERT(nvarchar(10), CASE SUI.intQuarter WHEN 1 THEN 3 WHEN 2 THEN 6 WHEN 3 THEN 9 WHEN 4 THEN 12 END) + CONVERT(nvarchar(10), SUI.intYear), 6) COLLATE Latin1_General_CI_AS 
+	,strMonthYearHired = ISNULL(RIGHT('000000'+ CONVERT(nvarchar(10), MONTH(EMP.dtmOriginalDateHired)) + CONVERT(nvarchar(10), YEAR(EMP.dtmOriginalDateHired)), 6), '') COLLATE Latin1_General_CI_AS 
+	,strMonthYearTerminated = ISNULL(RIGHT('000000'+ CONVERT(nvarchar(10), MONTH(EMP.dtmTerminated)) + CONVERT(nvarchar(10), YEAR(EMP.dtmTerminated)), 6), '') COLLATE Latin1_General_CI_AS 
 FROM
 	vyuPRReportQuarterlySUI SUI
 	INNER JOIN (SELECT intEntityId, strLastName, strFirstName, strMiddleName, strSocialSecurity, 

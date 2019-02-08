@@ -10,10 +10,10 @@ SELECT TOP 100 PERCENT dblGrossPL1 a
 	, *
 FROM (
 	SELECT *
-		, -dblFutCommission1/ case when ComSubCurrency = 'true' then ComCent else 1 end as dblFutCommission
+		, -dblFutCommission1/ case when ComSubCurrency = 1 then ComCent else 1 end as dblFutCommission
 	FROM (
 		SELECT ((dblSPrice - dblLPrice) * dblMatchQty * dblContractSize) as dblGrossPL1
-			, ((dblSPrice - dblLPrice) * dblMatchQty * dblContractSize) / case when ysnSubCurrency = 'true' then intCent else 1 end as dblGrossPL
+			, ((dblSPrice - dblLPrice) * dblMatchQty * dblContractSize) / case when ysnSubCurrency = 1 then intCent else 1 end as dblGrossPL
 			, *
 		FROM (
 			SELECT psh.intMatchFuturesPSHeaderId

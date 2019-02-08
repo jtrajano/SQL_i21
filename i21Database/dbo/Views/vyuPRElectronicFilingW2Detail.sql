@@ -4,7 +4,7 @@ SELECT
 	W2.intEmployeeW2Id
 	,W2.intYear
 	,W2.intEntityEmployeeId
-	,strSSN = LEFT(dbo.fnAPRemoveSpecialChars(ISNULL(EMP.strSocialSecurity, '')), 9)
+	,strSSN = LEFT(dbo.fnAPRemoveSpecialChars(ISNULL(EMP.strSocialSecurity, '')), 9) COLLATE Latin1_General_CI_AS 
 	,strFirstName = LEFT(ISNULL(EMP.strFirstName, ''), 15)
 	,strMiddleName = LEFT(ISNULL(EMP.strMiddleName, ''), 15)
 	,strLastName = LEFT(ISNULL(EMP.strLastName, ''), 20)
@@ -99,7 +99,7 @@ SELECT
 						   WHEN (W2.strState IN ('CO', 'DE', 'MO', 'NY')) THEN 'C'
 						   WHEN (W2.strState = '') THEN ' '
 						   WHEN (W2.strState NOT IN (SELECT strCode FROM tblPRTypeTaxState WHERE strCode <> '')) THEN 'F'
-						   ELSE 'D' END
+						   ELSE 'D' END COLLATE Latin1_General_CI_AS 
 	,W2.strState
 	,W2.strStateTaxID
 	,W2.dblTaxableState

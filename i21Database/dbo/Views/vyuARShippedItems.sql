@@ -377,7 +377,8 @@ FROM (
 			dblUnitPrice,
 			dblConvertedPrice = dblUnitPrice * isnull(dbo.fnARCalculateQtyBetweenUOM(intItemUOMId, intPriceUOMId, 1, intItemId, null) , 1),
 			dblDestinationQuantity,
-			intOwnershipType
+			intOwnershipType,
+			ysnAllowInvoice
 		FROM dbo.tblICInventoryShipmentItem WITH (NOLOCK)
 		WHERE 
 			ISNULL(ysnDestinationWeightsAndGrades, 0) = 0
@@ -397,6 +398,7 @@ FROM (
 			 , intEntityCustomerId
 			 , intShipToLocationId
 			 , intCurrencyId	= ISNULL(IIS.intCurrencyId, SHIPMENTCURRENCY.intCurrencyId)
+			 , intSourceType
 		FROM dbo.tblICInventoryShipment IIS WITH (NOLOCK)
 		OUTER APPLY (
 			SELECT TOP 1 intCurrencyId 
@@ -507,6 +509,10 @@ FROM (
 			OR
 			ISNULL(LGICSHIPMENT.intShipmentId,0) = 0
 			)
+		AND ((ISNULL(ICISI.ysnAllowInvoice, 1) = 1 AND ICIS.intSourceType = 1)
+			OR
+			ICIS.intSourceType <> 1
+			)
 
 	UNION ALL
 
@@ -598,6 +604,7 @@ FROM (
 			 , intOrderType
 			 , intEntityCustomerId
 			 , intShipToLocationId
+			 , intSourceType
 		FROM dbo.tblICInventoryShipment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 	) ICIS ON ICISC.intInventoryShipmentId = ICIS.intInventoryShipmentId
@@ -623,6 +630,10 @@ FROM (
 		AND ICIS.strShipmentNumber = ID.strDocumentNumber
 	WHERE ISNULL(ICISC.ysnPrice, 0) = 1 
 	  AND ISNULL(ARID.intInventoryShipmentChargeId, 0) = 0
+	  AND ((ISNULL(ICISC.ysnAllowInvoice, 1) = 1 AND ICIS.intSourceType = 1)
+			OR
+			ICIS.intSourceType <> 1
+			)
 
 	UNION ALL
 

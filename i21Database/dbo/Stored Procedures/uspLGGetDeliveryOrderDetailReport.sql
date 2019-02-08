@@ -47,6 +47,6 @@ BEGIN
 	LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
 	LEFT JOIN tblLGLoadContainer LC2 ON LC2.intLoadId = L.intLoadId
-	INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC2.intLoadContainerId = LDCL.intLoadContainerId
+	LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LC2.intLoadContainerId = LDCL.intLoadContainerId
 	WHERE strLoadNumber = @strLoadNumber 
 END

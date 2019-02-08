@@ -15,7 +15,7 @@ BEGIN
 		+ SPACE(19)
 		+ SPACE(8)
 		+ SPACE(442)
-		+ REPLICATE('0',8) -- 500-507
+		+ REPLICATE('0', 8 - LEN(CAST(@totalPayer AS NVARCHAR(100)))) + CAST(@totalPayer + 4 AS NVARCHAR(100)) -- 500-507
 		+ SPACE(241)
 		+ SPACE(2)
 

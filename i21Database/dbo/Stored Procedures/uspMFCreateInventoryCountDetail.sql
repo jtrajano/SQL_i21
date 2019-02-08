@@ -5,9 +5,25 @@
 	,@intPhysicalCountUOMId INT
 AS
 BEGIN
+	DECLARE @intItemUOMId INT
+	DECLARE @dblWeightPerQty NUMERIC(18, 6)
+
+	SELECT @intItemUOMId = L.intItemUOMId
+		,@dblWeightPerQty = CASE 
+			WHEN dblWeightPerQty = 0
+				THEN 1
+			ELSE dblWeightPerQty
+			END
+	FROM tblICLot L
+	WHERE L.intLotId = @intLotId
+
+	IF @intPhysicalCountUOMId <> @intItemUOMId
+	BEGIN
+		SELECT @dblPhysicalCount = @dblPhysicalCount / @dblWeightPerQty
+	END
+
 	EXEC dbo.uspICUpdateInventoryPhysicalCount @strCountNo = @strInventoryCountNo
 		,@dblPhysicalCount = @dblPhysicalCount
-		,@intPhysicalCountUOMId = @intPhysicalCountUOMId
 		,@intLotId = @intLotId
 		,@intUserSecurityId = @intUserSecurityId
 

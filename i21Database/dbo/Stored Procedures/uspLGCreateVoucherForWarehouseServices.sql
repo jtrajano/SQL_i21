@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @intWarehouseServicesId INT
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
+	DECLARE @strDeliveryNo NVARCHAR(100)
 	DECLARE @intLoadId INT
 	DECLARE @intPurchaseSale INT
 	DECLARE @intReceiptCount INT
@@ -39,6 +40,8 @@ BEGIN TRY
 		,intWarehouseServicesId INT
 		,ysnInventoryCost BIT
 		,intItemUOMId INT
+		,dblUnitQty DECIMAL(38,20)
+		,dblCostUnitQty DECIMAL(38,20)
 		)
 	DECLARE @distinctVendor TABLE (
 		intRecordId INT Identity(1, 1)
@@ -58,7 +61,7 @@ BEGIN TRY
 		,dblCost NUMERIC(18, 6)
 		)
 
-	SELECT @intLoadId = intLoadId
+	SELECT @intLoadId = intLoadId, @strDeliveryNo = strDeliveryNoticeNumber
 	FROM tblLGLoadWarehouse
 	WHERE intLoadWarehouseId = @intLoadWarehouseId
 
@@ -119,28 +122,24 @@ BEGIN TRY
 		,intWarehouseServicesId
 		,ysnInventoryCost
 		,intItemUOMId
+		,dblUnitQty
+		,dblCostUnitQty
 		)
-	SELECT ISNULL(SLCL.intVendorId, WRMH.intVendorEntityId)
-		,L.intLoadId
-		,LD.intLoadDetailId
-		,CH.intContractHeaderId
-		,CD.intContractDetailId
-		,Item.intItemId
+	SELECT intVendorEntityId = ISNULL(SLCL.intVendorId, WRMH.intVendorEntityId)
+		,intLoadId = L.intLoadId
+		,intLoadDetailId = LD.intLoadDetailId
+		,intContractHeaderId = CH.intContractHeaderId
+		,intContractDetailId = CD.intContractDetailId
+		,intItemId = Item.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,dblQtyReceived = 1
-		,dblCost = (
-			CONVERT(NUMERIC(18, 6), Sum(LWS.dblActualAmount)) / (
-				CONVERT(NUMERIC(18, 6), (
-						SELECT SUM(dblNet)
-						FROM tblLGLoadDetail D
-						WHERE L.intLoadId = D.intLoadId
-						))
-				) * CONVERT(NUMERIC(18, 6), SUM(LD.dblNet))
-			)
-		,LD.intItemUOMId
-		,LWS.intLoadWarehouseServicesId
-		,Item.ysnInventoryCost
-		,LD.intItemUOMId
+		,dblQtyReceived = CASE WHEN (WRMD.intCalculateQty = 8) THEN 1 ELSE LWS.dblQuantity END
+		,dblCost = LWS.dblUnitRate
+		,intCostUOMId = LWS.intItemUOMId
+		,intWarehouseServicesId = LWS.intLoadWarehouseServicesId
+		,ysnInventoryCost = Item.ysnInventoryCost
+		,intItemUOMId = CASE WHEN (WRMD.intCalculateQty = 8) THEN LWS.intItemUOMId ELSE LD.intItemUOMId END
+		,dblUnitQty = CASE WHEN (WRMD.intCalculateQty = 8) THEN 1 ELSE ItemUOM.dblUnitQty END
+		,dblCostUnitQty = CostUOM.dblUnitQty
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -151,16 +150,21 @@ BEGIN TRY
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
+	LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixDetailId = LWS.intWarehouseRateMatrixDetailId
 	LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 	LEFT JOIN tblICItem Item ON Item.intItemId = LWS.intItemId
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = Item.intItemId
 		AND ItemLoc.intLocationId = CD.intCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SLCL ON SLCL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		AND ItemLoc.intLocationId = SLCL.intCompanyLocationId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId 
+	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = LWS.intItemUOMId 
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 		AND LWS.dblActualAmount > 0
+		AND LWS.intBillId IS NULL
 	GROUP BY LWS.intLoadWarehouseServicesId
 		,WRMH.intVendorEntityId
+		,WRMD.intCalculateQty
 		,SLCL.intVendorId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
@@ -170,8 +174,13 @@ BEGIN TRY
 		,L.intLoadId
 		,L.strLoadNumber
 		,LD.intLoadDetailId
+		,LWS.dblQuantity
+		,LWS.dblUnitRate
+		,LWS.intItemUOMId
 		,Item.ysnInventoryCost
 		,LD.intItemUOMId
+		,ItemUOM.dblUnitQty
+		,CostUOM.dblUnitQty
 
 	SELECT @intVendorEntityId = intVendorEntityId
 	FROM @voucherDetailData
@@ -187,15 +196,17 @@ BEGIN TRY
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intPContractDetailId,LD.intSContractDetailId)
 	WHERE L.intLoadId = @intLoadId
 
-	IF EXISTS (
-			SELECT TOP 1 1
-			FROM tblAPBillDetail BD
-			JOIN tblLGLoadWarehouseServices LWS ON LWS.intBillId = BD.intBillId
-			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
+	IF NOT EXISTS (
+			SELECT TOP 1 1 FROM tblLGLoadWarehouseServices LWS 
+				INNER JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
+				INNER JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+				INNER JOIN tblAPVendor V ON CLSL.intVendorId = V.intEntityId
 			WHERE LW.intLoadId = @intLoadId
+				AND LWS.intLoadWarehouseId = @intLoadWarehouseId
+				AND LWS.intBillId IS NULL
 			)
 	BEGIN
-		SET @strErrorMessage = 'Voucher was already created for warehouse services of ' + @strLoadNumber;
+		SET @strErrorMessage = 'Vouchers were already created for all warehouse services ' + CHAR(13) + 'of Delivery No. ' + @strDeliveryNo;
 
 		RAISERROR (@strErrorMessage,16,1);
 	END
@@ -252,6 +263,8 @@ BEGIN TRY
 			,dblCost
 			,intCostUOMId
 			,intItemUOMId
+			,dblUnitQty
+			,dblCostUnitQty
 			)
 		SELECT intContractHeaderId
 			,intContractDetailId
@@ -262,6 +275,8 @@ BEGIN TRY
 			,dblCost
 			,intCostUOMId
 			,intItemUOMId
+			,dblUnitQty
+			,dblCostUnitQty
 		FROM @voucherDetailData
 
 		EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
@@ -299,6 +314,8 @@ BEGIN TRY
 				,dblCost
 				,intCostUOMId
 				,intItemUOMId
+				,dblUnitQty
+				,dblCostUnitQty
 				)
 			SELECT intContractHeaderId
 				,intContractDetailId
@@ -309,6 +326,8 @@ BEGIN TRY
 				,dblCost
 				,intCostUOMId
 				,intItemUOMId
+				,dblUnitQty
+				,dblCostUnitQty
 			FROM @voucherDetailData
 			WHERE ysnInventoryCost = 0
 
@@ -367,6 +386,8 @@ BEGIN TRY
 					,dblCost
 					,intCostUOMId
 					,intItemUOMId
+					,dblUnitQty
+					,dblCostUnitQty
 					)
 				SELECT intContractHeaderId
 					,intContractDetailId
@@ -377,6 +398,8 @@ BEGIN TRY
 					,dblCost
 					,intCostUOMId
 					,intItemUOMId
+					,dblUnitQty
+					,dblCostUnitQty
 				FROM @voucherDetailData
 
 				EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId

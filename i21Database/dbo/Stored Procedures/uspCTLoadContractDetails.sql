@@ -169,12 +169,12 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,CT.strContainerType
 				,CT.strContainerUOM --RM.strUnitMeasure strContainerUOM
 
-				,CT.dblQuantityPriceFixed
-				,CT.dblUnpricedQty
+				,dblQuantityPriceFixed = CASE WHEN CD.intPricingTypeId IN (1,6) THEN CD.dblQuantity ELSE  CT.dblQuantityPriceFixed END
+				,dblUnpricedQty		   = CASE WHEN CD.intPricingTypeId IN (1,6) THEN NULL		    ELSE  CT.dblUnpricedQty		   END
 				,CT.dblPFQuantityUOMId
-				,CT.[dblTotalLots]
-				,CT.[dblLotsFixed]
-				,CT.dblUnpricedLots
+				,dblTotalLots			= CASE WHEN CD.intPricingTypeId IN (1,6) THEN CD.dblNoOfLots ELSE  CT.[dblTotalLots]  END 
+				,dblLotsFixed			= CASE WHEN CD.intPricingTypeId IN (1,6) THEN CD.dblNoOfLots ELSE  CT.[dblLotsFixed]  END
+				,dblUnpricedLots		= CASE WHEN CD.intPricingTypeId IN (1,6) THEN NULL			 ELSE  CT.dblUnpricedLots END
 				,CT.intPriceFixationId
 				,CT.intPriceContractId
 				,CT.ysnSpreadAvailable

@@ -53,7 +53,7 @@ INSERT INTO @Realized
 exec uspRKRealizedPnL 	 @dtmFromDate =@dtmTransactionFromDate
 	,@dtmToDate = @dtmTransactionToDate
 	,@intCommodityId=NULL
-	,@ysnExpired='false'
+	,@ysnExpired=0
 	,@intFutureMarketId  = NULL
 	,@intEntityId  = NULL
 	,@intBrokerageAccountId  = NULL

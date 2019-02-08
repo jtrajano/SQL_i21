@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspLGGetSalesInvoiceDetailReport]
+﻿/* Version of uspLGGetSalesInvoiceDetailReport with no container details for Sales Invoice Format 2 */
+
+CREATE PROCEDURE [dbo].[uspLGGetSalesInvoiceDetailReport2]
 		@xmlParam NVARCHAR(MAX) = NULL,
 		@ysnIncludeOtherChargeItems BIT = 1 
 AS
@@ -41,14 +43,6 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure WtUOM ON WtUOM.intUnitMeasureId = WtItemUOM.intUnitMeasureId
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
-	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
-	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId
-		AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
-	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
 	WHERE Inv.intInvoiceId = @intInvoiceId
 		AND Item.strType <> CASE 
 			WHEN @ysnIncludeOtherChargeItems <> 1
@@ -91,8 +85,6 @@ BEGIN
 		CH.strCustomerContract,
 		CH.strContractNumber,
 		CD.intContractSeq,
-		Cont.strContainerNumber,
-		Cont.strMarks,
 		Inv.dblInvoiceSubtotal,
 		Inv.dblTax,
 		Inv.dblInvoiceTotal,
@@ -114,12 +106,6 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure WtUOM ON WtUOM.intUnitMeasureId = WtItemUOM.intUnitMeasureId
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
-	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId	
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
-	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = ReceiptItem.intContainerId
 	WHERE Inv.intInvoiceId = @intInvoiceId
 		AND Item.strType <> CASE WHEN @ysnIncludeOtherChargeItems <> 1 THEN 'Other Charge' ELSE '' END
 END

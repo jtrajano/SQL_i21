@@ -109,6 +109,10 @@ LEFT OUTER JOIN
 		ON SO.strSalesOrderNumber = @strReferenceNumber
 		AND ICIS.strReferenceNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
+	AND ((ISNULL(ICISITEM.[ysnAllowInvoice], 1) = 1 AND ICIS.[intSourceType] = 1)
+		OR
+		ICIS.[intSourceType] <> 1
+		)
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN
@@ -607,6 +611,10 @@ WHERE
 	AND ICISI.intOwnershipType = 1
 	AND ICISI.intOrderId IS NULL
 	AND ICISI.intLineNo IS NULL
+	AND ((ISNULL(ICISI.[ysnAllowInvoice], 1) = 1 AND ICIS.[intSourceType] = 1)
+		OR
+		ICIS.[intSourceType] <> 1
+		)
 	AND ICIS.strShipmentNumber NOT IN (SELECT strTransactionNumber FROM vyuARShippedItems WHERE strTransactionNumber = @ShipmentNumber)
 
 IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)

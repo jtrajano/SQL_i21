@@ -5,17 +5,24 @@ SELECT DISTINCT
 	,E.strName AS strEntityName
 	,E.strEntityNo
 	,ET.strType AS strEntityType
-	,ST.ysnCustomerStorage
-	,ysnStorageVendorReady = CAST(
-                                CASE
-                                  WHEN ysnTransferStorage = 1 THEN 1
-                                  ELSE 
-                                    CASE
-                                      WHEN CS.intTicketId IS NOT NULL THEN 1
-                                      WHEN CS.intDeliverySheetId IS NOT NULL THEN (SELECT ysnPost FROM tblSCDeliverySheet WHERE intDeliverySheetId = CS.intDeliverySheetId)
-                                    END
-                                END AS BIT
-                              )
+	,ysnCustomerStorage		  = CAST(
+                              CASE
+                                WHEN ST.ysnCustomerStorage = 0 THEN 1
+                                
+                                WHEN ST.ysnCustomerStorage = 1 AND ST.strOwnedPhysicalStock = 'Customer' THEN 1
+                                ELSE 0
+                              END AS BIT
+                          )
+	,ysnStorageVendorReady  = CAST(
+                              CASE
+                                WHEN ysnTransferStorage = 1 THEN 1
+                                ELSE 
+                                  CASE
+                                    WHEN CS.intTicketId IS NOT NULL THEN 1
+                                    WHEN CS.intDeliverySheetId IS NOT NULL THEN (SELECT ysnPost FROM tblSCDeliverySheet WHERE intDeliverySheetId = CS.intDeliverySheetId)
+                                  END
+                              END AS BIT
+                          )
 FROM tblGRCustomerStorage CS  
 INNER JOIN tblEMEntity E 
 	ON E.intEntityId = CS.intEntityId
