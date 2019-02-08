@@ -6,6 +6,7 @@ SELECT
 	,P.intEntityId
 	,P.intEntityCustomerId
 	,P.intBankAccountId
+	,strBankName            = LTRIM(RTRIM(B.strBankName))
 	,strBankAccountNo		= LTRIM(RTRIM(BA.strBankAccountNo))
 	,strCustomerName		= LTRIM(RTRIM(E.strName))
 	,strCustomerNumber		= ISNULL(C.strCustomerNumber, E.strEntityNo)
@@ -75,9 +76,14 @@ LEFT OUTER JOIN (SELECT intEntityId
 				 FROM dbo.tblARCustomer WITH (NOLOCK)
 ) C ON E.intEntityId = C.intEntityId
 LEFT OUTER JOIN (SELECT intBankAccountId
+					  ,intBankId
 					  , strBankAccountNo 
 				 FROM dbo.tblCMBankAccount WITH (NOLOCK)
 ) BA ON P.intBankAccountId = BA.intBankAccountId
+INNER JOIN (SELECT intBankId
+					  , strBankName 
+				 FROM dbo.tblCMBank WITH (NOLOCK)
+) B ON B.intBankId = BA.intBankId
 LEFT OUTER JOIN (SELECT intCompanyLocationId
 					  , strLocationName 
 				 FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
