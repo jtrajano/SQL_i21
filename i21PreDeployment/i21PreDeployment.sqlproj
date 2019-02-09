@@ -369,4 +369,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\24_SC\3_UpdateSplitIdForSCTicket.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\1910_StopAuditMigrationJob.sql" />
+  </ItemGroup>
 </Project>

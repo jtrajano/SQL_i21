@@ -81,14 +81,26 @@ BEGIN
 		
 		ELSE
 			BEGIN
-				IF(@jobId is not null)
-					BEGIN
-						EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 0--disable job
-
+				if(@jobId is null)
+					begin
 						EXEC [uspSMCreateAuditLogMigrationPlan] @currentDBName
-						
+					end
+				else
+					begin
 						EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 1--enable the job
-					END
+					end
+				--IF(@jobId is not null)
+					--BEGIN
+						--EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 0--disable job
+
+						--EXEC [uspSMCreateAuditLogMigrationPlan] @currentDBName
+						
+						--EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 1--enable the job
+					--END
+				--ELSE --CREATE THE JOB
+					--BEGIN
+						--EXEC [uspSMCreateAuditLogMigrationPlan] @currentDBName
+					--END
 						
 			END
 					

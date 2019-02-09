@@ -136,7 +136,7 @@ DECLARE @maxStepId INT
 
 
 SET @stepWeekDaySchedule = N'i21_Audit_Migration_WeekDay for ' + CONVERT(NVARCHAR(100),@currentDatabaseName)
-SET @stepWeekEndSchedule = N'i21_Audit_Migration_Weekends_FullBlast for '+ @currentDatabaseName
+SET @stepWeekEndSchedule = N'i21_Audit_Migration_Weekends_FullBlast for '+ CONVERT(NVARCHAR(100),@currentDatabaseName)
 
 SET @stepName = N'Invoke Migration SP in ' + CONVERT(NVARCHAR(100),@currentDatabaseName)
 SET @stepCommand = N'
@@ -221,6 +221,10 @@ END
 ------------------------------------------------------------------------------------
 SELECT @stepId = step_id FROM msdb.dbo.sysjobsteps WHERE step_name = @stepName
 SELECT @maxStepId = MAX(step_id) FROM msdb.dbo.sysjobsteps WHERE job_id = @jobId
+DECLARE @currentDate nvarchar(max)
+
+SET @currentDate = convert(NVARCHAR, GETDATE(), 112)
+
 IF ISNULL(@stepId,0) = 0
 BEGIN
 SET @maxStepId = ISNULL(@maxStepId, 0) + 1
@@ -247,13 +251,13 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule
 		@job_id=@jobId, 
 		@name=  @stepWeekDaySchedule, 
 		@enabled=1, 
-		@freq_type=4, 
-		@freq_interval=1, 
+		@freq_type=8, 
+		@freq_interval=62, 
 		@freq_subday_type=4, 
 		@freq_subday_interval=10, 
 		@freq_relative_interval=0, 
-		@freq_recurrence_factor=0, 
-		@active_start_date=20190206, 
+		@freq_recurrence_factor=1, 
+		@active_start_date=@currentDate,--20190206, 
 		@active_end_date=99991231, 
 		@active_start_time=0, 
 		@active_end_time=235959 
@@ -269,7 +273,7 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule
 		@freq_subday_interval=0, 
 		@freq_relative_interval=0, 
 		@freq_recurrence_factor=1, 
-		@active_start_date=20190206, 
+		@active_start_date=@currentDate,--20190206, 
 		@active_end_date=99991231, 
 		@active_start_time=0, 
 		@active_end_time=235959 
@@ -294,10 +298,11 @@ END
 END
 	ELSE
 		BEGIN
-			EXEC @ReturnCode = msdb.dbo.sp_update_job
+			EXEC @ReturnCode = msdb.dbo.sp_update_jobstep
 				 @job_id = @jobId,
-				 @start_step_id =@stepId--,
-				 --@command = @stepCommand
+				 @step_id =@stepId,
+				 @command = @stepCommand
+			 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 		END
 COMMIT TRANSACTION
 GOTO EndSave
