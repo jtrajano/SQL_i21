@@ -47,33 +47,36 @@ BEGIN
 		DECLARE @step_name NVARCHAR(100)
 		DECLARE @stepId INT
 		DECLARE @maxStepId INT
+		DECLARE @JOB_NAME NVARCHAR(MAX)
 		SET @currentDBName = DB_NAME()
-		SET @step_name = N'Invoke Re-Index Stored Procedure in '+CONVERT(NVARCHAR(100),@currentDBName)
+		SET @JOB_NAME = 'i21_AuditLog_Migration_Job_' + CONVERT(NVARCHAR(max),@currentDBName)
+		--SET @step_name = N'Invoke Audit Migratiob Procedure in '+CONVERT(NVARCHAR(max),@currentDBName)
 
-		--set processed true for this created and deleted action type
-		UPDATE tblSMAuditLog SET ysnProcessed = 1  WHERE ISNULL(strActionType,'') IN ('Created', 'Deleted') 
+		--set processed true for this created and deleted action type | null strJsonData
+		UPDATE tblSMAuditLog SET ysnProcessed = 1  WHERE ISNULL(strActionType,'') IN ('Created', 'Deleted') OR ISNULL(strJsonData,'') = ''
+		
 
 		SET @unProcessedCount = (SELECT COUNT(intAuditLogId) FROM tblSMAuditLog WHERE ysnProcessed = 0)
-		SELECT @jobId = job_id FROM msdb.dbo.sysjobs where [name] = 'i21_AuditLog_Migration_Job'
+		SELECT @jobId = job_id FROM msdb.dbo.sysjobs where [name] = @JOB_NAME
 
 		--IF THERE IS NO AUDIT LOG TO BE MIGRATED, DELETE THE JOB
 		IF (@unProcessedCount = 0)
 			BEGIN
 				IF(@jobId is not null)
 					BEGIN
-						SELECT @stepId = step_id FROM msdb.dbo.sysjobsteps WHERE step_name = @step_name AND job_id = @jobId
+						--SELECT @stepId = step_id FROM msdb.dbo.sysjobsteps WHERE step_name = @step_name AND job_id = @jobId
 						
-						exec msdb.dbo.sp_delete_jobstep @job_id = @jobId, @step_id = @stepId --delete job step
+						--exec msdb.dbo.sp_delete_jobstep @job_id = @jobId, @step_id = @stepId --delete job step
 
-						SET @maxStepId = (select max(step_id) from msdb.dbo.sysjobsteps where job_id = @jobId)
+						--SET @maxStepId = (select max(step_id) from msdb.dbo.sysjobsteps where job_id = @jobId)
 
-						if(@maxStepId = @stepId) --delete job if it is the remaining step
-							begin
-								exec msdb.dbo.sp_delete_job @job_name = @jobId
-							end
+						--if(@maxStepId = @stepId) --delete job if it is the remaining step
+							--begin
+								exec msdb.dbo.sp_delete_job @job_id = @jobId
+						--	end
 
 					 --finally, update the onsuccess of last step to 'quit the job success'
-					   update msdb.dbo.sysjobsteps set on_success_action = 1 WHERE job_id = @jobId and step_id = @maxStepId 
+					 --  update msdb.dbo.sysjobsteps set on_success_action = 1 WHERE job_id = @jobId and step_id = @maxStepId 
 							
 					END
 					
@@ -85,10 +88,10 @@ BEGIN
 					begin
 						EXEC [uspSMCreateAuditLogMigrationPlan] @currentDBName
 					end
-				else
-					begin
-						EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 1--enable the job
-					end
+				--else
+					--begin
+					--	EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 1--enable the job
+					--end
 				--IF(@jobId is not null)
 					--BEGIN
 						--EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 0--disable job

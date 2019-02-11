@@ -133,15 +133,30 @@ DECLARE @stepName NVARCHAR(MAX)
 DECLARE @stepWeekDaySchedule NVARCHAR(MAX)
 DECLARE @stepWeekEndSchedule NVARCHAR(MAX)
 DECLARE @maxStepId INT
+DECLARE @JOB_NAME NVARCHAR(200);
 
-
+SET @JOB_NAME = N'i21_AuditLog_Migration_Job_'+CONVERT(NVARCHAR(100),@currentDatabaseName)
 SET @stepWeekDaySchedule = N'i21_Audit_Migration_WeekDay for ' + CONVERT(NVARCHAR(100),@currentDatabaseName)
 SET @stepWeekEndSchedule = N'i21_Audit_Migration_Weekends_FullBlast for '+ CONVERT(NVARCHAR(100),@currentDatabaseName)
 
 SET @stepName = N'Invoke Migration SP in ' + CONVERT(NVARCHAR(100),@currentDatabaseName)
 SET @stepCommand = N'
 DECLARE @DAY NVARCHAR(15);
+DECLARE @AuditId INT;
+DECLARE @jobId BINARY(16);
+
 SET @DAY = (SELECT DATENAME(DW, GETDATE()))
+SET @AuditId = (SELECT TOP 1 intAuditLogId FROM tblSMAuditLog WHERE ysnProcessed = 0)
+SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE name = '''+ @JOB_NAME +'''
+
+if(@AuditId is null)
+	begin
+		exec msdb.dbo.sp_delete_job @job_id = @jobId
+	end
+else
+	begin
+
+
 DECLARE @isWeekend BIT = CASE WHEN (@DAY = ''Saturday'' OR @DAY = ''Sunday'') THEN 1 ELSE 0 END
 
 BEGIN TRY
@@ -157,6 +172,8 @@ SELECT
 		ERROR_LINE() as ErrorLine,
 		ERROR_MESSAGE() as ErrorMessage;
 END CATCH
+
+end
 '
 
 IF NOT EXISTS (SELECT name FROM msdb.dbo.syscategories WHERE name=N'i21 Audit Migration' AND category_class=1)
@@ -169,31 +186,35 @@ END
 --===================================================================================
 -- CHECK IF MAINTENANCE IS CURRENTLY EXISTING ELSE CREATE IT
 -------------------------------------------------------------------------------------
-DECLARE @planId binary(16)
-	SELECT @planId = plan_id FROM msdb.dbo.sysdbmaintplans WHERE plan_name = 'i21_AuditMigration_Maintenance_Plan'
-	IF @planId IS NULL
-	BEGIN
-		EXEC @ReturnCode = msdb.dbo.sp_add_maintenance_plan 
-				@plan_name = 'i21_AuditMigration_Maintenance_Plan' ,   
-				@plan_id = @planId OUTPUT 
-		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+--DECLARE @planId binary(16)
+--	SELECT @planId = plan_id FROM msdb.dbo.sysdbmaintplans WHERE plan_name = 'i21_AuditMigration_Maintenance_Plan'
+--	IF @planId IS NULL
+--	BEGIN
+--		EXEC @ReturnCode = msdb.dbo.sp_add_maintenance_plan 
+--				@plan_name = 'i21_AuditMigration_Maintenance_Plan' ,   
+--				@plan_id = @planId OUTPUT 
+--		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
-		EXEC @ReturnCode = msdb.dbo.sp_add_maintenance_plan_db 
-				@planId, 
-				@currentDatabaseName
-		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-	END
---===================================================================================
+--		EXEC @ReturnCode = msdb.dbo.sp_add_maintenance_plan_db 
+--				@planId, 
+--				@currentDatabaseName
+--		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+--	END
+----===================================================================================
 -- ADD JOB FOR THIS DATABASE
 -------------------------------------------------------------------------------------
 
 DECLARE @jobId BINARY(16)
+--DECLARE @JOB_NAME NVARCHAR(200);
+
+
+
 DECLARE @serverName NVARCHAR(MAX) = Convert(varchar(250), SERVERPROPERTY('ServerName'))
-SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE name = N'i21_AuditLog_Migration_Job'
+SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE name = @JOB_NAME --N'i21_AuditLog_Migration_Job'
 IF @jobId IS NULL
 BEGIN
 EXEC @ReturnCode =  msdb.dbo.sp_add_job 
-		@job_name=N'i21_AuditLog_Migration_Job', 
+		@job_name=@JOB_NAME, 
 		@enabled=1, 
 		@notify_level_eventlog=0, 
 		@notify_level_email=0, 
@@ -211,27 +232,27 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobserver
 		@server_name = @serverName
 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
-EXEC @ReturnCode = msdb.dbo.sp_add_maintenance_plan_job @planId, @jobId
-IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+--EXEC @ReturnCode = msdb.dbo.sp_add_maintenance_plan_job @planId, @jobId
+--IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 		
 
 END
 --==================================================================================
 -- START ADD JOB STEP AND SCHEDULE
 ------------------------------------------------------------------------------------
-SELECT @stepId = step_id FROM msdb.dbo.sysjobsteps WHERE step_name = @stepName
-SELECT @maxStepId = MAX(step_id) FROM msdb.dbo.sysjobsteps WHERE job_id = @jobId
+--SELECT @stepId = step_id FROM msdb.dbo.sysjobsteps WHERE step_name = @stepName
+--SELECT @maxStepId = MAX(step_id) FROM msdb.dbo.sysjobsteps WHERE job_id = @jobId
 DECLARE @currentDate nvarchar(max)
 
 SET @currentDate = convert(NVARCHAR, GETDATE(), 112)
 
-IF ISNULL(@stepId,0) = 0
-BEGIN
-SET @maxStepId = ISNULL(@maxStepId, 0) + 1
+--IF ISNULL(@stepId,0) = 0
+--BEGIN
+--SET @maxStepId = ISNULL(@maxStepId, 0) + 1
 EXEC @ReturnCode = msdb.dbo.sp_add_jobstep 
 		@job_id=@jobId, 
 		@step_name=@stepName, 
-		@step_id=@maxStepId,--1, 
+		@step_id=1, 
 		@cmdexec_success_code=0, 
 		--@on_success_action=3,--go to next step 
 		@on_success_step_id=0, 
@@ -282,28 +303,27 @@ IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 --=======================================================
 --UPDATE LOWER STEP SUCCESS ACTION TO "Quit with success"
 ---------------------------------------------------------
-IF @maxStepId > 1
-BEGIN
-	UPDATE msdb.dbo.sysjobsteps set on_success_action = 3
-	WHERE job_id = @jobId and step_id <> @maxStepId
-	--UPDATE msdb.dbo.sysjobsteps set on_success_action = 1
-	--WHERE job_id = @jobId and step_id = @maxStepId
-END
+--IF @maxStepId > 1
+--BEGIN
+--	UPDATE msdb.dbo.sysjobsteps set on_success_action = 3
+--	WHERE job_id = @jobId and step_id <> @maxStepId
+	
+--END
 
 --EXEC @ReturnCode = msdb.dbo.sp_add_jobserver 
 --					@job_id = @jobId, 
 --					@server_name = @serverName
 --IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
-END
-	ELSE
-		BEGIN
-			EXEC @ReturnCode = msdb.dbo.sp_update_jobstep
-				 @job_id = @jobId,
-				 @step_id =@stepId,
-				 @command = @stepCommand
-			 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-		END
+--END
+	--ELSE
+	--	BEGIN
+	--		EXEC @ReturnCode = msdb.dbo.sp_update_jobstep
+	--			 @job_id = @jobId,
+	--			 @step_id =@stepId,
+	--			 @command = @stepCommand
+	--		 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+	--	END
 COMMIT TRANSACTION
 GOTO EndSave
 QuitWithRollback:
