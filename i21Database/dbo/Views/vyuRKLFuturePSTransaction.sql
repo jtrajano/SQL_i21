@@ -45,7 +45,7 @@ FROM (
 										from tblRKBrokerageCommission bc
 										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
 										where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId
-											and  ot.dtmTransactionDate between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,getdate())),0) * -1
+											and  getdate() between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,getdate())),0) * -1
 			, ot.intBrokerageCommissionId
 			, dtmFilledDate
 			, ot.intFutOptTransactionHeaderId
