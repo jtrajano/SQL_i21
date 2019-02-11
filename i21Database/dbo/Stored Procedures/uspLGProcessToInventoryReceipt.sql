@@ -185,6 +185,8 @@ BEGIN TRY
 							END
 						) AS BIT) = 0
 				AND L.intLoadId = @intLoadId
+				AND ISNULL(LC.ysnRejected, 0) <> 1 
+				AND ISNULL(LDCL.dblReceivedQty,0) = 0
 			ORDER BY LDCL.intLoadDetailContainerLinkId
 		END
 		ELSE
@@ -720,6 +722,8 @@ BEGIN TRY
 							END
 						) AS BIT) = 0
 				AND L.intLoadId = @intLoadId
+				AND ISNULL(LC.ysnRejected, 0) <> 1
+				AND ISNULL(LDCL.dblReceivedQty,0) = 0
 			ORDER BY LDCL.intLoadDetailContainerLinkId
 		END
 		ELSE
