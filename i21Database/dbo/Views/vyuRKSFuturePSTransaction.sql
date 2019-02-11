@@ -41,7 +41,7 @@ FROM (
 										FROM tblRKBrokerageCommission bc
 										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
 										WHERE bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId
-											and ot.dtmTransactionDate between bc.dtmEffectiveDate and ISNULL(bc.dtmEndDate,getdate())),0) * -1 --commision is always negative (RM-1174)
+											and getdate() between bc.dtmEffectiveDate and ISNULL(bc.dtmEndDate,getdate())),0) * -1 --commision is always negative (RM-1174)
 			, dtmFilledDate
 			, ot.intFutOptTransactionHeaderId
 			, intCurrencyId = c.intCurrencyID
