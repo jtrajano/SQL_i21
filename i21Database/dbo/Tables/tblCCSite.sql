@@ -32,7 +32,7 @@
 
 
 	CONSTRAINT [PK_tblCCSite] PRIMARY KEY ([intSiteId]),
-	CONSTRAINT [AK_tblCCSite] UNIQUE ([strSite]),
+	CONSTRAINT [AK_tblCCSite] UNIQUE ([intVendorDefaultId],[strSite]),
 
 	CONSTRAINT [FK_tblCCSite_tblCCVendorDefault_intVendorDefaultId] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [dbo].[tblCCVendorDefault] ([intVendorDefaultId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCCSite_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),	
