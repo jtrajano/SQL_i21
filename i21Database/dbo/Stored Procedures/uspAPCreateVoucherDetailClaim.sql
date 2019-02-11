@@ -39,7 +39,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblCost]						,
 		[int1099Form]					,
 		[int1099Category]				,
-		[intLineNo]						
+		[intLineNo]						,
+		[intSubLocationId]				,
+		[intStorageLocationId]				
 	)
 	OUTPUT inserted.intBillDetailId INTO @detailCreated
 	SELECT
@@ -68,7 +70,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 													WHEN E.str1099Form = '1099-B' THEN 3
 												ELSE 0 END),
 		[int1099Category]				=	ISNULL(F.int1099CategoryId, 0),
-		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))			
+		[intLineNo]						=	ROW_NUMBER() OVER(ORDER BY (SELECT 1)),
+		[intSubLocationId]				=	A.intSubLocationId,
+		[intStorageLocationId]			=	A.intStorageLocationId	
 	FROM @voucherDetailClaim A
 	CROSS APPLY tblAPBill B
 	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
