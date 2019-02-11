@@ -56,11 +56,15 @@ AS
 			CH.dtmExported,
 			CH.strCropYear,
 			CH.ysnLoad,
-			CASE	WHEN	CH.strStatuses LIKE '%Open%'
-					THEN	'Open'
+			CASE	
+					WHEN	CH.strStatuses LIKE '%Incomplete%'
+					THEN	'Incomplete'
+					WHEN	CH.strStatuses LIKE '%Open%'
+					THEN	'Open'					
 					WHEN	CH.strStatuses LIKE '%Complete%'
 					THEN	'Complete'
 					ELSE	CH.strStatuses
+
 			END		strStatuses,
 			CH.intStockCommodityUnitMeasureId,
 			CH.strStockCommodityUnitMeasure,
