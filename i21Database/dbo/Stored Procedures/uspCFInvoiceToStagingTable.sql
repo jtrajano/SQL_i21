@@ -635,6 +635,7 @@ BEGIN TRY
 		,strCFTerm
 		,strCFTermCode
 		,intEntityUserId
+		,strStatementType
 		)
 		SELECT
 		 intCustomerId
@@ -717,6 +718,7 @@ BEGIN TRY
 		,intTermID		
 		,strTerm
 		,strTermCode
+		,@strStatementFormat
 
 		--SELECT '2',* FROM tblARCustomerStatementStagingTable
 
