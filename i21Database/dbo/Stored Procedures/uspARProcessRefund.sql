@@ -134,6 +134,7 @@ INSERT INTO @tblInvoiceEntries (
 	,[dblPrice]
 	,[ysnRefreshPrice]
 	,[ysnRecomputeTax]
+	,[intOriginalInvoiceId]
 )
 SELECT
 	 [strSourceTransaction]				= 'Direct'
