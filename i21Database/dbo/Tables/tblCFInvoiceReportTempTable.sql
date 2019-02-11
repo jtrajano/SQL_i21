@@ -85,10 +85,13 @@
     [ysnPostForeignSales]         BIT             NULL,
     [ysnDepartmentGrouping]       BIT             NULL,
     [ysnSummaryByDeptVehicleProd] BIT             NULL,
-    [strGuid]                     NVARCHAR (MAX)  NULL,
-    [strUserId]                   NVARCHAR (MAX)  NULL,
+    [strGuid]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strUserId]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intVehicleId]                INT             NULL,
-    [strStatementType]            NVARCHAR (MAX)  NULL
+    [strStatementType]            NVARCHAR (MAX)  NULL,
+	[strDriverPinNumber]		  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strDriverPinDescription]	  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [intDriverPinId]			  INT             NULL,
 );
 
 

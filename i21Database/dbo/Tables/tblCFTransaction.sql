@@ -81,6 +81,7 @@
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),
+    CONSTRAINT [FK_tblCFTransaction_tblCFDriverPin] FOREIGN KEY ([intDriverPinId]) REFERENCES [dbo].[tblCFDriverPin] ([intDriverPinId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFVehicle] FOREIGN KEY ([intVehicleId]) REFERENCES [dbo].[tblCFVehicle] ([intVehicleId]),

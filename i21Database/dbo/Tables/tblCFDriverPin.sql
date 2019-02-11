@@ -10,3 +10,9 @@ CREATE TABLE [dbo].[tblCFDriverPin](
 	CONSTRAINT [PK_tblCFDriverPin] PRIMARY KEY CLUSTERED ([intDriverPinId] ASC),
 ) ON [PRIMARY]
 GO
+
+
+CREATE UNIQUE NONCLUSTERED INDEX [tblCFDriverPin_UniqueAccountDriverPinNumber]
+    ON [dbo].[tblCFDriverPin]([intAccountId] ASC, [strDriverPinNumber] ASC) WITH (FILLFACTOR = 70);
+GO
+
