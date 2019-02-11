@@ -677,6 +677,7 @@ BEGIN TRY
 		,intEntityUserId
 		,dblCFTotalFuelExpensed
 		,dblCFFeeTotalAmount
+		,strStatementFormat
 		)
 		SELECT
 		 intCustomerId
@@ -737,6 +738,7 @@ BEGIN TRY
 		,@intEntityUserId
 		,ISNULL(dblTotalFuelExpensed,0)
 		,ISNULL(dblFeeAmount,0)
+		,@strStatementFormat
 		FROM
 		tblCFInvoiceStagingTable 
 		AS cfInv
