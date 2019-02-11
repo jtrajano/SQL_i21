@@ -18,7 +18,7 @@ SELECT
     ,strSubLocationName					= ISNULL(SLOC.strSubLocationName,'')
     ,dtmDeliveryDate					= CS.dtmDeliveryDate  
     ,strDPARecieptNumber				= ISNULL(CS.strDPARecieptNumber,'')
-    ,dblOpenBalance						= dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId, ItemUOM.intItemUOMId, CS.dblOpenBalance)  
+    ,dblOpenBalance						= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId, ItemUOM.intItemUOMId, CS.dblOpenBalance), 6)
     ,ysnDPOwnedType						= ST.ysnDPOwnedType
     ,intContractHeaderId                = CH.intContractHeaderId
     ,intContractDetailId				= SC.intContractId
