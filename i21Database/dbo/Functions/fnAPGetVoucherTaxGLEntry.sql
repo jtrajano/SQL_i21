@@ -8,9 +8,9 @@ RETURNS TABLE AS RETURN
 		B.intBillDetailId
 		,D.intBillDetailTaxId
 		,B.strMiscDescription
-		,CAST((ISNULL(D.dblAdjustedTax, D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1)) 
+		,CAST((D.dblTax * ISNULL(NULLIF(B.dblRate,0),1)) 
 			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblTotal
-		,CAST((ISNULL(D.dblAdjustedTax, D.dblTax)) 
+		,CAST((D.dblTax) 
 			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
 		,CASE WHEN B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL OR B.intInventoryShipmentChargeId IS NOT NULL
@@ -41,8 +41,8 @@ RETURNS TABLE AS RETURN
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3)
 	-- AND D.dblTax != 0
-	AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
-				THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax
-					* (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN -1 ELSE 1 END)
-		ELSE (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax END * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2) != 0
+	-- AND ROUND(CASE WHEN charges.intInventoryReceiptChargeId > 0 
+	-- 			THEN (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax
+	-- 				* (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 THEN -1 ELSE 1 END)
+	-- 	ELSE (ISNULL(D.dblAdjustedTax, D.dblTax) / B.dblTax) * B.dblTax END * ISNULL(NULLIF(B.dblRate,0),1) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END), 2) != 0
 )
