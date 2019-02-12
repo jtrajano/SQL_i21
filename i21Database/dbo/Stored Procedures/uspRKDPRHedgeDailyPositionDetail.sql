@@ -30,6 +30,12 @@ BEGIN
 		, @ysnHideNetPayableAndReceivable = ISNULL(ysnHideNetPayableAndReceivable, 0)
 		, @ysnPreCrush = ISNULL(ysnPreCrush, 0)
 	FROM tblRKCompanyPreference
+
+	DECLARE @CrushReport BIT = 0
+	IF (ISNULL(@strPositionBy, '') = 'Delivery Month' OR ISNULL(@strPositionBy, '') = 'Futures Month')
+	BEGIN
+		SET @CrushReport = 1
+	END
 	
 	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
 		, intCommodity INT)
@@ -304,7 +310,7 @@ BEGIN
 			, ysnPreCrush
 			, strNotes
 			, strBrokerTradeNo)
-		SELECT * FROM fnRKGetOpenFutureByDate( @tempCommId, @dtmToDate)
+		SELECT * FROM fnRKGetOpenFutureByDate( @tempCommId, @dtmToDate, @CrushReport)
 
 		DELETE FROM #tempCommodity WHERE intCommodity = @tempCommId
 	END
