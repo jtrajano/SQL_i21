@@ -128,13 +128,13 @@ SELECT 	 SQ.intContractDetailId
 	JOIN 		tblCTContractHeader				 	CH	ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
 	LEFT JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=	CH.intContractBasisId
 	LEFT JOIN	tblICItem						 	IM	ON	IM.intItemId						=	SQ.intItemId
-	LEFT JOIN 	tblEMEntity						 	PR	ON	PR.intEntityId						=	CH.intProducerId
+	LEFT JOIN 	tblEMEntity						 	PR	ON	PR.intEntityId						=	ISNULL(CD.intProducerId,CH.intProducerId)
 	LEFT JOIN 	tblSMCity						 	LP	ON	LP.intCityId						=	CD.intLoadingPortId
 	LEFT JOIN 	tblSMCity						 	DP	ON	DP.intCityId						=	CD.intDestinationPortId
 	LEFT JOIN 	tblSMCity						 	DC	ON	DC.intCityId						=	CD.intDestinationCityId
 	LEFT JOIN 	tblICItemContract				 	IC	ON	IC.intItemContractId				=	CD.intItemContractId
 	LEFT JOIN 	tblSMCountry					 	RY	ON	RY.intCountryID						=	IC.intCountryId
-	LEFT JOIN 	tblICCommodityAttribute			 	CA	ON	CA.intCommodityAttributeId			=	IM.intOriginId
+	LEFT JOIN 	tblICCommodityAttribute			 	CA	ON	CA.intCommodityAttributeId			=	IM.intOriginId	
 														AND	CA.strType							=	'Origin'
 	LEFT JOIN 	tblSMCountry					 	OG	ON	OG.intCountryID						=	CA.intCountryID
 	LEFT JOIN 	tblLGContainerType				 	CT	ON	CT.intContainerTypeId				=	CD.intContainerTypeId
