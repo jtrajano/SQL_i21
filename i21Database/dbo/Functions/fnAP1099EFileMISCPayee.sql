@@ -42,9 +42,9 @@ BEGIN
 					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
-					+ CAST(PARSENAME(CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+					CAST(FLOOR((CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)) --get the whole number
+					+ REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)))) --add zeros after the whole number
+					+ CAST(PARSENAME(CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2)) --last two digit decimal
 			END
 			+ CASE WHEN ISNULL(A.dblRoyalties,0) > @maxAmount 
 				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
