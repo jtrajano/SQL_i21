@@ -127,7 +127,7 @@ SELECT 	 SQ.intContractDetailId
 	JOIN 		tblCTContractHeader				 	CH	WITH (NOLOCK) ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
 	LEFT JOIN	tblCTContractBasis					CB	WITH (NOLOCK) ON	CB.intContractBasisId				=	CH.intContractBasisId
 	LEFT JOIN	tblICItem						 	IM	WITH (NOLOCK) ON	IM.intItemId						=	SQ.intItemId
-	LEFT JOIN 	tblEMEntity						 	PR	WITH (NOLOCK) ON	PR.intEntityId						=	CH.intProducerId
+	LEFT JOIN 	tblEMEntity						 	PR	WITH (NOLOCK) ON	PR.intEntityId						=	ISNULL(CD.intProducerId,CH.intProducerId)
 	LEFT JOIN 	tblSMCity						 	LP	WITH (NOLOCK) ON	LP.intCityId						=	CD.intLoadingPortId
 	LEFT JOIN 	tblSMCity						 	DP	WITH (NOLOCK) ON	DP.intCityId						=	CD.intDestinationPortId
 	LEFT JOIN 	tblSMCity						 	DC	WITH (NOLOCK) ON	DC.intCityId						=	CD.intDestinationCityId
