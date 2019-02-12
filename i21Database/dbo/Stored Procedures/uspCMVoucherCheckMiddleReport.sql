@@ -161,6 +161,7 @@ SELECT
 		--Use to display the MICR
 		,BNKACCNT.ysnCheckEnableMICRPrint
 		,strCheckMessage = ISNULL(PYMT.strCheckMessage,'') 
+		,CHK.ysnCheckVoid
 FROM	dbo.tblCMBankTransaction CHK 
 		INNER JOIN tblCMBankAccount BNKACCNT
 			ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
