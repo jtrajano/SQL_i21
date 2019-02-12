@@ -410,7 +410,7 @@ SELECT DISTINCT CH.intCommodityUOMId intCommodityUnitMeasureId
 	, CD.intMarketZoneId
 	, CD.dtmPlannedAvailabilityDate
 	, IM.strItemNo
-	, PT.strPricingType
+	, OCD.strPricingType
 	, PU.intUnitMeasureId AS intPriceUnitMeasureId
 	, IU.intUnitMeasureId
 	, MO.strFutureMonth
