@@ -48,6 +48,11 @@ BEGIN
 	DECLARE @strCommodityCode NVARCHAR(50)
 	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
 		, intCommodity INT)
+	DECLARE @CrushReport BIT = 0
+	IF (ISNULL(@strPositionBy, '') = 'Delivery Month' OR ISNULL(@strPositionBy, '') = 'Futures Month')
+	BEGIN
+		SET @CrushReport = 1
+	END
 
 	INSERT INTO @Commodity (intCommodity)
 	SELECT Item Collate Latin1_General_CI_AS
@@ -293,7 +298,7 @@ BEGIN
 				, ysnPreCrush
 				, strNotes
 				, strBrokerTradeNo)
-			SELECT * FROM  fnRKGetOpenFutureByDate( @intCommodityId, @dtmToDate)
+			SELECT * FROM  fnRKGetOpenFutureByDate( @intCommodityId, @dtmToDate, @CrushReport)
 
 			INSERT INTO @List (strCommodityCode
 				, intCommodityId
