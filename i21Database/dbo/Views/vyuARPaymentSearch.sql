@@ -1,55 +1,55 @@
 ﻿CREATE VIEW [dbo].[vyuARPaymentSearch]
 AS
-SELECT 
-	 P.intPaymentId
-	,P.strRecordNumber
-	,P.intEntityId
-	,P.intEntityCustomerId
-	,P.intBankAccountId
-	,strBankName            = LTRIM(RTRIM(B.strBankName))
-	,strBankAccountNo		= LTRIM(RTRIM(BA.strBankAccountNo))
-	,strCustomerName		= LTRIM(RTRIM(E.strName))
-	,strCustomerNumber		= ISNULL(C.strCustomerNumber, E.strEntityNo)
-	,P.dtmDatePaid
-	,P.intPaymentMethodId
-	,strPaymentMethod		= PM.strPaymentMethod
-	,dblAmountPaid			= P.dblAmountPaid
-    ,dblDiscount            = ISNULL(PD.dblDiscount, 0)
-	,P.ysnPosted
-	,strPaymentType			= 'Payment' COLLATE Latin1_General_CI_AS
-	,strInvoices			= TRANSACTIONS.strTransactionId
-	,P.intLocationId 
-	,CL.strLocationName
-	,dtmBatchDate			= P.dtmBatchDate
-	,strBatchId				= P.strBatchId
-	,strUserEntered			= POSTEDBY.strName
-	,strEnteredBy			= EM.strName
-	,strTicketNumbers		= SCALETICKETS.strTicketNumbers
-	,strCustomerReferences	= CUSTOMERREFERENCES.strCustomerReferences
-	,intCurrencyId			= P.intCurrencyId
-	,strCurrency			= SMC.strCurrency
-    ,strCurrencyDescription	= SMC.strDescription
-	,P.strPaymentInfo
-	,P.ysnProcessedToNSF
-	,strTransactionId		= ARP.strTransactionId
-FROM (SELECT intPaymentId
-		   , strRecordNumber 
-		   , intEntityId
-		   , intEntityCustomerId
-		   , intBankAccountId
-		   , dtmDatePaid
-		   , intPaymentMethodId
-		   , dblAmountPaid
-		   , ysnPosted
-		   , intLocationId
-		   , intAccountId 
-		   , intCurrencyId
-		   , dtmBatchDate
-		   , intPostedById
-		   , strBatchId
-		   , strPaymentInfo
-		   , ysnProcessedToNSF
-	  FROM dbo.tblARPayment WITH (NOLOCK)
+SELECT intPaymentId				= P.intPaymentId
+	 , strRecordNumber			= P.strRecordNumber
+	 , intEntityId				= P.intEntityId
+	 , intEntityCustomerId		= P.intEntityCustomerId
+	 , intBankAccountId			= P.intBankAccountId
+	 , strBankName				= LTRIM(RTRIM(BA.strBankName))
+	 , strBankAccountNo			= LTRIM(RTRIM(BA.strBankAccountNo))
+	 , strCustomerName			= LTRIM(RTRIM(E.strName))
+	 , strCustomerNumber		= ISNULL(C.strCustomerNumber, E.strEntityNo)
+	 , dtmDatePaid				= P.dtmDatePaid
+	 , intPaymentMethodId		= P.intPaymentMethodId
+	 , strPaymentMethod			= PM.strPaymentMethod
+	 , dblAmountPaid			= P.dblAmountPaid
+     , dblDiscount				= ISNULL(PD.dblDiscount, 0)
+	 , ysnPosted				= P.ysnPosted
+	 , strPaymentType			= 'Payment' COLLATE Latin1_General_CI_AS
+	 , strInvoices				= TRANSACTIONS.strTransactionId
+	 , intLocationId			= P.intLocationId 
+	 , strLocationName			= CL.strLocationName
+	 , dtmBatchDate				= P.dtmBatchDate
+	 , strBatchId				= P.strBatchId
+	 , strUserEntered			= POSTEDBY.strName
+	 , strEnteredBy				= EM.strName
+	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
+	 , strCustomerReferences	= CUSTOMERREFERENCES.strCustomerReferences
+	 , intCurrencyId			= P.intCurrencyId
+	 , strCurrency				= SMC.strCurrency
+     , strCurrencyDescription	= SMC.strDescription
+	 , strPaymentInfo			= P.strPaymentInfo
+	 , ysnProcessedToNSF		= P.ysnProcessedToNSF
+	 , strTransactionId			= ARP.strTransactionId
+FROM (
+	SELECT intPaymentId
+		 , strRecordNumber 
+		 , intEntityId
+		 , intEntityCustomerId
+		 , intBankAccountId
+		 , dtmDatePaid
+		 , intPaymentMethodId
+		 , dblAmountPaid
+		 , ysnPosted
+		 , intLocationId
+		 , intAccountId 
+		 , intCurrencyId
+		 , dtmBatchDate
+		 , intPostedById
+		 , strBatchId
+		 , strPaymentInfo
+		 , ysnProcessedToNSF
+	FROM dbo.tblARPayment WITH (NOLOCK)
 ) P 
 LEFT JOIN (
      SELECT intPaymentId
@@ -58,44 +58,54 @@ LEFT JOIN (
      WHERE ISNULL(dblDiscount, 0) <> 0
      GROUP BY intPaymentId
 ) PD ON P.intPaymentId = PD.intPaymentId
-LEFT OUTER JOIN (SELECT intEntityId
-					  , strName 
-				 FROM dbo.tblEMEntity WITH (NOLOCK)
+LEFT OUTER JOIN (
+	SELECT intEntityId
+		 , strName 
+	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) EM ON P.intEntityId = EM.intEntityId
-LEFT OUTER JOIN (SELECT intPaymentMethodID
-					  , strPaymentMethod 
-				 FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
+LEFT OUTER JOIN (
+	SELECT intPaymentMethodID
+		 , strPaymentMethod 
+	FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
 ) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
-INNER JOIN (SELECT intEntityId 
-			     , strEntityNo
-			     , strName 
-		    FROM dbo.tblEMEntity WITH (NOLOCK)
+INNER JOIN (
+	SELECT intEntityId 
+		 , strEntityNo
+		 , strName 
+	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) E ON P.intEntityCustomerId = E.intEntityId
-LEFT OUTER JOIN (SELECT intEntityId
-					 ,  strCustomerNumber 
-				 FROM dbo.tblARCustomer WITH (NOLOCK)
+LEFT OUTER JOIN (
+	SELECT intEntityId
+		 , strCustomerNumber 
+	FROM dbo.tblARCustomer WITH (NOLOCK)
 ) C ON E.intEntityId = C.intEntityId
-LEFT OUTER JOIN (SELECT intBankAccountId
-					  ,intBankId
-					  , strBankAccountNo 
-				 FROM dbo.tblCMBankAccount WITH (NOLOCK)
+LEFT OUTER JOIN (
+	SELECT intBankAccountId
+		 , BA.intBankId
+		 , strBankAccountNo
+		 , B.strBankName 
+	FROM dbo.tblCMBankAccount BA WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intBankId
+			 , strBankName 
+		FROM dbo.tblCMBank WITH (NOLOCK)
+	) B ON B.intBankId = BA.intBankId
 ) BA ON P.intBankAccountId = BA.intBankAccountId
-INNER JOIN (SELECT intBankId
-					  , strBankName 
-				 FROM dbo.tblCMBank WITH (NOLOCK)
-) B ON B.intBankId = BA.intBankId
-LEFT OUTER JOIN (SELECT intCompanyLocationId
-					  , strLocationName 
-				 FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+LEFT OUTER JOIN (
+	SELECT intCompanyLocationId
+		 , strLocationName 
+	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) CL ON P.intLocationId = CL.intCompanyLocationId
-LEFT OUTER JOIN (SELECT intEntityId
-				      , strName
-				 FROM dbo.tblEMEntity WITH (NOLOCK)
+LEFT OUTER JOIN (
+	SELECT intEntityId
+		 , strName
+	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) POSTEDBY ON P.intPostedById = POSTEDBY.intEntityId
-LEFT OUTER JOIN (SELECT intCurrencyID
-					  , strCurrency
-					  , strDescription 
-				 FROM dbo.tblSMCurrency WITH (NOLOCK)
+LEFT OUTER JOIN (
+	SELECT intCurrencyID
+		 , strCurrency
+		 , strDescription 
+	FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) SMC ON P.intCurrencyId = SMC.intCurrencyID
 LEFT OUTER JOIN vyuARPaymentBankTransaction ARP
 	ON ARP.intPaymentId = P.intPaymentId

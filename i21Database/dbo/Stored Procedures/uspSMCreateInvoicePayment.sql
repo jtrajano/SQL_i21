@@ -118,7 +118,7 @@ BEGIN
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
 				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN BA.intBankAccountId ELSE NULL END
-				, dblAmountPaid					= dblAmountDue
+				, dblAmountPaid					= ISNULL(PAYMENTS.dblPayment, 0)
 				, ysnPost						= NULL
 				, intEntityId					= @intUserId
 				, intInvoiceId					= INVOICE.intInvoiceId
@@ -133,8 +133,8 @@ BEGIN
 				, dblDiscountAvailable			= INVOICE.dblDiscountAvailable
 				, dblInterest					= INVOICE.dblInterest
 				, dblPayment					= ISNULL(PAYMENTS.dblPayment, 0)
-				, dblAmountDue					= INVOICE.dblAmountDue
-				, dblBaseAmountDue				= INVOICE.dblBaseAmountDue
+				, dblAmountDue					= INVOICE.dblAmountDue - ISNULL(PAYMENTS.dblPayment, 0)
+				, dblBaseAmountDue				= INVOICE.dblBaseAmountDue - ISNULL(PAYMENTS.dblPayment, 0)
 				, strInvoiceReportNumber		= INVOICE.strInvoiceReportNumber
 				, intCurrencyExchangeRateTypeId	= INVOICE.intCurrencyExchangeRateTypeId
 				, intCurrencyExchangeRateId		= INVOICE.intCurrencyExchangeRateId
