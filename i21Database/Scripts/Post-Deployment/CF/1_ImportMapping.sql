@@ -834,7 +834,9 @@ BEGIN
 	
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@cfnImportHeader, N'TaxValue10', 0, 40, NULL, 0, 2, NULL, NULL)
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@cfnImportHeader,SCOPE_IDENTITY(), 34, 0, NULL, NULL, NULL, NULL, 0, NULL, 1, 1)
-
+	
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) VALUES (@cfnImportHeader, N'PumpNumber', 0, 11, NULL, 0, 2, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) VALUES (@cfnImportHeader,SCOPE_IDENTITY(), 35, 0, NULL, N'tblCFTransaction', N'intPumpNumber', NULL, 0, NULL, 1, 1)
 END
 
 -----------CFN-------------
