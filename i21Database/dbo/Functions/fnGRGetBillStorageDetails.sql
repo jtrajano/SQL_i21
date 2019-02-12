@@ -59,12 +59,33 @@ BEGIN
 		,[dblStorageBilledAmount]		DECIMAL(18,6)		NOT NULL DEFAULT 0			
     	,[dblFlatFeeTotal]				DECIMAL(18,6)		NOT NULL DEFAULT 0				
 	)
+
+	DECLARE @tmpBillStorageValues AS TABLE
+	(
+		[intCustomerStorageId]			INT
+		,[intStorageScheduleId]			INT
+		,[dblOpenBalance]				DECIMAL(38,20)		NOT NULL DEFAULT 0
+		,[dblStorageDuePerUnit]			DECIMAL(18,6)		NOT NULL DEFAULT 0
+		,[dblStorageDueAmount]			DECIMAL(18,6)		NOT NULL DEFAULT 0
+		,[dblStorageDueTotalPerUnit]	DECIMAL(18,6)		NOT NULL DEFAULT 0
+		,[dblStorageDueTotalAmount]		DECIMAL(18,6)		NOT NULL DEFAULT 0
+		,[dblStorageBilledPerUnit]		DECIMAL(18,6)		NOT NULL DEFAULT 0		
+		,[dblStorageBilledAmount]		DECIMAL(18,6)		NOT NULL DEFAULT 0			
+    	,[dblFlatFeeTotal]				DECIMAL(18,6)		NOT NULL DEFAULT 0
+	)
 	
-	INSERT INTO @BillStorageValues(intCustomerStorageId, intStorageScheduleId, dblOpenBalance)
+	INSERT INTO @tmpBillStorageValues
 	SELECT 
 		CS.intCustomerStorageId
 		,CS.intStorageScheduleId
 		,CS.dblOpenBalance
+		,0
+		,0
+		,0
+		,0
+		,0
+		,0
+		,0
 	FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageType ST
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
@@ -72,58 +93,63 @@ BEGIN
 		AND ST.ysnCustomerStorage = 0
 	ORDER BY CS.dtmDeliveryDate
 
-	SELECT @intBillStorageKey = MIN(intBillStorageKey)
-	FROM @BillStorageValues
+	--SELECT @intBillStorageKey = MIN(intBillStorageKey)
+	--FROM @BillStorageValues
 
-	WHILE @intBillStorageKey > 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM @tmpBillStorageValues)
 	BEGIN
-		SET @intCustomerStorageId = NULL
-		SET @intStorageScheduleId = NULL
-		SET @dblOpenBalance = NULL
-		SET @dblAdditionalCharge = NULL
-		SET @dblNewStorageDue = NULL
-		SET @dblNewStorageBilled = NULL
-		SET @dblStorageDueAmount = NULL
-		SET @dblFlatFeeTotal = NULL
+		BEGIN
+			SET @intCustomerStorageId = NULL
+			SET @intStorageScheduleId = NULL
+			SET @dblOpenBalance = NULL
+			SET @dblAdditionalCharge = NULL
+			SET @dblNewStorageDue = NULL
+			SET @dblNewStorageBilled = NULL
+			SET @dblStorageDueAmount = NULL
+			SET @dblFlatFeeTotal = NULL
 
-		SELECT 
-			@intCustomerStorageId	= intCustomerStorageId
-			,@intStorageScheduleId	= intStorageScheduleId
-			,@dblOpenBalance		= dblOpenBalance
-		FROM @BillStorageValues WHERE intBillStorageKey = @intBillStorageKey
+			SELECT TOP 1
+				@intCustomerStorageId	= intCustomerStorageId
+				,@intStorageScheduleId	= intStorageScheduleId
+				,@dblOpenBalance		= dblOpenBalance
+			FROM @tmpBillStorageValues
 
-		--DELETE FROM @StorageSchedulePeriods
+			DELETE FROM @StorageSchedulePeriods
 
-		INSERT INTO @StorageSchedulePeriods
-		SELECT 
-			[intPeriodNumber]	= RANK() OVER (ORDER BY intSort)
-			,[strPeriodType]	
-			,[dtmStartDate]		= dtmEffectiveDate	
-			,[dtmEndingDate]
-			,[intNumberOfDays]
-			,[dblStorageRate]
-			,[dblFeeRate]		
-			,[strFeeType]
-		FROM tblGRStorageSchedulePeriod
-		WHERE intStorageScheduleRule = @intStorageScheduleId
-		ORDER BY intSort
+			INSERT INTO @StorageSchedulePeriods
+			SELECT 
+				[intPeriodNumber]	= RANK() OVER (ORDER BY intSort)
+				,[strPeriodType]	
+				,[dtmStartDate]		= dtmEffectiveDate	
+				,[dtmEndingDate]
+				,[intNumberOfDays]
+				,[dblStorageRate]
+				,[dblFeeRate]		
+				,[strFeeType]
+			FROM tblGRStorageSchedulePeriod
+			WHERE intStorageScheduleRule = @intStorageScheduleId
+			ORDER BY intSort
 
-		UPDATE SV
-		SET SV.dblStorageDuePerUnit			= SC.dblStorageDuePerUnit
-			,SV.dblStorageDueAmount			= SC.dblStorageDueAmount
-			,SV.dblStorageDueTotalPerUnit	= SC.dblStorageDueTotalPerUnit
-			,SV.dblStorageDueTotalAmount	= SC.dblStorageDueTotalAmount
-			,SV.dblStorageBilledPerUnit		= SC.dblStorageBilledPerUnit
-			,SV.dblStorageBilledAmount		= SC.dblStorageBilledAmount
-			,SV.dblFlatFeeTotal				= ISNULL(SC.dblFlatFeeTotal,0)
-		FROM @BillStorageValues SV
-		INNER JOIN [dbo].[fnGRCalculateStorageCharge](@intCustomerStorageId, @dblOpenBalance, @dtmStorageChargeDate, @StorageSchedulePeriods) SC
-			ON SV.intCustomerStorageId = SC.intCustomerStorageId
-		WHERE SV.intBillStorageKey = @intBillStorageKey
+			UPDATE SV
+			SET SV.dblStorageDuePerUnit			= SC.dblStorageDuePerUnit
+				,SV.dblStorageDueAmount			= SC.dblStorageDueAmount
+				,SV.dblStorageDueTotalPerUnit	= SC.dblStorageDueTotalPerUnit
+				,SV.dblStorageDueTotalAmount	= SC.dblStorageDueTotalAmount
+				,SV.dblStorageBilledPerUnit		= SC.dblStorageBilledPerUnit
+				,SV.dblStorageBilledAmount		= SC.dblStorageBilledAmount
+				,SV.dblFlatFeeTotal				= ISNULL(SC.dblFlatFeeTotal,0)
+			FROM @tmpBillStorageValues SV
+			INNER JOIN [dbo].[fnGRCalculateStorageCharge](@intCustomerStorageId, @dblOpenBalance, @dtmStorageChargeDate, @StorageSchedulePeriods) SC
+				ON SV.intCustomerStorageId = SC.intCustomerStorageId
+			WHERE SV.intCustomerStorageId = @intCustomerStorageId
 
-		SELECT @intBillStorageKey = MIN(intBillStorageKey)
-		FROM @BillStorageValues
-		WHERE intBillStorageKey > @intBillStorageKey
+			INSERT INTO @BillStorageValues
+			SELECT * FROM @tmpBillStorageValues
+			WHERE intCustomerStorageId = @intCustomerStorageId
+
+			DELETE FROM @tmpBillStorageValues 
+			WHERE intCustomerStorageId = @intCustomerStorageId
+		END
 	END
 
 	INSERT INTO @returnTable
