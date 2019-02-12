@@ -7314,6 +7314,7 @@
     <Build Include="dbo\Views\vyuCTContractDetailNoOfLotsTotal.sql" />
     <Build Include="dbo\Tables\tblCRMOpportunityProject.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityProject.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeleteCreditCardPrepayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
