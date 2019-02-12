@@ -15,5 +15,7 @@
 	intItemId					INT	NULL,
 	intContractHeaderId			INT	NULL,
 	intInventoryReceiptItemId	INT NULL,
-	intContractDetailId			INT	NULL
+	intContractDetailId			INT	NULL,
+	intSubLocationId			INT	NULL,
+	intStorageLocationId		INT	NULL
 )

@@ -38,6 +38,7 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
 SET @dtmTransactionDateUpTo = LEFT(CONVERT(VARCHAR, @dtmTransactionDateUpTo, 101), 10)
 
 IF (@intCommodityId = 0) SET @intCommodityId = NULL
+IF (@intLocationId = 0) SET @intLocationId = NULL
 IF (@intMarketZoneId = 0) SET @intMarketZoneId = NULL
 
 DECLARE @tblFinalDetail TABLE (intContractHeaderId int
@@ -234,188 +235,35 @@ INSERT INTO @tblGetOpenContractDetail (intRowNum
 	, strCustomerContract
 	, intFutureMarketId
 	, intFutureMonthId)
-SELECT intRowNum
-	, strCommodityCode
-	, intCommodityId
-	, intContractHeaderId
-	, strContractNumber
-	, strLocationName
-	, dtmEndDate
-	, dblBalance
-	, intUnitMeasureId
-	, intPricingTypeId
-	, intContractTypeId
-	, intCompanyLocationId
-	, strContractType
-	, strPricingType
-	, intCommodityUnitMeasureId
-	, intContractDetailId
-	, intContractStatusId
-	, intEntityId
-	, intCurrencyId
-	, strType
-	, intItemId
-	, strItemNo
-	, dtmContractDate
-	, strEntityName
-	, strCustomerContract
-	, intFutureMarketId
-	, intFutureMonthId
-FROM (
-	SELECT *
-	FROM (
-		SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmHistoryCreated DESC) intRowNum
-			, strCommodity strCommodityCode
-			, h.intCommodityId intCommodityId
-			, intContractHeaderId
-			, strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
-			, strLocation strLocationName
-			, dtmEndDate
-			, dblBalance
-			, intDtlQtyUnitMeasureId intUnitMeasureId
-			, intPricingTypeId
-			, intContractTypeId
-			, intCompanyLocationId
-			, strContractType
-			, strPricingType
-			, intDtlQtyInCommodityUOMId intCommodityUnitMeasureId
-			, intContractDetailId
-			, intContractStatusId
-			, e.intEntityId intEntityId
-			, intCurrencyId
-			, strContractType + ' Priced' AS strType
-			, i.intItemId intItemId
-			, strItemNo
-			, dtmHistoryCreated dtmContractDate
-			, e.strName strEntityName
-			, '' strCustomerContract
-			, intFutureMarketId
-			, intFutureMonthId
-			, strPricingStatus
-		FROM tblCTSequenceHistory h
-		JOIN tblICItem i ON h.intItemId = i.intItemId
-		JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmTransactionDateUpTo
-			AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
-	) a
-	WHERE a.intRowNum = 1 AND strPricingStatus IN ('Fully Priced') AND intContractStatusId NOT IN (2, 3, 6)
-	
-	UNION ALL SELECT *
-	FROM (
-		SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmHistoryCreated DESC) intRowNum
-			, strCommodity strCommodityCode
-			, h.intCommodityId intCommodityId
-			, intContractHeaderId
-			, strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
-			, strLocation strLocationName
-			, dtmEndDate
-			, case when strPricingStatus='Parially Priced' then dblQuantity - ISNULL(dblQtyPriced + (dblQuantity - dblBalance),0)
-				else ISNULL(dblQtyUnpriced,dblQuantity) end dblBalance
-			, intDtlQtyUnitMeasureId intUnitMeasureId
-			, intPricingTypeId
-			, intContractTypeId
-			, intCompanyLocationId
-			, strContractType
-			, strPricingType
-			, intDtlQtyInCommodityUOMId intCommodityUnitMeasureId
-			, intContractDetailId
-			, intContractStatusId
-			, e.intEntityId intEntityId
-			, intCurrencyId
-			, strContractType + ' Basis' AS strType
-			, i.intItemId intItemId
-			, strItemNo
-			, dtmHistoryCreated dtmContractDate
-			, e.strName strEntityName
-			, '' strCustomerContract
-			, intFutureMarketId
-			, intFutureMonthId
-			, strPricingStatus
-		FROM tblCTSequenceHistory h
-		JOIN tblICItem i ON h.intItemId = i.intItemId
-		JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmTransactionDateUpTo
-			AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
-	) a
-	WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) and intPricingTypeId=2 and strPricingStatus in( 'Parially Priced','Unpriced')
-	
-	UNION ALL SELECT *
-	FROM (
-		SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmHistoryCreated DESC) intRowNum
-			, strCommodity strCommodityCode
-			, h.intCommodityId intCommodityId
-			, intContractHeaderId
-			, strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
-			, strLocation strLocationName
-			, dtmEndDate
-			, CASE WHEN dblQtyPriced - (dblQuantity - dblBalance) < 0 THEN 0 ELSE dblQtyPriced - (dblQuantity - dblBalance) END dblBalance
-			, intDtlQtyUnitMeasureId intUnitMeasureId
-			, intPricingTypeId
-			, intContractTypeId
-			, intCompanyLocationId
-			, strContractType
-			, strPricingType
-			, intDtlQtyInCommodityUOMId intCommodityUnitMeasureId
-			, intContractDetailId
-			, intContractStatusId
-			, e.intEntityId intEntityId
-			, intCurrencyId
-			, strContractType + ' Priced' AS strType
-			, i.intItemId intItemId
-			, strItemNo
-			, dtmHistoryCreated dtmContractDate
-			, e.strName strEntityName
-			, '' strCustomerContract
-			, intFutureMarketId
-			, intFutureMonthId
-			, strPricingStatus
-		FROM tblCTSequenceHistory h
-		JOIN tblICItem i ON h.intItemId = i.intItemId
-		JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmTransactionDateUpTo
-			AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
-	) a
-	WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and strPricingStatus = 'Parially Priced'  and intPricingTypeId=2
-	
-	UNION ALL SELECT *
-	FROM (
-		SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmHistoryCreated DESC) intRowNum
-			, strCommodity strCommodityCode
-			, h.intCommodityId intCommodityId
-			, intContractHeaderId
-			, strContractNumber + '-' + Convert(NVARCHAR, intContractSeq) strContractNumber
-			, strLocation strLocationName
-			, dtmEndDate
-			, dblBalance dblBalance
-			, intDtlQtyUnitMeasureId intUnitMeasureId
-			, intPricingTypeId
-			, intContractTypeId
-			, intCompanyLocationId
-			, strContractType
-			, strPricingType
-			, intDtlQtyInCommodityUOMId intCommodityUnitMeasureId
-			, intContractDetailId
-			, intContractStatusId
-			, e.intEntityId intEntityId
-			, intCurrencyId
-			, strContractType + ' ' + strPricingType AS strType
-			, i.intItemId intItemId
-			, strItemNo
-			, dtmHistoryCreated dtmContractDate
-			, e.strName strEntityName
-			, '' strCustomerContract
-			, intFutureMarketId
-			, intFutureMonthId
-			, strPricingStatus
-		FROM tblCTSequenceHistory h
-		JOIN tblICItem i ON h.intItemId = i.intItemId
-		JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-		WHERE intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTPriceFixation)
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110), 110), 110) <= CONVERT(DATETIME, @dtmTransactionDateUpTo)
-			AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
-	) a
-	WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and intPricingTypeId not in (1,2)
-) t
+SELECT 
+	ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC) intRowNum
+	,strCommodityCode
+	,intCommodityId
+	,intContractHeaderId
+	,strContract
+	,strLocationName
+	,dtmSeqEndDate
+	,dblQuantity
+	,intUnitMeasureId
+	,intPricingTypeId
+	,intContractTypeId
+	,intCompanyLocationId
+	,strContractType
+	,strPricingTypeDesc
+	,intCommodityUnitMeasureId = null
+	,intContractDetailId
+	,intContractStatusId
+	,intEntityId
+	,intCurrencyId
+	,strType = strContractType + ' ' + strPricingTypeDesc
+	,intItemId
+	,strItemNo
+	,dtmContractDate
+	,strCustomer
+	,strCustomerContract = ''
+	,intFutureMarketId
+	,intFutureMonthId
+FROM tblCTContractBalance where CONVERT(DATETIME,CONVERT(VARCHAR, dtmEndDate, 101),101) = @dtmTransactionDateUpTo and intCommodityId = @intCommodityId
 
 SELECT *
 INTO #tblPriceFixationDetail

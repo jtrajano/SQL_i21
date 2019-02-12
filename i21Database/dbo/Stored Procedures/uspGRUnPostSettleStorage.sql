@@ -484,7 +484,7 @@ BEGIN TRY
 			BEGIN
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
 			END
-			ELSE
+			ELSE IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
 			BEGIN
 				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
 				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId
