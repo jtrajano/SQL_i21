@@ -50,8 +50,18 @@ SELECT
 	CONI.strContractItemName,
 	OG.strCountry AS strOrigin,
 	BILL.strBillId,
-	BILL.intBillId
-
+	BILL.intBillId,
+	CH.intContractBasisId,
+	CB.strContractBasis,
+	CD.strERPPONumber,
+	CD.strERPItemNumber,
+	(SELECT CLSL.strSubLocationName
+			FROM tblLGLoadWarehouse LW
+			JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
+			WHERE LW.intLoadId = Load.intLoadId) strSublocation,
+	CD.intPurchasingGroupId,
+	PG.strName AS strPurchasingGroupName,
+	PG.strDescription AS strPurchasingGroupDesc
 
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId
@@ -65,10 +75,19 @@ JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
 JOIN tblICItem I ON I.intItemId = CD.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
-LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
+	AND CONI.intItemId = I.intItemId
+LEFT JOIN tblSMCountry OG ON OG.intCountryID  = (
+	CASE 
+		WHEN ISNULL(CONI.intCountryId, 0) = 0
+			THEN ISNULL(CA.intCountryID, 0)
+		ELSE CONI.intCountryId
+		END
+	)
 LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID = WD.intCurrencyId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = WD.intPriceItemUOMId
 LEFT JOIN tblEMEntity PTEM ON PTEM.intEntityId = WD.intPartyEntityId
 LEFT JOIN tblAPBill BILL ON BILL.intBillId = WD.intBillId
+LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
