@@ -841,6 +841,7 @@ BEGIN TRY
 				AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
 				INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SC.intTicketId
+				AND QM.intDiscountScheduleCodeId = QMT.intDiscountScheduleCodeId
 				
 				UPDATE SCS SET
 					SCS.intCustomerId					= SCST.intCustomerId 
@@ -856,8 +857,8 @@ BEGIN TRY
 				AND SC.strInOutFlag = SCT.strInOutFlag
 				AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
-				INNER JOIN tblSCTicketSplit QM ON QM.intTicketId = SC.intTicketId
-
+				INNER JOIN tblSCTicketSplit SCS ON SCS.intTicketId = SC.intTicketId
+				AND SCS.intCustomerId = SCST.intCustomerId
 			END
 		END
 		ELSE
@@ -1076,25 +1077,25 @@ BEGIN TRY
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
 
 				INSERT INTO tblSCDeliverySheetSplit(
-				[intDeliverySheetId],
-				[intEntityId], 
-				[dblSplitPercent], 
-				[intStorageScheduleTypeId],
-				[strDistributionOption],
-				[intStorageScheduleRuleId],
-				[intConcurrencyId]
-			)
-			SELECT 
-				[intDeliverySheetId]			= DS.intDeliverySheetId 
-				,[intEntityId]					= SCDS.intEntityId 
-				,[dblSplitPercent]				= SCDS.dblSplitPercent 
-				,[intStorageScheduleTypeId]		= SCDS.intStorageScheduleTypeId
-				,[strDistributionOption]		= SCDS.strDistributionOption
-				,[intStorageScheduleRuleId]		= SCDS.intStorageScheduleRuleId
-				,[intConcurrencyId]				= 1
-			FROM @temp_xml_splitdstable SCDS
-			INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
-			INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+					[intDeliverySheetId],
+					[intEntityId], 
+					[dblSplitPercent], 
+					[intStorageScheduleTypeId],
+					[strDistributionOption],
+					[intStorageScheduleRuleId],
+					[intConcurrencyId]
+				)
+				SELECT 
+					[intDeliverySheetId]			= DS.intDeliverySheetId 
+					,[intEntityId]					= SCDS.intEntityId 
+					,[dblSplitPercent]				= SCDS.dblSplitPercent 
+					,[intStorageScheduleTypeId]		= SCDS.intStorageScheduleTypeId
+					,[strDistributionOption]		= SCDS.strDistributionOption
+					,[intStorageScheduleRuleId]		= SCDS.intStorageScheduleRuleId
+					,[intConcurrencyId]				= 1
+				FROM @temp_xml_splitdstable SCDS
+				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
+				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
 			END
 		END
 END TRY
