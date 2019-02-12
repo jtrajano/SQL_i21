@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductions] @intManufacturingCellId INT
 	,@ysnProduced BIT = 0
+	,@intLocationId int=0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -157,6 +158,6 @@ BEGIN
 		LEFT JOIN tblSMUserSecurity us ON w.intCreatedUserId = us.[intEntityId]
 		LEFT JOIN tblICStorageLocation sl ON w.intStorageLocationId = sl.intStorageLocationId
 		WHERE ISNULL(w.intBlendRequirementId, 0) > 0
-			AND w.intStatusId = 13
+			AND w.intStatusId = 13 and w.intLocationId=@intLocationId
 		ORDER BY w.dtmCompletedDate DESC
 END
