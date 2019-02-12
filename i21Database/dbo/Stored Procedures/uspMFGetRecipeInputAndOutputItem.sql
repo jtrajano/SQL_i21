@@ -1063,7 +1063,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intRowNo)
 	FROM #tblMFConsumptionDetail
-	WHERE ysnInputItem=1
+	WHERE ysnInputItem = 1
 
 	WHILE @intRowNo IS NOT NULL
 	BEGIN
@@ -1348,33 +1348,299 @@ BEGIN TRY
 			AND ysnInputItem = 1
 	END
 
-	SELECT intContainerId
-		,strContainerId
-		,intStorageLocationId
-		,strStorageLocationName
-		,intStorageSubLocationId
-		,intInputItemId
-		,strInputItemNo
-		,strInputItemDescription
-		,dblInputQuantity
-		,intInputItemUOMId
-		,intUnitMeasureId
-		,strInputItemUnitMeasure
-		,intInputLotId
-		,strInputLotNumber
-		,dblInputLotQuantity
-		,strInputLotUnitMeasure
-		,ysnEmptyOutSource
-		,dtmFeedTime
-		,strReferenceNo
-		,dtmActualInputDateTime
-		,intRowNo
-		,dblInputQuantity dblReadingQuantity
+	
+	DECLARE @intRecordId INT
+		,@dblInputQuantity NUMERIC(38, 20)
+		,@ysnPickByLotCode BIT
+		,@intLotCodeStartingPosition INT
+		,@intLotCodeNoOfDigits INT
+		,@dblRequiredQuantity NUMERIC(38, 20)
+		,@intRequiredQuantityItemUOMId INT
+		,@intLotRecordId INT
+		,@intLotId INT
+		,@dblQty NUMERIC(38, 20)
+		,@intItemUOMId INT
+		,@strStorageLocationId NVARCHAR(MAX)
+	DECLARE @tblMFLot TABLE (
+		intLotRecordId INT Identity(1, 1)
+		,intLotId INT
+		,dblQty NUMERIC(38, 20)
+		,intItemUOMId INT
+		,dblWeight NUMERIC(38, 20)
+		,intWeightUOMId INT
+		,dblWeightPerQty NUMERIC(38, 20)
+		)
+	DECLARE @tblMFPickLots TABLE (
+		intLotRecordId INT Identity(1, 1)
+		,intItemId int
+		,intLotId INT
+		,dblQty NUMERIC(38, 20)
+		,intItemUOMId INT
+		)
+
+	SELECT @strStorageLocationId = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 80
+
+	SELECT @ysnPickByLotCode = ysnPickByLotCode
+		,@intLotCodeStartingPosition = intLotCodeStartingPosition
+		,@intLotCodeNoOfDigits = intLotCodeNoOfDigits
+	FROM tblMFCompanyPreference
+
+	SELECT @intRecordId = min(intRowNo)
 	FROM #tblMFConsumptionDetail
 	WHERE dblInputQuantity > 0
 
+	WHILE @intRecordId IS NOT NULL
+	BEGIN
+		SELECT @intInputItemId = NULL
+			,@dblRequiredQuantity = NULL
+			,@intRequiredQuantityItemUOMId = NULL
+
+		SELECT @intInputItemId = intInputItemId
+			,@dblRequiredQuantity = dblInputQuantity
+			,@intRequiredQuantityItemUOMId = intInputItemUOMId
+		FROM #tblMFConsumptionDetail
+		WHERE intRowNo = @intRecordId
+
+		DELETE
+		FROM @tblMFLot
+
+		IF @strStorageLocationId IS NULL
+			OR @strStorageLocationId = ''
+		BEGIN
+			INSERT INTO @tblMFLot (
+				intLotId
+				,dblQty
+				,intItemUOMId
+				,dblWeight
+				,intWeightUOMId
+				,dblWeightPerQty
+				)
+			SELECT L.intLotId
+				,L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))
+				,L.intItemUOMId
+				,L.dblWeight - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0)))
+				,L.intWeightUOMId
+				,L.dblWeightPerQty
+			FROM tblICLot L
+			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+				AND UT.ysnAllowPick = 1
+			LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+				AND SR.ysnPosted = 0
+			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+				AND BS.strPrimaryStatus = 'Active'
+			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+			WHERE L.intLocationId = @intLocationId
+				AND L.intItemId = @intInputItemId
+				AND L.dblQty > 0
+				AND LS.strPrimaryStatus = 'Active'
+				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND SL.intRestrictionId NOT IN (
+					SELECT RT.intRestrictionId
+					FROM tblMFInventoryShipmentRestrictionType RT
+					)
+				AND LI.ysnPickAllowed = 1
+			GROUP BY L.intLotId
+				,L.intItemId
+				,L.dblQty
+				,L.intItemUOMId
+				,L.dblWeight
+				,L.intWeightUOMId
+				,L.dblWeightPerQty
+				,L.dtmDateCreated
+				,L.dtmManufacturedDate
+				,PL.strParentLotNumber
+			HAVING (
+					CASE 
+						WHEN L.intWeightUOMId IS NULL
+							THEN L.dblQty
+						ELSE L.dblWeight
+						END
+					) - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNULL(L.intWeightUOMId, L.intItemUOMId), SR.dblQty), 0))) > 0
+			ORDER BY CASE 
+					WHEN @ysnPickByLotCode = 0
+						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+					ELSE '1900-01-01'
+					END ASC
+				,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+					ELSE '1'
+					END ASC
+				,L.dtmDateCreated ASC
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblMFLot (
+				intLotId
+				,dblQty
+				,intItemUOMId
+				,dblWeight
+				,intWeightUOMId
+				,dblWeightPerQty
+				)
+			SELECT L.intLotId
+				,L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))
+				,L.intItemUOMId
+				,L.dblWeight - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0)))
+				,L.intWeightUOMId
+				,L.dblWeightPerQty
+			FROM tblICLot L
+			JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
+				AND UT.ysnAllowPick = 1
+			LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+				AND SR.ysnPosted = 0
+			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
+				AND BS.strPrimaryStatus = 'Active'
+			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+			WHERE L.intLocationId = @intLocationId
+				AND SL.intStorageLocationId IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strStorageLocationId, ',')
+					)
+				AND L.intItemId = @intInputItemId
+				AND L.dblQty > 0
+				AND LS.strPrimaryStatus = 'Active'
+				AND ISNULL(L.dtmExpiryDate, @dtmCurrentDateTime) >= @dtmCurrentDateTime
+				AND SL.intRestrictionId NOT IN (
+					SELECT RT.intRestrictionId
+					FROM tblMFInventoryShipmentRestrictionType RT
+					)
+				AND LI.ysnPickAllowed = 1
+			GROUP BY L.intLotId
+				,L.intItemId
+				,L.dblQty
+				,L.intItemUOMId
+				,L.dblWeight
+				,L.intWeightUOMId
+				,L.dblWeightPerQty
+				,L.dtmDateCreated
+				,L.dtmManufacturedDate
+				,PL.strParentLotNumber
+			HAVING (
+					CASE 
+						WHEN L.intWeightUOMId IS NULL
+							THEN L.dblQty
+						ELSE L.dblWeight
+						END
+					) - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNULL(L.intWeightUOMId, L.intItemUOMId), SR.dblQty), 0))) > 0
+			ORDER BY CASE 
+					WHEN @ysnPickByLotCode = 0
+						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
+					ELSE '1900-01-01'
+					END ASC
+				,CASE 
+					WHEN @ysnPickByLotCode = 1
+						THEN Substring(PL.strParentLotNumber, @intLotCodeStartingPosition, @intLotCodeNoOfDigits)
+					ELSE '1'
+					END ASC
+				,L.dtmDateCreated ASC
+		END
+
+		SELECT @intLotRecordId = NULL
+
+		SELECT @intLotRecordId = MIN(intLotRecordId)
+		FROM @tblMFLot
+
+		WHILE @intLotRecordId IS NOT NULL
+			AND @dblRequiredQuantity > 0
+		BEGIN
+			SELECT @intLotId = NULL
+				,@dblQty = NULL
+				,@intItemUOMId = NULL
+
+			SELECT @intLotId = intLotId
+				,@dblQty = dblQty
+				,@intItemUOMId = intItemUOMId
+			FROM @tblMFLot
+			WHERE intLotRecordId = @intLotRecordId
+
+			IF (@dblQty >= [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRequiredQuantityItemUOMId, @intItemUOMId, @dblRequiredQuantity))
+			BEGIN
+				INSERT INTO @tblMFPickLots (
+					intItemId
+					,intLotId
+					,dblQty
+					,intItemUOMId
+					)
+				SELECT @intInputItemId 
+					,@intLotId
+					,[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRequiredQuantityItemUOMId, @intItemUOMId, @dblRequiredQuantity)
+					,@intItemUOMId
+
+				SELECT @dblRequiredQuantity = 0
+
+				BREAK
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @tblMFPickLots (
+					intItemId
+					,intLotId
+					,dblQty
+					,intItemUOMId
+					)
+				SELECT @intInputItemId 
+					,@intLotId
+					,@dblQty
+					,@intItemUOMId
+
+				SELECT @dblRequiredQuantity = @dblRequiredQuantity - [dbo].[fnMFConvertQuantityToTargetItemUOM](@intItemUOMId, @intRequiredQuantityItemUOMId, @dblQty)
+			END
+
+			SELECT @intLotRecordId = MIN(intLotRecordId)
+			FROM @tblMFLot
+			WHERE intLotRecordId > @intLotRecordId
+				AND @dblRequiredQuantity > 0
+		END
+
+		SELECT @intRecordId = min(intRowNo)
+		FROM #tblMFConsumptionDetail
+		WHERE dblInputQuantity > 0
+			AND intRowNo > @intRecordId
+	END
+	SELECT WC.intContainerId
+		,WC.strContainerId
+		,SL.intStorageLocationId
+		,SL.strName As strStorageLocationName
+		,SL.intSubLocationId As intStorageSubLocationId
+		,WC.intInputItemId
+		,WC.strInputItemNo
+		,WC.strInputItemDescription
+		,WC.dblInputQuantity
+		,WC.intInputItemUOMId
+		,WC.intUnitMeasureId
+		,WC.strInputItemUnitMeasure
+		,PL.intLotId intInputLotId
+		,L.strLotNumber strInputLotNumber
+		,PL.dblQty dblInputLotQuantity
+		,UM.strUnitMeasure strInputLotUnitMeasure
+		,WC.ysnEmptyOutSource
+		,WC.dtmFeedTime
+		,WC.strReferenceNo
+		,WC.dtmActualInputDateTime
+		,WC.intRowNo
+		,PL.dblQty dblReadingQuantity
+	FROM #tblMFConsumptionDetail WC
+	Left JOIN @tblMFPickLots PL on PL.intItemId=WC.intInputItemId
+	Left JOIN tblICLot L on L.intLotId=PL.intLotId
+	Left JOIN tblICItemUOM IU on IU.intItemUOMId=L.intItemUOMId
+	Left JOIN tblICUnitMeasure UM On UM.intUnitMeasureId =IU.intUnitMeasureId 
+	Left JOIN tblICStorageLocation SL on SL.intStorageLocationId=IsNULL(L.intStorageLocationId,WC.intStorageLocationId)
+
+	WHERE dblInputQuantity > 0
 	EXEC sp_xml_removedocument @idoc
 END TRY
+
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
