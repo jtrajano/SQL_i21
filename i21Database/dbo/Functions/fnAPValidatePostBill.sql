@@ -177,30 +177,30 @@ BEGIN
 					WHERE B.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 							AND (B.intAccountId IS NULL AND B.intAccountId = 0))
 
-		--VALIDATION FOR RECEIPT
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
-		SELECT
-			'The item "' + C.strItemNo + '" on this transaction was already vouchered.',
-			'Bill',
-			A.strBillId,
-			A.intBillId,
-			12
-		FROM tblAPBill A 
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			INNER JOIN
-			(
-				SELECT
-					D.strReceiptNumber
-					,F.strItemNo
-					,E.intItemId
-					,intInventoryReceiptItemId
-				FROM tblICInventoryReceipt D
-					INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
-					INNER JOIN tblICItem F ON E.intItemId = F.intItemId
-				WHERE E.dblOpenReceive = E.dblBillQty
-			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
-			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-			AND A.intTransactionType = 1
+		-- --VALIDATION FOR RECEIPT
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		-- SELECT
+		-- 	'The item "' + C.strItemNo + '" on this transaction was already vouchered.',
+		-- 	'Bill',
+		-- 	A.strBillId,
+		-- 	A.intBillId,
+		-- 	12
+		-- FROM tblAPBill A 
+		-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		-- INNER JOIN
+		-- (
+		-- 	SELECT
+		-- 		D.strReceiptNumber
+		-- 		,F.strItemNo
+		-- 		,E.intItemId
+		-- 		,intInventoryReceiptItemId
+		-- 	FROM tblICInventoryReceipt D
+		-- 		INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
+		-- 		INNER JOIN tblICItem F ON E.intItemId = F.intItemId
+		-- 	WHERE E.dblOpenReceive = E.dblBillQty
+		-- ) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
+		-- WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		-- AND A.intTransactionType = 1
 
 		--VALIDATION FOR RECEIPT CHARGE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
