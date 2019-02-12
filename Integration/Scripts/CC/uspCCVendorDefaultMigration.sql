@@ -4,8 +4,12 @@ GO
 
 CREATE PROCEDURE [dbo].[uspCCVendorDefaultMigration]
 	@intUserId INT,
-	@strSource NVARCHAR(100)
+	@strSource NVARCHAR(100),
+	@return INT OUTPUT
 AS
+
+SET NOCOUNT ON
+
 BEGIN
 
 	DECLARE @ErrorMessage NVARCHAR(4000)
@@ -24,13 +28,15 @@ BEGIN
 		-- CHECK IF ALREADY IMPORTED
 		IF EXISTS(SELECT TOP 1 1 FROM tblCCImportStatus WHERE strImportType = @strImportType AND ysnActive = 1)
 		BEGIN
-			RETURN -1
+			SET @return = -1
+			RETURN
 		END
 
 		-- CHECK IF CURRENTLY RUNNING
 		IF EXISTS(SELECT TOP 1 1 FROM tblCCImportStatus WHERE strImportType = @strImportType AND ysnOnProcess = 1)
 		BEGIN
-			RETURN -2
+			SET @return = -2
+			RETURN
 		END
 
 		BEGIN TRANSACTION
@@ -140,7 +146,7 @@ BEGIN
 
 		COMMIT
 
-		RETURN 1
+		SET @return = 1
 
 	END TRY
 	BEGIN CATCH
