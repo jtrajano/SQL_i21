@@ -37,17 +37,15 @@ BEGIN TRY
 		,@dblOtherCharges DECIMAL(38, 24)
 		,@dblProduceQty NUMERIC(38, 20)
 		,@ysnCostEnabled BIT
-		,@intWOItemUOMId int
-		,@intUnitMeasureId int
-
-
+		,@intWOItemUOMId INT
+		,@intUnitMeasureId INT
 	DECLARE @intReturnValue AS INT
 	DECLARE @unpostCostAdjustment AS ItemCostAdjustmentTableType
 	DECLARE @strBatchIdForUnpost AS NVARCHAR(50)
 	DECLARE @strErrorMessage AS NVARCHAR(4000)
 
-	SELECT TOP 1 @ysnCostEnabled=ysnCostEnabled
-		FROM tblMFCompanyPreference
+	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
+	FROM tblMFCompanyPreference
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -62,14 +60,14 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@strCostAdjustmentBatchId = strCostAdjustmentBatchId
 		,@intLocationId = intLocationId
-		,@intWOItemUOMId=intItemUOMId
-		,@strWorkOrderNo =strWorkOrderNo 
+		,@intWOItemUOMId = intItemUOMId
+		,@strWorkOrderNo = strWorkOrderNo
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
-			Select @intUnitMeasureId=intUnitMeasureId
-	From tblICItemUOM
-	Where intItemUOMId=@intWOItemUOMId
+	SELECT @intUnitMeasureId = intUnitMeasureId
+	FROM tblICItemUOM
+	WHERE intItemUOMId = @intWOItemUOMId
 
 	SELECT @strAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -77,9 +75,10 @@ BEGIN TRY
 		AND intAttributeId = 20 --Is Instant Consumption
 		AND intLocationId = @intLocationId
 
-	SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId,IsNULL(IU.intItemUOMId,WP.intItemUOMId),WP.dblQuantity))
+	SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
 	FROM dbo.tblMFWorkOrderProducedLot WP
-	Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+		AND IU.intUnitMeasureId = @intUnitMeasureId
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
 		AND WP.intItemId IN (
@@ -114,12 +113,12 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 
 		SELECT @dblNewCost = SUM([dbo].[fnMFGetTotalStockValueFromTransactionBatch](DT.intBatchId, DT.strBatchId))
-			FROM (
-				SELECT DISTINCT intBatchId
-					,strBatchId
-				FROM tblMFWorkOrderConsumedLot
-				WHERE intWorkOrderId = @intWorkOrderId
-				) AS DT
+		FROM (
+			SELECT DISTINCT intBatchId
+				,strBatchId
+			FROM tblMFWorkOrderConsumedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+			) AS DT
 
 		SELECT @intWorkOrderProducedLotId = MIN(intWorkOrderProducedLotId)
 		FROM tblMFWorkOrderProducedLot PL
@@ -238,8 +237,9 @@ BEGIN TRY
 		FROM tblICInventoryTransaction t
 		WHERE t.strBatchId = @strCostAdjustmentBatchId
 			AND t.ysnIsUnposted = 0
-			AND t.intTransactionTypeId = 26 and t.strTransactionId=t.strRelatedTransactionId 
-			AND t.strTransactionId=@strWorkOrderNo 
+			AND t.intTransactionTypeId = 26
+			AND t.strTransactionId = t.strRelatedTransactionId
+			AND t.strTransactionId = @strWorkOrderNo
 
 		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust = @unpostCostAdjustment
 			,@strBatchId = @strBatchIdForUnpost
@@ -415,8 +415,8 @@ BEGIN TRY
 	BEGIN
 		SELECT @strBatchId = NULL
 			,@intBatchId = NULL
-			--,@strWorkOrderNo = NULL
 
+		--,@strWorkOrderNo = NULL
 		SELECT @strBatchId = strBatchId
 			,@intBatchId = intBatchId
 		FROM tblMFWorkOrderConsumedLot
@@ -618,6 +618,23 @@ BEGIN TRY
 
 	IF @strAttributeValue = 'False' --Is Instant Consumption
 	BEGIN
+		IF NOT EXISTS (
+				SELECT SUM(dblQty)
+				FROM tblICInventoryTransaction
+				WHERE strTransactionId = @strWorkOrderNo
+					AND intTransactionTypeId = 8
+				HAVING SUM(dblQty) = 0
+				)
+		BEGIN
+			RAISERROR (
+					'Unable to reverse consumption entries.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
+
 		SELECT @intInputItemId = intItemId
 		FROM tblMFWorkOrderInputLot
 		WHERE intWorkOrderId = @intWorkOrderId
