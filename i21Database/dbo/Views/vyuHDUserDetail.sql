@@ -46,7 +46,7 @@
 			,intUserId = ec.[intEntityId]
 			,intEntityId = ec.[intEntityId]
 			,strName = ec.strEmail
-			,strUserName = case when (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) end
+			,strUserName = case when (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) end COLLATE Latin1_General_CI_AS
 			,strFirstName = ec.strEmail
 			,strMiddleName = ec.strEmail
 			,strLastName = ec.strEmail
@@ -76,7 +76,7 @@
 			,intUserId = ec.[intEntityId]
 			,intEntityId = ec.[intEntityId]
 			,strName = ec.strEmail
-			,strUserName = case when (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) end
+			,strUserName = case when (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from [tblEMEntityCredential] where intEntityId = ec.[intEntityId]) end COLLATE Latin1_General_CI_AS
 			,strFirstName = ec.strEmail
 			,strMiddleName = ec.strEmail
 			,strLastName = ec.strEmail

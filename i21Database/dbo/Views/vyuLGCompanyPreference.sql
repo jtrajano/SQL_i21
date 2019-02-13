@@ -104,8 +104,6 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Shipping Instruction Report Format - 3'
 		WHEN 4
 			THEN 'Shipping Instruction Report Format - 4'
-		WHEN 5
-			THEN 'Shipping Instruction Report Format - 5'
 		END COLLATE Latin1_General_CI_AS AS strShippingInstructionReportFormat
 	,CP.intDeliveryOrderReportFormat
 	,CASE CP.intDeliveryOrderReportFormat
@@ -113,8 +111,6 @@ SELECT CP.intCompanyPreferenceId
 			THEN 'Delivery Order Report Format - 1'
 		WHEN 2
 			THEN 'Delivery Order Report Format - 2'
-		WHEN 3
-			THEN 'Delivery Order Report Format - 3'
 		END COLLATE Latin1_General_CI_AS strDeliveryOrderReportFormat
 	,CP.intInStoreLetterReportFormat
 	,CASE CP.intInStoreLetterReportFormat

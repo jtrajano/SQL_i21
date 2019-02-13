@@ -56,6 +56,11 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , strCustomerNumber	    = CUSTOMER.strCustomerNumber
 	 , strCustomerName			= CUSTOMER.strCustomerName
 	 , strDisplayName			= CUSTOMER.strDisplayName
+	 , strTaxNumber				= CUSTOMER.strTaxNumber
+	 , intEntitySalespersonId	= INVOICE.intEntitySalespersonId
+	 , strSalespersonNumber		= SALESPERSON.strSalespersonNumber
+	 , strSalespersonName		= SALESPERSON.strSalespersonName
+	 , strSalespersonDisplayName = SALESPERSON.strSalespersonDisplayName
 	 , strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
 	 , strCurrency				= CURRENCY.strCurrency
@@ -217,13 +222,27 @@ INNER JOIN (
 		 , strDisplayName		= ISNULL(C.strCustomerNumber, '') + ' - ' + ISNULL(ENTITY.strName, '')
 		 , strStateTaxId  		= ENTITY.strStateTaxId
 		 , strFederalTaxId		= ENTITY.strFederalTaxId
+		 , strTaxNumber			= C.strTaxNumber
 	FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
 	INNER JOIN (
 		SELECT intEntityId
 			 , strCustomerNumber
+			 , strTaxNumber
 		FROM dbo.tblARCustomer WITH (NOLOCK)
 	) C ON ENTITY.intEntityId = C.intEntityId
 ) CUSTOMER ON INVOICE.intEntityCustomerId = CUSTOMER.intEntityId
+LEFT JOIN (
+	SELECT intEntityId					= ENTITY.intEntityId 
+		 , strSalespersonNumber			= ISNULL(NULLIF(SP.strSalespersonId, ''), ENTITY.strEntityNo)
+		 , strSalespersonName			= ENTITY.strName
+		 , strSalespersonDisplayName	= ISNULL(NULLIF(SP.strSalespersonId, ''), ENTITY.strEntityNo) + ' - ' + ISNULL(ENTITY.strName, '')
+	FROM dbo.tblEMEntity ENTITY WITH (NOLOCK) 
+	INNER JOIN (
+		SELECT intEntityId
+			 , strSalespersonId
+		FROM dbo.tblARSalesperson WITH (NOLOCK)
+	) SP ON ENTITY.intEntityId = SP.intEntityId
+) SALESPERSON ON INVOICE.intEntitySalespersonId = SALESPERSON.intEntityId
 LEFT OUTER JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName

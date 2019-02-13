@@ -35,5 +35,5 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL	
 	,[intCostingMethod] INT NULL 
-	,[ysnAllowInvoiceVoucher] BIT NULL 
+	,[ysnAllowVoucher] BIT NULL 
 )

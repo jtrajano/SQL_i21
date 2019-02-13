@@ -15,6 +15,8 @@ SELECT
 	,SCD.strSplitDescription
 	,SCD.strCountyProducer
 	,SCD.ysnPost
+	,SCD.intTicketTypeId
+	,CASE WHEN SCD.intTicketTypeId = 1 THEN 'Load In' ELSE 'Load Out' END COLLATE Latin1_General_CI_AS AS strTicketType
 
 	,EM.strName
 	,EML.strLocationName

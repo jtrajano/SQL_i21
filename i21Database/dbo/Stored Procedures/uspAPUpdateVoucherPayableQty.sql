@@ -15,6 +15,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+DECLARE @insertedData TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @deleted TABLE(intVoucherPayableId INT);
 DECLARE @taxDeleted TABLE(intVoucherPayableId INT);
 DECLARE @invalidPayables TABLE(intVoucherPayableId INT, strError NVARCHAR(1000));
@@ -126,7 +127,10 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 		)
 	BEGIN
+		INSERT INTO @insertedData
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
+
+		SELECT * FROM @insertedData
 		RETURN;
 	END
 
@@ -882,6 +886,7 @@ ELSE SAVE TRAN @SavePoint
 			-- END
 
 			EXEC uspAPRemoveVoucherPayable @voucherPayable = @validPayables, @throwError = 1
+			INSERT INTO @insertedData
 			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax,  @throwError = 1
 		END
 
@@ -905,6 +910,8 @@ ELSE
 			ROLLBACK TRANSACTION  @SavePoint
 		END
 	END
+
+SELECT * FROM @insertedData
 
 END TRY
 BEGIN CATCH

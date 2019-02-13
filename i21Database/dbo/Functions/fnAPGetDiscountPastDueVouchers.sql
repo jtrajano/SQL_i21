@@ -27,6 +27,7 @@ BEGIN
 		AND voucher.ysnDiscountOverride = 1
 		AND voucher.dblDiscount != 0
 		AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
+		AND forPay.ysnPymtCtrlAlwaysDiscount = 0
 	END
 	ELSE
 	BEGIN
@@ -45,6 +46,7 @@ BEGIN
 			AND voucher.ysnDiscountOverride = 1
 			AND voucher.dblDiscount != 0
 			AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
+			AND forPay.ysnPymtCtrlAlwaysDiscount = 0
 		END
 		ELSE
 		BEGIN
@@ -61,6 +63,7 @@ BEGIN
 			AND voucher.ysnDiscountOverride = 1
 			AND voucher.dblDiscount != 0
 			AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
+			AND forPay.ysnPymtCtrlAlwaysDiscount = 0
 			AND voucher.intBillId
 			IN
 			(

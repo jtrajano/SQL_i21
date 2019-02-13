@@ -29,7 +29,7 @@ BEGIN
 				strLocation = G.vwloc_loc_no
 				,strItemNo = CASE WHEN M.vwitm_no IS NULL THEN F.vwitm_no ELSE M.vwitm_no END
 				,strRoute = J.strRouteId
-				,strDriverId = L.vwsls_slsmn_id
+				,strDriverId = L.vwsls_slsmn_id  COLLATE Latin1_General_CI_AS  
 				,dtmRequestedDate = E.dtmRequestedDate
 				,ysnCallEntryPrinted = E.ysnCallEntryPrinted
 				,strDeliveryTicketFormat = K.strDeliveryTicketFormat
@@ -44,6 +44,7 @@ BEGIN
 				,intConcurrencyId = E.intConcurrencyId
 				,intClockId = K.intClockID
 				,intEntityUserSecurityId = E.intUserID
+				,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -78,7 +79,7 @@ BEGIN
 				strLocation = G.strLocationName
 				,strItemNo = CASE WHEN M.intItemId IS NULL THEN F.strItemNo ELSE M.strItemNo END
 				,strRoute = J.strRouteId
-				,strDriverId = L.strEntityNo
+				,strDriverId = L.strEntityNo  COLLATE Latin1_General_CI_AS  
 				,dtmRequestedDate = E.dtmRequestedDate
 				,ysnCallEntryPrinted = E.ysnCallEntryPrinted
 				,strDeliveryTicketFormat = K.strDeliveryTicketFormat
@@ -93,6 +94,7 @@ BEGIN
 				,intConcurrencyId = E.intConcurrencyId
 				,intClockId = K.intClockID
 				,intEntityUserSecurityId = E.intUserID
+				,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID

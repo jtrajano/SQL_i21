@@ -14,6 +14,8 @@
 	[strDiversionNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intStateId] INT NULL,	
 	[intConcurrencyId] [int] NOT NULL,
+	[strImportVerificationNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[strPurchaserSignedStatementNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblTRLoadHeader] PRIMARY KEY ([intLoadHeaderId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intSellerId] FOREIGN KEY ([intSellerId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),

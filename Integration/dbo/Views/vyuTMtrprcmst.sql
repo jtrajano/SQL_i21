@@ -11,8 +11,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		CREATE VIEW [dbo].[vyuTMtrprcmst]
 		AS
 		SELECT
-		strVendorNumber = ''''
-			,strRackItemNumber = ''''
+		strVendorNumber = '''' COLLATE Latin1_General_CI_AS 
+			,strRackItemNumber = '''' COLLATE Latin1_General_CI_AS 
 			,dblVendorRackPrice = 0
 			,dblJobberRackPrice = 0
 			,dtmDate = GETDATE()
@@ -24,8 +24,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		CREATE VIEW [dbo].[vyuTMtrprcmst]
 		AS
 		SELECT 
-			strVendorNumber = trprc_vnd_no
-			,strRackItemNumber = trprc_pt_itm_no
+			strVendorNumber = trprc_vnd_no COLLATE Latin1_General_CI_AS 
+			,strRackItemNumber = trprc_pt_itm_no COLLATE Latin1_General_CI_AS 
 			,dblVendorRackPrice = trprc_rack_prc
 			,dblJobberRackPrice = trprc_cost
 			,dtmDate = (CASE WHEN trprc_rev_dt = 0 THEN NULL 

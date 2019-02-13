@@ -2,6 +2,7 @@
 (
 	[intLoadBlendIngredientId] INT NOT NULL IDENTITY, 
     [intLoadDistributionDetailId] INT NOT NULL, 
+	[strBillOfLading] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[strReceiptLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	[intRecipeItemId] INT NOT NULL,
     [dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 

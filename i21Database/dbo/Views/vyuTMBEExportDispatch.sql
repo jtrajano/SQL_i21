@@ -3,12 +3,12 @@ AS
 
 SELECT 
 	 routeNum = J.strRouteId
-	 ,seqNum = ''
+	 ,seqNum = '' COLLATE Latin1_General_CI_AS
 	 ,account = CAST(C.strEntityNo AS NVARCHAR(16))
 	 ,asset = REPLACE(STR(A.intSiteNumber, 4), SPACE(1), '0') + '-' + ISNULL(K.strSerialNumber,'')
 	 ,orderQty = CAST(ROUND((CASE WHEN ISNULL(D.dblMinimumQuantity,0) = 0 THEN ISNULL(D.dblQuantity,0.0) ELSE D.dblMinimumQuantity END),0) AS INT)
 	 ,priceID = D.dblPrice
-	 ,invoice = ''
+	 ,invoice = '' COLLATE Latin1_General_CI_AS
 	 ,"message" = CAST(D.strComments AS NVARCHAR(64))
 	 ,reference = D.intDispatchID
 	 ,taxCode = A.intTaxStateID

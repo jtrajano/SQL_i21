@@ -124,7 +124,7 @@ BEGIN
 			7
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
-			(A.dblTotal) <> (SELECT CAST(SUM(CAST(dblTotal AS DECIMAL(18,2))) + SUM(dblTax) AS DECIMAL(18,2)) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
+			(A.dblTotal) <> (SELECT CAST(SUM(dblTotal) + SUM(dblTax) AS DECIMAL(18,2)) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
 
 		--ALREADY POSTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)

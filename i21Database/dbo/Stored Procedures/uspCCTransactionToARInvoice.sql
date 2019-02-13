@@ -105,6 +105,8 @@ BEGIN
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType != 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet + (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross - (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100))
+			WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
+			WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site' THEN 0
 			ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
 		,[intTaxGroupId] = null
         ,[ysnRecomputeTax] = 0
@@ -126,7 +128,7 @@ BEGIN
 
     --REMOVE -1 items
 	--and those sites that does not have customer
-    DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null;
+    DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null OR dblPrice = 0
 
 	set @EntriesForInvoiceCount = (select count(*) from @EntriesForInvoice);
 

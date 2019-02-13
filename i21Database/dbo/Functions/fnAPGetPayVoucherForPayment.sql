@@ -52,6 +52,7 @@ RETURNS TABLE AS RETURN
 		,forPay.strCheckPayeeName
 		,forPay.ysnDeferredPayment
 		,ysnPastDue = dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate)
+		,forPay.ysnPymtCtrlAlwaysDiscount
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)

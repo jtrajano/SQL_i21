@@ -53,7 +53,22 @@
 	[strFeedbackComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strResolution] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[strResolutionHelpManualLink] [nvarchar](1000) COLLATE Latin1_General_CI_AS NULL,
+	[strResolutionYoutubeLink] [nvarchar](1000) COLLATE Latin1_General_CI_AS NULL,
 	[strImageId] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
+	[intUpgradeTypeId] [int] null,
+	[strUpgradeEnvironmentId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[intUpgradeTargetVersionId] [int] null,
+	[strUpgradeCompany] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
+	[strUpgradeCustomerContactId] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[dtmUpgradeStartTime] datetime null,
+	[strUpgradeCustomerTimeZone] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[dtmUpgradeEndTime] datetime null,
+	[intUpgradeTimeTook] [int] null,
+	[strUpgradeSpecialInstruction] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[intRootCauseId] [int] null,
+	[intSubcauseId] [int] null,
+	[strRootCauseReason] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
@@ -71,7 +86,11 @@
     CONSTRAINT [FK_tblHDTicket_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
     CONSTRAINT [FK_tblHDTicket_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
     CONSTRAINT [FK_tblHDTicket_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [dbo].[tblSMCurrencyExchangeRate] ([intCurrencyExchangeRateId]),
-    CONSTRAINT [FK_tblHDTicket_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
+    CONSTRAINT [FK_tblHDTicket_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId]),
+    CONSTRAINT [FK_tblHDTicket_tblHDUpgradeType_intUpgradeTypeId] FOREIGN KEY ([intUpgradeTypeId]) REFERENCES [dbo].[tblHDUpgradeType] ([intUpgradeTypeId]),
+    CONSTRAINT [FK_tblHDTicket_tblHDTicketRootCause_intRootCauseId] FOREIGN KEY ([intRootCauseId]) REFERENCES [dbo].[tblHDTicketRootCause] ([intRootCauseId]),
+    CONSTRAINT [FK_tblHDTicket_tblHDTicketSubcause_intSubcauseId] FOREIGN KEY ([intSubcauseId]) REFERENCES [dbo].[tblHDTicketSubcause] ([intSubcauseId]),
+    CONSTRAINT [FK_tblHDTicket_tblHDVersion_intUpgradeTargetVersionId] FOREIGN KEY ([intUpgradeTargetVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId])
 )
 
 GO

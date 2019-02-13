@@ -28,7 +28,7 @@ AS
 		,intContactRank = ISNULL(contact.intEntityRank,1)
 		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101) COLLATE Latin1_General_CI_AS
 		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101) COLLATE Latin1_General_CI_AS
-		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId, convert(bit,0)) COLLATE Latin1_General_CI_AS
+		,strJiraKey = dbo.fnHDCoalesceJiraKey(tic.intTicketId,convert(bit,0)) COLLATE Latin1_General_CI_AS
 		,strJiraKeyDisplay = dbo.fnHDCoalesceJiraKey(tic.intTicketId,convert(bit,1)) COLLATE Latin1_General_CI_AS
 		,tic.intCustomerId
 		,tic.intCreatedUserEntityId
@@ -40,7 +40,7 @@ AS
 		,strCustomerName = cus.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intCustomerId)
 		,tic.dtmLastCommented
 		,strDateLastCommented = convert(nvarchar,tic.dtmLastCommented, 101) COLLATE Latin1_General_CI_AS
-		,strLastCommentedBy = (select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
+		,strLastCommentedBy = lastcomment.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
 		,strCompanyLocation = camloc.strLocationName
 		,strEntityLocation = enloc.strLocationName
 		,tic.strDescription
@@ -62,6 +62,12 @@ AS
 											   when tic.intFeedbackWithRepresentativeId = 5 then 'Very Satisfied'
 											   else ''
 										  end) COLLATE Latin1_General_CI_AS
+		,strTicketTypeType = (case when typ.intTicketTypeTypeId = 1 then 'No'
+								   when typ.intTicketTypeTypeId = 2 then 'Help Ticket'
+								   when typ.intTicketTypeTypeId = 3 then 'Upgrade Ticket'
+								   when typ.intTicketTypeTypeId = 4 then 'Statement of Work'
+								   else null
+							  end) COLLATE Latin1_General_CI_AS
 	from
 		tblHDTicket tic
 		join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId

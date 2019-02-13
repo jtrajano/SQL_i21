@@ -19,12 +19,12 @@
 	select
 		strId = NEWID()
 		,intEntityCustomerId = us.[intEntityId]
-		,strCustomerNumber = 'INTERNALUSER'
+		,strCustomerNumber = 'INTERNALUSER' COLLATE Latin1_General_CI_AS
 		,intEntityContactId = con.intEntityId
 		,con.strName
 		,con.strEmail
 		,imgPhoto = null
-		,strEntityType = 'Agent'
+		,strEntityType = 'Agent' COLLATE Latin1_General_CI_AS
 	from
 		tblSMUserSecurity us
 		left outer join vyuEMEntityContact con on con.intEntityId = us.[intEntityId] and con.ysnDefaultContact = 1

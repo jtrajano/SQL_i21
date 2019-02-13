@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceProcess](
 	 @entityId					INT			   = NULL
 	,@username					NVARCHAR(MAX)  
 	,@ErrorMessage				NVARCHAR(250)  = NULL	OUTPUT
@@ -894,7 +892,7 @@ BEGIN TRY
 	
 	UPDATE tblCFTransaction 
 	SET ysnInvoiced = 1
-	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) 
+	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username  AND ISNULL(ysnExpensed,0) = 0 AND LOWER(strStatementType) = @statementType) 
 
 
 	----------DROP TEMPORARY TABLE----------

@@ -127,7 +127,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId  
-								,ysnAllowInvoiceVoucher
+								,ysnAllowVoucher
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -148,7 +148,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption 
-								,ysnAllowInvoiceVoucher
+								,ysnAllowVoucher
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -174,7 +174,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId
-								,ysnAllowInvoiceVoucher  
+								,ysnAllowVoucher  
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -195,7 +195,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption 
-								,ysnAllowInvoiceVoucher
+								,ysnAllowVoucher
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -259,7 +259,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId
-								,ysnAllowInvoiceVoucher  
+								,ysnAllowVoucher  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @intEntityId, @ysnIsStorage;
@@ -292,7 +292,7 @@ OPEN intListCursor;
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
 						,strSourceTransactionId
-						,ysnAllowInvoiceVoucher
+						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
 					END

@@ -4,7 +4,7 @@
 			a.intCurrencyExchangeRateId
 			,a.intFromCurrencyId
 			,a.intToCurrencyId
-			,strCurrencyExchangeRate = b.strCurrency + ' To ' + c.strCurrency
+			,strCurrencyExchangeRate = b.strCurrency + ' To ' + c.strCurrency COLLATE Latin1_General_CI_AS
 			,strFromCurrency = b.strCurrency
 			,strToCurrency = c.strCurrency 
 		from

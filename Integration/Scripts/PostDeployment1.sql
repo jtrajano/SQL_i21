@@ -109,3 +109,9 @@ GO
 -- Meter Billing
 :r "..\Scripts\MB\uspMBDCMeterAccountMigration.sql"
 GO	
+
+-- Credit Card Recon - CCR
+:r "..\Scripts\CC\uspCCVendorDefaultMigration.sql"
+GO
+:r "..\Scripts\CC\uspCCDealerSiteCompanyOwnedMigration.sql"
+GO

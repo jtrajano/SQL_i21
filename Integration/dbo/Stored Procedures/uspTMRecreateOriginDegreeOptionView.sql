@@ -49,13 +49,13 @@ BEGIN
 					CREATE VIEW [dbo].[vyuTMOriginDegreeOption]  
 					AS  
 					SELECT  
-						vwctl_ser_dt_desc_1 = ISNULL(adctl_ser_dt_desc_1,'''')
-						,vwctl_ser_dt_desc_2 = ISNULL(adctl_ser_dt_desc_2,'''')
-						,vwctl_ser_dt_desc_3 = ISNULL(adctl_ser_dt_desc_3,'''')
-						,vwctl_ser_dt_desc_4 = ISNULL(adctl_ser_dt_desc_4,'''')
-						,vwctl_ser_dt_desc_5 = ISNULL(adctl_ser_dt_desc_5,'''')
-						,vwctl_ser_dt_desc_6 = ISNULL(adctl_ser_dt_desc_6,'''')
-						,vwctl_ser_dt_desc_7 = ISNULL(adctl_ser_dt_desc_7,'''')
+						vwctl_ser_dt_desc_1 = ISNULL(adctl_ser_dt_desc_1,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_2 = ISNULL(adctl_ser_dt_desc_2,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_3 = ISNULL(adctl_ser_dt_desc_3,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_4 = ISNULL(adctl_ser_dt_desc_4,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_5 = ISNULL(adctl_ser_dt_desc_5,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_6 = ISNULL(adctl_ser_dt_desc_6,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_7 = ISNULL(adctl_ser_dt_desc_7,'''') COLLATE Latin1_General_CI_AS 
 						,intOriginDegreeOption = CAST(A4GLIdentity AS INT)
 					FROM adctlmst
 				
@@ -70,13 +70,13 @@ BEGIN
 					CREATE VIEW [dbo].[vyuTMOriginDegreeOption]  
 					AS  
 					SELECT  
-						vwctl_ser_dt_desc_1 = ISNULL(pdctl_ser_dt_desc_1,'''')
-						,vwctl_ser_dt_desc_2 = ISNULL(pdctl_ser_dt_desc_2,'''')
-						,vwctl_ser_dt_desc_3 = ISNULL(pdctl_ser_dt_desc_3,'''')
-						,vwctl_ser_dt_desc_4 = ISNULL(pdctl_ser_dt_desc_4,'''')
-						,vwctl_ser_dt_desc_5 = ''''
-						,vwctl_ser_dt_desc_6 = ''''
-						,vwctl_ser_dt_desc_7 = ''''
+						vwctl_ser_dt_desc_1 = ISNULL(pdctl_ser_dt_desc_1,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_2 = ISNULL(pdctl_ser_dt_desc_2,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_3 = ISNULL(pdctl_ser_dt_desc_3,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_4 = ISNULL(pdctl_ser_dt_desc_4,'''') COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_5 = '''' COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_6 = '''' COLLATE Latin1_General_CI_AS 
+						,vwctl_ser_dt_desc_7 = '''' COLLATE Latin1_General_CI_AS 
 						,intOriginDegreeOption = CAST(A4GLIdentity AS INT)
 					FROM pdctlmst
 				
@@ -90,13 +90,13 @@ BEGIN
 			CREATE VIEW [dbo].[vyuTMOriginDegreeOption]  
 			AS  
 			SELECT  
-				vwctl_ser_dt_desc_1 = ''''
-				,vwctl_ser_dt_desc_2 = ''''
-				,vwctl_ser_dt_desc_3 = ''''
-				,vwctl_ser_dt_desc_4 = ''''
-				,vwctl_ser_dt_desc_5 = ''''
-				,vwctl_ser_dt_desc_6 = ''''
-				,vwctl_ser_dt_desc_7 = ''''
+				vwctl_ser_dt_desc_1 = '''' COLLATE Latin1_General_CI_AS 
+				,vwctl_ser_dt_desc_2 = '''' COLLATE Latin1_General_CI_AS 
+				,vwctl_ser_dt_desc_3 = '''' COLLATE Latin1_General_CI_AS 
+				,vwctl_ser_dt_desc_4 = '''' COLLATE Latin1_General_CI_AS 
+				,vwctl_ser_dt_desc_5 = '''' COLLATE Latin1_General_CI_AS 
+				,vwctl_ser_dt_desc_6 = '''' COLLATE Latin1_General_CI_AS 
+				,vwctl_ser_dt_desc_7 = '''' COLLATE Latin1_General_CI_AS 
 				,intOriginDegreeOption = 0
 			WHERE 1 = 0
 		')

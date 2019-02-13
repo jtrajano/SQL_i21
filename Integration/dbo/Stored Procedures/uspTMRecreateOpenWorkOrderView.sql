@@ -34,7 +34,7 @@ BEGIN
 											END   
 									END) COLLATE Latin1_General_CI_AS 
 				,strWorkStatus = C.strWorkStatus
-				,strSiteNumber = RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4)
+				,strSiteNumber = RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS 
 				,strLocation = M.vwloc_loc_no
 				,strWorkOrderCategory = D.strWorkOrderCategory
 				,dtmDateCreated = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateCreated),0)
@@ -54,7 +54,10 @@ BEGIN
 				,A.intCustomerID
 				,A.intConcurrencyId
 				,A.intLocationId
-				
+				,A.strSiteAddress
+				,A.strZipCode
+				,A.strState
+				,A.strCity
 			FROM tblTMSite A
 			INNER JOIN tblTMWorkOrder B
 				ON A.intSiteID = B.intSiteID
@@ -90,7 +93,7 @@ BEGIN
 				strCustomerNumber = G.strEntityNo
 				,strCustomerName = G.strName
 				,strWorkStatus = C.strWorkStatus
-				,strSiteNumber = RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4)
+				,strSiteNumber = RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) COLLATE Latin1_General_CI_AS 
 				,strLocation = E.strLocationName
 				,strWorkOrderCategory = D.strWorkOrderCategory
 				,dtmDateCreated = DATEADD(dd, DATEDIFF(dd, 0, B.dtmDateCreated),0)
@@ -110,7 +113,10 @@ BEGIN
 				,A.intCustomerID
 				,A.intConcurrencyId
 				,A.intLocationId
-				
+				,A.strSiteAddress
+				,A.strZipCode
+				,A.strState
+				,A.strCity
 			FROM tblTMSite A
 			INNER JOIN tblTMWorkOrder B
 				ON A.intSiteID = B.intSiteID

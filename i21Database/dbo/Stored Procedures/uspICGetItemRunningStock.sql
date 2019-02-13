@@ -191,7 +191,7 @@ INSERT INTO @tblInventoryTransactionGrouped
 	,dblQty
 	,dblUnitStorage
 	,dblCost
-)
+	)
 SELECT 
 	i.intItemId
 	, intItemUOMId
@@ -280,7 +280,7 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 			, i.dblUnitQty
 			, i.ysnStockUnit
 	) stock 
-	OUTER APPLY(
+	CROSS APPLY(
 		SELECT TOP 1
 			dblCost
 			, intItemUOMId
@@ -289,7 +289,7 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 		WHERE	
 			t.intItemId = FIFO.intItemId
 			AND t.intItemLocationId = FIFO.intItemLocationId
-			AND dblStockIn - dblStockOut > 0
+			AND dblStockIn- dblStockOut > 0
 		ORDER BY dtmDate ASC
 	) FIFO
 	LEFT JOIN tblICItemUOM StockUOM

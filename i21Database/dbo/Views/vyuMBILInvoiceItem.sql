@@ -11,7 +11,7 @@ SELECT Invoice.*
 	, Site.strState
 	, Site.strZipCode
 	, Site.strCountry
-	, strSiteStatus = dbo.fnMBILGetInvoiceStatus(NULL, InvoiceItem.intSiteId)
+	, strSiteStatus = dbo.fnMBILGetInvoiceStatus(NULL, InvoiceItem.intSiteId) COLLATE Latin1_General_CI_AS
 	, InvoiceItem.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription

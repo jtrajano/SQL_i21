@@ -73,6 +73,7 @@
     <Folder Include="Scripts\GL" />
     <Folder Include="Scripts\IC" />
     <Folder Include="Scripts\MB" />
+    <Folder Include="Scripts\CC" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -180,6 +181,8 @@
     <PostDeploy Include="Scripts\PostDeployment1.sql" />
     <None Include="Scripts\SM\FixCompanyLocationNumber.sql" />
     <None Include="Scripts\SM\SetDefaultValues.sql" />
+    <None Include="Scripts\CC\uspCCVendorDefaultMigration.sql" />
+    <None Include="Scripts\CC\uspCCDealerSiteCompanyOwnedMigration.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\vyuTFTaxCycle.sql" />
@@ -467,6 +470,8 @@
     <None Include="Scripts\IC\uspICDCCommoditySetupAg.sql" />
     <None Include="Scripts\IC\uspICDCBeginInventoryGr.sql" />
     <None Include="Scripts\MB\uspMBDCMeterAccountMigration.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportTaxGroup.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportTaxClass.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportCreateInitialScaleSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromOrigin.sql" />
   </ItemGroup>

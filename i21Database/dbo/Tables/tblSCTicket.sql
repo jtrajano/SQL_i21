@@ -177,7 +177,8 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intDeliverySheetId] ON [dbo].[tblSCTicket](
 	[intDeliverySheetId] ASC
 );
-
+GO
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intDeliverySheetId_strTicketStatus] ON [dbo].[tblSCTicket]([strTicketStatus]) INCLUDE([intDeliverySheetId]);
 GO
 CREATE NONCLUSTERED INDEX [IX_tblSCTicket_strTicketStatus]
 	ON [dbo].[tblSCTicket] ([strTicketStatus],[strDistributionOption])

@@ -115,6 +115,36 @@ BEGIN
 			ON D.intSiteID = J.intSiteID
 		WHERE D.strBillingBy = 'Flow Meter'
 			AND ISNULL(B.ysnLeaseBilling,0) <> 1
+
+
+		---------------------------------------------------------------------------------------------------------------
+		-------------------------------------------------Lock Record Checking-------------------------------------------
+
+		UNION ALL
+
+		SELECT
+			intInvoiceId = A.intInvoiceId
+			,[strInvoiceNumber] = C.[strInvoiceNumber]
+			,C.[strTransactionType]		
+			,C.[intInvoiceDetailId]		
+			,C.[intItemId]				
+			,C.[strBatchId]	
+			,[strPostingError] = 'Consumption Site record is locked.'
+		FROM tblARInvoice A
+		INNER JOIN tblARInvoiceDetail B
+			ON A.intInvoiceId = B.intInvoiceId
+		INNER JOIN @Invoices C
+			ON A.intInvoiceId = C.intInvoiceId
+		INNER JOIN tblTMSite D
+			ON B.intSiteId = D.intSiteID
+		INNER JOIN tblSMTransaction E
+			ON D.intCustomerID = E.intRecordId
+		INNER JOIN tblSMScreen F
+			ON E.intScreenId = F.intScreenId
+				AND strModule = 'Tank Management'
+				AND strNamespace = 'TankManagement.view.ConsumptionSite'
+				AND ysnLocked = 1				
+		
 	) AA WHERE AA.[strPostingError] <> '' AND AA.[strPostingError] IS NOT NULL
 
 																												

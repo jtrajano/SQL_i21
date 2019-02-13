@@ -20,6 +20,8 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 DECLARE @dtmDateFrom			DATETIME
 	  , @dtmDateTo				DATETIME
 	  , @strTaxCode				NVARCHAR(100)
+	  , @strState				NVARCHAR(100)
+	  , @strSalespersonName		NVARCHAR(200)
 	  , @strTaxAgency			NVARCHAR(100)
 	  , @strTaxClass			NVARCHAR(100)
 	  , @strTaxGroup			NVARCHAR(100)
@@ -82,6 +84,14 @@ WITH (
 SELECT @strTaxCode = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strTaxCode'
+
+SELECT @strState = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strState'
+
+SELECT @strSalespersonName = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strSalespersonName'
 
 SELECT @strTaxAgency = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
@@ -233,6 +243,7 @@ ELSE
 TRUNCATE TABLE tblARTaxStagingTable
 INSERT INTO tblARTaxStagingTable (
 	  intEntityCustomerId
+	, intEntitySalespersonId
 	, intCurrencyId
 	, intCompanyLocationId
 	, intShipToLocationId
@@ -249,6 +260,10 @@ INSERT INTO tblARTaxStagingTable (
 	, strCustomerNumber
 	, strCustomerName
 	, strDisplayName
+	, strTaxNumber
+	, strSalespersonNumber
+	, strSalespersonName
+	, strSalespersonDisplayName
 	, strCompanyName
 	, strCompanyAddress
 	, strCurrency
@@ -288,6 +303,7 @@ INSERT INTO tblARTaxStagingTable (
 	, strStateTaxId
 )
 SELECT TAX.intEntityCustomerId
+	, TAX.intEntitySalespersonId
 	, TAX.intCurrencyId
 	, TAX.intCompanyLocationId
 	, TAX.intShipToLocationId
@@ -304,6 +320,10 @@ SELECT TAX.intEntityCustomerId
 	, TAX.strCustomerNumber
 	, TAX.strCustomerName
 	, TAX.strDisplayName
+	, TAX.strTaxNumber
+	, TAX.strSalespersonNumber
+	, TAX.strSalespersonName
+	, TAX.strSalespersonDisplayName
 	, TAX.strCompanyName
 	, TAX.strCompanyAddress
 	, TAX.strCurrency
@@ -350,6 +370,8 @@ AND (@strTaxCode IS NULL OR TAX.strTaxCode LIKE '%'+ @strTaxCode +'%')
 AND (@strTaxAgency IS NULL OR TAX.strTaxAgency LIKE '%'+ @strTaxAgency +'%')
 AND (@strTaxClass IS NULL OR TAX.strTaxClass LIKE '%'+ @strTaxClass +'%')
 AND (@strTaxGroup IS NULL OR TAX.strTaxGroup LIKE '%'+ @strTaxGroup +'%')
+AND (@strState IS NULL OR TAX.strState LIKE '%'+ @strState +'%')
+AND (@strSalespersonName IS NULL OR TAX.strSalespersonName LIKE '%' + @strSalespersonName + '%')
 
 IF ISNULL(@ysnTaxExemptOnly, 0) = 1 
 	DELETE FROM tblARTaxStagingTable WHERE ysnTaxExempt = 0

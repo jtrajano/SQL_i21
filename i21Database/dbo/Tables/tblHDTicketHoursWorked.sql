@@ -5,12 +5,17 @@
 	[intAgentId] [int] NOT NULL,
 	[intAgentEntityId] [int] NULL,
 	[intHours] [numeric](18, 6) NOT NULL,
+	[dblEstimatedHours] [numeric](18, 6) NOT NULL default 0.00,
 	[dtmDate] [datetime] NULL,
+	[dtmStartTime] [datetime] NULL,
+	[dtmEndTime] [datetime] NULL,
 	[dblRate] [numeric](18, 6) NOT NULL,
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strJIRALink] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intInvoiceId] [int] NULL,
+	[intBillId] [int] NULL,
 	[ysnBillable] [bit] NOT NULL,
+	[ysnReimburseable] [bit] NOT NULL default convert(bit,0),
 	[ysnBilled] [bit] NULL,
 	[dtmBilled] [datetime] NULL,
 	[intCreatedUserId] [int] NULL,
@@ -29,7 +34,8 @@
     CONSTRAINT [FK_TicketHoursWorked_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
     CONSTRAINT [FK_TicketHoursWorked_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId]),
     --CONSTRAINT [FK_TicketHoursWorked_tblHDTimeEntry_intTimeEntryId] FOREIGN KEY ([intTimeEntryId]) REFERENCES [dbo].[tblHDTimeEntry] ([intTimeEntryId]),
-	CONSTRAINT [FK_tblHDTicketHoursWorked_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])
+	CONSTRAINT [FK_tblHDTicketHoursWorked_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]),
+	CONSTRAINT [FK_tblHDTicketHoursWorked_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId])
 )
 
 GO

@@ -1,9 +1,8 @@
-﻿CREATE VIEW [dbo].[vyuCMBankTransaction]
+﻿CREATE  VIEW [dbo].[vyuCMBankTransaction]
 AS 
-
 SELECT 
-*,
-strBankTransactionTypeName = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = tblCMBankTransaction.intBankTransactionTypeId),
+A.*,
+strBankTransactionTypeName = (SELECT strBankTransactionTypeName FROM tblCMBankTransactionType WHERE intBankTransactionTypeId = A.intBankTransactionTypeId),
 ysnPayeeEFTInfoActive = ISNULL((
 		SELECT TOP 1 ysnActive FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
@@ -41,11 +40,16 @@ strSocialSecurity = ISNULL((
 		SELECT Emp.strSocialSecurity FROM 
 		tblPRPaycheck PayCheck  INNER JOIN
 		tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.[intEntityId]
-		WHERE PayCheck.strPaycheckId = tblCMBankTransaction.strTransactionId 
+		WHERE PayCheck.strPaycheckId = A.strTransactionId 
 ),''),
 strAccountClassification = ISNULL((
 		SELECT TOP 1 strAccountClassification FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
-),'')
-FROM tblCMBankTransaction
- --dbo.fnIsDepositEntry(strLink) = 0
+),''),
+Detail.dblDebit,
+Detail.dblCredit
+FROM tblCMBankTransaction A
+OUTER APPLY (
+	SELECT SUM(ISNULL(dblDebit,0)) dblDebit, SUM(ISNULL(dblCredit,0)) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = A.intTransactionId
+)Detail
+GO

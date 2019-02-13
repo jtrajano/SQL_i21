@@ -278,13 +278,7 @@ LEFT JOIN vyuCTCompactContractDetailView ContractView
 	AND Receipt.strReceiptType = 'Purchase Contract'
 LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ContractView.intContractDetailId
 LEFT JOIN tblEMEntityFarm ContractFarm ON ContractFarm.intFarmFieldId = ContractDetail.intFarmFieldId
--- LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = ReceiptItem.intSourceId
-OUTER APPLY (
-	SELECT	strTicketNumber, intFarmFieldId
-	FROM	tblSCTicket 
-	WHERE	intTicketId = ReceiptItem.intSourceId
-			AND Receipt.intSourceType = 1
-) ticket 
+LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = ReceiptItem.intSourceId and Receipt.intSourceType = 1
 LEFT JOIN tblEMEntityFarm ScaleFarm ON ScaleFarm.intFarmFieldId = ticket.intFarmFieldId
 OUTER APPLY (
 	SELECT	* 
@@ -332,14 +326,6 @@ OUTER APPLY (
 	WHERE	intCustomerStorageId = ReceiptItem.intSourceId 
 			AND Receipt.intSourceType = 4
 ) vyuGRStorageSearchView
--- OUTER APPLY (
--- 	SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
--- 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
--- 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
--- 	WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId
--- 			AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
--- 			AND Receipt.strReceiptType = 'Inventory Return'
--- ) rtn
 OUTER APPLY (
 	SELECT	strDeliverySheetNumber 
 	FROM	tblSCDeliverySheet 

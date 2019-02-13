@@ -186,6 +186,7 @@ INSERT INTO tblHDCallDetail
 		   intEntityId
            ,strName
            ,strFirstName
+		   ,strDepartment
            ,intClosedCalls
            ,intOpenCalls
            ,intTotalCalls
@@ -207,6 +208,7 @@ INSERT INTO tblHDCallDetail
 				intEntityId = b.intEntityId
 				,strName = ltrim(rtrim(b.strName))
 				,strFirstName = SUBSTRING(ltrim(rtrim(b.strName)),1,CHARINDEX(' ',ltrim(rtrim(b.strName)),1))
+				,strDepartment = (select top 1 bb.strDepartment from tblPREmployeeDepartment aa, tblPRDepartment bb where aa.intEntityEmployeeId = b.intEntityId and bb.intDepartmentId = aa.intDepartmentId order by aa.intSort desc, aa.intEmployeeDepartmentId)
 				,intClosedCalls = isnull((select intClosedCalls from closedCalls where intEntityId = b.intEntityId),0)
 				,intOpenCalls = isnull((select intOpenCalls from openCalls where intEntityId = b.intEntityId),0)
 				,intTotalCalls = isnull((select intTotalCalls from totalCalls where intEntityId = b.intEntityId),0)
@@ -244,6 +246,7 @@ INSERT INTO tblHDCallDetail
 		,intEntityId
 		,strName
 		,strFirstName
+		,strDepartment
 		,intClosedCalls
 		,intOpenCalls
 		,intTotalCalls
@@ -266,6 +269,7 @@ INSERT INTO tblHDCallDetail
 			intEntityId
 			,strName
 			,strFirstName
+			,strDepartment
 			,intClosedCalls
 			,intOpenCalls
 			,intTotalCalls

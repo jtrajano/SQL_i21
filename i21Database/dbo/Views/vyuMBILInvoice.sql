@@ -29,7 +29,7 @@ SELECT Invoice.intInvoiceId
 	, Invoice.inti21InvoiceId
 	, stri21InvoiceNo = i21Invoice.strInvoiceNumber
 	, Invoice.intConcurrencyId
-	, strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL)
+	, strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL) COLLATE Latin1_General_CI_AS
 FROM tblMBILInvoice Invoice
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Invoice.intEntityCustomerId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Invoice.intLocationId

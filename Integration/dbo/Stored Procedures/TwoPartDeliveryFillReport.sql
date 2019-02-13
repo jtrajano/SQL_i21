@@ -1,7 +1,8 @@
 ﻿GO
 PRINT 'START OF CREATING TwoPartDeliveryFillReport SP'
 GO
-  
+
+/*
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TwoPartDeliveryFillReport]') AND type in (N'P', N'PC'))
 DROP PROCEDURE [dbo].[TwoPartDeliveryFillReport]
 GO
@@ -1611,6 +1612,7 @@ GO
 		 ORDER BY agcus_key, intSiteNumber, intLineNumber ,strLine DESC
 	')
 --END
+*/
 GO
 
 PRINT 'END OF CREATING TwoPartDeliveryFillReport SP'

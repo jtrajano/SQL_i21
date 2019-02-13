@@ -15,6 +15,8 @@ BEGIN
 	DECLARE @strClassFill NVARCHAR(15)
 	DECLARE @intSiteItemId INT
 	DECLARE @strItemType NVARCHAR(50)
+	DECLARE @intScreenId INT
+	DECLARE @intCustomerID INT
 
 	SET @ResultLog = ''
 
@@ -58,6 +60,7 @@ BEGIN
 			,@strSiteBillingBy = strBillingBy
 			,@intSiteItemId = intProduct
 			,@strClassFill = strClassFillOption
+			,@intCustomerID = intCustomerID
 		FROM tblTMSite
 		WHERE intSiteID = @intSiteId
 		
@@ -164,6 +167,24 @@ BEGIN
 					GOTO DONEVALIDATING
 				END
 			END
+
+			------------------------Check CS Locked Record
+			SELECT TOP 1 
+				@intScreenId = intScreenId 
+			FROM tblSMScreen
+			WHERE strModule = 'Tank Management'
+				AND strNamespace = 'TankManagement.view.ConsumptionSite'
+
+			IF EXISTS(SELECT TOP 1 1 
+						FROM tblSMTransaction 
+						WHERE intScreenId = @intScreenId
+							AND intRecordId =  @intCustomerID
+							AND ysnLocked = 1)
+			BEGIN
+				SET @ResultLog = @ResultLog + 'Exception:Consumption Site record is locked.' + CHAR(10)
+				GOTO DONEVALIDATING
+			END
+
 		END
 		
 		CONTINUELOOP:

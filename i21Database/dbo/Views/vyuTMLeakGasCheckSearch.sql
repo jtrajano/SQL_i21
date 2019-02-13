@@ -4,7 +4,7 @@ AS
 		strLocation = D.strLocationName
 		,strCustomerNumber = B.strEntityNo
 		,strCustomerName = B.strName
-		,strSiteNumber = RIGHT('0000'+ CAST(A.intSiteNumber AS VARCHAR(4)),4)
+		,strSiteNumber = RIGHT('0000'+ CAST(A.intSiteNumber AS VARCHAR(4)),4) COLLATE Latin1_General_CI_AS  
 		,strSerialNumber = I.strSerialNumber
 		,dblTankCapacity = I.dblTankCapacity
 		,strTankType = J.strTankType

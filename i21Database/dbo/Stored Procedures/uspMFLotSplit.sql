@@ -10,7 +10,7 @@
 	,@intInventoryAdjustmentId INT = NULL OUTPUT
 	,@dtmDate DATETIME = NULL
 	,@strReasonCode NVARCHAR(MAX) = NULL
-	,@intTaskId int=NULL
+	,@intTaskId INT = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -46,6 +46,9 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
 		,@dblNewSplitLotQuantity NUMERIC(38, 20)
+		,@ItemsToReserve AS dbo.ItemReservationTableType
+		,@intTransactionId INT
+		,@ItemsToUnReserve AS dbo.ItemReservationTableType
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -94,9 +97,14 @@ BEGIN TRY
 	IF @dtmDate IS NULL
 		SELECT @dtmDate = GETDATE()
 
+	SELECT @intTransactionId = intOrderHeaderId
+	FROM tblMFTask
+	WHERE intTaskId = @intTaskId
+
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))
 	FROM tblICStockReservation
 	WHERE intLotId = @intLotId
+		AND intTransactionId = IsNULL(@intTransactionId, intTransactionId)
 		AND ISNULL(ysnPosted, 0) = 0
 
 	IF (
@@ -193,19 +201,52 @@ BEGIN TRY
 	SELECT @intNewItemUOMId = NULL
 
 	IF @intItemUOMId <> @intSplitItemUOMId
-		AND IsNULL(@intWeightUOMId,@intItemUOMId) <> @intSplitItemUOMId
+		AND IsNULL(@intWeightUOMId, @intItemUOMId) <> @intSplitItemUOMId
 	BEGIN
 		SELECT @dblNewSplitLotQuantity = abs(@dblAdjustByQuantity)
 
 		SELECT @intNewItemUOMId = @intSplitItemUOMId
 
-		SELECT @dblAdjustByQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intSplitItemUOMId, IsNULL(@intWeightUOMId,@intItemUOMId), @dblAdjustByQuantity)
+		SELECT @dblAdjustByQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intSplitItemUOMId, IsNULL(@intWeightUOMId, @intItemUOMId), @dblAdjustByQuantity)
 
-		SELECT @intSplitItemUOMId = IsNULL(@intWeightUOMId,@intItemUOMId)
+		SELECT @intSplitItemUOMId = IsNULL(@intWeightUOMId, @intItemUOMId)
 	END
 
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
+
+	IF @intTaskId IS NOT NULL
+	BEGIN
+		INSERT INTO @ItemsToReserve (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			)
+		SELECT SR.intItemId
+			,SR.intItemLocationId
+			,SR.intItemUOMId
+			,SR.intLotId
+			,SR.intSubLocationId
+			,SR.intStorageLocationId
+			,SR.dblQty
+			,SR.intTransactionId
+			,SR.strTransactionId
+			,SR.intInventoryTransactionType
+		FROM tblICStockReservation SR
+		WHERE SR.intTransactionId = @intTransactionId
+			AND SR.intInventoryTransactionType = 34
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToUnReserve
+			,@intTransactionId
+			,34
+	END
 
 	EXEC uspICInventoryAdjustment_CreatePostSplitLot @intItemId = @intItemId
 		,@dtmDate = @dtmDate
@@ -233,7 +274,46 @@ BEGIN TRY
 	SELECT TOP 1 @strSplitLotNumber = strLotNumber
 		,@intNewLotId = intLotId
 	FROM tblICLot
+	WHERE strLotNumber = @strNewLotNumber
+		AND intItemId = @intItemId
+		AND intStorageLocationId = @intSplitStorageLocationId
 	ORDER BY intLotId DESC
+
+	IF @intNewLotId IS NULL
+	BEGIN
+		SELECT TOP 1 @strSplitLotNumber = strLotNumber
+			,@intNewLotId = intLotId
+		FROM tblICLot
+		WHERE intItemId = @intItemId
+			AND intStorageLocationId = @intSplitStorageLocationId
+		ORDER BY intLotId DESC
+	END
+
+	IF @intNewLotId IS NULL
+	BEGIN
+		SELECT TOP 1 @strSplitLotNumber = strLotNumber
+			,@intNewLotId = intLotId
+		FROM tblICLot
+		ORDER BY intLotId DESC
+	END
+
+	IF @intTaskId IS NOT NULL
+	BEGIN
+		UPDATE tblMFTask
+		SET intLotId = @intNewLotId
+			,intFromStorageLocationId = @intSplitStorageLocationId
+		WHERE intTaskId = @intTaskId
+
+		UPDATE @ItemsToReserve
+		SET intLotId = @intNewLotId
+			,intStorageLocationId = @intSplitStorageLocationId
+			,intSubLocationId = @intSplitSubLocationId
+		WHERE intLotId = @intLotId
+
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+			,@intTransactionId
+			,34
+	END
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 17

@@ -5,6 +5,7 @@ SELECT DistDetail.intLoadDistributionDetailId
 	, DistDetail.intLoadDistributionHeaderId
 	, Header.intLoadHeaderId
 	, Header.strTransaction
+	, DistDetail.strBillOfLading
 	, DistDetail.intItemId
 	, ItemLocation.strItemNo
 	, strItemDescription = ItemLocation.strDescription

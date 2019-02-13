@@ -1,7 +1,9 @@
 ﻿
-CREATE PROCEDURE uspCMGetClearedPayments
+CREATE PROCEDURE [dbo].[uspCMGetClearedPayments]
 	@intBankAccountId INT = NULL,
-	@dtmStatementDate AS DATETIME = NULL
+	@dtmStatementDate AS DATETIME = NULL,
+	@ysnCheckVoid BIT = 0
+
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,6 +17,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@MISC_CHECKS INT = 3
 		,@BANK_TRANSFER INT = 4
 		,@BANK_TRANSACTION INT = 5
+		,@BANK_INTEREST INT = 51
+		,@BANK_LOAN INT = 52
 		,@CREDIT_CARD_CHARGE INT = 6
 		,@CREDIT_CARD_RETURNS INT = 7
 		,@CREDIT_CARD_PAYMENTS INT = 8
@@ -33,15 +37,17 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@PAYCHECK AS INT = 21
 		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
-		,@LastReconDate AS DATETIME
+		,@NSF AS INT = 124
+		,@LastReconDate AS DATETIME;
 
-		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
+SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
 		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ABS(ISNULL(dblAmount, 0))), 0)
 FROM	tblCMBankTransaction 
 WHERE	ysnPosted = 1
 		AND ysnClr = 1
+		AND @ysnCheckVoid = (CASE WHEN ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled THEN 1 ELSE 0 END )
 		AND intBankAccountId = @intBankAccountId
 		AND dblAmount <> 0		
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
@@ -54,8 +60,8 @@ WHERE	ysnPosted = 1
 		)
 		AND (
 			-- Filter for all the bank payments and debits:
-			intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
-			OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
+			intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@BANK_INTEREST,@BANK_LOAN,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
+			OR ( dblAmount < 0 AND intBankTransactionTypeId in ( @BANK_TRANSACTION ))
 		)
 		AND 1 = CASE 
 			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 

@@ -145,9 +145,11 @@ SELECT
 	strSubBook = CSBOOK.strSubBook,
 	intCreditStopDays = CUS.intCreditStopDays,
 	strCreditCode = CUS.strCreditCode,
-	intPurchaseSale	= LG.intPurchaseSale,
+	intPurchaseSale	= LG.intPurchaseSale, 
     strReceiptNumber = ISNULL(POS.strReceiptNumber,POSMixedTransactionCreditMemo.strReceiptNumber),
     strEODNumber = ISNULL(POS.strEODNo,POSMixedTransactionCreditMemo.strEODNo),
+	strEODStatus = CASE WHEN POS.ysnClosed = 1 THEN 'Completed' ELSE 'Open' END,
+	strEODPOSDrawerName = POS.strPOSDrawerName,
 	intCreditLimitReached = CUS.intCreditLimitReached,
 	dtmCreditLimitReached = CUS.dtmCreditLimitReached
 FROM 
@@ -233,21 +235,24 @@ LEFT JOIN (
     SELECT intInvoiceId
          , strReceiptNumber
          , strEODNo
+		 , EOD.ysnClosed
 		 , POS.strComment
+		 , DRAWER.strPOSDrawerName
     FROM dbo.tblARPOS POS WITH (NOLOCK)
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
+	INNER JOIN dbo.tblSMCompanyLocationPOSDrawer DRAWER WITH (NOLOCK) ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId 
 ) POS ON INV.intInvoiceId = POS.intInvoiceId 
      AND INV.strType = 'POS'
 LEFT OUTER JOIN (
-	SELECT intCreditMemoId
+    SELECT intCreditMemoId
          , strReceiptNumber
          , strEODNo
-		 , intItemCount
-		 , dblTotal
+         , intItemCount
+         , dblTotal
     FROM dbo.tblARPOS POS WITH (NOLOCK)
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId 
-	WHERE intCreditMemoId IS NOT NULL
+    WHERE intCreditMemoId IS NOT NULL
 ) POSMixedTransactionCreditMemo ON INV.intInvoiceId = POSMixedTransactionCreditMemo.intCreditMemoId
 AND INV.strType = 'POS'

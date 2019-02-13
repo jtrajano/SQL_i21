@@ -28,6 +28,7 @@ DECLARE @intEntityVendorId AS INT
 		,@intShipTo AS INT 
 		,@strVendorRefNo NVARCHAR(50)
 		,@intCurrencyId AS INT 
+		,@strBillOfLading NVARCHAR(50)
 
 		,@intShipFrom_DebitMemo AS INT
 		,@intReturnValue AS INT
@@ -59,6 +60,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 		,@intShipFrom = r.intShipFromId
 		,@intShipTo = r.intLocationId
 		,@strVendorRefNo = r.strVendorRefNo
+		,@strBillOfLading = r.strBillOfLading
 		,@intCurrencyId = r.intCurrencyId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
@@ -242,7 +244,7 @@ BEGIN
 			,@voucherDetailReceiptCharge = @voucherOtherCharges
 			,@shipTo = @intShipTo
 			,@shipFrom = @intShipFrom
-			,@vendorOrderNumber = @strVendorRefNo
+			,@vendorOrderNumber = @strBillOfLading
 			,@currencyId = @intCurrencyId
 			,@throwError = 0
 			,@error = @throwedError OUTPUT

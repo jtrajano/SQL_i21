@@ -94,7 +94,7 @@ BEGIN
 														ORDER BY tblTMLeaseMinimumUse.dblSiteCapacity ASC)
 					,dtmLastLeaseBillingDate = ISNULL(A.dtmLastLeaseBillingDate,''1/1/1900'')
 					,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intLeaseId)) AS INT)
-					,strSiteNumber = RIGHT(''000''+ CAST(F.intSiteNumber AS VARCHAR(4)),4)
+					,strSiteNumber = RIGHT(''000''+ CAST(F.intSiteNumber AS VARCHAR(4)),4)  COLLATE Latin1_General_CI_AS  
 					,strAgreementLetter = M.strName
 					,A.ysnPrintDeviceValueInAgreement
 					,A.strEvaluationMethod
@@ -192,7 +192,7 @@ BEGIN
 															ORDER BY tblTMLeaseMinimumUse.dblSiteCapacity ASC)
 						,dtmLastLeaseBillingDate = ISNULL(A.dtmLastLeaseBillingDate,''1/1/1900'')
 						,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intLeaseId)) AS INT)
-						,strSiteNumber = RIGHT(''000''+ CAST(F.intSiteNumber AS VARCHAR(4)),4)
+						,strSiteNumber = RIGHT(''000''+ CAST(F.intSiteNumber AS VARCHAR(4)),4) COLLATE Latin1_General_CI_AS  
 						,strAgreementLetter = M.strName
 						,A.ysnPrintDeviceValueInAgreement
 						,A.strEvaluationMethod

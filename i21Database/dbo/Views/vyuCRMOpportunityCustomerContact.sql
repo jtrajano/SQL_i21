@@ -34,9 +34,9 @@
 			,intEntityLocationId = (select top 1 [tblEMEntityLocation].intEntityLocationId from [tblEMEntityLocation] where [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId)
 			,strLocationName = (select top 1 [tblEMEntityLocation].strLocationName from [tblEMEntityLocation] where [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId)
 			,tblEMEntity.ysnActive
-			,strEntityType = 'Vendor'
+			,strEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
 			,tblEMEntityPhoneNumber.strPhone
-			,strDirectionEntityType = 'Vendor'
+			,strDirectionEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
 		from tblAPVendor
 			,[tblEMEntityToContact]
 			,tblEMEntity

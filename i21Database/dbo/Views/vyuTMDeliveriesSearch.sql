@@ -3,7 +3,7 @@ AS
 	SELECT 
 		strCustomerNumber = B.strEntityNo
 		,strCustomerName = B.strName
-		,strSiteNumber = RIGHT('0000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
+		,strSiteNumber = RIGHT('0000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)  COLLATE Latin1_General_CI_AS  
 		,F.dtmInvoiceDate
 		,F.strBulkPlantNumber
 		,strProductDelivered = F.strProductDelivered
@@ -22,6 +22,7 @@ AS
 		,F.strInvoiceNumber
 		,K.strFillMethod
 		,strItemDescription = I.strDescription		
+		,strAccountStatus = C.strAcctStatus	
 	FROM tblTMSite C 
 	INNER JOIN tblTMCustomer E 
 		ON C.intCustomerID = E.intCustomerID

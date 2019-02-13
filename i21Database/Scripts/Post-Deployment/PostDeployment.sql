@@ -429,6 +429,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\1740_Activate_Default_Contact.sql
 :r .\EM\1810_Set_Default_Language.sql
 :r .\EM\1810_Fix_Check_Payee_Name.sql
+:r .\EM\1910_Set_Contact_Location.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
@@ -464,6 +465,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\01_TaxAuthority.sql
 :r .\TF\DefaultData\02_TerminalControl.sql
 :r .\TF\DefaultData\03_TaxCategory.sql
+:r .\TF\DefaultData\04_TransactionSource.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\IL_Illinois.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
@@ -477,6 +479,14 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\NM_NewMexico.sql
 :r .\TF\DefaultData\SC_SouthCarolina.sql
 :r .\TF\DefaultData\PA_Pennsylvania.sql
+:r .\TF\DefaultData\MT_Montana.sql
+:r .\TF\DefaultData\MN_Minnesota.sql
+:r .\TF\DefaultData\KS_Kansas.sql
+:r .\TF\DefaultData\KY_Kentucky.sql
+:r .\TF\DefaultData\ID_Idaho.sql
+:r .\TF\DefaultData\OK_Oklahoma.sql
+:r .\TF\DefaultData\TX_Texas.sql
+:r .\TF\DefaultData\AR_Arkansas.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

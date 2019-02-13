@@ -7,6 +7,7 @@ SELECT
 	ISNULL(A.dblUnapplied,0) AS dblUnapplied,
 	ISNULL(A.dblWithheld,0) AS dblWithheld,
 	A.dtmDatePaid ,
+	A.dtmDateCreated,
 	A.intAccountId ,
 	A.intBankAccountId ,
 	A.intCurrencyId ,

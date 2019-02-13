@@ -226,58 +226,58 @@ BEGIN
 			)
 
 			DECLARE @tblCFInvoiceFeeDetail TABLE
-		(
-		     intFeeProfileId						 INT
-			,strFeeProfileId						 NVARCHAR(MAX)
-			,strFeeProfileDescription				 NVARCHAR(MAX)
-			,strInvoiceFormat						 NVARCHAR(MAX)
-			,intFeeProfileDetailId					 INT
-			,strFeeProfileDetailDescription			 NVARCHAR(MAX)
-			,dtmEndDate								 DATETIME
-			,dtmStartDate							 DATETIME
-			,intFeeId								 INT
-			,strFee									 NVARCHAR(MAX)
-			,strFeeDescription						 NVARCHAR(MAX)
-			,strCalculationType						 NVARCHAR(MAX)
-			,strCalculationFrequency				 NVARCHAR(MAX)
-			,ysnExtendedRemoteTrans					 BIT
-			,ysnRemotesTrans						 BIT
-			,ysnLocalTrans							 BIT
-			,ysnForeignTrans						 BIT
-			,intNetworkId							 INT
-			,intCardTypeId							 INT
-			,intMinimumThreshold					 INT
-			,intMaximumThreshold					 INT
-			,dblFeeRate								 NUMERIC(18,6)
-			,intGLAccountId							 INT
-			,intItemId								 INT
-			,intRestrictedByProduct					 INT
-		)
+			(
+					intFeeProfileId						 INT
+				,strFeeProfileId						 NVARCHAR(MAX)
+				,strFeeProfileDescription				 NVARCHAR(MAX)
+				,strInvoiceFormat						 NVARCHAR(MAX)
+				,intFeeProfileDetailId					 INT
+				,strFeeProfileDetailDescription			 NVARCHAR(MAX)
+				,dtmEndDate								 DATETIME
+				,dtmStartDate							 DATETIME
+				,intFeeId								 INT
+				,strFee									 NVARCHAR(MAX)
+				,strFeeDescription						 NVARCHAR(MAX)
+				,strCalculationType						 NVARCHAR(MAX)
+				,strCalculationFrequency				 NVARCHAR(MAX)
+				,ysnExtendedRemoteTrans					 BIT
+				,ysnRemotesTrans						 BIT
+				,ysnLocalTrans							 BIT
+				,ysnForeignTrans						 BIT
+				,intNetworkId							 INT
+				,intCardTypeId							 INT
+				,intMinimumThreshold					 INT
+				,intMaximumThreshold					 INT
+				,dblFeeRate								 NUMERIC(18,6)
+				,intGLAccountId							 INT
+				,intItemId								 INT
+				,intRestrictedByProduct					 INT
+			)
 
-			CREATE TABLE ##tblCFInvoiceFeeOutput
-		(
-			  intFeeLoopId				INT
-			 ,intAccountId				INT
-			 ,strCalculationType		NVARCHAR(MAX)
-			 ,dblFeeRate				NUMERIC(18,6)
-			 ,intTransactionId			INT
-			 ,dtmTransactionDate		DATETIME
-			 ,dtmStartDate				DATETIME
-			 ,dtmEndDate				DATETIME
-			 ,dblQuantity				NUMERIC(18,6)
-			 ,intCardId					INT	
-			 ,dblFeeAmount				NUMERIC(18,6)
-			 ,strFeeDescription			NVARCHAR(MAX)
-			 ,strFee					NVARCHAR(MAX)
-			 ,strInvoiceFormat			NVARCHAR(MAX)
-			 ,strInvoiceReportNumber	NVARCHAR(MAX)
-			 ,intCustomerId				INT
-			 ,intTermID					INT
-			 ,intSalesPersonId			INT
-			 ,dtmInvoiceDate			DATETIME
-			 ,intItemId					INT
-			 ,intARLocationId			INT
-		)
+			DECLARE @tblCFInvoiceFeeOutput TABLE
+			(
+				intFeeLoopId				INT
+				,intAccountId				INT
+				,strCalculationType		NVARCHAR(MAX)
+				,dblFeeRate				NUMERIC(18,6)
+				,intTransactionId			INT
+				,dtmTransactionDate		DATETIME
+				,dtmStartDate				DATETIME
+				,dtmEndDate				DATETIME
+				,dblQuantity				NUMERIC(18,6)
+				,intCardId					INT	
+				,dblFeeAmount				NUMERIC(18,6)
+				,strFeeDescription			NVARCHAR(MAX)
+				,strFee					NVARCHAR(MAX)
+				,strInvoiceFormat			NVARCHAR(MAX)
+				,strInvoiceReportNumber	NVARCHAR(MAX)
+				,intCustomerId				INT
+				,intTermID					INT
+				,intSalesPersonId			INT
+				,dtmInvoiceDate			DATETIME
+				,intItemId					INT
+				,intARLocationId			INT
+			)
 
 			-------------VARIABLES------------
 
@@ -285,14 +285,6 @@ BEGIN
 		
 
 
-			-----------------MAIN QUERY------------------
-			--SELECT * FROM tblCFInvoiceStagingTable AS cfInv
-			--INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
-
-			--EXEC('SELECT * 
-			--INTO ##tmpInvoiceFee
-			--FROM tblCFInvoiceStagingTable ')
-			-----------------MAIN QUERY------------------
 
 			INSERT @tblCFInvoiceFeesTemp
 			SELECT
@@ -343,6 +335,7 @@ BEGIN
 			--INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount ON cfInv.intCardId = cfCardAccount.intCardId
 			WHERE ISNULL(intInvoiceId,0) != 0
 			AND cfInv.strUserId = @UserId
+			AND ISNULL(cfInv.ysnExpensed,0) = 0
 			AND LOWER(cfInv.strStatementType) = 'invoice'
 
 
@@ -802,7 +795,7 @@ BEGIN
 						
 
 
-					INSERT INTO ##tblCFInvoiceFeeOutput(
+					INSERT INTO @tblCFInvoiceFeeOutput(
 						 intFeeLoopId	
 						,intAccountId		
 						,strCalculationType
@@ -948,7 +941,6 @@ BEGIN
 			----------------------------------
 			---**END DISCOUNT CALCULATION**---
 			----------------------------------
-			--SELECT * FROM ##tblCFInvoiceFeeOutput
 
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
 			INSERT INTO tblCFInvoiceFeeStagingTable
@@ -1001,11 +993,11 @@ BEGIN
 			,tbl1.dtmStartDate			
 			,tbl1.dtmEndDate
 			,@UserId
-			FROM ##tblCFInvoiceFeeOutput AS tbl1
+			FROM @tblCFInvoiceFeeOutput AS tbl1
 			inner join 
 			(
 			SELECT dblFeeTotalAmount = (SELECT ROUND(SUM(dblFeeAmount),2))  , intAccountId
-			FROM ##tblCFInvoiceFeeOutput 
+			FROM @tblCFInvoiceFeeOutput 
 			GROUP BY intAccountId	
 			,intAccountId	
 			) AS tbl2
@@ -1014,14 +1006,7 @@ BEGIN
 			--SELECT * FROM tblCFInvoiceFeeStagingTable
 					
 			-------------SELECT MAIN TABLE FOR OUTPUT---------------
-
-			-------------DROP TEMPORARY TABLES---------------
-			IF OBJECT_ID(N'tempdb..##tmpInvoiceFee', N'U') IS NOT NULL 
-			DROP TABLE ##tmpInvoiceFee;
-
-			IF OBJECT_ID(N'tempdb..##tblCFInvoiceFeeOutput', N'U') IS NOT NULL 
-			DROP TABLE ##tblCFInvoiceFeeOutput;
-			-------------DROP TEMPORARY TABLES---------------
+	
 		END TRY
 		BEGIN CATCH
 			
@@ -1029,13 +1014,6 @@ BEGIN
 			select @error = ERROR_NUMBER(),
             @message = ERROR_MESSAGE(), 
             @xstate = XACT_STATE();
-			
-			-------------DROP TEMPORARY TABLES---------------
-			IF OBJECT_ID(N'tempdb..##tmpInvoiceFee', N'U') IS NOT NULL 
-			DROP TABLE ##tmpInvoiceFee;
-
-			IF OBJECT_ID(N'tempdb..##tblCFInvoiceFeeOutput', N'U') IS NOT NULL 
-			DROP TABLE ##tblCFInvoiceFeeOutput;
-			-------------DROP TEMPORARY TABLES---------------
+	
 		END CATCH
 END

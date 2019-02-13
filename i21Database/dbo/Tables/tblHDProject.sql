@@ -58,6 +58,7 @@
 	[strWinLossActionItem] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intLostToCompetitorId] [int] null,
 	[ysnEmailAlert] bit null,
+	[ysnMultipleCustomer] bit not null default convert(bit,0),
 	[intTargetVersionId] [int] null,
 	[strProjectImageId] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,

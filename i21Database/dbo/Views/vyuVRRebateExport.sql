@@ -62,6 +62,7 @@ AS
 	LEFT JOIN tblVRUOMXref R
 		ON F.intUnitMeasureId = R.intUnitMeasureId
 			AND J.intVendorSetupId = R.intVendorSetupId
+	WHERE I.ysnActive = 1
 	
 
 GO

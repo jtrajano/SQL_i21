@@ -1,7 +1,8 @@
 ﻿
-CREATE PROCEDURE uspCMGetClearedDeposits
+CREATE PROCEDURE [dbo].[uspCMGetClearedDeposits]
 	@intBankAccountId INT = NULL,
-	@dtmStatementDate AS DATETIME = NULL
+	@dtmStatementDate AS DATETIME = NULL,
+	@ysnCheckVoid BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,6 +16,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@MISC_CHECKS INT = 3
 		,@BANK_TRANSFER INT = 4
 		,@BANK_TRANSACTION INT = 5
+		,@BANK_INTEREST INT = 51
+		,@BANK_LOAN INT = 52
 		,@CREDIT_CARD_CHARGE INT = 6
 		,@CREDIT_CARD_RETURNS INT = 7
 		,@CREDIT_CARD_PAYMENTS INT = 8
@@ -39,12 +42,15 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@LastReconDate AS DATETIME
 
 		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
-		
+
+
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
 		AND ysnClr = 1
+		
+		AND @ysnCheckVoid = (CASE WHEN ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled THEN 1 ELSE 0 END )
 		AND intBankAccountId = @intBankAccountId
 		AND dblAmount <> 0
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
@@ -58,7 +64,7 @@ WHERE	ysnPosted = 1
 		AND (
 			-- Filter for all the bank deposits and credits:
 			intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT, @VOID_CHECK, @VOID_MISC_CHECKS, @VOID_AP_PAYMENT, @VOID_PAYCHECK, @VOID_ACH, @VOID_DIRECT_DEPOSIT)
-			OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
+			OR ( dblAmount > 0 AND intBankTransactionTypeId in ( @BANK_TRANSACTION, @BANK_LOAN ))
 		)
 		--AND dbo.fnIsDepositEntry(strLink) = 0
 		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry
@@ -68,3 +74,4 @@ WHERE	ysnPosted = 1
 			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 
 			ELSE 1 
 			END --CM-1143
+

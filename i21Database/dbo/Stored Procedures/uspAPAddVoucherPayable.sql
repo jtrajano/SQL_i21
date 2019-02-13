@@ -575,6 +575,9 @@ ELSE
 		END
 	END	
 
+--RETURN THE NEW PAYABLE ID LINKED TO tblAPVoucherPayable
+SELECT * FROM @insertedData
+
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,

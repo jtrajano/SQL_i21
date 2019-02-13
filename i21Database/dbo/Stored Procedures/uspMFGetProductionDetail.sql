@@ -11,6 +11,14 @@ BEGIN
 		,@strColumn8 NVARCHAR(100)
 		,@strColumn9 NVARCHAR(100)
 		,@strColumn10 NVARCHAR(100)
+		,@dtmOrderDate DATETIME
+		,@intItemId INT
+		,@intManufacturingProcessId INT
+		,@strWorkOrderNo NVARCHAR(50)
+		,@strProcessName NVARCHAR(50)
+		,@strDescription NVARCHAR(250)
+		,@strTargetItemNo NVARCHAR(50)
+		,@strTargetDescription NVARCHAR(250)
 
 	SELECT @strColumn1 = ''
 		,@strColumn2 = ''
@@ -137,31 +145,39 @@ BEGIN
 				,strColumn10
 				)) AS PivotTable
 
+	SELECT @intItemId = intItemId
+		,@intManufacturingProcessId = intManufacturingProcessId
+		,@strWorkOrderNo = strWorkOrderNo
+		,@dtmOrderDate = dtmOrderDate
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strProcessName = strProcessName
+		,@strDescription = strDescription
+	FROM tblMFManufacturingProcess
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+
+	SELECT @strTargetItemNo = strItemNo
+		,@strTargetDescription = strDescription
+	FROM tblICItem
+	WHERE intItemId = @intItemId
+
 	SELECT W.intWorkOrderProducedLotId
 		,L.intLotId
 		,L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
-		,CASE 
-			WHEN IU.ysnStockUnit = 1
-				THEN W.dblQuantity
-			ELSE W.dblPhysicalCount
-			END AS dblQuantity
-		,CASE 
-			WHEN IU.ysnStockUnit = 1
-				THEN IU.intItemUOMId
-			ELSE IU1.intItemUOMId
-			END AS intItemUOMId
-		,CASE 
-			WHEN IU.ysnStockUnit = 1
-				THEN U.intUnitMeasureId
-			ELSE U1.intUnitMeasureId
-			END AS intUnitMeasureId
-		,CASE 
-			WHEN IU.ysnStockUnit = 1
-				THEN U.strUnitMeasure
-			ELSE U1.strUnitMeasure
-			END AS strUnitMeasure
+		,W.dblQuantity
+		,W.dblQuantity + W.dblTareWeight AS dblGrossWeight
+		,W.dblTareWeight
+		,W.dblWeightPerUnit
+		,IU.intItemUOMId
+		,U.intUnitMeasureId
+		,U.strUnitMeasure
+		,W.dblPhysicalCount AS dblPack
+		,IU1.intItemUOMId intPackItemUOMId
+		,U1.intUnitMeasureId intPackUnitMeasureId
+		,U1.strUnitMeasure strPackUOM
 		,W.dtmProductionDate
 		,W.dtmCreated
 		,W.intCreatedUserId
@@ -198,6 +214,12 @@ BEGIN
 		,CV.strColumn8
 		,CV.strColumn9
 		,CV.strColumn10
+		,@strProcessName AS strProcessName
+		,@strDescription AS strProcessDescription
+		,@strWorkOrderNo AS strWorkOrderNo
+		,@dtmOrderDate AS strWorkOrderDate
+		,@strTargetItemNo AS strTargetItemNo
+		,@strTargetDescription AS strTargetDescription
 		,L.dblLastCost 
 		,W.dblItemValue 
 	FROM dbo.tblMFWorkOrderProducedLot W

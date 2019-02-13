@@ -32,8 +32,16 @@
 		,strCurrencyExchangeRateType = w.strCurrencyExchangeRateType
 		,intMoveToStatusId = y.intTicketStatusId
 		,strMoveToStatus = y.strStatus
-		,strFeedbackWithSolution = (case a.intFeedbackWithSolutionId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end) COLLATE Latin1_General_CI_AS 
-		,strFeedbackWithRepresentative = (case a.intFeedbackWithRepresentativeId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end) COLLATE Latin1_General_CI_AS 
+		,strFeedbackWithSolution = (case a.intFeedbackWithSolutionId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end) COLLATE Latin1_General_CI_AS
+		,strFeedbackWithRepresentative = (case a.intFeedbackWithRepresentativeId when 1 then 'Very Dissatisfied' when 2 then 'Dissatisfied' when 3 then 'Neutral' when 4 then 'Satisfied' when 5 then 'Very Satisfied' else null end) COLLATE Latin1_General_CI_AS
+		,strUpgradeType = z.strType
+		,strUpgradeTargetVersionNo = a1.strVersionNo
+		,strScreenConnectLink = a2.strScreenConnectLink
+		,a3.strRootCause
+		,a4.strSubcause
+		,intCustomerCurrencyId = a2.intCurrencyId
+		,intCustomerShipToLocationId = a2.intShipToId
+		,intCustomerLocationId = (select top 1 intWarehouseId from tblEMEntityLocation where intEntityId = a.intCustomerId)
 	from tblHDTicket a
 		left join tblEMEntity b on b.intEntityId = a.intCustomerContactId
 		left join tblEMEntity c on c.intEntityId = a.intCustomerId
@@ -60,3 +68,8 @@
 		left join tblSMCurrencyExchangeRateType w on w.intCurrencyExchangeRateTypeId = a.intCurrencyExchangeRateTypeId
 		left join tblHDTicketStatusWorkflow x on x.intFromStatusId = a.intTicketStatusId and x.ysnActive = convert(bit,1) and x.strTiggerBy = 'Customer Responds'
 		left join tblHDTicketStatus y on y.intTicketStatusId = x.intToStatusId
+		left join tblHDUpgradeType z on z.intUpgradeTypeId = a.intUpgradeTypeId
+		left join tblHDVersion a1 on a1.intVersionId = a.intUpgradeTargetVersionId
+		left join tblARCustomer a2 on a2.intEntityId = a.intCustomerId
+		left join tblHDTicketRootCause a3 on a3.intRootCauseId = a.intRootCauseId
+		left join tblHDTicketSubcause a4 on a4.intSubcauseId = a.intSubcauseId

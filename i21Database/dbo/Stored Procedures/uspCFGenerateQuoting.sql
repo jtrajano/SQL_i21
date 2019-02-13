@@ -524,20 +524,7 @@ BEGIN
 		END
 
 
-		--IF OBJECT_ID('tempdb..##tblCFTransactionTaxType') IS NOT NULL
-		--begin
-		--		drop table ##tblCFTransactionTaxType
-		--end
-
-		--IF OBJECT_ID('tempdb..##tblCFTransactionPriceType') IS NOT NULL
-		--begin
-		--		drop table ##tblCFTransactionPriceType
-		--end
-
-		--IF OBJECT_ID('tempdb..##tblCFTransactionPricingType') IS NOT NULL
-		--begin
-		--		drop table ##tblCFTransactionPricingType
-		--end
+		
 
 		
 

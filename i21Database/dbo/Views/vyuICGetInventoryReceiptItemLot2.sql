@@ -60,9 +60,18 @@ SELECT
 		,intGrossUOMDecimalPlaces = weightUOM.intDecimalPlaces
 	 	,intQtyUOMDecimalPlaces = uom.intDecimalPlaces
 		,intWeightUOMId = itemWeightUOM.intItemUOMId
+		,com.strCommodityCode
+		,com.strDescription strCommodity
+		,cat.strCategoryCode
+		,cat.strDescription strCategory
+		,cat.intCategoryId
+		,com.intCommodityId
 FROM	tblICInventoryReceiptItemLot receiptItemLot
 		INNER JOIN tblICInventoryReceiptItem item 
 			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
+		INNER JOIN tblICItem oItem ON oItem.intItemId = item.intItemId
+		LEFT OUTER JOIN tblICCategory cat ON cat.intCategoryId = oItem.intCategoryId
+		LEFT OUTER JOIN tblICCommodity com ON com.intCommodityId = oItem.intCommodityId
 		INNER JOIN tblICInventoryReceipt receipt
 			ON receipt.intInventoryReceiptId = item.intInventoryReceiptId
 		LEFT OUTER JOIN tblSMCompanyLocationSubLocation sub 

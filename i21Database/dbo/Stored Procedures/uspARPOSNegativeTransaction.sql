@@ -234,11 +234,11 @@ IF ISNULL(@ErrorMessage, '') = ''
 		SET ysnReturn = 1, intInvoiceId = @createdCreditMemoId
 		WHERE intPOSId = @intPOSId
 		
-		-- UPDATE tblARInvoice
-		-- SET ysnProcessed = 1
-		-- FROM tblARInvoice
-		-- WHERE intInvoiceId = @createdCreditMemoId
-
+		UPDATE tblARInvoice
+		SET ysnProcessed = 1
+		FROM tblARInvoice
+		WHERE intInvoiceId = @createdCreditMemoId
+		
 		IF(OBJECT_ID('tempdb..#POSRETURNPAYMENTS') IS NOT NULL)
 		BEGIN
 			DROP TABLE #POSRETURNPAYMENTS

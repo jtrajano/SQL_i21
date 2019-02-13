@@ -60,5 +60,6 @@
 	[strFTPExportValidURL] NVARCHAR (MAX) NULL,
     [intCompanySetupId] INT NOT NULL,
 	[intMultiCurrencyId] INT NULL,
+    [intPDFExportLimit] INT NOT NULL DEFAULT(10000),
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )

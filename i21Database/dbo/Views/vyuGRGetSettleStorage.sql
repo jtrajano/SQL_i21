@@ -50,15 +50,15 @@ SELECT DISTINCT
 											ELSE TSS.intTransferStorageId
 										END
 								END
-	,strTransactionNumber		= CASE 
+	,CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN ''
 									ELSE
 										CASE
 											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
 											ELSE TS.strTransferStorageTicket
-										END
-								END
+										END 
+								END COLLATE Latin1_General_CI_AS AS strTransactionNumber
 	,CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN ''
 									ELSE
@@ -67,7 +67,7 @@ SELECT DISTINCT
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'SC' --SCALE TICKET
 											ELSE 'TS' --TRANSFER STORAGE
 										END
-								END COLLATE Latin1_General_CI_AS as strTransactionCode
+								END COLLATE Latin1_General_CI_AS AS strTransactionCode
 	, strCommodityCode
 	, strCategoryCode	= Category.strCategoryCode
 FROM tblGRSettleStorage SS

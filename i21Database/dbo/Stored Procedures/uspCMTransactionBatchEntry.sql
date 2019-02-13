@@ -34,6 +34,7 @@ DECLARE @intTransactionId INT
 		,@strRowState NVARCHAR(20)
 		,@intConcurrencyId INT
 		,@detailCount INT
+		,@intBankLoanId INT
 
 
 SELECT  *
@@ -68,6 +69,7 @@ FROM @BankTransactionBatchDetailEntries
 				@intTransactionId		= intTransactionId
 				,@dtmDate				= dtmDate
 				,@intGLAccountId		= intGLAccountId
+				,@intBankLoanId			= intBankLoanId
 				,@strDescriptionDetail	= strDescription
 				,@strName				= strName
 				,@dblDebit				= dblDebit
@@ -89,6 +91,7 @@ FROM @BankTransactionBatchDetailEntries
 					[strTransactionId]
 					,[intBankTransactionTypeId]
 					,[intBankAccountId]
+					,[intBankLoanId]
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[dtmDate]
@@ -132,6 +135,7 @@ FROM @BankTransactionBatchDetailEntries
 					@newStrTransactionId--[strTransactionId]
 					,@intBankTransactionTypeId--[intBankTransactionTypeId]
 					,@intBankAccountId--[intBankAccountId]
+					,@intBankLoanId
 					,@intCurrencyId--[intCurrencyId]
 					,1--[dblExchangeRate]
 					,@dtmBatchDate--[dtmDate]
@@ -220,6 +224,7 @@ FROM @BankTransactionBatchDetailEntries
 				UPDATE [dbo].[tblCMBankTransaction]
 					SET [intBankTransactionTypeId] = @intBankTransactionTypeId
 						,[intBankAccountId] = @intBankAccountId
+						,[intBankLoanId] = @intBankLoanId
 						,[intCurrencyId] = @intCurrencyId
 						,[dtmDate] = @dtmBatchDate
 						,[strPayee] = @strName
@@ -320,5 +325,3 @@ FROM @BankTransactionBatchDetailEntries
 -- 	EXIT ROUTINES 
 ---------------------------------------------------------------------------------------------------------------------------------------
 Exit_Procedure:
-
-

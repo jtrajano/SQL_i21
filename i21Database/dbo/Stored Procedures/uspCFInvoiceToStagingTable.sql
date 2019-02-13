@@ -259,6 +259,7 @@ BEGIN TRY
 	,ysnPostedCSV
 	,strGuid
 	,strUserId
+	,ysnExpensed
 	,strStatementType
 	)
 	SELECT 
@@ -498,6 +499,7 @@ BEGIN TRY
 	,ysnPostedCSV
 	,@Guid
 	,@UserId
+	,ysnExpensed
 	,@StatementType 
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
@@ -551,6 +553,17 @@ BEGIN TRY
 	--AND cfInvRptSum.strUserId = @UserId
 	--AND cfInvRptDcnt.strUserId = @UserId
 
+	--UPDATE tblCFInvoiceStagingTable SET dblTotalFuelExpensed = ISNULL((SELECT SUM(t.dblCalculatedTotalPrice * -1) FROM tblCFInvoiceStagingTable as s
+	--													INNER JOIN tblCFTransaction as t
+	--													ON s.intTransactionId = t.intTransactionId
+	--													WHERE ISNULL(t.ysnExpensed,0) = 1 
+	--													AND s.strUserId = @UserId)
+	--													,0)
+	--WHERE strUserId = @UserId
+
+
+	
+	
 	SELECT DISTINCT 
 	 intAccountId
 	,intCustomerId
@@ -565,6 +578,34 @@ BEGIN TRY
 		EXEC "dbo"."uspCFInvoiceReportFee"		@xmlParam	=	@xmlParam , @UserId = @UserId
 	END
 
+
+	
+	UPDATE tblCFInvoiceStagingTable
+	SET 
+			tblCFInvoiceStagingTable.dblTotalFuelExpensed			   =		ISNULL(cfInv.dblTotalFuelExpensed,0),
+			tblCFInvoiceStagingTable.dblFeeAmount					   =		iSNULL((SELECT SUM(ISNULL(innerTable.dblFeeAmount,0)) AS dblTotalFeeAMount 
+																						FROM tblCFInvoiceFeeStagingTable AS innerTable
+																						WHERE innerTable.intAccountId = tblCFInvoiceStagingTable.intAccountId  
+																						AND LOWER(tblCFInvoiceStagingTable.strStatementType) =  LOWER(@StatementType)
+																						AND strUserId = @UserId 
+																				GROUP BY intAccountId),0)
+	FROM (
+		SELECT SUM(t.dblCalculatedTotalPrice * -1) as dblTotalFuelExpensed , s.intCustomerId
+		FROM tblCFInvoiceStagingTable as s
+		INNER JOIN tblCFTransaction as t
+		ON s.intTransactionId = t.intTransactionId
+		WHERE ISNULL(t.ysnExpensed,0) = 1 
+		AND LOWER(s.strStatementType) =  LOWER(@StatementType)
+		AND s.strUserId = @UserId
+		GROUP BY s.intCustomerId
+	) AS cfInv
+	WHERE tblCFInvoiceStagingTable.intCustomerId = cfInv.intCustomerId
+	AND tblCFInvoiceStagingTable.strUserId = @UserId
+	AND LOWER(tblCFInvoiceStagingTable.strStatementType) =  LOWER(@StatementType)
+
+	
+
+
 	IF(@ysnIncludeRemittancePage = 1 AND LOWER(@StatementType)  = 'invoice')
 	BEGIN
 
@@ -575,9 +616,8 @@ BEGIN TRY
 			, @dtmBalanceForwardDate = @dtmBalanceForwardDate
 			, @ysnPrintFromCF = 1
 			, @strCustomerNumber = @strCustomerNumber		
-			, @intEntityUserId = @intEntityUserId
-			, @ysnReprintInvoice = @ysnReprintInvoice
-			, @strUserId = @UserId
+			,@intEntityUserId = @intEntityUserId
+			,@ysnReprintInvoice = @ysnReprintInvoice
 
 
 		--SELECT '1',* FROM tblARCustomerStatementStagingTable
@@ -635,6 +675,9 @@ BEGIN TRY
 		,strCFTerm
 		,strCFTermCode
 		,intEntityUserId
+		,dblCFTotalFuelExpensed
+		,dblCFFeeTotalAmount
+		,strStatementFormat
 		)
 		SELECT
 		 intCustomerId
@@ -660,13 +703,13 @@ BEGIN TRY
 		,strCompanyName
 		,strCompanyAddress
 		,NULL --dblCreditLimit
-		,(dblAccountTotalAmount + ( 
+		,(dblAccountTotalAmount + ISNULL(dblTotalFuelExpensed,0) +( 
 			ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
 			WHERE innerTable.intAccountId = cfInv.intAccountId AND strUserId = @UserId
 			GROUP BY intAccountId),0)
 		)) --dblInvoiceTotal
 		,0 --dblPayment
-		,(dblAccountTotalAmount + ( 
+		,(dblAccountTotalAmount + ISNULL(dblTotalFuelExpensed,0) + ( 
 			ISNULL((SELECT SUM(ISNULL(dblFeeAmount,0)) AS dblTotalFeeAMount FROM tblCFInvoiceFeeStagingTable AS innerTable
 			WHERE innerTable.intAccountId = cfInv.intAccountId  AND strUserId = @UserId
 			GROUP BY intAccountId),0)
@@ -693,10 +736,14 @@ BEGIN TRY
 		,strTerm
 		,strTermCode
 		,@intEntityUserId
+		,ISNULL(dblTotalFuelExpensed,0)
+		,ISNULL(dblFeeAmount,0)
+		,@strStatementFormat
 		FROM
 		tblCFInvoiceStagingTable 
 		AS cfInv
-		WHERE strUserId = @UserId and LOWER(strStatementType) =  LOWER(@StatementType)
+		WHERE strUserId = @UserId
+		AND LOWER(strStatementType) =  LOWER(@StatementType)
 		GROUP BY 
 		intCustomerId
 		,dtmInvoiceDate
@@ -717,6 +764,8 @@ BEGIN TRY
 		,intTermID		
 		,strTerm
 		,strTermCode
+		,dblTotalFuelExpensed
+		,dblFeeAmount
 
 		--SELECT '2',* FROM tblARCustomerStatementStagingTable
 
@@ -767,7 +816,7 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.intCFTermID						   = 		cfInv.intTermID					
 				,tblARCustomerStatementStagingTable.dblCFAccountTotalAmount			   = 		cfInv.dblAccountTotalAmount		
 				,tblARCustomerStatementStagingTable.dblCFAccountTotalDiscount		   = 		cfInv.dblAccountTotalDiscount	
-				,tblARCustomerStatementStagingTable.dblCFFeeTotalAmount				   = 		cfInv.dblFeeAmount			
+				,tblARCustomerStatementStagingTable.dblCFFeeTotalAmount				   = 		ISNULL(cfInv.dblFeeAmount,0)
 				,tblARCustomerStatementStagingTable.dblCFInvoiceTotal				   = 		cfInv.dblInvoiceTotal			
 				,tblARCustomerStatementStagingTable.dblCFTotalQuantity				   = 		cfInv.dblTotalQuantity			
 				,tblARCustomerStatementStagingTable.strCFTempInvoiceReportNumber	   = 		cfInv.strTempInvoiceReportNumber
@@ -775,7 +824,8 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.strCFEmail						   = 		cfInv.strEmail			
 				,tblARCustomerStatementStagingTable.ysnCFShowDiscountOnInvoice		   =		cfInv.ysnShowOnCFInvoice	
 				,tblARCustomerStatementStagingTable.strCFTerm						   = 		cfInv.strTerm			
-				,tblARCustomerStatementStagingTable.strCFTermCode					   = 		cfInv.strTermCode		
+				,tblARCustomerStatementStagingTable.strCFTermCode					   = 		cfInv.strTermCode
+				,tblARCustomerStatementStagingTable.dblCFTotalFuelExpensed			   =		ISNULL(cfInv.dblTotalFuelExpensed,0)
 		FROM tblCFInvoiceStagingTable cfInv
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId
 		AND strStatementFormat = @strStatementFormat
@@ -952,7 +1002,7 @@ BEGIN TRY
 					,tblARCustomerStatementStagingTable.intCFTermID						   = 		cfInv.intTermID					
 					,tblARCustomerStatementStagingTable.dblCFAccountTotalAmount			   = 		cfInv.dblAccountTotalAmount		
 					,tblARCustomerStatementStagingTable.dblCFAccountTotalDiscount		   = 		cfInv.dblAccountTotalDiscount	
-					,tblARCustomerStatementStagingTable.dblCFFeeTotalAmount				   = 		cfInv.dblFeeAmount			
+					,tblARCustomerStatementStagingTable.dblCFFeeTotalAmount				   = 		ISNULL(cfInv.dblFeeAmount,0)			
 					,tblARCustomerStatementStagingTable.dblCFInvoiceTotal				   = 		cfInv.dblInvoiceTotal			
 					,tblARCustomerStatementStagingTable.dblCFTotalQuantity				   = 		cfInv.dblTotalQuantity			
 					,tblARCustomerStatementStagingTable.strCFTempInvoiceReportNumber	   = 		cfInv.strTempInvoiceReportNumber
@@ -961,6 +1011,7 @@ BEGIN TRY
 					,tblARCustomerStatementStagingTable.ysnCFShowDiscountOnInvoice		   =		cfInv.ysnShowOnCFInvoice	
 					,tblARCustomerStatementStagingTable.strCFTerm						   = 		cfInv.strTerm			
 					,tblARCustomerStatementStagingTable.strCFTermCode					   = 		cfInv.strTermCode	
+					,tblARCustomerStatementStagingTable.dblCFTotalFuelExpensed			   =		ISNULL(cfInv.dblTotalFuelExpensed,0)
 						
 			FROM tblCFInvoiceStagingTable cfInv
 			WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfInv.intCustomerId

@@ -90,7 +90,7 @@ BEGIN
 	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
 		AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
 		AND (intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
-		AND (ItemLocation.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (Lot.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 		AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)			
 		AND Item.strLotTracking <> 'No'
@@ -124,26 +124,28 @@ BEGIN
 		, intLotId = NULL
 		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
-			ISNULL(
-				CASE 
-					WHEN il.intCostingMethod = 1 THEN dbo.fnGetItemAverageCost(
-						i.intItemId, il.intItemLocationId, 
-						COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-					) --AVG
-					WHEN il.intCostingMethod = 2 THEN dbo.fnCalculateCostBetweenUOM(
-						COALESCE(FIFO.intItemUOMId, stockUOM.intItemUOMId),
-						COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId),
-						COALESCE(FIFO.dblCost, p.dblLastCost)
-					) -- FIFO
-					WHEN il.intCostingMethod = 3 THEN dbo.fnCalculateCostBetweenUOM(
-						stockUOM.intItemUOMId,
-						COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId),
-						p.dblLastCost
-					) -- LIFO
-					ELSE
-						dbo.fnCalculateCostBetweenUOM(stockUOM.intItemUOMId, stock.intItemUOMId, p.dblLastCost)
-				END, 
-			0)
+			---- Convert the last cost from Stock UOM to stock.intItemUOMId
+			CASE 
+				WHEN il.intCostingMethod = 1 THEN 
+					AVERAGE.dblCost
+				WHEN il.intCostingMethod = 2 THEN 
+					dbo.fnCalculateCostBetweenUOM(
+						COALESCE(FIFO.intItemUOMId, stockUOM.intItemUOMId)
+						,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+						,COALESCE(FIFO.dblCost, p.dblLastCost)
+					)
+				ELSE 
+					dbo.fnCalculateCostBetweenUOM(
+						stockUOM.intItemUOMId
+						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+						, COALESCE(stock.dblLastCost, p.dblLastCost)
+					)
+			END
+			--dbo.fnCalculateCostBetweenUOM(
+			--	stockUOM.intItemUOMId
+			--	, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+			--	, COALESCE(stock.dblLastCost, p.dblLastCost)
+			--)
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 		, ysnRecount = 0
@@ -202,8 +204,6 @@ BEGIN
 			--AND ISNULL(stockUnit.ysnStockUnit, 0) = 0
 			AND stockUnit.intItemLocationId = il.intItemLocationId
 			AND stockUnit.intLocationId = il.intLocationId
-			AND (stockUnit.intSubLocationId = stock.intSubLocationId OR (stockUnit.intSubLocationId IS NULL AND stock.intSubLocationId IS NULL))
-			AND (stockUnit.intStorageLocationId = stock.intStorageLocationId OR (stockUnit.intStorageLocationId IS NULL AND stock.intStorageLocationId IS NULL))
 		OUTER APPLY(
 			SELECT TOP 1
 					dblCost
@@ -225,7 +225,6 @@ BEGIN
 		AND (i.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
 		AND ((@intSubLocationId IS NULL) OR (stock.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))
 		AND ((@intStorageLocationId IS NULL) OR (stock.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))
-		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND i.strLotTracking = 'No'
 
 END

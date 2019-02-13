@@ -132,20 +132,20 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 															  FROM tblICItem 
 															  WHERE strItemNo = LTRIM(RTRIM(cfppd_ar_itm_no))
 																				 COLLATE Latin1_General_CI_AS)
-					,@intNetworkId					= ISNULL((SELECT intNetworkId 
+					,@intNetworkId					= (SELECT intNetworkId 
 															  FROM tblCFNetwork 
 															  WHERE strNetwork = LTRIM(RTRIM(cfppd_netwrok_id))
-																				 COLLATE Latin1_General_CI_AS),0)
+																				 COLLATE Latin1_General_CI_AS)
 
-					,@intSiteGroupId				= ISNULL((SELECT intSiteGroupId 
+					,@intSiteGroupId				= (SELECT intSiteGroupId 
 															  FROM tblCFSiteGroup 
 															  WHERE strSiteGroup = LTRIM(RTRIM(cfppd_site_grp_id)) 
-																				   COLLATE Latin1_General_CI_AS),0)
+																				   COLLATE Latin1_General_CI_AS)
 
-					,@intSiteId						= ISNULL((SELECT intSiteId 
+					,@intSiteId						= (SELECT intSiteId 
 															  FROM tblCFSite 
 															  WHERE strSiteNumber = LTRIM(RTRIM(cfppd_site_no)) 
-																					COLLATE Latin1_General_CI_AS),0)
+																					COLLATE Latin1_General_CI_AS)
 
 					,@intLocalPricingIndex			= (SELECT intPriceIndexId 
 															  FROM tblCFPriceIndex 

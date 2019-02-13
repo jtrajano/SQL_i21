@@ -410,7 +410,7 @@ BEGIN TRY
 
 		IF @intOldItemId <> @intNewItemId
 		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM vyuCTSequenceUsageHistory WHERE intContractDetailId = @intContractDetailId AND ysnDeleted <> 1 AND strScreenName <> 'Load Schedule')
+			IF EXISTS(SELECT TOP 1 1 FROM vyuCTSequenceUsageHistory WHERE intContractDetailId = @intContractDetailId AND ysnDeleted <> 1 AND strScreenName NOT IN('Import', 'Load Schedule'))
 			BEGIN
 				SET @ErrMsg = 'Cannot change item for Sequence ' + LTRIM(@intContractSeq) + ', which is already in use.'
 				RAISERROR(@ErrMsg,16,1) 

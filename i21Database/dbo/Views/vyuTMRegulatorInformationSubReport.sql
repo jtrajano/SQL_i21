@@ -2,8 +2,8 @@
 AS 
 	
 	SELECT 
-		C.strManufacturerID
-		,C.strManufacturerName
+		E.strManufacturerId
+		,E.strManufacturerName
 		,C.dtmManufacturedDate
 		,C.strDescription
 		,intSiteId = A.intSiteID
@@ -14,6 +14,8 @@ AS
 		ON B.intDeviceId = C.intDeviceId
 	INNER JOIN 	tblTMDeviceType D
 		ON C.intDeviceTypeId = D.intDeviceTypeId
+	LEFT JOIN tblTMManufacturer E
+		ON C.intManufacturerId = E.intManufacturerId
 	WHERE D.strDeviceType = 'Regulator'
 
 GO

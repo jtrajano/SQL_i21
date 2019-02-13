@@ -70,6 +70,12 @@ SELECT
 	,strWeightUOM = WeightUOM.strUnitMeasure
 	,intGrossUOMDecimalPlaces = WeightUOM.intDecimalPlaces
 	,intQtyUOMDecimalPlaces = UOM.intDecimalPlaces
+	,receiptItem.strCommodityCode
+	,receiptItem.strCommodity
+	,receiptItem.strCategoryCode
+	,receiptItem.strCategory
+	,receiptItem.intCategoryId
+	,receiptItem.intCommodityId
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceiptItem rItem ON rItem.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId

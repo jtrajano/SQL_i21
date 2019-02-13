@@ -245,7 +245,7 @@ BEGIN TRY
 					,ysnIsStorage 
 					,strSourceTransactionId 
 					,intStorageScheduleTypeId
-					,ysnAllowInvoiceVoucher
+					,ysnAllowVoucher
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
@@ -282,7 +282,7 @@ BEGIN TRY
 			,ysnIsStorage
 			,strSourceTransactionId  
 			,intStorageScheduleTypeId
-			,ysnAllowInvoiceVoucher
+			,ysnAllowVoucher
 		)
 		EXEC dbo.uspSCGetScaleItemForItemReceipt 
 			@intTicketId
@@ -329,7 +329,7 @@ BEGIN TRY
 					,ysnIsStorage
 					,strSourceTransactionId 
 					,intStorageScheduleTypeId
-					,ysnAllowInvoiceVoucher
+					,ysnAllowVoucher
 				)
 				EXEC dbo.uspSCGetScaleItemForItemReceipt 
 					 @intTicketId
@@ -401,8 +401,7 @@ BEGIN TRY
 								,intSubLocationId
 								,intStorageLocationId
 								,ysnIsStorage
-								,strSourceTransactionId
-								,ysnAllowInvoiceVoucher  
+								,strSourceTransactionId  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @intEntityId, @ysnDPStorage;
@@ -435,8 +434,7 @@ BEGIN TRY
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 							,ysnIsStorage
-							,strSourceTransactionId
-							,ysnAllowInvoiceVoucher 
+							,strSourceTransactionId 
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
 				END

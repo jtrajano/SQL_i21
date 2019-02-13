@@ -25,14 +25,17 @@ BEGIN TRY
 		, @TaxAuthorityId INT
 		, @StoreProcedure NVARCHAR(100)
 		, @RCId INT
+		
+	DECLARE @tmpRC TABLE (intReportingComponentId INT)
 
+
+	INSERT INTO @tmpRC
 	SELECT intReportingComponentId = Item COLLATE Latin1_General_CI_AS
-	INTO #tmpRC
 	FROM dbo.fnSplitStringWithTrim(@ReportingComponentId, ',')
 		
-	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpRC)
+	WHILE EXISTS(SELECT TOP 1 1 FROM @tmpRC)
 	BEGIN
-		SELECT TOP 1 @RCId = intReportingComponentId FROM #tmpRC
+		SELECT TOP 1 @RCId = intReportingComponentId FROM @tmpRC
 
 		SELECT * 
 		INTO #tmpTransaction
@@ -142,6 +145,7 @@ BEGIN TRY
 				LEFT JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
 				LEFT JOIN tblSMCompanyLocation Origin ON Origin.intCompanyLocationId = Invoice.intCompanyLocationId
 				LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
+					--LEFT JOIN tblEMEntityLocation Destination ON Destination.intEntityLocationId = Invoice.intShipToLocationId
 				LEFT JOIN tblCFTransaction ON tblCFTransaction.intInvoiceId = Invoice.intInvoiceId
 					LEFT JOIN tblCFCard ON tblCFCard.intCardId = tblCFTransaction.intCardId
 					LEFT JOIN tblCFVehicle ON tblCFVehicle.intVehicleId = tblCFTransaction.intVehicleId
@@ -261,15 +265,38 @@ BEGIN TRY
 				) AS PvtTbl
 			) UnCommonField 
 			CROSS JOIN tblTFTransaction
+		END
+		ELSE IF (@TaxAuthorityCode = 'MN' AND @ScheduleCode = 'PDA-46H')
+		BEGIN
 
+			INSERT INTO tblTFTransactionDynamicMN 
+			SELECT trans.intTransactionId, Item.strDescription FROM #tmpTransaction trans INNER JOIN tblICItem Item ON Item.intItemId = trans.intItemId
+		
+		END
+		ELSE IF (@TaxAuthorityCode = 'TX')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicTX
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+			
+			INSERT INTO tblTFTransactionDynamicTX (intTransactionId,strTXPurchaserSignedStatementNumber, intConcurrencyId)
+			SELECT Trans.intTransactionId, tblTRLoadHeader.strPurchaserSignedStatementNumber, 1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
+			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+			WHERE Trans.uniqTransactionGuid = @Guid
+			AND Trans.intReportingComponentId = @ReportingComponentId
+			AND Trans.strTransactionType = 'Invoice'
+			AND Trans.intTransactionId IS NOT NULL
 		END
 
-		DELETE FROM #tmpRC WHERE intReportingComponentId = @RCId
+		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
 
 		DROP TABLE #tmpTransaction
 	END
-
-	DROP TABLE #tmpRC
 
 END TRY
 BEGIN CATCH

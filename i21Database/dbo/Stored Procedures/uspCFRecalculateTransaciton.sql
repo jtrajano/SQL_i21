@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿
+CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -166,78 +167,10 @@ BEGIN
 	IF(@IsImporting = 1)
 	BEGIN
 
-	--IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPricingType') = 1)
-    	--BEGIN
-    	--	DROP TABLE ##tblCFTransactionPricingType
-    	--END
-    	--	CREATE TABLE ##tblCFTransactionPricingType (
-    	--	 intItemId						INT
-    	--	,intProductId					INT
-    	--	,strProductNumber				NVARCHAR(MAX)
-    	--	,strItemId						NVARCHAR(MAX)
-    	--	,intCustomerId					INT
-    	--	,intLocationId					INT
-    	--	,dblQuantity					NUMERIC(18,6)
-    	--	,intItemUOMId					INT
-    	--	,dtmTransactionDate				DATETIME
-    	--	,strTransactionType				NVARCHAR(MAX)
-    	--	,intNetworkId					INT
-    	--	,intSiteId						INT
-    	--	,dblTransferCost				NUMERIC(18,6)
-    	--	,dblInventoryCost				NUMERIC(18,6)
-    	--	,dblOriginalPrice				NUMERIC(18,6)
-    	--	,dblPrice						NUMERIC(18,6)
-    	--	,strPriceMethod					NVARCHAR(MAX)
-    	--	,dblAvailableQuantity			NUMERIC(18,6)
-    	--	,intContractHeaderId			INT
-    	--	,intContractDetailId			INT
-    	--	,strContractNumber				NVARCHAR(MAX)
-    	--	,intContractSeq					INT
-    	--	,strPriceBasis					NVARCHAR(MAX)
-    	--	,intPriceProfileId				INT
-    	--	,intPriceIndexId 				INT
-    	--	,intSiteGroupId 				INT
-    	--	,strPriceProfileId				NVARCHAR(MAX)
-    	--	,strPriceIndexId				NVARCHAR(MAX)
-    	--	,strSiteGroup					NVARCHAR(MAX)
-    	--	,dblPriceProfileRate			NUMERIC(18,6)
-    	--	,dblPriceIndexRate				NUMERIC(18,6)
-    	--	,dtmPriceIndexDate				DATETIME
-    	--	,dblMargin						NUMERIC(18,6)
-    	--	,dblAdjustmentRate				NUMERIC(18,6)
-    	--	,ysnDuplicate					BIT
-    	--	,ysnInvalid						BIT
-    	--	,dblGrossTransferCost			NUMERIC(18,6)
-    	--	,dblNetTransferCost				NUMERIC(18,6)
-    	--	,intFreightTermId				INT
-    	--);
+	
 
 	DELETE FROM tblCFTransactionPricingType
-
-	--IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionTaxType') = 1)
-	--BEGIN
-	--	DROP TABLE ##tblCFTransactionTaxType
-	--END
-	--	CREATE TABLE ##tblCFTransactionTaxType (
-	--	 [dblTaxCalculatedAmount]		NUMERIC(18,6)
-	--	,[dblTaxOriginalAmount]			NUMERIC(18,6)
-	--	,[intTaxCodeId]					INT
-	--	,[dblTaxRate]					NUMERIC(18,6)
-	--	,[strTaxCode]					NVARCHAR(MAX)
-	--);
-
 	DELETE FROM tblCFTransactionTaxType
-
-	--IF ((SELECT COUNT(*) FROM tempdb..sysobjects WHERE name = '##tblCFTransactionPriceType') = 1)
-	--BEGIN
-	--	DROP TABLE ##tblCFTransactionPriceType
-	--END
-	--	CREATE TABLE ##tblCFTransactionPriceType (
-	--	 [strTransactionPriceId]		NVARCHAR(MAX)
-	--	,[dblTaxOriginalAmount]			NUMERIC(18,6)
-	--	,[dblTaxCalculatedAmount]		NUMERIC(18,6)
-	--);
-
 	DELETE FROM tblCFTransactionPriceType
 
 	END
@@ -5855,17 +5788,41 @@ BEGIN
 	-------------- End get card type/ dual card
 	------------------------------------------------------
 
-	--IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0 ) AND @strTransactionType != 'Foreign Sale')
-	--BEGIN
-	--	SET @intVehicleId = NULL
-	--	IF(ISNULL(@ysnVehicleRequire,0) = 1)
-	--	BEGIN
-	--		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-	--		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required.')
-	--		SET @ysnInvalid = 1
-	--	END
-	--END
 	
+	-----------------------------------------------------
+	-------------- Start Zero Dollar Transaction
+	------------------------------------------------------
+	DECLARE @ysnExpensed AS BIT = 0
+	DECLARE @intExpensedItemId AS INT
+
+	SELECT 
+	@ysnExpensed = ysnCardForOwnUse 
+	,@intExpensedItemId = intExpenseItemId
+	FROM tblCFVehicle WHERE intVehicleId = @intVehicleId 
+
+	IF(ISNULL(@ysnExpensed,0) = 0)
+	BEGIN
+
+		SELECT 
+		@ysnExpensed = ysnCardForOwnUse 
+		,@intExpensedItemId = intExpenseItemId
+		FROM tblCFCard WHERE intCardId = @intCardId 
+
+	END
+
+
+
+	IF(ISNULL(@ysnExpensed,0) = 0)
+	BEGIN
+		SET @intExpensedItemId = NULL
+	END
+	
+	------------------------------------------------------
+	-------------- End Zero Dollar Transaction
+	------------------------------------------------------
+
+
+
 	IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 )
 	BEGIN
 		SET @intVehicleId = NULL
@@ -6093,6 +6050,8 @@ BEGIN
 			,dtmPriceIndexDate		   = @dtmPriceIndexDate		
 			,ysnDuplicate			   = @ysnDuplicate			
 			,ysnInvalid				   = @ysnInvalid	
+			,ysnExpensed			   = @ysnExpensed
+			,intExpensedItemId		   = @intExpensedItemId
 			,dblQuantity			   = @dblQuantity
 			,intSiteGroupId			   = @intSiteGroupId
 			,dblCalculatedGrossPrice   = @dblCalculatedGrossPrice
@@ -6542,6 +6501,8 @@ BEGIN
 			,dblOriginalNetPrice	
 			,dblCalculatedPumpPrice	
 			,dblOriginalPumpPrice	
+			,ysnExpensed			  
+			,intExpensedItemId		  
 			)
 			SELECT
 			 @intItemId					 AS intItemId
@@ -6591,6 +6552,8 @@ BEGIN
 			,@dblOutOriginalNetPrice	 AS dblOriginalNetPrice	
 			,@dblOutCalculatedPumpPrice	 AS dblCalculatedPumpPrice	
 			,@dblOutOriginalPumpPrice	 AS dblOriginalPumpPrice	
+			,@ysnExpensed
+			,@intExpensedItemId
 		END
 	ELSE
 		BEGIN
@@ -6642,6 +6605,8 @@ BEGIN
 			,@dblOutOriginalNetPrice	 AS dblOriginalNetPrice	
 			,@dblOutCalculatedPumpPrice	 AS dblCalculatedPumpPrice	
 			,@dblOutOriginalPumpPrice	 AS dblOriginalPumpPrice
+			,@ysnExpensed				 AS ysnExpensed
+			,@intExpensedItemId			 AS intExpensedItemId
 
 		END
 	---------------------------------------------------

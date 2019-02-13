@@ -2,6 +2,7 @@
 (
 	[intExceptionId] INT IDENTITY NOT NULL,
 	[intReportingComponentId] INT NOT NULL,
+	[intTaxAuthorityId] INT NULL,
 	[strExceptionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTransactionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intTransactionNumberId] INT NULL,
@@ -56,5 +57,45 @@
 	[dtmLastRun] DATETIME NULL,
 	[ysnDeleted] BIT DEFAULT((0)) NULL,
 	[intConcurrencyId] INT DEFAULT((1)) NULL,
-    CONSTRAINT [PK_tblTFException] PRIMARY KEY ([intExceptionId]) 
+	[intUserEntityId] INT NULL,
+	[dtmCreatedDate] DATETIME NULL,
+    [intVendorId] INT NULL, 
+    [intCustomerId] INT NULL, 
+    [intTransporterId] INT NULL,
+	[strTransactionSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
+	[strTransportNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    CONSTRAINT [PK_tblTFException] PRIMARY KEY ([intExceptionId]),
+	CONSTRAINT [FK_tblTFException_tblEMEntity] FOREIGN KEY ([intUserEntityId]) REFERENCES [tblEMEntity]([intEntityId])
 )
+GO
+
+CREATE INDEX [IX_tblTFException_intUserEntityId] ON [dbo].[tblTFException] ([intUserEntityId])
+GO
+
+CREATE INDEX [IX_tblTFException_intReportingComponentId] ON [dbo].[tblTFException] ([intReportingComponentId])
+GO
+
+CREATE INDEX [IX_tblTFException_intTaxAuthorityId] ON [dbo].[tblTFException] ([intTaxAuthorityId])
+GO
+
+CREATE INDEX [IX_tblTFException_intTransactionNumberId] ON [dbo].[tblTFException] ([intTransactionNumberId])
+GO
+
+CREATE INDEX [IX_tblTFException_intProductCodeId] ON [dbo].[tblTFException] ([intProductCodeId])
+GO
+
+CREATE INDEX [IX_tblTFException_intItemId] ON [dbo].[tblTFException] ([intItemId])
+GO
+
+CREATE INDEX [IX_tblTFException_intVendorId] ON [dbo].[tblTFException] ([intVendorId])
+GO
+
+CREATE INDEX [IX_tblTFException_intCustomerId] ON [dbo].[tblTFException] ([intCustomerId])
+GO
+
+CREATE INDEX [IX_tblTFException_intTransporterId] ON [dbo].[tblTFException] ([intTransporterId])
+GO
+
+
+
+

@@ -56,7 +56,7 @@ BEGIN
 													RTRIM(B.vwcus_last_name) + RTRIM(B.vwcus_name_suffix) + '', '' + RTRIM(B.vwcus_first_name) + RTRIM(B.vwcus_mid_init)    
 												END   
 											END) COLLATE Latin1_General_CI_AS 
-						,strSiteNumber = RIGHT(''000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
+						,strSiteNumber = RIGHT(''000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4) COLLATE Latin1_General_CI_AS 
 						,strSiteAddress = C.strSiteAddress
 						,strFillMethod = F.strFillMethod
 						,dblCalculatedBurnRate = A.dblCalculatedBurnRate
@@ -101,7 +101,7 @@ BEGIN
 				SELECT 
 					strCustomerNumber = B.strEntityNo
 					,strCustomerName = B.strName
-					,strSiteNumber = RIGHT(''000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
+					,strSiteNumber = RIGHT(''000''+ CAST(C.intSiteNumber AS VARCHAR(4)),4) COLLATE Latin1_General_CI_AS 
 					,strSiteAddress = C.strSiteAddress
 					,strFillMethod = F.strFillMethod
 					,dblCalculatedBurnRate = A.dblCalculatedBurnRate

@@ -209,7 +209,10 @@
 :r .\23_MFT\1_CleanUp_Data.sql
 
 --SC
-:r .\24_SC\2_UpdateZeroSplitIdTickets.sql
+:r .\24_SC\3_UpdateSplitIdForSCTicket.sql
+
+--SC
+
 :r .\24_SC\3_UpdateSplitIdForSCTicket.sql
 
 

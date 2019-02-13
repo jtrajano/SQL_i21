@@ -4,7 +4,7 @@ SELECT
 	strLocation = G.strLocationName
 	,strItemNo = CASE WHEN M.intItemId IS NULL THEN F.strItemNo ELSE M.strItemNo END
 	,strRoute = J.strRouteId
-	,strDriverId = L.strEntityNo
+	,strDriverId = L.strEntityNo COLLATE Latin1_General_CI_AS  
 	,dtmRequestedDate = E.dtmRequestedDate
 	,ysnCallEntryPrinted = E.ysnCallEntryPrinted
 	,strDeliveryTicketFormat = K.strDeliveryTicketFormat
@@ -19,6 +19,7 @@ SELECT
 	,intConcurrencyId = E.intConcurrencyId
 	,intClockId = K.intClockID
 	,intEntityUserSecurityId = E.intUserID
+	,ysnOnHold = CAST(ISNULL(A.ysnOnHold,0) AS BIT)
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID

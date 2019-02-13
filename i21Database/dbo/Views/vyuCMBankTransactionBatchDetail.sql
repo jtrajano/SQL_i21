@@ -4,6 +4,8 @@ SELECT
 BTB.intBankTransactionBatchId, 
 BT.intTransactionId, 
 BT.strTransactionId, 
+BT.intBankLoanId,
+BL.strBankLoanId,
 BTD.dtmDate, 
 BTD.intGLAccountId, 
 GL.strAccountId, 
@@ -17,5 +19,7 @@ FROM tblCMBankTransactionBatch AS BTB INNER JOIN
     tblCMBankTransaction AS BT ON BTB.strBankTransactionBatchId = BT.strLink INNER JOIN
     tblCMBankTransactionDetail AS BTD ON BT.intTransactionId = BTD.intTransactionId INNER JOIN
     vyuGLAccountDetail AS GL ON BTD.intGLAccountId = GL.intAccountId
+	LEFT JOIN tblCMBankLoan BL on BL.intBankLoanId = BT.intBankLoanId
+GO
 
 

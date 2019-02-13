@@ -1,5 +1,6 @@
 ﻿
 
+
 CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
@@ -23,6 +24,7 @@ SELECT
  ,cfTrans.dblQuantity
  ,cfTrans.strMiscellaneous
  ,cfTrans.dtmCreatedDate
+ ,cfTrans.ysnExpensed
  ,dblCalculatedTotalAmount	  = Round(cfTrans.dblCalculatedTotalPrice, 2)
  ,dblOriginalTotalAmount	  = cfTrans.dblOriginalTotalPrice
  ,dblCalculatedGrossAmount	  = cfTrans.dblCalculatedGrossPrice

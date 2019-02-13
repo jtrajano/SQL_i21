@@ -63,7 +63,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
-	,[ysnExported]
+    ,[ysnExported]
 	,[intPaymentId]
 	,[intSplitId]
 	,[intLoadDistributionHeaderId]
@@ -1219,7 +1219,7 @@ CREATE TABLE #CustomerInvoice
 	,[ysnSplitted]					BIT												NULL
 	,[ysnImpactInventory]			BIT												NULL
     ,[ysnFromProvisional]           BIT                                             NULL
-	,[ysnExported]					BIT                                             NULL
+    ,[ysnExported]                  BIT                                             NULL
     ,[ysnProvisionalWithGL]         BIT                                             NULL
 	,[dblSplitPercent]				NUMERIC(18, 6)									NULL
 	,[ysnImportedFromOrigin]		BIT												NULL
@@ -1321,7 +1321,7 @@ INSERT INTO #CustomerInvoice
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
-	,[ysnExported]
+    ,[ysnExported]
     ,[ysnProvisionalWithGL]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
@@ -1600,7 +1600,7 @@ USING
 		,[ysnSplitted]
 		,[ysnImpactInventory]
         ,[ysnFromProvisional]
-		,[ysnExported]
+        ,[ysnExported]
 		,[dblSplitPercent]
 		,[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]
@@ -1703,7 +1703,7 @@ INSERT(
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
-	,[ysnExported]
+    ,[ysnExported]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1794,7 +1794,7 @@ VALUES(
 	,[ysnSplitted]
 	,[ysnImpactInventory]
     ,[ysnFromProvisional]
-	,[ysnExported]
+    ,[ysnExported]
 	,[dblSplitPercent]
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
@@ -1956,7 +1956,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[ysnImpactInventory]
         ,[ysnFromProvisional]
-		,[ysnExported]
+        ,[ysnExported]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -2099,7 +2099,7 @@ BEGIN TRY
 		,[ysnSplitted]							= ITG.[ysnSplitted]
 		,[ysnImpactInventory]					= ITG.[ysnImpactInventory]
         ,[ysnFromProvisional]                   = ITG.[ysnFromProvisional]
-		,[ysnExported]							= ITG.[ysnExported]
+        ,[ysnExported]                          = ITG.[ysnExported]
 		,[intPaymentId]							= ITG.[intPaymentId]
 		,[intSplitId]							= ITG.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ITG.[intLoadDistributionHeaderId]

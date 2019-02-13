@@ -6,6 +6,7 @@
 		,tblCRMOpportunity.strLinesOfBusiness
 		,tblCRMOpportunity.strWinLossReason
 		,tblCRMOpportunity.intOpportunityId
+		,strOpportunityName = tblCRMOpportunity.strName
 		,tblCRMOpportunity.intCustomerId
 	from
 		tblCRMOpportunity

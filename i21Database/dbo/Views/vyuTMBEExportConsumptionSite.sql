@@ -14,11 +14,11 @@ SELECT
 	 ,"state" = CAST(A.strState AS NVARCHAR(2))
 	 ,"zip" = A.strZipCode
 	 ,"country" = A.strCountry
-	 ,"zone" = ''
-	 ,"applications"= 'FFFF'
+	 ,"zone" = '' COLLATE Latin1_General_CI_AS
+	 ,"applications"= 'FFFF'  COLLATE Latin1_General_CI_AS
 	 ,"longitude" = dblLongitude
 	 ,"latitude" = A.dblLatitude
-	 ,"altitude" = ''
+	 ,"altitude" = ''  COLLATE Latin1_General_CI_AS
 	 ,"directions" = A.strInstruction
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B

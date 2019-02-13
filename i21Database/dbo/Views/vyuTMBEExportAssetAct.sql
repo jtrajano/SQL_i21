@@ -7,10 +7,10 @@ SELECT
 	 ,reference = RTRIM(SUBSTRING(A.strDescription,0,11))
 	 ,priceID = CAST(F.dblSalePrice AS NUMERIC(8,6))
 	 ,priceDiscount = 0.0000
-	 ,cashCode = ''
-	 ,miscTranCode = ''
-	 ,misPriceID = ''
-	 ,lastDate =  CONVERT(VARCHAR(10), dtmLastDeliveryDate, 112)
+	 ,cashCode = ''  COLLATE Latin1_General_CI_AS
+	 ,miscTranCode = ''  COLLATE Latin1_General_CI_AS
+	 ,misPriceID = ''  COLLATE Latin1_General_CI_AS
+	 ,lastDate =  CONVERT(VARCHAR(10), dtmLastDeliveryDate, 112)  COLLATE Latin1_General_CI_AS
 	 ,lastAmount = CAST(ROUND(dblLastDeliveredGal,2) AS NUMERIC(18,2))
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B

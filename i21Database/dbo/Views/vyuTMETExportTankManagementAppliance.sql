@@ -3,14 +3,14 @@ AS
 
 SELECT
 	ISNULL(E.strEntityNo,'') CustomerNumber
-	,REPLICATE('0',4-LEN(CAST(C.intSiteNumber  AS NVARCHAR(20)))) + CAST(C.intSiteNumber  AS NVARCHAR(20)) ConsumptionSiteNumber
+	,REPLICATE('0',4-LEN(CAST(C.intSiteNumber  AS NVARCHAR(20)))) + CAST(C.intSiteNumber  AS NVARCHAR(20)) COLLATE Latin1_General_CI_AS  ConsumptionSiteNumber
 	,ISNULL(F.strApplianceType,'') ApplianceType
 	,ISNULL(A.strDescription,'') [Description]
-	,ISNULL(A.strManufacturerName,'') ManufactureName
+	,ISNULL(A.strManufacturerName,'') COLLATE Latin1_General_CI_AS ManufactureName
 	,ISNULL(A.strModelNumber,'') ModelNumber
 	,ISNULL(A.strSerialNumber,'')SerialNumber
-	,ISNULL(CONVERT(VARCHAR(10),A.dtmPurchaseDate, 101),'') PurchaseDate
-	,ISNULL(CONVERT(VARCHAR(10),A.dtmManufacturedDate, 101),'') ManufacturedDate
+	,ISNULL(CONVERT(VARCHAR(10),A.dtmPurchaseDate, 101),'') COLLATE Latin1_General_CI_AS PurchaseDate
+	,ISNULL(CONVERT(VARCHAR(10),A.dtmManufacturedDate, 101),'') COLLATE Latin1_General_CI_AS ManufacturedDate
 	,ISNULL(A.strComment,'')Comment
 FROM tblTMDevice A
 LEFT JOIN tblTMSiteDevice B

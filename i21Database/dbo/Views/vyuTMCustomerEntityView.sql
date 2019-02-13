@@ -5,8 +5,8 @@ SELECT
 	vwcus_key = ISNULL(Ent.strEntityNo,'')
 	,vwcus_last_name = ISNULL((CASE WHEN Cus.strType = 'Company' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  -1 ELSE 25 END)) END),'')
 	,vwcus_first_name = ISNULL((CASE WHEN Cus.strType = 'Company' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( ', ', Ent.strName) != 0 THEN CHARINDEX( ', ', Ent.strName)  + 2 ELSE 50 END),50) END),'')
-	,vwcus_mid_init = ''
-	,vwcus_name_suffix = ''
+	,vwcus_mid_init = ''  COLLATE Latin1_General_CI_AS  
+	,vwcus_name_suffix = ''  COLLATE Latin1_General_CI_AS  
 	,vwcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END
 	,vwcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END
 	,vwcus_city = SUBSTRING(Loc.strCity,1,20)
@@ -14,7 +14,7 @@ SELECT
 	,vwcus_zip = SUBSTRING(Loc.strZipCode,1,10)  
 	,vwcus_phone = E.strPhone
 	,vwcus_phone_ext = (CASE WHEN CHARINDEX('x', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX('x',Con.strPhone) + 1, LEN(Con.strPhone))END)
-	,vwcus_bill_to = ''  
+	,vwcus_bill_to = '' COLLATE Latin1_General_CI_AS  
 	,vwcus_contact = SUBSTRING((Con.strName),1,20) 
 	,vwcus_comments = SUBSTRING(Con.strInternalNotes,1,30) 
 	,vwcus_slsmn_id = (SELECT strSalespersonId FROM tblARSalesperson WHERE [intEntityId] = Cus.intSalespersonId)
@@ -24,14 +24,14 @@ SELECT
 							WHEN Cus.strStatementFormat = 'Balance Forward' THEN 'B' 
 							WHEN Cus.strStatementFormat = 'Budget Reminder' THEN 'R' 
 							WHEN Cus.strStatementFormat = 'None' THEN 'N' 
-							WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '' END
+							WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '' END  COLLATE Latin1_General_CI_AS  
 	,vwcus_ytd_pur = 0  
 	,vwcus_ytd_sls = ISNULL(CI.dblYTDSales, 0.0)
 	,vwcus_ytd_cgs = 0.0  
 	,vwcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling
 	,vwcus_budget_beg_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),0) AS INT)
 	,vwcus_budget_end_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),0) AS INT)
-	,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN 'Y' ELSE 'N' END
+	,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN 'Y' ELSE 'N' END  COLLATE Latin1_General_CI_AS  
 	,vwcus_ar_future = CAST(ISNULL(CI.dblFuture,0.0) AS NUMERIC(18,6))
 	,vwcus_ar_per1 = ISNULL(CI.dbl10Days,0.0) +  ISNULL(CI.dbl0Days,0.0)
 	,vwcus_ar_per2 = ISNULL(CI.dbl30Days,0.0)
@@ -42,8 +42,8 @@ SELECT
 	,vwcus_cred_reg = ISNULL(CI.dblUnappliedCredits,0.0)
 	,vwcus_pend_pymt = ISNULL(CI.dblPendingPayment,0.0)
 	,vwcus_cred_ga = 0.0
-	,vwcus_co_per_ind_cp = CASE WHEN Cus.strType = 'Company' THEN 'C' ELSE 'P' END
-	,vwcus_bus_loc_no = ''
+	,vwcus_co_per_ind_cp = CASE WHEN Cus.strType = 'Company' THEN 'C' ELSE 'P' END COLLATE Latin1_General_CI_AS  
+	,vwcus_bus_loc_no = ''  COLLATE Latin1_General_CI_AS  
 	,vwcus_cred_limit = ISNULL(Cus.dblCreditLimit,0.0)
 	,vwcus_last_stmt_bal = ISNULL(CI.dblLastStatement,0.0)
 	,vwcus_budget_amt_due  = ISNULL(CI.dblTotalDue,0.0)
@@ -59,8 +59,8 @@ SELECT
 	,vwcus_last_stmt_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastStatementDate) AS NVARCHAR(4)) + RIGHT('00' + CAST(MONTH(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)  + RIGHT('00' + CAST(DAY(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)) AS INT),0) 
 	,vwcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '' END)  
 	,vwcus_termdescription = T.strTerm
-	,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN 'Y' ELSE 'N' END   
-	,vwcus_tax_state = ''  
+	,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN 'Y' ELSE 'N' END    COLLATE Latin1_General_CI_AS    
+	,vwcus_tax_state = '' COLLATE Latin1_General_CI_AS    
 	,A4GLIdentity = Ent.intEntityId
 	,vwcus_phone2 =  F.strPhone
 	,vwcus_balance = ISNULL(CI.dblTotalDue,0.0)
@@ -86,7 +86,7 @@ SELECT
 	,strFormattedAddress =  ISNULL(Loc.strAddress,'') COLLATE Latin1_General_CI_AS
 	,strFullName = Ent.strName
 	,strFullTermName = (CAST(ISNULL(T.intTermID,'') AS NVARCHAR(10)) + ' - ' + ISNULL(T.strTerm,'')) COLLATE Latin1_General_CI_AS
-	,strCreditNote =''
+	,strCreditNote =''  COLLATE Latin1_General_CI_AS  
 FROM tblEMEntity Ent
 INNER JOIN tblARCustomer Cus 
 	ON Ent.intEntityId = Cus.[intEntityId]

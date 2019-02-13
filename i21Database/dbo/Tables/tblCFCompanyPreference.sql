@@ -21,6 +21,7 @@
     [intCompanyAddressLeftOffset]       NUMERIC (18, 6) NULL,
     [ysnCompanyAddressShowBorder]       BIT             NULL,
     [intConcurrencyId]                  INT             CONSTRAINT [DF_tblCFCompanyPreference_intConcurrencyId] DEFAULT ((1)) NULL,
+	[strExportTransactionTo]            NVARCHAR (20)  COLLATE Latin1_General_CI_AS DEFAULT ('None') NOT NULL,
     CONSTRAINT [PK_tblCFCompanyPreference] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFCompanyPreference_tblGLAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblCFCompanyPreference_tblSMCompanyLocation] FOREIGN KEY ([intARLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),

@@ -9,6 +9,7 @@
 			,strAgent = ltrim(rtrim(entityCreator.strName))
 			,intHours = b.intHours
 			,dblHours = b.intHours
+			,b.dblEstimatedHours
 			,dtmDateCreated = b.dtmDate
 			,strJobCode = c.strItemNo
 			,ysnBillable = b.ysnBillable
@@ -19,6 +20,7 @@
 			,strInvoiceNo = d.strInvoiceNumber
 			,dtmDateExported = b.dtmBilled
 			,b.intTicketHoursWorkedId
+			,strServiceType = c.strServiceType
         from
 			tblHDTicket a
 			inner join tblHDTicketHoursWorked b on b.intTicketId = a.intTicketId

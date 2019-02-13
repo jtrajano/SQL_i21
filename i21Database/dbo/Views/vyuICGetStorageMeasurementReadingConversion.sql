@@ -5,10 +5,6 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, Detail.intStorageMeasurementReadingId
 	, Header.strReadingNo
 	, Header.dtmDate
-	, Detail.intCommodityId
-	, strCommodity = Commodity.strCommodityCode
-	, Item.intCategoryId
-	, strCategory = Category.strCategoryCode
 	, Detail.intItemId
 	, Item.strItemNo
 	, Detail.intStorageLocationId
@@ -36,6 +32,12 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, Detail.intCreatedByUserId
 	, Detail.intCompanyId
 	, Detail.intConcurrencyId
+	, Commodity.strCommodityCode
+	, Commodity.strDescription strCommodity
+	, Category.strCategoryCode
+	, Category.strDescription strCategory
+	, Category.intCategoryId
+	, Commodity.intCommodityId
 FROM tblICStorageMeasurementReadingConversion Detail
 LEFT JOIN tblICStorageMeasurementReading Header ON Header.intStorageMeasurementReadingId = Detail.intStorageMeasurementReadingId
 LEFT JOIN tblICItem Item ON Item.intItemId = Detail.intItemId

@@ -653,5 +653,154 @@ GO
 		and b.ysnDefaultContact = convert(bit,1)
 
 GO
-	PRINT N'End updating Help Desk ticket Currency, Currency Rate Type and Forex Rate.';
+	PRINT N'Start updating Help Desk ticket type.';
+GO
+
+	update tblHDTicketType set intTicketTypeTypeId = (case when ysnTicket = convert(bit,1) then 2 else 1 end) where intTicketTypeTypeId is null;
+
+GO
+	PRINT N'End updating Help Desk ticket type.';
+	PRINT N'Start creating Ticket Hours Worked estimated hours.';
+GO
+
+if not exists (select * from tblEMEntityCredential where strUserName = 'HD_UNASSIGNED_USER')
+begin
+
+	if exists (select * from tblHDTicket where dblQuotedHours is not null and dblQuotedHours > 0)
+	begin
+
+		declare @entity_no nvarchar(40)
+		declare @freight_term_id int 
+		declare @role_id int
+		declare @policy_id int
+		declare @user_name nvarchar(50)
+
+		set @user_name = 'HD_UNASSIGNED_USER'
+
+		select top 1 @freight_term_id = intFreightTermId from tblSMFreightTerms
+		select top 1 @role_id = intUserRoleID from tblSMUserRole order by intUserRoleID Asc
+		select top 1 @policy_id = intSecurityPolicyId from tblSMSecurityPolicy order by intSecurityPolicyId Asc
+		exec uspSMGetStartingNumber 43, @entity_no output
+
+		select @entity_no
+
+		declare @entity_id int
+		declare @entity_contact_id int
+		declare @entity_location_id  int
+
+		insert into tblEMEntity( strName, strEntityNo, strContactNumber, strEmail)
+		select 'Unassigned', @entity_no, '', 'unassigned@irely.com'
+
+		set @entity_id = @@IDENTITY
+
+		insert into tblEMEntity( strName, strEntityNo, strContactNumber, strEmail)
+		select 'Unassigned', '', '', 'unassigned@irely.com'
+
+		set @entity_contact_id = @@IDENTITY
+
+		insert into tblEMEntityMobileNumber(intEntityId, intCountryId)
+		select top 1 @entity_contact_id, intCountryID from tblSMCountry where strCountry like 'United States%'
+
+		insert into tblEMEntityPhoneNumber(intEntityId, intCountryId)
+		select top 1 @entity_contact_id, intCountryID from tblSMCountry where strCountry like 'United States%'
+
+		insert into tblEMEntityLocation( intEntityId, strLocationName, strCheckPayeeName, strZipCode, intFreightTermId, ysnDefaultLocation)
+		select @entity_id, 'Unassigned', 'Unassigned', '0000', @freight_term_id, 1
+
+		set @entity_location_id =  @@IDENTITY
+
+		insert into tblEMEntityToContact(intEntityId, intEntityContactId, intEntityLocationId, ysnDefaultContact, ysnPortalAccess)
+		select @entity_id, @entity_contact_id, @entity_location_id, 1, 0
+
+		insert into tblEMEntityType(intEntityId, strType, intConcurrencyId)
+		select @entity_id, 'User', 1
+
+		select * from tblSMUserSecurity order by intEntityId desc
+		insert into tblSMUserSecurity(intEntityId, strUserName, intUserRoleID, intSecurityPolicyId)
+		select @entity_id, @user_name, @role_id, @policy_id
+
+		declare @password nvarchar(max)
+		exec uspAESEncryptASym 'iRely#1', @password output
+
+		insert into tblEMEntityCredential(intEntityId, strUserName, strPassword)
+		select @entity_id, @user_name, @password
+
+		declare @unassignedEntityId int;
+		declare @nonBillableItemId int;
+		declare @nonBillableItemUOMId int;
+
+		set @unassignedEntityId = (select intEntityId from tblEMEntityCredential where strUserName = 'HD_UNASSIGNED_USER');
+		set @nonBillableItemId = (select intItemId from tblICItem where strItemNo = 'HDNonBillable');
+		set @nonBillableItemUOMId = (select intItemUOMId from tblICItemUOM where intItemId = @nonBillableItemId);
+
+		INSERT INTO [dbo].[tblHDTicketHoursWorked]
+				   ([intTicketId]
+				   ,[intAgentId]
+				   ,[intAgentEntityId]
+				   ,[intHours]
+				   ,[dblEstimatedHours]
+				   ,[dtmDate]
+				   ,[dtmStartTime]
+				   ,[dtmEndTime]
+				   ,[dblRate]
+				   ,[strDescription]
+				   ,[strJIRALink]
+				   ,[intInvoiceId]
+				   ,[intBillId]
+				   ,[ysnBillable]
+				   ,[ysnReimburseable]
+				   ,[ysnBilled]
+				   ,[dtmBilled]
+				   ,[intCreatedUserId]
+				   ,[intCreatedUserEntityId]
+				   ,[dtmCreated]
+				   ,[intJobCodeId]
+				   ,[intCurrencyId]
+				   ,[intCurrencyExchangeRateTypeId]
+				   ,[dblCurrencyRate]
+				   ,[intItemId]
+				   ,[intItemUOMId]
+				   ,[intTimeEntryId]
+				   ,[intConcurrencyId]
+				   )
+		select 
+			[intTicketId] = a.intTicketId
+			,[intAgentId] = @unassignedEntityId
+			,[intAgentEntityId] = @unassignedEntityId
+			,[intHours] = 0.00
+			,[dblEstimatedHours] = a.dblQuotedHours
+			,[dtmDate] = (case when a.dtmDueDate is null then a.dtmCreated else a.dtmDueDate end)
+			,[dtmStartTime] = null
+			,[dtmEndTime] = null
+			,[dblRate] = 0
+			,[strDescription] = 'Quoted Milestone Hours'
+			,[strJIRALink] = null
+			,[intInvoiceId] = null
+			,[intBillId] = null
+			,[ysnBillable] = convert(bit,0)
+			,[ysnReimburseable] = convert(bit,0)
+			,[ysnBilled] = convert(bit,0)
+			,[dtmBilled] = null
+			,[intCreatedUserId] = @unassignedEntityId
+			,[intCreatedUserEntityId] = @unassignedEntityId
+			,[dtmCreated] = getdate()
+			,[intJobCodeId] = null
+			,[intCurrencyId] = a.intCurrencyId
+			,[intCurrencyExchangeRateTypeId] = a.intCurrencyExchangeRateTypeId
+			,[dblCurrencyRate] = a.dblCurrencyRate
+			,[intItemId] = @nonBillableItemId
+			,[intItemUOMId] = @nonBillableItemUOMId
+			,[intTimeEntryId] = 1
+			,[intConcurrencyId] = 1
+		from tblHDTicket a
+		where a.dblQuotedHours is not null and a.dblQuotedHours > 0
+
+		update tblHDTicket set dblQuotedHours = 0.00 where dblQuotedHours is not null and dblQuotedHours > 0
+
+	end
+
+end
+
+GO
+	PRINT N'End creating Ticket Hours Worked estimated hours.';
 GO

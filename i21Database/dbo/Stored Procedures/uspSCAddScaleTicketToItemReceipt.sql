@@ -229,7 +229,7 @@ SELECT
 		,ysnAllowVoucher			= CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
 										CASE  
 											WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 
-											ELSE LI.ysnAllowInvoiceVoucher 
+											ELSE LI.ysnAllowVoucher 
 										END
 									END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 

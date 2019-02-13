@@ -4,7 +4,7 @@
 		from
 			tblHDTicketWatcher w,
 			(
-				select intEntityId, strName, strRoleName = isnull(strRoleName, '<font color="red"><i>No i21 access</i></font>') from
+				select intEntityId, strName, strRoleName = isnull(strRoleName, '<font color="red"><i>No i21 access</i></font>') COLLATE Latin1_General_CI_AS from
 				(
 					select a.intEntityId, strName = a.strName, strRoleName = (select top 1 c.strName from tblSMUserRole c where c.intUserRoleID = b.intUserRoleID)
 					from tblEMEntity a, tblSMUserSecurity b

@@ -70,19 +70,28 @@
     [intFreightTermId]           INT             NULL,
     [intForDeleteTransId]        INT             NULL,
     [intCustomerId]              INT             NULL,
-    [ysnInvoiced]                  BIT             NULL,
-    [intImportCardId] INT NULL, 
-    CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
+    [ysnInvoiced]                BIT             NULL,
+    [intImportCardId]            INT             NULL,
+    [ysnExpensed]                BIT             NULL,
+    [intExpensedItemId]          INT             NULL,
+    [ysnExportedThirdParty] BIT NOT NULL DEFAULT 0, 
+    [dtmExportedThirdPartyDate] DATETIME NULL, 
+    [intExportedThirdPartyUser] INT NULL, 
+    [intDriverPinId]			INT NULL, 
+    CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),
+    CONSTRAINT [FK_tblCFTransaction_tblCFDriverPin] FOREIGN KEY ([intDriverPinId]) REFERENCES [dbo].[tblCFDriverPin] ([intDriverPinId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFVehicle] FOREIGN KEY ([intVehicleId]) REFERENCES [dbo].[tblCFVehicle] ([intVehicleId]),
     CONSTRAINT [FK_tblCFTransaction_tblCTContractDetail] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
     CONSTRAINT [FK_tblCFTransaction_tblCTContractHeader] FOREIGN KEY ([intContractId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
     CONSTRAINT [FK_tblCFTransaction_tblICItem] FOREIGN KEY ([intARItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
-    CONSTRAINT [UC_UTransactionId] UNIQUE NONCLUSTERED ([strTransactionId] ASC)
+    CONSTRAINT [UC_UTransactionId] UNIQUE NONCLUSTERED ([strTransactionId] ASC) WITH (FILLFACTOR = 70)
 );
+
+
 
 
 GO

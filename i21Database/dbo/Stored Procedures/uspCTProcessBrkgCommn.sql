@@ -71,7 +71,7 @@ BEGIN TRY
     IF  ISNULL(@ysnReceivable,0)	=   0
     BEGIN
 	   INSERT INTO @VoucherDetailNonInvContract(intItemId,dblQtyReceived,dblCost,intContractHeaderId,intContractDetailId,intAccountId,intContractSeq,intContractCostId)
-	   SELECT @intVoucherItemId,1,@dblRcvdPaidAmount,@intContractHeaderId,@intContractDetailId,dbo.fnGetItemGLAccount(@intCostItemId, @intCostItemLocationId, 'AP Clearing'),@intContractSeq,@intContractCostId
+	   SELECT @intVoucherItemId,1,@dblRcvdPaidAmount,@intContractHeaderId,@intContractDetailId,dbo.fnGetItemGLAccount(@intCostItemId, @intCostItemLocationId, 'Cost of Goods'),@intContractSeq,@intContractCostId
 
 	   EXEC [dbo].[uspAPCreateBillData] 
 			 @userId						=	 @intUserId

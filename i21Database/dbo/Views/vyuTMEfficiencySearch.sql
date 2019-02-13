@@ -3,7 +3,7 @@ AS
 	SELECT 
 		strCustomerNumber = B.strEntityNo
 		,strCustomerName = B.strName
-		,strSiteNumber = RIGHT('000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)
+		,strSiteNumber = RIGHT('000'+ CAST(C.intSiteNumber AS VARCHAR(4)),4)  COLLATE Latin1_General_CI_AS
 		,strSiteAddress = C.strSiteAddress
 		,strFillMethod = F.strFillMethod
 		,dblTotalCapacity = C.dblTotalCapacity

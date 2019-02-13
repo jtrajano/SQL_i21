@@ -78,8 +78,8 @@ SELECT
 	,dtmDateCreated = DATEADD(DAY, DATEDIFF(DAY, 0, WRK.dtmDateCreated), 0)
 	,dtmDateScheduled = WRK.dtmDateScheduled
 	,strAdditonalInfo = WRK.strAdditionalInfo
-	,strPerformer = PRF.strName
-	,strPerformerId = PRF.strEntityNo
+	,strPerformer = PRF.strName COLLATE Latin1_General_CI_AS
+	,strPerformerId = PRF.strEntityNo COLLATE Latin1_General_CI_AS
 	,C.strWorkStatus
 	,Z.strCompanyName
 	,loc.strLocationName

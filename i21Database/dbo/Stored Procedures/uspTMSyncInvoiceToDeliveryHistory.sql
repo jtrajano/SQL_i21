@@ -42,6 +42,8 @@ BEGIN
 	DECLARE @ysnMaxExceed BIT
 	DECLARE @dtmCurrentSeasonStart DATETIME
 	DECLARE @intAccumulatedDDAfterLastDeliveryBeforeReset INT
+	DECLARE @intCustomerId INT
+	DECLARE @intScreenId INT
 	
 
 
@@ -52,6 +54,16 @@ BEGIN
 		GOTO DONESYNCHING
 	END
 	
+	----------------------------------------------
+	SELECT TOP 1
+		@intScreenId = intScreenId
+	FROM tblSMScreen 
+	WHERE strModule = 'Tank Management'
+		AND strNamespace = 'TankManagement.view.ConsumptionSite'
+
+	----------------------------------------------
+
+
 	PRINT 'Get invoice header detail'
 	-----Get invoice header detail
 	SELECT 
@@ -117,6 +129,7 @@ BEGIN
 		-------GEt site Detail
 		SELECT @intClockId = intClockID
 		,@dtmLastDeliveryDate = dtmLastDeliveryDate
+		,@intCustomerId = intCustomerID
 		FROM tblTMSite
 		WHERE intSiteID = @intSiteId
 		
@@ -156,6 +169,42 @@ BEGIN
 		BEGIN
 			SET @intElapseDays = 0
 		END
+
+
+		---------------------------------------------------------------------------------
+		---------------------------Lock CS Record----------------------------------------
+		---------------------------------------------------------------------------------
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMTransaction WHERE intScreenId = @intScreenId AND intRecordId = @intCustomerId) 
+		BEGIN
+			UPDATE tblSMTransaction
+			SET ysnLocked = 1
+				,dtmDate = GETDATE()
+				,intLockedBy = @intUserId
+			WHERE intScreenId = @intScreenId AND intRecordId = @intCustomerId
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblSMTransaction(
+				ysnLocked 
+				,dtmDate
+				,intLockedBy
+				,intRecordId
+				,intScreenId
+			)
+			SELECT 
+				ysnLocked = 1
+				,dtmDate = GETDATE()
+				,intLockedBy = @intUserId
+				,intRecordId = @intCustomerId
+				,intScreenId = @intScreenId
+		END
+
+		---------------------------------------------------------------------------------
+		---------------------------------------------------------------------------------
+
+
+
 		
 		PRINT 'BEGIN'
 		
@@ -220,7 +269,7 @@ BEGIN
 			IF(@ysnLessThanLastDeliveryDate = 1)
 			BEGIN
 				PRINT 'Left Over Invoice'
-				IF(@dtmLastDeliveryDate = @dtmInvoiceDate)
+				IF(@dtmLastDeliveryDate = @dtmInvoiceDate AND EXISTS(SELECT TOP 1 1FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate AND ysnMeterReading <> 1))
 				BEGIN
 					PRINT 'Same date as the last delivery'
 					
@@ -991,6 +1040,7 @@ BEGIN
 							,[ysnLeakCheckRequired]
 							,[dblOriginalPercentLeft]		
 							,[dtmReceivedDate]
+							,intPaymentId
 						)	
 						SELECT TOP 1 
 							[intDispatchId]				= [intDispatchID]
@@ -1034,6 +1084,7 @@ BEGIN
 							,[ysnLeakCheckRequired]
 							,[dblOriginalPercentLeft]
 							,[dtmReceivedDate]
+							,intPaymentId
 						FROM tblTMDispatch
 						WHERE intSiteID = @intSiteId
 					END
@@ -1046,6 +1097,21 @@ BEGIN
 			END
 		END
 		CONTINUELOOP:
+
+		
+		-------------------------------------------------------
+		-------------------------Unlock Record
+		-------------------------------------------------------
+		UPDATE tblSMTransaction
+		SET ysnLocked = 0
+			,dtmDate = NULL
+			,intLockedBy = NULL
+		WHERE intScreenId = @intScreenId AND intRecordId = @intCustomerId
+
+		-------------------------------------------------------
+		-------------------------------------------------------
+		
+
 		DELETE FROM #tmpInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
 		PRINT 'DONE'
 	END

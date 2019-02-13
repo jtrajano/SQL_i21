@@ -70,21 +70,7 @@ BEGIN
 				, intSort			= 0
 				, intConcurrencyId	= 1
 		END
-	IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'DEBIT MEMOS AND PAYMENTS')
-		BEGIN
-			INSERT INTO tblSMPaymentMethod (
-				  strPaymentMethod
-				, intNumber
-				, ysnActive
-				, intSort
-				, intConcurrencyId
-			)
-			SELECT strPaymentMethod = 'Debit Memos and Payments'
-				, intNumber		 	= 1
-				, ysnActive			= 1
-				, intSort			= 0
-				, intConcurrencyId	= 1
-		END
+
 	--INSERT POSITIVE TRANSACTION (INVOICE)
 	INSERT INTO @EntriesForInvoice(
 	 [strTransactionType]
@@ -356,7 +342,7 @@ BEGIN
 			
 			SELECT TOP 1  @cashPaymentMethodId = intPaymentMethodID
 			FROM tblSMPaymentMethod
-			WHERE strPaymentMethod = 'Debit Memos and Payments'
+			WHERE strPaymentMethod = 'Cash'
 					
 
 			UPDATE tblARPOS
@@ -419,7 +405,7 @@ BEGIN
 					,intCurrencyId					= INV.intCurrencyId
 					,dtmDatePaid					= GETDATE()
 					,intPaymentMethodId				= @cashPaymentMethodId
-					,strPaymentMethod				= 'Debit Memos and Payments'
+					,strPaymentMethod				= 'Cash'
 					,strPaymentInfo					= ''
 					,intBankAccountId				= BA.intBankAccountId
 					,dblAmountPaid					= 0
@@ -458,7 +444,7 @@ BEGIN
 					,intCurrencyId					= CM.intCurrencyId
 					,dtmDatePaid					= GETDATE()
 					,intPaymentMethodId				= @cashPaymentMethodId
-					,strPaymentMethod				= 'Debit Memos and Payments'
+					,strPaymentMethod				= 'Cash'
 					,strPaymentInfo					= ''
 					,intBankAccountId				= BA.intBankAccountId
 					,dblAmountPaid					= 0

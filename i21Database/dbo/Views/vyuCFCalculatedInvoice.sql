@@ -1,5 +1,4 @@
-﻿
-CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
+﻿CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
 AS
 
 SELECT  
@@ -7,12 +6,12 @@ SELECT
 	 strUserId,
 	 intCustomerId, 
 	 strTempInvoiceReportNumber, 
-	 dblAccountTotalAmount, 
+	 dblAccountTotalAmount , 
 	 dblAccountTotalDiscount, 
 	 intTermID,
 	 dtmInvoiceDate, 
-	 dblFeeTotalAmount,
-	 dblInvoiceTotal, 
+	 dblFeeTotalAmount, 
+	 dblInvoiceTotal = dblInvoiceTotal + ISNULL(dblTotalFuelExpensed,0), 
 	 SUM(dblQuantity) AS dblTotalQuantity, 
 	 dblEligableGallon, 
 	 strCustomerName, 
@@ -24,7 +23,9 @@ SELECT
 			WHEN (ISNULL(strEmail,'') != '') AND (strEmailDistributionOption like '%CF Invoice%') THEN CAST(1 AS BIT)
 			ELSE CAST(0 AS BIT)
 			END
-			AS ysnEmail
+			AS ysnEmail,
+	 dblTotalFuelExpensed
+
 FROM (
 	SELECT        
 		cfInv.strCustomerNumber,
@@ -54,6 +55,7 @@ FROM (
 		cfInv.strCustomerName, 
 		cfInv.strEmail, 
 		cfInv.strEmailDistributionOption, 
+		dblTotalFuelExpensed,
 		cfInv.strStatementType,
 		'Ready' AS strStatus
 	FROM            dbo.tblCFInvoiceStagingTable AS cfInv 
@@ -65,7 +67,7 @@ FROM (
 	ON cfInv.intAccountId = cfInvFee.intAccountId
 	AND cfInv.strUserId  COLLATE Latin1_General_CI_AS = cfInvFee.strUserId) AS outertable
 	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, intTermID, dtmInvoiceDate, dblFeeTotalAmount, 
-	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus, strStatementType
+	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType
 GO
 
 

@@ -53,8 +53,7 @@ DECLARE @intStorageScheduleId AS INT
 		,@strWhereFinalizedGrade NVARCHAR(20)
 		,@ysnCustomerStorage BIT
 		,@intContractDetailId INT
-		,@ysnPriceFixation BIT = 0
-		,@ysnAllowInvoiceVoucher BIT = 0;
+		,@ysnPriceFixation BIT = 0;
 
 SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId
@@ -72,13 +71,13 @@ DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38,20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowInvoiceVoucher
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher
 FROM @LineItem;
 
 OPEN intListCursor;
 
 		-- Initial fetch attempt
-		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId, @ysnAllowInvoiceVoucher;
+		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
@@ -113,7 +112,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId
-								,ysnAllowInvoiceVoucher  
+								,ysnAllowVoucher  
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -134,7 +133,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption
-								,ysnAllowInvoiceVoucher   
+								,ysnAllowVoucher   
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -160,7 +159,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId
-								,ysnAllowInvoiceVoucher  
+								,ysnAllowVoucher  
 							)SELECT 
 								intItemId
 								,intItemLocationId
@@ -181,7 +180,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption
-								,ysnAllowInvoiceVoucher 
+								,ysnAllowVoucher 
 							FROM @LineItem
 							where intId = @intId
 					END
@@ -245,7 +244,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId
-								,ysnAllowInvoiceVoucher  
+								,ysnAllowVoucher  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblDPContractUnits, @intEntityId, @ysnIsStorage;
@@ -279,13 +278,13 @@ OPEN intListCursor;
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
 						,intStorageScheduleTypeId
-						,ysnAllowInvoiceVoucher
+						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
 					END
 			END		   
 			-- Attempt to fetch next row from cursor
-			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId, @ysnAllowInvoiceVoucher;
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
 		END;
 
 CLOSE intListCursor;

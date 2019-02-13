@@ -25,7 +25,8 @@
 			case when Buyer = 1 then 'Buyer, ' else '' end COLLATE Latin1_General_CI_AS,
 		intTicketIdDate = (select top 1 cast(intTicketId as nvarchar) + '|^|' + CONVERT(nvarchar(24),dtmCreated,101) + '|^|' + strTicketNumber from tblHDTicket where intCustomerId = a.intEntityId order by dtmCreated DESC),
 		intEntitySalespersonId = m.intEntityId,
-		strEntitySalespersonName = m.strName
+		strEntitySalespersonName = m.strName,
+		strPrimaryContactEmail = g.strEmail
 
     FROM         
             tblEMEntity a

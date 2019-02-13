@@ -312,6 +312,9 @@ BEGIN
 		-----------------------------------
 		--**BEGIN DISCOUNT CALCULATION**---
 		-----------------------------------
+
+		DELETE FROM tblCFInvoiceDiscountCalculationTempTable 
+		WHERE strUserId = @UserId OR ISNULL(strUserId ,'') = ''
 		
 		-------------VARIABLES------------
 		DECLARE @dblTotalQuantity NUMERIC(18,6)
@@ -418,81 +421,189 @@ BEGIN
 			 ,dtmPostedDate				DATETIME
 
 		)
-		CREATE TABLE ##tblCFInvoiceDiscount	
+		DECLARE @tblCFInvoiceDiscount TABLE 	
 		(
-			  intAccountId						INT
-			 ,intSalesPersonId					INT
-			 ,dtmInvoiceDate					DATETIME
-			 ,intCustomerId						INT
-			 ,intInvoiceId						INT
-			 ,intTransactionId					INT
-			 ,intCustomerGroupId				INT
-			 ,intTermID							INT
-			 ,intBalanceDue						INT
-			 ,intDiscountDay					INT	
-			 ,intDayofMonthDue					INT
-			 ,intDueNextMonth					INT
-			 ,intSort							INT
-			 ,intConcurrencyId					INT
-			 ,ysnAllowEFT						BIT
-			 ,ysnActive							BIT
-			 ,ysnEnergyTrac						BIT	
-			 ,strDiscountSchedule				NVARCHAR(100)	
-			 ,ysnShowOnCFInvoice				BIT
-			 ,dblQuantity						NUMERIC(18,6)
-			 ,dblTotalQuantity					NUMERIC(18,6)
-			 ,dblDiscountRate					NUMERIC(18,6)
-			 ,dblDiscount						NUMERIC(18,6)
-			 ,dblTotalAmount					NUMERIC(18,6)
-			 ,dblAccountTotalAmount				NUMERIC(18,6)
-			 ,dblAccountTotalDiscount			NUMERIC(18,6)
-			 ,dblAccountTotalLessDiscount		NUMERIC(18,6)
-			 ,dblAccountTotalDiscountQuantity	NUMERIC(18,6)
-			 ,dblDiscountEP						NUMERIC(18,6)
-			 ,dblAPR							NUMERIC(18,6)	
-			 ,strTerm							NVARCHAR(MAX)
-			 ,strType							NVARCHAR(MAX)
-			 ,strTermCode						NVARCHAR(MAX)	
-			 ,strNetwork						NVARCHAR(MAX)	
-			 ,strCustomerName					NVARCHAR(MAX)
-			 ,strInvoiceCycle					NVARCHAR(MAX)
-			 ,strGroupName						NVARCHAR(MAX)
-			 ,strInvoiceNumber					NVARCHAR(MAX)
-			 ,strInvoiceReportNumber			NVARCHAR(MAX)
-			 ,dtmDiscountDate					DATETIME
-			 ,dtmDueDate						DATETIME
-			 ,dtmTransactionDate				DATETIME
-			 ,dtmBillingDate					DATETIME
-			 ,dtmPostedDate						DATETIME
-
+			 intCustomerId				INT
+			,intTransactionId			INT
+			,intSalesPersonId			INT
+			,intInvoiceId				INT
+			,intAccountId				INT
+			,intTermID					INT
+			,intBalanceDue				INT
+			,intDiscountDay				INT
+			,intDayofMonthDue			INT
+			,intDueNextMonth			INT
+			,intSort					INT
+			,intConcurrencyId			INT
+			,intDiscountScheduleId		INT
+			,intCustomerGroupId			INT
+			,ysnInvoiced				BIT
+			,ysnAllowEFT				BIT
+			,ysnActive					BIT
+			,ysnEnergyTrac				BIT
+			,ysnShowOnCFInvoice			BIT
+			,dblAPR						NUMERIC(18,6)
+			,dblDiscountEP				NUMERIC(18,6)
+			,dblTotalAmount				NUMERIC(18,6)
+			,dblQuantity				NUMERIC(18,6)
+			,dtmDiscountDate			DATETIME
+			,dtmDueDate					DATETIME
+			,dtmPostedDate				DATETIME
+			,dtmTransactionDate			DATETIME
+			,dtmBillingDate				DATETIME
+			,dtmCreatedDate				DATETIME
+			,dtmInvoiceDate				DATETIME
+			,strGroupName				NVARCHAR(MAX)
+			,strEmailDistributionOption	NVARCHAR(MAX)
+			,strEmail					NVARCHAR(MAX)
+			,strDiscountSchedule		NVARCHAR(MAX)
+			,strNetwork					NVARCHAR(MAX)
+			,strInvoiceCycle			NVARCHAR(MAX)
+			,strTerm					NVARCHAR(MAX)
+			,strType					NVARCHAR(MAX)
+			,strCustomerName			NVARCHAR(MAX)
+			,strCustomerNumber			NVARCHAR(MAX)
+			,strInvoiceNumber			NVARCHAR(MAX)
+			,strTransactionType			NVARCHAR(MAX)
+			,strInvoiceReportNumber		NVARCHAR(MAX)
+			,strPrintTimeStamp			NVARCHAR(MAX)
+			,strTermCode				NVARCHAR(MAX)
+		)
+		DECLARE @tblCFDiscountschedule TABLE
+		(
+			 intDiscountSchedDetailId	  INT
+			,intDiscountScheduleId		  INT
+			,intFromQty					  INT
+			,intThruQty					  INT
+			,dblRate					  NUMERIC(18,6)
 		)
 		-------------VARIABLES------------
 
 		
 		----------GET DISCOUNT SCHEDULE------------
+		INSERT INTO @tblCFDiscountschedule
+		(
+			intDiscountSchedDetailId
+			,intDiscountScheduleId
+			,intFromQty
+			,intThruQty
+			,dblRate
+		)
 		SELECT 
-		 intDiscountSchedDetailId
-		,intDiscountScheduleId
-		,intFromQty
-		,intThruQty
-		,dblRate
-		,intConcurrencyId
-		INTO #tmpdiscountschedule
+			 intDiscountSchedDetailId
+			,intDiscountScheduleId
+			,intFromQty
+			,intThruQty
+			,dblRate
 		FROM tblCFDiscountScheduleDetail
 		----------GET DISCOUNT SCHEDULE------------
 
 
 		-----------------MAIN QUERY------------------
-		EXEC('SELECT * 
-		INTO ##tmpInvoiceDiscount
-		FROM vyuCFInvoiceDiscount '+ @whereClause)
+		INSERT INTO @tblCFInvoiceDiscount
+		(
+			 intCustomerId				
+			,intTransactionId			
+			,intSalesPersonId			
+			,intInvoiceId				
+			,intAccountId				
+			,intTermID					
+			,intBalanceDue				
+			,intDiscountDay				
+			,intDayofMonthDue			
+			,intDueNextMonth			
+			,intSort					
+			,intConcurrencyId			
+			,intDiscountScheduleId		
+			,intCustomerGroupId			
+			,ysnInvoiced				
+			,ysnAllowEFT				
+			,ysnActive					
+			,ysnEnergyTrac				
+			,ysnShowOnCFInvoice			
+			,dblAPR						
+			,dblDiscountEP				
+			,dblTotalAmount				
+			,dblQuantity				
+			,dtmDiscountDate			
+			,dtmDueDate					
+			,dtmPostedDate				
+			,dtmTransactionDate			
+			,dtmBillingDate				
+			,dtmCreatedDate				
+			,dtmInvoiceDate				
+			,strGroupName				
+			,strEmailDistributionOption	
+			,strEmail					
+			,strDiscountSchedule		
+			,strNetwork					
+			,strInvoiceCycle			
+			,strTerm					
+			,strType					
+			,strCustomerName			
+			,strCustomerNumber			
+			,strInvoiceNumber			
+			,strTransactionType			
+			,strInvoiceReportNumber		
+			,strPrintTimeStamp			
+			,strTermCode				
+		)
+		EXEC('
+		SELECT 
+			 intCustomerId				
+			,intTransactionId			
+			,intSalesPersonId			
+			,intInvoiceId				
+			,intAccountId				
+			,intTermID					
+			,intBalanceDue				
+			,intDiscountDay				
+			,intDayofMonthDue			
+			,intDueNextMonth			
+			,intSort					
+			,intConcurrencyId			
+			,intDiscountScheduleId		
+			,intCustomerGroupId			
+			,ysnInvoiced				
+			,ysnAllowEFT				
+			,ysnActive					
+			,ysnEnergyTrac				
+			,ysnShowOnCFInvoice			
+			,dblAPR						
+			,dblDiscountEP				
+			,dblTotalAmount				
+			,dblQuantity				
+			,dtmDiscountDate			
+			,dtmDueDate					
+			,dtmPostedDate				
+			,dtmTransactionDate			
+			,dtmBillingDate				
+			,dtmCreatedDate				
+			,dtmInvoiceDate				
+			,strGroupName				
+			,strEmailDistributionOption	
+			,strEmail					
+			,strDiscountSchedule		
+			,strNetwork					
+			,strInvoiceCycle			
+			,strTerm					
+			,strType					
+			,strCustomerName			
+			,strCustomerNumber			
+			,strInvoiceNumber			
+			,strTransactionType			
+			,strInvoiceReportNumber		
+			,strPrintTimeStamp			
+			,strTermCode				
+		FROM vyuCFInvoiceDiscount 
+		'+ @whereClause)
 		-----------------MAIN QUERY------------------
 
 		
 		-------------GROUP VOLUME DISCOUNT---------------
 		INSERT @tblCFGroupVolumeDisctinct
 		SELECT DISTINCT ISNULL(intCustomerGroupId,0)
-		FROM ##tmpInvoiceDiscount
+		FROM @tblCFInvoiceDiscount
 		WHILE (EXISTS(SELECT 1 FROM @tblCFGroupVolumeDisctinct))
 		BEGIN
 	
@@ -503,7 +614,7 @@ BEGIN
 
 			SELECT 
 			@dblTotalQuantity = SUM(dblQuantity)	
-			FROM ##tmpInvoiceDiscount as cfInvoice
+			FROM @tblCFInvoiceDiscount as cfInvoice
 			WHERE intCustomerGroupId = @intDistinctDiscountLoop
 			GROUP BY intCustomerGroupId
 
@@ -570,12 +681,12 @@ BEGIN
 				,@dblTotalQuantity		
 				,ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
-					 FROM #tmpdiscountschedule
+					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
 					 ORDER BY intFromQty DESC), 0)
 				,ROUND((ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
-					 FROM #tmpdiscountschedule
+					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
 					 ORDER BY intFromQty DESC), 0) * dblQuantity),2)
 				,dblTotalAmount	
@@ -596,7 +707,7 @@ BEGIN
 				,dtmPostedDate		
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
-			FROM ##tmpInvoiceDiscount as cfInvoice
+			FROM @tblCFInvoiceDiscount as cfInvoice
 			WHERE intCustomerGroupId = @intDistinctDiscountLoop
 
 			END
@@ -609,7 +720,7 @@ BEGIN
 		-------------ACCOUNT VOLUME DISCOUNT---------------
 		INSERT @tblCFAccountVolumeDisctinct
 		SELECT DISTINCT ISNULL(intAccountId,0)
-		FROM ##tmpInvoiceDiscount
+		FROM @tblCFInvoiceDiscount
 		WHILE (EXISTS(SELECT 1 FROM @tblCFAccountVolumeDisctinct))
 		BEGIN
 	
@@ -620,7 +731,7 @@ BEGIN
 
 			SELECT 
 			@dblTotalQuantity = SUM(dblQuantity)	
-			FROM ##tmpInvoiceDiscount as cfInvoice
+			FROM @tblCFInvoiceDiscount as cfInvoice
 			WHERE intAccountId = @intDistinctDiscountLoop
 			GROUP BY intAccountId
 
@@ -687,12 +798,12 @@ BEGIN
 				,@dblTotalQuantity		
 				,ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
-					 FROM #tmpdiscountschedule
+					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
 					 ORDER BY intFromQty DESC), 0)
 				,ROUND((ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
-					 FROM #tmpdiscountschedule
+					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
 					 ORDER BY intFromQty DESC), 0) * dblQuantity),2)
 				,dblTotalAmount	
@@ -713,7 +824,7 @@ BEGIN
 				,dtmPostedDate		
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
-			FROM ##tmpInvoiceDiscount as cfInvoice
+			FROM @tblCFInvoiceDiscount as cfInvoice
 			WHERE intAccountId = @intDistinctDiscountLoop AND intCustomerGroupId = 0
 			END
 			
@@ -750,7 +861,7 @@ BEGIN
 			FROM @tblCFGroupVolumeTemp
 			WHERE intAccountId = @intDistinctDiscountLoop
 
-			INSERT INTO ##tblCFInvoiceDiscount(
+			INSERT INTO tblCFInvoiceDiscountCalculationTempTable(
 				 intAccountId			
 			    ,intSalesPersonId			
 			    ,dtmInvoiceDate		
@@ -794,6 +905,7 @@ BEGIN
 				,dblAccountTotalDiscountQuantity	
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
+				,strUserId
 			)
 			SELECT 
 				 intAccountId				
@@ -839,6 +951,7 @@ BEGIN
 				,@totalAccountTotalDiscountQuantity
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
+				,@UserId
 			FROM @tblCFGroupVolumeTemp as cfGroupVolumeDiscount
 			WHERE intAccountId = @intDistinctDiscountLoop
 
@@ -869,7 +982,7 @@ BEGIN
 			FROM @tblCFAccountVolumeTemp
 			WHERE intAccountId = @intDistinctDiscountLoop
 
-			INSERT INTO ##tblCFInvoiceDiscount(
+			INSERT INTO tblCFInvoiceDiscountCalculationTempTable(
 				 intAccountId				
 			    ,intSalesPersonId			
 			    ,dtmInvoiceDate	
@@ -913,6 +1026,7 @@ BEGIN
 				,dblAccountTotalDiscountQuantity
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
+				,strUserId
 			)
 			SELECT 
 				 intAccountId			
@@ -958,6 +1072,7 @@ BEGIN
 				,@totalAccountTotalDiscountQuantity
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
+				,@UserId
 			FROM @tblCFAccountVolumeTemp as cfAccountVolumeDiscount
 			WHERE intAccountId = @intDistinctDiscountLoop
 
@@ -1031,18 +1146,12 @@ BEGIN
 			,intTransactionId
 			,strDiscountSchedule
 			,ysnShowOnCFInvoice
-			,''' +@UserId+'''
-	    FROM ##tblCFInvoiceDiscount' + @endWhereClause) 
+			,strUserId
+	    FROM tblCFInvoiceDiscountCalculationTempTable' + @endWhereClause) 
 
-		--EXEC('SELECT * FROM ##tblCFInvoiceDiscount ' + @endWhereClause) 
-		--SELECT * FROM tblCFInvoiceDiscountTempTable
+	
 		-------------SELECT MAIN TABLE FOR OUTPUT---------------
-
-		-------------DROP TEMPORARY TABLES---------------
-		DROP TABLE #tmpdiscountschedule
-		DROP TABLE ##tmpInvoiceDiscount
-		DROP TABLE ##tblCFInvoiceDiscount
-		-------------DROP TEMPORARY TABLES---------------
+	
 
 	END
 END

@@ -134,6 +134,7 @@ INSERT INTO @tblInvoiceEntries (
 	,[dblPrice]
 	,[ysnRefreshPrice]
 	,[ysnRecomputeTax]
+	,[intOriginalInvoiceId]
 )
 SELECT
 	 [strSourceTransaction]				= 'Direct'
@@ -158,6 +159,7 @@ SELECT
 	,[dblPrice]							= I.dblAmountDue
 	,[ysnRefreshPrice]					= 0
 	,[ysnRecomputeTax]					= 0
+	,[intOriginalInvoiceId]             = I.intInvoiceId
 FROM dbo.tblARInvoice I
 WHERE I.intInvoiceId = @intInvoiceId
 
@@ -204,6 +206,7 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 		IF @ysnSuccess = 1
 			BEGIN
 				DECLARE @tblPaymentDetail		PaymentDetailStaging
+				
 
 				INSERT INTO @tblPaymentDetail (
 					  intAccountId
@@ -239,6 +242,22 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 						RAISERROR(@strErrorMessage, 16, 1) 
 						RETURN 0;
 					END
+
+				--Audit log Entry 
+				DECLARE @strInvoiceNumberCashRefund NVARCHAR(100)	= NULL
+				SELECT TOP 1 @strInvoiceNumberCashRefund = strInvoiceNumber from tblARInvoice 
+				WHERE intInvoiceId = @intNewInvoiceId
+
+				EXEC uspSMAuditLog
+					@keyValue = @intInvoiceId,                                  -- Primary Key Value
+					@screenName = 'AccountsReceivable.view.Invoice',            -- Screen Namespace
+					@entityId = 1,                                              -- Entity Id.
+					@actionType = 'Processed',
+																
+					@changeDescription = 'Cash Refund on',						-- Description
+					@fromValue = '',											-- Previous Value
+					@toValue = @strInvoiceNumberCashRefund  
+
 			END
 		
 		--UPDATE YSNPROCESSED

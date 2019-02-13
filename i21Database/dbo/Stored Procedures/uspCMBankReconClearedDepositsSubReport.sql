@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMBankReconClearedDepositsSubReport]
 	@intBankAccountId AS INT
 	,@dtmStatementDate AS DATETIME
+	,@ysnCheckVoid BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -25,11 +26,14 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
+		,@VOID_AP_PAYMENT AS INT = 116
 		,@BANK_STMT_IMPORT AS INT = 17
 		,@AR_PAYMENT AS INT = 18
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@VOID_ACH AS INT = 122
+
 
 --SET @xmlparam = '
 --<xmlparam>
@@ -115,7 +119,7 @@ IF @dtmStatementDate IS NOT NULL
 	SELECT @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
 
 DECLARE @lastDateReconciled datetime
-	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankTransaction 
+	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankReconciliation 
 	WHERE intBankAccountId = @intBankAccountId
 	ORDER BY dtmDateReconciled DESC
 	
@@ -155,17 +159,20 @@ FROM	[dbo].[tblCMBankTransaction] BankTrans INNER JOIN [dbo].[tblCMBankAccount] 
 			ON BankTrans.intBankTransactionTypeId = BankTypes.intBankTransactionTypeId
 			
 WHERE	BankTrans.ysnPosted = 1
+		AND @ysnCheckVoid = (CASE WHEN ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled THEN 1 ELSE 0 END )
 		AND BankTrans.intBankAccountId = @intBankAccountId
 		AND BankTrans.dblAmount <> 0		
 		AND BankTrans.dtmDate <= ISNULL(@filterDate, BankTrans.dtmDate)
-		AND ISNULL(BankTrans.dtmDateReconciled, @dtmStatementDate) >= ISNULL(@dtmStatementDate, BankTrans.dtmDateReconciled)
+
+		AND ISNULL(BankTrans.dtmDateReconciled, @dtmStatementDate) >= ISNULL( @dtmStatementDate, BankTrans.dtmDateReconciled)
 		AND (
-			-- Filter for all the bank deposits and credits:
-			BankTrans.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
+		--	-- Filter for all the bank deposits and credits:
+			BankTrans.intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT,@VOID_ACH)
 			OR ( dblAmount > 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
+			OR  (BankTrans.intBankTransactionTypeId = @VOID_AP_PAYMENT and @ysnCheckVoid = 1)
 		)
 		AND dbo.fnIsDepositEntry(BankTrans.strLink) = 0
+		
 )
 SELECT * FROM R WHERE ysnClr = 1
 GO
-

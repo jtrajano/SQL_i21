@@ -1,15 +1,16 @@
 ﻿CREATE PROCEDURE uspSMCreateInvoicePayment
-	@strInvoiceNumber AS NVARCHAR(MAX)
-	,@dblPayment AS NUMERIC(18,6) 
-	,@strInvoiceAndPayment AS NVARCHAR(MAX)
-	,@strCreditCardNumber AS NVARCHAR(50)
-	,@intUserId INT
-	,@strAction NVARCHAR(50)
-	,@intEntityCardInfoId INT = NULL
-	,@intPaymentId INT = NULL
-	,@strPaymentIdNew NVARCHAR(50) OUTPUT
-	,@intPaymentIdNew INT OUTPUT
-	,@ErrorMessage NVARCHAR(250)  = NULL	OUTPUT
+	 @strInvoiceNumber 		AS NVARCHAR(MAX)	= NULL
+	,@dblPayment 			AS NUMERIC(18,6) 
+	,@strInvoiceAndPayment 	AS NVARCHAR(MAX)	= NULL
+	,@strCreditCardNumber 	AS NVARCHAR(50)		= NULL
+	,@intUserId 			AS INT
+	,@strAction 			AS NVARCHAR(50)
+	,@intEntityCustomerId	AS INT 				= NULL
+	,@intEntityCardInfoId 	AS INT 				= NULL
+	,@intPaymentId 			AS INT 				= NULL
+	,@strPaymentIdNew 		AS NVARCHAR(50) 	= NULL OUTPUT
+	,@intPaymentIdNew 		AS INT 				= NULL OUTPUT
+	,@ErrorMessage 			AS NVARCHAR(250)	= NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER ON
@@ -26,104 +27,208 @@ DECLARE @LogId INT
 --================================================================
 IF @strAction = 'Add'
 BEGIN
+	DECLARE @intPaymentMethodId		INT = NULL
+	
+	SELECT TOP 1 @intPaymentMethodId = intPaymentMethodID
+	FROM tblSMPaymentMethod
+	WHERE strPaymentMethod = 'ACH'
 
-	--Create a temp table to store the ivoice number and corresponding amount
-	SELECT  strValues as strRawValue INTO #RawValue  FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceAndPayment)
-	declare @total NUMERIC (18, 6)
-	SELECT A.InvoiceNumber
-		,CONVERT(NUMERIC(18,6),Split.a.value('.', 'VARCHAR(100)')) AS Payment
-		INTO #InvoiceAndPayment
-	FROM (
-		SELECT left(strRawValue, charindex('|', strRawValue) - 1) AS InvoiceNumber
-			,CAST('<M>' + REPLACE(substring(strRawValue, charindex('|', strRawValue) + 1, len(strRawValue) - charindex('|', strRawValue)), ',', '</M><M>') + '</M>' AS XML) AS String
-		FROM #RawValue
-		) AS A
-	CROSS APPLY String.nodes('/M') AS Split(a);
+	--FOR PAYMENTS WITH INVOICES
+	IF ISNULL(@strInvoiceNumber, '') <> ''
+		BEGIN
+			--CREATE TEMP TABLES
+			IF(OBJECT_ID('tempdb..#RAWVALUE') IS NOT NULL)
+			BEGIN
+				DROP TABLE #RAWVALUE
+			END
 
-	select @total = isnull(@total, 0) + Payment from #InvoiceAndPayment
+			IF(OBJECT_ID('tempdb..#INVOICEANDPAYMENT') IS NOT NULL)
+			BEGIN
+				DROP TABLE #INVOICEANDPAYMENT
+			END
 
-	insert into @EntriesForPayment
-	(
-	intId
-	,strSourceTransaction
-	,intSourceId
-	,strSourceId
-	,intPaymentId
-	,intEntityCustomerId
-	,intCompanyLocationId
-	,intCurrencyId
-	,dtmDatePaid
-	,intPaymentMethodId
-	,strPaymentMethod
-	,strPaymentInfo
-	,strNotes
-	,intAccountId
-	,intBankAccountId
-	,dblAmountPaid
-	,ysnPost
-	,intEntityId
-	,intInvoiceId
-	,strTransactionType
-	,strTransactionNumber
-	,intTermId
-	,intInvoiceAccountId
-	,dblInvoiceTotal
-	,dblBaseInvoiceTotal
-	,ysnApplyTermDiscount
-	,dblDiscount
-	,dblDiscountAvailable
-	,dblInterest
-	,dblPayment
-	,dblAmountDue
-	,dblBaseAmountDue
-	,strInvoiceReportNumber
-	,intCurrencyExchangeRateTypeId
-	,intCurrencyExchangeRateId
-	,dblCurrencyExchangeRate
-	,ysnAllowOverpayment
-	,ysnFromAP
-	)
-	select  
-	Inv.intInvoiceId
-	,strTransactionType
-	,Inv.intInvoiceId
-	,Inv.strInvoiceNumber
-	,intPaymentId
-	,intEntityCustomerId
-	,intCompanyLocationId
-	,intCurrencyId
-	,GETDATE()
-	,11 --For Credit Card
-	,@strCreditCardNumber --Payment Method
-	,NULL
-	,'' --Notes
-	,Inv.intAccountId
-	,NULL --Bank Account
-	,@total -- dblAmountDue
-	,NULL --Set NULL to Create
-	,@intUserId
-	,Inv.intInvoiceId
-	,Inv.strTransactionType
-	,Inv.strTransactionNumber
-	,Inv.intTermId
-	,Inv.intAccountId
-	,Inv.dblInvoiceTotal
-	,Inv.dblBaseInvoiceTotal
-	,0
-	,Inv.dblDiscount
-	,Inv.dblDiscountAvailable
-	,Inv.dblInterest
-	,(SELECT TOP 1 Payment FROM #InvoiceAndPayment WHERE InvoiceNumber COLLATE Latin1_General_CI_AS = Inv.strInvoiceNumber) --Get the amount from the temp table created above
-	,Inv.dblAmountDue
-	,Inv.dblBaseAmountDue
-	,Inv.strInvoiceReportNumber
-	,Inv.intCurrencyExchangeRateTypeId
-	,Inv.intCurrencyExchangeRateId
-	,Inv.dblCurrencyExchangeRate
-	,0
-	,0
-	from vyuARInvoicesForPayment Inv
-	where strInvoiceNumber IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceNumber))
+			--STORE INVOICE NUMBERS WITH CORRESPONDING AMOUNT
+			SELECT strRawValue = strValues 
+			INTO #RAWVALUE  
+			FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceAndPayment)
+
+			SELECT strInvoiceNumber	= A.InvoiceNumber
+				, dblPayment		= CONVERT(NUMERIC(18,6),Split.a.value('.', 'VARCHAR(100)'))
+			INTO #INVOICEANDPAYMENT
+			FROM (
+				SELECT InvoiceNumber	= LEFT(strRawValue, CHARINDEX('|', strRawValue) - 1)
+					, String			= CAST('<M>' + REPLACE(SUBSTRING(strRawValue, CHARINDEX('|', strRawValue) + 1, len(strRawValue) - CHARINDEX('|', strRawValue)), ',', '</M><M>') + '</M>' AS XML)
+				FROM #RAWVALUE
+			) AS A
+			CROSS APPLY String.nodes('/M') AS Split(a);
+
+			INSERT INTO @EntriesForPayment (
+				intId
+				, strSourceTransaction
+				, intSourceId
+				, strSourceId
+				, intPaymentId
+				, intEntityCustomerId
+				, intCompanyLocationId
+				, intCurrencyId
+				, dtmDatePaid
+				, intPaymentMethodId
+				, strPaymentMethod
+				, strPaymentInfo
+				, strNotes
+				, intAccountId
+				, intBankAccountId
+				, dblAmountPaid
+				, ysnPost
+				, intEntityId
+				, intInvoiceId
+				, strTransactionType
+				, strTransactionNumber
+				, intTermId
+				, intInvoiceAccountId
+				, dblInvoiceTotal
+				, dblBaseInvoiceTotal
+				, ysnApplyTermDiscount
+				, dblDiscount
+				, dblDiscountAvailable
+				, dblInterest
+				, dblPayment
+				, dblAmountDue
+				, dblBaseAmountDue
+				, strInvoiceReportNumber
+				, intCurrencyExchangeRateTypeId
+				, intCurrencyExchangeRateId
+				, dblCurrencyExchangeRate
+				, ysnAllowOverpayment
+				, ysnFromAP
+			)
+			SELECT 
+				intId							= INVOICE.intInvoiceId
+				, strSourceTransaction			= INVOICE.strTransactionType
+				, intSourceId					= INVOICE.intInvoiceId
+				, strSourceId					= INVOICE.strInvoiceNumber
+				, intPaymentId					= INVOICE.intPaymentId
+				, intEntityCustomerId			= INVOICE.intEntityCustomerId
+				, intCompanyLocationId			= INVOICE.intCompanyLocationId
+				, intCurrencyId					= INVOICE.intCurrencyId
+				, dtmDatePaid					= GETDATE()
+				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
+				, strPaymentMethod				= ISNULL(@strCreditCardNumber, 'ACH')
+				, strPaymentInfo				= NULL
+				, strNotes						= NULL
+				, intAccountId					= INVOICE.intAccountId
+				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN BA.intBankAccountId ELSE NULL END
+				, dblAmountPaid					= ISNULL(PAYMENTS.dblPayment, 0)
+				, ysnPost						= NULL
+				, intEntityId					= @intUserId
+				, intInvoiceId					= INVOICE.intInvoiceId
+				, strTransactionType			= INVOICE.strTransactionType
+				, strTransactionNumber			= INVOICE.strTransactionNumber
+				, intTermId						= INVOICE.intTermId
+				, intInvoiceAccountId			= INVOICE.intAccountId
+				, dblInvoiceTotal				= INVOICE.dblInvoiceTotal
+				, dblBaseInvoiceTotal			= INVOICE.dblBaseInvoiceTotal
+				, ysnApplyTermDiscount			= 0
+				, dblDiscount					= INVOICE.dblDiscount
+				, dblDiscountAvailable			= INVOICE.dblDiscountAvailable
+				, dblInterest					= INVOICE.dblInterest
+				, dblPayment					= ISNULL(PAYMENTS.dblPayment, 0)
+				, dblAmountDue					= INVOICE.dblAmountDue - ISNULL(PAYMENTS.dblPayment, 0)
+				, dblBaseAmountDue				= INVOICE.dblBaseAmountDue - ISNULL(PAYMENTS.dblPayment, 0)
+				, strInvoiceReportNumber		= INVOICE.strInvoiceReportNumber
+				, intCurrencyExchangeRateTypeId	= INVOICE.intCurrencyExchangeRateTypeId
+				, intCurrencyExchangeRateId		= INVOICE.intCurrencyExchangeRateId
+				, dblCurrencyExchangeRate		= INVOICE.dblCurrencyExchangeRate
+				, ysnAllowOverpayment			= 0
+				, ysnFromAP						= 0
+			FROM vyuARInvoicesForPayment INVOICE
+			INNER JOIN tblSMCompanyLocation CL ON INVOICE.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			CROSS APPLY (
+				SELECT TOP 1 dblPayment 
+				FROM #INVOICEANDPAYMENT 
+				WHERE strInvoiceNumber COLLATE Latin1_General_CI_AS = INVOICE.strInvoiceNumber
+			) PAYMENTS
+			WHERE strInvoiceNumber IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceNumber))
+		END
+	--FOR PREPAYMENTS
+	ELSE
+		BEGIN
+			DECLARE @intUndepositedFundId 	INT	= NULL
+				  , @intCompanyLocationId	INT = NULL
+				  , @intBankAccountId		INT = NULL
+
+			--VALIDATIONS			
+			IF ISNULL(@intEntityCustomerId, 0) = 0
+				BEGIN
+					SET @ErrorMessage = 'Customer is required when creating prepayment!'
+					RAISERROR(@ErrorMessage, 16, 1);
+					GOTO Exit_Routine
+				END
+
+			SELECT TOP 1 @intCompanyLocationId = CL.intCompanyLocationId
+					   , @intUndepositedFundId = CL.intUndepositedFundsId
+					   , @intBankAccountId	   = BA.intBankAccountId
+			FROM vyuARCustomerSearch C
+			INNER JOIN tblSMCompanyLocation CL ON C.intWarehouseId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			WHERE C.intEntityId = @intEntityCustomerId
+
+			IF ISNULL(@intCompanyLocationId, 0) = 0
+				BEGIN
+					SET @ErrorMessage = 'Customer''s Warehouse is required when creating prepayment!'
+					RAISERROR(@ErrorMessage, 16, 1);
+					GOTO Exit_Routine
+				END
+
+			IF ISNULL(@intBankAccountId, 0) = 0 AND ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0
+				BEGIN
+					SET @ErrorMessage = 'Bank Account is required for payment with ACH payment method!'
+					RAISERROR(@ErrorMessage, 16, 1);
+					GOTO Exit_Routine
+				END
+
+			INSERT INTO @EntriesForPayment (
+				  intId
+				, strSourceTransaction
+				, intSourceId
+				, strSourceId
+				, intPaymentId
+				, intEntityCustomerId
+				, intCompanyLocationId
+				, intCurrencyId
+				, dtmDatePaid
+				, intPaymentMethodId
+				, strPaymentMethod
+				, strPaymentInfo
+				, strNotes
+				, intAccountId
+				, intBankAccountId
+				, dblAmountPaid
+				, ysnPost
+				, intEntityId
+			)
+			SELECT intId						= 1
+				, strSourceTransaction			= 'Direct'
+				, intSourceId					= NULL
+				, strSourceId					= C.strCustomerNumber
+				, intPaymentId					= NULL
+				, intEntityCustomerId			= C.intEntityCustomerId
+				, intCompanyLocationId			= @intCompanyLocationId
+				, intCurrencyId					= C.intCurrencyId
+				, dtmDatePaid					= GETDATE()
+				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
+				, strPaymentMethod				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN 'ACH' ELSE @strCreditCardNumber END
+				, strPaymentInfo				= NULL
+				, strNotes						= 'Prepayment from Portal.'
+				, intAccountId					= @intUndepositedFundId
+				, intBankAccountId				= @intBankAccountId
+				, dblAmountPaid					= @dblPayment
+				, ysnPost						= 0
+				, intEntityId					= @intUserId
+			FROM vyuARCustomerSearch C			
+			WHERE intEntityId = @intEntityCustomerId
+		END
 
 	EXEC [dbo].[uspARProcessPayments]
 			 @PaymentEntries	= @EntriesForPayment
@@ -143,8 +248,6 @@ END
 --================================================================
 IF @strAction = 'Post'
 BEGIN
-	
-
 	EXEC [dbo].[uspARPostPayment]
 			@batchId = NULL,
 			@post = 1,
@@ -182,7 +285,4 @@ BEGIN
 	GOTO Exit_Routine
 END
 
-
-
 Exit_Routine:
-

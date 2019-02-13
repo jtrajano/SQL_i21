@@ -69,6 +69,7 @@
     [dtmDeceasedDate]                 DATETIME        NULL,
     --[ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
 	[ysnHDBillableSupport]			  BIT             DEFAULT ((0)) NOT NULL,
+    [strScreenConnectLink]			  NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[intTaxCodeId]					  INT			  NULL,
 	[intContractGroupId]			  INT			  NULL,
 	[intBuybackGroupId]				  INT			  NULL,

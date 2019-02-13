@@ -49,7 +49,7 @@ BEGIN
 					AS
 					SELECT 
 						vwtrm_key_n = CAST(agtrm_key_n AS INT)
-						,vwtrm_desc = agtrm_desc
+						,vwtrm_desc = agtrm_desc  COLLATE Latin1_General_CI_AS      
 						,A4GLIdentity= CAsT(A4GLIdentity AS INT)
 					FROM
 					agtrmmst
@@ -64,7 +64,7 @@ BEGIN
 					AS
 					SELECT 
 						vwtrm_key_n = CAST(pttrm_code AS INT)
-						,vwtrm_desc = pttrm_desc
+						,vwtrm_desc = pttrm_desc  COLLATE Latin1_General_CI_AS      
 						,A4GLIdentity= CAsT(A4GLIdentity AS INT)
 					FROM
 					pttrmmst
@@ -79,7 +79,7 @@ BEGIN
 			AS
 			SELECT 
 				vwtrm_key_n = CAST(intTermID AS INT)
-				,vwtrm_desc = strTerm
+				,vwtrm_desc = strTerm  COLLATE Latin1_General_CI_AS      
 				,A4GLIdentity= CAST(intTermID AS INT)
 			FROM tblSMTerm
 		')

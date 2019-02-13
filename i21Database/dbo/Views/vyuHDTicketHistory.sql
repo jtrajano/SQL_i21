@@ -14,7 +14,7 @@
 								when th.strField = 'intAssignedToEntity' then (select top 1 t.strName from tblEMEntity t where t.intEntityId = convert(int, th.strOldValue))
 								when th.strField = 'intCustomerContactId' then (select top 1 t.strName from tblEMEntity t where t.intEntityId = convert(int, th.strOldValue))
 							else ''
-							end)
+							end) COLLATE Latin1_General_CI_AS
 			,strNewValue = (case
 								when th.strField = 'intTicketTypeId' then (select top 1 t.strType from tblHDTicketType t where t.intTicketTypeId = convert(int, th.strNewValue))
 								when th.strField = 'intTicketStatusId' then (select top 1 t.strStatus from tblHDTicketStatus t where t.intTicketStatusId = convert(int, th.strNewValue))
@@ -23,6 +23,6 @@
 								when th.strField = 'intAssignedToEntity' then (select top 1 t.strName from tblEMEntity t where t.intEntityId = convert(int, th.strNewValue))
 								when th.strField = 'intCustomerContactId' then (select top 1 t.strName from tblEMEntity t where t.intEntityId = convert(int, th.strNewValue))
 							else ''
-							end)
+							end) COLLATE Latin1_General_CI_AS
 
 		from tblHDTicketHistory th

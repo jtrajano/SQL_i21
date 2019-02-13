@@ -30,6 +30,8 @@ SELECT intPOSId				= POS.intPOSId
 	 , strPONumber			= POS.strPONumber
 	 , strComment			= POS.strComment
 	 , ysnReturn			= POS.ysnReturn
+	 , dtmDate				= POS.dtmDate
+	 , ysnTaxExempt			= POS.ysnTaxExempt
 FROM dbo.tblARPOS POS WITH (NOLOCK)
 INNER JOIN dbo.tblARPOSDetail POSD ON POS.intPOSId = POSD.intPOSId
 INNER JOIN (

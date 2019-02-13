@@ -3,10 +3,10 @@ AS
 
 SELECT 
 	ISNULL(D.strEntityNo,'') CustomerNumber
-	,REPLICATE('0',4-LEN(CAST(B.intSiteNumber  AS NVARCHAR(20)))) + CAST(B.intSiteNumber  AS NVARCHAR(20)) ConsumptionSiteNumber
+	,REPLICATE('0',4-LEN(CAST(B.intSiteNumber  AS NVARCHAR(20)))) + CAST(B.intSiteNumber  AS NVARCHAR(20))  COLLATE Latin1_General_CI_AS ConsumptionSiteNumber
 	,ISNULL(A.strInvoiceNumber,'') InvoiceNumber
 	,ISNULL(A.strBulkPlantNumber,'') LocationNumber
-	,ISNULL(CONVERT(VARCHAR(10),A.dtmInvoiceDate, 101),'') InvoiceDate
+	,ISNULL(CONVERT(VARCHAR(10),A.dtmInvoiceDate, 101),'')  COLLATE Latin1_General_CI_AS InvoiceDate
 	,ISNULL(A.strProductDelivered,'') Product
 	,ISNULL(A.dblQuantityDelivered,0) Quantity
 	,ISNULL(A.intDegreeDayOnDeliveryDate,0) DegreeDayOnDeliveryDate

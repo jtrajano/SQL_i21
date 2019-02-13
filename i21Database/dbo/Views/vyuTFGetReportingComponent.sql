@@ -27,6 +27,8 @@ SELECT RC.intReportingComponentId
 	, dbo.fnTFCoalesceVendor(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeVendors
 	, dbo.fnTFCoalesceCustomer(RC.intReportingComponentId, 1) COLLATE Latin1_General_CI_AS strIncludeCustomers
 	, dbo.fnTFCoalesceCustomer(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeCustomers
+	, dbo.fnTFCoalesceTransactionSource(RC.intReportingComponentId, 1) COLLATE Latin1_General_CI_AS strIncludeTransactionSource
+	, dbo.fnTFCoalesceTransactionSource(RC.intReportingComponentId, 0) COLLATE Latin1_General_CI_AS strExcludeTransactionSource
 FROM tblTFReportingComponent RC
 LEFT JOIN tblTFTaxAuthority TA ON TA.intTaxAuthorityId = RC.intTaxAuthorityId
 LEFT JOIN tblTFComponentType CType ON CType.intComponentTypeId = RC.intComponentTypeId

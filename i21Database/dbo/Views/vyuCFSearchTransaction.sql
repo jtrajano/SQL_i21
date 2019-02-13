@@ -1,5 +1,7 @@
-﻿CREATE VIEW [dbo].[vyuCFSearchTransaction]
+﻿
+CREATE VIEW [dbo].[vyuCFSearchTransaction]
 AS
+
 
 SELECT   
 	cfVehicle.strVehicleNumber
@@ -109,7 +111,15 @@ SELECT
                              END 
                         ELSE 'Unknown' 
                     END)
+	,ysnExpensed
+	,icExpense.strItemNo AS strExpenseItem
+	,cfTransaction.ysnExportedThirdParty
+	,cfTransaction.dtmExportedThirdPartyDate
+	,cfTransaction.intExportedThirdPartyUser
+	,strExportedThirdPartyUser = exportuser.strName
 FROM dbo.tblCFTransaction AS cfTransaction 
+LEFT OUTER JOIN tblICItem AS icExpense
+ON cfTransaction.intExpensedItemId = icExpense.intItemId
 LEFT OUTER JOIN 
 	(	SELECT cfNetwork.* , emEntity.strName as strForeignCustomer , emEntity.strEntityNo FROM tblCFNetwork as cfNetwork
 		LEFT JOIN tblEMEntity emEntity 
@@ -207,6 +217,8 @@ LEFT OUTER JOIN (SELECT intTransactionId,
                 WHERE  ( strTaxClass LIKE '%(SST)%' ) 
                 GROUP  BY intTransactionId) AS SSTTaxes_1 
 	ON cfTransaction.intTransactionId = SSTTaxes_1.intTransactionId 
+LEFT JOIN tblEMEntity exportuser
+	ON cfTransaction.intExportedThirdPartyUser = exportuser.intEntityId
 LEFT OUTER JOIN (SELECT intTransactionId, 
                         ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount 
                 FROM   dbo.vyuCFTransactionTax AS LCTaxes 
@@ -221,10 +233,12 @@ LEFT OUTER JOIN (SELECT intTransactionId,
 	 ,(  
   SELECT TOP 1 COUNT(*) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0  
  ) AS cfDuplicateUnpostedTransaction
+ 
 
 
 
 
 GO
+
 
 

@@ -102,7 +102,10 @@ BEGIN TRY
 				, ysnDiversion
 				, strContactName
 				, strEmail
-				, intAccountStatusId)
+				, strTransactionSource
+				, strTransportNumber
+				, intAccountStatusId
+				, strImportVerificationNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 				FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 						, tblTFReportingComponent.intTaxAuthorityId
@@ -161,7 +164,10 @@ BEGIN TRY
 						, ysnDiversion = tblTRLoadHeader.ysnDiversion
 						, strContactName = tblTFCompanyPreference.strContactName
 						, strEmail = tblTFCompanyPreference.strContactEmail
+						, strTransactionSource = tblARInvoice.strType
+						, tblTRLoadHeader.strTransaction
 						, intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId
+						, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -226,7 +232,11 @@ BEGIN TRY
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 							OR (tblTRLoadReceipt.strOrigin = 'Terminal' AND ISNULL(tblAPVendor.intEntityId, 0) NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0)))
 						AND ((tblTRLoadReceipt.strOrigin = 'Terminal' AND tblTRLoadDistributionHeader.strDestination = 'Customer') OR
-							(tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Customer'))			
+							(tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Customer'))	
+						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
+							OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
+						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
+							OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))		
 				) Transactions
 		END
 		ELSE
@@ -289,7 +299,10 @@ BEGIN TRY
 				, ysnDiversion
 				, strContactName
 				, strEmail
-				, intAccountStatusId)
+				, strTransactionSource
+				, strTransportNumber
+				, intAccountStatusId
+				, strImportVerificationNumber)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInvoiceDetailId, intTaxAuthorityId) AS intId, *
 			FROM (SELECT DISTINCT tblARInvoiceDetail.intInvoiceDetailId
 						, tblTFReportingComponent.intTaxAuthorityId
@@ -348,7 +361,10 @@ BEGIN TRY
 						, ysnDiversion = tblTRLoadHeader.ysnDiversion
 						, strContactName = tblTFCompanyPreference.strContactName
 						, strEmail = tblTFCompanyPreference.strContactEmail
+						, strTransactionSource = tblARInvoice.strType
+						, strTransportNumber = tblTRLoadHeader.strTransaction
 						, intAccountStatusId = tblARCustomerAccountStatus.intAccountStatusId
+						, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
 					FROM tblTFReportingComponent
 					INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 					INNER JOIN tblICItemMotorFuelTax ON tblICItemMotorFuelTax.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -412,7 +428,11 @@ BEGIN TRY
 						AND ((SELECT COUNT(*) FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 							OR (tblTRLoadReceipt.strOrigin = 'Terminal' AND ISNULL(tblAPVendor.intEntityId, 0) NOT IN (SELECT intVendorId FROM tblTFReportingComponentVendor WHERE intReportingComponentId = @RCId AND ysnInclude = 0)))
 						AND ((tblTRLoadReceipt.strOrigin = 'Terminal' AND tblTRLoadDistributionHeader.strDestination = 'Customer') OR
-							(tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Customer'))			
+							(tblTRLoadReceipt.strOrigin = 'Location' AND tblTRLoadDistributionHeader.strDestination = 'Customer'))
+						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1) = 0
+							OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
+						AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
+							OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
 				) Transactions
 		END
 
@@ -430,22 +450,22 @@ BEGIN TRY
             DELETE FROM @tmpTransaction WHERE intAccountStatusId IS NULL
         END
 
-        -- Has excluded account status code 
-        IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0)
+		-- Has excluded account status code 
+		IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0)
         BEGIN      
             DELETE FROM @tmpTransaction WHERE intTransactionDetailId IN (
-                SELECT A.intTransactionDetailId FROM @tmpTransaction A 
-                INNER JOIN tblTFReportingComponentAccountStatusCode B ON B.intAccountStatusId = A.intAccountStatusId 
-                WHERE B.ysnInclude = 0)
+				SELECT A.intTransactionDetailId FROM @tmpTransaction A 
+				INNER JOIN tblTFReportingComponentAccountStatusCode B ON B.intAccountStatusId = A.intAccountStatusId 
+				WHERE B.ysnInclude = 0)
         END
 
-        -- Has included account status code
-        IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 1)
+		-- Has included account status code
+		IF EXISTS(SELECT TOP 1 1 FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 1)
         BEGIN
             DELETE FROM @tmpTransaction WHERE intId NOT IN (
-                SELECT A.intId FROM @tmpTransaction A 
-                INNER JOIN tblTFReportingComponentAccountStatusCode B ON B.intAccountStatusId = A.intAccountStatusId 
-                WHERE B.ysnInclude = 1)
+				SELECT A.intId FROM @tmpTransaction A 
+				INNER JOIN tblTFReportingComponentAccountStatusCode B ON B.intAccountStatusId = A.intAccountStatusId 
+				WHERE B.ysnInclude = 1)
         END
 
 		INSERT INTO @tmpInvoiceDetailUniqueAccountStatusCode
@@ -480,7 +500,7 @@ BEGIN TRY
 
 			-- TRANSACTION WITH TAX CODE
 			INSERT INTO @tmpDetailTax (intTransactionDetailId, intTaxCodeId, strCriteria, dblTax)
-			SELECT InvTran.intTransactionDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria, tblARInvoiceDetailTax.dblTax
+			SELECT InvTran.intTransactionDetailId, tblARInvoiceDetailTax.intTaxCodeId, tblTFReportingComponentCriteria.strCriteria, tblARInvoiceDetailTax.dblAdjustedTax
 			FROM @tmpTransaction InvTran
 				INNER JOIN tblARInvoiceDetailTax ON tblARInvoiceDetailTax.intInvoiceDetailId = InvTran.intTransactionDetailId
 				INNER JOIN tblSMTaxCode ON tblSMTaxCode.intTaxCodeId = tblARInvoiceDetailTax.intTaxCodeId
@@ -583,7 +603,10 @@ BEGIN TRY
 				, strTransactionType
 				, intTransactionNumberId
 				, strContactName
-				, strEmail)
+				, strEmail
+				, strTransactionSource
+				, strTransportNumber
+				, strImportVerificationNumber)
 			SELECT DISTINCT @Guid
 				, intReportingComponentId
 				, intProductCodeId = (SELECT TOP 1 vyuTFGetReportingComponentProductCode.intProductCodeId 
@@ -647,6 +670,9 @@ BEGIN TRY
 				, intTransactionNumberId
 				, strContactName
 				, strEmail
+				, strTransactionSource
+				, strTransportNumber
+				, strImportVerificationNumber
 			FROM @tmpTransaction Trans
 		END
 		

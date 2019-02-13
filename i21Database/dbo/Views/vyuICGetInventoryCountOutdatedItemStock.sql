@@ -85,8 +85,11 @@ FROM
 		) nonLotted ON nonLotted.intItemId = cd.intItemId
 			AND nonLotted.intItemLocationId = cd.intItemLocationId
 			--AND ss.intItemUOMId = cd.intItemUOMId
-			AND (cd.intSubLocationId = nonLotted.intSubLocationId OR (nonLotted.intSubLocationId IS NULL AND cd.intSubLocationId IS NULL))
-			AND (cd.intStorageLocationId = nonLotted.intStorageLocationId OR (nonLotted.intStorageLocationId IS NULL AND cd.intStorageLocationId IS NULL))
+			AND (
+				((CASE WHEN cd.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL THEN 0 ELSE 1 END) = 0) OR
+				((CASE WHEN cd.intSubLocationId = nonLotted.intSubLocationId AND cd.intStorageLocationId = nonLotted.intStorageLocationId THEN 0 ELSE 1 END) = 0) OR
+				((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = nonLotted.intSubLocationId THEN 0 ELSE 1 END) = 0)
+			)
 			AND dbo.fnDateLessThanEquals(nonLotted.dtmDate, c.dtmCountDate) = 1
 		OUTER APPLY(
 			SELECT TOP 1

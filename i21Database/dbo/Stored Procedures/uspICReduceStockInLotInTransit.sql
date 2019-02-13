@@ -73,7 +73,7 @@ BEGIN
 						AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
 						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
-						AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId) 
+						AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId)
 				HAVING 
 					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
 			) cb 

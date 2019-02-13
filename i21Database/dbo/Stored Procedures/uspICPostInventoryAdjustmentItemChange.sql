@@ -374,7 +374,7 @@ BEGIN
 			,intItemLocationId		= Lot.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId -- Lot.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -Detail.dblNewQuantity
+			,dblQty					= Detail.dblAdjustByQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Lot.intItemId)
@@ -414,7 +414,7 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId -- Lot.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -Detail.dblNewQuantity
+			,dblQty					= Detail.dblAdjustByQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intItemId)
@@ -490,7 +490,7 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= SourceTransaction.dblQty * -1
+			,dblQty					= -SourceTransaction.dblQty
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intNewItemId)
@@ -538,7 +538,7 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= SourceTransaction.dblQty * -1
+			,dblQty					= -SourceTransaction.dblQty
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= Detail.dblNewCost
 			,dblValue				= 0
@@ -619,7 +619,7 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= SourceTransaction.dblQty * -1
+			,dblQty					= -SourceTransaction.dblQty 
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= Detail.dblNewCost
 			,dblValue				= 0
@@ -663,7 +663,7 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= SourceTransaction.dblQty * -1
+			,dblQty					= -SourceTransaction.dblQty 
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intNewItemId)

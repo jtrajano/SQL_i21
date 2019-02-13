@@ -2,18 +2,19 @@
 	AS
 		select
 			a.intTicketHoursWorkedId
-			,intTicketId = convert(nvarchar(20),b.intTicketId) COLLATE Latin1_General_CI_AS 
+			,intTicketId = convert(nvarchar(20),b.intTicketId) COLLATE Latin1_General_CI_AS
 			,b.strTicketNumber
 			,b.strSubject
-			,intProjectId = convert(nvarchar(20),d.intProjectId) COLLATE Latin1_General_CI_AS 
+			,intProjectId = convert(nvarchar(20),d.intProjectId) COLLATE Latin1_General_CI_AS
 			,d.strProjectName
-			,intCustomerId = convert(nvarchar(20),f.intEntityId) COLLATE Latin1_General_CI_AS 
+			,intCustomerId = f.intEntityId
 			,strCustomerName = f.strName
 			,k.strModule
 			,a.dtmDate
 			,intAgentEntityId = g.intEntityId
 			,strAgentName = g.strName
 			,a.intHours
+			,a.dblEstimatedHours
 			,dblHours = a.intHours
 			,intBilledAmount = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end) * a.dblRate
 			,intBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end)
@@ -41,3 +42,4 @@
 			left join tblEMEntity i on i.intEntityId = d.intInternalProjectManager
 			left join tblHDModule j on j.intModuleId = b.intModuleId
 			left join tblSMModule k on k.intModuleId = j.intSMModuleId
+		where a.intAgentEntityId is not null and a.intAgentEntityId > 0

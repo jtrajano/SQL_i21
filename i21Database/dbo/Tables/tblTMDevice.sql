@@ -32,6 +32,7 @@
     [ysnAppliance]             BIT             DEFAULT 0 NOT NULL,
     [intApplianceTypeID]       INT              NULL,
     [intLocationId] INT NULL, 
+    [intManufacturerId] INT NULL, 
     CONSTRAINT [PK_tblTMDevice] PRIMARY KEY CLUSTERED ([intDeviceId] ASC),
     CONSTRAINT [FK_tblTMDevice_tblTMApplianceType] FOREIGN KEY ([intApplianceTypeID]) REFERENCES [dbo].[tblTMApplianceType] ([intApplianceTypeID]),
     CONSTRAINT [FK_tblTMDevice_tblTMDeployedStatus] FOREIGN KEY ([intDeployedStatusID]) REFERENCES [dbo].[tblTMDeployedStatus] ([intDeployedStatusID]) ON DELETE SET NULL,
@@ -363,3 +364,12 @@ CREATE NONCLUSTERED INDEX [IX_tblTMDevice_ysnAppliance_intDeviceId_intDeviceType
 )
 GO
 
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Manufacturer Record Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intManufacturerId'
