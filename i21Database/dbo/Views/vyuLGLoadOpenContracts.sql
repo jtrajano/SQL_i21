@@ -91,7 +91,7 @@ SELECT CD.intContractDetailId
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 	,strOrigin = ISNULL(CO.strCountry, CO2.strCountry)
-	,CD.intFreightRateId
+	,CD.intFreightTermId
 	,FT.strFreightTerm
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -234,7 +234,7 @@ SELECT CD.intContractDetailId
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 	,strOrigin = ISNULL(CO.strCountry, CO2.strCountry)
-	,CD.intFreightRateId
+	,CD.intFreightTermId
 	,FT.strFreightTerm
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -342,7 +342,7 @@ GROUP BY CD.intContractDetailId
 	,CD.intStorageLocationId
 	,WG.ysnSample
 	,CD.dblShippingInstructionQty
-	,CD.intFreightRateId
+	,CD.intFreightTermId
 	,FT.strFreightTerm
 	,CO.strCountry
 	,CO2.strCountry
