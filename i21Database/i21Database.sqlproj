@@ -7322,7 +7322,23 @@
     <Build Include="dbo\Stored Procedures\uspRKGetFutureTradingMonths.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceDetailReport2.sql" />
     <Build Include="dbo\Views\vyuSTItemRecipeAndStockQty.sql" />
-    
+    <Build Include="dbo\Functions\fnSMJson_Parse.sql" />
+    <Build Include="dbo\Functions\fnSMJson_Skip.sql" />
+    <Build Include="dbo\Functions\fnSMJson_SkipUntil.sql" />
+    <Build Include="dbo\Functions\fnSMJson_String.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Item.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Message.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Name.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Natural.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Number.sql" />
+    <Build Include="dbo\Functions\fnSMParseJson_Object.sql" />
+    <Build Include="dbo\Tables\tblSMLog.sql" />
+    <Build Include="dbo\Tables\tblSMAudit.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateScheduledAuditLog.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_CreateAuditLogMigrationPlan.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_MigrateAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

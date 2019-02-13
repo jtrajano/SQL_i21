@@ -7,6 +7,8 @@
 	[strRoute]      	 NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
 	[strJsonData]		 NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [dtmDate]			 DATETIME         NOT NULL,
+	[ysnProcessed]		 BIT  			  NULL		DEFAULT(0),	
+	[ysnInit]			 BIT			  NULL		DEFAULT(0),
     [intEntityId]        INT              NULL,
     [intConcurrencyId]   INT              NOT NULL,
     CONSTRAINT [FK_dbo.tblSMAuditLog_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
