@@ -204,7 +204,7 @@ BEGIN
 		,@strProcessName AS strProcessName
 		,@strDescription AS strProcessDescription
 		,@strWorkOrderNo AS strWorkOrderNo
-		,@dtmOrderDate AS strWorkOrderDate
+		,@dtmOrderDate AS dtmWorkOrderDate
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
 		,L.dblLastCost 
@@ -271,7 +271,7 @@ BEGIN
 		,@strProcessName AS strProcessName
 		,@strDescription AS strProcessDescription
 		,@strWorkOrderNo AS strWorkOrderNo
-		,@dtmOrderDate AS strWorkOrderDate
+		,@dtmOrderDate AS dtmWorkOrderDate
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
 		,L.dblLastCost 

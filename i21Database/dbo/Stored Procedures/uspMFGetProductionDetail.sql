@@ -217,11 +217,12 @@ BEGIN
 		,@strProcessName AS strProcessName
 		,@strDescription AS strProcessDescription
 		,@strWorkOrderNo AS strWorkOrderNo
-		,@dtmOrderDate AS strWorkOrderDate
+		,@dtmOrderDate AS dtmWorkOrderDate
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
 		,L.dblLastCost 
 		,W.dblItemValue 
+		,W.strComment AS strRemarks
 	FROM dbo.tblMFWorkOrderProducedLot W
 	LEFT JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	--LEFT JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
