@@ -6425,6 +6425,13 @@
     <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
     <Build Include="dbo\Functions\fnAPGetIRPartialStatus.sql" />
     <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
+    <Build Include="dbo\Functions\fnAPGetDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Functions\fnIsDiscountPastDue.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptDM.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWC.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

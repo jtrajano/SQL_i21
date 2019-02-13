@@ -7,7 +7,7 @@ SELECT	DISTINCT
 			,V.strVendorId
 			,APB.intEntityVendorId
 			,strVendorName =  E.strName
-			,strVendorAddress = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, NULL))
+			,strVendorAddress = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, EL.strAddress, EL.strCity, EL.strState, EL.strZipCode, EL.strCountry, NULL)) COLLATE Latin1_General_CI_AS
 			,ISNULL(EL.strCity, 'N/A') AS strVendorCity
 			,ISNULL(EL.strState, 'N/A') AS strVendorState
 			,ISNULL(EL.strZipCode,'N/A') AS strVendorZipCode
@@ -26,7 +26,7 @@ SELECT	DISTINCT
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,Payment.dtmDatePaid
-			,APBD.dblTotal + APBD.dblTax as dblTotal
+			,APBD.dblTotal 
 			,APBD.dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
@@ -104,7 +104,7 @@ SELECT	DISTINCT
 			,APB.strVendorOrderNumber
 			,APB.dtmBillDate
 			,Payment.dtmDatePaid
-			,APBD.dblTotal + APBD.dblTax as dblTotal
+			,APBD.dblTotal 
 			,APBD.dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)

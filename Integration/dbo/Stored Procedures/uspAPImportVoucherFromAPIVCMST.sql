@@ -154,7 +154,7 @@ SELECT
 											THEN ISNULL(A.apivc_disc_avail,0)
 								ELSE 0 END, --THERE ARE DISCOUNT TAKE BUT DID NOT DEDUCTED TO CHECK AMOUNT
 	[dblInterest]			=	CASE WHEN A.apivc_disc_taken < 0 AND A.apivc_net_amt - ISNULL(ABS(A.apivc_disc_taken),0) = A.apivc_orig_amt
-											THEN A.apivc_disc_taken --it is interest if its value is negative
+											THEN ABS(A.apivc_disc_taken) --it is interest if its value is negative
 									WHEN A.apivc_disc_avail < 0 AND A.apivc_net_amt - ISNULL(ABS(A.apivc_disc_avail),0) = A.apivc_orig_amt
 											THEN ABS(A.apivc_disc_avail) --it is interest if its value is negative
 								ELSE 0 END, 
@@ -314,7 +314,8 @@ UPDATE A
 							THEN @prepay
 						WHEN 3
 							THEN @debitMemo
-						END) + (CAST(B.intRecordNumber AS NVARCHAR))
+						END) + (CAST(B.intRecordNumber AS NVARCHAR)),
+		A.ysnDiscountOverride = CASE WHEN A.dblDiscount != 0 AND A.ysnPaid = 0 THEN 1 ELSE 0 END
 FROM tblAPBill A
 INNER JOIN #tmpVouchersWithRecordNumber B ON A.intBillId = B.intBillId
 
@@ -380,31 +381,60 @@ SELECT
 	[intBillId]				=	A.intBillId,
 	[strMiscDescription]	=	A.strReference,
 	[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									* 
 									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE --('I')
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									*
-									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE 
+										WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
+										THEN 
+											(CASE WHEN C2.apivc_net_amt = 0 AND C.aphgl_gl_un < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
+										ELSE 1 END) 
 								END),
 	[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
 									* 
 									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE 
-									(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
+									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									*
-									(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE 
+										WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
+										THEN 
+											(CASE WHEN C2.apivc_net_amt = 0 AND ISNULL(NULLIF(C.aphgl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
+										ELSE 1 END) 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), B.intGLAccountExpenseId),
 	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') --always reverse the amount of detail if type is C or A
 											THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 --make this positive as this is from a debit memo or prepayment
 										--WHEN C.aphgl_gl_amt < 0 AND C2.apivc_trans_type = 'I' THEN C.aphgl_gl_amt * -1 --reverse the amount of detail if type is I and amount is negative
 										ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END, --IF 'I' the amount sign is correct
-	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') THEN
-										(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END) --Cost should always positive
-									ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
+	[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN ('C','A','I') 
+									THEN
+										(CASE 
+											WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 
+												THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 
+											ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) 
+										END) --Cost should always positive
+									ELSE 
+										ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) 
+									END) 
+									/ 
+									(CASE WHEN 
+										 (
+											 CASE WHEN C2.apivc_trans_type IN ('C','A') 
+												THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1
+											ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END
+										 ) < 0
+										THEN -(ABS(ISNULL(NULLIF(C.aphgl_gl_un,0),1))) --when line total is negative, get the cost by dividing to negative as well
+										ELSE ISNULL(NULLIF(C.aphgl_gl_un,0),1)
+									END),
 	[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
 								THEN 
 									(

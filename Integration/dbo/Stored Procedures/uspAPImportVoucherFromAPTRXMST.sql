@@ -278,7 +278,8 @@ UPDATE A
 							THEN @prepay
 						WHEN 3
 							THEN @debitMemo
-						END) + (CAST(B.intRecordNumber AS NVARCHAR))
+						END) + (CAST(B.intRecordNumber AS NVARCHAR)),
+		A.ysnDiscountOverride = CASE WHEN A.dblDiscount != 0 THEN 1 ELSE 0 END
 FROM tblAPBill A
 INNER JOIN #tmpVouchersWithRecordNumber B ON A.intBillId = B.intBillId
 
@@ -333,30 +334,53 @@ SELECT
 	[intBillId]				=	A.intBillId,
 	[strMiscDescription]	=	A.strReference,
 	[dblQtyOrdered]			=	(CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN
-									(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
+									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
+									ISNULL(NULLIF(C.apegl_gl_un,0),1)
 									* 
 									 (CASE WHEN C.apegl_gl_amt > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE --('I')
-									(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)
+									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)
+									ISNULL(NULLIF(C.apegl_gl_un,0),1)
 									*
-									(CASE WHEN C.apegl_gl_amt < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE WHEN C.apegl_gl_amt < 0 -- make the quantity negative if amount is negative 
+										THEN (CASE WHEN C2.aptrx_net_amt = 0 AND ISNULL(NULLIF(C.apegl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative, this is offset voucher
+										ELSE 1 END) 
 								END),
 	[dblQtyReceived]		=	(CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN
-									(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
+									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
+									ISNULL(NULLIF(C.apegl_gl_un,0),1)
 									* 
 									 (CASE WHEN C.apegl_gl_amt > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
 								ELSE --('I')
-									(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)
+									--(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)
+									ISNULL(NULLIF(C.apegl_gl_un,0),1)
 									*
-									(CASE WHEN C.apegl_gl_amt < 0 THEN -1 ELSE 1 END) -- make the quantity negative if amount is negative 
+									(CASE WHEN C.apegl_gl_amt < 0 -- make the quantity negative if amount is negative 
+										THEN (CASE WHEN C2.aptrx_net_amt = 0 AND ISNULL(NULLIF(C.apegl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative 
+										ELSE 1 END) 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
 	[dblTotal]				=	CASE WHEN  C2.aptrx_trans_type IN ('C','A') 
 											THEN C.apegl_gl_amt * (-1) 
 										ELSE C.apegl_gl_amt END,
-	[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN ('C','A','I') THEN
-										(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END) --Cost should always positive
-									ELSE C.apegl_gl_amt END) / (CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
+	[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN ('C','A','I') 
+									THEN
+										(CASE 
+											WHEN C.apegl_gl_amt < 0 
+											THEN C.apegl_gl_amt * -1 
+											ELSE C.apegl_gl_amt 
+										END) --Cost should always positive
+									ELSE C.apegl_gl_amt 
+									END) 
+									/ 
+									(CASE 
+										WHEN 
+											(CASE WHEN  C2.aptrx_trans_type IN ('C','A') 
+												THEN C.apegl_gl_amt * (-1) 
+											ELSE C.apegl_gl_amt END) < 0 
+										THEN -(ABS(ISNULL(NULLIF(C.apegl_gl_un,0),1))) --when line total is negative, get the cost by dividing to negative as well
+										ELSE ISNULL(NULLIF(C.apegl_gl_un,0),1) 
+									END),
 	[intLineNo]				=	C.apegl_dist_no
 FROM tblAPBill A
 	INNER JOIN tblAPVendor B

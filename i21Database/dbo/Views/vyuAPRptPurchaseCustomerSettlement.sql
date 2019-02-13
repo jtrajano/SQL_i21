@@ -6,14 +6,14 @@ AS
 	BNKTRN.intTransactionId,
 	BNKTRN.strTransactionId,
 	strCompanyName = COMPANY.strCompanyName,
-	strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState,COMPANY.strZip),
+	strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState,COMPANY.strZip) COLLATE Latin1_General_CI_AS,
 	Item.strItemNo,
 	strCommodity = (SELECT strCommodityCode FROM tblICCommodity WHERE intCommodityId = Item.intCommodityId),
 	dtmPaymentDate = PYMT.dtmDatePaid,
 	strAccountNumber = dbo.fnAESDecryptASym(EFT.strAccountNumber),
 	strCheckNo = BNKTRN.strReferenceNo,
 	strVendorName = ENTITY.strName,
-	strVendorAddress = dbo.fnConvertToFullAddress(NULL, Bill.strShipFromCity, Bill.strShipFromState, NULL),
+	strVendorAddress = dbo.fnConvertToFullAddress(NULL, Bill.strShipFromCity, Bill.strShipFromState, NULL) COLLATE Latin1_General_CI_AS,
 	intTicketId = 
 		(CASE 
 		WHEN INVRCPT.intSourceType = 4 

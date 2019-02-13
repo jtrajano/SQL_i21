@@ -469,6 +469,37 @@ BEGIN
 		AND userPref.ysnAllowUserSelfPost = 1
 		AND A.intEntityId != @userId
 
+		--DO NOT ALLOW TO OFFSET PREPAYMENT IF DOES NOT HAVE ACTUAL PAY
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'You cannot offset ' + payDetails.strBillId + ' because is not paid yet.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		CROSS APPLY 
+		(
+			SELECT
+				voucher.strBillId
+			FROM tblAPPaymentDetail payDetail
+			INNER JOIN tblAPBill voucher
+				ON payDetail.intBillId = voucher.intBillId
+			WHERE 
+				voucher.intTransactionType = 2
+			AND payDetail.intPaymentId = A.intPaymentId
+			AND NOT EXISTS
+			(
+				SELECT
+					1
+				FROM tblAPPaymentDetail prepayDetail
+				INNER JOIN tblAPPayment prepay
+					ON prepayDetail.intPaymentId = prepay.intPaymentId AND prepay.ysnPosted = 1
+				INNER JOIN tblCMBankTransaction bankTran
+					ON prepay.strPaymentRecordNum = bankTran.strTransactionId AND bankTran.ysnCheckVoid = 0
+				WHERE prepayDetail.intBillId = voucher.intBillId
+			)
+		) payDetails
+		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 	END
 	ELSE
 	BEGIN

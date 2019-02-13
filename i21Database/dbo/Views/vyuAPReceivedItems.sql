@@ -343,7 +343,7 @@ SELECT * FROM (
 				ELSE 1
 				END
 		AND B.dblQtyOrdered != B.dblQtyReceived
-		AND ((Billed.dblQty <= B.dblQtyOrdered) OR Billed.dblQty IS NULL) --COMPARE THE ORIGINAL PO QTY TO BILL QTY RECEIVED
+		AND ((Billed.dblQty <= B.dblQtyReceived) OR Billed.dblQty IS NULL)
 		AND (approval.strApprovalStatus != 'Waiting for Approval' or approval.strApprovalStatus is null) --WILL NOT SHOW FOR APPROVAL TRANSACTION
 		UNION ALL
 		--DIRECT TYPE

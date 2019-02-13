@@ -66,7 +66,15 @@ SELECT
 	B.dtmExpectedDate,
 	B.strBillOfLading,
 	P.strPurchaseOrderNumber,
-	PD.intLineNo AS intPOLineNumber
+	PD.intLineNo AS intPOLineNumber,
+	ISNULL(subLoc.strSubLocationName, receiptSubLoc.strSubLocationName) AS strSubLocationName,
+	ISNULL(itemContractCountry.strCountry,CommodityAttr.strDescription) AS strCountryOrigin,
+	CD.strERPPONumber,
+	CD.strERPItemNumber,
+	term.strTerm,
+	A.strRemarks,
+	PG.strName as strPurchasingGroupName,
+	CB.strContractBasis as strINCO
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
@@ -96,6 +104,11 @@ INNER JOIN dbo.tblSMCurrency CUR
 LEFT JOIN dbo.tblCTContractDetail CD
 	ON CD.intContractHeaderId = CH.intContractHeaderId
 	AND CD.intContractDetailId = B.intContractDetailId
+LEFT JOIN (dbo.tblICItemContract itemContract 
+	INNER JOIN dbo.tblSMCountry itemContractCountry ON itemContract.intCountryId = itemContractCountry.intCountryID)
+	ON CD.intItemContractId = itemContract.intItemContractId
+LEFT JOIN dbo.tblICCommodityAttribute CommodityAttr 
+	ON CommodityAttr.intCommodityAttributeId = C.intOriginId
 LEFT JOIN dbo.tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = A.intShipToId
 LEFT JOIN (dbo.tblICItemUOM weightItemUOM INNER JOIN dbo.tblICUnitMeasure weightUOM ON weightItemUOM.intUnitMeasureId = weightUOM.intUnitMeasureId)
@@ -110,6 +123,17 @@ LEFT JOIN dbo.tblICStorageLocation SL
 	ON SL.intStorageLocationId = B.intStorageLocationId
 LEFT JOIN (dbo.tblPOPurchaseDetail PD LEFT JOIN dbo.tblPOPurchase P ON PD.intPurchaseId = P.intPurchaseId)
 	ON PD.intPurchaseDetailId = B.intPurchaseDetailId
-LEFT JOIN vyuICGetReceiptItemSource ICS 
- 	ON ICS.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId AND strSourceType = 'Inbound Shipment'	
+LEFT JOIN dbo.tblSMCompanyLocationSubLocation subLoc
+	--ON IRE.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+	ON B.intSubLocationId = subLoc.intCompanyLocationSubLocationId
+LEFT JOIN dbo.tblSMCompanyLocationSubLocation receiptSubLoc
+	ON IRE.intSubLocationId = receiptSubLoc.intCompanyLocationSubLocationId
+LEFT JOIN dbo.tblSMTerm term
+	ON term.intTermID = A.intTermsId
+LEFT JOIN dbo.tblSMPurchasingGroup PG
+ ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+LEFT JOIN tblCTContractBasis CB
+ ON CB.intContractBasisId = CH.intContractBasisId
+ LEFT JOIN vyuICGetReceiptItemSource ICS 
+     ON ICS.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId AND strSourceType = 'Inbound Shipment'    	
 -- WHERE weightItemUOM.intItemUOMId IS NOT NULL OR itemUOM.intItemUOMId IS NOT NULL

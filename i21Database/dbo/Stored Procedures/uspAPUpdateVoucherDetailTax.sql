@@ -76,7 +76,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 0
-		,intFreightTermId			= NULL
+		,intFreightTermId			= EL.intFreightTermId
 		,ysnExcludeCheckOff			= 0
 		,intBillDetailId			= B.intBillDetailId
 		,intItemUOMId				= CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
@@ -84,6 +84,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 										ELSE B.intUnitOfMeasureId END
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId --GET THE FREIGHT TERM FROM ENTITY LOCATION
 	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId		
 
 	INSERT INTO tblAPBillDetailTax(
@@ -137,16 +138,20 @@ IF @transCount = 0 BEGIN TRANSACTION
 	WHERE Taxes.dblTax IS NOT NULL
 
 	UPDATE A
-		SET A.dblTax = CASE WHEN D.intInventoryReceiptChargeId IS NOT NULL AND D.intInventoryReceiptChargeId > 0 AND D.ysnPrice = 1
-								THEN TaxAmount.dblTax * -1 
-							ELSE TaxAmount.dblTax
-						END
+		SET A.dblTax = TaxAmount.dblTax
+						-- CASE WHEN D.intInventoryReceiptChargeId IS NOT NULL AND D.intInventoryReceiptChargeId > 0 AND D.ysnPrice = 1
+						-- 		THEN TaxAmount.dblTax * -1 
+						-- 	ELSE TaxAmount.dblTax
+						-- END
+			,A.intTaxGroupId = TaxAmount.intTaxGroupId
 	FROM tblAPBillDetail A
 	INNER JOIN @billDetailIds B ON A.intBillDetailId = B.intId
 	CROSS APPLY (
 		SELECT 
 			SUM(CASE WHEN B.ysnTaxAdjusted = 1 THEN B.dblAdjustedTax ELSE B.dblTax END) dblTax
+			,B.intTaxGroupId
 		FROM tblAPBillDetailTax B WHERE B.intBillDetailId = A.intBillDetailId
+		GROUP BY B.intTaxGroupId
 	) TaxAmount
 	LEFT JOIN tblICInventoryReceiptCharge D ON A.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
 	WHERE TaxAmount.dblTax IS NOT NULL
