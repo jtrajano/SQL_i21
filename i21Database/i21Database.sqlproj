@@ -6432,6 +6432,10 @@
     <Build Include="dbo\Stored Procedures\uspAPRptWC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateDiscountPastDueVouchers.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentTotal.sql" />
+    <Build Include="dbo\Views\vyuAPRptDM.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPRptVoucherCommonData.sql" />
+    <Build Include="dbo\Views\vyuAPRptWC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
