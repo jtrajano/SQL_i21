@@ -289,7 +289,7 @@ BEGIN
 			[intItemId]						=	A.intItemId,
 			[intToBillUOMId]				=	CASE WHEN A.intWeightUOMId > 0 THEN A.intWeightUOMId ELSE A.intQtyToBillUOMId END,
 			[dblToBillQty]					=	CASE WHEN A.intWeightUOMId > 0 THEN A.dblNetWeight ELSE A.dblQuantityToBill END
-												* (CASE WHEN @decreaseQty = 1 
+												* (CASE WHEN @decreaseQty = 0 
 														THEN -1
 													ELSE 1
 													END)
@@ -344,13 +344,13 @@ BEGIN CATCH
 				COMMIT TRANSACTION
 			END
 		END		
-	ELSE
-		BEGIN
-			IF (XACT_STATE()) = -1 AND @transCount > 0
-			BEGIN
-				ROLLBACK TRANSACTION  @SavePoint
-			END
-		END	
+	-- ELSE
+	-- 	BEGIN
+	-- 		IF (XACT_STATE()) = -1 AND @transCount > 0
+	-- 		BEGIN
+	-- 			ROLLBACK TRANSACTION  @SavePoint
+	-- 		END
+	-- 	END	
 
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
