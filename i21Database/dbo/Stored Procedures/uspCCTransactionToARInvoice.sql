@@ -128,7 +128,7 @@ BEGIN
 
     --REMOVE -1 items
 	--and those sites that does not have customer
-    DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null;
+    DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null OR dblPrice = 0
 
 	set @EntriesForInvoiceCount = (select count(*) from @EntriesForInvoice);
 
