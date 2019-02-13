@@ -6617,6 +6617,7 @@
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
     <None Include="Scripts\Post-Deployment\PAT\18.3\VolumeSchemaFix.sql" />
     <None Include="Scripts\Post-Deployment\GR\2_ScaleTrigger.sql" />
+    <None Include="Scripts\Post-Deployment\LG\2_DataFixes.sql" />
     <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
     <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
     <Build Include="dbo\Views\vyuAP1099BYear.sql" />
