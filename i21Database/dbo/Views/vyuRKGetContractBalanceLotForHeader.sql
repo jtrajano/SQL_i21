@@ -12,7 +12,6 @@ CASE WHEN ISNULL(dblAvailableLot,0)-dblSelectedLot <=0 then 0 else isnull(dblAva
 FROM tblCTContractHeader cd
 join tblEMEntity e on cd.intEntityId=e.intEntityId
 JOIN tblCTContractType ct on ct.intContractTypeId=cd.intContractTypeId
-WHERE cd.intFutureMarketId IS NOT NULL AND cd.intFutureMonthId IS NOT NULL  
+WHERE cd.intFutureMarketId IS NOT NULL AND cd.intFutureMonthId IS NOT NULL  and isnull(ysnMultiplePriceFixation,0) = 1
 and intContractHeaderId not IN (select top 1 intContractHeaderId from tblCTContractDetail where intContractStatusId not in(2,3)) 
-and isnull(ysnMultiplePriceFixation,0) = 1
 GROUP BY strContractNumber,cd.intContractHeaderId,cd.intFutureMarketId,cd.intFutureMonthId,ct.strContractType,e.strName)t 
