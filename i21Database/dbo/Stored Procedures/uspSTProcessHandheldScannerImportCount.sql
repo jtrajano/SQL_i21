@@ -137,21 +137,29 @@ BEGIN TRY
 					, @dblCountQty DECIMAL(18, 6)
 					, @intItemId INT
 					, @intItemLocationId INT
+					, @intCompanyLocationId INT
 					, @intItemUOMId INT
 
 			-- Loop here
 			WHILE (SELECT COUNT(*) FROM #ImportCounts) > 0
 				BEGIN
-					-- Get Primary Id
+					-- Get values
 					SELECT TOP 1 
-						@intPrimaryCountId = intHandheldScannerImportCountId
-						, @dblCountQty = dblCountQty
-						, @intItemId = intItemId
-						, @intItemLocationId = intItemLocationId
-						, @intItemUOMId = intItemUOMId
-					FROM #ImportCounts
+						@intPrimaryCountId = Imports.intHandheldScannerImportCountId
+						, @dblCountQty = Imports.dblCountQty
+						, @intItemId = Imports.intItemId
+						, @intItemLocationId = IL.intItemLocationId
+						, @intItemUOMId = Imports.intItemUOMId
+						, @intCompanyLocationId = Store.intCompanyLocationId
+					FROM #ImportCounts Imports
+					INNER JOIN tblSTStore Store
+						ON Imports.intStoreId = Store.intStoreId
+					INNER JOIN tblICItemLocation IL
+						ON Imports.intItemId = IL.intItemId
+						AND Store.intCompanyLocationId = IL.intLocationId
 
-					-- Update
+
+					-- UPDATE Item
 					BEGIN TRY
 						EXEC uspICUpdateInventoryPhysicalCount
 							-- Count No and Physical Count are required
@@ -188,6 +196,96 @@ BEGIN TRY
 						-- ROLLBACK
 						GOTO ExitWithRollback
 					END CATCH
+
+
+					-- ===================================================================================
+					-- Start - Check if Item Has recipe --------------------------------------------------
+					-- ===================================================================================
+					-- If Output Item exists
+					IF EXISTS (SELECT TOP 1 1 FROM vyuSTItemRecipeAndStockQty WHERE intItemId = @intItemId AND intCompanyLocationId = @intCompanyLocationId AND intRecipeItemTypeId = 2)
+						BEGIN
+							-- PRINT 'Output Item exists'
+
+							DECLARE @dblHandheldOutputItemCount AS DECIMAL(18, 6) = @dblCountQty
+									, @dblRecipeInputStockQty AS DECIMAL(18, 6)
+									, @dblRecipeInputQty AS DECIMAL(18, 6)
+									, @intRecipeId AS INT
+									, @dblInputItemComputedQty DECIMAL(18, 6)
+									, @intInputItemId AS INT
+									, @intInputItemUOMId AS INT
+
+							SELECT @intRecipeId = intRecipeId 
+							FROM vyuSTItemRecipeAndStockQty 
+							WHERE intItemId = @intItemId 
+								AND intCompanyLocationId = @intCompanyLocationId
+								AND intRecipeItemTypeId = 2
+
+							
+							-- If Input Item exists
+							IF EXISTS(SELECT TOP 1 1 FROM vyuSTItemRecipeAndStockQty WHERE intRecipeId = @intRecipeId AND intRecipeItemTypeId = 1)
+								BEGIN
+									-- PRINT 'Input Item exists'
+
+									SELECT @dblRecipeInputStockQty = ISNULL(dblItemStockUnitOnHand, 0)
+										   , @dblRecipeInputQty = ISNULL(dblRecipeQuantity, 0)
+										   , @intInputItemId = intItemId
+										   , @intInputItemUOMId = intItemUOMId
+									FROM vyuSTItemRecipeAndStockQty
+									WHERE intRecipeId = @intRecipeId 
+										AND intRecipeItemTypeId = 1
+
+									--PRINT '@dblHandheldOutputItemCount: ' + CAST(@dblHandheldOutputItemCount AS NVARCHAR(15))
+									--PRINT '@dblRecipeInputStockQty: ' + CAST(@dblRecipeInputStockQty AS NVARCHAR(50))
+									--PRINT '@dblRecipeInputQty: ' + CAST(@dblRecipeInputQty AS NVARCHAR(50))
+									--PRINT CAST(@dblRecipeInputStockQty + (@dblHandheldOutputItemCount * @dblRecipeInputQty) AS NVARCHAR(50))
+
+									SET @dblInputItemComputedQty = @dblRecipeInputStockQty + (@dblHandheldOutputItemCount * @dblRecipeInputQty)
+
+									-- UPDATE INOUT Item
+									BEGIN TRY
+										EXEC uspICUpdateInventoryPhysicalCount
+											-- Count No and Physical Count are required
+											@strCountNo = @strCountNo,
+											@dblPhysicalCount = @dblInputItemComputedQty,
+
+											-- ========================================
+											--    Required for a lotted item
+											-- ========================================
+											-- Set this to NULL for a non-lotted item
+											@intLotId = NULL,
+
+											-- This is also required
+											@intUserSecurityId = @UserId,
+
+											-- ========================================
+											--    Parameters for a non-lotted item
+											-- ========================================
+											-- Required for a non-lotted item
+											@intItemId = @intInputItemId,
+											@intItemLocationId = @intItemLocationId,
+
+											-- Set this to change the Count UOM 
+											@intItemUOMId = @intInputItemUOMId,
+											-- Set these to change the storage unit/loc
+											@intStorageLocationId = NULL,
+											@intStorageUnitId = NULL
+									END TRY
+									BEGIN CATCH
+										-- Flag Success
+										SET @ysnSuccess = CAST(0 AS BIT)
+										SET @strStatusMsg = 'Updating Recipe Input Item: ' + ERROR_MESSAGE()
+
+										-- ROLLBACK
+										GOTO ExitWithRollback
+									END CATCH
+								END
+						
+						END
+					-- ===================================================================================
+					-- End - Check if Item Has recipe ----------------------------------------------------
+					-- ===================================================================================
+
+
 
 					-- Remove record after use
 					DELETE FROM #ImportCounts
