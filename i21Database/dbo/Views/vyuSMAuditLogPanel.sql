@@ -25,8 +25,7 @@ tblSMLog.dtmDate,
 CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX)) as strRecordNo,
 tblSMLog.intEntityId,
 CASE WHEN tblSMTransaction.strTransactionNo IS NULL THEN CAST(tblSMTransaction.intTransactionId AS NVARCHAR(MAX))
-ELSE tblSMTransaction.strTransactionNo END AS 'strReference',
-tblSMTransaction.dtmDate as 'dtmTransactionDate'
+ELSE tblSMTransaction.strTransactionNo END AS 'strReference'
 FROM tblSMLog tblSMLog
 INNER JOIN tblSMAudit tblSMAudit on tblSMAudit.intLogId = tblSMLog.intLogId
 INNER JOIN tblEMEntity en on en.intEntityId = tblSMLog.intEntityId
