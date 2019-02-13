@@ -76,6 +76,6 @@ FROM (
 		, History.strUserName
 		, History.strAction
 	FROM tblRKFutOptTransactionHistory History
-	JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
+	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	WHERE ISNULL(History.strAction, '') <> ''
 ) t
