@@ -311,13 +311,13 @@ IF @transCount = 0
 			COMMIT TRANSACTION
 		END
 	END		
-ELSE
-	BEGIN
-		IF (XACT_STATE()) = -1
-		BEGIN
-			ROLLBACK TRANSACTION  @SavePoint
-		END
-	END	
+-- ELSE
+-- 	BEGIN
+-- 		IF (XACT_STATE()) = -1
+-- 		BEGIN
+-- 			ROLLBACK TRANSACTION  @SavePoint
+-- 		END
+-- 	END	
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
