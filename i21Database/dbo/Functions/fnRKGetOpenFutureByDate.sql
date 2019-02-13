@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetOpenFutureByDate](
 	@intCommodityId INT = NULL
 	, @dtmToDate DATETIME = NULL
+	, @ysnCrush BIT = 0
 )
 RETURNS @FinalResult TABLE (
 	intFutOptTransactionId INT
@@ -79,15 +80,15 @@ FROM (
 		, *
 	FROM (
 		--Futures Buy
-		SELECT dtmTransactionDate = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dtmTransactionDate
+		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.intOpenContract
+			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.intOpenContract
 									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
-			, dblContractSize = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dblContractSize
+			, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
 									ELSE History.dblContractSize END
 			, FOT.strFutMarketName
 			, FOT.strFutureMonth AS strFutureMonth
@@ -120,15 +121,15 @@ FROM (
 			
 		UNION ALL
 		--Futures Sell
-		SELECT dtmTransactionDate = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dtmTransactionDate
+		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.intOpenContract
+			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.intOpenContract
 									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
-			, dblContractSize = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dblContractSize
+			, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
 									ELSE History.dblContractSize END
 			, FOT.strFutMarketName
 			, FOT.strFutureMonth AS strFutureMonth
@@ -161,15 +162,15 @@ FROM (
 			
 		UNION ALL
 		--Options Buy
-		SELECT dtmTransactionDate = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dtmTransactionDate
+		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.intOpenContract
+			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.intOpenContract
 									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
-			, dblContractSize = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dblContractSize
+			, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
 									ELSE History.dblContractSize END
 			, FOT.strFutMarketName
 			, FOT.strFutureMonth AS strFutureMonth
@@ -202,15 +203,15 @@ FROM (
 				
 		UNION ALL
 		--Options Sell
-		SELECT dtmTransactionDate = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dtmTransactionDate
+		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.intOpenContract
+			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.intOpenContract
 									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
-			, dblContractSize = CASE WHEN ISNULL(ysnPreCrush, 0) = 0 THEN FOT.dblContractSize
+			, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
 									ELSE History.dblContractSize END
 			, FOT.strFutMarketName
 			, FOT.strFutureMonth AS strFutureMonth

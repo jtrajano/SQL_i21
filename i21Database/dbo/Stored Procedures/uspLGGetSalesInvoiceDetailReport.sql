@@ -44,7 +44,7 @@ BEGIN
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
+	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId
 		AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
@@ -117,7 +117,7 @@ BEGIN
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId	
 	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
+	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = ReceiptItem.intContainerId
 	WHERE Inv.intInvoiceId = @intInvoiceId

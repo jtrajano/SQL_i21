@@ -497,6 +497,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Logistics
 :R .\LG\1_MasterTables.sql
+:R .\LG\2_DataFixes.sql
 
 --RiskManagement
 :R .\RM\01_MasterScript.sql

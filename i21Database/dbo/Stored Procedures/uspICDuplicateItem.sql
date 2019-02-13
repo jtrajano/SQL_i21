@@ -166,7 +166,7 @@ BEGIN
 		strCostType,
 		intM2MComputationId,
 		ysnUseWeighScales ,
-		intTonnageTaxUOMId)
+		intTonnageTaxUOMId, ysnLotWeightsRequired)
 	SELECT @NewItemNo,
 		strType,
 		strDescription,
@@ -301,7 +301,8 @@ BEGIN
 		strCostType,
 		intM2MComputationId,
 		ysnUseWeighScales ,
-		intTonnageTaxUOMId
+		intTonnageTaxUOMId,
+		ysnLotWeightsRequired = CASE WHEN strLotTracking = 'No' THEN 0 ELSE ysnLotWeightsRequired END
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------

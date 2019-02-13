@@ -135,6 +135,7 @@
 	,SCT.intTransferLocationId
 	,SCT.intSubLocationToId
 	,SCT.intStorageLocationToId
+	,SCT.ysnExport
 	,SMC.strLocationName AS strProcessingLocationName
 	,SMCT.strLocationName AS strTransferLocationName
 	,SMC.strDiscountScheduleType AS strDefaultLocationSchedule

@@ -247,7 +247,7 @@ BEGIN TRY
 			@amount = 0,
 			@requireApproval = @requireApproval OUTPUT
 
-		IF @requireApproval = 1 AND @intDuplicateType <> 1
+		IF  @intDuplicateType <> 1
 		BEGIN
 			EXEC uspSMSubmitTransaction
 				@type = 'AccountsPayable.view.PurchaseOrder',

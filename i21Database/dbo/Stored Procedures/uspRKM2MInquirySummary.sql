@@ -266,7 +266,7 @@ DECLARE @UnRelaized AS TABLE (
 exec uspRKUnrealizedPnL  @dtmFromDate ='01-01-1900',
 		@dtmToDate = @dtmTransactionDateUpTo,
 	@intCommodityId  = @intCommodityId,
-	@ysnExpired ='false',
+	@ysnExpired =0,
 	@intFutureMarketId  = NULL,
 	@intEntityId  = NULL,
 	@intBrokerageAccountId  = NULL,

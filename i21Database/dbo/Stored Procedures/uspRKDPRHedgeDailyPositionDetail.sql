@@ -30,6 +30,12 @@ BEGIN
 		, @ysnHideNetPayableAndReceivable = ISNULL(ysnHideNetPayableAndReceivable, 0)
 		, @ysnPreCrush = ISNULL(ysnPreCrush, 0)
 	FROM tblRKCompanyPreference
+
+	DECLARE @CrushReport BIT = 0
+	IF (ISNULL(@strPositionBy, '') = 'Delivery Month' OR ISNULL(@strPositionBy, '') = 'Futures Month')
+	BEGIN
+		SET @CrushReport = 1
+	END
 	
 	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
 		, intCommodity INT)
@@ -304,7 +310,7 @@ BEGIN
 			, ysnPreCrush
 			, strNotes
 			, strBrokerTradeNo)
-		SELECT * FROM fnRKGetOpenFutureByDate( @tempCommId, @dtmToDate)
+		SELECT * FROM fnRKGetOpenFutureByDate( @tempCommId, @dtmToDate, @CrushReport)
 
 		DELETE FROM #tempCommodity WHERE intCommodity = @tempCommId
 	END
@@ -483,7 +489,7 @@ BEGIN
 			, ch.strItemNo
 			, ch.strCategory
 			, ch.strEntityName
-			, c.intReceiptNo
+			, c.strReceiptNo
 			, ch.intContractHeaderId
 			, strContractNumber
 			, c.dtmOpenDate
@@ -869,6 +875,35 @@ BEGIN
 						)
 					SELECT strCommodityCode
 						, 'Price Risk' COLLATE Latin1_General_CI_AS
+						, strContractType
+						, dblTotal
+						, intContractHeaderId
+						, strContractNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intFutOptTransactionHeaderId
+						, strInternalTradeNo
+					FROM @tempFinal
+					WHERE intCommodityId = @intCommodityId AND strType  = 'Crush'
+
+
+					--Include Crush in Net Hedge
+					INSERT INTO @tempFinal(strCommodityCode
+						, strType
+						, strContractType
+						, dblTotal
+						, intContractHeaderId
+						, strContractNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intFutOptTransactionHeaderId
+						, strInternalTradeNo
+
+						)
+					SELECT strCommodityCode
+						, 'Net Hedge' COLLATE Latin1_General_CI_AS
 						, strContractType
 						, dblTotal
 						, intContractHeaderId
@@ -2076,9 +2111,9 @@ BEGIN
 						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 					FROM @tblGetOpenContractDetail cd
 					WHERE cd.intContractTypeId IN (1, 2)
-						AND cd.intCommodityId IN (SELECT intCommodityId FROM @Commodity)
+						AND cd.intCommodityId = @intCommodityId
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
-						AND intEntityId = @intVendorId
+						AND cd.intEntityId = @intVendorId
 				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				
 				INSERT INTO @tempFinal (strCommodityCode

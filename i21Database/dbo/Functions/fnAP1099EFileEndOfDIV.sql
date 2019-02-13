@@ -155,7 +155,7 @@ BEGIN
 		+ @controlTotalF
 		+ @controlTotalG
 		+ SPACE(196)
-		+ SPACE(8) --500-507
+		+ REPLICATE('0', 8 - LEN(CAST(@totalPayees AS NVARCHAR(100)))) + CAST(@totalPayees + 3 AS NVARCHAR(100)) --500-507
 		+ SPACE(241)
 		+ CHAR(13) + CHAR(10)
 

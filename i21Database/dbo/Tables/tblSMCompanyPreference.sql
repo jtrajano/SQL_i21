@@ -53,7 +53,7 @@
     [strFTPProtocol] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [strFTPLogOnType] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [strFTPUser] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
-    [strFTPPassword] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [strFTPPassword] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strFTPKeyFilePath] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strFTPPassphrase] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strFTPHostKeyFingerPrint] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,

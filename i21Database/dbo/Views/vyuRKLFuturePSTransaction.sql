@@ -41,15 +41,18 @@ FROM (
 			, intFutOptTransactionId
 			, fm.dblContractSize
 			, dblFutCommission = ISNULL((select TOP 1 (case when bc.intFuturesRateType = 2 then 0
-															else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 'true' then cur.intCent else 1 end end) as dblFutCommission
+															else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 1 then cur.intCent else 1 end end) as dblFutCommission
 										from tblRKBrokerageCommission bc
 										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
 										where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId
-											and  ot.dtmTransactionDate between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,getdate())),0) * -1
+											and  getdate() between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,getdate())),0) * -1
 			, ot.intBrokerageCommissionId
 			, dtmFilledDate
 			, ot.intFutOptTransactionHeaderId
 			, c.intCurrencyID as intCurrencyId
+			, c.strCurrency
+			, intMainCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE c.intCurrencyID END
+			, strMainCurrency = CASE WHEN c.ysnSubCurrency = 0 THEN c.strCurrency ELSE MainCurrency.strCurrency END
 			, c.intCent
 			, c.ysnSubCurrency
 			, ot.intBankId
@@ -59,6 +62,7 @@ FROM (
 		FROM tblRKFutOptTransaction ot
 		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 		JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
+		LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 		LEFT JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId =1
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId and intSelectedInstrumentTypeId=1
@@ -108,6 +112,9 @@ FROM (
 			, null dtmFilledDate
 			, ot.intFutOptTransactionHeaderId
 			, null as intCurrencyId
+			, strCurrency = NULL
+			, intMainCurrencyId = NULL
+			, strMainCurrency = NULL
 			, null as intCent
 			, null ysnSubCurrency
 			, ot.intBankId
@@ -122,5 +129,5 @@ FROM (
 		LEFT JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ot.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
 		where intSelectedInstrumentTypeId=2 AND ot.intInstrumentTypeId = 3 and isnull(ysnLiquidation,0) = 0
 	) t
-) t1 --WHERE dblBalanceLot > 0
+) t1
 Order by dtmCreateDateTime Asc, dblPrice desc

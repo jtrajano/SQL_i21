@@ -487,7 +487,7 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
-				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId
+				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 			END
 
 			--5. Removing Voucher

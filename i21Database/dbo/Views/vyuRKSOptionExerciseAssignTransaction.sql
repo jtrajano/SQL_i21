@@ -14,7 +14,7 @@ SELECT m.intOptionsPnSExercisedAssignedId
 	, t.dblStrike
 	, t.strOptionType
 	, t.dblPrice AS dblPremiumRate
-	, (t.dblPrice*dblContractSize*intLots)/ case when ysnSubCurrency = 'true' then intCent else 1 end AS dblPremiumTotal
+	, (t.dblPrice*dblContractSize*intLots)/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblPremiumTotal
 	, e.strName
 	, b.strAccountNumber
 	, strCommodityCode

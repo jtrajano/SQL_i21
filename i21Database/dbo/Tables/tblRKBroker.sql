@@ -12,9 +12,9 @@
 	[strCity] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
 	[strState] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
 	[strCountry] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
-	[intPhone] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL , 
-	[intFax] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL , 
-	[intAltPhone] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL , 
+	[strPhone] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL , 
+	[strFax] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL , 
+	[strAltPhone] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL , 
 	[strEmail] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,	
 	CONSTRAINT [PK_tblRKBroker_intBrokerId] PRIMARY KEY ([intBrokerId])
 )

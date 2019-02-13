@@ -94,7 +94,12 @@ Type the overview for the table here.
 	CREATE NONCLUSTERED INDEX IX_tblICInventoryReceiptItem_SourceId
 		ON tblICInventoryReceiptItem (intSourceId, intLineNo, intOrderId)
 	GO
-	
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItem_intLineNo]
+		ON [dbo].[tblICInventoryReceiptItem] ([intLineNo])
+		INCLUDE ([intInventoryReceiptId],[intSourceId])
+	GO
+		
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Inventory Receipt Id',
 		@level0type = N'SCHEMA',

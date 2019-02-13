@@ -7316,6 +7316,13 @@
     <Build Include="dbo\Tables\tblCRMOpportunityProject.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityProject.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteCreditCardPrepayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailForeignRate.sql" />
+    <Build Include="dbo\Views\vyuCFSearchAccount.sql" />
+    <Build Include="dbo\Views\vyuCFSearchAccountCard.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutureTradingMonths.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceDetailReport2.sql" />
+    <Build Include="dbo\Views\vyuSTItemRecipeAndStockQty.sql" />
+    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7525,6 +7532,7 @@
     <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcTrialBalance.sql" />
+    <None Include="Scripts\Post-Deployment\LG\2_DataFixes.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

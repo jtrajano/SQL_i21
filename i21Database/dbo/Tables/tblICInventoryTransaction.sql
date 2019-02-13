@@ -93,3 +93,8 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_detail]
 		ON [dbo].[tblICInventoryTransaction]([intTransactionId] ASC, [intTransactionDetailId] ASC, [strTransactionId] ASC);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_strTransactionId]
+		ON [dbo].[tblICInventoryTransaction] ([strTransactionId])
+		INCLUDE ([intItemId],[intItemUOMId],[dtmDate],[dblQty],[intTransactionId],[intTransactionDetailId],[intTransactionTypeId],[intInTransitSourceLocationId])
+	GO

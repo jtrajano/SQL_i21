@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblRKCollateral]
 (
 	[intCollateralId] INT IDENTITY(1,1) NOT NULL, 
-	[intConcurrencyId] INT NOT NULL, 
-    [intReceiptNo]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [dtmOpenDate] DATETIME  NOT NULL, 
+	[intConcurrencyId] INT NULL DEFAULT ((0)), 
+    [strReceiptNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [dtmOpenDate] DATETIME NOT NULL, 
     [strType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intCommodityId] INT NOT NULL, 
 	[intLocationId] INT NOT NULL, 

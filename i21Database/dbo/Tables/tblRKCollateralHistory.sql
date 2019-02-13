@@ -2,7 +2,7 @@
 (
 	[intCollateralHistoryId] INT IDENTITY(1,1) NOT NULL,
 	[intCollateralId] INT NOT NULL,
-	[intReceiptNo]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strReceiptNo]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmOpenDate] DATETIME NOT NULL,
 	[strType]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intCommodityId] INT NOT NULL,
@@ -25,5 +25,6 @@
 	[strUserName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strAction] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 
+    [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblRKCollateralHistory_intCollateralHistoryId] PRIMARY KEY CLUSTERED (intCollateralHistoryId ASC), 	
 )

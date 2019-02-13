@@ -63,7 +63,7 @@ FROM (
 									AND PrevRec.intFutOptTransactionHistoryId != History.intFutOptTransactionHistoryId
 									AND PrevRec.dtmTransactionDate < History.dtmTransactionDate
 								ORDER BY PrevRec.dtmTransactionDate DESC)
-		, History.intNewNoOfContract
+		, intNewNoOfContract = CASE WHEN History.strNewBuySell = 'Buy' THEN History.intNewNoOfContract ELSE - History.intNewNoOfContract END
 		, History.strScreenName
 		, History.strOldBuySell
 		, History.strNewBuySell	

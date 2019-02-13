@@ -78,8 +78,8 @@
     [strCFTerm]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCFTermCode]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strComment]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [strCFInvoiceNumber]           NVARCHAR (MAX)  NULL,
-    [strInvoiceNumberHistory]      NVARCHAR (MAX)  NULL,
+    [strCFInvoiceNumber]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strInvoiceNumberHistory]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmDueDateBaseOnTermsHistory] DATETIME		   NULL
 );
 

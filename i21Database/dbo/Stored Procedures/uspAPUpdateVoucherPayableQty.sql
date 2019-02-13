@@ -939,13 +939,13 @@ BEGIN CATCH
 				COMMIT TRANSACTION
 			END
 		END		
-	ELSE
-		BEGIN
-			IF (XACT_STATE()) = -1
-			BEGIN
-				ROLLBACK TRANSACTION  @SavePoint
-			END
-		END	
+	-- ELSE
+	-- 	BEGIN
+	-- 		IF (XACT_STATE()) = -1
+	-- 		BEGIN
+	-- 			ROLLBACK TRANSACTION  @SavePoint
+	-- 		END
+	-- 	END	
 
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH

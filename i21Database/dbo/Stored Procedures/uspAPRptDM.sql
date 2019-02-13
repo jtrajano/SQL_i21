@@ -29,6 +29,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @intBillId INT 
 DECLARE @query NVARCHAR(MAX);
 DECLARE @xmlDocumentId AS INT;
+DECLARE @intReportLogoHeight INT, @intReportLogoWidth INT;
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -72,8 +73,11 @@ BEGIN
 END
 
 --SET @intPurchaseId = @intBillId;
+SELECT @intReportLogoHeight = intReportLogoHeight,@intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference WITH (NOLOCK)
 
 SELECT 
-* 
-FROM [vyuAPRptDM]
+	A.* 
+	,intReportLogoHeight = @intReportLogoHeight
+	,intReportLogoWidth = @intReportLogoWidth
+FROM [vyuAPRptDM] A
 WHERE intBillId = (CASE WHEN @intBillId IS NOT NULL THEN @intBillId ELSE 0 END)

@@ -31,9 +31,9 @@ BEGIN
 		SELECT ISNULL(strBrokerName,''), 
 				'',
 				ISNULL(strEmail,''), 
-				ISNULL(intPhone,''), 
-				ISNULL(intAltPhone,''), 
-				ISNULL(intFax,'')
+				ISNULL(strPhone,''), 
+				ISNULL(strAltPhone,''), 
+				ISNULL(strFax,'')
 					FROM tblRKBroker 
 						WHERE intEntityId = @intEntityId
 	

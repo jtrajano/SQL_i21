@@ -177,30 +177,30 @@ BEGIN
 					WHERE B.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 							AND (B.intAccountId IS NULL AND B.intAccountId = 0))
 
-		--VALIDATION FOR RECEIPT
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
-		SELECT
-			'The item "' + C.strItemNo + '" on this transaction was already vouchered.',
-			'Bill',
-			A.strBillId,
-			A.intBillId,
-			12
-		FROM tblAPBill A 
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			INNER JOIN
-			(
-				SELECT
-					D.strReceiptNumber
-					,F.strItemNo
-					,E.intItemId
-					,intInventoryReceiptItemId
-				FROM tblICInventoryReceipt D
-					INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
-					INNER JOIN tblICItem F ON E.intItemId = F.intItemId
-				WHERE E.dblOpenReceive = E.dblBillQty
-			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
-			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-			AND A.intTransactionType = 1
+		-- --VALIDATION FOR RECEIPT
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		-- SELECT
+		-- 	'The item "' + C.strItemNo + '" on this transaction was already vouchered.',
+		-- 	'Bill',
+		-- 	A.strBillId,
+		-- 	A.intBillId,
+		-- 	12
+		-- FROM tblAPBill A 
+		-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		-- INNER JOIN
+		-- (
+		-- 	SELECT
+		-- 		D.strReceiptNumber
+		-- 		,F.strItemNo
+		-- 		,E.intItemId
+		-- 		,intInventoryReceiptItemId
+		-- 	FROM tblICInventoryReceipt D
+		-- 		INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
+		-- 		INNER JOIN tblICItem F ON E.intItemId = F.intItemId
+		-- 	WHERE E.dblOpenReceive = E.dblBillQty
+		-- ) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
+		-- WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		-- AND A.intTransactionType = 1
 
 		--VALIDATION FOR RECEIPT CHARGE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
@@ -262,23 +262,23 @@ BEGIN
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND A.dtmDate < C2.dtmReceiptDate
 
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
-		SELECT
-			'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',
-			'Bill',
-			A.strBillId,
-			A.intBillId,
-			13
-		FROM tblAPBill A 
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
-			INNER JOIN tblICItem D ON C.intItemId = D.intItemId
-			LEFT JOIN [vyuGRStorageAdjustmentRecords] SA  ON SA.intCustomerStorageId = B.intCustomerStorageId 
-		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN CAST(B.dblQtyReceived  AS DECIMAL (18,2)) * -1 ELSE (CASE WHEN B.dblNetWeight > 0 THEN  
-																																CAST(dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId  ,B.intUnitOfMeasureId , B.dblNetWeight) AS DECIMAL (18,2))
-																																ELSE  CAST(B.dblQtyReceived  AS DECIMAL (18,2))  END) END)) > CAST( C.dblOpenReceive  AS DECIMAL (18,2)) 
-		AND (SA.ysnIsStorageAdjusted = 0 OR SA.ysnIsStorageAdjusted IS NULL) --WILL EXCLUDE STORAGE ADJUSTMENT TRANSACTION 
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		-- SELECT
+		-- 	'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',
+		-- 	'Bill',
+		-- 	A.strBillId,
+		-- 	A.intBillId,
+		-- 	13
+		-- FROM tblAPBill A 
+		-- 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		-- 	INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
+		-- 	INNER JOIN tblICItem D ON C.intItemId = D.intItemId
+		-- 	LEFT JOIN [vyuGRStorageAdjustmentRecords] SA  ON SA.intCustomerStorageId = B.intCustomerStorageId 
+		-- WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		-- AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN CAST(B.dblQtyReceived  AS DECIMAL (18,2)) * -1 ELSE (CASE WHEN B.dblNetWeight > 0 THEN  
+		-- 																														CAST(dbo.fnCalculateQtyBetweenUOM(B.intWeightUOMId  ,B.intUnitOfMeasureId , B.dblNetWeight) AS DECIMAL (18,2))
+		-- 																														ELSE  CAST(B.dblQtyReceived  AS DECIMAL (18,2))  END) END)) > CAST( C.dblOpenReceive  AS DECIMAL (18,2)) 
+		-- AND (SA.ysnIsStorageAdjusted = 0 OR SA.ysnIsStorageAdjusted IS NULL) --WILL EXCLUDE STORAGE ADJUSTMENT TRANSACTION 
 		
 		--VALIDATION FOR MISCELLANEOUS ITEM
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
