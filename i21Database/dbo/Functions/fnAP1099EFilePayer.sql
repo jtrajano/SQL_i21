@@ -14,23 +14,25 @@ BEGIN
 
 	IF @form1099 = 1
 	BEGIN
-		SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes FROM (
-			SELECT DISTINCT(strAmountCodes) strAmountCodes 
+		-- SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes 
+		-- FROM (
+			SELECT @amountCodes = strAmountCodes 
 			FROM (
 				SELECT 
-					CASE WHEN A.dblDirectSales > 0 THEN '1' --ELSE '' END, --DIRECT SALES see page 53
-							WHEN A.dblRents > 0 THEN '1' --ELSE '' END,
-							WHEN A.dblRoyalties > 0 THEN '2' --ELSE '' END,
-						WHEN A.dblOtherIncome > 0 THEN '3' --ELSE '' END,
-						WHEN A.dblFederalIncome > 0 THEN '4' --ELSE '' END,
-						WHEN A.dblBoatsProceeds > 0 THEN '5' --ELSE '' END,
-						WHEN A.dblMedicalPayments > 0 THEN '6' --ELSE '' END,
-						WHEN A.dblNonemployeeCompensation > 0 THEN '7' --ELSE '' END,
-						WHEN A.dblSubstitutePayments > 0 THEN '8' --ELSE '' END,
-						WHEN A.dblCropInsurance > 0 THEN 'A' --ELSE '' END,
-						WHEN A.dblParachutePayments > 0 THEN 'B' --ELSE '' END,
-						WHEN A.dblGrossProceedsAtty > 0 THEN 'C' 
-					ELSE '' END AS strAmountCodes
+					CASE WHEN SUM(A.dblDirectSales) > 0 THEN '1' --DIRECT SALES see page 53
+					ELSE  
+						CASE WHEN SUM(A.dblRents) > 0 THEN '1' ELSE '' END +
+						CASE WHEN SUM(A.dblRoyalties) > 0 THEN '2' ELSE '' END +
+						CASE WHEN SUM(A.dblOtherIncome) > 0 THEN '3' ELSE '' END +
+						CASE WHEN SUM(A.dblFederalIncome) > 0 THEN '4' ELSE '' END +
+						CASE WHEN SUM(A.dblBoatsProceeds) > 0 THEN '5' ELSE '' END + 
+						CASE WHEN SUM(A.dblMedicalPayments) > 0 THEN '6' ELSE '' END + 
+						CASE WHEN SUM(A.dblNonemployeeCompensation) > 0 THEN '7' ELSE '' END + 
+						CASE WHEN SUM(A.dblSubstitutePayments) > 0 THEN '8' ELSE '' END + 
+						CASE WHEN SUM(A.dblCropInsurance) > 0 THEN 'A' ELSE '' END + 
+						CASE WHEN SUM(A.dblParachutePayments) > 0 THEN 'B' ELSE '' END + 
+						CASE WHEN SUM(A.dblGrossProceedsAtty) > 0 THEN 'C' ELSE '' END
+					END AS strAmountCodes
 				FROM vyuAP1099MISC A
 				--OUTER APPLY --Temporarily removed, identify when the voucher will exclude from generating 1099 file and report
 				--(
@@ -44,7 +46,7 @@ BEGIN
 						ELSE 1 END)
 				AND A.intYear = @year
 			) tmpAmountCodes
-		) tblAmountCodes
+		-- ) tblAmountCodes
 	END
 	ELSE IF @form1099 = 2
 	BEGIN
