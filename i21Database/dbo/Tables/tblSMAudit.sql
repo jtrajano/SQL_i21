@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblSMAudit] (
 	[intLogId]			 INT			  NULL,
 	[intKeyValue]		 INT			  NULL,
 	[strAction]		     NVARCHAR(100)    COLLATE Latin1_General_CI_AS NULL,
-	[strChange]			 NVARCHAR(MAX)	  COLLATE Latin1_General_CI_AS NULL, 
+	[strChange]			 NVARCHAR(100)	  COLLATE Latin1_General_CI_AS NULL, 
 	[strFrom]			 NVARCHAR(MAX)	  COLLATE Latin1_General_CI_AS NULL, 
 	[strTo]				 NVARCHAR(MAX)	  COLLATE Latin1_General_CI_AS NULL, 
 	[strAlias]			 NVARCHAR(255)	  COLLATE Latin1_General_CI_AS NULL, 
