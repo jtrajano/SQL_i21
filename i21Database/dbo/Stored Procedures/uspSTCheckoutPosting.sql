@@ -1173,7 +1173,33 @@ BEGIN
 																						) AS NUMERIC(18, 6))
 																							) > 0 
 																						THEN 1
-																				ELSE -1 -- If not match on Pump Totals and Item Movements
+																				WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+																																					SELECT SUM(IM.dblTotalSales)
+																																					FROM tblSTCheckoutItemMovements IM
+																																					JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																					JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																					JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																					WHERE IM.intCheckoutId = @intCheckoutId
+																																					AND CATT.intCategoryId = DT.intCategoryId
+																															              ),0)
+																						) AS NUMERIC(18, 6))
+																							) < 0 
+																						THEN -1
+																				WHEN (
+																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+																																					SELECT SUM(IM.dblTotalSales)
+																																					FROM tblSTCheckoutItemMovements IM
+																																					JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+																																					JOIN tblICItem I ON UOM.intItemId = I.intItemId
+																																					JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+																																					WHERE IM.intCheckoutId = @intCheckoutId
+																																					AND CATT.intCategoryId = DT.intCategoryId
+																															              ),0)
+																						) AS NUMERIC(18, 6))
+																							) = 0 
+																						THEN 0
+																				ELSE -1 
 																		  END
 											,[dblDiscount]				= 0 --ISNULL(DT.dblManagerDiscountAmount, 0) + ISNULL(DT.dblPromotionalDiscountAmount, 0) + ISNULL(DT.dblRefundAmount, 0)
 											,[dblPrice]					= CASE
@@ -1314,6 +1340,7 @@ BEGIN
 								WHERE DT.intCheckoutId = @intCheckoutId
 									--AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
 									AND UOM.ysnStockUnit = CAST(1 AS BIT)
+
 					END
 				----------------------------------------------------------------------
 				--------------------- END DEPARTMENT TOTALS --------------------------
@@ -3041,9 +3068,8 @@ BEGIN
 				DECLARE @CreatedIvoices AS NVARCHAR(MAX)
 				
 
-				-- Filter dblPrice should not be 0 and null
-				-- DELETE FROM @EntriesForInvoice WHERE dblPrice = 0 OR dblPrice IS NULL
 				-- Note: Do not include Department that has zero ItemSold quantity (http://jira.irelyserver.com/browse/ST-1204)
+				--       Include Qty that is < 0 because of the Refunded item
 				DELETE FROM @EntriesForInvoice WHERE dblQtyShipped = 0 OR dblQtyShipped IS NULL 
 
 --PRINT 'START POST TO AR SALES INVOICE'
@@ -3402,21 +3428,20 @@ BEGIN
 										--			,@ErrorMessage				= @ErrorMessage OUTPUT
 										--			,@CreatedIvoices			= @CreatedIvoices OUTPUT
 										--			,@BatchIdForNewPostRecap	= @strBatchIdForNewPostRecap OUTPUT
-										
 
-										-- Check if Recap
-										IF(@ysnRecap = CAST(1 AS BIT))
-											BEGIN
-												IF(@strBatchIdForNewPostRecap IS NOT NULL)
-													BEGIN
-														--DECLARE @intCount AS INT = (SELECT COUNT(*) FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
+									-- Check if Recap
+									IF(@ysnRecap = CAST(1 AS BIT))
+										BEGIN -- Start: @ysnRecap = 1
 
-														IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
-															BEGIN
-																SET @strCreateGuidBatch = NEWID();
+											IF(@strBatchIdForNewPostRecap IS NOT NULL AND @strBatchIdForNewPostRecap != '')
+												BEGIN -- Start:@strBatchIdForNewPostRecap
 
-																-- GET POST PREVIEW on GL Entries
-																INSERT INTO @GLEntries (
+													IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
+														BEGIN
+															SET @strCreateGuidBatch = NEWID();
+
+															-- GET POST PREVIEW on GL Entries
+															INSERT INTO @GLEntries (
 																					[dtmDate] 
 																					,[strBatchId]
 																					,[intAccountId]
@@ -3485,19 +3510,24 @@ BEGIN
 																			FROM tblGLPostRecap
 																			WHERE strBatchId = @strBatchIdForNewPostRecap
 
-																ROLLBACK TRANSACTION 
+															ROLLBACK TRANSACTION 
 
-																BEGIN TRANSACTION
-																	EXEC dbo.uspGLPostRecap 
-																			@GLEntries
-																			,@intCurrentUserId
+															BEGIN TRANSACTION
+																EXEC dbo.uspGLPostRecap 
+																		@GLEntries
+																		,@intCurrentUserId
 																	
-																	SET @strBatchIdForNewPostRecap = @strCreateGuidBatch
+																SET @strBatchIdForNewPostRecap = @strCreateGuidBatch
 
 																GOTO ExitWithCommit
-															END
-													END
-											END
+														END
+
+												END -- End:@strBatchIdForNewPostRecap
+											ELSE
+
+												GOTO ExitWithRollback
+										END -- End: @ysnRecap = 1
+											
 									END TRY
 
 									BEGIN CATCH
@@ -3518,6 +3548,8 @@ BEGIN
 										
 									END CATCH
 								END
+
+
 
 						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
 							BEGIN
@@ -3906,7 +3938,6 @@ BEGIN
 
 												IF(@strBatchIdUsed IS NOT NULL)
 													BEGIN
-														--DECLARE @intCount AS INT = (SELECT COUNT(*) FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
 
 														IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdUsed)
 															BEGIN
@@ -3994,6 +4025,8 @@ BEGIN
 
 																GOTO ExitWithCommit
 															END
+														ELSE
+															GOTO ExitWithRollback
 													END
 											END
 						END TRY
