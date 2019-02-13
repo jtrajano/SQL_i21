@@ -92,7 +92,7 @@ USING
 		,dblDifference						=	A.dblDifference
 		/*Weight info*/						
 		,intWeightUOMId						=	A.intWeightUOMId
-		,dblWeightUnitQty					=	A.dblWeightUnitQty
+		,dblWeightUnitQty					=	ISNULL(A.dblWeightUnitQty, 1)
 		,dblNetWeight						=	A.dblNetWeight
 		,dblWeight							=	A.dblWeight
 		/*Cost info*/						
@@ -450,7 +450,7 @@ SELECT intBillDetailId FROM @voucherDetailsInfo
 --UPDATE AVAILABLE QTY
 EXEC uspAPUpdateIntegrationPayableAvailableQty @billDetailIds = @voucherDetailIds, @decrease = 1
 --UPDATE ADD PAYABLES AVAILABLE QTY
-EXEC uspAPUpdateVoucherPayable @voucherDetailIds = @voucherDetailIds, @decrease = 1
+EXEC uspAPUpdateVoucherPayable @voucherDetailIds = @voucherDetailIds, @decrease = 0
 
 IF @transCount = 0
 	BEGIN
@@ -497,13 +497,13 @@ BEGIN CATCH
 				COMMIT TRANSACTION
 			END
 		END		
-	ELSE
-		BEGIN
-			IF (XACT_STATE()) = -1
-			BEGIN
-				ROLLBACK TRANSACTION  @SavePoint
-			END
-		END	
+	-- ELSE
+	-- 	BEGIN
+	-- 		IF (XACT_STATE()) = -1
+	-- 		BEGIN
+	-- 			ROLLBACK TRANSACTION  @SavePoint
+	-- 		END
+	-- 	END	
 
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
