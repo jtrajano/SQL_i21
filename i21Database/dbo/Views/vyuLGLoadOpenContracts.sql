@@ -91,6 +91,8 @@ SELECT CD.intContractDetailId
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 	,strOrigin = ISNULL(CO.strCountry, CO2.strCountry)
+	,CD.intFreightRateId
+	,FT.strFreightTerm
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -108,6 +110,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLoca
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN (
@@ -231,6 +234,8 @@ SELECT CD.intContractDetailId
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
 	,strOrigin = ISNULL(CO.strCountry, CO2.strCountry)
+	,CD.intFreightRateId
+	,FT.strFreightTerm
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -248,6 +253,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLoca
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId AND CD.intItemContractId = ICI.intItemContractId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN (
@@ -336,5 +342,7 @@ GROUP BY CD.intContractDetailId
 	,CD.intStorageLocationId
 	,WG.ysnSample
 	,CD.dblShippingInstructionQty
+	,CD.intFreightRateId
+	,FT.strFreightTerm
 	,CO.strCountry
 	,CO2.strCountry
