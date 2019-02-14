@@ -228,15 +228,16 @@ BEGIN
 END
 
 
-IF @strAccountId IS NOT NULL
-BEGIN 
-	BEGIN 
-		SET @innerQuery = @innerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
-		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
-	END
-END
+--IF @strAccountId IS NOT NULL
+--BEGIN 
+--	BEGIN
+	 
+--		SET @innerQuery = @innerQuery + CASE WHEN @dateFrom IS NOT NULL THEN ' AND ' ELSE ' WHERE ' END + ' strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+--		SET @prepaidInnerQuery = @prepaidInnerQuery + CASE WHEN @dateFrom IS NOT NULL THEN ' AND ' ELSE ' WHERE ' END + ' strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+--	END
+--END
 
-DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'
+--DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
