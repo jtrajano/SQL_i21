@@ -2,6 +2,8 @@
 	@xmlParam1 NVARCHAR(MAX) = NULL,
 	@xmlParam2  NVARCHAR(MAX) = NULL,
 	@xmlParam3  NVARCHAR(MAX) = NULL,
+	@xmlParamDS  NVARCHAR(MAX) = NULL,
+	@xmlParamDSS  NVARCHAR(MAX) = NULL,
 	@ysnDeliverySheet BIT,
 	@ysnUpdateData BIT = 0
 AS
@@ -18,8 +20,11 @@ BEGIN TRY
 		SET @xmlParam2 = NULL
 	IF LTRIM(RTRIM(@xmlParam3)) = ''
 		SET @xmlParam3 = NULL
+	IF LTRIM(RTRIM(@xmlParamDS)) = ''
+		SET @xmlParamDS = NULL
+	IF LTRIM(RTRIM(@xmlParamDS)) = ''
+		SET @xmlParamDSS = NULL
 
-	
 		IF @ysnDeliverySheet = 0
 		BEGIN
 			--SCALE TICKET
@@ -354,6 +359,240 @@ BEGIN TRY
 				[intStorageScheduleId] INT
 			)
 
+			IF LTRIM(RTRIM(@xmlParamDS)) != ''
+			BEGIN
+				--DELIVERY SHEET
+				DECLARE @temp_xml_deliverysheet_sc TABLE 
+				(
+					[intDeliverySheetId] INT NOT NULL,
+					[intEntityId] INT NOT NULL, 
+					[intCompanyLocationId] INT NOT NULL, 
+					[intItemId] INT NULL, 
+					[intDiscountId] INT NULL, 
+					[strDeliverySheetNumber] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+					[dtmDeliverySheetDate] DATETIME NULL DEFAULT GETDATE(), 
+					[intCurrencyId] INT NULL,
+					[intTicketTypeId] INT NULL, 
+					[intSplitId] INT NULL, 
+					[strSplitDescription] NVARCHAR(255) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '',
+					[intFarmFieldId] INT NULL,
+					[dblGross] NUMERIC(38, 20) NULL DEFAULT ((0)),
+					[dblShrink] NUMERIC(38, 20) NULL DEFAULT ((0)),
+					[dblNet] NUMERIC(38, 20) NULL DEFAULT ((0)),
+					[intStorageScheduleRuleId] INT NULL, 
+					[intCompanyId] INT NULL,
+					[ysnPost] BIT NULL DEFAULT (0),
+					[ysnLockSummaryGrid] BIT NULL DEFAULT (0),
+					[ysnExport] BIT NULL DEFAULT (0),
+					[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+				)
+				EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParamDS
+
+				INSERT INTO @temp_xml_deliverysheet_sc
+				SELECT *
+				FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblSCDeliverySheet', 2) WITH 
+				(
+					[intDeliverySheetId] INT,
+					[intEntityId] INT, 
+					[intCompanyLocationId] INT, 
+					[intItemId] INT, 
+					[intDiscountId] INT, 
+					[strDeliverySheetNumber] NVARCHAR(MAX),
+					[dtmDeliverySheetDate] DATETIME, 
+					[intCurrencyId] INT,
+					[intTicketTypeId] INT, 
+					[intSplitId] INT, 
+					[strSplitDescription] NVARCHAR(255),
+					[intFarmFieldId] INT,
+					[dblGross] NUMERIC(38, 20),
+					[dblShrink] NUMERIC(38, 20),
+					[dblNet] NUMERIC(38, 20),
+					[intStorageScheduleRuleId] INT, 
+					[intCompanyId] INT,
+					[ysnPost] BIT,
+					[ysnLockSummaryGrid] BIT,
+					[ysnExport] BIT,
+					[strCountyProducer] NVARCHAR(MAX)
+				)
+
+				--DELIVERY SHEET DISCOUNT
+				DECLARE @temp_xml_qmdstable_sc TABLE 
+				(
+					[intTicketDiscountId] INT NOT NULL,
+					[dblGradeReading] DECIMAL(24, 10) NULL, 
+					[strCalcMethod] NVARCHAR COLLATE Latin1_General_CI_AS NULL,
+					[strShrinkWhat] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+					[dblShrinkPercent] DECIMAL(24, 10) NULL,  
+					[dblDiscountAmount] DECIMAL(24, 10) NULL,
+					[dblDiscountDue] DECIMAL(24, 10) NULL,
+					[dblDiscountPaid] DECIMAL(24, 10) NULL,
+					[ysnGraderAutoEntry] BIT NULL, 
+					[intDiscountScheduleCodeId] INT NULL,
+					[dtmDiscountPaidDate] DATETIME NULL, 	 
+					[intTicketId] INT NULL, 
+					[intTicketFileId] INT NULL, 
+					[strSourceType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
+					[intSort] INT NULL ,
+					[strDiscountChargeType] NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL
+				)
+				EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParam2
+
+				INSERT INTO @temp_xml_qmdstable_sc
+				SELECT *
+				FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblQMTicketDiscount', 2) WITH 
+				(
+					[intTicketDiscountId] INT,
+					[dblGradeReading] DECIMAL(24, 10),
+					[strCalcMethod] NVARCHAR,
+					[strShrinkWhat] NVARCHAR(50), 
+					[dblShrinkPercent] DECIMAL(24, 10),  
+					[dblDiscountAmount] DECIMAL(24, 10),
+					[dblDiscountDue] DECIMAL(24, 10),
+					[dblDiscountPaid] DECIMAL(24, 10),
+					[ysnGraderAutoEntry] BIT, 
+					[intDiscountScheduleCodeId] INT,
+					[dtmDiscountPaidDate] DATETIME, 	 
+					[intTicketId] INT, 
+					[intTicketFileId] INT, 
+					[strSourceType] NVARCHAR(30),
+					[intSort] INT,
+					[strDiscountChargeType] NVARCHAR(30)
+				)
+
+				--DELIVERY SHEET SUMMARY
+				DECLARE @temp_xml_splitdstable_sc TABLE 
+				(
+					[intDeliveySheetSplitId] INT NOT NULL,
+					[intDeliverySheetId] INT NOT NULL, 
+					[intEntityId] INT NOT NULL, 
+					[dblSplitPercent] DECIMAL(18, 6) NOT NULL, 
+					[intStorageScheduleTypeId] INT NULL,
+					[strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
+					[intStorageScheduleRuleId] INT NULL
+				)
+				EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParamDSS
+		
+				INSERT INTO @temp_xml_splitdstable_sc
+				SELECT *
+				FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblSCDeliverySheetSplit', 2) WITH 
+				(
+					[intDeliverySheetSplitId] INT, 
+					[intDeliverySheetId] INT,
+					[intEntityId] INT, 
+					[dblSplitPercent] DECIMAL(18, 6), 
+					[intStorageScheduleTypeId] INT,
+					[strDistributionOption] NVARCHAR(3),
+					[intStorageScheduleRuleId] INT
+				)
+
+				INSERT INTO tblSCDeliverySheet (
+					[intEntityId]
+					,[intCompanyLocationId]
+					,[intItemId]
+					,[intDiscountId]
+					,[strDeliverySheetNumber]
+					,[dtmDeliverySheetDate]
+					,[intCurrencyId]
+					,[intTicketTypeId]
+					,[intSplitId]
+					,[strSplitDescription]
+					,[intFarmFieldId]
+					,[dblGross]
+					,[dblShrink]
+					,[dblNet]
+					,[intStorageScheduleRuleId]
+					,[intCompanyId]
+					,[ysnPost]
+					,[ysnLockSummaryGrid]
+					,[ysnExport]
+					,[strCountyProducer]
+					,[intConcurrencyId]
+				)
+				SELECT  
+					[intEntityId]							= SCD.intEntityId
+					,[intCompanyLocationId]					= SCD.intCompanyLocationId
+					,[intItemId]							= SCD.intItemId
+					,[intDiscountId]						= SCD.intDiscountId
+					,[strDeliverySheetNumber]				= SCD.strDeliverySheetNumber
+					,[dtmDeliverySheetDate]					= SCD.dtmDeliverySheetDate
+					,[intCurrencyId]						= SCD.intCurrencyId
+					,[intTicketTypeId]						= SCD.intTicketTypeId
+					,[intSplitId]							= SCD.intSplitId
+					,[strSplitDescription]					= SCD.strSplitDescription
+					,[intFarmFieldId]						= SCD.intFarmFieldId
+					,[dblGross]								= SCD.dblGross
+					,[dblShrink]							= SCD.dblShrink
+					,[dblNet]								= SCD.dblNet
+					,[intStorageScheduleRuleId]				= SCD.intStorageScheduleRuleId
+					,[intCompanyId]							= SCD.intCompanyId
+					,[ysnPost]								= SCD.ysnPost
+					,[ysnLockSummaryGrid]					= SCD.ysnLockSummaryGrid
+					,[ysnExport]							= SCD.ysnExport
+					,[strCountyProducer]					= SCD.strCountyProducer
+					,[intConcurrencyId]						= 1
+				FROM @temp_xml_deliverysheet_sc SCD
+
+				INSERT INTO tblQMTicketDiscount
+				(
+					[dblGradeReading]
+					,[strCalcMethod]
+					,[strShrinkWhat] 
+					,[dblShrinkPercent]
+					,[dblDiscountAmount]
+					,[dblDiscountDue]
+					,[dblDiscountPaid]
+					,[ysnGraderAutoEntry] 
+					,[intDiscountScheduleCodeId]
+					,[dtmDiscountPaidDate] 	 
+					,[intTicketId]
+					,[intTicketFileId]
+					,[strSourceType]
+					,[intSort]
+					,[strDiscountChargeType]
+					,[intConcurrencyId]
+				)
+				SELECT  
+					[dblGradeReading]					= QM.dblGradeReading
+					,[strCalcMethod]					= QM.strCalcMethod			
+					,[strShrinkWhat]					= QM.strShrinkWhat 
+					,[dblShrinkPercent]					= QM.dblShrinkPercent
+					,[dblDiscountAmount]				= QM.dblDiscountAmount
+					,[dblDiscountDue]					= QM.dblDiscountDue
+					,[dblDiscountPaid]					= QM.dblDiscountPaid
+					,[ysnGraderAutoEntry] 				= QM.ysnGraderAutoEntry
+					,[intDiscountScheduleCodeId]		= QM.intDiscountScheduleCodeId
+					,[dtmDiscountPaidDate] 	 			= QM.dtmDiscountPaidDate
+					,[intTicketId]						= NULL
+					,[intTicketFileId]					= SCD.intDeliverySheetId
+					,[strSourceType]					= QM.strSourceType
+					,[intSort]							= QM.intSort
+					,[strDiscountChargeType]			= QM.strDiscountChargeType
+					,[intConcurrencyId]					= 1
+				FROM @temp_xml_qmdstable_sc QM
+				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
+				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+
+				INSERT INTO tblSCDeliverySheetSplit(
+					[intDeliverySheetId],
+					[intEntityId], 
+					[dblSplitPercent], 
+					[intStorageScheduleTypeId],
+					[strDistributionOption],
+					[intStorageScheduleRuleId],
+					[intConcurrencyId]
+				)
+				SELECT 
+					[intDeliverySheetId]			= DS.intDeliverySheetId 
+					,[intEntityId]					= SCDS.intEntityId 
+					,[dblSplitPercent]				= SCDS.dblSplitPercent 
+					,[intStorageScheduleTypeId]		= SCDS.intStorageScheduleTypeId
+					,[strDistributionOption]		= SCDS.strDistributionOption
+					,[intStorageScheduleRuleId]		= SCDS.intStorageScheduleRuleId
+					,[intConcurrencyId]				= 1
+				FROM @temp_xml_splitdstable_sc SCDS
+				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
+				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+			END
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
 				INSERT INTO tblSCTicket (
@@ -596,7 +835,11 @@ BEGIN TRY
 					,[strCostMethod]
 					,[intGradeId]
 					,[intWeightId]
-					,[intDeliverySheetId]
+					,(
+						SELECT DS.intDeliverySheetId FROM @temp_xml_table SC
+						INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
+						INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+					)
 					,[intCommodityAttributeId]
 					,[strElevatorReceiptNumber]
 					,[ysnRailCar]
@@ -964,7 +1207,7 @@ BEGIN TRY
 			--DELIVERY SHEET SUMMARY
 			DECLARE @temp_xml_splitdstable TABLE 
 			(
-				[intDeliveySheetSplitId] INT NOT NULL,
+				[intDeliverySheetSplitId] INT NOT NULL,
 				[intDeliverySheetId] INT NOT NULL, 
 				[intEntityId] INT NOT NULL, 
 				[dblSplitPercent] DECIMAL(18, 6) NOT NULL, 

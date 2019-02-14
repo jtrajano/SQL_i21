@@ -23,6 +23,7 @@
 	[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),  
     CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
+	CONSTRAINT [UK_tblSCDeliverySheet_intEntityId_intCompanyLocationId_intItemId_intDiscountId_intTicketTypeId] UNIQUE ([intEntityId],[intCompanyLocationId],[intItemId],[intDiscountId],[intTicketTypeId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
