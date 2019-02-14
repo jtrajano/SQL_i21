@@ -19,7 +19,11 @@
 		,d.dtmJiraUpdated
 		,d.strFixedVersion
 		,a.intConcurrencyId
-	from tblHDProject a, tblHDProjectTask b, tblHDTicket c, tblHDTicketJIRAIssue d
+		,intOriginalProjectId = a1.intProjectId
+		,strOriginalProjectName = a1.strProjectName
+	from tblHDProject a, tblHDProjectTask b, tblHDTicket c, tblHDTicketJIRAIssue d, tblHDProjectTask b1, tblHDProject a1
 	where (b.intProjectId = a.intProjectId or b.intProjectId in (select aa.intDetailProjectId from  tblHDProjectDetail aa where aa.intProjectId = a.intProjectId))
 	and c.intTicketId = b.intTicketId
 	and d.intTicketId = c.intTicketId
+	and b1.intTicketId = c.intTicketId
+	and a1.intProjectId = b1.intProjectId
