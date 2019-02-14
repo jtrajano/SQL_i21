@@ -6436,6 +6436,7 @@
     <Build Include="dbo\Views\vyuAPRptVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRptVoucherCommonData.sql" />
     <Build Include="dbo\Views\vyuAPRptWC.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKUpdateMismatchedMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
