@@ -291,7 +291,8 @@ BEGIN TRY
 					,intLotId
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-					,ysnIsStorage 
+					,ysnIsStorage
+					,ysnAllowInvoiceVoucher 
 				)
 				EXEC dbo.uspSCGetScaleItemForItemShipment 
 					 @intTicketId
@@ -549,7 +550,7 @@ BEGIN TRY
 
 	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
 	BEGIN
-		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1;
+		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1, 1;
 	END
 	
 	EXEC dbo.uspSMAuditLog 
