@@ -715,4 +715,11 @@ BEGIN
   DELETE FROM tblSMStartingNumber WHERE strTransactionType = N'DPContract'
 END
 GO
+IF EXISTS(SELECT 1 FROM tblSMGridLayout WHERE strGridLayoutFields LIKE '%{"strFieldName":"dtmPlannedAvailabilityDate","strDataType":"date","strDisplayName":"Planned Availability(Y-M)"%')
+ BEGIN
+		UPDATE tblSMGridLayout
+		SET strGridLayoutFields = REPLACE(strGridLayoutFields,'{"strFieldName":"dtmPlannedAvailabilityDate","strDataType":"date","strDisplayName":"Planned Availability(Y-M)"','{"strFieldName":"dtmPlannedAvailabilityDateYM","strDataType":"date","strDisplayName":"Planned Availability(Y-M)"')
+		WHERE strScreen = 'ContractManagement.view.Overview' and strGrid = 'grdSearch'
+ END
+GO
 PRINT('Contract 1_MasterTables End')
