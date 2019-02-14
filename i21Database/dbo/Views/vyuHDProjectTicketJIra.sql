@@ -20,6 +20,6 @@
 		,d.strFixedVersion
 		,a.intConcurrencyId
 	from tblHDProject a, tblHDProjectTask b, tblHDTicket c, tblHDTicketJIRAIssue d
-	where b.intProjectId = a.intProjectId
+	where (b.intProjectId = a.intProjectId or b.intProjectId in (select aa.intDetailProjectId from  tblHDProjectDetail aa where aa.intProjectId = a.intProjectId))
 	and c.intTicketId = b.intTicketId
 	and d.intTicketId = c.intTicketId
