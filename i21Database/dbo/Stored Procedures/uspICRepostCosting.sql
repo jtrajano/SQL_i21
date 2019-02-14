@@ -574,8 +574,11 @@ BEGIN
 		USING (
 				SELECT	intItemId = @intItemId
 						,intItemLocationId = @intItemLocationId
-						,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
-						,Cost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+						,Qty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblQty) --dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
+						,Cost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblCost) -- dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+				FROM	tblICItemUOM iu
+				WHERE	iu.intItemId = @intItemId
+						AND iu.ysnStockUnit = 1
 		) AS StockToUpdate
 			ON ItemPricing.intItemId = StockToUpdate.intItemId
 			AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
