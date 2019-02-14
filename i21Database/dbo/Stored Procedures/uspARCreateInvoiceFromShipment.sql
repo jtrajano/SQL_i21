@@ -618,8 +618,9 @@ WHERE
 		)
 	AND ICIS.strShipmentNumber NOT IN (SELECT strTransactionNumber FROM vyuARShippedItems WHERE strTransactionNumber = @ShipmentNumber)
 
-IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice) AND ISNULL(@IgnoreNoAvailableItemError,0) = 0
+IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
 	BEGIN
+		IF ISNULL(@IgnoreNoAvailableItemError,0) = 1 RETURN 0;
 		RAISERROR('There is no available item to Invoice.', 16, 1);
 		RETURN 0;
 	END
