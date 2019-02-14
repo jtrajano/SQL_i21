@@ -6447,6 +6447,7 @@
     <Build Include="dbo\Views\vyuAP1099DIVYear.sql" />
     <Build Include="dbo\Functions\fnAPGetIRPartialStatus.sql" />
     <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKUpdateMismatchedMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
