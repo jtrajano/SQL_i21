@@ -428,7 +428,8 @@ BEGIN TRY
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
 	WHERE F.intWorkOrderId = @intWorkOrderId
 		AND F.dblYieldQuantity <> 0
-
+		AND F.intItemTypeId in (1,3)
+		
 	WHILE @intProductionSummaryId IS NOT NULL
 	BEGIN
 		SELECT @intItemId = NULL
