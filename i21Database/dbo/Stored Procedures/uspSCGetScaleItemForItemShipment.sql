@@ -78,6 +78,7 @@ BEGIN TRY
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
 						,ysnIsStorage = 0
+						,ysnAllowInvoice = CASE WHEN (ISNULL(ScaleTicket.dblUnitBasis,0) + ISNULL(ScaleTicket.dblUnitPrice,0)) = 0 THEN 0 ELSE 1 END
 				FROM	tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
 						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
