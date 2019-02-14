@@ -128,6 +128,8 @@ BEGIN TRY
 		  ,intContractHeaderId
 		  ,intInventoryReceiptItemId
 		  ,intContractDetailId
+		  ,intSubLocationId
+		  ,intStorageLocationId
 		  ,dblFranchiseAmount)
 	/* Weight Claim Details */
 	SELECT intWeightClaimId = WC.intWeightClaimId
@@ -161,6 +163,8 @@ BEGIN TRY
 		,intContractHeaderId = CH.intContractHeaderId
 		,intInventoryReceiptItemId = NULL
 		,intContractDetailId = WCD.intContractDetailId
+		,intSubLocationId = CD.intSubLocationId
+		,intStorageLocationId = CD.intStorageLocationId
 		,dblFranchiseAmount = ROUND(CASE 
 				 WHEN CU.ysnSubCurrency = 1
 					THEN (dbo.fnCTConvertQtyToTargetItemUOM(
@@ -218,6 +222,8 @@ BEGIN TRY
 		,intContractHeaderId = NULL
 		,intInventoryReceiptItemId = NULL 
 		,intContractDetailId = NULL
+		,intSubLocationId = NULL
+		,intStorageLocationId = NULL
 		,dblFranchiseAmount = 0
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimOtherCharges WCOC ON WCOC.intWeightClaimId = WC.intWeightClaimId
@@ -291,6 +297,8 @@ BEGIN TRY
 			,intContractHeaderId
 			,intInventoryReceiptItemId
 			,intContractDetailId
+			,intSubLocationId
+			,intStorageLocationId
 			,dblFranchiseAmount)
 		SELECT dblNetShippedWeight
 			,dblWeightLoss
@@ -307,6 +315,8 @@ BEGIN TRY
 			,intContractHeaderId
 			,intInventoryReceiptItemId
 			,intContractDetailId
+			,intSubLocationId
+			,intStorageLocationId
 			,dblFranchiseAmount
 		FROM @voucherDetailData
 		WHERE intPartyEntityId = @intVendorEntityId
