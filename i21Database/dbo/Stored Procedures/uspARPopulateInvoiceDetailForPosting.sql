@@ -1300,7 +1300,7 @@ SELECT
     ,[intAllowNegativeInventory]        = ICIL.[intAllowNegativeInventory]
     ,[ysnStockTracking]					= @OneBit
     ,[intItemLocationId]                = ICIL.[intItemLocationId]
-    ,[dblLastCost]                      = ICIP.[dblLastCost] * ICIU.[dblUnitQty] --ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemUOMId], ISNULL(ICSUOM.[intItemUOMId], ARID.[intItemUOMId]), @OneDecimal), @ZeroDecimal) --ICIP.[dblLastCost]
+    ,[dblLastCost]                      = ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemUOMId], ISNULL(ICSUOM.[intItemUOMId], ARID.[intItemUOMId]), ICIP.[dblLastCost]), @ZeroDecimal) --ICIP.[dblLastCost]
     ,[intCategoryId]                    = ICI.[intCategoryId]
     ,[ysnRetailValuation]				= ICC.[ysnRetailValuation]
     ,[dblPrice]                         = ARID.[dblPrice]
