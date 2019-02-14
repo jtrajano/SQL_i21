@@ -294,7 +294,7 @@ BEGIN TRY
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage
-					,ysnAllowInvoiceVoucher 
+					,ysnAllowVoucher 
 				)
 				EXEC dbo.uspSCGetScaleItemForItemShipment 
 					 @intTicketId
