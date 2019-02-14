@@ -24,7 +24,7 @@ strRoute,
 tblSMLog.dtmDate,
 CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX)) as strRecordNo,
 tblSMLog.intEntityId,
-case when tblSMTransaction.strTransactionNo is null then CAST(tblSMTransaction.intTransactionId AS NVARCHAR(MAX))
+case when tblSMTransaction.strTransactionNo is null then CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX))
 else tblSMTransaction.strTransactionNo end as 'strReference',
 tblSMTransaction.dtmDate as 'dtmTransactionDate'
 FROM tblSMLog tblSMLog
