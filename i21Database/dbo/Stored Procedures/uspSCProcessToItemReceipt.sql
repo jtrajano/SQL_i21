@@ -401,7 +401,8 @@ BEGIN TRY
 								,intSubLocationId
 								,intStorageLocationId
 								,ysnIsStorage
-								,strSourceTransactionId  
+								,strSourceTransactionId 
+								,ysnAllowVoucher 
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @intEntityId, @ysnDPStorage;
