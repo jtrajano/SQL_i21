@@ -80,6 +80,7 @@ SELECT 	 SQ.intContractDetailId
 		,CH.strCustomerContract
 		,CB.strContractBasis
 		,CD.dtmPlannedAvailabilityDate
+		,dtmPlannedAvailabilityDateYM = CD.dtmPlannedAvailabilityDate
 		,SQ.strCommodityCode
 		,QA.strSampleStatus
 		,QA.dblApprovedQty
