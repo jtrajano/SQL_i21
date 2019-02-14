@@ -387,9 +387,9 @@ SELECT * FROM (
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	NULL
 		,[intTermId]				=	NULL
-		,[strContractNumber]		=	CAST(F1.strContractNumber AS NVARCHAR(100))
+		,[strContractNumber]		=	CAST(CH.strContractNumber AS NVARCHAR(100))
 		,[strBillOfLading]			=	A.strBillOfLading
-		,[intContractHeaderId]		=	F1.intContractHeaderId
+		,[intContractHeaderId]		=	CH.intContractHeaderId
 		,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 		,[intContractSequence]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN CD.intContractSeq ELSE NULL END
 		,[intScaleTicketId]			=	G.intTicketId
@@ -461,12 +461,12 @@ SELECT * FROM (
 		LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 		LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityId]
 		--FOR REVIEW, JOINING FOR CONTRACT IS ALREADY DEFINED ABOVE
-		LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
-			ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = ISNULL(F2.intContractDetailId,0)
+		-- LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
+		-- 	ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = ISNULL(F2.intContractDetailId,0)
 		LEFT JOIN tblSCTicket G ON (CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE 0 END) = G.intTicketId
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-		LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = A.intCurrencyId) 
+		LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = compPref.intDefaultCurrencyId AND F.intToCurrencyId = A.intCurrencyId) 
 		LEFT JOIN dbo.tblSMCurrencyExchangeRateDetail G1 ON F.intCurrencyExchangeRateId = G1.intCurrencyExchangeRateId AND G1.dtmValidFromDate = (SELECT CONVERT(char(10), GETDATE(),126))
 		LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 		LEFT JOIN dbo.tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId
@@ -477,10 +477,8 @@ SELECT * FROM (
 		LEFT JOIN dbo.tblCTWeightGrade J ON CH.intWeightId = J.intWeightGradeId
 		LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = B.intForexRateTypeId
 		LEFT JOIN dbo.tblSMTaxGroup TG ON TG.intTaxGroupId = B.intTaxGroupId
-		OUTER APPLY 
-		(
-			SELECT TOP 1 intAccountId, strAccountId, strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing')
-		) apClearing
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable(B.intItemId, loc.intItemLocationId, 'AP Clearing') itemAccnt
+		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		OUTER APPLY 
 		(
 			SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -498,8 +496,8 @@ SELECT * FROM (
 		) Loads
 		WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 		AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
-							CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
-										AND F2.intPricingTypeId NOT IN (2, 3, 4, 5) --AP-4971
+							CASE WHEN ISNULL(CH.intContractTypeId,1) = 1 
+										AND CD.intPricingTypeId NOT IN (2, 3, 4, 5) --AP-4971
 								THEN 1 ELSE 0 END
 						ELSE 1 END)
 		AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
