@@ -12,7 +12,7 @@
 					FROM tblAPPaymentDetail 
 					WHERE intPaymentId = APP.intPaymentId),0) as dblDiscount,
 			ISNULL(APP.dblWithheld,0) AS dblWithheldAmount,
-			ISNULL(CMBT.dblAmount,0) AS dblAmount,
+			CASE WHEN APP.strNotes  LIKE '%Void transaction for%' THEN ISNULL(-CMBT.dblAmount,0) ELSE ISNULL(CMBT.dblAmount,0)  END AS dblAmount,
 			CMBA.strCbkNo,
 			--CMBT.strMemo, --Remove Field notes from CM
 			APP.strNotes,
