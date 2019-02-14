@@ -17,11 +17,11 @@ SET ANSI_WARNINGS ON
 
 BEGIN
 
-	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable;
-	DECLARE @EntriesForInvoicePerSite AS InvoiceIntegrationStagingTable;
-	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable;
-	DECLARE @EntriesForInvoiceCount INT;
-	DECLARE @EntriesForInvoiceActiveId INT;
+	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+	DECLARE @EntriesForInvoicePerSite AS InvoiceIntegrationStagingTable
+	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
+	--DECLARE @EntriesForInvoiceCount INT;
+	--DECLARE @EntriesForInvoiceActiveId INT;
 
     DECLARE @CCRItemToARItem TABLE
     (
@@ -59,11 +59,10 @@ BEGIN
 
     SET @success = 0
     
-
     INSERT INTO @EntriesForInvoice(
         [strTransactionType]
         ,[strSourceTransaction]
-        ,[intSourceId]
+        --,[intSourceId]
         ,[strSourceId]
         ,[intEntityCustomerId]
         ,[intCompanyLocationId]
@@ -84,10 +83,11 @@ BEGIN
         ,[ysnInventory]
 		,[intSalesAccountId]
 		,[strComments]
+		--,[intInvoiceId]
     )
     SELECT [strTransactionType] = 'Credit Memo' 
         ,[strSourceTransaction] = 'Credit Card Reconciliation'
-        ,[intSourceId] = null
+        --,[intSourceId] = ccSiteHeader.intSiteHeaderId
         ,[strSourceId] = ccSiteDetail.intSiteDetailId
         ,[intEntityCustomerId] = ccSite.intCustomerId
         ,[intCompanyLocationId] = ccSiteHeader.intCompanyLocationId
@@ -114,6 +114,7 @@ BEGIN
         ,[ysnInventory] = 1
 		,[intSalesAccountId] = ItemAcc.intAccountId
 		,[strComments] = ccSiteHeader.strCcdReference
+		--,[intInvoiceId] = ARInvoiceDetail.intInvoiceId
     FROM tblCCSiteHeader ccSiteHeader 
     INNER JOIN vyuCCVendor ccVendor ON ccSiteHeader.intVendorDefaultId = ccVendor.intVendorDefaultId 
     INNER JOIN @CCRItemToARItem ccItem ON ccItem.intSiteHeaderId = ccSiteHeader.intSiteHeaderId
@@ -121,128 +122,139 @@ BEGIN
     LEFT JOIN vyuCCSite ccSite ON ccSite.intSiteId = ccSiteDetail.intSiteId
     LEFT JOIN vyuCCCustomer ccCustomer ON ccCustomer.intCustomerId = ccSite.intCustomerId AND ccCustomer.intSiteId = ccSite.intSiteId
 	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
+	--LEFT JOIN tblARInvoiceDetail ARInvoiceDetail ON ARInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
     WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL and ccSite.intCustomerId is not null
-		--Fixes for CCR-315
-		-- and ccSite.ysnPostNetToArCustomer = 1
-
+	--Fixes for CCR-315
+	-- and ccSite.ysnPostNetToArCustomer = 1
 
     --REMOVE -1 items
 	--and those sites that does not have customer
     DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null OR dblPrice = 0
+	
+	DECLARE @intId INT
 
-	set @EntriesForInvoiceCount = (select count(*) from @EntriesForInvoice);
+	DECLARE @CursorTran AS CURSOR
+	SET @CursorTran = CURSOR FOR
+	SELECT intId FROM @EntriesForInvoice
+	OPEN @CursorTran
+	FETCH NEXT FROM @CursorTran INTO @intId
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		
+		DELETE FROM @EntriesForInvoicePerSite
 
-	if (@EntriesForInvoiceCount > 0)
-	begin
+		INSERT INTO @EntriesForInvoicePerSite (
+			[strTransactionType]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dtmDate]
+			,[dtmShipDate]
+			,[intEntitySalespersonId]
+			,[intEntityId]
+			,[ysnPost]
+			,[intItemId]
+			,[strItemDescription]
+			,[dblQtyShipped]
+			,[dblPrice]
+			,[intTaxGroupId]
+			,[ysnRecomputeTax]
+			,[intSiteDetailId]
+			,[ysnInventory]
+			,[intSalesAccountId]
+			,[strComments]
+		)
+		SELECT [strTransactionType]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[dtmDate]
+			,[dtmShipDate]
+			,[intEntitySalespersonId]
+			,[intEntityId]
+			,[ysnPost]
+			,[intItemId]
+			,[strItemDescription]
+			,[dblQtyShipped]
+			,[dblPrice]
+			,[intTaxGroupId]
+			,[ysnRecomputeTax]
+			,[intSiteDetailId]
+			,[ysnInventory]
+			,[intSalesAccountId]
+			,[strComments]
+		FROM @EntriesForInvoice WHERE intId = @intId
 
 		IF(@Post = 1)
 		BEGIN
+	
+			EXEC [dbo].[uspARProcessInvoices]
+				@InvoiceEntries	= @EntriesForInvoicePerSite
+				,@LineItemTaxEntries = @TaxDetails
+				,@UserId			 = @UserId
+				,@GroupingOption	 = 7
+				,@RaiseError		 = 1
+				,@ErrorMessage		 = @ErrorMessage OUTPUT
+				,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+				,@UpdatedIvoices	 = @UpdatedIvoices OUTPUT
 
-			While (Select Count(*) From @EntriesForInvoice) > 0
-			Begin
-				Select Top 1 @EntriesForInvoiceActiveId = intId From @EntriesForInvoice;
-				delete from @EntriesForInvoicePerSite;
-				insert into @EntriesForInvoicePerSite
-				(
-					[strTransactionType]
-					,[strSourceTransaction]
-					,[intSourceId]
-					,[strSourceId]
-					,[intEntityCustomerId]
-					,[intCompanyLocationId]
-					,[intCurrencyId]
-					,[intTermId]
-					,[dtmDate]
-					,[dtmShipDate]
-					,[intEntitySalespersonId]
-					,[intEntityId]
-					,[ysnPost]
-					,[intItemId]
-					,[strItemDescription]
-					,[dblQtyShipped]
-					,[dblPrice]
-					,[intTaxGroupId]
-					,[ysnRecomputeTax]
-					,[intSiteDetailId]
-					,[ysnInventory]
-					,[intSalesAccountId]
-					,[strComments]
-				)
-				select top 1
-					[strTransactionType]
-					,[strSourceTransaction]
-					,[intSourceId]
-					,[strSourceId]
-					,[intEntityCustomerId]
-					,[intCompanyLocationId]
-					,[intCurrencyId]
-					,[intTermId]
-					,[dtmDate]
-					,[dtmShipDate]
-					,[intEntitySalespersonId]
-					,[intEntityId]
-					,[ysnPost]
-					,[intItemId]
-					,[strItemDescription]
-					,[dblQtyShipped]
-					,[dblPrice]
-					,[intTaxGroupId]
-					,[ysnRecomputeTax]
-					,[intSiteDetailId]
-					,[ysnInventory]
-					,[intSalesAccountId]
-					,[strComments]
-				from @EntriesForInvoice;
-
-				EXEC [dbo].[uspARProcessInvoices]
-						 @InvoiceEntries	= @EntriesForInvoicePerSite
-						,@LineItemTaxEntries = @TaxDetails
-						,@UserId			= @UserId
-						,@GroupingOption	= 7
-						,@RaiseError		= 1
-						,@ErrorMessage		= @ErrorMessage OUTPUT
-						,@CreatedIvoices	= @CreatedIvoices OUTPUT
-						,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
-
-				IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
-
-				Delete @EntriesForInvoice Where intId = @EntriesForInvoiceActiveId;
-			End
+			IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
 
 		END
 		ELSE IF (@Post = 0)
-		BEGIN		
-			DECLARE @intInvoiceId1 INT = NULL
-		
-			SELECT @intInvoiceId1 = arInvoiceDetail.intInvoiceId FROM tblCCSiteDetail ccSiteDetail 
-				INNER JOIN tblARInvoiceDetail arInvoiceDetail ON arInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
-			WHERE ccSiteDetail.intSiteHeaderId = @intSiteHeaderId
-			GROUP BY arInvoiceDetail.intInvoiceId
-			IF(@intInvoiceId1 IS NOT NULL)
-			BEGIN
-				UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId1
+		BEGIN
 
-				EXEC [dbo].[uspARProcessInvoices]
-						 @InvoiceEntries	= @EntriesForInvoice
-						,@LineItemTaxEntries = @TaxDetails
-						,@UserId			= @UserId
-						,@GroupingOption	= 7
-						,@RaiseError		= 1
-						,@ErrorMessage		= @ErrorMessage OUTPUT
-						,@CreatedIvoices	= @CreatedIvoices OUTPUT
-						,@UpdatedIvoices	= @UpdatedIvoices OUTPUT
+			DECLARE @intInvoiceId INT = NULL
 
-				--DELETE Invoice Transaction
-				DELETE FROM tblARInvoice WHERE intInvoiceId IN (
-					SELECT DISTINCT C.intInvoiceId 
-						FROM tblCCSiteHeader A 
-					JOIN tblCCSiteDetail B ON B.intSiteHeaderId = A.intSiteHeaderId
-					JOIN tblARInvoiceDetail C ON C.intSiteDetailId = B.intSiteDetailId
-						WHERE A.intSiteHeaderId = @intSiteHeaderId)
+			SELECT DISTINCT @intInvoiceId =  B.intInvoiceId FROM @EntriesForInvoicePerSite A 
+			INNER JOIN tblARInvoiceDetail B ON B.intSiteDetailId = A.intSiteDetailId AND B.strItemDescription = A.strItemDescription	
+			
+			UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId WHERE intId = @intId
+			UPDATE @EntriesForInvoicePerSite SET intInvoiceId = @intInvoiceId	
 
-			END
+			EXEC [dbo].[uspARProcessInvoices]
+				@InvoiceEntries	= @EntriesForInvoicePerSite
+				,@LineItemTaxEntries = @TaxDetails
+				,@UserId			 = @UserId
+				,@GroupingOption	 = 7
+				,@RaiseError		 = 1
+				,@ErrorMessage		 = @ErrorMessage OUTPUT
+				,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+				,@UpdatedIvoices	 = @UpdatedIvoices OUTPUT
+
+			IF(ISNULL(@ErrorMessage,'') = '') SET @success = 1
 
 		END
 
-	end
+		FETCH NEXT FROM @CursorTran INTO @intId
+	END
+	CLOSE @CursorTran
+	DEALLOCATE @CursorTran
+
+	IF (@Post = 0)
+	BEGIN
+		-- DELETE INVOICE
+		DECLARE @intInvoiceIdDelete INT = NULL
+		DECLARE @CursorDeleteTran AS CURSOR
+		SET @CursorDeleteTran = CURSOR FOR
+		SELECT DISTINCT intInvoiceId FROM @EntriesForInvoice
+		OPEN @CursorDeleteTran
+		FETCH NEXT FROM @CursorDeleteTran INTO @intInvoiceIdDelete
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC [dbo].[uspARDeleteInvoice]
+				@intInvoiceIdDelete
+				,@UserId
+			FETCH NEXT FROM @CursorDeleteTran INTO @intInvoiceIdDelete
+		END
+	END
+
 END
