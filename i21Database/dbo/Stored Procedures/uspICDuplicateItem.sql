@@ -435,7 +435,8 @@ BEGIN
 		strCounted,
 		intCountGroupId,
 		ysnCountedDaily,
-		intSort)
+		intSort,
+		ysnStorageUnitRequired)
 	SELECT @NewItemId,
 		intLocationId,
 		intVendorId,
@@ -495,7 +496,8 @@ BEGIN
 		strCounted,
 		intCountGroupId,
 		ysnCountedDaily,
-		intSort
+		intSort,
+		ysnStorageUnitRequired
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------
@@ -1049,5 +1051,22 @@ BEGIN
 	-------------------------------------
 	-- End Duplicate Item Add-on table --
 	-------------------------------------
+
+	-- Add the audit logs
+	BEGIN 
+	DECLARE @strDescription NVARCHAR(400)
+	SELECT @ItemNo = strItemNo FROM tblICItem where intItemId = @ItemId
+	SELECT @NewItemNo = strItemNo FROM tblICItem where intItemId = @NewItemId
+
+	SET @strDescription = 'Duplicated ' + @ItemNo + ' as ' + @NewItemNo + ''
+	EXEC	dbo.uspSMAuditLog 
+				@keyValue = @NewItemId						-- Item Id. 
+				,@screenName = 'Inventory.view.Item'        -- Screen Namespace
+				,@entityId = @intUserId						-- Entity Id.
+				,@actionType = 'Duplicate'                  -- Action Type
+				,@changeDescription = @strDescription
+				,@fromValue = @ItemNo							-- Previous Value
+				,@toValue = @NewItemNo						-- New Value
+	END
 END
 GO
