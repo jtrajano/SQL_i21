@@ -38,103 +38,103 @@ BEGIN
 		  ELSE
 		  	--PAGE 79
 			 CASE WHEN ISNULL(A.dblRents,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)) --get the whole number
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)))) --add zeros after the whole number
+					REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)))) --add zeros after the whole number
+					+ CAST(FLOOR((CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)) --get the whole number
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblRents,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2)) --last two digit decimal
 			END
 			+ CASE WHEN ISNULL(A.dblRoyalties,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblRoyalties,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblRoyalties,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblRoyalties,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ CASE WHEN ISNULL(ISNULL(A.dblOtherIncome,0),0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblOtherIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblOtherIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblOtherIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblOtherIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblOtherIncome,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblOtherIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblOtherIncome,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblOtherIncome,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblOtherIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblOtherIncome,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ CASE WHEN ISNULL(A.dblFederalIncome,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalIncome,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblFederalIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblFederalIncome,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblFederalIncome,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblFederalIncome,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalIncome,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ CASE WHEN ISNULL(A.dblBoatsProceeds,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblBoatsProceeds,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblBoatsProceeds,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblBoatsProceeds,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblBoatsProceeds,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblBoatsProceeds,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblBoatsProceeds,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblBoatsProceeds,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblBoatsProceeds,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblBoatsProceeds,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblBoatsProceeds,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ CASE WHEN ISNULL(A.dblMedicalPayments,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblMedicalPayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblMedicalPayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblMedicalPayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblMedicalPayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblMedicalPayments,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblMedicalPayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblMedicalPayments,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblMedicalPayments,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblMedicalPayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblMedicalPayments,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ CASE WHEN ISNULL(A.dblNonemployeeCompensation,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblNonemployeeCompensation,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblNonemployeeCompensation,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblNonemployeeCompensation,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblNonemployeeCompensation,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblNonemployeeCompensation,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblNonemployeeCompensation,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblNonemployeeCompensation,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblNonemployeeCompensation,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblNonemployeeCompensation,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblNonemployeeCompensation,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ CASE WHEN ISNULL(A.dblSubstitutePayments,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblSubstitutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblSubstitutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblSubstitutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblSubstitutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblSubstitutePayments,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblSubstitutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblSubstitutePayments,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblSubstitutePayments,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblSubstitutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblSubstitutePayments,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ REPLICATE('0',12) --Payment Amount 9
 			+ CASE WHEN ISNULL(A.dblCropInsurance,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblCropInsurance,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblCropInsurance,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblCropInsurance,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblCropInsurance,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblCropInsurance,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblCropInsurance,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblCropInsurance,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblCropInsurance,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblCropInsurance,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblCropInsurance,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ CASE WHEN ISNULL(A.dblParachutePayments,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblParachutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblParachutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblParachutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblParachutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblParachutePayments,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblParachutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblParachutePayments,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblParachutePayments,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblParachutePayments,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblParachutePayments,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 			+ CASE WHEN ISNULL(A.dblGrossProceedsAtty,0) > @maxAmount 
-				THEN CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblGrossProceedsAtty,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblGrossProceedsAtty,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblGrossProceedsAtty,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblGrossProceedsAtty,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblGrossProceedsAtty,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 				ELSE 
-					CAST(FLOOR((CAST(ISNULL(A.dblGrossProceedsAtty,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblGrossProceedsAtty,0))) AS NVARCHAR(100))))
+					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblGrossProceedsAtty,0))) AS NVARCHAR(100))))
+					+ CAST(FLOOR((CAST(ISNULL(A.dblGrossProceedsAtty,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblGrossProceedsAtty,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
 		+ REPLICATE('0',12) --Section 409A deferals
