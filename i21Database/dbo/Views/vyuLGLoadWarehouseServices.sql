@@ -39,7 +39,7 @@ SELECT LWS.intLoadWarehouseServicesId
 FROM tblLGLoadWarehouse LW
 JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
 JOIN tblLGWarehouseRateMatrixDetail WMD ON LWS.intWarehouseRateMatrixDetailId = WMD.intWarehouseRateMatrixDetailId
-JOIN tblICItemUOM IU ON IU.intItemUOMId = LWS.intItemUOMId 
-JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN tblICItem I ON I.intItemId = LWS.intItemId
+LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LWS.intItemUOMId 
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblAPBill B ON B.intBillId = LWS.intBillId
