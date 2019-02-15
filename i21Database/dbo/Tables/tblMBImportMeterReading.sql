@@ -9,6 +9,8 @@
     [dblCurrentAmount] NUMERIC(18, 6) NULL,
 	[intUserId] INT NOT NULL,
 	[dtmDate] DATETIME NOT NULL,
+	[ysnValid] BIT NOT NULL,
+	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblMBImportMeterReading] PRIMARY KEY ([intImportMeterReadingId])
 )
 GO
