@@ -178,7 +178,7 @@ INTO #final
 FROM (
 	SELECT DISTINCT dtmDate
 		, [Receive In] + ISNULL(tranDSInQty, 0) as [dblReceiveIn]
-		, ISNULL([Ship Out], 0) + ISNULL(dblInvoiceQty, 0) as [dblShipOut]
+		, ISNULL([Ship Out], 0) as [dblShipOut]
 		, Adjustments as dblAdjustments
 		, dblCount,dblInvoiceQty
 		, ISNULL([InventoryBalance], 0) as [dblInventoryBalance]
