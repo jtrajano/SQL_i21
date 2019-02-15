@@ -836,9 +836,10 @@ BEGIN TRY
 					,[intGradeId]
 					,[intWeightId]
 					,(
-						SELECT DS.intDeliverySheetId FROM @temp_xml_table SC
+						SELECT TOP 1 DS.intDeliverySheetId FROM @temp_xml_table SC
 						INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
-						INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+						INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber
+						WHERE SC.strTicketNumber = strTicketNumber 
 					)
 					,[intCommodityAttributeId]
 					,[strElevatorReceiptNumber]
