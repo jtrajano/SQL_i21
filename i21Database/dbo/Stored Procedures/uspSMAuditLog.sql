@@ -42,7 +42,7 @@ CREATE TABLE #tmpAuditEntries (
 
 IF (ISNULL(@changeDescription, '') <> '')
 BEGIN
-	SET @children = '{"change":"' + @changeDescription + '","iconCls":"small-menu-maintenance","from":"' + @fromValue + '","to":"' + @toValue + '","leaf":true}'	
+	SET @children = '{"change":"' + ISNULL(@changeDescription,'') + '","iconCls":"small-menu-maintenance","from":"' + ISNULL(@fromValue,'') + '","to":"' + ISNULL(@toValue,'') + '","leaf":true}'	
 END
 
 IF (ISNULL(@details, '') <> '')
@@ -50,7 +50,7 @@ BEGIN
 	SET @children = @details
 END
 
-SET @jsonData = '{"action":"' + @actionType + '","change":"Updated - Record: ' + @keyValue + '","iconCls":"' + @actionIcon + '","children":['+ @children +']}'
+SET @jsonData = '{"action":"' + ISNULL(@actionType,'') + '","change":"Updated - Record: ' + ISNULL(@keyValue,'') + '","iconCls":"' + ISNULL(@actionIcon,'') + '","children":['+ ISNULL(@children,'') +']}'
 
 --=====================================================================================================================================
 -- 	INSERT AUDIT ENTRY
@@ -125,7 +125,11 @@ WITH Audit_CTE AS (
 	, min(case SourceTable.[name] when 'hidden' then value end) as [ysnHidden]
 	, min(case SourceTable.[name] when 'isField' then value end) as [ysnField]
 	from (
-		select * from fnSMJson_Parse(REPLACE(@json, ':null', ':"null"')) where [name] NOT IN ('leaf', 'iconCls') AND ([kind] <> 'OBJECT')
+	SELECT * 
+			FROM fnSMJson_Parse(REPLACE(REPLACE(@json, ':null', ':"null"'), ',"children":[]', ''))
+			WHERE [name] NOT IN ('leaf', 'iconCls') AND ([kind] <> 'OBJECT')
+			
+		--select * from fnSMJson_Parse(REPLACE(@json, ':null', ':"null"')) where [name] NOT IN ('leaf', 'iconCls') AND ([kind] <> 'OBJECT')
 	) SourceTable 
 	group by SourceTable.parent
 )
