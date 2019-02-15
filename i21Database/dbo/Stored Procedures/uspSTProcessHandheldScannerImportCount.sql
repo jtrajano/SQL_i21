@@ -230,6 +230,7 @@ BEGIN TRY
 										   , @dblRecipeInputQty = ISNULL(dblRecipeQuantity, 0)
 										   , @intInputItemId = intItemId
 										   , @intInputItemUOMId = intItemUOMId
+										   , @intItemLocationId = intItemLocationId
 									FROM vyuSTItemRecipeAndStockQty
 									WHERE intRecipeId = @intRecipeId 
 										AND intRecipeItemTypeId = 1
@@ -241,8 +242,19 @@ BEGIN TRY
 
 									SET @dblInputItemComputedQty = @dblRecipeInputStockQty + (@dblHandheldOutputItemCount * @dblRecipeInputQty)
 
-									-- UPDATE INOUT Item
+									-- UPDATE INPUT Item
 									BEGIN TRY
+---- TEST
+--PRINT 'Will update Input Item'
+--PRINT '@strCountNo: ' + @strCountNo
+--PRINT '@dblInputItemComputedQty: ' + CAST(@dblInputItemComputedQty AS NVARCHAR(50)) 
+--PRINT '@UserId: ' + CAST(@UserId AS NVARCHAR(10))
+--PRINT '@intInputItemId: ' + CAST(@intInputItemId AS NVARCHAR(10))
+--PRINT '@intItemLocationId: ' + CAST(@intItemLocationId AS NVARCHAR(10))
+--PRINT '@intInputItemUOMId: ' + CAST(@intInputItemUOMId AS NVARCHAR(10))
+
+
+
 										EXEC uspICUpdateInventoryPhysicalCount
 											-- Count No and Physical Count are required
 											@strCountNo = @strCountNo,
@@ -269,12 +281,16 @@ BEGIN TRY
 											-- Set these to change the storage unit/loc
 											@intStorageLocationId = NULL,
 											@intStorageUnitId = NULL
+
+---- TEST
+--PRINT 'SUCCESS'
 									END TRY
 									BEGIN CATCH
 										-- Flag Success
 										SET @ysnSuccess = CAST(0 AS BIT)
 										SET @strStatusMsg = 'Updating Recipe Input Item: ' + ERROR_MESSAGE()
-
+---- TEST
+--PRINT 'FAILED: ' + @strStatusMsg
 										-- ROLLBACK
 										GOTO ExitWithRollback
 									END CATCH
@@ -284,7 +300,6 @@ BEGIN TRY
 					-- ===================================================================================
 					-- End - Check if Item Has recipe ----------------------------------------------------
 					-- ===================================================================================
-
 
 
 					-- Remove record after use
