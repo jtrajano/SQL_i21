@@ -46,6 +46,8 @@
 	,@strPrintSiteAddress			NVARCHAR(MAX)	 =	 'None'
 	,@strPrimaryDepartment			NVARCHAR(MAX)	 =	 'Card'
 	,@strExportFileMapping			NVARCHAR(MAX)	 =	 NULL
+	,@strDetailDisplay			    NVARCHAR(MAX)	 =	 NULL
+	
 	
 	---------------------------------------------------------
 
@@ -81,55 +83,63 @@ BEGIN
 	---------------------------------------------------------
 	--					 REQUIRED FIELDS				   --
 	---------------------------------------------------------
-	IF(@strCustomerId = NULL OR @strCustomerId = '')
+	IF(ISNULL(@strCustomerId,'') = '')
 	BEGIN
 		SET @strCustomerId = NEWID()
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Account number is required')
 		SET @ysnHasError = 1
 	END
-	IF(@strAccountStatusCodeId = NULL OR @strAccountStatusCodeId = '')
+	IF(ISNULL(@strAccountStatusCodeId,'') = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Account status code is required')
 		SET @ysnHasError = 1
 	END
-	IF(@strTermsCode = NULL OR @strTermsCode = '')
+	IF(ISNULL(@strTermsCode,'') = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Terms code is required')
 		SET @ysnHasError = 1
 	END
-	IF(@strDiscountScheduleId = NULL OR @strDiscountScheduleId = '')
+	IF(ISNULL(@strDiscountScheduleId,'') = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog(strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Discount schedule is required')
 		SET @ysnHasError = 1
 	END
-	IF(@strRemotePriceProfileId = NULL OR @strRemotePriceProfileId = '')
+	IF(ISNULL(@strRemotePriceProfileId,'') = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Remote price profile is required')
 		SET @ysnHasError = 1
 	END
-	IF(@strExtRemotePriceProfileId = NULL OR @strExtRemotePriceProfileId = '')
+	IF(ISNULL(@strExtRemotePriceProfileId,'') = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog(strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Ext Remote price profile is required')
 		SET @ysnHasError = 1
 	END
-	IF(@strSalesPersonId = NULL OR @strSalesPersonId = '')
+	IF(ISNULL(@strSalesPersonId,'') = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog(strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Salesperson is required')
 		SET @ysnHasError = 1
 	END
-	IF(@strInvoiceCycle = NULL OR @strInvoiceCycle = '')
+	IF(ISNULL(@strInvoiceCycle,'') = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Invoice cycle is required')
 		SET @ysnHasError = 1
 	END
+	IF(ISNULL(@strDetailDisplay,'') = '')
+	BEGIN
+		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+		VALUES (@strCustomerId,'Detail Display is required')
+		SET @ysnHasError = 1
+	END
+
+	
 	---------------------------------------------------------
 
 	IF(@ysnHasError = 1)
@@ -388,6 +398,16 @@ BEGIN
 	---------------------------------------------------------
 	--				VALID PREDEFINED VALUES			       --		
 	---------------------------------------------------------
+
+	--Detail Display
+	
+	IF(@strDetailDisplay NOT IN ('Card','Vehicle','DriverPin'))
+	BEGIN
+		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+		VALUES (@strCustomerId,'Invalid detail display value '+ @strDetailDisplay +'. Value should be Card, Vehicle, DriverPin only')
+		SET @ysnHasError = 1
+	END
+
 	--Print Time On Invoice
 	IF (@ysnPrintTimeOnInvoices = 'N')
 		BEGIN 
@@ -709,6 +729,7 @@ BEGIN
 			,ysnDepartmentGrouping 
 			,ysnSummaryByDeptVehicleProd
 			,intImportMapperId
+			,strDetailDisplay
 			)
 			VALUES(
 			 @intCustomerId
@@ -749,6 +770,7 @@ BEGIN
 			,@ysnDepartmentGrouping	
 			,@ysnSummaryByDeptVehicleProduct
 			,@intImportFileHeaderId
+			,@strDetailDisplay
 			)
 
 			COMMIT TRANSACTION

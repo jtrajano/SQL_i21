@@ -21,6 +21,7 @@
     [ysnSummaryByProduct]         BIT             NULL,
     [ysnSummaryByDepartment]      BIT             NULL,
     [ysnSummaryByDeptCardProd]    BIT             NULL,
+    [ysnSummaryByDriverPin]       BIT             NULL,
     [ysnSummaryByCardProd]        BIT             NULL,
     [ysnVehicleRequire]           BIT             NULL,
     [intAccountStatusCodeId]      INT             NOT NULL,
@@ -42,19 +43,20 @@
     [intLastModifiedUserId]       INT             NULL,
     [dtmLastModified]             DATETIME        NULL,
     [intConcurrencyId]            INT             CONSTRAINT [DF_tblCFAccount_intConcurrencyId] DEFAULT ((1)) NULL,
-	[ysnDepartmentGrouping]           BIT         DEFAULT ((0))   NOT NULL,
-	[ysnSummaryByDeptVehicleProd]	  BIT		  DEFAULT ((0))	  NOT NULL,
-	[strPrimaryDepartment]         NVARCHAR(8)  COLLATE Latin1_General_CI_AS DEFAULT(N'Card') NOT NULL,
-	[intCustomerGroupId]       INT             NULL,
-	[intQuoteProduct1Id]       INT             NULL,
-	[intQuoteProduct2Id]       INT             NULL,
-	[intQuoteProduct3Id]       INT             NULL,
-	[intQuoteProduct4Id]       INT             NULL,
-	[intQuoteProduct5Id]       INT             NULL,
-	[ysnQuoteTaxExempt]	  BIT		  DEFAULT ((0))	  NOT NULL,
-	[ysnConvertMiscToVehicle]	  BIT		  DEFAULT ((0))	  NOT NULL,
-	[intDailyTransactionCount]   INT            CONSTRAINT [DF_tblCFAccount_intDailyTransactionCount] DEFAULT ((1)) NOT NULL,
-    CONSTRAINT [PK_tblCFAccount] PRIMARY KEY CLUSTERED ([intAccountId] ASC),
+    [ysnDepartmentGrouping]       BIT             CONSTRAINT [DF__tblCFAcco__ysnDe__361DBC14] DEFAULT ((0)) NULL,
+    [ysnSummaryByDeptVehicleProd] BIT             CONSTRAINT [DF__tblCFAcco__ysnSu__3711E04D] DEFAULT ((0)) NULL,
+    [strPrimaryDepartment]        NVARCHAR (8)    COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblCFAcco__strPr__38060486] DEFAULT (N'Card') NULL,
+    [strDetailDisplay]            NVARCHAR (20)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF_tblCFAccount_strPrimaryDepartment1] DEFAULT (N'Card') NULL,
+    [intCustomerGroupId]          INT             NULL,
+    [intQuoteProduct1Id]          INT             NULL,
+    [intQuoteProduct2Id]          INT             NULL,
+    [intQuoteProduct3Id]          INT             NULL,
+    [intQuoteProduct4Id]          INT             NULL,
+    [intQuoteProduct5Id]          INT             NULL,
+    [ysnQuoteTaxExempt]           BIT             CONSTRAINT [DF__tblCFAcco__ysnQu__4DD942C7] DEFAULT ((0)) NULL,
+    [ysnConvertMiscToVehicle]     BIT             CONSTRAINT [DF__tblCFAcco__ysnCo__4ECD6700] DEFAULT ((0)) NULL,
+    [intDailyTransactionCount]    INT             CONSTRAINT [DF_tblCFAccount_intDailyTransactionCount] DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblCFAccount] PRIMARY KEY CLUSTERED ([intAccountId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFAccount_tblARAccountStatus] FOREIGN KEY ([intAccountStatusCodeId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblCFAccount_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblCFAccount_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
@@ -68,6 +70,8 @@
     CONSTRAINT [FK_tblCFAccount_tblSMImportFileHeader] FOREIGN KEY ([intImportMapperId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]),
     CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 );
+
+
 
 
 

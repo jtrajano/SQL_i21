@@ -261,6 +261,13 @@ BEGIN TRY
 	,strUserId
 	,ysnExpensed
 	,strStatementType
+	,strDriverPinNumber		
+	,strDriverDescription	
+	,intDriverPinId			
+	,ysnSummaryByDriverPin	
+	,strDetailDisplay
+	,strDetailDisplayValue
+	,strDetailDisplayLabel		
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -501,6 +508,25 @@ BEGIN TRY
 	,@UserId
 	,ysnExpensed
 	,@StatementType 
+	,strDriverPinNumber		
+	,strDriverDescription	
+	,intDriverPinId			
+	,ysnSummaryByDriverPin	
+	,strDetailDisplay	
+	,strDetailDisplayValue = CASE WHEN LOWER(strDetailDisplay) = 'card'
+									THEN strCardNumber + ' - ' + strCardDescription
+								  WHEN LOWER(strDetailDisplay) = 'vehicle'
+									THEN strVehicleNumber + ' - ' + strVehicleDescription
+								  WHEN LOWER(strDetailDisplay) = 'driverpin'
+									THEN strDriverPinNumber + ' - ' + strDriverDescription
+							 END
+	,strDetailDisplayLabel = CASE WHEN LOWER(strDetailDisplay) = 'card'
+									THEN 'Card'
+								  WHEN LOWER(strDetailDisplay) = 'vehicle'
+									THEN 'Vehicle'
+								  WHEN LOWER(strDetailDisplay) = 'driverpin'
+									THEN 'Driver Pin'
+							 END
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 

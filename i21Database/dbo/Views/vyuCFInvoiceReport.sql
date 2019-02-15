@@ -1,6 +1,4 @@
 ﻿
-
-
 CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
@@ -58,6 +56,8 @@ SELECT
 ,cfAccount.ysnSummaryByDeptVehicleProd
 ,cfAccount.strPrimaryDepartment
 ,cfAccount.ysnDepartmentGrouping
+,cfAccount.ysnSummaryByDriverPin
+,cfAccount.strDetailDisplay
 ----------------------------------------------
 ,strCustomerName = emEntity.strName
 ,emEntity.strName
@@ -225,6 +225,9 @@ SELECT
 ,dblTaxExceptSST			= cfTransExceptSSTTax.dblTotalTax
 ,strEmailDistributionOption = arCustomerContact.strEmailDistributionOption
 ,strEmail					= arCustomerContact.strEmail
+,cfDriverPin.strDriverPinNumber
+,cfDriverPin.strDriverDescription
+,cfDriverPin.intDriverPinId
 
 --SPECIAL CASE--------------------------------
 
@@ -286,6 +289,9 @@ LEFT JOIN tblCFItem AS cfItem
 -------------------------------------------------------------
 LEFT JOIN tblICItem AS icItem
 	ON cfItem.intARItemId = icItem.intItemId
+-------------------------------------------------------------
+LEFT JOIN tblCFDriverPin AS cfDriverPin 
+	ON cfDriverPin.intDriverPinId = cfTrans.intDriverPinId 
 
 --MOVED TO INSERT PART OF uspCFInsertToStagingTable--
 -------------------------------------------------------------
@@ -381,5 +387,6 @@ OUTER APPLY (
 WHERE ISNULL(cfTrans.ysnPosted,0) = 1 
 AND ISNULL(cfTrans.ysnInvalid,0) = 0
 GO
+
 
 
