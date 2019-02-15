@@ -297,7 +297,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.1\11_ImplementBasketChanges.sql 
 :r .\IC\Data_Fix_For_18.1\12_PopulateGLEntityForICTransactions.sql
 :r .\IC\Data_Fix_For_18.1\13_PopulateLotInTransitQtyAndWgt.sql
-:r .\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

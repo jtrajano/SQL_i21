@@ -26,7 +26,7 @@ AS
 			EY.strName strEntityName,
 			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)	AS	strSequenceNumber,
 			SH.strLoadNumber,
-			'' AS strReceiptNumber,
+			''  COLLATE Latin1_General_CI_AS AS strReceiptNumber,
 			CY.strCurrency AS strCleanCostCurrency,
 			UM.strUnitMeasure AS strCleanCostUOM
 

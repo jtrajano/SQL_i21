@@ -76,9 +76,6 @@ BEGIN TRY
 			strAtlasPrice			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN CASE WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN LTRIM(CAST(ROUND(CD.dblCashPrice,2) AS NUMERIC(18,2))) ELSE dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) END  + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
 											WHEN 	CD.intPricingTypeId = 2	THEN CASE WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN LTRIM(CAST(ROUND(CD.dblBasis,2) AS NUMERIC(18,2))) ELSE dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) END + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth  	
 									  END,
-			strBeGreenPrice			= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure + ' ' + MO.strFutureMonth  	
-											WHEN 	CD.intPricingTypeId = 2		 THEN LTRIM(ABS(CAST(CD.dblBasis AS NUMERIC(18, 2)))) + ' ' + CY.strCurrency + '/' + PU.strUnitMeasure + CASE WHEN CD.dblBasis < 0 THEN ' under ' ELSE ' over ' END + MO.strFutureMonth  	
-									  END,
 			strDescription			= ISNULL(IC.strContractItemName,IM.strDescription),
 			strBagMark				= BM.strBagMark,
 			strReference			= CD.strReference,

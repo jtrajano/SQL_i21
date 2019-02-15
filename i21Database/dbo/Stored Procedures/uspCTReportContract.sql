@@ -253,7 +253,6 @@ BEGIN TRY
 		
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= TP.strContractType + ' Contract:- ' + CH.strContractNumber
-			,strCaptionBGT							= TP.strContractType + ' Contract: ' + CH.strContractNumber
 			,strTeaCaption							= @strCompanyName + ' - '+TP.strContractType+' Contract' 
 			,strAtlasDeclaration					= 'We confirm having'			   + CASE WHEN CH.intContractTypeId = 1	   THEN ' bought from '   ELSE ' sold to ' END + 'you as follows:'
 			,strPurchaseOrder						= TP.strContractType + ' Order:- ' + CASE WHEN CM.strCommodityCode = 'Tea' THEN SQ.strERPPONumber ELSE NULL        END
@@ -282,7 +281,7 @@ BEGIN TRY
 			,strArbitration							= 'Rules of arbitration of '+ AN.strComment + '  as per latest edition for quality and principle. ' 
 														+ CHAR(13)+CHAR(10) +
 														'Place of jurisdiction is ' + AB.strState +', '+RY.strCountry
-			,strBeGreenArbitration					=   AB.strCity
+
 			,strCompanyAddress						=   @strCompanyName + ', '		  + CHAR(13)+CHAR(10) +
 														ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
@@ -312,11 +311,8 @@ BEGIN TRY
 			,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN 'Location :'					ELSE NULL END
 			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN 'Documents Required :'			ELSE NULL END
 			,lblArbitrationComment					= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Contract :'					ELSE NULL END
-			,lblBeGreenArbitrationComment			= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Rule :'						ELSE NULL END
 			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN 'Notes/Remarks :'				ELSE NULL END
-			
 			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Price Basis :'					ELSE NULL END
-			,lblIncoTerms							= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Incoterms :'					ELSE NULL END
 			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN 'Others :'						ELSE NULL END
 			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Condition :'					ELSE NULL END
 			,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN 'Producer :'					ELSE NULL END

@@ -25,6 +25,7 @@ BEGIN
 			,@Missing_Cash_Account_Group AS BIT OUTPUT
 			,@Future_Clear_Date_Found AS BIT OUTPUT
 			,@Unbalance_Found AS BIT OUTPUT
+			,@Duplicate_Bank_Name_Found AS BIT OUTPUT
 		AS
 
 		DECLARE @CASH_ACCOUNT AS NVARCHAR(20) = ''Cash Account''
@@ -117,6 +118,19 @@ BEGIN
 		) AS T
 		WHERE NotBalance = 1
 
+		SELECT TOP 1 @Duplicate_Bank_Name_Found = 1  
+		FROM (
+			SELECT	
+				strBankName	= LTRIM(RTRIM(ISNULL(apcbk_desc COLLATE Latin1_General_CI_AS, ''''))) 
+			FROM apcbkmst
+
+			UNION ALL SELECT 
+				strBankName	= LTRIM(RTRIM(ISNULL(ssbnk_name COLLATE Latin1_General_CI_AS, '''')))		
+			FROM ssbnkmst
+		) tbl
+		GROUP BY strBankName COLLATE Latin1_General_CI_AS
+		HAVING (COUNT(strBankName) > 1)
+
 
 		SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
 				,@Invalid_GL_Account_Id_Found = ISNULL(@Invalid_GL_Account_Id_Found, 0)
@@ -127,6 +141,7 @@ BEGIN
 				,@Missing_Cash_Account_Group = ISNULL(@Missing_Cash_Account_Group, 0)
 				,@Future_Clear_Date_Found = ISNULL(@Future_Clear_Date_Found, 0)	
 				,@Unbalance_Found = ISNULL(@Unbalance_Found, 0)	
+				,@Duplicate_Bank_Name_Found = ISNULL(@Duplicate_Bank_Name_Found, 0)	
 	')
 
 END

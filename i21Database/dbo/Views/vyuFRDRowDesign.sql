@@ -8,7 +8,7 @@ intRowDetailId
 ,B.strRowName
 ,B.strDescription as strHeaderDescription
 ,intRefNo
-,'R' + CAST(intRefNo as NVARCHAR(10)) COLLATE Latin1_General_CI_AS AS strRefNo
+,'R' + CAST(intRefNo as NVARCHAR(10)) as strRefNo
 ,A.strDescription
 ,strRowType
 ,strBalanceSide

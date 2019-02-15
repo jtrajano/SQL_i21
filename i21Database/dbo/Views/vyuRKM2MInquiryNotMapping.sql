@@ -10,10 +10,10 @@ SELECT intM2MInquiryId
 	,dtmPriceDate dtmFutureSettlementDate
 	,pum.strUnitMeasure strPriceUnitMeasure
 FROM tblRKM2MInquiry bd
+JOIN tblRKM2MBasis bas ON bas.intM2MBasisId = bd.intM2MBasisId
 JOIN tblSMCurrency cur ON cur.intCurrencyID = bd.intCurrencyId
 JOIN tblICUnitMeasure pum ON pum.intUnitMeasureId = bd.intPriceItemUOMId
-LEFT JOIN tblRKM2MBasis bas ON bas.intM2MBasisId = bd.intM2MBasisId
-LEFT JOIN tblRKFuturesSettlementPrice sc ON sc.intFutureSettlementPriceId = bd.intFutureSettlementPriceId
+JOIN tblRKFuturesSettlementPrice sc ON sc.intFutureSettlementPriceId = bd.intFutureSettlementPriceId
 LEFT JOIN tblICCommodity c ON c.intCommodityId = bd.intCommodityId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = bd.intUnitMeasureId
 LEFT JOIN tblARMarketZone z ON z.intMarketZoneId = bd.intMarketZoneId

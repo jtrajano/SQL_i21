@@ -22,7 +22,6 @@ BEGIN
  DECLARE @strItemNumber       NVARCHAR(50)      
  DECLARE @strTaxGroup       NVARCHAR(50)      
  DECLARE @strDriverNumber      NVARCHAR(100)      
- DECLARE @strTruckNumber NVARCHAR(50)      
  DECLARE @strType        NVARCHAR(10)      
  DECLARE @dblQuantity       NUMERIC(18, 6)      
  DECLARE @dblTotal        NUMERIC(18, 6)      
@@ -45,9 +44,7 @@ BEGIN
  DECLARE @intLocation INT    
  DECLARE @dblLatitude NUMERIC(18, 6)
  DECLARE @dblLongitude NUMERIC(18, 6)
- DECLARE @intTruckDriverReferenceId INT    
- DECLARE @intEntitySalespersonId INT    
-           
+            
  DECLARE @ValidationTableLog TABLE(    
   strCustomerNumber   NVARCHAR(100)    
   ,strInvoiceNumber   NVARCHAR(50)    
@@ -70,121 +67,77 @@ BEGIN
       
  ---Loop through the unique customer invoice date      
  WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDDToInvoice)       
- BEGIN      
-           
-  SELECT TOP 1       
-    @strCustomerNumber     = strCustomerNumber      
-    ,@strInvoiceNumber     = strInvoiceNumber      
-    ,@dtmInvoiceDate     = dtmDate      
-    ,@intLineItem      = intLineItem      
-    ,@strSiteNumber      = strSiteNumber       
-    ,@strUOM       = NULL --strUOM no UOM as of this writing. (02022018)      
-    ,@dblUnitPrice      = dblUnitPrice      
-    ,@strItemDescription    = strItemDescription      
-    ,@dblPercentFullAfterDelivery = dblPercentFullAfterDelivery      
-    ,@strLocation      = strLocation --Company Location      
-    ,@strTermCode      = NULL --strTermCode no TERM as of this writing. (02022018)      
-    ,@strSalesAccount     = NULL --strSalesAccount no SALES ACCOUNT as of this writing. (02022018)      
-    ,@strItemNumber      = strItemNumber      
-    ,@strTaxGroup      = strSalesTaxId      
-    ,@strDriverNumber     = strDriverNumber      
- ,@strTruckNumber     = strTruckNumber      
-    ,@strType       = 'Invoice'--strType no other type as of this writing 02022018      
-    ,@dblQuantity      = dblQuantity      
-    ,@dblTotal       = NULL --dblTotal      
-    ,@intLineItem      = intLineItem      
-    ,@dblPrice       = dblPrice      
-    ,@strComment      = strComment      
-    ,@intImportDDToInvoiceId   = intImportDDToInvoiceId      
-    ,@strDetailType      = '' --strDetailType not in use as of this writing      
-    ,@strContractNumber     = '' --strContractNumber no contract      
-    ,@intContractSequence    = NULL --intContractSequence      
-	,@dblLatitude = dblLatitude
-	,@dblLongitude = dblLongitude
-   FROM #tmpDDToInvoice      
+ BEGIN
+            
+	SELECT TOP 1
+		@strCustomerNumber     = strCustomerNumber      
+		,@strInvoiceNumber     = strInvoiceNumber      
+		,@dtmInvoiceDate     = dtmDate      
+		,@intLineItem      = intLineItem      
+		,@strSiteNumber      = strSiteNumber       
+		,@strUOM       = NULL --strUOM no UOM as of this writing. (02022018)      
+		,@dblUnitPrice      = dblUnitPrice      
+		,@strItemDescription    = strItemDescription      
+		,@dblPercentFullAfterDelivery = dblPercentFullAfterDelivery      
+		,@strLocation      = strLocation --Company Location      
+		,@strTermCode      = NULL --strTermCode no TERM as of this writing. (02022018)      
+		,@strSalesAccount     = NULL --strSalesAccount no SALES ACCOUNT as of this writing. (02022018)      
+		,@strItemNumber      = strItemNumber      
+		,@strTaxGroup      = strSalesTaxId      
+		,@strDriverNumber     = strDriverNumber      
+		,@strType       = 'Invoice'--strType no other type as of this writing 02022018      
+		,@dblQuantity      = dblQuantity      
+		,@dblTotal       = NULL --dblTotal      
+		,@intLineItem      = intLineItem      
+		,@dblPrice       = dblPrice      
+		,@strComment      = strComment      
+		,@intImportDDToInvoiceId   = intImportDDToInvoiceId      
+		,@strDetailType      = '' --strDetailType not in use as of this writing      
+		,@strContractNumber     = '' --strContractNumber no contract      
+		,@intContractSequence    = NULL --intContractSequence      
+		,@dblLatitude = dblLatitude
+		,@dblLongitude = dblLongitude
+	FROM #tmpDDToInvoice      
    --ORDER BY intLineItem ASC      
       
-   --SET @TransactionType = 'Invoice'      
+	--SET @TransactionType = 'Invoice'      
       
-   --Get Customer Entity Id      
-   SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)      
+	--Get Customer Entity Id      
+	SET @intCustomerEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = @strCustomerNumber)      
       
-   --Get Tax Group Id      
-    SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE intTaxGroupId = @strTaxGroup) 
-    -- IET-349 - use INT - select is use to somehow validate the taxcode,  if returns null .. AR will default tax from customer setup (IET-321)
+	--Get Tax Group Id      
+	SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE intTaxGroupId = @strTaxGroup) 
+	-- IET-349 - use INT - select is use to somehow validate the taxcode,  if returns null .. AR will default tax from customer setup (IET-321)
       
-   --Get Item id      
-   SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)      
+	--Get Item id      
+	SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)      
     
-    /*Tank Management */    
- /*-------------------------------------------------------------------------------------------------------------------------------------------------*/    
- SET @intSiteId = ( SELECT TOP 1 intSiteID FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID    
-            WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))    
+	/*Tank Management */    
+	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/    
+	SET @intSiteId = ( SELECT TOP 1 intSiteID FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID    
+			WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))    
     
- IF(@dblPercentFullAfterDelivery = 0 AND @dblQuantity > 0)    
- SET @dblPercentFullAfterDelivery = (SELECT TOP 1 dblDefaultFull FROM tblICItem WHERE intItemId = @intItemId)    
-    /*------------------------------------------------------------------------------------------------------------------------------------------------- */    
+	IF(@dblPercentFullAfterDelivery = 0 AND @dblQuantity > 0)    
+	SET @dblPercentFullAfterDelivery = (SELECT TOP 1 dblDefaultFull FROM tblICItem WHERE intItemId = @intItemId)    
+	/*------------------------------------------------------------------------------------------------------------------------------------------------- */    
       
-    --Invoice Number      
-   SET @stri21InvoiceNumber =  ISNULL((SELECT TOP 1 strPrefix COLLATE Latin1_General_CI_AS FROM tblSMStartingNumber  WHERE strTransactionType COLLATE Latin1_General_CI_AS = 'Truck Billing' AND strModule COLLATE Latin1_General_CI_AS = 'Energy Trac') , '')
-   
-    
-     
-         + REPLACE(@strInvoiceNumber COLLATE Latin1_General_CI_AS,'-', '')         
+	--Invoice Number      
+	SET @stri21InvoiceNumber =  ISNULL((SELECT TOP 1 strPrefix COLLATE Latin1_General_CI_AS 
+										FROM tblSMStartingNumber  
+									    WHERE strTransactionType COLLATE Latin1_General_CI_AS = 'Truck Billing' 
+										AND strModule COLLATE Latin1_General_CI_AS = 'Energy Trac') , '') + REPLACE(@strInvoiceNumber COLLATE Latin1_General_CI_AS,'-', '')         
           
+	--Get Entity ID of the Driver  
+	SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo COLLATE Latin1_General_CI_AS = @strDriverNumber )    
             
- --Get Entity ID of the Driver      
- --Set Driver Number from Import Column DriverNumber    
- --Error if Driver Number is not setup in Salespersons setup    
- --And Mark the transition is invalid and do not create sales invoice.    
-   --SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo COLLATE Latin1_General_CI_AS = @strDriverNumber )      
-    IF(LTRIM(RTRIM(@strDriverNumber)) <> '')    
- BEGIN    
-  SET @intDriverEntityId = (SELECT TOP 1 intEntityId FROM tblARSalesperson where strType = 'Driver' and strDriverNumber COLLATE Latin1_General_CI_AS = @strDriverNumber)    
-  IF (@intDriverEntityId IS NULL)    
-  BEGIN    
-   INSERT INTO @ValidationTableLog (strCustomerNumber ,strInvoiceNumber,strSiteNumber,intLineItem ,strMessage,ysnError)    
-   SELECT strCustomerNumber = @strCustomerNumber     
-     ,strInvoiceNumber = @stri21InvoiceNumber    
-     ,strSiteNumber = @strSiteNumber     
-     ,intLineItem = @intImportDDToInvoiceId     
-     ,strMessage = 'Invalid Driver Number'    
-     ,ysnError = 1   
-  END    
- END    
- /*----------------------------------------------------------------------------    
- --Set Truck No from Import Column TruckNumber    
- --Error if Truck No is not setup in > tblSCTruckDriverReference    
- --And Mark the transition is invalid and do not create sales invoice.    
- */----------------------------------------------------------------------------    
- IF(LTRIM(RTRIM(@strTruckNumber)) <> '')    
- BEGIN    
-  SET @intTruckDriverReferenceId = (SELECT TOP 1 intTruckDriverReferenceId FROM tblSCTruckDriverReference where strRecordType = 'T' AND strData = @strTruckNumber)    
-  IF (@intTruckDriverReferenceId IS NULL)    
-  BEGIN    
-   INSERT INTO @ValidationTableLog (strCustomerNumber ,strInvoiceNumber,strSiteNumber,intLineItem ,strMessage,ysnError)    
-   SELECT strCustomerNumber = @strCustomerNumber     
-     ,strInvoiceNumber = @stri21InvoiceNumber    
-     ,strSiteNumber = @strSiteNumber     
-     ,intLineItem = @intImportDDToInvoiceId     
-     ,strStatus = 'Invalid Truck Number'    
-     ,ysnError = 1    
-  END    
- END    
- /*----------------------------------------------------------------------------    
- --Default Salesperson to the Salesperson from Customer Setup (IET-319)    
- --If Customer Setup for Salesperson is blank    
- --Then Set to Driver Number    
- */----------------------------------------------------------------------------    
- SET @intEntitySalespersonId = ISNULL((SELECT TOP 1 intSalespersonId FROM tblARCustomer where intEntityId = @intCustomerEntityId),@intDriverEntityId)    
-          
    --Get Location Id      
    /*Convert to Numeric DIGITAL DISPATCH send divisionNUm as numeric(int)*/    
        
-   SET @intLocation  = (SELECT CASE WHEN ISNUMERIC(@strLocation) = 1 THEN CAST(@strLocation AS INT) ELSE NULL END)    
+	SET @intLocation  = (SELECT CASE WHEN ISNUMERIC(@strLocation) = 1 THEN CAST(@strLocation AS INT) ELSE NULL END)    
     
-   SET @intLocationId = ISNULL((SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation     
-      WHERE (CASE WHEN ISNUMERIC(strLocationNumber) = 1 THEN CAST(strLocationNumber  AS INT) ELSE 0 END) = @intLocation),0)      
+	SET @intLocationId = ISNULL((SELECT TOP 1 intCompanyLocationId 
+	                             FROM tblSMCompanyLocation 
+	                             WHERE (CASE WHEN ISNUMERIC(strLocationNumber) = 1 THEN CAST(strLocationNumber  AS INT) ELSE 0 END) = @intLocation),0)      
          
    --------Get Item Unit Measure Id = ()      
    ------SET @intUnitMeasureId = (SELECT TOP 1 intUnitMeasureId FROM tblICUnitMeasure WHERE strSymbol = @strUOM)      
@@ -194,8 +147,7 @@ BEGIN
    --------Get Term Code      
    ------SET @intTermCode = (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTermCode = @strTermCode)      
       
-      
-   INSERT INTO @EntriesForInvoice(      
+   INSERT INTO @EntriesForInvoice(
         [strSourceTransaction]      
         ,[intEntityCustomerId]      
         ,[intSiteId]      
@@ -256,8 +208,6 @@ BEGIN
        --,[intSourceId]      
        --,[strBillingBy]      
        ,[dblPercentFull]      
-       ,[intTruckDriverId]		
-	   ,[intTruckDriverReferenceId]
        --,[dblNewMeterReading]      
        --,[dblPreviousMeterReading]      
        --,[dblConversionFactor]      
@@ -303,7 +253,7 @@ BEGIN
        ,[intInvoiceId]    = NULL      
        ,[intCompanyLocationId]  = ISNULL(@intLocationId,0)      
        ,[dtmDate]     = @dtmInvoiceDate      
-       ,[intEntitySalespersonId] = ISNULL(@intEntitySalespersonId ,@intDriverEntityId)      
+       ,[intEntitySalespersonId] = @intDriverEntityId
        ,[intFreightTermId]   = NULL      
              
        ,[intPaymentMethodId]  = NULL      
@@ -354,8 +304,6 @@ BEGIN
        --,[intSourceId]    = @intImportDDToInvoiceId      
        --,[strBillingBy]    = @BillingBy      
        ,[dblPercentFull]   = @dblPercentFullAfterDelivery
-       ,[intTruckDriverId]	= 	@intDriverEntityId
-	   ,[intTruckDriverReferenceId] = @intTruckDriverReferenceId
        --,[dblNewMeterReading]  = @NewMeterReading      
        --,[dblPreviousMeterReading] = @PreviousMeterReading      
        --,[dblConversionFactor]  = @ConversionFactor      
@@ -388,7 +336,6 @@ BEGIN
        --,[ysnPost]     = NULL      
        --,[strItemDescription]  = @ItemDescription      
        --,[dblDiscount]    = @DiscountPercentage      
-     WHERE NOT EXISTS(SELECT TOP 1 1 FROM @ValidationTableLog WHERE strInvoiceNumber = @stri21InvoiceNumber and ysnError = 1)    
 
 	/**GPS**/    
 	IF(@dblLatitude <> 0 AND @dblLongitude <> 0 AND ISNULL(@intSiteId,0) <> 0) 
@@ -400,93 +347,79 @@ BEGIN
    --Delete       
    DELETE FROM #tmpDDToInvoice WHERE intImportDDToInvoiceId = @intImportDDToInvoiceId        
  END      
-      
- --SELECT * FROM @EntriesForInvoice      
- --(AR)Process      
- -------------------------------------------------------------------------------------------------------------------------------------------------------      
- DECLARE  @LineItemTaxEntries LineItemTaxDetailStagingTable      
- EXEC [dbo].[uspARProcessInvoicesByBatch]      
-     @InvoiceEntries  = @EntriesForInvoice      
-     ,@LineItemTaxEntries =  @LineItemTaxEntries      
-     ,@UserId    = @EntityUserId      
-      ,@GroupingOption  = 15      
-     ,@RaiseError   = 0      
-     ,@ErrorMessage   = @ErrorMessage OUTPUT      
-     ,@LogId     = @LogId OUTPUT         
-      
-     --,@CreatedIvoices  = @CreatedIvoices OUTPUT      
-     --SET @NewTransactionId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))      
-      
- -------------------------------------------------------------------------------------------------------------------------------------------------------      
- --INSERT INTO @ResultTableLog ( strCustomerNumber ,strInvoiceNumber ,strSiteNumber ,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,intInvoiceId ,strTransactionType )      
-      
-  /**GPS**/
-  DECLARE @GPSTableARInvoiceDetail AS TMGPSUpdateByIdTable 
-  /** get only all sucessful invoicedetails**/
+    
+	--(AR)Process      
+	-------------------------------------------------------------------------------------------------------------------------------------------------------      
+	DECLARE  @LineItemTaxEntries LineItemTaxDetailStagingTable      
+	DECLARE @ValidEntriesForInvoice AS InvoiceStagingTable      
+	INSERT INTO @ValidEntriesForInvoice  SELECT * FROM @EntriesForInvoice WHERE [strInvoiceOriginId] NOT IN (SELECT DISTINCT strInvoiceNumber COLLATE Latin1_General_CI_AS  FROM @ValidationTableLog WHERE ysnError = 1)    
+	IF @@ROWCOUNT > 0 
+	BEGIN
+	EXEC [dbo].[uspARProcessInvoicesByBatch]
+		@InvoiceEntries  = @ValidEntriesForInvoice      
+		,@LineItemTaxEntries =  @LineItemTaxEntries      
+		,@UserId    = @EntityUserId      
+		,@GroupingOption  = 15      
+		,@RaiseError   = 0      
+		,@ErrorMessage   = @ErrorMessage OUTPUT      
+		,@LogId     = @LogId OUTPUT         
+	END      
+	-------------------------------------------------------------------------------------------------------------------------------------------------------      
+       
+	/**GPS**/
+	DECLARE @GPSTableARInvoiceDetail AS TMGPSUpdateByIdTable 
+	/** get only all sucessful invoicedetails**/
   
-  INSERT INTO @GPSTableARInvoiceDetail 
-  SELECT ARD.intSiteId, GPS.dblLatitude , GPS.dblLongitude FROM tblARInvoiceIntegrationLogDetail IL
-  INNER JOIN tblARInvoiceDetail ARD ON IL.intInvoiceDetailId = ARD.intInvoiceDetailId 
-  INNER JOIN @GPSTable GPS ON ARD.intSiteId = GPS.intSiteId
-  WHERE IL.intIntegrationLogId = @LogId AND IL.intInvoiceDetailId IS NOT NULL AND ysnSuccess = 1
-  AND ISNULL(ARD.intSiteId,0) <> 0  
+	INSERT INTO @GPSTableARInvoiceDetail 
+	SELECT ARD.intSiteId, GPS.dblLatitude , GPS.dblLongitude 
+	FROM tblARInvoiceIntegrationLogDetail IL
+		INNER JOIN tblARInvoiceDetail ARD ON IL.intInvoiceDetailId = ARD.intInvoiceDetailId 
+		INNER JOIN @GPSTable GPS ON ARD.intSiteId = GPS.intSiteId
+	WHERE IL.intIntegrationLogId = @LogId AND IL.intInvoiceDetailId IS NOT NULL AND ysnSuccess = 1
+		AND ISNULL(ARD.intSiteId,0) <> 0  
 
-  IF @@rowcount > 0
+	IF @@rowcount > 0
 	BEGIN
 		Exec uspTMUpdateSiteGPSById @GPSTableARInvoiceDetail
 	END
-  /**END GPS**/
+	/**END GPS**/
     
-  SELECT * FROM ( SELECT tblARCustomer.strCustomerNumber AS strCustomerNumber        
-   ,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber        
-   ,'' COLLATE Latin1_General_CI_AS AS strSiteNumber         
-   ,tblARInvoice.dtmDate AS dtmDate          
-   ,tblICItem.strItemNo AS strItemNumber    
-   ,0 AS intLineItem         
-   ,'' AS strFileName         
-   ,strMessage AS strStatus          
-   ,ISNULL(ysnSuccess,0) AS ysnSuccessful         
-   ,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId      
-   ,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType      
-   FROM tblARInvoiceIntegrationLogDetail        
-   LEFT JOIN tblARInvoice ON tblARInvoiceIntegrationLogDetail.intInvoiceId = tblARInvoice.intInvoiceId      
-   LEFT JOIN tblARInvoiceDetail ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId      
-   LEFT JOIN tblICItem ON tblARInvoiceDetail.intItemId = tblICItem.intItemId    
-   LEFT JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId    
-   WHERE intIntegrationLogId = @LogId     
-   --WHERE ysnHeader = 1 AND ysnSuccess = 1 AND intIntegrationLogId = @LogId     
-   --AND NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE ysnHeader = 0 AND ysnSuccess = 0 AND intIntegrationLogId = @LogId )      
-   --UNION      
-   --SELECT   NULL AS strCustomerNumber        
-   --  ,'' AS strInvoiceNumber        
-   --  ,'' AS strSiteNumber         
-   --  ,null AS dtmDate          
-   --  ,0 AS intLineItem         
-   --  ,'' AS strFileName         
-   --  ,strMessage  AS strStatus          
-   --  ,ysnSuccess AS ysnSuccessful         
-   --  ,ISNULL(intInvoiceId,0) AS intInvoiceId      
-   --  ,strTransactionType AS strTransactionType      
-   --FROM tblARInvoiceIntegrationLogDetail       
-   --WHERE ysnSuccess = 0 AND intIntegrationLogId = @LogId      
-  
-    
-   UNION
-  SELECT    
-  strCustomerNumber COLLATE Latin1_General_CI_AS AS strCustomerNumber        
-   ,strInvoiceNumber COLLATE Latin1_General_CI_AS AS strInvoiceNumber        
-   ,'' AS strSiteNumber         
-   ,getdate() AS dtmDate          
-   ,'' AS strItemNumber    
-   ,0 AS intLineItem         
-   ,'' AS strFileName         
-   ,strMessage COLLATE Latin1_General_CI_AS AS strStatus          
-   , CAST(0 AS BIT)  AS ysnSuccessful         
-   ,0 AS intInvoiceId      
-   ,'' strTransactionType      
-  FROM @ValidationTableLog    
-  
+	SELECT * FROM ( 
+			SELECT tblARCustomer.strCustomerNumber AS strCustomerNumber        
+				,ISNULL(tblARInvoice.strInvoiceNumber, '') AS strInvoiceNumber        
+				,'' COLLATE Latin1_General_CI_AS AS strSiteNumber         
+				,tblARInvoice.dtmDate AS dtmDate          
+				,tblICItem.strItemNo AS strItemNumber    
+				,0 AS intLineItem         
+				,'' AS strFileName         
+				,strMessage AS strStatus          
+				,ISNULL(ysnSuccess,0) AS ysnSuccessful         
+				,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId      
+				,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType      
+			FROM tblARInvoiceIntegrationLogDetail        
+				LEFT JOIN tblARInvoice ON tblARInvoiceIntegrationLogDetail.intInvoiceId = tblARInvoice.intInvoiceId --  AND intInvoiceDetailId IS null
+				LEFT JOIN tblARInvoiceDetail ON tblARInvoiceIntegrationLogDetail.intInvoiceDetailId = tblARInvoiceDetail.intInvoiceDetailId
+				LEFT JOIN tblICItem ON tblARInvoiceDetail.intItemId = tblICItem.intItemId    
+				LEFT JOIN tblARCustomer ON tblARInvoice.intEntityCustomerId = tblARCustomer.intEntityId        
+			WHERE intIntegrationLogId = @LogId     
+		    
+		   UNION
+
+			SELECT    
+				strCustomerNumber COLLATE Latin1_General_CI_AS AS strCustomerNumber        
+				,strInvoiceNumber COLLATE Latin1_General_CI_AS AS strInvoiceNumber        
+				,'' AS strSiteNumber         
+				,getdate() AS dtmDate          
+				,'' AS strItemNumber    
+				,0 AS intLineItem         
+				,'' AS strFileName         
+				,strMessage COLLATE Latin1_General_CI_AS AS strStatus          
+				, CAST(0 AS BIT)  AS ysnSuccessful         
+				,0 AS intInvoiceId      
+				,'' strTransactionType      
+			FROM @ValidationTableLog    
    ) ResultTableLog    
+  ORDER BY ysnSuccessful,strInvoiceNumber,strItemNumber
   --SELECT * FROM @ResultTableLog    
    
     

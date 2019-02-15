@@ -6,7 +6,11 @@
 	@vendorFrom NVARCHAR(100) = NULL,
 	@vendorTo NVARCHAR(100) = NULL
 )
-RETURNS NVARCHAR(1500)
+RETURNS @returnTable TABLE 
+(
+	C NVARCHAR(1500)
+	,intCount INT
+)
 AS
 BEGIN
 	
@@ -71,46 +75,46 @@ BEGIN
 		,A.dblOther
 		,A.intEntityVendorId
 		FROM dbo.vyuAP1099PATR A
-		OUTER APPLY 
-		(
-			SELECT TOP 1 * FROM tblAP1099History B
-			WHERE A.intYear = B.intYear AND B.int1099Form = 4
-			AND B.intEntityVendorId = A.intEntityVendorId
-			ORDER BY B.dtmDatePrinted DESC
-		) History
+		-- OUTER APPLY 
+		-- (
+		-- 	SELECT TOP 1 * FROM tblAP1099History B
+		-- 	WHERE A.intYear = B.intYear AND B.int1099Form = 4
+		-- 	AND B.intEntityVendorId = A.intEntityVendorId
+		-- 	ORDER BY B.dtmDatePrinted DESC
+		-- ) History
 		WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
 					(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
 				ELSE 1 END)
 		AND A.intYear = @year
-		AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
-				WHEN History.ysnPrinted IS NULL THEN 1
-				WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
-				ELSE 0 END)
+		-- AND 1 = (CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprint = 1 THEN 1 
+		-- 		WHEN History.ysnPrinted IS NULL THEN 1
+		-- 		WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
+		-- 		ELSE 0 END)
 	)
 
 	SELECT
 		@totalPayees = (SELECT COUNT(*) FROM PATR1099)		,
-		@controlTotal1 = dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblDividends,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-						+ REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblDividends,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))))),
-		@controlTotal2 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblNonpatronage,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblNonpatronage,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))),
-		@controlTotal3 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblPerUnit,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblPerUnit,0)) AS DECIMAL(18,2)) AS NVARCHAR(100))),
-		@controlTotal4 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblFederalTax,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblFederalTax,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotal5 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblRedemption,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblRedemption,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotal6 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblDomestic,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblDomestic,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotal7 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblInvestment,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblInvestment,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
-		@controlTotal8 = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblOpportunity,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblOpportunity,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotal1 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblDividends,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblDividends,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
+		@controlTotal2 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblNonpatronage,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblNonpatronage,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
+		@controlTotal3 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblPerUnit,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblPerUnit,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
+		@controlTotal4 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblFederalTax,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblFederalTax,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
+		@controlTotal5 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblRedemption,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblRedemption,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
+		@controlTotal6 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblDomestic,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblDomestic,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
+		@controlTotal7 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblInvestment,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblInvestment,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
+		@controlTotal8 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblOpportunity,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblOpportunity,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
 		@controlTotal9 = REPLICATE('0',18)		,
-		@controlTotalA = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblAMT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblAMT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,	
-		@controlTotalB = REPLICATE('0',18 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblOther,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-						+ dbo.fnAPRemoveSpecialChars(CAST(CAST(SUM(ISNULL(A.dblOther,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)))			,
+		@controlTotalA = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblAMT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblAMT,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,		
+		@controlTotalB = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblOther,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblOther,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
 		@controlTotalC = REPLICATE('0',18)		,
 		@controlTotalD = REPLICATE('0',18)		,
 		@controlTotalE = REPLICATE('0',18)		,
@@ -121,7 +125,7 @@ BEGIN
 	--PAGE 110
 	SELECT
 		@endOfPATR = 'C'
-		+ REPLICATE('0', 8 - LEN(CAST(COUNT(*) AS NVARCHAR(100)))) + CAST(COUNT(*) AS NVARCHAR(100))
+		+ REPLICATE('0', 8 - LEN(CAST(@totalPayees AS NVARCHAR(100)))) + CAST(@totalPayees AS NVARCHAR(100))
 		+ SPACE(6)
 		+ @controlTotal1
 		+ @controlTotal2
@@ -140,10 +144,13 @@ BEGIN
 		+ @controlTotalF
 		+ @controlTotalG
 		+ SPACE(196)
-		+ SPACE(8) --500-507
+		+ REPLICATE('0', 8 - LEN(CAST(@totalPayees AS NVARCHAR(100)))) + CAST(@totalPayees + 3 AS NVARCHAR(100)) --500-507
 		+ SPACE(241)
-		+ SPACE(2)
+		+ CHAR(13) + CHAR(10)
 
-	RETURN @endOfPATR;
+	INSERT INTO @returnTable
+	SELECT @endOfPATR, @totalPayees
+
+	RETURN;
 
 END

@@ -6,7 +6,11 @@
 	@vendorFrom NVARCHAR(100) = NULL,
 	@vendorTo NVARCHAR(100) = NULL
 )
-RETURNS NVARCHAR(1500)
+RETURNS @returnTable TABLE
+(
+	C NVARCHAR(1500)
+	,intCount INT
+)
 AS
 BEGIN
 	
@@ -96,6 +100,7 @@ BEGIN
 		--		ELSE 0 END)
 	)
 	--SAMPLE OUTPUT OF 100.00
+	--PAGE 138
 	--000000010000
 	SELECT
 		@totalPayees = (SELECT COUNT(*) FROM MISC1099)		,
@@ -150,10 +155,13 @@ BEGIN
 		+ @controlTotalF
 		+ @controlTotalG
 		+ SPACE(196)
-		+ SPACE(8) --500-507
+		+ REPLICATE('0', 8 - LEN(CAST(@totalPayees AS NVARCHAR(100)))) + CAST(@totalPayees + 3 AS NVARCHAR(100)) --500-507
 		+ SPACE(241)
 		+ CHAR(13) + CHAR(10)
 
-	RETURN @endOfMISC;
+	INSERT INTO @returnTable
+	SELECT @endOfMISC, @totalPayees
+	
+	RETURN;
 
 END

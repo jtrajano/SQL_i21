@@ -17,7 +17,7 @@ SET ANSI_WARNINGS OFF
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
 	DROP TABLE #tmpInventoryTransactionStockToReverse
-	
+
 -- Create the temp table 
 CREATE TABLE #tmpInventoryTransactionStockToReverse (
 	intInventoryTransactionId INT NOT NULL 
@@ -43,9 +43,6 @@ DECLARE @AVERAGECOST AS INT = 1
 
 		,@FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2
-
-		,@Ownership_Own AS INT = 1
-		,@Ownership_Storage AS INT = 2
 
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
@@ -738,103 +735,4 @@ BEGIN
 		,@strTransactionId
 		,@intEntityUserSecurityId
 	;
-END 
-
--------------------------------------------
--- Add records to the stock movement table
--------------------------------------------
-BEGIN 
-	INSERT INTO dbo.tblICInventoryStockMovement (		
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,intSubLocationId
-		,intStorageLocationId
-		,intLotId
-		,dtmDate
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblValue
-		,dblSalesPrice
-		,intCurrencyId
-		,dblExchangeRate
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,strBatchId
-		,intTransactionTypeId
-		,ysnIsUnposted
-		,strTransactionForm
-		,intRelatedInventoryTransactionId
-		,intRelatedTransactionId
-		,strRelatedTransactionId
-		,intCostingMethod
-		,dtmCreated
-		,intCreatedUserId
-		,intCreatedEntityId
-		,intConcurrencyId
-		,intForexRateTypeId
-		,dblForexRate
-		,intInventoryTransactionId
-		,intInventoryTransactionStorageId
-		,intOwnershipType
-	)
-	SELECT 
-		t.intItemId
-		,t.intItemLocationId
-		,t.intItemUOMId
-		,t.intSubLocationId
-		,t.intStorageLocationId
-		,t.intLotId
-		,t.dtmDate
-		,-t.dblQty
-		,t.dblUOMQty
-		,t.dblCost
-		,t.dblValue
-		,t.dblSalesPrice
-		,t.intCurrencyId
-		,t.dblExchangeRate
-		,t.intTransactionId
-		,t.intTransactionDetailId
-		,t.strTransactionId
-		,@strBatchId
-		,t.intTransactionTypeId
-		,t.ysnIsUnposted
-		,t.strTransactionForm
-		,t.intRelatedInventoryTransactionId
-		,t.intRelatedTransactionId
-		,t.strRelatedTransactionId
-		,t.intCostingMethod
-		,GETDATE()
-		,@intEntityUserSecurityId
-		,@intEntityUserSecurityId
-		,t.intConcurrencyId
-		,t.intForexRateTypeId
-		,t.dblForexRate
-		,t.intInventoryTransactionId
-		,t.intInventoryTransactionStorageId
-		,t.intOwnershipType
-	FROM	#tmpInventoryTransactionStockToReverse tmp INNER JOIN dbo.tblICInventoryStockMovement t
-				ON tmp.intInventoryTransactionId = t.intInventoryTransactionId 
-		
-	--------------------------------------------------------------
-	-- Update the ysnIsUnposted flag for the related transactions 
-	--------------------------------------------------------------
-	UPDATE	t
-	SET		ysnIsUnposted = 1
-	FROM	dbo.tblICInventoryStockMovement t 
-	WHERE	t.intRelatedTransactionId = @intTransactionId
-			AND t.strRelatedTransactionId = @strTransactionId
-			AND t.ysnIsUnposted = 0
-
-	--------------------------------------------------------------
-	-- Update the ysnIsUnposted flag for the transaction
-	--------------------------------------------------------------
-	UPDATE	t
-	SET		ysnIsUnposted = 1
-	FROM	dbo.tblICInventoryStockMovement t 
-	WHERE	t.intTransactionId = @intTransactionId
-			AND t.strTransactionId = @strTransactionId
-			AND t.ysnIsUnposted = 0
 END 

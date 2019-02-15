@@ -120,7 +120,7 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmReceiptDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SET @innerQuery = 'SELECT DISTINCT
+SET @innerQuery2 = 'SELECT DISTINCT
 						intInventoryReceiptId
 						,strBillId
 						,intBillId
@@ -151,7 +151,7 @@ SET @innerQuery = 'SELECT DISTINCT
 						,strLocationName
 				  FROM dbo.[vyuAPClearablesOnly]'
 
-SET @innerQuery2 = 'SELECT DISTINCT
+SET @innerQuery = 'SELECT DISTINCT
 						intInventoryReceiptId
 						,strBillId
 						,intBillId
@@ -186,11 +186,11 @@ IF @dateFrom IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery2 + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = @innerQuery2 + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmReceiptDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 	END  
 END
 
@@ -200,13 +200,15 @@ IF @dtmDate IS NOT NULL
 BEGIN	
 	IF @condition = 'Equal To'
 	BEGIN 
-		SET @innerQuery = @innerQuery2 + CASE WHEN @dateFrom IS NOT NULL THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + '''' 
+		SET @innerQuery = @innerQuery + CASE WHEN @dateFrom IS NOT NULL THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + '''' 
 		ELSE ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + '''' END 
 	END
     ELSE 
 	BEGIN 
-		SET @innerQuery = @innerQuery2 + CASE WHEN @dateFrom IS NOT NULL THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
-		ELSE ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + '''' END
+		SET @innerQuery = @innerQuery + CASE WHEN @dateFrom IS NOT NULL 
+												THEN ' AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+										ELSE ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + '''' 
+										END
 	END  
 	SET @dateFrom = CONVERT(VARCHAR(10), @dtmDate, 110)
 	SET @dateTo = @dtmDateTo;
@@ -306,7 +308,7 @@ SELECT * FROM (
 	,tmpAgingSummaryTotal.strBillOfLading
 	,tmpAgingSummaryTotal.strLocationName
 	,tmpAgingSummaryTotal.strOrderNumber AS strOrderNumber
-	,tmpAgingSummaryTotal.dtmDate
+	,APB.dtmDate
 	,tmpAgingSummaryTotal.dtmBillDate
 	,tmpAgingSummaryTotal.dtmDueDate
 	,tmpAgingSummaryTotal.strVendorId
@@ -323,9 +325,9 @@ SELECT * FROM (
 	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 
 		THEN 0 
 		ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
-	,CASE WHEN DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmReceiptDate,GETDATE())<=0 
+	,CASE WHEN DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmDueDate,GETDATE())<=0 
 		THEN 0
-		ELSE ISNULL(DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmReceiptDate,GETDATE()),0) END AS intAging
+		ELSE ISNULL(DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmDueDate,GETDATE()),0) END AS intAging
 	,CASE WHEN DATEDIFF(dayofyear,tmpAgingSummaryTotal.dtmDueDate,GETDATE())<=0 
 		THEN tmpAgingSummaryTotal.dblAmountDue 
 		ELSE 0 END AS dblCurrent
@@ -348,7 +350,7 @@ SELECT * FROM (
 		,tmpAPClearables.strContainer
 		,tmpAPClearables.strVendorId
 		,tmpAPClearables.strReceiptNumber
-		,tmpAPClearables.dtmDate
+		--,tmpAPClearables.dtmDate
 		,tmpAPClearables.dtmBillDate
 		,tmpAPClearables.dtmDueDate
 		,tmpAPClearables.strTerm
@@ -356,21 +358,39 @@ SELECT * FROM (
 		,tmpAPClearables.strBillOfLading
 		,tmpAPClearables.strLocationName
 		,SUM(tmpAPClearables.dblVoucherAmount) as dblVoucherAmount
-		,SUM(tmpAPClearables.dblTotal) AS dblTotal
+		,tmpAPClearables.dblTotal AS dblTotal
 		,SUM(tmpAPClearables.dblAmountPaid) AS dblAmountPaid
-		,SUM(tmpAPClearables.dblAmountDue) AS dblAmountDue
-		,SUM(tmpAPClearables.dblQtyToReceive) AS dblQtyToReceive
+		,tmpAPClearables.dblAmountDue AS dblAmountDue
+		,tmpAPClearables.dblQtyToReceive AS dblQtyToReceive
 		,SUM(tmpAPClearables.dblQtyVouchered) AS dblQtyVouchered
-		,SUM(tmpAPClearables.dblQtyToVoucher) AS dblQtyToVoucher
-		,SUM(tmpAPClearables.dblAmountToVoucher) AS dblAmountToVoucher
+		,SUM(tmpAPClearables.dblReceiptQty) - SUM(tmpAPClearables.dblVoucherQty) AS dblQtyToVoucher
+		,tmpAPClearables.dblTotal - SUM(tmpAPClearables.dblVoucherAmount)  AS dblAmountToVoucher
 		,SUM(tmpAPClearables.dblChargeAmount) AS dblChargeAmount
 		,(SUM(tmpAPClearables.dblReceiptQty)  -  SUM(tmpAPClearables.dblVoucherQty)) AS dblClearingQty
 		FROM ('
 				+ @innerQuery +
 			   ') tmpAPClearables 
-		GROUP BY intInventoryReceiptId,intBillId, dblAmountDue,strVendorIdName,strContainer,
-				 strVendorId, strBillId ,strOrderNumber,dtmDate,dtmDueDate,dtmReceiptDate,strTerm,strReceiptNumber,strBillOfLading ,strLocationName, dtmBillDate
+		GROUP BY 
+				 dblTotal,
+				 dblQtyToReceive,
+				 dblAmountDue,
+				 intInventoryReceiptId,
+				 intBillId, 
+				 dblAmountDue,
+				 strVendorIdName,
+				 strContainer,
+				 strVendorId, 
+				 strBillId ,
+				 strOrderNumber,
+				 dtmReceiptDate,
+				 strTerm,
+				 strReceiptNumber,
+				 strBillOfLading ,
+				 strLocationName, 
+				 dtmBillDate,
+				 dtmDueDate
 	) AS tmpAgingSummaryTotal
+	LEFT JOIN tblAPBill APB ON APB.intBillId = tmpAgingSummaryTotal.intBillId
 	--LEFT JOIN vyuICGetInventoryReceipt IR
 	--	ON IR.intInventoryReceiptId = tmpAgingSummaryTotal.intInventoryReceiptId
 	WHERE tmpAgingSummaryTotal.dblClearingQty > 0

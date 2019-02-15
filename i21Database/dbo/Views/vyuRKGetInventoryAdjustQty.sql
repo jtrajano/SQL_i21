@@ -20,7 +20,6 @@ LEFT JOIN tblICInventoryReceiptItem ri on cd.intContractDetailId=ri.intLineNo
 LEFT JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId 
 LEFT JOIN tblICInventoryReceiptItemLot il on ri.intInventoryReceiptItemId=il.intInventoryReceiptItemId 
 LEFT JOIN (SELECT isnull(sum(ad.dblAdjustByQuantity),0) dblAdjustByQuantity,cd.intContractDetailId
-
 			FROM tblCTContractDetail cd
 			LEFT JOIN tblICInventoryReceiptItem ri on cd.intContractDetailId=ri.intLineNo
 			LEFT JOIN tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId

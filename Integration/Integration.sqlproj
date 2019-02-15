@@ -464,6 +464,5 @@
     <None Include="dbo\Stored Procedures\uspEMCreateOriginCustomer.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportFreightSettlement.sql" />
     <None Include="Scripts\IC\uspICDCCommoditySetupAg.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromOrigin.sql" />
   </ItemGroup>
 </Project>

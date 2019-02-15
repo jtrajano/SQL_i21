@@ -81,7 +81,7 @@ SELECT	DISTINCT
 				INNER JOIN tblSMTerm C ON C.intTermID = A.intTermsId
 				WHERE 
 				B.intInventoryReceiptChargeId IS NULL AND B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
-				AND  A.ysnPosted = 0
+				--AND  A.ysnPosted = 0
 			) bill
 			OUTER APPLY (
 				SELECT 
@@ -116,9 +116,9 @@ SELECT	DISTINCT
 			,dblAmountPaid = 0
 			,dblTotal = ISNULL(dblReceiptLineTotal + dblReceiptTax,0)
 			,dblAmountDue = ABS(ISNULL(dblItemsPayable + dblTaxesPayable,0))
-			,dblVoucherAmount = CASE 
-								WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE  dblVoucherLineTotal + dblVoucherTax  END),0)
-								ELSE 0 END    
+			,dblVoucherAmount = 0--CASE 
+								--WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((CASE WHEN dblVoucherLineTotal = 0 THEN totalVouchered.dblTotal ELSE  dblVoucherLineTotal + dblVoucherTax  END),0)
+								--ELSE 0 END    
 			,dblWithheld = 0
 			,dblDiscount = 0 
 			,dblInterest = 0 
@@ -130,12 +130,13 @@ SELECT	DISTINCT
 			,(CASE WHEN bill.ysnPosted = 1 THEN bill.strTerm ELSE '' END) AS strTerm
 			,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 			,dblQtyToReceive = dblReceiptQty
-			,dblQtyVouchered = CASE WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
-			,dblQtyToVoucher = dblOpenQty
-			,dblAmountToVoucher = CASE 
-									WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax)	,0) -  ISNULL((totalVouchered.dblTotal),0)
-									WHEN bill.ysnPosted = 0 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL(dblItemsPayable + dblTaxesPayable,0)
-									ELSE (dblReceiptLineTotal + dblReceiptTax)  END                                    
+			,dblQtyVouchered = 0--CASE WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL)  AND  (dblReceiptQty - dblVoucherQty) != 0 THEN dblVoucherQty ELSE 0 END
+			,dblQtyToVoucher = dblReceiptQty--dblOpenQty
+			,dblAmountToVoucher = (dblReceiptLineTotal + dblReceiptTax)  
+									--CASE 
+									--WHEN (bill.ysnPosted = 1 OR bill.ysnPosted IS NULL) AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL((dblReceiptLineTotal + dblReceiptTax)	,0) -  ISNULL((totalVouchered.dblTotal),0)
+									--WHEN bill.ysnPosted = 0 AND  (dblReceiptQty - dblVoucherQty) != 0 THEN ISNULL(dblItemsPayable + dblTaxesPayable,0)
+									--ELSE (dblReceiptLineTotal + dblReceiptTax)  END                                    
 			,dblChargeAmount = 0
 			,strContainer = strContainerNumber
 			,dblVoucherQty = 0
@@ -172,7 +173,7 @@ SELECT	DISTINCT
 				INNER JOIN tblSMTerm C ON C.intTermID = A.intTermsId
 				WHERE 
 				B.intInventoryReceiptChargeId IS NULL AND B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
-				AND  A.ysnPosted = 0
+				--AND  A.ysnPosted = 0
 			) bill
 			OUTER APPLY (
 				SELECT 
@@ -300,7 +301,7 @@ SELECT DISTINCT
 	, dblDiscount = 0 
 	, dblInterest = 0 
 	, Vendor.strVendorId 
-	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor2.strName,'') as strVendorIdName 
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
@@ -322,8 +323,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnAccrue = 1 AND ReceiptCharge.ysnPrice = 0
 										AND ReceiptCharge.intEntityVendorId = Receipt.intEntityVendorId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
-LEFT JOIN vyuAPVendor Vendor
+LEFT JOIN tblAPVendor Vendor
 			ON Vendor.intEntityId = Receipt.intEntityVendorId
+LEFT JOIN tblEMEntity Vendor2 ON Vendor2.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
@@ -469,7 +471,7 @@ SELECT DISTINCT
 	, dblDiscount = 0 
 	, dblInterest = 0 
 	, Vendor.strVendorId 
-	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') as strVendorIdName 
+	, ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor2.strName,'') as strVendorIdName 
 	, Bill.dtmDueDate
 	, Receipt.ysnPosted 
 	, Bill.ysnPaid
@@ -490,8 +492,9 @@ SELECT DISTINCT
 FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId AND ReceiptCharge.ysnPrice = 1
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Receipt.intLocationId
-LEFT JOIN vyuAPVendor Vendor
+LEFT JOIN tblAPVendor Vendor
 			ON Vendor.intEntityId = Receipt.intEntityVendorId
+LEFT JOIN tblEMEntity Vendor2 ON Vendor2.intEntityId = Receipt.intEntityVendorId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
@@ -522,6 +525,7 @@ LEFT JOIN vyuAPVendor Vendor
 			) Detail		
 		WHERE ISNULL(intInventoryReceiptChargeId, '') <> ''
 	) Bill ON Bill.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId AND Bill.intEntityVendorId = Receipt.intEntityVendorId
+
 WHERE Receipt.ysnPosted = 1 
 	  --AND ReceiptCharge.intInventoryReceiptChargeId NOT IN (SELECT DISTINCT intInventoryReceiptChargeId FROM tblAPBillDetail A
 	  --																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryReceiptChargeId IS NOT NULL AND B.ysnPosted = 1)
