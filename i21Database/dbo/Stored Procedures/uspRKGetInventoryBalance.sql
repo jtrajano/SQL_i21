@@ -121,6 +121,7 @@ FROM (
 			AND IA.ysnPosted = 1
 			AND i.intCommodityId=@intCommodityId  
 			AND i.intItemId = isnull(@intItemId, i.intItemId)
+			AND IA.intAdjustmentType <> 3
 	) a
 	
 	UNION ALL --Direct From Scale
@@ -348,9 +349,9 @@ INSERT INTO @tblResultInventory (dtmDate
 	, tranDSInQty)
 SELECT dtmDate
 	, tranShipmentNumber
-	, tranShipQty
+	, isnull(tranShipQty,0) + CASE WHEN dblInvoiceQty < 0 THEN dblInvoiceQty ELSE 0 END
 	, tranReceiptNumber
-	, tranRecQty 
+	, isnull(tranRecQty,0) + CASE WHEN dblInvoiceQty > 0 THEN dblInvoiceQty ELSE 0 END
 	, tranAdjNumber
 	, dblAdjustmentQty
 	, tranCountNumber
