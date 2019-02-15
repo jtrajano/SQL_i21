@@ -49,6 +49,8 @@ BEGIN TRY
 		,intContractHeaderId INT
 		,intInventoryReceiptItemId INT
 		,intContractDetailId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT
 		,dblFranchiseAmount DECIMAL(18, 6))
 
 	DECLARE @distinctVendor TABLE 
