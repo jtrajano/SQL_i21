@@ -142,10 +142,14 @@
     [strGuid]                      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strUserId]                    NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceNumberHistory]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [dtmDueDateBaseOnTermsHistory] DATETIME NULL, 
-	[strDriverPinNumber]		   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strDriverDescription]		   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [intDriverPinId]			   INT             NULL,
-    CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC)
+    [dtmDueDateBaseOnTermsHistory] DATETIME        NULL,
+    [strDriverPinNumber]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strDriverDescription]         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [intDriverPinId]               INT             NULL,
+    [ysnSummaryByDriverPin]        BIT             NULL,
+    [strDetailDisplay]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC) WITH (FILLFACTOR = 70)
 );
+
+
 

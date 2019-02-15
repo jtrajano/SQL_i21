@@ -350,6 +350,7 @@ BEGIN
 			,intCustomerGroupId				INT
 			,intOdometerAging				INT
 			,intVehicleId					INT
+			,intDriverPinId					INT
 			----------------------------------------------------
 			,dtmTransactionDate				DATETIME
 			,dtmInvoiceDate					DATETIME
@@ -401,6 +402,9 @@ BEGIN
 			,strEmailDistributionOption		NVARCHAR(MAX)
 			,strEmail						NVARCHAR(MAX)
 			,strCustomerName				NVARCHAR(MAX)
+			,strDetailDisplay				NVARCHAR(MAX)
+			,strDriverPinNumber				NVARCHAR(MAX)
+			,strDriverDescription			NVARCHAR(MAX)
 			----------------------------------------------------
 			,dblQuantity					NUMERIC(18,6)
 			,dblCalculatedTotalAmount		NUMERIC(18,6)
@@ -432,9 +436,9 @@ BEGIN
 			,ysnDepartmentGrouping			BIT
 			,ysnPostForeignSales			BIT
 			,ysnExpensed					BIT
+			,ysnSummaryByDriverPin			BIT
 
 		)
-
 
 		IF(ISNULL(@ysnReprintInvoice,0) = 1 OR ISNULL(@From,0) = 1)
 		BEGIN
@@ -450,6 +454,7 @@ BEGIN
 			,intCustomerGroupId			
 			,intOdometerAging		
 			,intVehicleId	
+			,intDriverPinId			
 			----------------------------
 			,dtmTransactionDate			
 			,dtmInvoiceDate				
@@ -501,6 +506,9 @@ BEGIN
 			,strEmailDistributionOption	
 			,strEmail				
 			,strCustomerName	
+			,strDetailDisplay				
+			,strDriverPinNumber				
+			,strDriverDescription		
 			----------------------------
 			,dblQuantity				
 			,dblCalculatedTotalAmount	
@@ -531,7 +539,8 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
-			,ysnExpensed
+			,ysnExpensed				
+			,ysnSummaryByDriverPin		
 			)
 			SELECT 
 			 intCustomerId				
@@ -544,7 +553,8 @@ BEGIN
 			,intInvoiceId				
 			,intCustomerGroupId			
 			,intOdometerAging		
-			,intVehicleId			
+			,intVehicleId	
+			,intDriverPinId				
 			----------------------------
 			,dtmTransactionDate			
 			,dtmInvoiceDate				
@@ -595,7 +605,10 @@ BEGIN
 			,strCompanyAddress			
 			,strEmailDistributionOption	
 			,strEmail		
-			,strCustomerName			
+			,strCustomerName	
+			,strDetailDisplay				
+			,strDriverPinNumber				
+			,strDriverDescription
 			----------------------------
 			,dblQuantity				
 			,dblCalculatedTotalAmount	
@@ -626,7 +639,8 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
-			,ysnExpensed
+			,ysnExpensed				
+			,ysnSummaryByDriverPin
 			FROM vyuCFInvoiceReport
 		END
 		ELSE
@@ -641,15 +655,116 @@ BEGIN
 			,intInvoiceCycle			
 			,intInvoiceId				
 			,intCustomerGroupId			
-			,intOdometerAging			
-			,intVehicleId		
+			,intOdometerAging		
+			,intVehicleId	
+			,intDriverPinId			
 			----------------------------
 			,dtmTransactionDate			
 			,dtmInvoiceDate				
 			,dtmPostedDate				
 			,dtmCreatedDate				
-			,dtmDate					
-			,dtmBillingDate	
+			,dtmDate		
+			,dtmBillingDate			
+			----------------------------
+			,strTransactionId			
+			,strTransactionType			
+			,strInvoiceReportNumber		
+			,strTempInvoiceReportNumber	
+			,strMiscellaneous			
+			,strPrintTimeStamp			
+			,strPrimarySortOptions		
+			,strSecondarySortOptions	
+			,strPrintRemittancePage		
+			,strPrintPricePerGallon		
+			,strPrintSiteAddress		
+			,strPrimaryDepartment		
+			,strName					
+			,strCustomerNumber			
+			,strBillTo					
+			,strShipTo					
+			,strType					
+			,strLocationName			
+			,strInvoiceNumber			
+			,strNetwork					
+			,strGroupName				
+			,strInvoiceCycle			
+			,strCardNumber				
+			,strCardDescription			
+			,strSiteNumber				
+			,strSiteName				
+			,strTaxState				
+			,strSiteType				
+			,strState					
+			,strSiteAddress				
+			,strSiteCity				
+			,strProductNumber			
+			,strItemNo					
+			,strDescription				
+			,strVehicleNumber			
+			,strVehicleDescription		
+			,strDepartment				
+			,strDepartmentDescription	
+			,strCompanyName				
+			,strCompanyAddress			
+			,strEmailDistributionOption	
+			,strEmail				
+			,strCustomerName	
+			,strDetailDisplay				
+			,strDriverPinNumber				
+			,strDriverDescription		
+			----------------------------
+			,dblQuantity				
+			,dblCalculatedTotalAmount	
+			,dblOriginalTotalAmount		
+			,dblCalculatedGrossAmount	
+			,dblOriginalGrossAmount		
+			,dblCalculatedNetAmount		
+			,dblOriginalNetAmount		
+			,dblMargin					
+			,dblTotalMiles				
+			,dblTotalTax				
+			,dblTotalSST				
+			,dblTaxExceptSST			
+			----------------------------
+			,ysnInvalid					
+			,ysnPosted					
+			,ysnPostedCSV				
+			,ysnPrintMiscellaneous		
+			,ysnSummaryByCard			
+			,ysnSummaryByDepartment		
+			,ysnSummaryByMiscellaneous	
+			,ysnSummaryByProduct		
+			,ysnSummaryByVehicle		
+			,ysnSummaryByCardProd		
+			,ysnSummaryByDeptCardProd	
+			,ysnPrintTimeOnInvoices		
+			,ysnPrintTimeOnReports		
+			,ysnSummaryByDeptVehicleProd
+			,ysnDepartmentGrouping		
+			,ysnPostForeignSales		
+			,ysnExpensed				
+			,ysnSummaryByDriverPin		
+			)
+			SELECT 
+			 intCustomerId				
+			,intTransactionId			
+			,intOdometer				
+			,intProductId				
+			,intCardId					
+			,intAccountId				
+			,intInvoiceCycle			
+			,intInvoiceId				
+			,intCustomerGroupId			
+			,intOdometerAging		
+			,intVehicleId	
+			,intDriverPinId				
+			----------------------------
+			,dtmTransactionDate			
+			,dtmInvoiceDate				
+			,dtmPostedDate				
+			,dtmCreatedDate				
+			,dtmDate	
+			,dtmBillingDate				
 			----------------------------
 			,strTransactionId			
 			,strTransactionType			
@@ -693,7 +808,10 @@ BEGIN
 			,strCompanyAddress			
 			,strEmailDistributionOption	
 			,strEmail		
-			,strCustomerName				
+			,strCustomerName	
+			,strDetailDisplay				
+			,strDriverPinNumber				
+			,strDriverDescription			
 			----------------------------
 			,dblQuantity				
 			,dblCalculatedTotalAmount	
@@ -724,102 +842,8 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
-			,ysnExpensed
-			)
-			SELECT 
-			 intCustomerId				
-			,intTransactionId			
-			,intOdometer				
-			,intProductId				
-			,intCardId					
-			,intAccountId				
-			,intInvoiceCycle			
-			,intInvoiceId				
-			,intCustomerGroupId			
-			,intOdometerAging		
-			,intVehicleId			
-			----------------------------
-			,dtmTransactionDate			
-			,dtmInvoiceDate				
-			,dtmPostedDate				
-			,dtmCreatedDate				
-			,dtmDate					
-			,dtmBillingDate	
-			----------------------------
-			,strTransactionId			
-			,strTransactionType			
-			,strInvoiceReportNumber		
-			,strTempInvoiceReportNumber	
-			,strMiscellaneous			
-			,strPrintTimeStamp			
-			,strPrimarySortOptions		
-			,strSecondarySortOptions	
-			,strPrintRemittancePage		
-			,strPrintPricePerGallon		
-			,strPrintSiteAddress		
-			,strPrimaryDepartment		
-			,strName					
-			,strCustomerNumber			
-			,strBillTo					
-			,strShipTo					
-			,strType					
-			,strLocationName			
-			,strInvoiceNumber			
-			,strNetwork					
-			,strGroupName				
-			,strInvoiceCycle			
-			,strCardNumber				
-			,strCardDescription			
-			,strSiteNumber				
-			,strSiteName				
-			,strTaxState				
-			,strSiteType				
-			,strState					
-			,strSiteAddress				
-			,strSiteCity				
-			,strProductNumber			
-			,strItemNo					
-			,strDescription				
-			,strVehicleNumber			
-			,strVehicleDescription		
-			,strDepartment				
-			,strDepartmentDescription	
-			,strCompanyName				
-			,strCompanyAddress			
-			,strEmailDistributionOption	
-			,strEmail			
-			,strCustomerName			
-			----------------------------
-			,dblQuantity				
-			,dblCalculatedTotalAmount	
-			,dblOriginalTotalAmount		
-			,dblCalculatedGrossAmount	
-			,dblOriginalGrossAmount		
-			,dblCalculatedNetAmount		
-			,dblOriginalNetAmount		
-			,dblMargin					
-			,dblTotalMiles				
-			,dblTotalTax				
-			,dblTotalSST				
-			,dblTaxExceptSST			
-			----------------------------
-			,ysnInvalid					
-			,ysnPosted					
-			,ysnPostedCSV				
-			,ysnPrintMiscellaneous		
-			,ysnSummaryByCard			
-			,ysnSummaryByDepartment		
-			,ysnSummaryByMiscellaneous	
-			,ysnSummaryByProduct		
-			,ysnSummaryByVehicle		
-			,ysnSummaryByCardProd		
-			,ysnSummaryByDeptCardProd	
-			,ysnPrintTimeOnInvoices		
-			,ysnPrintTimeOnReports		
-			,ysnSummaryByDeptVehicleProd
-			,ysnDepartmentGrouping		
-			,ysnPostForeignSales		
-			,ysnExpensed
+			,ysnExpensed				
+			,ysnSummaryByDriverPin
 			FROM vyuCFInvoiceReport
 			WHERE  ISNULL(ysnInvoiced,0) = 0
 		END
@@ -1106,6 +1130,11 @@ BEGIN
 		,ysnSummaryByDeptVehicleProd	
 		,ysnPostedCSV
 		,ysnExpensed
+		,intDriverPinId		
+		,ysnSummaryByDriverPin
+		,strDetailDisplay			
+		,strDriverPinNumber			
+		,strDriverDescription		
 		INTO #tblCFTempInvoiceReportSummary 
 		FROM #tblCFTempInvoiceReport AS main 
 		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
@@ -1203,7 +1232,12 @@ BEGIN
 		,ysnSummaryByDeptVehicleProd
 		,ysnPostedCSV
 		,strUserId
-			,ysnExpensed
+		,ysnExpensed
+		,intDriverPinId		
+		,ysnSummaryByDriverPin
+		,strDetailDisplay			
+		,strDriverPinNumber			
+		,strDriverDescription
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -1292,7 +1326,12 @@ BEGIN
 		,ysnSummaryByDeptVehicleProd		
 		,ysnPostedCSV
 		,@UserId
-			,ysnExpensed
+		,ysnExpensed
+		,intDriverPinId		
+		,ysnSummaryByDriverPin
+		,strDetailDisplay			
+		,strDriverPinNumber			
+		,strDriverDescription
 	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 

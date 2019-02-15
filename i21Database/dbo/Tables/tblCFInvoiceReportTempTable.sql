@@ -89,10 +89,14 @@
     [strUserId]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intVehicleId]                INT             NULL,
     [strStatementType]            NVARCHAR (MAX)  NULL,
-	[strDriverPinNumber]		  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strDriverPinDescription]	  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [intDriverPinId]			  INT             NULL,
+    [strDriverPinNumber]          NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strDriverDescription]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [intDriverPinId]              INT             NULL,
+    [ysnSummaryByDriverPin]       BIT             NULL,
+    [strDetailDisplay]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
 );
+
+
 
 
 

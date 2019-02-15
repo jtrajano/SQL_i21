@@ -7339,6 +7339,11 @@
     <None Include="Scripts\Post-Deployment\SM\1910_CreateAuditLogMigrationPlan.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_MigrateAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
+    <Build Include="dbo\Tables\tblMBImportMeterReading.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceGroupByDriverPinOdometerHistory.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByDriverPinOdometer.sql" />
+    <Build Include="dbo\Views\vyuCFinvoiceGroupByDriverPinHistory.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceGroupByDriverPin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
