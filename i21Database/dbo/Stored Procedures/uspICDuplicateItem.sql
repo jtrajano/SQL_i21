@@ -1063,7 +1063,7 @@ BEGIN
 				@keyValue = @NewItemId						-- Item Id. 
 				,@screenName = 'Inventory.view.Item'        -- Screen Namespace
 				,@entityId = @intUserId						-- Entity Id.
-				,@actionType = 'Duplicate'                  -- Action Type
+				,@actionType = 'Duplicated'                  -- Action Type
 				,@changeDescription = @strDescription
 				,@fromValue = @ItemNo							-- Previous Value
 				,@toValue = @NewItemNo						-- New Value
