@@ -63,7 +63,6 @@ BEGIN
 										INNER JOIN (SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst ) Q
 											ON gl.intAccountId = Q.intGLAccountId
 										INNER JOIN tblGLAccountSegmentMapping ASM ON gl.intAccountId = ASM.intAccountId)
-
 		-- INSERT new records for tblCMBank
 		INSERT INTO tblCMBank (
 				strBankName

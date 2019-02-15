@@ -117,6 +117,7 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intSort
 				)
 			SELECT strReceiptType = 'Direct'
 				,intEntityVendorId = LD.intVendorEntityId
@@ -152,6 +153,7 @@ BEGIN TRY
 				,dblForexRate = NULL
 				,ISNULL(LC.intLoadContainerId, - 1)
 				,L.intFreightTermId
+				,ISNULL(LC.intLoadContainerId, 0)
 			FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId 
@@ -176,6 +178,8 @@ BEGIN TRY
 							END
 						) AS BIT) = 0
 				AND L.intLoadId = @intLoadId
+				AND ISNULL(LC.ysnRejected, 0) <> 1 
+				AND ISNULL(LDCL.dblReceivedQty,0) = 0
 			ORDER BY LDCL.intLoadDetailContainerLinkId
 		END
 		ELSE
@@ -215,6 +219,7 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intSort
 				)
 			SELECT strReceiptType = 'Direct'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -250,6 +255,7 @@ BEGIN TRY
 				,dblForexRate = NULL
 				,- 1 --
 				,L.intFreightTermId
+				,intSort = NULL
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
@@ -463,9 +469,9 @@ BEGIN TRY
 			,NULL
 			,LD.intItemUOMId
 			,LD.intItemId
-			,ISNULL(LC.dblQuantity, LD.dblQuantity)
-			,ISNULL(LC.dblGrossWt, LD.dblGross)
-			,ISNULL(LC.dblTareWt, LD.dblTare)
+			,ISNULL(LDCL.dblQuantity, ISNULL(LC.dblQuantity, LD.dblQuantity))
+			,ISNULL(LDCL.dblLinkGrossWt, ISNULL(LC.dblGrossWt, LD.dblGross))
+			,ISNULL(LDCL.dblLinkTareWt, ISNULL(LC.dblTareWt, LD.dblTare))
 			,LC.strContainerNumber
 			,ISNULL(LC.intLoadContainerId,0)
 			,LC.strMarks
@@ -624,6 +630,7 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intSort
 				)
 			SELECT strReceiptType = 'Purchase Contract'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -659,6 +666,7 @@ BEGIN TRY
 				,dblForexRate = CD.dblRate
 				,ISNULL(LC.intLoadContainerId, - 1) --
 				,L.intFreightTermId
+				,ISNULL(LC.intLoadContainerId, 0)
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -686,6 +694,8 @@ BEGIN TRY
 							END
 						) AS BIT) = 0
 				AND L.intLoadId = @intLoadId
+				AND ISNULL(LC.ysnRejected, 0) <> 1
+				AND ISNULL(LDCL.dblReceivedQty,0) = 0
 			ORDER BY LDCL.intLoadDetailContainerLinkId
 		END
 		ELSE
@@ -725,6 +735,7 @@ BEGIN TRY
 				,dblForexRate
 				,intContainerId
 				,intFreightTermId
+				,intSort
 				)
 			SELECT strReceiptType = 'Purchase Contract'
 				,intEntityVendorId = LD.intVendorEntityId --
@@ -760,6 +771,7 @@ BEGIN TRY
 				,dblForexRate = CD.dblRate
 				,- 1 --
 				,L.intFreightTermId
+				,intSort = NULL
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -976,9 +988,9 @@ BEGIN TRY
 			,CD.intContractDetailId
 			,LD.intItemUOMId
 			,LD.intItemId
-			,ISNULL(LC.dblQuantity, LD.dblQuantity)
-			,ISNULL(LC.dblGrossWt, LD.dblGross)
-			,ISNULL(LC.dblTareWt, LD.dblTare)
+			,ISNULL(LDCL.dblQuantity, ISNULL(LC.dblQuantity, LD.dblQuantity))
+			,ISNULL(LDCL.dblLinkGrossWt, ISNULL(LC.dblGrossWt, LD.dblGross))
+			,ISNULL(LDCL.dblLinkTareWt, ISNULL(LC.dblTareWt, LD.dblTare))
 			,LC.strContainerNumber
 			,ISNULL(LC.intLoadContainerId,0)
 			,LC.strMarks

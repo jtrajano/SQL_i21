@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[uspMFUpdateWorkOrder] (@strXML NVARCHAR(MAX),@intConcurrencyId Int Output)
+﻿CREATE PROCEDURE [dbo].[uspMFUpdateWorkOrder] (
+	@strXML NVARCHAR(MAX)
+	,@intConcurrencyId INT OUTPUT
+	)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -31,13 +34,14 @@ BEGIN TRY
 		,@intPrevExecutionOrder INT
 		,@dtmOrderDate DATETIME
 		,@dtmExpectedDate DATETIME
-		,@ysnIngredientAvailable bit
-		,@intMaxExecutionOrder int
-		,@intDepartmentId int
+		,@ysnIngredientAvailable BIT
+		,@intMaxExecutionOrder INT
+		,@intDepartmentId INT
 		,@intTransactionCount INT
-		,@intBlendRequirementId int
-		,@intUnitMeasureId int
+		,@intBlendRequirementId INT
+		,@intUnitMeasureId INT
 		,@dtmCurrentDate DATETIME
+		,@dtmPrevPlannedDate DATETIME
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -57,7 +61,7 @@ BEGIN TRY
 		,@intItemId = intItemId
 		,@dblQuantity = dblQuantity
 		,@intItemUOMId = intItemUOMId
-		,@dtmExpectedDate=dtmExpectedDate
+		,@dtmExpectedDate = dtmExpectedDate
 		,@intExecutionOrder = intExecutionOrder
 		,@intUserId = intUserId
 		,@strLotNumber = strLotNumber
@@ -73,8 +77,8 @@ BEGIN TRY
 		,@intCustomerId = intCustomerId
 		,@strSalesOrderNo = strSalesOrderNo
 		,@intSupervisorId = intSupervisorId
-		,@ysnIngredientAvailable=ysnIngredientAvailable
-		,@intDepartmentId=intDepartmentId
+		,@ysnIngredientAvailable = ysnIngredientAvailable
+		,@intDepartmentId = intDepartmentId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
@@ -103,15 +107,17 @@ BEGIN TRY
 			,intCustomerId INT
 			,strSalesOrderNo NVARCHAR(50)
 			,intSupervisorId INT
-			,ysnIngredientAvailable bit
-			,intDepartmentId int
+			,ysnIngredientAvailable BIT
+			,intDepartmentId INT
 			)
 
 	IF EXISTS (
-		SELECT *
-		FROM tblMFWorkOrder
-		WHERE strLotNumber = @strLotNumber and intWorkOrderId <>@intWorkOrderId 
-	) and @strLotNumber<>''
+			SELECT *
+			FROM tblMFWorkOrder
+			WHERE strLotNumber = @strLotNumber
+				AND intWorkOrderId <> @intWorkOrderId
+			)
+		AND @strLotNumber <> ''
 	BEGIN
 		RAISERROR (
 				'Lot Id already exists. It should be unique'
@@ -120,33 +126,47 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @intPrevExecutionOrder = intExecutionOrder,@intConcurrencyId=ISNULL(intConcurrencyId,0)+1,@intBlendRequirementId = intBlendRequirementId
+	SELECT @intPrevExecutionOrder = intExecutionOrder
+		,@intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+		,@intBlendRequirementId = intBlendRequirementId
+		,@dtmPrevPlannedDate = dtmPlannedDate
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	IF @intPrevExecutionOrder <> @intExecutionOrder
 	BEGIN
-		SELECT @intMaxExecutionOrder=Count(*)
+		SELECT @intMaxExecutionOrder = Count(*)
 		FROM dbo.tblMFWorkOrder
 		WHERE intManufacturingCellId = @intManufacturingCellId
-		AND dtmPlannedDate = @dtmPlannedDate
-		AND intStatusId <>13
+			AND dtmPlannedDate = @dtmPlannedDate
+			AND intStatusId <> 13
 
-		if @intExecutionOrder>@intMaxExecutionOrder or 0>@intExecutionOrder
-		Begin
+		IF @intExecutionOrder > @intMaxExecutionOrder
+			OR 0 > @intExecutionOrder
+		BEGIN
 			RAISERROR (
-				'Execution order entered is out of range.'
-				,11
-				,1
-				)
-		End
-			
+					'Execution order entered is out of range.'
+					,11
+					,1
+					)
+		END
 	END
-	
-	IF @intTransactionCount = 0
-	BEGIN TRANSACTION
 
-	
+	IF @intTransactionCount = 0
+		BEGIN TRANSACTION
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM tblMFSchedule
+			WHERE ysnStandard = 1
+			)
+		AND @dtmPrevPlannedDate <> @dtmPlannedDate
+	BEGIN
+		UPDATE tblMFStageWorkOrder
+		SET dtmPlannedDate = @dtmPlannedDate
+		WHERE intWorkOrderId = @intWorkOrderId
+	END
+
 	IF @intPrevExecutionOrder <> @intExecutionOrder
 	BEGIN
 		IF @intPrevExecutionOrder > @intExecutionOrder --Move upward
@@ -157,7 +177,7 @@ BEGIN TRY
 				AND dtmPlannedDate = @dtmPlannedDate
 				AND intExecutionOrder BETWEEN @intExecutionOrder
 					AND @intPrevExecutionOrder
-					AND intStatusId <>13
+				AND intStatusId <> 13
 		END
 		ELSE
 		BEGIN --Move downward
@@ -167,7 +187,7 @@ BEGIN TRY
 				AND dtmPlannedDate = @dtmPlannedDate
 				AND intExecutionOrder BETWEEN @intPrevExecutionOrder
 					AND @intExecutionOrder
-					AND intStatusId <>13
+				AND intStatusId <> 13
 		END
 	END
 
@@ -196,11 +216,11 @@ BEGIN TRY
 		,intSalesRepresentativeId = @intSalesRepresentativeId
 		,intSupervisorId = @intSupervisorId
 		,intCustomerId = @intCustomerId
-		,ysnIngredientAvailable=@ysnIngredientAvailable
-		,intDepartmentId=@intDepartmentId
+		,ysnIngredientAvailable = @ysnIngredientAvailable
+		,intDepartmentId = @intDepartmentId
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
-		,intConcurrencyId=@intConcurrencyId
+		,intConcurrencyId = @intConcurrencyId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	INSERT INTO dbo.tblMFWorkOrderProductSpecification (
@@ -217,33 +237,39 @@ BEGIN TRY
 			intWorkOrderProductSpecificationId INT
 			,strParameterName NVARCHAR(50)
 			,strParameterValue NVARCHAR(MAX)
-			,strRowState nvarchar(50)
+			,strRowState NVARCHAR(50)
 			) x
-	WHERE x.intWorkOrderProductSpecificationId = 0 and x.strRowState='ADDED'
+	WHERE x.intWorkOrderProductSpecificationId = 0
+		AND x.strRowState = 'ADDED'
 
-	Update tblMFWorkOrderProductSpecification
-	Set strParameterName=x.strParameterName
-		,strParameterValue=x.strParameterValue
-		,intConcurrencyId=Isnull(intConcurrencyId,0)+1
+	UPDATE tblMFWorkOrderProductSpecification
+	SET strParameterName = x.strParameterName
+		,strParameterValue = x.strParameterValue
+		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 	FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
 			intWorkOrderProductSpecificationId INT
 			,strParameterName NVARCHAR(50)
 			,strParameterValue NVARCHAR(MAX)
-			,strRowState nvarchar(50)
+			,strRowState NVARCHAR(50)
 			) x
-	WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='MODIFIED'
+	WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId
+		AND x.strRowState = 'MODIFIED'
 
 	DELETE
 	FROM dbo.tblMFWorkOrderProductSpecification
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND EXISTS (
 			SELECT *
-			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (intWorkOrderProductSpecificationId INT,strRowState nvarchar(50)) x
-			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='DELETE'
+			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
+					intWorkOrderProductSpecificationId INT
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId
+				AND x.strRowState = 'DELETE'
 			)
 
-	If @intBlendRequirementId is not null
-	Begin
+	IF @intBlendRequirementId IS NOT NULL
+	BEGIN
 		SELECT @intUnitMeasureId = intUnitMeasureId
 		FROM tblICItemUOM
 		WHERE intItemUOMId = @intItemUOMId
@@ -258,10 +284,10 @@ BEGIN TRY
 			,intLastModifiedUserId = @intUserId
 			,dtmLastModified = @dtmCurrentDate
 		WHERE intBlendRequirementId = @intBlendRequirementId
-	End
-	
+	END
+
 	IF @intTransactionCount = 0
-	COMMIT TRANSACTION
+		COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
@@ -269,7 +295,8 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0 AND @intTransactionCount = 0
+	IF XACT_STATE() != 0
+		AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0

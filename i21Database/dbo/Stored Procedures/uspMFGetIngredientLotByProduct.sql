@@ -50,7 +50,15 @@ BEGIN
 						THEN L.dblWeight
 					ELSE L.dblQty
 					END
-				) - IsNULL(SR.dblWeight, 0) AS dblWeight
+				)  AS dblWeight
+				,IsNULL(SR.dblWeight, 0) AS dblReservedWeight
+				,(
+				CASE 
+					WHEN L.intWeightUOMId IS NOT NULL
+						THEN L.dblWeight
+					ELSE L.dblQty
+					END
+				) - IsNULL(SR.dblWeight, 0) AS dblAvailableWeight
 			,ISNULL(L.intWeightUOMId, L.intItemUOMId) AS intWeightUOMId
 			,U.strUnitMeasure
 			,IU.intUnitMeasureId
@@ -58,7 +66,9 @@ BEGIN
 			,L.strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
-			,L.dblQty - IsNULL(SR.dblQty, 0) AS dblQty
+			,L.dblQty AS dblQty
+			,IsNULL(SR.dblQty, 0) AS dblReservedQty
+			,L.dblQty - IsNULL(SR.dblQty, 0) AS dblAvailableQty
 			,L.intItemUOMId AS intQtyUOMId
 			,U1.strUnitMeasure AS strQtyUOM
 			,CASE 
@@ -147,14 +157,14 @@ BEGIN
 					ELSE L.intLotId
 					END
 				)
-			AND L.dblQty - IsNULL(SR.dblQty, 0) > 0
-			AND (
-				CASE 
-					WHEN L.intWeightUOMId IS NOT NULL
-						THEN L.dblWeight
-					ELSE L.dblQty
-					END
-				) - IsNULL(SR.dblWeight, 0) > 0
+			--AND L.dblQty - IsNULL(SR.dblQty, 0) > 0
+			--AND (
+			--	CASE 
+			--		WHEN L.intWeightUOMId IS NOT NULL
+			--			THEN L.dblWeight
+			--		ELSE L.dblQty
+			--		END
+			--	) - IsNULL(SR.dblWeight, 0) > 0
 				AND LI.ysnPickAllowed = 1
 		
 		UNION
@@ -164,7 +174,9 @@ BEGIN
 			,NULL AS strLotNumber
 			,I.strItemNo
 			,I.strDescription
-			,S.dblOnHand - S.dblUnitReserved AS dblWeight
+			,S.dblOnHand AS dblWeight
+			,S.dblUnitReserved AS dblReservedWeight
+			,S.dblOnHand - S.dblUnitReserved AS dblAvailableWeight
 			,IU.intItemUOMId AS intWeightUOMId
 			,U.strUnitMeasure
 			,IU.intUnitMeasureId
@@ -172,7 +184,9 @@ BEGIN
 			,NULL AS strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
-			,S.dblOnHand - S.dblUnitReserved AS dblQty
+			,S.dblOnHand AS dblQty
+			,S.dblUnitReserved AS dblReservedQty
+			,S.dblOnHand - S.dblUnitReserved AS dblAvailableQty
 			,IU.intItemUOMId AS intQtyUOMId
 			,U.strUnitMeasure AS strQtyUOM
 			,CASE 
@@ -246,7 +260,15 @@ BEGIN
 						THEN L.dblWeight
 					ELSE L.dblQty
 					END
-				) - IsNULL(SR.dblWeight, 0) AS dblWeight
+				)  AS dblWeight
+				,IsNULL(SR.dblWeight, 0) AS dblReservedWeight
+				,(
+				CASE 
+					WHEN L.intWeightUOMId IS NOT NULL
+						THEN L.dblWeight
+					ELSE L.dblQty
+					END
+				) - IsNULL(SR.dblWeight, 0) AS dblAvailableWeight
 			,ISNULL(L.intWeightUOMId, L.intItemUOMId) AS intWeightUOMId
 			,U.strUnitMeasure
 			,IU.intUnitMeasureId
@@ -254,7 +276,9 @@ BEGIN
 			,L.strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
-			,L.dblQty - IsNULL(SR.dblQty, 0) AS dblQty
+			,L.dblQty  AS dblQty
+			,IsNULL(SR.dblQty, 0) AS dblReservedQty
+			,L.dblQty - IsNULL(SR.dblQty, 0) AS dblAvailableQty
 			,L.intItemUOMId AS intQtyUOMId
 			,U1.strUnitMeasure AS strQtyUOM
 			,CASE 
@@ -343,14 +367,14 @@ BEGIN
 					ELSE L.intLotId
 					END
 				)
-			AND L.dblQty - IsNULL(SR.dblQty, 0) > 0
-			AND (
-				CASE 
-					WHEN L.intWeightUOMId IS NOT NULL
-						THEN L.dblWeight
-					ELSE L.dblQty
-					END
-				) - IsNULL(SR.dblWeight, 0) > 0
+			--AND L.dblQty - IsNULL(SR.dblQty, 0) > 0
+			--AND (
+			--	CASE 
+			--		WHEN L.intWeightUOMId IS NOT NULL
+			--			THEN L.dblWeight
+			--		ELSE L.dblQty
+			--		END
+			--	) - IsNULL(SR.dblWeight, 0) > 0
 			AND L.intLotId NOT IN (
 				SELECT Item Collate Latin1_General_CI_AS
 				FROM [dbo].[fnSplitString](@strLotId, ',')
@@ -364,7 +388,9 @@ BEGIN
 			,NULL AS strLotNumber
 			,I.strItemNo
 			,I.strDescription
-			,S.dblOnHand - S.dblUnitReserved AS dblWeight
+			,S.dblOnHand  AS dblWeight
+			,S.dblUnitReserved AS dblReservedWeight
+			,S.dblOnHand - S.dblUnitReserved AS dblAvailableWeight
 			,S.intItemUOMId AS intWeightUOMId
 			,U.strUnitMeasure
 			,IU.intUnitMeasureId
@@ -372,7 +398,9 @@ BEGIN
 			,NULL strLotAlias
 			,SL.intStorageLocationId
 			,SL.strName
-			,S.dblOnHand - S.dblUnitReserved AS dblQty
+			,S.dblOnHand  AS dblQty
+			,S.dblUnitReserved AS dblReservedQty
+			,S.dblOnHand - S.dblUnitReserved AS dblAvailableQty
 			,S.intItemUOMId AS intQtyUOMId
 			,U.strUnitMeasure AS strQtyUOM
 			,CASE 

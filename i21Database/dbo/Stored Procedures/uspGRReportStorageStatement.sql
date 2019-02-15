@@ -25,8 +25,7 @@ BEGIN TRY
 			@xmlDocumentId			INT,
 			@strPrefix              Nvarchar(100),
 			@intNumber				INT,
-			@strFormNumber			NVARCHAR(100),
-			@strType				NVARCHAR(100)
+			@strFormNumber			NVARCHAR(100)
 						
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -58,74 +57,45 @@ BEGIN TRY
 				[begingroup]	NVARCHAR(50),  
 				[endgroup]		NVARCHAR(50),  
 				[datatype]		NVARCHAR(50)  
-	)
+	)  
+    
+	SELECT	@intEntityId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intEntityId'
+
+	SELECT @intItemId=[from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intItemId'
+	
+	SELECT @intStorageTypeId=[from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intStorageTypeId'
+
+	SELECT @intStorageScheduleId=[from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intStorageScheduleRuleId'
 
 	SELECT  @strFormNumber=[from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strFormNumber'
-	
-	SELECT  @strType = [from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'strType'	
 		
-	IF EXISTS(SELECT 1 FROM tblGRStorageStatement WHERE strFormNumber = @strFormNumber)
+	IF @intEntityId IS NULL
 	BEGIN
 	
-		SELECT 
-		 @intEntityId = intEntityId
-		,@intItemId = intItemId
-		,@intStorageTypeId = intStorageTypeId
-		,@intStorageScheduleId = intStorageScheduleId
-		FROM tblGRCustomerStorage 
-		WHERE intCustomerStorageId = (
-										SELECT Top 1 intCustomerStorageId 
-										FROM tblGRStorageStatement 
-										WHERE strFormNumber = @strFormNumber
-									 
-									 )
-		SELECT Top 1 @strLicenseNumber = strLicenceNumber 
-		FROM tblGRStorageStatement 
-		WHERE strFormNumber = @strFormNumber
-
-		SELECT @strItemNo = strItemNo FROM tblICItem WHERE intItemId = @intItemId
-		SELECT @strStorageType = strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId = @intStorageTypeId
-		SET @strPrefix = NULL
-		SET @intNumber = 0
+		SELECT @intEntityId=intEntityId,@intItemId=intItemId,@intStorageTypeId=intStorageTypeId,@intStorageScheduleId=intStorageScheduleId
+		FROM tblGRCustomerStorage Where intCustomerStorageId=(SELECT Top 1 intCustomerStorageId FROM tblGRStorageStatement WHERE strFormNumber=@strFormNumber)
+		SELECT Top 1 @strLicenseNumber=strLicenceNumber FROM tblGRStorageStatement WHERE strFormNumber=@strFormNumber
+		SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
+		SELECT @strStorageType=strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId=@intStorageTypeId
+		SET @strPrefix=NULL
+		SET @intNumber=0
 	END
 	ELSE
 	BEGIN
-		
-		SELECT	@intEntityId = [from]
-		FROM	@temp_xml_table   
-		WHERE	[fieldname] = 'intEntityId'
-
-		SELECT @intItemId=[from]
-		FROM	@temp_xml_table   
-		WHERE	[fieldname] = 'intItemId'
-			
-		SELECT @intStorageTypeId=[from]
-		FROM	@temp_xml_table   
-		WHERE	[fieldname] = 'intStorageTypeId'
-
-		SELECT @intStorageScheduleId=[from]
-		FROM	@temp_xml_table   
-		WHERE	[fieldname] = 'intStorageScheduleRuleId'
-
-		SELECT @strItemNo = strItemNo 
-		FROM tblICItem 
-		WHERE intItemId= @intItemId
-		
-		SELECT @strStorageType = strStorageTypeDescription 
-		FROM tblGRStorageType 
-		WHERE intStorageScheduleTypeId=@intStorageTypeId
-		
-		SELECT @strLicenseNumber = [strLicenseNumber] 
-		FROM [tblGRCompanyPreference]
-		
-		SELECT @strPrefix = [strPrefix]
-			  ,@intNumber=intNumber+1 
-		FROM tblSMStartingNumber 
-		WHERE [strTransactionType]	= N'Storage Statement FormNo'
+		SELECT @strItemNo=strItemNo FROM tblICItem WHERE intItemId=@intItemId
+		SELECT @strStorageType=strStorageTypeDescription FROM tblGRStorageType WHERE intStorageScheduleTypeId=@intStorageTypeId
+		SELECT @strLicenseNumber=[strLicenseNumber] FROM [tblGRCompanyPreference]
+		SELECT @strPrefix=[strPrefix],@intNumber=intNumber+1 FROM tblSMStartingNumber WHERE [strTransactionType]	= N'Storage Statement FormNo'
 	END
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(strCompanyName)) END,
@@ -159,8 +129,7 @@ BEGIN TRY
 		@intStorageScheduleId AS intStorageScheduleId,
 		@strFormNumber AS strFormNumber,
 		@strPrefix AS strPrefix,
-		@intNumber AS intNumber,
-		@strType   AS strType
+		@intNumber AS intNumber
 	FROM vyuCTEntity EY	WHERE EY.intEntityId=@intEntityId		
 
 END TRY

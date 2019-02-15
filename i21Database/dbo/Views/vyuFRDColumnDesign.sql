@@ -8,7 +8,7 @@ intColumnDetailId
 ,B.strColumnName
 ,B.strDescription as strHeaderDescription
 ,intRefNo
-,'C' + CAST(intRefNo as NVARCHAR(10)) COLLATE Latin1_General_CI_AS AS strRefNo
+,'C' + CAST(intRefNo as NVARCHAR(10)) as strRefNo
 ,ysnReverseSignforExpense
 ,strSegmentUsed
 ,strColumnHeader

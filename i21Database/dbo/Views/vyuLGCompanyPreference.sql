@@ -69,7 +69,6 @@ SELECT CP.intCompanyPreferenceId
 	--,CP.strSignature
 	,CP.strCarrierShipmentStandardText
 	,CP.strShippingInstructionText
-	,CP.strBOLText
 	,CP.dblRouteHours
 	,CP.intShippingMode
 	,SM.strShippingMode

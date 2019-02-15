@@ -120,9 +120,9 @@ End
 
 		Set @strBatchId=@strRetBatchId
 
-		Update tblMFWorkOrder 
-		Set dblQuantity=(Select sum(dblQuantity) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
-		Where intWorkOrderId=@intWorkOrderId
+		--Update tblMFWorkOrder 
+		--Set dblQuantity=(Select sum(dblQuantity) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
+		--Where intWorkOrderId=@intWorkOrderId
 
 		Update tblMFWorkOrderConsumedLot Set ysnStaged=1 Where intWorkOrderId=@intWorkOrderId
 

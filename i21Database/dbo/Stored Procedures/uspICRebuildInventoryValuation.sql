@@ -592,14 +592,6 @@ BEGIN
 				, @dtmStartDate
 			) = 1 
 			AND intItemId = ISNULL(@intItemId, intItemId) 
-
-	DELETE	FROM tblICInventoryStockMovement 
-	WHERE	dbo.fnDateGreaterThanEquals(
-				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-				, @dtmStartDate
-			) = 1 
-			AND intItemId = ISNULL(@intItemId, intItemId) 
-			AND intInventoryTransactionId IS NOT NULL 
 END 
 
 --------------------------------------------------------------------
@@ -1037,10 +1029,8 @@ BEGIN
 			-- Repost 'Inventory Transfer'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Transfer', 'Inventory Transfer with Shipment'))
 			BEGIN 
-
 				DECLARE @ysnTransferOnSameLocation AS BIT
 				DECLARE @ysnShipmentRequired AS BIT 
-
 				SET @ysnTransferOnSameLocation = 0 
 				SET @ysnShipmentRequired = 0 
 				

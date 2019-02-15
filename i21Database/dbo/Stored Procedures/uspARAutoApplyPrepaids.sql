@@ -374,7 +374,7 @@ IF @ysnAutoApplyPrepaids = 1 AND EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceIds)
 						--INSERT PAYMENTS TO POST
 						INSERT INTO @tblPayments
 						SELECT @intPaymentId
-					END
+					END				
 
 				DELETE FROM @tblInvoices WHERE intInvoiceId = @intInvoiceId
 			END

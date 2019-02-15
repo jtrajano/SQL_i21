@@ -39,8 +39,6 @@ BEGIN TRY
 			,'' AS 'strCustomCustomerPO'
 			,'' AS 'intPalletsCount'
 			,'' AS 'strTruckNo'
-			,'' AS 'strBOLText' 
-			,'' AS 'strLoadDirectionMsg' 
 
 		RETURN
 	END
@@ -213,12 +211,10 @@ BEGIN TRY
 				,Load.strMVessel
 				,Load.strMarks
 				,Load.strTrailerNo3 AS strSealNumber
-				,LoadDetail.strLoadDirectionMsg AS strDeliveryInstruction
+				,Load.strComments AS strDeliveryInstruction
 				,ISNULL('', '') AS strCustomCustomerPO
 				,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
 				,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
-				,CP.strBOLText
-				,LoadDetail.strLoadDirectionMsg
 			FROM tblLGLoad Load
 			JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = Load.intLoadId
 			LEFT JOIN tblLGLoadDetailLot LoadDetailLot ON LoadDetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
@@ -234,9 +230,9 @@ BEGIN TRY
 			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
 			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = LoadDetail.intCustomerEntityId
 			LEFT JOIN	tblEMEntity Via ON Via.intEntityId = Load.intHaulerEntityId
+			--LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = Shipment.intShipViaId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Load.intFreightTermId
 				AND Load.intPurchaseSale = 2 -- 'Outbound Order'
-			CROSS APPLY tblLGCompanyPreference CP
 			) AS a
 		WHERE strLoadNumber =  @strShipmentNo
 	END

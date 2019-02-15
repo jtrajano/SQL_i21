@@ -78,16 +78,11 @@ BEGIN TRY
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
-	IF EXISTS (
-			SELECT TOP 1 1
-			FROM tblAPBillDetail BD
-			JOIN tblLGLoadCost LC ON LC.intBillId = BD.intBillId
-			WHERE LC.intLoadId = @intLoadId
-			)
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblLGLoadCost WHERE intLoadId = @intLoadId AND intBillId IS NULL)
 	BEGIN
 		DECLARE @ErrorMessage NVARCHAR(250)
 
-		SET @ErrorMessage = 'Voucher was already created for other charges in ' + @strLoadNumber;
+		SET @ErrorMessage = 'Vouchers were already created for all other charges in ' + @strLoadNumber;
 
 		RAISERROR (@ErrorMessage,16,1);
 	END
@@ -136,8 +131,8 @@ BEGIN TRY
 		,V.intLoadCostId
 		,I.ysnInventoryCost
 		,LD.intItemUOMId
-		,ISNULL(ItemUOM.dblUnitQty,1)
-		,ISNULL(CostUOM.dblUnitQty,1)
+		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
+		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -252,7 +247,9 @@ BEGIN TRY
 			SET intBillId = @intBillId
 			WHERE intLoadCostId IN (
 					SELECT intLoadCostId
-					FROM @voucherDetailData)
+					FROM @voucherDetailData
+					WHERE intVendorEntityId = @intVendorEntityId)
+				
 
 			UPDATE tblAPBillDetail 
 			SET intLoadId = @intLoadId 

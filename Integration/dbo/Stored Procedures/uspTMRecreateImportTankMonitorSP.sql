@@ -343,7 +343,7 @@ BEGIN
 							,B.ysnMaxPrice
 							,dblContractPrice = B.dblPrice
 						FROM vyuTMSiteOrder A
-						OUTER APPLY dbo.fnTMGetContractForCustomer(A.strCustomerNumber,A.intSiteID,A.intProductId) B
+						OUTER APPLY dbo.fnTMGetContractForCustomer(A.strCustomerNumber,A.intSiteID) B
 						WHERE A.intSiteID = @siteId
 					) A
 

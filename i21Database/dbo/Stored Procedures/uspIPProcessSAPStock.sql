@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPStock]
 @strSessionId NVARCHAR(50)='',
 @strInfo1 NVARCHAR(MAX)='' OUT,
-@strInfo2 NVARCHAR(MAX)='' OUT
+@strInfo2 NVARCHAR(MAX)='' OUT,
+@ysnProcessDeadLockEntry BIT=0
 AS
 BEGIN TRY
 
@@ -37,6 +38,14 @@ DECLARE @tblStock TABLE (
 [strSessionId] NVARCHAR(50)
 )
 
+if @ysnProcessDeadLockEntry=1
+Begin
+	Insert Into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,ysnDeadlockError)
+	Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,ysnDeadlockError
+	From tblIPStockError Where isNULL(ysnDeadlockError,0)=1
+	Delete From tblIPStockError Where isNULL(ysnDeadlockError,0)=1
+End
+
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
 If ISNULL(@strSessionId,'')=''
@@ -63,7 +72,8 @@ Begin
 		From @tblStock Where intRowNo=@intMinRowNo
 
 		Select TOP 1 @dblInspectionQuantity=ISNULL(dblInspectionQuantity,0),@dblUnrestrictedQuantity=ISNULL(dblUnrestrictedQuantity,0),
-		@dblInTransitQuantity=ISNULL(dblInTransitQuantity,0),@strStockType=strStockType 
+		@dblInTransitQuantity=ISNULL(dblInTransitQuantity,0),@strStockType=strStockType,
+		@dblBlockedQuantity = ISNULL(dblBlockedQuantity,0)
 		From tblIPStockStage 
 		Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
@@ -73,10 +83,10 @@ Begin
 		End
 
 		If @strStockType='WB'
-			Set @dblQuantity = @dblQuantity + @dblInTransitQuantity
+			Set @dblQuantity = @dblQuantity + @dblInTransitQuantity + @dblBlockedQuantity
 
 		--Add Qty from LK,KB
-		Select @dblQuantity = @dblQuantity + SUM(ISNULL(dblQuantity,0)) 
+		Select @dblQuantity = @dblQuantity + SUM(ISNULL(dblQuantity,0)) + SUM(ISNULL(dblBlockedQuantity,0)) 
 		From tblIPStockStage 
 		Where strSessionId=@strSessionId AND strStockType<>'WB'
 		Group By strItemNo,strSubLocation,strSessionId
@@ -131,8 +141,8 @@ Begin
 		End
 
 		--Move to Archive
-		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
-		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,'Success',''
+		Insert Into tblIPStockArchive(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage,ysnDeadlockError)
+		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,'Success','',ysnDeadlockError
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
@@ -148,8 +158,8 @@ Begin
 		SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 		--Move to Error
-		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage)
-		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,'Failed',@ErrMsg
+		Insert Into tblIPStockError(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,strImportStatus,strErrorMessage,ysnDeadlockError)
+		Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,'Failed',@ErrMsg,(Case When ERROR_NUMBER() = 1205 and IsNULL(ysnDeadlockError,0)=0 Then 1 else 0 end)
 		From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId
 
 		Delete From tblIPStockStage Where strItemNo=@strItemNo AND strSubLocation=@strSubLocation AND strSessionId=@strSessionId

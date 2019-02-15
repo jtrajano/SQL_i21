@@ -156,7 +156,7 @@ INSERT INTO [dbo].[tblRKM2MInquiryTransaction]
            ,dblMarketBasis
 		   ,dblMarketRatio
            ,dblFuturePrice
-           ,dblCashPrice dblContractCash
+           ,NULL --dblContractCash
            ,dblMarketPrice
            ,dblResult
            ,dblResultBasis

@@ -363,10 +363,10 @@ SELECT * FROM (
 		,tmpAPClearables.dblAmountDue AS dblAmountDue
 		,tmpAPClearables.dblQtyToReceive AS dblQtyToReceive
 		,SUM(tmpAPClearables.dblQtyVouchered) AS dblQtyVouchered
-		,ABS(SUM(tmpAPClearables.dblReceiptQty) - SUM(tmpAPClearables.dblVoucherQty) )AS dblQtyToVoucher
+		,SUM(tmpAPClearables.dblReceiptQty) - SUM(tmpAPClearables.dblVoucherQty) AS dblQtyToVoucher
 		,tmpAPClearables.dblTotal - SUM(tmpAPClearables.dblVoucherAmount)  AS dblAmountToVoucher
 		,SUM(tmpAPClearables.dblChargeAmount) AS dblChargeAmount
-		,ABS((SUM(tmpAPClearables.dblReceiptQty)  -  SUM(tmpAPClearables.dblVoucherQty))) AS dblClearingQty
+		,(SUM(tmpAPClearables.dblReceiptQty)  -  SUM(tmpAPClearables.dblVoucherQty)) AS dblClearingQty
 		FROM ('
 				+ @innerQuery +
 			   ') tmpAPClearables 

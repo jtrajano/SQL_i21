@@ -12,10 +12,10 @@
 		@strPositionBy nvarchar(100) = NULL
 AS  
 
-IF ISNULL(@intForecastWeeklyConsumptionUOMId,0)=0
-BEGIN
-SET @intForecastWeeklyConsumption = 1
-END
+-- IF ISNULL(@intForecastWeeklyConsumptionUOMId,0)=0
+-- BEGIN
+-- SET @intForecastWeeklyConsumption = 1
+-- END
 If isnull(@intForecastWeeklyConsumptionUOMId,0) = 0
 BEGIN
 set @intForecastWeeklyConsumptionUOMId = @intUOMId
@@ -243,7 +243,7 @@ SELECT fm.strFutureMonth
        ,dtmStartDate AS TransactionDate
        ,strContractType AS TranType
        ,strEntityName AS CustVendor
-       ,cv.dblNoOfLots AS dblNoOfLot
+       ,case when isnull(cv.ysnMultiplePriceFixation,0)=0 then  cv.dblNoOfLots else ch.dblNoOfLots end AS dblNoOfLot
        ,dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, CASE WHEN @ysnIncludeInventoryHedge = 0 THEN isnull(dblBalance, 0) ELSE dblDetailQuantity END) AS dblQuantity
        ,cv.intContractHeaderId
        ,NULL AS intFutOptTransactionHeaderId
@@ -514,12 +514,15 @@ SELECT 4 intRowNumber,'1.Outright Coverage','Outright coverage'  Selection,
     CONVERT(DOUBLE PRECISION,isnull(dblNoOfContract,0.0)) as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
        dblQuantity,4,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal where intRowNumber in(1)  and strFutureMonth = 'Previous' 
 
+IF(ISNULL(@intForecastWeeklyConsumption,0) <> 0)
+BEGIN
 INSERT INTO @ListFinal (intRowNumber,strGroup ,Selection , PriceStatus,strFutureMonth,  strAccountNumber,  dblNoOfContract, strTradeNo , 
 TransactionDate, TranType, CustVendor,  dblNoOfLot,  dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 SELECT
 5 intRowNumber,'1.Outright Coverage','Outright Coverage' Selection,'4.Outright coverage(Weeks)' PriceStatus,strFutureMonth,strAccountNumber,  
     CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))/@dblForecastWeeklyConsumption as dblNoOfContract,strTradeNo,TransactionDate,TranType,CustVendor,dblNoOfLot, 
        dblQuantity,5,intContractHeaderId,intFutOptTransactionHeaderId    FROM @ListFinal WHERE intRowNumber in(4)
+END
 
 ---- Futures Required
 

@@ -58,7 +58,7 @@ SELECT @intBookId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intBookId'
 SELECT @intSubBookId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intSubBookId'
 SELECT @strPositionBy = [from] FROM @temp_xml_table WHERE [fieldname] = 'strPositionBy'
 
-DECLARE @temp as Table (  
+DECLARE @temp as Table (  intRowNumFinal int,
      intRowNumber int,
      strGroup  nvarchar(200) COLLATE Latin1_General_CI_AS, 
      Selection  nvarchar(200) COLLATE Latin1_General_CI_AS,  
@@ -117,6 +117,7 @@ SELECT  intRowNumber ,
    CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
    (PARTITION BY NULL ORDER BY 
    CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
+   ,strReportName = 'Risk Position Inquiry' 
   FROM @temp 
 
 END
@@ -124,7 +125,7 @@ END
 ELSE
 
 BEGIN
-INSERT INTO @temp (intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
+INSERT INTO @temp (intRowNumFinal,intRowNumber,strGroup,Selection,PriceStatus,strFutureMonth,strAccountNumber,dblNoOfContract,strTradeNo,TransactionDate,  
      TranType, CustVendor,dblNoOfLot,dblQuantity,intOrderByHeading,intContractHeaderId,intFutOptTransactionHeaderId)
 Exec uspRKRiskPositionInquiryBySummary  @intCommodityId=@intCommodityId,  
         @intCompanyLocationId=@intCompanyLocationId,  
@@ -146,6 +147,7 @@ SELECT  intRowNumber ,strGroup,Selection ,
    convert(numeric(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
    (PARTITION BY null ORDER BY 
    CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
+   ,strReportName = 'Coverage Inquiry' 
 INTO #temp
 FROM @temp where isnull(dblNoOfContract,0) <> 0
 

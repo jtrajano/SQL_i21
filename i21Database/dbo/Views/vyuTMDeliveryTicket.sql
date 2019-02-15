@@ -8,18 +8,18 @@ SELECT
 	,strCustomerZip = Loc.strZipCode
 	,strCustomerName = Ent.strName
 	,A.intSiteNumber
-	,strInstruction = ISNULL(A.strInstruction,'')
+	,A.strInstruction
 	,A.dblTotalCapacity
-	,strDispatchComments = ISNULL(J.strComments,'')
+	,strDispatchComments = J.strComments
 	,strCustomerNumber = Ent.strEntityNo
 	,A.intNextDeliveryDegreeDay
 	,K.strRouteId
 	,strItemNo = ISNULL(O.strItemNo, I.strItemNo)
 	,J.dtmRequestedDate
-	,strTerm = ISNULL(L.strTerm ,'')
+	,strTerm = L.strTerm 
 	,dblARBalance = ISNULL(Cus.dblARBalance,0.0)
-	,dblPrice = ISNULL(J.dblPrice,0.0)
-	,dblTaxRate = ISNULL(dbo.[fnGetItemTotalTaxForCustomer](
+	,J.dblPrice
+	,dblTaxRate = dbo.[fnGetItemTotalTaxForCustomer](
                                                         ISNULL(O.intItemId, I.intItemId)
                                                         ,Ent.intEntityId
                                                         ,J.dtmCallInDate
@@ -42,12 +42,12 @@ SELECT
 														,NULL
 														,NULL
 														,NULL
-                                                    ),0.0)
+                                                    )
 	,intSiteId = A.intSiteID
 	,M.strDeliveryTicketFormat
-	,strSiteCity = ISNULL(A.strCity,'')
-	,strSiteState = ISNULL(A.strState,'')
-	,strSiteZipCode = ISNULL(A.strZipCode,'')
+	,strSiteCity = A.strCity
+	,strSiteState = A.strState
+	,strSiteZipCode = A.strZipCode
 	,dblRequestedQuantity = ISNULL(J.dblMinimumQuantity,0.0)
 	,dblQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
 	,intDispatchId = J.intDispatchID
@@ -56,11 +56,11 @@ SELECT
 	,strCustomerPhone = ISNULL(ConPhone.strPhone,'')
 	,strOrderNumber = ISNULL(J.strOrderNumber,'')
 	,dblSiteEstimatedPercentLeft = ISNULL(J.dblPercentLeft,0.0)
-	,strFillMethod = ISNULL(H.strFillMethod,'')
+	,H.strFillMethod
 	,A.dtmLastDeliveryDate
 	,J.dtmCallInDate
 	,strUserCreated = P.strUserName
-	,strSerialNumber = ISNULL(Q.strSerialNumber,'')
+	,strSerialNumber = Q.strSerialNumber
 	,strTaxGroup = ISNULL(R.strTaxGroup,'')
 	,dblYTDGalsThisSeason = ISNULL(HH.dblTotalGallons,0.0)
 	,ysnTaxable = ISNULL(A.ysnTaxable,0)

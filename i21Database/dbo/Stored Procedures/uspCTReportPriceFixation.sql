@@ -160,10 +160,7 @@ BEGIN TRY
 			CASE WHEN CD.intCurrencyId = TY.intCurrencyID THEN FY.strCurrency ELSE TY.strCurrency END + 
 			' per ' + FM.strUnitMeasure AS strFXFinalPriceDesc,
 			@LastModifiedUserSign AS strLastModifiedUserSign
-			
-			,strDefaultContractReport = ISNULL(CP.strDefaultContractReport,'')
-			,intReportLogoHeight	  = CASE WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN 78   ELSE 0 END
-			,intReportLogoWidth       = CASE WHEN ISNULL(CP.strDefaultContractReport,'') = 'ContractBeGreen' THEN 210  ELSE 0 END
+
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	JOIN	(
@@ -196,7 +193,6 @@ BEGIN TRY
 	JOIN	tblICUnitMeasure			U7	ON	U7.intUnitMeasureId				=	WU.intUnitMeasureId		LEFT	
 	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId		LEFT
 	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId	
-	CROSS JOIN tblCTCompanyPreference   CP
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 

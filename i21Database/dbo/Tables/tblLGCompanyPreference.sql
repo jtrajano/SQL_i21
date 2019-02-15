@@ -19,7 +19,6 @@
 [intHaulerEntityId] INT NULL,
 [intDefaultShipmentType] INT NULL,
 [strShippingInstructionText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-[strBOLText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [intCompanyLocationId] INT NULL,
 [intShippingInstructionReportFormat] INT NULL,
 [intDeliveryOrderReportFormat] INT NULL,

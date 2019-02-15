@@ -47,7 +47,9 @@ BEGIN TRY
 		,intItemId INT
 		,intContractHeaderId INT
 		,intInventoryReceiptItemId INT
-		,intContractDetailId INT)
+		,intContractDetailId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT)
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
@@ -119,7 +121,9 @@ BEGIN TRY
 		  ,intItemId
 		  ,intContractHeaderId
 		  ,intInventoryReceiptItemId
-		  ,intContractDetailId)
+		  ,intContractDetailId
+		  ,intSubLocationId
+		  ,intStorageLocationId)
 	SELECT WC.intWeightClaimId
 		,WC.strReferenceNumber
 		,WCD.intWeightClaimDetailId
@@ -151,6 +155,8 @@ BEGIN TRY
 		,CH.intContractHeaderId
 		,NULL AS intInventoryReceiptItemId
 		,WCD.intContractDetailId
+		,CD.intSubLocationId
+		,CD.intStorageLocationId
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
@@ -224,7 +230,9 @@ BEGIN TRY
 			,intItemId
 			,intContractHeaderId
 			,intInventoryReceiptItemId
-			,intContractDetailId)
+			,intContractDetailId
+			,intSubLocationId
+			,intStorageLocationId)
 		SELECT dblNetShippedWeight
 			,dblWeightLoss
 			,dblFranchiseWeight
@@ -240,6 +248,8 @@ BEGIN TRY
 			,intContractHeaderId
 			,intInventoryReceiptItemId
 			,intContractDetailId
+			,intSubLocationId
+			,intStorageLocationId
 		FROM @voucherDetailData
 		WHERE intPartyEntityId = @intVendorEntityId
 
@@ -316,6 +326,7 @@ BEGIN TRY
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
 	WHERE WCD.intContractDetailId = BD.intContractDetailId
 		AND WC.intWeightClaimId = @intWeightClaimId 
+		AND B.intTransactionType = 11
 
 END TRY
 
