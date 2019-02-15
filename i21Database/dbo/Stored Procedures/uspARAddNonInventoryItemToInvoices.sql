@@ -1179,7 +1179,7 @@ VALUES(
 	,[intConcurrencyId]
 )
 OUTPUT  
-			@IntegrationLogId						--[intIntegrationLogId]
+			ISNULL(@IntegrationLogId, -9999)		--[intIntegrationLogId]
 			,INSERTED.[intInvoiceId]				--[intInvoiceId]
 			,INSERTED.[intInvoiceDetailId]			--[intInvoiceDetailId]
 			,Source.[intTempDetailIdForTaxes]		--[intTempDetailIdForTaxes]	
