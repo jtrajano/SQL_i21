@@ -137,7 +137,7 @@ DECLARE @JOB_NAME NVARCHAR(200);
 
 SET @JOB_NAME = N'i21_AuditLog_Migration_Job_'+CONVERT(NVARCHAR(100),@currentDatabaseName)
 SET @stepWeekDaySchedule = N'i21_Audit_Migration_WeekDay for ' + CONVERT(NVARCHAR(100),@currentDatabaseName)
-SET @stepWeekEndSchedule = N'i21_Audit_Migration_Weekends_FullBlast for '+ CONVERT(NVARCHAR(100),@currentDatabaseName)
+SET @stepWeekEndSchedule = N'i21_Audit_Migration_Weekends for '+ CONVERT(NVARCHAR(100),@currentDatabaseName)
 
 SET @stepName = N'Invoke Migration SP in ' + CONVERT(NVARCHAR(100),@currentDatabaseName)
 SET @stepCommand = N'
@@ -290,8 +290,8 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule
 		@enabled=1, 
 		@freq_type=8, 
 		@freq_interval=65, 
-		@freq_subday_type=1, 
-		@freq_subday_interval=0, 
+		@freq_subday_type=4,--1, 
+		@freq_subday_interval=10,--0, 
 		@freq_relative_interval=0, 
 		@freq_recurrence_factor=1, 
 		@active_start_date=@currentDate,--20190206, 

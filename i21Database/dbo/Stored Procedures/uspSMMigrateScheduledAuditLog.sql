@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspSMMigrateScheduledAuditLog
-@blast BIT
+@isWeekend BIT
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET NOCOUNT ON  
@@ -36,7 +36,7 @@ DECLARE @tblSMAuditLog TABLE (
 ---------------------------------------------------------------------------------------------------------------------------------------  
 BEGIN
 	
-IF(@blast = 1)
+IF(@isWeekend = 1)
 BEGIN
 INSERT INTO @tblSMAuditLog (
 	intAuditLogId, 
@@ -46,7 +46,7 @@ INSERT INTO @tblSMAuditLog (
 	intEntityId,
 	intTransactionId
 )
-SELECT 
+SELECT  TOP 5000
 	A.intAuditLogId,
 	A.strActionType,
 	A.strJsonData,
@@ -73,6 +73,8 @@ WHERE	ISNULL(A.ysnProcessed, 0) = 0 AND
 		ISNULL(A.strJsonData, '') LIKE '%}' AND 
 		ISNULL(A.strActionType, '') NOT IN ('Created','Deleted')
 END
+
+
 ELSE
 	BEGIN
 		INSERT INTO @tblSMAuditLog (

@@ -1,4 +1,4 @@
-﻿PRINT N'START MIGRATE AUDIT LOG INCLUDING TOP 1000'
+﻿PRINT N'START MIGRATE AUDIT LOG'
 BEGIN
 
 INSERT INTO tblSMScreen (strNamespace, strScreenId, strScreenName, strModule)
@@ -85,7 +85,7 @@ SELECT intLogId, strAction, intOldAuditLogId, 1 FROM @tblSMAudit
 
 
 
-exec uspSMMigrateAuditLog
+--exec uspSMMigrateAuditLog --remove 
 
 END
 PRINT N'END MIGRATE AUDIT LOG INCLUDING TOP 1000'
