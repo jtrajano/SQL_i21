@@ -26,6 +26,88 @@
 AS
 BEGIN
 
+	---------FIELD NAME SETUP---------
+	
+	DECLARE @tblCFEnumFieldName AS TABLE
+	(
+		 strOriginal nvarchar(50) COLLATE Latin1_General_CI_AS 
+		,strModified nvarchar(50) COLLATE Latin1_General_CI_AS 
+	)
+	INSERT INTO @tblCFEnumFieldName
+	(strOriginal,strModified)
+	VALUES 
+	----------VEHICLE FIELDS-----------
+	('intVehicleId'					,'Vehicle')
+	,('intAccountId'				,'Account')
+	,('strVehicleNumber'			,'Vehicle Number')
+	,('strCustomerUnitNumber'		,'Customer Unit Number')
+	,('strVehicleDescription'		,'Vehicle Description')
+	,('intDaysBetweenService'		,'Days Between Service')
+	,('intMilesBetweenService'		,'Miles Between Service')
+	,('intLastReminderOdometer'		,'Last Reminder Odometer')
+	,('dtmLastReminderDate'			,'Last Reminder Date')
+	,('dtmLastServiceDate'			,'Last Service Date')
+	,('intLastServiceOdometer'		,'Last Service Odometer')
+	,('strNoticeMessageLine1'		,'Notice Message Line 1')
+	,('strNoticeMessageLine2'		,'Notice Message Line 2')
+	,('strVehicleForOwnUse'			,'Vehicle For Own Use')
+	,('intExpenseItemId'			,'Expense Item')
+	,('strLicencePlateNumber'		,'Licence Plate Number')
+	,('strDepartment'				,'Department')
+	,('intCreatedUserId'			,'Created User')
+	,('dtmCreated'					,'Created')
+	,('intLastModifiedUserId'		,'Last Modified User')
+	,('intConcurrencyId'			,'Concurrency')
+	,('dtmLastModified'				,'Last Modified')
+	,('ysnCardForOwnUse'			,'Card For Own Use')
+	,('ysnActive'					,'Active')
+	,('intDepartmentId'				,'Department')
+	,('strComment'					,'Comment')
+	----------CARD FIELDS-----------
+	,('intCardId'					,'Card')
+	,('intNetworkId'				,'Network')
+	,('strCardNumber'				,'Card Number')
+	,('strCardDescription'			,'Card Description')
+	,('intAccountId'				,'Account')
+	,('intProductAuthId'			,'Product Auth')
+	,('intEntryCode'				,'Entry Code')
+	,('strCardXReference'			,'Card X Reference')
+	,('strCardForOwnUse'			,'Card For OwnUse')
+	,('intExpenseItemId'			,'Expense Item')
+	,('intDefaultFixVehicleNumber'	,'Default Vehicle Number')
+	,('intDepartmentId'				,'Department')
+	,('dtmLastUsedDated'			,'Last Used Dated')
+	,('intCardTypeId'				,'Card Type')
+	,('dtmIssueDate'				,'Issue Date')
+	,('ysnActive'					,'Active')
+	,('ysnCardLocked'				,'Card Locked')
+	,('strCardPinNumber'			,'Card Pin Number')
+	,('dtmCardExpiratioYearMonth'	,'Card Expiratio Year Month')
+	,('strCardValidationCode'		,'Card Validation Code')
+	,('intNumberOfCardsIssued'		,'Number Of Cards Issued')
+	,('intCardLimitedCode'			,'Card Limited Code')
+	,('intCardFuelCode'				,'Card Fuel Code')
+	,('strCardTierCode'				,'CardTier Code')
+	,('strCardOdometerCode'			,'Card OdometerCode')
+	,('strCardWCCode'				,'Card WC Code')
+	,('strSplitNumber'				,'Split Number')
+	,('intCardManCode'				,'Card Man Code')
+	,('intCardShipCat'				,'Card Ship Cat')
+	,('intCardProfileNumber'		,'Card Profile Number')
+	,('intCardPositionSite'			,'Card Position Site')
+	,('intCardvehicleControl'		,'Card Vehicle Control')
+	,('intCardCustomPin'			,'Card Custom Pin')
+	,('intCreatedUserId'			,'Created User')
+	,('dtmCreated'					,'Created')
+	,('intLastModifiedUserId'		,'Last Modified User')
+	,('intConcurrencyId'			,'Concurrency Id')
+	,('dtmLastModified'				,'Last Modified')
+	,('ysnCardForOwnUse'			,'Card For Own Use')
+	,('ysnIgnoreCardTransaction'	,'Ignore Card Transaction')
+	,('strComment'					,'Comment')
+	,('intDefaultDriverPin'			,'Default Driver Pin')
+		---------FIELD NAME SETUP---------
+
 	DECLARE @intAccountId			INT
 	DECLARE @intSycnType			INT
 	DECLARE @strAction				NVARCHAR(MAX)	 =	 ''
@@ -83,6 +165,7 @@ BEGIN
 				FROM tblCFNetworkAccount 
 				WHERE strNetworkAccountId not like '%[^0-9]%' and strNetworkAccountId != ''
 
+
 				SET @intAccountId =
 				(SELECT TOP 1 intAccountId
 				FROM @tblCFNumericAccount
@@ -119,6 +202,7 @@ BEGIN
 					,strNetworkAccountId	
 				FROM tblCFNetworkAccount 
 				WHERE strNetworkAccountId like '%[^0-9]%' and strNetworkAccountId != ''
+
 
 				SET @intAccountId =
 				(SELECT TOP 1 intAccountId
@@ -810,6 +894,7 @@ BEGIN
 				,strComment
 			FROM tblCFCard 
 			WHERE intCardId = @intAddCardIdentity
+
 			INSERT INTO tblCFCSUAuditLog
 			(
 				 strSessionId
@@ -825,15 +910,69 @@ BEGIN
 				,strAccountNumber
 				,intNetworkId
 				,strNetwork
+				,strRawOldValue
+				,strRawNewValue
 			)
 			SELECT 
 				 @strSessionId
 				 ,intPK
 				 ,strType
 				 ,strTableName
-				 ,strFieldName
-				 ,strOldValue
-				 ,strNewValue
+				 ,strFieldName =  (SELECT TOP 1 ISNULL(strModified,strFieldName) FROM @tblCFEnumFieldName WHERE strOriginal = strFieldName)
+				 ,strOldValue = (CASE
+					WHEN strFieldName = 'intNetworkId'
+						THEN (SELECT TOP 1 strNetwork + '-' + strNetworkDescription FROM tblCFNetwork WHERE intNetworkId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intAccountId'
+						THEN (SELECT TOP 1 strEntityNo + ' - ' + strName FROM tblCFAccount as acct
+							  INNER JOIN tblEMEntity as ent
+							  ON acct.intCustomerId = ent.intEntityId WHERE intAccountId =  CAST(ISNULL(strOldValue,0) AS int))
+					WHEN strFieldName = 'intProductAuthId'
+						THEN (SELECT TOP 1 strNetworkGroupNumber + '-' + strDescription FROM tblCFProductAuth WHERE intProductAuthId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intExpenseItemId'
+						THEN (SELECT TOP 1 strItemNo + '-' + strShortName FROM tblICItem WHERE intItemId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDefaultFixVehicleNumber'
+						THEN (SELECT TOP 1 strVehicleNumber + '-' + strVehicleDescription FROM tblCFVehicle WHERE intVehicleId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDepartmentId'
+						THEN (SELECT TOP 1 strDepartment + '-' + strDepartmentDescription FROM tblCFDepartment WHERE intDepartmentId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intCardTypeId'
+						THEN (SELECT TOP 1 strCardType + '-' + strDescription FROM tblCFCardType WHERE intCardTypeId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDefaultDriverPin'
+						THEN (SELECT TOP 1 strDriverPinNumber + '-' + strDriverDescription FROM tblCFDriverPin WHERE intDriverPinId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName like 'ysn%'
+						THEN (CASE
+								WHEN strOldValue  = 0 THEN 'No'
+								WHEN strOldValue  = 1 THEN 'Yes'
+								ELSE strOldValue
+							 END)
+					ELSE strOldValue
+				END)
+				 ,strNewValue = (CASE
+					WHEN strFieldName = 'intNetworkId'
+						THEN (SELECT TOP 1 strNetwork + '-' + strNetworkDescription FROM tblCFNetwork WHERE intNetworkId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intAccountId'
+						THEN (SELECT TOP 1 strEntityNo + ' - ' + strName FROM tblCFAccount as acct
+							  INNER JOIN tblEMEntity as ent
+							  ON acct.intCustomerId = ent.intEntityId WHERE intAccountId =  CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intProductAuthId'
+						THEN (SELECT TOP 1 strNetworkGroupNumber + '-' + strDescription FROM tblCFProductAuth WHERE intProductAuthId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intExpenseItemId'
+						THEN (SELECT TOP 1 strItemNo + '-' + strShortName FROM tblICItem WHERE intItemId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDefaultFixVehicleNumber'
+						THEN (SELECT TOP 1 strVehicleNumber + '-' + strVehicleDescription FROM tblCFVehicle WHERE intVehicleId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDepartmentId'
+						THEN (SELECT TOP 1 strDepartment + '-' + strDepartmentDescription FROM tblCFDepartment WHERE intDepartmentId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intCardTypeId'
+						THEN (SELECT TOP 1 strCardType + '-' + strDescription FROM tblCFCardType WHERE intCardTypeId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDefaultDriverPin'
+						THEN (SELECT TOP 1 strDriverPinNumber + '-' + strDriverDescription FROM tblCFDriverPin WHERE intDriverPinId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName like 'ysn%'
+						THEN (CASE
+								WHEN strNewValue  = 0 THEN 'No'
+								WHEN strNewValue  = 1 THEN 'Yes'
+								ELSE strNewValue
+							 END)
+					ELSE strNewValue
+				 END)
 				 ,@dtmImportDate
 				 ,strUserName	
 				 ,strRecord = CASE
@@ -845,6 +984,8 @@ BEGIN
 				,@strAccountNumber
 				,@intNetworkId
 				,@strNetwork
+				,strOldValue
+				,strNewValue
 
 			FROM 
 			tblCFTempCSUAuditLog
@@ -1007,6 +1148,8 @@ BEGIN
 				,strAccountNumber
 				,intNetworkId
 				,strNetwork
+				,strRawOldValue
+				,strRawNewValue
 				
 			)
 			SELECT 
@@ -1014,9 +1157,61 @@ BEGIN
 				 ,intPK
 				 ,strType
 				 ,strTableName
-				 ,strFieldName
-				 ,strOldValue
-				 ,strNewValue
+				 ,strFieldName =  (SELECT TOP 1 ISNULL(strModified,strFieldName) FROM @tblCFEnumFieldName WHERE strOriginal = strFieldName)
+				 ,strOldValue = (CASE
+					WHEN strFieldName = 'intNetworkId'
+						THEN (SELECT TOP 1 strNetwork + '-' + strNetworkDescription FROM tblCFNetwork WHERE intNetworkId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intAccountId'
+						THEN (SELECT TOP 1 strEntityNo + ' - ' + strName FROM tblCFAccount as acct
+							  INNER JOIN tblEMEntity as ent
+							  ON acct.intCustomerId = ent.intEntityId WHERE intAccountId =  CAST(ISNULL(strOldValue,0) AS int))
+					WHEN strFieldName = 'intProductAuthId'
+						THEN (SELECT TOP 1 strNetworkGroupNumber + '-' + strDescription FROM tblCFProductAuth WHERE intProductAuthId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intExpenseItemId'
+						THEN (SELECT TOP 1 strItemNo + '-' + strShortName FROM tblICItem WHERE intItemId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDefaultFixVehicleNumber'
+						THEN (SELECT TOP 1 strVehicleNumber + '-' + strVehicleDescription FROM tblCFVehicle WHERE intVehicleId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDepartmentId'
+						THEN (SELECT TOP 1 strDepartment + '-' + strDepartmentDescription FROM tblCFDepartment WHERE intDepartmentId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intCardTypeId'
+						THEN (SELECT TOP 1 strCardType + '-' + strDescription FROM tblCFCardType WHERE intCardTypeId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDefaultDriverPin'
+						THEN (SELECT TOP 1 strDriverPinNumber + '-' + strDriverDescription FROM tblCFDriverPin WHERE intDriverPinId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName like 'ysn%'
+						THEN (CASE
+								WHEN strOldValue  = 0 THEN 'No'
+								WHEN strOldValue  = 1 THEN 'Yes'
+								ELSE strOldValue
+							 END)
+					ELSE strOldValue
+				END)
+				, strNewValue = CASE
+					WHEN strFieldName = 'intNetworkId'
+						THEN (SELECT TOP 1 strNetwork + '-' + strNetworkDescription FROM tblCFNetwork WHERE intNetworkId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intAccountId'
+						THEN (SELECT TOP 1 strEntityNo + ' - ' + strName FROM tblCFAccount as acct
+							  INNER JOIN tblEMEntity as ent
+							  ON acct.intCustomerId = ent.intEntityId WHERE intAccountId =  CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intProductAuthId'
+						THEN (SELECT TOP 1 strNetworkGroupNumber + '-' + strDescription FROM tblCFProductAuth WHERE intProductAuthId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intExpenseItemId'
+						THEN (SELECT TOP 1 strItemNo + '-' + strShortName FROM tblICItem WHERE intItemId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDefaultFixVehicleNumber'
+						THEN (SELECT TOP 1 strVehicleNumber + '-' + strVehicleDescription FROM tblCFVehicle WHERE intVehicleId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDepartmentId'
+						THEN (SELECT TOP 1 strDepartment + '-' + strDepartmentDescription FROM tblCFDepartment WHERE intDepartmentId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intCardTypeId'
+						THEN (SELECT TOP 1 strCardType + '-' + strDescription FROM tblCFCardType WHERE intCardTypeId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDefaultDriverPin'
+						THEN (SELECT TOP 1 strDriverPinNumber + '-' + strDriverDescription FROM tblCFDriverPin WHERE intDriverPinId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName like 'ysn%'
+						THEN (CASE
+								WHEN strNewValue  = 0 THEN 'No'
+								WHEN strNewValue  = 1 THEN 'Yes'
+								ELSE strNewValue
+							 END)
+					ELSE strNewValue
+				END
 				 ,@dtmImportDate
 				 ,strUserName	
 				 ,strRecord = CASE
@@ -1028,6 +1223,9 @@ BEGIN
 				,@strAccountNumber
 				,@intNetworkId
 				,@strNetwork
+				,strOldValue
+				,strNewValue
+
 			FROM 
 			tblCFTempCSUAuditLog
 
@@ -1142,15 +1340,69 @@ BEGIN
 				,strAccountNumber
 				,intNetworkId
 				,strNetwork
+				,strRawOldValue
+				,strRawNewValue
 			)
 			SELECT 
 				 @strSessionId
 				 ,intPK
 				 ,strType
 				 ,strTableName
-				 ,strFieldName
-				 ,strOldValue
-				 ,strNewValue
+				 ,strFieldName =  (SELECT TOP 1 ISNULL(strModified,strFieldName) FROM @tblCFEnumFieldName WHERE strOriginal = strFieldName)
+				 ,strOldValue = (CASE
+					WHEN strFieldName = 'intNetworkId'
+						THEN (SELECT TOP 1 strNetwork + '-' + strNetworkDescription FROM tblCFNetwork WHERE intNetworkId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intAccountId'
+						THEN (SELECT TOP 1 strEntityNo + ' - ' + strName FROM tblCFAccount as acct
+							  INNER JOIN tblEMEntity as ent
+							  ON acct.intCustomerId = ent.intEntityId WHERE intAccountId =  CAST(ISNULL(strOldValue,0) AS int))
+					WHEN strFieldName = 'intProductAuthId'
+						THEN (SELECT TOP 1 strNetworkGroupNumber + '-' + strDescription FROM tblCFProductAuth WHERE intProductAuthId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intExpenseItemId'
+						THEN (SELECT TOP 1 strItemNo + '-' + strShortName FROM tblICItem WHERE intItemId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDefaultFixVehicleNumber'
+						THEN (SELECT TOP 1 strVehicleNumber + '-' + strVehicleDescription FROM tblCFVehicle WHERE intVehicleId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDepartmentId'
+						THEN (SELECT TOP 1 strDepartment + '-' + strDepartmentDescription FROM tblCFDepartment WHERE intDepartmentId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intCardTypeId'
+						THEN (SELECT TOP 1 strCardType + '-' + strDescription FROM tblCFCardType WHERE intCardTypeId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDefaultDriverPin'
+						THEN (SELECT TOP 1 strDriverPinNumber + '-' + strDriverDescription FROM tblCFDriverPin WHERE intDriverPinId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName like 'ysn%'
+						THEN (CASE
+								WHEN strOldValue  = 0 THEN 'No'
+								WHEN strOldValue  = 1 THEN 'Yes'
+								ELSE strOldValue
+							 END)
+					ELSE strOldValue
+				END)
+				, strNewValue = CASE
+					WHEN strFieldName = 'intNetworkId'
+						THEN (SELECT TOP 1 strNetwork + '-' + strNetworkDescription FROM tblCFNetwork WHERE intNetworkId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intAccountId'
+						THEN (SELECT TOP 1 strEntityNo + ' - ' + strName FROM tblCFAccount as acct
+							  INNER JOIN tblEMEntity as ent
+							  ON acct.intCustomerId = ent.intEntityId WHERE intAccountId =  CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intProductAuthId'
+						THEN (SELECT TOP 1 strNetworkGroupNumber + '-' + strDescription FROM tblCFProductAuth WHERE intProductAuthId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intExpenseItemId'
+						THEN (SELECT TOP 1 strItemNo + '-' + strShortName FROM tblICItem WHERE intItemId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDefaultFixVehicleNumber'
+						THEN (SELECT TOP 1 strVehicleNumber + '-' + strVehicleDescription FROM tblCFVehicle WHERE intVehicleId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDepartmentId'
+						THEN (SELECT TOP 1 strDepartment + '-' + strDepartmentDescription FROM tblCFDepartment WHERE intDepartmentId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intCardTypeId'
+						THEN (SELECT TOP 1 strCardType + '-' + strDescription FROM tblCFCardType WHERE intCardTypeId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDefaultDriverPin'
+						THEN (SELECT TOP 1 strDriverPinNumber + '-' + strDriverDescription FROM tblCFDriverPin WHERE intDriverPinId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName like 'ysn%'
+						THEN (CASE
+								WHEN strNewValue  = 0 THEN 'No'
+								WHEN strNewValue  = 1 THEN 'Yes'
+								ELSE strNewValue
+							 END)
+					ELSE strNewValue
+				END
 				 ,@dtmImportDate
 				 ,strUserName	
 				 ,strRecord = CASE
@@ -1162,6 +1414,8 @@ BEGIN
 				,@strAccountNumber
 				,@intNetworkId
 				,@strNetwork
+				,strOldValue
+				,strNewValue
 			FROM 
 			tblCFTempCSUAuditLog
 
@@ -1245,7 +1499,6 @@ BEGIN
 			WHERE intVehicleId = @intVehicleId
 			AND intAccountId = @intAccountId
 
-		--SELECT * FROM tblCFTempCSUVehicle
 
 		DELETE FROM tblCFTempCSUAuditLog
 
@@ -1276,15 +1529,69 @@ BEGIN
 			,strAccountNumber
 			,intNetworkId
 			,strNetwork
+			,strRawOldValue
+			,strRawNewValue
 		)
 		SELECT 
 			@strSessionId
 			,intPK
 			,strType
 			,strTableName
-			,strFieldName
-			,strOldValue
-			,strNewValue
+			,strFieldName =  (SELECT TOP 1 ISNULL(strModified,strFieldName) FROM @tblCFEnumFieldName WHERE strOriginal = strFieldName)
+			,strOldValue = (CASE
+					WHEN strFieldName = 'intNetworkId'
+						THEN (SELECT TOP 1 strNetwork + '-' + strNetworkDescription FROM tblCFNetwork WHERE intNetworkId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intAccountId'
+						THEN (SELECT TOP 1 strEntityNo + ' - ' + strName FROM tblCFAccount as acct
+							  INNER JOIN tblEMEntity as ent
+							  ON acct.intCustomerId = ent.intEntityId WHERE intAccountId =  CAST(ISNULL(strOldValue,0) AS int))
+					WHEN strFieldName = 'intProductAuthId'
+						THEN (SELECT TOP 1 strNetworkGroupNumber + '-' + strDescription FROM tblCFProductAuth WHERE intProductAuthId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intExpenseItemId'
+						THEN (SELECT TOP 1 strItemNo + '-' + strShortName FROM tblICItem WHERE intItemId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDefaultFixVehicleNumber'
+						THEN (SELECT TOP 1 strVehicleNumber + '-' + strVehicleDescription FROM tblCFVehicle WHERE intVehicleId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDepartmentId'
+						THEN (SELECT TOP 1 strDepartment + '-' + strDepartmentDescription FROM tblCFDepartment WHERE intDepartmentId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intCardTypeId'
+						THEN (SELECT TOP 1 strCardType + '-' + strDescription FROM tblCFCardType WHERE intCardTypeId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName = 'intDefaultDriverPin'
+						THEN (SELECT TOP 1 strDriverPinNumber + '-' + strDriverDescription FROM tblCFDriverPin WHERE intDriverPinId = CONVERT(INT,ISNULL(strOldValue,0)))
+					WHEN strFieldName like 'ysn%'
+						THEN (CASE
+								WHEN strOldValue  = 0 THEN 'No'
+								WHEN strOldValue  = 1 THEN 'Yes'
+								ELSE strOldValue
+							 END)
+					ELSE strOldValue
+				END)
+				, strNewValue = CASE
+					WHEN strFieldName = 'intNetworkId'
+						THEN (SELECT TOP 1 strNetwork + '-' + strNetworkDescription FROM tblCFNetwork WHERE intNetworkId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intAccountId'
+						THEN (SELECT TOP 1 strEntityNo + ' - ' + strName FROM tblCFAccount as acct
+							  INNER JOIN tblEMEntity as ent
+							  ON acct.intCustomerId = ent.intEntityId WHERE intAccountId =  CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intProductAuthId'
+						THEN (SELECT TOP 1 strNetworkGroupNumber + '-' + strDescription FROM tblCFProductAuth WHERE intProductAuthId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intExpenseItemId'
+						THEN (SELECT TOP 1 strItemNo + '-' + strShortName FROM tblICItem WHERE intItemId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDefaultFixVehicleNumber'
+						THEN (SELECT TOP 1 strVehicleNumber + '-' + strVehicleDescription FROM tblCFVehicle WHERE intVehicleId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDepartmentId'
+						THEN (SELECT TOP 1 strDepartment + '-' + strDepartmentDescription FROM tblCFDepartment WHERE intDepartmentId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intCardTypeId'
+						THEN (SELECT TOP 1 strCardType + '-' + strDescription FROM tblCFCardType WHERE intCardTypeId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName = 'intDefaultDriverPin'
+						THEN (SELECT TOP 1 strDriverPinNumber + '-' + strDriverDescription FROM tblCFDriverPin WHERE intDriverPinId = CAST(ISNULL(strNewValue,0) AS int))
+					WHEN strFieldName like 'ysn%'
+						THEN (CASE
+								WHEN strNewValue  = 0 THEN 'No'
+								WHEN strNewValue  = 1 THEN 'Yes'
+								ELSE strNewValue
+							 END)
+					ELSE strNewValue
+				END
 			,@dtmImportDate
 			,strUserName	
 			,strRecord = CASE
@@ -1296,6 +1603,8 @@ BEGIN
 			,@strAccountNumber
 			,@intNetworkId
 			,@strNetwork
+			,strOldValue
+			,strNewValue
 		FROM 
 		tblCFTempCSUAuditLog
 
