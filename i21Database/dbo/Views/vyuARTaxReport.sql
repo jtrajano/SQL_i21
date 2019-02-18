@@ -37,7 +37,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTaxable       		= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN 0 
 									ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-												THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(DETAIL.dblTotalAdjustedTax, 1.000000))
+												THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(nullif(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
@@ -48,7 +48,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 												ELSE 0.000000 
 											END) +
 											(CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-												THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(DETAIL.dblTotalAdjustedTax, 1.000000))
+												THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(nullif(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
 												ELSE 0.000000 
 											END))
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
@@ -130,9 +130,11 @@ INNER JOIN (
 			 , intTaxClassId
 			 , strCalculationMethod
 			 , dblRate
-			 , dblAdjustedTax		= CASE WHEN ysnTaxExempt = 1 THEN 0 ELSE dblAdjustedTax end
+			 --, dblAdjustedTax		= CASE WHEN ysnTaxExempt = 1 THEN 0 ELSE dblAdjustedTax end
+			 , dblAdjustedTax		
 			 , dblTax				
 			 , ysnTaxExempt
+			 ,ysnTaxAdjusted
 			 , ysnInvalidSetup
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
@@ -151,13 +153,13 @@ INNER JOIN (
 			 , strItemNo
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
-	LEFT JOIN (
+	INNER JOIN (
 		SELECT intTaxClassId
 			 , intCategoryId
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 	) ITEMTAXCATEGORY ON ITEMTAXCATEGORY.intTaxClassId = IDT.intTaxClassId
 					 AND ITEMTAXCATEGORY.intCategoryId = ITEM.intCategoryId
-	OUTER APPLY (
+	CROSS APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 		WHERE ICT.intCategoryId = ITEM.intCategoryId
@@ -249,7 +251,8 @@ LEFT OUTER JOIN (
     AND INVOICE.strType = 'CF Tran'
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
+			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
 WHERE INVOICE.ysnPosted = 1
+GO
