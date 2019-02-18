@@ -144,10 +144,16 @@ SET @stepCommand = N'
 DECLARE @DAY NVARCHAR(15);
 DECLARE @AuditId INT;
 DECLARE @jobId BINARY(16);
+DECLARE @ysnMigrated BIT;
 
 SET @DAY = (SELECT DATENAME(DW, GETDATE()))
 SET @AuditId = (SELECT TOP 1 intAuditLogId FROM tblSMAuditLog WHERE ysnProcessed = 0)
 SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE name = '''+ @JOB_NAME +'''
+SET @ysnMigrated = (SELECT TOP 1 ysnAuditBatchMigrated FROM tblSMCompanySetup)
+
+IF(ISNULL(@ysnMigrated, 1) != 1) return;
+
+update tblSMCompanySetup set ysnAuditBatchMigrated = 0
 
 if(@AuditId is null)
 	begin
@@ -162,6 +168,8 @@ DECLARE @isWeekend BIT = CASE WHEN (@DAY = ''Saturday'' OR @DAY = ''Sunday'') TH
 BEGIN TRY
 USE [' + CONVERT(nvarchar(MAX), @currentDatabaseName) + ']
 exec [uspSMMigrateScheduledAuditLog] @isWeekend
+
+update tblSMCompanySetup set ysnAuditBatchMigrated = 1
 END TRY
 BEGIN CATCH
 SELECT 

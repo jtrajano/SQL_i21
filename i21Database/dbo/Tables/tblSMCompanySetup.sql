@@ -21,6 +21,7 @@
     [strBusinessType]   NVARCHAR (15)  COLLATE Latin1_General_CI_AS NULL,
     [ysnScreenControlListingUpdated] BIT NULL,
 	[ysnScreenLabelListingUpdated] BIT NULL, 
+	[ysnAuditBatchMigrated] BIT DEFAULT 1 NULL,
 	[intMultiCompanyId] INT NULL,
     [intConcurrencyId]  INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblSMCompanySetup] PRIMARY KEY ([intCompanySetupID]), 
