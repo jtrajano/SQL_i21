@@ -127,8 +127,7 @@ and f.intBrokerageAccountId=case when isnull(@intBorkerageAccountId,0)=0 then f.
 and
 isnull(f.ysnFreezed,0) = 0
 )t
-GROUP BY strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
-strSalesPersionId,strCurrency,strBrokerTradeNo,strBuySell,strFutureMonth,dblPrice,strReference,strStatus,dtmFilledDate
+GROUP BY strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
 order by strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
          
 INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
