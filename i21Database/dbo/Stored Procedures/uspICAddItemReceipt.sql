@@ -892,19 +892,14 @@ BEGIN
 				,dblReceived			= ISNULL(RawData.dblQty, 0)
 				,intUnitMeasureId		= ItemUOM.intItemUOMId
 				,intWeightUOMId			= 
-										CASE	WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL 
-												WHEN GrossNetUnitMeasure.intUnitMeasureId IS NOT NULL THEN GrossNetUOM.intItemUOMId
-												ELSE (
-														SELECT	TOP 1 
-																tblICItemUOM.intItemUOMId 
-														FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
-																	ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
-														WHERE	tblICItemUOM.intItemId = RawData.intItemId 
-																AND tblICItemUOM.ysnStockUnit = 1 
-																AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
-													)											
+										CASE	
+											WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL 
+											ELSE COALESCE( 
+												GrossNetUOM.intItemUOMId
+												, dbo.fnGetMatchingItemUOMId(RawData.intItemId,  RawData.intGrossNetUOMId)
+												, defaultGrossNetUOM.intItemUOMId
+											)
 										END 
-				
 										
 				,dblUnitCost			= RawData.dblCost
 				--,dblLineTotal			= RawData.dblQty * RawData.dblCost
@@ -960,17 +955,27 @@ BEGIN
 					ON Item.intItemId = RawData.intItemId
 				INNER JOIN dbo.tblICItemUOM ItemUOM			
 					ON ItemUOM.intItemId = RawData.intItemId  
-					AND ItemUOM.intItemUOMId = RawData.intItemUOMId			
+					AND ItemUOM.intItemUOMId = RawData.intItemUOMId
 				INNER JOIN dbo.tblICUnitMeasure UOM
 					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM GrossNetUOM 
 					ON GrossNetUOM.intItemUOMId = RawData.intGrossNetUOMId
+					AND GrossNetUOM.intItemId = RawData.intItemId
                 LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure    
                     ON GrossNetUOM.intUnitMeasureId = GrossNetUnitMeasure.intUnitMeasureId
                     AND GrossNetUnitMeasure.strUnitType IN ('Weight', 'Volume')
 				LEFT JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = RawData.intItemId 
 					AND ItemLocation.intLocationId = RawData.intLocationId
+				OUTER APPLY (
+					SELECT	TOP 1 
+							tblICItemUOM.intItemUOMId 
+					FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
+								ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
+					WHERE	tblICItemUOM.intItemId = RawData.intItemId 
+							AND tblICItemUOM.ysnStockUnit = 1 
+							AND tblICUnitMeasure.strUnitType IN ('Weight', 'Volume')
+				) defaultGrossNetUOM
 				LEFT JOIN tblICCostingMethod CostingMethod
 					ON CostingMethod.intCostingMethodId = ItemLocation.intCostingMethod
 				-- Get the SM forex rate. 
@@ -991,7 +996,7 @@ BEGIN
 								,RawData.intShipFromId		--,@VendorLocationId
 								,RawData.intFreightTermId	--,@FreightTermId
 							)
-							AND RawData.intTaxGroupId IS NULL 			
+							AND RawData.intTaxGroupId IS NULL
 				) taxHierarcy 
 
 				-- Integrations with the other modules: 
