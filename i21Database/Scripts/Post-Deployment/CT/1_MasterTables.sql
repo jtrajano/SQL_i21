@@ -650,7 +650,7 @@ GO
  BEGIN
 		UPDATE tblSMGridLayout
 		SET strGridLayoutFields = REPLACE(strGridLayoutFields,'{"strFieldName":"dtmPlannedAvailabilityDate","strDataType":"date","strDisplayName":"Planned Availability(Y-M)"','{"strFieldName":"dtmPlannedAvailabilityDateYM","strDataType":"date","strDisplayName":"Planned Availability(Y-M)"')
-		WHERE strScreen = 'ContractManagement.view.Overview' and strGrid = 'grdSearch'
+		WHERE strScreen LIKE 'ContractManagement.view.Overview%' and strGrid = 'grdSearch'
  END
 GO
 PRINT('Contract 1_MasterTables End')
