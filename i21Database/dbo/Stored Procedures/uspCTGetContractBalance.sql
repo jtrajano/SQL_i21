@@ -467,11 +467,8 @@ BEGIN TRY
 									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 									ELSE
-										(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,(CD.intNoOfLoad -ISNULL(BL.intNoOfLoad,0)) * CD.dblQuantityPerLoad),0) 
+										
 							  END
 	,strQuantityUOM			= IUM.strUnitMeasure
 	,dblCashPrice			= CASE 
@@ -484,11 +481,7 @@ BEGIN TRY
 							  		WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 							  		ELSE
-							  			(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,(CD.intNoOfLoad -ISNULL(BL.intNoOfLoad,0)) * CD.dblQuantityPerLoad),0) 
 							    END
 
 	,dblAmount				= (
@@ -496,11 +489,8 @@ BEGIN TRY
 									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
 										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
 									ELSE
-										(
-											CD.intNoOfLoad 
-										  -- ISNULL(BL.intNoOfLoad,0)
-										  - ROUND((ISNULL(PF.dblQuantity,0)/CD.dblQuantityPerLoad),0)
-										) * CD.dblQuantityPerLoad
+										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,(CD.intNoOfLoad -ISNULL(BL.intNoOfLoad,0)) * CD.dblQuantityPerLoad),0) 
+
 							    END
 							  ) 
 							  * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
@@ -853,8 +843,7 @@ BEGIN TRY
 	,dblCashPriceinCommodityStockUOM
 	,dblAmountinCommodityStockUOM	
 	FROM tblCTContractBalance 
-	WHERE  dblAvailableQty > 0
-	AND
+	WHERE 
 	intContractTypeId		  = CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId	      ELSE intContractTypeId     END
 	AND intEntityId			  = CASE WHEN ISNULL(@intEntityId ,0) > 0			THEN @intEntityId		      ELSE intEntityId		     END
 	AND intCommodityId		  = CASE WHEN ISNULL(@IntCommodityId ,0) > 0		THEN @IntCommodityId	      ELSE intCommodityId	     END
