@@ -51,6 +51,8 @@ SELECT IC.intHandheldScannerImportCountId
 	, RI.intRecipeItemTypeId
 	, ISNULL(RI.dblCalculatedQuantity, 1) * ISNULL(IC.dblCountQty, 0) AS dblComputedCount
 FROM tblSTHandheldScannerImportCount IC
+INNER JOIN tblICItem HandheldItem
+	ON IC.intItemId = HandheldItem.intItemId
 LEFT JOIN tblSTHandheldScanner HS 
 	ON HS.intHandheldScannerId = IC.intHandheldScannerId
 LEFT JOIN tblSTStore Store 
@@ -58,7 +60,11 @@ LEFT JOIN tblSTStore Store
 
 -- Recipe
 LEFT JOIN tblMFRecipe Recipe
-	ON IC.intItemId = Recipe.intItemId
+	ON Recipe.intItemId = CASE 
+							WHEN HandheldItem.ysnAutoBlend = 1
+								THEN IC.intItemId
+							ELSE NULL
+						END
 LEFT JOIN tblMFRecipeItem RI
 	ON Recipe.intRecipeId = RI.intRecipeId
 LEFT JOIN tblICItem Item
