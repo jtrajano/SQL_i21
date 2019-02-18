@@ -413,7 +413,7 @@ SELECT --Direct from Invoice
 	,dblInQty AS dblUnpaidIn
 	,0 AS dblUnpaidOut
 	,0 AS dblUnpaidBalance
-	,ABS(dblInQty) + ABS(isnull(dblOutQty, 0)) * -1 as dblPaidBalance
+	,ABS(dblInQty) + ABS(isnull(dblOutQty, 0)) * CASE WHEN dblOutQty < 0 THEN 1 ELSE -1 END as dblPaidBalance
 	,strDistributionOption
 	,strReceiptNumber
 	,intInventoryReceiptItemId
@@ -433,6 +433,7 @@ tblARInvoice I
 INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblICItem Itm ON ID.intItemId = Itm.intItemId
 INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+LEFT JOIN tblICItemLocation ItmLoc ON  Itm.intItemId = ItmLoc.intItemId AND I.intCompanyLocationId = ItmLoc.intLocationId
 WHERE I.ysnPosted = 1
 AND ID.intInventoryShipmentItemId IS NULL
 AND ID.intInventoryShipmentChargeId IS NULL
@@ -447,6 +448,7 @@ AND I.intCompanyLocationId IN (
 		FROM tblSMCompanyLocation
 		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 		)
+AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[intItemLocationId], ID.[intItemUOMId]) <> 0)) ) 
 )t
 
 	--Direct Inventory Shipment (This will show the Invoice Number once Shipment is invoiced)
