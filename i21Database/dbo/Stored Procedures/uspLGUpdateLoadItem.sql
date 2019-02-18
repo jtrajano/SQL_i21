@@ -105,11 +105,12 @@ BEGIN TRY
 		RETURN;
 	END
 
-	UPDATE tblLGLoadDetail SET intItemId = @intItemId WHERE intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId AND intItemId <> @intItemId
-
 	UPDATE LD SET intWeightItemUOMId = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = L.intWeightUnitMeasureId), @intNetWeightUOMId)
 	FROM tblLGLoadDetail LD INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
 	WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId)
+	AND intItemId <> @intItemId
+
+	UPDATE tblLGLoadDetail SET intItemId = @intItemId WHERE intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId AND intItemId <> @intItemId
 
 	UPDATE tblLGLoadDetail SET intItemUOMId=@intItemUOMId WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND intItemUOMId <> @intItemUOMId
 
