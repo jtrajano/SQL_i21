@@ -7344,6 +7344,7 @@
     <Build Include="dbo\Views\vyuCFInvoiceGroupByDriverPinOdometer.sql" />
     <Build Include="dbo\Views\vyuCFinvoiceGroupByDriverPinHistory.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceGroupByDriverPin.sql" />
+    <Build Include="dbo\Views\vyuSTGetHandheldScannerImportCountWithRecipe.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
