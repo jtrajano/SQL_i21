@@ -2547,16 +2547,12 @@ BEGIN
 															, RebuildInvTrans.intItemUOMId
 														) 
 													ELSE 
-														dbo.fnMultiply(
-															ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
-															,dblUOMQty
-														)
+														ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
 											END 
 
 										-- When it is a credit memo:
 										--WHEN (RebuildInvTrans.dblQty > 0 AND RebuildInvTrans.strTransactionId LIKE 'SI%') THEN 
-										WHEN RebuildInvTrans.dblQty > 0 THEN 
-											
+										WHEN RebuildInvTrans.dblQty > 0 THEN 											
 											CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 														-- If using Average Costing, use Ave Cost.
 														dbo.fnGetItemAverageCost(
@@ -2566,7 +2562,7 @@ BEGIN
 														) 
 													ELSE
 														-- Otherwise, get the last cost. 
-														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
+														ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
 											END 
 
 										ELSE 
@@ -2597,8 +2593,26 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
-						LEFT JOIN dbo.tblICLot lot
-							ON lot.intLotId = RebuildInvTrans.intLotId 
+						LEFT JOIN dbo.tblICItemUOM StockUOM
+							ON StockUOM.intItemId = RebuildInvTrans.intItemId
+							AND StockUOM.ysnStockUnit = 1
+						OUTER APPLY (
+							SELECT
+								lot.intLotId
+								,dblLastCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, ItemUOM.intItemUOMId, lot.dblLastCost)
+							FROM	
+								dbo.tblICLot lot 
+							WHERE	
+								lot.intLotId = RebuildInvTrans.intLotId 
+								AND lot.intItemId = RebuildInvTrans.intItemId
+						) lot
+						OUTER APPLY (
+							SELECT	TOP 1 
+									dblLastCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, ItemUOM.intItemUOMId, p.dblLastCost)
+							FROM	tblICItemPricing p 
+							WHERE	p.intItemId = RebuildInvTrans.intItemId 
+									AND p.intItemLocationId = RebuildInvTrans.intItemLocationId
+						) itemPricing
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
@@ -2638,7 +2652,7 @@ BEGIN
 							,[ysnIsUnposted]
 							,[intUserId]
 							,[intEntityId]
-							,[strTransactionId]					
+							,[strTransactionId]
 							,[intTransactionId]
 							,[strTransactionType]
 							,[strTransactionForm] 
