@@ -14,7 +14,7 @@ DECLARE @ErrorState INT;
 DECLARE @ErrMsg      NVARCHAR(MAX);
 DECLARE @strItemType NVARCHAR(MAX);
 DECLARE @intContractTypeId INT; 
-DECLARE @intCount INT, @intItemId INT, @intItemUOMId INT;
+DECLARE @intCount INT, @intItemId INT, @intItemUOMId INT, @intNetWeightUOMId INT;
 DECLARE @ysnUpdateVesselInfo BIT
 
 BEGIN TRY
@@ -24,7 +24,8 @@ BEGIN TRY
 		RETURN;
 	END
 
-	SELECT @intContractTypeId = CT.intContractTypeId, @intItemId=CT.intItemId, @intItemUOMId=CT.intItemUOMId FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId=@intContractDetailId
+	SELECT @intContractTypeId = CT.intContractTypeId, @intItemId=CT.intItemId, @intItemUOMId=CT.intItemUOMId,@intNetWeightUOMId=CT.intNetWeightUOMId 
+		FROM vyuCTContractDetailView CT WHERE CT.intContractDetailId=@intContractDetailId
 	SELECT @strItemType = Item.strType FROM tblICItem Item WHERE Item.intItemId = @intItemId
 	SELECT @ysnUpdateVesselInfo = ysnUpdateVesselInfo FROM tblLGCompanyPreference
 
@@ -106,7 +107,9 @@ BEGIN TRY
 
 	UPDATE tblLGLoadDetail SET intItemId = @intItemId WHERE intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId AND intItemId <> @intItemId
 
-	UPDATE tblLGLoadDetail SET intWeightItemUOMId = @intItemUOMId WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND intWeightItemUOMId = intItemUOMId AND intItemUOMId <> @intItemUOMId
+	UPDATE LD SET intWeightItemUOMId = ISNULL((SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = L.intWeightUnitMeasureId), @intNetWeightUOMId)
+	FROM tblLGLoadDetail LD INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+	WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId)
 
 	UPDATE tblLGLoadDetail SET intItemUOMId=@intItemUOMId WHERE (intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND intItemUOMId <> @intItemUOMId
 
