@@ -189,7 +189,7 @@ BEGIN
 			@CostBucketId = cb.intInventoryActualCostId
 			,@CostBucketOriginalStockIn = cb.dblStockIn
 			,@CostBucketOriginalCost = cb.dblCost
-			,@CostBucketOriginalValue = dbo.fnMultiply(cb.dblStockIn, cb.dblCost)
+			,@CostBucketOriginalValue = ROUND(dbo.fnMultiply(cb.dblStockIn, cb.dblCost), 2) 
 			,@CostBucketDate = cb.dtmDate
 	FROM	tblICInventoryActualCost cb
 	WHERE	cb.intItemId = @intItemId
