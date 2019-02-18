@@ -7271,6 +7271,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetFutureTradingMonths.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetSalesInvoiceDetailReport2.sql" />
     <Build Include="dbo\Views\vyuSTItemRecipeAndStockQty.sql" />
+    <Build Include="dbo\Views\vyuSTGetHandheldScannerImportCountWithRecipe.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
