@@ -6,6 +6,7 @@
     ,@UserId            INT
 	,@BatchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
 	,@raiseError		AS BIT				= 0
+	,@IntegrationLogId	AS INT				= NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -29,6 +30,11 @@ DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000
 DECLARE @OneDecimal DECIMAL(18,6)
 SET @OneDecimal = 1.000000
+
+DECLARE @ZeroBit BIT
+SET @ZeroBit = CAST(0 AS BIT)
+DECLARE @OneBit BIT
+SET @OneBit = CAST(1 AS BIT)
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 
@@ -61,21 +67,21 @@ BEGIN TRY
 
 	SET @BatchIdUsed = @BatchId
 
-	IF @Post = 1
+	IF @Post = @OneBit
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
 			@PostDate        = @PostDate
 		   ,@UserId          = @UserId
 
-	IF @Post = 1
+	IF @Post = @OneBit
     EXEC [dbo].[uspARPrePostInvoiceIntegration]
 
-	IF @Post = 1
+	IF @Post = @OneBit
     EXEC dbo.[uspARUpdateTransactionAccountOnPost]  
 
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-	IF @raiseError = 0
+	IF @raiseError = @ZeroBit
 		BEGIN
 			IF @InitTranCount = 0
 				IF (XACT_STATE()) <> 0
@@ -98,7 +104,7 @@ BEGIN CATCH
 			FROM
 				#ARPostInvoiceHeader
 			WHERE
-				[ysnRecap] = 1
+				[ysnRecap] = @OneBit
 									
 			EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @DelimitedIds
 
@@ -115,7 +121,7 @@ BEGIN CATCH
 						ROLLBACK TRANSACTION  @CurrentSavepoint
 				END	
 		END						
-	IF @raiseError = 1
+	IF @raiseError = @OneBit
 		RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
@@ -172,7 +178,7 @@ BEGIN TRY
 	intSourceEntityId INT NULL,
 	ysnRebuild BIT NULL)
 	
-	IF @Post = 1
+	IF @Post = @OneBit
 	EXEC dbo.uspARGenerateEntriesForAccrual  
 
     EXEC [dbo].[uspARGenerateGLEntries]
@@ -185,7 +191,7 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-	IF @raiseError = 0
+	IF @raiseError = @ZeroBit
 		BEGIN
 			IF @InitTranCount = 0
 				IF (XACT_STATE()) <> 0
@@ -208,7 +214,7 @@ BEGIN CATCH
 			FROM
 				#ARPostInvoiceHeader
 			WHERE
-				[ysnRecap] = 1
+				[ysnRecap] = @OneBit
 									
 			EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @DelimitedIds
 									
@@ -225,7 +231,7 @@ BEGIN CATCH
 						ROLLBACK TRANSACTION  @CurrentSavepoint
 				END	
 		END						
-	IF @raiseError = 1
+	IF @raiseError = @OneBit
 		RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
@@ -722,17 +728,164 @@ BEGIN TRY
 		WHERE I.strInvoiceNumber = A.strTransactionId 
 			AND I.intInvoiceId = A.intTransactionId
 	) RATETYPE
-				
+
+	IF @IntegrationLogId IS NOT NULL
+    UPDATE ILD
+    SET
+        ILD.[ysnPosted]                 = CASE WHEN ILD.[ysnPost] = @OneBit THEN 0 ELSE ILD.[ysnPosted] END
+        ,ILD.[ysnUnPosted]              = CASE WHEN ILD.[ysnPost] = @OneBit THEN ILD.[ysnUnPosted] ELSE 0 END
+        ,ILD.[strPostingMessage]        = CASE WHEN ILD.[ysnPost] = 1 THEN 'Recap - Transaction successfully posted.' ELSE 'Recap - Transaction successfully unposted.' END
+        ,ILD.[strBatchId]               = PID.[strBatchId]
+        ,ILD.[strPostedTransactionId]   = PID.[strInvoiceNumber] 
+    FROM
+        tblARInvoiceIntegrationLogDetail ILD
+    INNER JOIN
+        @Invoice PID
+            ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+    WHERE
+        ILD.[intIntegrationLogId] = @IntegrationLogId
+        AND ILD.[ysnPost] IS NOT NULL
+        AND ILD.[ysnRecap] = @OneBit
+
+    UPDATE ARIL
+    SET
+         [strBatchIdForNewPost] = NIP.[strBatchId]
+        ,[intPostedNewCount] = ISNULL(NIP.[intRecordTotal], 0)
+        ,[strBatchIdForNewPostRecap] = NIPR.[strBatchId]
+        ,[intRecapNewCount] = ISNULL(NIPR.[intRecordTotal], 0)
+        ,[strBatchIdForExistingPost] = EIP.[strBatchId]
+        ,[intPostedExistingCount] = ISNULL(EIP.[intRecordTotal], 0)
+        ,[strBatchIdForExistingRecap] = EIPR.[strBatchId]
+        ,[intRecapPostExistingCount] = ISNULL(EIPR.[intRecordTotal], 0)
+        ,[strBatchIdForExistingUnPost] = EIU.[strBatchId]
+        ,[intUnPostedExistingCount] = ISNULL(EIU.[intRecordTotal], 0)
+        ,[strBatchIdForExistingUnPostRecap] = EIUR.[strBatchId]
+        ,[intRecapUnPostedExistingCount] = ISNULL(EIUR.[intRecordTotal], 0)
+    FROM
+        tblARInvoiceIntegrationLog ARIL
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 1
+            AND [ysnRecap] = 0
+            AND [ysnPost] = 1
+            AND [ysnPosted] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) NIP
+            ON ARIL.[intIntegrationLogId] = NIP.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 1
+            AND [ysnRecap] = 1
+            AND [ysnPost] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) NIPR
+            ON ARIL.[intIntegrationLogId] = NIPR.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 0
+            AND [ysnRecap] = 0
+            AND [ysnPost] = 1
+            AND [ysnPosted] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) EIP
+            ON ARIL.[intIntegrationLogId] = EIP.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 0
+            AND [ysnRecap] = 1
+            AND [ysnPost] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) EIPR
+            ON ARIL.[intIntegrationLogId] = EIPR.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 0
+            AND [ysnRecap] = 0
+            AND [ysnPost] = 0
+            AND [ysnUnPosted] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) EIU
+            ON ARIL.[intIntegrationLogId] = EIU.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 0
+            AND [ysnRecap] = 1
+            AND [ysnPost] = 0
+        GROUP BY
+            [intIntegrationLogId]
+        ) EIUR
+            ON ARIL.[intIntegrationLogId] = EIUR.[intIntegrationLogId]
+    WHERE
+        ARIL.[intIntegrationLogId] = @IntegrationLogId
 
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()
-	IF @raiseError = 0
+	IF @raiseError = @ZeroBit
 		BEGIN
 			SET @CurrentTranCount = @@TRANCOUNT
 			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
 			
-			IF @CurrentTranCount = 0
+			IF @CurrentTranCount = @ZeroBit
 				BEGIN TRANSACTION
 			ELSE
 				SAVE TRANSACTION @CurrentSavepoint
@@ -743,7 +896,7 @@ BEGIN CATCH
 	FROM
 		#ARPostInvoiceHeader
 	WHERE
-		[ysnRecap] = 1
+		[ysnRecap] = @OneBit
 
 			EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @DelimitedIds		
 		IF @CurrentTranCount = 0
@@ -759,7 +912,7 @@ BEGIN CATCH
 					ROLLBACK TRANSACTION  @CurrentSavepoint
 			END
 		END			
-	IF @raiseError = 1
+	IF @raiseError = @OneBit
 		RAISERROR(@ErrorMerssage, 11, 1)
 	GOTO Post_Exit
 END CATCH

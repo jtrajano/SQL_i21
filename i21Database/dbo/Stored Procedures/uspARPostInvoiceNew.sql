@@ -42,6 +42,9 @@ SET @OneDecimal = 1.000000
 DECLARE @OneHundredDecimal DECIMAL(18,6)
 SET @OneHundredDecimal = 100.000000
 
+
+
+
 DECLARE  @InitTranCount				INT
 		,@CurrentTranCount			INT
 		,@Savepoint					NVARCHAR(32)
@@ -695,10 +698,12 @@ BEGIN TRY
 	IF @Recap = 1
     BEGIN
         EXEC [dbo].[uspARPostInvoiceRecap]
-		        @BatchId         = @BatchIdUsed
-		       ,@PostDate        = @PostDate
-		       ,@UserId          = @UserId
-		       ,@raiseError      = @RaiseError
+                @Post               = @Post
+		       ,@BatchId            = @BatchIdUsed
+		       ,@PostDate           = @PostDate
+		       ,@UserId             = @UserId
+		       ,@raiseError         = @RaiseError
+               ,@IntegrationLogId   = @IntegrationLogId
         GOTO Do_Commit
     END
 
@@ -1014,6 +1019,136 @@ BEGIN TRY
 	WHERE
 		ILD.[intIntegrationLogId] = @IntegrationLogId
 		AND ILD.[ysnPost] IS NOT NULL
+
+    UPDATE ARIL
+    SET
+         [strBatchIdForNewPost] = NIP.[strBatchId]
+        ,[intPostedNewCount] = ISNULL(NIP.[intRecordTotal], 0)
+        ,[strBatchIdForNewPostRecap] = NIPR.[strBatchId]
+        ,[intRecapNewCount] = ISNULL(NIPR.[intRecordTotal], 0)
+        ,[strBatchIdForExistingPost] = EIP.[strBatchId]
+        ,[intPostedExistingCount] = ISNULL(EIP.[intRecordTotal], 0)
+        ,[strBatchIdForExistingRecap] = EIPR.[strBatchId]
+        ,[intRecapPostExistingCount] = ISNULL(EIPR.[intRecordTotal], 0)
+        ,[strBatchIdForExistingUnPost] = EIU.[strBatchId]
+        ,[intUnPostedExistingCount] = ISNULL(EIU.[intRecordTotal], 0)
+        ,[strBatchIdForExistingUnPostRecap] = EIUR.[strBatchId]
+        ,[intRecapUnPostedExistingCount] = ISNULL(EIUR.[intRecordTotal], 0)
+    FROM
+        tblARInvoiceIntegrationLog ARIL
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 1
+            AND [ysnRecap] = 0
+            AND [ysnPost] = 1
+            AND [ysnPosted] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) NIP
+            ON ARIL.[intIntegrationLogId] = NIP.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 1
+            AND [ysnRecap] = 1
+            AND [ysnPost] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) NIPR
+            ON ARIL.[intIntegrationLogId] = NIPR.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 0
+            AND [ysnRecap] = 0
+            AND [ysnPost] = 1
+            AND [ysnPosted] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) EIP
+            ON ARIL.[intIntegrationLogId] = EIP.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 0
+            AND [ysnRecap] = 1
+            AND [ysnPost] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) EIPR
+            ON ARIL.[intIntegrationLogId] = EIPR.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 0
+            AND [ysnRecap] = 0
+            AND [ysnPost] = 0
+            AND [ysnUnPosted] = 1
+        GROUP BY
+            [intIntegrationLogId]
+        ) EIU
+            ON ARIL.[intIntegrationLogId] = EIU.[intIntegrationLogId]
+    LEFT JOIN
+        (
+        SELECT
+             [intIntegrationLogId]	= [intIntegrationLogId]
+            ,[intRecordTotal]       = COUNT([intIntegrationLogDetailId])
+            ,[strBatchId]           = MIN(strBatchId)
+        FROM
+            tblARInvoiceIntegrationLogDetail
+        WHERE
+            [intIntegrationLogId] = @IntegrationLogId
+            AND [ysnHeader] = 1
+            AND [ysnInsert] = 0
+            AND [ysnRecap] = 1
+            AND [ysnPost] = 0
+        GROUP BY
+            [intIntegrationLogId]
+        ) EIUR
+            ON ARIL.[intIntegrationLogId] = EIUR.[intIntegrationLogId]
+    WHERE
+        ARIL.[intIntegrationLogId] = @IntegrationLogId
 
 END TRY
 BEGIN CATCH
