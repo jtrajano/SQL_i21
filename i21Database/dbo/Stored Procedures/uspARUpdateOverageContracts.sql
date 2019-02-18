@@ -368,8 +368,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intItemUOMId					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemUOMId ELSE IDTOADD.intItemUOMId END
 			, intPriceUOMId					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intPriceUOMId ELSE IDTOADD.intItemUOMId END
 			, dblQtyShipped					= IDTOADD.dblQtyShipped
-			, dblPrice						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.dblPrice ELSE IDTOADD.dblPrice END
-			, dblUnitPrice					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.dblUnitPrice ELSE IDTOADD.dblPrice END
+			, dblPrice						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN 0 ELSE IDTOADD.dblPrice END
+			, dblUnitPrice					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN 0 ELSE IDTOADD.dblPrice END
 			, dblContractPriceUOMQty		= IDTOADD.dblQtyShipped
 			, intItemWeightUOMId			= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemWeightUOMId ELSE NULL END
 			, intContractDetailId			= IDTOADD.intContractDetailId
