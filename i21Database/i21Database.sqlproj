@@ -7346,6 +7346,7 @@
     <Build Include="dbo\Views\vyuCFInvoiceGroupByDriverPin.sql" />
     <Build Include="dbo\Views\vyuSTGetHandheldScannerImportCountWithRecipe.sql" />
     <None Include="Scripts\Post-Deployment\CF\5_18.3To19.1DataConversion.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutHeaderSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
