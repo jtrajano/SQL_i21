@@ -50,8 +50,8 @@ BEGIN TRY
 		,@intDockDoorId = intDockDoorId
 	FROM tblICInventoryShipmentItem
 	WHERE intInventoryShipmentId = @intInventoryShipmentId
-		AND intStorageLocationId IS NOT NULL
-		OR intDockDoorId IS NOT NULL
+		AND (intStorageLocationId IS NOT NULL
+		OR intDockDoorId IS NOT NULL)
 
 	IF @intStageLocationId IS NULL
 	BEGIN

@@ -174,7 +174,23 @@ BEGIN TRY
 			WHERE intRowNo = @intMinWO
 
 			IF @dtmPlannedDate IS NULL
-				SET @dtmPlannedDate = GETDATE()
+			BEGIN
+				SET @dtmPlannedDate = Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+
+				SELECT @intPlannedShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId
+					AND @dtmCurrentDate BETWEEN GETDATE() + dtmShiftStartTime + intStartOffset
+						AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+				IF @intPlannedShiftId IS NULL
+				BEGIN
+					SELECT @intPlannedShiftId = intShiftId
+					FROM dbo.tblMFShift
+					WHERE intLocationId = @intLocationId
+						AND intShiftSequence = 1
+				END
+			END
 
 			IF @intPlannedShiftId IS NULL
 			BEGIN
@@ -492,7 +508,23 @@ BEGIN TRY
 			WHERE intRowNo = @intMinWO
 
 			IF @dtmPlannedDate IS NULL
-				SET @dtmPlannedDate = GETDATE()
+			BEGIN
+				SET @dtmPlannedDate = Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+
+				SELECT @intPlannedShiftId = intShiftId
+				FROM dbo.tblMFShift
+				WHERE intLocationId = @intLocationId
+					AND @dtmCurrentDate BETWEEN GETDATE() + dtmShiftStartTime + intStartOffset
+						AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+				IF @intPlannedShiftId IS NULL
+				BEGIN
+					SELECT @intPlannedShiftId = intShiftId
+					FROM dbo.tblMFShift
+					WHERE intLocationId = @intLocationId
+						AND intShiftSequence = 1
+				END
+			END
 
 			IF @intPlannedShiftId IS NULL
 			BEGIN
@@ -550,8 +582,16 @@ BEGIN TRY
 			WHERE intSalesOrderDetailId = @intSalesOrderDetailId
 
 			--if the item does not belong to the SO, it is the recipe input item (next level recipe), use stock uom
-			If Not Exists (Select 1 From tblSOSalesOrderDetail Where intSalesOrderDetailId=@intSalesOrderDetailId AND intItemId=@intItemId)
-				Select @intItemUOMId=intItemUOMId From tblICItemUOM where intItemId=@intItemId AND ysnStockUnit=1
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblSOSalesOrderDetail
+					WHERE intSalesOrderDetailId = @intSalesOrderDetailId
+						AND intItemId = @intItemId
+					)
+				SELECT @intItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intItemId
+					AND ysnStockUnit = 1
 
 			INSERT INTO tblMFWorkOrder (
 				strWorkOrderNo
