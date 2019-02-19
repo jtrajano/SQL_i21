@@ -143,6 +143,7 @@
     [strUserId]                    NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceNumberHistory]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmDueDateBaseOnTermsHistory] DATETIME NULL, 
+	[ysnMPGCalculation]            BIT             NULL,
     CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC)
 );
 

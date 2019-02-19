@@ -431,7 +431,6 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd	BIT
 			,ysnDepartmentGrouping			BIT
 			,ysnPostForeignSales			BIT
-			,ysnExpensed					BIT
 			,ysnMPGCalculation			    BIT
 
 		)
@@ -532,7 +531,6 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
-			,ysnExpensed				
 			,ysnMPGCalculation
 			)
 			SELECT 
@@ -628,7 +626,6 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
-			,ysnExpensed				
 			,ysnMPGCalculation
 			FROM vyuCFInvoiceReport
 		END
@@ -727,7 +724,6 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
-			,ysnExpensed				
 			,ysnMPGCalculation	
 			)
 			SELECT 
@@ -823,7 +819,6 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
-			,ysnExpensed				
 			,ysnMPGCalculation	
 			FROM vyuCFInvoiceReport
 			WHERE  ISNULL(ysnInvoiced,0) = 0
@@ -1110,7 +1105,6 @@ BEGIN
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd	
 		,ysnPostedCSV
-		,ysnExpensed
 		,ysnMPGCalculation
 		INTO #tblCFTempInvoiceReportSummary 
 		FROM #tblCFTempInvoiceReport AS main 
@@ -1209,7 +1203,6 @@ BEGIN
 		,ysnSummaryByDeptVehicleProd
 		,ysnPostedCSV
 		,strUserId
-		,ysnExpensed
 		,ysnMPGCalculation
 		)
 		SELECT
@@ -1299,7 +1292,6 @@ BEGIN
 		,ysnSummaryByDeptVehicleProd		
 		,ysnPostedCSV
 		,@UserId
-		,ysnExpensed
 		,ysnMPGCalculation
 	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
