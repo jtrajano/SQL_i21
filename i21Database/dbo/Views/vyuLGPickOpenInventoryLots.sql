@@ -105,7 +105,7 @@ FROM (
 	   ,intPriceItemUOMId = CTDetail.intPriceItemUOMId
 	   ,strPriceBasis = CAST(BC.strCurrency as VARCHAR(100)) + '/' + CAST(BUM.strUnitMeasure as VARCHAR(100))
 	   ,dblTotalCost = CTDetail.dblTotalCost
-	   ,intWeightItemUOMId = LD.intWeightItemUOMId
+	   ,intWeightItemUOMId = COALESCE(Lot.intWeightUOMId, LD.intWeightItemUOMId, dbo.fnGetMatchingItemUOMId(LD.intItemId, L.intWeightUnitMeasureId), CTDetail.intNetWeightUOMId)
 	   ,strPosition = PO.strPosition
 	   ,intBookId = CTDetail.intBookId
 	   ,strBook = BO.strBook COLLATE Latin1_General_CI_AS
