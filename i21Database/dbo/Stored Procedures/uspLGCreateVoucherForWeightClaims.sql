@@ -260,36 +260,29 @@ BEGIN TRY
 			,@type = @intVoucherType
 			,@billId = @intBillId OUTPUT
 	
-		IF (@total = @intCount)
-		BEGIN
-			UPDATE tblLGWeightClaimDetail
-			SET intBillId = @intBillId
-			WHERE intWeightClaimId = @intWeightClaimId
+		UPDATE tblLGWeightClaimDetail
+		SET intBillId = @intBillId
+		WHERE intWeightClaimId = CASE WHEN (@total = @intCount) THEN @intWeightClaimId ELSE @intWeightClaimDetailId END
 
-			UPDATE tblAPBillDetail
-			SET intLoadId = @intLoadId,
-				intCurrencyId = @intCurrencyId,
-				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = ROUND(@dblClaimAmount, 2),
-				dblTotal = ROUND(@dblClaimAmount, 2),
-				dblNetWeight = @dblNetWeight
-			WHERE intBillId = @intBillId
-		END
-		ELSE 
-		BEGIN
-			UPDATE tblLGWeightClaimDetail
-			SET intBillId = @intBillId
-			WHERE intWeightClaimDetailId = @intWeightClaimDetailId
-			
-			UPDATE tblAPBillDetail
-			SET intLoadId = @intLoadId,
-				intCurrencyId = @intCurrencyId,
-				ysnSubCurrency = @ysnSubCurrency,
-				dblClaimAmount = ROUND(@dblClaimAmount, 2),
-				dblTotal = ROUND(@dblClaimAmount, 2),
-				dblNetWeight = @dblNetWeight
-			WHERE intBillId = @intBillId
-		END
+		UPDATE tblAPBillDetail
+		SET intLoadId = @intLoadId,
+			intCurrencyId = @intCurrencyId,
+			ysnSubCurrency = @ysnSubCurrency,
+			dblClaimAmount = ROUND(@dblClaimAmount, 2),
+			dblTotal = ROUND(@dblClaimAmount, 2),
+			dblNetWeight = @dblNetWeight,
+			intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing')
+		WHERE intBillId = @intBillId
+
+		SELECT @dblTotalForBill = SUM(dblTotal)
+		  ,@dblAmountDueForBill = SUM(dblClaimAmount)
+		FROM tblAPBillDetail
+		WHERE intBillId = @intBillId
+
+		UPDATE tblAPBill
+		SET dblTotal = @dblTotalForBill
+		   ,dblAmountDue = @dblAmountDueForBill
+		WHERE intBillId = @intBillId
 
 		DELETE
 		FROM @VoucherDetailClaim
@@ -300,34 +293,6 @@ BEGIN TRY
 		FROM @distinctVendor
 		WHERE intRecordId > @intMinRecord
 	END
-
-	SELECT @dblTotalForBill = SUM(dblTotal)
-		  ,@dblAmountDueForBill = SUM(dblClaimAmount)
-	FROM tblAPBillDetail
-	WHERE intBillId = @intBillId
-
-	UPDATE tblAPBill
-	SET dblTotal = @dblTotalForBill
-	   ,dblAmountDue = @dblAmountDueForBill
-	WHERE intBillId = @intBillId
-
-	UPDATE BD
-	SET intCurrencyId = WCD.intCurrencyId
-		,ysnSubCurrency = 1
-		,dblClaimAmount = ROUND(WCD.dblClaimAmount, 2)
-		,dblTotal = ROUND(WCD.dblClaimAmount, 2)
-		,dblNetWeight = WCD.dblToNet
-		,intLoadId = WC.intLoadId
-		,intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing')
-	FROM tblAPBill B
-	JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-	JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
-	JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
-	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
-	WHERE WCD.intContractDetailId = BD.intContractDetailId
-		AND WC.intWeightClaimId = @intWeightClaimId 
-		AND B.intTransactionType = 11
-
 END TRY
 
 BEGIN CATCH
