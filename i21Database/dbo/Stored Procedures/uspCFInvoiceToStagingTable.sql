@@ -515,17 +515,50 @@ BEGIN TRY
 	,strDetailDisplay	
 	,strDetailDisplayValue = CASE WHEN LOWER(strDetailDisplay) = 'card'
 									THEN strCardNumber + ' - ' + strCardDescription
+
 								  WHEN LOWER(strDetailDisplay) = 'vehicle'
-									THEN strVehicleNumber + ' - ' + strVehicleDescription
+									THEN (CASE	
+											WHEN ISNULL(strVehicleNumber,'') != '' THEN strVehicleNumber + ' - ' + strVehicleDescription
+											ELSE (CASE	
+													WHEN LOWER(strPrimarySortOptions) = 'card' THEN strDriverPinNumber + ' - ' + strDriverDescription
+													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN strCardNumber + ' - ' + strCardDescription
+													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN strDriverPinNumber + ' - ' + strDriverDescription
+												  END)
+										  END)
+
 								  WHEN LOWER(strDetailDisplay) = 'driverpin'
-									THEN strDriverPinNumber + ' - ' + strDriverDescription
+									THEN (CASE
+											WHEN ISNULL(strDriverPinNumber,'') != '' THEN strDriverPinNumber + ' - ' + strDriverDescription
+											ELSE (CASE 
+													WHEN LOWER(strPrimarySortOptions) = 'card' THEN strVehicleNumber + ' - ' + strVehicleDescription
+													WHEN LOWER(strPrimarySortOptions) = 'vehicle' THEN strCardNumber + ' - ' + strCardDescription
+													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN strVehicleNumber + ' - ' + strVehicleDescription
+												  END)
+											END)
 							 END
+
 	,strDetailDisplayLabel = CASE WHEN LOWER(strDetailDisplay) = 'card'
 									THEN 'Card'
+
 								  WHEN LOWER(strDetailDisplay) = 'vehicle'
-									THEN 'Vehicle'
+									THEN (CASE	
+											WHEN ISNULL(strVehicleNumber,'') != '' THEN 'Vehicle'
+											ELSE (CASE	
+													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 'Driver Pin'
+													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN 'Card'
+													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 'Driver Pin'
+												  END)
+										  END)
+
 								  WHEN LOWER(strDetailDisplay) = 'driverpin'
-									THEN 'Driver Pin'
+									THEN (CASE
+											WHEN ISNULL(strDriverPinNumber,'') != '' THEN  'Driver Pin'
+											ELSE (CASE 
+													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 'Vehicle'
+													WHEN LOWER(strPrimarySortOptions) = 'vehicle' THEN 'Card'
+													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 'Vehicle'
+												  END)
+											END)
 							 END
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
