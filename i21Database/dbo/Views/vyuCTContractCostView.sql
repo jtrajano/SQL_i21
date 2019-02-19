@@ -8,7 +8,7 @@ AS
 				UM.strUnitMeasure strUOM, 
 				EY.strName strVendorName, 
 				CD.intContractHeaderId, 
-				IU.intUnitMeasureId, 
+				IU.intItemUOMId, --IU.intUnitMeasureId, 
 				CD.intContractSeq, 
 				CY.strCurrency,
 				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
