@@ -485,41 +485,39 @@ AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[i
 		, strReceiptNumber
 		, intInventoryReceiptItemId
 	FROM (
-		SELECT CASE WHEN SS.intBillId IS NULL THEN CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) ELSE CONVERT(VARCHAR(10), SS.dtmCreated, 110) END dtmDate
-			, RI.dblUnitCost dblUnitCost1
-			, intCustomerStorageId as intInventoryReceiptItemId
-			, I.strItemNo
-			, CASE WHEN SS.intBillId IS NULL THEN isnull(RI.dblNet, 0) ELSE SS.dblOpenBalance END dblInQty
-			, 0 AS dblOutQty
-			, ST.strDistributionOption 
-			, CASE WHEN SS.strStorageTicketNumber IS NULL THEN R.strReceiptNumber ELSE  SS.strStorageTicketNumber END AS strReceiptNumber
-			, CASE WHEN SS.intCustomerStorageId IS NULL THEN R.intInventoryReceiptId ELSE SS.intCustomerStorageId END AS intReceiptId
-		FROM vyuSCTicketView ST
-		INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
-		INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-		INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
-		CROSS APPLY (
-			SELECT dblSettleUnits
-				, gr.dtmCreated
-				, cs.intCustomerStorageId
-				, cs.strStorageTicketNumber
-				, intBillId
-				, cs.dblOpenBalance
-			FROM tblGRSettleStorage gr
-			INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId
-			INNER JOIN vyuSCGetScaleDistribution sd ON  grt.intCustomerStorageId = sd.intCustomerStorageId
-			INNER JOIN tblGRCustomerStorage cs ON sd.intCustomerStorageId = cs.intCustomerStorageId
-			where sd.intInventoryReceiptItemId = RI.intInventoryReceiptItemId and intBillId IS NOT NULL
-		) SS
-		WHERE ST.strTicketStatus = 'C'
-			AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-			AND ST.intCommodityId = @intCommodityId
-			AND ST.intItemId = isnull(@intItemId, ST.intItemId)
-			AND ST.intProcessingLocationId = isnull(@intLocationId, ST.intProcessingLocationId)
-			AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-			AND RI.intOwnershipType = 1
-			AND ST.strDistributionOption = 'DP'
-			AND SS.dblOpenBalance <> 0
+		select
+				CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+				,S.strStorageTypeCode strDistributionOption
+				, 0  AS dblOutQty
+				,CASE WHEN SH.strType = 'Settlement' THEN
+					ABS(dblUnits)
+					WHEN  SH.strType = 'Reverse Settlement'  THEN
+					ABS(dblUnits) * -1
+					ELSE 0 END AS dblInQty
+				,S.intStorageScheduleTypeId
+				,SH.intSettleStorageId as intInventoryReceiptItemId
+				,SH.strSettleTicket as strReceiptNumber
+				,I.strItemNo
+
+			from 
+			tblGRCustomerStorage CS
+			INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+			INNER JOIN tblICItem I ON CS.intItemId = I.intItemId
+			WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
+									convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+								AND CS.intCommodityId= @intCommodityId
+								and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
+								AND  CS.intCompanyLocationId  IN (
+																			SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																			WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																			ELSE isnull(ysnLicensed, 0) END)
+				
+								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
+								AND SH.strType IN ('Settlement','Reverse Settlement')
+								AND S.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN NULL ELSE 1 END
+								AND SH.intBillId IS NULL
 	) t
 
 	--Get Balance Forward
