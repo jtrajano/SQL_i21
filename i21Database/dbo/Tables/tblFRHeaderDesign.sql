@@ -14,10 +14,12 @@
     [strWith]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strColumnName]     NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intColumnRefNo]    INT             NULL,
+	[intColumnRefNoTo]  INT             NULL,
     [intSort]           INT             NULL,
     [intConcurrencyId]  INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRHeaderDesign] PRIMARY KEY CLUSTERED ([intHeaderDetailId] ASC, [intHeaderId] ASC),
     CONSTRAINT [FK_tblFRHeaderDesign_tblFRHeader] FOREIGN KEY ([intHeaderId]) REFERENCES [dbo].[tblFRHeader] ([intHeaderId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblFRHeaderDesign_tblFRColumnDesign] FOREIGN KEY ([intColumnRefNo]) REFERENCES [dbo].[tblFRColumnDesign] ([intColumnDetailId])
+    CONSTRAINT [FK_tblFRHeaderDesign_tblFRColumnDesign] FOREIGN KEY ([intColumnRefNo]) REFERENCES [dbo].[tblFRColumnDesign] ([intColumnDetailId]),
+	CONSTRAINT [FK_tblFRHeaderDesign_tblFRColumnDesign] FOREIGN KEY ([intColumnRefNoTo]) REFERENCES [dbo].[tblFRColumnDesign] ([intColumnDetailId])
 );
 
