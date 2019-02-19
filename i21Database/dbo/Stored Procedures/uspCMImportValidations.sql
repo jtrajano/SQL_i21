@@ -15,6 +15,7 @@ CREATE PROCEDURE [dbo].[uspCMImportValidations]
 	,@Missing_Cash_Account_Group AS BIT OUTPUT
 	,@Future_Clear_Date_Found AS BIT OUTPUT
 	,@Unbalance_Found AS BIT OUTPUT
+	,@Duplicate_Bank_Name_Found AS BIT OUTPUT
 AS
 
 RAISERROR('Importing procedure not available.', 16, 1);
