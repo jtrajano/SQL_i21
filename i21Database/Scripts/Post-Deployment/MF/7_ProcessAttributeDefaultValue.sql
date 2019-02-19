@@ -2071,13 +2071,21 @@ BEGIN
 		1
 		,94
 		,1
-		,'False'
-		,'False'
+		,'6'
+		,'Lot'
 		,1
 		,GETDATE()
 		,1
 		,GETDATE()
 		)
+END
+ELSE
+BEGIN
+	UPDATE tblMFAttributeDefaultValue
+	SET strAttributeDefaultValue = '6', strAttributeDisplayValue = 'Lot'
+	WHERE intAttributeId = 94
+		AND intAttributeTypeId = 1
+		AND strAttributeDefaultValue = 'False'
 END
 GO
 

@@ -10,7 +10,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @intProductTypeId INT
 
-SELECT @intProductTypeId = MPA.strAttributeValue
+SELECT @intProductTypeId = (CASE WHEN ISNULL(MPA.strAttributeValue, '') = '' THEN '6' ELSE MPA.strAttributeValue END)
 FROM tblMFWorkOrder W
 JOIN tblMFManufacturingProcessAttribute MPA ON MPA.intManufacturingProcessId = W.intManufacturingProcessId
 	AND MPA.intAttributeId = 94 -- Process Attribute: Quality Line Chart By
