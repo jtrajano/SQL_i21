@@ -396,6 +396,10 @@ BEGIN TRY
 							EXEC dbo.uspGLBookEntries @GLEntries, 0 
 						END
 
+						UPDATE tblGLDetail SET ysnIsUnposted = 1
+						WHERE strTransactionType = 'Storage Settlement'
+							AND intTransactionId = @intSettleStorageId
+							AND strTransactionId = (SELECT strStorageTicket FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 					END				
 			END
 
