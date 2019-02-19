@@ -8,6 +8,14 @@
 
 AS
 
+
+	DECLARE @dtmOrigFromTransactionDate DATETIME
+
+	--Grab the original start date and assinged to a varialbe to be used laster on.
+	SET @dtmOrigFromTransactionDate = @dtmFromTransactionDate
+	--Set the Start date as the beggining date "1900"
+	SET @dtmFromTransactionDate =  '1900-01-01 00:00:00'
+
 BEGIN
 
 	DECLARE @tblResult TABLE (Id INT identity(1, 1)
@@ -23,7 +31,10 @@ BEGIN
 		, intReceiptId INT)
 
 	DECLARE @intCommodityUnitMeasureId INT= NULL
+			,@ysnIncludeDPPurchasesInCompanyTitled BIT
 	SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
+
+	SELECT TOP 1  @ysnIncludeDPPurchasesInCompanyTitled = ysnIncludeDPPurchasesInCompanyTitled FROM tblRKCompanyPreference
 
 	SELECT intCompanyLocationId
 	INTO #LicensedLocations
@@ -39,69 +50,8 @@ BEGIN
 		SET @intItemId = NULL
 	END
 
-	INSERT INTO @tblResult (dblUnpaidBalance
-		, InventoryBalanceCarryForward)
-	SELECT sum(dblUnpaidBalance)
-		, sum(InventoryBalanceCarryForward)
-	FROM (
-		SELECT sum(dblUnpaidIn) - sum(dblUnpaidIn - dblUnpaidOut) dblUnpaidBalance
-			, (SELECT sum(dblQty) BalanceForward
-				FROM tblICInventoryTransaction it
-				JOIN tblICItem i ON i.intItemId = it.intItemId AND it.intTransactionTypeId IN (4, 5, 10, 23,33, 44)
-				JOIN tblICItemLocation il ON it.intItemLocationId = il.intItemLocationId AND isnull(il.strDescription, '') <> 'In-Transit'
-					AND il.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-				WHERE intCommodityId = @intCommodityId AND convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110)
-					AND i.intCommodityId = @intCommodityId AND i.intItemId = isnull(@intItemId, i.intItemId) AND isnull(i.strType, '') <> 'Other Charge'
-					AND il.intLocationId = isnull(@intLocationId, il.intLocationId)) InventoryBalanceCarryForward
-		FROM (
-			SELECT dblInQty dblUnpaidIn
-				, dblOutQty dblUnpaidOut
-			FROM (
-				SELECT DISTINCT CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
-					, dblUnitCost dblUnitCost1
-					, ir.intInventoryReceiptItemId
-					, i.strItemNo
-					, isnull(bd.dblQtyReceived, 0) dblInQty
-					, (bd.dblQtyReceived/b.dblTotal) * (b.dblTotal - b.dblAmountDue) AS dblOutQty
-					, strDistributionOption
-					, b.strBillId AS strReceiptNumber
-					, b.intBillId AS intReceiptId
-				FROM tblAPBill b
-				JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
-				LEFT JOIN tblICInventoryReceiptItem ir ON bd.intInventoryReceiptItemId = ir.intInventoryReceiptItemId
-				JOIN tblICItem i ON i.intItemId = bd.intItemId
-				LEFT JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
-				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) < convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110)
-					AND i.intCommodityId = @intCommodityId AND i.intItemId = isnull(@intItemId, i.intItemId) AND isnull(strType, '') <> 'Other Charge'
-					AND b.intShipToId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-					AND b.intShipToId = isnull(@intLocationId, b.intShipToId)
-			) t
-		) t2
-		
-		UNION ALL SELECT sum(dblGrossUnits) AS dblUnpaidBalance
-			, NULL InventoryBalanceCarryForward
-		FROM tblICInventoryReceiptItem ir
-		JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ir.intInventoryReceiptId AND ysnPosted = 1
-		JOIN tblSMCompanyLocationSubLocation sl ON ir.intSubLocationId = sl.intCompanyLocationSubLocationId
-			AND sl.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-		JOIN tblICItem i ON i.intItemId = ir.intItemId
-		JOIN tblSCTicket st ON st.intTicketId = ir.intSourceId
-		JOIN tblGRStorageType s ON st.intStorageScheduleTypeId = s.intStorageScheduleTypeId AND isnull(ysnDPOwnedType, 0) = 1
-		WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) < convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110))
-			AND i.intItemId = isnull(@intItemId, i.intItemId) AND isnull(strType, '') <> 'Other Charge' AND i.intCommodityId = @intCommodityId
-			AND ir.intSubLocationId =  isnull(@intLocationId, ir.intSubLocationId)
-	) t3
 	
-	INSERT INTO @tblResult (strItemNo
-		, dtmDate
-		, dblUnpaidIn
-		, dblUnpaidOut
-		, dblUnpaidBalance
-		, dblPaidBalance
-		, strDistributionOption
-		, strReceiptNumber
-		, intReceiptId)
-	SELECT strItemNo
+	SELECT  strItemNo
 		, dtmDate
 		, dblUnpaidIn
 		, dblUnpaidOut
@@ -110,6 +60,7 @@ BEGIN
 		, strDistributionOption
 		, strReceiptNumber
 		, intReceiptId
+	INTO #tempResult
 	FROM (
 		--SELECT *
 		--	, round(dblInQty, 2) dblUnpaidIn
@@ -160,7 +111,7 @@ BEGIN
 			WHERE convert(DATETIME, CONVERT(VARCHAR(10), gr.dtmHistoryDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110)
 				AND i.intCommodityId = @intCommodityId AND i.intItemId = isnull(@intItemId, i.intItemId) AND isnull(i.strType, '') <> 'Other Charge'
 				AND b.intShipToId = isnull(@intLocationId, b.intShipToId)
-				AND gs.strStorageTypeCode NOT IN ('DP','CNT')
+				AND gs.strStorageTypeCode NOT IN ('CNT', CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 'DP' ELSE '' END)
 		) t
 	) t2
 	
@@ -182,7 +133,7 @@ BEGIN
 	WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110)) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110)) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110))
 		AND i.intCommodityId = @intCommodityId AND i.intItemId = isnull(@intItemId, i.intItemId) AND isnull(strType, '') <> 'Other Charge'
 		AND ir.intSubLocationId = isnull(@intLocationId, ir.intSubLocationId)
-		AND st.strDistributionOption NOT IN ('DP','CNT')
+		AND st.strDistributionOption NOT IN ('CNT', CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 'DP' ELSE '' END)
 	
 	--IS decressing the Unpaid Balance and Company Owned
 	UNION ALL SELECT strItemNo
@@ -252,7 +203,7 @@ BEGIN
 			AND ST.intProcessingLocationId = isnull(@intLocationId, ST.intProcessingLocationId)
 			AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
 			AND RI.intOwnershipType = 1
-			AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
+			AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 1 ELSE NULL END)--Contract, Spot and DP
 			AND RI.dblBillQty = 0
 			AND R.intSourceType = 1
 			AND RI.intInventoryReceiptItemId NOT IN (select intInventoryReceiptItemId from tblGRSettleStorage gr 
@@ -348,7 +299,7 @@ FROM (
 			)
 	AND RI.intOwnershipType = 1
 	AND R.intSourceType = 1
-	AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
+	AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 1 ELSE NULL END)--Contract, Spot and DP
 	--AND RI.dblBillQty = 0
 	
 
@@ -399,7 +350,7 @@ FROM (
     AND RI.intOwnershipType = 1
     AND R.intSourceType = 1
     AND Bill.ysnPosted = 1
-    AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
+    AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 1 ELSE NULL END)--Contract, Spot and DP
     AND RI.dblBillQty <> 0
     
 )t
@@ -571,6 +522,37 @@ AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[i
 			AND SS.dblOpenBalance <> 0
 	) t
 
+	--Get Balance Forward
+	INSERT INTO @tblResult (
+		  dblUnpaidBalance
+		, InventoryBalanceCarryForward
+	)
+	select sum(dblUnpaidBalance), sum(dblPaidBalance) from #tempResult WHERE dtmDate < @dtmOrigFromTransactionDate
+
+	--Filter it by orignal filter date
+	INSERT INTO @tblResult (strItemNo
+		, dtmDate
+		, strDistributionOption
+		, dblUnpaidIn
+		, dblUnpaidOut
+		, dblUnpaidBalance
+		, dblPaidBalance
+		, strReceiptNumber
+		, intReceiptId)
+	SELECT strItemNo
+		, ISNULL(dtmDate,'') dtmDate
+		, strDistributionOption [strDistribution]
+		, dblUnpaidIn [dblUnpaidIN]
+		, dblUnpaidOut [dblUnpaidOut]
+		, dblUnpaidBalance [dblUnpaidBalance]
+		, dblPaidBalance
+		, strReceiptNumber
+		, intReceiptId
+	FROM #tempResult T1
+	WHERE dtmDate between @dtmOrigFromTransactionDate and @dtmToTransactionDate
+
+
+	--Return
 	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum
 		, ISNULL(dtmDate,'') dtmDate
 		, strDistributionOption [strDistribution]

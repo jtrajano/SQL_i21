@@ -343,8 +343,8 @@ SELECT @strPermtableListBF= CASE WHEN LEN(@strPermtableListBF) = 0 THEN '' ELSE 
 IF LEN(@strPermtableListBF) <> 0 
 BEGIN
 	set @SQLBalanceForward='
-	INSERT INTO tblRKDailyPositionForCustomer ('+@strPermtableListBF+')
-	SELECT  '+@strInsertListBF+'
+	INSERT INTO tblRKDailyPositionForCustomer ([dtmDate],'+@strPermtableListBF+')
+	SELECT  ''1900-01-01'','+@strInsertListBF+'
 	FROM ##tblRKDailyPositionForCustomer1 t 
 	WHERE dtmDate < ''' + CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) + '''
 	GROUP BY ' + @strInsertListBFGroupBy + '
