@@ -22,7 +22,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dblDiscount				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscount,0)  ELSE  ISNULL(I.dblDiscount,0) * -1 END
 	 , dblDiscountAvailable		= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscountAvailable,0)  ELSE  ISNULL(I.dblDiscountAvailable,0) * -1 END
 	 , dblInterest				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblInterest,0)  ELSE  ISNULL(I.dblInterest,0) * -1 END
-	 , dblAmountDue				= P.dblAmountDue
+	 , dblAmountDue				= I.dblAmountDue
 	 , dblPayment				= CASE WHEN I.strTransactionType = 'Cash' THEN I.dblPayment ELSE P.dblPayment END 
 	 , intPaymentMethodId		= CASE WHEN I.strTransactionType = 'Cash' THEN I.intPaymentMethodId ELSE P.intPaymentMethodId END
 	 , strPaymentMethod			= PM.strPaymentMethod
