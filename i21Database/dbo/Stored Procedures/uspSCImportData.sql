@@ -1514,8 +1514,11 @@ BEGIN TRY
 					,[intConcurrencyId]				= 1
 				FROM @temp_xml_splitdstable SCDS
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
-				LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE DS.strDeliverySheetNumber IS NULL
+				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+				OUTER APPLY(
+					SELECT intDeliverySheetSplitId FROM tblSCDeliverySheetSplit WHERE intDeliverySheetId = DS.intDeliverySheetId
+				) DSS
+				WHERE DSS.intDeliverySheetSplitId IS NULL
 			END
 		END
 END TRY
