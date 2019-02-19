@@ -870,7 +870,7 @@ BEGIN
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
-		[intAccountId]					=	CASE WHEN B.intInventoryReceiptItemId IS NOT NULL OR B.intInventoryReceiptChargeId IS NOT NULL
+		[intAccountId]					=	CASE WHEN ((B.intInventoryReceiptItemId IS NOT NULL AND receiptItem.intOwnershipType <> 2) OR B.intInventoryReceiptChargeId IS NOT NULL)
 												 THEN  dbo.[fnGetItemGLAccount](F.intItemId, loc.intItemLocationId, 'AP Clearing')
 												 ELSE D.intAccountId
 											END, --AP-3227 always use the AP Clearing Account,
@@ -959,6 +959,8 @@ BEGIN
 				ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
 			LEFT JOIN tblICInventoryReceipt receipts
 				ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
+			LEFT JOIN tblICInventoryReceiptItem receiptItem
+				ON receiptItem.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 				ON G.intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId
 			LEFT JOIN tblICItem B2
