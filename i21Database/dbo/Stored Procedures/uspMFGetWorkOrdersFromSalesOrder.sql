@@ -82,7 +82,7 @@ End
 --Existing WOs
 If Exists(Select 1 From tblMFWorkOrder Where intSalesOrderLineItemId=@intSalesOrderDetailId And intItemId=@intItemId And intManufacturingProcessId=@intManufacturingProcessId)
 	Begin
-		Select w.intWorkOrderId,w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate AS dtmDueDate,mc.strCellName,br.strDemandNo,um.strUnitMeasure AS strUOM,w.dtmPlannedDate,w.intPlannedShiftId,s.strShiftName AS strPlannedShiftName,mp.intAttributeTypeId
+		Select CONVERT(INT, ROW_NUMBER() OVER(ORDER BY intWorkOrderId ASC)) AS intRowNo,w.intWorkOrderId,w.strWorkOrderNo,w.dblQuantity,w.dtmExpectedDate AS dtmDueDate,mc.strCellName,br.strDemandNo,um.strUnitMeasure AS strUOM,w.dtmPlannedDate,w.intPlannedShiftId,s.strShiftName AS strPlannedShiftName,mp.intAttributeTypeId
 		From tblMFWorkOrder w Join tblMFManufacturingCell mc on w.intManufacturingCellId=mc.intManufacturingCellId
 		Left Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementId
 		Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
@@ -130,8 +130,8 @@ Begin --New WOs
 					values(0,'',@dblQuantity,@dtmOrderDate,@intCellId,@strCellName)
 			End
 
-			Select *,@intMachineId AS intMachineId,@strMachineName AS strMachineName,ISNULL(@dblMachineCapacity,0.0) AS dblMachineCapacity,@strUOM AS strUOM From @tblWO
+			Select CONVERT(INT, ROW_NUMBER() OVER(ORDER BY intWorkOrderId ASC)) AS intRowNo,*,@intMachineId AS intMachineId,@strMachineName AS strMachineName,ISNULL(@dblMachineCapacity,0.0) AS dblMachineCapacity,@strUOM AS strUOM From @tblWO
 		End
 	Else
-		Select 0 AS intWorkOrderId,'' AS strWorkOrderNo,@dblQuantity AS dblQuantity,@dtmOrderDate AS dtmDueDate,@intCellId AS intCellId,@strCellName AS strCellName,@strUOM AS strUOM,0 AS intMachineId,0.0 AS dblMachineCapacity
+		Select CONVERT(INT, ROW_NUMBER() OVER(ORDER BY @dtmOrderDate ASC)) AS intRowNo,0 AS intWorkOrderId,'' AS strWorkOrderNo,@dblQuantity AS dblQuantity,@dtmOrderDate AS dtmDueDate,@intCellId AS intCellId,@strCellName AS strCellName,@strUOM AS strUOM,0 AS intMachineId,0.0 AS dblMachineCapacity
 End
