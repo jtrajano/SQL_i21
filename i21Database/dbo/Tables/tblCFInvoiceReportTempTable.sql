@@ -93,7 +93,8 @@
     [strDriverDescription]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intDriverPinId]              INT             NULL,
     [ysnSummaryByDriverPin]       BIT             NULL,
-    [strDetailDisplay]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
+    [strDetailDisplay]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[ysnMPGCalculation]			  BIT             NULL
 );
 
 

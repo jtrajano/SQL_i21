@@ -250,7 +250,8 @@ BEGIN TRY
 	,ysnPrintTimeOnReports
 	,ysnInvalid
 	,ysnPosted
-	,ysnIncludeInQuantityDiscount
+	,ysnIncludeInQuantityDiscount	
+	,ysnMPGCalculation
 	,ysnShowOnCFInvoice
 	,strDiscountSchedule
 	,ysnPostForeignSales
@@ -267,7 +268,7 @@ BEGIN TRY
 	,ysnSummaryByDriverPin	
 	,strDetailDisplay
 	,strDetailDisplayValue
-	,strDetailDisplayLabel		
+	,strDetailDisplayLabel	
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -498,6 +499,7 @@ BEGIN TRY
 	,ysnInvalid
 	,ysnPosted
 	,ysnIncludeInQuantityDiscount
+	,cfInvRpt.ysnMPGCalculation
 	,cfInvRptDcnt.ysnShowOnCFInvoice
 	,cfInvRptDcnt.strDiscountSchedule
 	,cfInvRpt.ysnPostForeignSales

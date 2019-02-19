@@ -148,6 +148,7 @@
     [intDriverPinId]               INT             NULL,
     [ysnSummaryByDriverPin]        BIT             NULL,
     [strDetailDisplay]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [ysnMPGCalculation]		       BIT             NULL,
     CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC) WITH (FILLFACTOR = 70)
 );
 
