@@ -703,7 +703,7 @@ SELECT * FROM (
 			,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 			,[intShipmentId]							=	0     
 			,[intShipmentContractQtyId]					=	NULL
-			,[intUnitMeasureId]							=	CC.intUnitMeasureId
+			,[intUnitMeasureId]							=	CC.intItemUOMId
 			,[strUOM]									=	UOM.strUnitMeasure
 			,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
 			,[intCostUOMId]								=	CC.intItemUOMId
@@ -830,7 +830,7 @@ SELECT * FROM (
 			,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 			,[intShipmentId]							=	0     
 			,[intShipmentContractQtyId]					=	NULL
-			,[intUnitMeasureId]							=	CC.intUnitMeasureId
+			,[intUnitMeasureId]							=	CC.intItemUOMId
 			,[strUOM]									=	UOM.strUnitMeasure
 			,[intWeightUOMId]							=	NULL--CD.intNetWeightUOMId
 			,[intCostUOMId]								=	CC.intItemUOMId
