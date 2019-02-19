@@ -154,9 +154,9 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 
 		--UPDATE INVOICE DETAIL QTY SHIPPED = AVAILABLE CONTRACT QTY
 		UPDATE ID
-		SET dblQtyShipped	= ISI.dblQuantity
-		  , dblUnitQuantity	= ISI.dblQuantity
-		  , @dblQtyOverAged	= @dblNetWeight - ISI.dblQuantity
+		SET dblQtyShipped	= ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
+		  , dblUnitQuantity	= ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
+		  , @dblQtyOverAged	= @dblNetWeight - ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
 		FROM tblARInvoiceDetail ID
 		INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
 		WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
