@@ -140,7 +140,8 @@ LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
 LEFT JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
 LEFT JOIN tblICCommodity c ON c.intCommodityId = ch.intCommodityId
-LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
+LEFT JOIN tblICItemLocation itm on itm.intItemId = i.intItemId
+LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = itm.intLocationId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 WHERE (iis.dblUnitOnHand > 0 OR iis.dblUnitStorage > 0)
 	AND i.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN i.strLotTracking ELSE 'No' END)
