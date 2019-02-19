@@ -69,7 +69,7 @@ FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
-  AND dblQtyShipped > dblQtyOrdered
+  --AND dblQtyShipped > ID.dblQtyOrdered
 
 INSERT INTO @tblInvoiceIds (intHeaderId)
 SELECT DISTINCT intInvoiceId FROM #INVOICEDETAILS
