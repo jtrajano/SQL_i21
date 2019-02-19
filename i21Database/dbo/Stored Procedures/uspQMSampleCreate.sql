@@ -346,6 +346,7 @@ BEGIN TRY
 		,intInventoryReceiptId
 		,intInventoryShipmentId
 		,intWorkOrderId
+		,strChildLotNumber
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -408,6 +409,7 @@ BEGIN TRY
 		,@intInventoryReceiptId
 		,@intInventoryShipmentId
 		,@intWorkOrderId
+		,strChildLotNumber
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -460,6 +462,7 @@ BEGIN TRY
 			,strComment NVARCHAR(MAX)
 			,intItemBundleId INT
 			,intLocationId INT
+			,strChildLotNumber NVARCHAR(50)
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT

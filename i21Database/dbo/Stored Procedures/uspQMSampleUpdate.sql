@@ -177,6 +177,7 @@ BEGIN TRY
 		,intWorkOrderId = x.intWorkOrderId
 		,intInventoryReceiptId = x.intInventoryReceiptId
 		,intInventoryShipmentId = x.intInventoryShipmentId
+		,strChildLotNumber = x.strChildLotNumber
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -229,6 +230,7 @@ BEGIN TRY
 			,intWorkOrderId INT
 			,intInventoryReceiptId INT
 			,intInventoryShipmentId INT
+			,strChildLotNumber NVARCHAR(50)
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)
