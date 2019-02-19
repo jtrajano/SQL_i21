@@ -39,10 +39,29 @@ BEGIN TRY
 	-------------------- End Validate if has record to Process ---------------------------
 	--------------------------------------------------------------------------------------
 
-	SELECT *
+	--SELECT *
+	--INTO #ImportCounts
+	--FROM vyuSTGetHandheldScannerImportCount ImportCount
+	--WHERE ImportCount.intHandheldScannerId = @HandheldScannerId
+
+	SELECT intHandheldScannerId
+		   , intStoreId
+		   , intStoreNo
+		   , intCompanyLocationId 
+		   , intUnitMeasureId
+		   , strUPCNo
+		   , intItemId
+		   , strItemNo
+		   , strDescription
+		   , intItemUOMId
+		   , strUnitMeasure
+		   , intItemLocationId
+		   , SUM(dblComputedCount) AS dblComputedCount
 	INTO #ImportCounts
-	FROM vyuSTGetHandheldScannerImportCount ImportCount
-	WHERE ImportCount.intHandheldScannerId = @HandheldScannerId
+	FROM vyuSTGetHandheldScannerImportCountWithRecipe
+	WHERE intHandheldScannerId = @HandheldScannerId
+	GROUP BY intHandheldScannerId, intStoreId, intStoreNo, intCompanyLocationId, intUnitMeasureId, strUPCNo, intItemId, strItemNo, strDescription, intItemUOMId, strUnitMeasure, intItemLocationId
+
 
 	DECLARE @NewId INT,
 		--@CountDate DATETIME = @dtmCountDate,
@@ -56,7 +75,7 @@ BEGIN TRY
 		,dblPhysicalCount)
 	SELECT intItemId
 		, intItemUOMId
-		, dblCountQty
+		, dblComputedCount
 	FROM #ImportCounts
 
 	SET @strStatusMsg = ''
@@ -137,26 +156,33 @@ BEGIN TRY
 					, @dblCountQty DECIMAL(18, 6)
 					, @intItemId INT
 					, @intItemLocationId INT
+					, @intCompanyLocationId INT
 					, @intItemUOMId INT
 
 			-- Loop here
 			WHILE (SELECT COUNT(*) FROM #ImportCounts) > 0
 				BEGIN
-					-- Get Primary Id
+					-- Get values
 					SELECT TOP 1 
-						@intPrimaryCountId = intHandheldScannerImportCountId
-						, @dblCountQty = dblCountQty
-						, @intItemId = intItemId
-						, @intItemLocationId = intItemLocationId
-						, @intItemUOMId = intItemUOMId
-					FROM #ImportCounts
+						@intItemId = Imports.intItemId
+						, @intItemUOMId = Imports.intItemUOMId
+						, @intItemLocationId = IL.intItemLocationId
+						, @intCompanyLocationId = Store.intCompanyLocationId
+						, @dblCountQty = Imports.dblComputedCount
+					FROM #ImportCounts Imports
+					INNER JOIN tblSTStore Store
+						ON Imports.intStoreId = Store.intStoreId
+					INNER JOIN tblICItemLocation IL
+						ON Imports.intItemId = IL.intItemId
+						AND Store.intCompanyLocationId = IL.intLocationId
 
-					-- Update
+
+					-- UPDATE Item
 					BEGIN TRY
 						EXEC uspICUpdateInventoryPhysicalCount
 							-- Count No and Physical Count are required
-							@strCountNo = @strCountNo,
-							@dblPhysicalCount = @dblCountQty,
+							@strCountNo			= @strCountNo,
+							@dblPhysicalCount	= @dblCountQty,
 
 							-- ========================================
 							--    Required for a lotted item
@@ -165,20 +191,20 @@ BEGIN TRY
 							@intLotId = NULL,
 
 							-- This is also required
-							@intUserSecurityId = @UserId,
+							@intUserSecurityId	= @UserId,
 
 							-- ========================================
 							--    Parameters for a non-lotted item
 							-- ========================================
 							-- Required for a non-lotted item
-							@intItemId = @intItemId,
-							@intItemLocationId = @intItemLocationId,
+							@intItemId			= @intItemId,
+							@intItemLocationId	= @intItemLocationId,
 
 							-- Set this to change the Count UOM 
-							@intItemUOMId = @intItemUOMId,
+							@intItemUOMId		= @intItemUOMId,
 							-- Set these to change the storage unit/loc
 							@intStorageLocationId = NULL,
-							@intStorageUnitId = NULL
+							@intStorageUnitId	= NULL
 					END TRY
 					BEGIN CATCH
 						-- Flag Success
@@ -189,9 +215,12 @@ BEGIN TRY
 						GOTO ExitWithRollback
 					END CATCH
 
+
 					-- Remove record after use
 					DELETE FROM #ImportCounts
-					WHERE intHandheldScannerImportCountId = @intPrimaryCountId
+					WHERE intItemId				= @intItemId
+						AND intItemUOMId		= @intItemUOMId
+						AND intItemLocationId	= @intItemLocationId
 				END
 
 			-- ======================================================================================================================

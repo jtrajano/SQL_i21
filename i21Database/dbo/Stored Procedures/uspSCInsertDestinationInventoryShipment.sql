@@ -128,7 +128,7 @@ BEGIN TRY
 	SELECT	
 		[intItemId]						= SC.intItemId 
 		,[intItemLocationId]			= ICIL.intItemLocationId
-		,[dblDestinationQty]			= SC.dblQty
+		,[dblDestinationQty]			= CASE WHEN SCT.dblNetUnits > @dblQuantity THEN CASE WHEN SCT.dblNetUnits > (CD.dblScheduleQty + CD.dblAvailableQty) THEN CD.dblOriginalQty ELSE SC.dblQty END ELSE SC.dblQty END
 		,[intSourceId]					= 1
 		,[intInventoryShipmentId]		= SC.intTransactionHeaderId
 		,[intInventoryShipmentItemId]	= SC.intTransactionDetailId
@@ -136,6 +136,8 @@ BEGIN TRY
 		,[dblDestinationNet]			= SC.dblGross - SC.dblTare
 	FROM @scaleStaging SC 
 	INNER JOIN tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intItemLocationId 
+	INNER JOIN tblSCTicket SCT ON SC.intTicketId = SCT.intTicketId
+	LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = SC.intContractDetailId
 	WHERE SC.intTicketId = @intTicketId
 
 	INSERT INTO @ShipmentCharges
