@@ -406,6 +406,7 @@ BEGIN TRY
 		,strUserId
 		,strInvoiceNumberHistory
 		,dtmDueDateBaseOnTermsHistory
+		,ysnMPGCalculation
 	)
 	SELECT 
 		intCustomerGroupId
@@ -552,6 +553,7 @@ BEGIN TRY
 		,strUserId
 		,strTempInvoiceReportNumber
 		,dbo.fnGetDueDateBasedOnTerm(dtmInvoiceDate, intTermID)
+		,ysnMPGCalculation
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username

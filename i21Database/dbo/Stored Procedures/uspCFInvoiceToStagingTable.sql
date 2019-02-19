@@ -250,7 +250,8 @@ BEGIN TRY
 	,ysnPrintTimeOnReports
 	,ysnInvalid
 	,ysnPosted
-	,ysnIncludeInQuantityDiscount
+	,ysnIncludeInQuantityDiscount	
+	,ysnMPGCalculation
 	,ysnShowOnCFInvoice
 	,strDiscountSchedule
 	,ysnPostForeignSales
@@ -490,6 +491,7 @@ BEGIN TRY
 	,ysnInvalid
 	,ysnPosted
 	,ysnIncludeInQuantityDiscount
+	,cfInvRpt.ysnMPGCalculation
 	,cfInvRptDcnt.ysnShowOnCFInvoice
 	,cfInvRptDcnt.strDiscountSchedule
 	,cfInvRpt.ysnPostForeignSales

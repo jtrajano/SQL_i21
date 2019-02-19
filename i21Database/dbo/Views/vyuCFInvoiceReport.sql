@@ -99,6 +99,7 @@ SELECT
 ,cfSite.strSiteCity
 ----------------------------------------------
 ,cfItem.strProductNumber
+,cfItem.ysnMPGCalculation
 ----------------------------------------------
 ,icItem.strItemNo
 ,icItem.strShortName AS strDescription
