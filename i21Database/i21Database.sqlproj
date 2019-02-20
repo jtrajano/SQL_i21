@@ -7358,6 +7358,7 @@
     <Build Include="dbo\Views\vyuRKGetOTC.sql" />
     <Build Include="dbo\Views\vyuRKGetStock.sql" />
     <Build Include="dbo\Views\vyuARCustomerAddressLabelReport.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
