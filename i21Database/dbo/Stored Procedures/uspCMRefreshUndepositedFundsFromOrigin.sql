@@ -68,6 +68,10 @@ SELECT
 		,dtmCreated = GETDATE()
 		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = GETDATE()
+		,strPaymentSource = '' COLLATE Latin1_General_CI_AS  
+		,strEODNumber = ''  COLLATE Latin1_General_CI_AS  
+		,strEODDrawer = '' COLLATE Latin1_General_CI_AS   
+		,ysnEODCompleted = NULL
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
 WHERE	b.intBankAccountId = @intBankAccountId
@@ -96,7 +100,11 @@ UNION SELECT DISTINCT
 	intCreatedUserId = intEntityEnteredById,
 	dtmCreated = GETDATE(),
 	intLastModifiedUserId = intEntityEnteredById,
-	dtmLastModified = GETDATE()
+	dtmLastModified = GETDATE(),
+	strPaymentSource,			
+	strEODNumber,
+	strEODDrawer = strDrawerName,		
+    ysnEODCompleted = ysnCompleted 		
 FROM vyuARUndepositedPayment v LEFT JOIN tblCMBankAccount b
 			ON b.intBankAccountId = v.intBankAccountId --OR ISNULL(v.intBankAccountId,0) = 0 --Include payments without bank account
 WHERE	v.intBankAccountId = @intBankAccountId
