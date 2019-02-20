@@ -695,9 +695,9 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		)
 		AND (
-			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0))
-			- dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0))
-		) <> 0 
+			ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblCost, 0)),2)
+			- ROUND(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReturnUnitCostInFunctionalCurrency, 0)), 2)
+		) <> 0
 
 
 -- Inventory 
