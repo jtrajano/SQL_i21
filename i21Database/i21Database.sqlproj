@@ -7357,7 +7357,6 @@
     <Build Include="dbo\Views\vyuRKGetNonOTC.sql" />
     <Build Include="dbo\Views\vyuRKGetOTC.sql" />
     <Build Include="dbo\Views\vyuRKGetStock.sql" />
-    <Build Include="dbo\Views\vyuARCustomerAddressLabelReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
