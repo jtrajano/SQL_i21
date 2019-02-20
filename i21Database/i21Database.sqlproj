@@ -7273,6 +7273,7 @@
     <Build Include="dbo\Views\vyuSTItemRecipeAndStockQty.sql" />
     <Build Include="dbo\Views\vyuSTGetHandheldScannerImportCountWithRecipe.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutHeaderSearch.sql" />
+    <Build Include="dbo\Views\vyuSTCigaretteRebateProgramSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
