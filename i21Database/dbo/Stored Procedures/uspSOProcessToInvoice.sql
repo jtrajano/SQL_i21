@@ -32,6 +32,13 @@ IF EXISTS(SELECT NULL FROM vyuARForApprovalTransction WHERE strScreenName = 'Sal
 		RETURN;
 	END
 
+--VALIDATE IF SO HAS BUNDLE-OPTION ITEM
+IF EXISTS(SELECT NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId WHERE intSalesOrderId = @SalesOrderId AND I.strType = 'Bundle' AND I.strBundleType = 'Option')
+	BEGIN
+		RAISERROR('Option bundle cannot be processed directly to invoice/shipment', 16, 1)
+		RETURN;
+	END
+
 --VALIDATE IF HAS NON-STOCK ITEMS
 IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId AND SO.intSalesOrderId = @SalesOrderId AND SI.dblQtyRemaining > 0)
 	BEGIN
