@@ -155,10 +155,11 @@ FROM (
 			, r.intInventoryReceiptId
 		FROM vyuSCTicketView st
 		JOIN tblICItem i on i.intItemId=st.intItemId
-		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																											WHERE isnull(ysnLicensed, 0) = CASE WHEN 'All storage' = 'licensed storage' THEN 1 
-																											WHEN 'All storage' = 'Non-licensed storage' THEN 0 
-																											ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId AND st.intProcessingLocationId IN (
+													SELECT intCompanyLocationId FROM tblSMCompanyLocation
+													WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+													WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+													ELSE isnull(ysnLicensed, 0) END)
 		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
 		join tblGRStorageHistory gsh on gsh.intInventoryReceiptId = r.intInventoryReceiptId
 		join tblGRCustomerStorage gh on gh.intCustomerStorageId = gsh.intCustomerStorageId
@@ -230,6 +231,10 @@ FROM (
 			AND convert(DATETIME, CONVERT(VARCHAR(10), IA.dtmPostedDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
 			AND C.intCommodityId = @intCommodityId 
 			AND IAD.intItemId = isnull(@intItemId, IAD.intItemId)
+			AND IA.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																						ELSE isnull(ysnLicensed, 0) END)
 	) a
 	
 	UNION SELECT dtmDate
@@ -466,7 +471,7 @@ FROM(
 				)
 	)a
 
-	UNION ALL --Consume, Produce and Outbound Shimpment
+	UNION ALL --Consume, Produce and Outbound Shipment
 	SELECT dtmDate
 		, '' strDistributionOption
 		, '' strShipDistributionOption
@@ -515,6 +520,54 @@ FROM(
 			and convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		group by dtmDate, intTransactionTypeId,strTransactionId,ium.intCommodityUnitMeasureId,intTransactionId
 	) a
+
+
+	UNION ALL --Inventory Transfer
+	SELECT dtmDate
+		, '' strDistributionOption
+		, '' strShipDistributionOption
+		, '' as strAdjDistributionOption
+		, '' as strCountDistributionOption
+		, tranShipmentNumber
+		, tranShipQty
+		, tranReceiptNumber
+		, tranRecQty
+		, '' tranAdjNumber
+		, 0.0 dblAdjustmentQty
+		, '' tranCountNumber
+		, 0.0 dblCountQty
+		, '' tranInvoiceNumber
+		, 0.0 dblInvoiceQty
+		, intTransactionId intInventoryReceiptId
+		, intTransactionId intInventoryShipmentId
+		, null intInventoryAdjustmentId
+		, null intInventoryCountId
+		, null intInvoiceId
+		, null intDeliverySheetId
+		, '' AS deliverySheetNumber
+		, null intTicketId
+		, '' AS ticketNumber
+	FROM (
+		SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
+			, CASE WHEN it.dblQty < 0 THEN it.strTransactionId ELSE '' END tranShipmentNumber
+			, CASE WHEN it.dblQty < 0  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ABS(it.dblQty),0)) ELSE  0.0 END tranShipQty
+			, CASE WHEN it.dblQty > 0  THEN it.strTransactionId ELSE '' END tranReceiptNumber
+			, CASE WHEN it.dblQty > 0  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(it.dblQty,0)) ELSE 0.0 END tranRecQty
+			, it.intTransactionId
+		FROM tblICInventoryTransaction it 
+		JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(12)
+		join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
+		JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																										WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																										ELSE isnull(ysnLicensed, 0) END)
+			and isnull(il.strDescription,'') <> 'In-Transit'
+		WHERE i.intCommodityId=@intCommodityId  
+		and i.intItemId = isnull(@intItemId, i.intItemId)
+		and il.intLocationId = isnull(@intLocationId, il.intLocationId)
+		and convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+	) t
 
 	UNION ALL --Storage Transfer
 	SELECT dtmDate
