@@ -60,10 +60,10 @@ SELECT
 		on b.intEntityId = a.[intEntityId]
 	join tblEMEntityType etype
 		on etype.intEntityId = b.intEntityId and strType = 'Vendor'
-	join [tblEMEntityToContact] c
+	left join [tblEMEntityToContact] c
 		on c.intEntityId = b.intEntityId
 			and c.ysnDefaultContact = 1
-	join tblEMEntity d
+	left join tblEMEntity d
 		on c.intEntityContactId = d.intEntityId
 	join [tblEMEntityLocation] e
 		on e.intEntityId = a.[intEntityId]
