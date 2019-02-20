@@ -18,6 +18,14 @@
 			and c.intTicketId = b.intTicketId
 			and d.intTicketStatusId = c.intTicketStatusId
 			and e.intMilestoneId = c.intMilestoneId
+		),
+		estimatedHours as (
+			select a.intMilestoneId, d.intProjectId, dblEstimatedHours = sum(isnull(c.dblEstimatedHours, 0.00))
+			from tblHDMilestone a, tblHDTicket b, tblHDTicketHoursWorked c, tblHDProjectTask d
+			where b.intMilestoneId = a.intMilestoneId
+			and c.intTicketId = b.intTicketId
+			and d.intTicketId = b.intTicketId
+			group by a.intMilestoneId,d.intProjectId
 		)
 
 		select
@@ -30,9 +38,10 @@
 			,intCompletedTickets = (select count(*) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority and e.strStatus = 'Closed')
 			,intTotalTickets = (select count(*) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority)
 			,dblPercentComplete = ((select convert(numeric(18,6),count(*)) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority and e.strStatus = 'Closed')/(select convert(numeric(18,6),count(*)) from ticketStatus e where e.intProjectId = d.intProjectId and e.intPriority = a.intPriority)) * 100.00
-			,dblQuotedHours = isnull(sum(b.dblQuotedHours),0.00)
+			--,dblQuotedHours = isnull(sum(b.dblQuotedHours),0.00)
+			,dblQuotedHours = isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
 			,dblActualHours = isnull(sum(b.dblActualHours),0.00)
-			,dblOverShort = isnull(sum(b.dblActualHours),0.00) - isnull(sum(b.dblQuotedHours),0.00)
+			,dblOverShort = isnull(sum(b.dblActualHours),0.00) - isnull((select estimatedHours.dblEstimatedHours from estimatedHours where estimatedHours.intMilestoneId = a.intMilestoneId and estimatedHours.intProjectId = d.intProjectId), 0.00)
 		from
 			tblHDMilestone a
 			join tblHDTicket b on b.intMilestoneId = a.intMilestoneId
