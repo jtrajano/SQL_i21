@@ -202,10 +202,16 @@ BEGIN
 			CROSS APPLY (
 				SELECT	DISTINCT 
 						adjust.strTransactionId
-				FROM	@ItemsToAdjust adjust
-				WHERE	adjust.strTransactionId = t.strTransactionId
+						,t2.strBatchId 
+				FROM	@ItemsToAdjust adjust INNER JOIN tblICInventoryTransaction t2
+							ON adjust.strTransactionId = t2.strTransactionId
+						INNER JOIN dbo.tblICInventoryTransactionType y
+							ON t2.intTransactionTypeId = y.intTransactionTypeId
+				WHERE	y.strName = 'Cost Adjustment'
+						AND ISNULL(t2.ysnIsUnposted, 0) = 0 
 			) m
-	WHERE	ISNULL(t.ysnIsUnposted, 0) = 0
+	WHERE	t.strTransactionId = m.strTransactionId
+			AND t.strBatchId = m.strBatchId 
 
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for the LOT transactions 
@@ -216,10 +222,16 @@ BEGIN
 			CROSS APPLY (
 				SELECT	DISTINCT 
 						adjust.strTransactionId
-				FROM	@ItemsToAdjust adjust
-				WHERE	adjust.strTransactionId = t.strTransactionId
+						,t2.strBatchId 
+				FROM	@ItemsToAdjust adjust INNER JOIN tblICInventoryLotTransaction t2
+							ON adjust.strTransactionId = t2.strTransactionId
+						INNER JOIN dbo.tblICInventoryTransactionType y
+							ON t2.intTransactionTypeId = y.intTransactionTypeId
+				WHERE	y.strName = 'Cost Adjustment'
+						AND ISNULL(t2.ysnIsUnposted, 0) = 0 
 			) m
-	WHERE	ISNULL(t.ysnIsUnposted, 0) = 0
+	WHERE	t.strTransactionId = m.strTransactionId
+			AND t.strBatchId = m.strBatchId 
 END
 
 ESCALATE_COST_ADJUSTMENT:
@@ -466,7 +478,7 @@ BEGIN
 	END CATCH
 
 	-- Lot Costing
-	IF (@CostingMethod = @LOTCOST) AND (@strActualCostId IS NULL)
+	IF (@CostingMethod = @LOTCOST) AND (@intLotId IS NOT NULL)
 	BEGIN TRY
 		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveLot 
 			@dtmDate 
@@ -510,7 +522,7 @@ BEGIN
 	END CATCH
 
 	-- Actual Costing
-	IF (ISNULL(@strActualCostId, '') <> '')
+	IF (ISNULL(@strActualCostId, '') <> '' AND @intLotId IS NULL)
 	BEGIN TRY
 		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveActual
 			@dtmDate

@@ -6437,6 +6437,7 @@
     <Build Include="dbo\Views\vyuAPRptVoucherCommonData.sql" />
     <Build Include="dbo\Views\vyuAPRptWC.sql" />
     <Build Include="dbo\Stored Procedures\uspRKUpdateMismatchedMonth.sql" />
+    <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
