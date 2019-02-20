@@ -743,8 +743,11 @@ SELECT * FROM (
 			,[strTaxGroup]								=	NULL
 		FROM		vyuCTContractCostView		CC
 		JOIN		tblCTContractDetail			CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
-														AND	CC.ysnAccrue		=	1
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+													AND	CC.ysnAccrue = CASE 
+																			WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN 1 
+																			ELSE CC.ysnAccrue 
+																	   END
 		LEFT JOIN   tblSMTerm					TM	ON  TM.intTermID			=	CH.intTermId
 		LEFT JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
 		LEFT JOIN	tblSMCurrency				SubCur ON CU.intMainCurrencyId	=	SubCur.intCurrencyID
