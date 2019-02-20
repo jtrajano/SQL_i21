@@ -23,7 +23,7 @@
 	[dblTotalBillableAmount] [numeric] (18,6)  not null,
 	[intCallsRated] [int]  null,
 	[dblAverageRating] [numeric] (18,6)  null,
-	[intDaysOutstanding] [int]  null,
+	[intDaysOutstanding] NUMERIC(18, 6)  null,
 	[dtmCreatedDate] [datetime]  not null default getdate(),
 	[intConcurrencyId] [int]  not null default 1,
 	CONSTRAINT [PK_tblHDCallDetailNested_intCallDetailNestedId] PRIMARY KEY CLUSTERED ([intCallDetailNestedId] ASC)
