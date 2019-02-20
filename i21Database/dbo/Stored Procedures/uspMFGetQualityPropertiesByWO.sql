@@ -64,7 +64,7 @@ BEGIN
 	JOIN tblMFWorkOrderProducedLot WPL ON WPL.intLotId = TR.intProductValueId
 		AND TR.intProductTypeId = 6
 	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-	WHERE ISNUMERIC(TR.strPropertyValue) = 1
+	WHERE IsNULL(TR.strPropertyValue,'') <>'' and P.intDataTypeId in (1,2)
 		AND P.strPropertyName LIKE '%'
 		AND WPL.intWorkOrderId = @intWorkOrderId
 		AND P.intPropertyId = (

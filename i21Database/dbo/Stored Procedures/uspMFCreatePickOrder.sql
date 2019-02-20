@@ -473,7 +473,7 @@ BEGIN TRY
 							)
 					END)
 			,ri.intItemUOMId
-			,MAX(IU.dblUnitQty)
+			,1
 			,SUM(CASE 
 					WHEN C.strCategoryCode = @strPackagingCategory
 						THEN (
