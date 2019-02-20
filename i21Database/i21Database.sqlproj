@@ -7348,6 +7348,7 @@
     <None Include="Scripts\Post-Deployment\CF\5_18.3To19.1DataConversion.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutHeaderSearch.sql" />
     <Build Include="dbo\Views\vyuMFMachinesByCell.sql" />
+    <Build Include="dbo\Views\vyuSTCigaretteRebateProgramSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
