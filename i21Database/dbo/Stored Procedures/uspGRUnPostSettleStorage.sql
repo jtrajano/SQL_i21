@@ -31,6 +31,7 @@ BEGIN TRY
 	DECLARE @strOwnedPhysicalStock NVARCHAR(20)	
 	DECLARE @isParentSettleStorage AS BIT
 	DECLARE @intDecimalPrecision INT
+	DECLARE @intCustomerStorageId AS INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -332,9 +333,11 @@ BEGIN TRY
 				IF @intReturnValue < 0 GOTO SettleStorage_Exit;
 
 				DELETE FROM @GLEntries
-				DECLARE @intCustomerStorageId AS INT;
+				
 
-				SELECT TOP 1 @intCustomerStorageId = intCustomerStorageId FROM tblGRStorageHistory
+				SELECT TOP 1 
+					@intCustomerStorageId = intCustomerStorageId 
+				FROM tblGRSettleStorageTicket
 				WHERE intSettleStorageId = @intSettleStorageId
 
 				SELECT @strOwnedPhysicalStock = ST.strOwnedPhysicalStock
@@ -479,19 +482,19 @@ BEGIN TRY
 				) CS
 				WHERE intSettleStorageId = @intParentSettleStorageId
 
-				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
+				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId				
 			END
 
 			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
-			
+
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
-			BEGIN
+			BEGIN 
+				--cascaded deletion in tblGRSettleStorageTicket
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
 			END
 			ELSE
 			BEGIN
-				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
-				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
+				DELETE FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId AND intCustomerStorageId = @intCustomerStorageId
 			END
 
 			--5. Removing Voucher
