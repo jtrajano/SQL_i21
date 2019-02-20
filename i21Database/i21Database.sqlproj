@@ -6440,6 +6440,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherDetailReceiptChargeTax.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherDetailReceiptTax.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherDetailShipmentChargeTax.sql" />
+    <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -192,7 +192,7 @@ BEGIN
 			@CostBucketId = cb.intInventoryFIFOId
 			,@CostBucketOriginalStockIn = cb.dblStockIn
 			,@CostBucketOriginalCost = cb.dblCost
-			,@CostBucketOriginalValue = ISNULL(cb.dblStockIn, 0) * ISNULL(cb.dblCost, 0)
+			,@CostBucketOriginalValue = ROUND(dbo.fnMultiply(cb.dblStockIn, cb.dblCost), 2) 
 			,@CostBucketDate = cb.dtmDate
 	FROM	tblICInventoryFIFO cb
 	WHERE	cb.intItemId = @intItemId
@@ -378,6 +378,7 @@ BEGIN
 			AND t.intInventoryTransactionId >= @InventoryTransactionStartId
 			--AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
 			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
+			AND t.dblQty <> 0 
 
 	ORDER BY t.intInventoryTransactionId ASC 
 
@@ -932,10 +933,10 @@ BEGIN
 			,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
 														dbo.fnFormatMessage(
 														dbo.fnICGetErrorMessage(80078)
-														,CONVERT(NVARCHAR, CAST(dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId) AS MONEY), 2)
-														,CONVERT(NVARCHAR, CAST(Stock.dblUnitOnHand AS MONEY), 1)
-														,CONVERT(NVARCHAR, CAST(ItemPricing.dblAverageCost AS MONEY), 2)
-														,CONVERT(NVARCHAR, CAST((Stock.dblUnitOnHand * ItemPricing.dblAverageCost) AS MONEY), 2)
+														,dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId)
+														,Stock.dblUnitOnHand
+														,ItemPricing.dblAverageCost
+														,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
 														, DEFAULT
 														, DEFAULT
 														, DEFAULT
