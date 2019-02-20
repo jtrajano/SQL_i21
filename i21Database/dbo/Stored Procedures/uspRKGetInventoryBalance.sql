@@ -322,6 +322,59 @@ FROM (
 												ELSE isnull(ysnLicensed, 0) END)
 			AND st.intDeliverySheetId IS NULL AND st.strTicketStatus = 'H'
 	) t1
+
+	UNION ALL
+	SELECT dtmDate
+		, '' tranShipmentNumber
+		, isnull(dblOutQty,0) * -1 tranShipQty
+		, '' tranReceiptNumber
+		, dblInQty tranRecQty
+		, ''  tranAdjNumber
+		, 0.0 dblAdjustmentQty
+		, '' tranCountNumber
+		, 0.0 dblCountQty
+		, '' tranInvoiceNumber
+		, 0.0 dblInvoiceQty
+		, 0.0 dblSalesInTransit
+		, 0.0 tranDSInQty
+	FROM(
+
+		select
+				CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
+				,S.strStorageTypeCode strDistributionOption
+				, 0  AS dblInQty
+				,CASE WHEN strType = 'Settlement' THEN
+					ABS(dblUnits)
+					WHEN  strType = 'Reverse Settlement'  THEN
+					ABS(dblUnits) * -1
+					ELSE 0 END AS dblOutQty
+				,S.intStorageScheduleTypeId
+				,SH.intSettleStorageId
+				,SH.strSettleTicket
+
+			from 
+			tblGRCustomerStorage CS
+			INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+
+			WHERE 
+			--convert(datetime,CONVERT(VARCHAR(10),SH.dtmHistoryDate,110),110) BETWEEN
+			--						convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+			--					AND
+								 CS.intCommodityId= @intCommodityId
+								and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
+								AND  CS.intCompanyLocationId  IN (
+																			SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																			WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																			ELSE isnull(ysnLicensed, 0) END)
+				
+								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
+								AND strType IN ('Settlement','Reverse Settlement')
+								AND SH.intSettleStorageId IS NULL
+								AND S.ysnDPOwnedType <> 1
+	) a
+
 )t
 
 --Previous value start 
