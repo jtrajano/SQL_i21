@@ -95,6 +95,34 @@ FROM (
 	and il.intLocationId = isnull(@intLocationId, il.intLocationId)
 	group by dtmDate, intTransactionTypeId,strTransactionId,ium.intCommodityUnitMeasureId
 	
+	UNION ALL --Inventory Transfer
+	SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
+		, CASE WHEN it.dblQty < 0 THEN it.strTransactionId ELSE '' END tranShipmentNumber
+		, CASE WHEN it.dblQty < 0  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(it.dblQty,0)) ELSE  0.0 END tranShipQty
+		, CASE WHEN it.dblQty > 0  THEN it.strTransactionId ELSE '' END tranReceiptNumber
+		, CASE WHEN it.dblQty > 0  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(it.dblQty,0)) ELSE 0.0 END tranRecQty
+		, '' tranAdjNumber
+		, 0.0 dblAdjustmentQty
+		, '' tranCountNumber
+		, 0.0 dblCountQty
+		, '' tranInvoiceNumber
+		, 0.0 dblInvoiceQty
+		, 0.0 dblSalesInTransit
+		, 0.0 tranDSInQty
+	FROM tblICInventoryTransaction it 
+	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(12)
+	join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
+	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
+	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																									ELSE isnull(ysnLicensed, 0) END)
+		and isnull(il.strDescription,'') <> 'In-Transit'
+	WHERE i.intCommodityId=@intCommodityId  
+	and i.intItemId = isnull(@intItemId, i.intItemId)
+	and il.intLocationId = isnull(@intLocationId, il.intLocationId)
+
+
 	UNION ALL --Inventory Adjustment (Storage)
 	SELECT dtmDate
 		, '' tranShipmentNumber
@@ -122,6 +150,10 @@ FROM (
 			AND i.intCommodityId=@intCommodityId  
 			AND i.intItemId = isnull(@intItemId, i.intItemId)
 			AND IA.intAdjustmentType <> 3
+			AND IA.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																						ELSE isnull(ysnLicensed, 0) END)
 	) a
 	
 	UNION ALL --Direct From Scale

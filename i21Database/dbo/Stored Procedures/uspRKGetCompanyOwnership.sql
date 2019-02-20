@@ -257,6 +257,42 @@ BEGIN
 
 		)a
 
+	--Inventory Transfers
+	UNION ALL SELECT strItemNo
+		, dtmDate
+		, 0 AS dblUnpaidIn
+		, 0 AS dblUnpaidOut
+		, 0 AS dblUnpaidBalance
+		, dblTransferQty as dblPaidBalance
+		, '' COLLATE Latin1_General_CI_AS as strDistributionOption
+		, strTransactionId as strReceiptNumber
+		, intTransactionId as intReceiptId
+	FROM (
+		SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
+			, dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(SUM(it.dblQty),0)) dblTransferQty
+			, it.intTransactionId
+			, i.strItemNo
+			, it.strTransactionId
+		FROM tblICInventoryTransaction it 
+		JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(12)
+		join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
+		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
+		JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
+																										WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
+																										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																										ELSE isnull(ysnLicensed, 0) END)
+			and isnull(il.strDescription,'') <> 'In-Transit'
+		WHERE i.intCommodityId=@intCommodityId  
+		and i.intItemId = isnull(@intItemId, i.intItemId)
+		and il.intLocationId = isnull(@intLocationId, il.intLocationId)
+		and convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+		group by dtmDate, strItemNo, it.intTransactionId, it.strTransactionId, intCommodityUnitMeasureId
+		
+
+		)a WHERE dblTransferQty <> 0
+
+
+
 UNION 
 SELECT --Delivery Sheet
  strItemNo
@@ -292,11 +328,7 @@ FROM (
 	AND ST.intCommodityId = @intCommodityId 
 	AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
 	AND ST.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
-	AND ST.intProcessingLocationId IN (
-			SELECT intCompanyLocationId
-			FROM tblSMCompanyLocation
-			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
-			)
+	AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
 	AND RI.intOwnershipType = 1
 	AND R.intSourceType = 1
 	AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 1 ELSE NULL END)--Contract, Spot and DP
@@ -342,11 +374,7 @@ FROM (
     AND ST.intCommodityId = @intCommodityId 
     AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
     AND ST.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
-    AND ST.intProcessingLocationId IN (
-            SELECT intCompanyLocationId
-            FROM tblSMCompanyLocation
-            WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
-            )
+    AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
     AND RI.intOwnershipType = 1
     AND R.intSourceType = 1
     AND Bill.ysnPosted = 1
@@ -394,11 +422,7 @@ AND convert(DATETIME, CONVERT(VARCHAR(10), I.dtmPostDate, 110), 110) BETWEEN con
 AND C.intCommodityId = @intCommodityId 
 AND ID.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ID.intItemId ELSE @intItemId END 
 AND I.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then I.intCompanyLocationId else @intLocationId end 
-AND I.intCompanyLocationId IN (
-		SELECT intCompanyLocationId
-		FROM tblSMCompanyLocation
-		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
-		)
+AND I.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
 AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[intItemLocationId], ID.[intItemUOMId]) <> 0)) ) 
 )t
 
@@ -508,12 +532,7 @@ AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[i
 									convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 								AND CS.intCommodityId= @intCommodityId
 								and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
-								AND  CS.intCompanyLocationId  IN (
-																			SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																			WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																			ELSE isnull(ysnLicensed, 0) END)
-				
+								AND  CS.intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocations)
 								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
 								AND SH.strType IN ('Settlement','Reverse Settlement')
 								AND S.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN NULL ELSE 1 END
