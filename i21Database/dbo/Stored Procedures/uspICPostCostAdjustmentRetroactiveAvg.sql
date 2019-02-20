@@ -378,6 +378,7 @@ BEGIN
 			AND t.intInventoryTransactionId >= @InventoryTransactionStartId
 			--AND t.intTransactionTypeId <> @INV_TRANS_TYPE_Cost_Adjustment
 			AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
+			AND t.dblQty <> 0 
 
 	ORDER BY t.intInventoryTransactionId ASC 
 
