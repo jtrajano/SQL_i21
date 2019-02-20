@@ -6441,6 +6441,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherDetailReceiptTax.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherDetailShipmentChargeTax.sql" />
     <Build Include="dbo\Functions\fnMFGetRecipeCostAllocation.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
