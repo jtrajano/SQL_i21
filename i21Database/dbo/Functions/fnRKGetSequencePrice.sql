@@ -70,8 +70,8 @@ BEGIN
 			,6
 			)
 	BEGIN
-		SELECT @dblSeqPrice = dblSeqPrice
-		FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId)
+	SELECT @dblSeqPrice = dblCashPrice
+		FROM tblCTContractDetail where intContractDetailId=@intContractDetailId
 	END
 	ELSE IF @intPricingTypeId = 2
 	BEGIN

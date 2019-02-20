@@ -28,6 +28,5 @@
 	CONSTRAINT [FK_tblRKCurExpStock_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY(intFutureMarketId)REFERENCES [dbo].[tblRKFutureMarket] (intFutureMarketId),
 	CONSTRAINT [FK_tblRKCurExpStock_tblSMCurrency_intMarketPremiumCurrencyId] FOREIGN KEY(intMarketPremiumCurrencyId)REFERENCES [dbo].[tblSMCurrency] (intCurrencyID),
 	CONSTRAINT [FK_tblRKCurExpStock_tblICUnitMeasure_intMarketPremiumUOMId] FOREIGN KEY(intMarketPremiumUOMId)REFERENCES [dbo].[tblICUnitMeasure] (intUnitMeasureId),
-	CONSTRAINT [FK_tblRKCurExpStock_tblSMCurrency_intMarketPriceCurrencyId] FOREIGN KEY(intMarketPriceCurrencyId)REFERENCES [dbo].[tblSMCurrency] (intCurrencyID),
-	CONSTRAINT [FK_tblRKCurExpStock_tblICUnitMeasure_intMarketPriceUOMId] FOREIGN KEY(intMarketPriceUOMId)REFERENCES [dbo].[tblICUnitMeasure] (intUnitMeasureId),
+	CONSTRAINT [FK_tblRKCurExpStock_tblSMCurrency_intMarketPriceCurrencyId] FOREIGN KEY(intMarketPriceCurrencyId)REFERENCES [dbo].[tblSMCurrency] (intCurrencyID)	
 )
