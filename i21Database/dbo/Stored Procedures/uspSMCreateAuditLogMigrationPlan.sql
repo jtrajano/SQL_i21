@@ -1,115 +1,4 @@
-﻿--CREATE PROCEDURE [dbo].[uspSMCreateAuditLogMigrationPlan]
--- @currentDatabase NVARCHAR(100)
--- AS
--- BEGIN
-
-
---EXEC sp_configure'SHOW ADVANCE',1
---	RECONFIGURE
---	EXEC sp_configure'AGENT XPs',1
---	RECONFIGURE
-
---BEGIN TRANSACTION
---DECLARE @ReturnCode INT
---SELECT @ReturnCode = 0
---DECLARE @stepCommand nvarchar(max)
-
---SET @stepCommand = N'
---DECLARE @DAY NVARCHAR(15);
---SET @DAY = (SELECT DATENAME(DW, GETDATE()))
---DECLARE @isWeekend BIT = CASE WHEN (@DAY = ''Saturday'' OR @DAY = ''Sunday'') THEN 1 ELSE 0 END
-
---BEGIN TRY
---USE [' + CONVERT(nvarchar(MAX), @currentDatabase) + ']
---exec [uspSMMigrateScheduledAuditLog] @isWeekend
---END TRY
---BEGIN CATCH
---SELECT 
---		ERROR_NUMBER() AS ErrorNumber,
---		ERROR_SEVERITY() AS ErrorSeverity,
---		ERROR_STATE() as ErrorState,
---		ERROR_PROCEDURE() as ErrorProcedure,
---		ERROR_LINE() as ErrorLine,
---		ERROR_MESSAGE() as ErrorMessage;
---END CATCH
---'
-
---IF NOT EXISTS (SELECT name FROM msdb.dbo.syscategories WHERE name=N'i21 Audit Migration' AND category_class=1)
---BEGIN
---EXEC @ReturnCode = msdb.dbo.sp_add_category @class=N'JOB', @type=N'LOCAL', @name=N'i21 Audit Migration'
---IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-
---END
-
---DECLARE @jobId BINARY(16)
---EXEC @ReturnCode =  msdb.dbo.sp_add_job @job_name=N'i21_AuditLog_Migration_Job', 
---		@enabled=1, 
---		@notify_level_eventlog=0, 
---		@notify_level_email=0, 
---		@notify_level_netsend=0, 
---		@notify_level_page=0, 
---		@delete_level=0, 
---		@description=N'SQL Agent Job that will migrate old audit log to flat table.', 
---		@category_name=N'i21 Audit Migration', 
---		@owner_login_name=N'sa', @job_id = @jobId OUTPUT
---IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
-
---EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Invoke Migration SP', 
---		@step_id=1, 
---		@cmdexec_success_code=0, 
---		@on_success_action=1, 
---		@on_success_step_id=0, 
---		@on_fail_action=2, 
---		@on_fail_step_id=0, 
---		@retry_attempts=0, 
---		@retry_interval=0, 
---		@os_run_priority=0, @subsystem=N'TSQL', 
---		@output_file_name=N'C:\\i21Log\i21_AuditMigration_Log',
---		@command=@stepCommand, 
---		@database_name= @currentDatabase, 
---		@flags=0
---IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
---EXEC @ReturnCode = msdb.dbo.sp_update_job @job_id = @jobId, @start_step_id = 1
---IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
---EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule @job_id=@jobId, @name=N'i21_Audit_Migration_WeekDay', 
---		@enabled=1, 
---		@freq_type=4, 
---		@freq_interval=1, 
---		@freq_subday_type=4, 
---		@freq_subday_interval=10, 
---		@freq_relative_interval=0, 
---		@freq_recurrence_factor=0, 
---		@active_start_date=20190206, 
---		@active_end_date=99991231, 
---		@active_start_time=0, 
---		@active_end_time=235959 
---		--@schedule_uid=N'c9bbe610-b230-49fe-901b-be6b2a121c7e'
---IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
---EXEC @ReturnCode = msdb.dbo.sp_add_jobschedule @job_id=@jobId, @name=N'i21_Audit_Migration_Weekends_FullBlast', 
---		@enabled=1, 
---		@freq_type=8, 
---		@freq_interval=65, 
---		@freq_subday_type=1, 
---		@freq_subday_interval=0, 
---		@freq_relative_interval=0, 
---		@freq_recurrence_factor=1, 
---		@active_start_date=20190206, 
---		@active_end_date=99991231, 
---		@active_start_time=0, 
---		@active_end_time=235959 
---		--@schedule_uid=N'19ad59f2-f2ee-44c3-8074-6a8bf61a2b2f'
---IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
---EXEC @ReturnCode = msdb.dbo.sp_add_jobserver @job_id = @jobId, @server_name = N'(local)'
---IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
---COMMIT TRANSACTION
---GOTO EndSave
---QuitWithRollback:
---    IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
---EndSave:
-
-
---END
-
+﻿
 CREATE PROCEDURE [dbo].[uspSMCreateAuditLogMigrationPlan]
  @currentDatabaseName NVARCHAR(100)
  AS
@@ -151,7 +40,8 @@ SET @AuditId = (SELECT TOP 1 intAuditLogId FROM tblSMAuditLog WHERE ysnProcessed
 SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE name = '''+ @JOB_NAME +'''
 SET @ysnMigrated = (SELECT TOP 1 ysnAuditBatchMigrated FROM tblSMCompanySetup)
 
-IF(ISNULL(@ysnMigrated, 1) != 1) return;
+IF(ISNULL(@ysnMigrated, 1) = 1)
+begin
 
 update tblSMCompanySetup set ysnAuditBatchMigrated = 0
 
@@ -182,6 +72,11 @@ SELECT
 END CATCH
 
 end
+end
+	else
+		begin
+			print ''batch not yet done''
+		end
 '
 
 IF NOT EXISTS (SELECT name FROM msdb.dbo.syscategories WHERE name=N'i21 Audit Migration' AND category_class=1)

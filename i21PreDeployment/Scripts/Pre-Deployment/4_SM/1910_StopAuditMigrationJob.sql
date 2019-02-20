@@ -12,6 +12,10 @@
 				--EXEC msdb.dbo.sp_update_job @job_name='i21_AuditLog_Migration_Job',@enabled = 0--disable job
 				exec msdb.dbo.sp_delete_job @job_id = @jobId
 			end
+		IF(EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE NAME = N'ysnAuditBatchMigrated' AND OBJECT_ID  = OBJECT_ID(N'tblSMCompanySetup')))
+			begin
+				update tblSMCompanySetup set ysnAuditBatchMigrated = null
+			end
 	END
 	PRINT N'END REMOVE AUDIT MIGRATION JOB'
 GO
