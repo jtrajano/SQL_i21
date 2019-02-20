@@ -86,6 +86,7 @@ BEGIN
 		AND SOSOD.[intSalesOrderDetailId] NOT IN (SELECT [intTransactionDetailId] FROM tblARTransactionDetail WHERE [intTransactionId] = @SalesOrderId)
 		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0
 		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')
+		AND ICI.strBundleType <> 'Option'
 
 
 	--New > Item Changed
@@ -126,8 +127,9 @@ BEGIN
 		AND SO.[strTransactionType] = 'Order'
 		AND SOSOD.[intItemId] <> ARTD.[intItemId]
 		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0	
-		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')					
-	 
+		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')
+		AND ICI.strBundleType <> 'Option'
+
 END
 
 GO
