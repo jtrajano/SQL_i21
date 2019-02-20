@@ -262,5 +262,13 @@ BEGIN
 END
 GO
 
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKFutOptTransactionHistory' AND COLUMN_NAME = 'ysnPreCrush')
+BEGIN
+	UPDATE tblRKFutOptTransactionHistory
+	SET ysnPreCrush = ISNULL(tblRKFutOptTransaction.ysnPreCrush, 0)
+	FROM tblRKFutOptTransaction
+	WHERE tblRKFutOptTransaction.intFutOptTransactionId = tblRKFutOptTransactionHistory.intFutOptTransactionId
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

@@ -144,8 +144,8 @@ FROM (
 			, FOT.intFutureMarketId
 			, FOT.intFutureMonthId
 			, FOT.strBrokerTradeNo
-			, strNotes
-			, ysnPreCrush
+			, FOT.strNotes
+			, FOT.ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 		OUTER APPLY (
@@ -185,8 +185,8 @@ FROM (
 			, FOT.intFutureMarketId
 			, FOT.intFutureMonthId
 			, FOT.strBrokerTradeNo
-			, strNotes
-			, ysnPreCrush
+			, FOT.strNotes
+			, FOT.ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 		OUTER APPLY (
@@ -226,8 +226,8 @@ FROM (
 			, FOT.intFutureMarketId
 			, FOT.intFutureMonthId
 			, FOT.strBrokerTradeNo
-			, strNotes
-			, ysnPreCrush
+			, FOT.strNotes
+			, FOT.ysnPreCrush
 		FROM tblRKFutOptTransactionHeader FOTH
 		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 		OUTER APPLY (
@@ -241,6 +241,41 @@ FROM (
 		) History
 		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+
+		UNION ALL
+		-- Deleted Derivatives but with values prior to As Of Date
+		SELECT History.dtmTransactionDate
+			, History.intFutOptTransactionId
+			, intOpenContract = History.intNewNoOfContract
+			, History.strCommodity
+			, History.strInternalTradeNo
+			, History.strLocationName
+			, History.dblContractSize
+			, History.strFutureMarket
+			, History.strFutureMonth
+			, History.strOptionMonth
+			, History.dblStrike
+			, History.strOptionType
+			, History.strInstrumentType
+			, History.strBrokerAccount
+			, History.strBroker
+			, strBuySell = History.strNewBuySell
+			, intFutOptTransactionHeaderId
+			, intFutureMarketId
+			, intFutureMonthId
+			, strBrokerTradeNo
+			, History.strNotes
+			, History.ysnPreCrush
+		FROM (
+			SELECT * FROM (
+				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
+					, *
+				FROM vyuRKGetFutOptTransactionHistory History 
+				WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
+					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
+			) t WHERE intRowNum = 1
+		) History
+		WHERE ISNULL(@ysnCrush, 0) = 1
 	) t2
 )t3 WHERE t3.intRowNum = 1
 
