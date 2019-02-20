@@ -182,3 +182,4 @@ WHERE SO.strTransactionType = 'Order'
   AND (SODETAIL.intItemId IS NOT NULL OR (SODETAIL.intItemId IS NULL AND ISNULL(SODETAIL.strItemDescription, '') <> ''))
   AND SO.intSalesOrderId NOT IN (SELECT intTransactionId FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order')
   AND SO.ysnRejected = 0
+  AND ISNULL(ITEM.strBundleType, '') <> 'Option'

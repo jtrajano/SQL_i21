@@ -1333,6 +1333,7 @@ LEFT OUTER JOIN (
 		 , strDescription
 		 , strLotTracking
 	FROM dbo.tblICItem WITH (NOLOCK)
+	WHERE strBundleType <> 'Option'
 ) ITEM ON SHIPPEDITEMS.intItemId = ITEM.intItemId
 LEFT OUTER JOIN (
 	SELECT intItemUOMId
