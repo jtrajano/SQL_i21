@@ -1368,7 +1368,7 @@ BEGIN TRY
 					,DS.[intCompanyId]						= SCD.intCompanyId
 					,DS.[ysnPost]							= SCD.ysnPost
 					,DS.[ysnLockSummaryGrid]				= SCD.ysnLockSummaryGrid
-					,DS.[ysnExport]							= SCD.ysnExport
+					,DS.[ysnExport]							= 1
 					,DS.[strCountyProducer]					= SCD.strCountyProducer
 				FROM tblSCDeliverySheet DS  
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.strDeliverySheetNumber = DS.strDeliverySheetNumber 
@@ -1454,7 +1454,7 @@ BEGIN TRY
 					,[intCompanyId]							= SCD.intCompanyId
 					,[ysnPost]								= SCD.ysnPost
 					,[ysnLockSummaryGrid]					= SCD.ysnLockSummaryGrid
-					,[ysnExport]							= SCD.ysnExport
+					,[ysnExport]							= 1
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
 				FROM @temp_xml_deliverysheet  SCD
