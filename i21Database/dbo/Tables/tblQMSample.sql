@@ -59,6 +59,7 @@
 	intStorageLocationId INT,
 	intBookId INT,
 	intSubBookId INT,
+	strChildLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),

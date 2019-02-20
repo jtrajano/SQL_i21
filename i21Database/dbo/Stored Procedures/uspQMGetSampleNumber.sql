@@ -248,8 +248,8 @@ END
 ELSE IF @intProductTypeId = 11 -- Parent Lot
 BEGIN
 	INSERT INTO @tblMFLot
-	SELECT strLotNumber
-	FROM tblICLot
+	SELECT strParentLotNumber
+	FROM tblICParentLot
 	WHERE intParentLotId = @intProductValueId
 
 	INSERT INTO @tblMFFinalLot (

@@ -19,6 +19,8 @@ DECLARE @intNoOfShipRecordCounter INT
 DECLARE @intNoOfShipRecordParentCounter INT
 DECLARE @strTransactionName NVARCHAR(50)
 DECLARE @strLotNumber NVARCHAR(MAX)
+Declare @intItemId int
+
 DECLARE @tblTemp AS TABLE (
 	intRecordId INT
 	,intParentId INT
@@ -316,15 +318,17 @@ BEGIN
 		SELECT TOP 1 @intContractId = ISNULL(ri.intOrderId, 0)
 			,@intShipmentId = ISNULL(ld.intLoadId, 0)
 			,@intContainerId = ISNULL(ri.intContainerId, 0)
+			,@intItemId=ri.intItemId
 		FROM tblICInventoryReceiptItem ri
 		JOIN tblICInventoryReceiptItemLot rl ON ri.intInventoryReceiptItemId = rl.intInventoryReceiptItemId
 		JOIN tblICInventoryReceipt rh ON ri.intInventoryReceiptId = rh.intInventoryReceiptId
 		LEFT JOIN tblLGLoadDetail ld ON ri.intSourceId = ld.intLoadDetailId
 		JOIN tblICLot l ON rl.intLotId = l.intLotId
-		WHERE l.strLotNumber = (
-				SELECT TOP 1 strLotNumber
-				FROM tblICLot
-				WHERE intLotId = @intLotId
+		WHERE Exists (
+				SELECT 1
+				FROM tblICLot L1
+				WHERE L1.intLotId = @intLotId and L1.strLotNumber=l.strLotNumber
+				and L1.intItemId=ri.intItemId
 				)
 			AND rh.strReceiptType = 'Purchase Contract'
 
@@ -350,6 +354,7 @@ BEGIN
 				)
 			EXEC uspMFGetTraceabilityContractDetail @intContractId
 				,@intDirectionId
+				,@intItemId
 
 			UPDATE @tblNodeData
 			SET intRecordId = 1
@@ -2519,7 +2524,7 @@ SELECT intRecordId AS [key]
 			THEN strLotNumber
 		ELSE strLotNumber + CHAR(13) + '(' + strProcessName + ')'
 		END AS strNodeText
-	,'Item No.	  : ' + ISNULL(strItemNo, '') + CHAR(13) + 'Item Desc.   : ' + ISNULL(strItemDesc, '') + CHAR(13) + 'Quantity     : ' + ISNULL(dbo.fnRemoveTrailingZeroes(IsNULL(dblWOQty, dblQuantity)), '') + ' ' + ISNULL(strUOM + CHAR(13), '') + CHAR(13) + 'Tran. Date   : ' + ISNULL(CONVERT(VARCHAR, dtmTransactionDate), '') + CHAR(13) + CASE 
+	,'Item No.	  : ' + ISNULL(strItemNo, '') + CHAR(13) + 'Item Desc.   : ' + rtrim(Ltrim(ISNULL(strItemDesc, ''))) + CHAR(13) + 'Quantity     : ' + ISNULL(dbo.fnRemoveTrailingZeroes(IsNULL(dblWOQty, dblQuantity)), '') + ' ' + ISNULL(strUOM, '') + CHAR(13) + 'Tran. Date   : ' + ISNULL(CONVERT(VARCHAR, dtmTransactionDate), '') + CHAR(13) + CASE 
 		WHEN strType = 'R'
 			THEN 'Vendor     : ' + ISNULL(strVendor, '')
 		ELSE ''

@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARUndepositedPayment]
 AS
-SELECT strSourceTransactionId	= TRANSACTIONS.strSourceTransactionId
+SELECT DISTINCT 
+	   strSourceTransactionId	= TRANSACTIONS.strSourceTransactionId
 	 , intSourceTransactionId	= TRANSACTIONS.intSourceTransactionId
 	 , dtmDate					= TRANSACTIONS.dtmDate
 	 , strName					= CUSTOMER.strName
@@ -11,6 +12,10 @@ SELECT strSourceTransactionId	= TRANSACTIONS.strSourceTransactionId
 	 , strPaymentMethod			= TRANSACTIONS.strPaymentMethod
 	 , intEntityEnteredById		= TRANSACTIONS.intEntityId
 	 , strEntityEnteredBy		= ENTEREDBY.strName
+	 , strPaymentSource			= TRANSACTIONS.strPaymentSource
+	 , strEODNumber				= TRANSACTIONS.strEODNumber
+	 , strDrawerName			= TRANSACTIONS.strDrawerName
+	 , ysnCompleted				= TRANSACTIONS.ysnCompleted
 FROM (
 	SELECT strSourceTransactionId	= PAYMENT.strRecordNumber
 		 , intSourceTransactionId	= PAYMENT.intPaymentId
@@ -21,11 +26,20 @@ FROM (
 		 , intCompanyLocationId		= PAYMENT.intLocationId
 		 , intEntityId				= PAYMENT.intEntityId
 		 , strPaymentMethod			= SMPM.strPaymentMethod
+		 , strPaymentSource			= CASE WHEN POSEOD.strEODNo IS NULL THEN 'Manual Entry' ELSE 'POS' END COLLATE Latin1_General_CI_AS
+		 , strEODNumber				= POSEOD.strEODNo
+		 , strDrawerName			= POSDRAWER.strPOSDrawerName
+		 , ysnCompleted				= POSEOD.ysnClosed
 	FROM tblARPayment PAYMENT
 	LEFT OUTER JOIN tblSMPaymentMethod SMPM ON PAYMENT.intPaymentMethodId = SMPM.intPaymentMethodID
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON PAYMENT.intPaymentId = CM.intSourceTransactionId 
 										   AND PAYMENT.strRecordNumber = CM.strSourceTransactionId 
-										   AND CM.strSourceSystem = 'AR'	
+										   AND CM.strSourceSystem = 'AR'
+	INNER JOIN tblARPaymentDetail PAYMENTDETAILS ON PAYMENT.intPaymentId = PAYMENTDETAILS.intPaymentId
+	LEFT OUTER JOIN tblARPOS POS ON PAYMENTDETAILS.intInvoiceId = POS.intInvoiceId
+	LEFT OUTER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
+	LEFT OUTER JOIN tblARPOSEndOfDay POSEOD ON POSLOG.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
+	LEFT OUTER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
 	WHERE PAYMENT.ysnPosted = 1
 	  AND PAYMENT.ysnProcessedToNSF = 0
 	  AND PAYMENT.intAccountId IS NOT NULL
@@ -44,7 +58,11 @@ FROM (
 		 , intEntityCustomerId		= INVOICE.intEntityCustomerId
 		 , intCompanyLocationId		= INVOICE.intCompanyLocationId
 		 , intEntityId				= INVOICE.intEntityId		 		
-		 , strPaymentMethod			= SMPM.strPaymentMethod				
+		 , strPaymentMethod			= SMPM.strPaymentMethod		
+		 , strPaymentSource			= NULL
+		 , strEODNumber				= NULL
+		 , strDrawerName			= NULL
+		 , ysnCompleted				= 0
 	FROM tblARInvoice INVOICE
 	LEFT OUTER JOIN tblSMPaymentMethod SMPM ON INVOICE.intPaymentMethodId = SMPM.intPaymentMethodID
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON INVOICE.intInvoiceId = CM.intSourceTransactionId 
@@ -68,10 +86,15 @@ FROM (
 		 , intLocationId			= DRAWER.intCompanyLocationId	
 		 , intEntityId				= EOD.intEntityId
 		 , strPaymentMethod			= 'Cash' COLLATE Latin1_General_CI_AS
+		 , strPaymentSource			= 'POS' COLLATE Latin1_General_CI_AS
+		 , strEODNumber				= EOD.strEODNo
+		 , strDrawerName			= DRAWER.strPOSDrawerName
+		 , ysnCompleted				= ysnClosed
 	FROM tblARPOSEndOfDay EOD
 	INNER JOIN (
 		SELECT intCompanyLocationId
 			 , intCompanyLocationPOSDrawerId
+			 , strPOSDrawerName
 		FROM tblSMCompanyLocationPOSDrawer
 	) DRAWER ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 	WHERE EOD.ysnClosed = 1
@@ -79,5 +102,4 @@ FROM (
 ) TRANSACTIONS
 INNER JOIN tblEMEntity CUSTOMER ON TRANSACTIONS.intEntityCustomerId = CUSTOMER.intEntityId
 LEFT JOIN tblEMEntity ENTEREDBY ON TRANSACTIONS.intEntityId = ENTEREDBY.intEntityId
-
 GO

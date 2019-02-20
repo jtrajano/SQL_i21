@@ -437,7 +437,7 @@ BEGIN
 			,ysnPostForeignSales			BIT
 			,ysnExpensed					BIT
 			,ysnSummaryByDriverPin			BIT
-
+			,ysnMPGCalculation			BIT
 		)
 
 		IF(ISNULL(@ysnReprintInvoice,0) = 1 OR ISNULL(@From,0) = 1)
@@ -541,6 +541,7 @@ BEGIN
 			,ysnPostForeignSales		
 			,ysnExpensed				
 			,ysnSummaryByDriverPin		
+			,ysnMPGCalculation
 			)
 			SELECT 
 			 intCustomerId				
@@ -641,6 +642,7 @@ BEGIN
 			,ysnPostForeignSales		
 			,ysnExpensed				
 			,ysnSummaryByDriverPin
+			,ysnMPGCalculation
 			FROM vyuCFInvoiceReport
 		END
 		ELSE
@@ -743,7 +745,8 @@ BEGIN
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
 			,ysnExpensed				
-			,ysnSummaryByDriverPin		
+			,ysnSummaryByDriverPin	
+			,ysnMPGCalculation	
 			)
 			SELECT 
 			 intCustomerId				
@@ -844,6 +847,7 @@ BEGIN
 			,ysnPostForeignSales		
 			,ysnExpensed				
 			,ysnSummaryByDriverPin
+			,ysnMPGCalculation	
 			FROM vyuCFInvoiceReport
 			WHERE  ISNULL(ysnInvoiced,0) = 0
 		END
@@ -1135,6 +1139,7 @@ BEGIN
 		,strDetailDisplay			
 		,strDriverPinNumber			
 		,strDriverDescription		
+		,ysnMPGCalculation
 		INTO #tblCFTempInvoiceReportSummary 
 		FROM #tblCFTempInvoiceReport AS main 
 		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
@@ -1238,6 +1243,7 @@ BEGIN
 		,strDetailDisplay			
 		,strDriverPinNumber			
 		,strDriverDescription
+		,ysnMPGCalculation
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -1332,6 +1338,7 @@ BEGIN
 		,strDetailDisplay			
 		,strDriverPinNumber			
 		,strDriverDescription
+		,ysnMPGCalculation
 	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 

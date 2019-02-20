@@ -155,6 +155,7 @@
     [strDetailDisplay]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strDetailDisplayValue]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strDetailDisplayLabel]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[ysnMPGCalculation]				  BIT             NULL,
     CONSTRAINT [UserAndTransactionIdAndStatementType] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC, [strStatementType] ASC) WITH (FILLFACTOR = 70)
 );
 

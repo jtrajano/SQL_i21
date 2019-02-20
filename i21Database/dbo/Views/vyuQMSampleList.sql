@@ -61,6 +61,7 @@ SELECT S.intSampleId
 	,SL.strName AS strStorageLocationName
 	,B.strBook
 	,SB.strSubBook
+	,S.strChildLotNumber
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1

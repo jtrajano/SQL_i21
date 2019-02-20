@@ -21,12 +21,10 @@ SELECT TR.intTestResultId
 	,S.dblRepresentingQty
 	,UM1.strUnitMeasure AS strRepresentingUOM
 	,COALESCE(SC.strContainerNumber, S.strContainerNumber) AS strContainerNumber
-	--,ISNULL(L.intLotId, PL.intParentLotId) AS intLotId
-	--,ISNULL(L.strLotNumber, PL.strParentLotNumber) AS strLotNumber
 	,L.intLotId
-	,L.strLotNumber
-	,LPL.intParentLotId
-	,LPL.strParentLotNumber
+	,ISNULL(L.strLotNumber, S.strChildLotNumber) AS strLotNumber
+	,ISNULL(LPL.intParentLotId, PL.intParentLotId) AS intParentLotId
+	,ISNULL(LPL.strParentLotNumber, PL.strParentLotNumber) AS strParentLotNumber
 	,S.strSampleNumber
 	,S.strSampleRefNo
 	,E.strName

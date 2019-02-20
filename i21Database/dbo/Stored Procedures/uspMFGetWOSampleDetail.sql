@@ -20,8 +20,8 @@ BEGIN
 		,S.dtmSamplingEndDate
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
-		AND S.intProductTypeId = 12
-		AND S.intProductValueId = @intWorkOrderId
+		--AND S.intProductTypeId = 12
+		AND S.intWorkOrderId = @intWorkOrderId
 	JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 	LEFT JOIN tblICItem I ON I.intItemId = S.intItemId
 	LEFT JOIN tblEMEntity E ON E.intEntityId = S.intEntityId
