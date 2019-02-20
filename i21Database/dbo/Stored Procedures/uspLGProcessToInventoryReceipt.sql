@@ -999,7 +999,7 @@ BEGIN TRY
 			,CD.intCompanyLocationId
 			,NULL
 			,EL.intEntityLocationId
-			,ISNULL(SC.intMainCurrencyId, L.intCurrencyId)
+			,ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId)
 			,2
 			,L.strBLNumber
 		FROM tblLGLoad L  
@@ -1009,10 +1009,16 @@ BEGIN TRY
 		JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId 
 			AND EL.ysnDefaultLocation = 1 
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN tblLGLoadWarehouse LW ON LD.intLoadId = LW.intLoadId
-		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
+		LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = CASE 
+				WHEN SC.intMainCurrencyId IS NOT NULL
+					THEN CD.intCurrencyId
+				ELSE NULL
+				END
 		WHERE LD.intLoadId = @intLoadId
 
 		IF NOT EXISTS (
