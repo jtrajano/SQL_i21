@@ -82,6 +82,7 @@ BEGIN
 
 	DECLARE	
 			@CostAdjustment AS NUMERIC(38, 20)			
+			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
@@ -188,7 +189,7 @@ BEGIN
 			@CostBucketId = cb.intInventoryActualCostId
 			,@CostBucketOriginalStockIn = cb.dblStockIn
 			,@CostBucketOriginalCost = cb.dblCost
-			,@CostBucketOriginalValue = dbo.fnMultiply(cb.dblStockIn, cb.dblCost)
+			,@CostBucketOriginalValue = ROUND(dbo.fnMultiply(cb.dblStockIn, cb.dblCost), 2) 
 			,@CostBucketDate = cb.dtmDate
 	FROM	tblICInventoryActualCost cb
 	WHERE	cb.intItemId = @intItemId
@@ -352,6 +353,7 @@ BEGIN
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+			AND t.dblQty <> 0 
 	ORDER BY t.intInventoryTransactionId ASC 
 
 	OPEN loopRetroactive;
@@ -643,7 +645,8 @@ BEGIN
 										@CostAdjustmentPerCb * @t_dblQty
 								END 
 							WHEN @t_dblQty < 0 THEN 
-								(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+								@t_dblQty * @CostAdjustmentPerQty
 							ELSE 
 								0
 					END 
@@ -665,7 +668,8 @@ BEGIN
 									@CostAdjustmentPerCb * @t_dblQty
 							END 
 						WHEN @t_dblQty < 0 THEN 
-							(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							@t_dblQty * @CostAdjustmentPerQty
 						ELSE 
 							0
 				END <> 0 
