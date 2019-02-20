@@ -124,7 +124,6 @@ BEGIN TRY
 		,@intManufacturingCellId = intManufacturingCellId
 		,@intSubLocationId = intSubLocationId
 		,@intWOItemUOMId = intItemUOMId
-		,@dtmCurrentDateTime = IsNull(dtmPostDate, @dtmCurrentDateTime)
 		,@strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
@@ -1360,11 +1359,7 @@ BEGIN TRY
 
 	UPDATE tblMFWorkOrder
 	SET strCostAdjustmentBatchId = @strBatchId
-		,dtmPostDate = CASE 
-			WHEN dtmPostDate IS NULL
-				THEN @dtmCurrentDateTime
-			ELSE dtmPostDate
-			END
+		,dtmPostDate = @dtmCurrentDateTime
 		,dblInputItemValue = @dblNewCost
 	WHERE intWorkOrderId = @intWorkOrderId
 

@@ -224,6 +224,7 @@ BEGIN
 	LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
 	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 	WHERE l.intLotId = @intLotId
+	and ilt.intTransactionTypeId<>26
 
 	INSERT INTO #tempLotHistory
 	SELECT ilt.dtmCreated AS dtmDateTime
@@ -510,6 +511,7 @@ BEGIN
 		LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
 		LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 		WHERE l.intLotId = @intLotId1
+		and ilt.intTransactionTypeId<>26
 			AND ilt.intInventoryTransactionId < @intInventoryTransactionId
 
 		SELECT @intSplitFromLotId = NULL
