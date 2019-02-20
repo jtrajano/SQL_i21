@@ -364,7 +364,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intItemId						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemId ELSE IDTOADD.intItemId END
 			, strItemDescription			= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.strItemDescription ELSE ITEM.strDescription END
 			, intOrderUOMId					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intOrderUOMId ELSE NULL END
-			, dblQtyOrdered					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.dblQtyOrdered ELSE 1 END
+			, dblQtyOrdered					= 0
 			, intItemUOMId					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemUOMId ELSE IDTOADD.intItemUOMId END
 			, intPriceUOMId					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intPriceUOMId ELSE IDTOADD.intItemUOMId END
 			, dblQtyShipped					= IDTOADD.dblQtyShipped
