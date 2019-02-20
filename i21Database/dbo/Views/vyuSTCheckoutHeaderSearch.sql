@@ -5,20 +5,26 @@ SELECT DISTINCT
      , ST.intStoreNo
 	 , Chk.dtmCheckoutDate
 	 , Chk.intShiftNo
+	 , Chk.dtmShiftClosedDate
 	 , Chk.strCheckoutType
-	 , Chk.dblTotalSales
-	 , Chk.dblCashOverShort
-     , CASE 
+	 , CASE 
 			WHEN Inv.ysnPosted = 1
 				THEN 'Posted'
 			ELSE Chk.strCheckoutStatus
-	END AS strCheckoutStatus
-	, ST.intCompanyLocationId AS intStoreCompanyLocationId
-	, RolePerm.intCompanyLocationId AS intUserCompanyLocationId
-	, USec.ysnStoreManager AS ysnIsUserStoreManager
-	, USec.ysnAdmin AS ysnIsUserAdmin
-	, USec.strDashboardRole
-	, USec.intEntityId
+	 END AS strCheckoutStatus
+	 , Chk.dblCustomerCount
+	 , Chk.dblTotalSales
+	 , Chk.dblTotalTax
+	 , Chk.dblTotalPaidOuts
+	 , Chk.dblTotalToDeposit
+	 , Chk.dblTotalDeposits
+	 , Chk.dblCashOverShort   
+	 , ST.intCompanyLocationId AS intStoreCompanyLocationId
+	 , RolePerm.intCompanyLocationId AS intUserCompanyLocationId
+	 , USec.ysnStoreManager AS ysnIsUserStoreManager
+	 , USec.ysnAdmin AS ysnIsUserAdmin
+	 , USec.strDashboardRole
+	 , USec.intEntityId
 FROM tblSTCheckoutHeader Chk
 INNER JOIN tblSTStore ST
 	ON Chk.intStoreId = ST.intStoreId
