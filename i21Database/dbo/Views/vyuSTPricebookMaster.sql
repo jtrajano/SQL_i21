@@ -1,8 +1,7 @@
 ﻿CREATE VIEW dbo.vyuSTPricebookMaster
 AS
-SELECT 
-	ROW_NUMBER() OVER (ORDER BY IP.intItemPricingId, UOM.intItemUOMId ASC) AS intRowId 
-	, CAST(IP.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(UOM.intItemUOMId AS NVARCHAR(1000)) COLLATE Latin1_General_CI_AS AS strUniqueId
+SELECT
+	IL.intItemLocationId AS intUniqueId
 	, IP.intItemPricingId
 	, IP.dblSalePrice
 	, IP.dblLastCost
@@ -54,8 +53,3 @@ LEFT OUTER JOIN dbo.tblEMEntity AS Entity
 	ON Entity.intEntityId = IL.intVendorId 
 LEFT OUTER JOIN dbo.tblICItemVendorXref AS VX 
 	ON VX.intItemLocationId = IL.intItemLocationId
-
-
-
-
-
