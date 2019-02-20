@@ -542,7 +542,7 @@ FROM(
 		, null intTicketId
 		, '' AS ticketNumber
 	FROM (
-		SELECT CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+		SELECT CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
 			, S.strStorageTypeCode strDistributionOption
 			, CASE WHEN strType = 'From Transfer' THEN dblUnits
 					ELSE 0 END AS dblInQty
@@ -554,7 +554,7 @@ FROM(
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
 		INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
-		WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110)
+		WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmHistoryDate,110),110)
 			BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 			AND CS.intCommodityId = @intCommodityId
 			and CS.intItemId = isnull(@intItemId, CS.intItemId)
@@ -592,7 +592,7 @@ FROM(
 	FROM(
 
 		select
-				CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+				CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
 				,S.strStorageTypeCode strDistributionOption
 				, 0  AS dblInQty
 				,CASE WHEN strType = 'Settlement' THEN
@@ -609,7 +609,7 @@ FROM(
 			INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
 			INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
 
-			WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
+			WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmHistoryDate,110),110) BETWEEN
 									convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 								AND CS.intCommodityId= @intCommodityId
 								and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
@@ -621,6 +621,7 @@ FROM(
 				
 								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
 								AND strType IN ('Settlement','Reverse Settlement')
+								AND SH.intSettleStorageId IS NULL
 	) a
 
 	
