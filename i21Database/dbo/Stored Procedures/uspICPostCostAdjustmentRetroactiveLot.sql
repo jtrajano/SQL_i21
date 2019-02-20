@@ -415,6 +415,7 @@ BEGIN
 		WHERE	t.intItemId = @intItemId
 				AND t.intItemLocationId = @intItemLocationId			
 				AND ISNULL(t.ysnIsUnposted, 0) = 0 
+				AND t.dblQty <> 0 
 		ORDER BY 
 				tmp.intSort
 				,t.intInventoryTransactionId ASC 	
