@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuRKCurrencyExposureSearch
+﻿CREATE VIEW vyuRKCurrencyExposure
 
 AS
 
@@ -11,9 +11,13 @@ SELECT intCurrencyExposureId
 	, e.intCommodityId
 	, c.strCommodityCode
 	, dtmFutureClosingDate
-	, intCurrencyId
 	, cur.strCurrency
 	, e.intConcurrencyId
+	, cur.intCurrencyID intCurrencyId
+	,ic.intUnitMeasureId
+	,dblAP
+	,dblAR
+	,dblMoneyMarket
 FROM tblRKCurrencyExposure e
 LEFT JOIN tblICCommodity c ON c.intCommodityId = e.intCommodityId
 LEFT JOIN tblICUnitMeasure ic ON ic.intUnitMeasureId = e.intWeightUnit

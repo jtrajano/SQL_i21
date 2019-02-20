@@ -7349,6 +7349,14 @@
     <Build Include="dbo\Views\vyuSTCheckoutHeaderSearch.sql" />
     <Build Include="dbo\Views\vyuMFMachinesByCell.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSaveCurrencyExposure.sql" />
+    <Build Include="dbo\Views\vyuRKGetCurExpSummary.sql" />
+    <Build Include="dbo\Views\vyuRKCurrencyExposure.sql" />
+    <Build Include="dbo\Views\vyuRKGetBankBalance.sql" />
+    <Build Include="dbo\Views\vyuRKGetMoneyMarket.sql" />
+    <Build Include="dbo\Views\vyuRKGetNonOTC.sql" />
+    <Build Include="dbo\Views\vyuRKGetOTC.sql" />
+    <Build Include="dbo\Views\vyuRKGetStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

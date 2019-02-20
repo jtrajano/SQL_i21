@@ -62,3 +62,9 @@ EXEC uspRKSyncCommodityMarketAttribute -- saving to an RM table with constraint 
 GO
 PRINT('/*******************  END Syncing Commodity Attributes to RM *******************/')
 GO
+IF NOT EXISTS (SELECT 1 FROM tblSMStartingNumber WHERE ISNULL(strTransactionType, '') = 'Currency Exposure' and strModule='Risk Management')
+BEGIN
+	INSERT INTO tblSMStartingNumber (strTransactionType,intNumber,strPrefix,strModule,ysnUseLocation,ysnResetNumber,dtmResetDate,ysnEnable,intConcurrencyId) 
+	VALUES('Currency Exposure',1,'','Risk Management',0,0,getdate(),1,1)
+END
+GO
