@@ -36,6 +36,18 @@ BEGIN
 							WHEN (strPrimarySortOptions = 'Miscellaneous')
 							THEN 'Vehicle'
 						END)
+	
+
+	UPDATE tblCFInvoiceHistoryStagingTable 
+	SET 
+	strDetailDisplay = (CASE 
+							WHEN (strPrimarySortOptions = 'Card')
+							THEN 'Vehicle'
+							WHEN (strPrimarySortOptions = 'Vehicle')
+							THEN 'Card'
+							WHEN (strPrimarySortOptions = 'Miscellaneous')
+							THEN 'Vehicle'
+						END)
 	---CF-2064---
 
 
