@@ -35,6 +35,7 @@
 	,@strProductAuthorization		NVARCHAR(MAX)	 =	 ''
 	,@strComment					NVARCHAR(MAX)	 =	 ''
 	,@strDefaultDriverPrin			NVARCHAR(MAX)	 =	 ''
+	,@strCardNotation				NVARCHAR(MAX)	 =	 ''
 
 AS
 BEGIN
@@ -281,7 +282,6 @@ BEGIN
 	END
 
 
-	
 	---------------------------------------------------------
 	
 	IF(@ysnHasError = 1)
@@ -397,6 +397,7 @@ BEGIN
 			 ,strComment
 			 ,intProductAuthId
 			 ,intDefaultDriverPin
+			 ,strCardNotation
 			 )
 			VALUES(
 			  @intNetworkId					
@@ -426,6 +427,7 @@ BEGIN
 			 ,@strComment
 			 ,@intProductAuthId
 			 ,@intDriverPinId
+			 ,@strCardNotation
 			 )
 
 			COMMIT TRANSACTION
