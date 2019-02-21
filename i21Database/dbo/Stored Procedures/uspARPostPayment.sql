@@ -984,7 +984,11 @@ IF @recap = 0
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			IF EXISTS(SELECT TOP 1 NULL FROM @InvalidGLEntries)
+				SELECT TOP 1 @ErrorMerssage = strText FROM @InvalidGLEntries
+			ELSE
+				SELECT @ErrorMerssage = ERROR_MESSAGE()
+			
 			GOTO Do_Rollback
 		END CATCH	
 		 
