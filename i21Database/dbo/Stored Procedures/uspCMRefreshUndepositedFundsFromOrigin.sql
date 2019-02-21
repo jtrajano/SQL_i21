@@ -71,7 +71,7 @@ SELECT
 		,strPaymentSource = '' COLLATE Latin1_General_CI_AS  
 		,strEODNumber = ''  COLLATE Latin1_General_CI_AS  
 		,strEODDrawer = '' COLLATE Latin1_General_CI_AS   
-		,ysnEODCompleted = NULL
+		,ysnEODComplete = NULL
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
 WHERE	b.intBankAccountId = @intBankAccountId
@@ -104,7 +104,7 @@ UNION SELECT DISTINCT
 	strPaymentSource,			
 	strEODNumber,
 	strEODDrawer = strDrawerName,		
-    ysnEODCompleted = ysnCompleted 		
+    ysnEODComplete = ysnCompleted 		
 FROM vyuARUndepositedPayment v LEFT JOIN tblCMBankAccount b
 			ON b.intBankAccountId = v.intBankAccountId --OR ISNULL(v.intBankAccountId,0) = 0 --Include payments without bank account
 WHERE	v.intBankAccountId = @intBankAccountId
@@ -129,6 +129,10 @@ INSERT INTO tblCMUndepositedFund (
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,strPaymentSource
+		,strEODNumber
+		,strEODDrawer
+    	,ysnEODComplete
 )
 SELECT 
 intBankAccountId
@@ -144,6 +148,10 @@ intBankAccountId
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,strPaymentSource
+		,strEODNumber
+		,strEODDrawer
+    	,ysnEODComplete 
 FROM CTE
 WHERE dblAmount <> 0
 
