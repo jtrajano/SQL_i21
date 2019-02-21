@@ -120,16 +120,21 @@ BEGIN TRY
 		,TR.intSequenceNo
 	FROM tblQMSample S
 	INNER JOIN tblICItem I ON I.intItemId = S.intItemId
+		AND S.intSampleId = @intSampleId
 	INNER JOIN tblQMTestResult TR ON TR.intSampleId = S.intSampleId
 	INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 	INNER JOIN tblQMTest T ON T.intTestId = TR.intTestId
 	INNER JOIN tblQMProduct PRD ON PRD.intProductId = TR.intProductId
+	INNER JOIN tblQMProductProperty PP ON PP.intProductId = PRD.intProductId
+		AND PP.intTestId = TR.intTestId
+		AND PP.intPropertyId = TR.intPropertyId
+		AND PP.ysnPrintInLabel = 1
 	LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId and LD.intItemId =S.intItemId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
 	LEFT JOIN tblEMEntity E ON EL.intEntityId = E.intEntityId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = ISNULL(LD.intSCompanyLocationId, S.intLocationId)
-	WHERE S.intSampleId = @intSampleId
+	--WHERE S.intSampleId = @intSampleId
 	GROUP BY strItemNo
 		,I.strDescription
 		,strLoadNumber
