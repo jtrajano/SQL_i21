@@ -369,8 +369,7 @@ BEGIN TRY
 		LEFT JOIN tblICCommodityAttribute		CA2				 ON CA2.intCommodityAttributeId		 = Item.intGradeId
 		AND	CA2.strType						 = 'Grade'
 		LEFT JOIN tblAPBillDetail BillDetail					 ON BillDetail.intContractDetailId   = CD.intContractDetailId 
-																	AND   BillDetail.intItemId       = CD.intItemId
-																	AND ISNULL(BillDetail.intLoadDetailId,0)   = ISNULL(LoadDetail.intLoadDetailId,0)
+																	AND   BillDetail.intItemId       = CD.intItemId																	
 		LEFT JOIN tblAPBill Bill								 ON Bill.intBillId					 = BillDetail.intBillId 
         LEFT JOIN 	tblSMCountry				OG				 ON	OG.intCountryID					 = CA.intCountryID
 		LEFT JOIN tblARMarketZone				MZ				 ON MZ.intMarketZoneId				 = CD.intMarketZoneId
