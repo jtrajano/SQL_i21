@@ -189,18 +189,24 @@ AS SELECT
 	,SMS.intEntityId AS intUserId
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 	,tblSCTicketFormat.ysnSuppressCashPrice
+	,Origin.strLocationName as strOriginLocationName
+	,OriginSubLocation.strSubLocationName as strOriginSubLocation
+	,OriginStorageLocation.strName as strOriginStorageLocation
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
   LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = SC.intSplitId
   LEFT JOIN tblSCScaleSetup tblSCScaleSetup on tblSCScaleSetup.intScaleSetupId = SC.intScaleSetupId
-  LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intProcessingLocationId
+  LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intTransferLocationId
+  LEFT JOIN tblSMCompanyLocation Origin on Origin.intCompanyLocationId = SC.intProcessingLocationId
   LEFT JOIN tblSCListTicketTypes tblSCListTicketTypes on (tblSCListTicketTypes.intTicketType = SC.intTicketType AND tblSCListTicketTypes.strInOutIndicator = SC.strInOutFlag)
   LEFT JOIN tblGRStorageType tblGRStorageType on tblGRStorageType.strStorageTypeCode = SC.strDistributionOption
   LEFT JOIN tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation on tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationId
+  LEFT JOIN tblSMCompanyLocationSubLocation OriginSubLocation on OriginSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationId
   LEFT JOIN tblSCTicketPool tblSCTicketPool on tblSCTicketPool.intTicketPoolId = SC.intTicketPoolId
   LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SC.intDiscountId
   LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
+  LEFT JOIN tblICStorageLocation OriginStorageLocation on OriginStorageLocation.intStorageLocationId = SC.intStorageLocationId
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
   LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
   LEFT JOIN tblICInventoryShipment tblICInventoryShipment on tblICInventoryShipment.intInventoryShipmentId = SC.intInventoryShipmentId
