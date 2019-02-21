@@ -32,6 +32,13 @@ BEGIN
 	BEGIN
 		SET @intVendorId = NULL
 	END
+
+	SELECT intCompanyLocationId
+	INTO #LicensedLocation
+	FROM tblSMCompanyLocation
+	WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1
+										WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0
+										ELSE ISNULL(ysnLicensed, 0) END
 	
 	DECLARE @strCommodityCode NVARCHAR(50)
 
@@ -433,10 +440,7 @@ BEGIN
 				FROM @tblGetOpenContractDetail CD
 				WHERE intContractTypeId IN (1,2) AND CD.intCommodityId = @intCommodityId
 					AND CD.intContractStatusId <> 3
-					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																					ELSE ISNULL(ysnLicensed, 0) END)
+					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					AND intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intLocationId END
 					AND  CD.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN CD.intEntityId ELSE @intVendorId END
 				) t
@@ -509,10 +513,7 @@ BEGIN
 				WHERE th.intCommodityId IN (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
 					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 					AND e.intEntityId = ISNULL(@intVendorId, e.intEntityId)
-					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																					ELSE isnull(ysnLicensed, 0) END)
+					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			) t
 			
 			--Option NetHEdge
@@ -580,10 +581,7 @@ BEGIN
 				AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 				AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 				AND e.intEntityId = ISNULL(@intVendorId, e.intEntityId)
-				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-											WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																				WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																				ELSE isnull(ysnLicensed, 0) END)
+				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
 			--Net Hedge option end
 			DECLARE @intUnitMeasureId int
