@@ -10,6 +10,8 @@
 AS
 
 BEGIN
+	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+
 	IF ISNULL(@strPurchaseSales, '') <> ''
 	BEGIN
 		IF @strPurchaseSales = 'Purchase'
