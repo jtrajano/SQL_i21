@@ -15,14 +15,14 @@ IF ISNULL(@InvoiceIds, '') <> ''
 	BEGIN
 		DECLARE @ServiceChargeToForgive TABLE (intInvoiceId INT, strInvoiceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS, dtmForgiveDate DATETIME NULL)
 		DECLARE @ServiceChargeHasPayments NVARCHAR(MAX)
-
+		DECLARE @dtmDateToday DATETIME = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
 		DECLARE @strBatchId VARCHAR(16)
 		EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT, NULL --get starting number for Batch
 
 		INSERT INTO @ServiceChargeToForgive
 		SELECT SCI.intInvoiceId
 			 , SCI.strInvoiceNumber
-			 , DV.dtmForgiveDate
+			 , CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), DV.dtmForgiveDate)))
 		FROM @ServiceChargeParam DV
 		INNER JOIN (
 			SELECT intInvoiceId
@@ -57,7 +57,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 
 			UPDATE INV
 			SET INV.ysnForgiven = @ysnForgive,
-				INV.dtmForgiveDate =  CASE WHEN @ysnForgive = 1 THEN ISNULL(SCI.dtmForgiveDate, GETDATE()) ELSE NULL END
+				INV.dtmForgiveDate =  CASE WHEN @ysnForgive = 1 THEN ISNULL(SCI.dtmForgiveDate, @dtmDateToday) ELSE NULL END
 			FROM tblARInvoice INV
 			INNER JOIN @ServiceChargeToForgive SCI ON INV.intInvoiceId = SCI.intInvoiceId
 			WHERE INV.ysnPosted = 1
@@ -176,7 +176,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				, ysnRevalued
 			)
 			SELECT intCompanyId					= GL.intCompanyId
-				, dtmDate						=  ISNULL(SCI.dtmForgiveDate, GETDATE())
+				, dtmDate						= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 				, strBatchId					= @strBatchId
 				, intAccountId					= GL.intAccountId
 				, dblDebit						= CASE WHEN @ysnForgive = 0 THEN GL.dblDebit ELSE GL.dblCredit END
@@ -188,7 +188,7 @@ IF ISNULL(@InvoiceIds, '') <> ''
 				, strReference					= GL.strReference
 				, intCurrencyId					= GL.intCurrencyId
 				, dblExchangeRate				= GL.dblExchangeRate
-				, dtmDateEntered				= GETDATE()
+				, dtmDateEntered				= @dtmDateToday
 				, dtmTransactionDate			= GL.dtmTransactionDate
 				, strJournalLineDescription		= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge' ELSE 'Forgiven Service Charge' END
 				, intJournalLineNo				= GL.intJournalLineNo
