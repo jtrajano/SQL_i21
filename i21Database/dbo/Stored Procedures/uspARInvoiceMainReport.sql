@@ -140,6 +140,7 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 										END
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN ISNULL(COMPANYPREFERENCE.strTankDeliveryInvoiceFormat, 'Standard')
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN ISNULL(COMPANYPREFERENCE.strTransportsInvoiceFormat, 'Standard')
+								   WHEN INVOICE.strType IN ('Meter Billing') THEN 'Meter Billing'
 								   ELSE ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard')
 							   END								
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)

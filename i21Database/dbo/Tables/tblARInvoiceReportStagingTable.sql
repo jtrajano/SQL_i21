@@ -46,6 +46,7 @@
 	[strItem]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strItemDescription]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strUnitMeasure]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strUnitMeasureSymbol]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strPaid]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strPosted]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strTaxCode]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

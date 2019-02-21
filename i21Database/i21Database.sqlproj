@@ -7362,6 +7362,8 @@
     <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCard.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceMeterBillingReport.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailMeterBillingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

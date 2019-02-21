@@ -53,6 +53,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strItem
 	 , strItemDescription
 	 , strUnitMeasure
+	 , strUnitMeasureSymbol
 	 , dblQtyShipped
 	 , dblQtyOrdered
 	 , dblDiscount
@@ -162,6 +163,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
+	 , strUnitMeasureSymbol		= INVOICEDETAIL.strSymbol
 	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblQtyShipped, 0) END
 								  ELSE NULL END
@@ -252,6 +254,7 @@ LEFT JOIN (
 		 , ID.strVFDDocumentNumber
 		 , ID.strSCInvoiceNumber
 		 , UOM.strUnitMeasure
+		 , UOM.strSymbol
 		 , CONTRACTS.dblBalance
 		 , CONTRACTS.strContractNumber
 		 , CONTRACTS.strCustomerContract
@@ -290,7 +293,8 @@ LEFT JOIN (
 		SELECT intItemUOMId
 			 , intItemId
 			 , strUnitMeasure
-		FROM dbo. vyuARItemUOM WITH (NOLOCK)
+			 , strSymbol
+		FROM dbo.vyuARItemUOM WITH (NOLOCK)
 	) UOM ON ID.intItemUOMId = UOM.intItemUOMId
 	     AND ID.intItemId = UOM.intItemId
 	LEFT JOIN (
