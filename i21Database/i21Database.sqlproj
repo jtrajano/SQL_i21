@@ -7284,6 +7284,7 @@
     <Build Include="dbo\Views\vyuRKGetStock.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
+    <Build Include="dbo\Functions\fnRKGetAdditionalColumnForDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
