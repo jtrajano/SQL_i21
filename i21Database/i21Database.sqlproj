@@ -7359,6 +7359,7 @@
     <Build Include="dbo\Views\vyuRKGetStock.sql" />
     <Build Include="dbo\Views\vyuARCustomerAddressLabelReport.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
+    <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7569,7 +7570,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecalcTrialBalance.sql" />
     <None Include="Scripts\Post-Deployment\LG\2_DataFixes.sql" />
-	<Build Include="dbo\Stored Procedures\uspMBImportMeterReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBImportMeterReading.sql" />
     <Build Include="dbo\Tables\tblMBImportMeterReadingDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMBImportMeterReadingPost.sql" />
   </ItemGroup>
