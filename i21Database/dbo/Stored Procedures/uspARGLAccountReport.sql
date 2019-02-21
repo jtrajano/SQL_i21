@@ -12,7 +12,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @dtmAsOfDateLocal	DATETIME = @dtmAsOfDate
 
 IF @dtmAsOfDateLocal IS NULL
-    SET @dtmAsOfDateLocal = GETDATE()
+    SET @dtmAsOfDateLocal = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
 
 DELETE FROM tblARGLSummaryStagingTable WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARGLSummaryStagingTable
@@ -33,7 +33,7 @@ FROM (
 		INNER JOIN vyuGLAccountDetail GLAD ON GLD.intAccountId = GLAD.intAccountId
 			AND GLAD.strAccountCategory = 'AR Account'
 	WHERE GLD.ysnIsUnposted = 0
-	AND GLD.dtmDate <= @dtmAsOfDateLocal
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GLD.dtmDate))) <= @dtmAsOfDateLocal
 	GROUP BY GLD.intAccountId, GLAD.strAccountId, strAccountCategory
 	HAVING ISNULL(SUM(dblDebit) - SUM(dblCredit), 0) <> 0.00
 
@@ -47,7 +47,7 @@ FROM (
 		INNER JOIN vyuGLAccountDetail GLAD ON GLD.intAccountId = GLAD.intAccountId
 			AND GLAD.strAccountCategory = 'Customer Prepayments'
 	WHERE GLD.ysnIsUnposted = 0
-	AND GLD.dtmDate <= @dtmAsOfDateLocal
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), GLD.dtmDate))) <= @dtmAsOfDateLocal
 	GROUP BY GLD.intAccountId, GLAD.strAccountId, strAccountCategory
 	HAVING ISNULL(SUM(dblDebit) - SUM(dblCredit), 0) <> 0.00
 ) GL
