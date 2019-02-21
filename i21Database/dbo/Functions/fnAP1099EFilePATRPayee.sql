@@ -32,75 +32,95 @@ BEGIN
 		-- + CASE WHEN ISNULL(A.dblDividends,0) IS NOT NULL THEN REPLICATE('0',192) -- ALL ZEROS WHEN DIRECT SALES SEE PAGE 53
 		--   ELSE
 		+ CASE WHEN ISNULL(A.dblDividends,0) > @maxAmount --See PAGE 65 for amount codes, PAGE 75 for values
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblDividends,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
 			END
-			+ CASE WHEN ISNULL(A.dblNonpatronage,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
-			+ CASE WHEN ISNULL(A.dblPerUnit,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
-			+ CASE WHEN ISNULL(A.dblFederalTax,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
-			+ CASE WHEN ISNULL(A.dblRedemption,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
-			+ CASE WHEN ISNULL(A.dblDomestic,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
-			+ CASE WHEN ISNULL(A.dblInvestment,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
-			+ CASE WHEN ISNULL(A.dblOpportunity,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
-			+ CASE WHEN ISNULL(A.dblAMT,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
-			+ CASE WHEN ISNULL(A.dblOther,0) > @maxAmount 
-				THEN dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100))) 
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(@maxAmount - CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-				ELSE 
-					dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))
-					+ REPLICATE('0',12 - LEN(dbo.fnAPRemoveSpecialChars(CAST(CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)) AS NVARCHAR(100)))))
-			END
+		+ CASE WHEN ISNULL(A.dblNonpatronage,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblNonpatronage,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
+		+ CASE WHEN ISNULL(A.dblPerUnit,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblPerUnit,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
+		+ CASE WHEN ISNULL(A.dblFederalTax,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalTax,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
+		+ CASE WHEN ISNULL(A.dblRedemption,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblRedemption,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
+		+ CASE WHEN ISNULL(A.dblDomestic,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblDomestic,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
+		+ CASE WHEN ISNULL(A.dblInvestment,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblInvestment,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
+		+ CASE WHEN ISNULL(A.dblOpportunity,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblOpportunity,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
+		+ CASE WHEN ISNULL(A.dblAMT,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblAMT,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
+		+ CASE WHEN ISNULL(A.dblOther,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblOther,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+		END
 		-- + ' '
 		+ REPLICATE('0',12) --B
 		+ REPLICATE('0',12) --C
