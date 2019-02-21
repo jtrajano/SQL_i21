@@ -1635,7 +1635,7 @@ BEGIN TRY
 								@amount = @dblTotal,
 								@requireApproval = @requireApproval OUTPUT
 					
-					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
+					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0 AND @ysnDPOwnedType = 0
 					BEGIN
 							EXEC [dbo].[uspAPPostBill] 
 								 @post = 1
