@@ -44,8 +44,12 @@ Declare @tblItem table
 	dblRecipeItemQty numeric(38,20),
 	strRecipeItemUOM nvarchar(50),
 	strConsumptionStorageLocation nvarchar(50),
-	intConsumptionMethodId int
-
+	intConsumptionMethodId int,
+	ysnHandAddIngredient BIT,
+	intRecipeId INT,
+	intConsumptionStorageLocationId INT,
+	intManufacturingProcessId INT,
+	strBlendItemLotTracking NVARCHAR(50)
 )
 
 --Get the Comma Separated Work Order Ids into a table
