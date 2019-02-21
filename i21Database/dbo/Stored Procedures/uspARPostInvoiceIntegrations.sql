@@ -1113,10 +1113,13 @@ SELECT
 	,[intLoadDetailId]				= ID.[intLoadDetailId]
 	,[ysnLeaseBilling]				= ID.[ysnLeaseBilling]				
 FROM
-	#ARPostInvoiceDetail ID	
+	#ARPostInvoiceDetail ID
 JOIN
+	tblCTContractDetail CD
+		ON ID.[intContractDetailId] = CD.[intContractDetailId]	
+LEFT JOIN
 	tblCTContractHeader CH
-		ON ID.intContractHeaderId = CH.intContractHeaderId
+		ON CD.intContractHeaderId = CH.intContractHeaderId
 WHERE
 	--ID.[intInventoryShipmentItemId] IS NULL AND
 	ID.[intInventoryShipmentChargeId] IS NULL
