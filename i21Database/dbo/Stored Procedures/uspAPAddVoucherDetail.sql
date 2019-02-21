@@ -28,9 +28,37 @@ IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
 --MAKE SURE TO ADD FIRST TO THE PAYABLES THE VOUCHER DETAIL BEING ADDED
---STORED PROCEDURE uspAPUpdateVoucherPayableQty WILL CHECK FIRST IF IT IS ALREADY ADDED, 
---IF ALREADY ADDED, THIS WILL REMOVE THE EXISTING AND RE-INSERT THE NEW
-EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherDetails, @voucherPayableTax = @voucherPayableTax, @post = 1, @throwError = @throwError, @error = @error OUT
+IF NOT EXISTS(
+	SELECT TOP 1 1
+		FROM tblAPVoucherPayable A
+		INNER JOIN @voucherDetails C
+			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
+			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
+			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
+			--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
+			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
+			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+	)
+	AND NOT EXISTS(
+		SELECT TOP 1 1
+		FROM tblAPVoucherPayableCompleted A
+		INNER JOIN @voucherDetails C
+			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
+			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
+			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
+			--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
+			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
+			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+	)
+BEGIN
+	EXEC uspAPAddVoucherPayable @voucherPayable = @voucherDetails, @voucherPayableTax = @voucherPayableTax, @throwError = 1
+END
 
 --uspAPUpdateVoucherPayableQty updates the tblAPVoucherPayable table for valid payables only
 --make sure to add on tblAPBillDetail the valid payables
