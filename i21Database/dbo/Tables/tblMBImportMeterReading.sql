@@ -2,16 +2,11 @@
 (
 	[intImportMeterReadingId] INT NOT NULL IDENTITY,
 	[guidImportIdentifier] UNIQUEIDENTIFIER NOT NULL,
-	[intMeterCustomerId] INT NOT NULL,
-    [intMeterNumber] INT NOT NULL,
-	[dtmTransactionDate] DATETIME NOT NULL,
-    [dblCurrentReading] NUMERIC(18, 6) NULL, 
-    [dblCurrentAmount] NUMERIC(18, 6) NULL,
+	[intImportFileHeaderId] INT NOT NULL,
 	[intUserId] INT NOT NULL,
-	[dtmDate] DATETIME NOT NULL,
-	[ysnValid] BIT NOT NULL,
-	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	CONSTRAINT [PK_tblMBImportMeterReading] PRIMARY KEY ([intImportMeterReadingId])
+	[dtmImportDate] DATETIME NOT NULL,
+	CONSTRAINT [PK_tblMBImportMeterReading] PRIMARY KEY ([intImportMeterReadingId]),
+	CONSTRAINT [FK_tblMBImportMeterReading_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )
 GO
 
