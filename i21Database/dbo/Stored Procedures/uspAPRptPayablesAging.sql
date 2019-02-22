@@ -362,7 +362,7 @@ SET @query = '
 	,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
 	,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 	,A.intAccountId
-	--,tmpAgingSummaryTotal.strAccountId
+	,D.strAccountId
 	,tmpAgingSummaryTotal.dblTotal
 	,tmpAgingSummaryTotal.dblAmountPaid
 	,tmpAgingSummaryTotal.dblDiscount
