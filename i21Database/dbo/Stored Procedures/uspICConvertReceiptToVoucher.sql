@@ -131,7 +131,7 @@ BEGIN
 	)
 	SELECT 
 		[intEntityVendorId]			
-		,[intTransactionType] = @ReceiptType
+		,[intTransactionType]
 		,[intLocationId]	
 		,[intShipToId] = NULL	
 		,[intShipFromId] = NULL	 		
