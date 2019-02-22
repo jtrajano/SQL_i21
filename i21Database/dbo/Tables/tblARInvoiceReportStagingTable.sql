@@ -55,6 +55,7 @@
 	[strItemComments]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strItemType]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strVFDDocumentNumber]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strBOLNumberDetail]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strProvisional]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerComments]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strTicketNumbers]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

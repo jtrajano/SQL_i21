@@ -23,6 +23,7 @@
 	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
+	,@ItemBOLNumber					NVARCHAR(50)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -166,6 +167,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemUnitPrice					= @ItemUnitPrice
 			,@ItemPricing					= @ItemPricing
 			,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
+			,@ItemBOLNumber					= @ItemBOLNumber
 			,@RefreshPrice					= @RefreshPrice
 			,@ItemMaintenanceType			= @ItemMaintenanceType
 			,@ItemFrequency					= @ItemFrequency
@@ -410,6 +412,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblUnitPrice]
 				,[strPricing]
 				,[strVFDDocumentNumber]
+				,[strBOLNumberDetail]
 				,[intSiteId]
 				,[strBillingBy]
 				,[dblNewMeterReading]
@@ -492,6 +495,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemUnitPrice
 				,@ItemPricing
 				,@ItemVFDDocumentNumber
+				,@ItemBOLNumber
 				,@ItemSiteId
 				,@ItemBillingBy
 				,@ItemNewMeterReading
@@ -618,6 +622,8 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
             ,@ItemAddonDetailKey            = @ItemAddonDetailKey
             ,@ItemAddonParent               = @ItemAddonParent
             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+			,@ItemBOLNumber					= @ItemBOLNumber
+			
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					IF ISNULL(@RaiseError,0) = 0

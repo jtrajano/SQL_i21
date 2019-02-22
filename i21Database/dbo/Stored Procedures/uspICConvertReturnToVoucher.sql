@@ -19,6 +19,7 @@ DECLARE @intEntityVendorId AS INT
 
 		
 		,@voucherItems AS VoucherPayable
+		,@voucherItemsTax AS VoucherDetailTax
 		--,@voucherItems AS VoucherDetailReceipt 
 		--,@voucherOtherCharges AS VoucherDetailReceiptCharge 
 		--,@voucherDetailClaim AS VoucherDetailClaim
@@ -208,37 +209,44 @@ BEGIN
 					AND IRI.intOwnershipType = @Own
 					AND rtnVendor.intEntityVendorId = @intEntityVendorId
 					AND ISNULL(IR.strReceiptType, '') = 'Inventory Return'
-			--INSERT INTO @voucherItems (
-			--		[intInventoryReceiptType]
-			--		,[intInventoryReceiptItemId]
-			--		,[dblQtyReceived]
-			--		,[dblCost]
-			--		,[intTaxGroupId]
-			--)
-			--SELECT 
-			--		[intInventoryReceiptType] = 
-			--			CASE 
-			--				WHEN r.strReceiptType = 'Direct' THEN 1
-			--				WHEN r.strReceiptType = 'Purchase Contract' THEN 2
-			--				WHEN r.strReceiptType = 'Purchase Order' THEN 3
-			--				WHEN r.strReceiptType = 'Transfer Order' THEN 4
-			--				WHEN r.strReceiptType = 'Inventory Return' THEN 4
-			--				ELSE NULL 
-			--			END 
-			--		,[intInventoryReceiptItemId] = ri.intInventoryReceiptItemId
-			--		,[dblQtyReceived] = ri.dblOpenReceive - ri.dblBillQty
-			--		,[dblCost] = ri.dblUnitCost
-			--		,[intTaxGroupId] = ri.intTaxGroupId
-			--FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-			--			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			--		INNER JOIN #tmpReturnVendors rtnVendor
-			--			ON rtnVendor.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-			--WHERE	r.ysnPosted = 1
-			--		AND r.intInventoryReceiptId = @intReceiptId
-			--		AND ri.dblBillQty < ri.dblOpenReceive 
-			--		AND ri.intOwnershipType = @Own
-			--		AND rtnVendor.intEntityVendorId = @intEntityVendorId
-			--		AND ISNULL(r.strReceiptType, '') = 'Inventory Return'
+		END 
+
+
+		BEGIN 
+			DELETE FROM @voucherItemsTax
+			INSERT INTO @voucherItemsTax(
+			[intVoucherPayableId]
+			,[intTaxGroupId]				
+			,[intTaxCodeId]				
+			,[intTaxClassId]				
+			,[strTaxableByOtherTaxes]	
+			,[strCalculationMethod]		
+			,[dblRate]					
+			,[intAccountId]				
+			,[dblTax]					
+			,[dblAdjustedTax]			
+			,[ysnTaxAdjusted]			
+			,[ysnSeparateOnBill]			
+			,[ysnCheckOffTax]		
+			,[ysnTaxExempt]	
+			,[ysnTaxOnly]
+		)
+		SELECT [intVoucherPayableId]
+				,[intTaxGroupId]				
+				,[intTaxCodeId]				
+				,[intTaxClassId]				
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[intAccountId]				
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[ysnTaxAdjusted]			
+				,[ysnSeparateOnBill]			
+				,[ysnCheckOffTax]		
+				,[ysnTaxExempt]	
+				,[ysnTaxOnly]	
+		FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
 		END 
 
 		-- Check if we can convert the RTN to Debit Memo
@@ -263,6 +271,7 @@ BEGIN
 
 			EXEC [dbo].[uspAPCreateVoucher]
 				@voucherPayables = @voucherItems
+				,@voucherPayableTax = @voucherItemsTax
 				,@userId = @intEntityVendorId
 				,@throwError = 0
 				,@error = @throwedError OUTPUT

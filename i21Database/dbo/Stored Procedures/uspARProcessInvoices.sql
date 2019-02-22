@@ -240,6 +240,7 @@ DECLARE  @Id									INT
 		,@ItemUnitPrice							NUMERIC(18, 6)
 		,@ItemPricing							NVARCHAR(250)
 		,@ItemVFDDocumentNumber					NVARCHAR(100)
+		,@ItemBOLNumber							NVARCHAR(50)
 		,@RefreshPrice							BIT
 		,@ItemMaintenanceType					NVARCHAR(25)
 		,@ItemFrequency							NVARCHAR(25)
@@ -416,6 +417,7 @@ BEGIN
 		,@ItemUnitPrice					= (CASE WHEN @GroupingOption = 0 THEN [dblUnitPrice] ELSE NULL END)
 		,@ItemPricing					= (CASE WHEN @GroupingOption = 0 THEN [strPricing] ELSE NULL END)
 		,@ItemVFDDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strVFDDocumentNumber] ELSE NULL END)
+		,@ItemBOLNumber					= (CASE WHEN @GroupingOption = 0 THEN [strBOLNumberDetail] ELSE NULL END)
 		,@RefreshPrice					= (CASE WHEN @GroupingOption = 0 THEN [ysnRefreshPrice] ELSE 0 END)
 		,@ItemMaintenanceType			= (CASE WHEN @GroupingOption = 0 THEN [strMaintenanceType] ELSE NULL END)
 		,@ItemFrequency					= (CASE WHEN @GroupingOption = 0 THEN [strFrequency] ELSE NULL END)
@@ -830,6 +832,7 @@ BEGIN
 					,@ItemUnitPrice					= [dblUnitPrice]
 					,@ItemPricing					= CASE WHEN ISNULL([strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + strSourceTransaction COLLATE Latin1_General_CI_AS ELSE [strPricing] COLLATE Latin1_General_CI_AS END
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
+					,@ItemBOLNumber					= [strBOLNumberDetail]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
@@ -925,6 +928,7 @@ BEGIN
 						,@ItemUnitPrice					= @ItemUnitPrice
 						,@ItemPricing					= @ItemPricing
 						,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
+						,@ItemBOLNumber					= @ItemBOLNumber
 						,@RefreshPrice					= @RefreshPrice
 						,@ItemMaintenanceType			= @ItemMaintenanceType
 						,@ItemFrequency					= @ItemFrequency
@@ -1596,6 +1600,7 @@ BEGIN TRY
 						,@ItemUnitPrice					= [dblUnitPrice]
 						,@ItemPricing					= [strPricing] 
 						,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
+						,@ItemBOLNumber					= [strBOLNumberDetail]
 						,@RefreshPrice					= [ysnRefreshPrice]
 						,@ItemMaintenanceType			= [strMaintenanceType]
 						,@ItemFrequency					= [strFrequency]
@@ -1687,6 +1692,7 @@ BEGIN TRY
 							,@ItemUnitPrice					= @ItemUnitPrice
 							,@ItemPricing					= @ItemPricing
 							,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
+							,@ItemBOLNumber					= @ItemBOLNumber
 							,@RefreshPrice					= @RefreshPrice
 							,@ItemMaintenanceType			= @ItemMaintenanceType
 							,@ItemFrequency					= @ItemFrequency
@@ -1915,6 +1921,7 @@ BEGIN TRY
 					,@ItemUnitPrice					= [dblUnitPrice]
 					,@ItemPricing					= [strPricing] 
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
+					,@ItemBOLNumber					= [strBOLNumberDetail]
 					,@RefreshPrice					= [ysnRefreshPrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
@@ -2077,6 +2084,7 @@ BEGIN TRY
 																  END
 						,[strPricing]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPricing ELSE [strPricing] END							
 						,[strVFDDocumentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVFDDocumentNumber ELSE [strVFDDocumentNumber] END
+						,[strBOLNumberDetail]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemBOLNumber ELSE [strBOLNumberDetail] END
 						,[strMaintenanceType]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceType ELSE [strMaintenanceType] END
 						,[strFrequency]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemFrequency ELSE [strFrequency] END					
 						,[dtmMaintenanceDate]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceDate ELSE [dtmMaintenanceDate] END			

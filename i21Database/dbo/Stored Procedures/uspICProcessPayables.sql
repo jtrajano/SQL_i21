@@ -63,7 +63,7 @@ BEGIN
 	)
 	SELECT 
 		[intEntityVendorId]			
-		,[intTransactionType] = @ReceiptType
+		,[intTransactionType]
 		,[intLocationId]	
 		,[intShipToId] = NULL	
 		,[intShipFromId] = NULL	 		
@@ -92,8 +92,8 @@ BEGIN
 		,[dblOrderUnitQty] = 0.00					
 		,[intOrderUOMId] = NULL	 				
 		,[dblQuantityToBill]				
-		,[dblQtyToBillUnitQty] = NULL				
-		,[intQtyToBillUOMId] = NULL				
+		,[dblQtyToBillUnitQty]				
+		,[intQtyToBillUOMId]				
 		,[dblCost] = dblUnitCost							
 		,[dblCostUnitQty]					
 		,[intCostUOMId]						
@@ -114,6 +114,41 @@ BEGIN
 		,[ysnReturn]	 
 	FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost)
 	
+
+	INSERT INTO @voucherPayableTax(
+		[intVoucherPayableId]
+		,[intTaxGroupId]				
+		,[intTaxCodeId]				
+		,[intTaxClassId]				
+		,[strTaxableByOtherTaxes]	
+		,[strCalculationMethod]		
+		,[dblRate]					
+		,[intAccountId]				
+		,[dblTax]					
+		,[dblAdjustedTax]			
+		,[ysnTaxAdjusted]			
+		,[ysnSeparateOnBill]			
+		,[ysnCheckOffTax]		
+		,[ysnTaxExempt]	
+		,[ysnTaxOnly]
+	)
+	SELECT	[intVoucherPayableId]
+			,[intTaxGroupId]				
+			,[intTaxCodeId]				
+			,[intTaxClassId]				
+			,[strTaxableByOtherTaxes]	
+			,[strCalculationMethod]		
+			,[dblRate]					
+			,[intAccountId]				
+			,[dblTax]					
+			,[dblAdjustedTax]			
+			,[ysnTaxAdjusted]			
+			,[ysnSeparateOnBill]			
+			,[ysnCheckOffTax]		
+			,[ysnTaxExempt]	
+			,[ysnTaxOnly]
+	FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
+
 	IF @ysnPost = 1
 	BEGIN
 		EXEC dbo.uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
