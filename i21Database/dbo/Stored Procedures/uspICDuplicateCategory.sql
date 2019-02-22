@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICDuplicateCategory]
 	@intCategoryId INT,
-	@intNewCategoryId INT OUTPUT
+	@intNewCategoryId INT OUTPUT,
+	@intUserId INT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -209,3 +210,23 @@ INSERT INTO [dbo].[tblICCategoryAccount]
 SELECT @intNewCategoryId, intAccountCategoryId, intAccountId, intSort
 FROM tblICCategoryAccount
 WHERE intCategoryId = @intCategoryId
+
+-- Add the audit logs
+BEGIN 
+
+DECLARE @strDescription NVARCHAR(400)
+DECLARE @CategoryCode NVARCHAR(50)
+DECLARE @NewCategoryCode NVARCHAR(50)
+SELECT @CategoryCode = strCategoryCode FROM tblICCategory where intCategoryId = @intCategoryId
+SELECT @NewCategoryCode = strCategoryCode FROM tblICCategory where intCategoryId = @intNewCategoryId
+
+SET @strDescription = 'Duplicated ' + @CategoryCode + ' as ' + @NewCategoryCode + ''
+EXEC	dbo.uspSMAuditLog 
+			@keyValue = @intNewCategoryId						-- Item Id. 
+			,@screenName = 'Inventory.view.Category'     -- Screen Namespace
+			,@entityId = @intUserId						-- Entity Id.
+			,@actionType = 'Duplicated'                  -- Action Type
+			,@changeDescription = @strDescription
+			,@fromValue = @CategoryCode							-- Previous Value
+			,@toValue = @NewCategoryCode						-- New Value
+END

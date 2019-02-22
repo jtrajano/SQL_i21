@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICDuplicateStorageLocation]
 	@StorageLocationId INT,
-	@NewStorageLocationId INT OUTPUT
+	@NewStorageLocationId INT OUTPUT,
+	@intUserId INT = 1
 AS
 BEGIN
 
@@ -191,4 +192,19 @@ BEGIN
 	---------------------------------------------------
 	-- End duplication of Storage Location Sku table --
 	---------------------------------------------------
+
+	-- Add the audit logs
+	BEGIN 
+	DECLARE @strDescription NVARCHAR(400)
+
+	SET @strDescription = 'Duplicated ' + @StorageLocationName + ' as ' + @NewStorageLocationName + ''
+	EXEC	dbo.uspSMAuditLog 
+				@keyValue = @NewStorageLocationId						-- Item Id. 
+				,@screenName = 'Inventory.view.StorageUnit'     -- Screen Namespace
+				,@entityId = @intUserId						-- Entity Id.
+				,@actionType = 'Duplicated'                  -- Action Type
+				,@changeDescription = @strDescription
+				,@fromValue = @StorageLocationName							-- Previous Value
+				,@toValue = @NewStorageLocationName						-- New Value
+	END
 END
