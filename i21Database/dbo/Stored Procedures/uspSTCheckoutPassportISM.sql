@@ -194,10 +194,9 @@ BEGIN
 
 		DECLARE @intLocationId AS INT = (SELECT intCompanyLocationId FROM tblSTStore WHERE intStoreId = @intStoreId)
 
-		-- ==================================================================================================================
-		-- Start: Item Movement without REFUND
-		-- ==================================================================================================================
-		BEGIN
+		 -- ==================================================================================================================
+		 -- Start: All Item Movement
+		 -- ==================================================================================================================
 			INSERT INTO dbo.tblSTCheckoutItemMovements
 			(
 				intCheckoutId
@@ -257,20 +256,16 @@ BEGIN
 			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
-				AND Chk.RefundCount = 0 -- Only Items without REFUND
-
-		END
-		-- ==================================================================================================================
-		-- End: Item Movement without REFUND
-		-- ==================================================================================================================
+		 -- ==================================================================================================================
+		 -- End: All Item Movement
+		 -- ==================================================================================================================
 
 
 
 
 		-- ==================================================================================================================
-		-- Start: Item Movement with REFUND
+		-- Start: Item Movement Add extra line for refund
 		-- ==================================================================================================================
-		BEGIN
 			INSERT INTO dbo.tblSTCheckoutItemMovements
 			(
 				intCheckoutId
@@ -327,10 +322,8 @@ BEGIN
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
 				AND Chk.RefundCount > 0 -- Only Items with REFUND
-
-		END
 		-- ==================================================================================================================
-		-- End: Item Movement with REFUND
+		-- End: Item Movement Add extra line for refund
 		-- ==================================================================================================================
 
 
