@@ -1,5 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuICGetReceiptItemSource]
-	AS
+CREATE VIEW [dbo].[vyuICGetReceiptItemSource]
+AS
 
 SELECT 
 	ReceiptItem.intInventoryReceiptId,
@@ -222,20 +222,69 @@ SELECT
 				)
 				ELSE NULL 
 			END
-		)	
+		)
+	, strFieldNo = 
+		CASE Receipt.intSourceType
+			-- None
+			WHEN 0 THEN ContractFarm.strFieldNumber
+			-- Scale
+			WHEN 1 THEN ScaleFarm.strFieldNumber
+			ELSE NULL 
+		END			
+	, intContractSeq = 
+			CASE 
+				WHEN Receipt.strReceiptType = 'Purchase Contract' THEN 
+					ContractView.intContractSeq
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					CASE	
+						WHEN rtn.strReceiptType = 'Purchase Contract' THEN 
+							ContractView.intContractSeq							
+						ELSE 
+							NULL 
+					END 
+				ELSE 
+					NULL
+			END
+	, ContractView.strERPPONumber
+	, ContractView.strERPItemNumber
+	, ContractView.strOrigin
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt 
 	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+OUTER APPLY (
+	SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
+			,r.strReceiptType
+			,r.strReceiptNumber
+	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
+	WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId
+			AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
+			AND Receipt.strReceiptType = 'Inventory Return'
+) rtn
 LEFT JOIN vyuICGetItemUOM ItemUOM 
 	ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 LEFT JOIN vyuCTCompactContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
-	AND strReceiptType = 'Purchase Contract'
-LEFT JOIN vyuLGLoadContainerLookup LogisticsView --LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
-	ON LogisticsView.intLoadDetailId = CASE WHEN Receipt.intSourceType = 2 THEN ReceiptItem.intSourceId ELSE NULL END 
-	AND intLoadContainerId = ReceiptItem.intContainerId
-	AND strReceiptType = 'Purchase Contract'
-	AND Receipt.intSourceType = 2
+	AND Receipt.strReceiptType = 'Purchase Contract'
+LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ContractView.intContractDetailId
+LEFT JOIN tblEMEntityFarm ContractFarm ON ContractFarm.intFarmFieldId = ContractDetail.intFarmFieldId
+LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = ReceiptItem.intSourceId
+LEFT JOIN tblEMEntityFarm ScaleFarm ON ScaleFarm.intFarmFieldId = ticket.intFarmFieldId
+OUTER APPLY (
+	SELECT	* 
+	FROM	vyuLGLoadContainerLookup LogisticsView --LEFT JOIN vyuLGLoadContainerReceiptContracts LogisticsView
+	WHERE	LogisticsView.intLoadDetailId = ReceiptItem.intSourceId 
+			AND intLoadContainerId = ReceiptItem.intContainerId
+			AND Receipt.intSourceType = 2
+			AND (
+				Receipt.strReceiptType = 'Purchase Contract'
+				OR (
+					Receipt.strReceiptType = 'Inventory Return'
+					AND rtn.strReceiptType = 'Purchase Contract'
+				)
+			)
+) LogisticsView
+
 OUTER APPLY (
 	SELECT	LoadHeader.strTransaction
 			, dblOrderedQuantity  = CASE WHEN ISNULL(LoadSchedule.dblQuantity,0) = 0 AND SupplyPoint.strGrossOrNet = 'Net' THEN LoadReceipt.dblNet
@@ -267,23 +316,3 @@ OUTER APPLY (
 	WHERE	intCustomerStorageId = ReceiptItem.intSourceId 
 			AND Receipt.intSourceType = 4
 ) vyuGRStorageSearchView
-OUTER APPLY (
-	SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
-	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-				ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
-	WHERE	r.intInventoryReceiptId = Receipt.intSourceInventoryReceiptId
-			AND ri.intInventoryReceiptItemId = ReceiptItem.intSourceInventoryReceiptItemId
-			AND Receipt.strReceiptType = 'Inventory Return'
-) rtn
-OUTER APPLY (
-	SELECT	strTicketNumber 
-	FROM	tblSCTicket 
-	WHERE	intTicketId = ReceiptItem.intSourceId
-			AND Receipt.intSourceType = 1
-) ticket 
-OUTER APPLY (
-	SELECT	strDeliverySheetNumber 
-	FROM	tblSCDeliverySheet 
-	WHERE	intDeliverySheetId = ReceiptItem.intSourceId 
-			AND Receipt.intSourceType = 5
-) deliverySheet
