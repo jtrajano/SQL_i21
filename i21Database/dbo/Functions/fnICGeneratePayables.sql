@@ -2,6 +2,7 @@ CREATE FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT)
 RETURNS @table TABLE
 (
   [intEntityVendorId]			    INT NULL 
+, [intTransactionType]				INT NULL
 , [dtmDate]							DATETIME NULL
 , [strReference]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [strSourceNumber]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
@@ -16,6 +17,8 @@ RETURNS @table TABLE
 , [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
 , [dblOpenReceive]					NUMERIC(38, 20) NULL 
 , [dblQuantityToBill]				NUMERIC(38, 20) NULL 				
+, [dblQtyToBillUnitQty]				NUMERIC(38, 20) NULL 
+, [intQtyToBillUOMId]				INT NULL
 , [dblQuantityBilled]				NUMERIC(38, 20) NULL 
 , [intLineNo]						INT NULL 
 , [intInventoryReceiptItemId]		INT NULL 
@@ -85,7 +88,8 @@ BEGIN
 
 INSERT INTO @table
 SELECT DISTINCT
-	 [intEntityVendorId]			=	A.intEntityVendorId
+	[intEntityVendorId]			=	A.intEntityVendorId
+	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
@@ -104,6 +108,8 @@ SELECT DISTINCT
 																						THEN B.intWeightUOMId ELSE B.intUnitMeasureId END),
 														 CD.intItemUOMId, (B.dblOpenReceive - B.dblBillQty)) 
 									ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,6)) 
+	,[dblQtyToBillUnitQty]		=	ISNULL(ItemUOM.dblUnitQty, 1)
+	,[intQtyToBillUOMId]		=	B.intUnitMeasureId
 	,[dblQuantityBilled]		=	B.dblBillQty
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
@@ -262,6 +268,7 @@ SELECT DISTINCT
 	--RECEIPT OTHER CHARGES
 	SELECT DISTINCT
 		[intEntityVendorId]							=	A.intEntityVendorId
+		,[intTransactionType]						=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
 		,[dtmDate]									=	A.dtmDate
 		,[strReference]								=	A.strReference
 		,[strSourceNumber]							=	A.strSourceNumber
@@ -276,6 +283,8 @@ SELECT DISTINCT
 		,[dblPOOpenReceive]							=	A.dblPOOpenReceive
 		,[dblOpenReceive]							=	A.dblOpenReceive
 		,[dblQuantityToBill]						=	A.dblQuantityToBill
+		,[dblQtyToBillUnitQty]						=	1
+		,[intQtyToBillUOMId]						=	NULL
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
 		,[intLineNo]								=	A.intLineNo
 		,[intInventoryReceiptItemId]				=	ISNULL (J.intInventoryReceiptItemId, (SELECT TOP 1 intInventoryReceiptItemId from tblICInventoryReceiptItem ri where ri.intInventoryReceiptId = A.intInventoryReceiptId))
@@ -357,9 +366,9 @@ SELECT DISTINCT
 		,[strReceiptLocation]						= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
-		,[intTaxGroupId]							=	NULL
+		,[intTaxGroupId]							=	A.intTaxGroupId
 		,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
-		,[strTaxGroup]								=	NULL
+		,[strTaxGroup]								=	TG.strTaxGroup
 		,intShipViaId								=   NULL
 	FROM [vyuICChargesForBilling] A
 	--LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
@@ -376,6 +385,7 @@ SELECT DISTINCT
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intEntityVendorId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = A.intContractHeaderId      
+	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = A.intTaxGroupId
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT

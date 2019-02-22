@@ -7364,6 +7364,7 @@
     <Build Include="dbo\Tables\tblCFEncodeCard.sql" />
     <Build Include="dbo\Views\vyuARInvoiceMeterBillingReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMeterBillingReport.sql" />
+    <Build Include="dbo\Functions\fnICGeneratePayablesTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
