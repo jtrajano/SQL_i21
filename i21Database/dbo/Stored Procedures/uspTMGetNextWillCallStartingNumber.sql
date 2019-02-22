@@ -8,6 +8,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 BEGIN
+
+	set @newStartingNumber =
+	(
+		SELECT strPrefix
+		FROM tblSMStartingNumber 
+		WHERE strTransactionType = 'Will Call'
+			AND strModule = 'Tank Management'
+	)
+/*
 	DECLARE @intNextNumber INT
 	DECLARE @strPrefix NVARCHAR(50)
 	DECLARE @intCurrentNumber INT
@@ -31,6 +40,8 @@ GETSTART:
 	BEGIN
 		GOTO GETSTART
 	END
+*/
+
 END
 	
 GO
