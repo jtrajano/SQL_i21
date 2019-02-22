@@ -426,3 +426,20 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'dblOriginalPercentLeft'
+GO
+
+CREATE TRIGGER [dbo].[trgAfterInsertTMDispatch]
+    ON [dbo].[tblTMDispatch]
+    AFTER INSERT
+    AS
+    BEGIN
+        declare @willCallPrefix nvarchar(20);
+		declare @newId int;
+
+		select @newId = i.intDispatchID from inserted i;
+		set @willCallPrefix = (select strPrefix from tblSMStartingNumber where strModule = 'Tank Management' and strTransactionType = 'Will Call');
+
+		update tblTMDispatch set strOrderNumber = @willCallPrefix + convert(nvarchar(10),@newId) where intDispatchID = @newId;
+		update tblSMStartingNumber set intNumber = (@newId + 1) where strModule = 'Tank Management' and strTransactionType = 'Will Call';
+
+    END
