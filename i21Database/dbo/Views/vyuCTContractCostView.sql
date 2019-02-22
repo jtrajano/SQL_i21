@@ -1,8 +1,40 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractCostView]
 AS 
 
-	SELECT		CC.*,
-
+	SELECT		CC.intContractCostId,
+				CC.intContractDetailId,
+				CC.intItemId,
+				CC.intVendorId,
+				CC.strCostMethod,
+				CC.intCurrencyId,
+				CC.dblRate,
+				CC.intItemUOMId,
+				CC.intRateTypeId,
+				CC.dblFX,
+				CC.ysnAccrue,
+				CC.ysnMTM,
+				CC.ysnPrice,
+				CC.ysnAdditionalCost,
+				CC.ysnBasis,
+				CC.ysnReceivable,
+				CC.strPaidBy,
+				CC.dtmDueDate,
+				CC.ysn15DaysFromShipment,
+				CC.strReference,
+				CC.strRemarks,
+				CC.strStatus,
+				CC.strCostStatus,
+				CC.dblReqstdAmount,
+				CC.dblRcvdPaidAmount,
+				CC.dblActualAmount,
+				CC.dblAccruedAmount,
+				CC.dblRemainingPercent,
+				CC.dtmAccrualDate,
+				CC.strAPAR,
+				CC.strPayToReceiveFrom,
+				CC.strReferenceNo,
+				CC.intContractCostRefId,
+				CC.intConcurrencyId,							
 				IM.strItemNo, 
 				IM.strDescription strItemDescription,
 				UM.strUnitMeasure strUOM, 
@@ -26,7 +58,7 @@ AS
 						WHEN	CC.strCostMethod = 'Percentage' THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
 				END   dblAmount,
-				RT.strCurrencyExchangeRateType
+				RT.strCurrencyExchangeRateType				
 
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId

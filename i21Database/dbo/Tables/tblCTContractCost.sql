@@ -19,6 +19,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[strPaidBy]					NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[dtmDueDate]				DATETIME,
 	[strReference]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[ysn15DaysFromShipment]		BIT NOT NULL DEFAULT ((0)),
 	[strRemarks]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	strStatus					NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	strCostStatus				NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
