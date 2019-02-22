@@ -52,7 +52,11 @@ BEGIN TRY
 			@ysnFinalSubCurrency		BIT,
 			@dblTotalPFDetailQuantiy	NUMERIC(18,6),
 			@ysnFullyPriced				BIT = 0,
-			@strPricingQuantity			NVARCHAR(100)
+			@strPricingQuantity			NVARCHAR(100),
+			@intMarketUnitMeasureId		INT,
+			@intMarketCurrencyId		INT,
+			@intPriceContractId			INT,
+			@ysnSeqSubCurrency			BIT
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -63,7 +67,8 @@ BEGIN TRY
 			@ysnSplit				=	ysnSplit,
 			@dblTotalLots			=	[dblTotalLots],
 			@intFinalCurrencyId		=	intFinalCurrencyId,
-			@ysnFinalSubCurrency	=	CY.ysnSubCurrency
+			@ysnFinalSubCurrency	=	CY.ysnSubCurrency,
+			@intPriceContractId		=	PF.intPriceContractId
 	FROM	tblCTPriceFixation		PF
 	JOIN	tblCTPriceContract		PC	ON	PC.intPriceContractId	=	PF.intPriceContractId	LEFT 
 	JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	PC.intFinalCurrencyId
@@ -90,7 +95,8 @@ BEGIN TRY
 				@intBasisUOMId				=	BM.intCommodityUnitMeasureId,
 				@intCurrencyId				=	CD.intCurrencyId,
 				@intBasisCurrencyId			=	CD.intBasisCurrencyId,
-				@ysnBasisSubCurrency		=	AY.ysnSubCurrency
+				@ysnBasisSubCurrency		=	AY.ysnSubCurrency,
+				@ysnSeqSubCurrency		=	SY.ysnSubCurrency
 
 		FROM	tblCTContractDetail			CD
 		JOIN	vyuCTContractHeaderView		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
@@ -98,6 +104,7 @@ BEGIN TRY
    LEFT JOIN	tblICCommodityUnitMeasure	BM	ON	BM.intCommodityId		=	CH.intCommodityId
 												AND	BM.intUnitMeasureId		=	BU.intUnitMeasureId
    LEFT JOIN	tblSMCurrency				AY	ON	AY.intCurrencyID		=	CD.intBasisCurrencyId
+   LEFT JOIN	tblSMCurrency				SY	ON	SY.intCurrencyID		=	CD.intCurrencyId
 		WHERE	intContractDetailId			=	@intContractDetailId
 		
 		IF @strPricingQuantity = 'By Futures Contracts'
@@ -353,6 +360,62 @@ BEGIN TRY
 			WHERE	intPriceFixationId		=	@intPriceFixationId
 			AND		intTypeRef				=	@intTypeRef
 
+			SELECT	@intMarketUnitMeasureId = intUnitMeasureId,
+					@intMarketCurrencyId = intCurrencyId 
+			FROM	tblRKFutureMarket 
+			WHERE	intFutureMarketId = @intNewFutureMarketId
+
+			SELECT	@intFinalPriceUOMId		=	intCommodityUnitMeasureId,
+					@intFinalCurrencyId		=	@intMarketCurrencyId,
+					@intPriceCommodityUOMId	=	intCommodityUnitMeasureId
+			FROM	tblICCommodityUnitMeasure 
+			WHERE	intCommodityId		=	@intCommodityId 
+			AND		intUnitMeasureId	=	@intMarketUnitMeasureId
+
+			UPDATE	FD
+			SET		dblFutures		=	dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFinalPriceUOMId,PF.intFinalPriceUOMId,FD.dblFixationPrice) / 
+												CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+														WHEN	@intFinalCurrencyId <> @intCurrencyId	
+														AND		@ysnSeqSubCurrency = 1				THEN 100 
+														ELSE	0.01 
+												END,
+					dblFinalPrice	=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFinalPriceUOMId,PF.intFinalPriceUOMId,FD.dblFixationPrice) / 
+												CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+														WHEN	@intFinalCurrencyId <> @intCurrencyId	
+														AND		@ysnSeqSubCurrency = 1				THEN 100 
+														ELSE	0.01 
+												END) + PF.dblOriginalBasis + PF.dblRollArb,
+					dblCashPrice	=	(dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFinalPriceUOMId,PF.intFinalPriceUOMId,FD.dblFixationPrice) / 
+												CASE	WHEN	@intFinalCurrencyId = @intCurrencyId	THEN 1 
+														WHEN	@intFinalCurrencyId <> @intCurrencyId	
+														AND		@ysnSeqSubCurrency = 1				THEN 100 
+														ELSE	0.01 
+												END) + PF.dblOriginalBasis + PF.dblRollArb
+			FROM	tblCTPriceFixation			PF 
+			--JOIN	tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
+			JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
+			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+			UPDATE	PF
+			SET		dblPriceWORollArb	=	dblFutXLots / @dblTotalPFDetailNoOfLots,
+					dblFinalPrice		=	dblFutXLots / @dblTotalPFDetailNoOfLots + PF.dblOriginalBasis + PF.dblRollArb
+			FROM	tblCTPriceFixation			PF 
+			JOIN	(	SELECT	intPriceFixationId, SUM(FD.dblFutures * FD.dblNoOfLots) dblFutXLots 
+						FROM	tblCTPriceFixationDetail FD
+						WHERE	intPriceFixationId = @intPriceFixationId 
+						GROUP	BY intPriceFixationId
+					)	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
+			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+			UPDATE  tblCTPriceContract SET intFinalPriceUOMId = @intFinalPriceUOMId, intFinalCurrencyId = @intFinalCurrencyId WHERE intPriceContractId	=	@intPriceContractId
+			
+			UPDATE	tblCTSpreadArbitrage 
+			SET		intSpreadUOMId			=	@intFinalPriceUOMId
+			WHERE	intPriceFixationId		=	@intPriceFixationId
+			AND		intTypeRef				=	@intTypeRef
+
+			SELECT	@intCurrencyId	=	@intMarketCurrencyId
+
 			UPDATE	CD
 			SET		CD.dblBasis				=	(
 													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intBasisUOMId,@intFinalPriceUOMId,ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0))) / 
@@ -365,7 +428,9 @@ BEGIN TRY
 												dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblRollArb,0)),
 					CD.intFutureMarketId	=	@intNewFutureMarketId,
 					CD.intFutureMonthId		=	@intNewFutureMonthId,
-					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
+					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
+					CD.intCurrencyId		=	@intMarketCurrencyId,
+					CD.intPriceItemUOMId	=	(SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = CD.intItemId AND intUnitMeasureId = @intMarketUnitMeasureId)
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
