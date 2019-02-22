@@ -363,11 +363,12 @@ BEGIN
 			AND ISNULL(t.ysnIsUnposted, 0) = 0
 			AND ISNULL(t.dblQty, 0) > 0 				
 			AND 1 = 
-				CASE WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt THEN 0 
-						WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 1 
-						WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @intTransactionDetailId_NegativeStock THEN 1 
-						ELSE 0 
-				END 	
+				CASE 
+					WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt AND t.intTransactionDetailId = @intTransactionDetailId_NegativeStock THEN 1
+					WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 0
+					WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @intTransactionDetailId_NegativeStock THEN 1 
+					ELSE 0 
+				END 
 			AND @EscalateInventoryTransactionId IS NULL 
 			AND @intInventoryTransactionId_NegativeStock IS NOT NULL 
 END 
