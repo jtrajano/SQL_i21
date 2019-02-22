@@ -83,6 +83,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
 :r .\SM\1830_Encrypt_Merchant_Password.sql
+:r .\SM\1910_MigrateINCOToFreightTerm.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
