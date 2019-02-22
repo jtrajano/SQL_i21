@@ -653,8 +653,8 @@ BEGIN TRY
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
 
-	--IF @IsFullApproved=1  OR ISNULL(@ysnFeedOnApproval,0) = 0
-	--	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
+	IF @IsFullApproved=1  OR ISNULL(@ysnFeedOnApproval,0) = 0
+		UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
 
 END TRY
 

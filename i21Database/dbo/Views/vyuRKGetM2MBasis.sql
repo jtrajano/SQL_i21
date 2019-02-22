@@ -103,9 +103,9 @@ UNION SELECT DISTINCT strCommodityCode
 	, fm.strFutMarketName
 	, strFutureMonth
 	, strPeriodTo = NULL
-	, strLocationName
+	, iis.strLocationName
 	, strMarketZoneCode
-	, strCurrency = (CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN strCurrency ELSE muc.strCurrency END)
+	, strCurrency = (CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN iis.strCurrency ELSE muc.strCurrency END)
 	, strPricingType
 	, strContractInventory = 'Inventory' COLLATE Latin1_General_CI_AS
 	, strContractType
@@ -126,7 +126,7 @@ UNION SELECT DISTINCT strCommodityCode
 	, intUnitMeasureId = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END)
 	, intConcurrencyId = 0
 	, i.strMarketValuation
-FROM tblICItemStock iis
+FROM vyuRKGetInventoryValuation iis
 JOIN tblICItem i ON i.intItemId = iis.intItemId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = i.intOriginId
 LEFT JOIN tblCTContractDetail cd ON iis.intItemId = cd.intItemId
@@ -140,7 +140,8 @@ LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
 LEFT JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
 LEFT JOIN tblICCommodity c ON c.intCommodityId = ch.intCommodityId
-LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
+LEFT JOIN tblICItemLocation itm on itm.intItemId = i.intItemId
+LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = itm.intLocationId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
-WHERE (iis.dblUnitOnHand > 0 OR iis.dblUnitStorage > 0)
+WHERE (iis.dblQuantity > 0)
 	AND i.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN i.strLotTracking ELSE 'No' END)

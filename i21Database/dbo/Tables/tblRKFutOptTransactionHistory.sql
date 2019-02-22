@@ -34,5 +34,7 @@
 	[ysnMonthExpired] [bit] NULL,
 	[strUserName] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[strAction] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+	[strNotes] [NVARCHAR](MAX) COLLATE Latin1_General_CI_AS NULL,
+	[ysnPreCrush] [BIT] NULL,
 	CONSTRAINT [PK_tblRKFutOptTransactionHistory_intFutOptTransactionHistoryId] PRIMARY KEY CLUSTERED (intFutOptTransactionHistoryId ASC)
 )

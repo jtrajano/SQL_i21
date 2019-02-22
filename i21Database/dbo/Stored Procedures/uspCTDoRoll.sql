@@ -99,6 +99,7 @@ BEGIN TRY
 			CD.dblBasis				=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
 			CD.dblOriginalBasis		=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
 			CD.intFutureMonthId		=	TD.intFutureMonthId,
+			CD.dblCashPrice		    =	CASE WHEN CD.dblCashPrice IS NULL THEN CD.dblCashPrice ELSE ISNULL(TD.dblFutures,0) + ISNULL(TD.dblBasis,0) END,
 			CD.intFutureMarketId	=	CASE WHEN ISNULL(TD.intFutureMarketId,0) = 0 THEN CD.intFutureMarketId ELSE TD.intFutureMarketId END
 			
 	FROM	tblCTContractDetail		CD

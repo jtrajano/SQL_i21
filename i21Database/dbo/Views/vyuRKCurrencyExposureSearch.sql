@@ -5,11 +5,9 @@ AS
 SELECT intCurrencyExposureId
 	, strBatchName
 	, dtmBatchDate
-	, dtmCurrencyExposureAsOn
 	, intWeightUnit
 	, ic.strUnitMeasure
 	, e.intCompanyId
-	, dtmMarketPremiumAsOn
 	, e.intCommodityId
 	, c.strCommodityCode
 	, dtmFutureClosingDate

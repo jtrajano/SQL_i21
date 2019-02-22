@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdatePricebookItem]
-@strUniqueId NVARCHAR(1000)
+@intUniqueId INT
 , @intEntityId Int
 , @intCategoryId int
 , @intItemVendorXrefId INT
@@ -28,11 +28,11 @@ BEGIN
 		DECLARE @strCompanyLocation AS NVARCHAR(150)
 
 		SELECT 
-		@intItemUOMId = intItemUOMId
-		, @intItemId = intItemId
-		, @intItemLocationId = intItemLocationId
-		, @intItemPricingId = intItemPricingId
-		FROM vyuSTPricebookMaster WHERE strUniqueId = @strUniqueId
+			@intItemUOMId = intItemUOMId
+			, @intItemId = intItemId
+			, @intItemLocationId = intItemLocationId
+			, @intItemPricingId = intItemPricingId
+		FROM vyuSTPricebookMaster WHERE intUniqueId = @intUniqueId
 
 
 

@@ -71,7 +71,7 @@ BEGIN
 			)
 	BEGIN
 		SELECT @dblSeqPrice = dblSeqPrice
-		FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId)
+		FROM dbo.fnRKGetAdditionalColumnForDetailView(@intContractDetailId)
 	END
 	ELSE IF @intPricingTypeId = 2
 	BEGIN

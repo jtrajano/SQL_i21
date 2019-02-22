@@ -218,7 +218,8 @@ BEGIN TRY
 				,intSubLocationId
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 				,ysnIsStorage
-				,strSourceTransactionId  
+				,strSourceTransactionId
+				,ysnAllowInvoiceVoucher  
 			)
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
 			SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt

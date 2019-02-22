@@ -16,6 +16,7 @@ BEGIN TRY
 	DECLARE @voucherDetailReceiptCharge AS VoucherDetailReceiptCharge
 	DECLARE @intItemId INT
 	DECLARE @intWarehouseServicesId INT
+	DECLARE @strWarehouseName NVARCHAR(100)
 	DECLARE @intAPAccount INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @strDeliveryNo NVARCHAR(100)
@@ -61,10 +62,24 @@ BEGIN TRY
 		,dblCost NUMERIC(18, 6)
 		)
 
-	SELECT @intLoadId = intLoadId, @strDeliveryNo = strDeliveryNoticeNumber
-	FROM tblLGLoadWarehouse
+	SELECT @intLoadId = intLoadId, @strDeliveryNo = strDeliveryNoticeNumber, @strWarehouseName = CLSL.strSubLocationName
+	FROM tblLGLoadWarehouse LW
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	WHERE intLoadWarehouseId = @intLoadWarehouseId
 
+	IF NOT EXISTS(
+			SELECT TOP 1 1 FROM tblLGLoadWarehouseServices LWS 
+				INNER JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId AND LW.intLoadId = @intLoadId
+				LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixDetailId = LWS.intWarehouseRateMatrixDetailId
+				LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
+				INNER JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+				INNER JOIN tblAPVendor V ON V.intEntityId = ISNULL(CLSL.intVendorId, WRMH.intVendorEntityId)
+			WHERE LWS.intLoadWarehouseId = @intLoadWarehouseId)
+	BEGIN
+		SET @strErrorMessage = 'Vendor is not specified for ' + @strWarehouseName;
+		RAISERROR (@strErrorMessage,16,1);
+	END
+	
 	SELECT @strLoadNumber = strLoadNumber
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
@@ -138,8 +153,8 @@ BEGIN TRY
 		,intWarehouseServicesId = LWS.intLoadWarehouseServicesId
 		,ysnInventoryCost = Item.ysnInventoryCost
 		,intItemUOMId = CASE WHEN (WRMD.intCalculateQty = 8) THEN LWS.intItemUOMId ELSE LD.intItemUOMId END
-		,dblUnitQty = CASE WHEN (WRMD.intCalculateQty = 8) THEN 1 ELSE ItemUOM.dblUnitQty END
-		,dblCostUnitQty = CostUOM.dblUnitQty
+		,dblUnitQty = CASE WHEN (WRMD.intCalculateQty = 8) THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty, 1) END
+		,dblCostUnitQty = ISNULL(CostUOM.dblUnitQty, 1)
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -198,11 +213,12 @@ BEGIN TRY
 
 	IF NOT EXISTS (
 			SELECT TOP 1 1 FROM tblLGLoadWarehouseServices LWS 
-				INNER JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
+				INNER JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId AND LW.intLoadId = @intLoadId
+				LEFT JOIN tblLGWarehouseRateMatrixDetail WRMD ON WRMD.intWarehouseRateMatrixDetailId = LWS.intWarehouseRateMatrixDetailId
+				LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 				INNER JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
-				INNER JOIN tblAPVendor V ON CLSL.intVendorId = V.intEntityId
-			WHERE LW.intLoadId = @intLoadId
-				AND LWS.intLoadWarehouseId = @intLoadWarehouseId
+				INNER JOIN tblAPVendor V ON V.intEntityId = ISNULL(CLSL.intVendorId, WRMH.intVendorEntityId)
+			WHERE LWS.intLoadWarehouseId = @intLoadWarehouseId
 				AND LWS.intBillId IS NULL
 			)
 	BEGIN

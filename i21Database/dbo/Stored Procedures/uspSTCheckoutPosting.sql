@@ -1099,7 +1099,7 @@ BEGIN
 											--,[ysnImportedFromOrigin]
 											--,[ysnImportedAsPosted]
 										)
-												SELECT DISTINCT
+										SELECT DISTINCT
 											 [strSourceTransaction]		= 'Invoice'
 											,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										    ,[strType]					= @strInvoiceTypeMain
@@ -1150,137 +1150,9 @@ BEGIN
 											,[intOrderUOMId]			= UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0
 											,[intItemUOMId]				= UOM.intItemUOMId
-											,[dblQtyShipped]			= CASE 
-																				-- PUMP TOTALS
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed = CPT.dblAmount)
-																					THEN 0
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
-																					THEN 1
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount)
-																					THEN -1
-
-																				-- ITEM MOVEMENTS
-																			    WHEN (
-																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-																																					SELECT SUM(IM.dblTotalSales)
-																																					FROM tblSTCheckoutItemMovements IM
-																																					JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																																					JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																																					JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																																					WHERE IM.intCheckoutId = @intCheckoutId
-																																					AND CATT.intCategoryId = DT.intCategoryId
-																															              ),0)
-																						) AS NUMERIC(18, 6))
-																							) > 0 
-																						THEN 1
-																				WHEN (
-																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-																																					SELECT SUM(IM.dblTotalSales)
-																																					FROM tblSTCheckoutItemMovements IM
-																																					JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																																					JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																																					JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																																					WHERE IM.intCheckoutId = @intCheckoutId
-																																					AND CATT.intCategoryId = DT.intCategoryId
-																															              ),0)
-																						) AS NUMERIC(18, 6))
-																							) < 0 
-																						THEN -1
-																				WHEN (
-																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-																																					SELECT SUM(IM.dblTotalSales)
-																																					FROM tblSTCheckoutItemMovements IM
-																																					JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																																					JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																																					JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																																					WHERE IM.intCheckoutId = @intCheckoutId
-																																					AND CATT.intCategoryId = DT.intCategoryId
-																															              ),0)
-																						) AS NUMERIC(18, 6))
-																							) = 0 
-																						THEN 0
-																				ELSE -1 
-																		  END
-											,[dblDiscount]				= 0 --ISNULL(DT.dblManagerDiscountAmount, 0) + ISNULL(DT.dblPromotionalDiscountAmount, 0) + ISNULL(DT.dblRefundAmount, 0)
-											,[dblPrice]					= CASE
-																				-- PUMP TOTALS
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed = CPT.dblAmount)
-																					THEN 0
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
-																					THEN DT.dblTotalSalesAmountComputed - (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
-																				WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount)
-																					THEN (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount) - DT.dblTotalSalesAmountComputed
-
-																				-- ITEM MOVEMENTS
-																				 WHEN (
-																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-																																					SELECT SUM(IM.dblTotalSales)
-																																					FROM tblSTCheckoutItemMovements IM
-																																					JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																																					JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																																					JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																																					WHERE IM.intCheckoutId = @intCheckoutId
-																																					AND CATT.intCategoryId = DT.intCategoryId
-																																			     ),0)
-																						) AS NUMERIC(18, 6))
-																							) > 0 
-																						THEN (
-																								ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-																																								SELECT SUM(IM.dblTotalSales)
-																																								FROM tblSTCheckoutItemMovements IM
-																																								JOIN tblICItemUOM UOM 
-																																									ON IM.intItemUPCId = UOM.intItemUOMId
-																																								JOIN tblICItem I 
-																																									ON UOM.intItemId = I.intItemId
-																																								JOIN tblICCategory CATT 
-																																									ON I.intCategoryId = CATT.intCategoryId 
-																																								WHERE intCheckoutId = @intCheckoutId
-																																								AND CATT.intCategoryId = DT.intCategoryId
-																																							), 0)
-																									) AS NUMERIC(18, 6)))
-																						)
-																				 WHEN (
-																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-																																					SELECT SUM(IM.dblTotalSales)
-																																					FROM tblSTCheckoutItemMovements IM
-																																					JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																																					JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																																					JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																																					WHERE IM.intCheckoutId = @intCheckoutId
-																																					AND CATT.intCategoryId = DT.intCategoryId
-																																			    ),0)
-																						) AS NUMERIC(18, 6))
-																							) < 0 
-																						THEN (
-																								ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-																																								SELECT SUM(IM.dblTotalSales)
-																																								FROM tblSTCheckoutItemMovements IM
-																																								JOIN tblICItemUOM UOM 
-																																									ON IM.intItemUPCId = UOM.intItemUOMId
-																																								JOIN tblICItem I 
-																																									ON UOM.intItemId = I.intItemId
-																																								JOIN tblICCategory CATT 
-																																									ON I.intCategoryId = CATT.intCategoryId 
-																																								WHERE intCheckoutId = @intCheckoutId
-																																								AND CATT.intCategoryId = DT.intCategoryId
-																																							), 0)
-																									) AS NUMERIC(18, 6)))
-																						)
-																				 WHEN (
-																						CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-																																					SELECT SUM(IM.dblTotalSales)
-																																					FROM tblSTCheckoutItemMovements IM
-																																					JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-																																					JOIN tblICItem I ON UOM.intItemId = I.intItemId
-																																					JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-																																					WHERE IM.intCheckoutId = @intCheckoutId
-																																					AND CATT.intCategoryId = DT.intCategoryId
-																																			   ),0)
-																			            ) AS NUMERIC(18, 6))
-																							) = 0 
-																						THEN  0
-																				ELSE ISNULL(DT.dblTotalSalesAmountComputed, 0) -- If not match on Pump Totals and Item Movements
-																		END
+											,[dblQtyShipped]			= DT.dblCalculatedInvoiceQty
+											,[dblDiscount]				= 0
+											,[dblPrice]					= DT.dblCalculatedInvoicePrice
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
 											,[strFrequency]				= NULL
@@ -1320,7 +1192,7 @@ BEGIN
 											,[dblSubCurrencyRate]		= 1.000000
 											--,0
 											--,1
-								FROM tblSTCheckoutDepartmetTotals DT
+								FROM vyuSTCheckoutDepartmentInvoiceEntries DT
 								JOIN tblICItem I 
 									ON DT.intItemId = I.intItemId
 								JOIN tblICItemUOM UOM 
@@ -1340,6 +1212,250 @@ BEGIN
 								WHERE DT.intCheckoutId = @intCheckoutId
 									--AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
 									AND UOM.ysnStockUnit = CAST(1 AS BIT)
+
+
+
+								--				SELECT DISTINCT
+								--			 [strSourceTransaction]		= 'Invoice'
+								--			,[strTransactionType]		= @strInvoiceTransactionTypeMain
+								--		    ,[strType]					= @strInvoiceTypeMain
+								--			,[intSourceId]				= @intCheckoutId
+								--			,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
+								--			,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
+								--			,[intEntityCustomerId]		= @intEntityCustomerId
+								--			,[intCompanyLocationId]		= @intCompanyLocationId
+								--			,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
+								--			,[intTermId]				= vC.intTermsId						--ADDED
+								--			,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+								--			,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+								--			,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+								--			,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+								--			,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
+								--			,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+								--			,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+								--			,[intShipViaId]				= vC.intShipViaId					--ADDED
+								--			,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
+								--			,[strInvoiceOriginId]		= NULL -- not sure
+								--			,[strPONumber]				= NULL -- not sure
+								--			,[strBOLNumber]				= NULL -- not sure
+								--			,[strComments]				= @strComments
+								--			,[intShipToLocationId]		= vC.intShipToId					--ADDED
+								--			,[intBillToLocationId]		= NULL
+								--			,[ysnTemplate]				= 0
+								--			,[ysnForgiven]				= 0
+								--			,[ysnCalculated]			= 0 -- not sure
+								--			,[ysnSplitted]				= 0
+								--			,[intPaymentId]				= NULL
+								--			,[intSplitId]				= NULL
+								--			,[intLoadDistributionHeaderId]	= NULL
+								--			,[strActualCostId]			= NULL
+								--			,[intShipmentId]			= NULL
+								--			,[intTransactionId]			= NULL
+								--			,[intEntityId]				= @intCurrentUserId
+								--			,[ysnResetDetails]			= CASE
+								--											WHEN @intCurrentInvoiceId IS NOT NULL
+								--												THEN CAST(0 AS BIT)
+								--											ELSE CAST(1 AS BIT)
+								--									      END
+								--			,[ysnRecap]					= @ysnRecap
+								--			,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
+								--			,[intInvoiceDetailId]		= NULL
+								--			,[intItemId]				= I.intItemId
+								--			,[ysnInventory]				= 1
+								--			,[strItemDescription]		= I.strDescription
+								--			,[intOrderUOMId]			= UOM.intItemUOMId
+								--			,[dblQtyOrdered]			= 0
+								--			,[intItemUOMId]				= UOM.intItemUOMId
+								--			,[dblQtyShipped]			= CASE 
+								--												-- PUMP TOTALS
+								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed = CPT.dblAmount)
+								--													THEN 0
+								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
+								--													THEN 1
+								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount)
+								--													THEN -1
+
+								--												-- ITEM MOVEMENTS
+								--											    WHEN (
+								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+								--																													SELECT SUM(IM.dblTotalSales)
+								--																													FROM tblSTCheckoutItemMovements IM
+								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
+								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+								--																													WHERE IM.intCheckoutId = @intCheckoutId
+								--																													AND CATT.intCategoryId = DT.intCategoryId
+								--																							              ),0)
+								--														) AS NUMERIC(18, 6))
+								--															) > 0 
+								--														THEN 1
+								--												WHEN (
+								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+								--																													SELECT SUM(IM.dblTotalSales)
+								--																													FROM tblSTCheckoutItemMovements IM
+								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
+								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+								--																													WHERE IM.intCheckoutId = @intCheckoutId
+								--																													AND CATT.intCategoryId = DT.intCategoryId
+								--																							              ),0)
+								--														) AS NUMERIC(18, 6))
+								--															) < 0 
+								--														THEN -1
+								--												WHEN (
+								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+								--																													SELECT SUM(IM.dblTotalSales)
+								--																													FROM tblSTCheckoutItemMovements IM
+								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
+								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+								--																													WHERE IM.intCheckoutId = @intCheckoutId
+								--																													AND CATT.intCategoryId = DT.intCategoryId
+								--																							              ),0)
+								--														) AS NUMERIC(18, 6))
+								--															) = 0 
+								--														THEN 0
+								--												ELSE -1 
+								--										  END
+								--			,[dblDiscount]				= 0 --ISNULL(DT.dblManagerDiscountAmount, 0) + ISNULL(DT.dblPromotionalDiscountAmount, 0) + ISNULL(DT.dblRefundAmount, 0)
+								--			,[dblPrice]					= CASE
+								--												-- PUMP TOTALS
+								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed = CPT.dblAmount)
+								--													THEN 0
+								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
+								--													THEN DT.dblTotalSalesAmountComputed - (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
+								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount)
+								--													THEN (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount) - DT.dblTotalSalesAmountComputed
+
+								--												-- ITEM MOVEMENTS
+								--												 WHEN (
+								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+								--																													SELECT SUM(IM.dblTotalSales)
+								--																													FROM tblSTCheckoutItemMovements IM
+								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
+								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+								--																													WHERE IM.intCheckoutId = @intCheckoutId
+								--																													AND CATT.intCategoryId = DT.intCategoryId
+								--																											     ),0)
+								--														) AS NUMERIC(18, 6))
+								--															) > 0 
+								--														THEN (
+								--																ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+								--																																SELECT SUM(IM.dblTotalSales)
+								--																																FROM tblSTCheckoutItemMovements IM
+								--																																JOIN tblICItemUOM UOM 
+								--																																	ON IM.intItemUPCId = UOM.intItemUOMId
+								--																																JOIN tblICItem I 
+								--																																	ON UOM.intItemId = I.intItemId
+								--																																JOIN tblICCategory CATT 
+								--																																	ON I.intCategoryId = CATT.intCategoryId 
+								--																																WHERE intCheckoutId = @intCheckoutId
+								--																																AND CATT.intCategoryId = DT.intCategoryId
+								--																															), 0)
+								--																	) AS NUMERIC(18, 6)))
+								--														)
+								--												 WHEN (
+								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+								--																													SELECT SUM(IM.dblTotalSales)
+								--																													FROM tblSTCheckoutItemMovements IM
+								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
+								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+								--																													WHERE IM.intCheckoutId = @intCheckoutId
+								--																													AND CATT.intCategoryId = DT.intCategoryId
+								--																											    ),0)
+								--														) AS NUMERIC(18, 6))
+								--															) < 0 
+								--														THEN (
+								--																ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+								--																																SELECT SUM(IM.dblTotalSales)
+								--																																FROM tblSTCheckoutItemMovements IM
+								--																																JOIN tblICItemUOM UOM 
+								--																																	ON IM.intItemUPCId = UOM.intItemUOMId
+								--																																JOIN tblICItem I 
+								--																																	ON UOM.intItemId = I.intItemId
+								--																																JOIN tblICCategory CATT 
+								--																																	ON I.intCategoryId = CATT.intCategoryId 
+								--																																WHERE intCheckoutId = @intCheckoutId
+								--																																AND CATT.intCategoryId = DT.intCategoryId
+								--																															), 0)
+								--																	) AS NUMERIC(18, 6)))
+								--														)
+								--												 WHEN (
+								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
+								--																													SELECT SUM(IM.dblTotalSales)
+								--																													FROM tblSTCheckoutItemMovements IM
+								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
+								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
+								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
+								--																													WHERE IM.intCheckoutId = @intCheckoutId
+								--																													AND CATT.intCategoryId = DT.intCategoryId
+								--																											   ),0)
+								--											            ) AS NUMERIC(18, 6))
+								--															) = 0 
+								--														THEN  0
+								--												ELSE ISNULL(DT.dblTotalSalesAmountComputed, 0) -- If not match on Pump Totals and Item Movements
+								--										END
+								--			,[ysnRefreshPrice]			= 0
+								--			,[strMaintenanceType]		= NULL
+								--			,[strFrequency]				= NULL
+								--			,[dtmMaintenanceDate]		= NULL
+								--			,[dblMaintenanceAmount]		= NULL
+								--			,[dblLicenseAmount]			= NULL
+								--			,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
+								--			,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
+								--			,[intSCInvoiceId]			= NULL
+								--			,[strSCInvoiceNumber]		= NULL
+								--			,[intInventoryShipmentItemId] = NULL
+								--			,[strShipmentNumber]		= NULL
+								--			,[intSalesOrderDetailId]	= NULL
+								--			,[strSalesOrderNumber]		= NULL
+								--			,[intContractHeaderId]		= NULL
+								--			,[intContractDetailId]		= NULL
+								--			,[intShipmentPurchaseSalesContractId]	= NULL
+								--			,[intTicketId]				= NULL
+								--			,[intTicketHoursWorkedId]	= NULL
+								--			,[intSiteId]				= NULL -- not sure
+								--			,[strBillingBy]				= NULL -- not sure
+								--			,[dblPercentFull]			= NULL
+								--			,[dblNewMeterReading]		= NULL
+								--			,[dblPreviousMeterReading]	= NULL -- not sure
+								--			,[dblConversionFactor]		= NULL -- not sure
+								--			,[intPerformerId]			= NULL -- not sure
+								--			,[ysnLeaseBilling]			= NULL
+								--			,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
+								--			,[strImportFormat]			= ''
+								--			,[dblCOGSAmount]			= 0 --IP.dblSalePrice
+								--			,[intTempDetailIdForTaxes]  = NULL
+								--			,[intConversionAccountId]	= NULL -- not sure
+								--			,[intCurrencyExchangeRateTypeId]	= NULL
+								--			,[intCurrencyExchangeRateId]		= NULL
+								--			,[dblCurrencyExchangeRate]	= 1.000000
+								--			,[intSubCurrencyId]			= NULL
+								--			,[dblSubCurrencyRate]		= 1.000000
+								--			--,0
+								--			--,1
+								--FROM tblSTCheckoutDepartmetTotals DT
+								--JOIN tblICItem I 
+								--	ON DT.intItemId = I.intItemId
+								--JOIN tblICItemUOM UOM 
+								--	ON I.intItemId = UOM.intItemId
+								--JOIN tblSTCheckoutHeader CH 
+								--	ON DT.intCheckoutId = CH.intCheckoutId
+								--JOIN tblICItemLocation IL 
+								--	ON I.intItemId = IL.intItemId
+								--JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId
+								--JOIN tblSTStore ST 
+								--	ON IL.intLocationId = ST.intCompanyLocationId
+								--	AND CH.intStoreId = ST.intStoreId
+								--JOIN vyuEMEntityCustomerSearch vC 
+								--	ON ST.intCheckoutCustomerId = vC.intEntityId
+								--WHERE DT.intCheckoutId = @intCheckoutId
+								--	--AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
+								--	AND UOM.ysnStockUnit = CAST(1 AS BIT)
 
 					END
 				----------------------------------------------------------------------
@@ -3202,7 +3318,8 @@ BEGIN
 											,[dblCOGSAmount]
 											,[strImportFormat]
 											,[dblSubCurrencyRate]
-											,[dblCurrencyExchangeRate])
+											,[dblCurrencyExchangeRate]
+											,[ysnRecap])
 										SELECT 
 											ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 											,[strTransactionType]
@@ -3290,6 +3407,7 @@ BEGIN
 											,[strImportFormat]
 											,[dblSubCurrencyRate]
 											,[dblCurrencyExchangeRate]
+											,[ysnRecap]
 										FROM @EntriesForInvoice
 
 										--SELECT * FROM @EntriesForInvoice
@@ -3364,74 +3482,76 @@ BEGIN
 													,@ErrorMessage				= @ErrorMessage OUTPUT
 													,@LogId					    = @intIntegrationLogId OUTPUT
 
-										IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
+										-- NOT RECAP
+										IF(@ysnRecap = CAST(0 AS BIT))
 											BEGIN
-												IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-													BEGIN
-														-- Posting to Sales Invoice was successfull
-														UPDATE tblSTCheckoutHeader
-														SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
-														WHERE intCheckoutId = @intCheckoutId
+	
+											IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
+												BEGIN
 
-														SELECT @strBatchIdForNewPostRecap = strBatchIdForNewPostRecap
-														FROM tblARInvoiceIntegrationLog
-														WHERE intIntegrationLogId = @intIntegrationLogId
+													IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+														BEGIN
 
-														-- Insert to Temp Table
-														DELETE FROM @tblTempInvoiceIds
 
-														INSERT INTO @tblTempInvoiceIds
-														(
-															intInvoiceId
-														)
-														SELECT DISTINCT 
-															intInvoiceId
-														FROM tblARInvoiceIntegrationLogDetail
-														WHERE intIntegrationLogId = (
-																						SELECT intSalesInvoiceIntegrationLogId
-																						FROM tblSTCheckoutHeader
-																						WHERE intCheckoutId =  @intCheckoutId
-																					)
+															-- Posting to Sales Invoice was successfull
+															UPDATE tblSTCheckoutHeader
+															SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
+															WHERE intCheckoutId = @intCheckoutId
 
-														-- Populate variable with Invoice Ids
-														SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
-														FROM @tblTempInvoiceIds
-											END
-										ELSE
-											BEGIN
-												-- SELECT * FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
-												SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-												SET @strStatusMsg = 'Main Checkout was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
+															SELECT @strBatchIdForNewPostRecap = ISNULL(strBatchIdForNewPostRecap, '')
+															FROM tblARInvoiceIntegrationLog
+															WHERE intIntegrationLogId = @intIntegrationLogId
 
-												-- ROLLBACK
-												GOTO ExitWithRollback
-												-- RETURN
-											END
-									END
-								ELSE
-									BEGIN
-										SET @strStatusMsg = 'Post Main Checkout has error: ' + @ErrorMessage
+															-- Insert to Temp Table
+															DELETE FROM @tblTempInvoiceIds
 
-										-- ROLLBACK
-										GOTO ExitWithRollback
-										-- RETURN
-									END
+															INSERT INTO @tblTempInvoiceIds
+															(
+																intInvoiceId
+															)
+															SELECT DISTINCT 
+																intInvoiceId
+															FROM tblARInvoiceIntegrationLogDetail
+															WHERE intIntegrationLogId = (
+																							SELECT intSalesInvoiceIntegrationLogId
+																							FROM tblSTCheckoutHeader
+																							WHERE intCheckoutId =  @intCheckoutId
+																						)
 
-										---- POST Invoice
-										--EXEC [dbo].[uspARProcessInvoices]
-										--			@InvoiceEntries				= @EntriesForInvoice
-										--			,@LineItemTaxEntries		= @LineItemTaxEntries
-										--			,@UserId					= @intCurrentUserId
-		 							--				,@GroupingOption			= 11
-										--			,@RaiseError				= 1
-										--			--,@BatchId					= @strCreateGuidBatch
-										--			,@ErrorMessage				= @ErrorMessage OUTPUT
-										--			,@CreatedIvoices			= @CreatedIvoices OUTPUT
-										--			,@BatchIdForNewPostRecap	= @strBatchIdForNewPostRecap OUTPUT
+															-- Populate variable with Invoice Ids
+															SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
+															FROM @tblTempInvoiceIds
+														END
+													ELSE
+														BEGIN
+															-- SELECT * FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
+															SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+															SET @strStatusMsg = 'Main Checkout was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
-									-- Check if Recap
-									IF(@ysnRecap = CAST(1 AS BIT))
-										BEGIN -- Start: @ysnRecap = 1
+															-- ROLLBACK
+															GOTO ExitWithRollback
+															-- RETURN
+														END
+												END
+											ELSE
+												BEGIN
+													SET @strStatusMsg = 'Post Main Checkout has error: ' + @ErrorMessage
+
+													-- ROLLBACK
+													GOTO ExitWithRollback
+													-- RETURN
+												END
+
+										END
+
+										-- Check if RECAP
+										ELSE IF(@ysnRecap = CAST(1 AS BIT))
+											BEGIN -- Start: @ysnRecap = 1
+											
+											-- Get Batch Id
+											SELECT @strBatchIdForNewPostRecap = ISNULL(strBatchIdForNewPostRecap, '')
+											FROM tblARInvoiceIntegrationLog 
+											WHERE intIntegrationLogId = @intIntegrationLogId
 
 											IF(@strBatchIdForNewPostRecap IS NOT NULL AND @strBatchIdForNewPostRecap != '')
 												BEGIN -- Start:@strBatchIdForNewPostRecap
@@ -3605,6 +3725,7 @@ BEGIN
 										SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
                                         SET @ysnSuccess = CAST(0 AS BIT)
                                         SET @strStatusMsg = 'Invoice and Checkout Total Validation: ' + @strRemark
+
 
                                         -- ROLLBACK
                                         GOTO ExitWithRollback

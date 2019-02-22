@@ -87,7 +87,8 @@
     [strGuid]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strUserId]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intVehicleId]                INT             NULL,
-    [strStatementType]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
+    [strStatementType]            NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [ysnMPGCalculation]			  BIT			  NULL
 );
 
 

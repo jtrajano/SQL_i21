@@ -431,6 +431,7 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd	BIT
 			,ysnDepartmentGrouping			BIT
 			,ysnPostForeignSales			BIT
+			,ysnMPGCalculation			    BIT
 
 		)
 
@@ -530,6 +531,7 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
+			,ysnMPGCalculation
 			)
 			SELECT 
 			 intCustomerId				
@@ -624,6 +626,7 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
+			,ysnMPGCalculation
 			FROM vyuCFInvoiceReport
 		END
 		ELSE
@@ -721,6 +724,7 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
+			,ysnMPGCalculation	
 			)
 			SELECT 
 			 intCustomerId				
@@ -815,6 +819,7 @@ BEGIN
 			,ysnSummaryByDeptVehicleProd
 			,ysnDepartmentGrouping		
 			,ysnPostForeignSales		
+			,ysnMPGCalculation	
 			FROM vyuCFInvoiceReport
 			WHERE  ISNULL(ysnInvoiced,0) = 0
 		END
@@ -1100,6 +1105,7 @@ BEGIN
 		,ysnDepartmentGrouping
 		,ysnSummaryByDeptVehicleProd	
 		,ysnPostedCSV
+		,ysnMPGCalculation
 		INTO #tblCFTempInvoiceReportSummary 
 		FROM #tblCFTempInvoiceReport AS main 
 		INNER JOIN @tblCFInvoiceNunber as cfInvRptNo
@@ -1197,6 +1203,7 @@ BEGIN
 		,ysnSummaryByDeptVehicleProd
 		,ysnPostedCSV
 		,strUserId
+		,ysnMPGCalculation
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -1285,6 +1292,7 @@ BEGIN
 		,ysnSummaryByDeptVehicleProd		
 		,ysnPostedCSV
 		,@UserId
+		,ysnMPGCalculation
 	    FROM #tblCFTempInvoiceReportSummary 
 		where intTransactionId in (SELECT intTransactionId FROM @tblCFFilterIds)
 

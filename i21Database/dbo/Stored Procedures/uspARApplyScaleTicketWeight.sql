@@ -14,11 +14,10 @@ BEGIN
 	DECLARE @strInvalidItem			NVARCHAR(MAX) = ''
 	DECLARE @strUnitMeasure			NVARCHAR(100) = ''
 
-	SELECT @intUnitMeasureId 	= IUOM.intUnitMeasureId
+	SELECT @intUnitMeasureId 	= UOM.intUnitMeasureId
 		 , @strUnitMeasure		= UOM.strUnitMeasure
-	FROM dbo.tblICItemUOM IUOM WITH (NOLOCK)
-	INNER JOIN tblICUnitMeasure UOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId
-	WHERE IUOM.intItemUOMId = @intScaleUOMId
+	FROM dbo.tblICUnitMeasure UOM WITH (NOLOCK)
+	WHERE UOM.intUnitMeasureId = @intScaleUOMId
 
 	SELECT TOP 1 @strInvalidItem = I.strItemNo + ' - ' + I.strDescription
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
@@ -44,9 +43,9 @@ BEGIN
 	SELECT @dblTotalOrderedQty = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(SOD.intItemUOMId, I.intItemUOMId, SOD.dblQtyOrdered), 0))
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
 	INNER JOIN (
-	SELECT I.intItemId
-		 , IUOM.intItemUOMId
-	FROM dbo.tblICItem I WITH (NOLOCK)
+		SELECT I.intItemId
+			, IUOM.intItemUOMId
+		FROM dbo.tblICItem I WITH (NOLOCK)
 	INNER JOIN tblICItemUOM IUOM ON I.intItemId = IUOM.intItemId AND IUOM.intUnitMeasureId = @intUnitMeasureId	
 	WHERE I.ysnUseWeighScales = 1	  
 	) I ON SOD.intItemId = I.intItemId

@@ -348,12 +348,24 @@ BEGIN
 		DECLARE @EntityId INT
 		if not exists(select top 1 1 from tblSMUserSecurity where strEmployeeOriginId = @originEmployee)
 		begin
-			--INSERT Entity record 
-			INSERT [dbo].[tblEMEntity]	([strName], [strContactNumber], [strEntityNo])
-			VALUES						(@strName, '''',  @originEmployee)
-
 			
-			SET @EntityId = SCOPE_IDENTITY()
+
+			IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originEmployee))  )
+			BEGIN
+
+				SELECT TOP 1 @EntityId = intEntityId FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originEmployee)) 				
+
+			END
+			ELSE
+			BEGIN
+
+				--INSERT Entity record 
+				INSERT [dbo].[tblEMEntity]	([strName], [strContactNumber], [strEntityNo])
+				VALUES						(@strName, '''',  @originEmployee)
+				
+				SET @EntityId = SCOPE_IDENTITY()
+			END
+	
 
 			PRINT ''INSERT Entity Contact Record''
 

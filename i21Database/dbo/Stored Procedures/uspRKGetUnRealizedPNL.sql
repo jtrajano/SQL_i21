@@ -222,13 +222,15 @@ BEGIN TRY
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 	GROUP BY LD.intPContractDetailId
 	
-	UNION ALL SELECT 2 AS intContractTypeId,LD.intSContractDetailId intContractDetailId,SUM(LD.dblQuantity) dblPostedQuantity
+	UNION  
+	SELECT 2 AS intContractTypeId,LD.intSContractDetailId intContractDetailId,SUM(LD.dblQuantity) dblPostedQuantity
 	FROM tblLGLoadDetail LD
 	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) AND L.intShipmentType = 1 AND L.intPurchaseSale = 3
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	GROUP BY LD.intSContractDetailId
 	
-	UNION ALL SELECT 3 AS intContractTypeId,LD.intSContractDetailId intContractDetailId,SUM(LD.dblQuantity) dblPostedQuantity
+	UNION  
+	SELECT 3 AS intContractTypeId,LD.intSContractDetailId intContractDetailId,SUM(LD.dblQuantity) dblPostedQuantity
 	FROM tblLGLoadDetail LD
 	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6) AND L.intShipmentType = 1 AND L.intPurchaseSale = 2
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -477,15 +479,22 @@ BEGIN TRY
 	LEFT JOIN tblICItemContract				IC				 ON	IC.intItemContractId			 = CD.intItemContractId
 	LEFT JOIN tblSMCountry					RY				 ON	RY.intCountryID					 = IC.intCountryId
 	LEFT JOIN tblSMMultiCompany				Company			 ON Company.intMultiCompanyId		 = CH.intCompanyId
-	WHERE CH.intCommodityId = ISNULL(@intCommodityId, CH.intCommodityId)
+		WHERE CH.intCommodityId = CASE 																											
+										WHEN ISNULL(@intCommodityId, 0) = 0 THEN CH.intCommodityId
+										ELSE @intCommodityId
+								  END		
 		AND CD.dblQuantity > ISNULL(CD.dblInvoicedQty, 0)
-		AND CL.intCompanyLocationId = ISNULL(@intLocationId, CL.intCompanyLocationId)
+		AND CL.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId,0)= 0 THEN CL.intCompanyLocationId ELSE @intLocationId END
 		AND intContractStatusId NOT IN (2,3,6)
 		AND ISNULL(CD.dblBalance,0)-ISNULL(L.dblPostedQuantity,0)>0
-		AND ISNULL(CH.intCompanyId, 0) = ISNULL(@intCompanyId, ISNULL(CH.intCompanyId, 0))
+		AND ISNULL(CH.intCompanyId,0) = CASE 
+										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(CH.intCompanyId,0)
+										ELSE @intCompanyId
+								  END	
 	
 	---InTransit-----
-	UNION ALL SELECT strType						= CASE WHEN ISNULL(Invoice.strType,'')='Provisional' THEN 'Realized Not Fixed' ELSE 'Unrealized' END COLLATE Latin1_General_CI_AS
+	UNION  
+		 SELECT strType						= CASE WHEN ISNULL(Invoice.strType,'')='Provisional' THEN 'Realized Not Fixed' ELSE 'Unrealized' END COLLATE Latin1_General_CI_AS
 		,intContractTypeId							= CH.intContractTypeId
 		,intContractHeaderId						= CH.intContractHeaderId
 		,strContractType							= TP.strContractType
@@ -1551,7 +1560,7 @@ BEGIN TRY
 		AND CL.intCompanyLocationId = CASE 
 										WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId
 										ELSE @intLocationId
-								  END		
+								      END		
        
 	   AND ISNULL(CH.intCompanyId,0)		= CASE 
 													WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(CH.intCompanyId,0)
@@ -1890,7 +1899,15 @@ BEGIN TRY
 												 ,CD.intPriceUnitMeasureId												
 												 ,[dbo].[fnRKGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice)
 												)
-		/ CASE WHEN ISNULL(Detail.dblFXPrice,0) = 0 THEN ISNULL(EX.dblRate,1) ELSE ISNULL(Detail.dblRate,1) END
+		*(CASE 
+				WHEN CD.intCurrencyId <> @intCurrencyUOMId THEN
+					CASE 
+							WHEN ISNULL(Detail.dblFXPrice,0) = 0 THEN ISNULL(EX.dblRate,1) 
+							ELSE ISNULL(Detail.dblRate,1) 
+					END
+				ELSE 1
+		  END 
+		 )
 		/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END	
 
 	FROM @tblUnRealizedPNL CD

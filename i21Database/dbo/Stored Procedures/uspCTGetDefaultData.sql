@@ -108,29 +108,11 @@ BEGIN
 													WHEN @ysnRegion = 1 THEN 'Region'
 													ELSE 'City'
 											END	AS strDestinationPointType
+											,@strCity AS strDestinationPoint
 		END
 		ELSE
 		BEGIN
-			SELECT NULL AS intCityId, NULL	AS strDestinationPointType
-		END
-	END
-
-	IF @strType = 'Destination Point'
-	BEGIN
-		SELECT @intVendorId = intVendorId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = @intSubLocationId
-		SELECT @strCity = strCity FROM tblEMEntityLocation WHERE intEntityId = @intVendorId AND ysnDefaultLocation = 1
-		SELECT @intCityId = intCityId, @ysnPort = ysnPort, @ysnRegion = ysnRegion FROM tblSMCity WHERE strCity = @strCity
-
-		IF @intCityId IS NOT NULL
-		BEGIN
-			SELECT @intCityId AS intCityId, CASE	WHEN @ysnPort = 1 THEN 'Port' 
-													WHEN @ysnRegion = 1 THEN 'Region'
-													ELSE 'City'
-											END	AS strDestinationPointType
-		END
-		ELSE
-		BEGIN
-			SELECT NULL AS intCityId, NULL	AS strDestinationPointType
+			SELECT NULL AS intCityId, NULL	AS strDestinationPointType, NULL AS strDestinationPoint
 		END
 	END
 
