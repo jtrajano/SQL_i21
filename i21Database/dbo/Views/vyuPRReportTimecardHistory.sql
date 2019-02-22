@@ -77,6 +77,8 @@ FROM
 		ON EEOT.intEmployeeEarningId = PGDOT.intEmployeeEarningId
 		AND EEOT.intEntityEmployeeId = PGDOT.intEntityEmployeeId
 		AND PGDOT.intDepartmentId = TC.intEmployeeDepartmentId
+		AND TC.intPayGroupDetailId = PGDOT.intPayGroupDetailId
+		AND PGDOT.intSource = 3 --Time Approval
 	LEFT JOIN tblPRPaycheckEarning PEOT
 		ON PEOT.intEmployeeEarningId = EEOT.intEmployeeEarningId
 		AND PEOT.intPaycheckId = TC.intPaycheckId
