@@ -14,7 +14,7 @@ end
 else
 begin
 	set @currentStartingNumber = (@currentStartingNumber-1);
-	DBCC CHECKIDENT ('[tblSMStartingNumber]', RESEED, @currentStartingNumber);
+	DBCC CHECKIDENT ('[tblTMDispatch]', RESEED, @currentStartingNumber);
 end
 
 GO
