@@ -132,7 +132,7 @@ FROM (
 		LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId AND LDCL.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId 
 		LEFT JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId AND ET.strType = (CASE WHEN CTHeader.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)  
