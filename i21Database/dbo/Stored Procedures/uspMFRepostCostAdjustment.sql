@@ -29,6 +29,8 @@ BEGIN TRY
 		,@dblValue NUMERIC(38, 20)
 		,@intWOItemUOMId INT
 		,@intUnitMeasureId INT
+		,@dtmProductionDate datetime
+
 	DECLARE @tblMFConsumedLot TABLE (
 		intWorkOrderConsumedLotId INT identity(1, 1)
 		,intBatchId INT
@@ -166,6 +168,45 @@ BEGIN TRY
 		,@ysnProposed = 0
 		,@strPatternString = @intBatchId OUTPUT
 
+	SELECT @dtmCurrentDateTime = Max(dtmProductionDate)
+	FROM tblMFWorkOrderInputLot
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND ysnConsumptionReversed = 0
+
+	IF @dtmCurrentDateTime IS NULL
+	BEGIN
+		SELECT @dtmCurrentDateTime = Max(dtmProductionDate)
+		FROM tblMFWorkOrderProducedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnProductionReversed = 0
+
+		IF @dtmCurrentDateTime IS NULL
+			SELECT @dtmCurrentDateTime = Getdate()
+	END
+	ELSE
+	BEGIN
+		SELECT @dtmProductionDate = Max(dtmProductionDate)
+		FROM tblMFWorkOrderProducedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnProductionReversed = 0
+
+		IF @dtmProductionDate IS not NULL
+		BEGIN
+			IF @dtmProductionDate > @dtmCurrentDateTime
+				SELECT @dtmCurrentDateTime = @dtmProductionDate
+		END
+
+		SELECT @dtmProductionDate = Max(dtmActualInputDateTime)
+		FROM tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		IF @dtmProductionDate IS not NULL
+		BEGIN
+			IF @dtmProductionDate > @dtmCurrentDateTime
+				SELECT @dtmCurrentDateTime = @dtmProductionDate
+		END
+	END
+
 	INSERT INTO @adjustedEntries (
 		[intItemId]
 		,[intItemLocationId]
@@ -200,7 +241,7 @@ BEGIN TRY
 					AND IL.intLocationId = @intLocationId
 				))
 		,[intItemUOMId] = PL.intItemUOMId
-		,[dtmDate] = IsNull(Isnull(W.dtmPostDate, W.dtmCompletedDate), @dtmCurrentDateTime)
+		,[dtmDate] = IsNull(Isnull(@dtmCurrentDateTime,W.dtmPostDate), W.dtmCompletedDate)
 		,[dblQty] = 0
 		,[dblUOMQty] = 1
 		,[intCostUOMId] = PL.intItemUOMId

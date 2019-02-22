@@ -85,11 +85,7 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND ysnProductionReversed = 0
 
-		IF @dtmProductionDate IS NULL
-		BEGIN
-			SELECT @dtmCurrentDateTime = Getdate()
-		END
-		ELSE
+		IF @dtmProductionDate IS not NULL
 		BEGIN
 			IF @dtmProductionDate > @dtmCurrentDateTime
 				SELECT @dtmCurrentDateTime = @dtmProductionDate
