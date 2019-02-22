@@ -491,22 +491,11 @@ BEGIN
 		) 
 		SELECT Detail.intItemId
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
-				,COALESCE(Detail.intGrossNetUOMId, FromStock.intItemUOMId)
+				,FromStock.intItemUOMId
 				,Header.dtmTransferDate
-				,dblQty = CASE WHEN Detail.intGrossNetUOMId IS NOT NULL AND Header.ysnShipmentRequired <> 1 THEN ISNULL(Detail.dblGross, 0) - ISNULL(Detail.dblTare, 0) ELSE -FromStock.dblQty END --CASE WHEN Detail.intGrossNetUOMId IS NULL THEN -FromStock.dblQty ELSE ISNULL(Detail.dblGross, 0) - ISNULL(Detail.dblTare, 0) END
-				,dblUOMQty = CASE WHEN Detail.intGrossNetUOMId IS NOT NULL AND Header.ysnShipmentRequired <> 1 THEN WeightUOM.dblUnitQty ELSE FromStock.dblUOMQty END --CASE WHEN Detail.intGrossNetUOMId IS NULL THEN FromStock.dblUOMQty ELSE WeightUOM.dblUnitQty END
-				,dblCost = CASE	WHEN Detail.intGrossNetUOMId IS NOT NULL AND Header.ysnShipmentRequired <> 1 THEN 
-								CASE	WHEN ISNULL(Detail.dblGross, 0) - ISNULL(Detail.dblTare, 0) = 0 THEN 0 
-										ELSE dbo.fnDivide(dbo.fnMultiply(-FromStock.dblQty, FromStock.dblCost), ISNULL(Detail.dblGross, 0) - ISNULL(Detail.dblTare, 0))
-								END 
-							ELSE	ISNULL(FromStock.dblCost, 0)
-					END 
-					--CASE	WHEN Detail.intGrossNetUOMId IS NULL THEN ISNULL(FromStock.dblCost, 0) 
-					--		ELSE 
-					--			CASE	WHEN ISNULL(Detail.dblGross, 0) - ISNULL(Detail.dblTare, 0) = 0 THEN 0 
-					--					ELSE dbo.fnDivide(dbo.fnMultiply(-FromStock.dblQty, FromStock.dblCost), ISNULL(Detail.dblGross, 0) - ISNULL(Detail.dblTare, 0))
-					--			END 
-					--END
+				,dblQty = -FromStock.dblQty 
+				,dblUOMQty = FromStock.dblUOMQty 
+				,dblCost = ISNULL(FromStock.dblCost, 0)
 				,dblSalesPrice = 0
 				,@DefaultCurrencyId
 				,dblExchangeRate = 1
