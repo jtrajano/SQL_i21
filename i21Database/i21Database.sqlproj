@@ -7360,6 +7360,8 @@
     <Build Include="dbo\Views\vyuARCustomerAddressLabelReport.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
+    <Build Include="dbo\Views\vyuSMFreightTerms.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_MigrateINCOToFreightTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
