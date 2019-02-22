@@ -48,7 +48,7 @@ AS
 			END		AS		dblConversionFactor,
 			ISNULL(QM.strUnitMeasure,YM.strUnitMeasure)	AS	strUOM,
 			CASE	WHEN	CH.ysnLoad = 1
-						THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalance,0)
+						THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
 						ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
 			END		AS	dblAppliedQty,
 			dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId,0)	AS	dblExchangeRate,
