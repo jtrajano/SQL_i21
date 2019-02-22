@@ -7365,7 +7365,7 @@
     <Build Include="dbo\Views\vyuARInvoiceMeterBillingReport.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailMeterBillingReport.sql" />
     <Build Include="dbo\Functions\fnICGeneratePayablesTaxes.sql" />
-    <Build Include="Scripts\Post-Deployment\SM\1910_MigrateINCOToFreightTerm.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_MigrateINCOToFreightTerm.sql" />
     <Build Include="dbo\Views\vyuSMFreightTerms.sql" />
   </ItemGroup>
   <ItemGroup>
