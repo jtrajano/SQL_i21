@@ -37,12 +37,12 @@ DECLARE @intCommodityUnitMeasureId INT= NULL
 SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
 
 SELECT *
-	, isnull(tranShipQty,0)+isnull(tranRecQty,0)+isnull(dblAdjustmentQty,0)+isnull(dblCountQty,0)+isnull(dblInvoiceQty,0) BalanceForward
+	, isnull(tranRecQty,0) - isnull(ABS(tranShipQty),0) +isnull(dblAdjustmentQty,0)+isnull(dblCountQty,0)+isnull(dblInvoiceQty,0) BalanceForward
 INTO #temp
 FROM (
 	SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 		, (SELECT strShipmentNumber FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) tranShipmentNumber
-		, (SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SUM(dblQty)) FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) tranShipQty
+		, (SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SUM(ABS(dblQty))) FROM tblICInventoryShipment sh WHERE sh.strShipmentNumber=it.strTransactionId) tranShipQty
 		, (SELECT strReceiptNumber FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId) tranReceiptNumber
 		, (SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SUM(dblQty)) FROM tblICInventoryReceipt ir WHERE ir.strReceiptNumber=it.strTransactionId) tranRecQty
 		, (SELECT strAdjustmentNo FROM tblICInventoryAdjustment ia WHERE ia.strAdjustmentNo=it.strTransactionId) tranAdjNumber
@@ -54,7 +54,7 @@ FROM (
 		, 0.0 dblSalesInTransit
 		, 0.0 tranDSInQty
 	FROM tblICInventoryTransaction it 
-	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 15, 10, 23, 33, 44, 45, 47)
+	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 15, 10, 23, 33, 45, 47)
 	join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
 	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
@@ -98,7 +98,7 @@ FROM (
 	UNION ALL --Inventory Transfer
 	SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 		, CASE WHEN it.dblQty < 0 THEN it.strTransactionId ELSE '' END tranShipmentNumber
-		, CASE WHEN it.dblQty < 0  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(it.dblQty,0)) ELSE  0.0 END tranShipQty
+		, CASE WHEN it.dblQty < 0  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ABS(it.dblQty),0)) ELSE  0.0 END tranShipQty
 		, CASE WHEN it.dblQty > 0  THEN it.strTransactionId ELSE '' END tranReceiptNumber
 		, CASE WHEN it.dblQty > 0  THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(it.dblQty,0)) ELSE 0.0 END tranRecQty
 		, '' tranAdjNumber
@@ -243,7 +243,7 @@ FROM (
 	--Shipment against customer storage	
 	UNION ALL SELECT CONVERT(VARCHAR(10),dtmDate,110) dtmDate
 		, '' tranShipmentNumber
-		, -dblOutQty tranShipQty
+		, ABS(dblOutQty) tranShipQty
 		, '' tranReceiptNumber
 		, 0.0 tranRecQty
 		, '' tranAdjNumber
@@ -308,7 +308,7 @@ FROM (
 	--On Hold without Delivery Sheet
 	UNION ALL select dtmDate
 		, '' tranShipmentNumber
-		, abs(isnull(tranShipQty,0)) * -1 tranShipQty
+		, abs(isnull(tranShipQty,0)) tranShipQty
 		, '' tranReceiptNumber
 		, tranRecQty tranRecQty
 		, ''  tranAdjNumber
@@ -326,7 +326,7 @@ FROM (
 			, '' as strAdjDistributionOption
 			, '' as strCountDistributionOption
 			, '' as tranShipmentNumber
-			, (CASE WHEN strInOutFlag='O' THEN dblNetUnits  ELSE 0 END) tranShipQty
+			, (CASE WHEN strInOutFlag='O' THEN ABS(dblNetUnits)  ELSE 0 END) tranShipQty
 			, '' tranReceiptNumber
 			, (CASE WHEN strInOutFlag='I' THEN dblNetUnits  ELSE 0 END) tranRecQty
 			, '' tranAdjNumber
@@ -358,7 +358,7 @@ FROM (
 	UNION ALL
 	SELECT dtmDate
 		, '' tranShipmentNumber
-		, isnull(dblOutQty,0) * -1 tranShipQty
+		, isnull(ABS(dblOutQty),0) tranShipQty
 		, '' tranReceiptNumber
 		, dblInQty tranRecQty
 		, ''  tranAdjNumber
@@ -374,12 +374,12 @@ FROM (
 		select
 				CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
 				,S.strStorageTypeCode strDistributionOption
-				, 0  AS dblInQty
+				, CASE WHEN strType = 'Reverse Settlement' THEN
+					ABS(dblUnits)
+					ELSE 0 END  AS dblOutQty
 				,CASE WHEN strType = 'Settlement' THEN
 					ABS(dblUnits)
-					WHEN  strType = 'Reverse Settlement'  THEN
-					ABS(dblUnits) * -1
-					ELSE 0 END AS dblOutQty
+					ELSE 0 END AS dblInQty
 				,S.intStorageScheduleTypeId
 				,SH.intSettleStorageId
 				,SH.strSettleTicket
@@ -434,7 +434,7 @@ INSERT INTO @tblResultInventory (dtmDate
 	, tranDSInQty)
 SELECT dtmDate
 	, tranShipmentNumber
-	, isnull(tranShipQty,0) + CASE WHEN dblInvoiceQty < 0 THEN dblInvoiceQty ELSE 0 END
+	, isnull(ABS(tranShipQty),0) + CASE WHEN dblInvoiceQty < 0 THEN ABS(dblInvoiceQty) ELSE 0 END
 	, tranReceiptNumber
 	, isnull(tranRecQty,0) + CASE WHEN dblInvoiceQty > 0 THEN dblInvoiceQty ELSE 0 END
 	, tranAdjNumber
@@ -443,7 +443,7 @@ SELECT dtmDate
 	, dblCountQty
 	, tranInvoiceNumber
 	, dblInvoiceQty
-	, isnull(tranShipQty,0)+isnull(tranRecQty,0)+isnull(dblAdjustmentQty,0)+isnull(dblCountQty,0)+isnull(dblInvoiceQty,0) BalanceForward
+	, isnull(tranRecQty,0) - isnull(ABS(tranShipQty),0) + isnull(dblAdjustmentQty,0) + isnull(dblCountQty,0) + isnull(dblInvoiceQty,0) BalanceForward
 	, dblSalesInTransit
 	, tranDSInQty
 FROM (

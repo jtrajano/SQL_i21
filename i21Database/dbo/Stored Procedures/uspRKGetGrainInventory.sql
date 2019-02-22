@@ -647,12 +647,12 @@ FROM(
 		select
 				CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
 				,S.strStorageTypeCode strDistributionOption
-				, 0  AS dblInQty
+				, CASE WHEN strType = 'Reverse Settlement' THEN
+					ABS(dblUnits)
+					ELSE 0 END  AS dblOutQty
 				,CASE WHEN strType = 'Settlement' THEN
 					ABS(dblUnits)
-					WHEN  strType = 'Reverse Settlement'  THEN
-					ABS(dblUnits) * -1
-					ELSE 0 END AS dblOutQty
+					ELSE 0 END AS dblInQty
 				,S.intStorageScheduleTypeId
 				,SH.intSettleStorageId
 				,SH.strSettleTicket
@@ -675,6 +675,7 @@ FROM(
 								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
 								AND strType IN ('Settlement','Reverse Settlement')
 								AND SH.intSettleStorageId IS NULL
+								AND S.ysnDPOwnedType <> 1
 	) a
 
 	
