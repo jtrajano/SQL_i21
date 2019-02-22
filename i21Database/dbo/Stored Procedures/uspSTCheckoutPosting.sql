@@ -3318,7 +3318,8 @@ BEGIN
 											,[dblCOGSAmount]
 											,[strImportFormat]
 											,[dblSubCurrencyRate]
-											,[dblCurrencyExchangeRate])
+											,[dblCurrencyExchangeRate]
+											,[ysnRecap])
 										SELECT 
 											ROW_NUMBER() OVER(ORDER BY intEntityCustomerId ASC)
 											,[strTransactionType]
@@ -3406,6 +3407,7 @@ BEGIN
 											,[strImportFormat]
 											,[dblSubCurrencyRate]
 											,[dblCurrencyExchangeRate]
+											,[ysnRecap]
 										FROM @EntriesForInvoice
 
 										--SELECT * FROM @EntriesForInvoice
@@ -3480,74 +3482,76 @@ BEGIN
 													,@ErrorMessage				= @ErrorMessage OUTPUT
 													,@LogId					    = @intIntegrationLogId OUTPUT
 
-										IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
+										-- NOT RECAP
+										IF(@ysnRecap = CAST(0 AS BIT))
 											BEGIN
-												IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-													BEGIN
-														-- Posting to Sales Invoice was successfull
-														UPDATE tblSTCheckoutHeader
-														SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
-														WHERE intCheckoutId = @intCheckoutId
+	
+											IF EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLog WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
+												BEGIN
 
-														SELECT @strBatchIdForNewPostRecap = ISNULL(strBatchIdForNewPostRecap, '')
-														FROM tblARInvoiceIntegrationLog
-														WHERE intIntegrationLogId = @intIntegrationLogId
+													IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+														BEGIN
 
-														-- Insert to Temp Table
-														DELETE FROM @tblTempInvoiceIds
 
-														INSERT INTO @tblTempInvoiceIds
-														(
-															intInvoiceId
-														)
-														SELECT DISTINCT 
-															intInvoiceId
-														FROM tblARInvoiceIntegrationLogDetail
-														WHERE intIntegrationLogId = (
-																						SELECT intSalesInvoiceIntegrationLogId
-																						FROM tblSTCheckoutHeader
-																						WHERE intCheckoutId =  @intCheckoutId
-																					)
+															-- Posting to Sales Invoice was successfull
+															UPDATE tblSTCheckoutHeader
+															SET intSalesInvoiceIntegrationLogId = @intIntegrationLogId
+															WHERE intCheckoutId = @intCheckoutId
 
-														-- Populate variable with Invoice Ids
-														SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
-														FROM @tblTempInvoiceIds
-											END
-										ELSE
-											BEGIN
-												-- SELECT * FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
-												SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-												SET @strStatusMsg = 'Main Checkout was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
+															SELECT @strBatchIdForNewPostRecap = ISNULL(strBatchIdForNewPostRecap, '')
+															FROM tblARInvoiceIntegrationLog
+															WHERE intIntegrationLogId = @intIntegrationLogId
 
-												-- ROLLBACK
-												GOTO ExitWithRollback
-												-- RETURN
-											END
-									END
-								ELSE
-									BEGIN
-										SET @strStatusMsg = 'Post Main Checkout has error: ' + @ErrorMessage
+															-- Insert to Temp Table
+															DELETE FROM @tblTempInvoiceIds
 
-										-- ROLLBACK
-										GOTO ExitWithRollback
-										-- RETURN
-									END
+															INSERT INTO @tblTempInvoiceIds
+															(
+																intInvoiceId
+															)
+															SELECT DISTINCT 
+																intInvoiceId
+															FROM tblARInvoiceIntegrationLogDetail
+															WHERE intIntegrationLogId = (
+																							SELECT intSalesInvoiceIntegrationLogId
+																							FROM tblSTCheckoutHeader
+																							WHERE intCheckoutId =  @intCheckoutId
+																						)
 
-										---- POST Invoice
-										--EXEC [dbo].[uspARProcessInvoices]
-										--			@InvoiceEntries				= @EntriesForInvoice
-										--			,@LineItemTaxEntries		= @LineItemTaxEntries
-										--			,@UserId					= @intCurrentUserId
-		 							--				,@GroupingOption			= 11
-										--			,@RaiseError				= 1
-										--			--,@BatchId					= @strCreateGuidBatch
-										--			,@ErrorMessage				= @ErrorMessage OUTPUT
-										--			,@CreatedIvoices			= @CreatedIvoices OUTPUT
-										--			,@BatchIdForNewPostRecap	= @strBatchIdForNewPostRecap OUTPUT
+															-- Populate variable with Invoice Ids
+															SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
+															FROM @tblTempInvoiceIds
+														END
+													ELSE
+														BEGIN
+															-- SELECT * FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId
+															SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+															SET @strStatusMsg = 'Main Checkout was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
-									-- Check if Recap
-									IF(@ysnRecap = CAST(1 AS BIT))
-										BEGIN -- Start: @ysnRecap = 1
+															-- ROLLBACK
+															GOTO ExitWithRollback
+															-- RETURN
+														END
+												END
+											ELSE
+												BEGIN
+													SET @strStatusMsg = 'Post Main Checkout has error: ' + @ErrorMessage
+
+													-- ROLLBACK
+													GOTO ExitWithRollback
+													-- RETURN
+												END
+
+										END
+
+										-- Check if RECAP
+										ELSE IF(@ysnRecap = CAST(1 AS BIT))
+											BEGIN -- Start: @ysnRecap = 1
+											
+											-- Get Batch Id
+											SELECT @strBatchIdForNewPostRecap = ISNULL(strBatchIdForNewPostRecap, '')
+											FROM tblARInvoiceIntegrationLog 
+											WHERE intIntegrationLogId = @intIntegrationLogId
 
 											IF(@strBatchIdForNewPostRecap IS NOT NULL AND @strBatchIdForNewPostRecap != '')
 												BEGIN -- Start:@strBatchIdForNewPostRecap
