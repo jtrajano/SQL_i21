@@ -180,6 +180,14 @@ BEGIN
 END 
 GO
 
+---- Update all NULL intNoOfContract in tblRKFutOptTransaction before inserting it to tblRKFutOptTransactionHistory ------ RM-2563
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblRKFutOptTransaction') 
+BEGIN
+	UPDATE tblRKFutOptTransaction 
+	SET intNoOfContract = 0
+	WHERE intNoOfContract IS NULL
+END
+
 ---- Insert previously created Derivative Entry to tblRKFutOptTransactionHistory ------ RM-2563
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblRKFutOptTransaction') 
 	AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblRKFutOptTransactionHistory')
