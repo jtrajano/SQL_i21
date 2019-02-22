@@ -35,7 +35,7 @@ FROM (
 		,IM.strItemNo
 		,IM.strDescription strItemDescription
 		,UM.strUnitMeasure strUOM
-		,EY.strName strVendorName
+		,strVendorName = ET.strName
 		,CD.intContractHeaderId
 		,IU.intUnitMeasureId
 		,CD.intContractSeq
@@ -60,7 +60,7 @@ FROM (
 				THEN dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, QU.intUnitMeasureId, PU.intUnitMeasureId, CD.dblQuantity) * CD.dblCashPrice * CC.dblRate / 100
 			END dblAmount
 		,RT.strCurrencyExchangeRateType
-		,ET.strType AS strEntityType
+		,strEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
 	FROM tblCTContractCost CC
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CC.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -69,14 +69,13 @@ FROM (
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CC.intCurrencyId
 	LEFT JOIN tblSMCurrency MY ON MY.intCurrencyID = CY.intMainCurrencyId
-	LEFT JOIN tblEMEntity EY ON EY.intEntityId = CC.intVendorId
-	LEFT JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
-		AND ET.strType = 'Vendor'
+	LEFT JOIN tblEMEntity ET ON ET.intEntityId = CC.intVendorId
 	LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = CD.intPriceItemUOMId
 	LEFT JOIN tblICItemUOM QU ON QU.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICItemUOM CM ON CM.intUnitMeasureId = IU.intUnitMeasureId
 		AND CM.intItemId = CD.intItemId
 	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
+	WHERE CC.ysnPrice = 0
 	
 	UNION
 	
@@ -124,10 +123,9 @@ FROM (
 		,CCV.strMainCurrency
 		,CCV.dblAmount
 		,CCV.strCurrencyExchangeRateType
-		,ET.strType AS strEntityType
+		,strEntityType = CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END COLLATE Latin1_General_CI_AS
 	FROM vyuCTContractCostView CCV
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CCV.intContractHeaderId
 	JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
-	JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 	WHERE ysnPrice = 1
 	) tbl
