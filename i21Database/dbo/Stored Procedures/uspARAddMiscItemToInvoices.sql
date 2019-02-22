@@ -287,6 +287,7 @@ USING
 		,[intSalesOrderDetailId]				= IE.[intSalesOrderDetailId]
 		,[strSalesOrderNumber]					= IE.[strSalesOrderNumber]
 		,[strVFDDocumentNumber]					= IE.[strVFDDocumentNumber]
+		,[strBOLNumberDetail]					= IE.[strBOLNumberDetail]
 		,[intContractHeaderId]					= IE.[intContractHeaderId]
 		,[intContractDetailId]					= IE.[intContractDetailId]
 		,[dblContractBalance]					= @ZeroDecimal
@@ -414,6 +415,7 @@ INSERT(
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[strVFDDocumentNumber]
+	,[strBOLNumberDetail]
 	,[intContractHeaderId]
 	,[intContractDetailId]
 	,[dblContractBalance]
@@ -525,6 +527,7 @@ VALUES(
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[strVFDDocumentNumber]
+	,[strBOLNumberDetail]
 	,[intContractHeaderId]
 	,[intContractDetailId]
 	,[dblContractBalance]

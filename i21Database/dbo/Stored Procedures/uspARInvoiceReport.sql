@@ -73,6 +73,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strItemType
 	 , dblTotalWeight
 	 , strVFDDocumentNumber
+	 , strBOLNumberDetail
 	 , ysnHasEmailSetup
 	 , ysnHasRecipeItem
 	 , ysnHasVFDDrugItem
@@ -191,6 +192,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strItemType				= INVOICEDETAIL.strItemType
 	 , dblTotalWeight			= ISNULL(INV.dblTotalWeight, 0)
 	 , strVFDDocumentNumber		= INVOICEDETAIL.strVFDDocumentNumber
+	 , strBOLNumberDetail		= INVOICEDETAIL.strBOLNumberDetail
 	 , ysnHasEmailSetup			= CASE WHEN (ISNULL(EMAILSETUP.intEmailSetupCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , ysnHasRecipeItem			= CASE WHEN (ISNULL(RECIPEITEM.intRecipeItemCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , ysnHasVFDDrugItem        = CASE WHEN (ISNULL(VFDDRUGITEM.intVFDDrugItemCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -252,6 +254,7 @@ LEFT JOIN (
 		 , ID.dblPrice
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
+		 , ID.strBOLNumberDetail
 		 , ID.strSCInvoiceNumber
 		 , UOM.strUnitMeasure
 		 , UOM.strSymbol

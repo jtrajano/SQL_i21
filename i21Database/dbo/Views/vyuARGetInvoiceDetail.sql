@@ -106,6 +106,7 @@ SELECT
 	INV.intDestinationWeightId,
 	INV.intConcurrencyId,
 	INV.strVFDDocumentNumber,
+	INV.strBOLNumberDetail,
 	strRebateSubmitted	= INV.strRebateSubmitted COLLATE Latin1_General_CI_AS,
 	INV.dblRebateAmount,
 	INV.dblBaseRebateAmount,

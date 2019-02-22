@@ -128,6 +128,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[dblUnitPrice]							NUMERIC(18, 6)									NULL		-- The line item price
     ,[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
 	,[strVFDDocumentNumber]					NVARCHAR(100) 	COLLATE Latin1_General_CI_AS	NULL
+	,[strBOLNumberDetail]					NVARCHAR(50) 	COLLATE Latin1_General_CI_AS	NULL
     ,[ysnRefreshPrice]						BIT												NULL		-- Indicate whether to recompute for Price based on the available pricing setup	
 	,[strMaintenanceType]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
     ,[strFrequency]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL

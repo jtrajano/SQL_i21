@@ -451,6 +451,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intSalesOrderDetailId]			INT												NULL
 	,[strSalesOrderNumber]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strVFDDocumentNumber]				NVARCHAR(100) 	COLLATE Latin1_General_CI_AS	NULL
+	,[strBOLNumberDetail]				NVARCHAR(50) 	COLLATE Latin1_General_CI_AS	NULL
 	,[intContractHeaderId]				INT												NULL
 	,[intContractDetailId]				INT												NULL
 	,[dblContractBalance]				NUMERIC(18, 6)									NULL
@@ -573,6 +574,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[strVFDDocumentNumber]
+	,[strBOLNumberDetail]
 	,[intContractHeaderId]
 	,[intContractDetailId]
 	,[dblContractBalance]
@@ -710,6 +712,7 @@ SELECT
 	,[intSalesOrderDetailId]				= IE.[intSalesOrderDetailId]
 	,[strSalesOrderNumber]					= IE.[strSalesOrderNumber]
 	,[strVFDDocumentNumber]					= IE.[strVFDDocumentNumber]
+	,[strBOLNumberDetail]					= IE.[strBOLNumberDetail]
 	,[intContractHeaderId]					= ISNULL(IP.[intContractHeaderId], IE.[intContractHeaderId])
 	,[intContractDetailId]					= ISNULL(IP.[intContractDetailId], IE.[intContractDetailId])
 	,[dblContractBalance]					= @ZeroDecimal
@@ -905,6 +908,7 @@ USING
 		,[intSalesOrderDetailId]
 		,[strSalesOrderNumber]
 		,[strVFDDocumentNumber]
+		,[strBOLNumberDetail]
 		,[intContractHeaderId]
 		,[intContractDetailId]
 		,[dblContractBalance]
@@ -1031,6 +1035,7 @@ INSERT(
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[strVFDDocumentNumber]
+	,[strBOLNumberDetail]
 	,[intContractHeaderId]
 	,[intContractDetailId]
 	,[dblContractBalance]
@@ -1142,6 +1147,7 @@ VALUES(
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[strVFDDocumentNumber]
+	,[strBOLNumberDetail]
 	,[intContractHeaderId]
 	,[intContractDetailId]
 	,[dblContractBalance]

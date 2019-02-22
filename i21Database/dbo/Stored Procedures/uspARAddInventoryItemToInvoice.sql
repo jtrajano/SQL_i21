@@ -21,6 +21,7 @@
 	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
 	,@ItemPricing					NVARCHAR(250)	= NULL
 	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
+	,@ItemBOLNumber					NVARCHAR(50)	= NULL
 	,@RefreshPrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
@@ -377,6 +378,7 @@ BEGIN TRY
 				,[intDestinationGradeId]
 				,[intDestinationWeightId]
 				,[strVFDDocumentNumber]
+				,[strBOLNumberDetail]
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
 				,[dblAddOnQuantity]
@@ -488,6 +490,7 @@ BEGIN TRY
 				,[intDestinationGradeId]			= @ItemDestinationGradeId
 				,[intDestinationWeightId]			= @ItemDestinationWeightId
 				,[strVFDDocumentNumber]				= @ItemVFDDocumentNumber
+				,[strBOLNumberDetail]				= @ItemBOLNumber
 				,[strAddonDetailKey]				= @ItemAddonDetailKey
 				,[ysnAddonParent]					= @ItemAddonParent
 				,[dblAddOnQuantity]					= @ItemAddOnQuantity
