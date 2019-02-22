@@ -79,7 +79,8 @@ BEGIN
 			,@INV_TRANS_TYPE_NegativeStock AS INT = 35
 
 	DECLARE	
-			@CostAdjustment AS NUMERIC(38, 20)			
+			@CostAdjustment AS NUMERIC(38, 20)
+			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
@@ -185,7 +186,7 @@ BEGIN
 			@CostBucketId = cb.intInventoryFIFOId
 			,@CostBucketOriginalStockIn = cb.dblStockIn
 			,@CostBucketOriginalCost = cb.dblCost
-			,@CostBucketOriginalValue = ISNULL(cb.dblStockIn, 0) * ISNULL(cb.dblCost, 0)
+			,@CostBucketOriginalValue = ROUND(dbo.fnMultiply(cb.dblStockIn, cb.dblCost), 2) 
 			,@CostBucketDate = cb.dtmDate
 	FROM	tblICInventoryFIFO cb
 	WHERE	cb.intItemId = @intItemId
@@ -241,6 +242,22 @@ BEGIN
 	SELECT	cbOut.intInventoryTransactionId
 	FROM	tblICInventoryFIFOOut cbOut
 	WHERE	cbOut.intInventoryFIFOId = @CostBucketId			
+END 
+
+-- Calculate how much cost adjustment goes for each qty. 
+BEGIN 
+	SELECT	@CostAdjustmentPerQty = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
+	FROM	tblICInventoryFIFO cb
+	WHERE	cb.intItemId = @intItemId
+			AND cb.intItemLocationId = @intItemLocationId
+			AND cb.intTransactionId = @intSourceTransactionId
+			AND ISNULL(cb.intTransactionDetailId, 0) = ISNULL(@intSourceTransactionDetailId, 0)
+			AND cb.strTransactionId = @strSourceTransactionId
+			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
+
+	-- If value of cost adjustment is zero, then exit immediately. 
+	IF @CostAdjustmentPerQty IS NULL 
+		RETURN; 
 END 
 
 -- Log the original cost
@@ -320,6 +337,7 @@ BEGIN
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
+			AND t.dblQty <> 0 
 	ORDER BY t.intInventoryTransactionId ASC 
 
 	OPEN loopRetroactive;
@@ -516,7 +534,8 @@ BEGIN
 					CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 								@CostAdjustment
 							WHEN @t_dblQty < 0 THEN 
-								(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+								@t_dblQty * @CostAdjustmentPerQty
 							ELSE 
 								0
 					END 
@@ -533,7 +552,8 @@ BEGIN
 				CASE	WHEN @t_dblQty > 0 AND @t_intInventoryTransactionId = @InventoryTransactionStartId THEN 
 							@CostAdjustment
 						WHEN @t_dblQty < 0 THEN 
-							(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
+							@t_dblQty * @CostAdjustmentPerQty
 						ELSE 
 							0
 				END <> 0 
