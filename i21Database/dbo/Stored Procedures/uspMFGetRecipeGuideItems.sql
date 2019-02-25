@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetRecipeGuideItems]
 	@intPropertyId int = 0,
 	@intCostTypeId int,
-	@intLocationId int
+	@intLocationId int,
+	@strItemNo NVARCHAR(50) = ''
 AS
 
 If ISNULL(@intPropertyId,0)>0
@@ -17,6 +18,7 @@ If ISNULL(@intPropertyId,0)>0
 	Left Join tblICItemPricing ip on ip.intItemId=i.intItemId AND ip.intItemLocationId=il.intItemLocationId
 	Join tblQMProduct p on i.intItemId=p.intProductValueId AND p.intProductTypeId=2
 	Join tblQMProductProperty pp on p.intProductId=pp.intProductId AND pp.intPropertyId=@intPropertyId
+	WHERE i.strItemNo LIKE '%' + @strItemNo + '%'
 Else
 	SELECT i.intItemId,i.strItemNo,i.strDescription,iu.intItemUOMId,um.strUnitMeasure AS strUOM,
 	CASE When @intCostTypeId=2 AND ISNULL(ip.dblAverageCost,0) > 0 THEN ISNULL(ip.dblAverageCost,0) 
@@ -28,3 +30,4 @@ Else
 	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 	Join tblICItemLocation il on i.intItemId=il.intItemId AND il.intLocationId=@intLocationId 
 	Left Join tblICItemPricing ip on ip.intItemId=i.intItemId AND ip.intItemLocationId=il.intItemLocationId
+	WHERE i.strItemNo LIKE '%' + @strItemNo + '%'
