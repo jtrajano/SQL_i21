@@ -135,7 +135,7 @@ BEGIN
 		,0 AS dblOutrightPhysicalQty
 		,0 AS dblOutrightPhysicalPrice
 		,0 AS dblFutureTradeDeltaQty
-		,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +',ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0) )  AS dblFutureTradeQty
+		,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +',ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0) )  AS dblFutureTradeQty
 		,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,' + CASE WHEN @intPriceUOMId IS NULL THEN '0' ELSE CAST(@intPriceUOMId AS NVARCHAR(10)) END  +',FM.intUnitMeasureId,ISNULL(DD.dblPrice,0))  AS dblFutureTradePrice
 		,0 AS dblPriceFixationDeltaQty
 		,0 AS dblPriceFixationQty
@@ -262,7 +262,7 @@ BEGIN
 		,0 AS dblOutrightPhysicalQty
 		,0 AS dblOutrightPhysicalPrice
 		,0 AS dblFutureTradeDeltaQty
-		,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +',ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0) )  AS dblFutureTradeQty
+		,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +',ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0) )  AS dblFutureTradeQty
 		,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,' + CASE WHEN @intPriceUOMId IS NULL THEN '0' ELSE CAST(@intPriceUOMId AS NVARCHAR(10)) END  +',FM.intUnitMeasureId,ISNULL(DD.dblPrice,0))  AS dblFutureTradePrice
 		,0 AS dblPriceFixationDeltaQty
 		,0 AS dblPriceFixationQty

@@ -128,7 +128,7 @@ BEGIN TRY
 					
 					EXEC	uspCTGetStartingNumber 'FutOpt Transaction', @strTradeNo OUTPUT
 					SET		@strTradeNo	=	LTRIM(RTRIM(@strTradeNo)) + '-H'
-					SET		@XML =	'<root><toUpdate><intNoOfContract>'+STR(@dblChildSeqLots)+'</intNoOfContract>'+
+					SET		@XML =	'<root><toUpdate><dblNoOfContract>'+STR(@dblChildSeqLots)+'</dblNoOfContract>'+
 									'<dtmTransactionDate>'+@strDate+'</dtmTransactionDate>'+
 									'<dtmFilledDate>'+@strDate+'</dtmFilledDate>'+
 									'<strInternalTradeNo>'+@strTradeNo+'</strInternalTradeNo></toUpdate></root>' 

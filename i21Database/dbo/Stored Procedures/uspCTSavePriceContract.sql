@@ -26,7 +26,7 @@ BEGIN TRY
 			@intTraderId				INT,
 			@intCurrencyId				INT,
 			@strBuySell					NVARCHAR(50),
-			@intNoOfContract			INT,
+			@dblNoOfContract			NUMERIC(18,6),
 			@intHedgeFutureMonthId		INT,
 			@dblHedgePrice				NUMERIC(18,6),
 			@intBookId					INT,
@@ -57,7 +57,7 @@ BEGIN TRY
 					@intBrokerId			=	FD.intBrokerId,
 					@intBrokerageAccountId	=	FD.intBrokerageAccountId,
 					@intFutureMarketId		=	FD.intFutureMarketId,
-					@intNoOfContract		=	FD.dblNoOfLots,
+					@dblNoOfContract		=	FD.dblNoOfLots,
 					@intHedgeFutureMonthId	=	FD.intHedgeFutureMonthId,
 					@dblHedgePrice			=	FD.dblHedgePrice,
 					@ysnHedge				=	FD.ysnHedge,
@@ -107,7 +107,7 @@ BEGIN TRY
 					SET @strXML = @strXML +  '<intCurrencyId>' + LTRIM(@intCurrencyId) + '</intCurrencyId>'
 					SET @strXML = @strXML +  '<intSelectedInstrumentTypeId>1</intSelectedInstrumentTypeId>'
 					SET @strXML = @strXML +  '<strBuySell>' + @strBuySell + '</strBuySell>'
-					SET @strXML = @strXML +  '<intNoOfContract>' + LTRIM(@intNoOfContract) + '</intNoOfContract>'
+					SET @strXML = @strXML +  '<dblNoOfContract>' + LTRIM(@dblNoOfContract) + '</dblNoOfContract>'
 					SET @strXML = @strXML +  '<intFutureMonthId>' + LTRIM(@intHedgeFutureMonthId) + '</intFutureMonthId>'
 					SET @strXML = @strXML +  '<dblPrice>' + LTRIM(@dblHedgePrice) + '</dblPrice>'
 					SET @strXML = @strXML +  '<strStatus>' + 'Filled' + '</strStatus>'

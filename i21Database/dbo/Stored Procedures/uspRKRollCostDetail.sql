@@ -20,7 +20,7 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 				join tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell='Buy'
 				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.dblOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
 
-			,(SELECT SUM(dblMatchQty) intNoOfContract from (
+			,(SELECT SUM(dblMatchQty) dblNoOfContract from (
 			SELECT DISTINCT 
 				m.dblMatchQty,
 				fut.dblPrice a
@@ -39,7 +39,7 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 					JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intSFutOptTransactionId
 					WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId)t) dblSellPrice
 
-			,(SELECT sum(dblMatchQty) intNoOfContract from (
+			,(SELECT sum(dblMatchQty) dblNoOfContract from (
 				SELECT distinct 
 					m.dblMatchQty,
 					fut.dblPrice a
@@ -94,7 +94,7 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 				and strBuySell='Buy'
 				WHERE foot.intFutOptTransactionId =ft.intFutOptTransactionId  )*isnull(ft.dblPrice,0),0) dblRMNotEqFMQtyPrice
 
-			,(SELECT sum(dblMatchQty) intNoOfContract from (
+			,(SELECT sum(dblMatchQty) dblNoOfContract from (
 				SELECT distinct 
 					m.dblMatchQty,
 					fut.dblPrice a
@@ -103,7 +103,7 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 					JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intLFutOptTransactionId
 				WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId and isnull(t.intRollingMonthId,0) = 0)t) dblBuyWithOutRollMonthQty
 
-			,(SELECT sum(dblMatchPrice) intNoOfContract from (
+			,(SELECT sum(dblMatchPrice) dblNoOfContract from (
 				SELECT distinct 
 					m.dblMatchQty* fut.dblPrice dblMatchPrice
 					FROM tblRKFutOptTransaction t					

@@ -39,7 +39,7 @@ INSERT INTO tblRKFutOptTransactionImport_ErrLog(intFutOptTransactionId,strErrorM
 VALUES (1,'There is no setup for DateTime Format in Company Configuration - Risk Management tab.',1)
 
 SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
-		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
+		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,dblNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
 		'' dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg, '' dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog
 
 DELETE FROM tblRKFutOptTransactionImport_ErrLog
@@ -521,7 +521,7 @@ WHILE @mRowNumber > 0
 			   ,[strCurrency]
 			   ,[strBrokerTradeNo]
 			   ,[strBuySell]
-			   ,[intNoOfContract]
+			   ,[dblNoOfContract]
 			   ,[strFutureMonth]
 			   ,[strOptionMonth]
 			   ,[strOptionType]
@@ -548,7 +548,7 @@ WHILE @mRowNumber > 0
 			   ,[strCurrency]
 			   ,[strBrokerTradeNo]
 			   ,[strBuySell]
-			   ,[intNoOfContract]
+			   ,[dblNoOfContract]
 			   ,[strFutureMonth]
 			   ,[strOptionMonth]
 			   ,[strOptionType]
@@ -571,7 +571,7 @@ SELECT @mRowNumber = MIN(intFutOptTransactionId)	FROM tblRKFutOptTransactionImpo
 END
 
 SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
-		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
+		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,dblNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
 		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,  dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog  ORDER BY intFutOptTransactionErrLogId
 --		WHERE isnull(strName,'') <> '' and isnull(strFutMarketName,'') <> '' and isnull(strInstrumentType,'') <> ''
 --AND isnull(strAccountNumber,'') <> '' and isnull(strCommodityCode,'') <> '' and isnull(strLocationName,'') <> '' and isnull(strSalespersonId,'') <> ''

@@ -96,14 +96,14 @@ SET @query = '
 			,strFutMarketName
 			,CONVERT(VARCHAR(10), dtmFilledDate, 110) dtmTransactionDate
 			,(Left(replace(convert(varchar(9), dtmFilledDate, 6), '' '', ''-'') + '' '' + convert(varchar(8), dtmFilledDate, 8),9)) COLLATE Latin1_General_CI_AS LdtmTransactionDate
-			,intNoOfContract LintNoOfContract
+			,dblNoOfContract LdblNoOfContract
 			,strFutureMonth LstrFutureMonth
 			,dblPrice LdblPrice
 			,null SdtmTransactionDate
-			,null SintNoOfContract
+			,null SdblNoOfContract
 			,null SstrFutureMonth
 			,null SdblPrice
-			,CASE WHEN bc.intFuturesRateType = 1 then 0 else - isnull(bc.dblFutCommission, 0) end * intNoOfContract as dblFutCommission
+			,CASE WHEN bc.intFuturesRateType = 1 then 0 else - isnull(bc.dblFutCommission, 0) end * dblNoOfContract as dblFutCommission
 		FROM tblRKFutOptTransaction t
 		JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell=''Buy''
@@ -118,14 +118,14 @@ SET @query = '
 			,strFutMarketName
 			,CONVERT(VARCHAR(10), dtmFilledDate, 110) dtmTransactionDate
 			,null LdtmTransactionDate
-			,null LintNoOfContract
+			,null LdblNoOfContract
 			,null LstrFutureMonth
 			,null LdblPrice
 			,(LEFT(REPLACE(CONVERT(VARCHAR(9), dtmFilledDate, 6), '' '', ''-'') + '' '' + convert(varchar(8), dtmFilledDate, 8),9)) COLLATE Latin1_General_CI_AS SdtmTransactionDate
-			,intNoOfContract SintNoOfContract
+			,dblNoOfContract SdblNoOfContract
 			,strFutureMonth SstrFutureMonth
 			,dblPrice SdblPrice
-			,CASE WHEN bc.intFuturesRateType= 1 then 0 else  -isnull(bc.dblFutCommission,0) end*intNoOfContract as dblFutCommission
+			,CASE WHEN bc.intFuturesRateType= 1 then 0 else  -isnull(bc.dblFutCommission,0) end*dblNoOfContract as dblFutCommission
 		FROM tblRKFutOptTransaction t
 		JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell=''Sell''
@@ -147,11 +147,11 @@ DECLARE @tempTable TABLE (strItnernalTradeNo nvarchar(100) COLLATE Latin1_Genera
 	, strFutMarketName nvarchar(100) COLLATE Latin1_General_CI_AS
 	, dtmTransactionDate datetime
 	, LdtmTransactionDate datetime
-	, LintNoOfContract int
+	, LdblNoOfContract numeric(24,10)
 	, LstrFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS
 	, LdblPrice numeric(24,10)
 	, SdtmTransactionDate datetime
-	, SintNoOfContract int
+	, SdblNoOfContract numeric(24,10)
 	, SstrFutureMonth nvarchar(100) COLLATE Latin1_General_CI_AS
 	, SdblPrice numeric(24,10)
 	, dblFutCommission numeric(24,10))
@@ -160,11 +160,11 @@ INSERT INTO @tempTable (strItnernalTradeNo
 	, strFutMarketName
 	, dtmTransactionDate
 	, LdtmTransactionDate
-	, LintNoOfContract
+	, LdblNoOfContract
 	, LstrFutureMonth
 	, LdblPrice
 	, SdtmTransactionDate
-	, SintNoOfContract
+	, SdblNoOfContract
 	, SstrFutureMonth
 	, SdblPrice
 	, dblFutCommission)

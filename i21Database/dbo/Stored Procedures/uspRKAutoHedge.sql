@@ -15,7 +15,7 @@ BEGIN TRY
         @strInternalTradeNo nvarchar(10),
         @strBrokerTradeNo nvarchar(50),
         @strBuySell nvarchar(10),
-        @intNoOfContract int,
+        @dblNoOfContract numeric(18,6),
         @dblPrice numeric(18,6),
         @strStatus nvarchar(50),
         @dtmFilledDate datetime,
@@ -53,7 +53,7 @@ SELECT
       @strInternalTradeNo = strInternalTradeNo ,
       @strBrokerTradeNo =      strBrokerTradeNo ,
       @strBuySell =      strBuySell ,
-      @intNoOfContract = intNoOfContract, 
+      @dblNoOfContract = dblNoOfContract, 
       @dblPrice =  dblPrice ,
       @strStatus = strStatus ,
       @dtmFilledDate =   dtmFilledDate ,
@@ -82,7 +82,7 @@ intTraderId int,
 strInternalTradeNo nvarchar(10),
 strBrokerTradeNo nvarchar(50),
 strBuySell nvarchar(10),
-intNoOfContract int,
+dblNoOfContract numeric(18,6),
 dblPrice NUMERIC(18,6),
 strStatus nvarchar(50),
 dtmFilledDate datetime,
@@ -128,22 +128,22 @@ BEGIN
       intBrokerageAccountId = @intBrokerageAccountId ,
       intFutureMarketId =     @intFutureMarketId ,
       intFutureMonthId =      @intFutureMonthId ,
-      dblNoOfContract = @intNoOfContract, 
+      dblNoOfContract = @dblNoOfContract, 
 	  dtmFilledDate = @dtmFilledDate, 
       dblPrice =  @dblPrice 
       WHERE intFutOptTransactionId = @intFutOptTransactionId
 
 	  SELECT @intMatchedLots = SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned WHERE intFutOptTransactionId = @intFutOptTransactionId
 
-	  IF @intMatchedLots < @intNoOfContract
+	  IF @intMatchedLots < @dblNoOfContract
 	  BEGIN
 		RAISERROR('Cannot change number of hedged lots as it is used in Match Futures Purchase and sales.',16,1)
 	  END
 
 	IF ISNULL(@intContractDetailId,0) > 0
-		UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @intNoOfContract WHERE intContractDetailId = @intContractDetailId AND intFutOptTransactionId = @intFutOptTransactionId
+		UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @dblNoOfContract WHERE intContractDetailId = @intContractDetailId AND intFutOptTransactionId = @intFutOptTransactionId
 	ELSE
-		UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @intNoOfContract WHERE intContractHeaderId = @intContractHeaderId AND intFutOptTransactionId = @intFutOptTransactionId
+		UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @dblNoOfContract WHERE intContractHeaderId = @intContractHeaderId AND intFutOptTransactionId = @intFutOptTransactionId
 END
 ELSE
 BEGIN
@@ -192,7 +192,7 @@ BEGIN
               @strInternalTradeNo ,
               @strBrokerTradeNo ,
               @strBuySell ,
-              @intNoOfContract ,
+              @dblNoOfContract ,
               @dblPrice ,
               @strStatus ,
               CONVERT(DATETIME,CONVERT(CHAR(10),@dtmFilledDate,110)),
@@ -217,7 +217,7 @@ BEGIN
 		SET @strXml = @strXml + '<intContractDetailId>'+LTRIM(@intContractDetailId)+'</intContractDetailId>'
 	SET @strXml = @strXml + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
 	SET @strXml = @strXml + '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
-	SET @strXml = @strXml + '<intHedgedLots>'+LTRIM(@intNoOfContract)+'</intHedgedLots>'
+	SET @strXml = @strXml + '<dblHedgedLots>'+LTRIM(@dblNoOfContract)+'</dblHedgedLots>'
 	SET @strXml = @strXml + '<dblAssignedLots>0</dblAssignedLots>'
 	SET @strXml = @strXml + '<ysnIsHedged>1</ysnIsHedged>'
 	SET @strXml = @strXml + '</Transaction></root>'

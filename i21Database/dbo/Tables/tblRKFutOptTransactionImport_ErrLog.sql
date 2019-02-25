@@ -12,7 +12,7 @@
 	[strCurrency] nvarchar(40) COLLATE Latin1_General_CI_AS NULL,
 	[strBrokerTradeNo] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strBuySell] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[intNoOfContract] int,
+	[dblNoOfContract] numeric(24,10),
 	[strFutureMonth] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 	[strOptionMonth] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strOptionType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,

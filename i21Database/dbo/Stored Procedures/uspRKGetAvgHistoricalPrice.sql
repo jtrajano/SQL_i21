@@ -96,7 +96,7 @@ FROM (
 		, ISNULL((SELECT SUM(dblOpenContract) FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell='Buy'
 				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.dblOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
-		, (SELECT SUM(dblMatchQty) intNoOfContract
+		, (SELECT SUM(dblMatchQty) dblNoOfContract
 			FROM (
 				SELECT DISTINCT m.dblMatchQty, fut.dblPrice a
 				FROM tblRKFutOptTransaction t
@@ -112,7 +112,7 @@ FROM (
 				JOIN tblRKMatchFuturesPSDetail m on m.intSFutOptTransactionId=ft1.intFutOptTransactionId
 				JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intSFutOptTransactionId
 				WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId)t) dblSellPrice
-		, (SELECT SUM(dblMatchQty) intNoOfContract
+		, (SELECT SUM(dblMatchQty) dblNoOfContract
 			FROM (
 				SELECT DISTINCT m.dblMatchQty, fut.dblPrice a
 				FROM tblRKFutOptTransaction t
@@ -152,14 +152,14 @@ FROM (
 		, ISNULL((SELECT SUM(dblOpenContract) from vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and foot.intRollingMonthId=foot.intFutureMonthId and strBuySell='Buy'
 				WHERE foot.intFutOptTransactionId =ft.intFutOptTransactionId  )*isnull(ft.dblPrice,0),0) dblRMNotEqFMQtyPrice
-		, (SELECT SUM(dblMatchQty) intNoOfContract
+		, (SELECT SUM(dblMatchQty) dblNoOfContract
 			FROM (
 				SELECT distinct m.dblMatchQty, fut.dblPrice a
 				FROM tblRKFutOptTransaction t
 				JOIN tblRKMatchFuturesPSDetail m on m.intSFutOptTransactionId=t.intFutOptTransactionId
 				JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intLFutOptTransactionId
 				WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId and isnull(t.intRollingMonthId,0) = 0)t) dblBuyWithOutRollMonthQty
-		, (SELECT SUM(dblMatchPrice) intNoOfContract
+		, (SELECT SUM(dblMatchPrice) dblNoOfContract
 			FROM (
 				SELECT DISTINCT m.dblMatchQty * fut.dblPrice dblMatchPrice
 				FROM tblRKFutOptTransaction t

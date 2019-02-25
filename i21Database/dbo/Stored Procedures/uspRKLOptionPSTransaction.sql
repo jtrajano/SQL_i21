@@ -116,7 +116,7 @@ BEGIN TRY
 				, om.strOptionMonth
 				, e.strName
 				, ba.strAccountNumber
-				, intTotalLot = ot.intNoOfContract
+				, dblTotalLot = ot.dblNoOfContract
 				, dblSelectedLot1 = ISNULL(sl.dblSelectedLot, 0)
 				, ot.strOptionType
 				, ot.dblStrike

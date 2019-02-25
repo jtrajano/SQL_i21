@@ -92,7 +92,7 @@ BEGIN
 		, dblDelta NUMERIC(24, 10)
 		, intBrokerageAccountId int
 		, strInstrumentType NVARCHAR(200) Collate Latin1_General_CI_AS
-		, intNoOfContract NUMERIC(24, 10)
+		, dblNoOfContract NUMERIC(24, 10)
 		, dblContractSize NUMERIC(24, 10)
 		, strCurrency NVARCHAR(200) Collate Latin1_General_CI_AS
 		, intCompanyLocationId int

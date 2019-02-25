@@ -187,16 +187,16 @@ SET @outrightQuery = N'
 			,CONVERT(date,DD.dtmFilledDate,101) AS dtmTransactionDate
 			,'''' COLLATE Latin1_General_CI_AS AS strItemNo
 			,0 AS intItemId
-			,ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0)  AS dblOriginalQty
-			,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +',ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0) ) AS dblQty
+			,ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)  AS dblOriginalQty
+			,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,' + CASE WHEN @intQtyUOMId IS NULL THEN '0' ELSE CAST(@intQtyUOMId AS NVARCHAR(10)) END  +',ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0) ) AS dblQty
 			,null AS intItemUOMId
 			,UM.strSymbol
-			,ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0)  AS dblDeltaQty
-			,DD.intNoOfContract
+			,ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)  AS dblDeltaQty
+			,DD.dblNoOfContract
 			,'''' COLLATE Latin1_General_CI_AS AS strPosition
 			,'''' COLLATE Latin1_General_CI_AS AS strFutureMonth
 			,dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,' + CASE WHEN @intPriceUOMId IS NULL THEN '0' ELSE CAST(@intPriceUOMId AS NVARCHAR(10)) END  +',FM.intUnitMeasureId,ISNULL(DD.dblPrice,0)) AS dblPrice 
-			,(ISNULL(DD.intNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * DD.dblPrice AS strValue
+			,(ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * DD.dblPrice AS strValue
 			,null AS intPriceFixationId
 		FROM tblRKFutOptTransactionHeader DH
 		INNER JOIN tblRKFutOptTransaction DD ON DH.intFutOptTransactionHeaderId = DD.intFutOptTransactionHeaderId

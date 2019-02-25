@@ -30,7 +30,7 @@ SELECT * INTO #temp FROM(
 SELECT DISTINCT @intFutOptTransactionHeaderId intFutOptTransactionHeaderId ,1 intConcurrencyId,
 		getdate() dtmTransactionDate,em.intEntityId,intBrokerageAccountId, fm.intFutureMarketId,
 	   CASE WHEN ti.strInstrumentType ='Futures' THEN 1 ELSE 2 END intInstrumentTypeId,c.intCommodityId,l.intCompanyLocationId,sp.intEntityId intTraderId,
-	   cur.intCurrencyID, ROW_NUMBER() over(order by intFutOptTransactionId) strInternalTradeNo,ti.strBrokerTradeNo,ti.strBuySell,ti.intNoOfContract,
+	   cur.intCurrencyID, ROW_NUMBER() over(order by intFutOptTransactionId) strInternalTradeNo,ti.strBrokerTradeNo,ti.strBuySell,ti.dblNoOfContract,
 	   m.intFutureMonthId, intOptionMonthId,strOptionType,ti.dblStrike,ti.dblPrice,strReference,strStatus,convert(datetime,ti.dtmFilledDate,@ConvertYear) dtmFilledDate,b.intBookId,sb.intSubBookId,convert(datetime,dtmCreateDateTime,@ConvertYear) dtmCreateDateTime
 FROM tblRKFutOptTransactionImport ti
 JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName
@@ -101,7 +101,7 @@ BEGIN
 		,@strInternalTradeNo
 		,strBrokerTradeNo
 		,strBuySell
-		,intNoOfContract
+		,dblNoOfContract
 		,intFutureMonthId
 		,intOptionMonthId
 		,strOptionType
@@ -127,7 +127,7 @@ END
 --UPDATE tblSMStartingNumber SET intNumber= intNumber + 1 where intStartingNumberId=45
 COMMIT TRAN
 --SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
---		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
+--		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,dblNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
 --		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,dtmCreateDateTime FROM tblRKFutOptTransactionImport_ErrLog
 
 --This will return the newly created Derivative Entry

@@ -82,7 +82,7 @@ BEGIN
 		, dblDelta NUMERIC(24, 10)
 		, intBrokerageAccountId INT
 		, strInstrumentType NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intNoOfContract NUMERIC(24, 10)
+		, dblNoOfContract NUMERIC(24, 10)
 		, dblContractSize NUMERIC(24, 10)
 		, strCurrency NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, intCompanyLocationId INT
@@ -141,7 +141,7 @@ BEGIN
 		, dblDelta NUMERIC(24, 10)
 		, intBrokerageAccountId INT
 		, strInstrumentType NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intNoOfContract NUMERIC(24, 10)
+		, dblNoOfContract NUMERIC(24, 10)
 		, dblContractSize NUMERIC(24, 10)
 		, strCurrency NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, intInvoiceId INT
@@ -1877,7 +1877,7 @@ BEGIN
 					, dblDelta
 					, intBrokerageAccountId
 					, strInstrumentType
-					, intNoOfContract
+					, dblNoOfContract
 					, dblContractSize
 					, strCurrency
 					, intInvoiceId
@@ -1927,7 +1927,7 @@ BEGIN
 					, dblDelta
 					, intBrokerageAccountId
 					, strInstrumentType
-					, intNoOfContract
+					, dblNoOfContract
 					, dblContractSize
 					, strCurrency
 					, intInvoiceId
@@ -1983,7 +1983,7 @@ BEGIN
 					, dblDelta
 					, intBrokerageAccountId
 					, strInstrumentType
-					, intNoOfContract
+					, dblNoOfContract
 					, dblContractSize
 					, strCurrency
 					, intInvoiceId
@@ -2033,7 +2033,7 @@ BEGIN
 					, dblDelta
 					, intBrokerageAccountId
 					, strInstrumentType
-					, intNoOfContract
+					, dblNoOfContract
 					, dblContractSize
 					, strCurrency
 					, intInvoiceId
@@ -2406,7 +2406,7 @@ BEGIN
 					, dblDelta
 					, intBrokerageAccountId
 					, strInstrumentType
-					, intNoOfContract
+					, dblNoOfContract
 					, dblContractSize
 					, strCurrency
 					, intInvoiceId
@@ -2452,7 +2452,7 @@ BEGIN
 					, dblDelta
 					, intBrokerageAccountId
 					, strInstrumentType
-					, intNoOfContract
+					, dblNoOfContract
 					, dblContractSize
 					, strCurrency
 					, intInvoiceId
@@ -2505,7 +2505,7 @@ BEGIN
 					, dblDelta
 					, intBrokerageAccountId
 					, strInstrumentType
-					, intNoOfContract
+					, dblNoOfContract
 					, dblContractSize
 					, strCurrency
 					, intInvoiceId
@@ -2646,9 +2646,9 @@ BEGIN
 			, 0.0 dblCollatralSales
 			, 0.0 SlsBasisDeliveries
 			, 0.0 CompanyTitled
-			, intNoOfContract
+			, dblNoOfContract
 			, dblContractSize
-			, intNoOfContract
+			, dblNoOfContract
 			, dblContractSize
 			, strCurrency
 			, intInvoiceId
@@ -2720,9 +2720,9 @@ BEGIN
 			, 0.0 dblCollatralSales
 			, 0.0 SlsBasisDeliveries
 			, 0.0 CompanyTitled
-			, intNoOfContract
+			, dblNoOfContract
 			, dblContractSize
-			, intNoOfContract
+			, dblNoOfContract
 			, dblContractSize
 			, strCurrency
 			, intInvoiceId

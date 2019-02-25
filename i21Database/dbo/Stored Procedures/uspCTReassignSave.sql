@@ -275,7 +275,7 @@ BEGIN TRY
 				SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intSubBookId)[1]')
 				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmTransactionDate/text())[1] with sql:variable("@dtmCurrentDate")')
 				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmFilledDate/text())[1] with sql:variable("@dtmCurrentDate")')
-				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/intNoOfContract/text())[1] with sql:variable("@dblReassignPricing")')
+				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dblNoOfContract/text())[1] with sql:variable("@dblReassignPricing")')
 				SET		@XML.modify('insert <intContractHeaderId>{ xs:string(sql:variable("@intRecipientHeaderId")) }</intContractHeaderId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
 				SET		@XML.modify('insert <intContractDetailId>{ xs:string(sql:variable("@intRecipientId")) }</intContractDetailId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
 
@@ -385,7 +385,7 @@ BEGIN TRY
 			SET		@XML.modify('delete (/tblRKFutOptTransactions/tblRKFutOptTransaction/intSubBookId)[1]')
 			SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmTransactionDate/text())[1] with sql:variable("@dtmCurrentDate")')
 			SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmFilledDate/text())[1] with sql:variable("@dtmCurrentDate")')
-			SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/intNoOfContract/text())[1] with sql:variable("@dblReassignFutures")')
+			SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dblNoOfContract/text())[1] with sql:variable("@dblReassignFutures")')
 
 			IF ISNULL(@intRecipientBookId,0) > 0
 				SET		@XML.modify('insert <intBookId>{ xs:string(sql:variable("@intRecipientBookId")) }</intBookId> into (/tblRKFutOptTransactions/tblRKFutOptTransaction)[1]')
