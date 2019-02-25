@@ -1,4 +1,4 @@
-CREATE VIEW [dbo].[vyuCTCompactContractDetailView]
+﻿CREATE VIEW [dbo].[vyuCTCompactContractDetailView]
 AS
 	SELECT	CD.intContractHeaderId
 			,CD.intContractDetailId
@@ -13,10 +13,12 @@ AS
 			,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0) AS dblAvailableQty
 			,PT.strPricingType
 			,CD.intContractSeq
-			,ISNULL(CD.dblQuantityPerLoad, 0) AS dblQuantityPerLoad
 			,CD.strERPPONumber
 			,CD.strERPItemNumber
 			,strOrigin = ISNULL(RY.strCountry,OG.strCountry)
+			,strPurchasingGroup = PG.strName 
+			,strINCOShipTerm = CB.strContractBasis
+			,CD.intCompanyLocationId
 	FROM	tblCTContractDetail					CD	
 	CROSS APPLY tblCTCompanyPreference			CP	
 	LEFT JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
@@ -29,3 +31,5 @@ AS
 	LEFT JOIN	tblICCommodityAttribute			CA	ON	CA.intCommodityAttributeId  =	IM.intOriginId												
 														AND	CA.strType				=	'Origin'			
 	LEFT JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	CA.intCountryID	
+	LEFT JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId		=	CD.intPurchasingGroupId
+	LEFT JOIN	tblCTContractBasis				CB	ON	CB.intContractBasisId		=	CH.intContractBasisId		
