@@ -30,7 +30,7 @@ SELECT
        ,c.strCommodityCode
        ,b.strBook
        ,sb.strSubBook       
-       ,case when strBuySell= 'Buy' then intNoOfContract else -intNoOfContract end dblOpenContract1
+       ,case when strBuySell= 'Buy' then dblNoOfContract else -dblNoOfContract end dblOpenContract1
        ,dblLimit
 FROM tblRKFutOptTransaction fot 
 JOIN tblCTBook b ON b.intBookId = fot.intBookId and isnull(b.ysnLimitForMonth,0) = 1
@@ -64,7 +64,7 @@ SELECT
        ,c.strCommodityCode
        ,b.strBook
        ,sb.strSubBook       
-       ,case when strBuySell= 'Buy' then intNoOfContract else -intNoOfContract end dblOpenContract1
+       ,case when strBuySell= 'Buy' then dblNoOfContract else -dblNoOfContract end dblOpenContract1
        ,dblLimit
 FROM  tblRKFutOptTransaction fot
 JOIN tblCTLimit l on fot.intBookId = l.intBookId AND fot.intFutureMarketId=l.intFutureMarketId                                                        

@@ -295,9 +295,9 @@ INTO #tempFutureRec
 				,'' strPricingType 
 				,ca.strType strTranType
 				,strFutureMonth
-				,oc.intOpenContract AS dblNoOfContract
-				,oc.intOpenContract   dblNoOfLot
-				,oc.intOpenContract * @dblContractSize AS dblQuantity
+				,oc.dblOpenContract AS dblNoOfContract
+				,oc.dblOpenContract   dblNoOfLot
+				,oc.dblOpenContract * @dblContractSize AS dblQuantity
 				,strSymbol,strBuySell strContractType,dtmFutureMonthsDate,strInternalTradeNo strTradeNo,ft.intFutOptTransactionHeaderId,
 				fh.dtmTransactionDate TransactionDate, strBuySell+'(F)' TranType,strName CustVendor,strLocationName,fh.intCompanyId intMultiCompanyId,strCompanyName
 				,isnull(ysnDeltaHedge,0) ysnDeltaHedge

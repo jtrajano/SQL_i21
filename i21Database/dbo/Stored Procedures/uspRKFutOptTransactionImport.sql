@@ -73,7 +73,7 @@ BEGIN
 		,strInternalTradeNo
 		,strBrokerTradeNo
 		,strBuySell
-		,intNoOfContract
+		,dblNoOfContract
 		,intFutureMonthId
 		,intOptionMonthId
 		,strOptionType

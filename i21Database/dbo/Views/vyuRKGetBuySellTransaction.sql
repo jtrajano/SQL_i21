@@ -4,8 +4,8 @@ SELECT intFutureMonthId,strFutureMonth,intFutureMarketId,strFutMarketName,dblCon
 dtmFutureMonthsDate
 from(
  SELECT t.intFutureMonthId,fm.strFutureMonth,t.intFutureMarketId,strFutMarketName,
-	case when strBuySell= 'Buy' then intNoOfContract else 0 end dblBuy,
-	case when strBuySell= 'Sell' then intNoOfContract else 0 end dblSell,
+	case when strBuySell= 'Buy' then dblNoOfContract else 0 end dblBuy,
+	case when strBuySell= 'Sell' then dblNoOfContract else 0 end dblSell,
 	mar.dblContractSize,intLocationId,t.intBrokerageAccountId,dtmFutureMonthsDate
   FROM tblRKFutOptTransaction t
  JOIN tblRKFutOptTransactionHeader th on th.intFutOptTransactionHeaderId=t.intFutOptTransactionHeaderId

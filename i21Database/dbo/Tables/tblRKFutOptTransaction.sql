@@ -17,7 +17,7 @@
     [strInternalTradeNo] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strBrokerTradeNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBuySell] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
-    [intNoOfContract] INT NULL, 
+    [dblNoOfContract] NUMERIC(18,6) NULL, 
     [intFutureMonthId] int NULL, 
 	[intOptionMonthId] int NULL, 
     [strOptionType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 

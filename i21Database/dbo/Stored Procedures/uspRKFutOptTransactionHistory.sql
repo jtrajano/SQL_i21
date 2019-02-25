@@ -37,9 +37,9 @@ BEGIN TRY
            ,dblPrice
            ,strStatus
            ,dtmFilledDate
-           ,intOldNoOfContract
-           ,intNewNoOfContract
-           ,intBalanceContract
+           ,dblOldNoOfContract
+           ,dblNewNoOfContract
+           ,dblBalanceContract
            ,strScreenName
            ,strOldBuySell
            ,strNewBuySell
@@ -122,9 +122,9 @@ BEGIN TRY
            ,dblPrice
            ,strStatus
            ,dtmFilledDate
-           ,intOldNoOfContract
-           ,intNewNoOfContract
-           ,intBalanceContract
+           ,dblOldNoOfContract
+           ,dblNewNoOfContract
+           ,dblBalanceContract
            ,strScreenName
            ,strOldBuySell
            ,strNewBuySell
@@ -161,8 +161,8 @@ BEGIN TRY
 			,strStatus
 			,dtmFilledDate
 			,NULL--intOldNoOfContract
-			,intNewNoOfContract = (CASE WHEN @action = 'DELETE' THEN 0 ELSE T.intNoOfContract END)
-			,intBalanceContract = (CASE WHEN @action = 'DELETE' THEN 0 ELSE T.intNoOfContract END)
+			,dblNoOfContract = (CASE WHEN @action = 'DELETE' THEN 0 ELSE T.dblNoOfContract END)
+			,dblBalanceContract = (CASE WHEN @action = 'DELETE' THEN 0 ELSE T.dblNoOfContract END)
 			,@strScreenName
 			,NULL
 			,T.strBuySell

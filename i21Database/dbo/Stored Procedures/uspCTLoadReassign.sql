@@ -14,8 +14,8 @@ BEGIN
 			PF.dblLotsFixed AS  dblPricedLot,
 			MA.strFutMarketName strMarketName,	
 			MO.strFutureMonth AS strMonth,		
-			CAST(SY.intHedgedLots AS NUMERIC(18,6)) AS dblHedgeLot,		
-			SY.intHedgedLots * MA.dblContractSize AS dblHedgeQty,
+			CAST(SY.dblHedgedLots AS NUMERIC(18,6)) AS dblHedgeLot,		
+			SY.dblHedgedLots * MA.dblContractSize AS dblHedgeQty,
 			PM.strUnitMeasure AS strPriceUOM,		
 			EY.strName AS strEntityName,				
 			CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractSeq,
@@ -48,7 +48,7 @@ BEGIN
 				GROUP BY	intPriceFixationId
 			)					PD	ON	PD.intPriceFixationId	=	PF.intPriceFixationId		LEFT
 	JOIN	(
-				SELECT		intContractDetailId,SUM(intHedgedLots)intHedgedLots
+				SELECT		intContractDetailId,SUM(dblHedgedLots)dblHedgedLots
 				FROM		tblRKAssignFuturesToContractSummary	
 				GROUP BY	intContractDetailId
 			)					SY	ON	SY.intContractDetailId	=	CD.intContractDetailId		LEFT
@@ -114,7 +114,7 @@ BEGIN
 			FO.intFutureMonthId,
 			MA.intUnitMeasureId AS intPriceUOMId,
 			FO.dblPrice,
-			SY.dblAssignedLots + SY.intHedgedLots dblLot,
+			SY.dblAssignedLots + SY.dblHedgedLots dblLot,
 			NULL AS dblReassign,
 			MA.strFutMarketName strMarketName,	
 			MO.strFutureMonth AS strMonth,	
@@ -230,7 +230,7 @@ BEGIN
 				GROUP BY	intPriceFixationId
 			)					PD	ON	PD.intPriceFixationId	=	PF.intPriceFixationId		LEFT
 	JOIN	(
-				SELECT		intContractDetailId,SUM(ISNULL(intHedgedLots,0) + ISNULL(dblAssignedLots,0))dblFuturesLot
+				SELECT		intContractDetailId,SUM(ISNULL(dblHedgedLots,0) + ISNULL(dblAssignedLots,0))dblFuturesLot
 				FROM		tblRKAssignFuturesToContractSummary	
 				GROUP BY	intContractDetailId
 			)					SY	ON	SY.intContractDetailId	=	CD.intContractDetailId		LEFT

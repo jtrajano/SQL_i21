@@ -128,7 +128,7 @@ BEGIN
       intBrokerageAccountId = @intBrokerageAccountId ,
       intFutureMarketId =     @intFutureMarketId ,
       intFutureMonthId =      @intFutureMonthId ,
-      intNoOfContract = @intNoOfContract, 
+      dblNoOfContract = @intNoOfContract, 
 	  dtmFilledDate = @dtmFilledDate, 
       dblPrice =  @dblPrice 
       WHERE intFutOptTransactionId = @intFutOptTransactionId
@@ -141,9 +141,9 @@ BEGIN
 	  END
 
 	IF ISNULL(@intContractDetailId,0) > 0
-		UPDATE tblRKAssignFuturesToContractSummary SET intHedgedLots = @intNoOfContract WHERE intContractDetailId = @intContractDetailId AND intFutOptTransactionId = @intFutOptTransactionId
+		UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @intNoOfContract WHERE intContractDetailId = @intContractDetailId AND intFutOptTransactionId = @intFutOptTransactionId
 	ELSE
-		UPDATE tblRKAssignFuturesToContractSummary SET intHedgedLots = @intNoOfContract WHERE intContractHeaderId = @intContractHeaderId AND intFutOptTransactionId = @intFutOptTransactionId
+		UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @intNoOfContract WHERE intContractHeaderId = @intContractHeaderId AND intFutOptTransactionId = @intFutOptTransactionId
 END
 ELSE
 BEGIN
@@ -166,7 +166,7 @@ BEGIN
               strInternalTradeNo ,
               strBrokerTradeNo ,
               strBuySell ,
-              intNoOfContract ,
+              dblNoOfContract ,
               dblPrice ,
               strStatus ,
               dtmFilledDate ,

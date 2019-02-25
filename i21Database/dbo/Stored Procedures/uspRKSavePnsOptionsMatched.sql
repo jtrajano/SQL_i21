@@ -50,7 +50,7 @@ SELECT
 IF EXISTS(SELECT * FROM @tblMatchedDelete)  
 BEGIN  
 
-INSERT INTO tblRKMatchDerivativesHistoryForOption (intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,intMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,dtmTransactionDate,strUserName)
+INSERT INTO tblRKMatchDerivativesHistoryForOption (intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,dblMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,dtmTransactionDate,strUserName)
 
 SELECT intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,-(intMatchQty),dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,getdate(),userName
 FROM tblRKOptionsMatchPnS  p
@@ -181,7 +181,7 @@ declare @strName nvarchar(100) =''
  select @intOptMPNSId = scope_identity()
  SELECT TOP 1 @strTranNoPNS =strTranNo FROM tblRKOptionsMatchPnS WHERE intMatchOptionsPnSId = @intOptMPNSId
  
- INSERT INTO tblRKMatchDerivativesHistoryForOption (intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,intMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,dtmTransactionDate,strUserName)
+ INSERT INTO tblRKMatchDerivativesHistoryForOption (intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,dblMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,dtmTransactionDate,strUserName)
  SELECT intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,intMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,getdate(),@strName
 FROM tblRKOptionsMatchPnS where strTranNo=@strTranNoPNS
 
@@ -287,7 +287,7 @@ BEGIN
          dtmTransactionDate,intEntityId, intBrokerageAccountId,  
          intFutureMarketId,intInstrumentTypeId,intCommodityId,  
          intLocationId,intTraderId,intCurrencyId,strInternalTradeNo,  
-         strBrokerTradeNo,strBuySell,intNoOfContract,intFutureMonthId,intOptionMonthId,  
+         strBrokerTradeNo,strBuySell,dblNoOfContract,intFutureMonthId,intOptionMonthId,  
          strOptionType,dblPrice,strReference,strStatus,  
          dtmFilledDate,strReserveForFix,intBookId,intSubBookId,ysnOffset,dtmCreateDateTime)  
            

@@ -1,18 +1,18 @@
 ﻿CREATE VIEW vyuRKGetAssignFutureTransaction
 
 AS
-SELECT * FROM(SELECT *,intLots-(dblAssignedLots1+intHedgedLots1) as dblBalanceLots FROM(
+SELECT * FROM(SELECT *,dblLots-(dblAssignedLots1+dblHedgedLots1) as dblBalanceLots FROM(
 SELECT 
 		ot.intFutOptTransactionId,
 		ot.strInternalTradeNo AS strInternalTradeNo,
 		ot.strBrokerTradeNo AS strBrokerTradeNo
 		,ot.dtmFilledDate as dtmFilledDate
 		,strBuySell as strBuySell      
-		,ot.intNoOfContract as intLots
+		,ot.dblNoOfContract as dblLots
 		,IsNull((SELECT SUM(AD.dblAssignedLots)	FROM tblRKAssignFuturesToContractSummary AD 
 				 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblAssignedLots1
-		 ,IsNull((SELECT SUM(AD.intHedgedLots)	FROM tblRKAssignFuturesToContractSummary AD 
-		 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As intHedgedLots1
+		 ,IsNull((SELECT SUM(AD.dblHedgedLots)	FROM tblRKAssignFuturesToContractSummary AD 
+		 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblHedgedLots1
 		,fm.strFutMarketName
 		,fmh.strFutureMonth
 		,ba.strAccountNumber

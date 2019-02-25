@@ -814,13 +814,13 @@ BEGIN
 				, PriceStatus = 'Broker Account'
 				, fm.strFutureMonth
 				, strAccountNumber = e.strName + '-' + strAccountNumber
-				, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
+				, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
 				, strTradeNo = ft.strInternalTradeNo
 				, TransactionDate = ft.dtmTransactionDate
 				, TranType = strBuySell
 				, CustVendor = e.strName
-				, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
-				, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract * @dblContractSize) ELSE - (ft.intNoOfContract * @dblContractSize) END
+				, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
+				, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract * @dblContractSize) ELSE - (ft.dblNoOfContract * @dblContractSize) END
 				, intContractHeaderId = NULL
 				, ft.intFutOptTransactionHeaderId
 				, strProductType = ca.strDescription
@@ -875,13 +875,13 @@ BEGIN
 				, PriceStatus = 'Broker Account'
 				, strFutureMonth
 				, strAccountNumber = e.strName + '-' + strAccountNumber
-				, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
+				, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
 				, strTradeNo = ft.strInternalTradeNo
 				, TransactionDate = ft.dtmTransactionDate
 				, TranType = strBuySell
 				, CustVendor = e.strName
-				, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
-				, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract * @dblContractSize) ELSE - (ft.intNoOfContract * @dblContractSize) END
+				, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
+				, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract * @dblContractSize) ELSE - (ft.dblNoOfContract * @dblContractSize) END
 				, um.intCommodityUnitMeasureId
 				, intContractHeaderId = NULL
 				, ft.intFutOptTransactionHeaderId
@@ -917,10 +917,10 @@ BEGIN
 			, strFutureMonth
 			, strAccountNumber = e.strName + '-' + strAccountNumber
 			, dblNoOfContract = (CASE WHEN ft.strBuySell = 'Buy'
-										THEN (ft.intNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+										THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
 																		FROM tblRKOptionsMatchPnS l
 																		WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-									ELSE - (ft.intNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+									ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
 																		FROM tblRKOptionsMatchPnS s
 																		WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)) END)
 								* ISNULL((SELECT TOP 1 dblDelta
@@ -936,10 +936,10 @@ BEGIN
 			, TranType = strBuySell
 			, CustVendor = e.strName
 			, dblNoOfLot = (CASE WHEN ft.strBuySell = 'Buy'
-									THEN (ft.intNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+									THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
 																	FROM tblRKOptionsMatchPnS l
 																	WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-								ELSE - (ft.intNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+								ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
 																	FROM tblRKOptionsMatchPnS s
 																	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)) END)
 							* ISNULL((SELECT TOP 1 dblDelta
@@ -1036,13 +1036,13 @@ BEGIN
 				, PriceStatus = 'Broker Account'
 				, strFutureMonth
 				, strAccountNumber = e.strName + '-' + strAccountNumber
-				, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
+				, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
 				, strTradeNo = ft.strInternalTradeNo
 				, TransactionDate = ft.dtmTransactionDate
 				, TranType = strBuySell
 				, CustVendor = e.strName
-				, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
-				, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract * @dblContractSize) ELSE - (ft.intNoOfContract * @dblContractSize) END
+				, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
+				, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract * @dblContractSize) ELSE - (ft.dblNoOfContract * @dblContractSize) END
 				, intContractHeaderId = NULL
 				, ft.intFutOptTransactionHeaderId
 				, strProductType = ca.strDescription
@@ -1076,10 +1076,10 @@ BEGIN
 			, strFutureMonth
 			, strAccountNumber = e.strName + '-' + strAccountNumber
 			, dblNoOfContract = (CASE WHEN ft.strBuySell = 'Buy'
-										THEN (ft.intNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+										THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
 																		FROM tblRKOptionsMatchPnS l
 																		WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-									ELSE - (ft.intNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+									ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
 																		FROM tblRKOptionsMatchPnS s
 																		WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)) END)
 								* ISNULL((SELECT TOP 1 dblDelta
@@ -1095,10 +1095,10 @@ BEGIN
 			, TranType = strBuySell
 			, CustVendor = e.strName
 			, dblNoOfLot = (CASE WHEN ft.strBuySell = 'Buy'
-									THEN (ft.intNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+									THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
 																	FROM tblRKOptionsMatchPnS l
 																	WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-								ELSE - (ft.intNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+								ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
 																	FROM tblRKOptionsMatchPnS s
 																	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)) END)
 							* ISNULL((SELECT TOP 1 dblDelta
@@ -1194,13 +1194,13 @@ BEGIN
 					, PriceStatus = 'Broker Account'
 					, strFutureMonth
 					, strAccountNumber = e.strName + '-' + strAccountNumber
-					, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
+					, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
 					, strTradeNo = ft.strInternalTradeNo
 					, TransactionDate = ft.dtmTransactionDate
 					, TranType = strBuySell
 					, CustVendor = e.strName
-					, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
-					, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract * @dblContractSize) ELSE - (ft.intNoOfContract * @dblContractSize) END
+					, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
+					, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract * @dblContractSize) ELSE - (ft.dblNoOfContract * @dblContractSize) END
 					, um.intCommodityUnitMeasureId
 					, intContractHeaderId = NULL
 					, ft.intFutOptTransactionHeaderId
@@ -1256,13 +1256,13 @@ BEGIN
 					, PriceStatus = 'Broker Account'
 					, strFutureMonth
 					, strAccountNumber = e.strName + '-' + strAccountNumber
-					, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
+					, dblNoOfContract = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
 					, strTradeNo = ft.strInternalTradeNo
 					, TransactionDate = ft.dtmTransactionDate
 					, TranType = strBuySell
 					, CustVendor = e.strName
-					, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract) ELSE - (ft.intNoOfContract) END
-					, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.intNoOfContract * @dblContractSize) ELSE - (ft.intNoOfContract * @dblContractSize) END
+					, dblNoOfLot = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract) ELSE - (ft.dblNoOfContract) END
+					, dblQuantity = CASE WHEN ft.strBuySell = 'Buy' THEN (ft.dblNoOfContract * @dblContractSize) ELSE - (ft.dblNoOfContract * @dblContractSize) END
 					, um.intCommodityUnitMeasureId
 					, dblDelta = (SELECT TOP 1 dblDelta
 								FROM tblRKFuturesSettlementPrice sp

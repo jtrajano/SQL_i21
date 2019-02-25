@@ -35,14 +35,14 @@ BEGIN
               IF EXISTS(SELECT * FROM  tblRKAssignFuturesToContractSummary where intFutOptTransactionId in(@intLFutOptTransactionId,@intSFutOptTransactionId) AND ysnIsHedged = 1 )  
               BEGIN  
   
-                     IF (SELECT ISNULL(SUM(ISNULL(intHedgedLots,0) + ISNULL(dblAssignedLots,0)),0) FROM  tblRKAssignFuturesToContractSummary   
+                     IF (SELECT ISNULL(SUM(ISNULL(dblHedgedLots,0) + ISNULL(dblAssignedLots,0)),0) FROM  tblRKAssignFuturesToContractSummary   
                                                                                   WHERE intFutOptTransactionId in(@intLFutOptTransactionId,@intSFutOptTransactionId))  <   
-                     (SELECT ISNULL(SUM(intNoOfContract),0) FROM  tblRKFutOptTransaction where intFutOptTransactionId in(@intLFutOptTransactionId,@intSFutOptTransactionId))  
+                     (SELECT ISNULL(SUM(dblNoOfContract),0) FROM  tblRKFutOptTransaction where intFutOptTransactionId in(@intLFutOptTransactionId,@intSFutOptTransactionId))  
                      BEGIN  
                            DECLARE @intAssignFuturesToContractHeaderId int=null  
 						   declare @ysnMultiplePriceFixation bit = null
-                           IF (SELECT ISNULL(SUM(intHedgedLots),0) FROM  tblRKAssignFuturesToContractSummary where intFutOptTransactionId = @intLFutOptTransactionId AND ysnIsHedged = 1) <  
-                           (SELECT ISNULL(SUM(intNoOfContract),0) FROM  tblRKFutOptTransaction where intFutOptTransactionId in(@intLFutOptTransactionId))  
+                           IF (SELECT ISNULL(SUM(dblHedgedLots),0) FROM  tblRKAssignFuturesToContractSummary where intFutOptTransactionId = @intLFutOptTransactionId AND ysnIsHedged = 1) <  
+                           (SELECT ISNULL(SUM(dblNoOfContract),0) FROM  tblRKFutOptTransaction where intFutOptTransactionId in(@intLFutOptTransactionId))  
                            BEGIN                        
                 
                                   INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId)
@@ -116,9 +116,9 @@ BEGIN
 					END
 
 
-                           IF (SELECT ISNULL(SUM(ISNULL(intHedgedLots,0) + ISNULL(dblAssignedLots,0)),0) FROM  tblRKAssignFuturesToContractSummary   
+                           IF (SELECT ISNULL(SUM(ISNULL(dblHedgedLots,0) + ISNULL(dblAssignedLots,0)),0) FROM  tblRKAssignFuturesToContractSummary   
                                                                                                        WHERE intFutOptTransactionId = @intSFutOptTransactionId)<  
-                           (SELECT ISNULL(SUM(intNoOfContract),0) FROM  tblRKFutOptTransaction where intFutOptTransactionId in(@intSFutOptTransactionId))  
+                           (SELECT ISNULL(SUM(dblNoOfContract),0) FROM  tblRKFutOptTransaction where intFutOptTransactionId in(@intSFutOptTransactionId))  
                            BEGIN                  
                                          SELECT TOP 1 @intAssignFuturesToContractHeaderId,  
                                          1,  

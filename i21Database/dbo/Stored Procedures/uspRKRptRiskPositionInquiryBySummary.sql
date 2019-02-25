@@ -743,12 +743,12 @@ SELECT DISTINCT 2 intRowNumber,'1.Outright Coverage' grpname,'Outright Coverage'
   --intOpenContract as dblNoOfContract,  
   isnull(CASE 
 						WHEN ft.strBuySell = 'Buy'
-							THEN isnull(ft.intNoOfContract, 0)
+							THEN isnull(ft.dblNoOfContract, 0)
 						ELSE NULL
 						END, 0) Long1
 				,isnull(CASE 
 						WHEN ft.strBuySell = 'Sell'
-							THEN isnull(ft.intNoOfContract, 0)
+							THEN isnull(ft.dblNoOfContract, 0)
 						ELSE NULL
 						END, 0) Sell1			
 				,ISNULL((

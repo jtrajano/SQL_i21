@@ -47,7 +47,7 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (ORDER BY CONVERT(DATETIME, '01 ' + strFut
 	, NetPnL dblNetPnL
 	, intFutureMarketId
 	, intFutureMonthId
-	, intOriginalQty dblOriginalQty
+	, dblOriginalQty dblOriginalQty
 	, intFutOptTransactionHeaderId
 	, intCommodityId
 	, ysnExpired
@@ -88,10 +88,10 @@ FROM (
 				, sp.strSalespersonId
 				, icc.strCommodityCode
 				, sl.strLocationName
-				, ot.intNoOfContract AS intOriginalQty
-				, Long1 = ISNULL(CASE WHEN ot.strBuySell = 'Buy' THEN ISNULL(ot.intNoOfContract, 0) ELSE NULL END, 0)
-				, Sell1 = ISNULL(CASE WHEN ot.strBuySell = 'Sell' THEN ISNULL(ot.intNoOfContract, 0) ELSE NULL END, 0)
-				, intNet1 = ot.intNoOfContract
+				, ot.dblNoOfContract AS intOriginalQty
+				, Long1 = ISNULL(CASE WHEN ot.strBuySell = 'Buy' THEN ISNULL(ot.dblNoOfContract, 0) ELSE NULL END, 0)
+				, Sell1 = ISNULL(CASE WHEN ot.strBuySell = 'Sell' THEN ISNULL(ot.dblNoOfContract, 0) ELSE NULL END, 0)
+				, dblNet1 = ot.dblNoOfContract
 				, dblActual = ot.dblPrice
 				, dblPrice = ISNULL(ot.dblPrice, 0)
 				, fm.dblContractSize

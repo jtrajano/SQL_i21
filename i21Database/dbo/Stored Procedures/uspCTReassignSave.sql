@@ -120,7 +120,7 @@ BEGIN TRY
 	INSERT	INTO @tblFutures
 	SELECT	RP.intReassignFutureId,
 			RP.dblReassign,
-			ISNULL(F1.dblAssignedLots,0) + ISNULL(F1.intHedgedLots,0),
+			ISNULL(F1.dblAssignedLots,0) + ISNULL(F1.dblHedgedLots,0),
 			CAST(ISNULL(F2.intAssignFuturesToContractSummaryId,0)/ISNULL(F2.intAssignFuturesToContractSummaryId,1) AS INT) AS ysnFullyPricingFutures,
 			F1.intFutOptTransactionId,
 			RP.intAssignFuturesToContractSummaryId
@@ -128,7 +128,7 @@ BEGIN TRY
 	JOIN	tblRKAssignFuturesToContractSummary	F1	ON	F1.intAssignFuturesToContractSummaryId	=	RP.intAssignFuturesToContractSummaryId	LEFT
 	JOIN	tblRKAssignFuturesToContractSummary	F2	ON	F2.intAssignFuturesToContractSummaryId	=	RP.intAssignFuturesToContractSummaryId	AND 
 														ISNULL(F2.dblAssignedLots,0) + 
-														ISNULL(F2.intHedgedLots,0)				=	RP.dblReassign
+														ISNULL(F2.dblHedgedLots,0)				=	RP.dblReassign
 	WHERE	RP.intReassignId = @intReassignId AND ISNULL(RP.dblReassign,0) > 0 AND RP.intPriceFixationDetailId IS NULL
 
 	INSERT	INTO  @tblAllocation
@@ -262,7 +262,7 @@ BEGIN TRY
 			IF ISNULL(@intAssignFuturesToContractSummaryId,0) > 0
 			BEGIN
 				UPDATE	SY
-				SET		intHedgedLots = intHedgedLots - @dblReassignPricing
+				SET		dblHedgedLots = dblHedgedLots - @dblReassignPricing
 				FROM	tblRKAssignFuturesToContractSummary SY
 				WHERE	intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
 
@@ -372,8 +372,8 @@ BEGIN TRY
 		BEGIN
 			UPDATE	tblRKAssignFuturesToContractSummary 
 			SET		dblAssignedLots = dblAssignedLots - CASE WHEN ISNULL(dblAssignedLots,0) = 0 THEN  0 ElSE @dblReassignFutures END,
-					intHedgedLots = intHedgedLots - CASE WHEN ISNULL(intHedgedLots,0) = 0 THEN 0 ElSE @dblReassignFutures END,
-					@ysnIsHedged = CAST(CASE WHEN ISNULL(intHedgedLots,0) > ISNULL(dblAssignedLots,0) THEN 1 ELSE 0 END AS INT)
+					dblHedgedLots = dblHedgedLots - CASE WHEN ISNULL(dblHedgedLots,0) = 0 THEN 0 ElSE @dblReassignFutures END,
+					@ysnIsHedged = CAST(CASE WHEN ISNULL(dblHedgedLots,0) > ISNULL(dblAssignedLots,0) THEN 1 ELSE 0 END AS INT)
 			WHERE	intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
 
 			SELECT	@strCondition = 'intFutOptTransactionId = ' + LTRIM(@intFutOptTransactionId)
@@ -405,7 +405,7 @@ BEGIN TRY
 			SET @strXML = @strXML + '<intContractDetailId>' + LTRIM(@intRecipientId) + '</intContractDetailId>'
 			SET @strXML = @strXML + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
 			SET @strXML = @strXML + '<intFutOptTransactionId>' + LTRIM(@intNewFutOptTransactionId) + '</intFutOptTransactionId>'
-			SET @strXML = @strXML + '<intHedgedLots>' + LTRIM(CAST(@dblReassignFutures AS INT) * @ysnIsHedged) + '</intHedgedLots>'
+			SET @strXML = @strXML + '<dblHedgedLots>' + LTRIM(CAST(@dblReassignFutures AS INT) * @ysnIsHedged) + '</dblHedgedLots>'
 			IF	@ysnIsHedged = 0
 				SET @strXML = @strXML + '<dblAssignedLots>'+LTRIM(@dblReassignFutures)+'</dblAssignedLots>'
 			ElSE

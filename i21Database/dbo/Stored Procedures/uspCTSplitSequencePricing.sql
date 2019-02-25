@@ -95,11 +95,11 @@ BEGIN TRY
 		WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
 
 		UPDATE  tblRKAssignFuturesToContractSummary
-		SET		intHedgedLots			=	@dblNoOfLots
+		SET		dblHedgedLots			=	@dblNoOfLots
 		WHERE	intContractDetailId		=	@intContractDetailId
 		
 		UPDATE	tblRKFutOptTransaction 
-		SET		intNoOfContract			=	@dblNoOfLots
+		SET		dblNoOfContract			=	@dblNoOfLots
 		WHERE	intFutOptTransactionId	=	@intFutOptTransactionId
 
 		SELECT	@intChildContractDetailId = MIN(intContractDetailId) 

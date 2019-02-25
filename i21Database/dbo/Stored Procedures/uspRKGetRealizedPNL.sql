@@ -668,8 +668,8 @@ BEGIN TRY
 		JOIN @tblRealizedPNL gs on gs.strAllocationRefNo = g.strAllocationRefNo AND gs.intContractTypeId = 2
 		JOIN (
 			SELECT Summary.intContractDetailId,Market.dblContractSize
-				,SUM(Summary.intHedgedLots) intHedgedLots
-				,(SUM(Summary.intHedgedLots*FutOpt.dblPrice)/SUM(Summary.intHedgedLots))
+				,SUM(Summary.dblHedgedLots) intHedgedLots
+				,(SUM(Summary.dblHedgedLots*FutOpt.dblPrice)/SUM(Summary.dblHedgedLots))
 				/(CASE WHEN Currency.ysnSubCurrency = 1 THEN Currency.intCent ELSE 1 END
 				* CASE WHEN FutOpt.strBuySell = 'Sell' THEN - 1 ELSE 1 END )  dblWeightedValue
 				FROM tblRKAssignFuturesToContractSummary Summary
@@ -681,8 +681,8 @@ BEGIN TRY
 		)t on t.intContractDetailId = gp.intContractDetailId
 		JOIN (
 			SELECT Summary.intContractDetailId,Market.dblContractSize
-				,SUM(Summary.intHedgedLots) intHedgedLots
-				,(SUM(Summary.intHedgedLots*FutOpt.dblPrice)/SUM(Summary.intHedgedLots))
+				,SUM(Summary.dblHedgedLots) intHedgedLots
+				,(SUM(Summary.dblHedgedLots*FutOpt.dblPrice)/SUM(Summary.dblHedgedLots))
 				/(CASE WHEN Currency.ysnSubCurrency = 1 THEN Currency.intCent ELSE 1 END
 				 * CASE WHEN FutOpt.strBuySell = 'Sell' THEN - 1 ELSE 1 END ) dblWeightedValue
 				FROM tblRKAssignFuturesToContractSummary Summary

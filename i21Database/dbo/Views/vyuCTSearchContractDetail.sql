@@ -95,10 +95,10 @@ AS
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,IU.intUnitMeasureId,CH.intStockCommodityUnitMeasureId,CD.dblQuantity)			AS	dblQtyInCommodityStockUOM,
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,IU.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,CD.dblQuantity)			AS	dblQtyInCommodityDefaultUOM,
 			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,IU.intUnitMeasureId,FM.intUnitMeasureId,CD.dblQuantity)/FM.dblContractSize		AS	dblActualLots,
-			SY.intHedgedLots,
-			CD.dblNoOfLots - ISNULL(SY.intHedgedLots,0) AS dblBalLotsToHedge,
-			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * ISNULL(SY.intHedgedLots,0))	AS dblHedgeQty,
-			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * (CD.dblNoOfLots - ISNULL(SY.intHedgedLots,0)))	AS dblBalQtyToHedge,
+			SY.dblHedgedLots,
+			CD.dblNoOfLots - ISNULL(SY.dblHedgedLots,0) AS dblBalLotsToHedge,
+			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * ISNULL(SY.dblHedgedLots,0))	AS dblHedgeQty,
+			dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,FM.intUnitMeasureId,CH.intDefaultCommodityUnitMeasureId,FM.dblContractSize * (CD.dblNoOfLots - ISNULL(SY.dblHedgedLots,0)))	AS dblBalQtyToHedge,
 			CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) dblAvailableQty,
 			--Header
 	
@@ -163,7 +163,7 @@ AS
 				Group By	intSContractDetailId
 			)								SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN	(
-				SELECT		intContractDetailId,SUM(intHedgedLots) intHedgedLots 
+				SELECT		intContractDetailId,SUM(dblHedgedLots) dblHedgedLots 
 				FROM		tblRKAssignFuturesToContractSummary 
 				GROUP BY	intContractDetailId
 			)								SY	ON	SY.intContractDetailId		=	CD.intContractDetailId

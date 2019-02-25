@@ -57,13 +57,13 @@ FROM (
 		, History.dblPrice
 		, History.strStatus
 		, History.dtmFilledDate
-		, intOldNoOfContract = (SELECT TOP 1 ISNULL(intNewNoOfContract, 0)
+		, intOldNoOfContract = (SELECT TOP 1 ISNULL(dblNewNoOfContract, 0)
 								FROM tblRKFutOptTransactionHistory PrevRec
 								WHERE PrevRec.intFutOptTransactionId = History.intFutOptTransactionId
 									AND PrevRec.intFutOptTransactionHistoryId != History.intFutOptTransactionHistoryId
 									AND PrevRec.dtmTransactionDate < History.dtmTransactionDate
 								ORDER BY PrevRec.dtmTransactionDate DESC)
-		, intNewNoOfContract = CASE WHEN History.strNewBuySell = 'Buy' THEN History.intNewNoOfContract ELSE - History.intNewNoOfContract END
+		, intNewNoOfContract = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
 		, History.strScreenName
 		, History.strOldBuySell
 		, History.strNewBuySell	

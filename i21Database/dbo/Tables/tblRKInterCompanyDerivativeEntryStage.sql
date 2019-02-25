@@ -14,5 +14,5 @@
 	intEntityId				INT,
 	intCompanyLocationId	INT NULL,
 	strTransactionType		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	intHedgedLots			INT
+	dblHedgedLots			NUMERIC(18,6)
 )

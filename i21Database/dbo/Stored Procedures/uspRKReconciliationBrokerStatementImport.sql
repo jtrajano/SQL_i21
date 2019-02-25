@@ -47,7 +47,7 @@ DECLARE @ImportedRec TABLE
        [strFutMarketName] nvarchar(30) COLLATE Latin1_General_CI_AS NULL,
        [strCommodityCode] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
        [strBuySell] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-       [intNoOfContract] int,
+       [dblNoOfContract] numeric(24,10),
        [strFutureMonth] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,     
        [dblPrice] decimal(24,10) , 
        [dtmFilledDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
@@ -61,7 +61,7 @@ DECLARE @tblTransRec TABLE
        [strFutMarketName] nvarchar(30) COLLATE Latin1_General_CI_AS NULL,
        [strCommodityCode] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
        [strBuySell] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-       [intNoOfContract] int,
+       [dblNoOfContract] numeric(24,10),
        [strFutureMonth] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,     
        [dblPrice] decimal(24,10) , 
        [dtmFilledDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
@@ -75,20 +75,20 @@ DECLARE @tblFinalRec TABLE
        [strFutMarketName] nvarchar(30) COLLATE Latin1_General_CI_AS NULL,
        [strCommodityCode] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
        [strBuySell] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-       [intNoOfContract] int,
+       [dblNoOfContract] numeric(24,10),
        [strFutureMonth] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,     
        [dblPrice] decimal(24,10) , 
        [dtmFilledDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
        [strStatus] nvarchar(200) COLLATE Latin1_General_CI_AS NULL
 )
 
-INSERT INTO @ImportedRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate)
+INSERT INTO @ImportedRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate)
 SELECT strName,
 strAccountNumber,
 strFutMarketName,
 strCommodityCode,
 strBuySell,
-sum(intNoOfContract) intNoOfContract,
+sum(dblNoOfContract) dblNoOfContract,
 replace(strFutureMonth,'-',' ') strFutureMonth,
 dblPrice,
 replace(dtmFilledDate,'-','/') dtmFilledDate 
@@ -101,15 +101,15 @@ AND convert(datetime,(convert(varchar, replace(dtmFilledDate,'-','/'), @ConvertY
 GROUP BY strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
 ORDER BY strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
 
-INSERT INTO @tblTransRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate)
-SELECT strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell, sum(intNoOfContract) intNoOfContract,strFutureMonth,dblPrice,
+INSERT INTO @tblTransRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate)
+SELECT strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell, sum(dblNoOfContract) dblNoOfContract,strFutureMonth,dblPrice,
 CONVERT(VARCHAR,@dtmFilledDate, @ConvertYear) dtmFilledDate 
 FROM (SELECT e.strName,strAccountNumber,fm.strFutMarketName,
        case when f.intInstrumentTypeId = 1 then 'Futures' 
                when f.intInstrumentTypeId =2 then  'Options' 
        end as strInstrumentType,
               strCommodityCode, l.strLocationName,
-              en.strName strSalesPersionId,strCurrency,strBrokerTradeNo,strBuySell,intNoOfContract,fmon.strFutureMonth,dblPrice,strReference,strStatus,
+              en.strName strSalesPersionId,strCurrency,strBrokerTradeNo,strBuySell,dblNoOfContract,fmon.strFutureMonth,dblPrice,strReference,strStatus,
               dtmFilledDate
 FROM tblRKFutOptTransaction f
 join tblEMEntity e on e.intEntityId=f.intEntityId and f.intInstrumentTypeId = 1
@@ -130,8 +130,8 @@ isnull(f.ysnFreezed,0) = 0
 GROUP BY strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
 order by strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,strFutureMonth,dblPrice,dtmFilledDate
          
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,t.intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,t.dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
           t.ImportId,'Success'
 FROM @ImportedRec t
 JOIN @tblTransRec t1 on t.strName=t1.strName
@@ -139,7 +139,7 @@ JOIN @tblTransRec t1 on t.strName=t1.strName
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-        and t.intNoOfContract=t1.intNoOfContract
+        and t.dblNoOfContract=t1.dblNoOfContract
         and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
@@ -150,7 +150,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
                                                                                   and t.strFutMarketName=t1.strFutMarketName 
                                                                                   and t.strCommodityCode=t1.strCommodityCode 
                                                                                   and t.strBuySell=t1.strBuySell 
-                                                                                  and t.intNoOfContract=t1.intNoOfContract
+                                                                                  and t.dblNoOfContract=t1.dblNoOfContract
                                                                                   and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
                                                                                   and t.dblPrice=t1.dblPrice 
                                                                                   AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
@@ -161,22 +161,22 @@ delete from  @tblTransRec  where Id in (select t1.Id from  @tblTransRec t1
                                                                                   and t.strFutMarketName=t1.strFutMarketName 
                                                                                   and t.strCommodityCode=t1.strCommodityCode 
                                                                                   and t.strBuySell=t1.strBuySell 
-                                                                                  and t.intNoOfContract=t1.intNoOfContract
+                                                                                  and t.dblNoOfContract=t1.dblNoOfContract
                                                                                   and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
                                                                                   and t.dblPrice=t1.dblPrice 
                                                                                   AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
 
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t where convert (datetime, '1 '+t.strFutureMonth) not in(select convert (datetime, '1 '+t1.strFutureMonth) from @tblTransRec t1 )              
 
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t where convert (datetime, '1 '+t.strFutureMonth) not in(select convert (datetime, '1 '+t1.strFutureMonth) from @ImportedRec t1 )
   
 delete from  @ImportedRec   where convert (datetime, '1 '+strFutureMonth) not in(select convert (datetime, '1 '+t1.strFutureMonth) from @tblTransRec t1 ) 
@@ -185,30 +185,30 @@ delete from  @tblTransRec where convert (datetime, '1 '+strFutureMonth) not in(s
 
 
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)-isnull(t1.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: '+convert(nvarchar,isnull(t1.intNoOfContract,0))+'. Difference : '+convert(nvarchar,(abs(isnull(t.intNoOfContract,0)-isnull(t1.intNoOfContract,0)))) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)-isnull(t1.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: '+convert(nvarchar,isnull(t1.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,(abs(isnull(t.dblNoOfContract,0)-isnull(t1.dblNoOfContract,0)))) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-        --and t.intNoOfContract=t1.intNoOfContract
+        --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)-isnull(t1.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has: '+convert(nvarchar,isnull(t1.intNoOfContract,0))+' and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,(abs(isnull(t1.intNoOfContract,0)-isnull(t.intNoOfContract,0)))) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)-isnull(t1.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has: '+convert(nvarchar,isnull(t1.dblNoOfContract,0))+' and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,(abs(isnull(t1.dblNoOfContract,0)-isnull(t.dblNoOfContract,0)))) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-        --and t.intNoOfContract=t1.intNoOfContract
+        --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
@@ -219,7 +219,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
                                                                                   and t.strFutMarketName=t1.strFutMarketName 
                                                                                   and t.strCommodityCode=t1.strCommodityCode 
                                                                                   and t.strBuySell=t1.strBuySell 
-                                                                                  --and t.intNoOfContract=t1.intNoOfContract
+                                                                                  --and t.dblNoOfContract=t1.dblNoOfContract
                                                                               and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
                                                                                   and t.dblPrice=t1.dblPrice 
                                                                                   AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
@@ -230,35 +230,35 @@ delete from  @tblTransRec  where Id in (select t1.Id from  @tblTransRec t1
                                                                                   and t.strFutMarketName=t1.strFutMarketName 
                                                                                   and t.strCommodityCode=t1.strCommodityCode 
                                                                                   and t.strBuySell=t1.strBuySell 
-                                                                                  --and t.intNoOfContract=t1.intNoOfContract
+                                                                                  --and t.dblNoOfContract=t1.dblNoOfContract
                                                                               and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
                                                                                   and t.dblPrice=t1.dblPrice 
                                                                                   AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
@@ -269,7 +269,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
@@ -281,35 +281,35 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
@@ -320,7 +320,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
@@ -332,35 +332,35 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
@@ -371,7 +371,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
@@ -383,36 +383,36 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
@@ -423,7 +423,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
@@ -435,35 +435,35 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear)
@@ -474,7 +474,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
@@ -486,35 +486,35 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         AND  convert (datetime,t.dtmFilledDate, @ConvertYear)= convert (datetime,convert(varchar, t1.dtmFilledDate, @ConvertYear), @ConvertYear))
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
@@ -524,7 +524,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice)
 
@@ -535,34 +535,34 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
@@ -572,7 +572,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth)) 
         --and t.dblPrice=t1.dblPrice 
 
@@ -583,34 +583,34 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) )
         --and t.dblPrice=t1.dblPrice 
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
@@ -620,7 +620,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice) 
 
@@ -631,34 +631,34 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         --and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice )
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
        -- and t.dblPrice=t1.dblPrice 
         
@@ -668,7 +668,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract) 
+       and t.dblNoOfContract=t1.dblNoOfContract) 
 
 delete from  @tblTransRec  
               where Id in (select t1.Id from  @tblTransRec t1
@@ -677,32 +677,32 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
         and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract)
+       and t.dblNoOfContract=t1.dblNoOfContract)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice 
         
@@ -712,7 +712,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice) 
 
@@ -723,34 +723,34 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         and t.dblPrice=t1.dblPrice)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
@@ -760,7 +760,7 @@ LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) )
 
 delete from  @tblTransRec  
@@ -770,33 +770,33 @@ LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       --and t.intNoOfContract=t1.intNoOfContract
+       --and t.dblNoOfContract=t1.dblNoOfContract
        and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth))        
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.intNoOfContract,0) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.intNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,isnull(t.dblNoOfContract,0) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. Broker statement has  : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+' and i21 has: 0 . Difference : '+ convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 LEFT JOIN @tblTransRec t1 on t.strName=t1.strName
        where t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 LEFT JOIN @ImportedRec t1 on t.strName=t1.strName
        WHERE t.strAccountNumber=t1.strAccountNumber 
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract
+       and t.dblNoOfContract=t1.dblNoOfContract
        --and convert (datetime, '1 '+t.strFutureMonth) = convert (datetime, '1 '+t1.strFutureMonth) 
         --and t.dblPrice=t1.dblPrice 
         
@@ -806,7 +806,7 @@ delete from  @ImportedRec  where ImportId in (select t1.ImportId from  @Imported
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract) 
+       and t.dblNoOfContract=t1.dblNoOfContract) 
 
 delete from  @tblTransRec  
               where Id in (select t1.Id from  @tblTransRec t1
@@ -815,15 +815,15 @@ delete from  @tblTransRec
         and t.strFutMarketName=t1.strFutMarketName 
         and t.strCommodityCode=t1.strCommodityCode 
        -- and t.strBuySell=t1.strBuySell 
-       and t.intNoOfContract=t1.intNoOfContract)
+       and t.dblNoOfContract=t1.dblNoOfContract)
 
-INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.ImportId,'Contract mismatch. i21 has  : 0 and Broker statement has : '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+INSERT INTO @tblFinalRec (strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,ImportId,strStatus)
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.ImportId,'Contract mismatch. i21 has  : 0 and Broker statement has : '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @ImportedRec t
 UNION
-SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.intNoOfContract,0)) intNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
-          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.intNoOfContract,0))+'. Difference : '+convert(nvarchar,t.intNoOfContract) +' '
+SELECT t.strName,t.strAccountNumber,t.strFutMarketName,t.strCommodityCode,t.strBuySell,abs(isnull(t.dblNoOfContract,0)) dblNoOfContract,t.strFutureMonth,t.dblPrice,t.dtmFilledDate,
+          t.Id,'Contract mismatch. Broker statement has  : 0 and i21 has: '+convert(nvarchar,isnull(t.dblNoOfContract,0))+'. Difference : '+convert(nvarchar,t.dblNoOfContract) +' '
 FROM @tblTransRec t
 
 DELETE FROM @ImportedRec
@@ -878,8 +878,8 @@ END
 
 
 INSERT INTO tblRKReconciliationBrokerStatement
-(intReconciliationBrokerStatementHeaderId,intConcurrencyId,strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,strErrMessage)
-SELECT distinct @intReconciliationBrokerStatementHeaderId ,1 AS intConcurrencyId,strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,intNoOfContract,strFutureMonth,dblPrice,convert(datetime,(convert(varchar, replace(dtmFilledDate,'-','/'), @ConvertYear)),@ConvertYear) , strStatus
+(intReconciliationBrokerStatementHeaderId,intConcurrencyId,strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,dtmFilledDate,strErrMessage)
+SELECT distinct @intReconciliationBrokerStatementHeaderId ,1 AS intConcurrencyId,strName,strAccountNumber,strFutMarketName,strCommodityCode,strBuySell,dblNoOfContract,strFutureMonth,dblPrice,convert(datetime,(convert(varchar, replace(dtmFilledDate,'-','/'), @ConvertYear)),@ConvertYear) , strStatus
 FROM @tblFinalRec
 
 SELECT @intReconciliationBrokerStatementHeaderIdOut = @intReconciliationBrokerStatementHeaderId,@strStatus = @strStatus

@@ -221,7 +221,7 @@ BEGIN
 			DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
 				, dtmTransactionDate DATETIME
 				, intFutOptTransactionId INT
-				, intOpenContract INT
+				, dblOpenContract INT
 				, strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
 				, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 				, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -251,7 +251,7 @@ BEGIN
 					--Futures Buy
 					SELECT FOT.dtmTransactionDate
 						, intFutOptTransactionId
-						, intOpenContract
+						, dblOpenContract
 						, FOT.strCommodityCode
 						, strInternalTradeNo
 						, strLocationName
@@ -281,7 +281,7 @@ BEGIN
 					--Futures Sell
 					SELECT FOT.dtmTransactionDate
 						, intFutOptTransactionId
-						, intOpenContract
+						, dblOpenContract
 						, FOT.strCommodityCode
 						, strInternalTradeNo
 						, strLocationName
@@ -311,7 +311,7 @@ BEGIN
 					--Options Buy
 					SELECT FOT.dtmTransactionDate
 						, intFutOptTransactionId
-						, intOpenContract
+						, dblOpenContract
 						, FOT.strCommodityCode
 						, strInternalTradeNo
 						, strLocationName
@@ -341,7 +341,7 @@ BEGIN
 					--Options Sell
 					SELECT FOT.dtmTransactionDate
 						, intFutOptTransactionId
-						, intOpenContract
+						, dblOpenContract
 						, FOT.strCommodityCode
 						, strInternalTradeNo
 						, strLocationName
@@ -483,7 +483,7 @@ BEGIN
 					, intFutOptTransactionHeaderId
 					, th.intCommodityId
 					, dtmFutureMonthsDate
-					, HedgedQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(intOpenContract, 0) * t.dblContractSize)
+					, HedgedQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(dblOpenContract, 0) * t.dblContractSize)
 					, l.strLocationName
 					, strFutureMonth = LEFT(t.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2),intYear) COLLATE Latin1_General_CI_AS
 					, m.intUnitMeasureId
@@ -491,7 +491,7 @@ BEGIN
 					, strTranType = strNewBuySell
 					, ba.intBrokerageAccountId
 					, t.strInstrumentType as strInstrumentType
-					, dblNoOfLot = ISNULL(intOpenContract, 0)
+					, dblNoOfLot = ISNULL(dblOpenContract, 0)
 					, ysnPreCrush
 					, t.strNotes
 					, strBrokerTradeNo
@@ -542,7 +542,7 @@ BEGIN
 				, t.strLocationName
 				, strFutureMonth = LEFT(t.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), fm.intYear) COLLATE Latin1_General_CI_AS
 				, dtmFutureMonthsDate = LEFT(t.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), fm.intYear) COLLATE Latin1_General_CI_AS
-				, dblTotal = (intOpenContract * ISNULL((SELECT TOP 1 dblDelta
+				, dblTotal = (dblOpenContract * ISNULL((SELECT TOP 1 dblDelta
 														FROM tblRKFuturesSettlementPrice sp
 														INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 														WHERE intFutureMarketId = m.intFutureMarketId AND mm.intOptionMonthId = om.intOptionMonthId 
@@ -552,7 +552,7 @@ BEGIN
 				, m.intUnitMeasureId 
 				, strAccountNumber = e.strName + '-' + strAccountNumber COLLATE Latin1_General_CI_AS
 				, TranType = strNewBuySell
-				, dblNoOfLot = intOpenContract
+				, dblNoOfLot = dblOpenContract
 				, dblDelta = ISNULL((SELECT TOP 1 dblDelta
 											FROM tblRKFuturesSettlementPrice sp
 											INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId

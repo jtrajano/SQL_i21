@@ -4,7 +4,7 @@ AS
 
 SELECT TOP 100 PERCENT *
 	, intRowNum = CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutOptTransactionId))
-	, dblHedgeQty = ISNULL(dblContractSize, 0) * intOpenContract
+	, dblHedgeQty = ISNULL(dblContractSize, 0) * dblOpenContract
 FROM (
 	SELECT ft.intFutOptTransactionId
 		, ft.intFutOptTransactionHeaderId
@@ -20,9 +20,9 @@ FROM (
 		, ft.strInternalTradeNo
 		, e.strName
 		, strBrokerageAccount = acc.strAccountNumber
-		, intGetNoOfContract = CASE WHEN (N'Sell' = ft.[strBuySell]) THEN - (ft.[intNoOfContract]) ELSE ft.[intNoOfContract] END
+		, intGetNoOfContract = CASE WHEN (N'Sell' = ft.[strBuySell]) THEN - (ft.[dblNoOfContract]) ELSE ft.[dblNoOfContract] END
 		, fot.dblContractSize
-		, intOpenContract = (SELECT CONVERT(DECIMAL, SUM(intOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
+		, dblOpenContract = (SELECT CONVERT(DECIMAL, SUM(dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
 		, um.strUnitMeasure
 		, ft.strBuySell
 		, ft.dblPrice

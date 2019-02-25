@@ -17,9 +17,9 @@ SELECT ft.intFutOptTransactionId
 	, CASE WHEN ft.intInstrumentTypeId = 1 then 'Futures'
 			WHEN ft.intInstrumentTypeId = 2 then 'Options'
 			WHEN ft.intInstrumentTypeId = 3 then 'Currency Contract' end COLLATE Latin1_General_CI_AS AS strInstrumentType
-	, CASE WHEN strBuySell = 'Sell' then -intNoOfContract else intNoOfContract end intGetNoOfContract
-	, case when strBuySell = 'Sell' then -(fot.dblContractSize * (select sum(intOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId))
-			else (fot.dblContractSize * (select sum(intOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId)) end dblHedgeQty
+	, CASE WHEN strBuySell = 'Sell' then -dblNoOfContract else dblNoOfContract end intGetNoOfContract
+	, case when strBuySell = 'Sell' then -(fot.dblContractSize * (select sum(dblOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId))
+			else (fot.dblContractSize * (select sum(dblOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId)) end dblHedgeQty
 	, strUnitMeasure
 	, strCommodityCode
 	, strLocationName
@@ -36,7 +36,7 @@ SELECT ft.intFutOptTransactionId
 	, intAssignedLots as intAssignedLots
 	, b.strBankName
 	, ba.strBankAccountNo
-	, ISNULL(ft.intNoOfContract - GOC.intOpenContract,0) as intUsedContract
+	, ISNULL(ft.dblNoOfContract - GOC.dblOpenContract,0) as dblUsedContract
 	, CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction 
 				WHERE 
 				(intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail) 
@@ -72,5 +72,5 @@ LEFT OUTER JOIN [dbo].[tblRKAssignFuturesToContractSummary] AS cs ON cs.[intFutO
 LEFT OUTER JOIN [dbo].[tblCTContractHeader] AS ch ON ch.[intContractHeaderId] = cs.[intContractHeaderId]
 LEFT OUTER JOIN [dbo].[tblCTContractDetail] AS cd ON cd.[intContractDetailId] = cs.[intContractDetailId]
 LEFT JOIN (
-	select intFutOptTransactionId, max(intOpenContract) as intOpenContract from vyuRKGetOpenContract group by intFutOptTransactionId
+	select intFutOptTransactionId, max(dblOpenContract) as dblOpenContract from vyuRKGetOpenContract group by intFutOptTransactionId
 ) GOC ON ft.intFutOptTransactionId = GOC.intFutOptTransactionId

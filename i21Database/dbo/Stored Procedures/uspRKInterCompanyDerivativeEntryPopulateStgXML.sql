@@ -3,7 +3,7 @@ CREATE PROCEDURE uspRKInterCompanyDerivativeEntryPopulateStgXML
 	 @intFutOptTransactionHeaderId INT
 	,@intContractHeaderId INT
 	,@strInternalTradeNo NVARCHAR(20)
-	,@intHedgedLots INT
+	,@dblHedgedLots NUMERIC(18,6)
 	,@strTransactionType NVARCHAR(20)
 	,@action NVARCHAR(20)
 	,@intInterCompanyTransactionConfigurationId INT
@@ -62,7 +62,7 @@ EXEC [dbo].[uspCTGetTableDataInXML]
 		,intMultiCompanyId
 		,intEntityId
 		,intCompanyLocationId
-		,intHedgedLots
+		,dblHedgedLots
 		,strInternalTradeNo)
 	VALUES(
 		@intFutOptTransactionHeaderId
@@ -74,7 +74,7 @@ EXEC [dbo].[uspCTGetTableDataInXML]
 		,@intToCompanyId
 		,@intEntityId
 		,@intCompanyLocationId
-		,@intHedgedLots
+		,@dblHedgedLots
 		,@strInternalTradeNo)
 END
 

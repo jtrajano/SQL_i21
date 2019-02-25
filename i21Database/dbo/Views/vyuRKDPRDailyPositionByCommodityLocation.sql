@@ -73,11 +73,11 @@ SELECT distinct c.intCommodityId, strLocationName,
    JOIN tblRKFutureMarket rfm on rfm.intFutureMarketId=otr.intFutureMarketId  
    WHERE otr.intCommodityId=c.intCommodityId and otr.intLocationId=cl.intCompanyLocationId) dblContractSize     
               
- ,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
+ ,(SELECT isnull(SUM(dblNoOfContract),0) from tblRKFutOptTransaction otr  
      WHERE otr.strBuySell='Sell' AND otr.intCommodityId=c.intCommodityId  
      and otr.intLocationId=cl.intCompanyLocationId ) FutSBalTransQty     
   
- ,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr  
+ ,(SELECT isnull(SUM(dblNoOfContract),0) from tblRKFutOptTransaction otr  
   WHERE otr.strBuySell='Buy' AND otr.intCommodityId=c.intCommodityId and otr.intLocationId=cl.intCompanyLocationId) as FutLBalTransQty,          
            
  (SELECT SUM(psd.dblMatchQty) from tblRKMatchFuturesPSHeader psh            

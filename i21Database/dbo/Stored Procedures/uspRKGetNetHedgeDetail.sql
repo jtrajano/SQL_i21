@@ -12,7 +12,7 @@ DECLARE @tblTemp TABLE (strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_A
 	, strAccountNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, intFutOptTransactionId INT
 	, strFutMarketName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	, intNoOfContract INT
+	, dblNoOfContract NUMERIC(24,10)
 	, dblMatchQty NUMERIC(24,10)
 	, dblContractSize NUMERIC(24,10)
 	, intFutureMarketId INT
@@ -32,7 +32,7 @@ BEGIN
 		, strAccountNumber
 		, intFutOptTransactionId
 		, strFutMarketName
-		, intNoOfContract
+		, dblNoOfContract
 		, dblMatchQty
 		, dblContractSize
 		, intFutureMarketId
@@ -51,13 +51,13 @@ BEGIN
 	FROM (
 		SELECT f.intFutOptTransactionId
 			, m.strFutMarketName
-			, isnull(intNoOfContract,0) intNoOfContract
+			, isnull(dblNoOfContract,0) dblNoOfContract
 			, ISNULL(dblMatchQty,0) dblMatchQty
 			, m.dblContractSize
 			, m.intFutureMarketId
 			, 'Buy' COLLATE Latin1_General_CI_AS as [BuySell]
-			, (ISNULL(intNoOfContract,0)-isnull(dblMatchQty,0)) OpenLots
-			, (ISNULL(intNoOfContract,0)-isnull(dblMatchQty,0)) * m.dblContractSize as HedgedQty
+			, (ISNULL(dblNoOfContract,0)-isnull(dblMatchQty,0)) OpenLots
+			, (ISNULL(dblNoOfContract,0)-isnull(dblMatchQty,0)) * m.dblContractSize as HedgedQty
 			, intCommodityId
 		FROM tblRKFutOptTransaction f
 		JOIN tblRKFutureMarket m on f.intFutureMarketId=m.intFutureMarketId
@@ -66,13 +66,13 @@ BEGIN
 		
 		UNION ALL SELECT f.intFutOptTransactionId
 			,m.strFutMarketName
-			,isnull(intNoOfContract,0) intNoOfContract
+			,isnull(dblNoOfContract,0) dblNoOfContract
 			,isnull(dblMatchQty,0) dblMatchQty
 			,m.dblContractSize
 			,m.intFutureMarketId
 			,'Sell' COLLATE Latin1_General_CI_AS as [BuySell]
-			,(ISNULL(intNoOfContract,0)-isnull(dblMatchQty,0)) OpenLots
-			,-(isnull(intNoOfContract,0)-isnull(dblMatchQty,0)) * m.dblContractSize as HedgedQty
+			,(ISNULL(dblNoOfContract,0)-isnull(dblMatchQty,0)) OpenLots
+			,-(isnull(dblNoOfContract,0)-isnull(dblMatchQty,0)) * m.dblContractSize as HedgedQty
 			,intCommodityId
 		FROM tblRKFutOptTransaction f
 		JOIN tblRKFutureMarket m on f.intFutureMarketId=m.intFutureMarketId
@@ -96,7 +96,7 @@ BEGIN
 		, strAccountNumber
 		, intFutOptTransactionId
 		, strFutMarketName
-		, intNoOfContract
+		, dblNoOfContract
 		, dblMatchQty
 		, dblContractSize
 		, intFutureMarketId
@@ -115,13 +115,13 @@ BEGIN
 	FROM (
 		SELECT f.intFutOptTransactionId
 			, m.strFutMarketName
-			, isnull(intNoOfContract,0) intNoOfContract
+			, isnull(dblNoOfContract,0) dblNoOfContract
 			, ISNULL(dblMatchQty,0) dblMatchQty
 			, m.dblContractSize
 			, m.intFutureMarketId
 			, 'Buy' COLLATE Latin1_General_CI_AS as [BuySell]
-			, (ISNULL(intNoOfContract,0)-isnull(dblMatchQty,0)) OpenLots
-			, (ISNULL(intNoOfContract,0)-isnull(dblMatchQty,0)) * m.dblContractSize as HedgedQty
+			, (ISNULL(dblNoOfContract,0)-isnull(dblMatchQty,0)) OpenLots
+			, (ISNULL(dblNoOfContract,0)-isnull(dblMatchQty,0)) * m.dblContractSize as HedgedQty
 			, intCommodityId
 		FROM tblRKFutOptTransaction f
 		JOIN tblRKFutureMarket m on f.intFutureMarketId=m.intFutureMarketId
@@ -130,13 +130,13 @@ BEGIN
 
 		UNION ALL SELECT f.intFutOptTransactionId
 			, m.strFutMarketName
-			, isnull(intNoOfContract,0) intNoOfContract
+			, isnull(dblNoOfContract,0) dblNoOfContract
 			, isnull(dblMatchQty,0) dblMatchQty
 			, m.dblContractSize
 			, m.intFutureMarketId
 			, 'Sell' COLLATE Latin1_General_CI_AS as [BuySell]
-			, (ISNULL(intNoOfContract,0)-isnull(dblMatchQty,0)) OpenLots
-			, -(isnull(intNoOfContract,0)-isnull(dblMatchQty,0)) * m.dblContractSize as HedgedQty
+			, (ISNULL(dblNoOfContract,0)-isnull(dblMatchQty,0)) OpenLots
+			, -(isnull(dblNoOfContract,0)-isnull(dblMatchQty,0)) * m.dblContractSize as HedgedQty
 			, intCommodityId
 		FROM tblRKFutOptTransaction f
 		JOIN tblRKFutureMarket m on f.intFutureMarketId=m.intFutureMarketId
@@ -165,7 +165,7 @@ BEGIN
 		,strAccountNumber
 		,intFutOptTransactionId
 		,strFutMarketName
-		,intNoOfContract
+		,dblNoOfContract
 		,dblMatchQty
 		,dblContractSize
 		,intFutureMarketId
@@ -187,7 +187,7 @@ BEGIN
 		,strAccountNumber
 		,intFutOptTransactionId
 		,strFutMarketName
-		,intNoOfContract
+		,dblNoOfContract
 		,dblMatchQty
 		,dblContractSize
 		,intFutureMarketId

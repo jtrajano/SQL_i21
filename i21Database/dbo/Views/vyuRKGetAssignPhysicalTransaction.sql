@@ -2,7 +2,7 @@
 
 AS
  SELECT  convert(int,row_number() OVER(ORDER BY intContractDetailId)) intRowNum, * FROM (
- SELECT *,intNoOfLots-intHedgedLots as intToBeHedgedLots FROM
+ SELECT *,intNoOfLots-dblHedgedLots as dblToBeHedgedLots FROM
  (SELECT intContractDetailId,CH.intContractHeaderId,
  CH.dtmContractDate,CT.strContractType,CH.strContractNumber ,CD.intContractSeq,
  E.strName as strCustomer,
@@ -12,8 +12,8 @@ AS
  M.strFutMarketName,
  MO.strFutureMonth,
  ISNULL(convert(int,CD.dblNoOfLots),0) intNoOfLots,
- ISNULL((SELECT SUM(AD.intHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
-		HAVING CD.intContractDetailId = AD.intContractDetailId), 0) as intHedgedLots,
+ ISNULL((SELECT SUM(AD.dblHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
+		HAVING CD.intContractDetailId = AD.intContractDetailId), 0) as dblHedgedLots,
  ISNULL((SELECT SUM(AD.dblAssignedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
 		HAVING CD.intContractDetailId = AD.intContractDetailId), 0) as dblAssignedLots,
  COM.strCommodityCode,
@@ -35,7 +35,7 @@ AS
 
  UNION 
 
- SELECT *,intNoOfLots-intHedgedLots as intToBeHedgedLots FROM
+ SELECT *,intNoOfLots-dblHedgedLots as intToBeHedgedLots FROM
  (
  SELECT NULL AS intContractDetailId,CH.intContractHeaderId,
 		 CH.dtmContractDate,CT.strContractType,CH.strContractNumber ,null as intContractSeq,
@@ -46,8 +46,8 @@ AS
 		 M.strFutMarketName,
 		 MO.strFutureMonth,
 		 ISNULL(convert(int,CH.dblNoOfLots),0) intNoOfLots,
-		 ISNULL((SELECT SUM(AD.intHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractHeaderId 
-				HAVING CH.intContractHeaderId = AD.intContractHeaderId), 0) as intHedgedLots,
+		 ISNULL((SELECT SUM(AD.dblHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractHeaderId 
+				HAVING CH.intContractHeaderId = AD.intContractHeaderId), 0) as dblHedgedLots,
 		 ISNULL((SELECT SUM(AD.dblAssignedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractHeaderId 
 				HAVING CH.intContractHeaderId = AD.intContractHeaderId), 0) as dblAssignedLots,
 		 COM.strCommodityCode,

@@ -313,9 +313,9 @@ INSERT INTO @Result (
 	,dblPriceVariation
 	)
 SELECT 'Futures Impact - USD',@dblQty
-	,sum((isnull(dtmLatestSettlementPrice, 0) - isnull(dblPrice, 0)) * (isnull(intNoOfLots, 0) * isnull(dblContractSize, 0))
+	,sum((isnull(dtmLatestSettlementPrice, 0) - isnull(dblPrice, 0)) * (isnull(dblNoOfLots, 0) * isnull(dblContractSize, 0))
 	/case when ysnSubCurrency=1 then 100 else 1 end) dblUSD
-	,sum((isnull(dtmLatestSettlementPrice, 0) - isnull(dblPrice, 0)) * (isnull(intNoOfLots, 0) * isnull(dblContractSize, 0))
+	,sum((isnull(dtmLatestSettlementPrice, 0) - isnull(dblPrice, 0)) * (isnull(dblNoOfLots, 0) * isnull(dblContractSize, 0))
 	/case when ysnSubCurrency=1 then 100 else 1 end) dblInvoicePrice
 FROM (
 	SELECT DISTINCT TP.strContractType
@@ -328,7 +328,7 @@ FROM (
 		,strInternalTradeNo
 		,dblAssignedLots
 		,t.dblPrice dblContractPrice
-		,-((isnull(cs.dblAssignedLots, 0) + isnull(cs.intHedgedLots, 0)) * (AD.dblSAllocatedQty / CD.dblQuantity) * 100) / 100 intNoOfLots
+		,-((isnull(cs.dblAssignedLots, 0) + isnull(cs.dblHedgedLots, 0)) * (AD.dblSAllocatedQty / CD.dblQuantity) * 100) / 100 dblNoOfLots
 		,t.dblPrice
 		,t.intFutureMarketId
 		,t.intFutureMonthId
@@ -359,7 +359,7 @@ FROM (
 		,strInternalTradeNo
 		,dblAssignedLots
 		,t.dblPrice dblContractPrice
-		,((isnull(cs.dblAssignedLots, 0) + isnull(cs.intHedgedLots, 0)) * (sum(dblSAllocatedQty) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 intNoOfLots
+		,((isnull(cs.dblAssignedLots, 0) + isnull(cs.dblHedgedLots, 0)) * (sum(dblSAllocatedQty) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 dblNoOfLots
 		,t.dblPrice
 		,t.intFutureMarketId
 		,t.intFutureMonthId
@@ -389,7 +389,7 @@ UNION
 		,strInternalTradeNo
 		,dblAssignedLots
 		,t.dblPrice dblContractPrice
-		,((isnull(cs.dblAssignedLots, 0) + isnull(cs.intHedgedLots, 0)) * (sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 intNoOfLots
+		,((isnull(cs.dblAssignedLots, 0) + isnull(cs.dblHedgedLots, 0)) * (sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 dblNoOfLots
 		,t.dblPrice
 		,t.intFutureMarketId
 		,t.intFutureMonthId
@@ -420,7 +420,7 @@ UNION
 		,strInternalTradeNo
 		,dblAssignedLots
 		,t.dblPrice dblContractPrice
-		,-((isnull(cs.dblAssignedLots, 0) + isnull(cs.intHedgedLots, 0)) * (sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 intNoOfLots
+		,-((isnull(cs.dblAssignedLots, 0) + isnull(cs.dblHedgedLots, 0)) * (sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 dblNoOfLots
 		,t.dblPrice
 		,t.intFutureMarketId
 		,t.intFutureMonthId

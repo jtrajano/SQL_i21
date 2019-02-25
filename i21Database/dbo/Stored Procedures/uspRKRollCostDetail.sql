@@ -7,18 +7,18 @@
 AS
 
 select intFutOptTransactionId ,strInternalTradeNo,intFutureMarketId  ,strFutMarketName ,intCommodityId ,strCommodityCode ,
-strFutureMonth ,strRollMonth,dblContractSize ,intOpenContract , dblPrice dblContratPrice ,strBuySell
+strFutureMonth ,strRollMonth,dblContractSize ,dblOpenContract , dblPrice dblContratPrice ,strBuySell
 from (
 
 SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketId,m.strFutMarketName,ft.intCommodityId,c.strCommodityCode,
 				fm.strFutureMonth,rfm.strFutureMonth  strRollMonth,dblContractSize,strBuySell,
-		isnull((SELECT sum(intOpenContract) from vyuRKGetOpenContract fc 
+		isnull((SELECT sum(dblOpenContract) from vyuRKGetOpenContract fc 
 				join tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell='Buy'
-				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.intOpenContract,0) > 0),0) intOpenContract
+				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.dblOpenContract,0) > 0),0) dblOpenContract
 		,isnull(ft.dblPrice,0) dblPrice
-		,isnull((SELECT sum(intOpenContract) from vyuRKGetOpenContract fc 
+		,isnull((SELECT sum(dblOpenContract) from vyuRKGetOpenContract fc 
 				join tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell='Buy'
-				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.intOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
+				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.dblOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
 
 			,(SELECT SUM(dblMatchQty) intNoOfContract from (
 			SELECT DISTINCT 
@@ -74,7 +74,7 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 			JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intLFutOptTransactionId  
 			WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId) intBuyMatchId
 
-		,isnull((SELECT sum(intOpenContract) from vyuRKGetOpenContract fc 
+		,isnull((SELECT sum(dblOpenContract) from vyuRKGetOpenContract fc 
 				join tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and isnull(foot.intRollingMonthId,0) = 0
 				 and strBuySell='Buy'
 				WHERE  foot.intFutOptTransactionId =ft.intFutOptTransactionId ),0) dblBlankRMQty
@@ -84,12 +84,12 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 				and strBuySell='Buy'
 				WHERE foot.intFutOptTransactionId =ft.intFutOptTransactionId  ),0) dblBlankRMQtyPrice
 
-		,isnull((SELECT sum(intOpenContract) from vyuRKGetOpenContract fc 
+		,isnull((SELECT sum(dblOpenContract) from vyuRKGetOpenContract fc 
 				join tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and foot.intRollingMonthId=foot.intFutureMonthId
 				 and strBuySell='Buy'
 				WHERE  foot.intFutOptTransactionId =ft.intFutOptTransactionId ),0) dblRMNotEqFMQty
 
-		,isnull((SELECT sum(intOpenContract) from vyuRKGetOpenContract fc 
+		,isnull((SELECT sum(dblOpenContract) from vyuRKGetOpenContract fc 
 				join tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and foot.intRollingMonthId=foot.intFutureMonthId
 				and strBuySell='Buy'
 				WHERE foot.intFutOptTransactionId =ft.intFutOptTransactionId  )*isnull(ft.dblPrice,0),0) dblRMNotEqFMQtyPrice
@@ -122,5 +122,5 @@ SELECT distinct ft.intFutOptTransactionId,strInternalTradeNo,ft.intFutureMarketI
 		WHERE intSelectedInstrumentTypeId=1  AND intInstrumentTypeId=1 and fm.strFutureMonth=@strFutureMonth
 		and m.strFutMarketName = @strFutMarketName
 		and c.strCommodityCode = @strCommodityCode
-		and convert(datetime,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFromDate and @dtmToDate )t where intOpenContract >0
+		and convert(datetime,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFromDate and @dtmToDate )t where dblOpenContract >0
 		order by strFutureMonth

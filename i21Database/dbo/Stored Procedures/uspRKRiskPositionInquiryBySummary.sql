@@ -809,9 +809,9 @@ SELECT * FROM (
 			, strFutureMonth strFutureMonth
 			, e.strName + '-' + strAccountNumber as strAccountNumber
 			, strBuySell
-			, ISNULL(CASE WHEN ft.strBuySell = 'Buy' THEN ISNULL(ft.intNoOfContract, 0)
+			, ISNULL(CASE WHEN ft.strBuySell = 'Buy' THEN ISNULL(ft.dblNoOfContract, 0)
 						ELSE NULL END, 0) Long1
-			, ISNULL(CASE WHEN ft.strBuySell = 'Sell' THEN ISNULL(ft.intNoOfContract, 0)
+			, ISNULL(CASE WHEN ft.strBuySell = 'Sell' THEN ISNULL(ft.dblNoOfContract, 0)
 						ELSE NULL END, 0) Sell1
 			, ISNULL((SELECT SUM(dblMatchQty)
 						FROM tblRKMatchFuturesPSDetail psd

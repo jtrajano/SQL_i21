@@ -202,12 +202,12 @@ BEGIN
 --Future Transaction with product Type
 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strFutMarketName,strLocationName,strTradeNo,CustVendor,strFutureMonth as strFutureMonth,
                                 abs((isnull(strBuy,0)-isnull(strSell,0)))*dblContractSize dblQuantity,dtmFutureMonthsDate as dtmTransactionDate,strBuySell,
-                                abs((isnull(strBuy,0)-isnull(strSell,0))) intNoOfContract,dblPrice dblPrice,strTradeNo strInternalTradeNo,intFutureMarketId,intFutOptTransactionHeaderId 
+                                abs((isnull(strBuy,0)-isnull(strSell,0))) dblNoOfContract,dblPrice dblPrice,strTradeNo strInternalTradeNo,intFutureMarketId,intFutOptTransactionHeaderId 
 INTO #FutureTransaction
 FROM (
                 SELECT strFutMarketName,strFutureMonth, t.intFutureMarketId, strName CustVendor,strBuySell,dtmFutureMonthsDate,dblPrice,
-                (select intNoOfContract from tblRKFutOptTransaction ot where ot.intFutOptTransactionId=t.intFutOptTransactionId and strBuySell='Buy') strBuy,
-                (select intNoOfContract from tblRKFutOptTransaction ot where ot.intFutOptTransactionId=t.intFutOptTransactionId and strBuySell='Sell') strSell,
+                (select dblNoOfContract from tblRKFutOptTransaction ot where ot.intFutOptTransactionId=t.intFutOptTransactionId and strBuySell='Buy') strBuy,
+                (select dblNoOfContract from tblRKFutOptTransaction ot where ot.intFutOptTransactionId=t.intFutOptTransactionId and strBuySell='Sell') strSell,
                 m.dblContractSize dblContractSize ,strLocationName strLocationName,t.strInternalTradeNo strTradeNo,t.intFutOptTransactionHeaderId
                 FROM tblRKFutOptTransaction t 
                 join tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
@@ -222,34 +222,34 @@ UPDATE #FutureTransaction set strFutureMonth = 'Previous' where dtmTransactionDa
 
 IF (@strDetailColumnName='colTotalPurchase')
                 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Purchase' and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Purchase' and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
 ELSE IF  (@strDetailColumnName='colTotalSales')
                 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale' and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale' and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
 ELSE IF (@strDetailColumnName='colUnfixedPurchase')
                 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Purchase' AND  strPricingType='UnPriced' and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Purchase' AND  strPricingType='UnPriced' and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
 ELSE IF (@strDetailColumnName='colUnfixedSales')  
                 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale' AND  strPricingType='UnPriced' and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale' AND  strPricingType='UnPriced' and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
 ELSE IF (@strDetailColumnName='colPrevious') 
  SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale'  and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale'  and intProductTypeId=@intProductTypeId and intFutureMarketId=@intFutureMarketId
 
 ELSE IF (@strDetailColumnName='colFutures')                                                                                                  
                     SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmTransactionDate dtmTransactionDate,strBuySell,
-                intNoOfContract,dblPrice dblPrice,'' strInternalTradeNo,intFutOptTransactionHeaderId,0 as intContractHeaderId,@intDecimals intDecimals FROM #FutureTransaction WHERE strFutureMonth=@strFutureMonth and intFutureMarketId=@intFutureMarketId
+                dblNoOfContract,dblPrice dblPrice,'' strInternalTradeNo,intFutOptTransactionHeaderId,0 as intContractHeaderId,@intDecimals intDecimals FROM #FutureTransaction WHERE strFutureMonth=@strFutureMonth and intFutureMarketId=@intFutureMarketId
 END
 ELSE
 BEGIN
 --Futures Transaction With out product Type
 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strFutMarketName,strLocationName,strTradeNo,CustVendor,strFutureMonth as strFutureMonth,
                                 abs((isnull(strBuy,0)-isnull(strSell,0)))*dblContractSize dblQuantity,dtmFutureMonthsDate as dtmTransactionDate,strBuySell,
-                                abs((isnull(strBuy,0)-isnull(strSell,0))) intNoOfContract,dblPrice dblPrice,strTradeNo strInternalTradeNo,intFutureMarketId,intFutOptTransactionHeaderId into #FutureTransaction1
+                                abs((isnull(strBuy,0)-isnull(strSell,0))) dblNoOfContract,dblPrice dblPrice,strTradeNo strInternalTradeNo,intFutureMarketId,intFutOptTransactionHeaderId into #FutureTransaction1
 FROM (
                 SELECT strFutMarketName,strFutureMonth, t.intFutureMarketId, strName CustVendor,strBuySell,dtmFutureMonthsDate,dblPrice,
-                (select intNoOfContract from tblRKFutOptTransaction ot where ot.intFutOptTransactionId=t.intFutOptTransactionId and strBuySell='Buy') strBuy,
-                (select intNoOfContract from tblRKFutOptTransaction ot where ot.intFutOptTransactionId=t.intFutOptTransactionId and strBuySell='Sell') strSell,
+                (select dblNoOfContract from tblRKFutOptTransaction ot where ot.intFutOptTransactionId=t.intFutOptTransactionId and strBuySell='Buy') strBuy,
+                (select dblNoOfContract from tblRKFutOptTransaction ot where ot.intFutOptTransactionId=t.intFutOptTransactionId and strBuySell='Sell') strSell,
                 m.dblContractSize dblContractSize ,strLocationName strLocationName,t.strInternalTradeNo strTradeNo,intFutOptTransactionHeaderId
                 FROM tblRKFutOptTransaction t 
                 join tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
@@ -263,22 +263,22 @@ UPDATE #FutureTransaction1 set strFutureMonth = 'Previous' where dtmTransactionD
 
 IF (@strDetailColumnName='colTotalPurchase')
                 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,intProductTypeId,intFutureMarketId,strFutureMonth,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Purchase' and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Purchase' and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
 ELSE IF  (@strDetailColumnName='colTotalSales')
                 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale' and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale' and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
 ELSE IF (@strDetailColumnName='colUnfixedPurchase')
                 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Purchase' AND  strPricingType='UnPriced' and intFutureMarketId=@intFutureMarketId  and strFutureMonth=@strFutureMonth
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Purchase' AND  strPricingType='UnPriced' and intFutureMarketId=@intFutureMarketId  and strFutureMonth=@strFutureMonth
 ELSE IF (@strDetailColumnName='colUnfixedSales')  
                 SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale' AND  strPricingType='UnPriced' and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale' AND  strPricingType='UnPriced' and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
 ELSE IF (@strDetailColumnName='colPrevious')
     SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,dblQuantity,dtmFutureMonthsDate dtmTransactionDate,TranType strBuySell,
-                0 intNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale'  and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
+                0.0 dblNoOfContract,0.0 dblPrice,'' strInternalTradeNo,0 as intFutOptTransactionHeaderId,intContractHeaderId,@intDecimals intDecimals FROM #ContractTransaction WHERE strFutureMonth=@strFutureMonth AND TranType='Sale'  and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
 
 ELSE IF (@strDetailColumnName='colFutures')                                                                                                  
                     SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutMarketName)) as intRowNum,strLocationName,strTradeNo,CustVendor,
                                 case when strBuySell='Buy' then dblQuantity else -abs(dblQuantity) end dblQuantity,dtmTransactionDate dtmTransactionDate,strBuySell,
-                case when strBuySell='Buy' then intNoOfContract else -abs(intNoOfContract) end intNoOfContract,dblPrice dblPrice,'' strInternalTradeNo,intFutOptTransactionHeaderId,0 intContractHeaderId,@intDecimals intDecimals FROM #FutureTransaction1 WHERE strFutureMonth=@strFutureMonth and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
+                case when strBuySell='Buy' then dblNoOfContract else -abs(dblNoOfContract) end dblNoOfContract,dblPrice dblPrice,'' strInternalTradeNo,intFutOptTransactionHeaderId,0 intContractHeaderId,@intDecimals intDecimals FROM #FutureTransaction1 WHERE strFutureMonth=@strFutureMonth and intFutureMarketId=@intFutureMarketId and strFutureMonth=@strFutureMonth
 END

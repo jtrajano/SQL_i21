@@ -10,7 +10,7 @@ AS
 			PD.dblFinalPrice,
 			CM.strUnitMeasure strPricingUOM,
 			SY.dtmMatchDate,
-			SY.intHedgedLots,
+			SY.dblHedgedLots,
 			FO.dblPrice,
 			MM.strUnitMeasure strHedgeUOM,
 			PF.intPriceContractId,

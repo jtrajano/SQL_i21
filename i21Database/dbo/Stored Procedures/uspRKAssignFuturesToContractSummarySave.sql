@@ -17,7 +17,6 @@ Declare @intContractDetailId  int
 Declare @dtmMatchDate datetime      
 Declare @intFutOptTransactionId int      
 Declare @dblAssignedLots int     
-Declare @dblHedgedLots NUMERIC(18,6)
 DECLARE @ErrMsg nvarchar(max)       
     
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml        
@@ -80,7 +79,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	dtmMatchDate,
 	intFutOptTransactionId,
 	dblAssignedLots,
-	intHedgedLots,
+	dblHedgedLots,
 	ysnIsHedged  
   )      
     
@@ -92,7 +91,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	dtmMatchDate,
 	intFutOptTransactionId,
 	dblAssignedLots,
-	intHedgedLots,
+	dblHedgedLots,
 	ysnIsHedged  
        
   FROM OPENXML(@idoc,'root/Transaction', 2)          
@@ -103,7 +102,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	dtmMatchDate datetime,
 	intFutOptTransactionId int,
 	dblAssignedLots numeric(16,10),
-	intHedgedLots NUMERIC(18,6),
+	dblHedgedLots NUMERIC(18,6),
 	ysnIsHedged bit 
  )          
        
@@ -150,7 +149,7 @@ WHERE intAssignFuturesToContractHeaderId = @intAssignFuturesToContractHeaderId
 				@intFutOptTransactionHeaderId INT,
 				@intContractHeaderId INT,
 				@strInternalTradeNo NVARCHAR(20),
-				@intHedgedLots INT
+				@dblHedgedLots INT
 				
 		SELECT TOP 1 
 			@intAssignFuturesToContractSummaryId = intAssignFuturesToContractSummaryId
@@ -162,7 +161,7 @@ WHERE intAssignFuturesToContractHeaderId = @intAssignFuturesToContractHeaderId
 			,@intFutOptTransactionHeaderId = intFutOptTransactionHeaderId
 			,@intContractHeaderId = intContractHeaderId
 			,@strInternalTradeNo = strInternalTradeNo
-			,@intHedgedLots = intHedgedLots
+			,@dblHedgedLots = dblHedgedLots
 		FROM vyuRKAssignFuturesToContractSummary
 		WHERE intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
 
@@ -170,12 +169,12 @@ WHERE intAssignFuturesToContractHeaderId = @intAssignFuturesToContractHeaderId
 		BEGIN
 			IF @strBuySell = 'Sell' AND @ysnShortFuturesConfigured = 1 
 			BEGIN
-				EXEC uspRKInterCompanyDerivativeEntryPopulateStgXML @intFutOptTransactionHeaderId,@intContractHeaderId,@strInternalTradeNo,@intHedgedLots,'SELL','ADDED', @intInterCompanyTransactionConfigurationId
+				EXEC uspRKInterCompanyDerivativeEntryPopulateStgXML @intFutOptTransactionHeaderId,@intContractHeaderId,@strInternalTradeNo,@dblHedgedLots,'SELL','ADDED', @intInterCompanyTransactionConfigurationId
 			END
 
 			IF @strBuySell = 'Buy' AND @ysnLongFuturesConfigured = 1 
 			BEGIN
-				EXEC uspRKInterCompanyDerivativeEntryPopulateStgXML @intFutOptTransactionHeaderId,@intContractHeaderId,@strInternalTradeNo,@intHedgedLots,'BUY','ADDED', @intInterCompanyTransactionConfigurationId
+				EXEC uspRKInterCompanyDerivativeEntryPopulateStgXML @intFutOptTransactionHeaderId,@intContractHeaderId,@strInternalTradeNo,@dblHedgedLots,'BUY','ADDED', @intInterCompanyTransactionConfigurationId
 			END
 		END
 

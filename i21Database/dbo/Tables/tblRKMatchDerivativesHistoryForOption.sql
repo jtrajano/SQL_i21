@@ -3,7 +3,7 @@
 	intMatchDerivativeHistoryForOptionId INT IDENTITY(1,1) NOT NULL, 
 	intOptionsMatchPnSHeaderId INT NOT NULL,
 	intMatchOptionsPnSId INT NOT NULL,
-	intMatchQty int NULL,
+	dblMatchQty numeric(18,6) NULL,
 	dtmMatchDate DATETIME NOT NULL,
 	intLFutOptTransactionId INT NOT NULL,
 	intSFutOptTransactionId INT NOT NULL,	

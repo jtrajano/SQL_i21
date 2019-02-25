@@ -8,8 +8,8 @@ SELECT TOP 100 PERCENT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY CONVERT(DATETIME,'
 	, sum(dblSell) dblSell
 FROM (
 	SELECT fm.strOptionMonth
-		, SUM(isnull(f.intNoOfContract,0)) dblBuy
-		, isnull((SELECT SUM(isnull(ft.intNoOfContract,0))
+		, SUM(isnull(f.dblNoOfContract,0)) dblBuy
+		, isnull((SELECT SUM(isnull(ft.dblNoOfContract,0))
 				FROM tblRKFutOptTransaction ft
 				WHERE ft.intOptionMonthId=fm.intOptionMonthId and ft.intInstrumentTypeId=2 and ft.strBuySell='Sell'),0) dblSell
 	FROM tblRKFutOptTransaction f

@@ -82,7 +82,7 @@ BEGIN TRY
 	JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CT.intFutureMonthId
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CT.intLocationId
 	WHERE CT.intCommodityId = @intCommodityId
-		AND OC.intOpenContract > 0
+		AND OC.dblOpenContract > 0
 		AND CL.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId ELSE @intLocationId END
 		AND LEFT(CONVERT(VARCHAR, CT.dtmFilledDate, 101), 10) <= @dtmTransactionDateUpTo
 		AND MO.intFutureMonthId IN (SELECT intFutureMonthId

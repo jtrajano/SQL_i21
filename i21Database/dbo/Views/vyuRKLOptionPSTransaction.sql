@@ -9,7 +9,7 @@ SELECT strInternalTradeNo
 	, strOptionMonth
 	, strName
 	, strAccountNumber
-	, intTotalLot = ISNULL(intTotalLot, 0)
+	, dblTotalLot = ISNULL(dblTotalLot, 0)
 	, dblOpenLots = ISNULL(dblOpenLots, 0)
 	, strOptionType
 	, dblStrike
@@ -46,10 +46,10 @@ SELECT strInternalTradeNo
 	, intCommodityId
 	, intOptionMonthId
 FROM (
-	SELECT dblOpenLots = (intTotalLot - dblSelectedLot - intExpiredLots - intAssignedLots)
-		, dblPremiumValue = ((intTotalLot - dblSelectedLot) * dblContractSize * dblPremium) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
-		, dblMarketValue = ((intTotalLot - dblSelectedLot) * dblContractSize * dblMarketPremium) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
-		, dblCommission = (- dblOptCommission * (intTotalLot - dblSelectedLot)) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
+	SELECT dblOpenLots = (dblTotalLot - dblSelectedLot - intExpiredLots - intAssignedLots)
+		, dblPremiumValue = ((dblTotalLot - dblSelectedLot) * dblContractSize * dblPremium) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
+		, dblMarketValue = ((dblTotalLot - dblSelectedLot) * dblContractSize * dblMarketPremium) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
+		, dblCommission = (- dblOptCommission * (dblTotalLot - dblSelectedLot)) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
 		, *
 	FROM (
 		SELECT DISTINCT strInternalTradeNo
@@ -59,7 +59,7 @@ FROM (
 			, om.strOptionMonth
 			, e.strName
 			, ba.strAccountNumber
-			, intTotalLot = ot.intNoOfContract
+			, dblTotalLot = ot.dblNoOfContract
 			, dblSelectedLot = ISNULL((SELECT SUM (AD.intMatchQty) FROM tblRKOptionsMatchPnS AD Group By AD.intLFutOptTransactionId
 									Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)
 			, ot.strOptionType

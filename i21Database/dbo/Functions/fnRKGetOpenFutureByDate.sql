@@ -5,7 +5,7 @@
 )
 RETURNS @FinalResult TABLE (
 	intFutOptTransactionId INT
-	, intOpenContract INT
+	, dblOpenContract INT
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -37,7 +37,7 @@ WHERE intCommodityId = @intCommodityId
 
 INSERT INTO @FinalResult(
 	intFutOptTransactionId
-	, intOpenContract
+	, dblOpenContract
 	, strCommodityCode
 	, strInternalTradeNo
 	, strLocationName
@@ -57,7 +57,7 @@ INSERT INTO @FinalResult(
 	, strBrokerTradeNo
 )
 SELECT DISTINCT intFutOptTransactionId
-	, intOpenContract
+	, dblOpenContract
 	, strCommodityCode
 	, strInternalTradeNo
 	, strLocationName
@@ -83,7 +83,7 @@ FROM (
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.intOpenContract
+			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
 									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
@@ -124,7 +124,7 @@ FROM (
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.intOpenContract
+			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
 									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
@@ -165,7 +165,7 @@ FROM (
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.intOpenContract
+			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
 									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
@@ -206,7 +206,7 @@ FROM (
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.intOpenContract
+			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
 									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo

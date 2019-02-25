@@ -19,7 +19,7 @@ DECLARE @RollCostDetail AS TABLE (intFutOptTransactionId int
 	, strRollMonth nvarchar(50) COLLATE Latin1_General_CI_AS
 	, dblContractSize DECIMAL(24,10)
 	, ysnSubCurrency bit
-	, intOpenContract int
+	, dblOpenContract int
 	, dblContratPrice DECIMAL(24,10)
 	, dblSellQty DECIMAL(24,10)
 	, dblSellPrice DECIMAL(24,10)
@@ -43,7 +43,7 @@ INSERT INTO @RollCostDetail (intFutOptTransactionId
 	, strRollMonth
 	, dblContractSize
 	, ysnSubCurrency
-	, intOpenContract
+	, dblOpenContract
 	, dblContratPrice
 	, dblSellQty
 	, dblSellPrice
@@ -66,7 +66,7 @@ SELECT intFutOptTransactionId
 	, strRollMonth
 	, dblContractSize
 	, ysnSubCurrency
-	, intOpenContract
+	, dblOpenContract
 	, dblContratPrice
 	, dblSellQty
 	, dblSellPrice
@@ -90,12 +90,12 @@ FROM (
 		, rfm.strFutureMonth strRollMonth
 		, dblContractSize
 		, ysnSubCurrency
-		, ISNULL((SELECT SUM(intOpenContract) FROM vyuRKGetOpenContract fc
+		, ISNULL((SELECT SUM(dblOpenContract) FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell = 'Buy'
-				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId AND isnull(fc.intOpenContract,0) > 0),0) intOpenContract
-		, ISNULL((SELECT SUM(intOpenContract) FROM vyuRKGetOpenContract fc
+				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId AND isnull(fc.dblOpenContract,0) > 0),0) dblOpenContract
+		, ISNULL((SELECT SUM(dblOpenContract) FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell='Buy'
-				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.intOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
+				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.dblOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
 		, (SELECT SUM(dblMatchQty) intNoOfContract
 			FROM (
 				SELECT DISTINCT m.dblMatchQty, fut.dblPrice a
@@ -140,16 +140,16 @@ FROM (
 			JOIN tblRKMatchFuturesPSDetail m on m.intSFutOptTransactionId=ft1.intFutOptTransactionId
 			JOIN tblRKFutOptTransaction fut on fut.intFutOptTransactionId = m.intLFutOptTransactionId 
 			WHERE fut.intFutOptTransactionId=ft.intFutOptTransactionId) intBuyMatchId
-		, ISNULL((SELECT SUM(intOpenContract) FROM vyuRKGetOpenContract fc
+		, ISNULL((SELECT SUM(dblOpenContract) FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and isnull(foot.intRollingMonthId,0) = 0 AND strBuySell = 'Buy'
 				WHERE foot.intFutOptTransactionId = ft.intFutOptTransactionId ),0) dblBlankRMQty
 		, ISNULL((SELECT TOP 1 ft.dblPrice FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and isnull(foot.intRollingMonthId,0) = 0 and strBuySell='Buy'
 				WHERE foot.intFutOptTransactionId =ft.intFutOptTransactionId  ),0) dblBlankRMQtyPrice
-		, ISNULL((SELECT SUM(intOpenContract) from vyuRKGetOpenContract fc
+		, ISNULL((SELECT SUM(dblOpenContract) from vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and foot.intRollingMonthId=foot.intFutureMonthId and strBuySell='Buy'
 				WHERE foot.intFutOptTransactionId =ft.intFutOptTransactionId ),0) dblRMNotEqFMQty
-		, ISNULL((SELECT SUM(intOpenContract) from vyuRKGetOpenContract fc
+		, ISNULL((SELECT SUM(dblOpenContract) from vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and foot.intRollingMonthId=foot.intFutureMonthId and strBuySell='Buy'
 				WHERE foot.intFutOptTransactionId =ft.intFutOptTransactionId  )*isnull(ft.dblPrice,0),0) dblRMNotEqFMQtyPrice
 		, (SELECT SUM(dblMatchQty) intNoOfContract

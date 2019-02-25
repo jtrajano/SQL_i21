@@ -18,7 +18,7 @@ DECLARE @intDerivativeEntryStageId INT,
 		@strTransactionType NVARCHAR(20),
 		@intMultiCompanyId INT,
 		@intCompanyLocationId INT,
-		@intHedgedLots INT,
+		@dblHedgedLots NUMERIC(18,6),
 		@dtmTransactionDate DATETIME
 
 DECLARE @NewHeaderId INT,
@@ -49,7 +49,7 @@ WHERE strFeedStatus IS NULL
 			,@intMultiCompanyId				= intMultiCompanyId
 			,@intCompanyLocationId			= intCompanyLocationId
 			,@strInternalTradeNo			= strInternalTradeNo
-			,@intHedgedLots					= intHedgedLots
+			,@dblHedgedLots					= dblHedgedLots
 		FROM tblRKInterCompanyDerivativeEntryStage
 		WHERE intDerivativeEntryStageId = @intDerivativeEntryStageId
 
@@ -158,7 +158,7 @@ WHERE strFeedStatus IS NULL
 			dtmMatchDate,
 			intFutOptTransactionId,
 			dblAssignedLots,
-			intHedgedLots,
+			dblHedgedLots,
 			ysnIsHedged  
 		  ) 
 		  VALUES(
@@ -169,7 +169,7 @@ WHERE strFeedStatus IS NULL
 			GETDATE(),
 			@NewDetailId,
 			0,
-			@intHedgedLots,
+			@dblHedgedLots,
 			1
 		  )  
 

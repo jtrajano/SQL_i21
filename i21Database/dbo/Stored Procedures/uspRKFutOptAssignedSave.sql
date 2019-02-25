@@ -38,7 +38,7 @@ BEGIN TRY
 				, dtmMatchDate
 				, intFutOptTransactionId
 				, dblAssignedLots
-				, intHedgedLots
+				, dblHedgedLots
 				, ysnIsHedged
 				, intFutOptAssignedId)
 			SELECT @intAssignFuturesToContractHeaderId
@@ -65,7 +65,7 @@ BEGIN TRY
 				, dtmMatchDate
 				, intFutOptTransactionId
 				, dblAssignedLots
-				, intHedgedLots
+				, dblHedgedLots
 				, ysnIsHedged
 				, intFutOptAssignedId)
 			SELECT @intAssignFuturesToContractHeaderId

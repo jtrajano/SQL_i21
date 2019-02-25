@@ -4,15 +4,15 @@ AS
 
 SELECT TOP 100 PERCENT *
 FROM (
-	SELECT dblBalanceLot = intTotalLot - dblSelectedLot1
-		, dblBalanceLotRoll = intTotalLot - dblSelectedLotRoll
+	SELECT dblBalanceLot = dblTotalLot - dblSelectedLot1
+		, dblBalanceLotRoll = dblTotalLot - dblSelectedLotRoll
 		, dblSelectedLot = 0.0
 		, *
 	FROM (
 		SELECT intSelectedInstrumentTypeId
 			, strTransactionNo = strInternalTradeNo
 			, dtmTransactionDate
-			, intTotalLot = CONVERT(INT, ot.intNoOfContract)
+			, dblTotalLot = CONVERT(INT, ot.dblNoOfContract)
 			, dblSelectedLot1 = ISNULL((SELECT SUM (AD.dblMatchQty) FROM tblRKMatchFuturesPSDetail AD
 										INNER JOIN tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId
 										WHERE A.strType = 'Realize' GROUP BY AD.intSFutOptTransactionId
@@ -67,15 +67,15 @@ FROM (
   
 UNION ALL SELECT TOP 100 PERCENT *
 FROM (
-	SELECT dblBalanceLot = intTotalLot - dblSelectedLot1
-		, dblBalanceLotRoll = intTotalLot - dblSelectedLotRoll
+	SELECT dblBalanceLot = dblTotalLot - dblSelectedLot1
+		, dblBalanceLotRoll = dblTotalLot - dblSelectedLotRoll
 		, dblSelectedLot = 0.0
 		, *
 	FROM (
 		SELECT intSelectedInstrumentTypeId
 			, strTransactionNo = strInternalTradeNo
 			, dtmTransactionDate
-			, intTotalLot = CONVERT(INT, ot.dblContractAmount)
+			, dblTotalLot = CONVERT(INT, ot.dblContractAmount)
 			, dblSelectedLot1 = ISNULL((SELECT SUM (AD.dblMatchQty)
 										FROM tblRKMatchFuturesPSDetail AD
 										inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId

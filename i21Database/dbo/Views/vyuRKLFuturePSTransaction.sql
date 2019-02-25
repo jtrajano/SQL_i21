@@ -12,7 +12,7 @@ FROM (
 		SELECT intSelectedInstrumentTypeId
 			, strInternalTradeNo AS strTransactionNo
 			, dtmTransactionDate as dtmTransactionDate
-			, convert(int,ot.intNoOfContract) as intTotalLot
+			, convert(int,ot.dblNoOfContract) as intTotalLot
 			, IsNull((SELECT SUM (AD.dblMatchQty)
 					from tblRKMatchFuturesPSDetail AD
 					inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId

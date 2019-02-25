@@ -722,7 +722,7 @@ BEGIN TRY
 		, strSubHeading = 'Futures - Long'
 		, strSecondSubHeading = 'Futures - Long'
 		, strFutureMonth
-		, intOpenContract = (intNoOfContract - ISNULL(intOpenContract, 0)) * dblContractSize
+		, intOpenContract = (dblNoOfContract - ISNULL(intOpenContract, 0)) * dblContractSize
 		, dblPrice
 		, strInternalTradeNo
 		, strLocationName
@@ -731,7 +731,7 @@ BEGIN TRY
 	FROM (
 		SELECT ot.intFutOptTransactionId
 			, ot.strInternalTradeNo
-			, intNoOfContract = SUM(ot.intNoOfContract)
+			, dblNoOfContract = SUM(ot.dblNoOfContract)
 			, strFutureMonth = RIGHT(CONVERT(VARCHAR(11), dtmFutureMonthsDate, 106), 8)
 			, ot.dblPrice
 			, strCommodityCode
@@ -774,7 +774,7 @@ BEGIN TRY
 		, strSubHeading = 'Futures - Short'
 		, strSecondSubHeading = 'Futures - Short'
 		, strFutureMonth
-		, intOpenContract = - (intNoOfContract - ISNULL(intOpenContract, 0)) * dblContractSize
+		, intOpenContract = - (dblNoOfContract - ISNULL(dblNoOfContract, 0)) * dblContractSize
 		, dblPrice
 		, strInternalTradeNo
 		, strLocationName
@@ -783,7 +783,7 @@ BEGIN TRY
 	FROM (
 		SELECT ot.intFutOptTransactionId
 			, ot.strInternalTradeNo
-			, intNoOfContract = SUM(ot.intNoOfContract)
+			, dblNoOfContract = SUM(ot.dblNoOfContract)
 			, strFutureMonth = RIGHT(CONVERT(VARCHAR(11), dtmFutureMonthsDate, 106), 8)
 			, ot.dblPrice
 			, strCommodityCode

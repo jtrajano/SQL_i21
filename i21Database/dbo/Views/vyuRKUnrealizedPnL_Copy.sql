@@ -33,10 +33,10 @@ FROM (
 				, sp.strSalespersonId
 				, icc.strCommodityCode
 				, sl.strLocationName
-				, ot.intNoOfContract as intOriginalQty
-				, Case WHEN ot.strBuySell='Buy' THEN ISNULL(ot.intNoOfContract,0) ELSE null end Long1
-				, Case WHEN ot.strBuySell='Sell' THEN ISNULL(ot.intNoOfContract,0) ELSE null end Sell1
-				, ot.intNoOfContract as intNet1
+				, ot.dblNoOfContract as dblOriginalQty
+				, Case WHEN ot.strBuySell='Buy' THEN ISNULL(ot.dblNoOfContract,0) ELSE null end Long1
+				, Case WHEN ot.strBuySell='Sell' THEN ISNULL(ot.dblNoOfContract,0) ELSE null end Sell1
+				, ot.dblNoOfContract as intNet1
 				, ot.dblPrice as dblActual
 				, null as dblClosing
 				, ISNULL(ot.dblPrice,0) dblPrice

@@ -7581,6 +7581,7 @@
     <Build Include="dbo\Tables\tblMBImportMeterReadingDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMBImportMeterReadingPost.sql" />
     <None Include="Scripts\Post-Deployment\TM\6_SyncStartingNumberAndDispatchId.sql" />
+    <None Include="19.1i21Database.publish.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

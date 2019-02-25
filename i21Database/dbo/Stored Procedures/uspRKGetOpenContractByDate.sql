@@ -13,7 +13,7 @@ FROM tblICCommodity
 WHERE intCommodityId = @intCommodityId
 
 SELECT DISTINCT intFutOptTransactionId
-	, intOpenContract
+	, dblOpenContract
 	, strCommodityCode
 	, strInternalTradeNo
 	, strLocationName
@@ -38,7 +38,7 @@ FROM (
 		--Futures Buy
 		SELECT FOT.dtmTransactionDate
 			, intFutOptTransactionId
-			, intOpenContract
+			, dblOpenContract
 			, FOT.strCommodityCode
 			, strInternalTradeNo
 			, strLocationName
@@ -67,7 +67,7 @@ FROM (
 		--Futures Sell
 		SELECT FOT.dtmTransactionDate
 			, intFutOptTransactionId
-			, intOpenContract
+			, dblOpenContract
 			, FOT.strCommodityCode
 			, strInternalTradeNo
 			, strLocationName
@@ -96,7 +96,7 @@ FROM (
 		--Options Buy
 		SELECT FOT.dtmTransactionDate
 			, intFutOptTransactionId
-			, intOpenContract
+			, dblOpenContract
 			, FOT.strCommodityCode
 			, strInternalTradeNo
 			, strLocationName
@@ -125,7 +125,7 @@ FROM (
 		--Options Sell
 		SELECT FOT.dtmTransactionDate
 			, intFutOptTransactionId
-			, intOpenContract
+			, dblOpenContract
 			, FOT.strCommodityCode
 			, strInternalTradeNo
 			, strLocationName

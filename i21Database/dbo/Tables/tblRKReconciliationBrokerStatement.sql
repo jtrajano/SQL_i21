@@ -8,7 +8,7 @@
 	[strFutMarketName] nvarchar(30) COLLATE Latin1_General_CI_AS NULL,
 	[strCommodityCode] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strBuySell] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[intNoOfContract] int,
+	[dblNoOfContract]  NUMERIC(18, 6) ,
 	[strFutureMonth] nvarchar(20) COLLATE Latin1_General_CI_AS NULL,	
 	[dblPrice] NUMERIC(18, 6) ,
 	[strReference] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
