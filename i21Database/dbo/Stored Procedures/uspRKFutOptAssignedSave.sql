@@ -2,7 +2,7 @@
 	@intContractDetailId INT = NULL
 	, @dtmMatchDate DATETIME = NULL
 	, @intFutOptTransactionId INT
-	, @intAssignedLots INT
+	, @dblAssignedLots numeric(18,6)
 	, @intContractHeaderId INT = NULL
 	, @strContractSeq NVARCHAR(50) = NULL
 	, @strContractNumber NVARCHAR(50) = NULL
@@ -47,7 +47,7 @@ BEGIN TRY
 				, @intContractDetailId
 				, @dtmMatchDate
 				, @intFutOptTransactionId
-				, @intAssignedLots
+				, @dblAssignedLots
 				, 0
 				, 0
 				, @intFutOptTransactionId
@@ -74,7 +74,7 @@ BEGIN TRY
 				, NULL
 				, @dtmMatchDate
 				, @intFutOptTransactionId
-				, @intAssignedLots
+				, @dblAssignedLots
 				, 0
 				, 0
 				, @intFutOptTransactionId
@@ -95,7 +95,7 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblRKAssignFuturesToContractSummary
 				SET intContractDetailId = @intContractDetailId
-					, dblAssignedLots = @intAssignedLots
+					, dblAssignedLots = @dblAssignedLots
 					, intContractHeaderId = NULL
 				WHERE intFutOptAssignedId = @intFutOptTransactionId
 			END
@@ -114,7 +114,7 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblRKAssignFuturesToContractSummary
 			SET intContractHeaderId = @intContractHeaderId
-				, dblAssignedLots = @intAssignedLots
+				, dblAssignedLots = @dblAssignedLots
 				, intContractDetailId = NULL
 			WHERE intFutOptAssignedId = @intFutOptTransactionId
 		END

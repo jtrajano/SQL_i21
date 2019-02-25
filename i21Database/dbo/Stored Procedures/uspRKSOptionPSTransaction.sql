@@ -102,10 +102,10 @@ FROM (
 			, intFutOptTransactionId
 			, isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope
 					where ope.intFutOptTransactionId= ot.intFutOptTransactionId
-					and dtmExpiredDate<=@dtmPositionAsOf),0) intExpiredLots
+					and dtmExpiredDate<=@dtmPositionAsOf),0) dblExpiredLots
 			, isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa
 					where opa.intFutOptTransactionId= ot.intFutOptTransactionId
-					and dtmTranDate<=@dtmPositionAsOf),0) intAssignedLots
+					and dtmTranDate<=@dtmPositionAsOf),0) dblAssignedLots
 			, c.intCurrencyID as intCurrencyId
 			, c.intCent
 			, ysnSubCurrency

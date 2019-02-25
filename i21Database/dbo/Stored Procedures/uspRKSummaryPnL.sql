@@ -46,7 +46,7 @@ intFutOptTransactionId int
 ,NetPnL numeric(24,10)
 ,intFutureMarketId int
 ,intFutureMonthId int
-,intOriginalQty int
+,dblOriginalQty numeric(24,10)
 ,intFutOptTransactionHeaderId int
 ,MonthOrder nvarchar(100)
 ,RowNum int
@@ -100,7 +100,7 @@ intSFutOptTransactionHeaderId int
 
 INSERT INTO @UnRelaized(RowNum, MonthOrder,intFutOptTransactionId ,GrossPnL ,dblLong ,dblShort ,dblFutCommission ,strFutMarketName ,strFutureMonth ,dtmTradeDate 
 ,strInternalTradeNo ,strName ,strAccountNumber ,strBook ,strSubBook ,strSalespersonId ,strCommodityCode ,strLocationName ,Long1 ,Sell1 ,intNet ,dblActual         
-,dblClosing ,dblPrice ,dblContractSize ,dblFutCommission1 ,MatchLong ,MatchShort ,NetPnL ,intFutureMarketId ,intFutureMonthId ,intOriginalQty ,intFutOptTransactionHeaderId 
+,dblClosing ,dblPrice ,dblContractSize ,dblFutCommission1 ,MatchLong ,MatchShort ,NetPnL ,intFutureMarketId ,intFutureMonthId ,dblOriginalQty ,intFutOptTransactionHeaderId 
 ,intCommodityId ,ysnExpired ,dblVariationMargin ,dblInitialMargin ,LongWaitedPrice,ShortWaitedPrice
 )
 EXEC uspRKUnrealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId ,@intEntityId=@intEntityId,@intBrokerageAccountId=@intBrokerageAccountId,@intFutureMonthId=@intFutureMonthId,@strBuySell=@strBuySell

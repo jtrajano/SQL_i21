@@ -12,7 +12,7 @@ SELECT @strCommodityCode = strCommodityCode FROM tblICCommodity WHERE intCommodi
 SELECT @strFutureMarket = strFutMarketName FROM tblRKFutureMarket WHERE intFutureMarketId = @intFutureMarketId
 
 
-select DISTINCT intFutOptTransactionId, intOpenContract,@strCommodityCode strCommodityCode,strInternalTradeNo,
+select DISTINCT intFutOptTransactionId, dblOpenContract,@strCommodityCode strCommodityCode,strInternalTradeNo,
 	strLocationName,dblContractSize,strFutureMarket
 ,strFutureMonth,strOptionMonth,dblStrike,strOptionType,strInstrumentType,strBrokerAccount,strBroker,strNewBuySell,intFutOptTransactionHeaderId,
 intBookId,intSubBookId,ysnMonthExpired,strStatus
@@ -31,7 +31,7 @@ FROM (
 			FROM tblRKMatchDerivativesHistory mf
 			WHERE intFutOptTransactionId = mf.intLFutOptTransactionId
 					and convert(DATETIME, CONVERT(VARCHAR(10), mf.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-			) intOpenContract
+			) dblOpenContract
 	FROM (
 		SELECT ROW_NUMBER() OVER (
 				PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC
@@ -56,7 +56,7 @@ FROM (
 			FROM tblRKMatchDerivativesHistory mf
 			WHERE intFutOptTransactionId = mf.intLFutOptTransactionId
 					and convert(DATETIME, CONVERT(VARCHAR(10), mf.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-			) intOpenContract
+			) dblOpenContract
 	FROM (
 		SELECT ROW_NUMBER() OVER (
 				PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC
@@ -78,7 +78,7 @@ FROM (
 			FROM tblRKMatchDerivativesHistoryForOption mf
 			WHERE  mf.intLFutOptTransactionId=intFutOptTransactionId
 				and convert(DATETIME, CONVERT(VARCHAR(10), mf.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-		 ) intOpenContract
+		 ) dblOpenContract
 	FROM (
 		SELECT ROW_NUMBER() OVER (PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC) intRowNum,dtmTransactionDate,
 				 ot.intFutOptTransactionId, 
@@ -104,7 +104,7 @@ FROM (
 			FROM tblRKMatchDerivativesHistoryForOption mf
 			WHERE  mf.intLFutOptTransactionId=intFutOptTransactionId
 				and convert(DATETIME, CONVERT(VARCHAR(10), mf.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
-		 ) intOpenContract
+		 ) dblOpenContract
 	FROM (
 		SELECT ROW_NUMBER() OVER (PARTITION BY ot.intFutOptTransactionId ORDER BY ot.dtmTransactionDate DESC) intRowNum,dtmTransactionDate,
 				 ot.intFutOptTransactionId, 

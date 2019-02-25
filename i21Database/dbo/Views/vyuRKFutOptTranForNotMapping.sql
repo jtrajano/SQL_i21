@@ -33,7 +33,7 @@ SELECT ft.intFutOptTransactionId
 	, frm.strFutureMonth strRollingMonth
 	, ft.intRollingMonthId
 	, CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  then 'Exchange Traded' else 'OTC' end COLLATE Latin1_General_CI_AS as strSelectedInstrumentType
-	, intAssignedLots as intAssignedLots
+	, cs.dblAssignedLots as dblAssignedLots
 	, b.strBankName
 	, ba.strBankAccountNo
 	, ISNULL(ft.dblNoOfContract - GOC.dblOpenContract,0) as dblUsedContract

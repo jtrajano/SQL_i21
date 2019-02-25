@@ -88,7 +88,7 @@ FROM (
 				, sp.strSalespersonId
 				, icc.strCommodityCode
 				, sl.strLocationName
-				, ot.dblNoOfContract AS intOriginalQty
+				, ot.dblNoOfContract AS dblOriginalQty
 				, Long1 = ISNULL(CASE WHEN ot.strBuySell = 'Buy' THEN ISNULL(ot.dblNoOfContract, 0) ELSE NULL END, 0)
 				, Sell1 = ISNULL(CASE WHEN ot.strBuySell = 'Sell' THEN ISNULL(ot.dblNoOfContract, 0) ELSE NULL END, 0)
 				, dblNet1 = ot.dblNoOfContract

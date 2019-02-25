@@ -1,10 +1,10 @@
 ﻿CREATE VIEW vyuRKGetAssignedLots    
 AS  
-SELECT intFutOptTransactionId,convert(int,ISNULL(intNoOfContract,0)-isnull(intAssignedLots1,0)) as intAssignedLots FROM(
+SELECT intFutOptTransactionId,convert(int,ISNULL(dblNoOfContract,0)-isnull(dblAssignedLots1,0)) as dblAssignedLots FROM(
 SELECT f.intFutOptTransactionId,
-		sum(f.dblNoOfContract) intNoOfContract,
+		sum(f.dblNoOfContract) dblNoOfContract,
 		(SELECT SUM(isnull(convert(int,dblAssignedLots),0)) FROM tblRKAssignFuturesToContractSummary af 
-		WHERE af.intFutOptTransactionId= f.intFutOptTransactionId) as intAssignedLots1
+		WHERE af.intFutOptTransactionId= f.intFutOptTransactionId) as dblAssignedLots1
  FROM tblRKFutOptTransaction f 
 GROUP BY f.intFutOptTransactionId)t
 

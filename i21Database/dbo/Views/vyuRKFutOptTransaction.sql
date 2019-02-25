@@ -20,7 +20,7 @@ FROM (
 		, ft.strInternalTradeNo
 		, e.strName
 		, strBrokerageAccount = acc.strAccountNumber
-		, intGetNoOfContract = CASE WHEN (N'Sell' = ft.[strBuySell]) THEN - (ft.[dblNoOfContract]) ELSE ft.[dblNoOfContract] END
+		, dblGetNoOfContract = CASE WHEN (N'Sell' = ft.[strBuySell]) THEN - (ft.[dblNoOfContract]) ELSE ft.[dblNoOfContract] END
 		, fot.dblContractSize
 		, dblOpenContract = (SELECT CONVERT(DECIMAL, SUM(dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
 		, um.strUnitMeasure
