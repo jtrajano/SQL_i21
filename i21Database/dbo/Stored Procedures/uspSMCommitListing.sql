@@ -62,12 +62,21 @@ BEGIN TRANSACTION
 	WHERE ISNULL(A.strChange, '') = 'Added'
 	
 	-- DELETE Controls
+	-- DELETE tblSMControl 
+	-- FROM tblSMControlStage A
+	-- 		INNER JOIN tblSMScreenStage B  ON A.intScreenStageId = B.intScreenStageId
+	-- 		INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace			
+	-- 		INNER JOIN tblSMControl D ON D.strControlId = A.strControlId	
+	-- WHERE ISNULL(A.strChange, '') = 'Deleted'
+
 	DELETE tblSMControl 
 	FROM tblSMControlStage A
 			INNER JOIN tblSMScreenStage B  ON A.intScreenStageId = B.intScreenStageId
 			INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace			
 			INNER JOIN tblSMControl D ON D.strControlId = A.strControlId	
 	WHERE ISNULL(A.strChange, '') = 'Deleted'
+	AND
+	B.strNamespace = C.strNamespace and D.intScreenId = C.intScreenId
 
 	-- UPDATE MODULE
 	UPDATE tblSMScreen SET strModule = 'Ticket Management'
