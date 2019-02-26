@@ -7370,6 +7370,7 @@
     <Build Include="dbo\Views\vyuCMBankLoan.sql" />
     <Build Include="dbo\Views\vyuCMBankLoanDetail.sql" />
     <Build Include="tblICItemBook.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTBeforeInvoiceDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
