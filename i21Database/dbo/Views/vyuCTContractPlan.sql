@@ -1,7 +1,31 @@
 ﻿CREATE VIEW [dbo].[vyuCTContractPlan]
 
 AS	
-	SELECT	CP.*,
+	SELECT	CP.intContractPlanId,
+			CP.strContractPlan,
+			CP.strDescription,
+			CP.intContractTypeId,
+			CP.intCommodityId,
+			CP.intPositionId,
+			CP.intPricingTypeId,
+			CP.intTermId,
+			CP.intGradeId,
+			CP.intWeightId,
+			CP.dtmStartDate,
+			CP.dtmEndDate,
+			CP.ysnMaxPrice,
+			CP.ysnUnlimitedQuantity,
+			CP.ysnSubstituteItem,
+			CP.intItemId,
+			CP.dblPrice,
+			CP.intSalespersonId,
+			CP.intContractTextId,
+			CP.intAssociationId,
+			CP.intCropYearId,
+			CP.intCompanyLocationId,
+			CP.ysnActive,
+			CP.intConcurrencyId,
+			CP.intContractBasisId,
 			CY.strCommodityCode,
 			CY.ysnExchangeTraded,
 			SP.strName					AS	strSalesperson,
@@ -17,8 +41,7 @@ AS
 			CB.strContractBasis,
 			CB.strINCOLocationType,
 			IM.strItemNo,
-			CL.strLocationName,
-			CG.strCategoryCode
+			CL.strLocationName
 
 	FROM	tblCTContractPlan		CP	LEFT
 	JOIN	tblEMEntity				SP	ON	SP.intEntityId				=		CP.intSalespersonId					LEFT
@@ -34,5 +57,4 @@ AS
 	JOIN	tblCTCropYear			YR	ON	YR.intCropYearId			=		CP.intCropYearId					LEFT
 	JOIN	tblCTPricingType		PT	ON	PT.intPricingTypeId			=		CP.intPricingTypeId					LEFT			
 	JOIN	tblICItem				IM	ON	IM.intItemId				=		CP.intItemId						LEFT
-	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=		CP.intCompanyLocationId				LEFT
-	JOIN	tblICCategory			CG	ON	CG.intCategoryId			=		CP.intCategoryId
+	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=		CP.intCompanyLocationId				

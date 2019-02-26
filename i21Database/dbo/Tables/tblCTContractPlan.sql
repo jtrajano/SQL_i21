@@ -15,7 +15,6 @@
     [ysnMaxPrice] BIT NULL, 
 	[ysnUnlimitedQuantity] BIT NULL, 
 	[ysnSubstituteItem] BIT NULL, 
-	[intCategoryId] INT NULL, 
     [intItemId] INT NULL, 
     [dblPrice] NUMERIC(18, 6) NULL,
 	[intSalespersonId] INT NULL, 
@@ -30,7 +29,6 @@
 	CONSTRAINT [PK_tblCTContractPlan_intContractPlanId] PRIMARY KEY CLUSTERED ([intContractPlanId] ASC),
 	CONSTRAINT [FK_tblCTContractPlan_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblCTContractPlan_tblCTContractBasis_intContractBasisId] FOREIGN KEY ([intContractBasisId]) REFERENCES [tblCTContractBasis]([intContractBasisId]),
-	CONSTRAINT [FK_tblCTContractPlan_tblICCategory_intCategoryId] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
 
 	CONSTRAINT [FK_tblCTContractPlan_tblCTAssociation_intAssociationId] FOREIGN KEY (intAssociationId) REFERENCES tblCTAssociation(intAssociationId),
 	CONSTRAINT [FK_tblCTContractPlan_tblICCommodity_intCommodityId] FOREIGN KEY (intCommodityId) REFERENCES tblICCommodity(intCommodityId),
