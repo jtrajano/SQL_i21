@@ -154,7 +154,14 @@ FROM 	tblICItem i
 			ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
 			AND shipmentItem.intInventoryShipmentItemId = t.intTransactionDetailId
 			AND shipmentItem.intItemId = i.intItemId
-
+		LEFT JOIN tblICInventoryAdjustment adjustment
+			ON adjustment.intInventoryAdjustmentId = t.intTransactionId
+			AND adjustment.strAdjustmentNo = t.strTransactionId
+			AND ty.intTransactionTypeId IN (10,14,15,16,17,18,19,20) 
+		LEFT JOIN tblICInventoryTransfer transfers
+			ON transfers.intInventoryTransferId = t.intTransactionId
+			AND transfers.strTransferNo = t.strTransactionId
+			AND ty.intTransactionTypeId IN (12) 
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
@@ -163,6 +170,10 @@ FROM 	tblICItem i
 			ON bill.intBillId = t.intTransactionId
 			AND bill.strBillId = t.strTransactionId
 			AND ty.intTransactionTypeId IN (26, 27) 
+		LEFT JOIN tblMFWorkOrder workorder
+			ON workorder.intWorkOrderId = t.intTransactionId
+			AND workorder.strWorkOrderNo = t.strTransactionId
+			AND ty.intTransactionTypeId IN (8, 9) 
 		OUTER APPLY (
 			SELECT	TOP 1 
 					ld.intVendorEntityId
@@ -191,6 +202,9 @@ FROM 	tblICItem i
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
 				, settleStorage.intEntityId
+				, adjustment.intEntityId
+				, transfers.intEntityId
+				, workorder.intCustomerId
 			)
 
 		LEFT JOIN tblSCTicket ScaleView
