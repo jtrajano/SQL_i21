@@ -438,6 +438,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				'' AS intContractBasisId,
 				'' AS strContractBasis,
 				'' AS strContractBasisDescription,
+				'' AS strWeightTerms,
 				'' AS strUserEmailId,
 				'' AS strUserPhoneNo,
 				L.strShippingMode,
@@ -1198,6 +1199,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				CH.intContractBasisId,
 				Basis.strContractBasis,
 				Basis.strDescription AS strContractBasisDescription,
+				strWeightTerms = WG.strWeightGradeDesc,
 				@strUserEmailId AS strUserEmailId,
 				@strUserPhoneNo AS strUserPhoneNo,
 				L.strShippingMode,
@@ -1245,6 +1247,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		LEFT JOIN	tblCTContractBasis Basis ON Basis.intContractBasisId = CH.intContractBasisId
+		LEFT JOIN	tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 		CROSS APPLY tblLGCompanyPreference CP
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	END
