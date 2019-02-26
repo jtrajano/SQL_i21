@@ -1,7 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuCMBankLoan]
 AS
 SELECT 
-L.*,
+L.strBankLoanId,
+L.intBankLoanId,
+L.dtmOpened,
+L.dtmMaturity,
+L.dtmEntered,
+L.decAnnualInterest,
+L.ysnOpen,
+L.strComments,
+L.intConcurrencyId,
+L.dblLoanAmount,
 BA.intBankAccountId,
 T.strTransactionId,
 BA.strBankAccountNo,
