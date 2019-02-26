@@ -139,7 +139,7 @@ BEGIN
 		,[intPayToAddressId] = NULL
 		,[intCurrencyId]					
 		,[dtmDate]				
-		,[strVendorOrderNumber]	= NULL		
+		,[strVendorOrderNumber]		
 		,[strReference]						
 		,[strSourceNumber]					
 		,[intPurchaseDetailId]				
@@ -302,7 +302,6 @@ BEGIN
 		--	,@error = @throwedError OUTPUT
 		--	,@billId = @intBillId OUTPUT
 		--	,@voucherDate = @dtmReceiptDate
-		--SELECT 'Convert IR to Voucher @voucherItems',* FROM @voucherItems;
 
 
 		EXEC [dbo].[uspAPCreateVoucher]
