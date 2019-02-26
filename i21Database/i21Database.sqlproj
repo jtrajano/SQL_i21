@@ -7369,6 +7369,7 @@
     <Build Include="dbo\Views\vyuSMFreightTerms.sql" />
     <Build Include="dbo\Views\vyuCMBankLoan.sql" />
     <Build Include="dbo\Views\vyuCMBankLoanDetail.sql" />
+    <Build Include="tblICItemBook.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
