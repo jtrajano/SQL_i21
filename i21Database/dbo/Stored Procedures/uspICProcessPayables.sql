@@ -71,7 +71,7 @@ BEGIN
 		,[intPayToAddressId] = NULL
 		,[intCurrencyId]					
 		,[dtmDate]				
-		,[strVendorOrderNumber]	= NULL		
+		,[strVendorOrderNumber]		
 		,[strReference]						
 		,[strSourceNumber]					
 		,[intPurchaseDetailId]				
