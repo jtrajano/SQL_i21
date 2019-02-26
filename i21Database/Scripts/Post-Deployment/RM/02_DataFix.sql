@@ -213,9 +213,9 @@ BEGIN
 		,dblPrice
 		,strStatus
 		,dtmFilledDate
-		,intOldNoOfContract
-		,intNewNoOfContract
-		,intBalanceContract
+		,dblOldNoOfContract
+		,dblNewNoOfContract
+		,dblBalanceContract
 		,strScreenName
 		,strOldBuySell
 		,strNewBuySell

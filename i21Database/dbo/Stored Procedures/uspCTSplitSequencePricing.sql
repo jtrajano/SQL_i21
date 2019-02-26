@@ -135,7 +135,7 @@ BEGIN TRY
 
 					EXEC uspCTCreateADuplicateRecord 'tblRKFutOptTransaction',@intFutOptTransactionId, @intNewFutOptTransactionId OUTPUT,@XML
 
-					SET @XML =	'<root><toUpdate><intHedgedLots>'+STR(@dblChildSeqLots)+'</intHedgedLots>'+
+					SET @XML =	'<root><toUpdate><dblHedgedLots>'+STR(@dblChildSeqLots)+'</dblHedgedLots>'+
 								'<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>'+
 								'<dtmMatchDate>'+@strDate+'</dtmMatchDate>'+
 								'<intContractDetailId>'+STR(@intChildContractDetailId)+'</intContractDetailId></toUpdate></root>' 
