@@ -39,6 +39,9 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblCMUndepositedFund_intBankDepositId]
     ON [dbo].[tblCMUndepositedFund]([intBankDepositId] ASC);
 GO
+ALTER TABLE [dbo].[tblCMUndepositedFund]  WITH CHECK ADD  CONSTRAINT [FK_tblCMUndepositedFund_tblCMBankTransaction] FOREIGN KEY([intBankDepositId])
+REFERENCES [dbo].[tblCMBankTransaction] ([intTransactionId])
+GO
 
 CREATE TRIGGER trg_delete_tblCMUndepositedFund
 ON [dbo].tblCMUndepositedFund
