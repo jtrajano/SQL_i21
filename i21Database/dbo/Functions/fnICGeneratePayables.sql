@@ -251,7 +251,7 @@ SELECT DISTINCT
 		--				THEN 1
 		--				ELSE 0 END)
 	) Loads
-	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return') AND A.ysnPosted = @ysnPosted AND B.dblBillQty != B.dblOpenReceive 
+	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') AND A.ysnPosted = @ysnPosted AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
 									AND F2.intPricingTypeId NOT IN (2, 3, 4,5) --AP-4971
