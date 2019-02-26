@@ -1342,7 +1342,19 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Shift Number')
-	
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 142
+			,[strTransactionType]	= N'Currency Exposure'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Currency Exposure' and strModule = 'Risk Management')
+	--Make sure to check with 19.1 142 is the last number
+
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
