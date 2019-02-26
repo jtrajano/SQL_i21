@@ -7367,6 +7367,8 @@
     <Build Include="dbo\Functions\fnICGeneratePayablesTaxes.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_MigrateINCOToFreightTerm.sql" />
     <Build Include="dbo\Views\vyuSMFreightTerms.sql" />
+    <Build Include="dbo\Views\vyuCMBankLoan.sql" />
+    <Build Include="dbo\Views\vyuCMBankLoanDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
