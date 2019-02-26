@@ -651,7 +651,7 @@ BEGIN
 			-- Inventory Valuation
 			--=============================
 			SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
-				, strCustomer = ''
+				, strCustomer = s.strEntity
 				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
 				--, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
 				, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
@@ -745,6 +745,7 @@ BEGIN
 				, strType
 				, dblTotal
 				, strLocationName
+				, strCustomerName
 				, intItemId
 				, strItemNo
 				, intCategoryId
@@ -770,6 +771,7 @@ BEGIN
 				, strType = 'Receipt' COLLATE Latin1_General_CI_AS
 				, dblTotal = ISNULL(dblTotal, 0)
 				, strLocationName
+				, strCustomer
 				, intItemId
 				, strItemNo
 				, intCategoryId
@@ -1787,6 +1789,7 @@ BEGIN
 				, strType
 				, dblTotal
 				, strLocationName
+				, strCustomerName
 				, intItemId
 				, strItemNo
 				, intCategoryId
@@ -1816,6 +1819,7 @@ BEGIN
 				, strType = 'Receipt' COLLATE Latin1_General_CI_AS
 				, dblTotal
 				, strLocationName
+				, strCustomerName
 				, intItemId
 				, strItemNo
 				, intCategoryId
