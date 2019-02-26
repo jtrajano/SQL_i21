@@ -142,9 +142,9 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
+SELECT @strAccountId = [from], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
-SELECT @strAccountId = [from], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';
 SET @innerQuery = 'SELECT --DISTINCT 
 					intBillId
 					--,strAccountId
