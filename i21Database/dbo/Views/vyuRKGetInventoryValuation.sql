@@ -94,6 +94,9 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,t.dtmCreated
 		,t.intCurrencyId
 		,cur.strCurrency
+		,i.intOriginId
+		,i.strMarketValuation
+		,i.strLotTracking
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 

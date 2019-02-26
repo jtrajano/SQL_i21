@@ -98,7 +98,7 @@ LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 WHERE cd.intPricingTypeId = 5 AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT strCommodityCode
-	, i.strItemNo
+	, iis.strItemNo
 	, strOriginDest = ca.strDescription
 	, fm.strFutMarketName
 	, strFutureMonth
@@ -115,7 +115,7 @@ UNION SELECT DISTINCT strCommodityCode
 	, strUnitMeasure = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.strUnitMeasure ELSE mum.strUnitMeasure END)
 	, ch.intCommodityId
 	, cd.intItemId
-	, intOriginId = i.intOriginId
+	, intOriginId = iis.intOriginId
 	, cd.intFutureMarketId
 	, cd.intFutureMonthId
 	, cd.intCompanyLocationId
@@ -125,10 +125,9 @@ UNION SELECT DISTINCT strCommodityCode
 	, ch.intContractTypeId
 	, intUnitMeasureId = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END)
 	, intConcurrencyId = 0
-	, i.strMarketValuation
+	, iis.strMarketValuation
 FROM vyuRKGetInventoryValuation iis
-JOIN tblICItem i ON i.intItemId = iis.intItemId
-LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = i.intOriginId
+LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = iis.intOriginId
 LEFT JOIN tblCTContractDetail cd ON iis.intItemId = cd.intItemId
 LEFT JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
@@ -140,8 +139,6 @@ LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
 LEFT JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
 LEFT JOIN tblICCommodity c ON c.intCommodityId = ch.intCommodityId
-LEFT JOIN tblICItemLocation itm on itm.intItemId = i.intItemId
-LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = itm.intLocationId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 WHERE (iis.dblQuantity > 0)
-	AND i.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN i.strLotTracking ELSE 'No' END)
+	AND iis.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN iis.strLotTracking ELSE 'No' END)
