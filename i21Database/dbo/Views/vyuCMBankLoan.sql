@@ -2,7 +2,7 @@
 AS
 SELECT 
 L.*,
-T.intBankAccountId,
+BA.intBankAccountId,
 T.strTransactionId,
 BA.strBankAccountNo,
 U.dblBalance,

@@ -17,3 +17,20 @@ CREATE TABLE [dbo].[tblCMBankLoan](
 ) ON [PRIMARY]
 GO
 
+CREATE TRIGGER [dbo].[trgBankLoan]
+   ON  [dbo].[tblCMBankLoan]
+   AFTER INSERT
+AS 
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	UPDATE BL
+	SET strBankLoanId = 'LN-' + CAST(BL.intBankLoanId AS NVARCHAR(10))
+	FROM tblCMBankLoan BL JOIN
+	inserted I on I.intBankLoanId = BL.intBankLoanId
+	--SELECT IDENT_CURRENT('Employees') + IDENT_INCR('Employees')
+
+    -- Insert statements for trigger here
+
+END
