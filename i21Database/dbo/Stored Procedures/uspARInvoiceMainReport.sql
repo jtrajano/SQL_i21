@@ -140,7 +140,7 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 										END
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN ISNULL(COMPANYPREFERENCE.strTankDeliveryInvoiceFormat, 'Standard')
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN ISNULL(COMPANYPREFERENCE.strTransportsInvoiceFormat, 'Standard')
-								   WHEN INVOICE.strType IN ('Meter Billing') THEN 'Meter Billing'
+								   WHEN INVOICE.strType IN ('Meter Billing') THEN ISNULL(COMPANYPREFERENCE.strMeterBillingInvoiceFormat, 'Standard')
 								   ELSE ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard')
 							   END								
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
@@ -151,6 +151,7 @@ OUTER APPLY (
 			   , strTankDeliveryInvoiceFormat
 			   , strTransportsInvoiceFormat
 			   , strGrainInvoiceFormat
+			   , strMeterBillingInvoiceFormat
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) COMPANYPREFERENCE
 OUTER APPLY (
