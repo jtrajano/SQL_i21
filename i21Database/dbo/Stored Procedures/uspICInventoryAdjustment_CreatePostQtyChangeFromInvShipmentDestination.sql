@@ -165,7 +165,8 @@ BEGIN
 				,@intSourceTransactionTypeId
 				,@intEntityUserSecurityId 
 				,@intInventoryAdjustmentId OUTPUT
-				,DEFAULT 
+				,DEFAULT
+				,@ysnPost
 		END TRY 
 		BEGIN CATCH
 			SELECT 
