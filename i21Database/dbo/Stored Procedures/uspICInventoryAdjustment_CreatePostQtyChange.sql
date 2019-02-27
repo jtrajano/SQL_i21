@@ -17,6 +17,7 @@
 	,@intEntityUserSecurityId AS INT 
 	,@intInventoryAdjustmentId AS INT OUTPUT
 	,@strDescription AS NVARCHAR(1000) = NULL 
+	,@ysnPost BIT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -136,6 +137,8 @@ IF @@ERROR <> 0 GOTO _Exit
 ------------------------------------------------------------------------------------------------------------------------------------
 SET @dtmDate = ISNULL(@dtmDate, GETDATE());
 
+IF @ysnPost = 1
+BEGIN
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the header record
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -252,6 +255,9 @@ BEGIN
 	WHERE	Item.intItemId = @intItemId			
 END 
 
+END
+
+IF @ysnPost = 1
 -- Auto post the inventory adjustment
 BEGIN 
 
@@ -261,5 +267,19 @@ BEGIN
 		,@strTransactionId = @strAdjustmentNo
 		,@intEntityUserSecurityId = @intEntityUserSecurityId
 END 
+
+IF @ysnPost = 0
+BEGIN
+	SELECT @strAdjustmentNo = strAdjustmentNo
+	FROM tblICInventoryAdjustment
+	WHERE intSourceId = @intSourceId
+	
+	EXEC dbo.uspICPostInventoryAdjustment
+			@ysnPost = 0
+			,@ysnRecap = 0
+			,@strTransactionId = @strAdjustmentNo
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+	DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
+END
 
 _Exit:
