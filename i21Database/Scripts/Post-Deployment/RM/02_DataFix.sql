@@ -213,9 +213,9 @@ BEGIN
 		,dblPrice
 		,strStatus
 		,dtmFilledDate
-		,intOldNoOfContract
-		,intNewNoOfContract
-		,intBalanceContract
+		,dblOldNoOfContract
+		,dblNewNoOfContract
+		,dblBalanceContract
 		,strScreenName
 		,strOldBuySell
 		,strNewBuySell
@@ -250,7 +250,7 @@ BEGIN
 		,dblPrice
 		,strStatus
 		,dtmFilledDate
-		,NULL--intOldNoOfContract
+		,NULL
 		,dblNewNoOfContract = FOT.dblNoOfContract
 		,dblBalanceContract = FOT.dblNoOfContract
 		,'FutOptTransaction'

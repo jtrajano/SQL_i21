@@ -5,7 +5,7 @@
 )
 RETURNS @FinalResult TABLE (
 	intFutOptTransactionId INT
-	, dblOpenContract INT
+	, dblOpenContract NUMERIC(24,10)
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -84,7 +84,7 @@ FROM (
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
 			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.intNewNoOfContract END
+									ELSE History.dblNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -125,7 +125,7 @@ FROM (
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
 			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.intNewNoOfContract END
+									ELSE History.dblNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -166,7 +166,7 @@ FROM (
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
 			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.intNewNoOfContract END
+									ELSE History.dblNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -207,7 +207,7 @@ FROM (
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
 			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.intNewNoOfContract END
+									ELSE History.dblNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
