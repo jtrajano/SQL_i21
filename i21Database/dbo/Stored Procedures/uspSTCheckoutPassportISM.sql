@@ -174,14 +174,14 @@ BEGIN
 			CAST(ActualSalesPrice AS DECIMAL(18,6)),
 			POSCode,
 			CASE 
-				WHEN ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) = 0
+				WHEN CAST(SalesQuantity AS INT) = 0
 					THEN 0
-				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) ,0) , 0)  /  CAST(SalesQuantity AS INT)
 			END AS dblAveragePrice,
 			CASE 
-				WHEN ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) = 0
+				WHEN CAST(SalesQuantity AS INT) = 0
 					THEN 0
-				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) + CAST(DiscountAmount AS DECIMAL(18, 6)) + CAST(PromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(DiscountAmount AS DECIMAL(18, 6)) + CAST(PromotionAmount AS DECIMAL(18, 6)) ,0) , 0)  /  CAST(SalesQuantity AS INT)
 			END AS dblAveragePriceWthDiscounts
 		FROM #tempCheckoutInsert
 		-- ==================================================================================================================
@@ -194,9 +194,7 @@ BEGIN
 
 		DECLARE @intLocationId AS INT = (SELECT intCompanyLocationId FROM tblSTStore WHERE intStoreId = @intStoreId)
 
-		 -- ==================================================================================================================
-		 -- Start: All Item Movement
-		 -- ==================================================================================================================
+		BEGIN
 			INSERT INTO dbo.tblSTCheckoutItemMovements
 			(
 				intCheckoutId
@@ -217,16 +215,16 @@ BEGIN
 			  , intItemUPCId		= UOM.intItemUOMId
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
-			  , intQtySold			= (Chk.SalesQuantity)
+			  , intQtySold			= (Chk.SalesQuantity - Chk.RefundCount)
 			  , dblCurrentPrice		= CASE 
-										WHEN (Chk.SalesQuantity) = 0
+										WHEN (Chk.SalesQuantity - Chk.RefundCount) = 0
 											THEN 0
-										ELSE (Chk.SalesAmount)  /  (Chk.SalesQuantity)
+										ELSE (Chk.SalesAmount + Chk.RefundAmount)  /  (Chk.SalesQuantity - Chk.RefundCount)
 									END
 			  , dblDiscountAmount	= (Chk.DiscountAmount + Chk.PromotionAmount)
 			  -- , dblRefundAmount     = Chk.RefundAmount
-			  , dblGrossSales		= (Chk.SalesAmount)
-			  , dblTotalSales		= (Chk.SalesAmount) + (Chk.DiscountAmount + Chk.PromotionAmount)
+			  , dblGrossSales		= (Chk.SalesAmount + Chk.RefundAmount)
+			  , dblTotalSales		= (Chk.SalesAmount + Chk.RefundAmount) + (Chk.DiscountAmount + Chk.PromotionAmount)
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM @tblTempForCalculation Chk
@@ -256,77 +254,8 @@ BEGIN
 			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
-		 -- ==================================================================================================================
-		 -- End: All Item Movement
-		 -- ==================================================================================================================
 
-
-
-
-		-- ==================================================================================================================
-		-- Start: Item Movement Add extra line for refund
-		-- ==================================================================================================================
-			INSERT INTO dbo.tblSTCheckoutItemMovements
-			(
-				intCheckoutId
-				, intItemUPCId
-				, strDescription
-				, intVendorId
-				, intQtySold
-				, dblCurrentPrice
-				, dblDiscountAmount
-				-- , dblRefundAmount
-				, dblGrossSales
-				, dblTotalSales
-				, dblItemStandardCost
-				, intConcurrencyId
-			)
-			SELECT 
-				intCheckoutId		= @intCheckoutId
-			  , intItemUPCId		= UOM.intItemUOMId
-			  , strDescription		= I.strDescription
-			  , intVendorId			= IL.intVendorId
-			  , intQtySold			= (Chk.RefundCount * -1)
-			  , dblCurrentPrice		= ABS(Chk.RefundAmount)
-			  , dblDiscountAmount	= 0
-			  -- , dblRefundAmount     = Chk.RefundAmount
-			  , dblGrossSales		= (Chk.RefundCount * -1) * ABS(Chk.RefundAmount)
-			  , dblTotalSales		= (Chk.RefundCount * -1) * ABS(Chk.RefundAmount)
-			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
-			  , intConcurrencyId	= 1
-			FROM @tblTempForCalculation Chk
-			INNER JOIN
-			(
-				SELECT intItemUOMId
-					, intItemId
-					, strLongUPCCode
-					, CASE 
-						WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
-							THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
-						ELSE NULL
-					END AS intLongUpcCode 
-				FROM dbo.tblICItemUOM
-			) AS UOM
-				ON Chk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
-				OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) = UOM.intLongUpcCode
-
-			INNER JOIN dbo.tblICItem I 
-				ON I.intItemId = UOM.intItemId
-			INNER JOIN dbo.tblICItemLocation IL 
-				ON IL.intItemId = I.intItemId
-			INNER JOIN dbo.tblICItemPricing P 
-				ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
-			INNER JOIN dbo.tblSMCompanyLocation CL 
-				ON CL.intCompanyLocationId = IL.intLocationId
-			INNER JOIN dbo.tblSTStore S 
-				ON S.intCompanyLocationId = CL.intCompanyLocationId
-			WHERE S.intStoreId = @intStoreId
-				AND Chk.RefundCount > 0 -- Only Items with REFUND
-		-- ==================================================================================================================
-		-- End: Item Movement Add extra line for refund
-		-- ==================================================================================================================
-
-
+		END
 
 
 
@@ -347,16 +276,16 @@ BEGIN
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
 										WHEN Chk.dblAveragePrice > P.dblSalePrice 
-											THEN Chk.dblAveragePrice - P.dblSalePrice
+											THEN (Chk.dblAveragePrice)							-- Chk.dblAveragePrice - P.dblSalePrice
 										WHEN Chk.dblAveragePrice < P.dblSalePrice 
-											THEN P.dblSalePrice - Chk.dblAveragePrice
+											THEN (Chk.dblAveragePrice)							-- P.dblSalePrice - Chk.dblAveragePrice
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
 										WHEN Chk.dblAveragePriceWthDiscounts > P.dblSalePrice 
-											THEN Chk.dblAveragePriceWthDiscounts - P.dblSalePrice
+											THEN (Chk.dblAveragePriceWthDiscounts)				-- Chk.dblAveragePriceWthDiscounts - P.dblSalePrice
 										WHEN Chk.dblAveragePriceWthDiscounts < P.dblSalePrice 
-											THEN P.dblSalePrice - Chk.dblAveragePriceWthDiscounts
+											THEN (Chk.dblAveragePriceWthDiscounts)				-- P.dblSalePrice - Chk.dblAveragePriceWthDiscounts
 									END
 						END) AS dblRetailUnit
 
@@ -365,16 +294,16 @@ BEGIN
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
 										WHEN Chk.dblAveragePrice > P.dblSalePrice 
-											THEN (Chk.dblAveragePrice - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (Chk.dblAveragePrice * Chk.SalesQuantity)			-- (Chk.dblAveragePrice - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 										WHEN Chk.dblAveragePrice < P.dblSalePrice 
-											THEN (P.dblSalePrice - Chk.dblAveragePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (Chk.dblAveragePrice * Chk.SalesQuantity)			-- (P.dblSalePrice - Chk.dblAveragePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
 										WHEN Chk.dblAveragePriceWthDiscounts > P.dblSalePrice 
-											THEN (Chk.dblAveragePriceWthDiscounts - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (Chk.dblAveragePriceWthDiscounts * Chk.SalesQuantity)	-- (Chk.dblAveragePriceWthDiscounts - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 										WHEN Chk.dblAveragePriceWthDiscounts < P.dblSalePrice 
-											THEN (P.dblSalePrice - Chk.dblAveragePriceWthDiscounts) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (Chk.dblAveragePriceWthDiscounts * Chk.SalesQuantity)  -- (P.dblSalePrice - Chk.dblAveragePriceWthDiscounts) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 									END
 						END) AS dblAmount
 
@@ -437,6 +366,13 @@ BEGIN
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
 					AND I.strLotTracking = 'No'
+					AND Chk.SalesQuantity > 0
+					AND 0 < CASE
+								WHEN @strAllowMarkUpDown = 'I'
+									THEN Chk.dblAveragePrice
+								WHEN @strAllowMarkUpDown = 'D'
+									THEN Chk.dblAveragePriceWthDiscounts
+							END
 					AND P.dblSalePrice != CASE
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN Chk.dblAveragePrice
