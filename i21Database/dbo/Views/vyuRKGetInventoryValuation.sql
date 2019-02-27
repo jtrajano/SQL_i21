@@ -154,14 +154,6 @@ FROM 	tblICItem i
 			ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
 			AND shipmentItem.intInventoryShipmentItemId = t.intTransactionDetailId
 			AND shipmentItem.intItemId = i.intItemId
-		LEFT JOIN tblICInventoryAdjustment adjustment
-			ON adjustment.intInventoryAdjustmentId = t.intTransactionId
-			AND adjustment.strAdjustmentNo = t.strTransactionId
-			AND ty.intTransactionTypeId IN (10,14,15,16,17,18,19,20) 
-		LEFT JOIN tblICInventoryTransfer transfers
-			ON transfers.intInventoryTransferId = t.intTransactionId
-			AND transfers.strTransferNo = t.strTransactionId
-			AND ty.intTransactionTypeId IN (12) 
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
@@ -202,8 +194,6 @@ FROM 	tblICItem i
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
 				, settleStorage.intEntityId
-				, adjustment.intEntityId
-				, transfers.intEntityId
 				, workorder.intCustomerId
 			)
 
