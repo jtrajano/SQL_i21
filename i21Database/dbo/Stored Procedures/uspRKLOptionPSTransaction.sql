@@ -92,6 +92,9 @@ BEGIN TRY
 		, dblContractSize
 		, intFutOptTransactionHeaderId
 		, intCurrencyId
+		, strCurrency
+		, intMainCurrencyId
+		, strMainCurrency
 		, intCent
 		, ysnSubCurrency
 		, dtmExpirationDate
@@ -160,8 +163,11 @@ BEGIN TRY
 				, intExpiredLots = ISNULL(el.intExpiredLots, 0)
 				, intAssignedLots = ISNULL(al.intAssignedLots, 0)
 				, intCurrencyId = c.intCurrencyID
+				, c.strCurrency
+				, intMainCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE c.intCurrencyID END
+				, strMainCurrency = CASE WHEN c.ysnSubCurrency = 0 THEN c.strCurrency ELSE MainCurrency.strCurrency END
 				, c.intCent
-				, ysnSubCurrency = ISNULL(ysnSubCurrency, 0)
+				, c.ysnSubCurrency
 				, intFutOptTransactionHeaderId
 				, ysnExpired = (CASE WHEN CAST(FLOOR(CAST(dtmExpirationDate AS FLOAT)) AS DATETIME) < CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) THEN 1 ELSE 0 END)
 				, intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
@@ -177,6 +183,7 @@ BEGIN TRY
 			JOIN tblEMEntity e ON e.intEntityId = ot.intEntityId
 			LEFT JOIN tblRKBrokerageCommission bc ON bc.intFutureMarketId = ot.intFutureMarketId AND ba.intBrokerageAccountId = bc.intBrokerageAccountId
 			LEFT JOIN tblSMCurrency c ON c.intCurrencyID = bc.intFutCurrencyId
+			LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 			LEFT JOIN tblCTBook b ON b.intBookId = ot.intBookId
 			LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = ot.intSubBookId
 			LEFT JOIN #SelectedLots sl ON sl.intLFutOptTransactionId = ot.intFutOptTransactionId
