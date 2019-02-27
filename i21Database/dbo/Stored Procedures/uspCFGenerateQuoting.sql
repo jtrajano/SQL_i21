@@ -292,7 +292,7 @@ BEGIN
 		WHERE intNetworkId = @loopNetworkId
 		AND intSiteId = @loopSiteId
 		AND intItemId = @loopARItemId
-		AND CONVERT( varchar, dtmDate, 101) <= CONVERT( varchar, @dtmDate, 101)
+		AND DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) <= DATEADD(dd, DATEDIFF(dd, 0, @dtmDate), 0)
 		ORDER BY dtmDate DESC
 		
 

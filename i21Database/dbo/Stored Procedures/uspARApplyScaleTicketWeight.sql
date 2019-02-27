@@ -14,10 +14,11 @@ BEGIN
 	DECLARE @strInvalidItem			NVARCHAR(MAX) = ''
 	DECLARE @strUnitMeasure			NVARCHAR(100) = ''
 
-	SELECT @intUnitMeasureId 	= UOM.intUnitMeasureId
-		 , @strUnitMeasure		= UOM.strUnitMeasure
-	FROM dbo.tblICUnitMeasure UOM WITH (NOLOCK)
-	WHERE UOM.intUnitMeasureId = @intScaleUOMId
+	SELECT @intUnitMeasureId  = IUOM.intUnitMeasureId
+		 , @strUnitMeasure    = UOM.strUnitMeasure
+	FROM dbo.tblICItemUOM IUOM WITH (NOLOCK)
+	INNER JOIN tblICUnitMeasure UOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	WHERE IUOM.intItemUOMId = @intScaleUOMId
 
 	SELECT TOP 1 @strInvalidItem = I.strItemNo + ' - ' + I.strDescription
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)

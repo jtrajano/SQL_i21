@@ -28,6 +28,25 @@ SET ANSI_WARNINGS OFF
 -- Check if there is a value to escalate. Exit immediately if zero. 
 IF ISNULL(@dblEscalateValue, 0) = 0 RETURN; 
 
+-- Check if the system has to escalate the cost change or not. 
+BEGIN 
+	-- Create the temp table if it does not exists.		
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAllowCostAdjustmentToEscalate')) 
+	BEGIN 
+		CREATE TABLE #tmpAllowCostAdjustmentToEscalate (
+			[ysnAllowEscalate] BIT NULL
+		)
+
+		INSERT INTO #tmpAllowCostAdjustmentToEscalate (ysnAllowEscalate) VALUES (0)
+	END 
+
+	IF EXISTS (SELECT TOP 1 1 FROM #tmpAllowCostAdjustmentToEscalate WHERE ysnAllowEscalate = 0 OR ysnAllowEscalate IS NULL)
+	BEGIN 
+		RETURN; 
+	END 
+END 
+
+
 -- Create the temp table if it does not exists. 
 BEGIN 
 	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevalueProducedItems')) 
