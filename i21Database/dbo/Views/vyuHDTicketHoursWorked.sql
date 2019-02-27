@@ -117,7 +117,7 @@ from
 union all
 
 		select
-			intTicketHoursWorkedId = ROW_NUMBER() over (order by a.intPREntityEmployeeId asc)
+			intTicketHoursWorkedId = convert(int,ROW_NUMBER() over (order by a.intPREntityEmployeeId asc))
 			,intTicketId = 0
 			,intAgentId = a.intPREntityEmployeeId
 			,intAgentEntityId = a.intPREntityEmployeeId
