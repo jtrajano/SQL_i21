@@ -334,7 +334,14 @@ IF(@exclude IS NOT NULL)
 					@ARReceivableInvalidData I
 						ON A.[intTransactionId] = I.[intTransactionId]
 												
-						
+				DELETE
+					A
+				FROM
+					@ZeroPayment A
+				INNER JOIN 
+					@ARReceivableInvalidData I
+						ON A.[intTransactionId] = I.intTransactionId
+
 				DELETE 
 					A
 				FROM
