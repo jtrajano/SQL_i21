@@ -287,6 +287,7 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
 										  , @ysnFromBalanceForward = 0
 										  , @dtmBalanceForwardDate = @dtmBalanceForwardDateLocal
 										  , @ysnPrintFromCF = @ysnPrintFromCFLocal
+											, @strUserId = @strUserId
 
 INSERT INTO @temp_aging_table
 SELECT strCustomerName
