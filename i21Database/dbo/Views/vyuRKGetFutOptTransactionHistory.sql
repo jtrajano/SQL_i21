@@ -84,7 +84,7 @@ FROM (
 		, History.strScreenName
 		, History.strOldBuySell
 		, History.strNewBuySell	
-		, Trans.strInternalTradeNo
+		, History.strInternalTradeNo
 		, intLocationId = Location.intCompanyLocationId
 		, History.strLocationName
 		, History.dblContractSize
