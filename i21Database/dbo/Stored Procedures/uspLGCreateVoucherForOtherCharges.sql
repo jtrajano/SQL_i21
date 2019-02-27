@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspLGCreateVoucherForOtherCharges 
 	 @intLoadId INT
-	,@intEntityUserSecurityId INT 
-	,@intBillId INT OUTPUT
+	,@strLoadCostIds NVARCHAR(MAX)
+	,@intEntityUserSecurityId INT
 AS
 BEGIN TRY
 	DECLARE @strErrorMessage NVARCHAR(MAX);
@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @intMinRecord AS INT
 	DECLARE @intMinInventoryReceiptId AS INT
 	DECLARE @intMinItemRecordId AS INT
+	DECLARE @intBillId AS INT
 	DECLARE @VoucherDetailLoadNonInvAll AS VoucherDetailLoadNonInv
 	DECLARE @VoucherDetailLoadNonInv AS VoucherDetailLoadNonInv
 	DECLARE @voucherDetailReceipt AS VoucherDetailReceipt
@@ -22,6 +23,7 @@ BEGIN TRY
 	DECLARE @intReceiptCount INT
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
+	DECLARE @xmlLoadCosts XML
 
 	DECLARE @voucherDetailData TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -40,6 +42,10 @@ BEGIN TRY
 		,intItemUOMId INT
 		,dblUnitQty DECIMAL(38,20)
 		,dblCostUnitQty DECIMAL(38,20)
+		)
+	DECLARE @loadCosts TABLE (
+		intRecordId INT Identity(1, 1)
+		,intLoadCostId INT
 		)
 	DECLARE @distinctVendor TABLE (
 		intRecordId INT Identity(1, 1)
@@ -79,11 +85,29 @@ BEGIN TRY
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblLGLoadCost WHERE intLoadId = @intLoadId AND intBillId IS NULL)
+	SELECT @xmlLoadCosts = CAST('<A>'+ REPLACE(@strLoadCostIds, ',', '</A><A>')+ '</A>' AS XML)
+
+	INSERT @loadCosts (intLoadCostId)
+	SELECT RTRIM(LTRIM(T.value('.', 'INT'))) AS intLoadCostId
+	FROM @xmlLoadCosts.nodes('/A') AS X(T) 
+	WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0 
+	OPTION (OPTIMIZE FOR ( @xmlLoadCosts = NULL ))
+
+	--SELECT RTRIM(LTRIM(T.value('.', 'INT'))) AS intLoadCostId
+	--INTO @loadCosts
+	--FROM @xmlLoadCosts.nodes('/A') AS X(T) 
+	--WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0 
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblLGLoadCost WHERE intLoadId = @intLoadId AND intBillId IS NULL 
+			AND (intLoadCostId IN (SELECT intLoadCostId FROM @loadCosts) OR NOT EXISTS (SELECT TOP 1 1 FROM @loadCosts)))
 	BEGIN
 		DECLARE @ErrorMessage NVARCHAR(250)
 
-		SET @ErrorMessage = 'Vouchers were already created for all other charges in ' + @strLoadNumber;
+		SET @ErrorMessage = CASE WHEN EXISTS(SELECT TOP 1 1 FROM @loadCosts) THEN
+								'Vouchers were already created for the selected other charges.'
+								ELSE 
+								'Vouchers were already created for all other charges in ' + @strLoadNumber
+							END;
 
 		RAISERROR (@ErrorMessage,16,1);
 	END
@@ -156,6 +180,7 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
 	WHERE V.intLoadId = @intLoadId
+		AND ((V.intLoadCostId IN (SELECT intLoadCostId FROM @loadCosts)) OR (NOT EXISTS (SELECT TOP 1 1 FROM @loadCosts))) 
 	GROUP BY V.intEntityVendorId
 		,CH.intContractHeaderId
 		,CD.intContractDetailId
@@ -360,6 +385,7 @@ BEGIN TRY
 					AND LC.intVendorId = C.intEntityVendorId
 				WHERE C.ysnInventoryCost = 1
 					AND LD.intLoadId = @intLoadId
+					AND LC.intLoadCostId IN (SELECT intLoadCostId FROM @voucherDetailData WHERE ysnInventoryCost = 1) 
 					AND  C.intEntityVendorId = @intVendorEntityId 
 				GROUP BY intInventoryReceiptChargeId
 					,LC.dblRate
@@ -383,7 +409,6 @@ BEGIN TRY
 						FROM @voucherDetailData
 						WHERE intVendorEntityId = @intVendorEntityId
 							AND ysnInventoryCost = 1)
-
 			END
 
 			SELECT @intMinVendorRecordId = MIN(intRecordId)
