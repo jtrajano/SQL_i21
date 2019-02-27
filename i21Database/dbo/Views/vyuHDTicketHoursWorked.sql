@@ -1,5 +1,56 @@
 ﻿CREATE VIEW [dbo].[vyuHDTicketHoursWorked]
 	AS
+select
+			intTicketHoursWorkedId
+			,intTicketId
+			,intAgentId
+			,intAgentEntityId
+			,intHours
+			,dblHours
+			,dblEstimatedHours
+			,dtmDate
+			,dtmStartTime
+			,dtmEndTime
+			,dblRate
+			,strDescription
+			,strJIRALink
+			,intInvoiceId
+			,dtmInvoiceDate
+			,intBillId
+			,ysnBillable
+			,ysnReimburseable
+			,ysnBilled
+			,dtmBilled
+			,intCreatedUserId
+			,intCreatedUserEntityId
+			,dtmCreated
+			,intJobCodeId
+			,intConcurrencyId
+			,intCurrencyId
+			,intCurrencyExchangeRateTypeId
+			,dblCurrencyRate
+			,intItemId
+			,intItemUOMId
+			,strAgent
+			,strInvoiceNumber
+			,strVoucherNumber
+			,strCreatedUserName
+			,strJobCode
+			,strCurrency
+			,strCurrencyExchangeRateType
+			,strDate
+			,strInvoiceDate
+			,strItemNo
+			,intTimeEntryId
+			,strTicketNumber
+			,intCustomerId
+			,dblExtendedRate
+			,strProjectName
+			,intProjectId
+			,ysnVendor
+			,strServiceType
+from
+(
 		select
 			a.intTicketHoursWorkedId
 			,a.intTicketId
@@ -62,3 +113,65 @@
 			left join tblHDProjectTask j on j.intTicketId = a.intTicketId
 			left join tblHDProject k on k.intProjectId = j.intProjectId
 			left join tblAPBill l on l.intBillId = a.intBillId
+
+union all
+
+		select
+			intTicketHoursWorkedId = ROW_NUMBER() over (order by a.intPREntityEmployeeId asc)
+			,intTicketId = 0
+			,intAgentId = a.intPREntityEmployeeId
+			,intAgentEntityId = a.intPREntityEmployeeId
+			,intHours = a.dblPRRequest
+			,dblHours = a.dblPRRequest
+			,dblEstimatedHours = a.dblPRRequest
+			,dtmDate = a.dtmPRDate
+			,dtmStartTime = null
+			,dtmEndTime = null
+			,dblRate = 0.00
+			,strDescription = c.strTimeOff + ' (' + c.strDescription + ')'
+			,strJIRALink = null
+			,intInvoiceId = null
+			,dtmInvoiceDate = null
+			,intBillId = null
+			,ysnBillable = convert(bit,0)
+			,ysnReimburseable = convert(bit,0)
+			,ysnBilled = null
+			,dtmBilled = null
+			,intCreatedUserId = a.intPREntityEmployeeId
+			,intCreatedUserEntityId = a.intPREntityEmployeeId
+			,dtmCreated = a.dtmPRDate
+			,intJobCodeId = null
+			,intConcurrencyId = 1
+			,intCurrencyId = null
+			,intCurrencyExchangeRateTypeId = null
+			,dblCurrencyRate = null
+			,intItemId = null
+			,intItemUOMId = null
+			,strAgent = d.strName
+			,strInvoiceNumber = null
+			,strVoucherNumber = null
+			,strCreatedUserName = d.strName
+			,strJobCode = null
+			,strCurrency = null
+			,strCurrencyExchangeRateType = null
+			,strDate = convert(nvarchar(20), a.dtmPRDate, 101) COLLATE Latin1_General_CI_AS
+			,strInvoiceDate = null
+			,strItemNo = null
+			,intTimeEntryId = 1
+			,strTicketNumber = null
+			,intCustomerId = 0
+			,dblExtendedRate = null
+			,strProjectName = null
+			,intProjectId = null
+			,ysnVendor = convert(bit,0)
+			,strServiceType = null
+		from
+			tblHDTimeOffRequest a
+			,tblPRTimeOffRequest b
+			,tblPRTypeTimeOff c
+			,tblEMEntity d
+		where
+			b.intTimeOffRequestId = a.intPRTimeOffRequestId
+			and c.intTypeTimeOffId = b.intTypeTimeOffId
+			and d.intEntityId = a.intPREntityEmployeeId
+) as rawData
