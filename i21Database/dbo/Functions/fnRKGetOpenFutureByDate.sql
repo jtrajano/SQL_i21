@@ -84,7 +84,7 @@ FROM (
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
 			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.dblNewNoOfContract END
+									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -125,7 +125,7 @@ FROM (
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
 			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.dblNewNoOfContract END
+									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -166,7 +166,7 @@ FROM (
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
 			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.dblNewNoOfContract END
+									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -207,7 +207,7 @@ FROM (
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
 			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.dblNewNoOfContract END
+									ELSE History.intNewNoOfContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName

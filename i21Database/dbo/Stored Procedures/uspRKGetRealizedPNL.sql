@@ -662,13 +662,13 @@ BEGIN TRY
 			--					 *CASE WHEN g.intContractTypeId=1 THEN t.dblWeightedValue ELSE t1.dblWeightedValue END
 
 			--,
-			dblFixedLots =     CASE WHEN t.dblHedgedLots > t1.dblHedgedLots THEN t1.dblHedgedLots ELSE t.dblHedgedLots END
+			dblFixedLots =     CASE WHEN t.intHedgedLots > t1.intHedgedLots THEN t1.intHedgedLots ELSE t.intHedgedLots END
 		FROM @tblRealizedPNL g
 		JOIN @tblRealizedPNL gp on gp.strAllocationRefNo = g.strAllocationRefNo AND gp.intContractTypeId = 1
 		JOIN @tblRealizedPNL gs on gs.strAllocationRefNo = g.strAllocationRefNo AND gs.intContractTypeId = 2
 		JOIN (
 			SELECT Summary.intContractDetailId,Market.dblContractSize
-				,SUM(Summary.dblHedgedLots) dblHedgedLots
+				,SUM(Summary.dblHedgedLots) intHedgedLots
 				,(SUM(Summary.dblHedgedLots*FutOpt.dblPrice)/SUM(Summary.dblHedgedLots))
 				/(CASE WHEN Currency.ysnSubCurrency = 1 THEN Currency.intCent ELSE 1 END
 				* CASE WHEN FutOpt.strBuySell = 'Sell' THEN - 1 ELSE 1 END )  dblWeightedValue
@@ -681,7 +681,7 @@ BEGIN TRY
 		)t on t.intContractDetailId = gp.intContractDetailId
 		JOIN (
 			SELECT Summary.intContractDetailId,Market.dblContractSize
-				,SUM(Summary.dblHedgedLots) dblHedgedLots
+				,SUM(Summary.dblHedgedLots) intHedgedLots
 				,(SUM(Summary.dblHedgedLots*FutOpt.dblPrice)/SUM(Summary.dblHedgedLots))
 				/(CASE WHEN Currency.ysnSubCurrency = 1 THEN Currency.intCent ELSE 1 END
 				 * CASE WHEN FutOpt.strBuySell = 'Sell' THEN - 1 ELSE 1 END ) dblWeightedValue
