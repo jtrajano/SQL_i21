@@ -3,6 +3,7 @@ AS
 SELECT ETO.intEntityEmployeeId
 	,ET.intEntityId
 	,ETO.intEmployeeTimeOffId
+	,ETO.intTypeTimeOffId
 	,ET.strEntityNo
 	,strEntityName = ET.strName
 	,strTimeOffId = TTO.strTimeOff
@@ -17,11 +18,12 @@ SELECT ETO.intEntityEmployeeId
 	,ETO.dtmLastAward
 	,ETO.dblHoursEarned
 	,ETO.dblHoursAccrued
-	,ETO.dblHoursUsed
 	,ETO.intSort
 	,ETO.dblPerPeriod
 	,ETO.strPeriod
 	,EMP.intRank
+	,dblHoursUsed = (ETO.dblHoursUsed + ISNULL(TOYTD.dblHoursUsedYTD,0))
+	,dblBalance = (ETO.dblHoursCarryover + ETO.dblHoursEarned) - (ETO.dblHoursUsed + ISNULL(TOYTD.dblHoursUsedYTD,0))
 FROM tblPREmployeeTimeOff ETO
 LEFT JOIN(
 	SELECT intEntityId
@@ -40,3 +42,10 @@ LEFT JOIN(
 		,intRank
 	FROM tblPREmployee
 ) EMP ON ETO.intEntityEmployeeId = EMP.intEntityId
+LEFT JOIN(
+	SELECT intEntityEmployeeId
+		,intTypeTimeOffId
+		,intYear
+		,dblHoursUsedYTD = dblHoursUsed 
+	FROM vyuPREmployeeTimeOffUsedYTD
+) TOYTD ON ETO.intEntityEmployeeId = TOYTD.intEntityEmployeeId AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId AND TOYTD.intYear = YEAR(GETDATE())
