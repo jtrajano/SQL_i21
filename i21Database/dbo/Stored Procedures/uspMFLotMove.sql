@@ -11,6 +11,7 @@
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@ysnBulkChange BIT = 0
 	,@intNewLotId INT = NULL OUTPUT
+	,@intWorkOrderId int=NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -658,6 +659,7 @@ BEGIN TRY
 		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+		,@intWorkOrderId=@intWorkOrderId
 
 	IF ISNULL(@intLotStatusId, 0) <> ISNULL(@intDestinationLotStatusId, 0)
 		AND @dblDestinationLotQty = 0

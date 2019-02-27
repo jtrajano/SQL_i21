@@ -625,4 +625,27 @@ BEGIN
 		,intWorkOrderId = @intWorkOrderId
 		,intManufacturingProcessId=@intManufacturingProcessId
 	WHERE intLotId = @intLotId
+
+	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmProductionDate
+			,@intTransactionTypeId = 9
+			,@intItemId = @intItemId
+			,@intSourceLotId = @intLotId
+			,@intDestinationLotId = NULL
+			,@dblQty = @dblPhysicalCount
+			,@intItemUOMId = @intPhysicalItemUOMId
+			,@intOldItemId = NULL
+			,@dtmOldExpiryDate = NULL
+			,@dtmNewExpiryDate = NULL
+			,@intOldLotStatusId = NULL
+			,@intNewLotStatusId = NULL
+			,@intUserId = @intUserId
+			,@strNote = @strComment
+			,@strReason = NULL
+			,@intLocationId = @intLocationId
+			,@intInventoryAdjustmentId = NULL
+			,@intStorageLocationId  = @intStorageLocationId
+			,@intDestinationStorageLocationId  = NULL
+			,@intWorkOrderInputLotId  = NULL
+			,@intWorkOrderProducedLotId  = @intWorkOrderProducedLotId
+			,@intWorkOrderId  = @intWorkOrderId
 END

@@ -34,11 +34,11 @@ BEGIN TRY
 		,@dblProduceQty NUMERIC(38, 20)
 		,@dtmCurrentDateTime DATETIME
 		,@ysnCostEnabled BIT
-		,@intWOItemUOMId int
-		,@intUnitMeasureId int
+		,@intWOItemUOMId INT
+		,@intUnitMeasureId INT
 
-	SELECT TOP 1 @ysnCostEnabled=ysnCostEnabled
-		FROM tblMFCompanyPreference
+	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
+	FROM tblMFCompanyPreference
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -53,13 +53,13 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@strCostAdjustmentBatchId = strCostAdjustmentBatchId
 		,@intLocationId = intLocationId
-		,@intWOItemUOMId=intItemUOMId
+		,@intWOItemUOMId = intItemUOMId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
-			Select @intUnitMeasureId=intUnitMeasureId
-	From tblICItemUOM
-	Where intItemUOMId=@intWOItemUOMId
+	SELECT @intUnitMeasureId = intUnitMeasureId
+	FROM tblICItemUOM
+	WHERE intItemUOMId = @intWOItemUOMId
 
 	SELECT @strAttributeValue = strAttributeValue
 	FROM tblMFManufacturingProcessAttribute
@@ -67,9 +67,10 @@ BEGIN TRY
 		AND intAttributeId = 20 --Is Instant Consumption
 		AND intLocationId = @intLocationId
 
-	SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId,IsNULL(IU.intItemUOMId,WP.intItemUOMId),WP.dblQuantity))
+	SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
 	FROM dbo.tblMFWorkOrderProducedLot WP
-	Left JOIN dbo.tblICItemUOM IU on IU.intItemId=WP.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
+		AND IU.intUnitMeasureId = @intUnitMeasureId
 	WHERE WP.intWorkOrderId = @intWorkOrderId
 		AND WP.ysnProductionReversed = 0
 		AND WP.intItemId IN (
@@ -204,11 +205,13 @@ BEGIN TRY
 			,[dblQty] = PL.dblQuantity
 			,[dblUOMQty] = 1
 			,[intCostUOMId] = PL.intItemUOMId
-					,[dblNewCost] = -1*(CASE 
-				WHEN IsNULL(RI.dblPercentage, 0) = 0
-					THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)
-				ELSE ((@dblNewCost * RI.dblPercentage / 100/SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity)) Over(Partition By PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId,IsNULL(IU.intItemUOMId,PL.intItemUOMId),PL.dblQuantity))
-				END)
+			,[dblNewCost] = - 1 * (
+				CASE 
+					WHEN IsNULL(RI.dblPercentage, 0) = 0
+						THEN @dblNewUnitCost * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)
+					ELSE ((@dblNewCost * RI.dblPercentage / 100 / SUM(dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity)) OVER (PARTITION BY PL.intItemId)) * dbo.fnMFConvertQuantityToTargetItemUOM(PL.intItemUOMId, IsNULL(IU.intItemUOMId, PL.intItemUOMId), PL.dblQuantity))
+					END
+				)
 			,[intCurrencyId] = (
 				SELECT TOP 1 intDefaultReportingCurrencyId
 				FROM tblSMCompanyPreference
@@ -229,8 +232,9 @@ BEGIN TRY
 			,intFobPointId = 2
 		FROM dbo.tblMFWorkOrderProducedLot PL
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PL.intWorkOrderId
-		Left JOIN dbo.tblICItemUOM IU on IU.intItemId=PL.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
-		Left JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
+		LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId
+			AND IU.intUnitMeasureId = @intUnitMeasureId
+		LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
 		LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 			AND RI.intItemId = PL.intItemId
 			AND RI.intRecipeItemTypeId = 2
@@ -254,7 +258,8 @@ BEGIN TRY
 		IF EXISTS (
 				SELECT TOP 1 1
 				FROM @adjustedEntries
-				)and @ysnCostEnabled=1
+				)
+			AND @ysnCostEnabled = 1
 		BEGIN
 			DECLARE @intReturnValue AS INT
 
@@ -489,8 +494,12 @@ BEGIN TRY
 				,0
 		END
 
+		DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
+
 		DELETE
 		FROM dbo.tblMFWorkOrderConsumedLot
+		OUTPUT deleted.intWorkOrderConsumedLotId
+		INTO @tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
 			AND intItemId NOT IN (
@@ -511,6 +520,37 @@ BEGIN TRY
 		DELETE
 		FROM dbo.tblMFWorkOrderProducedLotTransaction
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		INSERT INTO tblMFInventoryAdjustment (
+			dtmDate
+			,intTransactionTypeId
+			,intItemId
+			,intSourceLotId
+			,dblQty
+			,intItemUOMId
+			,intUserId
+			,intLocationId
+			,intStorageLocationId
+			,intWorkOrderConsumedLotId
+			,dtmBusinessDate
+			,intBusinessShiftId
+			,intWorkOrderId 
+			)
+		SELECT dtmDate
+			,intTransactionTypeId
+			,IA.intItemId
+			,intSourceLotId
+			,- dblQty
+			,intItemUOMId
+			,intUserId
+			,intLocationId
+			,intStorageLocationId
+			,IA.intWorkOrderConsumedLotId
+			,dtmBusinessDate
+			,intBusinessShiftId
+			,intWorkOrderId
+		FROM tblMFInventoryAdjustment IA
+		JOIN @tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
 	END
 
 	SELECT @intInputItemId = intItemId
