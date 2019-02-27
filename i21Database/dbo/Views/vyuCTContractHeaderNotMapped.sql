@@ -63,6 +63,8 @@ AS
 						MA.dblContractSize			AS	dblMarketContractSize,
 						MA.intCurrencyId			AS	intMarketCurrencyId,
 						CR.strCurrency				AS	strMarketCurrency,
+						CR.ysnSubCurrency			AS	ysnMarketSubCurrency,
+						CR.intCent					AS	intMarketCent,
 						CA.strCommodityAttributeId,
 						EL.intEntityLocationId		AS	intEntityDefaultLocationId,
 						EL.strLocationName			AS	strEntityDefaultLocation,
