@@ -151,8 +151,8 @@ OUTER APPLY (
 	SELECT TOP 1 *
 	FROM Audit_CTE B
 	WHERE  B.[row] < A.[row] AND 
-	1 = CASE WHEN ISNULL(A.[strAction], '') = '' AND ISNULL(B.[strAction], '') = 'Updated' THEN 1 ELSE 
-			CASE WHEN ISNULL(A.[strAction], '') IN ('Updated', 'Created', 'Deleted') AND ISNULL(B.[strAction], '') = '' AND ISNULL(B.[strFrom], '') = '' AND ISNULL(B.[strTo], '') = '' 
+	1 = CASE WHEN ISNULL(A.[strAction], '') = '' AND ISNULL(B.[strAction], '') <> '' THEN 1 ELSE 
+			CASE WHEN ISNULL(A.[strAction], '') <> '' AND ISNULL(B.[strAction], '') = '' AND ISNULL(B.[strFrom], '') = '' AND ISNULL(B.[strTo], '') = '' 
 				THEN 1 ELSE 0  
 			END
 		END 
