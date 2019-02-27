@@ -39,6 +39,8 @@ BEGIN TRY
 		,@intWorkOrderProducedLotParentId INT
 		,@intWorkOrderProducedLotId INT
 		,@intBiProductWorkOrderProducedLotId int
+		,@intPhysicalItemUOMId INT
+		,@dtmProductionDate DATETIME
 
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
@@ -114,6 +116,8 @@ BEGIN TRY
 		,@intStorageLocationId = intStorageLocationId
 		,@intItemId = intItemId
 		,@intWorkOrderProducedLotParentId = intWorkOrderProducedLotParentId
+		,@intPhysicalItemUOMId = intPhysicalItemUOMId
+		,@dtmProductionDate = dtmProductionDate
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND intBatchId = @intBatchId
@@ -542,6 +546,7 @@ BEGIN TRY
 		,intItemId INT
 		,dblQuantity INT
 		,intMachineId INT
+		,intWorkOrderConsumedLotId INT
 		);
 
 	IF @strInstantConsumption = 'True'
@@ -552,6 +557,7 @@ BEGIN TRY
 			,deleted.intItemId
 			,deleted.dblQuantity
 			,deleted.intMachineId
+			,deleted.intWorkOrderConsumedLotId
 		INTO @tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
@@ -565,6 +571,33 @@ BEGIN TRY
 		WHERE PS.intWorkOrderId = @intWorkOrderId
 			AND PS.intItemId = @intItemId
 			AND IsNULL(PS.intMachineId, 0) = IsNULL(@intMachineId, 0)
+
+		INSERT INTO tblMFInventoryAdjustment (
+			dtmDate
+			,intTransactionTypeId
+			,intItemId
+			,intSourceLotId
+			,dblQty
+			,intItemUOMId
+			,intUserId
+			,intLocationId
+			,intStorageLocationId
+			,intWorkOrderConsumedLotId
+			,intWorkOrderId
+			)
+		SELECT dtmDate
+			,intTransactionTypeId
+			,IA.intItemId
+			,intSourceLotId
+			,- dblQty
+			,intItemUOMId
+			,intUserId
+			,intLocationId
+			,intStorageLocationId
+			,IA.intWorkOrderConsumedLotId
+			,intWorkOrderId
+		FROM tblMFInventoryAdjustment IA
+		JOIN @tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
 	END
 
 	DECLARE @tblMFWorkOrderProducedLot TABLE (
@@ -668,6 +701,32 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,0
 	END
+
+	SELECT @dblPhysicalCount = - @dblPhysicalCount
+
+	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmProductionDate
+		,@intTransactionTypeId = 9
+		,@intItemId = @intItemId
+		,@intSourceLotId = @intLotId
+		,@intDestinationLotId = NULL
+		,@dblQty = @dblPhysicalCount
+		,@intItemUOMId = @intPhysicalItemUOMId
+		,@intOldItemId = NULL
+		,@dtmOldExpiryDate = NULL
+		,@dtmNewExpiryDate = NULL
+		,@intOldLotStatusId = NULL
+		,@intNewLotStatusId = NULL
+		,@intUserId = @intUserId
+		,@strNote = NULL
+		,@strReason = NULL
+		,@intLocationId = @intLocationId
+		,@intInventoryAdjustmentId = NULL
+		,@intStorageLocationId = @intStorageLocationId
+		,@intDestinationStorageLocationId = NULL
+		,@intWorkOrderInputLotId = NULL
+		,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+		,@intWorkOrderId = @intWorkOrderId
+
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

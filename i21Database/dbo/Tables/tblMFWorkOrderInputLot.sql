@@ -39,3 +39,10 @@
 	CONSTRAINT FK_tblMFWorkOrderInputLot_tblICStorageLocation_intStorageLocationId FOREIGN KEY (intStorageLocationId) REFERENCES dbo.tblICStorageLocation (intStorageLocationId),
 	CONSTRAINT FK_tblMFWorkOrderInputLot_tblMFMachine_intMachineId FOREIGN KEY (intMachineId) REFERENCES dbo.tblMFMachine (intMachineId)
 )
+Go
+CREATE NONCLUSTERED INDEX IX_tblMFWorkOrderInputLot_intWorkOrderInputLotId ON [dbo].[tblMFWorkOrderInputLot]
+(
+	[intWorkOrderInputLotId] ASC
+)
+INCLUDE ( 	[strReferenceNo],
+	[dtmActualInputDateTime]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

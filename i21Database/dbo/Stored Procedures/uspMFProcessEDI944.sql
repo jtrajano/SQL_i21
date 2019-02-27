@@ -152,11 +152,11 @@ BEGIN
 					THEN IsNULL(IRL.dblGrossWeight, 0) - IsNULL(IRL.dblTareWeight, 0)
 				ELSE IRL.dblQuantity
 				END) dblReceived
-		,IsNULL(EDI.strUOM, (
+		,IsNULL(IsNULL(EDI.strUOM, (
 				SELECT TOP 1 Arc.strUOM
 				FROM tblMFEDI943Archive Arc
 				WHERE Arc.strVendorItemNumber = I.strItemNo
-				)) AS strUOM
+				)),I.strMask3) AS strUOM
 		,IRL.strParentLotNumber
 	FROM dbo.tblICInventoryReceipt IR
 	JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
@@ -187,12 +187,13 @@ BEGIN
 		,EDI.strUOM
 		,IRL.strParentLotNumber
 		,IRI.intInventoryReceiptItemId
+		,I.strMask3
 	ORDER BY IRI.intInventoryReceiptItemId
 
 	IF EXISTS (
 			SELECT *
 			FROM @tblMFEDI944 EDI
-			WHERE strUOM IS NULL
+			WHERE strUOM IS NULL OR LTRIM(RTRIM(strUOM))=''
 			)
 	BEGIN
 		INSERT INTO tblMFEDI944Error (
