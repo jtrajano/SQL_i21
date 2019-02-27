@@ -88,3 +88,19 @@
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFDepartment_intDepartmentId] FOREIGN KEY ([intDepartmentId]) REFERENCES [tblMFDepartment]([intDepartmentId]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFWorkOrderStatus_intKitStatusId] FOREIGN KEY ([intKitStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId])
 )
+Go
+CREATE NONCLUSTERED INDEX IX_tblMFWorkOrder_intWorkOrderId ON [dbo].[tblMFWorkOrder]
+(
+	[intWorkOrderId] ASC,
+	[intPlannedShiftId] ASC,
+	[intManufacturingProcessId] ASC,
+	[intManufacturingCellId] ASC,
+	[intStatusId] ASC,
+	[intItemId] ASC,
+	[intItemUOMId] ASC
+)
+INCLUDE ( 	[strWorkOrderNo],
+	[dtmOrderDate],
+	[dblQuantity],
+	[dtmPlannedDate],
+	[strComment]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

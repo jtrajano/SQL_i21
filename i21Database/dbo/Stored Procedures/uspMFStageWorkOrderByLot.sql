@@ -1345,6 +1345,29 @@ BEGIN TRY
 	SET intDestinationLotId = @intDestinationLotId
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
+	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmPlannedDate
+		,@intTransactionTypeId = 104--Stage
+		,@intItemId = @intInputItemId
+		,@intSourceLotId = @intInputLotId
+		,@intDestinationLotId = @intDestinationLotId
+		,@dblQty = @dblInputWeight
+		,@intItemUOMId = @intInputWeightUOMId
+		,@intOldItemId = NULL
+		,@dtmOldExpiryDate = NULL
+		,@dtmNewExpiryDate = NULL
+		,@intOldLotStatusId = NULL
+		,@intNewLotStatusId = NULL
+		,@intUserId = @intUserId
+		,@strNote = NULL
+		,@strReason = NULL
+		,@intLocationId = @intLocationId
+		,@intInventoryAdjustmentId = NULL
+		,@intStorageLocationId  = @intStorageLocationId
+		,@intDestinationStorageLocationId  = @intConsumptionStorageLocationId
+		,@intWorkOrderInputLotId  = @intWorkOrderInputLotId
+		,@intWorkOrderProducedLotId  = NULL
+		,@intWorkOrderId  = @intWorkOrderId
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 

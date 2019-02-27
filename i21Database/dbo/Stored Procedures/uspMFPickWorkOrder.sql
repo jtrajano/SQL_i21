@@ -82,6 +82,8 @@ BEGIN TRY
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@strInstantConsumption NVARCHAR(50)
 		,@strCycleCountbasedonRecipeTolerance NVARCHAR(50)
+		,@dblPhysicalCount NUMERIC(18, 6)
+		,@intWorkOrderConsumedLotId INT
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
@@ -2146,6 +2148,34 @@ BEGIN TRY
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
 
+				SELECT @intWorkOrderConsumedLotId = SCOPE_IDENTITY()
+
+				Select @dblPhysicalCount=[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
+
+				EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmCurrentDateTime
+						,@intTransactionTypeId = 8
+						,@intItemId = @intItemId
+						,@intSourceLotId = @intLotId
+						,@intDestinationLotId = NULL
+						,@dblQty = @dblPhysicalCount
+						,@intItemUOMId = @intItemUOMId
+						,@intOldItemId = NULL
+						,@dtmOldExpiryDate = NULL
+						,@dtmNewExpiryDate = NULL
+						,@intOldLotStatusId = NULL
+						,@intNewLotStatusId = NULL
+						,@intUserId = @intUserId
+						,@strNote = NULL
+						,@strReason = NULL
+						,@intLocationId = @intLocationId
+						,@intInventoryAdjustmentId = NULL
+						,@intStorageLocationId  = @intStorageLocationId
+						,@intDestinationStorageLocationId  = NULL
+						,@intWorkOrderInputLotId  = NULL
+						,@intWorkOrderProducedLotId  = NULL
+						,@intWorkOrderId  = @intWorkOrderId
+						,@intWorkOrderConsumedLotId=@intWorkOrderConsumedLotId
+
 				IF NOT EXISTS (
 						SELECT *
 						FROM tblMFProductionSummary
@@ -2289,6 +2319,34 @@ BEGIN TRY
 					,intSubLocationId
 				FROM @tblLot
 				WHERE intLotRecordId = @intLotRecordId
+
+				SELECT @intWorkOrderConsumedLotId = SCOPE_IDENTITY()
+
+				Select @dblPhysicalCount=[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
+
+				EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmCurrentDateTime
+						,@intTransactionTypeId = 8
+						,@intItemId = @intItemId
+						,@intSourceLotId = @intLotId
+						,@intDestinationLotId = NULL
+						,@dblQty = @dblQty
+						,@intItemUOMId = @intItemUOMId
+						,@intOldItemId = NULL
+						,@dtmOldExpiryDate = NULL
+						,@dtmNewExpiryDate = NULL
+						,@intOldLotStatusId = NULL
+						,@intNewLotStatusId = NULL
+						,@intUserId = @intUserId
+						,@strNote = NULL
+						,@strReason = NULL
+						,@intLocationId = @intLocationId
+						,@intInventoryAdjustmentId = NULL
+						,@intStorageLocationId  = @intStorageLocationId
+						,@intDestinationStorageLocationId  = NULL
+						,@intWorkOrderInputLotId  = NULL
+						,@intWorkOrderProducedLotId  = NULL
+						,@intWorkOrderId  = @intWorkOrderId
+						,@intWorkOrderConsumedLotId=@intWorkOrderConsumedLotId
 
 				IF NOT EXISTS (
 						SELECT *

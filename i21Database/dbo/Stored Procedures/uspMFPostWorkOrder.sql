@@ -528,7 +528,38 @@ BEGIN TRY
 			WHERE intWorkOrderId = @intWorkOrderId
 				AND intTransactionTypeId = 25
 
-			--AND PL.dblQuantity < 0
+
+			INSERT INTO tblMFInventoryAdjustment (
+				dtmDate
+				,intTransactionTypeId
+				,intItemId
+				,intSourceLotId
+				,dblQty
+				,intItemUOMId
+				,intUserId
+				,intLocationId
+				,intStorageLocationId
+				,intWorkOrderConsumedLotId
+				,intWorkOrderId
+				,dtmBusinessDate 
+				,intBusinessShiftId 
+				)
+			SELECT @dtmCurrentDateTime
+				,8
+				,intItemId
+				,intLotId
+				,dblQuantity
+				,intItemUOMId
+				,intCreatedUserId
+				,@intLocationId
+				,intStorageLocationId
+				,intWorkOrderConsumedLotId
+				,intWorkOrderId
+				,@dtmBusinessDate
+				,@intBusinessShiftId
+			FROM tblMFWorkOrderConsumedLot 
+			Where intWorkOrderId=@intWorkOrderId and intSequenceNo=9999
+
 			DELETE
 			FROM @ItemsForPost
 

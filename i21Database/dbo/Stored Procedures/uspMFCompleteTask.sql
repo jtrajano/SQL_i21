@@ -331,6 +331,7 @@ BEGIN TRY
 					,@blnInventoryMove = @blnInventoryMove
 					,@strNotes = @strDescription
 					,@intNewLotId = @intNewLotId
+					,@intWorkOrderId=@intWorkOrderId
 
 				IF @intNewLotId IS NULL
 				BEGIN

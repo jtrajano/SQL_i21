@@ -18,18 +18,22 @@
 	,@intInventoryAdjustmentId INT
 	,@intOldItemOwnerId INT = NULL
 	,@intNewItemOwnerId INT = NULL
-	,@strOldLotAlias nvarchar(50)= NULL
-	,@strNewLotAlias nvarchar(50)= NULL
-	,@strOldVendorLotNumber nvarchar(50)= NULL
-	,@strNewVendorLotNumber nvarchar(50)= NULL
+	,@strOldLotAlias NVARCHAR(50) = NULL
+	,@strNewLotAlias NVARCHAR(50) = NULL
+	,@strOldVendorLotNumber NVARCHAR(50) = NULL
+	,@strNewVendorLotNumber NVARCHAR(50) = NULL
+	,@intStorageLocationId INT = NULL
+	,@intDestinationStorageLocationId INT = NULL
+	,@intWorkOrderInputLotId INT = NULL
+	,@intWorkOrderProducedLotId INT = NULL
+	,@intWorkOrderId INT = NULL
+	,@intWorkOrderConsumedLotId INT=NULL
 	)
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
-		,@intStorageLocationId int
-		,@intDestinationStorageLocationId int
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
 
@@ -39,15 +43,22 @@ BEGIN TRY
 		AND @dtmDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	SELECT @intStorageLocationId=intStorageLocationId FROM dbo.tblICLot WHERE intLotId =@intSourceLotId 
+	IF @intStorageLocationId IS NULL
+		SELECT @intStorageLocationId = intStorageLocationId
+		FROM dbo.tblICLot
+		WHERE intLotId = @intSourceLotId
 
-	SELECT @intDestinationStorageLocationId=intStorageLocationId FROM dbo.tblICLot WHERE intLotId =@intDestinationLotId
+	IF @intDestinationStorageLocationId IS NULL
+		AND @intDestinationLotId IS NOT NULL
+		SELECT @intDestinationStorageLocationId = intStorageLocationId
+		FROM dbo.tblICLot
+		WHERE intLotId = @intDestinationLotId
 
 	INSERT INTO tblMFInventoryAdjustment (
 		dtmDate
 		,intTransactionTypeId
 		,intItemId
-		,intStorageLocationId 
+		,intStorageLocationId
 		,intSourceLotId
 		,intDestinationStorageLocationId
 		,intDestinationLotId
@@ -67,10 +78,14 @@ BEGIN TRY
 		,intInventoryAdjustmentId
 		,intOldItemOwnerId
 		,intNewItemOwnerId
-		,strOldLotAlias 
-		,strNewLotAlias 
-		,strOldVendorLotNumber 
-		,strNewVendorLotNumber 
+		,strOldLotAlias
+		,strNewLotAlias
+		,strOldVendorLotNumber
+		,strNewVendorLotNumber
+		,intWorkOrderInputLotId
+		,intWorkOrderProducedLotId
+		,intWorkOrderId
+		,intWorkOrderConsumedLotId
 		)
 	SELECT @dtmDate
 		,@intTransactionTypeId
@@ -95,10 +110,14 @@ BEGIN TRY
 		,@intInventoryAdjustmentId
 		,@intOldItemOwnerId
 		,@intNewItemOwnerId
-		,@strOldLotAlias 
-		,@strNewLotAlias 
-		,@strOldVendorLotNumber 
-		,@strNewVendorLotNumber 
+		,@strOldLotAlias
+		,@strNewLotAlias
+		,@strOldVendorLotNumber
+		,@strNewVendorLotNumber
+		,@intWorkOrderInputLotId
+		,@intWorkOrderProducedLotId
+		,@intWorkOrderId
+		,@intWorkOrderConsumedLotId
 END TRY
 
 BEGIN CATCH
