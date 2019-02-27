@@ -545,6 +545,18 @@ BEGIN
 	)
 END 
 
+-- Create the temp table to instruct the cost adjustment sp to escalate the cost.
+BEGIN 
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAllowCostAdjustmentToEscalate')) 
+	BEGIN 
+		CREATE TABLE #tmpAllowCostAdjustmentToEscalate (
+			[ysnAllowEscalate] BIT NULL
+		)
+
+		INSERT INTO #tmpAllowCostAdjustmentToEscalate (ysnAllowEscalate) VALUES (1)
+	END 
+END 
+
 -- Create a temp table that holds all the items for reposting. 
 BEGIN 
 	IF OBJECT_ID('tempdb..#tmpICInventoryTransaction') IS NOT NULL  
