@@ -371,5 +371,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1910_StopAuditMigrationJob.sql" />
+    <None Include="Scripts\Pre-Deployment\4_SM\11_RemoveDuplicateTaxCodeUnderTaxGroup.sql" />
   </ItemGroup>
 </Project>

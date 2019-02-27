@@ -58,6 +58,7 @@
 :r .\4_SM\1810_Delete_Duplicate_Tax_Code_Rate.sql
 :r .\4_SM\1810_DeleteOldReportLabel.sql
 :r .\4_SM\1810_Fix_GL_Account.sql
+:r .\4_SM\11_RemoveDuplicateTaxCodeUnderTaxGroup.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
