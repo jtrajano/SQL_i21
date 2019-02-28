@@ -595,7 +595,7 @@ BEGIN TRY
 			,intLocationId
 			,intStorageLocationId
 			,IA.intWorkOrderConsumedLotId
-			,intWorkOrderId
+			,IA.intWorkOrderId
 		FROM tblMFInventoryAdjustment IA
 		JOIN @tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
 	END
