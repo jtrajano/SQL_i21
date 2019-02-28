@@ -7288,6 +7288,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
     <Build Include="dbo\Views\vyuSTGetHandheldScannerImportCountWithRecipe.sql" />
     <Build Include="dbo\Functions\fnICGeneratePayablesTaxes.sql" />
+    <Build Include="dbo\Functions\fnICGetCostAdjustmentSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
