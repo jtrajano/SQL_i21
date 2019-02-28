@@ -359,6 +359,12 @@ BEGIN TRY
 				[intStorageScheduleId] INT
 			)
 
+			---Final Insert/Update to table
+			DECLARE @existingTicketTable TABLE 
+			(
+				intTicketId INT NOT NULL
+			)
+
 			IF LTRIM(RTRIM(@xmlParamDS)) != ''
 			BEGIN
 				--DELIVERY SHEET
@@ -603,6 +609,23 @@ BEGIN TRY
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
 				UPDATE @temp_xml_table SET strTicketStatus = 'O' WHERE strTicketStatus = 'C'
+
+				----------------------------------------------------------------
+				---Get all existing tickets
+				INSERT INTO @existingTicketTable
+				SELECT A.intTicketId
+				FROM @temp_xml_table A
+				WHERE EXISTS(	SELECT TOP 1 1 
+								FROM tblSCTicket B
+								WHERE A.[intTicketPoolId] = B.[intTicketPoolId]
+									AND A.[intTicketType] = B.[intTicketType]
+									AND A.[strInOutFlag] = B.[strInOutFlag]
+									AND A.[strTicketNumber] = B.[strTicketNumber]
+									AND A.[intEntityId] = B.[intEntityId]
+									AND A.[intProcessingLocationId] = B.[intProcessingLocationId]
+							  )
+				--------------------------------------------------------------
+
 
 				INSERT INTO tblSCTicket (
 					[strTicketStatus]
@@ -862,6 +885,7 @@ BEGIN TRY
 					SELECT DS.intDeliverySheetId,SCD.intDeliverySheetId AS dsId,SCD.intEntityId FROM @temp_xml_deliverysheet_sc SCD
 					INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				) DS ON DS.dsId = SCT.intDeliverySheetId 
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE SCT.intTicketId = ERT.intTicketId)
 				ORDER BY strTicketNumber ASC
 				
 				INSERT INTO tblQMTicketDiscount
@@ -908,6 +932,7 @@ BEGIN TRY
 				AND SC.strInOutFlag = SCT.strInOutFlag
 				AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE QM.intTicketId = ERT.intTicketId)
 				
 				INSERT INTO tblSCTicketSplit(
 					[intTicketId], 
@@ -934,6 +959,7 @@ BEGIN TRY
 				AND SC.strInOutFlag = SCT.strInOutFlag
 				AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE SCS.intTicketId = ERT.intTicketId)
 			END
 			ELSE
 			BEGIN
