@@ -281,11 +281,13 @@ WHERE ysnPosted = 1
 
 IF (@ysnPrintFromCFLocal = 1)
 	BEGIN
-		DELETE PI 
-		FROM #POSTEDINVOICES PI
-		INNER JOIN tblCFInvoiceStagingTable IST ON PI.intInvoiceId = IST.intInvoiceId
+		DELETE I 
+		FROM #POSTEDINVOICES I
+		LEFT JOIN tblCFInvoiceStagingTable IST ON I.intInvoiceId = IST.intInvoiceId
 											   AND IST.strUserId = @strUserId
 											   AND LOWER(IST.strStatementType) = 'invoice'
+		WHERE I.strType = 'CF Tran'
+		  AND I.intInvoiceId IS NULL
 	END
 
 --#CASHREFUNDS
