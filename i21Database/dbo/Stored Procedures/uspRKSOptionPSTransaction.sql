@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKSOptionPSTransaction]
+﻿CREATE PROCEDURE [dbo].[uspRKSOptionPSTransaction]
 	@intTypeId int
 	, @intEntityId int
 	, @intFutureMarketId int
@@ -18,8 +18,8 @@ SELECT strInternalTradeNo
 	, strOptionMonth
 	, strName
 	, strAccountNumber
-	, isnull(dblTotalLot,0) dblTotalLot
-	, isnull(dblOpenLots,0) dblOpenLots
+	, isnull(intTotalLot,0) intTotalLot
+	, CAST(isnull(dblOpenLots,0) AS NUMERIC(18, 6)) dblOpenLots
 	, strOptionType
 	, dblStrike
 	, dblPremium
@@ -42,6 +42,9 @@ SELECT strInternalTradeNo
 	, dblContractSize
 	, intFutOptTransactionHeaderId
 	, intCurrencyId
+	, strCurrency
+	, intMainCurrencyId
+	, strMainCurrency
 	, intCent
 	, ysnSubCurrency
 	, dtmExpirationDate
@@ -52,11 +55,11 @@ SELECT strInternalTradeNo
 	, intCommodityId
 	, intOptionMonthId
 FROM (
-	SELECT (dblTotalLot-dblSelectedLot1-dblExpiredLots-dblAssignedLots) AS dblOpenLots
+	SELECT (intTotalLot-dblSelectedLot1-intExpiredLots-intAssignedLots) AS dblOpenLots
 		, '' as dblSelectedLot
-		, ((dblTotalLot-dblSelectedLot1)*dblContractSize*dblPremium)/ case when ysnSubCurrency = 1 then intCent else 1 end  as dblPremiumValue
-		, ((dblTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium)/ case when ysnSubCurrency = 1 then intCent else 1 end  as dblMarketValue
-		, (-dblOptCommission*(dblTotalLot-dblSelectedLot1))/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblCommission
+		, ((intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium)/ case when ysnSubCurrency = 1 then intCent else 1 end  as dblPremiumValue
+		, ((intTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium)/ case when ysnSubCurrency = 1 then intCent else 1 end  as dblMarketValue
+		, (-dblOptCommission*(intTotalLot-dblSelectedLot1))/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblCommission
 		, *
 	FROM (
 		SELECT DISTINCT strInternalTradeNo AS strInternalTradeNo
@@ -66,7 +69,7 @@ FROM (
 			, om.strOptionMonth as strOptionMonth
 			, e.strName as strName
 			, ba.strAccountNumber
-			, ot.dblNoOfContract as dblTotalLot
+			, ot.intNoOfContract as intTotalLot
 			, IsNull((SELECT SUM (AD.intMatchQty) from tblRKOptionsMatchPnS AD where  dtmMatchDate<=@dtmPositionAsOf Group By AD.intSFutOptTransactionId
 					Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0) As dblSelectedLot1
 			, ot.strOptionType
@@ -102,15 +105,18 @@ FROM (
 			, intFutOptTransactionId
 			, isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope
 					where ope.intFutOptTransactionId= ot.intFutOptTransactionId
-					and dtmExpiredDate<=@dtmPositionAsOf),0) dblExpiredLots
+					and dtmExpiredDate<=@dtmPositionAsOf),0) intExpiredLots
 			, isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa
 					where opa.intFutOptTransactionId= ot.intFutOptTransactionId
-					and dtmTranDate<=@dtmPositionAsOf),0) dblAssignedLots
-			, c.intCurrencyID as intCurrencyId
+					and dtmTranDate<=@dtmPositionAsOf),0) intAssignedLots
+			, intCurrencyId = c.intCurrencyID
+			, c.strCurrency
+			, intMainCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE c.intCurrencyID END
+			, strMainCurrency = CASE WHEN c.ysnSubCurrency = 0 THEN c.strCurrency ELSE MainCurrency.strCurrency END
 			, c.intCent
-			, ysnSubCurrency
+			, c.ysnSubCurrency
 			, ot.intFutOptTransactionHeaderId
-			, CASE WHEN CONVERT(VARCHAR(10),dtmExpirationDate,111) < CONVERT(VARCHAR(10),GETDATE(),111) then 1 else 0 end ysnExpired
+			, CASE WHEN CONVERT(VARCHAR(10),dtmExpirationDate,111) < CONVERT(VARCHAR(10),GETDATE(),111) then CAST(1 AS BIT) else CAST(0 AS BIT) end ysnExpired
 			, case when ot.strOptionType='Put' then 1 else 2 end intTypeId
 			, ot.intEntityId
 			, ot.intCommodityId
@@ -124,6 +130,7 @@ FROM (
 		JOIN tblEMEntity e on e.intEntityId=ot.intEntityId
 		LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId  AND ba.intBrokerageAccountId=bc.intBrokerageAccountId
 		LEFT JOIN tblSMCurrency c on c.intCurrencyID=bc.intFutCurrencyId
+		LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId where ot.intInstrumentTypeId=2 and strBuySell='Sell'
 	)t

@@ -38,6 +38,7 @@ RETURNS @returntable TABLE
 	,[ysnTaxExempt]					BIT DEFAULT 0
 	,[ysnTaxOnly]					BIT DEFAULT 0
 	,[ysnInvalidSetup]				BIT DEFAULT 0
+	,[ysnAddToCost]  				BIT DEFAULT 0
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
 )
@@ -70,6 +71,7 @@ BEGIN
 			,[strTaxGroup]					NVARCHAR(100)
 			,[strNotes]						NVARCHAR(500)
 			,[ysnTaxAdjusted]				BIT DEFAULT 0
+			,[ysnAddToCost]				    BIT DEFAULT 0			
 			,[ysnComputed]					BIT
 			)
 					
@@ -95,6 +97,7 @@ BEGIN
 		,[ysnTaxExempt]
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
+		,[ysnAddToCost]
 		,[strTaxGroup]
 		,[strNotes]
 	)
@@ -117,6 +120,7 @@ BEGIN
 		,[ysnTaxExempt]
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
+		,[ysnAddToCost]
 		,[strTaxGroup]
 		,[strNotes]
 	FROM
@@ -305,6 +309,7 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[ysnTaxOnly]
+		,[ysnAddToCost]
 		,[strTaxGroup]
 		,[strNotes]
 	)
@@ -327,6 +332,7 @@ BEGIN
 		,[strTaxCode]
 		,[ysnTaxExempt]
 		,[ysnTaxOnly]
+		,[ysnAddToCost]
 		,[strTaxGroup]
 		,[strNotes]
 	FROM

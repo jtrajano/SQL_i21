@@ -8,7 +8,6 @@ AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strUserName NVARCHAR(100)
-		,@intOldNoOfContract INT
 		,@strOldBuySell NVARCHAR(10)
 
 
@@ -75,7 +74,7 @@ BEGIN TRY
 			,dblPrice
 			,strStatus
 			,dtmFilledDate
-			,NULL--intOldNoOfContract
+			,NULL
 			,0
 			,0
 			,@strScreenName
@@ -160,7 +159,7 @@ BEGIN TRY
 			,dblPrice
 			,strStatus
 			,dtmFilledDate
-			,NULL--intOldNoOfContract
+			,NULL
 			,dblNoOfContract = (CASE WHEN @action = 'DELETE' THEN 0 ELSE T.dblNoOfContract END)
 			,dblBalanceContract = (CASE WHEN @action = 'DELETE' THEN 0 ELSE T.dblNoOfContract END)
 			,@strScreenName

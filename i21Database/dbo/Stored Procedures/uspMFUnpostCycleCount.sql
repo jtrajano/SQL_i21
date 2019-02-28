@@ -39,10 +39,12 @@ BEGIN TRY
 		,@ysnCostEnabled BIT
 		,@intWOItemUOMId INT
 		,@intUnitMeasureId INT
+
 	DECLARE @intReturnValue AS INT
 	DECLARE @unpostCostAdjustment AS ItemCostAdjustmentTableType
 	DECLARE @strBatchIdForUnpost AS NVARCHAR(50)
 	DECLARE @strErrorMessage AS NVARCHAR(4000)
+
 
 	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
 	FROM tblMFCompanyPreference
@@ -304,7 +306,7 @@ BEGIN TRY
 		SET ysnIsUnposted = 1
 
 		IF EXISTS (
-				SELECT TOP 1 1
+				SELECT 1
 				FROM @GLEntries
 				)
 		BEGIN
@@ -474,8 +476,12 @@ BEGIN TRY
 				,0
 		END
 
+		DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
+
 		DELETE
 		FROM dbo.tblMFWorkOrderConsumedLot
+		OUTPUT deleted.intWorkOrderConsumedLotId
+		INTO @tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
 			AND intItemId NOT IN (
@@ -496,6 +502,37 @@ BEGIN TRY
 		DELETE
 		FROM dbo.tblMFWorkOrderProducedLotTransaction
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		INSERT INTO tblMFInventoryAdjustment (
+			dtmDate
+			,intTransactionTypeId
+			,intItemId
+			,intSourceLotId
+			,dblQty
+			,intItemUOMId
+			,intUserId
+			,intLocationId
+			,intStorageLocationId
+			,intWorkOrderConsumedLotId
+			,dtmBusinessDate
+			,intBusinessShiftId
+			,intWorkOrderId 
+			)
+		SELECT dtmDate
+			,intTransactionTypeId
+			,IA.intItemId
+			,intSourceLotId
+			,- dblQty
+			,intItemUOMId
+			,intUserId
+			,intLocationId
+			,intStorageLocationId
+			,IA.intWorkOrderConsumedLotId
+			,dtmBusinessDate
+			,intBusinessShiftId
+			,intWorkOrderId
+		FROM tblMFInventoryAdjustment IA
+		JOIN @tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
 	END
 	ELSE
 	BEGIN

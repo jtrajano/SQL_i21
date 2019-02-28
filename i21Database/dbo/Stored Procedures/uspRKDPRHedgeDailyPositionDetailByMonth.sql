@@ -10,6 +10,8 @@
 AS
 
 BEGIN
+	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
+
 	IF ISNULL(@strPurchaseSales, '') <> ''
 	BEGIN
 		IF @strPurchaseSales = 'Purchase'
@@ -30,6 +32,13 @@ BEGIN
 	BEGIN
 		SET @intVendorId = NULL
 	END
+
+	SELECT intCompanyLocationId
+	INTO #LicensedLocation
+	FROM tblSMCompanyLocation
+	WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1
+										WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0
+										ELSE ISNULL(ysnLicensed, 0) END
 	
 	DECLARE @strCommodityCode NVARCHAR(50)
 
@@ -221,7 +230,7 @@ BEGIN
 			DECLARE @tblGetOpenFutureByDate TABLE (intRowNum INT
 				, dtmTransactionDate DATETIME
 				, intFutOptTransactionId INT
-				, dblOpenContract INT
+				, intOpenContract INT
 				, strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
 				, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 				, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -431,10 +440,7 @@ BEGIN
 				FROM @tblGetOpenContractDetail CD
 				WHERE intContractTypeId IN (1,2) AND CD.intCommodityId = @intCommodityId
 					AND CD.intContractStatusId <> 3
-					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																					ELSE ISNULL(ysnLicensed, 0) END)
+					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					AND intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN intCompanyLocationId ELSE @intLocationId END
 					AND  CD.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN CD.intEntityId ELSE @intVendorId END
 				) t
@@ -483,7 +489,7 @@ BEGIN
 					, intFutOptTransactionHeaderId
 					, th.intCommodityId
 					, dtmFutureMonthsDate
-					, HedgedQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(dblOpenContract, 0) * t.dblContractSize)
+					, HedgedQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(intOpenContract, 0) * t.dblContractSize)
 					, l.strLocationName
 					, strFutureMonth = LEFT(t.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2),intYear) COLLATE Latin1_General_CI_AS
 					, m.intUnitMeasureId
@@ -491,7 +497,7 @@ BEGIN
 					, strTranType = strNewBuySell
 					, ba.intBrokerageAccountId
 					, t.strInstrumentType as strInstrumentType
-					, dblNoOfLot = ISNULL(dblOpenContract, 0)
+					, dblNoOfLot = ISNULL(intOpenContract, 0)
 					, ysnPreCrush
 					, t.strNotes
 					, strBrokerTradeNo
@@ -507,10 +513,7 @@ BEGIN
 				WHERE th.intCommodityId IN (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ','))
 					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 					AND e.intEntityId = ISNULL(@intVendorId, e.intEntityId)
-					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-												WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																					WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																					ELSE isnull(ysnLicensed, 0) END)
+					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			) t
 			
 			--Option NetHEdge
@@ -542,7 +545,7 @@ BEGIN
 				, t.strLocationName
 				, strFutureMonth = LEFT(t.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), fm.intYear) COLLATE Latin1_General_CI_AS
 				, dtmFutureMonthsDate = LEFT(t.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), fm.intYear) COLLATE Latin1_General_CI_AS
-				, dblTotal = (dblOpenContract * ISNULL((SELECT TOP 1 dblDelta
+				, dblTotal = (intOpenContract * ISNULL((SELECT TOP 1 dblDelta
 														FROM tblRKFuturesSettlementPrice sp
 														INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 														WHERE intFutureMarketId = m.intFutureMarketId AND mm.intOptionMonthId = om.intOptionMonthId 
@@ -552,7 +555,7 @@ BEGIN
 				, m.intUnitMeasureId 
 				, strAccountNumber = e.strName + '-' + strAccountNumber COLLATE Latin1_General_CI_AS
 				, TranType = strNewBuySell
-				, dblNoOfLot = dblOpenContract
+				, dblNoOfLot = intOpenContract
 				, dblDelta = ISNULL((SELECT TOP 1 dblDelta
 											FROM tblRKFuturesSettlementPrice sp
 											INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
@@ -578,10 +581,7 @@ BEGIN
 				AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 				AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 				AND e.intEntityId = ISNULL(@intVendorId, e.intEntityId)
-				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-											WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-																				WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-																				ELSE isnull(ysnLicensed, 0) END)
+				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
 			--Net Hedge option end
 			DECLARE @intUnitMeasureId int

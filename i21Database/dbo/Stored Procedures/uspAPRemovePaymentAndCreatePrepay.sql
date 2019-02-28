@@ -211,7 +211,7 @@ BEGIN
 	--UPDATE THE JOURNAL LINE DESCRIPTION
 	UPDATE gl
 		SET gl.strJournalLineDescription = @prepayBillId
-		,gl.intAccountId = @prepayAccount
+		-- ,gl.intAccountId = @prepayAccount
 	FROM tblGLDetail gl
 	WHERE gl.strTransactionId = @paymentRecordNum 
 	AND gl.intTransactionId = @currentPaymentId

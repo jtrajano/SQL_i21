@@ -40,14 +40,6 @@ BEGIN TRANSACTION
 	WHERE strNamespace IN (SELECT strNamespace FROM tblSMScreenStage WHERE strChange = 'Deleted') AND strNamespace <> 'ContractManagement.view.ContractAmendment' 
 	--AND intScreenId NOT IN (SELECT intScreenId FROM tblSMTransaction)
 	
-	-- DELETE Controls
-	DELETE tblSMControl 
-	FROM tblSMControlStage A
-			INNER JOIN tblSMScreenStage B  ON A.intScreenStageId = B.intScreenStageId
-			INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace			
-			INNER JOIN tblSMControl D ON D.strControlId = A.strControlId	
-	WHERE ISNULL(A.strChange, '') = 'Deleted'
-
 	-- INSERT Controls
 	INSERT INTO tblSMControl (
 		strControlId,
@@ -69,7 +61,22 @@ BEGIN TRANSACTION
 	 INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace
 	WHERE ISNULL(A.strChange, '') = 'Added'
 	
+	-- DELETE Controls
+	-- DELETE tblSMControl 
+	-- FROM tblSMControlStage A
+	-- 		INNER JOIN tblSMScreenStage B  ON A.intScreenStageId = B.intScreenStageId
+	-- 		INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace			
+	-- 		INNER JOIN tblSMControl D ON D.strControlId = A.strControlId	
+	-- WHERE ISNULL(A.strChange, '') = 'Deleted'
 
+	DELETE tblSMControl 
+	FROM tblSMControlStage A
+			INNER JOIN tblSMScreenStage B  ON A.intScreenStageId = B.intScreenStageId
+			INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace			
+			INNER JOIN tblSMControl D ON D.strControlId = A.strControlId	
+	WHERE ISNULL(A.strChange, '') = 'Deleted'
+	AND
+	B.strNamespace = C.strNamespace and D.intScreenId = C.intScreenId
 
 	-- UPDATE MODULE
 	UPDATE tblSMScreen SET strModule = 'Ticket Management'
@@ -82,15 +89,15 @@ BEGIN TRANSACTION
 	UPDATE tblSMCompanySetup 
 	SET ysnScreenControlListingUpdated = 1
 
-	--UPDATE tblSMScreen SET ysnAvailable = 0 WHERE strNamespace IN 
-	--(	
-	--	'i21.view.UserRole',
-	--	'i21.view.Letters',
-	--	'i21.view.FileFieldMapping',
-	--	'i21.view.SecurityPolicy',
-	--	'i21.view.Signatures',
-	--	'i21.view.EntityUser'
-	--)
+	UPDATE tblSMScreen SET ysnAvailable = 0 WHERE strNamespace IN 
+	(	
+		'i21.view.UserRole',
+		'i21.view.Letters',
+		'i21.view.FileFieldMapping',
+		'i21.view.SecurityPolicy',
+		'i21.view.Signatures',
+		'i21.view.EntityUser'
+	)
 
 	--*************UPDATE tblSMScreen GroupName WHEN generating listing for contact user*************--
 	DECLARE @intScreenId INT,
@@ -127,4 +134,3 @@ BEGIN TRANSACTION
 
 
 COMMIT TRANSACTION
-GO

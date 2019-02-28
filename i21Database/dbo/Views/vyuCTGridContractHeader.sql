@@ -50,6 +50,8 @@ AS
 			NM.dblMarketContractSize,
 			NM.intMarketCurrencyId,
 			NM.strMarketCurrency,
+			NM.ysnMarketSubCurrency,
+			NM.intMarketCent,
 			NM.strCommodityAttributeId,
 			NM.intEntityDefaultLocationId,
 			NM.strEntityDefaultLocation,

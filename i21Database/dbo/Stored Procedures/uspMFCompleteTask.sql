@@ -457,6 +457,7 @@ BEGIN TRY
 					,@strNotes = @strDescription
 					,@intNewLotId = @intNewLotId
 					,@dtmDate=@dtmDate
+					,@intWorkOrderId=@intWorkOrderId
 
 				IF @intNewLotId IS NULL
 				BEGIN

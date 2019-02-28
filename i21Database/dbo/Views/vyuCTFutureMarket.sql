@@ -16,6 +16,8 @@ AS
 					,CM.strCommodityAttributeId
 					,MY.strCurrency				AS	strMainCurrency
 					,MY.intMainCurrencyId
+					,CY.ysnSubCurrency
+					,CY.intCent
 
 	FROM			tblICCommodity				CO 
 			JOIN	tblRKCommodityMarketMapping CM	ON	CO.intCommodityId		=	CM.intCommodityId

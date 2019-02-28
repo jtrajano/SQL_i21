@@ -71,62 +71,61 @@ BEGIN
 	END
     
 	SELECT Top(1)
-		Inv.intInvoiceId,
-		Inv.dtmDate,
-		Inv.dtmDueDate,
-		Inv.strInvoiceNumber,
+		intInvoiceId = Inv.intInvoiceId,
+		dtmDate = Inv.dtmDate,
+		dtmDueDate = Inv.dtmDueDate,
+		strInvoiceNumber = Inv.strInvoiceNumber,
 		strCustomer = EN.strEntityName,
-		Inv.strBillToAddress,
-		Inv.strBillToCity,
-		Inv.strBillToState,
-		Inv.strBillToZipCode,
-		Inv.strBillToCountry,
-		Inv.strShipToAddress,
-		Inv.strShipToCity,
-		Inv.strShipToCountry,
-		Inv.strShipToState,
-		Inv.strShipToZipCode,
-		Inv.strShipToLocationName,
-		Inv.strComments,
-		Inv.strFooterComments,
-		Inv.strTransactionType,
-		Inv.strType,
+		strBillToAddress = Inv.strBillToAddress,
+		strBillToCity = Inv.strBillToCity,
+		strBillToState = Inv.strBillToState,
+		strBillToZipCode = Inv.strBillToZipCode,
+		strBillToCountry = Inv.strBillToCountry,
+		strShipToAddress = Inv.strShipToAddress,
+		strShipToCity = Inv.strShipToCity,
+		strShipToCountry = Inv.strShipToCountry,
+		strShipToState = Inv.strShipToState,
+		strShipToZipCode = Inv.strShipToZipCode,
+		strShipToLocationName = Inv.strShipToLocationName,
+		strComments = Inv.strComments,
+		strFooterComments = Inv.strFooterComments,
+		strTransactionType = Inv.strTransactionType,
+		strType = Inv.strType,
 		strInvoiceCurrency = InvCur.strCurrency,
-		Term.strTerm,
+		strTerm = Term.strTerm,
 		strCompanyName = Comp.strLocationName,
-		L.strLoadNumber,
-		L.dtmScheduledDate,
-		L.dtmDeliveredDate,
-		CB.strContractBasis,
-		C.strFLOId,
-		CASE WHEN strTransactionType = 'Credit Memo' THEN ABS(Inv.dblInvoiceTotal - ISNULL(Inv.dblProvisionalAmount,0)) ELSE Inv.dblInvoiceTotal END dblInvoiceTotal ,
-		Inv.strTransactionType,
-		L.strBLNumber,
-		L.dtmBLDate,
-		L.strOriginPort,
-		L.strDestinationPort,
-		L.strShippingMode,
-		L.strMVessel,
-		L.dtmETAPOD,
-		L.intNumberOfContainers,
-		ShippingLine.strName AS strShippingLineName,
+		strLoadNumber = L.strLoadNumber,
+		dtmScheduledDate = L.dtmScheduledDate,
+		dtmDeliveredDate = L.dtmDeliveredDate,
+		strContractBasis = CB.strContractBasis,
+		strFLOId = C.strFLOId,
+		dblInvoiceTotal = CASE WHEN strTransactionType = 'Credit Memo' THEN ABS(Inv.dblInvoiceTotal - ISNULL(Inv.dblProvisionalAmount,0)) ELSE Inv.dblInvoiceTotal END,
+		strTransactionType = Inv.strTransactionType,
+		strBLNumber = CASE WHEN (ISNULL(IR.strBillOfLading, '') <> '') THEN IR.strBillOfLading ELSE L.strBLNumber END,
+		dtmBLDate = L.dtmBLDate,
+		strOriginPort = L.strOriginPort,
+		strDestinationPort = L.strDestinationPort,
+		strShippingMode = L.strShippingMode,
+		strMVessel = L.strMVessel,
+		dtmETAPOD = L.dtmETAPOD,
+		intNumberOfContainers = L.intNumberOfContainers,
+		strShippingLineName = ShippingLine.strName,
 		ysnDisplayPIInfo = CASE WHEN @ysnDisplayPIInfo = 0 THEN 'False' ELSE 'True' END,
-		CASE WHEN L.intPurchaseSale = 2 THEN 'OUTBOUND' WHEN L.intPurchaseSale = 3 THEN 'DROP SHIP' END AS strShipmentType,
+		strShipmentType = CASE WHEN L.intPurchaseSale = 2 THEN 'OUTBOUND' WHEN L.intPurchaseSale = 3 THEN 'DROP SHIP' END,
 		strReportName = @strReportName,
 		dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 		dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
-		ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight,
-		ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth,
-		'' AS strOurVATNo,
-		C.strVatNumber AS strYourVATNo,
-		'' AS strBrokerReferenceNo,
-		'' AS strRemarks,
-		ICT.strICTDesc,
-		CP.strInvoiceText,
-		(SELECT TOP 1 E.strName  
-		FROM tblLGLoadWarehouse LW
-		JOIN tblEMEntity E ON E.intEntityId = LW.intHaulerEntityId
-		WHERE LW.intLoadId = L.intLoadId) strCarrier
+		intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0),
+		intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0),
+		strOurVATNo = '',
+		strYourVATNo = C.strVatNumber,
+		strOurRef = CH.strContractNumber + '/' + CAST(CD.intContractSeq AS NVARCHAR(10)),
+		strBuyerRef = PCH.strCustomerContract,
+		strBrokerReferenceNo = '',
+		strRemarks = '',
+		strICTDesc = ICT.strICTDesc,
+		strInvoiceText = CP.strInvoiceText,
+		strCarrier = (SELECT TOP 1 E.strName FROM tblLGLoadWarehouse LW JOIN tblEMEntity E ON E.intEntityId = LW.intHaulerEntityId WHERE LW.intLoadId = L.intLoadId)
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer C ON C.intEntityId = Inv.intEntityCustomerId
@@ -140,7 +139,14 @@ BEGIN
 	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+	LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = InvDet.intContractDetailId 
+	LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId 
 	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 	CROSS APPLY tblLGCompanyPreference CP
+	OUTER APPLY (SELECT TOP 1 IR.strBillOfLading 
+					FROM tblARInvoiceDetailLot IDL 
+					JOIN tblICInventoryReceiptItemLot IRIL ON IDL.intLotId = IRIL.intLotId AND IDL.intInvoiceDetailId = InvDet.intInvoiceDetailId
+					JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId 
+					JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId) IR
 	WHERE Inv.intInvoiceId = @intInvoiceId
 END

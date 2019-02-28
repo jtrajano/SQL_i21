@@ -5,7 +5,7 @@
 )
 RETURNS @FinalResult TABLE (
 	intFutOptTransactionId INT
-	, dblOpenContract INT
+	, dblOpenContract NUMERIC(24,10)
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS

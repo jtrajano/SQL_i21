@@ -33,6 +33,7 @@ RETURNS @returntable TABLE
 	,[ysnTaxExempt]					BIT
 	,[ysnTaxOnly]					BIT
 	,[ysnInvalidSetup]				BIT
+	,[ysnAddToCost]					BIT
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
 )
@@ -76,6 +77,7 @@ BEGIN
 		,[ysnTaxExempt]					= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN @OneBit ELSE ISNULL(E.[ysnTaxExempt], @ZeroBit) END
 		,[ysnTaxOnly]					= ISNULL(TC.[ysnTaxOnly], @ZeroBit)
 		,[ysnInvalidSetup]				= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN @OneBit ELSE ISNULL(E.[ysnInvalidSetup], @ZeroBit) END
+		,[ysnAddToCost]					= TC.[ysnAddToCost]
 		,[strTaxGroup]					= TG.[strTaxGroup]
 		,[strNotes]						= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN 'No Valid Tax Code Detail!' ELSE E.[strExemptionNotes] END
 	FROM

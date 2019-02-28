@@ -84,6 +84,7 @@ BEGIN
 				,[ysnTaxExempt]
 				,[ysnTaxOnly]
 				,[ysnInvalidSetup]
+				,[ysnAddToCost]
 				,[strTaxGroup]
 				,[strNotes]
 			FROM
