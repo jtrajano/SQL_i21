@@ -16,6 +16,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[ysnAdditionalCost]			BIT NULL,
 	[ysnBasis]					BIT NULL,
 	[ysnReceivable]				BIT,
+	[strParty]					NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[strPaidBy]					NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[dtmDueDate]				DATETIME,
 	[strReference]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,

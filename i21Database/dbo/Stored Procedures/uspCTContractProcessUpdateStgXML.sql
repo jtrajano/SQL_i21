@@ -1369,7 +1369,7 @@ BEGIN TRY
 						   ,SCost.ysnAdditionalCost				= PCost.ysnAdditionalCost	
 						   ,SCost.ysnBasis						= PCost.ysnBasis			
 						   ,SCost.ysnReceivable					= PCost.ysnReceivable		
-						   ,SCost.strPaidBy						= PCost.strPaidBy			
+						   ,SCost.strParty						= PCost.strPaidBy			
 						   ,SCost.dtmDueDate					= PCost.dtmDueDate			
 						   ,SCost.strReference					= PCost.strReference		
 						   ,SCost.strRemarks					= PCost.strRemarks			
