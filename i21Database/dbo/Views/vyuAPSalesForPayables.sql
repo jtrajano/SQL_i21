@@ -95,4 +95,5 @@ WHERE A.strTransactionType = 'Invoice'
 AND B.strTransactionType = 'Customer Prepayment'
 AND A.ysnPosted = 1
 AND A2.ysnApplied = 1
+AND A.ysnPaid =  0 
 GO
