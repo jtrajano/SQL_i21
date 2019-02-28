@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKLOptionPSTransaction]
+﻿CREATE PROCEDURE [dbo].[uspRKLOptionPSTransaction]
 	@intTypeId INT
 	, @intEntityId INT
 	, @intFutureMarketId INT
@@ -21,28 +21,12 @@ DECLARE @ErrorState INT
 
 BEGIN TRY
 
-	-- Change with standard of taking out time from datetime
-	--SET @dtmPositionAsOf = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
-
 	SELECT AD.intLFutOptTransactionId
 		, dblSelectedLot = SUM(AD.intMatchQty)
 	INTO #SelectedLots
 	FROM tblRKOptionsMatchPnS AD
 	WHERE CAST(FLOOR(CAST(dtmMatchDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 	GROUP BY AD.intLFutOptTransactionId
-
-	-- Comment for now that FIRST_VALUE is not handled on SQL2008 instances. Will need to reimplement for performance improvements once we no longer support versions lower than sql2012.
-	--SELECT sp.intFutureMarketId
-	--	, spm.intOptionMonthId
-	--	, spm.dblStrike
-	--	, spm.intTypeId
-	--	, sp.dtmPriceDate
-	--	, dblMarketPremium = FIRST_VALUE(dblSettle) OVER (ORDER BY sp.dtmPriceDate DESC)
-	--	, dblDelta = FIRST_VALUE(dblDelta) OVER (ORDER BY sp.dtmPriceDate DESC)
-	--INTO #MarketPremium
-	--FROM tblRKFuturesSettlementPrice sp
-	--JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId
-	--	AND CAST(FLOOR(CAST(dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 
 	SELECT ope.intFutOptTransactionId
 		, intExpiredLots = SUM(intLots)
@@ -58,8 +42,6 @@ BEGIN TRY
 	WHERE CAST(FLOOR(CAST(dtmTranDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 	GROUP BY opa.intFutOptTransactionId
 
-
-
 	SELECT dblStrike
 		, strInternalTradeNo
 		, dtmTransactionDate
@@ -69,7 +51,7 @@ BEGIN TRY
 		, strName
 		, strAccountNumber
 		, intTotalLot = ISNULL(intTotalLot, 0)
-		, dblOpenLots = ISNULL(dblOpenLots, 0)
+		, dblOpenLots = CAST(ISNULL(dblOpenLots, 0) AS NUMERIC(18, 6))
 		, strOptionType
 		, dblStrike
 		, dblPremium = - dblPremium
@@ -169,7 +151,7 @@ BEGIN TRY
 				, c.intCent
 				, c.ysnSubCurrency
 				, intFutOptTransactionHeaderId
-				, ysnExpired = (CASE WHEN CAST(FLOOR(CAST(dtmExpirationDate AS FLOAT)) AS DATETIME) < CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) THEN 1 ELSE 0 END)
+				, ysnExpired = (CASE WHEN CAST(FLOOR(CAST(dtmExpirationDate AS FLOAT)) AS DATETIME) < CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END)
 				, intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
 				, ot.intEntityId
 				, ot.intCommodityId
