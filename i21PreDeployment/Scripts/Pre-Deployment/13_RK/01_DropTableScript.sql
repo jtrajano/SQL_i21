@@ -162,6 +162,17 @@ END
 GO
 
 
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKOptionsMatchPnS]') AND type in (N'U')) 
+BEGIN
+	If EXISTS( SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tblRKOptionsMatchPnS' and COLUMN_NAME='intMatchQty')
+	BEGIN
+		ALTER TABLE tblRKOptionsMatchPnS
+		ALTER COLUMN intMatchQty numeric(18,6) 
+	END
+END
+
+GO
+
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKFutOptTransaction]') AND type in (N'U')) 
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblNoOfContract' AND OBJECT_ID = OBJECT_ID(N'tblRKFutOptTransaction')) 
@@ -263,4 +274,16 @@ BEGIN
 
 END
 
+GO
+
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKOptionsMatchPnS]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblMatchQty' AND OBJECT_ID = OBJECT_ID(N'tblRKOptionsMatchPnS')) 
+	AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intMatchQty' AND OBJECT_ID = OBJECT_ID(N'tblRKOptionsMatchPnS'))
+    BEGIN
+          EXEC sp_rename 'tblRKOptionsMatchPnS.intMatchQty', 'dblMatchQty', 'COLUMN';
+    END
+
+END
 GO

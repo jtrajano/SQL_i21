@@ -22,7 +22,7 @@ DECLARE @ErrorState INT
 BEGIN TRY
 
 	SELECT AD.intLFutOptTransactionId
-		, dblSelectedLot = SUM(AD.intMatchQty)
+		, dblSelectedLot = SUM(AD.dblMatchQty)
 	INTO #SelectedLots
 	FROM tblRKOptionsMatchPnS AD
 	WHERE CAST(FLOOR(CAST(dtmMatchDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
