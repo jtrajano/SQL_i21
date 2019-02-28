@@ -3,6 +3,7 @@
 	[intItemMovementId] INT NOT NULL IDENTITY,
 	[intCheckoutId] INT,
     [intItemUPCId] INT NULL, 
+	[strInvalidUPCCode] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
     [strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intVendorId] INT NULL, 
     [intQtySold] INT NULL, 
