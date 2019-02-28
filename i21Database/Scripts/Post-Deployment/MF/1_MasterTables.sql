@@ -3458,7 +3458,7 @@ BEGIN
 		,intWorkOrderId
 		,dtmDateCreated
 		)
-	SELECT WC.dtmActualInputDateTime
+	SELECT isNULL(WC.dtmActualInputDateTime,WC.dtmCreated)
 		,8
 		,WC.intItemId
 		,WC.intLotId
@@ -3491,7 +3491,7 @@ BEGIN
 		,intWorkOrderId
 		,dtmDateCreated
 		)
-	SELECT WI.dtmProductionDate
+	SELECT IsNULL(WI.dtmProductionDate,WI.dtmCreated)
 		,104
 		,WI.intItemId
 		,WI.intLotId
@@ -3528,7 +3528,7 @@ BEGIN
 		,intWorkOrderId
 		,dtmDateCreated
 		)
-	SELECT WP.dtmProductionDate
+	SELECT IsNULL(WP.dtmProductionDate,WP.dtmCreated)
 		,9
 		,WP.intItemId
 		,WP.intLotId
