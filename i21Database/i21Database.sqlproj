@@ -7286,6 +7286,7 @@
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
     <Build Include="dbo\Functions\fnRKGetAdditionalColumnForDetailView.sql" />
     <Build Include="dbo\Functions\fnICGeneratePayablesTaxes.sql" />
+    <Build Include="dbo\Functions\fnICGetCostAdjustmentSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
