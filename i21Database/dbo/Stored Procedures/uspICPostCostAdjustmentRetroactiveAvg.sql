@@ -119,6 +119,11 @@ BEGIN
 
 
 	DECLARE @strReceiptType AS NVARCHAR(50)
+			,@costAdjustmentType_DETAILED AS TINYINT = 1
+			,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+
+	DECLARE @costAdjustmentType AS TINYINT 
+	SET @costAdjustmentType = dbo.fnICGetCostAdjustmentSetup(@intItemId, @intItemLocationId) 
 END 
 
 -- Compute the cost adjustment
@@ -552,6 +557,7 @@ BEGIN
 		END
 
 		-- Check if there is a transaction where the cost change needs escalation. 
+		IF @costAdjustmentType = @costAdjustmentType_DETAILED
 		BEGIN 
 			SET @EscalateCostAdjustment = 0 
 			SET @EscalateCostAdjustment = (@t_dblQty * @NewAverageCost) - (@t_dblQty * @OriginalAverageCost)
@@ -635,7 +641,10 @@ BEGIN
 				,[intInventoryTransactionId] = @DummyInventoryTransactionId 
 				,[intInventoryCostAdjustmentTypeId] = 
 						CASE	WHEN @t_dblQty > 0 THEN 
-									CASE	WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
+									CASE	
+											WHEN @costAdjustmentType = @costAdjustmentType_SUMMARIZED THEN 
+												@COST_ADJ_TYPE_Adjust_Value
+											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
 											WHEN @t_intTransactionTypeId IN (
 													@INV_TRANS_TYPE_ADJ_Item_Change
@@ -663,7 +672,10 @@ BEGIN
 												@COST_ADJ_TYPE_Adjust_Value
 									END 
 								WHEN @t_dblQty < 0 THEN 
-									CASE	WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
+									CASE	
+											WHEN @costAdjustmentType = @costAdjustmentType_SUMMARIZED THEN 
+												@COST_ADJ_TYPE_Adjust_Sold									
+											WHEN @t_intTransactionTypeId = @INV_TRANS_TYPE_Consume THEN 
 												@COST_ADJ_TYPE_Adjust_WIP
 											WHEN @EscalateInventoryTransactionTypeId = @INV_TRANS_TYPE_Inventory_Shipment THEN 
 												@COST_ADJ_TYPE_Adjust_InTransit_Inventory	

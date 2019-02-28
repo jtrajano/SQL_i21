@@ -7373,6 +7373,7 @@
     <Build Include="dbo\Stored Procedures\uspCTBeforeInvoiceDelete.sql" />
     <Build Include="dbo\Tables\tblHDTimeOffRequest.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTimeOffRequest.sql" />
+    <Build Include="dbo\Functions\fnICGetCostAdjustmentSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
