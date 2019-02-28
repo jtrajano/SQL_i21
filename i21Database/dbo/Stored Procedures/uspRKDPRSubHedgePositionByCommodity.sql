@@ -550,6 +550,7 @@ BEGIN
 		WHERE c.intCommodityId in (select intCommodity from @Commodity)
 			AND convert(DATETIME, CONVERT(VARCHAR(10), dtmOpenDate, 110), 110) <= convert(datetime,@dtmToDate)
 			AND c.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+			AND c.ysnIncludeInPriceRiskAndCompanyTitled = 1
 	) a WHERE a.intRowNum = 1
 	
 	DECLARE @mRowNumber INT

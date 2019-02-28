@@ -22,6 +22,7 @@ BEGIN
 		,strReceiptNo
 		,dtmOpenDate
 		,strType
+		,ysnIncludeInPriceRiskAndCompanyTitled
 		,intCommodityId
 		,intLocationId
 		,strCustomer
@@ -48,6 +49,7 @@ BEGIN
 		,C.strReceiptNo
 		,C.dtmOpenDate
 		,C.strType
+		,C.ysnIncludeInPriceRiskAndCompanyTitled
 		,C.intCommodityId
 		,C.intLocationId
 		,C.strCustomer
@@ -95,6 +97,7 @@ BEGIN
 			,strReceiptNo
 			,dtmOpenDate
 			,strType
+			,ysnIncludeInPriceRiskAndCompanyTitled
 			,intCommodityId
 			,intLocationId
 			,strCustomer
@@ -121,6 +124,7 @@ BEGIN
 			,C.strReceiptNo
 			,C.dtmOpenDate
 			,C.strType
+			,C.ysnIncludeInPriceRiskAndCompanyTitled
 			,C.intCommodityId
 			,C.intLocationId
 			,C.strCustomer
@@ -155,6 +159,7 @@ BEGIN
 			,strReceiptNo
 			,dtmOpenDate
 			,strType
+			,ysnIncludeInPriceRiskAndCompanyTitled
 			,intCommodityId
 			,intLocationId
 			,strCustomer
@@ -181,6 +186,7 @@ BEGIN
 			,C.strReceiptNo
 			,C.dtmOpenDate
 			,C.strType
+			,C.ysnIncludeInPriceRiskAndCompanyTitled
 			,C.intCommodityId
 			,C.intLocationId
 			,C.strCustomer
