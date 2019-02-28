@@ -2,7 +2,7 @@
 	intAdjustmentId INT identity(1, 1)
 	,dtmDate DATETIME NULL
 	,intTransactionTypeId INT NOT NULL
-	,intItemId INT NOT NULL
+	,intItemId INT NULL
 	,intStorageLocationId int NULL
 	,intSourceLotId INT NULL
 	,intDestinationStorageLocationId int NULL
