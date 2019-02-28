@@ -291,7 +291,8 @@ INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalNam
 INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) SELECT 140, 7, 'Glendale', 'City OCP', 1 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 140)
 INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) SELECT 141, 9, 'Wilmington', 'City', 1 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 141)
 INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) SELECT 142, 18, 'Sullivan', 'County', 1 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 142)
-
+INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) SELECT 143, 27, 'Benton Harbor', 'County', 1 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 143)
+INSERT INTO tblPRTypeTaxLocal (intTypeTaxLocalId, intTypeTaxStateId, strLocalName, strLocalType, intConcurrencyId) SELECT 144, 27, 'East Lansing', 'County', 1 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRTypeTaxLocal WHERE intTypeTaxLocalId = 144)
 GO
 
 INSERT INTO tblPRIRSCountryCode (intIRSCountryCodeId, strCountry, strCode, intConcurrencyId) SELECT 1, 'Afghanistan', 'AF', 1 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblPRIRSCountryCode WHERE intIRSCountryCodeId = 1)
