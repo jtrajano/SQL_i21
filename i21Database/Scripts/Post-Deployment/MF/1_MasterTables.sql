@@ -3431,7 +3431,8 @@ BEGIN
 		,0
 		,0
 END
-Go
+GO
+
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFInventoryAdjustment
@@ -3458,9 +3459,9 @@ BEGIN
 		,intWorkOrderId
 		,dtmDateCreated
 		)
-	SELECT isNULL(WC.dtmActualInputDateTime,WC.dtmCreated)
+	SELECT isNULL(WC.dtmActualInputDateTime, WC.dtmCreated)
 		,8
-		,WC.intItemId
+		,IsNULL(WC.intItemId, L.intItemId)
 		,WC.intLotId
 		,WC.dblQuantity
 		,WC.intItemUOMId
@@ -3474,6 +3475,7 @@ BEGIN
 		,WC.dtmActualInputDateTime
 	FROM tblMFWorkOrderConsumedLot WC
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WC.intWorkOrderId
+	LEFT JOIN tblICLot L ON L.intLotId = WC.intLotId
 
 	INSERT INTO tblMFInventoryAdjustment (
 		dtmDate
@@ -3491,9 +3493,9 @@ BEGIN
 		,intWorkOrderId
 		,dtmDateCreated
 		)
-	SELECT IsNULL(WI.dtmProductionDate,WI.dtmCreated)
+	SELECT IsNULL(WI.dtmProductionDate, WI.dtmCreated)
 		,104
-		,WI.intItemId
+		,IsNULL(WI.intItemId, L.intItemId)
 		,WI.intLotId
 		,CASE 
 			WHEN ysnConsumptionReversed = 0
@@ -3507,10 +3509,11 @@ BEGIN
 		,WI.intWorkOrderInputLotId
 		,WI.dtmBusinessDate
 		,WI.intBusinessShiftId
-		,W.intWorkOrderId 
+		,W.intWorkOrderId
 		,WI.dtmProductionDate
 	FROM tblMFWorkOrderInputLot WI
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
+	LEFT JOIN tblICLot L ON L.intLotId = WI.intLotId
 
 	INSERT INTO tblMFInventoryAdjustment (
 		dtmDate
@@ -3528,28 +3531,33 @@ BEGIN
 		,intWorkOrderId
 		,dtmDateCreated
 		)
-	SELECT IsNULL(WP.dtmProductionDate,WP.dtmCreated)
+	SELECT IsNULL(WP.dtmProductionDate, WP.dtmCreated)
 		,9
-		,WP.intItemId
+		,IsNULL(WP.intItemId, L.intItemId)
 		,WP.intLotId
 		,CASE 
 			WHEN ysnProductionReversed = 0
-				THEN WP.dblPhysicalCount 
+				THEN WP.dblPhysicalCount
 			ELSE - WP.dblPhysicalCount
 			END
-		,WP.intPhysicalItemUOMId 
+		,WP.intPhysicalItemUOMId
 		,WP.intCreatedUserId
 		,W.intLocationId
 		,WP.intStorageLocationId
 		,WP.intWorkOrderProducedLotId
 		,WP.dtmBusinessDate
 		,WP.intBusinessShiftId
-		,W.intWorkOrderId 
+		,W.intWorkOrderId
 		,WP.dtmProductionDate
 	FROM tblMFWorkOrderProducedLot WP
 	JOIN tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
+	LEFT JOIN tblICLot L ON L.intLotId = WP.intLotId
 
-	Update tblMFInventoryAdjustment Set dtmDateCreated=dtmDate Where dtmDateCreated is null
+	UPDATE tblMFInventoryAdjustment
+	SET dtmDateCreated = dtmDate
+	WHERE dtmDateCreated IS NULL
 END
-Go
+GO
+
+
 
