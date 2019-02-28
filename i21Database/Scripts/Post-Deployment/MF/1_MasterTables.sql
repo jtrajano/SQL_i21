@@ -3723,6 +3723,18 @@ BEGIN
 END
 GO
 
+-- To delete the duplicate combination
+GO
+DELETE
+FROM tblMFItemChangeMap
+WHERE intItemChangeId NOT IN (
+		SELECT MIN(intItemChangeId)
+		FROM tblMFItemChangeMap
+		GROUP BY intFromItemCategoryId
+			,intToItemCategoryId
+		)
+GO
 
-
-
+GO
+UPDATE tblMFItemChangeMap SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
+GO
