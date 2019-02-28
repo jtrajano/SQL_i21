@@ -1,6 +1,6 @@
 ﻿CREATE TABLE dbo.tblMFInventoryAdjustment (
 	intAdjustmentId INT identity(1, 1)
-	,dtmDate DATETIME NOT NULL
+	,dtmDate DATETIME NULL
 	,intTransactionTypeId INT NOT NULL
 	,intItemId INT NOT NULL
 	,intStorageLocationId int NULL
