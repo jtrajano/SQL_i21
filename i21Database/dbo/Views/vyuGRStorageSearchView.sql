@@ -74,7 +74,7 @@ SELECT
 									)
 	,Category.strCategoryCode
 	,strTransactionStatus           = CASE 
-										WHEN CS.ysnTransferStorage = 1 OR CS.intTicketId IS NOT NULL OR DS.ysnPost = 1 THEN 'Posted'
+										WHEN CS.ysnTransferStorage = 1 OR CS.intTicketId IS NOT NULL OR DeliverySheet.ysnPost = 1 THEN 'Posted'
 										ELSE 'Open'
 									END
 FROM tblGRCustomerStorage CS  
