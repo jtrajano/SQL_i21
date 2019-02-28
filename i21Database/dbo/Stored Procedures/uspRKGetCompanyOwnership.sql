@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[uspRKGetCompanyOwnership]
+﻿CREATE PROCEDURE [dbo].[uspRKGetCompanyOwnership]
 	@dtmFromTransactionDate DATE = NULL
 	, @dtmToTransactionDate DATE = NULL
 	, @intCommodityId INT = NULL
@@ -8,16 +8,14 @@
 
 AS
 
+DECLARE @dtmOrigFromTransactionDate DATETIME
 
-	DECLARE @dtmOrigFromTransactionDate DATETIME
-
-	--Grab the original start date and assinged to a varialbe to be used laster on.
-	SET @dtmOrigFromTransactionDate = @dtmFromTransactionDate
-	--Set the Start date as the beggining date "1900"
-	SET @dtmFromTransactionDate =  '1900-01-01 00:00:00'
+--Grab the original start date and assinged to a varialbe to be used laster on.
+SET @dtmOrigFromTransactionDate = @dtmFromTransactionDate
+--Set the Start date as the beggining date "1900"
+SET @dtmFromTransactionDate =  '1900-01-01 00:00:00'
 
 BEGIN
-
 	DECLARE @tblResult TABLE (Id INT identity(1, 1)
 		, dtmDate DATETIME
 		, strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -50,7 +48,6 @@ BEGIN
 		SET @intItemId = NULL
 	END
 
-	
 	SELECT  strItemNo
 		, dtmDate
 		, dblUnpaidIn
@@ -62,33 +59,8 @@ BEGIN
 		, intReceiptId
 	INTO #tempResult
 	FROM (
-		--SELECT *
-		--	, round(dblInQty, 2) dblUnpaidIn
-		--	, round(dblOutQty, 2) dblUnpaidOut
-		--FROM (
-		--	SELECT CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
-		--		, dblUnitCost dblUnitCost1
-		--		, iri.intInventoryReceiptItemId
-		--		, i.strItemNo
-		--		, isnull(bd.dblQtyReceived, 0) dblInQty
-		--		, (bd.dblQtyReceived/b.dblTotal) * (b.dblTotal - b.dblAmountDue) AS dblOutQty
-		--		, st.strDistributionOption as strDistributionOption
-		--		, b.strBillId AS strReceiptNumber
-		--		, b.intBillId AS intReceiptId
-		--		, b.ysnPaid
-		--	FROM tblAPBill b
-		--	JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId AND b.intShipToId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-		--	INNER JOIN tblICInventoryReceiptItem iri ON bd.intInventoryReceiptItemId = iri.intInventoryReceiptItemId
-		--	INNER JOIN tblICInventoryReceipt ir ON iri.intInventoryReceiptId = ir.intInventoryReceiptId
-		--	INNER JOIN tblICItem i ON i.intItemId = bd.intItemId
-		--	INNER JOIN vyuSCTicketView st ON st.intTicketId = iri.intSourceId
-		--	WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId
-		--		AND i.intItemId = isnull(@intItemId, i.intItemId) AND isnull(strType, '') <> 'Other Charge'
-		--		AND b.intShipToId = isnull(@intLocationId, b.intShipToId) AND ir.intSourceType = 1
-		--) t
-		
 		--From Settle Storage
-		 SELECT *
+		SELECT *
 			, round(dblInQty, 2) dblUnpaidIn
 			, round(dblOutQty, 2) dblUnpaidOut
 		FROM (
@@ -122,8 +94,8 @@ BEGIN
 		, dblGrossUnits AS dblUnpaidBalance
 		, dblGrossUnits as dblPaidBalance
 		, strDistributionOption 
-		, strReceiptNumber
-		, ir.intInventoryReceiptId
+		, r.strReceiptNumber
+		, r.intInventoryReceiptId
 	FROM tblICInventoryReceiptItem ir
 	JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ir.intInventoryReceiptId AND ysnPosted = 1
 	JOIN tblSMCompanyLocationSubLocation sl ON ir.intSubLocationId = sl.intCompanyLocationSubLocationId AND sl.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
@@ -180,7 +152,7 @@ BEGIN
 		, 0 as dblPaidBalance
 		, strDistributionOption
 		, strReceiptNumber
-		, intInventoryReceiptItemId
+		, intReceiptId
 	FROM (
 		SELECT CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
 			, RI.dblUnitCost dblUnitCost1
@@ -237,25 +209,7 @@ BEGIN
 			AND C.intCommodityId = @intCommodityId
 			AND IT.intItemId = isnull(@intItemId, IT.intItemId)
 			AND il.intLocationId = isnull(@intLocationId, il.intLocationId)
-		
-		--Storage
-		--UNION ALL SELECT CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
-		--	, round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
-		--	, IA.strAdjustmentNo strAdjustmentNo
-		--	, IA.intInventoryAdjustmentId intInventoryAdjustmentId
-		--	, strItemNo
-		--FROM tblICInventoryAdjustment IA
-		--INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
-		--INNER JOIN tblICItem Itm ON IAD.intItemId = Itm.intItemId
-		--INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
-		--WHERE IAD.intOwnershipType = 2 --Storage
-		--	AND IA.ysnPosted = 1
-		--	AND convert(DATETIME, CONVERT(VARCHAR(10), IA.dtmPostedDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-		--	AND C.intCommodityId = @intCommodityId 
-		--	AND IAD.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN IAD.intItemId ELSE @intItemId END 
-			--AND Itm.intLocationId = case when isnull(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
-
-		)a
+	)a
 
 	--Inventory Transfers
 	UNION ALL SELECT strItemNo
@@ -283,148 +237,128 @@ BEGIN
 																										ELSE isnull(ysnLicensed, 0) END)
 			and isnull(il.strDescription,'') <> 'In-Transit'
 		WHERE i.intCommodityId=@intCommodityId  
-		and i.intItemId = isnull(@intItemId, i.intItemId)
-		and il.intLocationId = isnull(@intLocationId, il.intLocationId)
-		and convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+			and i.intItemId = isnull(@intItemId, i.intItemId)
+			and il.intLocationId = isnull(@intLocationId, il.intLocationId)
+			and convert(datetime,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 		group by dtmDate, strItemNo, it.intTransactionId, it.strTransactionId, intCommodityUnitMeasureId
-		
+	)a WHERE dblTransferQty <> 0
 
-		)a WHERE dblTransferQty <> 0
-
-
-
-UNION 
-SELECT --Delivery Sheet
- strItemNo
-	, dtmDate
-	,dblInQty AS dblUnpaidIn
-	,0 AS dblUnpaidOut
-	,dblInQty AS dblUnpaidBalance
-	,0 as dblPaidBalance
-	,strDistributionOption
-	,strReceiptNumber
-	,intInventoryReceiptItemId
-FROM (
-	SELECT 
-		CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
-		,RI.dblUnitCost dblUnitCost1
-		,RI.intInventoryReceiptItemId
-		,I.strItemNo
-		,isnull(RI.dblNet, 0) - ISNULL(RI.dblBillQty,0) dblInQty
-		,0 AS dblOutQty
-		,GST.strStorageTypeCode strDistributionOption
-		,R.strReceiptNumber
-        ,R.intInventoryReceiptId
-		--,Inv.strInvoiceNumber AS strReceiptNumber
-		--,Inv.intInvoiceId AS intReceiptId
-	FROM tblSCDeliverySheetSplit DSS 
-	INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
-	INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
-	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
-	INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
-	WHERE ST.strTicketStatus = 'C'
-	AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-	AND ST.intCommodityId = @intCommodityId 
-	AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
-	AND ST.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
-	AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-	AND RI.intOwnershipType = 1
-	AND R.intSourceType = 1
-	AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 1 ELSE NULL END)--Contract, Spot and DP
-	--AND RI.dblBillQty = 0
+	--Delivery Sheet
+	UNION ALL SELECT strItemNo
+		, dtmDate
+		, dblInQty AS dblUnpaidIn
+		, 0 AS dblUnpaidOut
+		, dblInQty AS dblUnpaidBalance
+		, 0 as dblPaidBalance
+		, strDistributionOption
+		, strReceiptNumber
+		, intInventoryReceiptId
+	FROM (
+		SELECT CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
+			,RI.dblUnitCost dblUnitCost1
+			,RI.intInventoryReceiptItemId
+			,I.strItemNo
+			,isnull(RI.dblNet, 0) - ISNULL(RI.dblBillQty,0) dblInQty
+			,0 AS dblOutQty
+			,GST.strStorageTypeCode strDistributionOption
+			,R.strReceiptNumber
+			,R.intInventoryReceiptId
+		FROM tblSCDeliverySheetSplit DSS
+		INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
+		INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
+		INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+		INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+		INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
+		WHERE ST.strTicketStatus = 'C'
+			AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND ST.intCommodityId = @intCommodityId
+			AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END
+			AND ST.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end
+			AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+			AND RI.intOwnershipType = 1
+			AND R.intSourceType = 1
+			AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 1 ELSE NULL END)--Contract, Spot and DP
+	)t
 	
+	--Delivery Sheet With Voucher
+	UNION ALL SELECT strItemNo
+		, dtmDate
+		, dblInQty AS dblUnpaidIn
+		, 0 AS dblUnpaidOut
+		, dblInQty AS dblUnpaidBalance
+		, 0 as dblPaidBalance
+		, strDistributionOption
+		, strReceiptNumber
+		, intReceiptId
+	FROM (
+		SELECT 
+			CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
+			,RI.dblUnitCost dblUnitCost1
+			,RI.intInventoryReceiptItemId
+			,I.strItemNo
+			,isnull(BD.dblQtyReceived, 0) dblInQty
+			,0 AS dblOutQty
+			,GST.strStorageTypeCode strDistributionOption
+			,Bill.strBillId AS strReceiptNumber
+			,Bill.intBillId AS intReceiptId
+		FROM tblSCDeliverySheetSplit DSS 
+		INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
+		INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
+		INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+		INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+		INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
+		INNER JOIN tblAPBillDetail BD ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+		INNER JOIN tblAPBill Bill ON BD.intBillId = Bill.intBillId
+		WHERE ST.strTicketStatus = 'C'
+			AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND ST.intCommodityId = @intCommodityId 
+			AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
+			AND ST.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
+			AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+			AND RI.intOwnershipType = 1
+			AND R.intSourceType = 1
+			AND Bill.ysnPosted = 1
+			AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 1 ELSE NULL END)--Contract, Spot and DP
+			AND RI.dblBillQty <> 0
+	)t
 
-)t
-
-UNION 
-SELECT --Delivery Sheet With Voucher
- strItemNo
-    , dtmDate
-    ,dblInQty AS dblUnpaidIn
-    ,0 AS dblUnpaidOut
-    ,dblInQty AS dblUnpaidBalance
-    ,0 as dblPaidBalance
-    ,strDistributionOption
-    ,strReceiptNumber
-    ,intReceiptId as intInventoryReceiptItemId
-FROM (
-    SELECT 
-        CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
-        ,RI.dblUnitCost dblUnitCost1
-        ,RI.intInventoryReceiptItemId
-        ,I.strItemNo
-        ,isnull(BD.dblQtyReceived, 0) dblInQty
-        ,0 AS dblOutQty
-        ,GST.strStorageTypeCode strDistributionOption
-        ,Bill.strBillId AS strReceiptNumber
-        ,Bill.intBillId AS intReceiptId
-        --,Inv.strInvoiceNumber AS strReceiptNumber
-        --,Inv.intInvoiceId AS intReceiptId
-    FROM tblSCDeliverySheetSplit DSS 
-    INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
-    INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
-    INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-    INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
-    INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
-    INNER JOIN tblAPBillDetail BD ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-    INNER JOIN tblAPBill Bill ON BD.intBillId = Bill.intBillId
-    WHERE ST.strTicketStatus = 'C'
-    AND convert(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-    AND ST.intCommodityId = @intCommodityId 
-    AND ST.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
-    AND ST.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
-    AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-    AND RI.intOwnershipType = 1
-    AND R.intSourceType = 1
-    AND Bill.ysnPosted = 1
-    AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 1 ELSE NULL END)--Contract, Spot and DP
-    AND RI.dblBillQty <> 0
-    
-)t
-
-
-
-UNION
-SELECT --Direct from Invoice
- strItemNo
-	, dtmDate
-	,dblInQty AS dblUnpaidIn
-	,0 AS dblUnpaidOut
-	,0 AS dblUnpaidBalance
-	,ABS(dblInQty) + ABS(isnull(dblOutQty, 0)) * CASE WHEN dblOutQty < 0 THEN 1 ELSE -1 END as dblPaidBalance
-	,strDistributionOption
-	,strReceiptNumber
-	,intInventoryReceiptItemId
-FROM (
-SELECT
-	CONVERT(VARCHAR(10), I.dtmPostDate, 110) dtmDate
-	,0 dblUnitCost1
-	,I.intInvoiceId intInventoryReceiptItemId
-	,Itm.strItemNo
-	,CASE WHEN I.strTransactionType = 'Credit Memo' THEN isnull(ID.dblQtyShipped, 0) ELSE 0.0  END dblInQty
-	,CASE WHEN I.strTransactionType = 'Credit Memo' THEN 0.0 ELSE isnull(ID.dblQtyShipped, 0)  END dblOutQty
-	,'' strDistributionOption
-	,I.strInvoiceNumber AS strReceiptNumber
-	,I.intInvoiceId AS intReceiptId
-FROM 
-tblARInvoice I
-INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-INNER JOIN tblICItem Itm ON ID.intItemId = Itm.intItemId
-INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
-LEFT JOIN tblICItemLocation ItmLoc ON  Itm.intItemId = ItmLoc.intItemId AND I.intCompanyLocationId = ItmLoc.intLocationId
-WHERE I.ysnPosted = 1
-AND ID.intInventoryShipmentItemId IS NULL
-AND ID.intInventoryShipmentChargeId IS NULL
-AND Itm.strType IN ('Inventory', 'Raw Material', 'Finished Good')
-AND I.strTransactionType NOT IN  ('Customer Prepayment')
-AND convert(DATETIME, CONVERT(VARCHAR(10), I.dtmPostDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-AND C.intCommodityId = @intCommodityId 
-AND ID.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ID.intItemId ELSE @intItemId END 
-AND I.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then I.intCompanyLocationId else @intLocationId end 
-AND I.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[intItemLocationId], ID.[intItemUOMId]) <> 0)) ) 
-)t
+	--Direct from Invoice
+	UNION ALL SELECT strItemNo
+		, dtmDate
+		,dblInQty AS dblUnpaidIn
+		,0 AS dblUnpaidOut
+		,0 AS dblUnpaidBalance
+		,ABS(dblInQty) + ABS(isnull(dblOutQty, 0)) * CASE WHEN dblOutQty < 0 THEN 1 ELSE -1 END as dblPaidBalance
+		,strDistributionOption
+		,strReceiptNumber
+		,intInventoryReceiptItemId
+	FROM (
+		SELECT CONVERT(VARCHAR(10), I.dtmPostDate, 110) dtmDate
+			,0 dblUnitCost1
+			,I.intInvoiceId intInventoryReceiptItemId
+			,Itm.strItemNo
+			,CASE WHEN I.strTransactionType = 'Credit Memo' THEN isnull(ID.dblQtyShipped, 0) ELSE 0.0  END dblInQty
+			,CASE WHEN I.strTransactionType = 'Credit Memo' THEN 0.0 ELSE isnull(ID.dblQtyShipped, 0)  END dblOutQty
+			,'' strDistributionOption
+			,I.strInvoiceNumber AS strReceiptNumber
+			,I.intInvoiceId AS intReceiptId
+		FROM tblARInvoice I
+		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+		INNER JOIN tblICItem Itm ON ID.intItemId = Itm.intItemId
+		INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+		LEFT JOIN tblICItemLocation ItmLoc ON  Itm.intItemId = ItmLoc.intItemId AND I.intCompanyLocationId = ItmLoc.intLocationId
+		WHERE I.ysnPosted = 1
+			AND ID.intInventoryShipmentItemId IS NULL
+			AND ID.intInventoryShipmentChargeId IS NULL
+			AND Itm.strType IN ('Inventory', 'Raw Material', 'Finished Good')
+			AND I.strTransactionType NOT IN  ('Customer Prepayment')
+			AND convert(DATETIME, CONVERT(VARCHAR(10), I.dtmPostDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND C.intCommodityId = @intCommodityId 
+			AND ID.intItemId = CASE WHEN isnull(@intItemId, 0) = 0 THEN ID.intItemId ELSE @intItemId END 
+			AND I.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then I.intCompanyLocationId else @intLocationId end 
+			AND I.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+			AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[intItemLocationId], ID.[intItemUOMId]) <> 0)) ) 
+	)t
 
 	--Direct Inventory Shipment (This will show the Invoice Number once Shipment is invoiced)
 	UNION ALL SELECT strItemNo
@@ -509,41 +443,33 @@ AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[i
 		, strReceiptNumber
 		, intInventoryReceiptItemId
 	FROM (
-		select
-				CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
-				,S.strStorageTypeCode strDistributionOption
-				, 0  AS dblOutQty
-				,CASE WHEN SH.strType = 'Settlement' THEN
-					ABS(dblUnits)
-					WHEN  SH.strType = 'Reverse Settlement'  THEN
-					ABS(dblUnits) * -1
+		SELECT CONVERT(VARCHAR(10),SH.dtmDistributionDate,110) dtmDate
+			, S.strStorageTypeCode strDistributionOption
+			, 0  AS dblOutQty
+			, CASE WHEN SH.strType = 'Settlement' THEN ABS(dblUnits)
+					WHEN  SH.strType = 'Reverse Settlement' THEN ABS(dblUnits) * -1
 					ELSE 0 END AS dblInQty
-				,S.intStorageScheduleTypeId
-				,SH.intSettleStorageId as intInventoryReceiptItemId
-				,SH.strSettleTicket as strReceiptNumber
-				,I.strItemNo
-
-			from 
-			tblGRCustomerStorage CS
-			INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
-			INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
-			INNER JOIN tblICItem I ON CS.intItemId = I.intItemId
-			WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
-									convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-								AND CS.intCommodityId= @intCommodityId
-								and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
-								AND  CS.intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
-								AND SH.strType IN ('Settlement','Reverse Settlement')
-								AND S.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN NULL ELSE 1 END
-								AND SH.intBillId IS NULL
+			, S.intStorageScheduleTypeId
+			, SH.intSettleStorageId as intInventoryReceiptItemId
+			, SH.strSettleTicket as strReceiptNumber
+			, I.strItemNo
+		FROM tblGRCustomerStorage CS
+		INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+		INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+		INNER JOIN tblICItem I ON CS.intItemId = I.intItemId
+		WHERE convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+			AND CS.intCommodityId= @intCommodityId
+			and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
+			AND  CS.intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+			AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
+			AND SH.strType IN ('Settlement','Reverse Settlement')
+			AND S.ysnDPOwnedType = CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN NULL ELSE 1 END
+			AND SH.intBillId IS NULL
 	) t
 
 	--Get Balance Forward
-	INSERT INTO @tblResult (
-		  dblUnpaidBalance
-		, InventoryBalanceCarryForward
-	)
+	INSERT INTO @tblResult (dblUnpaidBalance
+		, InventoryBalanceCarryForward)
 	select sum(dblUnpaidBalance), sum(dblPaidBalance) from #tempResult WHERE dtmDate < @dtmOrigFromTransactionDate
 
 	--Filter it by orignal filter date
@@ -567,7 +493,6 @@ AND (( (ID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ID.[intItemId], ItmLoc.[i
 		, intReceiptId
 	FROM #tempResult T1
 	WHERE dtmDate between @dtmOrigFromTransactionDate and @dtmToTransactionDate
-
 
 	--Return
 	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum
