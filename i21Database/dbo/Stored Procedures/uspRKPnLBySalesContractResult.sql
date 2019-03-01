@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspRKPnLBySalesContractResult
+﻿CREATE PROCEDURE [dbo].[uspRKPnLBySalesContractResult]
 		@intSContractDetailId	INT,
 		@intCurrencyId			INT,-- currency
 		@intUnitMeasureId		INT,--- Price uom	
@@ -389,7 +389,8 @@ UNION
 		,strInternalTradeNo
 		,dblAssignedLots
 		,t.dblPrice dblContractPrice
-		,((isnull(cs.dblAssignedLots, 0) + isnull(cs.intHedgedLots, 0)) * (sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 intNoOfLots
+		,((isnull(cs.dblAssignedLots, 0) * CASE WHEN t.strBuySell = 'Sell' THEN -1 ELSE 1 END + 
+			isnull(cs.intHedgedLots, 0) * CASE WHEN t.strBuySell = 'Sell' THEN -1 ELSE 1 END) * (LD.dblQuantity / CD.dblQuantity)) intNoOfLots
 		,t.dblPrice
 		,t.intFutureMarketId
 		,t.intFutureMonthId
@@ -420,7 +421,8 @@ UNION
 		,strInternalTradeNo
 		,dblAssignedLots
 		,t.dblPrice dblContractPrice
-		,-((isnull(cs.dblAssignedLots, 0) + isnull(cs.intHedgedLots, 0)) * (sum(LD.dblQuantity) OVER (PARTITION BY CD.intContractDetailId) / CD.dblQuantity * 100)) / 100 intNoOfLots
+		,((isnull(cs.dblAssignedLots, 0) * CASE WHEN t.strBuySell = 'Sell' THEN -1 ELSE 1 END + 
+			isnull(cs.intHedgedLots, 0) * CASE WHEN t.strBuySell = 'Sell' THEN -1 ELSE 1 END) * (LD.dblQuantity / CD.dblQuantity)) intNoOfLots
 		,t.dblPrice
 		,t.intFutureMarketId
 		,t.intFutureMonthId
@@ -489,5 +491,3 @@ WHERE strContractType = 'Physical Profit - USD')t
 SELECT *
 FROM @Result
 ORDER BY intResultId
-
-GO
