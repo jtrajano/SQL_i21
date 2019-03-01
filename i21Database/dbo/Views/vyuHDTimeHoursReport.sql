@@ -15,10 +15,10 @@
 			,strAgentName = g.strName
 			,a.intHours
 			,a.dblEstimatedHours
-			,dblHours = a.intHours
-			,intBilledAmount = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end) * a.dblRate
-			,intBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end)
-			,intNonBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then a.intHours else 0 end)
+			,dblHours = (case when h.strServiceType = 'Expense' then 0.00 else a.intHours end)
+			,intBilledAmount = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else (case when h.strServiceType = 'Expense' then 0.00 else a.intHours end) end) * a.dblRate
+			,intBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else (case when h.strServiceType = 'Expense' then 0.00 else a.intHours end) end)
+			,intNonBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then (case when h.strServiceType <> 'Expense' then 0.00 else a.intHours end) else 0 end)
 			,intJobCodeId = h.intItemId
 			,strJobCode = h.strItemNo
 			,a.dblRate
