@@ -45,6 +45,8 @@ SELECT -- Load Header
 			THEN 'Truck'
 		WHEN LOAD.intTransportationMode = 2
 			THEN 'Ocean Vessel'
+		WHEN LOAD.intTransportationMode = 3
+			THEN 'Rail'
 		END COLLATE Latin1_General_CI_AS
 	,LOAD.intTransUsedBy
 	,strTransUsedBy = CASE 
