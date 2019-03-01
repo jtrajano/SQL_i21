@@ -218,59 +218,104 @@ BEGIN
 		-- ===================================================================
 		-- [Start] - VALIDATION ----------------------------------------------
 		-- ===================================================================
+		IF(@strDirection = 'Post')
+			BEGIN
+				-- Department Totals - Check if there are Item Movements that has no matching department in Department Totals
+				IF EXISTS(SELECT TOP 1 1
+							FROM tblSTCheckoutItemMovements IM
+							JOIN tblICItemUOM UOM
+								ON IM.intItemUPCId = UOM.intItemUOMId
+							JOIN tblICItem Item
+								ON UOM.intItemId = Item.intItemId
+							JOIN tblICCategory Cat
+								ON Item.intCategoryId = Cat.intCategoryId
+							WHERE IM.intCheckoutId = @intCheckoutId
+								AND Cat.intCategoryId NOT IN (
+																SELECT intCategoryId
+																FROM tblSTCheckoutDepartmetTotals
+																WHERE intCheckoutId = @intCheckoutId
+															 )
+						 )
+					BEGIN
+						SELECT TOP 1
+								@strItemNo     = Item.strItemNo,
+								@strDepartment = Cat.strCategoryCode
+							FROM tblSTCheckoutItemMovements IM
+							JOIN tblICItemUOM UOM
+								ON IM.intItemUPCId = UOM.intItemUOMId
+							JOIN tblICItem Item
+								ON UOM.intItemId = Item.intItemId
+							JOIN tblICCategory Cat
+								ON Item.intCategoryId = Cat.intCategoryId
+							WHERE IM.intCheckoutId = @intCheckoutId
+								AND Cat.intCategoryId NOT IN (
+																SELECT intCategoryId
+																FROM tblSTCheckoutDepartmetTotals
+																WHERE intCheckoutId = @intCheckoutId
+															 ) 
+
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the Checkout Departments.'
+						SET @strErrorCode = 'DT-01'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END
+
+				-- Department Totals - Check if there are Pump Items that has no matching department in Department Totals
+				ELSE IF EXISTS(SELECT TOP 1 1
+								FROM tblSTCheckoutPumpTotals PT
+								JOIN tblICItemUOM UOM
+									ON PT.intPumpCardCouponId = UOM.intItemUOMId
+								JOIN tblICItem Item
+									ON UOM.intItemId = Item.intItemId
+								JOIN tblICCategory Cat
+									ON PT.intCategoryId = Cat.intCategoryId
+								WHERE PT.intCheckoutId = @intCheckoutId
+									AND Cat.intCategoryId NOT IN (
+																	SELECT intCategoryId
+																	FROM tblSTCheckoutDepartmetTotals
+																	WHERE intCheckoutId = @intCheckoutId
+																 ) 
+						 )
+					BEGIN
+						SELECT TOP 1
+								@strItemNo     = Item.strItemNo,
+								@strDepartment = Cat.strCategoryCode
+							FROM tblSTCheckoutPumpTotals PT
+							JOIN tblICItemUOM UOM
+								ON PT.intPumpCardCouponId = UOM.intItemUOMId
+							JOIN tblICItem Item
+								ON UOM.intItemId = Item.intItemId
+							JOIN tblICCategory Cat
+								ON PT.intCategoryId = Cat.intCategoryId
+							WHERE PT.intCheckoutId = @intCheckoutId
+								AND Cat.intCategoryId NOT IN (
+																SELECT intCategoryId
+																FROM tblSTCheckoutDepartmetTotals
+																WHERE intCheckoutId = @intCheckoutId
+															 ) 
+
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the Checkout Departments.'
+						SET @strErrorCode = 'DT-02'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END
+
+				-- Item Movement - Check if has null 'intItemUPCId'
+				ELSE IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutItemMovements WHERE intCheckoutId = @intCheckoutId AND intItemUPCId IS NULL)
+					BEGIN
+						SET @ysnUpdateCheckoutStatus = 0
+						SET @strStatusMsg = 'Click Ok to Review Item Movements'
+						SET @strErrorCode = 'IM-01'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+					END
+			END
 		
-		-- Department Totals - Check if there are Item Movements that has no matching department in Department Totals
-		IF EXISTS(SELECT TOP 1 1
-					FROM tblSTCheckoutItemMovements IM
-					JOIN tblICItemUOM UOM
-						ON IM.intItemUPCId = UOM.intItemUOMId
-					JOIN tblICItem Item
-						ON UOM.intItemId = Item.intItemId
-					JOIN tblICCategory Cat
-						ON Item.intCategoryId = Cat.intCategoryId
-					WHERE IM.intCheckoutId = @intCheckoutId
-						AND Cat.intCategoryId NOT IN (
-														SELECT intCategoryId
-														FROM tblSTCheckoutDepartmetTotals
-														WHERE intCheckoutId = @intCheckoutId
-													 )
-		         )
-			BEGIN
-				SELECT TOP 1
-						@strItemNo     = Item.strItemNo,
-						@strDepartment = Cat.strCategoryCode
-					FROM tblSTCheckoutItemMovements IM
-					JOIN tblICItemUOM UOM
-						ON IM.intItemUPCId = UOM.intItemUOMId
-					JOIN tblICItem Item
-						ON UOM.intItemId = Item.intItemId
-					JOIN tblICCategory Cat
-						ON Item.intCategoryId = Cat.intCategoryId
-					WHERE IM.intCheckoutId = @intCheckoutId
-						AND Cat.intCategoryId NOT IN (
-														SELECT intCategoryId
-														FROM tblSTCheckoutDepartmetTotals
-														WHERE intCheckoutId = @intCheckoutId
-													 ) 
-
-				SET @ysnUpdateCheckoutStatus = 0
-				SET @strStatusMsg = 'Item # ' + @strItemNo + ' with Category ' + @strDepartment + ' does not exist in the Checkout Departments'
-				SET @strErrorCode = 'DT-01'
-
-				-- ROLLBACK
-				GOTO ExitWithRollback
-			END
-
-		-- Item Movement - Check if has null 'intItemUPCId'
-		IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutItemMovements WHERE intCheckoutId = @intCheckoutId AND intItemUPCId IS NULL)
-			BEGIN
-				SET @ysnUpdateCheckoutStatus = 0
-				SET @strStatusMsg = 'Item Movement has invalid UPC''s'
-				SET @strErrorCode = 'IM-01'
-
-				-- ROLLBACK
-				GOTO ExitWithRollback
-			END
 
 		-- ===================================================================
 		-- [End] - VALIDATION ------------------------------------------------
