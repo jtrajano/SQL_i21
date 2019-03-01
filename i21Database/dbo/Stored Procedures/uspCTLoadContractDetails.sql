@@ -34,14 +34,13 @@ BEGIN TRY
 
 	INSERT INTO @tblBill(intContractDetailId,dblQuantity)
 	SELECT 
-		   intContractDetailId	= BD.intContractDetailId
-		  ,dblQuantity			= ISNULL(SUM([dbo].[fnCTConvertQuantityToTargetItemUOM](BD.intItemId,BD.intUnitOfMeasureId,UOM.intUnitMeasureId,BD.dblQtyOrdered)),0)
-	FROM tblAPBillDetail BD
-	JOIN tblAPBill B ON B.intBillId = BD.intBillId AND B.ysnPosted = 1 AND BD.dblQtyOrdered > 0 
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = BD.intContractDetailId
-	JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CD.intItemUOMId
+		   intContractDetailId	= ReceiptItem.intLineNo
+		  ,dblQuantity			= ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ReceiptItem.intUnitMeasureId,CD.intItemUOMId,ReceiptItem.dblReceived)),0)
+	FROM tblICInventoryReceiptItem ReceiptItem
+	JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId AND Receipt.strReceiptType = 'Purchase Contract'
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo AND CD.intContractHeaderId = ReceiptItem.intOrderId
 	WHERE CD.intContractHeaderId = @intContractHeaderId
-	GROUP BY BD.intContractDetailId
+	GROUP BY ReceiptItem.intLineNo
 
 	;With ContractDetail AS (
 	   SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId --1247
