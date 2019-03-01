@@ -188,6 +188,59 @@ BEGIN TRY
 		UPDATE	#tmpExtracted SET strContractNumber = @strContractNumber
 	END
 
+	IF	@strScreenName = 'Transfer Storage'
+	BEGIN
+		INSERT	INTO	#tmpExtracted
+		(	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,
+			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,
+			intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId
+		)
+		SELECT	intContractTypeId	= 1, --Purchase
+				intEntityId			= @intEntityId, 
+				dtmContractDate		= TS.dtmTransferStorageDate,
+				intCommodityId		= CM.intCommodityId, 
+				intCommodityUOMId	= CU.intCommodityUnitMeasureId,
+				dblHeaderQuantity	= 0,
+				intSalespersonId	= CP.intDefSalespersonId, 
+				ysnSigned			= 0,
+				strContractNumber	= CAST('' AS NVARCHAR(100)),
+				ysnPrinted			= 0,
+				intItemId			= TS.intItemId,
+				intItemUOMId		= TS.intItemUOMId,
+				intContractSeq		= 1,
+				intStorageScheduleRuleId = TSS.intStorageScheduleId,
+				dtmEndDate = CASE 
+				WHEN strDefEndDateType = 'Calender' THEN ISNULL(CP.dtmDefEndDate,DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())))
+				WHEN strDefEndDateType = 'None' THEN DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+				WHEN strDefEndDateType = 'Last Date of the Start Date''s Month' THEN DATEADD(MONTH, DATEDIFF(MONTH, 0,  (GETDATE())) + 1, 0) - 1
+				ELSE DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
+				END,
+				intCompanyLocationId =	TSS.intCompanyLocationId,
+				dblQuantity			=	TSS.dblUnits,
+				intContractStatusId =	1,
+				dblBalance			=	0,
+				dtmStartDate		=	TS.dtmTransferStorageDate,
+				intPricingTypeId	=	5, --DP
+				dtmCreated			=	GETDATE(),
+				intConcurrencyId	=	1,
+				intCreatedById		=	1,
+				intUnitMeasureId	=	ItemUOM.intUnitMeasureId 
+
+		FROM	tblGRTransferStorageSplit	TSS
+		JOIN	tblGRTransferStorage		TS		ON  TS.intTransferStorageId =	TSS.intTransferStorageId
+  CROSS JOIN	tblCTCompanyPreference		CP
+		JOIN	tblICItem					Item	ON	Item.intItemId			=	TS.intItemId
+		JOIN	tblICItemUOM				ItemUOM ON	ItemUOM.intItemUOMId	=	TS.intItemUOMId
+		JOIN	tblICCommodity				CM		ON	CM.intCommodityId		=	Item.intCommodityId
+		JOIN	tblICCommodityUnitMeasure	CU		ON	CU.intCommodityId		=	CM.intCommodityId
+													AND CU.intUnitMeasureId		=	ItemUOM.intUnitMeasureId 
+		WHERE TSS.intTransferStorageSplitId = @intExternalId 
+
+		SELECT	@strStartingNumber = CASE WHEN intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END FROM #tmpExtracted
+		EXEC	uspCTGetStartingNumber @strStartingNumber, @strContractNumber OUTPUT
+		UPDATE	#tmpExtracted SET strContractNumber = @strContractNumber
+	END
+
 	IF	@strScreenName = 'Contract Import'
 	BEGIN
 		INSERT	INTO	#tmpExtracted
