@@ -318,7 +318,7 @@ SELECT *
 FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
-		,L.strLoadNumber
+		,strLoadNumber = CASE WHEN (L.intShipmentType = 1) THEN SI.strLoadNumber ELSE L.strLoadNumber END
 		,L.intPurchaseSale
 		,L.dtmBLDate
 		,L.dtmDeliveredDate
@@ -944,6 +944,7 @@ FROM (
 			ELSE intSContractDetailId
 			END
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 	LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
 	LEFT JOIN tblEMEntityToContact PEC ON PEC.intEntityId = Producer.intEntityId
 	LEFT JOIN tblEMEntity PETC ON PETC.intEntityId = PEC.intEntityContactId
