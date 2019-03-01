@@ -1,11 +1,11 @@
-﻿CREATE PROC uspRKCurExpForNonSelectedCurrency
+﻿CREATE PROC [dbo].[uspRKCurExpForNonSelectedCurrency]
          @intCommodityId int
        , @dtmClosingPrice datetime=null
        , @intCurrencyId int
 
 AS
 --declare   @intCommodityId int = 1
---     , @dtmClosingPrice datetime = '2019-02-21T19:33:04'
+--     , @dtmClosingPrice datetime = '2019-02-28 15:21:55'
 --     , @intCurrencyId int = 3
 
 BEGIN
@@ -20,11 +20,10 @@ BEGIN
                                                        WHERE id.intContractDetailId=cd.intContractDetailId) dblQuantity
                      , um.strUnitMeasure strUnitMeasure
                      ,
-                     (([dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId,cd.intCurrencyId)*
-              (dbo.fnRKGetSequencePrice(cd.intContractDetailId,dbo.fnRKGetLatestClosingPrice(fm.intFutureMarketId, 
+                     dbo.fnRKGetSequencePrice(cd.intContractDetailId,dbo.fnRKGetLatestClosingPrice(fm.intFutureMarketId, 
                                                                                                                         (SELECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth mon
                                                                                                                            WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId 
-                                                                                                                           ORDER BY 1 DESC), @dtmClosingPrice) )-cd.dblBasis)) + cd.dblBasis ) dblOrigPrice -- remove the basis from function then convert the price uom only settlement price. then we have added the basis
+                                                                                                                           ORDER BY 1 DESC), @dtmClosingPrice)) dblOrigPrice -- remove the basis from function then convert the price uom only settlement price. then we have added the basis
 
                      , (c.strCurrency + '/' + um.strUnitMeasure) COLLATE Latin1_General_CI_AS strOrigPriceUOM
                      , (CONVERT(VARCHAR(11), cd.dtmStartDate, 106) + '-' + CONVERT(VARCHAR(11), cd.dtmEndDate, 106)) COLLATE Latin1_General_CI_AS dtmPeriod
