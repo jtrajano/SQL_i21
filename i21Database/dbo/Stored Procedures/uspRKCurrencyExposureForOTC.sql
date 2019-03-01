@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKCurrencyExposureForOTC
+﻿CREATE PROC [dbo].[uspRKCurrencyExposureForOTC]
 	 @intCommodityId int
 AS
 
@@ -15,8 +15,8 @@ BEGIN
 		, case when strBuySell = 'Buy' then dblContractAmount else -dblContractAmount end dblContractAmount
 		, dblExchangeRate
 		, strFromCurrency strExchangeFromCurrency
-		, dblMatchAmount
-		, strFromCurrency strMatchedFromCurrency	
+		, case when strBuySell = 'Buy' then -dblMatchAmount else dblMatchAmount end dblMatchAmount
+		, strToCurrency strMatchedFromCurrency	
 		, mc.strCompanyName
 		, 1 as intConcurrencyId,intFutOptTransactionId, c.intCurrencyID intExchangeRateCurrencyId, c.intCurrencyID intAmountCurrencyId,mc.intMultiCompanyId intCompanyId
 	FROM tblRKFutOptTransaction ft
