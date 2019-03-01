@@ -59,6 +59,7 @@ DECLARE @intItemId AS INT
 		,@intCostingMethod AS INT 
 		,@InventoryTransactionIdentityId AS INT 
 		,@intInventoryTransactionId AS INT 
+		,@dtmCreated AS DATETIME 
 
 DECLARE	@GLEntries AS RecapTableType 
 DECLARE @GLAccounts AS dbo.ItemGLAccount
@@ -359,6 +360,7 @@ BEGIN
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@intCostingMethod = @intCostingMethod
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+					,@dtmCreated = @dtmCreated OUTPUT 
 			
 			IF @InventoryTransactionIdentityId IS NULL 
 			BEGIN 
@@ -461,7 +463,7 @@ BEGIN
 							,gd.strReference
 							,gd.intCurrencyId
 							,gd.dblExchangeRate
-							,GETDATE()--gd.dtmDateEntered
+							,@dtmCreated
 							,gd.dtmTransactionDate
 							,gd.strJournalLineDescription
 							,intJournalLineNo = @InventoryTransactionIdentityId
@@ -512,7 +514,7 @@ BEGIN
 							,gd.strReference
 							,gd.intCurrencyId
 							,gd.dblExchangeRate
-							,GETDATE() -- gd.dtmDateEntered
+							,@dtmCreated
 							,gd.dtmTransactionDate
 							,gd.strJournalLineDescription
 							,intJournalLineNo = @InventoryTransactionIdentityId
@@ -599,7 +601,7 @@ BEGIN
 							,gd.strReference
 							,gd.intCurrencyId
 							,gd.dblExchangeRate
-							,GETDATE()--gd.dtmDateEntered
+							,@dtmCreated
 							,gd.dtmTransactionDate
 							,gd.strJournalLineDescription
 							,intJournalLineNo = @InventoryTransactionIdentityId
@@ -650,7 +652,7 @@ BEGIN
 							,gd.strReference
 							,gd.intCurrencyId
 							,gd.dblExchangeRate
-							,GETDATE() -- gd.dtmDateEntered
+							,@dtmCreated
 							,gd.dtmTransactionDate
 							,gd.strJournalLineDescription
 							,intJournalLineNo = @InventoryTransactionIdentityId
@@ -727,6 +729,7 @@ BEGIN
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@intCostingMethod = @intCostingMethod
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+					,@dtmCreated = @dtmCreated OUTPUT 
 			
 			IF @InventoryTransactionIdentityId IS NULL 
 			BEGIN 
@@ -830,7 +833,7 @@ BEGIN
 							,gd.strReference
 							,gd.intCurrencyId
 							,gd.dblExchangeRate
-							,GETDATE()--gd.dtmDateEntered
+							,@dtmCreated
 							,gd.dtmTransactionDate
 							,gd.strJournalLineDescription
 							,intJournalLineNo = @InventoryTransactionIdentityId
@@ -881,7 +884,7 @@ BEGIN
 							,gd.strReference
 							,gd.intCurrencyId
 							,gd.dblExchangeRate
-							,GETDATE() -- gd.dtmDateEntered
+							,@dtmCreated
 							,gd.dtmTransactionDate
 							,gd.strJournalLineDescription
 							,intJournalLineNo = @InventoryTransactionIdentityId
@@ -968,7 +971,7 @@ BEGIN
 							,gd.strReference
 							,gd.intCurrencyId
 							,gd.dblExchangeRate
-							,GETDATE()--gd.dtmDateEntered
+							,@dtmCreated
 							,gd.dtmTransactionDate
 							,gd.strJournalLineDescription
 							,intJournalLineNo = @InventoryTransactionIdentityId
@@ -1019,7 +1022,7 @@ BEGIN
 							,gd.strReference
 							,gd.intCurrencyId
 							,gd.dblExchangeRate
-							,GETDATE() -- gd.dtmDateEntered
+							,@dtmCreated
 							,gd.dtmTransactionDate
 							,gd.strJournalLineDescription
 							,intJournalLineNo = @InventoryTransactionIdentityId

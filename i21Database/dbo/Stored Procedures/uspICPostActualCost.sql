@@ -71,6 +71,7 @@ DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryAdjustment_OpeningInventory AS INT = 47
 
 DECLARE @intReturnValue AS INT 
+DECLARE @dtmCreated AS DATETIME 
 
 -------------------------------------------------
 -- 1. Process the Actual Cost buckets
@@ -130,7 +131,7 @@ BEGIN
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(38,20) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
-			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblCostToUse AS NUMERIC(38,20) = ISNULL(@CostUsed, @dblCost)			
 
 			EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
@@ -163,6 +164,7 @@ BEGIN
 					,@dblForexRate = @dblForexRate						
 					,@strActualCostId = @strActualCostId
 					,@dblUnitRetail = @dblUnitRetail
+					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 			
@@ -171,10 +173,12 @@ BEGIN
 					intInventoryTransactionId
 					,intInventoryActualCostId
 					,dblQty
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 					,intInventoryActualCostId = @UpdatedActualCostId
 					,dblQty = @QtyOffset
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedActualCostId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
@@ -191,7 +195,7 @@ BEGIN
 		SET @dblAddQty = ISNULL(@dblQty, 0) 
 		SET @FullQty = @dblAddQty
 		SET @TotalQtyOffset = 0;
-		
+
 		-- Insert the inventory transaction record
 		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -224,6 +228,7 @@ BEGIN
 				,@dblForexRate = @dblForexRate				
 				,@strActualCostId = @strActualCostId		
 				,@dblUnitRetail = @dblUnitRetail
+				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -314,6 +319,7 @@ BEGIN
 							,@strActualCostId = @strActualCostId
 							,@dblUnitRetail = @dblUnitRetail
 							,@strDescription = @strDescription
+							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END 
@@ -325,11 +331,13 @@ BEGIN
 					,intInventoryActualCostId
 					,dblQty
 					,intRevalueActualCostId
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 					,intInventoryActualCostId = NULL 
 					,dblQty = @QtyOffset
 					,intRevalueActualCostId = @UpdatedActualCostId
+					,dtmCreated = @dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedActualCostId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 

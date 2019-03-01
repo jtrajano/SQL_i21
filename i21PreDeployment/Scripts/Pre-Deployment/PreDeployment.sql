@@ -128,6 +128,7 @@
 :r .\11_IC\RenameColumns.sql
 :r .\11_IC\Remove_Duplicate_Item_Owners.sql 
 :r .\11_IC\CreateTempBasketColumn.sql 
+:r .\11_IC\AddDtmCreatedColumn.sql 
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql

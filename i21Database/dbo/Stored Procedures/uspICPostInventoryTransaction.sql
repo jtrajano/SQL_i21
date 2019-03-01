@@ -34,6 +34,7 @@
 	,@dblUnitRetail NUMERIC(38,20) = NULL  
 	,@dblCategoryCostValue NUMERIC(38,20) = NULL  
 	,@dblCategoryRetailValue NUMERIC(38,20) = NULL  
+	,@dtmCreated DATETIME = NULL OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -46,10 +47,11 @@ DECLARE @InventoryStockMovementId AS INT
 
 BEGIN 
 	DECLARE @intFunctionalCurrencyId AS INT
-	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
+	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 	
 END 
 
 SET @InventoryTransactionIdentityId = NULL
+SET @dtmCreated = GETDATE()
 
 -- Initialize the UOM Qty
 SELECT	TOP 1
@@ -129,7 +131,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intStorageLocationId]				= @intStorageLocationId
 		,[ysnIsUnposted]					= 0 
 		,[intRelatedInventoryTransactionId] = @intRelatedInventoryTransactionId
-		,[dtmCreated]						= GETDATE()
+		,[dtmCreated]						= @dtmCreated
 		,[intCreatedEntityId]				= @intEntityUserSecurityId
 		,[intConcurrencyId]					= 1
 		,[intCostingMethod]					= @intCostingMethod

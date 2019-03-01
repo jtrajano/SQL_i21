@@ -40,6 +40,7 @@ This table is also used to map the negative Lot stock buckets it was able to rev
 		[dblQty] NUMERIC(38, 20) NOT NULL,
 		[dblCostAdjustQty] NUMERIC(38, 20) NULL,
 		[dblQtyReturned] NUMERIC(38, 20) NULL,
+		[dtmCreated] DATETIME NOT NULL,
 		CONSTRAINT [PK_tblICInventoryLotOut] PRIMARY KEY CLUSTERED ([intId]),
 		CONSTRAINT [FK_tblICInventoryLotOut_tblICInventoryLot] FOREIGN KEY ([intInventoryLotId]) REFERENCES [tblICInventoryLot]([intInventoryLotId]) 
 	)

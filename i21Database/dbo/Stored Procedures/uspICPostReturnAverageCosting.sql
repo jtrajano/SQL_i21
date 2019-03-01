@@ -92,6 +92,7 @@ DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @intInventoryFIFOOutId AS INT 
 
 DECLARE @intReturnValue AS INT 
+		,@dtmCreated AS DATETIME
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -159,6 +160,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 						,@intForexRateTypeId = @intForexRateTypeId
 						,@dblForexRate = @dblForexRate
+						,@dtmCreated = @dtmCreated OUTPUT 
 
 				IF @intReturnValue < 0 GOTO _Exit_With_Error
 
@@ -183,10 +185,12 @@ BEGIN
 						intInventoryTransactionId
 						,intInventoryFIFOId
 						,dblQty
+						,dtmCreated
 				)
 				SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 						,intInventoryFIFOId = @UpdatedFifoId
 						,dblQty = @QtyOffset
+						,@dtmCreated
 				WHERE	@InventoryTransactionIdentityId IS NOT NULL
 						AND @UpdatedFifoId IS NOT NULL 
 						AND @QtyOffset IS NOT NULL 
@@ -205,6 +209,7 @@ BEGIN
 					,strBatchId
 					,intTransactionTypeId 
 					,intTransactionDetailId
+					,dtmCreated
 				)
 				SELECT 
 					intInventoryFIFOId			= @UpdatedFifoId
@@ -217,6 +222,7 @@ BEGIN
 					,strBatchId					= @strBatchId
 					,intTransactionTypeId		= @intTransactionTypeId
 					,intTransactionDetailId		= @intTransactionDetailId
+					,dtmCreated					= @dtmCreated
 			END 
 
 			-- Reduce the remaining qty

@@ -65,6 +65,7 @@ DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38, 20)
 
 DECLARE @intReturnValue AS INT 
+		,@dtmCreated AS DATETIME 
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -129,6 +130,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@dtmCreated = @dtmCreated OUTPUT 
 								
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -137,10 +139,12 @@ BEGIN
 					intInventoryTransactionStorageId
 					,intInventoryFIFOStorageId
 					,dblQty
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionStorageId = @InventoryTransactionIdentityId
 					,intInventoryFIFOStorageId = @UpdatedFIFOStorageId
 					,dblQty = @QtyOffset
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedFIFOStorageId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
@@ -187,7 +191,8 @@ BEGIN
 				,@intCostingMethod = @FIFO
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 	
 				,@intForexRateTypeId = @intForexRateTypeId
-				,@dblForexRate = @dblForexRate						
+				,@dblForexRate = @dblForexRate		
+				,@dtmCreated = @dtmCreated OUTPUT 				
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -275,6 +280,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
+							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END
@@ -286,11 +292,13 @@ BEGIN
 					,intInventoryFIFOStorageId
 					,dblQty
 					,intRevalueFifoId
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionStorageId = @InventoryTransactionIdentityId
 					,intInventoryFIFOStorageId = NULL 
 					,dblQty = @QtyOffset
 					,intRevalueFifoId = @UpdatedFIFOStorageId
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedFIFOStorageId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 

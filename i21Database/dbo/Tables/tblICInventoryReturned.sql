@@ -26,6 +26,7 @@ When stock is returned, this table will log the transactions that returned the s
 		[intTransactionTypeId] INT NOT NULL,
 		[intTransactionDetailId] INT NULL,
 		[intCompanyId] INT NULL, 
+		[dtmCreated] DATETIME NOT NULL,
 		CONSTRAINT [PK_tblICInventoryReturned] PRIMARY KEY CLUSTERED ([intId])    
 	)
 	GO

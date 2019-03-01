@@ -39,6 +39,7 @@ This table is also used to map the negative fifo stock buckets it was able to re
 		[intRevalueFifoId] INT NULL,
 		[dblQty] NUMERIC(38, 20) NOT NULL,
 		[dblCostAdjustQty] NUMERIC(38, 20) NULL,
+		[dtmCreated] DATETIME NOT NULL,
 		CONSTRAINT [PK_tblICInventoryFIFOStorageOut] PRIMARY KEY CLUSTERED ([intId])    
 	)
 	GO

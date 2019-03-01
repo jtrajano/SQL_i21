@@ -28,6 +28,7 @@
 	,@intForexRateTypeId INT = NULL
 	,@dblForexRate NUMERIC(38, 20) = 1
 	,@strDescription NVARCHAR(255) = NULL 
+	,@dtmCreated DATETIME = NULL OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -38,6 +39,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @InventoryStockMovementId AS INT
 SET @InventoryTransactionIdentityId = NULL
+SET @dtmCreated = GETDATE()
 
 INSERT INTO dbo.tblICInventoryTransactionStorage (
 		[intItemId]
@@ -102,7 +104,7 @@ SELECT	[intItemId]								= @intItemId
 		,[intForexRateTypeId]					= @intForexRateTypeId
 		,[dblForexRate]							= @dblForexRate
 		,[ysnIsUnposted]						= 0
-		,[dtmCreated]							= GETDATE()
+		,[dtmCreated]							= @dtmCreated
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 

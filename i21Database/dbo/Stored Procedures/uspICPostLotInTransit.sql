@@ -67,6 +67,7 @@ DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38,20)
 
 DECLARE @intReturnValue AS INT 
+		,@dtmCreated DATETIME 
 
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
@@ -189,6 +190,7 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
 					,@strActualCostId = @strActualCostId
+					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -197,10 +199,12 @@ BEGIN
 					intInventoryTransactionId
 					,intInventoryLotId
 					,dblQty
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 					,intInventoryLotId = @UpdatedInventoryLotId
 					,dblQty = @QtyOffset
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedInventoryLotId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 			
@@ -316,6 +320,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@strActualCostId = @strActualCostId
+				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -412,6 +417,7 @@ BEGIN
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
 							,@strActualCostId = @strActualCostId
+							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END 
@@ -423,11 +429,13 @@ BEGIN
 					,intInventoryLotId
 					,dblQty
 					,intRevalueLotId
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 					,intInventoryLotId = NULL 
 					,dblQty = @QtyOffset
 					,intRevalueLotId = @UpdatedInventoryLotId
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedInventoryLotId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 

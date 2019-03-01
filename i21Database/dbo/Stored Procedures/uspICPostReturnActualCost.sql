@@ -64,6 +64,7 @@ DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @intInventoryActualCostOutId AS INT 
 
 DECLARE @intReturnValue AS INT 
+		,@dtmCreated AS DATETIME 
 
 -------------------------------------------------
 -- 1. Process the Actual Cost buckets
@@ -132,6 +133,7 @@ BEGIN
 						,@intForexRateTypeId = @intForexRateTypeId
 						,@dblForexRate = @dblForexRate
 						,@strActualCostId = @strActualCostId
+						,@dtmCreated = @dtmCreated OUTPUT 
 
 				IF @intReturnValue < 0 GOTO _Exit_With_Error
 
@@ -156,10 +158,12 @@ BEGIN
 						intInventoryTransactionId
 						,intInventoryActualCostId 
 						,dblQty
+						,dtmCreated
 				)
 				SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 						,intInventoryActualCostId = @UpdatedActualCostId
 						,dblQty = @QtyOffset
+						,@dtmCreated
 				WHERE	@InventoryTransactionIdentityId IS NOT NULL
 						AND @UpdatedActualCostId IS NOT NULL 
 						AND @QtyOffset IS NOT NULL 
@@ -178,6 +182,7 @@ BEGIN
 					,strBatchId
 					,intTransactionTypeId 
 					,intTransactionDetailId
+					,dtmCreated
 				)
 				SELECT 
 					intInventoryLIFOId			= @UpdatedActualCostId
@@ -190,6 +195,7 @@ BEGIN
 					,strBatchId					= @strBatchId
 					,intTransactionTypeId		= @intTransactionTypeId
 					,intTransactionDetailId		= @intTransactionDetailId
+					,dtmCreated					= @dtmCreated
 			END 
 			
 			-- Reduce the remaining qty
