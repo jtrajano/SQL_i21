@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspRKPNLSalesContractImpact 
+﻿CREATE PROCEDURE [dbo].[uspRKPNLSalesContractImpact] 
 	    @intSContractDetailId	INT,
 		@intCurrencyId			INT,-- currency
 		@intUnitMeasureId		INT,--- Price uom	
@@ -95,7 +95,8 @@ Insert into @ContractImpact
 				(sum(LD.dblQuantity) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity)*100 as dblContractPercentage
 				,fm.strFutureMonth + ' - ' + strBuySell strFutureMonth,
 				strInternalTradeNo,dblAssignedLots,t.dblPrice dblContractPrice,
-				((isnull(cs.dblAssignedLots,0)+isnull(cs.intHedgedLots,0))*(sum(LD.dblQuantity) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity*100))/100 intNoOfLots,
+				((isnull(cs.dblAssignedLots,0) * CASE WHEN t.strBuySell = 'Sell' THEN -1 ELSE 1 END + 
+					isnull(cs.intHedgedLots,0) * CASE WHEN t.strBuySell = 'Sell' THEN -1 ELSE 1 END) * (LD.dblQuantity/CD.dblQuantity)) intNoOfLots,
 				t.dblPrice,t.intFutureMarketId,t.intFutureMonthId,
 				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId,c.ysnSubCurrency
 		FROM	tblLGLoad AD
@@ -123,7 +124,8 @@ Insert into @ContractImpact
 				(sum(LD.dblQuantity) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity)*100 as dblContractPercentage
 				,fm.strFutureMonth + ' - ' + strBuySell strFutureMonth,
 				strInternalTradeNo,dblAssignedLots,t.dblPrice dblContractPrice,
-				-((isnull(cs.dblAssignedLots,0)+isnull(cs.intHedgedLots,0))*(sum(LD.dblQuantity) over  (PARTITION BY CD.intContractDetailId)/CD.dblQuantity*100))/100 intNoOfLots,
+				((isnull(cs.dblAssignedLots,0) * CASE WHEN t.strBuySell = 'Sell' THEN -1 ELSE 1 END +
+					isnull(cs.intHedgedLots,0) * CASE WHEN t.strBuySell = 'Sell' THEN -1 ELSE 1 END) * (LD.dblQuantity/CD.dblQuantity)) intNoOfLots,
 				t.dblPrice,t.intFutureMarketId,t.intFutureMonthId,
 				dbo.fnRKGetLatestClosingPrice(t.intFutureMarketId,t.intFutureMonthId,@dtmToDate) dblLatestSettlementPrice,m.dblContractSize,intFutOptTransactionHeaderId,c.ysnSubCurrency
 		FROM	tblLGLoad AD
@@ -147,7 +149,7 @@ Insert into @ContractImpact
 		)t
 
 INSERT INTO @ContractImpact(strContractNumber,strFutureMonth,intNoOfLots,dblPrice,dblLatestSettlementPrice,dblFutureImpact   )
-SELECT 'Total' strContractType,strFutureMonth,sum(intNoOfLots) intNoOfLots,sum(dblPrice) dblPrice,max(dblLatestSettlementPrice) dblLatestSettlementPrice,sum(dblFutureImpact) dblFutureImpact   
+SELECT 'Total' strContractType,strFutureMonth,sum(intNoOfLots) intNoOfLots,avg(dblPrice) dblPrice,max(dblLatestSettlementPrice) dblLatestSettlementPrice,sum(dblFutureImpact) dblFutureImpact   
 FROM @ContractImpact where isnull(strFutureMonth,'') <> ''  GROUP BY strFutureMonth
 ORDER BY case when isnull(strFutureMonth,'')='' then '' else CONVERT(DATETIME,'01 '+left(strFutureMonth,6)) end ASC 
 
