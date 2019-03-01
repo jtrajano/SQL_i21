@@ -44,7 +44,7 @@ SELECT
 														ELSE 
 															ABS(ISNULL(ShipmentCharge.dblAmount, 0))
 													END
-	,[dblTax]									=	0
+	,[dblTax]									=	ISNULL(ShipmentCharge.dblTax, 0)
 	,[intAccountId]								=	OtherChargeExpense.intAccountId 											 
 	,[strAccountId]								=	OtherChargeExpense.strAccountId
 	,[strName]									=	Entity.strName
@@ -61,6 +61,7 @@ SELECT
 	,[intScaleTicketId]							=	ScaleTicket.intScaleTicketId
 	,[strScaleTicketNumber]						=	ScaleTicket.strScaleTicketNumber
 	,[intLocationId]							=	Shipment.intShipFromLocationId
+	,[intTaxGroupId]							=	ShipmentCharge.intTaxGroupId
 	,intForexRateTypeId							=	ShipmentCharge.intForexRateTypeId
 	,dblForexRate								=	ShipmentCharge.dblForexRate
 
@@ -107,8 +108,7 @@ FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
 
-WHERE	ShipmentCharge.ysnAccrue = 1 
-		AND ShipmentCharge.intEntityVendorId IS NOT NULL
+WHERE ShipmentCharge.intEntityVendorId IS NOT NULL
 		AND ISNULL(Shipment.ysnPosted, 0) = 1
 		AND (
 			ISNULL(ShipmentCharge.dblAmountBilled, 0) < ROUND(ShipmentCharge.dblAmount, 6) 
