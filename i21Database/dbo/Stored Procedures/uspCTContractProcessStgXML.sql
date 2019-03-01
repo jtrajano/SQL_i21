@@ -103,6 +103,7 @@ BEGIN TRY
 					SET  intContractTypeId      = 2
 					    ,intEntityId            = @intEntityId
 						,intContractHeaderRefId = @intContractHeaderId
+						,dtmCreated				= GETDATE()
 						,strCustomerContract	= @strCustomerContract
 					WHERE intContractHeaderId   = @NewContractHeaderId
 
@@ -147,6 +148,7 @@ BEGIN TRY
 
 						UPDATE tblCTContractDetail 
 						SET intCompanyLocationId	 = @intCompanyLocationId
+						,dtmCreated					 = GETDATE()
 						WHERE  intContractHeaderId   = @NewContractHeaderId
 					
 						SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@NewContractHeaderId)
@@ -154,7 +156,7 @@ BEGIN TRY
 						EXEC uspCTGetTableDataInXML 'tblCTContractDetail',@strHeaderCondition,@strAckDetailXML  OUTPUT
 
 						UPDATE  tblCTContractAcknowledgementStage 
-						SET		strAckDetailXML =@strAckDetailXML 
+						SET		strAckDetailXML = @strAckDetailXML 
 						WHERE   intContractAcknowledgementStageId =@intContractAcknowledgementStageId
 
 					-----------------------------------------Cost-------------------------------------------
