@@ -104,7 +104,7 @@ SELECT
 	 [intBankAccountId]				= UF.intBankAccountId
 	,[strTransactionId]				= 'temp'
 	,[intCurrencyId]				= P.intCurrencyId
-	,[intBankTransactionTypeId]		= CASE WHEN SUM(UF.dblAmount) > 0 THEN 1 ELSE 2 END
+	,[intBankTransactionTypeId]		= CASE WHEN SUM(UF.dblAmount) >= 0 THEN 1 ELSE 2 END
 	,[dtmDate]						= P.dtmDatePaid
 	,[dblAmount]					= SUM(UF.dblAmount)
 	,[strMemo]						= CASE WHEN P.ysnVendorRefund = 1 THEN 'Vendor Refund' ELSE 'AR ACH' END
@@ -124,6 +124,7 @@ GROUP BY UF.intBankAccountId
 	   , UF.intLocationId
 	   , P.ysnVendorRefund
 	   , ISNULL(@intUserId, UF.intLastModifiedUserId)
+	   , CASE WHEN P.dblAmountPaid >=  0 then 1 ELSE 2 end
 --PaymentDup
 INSERT INTO @BankTransactionDup(
 	  [intBankAccountId]
@@ -158,6 +159,7 @@ DECLARE @DupBankId		INT
 	  , @DupBankTransId	INT
 	  , @DupDatePaid	DATETIME	  
 	  , @COUNTER		INT = 1
+	  , @intBankTransactionDupID INT
 
 WHILE EXISTS(SELECT TOP 1 1 FROM @BankTransactionDup)
 BEGIN
@@ -178,6 +180,7 @@ BEGIN
 			   , @DupDatePaid		= dtmDate
 			   , @DupLocation		= intCompanyLocationId
 			   , @DupBankTransId	= intBankTransactionTypeId
+			   , @intBankTransactionDupID = intTransactionId
 	FROM @BankTransactionDup
 
 	--Get the Bank Deposit strTransactionId by using this script.
@@ -189,17 +192,17 @@ BEGIN
 	
 	--Payment Current
 	INSERT INTO @BankTransactionCur(
-			[intBankAccountId]
-			, [strTransactionId]
-			, [intCurrencyId]
-			, [intBankTransactionTypeId]
-			, [dtmDate]
-			, [dblAmount]
-			, [strMemo]
-			, [intCompanyLocationId] 
-			, [intEntityId]
-			, [intCreatedUserId]
-			, [intLastModifiedUserId]) 
+		[intBankAccountId]
+		, [strTransactionId]
+		, [intCurrencyId]
+		, [intBankTransactionTypeId]
+		, [dtmDate]
+		, [dblAmount]
+		, [strMemo]
+		, [intCompanyLocationId] 
+		, [intEntityId]
+		, [intCreatedUserId]
+		, [intLastModifiedUserId]) 
 	SELECT 
 		[intBankAccountId]
 		, @strTransactionId
@@ -217,7 +220,12 @@ BEGIN
 	  AND [intCurrencyId] = @DupCurrency
 	  AND [dtmDate] = @DupDatePaid
 	  AND [intCompanyLocationId] = @DupLocation 
-	
+	  AND [intTransactionId] = @intBankTransactionDupID
+ 	
+
+	DECLARE @ISPOSITIVE  INT = 0;
+
+	SELECT  @ISPOSITIVE  = CASE WHEN T.[dblAmount] >=  0 then 1 ELSE 2 end from @BankTransactionDup T WHERE T.[intTransactionId] = @intBankTransactionDupID
 	--GETTING THE DETAIL
 	INSERT INTO @BankTransactionDetail(
 		  [intTransactionId]
@@ -252,9 +260,11 @@ BEGIN
 		  AND UF.strSourceTransactionId = P.strRecordNumber
 		  AND P.intCurrencyId = @DupCurrency
 		  AND P.dtmDatePaid = @DupDatePaid
+		
 	) PAYMENTS 
 	WHERE UF.intBankAccountId = @DupBankId 
 	  AND UF.intLocationId = @DupLocation 
+	  AND @ISPOSITIVE = CASE WHEN UF.dblAmount >=  0 then 1 ELSE 2 end
 
 	SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
 
@@ -336,10 +346,13 @@ BEGIN
 	END CATCH
 
 	DELETE FROM @BankTransactionDup 
-	WHERE [intBankAccountId] = @DupBankId 
-	  AND [intCurrencyId] = @DupCurrency
-	  AND [dtmDate] = @DupDatePaid
-	  AND [intCompanyLocationId] = @DupLocation 
+	WHERE [intTransactionId] = @intBankTransactionDupID
+	--WHERE [intBankAccountId] = @DupBankId 
+	--  AND [intCurrencyId] = @DupCurrency
+	--  AND [dtmDate] = @DupDatePaid
+	--  AND [intCompanyLocationId] = @DupLocation 
+
+	  
 
 	SET @COUNTER = @COUNTER + 1
 END
