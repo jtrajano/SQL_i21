@@ -54,6 +54,8 @@ BEGIN TRY
 		,strLoadNumber
 		,intCompanyLocationId
 		,intPurchaseSale
+		,intFreightTermId
+		,intCurrencyId
 		,dtmScheduledDate
 		,strCustomerReference
 		,strBookingReference
@@ -146,6 +148,8 @@ BEGIN TRY
 		,@strLoadSINumber
 		,@intNewContractLocationId
 		,intPurchaseSale
+		,intFreightTermId
+		,intCurrencyId
 		,dtmScheduledDate
 		,strCustomerReference
 		,strBookingReference

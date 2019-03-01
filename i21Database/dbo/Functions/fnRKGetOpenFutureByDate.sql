@@ -117,7 +117,8 @@ FROM (
 			) t WHERE intRowNum = 1
 		) History
 		WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
+										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			
 		UNION ALL
 		--Futures Sell
@@ -158,7 +159,8 @@ FROM (
 			) t WHERE intRowNum = 1
 		) History
 		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
+										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			
 		UNION ALL
 		--Options Buy
@@ -199,7 +201,8 @@ FROM (
 			) t WHERE intRowNum = 1
 		) History
 		WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
+										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 				
 		UNION ALL
 		--Options Sell
@@ -240,7 +243,8 @@ FROM (
 			) t WHERE intRowNum = 1
 		) History
 		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), FOT.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
+										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 
 		UNION ALL
 		-- Deleted Derivatives but with values prior to As Of Date

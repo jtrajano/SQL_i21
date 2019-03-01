@@ -94,6 +94,9 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,t.dtmCreated
 		,t.intCurrencyId
 		,cur.strCurrency
+		,i.intOriginId
+		,i.strMarketValuation
+		,i.strLotTracking
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 
@@ -154,7 +157,6 @@ FROM 	tblICItem i
 			ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
 			AND shipmentItem.intInventoryShipmentItemId = t.intTransactionDetailId
 			AND shipmentItem.intItemId = i.intItemId
-
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
@@ -163,6 +165,10 @@ FROM 	tblICItem i
 			ON bill.intBillId = t.intTransactionId
 			AND bill.strBillId = t.strTransactionId
 			AND ty.intTransactionTypeId IN (26, 27) 
+		LEFT JOIN tblMFWorkOrder workorder
+			ON workorder.intWorkOrderId = t.intTransactionId
+			AND workorder.strWorkOrderNo = t.strTransactionId
+			AND ty.intTransactionTypeId IN (8, 9) 
 		OUTER APPLY (
 			SELECT	TOP 1 
 					ld.intVendorEntityId
@@ -191,6 +197,7 @@ FROM 	tblICItem i
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
 				, settleStorage.intEntityId
+				, workorder.intCustomerId
 			)
 
 		LEFT JOIN tblSCTicket ScaleView

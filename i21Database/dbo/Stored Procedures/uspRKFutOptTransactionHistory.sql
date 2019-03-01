@@ -47,7 +47,8 @@ BEGIN TRY
 			, intSubBookId
 			, ysnMonthExpired
 			, strUserName
-			, strAction)
+			, strAction
+			, ysnPreCrush)
 		SELECT H.intFutOptTransactionHeaderId
 			, H.strSelectedInstrumentType
 			, T.intFutOptTransactionId
@@ -83,6 +84,7 @@ BEGIN TRY
 			, ysnMonthExpired = (SELECT TOP 1 ysnExpired FROM tblRKFuturesMonth a WHERE a.intFutureMonthId = T.intFutureMonthId)
 			, strUserName = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @intUserId)
 			, 'DELETE'
+			, ysnPreCrush
 		FROM tblRKFutOptTransaction T
 		INNER JOIN tblRKFutOptTransactionHeader H on T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		WHERE T.intFutOptTransactionId IN (
@@ -126,7 +128,8 @@ BEGIN TRY
 			, intSubBookId
 			, ysnMonthExpired
 			, strUserName
-			, strAction)
+			, strAction
+			, ysnPreCrush)
 		SELECT H.intFutOptTransactionHeaderId
 			, H.strSelectedInstrumentType
 			, T.intFutOptTransactionId
@@ -162,6 +165,7 @@ BEGIN TRY
 			, ysnMonthExpired = (SELECT TOP 1 ysnExpired FROM tblRKFuturesMonth a WHERE a.intFutureMonthId = T.intFutureMonthId)
 			, strUserName = (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = @intUserId)
 			, @action
+			, ysnPreCrush
 		FROM tblRKFutOptTransaction T
 		INNER JOIN tblRKFutOptTransactionHeader H on T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		WHERE T.intFutOptTransactionId = @intFutOptTransactionId	

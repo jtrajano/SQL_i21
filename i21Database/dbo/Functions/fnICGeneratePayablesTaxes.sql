@@ -66,6 +66,28 @@ BEGIN
 	LEFT JOIN tblICItem Item ON Item.intItemId = voucherItems.intItemId
 	WHERE Item.strType = @ItemType_OtherCharge COLLATE Latin1_General_CI_AS
 		AND voucherItems.dblTax != 0
+	UNION ALL
+	-- Shipment Charges Taxes
+	SELECT	intVoucherPayableId			= voucherItems.intVoucherPayableId
+			,intTaxGroupId				= ChargeTax.intTaxGroupId
+			,intTaxCodeId				= ChargeTax.intTaxCodeId
+			,intTaxClassId				= ChargeTax.intTaxClassId
+			,strTaxableByOtherTaxes		= ChargeTax.strTaxableByOtherTaxes
+			,strCalculationMethod		= ChargeTax.strCalculationMethod
+			,dblRate					= ChargeTax.dblRate
+			,intAccountId				= ChargeTax.intTaxAccountId
+			,dblTax						= ChargeTax.dblTax
+			,dblAdjustedTax				= ISNULL(ChargeTax.dblAdjustedTax, 0)
+			,ysnTaxAdjusted				= ChargeTax.ysnTaxAdjusted
+			,ysnSeparateOnBill			= 0
+			,ysnCheckoffTax				= ChargeTax.ysnCheckoffTax
+			,ysnTaxExempt				= CAST(ISNULL(ChargeTax.ysnTaxExempt, 0) AS BIT)
+			,ysnTaxOnly					= ChargeTax.ysnTaxOnly
+	FROM tblICInventoryShipmentChargeTax ChargeTax
+	INNER JOIN @voucherItems voucherItems ON voucherItems.intInventoryShipmentChargeId = ChargeTax.intInventoryShipmentChargeId
+	LEFT JOIN tblICItem Item ON Item.intItemId = voucherItems.intItemId
+	WHERE Item.strType = @ItemType_OtherCharge COLLATE Latin1_General_CI_AS
+		AND voucherItems.dblTax != 0
 	
 RETURN
 END

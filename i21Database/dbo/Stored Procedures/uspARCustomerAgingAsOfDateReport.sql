@@ -13,7 +13,8 @@
 	@strCustomerIds				NVARCHAR(MAX) = NULL,
 	@ysnFromBalanceForward		BIT = 0,
 	@ysnPrintFromCF				BIT = 0,
-	@dtmBalanceForwardDate		DATETIME = NULL
+	@dtmBalanceForwardDate		DATETIME = NULL,
+	@strUserId					AS NVARCHAR(MAX) = NULL
 AS
 
 DECLARE @dtmDateFromLocal				DATETIME		= NULL,
@@ -277,7 +278,17 @@ WHERE ysnPosted = 1
 	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
 	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
-	AND (@ysnPrintFromCFLocal = 0 OR (@ysnPrintFromCFLocal = 1 AND I.strType <> 'CF Tran'))
+
+IF (@ysnPrintFromCFLocal = 1)
+	BEGIN
+		DELETE I 
+		FROM #POSTEDINVOICES I
+		LEFT JOIN tblCFInvoiceStagingTable IST ON I.intInvoiceId = IST.intInvoiceId
+											   AND IST.strUserId = @strUserId
+											   AND LOWER(IST.strStatementType) = 'invoice'
+		WHERE I.strType = 'CF Tran'
+		  AND I.intInvoiceId IS NULL
+	END
 
 --#CASHREFUNDS
 SELECT strDocumentNumber	= ID.strDocumentNumber

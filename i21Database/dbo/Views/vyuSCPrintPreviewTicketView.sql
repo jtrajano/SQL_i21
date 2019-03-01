@@ -184,7 +184,30 @@ AS SELECT
 	,SO.strSalesOrderNumber
 
 	,SMCompanySetup.strCompanyName
-	,SMCompanySetup.strAddress
+	,strAddress = CASE WHEN Origin.strUseLocationAddress = 'No'
+					THEN
+						LTRIM(dbo.fnICFormatTransferAddressFormat2(
+										SMCompanySetup.strPhone
+										,SMCompanySetup.strFax
+										,null
+										,null
+										,SMCompanySetup.strAddress
+										,SMCompanySetup.strCity
+										,SMCompanySetup.strState
+										,SMCompanySetup.strZip
+										,null))
+					ELSE
+						LTRIM(dbo.fnICFormatTransferAddressFormat2(
+										Origin.strPhone
+										,Origin.strFax
+										,null
+										,null
+										,Origin.strAddress
+										,Origin.strCity
+										,Origin.strStateProvince
+										,Origin.strZipPostalCode
+										,null))
+					END 
 	,SMS.blbDetail AS blbSignature
 	,SMS.intEntityId AS intUserId
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
@@ -246,6 +269,9 @@ AS SELECT
 	AND IC.ysnUseWeighScales = 1
 	GROUP BY intSalesOrderId
   ) SOD
-  CROSS APPLY(
-	SELECT strCompanyName,strAddress FROM tblSMCompanySetup
+  ,(
+	SELECT TOP 1 strCompanyName,strCity, strState, strZip,strPhone, strFax, strAddress FROM tblSMCompanySetup
   ) SMCompanySetup
+
+
+

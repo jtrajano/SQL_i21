@@ -130,58 +130,63 @@ BEGIN
 			,[ysnReturn]						
 	)
 	SELECT 
-		[intEntityVendorId]			
-		,[intTransactionType]
-		,[intLocationId]	
+		GP.[intEntityVendorId]
+		,GP.[intTransactionType]
+		,GP.[intLocationId]	
 		,[intShipToId] = NULL	
 		,[intShipFromId] = NULL	 		
 		,[intShipFromEntityId] = NULL
 		,[intPayToAddressId] = NULL
-		,[intCurrencyId]					
-		,[dtmDate]				
-		,[strVendorOrderNumber]	= NULL		
-		,[strReference]						
-		,[strSourceNumber]					
-		,[intPurchaseDetailId]				
-		,[intContractHeaderId]				
-		,[intContractDetailId]				
+		,GP.[intCurrencyId]					
+		,GP.[dtmDate]				
+		,GP.[strVendorOrderNumber]		
+		,GP.[strReference]						
+		,GP.[strSourceNumber]					
+		,GP.[intPurchaseDetailId]				
+		,GP.[intContractHeaderId]				
+		,GP.[intContractDetailId]				
 		,[intContractSeqId] = NULL					
-		,[intScaleTicketId]					
-		,[intInventoryReceiptItemId]		
-		,[intInventoryReceiptChargeId]		
-		,[intInventoryShipmentItemId]		
-		,[intInventoryShipmentChargeId]		
+		,GP.[intScaleTicketId]					
+		,GP.[intInventoryReceiptItemId]		
+		,GP.[intInventoryReceiptChargeId]		
+		,GP.[intInventoryShipmentItemId]		
+		,GP.[intInventoryShipmentChargeId]		
 		,[intLoadShipmentId] = NULL				
 		,[intLoadShipmentDetailId] = NULL			
-		,[intItemId]						
-		,[intPurchaseTaxGroupId]			
-		,[strMiscDescription]				
-		,[dblOrderQty]						
+		,GP.[intItemId]						
+		,GP.[intPurchaseTaxGroupId]			
+		,GP.[strMiscDescription]				
+		,GP.[dblOrderQty]						
 		,[dblOrderUnitQty] = 0.00					
 		,[intOrderUOMId] = NULL	 				
-		,[dblQuantityToBill]			
-		,[dblQtyToBillUnitQty]				
-		,[intQtyToBillUOMId]				
-		,[dblCost] = dblUnitCost							
-		,[dblCostUnitQty]					
-		,[intCostUOMId]						
+		,GP.[dblQuantityToBill]			
+		,GP.[dblQtyToBillUnitQty]				
+		,GP.[intQtyToBillUOMId]				
+		,[dblCost] = GP.dblUnitCost							
+		,GP.[dblCostUnitQty]					
+		,GP.[intCostUOMId]						
 		,[dblNetWeight]						
 		,[dblWeightUnitQty]					
-		,[intWeightUOMId]					
-		,[intCostCurrencyId]
-		,[dblTax]							
-		,[dblDiscount]
-		,[intCurrencyExchangeRateTypeId]	
-		,[dblExchangeRate] = dblRate					
-		,[ysnSubCurrency]					
-		,[intSubCurrencyCents]				
-		,[intAccountId]						
-		,[intShipViaId]						
-		,[intTermId]						
-		,[strBillOfLading]					
-		,[ysnReturn]	 
-	FROM dbo.fnICGeneratePayables (@intReceiptId, 1)
-		
+		,GP.[intWeightUOMId]					
+		,GP.[intCostCurrencyId]
+		,GP.[dblTax]							
+		,GP.[dblDiscount]
+		,GP.[intCurrencyExchangeRateTypeId]	
+		,[dblExchangeRate] = GP.dblRate					
+		,GP.[ysnSubCurrency]					
+		,GP.[intSubCurrencyCents]				
+		,GP.[intAccountId]						
+		,GP.[intShipViaId]						
+		,GP.[intTermId]						
+		,GP.[strBillOfLading]					
+		,GP.[ysnReturn]	 
+	FROM dbo.fnICGeneratePayables (@intReceiptId, 1) GP
+	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
+		ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
+	INNER JOIN tblICInventoryReceipt Receipt
+		ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		AND Receipt.intEntityVendorId = GP.intEntityVendorId
+
 	END 
 
 	-- Assemble Item Taxes
@@ -302,7 +307,6 @@ BEGIN
 		--	,@error = @throwedError OUTPUT
 		--	,@billId = @intBillId OUTPUT
 		--	,@voucherDate = @dtmReceiptDate
-		--SELECT 'Convert IR to Voucher @voucherItems',* FROM @voucherItems;
 
 
 		EXEC [dbo].[uspAPCreateVoucher]

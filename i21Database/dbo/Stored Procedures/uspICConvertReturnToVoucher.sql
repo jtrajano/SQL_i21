@@ -99,116 +99,111 @@ BEGIN
 		-- Assemble the voucher items 
 		BEGIN 
 			DELETE FROM @voucherItems
-			INSERT INTO @voucherItems (
-			[intEntityVendorId]
-			,[intTransactionType]
-			,[intLocationId]
-			,[intShipToId]
-			,[intShipFromId]
-			,[intCurrencyId]
-			,[dtmVoucherDate]
-			,[strVendorOrderNumber]
-			--,[strReference]
-			,[strSourceNumber]
-			--,[intSubCurrencyCents]
-			,[intShipViaId]
-			--,[intTermId]
-			,[strBillOfLading]
-			--,[strCheckComment]
-			--,[intAPAccount]
-			
-			/* Voucher Details */
-			,[intItemId]
-			,[ysnSubCurrency]
-			,[intAccountId]
-			,[ysnReturn]
-			,[intLineNo]
-			,[intStorageLocationId]
-			--,[dblBasis]
-			--,[dblFutures]
-			,[intContractHeaderId]
-			,[intContractDetailId]
-			,[intContractSeqId]
-			,[intInventoryReceiptItemId]
-			/*Quantity info*/
-			,[dblQuantityToBill]
-			,[dblQtyToBillUnitQty]
-			,[intQtyToBillUOMId]
-			/*Cost info*/
-			,[dblCost]
-			,[dblCostUnitQty]
-			,[intCostUOMId]
-			/*Weight info*/
-			,[dblWeight]
-			,[dblNetWeight]
-			,[dblWeightUnitQty]
-			,[intWeightUOMId]
-			/*Exchange Rate info*/
-			,[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]
-			/*Tax info*/
-			,[intPurchaseTaxGroupId]
+			INSERT INTO @voucherItems(
+				[intEntityVendorId]			
+				,[intTransactionType]		
+				,[intLocationId]	
+				,[intShipToId]	
+				,[intShipFromId]			
+				,[intShipFromEntityId]
+				,[intPayToAddressId]
+				,[intCurrencyId]					
+				,[dtmDate]				
+				,[strVendorOrderNumber]			
+				,[strReference]						
+				,[strSourceNumber]					
+				,[intPurchaseDetailId]				
+				,[intContractHeaderId]				
+				,[intContractDetailId]				
+				,[intContractSeqId]					
+				,[intScaleTicketId]					
+				,[intInventoryReceiptItemId]		
+				,[intInventoryReceiptChargeId]		
+				,[intInventoryShipmentItemId]		
+				,[intInventoryShipmentChargeId]		
+				,[intLoadShipmentId]				
+				,[intLoadShipmentDetailId]			
+				,[intItemId]						
+				,[intPurchaseTaxGroupId]			
+				,[strMiscDescription]				
+				,[dblOrderQty]						
+				,[dblOrderUnitQty]					
+				,[intOrderUOMId]					
+				,[dblQuantityToBill]				
+				,[dblQtyToBillUnitQty]				
+				,[intQtyToBillUOMId]				
+				,[dblCost]							
+				,[dblCostUnitQty]					
+				,[intCostUOMId]						
+				,[dblNetWeight]						
+				,[dblWeightUnitQty]					
+				,[intWeightUOMId]					
+				,[intCostCurrencyId]
+				,[dblTax]							
+				,[dblDiscount]
+				,[intCurrencyExchangeRateTypeId]	
+				,[dblExchangeRate]					
+				,[ysnSubCurrency]					
+				,[intSubCurrencyCents]				
+				,[intAccountId]						
+				,[intShipViaId]						
+				,[intTermId]						
+				,[strBillOfLading]					
+				,[ysnReturn]						
 		)
-		SELECT
-				intEntityVendorId					= IR.intEntityVendorId
-				,intTransactionType					= CASE WHEN IR.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
-				,intLocationId						= IR.intLocationId
-				,intShipToId						= IR.intLocationId
-				,intShipFromId						= IR.intShipFromId
-				,intCurrencyId						= IR.intCurrencyId
-				,dtmVoucherDate						= IR.dtmReceiptDate
-				,strVendorOrderNumber				= IR.strBillOfLading
-				,strSourceNumber					= IR.strReceiptNumber
-				,intShipViaId						= IR.intShipViaId
-				,strBillOfLading					= IR.strBillOfLading
-				/* Items */
-				,intItemId							= IRI.intItemId
-				,ysnSubCurrency						= IRI.ysnSubCurrency
-				,intAccountId						= [dbo].[fnGetItemGLAccount](IRI.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-				,ysnReturn							= CAST(CASE WHEN IR.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END AS BIT)
-				,intLineNo							= IRI.intSort
-				,intStorageLocationId				= IRI.intStorageLocationId
-				,intContractHeaderId				= contractDetail.intContractHeaderId
-				,intContractDetailId				= contractDetail.intContractDetailId
-				,intContractSeqId					= contractDetail.intContractSeq
-				,intInventoryReceiptItemId			= IRI.intInventoryReceiptItemId
-				,dblQuantityToBill					= IRI.dblOpenReceive - IRI.dblBillQty 
-				,dblQtyToBillUnitQty				= ReceiptUOM.dblUnitQty
-				,intQtyToBillUOMId					= IRI.intUnitMeasureId
-				,dblCost							= IRI.dblUnitCost
-				,dblCostUnitQty						= CostUOM.dblUnitQty
-				,intCostUOMId						= IRI.intCostUOMId
-				,dblWeight							= IRI.dblGross
-				,dblNetWeight						= IRI.dblNet
-				,dblWeightUnitQty					= WeightUOM.dblUnitQty
-				,intWeightUOMId						= IRI.intWeightUOMId
-				,intCurrencyExchangeRateTypeId		= IRI.intForexRateTypeId
-				,dblExchangeRate					= IRI.dblForexRate
-				,intPurchaseTaxGroupId				= IRI.intTaxGroupId
+		SELECT 
+			[intEntityVendorId]			
+			,[intTransactionType]
+			,[intLocationId]	
+			,[intShipToId] = NULL	
+			,[intShipFromId] = NULL	 		
+			,[intShipFromEntityId] = NULL
+			,[intPayToAddressId] = NULL
+			,[intCurrencyId]					
+			,[dtmDate]				
+			,[strVendorOrderNumber]		
+			,[strReference]						
+			,[strSourceNumber]					
+			,[intPurchaseDetailId]				
+			,[intContractHeaderId]				
+			,[intContractDetailId]				
+			,[intContractSeqId] = NULL					
+			,[intScaleTicketId]					
+			,[intInventoryReceiptItemId]		
+			,[intInventoryReceiptChargeId]		
+			,[intInventoryShipmentItemId]		
+			,[intInventoryShipmentChargeId]		
+			,[intLoadShipmentId] = NULL				
+			,[intLoadShipmentDetailId] = NULL			
+			,[intItemId]						
+			,[intPurchaseTaxGroupId]			
+			,[strMiscDescription]				
+			,[dblOrderQty]						
+			,[dblOrderUnitQty] = 0.00					
+			,[intOrderUOMId] = NULL	 				
+			,[dblQuantityToBill]			
+			,[dblQtyToBillUnitQty]				
+			,[intQtyToBillUOMId]				
+			,[dblCost] = dblUnitCost							
+			,[dblCostUnitQty]					
+			,[intCostUOMId]						
+			,[dblNetWeight]						
+			,[dblWeightUnitQty]					
+			,[intWeightUOMId]					
+			,[intCostCurrencyId]
+			,[dblTax]							
+			,[dblDiscount]
+			,[intCurrencyExchangeRateTypeId]	
+			,[dblExchangeRate] = dblRate					
+			,[ysnSubCurrency]					
+			,[intSubCurrencyCents]				
+			,[intAccountId]						
+			,[intShipViaId]						
+			,[intTermId]						
+			,[strBillOfLading]					
+			,[ysnReturn]	 
+		FROM dbo.fnICGeneratePayables (@intReceiptId, 1)
 
-		FROM	tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptItem IRI
-					ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-				INNER JOIN #tmpReturnVendors rtnVendor
-					ON rtnVendor.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-				INNER JOIN tblICItem Item 
-					ON Item.intItemId = IRI.intItemId
-				INNER JOIN tblICItemLocation ItemLoc
-					ON ItemLoc.intLocationId = IR.intLocationId AND ItemLoc.intItemId = IRI.intItemId
-				INNER JOIN tblICItemUOM ReceiptUOM
-					ON ReceiptUOM.intItemUOMId = IRI.intUnitMeasureId AND ReceiptUOM.intItemId = Item.intItemId
-				INNER JOIN tblICItemUOM CostUOM
-					ON CostUOM.intItemUOMId = IRI.intCostUOMId AND CostUOM.intItemId = Item.intItemId
-				LEFT JOIN tblICItemUOM WeightUOM
-					ON WeightUOM.intItemUOMId = IRI.intWeightUOMId AND WeightUOM.intItemId = Item.intItemId
-				LEFT JOIN vyuCTContractDetailView contractDetail 
-					ON 	contractDetail.intContractHeaderId = IRI.intOrderId 
-					AND contractDetail.intContractDetailId = IRI.intLineNo
-				WHERE	IR.ysnPosted = 1
-					AND IR.intInventoryReceiptId = @intReceiptId
-					AND IRI.dblBillQty < IRI.dblOpenReceive 
-					AND IRI.intOwnershipType = @Own
-					AND rtnVendor.intEntityVendorId = @intEntityVendorId
-					AND ISNULL(IR.strReceiptType, '') = 'Inventory Return'
 		END 
 
 
@@ -268,6 +263,7 @@ BEGIN
 		BEGIN 				
 			DECLARE @throwedError AS NVARCHAR(1000);		
 			SELECT @intShipFrom_DebitMemo = CASE WHEN @originalEntityVendorId = @intEntityVendorId THEN @intShipFrom ELSE NULL END 
+
 
 			EXEC [dbo].[uspAPCreateVoucher]
 				@voucherPayables = @voucherItems

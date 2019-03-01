@@ -65,6 +65,7 @@ BEGIN TRY
 		,@strStagedLotNumber NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmProductionDate DATETIME
+		,@intDestinationLotId int
 
 	SELECT @strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
@@ -77,6 +78,7 @@ BEGIN TRY
 		,@intNewStorageLocationId = intStorageLocationId
 		,@intMachineId = intMachineId
 		,@dtmProductionDate = dtmProductionDate
+		,@intDestinationLotId=intDestinationLotId
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
@@ -378,6 +380,31 @@ BEGIN TRY
 	EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 		,@intWorkOrderId
 		,@intInventoryTransactionType
+
+	Select  @dblAdjustByQuantity=- @dblAdjustByQuantity
+
+	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmProductionDate
+		,@intTransactionTypeId = 104--Stage
+		,@intItemId = @intInputItemId
+		,@intSourceLotId = @intDestinationLotId
+		,@intDestinationLotId = @intLotId
+		,@dblQty =  @dblAdjustByQuantity
+		,@intItemUOMId = @intNewItemUOMId
+		,@intOldItemId = NULL
+		,@dtmOldExpiryDate = NULL
+		,@dtmNewExpiryDate = NULL
+		,@intOldLotStatusId = NULL
+		,@intNewLotStatusId = NULL
+		,@intUserId = @intUserId
+		,@strNote = NULL
+		,@strReason = NULL
+		,@intLocationId = @intLocationId
+		,@intInventoryAdjustmentId = NULL
+		,@intStorageLocationId  = @intStorageLocationId
+		,@intDestinationStorageLocationId  = @intNewStorageLocationId
+		,@intWorkOrderInputLotId  = @intWorkOrderInputLotId
+		,@intWorkOrderProducedLotId  = NULL
+		,@intWorkOrderId  = @intWorkOrderId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

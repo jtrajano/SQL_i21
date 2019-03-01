@@ -345,15 +345,16 @@ BEGIN
 				BEGIN
 					SELECT TOP 1 
 							@strLotNumber = Lot.strLotNumber 
-							,@intInventoryLotId = ICLot.intInventoryLotId
-							,@tempEachLotQty = ISNULL(ICLot.dblStockIn, 0) - ISNULL(ICLot.dblStockOut, 0)
-					FROM	dbo.tblICInventoryLot ICLot INNER JOIN dbo.tblICLot Lot 
-								ON Lot.intLotId = ICLot.intLotId
-					WHERE	ICLot.intItemId = @intItemId 
-							AND ICLot.intItemUOMId = @intItemUOMId 
-							AND ICLot.intSubLocationId = @intSubLocationId 
-							AND ICLot.intItemLocationId = @intItemLocationId 							
-							AND (ISNULL(ICLot.dblStockIn, 0) - ISNULL(ICLot.dblStockOut, 0)) > 0
+							,@intInventoryLotId = cb.intInventoryLotId
+							,@tempEachLotQty = ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)
+					FROM	dbo.tblICInventoryLot cb INNER JOIN dbo.tblICLot Lot 
+								ON Lot.intLotId = cb.intLotId
+					WHERE	cb.intItemId = @intItemId 
+							AND cb.intItemUOMId = @intItemUOMId 
+							AND cb.intSubLocationId = @intSubLocationId 
+							AND cb.intItemLocationId = @intItemLocationId 							
+							AND (ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)) > 0
+					ORDER BY cb.dtmCreated DESC
 
 					IF @intStorageLocationId IS NULL
 					 	BEGIN

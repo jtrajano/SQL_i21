@@ -194,13 +194,96 @@ BEGIN
 
 		DECLARE @intLocationId AS INT = (SELECT intCompanyLocationId FROM tblSTStore WHERE intStoreId = @intStoreId)
 
-		 -- ==================================================================================================================
-		 -- Start: All Item Movement
-		 -- ==================================================================================================================
+		-- ==================================================================================================================
+		-- Start: Insert first those UPC's that are not existing in i21
+		-- ==================================================================================================================
 			INSERT INTO dbo.tblSTCheckoutItemMovements
 			(
 				intCheckoutId
 				, intItemUPCId
+				, strInvalidUPCCode
+				, strDescription
+				, intVendorId
+				, intQtySold
+				, dblCurrentPrice
+				, dblDiscountAmount
+				, dblGrossSales
+				, dblTotalSales
+				, dblItemStandardCost
+				, intConcurrencyId
+			)
+			SELECT 
+				intCheckoutId		= @intCheckoutId
+			  , intItemUPCId		= NULL -- UOM.intItemUOMId
+			  , strInvalidUPCCode	= ISNULL(Chk.POSCode, '')
+			  , strDescription		= NULL -- I.strDescription
+			  , intVendorId			= NULL -- IL.intVendorId
+			  , intQtySold			= (Chk.SalesQuantity)
+			  , dblCurrentPrice		= CASE 
+										WHEN (Chk.SalesQuantity) = 0
+											THEN 0
+										ELSE (Chk.SalesAmount)  /  (Chk.SalesQuantity)
+									END
+			  , dblDiscountAmount	= (Chk.DiscountAmount + Chk.PromotionAmount)
+			  , dblGrossSales		= (Chk.SalesAmount)
+			  , dblTotalSales		= (Chk.SalesAmount) + (Chk.DiscountAmount + Chk.PromotionAmount)
+			  , dblItemStandardCost = NULL --ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
+			  , intConcurrencyId	= 1
+			FROM @tblTempForCalculation Chk
+			WHERE ISNULL(Chk.POSCode, '') NOT IN
+			(
+				SELECT DISTINCT 
+					tbl.strXmlRegisterPOSCode
+				FROM
+				(
+					SELECT DISTINCT
+						Chk.POSCode AS strXmlRegisterPOSCode
+					FROM #tempCheckoutInsert Chk
+					INNER JOIN
+					(
+						SELECT intItemUOMId
+							, intItemId
+							, strLongUPCCode
+							, CASE 
+								WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
+									THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
+								ELSE NULL
+							END AS intLongUpcCode 
+						FROM dbo.tblICItemUOM
+					) AS UOM
+						ON Chk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
+						OR CONVERT(NUMERIC(32, 0),CAST(Chk.POSCode AS FLOAT)) = UOM.intLongUpcCode
+					INNER JOIN dbo.tblICItem I 
+						ON I.intItemId = UOM.intItemId
+					INNER JOIN dbo.tblICItemLocation IL 
+						ON IL.intItemId = I.intItemId
+					INNER JOIN dbo.tblICItemPricing P 
+						ON IL.intItemLocationId = P.intItemLocationId 
+						AND I.intItemId = P.intItemId
+					INNER JOIN dbo.tblSMCompanyLocation CL 
+						ON CL.intCompanyLocationId = IL.intLocationId
+					INNER JOIN dbo.tblSTStore S 
+						ON S.intCompanyLocationId = CL.intCompanyLocationId
+					WHERE S.intStoreId = @intStoreId
+						AND ISNULL(Chk.POSCode, '') != ''
+				) AS tbl
+			)
+			AND ISNULL(Chk.POSCode, '') != ''
+		-- ==================================================================================================================
+		-- End: Insert first those UPC's that are not existing in i21
+		-- ==================================================================================================================
+
+
+
+
+		-- ==================================================================================================================
+		-- Start: All Item Movement
+		-- ==================================================================================================================
+			INSERT INTO dbo.tblSTCheckoutItemMovements
+			(
+				intCheckoutId
+				, intItemUPCId
+				, strInvalidUPCCode
 				, strDescription
 				, intVendorId
 				, intQtySold
@@ -215,6 +298,7 @@ BEGIN
 			SELECT 
 				intCheckoutId		= @intCheckoutId
 			  , intItemUPCId		= UOM.intItemUOMId
+			  , strInvalidUPCCode   = NULL
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
 			  , intQtySold			= (Chk.SalesQuantity)
@@ -256,9 +340,9 @@ BEGIN
 			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
-		 -- ==================================================================================================================
-		 -- End: All Item Movement
-		 -- ==================================================================================================================
+		-- ==================================================================================================================
+		-- End: All Item Movement
+		-- ==================================================================================================================
 
 
 
@@ -270,6 +354,7 @@ BEGIN
 			(
 				intCheckoutId
 				, intItemUPCId
+				, strInvalidUPCCode
 				, strDescription
 				, intVendorId
 				, intQtySold
@@ -284,6 +369,7 @@ BEGIN
 			SELECT 
 				intCheckoutId		= @intCheckoutId
 			  , intItemUPCId		= UOM.intItemUOMId
+			  , strInvalidUPCCode	= NULL
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
 			  , intQtySold			= (Chk.RefundCount * -1)

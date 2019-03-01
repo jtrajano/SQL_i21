@@ -86,7 +86,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ARID.[dblQtyShipped]), @ZeroDecimal)  --ICIT.[dblQty]
+	,[dblQty]						= - ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ICS.dblQuantity, ARID.[dblQtyShipped])), @ZeroDecimal)  --ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -114,7 +114,8 @@ CROSS APPLY
 		ICIS.[intInventoryShipmentId]		
 		, ICIS.[strShipmentNumber]		
 		, ICISI.[intInventoryShipmentItemId]
-		, ICISI.intChildItemLinkId  
+		, ICISI.intChildItemLinkId
+		, ICISI.dblQuantity  
 	FROM	
 		tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
 	INNER JOIN
@@ -246,7 +247,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - ICIT.[dblQty]--ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal)
+	,[dblQty]						= CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN ICIT.[dblQty] ELSE -ICIT.[dblQty] END--ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0

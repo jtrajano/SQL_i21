@@ -7,6 +7,42 @@ BEGIN TRY
 
 	DECLARE @ErrMsg	NVARCHAR(MAX)
 
+	DECLARE @tblShipment TABLE 
+	(  
+			intContractHeaderId		INT,  
+			intContractDetailId		INT,        
+			dblQuantity				NUMERIC(18,6)
+	)
+
+	DECLARE @tblBill TABLE 
+	(  
+			intContractDetailId		INT,        
+			dblQuantity				NUMERIC(18,6)
+	)
+
+	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity)
+	SELECT 
+		   intContractHeaderId  = ShipmentItem.intOrderId
+		  ,intContractDetailId	= ShipmentItem.intLineNo
+		  ,dblQuantity			= ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId,ShipmentItem.dblQuantity)),0)
+	
+	FROM tblICInventoryShipmentItem ShipmentItem
+	JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId
+	WHERE Shipment.ysnPosted = 1 AND ShipmentItem.intOrderId = @intContractHeaderId
+	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo
+
+	INSERT INTO @tblBill(intContractDetailId,dblQuantity)
+	SELECT 
+		   intContractDetailId	= BD.intContractDetailId
+		  ,dblQuantity			= ISNULL(SUM([dbo].[fnCTConvertQuantityToTargetItemUOM](BD.intItemId,BD.intUnitOfMeasureId,UOM.intUnitMeasureId,BD.dblQtyOrdered)),0)
+	FROM tblAPBillDetail BD
+	JOIN tblAPBill B ON B.intBillId = BD.intBillId AND B.ysnPosted = 1 AND BD.dblQtyOrdered > 0 
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = BD.intContractDetailId
+	JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CD.intItemUOMId
+	WHERE CD.intContractHeaderId = @intContractHeaderId
+	GROUP BY BD.intContractDetailId
+
 	;With ContractDetail AS (
 	   SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId --1247
     )
@@ -73,7 +109,11 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 	)
 
 	SELECT	*,
-			dblAppliedQty * dblQuantityPerLoad		AS	dblAppliedLoadQty
+			 dblAppliedLoadQty = CASE 
+										WHEN dblShipmentQuantity > 0  THEN dblShipmentQuantity
+										WHEN dblBillQty			 > 0  THEN dblBillQty
+										ELSE dblAppliedQty * dblQuantityPerLoad
+                                 END
 	FROM
 	(
 		SELECT	 CD.*
@@ -196,6 +236,8 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,CT.intBillInvoiceId
 				,CT.strDocType
 				,CT.strAdjustmentType
+				,dblShipmentQuantity = Shipment.dblQuantity
+				,dblBillQty          = Bill.dblQuantity
 
 		FROM			ContractDetail					CD
 				JOIN    CTE1							CT	ON CT.intContractDetailId				=		CD.intContractDetailId
@@ -227,7 +269,9 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		LEFT	JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId				=		CD.intPurchasingGroupId		--strPurchasingGroup
 		LEFT	JOIN	tblICCommodityUnitMeasure		CO	ON	CO.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				
 		LEFT    JOIN	tblICItemUOM					CM	ON	CM.intItemId						=		CD.intItemId		
-															AND	CM.intUnitMeasureId					=		CO.intUnitMeasureId			
+															AND	CM.intUnitMeasureId					=		CO.intUnitMeasureId
+		LEFT   JOIN     @tblShipment				Shipment ON Shipment.intContractDetailId        =       CD.intContractDetailId
+		LEFT   JOIN     @tblBill						Bill ON Bill.intContractDetailId			=       CD.intContractDetailId
 	)t ORDER BY intContractSeq
 
 END TRY
