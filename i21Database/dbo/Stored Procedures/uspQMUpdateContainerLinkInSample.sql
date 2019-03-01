@@ -1,6 +1,5 @@
 ﻿--EXEC uspQMUpdateContainerLinkInSample 4408,'016/2727/0003',4446,2310,2611,2986,182
-CREATE PROCEDURE uspQMUpdateContainerLinkInSample
-     @intContractDetailId INT
+CREATE PROCEDURE uspQMUpdateContainerLinkInSample @intContractDetailId INT
 	,@strContainerNumber NVARCHAR(100)
 	,@intLoadContainerId INT
 	,@intLoadDetailContainerLinkId INT
@@ -24,7 +23,10 @@ BEGIN TRY
 	FROM tblQMSample
 	WHERE strContainerNumber = @strContainerNumber
 		AND intContractDetailId = @intContractDetailId
-		AND intLoadDetailContainerLinkId IS NULL
+		AND (
+			intLoadDetailContainerLinkId IS NULL
+			OR intLoadDetailContainerLinkId <> @intLoadDetailContainerLinkId
+			)
 
 	SELECT @strSampleId = COALESCE(@strSampleId + ',', '') + CONVERT(NVARCHAR, intSampleId)
 	FROM @OldSampleDetail
@@ -41,7 +43,10 @@ BEGIN TRY
 		,dtmLastModified = GETDATE()
 	WHERE strContainerNumber = @strContainerNumber
 		AND intContractDetailId = @intContractDetailId
-		AND intLoadDetailContainerLinkId IS NULL
+		AND (
+			intLoadDetailContainerLinkId IS NULL
+			OR intLoadDetailContainerLinkId <> @intLoadDetailContainerLinkId
+			)
 
 	UPDATE tblQMTestResult
 	SET intConcurrencyId = (intConcurrencyId + 1)
@@ -53,6 +58,7 @@ BEGIN TRY
 			SELECT Item
 			FROM fnSplitStringWithTrim(@strSampleId, ',')
 			)
+		AND intProductValueId <> @intLoadDetailContainerLinkId
 
 	IF (LEN(@strSampleId) > 0)
 	BEGIN
