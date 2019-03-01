@@ -52,6 +52,7 @@ AS
 			,LC.ysnAccrue
 			,LC.ysnPrice
 			,LC.ysnMTM
+			,LC.intBillId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
@@ -78,3 +79,4 @@ AS
 			,LC.ysnAccrue
 			,LC.ysnPrice
 			,LC.ysnMTM
+			,LC.intBillId

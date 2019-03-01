@@ -179,7 +179,7 @@ BEGIN TRY
 	JOIN tblICItem I ON I.intItemId = V.intItemId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
-	WHERE V.intLoadId = @intLoadId
+	WHERE V.intLoadId = @intLoadId AND V.intBillId IS NULL
 		AND ((V.intLoadCostId IN (SELECT intLoadCostId FROM @loadCosts)) OR (NOT EXISTS (SELECT TOP 1 1 FROM @loadCosts))) 
 	GROUP BY V.intEntityVendorId
 		,CH.intContractHeaderId
