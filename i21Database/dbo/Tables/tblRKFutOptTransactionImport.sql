@@ -19,9 +19,9 @@
 	[dblPrice] decimal(24,10) ,
 	[strReference] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
 	[strStatus] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[dtmFilledDate] DATETIME NULL,
+	[dtmFilledDate] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strBook] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[strSubBook] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] int,
-	[dtmCreateDateTime] DATETIME NULL
+	[dtmCreateDateTime] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
 )
