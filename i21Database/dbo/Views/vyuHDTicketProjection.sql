@@ -6,6 +6,7 @@
 		,strProjectionCustomerName = c.strName
 		,strProjectionMileStone = d.strMileStone
 		,strProjectionType = e.strType
+		,intTicketTypeTypeId = e.intTicketTypeTypeId
 		,strProjectionStatus = f.strStatus
 		,strProjectionStatusBcColor = f.strBackColor
 		,strProjectionStatusFcColor = f.strFontColor

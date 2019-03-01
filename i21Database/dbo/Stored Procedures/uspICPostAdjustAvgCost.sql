@@ -111,7 +111,7 @@ BEGIN
 	DECLARE	@StockItemUOMId AS INT
 			,@strDescription AS NVARCHAR(255)
 			,@strNewCost AS NVARCHAR(50) 
-
+			,@dtmCreated AS DATETIME
 END 
 
 -- Compute the cost adjustment
@@ -571,6 +571,7 @@ BEGIN
 		,@intForexRateTypeId					= NULL
 		,@dblForexRate							= 1
 		,@strDescription						= @strDescription	
+		,@dtmCreated							= @dtmCreated OUTPUT 
 
 		UPDATE	tblICInventoryTransaction 
 		SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
@@ -581,6 +582,7 @@ END
 BEGIN 
 	UPDATE	tblICInventoryFIFOCostAdjustmentLog 
 	SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+			,dtmCreated = @dtmCreated
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
 END 
 

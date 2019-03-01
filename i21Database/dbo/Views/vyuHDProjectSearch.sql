@@ -9,11 +9,15 @@
 			group by aa.intProjectId
 		),
 		projecthours as (
-			select aa.intProjectId, dblQuotedHours = isnull(sum(ad.dblQuotedHours),0), dblActualHours = isnull(sum(ad.dblActualHours),0)
-			from tblHDProject aa, tblHDProjectTask ab, tblHDTicket ad
+			select intProjectId,dblQuotedHours= sum(isnull(dblQuotedHours,0.00)),dblActualHours= sum(isnull(dblActualHours,0.00))
+			from
+			(
+			select aa.intProjectId, dblQuotedHours = (select sum(ae.dblEstimatedHours) from tblHDTicketHoursWorked ae where ae.intTicketId = ab.intTicketId), dblActualHours = (select sum(af.dblActualHours) from tblHDTicket af where af.intTicketId = ab.intTicketId)
+			from tblHDProject aa, tblHDProjectTask ab
 			where ab.intProjectId = aa.intProjectId
-			and ad.intTicketId = ab.intTicketId
-			group by aa.intProjectId,aa.strProjectName
+			group by aa.intProjectId,ab.intTicketId
+			) as projecthoursraw
+			group by intProjectId
 		)
 		Select
 					 intProjectId
@@ -55,7 +59,7 @@
 					,strEntityLocation
 					,dblActualHours
 					,dblQuotedHours
-					,dblOverShort
+					,dblOverShort = (dblQuotedHours-dblActualHours)
 					,intParentProjectId
 					,strParentProjectName
 					,dblNonBillableHours
@@ -108,9 +112,9 @@
 					,cam.strCampaignName
 					,strCompanyLocation = camloc.strLocationName
 					,strEntityLocation = enloc.strLocationName
-					,ph.dblActualHours
-					,ph.dblQuotedHours
-					,dblOverShort = (ph.dblQuotedHours-ph.dblActualHours)
+					,dblActualHours = (select ph.dblActualHours from projecthours ph where ph.intProjectId = proj.intProjectId)
+					,dblQuotedHours = (select ph.dblQuotedHours from projecthours ph where ph.intProjectId = proj.intProjectId)
+					,dblOverShort = 0.00
 					,intParentProjectId = pp.intProjectId
 					,strParentProjectName = pp.strProjectName
 					,pnb.dblNonBillableHours
@@ -132,7 +136,7 @@
 					left outer join [tblCRMCampaign] cam on cam.[intCampaignId] = proj.intOpportunityCampaignId
 					left outer join tblSMCompanyLocation camloc on camloc.intCompanyLocationId = proj.intCompanyLocationId
 					left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = proj.intEntityLocationId
-					left join projecthours ph on ph.intProjectId = proj.intProjectId
+					--left join projecthours ph on ph.intProjectId = proj.intProjectId
 					left join projectnonbillable pnb on pnb.intProjectId = proj.intProjectId
 					left join tblHDProjectDetail pd on pd.intDetailProjectId = proj.intProjectId
 					left join tblHDProject pp on pp.intProjectId = pd.intProjectId

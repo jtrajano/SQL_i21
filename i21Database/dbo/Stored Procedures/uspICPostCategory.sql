@@ -93,6 +93,7 @@ DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryReturn AS INT = 42
 
 		,@InventoryTransactionIdentityId AS INT 
+		,@dtmCreated AS DATETIME 
 
 -- Exit immediately if there is nothing to post. 
 IF @dblAdjustRetailValue IS NULL AND ISNULL(@dblQty, 0) = 0
@@ -236,6 +237,7 @@ BEGIN
 		,@dblUnitRetail = @dblUnitRetail
 		,@dblCategoryCostValue = @dblCostValue
 		,@dblCategoryRetailValue = @dblRetailValue 
+		,@dtmCreated = @dtmCreated OUTPUT 
 END 
 
 -- Update the Category Pricing

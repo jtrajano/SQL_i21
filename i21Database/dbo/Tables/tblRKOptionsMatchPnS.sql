@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[tblRKOptionsMatchPnS]
 	[intOptionsMatchPnSHeaderId] int NOT NULL,
 	[strTranNo]  nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL , 
 	[dtmMatchDate] DATETIME NOT NULL, 
-    [intMatchQty] INT NOT NULL, 
+    [dblMatchQty] numeric(18,6) NOT NULL, 
 	[intLFutOptTransactionId] INT NOT NULL,
 	[intSFutOptTransactionId] INT NOT NULL,
 	[intConcurrencyId] INT NOT NULL,

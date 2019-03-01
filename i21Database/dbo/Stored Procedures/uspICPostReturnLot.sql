@@ -64,6 +64,7 @@ DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @intInventoryLotOutId AS INT 
 
 DECLARE @intReturnValue AS INT 
+		,@dtmCreated AS DATETIME 
 
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
@@ -174,6 +175,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 						,@intForexRateTypeId = @intForexRateTypeId
 						,@dblForexRate = @dblForexRate
+						,@dtmCreated = @dtmCreated OUTPUT 
 
 				IF @intReturnValue < 0 GOTO _Exit_With_Error
 
@@ -210,10 +212,12 @@ BEGIN
 						intInventoryTransactionId
 						,intInventoryLotId
 						,dblQty
+						,dtmCreated
 				)
 				SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 						,intInventoryLotId = @UpdatedInventoryLotId
 						,dblQty = @QtyOffset
+						,dtmCreated = @dtmCreated
 				WHERE	@InventoryTransactionIdentityId IS NOT NULL
 						AND @UpdatedInventoryLotId IS NOT NULL 
 						AND @QtyOffset IS NOT NULL 
@@ -232,6 +236,7 @@ BEGIN
 					,strBatchId
 					,intTransactionTypeId 
 					,intTransactionDetailId	
+					,dtmCreated
 				)
 				SELECT 
 					intInventoryLotId			= @UpdatedInventoryLotId
@@ -244,6 +249,7 @@ BEGIN
 					,strBatchId					= @strBatchId
 					,intTransactionTypeId		= @intTransactionTypeId
 					,intTransactionDetailId		= @intTransactionDetailId
+					,dtmCreated					= @dtmCreated
 			END 
 
 			-- Reduce the remaining qty

@@ -48,9 +48,9 @@ It helps to track the transaction(s) with a vendor where it was purchased, how i
 		CONSTRAINT [PK_tblICItemStockPath] PRIMARY KEY CLUSTERED ([intId] ASC),
 		CONSTRAINT [UN_tblICItemStockPath] UNIQUE NONCLUSTERED ([intItemId] ASC, [intItemLocationId] ASC, [intAncestorId] ASC, [intDescendantId] ASC),
 		CONSTRAINT [FK_tblICItemStockPath_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
-		CONSTRAINT [FK_tblICItemStockPath_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
-		CONSTRAINT [FK_tblICItemStockPath_tblICInventoryTransaction_Ancestor] FOREIGN KEY ([intAncestorId]) REFERENCES [tblICInventoryTransaction]([intInventoryTransactionId]),
-		CONSTRAINT [FK_tblICItemStockPath_tblICInventoryTransaction_Descendant] FOREIGN KEY ([intDescendantId]) REFERENCES [tblICInventoryTransaction]([intInventoryTransactionId]) 
+		CONSTRAINT [FK_tblICItemStockPath_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])
+		--CONSTRAINT [FK_tblICItemStockPath_tblICInventoryTransaction_Ancestor] FOREIGN KEY ([intAncestorId]) REFERENCES [tblICInventoryTransaction]([intInventoryTransactionId]),
+		--CONSTRAINT [FK_tblICItemStockPath_tblICInventoryTransaction_Descendant] FOREIGN KEY ([intDescendantId]) REFERENCES [tblICInventoryTransaction]([intInventoryTransactionId]) 
 	)
 	GO
 

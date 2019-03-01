@@ -18,7 +18,7 @@
     [strCountry]               NVARCHAR (75)    COLLATE Latin1_General_CI_AS NULL,
     [dblAmount]                DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
 	[dblAmountForeign]                DECIMAL (18, 6)  DEFAULT 0  NULL,
-	[dblShortAmount]           DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
+	[dblShortAmount]           DECIMAL (18, 6)  DEFAULT 0 NULL,
 	[intShortGLAccountId]      INT				NULL,
     [strAmountInWords]         NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
     [strMemo]                  NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,

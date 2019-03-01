@@ -9,7 +9,7 @@ intGLAccountIdDetail = D.intGLAccountId,
 T.strTransactionId,
 L.intBankLoanId,
 T.dtmDate,
-D.dblDebit,
+detailDebit.dblDebit,
 T.strMemo,
 T.ysnPosted,
 T.intConcurrencyId
@@ -23,5 +23,8 @@ on A.intAccountId = D.intGLAccountId
 LEFT JOIN
 tblCMBankTransactionType P
 on P.intBankTransactionTypeId = T.intBankTransactionTypeId
+outer apply(
+select sum(dblDebit -dblCredit ) dblDebit from tblCMBankTransactionDetail where intTransactionId = T.intTransactionId
+) detailDebit
 GO
 

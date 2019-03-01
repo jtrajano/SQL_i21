@@ -15,7 +15,7 @@ DECLARE @idoc int
 Declare @intOptionsMatchPnSHeaderId int    
 Declare @strTranNo nVarchar(50)    
 Declare @dtmMatchDate  datetime    
-Declare @intMatchQty int    
+Declare @dblMatchQty numeric(18,6)    
 Declare @intLFutOptTransactionId int    
 Declare @intSFutOptTransactionId int   
 Declare @strExpiredTranNo nVarchar(50)     
@@ -52,7 +52,7 @@ BEGIN
 
 INSERT INTO tblRKMatchDerivativesHistoryForOption (intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,dblMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,dtmTransactionDate,strUserName)
 
-SELECT intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,-(intMatchQty),dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,getdate(),userName
+SELECT intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,-(dblMatchQty),dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,getdate(),userName
 FROM tblRKOptionsMatchPnS  p
 JOIN @tblMatchedDelete m on p.strTranNo=m.strTranNo
 
@@ -143,7 +143,7 @@ SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPn
   intOptionsMatchPnSHeaderId,  
   strTranNo,   
   dtmMatchDate,  
-  intMatchQty,  
+  dblMatchQty,  
   intLFutOptTransactionId,  
   intSFutOptTransactionId,  
   intConcurrencyId      
@@ -153,7 +153,7 @@ SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPn
  @intOptionsMatchPnSHeaderId as intOptionsMatchPnSHeaderId,  
  @strTranNo + ROW_NUMBER()over(order by intLFutOptTransactionId)strTranNo,  
  dtmMatchDate,  
- intMatchQty,  
+ dblMatchQty,  
  intLFutOptTransactionId,  
  intSFutOptTransactionId,   
  1 as intConcurrencyId 
@@ -163,7 +163,7 @@ SELECT @strTranNo=isnull(max(convert(int,strTranNo)),0) from tblRKOptionsMatchPn
  (   
  [intOptionsMatchPnSHeaderId] int ,  
  [dtmMatchDate]  DATETIME  ,   
- [intMatchQty] int ,   
+ [dblMatchQty] numeric(18,6) ,   
  [intLFutOptTransactionId] INT,  
  [intSFutOptTransactionId] INT 
  )     
@@ -182,7 +182,7 @@ declare @strName nvarchar(100) =''
  SELECT TOP 1 @strTranNoPNS =strTranNo FROM tblRKOptionsMatchPnS WHERE intMatchOptionsPnSId = @intOptMPNSId
  
  INSERT INTO tblRKMatchDerivativesHistoryForOption (intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,dblMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,dtmTransactionDate,strUserName)
- SELECT intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,intMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,getdate(),@strName
+ SELECT intOptionsMatchPnSHeaderId,intMatchOptionsPnSId,dblMatchQty,dtmMatchDate,intLFutOptTransactionId,intSFutOptTransactionId,getdate(),@strName
 FROM tblRKOptionsMatchPnS where strTranNo=@strTranNoPNS
 
    ---------------Expired Record Insert ----------------  

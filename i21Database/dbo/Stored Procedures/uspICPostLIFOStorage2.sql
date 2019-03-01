@@ -65,6 +65,7 @@ DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38, 20)
 
 DECLARE @intReturnValue AS INT 
+		,@dtmCreated DATETIME 
 
 -------------------------------------------------
 -- 1. Process the LIFO Cost buckets
@@ -129,6 +130,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 		
@@ -137,10 +139,12 @@ BEGIN
 					intInventoryTransactionStorageId
 					,intInventoryLIFOStorageId
 					,dblQty
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionStorageId = @InventoryTransactionIdentityId
 					,intInventoryLIFOStorageId = @UpdatedLIFOStorageId
 					,dblQty = @QtyOffset
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedLIFOStorageId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
@@ -188,6 +192,7 @@ BEGIN
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
+				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -277,6 +282,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
+							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END
@@ -288,11 +294,13 @@ BEGIN
 					,intInventoryLIFOStorageId
 					,dblQty
 					,intRevalueLifoId
+					,dtmCreated
 			)		
 			SELECT	intInventoryTransactionStorageId = @InventoryTransactionIdentityId
 					,intInventoryLIFOStorageId = NULL 
 					,dblQty = @QtyOffset
 					,intRevalueLifoId = @UpdatedLIFOStorageId
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedLIFOStorageId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL

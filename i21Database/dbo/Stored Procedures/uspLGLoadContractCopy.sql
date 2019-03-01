@@ -54,6 +54,8 @@ BEGIN TRY
 		,strLoadNumber
 		,intCompanyLocationId
 		,intPurchaseSale
+		,intFreightTermId
+		,intCurrencyId
 		,dtmScheduledDate
 		,strCustomerReference
 		,strBookingReference
@@ -72,6 +74,9 @@ BEGIN TRY
 		,strTrailerNo1
 		,strTrailerNo2
 		,strTrailerNo3
+		,strCarNumber
+		,strEmbargoNo
+		,strEmbargoPermitNo
 		,intUserSecurityId
 		,strExternalLoadNumber
 		,intTransportLoadId
@@ -146,6 +151,8 @@ BEGIN TRY
 		,@strLoadSINumber
 		,@intNewContractLocationId
 		,intPurchaseSale
+		,intFreightTermId
+		,intCurrencyId
 		,dtmScheduledDate
 		,strCustomerReference
 		,strBookingReference
@@ -164,6 +171,9 @@ BEGIN TRY
 		,strTrailerNo1
 		,strTrailerNo2
 		,strTrailerNo3
+		,strCarNumber
+		,strEmbargoNo
+		,strEmbargoPermitNo
 		,intUserSecurityId
 		,strExternalLoadNumber
 		,intTransportLoadId

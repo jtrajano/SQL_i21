@@ -2143,7 +2143,7 @@ BEGIN
 		,@intTransactionId
 		,@intEntityUserSecurityId
 
-	EXEC dbo.uspICProcessPayables @intTransactionId, @ysnPost, @intEntityUserSecurityId
+	EXEC dbo.uspICProcessPayables @intTransactionId, default, @ysnPost, @intEntityUserSecurityId
 	
 	COMMIT TRAN @TransactionName
 END 

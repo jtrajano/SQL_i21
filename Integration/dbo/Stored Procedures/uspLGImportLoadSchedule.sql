@@ -83,6 +83,9 @@ BEGIN
 		,[strTrailerNo1]
 		,[strTrailerNo2]
 		,[strTrailerNo3]
+		,[strCarNumber]
+		,[strEmbargoNo]
+		,[strEmbargoPermitNo]
 		,[intUserSecurityId]
 		,[strExternalLoadNumber]
 		,[intTransportLoadId]
@@ -195,6 +198,9 @@ SELECT
 	,[strTrailerNo1]				= NULL
 	,[strTrailerNo2]				= NULL
 	,[strTrailerNo3]				= NULL
+	,[strCarNumber]					= NULL
+	,[strEmbargoNo]					= NULL
+	,[strEmbargoPermitNo]			= NULL
 	,[intUserSecurityId]			= @UserId
 	,[strExternalLoadNumber]		= NULL
 	,[intTransportLoadId]			= NULL

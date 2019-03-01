@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuCMBankLoan]
-AS
+as
 SELECT 
 L.strBankLoanId,
 L.intBankLoanId,
@@ -10,30 +10,46 @@ L.decAnnualInterest,
 L.ysnOpen,
 L.strComments,
 L.intConcurrencyId,
-L.dblLoanAmount,
-BA.intBankAccountId,
-T.strTransactionId,
-BA.strBankAccountNo,
+dblLoanAmount = V.dblBalance,
+V.intBankAccountId,
+V.strTransactionId,
+V.strBankAccountNo,
 U.dblBalance,
-intGLLoanAccountId = D.intGLAccountId,
-strGLLoanAccountId = GL.strAccountId,
-BA.strBankName,
-BA.strCurrency,
+intGLLoanAccountId = V.intGLAccountId,
+strGLLoanAccountId = V.strAccountId,
+V.strBankName,
+V.strCurrency,
 T.intCurrencyId,
 strStatus = CASE WHEN L.ysnOpen = 1 THEN  'Open' ELSE 'Closed' END COLLATE Latin1_General_CI_AS ,
 T.ysnPosted
 from tblCMBankLoan L 
 JOIN tblCMBankTransaction T
-ON L.intBankLoanId = L.intBankLoanId
-LEFT JOIN tblCMBankTransactionDetail D
-on D.intTransactionId = T.intTransactionId
-LEFT JOIN tblGLAccount GL 
-ON GL.intAccountId = D.intGLAccountId
-LEFT JOIN vyuCMBankAccount BA
-ON BA.intBankAccountId = T.intBankAccountId
+ON L.intBankLoanId = T.intBankLoanId
+AND intBankTransactionTypeId = 52
+
+
+
 CROSS APPLY
 (
-	SELECT SUM(dblAmount) dblBalance from tblCMBankTransaction WHERE intBankLoanId = L.intBankLoanId 
+	SELECT SUM(BB.dblDebit - BB.dblCredit) dblBalance 
+	from tblCMBankTransaction AA join tblCMBankTransactionDetail BB
+	on AA.intTransactionId = BB.intTransactionId
+	WHERE intBankLoanId = L.intBankLoanId 
 )U
-WHERE
-T.intBankTransactionTypeId = 52
+CROSS APPLY
+(
+	SELECT SUM(DD.dblDebit - DD.dblCredit) dblBalance, FF.strAccountId, EE.strBankAccountNo, CC.intBankAccountId, CC.strTransactionId, EE.strBankName
+	,EE.strCurrency, EE.intCurrencyId,DD.intGLAccountId
+	from tblCMBankTransaction CC 
+	join tblCMBankTransactionDetail DD	on CC.intTransactionId = DD.intTransactionId
+	join vyuCMBankAccount EE on EE.intBankAccountId = CC.intBankAccountId
+	join tblGLAccount FF on DD.intGLAccountId = FF.intAccountId
+	
+	 WHERE intBankLoanId = L.intBankLoanId 
+	 AND CC.intBankTransactionTypeId = 52
+	 GROUP BY CC.intBankAccountId,EE.strBankAccountNo,DD.intGLAccountId, FF.strAccountId, CC.strTransactionId,EE.strCurrency, EE.intCurrencyId, EE.strBankName
+)V
+
+
+GO
+

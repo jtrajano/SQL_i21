@@ -127,6 +127,9 @@ BEGIN
 			,LDV.strTrailerNo1
 			,LDV.strTrailerNo2
 			,LDV.strTrailerNo3
+			,LDV.strCarNumber
+			,LDV.strEmbargoNo
+			,LDV.strEmbargoPermitNo
 			,LDV.strTransUsedBy
 			,LDV.strTruckNo
 			,LDV.strType

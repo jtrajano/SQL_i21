@@ -20,7 +20,7 @@
 		[dblCost] NUMERIC(38, 20) NULL,
 		[dblValue] NUMERIC(38, 20) NULL,
 		[ysnIsUnposted] BIT DEFAULT 0,
-		[dtmCreated] DATETIME NULL, 
+		[dtmCreated] DATETIME NOT NULL, 
 		[strRelatedTransactionId] NVARCHAR(50), 
 		[intRelatedTransactionId] INT,
 		[intRelatedTransactionDetailId] INT,

@@ -40,6 +40,8 @@ SELECT L.intLoadId
 			THEN 'Truck'
 		WHEN 2
 			THEN 'Ocean Vessel'
+		WHEN 3
+			THEN 'Rail'
 		END COLLATE Latin1_General_CI_AS
 	,intGenerateReferenceNumber = GL.intReferenceNumber
 	,L.intGenerateSequence
@@ -84,6 +86,9 @@ SELECT L.intLoadId
     ,L.strTrailerNo1
     ,L.strTrailerNo2
     ,L.strTrailerNo3
+	,L.strCarNumber
+    ,L.strEmbargoNo
+    ,L.strEmbargoPermitNo
 	,L.strComments
 	,L.ysnPosted
     ,ysnInProgress = ISNULL(L.ysnInProgress, 0)

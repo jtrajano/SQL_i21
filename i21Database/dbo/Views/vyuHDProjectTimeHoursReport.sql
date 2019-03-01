@@ -1,9 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuHDProjectTimeHoursReport]
 	AS
 		with estimatedhours as (
-			select a.intProjectId,intEstimatedHours = isnull(sum(c.dblQuotedHours),0.000000) from tblHDProject a, tblHDProjectTask b, tblHDTicket c
-			where b.intProjectId = a.intProjectId and c.intTicketId = b.intTicketId
-			group by a.intProjectId
+			select a.intProjectId,intEstimatedHours = (select sum(isnull(ae.dblEstimatedHours,0.00)) from tblHDTicketHoursWorked ae, tblHDProjectTask b where b.intProjectId = a.intProjectId and ae.intTicketId = b.intTicketId)
+			from tblHDProject a
 		),
 		invoice as (
 			select a.intProjectId,dblAmountDue = isnull(sum(d.dblAmountDue),0.000000),dblPayment = isnull(sum(d.dblPayment),0.000000) from tblHDProject a, tblHDProjectTask b, tblHDTicketHoursWorked c, tblARInvoice d
@@ -40,10 +39,10 @@
 					,intAgentEntityId = g.intEntityId
 					,strAgentName = g.strName
 					,a.intHours
-					,dblHours = a.intHours
-					,intTotalBilled = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end) * a.dblRate
-					,intBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else a.intHours end)
-					,intNonBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then a.intHours else 0 end)
+					,dblHours = (case when j.strServiceType = 'Expense' then 0.00 else a.intHours end)
+					,intTotalBilled = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else (case when j.strServiceType = 'Expense' then 0.00 else a.intHours end) end) * a.dblRate
+					,intBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then 0 else (case when j.strServiceType = 'Expense' then 0.00 else a.intHours end) end)
+					,intNonBillableHours = (case when isnull(a.ysnBillable, convert(bit,0)) = convert(bit,0) then (case when j.strServiceType <> 'Expense' then 0.00 else a.intHours end) else 0 end)
 					,h.intJobCodeId
 					,h.strJobCode
 					,a.dblRate
@@ -60,6 +59,7 @@
 					left join tblEMEntity g on g.intEntityId = a.intAgentEntityId
 					left join tblHDJobCode h on h.intJobCodeId = a.intJobCodeId
 					left join tblEMEntity i on i.intEntityId = d.intInternalProjectManager
+					left join tblICItem j on j.intItemId = a.intItemId
 				where a.intAgentEntityId is not null and a.intAgentEntityId > 0
 		) as result
 		left join estimatedhours on estimatedhours.intProjectId = result.intProjectId

@@ -50,6 +50,8 @@ SELECT CH.strContractNumber
 			THEN 'Truck'
 		WHEN intTransportationMode = 2
 			THEN 'Ocean Vessel'
+		WHEN intTransportationMode = 3
+			THEN 'Rail'
 		END COLLATE Latin1_General_CI_AS
 	,LOAD.intTransUsedBy
 	,strTransUsedBy = CASE 
@@ -76,6 +78,9 @@ SELECT CH.strContractNumber
 	,LOAD.strTrailerNo1
 	,LOAD.strTrailerNo2
 	,LOAD.strTrailerNo3
+	,LOAD.strCarNumber
+	,LOAD.strEmbargoNo
+	,LOAD.strEmbargoPermitNo
 	,LOAD.strComments
 	,ysnDispatched = CASE 
 		WHEN LOAD.ysnDispatched = 1

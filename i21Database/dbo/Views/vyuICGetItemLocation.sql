@@ -93,6 +93,7 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.intSort
 	, ItemLocation.strStorageUnitNo
 	, ItemLocation.ysnStorageUnitRequired
+	, ItemLocation.intCostAdjustmentType
 FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId

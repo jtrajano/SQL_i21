@@ -95,17 +95,19 @@ billedhours as
 (
 	select
 		intEntityId = b.intAgentEntityId
-		,intTotalBilledHours = sum(isnull(b.intHours,0.00))
-		,dblTotalBillableAmount = sum(isnull(b.intHours,0.00)*isnull(b.dblRate,0.00))
+		,intTotalBilledHours = sum(isnull((case when c.strServiceType = 'Expense' then 0.00 else b.intHours end),0.00))
+		,dblTotalBillableAmount = sum(isnull((case when c.strServiceType = 'Expense' then 0.00 else b.intHours end),0.00)*isnull(b.dblRate,0.00))
 	from
 		tblHDTicket a
 		,tblHDTicketHoursWorked b
+		,tblICItem c
 	where
 		b.intAgentEntityId is not null
 		and a.strType = 'HD'
 		and convert(int, convert(nvarchar(8), b.dtmDate, 112)) between @DateFrom and @DateTo
 		and b.intTicketId = a.intTicketId
 		and b.ysnBillable = convert(bit,1)
+		and c.intItemId = b.intItemId
 	group by
 		b.intAgentEntityId
 ),

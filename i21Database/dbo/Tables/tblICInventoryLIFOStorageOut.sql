@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[dblQty] NUMERIC(38, 20) NOT NULL,
 		[intRevalueLifoId] INT NULL,
 		[dblCostAdjustQty] NUMERIC(38, 20) NULL,
+		[dtmCreated] DATETIME NOT NULL,
 		CONSTRAINT [PK_tblICInventoryLIFOStorageOut] PRIMARY KEY CLUSTERED ([intId])    
 	)
 	GO

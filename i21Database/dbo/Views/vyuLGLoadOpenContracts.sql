@@ -90,7 +90,7 @@ SELECT CD.intContractDetailId
 	,intShipmentType = 1
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
-	,CO.strCountry AS strOrigin
+	,strOrigin = ISNULL(CO.strCountry, CO2.strCountry)
 	,CD.intBookId
 	,BO.strBook
 	,CD.intSubBookId
@@ -107,6 +107,8 @@ SELECT CD.intContractDetailId
 	,CD.intInvoiceCurrencyId
 	,FXC.strCurrency AS strInvoiceCurrency
 	,CET.strCurrencyExchangeRateType
+	,CD.intFreightTermId
+	,FT.strFreightTerm
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -132,13 +134,9 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
 	AND CD.intItemContractId = ICI.intItemContractId
 LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId = CD.intRateTypeId
-LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
-		CASE 
-			WHEN ISNULL(ICI.intCountryId, 0) = 0
-				THEN ISNULL(CA.intCountryID, 0)
-			ELSE ICI.intCountryId
-			END
-		)
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
+LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -259,7 +257,7 @@ SELECT CD.intContractDetailId
 	,intShipmentType = 2
 	,CD.strERPPONumber
 	,ISNULL(WG.ysnSample,0) AS ysnSampleRequired
-	,CO.strCountry AS strOrigin
+	,strOrigin = ISNULL(CO.strCountry, CO2.strCountry)
 	,CD.intBookId
 	,BO.strBook
 	,CD.intSubBookId
@@ -276,6 +274,8 @@ SELECT CD.intContractDetailId
 	,CD.intInvoiceCurrencyId
 	,FXC.strCurrency AS strInvoiceCurrency
 	,CET.strCurrencyExchangeRateType
+	,CD.intFreightTermId
+	,FT.strFreightTerm
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -301,13 +301,9 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
 	AND CD.intItemContractId = ICI.intItemContractId
 LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId = CD.intRateTypeId
-LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
-		CASE 
-			WHEN ISNULL(ICI.intCountryId, 0) = 0
-				THEN ISNULL(CA.intCountryID, 0)
-			ELSE ICI.intCountryId
-			END
-		)
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
+LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
+LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -394,7 +390,10 @@ GROUP BY CD.intContractDetailId
 	,CD.intStorageLocationId
 	,WG.ysnSample
 	,CD.dblShippingInstructionQty
+	,CD.intFreightTermId
 	,CO.strCountry
+	,CO2.strCountry
+	,FT.strFreightTerm
 	,CD.intBookId
 	,BO.strBook
 	,CD.intSubBookId

@@ -917,10 +917,10 @@ BEGIN
 			, strFutureMonth
 			, strAccountNumber = e.strName + '-' + strAccountNumber
 			, dblNoOfContract = (CASE WHEN ft.strBuySell = 'Buy'
-										THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+										THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(dblMatchQty)
 																		FROM tblRKOptionsMatchPnS l
 																		WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-									ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+									ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(dblMatchQty)
 																		FROM tblRKOptionsMatchPnS s
 																		WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)) END)
 								* ISNULL((SELECT TOP 1 dblDelta
@@ -936,10 +936,10 @@ BEGIN
 			, TranType = strBuySell
 			, CustVendor = e.strName
 			, dblNoOfLot = (CASE WHEN ft.strBuySell = 'Buy'
-									THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+									THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(dblMatchQty)
 																	FROM tblRKOptionsMatchPnS l
 																	WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-								ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+								ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(dblMatchQty)
 																	FROM tblRKOptionsMatchPnS s
 																	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)) END)
 							* ISNULL((SELECT TOP 1 dblDelta
@@ -1076,10 +1076,10 @@ BEGIN
 			, strFutureMonth
 			, strAccountNumber = e.strName + '-' + strAccountNumber
 			, dblNoOfContract = (CASE WHEN ft.strBuySell = 'Buy'
-										THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+										THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(dblMatchQty)
 																		FROM tblRKOptionsMatchPnS l
 																		WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-									ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+									ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(dblMatchQty)
 																		FROM tblRKOptionsMatchPnS s
 																		WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)) END)
 								* ISNULL((SELECT TOP 1 dblDelta
@@ -1095,10 +1095,10 @@ BEGIN
 			, TranType = strBuySell
 			, CustVendor = e.strName
 			, dblNoOfLot = (CASE WHEN ft.strBuySell = 'Buy'
-									THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+									THEN (ft.dblNoOfContract - ISNULL((SELECT SUM(dblMatchQty)
 																	FROM tblRKOptionsMatchPnS l
 																	WHERE l.intLFutOptTransactionId = ft.intFutOptTransactionId), 0))
-								ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(intMatchQty)
+								ELSE - (ft.dblNoOfContract - ISNULL((SELECT SUM(dblMatchQty)
 																	FROM tblRKOptionsMatchPnS s
 																	WHERE s.intSFutOptTransactionId = ft.intFutOptTransactionId), 0)) END)
 							* ISNULL((SELECT TOP 1 dblDelta

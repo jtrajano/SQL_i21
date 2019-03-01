@@ -29,6 +29,11 @@
 [strTrailerNo1] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strTrailerNo2] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strTrailerNo3] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+
+[strCarNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strEmbargoNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strEmbargoPermitNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+
 [intUserSecurityId] INT NULL, 	
 [strExternalLoadNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intTransportLoadId] INT NULL,

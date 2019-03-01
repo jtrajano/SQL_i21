@@ -38,6 +38,9 @@ SELECT   Load.intLoadId
         ,Load.strTrailerNo1
         ,Load.strTrailerNo2
         ,Load.strTrailerNo3
+        ,Load.strCarNumber
+        ,Load.strEmbargoNo
+        ,Load.strEmbargoPermitNo
         ,Load.strComments
         ,ysnDispatched = CASE WHEN Load.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
 		,Load.dtmDispatchedDate
@@ -212,6 +215,8 @@ SELECT   Load.intLoadId
 				THEN 'Truck'
 			WHEN Load.intTransportationMode = 2
 				THEN 'Ocean Vessel'
+			WHEN Load.intTransportationMode = 3
+				THEN 'Rail'
 			END COLLATE Latin1_General_CI_AS
 		,strPCompanyLocation = PCL.strLocationName
 		,strSCompanyLocation = SCL.strLocationName

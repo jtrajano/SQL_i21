@@ -66,6 +66,7 @@ DECLARE @dblValue AS NUMERIC(38,20)
 DECLARE @dblAutoVarianceOnUsedOrSoldStock AS NUMERIC(38, 20)
 
 DECLARE @intReturnValue AS INT 
+		,@dtmCreated AS DATETIME 
 
 -------------------------------------------------
 -- 1. Process the Lot Storage Cost buckets
@@ -181,6 +182,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -189,10 +191,12 @@ BEGIN
 					intInventoryTransactionStorageId
 					,intInventoryLotStorageId
 					,dblQty
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionStorageId = @InventoryTransactionIdentityId
 					,intInventoryLotStorageId = @UpdatedInventoryLotId
 					,dblQty = @QtyOffset
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedInventoryLotId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
@@ -304,7 +308,8 @@ BEGIN
 				,@intCostingMethod = @LOTCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 				,@intForexRateTypeId = @intForexRateTypeId
-				,@dblForexRate = @dblForexRate					
+				,@dblForexRate = @dblForexRate			
+				,@dtmCreated = @dtmCreated OUTPUT 		
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -397,6 +402,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
+							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END				 
@@ -408,11 +414,13 @@ BEGIN
 					,intInventoryLotStorageId
 					,dblQty
 					,intRevalueLotId
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionStorageId = @InventoryTransactionIdentityId
 					,intInventoryLotStorageId = NULL 
 					,dblQty = @QtyOffset
 					,intRevalueLotId = @UpdatedInventoryLotId
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedInventoryLotId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 

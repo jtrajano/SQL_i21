@@ -9,6 +9,7 @@
     [ysnEnforceControlTotal]    BIT NOT NULL DEFAULT(0),
     [dblWithholdPercent]   DECIMAL (18, 6) NULL,
     [strReportGroupName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+    [strSetPostDate] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [strClaimReportName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [strDebitMemoReportName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [strVoucherReportName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 

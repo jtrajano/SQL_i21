@@ -70,7 +70,7 @@ estimate as (
 		a.intAssignedToEntity
 		,a.intTicketId
 		--,dblHours = convert(numeric(18,6),datediff(minute,a.dtmCreated, a.dtmDueDate)) / convert(numeric(18,6),60)
-		,dblHours = convert(numeric(18,6),a.dblQuotedHours)
+		,dblHours = convert(numeric(18,6),(select sum(isnull(b.dblEstimatedHours,0.00)) from tblHDTicketHoursWorked b where b.intTicketId = a.intTicketId))
 		,intDate = convert(int, convert(nvarchar(8), a.dtmDueDate, 112))
 	from
 		tblHDTicket a

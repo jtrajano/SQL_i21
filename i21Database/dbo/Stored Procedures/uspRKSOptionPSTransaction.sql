@@ -18,7 +18,7 @@ SELECT strInternalTradeNo
 	, strOptionMonth
 	, strName
 	, strAccountNumber
-	, isnull(intTotalLot,0) intTotalLot
+	, isnull(dblTotalLot,0) dblTotalLot
 	, CAST(isnull(dblOpenLots,0) AS NUMERIC(18, 6)) dblOpenLots
 	, strOptionType
 	, dblStrike
@@ -55,11 +55,11 @@ SELECT strInternalTradeNo
 	, intCommodityId
 	, intOptionMonthId
 FROM (
-	SELECT (intTotalLot-dblSelectedLot1-intExpiredLots-intAssignedLots) AS dblOpenLots
+	SELECT (dblTotalLot-dblSelectedLot1-dblExpiredLots-dblAssignedLots) AS dblOpenLots
 		, '' as dblSelectedLot
-		, ((intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium)/ case when ysnSubCurrency = 1 then intCent else 1 end  as dblPremiumValue
-		, ((intTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium)/ case when ysnSubCurrency = 1 then intCent else 1 end  as dblMarketValue
-		, (-dblOptCommission*(intTotalLot-dblSelectedLot1))/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblCommission
+		, ((dblTotalLot-dblSelectedLot1)*dblContractSize*dblPremium)/ case when ysnSubCurrency = 1 then intCent else 1 end  as dblPremiumValue
+		, ((dblTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium)/ case when ysnSubCurrency = 1 then intCent else 1 end  as dblMarketValue
+		, (-dblOptCommission*(dblTotalLot-dblSelectedLot1))/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblCommission
 		, *
 	FROM (
 		SELECT DISTINCT strInternalTradeNo AS strInternalTradeNo
@@ -69,8 +69,8 @@ FROM (
 			, om.strOptionMonth as strOptionMonth
 			, e.strName as strName
 			, ba.strAccountNumber
-			, ot.intNoOfContract as intTotalLot
-			, IsNull((SELECT SUM (AD.intMatchQty) from tblRKOptionsMatchPnS AD where  dtmMatchDate<=@dtmPositionAsOf Group By AD.intSFutOptTransactionId
+			, ot.dblNoOfContract as dblTotalLot
+			, IsNull((SELECT SUM (AD.dblMatchQty) from tblRKOptionsMatchPnS AD where  dtmMatchDate<=@dtmPositionAsOf Group By AD.intSFutOptTransactionId
 					Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0) As dblSelectedLot1
 			, ot.strOptionType
 			, ot.dblStrike
@@ -105,10 +105,10 @@ FROM (
 			, intFutOptTransactionId
 			, isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope
 					where ope.intFutOptTransactionId= ot.intFutOptTransactionId
-					and dtmExpiredDate<=@dtmPositionAsOf),0) intExpiredLots
+					and dtmExpiredDate<=@dtmPositionAsOf),0) dblExpiredLots
 			, isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa
 					where opa.intFutOptTransactionId= ot.intFutOptTransactionId
-					and dtmTranDate<=@dtmPositionAsOf),0) intAssignedLots
+					and dtmTranDate<=@dtmPositionAsOf),0) dblAssignedLots
 			, intCurrencyId = c.intCurrencyID
 			, c.strCurrency
 			, intMainCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE c.intCurrencyID END

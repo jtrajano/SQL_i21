@@ -74,6 +74,7 @@ DECLARE @TransactionType_InventoryReceipt AS INT = 4
 		,@TransactionType_InventoryAdjustment_OpeningInventory AS INT = 47
 
 DECLARE @intReturnValue AS INT 
+		,@dtmCreated AS DATETIME 
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -164,6 +165,7 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
 					,@dblUnitRetail = @dblUnitRetail
+					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;			
 			
@@ -172,10 +174,12 @@ BEGIN
 					intInventoryTransactionId
 					,intInventoryFIFOId
 					,dblQty
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 					,intInventoryFIFOId = @UpdatedFifoId
 					,dblQty = @QtyOffset
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedFifoId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
@@ -224,6 +228,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@dblUnitRetail = @dblUnitRetail
+				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
@@ -314,6 +319,7 @@ BEGIN
 							,@dblForexRate = @dblForexRate
 							,@dblUnitRetail = @dblUnitRetail
 							,@strDescription = @strDescription
+							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
 				END 
@@ -325,11 +331,13 @@ BEGIN
 					,intInventoryFIFOId
 					,dblQty
 					,intRevalueFifoId
+					,dtmCreated
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
 					,intInventoryFIFOId = NULL 
 					,dblQty = @QtyOffset
 					,intRevalueFifoId = @UpdatedFifoId
+					,@dtmCreated
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
 					AND @UpdatedFifoId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
@@ -387,6 +395,7 @@ BEGIN
 					,@dblForexRate = @dblForexRate
 					,@dblUnitRetail = 0
 					,@dblCategoryRetailValue = @CategoryRetailValue
+					,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 	END

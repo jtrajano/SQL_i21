@@ -12,12 +12,12 @@ AS
 SET @dtmPositionAsOf = convert(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
 
 SELECT top 100 percent *
-	, ((isnull(dblSPrice,0) - isnull(dblLPrice,0)) * intMatchQty * dblContractSize) / case when ysnSubCurrency = 1 then intCent else 1 end as dblImpact
+	, ((isnull(dblSPrice,0) - isnull(dblLPrice,0)) * dblMatchQty * dblContractSize) / case when ysnSubCurrency = 1 then intCent else 1 end as dblImpact
 FROM (
 	SELECT m.intMatchOptionsPnSId
 		, convert(int,strTranNo) strTranNo
 		, dtmMatchDate
-		, intMatchQty
+		, dblMatchQty
 		, e.strName
 		, b.strAccountNumber
 		, t.strInternalTradeNo

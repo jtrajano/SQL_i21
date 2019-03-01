@@ -60,7 +60,7 @@ FROM (
 			, e.strName
 			, ba.strAccountNumber
 			, dblTotalLot = ot.dblNoOfContract
-			, dblSelectedLot = ISNULL((SELECT SUM (AD.intMatchQty) FROM tblRKOptionsMatchPnS AD
+			, dblSelectedLot = ISNULL((SELECT SUM (AD.dblMatchQty) FROM tblRKOptionsMatchPnS AD
 										GROUP BY AD.intSFutOptTransactionId
 										HAVING ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)
 			, ot.strOptionType

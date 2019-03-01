@@ -97,6 +97,9 @@ SELECT LoadDetail.intLoadDetailId
 	, Load.strTrailerNo1
 	, Load.strTrailerNo2
 	, Load.strTrailerNo3
+	, Load.strCarNumber
+	, Load.strEmbargoNo
+	, Load.strEmbargoPermitNo
 	, Load.strComments
 	, ysnDispatched = CASE WHEN Load.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
 	, Load.dtmDispatchedDate

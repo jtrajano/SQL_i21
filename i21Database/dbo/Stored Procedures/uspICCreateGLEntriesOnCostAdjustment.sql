@@ -55,7 +55,11 @@ DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 		,@COST_ADJ_TYPE_Adjust_Auto_Variance AS INT = 10
 		,@COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Add AS INT = 11
 		,@COST_ADJ_TYPE_Adjust_InTransit_Transfer_Order_Reduce AS INT = 12
-					
+
+-- Declare the cost adjustment types
+DECLARE @costAdjustmentType_DETAILED AS TINYINT = 1
+		,@costAdjustmentType_SUMMARIZED AS TINYINT = 2
+
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 
@@ -658,7 +662,7 @@ WITH ForGLEntries_CTE (
 )
 AS
 (
-	-- FIFO 
+	-- FIFO DETAILED
 	SELECT	t.dtmDate
 			,t.intItemId
 			,t.intItemLocationId
@@ -688,13 +692,64 @@ AS
 				ON i.intItemId = t.intItemId
 			INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
 				ON cbLog.intInventoryTransactionId = t.intInventoryTransactionId
-				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+				AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost				
 			LEFT JOIN tblICItem charge
 				ON charge.intItemId = cbLog.intOtherChargeItemId
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
-	-- LIFO 
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_DETAILED
+	UNION ALL 
+	-- FIFO SUMMARIZED
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,NULL--cbLog.intRelatedTransactionId  
+			,NULL--cbLog.strRelatedTransactionId 
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,cbLog.intInventoryCostAdjustmentTypeId
+			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			CROSS APPLY (
+				SELECT 
+					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,cbLog.intInventoryCostAdjustmentTypeId 
+					,cbLog.intOtherChargeItemId
+				FROM
+					tblICInventoryFIFOCostAdjustmentLog cbLog
+				WHERE
+					cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+					AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+				GROUP BY 
+					cbLog.intInventoryCostAdjustmentTypeId
+					,cbLog.intOtherChargeItemId
+			) cbLog
+			LEFT JOIN tblICItem charge
+				ON charge.intItemId = cbLog.intOtherChargeItemId
+	WHERE	t.strBatchId = @strBatchId
+			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+			AND ISNULL(cbLog.dblValue, 0) <> 0 
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
+
+	-- LIFO DETAILED
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
@@ -731,7 +786,58 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
-	-- LOT 
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_DETAILED
+	-- LIFO SUMMARIZED
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,NULL--cbLog.intRelatedTransactionId 
+			,NULL--cbLog.strRelatedTransactionId 
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,cbLog.intInventoryCostAdjustmentTypeId
+			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			CROSS APPLY(
+				SELECT 
+					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,cbLog.intInventoryCostAdjustmentTypeId
+					,cbLog.intOtherChargeItemId
+				FROM 
+					tblICInventoryLIFOCostAdjustmentLog cbLog
+				WHERE
+					cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+					AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+				GROUP BY 
+					cbLog.intInventoryCostAdjustmentTypeId
+					,cbLog.intOtherChargeItemId
+			) cbLog
+			LEFT JOIN tblICItem charge
+				ON charge.intItemId = cbLog.intOtherChargeItemId
+	WHERE	t.strBatchId = @strBatchId
+			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+			AND ISNULL(cbLog.dblValue, 0) <> 0 
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
+
+	-- LOT DETAILED
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
@@ -768,8 +874,58 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_DETAILED
+	-- LOT SUMMARIZED
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,NULL--cbLog.intRelatedTransactionId 
+			,NULL--cbLog.strRelatedTransactionId 
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,cbLog.intInventoryCostAdjustmentTypeId
+			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			CROSS APPLY(
+				SELECT 
+					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,cbLog.intInventoryCostAdjustmentTypeId
+					,cbLog.intOtherChargeItemId
+				FROM 
+					tblICInventoryLotCostAdjustmentLog cbLog
+				WHERE
+					cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+					AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+				GROUP BY
+					cbLog.intInventoryCostAdjustmentTypeId
+					,cbLog.intOtherChargeItemId
+			) cbLog
+			LEFT JOIN tblICItem charge
+				ON charge.intItemId = cbLog.intOtherChargeItemId
+	WHERE	t.strBatchId = @strBatchId
+			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+			AND ISNULL(cbLog.dblValue, 0) <> 0 
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
 
-	-- ACTUAL COST 
+	-- ACTUAL COST DETAILED
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
@@ -806,6 +962,56 @@ AS
 	WHERE	t.strBatchId = @strBatchId
 			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
 			AND ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2) <> 0 
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_DETAILED
+	-- ACTUAL SUMMARIZED
+	UNION ALL 
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,dblValue = ISNULL(cbLog.dblValue, 0)
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) 
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
+			,t.intInTransitSourceLocationId
+			,i.strItemNo
+			,NULL --cbLog.intRelatedTransactionId  
+			,NULL --cbLog.strRelatedTransactionId
+			,t.strBatchId
+			,t.intLotId 
+			,t.intFobPointId
+			,t.dblForexRate
+			,cbLog.intInventoryCostAdjustmentTypeId
+			,charge.intItemId
+			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			CROSS APPLY (
+				SELECT 
+					dblValue = SUM(ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2))
+					,cbLog.intInventoryCostAdjustmentTypeId
+					,cbLog.intOtherChargeItemId
+				FROM
+					tblICInventoryActualCostAdjustmentLog cbLog
+				WHERE
+					cbLog.intInventoryTransactionId = t.intInventoryTransactionId
+					AND cbLog.intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+				GROUP BY 
+					cbLog.intInventoryCostAdjustmentTypeId
+					,cbLog.intOtherChargeItemId
+			) cbLog 
+			LEFT JOIN tblICItem charge
+				ON charge.intItemId = cbLog.intOtherChargeItemId
+	WHERE	t.strBatchId = @strBatchId
+			AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
+			AND ISNULL(cbLog.dblValue, 0) <> 0 
+			AND dbo.fnICGetCostAdjustmentSetup(t.intItemId, t.intItemLocationId) = @costAdjustmentType_SUMMARIZED
 
 	-- AUTO VARIANCE 
 	UNION ALL 
