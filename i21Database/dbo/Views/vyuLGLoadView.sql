@@ -79,6 +79,9 @@ SELECT -- Load Header
 	,LOAD.strTrailerNo1
 	,LOAD.strTrailerNo2
 	,LOAD.strTrailerNo3
+	,LOAD.strCarNumber
+	,LOAD.strEmbargoNo
+	,LOAD.strEmbargoPermitNo
 	,LOAD.strComments
 	,ysnDispatched = CASE 
 		WHEN LOAD.ysnDispatched = 1

@@ -84,6 +84,9 @@ SELECT L.intLoadId
     ,L.strTrailerNo1
     ,L.strTrailerNo2
     ,L.strTrailerNo3
+	,L.strCarNumber
+    ,L.strEmbargoNo
+    ,L.strEmbargoPermitNo
 	,L.strComments
 	,L.ysnPosted
     ,ysnInProgress = ISNULL(L.ysnInProgress, 0)

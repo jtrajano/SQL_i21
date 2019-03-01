@@ -74,6 +74,9 @@ BEGIN TRY
 		,strTrailerNo1
 		,strTrailerNo2
 		,strTrailerNo3
+		,strCarNumber
+		,strEmbargoNo
+		,strEmbargoPermitNo
 		,intUserSecurityId
 		,strExternalLoadNumber
 		,intTransportLoadId
@@ -168,6 +171,9 @@ BEGIN TRY
 		,strTrailerNo1
 		,strTrailerNo2
 		,strTrailerNo3
+		,strCarNumber
+		,strEmbargoNo
+		,strEmbargoPermitNo
 		,intUserSecurityId
 		,strExternalLoadNumber
 		,intTransportLoadId

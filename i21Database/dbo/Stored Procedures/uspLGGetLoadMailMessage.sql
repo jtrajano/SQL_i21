@@ -17,6 +17,7 @@ DECLARE @intPurchaseSale INT
 DECLARE @strEquipmentType NVARCHAR(MAX), @strComments NVARCHAR(MAX), @strSupplierLoadNo NVARCHAR(MAX), @strCustomerReferenceNo NVARCHAR(MAX) 
 DECLARE @strHauler NVARCHAR(MAX), @strHaulerAddress NVARCHAR(MAX), @strHaulerCity NVARCHAR(MAX), @strHaulerCountry NVARCHAR(MAX), @strHaulerState NVARCHAR(MAX), @strHaulerZip NVARCHAR(MAX), @strHaulerPhone NVARCHAR(MAX)
 DECLARE @strDriver NVARCHAR(MAX), @strDispatcher NVARCHAR(MAX), @strTrailerNo1 NVARCHAR(MAX), @strTrailerNo2 NVARCHAR(MAX), @strTrailerNo3 NVARCHAR(MAX), @strTruckNo NVARCHAR(MAX)
+DECLARE @strCarNumber NVARCHAR(MAX), @strEmbargoNo NVARCHAR(MAX), @strEmbargoPermitNo NVARCHAR(MAX)
 DECLARE @dtmScheduledDate DATETIME, @dtmDispatchedDate DATETIME
 
 DECLARE @incval INT, @total INT
@@ -96,7 +97,10 @@ BEGIN
 		@strTrailerNo1 = L.strTrailerNo1,
 		@strTrailerNo2 = L.strTrailerNo2,
 		@strTrailerNo3 = L.strTrailerNo3,
-		@strTruckNo = L.strTruckNo
+		@strTruckNo = L.strTruckNo,
+		@strCarNumber = L.strCarNumber,
+		@strEmbargoNo = L.strEmbargoNo,
+		@strEmbargoPermitNo = L.strEmbargoPermitNo
 
 	FROM		vyuLGLoadDetailView L
 	LEFT JOIN		tblEMEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
