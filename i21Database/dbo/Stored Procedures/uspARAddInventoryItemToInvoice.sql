@@ -23,6 +23,7 @@
 	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 	,@ItemBOLNumber					NVARCHAR(50)	= NULL
 	,@RefreshPrice					BIT				= 0
+	,@AllowRePrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
 	,@ItemMaintenanceDate			DATETIME		= NULL
@@ -45,6 +46,7 @@
 	,@ItemMargin					NUMERIC(18,6)	= NULL
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
+	,@ItemSubFormula				NVARCHAR(50)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
@@ -311,6 +313,7 @@ BEGIN TRY
 				,[ysnTermDiscountExempt]
 				,[dblPrice]
 				,[dblUnitPrice]
+				,[ysnAllowRePrice]				
 				,[strPricing]
 				,[dblTotalTax]
 				,[dblTotal]
@@ -338,6 +341,7 @@ BEGIN TRY
 				,[intInventoryShipmentItemId]
 				,[intInventoryShipmentChargeId]
 				,[strShipmentNumber]
+				,[strSubFormula]
 				,[intRecipeItemId] 
 				,[intRecipeId]
 				,[intSubLocationId]
@@ -423,6 +427,7 @@ BEGIN TRY
 				,[ysnTermDiscountExempt]			= @TermDiscountExempt
 				,[dblPrice]							= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemPrice, @ZeroDecimal) END)
 				,[dblUnitPrice]						= (CASE WHEN (ISNULL(@ItemSubCurrencyRate,0) = 1 AND ISNULL(@RefreshPrice,0) = 1) THEN ISNULL(@ItemUnitPrice, @ZeroDecimal) * @ItemSubCurrencyRate ELSE ISNULL(@ItemUnitPrice, @ZeroDecimal) END)
+				,[ysnAllowRePrice]					= @AllowRePrice 
 				,[strPricing]						= @ItemPricing 
 				,[dblTotalTax]						= @ZeroDecimal
 				,[dblTotal]							= @ZeroDecimal
@@ -450,6 +455,7 @@ BEGIN TRY
 				,[intInventoryShipmentItemId]		= @ItemInventoryShipmentItemId 
 				,[intInventoryShipmentChargeId]		= @ItemInventoryShipmentChargeId 
 				,[strShipmentNumber]				= @ItemShipmentNumber 
+				,[strSubFormula]					= @ItemSubFormula 
 				,[intRecipeItemId]					= @ItemRecipeItemId 
 				,[intRecipeId]						= @ItemRecipeId
 				,[intSubLocationId]					= @ItemSublocationId

@@ -285,6 +285,7 @@ BEGIN
 		,[strPricing]
 		,[strVFDDocumentNumber]
 		,[ysnRefreshPrice]
+		,[ysnAllowRePrice]
 		,[strMaintenanceType]
 		,[strFrequency]
 		,[dtmMaintenanceDate]
@@ -299,6 +300,7 @@ BEGIN
 		,[intInventoryShipmentItemId]
 		,[intInventoryShipmentChargeId]
 		,[strShipmentNumber]
+		,[strSubFormula]
 		,[intRecipeItemId]
 		,[intRecipeId]
 		,[intSubLocationId]
@@ -422,6 +424,7 @@ BEGIN
 		,[strPricing]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strPricing] ELSE NULL END)
 		,[strVFDDocumentNumber]				= (CASE WHEN @GroupingOption = 0 THEN IE.[strVFDDocumentNumber] ELSE NULL END)
 		,[ysnRefreshPrice]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnRefreshPrice] ELSE 0 END)
+		,[ysnAllowRePrice]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAllowRePrice] ELSE 0 END)
 		,[strMaintenanceType]				= (CASE WHEN @GroupingOption = 0 THEN IE.[strMaintenanceType] ELSE NULL END)
 		,[strFrequency]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strFrequency] ELSE NULL END)
 		,[dtmMaintenanceDate]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dtmMaintenanceDate] ELSE NULL END)
@@ -436,6 +439,7 @@ BEGIN
 		,[intInventoryShipmentItemId]		= (CASE WHEN @GroupingOption = 0 THEN IE.[intInventoryShipmentItemId] ELSE NULL END)
 		,[intInventoryShipmentChargeId]		= (CASE WHEN @GroupingOption = 0 THEN IE.[intInventoryShipmentChargeId] ELSE NULL END)
 		,[strShipmentNumber]				= (CASE WHEN @GroupingOption = 0 THEN IE.[strShipmentNumber] ELSE NULL END)
+		,[strSubFormula]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strSubFormula] ELSE NULL END)
 		,[intRecipeItemId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intRecipeItemId] ELSE NULL END)
 		,[intRecipeId]						= (CASE WHEN @GroupingOption = 0 THEN IE.[intRecipeId] ELSE NULL END)
 		,[intSubLocationId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intSubLocationId] ELSE NULL END)

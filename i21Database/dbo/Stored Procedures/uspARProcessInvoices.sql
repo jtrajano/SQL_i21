@@ -242,6 +242,7 @@ DECLARE  @Id									INT
 		,@ItemVFDDocumentNumber					NVARCHAR(100)
 		,@ItemBOLNumber							NVARCHAR(50)
 		,@RefreshPrice							BIT
+		,@AllowRePrice							BIT
 		,@ItemMaintenanceType					NVARCHAR(25)
 		,@ItemFrequency							NVARCHAR(25)
 		,@ItemMaintenanceDate					DATETIME
@@ -256,6 +257,7 @@ DECLARE  @Id									INT
 		,@ItemInventoryShipmentItemId			INT
 		,@ItemInventoryShipmentChargeId			INT
 		,@ItemShipmentNumber					NVARCHAR(50)
+	    ,@ItemSubFormula    					NVARCHAR(50)
 		,@ItemRecipeItemId						INT
 		,@ItemRecipeId							INT
 		,@ItemSublocationId						INT
@@ -419,6 +421,7 @@ BEGIN
 		,@ItemVFDDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strVFDDocumentNumber] ELSE NULL END)
 		,@ItemBOLNumber					= (CASE WHEN @GroupingOption = 0 THEN [strBOLNumberDetail] ELSE NULL END)
 		,@RefreshPrice					= (CASE WHEN @GroupingOption = 0 THEN [ysnRefreshPrice] ELSE 0 END)
+		,@AllowRePrice					= (CASE WHEN @GroupingOption = 0 THEN [ysnAllowRePrice] ELSE 0 END)
 		,@ItemMaintenanceType			= (CASE WHEN @GroupingOption = 0 THEN [strMaintenanceType] ELSE NULL END)
 		,@ItemFrequency					= (CASE WHEN @GroupingOption = 0 THEN [strFrequency] ELSE NULL END)
 		,@ItemMaintenanceDate			= (CASE WHEN @GroupingOption = 0 THEN [dtmMaintenanceDate] ELSE NULL END)
@@ -433,6 +436,7 @@ BEGIN
 		,@ItemInventoryShipmentItemId	= (CASE WHEN @GroupingOption = 0 THEN [intInventoryShipmentItemId] ELSE NULL END)
 		,@ItemInventoryShipmentChargeId	= (CASE WHEN @GroupingOption = 0 THEN [intInventoryShipmentChargeId] ELSE NULL END)
 		,@ItemShipmentNumber			= (CASE WHEN @GroupingOption = 0 THEN [strShipmentNumber] ELSE NULL END)
+		,@ItemSubFormula    			= (CASE WHEN @GroupingOption = 0 THEN [strSubFormula] ELSE NULL END)
 		,@ItemRecipeItemId				= (CASE WHEN @GroupingOption = 0 THEN [intRecipeItemId] ELSE NULL END)
 		,@ItemRecipeId					= (CASE WHEN @GroupingOption = 0 THEN [intRecipeId] ELSE NULL END)
 		,@ItemSublocationId				= (CASE WHEN @GroupingOption = 0 THEN [intSubLocationId] ELSE NULL END)
@@ -661,6 +665,7 @@ BEGIN
 			,@ItemPrice						= @ItemPrice
 			,@ItemUnitPrice					= @ItemUnitPrice
 			,@RefreshPrice					= @RefreshPrice
+			,@AllowRePrice					= @AllowRePrice
 			,@ItemMaintenanceType			= @ItemMaintenanceType
 			,@ItemFrequency					= @ItemFrequency
 			,@ItemMaintenanceDate			= @ItemMaintenanceDate
@@ -675,6 +680,7 @@ BEGIN
 			,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 			,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 			,@ItemShipmentNumber			= @ItemShipmentNumber
+			,@ItemSubFormula				= @ItemSubFormula
 			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemRecipeId					= @ItemRecipeId
 			,@ItemSublocationId				= @ItemSublocationId
@@ -834,6 +840,7 @@ BEGIN
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@ItemBOLNumber					= [strBOLNumberDetail]
 					,@RefreshPrice					= [ysnRefreshPrice]
+					,@AllowRePrice					= [ysnAllowRePrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
 					,@ItemMaintenanceDate			= [dtmMaintenanceDate]
@@ -848,6 +855,7 @@ BEGIN
 					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
 					,@ItemInventoryShipmentChargeId	= [intInventoryShipmentChargeId]
 					,@ItemShipmentNumber			= [strShipmentNumber]
+					,@ItemSubFormula				= [strSubFormula]
 					,@ItemRecipeItemId				= [intRecipeItemId]
 					,@ItemRecipeId					= [intRecipeId]
 					,@ItemSublocationId				= [intSubLocationId]
@@ -930,6 +938,7 @@ BEGIN
 						,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 						,@ItemBOLNumber					= @ItemBOLNumber
 						,@RefreshPrice					= @RefreshPrice
+						,@AllowRePrice					= @AllowRePrice
 						,@ItemMaintenanceType			= @ItemMaintenanceType
 						,@ItemFrequency					= @ItemFrequency
 						,@ItemMaintenanceDate			= @ItemMaintenanceDate
@@ -944,6 +953,7 @@ BEGIN
 						,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 						,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 						,@ItemShipmentNumber			= @ItemShipmentNumber
+						,@ItemSubFormula				= @ItemSubFormula
 						,@ItemRecipeItemId				= @ItemRecipeItemId
 						,@ItemRecipeId					= @ItemRecipeId
 						,@ItemSublocationId				= @ItemSublocationId
@@ -1602,6 +1612,7 @@ BEGIN TRY
 						,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 						,@ItemBOLNumber					= [strBOLNumberDetail]
 						,@RefreshPrice					= [ysnRefreshPrice]
+						,@AllowRePrice					= [ysnAllowRePrice]
 						,@ItemMaintenanceType			= [strMaintenanceType]
 						,@ItemFrequency					= [strFrequency]
 						,@ItemMaintenanceDate			= [dtmMaintenanceDate]
@@ -1616,6 +1627,7 @@ BEGIN TRY
 						,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
 						,@ItemInventoryShipmentChargeId	= [intInventoryShipmentChargeId]
 						,@ItemShipmentNumber			= [strShipmentNumber]						
+						,@ItemSubFormula				= [strSubFormula]
 						,@ItemRecipeItemId				= [intRecipeItemId]
 						,@ItemRecipeId					= [intRecipeId]
 						,@ItemSublocationId				= [intSubLocationId]
@@ -1694,6 +1706,7 @@ BEGIN TRY
 							,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 							,@ItemBOLNumber					= @ItemBOLNumber
 							,@RefreshPrice					= @RefreshPrice
+							,@AllowRePrice					= @AllowRePrice
 							,@ItemMaintenanceType			= @ItemMaintenanceType
 							,@ItemFrequency					= @ItemFrequency
 							,@ItemMaintenanceDate			= @ItemMaintenanceDate
@@ -1708,6 +1721,7 @@ BEGIN TRY
 							,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 							,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 							,@ItemShipmentNumber			= @ItemShipmentNumber
+							,@ItemSubFormula				= @ItemSubFormula
 							,@ItemRecipeItemId				= @ItemRecipeItemId
 							,@ItemRecipeId					= @ItemRecipeId
 							,@ItemSublocationId				= @ItemSublocationId
@@ -1923,6 +1937,7 @@ BEGIN TRY
 					,@ItemVFDDocumentNumber			= [strVFDDocumentNumber]
 					,@ItemBOLNumber					= [strBOLNumberDetail]
 					,@RefreshPrice					= [ysnRefreshPrice]
+					,@AllowRePrice					= [ysnAllowRePrice]
 					,@ItemMaintenanceType			= [strMaintenanceType]
 					,@ItemFrequency					= [strFrequency]
 					,@ItemMaintenanceDate			= [dtmMaintenanceDate]
@@ -1937,6 +1952,7 @@ BEGIN TRY
 					,@ItemInventoryShipmentItemId	= [intInventoryShipmentItemId]
 					,@ItemInventoryShipmentChargeId	= [intInventoryShipmentChargeId]
 					,@ItemShipmentNumber			= [strShipmentNumber]
+					,@ItemSubFormula				= [strSubFormula]
 					,@ItemRecipeItemId				= [intRecipeItemId]	
 					,@ItemRecipeId					= [intRecipeId]
 					,@ItemSublocationId				= [intSubLocationId]
@@ -2083,6 +2099,7 @@ BEGIN TRY
 																		[dblUnitPrice]
 																  END
 						,[strPricing]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPricing ELSE [strPricing] END							
+						,[ysnAllowRePrice]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @AllowRePrice ELSE [ysnAllowRePrice] END							
 						,[strVFDDocumentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemVFDDocumentNumber ELSE [strVFDDocumentNumber] END
 						,[strBOLNumberDetail]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemBOLNumber ELSE [strBOLNumberDetail] END
 						,[strMaintenanceType]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMaintenanceType ELSE [strMaintenanceType] END
@@ -2098,6 +2115,7 @@ BEGIN TRY
 						,[intInventoryShipmentItemId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemInventoryShipmentItemId ELSE [intInventoryShipmentItemId] END			
 						,[intInventoryShipmentChargeId]			= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemInventoryShipmentChargeId ELSE [intInventoryShipmentChargeId] END			
 						,[strShipmentNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentNumber ELSE [strShipmentNumber] END	
+						,[strSubFormula]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSubFormula ELSE [strSubFormula] END	
 						,[intRecipeItemId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeItemId ELSE [intRecipeItemId] END
 						,[intRecipeId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeId ELSE [intRecipeId] END
 						,[intSubLocationId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSublocationId ELSE [intSubLocationId] END

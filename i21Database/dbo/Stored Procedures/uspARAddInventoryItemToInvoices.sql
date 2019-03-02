@@ -411,6 +411,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[dblBasePrice]						NUMERIC(18, 6)									NULL
 	,[dblUnitPrice]						NUMERIC(18, 6)									NULL
 	,[dblBaseUnitPrice]					NUMERIC(18, 6)									NULL
+	,[ysnAllowRePrice]					BIT												NULL
 	,[strPricing]						NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
 	,[dblTotalTax]						NUMERIC(18, 6)									NULL
 	,[dblBaseTotalTax]					NUMERIC(18, 6)									NULL
@@ -448,6 +449,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intInventoryShipmentChargeId]		INT												NULL
 	,[intRecipeItemId]					INT												NULL
 	,[strShipmentNumber]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
+	,[strSubFormula]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 	,[intSalesOrderDetailId]			INT												NULL
 	,[strSalesOrderNumber]				NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strVFDDocumentNumber]				NVARCHAR(100) 	COLLATE Latin1_General_CI_AS	NULL
@@ -534,6 +536,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[dblBasePrice]
 	,[dblUnitPrice]
 	,[dblBaseUnitPrice]
+	,[ysnAllowRePrice]
 	,[strPricing]
 	,[dblTotalTax]
 	,[dblBaseTotalTax]
@@ -571,6 +574,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[intInventoryShipmentChargeId]
 	,[intRecipeItemId]
 	,[strShipmentNumber]
+	,[strSubFormula]
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[strVFDDocumentNumber]
@@ -672,6 +676,7 @@ SELECT
 	,[dblBasePrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblPrice], IE.[dblPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
 	,[dblUnitPrice]							= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END)
 	,[dblBaseUnitPrice]						= (CASE WHEN (ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]),0) <> 0) THEN ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) * ISNULL(ISNULL(IP.[dblSubCurrencyRate], IE.[dblSubCurrencyRate]), 1) ELSE ISNULL(ISNULL(IP.[dblUnitPrice], IE.[dblUnitPrice]), @ZeroDecimal) END) * (CASE WHEN ISNULL(IE.[dblCurrencyExchangeRate], 0) = 0 THEN 1 ELSE ISNULL(IE.[dblCurrencyExchangeRate], 1) END)
+	,[ysnAllowRePrice]						= ISNULL(IE.[ysnAllowRePrice], 0)
 	,[strPricing]							= ISNULL(IP.[strPricing], CASE WHEN ISNULL(IE.[strPricing],'') = '' THEN 'Subsystem - ' COLLATE Latin1_General_CI_AS + IE.[strSourceTransaction] COLLATE Latin1_General_CI_AS ELSE IE.[strPricing] COLLATE Latin1_General_CI_AS END)
 	,[dblTotalTax]							= @ZeroDecimal
 	,[dblBaseTotalTax]						= @ZeroDecimal
@@ -709,6 +714,7 @@ SELECT
 	,[intInventoryShipmentChargeId]			= IE.[intInventoryShipmentChargeId]
 	,[intRecipeItemId]						= IE.[intRecipeItemId]
 	,[strShipmentNumber]					= IE.[strShipmentNumber]
+	,[strSubFormula]						= IE.[strSubFormula]
 	,[intSalesOrderDetailId]				= IE.[intSalesOrderDetailId]
 	,[strSalesOrderNumber]					= IE.[strSalesOrderNumber]
 	,[strVFDDocumentNumber]					= IE.[strVFDDocumentNumber]
@@ -868,6 +874,7 @@ USING
 		,[dblBasePrice]
 		,[dblUnitPrice]
 		,[dblBaseUnitPrice]
+		,[ysnAllowRePrice]
 		,[strPricing]
 		,[dblTotalTax]
 		,[dblBaseTotalTax]
@@ -905,6 +912,7 @@ USING
 		,[intInventoryShipmentChargeId]
 		,[intRecipeItemId]
 		,[strShipmentNumber]
+		,[strSubFormula]
 		,[intSalesOrderDetailId]
 		,[strSalesOrderNumber]
 		,[strVFDDocumentNumber]
@@ -995,6 +1003,7 @@ INSERT(
 	,[dblBasePrice]
 	,[dblUnitPrice]
 	,[dblBaseUnitPrice]
+	,[ysnAllowRePrice]
 	,[strPricing]
 	,[dblTotalTax]
 	,[dblBaseTotalTax]
@@ -1032,6 +1041,7 @@ INSERT(
 	,[intInventoryShipmentChargeId]
 	,[intRecipeItemId]
 	,[strShipmentNumber]
+	,[strSubFormula]
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[strVFDDocumentNumber]
@@ -1107,6 +1117,7 @@ VALUES(
 	,[dblBasePrice]
 	,[dblUnitPrice]
 	,[dblBaseUnitPrice]
+	,[ysnAllowRePrice]
 	,[strPricing]
 	,[dblTotalTax]
 	,[dblBaseTotalTax]
@@ -1144,6 +1155,7 @@ VALUES(
 	,[intInventoryShipmentChargeId]
 	,[intRecipeItemId]
 	,[strShipmentNumber]
+	,[strSubFormula]
 	,[intSalesOrderDetailId]
 	,[strSalesOrderNumber]
 	,[strVFDDocumentNumber]
