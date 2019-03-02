@@ -134,7 +134,103 @@ CROSS APPLY
 				AND IT.[intItemId] = ARID.[intItemId]
 				AND IT.[ysnIsUnposted] = 0			 
 				AND ISNULL(IT.[intInTransitSourceLocationId], 0) <> 0 
-	) ICIT	 
+	) ICIT
+OUTER APPLY
+	(
+	SELECT
+		 [intInvoiceDetailLotId]
+		,[intInvoiceDetailId]
+		,[dblQuantityShipped]
+	FROM
+		tblARInvoiceDetailLot ARIDL
+	WHERE
+		ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+	) ARIDL
+WHERE
+	--ICIT.[intFobPointId] IS NOT NULL AND 
+	ISNULL(ARID.[intLoadDetailId], 0) = 0
+	AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
+	AND (
+			(ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0)
+		OR
+			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
+		)
+	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+
+
+UNION ALL
+
+--Lot
+SELECT
+	 [intItemId]					= ICIT.[intItemId]
+	,[intItemLocationId]			= ICIT.[intItemLocationId]
+	,[intItemUOMId]					= ICIT.[intItemUOMId]
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+	,[dblQty]						= CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN ICIT.[dblQty] ELSE -ICIT.[dblQty] END--- ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ICS.dblQuantity, ARID.[dblQtyShipped])), @ZeroDecimal)  --ICIT.[dblQty]
+	,[dblUOMQty]					= ICIT.[dblUOMQty]
+	,[dblCost]						= ICIT.[dblCost]
+	,[dblValue]						= 0
+	,[dblSalesPrice]				= ARID.[dblPrice]
+	,[intCurrencyId]				= ARID.[intCurrencyId]
+	,[dblExchangeRate]				= 1.00
+	,[intTransactionId]				= ARID.[intInvoiceId]
+	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
+	,[strTransactionId]				= ARID.[strInvoiceNumber]
+	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
+	,[intLotId]						= ISNULL(ARID.[intLotId], ICIT.[intLotId])
+	,[intSourceTransactionId]		= ICIT.[intTransactionId]
+	,[strSourceTransactionId]		= ICIT.[strTransactionId]
+	,[intSourceTransactionDetailId]	= ICIT.[intTransactionDetailId]
+	,[intFobPointId]				= ICIT.[intFobPointId]
+	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
+	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
+	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intLinkedItem]				= ICS.intChildItemLinkId
+FROM 
+	#ARPostInvoiceDetail ARID
+CROSS APPLY 
+	(	
+	SELECT	
+		ICIS.[intInventoryShipmentId]		
+		, ICIS.[strShipmentNumber]		
+		, ICISI.[intInventoryShipmentItemId]
+		, ICISI.intChildItemLinkId
+		, ICISI.dblQuantity  
+	FROM	
+		tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
+	INNER JOIN
+		tblICInventoryShipment ICIS WITH (NOLOCK) 
+			ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+	WHERE 
+		ICISI.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+	) ICS
+CROSS APPLY
+	(
+	SELECT
+		 [intInvoiceDetailLotId]
+		,[intInvoiceDetailId]
+		,[dblQuantityShipped]
+		,[intLotId]
+	FROM
+		tblARInvoiceDetailLot ARIDL
+	WHERE
+		ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+		
+	) ARIDL
+CROSS APPLY 
+	(
+		SELECT	IT.* 
+		FROM	tblICInventoryTransaction IT 
+		WHERE	IT.[intTransactionId] = ICS.[intInventoryShipmentId] 
+				AND IT.[strTransactionId] = ICS.[strShipmentNumber] 
+				AND IT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
+				AND IT.[intItemId] = ARID.[intItemId]
+				AND IT.[ysnIsUnposted] = 0			 
+				AND ISNULL(IT.[intInTransitSourceLocationId], 0) <> 0 
+				AND IT.[intLotId] = ARIDL.[intLotId]
+				AND ABS(IT.[dblQty]) = ABS(ARIDL.[dblQuantityShipped])
+
+	) ICIT
 WHERE
 	--ICIT.[intFobPointId] IS NOT NULL AND 
 	ISNULL(ARID.[intLoadDetailId], 0) = 0

@@ -564,7 +564,7 @@ BEGIN
 		,[intModifiedByUserId]		= NULL
 		,[intConcurrencyId]			= 1
 	FROM
-		vyuLGLoadDetailLotsView
+		vyuLGLoadDetailLotsView 
 	CROSS APPLY (
 		SELECT TOP 1 intItemUOMId 
 		FROM tblARInvoiceDetail

@@ -41,6 +41,8 @@ EXEC dbo.[uspARUpdateSOStatusFromInvoices] @IIDs
 
 EXEC dbo.[uspARUpdateLineItemsComponent] @IIDs
 
+EXEC dbo.[uspARUpdateLineItemsLotDetail] @IIDs
+
 EXEC dbo.[uspARUpdateLineItemsReservedStock] @IIDs
 
 EXEC dbo.[uspARUpdateLineItemsComponent] @IIDs

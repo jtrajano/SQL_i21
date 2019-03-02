@@ -7378,6 +7378,8 @@
     <Build Include="dbo\Views\vyuAPVoucherForEdit.sql" />
     <Build Include="dbo\Tables\tblAPBillEdit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillEdit.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateLineItemLotDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateLineItemsLotDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
