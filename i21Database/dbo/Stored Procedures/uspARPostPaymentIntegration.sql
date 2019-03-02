@@ -243,22 +243,22 @@ BEGIN
         tblCMBankTransaction B
             ON A.strRecordNumber = B.strTransactionId
 
-    --DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
-    DELETE FROM tblCMBankTransaction
-    WHERE
-        strTransactionId IN	(
-                            SELECT strRecordNumber 
-                            FROM tblARPayment
-                            INNER JOIN
-                                @NonZeroPaymentIds P
-                                    ON tblARPayment.[intPaymentId] = P.[intId]
-                            INNER JOIN
-                                tblSMPaymentMethod
-                                    ON tblARPayment.intPaymentMethodId = tblSMPaymentMethod.intPaymentMethodID
-                            WHERE
-                                tblSMPaymentMethod.strPaymentMethod != 'Check' 
-                                OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
-                            )
+    ----DELETE IF NOT CHECK PAYMENT AND DOESN'T HAVE CHECK NUMBER
+    --DELETE FROM tblCMBankTransaction
+    --WHERE
+    --    strTransactionId IN	(
+    --                        SELECT strRecordNumber 
+    --                        FROM tblARPayment
+    --                        INNER JOIN
+    --                            @NonZeroPaymentIds P
+    --                                ON tblARPayment.[intPaymentId] = P.[intId]
+    --                        INNER JOIN
+    --                            tblSMPaymentMethod
+    --                                ON tblARPayment.intPaymentMethodId = tblSMPaymentMethod.intPaymentMethodID
+    --                        WHERE
+    --                            tblSMPaymentMethod.strPaymentMethod != 'Check' 
+    --                            OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
+    --                        )
 
     DELETE FROM tblCMUndepositedFund
     WHERE
