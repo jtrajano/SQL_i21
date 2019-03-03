@@ -12,7 +12,7 @@ FROM (
 		SELECT intSelectedInstrumentTypeId
 			, strTransactionNo = strInternalTradeNo
 			, dtmTransactionDate
-			, dblTotalLot = CONVERT(INT, ot.dblNoOfContract)
+			, dblTotalLot =  ot.dblNoOfContract
 			, dblSelectedLot1 = ISNULL((SELECT SUM (AD.dblMatchQty) FROM tblRKMatchFuturesPSDetail AD
 										INNER JOIN tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId
 										WHERE A.strType = 'Realize' GROUP BY AD.intSFutOptTransactionId
@@ -75,7 +75,7 @@ FROM (
 		SELECT intSelectedInstrumentTypeId
 			, strTransactionNo = strInternalTradeNo
 			, dtmTransactionDate
-			, dblTotalLot = CONVERT(INT, ot.dblContractAmount)
+			, dblTotalLot = ot.dblContractAmount
 			, dblSelectedLot1 = ISNULL((SELECT SUM (AD.dblMatchQty)
 										FROM tblRKMatchFuturesPSDetail AD
 										inner join tblRKMatchFuturesPSHeader A ON AD.intMatchFuturesPSHeaderId = A.intMatchFuturesPSHeaderId

@@ -4,12 +4,13 @@
 	, @intCommodityId INT = NULL
 	, @ysnExpired BIT
 	, @intFutureMarketId INT = NULL
-	, @intEntityId int = null
+	, @intEntityId int = net
 	, @intBrokerageAccountId INT = NULL
 	, @intFutureMonthId INT = NULL
 	, @strBuySell nvarchar(10)=NULL
 	, @intBookId int=NULL
 	, @intSubBookId int=NULL
+	, @intSelectedInstrumentTypeId int =null
 
 AS
 
@@ -36,7 +37,7 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (ORDER BY CONVERT(DATETIME, '01 ' + strFut
 	, strLocationName
 	, Long1 dblLong1
 	, Sell1 dblSell1
-	, intNet dblNet
+	, dblNet dblNet
 	, dblActual
 	, dblClosing
 	, dblPrice
@@ -51,10 +52,11 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (ORDER BY CONVERT(DATETIME, '01 ' + strFut
 	, intFutOptTransactionHeaderId
 	, intCommodityId
 	, ysnExpired
-	, dblVariationMargin = intNet * VM.dblVariationMargin1
+	, dblVariationMargin = dblNet * VM.dblVariationMargin1
 	, 0.0 dblInitialMargin
 	, LongWaitedPrice = LongWaitedPrice / CASE WHEN ISNULL(dblLongTotalLotByMonth,0)=0 THEN 1 ELSE dblLongTotalLotByMonth END
 	, ShortWaitedPrice = ShortWaitedPrice / CASE WHEN ISNULL(dblShortTotalLotByMonth,0)=0 THEN 1 ELSE dblShortTotalLotByMonth END
+	, intSelectedInstrumentTypeId
 FROM (
 	SELECT *
 		, NetPnL = (GrossPnL1 * (dblClosing - dblPrice) - dblFutCommission2)
@@ -68,8 +70,8 @@ FROM (
 		SELECT GrossPnL1 = (CONVERT(INT, ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0))) * dblContractSize / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
 			, dblLong = ISNULL((Long1 - MatchLong), 0)
 			, dblShort = ISNULL(Sell1 - MatchShort, 0)
-			, dblFutCommission2 = CONVERT(INT, ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0)) * - dblFutCommission1 / CASE WHEN ComSubCurrency = 1 THEN ComCent ELSE 1 END
-			, intNet = CONVERT(INT, ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0))
+			, dblFutCommission2 = ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0) * - dblFutCommission1 / CASE WHEN ComSubCurrency = 1 THEN ComCent ELSE 1 END
+			, dblNet = ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0)
 			, dblClosing = dblLastSettle
 			, *
 		FROM (
@@ -123,7 +125,7 @@ FROM (
 				, ComCent = c.intCent
 				, ComSubCurrency = c.ysnSubCurrency
 				, LS.dblLastSettle
-				, ot.dtmFilledDate
+				, ot.dtmFilledDate,ot.intSelectedInstrumentTypeId
 			FROM tblRKFutOptTransaction ot
 			JOIN tblRKFuturesMonth om ON om.intFutureMonthId = ot.intFutureMonthId AND ot.strStatus = 'Filled'
 			JOIN tblRKBrokerageAccount acc ON acc.intBrokerageAccountId = ot.intBrokerageAccountId
@@ -154,7 +156,7 @@ FROM (
 				AND ot.strBuySell = CASE WHEN ISNULL(@strBuySell, '0') = '0' THEN ot.strBuySell ELSE @strBuySell END
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) <= @dtmToDate
 				AND ISNULL(ysnExpired, 0) = CASE WHEN ISNULL(@ysnExpired, 0) = 1 THEN ISNULL(ysnExpired, 0) ELSE @ysnExpired END
-				AND ot.intInstrumentTypeId = 1
+				AND ot.intInstrumentTypeId = 1 and ot.intSelectedInstrumentTypeId=@intSelectedInstrumentTypeId
 			) t1
 		) t1
 	) t1

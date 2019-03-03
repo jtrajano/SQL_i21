@@ -71,4 +71,5 @@ LEFT OUTER JOIN tblSMCompanyLocation AS cl ON ft.[intLocationId] = cl.[intCompan
 LEFT OUTER JOIN tblCMBank AS b ON ft.[intBankId] = b.[intBankId]
 LEFT OUTER JOIN tblCMBankAccount AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
-)t ORDER BY CONVERT(INT,REPLACE(REPLACE(REPLACE(strInternalTradeNo,'-S' ,''),'O-' ,''),'-H','')) ASC
+)t 
+ORDER BY intFutOptTransactionId ASC

@@ -17,7 +17,7 @@ SELECT ft.intFutOptTransactionId
 	, CASE WHEN ft.intInstrumentTypeId = 1 then 'Futures'
 			WHEN ft.intInstrumentTypeId = 2 then 'Options'
 			WHEN ft.intInstrumentTypeId = 3 then 'Currency Contract' end COLLATE Latin1_General_CI_AS AS strInstrumentType
-	, CASE WHEN strBuySell = 'Sell' then -dblNoOfContract else dblNoOfContract end intGetNoOfContract
+	, CASE WHEN strBuySell = 'Sell' then -dblNoOfContract else dblNoOfContract end dblGetNoOfContract
 	, case when strBuySell = 'Sell' then -(fot.dblContractSize * (select sum(dblOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId))
 			else (fot.dblContractSize * (select sum(dblOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId)) end dblHedgeQty
 	, strUnitMeasure
@@ -36,7 +36,7 @@ SELECT ft.intFutOptTransactionId
 	, cs.dblAssignedLots as dblAssignedLots
 	, b.strBankName
 	, ba.strBankAccountNo
-	, ISNULL(ft.dblNoOfContract - GOC.dblOpenContract,0) as dblUsedContract
+	, ISNULL(ft.dblNoOfContract - GOC.dblOpenContract,0.0) as dblUsedContract
 	, CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction 
 				WHERE 
 				(intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail) 

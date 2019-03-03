@@ -11,6 +11,7 @@ SELECT DISTINCT bac.intFutureMarketId
 	, it.intInstrumentTypeId
 	, strInstrumentType = it.strInstrumentType COLLATE Latin1_General_CI_AS
 	, cmm.intCommodityId
+	, isnull(ysnOTCOthers,0) ysnOTCOthers
 FROM tblRKBrokerageAccount ba
 JOIN tblRKBrokerageCommission bac on ba.intBrokerageAccountId = bac.intBrokerageAccountId
 JOIN vyuRKGetBrokerInstrumentType it on it.intBrokerageAccountId=ba.intBrokerageAccountId and it.intEntityId=ba.intEntityId
@@ -27,6 +28,7 @@ UNION ALL SELECT DISTINCT bac.intFutureMarketId
 	, 1
 	, 'Futures' COLLATE Latin1_General_CI_AS
 	, cmm.intCommodityId
+	, isnull(ysnOTCOthers,0) ysnOTCOthers
 FROM tblRKBrokerageAccount ba
 JOIN tblRKBrokerageCommission bac on ba.intBrokerageAccountId = bac.intBrokerageAccountId
 JOIN vyuRKGetBrokerInstrumentType it on it.intBrokerageAccountId=ba.intBrokerageAccountId and it.intEntityId=ba.intEntityId
@@ -43,6 +45,7 @@ UNION ALL SELECT DISTINCT bac.intFutureMarketId
 	, 2
 	, 'Options' COLLATE Latin1_General_CI_AS
 	, cmm.intCommodityId
+	, isnull(ysnOTCOthers,0) ysnOTCOthers
 FROM tblRKBrokerageAccount ba
 JOIN tblRKBrokerageCommission bac on ba.intBrokerageAccountId = bac.intBrokerageAccountId
 JOIN vyuRKGetBrokerInstrumentType it on it.intBrokerageAccountId=ba.intBrokerageAccountId and it.intEntityId=ba.intEntityId
