@@ -834,7 +834,7 @@ SELECT * FROM (
 			, ft.intFutOptTransactionHeaderId
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKFutureMarket mar on mar.intFutureMarketId=ft.intFutureMarketId and ft.strStatus='Filled'
-		JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  and ft.intInstrumentTypeId = 1  and ft.intCommodityId=@intCommodityId
+		JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  and ft.intInstrumentTypeId in (1,3)  and ft.intCommodityId=@intCommodityId
 			and ft.intFutureMarketId=@intFutureMarketId
 		JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0
 		JOIN tblEMEntity e on e.intEntityId=ft.intEntityId
