@@ -7286,6 +7286,9 @@
     <Build Include="dbo\Functions\fnCKSMUniqueDefaultPerCity.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutDepartmentInvoiceEntries.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCard.sql" />
+    <Build Include="dbo\Functions\fnCFPadString.sql" />
+    <Build Include="dbo\Functions\fnCFConstructFullCardNumber.sql" />
+    <Build Include="dbo\Views\vyuCFEncodeCard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
