@@ -83,7 +83,7 @@ BEGIN
 		, strDefaultStorageLocation, strDefaultStorageUnit, strDefaultSaleUom, strDefaultPurchaseUom
 		, strDefaultGrossUom, strInventoryCountGroup)
 	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName
-		, CASE il.intCostingMethod WHEN 1 THEN 'AVG' WHEN 2 THEN 'FIFO' WHEN 3 THEN 'LIFO' ELSE 'CATEGORY' END AS strCostingMethod
+		, cm.strCostingMethod
 		, il.intAllowNegativeInventory, il.ysnStorageUnitRequired, e.strName AS strDefaultVendorNo
 		, sl.strSubLocationName AS strDefaultStorageLocation, su.strName AS strDefaultStorageUnit
 		, us.strUnitMeasure AS strDefaultSaleUom, up.strUnitMeasure AS strDefaultPurchaseUom
@@ -97,6 +97,7 @@ BEGIN
 		LEFT OUTER JOIN tblICItemUOM ds ON ds.intItemUOMId = il.intIssueUOMId
 		LEFT OUTER JOIN tblICItemUOM ps ON ps.intItemUOMId = il.intReceiveUOMId
 		LEFT OUTER JOIN tblICItemUOM gs ON gs.intItemUOMId = il.intGrossUOMId
+		LEFT OUTER JOIN tblICCostingMethod cm ON cm.intCostingMethodId = il.intCostingMethod
 		LEFT OUTER JOIN tblICUnitMeasure us ON us.intUnitMeasureId = ds.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure up ON up.intUnitMeasureId = ps.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure ug ON ug.intUnitMeasureId = gs.intUnitMeasureId
