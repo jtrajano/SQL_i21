@@ -276,7 +276,8 @@ BEGIN
 			[intInventoryReceiptItemId],
 			[intInventoryReceiptChargeId],
 			[intInventoryShipmentChargeId],
-			[strSourceTrasactionNo],
+			[intSourceTransactionNoId],
+			[strSourceTransactionNo],
 			[intItemId],
 			[intToBillUOMId],
 			[dblToBillQty]
@@ -285,7 +286,8 @@ BEGIN
 			[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
 			[intInventoryReceiptChargeId]	=	A.intInventoryReceiptChargeId,
 			[intInventoryShipmentChargeId]	=	A.intInventoryShipmentChargeId,
-			[strSourceTrasactionNo]			=	B.strBillId,
+			[intSourceTransactionNoId]		=	B.intBillId,
+			[strSourceTransactionNo]		=	B.strBillId,
 			[intItemId]						=	A.intItemId,
 			[intToBillUOMId]				=	CASE WHEN A.intWeightUOMId > 0 THEN A.intWeightUOMId ELSE A.intQtyToBillUOMId END,
 			[dblToBillQty]					=	CASE WHEN A.intWeightUOMId > 0 THEN A.dblNetWeight ELSE A.dblQuantityToBill END
