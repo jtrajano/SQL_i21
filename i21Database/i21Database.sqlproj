@@ -2876,6 +2876,11 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadMailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostCancelEquity.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateInventoryShipmentItemLot.sql" />
+    <Build Include="dbo\Tables\tblICStagingItem.sql" />
+    <Build Include="dbo\Tables\tblICStagingItemUom.sql" />
+    <Build Include="dbo\Tables\tblICStagingItemPricing.sql" />
+    <Build Include="dbo\Tables\tblICStagingItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICExportItemsToStaging.sql" />
     <Build Include="dbo\Tables\tblCTBagMarkLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForItem.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForBlend.sql" />
