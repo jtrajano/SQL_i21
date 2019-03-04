@@ -133,7 +133,10 @@ SELECT
 	, dblState = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 15--'State Tax Withheld'     
 		THEN (A.dblTotal + A.dblTax) 
      ELSE 0 END   
-	, dbl1099 = (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+	, dbl1099 = CASE WHEN patRef.intBillId IS NULL AND A.int1099Form = 4
+				THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+				ELSE A.dbl1099
+				END
     , intYear = YEAR(ISNULL(B2.dtmDatePaid, B.dtmDate))
 	, A.int1099Form
 	, A.int1099Category
