@@ -83,7 +83,7 @@ BEGIN
 		, strDefaultStorageLocation, strDefaultStorageUnit, strDefaultSaleUom, strDefaultPurchaseUom
 		, strDefaultGrossUom, strInventoryCountGroup)
 	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName
-		, CASE il.intCostingMethod WHEN 1 THEN 'AVG' WHEN 2 THEN 'FIFO' WHEN 3 THEN 'CATEGORY' END AS strCostingMethod
+		, CASE il.intCostingMethod WHEN 1 THEN 'AVG' WHEN 2 THEN 'FIFO' WHEN 3 THEN 'LIFO' ELSE 'CATEGORY' END AS strCostingMethod
 		, il.intAllowNegativeInventory, il.ysnStorageUnitRequired, e.strName AS strDefaultVendorNo
 		, sl.strSubLocationName AS strDefaultStorageLocation, su.strName AS strDefaultStorageUnit
 		, us.strUnitMeasure AS strDefaultSaleUom, up.strUnitMeasure AS strDefaultPurchaseUom
