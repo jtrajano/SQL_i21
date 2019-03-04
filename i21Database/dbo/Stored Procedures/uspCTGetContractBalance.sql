@@ -823,21 +823,21 @@ BEGIN TRY
 	,intFutureMarketId      
 	,intFutureMonthId       
 	,strFutureMonth			
-	,dblFutures				
-	,dblBasis				
+	,dblFutures						  = CAST (dblFutures AS NUMERIC(18,6))
+	,dblBasis						  = CAST (dblBasis AS NUMERIC(18,6))	
 	,strBasisUOM			
-	,dblQuantity			
+	,dblQuantity					  = CAST (dblQuantity AS NUMERIC(18,6))
 	,strQuantityUOM			
-	,dblCashPrice			
+	,dblCashPrice					  = CAST (dblCashPrice AS NUMERIC(18,6))
 	,strPriceUOM			
 	,strStockUOM			
-	,dblAvailableQty		
-	,dblAmount
-	,dblQtyinCommodityStockUOM		
-	,dblFuturesinCommodityStockUOM	
-	,dblBasisinCommodityStockUOM	
-	,dblCashPriceinCommodityStockUOM
-	,dblAmountinCommodityStockUOM
+	,dblAvailableQty				  = CAST (dblAvailableQty AS NUMERIC(18,6))
+	,dblAmount						  = CAST (dblAmount AS NUMERIC(18,6))
+	,dblQtyinCommodityStockUOM		  = CAST (dblQtyinCommodityStockUOM AS NUMERIC(18,6))
+	,dblFuturesinCommodityStockUOM	  = CAST (dblFuturesinCommodityStockUOM AS NUMERIC(18,6))
+	,dblBasisinCommodityStockUOM	  = CAST (dblBasisinCommodityStockUOM AS NUMERIC(18,6))
+	,dblCashPriceinCommodityStockUOM  = CAST (dblCashPriceinCommodityStockUOM AS NUMERIC(18,6))
+	,dblAmountinCommodityStockUOM	  = CAST (dblAmountinCommodityStockUOM AS NUMERIC(18,6))
 	,strPrintOption	= @strPrintOption
 	FROM tblCTContractBalance 
 	WHERE 
