@@ -94,5 +94,6 @@ RETURNS TABLE AS RETURN
 	OR	B.intPaycheckHeaderId > 0
 	OR	B.intBuybackChargeId > 0
 	OR	B.intScaleTicketId > 0
+	OR	B.intInventoryShipmentChargeId > 0
 )
 

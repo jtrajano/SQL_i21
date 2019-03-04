@@ -69,6 +69,7 @@
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
 	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000	
 	,@RefreshPrice					BIT				= 0
+	,@AllowRePrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
 	,@ItemMaintenanceDate			DATETIME		= NULL
@@ -83,6 +84,7 @@
 	,@ItemInventoryShipmentItemId	INT				= NULL
 	,@ItemInventoryShipmentChargeId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
+	,@ItemSubFormula				NVARCHAR(50)	= NULL
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
@@ -676,6 +678,7 @@ BEGIN TRY
 		,@ItemPrice						= @ItemPrice
 		,@ItemUnitPrice					= @ItemUnitPrice
 		,@RefreshPrice					= @RefreshPrice
+		,@AllowRePrice					= @AllowRePrice
 		,@ItemMaintenanceType			= @ItemMaintenanceType
 		,@ItemFrequency					= @ItemFrequency
 		,@ItemMaintenanceDate			= @ItemMaintenanceDate
@@ -690,6 +693,7 @@ BEGIN TRY
 		,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
 		,@ItemInventoryShipmentChargeId	= @ItemInventoryShipmentChargeId
 		,@ItemShipmentNumber			= @ItemShipmentNumber
+		,@ItemSubFormula				= @ItemSubFormula
 		,@ItemRecipeItemId				= @ItemRecipeItemId
 		,@ItemRecipeId					= @ItemRecipeId
 		,@ItemSublocationId				= @ItemSublocationId

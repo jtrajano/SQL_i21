@@ -130,6 +130,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[strVFDDocumentNumber]					NVARCHAR(100) 	COLLATE Latin1_General_CI_AS	NULL
 	,[strBOLNumberDetail]					NVARCHAR(50) 	COLLATE Latin1_General_CI_AS	NULL
     ,[ysnRefreshPrice]						BIT												NULL		-- Indicate whether to recompute for Price based on the available pricing setup	
+    ,[ysnAllowRePrice]						BIT												NULL		-- Indicate whether Reprice is allowed after import
 	,[strMaintenanceType]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
     ,[strFrequency]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[intMaintenanceAccountId]				INT												NULL		-- Key Value from tblGLAccount with category = 'Maintenance Sales'
@@ -148,6 +149,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[intInventoryShipmentItemId]			INT												NULL		-- Key Value from tblICInventoryShipmentItem (Inventory Shipment)
 	,[intInventoryShipmentChargeId]			INT												NULL		-- Key Value from tblICInventoryShipmentCharge (Inventory Shipment)
 	,[strShipmentNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Inventory Shipment Number (Inventory Shipment)
+	,[strSubFormula]	    				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 	,[intRecipeItemId]						INT												NULL		-- Key Value from tblMFRecipeItem (Manufacturing Cost)
 	,[intRecipeId]							INT												NULL
 	,[intSubLocationId]						INT												NULL

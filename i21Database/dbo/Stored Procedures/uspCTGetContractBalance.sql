@@ -145,10 +145,50 @@ BEGIN TRY
 		,InvTran.dtmDate
 		,Shipment.intInventoryShipmentId
 		
-		
-	  
+	 INSERT INTO @Shipment
+	  (
+	    intContractTypeId
+	   ,intContractHeaderId	
+	   ,intContractDetailId	
+	   ,dtmDate	
+	   ,dtmEndDate			
+	   ,dblQuantity
+	   ,dblAllocatedQuantity
+	   ,intNoOfLoad
+	   ,intSourceId	  
+	  )
+	  SELECT 
+	   CH.intContractTypeId 
+	  ,CH.intContractHeaderId
+	  ,CD.intContractDetailId
+	  ,InvTran.dtmDate	  
+	  ,@dtmEndDate  AS dtmEndDate
+	  ,SUM(InvTran.dblQty * - 1) AS dblQuantity
+	  ,0
+	  ,COUNT(DISTINCT Invoice.intInvoiceId)
+	  ,Invoice.intInvoiceId	  
+	   FROM tblICInventoryTransaction InvTran
+	   JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvTran.intTransactionId 
+	   JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceId = InvTran.intTransactionId
+	   AND Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+	   AND InvoiceDetail.intInvoiceDetailId = InvTran.intTransactionDetailId
+	   JOIN tblCTContractHeader CH ON CH.intContractHeaderId = InvoiceDetail.intContractHeaderId
+	   JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvoiceDetail.intContractDetailId
+	   JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = InvoiceDetail.intSalesOrderDetailId
+	   AND CD.intContractHeaderId = CH.intContractHeaderId
+	   WHERE InvTran.strTransactionForm = 'Invoice'
+	   	AND InvTran.ysnIsUnposted = 0
+	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
+	   	AND intContractTypeId = 2
+	   	AND InvTran.intInTransitSourceLocationId IS NULL
+	   GROUP BY 
+	     CH.intContractTypeId
+		,CH.intContractHeaderId
+	   	,CD.intContractDetailId
+		,InvTran.dtmDate
+		,Invoice.intInvoiceId
 
-	   INSERT INTO @Shipment
+	  INSERT INTO @Shipment
 	  (
 	    intContractTypeId
 	   ,intContractHeaderId	
@@ -783,21 +823,21 @@ BEGIN TRY
 	,intFutureMarketId      
 	,intFutureMonthId       
 	,strFutureMonth			
-	,dblFutures				
-	,dblBasis				
+	,dblFutures						  = CAST (dblFutures AS NUMERIC(18,6))
+	,dblBasis						  = CAST (dblBasis AS NUMERIC(18,6))	
 	,strBasisUOM			
-	,dblQuantity			
+	,dblQuantity					  = CAST (dblQuantity AS NUMERIC(18,6))
 	,strQuantityUOM			
-	,dblCashPrice			
+	,dblCashPrice					  = CAST (dblCashPrice AS NUMERIC(18,6))
 	,strPriceUOM			
 	,strStockUOM			
-	,dblAvailableQty		
-	,dblAmount
-	,dblQtyinCommodityStockUOM		
-	,dblFuturesinCommodityStockUOM	
-	,dblBasisinCommodityStockUOM	
-	,dblCashPriceinCommodityStockUOM
-	,dblAmountinCommodityStockUOM
+	,dblAvailableQty				  = CAST (dblAvailableQty AS NUMERIC(18,6))
+	,dblAmount						  = CAST (dblAmount AS NUMERIC(18,6))
+	,dblQtyinCommodityStockUOM		  = CAST (dblQtyinCommodityStockUOM AS NUMERIC(18,6))
+	,dblFuturesinCommodityStockUOM	  = CAST (dblFuturesinCommodityStockUOM AS NUMERIC(18,6))
+	,dblBasisinCommodityStockUOM	  = CAST (dblBasisinCommodityStockUOM AS NUMERIC(18,6))
+	,dblCashPriceinCommodityStockUOM  = CAST (dblCashPriceinCommodityStockUOM AS NUMERIC(18,6))
+	,dblAmountinCommodityStockUOM	  = CAST (dblAmountinCommodityStockUOM AS NUMERIC(18,6))
 	,strPrintOption	= @strPrintOption
 	FROM tblCTContractBalance 
 	WHERE 

@@ -25,6 +25,7 @@
 	,@ItemVFDDocumentNumber			NVARCHAR(100)	= NULL
 	,@ItemBOLNumber					NVARCHAR(50)	= NULL
 	,@RefreshPrice					BIT				= 0
+	,@AllowRePrice					BIT				= 0
 	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
 	,@ItemFrequency					NVARCHAR(50)	= NULL
 	,@ItemMaintenanceDate			DATETIME		= NULL
@@ -39,6 +40,7 @@
 	,@ItemInventoryShipmentItemId	INT				= NULL
 	,@ItemInventoryShipmentChargeId	INT				= NULL
 	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
+	,@ItemSubFormula			NVARCHAR(50)	= NULL
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
@@ -169,6 +171,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemVFDDocumentNumber			= @ItemVFDDocumentNumber
 			,@ItemBOLNumber					= @ItemBOLNumber
 			,@RefreshPrice					= @RefreshPrice
+			,@AllowRePrice					= @AllowRePrice
 			,@ItemMaintenanceType			= @ItemMaintenanceType
 			,@ItemFrequency					= @ItemFrequency
 			,@ItemMaintenanceDate			= @ItemMaintenanceDate
@@ -191,6 +194,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemMargin					= @ItemMargin
 			,@ItemRecipeQty					= @ItemRecipeQty
 			,@ItemShipmentNumber			= @ItemShipmentNumber
+			,@ItemSubFormula				= @ItemSubFormula
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 			,@ItemContractHeaderId			= @ItemContractHeaderId
@@ -411,6 +415,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[dblPrice]
 				,[dblUnitPrice]
 				,[strPricing]
+				,[ysnAllowRePrice]
 				,[strVFDDocumentNumber]
 				,[strBOLNumberDetail]
 				,[intSiteId]
@@ -433,6 +438,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intSubCurrencyId]
 				,[dblSubCurrencyRate]
 				,[ysnBlended]
+				,[strSubFormula]
 				,[intRecipeId]
 				,[intSubLocationId]
 				,[intCostTypeId]
@@ -494,6 +500,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemPrice
 				,@ItemUnitPrice
 				,@ItemPricing
+				,@AllowRePrice
 				,@ItemVFDDocumentNumber
 				,@ItemBOLNumber
 				,@ItemSiteId
@@ -516,6 +523,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,ISNULL(@ItemSubCurrencyId, @CurrencyId)
 				,@ItemSubCurrencyRate
 				,@ItemIsBlended
+				,@ItemSubFormula
 				,@ItemRecipeId
 				,@ItemSublocationId
 				,@ItemCostTypeId

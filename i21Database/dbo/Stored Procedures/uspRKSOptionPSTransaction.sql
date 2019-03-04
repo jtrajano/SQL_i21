@@ -76,7 +76,11 @@ FROM (
 			, ot.dblStrike
 			, ot.dblPrice as dblPremium
 			, fm.dblContractSize as dblContractSize
-			, isnull(dblOptCommission,0) as dblOptCommission
+			, dblOptCommission = ISNULL((select TOP 1 (case when bc.intOptionsRateType = 2 then 0
+															else  isnull(bc.dblOptCommission,0) end) as dblOptCommission
+										from tblRKBrokerageCommission bc
+										where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId
+											and  getdate() between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,getdate())),0) 
 			, om.dtmExpirationDate
 			, ot.strStatus
 			, ic.strCommodityCode

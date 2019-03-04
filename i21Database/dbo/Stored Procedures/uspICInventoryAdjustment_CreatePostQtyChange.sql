@@ -124,13 +124,7 @@ BEGIN
 	-- Item UOM is invalid or missing.
 	EXEC uspICRaiseError 80048;   
 	GOTO _Exit
-END 
-
-------------------------------------------------------------------------------------------------------------------------------------
--- Create the starting number for the inventory adjustment. 
-------------------------------------------------------------------------------------------------------------------------------------
-EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT, @intLocationId
-IF @@ERROR <> 0 GOTO _Exit
+END
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Set the transaction date and expiration date
@@ -139,6 +133,13 @@ SET @dtmDate = ISNULL(@dtmDate, GETDATE());
 
 IF @ysnPost = 1
 BEGIN
+
+------------------------------------------------------------------------------------------------------------------------------------
+-- Create the starting number for the inventory adjustment. 
+------------------------------------------------------------------------------------------------------------------------------------
+EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT, @intLocationId
+IF @@ERROR <> 0 GOTO _Exit
+
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the header record
 ------------------------------------------------------------------------------------------------------------------------------------

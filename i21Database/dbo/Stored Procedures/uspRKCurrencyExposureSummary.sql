@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKCurrencyExposureSummary
+﻿CREATE PROC [dbo].[uspRKCurrencyExposureSummary]
 	 @intCommodityId int
 	,@dtmFutureClosingDate datetime=null
 	,@intCurrencyId int
@@ -12,7 +12,7 @@ DECLARE @tblRKSummary TABLE (strSum nvarchar(100),dblValue numeric(24,10))
 
 INSERT INTO @tblRKSummary (strSum,dblValue)
 SELECT '1. Treasury', sum(dblAmount) FROM(
-SELECT sum(case when strBuySell = 'Buy' then dblContractAmount else -dblContractAmount end) dblAmount
+SELECT sum(case when strBuySell = 'Buy' then -dblMatchAmount else dblMatchAmount end) dblAmount
 	FROM tblRKFutOptTransaction ft
 	JOIN tblRKFutOptTransactionHeader  t on ft.intFutOptTransactionHeaderId=t.intFutOptTransactionHeaderId
 	JOIN tblCMBank b on b.intBankId=ft.intBankId AND ft.intSelectedInstrumentTypeId=2

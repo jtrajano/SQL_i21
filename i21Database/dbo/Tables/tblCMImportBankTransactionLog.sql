@@ -1,8 +1,7 @@
-create table [dbo].[tblCMImportBankTransactionLog] (
+CREATE TABLE [dbo].[tblCMImportBankTransactionLog] (
     [intImportLogId] [int] NOT NULL IDENTITY(1,1),
     [strBuildNumber] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
-    [dtmCreated] [datetime] NOT NULL,
-    [strImportLogId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+    [dtmDate] [datetime] NOT NULL,
     [strFile] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
     [intEntityId] INT NOT NULL,
     [intConcurrencyId] [int] NOT NULL,
@@ -14,3 +13,5 @@ REFERENCES [dbo].[tblSMUserSecurity] ([intEntityId])
 GO
 ALTER TABLE [dbo].[tblCMImportBankTransactionLog] CHECK CONSTRAINT [tblCMImportBankTransactionLog_tblSMUserSecurity]
 GO
+
+

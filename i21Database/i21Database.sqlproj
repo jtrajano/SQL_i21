@@ -2876,6 +2876,11 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadMailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspPATPostCancelEquity.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateInventoryShipmentItemLot.sql" />
+    <Build Include="dbo\Tables\tblICStagingItem.sql" />
+    <Build Include="dbo\Tables\tblICStagingItemUom.sql" />
+    <Build Include="dbo\Tables\tblICStagingItemPricing.sql" />
+    <Build Include="dbo\Tables\tblICStagingItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICExportItemsToStaging.sql" />
     <Build Include="dbo\Tables\tblCTBagMarkLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForItem.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForBlend.sql" />
@@ -7376,6 +7381,15 @@
     <Build Include="dbo\Functions\fnICGetCostAdjustmentSetup.sql" />
     <Build Include="dbo\Views\vyuCTContractInvoice.sql" />
     <Build Include="dbo\Tables\tblCTContractInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTerm.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherForEdit.sql" />
+    <Build Include="dbo\Tables\tblAPBillEdit.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBillEdit.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateLineItemLotDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateLineItemsLotDetail.sql" />
+    <Build Include="dbo\Tables\tblCMImportBankTransactionLogDetail.sql" />
+    <Build Include="dbo\Tables\tblCMImportBankTransactionLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateRemoveSalesOrderStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
