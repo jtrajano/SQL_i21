@@ -1,8 +1,8 @@
 CREATE TABLE [dbo].[tblICStagingItemLocation] (
 	  intStagingItemLocationId INT IDENTITY(1,1)
-	, intItemId INT
-	, intItemLocationId INT
-	, intLocationId INT
+	, intItemId INT NULL -- Normally used when this field is included in export
+	, intItemLocationId INT NULL -- Normally used when this field is included in export
+	, intLocationId INT NULL -- Normally used when this field is included in export
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strCostingMethod NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, ysnAllowNegativeInventory BIT NULL

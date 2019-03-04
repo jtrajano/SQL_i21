@@ -1,9 +1,9 @@
 CREATE TABLE [dbo].[tblICStagingItemPricing] (
 	  intStagingItemPricingId INT IDENTITY(1,1)
-	, intItemId INT
-	, intItemPricingId INT
-	, intItemLocationId INT
-	, intLocationId INT
+	, intItemId INT -- Normally used when this field is included in export
+	, intItemPricingId INT -- Normally used when this field is included in export
+	, intItemLocationId INT -- Normally used when this field is included in export
+	, intLocationId INT -- Normally used when this field is included in export
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, dblStandardCost NUMERIC(18, 6) NULL
 	, strPricingMethod NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

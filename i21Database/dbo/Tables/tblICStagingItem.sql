@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[tblICStagingItem] (
 	  intStagingItemId INT IDENTITY(1,1)
-	, intItemId INT
+	, intItemId INT -- Normally used when this field is included in export
 	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS 
 	, strDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	, strType NVARCHAR(100) COLLATE Latin1_General_CI_AS
