@@ -3,8 +3,8 @@
 GO
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms WHERE strFreightTerm = N'Truck') 
 	BEGIN 
-		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId]) 
-		VALUES (N'Truck', N'Destination', 1 , 1) 
+		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
+		VALUES (N'Truck', N'Destination', 1 , 1, N'Truck', N'Truck') 
 	END
 	ELSE
 	BEGIN
@@ -13,8 +13,8 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms where strFreightTerm = N'Deliver') 
 	BEGIN 
-		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId]) 
-		VALUES (N'Deliver', N'Destination', 1 , 1) 
+		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
+		VALUES (N'Deliver', N'Destination', 1 , 1, N'Deliver', N'Deliver') 
 	END
 	ELSE
 	BEGIN
@@ -23,8 +23,8 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms where strFreightTerm = N'Pickup') 
 	BEGIN 
-		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId]) 
-		VALUES (N'Pickup', N'Origin', 1 , 1) 
+		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
+		VALUES (N'Pickup', N'Origin', 1 , 1, N'Pickup', N'Pickup') 
 	END
 	ELSE
 	BEGIN
@@ -33,8 +33,8 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms where strFreightTerm = N'Dlvd') 
 	BEGIN 
-		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId]) 
-		VALUES (N'Dlvd', N'Origin', 1 , 1) 
+		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
+		VALUES (N'Dlvd', N'Origin', 1 , 1, N'Dlvd', N'Dlvd') 
 	END
 	ELSE
 	BEGIN
@@ -43,8 +43,8 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms where strFreightTerm = N'Rail') 
 	BEGIN 
-		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId]) 
-		VALUES (N'Rail', N'Origin', 1 , 1) 
+		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
+		VALUES (N'Rail', N'Origin', 1 , 1, N'Rail', N'Rail') 
 	END
 	ELSE
 	BEGIN
@@ -53,8 +53,8 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms where strFreightTerm = N'Barge') 
 	BEGIN 
-		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId]) 
-		VALUES (N'Barge', N'Origin', 1 , 1) 
+		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
+		VALUES (N'Barge', N'Origin', 1 , 1, N'Barge', N'Barge') 
 	END
 	ELSE
 	BEGIN
@@ -63,8 +63,8 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms where strFreightTerm = N'Vessel') 
 	BEGIN 
-		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId]) 
-		VALUES (N'Vessel', N'Origin', 1 , 1) 
+		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
+		VALUES (N'Vessel', N'Origin', 1 , 1, N'Vessel', N'Vessel') 
 	END
 	ELSE
 	BEGIN
@@ -73,8 +73,8 @@ GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms where strFreightTerm = N'FOB') 
 	BEGIN 
-		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId]) 
-		VALUES (N'FOB', N'Origin', 1 , 1) 
+		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
+		VALUES (N'FOB', N'Origin', 1 , 1, N'FOB', N'FOB') 
 	END
 	ELSE
 	BEGIN
