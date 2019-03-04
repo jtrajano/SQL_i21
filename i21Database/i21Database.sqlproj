@@ -7387,6 +7387,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateLineItemsLotDetail.sql" />
     <Build Include="dbo\Tables\tblCMImportBankTransactionLogDetail.sql" />
     <Build Include="dbo\Tables\tblCMImportBankTransactionLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateRemoveSalesOrderStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
