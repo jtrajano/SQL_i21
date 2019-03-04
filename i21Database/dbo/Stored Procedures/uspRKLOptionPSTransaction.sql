@@ -50,7 +50,7 @@ BEGIN TRY
 		, strOptionMonth
 		, strName
 		, strAccountNumber
-		, intTotalLot = ISNULL(intTotalLot, 0)
+		, dblTotalLot = ISNULL(dblTotalLot, 0)
 		, dblOpenLots = CAST(ISNULL(dblOpenLots, 0) AS NUMERIC(18, 6))
 		, strOptionType
 		, dblStrike
@@ -87,11 +87,11 @@ BEGIN TRY
 		, intCommodityId
 		, intOptionMonthId
 	FROM (
-		SELECT dblOpenLots = (intTotalLot - dblSelectedLot1 - intExpiredLots - intAssignedLots)
+		SELECT dblOpenLots = (dblTotalLot - dblSelectedLot1 - intExpiredLots - intAssignedLots)
 			, dblSelectedLot = ''
-			, dblPremiumValue = ((intTotalLot - dblSelectedLot1) * dblContractSize * dblPremium) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
-			, dblMarketValue = ((intTotalLot - dblSelectedLot1) * dblContractSize * dblMarketPremium) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
-			, dblCommission = (- dblOptCommission * (intTotalLot - dblSelectedLot1)) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
+			, dblPremiumValue = ((dblTotalLot - dblSelectedLot1) * dblContractSize * dblPremium) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
+			, dblMarketValue = ((dblTotalLot - dblSelectedLot1) * dblContractSize * dblMarketPremium) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
+			, dblCommission = (- dblOptCommission * (dblTotalLot - dblSelectedLot1)) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
 			, *
 		FROM (
 			SELECT DISTINCT strInternalTradeNo
@@ -107,7 +107,11 @@ BEGIN TRY
 				, ot.dblStrike
 				, dblPremium = ot.dblPrice
 				, fm.dblContractSize
-				, dblOptCommission = ISNULL(dblOptCommission, 0)
+				, dblOptCommission = ISNULL((select TOP 1 (case when bc.intOptionsRateType = 2 then 0
+															else  isnull(bc.dblOptCommission,0) end) as dblOptCommission
+										from tblRKBrokerageCommission bc
+										where bc.intFutureMarketId = ot.intFutureMarketId and bc.intBrokerageAccountId = ot.intBrokerageAccountId
+											and  getdate() between bc.dtmEffectiveDate and isnull(bc.dtmEndDate,getdate())),0) 
 				, om.dtmExpirationDate
 				, ot.strStatus
 				, ic.strCommodityCode
