@@ -7378,6 +7378,9 @@
     <Build Include="dbo\Stored Procedures\uspCTBeforeInvoiceDelete.sql" />
     <Build Include="dbo\Tables\tblHDTimeOffRequest.sql" />
     <Build Include="dbo\Stored Procedures\uspHDGenerateTimeOffRequest.sql" />
+    <Build Include="dbo\Functions\fnCFPadString.sql" />
+    <Build Include="dbo\Functions\fnCFConstructFullCardNumber.sql" />
+    <Build Include="dbo\Views\vyuCFEncodeCard.sql" />
     <Build Include="dbo\Functions\fnICGetCostAdjustmentSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTerm.sql" />
     <Build Include="dbo\Views\vyuAPVoucherForEdit.sql" />
