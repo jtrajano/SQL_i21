@@ -264,7 +264,13 @@ BEGIN
 		,intLoadShipped				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
 		,ysnAllowInvoice			= CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
 										CASE  
-											WHEN CNT.intPricingTypeId = 2 OR CNT.intPricingTypeId = 5 THEN 0 
+											WHEN CNT.intPricingTypeId = 5 
+												THEN 0 
+											WHEN CNT.intPricingTypeId = 2
+												THEN 
+													CASE WHEN CNT.dblAvailablePriceContractQty > 0
+														THEN 1
+													ELSE 0 END
 											ELSE LI.ysnAllowInvoiceVoucher 
 										END
 									END
@@ -292,10 +298,27 @@ BEGIN
 			,CU.intCent
 			,CU.ysnSubCurrency
 			,CTH.ysnLoad
+			,ISNULL(PCD.dblQuantity,0) - ISNULL(PCDInvoice.dblQtyShipped,0) dblAvailablePriceContractQty
 			FROM tblCTContractDetail CTD 
 			INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
+			CROSS APPLY (
+				SELECT  SUM(PFD.dblQuantity) dblQuantity FROM tblCTPriceFixation PF
+				INNER JOIN tblCTPriceFixationDetail PFD
+					ON PFD.intPriceFixationId = PF.intPriceFixationId
+				WHERE PF.intContractDetailId = CTD.intContractDetailId and PF.intContractHeaderId = CTD.intContractHeaderId
+			) PCD
+			CROSS APPLY (
+				SELECT SUM(dblQtyShipped) dblQtyShipped FROM tblCTPriceFixation PF
+				INNER JOIN tblCTPriceFixationDetail PFD
+					ON PFD.intPriceFixationId = PF.intPriceFixationId
+				LEFT JOIN tblCTPriceFixationDetailAPAR APAR
+					ON APAR.intPriceFixationDetailId = PFD.intPriceFixationDetailId
+				LEFT JOIN tblARInvoiceDetail ARID
+					ON ARID.intInvoiceDetailId = APAR.intInvoiceDetailId
+				WHERE PF.intContractDetailId = CTD.intContractDetailId and PF.intContractHeaderId = CTD.intContractHeaderId
+			) PCDInvoice
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
 		LEFT JOIN tblICLot ICL ON ICL.intLotId = SC.intLotId
