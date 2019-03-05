@@ -61,10 +61,7 @@ BEGIN TRY
 			)
 			 SELECT 
 			 strItemNo					 = strItemNo
-			,dblDetailQuantity			 = CASE
-													WHEN strItemUOM IN ('lb', 'Metric Ton') THEN dbo.fnFormatNumber(CAST(dblDetailQuantity AS NVARCHAR))
-													ELSE dbo.fnICFormatNumber(dblDetailQuantity)
-										   END
+			,dblDetailQuantity			 = dblDetailQuantity
 			,dblPrice					 = CASE	
 													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
 													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,4))
