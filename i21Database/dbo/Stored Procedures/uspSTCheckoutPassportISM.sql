@@ -433,16 +433,16 @@ BEGIN
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
 										WHEN Chk.dblAveragePrice > P.dblSalePrice 
-											THEN Chk.dblAveragePrice - P.dblSalePrice
+											THEN (Chk.dblAveragePrice)							-- Chk.dblAveragePrice - P.dblSalePrice
 										WHEN Chk.dblAveragePrice < P.dblSalePrice 
-											THEN P.dblSalePrice - Chk.dblAveragePrice
+											THEN (Chk.dblAveragePrice)							-- P.dblSalePrice - Chk.dblAveragePrice
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
 										WHEN Chk.dblAveragePriceWthDiscounts > P.dblSalePrice 
-											THEN Chk.dblAveragePriceWthDiscounts - P.dblSalePrice
+											THEN (Chk.dblAveragePriceWthDiscounts)				-- Chk.dblAveragePriceWthDiscounts - P.dblSalePrice
 										WHEN Chk.dblAveragePriceWthDiscounts < P.dblSalePrice 
-											THEN P.dblSalePrice - Chk.dblAveragePriceWthDiscounts
+											THEN (Chk.dblAveragePriceWthDiscounts)				-- P.dblSalePrice - Chk.dblAveragePriceWthDiscounts
 									END
 						END) AS dblRetailUnit
 
@@ -451,16 +451,16 @@ BEGIN
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
 										WHEN Chk.dblAveragePrice > P.dblSalePrice 
-											THEN (Chk.dblAveragePrice - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (Chk.dblAveragePrice * Chk.SalesQuantity)			-- (Chk.dblAveragePrice - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 										WHEN Chk.dblAveragePrice < P.dblSalePrice 
-											THEN (P.dblSalePrice - Chk.dblAveragePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (Chk.dblAveragePrice * Chk.SalesQuantity)			-- (P.dblSalePrice - Chk.dblAveragePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
 										WHEN Chk.dblAveragePriceWthDiscounts > P.dblSalePrice 
-											THEN (Chk.dblAveragePriceWthDiscounts - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (Chk.dblAveragePriceWthDiscounts * Chk.SalesQuantity)	-- (Chk.dblAveragePriceWthDiscounts - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 										WHEN Chk.dblAveragePriceWthDiscounts < P.dblSalePrice 
-											THEN (P.dblSalePrice - Chk.dblAveragePriceWthDiscounts) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (Chk.dblAveragePriceWthDiscounts * Chk.SalesQuantity)  -- (P.dblSalePrice - Chk.dblAveragePriceWthDiscounts) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 									END
 						END) AS dblAmount
 
@@ -523,6 +523,13 @@ BEGIN
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
 					AND I.strLotTracking = 'No'
+					AND Chk.SalesQuantity > 0
+					AND 0 < CASE
+								WHEN @strAllowMarkUpDown = 'I'
+									THEN Chk.dblAveragePrice
+								WHEN @strAllowMarkUpDown = 'D'
+									THEN Chk.dblAveragePriceWthDiscounts
+							END
 					AND P.dblSalePrice != CASE
 												WHEN @strAllowMarkUpDown = 'I'
 													THEN Chk.dblAveragePrice
@@ -543,6 +550,7 @@ BEGIN
 		-- =============================================================================================================================================================================
 		-- End: Item Price Differences / Department Discounts
 		-- =============================================================================================================================================================================
+
 
 
 		SET @intCountRows = 1
