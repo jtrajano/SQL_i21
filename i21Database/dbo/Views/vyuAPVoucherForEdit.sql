@@ -27,8 +27,8 @@ SELECT
 	B.strVendorId,
 	A.intEntityVendorId,
 	B1.strName,
-	A.intTermsId,
-	term.strTerm,
+	ISNULL(editTerm.intTermID, A.intTermsId) AS intTermsId,
+	ISNULL(editTerm.strTerm, term.strTerm) AS strTerm,
 	A.ysnPosted,
 	A.ysnPaid,
 	CAST(CASE WHEN edit.intId IS NULL THEN 0 ELSE 1 END AS BIT) ysnSelected,
@@ -38,12 +38,38 @@ FROM
 	INNER JOIN 
 		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityId] = B1.intEntityId)
 		ON A.[intEntityVendorId] = B.[intEntityId]
-	LEFT JOIN dbo.tblSMTerm term
-		ON A.intTermsId = term.intTermID
+	OUTER APPLY tblAPBillEditField editField
 	LEFT JOIN dbo.tblAPBillEdit edit
 		ON A.intBillId = edit.intBillId
+	LEFT JOIN dbo.tblSMTerm term
+		ON A.intTermsId = term.intTermID
+	LEFT JOIN dbo.tblSMTerm editTerm
+		ON editTerm.intTermID = editField.intTermsId
+	OUTER APPLY (
+		SELECT TOP 1 intContractDetailId FROM tblAPBillDetail detail
+		WHERE 
+			detail.intBillId = A.intBillId
+		AND detail.intContractDetailId > 0
+	) details
+	OUTER APPLY (
+		SELECT C.intTermId, restrictedTerm.intCount intCount FROM tblAPVendorTerm C 
+		OUTER APPLY (
+			SELECT COUNT(*) intCount FROM tblAPVendorTerm C2 WHERE C2.intEntityVendorId = A.intEntityVendorId
+		) restrictedTerm
+		WHERE 
+			C.intEntityVendorId = A.intEntityVendorId
+	) vendorTerm
 WHERE 
 	A.ysnPaid = 0
 AND A.intTransactionType = 1
+AND details.intContractDetailId IS NULL
+AND (
+		(vendorTerm.intCount > 0 AND vendorTerm.intTermId = editField.intTermsId) --if there is term on edit field and term have data on restriction
+		OR
+		(vendorTerm.intCount > 0 AND NULLIF(editField.intTermsId, 0) IS NULL) --if there is term data restriction and no value of term on edit field
+		OR
+		(vendorTerm.intCount IS NULL) --no vendor term restriction setup
+	)
+--ORDER BY A.intBillId OFFSET 1 ROWS FETCH NEXT 500 ROWS ONLY
 	
 

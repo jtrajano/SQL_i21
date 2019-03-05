@@ -7405,6 +7405,7 @@
     <Build Include="dbo\Tables\tblSMInterDatabaseUserRoleSubRole.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDoBeforeUserRoleMigration.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDoUserRoleMigration.sql" />
+    <Build Include="dbo\Tables\tblAPBillEditField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
