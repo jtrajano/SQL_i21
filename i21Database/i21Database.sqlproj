@@ -7392,9 +7392,18 @@
     <Build Include="dbo\Tables\tblCMImportBankTransactionLogDetail.sql" />
     <Build Include="dbo\Tables\tblCMImportBankTransactionLog.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateRemoveSalesOrderStatus.sql" />
-	<Build Include="dbo\Tables\tblCCImportDealerCreditCardReconDetail.sql" />
+    <Build Include="dbo\Tables\tblCCImportDealerCreditCardReconDetail.sql" />
     <Build Include="dbo\Tables\tblCCImportDealerCreditCardRecon.sql" />
-	<Build Include="dbo\Stored Procedures\uspCCImportDealerCreditCardRecon.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCImportDealerCreditCardRecon.sql" />
+    <Build Include="dbo\Tables\tblSMInterDatabaseControl.sql" />
+    <Build Include="dbo\Tables\tblSMInterDatabaseScreen.sql" />
+    <Build Include="dbo\Tables\tblSMInterDatabaseUserRole.sql" />
+    <Build Include="dbo\Tables\tblSMInterDatabaseUserRoleControlPermission.sql" />
+    <Build Include="dbo\Tables\tblSMInterDatabaseUserRoleMenu.sql" />
+    <Build Include="dbo\Tables\tblSMInterDatabaseUserRoleScreenPermission.sql" />
+    <Build Include="dbo\Tables\tblSMInterDatabaseUserRoleSubRole.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDoBeforeUserRoleMigration.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDoUserRoleMigration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
