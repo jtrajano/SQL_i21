@@ -14,6 +14,7 @@ SELECT ST.intStoreId
 , SUM(CDT.intTotalSalesCount) intTotalSalesCount
 , SUM(CDT.dblRegisterSalesAmountComputed) dblTotalRegisterAmount
 , SUM(CDT.dblTotalSalesAmountComputed) dblTotalSalesAmount
+, SUM(CDT.dblRegisterSalesAmountComputed) - SUM(CDT.dblTotalSalesAmountComputed) dblDiffRegisterAndSales
 FROM tblSTCheckoutHeader CH 
 INNER JOIN tblSTStore ST 
 	ON ST.intStoreId = CH.intStoreId 
