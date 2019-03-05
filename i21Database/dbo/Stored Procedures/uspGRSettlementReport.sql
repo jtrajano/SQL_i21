@@ -958,7 +958,7 @@ BEGIN
 												END
 				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
-			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
+			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
