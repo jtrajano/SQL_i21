@@ -7289,6 +7289,7 @@
     <Build Include="dbo\Functions\fnCFPadString.sql" />
     <Build Include="dbo\Functions\fnCFConstructFullCardNumber.sql" />
     <Build Include="dbo\Views\vyuCFEncodeCard.sql" />
+    <Build Include="dbo\Tables\tblCFEncodeCardStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
