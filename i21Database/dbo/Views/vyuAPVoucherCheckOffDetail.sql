@@ -14,6 +14,7 @@ SELECT	DISTINCT
 			,ISNULL(EL.strCounty,'N/A') AS strVendorCounty
 			,ISNULL(vendor.strEmail, vendor.strEmail2) AS strEmail2
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
+			,strShipFrom = SF.strLocationName COLLATE Latin1_General_CI_AS
 			,TC.strTaxCode
 			,TC.strDescription AS strTaxCodeDesc
 			,TC.strCounty
@@ -38,6 +39,7 @@ SELECT	DISTINCT
 				 + ISNULL(RTRIM(strZip),'') + ' ' + ISNULL(RTRIM(strCity), '') + ' ' + ISNULL(RTRIM(strState), '') + CHAR(13) + char(10)
 				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
+			,GL.strAccountId
 			--,TAXDETAIL.*
 FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPBillDetail APBD  ON APBD.intBillId = APB.intBillId
@@ -55,7 +57,8 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
 			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
-OUTER APPLY(
+			LEFT JOIN vyuGLAccountDetail GL ON GL.intAccountId = APBD.intAccountId
+			OUTER APPLY(
 			SELECT TOP 1 
 						 B1.dtmDatePaid,
 						 B1.dblAmountPaid,
@@ -76,11 +79,18 @@ OUTER APPLY(
 				FROM tblEMEntity E1
 				WHERE E1.intEntityId = EC.intEntityContactId 
 			) vendor
+			OUTER APPLY
+			(
+				SELECT TOP 1 strLocationName FROM  [tblEMEntityLocation] B WHERE APB.intShipFromEntityId = B.intEntityId AND APB.intShipFromId = B.intEntityLocationId 
+			) SF
 WHERE  
 	  APB.ysnPosted = 1 
 		  AND Payment.ysnPosted = 1 
-		  AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
-
+		  AND (APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
+		  OR APBD.intCustomerStorageId > 0
+		  OR APBD.intScaleTicketId > 0) 
+		  
+		  
 UNION ALL 
 
 --VOUCHER W/ APPLIED PREPAID WITH CHECK OFF TAX 
@@ -97,6 +107,7 @@ SELECT	DISTINCT
 			,ISNULL(EL.strCounty,'N/A') AS strVendorCounty
 			,ISNULL(vendor.strEmail, vendor.strEmail2) AS strEmail2
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
+			,strShipFrom =  SF.strLocationName COLLATE Latin1_General_CI_AS
 			,TC.strTaxCode
 			,TC.strDescription AS strTaxCodeDesc
 			,TC.strCounty
@@ -121,6 +132,7 @@ SELECT	DISTINCT
 				 + ISNULL(RTRIM(strZip),'') + ' ' + ISNULL(RTRIM(strCity), '') + ' ' + ISNULL(RTRIM(strState), '') + CHAR(13) + char(10)
 				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
+			,GL.strAccountId
 			--,TAXDETAIL.*
 FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPBillDetail APBD  ON APBD.intBillId = APB.intBillId
@@ -140,6 +152,7 @@ FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
 			INNER JOIN dbo.tblAPAppliedPrepaidAndDebit APD ON APD.intBillId = APB.intBillId
 			INNER JOIN dbo.tblAPBill APB2 ON APD.intTransactionId = APB2.intBillId
+			LEFT JOIN vyuGLAccountDetail GL ON GL.intAccountId = APBD.intAccountId
 			OUTER APPLY (
 				SELECT TOP 1	
 						strEmail,
@@ -162,10 +175,15 @@ FROM		dbo.tblAPBill APB
 				
 			ORDER BY dtmDatePaid DESC
 			)  Payment 
+			OUTER APPLY
+			(
+				SELECT TOP 1 strLocationName FROM  [tblEMEntityLocation] B WHERE APB.intShipFromEntityId = B.intEntityId AND APB.intShipFromId = B.intEntityLocationId 
+			) SF
 WHERE  
 	  APB.ysnPosted = 1 
 	 AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
-	 AND APBD.dblTax < 0
+	 AND ( APBD.dblTax < 0 OR APBD.intCustomerStorageId > 0
+		  OR APBD.intScaleTicketId > 0) 
 	 and Payment.dtmDatePaid IS NOT NULL
 GO
 
