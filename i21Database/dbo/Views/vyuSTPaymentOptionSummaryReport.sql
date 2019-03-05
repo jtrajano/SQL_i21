@@ -11,7 +11,9 @@ SELECT ST.intStoreId
 , PO.strPaymentOptionId
 , PO.strDescription
 , ACC.strAccountId
+, SUM(CPO.dblRegisterAmount) dblRegisterAmount
 , SUM(CPO.dblAmount) dblAmount
+, SUM(CPO.dblRegisterAmount) - SUM(CPO.dblAmount) dblDiffRegisterAndSales
 FROM tblSTCheckoutHeader CH 
 INNER JOIN tblSTStore ST 
 	ON ST.intStoreId = CH.intStoreId 
