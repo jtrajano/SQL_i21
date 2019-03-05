@@ -7391,6 +7391,9 @@
     <Build Include="dbo\Tables\tblCMImportBankTransactionLogDetail.sql" />
     <Build Include="dbo\Tables\tblCMImportBankTransactionLog.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateRemoveSalesOrderStatus.sql" />
+	<Build Include="dbo\Tables\tblCCImportDealerCreditCardReconDetail.sql" />
+    <Build Include="dbo\Tables\tblCCImportDealerCreditCardRecon.sql" />
+	<Build Include="dbo\Stored Procedures\uspCCImportDealerCreditCardRecon.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
