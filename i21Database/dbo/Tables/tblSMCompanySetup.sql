@@ -23,6 +23,8 @@
 	[ysnScreenLabelListingUpdated] BIT NULL, 
 	[ysnAuditBatchMigrated] BIT DEFAULT 1 NULL,
 	[intMultiCompanyId] INT NULL,
+    [ysnDoingMigration] BIT NULL,
+    [dtmMigrationStarted] DATETIME NULL,
     [intConcurrencyId]  INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblSMCompanySetup] PRIMARY KEY ([intCompanySetupID]), 
     CONSTRAINT [FK_tblSMCompanySetup_tblSMMultiCompany] FOREIGN KEY ([intMultiCompanyId]) REFERENCES [tblSMMultiCompany]([intMultiCompanyId])    
