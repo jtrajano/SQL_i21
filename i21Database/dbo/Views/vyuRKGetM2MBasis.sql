@@ -99,46 +99,71 @@ WHERE cd.intPricingTypeId = 5 AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT strCommodityCode
 	, iis.strItemNo
-	, strOriginDest = ca.strDescription
-	, fm.strFutMarketName
+	, strDestination = NULL
+	, strFutMarketName
 	, strFutureMonth
 	, strPeriodTo = NULL
 	, iis.strLocationName
 	, strMarketZoneCode
-	, strCurrency = (CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN iis.strCurrency ELSE muc.strCurrency END)
+	, strCurrency = (CASE WHEN ISNULL(strFMCurrency,'') = '' THEN iis.strCurrency ELSE strFMCurrency END)
 	, strPricingType
 	, strContractInventory = 'Inventory' COLLATE Latin1_General_CI_AS
 	, strContractType
 	, dblCashOrFuture = 0
 	, dblBasisOrDiscount = 0
 	, dblRatio = 0
-	, strUnitMeasure = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.strUnitMeasure ELSE mum.strUnitMeasure END)
-	, ch.intCommodityId
-	, cd.intItemId
+	, strUnitMeasure = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN ct.strUOM ELSE strFMUOM END)
+	, ct.intCommodityId
+	, ct.intItemId
 	, intOriginId = iis.intOriginId
-	, cd.intFutureMarketId
-	, cd.intFutureMonthId
-	, cd.intCompanyLocationId
-	, cd.intMarketZoneId
-	, intCurrencyId = (CASE WHEN ISNULL(muc.intCurrencyID,'') = '' THEN cd.intCurrencyId ELSE muc.intCurrencyID END)
-	, cd.intPricingTypeId
-	, ch.intContractTypeId
-	, intUnitMeasureId = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END)
+	, ct.intFutureMarketId
+	, ct.intFutureMonthId
+	, iis.intLocationId
+	, ct.intMarketZoneId
+	, intCurrencyId = (CASE WHEN ISNULL(intFMCurrencyId,'') = '' THEN iis.intCurrencyId ELSE intFMCurrencyId END)
+	, ct.intPricingTypeId
+	, ct.intContractTypeId
+	, intUnitMeasureId = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN intUOMId ELSE intFMUOMId END)
 	, intConcurrencyId = 0
 	, iis.strMarketValuation
-FROM vyuRKGetInventoryValuation iis
-LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = iis.intOriginId
-LEFT JOIN tblCTContractDetail cd ON iis.intItemId = cd.intItemId
-LEFT JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
-LEFT JOIN tblRKFuturesMonth fmon ON fmon.intFutureMonthId = cd.intFutureMonthId
-LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
-LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
-LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
-LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
-LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
-LEFT JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
-LEFT JOIN tblICCommodity c ON c.intCommodityId = ch.intCommodityId
-LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
-WHERE (iis.dblQuantity > 0)
-	AND iis.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN iis.strLotTracking ELSE 'No' END)
+FROM (
+	SELECT *
+	FROM vyuRKGetInventoryTransaction
+	WHERE dblQuantity > 0
+		AND strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN strLotTracking ELSE 'No' END)) iis
+LEFT JOIN (
+	SELECT cd.intItemId
+		, cd.intCompanyLocationId
+		, cd.intFutureMarketId
+		, cd.intFutureMonthId
+		, cd.intItemUOMId
+		, ch.intCommodityId
+		, c.strCommodityCode
+		, cd.intMarketZoneId
+		, ct.intContractTypeId
+		, ct.strContractType
+		, pt.intPricingTypeId
+		, pt.strPricingType
+		, cd.intCurrencyId
+		, fm.strFutMarketName
+		, strFutureMonth
+		, strMarketZoneCode
+		, strFMCurrency = muc.strCurrency
+		, intFMCurrencyId = muc.intCurrencyID
+		, intFMUOMId = mum.intUnitMeasureId
+		, strFMUOM = mum.strUnitMeasure
+		, intUOMId = um.intUnitMeasureId
+		, strUOM = um.strUnitMeasure
+	FROM tblCTContractDetail cd
+	LEFT JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+	LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
+	LEFT JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
+	LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
+	LEFT JOIN tblRKFuturesMonth fmon ON fmon.intFutureMonthId = cd.intFutureMonthId
+	LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
+	LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
+	LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
+	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
+	LEFT JOIN tblICCommodity c ON c.intCommodityId = ch.intCommodityId
+	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
+) ct ON iis.intItemId = ct.intItemId
