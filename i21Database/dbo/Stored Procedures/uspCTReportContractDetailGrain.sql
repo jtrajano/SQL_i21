@@ -62,8 +62,8 @@ BEGIN TRY
 			 SELECT 
 			 strItemNo					 = strItemNo
 			,dblDetailQuantity			 = CASE
-													WHEN strItemUOM IN ('lb', 'Metric Ton') THEN CONVERT(NVARCHAR,CAST(dblDetailQuantity  AS Money),1)
-													ELSE LTRIM(dbo.fnRemoveTrailingZeroes(dblDetailQuantity)) 
+													WHEN strItemUOM IN ('lb', 'Metric Ton') THEN dbo.fnFormatNumber(CAST(dblDetailQuantity AS NVARCHAR))
+													ELSE dbo.fnICFormatNumber(dblDetailQuantity)
 										   END
 			,dblPrice					 = CASE	
 													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
