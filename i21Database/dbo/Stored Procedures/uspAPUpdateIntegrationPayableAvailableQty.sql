@@ -289,8 +289,8 @@ BEGIN
 			[intSourceTransactionNoId]		=	B.intBillId,
 			[strSourceTransactionNo]		=	B.strBillId,
 			[intItemId]						=	A.intItemId,
-			[intToBillUOMId]				=	CASE WHEN A.intWeightUOMId > 0 THEN A.intWeightUOMId ELSE A.intQtyToBillUOMId END,
-			[dblToBillQty]					=	CASE WHEN A.intWeightUOMId > 0 THEN A.dblNetWeight ELSE A.dblQuantityToBill END
+			[intToBillUOMId]				=	A.intQtyToBillUOMId,--CASE WHEN A.intWeightUOMId > 0 THEN A.intWeightUOMId ELSE A.intQtyToBillUOMId END,
+			[dblToBillQty]					=	A.dblQuantityToBill--CASE WHEN A.intWeightUOMId > 0 THEN A.dblNetWeight ELSE A.dblQuantityToBill END
 												* (CASE WHEN @decreaseQty = 0 
 														THEN -1
 													ELSE 1
