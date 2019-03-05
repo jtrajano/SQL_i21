@@ -1899,6 +1899,7 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
     <Build Include="dbo\Functions\fnGetMatchingItemUOMId.sql" />
+    <Build Include="dbo\Functions\fnGetMatchingItemUOMIdByTypes.sql" />
     <Build Include="dbo\Stored Procedures\uspEMMergeEntity.sql" />
     <Build Include="dbo\Views\vyuEMSearchMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStageWorkOrder.sql" />
