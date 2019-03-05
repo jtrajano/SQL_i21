@@ -59,7 +59,8 @@ SELECT GL.intGenerateLoadId
 			THEN 'Scale Ticket'
 		WHEN 3
 			THEN 'Transport Load'
-		END COLLATE Latin1_General_CI_AS AS strTransUsedBy	 
+		END COLLATE Latin1_General_CI_AS AS strTransUsedBy	
+	  ,GL.intTransportationMode 
 	  ,CASE GL.intTransportationMode
 		WHEN 1
 			THEN 'Truck'	
@@ -67,7 +68,7 @@ SELECT GL.intGenerateLoadId
 			THEN 'Ocean Vessel'
 		WHEN 3
 			THEN 'Rail'
-		END COLLATE Latin1_General_CI_AS AS strTransporationMode	 
+		END COLLATE Latin1_General_CI_AS AS strTransportationMode	 
 	  ,GL.intAllocationDetailId
 	  ,AH.strAllocationNumber
 
