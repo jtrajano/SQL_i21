@@ -64,14 +64,7 @@ BEGIN TRY
 			intContractSeq			= CD.intContractSeq,
 			strPeriod				= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
 			strAtlasPeriod			= CONVERT(NVARCHAR(50),dtmStartDate,106) + ' -   ' + CONVERT(NVARCHAR(50),dtmEndDate,106),
-			strQunatity				= CASE 
-											WHEN CP.strDefaultContractReport = 'ContractBeGreen' THEN 
-												CASE
-													WHEN UM.strUnitMeasure IN ('lb', 'Metric Ton') THEN CONVERT(NVARCHAR,CAST(CD.dblQuantity  AS Money),1)
-													ELSE LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) 
-												END
-											ELSE LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) 
-									  END + ' ' + UM.strUnitMeasure,
+			strQunatity				= CASE WHEN CP.strDefaultContractReport = 'ContractBeGreen' THEN CONVERT(NVARCHAR,CAST(CD.dblQuantity  AS Money),1) ELSE LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) END + ' ' + UM.strUnitMeasure,
 			strAtlasQunatity		= LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) + ' - ' + UM.strUnitMeasure,
 			dblQuantity				= CD.dblQuantity,
 			strPrice				= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
