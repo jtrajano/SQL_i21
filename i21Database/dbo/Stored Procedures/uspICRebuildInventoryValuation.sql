@@ -4115,17 +4115,10 @@ BEGIN
 													) 
 												ELSE
 													COALESCE(
-														dbo.fnMultiply(
-															COALESCE(
-																lot.dblLastCost
-																, (
-																	SELECT TOP 1 dblLastCost 
-																	FROM	tblICItemPricing 
-																	WHERE	intItemId = RebuildInvTrans.intItemId 
-																			and intItemLocationId = RebuildInvTrans.intItemLocationId
-																)
-															)
-															,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+														dbo.fnCalculateCostBetweenUOM ( 
+															COALESCE(StockUnit.intItemUOMId, ItemUOM.intItemUOMId)
+															,ItemUOM.intItemUOMId
+															,COALESCE(lot.dblLastCost, itemPricing.dblLastCost) 
 														)
 														,RebuildInvTrans.dblCost
 													)
@@ -4135,17 +4128,10 @@ BEGIN
 											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 
 														RebuildInvTrans.dblCost
 													ELSE 
-														--dbo.fnMultiply (
-														--	dbo.fnDivide(
-														--		ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
-														--		,AdjItemUOM.dblUnitQty
-														--	)
-														--	,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-														--)
 														dbo.fnCalculateCostBetweenUOM( 
-															AdjNewCostUOM.intItemUOMId
+															COALESCE(AdjNewCostUOM.intItemUOMId, ItemUOM.intItemUOMId)
 															,ItemUOM.intItemUOMId
-															,ISNULL(AdjDetail.dblNewCost, AdjDetail.dblCost) 
+															,COALESCE(AdjDetail.dblNewCost, AdjDetail.dblCost, RebuildInvTrans.dblCost) 
 														)
 											END
 										 ELSE 
@@ -4205,8 +4191,18 @@ BEGIN
 						LEFT JOIN dbo.tblICItemUOM AdjNewCostUOM
 							ON AdjNewCostUOM.intItemId = AdjDetail.intItemId
 							AND AdjNewCostUOM.intItemUOMId = ISNULL(AdjDetail.intNewItemUOMId, AdjDetail.intItemUOMId) 
+						LEFT JOIN dbo.tblICItemUOM StockUnit
+							ON StockUnit.intItemId = AdjDetail.intItemId
+							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
 						LEFT JOIN dbo.tblICLot lot
 							ON lot.intLotId = RebuildInvTrans.intLotId 
+						OUTER APPLY (
+							SELECT TOP 1 
+									dblLastCost 
+							FROM	tblICItemPricing 
+							WHERE	intItemId = RebuildInvTrans.intItemId 
+									AND intItemLocationId = RebuildInvTrans.intItemLocationId
+						) itemPricing
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 

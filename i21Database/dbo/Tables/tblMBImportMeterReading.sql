@@ -5,8 +5,8 @@
 	[intImportFileHeaderId] INT NOT NULL,
 	[intUserId] INT NOT NULL,
 	[dtmImportDate] DATETIME NOT NULL,
-	CONSTRAINT [PK_tblMBImportMeterReading] PRIMARY KEY ([intImportMeterReadingId]),
-	CONSTRAINT [FK_tblMBImportMeterReading_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
+	CONSTRAINT [PK_tblMBImportMeterReading] PRIMARY KEY ([intImportMeterReadingId])
+	--CONSTRAINT [FK_tblMBImportMeterReading_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )
 GO
 

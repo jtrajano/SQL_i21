@@ -1132,6 +1132,8 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 								
 								IF @ItemQtyOrdered <> @ItemQtyShipped
 									EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId, @DetailId = @NewDetailId								
+								ELSE 
+									EXEC dbo.uspARReComputeInvoiceTaxes @InvoiceId = @NewInvoiceId
 						END
 
 						DELETE FROM @tblItemsToInvoice WHERE intItemToInvoiceId = @intItemToInvoiceId

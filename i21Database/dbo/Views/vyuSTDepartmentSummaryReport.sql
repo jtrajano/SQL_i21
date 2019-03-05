@@ -12,6 +12,7 @@ SELECT ST.intStoreId
 , ISNULL(Inv.ysnPosted, 0) ysnPosted
 , SUM(CDT.intItemsSold) intItemsSold
 , SUM(CDT.intTotalSalesCount) intTotalSalesCount
+, SUM(CDT.dblRegisterSalesAmountComputed) dblTotalRegisterAmount
 , SUM(CDT.dblTotalSalesAmountComputed) dblTotalSalesAmount
 FROM tblSTCheckoutHeader CH 
 INNER JOIN tblSTStore ST 
