@@ -86,7 +86,7 @@ Begin
 			Set @dblQuantity = @dblQuantity + @dblInTransitQuantity + @dblBlockedQuantity
 
 		--Add Qty from LK,KB
-		Select @dblQuantity = @dblQuantity + SUM(ISNULL(dblQuantity,0)) + SUM(ISNULL(dblBlockedQuantity,0)) 
+		Select @dblQuantity = @dblQuantity + SUM(ISNULL(dblQuantity,0)) 
 		From tblIPStockStage 
 		Where strSessionId=@strSessionId AND strStockType<>'WB'
 		Group By strItemNo,strSubLocation,strSessionId

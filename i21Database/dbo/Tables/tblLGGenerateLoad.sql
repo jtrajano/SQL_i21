@@ -28,6 +28,7 @@
 [intNumberOfLoads] INT NOT NULL,
 [strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
 [intSourceType] INT NULL,
+[intTransportationMode] INT NULL,
 [intPCompanyLocationId] INT NULL,
 [intSCompanyLocationId] INT NULL,
 [intTransUsedBy] INT NULL, 

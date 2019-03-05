@@ -746,7 +746,7 @@ IF @ysnPrintFromCFLocal = 1
 			BEGIN
 				UPDATE AGINGREPORT
 				SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFee, 0)
-				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR + ISNULL(CF.dblTotalFee, 0) + ISNULL(AGINGREPORT.dblTempFuture, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR + ISNULL(CF.dblTotalFee, 0)
 				FROM @temp_aging_table AGINGREPORT
 				INNER JOIN (
 					SELECT intCustomerId
