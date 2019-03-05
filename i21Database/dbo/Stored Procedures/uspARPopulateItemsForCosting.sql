@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
-
+    --@InvoiceIds        [InvoiceId]     READONLY
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -26,6 +26,16 @@ DECLARE @ZeroBit BIT
 SET @ZeroBit = CAST(0 AS BIT)	
 DECLARE @OneBit BIT
 SET @OneBit = CAST(1 AS BIT)
+
+--DECLARE @ParamExists BIT
+--IF EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds)
+--	BEGIN
+--		SET @ParamExists = CAST(1 AS BIT)
+--		DELETE IFC FROM #ARItemsForCosting IFC INNER JOIN @InvoiceIds II ON IFC.[intTransactionId] = II.[intHeaderId]
+--	END
+--ELSE
+--    SET @ParamExists = CAST(0 AS BIT)
+	
 
 --IF(OBJECT_ID('tempdb..#ARItemsForCosting') IS NULL)
 --BEGIN
@@ -175,7 +185,8 @@ WHERE
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 	AND ARID.[strItemType] <> 'Finished Good'
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 
+	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) =
+	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
 
 
 INSERT INTO #ARItemsForCosting
@@ -290,6 +301,7 @@ WHERE
 	--AND ((@ForValidation = 1 AND ISNULL(ARID.[strItemType],'') <> 'Finished Good') OR (@ForValidation = 0))
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 
+	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
 
 INSERT INTO #ARItemsForCosting
 	([intItemId]
@@ -383,5 +395,6 @@ WHERE
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
+	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
 
 RETURN 1

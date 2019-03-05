@@ -164,7 +164,12 @@ IF (ISNULL(@ForInsertion, '') <> '')
 			,@BatchId           = @BatchId
 			,@AccrueLicense     = 0
 			,@TransType         = NULL
-			,@UserId            = @UserId				
+			,@UserId            = @UserId	
+			
+	--EXEC [dbo].[uspARPopulateItemsForCosting] @InvoiceIds = @InvoiceIds	
+	--EXEC [dbo].[uspARPopulateItemsForInTransitCosting] @InvoiceIds = @InvoiceIds
+	--EXEC [dbo].[uspARPopulateItemsForStorageCosting] @InvoiceIds = @InvoiceIds
+
 	END
 
 

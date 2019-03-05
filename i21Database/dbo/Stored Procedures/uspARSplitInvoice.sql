@@ -280,6 +280,7 @@ BEGIN
 					,@ErrorMessage					NVARCHAR(MAX)
 					,@ItemId						INT
 					,@ItemUOMId						INT
+					,@ItemOrderUOMId				INT
 					,@ItemQtyOrdered				NUMERIC(18,6)
 					,@ItemQtyShipped				NUMERIC(18,6)
 					,@ItemPrice						NUMERIC(18,6)					
@@ -320,11 +321,14 @@ BEGIN
 								([intInvoiceId]
 								,[intItemId]
 								,[strItemDescription]
+								,[strDocumentNumber]
+								,[intOrderUOMId]
 								,[intItemUOMId]
 								,[dblQtyOrdered]
 								,[dblQtyShipped]
 								,[dblDiscount]
 								,[dblPrice]
+								,[strPricing]
 								,[dblTotalTax]
 								,[dblTotal]
 								,[intAccountId]
@@ -363,6 +367,8 @@ BEGIN
 								 @NewInvoiceId
 								,[intItemId] 
 								,[strItemDescription]
+								,[strDocumentNumber]
+								,[intOrderUOMId]
 								,[intItemUOMId]
 								,(CASE WHEN  @TransactionType='Invoice' 
 										AND ((intInventoryShipmentItemId is not null OR intSalesOrderDetailId is not null))
@@ -370,6 +376,7 @@ BEGIN
 								,[dblQtyShipped] * @dblSplitPercent
 								,[dblDiscount]	  
 								,[dblPrice]
+								,[strPricing]
 								,[dblTotalTax]   * @dblSplitPercent
 								,[dblTotal]      * @dblSplitPercent
 								,[intAccountId] 
@@ -454,7 +461,8 @@ BEGIN
 			ELSE
 				BEGIN
 					SELECT
-						 @ItemId						= [intItemId]			
+						 @ItemId						= [intItemId]		
+						,@ItemOrderUOMId				= [intOrderUOMId]	
 						,@ItemUOMId						= [intItemUOMId]
 						,@ItemQtyOrdered				= [dblQtyOrdered]
 						,@ItemQtyShipped				= [dblQtyShipped]
@@ -498,6 +506,7 @@ BEGIN
 						,@ItemId						= @ItemId
 						,@NewInvoiceDetailId			= @NewInvoiceDetailId	OUTPUT 
 						,@ErrorMessage					= @ErrorMessage	OUTPUT
+						,@ItemOrderUOMId				= @ItemOrderUOMId
 						,@ItemUOMId						= @ItemUOMId
 						,@ItemQtyOrdered				= @ItemQtyOrdered
 						,@ItemQtyShipped				= @ItemQtyShipped

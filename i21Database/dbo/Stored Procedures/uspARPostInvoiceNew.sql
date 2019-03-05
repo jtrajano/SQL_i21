@@ -407,6 +407,12 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
     ,@TransType         = @TransType
     ,@UserId            = @UserId
 
+
+IF @Post = 1 AND @Recap = 0
+    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+			@PostDate        = @PostDate
+		   ,@UserId          = @UserId
+
 --Removed excluded Invoices to post/unpost
 IF(@Exclude IS NOT NULL)
 	BEGIN
@@ -702,7 +708,7 @@ BEGIN TRY
         GOTO Do_Commit
     END
 
-	IF @Post = 1
+	IF @Post = 1 AND @Recap = 1
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
 			@PostDate        = @PostDate
 		   ,@UserId          = @UserId

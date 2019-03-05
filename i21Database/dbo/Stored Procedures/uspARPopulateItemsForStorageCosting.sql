@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForStorageCosting]
-
+    --@InvoiceIds        [InvoiceId]     READONLY
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -56,6 +56,20 @@ SET @ZeroDecimal = 0.000000
 --	,[ysnPost] BIT NULL)
 --END
 
+DECLARE @ZeroBit BIT
+SET @ZeroBit = CAST(0 AS BIT)	
+DECLARE @OneBit BIT
+SET @OneBit = CAST(1 AS BIT)
+
+--DECLARE @ParamExists BIT
+--IF EXISTS(SELECT TOP 1 NULL FROM @InvoiceIds)
+--	BEGIN
+--		SET @ParamExists = CAST(1 AS BIT)
+--		DELETE IFC FROM #ARItemsForStorageCosting IFC INNER JOIN @InvoiceIds II ON IFC.[intTransactionId] = II.[intHeaderId]
+--	END
+--ELSE
+--    SET @ParamExists = CAST(0 AS BIT)
+
 INSERT INTO #ARItemsForStorageCosting
 	([intItemId] 
 	,[intItemLocationId]
@@ -81,11 +95,11 @@ SELECT
 	,[intItemLocationId]			= ARID.[intItemLocationId]
 	,[intItemUOMId]					= ARID.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= (ARID.[dblQtyShipped] * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = 0 THEN -1 ELSE 1 END
+	,[dblQty]						= (ARID.[dblQtyShipped] * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]					= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
-	,[dblCost]					= ISNULL(dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = 1 
+	,[dblCost]					= ISNULL(dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
 																THEN (
 																	SELECT SUM(ICIT.[dblCost]) 
 																	FROM
@@ -96,7 +110,7 @@ SELECT
 																			AND ICIT.[intTransactionId] = MFWO.[intBatchID] 
 																	WHERE
 																		MFWO.[intWorkOrderId] = (SELECT MAX(tblMFWorkOrder.[intWorkOrderId]) FROM tblMFWorkOrder WITH (NOLOCK) WHERE tblMFWorkOrder.[intInvoiceDetailId] = ARID.[intInvoiceDetailId])
-																		AND ICIT.[ysnIsUnposted] = 0
+																		AND ICIT.[ysnIsUnposted] = @ZeroBit
 																		AND ICIT.[strTransactionForm] = 'Produce'
 																)
 																ELSE
@@ -126,16 +140,17 @@ LEFT OUTER JOIN
 		ON LGL.[intLoadId] = ARID.[intLoadId]
 WHERE	
 	ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund') AND ISNULL(ARID.[intPeriodsToAccrue],0) <= 1 
-	AND ARID.[ysnImpactInventory] = CAST(1 AS BIT)			
+	AND ARID.[ysnImpactInventory] = @OneBit			
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR ARID.[dblQtyShipped] <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
 	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
 	AND ARID.[intItemId] IS NOT NULL
-	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ARID.[ysnBlended] = 1))
+	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle') OR (ARID.[ysnBlended] = @OneBit))
 	AND ARID.[strTransactionType] <> 'Debit Memo'
 	--AND ( ARID.[intStorageScheduleTypeId] IS NULL OR (ARID.[intStorageScheduleTypeId] IS NOT NULL AND ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0) )
 	AND (ARID.[intStorageScheduleTypeId] IS NOT NULL AND ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
+	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
 
 
 
