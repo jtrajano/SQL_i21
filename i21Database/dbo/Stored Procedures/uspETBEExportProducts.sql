@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICTMExportProducts]
+﻿CREATE PROCEDURE [dbo].[uspETBEExportProducts]
 	@intEntityUserSecurityId INT
 AS
 DECLARE @intDefaultLocationId INT

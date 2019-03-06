@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuSMETExportTerm]
+﻿CREATE VIEW [dbo].[vyuETExportTerm]
 AS 
 SELECT  DISTINCT [Location].[strLocationNumber] AS [trloc], 
 [Term].[strTerm] AS [trdesc], 

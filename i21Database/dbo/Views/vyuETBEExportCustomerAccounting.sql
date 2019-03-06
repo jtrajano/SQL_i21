@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuARBEExportCustomerAccounting]
+﻿CREATE VIEW [dbo].[vyuETBEExportCustomerAccounting]
 AS 
 SELECT
 	 account			= ISNULL(ARCI.strCustomerNumber, '')

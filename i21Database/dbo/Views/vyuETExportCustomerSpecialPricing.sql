@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuEMETExportCustomerSpecialPricing]
+﻿CREATE VIEW [dbo].[vyuETExportCustomerSpecialPricing]
  AS   
 	SELECT   
 	patr_no = b.strCustomerNumber,   
@@ -16,7 +16,7 @@
 	  
 	INNER JOIN  vyuICGetItemStock ICItems ON a.intCategoryId = ICItems.intCategoryId
 				AND ICItems.intLocationId = d.intWarehouseId   
-	INNER JOIN vyuICETExportItem ETItems ON ICItems.intItemId = ETItems.intItemId
+	INNER JOIN [vyuETExportItem] ETItems ON ICItems.intItemId = ETItems.intItemId
 	CROSS APPLY dbo.[fnARGetItemPricingDetails](  
 			ICItems.intItemId,  
 			b.[intEntityId],  

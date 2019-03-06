@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuEMETExportCustomerSplit]
+﻿CREATE VIEW [dbo].[vyuETExportCustomerSplit]
 	AS 
 	select 
 		sploc = dd.strLocationNumber,

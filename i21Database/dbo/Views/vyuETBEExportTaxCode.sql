@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuSMBEExportTaxCode]  
+﻿CREATE VIEW [dbo].[vyuETBEExportTaxCode]  
 AS 
 
 SELECT 

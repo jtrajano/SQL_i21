@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICETExportItem]    
+﻿CREATE VIEW [dbo].[vyuETExportItem]    
 AS    
 SELECT DISTINCT    
   CAST(location.strLocationNumber AS VARCHAR(3)) inloc,    

@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuTMETExportTankManagementAppliance]  
+﻿CREATE VIEW [dbo].[vyuETExportTankManagementAppliance]  
 AS 
 
 SELECT

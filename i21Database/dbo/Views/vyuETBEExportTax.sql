@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuSMBEExportTax]  
+﻿CREATE VIEW [dbo].[vyuETBEExportTax]  
 AS 
 SELECT 
 	 code = A.intTaxGroupId

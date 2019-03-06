@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuTMETExportConsumptionSiteInstruction]  
+﻿CREATE VIEW [dbo].[vyuETExportConsumptionSiteInstruction]  
 AS 
 
 SELECT  

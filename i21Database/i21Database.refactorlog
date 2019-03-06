@@ -7168,4 +7168,193 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTransactionDynamicId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="c993bc6a-dd92-496b-9e25-51d167c8879d" ChangeDateTime="03/05/2019 06:47:31">
+    <Property Name="ElementName" Value="[dbo].[vyuTMETExportConsumptionSite]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportConsumptionSite]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="48f8937d-fb87-4605-afae-918be2b66c10" ChangeDateTime="03/05/2019 06:48:42">
+    <Property Name="ElementName" Value="[dbo].[vyuTMETExportConsumptionSiteInstruction]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportConsumptionSiteInstruction]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0c308dda-fb0c-412b-8e23-6f4ecb8cb652" ChangeDateTime="03/05/2019 06:49:35">
+    <Property Name="ElementName" Value="[dbo].[vyuTMETExportTankManagementAppliance]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportTankManagementAppliance]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9c95fa55-727b-4e20-af09-dea861c8f317" ChangeDateTime="03/05/2019 07:01:46">
+    <Property Name="ElementName" Value="[dbo].[vyuTMETExportTankManagementDeliveryHistory]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportTankManagementDeliveryHistory]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="16a82219-4539-468e-b1d7-1da655bfc089" ChangeDateTime="03/05/2019 07:19:24">
+    <Property Name="ElementName" Value="[dbo].[vyuARETExportCustomerBalances]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportCustomerBalances]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="19c3d85f-40cf-4e49-b706-02cfb8605e36" ChangeDateTime="03/05/2019 07:20:39">
+    <Property Name="ElementName" Value="[dbo].[vyuCTETExportContractExport]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportContractExport]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="852c903f-409f-42a0-a093-7854f8f15035" ChangeDateTime="03/05/2019 07:25:37">
+    <Property Name="ElementName" Value="[dbo].[vyuICETExportItem]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportItem]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3d24fd04-d916-46b7-a209-0c68179b3f82" ChangeDateTime="03/05/2019 07:27:35">
+    <Property Name="ElementName" Value="[dbo].[vyuICETExportItemMessages]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportItemMessages]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a9efda40-5f9a-463d-b9b8-29386dc157bc" ChangeDateTime="03/05/2019 07:41:31">
+    <Property Name="ElementName" Value="[dbo].[vyuEMETExportCustomer]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportCustomer]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="88725796-c82b-4a48-b0f6-0420b8feb3ee" ChangeDateTime="03/05/2019 07:42:30">
+    <Property Name="ElementName" Value="[dbo].[vyuEMETExportCustomerComment]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportCustomerComment]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0439508a-7004-4cc6-b473-887148dd7310" ChangeDateTime="03/05/2019 07:43:34">
+    <Property Name="ElementName" Value="[dbo].[vyuEMETExportCustomerCSV]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportCustomerCSV]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a0303849-c54c-4a82-99fb-3ecd18b10a78" ChangeDateTime="03/05/2019 07:44:25">
+    <Property Name="ElementName" Value="[dbo].[vyuEMETExportCustomerSpecialPricing]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportCustomerSpecialPricing]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f8188553-a6ba-4c5a-b117-229282a227e5" ChangeDateTime="03/05/2019 07:45:24">
+    <Property Name="ElementName" Value="[dbo].[vyuEMETExportCustomerSplit]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportCustomerSplit]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d7f6865e-51c9-4e49-8361-f7898f76a2d2" ChangeDateTime="03/05/2019 07:46:16">
+    <Property Name="ElementName" Value="[dbo].[vyuEMETExportCustomerTaxExemption]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportCustomerTaxExemption]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7cc7f4a4-6d17-4953-953b-4f59b7e0b10a" ChangeDateTime="03/05/2019 07:47:24">
+    <Property Name="ElementName" Value="[dbo].[vyuEMETExportSalespersonDriver]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportSalespersonDriver]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1654f112-6f12-4ca5-ac85-cad4e0ed56fc" ChangeDateTime="03/05/2019 07:56:45">
+    <Property Name="ElementName" Value="[dbo].[vyuSMETExportFullTax]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportFullTax]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="836f60ae-e0f0-47ec-8ed6-bac38b889881" ChangeDateTime="03/05/2019 23:58:32">
+    <Property Name="ElementName" Value="[dbo].[vyuSMETExportSalesTax]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportSalesTax]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="203ab203-f11f-43b5-a5fc-bd6be811a576" ChangeDateTime="03/06/2019 00:00:18">
+    <Property Name="ElementName" Value="[dbo].[vyuSMETExportTerm]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportTerm]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="64c420b1-0b01-4871-8168-67f429fd6093" ChangeDateTime="03/06/2019 01:02:17">
+    <Property Name="ElementName" Value="[dbo].[uspICTMExportProducts]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[uspETBEExportProducts]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="82047749-842b-4d89-a98f-e75dd68b0374" ChangeDateTime="03/06/2019 01:07:54">
+    <Property Name="ElementName" Value="[dbo].[vyuEMBEExportCustomer]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETBEExportCustomer]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="be4ac105-2a1d-466b-a71a-6b27967f6e05" ChangeDateTime="03/06/2019 01:23:29">
+    <Property Name="ElementName" Value="[dbo].[vyuARBEExportCustomerAccounting]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETBEExportCustomerAccounting]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7194db18-59ee-4144-80ca-0200f14ca92b" ChangeDateTime="03/06/2019 01:25:10">
+    <Property Name="ElementName" Value="[dbo].[vyuTMBEExportConsumptionSite]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETBEExportConsumptionSite]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b6ca59e5-d503-457c-a81c-61182c327aa5" ChangeDateTime="03/06/2019 01:26:57">
+    <Property Name="ElementName" Value="[dbo].[vyuSMBEExportTax]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETBEExportTax]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b0ec3753-4610-4dba-ad6c-59eb6d62ec80" ChangeDateTime="03/06/2019 01:28:06">
+    <Property Name="ElementName" Value="[dbo].[vyuSMBEExportTaxCode]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETBEExportTaxCode]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9ab6fa01-899b-4411-8fa7-6bc82afb8810" ChangeDateTime="03/06/2019 01:47:01">
+    <Property Name="ElementName" Value="[dbo].[vyuTMETExportTankManagementSite]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportTankManagementSite]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a5ab0141-ec79-4846-831d-75b58bda33a1" ChangeDateTime="03/06/2019 01:48:40">
+    <Property Name="ElementName" Value="[dbo].[vyuTMETExportTankManagementDevice]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportTankManagementDevice]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4e7c317e-b7f7-4ffb-b9a7-337ce7fa3e85" ChangeDateTime="03/06/2019 01:50:41">
+    <Property Name="ElementName" Value="[dbo].[vyuTMETExportTankManagementEventHistory]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[vyuETExportTankManagementEventHistory]" />
+  </Operation>
 </Operations>

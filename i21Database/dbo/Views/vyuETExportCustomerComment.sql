@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuEMETExportCustomerComment]
+﻿CREATE VIEW [dbo].[vyuETExportCustomerComment]
 	AS 
 	select 
 		cust_id  = b.strEntityNo,

@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuEMETExportSalespersonDriver]
+﻿CREATE VIEW [dbo].[vyuETExportSalespersonDriver]
 	AS 
 select 
 	case when a.strSalespersonId <> '' then a.strSalespersonId else RIGHT(c.strEntityNo, 3) end as bp_no,

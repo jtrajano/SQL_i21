@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuSMETExportFullTax]
+﻿CREATE VIEW [dbo].[vyuETExportFullTax]
 AS 
 
 SELECT ItemNumber

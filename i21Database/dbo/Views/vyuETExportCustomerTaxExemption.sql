@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuEMETExportCustomerTaxExemption]  
+﻿CREATE VIEW [dbo].[vyuETExportCustomerTaxExemption]  
 AS  
 
 WITH EXEMPTIONS AS 
@@ -81,7 +81,7 @@ SELECT SMTGCE.*, SMTGC.[intTaxCodeId],SMTGC.[intTaxGroupId]
 						,strItemNo 
 						,intCategoryId
 		FROM
-		[vyuICETExportItem]
+		[vyuETExportItem]
 		) ETItems
 
 		CROSS APPLY(
