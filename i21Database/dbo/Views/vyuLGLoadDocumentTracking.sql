@@ -219,7 +219,7 @@ SELECT CH.strContractNumber
 	,[dblDischargeRate]
 	,[intDischargeUnitMeasureId]
 	,[strDischargePerUnit]
-	,[intTransportationMode]
+	,LOAD.[intTransportationMode]
 	,[intShipmentStatus]
 	,LDOC.intLoadDocumentId
 	,LDOC.intDocumentId
