@@ -271,7 +271,7 @@ BEGIN
 													CASE WHEN CNT.dblAvailablePriceContractQty >= SC.dblNetUnits
 														THEN 1
 													ELSE 0 END
-											ELSE LI.ysnAllowInvoiceVoucher 
+											ELSE LI.ysnAllowVoucher 
 										END
 									END
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
