@@ -57,7 +57,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #PAYMENTSWITHBUDGET)
 		CROSS APPLY (
 			SELECT dtmBudgetDate = CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmBudgetDate)))
 			FROM tblARCustomerBudget B
-			WHERE @dtmDatePaid BETWEEN B.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, B.dtmBudgetDate))
+			WHERE @dtmDatePaid BETWEEN CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), B.dtmBudgetDate))) AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), B.dtmBudgetDate)))))
+			--WHERE @dtmDatePaid BETWEEN B.dtmBudgetDate AND DATEADD(DAYOFYEAR, -1, DATEADD(MONTH, 1, B.dtmBudgetDate))
 			AND intEntityCustomerId = @intEntityCustomerId 
 		) NEAREST
 		WHERE BUDGET.intEntityCustomerId = @intEntityCustomerId

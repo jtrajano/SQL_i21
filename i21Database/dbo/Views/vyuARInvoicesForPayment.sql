@@ -66,6 +66,7 @@ SELECT
  	,intSourceId						= ARIFP.intSourceId 
 	,ysnClosed							= ARIFP.ysnClosed 
 FROM (
+		--AR TRANSACTIONS
 		SELECT 
 			 [intTransactionId]					= ARI.[intInvoiceId]
 			,[strTransactionNumber]				= ARI.[strInvoiceNumber]
@@ -231,6 +232,7 @@ FROM (
 	
 		UNION ALL
 
+		--AP TRANSACTIONS
 		SELECT 
 			 [intTransactionId]					= APB.[intTransactionId]
 			,[strTransactionNumber]				= APB.[strTransactionNumber]
@@ -294,6 +296,111 @@ FROM (
 			FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 			WHERE ysnDefaultLocation = 1
 		) AS EL ON APB.intEntityCustomerId = EL.intEntityId
+
+		UNION ALL
+
+		--EFT BUDGETS
+		SELECT  
+			 [intTransactionId]					= CB.intCustomerBudgetId
+			,[strTransactionNumber]				= 'EFT Budget ' + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) COLLATE Latin1_General_CI_AS
+			,[intInvoiceId]						= NULL
+			,[strInvoiceNumber]					= 'EFT Budget ' + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101) COLLATE Latin1_General_CI_AS
+			,[intBillId]						= NULL
+			,[strBillId]						= '' COLLATE Latin1_General_CI_AS
+			,[strTransactionType]				= 'EFT Budget' COLLATE Latin1_General_CI_AS
+			,[strType]							= 'EFT Budget' COLLATE Latin1_General_CI_AS
+			,[intEntityCustomerId]				= CB.intEntityCustomerId
+			,[strCustomerName]					= CE.strName
+			,[strCustomerNumber]				= ARC.strCustomerNumber
+			,[strAccountNumber]					= ARC.strAccountNumber
+			,[strAddress]						= EL.strAddress
+			,[intCompanyLocationId]				= EL.intWarehouseId
+			,[intAccountId]						= ISNULL(SMCL.intARAccount, ARCP.intARAccountId)
+			,[intCurrencyId]					= ARC.intCurrencyId	
+			,[dtmDate]							= CB.dtmBudgetDate
+			,[dtmDueDate]						= CB.dtmBudgetDate
+			,[dtmPostDate]						= CB.dtmBudgetDate
+			,[dblInvoiceTotal]					= CB.dblBudgetAmount
+			,[dblBaseInvoiceTotal]				= CB.dblBudgetAmount
+			,[dblDiscount]						= CAST(0 AS DECIMAL(18,6))
+			,[dblBaseDiscount]					= CAST(0 AS DECIMAL(18,6))
+			,[dblDiscountAvailable]				= CAST(0 AS DECIMAL(18,6))
+			,[dblBaseDiscountAvailable]			= CAST(0 AS DECIMAL(18,6))
+			,[dblInterest]						= CAST(0 AS DECIMAL(18,6))
+			,[dblBaseInterest]					= CAST(0 AS DECIMAL(18,6))
+			,[dblAmountDue]						= CB.dblBudgetAmount - CB.dblAmountPaid
+			,[dblBaseAmountDue]					= CB.dblBudgetAmount - CB.dblAmountPaid
+			,[dblPayment]						= CB.dblAmountPaid
+			,[dblBasePayment]					= CB.dblAmountPaid
+			,[ysnPosted]						= CAST(1 AS BIT)
+			,[ysnPaid]							= CAST(0 AS BIT)
+			,[intPaymentId]						= NULL
+			,[dblTotalTermDiscount]				= CAST(0 AS DECIMAL(18,6))
+			,[strInvoiceReportNumber]			= NULL
+			,[strTicketNumbers]					= NULL
+			,[strCustomerReferences]			= NULL
+			,[intTermId]						= ARC.intTermsId
+			,[ysnExcludeForPayment]				= CAST(0 AS BIT)
+			,[intPaymentMethodId]				= ISNULL(PM.intPaymentMethodID, ARC.intPaymentMethodId)
+			,[strPaymentMethod]					= ISNULL(PM.strPaymentMethod, SMP.strPaymentMethod)
+			,[intCurrencyExchangeRateTypeId]	= NULL
+			,[strCurrencyExchangeRateType]		= NULL
+			,[intCurrencyExchangeRateId]		= NULL
+			,[dblCurrencyExchangeRate]			= CAST(1 AS DECIMAL(18,6))
+			,[ysnACHActive]						= EFT.[ysnActive]
+			,[dblInvoiceDiscountAvailable]		= CAST(0 AS DECIMAL(18,6))
+			,[intSourceId]						= NULL
+			,[ysnClosed]						= CAST(0 AS BIT)
+		FROM dbo.tblARCustomerBudget CB WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+				, strCustomerNumber
+				, intPaymentMethodId
+				, intCurrencyId
+				, intTermsId
+				, strAccountNumber
+			FROM dbo.tblARCustomer WITH (NOLOCK)
+		) AS ARC ON CB.intEntityCustomerId = ARC.[intEntityId]
+		INNER JOIN (
+			SELECT intEntityId
+				, intWarehouseId
+				, strAddress
+			FROM dbo.tblEMEntityLocation WITH (NOLOCK)
+			WHERE ysnDefaultLocation = 1 
+			  AND ISNULL(intWarehouseId, 0) <> 0
+		) AS EL ON ARC.intEntityId = EL.intEntityId
+		INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+		) AS CE ON ARC.[intEntityId] = CE.intEntityId 
+		LEFT OUTER JOIN (
+			SELECT intPaymentMethodID
+				 , strPaymentMethod
+			FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
+		) AS SMP ON ARC.intPaymentMethodId = SMP.intPaymentMethodID
+		OUTER APPLY (
+			SELECT TOP 1 intPaymentMethodID
+					   , strPaymentMethod 
+			FROM tblSMPaymentMethod
+			WHERE LOWER(strPaymentMethod) LIKE '%ach%'
+		) PM
+		LEFT JOIN (
+			SELECT intEntityId
+				 , ysnActive
+			FROM dbo.tblEMEntityEFTInformation WITH (NOLOCK)
+		) EFT ON CE.intEntityId = EFT.intEntityId
+		INNER JOIN (
+			SELECT intCompanyLocationId
+				 , intARAccount
+			FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+		) SMCL ON EL.intWarehouseId = SMCL.intCompanyLocationId
+		CROSS APPLY (
+			SELECT TOP 1 intARAccountId
+			FROM tblARCompanyPreference
+			WHERE ISNULL(intARAccountId, 0) <> 0
+		) ARCP
+		WHERE CB.dblBudgetAmount - CB.dblAmountPaid <> 0
 	) ARIFP
 LEFT OUTER JOIN (
 	SELECT intTermID

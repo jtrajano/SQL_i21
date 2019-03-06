@@ -35,7 +35,7 @@ FROM (
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON PAYMENT.intPaymentId = CM.intSourceTransactionId 
 										   AND PAYMENT.strRecordNumber = CM.strSourceTransactionId 
 										   AND CM.strSourceSystem = 'AR'
-	INNER JOIN tblARPaymentDetail PAYMENTDETAILS ON PAYMENT.intPaymentId = PAYMENTDETAILS.intPaymentId
+	LEFT OUTER JOIN tblARPaymentDetail PAYMENTDETAILS ON PAYMENT.intPaymentId = PAYMENTDETAILS.intPaymentId
 	LEFT OUTER JOIN tblARPOS POS ON PAYMENTDETAILS.intInvoiceId = POS.intInvoiceId
 	LEFT OUTER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 	LEFT OUTER JOIN tblARPOSEndOfDay POSEOD ON POSLOG.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
