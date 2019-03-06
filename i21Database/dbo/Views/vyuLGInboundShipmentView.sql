@@ -1,4 +1,4 @@
-ALTER VIEW vyuLGInboundShipmentView
+CREATE VIEW vyuLGInboundShipmentView
 AS
 SELECT 
 	-- Starts from lower level (Containers)
