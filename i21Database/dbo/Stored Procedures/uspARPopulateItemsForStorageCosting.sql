@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForStorageCosting]
-    --@InvoiceIds        [InvoiceId]     READONLY
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -150,8 +149,5 @@ WHERE
 	--AND ( ARID.[intStorageScheduleTypeId] IS NULL OR (ARID.[intStorageScheduleTypeId] IS NOT NULL AND ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0) )
 	AND (ARID.[intStorageScheduleTypeId] IS NOT NULL AND ISNULL(ARID.[intStorageScheduleTypeId],0) <> 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
-	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
-
-
 
 RETURN 1

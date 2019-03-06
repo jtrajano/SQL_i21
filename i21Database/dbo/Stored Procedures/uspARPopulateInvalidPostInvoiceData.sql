@@ -30,13 +30,10 @@ BEGIN
     DECLARE @InvoiceIds [InvoiceId]
 	DECLARE @PostInvoiceDataFromIntegration AS [InvoicePostingTable]
 	DECLARE @ItemsForCosting [ItemCostingTableType]
-	--EXEC [dbo].[uspARPopulateItemsForCosting] @InvoiceIds = @InvoiceIds
 	EXEC [dbo].[uspARPopulateItemsForCosting]
 	DECLARE @ItemsForInTransitCosting [ItemInTransitCostingTableType]
-	--EXEC [dbo].[uspARPopulateItemsForInTransitCosting] @InvoiceIds = @InvoiceIds
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]
 	DECLARE @ItemsForStoragePosting [ItemCostingTableType]
-	--EXEC [dbo].[uspARPopulateItemsForStorageCosting] @InvoiceIds = @InvoiceIds
 	EXEC [dbo].[uspARPopulateItemsForStorageCosting]
 	
 	INSERT INTO #ARInvalidInvoiceData

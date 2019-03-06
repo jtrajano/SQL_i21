@@ -92,6 +92,7 @@ BEGIN
 
 	INSERT INTO tblARInvoice(
 		strInvoiceOriginId
+		,intOriginalInvoiceId
 		,intEntityCustomerId
 		,dtmDate
 		,dtmDueDate
@@ -142,6 +143,7 @@ BEGIN
 		,intEntityId)
 	SELECT 
 		 strInvoiceOriginId		= I.strInvoiceNumber
+		,intOriginalInvoiceId	= I.intInvoiceId
 		,intEntityCustomerId	= CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intEntityCustomerId ELSE I.intEntityCustomerId END
 		,dtmDate				= @InvoiceDate
 		,dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, CASE WHEN ISNULL(@SplitDetailId, 0) > 0 THEN SPLITENTITY.intTermsId ELSE I.intTermId END)
@@ -551,6 +553,7 @@ BEGIN
 	
 	EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
 	EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId
+	--EXEC dbo.[uspSOUpdateOrderShipmentStatus] @NewInvoiceId, 'Invoice', 1
 	EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId		
 
 	SET  @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewInvoiceId)

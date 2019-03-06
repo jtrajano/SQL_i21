@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForInTransitCosting]
-    --@InvoiceIds        [InvoiceId]     READONLY
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -170,8 +169,6 @@ WHERE
 			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = @OneBit)
 		)
 	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
-	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
-
 
 UNION ALL
 
@@ -255,8 +252,6 @@ WHERE
 			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = @OneBit)
 		)
 	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
-	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
-
 
 UNION ALL
 
@@ -350,7 +345,6 @@ WHERE
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
 	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
 	AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
-	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
 
 --LG - Lot
 UNION ALL
@@ -446,7 +440,6 @@ WHERE
 	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
 	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
-	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
 
 UNION ALL
 -- FOR Credit Note Reversal
@@ -521,8 +514,6 @@ WHERE
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND ARID.[intOriginalInvoiceId] IS NOT NULL 
 	AND ARID.[intOriginalInvoiceId] <> 0
-	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
-
 
 UNION ALL
 
@@ -626,7 +617,6 @@ WHERE
 	ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
-	--AND (@ParamExists = @ZeroBit OR (@ParamExists = @OneBit AND EXISTS(SELECT NULL FROM @InvoiceIds II WHERE II.intHeaderId = ARID.[intInvoiceDetailId])))
 
 UPDATE 
 	A 

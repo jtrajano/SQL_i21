@@ -105,6 +105,35 @@ BEGIN
     SELECT @ForDeletion = ISNULL(@ForDeletion, '') + ISNULL(CONVERT(NVARCHAR(20), @intSplitInvoiceId), '') + ','
 	SELECT @ForInsertion = ISNULL(@ForInsertion, '') + ISNULL(CONVERT(NVARCHAR(20), @invoicesToAdd), '') + ','
 
+	DECLARE @TempInvoiceIds AS [InvoiceId]
+	DELETE FROM @TempInvoiceIds
+
+	INSERT INTO @TempInvoiceIds
+		([intHeaderId]
+		,[ysnPost]
+		,[ysnRecap]
+		,[strBatchId]
+		,[ysnAccrueLicense])
+	SELECT
+		[intHeaderId]   = ARI.[intInvoiceId]
+		,[ysnPost]          = @Post
+		,[ysnRecap]         = @Recap
+		,[strBatchId]       = @BatchId
+		,[ysnAccrueLicense]	= @AccrueLicense
+	FROM
+	tblARInvoice ARI
+	WHERE
+		ARI.intInvoiceId <> @intSplitInvoiceId
+		AND EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@ForInsertion) DV WHERE DV.[intID] = ARI.[intInvoiceId])
+
+	WHILE EXISTS(SELECT NULL FROM @TempInvoiceIds)
+	BEGIN
+		DECLARE @TempInvoiceId INT
+		SELECT TOP 1 @TempInvoiceId = [intHeaderId] FROM @TempInvoiceIds
+		EXEC dbo.[uspSOUpdateOrderShipmentStatus] @TempInvoiceId, 'Invoice', 1
+		DELETE FROM @TempInvoiceIds WHERE [intHeaderId] = @TempInvoiceId
+	END
+
 	DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
 END
 
@@ -166,9 +195,6 @@ IF (ISNULL(@ForInsertion, '') <> '')
 			,@TransType         = NULL
 			,@UserId            = @UserId	
 			
-	--EXEC [dbo].[uspARPopulateItemsForCosting] @InvoiceIds = @InvoiceIds	
-	--EXEC [dbo].[uspARPopulateItemsForInTransitCosting] @InvoiceIds = @InvoiceIds
-	--EXEC [dbo].[uspARPopulateItemsForStorageCosting] @InvoiceIds = @InvoiceIds
 
 	END
 
