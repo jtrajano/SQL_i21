@@ -231,9 +231,9 @@ BEGIN TRY
 	JOIN tblLGWeightClaimOtherCharges WCOC ON WCOC.intWeightClaimId = WC.intWeightClaimId
 	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCOC.intRateUOMId
-	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	JOIN tblSMCurrency CU ON CU.intCurrencyID = WCOC.intRateCurrencyId
+	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = WCOC.intRateUOMId
+	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCOC.intRateCurrencyId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = WCOC.intItemUOMId
 	LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = WCOC.intWeightUOMId
 	WHERE WC.intWeightClaimId = @intWeightClaimId
