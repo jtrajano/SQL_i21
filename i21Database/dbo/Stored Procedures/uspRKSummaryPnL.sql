@@ -208,8 +208,6 @@ EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
 	@intSubBookId = @intSubBookId,
 	@intSelectedInstrumentTypeId = @intSelectedInstrumentTypeId
 
-SELECT *
-FROM @Relaized
 
 UPDATE r
 SET r.dblClosing = LS.dblLastSettle

@@ -199,21 +199,14 @@ BEGIN
 				,strCbkNo	
 		)
 		SELECT			
-				intBankId							= CASE WHEN i.apcbk_bnk_no IS NULL THEN
-															(SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS)   
-														ELSE
-															(SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = (
-																	SELECT  LTRIM(RTRIM(ISNULL(ssbnk_name, ''''))) COLLATE Latin1_General_CI_AS  FROM ssbnkmst WHERE  ssbnk_code = i.apcbk_bnk_no
-																)
-															)
-														END	
+				intBankId							= CMBank.intBankId
 				,ysnActive							= CASE WHEN i.apcbk_active_yn = ''Y'' THEN 1 ELSE 0 END 
 				,intGLAccountId						= dbo.fnGetGLAccountIdFromOriginToi21(i.apcbk_gl_cash) 
 				,intCurrencyId						= ISNULL(dbo.fnGetCurrencyIdFromOriginToi21(i.apcbk_currency), @intCurrencyId)
 				,intBankAccountType					= @DEPOSIT_ACCOUNT
 				,strContact							= ''''
-				,strBankAccountNo					= ISNULL(i.apcbk_bank_acct_no, '''') COLLATE Latin1_General_CI_AS
-				,strRTN								= ISNULL(LeadingZero.Value, '''') 
+				,strBankAccountNo					= [dbo].fnAESEncryptASym(ISNULL(i.apcbk_bank_acct_no, ''''))
+				,strRTN								= [dbo].fnAESEncryptASym(ISNULL(LeadingZero.Value, ''''))
 				,strAddress							= ''''
 				,strZipCode							= ''''
 				,strCity							= ''''
@@ -259,6 +252,19 @@ BEGIN
 			SELECT REPLICATE(''0'',  9 -  LEN(substring(RoutingNumber.Text, PATINDEX(''%[^0]%'', RoutingNumber.Text), 15))) + 
 			SUBSTRING(RoutingNumber.Text, PATINDEX(''%[^0]%'',RoutingNumber.Text), 15) Value
 		)LeadingZero
+		OUTER APPLY(
+		
+		
+			SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE 
+			A.strBankName = LTRIM(RTRIM(ISNULL(i.apcbk_desc, ''''))) COLLATE Latin1_General_CI_AS
+			AND i.apcbk_bnk_no IS NULL
+			UNION
+			SELECT TOP 1 A.intBankId FROM tblCMBank A WHERE A.strBankName = (
+					SELECT  LTRIM(RTRIM(ISNULL(ssbnk_name, ''''))) COLLATE Latin1_General_CI_AS  FROM ssbnkmst WHERE  ssbnk_code = i.apcbk_bnk_no
+				)	AND i.apcbk_bnk_no IS NOT NULL
+															
+														
+		)CMBank
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount WHERE tblCMBankAccount.strCbkNo = i.apcbk_no COLLATE Latin1_General_CI_AS)'
 	)
 END 

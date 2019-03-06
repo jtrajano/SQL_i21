@@ -7406,6 +7406,7 @@
     <Build Include="dbo\Stored Procedures\uspSMDoBeforeUserRoleMigration.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDoUserRoleMigration.sql" />
     <Build Include="dbo\Tables\tblAPBillEditField.sql" />
+    <Build Include="dbo\Tables\tblCFMaximaPrinterCardSoftware.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
