@@ -268,7 +268,7 @@ BEGIN
 												THEN 0 
 											WHEN CNT.intPricingTypeId = 2
 												THEN 
-													CASE WHEN CNT.dblAvailablePriceContractQty > 0
+													CASE WHEN CNT.dblAvailablePriceContractQty >= SC.dblNetUnits
 														THEN 1
 													ELSE 0 END
 											ELSE LI.ysnAllowInvoiceVoucher 
