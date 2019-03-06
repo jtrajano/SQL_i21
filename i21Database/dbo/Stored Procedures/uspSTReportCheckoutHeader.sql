@@ -64,15 +64,19 @@ BEGIN TRY
 	FROM	tblSMCompanySetup
 
    SELECT
-   @strCompanyName as CompanyName
-   , @strAddress as strAddress
-   , S.intStoreNo
-   , CONVERT(VARCHAR(50), CH.dtmCheckoutDate,101) as checkoutDate
-   , CH.intShiftNo
-   , CH.intCheckoutId 
-   , CAST(GETDATE() AS DATE) AS dtmDateToday
+	   @strCompanyName as CompanyName
+	   , CL.strCity + ', ' + CL.strStateProvince + ', ' + CL.strZipPostalCode as strAddress
+	   , S.intStoreNo
+	   , S.strDescription AS strStoreDescription
+	   , CONVERT(VARCHAR(50), CH.dtmCheckoutDate,101) as checkoutDate
+	   , CH.intShiftNo
+	   , CH.intCheckoutId 
+	   , CAST(GETDATE() AS DATE) AS dtmDateToday
    FROM tblSTCheckoutHeader CH
-   JOIN tblSTStore S ON CH.intStoreId = S.intStoreId
+   INNER JOIN tblSTStore S 
+		ON CH.intStoreId = S.intStoreId
+   INNER JOIN tblSMCompanyLocation CL
+		ON S.intCompanyLocationId = CL.intCompanyLocationId
    WHERE intCheckoutId = @intCheckoutId
  
   
