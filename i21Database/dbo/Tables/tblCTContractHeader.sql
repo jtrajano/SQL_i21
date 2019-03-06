@@ -77,6 +77,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	ysnBestPriceOnly BIT,
 	intCompanyId INT,
 	intContractHeaderRefId INT,
+	strReportTo [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber],[intEntityId],[intCommodityId]), 
