@@ -99,6 +99,7 @@ BEGIN
 		AND ICISP.intItemUnitMeasureId = @ItemUOMId
 		AND ISNULL(ICISP.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ICISP.dtmBeginDate AS DATE) AND CAST(ISNULL(ICISP.dtmEndDate,@TransactionDate) AS DATE)
+		AND (ISNULL(ICISP.dblDiscountThruQty,0) = 0 OR ICISP.strPromotionType = 'Terms Discount' OR (@Quantity <= ICISP.dblDiscountThruQty AND @Quantity >= ICISP.dblUnit AND ICISP.strPromotionType <> 'Terms Discount'))
  	ORDER BY
 		dtmBeginDate DESC
 	
