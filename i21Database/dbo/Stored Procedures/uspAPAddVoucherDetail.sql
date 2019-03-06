@@ -121,12 +121,12 @@ USING
 		/*Ordered and Received should always the same*/
 		,dblQtyOrdered						=	CASE WHEN A.intTransactionType = 1
 													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityToBill,0))
+															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityBilled,0))
 														ELSE A.dblQuantityToBill END)
 												ELSE A.dblQuantityToBill END
 		,dblQtyReceived						=	CASE WHEN A.intTransactionType = 1
 													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityToBill,0))
+															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityBilled,0))
 														ELSE A.dblQuantityToBill END)
 												ELSE A.dblQuantityToBill END
 		/*Contract info*/					
