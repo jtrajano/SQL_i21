@@ -138,4 +138,10 @@ FROM tblRKCommodityMarketMapping
 WHERE strCommodityAttributeId IS NOT NULL
 AND RIGHT(RTRIM(strCommodityAttributeId),1) = ','
 
+
+IF EXISTS(SELECT 1 FROM tblSMGridLayout where strScreen like '%RiskManagement.view.MToMInquiry%' and strGridLayoutFilters<> '[]')
+BEGIN
+UPDATE tblSMGridLayout set strGridLayoutFilters='[]' where strScreen like '%RiskManagement.view.MToMInquiry%'
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
