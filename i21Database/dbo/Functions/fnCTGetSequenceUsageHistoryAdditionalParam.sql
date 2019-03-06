@@ -106,6 +106,16 @@ BEGIN
 		JOIN	tblPOPurchase			HR	ON	HR.intPurchaseId	=	DL.intPurchaseId 
 		WHERE	DL.intPurchaseDetailId	=	@intExternalId
 	END
+	ELSE IF @strScreenName = 'Sales Order'
+	BEGIN
+		SELECT	@intExternalHeaderId	=	HR.intSalesOrderId,
+				@strNumber				=	HR.strSalesOrderNumber,
+				@strHeaderIdColumn		=	'intSalesOrderId',
+				@dtmScreenDate			=	HR.dtmDate
+		FROM	tblSOSalesOrderDetail	DL
+		JOIN	tblSOSalesOrder			HR	ON	HR.intSalesOrderId	=	DL.intSalesOrderId 
+		WHERE	DL.intSalesOrderDetailId	=	@intExternalId
+	END
 	ELSE IF @strScreenName = 'Settle Storage'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intSettleStorageId,
