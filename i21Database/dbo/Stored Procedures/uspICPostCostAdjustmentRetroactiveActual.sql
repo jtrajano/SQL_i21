@@ -82,7 +82,6 @@ BEGIN
 
 	DECLARE	
 			@CostAdjustment AS NUMERIC(38, 20)			
-			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
@@ -658,7 +657,7 @@ BEGIN
 								END 
 							WHEN @t_dblQty < 0 THEN 
 								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-								@t_dblQty * @CostAdjustmentPerQty
+								@t_dblQty * @CostAdjustmentPerCb
 							ELSE 
 								0
 					END 
@@ -681,7 +680,7 @@ BEGIN
 							END 
 						WHEN @t_dblQty < 0 THEN 
 							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-							@t_dblQty * @CostAdjustmentPerQty
+							@t_dblQty * @CostAdjustmentPerCb
 						ELSE 
 							0
 				END <> 0 

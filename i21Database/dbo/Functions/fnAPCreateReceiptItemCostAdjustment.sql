@@ -157,7 +157,7 @@ BEGIN
 		,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
 		,[strSourceTransactionId] 			=	E1.strReceiptNumber
 		,[intFobPointId]					=	fp.intFobPointId
-		,[intInTransitSourceLocationId]		=	sourceLocation.intItemLocationId
+		,[intInTransitSourceLocationId]		=	NULL --sourceLocation.intItemLocationId
 		FROM @voucherIds ids
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B
