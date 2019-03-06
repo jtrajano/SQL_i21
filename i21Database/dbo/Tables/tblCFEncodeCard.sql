@@ -6,6 +6,7 @@
 	[strCardNumber]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strNetwork]			  NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAddToReport]		  BIT			 NULL,
+	[ysnAddToPrinter]		  BIT			 NULL,
 	[intConcurrencyId]		  INT            NULL,
     CONSTRAINT [PK_tblCFEncodeCard] PRIMARY KEY CLUSTERED ([intEncodeCardId] ASC)
 );

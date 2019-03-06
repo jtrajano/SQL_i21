@@ -67,6 +67,8 @@ strISO = (CASE WHEN (LOWER(cfNet.strNetworkType) != 'nbs')
 ,cfCard.intNetworkId
 ,cfEncodeCard.intEncodeCardId
 ,cfEncodeCard.intConcurrencyId
+,cfCard.dtmCardExpiratioYearMonth
+,cfNet.dtmGlobalCardExpirationDate
 FROM tblCFEncodeCard as cfEncodeCard
 INNER JOIN tblCFCard as cfCard
 ON cfEncodeCard.intCardId = cfCard.intCardId
