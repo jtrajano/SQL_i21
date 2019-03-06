@@ -80,7 +80,7 @@ BEGIN
 
 	DECLARE	
 			@CostAdjustment AS NUMERIC(38, 20)
-			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
+			,@CostAdjustmentPerCb AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
@@ -251,7 +251,7 @@ END
 
 -- Calculate how much cost adjustment goes for each qty. 
 BEGIN 
-	SELECT	@CostAdjustmentPerQty = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
+	SELECT	@CostAdjustmentPerCb = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
 	FROM	tblICInventoryFIFO cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -261,7 +261,7 @@ BEGIN
 			AND ISNULL(cb.ysnIsUnposted, 0) = 0 
 
 	-- If value of cost adjustment is zero, then exit immediately. 
-	IF @CostAdjustmentPerQty IS NULL 
+	IF @CostAdjustmentPerCb IS NULL 
 		RETURN; 
 END 
 
@@ -547,7 +547,7 @@ BEGIN
 								@CostAdjustment
 							WHEN @t_dblQty < 0 THEN 
 								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-								@t_dblQty * @CostAdjustmentPerQty
+								@t_dblQty * @CostAdjustmentPerCb
 							ELSE 
 								0
 					END 
@@ -565,7 +565,7 @@ BEGIN
 							@CostAdjustment
 						WHEN @t_dblQty < 0 THEN 
 							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-							@t_dblQty * @CostAdjustmentPerQty
+							@t_dblQty * @CostAdjustmentPerCb
 						ELSE 
 							0
 				END <> 0 
