@@ -1,4 +1,4 @@
-CREATE VIEW vyuLGInboundShipmentView
+ALTER VIEW vyuLGInboundShipmentView
 AS
 SELECT 
 	-- Starts from lower level (Containers)
@@ -247,6 +247,8 @@ LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 OUTER APPLY (SELECT TOP 1 strReceiptNumber, dtmReceiptDate, strLocationName 
-			FROM vyuICGetInventoryReceiptItem WHERE intSourceId = LD.intLoadDetailId AND intSourceType = 2) IR
+			FROM vyuICGetInventoryReceiptItem WHERE intSourceId = LD.intLoadDetailId AND intSourceType = 2 
+			AND (LDCL.intLoadDetailContainerLinkId IS NULL 
+				OR (LDCL.intLoadDetailContainerLinkId IS NOT NULL AND intContainerId = LC.intLoadContainerId))) IR
 
 GO

@@ -9,7 +9,7 @@ FROM (
 		,intContractDetailId = Shipment.intContractDetailId
 		,dblOriginalQty = Shipment.dblPurchaseContractOriginalQty
 		,strOriginalQtyUOM = Shipment.strPurchaseContractOriginalUOM
-		,dblStockQty = Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0)
+		,dblStockQty = Shipment.dblContainerContractQty
 		,strStockUOM = Shipment.strItemUOM
 		,dblNetWeight = CASE WHEN IsNull(Shipment.dblContainerContractReceivedQty, 0) > 0
 							THEN CASE 
@@ -87,7 +87,7 @@ FROM (
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	LEFT JOIN tblARInvoice INV ON ISNULL(Shipment.intLoadId,0) = ISNULL(INV.intLoadId,0) 
-	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
+	WHERE Shipment.strReceiptNumber IS NULL 
 	   AND Shipment.ysnInventorized = 1
 	   AND INV.intLoadId IS NULL
 
