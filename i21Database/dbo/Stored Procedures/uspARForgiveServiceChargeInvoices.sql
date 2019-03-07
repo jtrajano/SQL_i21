@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARForgiveServiceChargeInvoices] 
-	@InvoiceIds	AS NVARCHAR(MAX)	= NULL,
-	@intEntityId AS INT,
-	@ysnForgive AS BIT = 0,
-	@ServiceChargeParam AS [dbo].[ServiceChargeInvoiceParam] READONLY
+	  @strInvoiceIds		AS NVARCHAR(MAX)	= NULL
+	, @intEntityId 			AS INT
+	, @ysnForgive 			AS BIT 				= 0
+	, @ServiceChargeParam 	AS [dbo].[ServiceChargeInvoiceParam] READONLY
 AS
   
 SET QUOTED_IDENTIFIER OFF  
@@ -11,94 +11,453 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-IF ISNULL(@InvoiceIds, '') <> ''
+IF ISNULL(@strInvoiceIds, '') <> ''
 	BEGIN
-		DECLARE @ServiceChargeToForgive TABLE (intInvoiceId INT, strInvoiceNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS, dtmForgiveDate DATETIME NULL)
-		DECLARE @ServiceChargeHasPayments NVARCHAR(MAX)
-		DECLARE @dtmDateToday DATETIME = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
-		DECLARE @strBatchId VARCHAR(16)
-		EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT, NULL --get starting number for Batch
+		DECLARE @tblCreditMemoEntries			InvoiceIntegrationStagingTable
+		DECLARE @tblInvoiceEntries				InvoiceIntegrationStagingTable
+		DECLARE @strServiceChargeHasPayments 	NVARCHAR(MAX)
+			  , @strErrorMsg					NVARCHAR(MAX)
+			  , @strCreatedCreditMemo			NVARCHAR(MAX)
+			  , @strCreatedInvoices				NVARCHAR(MAX)
+			  , @dtmDateToday 					DATETIME = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+			  , @strBatchId 					VARCHAR(16)
+		
+		--GET BATCH NUMBER
+		EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT, NULL
+		
+		IF(OBJECT_ID('tempdb..#SERVICECHARGETOFORGIVE') IS NOT NULL)
+		BEGIN
+			DROP TABLE #SERVICECHARGETOFORGIVE
+		END
 
-		INSERT INTO @ServiceChargeToForgive
-		SELECT SCI.intInvoiceId
-			 , SCI.strInvoiceNumber
-			 , CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), DV.dtmForgiveDate)))
+		--GET SERVICE CHARGES TO FORGIVE
+		SELECT intInvoiceId		= SCI.intInvoiceId
+			 , strInvoiceNumber	= SCI.strInvoiceNumber
+			 , dtmForgiveDate	= ISNULL(CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), DV.dtmForgiveDate))), @dtmDateToday)
+		INTO #SERVICECHARGETOFORGIVE
 		FROM @ServiceChargeParam DV
 		INNER JOIN (
 			SELECT intInvoiceId
 				 , strInvoiceNumber
 			FROM dbo.tblARInvoice WITH (NOLOCK)
 			WHERE ysnPosted = 1
-			  AND ysnForgiven = (CASE WHEN @ysnForgive = 1 THEN 0 ELSE 1 END)
-			  AND ysnPaid = 0
+			  AND ysnForgiven = (CASE WHEN @ysnForgive = 1 THEN 0 ELSE 1 END)			  
 			  AND strType = 'Service Charge'
 		) SCI ON DV.intInvoiceId = SCI.intInvoiceId
 
-		IF EXISTS(SELECT NULL FROM @ServiceChargeToForgive)
-		BEGIN			
-			SELECT @ServiceChargeHasPayments = COALESCE(@ServiceChargeHasPayments + ', ', '') + RTRIM(LTRIM(I.strInvoiceNumber)) 
-			FROM @ServiceChargeToForgive I
+		IF EXISTS(SELECT TOP 1 NULL FROM #SERVICECHARGETOFORGIVE)
+		BEGIN
+			--VALIDATE SERVICE CHARGES IF ALREADY USED IN PAYMENTS
+			SELECT @strServiceChargeHasPayments = COALESCE(@strServiceChargeHasPayments + ', ', '') + RTRIM(LTRIM(I.strInvoiceNumber)) 
+			FROM #SERVICECHARGETOFORGIVE I
 			INNER JOIN (
 				SELECT PD.intPaymentId
 					 , PD.intInvoiceId
+					 , P.strPaymentInfo
 				FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 				INNER JOIN (
 					SELECT intPaymentId
+						 , strPaymentInfo
 					FROM dbo.tblARPayment WITH (NOLOCK)
 				) P ON PD.intPaymentId = P.intPaymentId
-			) P ON I.intInvoiceId = P.intInvoiceId
+			) P ON I.intInvoiceId = P.intInvoiceId 
+			   AND I.strInvoiceNumber <> ISNULL(P.strPaymentInfo, 0)
 
-			IF ISNULL(@ServiceChargeHasPayments, '') <> ''
+			IF ISNULL(@strServiceChargeHasPayments, '') <> ''
 				BEGIN
-					SET @ServiceChargeHasPayments = 'These Service Charges Invoice has payments: ' + @ServiceChargeHasPayments
-					RAISERROR(@ServiceChargeHasPayments, 16, 1)
+					SET @strServiceChargeHasPayments = 'These Service Charges Invoice has payments: ' + @strServiceChargeHasPayments
+					RAISERROR(@strServiceChargeHasPayments, 16, 1)
 					RETURN;
 				END
 
+			--VALIDATE SERVICE CHARGES THAT HAS BEEN UNFORGIVEN ALREADY ONCE
+			IF (@ysnForgive = 0)
+				BEGIN
+					DECLARE @strUnforgivenServiceCharges  NVARCHAR(MAX)
+
+					SELECT @strUnforgivenServiceCharges = I.strInvoiceNumber + ' has been already unforgiven once. Service Charge linked: (' + UNFORGIVEN.strInvoiceNumber + ')'
+					FROM #SERVICECHARGETOFORGIVE I
+					INNER JOIN tblARInvoice UNFORGIVEN ON UNFORGIVEN.strInvoiceOriginId = I.strInvoiceNumber AND UNFORGIVEN.strType = 'Service Charge'
+					WHERE I.dtmForgiveDate <> @dtmDateToday 
+
+					IF ISNULL(@strUnforgivenServiceCharges, '') <> ''
+						BEGIN
+							RAISERROR(@strUnforgivenServiceCharges, 16, 1)
+							RETURN;
+						END
+				END
+
+			--UPDATE SERVICE CHARGES TO MARK AS FORGIVEN
 			UPDATE INV
-			SET INV.ysnForgiven = @ysnForgive,
-				INV.dtmForgiveDate =  CASE WHEN @ysnForgive = 1 THEN ISNULL(SCI.dtmForgiveDate, @dtmDateToday) ELSE NULL END
+			SET INV.ysnForgiven 	= @ysnForgive,
+				INV.dtmForgiveDate 	= CASE WHEN @ysnForgive = 1 THEN ISNULL(SCI.dtmForgiveDate, @dtmDateToday) ELSE NULL END
 			FROM tblARInvoice INV
-			INNER JOIN @ServiceChargeToForgive SCI ON INV.intInvoiceId = SCI.intInvoiceId
+			INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.intInvoiceId = SCI.intInvoiceId
 			WHERE INV.ysnPosted = 1
-			  AND INV.ysnForgiven = CASE WHEN @ysnForgive = 1 THEN 0 ELSE 1 END
-			  AND ysnPaid = 0
+			  AND INV.ysnForgiven = CASE WHEN @ysnForgive = 1 THEN 0 ELSE 1 END			  
 			  AND INV.strType = 'Service Charge'
+			  AND ((@ysnForgive = 0 AND SCI.dtmForgiveDate = @dtmDateToday) OR @ysnForgive = 1)
 
-			DECLARE @InvoicesToForgive TABLE (intInvoiceId INT)
-			DECLARE @BudgetToForgive TABLE (intBudgetId INT)
+			IF (@ysnForgive = 1)
+				BEGIN
+					--CREATE CREDIT MEMO
+					INSERT INTO @tblCreditMemoEntries (
+						strTransactionType
+						, strType	
+						, strSourceTransaction
+						, strSourceId
+						, intEntityCustomerId
+						, intCompanyLocationId
+						, intCurrencyId
+						, intTermId
+						, dtmDate
+						, dtmPostDate
+						, dtmShipDate
+						, intEntitySalespersonId
+						, intFreightTermId
+						, intShipViaId
+						, strInvoiceOriginId
+						, strPONumber
+						, strBOLNumber
+						, strComments
+						, strFooterComments	
+						, intShipToLocationId
+						, intBillToLocationId
+						, intEntityId	
+						, ysnServiceChargeCredit
+						, ysnPost
+						, strDocumentNumber
+						, strItemDescription
+						, dblQtyShipped
+						, dblPrice
+					)
+					SELECT strTransactionType		= 'Credit Memo'
+						, strType					= 'Standard'
+						, strSourceTransaction		= 'Direct'
+						, strSourceId				= INV.strInvoiceNumber
+						, intEntityCustomerId		= INV.intEntityCustomerId
+						, intCompanyLocationId		= INV.intCompanyLocationId
+						, intCurrencyId				= INV.intCurrencyId
+						, intTermId					= INV.intTermId
+						, dtmDate					= @dtmDateToday
+						, dtmPostDate				= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
+						, dtmShipDate				= @dtmDateToday
+						, intEntitySalespersonId	= INV.intEntitySalespersonId
+						, intFreightTermId			= INV.intFreightTermId
+						, intShipViaId				= INV.intShipViaId
+						, strInvoiceOriginId		= INV.strInvoiceNumber				 
+						, strPONumber				= INV.strPONumber
+						, strBOLNumber				= INV.strBOLNumber
+						, strComments				= INV.strInvoiceNumber + ' Forgiven'
+						, strFooterComments			= 'System Generated for prior forgiven Service Charge'
+						, intShipToLocationId		= INV.intShipToLocationId
+						, intBillToLocationId		= INV.intBillToLocationId
+						, intEntityId				= INV.intEntityId
+						, ysnServiceChargeCredit	= CAST(1 AS BIT)
+						, ysnPost					= CAST(1 AS BIT)
+						, strDocumentNumber			= INV.strInvoiceNumber
+						, strItemDescription		= INV.strInvoiceNumber + ' Forgiven'
+						, dblQtyShipped				= 1
+						, dblPrice					= INV.dblInvoiceTotal				 
+					FROM tblARInvoice INV
+					INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.intInvoiceId = SCI.intInvoiceId
 
-			--do not delete yet
-			--INSERT INTO @InvoicesToForgive
-			--SELECT ID.intSCInvoiceId
-			--FROM @ServiceChargeToForgive SCI
-			--INNER JOIN dbo.tblARInvoiceDetail ID ON SCI.intInvoiceId = ID.intInvoiceId
-			--WHERE intSCInvoiceId IS NOT NULL
+					IF EXISTS (SELECT TOP 1 NULL FROM @tblCreditMemoEntries)
+						EXEC dbo.uspARProcessInvoices @InvoiceEntries 	= @tblCreditMemoEntries
+													, @UserId			= @intEntityId
+													, @GroupingOption	= 0
+													, @RaiseError		= 1
+													, @ErrorMessage		= @strErrorMsg OUT
+													, @CreatedIvoices	= @strCreatedCreditMemo OUT
 
-			--INSERT INTO @BudgetToForgive
-			--SELECT ID.intSCBudgetId
-			--FROM @ServiceChargeToForgive SCI
-			--INNER JOIN dbo.tblARInvoiceDetail ID ON SCI.intInvoiceId = ID.intInvoiceId
-			--WHERE ID.intSCBudgetId IS NOT NULL
+					IF ISNULL(@strErrorMsg, '') <> ''
+						BEGIN
+							RAISERROR(@strErrorMsg, 16, 1)
+							RETURN;
+						END
+					ELSE IF ISNULL(@strCreatedCreditMemo, '') <> ''
+						BEGIN
+							--INSERT CM AND SC TO PAYMENT AND POST
+							DECLARE @tblPaymentEntries	PaymentIntegrationStagingTable
+								  , @ErrorMessage		NVARCHAR(MAX)
+								  , @intPaymentMethodId	INT
+								  , @strPaymentMethod	NVARCHAR(100)
 
-			--IF EXISTS(SELECT NULL FROM @InvoicesToForgive)
-			--	BEGIN
-			--		UPDATE INV
-			--		SET INV.ysnForgiven = @ysnForgive
-			--		FROM tblARInvoice INV
-			--		INNER JOIN @InvoicesToForgive SCI ON INV.intInvoiceId = SCI.intInvoiceId
-			--		WHERE INV.ysnPosted = 1
-			--	END
-			
-			--IF EXISTS(SELECT NULL FROM @BudgetToForgive)
-			--	BEGIN
-			--		UPDATE CB
-			--		SET CB.ysnForgiven = @ysnForgive
-			--		FROM tblARCustomerBudget CB
-			--		INNER JOIN @BudgetToForgive SCI ON CB.intCustomerBudgetId = SCI.intBudgetId
-			--	END
-			-- end of do not delete yet
+							--GET DEFAULT PAYMENT METHOD
+							SELECT TOP 1 @intPaymentMethodId 	= intPaymentMethodID
+								       , @strPaymentMethod		= strPaymentMethod
+							FROM tblSMPaymentMethod 
+							WHERE strPaymentMethod = 'Debit Memos and Payments'
 
+							IF ISNULL(@intPaymentMethodId, 0) = 0
+								BEGIN
+									INSERT INTO tblSMPaymentMethod (
+										strPaymentMethod
+										, intNumber
+										, ysnActive
+										, intSort
+										, intConcurrencyId
+									)
+									SELECT strPaymentMethod = 'Debit Memos and Payments'
+										, intNumber		 	= 1
+										, ysnActive			= 1
+										, intSort			= 0
+										, intConcurrencyId	= 1
+
+									SELECT TOP 1 @intPaymentMethodId 	= intPaymentMethodID
+											   , @strPaymentMethod		= strPaymentMethod
+									FROM tblSMPaymentMethod 
+									WHERE strPaymentMethod = 'Debit Memos and Payments'
+								END
+
+							INSERT INTO @tblPaymentEntries (
+								  intId
+								, strSourceTransaction
+								, intSourceId
+								, strSourceId
+								, intEntityCustomerId
+								, intCompanyLocationId
+								, intCurrencyId
+								, dtmDatePaid
+								, intPaymentMethodId
+								, strPaymentMethod
+								, strNotes
+								, strPaymentInfo
+								, intBankAccountId
+								, dblAmountPaid
+								, intEntityId
+								, intInvoiceId
+								, strTransactionType
+								, strTransactionNumber
+								, intTermId
+								, intInvoiceAccountId
+								, dblInvoiceTotal
+								, dblBaseInvoiceTotal
+								, dblPayment
+								, dblAmountDue
+								, dblBaseAmountDue
+								, strInvoiceReportNumber
+								, intCurrencyExchangeRateTypeId
+								, intCurrencyExchangeRateId
+								, dblCurrencyExchangeRate
+								, ysnPost
+							)
+							SELECT intId						= CM.intInvoiceId
+								, strSourceTransaction			= 'Direct'
+								, intSourceId					= CM.intInvoiceId
+								, strSourceId					= CM.strInvoiceNumber
+								, intEntityCustomerId			= CM.intEntityCustomerId
+								, intCompanyLocationId			= CM.intCompanyLocationId
+								, intCurrencyId					= CM.intCurrencyId
+								, dtmDatePaid					= CM.dtmPostDate
+								, intPaymentMethodId			= @intPaymentMethodId
+								, strPaymentMethod				= @strPaymentMethod
+								, strNotes						= 'Forgiven Service Charge ' + INV.strInvoiceOriginId
+								, strPaymentInfo				= INV.strInvoiceOriginId
+								, intBankAccountId				= NULL
+								, dblAmountPaid					= 0.000000
+								, intEntityId					= @intEntityId
+								, intInvoiceId					= CM.intInvoiceId
+								, strTransactionType			= CM.strTransactionType
+								, strTransactionNumber			= CM.strInvoiceNumber
+								, intTermId						= CM.intTermId
+								, intInvoiceAccountId			= CM.intAccountId
+								, dblInvoiceTotal				= CM.dblInvoiceTotal
+								, dblBaseInvoiceTotal			= CM.dblBaseInvoiceTotal
+								, dblPayment					= CM.dblInvoiceTotal
+								, dblAmountDue					= 0.000000
+								, dblBaseAmountDue				= 0.000000
+								, strInvoiceReportNumber		= CM.strInvoiceNumber
+								, intCurrencyExchangeRateTypeId	= CM.intCurrencyExchangeRateTypeId
+								, intCurrencyExchangeRateId		= CM.intCurrencyExchangeRateId
+								, dblCurrencyExchangeRate		= CM.dblCurrencyExchangeRate
+								, ysnPost						= CAST(1 AS BIT)
+							FROM dbo.vyuARInvoicesForPayment CM
+							INNER JOIN tblARInvoice INV ON CM.intInvoiceId = INV.intInvoiceId
+							INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strCreatedCreditMemo) CCM ON CCM.intID = CM.intInvoiceId
+
+							UNION ALL
+
+							SELECT intId						= SC.intInvoiceId
+								, strSourceTransaction			= 'Direct'
+								, intSourceId					= SC.intInvoiceId
+								, strSourceId					= SC.strInvoiceNumber
+								, intEntityCustomerId			= SC.intEntityCustomerId
+								, intCompanyLocationId			= SC.intCompanyLocationId
+								, intCurrencyId					= SC.intCurrencyId
+								, dtmDatePaid					= SCF.dtmForgiveDate
+								, intPaymentMethodId			= @intPaymentMethodId
+								, strPaymentMethod				= @strPaymentMethod
+								, strNotes						= 'Forgiven Service Charge ' + SC.strInvoiceNumber
+								, strPaymentInfo				= SC.strInvoiceNumber
+								, intBankAccountId				= NULL
+								, dblAmountPaid					= 0.000000
+								, intEntityId					= @intEntityId
+								, intInvoiceId					= SC.intInvoiceId
+								, strTransactionType			= SC.strTransactionType
+								, strTransactionNumber			= SC.strInvoiceNumber
+								, intTermId						= SC.intTermId
+								, intInvoiceAccountId			= SC.intAccountId
+								, dblInvoiceTotal				= SC.dblInvoiceTotal
+								, dblBaseInvoiceTotal			= SC.dblBaseInvoiceTotal
+								, dblPayment					= SC.dblInvoiceTotal
+								, dblAmountDue					= 0.000000
+								, dblBaseAmountDue				= 0.000000
+								, strInvoiceReportNumber		= SC.strInvoiceNumber
+								, intCurrencyExchangeRateTypeId	= SC.intCurrencyExchangeRateTypeId
+								, intCurrencyExchangeRateId		= SC.intCurrencyExchangeRateId
+								, dblCurrencyExchangeRate		= SC.dblCurrencyExchangeRate
+								, ysnPost						= CAST(1 AS BIT)
+							FROM dbo.vyuARInvoicesForPayment SC
+							INNER JOIN #SERVICECHARGETOFORGIVE SCF ON SCF.intInvoiceId = SC.intInvoiceId
+
+							EXEC dbo.uspARProcessPayments @PaymentEntries	= @tblPaymentEntries
+														, @UserId			= @intEntityId
+														, @GroupingOption	= 7
+														, @RaiseError		= 1
+														, @ErrorMessage		= @ErrorMessage OUTPUT
+
+							IF ISNULL(@ErrorMessage, '') <> ''
+								BEGIN
+									RAISERROR(@strErrorMsg, 16, 1)
+									RETURN;
+								END
+						END
+				END
+			ELSE
+				BEGIN					
+					--GET THE CREDIT MEMO LINKED
+					DECLARE @strCreditMemoToUnpost 	NVARCHAR(MAX)
+					DECLARE @strPaymentToUnpost		NVARCHAR(MAX)
+
+					IF(OBJECT_ID('tempdb..#CREDITMEMOTODELETE') IS NOT NULL)
+					BEGIN
+						DROP TABLE #CREDITMEMOTODELETE
+					END
+
+					IF(OBJECT_ID('tempdb..#PAYMENTSTODELETE') IS NOT NULL)
+					BEGIN
+						DROP TABLE #PAYMENTSTODELETE
+					END
+
+					SELECT intInvoiceId	= INV.intInvoiceId
+					INTO #CREDITMEMOTODELETE
+					FROM tblARInvoice INV
+					INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.strInvoiceOriginId = SCI.strInvoiceNumber
+					WHERE INV.strTransactionType = 'Credit Memo'						
+					  AND INV.ysnServiceChargeCredit = 1
+					  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), INV.dtmPostDate))) = @dtmDateToday
+
+					--UNPOST AND DELETE PAYMENT OF SC AND CM
+					SELECT DISTINCT P.intPaymentId
+					INTO #PAYMENTSTODELETE
+					FROM tblARPayment P
+					INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
+					INNER JOIN #CREDITMEMOTODELETE CM ON PD.intInvoiceId = CM.intInvoiceId
+
+					SELECT @strPaymentToUnpost = COALESCE(@strPaymentToUnpost + ', ', '') + RTRIM(LTRIM(P.intPaymentId)) 
+					FROM tblARPayment P
+					INNER JOIN #PAYMENTSTODELETE PD ON P.intPaymentId = PD.intPaymentId AND P.ysnPosted = 1
+
+					IF ISNULL(@strPaymentToUnpost, '') <> ''
+						EXEC dbo.uspARPostPayment @param = @strPaymentToUnpost, @post = 0, @recap = 0, @userId = @intEntityId, @raiseError = 1
+
+					DELETE P
+					FROM tblARPayment P
+					INNER JOIN #PAYMENTSTODELETE PD ON P.intPaymentId = PD.intPaymentId
+
+					--UNPOST AND DELETE CREDIT MEMO WITHIN TODAYS DATE
+					UPDATE INV
+					SET ysnServiceChargeCredit = CAST(0 AS BIT)
+					FROM tblARInvoice INV
+					INNER JOIN #CREDITMEMOTODELETE CM ON INV.intInvoiceId = CM.intInvoiceId 
+
+					SELECT @strCreditMemoToUnpost = COALESCE(@strCreditMemoToUnpost + ', ', '') + RTRIM(LTRIM(INV.intInvoiceId)) 
+					FROM tblARInvoice INV
+					INNER JOIN #CREDITMEMOTODELETE CM ON INV.intInvoiceId = CM.intInvoiceId AND INV.ysnPosted = 1
+
+					IF ISNULL(@strCreditMemoToUnpost, '') <> ''
+						EXEC dbo.uspARPostInvoice @param = @strCreditMemoToUnpost, @post = 0, @recap = 0, @userId = @intEntityId, @raiseError = 1
+
+					DELETE INV 
+					FROM tblARInvoice INV
+					INNER JOIN #CREDITMEMOTODELETE CM ON INV.intInvoiceId = CM.intInvoiceId
+
+					--CREATE SERVICE CHARGES NOT WITHIN TODAYS DATE
+					INSERT INTO @tblInvoiceEntries (
+						  strTransactionType
+						, strType	
+						, strSourceTransaction
+						, strSourceId
+						, intEntityCustomerId
+						, intCompanyLocationId
+						, intCurrencyId
+						, intTermId
+						, dtmDate
+						, dtmPostDate
+						, dtmShipDate
+						, intEntitySalespersonId
+						, intFreightTermId
+						, intShipViaId
+						, strInvoiceOriginId
+						, strPONumber
+						, strBOLNumber
+						, strComments
+						, strFooterComments	
+						, intShipToLocationId
+						, intBillToLocationId
+						, intEntityId	
+						, ysnPost
+						, strDocumentNumber
+						, strItemDescription
+						, dblQtyShipped
+						, dblPrice
+					)
+					SELECT strTransactionType		= 'Invoice'
+						, strType					= 'Service Charge'
+						, strSourceTransaction		= 'Direct'
+						, strSourceId				= INV.strInvoiceNumber
+						, intEntityCustomerId		= INV.intEntityCustomerId
+						, intCompanyLocationId		= INV.intCompanyLocationId
+						, intCurrencyId				= INV.intCurrencyId
+						, intTermId					= INV.intTermId
+						, dtmDate					= @dtmDateToday
+						, dtmPostDate				= @dtmDateToday
+						, dtmShipDate				= @dtmDateToday
+						, intEntitySalespersonId	= INV.intEntitySalespersonId
+						, intFreightTermId			= INV.intFreightTermId
+						, intShipViaId				= INV.intShipViaId
+						, strInvoiceOriginId		= INV.strInvoiceNumber				 
+						, strPONumber				= INV.strPONumber
+						, strBOLNumber				= INV.strBOLNumber
+						, strComments				= INV.strInvoiceNumber + ' Unforgiven'
+						, strFooterComments			= 'System Generated for prior unforgiven Service Charge'
+						, intShipToLocationId		= INV.intShipToLocationId
+						, intBillToLocationId		= INV.intBillToLocationId
+						, intEntityId				= INV.intEntityId
+						, ysnPost					= CAST(1 AS BIT)
+						, strDocumentNumber			= INV.strInvoiceNumber
+						, strItemDescription		= INV.strInvoiceNumber + ' Unforgiven'
+						, dblQtyShipped				= 1
+						, dblPrice					= INV.dblInvoiceTotal				 
+					FROM tblARInvoice INV
+					INNER JOIN #SERVICECHARGETOFORGIVE SCI ON INV.intInvoiceId = SCI.intInvoiceId
+					WHERE SCI.dtmForgiveDate <> @dtmDateToday					
+
+					IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
+						EXEC dbo.uspARProcessInvoices @InvoiceEntries 	= @tblInvoiceEntries
+													, @UserId			= @intEntityId
+													, @GroupingOption	= 0
+													, @RaiseError		= 1
+													, @ErrorMessage		= @strErrorMsg OUT
+													, @CreatedIvoices	= @strCreatedInvoices OUT
+
+					IF ISNULL(@strErrorMsg, '') <> ''
+						BEGIN
+							RAISERROR(@strErrorMsg, 16, 1)
+							RETURN;
+						END
+				END
 
 			/****************** AUDIT LOG ******************/
 			BEGIN TRANSACTION [AUDITLOG]
@@ -136,86 +495,5 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			COMMIT TRANSACTION [AUDITLOG]
 			END
 			/****************** AUDIT LOG ******************/
-
-			INSERT INTO tblGLDetail (
-					intCompanyId
-				, dtmDate
-				, strBatchId
-				, intAccountId
-				, dblDebit
-				, dblCredit
-				, dblDebitUnit
-				, dblCreditUnit
-				, strDescription
-				, strCode
-				, strReference
-				, intCurrencyId
-				, dblExchangeRate
-				, dtmDateEntered
-				, dtmTransactionDate
-				, strJournalLineDescription
-				, intJournalLineNo
-				, ysnIsUnposted
-				, intUserId
-				, intEntityId
-				, strTransactionId
-				, intTransactionId
-				, strTransactionType
-				, strTransactionForm
-				, strModuleName
-				, intConcurrencyId
-				, dblDebitForeign
-				, dblDebitReport
-				, dblCreditForeign
-				, dblCreditReport
-				, dblReportingRate
-				, dblForeignRate
-				, intReconciledId
-				, dtmReconciled
-				, ysnReconciled
-				, ysnRevalued
-			)
-			SELECT intCompanyId					= GL.intCompanyId
-				, dtmDate						= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
-				, strBatchId					= @strBatchId
-				, intAccountId					= GL.intAccountId
-				, dblDebit						= CASE WHEN @ysnForgive = 0 THEN GL.dblDebit ELSE GL.dblCredit END
-				, dblCredit						= CASE WHEN @ysnForgive = 0 THEN GL.dblCredit ELSE GL.dblDebit END
-				, dblDebitUnit					= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitUnit ELSE GL.dblCreditUnit END
-				, dblCreditUnit					= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END
-				, strDescription				= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge: ' ELSE 'Forgiven Service Charge: ' END + ISNULL(GL.strDescription, '')
-				, strCode						= GL.strCode
-				, strReference					= GL.strReference
-				, intCurrencyId					= GL.intCurrencyId
-				, dblExchangeRate				= GL.dblExchangeRate
-				, dtmDateEntered				= @dtmDateToday
-				, dtmTransactionDate			= GL.dtmTransactionDate
-				, strJournalLineDescription		= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge' ELSE 'Forgiven Service Charge' END
-				, intJournalLineNo				= GL.intJournalLineNo
-				, ysnIsUnposted					= 0
-				, intUserId						= GL.intUserId
-				, intEntityId					= GL.intEntityId
-				, strTransactionId				= GL.strTransactionId
-				, intTransactionId				= GL.intTransactionId
-				, strTransactionType			= 'Invoice'
-				, strTransactionForm			= 'Invoice'
-				, strModuleName					= 'Accounts Receivable'
-				, intConcurrencyId				= 1
-				, dblDebitForeign				= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitForeign ELSE GL.dblCreditForeign END
-				, dblDebitReport				= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitReport ELSE GL.dblCreditReport END
-				, dblCreditForeign				= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditForeign ELSE GL.dblDebitForeign END
-				, dblCreditReport				= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditReport ELSE GL.dblDebitReport END
-				, dblReportingRate				= GL.dblReportingRate
-				, dblForeignRate				= GL.dblForeignRate
-				, intReconciledId				= GL.intReconciledId
-				, dtmReconciled					= GL.dtmReconciled
-				, ysnReconciled					= GL.ysnReconciled
-				, ysnRevalued					= GL.ysnRevalued
-			FROM dbo.tblGLDetail GL WITH (NOLOCK)
-			INNER JOIN @ServiceChargeToForgive SCI
-				ON GL.intTransactionId = SCI.intInvoiceId
-				AND GL.strTransactionId = SCI.strInvoiceNumber
-			WHERE GL.ysnIsUnposted = 0
-				AND ISNULL(GL.strJournalLineDescription, '') NOT IN ('Forgiven Service Charge', 'Unforgive Service Charge')
 		END
 	END

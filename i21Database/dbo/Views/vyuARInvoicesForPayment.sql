@@ -64,7 +64,8 @@ SELECT
 	,[ysnACHActive]						=  ISNULL(ysnACHActive, 0)
 	,[dblInvoiceDiscountAvailable]		= ARIFP.[dblInvoiceDiscountAvailable]
  	,intSourceId						= ARIFP.intSourceId 
-	,ysnClosed							= ARIFP.ysnClosed 
+	,ysnClosed							= ARIFP.ysnClosed
+	,ysnForgiven						= ARIFP.ysnForgiven
 FROM (
 		--AR TRANSACTIONS
 		SELECT 
@@ -125,6 +126,7 @@ FROM (
 			,[dblInvoiceDiscountAvailable]		= CASE WHEN ARI.[strTransactionType] IN ('Invoice', 'Debit Memo') THEN ARI.[dblDiscountAvailable] ELSE CAST(0 AS DECIMAL(18,6)) END
 			,intSourceId						= ARI.intSourceId
 			,ysnClosed							= CASE WHEN ISNULL(EOD.ysnClosed, 0) = 1 AND ISNULL(ONACCOUNT.intPOSPaymentId, 0) = 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+			,ysnForgiven						= ARI.ysnForgiven
 		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intEntityId
@@ -227,7 +229,6 @@ FROM (
 		WHERE ARI.[ysnPosted] = 1
 			AND ysnCancelled = 0			
 			AND strTransactionType != 'Credit Note'
-			AND ((ARI.strType = 'Service Charge' AND ARI.ysnForgiven = 0) OR ((ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 1) OR (ARI.strType <> 'Service Charge' AND ARI.ysnForgiven = 0)))
 			AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
 	
 		UNION ALL
@@ -284,6 +285,7 @@ FROM (
 			,[dblInvoiceDiscountAvailable]		= APB.[dblInvoiceDiscountAvailable]
    			,[intSourceId] 						= NULL
 			,ysnClosed							= CAST(0 AS BIT)
+			,ysnForgiven						= CAST(0 AS BIT)
 		FROM [vyuAPVouchersForARPayment] APB
 		INNER JOIN (
 			SELECT intEntityId
@@ -351,6 +353,7 @@ FROM (
 			,[dblInvoiceDiscountAvailable]		= CAST(0 AS DECIMAL(18,6))
 			,[intSourceId]						= NULL
 			,[ysnClosed]						= CAST(0 AS BIT)
+			,ysnForgiven						= CAST(0 AS BIT)
 		FROM dbo.tblARCustomerBudget CB WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intEntityId

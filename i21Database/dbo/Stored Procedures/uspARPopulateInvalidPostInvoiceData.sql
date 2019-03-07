@@ -2245,6 +2245,29 @@ BEGIN
 	) VOUCHER
 	WHERE
 		@Recap = 0
+	
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--CREDIT MEMO FROM FORGIVEN SERVICE CHARGE
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'You cannot unpost this Credit Memo (' + INV.strInvoiceNumber + '). Please unforgive the Service Charge.'
+	FROM #ARPostInvoiceHeader I
+	INNER JOIN tblARInvoice INV ON INV.intInvoiceId = I.intInvoiceId	
+	WHERE @Recap = 0
+	  AND ISNULL(INV.ysnServiceChargeCredit, 0) = 1
+	  AND INV.strTransactionType = 'Credit Memo'
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration

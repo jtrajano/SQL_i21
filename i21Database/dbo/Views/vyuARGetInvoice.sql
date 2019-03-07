@@ -106,6 +106,7 @@ SELECT
 	INV.intSubBookId,
 	INV.strMobileBillingShiftNo,
     INV.ysnRefundProcessed,
+    INV.ysnServiceChargeCredit,
 	
 	strPONumber = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strPONumber END,                                    
 	strDeliverPickup = '' COLLATE Latin1_General_CI_AS,

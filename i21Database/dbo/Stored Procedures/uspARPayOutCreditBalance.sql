@@ -506,6 +506,7 @@ ELSE
 			INNER JOIN
 				vyuARInvoicesForPayment IFP
 					ON CB.[intInvoiceId] = IFP.[intInvoiceId]
+			WHERE IFP.ysnForgiven = 0
 
 
 
