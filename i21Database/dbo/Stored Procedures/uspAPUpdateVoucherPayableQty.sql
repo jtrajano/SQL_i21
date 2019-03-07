@@ -127,6 +127,12 @@ ELSE SAVE TRAN @SavePoint
 		)
 	BEGIN
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
+		
+		IF @transCount = 0
+		BEGIN
+			COMMIT TRANSACTION;
+		END
+
 		RETURN;
 	END
 
