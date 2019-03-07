@@ -25,6 +25,7 @@ BEGIN TRY
 	DECLARE @intReceiptCount INT
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
+	DECLARE @intCurrencyId INT
 
 	DECLARE @voucherDetailData TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -62,9 +63,10 @@ BEGIN TRY
 		,dblCost NUMERIC(18, 6)
 		)
 
-	SELECT @intLoadId = intLoadId, @strDeliveryNo = strDeliveryNoticeNumber, @strWarehouseName = CLSL.strSubLocationName
+	SELECT @intLoadId = intLoadId, @strDeliveryNo = strDeliveryNoticeNumber, @strWarehouseName = CLSL.strSubLocationName, @intCurrencyId = WRMH.intCurrencyId
 	FROM tblLGLoadWarehouse LW
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+	LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 	WHERE intLoadWarehouseId = @intLoadWarehouseId
 
 	IF NOT EXISTS(
@@ -299,6 +301,7 @@ BEGIN TRY
 			,@vendorId = @intVendorEntityId
 			,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 			,@shipTo = @intShipTo
+			,@currencyId = @intCurrencyId
 			,@billId = @intBillId OUTPUT
 
 		UPDATE tblLGLoadWarehouseServices
@@ -351,6 +354,7 @@ BEGIN TRY
 				,@vendorId = @intVendorEntityId
 				,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 				,@shipTo = @intShipTo
+				,@currencyId = @intCurrencyId
 				,@billId = @intBillId OUTPUT
 
 			UPDATE tblLGLoadWarehouseServices
@@ -388,6 +392,7 @@ BEGIN TRY
 					,@vendorId = @intVendorEntityId
 					,@voucherDetailReceiptCharge = @voucherDetailReceiptCharge
 					,@shipTo = @intShipTo
+					,@currencyId = @intCurrencyId
 					,@billId = @intBillId OUTPUT
 			END
 			ELSE
@@ -422,6 +427,7 @@ BEGIN TRY
 					,@vendorId = @intVendorEntityId
 					,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
 					,@shipTo = @intShipTo
+					,@currencyId = @intCurrencyId
 					,@billId = @intBillId OUTPUT
 			END
 
