@@ -10,7 +10,10 @@
 	@intStorageLocationId	INT = NULL,
 	@intItemContractId		INT = NULL,
 	@intEntityId			INT = NULL,
-	@intContractTypeId		INT = NULL
+	@intContractTypeId		INT = NULL,
+	@intCurrencyId			INT = NULL, 
+	@intInvoiceCurrencyId	INT = NULL,
+	@intRateTypeId			INT = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -187,4 +190,18 @@ BEGIN
 		ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) ASC
 	END
 
+	IF @strType = 'FX'
+	BEGIN
+		SELECT @intCurrencyId = ISNULL(intMainCurrencyId,intCurrencyID) FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
+		IF @intCurrencyId <> @intInvoiceCurrencyId
+		BEGIN
+			SELECT	intCurrencyExchangeRateId ,
+					'From ' + FC.strCurrency +' To ' + TC.strCurrency strExchangeRate,
+					(SELECT TOP 1 dblRate FROM tblSMCurrencyExchangeRateDetail WHERE intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId AND intRateTypeId = @intRateTypeId ORDER BY dtmValidFromDate DESC) dblRate
+			FROM	tblSMCurrencyExchangeRate ER
+			JOIN	tblSMCurrency FC ON FC.intCurrencyID = ER.intFromCurrencyId
+			JOIN	tblSMCurrency TC ON TC.intCurrencyID = ER.intToCurrencyId
+			WHERE	intToCurrencyId = @intInvoiceCurrencyId AND intFromCurrencyId = @intCurrencyId
+		END
+	END
 END
