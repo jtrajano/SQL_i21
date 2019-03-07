@@ -31,6 +31,11 @@ LEFT JOIN tblARInvoice Inv
 	ON Chk.intInvoiceId = Inv.intInvoiceId
 INNER JOIN tblSMUserSecurity USec
 	ON ST.intCompanyLocationId = USec.intCompanyLocationId
+	AND Chk.strCheckoutStatus != CASE
+									WHEN USec.ysnStoreManager = CAST(0 AS BIT)
+										THEN ''
+									ELSE 'Posted'
+								END
 	OR 1 = CASE
 				WHEN USec.ysnStoreManager = CAST(0 AS BIT)
 					THEN 1
