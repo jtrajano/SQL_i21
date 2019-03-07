@@ -20,7 +20,6 @@ SELECT DISTINCT
 	 , Chk.dblTotalDeposits
 	 , Chk.dblCashOverShort   
 	 , ST.intCompanyLocationId AS intStoreCompanyLocationId
-	 , RolePerm.intCompanyLocationId AS intUserCompanyLocationId
 	 , USec.ysnStoreManager AS ysnIsUserStoreManager
 	 , USec.ysnAdmin AS ysnIsUserAdmin
 	 , USec.strDashboardRole
@@ -30,7 +29,14 @@ INNER JOIN tblSTStore ST
 	ON Chk.intStoreId = ST.intStoreId
 LEFT JOIN tblARInvoice Inv
 	ON Chk.intInvoiceId = Inv.intInvoiceId
-OUTER APPLY tblSMUserSecurity USec
-INNER JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
-	ON USec.intEntityId = RolePerm.intEntityId
-	AND ST.intCompanyLocationId = RolePerm.intCompanyLocationId
+INNER JOIN tblSMUserSecurity USec
+	ON ST.intCompanyLocationId = USec.intCompanyLocationId
+	OR 1 = CASE
+				WHEN USec.ysnStoreManager = CAST(0 AS BIT)
+					THEN 1
+				ELSE 0
+			END
+--OUTER APPLY tblSMUserSecurity USec
+--LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
+--	ON USec.intEntityId = RolePerm.intEntityId
+--	AND ST.intCompanyLocationId = RolePerm.intCompanyLocationId
