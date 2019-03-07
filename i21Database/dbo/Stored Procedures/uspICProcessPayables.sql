@@ -206,6 +206,7 @@ BEGIN
 		OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 		WHERE Receipt.intInventoryReceiptId = @intReceiptId
 			AND Receipt.ysnPosted = 0
+			AND ReceiptCharge.intEntityVendorId IS NOT NULL
 	
 	END
 	
