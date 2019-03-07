@@ -395,3 +395,24 @@ BEGIN
 	WHERE intWorkersCompensationId IS NULL
 	')
 END
+
+/*
+* Employee Deduction
+* 1. Update null Account Id to Type Deduction's Account Id default 
+* 2...
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblPREmployeeDeduction') AND name = 'intAccountId') AND
+	EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblPRTypeDeduction') AND name = 'intAccountId')
+BEGIN
+	EXEC('
+	IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeDeduction WHERE ISNULL(intAccountId,0) = 0)
+	BEGIN
+		UPDATE ED
+		SET intAccountId = TD.intAccountId
+		FROM tblPREmployeeDeduction ED
+		JOIN tblPRTypeDeduction TD
+			ON TD.intTypeDeductionId = ED.intTypeDeductionId
+		WHERE ISNULL(ED.intAccountId,0) = 0
+	END
+	')
+END
