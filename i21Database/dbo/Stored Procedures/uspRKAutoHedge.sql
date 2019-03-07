@@ -133,7 +133,7 @@ BEGIN
       dblPrice =  @dblPrice 
       WHERE intFutOptTransactionId = @intFutOptTransactionId
 
-	  SELECT @intMatchedLots = SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned WHERE intFutOptTransactionId = @intFutOptTransactionId
+	  SELECT @intMatchedLots = SUM(dblLots) FROM tblRKOptionsPnSExercisedAssigned WHERE intFutOptTransactionId = @intFutOptTransactionId
 
 	  IF @intMatchedLots < @dblNoOfContract
 	  BEGIN

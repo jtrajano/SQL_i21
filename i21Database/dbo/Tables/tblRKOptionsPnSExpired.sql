@@ -4,7 +4,7 @@
 	[intOptionsMatchPnSHeaderId] int NOT NULL,
 	[strTranNo]  nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL , 
 	[dtmExpiredDate] DATETIME NOT NULL, 
-    [intLots] INT NOT NULL, 
+    [dblLots] NUMERIC(18, 6) NOT NULL, 
 	[intFutOptTransactionId] INT NOT NULL,
 	[intConcurrencyId] INT NOT NULL
     CONSTRAINT [PK_tblRKOptionsPnSExpired_intOptionsPnSExpiredId] PRIMARY KEY (intOptionsPnSExpiredId), 

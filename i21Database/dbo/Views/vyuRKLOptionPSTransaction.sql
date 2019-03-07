@@ -46,7 +46,7 @@ SELECT strInternalTradeNo
 	, intCommodityId
 	, intOptionMonthId
 FROM (
-	SELECT dblOpenLots = (dblTotalLot - dblSelectedLot - intExpiredLots - intAssignedLots)
+	SELECT dblOpenLots = (dblTotalLot - dblSelectedLot - dblExpiredLots - dblAssignedLots)
 		, dblPremiumValue = ((dblTotalLot - dblSelectedLot) * dblContractSize * dblPremium) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
 		, dblMarketValue = ((dblTotalLot - dblSelectedLot) * dblContractSize * dblMarketPremium) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
 		, dblCommission = (- dblOptCommission * (dblTotalLot - dblSelectedLot)) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
@@ -88,8 +88,8 @@ FROM (
 			, strHedgeUOM = um.strUnitMeasure
 			, strBuySell = CASE WHEN strBuySell = 'Buy' THEN 'B' ELSE 'S' END COLLATE Latin1_General_CI_AS
 			, intFutOptTransactionId
-			, intExpiredLots = ISNULL((SELECT SUM(intLots) FROM tblRKOptionsPnSExpired ope WHERE ope.intFutOptTransactionId = ot.intFutOptTransactionId),0)
-			, intAssignedLots = ISNULL((SELECT SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa WHERE opa.intFutOptTransactionId = ot.intFutOptTransactionId),0)
+			, dblExpiredLots = ISNULL((SELECT SUM(dblLots) FROM tblRKOptionsPnSExpired ope WHERE ope.intFutOptTransactionId = ot.intFutOptTransactionId),0)
+			, dblAssignedLots = ISNULL((SELECT SUM(dblLots) FROM tblRKOptionsPnSExercisedAssigned opa WHERE opa.intFutOptTransactionId = ot.intFutOptTransactionId),0)
 			, intCurrencyId = c.intCurrencyID
 			, c.strCurrency
 			, intMainCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE c.intCurrencyID END

@@ -29,14 +29,14 @@ BEGIN TRY
 	GROUP BY AD.intLFutOptTransactionId
 
 	SELECT ope.intFutOptTransactionId
-		, intExpiredLots = SUM(intLots)
+		, intExpiredLots = SUM(dblLots)
 	INTO #ExpiredLots
 	FROM tblRKOptionsPnSExpired ope
 	WHERE CAST(FLOOR(CAST(dtmExpiredDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 	GROUP BY ope.intFutOptTransactionId
 
 	SELECT opa.intFutOptTransactionId
-		, intAssignedLots = SUM(intLots)
+		, intAssignedLots = SUM(dblLots)
 	INTO #AssignedLots
 	FROM tblRKOptionsPnSExercisedAssigned opa
 	WHERE CAST(FLOOR(CAST(dtmTranDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)

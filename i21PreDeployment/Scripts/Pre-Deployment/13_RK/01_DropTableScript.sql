@@ -287,3 +287,46 @@ BEGIN
 
 END
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKOptionsPnSExpired]') AND type in (N'U')) 
+BEGIN
+	If EXISTS( SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tblRKOptionsPnSExpired' and COLUMN_NAME='intLots')
+	BEGIN
+		ALTER TABLE tblRKOptionsPnSExpired
+		ALTER COLUMN intLots numeric(18,6) 
+	END
+END
+
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKOptionsPnSExpired]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblLots' AND OBJECT_ID = OBJECT_ID(N'tblRKOptionsPnSExpired')) 
+	AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intLots' AND OBJECT_ID = OBJECT_ID(N'tblRKOptionsPnSExpired'))
+    BEGIN
+         EXEC sp_rename 'tblRKOptionsPnSExpired.intLots', 'dblLots', 'COLUMN'
+    END
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKOptionsPnSExercisedAssigned]') AND type in (N'U')) 
+BEGIN
+	If EXISTS( SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='tblRKOptionsPnSExercisedAssigned' and COLUMN_NAME='intLots')
+	BEGIN
+		ALTER TABLE tblRKOptionsPnSExercisedAssigned
+		ALTER COLUMN intLots numeric(18,6) 
+	END
+END
+
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKOptionsPnSExercisedAssigned]') AND type in (N'U')) 
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'dblLots' AND OBJECT_ID = OBJECT_ID(N'tblRKOptionsPnSExercisedAssigned')) 
+	AND EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intLots' AND OBJECT_ID = OBJECT_ID(N'tblRKOptionsPnSExercisedAssigned'))
+    BEGIN
+         EXEC sp_rename 'tblRKOptionsPnSExercisedAssigned.intLots', 'dblLots', 'COLUMN'
+    END
+END
+GO
+GO
