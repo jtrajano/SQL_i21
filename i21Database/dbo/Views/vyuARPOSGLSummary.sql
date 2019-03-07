@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSGLSummary]
 AS
 SELECT intPOSEndOfDayId		= GLSUMMARY.intPOSEndOfDayId
-	 , dblDebit				= CASE WHEN GLSUMMARY.strAccountCategory = 'Undeposited Funds' THEN GLSUMMARY.dblEndingBalance - GLSUMMARY.dblOpeningBalance ELSE GLSUMMARY.dblDebit END
+	 , dblDebit				= GLSUMMARY.dblDebit
 	 , dblCredit			= GLSUMMARY.dblCredit
 	 , strAccountId			= GLSUMMARY.strAccountId
 	 , strAccountCategory	= GLSUMMARY.strAccountCategory
@@ -37,6 +37,7 @@ FROM (
 		WHERE strType = 'POS'
 		  AND ysnPosted = 1
 		  AND POS.intInvoiceId = intInvoiceId
+		  AND EOD.ysnClosed = 1
 
 		UNION ALL
 
@@ -52,6 +53,15 @@ FROM (
 		) PAYMENT ON POSP.intPaymentId = PAYMENT.intPaymentId
 		WHERE POSP.intPOSId = POS.intPOSId
 		  AND POSP.strPaymentMethod <> 'On Account'
+
+		UNION ALL 
+
+		SELECT	intTransactionId = EODT.intPOSEndOfDayId
+				, strTransactionId = EODT.strEODNo
+				, strTransaction = 'EOD'
+		FROM dbo.tblARPOSEndOfDay EODT WITH (NOLOCK)
+		WHERE EODT.ysnClosed = 1 AND EODT.intCashOverShortId IS NOT NULL
+		AND EOD.intPOSEndOfDayId = EODT.intPOSEndOfDayId
 	) TRANSACTIONS
 	INNER JOIN (
 		SELECT intTransactionId
@@ -71,6 +81,7 @@ FROM (
 			 , strDescription
 		FROM dbo.vyuGLAccountDetail WITH (NOLOCK)	
 	) GLA ON GL.intAccountId = GLA.intAccountId
+	WHERE EOD.ysnClosed = 1
 	GROUP BY EOD.intPOSEndOfDayId
 		   , EOD.dblFinalEndingBalance
 		   , EOD.dblOpeningBalance
