@@ -130,6 +130,8 @@ ELSE SAVE TRAN @SavePoint
 		INSERT INTO @insertedData
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
 
+		SET @transCount = @@TRANCOUNT;
+		IF @transCount <> 0 COMMIT TRANSACTION
 		SELECT * FROM @insertedData
 		RETURN;
 	END
