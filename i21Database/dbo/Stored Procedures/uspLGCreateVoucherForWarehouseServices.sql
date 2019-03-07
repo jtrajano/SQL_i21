@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
 	DECLARE @intCurrencyId INT
+	DECLARE @ysnSubCurrency BIT
 
 	DECLARE @voucherDetailData TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -63,10 +64,12 @@ BEGIN TRY
 		,dblCost NUMERIC(18, 6)
 		)
 
-	SELECT @intLoadId = intLoadId, @strDeliveryNo = strDeliveryNoticeNumber, @strWarehouseName = CLSL.strSubLocationName, @intCurrencyId = WRMH.intCurrencyId
+	SELECT @intLoadId = intLoadId, @strDeliveryNo = strDeliveryNoticeNumber, @strWarehouseName = CLSL.strSubLocationName, 
+		   @intCurrencyId = ISNULL(CU.intMainCurrencyId, WRMH.intCurrencyId), @ysnSubCurrency = CASE WHEN (CU.intMainCurrencyId IS NULL) THEN 0 ELSE 1 END
 	FROM tblLGLoadWarehouse LW
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
+	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WRMH.intCurrencyId 
 	WHERE intLoadWarehouseId = @intLoadWarehouseId
 
 	IF NOT EXISTS(
@@ -150,13 +153,13 @@ BEGIN TRY
 		,intItemId = Item.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,dblQtyReceived = CASE WHEN (WRMD.intCalculateQty = 8) THEN 1 ELSE LWS.dblQuantity END
-		,dblCost = LWS.dblUnitRate
-		,intCostUOMId = LWS.intItemUOMId
+		,dblCost = LWS.dblUnitRate / CASE WHEN (@ysnSubCurrency = 1) THEN 100 ELSE 1 END
+		,intCostUOMId = NULL
 		,intWarehouseServicesId = LWS.intLoadWarehouseServicesId
 		,ysnInventoryCost = Item.ysnInventoryCost
-		,intItemUOMId = CASE WHEN (WRMD.intCalculateQty = 8) THEN LWS.intItemUOMId ELSE LD.intItemUOMId END
-		,dblUnitQty = CASE WHEN (WRMD.intCalculateQty = 8) THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty, 1) END
-		,dblCostUnitQty = ISNULL(CostUOM.dblUnitQty, 1)
+		,intItemUOMId = LWS.intItemUOMId
+		,dblUnitQty = 1
+		,dblCostUnitQty = 1 
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
