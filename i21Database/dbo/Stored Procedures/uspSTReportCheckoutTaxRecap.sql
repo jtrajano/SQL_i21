@@ -2,21 +2,23 @@
 	@intCheckoutId INT  
 	
 AS
-
 BEGIN TRY
 	
    DECLARE @ErrMsg NVARCHAR(MAX)
   
-   select A.intCheckoutId
-    ,A.dblTotalTax As TotalTax
-	,A.dblTaxableSales as TaxableSales
-	,A.dblTaxExemptSales as TaxExemptSales
-	,B.strAccountId
-	,B.strDescription
-   from tblSTCheckoutSalesTaxTotals A 
-   LEFT JOIN tblGLAccount B ON A.intSalesTaxAccount = B.intAccountId
-   where A.intCheckoutId = @intCheckoutId
-   and A.dblTotalTax is not NULL 
+	SELECT 
+		A.intCheckoutId
+		, A.strTaxNo
+		, A.dblTotalTax AS TotalTax
+		, A.dblTaxableSales AS TaxableSales
+		, A.dblTaxExemptSales AS TaxExemptSales
+		, B.strAccountId
+		, B.strDescription
+	FROM tblSTCheckoutSalesTaxTotals A 
+	LEFT JOIN tblGLAccount B 
+		ON A.intSalesTaxAccount = B.intAccountId
+	WHERE A.intCheckoutId = @intCheckoutId
+		AND A.dblTotalTax IS NOT NULL
     
 END TRY
 
