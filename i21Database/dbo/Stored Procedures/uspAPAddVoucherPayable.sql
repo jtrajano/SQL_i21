@@ -39,6 +39,10 @@ BEGIN
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1))
 	BEGIN
+		IF @transCount = 0
+		BEGIN
+			COMMIT TRANSACTION;
+		END
 		RETURN;
 	END
 	MERGE INTO tblAPVoucherPayable AS destination
