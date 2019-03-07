@@ -65,6 +65,8 @@
 	[strUpgradeCustomerTimeZone] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[dtmUpgradeEndTime] datetime null,
 	[intUpgradeTimeTook] [int] null,
+	[strUpgradeCopyDataFrom] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strUpgradeCopyDataTo] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strUpgradeSpecialInstruction] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[intRootCauseId] [int] null,
 	[intSubcauseId] [int] null,
