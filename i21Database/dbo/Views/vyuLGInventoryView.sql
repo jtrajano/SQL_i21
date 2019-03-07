@@ -11,11 +11,11 @@ FROM (
 		,strOriginalQtyUOM = Shipment.strPurchaseContractOriginalUOM
 		,dblStockQty = Shipment.dblContainerContractQty
 		,strStockUOM = Shipment.strItemUOM
-		,dblNetWeight = CASE WHEN IsNull(Shipment.dblContainerContractReceivedQty, 0) > 0
+		,dblNetWeight = CASE WHEN ISNULL(Shipment.dblContainerContractQty, 0) > 0
 							THEN CASE 
 									WHEN ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0) = 0
 										THEN Shipment.dblBLNetWt
-									ELSE ((ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)) / ISNULL(Shipment.dblContainerContractQty, 1)) * (ISNULL(Shipment.dblContainerContractQty, 0) - ISNULL(Shipment.dblContainerContractReceivedQty, 0))
+									ELSE ((ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)) / ISNULL(Shipment.dblContainerContractQty, 1)) * (ISNULL(Shipment.dblContainerContractQty, 0))
 									END
 							ELSE CASE 
 									WHEN ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0) = 0
