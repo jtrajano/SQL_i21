@@ -49,23 +49,23 @@ END
 
 	UPDATE Bank SET strRTN = ISNULL(dbo.fnAESDecrypt(strRTN),strRTN) 
 	FROM tblCMBank Bank 
-	WHERE LEN(TRIM(strRTN)) < @intEncryptCheckLength
+	WHERE LEN(LTRIM(RTRIM(strRTN))) < @intEncryptCheckLength
 
 	UPDATE BankAccount SET strBankAccountNo = ISNULL(dbo.fnAESDecrypt(strBankAccountNo),strBankAccountNo)
 	FROM tblCMBankAccount BankAccount
-	WHERE LEN(TRIM(strBankAccountNo )) < @intEncryptCheckLength
+	WHERE LEN(LTRIM(RTRIM(strBankAccountNo))) < @intEncryptCheckLength
 	
 	UPDATE BankAccount SET strRTN = ISNULL(dbo.fnAESDecrypt(strRTN),strRTN)
 	FROM tblCMBankAccount BankAccount
-	WHERE LEN(TRIM(strRTN )) < @intEncryptCheckLength
+	WHERE LEN(LTRIM(RTRIM(strRTN))) < @intEncryptCheckLength
 
 	UPDATE BankAccount SET strMICRBankAccountNo = ISNULL(dbo.fnAESDecrypt(strMICRBankAccountNo),strMICRBankAccountNo)
 	FROM tblCMBankAccount BankAccount
-	WHERE LEN(TRIM(strMICRBankAccountNo )) < @intEncryptCheckLength
+	WHERE LEN(LTRIM(RTRIM(strMICRBankAccountNo))) < @intEncryptCheckLength
 
 	UPDATE BankAccount SET strMICRRoutingNo = ISNULL(dbo.fnAESDecrypt(strMICRRoutingNo),strMICRRoutingNo)
 	FROM tblCMBankAccount BankAccount
-	WHERE LEN(TRIM(strMICRRoutingNo )) < @intEncryptCheckLength
+	WHERE LEN(LTRIM(RTRIM(strMICRRoutingNo))) < @intEncryptCheckLength
 
 	--Close the symmetric key
 	CLOSE SYMMETRIC KEY i21EncryptionSymKey
