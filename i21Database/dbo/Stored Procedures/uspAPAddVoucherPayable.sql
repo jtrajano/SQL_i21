@@ -82,7 +82,7 @@ BEGIN
 													THEN 
 													(
 														CASE 
-														WHEN A.intContractDetailId > 0 
+														WHEN A.intContractDetailId > 0
 														THEN ctDetail.dblDetailQuantity
 														ELSE A.dblOrderQty
 														END
@@ -94,7 +94,7 @@ BEGIN
 													THEN
 													(
 														CASE
-														WHEN A.intContractDetailId > 0 
+														WHEN A.intContractDetailId > 0
 														THEN contractItemUOM.dblUnitQty
 														ELSE A.dblOrderUnitQty 
 														END
@@ -106,7 +106,7 @@ BEGIN
 													THEN
 													(
 														CASE 
-														WHEN A.intContractDetailId > 0 
+														WHEN A.intContractDetailId > 0
 														THEN ctDetail.intItemUOMId
 														ELSE A.intOrderUOMId
 														END
@@ -118,7 +118,7 @@ BEGIN
 													THEN
 													(
 														CASE 
-														WHEN A.intContractDetailId > 0 
+														WHEN A.intContractDetailId > 0
 														THEN contractUOM.strUnitMeasure
 														ELSE orderQtyUOM.strUnitMeasure
 														END
@@ -134,7 +134,7 @@ BEGIN
 													THEN 
 													(
 														CASE 
-														WHEN A.intContractDetailId > 0 AND A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
+														WHEN A.intContractDetailId > 0 AND A.dblCost = 0 AND ctDetail.dblSeqPrice > 0 AND ctDetail.intPricingTypeId <> 5
 														THEN ctDetail.dblSeqPrice
 														ELSE A.dblCost
 														END
@@ -146,7 +146,7 @@ BEGIN
 													THEN
 													(
 														CASE 
-														WHEN A.intContractDetailId > 0 
+														WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
 														THEN contractItemCostUOM.dblUnitQty
 														ELSE A.dblCostUnitQty 
 														END
@@ -158,7 +158,7 @@ BEGIN
 													THEN 
 													(
 														CASE 
-														WHEN A.intContractDetailId > 0 
+														WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
 														THEN ctDetail.intPriceItemUOMId
 														ELSE A.intCostUOMId 
 														END
@@ -170,7 +170,7 @@ BEGIN
 													THEN
 													(
 														CASE 
-														WHEN A.intContractDetailId > 0 
+														WHEN A.intContractDetailId > 0 AND ctDetail.intPricingTypeId <> 5
 														THEN contractCostUOM.strUnitMeasure
 														ELSE costUOM.strUnitMeasure
 														END
@@ -579,9 +579,6 @@ ELSE
 		END
 	END	
 
---RETURN THE NEW PAYABLE ID LINKED TO tblAPVoucherPayable
-SELECT * FROM @insertedData
-
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
@@ -608,13 +605,13 @@ BEGIN CATCH
 				COMMIT TRANSACTION
 			END
 		END		
-	ELSE
-		BEGIN
-			IF (XACT_STATE()) = -1
-			BEGIN
-				ROLLBACK TRANSACTION  @SavePoint
-			END
-		END	
+	-- ELSE
+	-- 	BEGIN
+	-- 		IF (XACT_STATE()) = -1
+	-- 		BEGIN
+	-- 			ROLLBACK TRANSACTION  @SavePoint
+	-- 		END
+	-- 	END	
 
 	SET @error = @ErrorMessage;
 	
