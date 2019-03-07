@@ -454,7 +454,7 @@ SELECT 1 intRowNumber,'1.Outright Coverage','Outright Coverage' Selection,'1.Pri
               @strParamFutureMonth strFutureMonth,strAccountNumber,sum(dblNoOfLot) dblNoOfLot,null,getdate() TransactionDate,'Inventory' TranType,
               null, 0.0 ,sum(dblNoOfLot) dblQuantity,1
 FROM (
-  SELECT distinct    
+  SELECT distinct  ic.intItemId,  
   'Purchase'+' - '+isnull(c.strDescription,'') as strAccountNumber,
   dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,iis.dblUnitOnHand) dblNoOfLot
   FROM tblICCommodity co
