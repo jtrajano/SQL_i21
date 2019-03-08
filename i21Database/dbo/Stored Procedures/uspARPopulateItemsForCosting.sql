@@ -166,8 +166,8 @@ WHERE
     AND ARID.[intPeriodsToAccrue] <= 1
     AND ARID.[ysnImpactInventory] = @OneBit
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
-	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
-	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
+	--AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
+	--AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
 	AND ARID.[intItemId] IS NOT NULL
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
@@ -279,9 +279,12 @@ WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
     AND ARID.[ysnImpactInventory] = @OneBit
-	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
-	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
-	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
+	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 		
+	AND (
+		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0) AND  ARID.[strTransactionType] <> 'Credit Memo')
+		OR
+		(((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) OR (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)) AND ARID.[strTransactionType] = 'Credit Memo')
+		)
 	AND ARID.[intItemId] IS NOT NULL
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
@@ -374,9 +377,12 @@ LEFT OUTER JOIN
 		ON LGL.[intLoadId] = ARID.[intLoadId]				 				 
 WHERE
 	((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
-	AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0
+	AND (
+		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0) AND  ARID.[strTransactionType] <> 'Credit Memo')
+		OR
+		(((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) OR (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)) AND ARID.[strTransactionType] = 'Credit Memo')
+		)
     AND ARID.[ysnImpactInventory] = @OneBit
-	AND ISNULL(ARID.[intLoadDetailId],0) = 0
 	AND ARID.[intItemId] IS NOT NULL
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARID.[strTransactionType] <> 'Debit Memo'

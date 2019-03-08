@@ -81,7 +81,7 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM @IIDs)
 		,[strSCInvoiceNumber]						= ID.[strSCInvoiceNumber]			
 		,[intItemUOMId]								= ID.[intItemUOMId]					
 		,[dblQtyOrdered]							= ID.[dblQtyOrdered]				
-		,[dblQtyShipped]							= ID.[dblQtyShipped] * (CASE WHEN ISNULL(IIDs.[ysnPost], 0) = 1 THEN -1 ELSE 1 END) 				
+		,[dblQtyShipped]							= ID.[dblQtyShipped] * (CASE WHEN ISNULL(IIDs.[ysnPost], 0) = 1 THEN -1 ELSE 1 END) * (CASE WHEN I.[strTransactionType] ='Credit Memo' THEN -1 ELSE 1 END)			
 		,[dblDiscount]								= ID.[dblDiscount]					
 		,[dblPrice]									= ID.[dblPrice]						
 		,[dblTotalTax]								= ID.[dblTotalTax]					
@@ -113,7 +113,7 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM @IIDs)
 		,[intOriginalInvoiceDetailId]				= ID.[intOriginalInvoiceDetailId]
 		,[ysnLeaseBilling]							= ID.[ysnLeaseBilling]				
 	FROM
-		(SELECT [intInvoiceId] ,[strInvoiceNumber] ,[intEntityCustomerId] ,[dtmDate] ,[intCurrencyId] ,[intCompanyLocationId] ,[intDistributionHeaderId] ,[intTransactionId] FROM tblARInvoice WITH (NOLOCK)) I
+		(SELECT [intInvoiceId] ,[strInvoiceNumber] ,[intEntityCustomerId] ,[dtmDate] ,[intCurrencyId] ,[intCompanyLocationId] ,[intDistributionHeaderId] ,[intTransactionId], [strTransactionType] FROM tblARInvoice WITH (NOLOCK)) I
 	INNER JOIN
 		@IIDs IIDs
 			ON I.[intInvoiceId] = IIDs.[intHeaderId]
