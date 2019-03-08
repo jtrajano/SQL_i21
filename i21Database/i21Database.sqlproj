@@ -3332,6 +3332,7 @@
     <Build Include="dbo\Stored Procedures\uspGRProcessGrainStorage.sql" />
     <Build Include="dbo\User Defined Types\ScaleManualCostingTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspSCManualDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGenerateVoucherDetails.sql" />
     <Build Include="dbo\Views\vyuMFShiftActivityProductionSummaryByDate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateContactAdmin.sql" />
