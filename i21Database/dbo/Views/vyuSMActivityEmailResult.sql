@@ -12,7 +12,8 @@ as
 		b.dtmTransactionDate,
 		c.strName,
 		d.strTransactionNo,
-		e.strScreenName
+		e.strScreenName,
+		dbo.fnSMGetEmailRecipients(a.intActivityId) strRecipients
 	from tblSMActivity a
 	join tblSMActivityEmailResult b 
 		on a.intActivityId = b.intActivityId
@@ -22,5 +23,6 @@ as
 		on d.intScreenId = e.intScreenId
 	left join tblEMEntity c
 		on b.intEntityUserId = c.intEntityId
+	
 
 GO

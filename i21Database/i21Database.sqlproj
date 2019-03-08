@@ -7413,6 +7413,7 @@
     <Build Include="dbo\Stored Procedures\uspSMAddEmailResultLog.sql" />
     <Build Include="dbo\Tables\tblSMActivityEmailResult.sql" />
     <Build Include="dbo\Views\vyuSMActivityEmailResult.sql" />
+    <Build Include="dbo\Functions\fnSMGetEmailRecipients.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
