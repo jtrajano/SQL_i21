@@ -9,13 +9,13 @@ FROM (
 		,intContractDetailId = Shipment.intContractDetailId
 		,dblOriginalQty = Shipment.dblPurchaseContractOriginalQty
 		,strOriginalQtyUOM = Shipment.strPurchaseContractOriginalUOM
-		,dblStockQty = Shipment.dblContainerContractQty
+		,dblStockQty = Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0)
 		,strStockUOM = Shipment.strItemUOM
-		,dblNetWeight = CASE WHEN ISNULL(Shipment.dblContainerContractQty, 0) > 0
+		,dblNetWeight = CASE WHEN IsNull(Shipment.dblContainerContractReceivedQty, 0) > 0
 							THEN CASE 
 									WHEN ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0) = 0
 										THEN Shipment.dblBLNetWt
-									ELSE ((ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)) / ISNULL(Shipment.dblContainerContractQty, 1)) * (ISNULL(Shipment.dblContainerContractQty, 0))
+									ELSE ((ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)) / ISNULL(Shipment.dblContainerContractQty, 1)) * (ISNULL(Shipment.dblContainerContractQty, 0) - ISNULL(Shipment.dblContainerContractReceivedQty, 0))
 									END
 							ELSE CASE 
 									WHEN ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0) = 0
@@ -87,7 +87,7 @@ FROM (
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	LEFT JOIN tblARInvoice INV ON ISNULL(Shipment.intLoadId,0) = ISNULL(INV.intLoadId,0) 
-	WHERE Shipment.strReceiptNumber IS NULL 
+	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
 	   AND INV.intLoadId IS NULL
 
