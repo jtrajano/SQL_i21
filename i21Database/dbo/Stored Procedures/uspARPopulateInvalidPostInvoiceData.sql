@@ -12,6 +12,11 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000 
 
+DECLARE	@ZeroBit BIT
+       ,@OneBit BIT       
+SET @OneBit = CAST(1 AS BIT)
+SET @ZeroBit = CAST(0 AS BIT)
+
 --IF(OBJECT_ID('tempdb..#ARInvalidInvoiceData') IS NULL)
 --BEGIN
 --	CREATE TABLE #ARInvalidInvoiceData
@@ -25,7 +30,7 @@ SET @ZeroDecimal = 0.000000
 --END
 
 
-IF @Post = 1
+IF @Post = @OneBit
 BEGIN
     DECLARE @InvoiceIds [InvoiceId]
 	DECLARE @PostInvoiceDataFromIntegration AS [InvoicePostingTable]
@@ -56,7 +61,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE  
-		I.[ysnPosted] = 1
+		I.[ysnPosted] = @OneBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -79,7 +84,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE  
-		I.[ysnRecurring] = 1
+		I.[ysnRecurring] = @OneBit
 
 --   This is being handled by [uspGLValidateGLEntries]
 	--INSERT INTO #ARInvalidInvoiceData
@@ -150,7 +155,7 @@ BEGIN
 	WHERE
 		I.[intSiteId] IS NULL
 		AND I.[strType] = 'Tank Delivery'
-		AND I.[ysnTankRequired] = 1
+		AND I.[ysnTankRequired] = @OneBit
 		AND I.[strItemType] <> 'Comment'		
 		
 	INSERT INTO #ARInvalidInvoiceData
@@ -198,7 +203,30 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I					
 	WHERE
-		I.[dblInvoiceTotal] < @ZeroDecimal	
+		I.[dblInvoiceTotal] < @ZeroDecimal
+
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Zero Quantity
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'You cannot post an ' + I.[strTransactionType] + ' with a inventory item(' + I.[strItemDescription] + ') of zero quantity.'
+	FROM 
+		#ARPostInvoiceDetail I
+	WHERE
+		I.[dblQtyShipped] = @ZeroDecimal 
+		AND I.[ysnStockTracking] = @OneBit
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -222,7 +250,7 @@ BEGIN
 	--INNER JOIN dbo.tblARCustomer  ARC
 	--		ON I.[intEntityCustomerId] = ARC.[intEntityId]						
 	WHERE
-		I.[ysnCustomerActive] = 0
+		I.[ysnCustomerActive] = @ZeroBit
 			
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -273,7 +301,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE
-		I.[ysnForApproval] = 1
+		I.[ysnForApproval] = @OneBit
 	--INNER JOIN
 	--	(SELECT intTransactionId FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
 	--		ON I.intInvoiceId = FAT.intTransactionId
@@ -604,7 +632,7 @@ BEGIN
 		#ARPostInvoiceHeader I
 	WHERE
 		ISNULL(I.[intPeriodsToAccrue],0) > 1  
-		AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(I.[intPeriodsToAccrue],1) - 1), ISNULL(I.[dtmPostDate], I.[dtmDate]))), 0) = 0
+		AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(I.[intPeriodsToAccrue],1) - 1), ISNULL(I.[dtmPostDate], I.[dtmDate]))), @ZeroBit) = @ZeroBit
 
 
 	--INSERT INTO @returntable(
@@ -752,7 +780,7 @@ BEGIN
 		#ARPostInvoiceHeader I					
 	WHERE
 		I.[strType] = 'Provisional'
-		AND I.[ysnProvisionalWithGL] = 0
+		AND I.[ysnProvisionalWithGL] = @ZeroBit
 
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -1649,7 +1677,7 @@ BEGIN
 		SELECT dblAppliedInvoiceAmount	= SUM(ISNULL(dblAppliedInvoiceDetailAmount, 0))
 		FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)
 		WHERE intInvoiceId = I.intInvoiceId 
-			AND ysnApplied = 1
+			AND ysnApplied = @OneBit
 			AND ISNULL(dblAppliedInvoiceDetailAmount, 0) > 0			
 	) PREPAIDS
 	WHERE
@@ -1703,12 +1731,12 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError] -- + '[fnTMGetInvalidInvoicesForSync]'
 	FROM 
-		[dbo].[fnTMGetInvalidInvoicesForSync](@PostInvoiceDataFromIntegration, 1)
+		[dbo].[fnTMGetInvalidInvoicesForSync](@PostInvoiceDataFromIntegration, @OneBit)
 
 	--MFG Auto Blend
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM #ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> 1 AND PID.[ysnAutoBlend] = 1
+	SELECT PID.* FROM #ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> @OneBit AND PID.[ysnAutoBlend] = @OneBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1727,7 +1755,7 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError] -- + '[fnMFGetInvalidInvoicesForPosting]'
 	FROM 
-		[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, 1)
+		[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @OneBit)
 
 	-- IC Costing
 	DELETE FROM @ItemsForCosting	
@@ -1787,7 +1815,7 @@ BEGIN
 		#ARItemsForCosting
 	WHERE
 		[ysnForValidation] IS NULL
-		OR [ysnForValidation] = 1
+		OR [ysnForValidation] = @OneBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1807,7 +1835,7 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError] -- + '[fnICGetInvalidInvoicesForCosting]'
 	FROM 
-		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, 1)
+		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @OneBit)
 
 
 	-- IC In Transit Costing
@@ -1881,7 +1909,7 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError] -- + '[fnICGetInvalidInvoicesForInTransitCosting]'
 	FROM 
-		[dbo].[fnICGetInvalidInvoicesForInTransitCosting](@ItemsForInTransitCosting, 1)
+		[dbo].[fnICGetInvalidInvoicesForInTransitCosting](@ItemsForInTransitCosting, @OneBit)
 
 	-- IC Item Storage
 	DELETE FROM @ItemsForStoragePosting
@@ -1958,10 +1986,10 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError] -- + '[fnICGetInvalidInvoicesForItemStoragePosting]'
 	FROM 
-		[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, 1)
+		[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @OneBit)
 END
 
-IF @Post = 0
+IF @Post = @ZeroBit
 BEGIN
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1984,7 +2012,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceHeader I
 	WHERE  
-		I.[ysnPosted] = 0
+		I.[ysnPosted] = @ZeroBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2083,7 +2111,7 @@ BEGIN
 		#ARPostInvoiceHeader I
 	WHERE  
 		I.[intEntityId] <> I.[intUserId]
-		AND (I.[ysnUserAllowedToPostOtherTrans] IS NOT NULL AND I.[ysnUserAllowedToPostOtherTrans] = 1)			
+		AND (I.[ysnUserAllowedToPostOtherTrans] IS NOT NULL AND I.[ysnUserAllowedToPostOtherTrans] = @OneBit)			
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2110,7 +2138,7 @@ BEGIN
 		#ARPostInvoiceHeader I
 			ON ARPD.[intInvoiceId] = I.[intInvoiceId]
 	WHERE
-		@Recap = 0
+		@Recap = @ZeroBit
 		AND I.strTransactionType <> 'Cash Refund'
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -2134,7 +2162,7 @@ BEGIN
 	INNER JOIN tblAPBill A
 		ON A.strVendorOrderNumber = I.strInvoiceNumber
 	WHERE
-		@Recap = 0
+		@Recap = @ZeroBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2160,7 +2188,7 @@ BEGIN
 		#ARPostInvoiceHeader I
 			ON APPD.[intInvoiceId] = I.[intInvoiceId]
 	WHERE
-		@Recap = 0
+		@Recap = @ZeroBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2187,7 +2215,7 @@ BEGIN
 	INNER JOIN tblCMBankTransactionDetail CMBTD
 			ON CMUF.[intUndepositedFundId] = CMBTD.[intUndepositedFundId]
 	WHERE 
-		@Recap = 0
+		@Recap = @ZeroBit
 		AND CMUF.[strSourceSystem] = 'AR'
 
 	INSERT INTO #ARInvalidInvoiceData
@@ -2213,10 +2241,10 @@ BEGIN
 		SELECT TOP 1 P.strIssueNo
 		FROM dbo.tblPATIssueStock P WITH (NOLOCK)
 		WHERE P.intInvoiceId = I.intInvoiceId
-			AND P.ysnPosted = 1
+			AND P.ysnPosted = @OneBit
 	) PAT
 	WHERE
-		@Recap = 0
+		@Recap = @ZeroBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2244,7 +2272,7 @@ BEGIN
 		WHERE PD.intInvoiceId = I.intInvoiceId
 	) VOUCHER
 	WHERE
-		@Recap = 0
+		@Recap = @ZeroBit
 	
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2265,8 +2293,8 @@ BEGIN
 		,[strPostingError]		= 'You cannot unpost this Credit Memo (' + INV.strInvoiceNumber + '). Please unforgive the Service Charge.'
 	FROM #ARPostInvoiceHeader I
 	INNER JOIN tblARInvoice INV ON INV.intInvoiceId = I.intInvoiceId	
-	WHERE @Recap = 0
-	  AND ISNULL(INV.ysnServiceChargeCredit, 0) = 1
+	WHERE @Recap = @ZeroBit
+	  AND ISNULL(INV.ysnServiceChargeCredit, 0) = @OneBit
 	  AND INV.strTransactionType = 'Credit Memo'
 
 	--TM Sync
@@ -2292,12 +2320,12 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError] -- + '[fnTMGetInvalidInvoicesForSync]'
 	FROM 
-		[dbo].[fnTMGetInvalidInvoicesForSync](@PostInvoiceDataFromIntegration, 0)
+		[dbo].[fnTMGetInvalidInvoicesForSync](@PostInvoiceDataFromIntegration, @ZeroBit)
 
 	--MFG Auto Blend
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM #ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> 0 AND PID.[ysnAutoBlend] = 1
+	SELECT PID.* FROM #ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> @ZeroBit AND PID.[ysnAutoBlend] = @OneBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2316,20 +2344,20 @@ BEGIN
 		,[strBatchId]
 		,[strPostingError] -- + '[fnMFGetInvalidInvoicesForPosting]'
 	FROM 
-		[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, 0)
+		[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @ZeroBit)
 
 	--Don't allow Imported Invoice from Origin to be unposted
-	DECLARE @IsAG BIT = 0
-	DECLARE @IsPT BIT = 0
+	DECLARE @IsAG BIT = @ZeroBit
+	DECLARE @IsPT BIT = @ZeroBit
 
 	IF EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'coctlmst')
 		SELECT TOP 1 
-			@IsAG	= CASE WHEN ISNULL(coctl_ag, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst') THEN 1 ELSE 0 END
-			,@IsPT	= CASE WHEN ISNULL(coctl_pt, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst') THEN 1 ELSE 0 END 
+			@IsAG	= CASE WHEN ISNULL(coctl_ag, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'agivcmst') THEN @OneBit ELSE @ZeroBit END
+			,@IsPT	= CASE WHEN ISNULL(coctl_pt, '') = 'Y' AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst') THEN @OneBit ELSE @ZeroBit END 
 		FROM
 			coctlmst
 
-	IF @IsAG = 1
+	IF @IsAG = @OneBit
 		BEGIN
 			INSERT INTO #ARInvalidInvoiceData
 		        ([intInvoiceId]
@@ -2354,12 +2382,12 @@ BEGIN
 				(SELECT [agivc_ivc_no] FROM agivcmst WITH (NOLOCK)) OI
 					ON I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS = OI.[agivc_ivc_no] COLLATE Latin1_General_CI_AS
 			WHERE  
-				I.[ysnPosted] = 1
-				AND I.[ysnImportedAsPosted] = 1 
-				AND I.[ysnImportedFromOrigin] = 1														
+				I.[ysnPosted] = @OneBit
+				AND I.[ysnImportedAsPosted] = @OneBit 
+				AND I.[ysnImportedFromOrigin] = @OneBit														
 		END
 
-	IF @IsPT = 1
+	IF @IsPT = @OneBit
 		BEGIN
 			INSERT INTO #ARInvalidInvoiceData
 		        ([intInvoiceId]
@@ -2384,9 +2412,9 @@ BEGIN
 				(SELECT [ptivc_invc_no] FROM ptivcmst WITH (NOLOCK)) OI
 					ON I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS = OI.[ptivc_invc_no] COLLATE Latin1_General_CI_AS
 			WHERE
-				I.[ysnPosted] = 1
-				AND I.[ysnImportedAsPosted] = 1 
-				AND I.[ysnImportedFromOrigin] = 1												
+				I.[ysnPosted] = @OneBit
+				AND I.[ysnImportedAsPosted] = @OneBit 
+				AND I.[ysnImportedFromOrigin] = @OneBit												
 		END
 END
 
