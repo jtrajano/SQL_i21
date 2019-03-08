@@ -72,6 +72,8 @@ SELECT
 		,strEODNumber = ''  COLLATE Latin1_General_CI_AS  
 		,strEODDrawer = '' COLLATE Latin1_General_CI_AS   
 		,ysnEODComplete = NULL
+		,b.intCurrencyId
+		
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
 WHERE	b.intBankAccountId = @intBankAccountId
@@ -91,12 +93,12 @@ UNION SELECT DISTINCT
 	intBankAccountId = @intBankAccountId,
 	strSourceTransactionId,
 	intSourceTransactionId,
-	intLocationId,
+	v.intLocationId,
 	dtmDate,
 	dblAmount,
 	strName,
 	strSourceSystem,
-	strPaymentMethod,
+	v.strPaymentMethod,
 	intCreatedUserId = intEntityEnteredById,
 	dtmCreated = GETDATE(),
 	intLastModifiedUserId = intEntityEnteredById,
@@ -104,15 +106,20 @@ UNION SELECT DISTINCT
 	strPaymentSource,			
 	strEODNumber,
 	strEODDrawer = strDrawerName,		
-    ysnEODComplete = ysnCompleted 		
+    ysnEODComplete = ysnCompleted 	,
+	b.intCurrencyId
 FROM vyuARUndepositedPayment v LEFT JOIN tblCMBankAccount b
+
 			ON b.intBankAccountId = v.intBankAccountId --OR ISNULL(v.intBankAccountId,0) = 0 --Include payments without bank account
+			left join tblARPayment p on p.strRecordNumber = v.strSourceTransactionId
 WHERE	v.intBankAccountId = @intBankAccountId
-		OR ISNULL(v.intBankAccountId,0) = 0 -- AR-2379
+		OR 
+		ISNULL(v.intBankAccountId,0) = 0 -- AR-2379
 		AND	NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
 			WHERE	f.strSourceTransactionId = v.strSourceTransactionId)
+		AND isnull(p.intPaymentMethodId,0) <> 9 -- EXEMPT CF INVOICE
 )
 
 INSERT INTO tblCMUndepositedFund (
@@ -133,9 +140,10 @@ INSERT INTO tblCMUndepositedFund (
 		,strEODNumber
 		,strEODDrawer
     	,ysnEODComplete
+		,intCurrencyId
 )
 SELECT 
-intBankAccountId
+		intBankAccountId
 		,strSourceTransactionId
 		,intSourceTransactionId
 		,intLocationId
@@ -152,6 +160,8 @@ intBankAccountId
 		,strEODNumber
 		,strEODDrawer
     	,ysnEODComplete 
+		,intCurrencyId
+		
 FROM CTE
 WHERE dblAmount <> 0
 

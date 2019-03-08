@@ -3771,6 +3771,7 @@
     <Build Include="dbo\Stored Procedures\uspCTAddToContractImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessContractImport.sql" />
     <None Include="Scripts\Post-Deployment\CM\4_DataFix.sql" />
+    <None Include="Scripts\Post-Deployment\CM\5_UndepositedFund.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceTypeAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateCustomerPrepayment.sql" />
     <Build Include="dbo\Views\vyuICGetStorageBinMeasurementReading.sql" />

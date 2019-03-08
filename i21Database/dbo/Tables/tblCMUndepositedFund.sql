@@ -27,6 +27,7 @@
 	[strEODNumber]				NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[strEODDrawer]				NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
     [ysnEODComplete]			BIT NULL,
+	[intCurrencyId]				INT NULL,
     [intConcurrencyId]			INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMUndepositedFund] PRIMARY KEY CLUSTERED ([intUndepositedFundId] ASC)
 );
