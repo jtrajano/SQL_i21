@@ -178,6 +178,12 @@ BEGIN TRY
 		,intInventoryReceiptId = x.intInventoryReceiptId
 		,intInventoryShipmentId = x.intInventoryShipmentId
 		,strChildLotNumber = x.strChildLotNumber
+		,strCourier = x.strCourier
+		,strCourierRef = x.strCourierRef
+		,intForwardingAgentId = x.intForwardingAgentId
+		,strForwardingAgentRef = x.strForwardingAgentRef
+		,strSentBy = x.strSentBy
+		,intSentById = x.intSentById
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -231,6 +237,12 @@ BEGIN TRY
 			,intInventoryReceiptId INT
 			,intInventoryShipmentId INT
 			,strChildLotNumber NVARCHAR(50)
+			,strCourier NVARCHAR(50)
+			,strCourierRef NVARCHAR(50)
+			,intForwardingAgentId INT
+			,strForwardingAgentRef NVARCHAR(50)
+			,strSentBy NVARCHAR(50)
+			,intSentById INT
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)

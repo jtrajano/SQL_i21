@@ -60,6 +60,12 @@
 	intBookId INT,
 	intSubBookId INT,
 	strChildLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strCourier NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strCourierRef NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intForwardingAgentId INT,
+	strForwardingAgentRef NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strSentBy NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intSentById INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),
