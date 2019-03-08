@@ -112,6 +112,13 @@ SELECT @intTimeOffRequestId = @intTransactionId
 	END
 	ELSE
 	BEGIN
+		/* Check if TOR is already posted to calendar */
+		IF EXISTS (SELECT TOP 1 1 FROM vyuPRTimeOffRequest WHERE intTimeOffRequestId = @intTimeOffRequestId AND ysnPostedToCalendar = 1)
+		BEGIN
+			PRINT 'Time Off Request has been posted to calendar.'
+			GOTO Post_Exit
+		END
+
 		/* Check if TOR is already approved */
 		IF NOT EXISTS (SELECT TOP 1 1 FROM vyuPRTimeOffRequest WHERE intTimeOffRequestId = @intTimeOffRequestId AND strApprovalStatus IN ('Approved', 'No Need for Approval'))
 		BEGIN

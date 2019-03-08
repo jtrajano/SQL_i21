@@ -107,10 +107,10 @@ FROM (
 			, um.strUnitMeasure as strHedgeUOM
 			, CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
 			, intFutOptTransactionId
-			, isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope
+			, isnull((Select SUM(dblLots) From tblRKOptionsPnSExpired ope
 					where ope.intFutOptTransactionId= ot.intFutOptTransactionId
 					and dtmExpiredDate<=@dtmPositionAsOf),0) dblExpiredLots
-			, isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa
+			, isnull((Select SUM(dblLots) FROM tblRKOptionsPnSExercisedAssigned opa
 					where opa.intFutOptTransactionId= ot.intFutOptTransactionId
 					and dtmTranDate<=@dtmPositionAsOf),0) dblAssignedLots
 			, intCurrencyId = c.intCurrencyID

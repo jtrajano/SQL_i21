@@ -10,6 +10,7 @@
 	[ysnActivity]	   BIT NULL,
 	[ysnCustomTab]	   BIT NULL,
     [ysnDocumentSource] BIT NULL, 
+	[ysnSearch]			BIT NULL DEFAULT ((0)),
     [strApprovalMessage]	NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT CONSTRAINT [DF__tblSMScreen] DEFAULT ((1)) NOT NULL,
     [ysnAvailable] BIT NOT NULL DEFAULT 1, 

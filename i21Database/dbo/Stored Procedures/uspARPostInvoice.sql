@@ -414,6 +414,12 @@ EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
     ,@TransType         = @transType
     ,@UserId            = @userId
 
+
+IF @post = 1 AND @recap = 0
+    EXEC [dbo].[uspARProcessSplitOnInvoicePost]
+         @PostDate    = @PostDate
+        ,@UserId      = @userId
+
 --Removed excluded Invoices to post/unpost
 IF(@exclude IS NOT NULL)
 	BEGIN
@@ -584,7 +590,7 @@ CREATE TABLE #ARItemsForStorageCosting
 
 
 
---IF @post = 1
+IF @recap = 0
 	EXEC [dbo].[uspARPostItemResevation]
 	
 
@@ -711,7 +717,7 @@ BEGIN TRY
     END
 
 
-	IF @post = 1
+	IF @post = 1 AND @recap = 1
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
 			@PostDate        = @PostDate
 		   ,@UserId          = @userId

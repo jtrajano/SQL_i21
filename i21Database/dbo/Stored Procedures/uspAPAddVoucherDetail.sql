@@ -19,7 +19,7 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPAddVoucherDetail';
-DECLARE @insertedData TABLE(intOldPayableId int, intNewPayableId int);
+DECLARE @payablesKey TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @transCount INT = @@TRANCOUNT;
 DECLARE @voucherDetailsInfo TABLE(intBillDetailId INT, intVoucherPayableId INT);
 DECLARE @voucherDetailIds AS Id;
@@ -28,10 +28,45 @@ IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
 --MAKE SURE TO ADD FIRST TO THE PAYABLES THE VOUCHER DETAIL BEING ADDED
---STORED PROCEDURE uspAPUpdateVoucherPayableQty WILL CHECK FIRST IF IT IS ALREADY ADDED, 
---IF ALREADY ADDED, THIS WILL REMOVE THE EXISTING AND RE-INSERT THE NEW
-INSERT INTO @insertedData
-EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherDetails, @voucherPayableTax = @voucherPayableTax, @post = 1, @throwError = @throwError, @error = @error OUT
+IF NOT EXISTS(
+	SELECT TOP 1 1
+		FROM tblAPVoucherPayable A
+		INNER JOIN @voucherDetails C
+			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
+			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
+			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
+			--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
+			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
+			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+	)
+	AND NOT EXISTS(
+		SELECT TOP 1 1
+		FROM tblAPVoucherPayableCompleted A
+		INNER JOIN @voucherDetails C
+			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
+			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
+			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
+			--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
+			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
+			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+	)
+BEGIN
+	EXEC uspAPAddVoucherPayable @voucherPayable = @voucherDetails, @voucherPayableTax = @voucherPayableTax, @throwError = 1
+END
+
+--uspAPUpdateVoucherPayableQty updates the tblAPVoucherPayable table for valid payables only
+--make sure to add on tblAPBillDetail the valid payables
+INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
+SELECT
+	intOldPayableId
+	,intNewPayableId
+FROM dbo.fnAPGetPayableKeyInfo(@voucherDetails)
 
 MERGE INTO tblAPBillDetail AS destination
 USING
@@ -97,13 +132,13 @@ USING
 												ELSE A.dblCostUnitQty END
 		,dblCost							=	CASE WHEN A.intTransactionType = 1
 													THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
-														THEN ctDetail.dblSeqPrice
+															THEN ctDetail.dblSeqPrice
 														ELSE 
 															(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
 																THEN ctDetail.dblSeqPrice
 																ELSE A.dblCost
-																END)
-													END)
+															END)
+														END)
 												ELSE A.dblCost END
 		,dblOldCost							=	A.dblOldCost
 		/*Quantity info*/					
@@ -121,17 +156,20 @@ USING
 		/*Ordered and Received should always the same*/
 		,dblQtyOrdered						=	CASE WHEN A.intTransactionType = 1
 													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityToBill,0))
+															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityBilled,0))
 														ELSE A.dblQuantityToBill END)
 												ELSE A.dblQuantityToBill END
 		,dblQtyReceived						=	CASE WHEN A.intTransactionType = 1
 													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityToBill,0))
+															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityBilled,0))
 														ELSE A.dblQuantityToBill END)
 												ELSE A.dblQuantityToBill END
 		/*Contract info*/					
 		,dblQtyContract						=	ISNULL(ctDetail.dblDetailQuantity,0)
-		,dblContractCost					=	ISNULL(ctDetail.dblSeqPrice,0)
+		,dblContractCost					=	CASE WHEN A.intTransactionType = 13
+													THEN A.dblFutures + A.dblBasis
+													ELSE ISNULL(ctDetail.dblSeqPrice,0)
+													END
 		/*1099 info*/						
 		,int1099Form						=	ISNULL(A.int1099Form,
 													(CASE WHEN patron.intEntityId IS NOT NULL 
@@ -212,15 +250,18 @@ USING
 	LEFT JOIN tblICItemUOM contractItemQtyUOM ON contractItemQtyUOM.intItemUOMId = ctDetail.intItemUOMId
 	--we should expect that if creating voucher, their record should exists in Add Payables
 	--if payable is fully vouchered, it should trap with fnAPValidateVoucherPayableQty
+	LEFT JOIN @payablesKey payableKeys
+		ON payableKeys.intOldPayableId = A.intVoucherPayableId
 	LEFT JOIN tblAPVoucherPayable vp 
-		ON ISNULL(vp.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
-			AND ISNULL(vp.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
-			AND ISNULL(vp.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
-			AND ISNULL(vp.intInventoryReceiptChargeId,1) = ISNULL(A.intInventoryReceiptChargeId,1)
-			AND ISNULL(vp.intInventoryReceiptItemId,1) = ISNULL(A.intInventoryReceiptItemId,1)
-			AND ISNULL(vp.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
-			AND ISNULL(vp.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
-			AND ISNULL(vp.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
+		ON payableKeys.intNewPayableId = vp.intVoucherPayableId
+		-- ON ISNULL(vp.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
+		-- 	AND ISNULL(vp.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
+		-- 	AND ISNULL(vp.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
+		-- 	AND ISNULL(vp.intInventoryReceiptChargeId,1) = ISNULL(A.intInventoryReceiptChargeId,1)
+		-- 	AND ISNULL(vp.intInventoryReceiptItemId,1) = ISNULL(A.intInventoryReceiptItemId,1)
+		-- 	AND ISNULL(vp.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
+		-- 	AND ISNULL(vp.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
+		-- 	AND ISNULL(vp.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
 	ORDER BY A.intBillId ASC
 ) AS SourceData
 ON (1=0)
@@ -426,7 +467,7 @@ SELECT
 	[ysnTaxOnly]			=	A.ysnTaxOnly,
 	[ysnTaxExempt]			=	A.ysnTaxExempt
 FROM tblAPVoucherPayableTaxStaging A
-INNER JOIN @insertedData B
+INNER JOIN @payablesKey B
 	ON A.intVoucherPayableId = B.intNewPayableId
 INNER JOIN @voucherDetailsInfo C
 	ON B.intOldPayableId = C.intVoucherPayableId

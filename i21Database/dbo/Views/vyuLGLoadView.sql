@@ -119,47 +119,50 @@ SELECT -- Load Header
 			THEN 'Invoiced'
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS
-	,strCalenderInfo = LOAD.[strLoadNumber] + ' - ' + CASE 
-		WHEN LOAD.intPurchaseSale = 1
-			THEN 'Inbound'
-		ELSE CASE 
-				WHEN LOAD.intPurchaseSale = 2
-					THEN 'Outbound'
-				ELSE 'Drop-Ship'
-				END
-		END + ' - ' + CASE LOAD.intShipmentStatus
-		WHEN 1
-			THEN 'Scheduled'
-		WHEN 2
-			THEN 'Dispatched'
-		WHEN 3
-			THEN 'Inbound transit'
-		WHEN 4
-			THEN 'Received'
-		WHEN 5
-			THEN 'Outbound transit'
-		WHEN 6
-			THEN 'Delivered'
-		WHEN 7
-			THEN 'Instruction created'
-		WHEN 8
-			THEN 'Partial Shipment Created'
-		WHEN 9
-			THEN 'Full Shipment Created'
-		WHEN 10
-			THEN 'Cancelled'
-		WHEN 11
-			THEN 'Invoiced'
-		ELSE ''
-		END + CASE 
-		WHEN ISNULL(LOAD.strExternalLoadNumber, '') <> ''
+	,strCalenderInfo = LOAD.[strLoadNumber] 
+		+ CASE LOAD.intTransportationMode 
+			WHEN 1 THEN '(T)'
+			WHEN 2 THEN '(V)'
+			WHEN 3 THEN '(R)' 
+			END +  ' - ' 
+		+ CASE LOAD.intPurchaseSale 
+			WHEN 1 THEN 'Inbound'
+			WHEN 2 THEN 'Outbound'
+			WHEN 3 THEN 'Drop-Ship'
+			END + ' - ' 
+		+ CASE LOAD.intShipmentStatus
+			WHEN 1
+				THEN 'Scheduled'
+			WHEN 2
+				THEN 'Dispatched'
+			WHEN 3
+				THEN 'Inbound transit'
+			WHEN 4
+				THEN 'Received'
+			WHEN 5
+				THEN 'Outbound transit'
+			WHEN 6
+				THEN 'Delivered'
+			WHEN 7
+				THEN 'Instruction created'
+			WHEN 8
+				THEN 'Partial Shipment Created'
+			WHEN 9
+				THEN 'Full Shipment Created'
+			WHEN 10
+				THEN 'Cancelled'
+			WHEN 11
+				THEN 'Invoiced'
+			ELSE ''
+			END 
+		+ CASE WHEN ISNULL(LOAD.strExternalLoadNumber, '') <> ''
 			THEN ' - ' + '(S) ' + LOAD.strExternalLoadNumber
-		ELSE ''
-		END + CASE 
-		WHEN ISNULL(LOAD.strCustomerReference, '') <> ''
+			ELSE ''
+			END 
+		+ CASE WHEN ISNULL(LOAD.strCustomerReference, '') <> ''
 			THEN ' - ' + '(C) ' + LOAD.strCustomerReference
-		ELSE ''
-		END COLLATE Latin1_General_CI_AS,
+			ELSE ''
+			END COLLATE Latin1_General_CI_AS,
 		LOAD.intPositionId,
 		LOAD.[intWeightUnitMeasureId],
 		strWeightUnitMeasure = [strUnitMeasure],

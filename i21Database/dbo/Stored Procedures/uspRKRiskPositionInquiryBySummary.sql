@@ -92,7 +92,11 @@ DECLARE @RollCost AS TABLE (strFutMarketName nvarchar(200) COLLATE Latin1_Genera
 	, dblQuantity numeric(24,10)
 	, dblWtAvgOpenLongPosition  numeric(24,10)
 	, strTradeNo nvarchar(100) COLLATE Latin1_General_CI_AS
-	, intFutOptTransactionHeaderId int)
+	, intFutOptTransactionHeaderId int
+	, intBookId INT
+	, strBook nvarchar(100) COLLATE Latin1_General_CI_AS
+	, intSubBookId INT
+	, strSubBook nvarchar(100) COLLATE Latin1_General_CI_AS)
 
 DECLARE @dtmCurrentDate datetime
 SET @dtmCurrentDate = getdate()
@@ -107,7 +111,11 @@ INSERT INTO @RollCost(strFutMarketName
 	, dblQuantity
 	, dblWtAvgOpenLongPosition
 	, strTradeNo
-	, intFutOptTransactionHeaderId)
+	, intFutOptTransactionHeaderId
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT strFutMarketName
 	, strCommodityCode
 	, strFutureMonth
@@ -119,6 +127,10 @@ SELECT strFutMarketName
 	, dblWtAvgOpenLongPosition
 	, strInternalTradeNo
 	, intFutOptTransactionHeaderId
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM vyuRKRollCost
 WHERE intCommodityId = @intCommodityId and intFutureMarketId = @intFutureMarketId
 	AND ISNULL(intBookId,0) = ISNULL(@intBookId, ISNULL(intBookId,0))
@@ -287,7 +299,11 @@ DECLARE @ListFinal AS TABLE (intRowNumber int
 	, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intItemId INT
 	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS)  
+	, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+	, intBookId INT
+	, strBook nvarchar(100) COLLATE Latin1_General_CI_AS
+	, intSubBookId INT
+	, strSubBook nvarchar(100) COLLATE Latin1_General_CI_AS)  
 
 DECLARE @ContractTransaction AS TABLE (strFutureMonth nvarchar(200) COLLATE Latin1_General_CI_AS
 	, strAccountNumber nvarchar(200) COLLATE Latin1_General_CI_AS
@@ -314,7 +330,11 @@ DECLARE @ContractTransaction AS TABLE (strFutureMonth nvarchar(200) COLLATE Lati
 	, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intItemId INT
 	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS)
+	, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+	, intBookId INT
+	, strBook nvarchar(100) COLLATE Latin1_General_CI_AS
+	, intSubBookId INT
+	, strSubBook nvarchar(100) COLLATE Latin1_General_CI_AS)
 
 DECLARE @PricedContractList AS TABLE (strFutureMonth NVARCHAR(max) COLLATE Latin1_General_CI_AS
 	, strAccountNumber NVARCHAR(max) COLLATE Latin1_General_CI_AS
@@ -350,7 +370,11 @@ DECLARE @PricedContractList AS TABLE (strFutureMonth NVARCHAR(max) COLLATE Latin
 	, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intItemId INT
 	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS)
+	, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+	, intBookId INT
+	, strBook nvarchar(100) COLLATE Latin1_General_CI_AS
+	, intSubBookId INT
+	, strSubBook nvarchar(100) COLLATE Latin1_General_CI_AS)
 
 INSERT INTO @PricedContractList
 SELECT fm.strFutureMonth
@@ -388,6 +412,10 @@ SELECT fm.strFutureMonth
 	, intItemId = ic.intItemId
 	, strItemNo = ic.strItemNo
 	, strItemDescription = ic.strDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM vyuRKRiskPositionContractDetail cv
 JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
 JOIN tblICCommodityUnitMeasure um2 ON um2.intUnitMeasureId = ffm.intUnitMeasureId and um2.intCommodityId = cv.intCommodityId
@@ -428,7 +456,11 @@ INSERT INTO @ContractTransaction (strFutureMonth
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT strFutureMonth
 	, strAccountNumber
 	, dblNoOfContract
@@ -455,6 +487,10 @@ SELECT strFutureMonth
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM (
 	-- Direct Pricing
 	SELECT strFutureMonth
@@ -483,6 +519,10 @@ FROM (
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM @PricedContractList cv
 	WHERE cv.intPricingTypeId in (1,2,8) AND ysnDeltaHedge = 0 and intContractDetailId not in(SELECT ISNULL(intContractDetailId,0) from tblCTPriceFixation)
 	
@@ -513,6 +553,10 @@ FROM (
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM (
 		SELECT strFutureMonth
 			, strAccountNumber
@@ -554,6 +598,10 @@ FROM (
 			, intItemId
 			, strItemNo
 			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
 		FROM @PricedContractList cv
 		WHERE cv.intContractStatusId <> 3  AND ISNULL(ysnDeltaHedge, 0) =0
 			and intContractDetailId in(select ISNULL(intContractDetailId,0) from tblCTPriceFixation)
@@ -586,6 +634,10 @@ FROM (
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM (
 		SELECT strFutureMonth
 			, strAccountNumber
@@ -630,6 +682,10 @@ FROM (
 			, intItemId
 			, strItemNo
 			, strItemDescription
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
 		FROM @PricedContractList cv
 		WHERE cv.intContractStatusId <> 3  AND ISNULL(ysnDeltaHedge, 0) =0
 			and intContractDetailId in(select ISNULL(intContractDetailId,0) from tblCTPriceFixation)
@@ -659,7 +715,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT 1 intRowNumber
 	, '1.Outright Coverage','Outright Coverage' COLLATE Latin1_General_CI_AS Selection
 	, '1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS PriceStatus
@@ -683,6 +743,10 @@ SELECT 1 intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ContractTransaction
 WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId
 	AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -709,7 +773,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT 1 intRowNumber
 	, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
 	, 'Outright Coverage' COLLATE Latin1_General_CI_AS Selection
@@ -732,6 +800,10 @@ SELECT 1 intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId = NULL
+	, strBook = NULL
+	, intSubBookId = NULL
+	, strSubBook = NULL
 FROM (
 	SELECT DISTINCT 'Purchase' + ' - ' + ISNULL(c.strDescription,'') COLLATE Latin1_General_CI_AS as strAccountNumber
 		, dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,@intUOMId,t.dblQuantity) dblNoOfLot
@@ -783,7 +855,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, dblQuantity
 	, intOrderByHeading
 	, intContractHeaderId
-	, intFutOptTransactionHeaderId)
+	, intFutOptTransactionHeaderId
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT * FROM (
 	SELECT intRowNumber
 		, grpname
@@ -801,6 +877,10 @@ SELECT * FROM (
 		, 2 intOrderByHeading
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM (
 		SELECT DISTINCT 2 intRowNumber
 			, '1.Outright Coverage' COLLATE Latin1_General_CI_AS grpname
@@ -832,6 +912,10 @@ SELECT * FROM (
 			, um.intCommodityUnitMeasureId
 			, null as intContractHeaderId
 			, ft.intFutOptTransactionHeaderId
+			, ft.intBookId
+			, book.strBook
+			, ft.intSubBookId
+			, subBook.strSubBook
 		FROM tblRKFutOptTransaction ft
 		JOIN tblRKFutureMarket mar on mar.intFutureMarketId=ft.intFutureMarketId and ft.strStatus='Filled'
 		JOIN tblRKBrokerageAccount ba on ft.intBrokerageAccountId=ba.intBrokerageAccountId  and ft.intInstrumentTypeId in (1,3)  and ft.intCommodityId=@intCommodityId
@@ -839,10 +923,12 @@ SELECT * FROM (
 		JOIN tblRKFuturesMonth fm on fm.intFutureMonthId=ft.intFutureMonthId and fm.intFutureMarketId=ft.intFutureMarketId and fm.ysnExpired=0
 		JOIN tblEMEntity e on e.intEntityId=ft.intEntityId
 		JOIN tblICCommodityUnitMeasure um on um.intCommodityId=ft.intCommodityId and um.intUnitMeasureId=mar.intUnitMeasureId
+		LEFT JOIN tblCTBook book ON book.intBookId = ft.intBookId
+		LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = ft.intSubBookId
 		WHERE ft.intCommodityId=@intCommodityId AND ft.intFutureMarketId=@intFutureMarketId
 			AND intLocationId = ISNULL(@intCompanyLocationId, intLocationId)
-			AND ISNULL(intBookId,0) = ISNULL(@intBookId, ISNULL(intBookId,0))
-			AND ISNULL(intSubBookId,0) = ISNULL(@intSubBookId, ISNULL(intSubBookId,0))
+			AND ISNULL(ft.intBookId,0) = ISNULL(@intBookId, ISNULL(ft.intBookId,0))
+			AND ISNULL(ft.intSubBookId,0) = ISNULL(@intSubBookId, ISNULL(ft.intSubBookId,0))
 			and CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) <= @dtmToDate
 			and CONVERT(DATETIME,'01 '+strFutureMonth) >= @dtmFutureMonthsDate
 	)t
@@ -871,7 +957,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT 4 intRowNumber
 	, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
 	, 'Market coverage' COLLATE Latin1_General_CI_AS Selection
@@ -896,6 +986,10 @@ SELECT 4 intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal
 WHERE intRowNumber in(1,2) and strFutureMonth <> 'Previous'
 
@@ -923,6 +1017,10 @@ UNION ALL SELECT 4 intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal
 WHERE intRowNumber in(1,2)  and strFutureMonth = 'Previous'
 
@@ -951,7 +1049,11 @@ BEGIN
 		, strOrigin
 		, intItemId
 		, strItemNo
-		, strItemDescription)
+		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook)
 	SELECT 5 intRowNumber
 		, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
 		, 'Market Coverage' COLLATE Latin1_General_CI_AS Selection
@@ -976,6 +1078,10 @@ BEGIN
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM @ListFinal WHERE intRowNumber in(4)
 END
 ---- Futures Required
@@ -1003,7 +1109,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT intRowNumber
 	, strGroup
 	, Selection
@@ -1028,6 +1138,10 @@ SELECT intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM (
 	SELECT DISTINCT 6 intRowNumber
 		, '2.Futures Required' COLLATE Latin1_General_CI_AS strGroup
@@ -1052,6 +1166,10 @@ FROM (
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM @ContractTransaction
 	WHERE ysnExpired=0 and intPricingTypeId <> 1  AND intCommodityId=@intCommodityId
 		AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
@@ -1120,7 +1238,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT 8 intRowNumber
 	, '2.Futures Required' COLLATE Latin1_General_CI_AS
 	, 'Futures Required' COLLATE Latin1_General_CI_AS Selection
@@ -1145,6 +1267,10 @@ SELECT 8 intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal WHERE intRowNumber in(2)
 
 INSERT INTO @ListFinal (intRowNumber
@@ -1164,7 +1290,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT 9 intRowNumber
 	, '2.Futures Required' COLLATE Latin1_General_CI_AS
 	, 'Futures Required' COLLATE Latin1_General_CI_AS Selection
@@ -1183,6 +1313,10 @@ SELECT 9 intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM (
 	SELECT case when strFutureMonth = 'Previous' then @strParamFutureMonth else strFutureMonth end COLLATE Latin1_General_CI_AS strFutureMonth
 		, 0 dblNoOfContract1
@@ -1199,6 +1333,10 @@ FROM (
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM @ListFinal WHERE intRowNumber in(6,7)
 	group by strFutureMonth
 		, strProductType
@@ -1209,6 +1347,10 @@ FROM (
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	
 	UNION ALL SELECT strFutureMonth
 		, sum(dblQuantity) as dblNoOfContract1
@@ -1225,6 +1367,10 @@ FROM (
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM @ListFinal WHERE intRowNumber in(8)
 	group by strFutureMonth
 		, strProductType
@@ -1235,6 +1381,10 @@ FROM (
 		, intItemId
 		, strItemNo
 		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 )t group by strFutureMonth
 	, strProductType
 	, strProductLine
@@ -1244,6 +1394,10 @@ FROM (
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 
 INSERT INTO @ListFinal (intRowNumber
 	, strGroup
@@ -1260,7 +1414,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, dblQuantity
 	, intOrderByHeading
 	, intContractHeaderId
-	, intFutOptTransactionHeaderId)
+	, intFutOptTransactionHeaderId
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT 10 intRowNumber
 	, '2.Futures Required' COLLATE Latin1_General_CI_AS
 	, Selection
@@ -1277,6 +1435,10 @@ SELECT 10 intRowNumber
 	, 10
 	, null
 	, intFutOptTransactionHeaderId
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM (
 	SELECT DISTINCT 'Futures Required' COLLATE Latin1_General_CI_AS as Selection
 		, '5.Avg Long Price' COLLATE Latin1_General_CI_AS as PriceStatus
@@ -1287,6 +1449,10 @@ FROM (
 		, dblQuantity*dblNoOfLot dblQuantity
 		, strTradeNo
 		, intFutOptTransactionHeaderId
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
 	FROM @RollCost ft
 	WHERE ft.intCommodityId=@intCommodityId and intFutureMarketId=@intFutureMarketId
 		and CONVERT(DATETIME,'01 '+ ft.strFutureMonth) >= CONVERT(DATETIME,'01 '+ @strParamFutureMonth)
@@ -1315,7 +1481,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT 11
 	, strGroup
 	, Selection
@@ -1340,6 +1510,10 @@ SELECT 11
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal where strAccountNumber <> 'Avg Long Price'
 ORDER BY intRowNumber
 	, CASE WHEN strFutureMonth not in('Previous','Total') THEN CONVERT(DATETIME,'01 '+strFutureMonth) END
@@ -1369,7 +1543,11 @@ INSERT INTO @ListFinal (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT 11 intRowNumber
 	, strGroup
 	, Selection
@@ -1394,6 +1572,10 @@ SELECT 11 intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal where strAccountNumber = 'Avg Long Price'
 GROUP BY strGroup
 	, Selection
@@ -1407,6 +1589,10 @@ GROUP BY strGroup
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 
 DECLARE @MonthOrder AS TABLE (intRowNumber1 int identity(1,1)
 	, intRowNumber int
@@ -1432,7 +1618,11 @@ DECLARE @MonthOrder AS TABLE (intRowNumber1 int identity(1,1)
 	, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intItemId INT
 	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS)
+	, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+	, intBookId INT
+	, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intSubBookId INT
+	, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 
 DECLARE @strAccountNumber NVARCHAR(MAX)
 SELECT TOP 1 @strAccountNumber=strAccountNumber FROM @ListFinal
@@ -1467,7 +1657,11 @@ INSERT INTO @MonthOrder (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT DISTINCT 0
 	, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
 	, 'Outright Coverage' COLLATE Latin1_General_CI_AS
@@ -1492,6 +1686,10 @@ SELECT DISTINCT 0
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal  WHERE strFutureMonth
 NOT IN (SELECT DISTINCT strFutureMonth FROM @MonthList)
 
@@ -1518,7 +1716,11 @@ INSERT INTO @MonthOrder  (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT intRowNumber
 	, strGroup
 	, Selection
@@ -1543,6 +1745,10 @@ SELECT intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal where strFutureMonth='Previous'
 
 INSERT INTO @MonthOrder (intRowNumber
@@ -1568,7 +1774,11 @@ INSERT INTO @MonthOrder (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT intRowNumber
 	, strGroup
 	, Selection
@@ -1593,6 +1803,10 @@ SELECT intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal where strFutureMonth NOT IN('Previous','Total')
 ORDER BY intRowNumber,PriceStatus,CONVERT(DATETIME,'01 '+strFutureMonth) ASC
 
@@ -1619,7 +1833,11 @@ INSERT INTO @MonthOrder (intRowNumber
 	, strOrigin
 	, intItemId
 	, strItemNo
-	, strItemDescription)
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook)
 SELECT intRowNumber
 	, strGroup
 	, Selection
@@ -1644,9 +1862,13 @@ SELECT intRowNumber
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @ListFinal where strFutureMonth='Total'
 
-SELECT ROW_NUMBER() OVER(ORDER BY intRowNumber) intRowNumFinal
+SELECT intRowNumber1 intRowNumFinal
 	, intRowNumber
 	, strGroup
 	, Selection
@@ -1673,6 +1895,10 @@ SELECT ROW_NUMBER() OVER(ORDER BY intRowNumber) intRowNumFinal
 	, intItemId
 	, strItemNo
 	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
+	, strSubBook
 FROM @MonthOrder
 ORDER BY strGroup
 	, PriceStatus

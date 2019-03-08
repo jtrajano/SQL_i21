@@ -52,6 +52,7 @@ DECLARE @Taxes AS TABLE (
 	,ysnTaxExempt			BIT
 	,[ysnTaxOnly]			BIT
 	,[ysnInvalidSetup]		BIT
+	,[ysnAddToCost]			BIT
 	,[strTaxGroup]			NVARCHAR(100)
 	,[strNotes]				NVARCHAR(500)
 )
@@ -123,6 +124,7 @@ BEGIN
 		,ysnTaxExempt
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
+		,[ysnAddToCost]
 		,[strTaxGroup]
 		,[strNotes]
 	)

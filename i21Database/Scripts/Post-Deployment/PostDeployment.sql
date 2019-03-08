@@ -218,6 +218,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\2_DataImportStatus.sql
 :r .\CM\3_PopulateSourceSystemData.sql
 :r .\CM\4_DataFix.sql
+:r .\CM\5_UndepositedFund.sql
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql

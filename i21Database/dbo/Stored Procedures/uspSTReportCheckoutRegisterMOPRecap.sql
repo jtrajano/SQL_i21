@@ -1,18 +1,28 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTReportCheckoutRegisterMOPRecap]
 	@intCheckoutId INT  
-	
 AS
-
 BEGIN TRY
 	
-   DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @ErrMsg NVARCHAR(MAX)
   
-   select D.strPaymentOptionId as MOPID, D.strDescription, A.dblAmount, SUM(A.dblAmount) over() as TotalMOP ,
-   E.strAccountId AS AccountID, E.strDescription AS Description from tblSTCheckoutPaymentOptions A  JOIN tblSTCheckoutHeader
-   B ON A.intCheckoutId = B.intCheckoutId JOIN tblSTStore C ON B.intStoreId = C.intStoreId
-   JOIN tblSTPaymentOption D ON A.intPaymentOptionId = D.intPaymentOptionId
-   LEFT OUTER JOIN tblGLAccount E ON E.intAccountId = A.intAccountId 
-   where A.intCheckoutId =  @intCheckoutId
+	SELECT 
+		STPO.strPaymentOptionId as MOPID, 
+		STPO.strDescription, 
+		CHPO.dblRegisterAmount,
+		CHPO.dblAmount, 
+		SUM(CHPO.dblAmount) over() as TotalMOP,
+		GLAccount.strAccountId AS AccountID, 
+		GLAccount.strDescription AS Description 
+	FROM tblSTCheckoutPaymentOptions CHPO  
+	JOIN tblSTCheckoutHeader CH 
+		ON CHPO.intCheckoutId = CH.intCheckoutId 
+	JOIN tblSTStore ST 
+		ON CH.intStoreId = ST.intStoreId
+	JOIN tblSTPaymentOption STPO 
+		ON CHPO.intPaymentOptionId = STPO.intPaymentOptionId
+	LEFT OUTER JOIN tblGLAccount GLAccount 
+		ON GLAccount.intAccountId = CHPO.intAccountId 
+	WHERE CHPO.intCheckoutId =  @intCheckoutId
   
     
 END TRY

@@ -164,29 +164,29 @@ BEGIN
         AND P.[ysnInvoicePrepayment] = 1
         AND (P.[dblInvoiceTotal] <> P.[dblPayment] OR P.[dblInvoiceTotal] <> P.[dblAmountPaid])
 
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Forgiven Invoice(s)
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Invoice ' + P.[strTransactionNumber] + ' has been forgiven!'
-	FROM
-		#ARPostPaymentDetail P
-    WHERE
-            P.[ysnPost] = 1
-        AND P.[intInvoiceId] IS NOT NULL
-        AND P.[strType] = 'Service Charge'
-        AND P.[ysnForgiven] = 1
-        AND P.[dblPayment] <> @ZeroDecimal
+    -- INSERT INTO #ARInvalidPaymentData
+    --     ([intTransactionId]
+    --     ,[strTransactionId]
+    --     ,[strTransactionType]
+    --     ,[intTransactionDetailId]
+    --     ,[strBatchId]
+    --     ,[strError])
+	-- --Forgiven Invoice(s)
+	-- SELECT
+    --      [intTransactionId]         = P.[intTransactionId]
+    --     ,[strTransactionId]         = P.[strTransactionId]
+    --     ,[strTransactionType]       = @TransType
+    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+    --     ,[strBatchId]               = P.[strBatchId]
+    --     ,[strError]                 = 'Invoice ' + P.[strTransactionNumber] + ' has been forgiven!'
+	-- FROM
+	-- 	#ARPostPaymentDetail P
+    -- WHERE
+    --         P.[ysnPost] = 1
+    --     AND P.[intInvoiceId] IS NOT NULL
+    --     AND P.[strType] = 'Service Charge'
+    --     AND P.[ysnForgiven] = 1
+    --     AND P.[dblPayment] <> @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]

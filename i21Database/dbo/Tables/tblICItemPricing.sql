@@ -23,6 +23,7 @@ Type the overview for the table here.
 		[dblStandardCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblAverageCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblEndMonthCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblDefaultGrossPrice] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[ysnIsPendingUpdate] BIT NULL, 
 		[dtmDateChanged] DATETIME NULL,
@@ -40,6 +41,11 @@ Type the overview for the table here.
 	CREATE NONCLUSTERED INDEX [IX_tblICItemPricing_PendingUpdate]
 		ON [dbo].[tblICItemPricing]([ysnIsPendingUpdate] DESC)
 		INCLUDE ([intItemId], [intItemLocationId])
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICItemPricing_Posting]
+		ON [dbo].[tblICItemPricing]([intItemId] ASC, [intItemLocationId] ASC)
+		INCLUDE ([dblLastCost], [dblStandardCost])
 	GO
 
 	EXEC sp_addextendedproperty @name = N'MS_Description',

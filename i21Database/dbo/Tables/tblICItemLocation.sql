@@ -97,7 +97,8 @@ Type the overview for the table here.
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intItemId_intLocationId]
-		ON [dbo].[tblICItemLocation]([intItemId] ASC, [intLocationId] ASC);
+		ON [dbo].[tblICItemLocation]([intItemId] ASC, [intLocationId] ASC)
+		INCLUDE ([intCostingMethod])
 	GO
 
 	EXEC sp_addextendedproperty @name = N'MS_Description',

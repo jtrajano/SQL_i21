@@ -1,12 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuCMUndepositedPayment]
 AS 
-WITH ARReceiptAndInvoice as (
-	SELECT strRecordNumber strTransactionId,intCurrencyId FROM tblARPayment 
-	WHERE intPaymentMethodId <> 9 -- exclued CFInvoice GL-6725
-	UNION
-	SELECT strInvoiceNumber strTransactionId, intCurrencyId  FROM tblARInvoice UNION
-	SELECT strEODNo strTransactionId, intCurrencyId  FROM tblARPOSEndOfDay 
-)
 SELECT 
 Undep.intUndepositedFundId
 ,Undep.intBankAccountId
@@ -23,14 +16,17 @@ Undep.intUndepositedFundId
 ,Undep.intCreatedUserId
 ,EM.strName as strUserName
 ,Undep.dtmCreated
-,AR.intCurrencyId
-,strBatchId = (SELECT TOP 1 strBatchId FROM vyuGLDetail WHERE intTransactionId = Undep.intSourceTransactionId AND strTransactionType = 'Receive Payments')
-,SUBSTRING(Pay.strPaymentInfo,1,PATINDEX('% ending%',Pay.strPaymentInfo)) as strCardType
+,Undep.intCurrencyId
+,strBatchId = (SELECT TOP 1 strBatchId FROM vyuGLDetail WHERE strTransactionId = Undep.strSourceTransactionId AND strTransactionType = 'Receive Payments')
+,Pay.strCardType
+,Undep.strPaymentSource
+,Undep.strEODNumber
+,Undep.strEODDrawer 
+,Undep.ysnEODComplete 
 FROM tblCMUndepositedFund Undep
-LEFT JOIN ARReceiptAndInvoice AR ON AR.strTransactionId = strSourceTransactionId
 INNER JOIN tblEMEntity EM ON Undep.intCreatedUserId = EM.intEntityId
 INNER JOIN tblSMCompanyLocation Loc ON Undep.intLocationId = Loc.intCompanyLocationId
-LEFT JOIN tblSMPayment Pay ON Undep.intSourceTransactionId =  Pay.intTransactionId
+LEFT JOIN tblSMPayment Pay ON Undep.strSourceTransactionId =  Pay.strTransactionNo
 WHERE
 Undep.intUndepositedFundId NOT IN( 
 	SELECT intUndepositedFundId 
@@ -38,4 +34,9 @@ Undep.intUndepositedFundId NOT IN(
 	INNER JOIN tblCMBankTransaction BT ON BTDtl.intTransactionId = BT.intTransactionId 
 	WHERE BTDtl.intUndepositedFundId IS NOT NULL 
 )
-AND Undep.dblAmount <> 0
+AND
+Undep.dblAmount <> 0
+
+GO
+
+

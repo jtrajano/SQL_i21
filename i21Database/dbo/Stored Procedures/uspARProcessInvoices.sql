@@ -218,6 +218,7 @@ DECLARE  @Id									INT
 		,@ImportedAsPosted						BIT
 		,@FromProvisional						BIT
 		,@UpdateAvailableDiscount				BIT
+		,@ServiceChargeCredit					BIT
 		,@ImportFormat							NVARCHAR(50)
 
 		,@InvoiceDetailId						INT
@@ -397,6 +398,7 @@ BEGIN
 		,@ImportedAsPosted				= ISNULL([ysnImportedAsPosted],0)
         ,@FromProvisional               = ISNULL([ysnFromProvisional], 0)
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
+		,@ServiceChargeCredit			= ISNULL([ysnServiceChargeCredit],0)
 		,@ImportFormat					= [strImportFormat]
 
 		,@InvoiceDetailId				= [intInvoiceDetailId]
@@ -609,6 +611,7 @@ BEGIN
 			,@ImportedFromOrigin			= @ImportedFromOrigin 	
 			,@ImportedAsPosted   			= @ImportedAsPosted		
 			,@FromProvisional   			= @FromProvisional		
+			,@ServiceChargeCredit			= @ServiceChargeCredit
 			,@TransactionType				= @TransactionType
 			,@Type							= @Type
 			,@NewInvoiceId					= @NewInvoiceId			OUTPUT 

@@ -6,6 +6,7 @@
     [strModule]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strTableName]     NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strChange]		   NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[ysnSearch]		   BIT NULL DEFAULT ((0)),
     [intConcurrencyId] INT NOT NULL,
 
     [strGroupName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 

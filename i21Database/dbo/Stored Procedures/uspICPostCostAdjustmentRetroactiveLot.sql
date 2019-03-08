@@ -81,7 +81,7 @@ BEGIN
 
 	DECLARE	
 			@CostAdjustment AS NUMERIC(38, 20)			
-			,@CostAdjustmentPerLot AS NUMERIC(38, 20) 
+			,@CostAdjustmentPerCb AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
@@ -330,7 +330,7 @@ END
 -- There could be more than one lot record per item received. 
 -- Calculate how much cost adjustment goes for each lot qty. 
 BEGIN 
-	SELECT	@CostAdjustmentPerLot = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
+	SELECT	@CostAdjustmentPerCb = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
 	FROM	tblICInventoryLot cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -342,7 +342,7 @@ BEGIN
 			AND cb.intLotId = ISNULL(@intLotId, cb.intLotId) 
 
 	-- If value of cost adjustment is zero, then exit immediately. 
-	IF @CostAdjustmentPerLot IS NULL 
+	IF @CostAdjustmentPerCb IS NULL 
 		RETURN; 
 END 
 
@@ -523,7 +523,7 @@ BEGIN
 		-- Calculate the Cost Bucket cost 
 		SET @CostBucketNewCost = 
 			CASE	WHEN @IsSourceTransaction = 1 THEN 
-						(@CostBucketOriginalValue + @CostAdjustmentPerLot * @t_dblQty) / @t_dblQty
+						(@CostBucketOriginalValue + @CostAdjustmentPerCb * @t_dblQty) / @t_dblQty
 					ELSE
 						@CostBucketNewCost
 			END 
@@ -531,7 +531,7 @@ BEGIN
 		-- Calculate the current cost adjustment
 		SET @CurrentCostAdjustment = 
 			CASE	WHEN @IsSourceTransaction = 1  THEN 
-						@CostAdjustmentPerLot * @t_dblQty 
+						@CostAdjustmentPerCb * @t_dblQty 
 					WHEN 
 						@t_dblQty < 0 
 						AND @t_intTransactionTypeId = @INV_TRANS_TYPE_NegativeStock THEN
@@ -548,7 +548,7 @@ BEGIN
 		IF  @IsSourceTransaction = 1
 		BEGIN 
 			-- Validate if the cost is going to be negative. 
-			--IF ROUND(@CostBucketOriginalValue + (@CostAdjustmentPerLot * @t_dblQty), 2) < 0 
+			--IF ROUND(@CostBucketOriginalValue + (@CostAdjustmentPerCb * @t_dblQty), 2) < 0 
 			IF ROUND(@CostBucketNewCost, 2) < 0 
 			BEGIN 
 				SELECT	@strItemNo = CASE WHEN ISNULL(strItemNo, '') = '' THEN 'id: ' + CAST(@intItemId AS NVARCHAR(20)) ELSE strItemNo END 
@@ -571,7 +571,7 @@ BEGIN
 						--	,cb.dblStockIn 
 						--) 
 						--dbo.fnDivide(
-						--	(dbo.fnMultiply(cb.dblStockIn, cb.dblCost) + dbo.fnMultiply(@CostAdjustmentPerLot, cb.dblStockIn)) 
+						--	(dbo.fnMultiply(cb.dblStockIn, cb.dblCost) + dbo.fnMultiply(@CostAdjustmentPerCb, cb.dblStockIn)) 
 						--	,cb.dblStockIn 
 						--) 
 			FROM	tblICInventoryLot cb
@@ -632,7 +632,7 @@ BEGIN
 			--		'WHERE: source %i, qty %f, adj per lot %f, new cb cost %f, original cb cost %f'
 			--		,@IsSourceTransaction
 			--		,@t_dblQty
-			--		,@CostAdjustmentPerLot
+			--		,@CostAdjustmentPerCb
 			--		,@CostBucketNewCost
 			--		,@CostBucketOriginalCost
 			--		,DEFAULT
@@ -728,10 +728,10 @@ BEGIN
 				,[dblCost] = NULL 
 				,[dblValue] = 
 					CASE	WHEN @IsSourceTransaction = 1 THEN 
-								@t_dblQty * @CostAdjustmentPerLot
+								@t_dblQty * @CostAdjustmentPerCb
 							WHEN @t_dblQty < 0 THEN 
 								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-								@t_dblQty * @CostAdjustmentPerLot
+								@t_dblQty * @CostAdjustmentPerCb
 							ELSE 
 								0
 					END 
@@ -746,10 +746,10 @@ BEGIN
 				,[intOtherChargeItemId] = @intOtherChargeItemId 
 			WHERE		
 				CASE	WHEN @IsSourceTransaction = 1 THEN 
-							@t_dblQty * @CostAdjustmentPerLot
+							@t_dblQty * @CostAdjustmentPerCb
 						WHEN @t_dblQty < 0 THEN 
 							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-							@t_dblQty * @CostAdjustmentPerLot
+							@t_dblQty * @CostAdjustmentPerCb
 						ELSE 
 							0
 				END <> 0 

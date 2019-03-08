@@ -33,20 +33,21 @@ BEGIN
 				 , ID.intLotId
 				 , ID.intCompanyLocationSubLocationId
 				 , ID.[intStorageLocationId]
-				 , ID.dblQtyShipped
+				 , ISNULL(ICSI.dblQuantity, ID.[dblQtyShipped])
 				 , I.intInvoiceId
 				 , I.strInvoiceNumber
 				 , 7
 				 , fp.intFobPointId
 			FROM tblARInvoiceDetail ID
-				INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-				INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
-				LEFT JOIN tblSMFreightTerms ft
-					ON I.intFreightTermId = ft.intFreightTermId
-				LEFT JOIN tblICFobPoint fp
-					ON fp.strFobPoint = ft.strFobPoint
-				LEFT JOIN tblSCTicket TICKET
-					ON TICKET.intTicketId = ID.intTicketId
+			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+			INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
+			LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
+			LEFT JOIN tblSMFreightTerms ft
+				ON I.intFreightTermId = ft.intFreightTermId
+			LEFT JOIN tblICFobPoint fp
+				ON fp.strFobPoint = ft.strFobPoint
+			LEFT JOIN tblSCTicket TICKET
+				ON TICKET.intTicketId = ID.intTicketId
 			WHERE ID.intInvoiceId = @TransactionId 
 			AND (ISNULL(ID.intInventoryShipmentItemId, 0) > 0 OR ISNULL(ID.intLoadDetailId, 0) > 0)
 			AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O' AND ISNULL(TICKET.intStorageScheduleTypeId, 0) <> 1))

@@ -28,7 +28,9 @@ SELECT DISTINCT CT.strContractType
 	, CT.intContractTypeId
 	, FM.strFutureMonth
 	, CD.intBookId
+	, book.strBook
 	, CD.intSubBookId
+	, subBook.strSubBook
 	, dblRatioQty = ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblInvoicedQty, 0)
 	, dtmTransactionDate = ISNULL(CD.dtmM2MDate, GETDATE())
 	, intPricingTypeIdHeader = CH.intPricingTypeId
@@ -41,4 +43,6 @@ JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
 JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId 
 JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = CD.intCompanyLocationId
+LEFT JOIN tblCTBook book ON book.intBookId = CD.intBookId
+LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = CD.intSubBookId
 WHERE CD.dblQuantity > ISNULL(CD.dblInvoicedQty, 0)

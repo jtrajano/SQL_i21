@@ -1,22 +1,33 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTReportCheckoutTaxRecap]
 	@intCheckoutId INT  
-	
 AS
-
 BEGIN TRY
 	
    DECLARE @ErrMsg NVARCHAR(MAX)
   
-   select A.intCheckoutId
-    ,A.dblTotalTax As TotalTax
-	,A.dblTaxableSales as TaxableSales
-	,A.dblTaxExemptSales as TaxExemptSales
-	,B.strAccountId
-	,B.strDescription
-   from tblSTCheckoutSalesTaxTotals A 
-   LEFT JOIN tblGLAccount B ON A.intSalesTaxAccount = B.intAccountId
-   where A.intCheckoutId = @intCheckoutId
-   and A.dblTotalTax is not NULL 
+	SELECT 
+		CheckTax.intCheckoutId
+		, CheckTax.strTaxNo
+		, SMTax.strTaxCode
+		, CheckTax.dblTotalTax AS TotalTax
+		, CheckTax.dblTaxableSales AS TaxableSales
+		, CheckTax.dblTaxExemptSales AS TaxExemptSales
+		, GLAccount.strAccountId
+		, GLAccount.strDescription
+	FROM tblSTCheckoutSalesTaxTotals CheckTax 
+	INNER JOIN tblSTCheckoutHeader CH
+		ON CheckTax.intCheckoutId = CH.intCheckoutId
+	INNER JOIN tblSTStore ST
+		ON CH.intStoreId = ST.intStoreId
+	INNER JOIN tblSTStoreTaxTotals STTax
+		ON ST.intStoreId = STTax.intStoreId
+	INNER JOIN tblSMTaxCode SMTax
+		ON STTax.intTaxCodeId = SMTax.intTaxCodeId
+		AND CheckTax.strTaxNo = SMTax.strStoreTaxNumber
+	LEFT JOIN tblGLAccount GLAccount 
+		ON CheckTax.intSalesTaxAccount = GLAccount.intAccountId
+	WHERE CheckTax.intCheckoutId = @intCheckoutId
+		AND CheckTax.dblTotalTax IS NOT NULL
     
 END TRY
 

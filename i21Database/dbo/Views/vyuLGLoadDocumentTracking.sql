@@ -46,11 +46,11 @@ SELECT CH.strContractNumber
 			THEN 'Pick Lots w/o Contract'
 		END COLLATE Latin1_General_CI_AS
 	,strTransportationMode = CASE 
-		WHEN intTransportationMode = 1
+		WHEN LOAD.intTransportationMode = 1
 			THEN 'Truck'
-		WHEN intTransportationMode = 2
+		WHEN LOAD.intTransportationMode = 2
 			THEN 'Ocean Vessel'
-		WHEN intTransportationMode = 3
+		WHEN LOAD.intTransportationMode = 3
 			THEN 'Rail'
 		END COLLATE Latin1_General_CI_AS
 	,LOAD.intTransUsedBy
@@ -219,7 +219,7 @@ SELECT CH.strContractNumber
 	,[dblDischargeRate]
 	,[intDischargeUnitMeasureId]
 	,[strDischargePerUnit]
-	,[intTransportationMode]
+	,LOAD.[intTransportationMode]
 	,[intShipmentStatus]
 	,LDOC.intLoadDocumentId
 	,LDOC.intDocumentId

@@ -5,6 +5,9 @@ intStoreId
 , intStoreNo
 , strRegion
 , strDistrict
+, strCity
+, strStateProvince
+, strZipPostalCode
 , strStoreDescription
 , dtmCheckoutDate
 , ISNULL(ysnPosted, 0) ysnPosted
@@ -21,6 +24,9 @@ ST.intStoreId
 , ST.intStoreNo
 , ST.strRegion
 , ST.strDistrict
+, CL.strCity
+, CL.strStateProvince
+, CL.strZipPostalCode
 , ST.strDescription strStoreDescription
 , CH.dtmCheckoutDate
 , Inv.ysnPosted
@@ -68,7 +74,12 @@ ST.intStoreId
 , (SELECT SUM(ISNULL(D.dblTotalDeposit, 0)) 
 	FROM tblSTCheckoutDeposits D 
 	WHERE D.intCheckoutId = CH.intCheckoutId AND D.dblTotalDeposit <> 0) dblDeposit
-FROM tblSTCheckoutHeader CH INNER JOIN tblSTStore ST ON ST.intStoreId = CH.intStoreId 
-LEFT JOIN tblARInvoice Inv ON Inv.intInvoiceId = CH.intInvoiceId
+FROM tblSTCheckoutHeader CH 
+INNER JOIN tblSTStore ST 
+	ON ST.intStoreId = CH.intStoreId 
+INNER JOIN tblSMCompanyLocation CL
+	ON ST.intCompanyLocationId = CL.intCompanyLocationId
+LEFT JOIN tblARInvoice Inv 
+	ON Inv.intInvoiceId = CH.intInvoiceId
 ) A
-GROUP BY intStoreId, intStoreNo, strRegion, strDistrict, strStoreDescription, dtmCheckoutDate, ysnPosted
+GROUP BY intStoreId, intStoreNo, strRegion, strDistrict, strCity, strStateProvince, strZipPostalCode, strStoreDescription, dtmCheckoutDate, ysnPosted

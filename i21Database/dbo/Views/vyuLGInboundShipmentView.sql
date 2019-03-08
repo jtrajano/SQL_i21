@@ -62,7 +62,7 @@ SELECT
 	strPricingType = PT.strPricingType,
 	intContractSeq = PCT.intContractSeq,
 	strPContractNumber = CAST(PCH.strContractNumber as VARCHAR(100)) + '/' + CAST(PCT.intContractSeq AS VARCHAR(100)),
-	dblCashPrice = PCT.dblCashPrice,
+	dblCashPrice = dbo.fnCTGetSequencePrice(PCT.intContractDetailId,NULL),
 	dblCashPriceInQtyUOM = dbo.fnCTConvertQtyToTargetItemUOM(PCT.intItemUOMId,PCT.intPriceItemUOMId,PCT.dblCashPrice),
 	strCurrency = CUR.strCurrency,
 	strPriceUOM = U2.strUnitMeasure,
@@ -97,7 +97,7 @@ SELECT
 	strSalesPricingType = SPT.strPricingType,
 	intSContractSeq = SCT.intContractSeq,
 	strSContractNumber = CAST(SCH.strContractNumber as VARCHAR(100)) + '/' + CAST(SCT.intContractSeq AS VARCHAR(100)),
-	dblSCashPrice = SCT.dblCashPrice,
+	dblSCashPrice = dbo.fnCTGetSequencePrice(SCT.intContractDetailId,NULL),
 	dblSCashPriceInQtyUOM = dbo.fnCTConvertQtyToTargetItemUOM(SCT.intItemUOMId,SCT.intPriceItemUOMId,SCT.dblCashPrice),
 	strSCurrency = SCUR.strCurrency,
 	strSPriceUOM = SU2.strUnitMeasure,
@@ -169,7 +169,7 @@ SELECT
 	dblContainerContractTareWt = (LC.dblTareWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,
 	dblContainerContractlNetWt = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,	
 	dblContainerWeightPerQty = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END),
-	dblContainerContractReceivedQty = ISNULL(LDCL.dblReceivedQty,LD.dblDeliveredQuantity),
+	dblContainerContractReceivedQty = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) THEN ISNULL(LDCL.dblReceivedQty, 0) ELSE LD.dblDeliveredQuantity END,
 	dblReceivedGrossWt = IsNull((SELECT sum(ICItem.dblGross) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0),
 	dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0), 
 	
@@ -247,6 +247,8 @@ LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 OUTER APPLY (SELECT TOP 1 strReceiptNumber, dtmReceiptDate, strLocationName 
-			FROM vyuICGetInventoryReceiptItem WHERE intSourceId = LD.intLoadDetailId AND intSourceType = 2) IR
+			FROM vyuICGetInventoryReceiptItem WHERE intSourceId = LD.intLoadDetailId AND intSourceType = 2 
+			AND (LDCL.intLoadDetailContainerLinkId IS NULL 
+				OR (LDCL.intLoadDetailContainerLinkId IS NOT NULL AND intContainerId = LC.intLoadContainerId))) IR
 
 GO

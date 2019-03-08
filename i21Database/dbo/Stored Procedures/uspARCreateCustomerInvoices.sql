@@ -813,7 +813,7 @@ FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
 	ITG.[intAccountId] IS NOT NULL
-	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash')
+	AND ITG.[strTransactionType] NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
 	AND NOT EXISTS (SELECT NULL FROM vyuGLAccountDetail GLAD WITH (NOLOCK) WHERE GLAD.[strAccountCategory] = 'AR Account' AND GLAD.[intAccountId] =  ITG.[intAccountId])
 
 INSERT INTO #ARInvalidInvoiceRecords

@@ -8,13 +8,13 @@ SELECT m.intOptionsPnSExercisedAssignedId
 	, t.strInternalTradeNo
 	, t.dtmFilledDate as dtmTransactionDate
 	, case when t.strBuySell = 'Buy' Then 'B' else 'S' End COLLATE Latin1_General_CI_AS AS strBuySell
-	, m.intLots
+	, m.dblLots
 	, om.strOptionMonth
 	, fm.strFutMarketName
 	, t.dblStrike
 	, t.strOptionType
 	, t.dblPrice AS dblPremiumRate
-	, (t.dblPrice*dblContractSize*intLots)/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblPremiumTotal
+	, (t.dblPrice*dblContractSize*dblLots)/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblPremiumTotal
 	, e.strName
 	, b.strAccountNumber
 	, strCommodityCode

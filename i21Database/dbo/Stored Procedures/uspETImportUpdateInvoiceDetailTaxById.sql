@@ -103,7 +103,7 @@ BEGIN
 		,@intTaxCategory28    =  category28
 		,@intTaxCategory29    =  category29
 		,@intTaxCategory30    =  category30
-    FROM vyuSMBEExportTax
+    FROM [vyuETBEExportTax]
 	WHERE code = @intTaxGroupId
 
 

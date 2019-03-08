@@ -6,15 +6,15 @@ SELECT m.intOptionsPnSExpiredId
 	, convert(int,strTranNo) strTranNo
 	, dtmExpiredDate
 	, t.strInternalTradeNo
-	, intLots
+	, dblLots
 	, m.intFutOptTransactionId
-	, (case when t.strBuySell='Buy' THEN -isnull(t.dblPrice,0)* m.intLots * fm.dblContractSize else isnull(t.dblPrice,0)* m.intLots * fm.dblContractSize end)/ case when ysnSubCurrency = 1 then intCent else 1 end as dblImpact
+	, (case when t.strBuySell='Buy' THEN -isnull(t.dblPrice,0)* m.dblLots * fm.dblContractSize else isnull(t.dblPrice,0)* m.dblLots * fm.dblContractSize end)/ case when ysnSubCurrency = 1 then intCent else 1 end as dblImpact
 	, fm.strFutMarketName
 	, om.strOptionMonth
 	, t.dblStrike
 	, t.strOptionType
 	, t.dblPrice AS dblPremiumRate
-	, (Case WHEN t.strBuySell='Buy' THEN -isnull(t.dblPrice*dblContractSize*intLots,0) else isnull(t.dblPrice*dblContractSize*intLots,0) end)/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblPremiumTotal
+	, (Case WHEN t.strBuySell='Buy' THEN -isnull(t.dblPrice*dblContractSize*dblLots,0) else isnull(t.dblPrice*dblContractSize*dblLots,0) end)/ case when ysnSubCurrency = 1 then intCent else 1 end AS dblPremiumTotal
 	, e.strName
 	, b.strAccountNumber
 	, strCommodityCode

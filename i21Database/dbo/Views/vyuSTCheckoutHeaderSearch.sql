@@ -20,7 +20,6 @@ SELECT DISTINCT
 	 , Chk.dblTotalDeposits
 	 , Chk.dblCashOverShort   
 	 , ST.intCompanyLocationId AS intStoreCompanyLocationId
-	 , RolePerm.intCompanyLocationId AS intUserCompanyLocationId
 	 , USec.ysnStoreManager AS ysnIsUserStoreManager
 	 , USec.ysnAdmin AS ysnIsUserAdmin
 	 , USec.strDashboardRole
@@ -30,7 +29,26 @@ INNER JOIN tblSTStore ST
 	ON Chk.intStoreId = ST.intStoreId
 LEFT JOIN tblARInvoice Inv
 	ON Chk.intInvoiceId = Inv.intInvoiceId
-OUTER APPLY tblSMUserSecurity USec
-INNER JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
-	ON USec.intEntityId = RolePerm.intEntityId
-	AND ST.intCompanyLocationId = RolePerm.intCompanyLocationId
+INNER JOIN tblSMUserSecurity USec
+	ON ST.intCompanyLocationId = USec.intCompanyLocationId
+	AND (Chk.strCheckoutStatus != CASE
+									WHEN USec.ysnStoreManager = CAST(0 AS BIT)
+										THEN ''
+								END
+		OR Chk.strCheckoutStatus = CASE
+									WHEN USec.ysnStoreManager = CAST(1 AS BIT)
+										THEN 'Open'
+								END)
+	OR 1 = CASE
+				WHEN USec.ysnStoreManager = CAST(0 AS BIT)
+					THEN 1
+				ELSE 0
+			END
+INNER JOIN tblSMUserSecurityCompanyLocationRolePermission Perm
+	ON USec.intEntityId = Perm.intEntityId
+	AND ST.intCompanyLocationId = Perm.intCompanyLocationId
+	OR 1 = CASE
+				WHEN NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityId = USec.intEntityId AND intCompanyLocationId = USec.intCompanyLocationId)
+					THEN 1
+				ELSE 0
+			END

@@ -207,7 +207,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		SET
 			 dblTotalTax		= @TotalItemTax
 			,dblBaseTotalTax	= @TotalBaseItemTax
-			,intTaxGroupId		= @TaxGroupId
+		--	,intTaxGroupId		= @TaxGroupId
 		WHERE [intInvoiceDetailId] = @InvoiceDetailId
 					
 		DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	

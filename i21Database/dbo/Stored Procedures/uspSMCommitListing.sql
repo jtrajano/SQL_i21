@@ -16,14 +16,16 @@ BEGIN TRANSACTION
 		strModule,
 		strNamespace,
 		intConcurrencyId,
-		strGroupName
+		strGroupName,
+		ysnSearch
 	)
 	SELECT '',
 		strScreenName,
 		strModule,
 		strNamespace,
 		intConcurrencyId,
-		strGroupName
+		strGroupName,
+		ysnSearch
 	FROM tblSMScreenStage
 	WHERE ISNULL(strChange, '') = 'Added'
 

@@ -520,6 +520,7 @@ BEGIN TRY
 	,strCategory 				= Category.strCategoryCode
 
 	FROM tblCTContractDetail					CD	
+	JOIN tblCTContractStatus					CS	ON CS.intContractStatusId			=	CD.intContractStatusId
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
 	AND												   CD.intContractDetailId          =    BL.intContractDetailId
@@ -562,6 +563,7 @@ BEGIN TRY
 														WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	  
 														ELSE	 dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
 												   END
+		AND CS.strContractStatus <> 'Unconfirmed'
 
 	INSERT INTO @tblChange(intSequenceHistoryId,intContractDetailId)
 	SELECT MAX(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 

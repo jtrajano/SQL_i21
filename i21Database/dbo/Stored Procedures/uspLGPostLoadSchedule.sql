@@ -90,6 +90,8 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 			END
+
+			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
 		END
 		ELSE IF @intPurchaseSale = 2
 		BEGIN
@@ -121,6 +123,8 @@ BEGIN TRY
 				BEGIN
 					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 				END
+
+			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
 		END
 		ELSE IF @intPurchaseSale = 3
 		BEGIN
@@ -146,6 +150,8 @@ BEGIN TRY
 					ELSE 1
 					END
 			WHERE intLoadId = @intLoadId
+
+			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
 		END
 	END
 END TRY

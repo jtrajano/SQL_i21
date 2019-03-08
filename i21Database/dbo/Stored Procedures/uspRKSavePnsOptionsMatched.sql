@@ -193,7 +193,7 @@ FROM tblRKOptionsMatchPnS where strTranNo=@strTranNoPNS
   intOptionsMatchPnSHeaderId,  
   strTranNo,   
   dtmExpiredDate,  
-  intLots,  
+  dblLots,  
   intFutOptTransactionId,  
   intConcurrencyId    
   )    
@@ -201,14 +201,14 @@ FROM tblRKOptionsMatchPnS where strTranNo=@strTranNoPNS
  @intOptionsMatchPnSHeaderId as intOptionsMatchPnSHeaderId,  
  @strExpiredTranNo + ROW_NUMBER()over(order by intFutOptTransactionId)strTranNo,  
  dtmExpiredDate,  
- intLots,  
+ dblLots,  
  intFutOptTransactionId,   
  1 as intConcurrencyId    
   FROM OPENXML(@idoc,'root/Expired', 2)        
  WITH      
  (   
  [dtmExpiredDate]  DATETIME  ,   
-    [intLots] int ,   
+    [dblLots] numeric(18,6) ,   
  [intFutOptTransactionId] INT  
  )     
  
@@ -217,7 +217,7 @@ DECLARE @tblExercisedAssignedDetail table
   (     
   RowNumber int IDENTITY(1,1),   
   intFutOptTransactionId int,  
-  intLots int,  
+  dblLots numeric(18,6),  
   dtmTranDate datetime,  
   ysnAssigned Bit   
   )    
@@ -225,14 +225,14 @@ DECLARE @tblExercisedAssignedDetail table
 INSERT INTO @tblExercisedAssignedDetail  
 SELECT    
  intFutOptTransactionId,  
- intLots,  
+ dblLots,  
  dtmTranDate,  
  ysnAssigned   
   FROM OPENXML(@idoc,'root/ExercisedAssigned', 2)        
  WITH      
  (    
  [intFutOptTransactionId] INT,  
- [intLots] int,  
+ [dblLots] numeric(18,6),  
  [dtmTranDate] datetime,  
  [ysnAssigned] Bit  
  )  
@@ -241,7 +241,7 @@ DECLARE @mRowNumber int,
   @intFutOptTransactionId int,  
   @NewFutOptTransactionId int,  
   @NewFutOptTransactionHeaderId int,  
-  @intLots int,  
+  @dblLots numeric(18,6),  
   @dtmTranDate datetime,  
   @intInternalTradeNo int,  
   @ysnAssigned bit  
@@ -256,7 +256,7 @@ BEGIN
    DECLARE @intOptionsPnSExercisedAssignedId int  
    
    SELECT @strExercisedAssignedNo=isnull(max(convert(int,strTranNo)),0)+1 from tblRKOptionsPnSExercisedAssigned     
-   SELECT @intFutOptTransactionId=intFutOptTransactionId,@intLots=intLots,@dtmTranDate=dtmTranDate,@ysnAssigned=ysnAssigned FROM @tblExercisedAssignedDetail WHERE RowNumber=@mRowNumber    
+   SELECT @intFutOptTransactionId=intFutOptTransactionId,@dblLots=dblLots,@dtmTranDate=dtmTranDate,@ysnAssigned=ysnAssigned FROM @tblExercisedAssignedDetail WHERE RowNumber=@mRowNumber    
 
    	INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId,dtmTransactionDate,intSelectedInstrumentTypeId,strSelectedInstrumentType)  
 	VALUES (1,@dtmTranDate,1,'Exchange Traded')  
@@ -267,12 +267,12 @@ BEGIN
   intOptionsMatchPnSHeaderId,  
   strTranNo,   
   dtmTranDate,  
-  intLots,  
+  dblLots,  
   intFutOptTransactionId,  
   ysnAssigned,  
   intConcurrencyId    
   )    
- Values(@intOptionsMatchPnSHeaderId,@strExercisedAssignedNo,@dtmTranDate,@intLots,@intFutOptTransactionId,@ysnAssigned,1)  
+ Values(@intOptionsMatchPnSHeaderId,@strExercisedAssignedNo,@dtmTranDate,@dblLots,@intFutOptTransactionId,@ysnAssigned,1)  
  SELECT @intOptionsPnSExercisedAssignedId= Scope_Identity()   
  
  DECLARE @intTransactionId nvarchar(50)  
@@ -294,7 +294,7 @@ BEGIN
 SELECT @NewFutOptTransactionHeaderId,1,1,@dtmTranDate,  
   t.intEntityId,t.intBrokerageAccountId,t.intFutureMarketId, 1,t.intCommodityId,  
   t.intLocationId,t.intTraderId,t.intCurrencyId,'O-'+CONVERT(nvarchar(50),@intInternalTradeNo)as strInternalTradeNo,  
-  t.strBrokerTradeNo,t.strBuySell,@intLots as intLots,om.intFutureMonthId as intFutureMonthId,t.intOptionMonthId,  
+  t.strBrokerTradeNo,t.strBuySell,@dblLots as dblLots,om.intFutureMonthId as intFutureMonthId,t.intOptionMonthId,  
   t.strOptionType,isnull(t.dblStrike,0.0) as dblStrike,  
   Case when strBuySell = 'Buy'  THEN 'This futures transaction was the result of Option No. ('+@strTranNo+') being exercised on ('+ convert(nvarchar,@dtmTranDate,101) +')'   
    else 'This futures transaction was the result of Option No. ('+@strTranNo+') being assigned on ('+ convert(nvarchar,@dtmTranDate,101) +')' end strReference,  

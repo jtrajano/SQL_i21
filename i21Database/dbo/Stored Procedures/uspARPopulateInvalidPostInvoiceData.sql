@@ -27,7 +27,7 @@ SET @ZeroDecimal = 0.000000
 
 IF @Post = 1
 BEGIN
-
+    DECLARE @InvoiceIds [InvoiceId]
 	DECLARE @PostInvoiceDataFromIntegration AS [InvoicePostingTable]
 	DECLARE @ItemsForCosting [ItemCostingTableType]
 	EXEC [dbo].[uspARPopulateItemsForCosting]
@@ -246,7 +246,11 @@ BEGIN
 	WHERE
 		I.[dblCustomerCreditLimit] IS NULL 
 		AND I.[strTransactionType] != 'Cash'
+		AND I.[strTransactionType] != 'Cash Refund'
 		AND I.[strType] != 'POS'
+
+
+		
 
 			
 	INSERT INTO #ARInvalidInvoiceData
@@ -1653,28 +1657,28 @@ BEGIN
 		AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
 
 	--Invoice Split
-	DELETE FROM @PostInvoiceDataFromIntegration
-	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM #ARPostInvoiceHeader PID WHERE PID.[ysnPost] = 1 AND PID.[ysnSplitted] = 0 AND ISNULL(PID.[intSplitId], 0) > 0
+	--DELETE FROM @PostInvoiceDataFromIntegration
+	--INSERT INTO @PostInvoiceDataFromIntegration
+	--SELECT PID.* FROM #ARPostInvoiceHeader PID WHERE PID.[ysnPost] = 1 AND PID.[ysnSplitted] = 0 AND ISNULL(PID.[intSplitId], 0) > 0
 
-	INSERT INTO #ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	SELECT
-		 [intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError] -- + '[fnARGetInvalidInvoicesForInvoiceSplits]'
-	FROM 
-		[dbo].[fnARGetInvalidInvoicesForInvoiceSplits](@PostInvoiceDataFromIntegration, 1) ICC
+	--INSERT INTO #ARInvalidInvoiceData
+	--	([intInvoiceId]
+	--	,[strInvoiceNumber]
+	--	,[strTransactionType]
+	--	,[intInvoiceDetailId]
+	--	,[intItemId]
+	--	,[strBatchId]
+	--	,[strPostingError])
+	--SELECT
+	--	 [intInvoiceId]
+	--	,[strInvoiceNumber]
+	--	,[strTransactionType]
+	--	,[intInvoiceDetailId]
+	--	,[intItemId]
+	--	,[strBatchId]
+	--	,[strPostingError] -- + '[fnARGetInvalidInvoicesForInvoiceSplits]'
+	--FROM 
+	--	[dbo].[fnARGetInvalidInvoicesForInvoiceSplits](@PostInvoiceDataFromIntegration, 1) ICC
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
@@ -2241,6 +2245,29 @@ BEGIN
 	) VOUCHER
 	WHERE
 		@Recap = 0
+	
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--CREDIT MEMO FROM FORGIVEN SERVICE CHARGE
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'You cannot unpost this Credit Memo (' + INV.strInvoiceNumber + '). Please unforgive the Service Charge.'
+	FROM #ARPostInvoiceHeader I
+	INNER JOIN tblARInvoice INV ON INV.intInvoiceId = I.intInvoiceId	
+	WHERE @Recap = 0
+	  AND ISNULL(INV.ysnServiceChargeCredit, 0) = 1
+	  AND INV.strTransactionType = 'Credit Memo'
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
