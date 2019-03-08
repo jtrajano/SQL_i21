@@ -7410,6 +7410,9 @@
     <Build Include="dbo\Tables\tblAPBillEditField.sql" />
     <Build Include="dbo\Tables\tblCFMaximaPrinterCardSoftware.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAddEmailResultLog.sql" />
+    <Build Include="dbo\Tables\tblSMActivityEmailResult.sql" />
+    <Build Include="dbo\Views\vyuSMActivityEmailResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
