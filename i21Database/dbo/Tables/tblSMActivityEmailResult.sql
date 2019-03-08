@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[tblSMActivityEmailResult]
 (
 	[intActivityEmailResultId]          INT NOT NULL PRIMARY KEY IDENTITY,
 	[intActivityId]                     INT NOT NULL,
-    [strResult]                         NVARCHAR(4000) NULL,
+    [strResult]                         NVARCHAR(4000) COLLATE Latin1_General_CI_AS NULL,
     [dtmTransactionDate]                DATETIME NOT NULL DEFAULT(GETDATE()),
     [intEntityUserId]                   INT NULL,
 	[intConcurrencyId]		            INT NOT NULL DEFAULT ((1)), 
