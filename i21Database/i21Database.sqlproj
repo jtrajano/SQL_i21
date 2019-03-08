@@ -7294,6 +7294,7 @@
     <Build Include="dbo\Views\vyuCFEncodeCard.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCardStagingTable.sql" />
     <Build Include="dbo\Tables\tblCFMaximaPrinterCardSoftware.sql" />
+    <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
