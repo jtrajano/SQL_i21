@@ -42,6 +42,11 @@ Type the overview for the table here.
 		INCLUDE ([intItemId], [intItemLocationId])
 	GO
 
+	CREATE NONCLUSTERED INDEX [IX_tblICItemPricing_Posting]
+		ON [dbo].[tblICItemPricing]([intItemId] ASC, [intItemLocationId] ASC)
+		INCLUDE ([dblLastCost], [dblStandardCost])
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
 		@level0type = N'SCHEMA',
