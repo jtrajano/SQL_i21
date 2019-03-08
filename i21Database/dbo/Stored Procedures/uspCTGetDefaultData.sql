@@ -151,9 +151,14 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO @Item
-			SELECT TOP 1 intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null,dblEstimatedYieldRate FROM vyuCTInventoryItem 
+			SELECT intItemId,strItemNo,intPurchasingGroupId,strOrigin,intProductTypeId,null,null,null,strPurchasingGroup,null,null,null,dblEstimatedYieldRate FROM vyuCTInventoryItem 
 			WHERE intCommodityId = @intCommodityId AND intLocationId = @intLocationId AND strStatus <> 'Discontinued'
 			ORDER BY intItemId ASC
+		END
+
+		IF (SELECT COUNT(1) FROM @Item) > 1 AND @intItemId IS NULL
+		BEGIN
+			DELETE FROM @Item
 		END
 
 		SELECT	@intItemId = intItemId FROM @Item
