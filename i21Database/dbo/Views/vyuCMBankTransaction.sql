@@ -46,8 +46,8 @@ strAccountClassification = ISNULL((
 		SELECT TOP 1 strAccountClassification FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
 ),''),
-Detail.dblDebit,
-Detail.dblCredit
+dblDebit = ISNULL(Detail.dblDebit,0),
+dblCredit = ISNULL(Detail.dblCredit,0)
 FROM tblCMBankTransaction A
 OUTER APPLY (
 	SELECT SUM(ISNULL(dblDebit,0)) dblDebit, SUM(ISNULL(dblCredit,0)) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = A.intTransactionId
