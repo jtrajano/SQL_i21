@@ -467,7 +467,7 @@ BEGIN /* RECEIPT CHARGES */
 		[intLocationId]					=	IR.intLocationId,
 		[intEntityVendorId]				=   A.intEntityVendorId
 	FROM [vyuICChargesForBilling] A
-	INNER JOIN @voucherDetailReceiptCharge charges
+	INNER JOIN @VoucherDetailReceiptCharge charges
 		ON A.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
 	INNER JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
 	INNER JOIN tblEMEntity entity ON A.intEntityVendorId = entity.intEntityId
