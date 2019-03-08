@@ -143,7 +143,8 @@ WHERE
 		OR
 			(ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1)
 		)
-	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	--AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	AND ARID.[strTransactionType] <> 'Credit Memo'
 
 
 UNION ALL
@@ -236,8 +237,9 @@ WHERE
 	)
 	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
-	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
-	AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
+    --AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	AND ARID.[strTransactionType] <> 'Credit Memo'
+    AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0    
 
 --LG - Lot
 UNION ALL
@@ -332,7 +334,8 @@ WHERE
 	)
 	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
-	AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	--AND NOT (ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') AND ARID.[intOriginalInvoiceId] IS NOT NULL AND ARID.[intLoadDetailId] IS NOT NULL)
+	AND ARID.[strTransactionType] <> 'Credit Memo'
 
 UNION ALL
 -- FOR Credit Note Reversal
@@ -402,7 +405,8 @@ CROSS APPLY
 --		AND ARID.[intItemId] = ICIT.[intItemId]
 --		AND [ysnIsUnposted] = 0			 
 WHERE
-	(ARID.[strTransactionType] = 'Credit Note' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnFromProvisional] = 0))
+	ARID.[strTransactionType] = 'Credit Note'
+	AND ARID.[strTransactionType] <> 'Credit Memo'
 	AND ICIT.[intFobPointId] = @FOB_DESTINATION
 	AND ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND ARID.[intOriginalInvoiceId] IS NOT NULL 
@@ -443,7 +447,8 @@ INNER JOIN
 		[intLoadDistributionHeaderId], [strActualCostId], [dtmPostDate], [dtmShipDate], [intPeriodsToAccrue], [ysnImpactInventory], [dblSplitPercent], [intLoadId], [intFreightTermId], [intOriginalInvoiceId], [strInvoiceOriginId]
 	 FROM #ARPostInvoiceHeader INV
 	 WHERE
-		(INV.[strTransactionType] = 'Credit Note' OR (INV.[strTransactionType] = 'Credit Memo' AND INV.[ysnFromProvisional] = 0))
+		INV.[strTransactionType] = 'Credit Note'
+		AND INV.[strTransactionType] <> 'Credit Memo'
 		AND INV.[intOriginalInvoiceId] IS NOT NULL 
 		AND INV.[intOriginalInvoiceId] <> 0
 			) ARI 
