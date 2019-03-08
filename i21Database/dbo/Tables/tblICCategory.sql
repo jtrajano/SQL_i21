@@ -62,6 +62,11 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICCategory_tblSMLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblSMLineOfBusiness]([intLineOfBusinessId]), 
 		CONSTRAINT [FK_tblICCategory_tblICCategoryUOM] FOREIGN KEY ([intUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId])	
 	)
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICCategory_intCategoryId]
+		ON [dbo].[tblICCategory]([intCategoryId] ASC)
+		INCLUDE ([intCostingMethod])
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
