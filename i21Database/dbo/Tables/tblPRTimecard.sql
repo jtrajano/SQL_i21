@@ -30,6 +30,12 @@
 )
 
 GO
+
+CREATE NONCLUSTERED INDEX [tblPRTimecard_intWorkersCompensationId]
+ON [dbo].[tblPRTimecard] ([intEntityEmployeeId])
+INCLUDE ([dblHours],[intWorkersCompensationId])
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Key',
     @level0type = N'SCHEMA',

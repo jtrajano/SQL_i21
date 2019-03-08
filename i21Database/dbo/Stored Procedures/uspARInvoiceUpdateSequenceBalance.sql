@@ -51,14 +51,14 @@ BEGIN
 									 @intContractDetailId = @intContractDetailId
 									,@dblQuantityToUpdate = @dblQty
 									,@intUserId = @UserId
-									,@intExternalId = @intInvoiceId
+									,@intExternalId = @intInvoiceDetailId
 									,@strScreenName = 'Invoice'		
 
 								EXEC uspCTUpdateScheduleQuantity
 									@intContractDetailId	=	@intContractDetailId,
 									@dblQuantityToUpdate	=	@dblQtyOrdered,
 									@intUserId				=	@UserId,
-									@intExternalId			=	@intInvoiceId,
+									@intExternalId			=	@intInvoiceDetailId,
 									@strScreenName			=	'Invoice'		
 
 						
@@ -70,14 +70,14 @@ BEGIN
 									@intContractDetailId	=	@intContractDetailId,
 									@dblQuantityToUpdate	=	@dblQtyOrdered,
 									@intUserId				=	@UserId,
-									@intExternalId			=	@intInvoiceId,
+									@intExternalId			=	@intInvoiceDetailId,
 									@strScreenName			=	'Invoice'		
 
 								EXEC uspCTUpdateSequenceBalance 
 									 @intContractDetailId = @intContractDetailId
 									,@dblQuantityToUpdate = @dblQty
 									,@intUserId = @UserId
-									,@intExternalId = @intInvoiceId
+									,@intExternalId = @intInvoiceDetailId
 									,@strScreenName = 'Invoice'
 							END
 					END

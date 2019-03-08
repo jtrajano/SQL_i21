@@ -34,6 +34,7 @@
 	,@intEntryCode					INT				 =	 0
 	,@strProductAuthorization		NVARCHAR(MAX)	 =	 ''
 	,@strComment					NVARCHAR(MAX)	 =	 ''
+	,@strCardNotation				NVARCHAR(MAX)	 =	 ''
 
 AS
 BEGIN
@@ -371,6 +372,7 @@ BEGIN
 			 ,intEntryCode
 			 ,strComment
 			 ,intProductAuthId
+			 ,strCardNotation
 			 )
 			VALUES(
 			  @intNetworkId					
@@ -399,6 +401,7 @@ BEGIN
 			 ,@intEntryCode
 			 ,@strComment
 			 ,@intProductAuthId
+			 ,@strCardNotation
 			 )
 
 			COMMIT TRANSACTION

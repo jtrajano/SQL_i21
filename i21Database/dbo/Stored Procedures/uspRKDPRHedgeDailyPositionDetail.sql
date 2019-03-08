@@ -825,67 +825,68 @@ BEGIN
 						SELECT oc.strCommodityCode
 							, oc.strInternalTradeNo
 							, oc.intFutOptTransactionHeaderId
-							, f.intCommodityId
-							, cuc1.intCommodityUnitMeasureId
+							, th.intCommodityId
 							, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
-									else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS dtmFutureMonthsDate 
-							, dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0)
+									else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS dtmFutureMonthsDate
+							, dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(intOpenContract, 0)
 																																			ELSE ISNULL(intOpenContract, 0) END * m.dblContractSize) AS HedgedQty
 							, l.strLocationName
 							, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
 									else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS strFutureMonth
 							, m.intUnitMeasureId
 							, e.strName + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
-							, strBuySell AS strTranType
-							, f.intBrokerageAccountId
-							,CASE WHEN f.intInstrumentTypeId = 1 THEN 'Futures' ELSE 'Options ' END COLLATE Latin1_General_CI_AS AS strInstrumentType
-							,CASE WHEN f.strBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END dblNoOfLot
-							, f.intFutureMarketId
+							, strNewBuySell AS strTranType
+							, ba.intBrokerageAccountId
+							, strInstrumentType
+							, CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END dblNoOfLot
+							, m.intFutureMarketId
 							, oc.strFutureMarket
-							, f.intFutureMonthId
+							, fm.intFutureMonthId
 							, oc.strBrokerTradeNo
 							, oc.strNotes
 							, oc.ysnPreCrush
 						FROM @tblGetOpenFutureByDate oc
-						JOIN tblRKFutOptTransaction f ON oc.intFutOptTransactionId = f.intFutOptTransactionId AND oc.intOpenContract <> 0 and isnull(f.ysnPreCrush,0)=1
-						INNER JOIN tblRKFutureMarket m ON f.intFutureMarketId = m.intFutureMarketId
-						JOIN tblICCommodityUnitMeasure cuc1 ON f.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
-						INNER JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = f.intFutureMonthId
-						INNER JOIN tblSMCompanyLocation l ON f.intLocationId = l.intCompanyLocationId
-						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-						INNER JOIN tblRKBrokerageAccount ba ON f.intBrokerageAccountId = ba.intBrokerageAccountId
-						INNER JOIN tblEMEntity e ON e.intEntityId = f.intEntityId AND f.intInstrumentTypeId = 1
-						WHERE f.intCommodityId = @intCommodityId
-							AND f.intLocationId = ISNULL(@intLocationId, f.intLocationId)
-					) t
+						JOIN tblICCommodity th ON th.strCommodityCode = oc.strCommodityCode
+						JOIN tblSMCompanyLocation l ON l.strLocationName = oc.strLocationName
+						JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
+						JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
+						LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
+						INNER JOIN tblEMEntity e ON e.strName = oc.strBroker AND oc.strInstrumentType = 'Futures'
+						JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c) AND m.intUnitMeasureId = cuc1.intUnitMeasureId
+						LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cuc1.intUnitMeasureId
+						INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
+						WHERE th.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
+							AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
+							AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+							AND ISNULL(oc.ysnPreCrush, 0) = 1) t
 
-					--Include Crush in Price Risk
-					INSERT INTO @tempFinal(strCommodityCode
-						, strType
-						, strContractType
-						, dblTotal
-						, intContractHeaderId
-						, strContractNumber
-						, intFromCommodityUnitMeasureId
-						, intCommodityId
-						, strLocationName
-						, intFutOptTransactionHeaderId
-						, strInternalTradeNo
+					----Include Crush in Price Risk
+					--INSERT INTO @tempFinal(strCommodityCode
+					--	, strType
+					--	, strContractType
+					--	, dblTotal
+					--	, intContractHeaderId
+					--	, strContractNumber
+					--	, intFromCommodityUnitMeasureId
+					--	, intCommodityId
+					--	, strLocationName
+					--	, intFutOptTransactionHeaderId
+					--	, strInternalTradeNo
 
-						)
-					SELECT strCommodityCode
-						, 'Price Risk' COLLATE Latin1_General_CI_AS
-						, strContractType
-						, dblTotal
-						, intContractHeaderId
-						, strContractNumber
-						, intFromCommodityUnitMeasureId
-						, intCommodityId
-						, strLocationName
-						, intFutOptTransactionHeaderId
-						, strInternalTradeNo
-					FROM @tempFinal
-					WHERE intCommodityId = @intCommodityId AND strType  = 'Crush'
+					--	)
+					--SELECT strCommodityCode
+					--	, 'Price Risk' COLLATE Latin1_General_CI_AS
+					--	, strContractType
+					--	, dblTotal
+					--	, intContractHeaderId
+					--	, strContractNumber
+					--	, intFromCommodityUnitMeasureId
+					--	, intCommodityId
+					--	, strLocationName
+					--	, intFutOptTransactionHeaderId
+					--	, strInternalTradeNo
+					--FROM @tempFinal
+					--WHERE intCommodityId = @intCommodityId AND strType  = 'Crush'
 
 
 					--Include Crush in Net Hedge

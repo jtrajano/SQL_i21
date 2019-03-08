@@ -54,6 +54,8 @@
     [strExportValidURL]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
     [intAdvanceMappingId]                   INT             NULL,
 	[intNetworkCostMappingId]               INT             NULL,
+	[ysnCardEncodingIntegration]			BIT				NULL,
+	[dtmGlobalCardExpirationDate]			DATETIME		NULL,
     CONSTRAINT [PK_tblCFNetwork] PRIMARY KEY CLUSTERED ([intNetworkId] ASC),
     CONSTRAINT [FK_tblCFNetwork_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
     CONSTRAINT [FK_tblCFNetwork_tblCFAdvanceMapping] FOREIGN KEY ([intAdvanceMappingId]) REFERENCES [dbo].[tblCFAdvanceMapping] ([intAdvanceMappingId]),

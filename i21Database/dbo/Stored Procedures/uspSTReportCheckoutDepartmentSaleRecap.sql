@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTReportCheckoutDepartmentSaleRecap]
 	@intCheckoutId INT 
 AS
-
 BEGIN TRY
 	
    DECLARE @ErrMsg NVARCHAR(MAX)
@@ -9,6 +8,7 @@ BEGIN TRY
    SELECT B.strCategoryCode
 		, B.strDescription 
 		, A.intTotalSalesCount
+		, A.intItemsSold
 		, A.dblTotalSalesAmountComputed
 		, A.dblRegisterSalesAmountComputed 
 		, ISNULL(SUM(A.dblTotalSalesAmountComputed) OVER (),0) AS CategoryTotalSale

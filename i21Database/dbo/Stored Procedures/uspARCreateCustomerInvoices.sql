@@ -215,7 +215,7 @@ SELECT
 	,[intShipmentId]					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
 	,[intTransactionId] 				= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Card Fueling Transaction', 'CF Tran') THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 	,[intMeterReadingId]				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
-	,[intContractHeaderId]				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Sales Contract' THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
+	,[intContractHeaderId]				= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Sales Contract', 'Inventory Shipment') THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
 	,[intLoadId]						= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Load Schedule' THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
 	,[intOriginalInvoiceId]				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 	,[intEntityId]						= [intEntityId]

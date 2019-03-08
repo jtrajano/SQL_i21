@@ -1,10 +1,10 @@
 ﻿CREATE TABLE dbo.tblMFInventoryAdjustment (
 	intAdjustmentId INT identity(1, 1)
-	,dtmDate DATETIME NOT NULL
+	,dtmDate DATETIME NULL
 	,intTransactionTypeId INT NOT NULL
-	,intItemId INT NOT NULL
+	,intItemId INT NULL
 	,intStorageLocationId int NULL
-	,intSourceLotId INT NOT NULL
+	,intSourceLotId INT NULL
 	,intDestinationStorageLocationId int NULL
 	,intDestinationLotId INT
 	,dblQty NUMERIC(38, 20)
@@ -30,6 +30,11 @@
 	,intCompanyId INT NULL
 	,dtmOldDueDate DATETIME NULL
 	,dtmNewDueDate DATETIME NULL
+	,intWorkOrderInputLotId INT 
+	,intWorkOrderProducedLotId INT 
+	,intWorkOrderId INT 
+	,intWorkOrderConsumedLotId INT
+	,dtmDateCreated Datetime CONSTRAINT DF_tblMFInventoryAdjustment_dtmDateCreated Default (GETDATE())
 	,CONSTRAINT PK_tblMFInventoryAdjustment PRIMARY KEY (intAdjustmentId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intOldItemId FOREIGN KEY (intOldItemId) REFERENCES tblICItem(intItemId)
@@ -39,5 +44,34 @@
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItemOwner_intOldItemOwnerId FOREIGN KEY (intOldItemOwnerId) REFERENCES tblICItemOwner(intItemOwnerId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItemOwner_intNewItemOwnerId FOREIGN KEY (intNewItemOwnerId) REFERENCES tblICItemOwner(intItemOwnerId)
 	)
+Go
+CREATE NONCLUSTERED INDEX IX_tblMFInventoryAdjustment_dtmDate ON [dbo].[tblMFInventoryAdjustment]
+(
+	[dtmDateCreated] DESC
+)
+INCLUDE ( 	[intTransactionTypeId],
+	[intItemId],
+	[intStorageLocationId],
+	[intSourceLotId],
+	[intDestinationStorageLocationId],
+	[intDestinationLotId],
+	[dblQty],
+	[intItemUOMId],
+	[intOldItemId],
+	[dtmOldExpiryDate],
+	[dtmNewExpiryDate],
+	[intOldLotStatusId],
+	[intNewLotStatusId],
+	[intUserId],
+	[dtmBusinessDate],
+	[intBusinessShiftId],
+	[strNote],
+	[strReason],
+	[intOldItemOwnerId],
+	[intNewItemOwnerId],
+	[intWorkOrderInputLotId],
+	[intWorkOrderProducedLotId],
+	[intWorkOrderId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+Go
 
 

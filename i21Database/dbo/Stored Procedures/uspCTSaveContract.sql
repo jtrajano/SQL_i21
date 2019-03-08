@@ -149,6 +149,13 @@ BEGIN TRY
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intProducerId	IS NULL
 	AND		@intProducerId		IS NOT NULL
+	
+	UPDATE	CD 
+	SET		dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
+	FROM	tblCTContractDetail CD
+	JOIN	tblSMCurrency		CY	ON CY.intCurrencyID = CD.intCurrencyId
+	WHERE	CD.intPricingTypeId	IN (1,6)
+	AND		intContractHeaderId =	@intContractHeaderId
 	------------------------
 
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId

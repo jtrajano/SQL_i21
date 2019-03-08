@@ -92,7 +92,7 @@ BEGIN
 													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
 															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
 																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
+																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(NULLIF(B.dblRate,0),1) 
 														ELSE 
 															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
 																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
@@ -115,7 +115,7 @@ BEGIN
 																		, E2.dblUnitCost
 																	) 
 																	/ E1.intSubCurrencyCents
-																	* E2.dblForexRate
+																	* ISNULL(NULLIF(E2.dblForexRate,0),1)
 																ELSE 
 																	dbo.fnCalculateCostBetweenUOM(
 																		receiptCostUOM.intItemUOMId
@@ -131,7 +131,7 @@ BEGIN
 																	, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
 																	, E2.dblUnitCost
 																) 
-																* E2.dblForexRate
+																* ISNULL(NULLIF(E2.dblForexRate,0),1)
 															ELSE 
 																dbo.fnCalculateCostBetweenUOM(
 																	receiptCostUOM.intItemUOMId
@@ -199,7 +199,7 @@ BEGIN
 				,receiptCostUOM.intItemUOMId
 				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
 				) <> E2.dblUnitCost
-			OR E2.dblForexRate <> B.dblRate
+			OR ISNULL(NULLIF(E2.dblForexRate,0),1) <> ISNULL(NULLIF(B.dblRate,0),1)
 		) 
 		UNION ALL
 		--SETTLE STORAGE

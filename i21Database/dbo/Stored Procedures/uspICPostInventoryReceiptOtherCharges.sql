@@ -559,6 +559,7 @@ BEGIN
 		,intCurrencyId
 		,dblExchangeRate
 		,intInventoryReceiptItemId
+		,intInventoryReceiptChargeId
 		,strInventoryTransactionTypeName
 		,strTransactionForm
 		,ysnAccrue
@@ -591,6 +592,7 @@ BEGIN
 				,intCurrencyId = ISNULL(ReceiptCharges.intCurrencyId, Receipt.intCurrencyId) 
 				,dblExchangeRate = ISNULL(ReceiptCharges.dblForexRate, 1)
 				,ReceiptItem.intInventoryReceiptItemId
+				,AllocatedOtherCharges.intInventoryReceiptChargeId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
 				,AllocatedOtherCharges.ysnAccrue
@@ -855,8 +857,8 @@ BEGIN
 			dtmDate						= InventoryCostCharges.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
+			,dblDebit					= SUM(Credit.Value)
+			,dblCredit					= SUM(Debit.Value)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge 
@@ -867,7 +869,7 @@ BEGIN
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
-			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
+			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptChargeId--InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
 			,intEntityId				= InventoryCostCharges.intEntityVendorId
@@ -877,9 +879,9 @@ BEGIN
 			,strTransactionForm			= InventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN SUM(CreditForeign.Value) ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN SUM(DebitForeign.Value) ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
@@ -906,8 +908,20 @@ BEGIN
 
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 1
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
-			AND InventoryCostCharges.strBundleType != 'Kit'
-
+			AND InventoryCostCharges.strBundleType != 'Kit'	
+	GROUP BY	InventoryCostCharges.dtmDate,
+				GLAccount.intAccountId,
+				InventoryCostCharges.strCharge,
+				GLAccount.strDescription,
+				InventoryCostCharges.intCurrencyId,
+				InventoryCostCharges.dblForexRate,
+				InventoryCostCharges.intEntityVendorId,
+				InventoryCostCharges.intInventoryReceiptChargeId,
+				InventoryCostCharges.strTransactionId,
+				InventoryCostCharges.intTransactionId,
+				InventoryCostCharges.strInventoryTransactionTypeName,
+				InventoryCostCharges.strTransactionForm,
+				InventoryCostCharges.strRateType
 
 	-------------------------------------------------------------------------------------------
 	-- If linked item is a 'Kit' and Inventory Cost = true
@@ -977,8 +991,8 @@ BEGIN
 			dtmDate						= InventoryCostCharges.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
+			,dblDebit					= SUM(Credit.Value)
+			,dblCredit					= SUM(Debit.Value)
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge 
@@ -989,7 +1003,7 @@ BEGIN
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
-			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
+			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptChargeId--InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
 			,intEntityId				= InventoryCostCharges.intEntityVendorId
@@ -999,9 +1013,9 @@ BEGIN
 			,strTransactionForm			= InventoryCostCharges.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value ELSE 0 END  
+			,dblDebitForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN SUM(CreditForeign.Value) ELSE 0 END  
 			,dblDebitReport				= NULL 
-			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value ELSE 0 END 
+			,dblCreditForeign			= CASE WHEN intCurrencyId <> @intFunctionalCurrencyId THEN SUM(DebitForeign.Value) ELSE 0 END 
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
@@ -1028,6 +1042,19 @@ BEGIN
 	WHERE	ISNULL(InventoryCostCharges.ysnAccrue, 0) = 1
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
 			AND InventoryCostCharges.strBundleType = 'Kit'	
+	GROUP BY	InventoryCostCharges.dtmDate,
+				GLAccount.intAccountId,
+				InventoryCostCharges.strCharge,
+				GLAccount.strDescription,
+				InventoryCostCharges.intCurrencyId,
+				InventoryCostCharges.dblForexRate,
+				InventoryCostCharges.intEntityVendorId,
+				InventoryCostCharges.intInventoryReceiptChargeId,
+				InventoryCostCharges.strTransactionId,
+				InventoryCostCharges.intTransactionId,
+				InventoryCostCharges.strInventoryTransactionTypeName,
+				InventoryCostCharges.strTransactionForm,
+				InventoryCostCharges.strRateType
 
 	;
 	-- Generate the G/L Entries here: 

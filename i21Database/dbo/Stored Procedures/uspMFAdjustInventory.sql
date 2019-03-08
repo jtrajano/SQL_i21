@@ -24,14 +24,18 @@
 	,@strNewVendorLotNumber nvarchar(50)= NULL
 	,@dtmOldDueDate DATETIME= NULL
 	,@dtmNewDueDate DATETIME= NULL
+	,@intStorageLocationId INT = NULL
+	,@intDestinationStorageLocationId INT = NULL
+	,@intWorkOrderInputLotId INT = NULL
+	,@intWorkOrderProducedLotId INT = NULL
+	,@intWorkOrderId INT = NULL
+	,@intWorkOrderConsumedLotId INT=NULL
 	)
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
-		,@intStorageLocationId int
-		,@intDestinationStorageLocationId int
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
 
@@ -41,15 +45,22 @@ BEGIN TRY
 		AND @dtmDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 			AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-	SELECT @intStorageLocationId=intStorageLocationId FROM dbo.tblICLot WHERE intLotId =@intSourceLotId 
+	IF @intStorageLocationId IS NULL
+		SELECT @intStorageLocationId = intStorageLocationId
+		FROM dbo.tblICLot
+		WHERE intLotId = @intSourceLotId
 
-	SELECT @intDestinationStorageLocationId=intStorageLocationId FROM dbo.tblICLot WHERE intLotId =@intDestinationLotId
+	IF @intDestinationStorageLocationId IS NULL
+		AND @intDestinationLotId IS NOT NULL
+		SELECT @intDestinationStorageLocationId = intStorageLocationId
+		FROM dbo.tblICLot
+		WHERE intLotId = @intDestinationLotId
 
 	INSERT INTO tblMFInventoryAdjustment (
 		dtmDate
 		,intTransactionTypeId
 		,intItemId
-		,intStorageLocationId 
+		,intStorageLocationId
 		,intSourceLotId
 		,intDestinationStorageLocationId
 		,intDestinationLotId
@@ -75,6 +86,10 @@ BEGIN TRY
 		,strNewVendorLotNumber 
 		,dtmOldDueDate 
 		,dtmNewDueDate
+		,intWorkOrderInputLotId
+		,intWorkOrderProducedLotId
+		,intWorkOrderId
+		,intWorkOrderConsumedLotId
 		)
 	SELECT @dtmDate
 		,@intTransactionTypeId
@@ -105,6 +120,10 @@ BEGIN TRY
 		,@strNewVendorLotNumber 
 		,@dtmOldDueDate 
 		,@dtmNewDueDate 
+		,@intWorkOrderInputLotId
+		,@intWorkOrderProducedLotId
+		,@intWorkOrderId
+		,@intWorkOrderConsumedLotId
 
 	Update tblMFLotInventory
 	Set dtmLastMoveDate =@dtmDate
