@@ -23,8 +23,8 @@ DECLARE @intEntityVendorId AS INT
 		,@voucherItems AS VoucherPayable
 		,@voucherItemsTax AS VoucherDetailTax
 		--,@voucherItems AS VoucherDetailReceipt 
-		--,@voucherOtherCharges AS VoucherDetailReceiptCharge 
-		--,@voucherDetailClaim AS VoucherDetailClaim
+		,@voucherOtherCharges AS VoucherDetailReceiptCharge 
+		,@voucherDetailClaim AS VoucherDetailClaim
 
 		,@intShipFrom AS INT
 		,@intShipTo AS INT 
@@ -65,7 +65,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 
 		,@intShipFrom = r.intShipFromId
 		,@intShipTo = r.intLocationId
-		,@strVendorRefNo = r.strVendorRefNo
+		,@strVendorRefNo = ISNULL(r.strBillOfLading, r.strVendorRefNo)
 		,@intCurrencyId = r.intCurrencyId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
@@ -307,7 +307,6 @@ BEGIN
 		--	,@error = @throwedError OUTPUT
 		--	,@billId = @intBillId OUTPUT
 		--	,@voucherDate = @dtmReceiptDate
-
 
 		EXEC [dbo].[uspAPCreateVoucher]
 			@voucherPayables = @voucherItems
