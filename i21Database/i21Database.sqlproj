@@ -7415,6 +7415,7 @@
     <Build Include="dbo\Views\vyuSMActivityEmailResult.sql" />
     <Build Include="dbo\Functions\fnSMGetEmailRecipients.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSentByList.sql" />
+    <Build Include="dbo\Views\vyuARCustomerPricingInquiry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
