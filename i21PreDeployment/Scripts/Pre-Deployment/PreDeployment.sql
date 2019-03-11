@@ -9,12 +9,14 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
---DONT PUT ABOVE THIS 
-:r .\4_SM\1910_StopAuditMigrationJob.sql
+
 
 
 --EM
 :r .\12_EM\17_DropDependencies_RenameTable.sql
+
+--DONT PUT ABOVE THIS 
+:r .\4_SM\1910_StopAuditMigrationJob.sql
 
 -- Validate Origin records
 -- --coctlmst

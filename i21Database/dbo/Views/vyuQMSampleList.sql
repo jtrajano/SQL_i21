@@ -62,6 +62,16 @@ SELECT S.intSampleId
 	,B.strBook
 	,SB.strSubBook
 	,S.strChildLotNumber
+	,S.strCourier
+	,S.strCourierRef
+	,S.strForwardingAgentRef
+	,S.strSentBy
+	,E1.strName AS strForwardingAgentName
+	,CASE 
+		WHEN S.strSentBy = 'Self'
+			THEN CL1.strLocationName
+		ELSE E2.strName
+		END AS strSentByValue
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -95,3 +105,6 @@ LEFT JOIN tblICInventoryShipment INVS ON INVS.intInventoryShipmentId = S.intInve
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
 LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId
+LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
+LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
+LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById

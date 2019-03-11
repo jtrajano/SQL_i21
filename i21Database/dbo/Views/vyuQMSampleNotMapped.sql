@@ -25,6 +25,12 @@ SELECT S.intSampleId
 	,CD.strItemSpecification
 	,B.strBook
 	,SB.strSubBook
+	,E1.strName AS strForwardingAgentName
+	,CASE 
+		WHEN S.strSentBy = 'Self'
+			THEN CL1.strLocationName
+		ELSE E2.strName
+		END AS strSentByValue
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
@@ -47,3 +53,6 @@ LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocat
 LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
 LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId
+LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
+LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
+LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById

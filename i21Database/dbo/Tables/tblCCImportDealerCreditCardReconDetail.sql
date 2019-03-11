@@ -9,7 +9,11 @@
 	[dblNet] NUMERIC(18,6) NULL,
 	[dblFee] NUMERIC(18,6) NULL,
 	[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[ysnValid] BIT NULL, 
+	[ysnValid] BIT NULL,
+	[strBatchNumber] NVARCHAR(100) NULL,
+	[dblBatchGross] NUMERIC(18,6) NULL,
+	[dblBatchNet] NUMERIC(18,6) NULL,
+	[dblBatchFee] NUMERIC(18,6) NULL,
     CONSTRAINT [PK_tblCCImportDealerCreditCardReconDetail] PRIMARY KEY ([intImportDealerCreditCardReconDetailId]),
 	CONSTRAINT [FK_tblCCImportDealerCreditCardReconDetail_tblCCImportDealerCreditCardRecon] FOREIGN KEY([intImportDealerCreditCardReconId]) REFERENCES [tblCCImportDealerCreditCardRecon] ([intImportDealerCreditCardReconId]) ON DELETE CASCADE
 )

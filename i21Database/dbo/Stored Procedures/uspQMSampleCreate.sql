@@ -347,6 +347,12 @@ BEGIN TRY
 		,intInventoryShipmentId
 		,intWorkOrderId
 		,strChildLotNumber
+		,strCourier
+		,strCourierRef
+		,intForwardingAgentId
+		,strForwardingAgentRef
+		,strSentBy
+		,intSentById
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -410,6 +416,12 @@ BEGIN TRY
 		,@intInventoryShipmentId
 		,@intWorkOrderId
 		,strChildLotNumber
+		,strCourier
+		,strCourierRef
+		,intForwardingAgentId
+		,strForwardingAgentRef
+		,strSentBy
+		,intSentById
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -463,6 +475,12 @@ BEGIN TRY
 			,intItemBundleId INT
 			,intLocationId INT
 			,strChildLotNumber NVARCHAR(50)
+			,strCourier NVARCHAR(50)
+			,strCourierRef NVARCHAR(50)
+			,intForwardingAgentId INT
+			,strForwardingAgentRef NVARCHAR(50)
+			,strSentBy NVARCHAR(50)
+			,intSentById INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT

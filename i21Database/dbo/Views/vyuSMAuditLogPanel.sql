@@ -16,7 +16,8 @@ AS
 SELECT 
 tblSMAudit.intAuditId as 'intAuditLogId',
 tblSMLog.strName,
-[dbo].[fnSMAddSpaceToTitleCase](right(tblSMScreen.strNamespace, CHARINDEX('.', REVERSE(tblSMScreen.strNamespace)) - 1), 0) as strTransactionType,
+tblSMScreen.strNamespace as strScreenNamespace,
+tblSMScreen.strScreenName as strTransactionType,
 tblSMAudit.strAction + ' a record' COLLATE Latin1_General_CI_AS as strActionType,
 CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX))
 strDescription,

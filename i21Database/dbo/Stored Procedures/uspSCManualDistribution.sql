@@ -27,6 +27,8 @@ DECLARE @LineItems AS ScaleTransactionTableType
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge
 		,@thirdPartyVoucher AS VoucherDetailReceiptCharge
 		,@prePayId AS Id
+		,@voucherPayable as VoucherPayable
+		,@voucherTaxDetail as VoucherDetailTax
 DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @intLoadId INT
@@ -391,8 +393,10 @@ END
 	
 	-- VOUCHER INTEGRATION
 	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
+	
 	IF ISNULL(@createVoucher, 0) = 1 OR ISNULL(@postVoucher, 0) = 1
 	BEGIN
+
 		IF OBJECT_ID (N'tempdb.dbo.#tmpReceiptItem') IS NOT NULL
 			DROP TABLE #tmpReceiptItem
 		CREATE TABLE #tmpReceiptItem (
@@ -503,19 +507,93 @@ END
 		IF (@total > 0)
 		BEGIN
 		SET @intShipFrom = COALESCE(@intFarmFieldId, @intShipFrom);
-		EXEC [dbo].[uspAPCreateBillData]
-				@userId = @intUserId
-				,@vendorId = @intEntityId
-				,@type = 1
-				,@voucherDetailReceipt = @voucherItems
-				,@voucherDetailReceiptCharge = @voucherOtherCharges
-				,@shipTo = @intLocationId
-				,@shipFrom = @intShipFrom
-				,@shipFromEntityId = @shipFromEntityId
-				,@vendorOrderNumber = @vendorOrderNumber
-				,@voucherDate = @voucherDate
-				,@currencyId = @intCurrencyId
-				,@billId = @intBillId OUTPUT
+		INSERT INTO @voucherPayable(
+			[intTransactionType],
+			[intItemId],
+			[strMiscDescription],
+			[intInventoryReceiptItemId],
+			[dblQuantityToBill],
+			[dblOrderQty],
+			[dblExchangeRate],
+			[intCurrencyExchangeRateTypeId],
+			[ysnSubCurrency],
+			[intAccountId],
+			[dblCost],
+			[dblOldCost],
+			[dblNetWeight],
+			[dblNetShippedWeight],
+			[dblWeightLoss],
+			[dblFranchiseWeight],
+			[intContractDetailId],
+			[intContractHeaderId],
+			[intQtyToBillUOMId],
+			[intCostUOMId],
+			[intWeightUOMId],
+			[intLineNo],
+			[dblWeightUnitQty],
+			[dblCostUnitQty],
+			[dblQtyToBillUnitQty],
+			[intCurrencyId],
+			[intStorageLocationId],
+			[int1099Form],
+			[int1099Category],
+			[intLoadShipmentDetailId],
+			[strBillOfLading],
+			[intScaleTicketId],
+			[intLocationId],			
+			[intShipFromId],
+			[intShipToId],
+			[intInventoryReceiptChargeId],
+			[intPurchaseDetailId],
+			[dblTax],
+			[intEntityVendorId],
+			[strVendorOrderNumber],
+			[intLoadShipmentId]
+		)
+		EXEC [dbo].[uspSCGenerateVoucherDetails] @voucherItems,@voucherOtherCharges
+
+		IF EXISTS(SELECT NULL FROM @voucherPayable)
+		BEGIN
+			INSERT INTO @voucherTaxDetail(
+			[intVoucherPayableId]
+			,[intTaxGroupId]				
+			,[intTaxCodeId]				
+			,[intTaxClassId]				
+			,[strTaxableByOtherTaxes]	
+			,[strCalculationMethod]		
+			,[dblRate]					
+			,[intAccountId]				
+			,[dblTax]					
+			,[dblAdjustedTax]			
+			,[ysnTaxAdjusted]			
+			,[ysnSeparateOnBill]			
+			,[ysnCheckOffTax]		
+			,[ysnTaxExempt]	
+			,[ysnTaxOnly]
+			)
+			SELECT	[intVoucherPayableId]
+					,[intTaxGroupId]				
+					,[intTaxCodeId]				
+					,[intTaxClassId]				
+					,[strTaxableByOtherTaxes]	
+					,[strCalculationMethod]		
+					,[dblRate]					
+					,[intAccountId]				
+					,[dblTax]					
+					,[dblAdjustedTax]			
+					,[ysnTaxAdjusted]			
+					,[ysnSeparateOnBill]			
+					,[ysnCheckOffTax]		
+					,[ysnTaxExempt]	
+					,[ysnTaxOnly]
+			FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
+			BEGIN /* Create Voucher */
+
+			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId
+			
+			END
+		END
+
 		END
 
 		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
