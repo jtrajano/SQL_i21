@@ -426,15 +426,28 @@ BEGIN TRY
 														ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
 			
-			,strOtherPartyAddress					=   LTRIM(RTRIM(EY.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
-														ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-														ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') +
-														CASE WHEN @ysnFairtrade = 1 THEN
-															ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
-														ELSE '' END
+			,strOtherPartyAddress					= CASE 
+													  WHEN CH.strReportTo = 'Buyer' THEN --Customer
+													  	LTRIM(RTRIM(EC.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
+													  	ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+													  	ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') + 
+													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState))   END,'') + 
+													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
+													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') +
+													  	CASE WHEN @ysnFairtrade = 1 THEN
+													  		ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
+													  	ELSE '' END													
+													  ELSE -- Seller (Vendor)
+													  	LTRIM(RTRIM(EY.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
+													  	ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+													  	ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
+													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
+													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
+													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') +
+													  	CASE WHEN @ysnFairtrade = 1 THEN
+													  		ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
+													  	ELSE '' END
+													  END
 
 			,strAtlasOtherPartyAddress				=   LTRIM(RTRIM(EY.strEntityName)) +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')+ CHAR(13)+CHAR(10) +
 														ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
@@ -442,7 +455,14 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
 														ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
 														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
-			
+
+			,strBrokerAddress						=   LTRIM(RTRIM(EB.strEntityName)) +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')+ CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EB.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+														ISNULL(LTRIM(RTRIM(EB.strEntityCity)),'') + 
+														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EB.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EB.strEntityState))   END,'') + 
+														ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EB.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EB.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
+														ISNULL(CASE WHEN LTRIM(RTRIM(EB.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
+			,strBrokerCommissionMessage				= 'It is understood that your commission is ' + EB.strBrokerCommission + ' and will be paid by us to you directly.'
 			,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 			,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 			,strAtlasSeller							= CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'') END
@@ -521,7 +541,7 @@ BEGIN TRY
 			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  @rtSellerRefNo + '. :' ELSE NULL END
 			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s '+@rtCall+' vs '+LTRIM(@TotalAtlasLots)+' '+@rtLotssOf+' '+SQ.strFutMarketName + ' ' + @rtFutures ELSE NULL END
 			,strBeGreenCaller						= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
-			,strEQTCaller						= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
+			,strEQTCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
 			,strCallerDesc						    = CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
 													  ELSE 
 													  	  CASE WHEN CH.intPricingTypeId=2 THEN SQ.strFixationBy +'''s '+@rtCall+' ('+SQ.strFutMarketName+')'
@@ -584,7 +604,23 @@ BEGIN TRY
 	LEFT JOIN	vyuCTEntity					EV	WITH (NOLOCK) ON	EV.intEntityId					=	CH.intEntityId        
 												AND EV.strEntityType				=	'Vendor'					
 	LEFT JOIN	vyuCTEntity					EC	WITH (NOLOCK) ON	EC.intEntityId					=	CH.intCounterPartyId  
-												AND EC.strEntityType				=	'Customer'					
+												AND EC.strEntityType				=	'Customer'		
+	LEFT JOIN 
+	(
+		SELECT	c.intContractHeaderId,
+				a.strEntityName,
+				a.strEntityAddress,
+				a.strEntityCity,
+				a.strEntityState,
+				a.strEntityZipCode,
+				a.strEntityCountry,
+				strBrokerCommission = CONVERT(NVARCHAR,CAST(b.dblRate  AS Money),1) + ' ' + d.strCurrency + ' per ' + e.strUnitMeasure
+		FROM vyuCTEntity a
+		INNER JOIN tblCTContractCost b ON a.intEntityId = b.intVendorId AND b.strParty = 'Broker' AND a.strEntityType = 'Broker'
+		INNER JOIN tblCTContractDetail c ON b.intContractDetailId = c.intContractDetailId
+		INNER JOIN tblSMCurrency d	 ON	c.intCurrencyId = d.intCurrencyID
+		INNER JOIN tblICUnitMeasure e ON e.intUnitMeasureId = c.intUnitMeasureId
+	)										EB ON EB.intContractHeaderId = CH.intContractHeaderId											
 	LEFT JOIN	tblCTCropYear				CY	WITH (NOLOCK) ON	CY.intCropYearId				=	CH.intCropYearId			
 	LEFT JOIN	tblCTContractBasis			CB	WITH (NOLOCK) ON	CB.intContractBasisId			=	CH.intContractBasisId		
 	LEFT JOIN	tblCTWeightGrade			W1	WITH (NOLOCK) ON	W1.intWeightGradeId				=	CH.intWeightId				

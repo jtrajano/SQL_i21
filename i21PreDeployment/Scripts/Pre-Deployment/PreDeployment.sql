@@ -168,6 +168,7 @@
 
 --CT
 :r .\14_CT\CleanCostDataCorrection.sql
+:r .\14_CT\1910_ContractCostPaidByToParty.sql
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql

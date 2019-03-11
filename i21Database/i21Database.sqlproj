@@ -7416,6 +7416,8 @@
     <Build Include="dbo\Functions\fnSMGetEmailRecipients.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSentByList.sql" />
     <Build Include="dbo\Views\vyuARCustomerPricingInquiry.sql" />
+    <Build Include="dbo\Views\vyuCTContractInvoice.sql" />
+    <Build Include="dbo\Tables\tblCTContractInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

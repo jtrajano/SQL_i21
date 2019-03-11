@@ -22,7 +22,7 @@ FROM (
 		,CC.ysnAdditionalCost
 		,CC.ysnBasis
 		,CC.ysnReceivable
-		,CC.strPaidBy
+		,CC.strParty
 		,CC.dtmDueDate
 		,CC.strReference
 		,CC.strRemarks
@@ -96,7 +96,7 @@ FROM (
 		,CCV.ysnAdditionalCost
 		,CCV.ysnBasis
 		,CCV.ysnReceivable
-		,CCV.strPaidBy
+		,CCV.strParty
 		,CCV.dtmDueDate
 		,CCV.strReference
 		,CCV.strRemarks

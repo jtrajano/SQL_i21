@@ -102,8 +102,9 @@ AS
 			CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) dblAvailableQty,
 			--Header
 	
-			CH.*
-			
+			CH.*,
+
+			CI.strInvoiceNumber			
 
 	FROM	tblCTContractDetail				CD LEFT	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
@@ -166,4 +167,5 @@ AS
 				SELECT		intContractDetailId,SUM(dblHedgedLots) dblHedgedLots 
 				FROM		tblRKAssignFuturesToContractSummary 
 				GROUP BY	intContractDetailId
-			)								SY	ON	SY.intContractDetailId		=	CD.intContractDetailId
+			)								SY	ON	SY.intContractDetailId		=	CD.intContractDetailId		LEFT
+	JOIN tblCTContractInvoice				CI	ON	CI.intContractDetailId		=	CD.intContractDetailId
