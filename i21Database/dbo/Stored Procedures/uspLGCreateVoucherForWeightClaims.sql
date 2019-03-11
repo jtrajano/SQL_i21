@@ -130,7 +130,7 @@ BEGIN TRY
 		,WCD.intPartyEntityId
 		,WCD.dblFromNet AS dblNetShippedWeight
 		,ABS(WCD.dblWeightLoss) AS dblWeightLoss
-		,ABS(WCD.dblWeightLoss) AS dblNetWeight
+		,WCD.dblToNet AS dblNetWeight
 		,CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END AS dblFranchiseWeight
 		,(ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END) AS dblQtyReceived
 		,WCD.dblUnitPrice
