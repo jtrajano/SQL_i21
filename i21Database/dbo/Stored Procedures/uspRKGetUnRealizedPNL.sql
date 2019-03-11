@@ -1897,7 +1897,7 @@ BEGIN TRY
 												  CD.intItemId
 												 ,CD.intFutureMarketUnitMeasureId												
 												 ,CD.intPriceUnitMeasureId												
-												 ,[dbo].[fnRKGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice)
+												 ,[dbo].[fnRKGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice,getdate())
 												)
 		*(CASE 
 				WHEN CD.intCurrencyId <> @intCurrencyUOMId THEN
@@ -2111,4 +2111,3 @@ BEGIN CATCH
  RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
      
 END CATCH
-
