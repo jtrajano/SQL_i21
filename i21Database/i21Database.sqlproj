@@ -5336,7 +5336,6 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrualNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceNew.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPostInvoicesIntegrationsNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLog.sql" />
