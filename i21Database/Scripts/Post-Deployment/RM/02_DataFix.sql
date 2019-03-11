@@ -270,13 +270,6 @@ BEGIN
 	WHERE tblRKFutOptTransaction.intFutOptTransactionId = tblRKFutOptTransactionHistory.intFutOptTransactionId
 END
 
-GO
-
-IF EXISTS(SELECT 1 FROM tblSMGridLayout where strScreen like '%RiskManagement.view.MToMInquiry%' and strGridLayoutFilters<> '[]')
-BEGIN
-UPDATE tblSMGridLayout set strGridLayoutFilters='[]' where strScreen like '%RiskManagement.view.MToMInquiry%'
-END
-
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
 
