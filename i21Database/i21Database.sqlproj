@@ -2881,7 +2881,12 @@
     <Build Include="dbo\Tables\tblICStagingItemUom.sql" />
     <Build Include="dbo\Tables\tblICStagingItemPricing.sql" />
     <Build Include="dbo\Tables\tblICStagingItemLocation.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceipt.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceiptItem.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceiptItemLot.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspICExportItemsToStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportReceiptsFromStaging.sql" />
     <Build Include="dbo\Tables\tblCTBagMarkLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForItem.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForBlend.sql" />
