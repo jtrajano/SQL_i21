@@ -1888,7 +1888,7 @@ BEGIN TRY
 												  CD.intItemId
 												 ,CD.intFutureMarketUnitMeasureId												
 												 ,CD.intPriceUnitMeasureId												
-												 ,[dbo].[fnRKGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice)
+												 ,[dbo].[fnRKGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice,getdate())
 												)
 		/ CASE WHEN ISNULL(Detail.dblFXPrice,0) = 0 THEN ISNULL(EX.dblRate,1) ELSE ISNULL(Detail.dblRate,1) END
 		/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END	
@@ -2094,4 +2094,3 @@ BEGIN CATCH
  RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
      
 END CATCH
-

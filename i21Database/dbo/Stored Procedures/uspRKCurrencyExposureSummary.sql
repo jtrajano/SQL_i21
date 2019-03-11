@@ -45,9 +45,7 @@ SELECT
 FROM (
 	SELECT 
 		[dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId,@intCurrencyId)*
-		dbo.fnRKGetLatestClosingPrice(fm.intFutureMarketId, (SELECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth mon
-																WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId 
-																ORDER BY 1 DESC), @dtmFutureClosingDate) dblSettlementPrice
+		dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId,@dtmFutureClosingDate) dblSettlementPrice
 		,[dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId,@intCurrencyId)
 			*dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,um.intUnitMeasureId,fm.intUnitMeasureId,dblBasis) dblMarketPremium		
 		, l.dblQty
@@ -70,16 +68,15 @@ FROM (
 
 
 INSERT INTO @tblRKSummary (strSum,dblValue)
-SELECT '4. Non-USD Sales',sum(dblQuantity*dblPrice) -dblUSDValue
+SELECT '4. Non-USD Sales',-sum(dblQuantity*dblPrice) dblUSDValue
 		 FROM(
 		select  cd.dblQuantity - (SELECT ISNULL(SUM(dblQtyShipped),0) from tblARInvoice i
 								JOIN tblARInvoiceDetail id on i.intInvoiceId=id.intInvoiceId 
 								WHERE id.intContractDetailId=cd.intContractDetailId) dblQuantity
 			, 1 as intConcurrencyId,cd.intContractDetailId,ch.intEntityId,u.intUnitMeasureId,cd.intCurrencyId,ch.intCompanyId,
-			 [dbo].[fnRKGetCurrencyConvertion](cd.intCurrencyId,@intCurrencyId)*(dbo.fnRKGetSequencePrice(cd.intContractDetailId,dbo.fnRKGetLatestClosingPrice(fm.intFutureMarketId, 
-																	   (SELECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth mon
-																		WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId 
-																		ORDER BY 1 DESC), @dtmFutureClosingDate) )) dblPrice
+			 [dbo].[fnRKGetCurrencyConvertion](cd.intCurrencyId,@intCurrencyId)*(dbo.fnRKGetSequencePrice(cd.intContractDetailId,
+																					 dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId
+																														, @dtmFutureClosingDate),@dtmFutureClosingDate)) dblPrice
 		FROM tblCTContractHeader ch
 		JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and ch.intContractTypeId=2
 		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=cd.intFutureMarketId
