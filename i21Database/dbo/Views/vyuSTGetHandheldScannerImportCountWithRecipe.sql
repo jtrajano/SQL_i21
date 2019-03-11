@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuSTGetHandheldScannerImportCountWithRecipe]
-AS
+	AS
 SELECT IC.intHandheldScannerImportCountId
 	, IC.intHandheldScannerId
 	, HS.intStoreId
@@ -53,9 +53,9 @@ SELECT IC.intHandheldScannerImportCountId
 FROM tblSTHandheldScannerImportCount IC
 INNER JOIN tblICItem HandheldItem
 	ON IC.intItemId = HandheldItem.intItemId
-LEFT JOIN tblSTHandheldScanner HS 
+INNER JOIN tblSTHandheldScanner HS 
 	ON HS.intHandheldScannerId = IC.intHandheldScannerId
-LEFT JOIN tblSTStore Store 
+INNER JOIN tblSTStore Store 
 	ON Store.intStoreId = HS.intStoreId
 
 -- Recipe
@@ -63,33 +63,38 @@ LEFT JOIN tblMFRecipe Recipe
 	ON Recipe.intItemId = CASE 
 							WHEN HandheldItem.ysnAutoBlend = 1
 								THEN IC.intItemId
-							ELSE NULL
 						END
 LEFT JOIN tblMFRecipeItem RI
 	ON Recipe.intRecipeId = RI.intRecipeId
-LEFT JOIN tblICItem Item
+
+INNER JOIN tblICItem Item
 	ON Item.intItemId = CASE 
-						WHEN RI.intItemId IS NOT NULL
-							THEN RI.intItemId
-						ELSE IC.intItemId
-					END
-LEFT JOIN tblICItemLocation IL
+							WHEN HandheldItem.ysnAutoBlend = 1 AND Recipe.intRecipeId IS NOT NULL AND RI.intItemId IS NOT NULL
+								THEN RI.intItemId
+							ELSE IC.intItemId
+						END
+INNER JOIN tblICItemLocation IL
 	ON IL.intItemId = Item.intItemId
 	AND Store.intCompanyLocationId = IL.intLocationId
-LEFT JOIN tblICItemUOM ItemUOM 
+	AND Store.intCompanyLocationId = CASE 
+										WHEN HandheldItem.ysnAutoBlend = 1 AND Recipe.intRecipeId IS NOT NULL AND RI.intItemId IS NOT NULL
+											THEN Recipe.intLocationId
+										ELSE IL.intLocationId
+									END
+INNER JOIN tblICItemUOM ItemUOM 
 	ON ItemUOM.intItemId = Item.intItemId
 	AND ItemUOM.ysnStockUnit = CAST(1 AS BIT)
 	AND ItemUOM.intItemUOMId = CASE 
-								WHEN RI.intItemUOMId IS NOT NULL
-									THEN RI.intItemUOMId
-								ELSE (
-										SELECT intItemUOMId 
-										FROM tblICItemUOM 
-										WHERE strLongUPCCode COLLATE Latin1_General_CI_AS = ISNULL(IC.strUPCNo, '')
-											OR CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT)) = IC.strUPCNo
-									 )
+									WHEN RI.intItemUOMId IS NOT NULL
+										THEN RI.intItemUOMId
+									ELSE (
+											SELECT intItemUOMId 
+											FROM tblICItemUOM 
+											WHERE strLongUPCCode COLLATE Latin1_General_CI_AS = ISNULL(IC.strUPCNo, '')
+												OR CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT)) = IC.strUPCNo
+										 )
 							   END
-LEFT JOIN tblICUnitMeasure UOM
+INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 WHERE (RI.intRecipeItemTypeId = 1
 	OR RI.intRecipeItemTypeId IS NULL)
