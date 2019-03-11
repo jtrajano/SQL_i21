@@ -162,7 +162,7 @@ BEGIN TRY
 
 			UNION ALL
 		
-			SELECT 
+			SELECT DISTINCT
 				 intSettleStorageTicketId  = UH.intExternalId
 				,intPricingTypeId		   = 1 
 				,strDepletionType		   = 'Purchase Contract' 
@@ -177,6 +177,8 @@ BEGIN TRY
 				ON SH.intContractHeaderId = UH.intContractHeaderId 
 					AND SH.intCustomerStorageId = SST.intCustomerStorageId 
 					AND SH.intSettleStorageId = UH.intExternalHeaderId
+			LEFT JOIN tblCTContractDetail CD 
+				ON CD.intContractDetailId = UH.intContractDetailId
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
 				AND UH.strFieldName = 'Balance' 
