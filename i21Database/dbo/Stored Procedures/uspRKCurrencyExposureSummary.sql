@@ -70,7 +70,7 @@ FROM (
 
 
 INSERT INTO @tblRKSummary (strSum,dblValue)
-SELECT '4. Non-USD Sales',sum(dblQuantity*dblPrice) dblUSDValue
+SELECT '4. Non-USD Sales',sum(dblQuantity*dblPrice) -dblUSDValue
 		 FROM(
 		select  cd.dblQuantity - (SELECT ISNULL(SUM(dblQtyShipped),0) from tblARInvoice i
 								JOIN tblARInvoiceDetail id on i.intInvoiceId=id.intInvoiceId 
