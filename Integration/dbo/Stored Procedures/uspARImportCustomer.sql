@@ -1917,7 +1917,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				FROM ptcusmst
 			LEFT JOIN tblARCustomer
 				ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
-			WHERE tblARCustomer.strCustomerNumber IS NULL
+			WHERE tblARCustomer.strCustomerNumber IS NULL and  ptcus_co_per_ind_cp is not null
 		END
 	END
 	'
