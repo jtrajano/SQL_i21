@@ -99,6 +99,7 @@ SELECT	i21.intBankAccountId
 		,i21.dtmLastModified
 		,i21.strCbkNo
 		,i21.intConcurrencyId
+		,i21.intPayToDown
 		-- The following fields are from the origin system		
 		,apcbk_comment = CAST(NULL AS NVARCHAR(30))	 COLLATE Latin1_General_CI_AS -- CHAR (30)
 		,apcbk_password = CAST(NULL AS NVARCHAR(16)) COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -227,6 +228,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,dtmLastModified
 						,intConcurrencyId
 						,strCbkNo
+						,intPayToDown
 				)
 				OUTPUT 	inserted.intBankAccountId
 				SELECT	intBankId							= i.intBankId
@@ -309,6 +311,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,dtmLastModified					= i.dtmLastModified
 						,intConcurrencyId					= i.intConcurrencyId
 						,strCbkNo							= i.strCbkNo
+						,intPayToDown						= i.intPayToDown
 				FROM	inserted i 
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
@@ -414,6 +417,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,dtmLastModified					= i.dtmLastModified
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
+					,intPayToDown						= i.intPayToDown
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
