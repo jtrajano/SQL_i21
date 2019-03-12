@@ -122,7 +122,15 @@ BEGIN TRY
 					EXEC uspRKAutoHedge @strXML,@intOutputId OUTPUT
 
 					IF ISNULL(@intFutOptTransactionId,0) = 0
+					BEGIN
 						UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+						-- DERIVATIVE ENTRY HISTORY
+						DECLARE @intFutOptTransactionHeaderId INT = NULL
+						SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
+						EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'ADD'
+						-- DERIVATIVE ENTRY AUDIT LOG
+						EXEC uspSMAuditLog 'RiskManagement.view.DerivativeEntry', @intFutOptTransactionHeaderId, @intUserId, 'Created', 'small-new-plus'
+					END						
 				END
 			END
 			ELSE
