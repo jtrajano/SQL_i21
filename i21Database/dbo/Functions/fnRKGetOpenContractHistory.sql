@@ -16,7 +16,7 @@ BEGIN
 		, (intNoOfContract - ISNULL(intOpenContract, 0)) intOpenContract
 	FROM (
 		SELECT ot.intFutOptTransactionId
-			, SUM(ot.intNoOfContract) intNoOfContract
+			, SUM(ot.dblNoOfContract) intNoOfContract
 			, (SELECT SUM(CONVERT(int, mf.dblMatchQty))
 				FROM tblRKMatchDerivativesHistory mf
 				WHERE ot.intFutOptTransactionId = mf.intLFutOptTransactionId
@@ -30,7 +30,7 @@ BEGIN
 		, - (intNoOfContract - ISNULL(intOpenContract, 0)) intOpenContract
 	FROM (
 		SELECT ot.intFutOptTransactionId
-			, SUM(ot.intNoOfContract) intNoOfContract
+			, SUM(ot.dblNoOfContract) intNoOfContract
 			, (SELECT SUM(CONVERT(int, mf.dblMatchQty))
 				FROM tblRKMatchDerivativesHistory mf
 				WHERE ot.intFutOptTransactionId = mf.intSFutOptTransactionId
@@ -44,8 +44,8 @@ BEGIN
 		, (ISNULL(intNoOfContract, 0) - ISNULL(intOpenContract, 0)) intOpenContract
 	FROM (
 		SELECT ot.intFutOptTransactionId
-			, SUM(ISNULL(ot.intNoOfContract, 0)) intNoOfContract
-			, (SELECT SUM(CONVERT(int, mf.intMatchQty))
+			, SUM(ISNULL(ot.dblNoOfContract, 0)) intNoOfContract
+			, (SELECT SUM(CONVERT(int, mf.dblMatchQty))
 				FROM tblRKMatchDerivativesHistoryForOption mf
 				WHERE ot.intFutOptTransactionId = mf.intLFutOptTransactionId
 					AND mf.dtmMatchDate <= @dtmDateAsOf) intOpenContract
@@ -58,8 +58,8 @@ BEGIN
 		, - (intNoOfContract - ISNULL(intOpenContract, 0)) intOpenContract
 	FROM (
 		SELECT ot.intFutOptTransactionId
-			, SUM(ot.intNoOfContract) intNoOfContract
-			, (SELECT SUM(CONVERT(int, mf.intMatchQty))
+			, SUM(ot.dblNoOfContract) intNoOfContract
+			, (SELECT SUM(CONVERT(int, mf.dblMatchQty))
 				FROM tblRKMatchDerivativesHistoryForOption mf
 				WHERE ot.intFutOptTransactionId = mf.intSFutOptTransactionId
 					AND mf.dtmMatchDate <= @dtmDateAsOf) intOpenContract

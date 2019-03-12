@@ -2,15 +2,20 @@
 
 AS
 
-SELECT distinct intFutOptTransactionId,(dblNoOfContract-isnull(dblOpenContract,0)) dblOpenContract from (
-SELECT ot.intFutOptTransactionId,sum(ot.dblNoOfContract) dblNoOfContract,
-	   (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKMatchFuturesPSDetail mf where ot.intFutOptTransactionId=mf.intLFutOptTransactionId) dblOpenContract
-FROM tblRKFutOptTransaction ot where ot.strBuySell='Buy' and intInstrumentTypeId = 1
-GROUP BY intFutOptTransactionId) t
+SELECT DISTINCT intFutOptTransactionId
+	, (dblNoOfContract-isnull(dblOpenContract,0)) dblOpenContract
+FROM (
+	SELECT ot.intFutOptTransactionId
+		, sum(ot.dblNoOfContract) dblNoOfContract
+		, (SELECT SUM(CONVERT(int,mf.dblMatchQty))
+			FROM tblRKMatchFuturesPSDetail mf
+			where ot.intFutOptTransactionId = mf.intLFutOptTransactionId) dblOpenContract
+	FROM tblRKFutOptTransaction ot
+	where ot.strBuySell = 'Buy' and intInstrumentTypeId = 1
+	GROUP BY intFutOptTransactionId) t
 
-UNION 
-
-SELECT distinct intFutOptTransactionId,-(dblNoOfContract-isnull(dblOpenContract,0)) dblOpenContract from (
+UNION SELECT DISTINCT intFutOptTransactionId
+	, -(dblNoOfContract-isnull(dblOpenContract,0)) dblOpenContract from (
 SELECT ot.intFutOptTransactionId,sum(ot.dblNoOfContract) dblNoOfContract,
 	   (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKMatchFuturesPSDetail mf where ot.intFutOptTransactionId=mf.intSFutOptTransactionId) dblOpenContract
 FROM tblRKFutOptTransaction ot where ot.strBuySell='Sell' and intInstrumentTypeId = 1

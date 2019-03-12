@@ -51,8 +51,7 @@ BEGIN TRY
 		, intContractTypeId INT
 		, intUnitMeasureId  INT
 		, intConcurrencyId INT
-		, strMarketValuation NVARCHAR(250) COLLATE Latin1_General_CI_AS
-		, ysnLicensed BIT)
+		, strMarketValuation NVARCHAR(250) COLLATE Latin1_General_CI_AS)
 	
 	IF (@strEvaluationBy = 'Commodity')
 	BEGIN
@@ -89,7 +88,6 @@ BEGIN TRY
 				, intUnitMeasureId
 				, intConcurrencyId
 				, strMarketValuation = ISNULL(strMarketValuation, '')
-				, ysnLicensed
 			FROM vyuRKGetM2MBasis WHERE strContractInventory <> 'Inventory'
 		END
 		ELSE IF (@ysnIncludeInventoryM2M = 1)
@@ -125,7 +123,6 @@ BEGIN TRY
 				, intUnitMeasureId
 				, intConcurrencyId
 				, strMarketValuation = ISNULL(strMarketValuation, '') 
-				, ysnLicensed
 			FROM vyuRKGetM2MBasis
 		END
 		
@@ -183,7 +180,6 @@ BEGIN TRY
 				, intUnitMeasureId
 				, intConcurrencyId
 				, strMarketValuation = ISNULL(strMarketValuation, '')
-				, ysnLicensed
 			FROM vyuRKGetM2MBasis WHERE strContractInventory <> 'Inventory'
 		END
 		ELSE IF (@ysnIncludeInventoryM2M = 1)
@@ -219,7 +215,6 @@ BEGIN TRY
 				, intUnitMeasureId
 				, intConcurrencyId
 				, strMarketValuation = ISNULL(strMarketValuation, '')
-				, ysnLicensed
 			FROM vyuRKGetM2MBasis
 		END
 		

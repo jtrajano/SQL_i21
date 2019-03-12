@@ -90,10 +90,10 @@ FROM (
 		, rfm.strFutureMonth strRollMonth
 		, dblContractSize
 		, ysnSubCurrency
-		, ISNULL((SELECT SUM(dblOpenContract) FROM vyuRKGetOpenContract fc
+		, ISNULL((SELECT SUM(dblNoOfContract) FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell = 'Buy'
 				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId AND isnull(fc.dblOpenContract,0) > 0),0) dblOpenContract
-		, ISNULL((SELECT SUM(dblOpenContract) FROM vyuRKGetOpenContract fc
+		, ISNULL((SELECT SUM(dblNoOfContract) FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell='Buy'
 				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.dblOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
 		, (SELECT SUM(dblMatchQty) dblNoOfContract

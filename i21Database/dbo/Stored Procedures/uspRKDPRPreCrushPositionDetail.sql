@@ -656,7 +656,6 @@ BEGIN
 						, co.strCommodityCode
 						, cl.strLocationName
 						, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-						, ysnIncludeInPriceRiskAndCompanyTitled
 					FROM tblRKCollateralHistory c
 					JOIN tblICCommodity co ON co.intCommodityId = c.intCommodityId
 					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
@@ -666,8 +665,7 @@ BEGIN
 					WHERE c.intCommodityId = @intCommodityId 
 						AND c.intLocationId = ISNULL(@intLocationId, c.intLocationId)
 						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-						
-				) a WHERE a.intRowNum = 1 AND ysnIncludeInPriceRiskAndCompanyTitled = 1
+				) a WHERE a.intRowNum = 1
 			) t GROUP BY strCommodityCode
 				, strLocationName
 				, intCommodityId
