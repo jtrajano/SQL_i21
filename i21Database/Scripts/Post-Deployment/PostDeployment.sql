@@ -146,6 +146,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\4_MigrateLeaseIdFromDeviceToLeaseDeviceTable.sql
 :r .\TM\5_ObsoletingSeasonReset.sql
 :r .\TM\6_SyncStartingNumberAndDispatchId.sql
+:r .\TM\7_GenerateManufacturerFromDevice.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
