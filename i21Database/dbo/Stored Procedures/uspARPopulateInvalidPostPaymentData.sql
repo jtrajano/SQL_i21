@@ -140,29 +140,29 @@ BEGIN
         AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
         AND P.[strTransactionType] <> 'Claim'
 
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Invoice Prepayment
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = P.[strTransactionId] + '''s payment amount must be equal to ' + P.[strTransactionNumber] + '''s prepay amount!'
-	FROM
-		#ARPostPaymentDetail P
-    WHERE
-            P.[ysnPost] = 1
-        AND P.[intTransactionDetailId] IS NOT NULL
-        AND P.[intInvoiceId] IS NOT NULL
-        AND P.[ysnInvoicePrepayment] = 1
-        AND (P.[dblInvoiceTotal] <> P.[dblPayment] OR P.[dblInvoiceTotal] <> P.[dblAmountPaid])
+ --   INSERT INTO #ARInvalidPaymentData
+ --       ([intTransactionId]
+ --       ,[strTransactionId]
+ --       ,[strTransactionType]
+ --       ,[intTransactionDetailId]
+ --       ,[strBatchId]
+ --       ,[strError])
+	----Invoice Prepayment
+	--SELECT
+ --        [intTransactionId]         = P.[intTransactionId]
+ --       ,[strTransactionId]         = P.[strTransactionId]
+ --       ,[strTransactionType]       = @TransType
+ --       ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+ --       ,[strBatchId]               = P.[strBatchId]
+ --       ,[strError]                 = P.[strTransactionId] + '''s payment amount must be equal to ' + P.[strTransactionNumber] + '''s prepay amount!'
+	--FROM
+	--	#ARPostPaymentDetail P
+ --   WHERE
+ --           P.[ysnPost] = 1
+ --       AND P.[intTransactionDetailId] IS NOT NULL
+ --       AND P.[intInvoiceId] IS NOT NULL
+ --       AND P.[ysnInvoicePrepayment] = 1
+ --       AND (P.[dblInvoiceTotal] <> P.[dblPayment] OR P.[dblInvoiceTotal] <> P.[dblAmountPaid])
 
     -- INSERT INTO #ARInvalidPaymentData
     --     ([intTransactionId]
