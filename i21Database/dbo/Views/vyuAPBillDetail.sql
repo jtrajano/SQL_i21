@@ -18,6 +18,7 @@ SELECT
 		 ELSE 'Invalid Type'
 	END AS strTransactionType,
 	G2.strName,
+	G2.strEntityNo,
 	A.strVendorOrderNumber,
 	A.intBillId,
 	A.dtmDate,
