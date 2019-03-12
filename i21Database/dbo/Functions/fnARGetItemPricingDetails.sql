@@ -214,7 +214,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 				SET @OriginalGrossPrice = @UOMQuantity *	
 									( 
 										SELECT
-											P.dblSalePrice
+											P.dblDefaultGrossPrice
 										FROM
 											tblICItemPricing P
 										WHERE
@@ -652,8 +652,8 @@ DECLARE	 @Price							NUMERIC(18,6)
 	SET @dblCalculatedExchangeRate = ISNULL(@dblCalculatedExchangeRate, 1)
 	SET @Price = @UOMQuantity *	(SELECT P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
 	SET @Price = (CASE WHEN @ysnToBse = 1 THEN @Price / @dblCalculatedExchangeRate ELSE @Price * @dblCalculatedExchangeRate END)
-	SET @OriginalGrossPrice = @UOMQuantity * (SELECT P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)	
-	SET @OriginalGrossPrice = (CASE WHEN @ysnToBse = 1 THEN @OriginalGrossPrice / @dblCalculatedExchangeRate ELSE @Price * @dblCalculatedExchangeRate END)
+	SET @OriginalGrossPrice = @UOMQuantity * (SELECT P.dblDefaultGrossPrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)	
+	SET @OriginalGrossPrice = (CASE WHEN @ysnToBse = 1 THEN @OriginalGrossPrice / @dblCalculatedExchangeRate ELSE @OriginalGrossPrice * @dblCalculatedExchangeRate END)
 
 	IF(@Price IS NOT NULL)
 		BEGIN
