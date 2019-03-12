@@ -85,9 +85,9 @@ BEGIN
         --,P.[intTransactionDetailId]
         ,P.[strBatchId]
     HAVING
-            SUM(P.dblPayment) = @ZeroDecimal
-		AND MAX(P.dblPayment) = @ZeroDecimal
-		AND MIN(P.dblPayment) = @ZeroDecimal
+            SUM(P.dblPayment + P.dblWriteOffAmount) = @ZeroDecimal
+		AND MAX(P.dblPayment + P.dblWriteOffAmount) = @ZeroDecimal
+		AND MIN(P.dblPayment + P.dblWriteOffAmount) = @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -284,6 +284,29 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+	--Write off Account on detail
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = NULL
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Write off Account for ' + P.[strTransactionNumber] + ' was not set.'
+	FROM
+		#ARPostPaymentDetail P
+    WHERE
+            P.[ysnPost] = 1
+        AND P.[intInvoiceId] IS NOT NULL
+        AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
+        AND ISNULL(P.[intWriteOffAccountDetailId], 0) = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	--Income Interest Account
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
@@ -390,7 +413,7 @@ BEGIN
         AND ISNULL(P.[intGainLossAccount],0) = 0
 		AND P.[strTransactionType] <> 'Claim'
 		AND ((ISNULL(((((ISNULL(P.[dblBaseTransactionAmountDue], @ZeroDecimal) + ISNULL(P.[dblBaseInterest], @ZeroDecimal)) - ISNULL(P.[dblBaseDiscount], @ZeroDecimal) * [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]))) - P.[dblBasePayment]),0)))  <> @ZeroDecimal
-		AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount])
+		AND ((P.[dblTransactionAmountDue] + P.[dblInterest]) - P.[dblDiscount] - P.[dblWriteOffAmount]) = ((P.[dblPayment] - P.[dblInterest]) + P.[dblDiscount] + P.[dblWriteOffAmount])
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -520,7 +543,7 @@ BEGIN
         ,P.[strTransactionNumber]
         ,P.[strBatchId]
     HAVING
-         (-((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount]))) > ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]))
+         (-((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount]))) > ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]) + SUM(P.[dblWriteOffAmount])) 
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -552,7 +575,7 @@ BEGIN
         ,P.[strTransactionNumber]
         ,P.[strBatchId]
     HAVING
-        ((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount])) < ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]))
+        ((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount])) < ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]) + SUM(P.[dblWriteOffAmount]))
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -734,106 +757,6 @@ BEGIN
         AND GLAD.[strAccountCategory] = 'Cash Account'
         AND (CMBA.[ysnActive] != 1 OR  CMBA.[intGLAccountId] IS NULL)
 
-
-	--DECLARE @InvoiceIdsForChecking TABLE (
-	--	intInvoiceId int PRIMARY KEY,
-	--	UNIQUE (intInvoiceId)
-	--);
-
-	--INSERT INTO @InvoiceIdsForChecking(intInvoiceId)
-	--SELECT DISTINCT
-	--	PD.intInvoiceId 
-	--FROM
-	--	tblARPaymentDetail PD 
-	--INNER JOIN
-	--	@Payments P
-	--		ON PD.intPaymentId = P.intTransactionId
-	--WHERE
-	--	PD.dblPayment <> 0
-	--GROUP BY
-	--	PD.intInvoiceId
-	--HAVING
-	--	COUNT(PD.intInvoiceId) > 1
-	--	AND @Post = 1
-				
-	--WHILE(EXISTS(SELECT TOP 1 NULL FROM @InvoiceIdsForChecking))
-	--BEGIN
-	--	DECLARE @InvID INT			
-	--			,@InvoicePayment NUMERIC(18,6) = 0
-					
-	--	SELECT TOP 1 @InvID = intInvoiceId FROM @InvoiceIdsForChecking
-				
-	--	DECLARE @InvoicePaymentDetail TABLE(
-	--		intPaymentId INT,
-	--		intInvoiceId INT,
-	--		dblInvoiceTotal NUMERIC(18,6),
-	--		dblAmountDue NUMERIC(18,6),
-	--		dblPayment NUMERIC(18,6),
-	--		intPaymentDetailId INT,
-	--		strBatchId nvarchar(100),
-	--		strInvoiceNumber nvarchar(100)
-	--	);
-				
-	--	INSERT INTO @InvoicePaymentDetail(intPaymentId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment, intPaymentDetailId, strBatchId, strInvoiceNumber)
-	--	SELECT distinct
-	--		A.intPaymentId
-	--		,C.intInvoiceId
-	--		,C.dblInvoiceTotal
-	--		,C.dblAmountDue
-	--		,B.dblPayment
-	--		,B.intPaymentDetailId
-	--		,P.strBatchId
-	--		,C.strInvoiceNumber
-	--	FROM
-	--		tblARPayment A
-	--	INNER JOIN
-	--		tblARPaymentDetail B
-	--			ON A.intPaymentId = B.intPaymentId
-	--	INNER JOIN
-	--		tblARInvoice C
-	--			ON B.intInvoiceId = C.intInvoiceId
-	--	INNER JOIN
-	--		@Payments P
-	--			ON A.intPaymentId = P.intTransactionId
-	--	WHERE
-	--		C.intInvoiceId = @InvID
-	--		AND @Post = 1
-			
-					
-	--	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicePaymentDetail)
-	--	BEGIN
-	--		DECLARE @PayID INT
-	--				,@AmountDue NUMERIC(18,6) = 0
-	--		SELECT TOP 1 @PayID = intPaymentId, @AmountDue = dblAmountDue, @InvoicePayment = @InvoicePayment + dblPayment FROM @InvoicePaymentDetail ORDER BY intPaymentId
-				
-	--		IF @AmountDue < @InvoicePayment
-	--		BEGIN
-	--				INSERT INTO @returntable
-	--				([intTransactionId]
-	--				,[strTransactionId]
-	--				,[strTransactionType]
-	--				,[intTransactionDetailId]
-	--				,[strBatchId]
-	--				,[strError])
-	--				SELECT   
-	--				[intTransactionId]         = P.intPaymentId
-	--				,[strTransactionId]         = A.strRecordNumber
-	--				,[strTransactionType]       = @TransType
-	--				,[intTransactionDetailId]   = P.intPaymentDetailId
-	--				,[strBatchId]               = P.[strBatchId]                         
-	--				,[strError]                 = 'Payment on ' + P.strInvoiceNumber COLLATE Latin1_General_CI_AS + ' is over the transaction''s amount due' 
-	--				FROM
-	--					tblARPayment A
-	--				INNER JOIN
-	--					@InvoicePaymentDetail P
-	--						ON A.intPaymentId = P.intPaymentId
-	--				WHERE A.intPaymentId = @PayID
-	--			END									
-	--			DELETE FROM @InvoicePaymentDetail WHERE intPaymentId = @PayID	
-	--		END
-	--		DELETE FROM @InvoiceIdsForChecking WHERE intInvoiceId = @InvID							
-	--END
-
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
@@ -875,7 +798,6 @@ BEGIN
 		AND ARI.[dblAmountDue] < ARI2.[dblPayment]
 	ORDER BY
 		ARI.[intInvoiceId]
-
 
 END
 

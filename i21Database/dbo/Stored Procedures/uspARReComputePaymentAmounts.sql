@@ -44,6 +44,8 @@ SET
 	,ARPD.[dblBaseDiscount]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblDiscount], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblDiscountAvailable]		= ISNULL(ARPD.[dblDiscountAvailable], @ZeroDecimal)
 	,ARPD.[dblBaseDiscountAvailable]	= [dbo].fnRoundBanker(ISNULL(ARPD.[dblDiscountAvailable], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	,ARPD.[dblWriteOffAmount]			= ISNULL(ARPD.[dblWriteOffAmount], @ZeroDecimal)
+	,ARPD.[dblBaseWriteOffAmount]		= [dbo].fnRoundBanker(ISNULL(ARPD.[dblWriteOffAmount], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblInterest]					= ISNULL(ARPD.[dblInterest], @ZeroDecimal)
 	,ARPD.[dblBaseInterest]				= [dbo].fnRoundBanker(ISNULL(ARPD.[dblInterest], @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 	,ARPD.[dblAmountDue]				= ISNULL(ARPD.[dblAmountDue], @ZeroDecimal)
@@ -60,8 +62,8 @@ WHERE
 
 UPDATE ARPD
 SET	
-	 ARPD.[dblAmountDue]		= dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) * ((ISNULL(ABS(ARI.[dblAmountDue]), @ZeroDecimal)) + (ISNULL(ABS(ARPD.[dblInterest]), @ZeroDecimal) - (ISNULL(ABS(ARPD.[dblPayment]), @ZeroDecimal) + ISNULL(ABS(ARPD.[dblDiscount]), @ZeroDecimal))))
-	,ARPD.[dblBaseAmountDue]	= dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) * [dbo].fnRoundBanker((((ISNULL(ABS(ARI.[dblAmountDue]), @ZeroDecimal)) + (ISNULL(ABS(ARPD.[dblInterest]), @ZeroDecimal) - (ISNULL(ABS(ARPD.[dblPayment]), @ZeroDecimal) + ISNULL(ABS(ARPD.[dblDiscount]), @ZeroDecimal))))) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	 ARPD.[dblAmountDue]		= dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) * ((ISNULL(ABS(ARI.[dblAmountDue]), @ZeroDecimal)) + (ISNULL(ABS(ARPD.[dblInterest]), @ZeroDecimal) - (ISNULL(ABS(ARPD.[dblPayment]), @ZeroDecimal) + ISNULL(ABS(ARPD.[dblDiscount]), @ZeroDecimal) + ISNULL(ABS(ARPD.[dblWriteOffAmount]), @ZeroDecimal))))
+	,ARPD.[dblBaseAmountDue]	= dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) * [dbo].fnRoundBanker((((ISNULL(ABS(ARI.[dblAmountDue]), @ZeroDecimal)) + (ISNULL(ABS(ARPD.[dblInterest]), @ZeroDecimal) - (ISNULL(ABS(ARPD.[dblPayment]), @ZeroDecimal) + ISNULL(ABS(ARPD.[dblDiscount]), @ZeroDecimal) + ISNULL(ABS(ARPD.[dblWriteOffAmount]), @ZeroDecimal))))) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
 INNER JOIN
@@ -75,8 +77,8 @@ WHERE
 
 UPDATE ARPD
 SET	
-	 ARPD.[dblAmountDue]		= (ISNULL(APB.[dblAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal))
-	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL((ISNULL(APB.[dblAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal)), @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
+	 ARPD.[dblAmountDue]		= (ISNULL(APB.[dblAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal) + ISNULL(ARPD.[dblWriteOffAmount], @ZeroDecimal))
+	,ARPD.[dblBaseAmountDue]	= [dbo].fnRoundBanker(ISNULL((ISNULL(APB.[dblAmountDue], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)) + ISNULL(ARPD.[dblInterest], @ZeroDecimal) - (ISNULL(ARPD.[dblPayment], @ZeroDecimal) + ISNULL(ARPD.[dblDiscount], @ZeroDecimal) + ISNULL(ARPD.[dblWriteOffAmount], @ZeroDecimal)), @ZeroDecimal) * ARP.[dblExchangeRate], [dbo].[fnARGetDefaultDecimal]())
 FROM
 	tblARPaymentDetail ARPD
 INNER JOIN

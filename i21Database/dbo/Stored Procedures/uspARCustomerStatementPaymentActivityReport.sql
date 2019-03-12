@@ -244,7 +244,7 @@ SELECT intEntityCustomerId	= C.intEntityId
 	  , strTransactionType  = I.strTransactionType
 	  , strPaymentInfo	    = ''PAYMENT REF: '' + ISNULL(PD.strPaymentInfo, PD.strRecordNumber)
 	  , dtmDatePaid			= ISNULL(PD.dtmDatePaid, PCREDITS.dtmDatePaid)
-	  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) - ISNULL(PD.dblInterest, 0)
+	  , dblPayment			= ISNULL(PD.dblPayment, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0) - ISNULL(PD.dblInterest, 0)
 	  , dblBalance			= CASE WHEN I.intSourceId = 2 AND ISNULL(I.intOriginalInvoiceId, 0) <> 0 THEN (I.dblAmountDue * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)) ELSE (I.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)) - ISNULL(TOTALPAYMENT.dblPayment, 0) END
 	  , strSalespersonName  = C.strSalesPersonName	  
 	  , strTicketNumbers	= I.strTicketNumbers
@@ -319,6 +319,7 @@ FROM vyuARCustomerSearch C
 		SELECT intInvoiceId		= PD.intInvoiceId
 			 , dblPayment		= PD.dblPayment
 			 , dblDiscount		= PD.dblDiscount
+			 , dblWriteOffAmount = PD.dblWriteOffAmount
 			 , dblInterest		= PD.dblInterest
 			 , intPaymentId		= P.intPaymentId
 		     , strRecordNumber	= P.strRecordNumber
@@ -342,6 +343,7 @@ FROM vyuARCustomerSearch C
 		SELECT intInvoiceId		= PI.intInvoiceId
 			 , dblPayment		= PI.dblInvoiceTotal
 			 , dblDiscount		= 0.000000
+			 , dblWriteOffAmount = 0.000000
 			 , dblInterest		= 0.000000
 			 , intPaymentId		= PI.intInvoiceId
 			 , strRecordNumber  = PI.strInvoiceNumber
@@ -364,7 +366,7 @@ FROM vyuARCustomerSearch C
 	) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 	LEFT JOIN (
 		SELECT intInvoiceId
-			 , dblPayment 		= SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
+			 , dblPayment 		= SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 		INNER JOIN (SELECT intPaymentId
 					FROM dbo.tblARPayment WITH (NOLOCK)

@@ -463,7 +463,7 @@ LEFT JOIN (
 	SELECT PD.intInvoiceId
 		 , P.strRecordNumber
 		 , P.dtmDatePaid
-		 , dblTotalPayment	= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)
+		 , dblTotalPayment	= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) + ISNULL(dblWriteOffAmount, 0) - ISNULL(dblInterest, 0)
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId
 
