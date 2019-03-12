@@ -554,6 +554,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
+-- MB - Meter Billing
+:r .\MB\ImportFileDefault.sql
 
 
 print 'END POST DEPLOYMENT'
