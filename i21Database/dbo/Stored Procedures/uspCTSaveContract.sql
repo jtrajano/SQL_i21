@@ -49,7 +49,8 @@ BEGIN TRY
 			@intCurrencyId				INT,
 			@intHeaderPricingTypeId		INT,
 			@intProducerId				INT,
-			@strCertificationName		NVARCHAR(MAX)
+			@strCertificationName		NVARCHAR(MAX),
+			@strCustomerContract		NVARCHAR(100)
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -57,11 +58,17 @@ BEGIN TRY
 			@dblFutures					=	dblFutures,
 			@intHeaderPricingTypeId		=	intPricingTypeId,
 			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0),
-			@intProducerId				=	intProducerId
+			@intProducerId				=	intProducerId,
+			@strCustomerContract		=	CH.strCustomerContract
 	FROM	tblCTContractHeader CH
-	LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
-	WHERE	intContractHeaderId			=	@intContractHeaderId
+	LEFT JOIN tblCTPosition		PO ON PO.intPositionId = CH.intPositionId
+	WHERE	intContractHeaderId		=	@intContractHeaderId
 
+	IF LTRIM(RTRIM(ISNULL(@strCustomerContract,''))) <> '' AND EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE strCustomerContract = @strCustomerContract)
+	BEGIN
+		SELECT @ErrMsg = 'The Vendor/Customer Ref '+@strCustomerContract+' is already available for the selected vendor.'
+		RAISERROR(@ErrMsg,16,1)
+	END
 
 	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = ysnBasisComponent from tblCTCompanyPreference
 
