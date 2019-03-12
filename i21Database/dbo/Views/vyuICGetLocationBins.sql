@@ -57,12 +57,15 @@ SELECT
 						+ ISNULL(ItemStockUOM.dblConsignedSale, 0.00)
 				) + ISNULL(ItemStockUOM.dblUnitStorage, 0.00)
 	,dblExtended = (ISNULL(ItemStockUOM.dblOnHand, 0.00) + ISNULL(ItemStockUOM.dblUnitStorage,0.00) + ISNULL(ItemStockUOM.dblConsignedPurchase, 0.00))* ISNULL(ItemPricing.dblAverageCost, 0.00)
+	,dblExtendedRetail = (ISNULL(ItemStockUOM.dblOnHand, 0.00) + ISNULL(ItemStockUOM.dblUnitStorage,0.00) + ISNULL(ItemStockUOM.dblConsignedPurchase, 0.00))* ISNULL(ItemPricing.dblSalePrice, 0.00)
 	,dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0.00)
 	,dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0.00)
 	,dblNearingReorderBy = CAST(ISNULL(ItemStockUOM.dblOnHand, 0.00) - ISNULL(ItemLocation.dblReorderPoint, 0.00) AS NUMERIC(38, 7))
 	,dblCapacity = ISNULL(ItemStockUOM.dblCapacity, 0.00)
 	,dblSpaceAvailable = ISNULL(ItemStockUOM.dblAvailable, 0.00)
 	,dblPercentFull = ISNULL(ItemStockUOM.dblPercentFull, 0.00)
+	,dtmLastPurchaseDate = ItemStockUOM.dtmLastPurchaseDate
+	,dtmLastSaleDate = ItemStockUOM.dtmLastSaleDate
 FROM	
 	tblICItem Item 
 	LEFT JOIN tblICCategory Category 
@@ -119,7 +122,9 @@ FROM
 							)
 						ELSE 
 							NULL 
-					END 						
+					END
+				,dtmLastPurchaseDate = MAX(ItemStockUOM.dtmLastPurchaseDate)
+				,dtmLastSaleDate = MAX(ItemStockUOM.dtmLastSaleDate) 						
 		FROM	tblICItemStockUOM ItemStockUOM LEFT JOIN tblICStorageLocation sl
 					ON sl.intStorageLocationId = ItemStockUOM.intStorageLocationId
 		WHERE	ItemStockUOM.intItemId = Item.intItemId 
