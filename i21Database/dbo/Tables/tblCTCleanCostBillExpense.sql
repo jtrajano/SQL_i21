@@ -15,6 +15,7 @@
 	[ysnValueEnable] BIT,
 	[ysnQuantityEnable] BIT,
 	[ysnOtherCurrencyEnable] BIT,
+	[strComments]  NVARCHAR(500) COLLATE Latin1_General_CI_AS,
 
 	CONSTRAINT [PK_tblCTCleanCostBillExpense_intBillExpenseId] PRIMARY KEY CLUSTERED ([intBillExpenseId] ASC),
 	CONSTRAINT [FK_tblCTCleanCostBillExpense_tblCTCleanCost_intCleanCostId] FOREIGN KEY ([intCleanCostId]) REFERENCES [tblCTCleanCost]([intCleanCostId]) ON DELETE CASCADE,
