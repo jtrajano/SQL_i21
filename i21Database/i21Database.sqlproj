@@ -7778,4 +7778,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\04_TransactionSource.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CCR\ImportFileDefault.sql" />
+  </ItemGroup>
 </Project>
