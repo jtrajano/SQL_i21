@@ -15,11 +15,15 @@ SELECT	DISTINCT
 			,ISNULL(vendor.strEmail, vendor.strEmail2) AS strEmail2
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 			,strShipFrom = SF.strLocationName COLLATE Latin1_General_CI_AS
+			,SF.strAddress
+			,SF.strCity
+			,SF.strState
+			,SF.strZipCode
 			,TC.strTaxCode
 			,TC.strDescription AS strTaxCodeDesc
 			,TC.strCounty
 			,APBDT.strCalculationMethod
-			,APBDT.dblRate AS dblTaxRate
+			,ISNULL(APBDT.dblRate,0) AS dblTaxRate
 			,APBDT.dblTax AS dblTaxAmount
 			,APBD.dblQtyReceived
 			,C.strCommodityCode 
@@ -31,7 +35,7 @@ SELECT	DISTINCT
 			,APB.dtmBillDate
 			,Payment.dtmDatePaid
 			,APBD.dblTotal + APBD.dblTax as dblTotal
-			,APBDT.dblTax
+			,ISNULL(APBDT.dblTax,0) as dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
 			,strCompanyAddress = (SELECT TOP 1 
@@ -43,7 +47,7 @@ SELECT	DISTINCT
 			--,TAXDETAIL.*
 FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPBillDetail APBD  ON APBD.intBillId = APB.intBillId
-			INNER JOIN dbo.tblAPBillDetailTax APBDT ON APBD.intBillDetailId = APBDT.intBillDetailId
+			LEFT JOIN dbo.tblAPBillDetailTax APBDT ON APBD.intBillDetailId = APBDT.intBillDetailId
 			INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
 			INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
 			INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
@@ -55,8 +59,8 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
 			LEFT JOIN dbo.tblGRCustomerStorage CS ON CS.intCustomerStorageId = APBD.intCustomerStorageId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
-			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
-			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
+			LEFT JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
+			LEFT JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
 			LEFT JOIN vyuGLAccountDetail GL ON GL.intAccountId = APBD.intAccountId
 			OUTER APPLY(
 			SELECT TOP 1 
@@ -81,7 +85,12 @@ FROM		dbo.tblAPBill APB
 			) vendor
 			OUTER APPLY
 			(
-				SELECT TOP 1 strLocationName FROM  [tblEMEntityLocation] B WHERE APB.intShipFromEntityId = B.intEntityId AND APB.intShipFromId = B.intEntityLocationId 
+				SELECT TOP 1 
+				 strLocationName
+				,strAddress
+				,strCity
+				,strState
+				,strZipCode FROM  [tblEMEntityLocation] B WHERE APB.intShipFromEntityId = B.intEntityId AND APB.intShipFromId = B.intEntityLocationId 
 			) SF
 WHERE  
 	  APB.ysnPosted = 1 
@@ -89,7 +98,6 @@ WHERE
 		  AND (APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
 		  OR APBD.intCustomerStorageId > 0
 		  OR APBD.intScaleTicketId > 0) 
-		  
 		  
 UNION ALL 
 
@@ -108,11 +116,15 @@ SELECT	DISTINCT
 			,ISNULL(vendor.strEmail, vendor.strEmail2) AS strEmail2
 			,ISNULL(vendor.strPhone, vendor.strPhone2) AS strPhone
 			,strShipFrom =  SF.strLocationName COLLATE Latin1_General_CI_AS
+			,SF.strAddress
+			,SF.strCity
+			,SF.strState
+			,SF.strZipCode
 			,TC.strTaxCode
 			,TC.strDescription AS strTaxCodeDesc
 			,TC.strCounty
 			,APBDT.strCalculationMethod
-			,APBDT.dblRate AS dblTaxRate
+			,ISNULL(APBDT.dblRate,0) AS dblTaxRate
 			,APBDT.dblTax AS dblTaxAmount
 			,APBD.dblQtyReceived
 			,C.strCommodityCode 
@@ -124,7 +136,7 @@ SELECT	DISTINCT
 			,APB.dtmBillDate
 			,Payment.dtmDatePaid
 			,APBD.dblTotal + APBD.dblTax as dblTotal
-			,APBDT.dblTax
+			,ISNULL(APBDT.dblTax,0) as dblTax
 			,0 AS dblCommodityTotal
 			,strCompanyName = (SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup)
 			,strCompanyAddress = (SELECT TOP 1 
@@ -136,7 +148,7 @@ SELECT	DISTINCT
 			--,TAXDETAIL.*
 FROM		dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPBillDetail APBD  ON APBD.intBillId = APB.intBillId
-			INNER JOIN dbo.tblAPBillDetailTax APBDT ON APBD.intBillDetailId = APBDT.intBillDetailId
+			LEFT JOIN dbo.tblAPBillDetailTax APBDT ON APBD.intBillDetailId = APBDT.intBillDetailId
 			INNER JOIN dbo.tblAPVendor V ON APB.intEntityVendorId = V.intEntityId
 			INNER JOIN dbo.tblEMEntity E ON E.intEntityId = V.intEntityId
 			INNER JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND ysnDefaultContact = 1
@@ -148,8 +160,8 @@ FROM		dbo.tblAPBill APB
 			LEFT JOIN dbo.tblSCDeliverySheet SS ON SS.intDeliverySheetId = IRE.intSourceId
 			LEFT JOIN dbo.tblGRCustomerStorage CS ON CS.intCustomerStorageId = APBD.intCustomerStorageId
 			LEFT JOIN dbo.tblICCommodity C ON C.intCommodityId = IE.intCommodityId
-			INNER JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
-			INNER JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
+			LEFT JOIN tblSMTaxCode TC ON APBDT.intTaxCodeId = TC.intTaxCodeId
+			LEFT JOIN dbo.tblSMTaxClass TCS ON TC.intTaxClassId = TCS.intTaxClassId
 			INNER JOIN dbo.tblAPAppliedPrepaidAndDebit APD ON APD.intBillId = APB.intBillId
 			INNER JOIN dbo.tblAPBill APB2 ON APD.intTransactionId = APB2.intBillId
 			LEFT JOIN vyuGLAccountDetail GL ON GL.intAccountId = APBD.intAccountId
@@ -177,14 +189,18 @@ FROM		dbo.tblAPBill APB
 			)  Payment 
 			OUTER APPLY
 			(
-				SELECT TOP 1 strLocationName FROM  [tblEMEntityLocation] B WHERE APB.intShipFromEntityId = B.intEntityId AND APB.intShipFromId = B.intEntityLocationId 
+				SELECT TOP 1 
+				 strLocationName
+				,strAddress
+				,strCity
+				,strState
+				,strZipCode FROM  [tblEMEntityLocation] B WHERE APB.intShipFromEntityId = B.intEntityId AND APB.intShipFromId = B.intEntityLocationId 
 			) SF
 WHERE  
 	  APB.ysnPosted = 1 
 	 AND APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
-	 AND ( APBD.dblTax < 0 OR APBD.intCustomerStorageId > 0
+	 AND ( APBD.dblTax < 0 
+		   OR APBD.intCustomerStorageId > 0
 		  OR APBD.intScaleTicketId > 0) 
 	 and Payment.dtmDatePaid IS NOT NULL
 GO
-
-
