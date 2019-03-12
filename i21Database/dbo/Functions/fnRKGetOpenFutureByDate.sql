@@ -278,7 +278,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, intOpenContract = (SELECT SUM(intOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, intOpenContract = ISNULL((SELECT SUM(intOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId), History.intNewNoOfContract)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
