@@ -129,7 +129,16 @@ BEGIN TRY
 	END
 	CLOSE splitCursor;  
 	DEALLOCATE splitCursor;
-
+	DECLARE @ysnDPOwned as BIT = 0;
+	SELECT @ysnDPOwned = CASE WHEN CD.intPriceTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END FROM tblSCTicket SC
+	INNER JOIN tblSCDeliverySheet SDS
+		ON SDS.intDeliverySheetId = SC.intDeliverySheetId
+	INNER JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = SC.intContractId
+	OUTER APPLY(
+					SELECT strOwnedPhysicalStock FROM tblGRStorageType WHERE strStorageTypeCode = @strDistributionOption
+				) GR
+	WHERE SDS.intDeliverySheetId = @intDeliverySheetId
 	INSERT INTO @processTicket(
 		[intItemId]
 		,[dtmDate]
@@ -154,7 +163,7 @@ BEGIN TRY
 		,[dblAdjustByQuantity]				= ROUND(((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) - SC.dblNetUnits, @currencyDecimal)
 		,[dblNewUnitCost]					= 0
 		,[intItemUOMId]						= SC.intItemUOMIdTo
-		,[intOwnershipType]					= 2
+		,[intOwnershipType]					= CASE WHEN @ysnDPOwned = 1 THEN 1 ELSE 2 END
 	FROM 
 	tblSCDeliverySheet SCD
 	CROSS APPLY(
