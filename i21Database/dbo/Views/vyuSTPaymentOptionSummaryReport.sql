@@ -1,22 +1,27 @@
 ﻿CREATE VIEW [dbo].[vyuSTPaymentOptionSummaryReport]
 	AS
 SELECT ST.intStoreId
-, ST.intStoreNo
-, ST.strRegion
-, ST.strDistrict
-, ST.strDescription strStoreDescription
-, CH.dtmCheckoutDate
-, ISNULL(Inv.ysnPosted, 0) ysnPosted
-, CPO.intPaymentOptionId
-, PO.strPaymentOptionId
-, PO.strDescription
-, ACC.strAccountId
-, SUM(CPO.dblRegisterAmount) dblRegisterAmount
-, SUM(CPO.dblAmount) dblAmount
-, SUM(CPO.dblRegisterAmount) - SUM(CPO.dblAmount) dblDiffRegisterAndSales
+	, ST.intStoreNo
+	, ST.strRegion
+	, ST.strDistrict
+	, CL.strCity
+	, CL.strStateProvince
+	, CL.strZipPostalCode
+	, ST.strDescription strStoreDescription
+	, CH.dtmCheckoutDate
+	, ISNULL(Inv.ysnPosted, 0) ysnPosted
+	, CPO.intPaymentOptionId
+	, PO.strPaymentOptionId
+	, PO.strDescription
+	, ACC.strAccountId
+	, SUM(CPO.dblRegisterAmount) dblRegisterAmount
+	, SUM(CPO.dblAmount) dblAmount
+	, SUM(CPO.dblRegisterAmount) - SUM(CPO.dblAmount) dblDiffRegisterAndSales
 FROM tblSTCheckoutHeader CH 
 INNER JOIN tblSTStore ST 
 	ON ST.intStoreId = CH.intStoreId 
+INNER JOIN tblSMCompanyLocation CL
+	ON ST.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN tblARInvoice Inv 
 	ON Inv.intInvoiceId = CH.intInvoiceId
 INNER JOIN tblSTCheckoutPaymentOptions CPO 
@@ -29,4 +34,5 @@ INNER JOIN tblSTPaymentOption PO
 INNER JOIN tblICItem IT 
 	ON IT.intItemId = CPO.intItemId 
 WHERE CPO.dblAmount <> 0	
-GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CH.dtmCheckoutDate, ISNULL(Inv.ysnPosted, 0), CPO.intPaymentOptionId, PO.strPaymentOptionId, PO.strDescription, ACC.strAccountId
+GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, CL.strCity, CL.strStateProvince, CL.strZipPostalCode, ST.strDescription, CH.dtmCheckoutDate, ISNULL(Inv.ysnPosted, 0), CPO.intPaymentOptionId, PO.strPaymentOptionId, PO.strDescription, ACC.strAccountId
+

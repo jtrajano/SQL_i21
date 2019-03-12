@@ -130,7 +130,7 @@ BEGIN TRY
 	CLOSE splitCursor;  
 	DEALLOCATE splitCursor;
 	DECLARE @ysnDPOwned as BIT = 0;
-	SELECT @ysnDPOwned = CASE WHEN CD.intPriceTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END FROM tblSCTicket SC
+	SELECT @ysnDPOwned = CASE WHEN CD.intPricingTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END FROM tblSCTicket SC
 	INNER JOIN tblSCDeliverySheet SDS
 		ON SDS.intDeliverySheetId = SC.intDeliverySheetId
 	INNER JOIN tblCTContractDetail CD
