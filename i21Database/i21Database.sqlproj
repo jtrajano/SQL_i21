@@ -7423,6 +7423,8 @@
     <Build Include="dbo\Views\vyuCTContractInvoice.sql" />
     <Build Include="dbo\Tables\tblCTContractInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetLoadItemQuantity.sql" />
+    <Build Include="dbo\Views\vyuRKGetInventoryTransaction.sql" />
+    <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
