@@ -1,4 +1,4 @@
-CREATE TABLE [dbo].[tblICStagingReceiptCharges] (
+CREATE TABLE [dbo].[tblICStagingReceiptCharge] (
 	  intStagingReceiptChargeId INT IDENTITY(1, 1)
 	, intReceiptId INT NULL -- Normally used when this field is included in export
 	, intChargeId INT NULL -- Normally used when this field is included in export
