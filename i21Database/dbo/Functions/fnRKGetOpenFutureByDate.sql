@@ -5,7 +5,7 @@
 )
 RETURNS @FinalResult TABLE (
 	intFutOptTransactionId INT
-	, intOpenContract INT
+	, dblOpenContract NUMERIC(18, 6)
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -37,7 +37,7 @@ WHERE intCommodityId = @intCommodityId
 
 INSERT INTO @FinalResult(
 	intFutOptTransactionId
-	, intOpenContract
+	, dblOpenContract
 	, strCommodityCode
 	, strInternalTradeNo
 	, strLocationName
@@ -57,7 +57,7 @@ INSERT INTO @FinalResult(
 	, strBrokerTradeNo
 )
 SELECT DISTINCT intFutOptTransactionId
-	, intOpenContract
+	, dblOpenContract
 	, strCommodityCode
 	, strInternalTradeNo
 	, strLocationName
@@ -83,8 +83,8 @@ FROM (
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.intOpenContract END
+			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
+									ELSE History.dblOpenContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -111,7 +111,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, intOpenContract = (SELECT SUM(intOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, dblOpenContract = (SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
@@ -126,8 +126,8 @@ FROM (
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.intOpenContract END
+			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
+									ELSE History.dblOpenContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -154,7 +154,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, intOpenContract = (SELECT SUM(intOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, dblOpenContract = (SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
@@ -169,8 +169,8 @@ FROM (
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.intOpenContract END
+			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
+									ELSE History.dblOpenContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -197,7 +197,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, intOpenContract = (SELECT SUM(intOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, dblOpenContract = (SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
@@ -212,8 +212,8 @@ FROM (
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
-			, intOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.intOpenContract END
+			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
+									ELSE History.dblOpenContract END
 			, FOT.strCommodityCode
 			, FOT.strInternalTradeNo
 			, FOT.strLocationName
@@ -240,7 +240,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, intOpenContract = (SELECT SUM(intOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, dblOpenContract = (SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
@@ -278,7 +278,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, intOpenContract = ISNULL((SELECT SUM(intOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId), History.intNewNoOfContract)
+					, intOpenContract = ISNULL((SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId), History.dblNewNoOfContract)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
