@@ -7442,6 +7442,7 @@
     <Build Include="dbo\Tables\tblCTContractInvoice.sql" />
     <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTotalHours.sql" />
+    <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
