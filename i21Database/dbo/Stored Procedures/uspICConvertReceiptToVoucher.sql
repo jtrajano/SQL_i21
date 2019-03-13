@@ -20,9 +20,7 @@ DECLARE @intEntityVendorId AS INT
 		,@strReceiptNumber AS NVARCHAR(50)
 		,@dtmReceiptDate AS DATETIME
 
-		,@voucherItems AS VoucherPayable
-		,@voucherItemsTax AS VoucherDetailTax
-		--,@voucherItems AS VoucherDetailReceipt 
+		,@voucherItems AS VoucherDetailReceipt 
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge 
 		,@voucherDetailClaim AS VoucherDetailClaim
 
@@ -30,12 +28,10 @@ DECLARE @intEntityVendorId AS INT
 		,@intShipTo AS INT 
 		,@strVendorRefNo NVARCHAR(50)
 		,@intCurrencyId AS INT 
+		,@strBillOfLading NVARCHAR(50)
 
 		,@intShipFrom_DebitMemo AS INT
 		,@intReturnValue AS INT
-
-
-DECLARE @ReceiptType INT = 4;
 
 DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_SCALE AS INT = 1
@@ -45,8 +41,6 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_DELIVERY_SHEET AS INT = 5
 		,@SourceType_PURCHASE_ORDER AS INT = 6
 		,@SourceType_STORE AS INT = 7
-
-DECLARE @ItemType_OtherCharge AS NVARCHAR(50) = 'Other Charge';
 
 DECLARE @Own AS INT = 1
 		,@Storage AS INT = 2
@@ -65,7 +59,8 @@ SELECT	@intEntityVendorId = intEntityVendorId
 
 		,@intShipFrom = r.intShipFromId
 		,@intShipTo = r.intLocationId
-		,@strVendorRefNo = ISNULL(r.strBillOfLading, r.strVendorRefNo)
+		,@strVendorRefNo = r.strVendorRefNo
+		,@strBillOfLading = ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), '') , r.strVendorRefNo) 
 		,@intCurrencyId = r.intCurrencyId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
@@ -77,154 +72,102 @@ WHERE	r.ysnPosted = 1
 BEGIN 
 	-- Assemble the voucher items 
 	BEGIN 
-		INSERT INTO @voucherItems(
-			[intEntityVendorId]			
-			,[intTransactionType]		
-			,[intLocationId]	
-			,[intShipToId]	
-			,[intShipFromId]			
-			,[intShipFromEntityId]
-			,[intPayToAddressId]
-			,[intCurrencyId]					
-			,[dtmDate]				
-			,[strVendorOrderNumber]			
-			,[strReference]						
-			,[strSourceNumber]					
-			,[intPurchaseDetailId]				
-			,[intContractHeaderId]				
-			,[intContractDetailId]				
-			,[intContractSeqId]					
-			,[intScaleTicketId]					
-			,[intInventoryReceiptItemId]		
-			,[intInventoryReceiptChargeId]		
-			,[intInventoryShipmentItemId]		
-			,[intInventoryShipmentChargeId]		
-			,[intLoadShipmentId]				
-			,[intLoadShipmentDetailId]			
-			,[intItemId]						
-			,[intPurchaseTaxGroupId]			
-			,[strMiscDescription]				
-			,[dblOrderQty]						
-			,[dblOrderUnitQty]					
-			,[intOrderUOMId]					
-			,[dblQuantityToBill]				
-			,[dblQtyToBillUnitQty]				
-			,[intQtyToBillUOMId]				
-			,[dblCost]							
-			,[dblCostUnitQty]					
-			,[intCostUOMId]						
-			,[dblNetWeight]						
-			,[dblWeightUnitQty]					
-			,[intWeightUOMId]					
-			,[intCostCurrencyId]
-			,[dblTax]							
-			,[dblDiscount]
-			,[intCurrencyExchangeRateTypeId]	
-			,[dblExchangeRate]					
-			,[ysnSubCurrency]					
-			,[intSubCurrencyCents]				
-			,[intAccountId]						
-			,[intShipViaId]						
-			,[intTermId]						
-			,[strBillOfLading]					
-			,[ysnReturn]						
-	)
-	SELECT 
-		GP.[intEntityVendorId]
-		,GP.[intTransactionType]
-		,GP.[intLocationId]	
-		,[intShipToId] = NULL	
-		,[intShipFromId] = NULL	 		
-		,[intShipFromEntityId] = NULL
-		,[intPayToAddressId] = NULL
-		,GP.[intCurrencyId]					
-		,GP.[dtmDate]				
-		,GP.[strVendorOrderNumber]		
-		,GP.[strReference]						
-		,GP.[strSourceNumber]					
-		,GP.[intPurchaseDetailId]				
-		,GP.[intContractHeaderId]				
-		,GP.[intContractDetailId]				
-		,[intContractSeqId] = NULL					
-		,GP.[intScaleTicketId]					
-		,GP.[intInventoryReceiptItemId]		
-		,GP.[intInventoryReceiptChargeId]		
-		,GP.[intInventoryShipmentItemId]		
-		,GP.[intInventoryShipmentChargeId]		
-		,[intLoadShipmentId] = NULL				
-		,[intLoadShipmentDetailId] = NULL			
-		,GP.[intItemId]						
-		,GP.[intPurchaseTaxGroupId]			
-		,GP.[strMiscDescription]				
-		,GP.[dblOrderQty]						
-		,[dblOrderUnitQty] = 0.00					
-		,[intOrderUOMId] = NULL	 				
-		,GP.[dblQuantityToBill]			
-		,GP.[dblQtyToBillUnitQty]				
-		,GP.[intQtyToBillUOMId]				
-		,[dblCost] = GP.dblUnitCost							
-		,GP.[dblCostUnitQty]					
-		,GP.[intCostUOMId]						
-		,[dblNetWeight]						
-		,[dblWeightUnitQty]					
-		,GP.[intWeightUOMId]					
-		,GP.[intCostCurrencyId]
-		,GP.[dblTax]							
-		,GP.[dblDiscount]
-		,GP.[intCurrencyExchangeRateTypeId]	
-		,[dblExchangeRate] = GP.dblRate					
-		,GP.[ysnSubCurrency]					
-		,GP.[intSubCurrencyCents]				
-		,GP.[intAccountId]						
-		,GP.[intShipViaId]						
-		,GP.[intTermId]						
-		,GP.[strBillOfLading]					
-		,GP.[ysnReturn]	 
-	FROM dbo.fnICGeneratePayables (@intReceiptId, 1) GP
-	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
-		ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
-	INNER JOIN tblICInventoryReceipt Receipt
-		ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-		AND Receipt.intEntityVendorId = GP.intEntityVendorId
-
+		INSERT INTO @voucherItems (
+				[intInventoryReceiptType]
+				,[intInventoryReceiptItemId]
+				,[dblQtyReceived]
+				,[dblCost]
+				,[intTaxGroupId]
+		)
+		SELECT 
+				[intInventoryReceiptType] = 
+					CASE 
+						WHEN r.strReceiptType = 'Direct' THEN 1
+						WHEN r.strReceiptType = 'Purchase Contract' THEN 2
+						WHEN r.strReceiptType = 'Purchase Order' THEN 3
+						WHEN r.strReceiptType = 'Transfer Order' THEN 4
+						WHEN r.strReceiptType = 'Inventory Return' THEN 4
+						ELSE NULL 
+					END 
+				,[intInventoryReceiptItemId] = ri.intInventoryReceiptItemId
+				,[dblQtyReceived] = 
+					CASE 
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-(ri.dblOpenReceive - ri.dblBillQty)
+						ELSE 
+							ri.dblOpenReceive - ri.dblBillQty
+					END 
+				,[dblCost] = ri.dblUnitCost
+				,[intTaxGroupId] = ri.intTaxGroupId
+		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				INNER JOIN tblICItem Item 
+					ON Item.intItemId = ri.intItemId
+		WHERE	r.ysnPosted = 1
+				AND r.intInventoryReceiptId = @intReceiptId
+				AND ABS(ri.dblBillQty) < ABS(ri.dblOpenReceive)
+				AND ri.intOwnershipType = @Own
+				AND Item.strType <> 'Bundle'
+				AND ISNULL(r.strReceiptType, '') <> 'Transfer Order'
+				AND 1 = 
+					CASE 
+						WHEN @intScreenId = @intScreenId_InventoryReceipt AND ri.ysnAllowVoucher = 0 THEN 
+							0
+						ELSE 
+							1
+					END 
 	END 
 
-	-- Assemble Item Taxes
+	-- Assemble the Other Charges
 	BEGIN
-		INSERT INTO @voucherItemsTax(
-			[intVoucherPayableId]
-			,[intTaxGroupId]				
-			,[intTaxCodeId]				
-			,[intTaxClassId]				
-			,[strTaxableByOtherTaxes]	
-			,[strCalculationMethod]		
-			,[dblRate]					
-			,[intAccountId]				
-			,[dblTax]					
-			,[dblAdjustedTax]			
-			,[ysnTaxAdjusted]			
-			,[ysnSeparateOnBill]			
-			,[ysnCheckOffTax]		
-			,[ysnTaxExempt]	
-			,[ysnTaxOnly]
+		INSERT INTO @voucherOtherCharges (
+				[intInventoryReceiptChargeId]
+				,[dblQtyReceived]
+				,[dblCost]
+				,[intTaxGroupId]
 		)
-		SELECT [intVoucherPayableId]
-				,[intTaxGroupId]				
-				,[intTaxCodeId]				
-				,[intTaxClassId]				
-				,[strTaxableByOtherTaxes]	
-				,[strCalculationMethod]		
-				,[dblRate]					
-				,[intAccountId]				
-				,[dblTax]					
-				,[dblAdjustedTax]			
-				,[ysnTaxAdjusted]			
-				,[ysnSeparateOnBill]			
-				,[ysnCheckOffTax]		
-				,[ysnTaxExempt]	
-				,[ysnTaxOnly]	
-		FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
-	END
+		SELECT	
+				[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
+				,[dblQtyReceived] = 
+					CASE 
+						WHEN rc.ysnPrice = 1 THEN 
+							rc.dblQuantity - ISNULL(-rc.dblQuantityPriced, 0) 
+						ELSE 
+							rc.dblQuantity - ISNULL(rc.dblQuantityBilled, 0) 
+					END 
+
+				,[dblCost] = 
+					CASE 
+						WHEN rc.strCostMethod = 'Per Unit' THEN rc.dblRate
+						WHEN rc.strCostMethod = 'Gross Unit' THEN rc.dblRate
+						ELSE rc.dblAmount
+					END 
+				,[intTaxGroupId] = rc.intTaxGroupId
+		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc
+					ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+		WHERE	r.ysnPosted = 1
+				AND r.intInventoryReceiptId = @intReceiptId
+				AND ISNULL(r.strReceiptType, '') <> 'Transfer Order'
+				AND 
+				(
+					(
+						rc.ysnPrice = 1
+						AND ISNULL(-rc.dblAmountPriced, 0) < rc.dblAmount
+					)
+					OR (
+						rc.ysnAccrue = 1 
+						AND r.intEntityVendorId = ISNULL(rc.intEntityVendorId, r.intEntityVendorId) 
+						AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
+					)
+				)
+				AND 1 = 
+					CASE 
+						WHEN @intScreenId = @intScreenId_InventoryReceipt AND rc.ysnAllowVoucher = 0 THEN 
+							0
+						ELSE 
+							1
+					END
+	END 
 
 	-- Check if we can convert the IR Items to Voucher
 	IF (
@@ -237,7 +180,7 @@ BEGIN
 					AND ri.intOwnershipType = @Own
 					AND i.strType <> 'Bundle'
 		)
-		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptItemId IS NOT NULL) 
+		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems) 
 	) 
 	BEGIN 
 		-- 'The items in {Receipt Number} are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
@@ -265,7 +208,7 @@ BEGIN
 						)
 					)
 		)
-		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL) 
+		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherOtherCharges) 
 	) 
 	BEGIN 
 		-- 'The other charges in {Receipt Number} are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
@@ -280,7 +223,7 @@ BEGIN
 					ON ri.intInventoryReceiptItemId = vi.intInventoryReceiptItemId
 		WHERE	ISNULL(ri.dblOpenReceive, 0) <> ISNULL(ri.dblBillQty, 0)
 	) AND NOT EXISTS (
-		SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL
+		SELECT TOP 1 1 FROM @voucherOtherCharges
 	)
 	BEGIN 
 		-- Voucher is no longer needed. All items have Voucher. 
@@ -293,28 +236,20 @@ BEGIN
 	BEGIN 
 		DECLARE @throwedError AS NVARCHAR(1000);
 
-		--EXEC [dbo].[uspAPCreateBillData]
-		--	@userId = @intEntityUserSecurityId
-		--	,@vendorId = @intEntityVendorId
-		--	,@type = @billTypeToUse
-		--	,@voucherDetailReceipt = @voucherItems
-		--	,@voucherDetailReceiptCharge = @voucherOtherCharges
-		--	,@shipTo = @intShipTo
-		--	,@shipFrom = @intShipFrom
-		--	,@vendorOrderNumber = @strVendorRefNo
-		--	,@currencyId = @intCurrencyId
-		--	,@throwError = 0
-		--	,@error = @throwedError OUTPUT
-		--	,@billId = @intBillId OUTPUT
-		--	,@voucherDate = @dtmReceiptDate
-
-		EXEC [dbo].[uspAPCreateVoucher]
-			@voucherPayables = @voucherItems
-			,@voucherPayableTax = @voucherItemsTax
-			,@userId = @intEntityVendorId
+		EXEC [dbo].[uspAPCreateBillData]
+			@userId = @intEntityUserSecurityId
+			,@vendorId = @intEntityVendorId
+			,@type = @billTypeToUse
+			,@voucherDetailReceipt = @voucherItems
+			,@voucherDetailReceiptCharge = @voucherOtherCharges
+			,@shipTo = @intShipTo
+			,@shipFrom = @intShipFrom
+			,@vendorOrderNumber = @strBillOfLading
+			,@currencyId = @intCurrencyId
 			,@throwError = 0
 			,@error = @throwedError OUTPUT
-			,@createdVouchersId = @intBillId OUTPUT
+			,@billId = @intBillId OUTPUT
+			,@voucherDate = @dtmReceiptDate
 
 		IF(@throwedError <> '')
 		BEGIN
@@ -340,3 +275,5 @@ END
 
 Post_Exit:
 RETURN @intReturnValue;
+GO 
+
