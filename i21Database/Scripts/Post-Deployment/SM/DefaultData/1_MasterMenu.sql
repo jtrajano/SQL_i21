@@ -18,6 +18,14 @@ GO
 		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
 	END
 GO
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Credit Cards' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0)
+	BEGIN
+		EXEC uspSMIncreaseECConcurrency 0
+		
+		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
+		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
+	END
+GO
 	
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Formats'	AND strModuleName = 'Cash Management' AND (strCommand = 'CashManagement.controller.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat?showSearch=true'))
 	BEGIN
@@ -1357,11 +1365,15 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Miscellaneous Checks' AND strM
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Card Reconciliation' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0)
 UPDATE tblSMMasterMenu SET strMenuName = 'Credit Card Recon', strDescription = 'Credit Card Recon' WHERE strMenuName = 'Credit Card Reconciliation' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Card Recon' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0)
+/* Rename Credit Card Recon to Dealer Credit Cards*/
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Card Recon' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0)
+UPDATE tblSMMasterMenu SET strMenuName = 'Dealer Credit Cards', strDescription = 'Dealer Credit Cards' WHERE strMenuName = 'Credit Card Recon' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Credit Cards' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Credit Card Recon', N'Credit Card Recon', 0, N'Credit Card Recon', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 7, 0)
+	VALUES (N'Dealer Credit Cards', N'Credit Card Recon', 0, N'Dealer Credit Cards', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 7, 0)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 7 WHERE strMenuName = 'Credit Card Recon' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0
+	UPDATE tblSMMasterMenu SET intSort = 7 WHERE strMenuName = 'Dealer Credit Cards' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0
 
 DECLARE @CreditCardReconParentMenuId INT
 SELECT @CreditCardReconParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Credit Card Recon' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0
