@@ -7295,6 +7295,7 @@
     <Build Include="dbo\Tables\tblCFMaximaPrinterCardSoftware.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTotalHours.sql" />
+    <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
