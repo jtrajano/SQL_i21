@@ -87,7 +87,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 											END
 										AS NVARCHAR(100)
 									)
-		,strEntity					= e.strName										
+		,strEntity					= e.strName		
+		,strParentLotNumber			= ParentLot.strParentLotNumber
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId
 		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
@@ -133,6 +134,9 @@ FROM 	tblICItem i
 			ON iuTransUOM.intItemUOMId = t.intItemUOMId
 		LEFT JOIN tblICLot l
 			ON l.intLotId = t.intLotId
+		LEFT JOIN tblICParentLot ParentLot
+			ON ParentLot.intItemId = l.intItemId
+			AND ParentLot.intParentLotId = l.intParentLotId
 		LEFT JOIN tblICItemPricing ItemPricing
 			ON ItemPricing.intItemId = t.intItemId
 			AND ItemPricing.intItemLocationId = t.intItemLocationId

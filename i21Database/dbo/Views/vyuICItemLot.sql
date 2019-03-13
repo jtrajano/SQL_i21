@@ -15,6 +15,7 @@ SELECT
 	, strLocationName = loc.strLocationName
 	, strSubLocationName = subLoc.strSubLocationName
 	, strStorageLocation = stLoc.strName
+	, strParentLotNumber = ParentLot.strParentLotNumber
 	, strLotNumber = lot.strLotNumber
 	, dblQty = lot.dblQty
 	, dblWeight = lot.dblWeight
@@ -47,3 +48,5 @@ FROM tblICLot lot
 	LEFT JOIN tblICLotStatus lotStatus ON lotStatus.intLotStatusId = lot.intLotStatusId
 	LEFT JOIN tblCTBook book ON book.intBookId = lot.intBookId
 	LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = lot.intSubBookId
+	LEFT JOIN tblICParentLot ParentLot ON ParentLot.intItemId = lot.intItemId
+		AND ParentLot.intParentLotId = lot.intParentLotId
