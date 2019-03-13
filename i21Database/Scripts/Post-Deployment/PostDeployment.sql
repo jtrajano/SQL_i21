@@ -79,6 +79,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\38_ReplicationConfigurationTable.sql
 :r .\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql
 :r .\SM\DefaultData\40_DisconnectedReplicationTable.sql 
+:r .\SM\DefaultData\41_TaxReportType.sql 
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
