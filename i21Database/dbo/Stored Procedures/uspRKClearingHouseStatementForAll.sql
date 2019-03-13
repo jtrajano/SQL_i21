@@ -103,13 +103,17 @@ SET @query = '
 			,null SdblNoOfContract
 			,null SstrFutureMonth
 			,null SdblPrice
-			,CASE WHEN bc.intFuturesRateType = 1 then 0 else - isnull(bc.dblFutCommission, 0) end * dblNoOfContract as dblFutCommission
+			,dblFutCommission =(ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 2 THEN 0
+															ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END) as dblFutCommission
+										FROM tblRKBrokerageCommission bc
+										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
+										WHERE bc.intFutureMarketId = m.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId
+											and getdate() between bc.dtmEffectiveDate and ISNULL(bc.dtmEndDate,getdate())),0) * -1) * dblNoOfContract
 		FROM tblRKFutOptTransaction t
 		JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell=''Buy''
 		JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 		JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
-		LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId= t.intFutureMarketId AND t.intBrokerageAccountId=bc.intBrokerageAccountId
 		WHERE  strName= case when '''+isnull(@strName,'')+''' ='''' then strName else '''+isnull(@strName,'')+''' end
 			AND strAccountNumber = case when '''+isnull(@strAccountNumber,'')+'''='''' then strAccountNumber else '''+isnull(@strAccountNumber,'')+''' end
 			AND CONVERT(VARCHAR(10), dtmFilledDate, 110) between '''+CONVERT(VARCHAR(10), @dtmTransactionFromDate, 110)+''' and '''+CONVERT(VARCHAR(10), @dtmTransactionToDate, 110)+'''
@@ -125,13 +129,17 @@ SET @query = '
 			,dblNoOfContract SdblNoOfContract
 			,strFutureMonth SstrFutureMonth
 			,dblPrice SdblPrice
-			,CASE WHEN bc.intFuturesRateType= 1 then 0 else  -isnull(bc.dblFutCommission,0) end*dblNoOfContract as dblFutCommission
+			,dblFutCommission =(ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 2 THEN 0
+															ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END) as dblFutCommission
+										FROM tblRKBrokerageCommission bc
+										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
+										WHERE bc.intFutureMarketId = m.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId
+											and getdate() between bc.dtmEffectiveDate and ISNULL(bc.dtmEndDate,getdate())),0) * -1) * dblNoOfContract
 		FROM tblRKFutOptTransaction t
 		JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell=''Sell''
 		JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 		JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
-		LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId= t.intFutureMarketId AND t.intBrokerageAccountId=bc.intBrokerageAccountId 
 		WHERE   strName= case when '''+isnull(@strName,'')+''' ='''' then strName else '''+isnull(@strName,'')+''' end
 		AND strAccountNumber = case when '''+isnull(@strAccountNumber,'')+'''='''' then strAccountNumber else '''+isnull(@strAccountNumber,'')+''' end
 		AND CONVERT(VARCHAR(10), dtmFilledDate, 110) between '''+CONVERT(VARCHAR(10), @dtmTransactionFromDate, 110)+''' and '''+CONVERT(VARCHAR(10), @dtmTransactionToDate, 110)+'''

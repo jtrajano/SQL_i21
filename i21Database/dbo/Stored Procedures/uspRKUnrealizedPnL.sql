@@ -180,7 +180,7 @@ FROM (
    left join #TempSettlementPrice t on t.intFutureMarketId=ot.intFutureMarketId and t.intFutureMonthId=ot.intFutureMonthId
    LEFT JOIN tblCTBook cb ON cb.intBookId = ot.intBookId    
    LEFT JOIN tblCTSubBook csb ON csb.intSubBookId = ot.intSubBookId    
-   WHERE   ot.intSelectedInstrumentTypeId=@intSelectedInstrumentTypeId and
+   WHERE   ISNULL(ot.intSelectedInstrumentTypeId,0)= CASE WHEN ISNULL(@intSelectedInstrumentTypeId,0)=0 then ot.intSelectedInstrumentTypeId else @intSelectedInstrumentTypeId end and
    isnull(ot.intCommodityId, 0) = CASE     
      WHEN ISNULL(@intCommodityId, 0) = 0    
       THEN isnull(ot.intCommodityId, 0)    
