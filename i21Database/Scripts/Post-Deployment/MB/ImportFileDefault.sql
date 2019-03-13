@@ -25,7 +25,7 @@ BEGIN
 
 	-- Customer ID
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Customer ID', 1, 3, 1)
+	VALUES (@FileHeaderId, 'Customer ID', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -34,7 +34,7 @@ BEGIN
 
 	-- Meter Number
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Meter Number', 1, 5, 1)
+	VALUES (@FileHeaderId, 'Meter Number', 0, 5, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -43,7 +43,7 @@ BEGIN
 
 	-- Transaction Date
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Transaction Date', 1, 6, 1)
+	VALUES (@FileHeaderId, 'Transaction Date', 0, 6, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -52,7 +52,7 @@ BEGIN
 
 	-- Last Meter Reading
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Last Meter Reading', 1, 7, 1)
+	VALUES (@FileHeaderId, 'Last Meter Reading', 0, 7, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -61,7 +61,7 @@ BEGIN
 
 	-- Last Total Sales
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Last Total Sales', 1, 8, 1)
+	VALUES (@FileHeaderId, 'Last Total Sales', 0, 8, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
