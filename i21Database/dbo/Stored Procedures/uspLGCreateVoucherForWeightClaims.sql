@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @intVendorEntityId AS INT;
 	DECLARE @intMinRecord AS INT
 	DECLARE @VoucherDetailClaim AS VoucherDetailClaim
+	DECLARE @voucherPayableToProcess AS VoucherPayable
 	DECLARE @intAPAccount INT
 	DECLARE @strWeightClaimNo NVARCHAR(100)
 	DECLARE @intWeightClaimDetailId INT
@@ -51,7 +52,8 @@ BEGIN TRY
 		,intContractDetailId INT
 		,intSubLocationId INT
 		,intStorageLocationId INT
-		,dblFranchiseAmount DECIMAL(18, 6))
+		,dblFranchiseAmount DECIMAL(18, 6)
+		,intCurrencyId INT)
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
@@ -132,7 +134,8 @@ BEGIN TRY
 		  ,intContractDetailId
 		  ,intSubLocationId
 		  ,intStorageLocationId
-		  ,dblFranchiseAmount)
+		  ,dblFranchiseAmount
+		  ,intCurrencyId)
 	/* Weight Claim Details */
 	SELECT intWeightClaimId = WC.intWeightClaimId
 		,strReferenceNumber = WC.strReferenceNumber
@@ -140,7 +143,7 @@ BEGIN TRY
 		,intPartyEntityId = WCD.intPartyEntityId
 		,dblNetShippedWeight = WCD.dblFromNet
 		,dblWeightLoss = ABS(WCD.dblWeightLoss)
-		,dblNetWeight = ABS(WCD.dblWeightLoss)
+		,dblNetWeight = WCD.dblToNet
 		,dblFranchiseWeight = CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END
 		,dblQtyReceived = (ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END)
 		,dblCost = WCD.dblUnitPrice
@@ -176,6 +179,7 @@ BEGIN TRY
 						(SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId), 
 						WCD.intPriceItemUOMId, dblUnitPrice)) * dblFranchiseWt
 			   END, 2)
+		,intCurrencyId = WCD.intCurrencyId
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
 	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
@@ -227,6 +231,7 @@ BEGIN TRY
 		,intSubLocationId = NULL
 		,intStorageLocationId = NULL
 		,dblFranchiseAmount = 0
+		,intCurrencyId = WCOC.intRateCurrencyId
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimOtherCharges WCOC ON WCOC.intWeightClaimId = WC.intWeightClaimId
 	JOIN tblLGLoad LOAD ON LOAD.intLoadId = WC.intLoadId
@@ -265,6 +270,10 @@ BEGIN TRY
 
 	SELECT @intMinRecord = MIN(intRecordId) FROM @distinctVendor
 
+	DECLARE @xmlVoucherIds XML
+	DECLARE @createVoucherIds NVARCHAR(MAX)
+	DECLARE @voucherIds TABLE (intBillId INT)
+
 	WHILE ISNULL(@intMinRecord, 0) <> 0
 	BEGIN
 		SET @intVendorEntityId = NULL
@@ -283,54 +292,114 @@ BEGIN TRY
 		FROM @voucherDetailData 
 		WHERE intPartyEntityId = @intVendorEntityId
 
-		INSERT INTO @VoucherDetailClaim (
-			 dblNetShippedWeight
-			,dblWeightLoss
-			,dblFranchiseWeight
-			,dblQtyReceived
-			,dblCost
-			,dblCostUnitQty
-			,dblWeightUnitQty
-			,dblUnitQty
-			,intWeightUOMId
-			,intUOMId
-			,intCostUOMId
-			,intItemId
-			,intContractHeaderId
-			,intInventoryReceiptItemId
-			,intContractDetailId
-			,intSubLocationId
-			,intStorageLocationId
-			,dblFranchiseAmount)
-		SELECT dblNetShippedWeight
-			,dblWeightLoss
-			,dblFranchiseWeight
-			,(dblWeightLoss-ISNULL(dblFranchiseWeight,0))
-			,dblCost
-			,dblCostUnitQty
-			,dblWeightUnitQty
-			,dblUnitQty
-			,intWeightUOMId
-			,intUOMId
-			,intCostUOMId
-			,intItemId
-			,intContractHeaderId
-			,intInventoryReceiptItemId
-			,intContractDetailId
-			,intSubLocationId
-			,intStorageLocationId
-			,dblFranchiseAmount
-		FROM @voucherDetailData
-		WHERE intPartyEntityId = @intVendorEntityId
+		INSERT INTO @voucherPayableToProcess(
+			[intEntityVendorId]
+			,[intTransactionType]
+			,[intLocationId]
+			,[intCurrencyId]
+			,[dtmDate]
+			,[strVendorOrderNumber]
+			,[strReference]
+			,[strSourceNumber]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[intContractSeqId]
+			,[intLoadShipmentId]
+			,[intItemId]
+			,[strMiscDescription]
+			,[dblOrderQty]
+			,[dblOrderUnitQty]
+			,[intOrderUOMId]
+			,[dblQuantityToBill]
+			,[dblQtyToBillUnitQty]
+			,[intQtyToBillUOMId]
+			,[dblCost]
+			,[dblCostUnitQty]
+			,[intCostUOMId]
+			,[dblNetWeight]
+			,[dblNetShippedWeight]
+			,[dblWeightLoss]		
+			,[dblFranchiseWeight]
+			,[dblFranchiseAmount]	
+			,[dblWeightUnitQty]
+			,[intWeightUOMId]
+			,[intCostCurrencyId]
+			,[dblTax]
+			,[dblDiscount]
+			,[dblExchangeRate]
+			,[ysnSubCurrency]
+			,[intSubCurrencyCents]
+			,[intAccountId]
+			,[ysnReturn])
+		SELECT
+			[intEntityVendorId] = VDD.intPartyEntityId
+			,[intTransactionType] = @intVoucherType
+			,[intLocationId] = CD.intCompanyLocationId
+			,[intCurrencyId] = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)
+			,[dtmDate] = GETDATE()
+			,[strVendorOrderNumber] = ''
+			,[strReference] = ''
+			,[strSourceNumber] = LTRIM(WC.strReferenceNumber)
+			,[intContractHeaderId] = VDD.intContractHeaderId
+			,[intContractDetailId] = VDD.intContractDetailId
+			,[intContractSeqId] = CD.intContractSeq
+			,[intLoadShipmentId] = WC.intLoadId
+			,[intItemId] = VDD.intItemId
+			,[strMiscDescription] = I.strDescription
+			,[dblOrderQty] = VDD.dblQtyReceived
+			,[dblOrderUnitQty] = VDD.dblUnitQty
+			,[intOrderUOMId] = VDD.intUOMId
+			,[dblQuantityToBill] = VDD.dblQtyReceived
+			,[dblQtyToBillUnitQty] = VDD.dblUnitQty
+			,[intQtyToBillUOMId] = VDD.intUOMId
+			,[dblCost] = VDD.dblCost
+			,[dblCostUnitQty] = VDD.dblCostUnitQty
+			,[intCostUOMId] = VDD.intCostUOMId
+			,[dblNetWeight] = VDD.dblNetWeight
+			,[dblNetShippedWeight] = VDD.dblNetShippedWeight
+			,[dblWeightLoss] = VDD.dblWeightLoss
+			,[dblFranchiseWeight] = VDD.dblFranchiseWeight
+			,[dblFranchiseAmount] = VDD.dblFranchiseAmount
+			,[dblWeightUnitQty] = VDD.dblWeightUnitQty
+			,[intWeightUOMId] = VDD.intWeightUOMId
+			,[intCostCurrencyId] = VDD.intCurrencyId
+			,[dblTax] = 0
+			,[dblDiscount] = 0
+			,[dblExchangeRate] = 1
+			,[ysnSubCurrency] = CUR.ysnSubCurrency
+			,[intSubCurrencyCents] = CUR.intCent
+			,[intAccountId] = CASE WHEN (VDD.intContractDetailId IS NULL) 
+								THEN (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing') 
+								ELSE V.intGLAccountExpenseId END
+			,[ysnReturn] = CAST(0 AS BIT)
+		FROM @voucherDetailData VDD
+			INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
+			INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
+			LEFT JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = VDD.intWeightClaimId
+			LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimDetailId = VDD.intWeightClaimDetailId
+			LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
+			LEFT JOIN tblAPVendor V ON VDD.intPartyEntityId = V.intEntityId
+		WHERE VDD.intPartyEntityId = @intVendorEntityId
 
-		EXEC uspAPCreateBillData 
-			 @userId = @intEntityUserSecurityId	
-			,@vendorId = @intVendorEntityId
-			,@voucherDetailClaim = @VoucherDetailClaim
-			,@type = @intVoucherType
-			,@shipTo = @intShipTo
-			,@billId = @intBillId OUTPUT
+		EXEC uspAPCreateVoucher 
+			@voucherPayables = @voucherPayableToProcess
+			,@voucherPayableTax = DEFAULT
+			,@userId = @intEntityUserSecurityId
+			,@throwError = 1
+			,@error = @strErrorMessage OUTPUT
+			,@createdVouchersId = @createVoucherIds OUTPUT
 	
+		SET @xmlVoucherIds = CAST('<A>'+ REPLACE(@createVoucherIds, ',', '</A><A>')+ '</A>' AS XML)
+
+		INSERT INTO @voucherIds 
+			(intBillId) 
+		SELECT 
+			RTRIM(LTRIM(T.value('.', 'INT'))) AS intBillId
+		FROM @xmlVoucherIds.nodes('/A') AS X(T) 
+		WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
+
+		SELECT TOP 1 @intBillId = intBillId FROM @voucherIds
+
 		IF (@total = @intCount)
 		BEGIN
 			UPDATE tblLGWeightClaimDetail
@@ -343,51 +412,12 @@ BEGIN TRY
 			SET intBillId = @intBillId
 			WHERE intWeightClaimDetailId = @intWeightClaimDetailId
 		END
-		
-		UPDATE BD
-			SET intLoadId = @intLoadId,
-			intCurrencyId = @intCurrencyId,
-			ysnSubCurrency = @ysnSubCurrency,
-			dblClaimAmount = ROUND(vdd.dblClaimAmount, 2),
-			dblTotal = ROUND(vdd.dblClaimAmount,2),
-			dblNetWeight = vdd.dblNetWeight
-		FROM @voucherDetailData vdd
-		JOIN tblAPBillDetail BD ON BD.intItemId = vdd.intItemId
-		WHERE intBillId = @intBillId
-
-		SELECT @dblTotalForBill = SUM(dblTotal)
-		  ,@dblAmountDueForBill = SUM(dblClaimAmount)
-		FROM tblAPBillDetail
-		WHERE intBillId = @intBillId
-
-		UPDATE tblAPBill
-		SET dblTotal = @dblTotalForBill
-		   ,dblAmountDue = @dblAmountDueForBill
-		WHERE intBillId = @intBillId
-
-		UPDATE BD
-		SET intCurrencyId = @intCurrencyId
-			,ysnSubCurrency = @ysnSubCurrency
-			,dblClaimAmount = ROUND(WCD.dblClaimAmount,2)
-			,dblTotal = ROUND(WCD.dblClaimAmount,2)
-			,dblNetWeight = WCD.dblToNet
-			,intLoadId = WC.intLoadId
-			,intAccountId = (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing')
-		FROM tblAPBill B
-		JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-		JOIN tblLGLoad LD ON LD.intLoadId = BD.intLoadId
-		JOIN tblLGWeightClaim WC ON WC.intLoadId = BD.intLoadId
-		JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
-		WHERE WCD.intContractDetailId = BD.intContractDetailId
-			AND WC.intWeightClaimId = @intWeightClaimId 
-			AND BD.intBillId = @intBillId
-			AND B.intTransactionType = 11
-
-		DELETE
-		FROM @VoucherDetailClaim
 
 		IF (ISNULL(@intWeightClaimDetailId,0) <> 0)
 			SET @strBillId = ISNULL(@strBillId,'') + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
+
+		DELETE FROM @voucherPayableToProcess
+		DELETE FROM @voucherIds
 
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
