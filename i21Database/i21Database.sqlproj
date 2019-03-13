@@ -7441,6 +7441,7 @@
     <Build Include="dbo\Views\vyuCTContractInvoice.sql" />
     <Build Include="dbo\Tables\tblCTContractInvoice.sql" />
     <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeTotalHours.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
