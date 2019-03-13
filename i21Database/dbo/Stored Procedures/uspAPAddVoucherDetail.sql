@@ -262,7 +262,7 @@ USING
 		-- 	AND ISNULL(vp.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
 		-- 	AND ISNULL(vp.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
 		-- 	AND ISNULL(vp.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
-	ORDER BY A.intBillId ASC
+	ORDER BY A.intBillId ASC, intInventoryReceiptItemId ASC 
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN
