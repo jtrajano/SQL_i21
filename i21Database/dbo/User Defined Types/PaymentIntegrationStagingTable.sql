@@ -53,6 +53,7 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[strTransactionNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Transaction Number	
 	,[intTermId]							INT												NULL		-- Term Id(If NULL, customer's default will be used)	
 	,[intInvoiceAccountId]					INT												NULL		-- Account Id ([tblGLAccount].[intAccountId])
+	,[intWriteOffAccountDetailId]			INT												NULL		-- Write Off Account Id for details ([tblGLAccount].[intAccountId])
 	,[dblInvoiceTotal]						NUMERIC(18, 6)									NULL		-- Invoice Total
 	,[dblBaseInvoiceTotal]					NUMERIC(18, 6)									NULL		-- Base Invoice Total
 	,[ysnApplyTermDiscount]					BIT												NULL		-- 	
@@ -60,6 +61,8 @@ CREATE TYPE [dbo].[PaymentIntegrationStagingTable] AS TABLE
 	,[dblBaseDiscount]						NUMERIC(18, 6)									NULL		-- Discount
 	,[dblDiscountAvailable]					NUMERIC(18, 6)									NULL		-- Discount Available
 	,[dblBaseDiscountAvailable]				NUMERIC(18, 6)									NULL		-- Discount Available
+	,[dblWriteOffAmount]					NUMERIC(18, 6)									NULL		-- Write Off Amount
+	,[dblBaseWriteOffAmount]				NUMERIC(18, 6)									NULL		-- Base Write Off Amount
 	,[dblInterest]							NUMERIC(18, 6)									NULL		-- Interest
 	,[dblBaseInterest]						NUMERIC(18, 6)									NULL		-- Interest
 	,[dblPayment]							NUMERIC(18, 6)									NULL		-- Payment	

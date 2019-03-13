@@ -1808,7 +1808,7 @@ SELECT intRowNumber
 	, intSubBookId
 	, strSubBook
 FROM @ListFinal where strFutureMonth NOT IN('Previous','Total')
-ORDER BY intRowNumber,PriceStatus,CONVERT(DATETIME,'01 '+strFutureMonth) ASC
+ORDER BY intRowNumber,strBook,strSubBook,PriceStatus,CONVERT(DATETIME,'01 '+strFutureMonth) ASC
 
 INSERT INTO @MonthOrder (intRowNumber
 	, strGroup
@@ -1884,7 +1884,7 @@ SELECT intRowNumber1 intRowNumFinal
 	, CustVendor
 	, dblNoOfLot
 	, dblQuantity
-	, intOrderByHeading
+	, isnull(intOrderByHeading,0) intOrderByHeading
 	, intContractHeaderId
 	, intFutOptTransactionHeaderId
 	, strProductType
@@ -1900,7 +1900,8 @@ SELECT intRowNumber1 intRowNumFinal
 	, intSubBookId
 	, strSubBook
 FROM @MonthOrder
-ORDER BY strGroup
+ORDER BY strGroup,
+strBook,strSubBook
 	, PriceStatus
 	, CASE WHEN strFutureMonth ='Previous' THEN '01/01/1900'
 			WHEN strFutureMonth ='Total' THEN '01/01/9999'

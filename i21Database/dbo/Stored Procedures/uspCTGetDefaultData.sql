@@ -24,7 +24,10 @@ BEGIN
 			@strSubLocationName		NVARCHAR(100),
 			@strStorageLocation		NVARCHAR(100),
 			@strContractItemNo		NVARCHAR(100),
-			@strContractItemName	NVARCHAR(100)
+			@strContractItemName	NVARCHAR(100),
+			@strEntityName			NVARCHAR(100),
+			@intBrokerageAccountId	INT,
+			@strAccountNumber		NVARCHAR(100)
 
 	SELECT	@intItemId				= CASE WHEN @intItemId= 0 THEN NULL ELSE @intItemId END,
 			@intSubLocationId		= CASE WHEN @intSubLocationId= 0 THEN NULL ELSE @intSubLocationId END,
@@ -237,4 +240,22 @@ BEGIN
 		JOIN	tblARMarketZone M ON M.intMarketZoneId = C.intMarketZoneId
 		WHERE	intEntityId = @intEntityId
 	END
+
+	IF @strType = 'BrokerageAccount'
+	BEGIN
+		IF (SELECT COUNT(DISTINCT strName) FROM vyuRKGetBrokerByMarket WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3)) = 1
+		BEGIN
+			SELECT @intEntityId = intEntityId, @strEntityName = strName FROM vyuRKGetBrokerByMarket  WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3)
+
+			IF (SELECT COUNT(DISTINCT intBrokerageAccountId) FROM vyuRKGetBrokerByMarket  WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3) AND @intEntityId = intEntityId) = 1
+			BEGIN
+				SELECT @intBrokerageAccountId = intBrokerageAccountId,@strAccountNumber = strAccountNumber FROM vyuRKGetBrokerByMarket  WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3) AND @intEntityId = intEntityId
+			END
+		END
+		IF @intEntityId IS NOT NULL
+		BEGIN
+			SELECT @intEntityId,@strEntityName,@intBrokerageAccountId,@strAccountNumber
+		END
+	END
+
 END

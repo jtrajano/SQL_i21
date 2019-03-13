@@ -1083,7 +1083,7 @@ SELECT
 	--,[strSCInvoiceNumber]			= ID.[strSCInvoiceNumber]			
 	,[intItemUOMId]					= ID.[intItemUOMId]					
 	--,[dblQtyOrdered]				= ID.[dblQtyOrdered]				
-	,[dblQtyShipped]				= ID.[dblQtyShipped] * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[strTransactionType] ='Credit Memo' THEN -@OneDecimal ELSE @OneDecimal END)
+	,[dblQtyShipped]				= ID.[dblQtyShipped] * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
 	,[dblDiscount]					= ID.[dblDiscount]					
 	,[dblPrice]						= ID.[dblPrice]						
 	--,[dblTotalTax]					= ID.[dblTotalTax]					
@@ -1123,7 +1123,7 @@ LEFT JOIN
 WHERE
 	--ID.[intInventoryShipmentItemId] IS NULL AND
 	ID.[intInventoryShipmentChargeId] IS NULL
-	AND	(ID.strTransactionType <> 'Credit Memo' OR (ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL)))
+	AND	(ID.strTransactionType <> 'Credit Memo' OR (ID.[ysnIsInvoicePositive] = 0 AND ID.[intInventoryShipmentItemId] IS NOT NULL))
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 

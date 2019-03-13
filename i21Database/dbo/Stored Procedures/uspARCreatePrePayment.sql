@@ -290,7 +290,66 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemVirtualMeterReading			= @ItemVirtualMeterReading
 	      
 		  
-SET @NewInvoiceId = @NewId		                 
+SET @NewInvoiceId = @NewId		
+
+
+
+---Add Prepayment detail
+IF(ISNULL(@NewInvoiceId, 0) <> 0)
+BEGIN 
+	INSERT INTO [tblARPaymentDetail]
+		([intPaymentId]
+		,[intInvoiceId]
+		,[intBillId]
+		,[strTransactionNumber] 
+		,[intTermId]
+		,[intAccountId]
+		,[dblInvoiceTotal]
+		,[dblBaseInvoiceTotal]
+		,[dblDiscount]
+		,[dblBaseDiscount]
+		,[dblDiscountAvailable]
+		,[dblBaseDiscountAvailable]
+		,[dblInterest]
+		,[dblBaseInterest]
+		,[dblAmountDue]
+		,[dblBaseAmountDue]
+		,[dblPayment]		
+		,[dblBasePayment]		
+		,[strInvoiceReportNumber]
+		,[intConcurrencyId]
+		,[dtmDiscountDate]
+		)
+	SELECT
+		 [intPaymentId]				= @PaymentId
+		,[intInvoiceId]				= ARI.[intInvoiceId] 
+		,[intBillId]				= NULL
+		,[strTransactionNumber]		= ARI.[strInvoiceNumber]
+		,[intTermId]				= ARI.[intTermId] 
+		,[intAccountId]				= ARI.[intAccountId] 
+		,[dblInvoiceTotal]			= @ZeroDecimal 
+		,[dblBaseInvoiceTotal]		= @ZeroDecimal 
+		,[dblDiscount]				= @ZeroDecimal
+		,[dblBaseDiscount]			= @ZeroDecimal
+		,[dblDiscountAvailable]		= @ZeroDecimal
+		,[dblBaseDiscountAvailable]	= @ZeroDecimal
+		,[dblInterest]				= @ZeroDecimal
+		,[dblBaseInterest]			= @ZeroDecimal
+		,[dblAmountDue]				= (@ItemPrice * -1)	
+		,[dblBaseAmountDue]			= (@ItemPrice * -1)	
+		,[dblPayment]				= @ItemPrice		
+		,[dblBasePayment]			= @ItemPrice		
+		,[strInvoiceReportNumber]	= ''
+		,[intConcurrencyId]			= 0
+		,[dtmDiscountDate]			= NULL
+	FROM	
+		tblARInvoice ARI	
+	WHERE
+		ARI.[intInvoiceId] = @NewInvoiceId
+END
+
+
+
            
 RETURN @NewId
 

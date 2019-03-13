@@ -162,6 +162,7 @@ SELECT
 		,BNKACCNT.ysnCheckEnableMICRPrint
 		,strCheckMessage = ISNULL(PYMT.strCheckMessage,'') 
 		,CHK.ysnCheckVoid
+		,BNKACCNT.intPayToDown
 FROM	dbo.tblCMBankTransaction CHK 
 		INNER JOIN tblCMBankAccount BNKACCNT
 			ON BNKACCNT.intBankAccountId = CHK.intBankAccountId

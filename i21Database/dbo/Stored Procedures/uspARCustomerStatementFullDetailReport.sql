@@ -321,15 +321,16 @@ LEFT JOIN (
 		 , strType					= NULL
 		 , strItemNo				= NULL
 		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strRecordNumber) + ')'
-		 , dblAmount				= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0)) * -1
+		 , dblAmount				= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1
 		 , dblQuantity				= NULL
-		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0)) * -1
+		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1
 		 , dtmDate					= P.dtmDatePaid
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intPaymentId
-			 , dblDiscount = SUM(ISNULL(dblDiscount, 0))
-			 , dblInterest = SUM(ISNULL(dblInterest, 0))
+			 , dblDiscount 				= SUM(ISNULL(dblDiscount, 0))
+			 , dblInterest 				= SUM(ISNULL(dblInterest, 0))
+			 , dblWriteOffAmount 	= SUM(ISNULL(dblWriteOffAmount, 0))
 		FROM dbo.tblARPaymentDetail WITH (NOLOCK)
 		GROUP BY intPaymentId
 	) PD ON P.intPaymentId = PD.intPaymentId

@@ -115,7 +115,7 @@ FROM
 		,strContractBasis = CB.strContractBasis
 		,strERPPONumber = CD.strERPPONumber
 		,strERPItemNumber = CD.strERPItemNumber
-		,strSublocation = (SELECT CLSL.strSubLocationName
+		,strSublocation = (SELECT TOP 1 CLSL.strSubLocationName
 							  FROM tblLGLoadWarehouse LW
 							  JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 							  WHERE LW.intLoadId = LOAD.intLoadId) 

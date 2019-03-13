@@ -18,6 +18,8 @@ DECLARE @ZeroBit BIT
 SET @ZeroBit = CAST(0 AS BIT)
 DECLARE @OneBit BIT
 SET @OneBit = CAST(1 AS BIT)
+DECLARE @PrepayType NVARCHAR(50)
+SET @PrepayType = N'Customer Prepayment'
 
 DECLARE @PaymentIds AS Id
 DELETE FROM @PaymentIds
@@ -69,8 +71,8 @@ BEGIN
     UPDATE 
         tblARInvoice
     SET 
-         tblARInvoice.[dblPayment]        = ISNULL(tblARInvoice.[dblPayment], @ZeroDecimal) - P.[dblPayment] 
-        ,tblARInvoice.[dblBasePayment]    = ISNULL(tblARInvoice.[dblBasePayment], @ZeroDecimal) - P.[dblBasePayment]
+         tblARInvoice.[dblPayment]        =  CASE WHEN tblARInvoice.strTransactionType = @PrepayType  THEN  0.0000 ELSE ISNULL(tblARInvoice.[dblPayment], @ZeroDecimal) - P.[dblPayment]  END
+        ,tblARInvoice.[dblBasePayment]    = CASE WHEN tblARInvoice.strTransactionType = @PrepayType  THEN  0.0000 ELSE ISNULL(tblARInvoice.[dblBasePayment], @ZeroDecimal) - P.[dblBasePayment] END
         ,tblARInvoice.[dblDiscount]       = ISNULL(tblARInvoice.[dblDiscount], @ZeroDecimal) - P.[dblDiscount]			
         ,tblARInvoice.[dblBaseDiscount]	= ISNULL(tblARInvoice.[dblBaseDiscount], @ZeroDecimal) - P.[dblBaseDiscount]			
         ,tblARInvoice.[dblInterest]       = ISNULL(tblARInvoice.[dblInterest], @ZeroDecimal) - P.[dblInterest]				
@@ -78,8 +80,8 @@ BEGIN
     FROM
         (
         SELECT 
-             [dblPayment]      = SUM(A.[dblPayment] * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) 
-            ,[dblBasePayment]  = SUM(A.[dblBasePayment] * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) 
+             [dblPayment]      = SUM((A.[dblPayment] + A.[dblWriteOffAmount]) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) 
+            ,[dblBasePayment]  = SUM((A.[dblBasePayment] + A.[dblBaseWriteOffAmount]) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) 
             ,[dblDiscount]     = SUM(A.[dblDiscount]) 
             ,[dblBaseDiscount] = SUM(A.[dblBaseDiscount]) 
             ,[dblInterest]     = SUM(A.[dblInterest]) 						
@@ -96,10 +98,10 @@ BEGIN
         INNER JOIN
             tblARInvoice C
                 ON A.intInvoiceId = C.intInvoiceId
-        WHERE
-            ISNULL(B.[ysnInvoicePrepayment],0) = 0	
+      --  WHERE
+          --  ISNULL(B.[ysnInvoicePrepayment],0) = 0	
         GROUP BY
-            A.intInvoiceId
+            A.intInvoiceId			
         ) P
     WHERE
         tblARInvoice.intInvoiceId = P.intInvoiceId
@@ -134,8 +136,8 @@ BEGIN
     INNER JOIN
         tblARInvoice C
             ON B.intInvoiceId = C.intInvoiceId
-    WHERE
-        ISNULL(A.[ysnInvoicePrepayment],0) = 0
+   -- WHERE
+       -- ISNULL(A.[ysnInvoicePrepayment],0) = 0
 
     UPDATE 
         tblARInvoice
@@ -156,8 +158,8 @@ BEGIN
     UPDATE 
         tblARPaymentDetail
     SET 
-         dblAmountDue     = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblPayment)
-        ,dblBaseAmountDue = ((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblBasePayment)
+         dblAmountDue     = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) - ISNULL(A.dblWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblPayment)
+        ,dblBaseAmountDue = ((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00) - ISNULL(A.dblBaseWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblBasePayment)
     FROM
         tblARPaymentDetail A
     INNER JOIN
@@ -339,6 +341,7 @@ BEGIN
     DELETE FROM tblARPaymentDetail
     WHERE
         [dblPayment] = @ZeroDecimal
+        AND [dblWriteOffAmount] = @ZeroDecimal
         AND [dblDiscount] = @ZeroDecimal
         AND (
             [intInvoiceId] IN (SELECT [intInvoiceId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
@@ -362,31 +365,32 @@ BEGIN
     UPDATE 
         tblARInvoice
     SET 
-        tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
-        ,tblARInvoice.dblBasePayment = ISNULL(tblARInvoice.dblBasePayment,0.00) + P.dblBasePayment 
-        ,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount				
+        tblARInvoice.dblPayment =  CASE WHEN tblARInvoice.strTransactionType = @PrepayType  THEN  P.dblPayment    ELSE   ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment END
+        ,tblARInvoice.dblBasePayment = CASE WHEN tblARInvoice.strTransactionType = @PrepayType  THEN P.dblBasePayment ELSE ISNULL(tblARInvoice.dblBasePayment,0.00) + P.dblBasePayment END
+	    ,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount				
         ,tblARInvoice.dblBaseDiscount = ISNULL(tblARInvoice.dblBaseDiscount,0.00) + P.dblBaseDiscount				
         ,tblARInvoice.dblInterest = ISNULL(tblARInvoice.dblInterest,0.00) + P.dblInterest
         ,tblARInvoice.dblBaseInterest = ISNULL(tblARInvoice.dblBaseInterest,0.00) + P.dblBaseInterest
     FROM
         (
         SELECT 
-              dblPayment        = SUM(A.dblPayment * [dbo].[fnARGetInvoiceAmountMultiplier](A.[strTransactionType]))
-            ,dblBasePayment     = SUM(A.dblBasePayment * [dbo].[fnARGetInvoiceAmountMultiplier](A.[strTransactionType]))
+             dblPayment        = CASE WHEN A.strTransactionType = @PrepayType  THEN SUM(A.dblPayment) ELSE  SUM((A.dblPayment + A.dblWriteOffAmount) * [dbo].[fnARGetInvoiceAmountMultiplier](A.[strTransactionType])) END
+            ,dblBasePayment     = CASE WHEN A.strTransactionType = @PrepayType  THEN SUM(A.dblBasePayment) ELSE  SUM((A.dblBasePayment + A.dblBaseWriteOffAmount) * [dbo].[fnARGetInvoiceAmountMultiplier](A.[strTransactionType])) END
             ,dblDiscount        = SUM(A.dblDiscount) 
             ,dblBaseDiscount    = SUM(A.dblBaseDiscount) 
             ,dblInterest        = SUM(A.dblInterest) 
-            ,dblBaseInterest    = SUM(A.dblBaseInterest) 
-            ,intInvoiceId       = A.intInvoiceId 
+            ,dblBaseInterest    = SUM(A.dblBaseInterest)
+		    ,intInvoiceId       = A.intInvoiceId 			
         FROM
             #ARPostPaymentDetail A
         WHERE
-            A.[ysnInvoicePrepayment] = @ZeroBit
-			AND A.[ysnPost] = @OneBit
-            AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId] WHERE ARID.[intPrepayTypeId] > 0 AND ARID.[intInvoiceId] = A.[intInvoiceId] AND ARI.[intPaymentId] = A.[intTransactionId])						
+           -- A.[ysnInvoicePrepayment] = @ZeroBit
+			 A.[ysnPost] = @OneBit
+          --  AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId] WHERE ARID.[intPrepayTypeId] > 0 AND ARID.[intInvoiceId] = A.[intInvoiceId] AND ARI.[intPaymentId] = A.[intTransactionId])						
         GROUP BY
-            A.intInvoiceId
-        ) P
+            A.intInvoiceId,
+			A.strTransactionType
+        ) P	
     WHERE
         tblARInvoice.intInvoiceId = P.intInvoiceId
 
@@ -415,9 +419,9 @@ BEGIN
         tblARInvoice C
             ON B.intInvoiceId = C.intInvoiceId
     WHERE
-        NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = B.intInvoiceId AND ARI.intPaymentId = B.[intTransactionId])						
-        AND ISNULL(B.[ysnInvoicePrepayment],0) = 0
-		AND B.[ysnPost] = @OneBit
+      --  NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = B.intInvoiceId AND ARI.intPaymentId = B.[intTransactionId])						
+      --  AND ISNULL(B.[ysnInvoicePrepayment],0) = 0
+    B.[ysnPost] = @OneBit
 
 
     UPDATE
@@ -459,8 +463,8 @@ END
 UPDATE 
     ARPD
 SET 
-     ARPD.dblAmountDue     = -((C.dblTotal + ABS(ARPD.dblInterest)) - (ABS(ARPD.dblPayment) + ABS(ARPD.dblDiscount)))
-    ,ARPD.dblBaseAmountDue = [dbo].fnRoundBanker((-((C.dblTotal + ABS(ARPD.dblInterest)) - (ABS(ARPD.dblPayment) + ABS(ARPD.dblDiscount))) * (CASE WHEN ISNULL(ARPD.[dblCurrencyExchangeRate], 0) =  0 THEN 1.000000 ELSE ARPD.[dblCurrencyExchangeRate] END)), [dbo].[fnARGetDefaultDecimal]())
+     ARPD.dblAmountDue     = -((C.dblTotal + ABS(ARPD.dblInterest)) - (ABS(ARPD.dblPayment) + ABS(ARPD.dblDiscount) + ABS(ARPD.dblWriteOffAmount)))
+    ,ARPD.dblBaseAmountDue = [dbo].fnRoundBanker((-((C.dblTotal + ABS(ARPD.dblInterest)) - (ABS(ARPD.dblPayment) + ABS(ARPD.dblDiscount) + ABS(ARPD.dblWriteOffAmount))) * (CASE WHEN ISNULL(ARPD.[dblCurrencyExchangeRate], 0) =  0 THEN 1.000000 ELSE ARPD.[dblCurrencyExchangeRate] END)), [dbo].[fnARGetDefaultDecimal]())
 FROM
     tblARPaymentDetail ARPD
 INNER JOIN 
@@ -511,7 +515,7 @@ INNER JOIN (
         , dblTotalPayment = SUM(ISNULL(PD.dblTotalPayment, 0) + CASE WHEN P.ysnInvoicePrepayment = 0 THEN ISNULL(P.dblUnappliedAmount, 0)ELSE 0 END)
     FROM dbo.#ARPostPaymentHeader P WITH (NOLOCK)
     LEFT JOIN (
-        SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount)) - SUM(PD.dblInterest)
+        SELECT dblTotalPayment    = (SUM(PD.dblPayment) + SUM(PD.dblDiscount) + SUM(PD.dblWriteOffAmount)) - SUM(PD.dblInterest)
             , [intTransactionId]
         FROM dbo.#ARPostPaymentDetail PD WITH (NOLOCK)
         GROUP BY [intTransactionId]

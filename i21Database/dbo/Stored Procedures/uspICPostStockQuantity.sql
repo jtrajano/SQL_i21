@@ -9,7 +9,9 @@ CREATE PROCEDURE [dbo].[uspICPostStockQuantity]
 	@intItemUOMId AS INT,
 	@dblQty AS NUMERIC(38,20),
 	@dblUOMQty AS NUMERIC(38,20),
-	@intLotId AS INT 
+	@intLotId AS INT,
+	@intTransactionTypeId AS INT = NULL,
+	@dtmTransactionDate AS DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -30,6 +32,19 @@ BEGIN
 			,@intLotWeightUOMId AS INT
 			,@intLotItemUOMId AS INT 
 			,@dblWeightUnitQty AS NUMERIC(38,20) 
+
+	
+	DECLARE @TransactionType_InventoryReceipt AS INT,
+			@TransactionType_Invoice AS INT;
+
+	
+	SELECT	TOP 1 @TransactionType_InventoryReceipt = intTransactionTypeId
+	FROM	tblICInventoryTransactionType 
+	WHERE	strName = 'Inventory Receipt';
+
+	SELECT	TOP 1 @TransactionType_Invoice = intTransactionTypeId
+	FROM	tblICInventoryTransactionType 
+	WHERE	strName = 'Invoice';
 
 	SELECT	@intLotItemUOMId = intItemUOMId
 			,@intLotWeightUOMId = intWeightUOMId
@@ -119,6 +134,8 @@ BEGIN
 						,intSubLocationId 
 						,intStorageLocationId 
 						,Qty = ROUND(SUM(Qty), 6)
+						,dtmLastPurchaseDate = @dtmTransactionDate
+						,dtmLastSaleDate = @dtmTransactionDate
 				FROM (
 
 					-------------------------------------------
@@ -336,6 +353,17 @@ BEGIN
 	WHEN MATCHED THEN 
 		UPDATE 
 		SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
+				,dtmLastPurchaseDate = CASE WHEN @intTransactionTypeId = @TransactionType_InventoryReceipt
+												 AND (RawStockData.dtmLastPurchaseDate IS NOT NULL AND RawStockData.dtmLastPurchaseDate > ISNULL(ItemStockUOM.dtmLastPurchaseDate, '2000-01-01'))
+											THEN RawStockData.dtmLastPurchaseDate
+											ELSE ItemStockUOM.dtmLastPurchaseDate
+										END
+				,dtmLastSaleDate = CASE 
+										WHEN @intTransactionTypeId = @TransactionType_Invoice
+											AND (RawStockData.dtmLastSaleDate IS NOT NULL AND RawStockData.dtmLastSaleDate > ISNULL(ItemStockUOM.dtmLastSaleDate, '2000-01-01'))
+										THEN RawStockData.dtmLastSaleDate
+										ELSE ItemStockUOM.dtmLastSaleDate
+									END
 
 	-- If none found, insert a new item stock record
 	WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
@@ -347,6 +375,7 @@ BEGIN
 			,intStorageLocationId
 			,dblOnHand
 			,dblOnOrder
+			,dtmLastPurchaseDate
 			,intConcurrencyId
 		)
 		VALUES (
@@ -357,6 +386,7 @@ BEGIN
 			,RawStockData.intStorageLocationId
 			,RawStockData.Qty
 			,0
+			,RawStockData.dtmLastPurchaseDate
 			,1	
 		)
 	;

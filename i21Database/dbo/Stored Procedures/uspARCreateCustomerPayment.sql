@@ -154,6 +154,16 @@ DECLARE  @NewId INT
 		,@AddDetailError NVARCHAR(MAX)
 
 BEGIN TRY
+
+	
+	Declare @InvoiceTotal NUMERIC(18,6)
+
+    SELECT @InvoiceTotal =  ISNULL(SUM(dblTotal), 0)
+		 
+	FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId
+	
+
+
 	INSERT INTO [tblARPayment]
 		([intEntityCustomerId]
 		,[intCurrencyId]
@@ -190,7 +200,7 @@ BEGIN TRY
 		,[intBankAccountId]				= @BankAccountId
 		,[intPaymentMethodId]			= @PaymentMethodId
 		,[intLocationId]				= @CompanyLocationId
-		,[dblAmountPaid]				= @AmountPaid
+		,[dblAmountPaid]				= CASE WHEN ISNULL(@InvoicePrepayment, 0 ) = 1 THEN @InvoiceTotal  ELSE @AmountPaid END
 		,[dblBaseAmountPaid]			= @AmountPaid
 		,[dblUnappliedAmount]			= @AmountPaid
 		,[dblBaseUnappliedAmount]		= @AmountPaid
@@ -240,15 +250,19 @@ END CATCH
 IF @InvoiceId IS NOT NULL
 BEGIN
 
-	SET @Payment = ROUND(@Payment, [dbo].[fnARGetDefaultDecimal]())
+	SET @Payment = CASE WHEN ISNULL(@InvoicePrepayment, 0 ) = 1  THEN @InvoiceTotal ELSE ROUND(@Payment, [dbo].[fnARGetDefaultDecimal]()) END
 	SET @Discount = ROUND(@Discount, [dbo].[fnARGetDefaultDecimal]())
 	SET @Interest = ROUND(@Interest, [dbo].[fnARGetDefaultDecimal]())
 
+
+
 	BEGIN TRY
+
+		
 		EXEC [dbo].[uspARAddInvoiceToPayment]		
 			 @PaymentId				= @NewId
 			,@InvoiceId				= @InvoiceId
-			,@Payment				= @Payment
+			,@Payment				= @Payment 
 			,@ApplyTermDiscount		= @ApplyTermDiscount
 			,@Discount				= @Discount	
 			,@Interest				= @Interest

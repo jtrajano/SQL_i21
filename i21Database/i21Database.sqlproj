@@ -186,6 +186,7 @@
     <Folder Include="Scripts\Post-Deployment\VR" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3" />
     <Folder Include="Scripts\Post-Deployment\PAT\18.3\" />
+    <Folder Include="Scripts\Post-Deployment\MB" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -2881,7 +2882,20 @@
     <Build Include="dbo\Tables\tblICStagingItemUom.sql" />
     <Build Include="dbo\Tables\tblICStagingItemPricing.sql" />
     <Build Include="dbo\Tables\tblICStagingItemLocation.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceipt.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceiptItem.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceiptItemLot.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceiptCharge.sql" />
+    <Build Include="dbo\Tables\tblICStagingAdjustment.sql" />
+    <Build Include="dbo\Tables\tblICStagingAdjustmentDetail.sql" />
+    <Build Include="dbo\Tables\tblICStagingCount.sql" />
+    <Build Include="dbo\Tables\tblICStagingCountDetail.sql" />
+    <Build Include="dbo\Functions\fnICGetItemRunningStockQty.sql" />
+    <Build Include="dbo\Functions\fnICGetItemRunningCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportAdjustmentsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportCountsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICExportItemsToStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportReceiptsFromStaging.sql" />
     <Build Include="dbo\Tables\tblCTBagMarkLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForItem.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInventoryPlan_GenerateForBlend.sql" />
@@ -5344,7 +5358,6 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateCustomerInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspARGenerateEntriesForAccrualNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceNew.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPostInvoicesIntegrationsNew.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdatePrepaymentsAndCreditMemos.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateCustomerPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPaymentIntegrationLog.sql" />
@@ -7417,6 +7430,12 @@
     <Build Include="dbo\Views\vyuSMActivityEmailResult.sql" />
     <Build Include="dbo\Functions\fnSMGetEmailRecipients.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSentByList.sql" />
+    <Build Include="dbo\Views\vyuARCustomerPricingInquiry.sql" />
+    <Build Include="dbo\Views\vyuCTContractInvoice.sql" />
+    <Build Include="dbo\Tables\tblCTContractInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetLoadItemQuantity.sql" />
+    <Build Include="dbo\Views\vyuRKGetInventoryTransaction.sql" />
+    <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7632,6 +7651,7 @@
     <Build Include="dbo\Stored Procedures\uspMBImportMeterReadingPost.sql" />
     <None Include="Scripts\Post-Deployment\TM\6_SyncStartingNumberAndDispatchId.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\3_UpgradeTypeAndEnvironment.sql" />
+    <None Include="Scripts\Post-Deployment\TM\7_GenerateManufacturerFromDevice.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -7768,5 +7788,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\04_TransactionSource.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CCR\ImportFileDefault.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\MB\ImportFileDefault.sql" />
   </ItemGroup>
 </Project>

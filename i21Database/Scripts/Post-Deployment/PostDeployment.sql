@@ -146,6 +146,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\4_MigrateLeaseIdFromDeviceToLeaseDeviceTable.sql
 :r .\TM\5_ObsoletingSeasonReset.sql
 :r .\TM\6_SyncStartingNumberAndDispatchId.sql
+:r .\TM\7_GenerateManufacturerFromDevice.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
@@ -513,6 +514,7 @@ print 'BEGIN POST DEPLOYMENT'
 --CCR
 :r .\CCR\SiteDataFix.sql
 :r .\CCR\RemoveCCRObsoleteScreen.sql
+:r .\CCR\ImportFileDefault.sql
 
 --TR
 :r .\TR\RemoveObsoleteScreen.sql
@@ -552,6 +554,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
+-- MB - Meter Billing
+:r .\MB\ImportFileDefault.sql
 
 
 print 'END POST DEPLOYMENT'

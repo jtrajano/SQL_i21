@@ -491,6 +491,8 @@ BEGIN
 				,intTransferorId		= IntegrationData.intTransferorId 
 				,intBookId				= IntegrationData.intBookId
 				,intSubBookId			= IntegrationData.intSubBookId
+				,dtmDateModified		= GETDATE()
+				,intModifiedByUserId 	= @intUserId
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -530,6 +532,8 @@ BEGIN
 				,intTransferorId
 				,intBookId
 				,intSubBookId
+				,dtmDateCreated
+				,intCreatedByUserId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -569,6 +573,8 @@ BEGIN
 				/*intTransferorId*/				,IntegrationData.intTransferorId 
 				/*intBookId*/					,IntegrationData.intBookId
 				/*intSubBookId*/				,IntegrationData.intSubBookId 
+				,GETDATE()
+				,@intUserId
 			)
 		;
 				
@@ -850,6 +856,8 @@ BEGIN
 				,intContractDetailId
 				,dblUnitRetail
 				,ysnAllowVoucher
+				,dtmDateCreated
+				,intCreatedByUserId
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -940,6 +948,8 @@ BEGIN
 				,intContractDetailId			= RawData.intContractDetailId
 				,dblUnitRetail			= RawData.dblUnitRetail 
 				,ysnAllowVoucher				= RawData.ysnAllowVoucher
+				,dtmDateCreated = GETDATE()
+				,intCreatedByUserId = @intUserId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1358,6 +1368,8 @@ BEGIN
 				,[dblForexRate]
 				,[strChargesLink]
 				,[ysnAllowVoucher]
+				,dtmDateCreated
+				,intCreatedByUserId
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1386,6 +1398,8 @@ BEGIN
 				,[dblForexRate]				= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 			
 				,[strChargesLink]			= RawData.strChargesLink
 				,[ysnAllowVoucher]			= RawData.ysnAllowVoucher
+				,GETDATE()
+				,@intUserId
 
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
@@ -1802,6 +1816,8 @@ BEGIN
 				,[strTrackingNumber]
 				,[intSort]
 				,[intConcurrencyId]
+				,dtmDateCreated
+				,intCreatedByUserId
 			)
 			SELECT
 				[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
@@ -1849,6 +1865,8 @@ BEGIN
 				,[strTrackingNumber] = ItemLot.strTrackingNumber 
 				,[intSort] = 1
 				,[intConcurrencyId] = 1
+				,[dtmDateCreated] = GETDATE()
+				,[intCreatedByUserId] = @intUserId
 			FROM	
 				@LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)

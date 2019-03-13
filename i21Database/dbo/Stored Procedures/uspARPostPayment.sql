@@ -90,7 +90,7 @@ CREATE TABLE #ARPostPaymentHeader
     ,[intCompanyLocationId]             INT             NULL
     ,[strLocationName]                  NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
     ,[intUndepositedFundsId]            INT             NULL
-    ,[intSalesAdvAcct]                  INT             NULL
+    ,[intSalesAdvAcct]                  INT             NULL	
     ,[intCurrencyId]                    INT             NOT NULL
     ,[intPaymentMethodId]               INT             NOT NULL
     ,[strPaymentMethod]                 NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
@@ -182,7 +182,7 @@ CREATE TABLE #ARPostPaymentDetail
 	,[dblExchangeRate]					NUMERIC(18, 6)									NULL
     ,[dtmDatePaid]                      DATETIME        NOT NULL
     ,[dtmPostDate]                      DATETIME        NOT NULL
-    ,[intWriteOffAccountId]             INT             NULL
+    ,[intWriteOffAccountId]             INT             NULL	
     ,[intAccountId]                     INT             NULL
     ,[intBankAccountId]                 INT             NULL
     ,[intARAccountId]                   INT             NULL
@@ -212,6 +212,8 @@ CREATE TABLE #ARPostPaymentDetail
     ,[dblBasePayment]                   NUMERIC(18,6)   NULL
     ,[dblDiscount]                      NUMERIC(18,6)   NULL
     ,[dblBaseDiscount]                  NUMERIC(18,6)   NULL
+	,[dblWriteOffAmount]				NUMERIC(18,6)   NULL
+	,[dblBaseWriteOffAmount]			NUMERIC(18,6)   NULL
     ,[dblInterest]                      NUMERIC(18,6)   NULL
     ,[dblBaseInterest]                  NUMERIC(18,6)   NULL
     ,[dblInvoiceTotal]                  NUMERIC(18,6)   NULL
@@ -223,6 +225,7 @@ CREATE TABLE #ARPostPaymentDetail
     ,[ysnExcludedFromPayment]           BIT             NULL
     ,[ysnForgiven]                      BIT             NULL
 	,[intBillId]                        INT             NULL
+	,[intWriteOffAccountDetailId]		INT				NULL
     ,[strTransactionNumber]             NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strTransactionType]               NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strType]                          NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL

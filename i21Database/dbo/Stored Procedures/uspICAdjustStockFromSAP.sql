@@ -208,6 +208,8 @@ BEGIN
 			,0
 			,1
 			,@intLotId
+			,41 --SAP stock integration
+			,@dtmQtyChange
 	END
 	--------------------------------------
 	-- Transaction: Quantity Adjustment -- 

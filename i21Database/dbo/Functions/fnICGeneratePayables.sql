@@ -105,11 +105,18 @@ SELECT DISTINCT
 	,[dblOrderQty]				=	CASE WHEN CD.intContractDetailId > 0 THEN ROUND(CD.dblQuantity,2) ELSE B.dblOpenReceive END
 	,[dblPOOpenReceive]			=	B.dblReceived
 	,[dblOpenReceive]			=	B.dblOpenReceive
-	,[dblQuantityToBill]		=	CAST (CASE WHEN CD.intContractDetailId > 0  
-											THEN dbo.fnCalculateQtyBetweenUOM((CASE WHEN B.intWeightUOMId > 0 
-																						THEN B.intWeightUOMId ELSE B.intUnitMeasureId END),
-														 CD.intItemUOMId, (B.dblOpenReceive - B.dblBillQty)) 
-									ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,6)) 
+	,[dblQuantityToBill]		=	CAST (
+									CASE 
+										WHEN CD.intContractDetailId > 0  THEN 
+											dbo.fnCalculateQtyBetweenUOM(
+												(CASE WHEN B.intWeightUOMId > 0 THEN B.intWeightUOMId ELSE B.intUnitMeasureId END)
+												,CD.intItemUOMId
+												,(B.dblOpenReceive - B.dblBillQty)
+											) 
+										ELSE 
+											(B.dblOpenReceive - B.dblBillQty) 
+									END 
+									AS DECIMAL(18,6)) 
 	,[dblQtyToBillUnitQty]		=	ISNULL(ItemUOM.dblUnitQty, 1)
 	,[intQtyToBillUOMId]		=	B.intUnitMeasureId
 	,[dblQuantityBilled]		=	B.dblBillQty
@@ -203,7 +210,7 @@ SELECT DISTINCT
 	,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 	,[strTaxGroup]								=	TG.strTaxGroup
 	,intShipViaId                                = E.intEntityId
-	FROM tblICInventoryReceipt A
+FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -251,24 +258,38 @@ SELECT DISTINCT
 		--				THEN 1
 		--				ELSE 0 END)
 	) Loads
-	WHERE A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') AND A.ysnPosted = @ysnPosted AND B.dblBillQty != B.dblOpenReceive 
+WHERE 
+	A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
+	AND A.ysnPosted = @ysnPosted 
+	--AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
 									AND F2.intPricingTypeId NOT IN (2, 3, 4,5) --AP-4971
 							THEN 1 ELSE 0 END
 					ELSE 1 END)
-	AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
-	AND ((Billed.dblQty < B.dblOpenReceive) OR Billed.dblQty IS NULL)
+	--AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
+	AND (
+		Billed.dblQty IS NULL
+		OR 1 = 		
+		(
+			CASE 
+				WHEN SIGN(B.dblOpenReceive) = -1 AND B.dblOpenReceive < Billed.dblQty THEN 1 
+				WHEN SIGN(B.dblOpenReceive) = 1 AND B.dblOpenReceive > Billed.dblQty THEN 1 
+				ELSE 0
+			END 
+		) 
+	)
 	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
 	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType != 2
 	AND A.intInventoryReceiptId = @intReceiptId
-	
-	UNION ALL
+	ORDER BY B.intInventoryReceiptItemId ASC 
 
-	--RECEIPT OTHER CHARGES
-	SELECT DISTINCT
+
+--RECEIPT OTHER CHARGES
+INSERT INTO @table
+SELECT DISTINCT
 		[intEntityVendorId]							=	A.intEntityVendorId
 		,[intTransactionType]						=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
 		,[dtmDate]									=	A.dtmDate
@@ -373,10 +394,7 @@ SELECT DISTINCT
 		,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 		,[strTaxGroup]								=	TG.strTaxGroup
 		,intShipViaId								=   NULL
-	FROM [vyuICChargesForBilling] A
-	--LEFT JOIN tblSMCurrencyExchangeRate F ON  (F.intFromCurrencyId = (SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference) AND F.intToCurrencyId = CASE WHEN A.ysnSubCurrency > 0 
-	--																																					   THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
-	--																																					   ELSE  ISNULL(A.intCurrencyId,0) END) 
+FROM [vyuICChargesForBilling] A
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
@@ -407,21 +425,13 @@ SELECT DISTINCT
         SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
         WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
     ) J
-
-	--OUTER APPLY 
-	--(
-	--	SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
-	--	INNER JOIN dbo.tblAPBill B ON B.intBillId = H.intBillId
-	--	WHERE H.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-	--	GROUP BY H.intInventoryReceiptChargeId
-			
-	--) Qty
-	WHERE A.intInventoryReceiptId = @intReceiptId AND (
+WHERE 
+	A.intInventoryReceiptId = @intReceiptId AND (
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
 		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
 		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId 
 						AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 				ELSE 1 END
-	    )
+	)
 RETURN
 END

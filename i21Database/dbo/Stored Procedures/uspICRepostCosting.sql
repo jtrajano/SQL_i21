@@ -654,6 +654,8 @@ BEGIN
 			,@dblQty
 			,@dblUOMQty
 			,@intLotId
+			,@intTransactionTypeId
+			,@dtmDate
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END 

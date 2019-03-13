@@ -156,6 +156,7 @@ BEGIN TRY
 		,intTruckDriverId = CASE WHEN TL.intDriverId IS NULL THEN NULL ELSE TL.intDriverId END
 		,intTruckDriverReferenceId = CASE WHEN SC.intTruckDriverReferenceId IS NULL THEN NULL ELSE SC.intTruckDriverReferenceId END
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
+		,strBOLNumberDetail  = DD.strBillOfLading
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -654,6 +655,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					
 		,[intTempDetailIdForTaxes]
 		,[ysnImpactInventory]
+		,[strBOLNumberDetail]
 	)
 	SELECT 
 		0 AS intId
@@ -734,6 +736,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 		,[ysnImpactInventory]					= IE.ysnImpactInventory
+		,[strBOLNumberDetail]					= IE.strBOLNumberDetail
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1
@@ -817,6 +820,7 @@ BEGIN TRY
 		,[intTruckDriverId]
 		,[intTruckDriverReferenceId]
 		,[ysnImpactInventory]
+		,[strBOLNumberDetail]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -897,6 +901,7 @@ BEGIN TRY
 		,intTruckDriverId						= TR.intTruckDriverId
 		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
 		,ysnImpactInventory						= TR.ysnImpactInventory
+		,strBOLNumberDetail						= TR.strBOLNumberDetail
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
@@ -978,7 +983,8 @@ BEGIN TRY
 			,[ysnLeaseBilling]
 			,[ysnVirtualMeterReading]
 			,[ysnClearDetailTaxes]					
-			,[intTempDetailIdForTaxes])
+			,[intTempDetailIdForTaxes]
+			,[strBOLNumberDetail])
 		SELECT 
 			[strSourceTransaction]					= IE.strSourceTransaction
 			,[intSourceId]							= IE.intSourceId
@@ -1054,6 +1060,7 @@ BEGIN TRY
 			,[ysnVirtualMeterReading]				= IE.ysnVirtualMeterReading
 			,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
+			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE ISNULL(IE.dblFreightRate, 0) != 0
@@ -1129,6 +1136,7 @@ BEGIN TRY
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
 		,[ysnImpactInventory]
+		,[strBOLNumberDetail]
 	)
 	SELECT 
 		[strSourceTransaction]					= IE.strSourceTransaction
@@ -1199,6 +1207,7 @@ BEGIN TRY
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= IE.intLoadDistributionHeaderId
 		,[ysnImpactInventory]					= IE.ysnImpactInventory
+		,[strBOLNumberDetail]					= IE.strBOLNumberDetail
 	FROM @FreightSurchargeEntries IE
 	GROUP BY [strSourceTransaction]
 		,[strSourceId]
@@ -1263,6 +1272,7 @@ BEGIN TRY
 		,[intTempDetailIdForTaxes]
 		,[intLoadDistributionHeaderId]
 		,[ysnImpactInventory]
+		,[strBOLNumberDetail]
 
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
 

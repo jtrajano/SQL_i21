@@ -253,7 +253,7 @@ WHERE I.ysnPosted = 1
 ) I
 LEFT JOIN (
 	SELECT PD.intInvoiceId
-		 , dblTotalPayment		= SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0))
+		 , dblTotalPayment		= SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) + SUM(ISNULL(dblWriteOffAmount, 0)) - SUM(ISNULL(dblInterest, 0))
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId

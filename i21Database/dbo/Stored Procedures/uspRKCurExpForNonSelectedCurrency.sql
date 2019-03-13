@@ -1,16 +1,13 @@
 ﻿CREATE PROC [dbo].[uspRKCurExpForNonSelectedCurrency]
          @intCommodityId int
-       , @dtmClosingPrice datetime=null
+       , @dtmClosingPrice datetime = null
        , @intCurrencyId int
 
 AS
---declare   @intCommodityId int = 1
---     , @dtmClosingPrice datetime = '2019-02-28 15:21:55'
---     , @intCurrencyId int = 3
 
 BEGIN
               SELECT *,[dbo].[fnRKGetCurrencyConvertion](intCurrencyId,@intCurrencyId)*dblOrigPrice dblPrice, 
-              ([dbo].[fnRKGetCurrencyConvertion](intCurrencyId,@intCurrencyId)*dblOrigPrice)*dblQuantity dblUSDValue
+              ([dbo].[fnRKGetCurrencyConvertion](intCurrencyId,@intCurrencyId)*dblOrigPrice)*dblQuantity dblUSDValue,intCurrencyId,@intCurrencyId
               FROM(
               SELECT CONVERT(INT, ROW_NUMBER() OVER(ORDER BY intContractSeq)) as intRowNum,
                      (ch.strContractNumber + '-' + CONVERT(NVARCHAR, cd.intContractSeq)) COLLATE Latin1_General_CI_AS strContractNumber
@@ -20,10 +17,9 @@ BEGIN
                                                        WHERE id.intContractDetailId=cd.intContractDetailId) dblQuantity
                      , um.strUnitMeasure strUnitMeasure
                      ,
-                     dbo.fnRKGetSequencePrice(cd.intContractDetailId,dbo.fnRKGetLatestClosingPrice(fm.intFutureMarketId, 
-                                                                                                                        (SELECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth mon
-                                                                                                                           WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId 
-                                                                                                                           ORDER BY 1 DESC), @dtmClosingPrice)) dblOrigPrice -- remove the basis from function then convert the price uom only settlement price. then we have added the basis
+                     dbo.fnRKGetSequencePrice(cd.intContractDetailId,
+					 dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId
+														, @dtmClosingPrice),@dtmClosingPrice) dblOrigPrice -- remove the basis from function then convert the price uom only settlement price. then we have added the basis
 
                      , (c.strCurrency + '/' + um.strUnitMeasure) COLLATE Latin1_General_CI_AS strOrigPriceUOM
                      , (CONVERT(VARCHAR(11), cd.dtmStartDate, 106) + '-' + CONVERT(VARCHAR(11), cd.dtmEndDate, 106)) COLLATE Latin1_General_CI_AS dtmPeriod
@@ -38,5 +34,6 @@ BEGIN
               JOIN tblICUnitMeasure um on um.intUnitMeasureId=u.intUnitMeasureId
               JOIN tblSMCurrency c on c.intCurrencyID=cd.intCurrencyId and strCheckDescription='NON-FUNCTIONAL CURRENCY EXPOSURE'
               LEFT JOIN tblSMMultiCompany mc on mc.intMultiCompanyId=ch.intCompanyId
-              WHERE cd.intCurrencyId<>@intCurrencyId and ch.intCommodityId=@intCommodityId)t where dblQuantity <>0
+              WHERE cd.intCurrencyId<>@intCurrencyId and ch.intCommodityId=@intCommodityId
+			  )t where dblQuantity <>0
 END

@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKCurrencyExposureForStock
+﻿CREATE PROC [dbo].[uspRKCurrencyExposureForStock]
 	  @intCommodityId int
 	, @dtmClosingPrice datetime = null
 	, @intCurrencyId int
@@ -38,7 +38,7 @@ FROM (
 		um.intUnitMeasureId intMarketPremiumUOMId,
 		cur.intCurrencyID intMarketPriceCurrencyId,l.intItemId,cd.intFutureMarketId,ch.intCompanyId
 	FROM tblCTContractHeader ch
-	JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intCurrencyId=@intCurrencyId
+	JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId
 	join tblRKFutureMarket fm on cd.intFutureMarketId=fm.intFutureMarketId
 	JOIN tblICInventoryReceiptItem ri on cd.intContractDetailId=ri.intLineNo
 	JOIN tblICInventoryReceiptItemLot rl on ri.intInventoryReceiptItemId=rl.intInventoryReceiptItemId
