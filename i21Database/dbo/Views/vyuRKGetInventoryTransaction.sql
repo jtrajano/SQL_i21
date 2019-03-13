@@ -32,6 +32,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,i.intOriginId
 		,i.strMarketValuation
 		,i.strLotTracking
+		,ysnLicensed = ISNULL([Location].ysnLicensed, 0)
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 
