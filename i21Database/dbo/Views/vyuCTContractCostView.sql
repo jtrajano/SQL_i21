@@ -18,6 +18,7 @@ AS
 				CC.ysnBasis,
 				CC.ysnReceivable,
 				CC.strParty,
+				CC.strPaidBy,
 				CC.dtmDueDate,
 				CC.ysn15DaysFromShipment,
 				CC.strReference,
