@@ -94,7 +94,7 @@ SELECT DISTINCT
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
-	,[strVendorOrderNumber]		=	A.strBillOfLading
+	,[strVendorOrderNumber]		=	ISNULL(NULLIF(LTRIM(RTRIM(A.strBillOfLading)), ''), A.strVendorRefNo) 
 	,[strPurchaseOrderNumber]	=	NULL--A.strReceiptNumber
 	,[intPurchaseDetailId]		=	NULL
 	,[intItemId]				=	B.intItemId
