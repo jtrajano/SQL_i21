@@ -263,27 +263,26 @@ BEGIN
 		BEGIN 				
 			DECLARE @throwedError AS NVARCHAR(1000);		
 			SELECT @intShipFrom_DebitMemo = CASE WHEN @originalEntityVendorId = @intEntityVendorId THEN @intShipFrom ELSE NULL END 
-
-
-			--EXEC [dbo].[uspAPCreateVoucher]
-			--	@voucherPayables = @voucherItems
-			--	,@voucherPayableTax = @voucherItemsTax
-			--	,@userId = @intEntityVendorId
-			--	,@throwError = 0
-			--	,@error = @throwedError OUTPUT
-			--	,@createdVouchersId = @intBillId OUTPUT
-
-			EXEC [dbo].[uspAPCreateBillData]
-				@userId = @intEntityUserSecurityId
-				,@vendorId = @intEntityVendorId
-				,@type = @billTypeToUse
-				,@voucherDetailReceipt = @voucherItems
-				,@shipTo = @intShipTo
-				,@shipFrom = @intShipFrom_DebitMemo
-				,@currencyId = @intCurrencyId
+			
+			EXEC [dbo].[uspAPCreateVoucher]
+				@voucherPayables = @voucherItems
+				,@voucherPayableTax = @voucherItemsTax
+				,@userId = @intEntityVendorId
 				,@throwError = 0
-				,@error = NULL 			
-				,@billId = @intBillId OUTPUT
+				,@error = @throwedError OUTPUT
+				,@createdVouchersId = @intBillId OUTPUT
+
+			--EXEC [dbo].[uspAPCreateBillData]
+			--	@userId = @intEntityUserSecurityId
+			--	,@vendorId = @intEntityVendorId
+			--	,@type = @billTypeToUse
+			--	,@voucherDetailReceipt = @voucherItems
+			--	,@shipTo = @intShipTo
+			--	,@shipFrom = @intShipFrom_DebitMemo
+			--	,@currencyId = @intCurrencyId
+			--	,@throwError = 0
+			--	,@error = NULL 			
+			--	,@billId = @intBillId OUTPUT
 
 			IF(@throwedError <> '')
 			BEGIN
