@@ -17,7 +17,9 @@ BEGIN TRY
 			 @strCity				NVARCHAR(50),
 			 @strAddress			NVARCHAR(MAX),
 			 @intVendorId			INT,
-			 @blbFile				VARBINARY(MAX)
+			 @blbFile				VARBINARY(MAX),
+			 @intReportLogoHeight	INT,
+			 @intReportLogoWidth	INT
 			
     IF  LTRIM(RTRIM(@xmlParam)) = ''   
 	   SET @xmlParam = NULL   
@@ -51,6 +53,8 @@ BEGIN TRY
 			[endgroup]		NVARCHAR(50),  
 			[datatype]		NVARCHAR(50)  
 	)  
+
+	SELECT @intReportLogoHeight = intReportLogoHeight, @intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference WITH (NOLOCK)
     
 	SELECT	@intBrkgCommnId =	  [from]
 	FROM	@temp_xml_table   
@@ -91,7 +95,9 @@ BEGIN TRY
 			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + strRateUOM AS strRate,
 			strItemNo,
 			strCurrency,
-			dblReqstdAmount
+			dblReqstdAmount,
+			ISNULL(@intReportLogoHeight,0) AS intReportLogoHeight,
+			ISNULL(@intReportLogoWidth,0) AS intReportLogoWidth
 
 	FROM	  vyuCTGridBrokerageCommissionDetail  BD
 	WHERE  intBrkgCommnId =	  @intBrkgCommnId			
