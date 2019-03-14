@@ -597,6 +597,13 @@ WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule =
 
 ------------------------END Contract Management------------
 
+
+------------- System Manager User Entity Screen set availble-------------
+
+UPDATE tblSMScreen set ysnAvailable = 1 WHERE strNamespace = 'i21.view.EntityUser'
+
+-----------------------END SM User Entity Screen-------------------------
+
 PRINT N'END INSERT DEFAULT SCREEN'
 GO
 
