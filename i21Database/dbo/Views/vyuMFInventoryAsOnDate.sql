@@ -36,12 +36,10 @@ SELECT IA.guidSessionId
 	,IA.dblProduced
 	,IA.dblClosingQty
 	,IA.intConcurrencyId
-	--,IA.dtmDateCreated  
 	,IA.intCreatedByUserId
-	--,IA.strVendorRefNo  
-	,IA.strWarehouseRefNo
-	,IA.strBondStatus
-	,IA.strContainerNo
+	,IV.strWarehouseRefNo
+	,IV.strBondStatus
+	,IV.strContainerNo
 	,IV.strCertification
 	,IV.strCertificationId
 	,IV.dtmDateCreated
