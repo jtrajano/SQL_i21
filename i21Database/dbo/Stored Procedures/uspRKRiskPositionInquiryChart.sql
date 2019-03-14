@@ -159,7 +159,11 @@ BEGIN
 		, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intItemId INT
 		, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS)
+		, strItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+		, intBookId INT
+		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intSubBookId INT
+		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 
 	INSERT INTO @RiskPositionInquiryBySummaryTable(intRowNumFinal
 		, intRowNumber
@@ -185,7 +189,11 @@ BEGIN
 		, strOrigin
 		, intItemId
 		, strItemNo
-		, strItemDescription)
+		, strItemDescription
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook)
 	EXEC uspRKRiskPositionInquiryBySummary @intCommodityId = @intCommodityId
 		, @intCompanyLocationId = @intCompanyLocationId
 		, @intFutureMarketId = @intFutureMarketId
