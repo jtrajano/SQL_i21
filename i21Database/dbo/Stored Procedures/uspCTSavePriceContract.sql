@@ -36,8 +36,7 @@ BEGIN TRY
 			@intOutputId				INT,
 			@dtmFixationDate			DATETIME,
 			@ysnFreezed					BIT,
-			@ysnAA						BIT,
-			@intFutOptTransactionHeaderId INT = NULL
+			@ysnAA						BIT
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
@@ -125,26 +124,19 @@ BEGIN TRY
 					IF ISNULL(@intFutOptTransactionId,0) = 0
 					BEGIN
 						UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-						-- DERIVATIVE ENTRY HISTORY						
+						-- DERIVATIVE ENTRY HISTORY
+						DECLARE @intFutOptTransactionHeaderId INT = NULL
 						SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
 						EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'ADD'
-						-- DERIVATIVE ENTRY AUDIT LOG: EXEC uspSMAuditLog 'RiskManagement.view.DerivativeEntry', @intFutOptTransactionHeaderId, @intUserId, 'Created', 'small-new-plus'
-					END
-					ELSE IF dbo.fnCTCheckIfDuplicateFutOptTransactionHistory(@intOutputId) > 1
-					BEGIN
-						-- DERIVATIVE ENTRY HISTORY
-						SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-						EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'UPDATE'
-					END
+						-- DERIVATIVE ENTRY AUDIT LOG
+						EXEC uspSMAuditLog 'RiskManagement.view.DerivativeEntry', @intFutOptTransactionHeaderId, @intUserId, 'Created', 'small-new-plus'
+					END						
 				END
 			END
 			ELSE
 			BEGIN
 				IF ISNULL(@intFutOptTransactionId,0) > 0
 				BEGIN
-					-- DERIVATIVE ENTRY HISTORY
-					SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'DELETE'
 					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 					EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
 				END
