@@ -74,6 +74,7 @@ DECLARE @intEmployeeDepartmentId INT
 DECLARE @intWorkersCompensationId INT
 DECLARE @intEntityEmployeeId INT
 DECLARE @intPayGroupDetailId INT
+DECLARE @dblLongestTotalHours NUMERIC(18, 6)
 DECLARE @intDefaultWorkersCompensationId INT
 
 DECLARE @TimecardOvertime TABLE
@@ -168,27 +169,45 @@ BEGIN
 	/* Get the Created Pay Group Detail Id*/
 	SELECT @intPayGroupDetailId = @@IDENTITY
 
-	/* Check if Employee has multiple WC code in their time cards */
-	IF(SELECT COUNT(DISTINCT intWorkersCompensationId)FROM tblPRTimecard WHERE intEntityEmployeeId = @intEntityEmployeeId) > 1
+	/* Check if Employee has multiple WC code in their time card within Paygroup period */
+	IF(SELECT COUNT(DISTINCT intWorkersCompensationId)FROM #tmpTimecard WHERE intEntityEmployeeId = @intEntityEmployeeId) > 1
 	BEGIN
-		SELECT TOP(1) @intDefaultWorkersCompensationId = intWorkersCompensationId
-		FROM tblPRTimecard
-		WHERE intEntityEmployeeId = @intEntityEmployeeId
-		GROUP BY
-			intEntityEmployeeId
-			,intWorkersCompensationId
-		HAVING SUM(ISNULL(dblHours,0)) = (
-			SELECT MAX(dblTotalHours)
-			FROM(
+		/* Get the longest amount of hours rendered by Employee within Paygroup period*/
+		SELECT @dblLongestTotalHours = MAX(TH.dblTotalHours)
+		FROM (
 			SELECT intEntityEmployeeId
 				,intWorkersCompensationId
-				,dblTotalHours = SUM(ISNULL(dblHours,0))
-			FROM tblPRTimecard
-			WHERE intEntityEmployeeId = @intEntityEmployeeId
-			GROUP BY
-				intEntityEmployeeId
+				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
+			FROM #tmpTimecard
+			GROUP BY intEntityEmployeeId
 				,intWorkersCompensationId
-		) T)
+		)TH
+
+		/* Check if the longest total hours rendered has more than one WC Code within Paygroup period
+		   If true, get the default WC Code on Employee level */
+		IF(SELECT COUNT(intWorkersCompensationId) FROM (SELECT intEntityEmployeeId
+				,intWorkersCompensationId
+				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
+			FROM #tmpTimecard
+			GROUP BY intEntityEmployeeId
+				,intWorkersCompensationId) TH
+			WHERE TH.dblTotalHours = @dblLongestTotalHours) > 1
+		BEGIN
+			SELECT @intDefaultWorkersCompensationId = intWorkersCompensationId
+			FROM tblPREmployee WHERE intEntityId = @intEntityEmployeeId
+		END
+		ELSE
+		BEGIN
+			SELECT @intDefaultWorkersCompensationId = intWorkersCompensationId
+			FROM (SELECT intEntityEmployeeId
+				,intWorkersCompensationId
+				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
+			FROM #tmpTimecard
+
+			GROUP BY intEntityEmployeeId
+				,intWorkersCompensationId) TH
+			WHERE TH.dblTotalHours = @dblLongestTotalHours
+		END
 	END
 	ELSE 
 	BEGIN
