@@ -4,8 +4,11 @@ SELECT
 	   ST.intStoreId
 	 , ST.intStoreNo
 	 , IL.intFamilyId
+	 , Family.strSubcategoryId AS strFamily
 	 , IL.intClassId
+	 , Class.strSubcategoryId  AS strClass
 	 , Cat.intCategoryId
+	 , Cat.strCategoryCode
 	 , EM.strName AS strVendorName
 	 , tblIMQty.dtmCheckoutDateMin
 	 , tblIMQty.dtmCheckoutDateMax
@@ -16,12 +19,22 @@ SELECT
 	 , ItemPricing.dblSalePrice AS dblCurrentPrice
 	 , tblIMQty.dblItemCostSum AS dblItemCost
 	 , (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) AS dblTotalSales
-	 , ((ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum)) AS dblGrossMarginDollar
+
+	 -- Formula: Gross Margin $ = Totals Sales - (Qty * Item Movement Item Cost)
+	 , (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostSum) AS dblGrossMarginDollar
+
+	 -- Formula: Gross Margin % = Total Sales - (Qty * Item Movement Item Cost) / Total Sales
 	 , CASE 
 		WHEN (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) <> 0
-			THEN (( ((ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum)) / (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) )*100)
+			THEN ( (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostSum) ) / (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum)
 		ELSE 0
 	 END AS dblGrossMarginPercent
+	 --, ((ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum)) AS dblGrossMarginDollar
+	 --, CASE 
+		--WHEN (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) <> 0
+		--	THEN (( ((ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum)) / (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) )*100)
+		--ELSE 0
+	 --END AS dblGrossMarginPercent
 FROM
 (
 	SELECT 
@@ -67,6 +80,12 @@ INNER JOIN tblSMCompanyLocation CL
 INNER JOIN tblICItemLocation IL
 	ON tblIMQty.intItemId = IL.intItemId
 	AND CL.intCompanyLocationId = IL.intLocationId
+LEFT JOIN tblSTSubcategory Family
+	ON IL.intFamilyId = Family.intSubcategoryId
+	AND Family.strSubcategoryType = 'F'
+LEFT JOIN tblSTSubcategory Class
+	ON IL.intFamilyId = Class.intSubcategoryId
+	AND Class.strSubcategoryType = 'C'
 LEFT JOIN dbo.tblAPVendor Vendor 
 	ON Vendor.intEntityId = IL.intVendorId
 LEFT JOIN dbo.tblEMEntity EM
