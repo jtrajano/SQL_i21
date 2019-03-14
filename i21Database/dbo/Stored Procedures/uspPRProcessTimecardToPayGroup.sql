@@ -74,7 +74,6 @@ DECLARE @intEmployeeDepartmentId INT
 DECLARE @intWorkersCompensationId INT
 DECLARE @intEntityEmployeeId INT
 DECLARE @intPayGroupDetailId INT
-DECLARE @dblLongestTotalHours NUMERIC(18, 6)
 DECLARE @intDefaultWorkersCompensationId INT
 
 DECLARE @TimecardOvertime TABLE
@@ -172,25 +171,24 @@ BEGIN
 	/* Check if Employee has multiple WC code in their time cards */
 	IF(SELECT COUNT(DISTINCT intWorkersCompensationId)FROM tblPRTimecard WHERE intEntityEmployeeId = @intEntityEmployeeId) > 1
 	BEGIN
-		/* Get the longest amount of hours rendered by Employee*/
-		SELECT @dblLongestTotalHours = MAX(dblTotalHours)
-		FROM vyuPREmployeeTotalHours
+		SELECT TOP(1) @intDefaultWorkersCompensationId = intWorkersCompensationId
+		FROM tblPRTimecard
 		WHERE intEntityEmployeeId = @intEntityEmployeeId
-
-		/* Check if the longest total hours rendered has more than one WC Code 
-		   If true, get the default WC Code on Employee level */
-		IF(SELECT COUNT(*) FROM vyuPREmployeeTotalHours WHERE intEntityEmployeeId = @intEntityEmployeeId AND dblTotalHours = @dblLongestTotalHours) > 1
-		BEGIN
-			SELECT @intDefaultWorkersCompensationId = intWorkersCompensationId
-			FROM tblPREmployee WHERE intEntityId = @intEntityEmployeeId
-		END
-		ELSE
-		BEGIN
-			SELECT @intDefaultWorkersCompensationId = intWorkersCompensationId
-			FROM vyuPREmployeeTotalHours
+		GROUP BY
+			intEntityEmployeeId
+			,intWorkersCompensationId
+		HAVING SUM(ISNULL(dblHours,0)) = (
+			SELECT MAX(dblTotalHours)
+			FROM(
+			SELECT intEntityEmployeeId
+				,intWorkersCompensationId
+				,dblTotalHours = SUM(ISNULL(dblHours,0))
+			FROM tblPRTimecard
 			WHERE intEntityEmployeeId = @intEntityEmployeeId
-				AND dblTotalHours = @dblLongestTotalHours
-		END
+			GROUP BY
+				intEntityEmployeeId
+				,intWorkersCompensationId
+		) T)
 	END
 	ELSE 
 	BEGIN
