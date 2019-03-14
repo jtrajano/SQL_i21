@@ -78,7 +78,7 @@ SELECT
 	, AdjDetail.intOwnershipType
 	, AdjDetail.intCostingMethod
 	, strCostingMethod = ISNULL(CostingMethod.strCostingMethod, '')
-	, strOwnershipType = CASE AdjDetail.intOwnershipType WHEN 1 THEN 'Own' WHEN 2 THEN 'Storage' WHEN 3 THEN 'Consigned Purchase' WHEN 4 THEN 'Consigned Sale' ELSE NULL END
+	, strOwnershipType = CASE AdjDetail.intOwnershipType WHEN 1 THEN 'Own' WHEN 2 THEN 'Storage' WHEN 3 THEN 'Consigned Purchase' WHEN 4 THEN 'Consigned Sale' ELSE NULL END COLLATE Latin1_General_CI_AS
 	, AdjDetail.intConcurrencyId
 	, Commodity.strCommodityCode
 	, Commodity.strDescription strCommodity

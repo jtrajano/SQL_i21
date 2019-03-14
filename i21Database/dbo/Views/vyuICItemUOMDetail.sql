@@ -30,11 +30,11 @@ AS
 	, ItemLocation.intAllowNegativeInventory
 	, strAllowNegativeInventory = (CASE WHEN ItemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
 							 WHEN ItemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
-							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END)
+							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END) COLLATE Latin1_General_CI_AS
 	, ItemLocation.intCostingMethod
 	, strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
 							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
-							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END)
+							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END) COLLATE Latin1_General_CI_AS
 	, dblAmountPercent = ISNULL((ItemPricing.dblAmountPercent), 0.00)
 	, dblSalePrice = ISNULL((ItemPricing.dblSalePrice), 0.00)
 	, dblMSRPPrice = ISNULL((ItemPricing.dblMSRPPrice), 0.00)

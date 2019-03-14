@@ -22,8 +22,8 @@ SELECT ItemLocation.intItemLocationId
 	, strCostingMethod = CostingMethod.strCostingMethod
 	, ItemLocation.intAllowNegativeInventory
 	, strAllowNegativeInventory = (CASE WHEN intAllowNegativeInventory = 1 THEN 'Yes'
-								WHEN intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
-								WHEN intAllowNegativeInventory = 3 THEN 'No' END)
+								WHEN intAllowNegativeInventory = 2 THEN 'Yes wstrith Auto Write-Off'
+								WHEN intAllowNegativeInventory = 3 THEN 'No' END) COLLATE Latin1_General_CI_AS
 	, ItemLocation.intSubLocationId
 	, SubLocation.strSubLocationName
 	, ItemLocation.intStorageLocationId
@@ -73,7 +73,7 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnApplyBlueLaw2
 	, ItemLocation.ysnCarWash
 	, ItemLocation.intItemTypeCode
-	, strItemTypeCode = CAST(ISNULL(ItemTypeCode.intRadiantItemTypeCode, '') AS NVARCHAR)
+	, strItemTypeCode = CAST(ISNULL(ItemTypeCode.intRadiantItemTypeCode, '') AS NVARCHAR) COLLATE Latin1_General_CI_AS
 	, ItemLocation.intItemTypeSubCode
 	, ItemLocation.ysnAutoCalculateFreight
 	, ItemLocation.intFreightMethodId

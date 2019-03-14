@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuICGetInventoryTransfer]
+﻿
+CREATE VIEW [dbo].[vyuICGetInventoryTransfer]
 	AS 
 
 SELECT intInventoryTransferId
@@ -9,7 +10,7 @@ SELECT intInventoryTransferId
 	, strSourceType = (CASE WHEN intSourceType = 0 THEN 'None'
 			WHEN intSourceType = 1 THEN 'Scale'
 			WHEN intSourceType = 2 THEN 'Inbound Shipment'
-			WHEN intSourceType = 3 THEN 'Transports' END)
+			WHEN intSourceType = 3 THEN 'Transports' END) COLLATE Latin1_General_CI_AS
 	, intTransferredById
 	, strTransferredBy = Entity.strName
 	, strDescription

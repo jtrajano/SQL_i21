@@ -2,8 +2,8 @@
 AS
 SELECT 
 	--intKey = CAST(ROW_NUMBER() OVER(ORDER BY SODetail.intCompanyLocationId, SODetail.intEntityCustomerId, intSalesOrderDetailId) AS INT)
-	 strOrderType = 'Sales Order'
-	, strSourceType = 'None'
+	 strOrderType = 'Sales Order' COLLATE Latin1_General_CI_AS
+	, strSourceType = 'None' COLLATE Latin1_General_CI_AS
 	, intLocationId = SODetail.intCompanyLocationId
 	, strShipFromLocation = SODetail.strLocationName
 	, SODetail.intEntityCustomerId
@@ -83,7 +83,7 @@ SELECT
 						,ShipToLocation.strCountry
 						,DEFAULT 
 						,DEFAULT 
-					)
+					) COLLATE Latin1_General_CI_AS
 	, intPriceUOMId = ISNULL(SODetail.intPriceUOMId, SODetail.intItemUOMId) 
 	, strPriceUOM = ISNULL(SODetail.strPriceUOM, SODetail.strUnitMeasure) 
 	, dblPriceUOMConv = ISNULL(ItemPriceUOM.dblUnitQty, SODetail.dblUOMConversion)

@@ -6,7 +6,7 @@ SELECT
 	 , s.strShipmentNumber
 	 , c.strCustomerNumber
 	 , strCustomerName = e.strName
-	 , strOrderType = ot.strOrderType
+	 , strOrderType = ot.strOrderType COLLATE Latin1_General_CI_AS
 	 , s.intOrderType
 	 , strDestination = l.strLocationName
 	 , s.dtmShipDate
