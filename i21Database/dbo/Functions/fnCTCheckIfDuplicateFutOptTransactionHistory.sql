@@ -48,7 +48,7 @@ FROM
 		, ysnPreCrush
 		FROM tblRKFutOptTransaction T
 		INNER JOIN tblRKFutOptTransactionHeader H on T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
-		WHERE T.intFutOptTransactionId = 435	
+		WHERE T.intFutOptTransactionId = @intFutOptTransactionId	
 		UNION ALL
 		SELECT intFutOptTransactionHeaderId,strSelectedInstrumentType,intFutOptTransactionId,strInternalTradeNo,strLocationName,dblContractSize,strInstrumentType,
 				strFutureMarket,strCurrency,strCommodity,strBroker,strBrokerAccount,strTrader,strBrokerTradeNo,strFutureMonth,strOptionMonth,strOptionType,dblStrike,
@@ -58,7 +58,7 @@ FROM
 			strFutureMarket,strCurrency,strCommodity,strBroker,strBrokerAccount,strTrader,strBrokerTradeNo,strFutureMonth,strOptionMonth,strOptionType,dblStrike,
 			dblPrice,strStatus,dtmFilledDate,intNewNoOfContract,intBalanceContract,intBookId,intSubBookId,ysnMonthExpired,strUserName,ysnPreCrush
 			from tblRKFutOptTransactionHistory 
-			WHERE intFutOptTransactionId = 435	
+			WHERE intFutOptTransactionId = @intFutOptTransactionId	
 			order by dtmTransactionDate DESC
 		) a
 	) b
