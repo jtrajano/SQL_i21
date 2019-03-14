@@ -35,9 +35,9 @@ SELECT IA.guidSessionId
 	,Sum(IA.dblClosingQty) AS dblClosingQty
 	,IA.intConcurrencyId
 	,IA.intCreatedByUserId
-	,IA.strWarehouseRefNo
-	,IA.strBondStatus
-	,IA.strContainerNo
+	,IV.strWarehouseRefNo
+	,IV.strBondStatus
+	,IV.strContainerNo
 	,IV.strCertification
 	,IV.strCertificationId
 	,IV.dtmDateCreated
@@ -82,9 +82,9 @@ GROUP BY IA.guidSessionId
 	,IA.strItemUOM
 	,IA.intConcurrencyId
 	,IA.intCreatedByUserId
-	,IA.strWarehouseRefNo
-	,IA.strBondStatus
-	,IA.strContainerNo
+	,IV.strWarehouseRefNo
+	,IV.strBondStatus
+	,IV.strContainerNo
 	,IV.strCertification
 	,IV.strCertificationId
 	,IV.dtmDateCreated
