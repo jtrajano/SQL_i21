@@ -1167,7 +1167,7 @@ BEGIN TRY
 				[ysnExport] BIT NULL DEFAULT (0),
 				[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 			)
-			EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParam1
+			EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParamDS
 
 			INSERT INTO @temp_xml_deliverysheet
 			SELECT *
@@ -1251,7 +1251,7 @@ BEGIN TRY
 				[strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 				[intStorageScheduleRuleId] INT NULL
 			)
-			EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParam3
+			EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParamDSS
 		
 			INSERT INTO @temp_xml_splitdstable
 			SELECT *
