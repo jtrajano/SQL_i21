@@ -86,9 +86,9 @@ BEGIN TRY
 		,[ysnResetDetails] = 0
 		,[intItemId] = SC.intItemId
 		,[strItemDescription] = ICI.strItemNo
-		,[intOrderUOMId]= NULL
+		,[intOrderUOMId]= LGD.intItemUOMId
 		,[intItemUOMId] =  SC.intItemUOMIdTo
-		,[dblQtyOrdered] = SC.dblNetUnits
+		,[dblQtyOrdered] = ISNULL(LGD.dblQuantity, SC.dblNetUnits)
 		,[dblQtyShipped] = SC.dblNetUnits
 		,[dblDiscount] = 0
 		,[dblPrice] = SC.dblUnitPrice + dblUnitBasis
@@ -103,6 +103,7 @@ BEGIN TRY
 		LEFT JOIN tblARCustomer AR ON AR.intEntityId = SC.intEntityId
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
 		LEFT JOIN tblICItem ICI ON ICI.intItemId = SC.intItemId		
+		LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = SC.intLoadId and LGD.intSContractDetailId = SC.intContractId
 		WHERE SC.intTicketId = @intTicketId
 
 	--FOR FREIGHT CHARGES
