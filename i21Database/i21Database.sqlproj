@@ -7296,6 +7296,7 @@
     <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTotalHours.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutItemMovementReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
