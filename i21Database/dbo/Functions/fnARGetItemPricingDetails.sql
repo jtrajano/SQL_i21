@@ -241,6 +241,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 			BEGIN 
 				SELECT TOP 1
 					 @Price				= dblPrice
+					,@OriginalGrossPrice = dblGrossPrice
 					,@Pricing			= strPricing
 					,@Deviation			= dblDeviation
 					,@TermDiscount		= dblTermDiscount
@@ -441,6 +442,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 				SELECT TOP 1
 					 @Price				= dblPrice
 					,@UnitPrice			= dblPrice
+					,@OriginalGrossPrice = dblGrossPrice
 					,@PriceUOMQuantity	= 1.000000
 					,@Pricing			= strPricing
 					,@Deviation			= dblDeviation
@@ -475,6 +477,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 				INSERT @returntable(
 					 dblPrice
 					,dblUnitPrice
+					,dblOriginalGrossPrice
 					,dblTermDiscount
 					,strTermDiscountBy
 					,dblTermDiscountRate
@@ -506,6 +509,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 				SELECT 
 					 dblPrice						= dblPrice
 					,dblUnitPrice					= dblPrice
+					,dblOriginalGrossPrice     		= dblGrossPrice
 					,dblTermDiscount				= dblTermDiscount
 					,strTermDiscountBy				= strTermDiscountBy
 					,dblTermDiscountRate			= @TermDiscountRate
