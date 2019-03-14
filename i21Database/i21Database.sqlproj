@@ -7294,7 +7294,6 @@
     <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
         <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
-    <Build Include="dbo\Views\vyuPREmployeeTotalHours.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
