@@ -7443,6 +7443,7 @@
     <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
     <Build Include="dbo\Stored Procedures\uspCFOptimizeFiltering.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutItemMovementReport.sql" />
+    <Build Include="dbo\Views\vyuEMEAExportCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
