@@ -820,6 +820,17 @@ FROM (
 						THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(cd.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
 						AND temp.strContractInventory = 'Contract'
 					),0) AS dblMarketBasis1
+		, ISNULL((SELECT top 1 (ISNULL(dblBasisOrDiscount,0)+ISNULL(dblCashOrFuture,0))
+									/ case when c.ysnSubCurrency= 1 then 100 else 1 end
+					FROM tblRKM2MBasisDetail temp
+					LEFT JOIN tblSMCurrency c on temp.intCurrencyId=c.intCurrencyID
+					WHERE temp.intM2MBasisId=@intM2MBasisId and temp.intCommodityId=@intCommodityId
+						and ISNULL(temp.intFutureMarketId,0) = CASE WHEN ISNULL(temp.intFutureMarketId,0)= 0 THEN 0 ELSE cd.intFutureMarketId END
+						and ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE cd.intItemId END
+						and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE cd.intContractTypeId  END
+						AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0)  END
+						AND temp.strContractInventory = 'Contract'
+					),0) AS dblMarketCashPrice
 		, ISNULL((SELECT top 1 intCommodityUnitMeasureId as dblMarketBasisUOM FROM tblRKM2MBasisDetail temp
 					JOIN tblICCommodityUnitMeasure cum on cum.intCommodityId=temp.intCommodityId and temp.intUnitMeasureId=cum.intUnitMeasureId
 					WHERE temp.intM2MBasisId=@intM2MBasisId and temp.intCommodityId=@intCommodityId
@@ -1625,8 +1636,16 @@ FROM (
 SELECT *
 	, ISNULL(dblContractBasis,0) + (ISNULL(dblFutures,0) * ISNULL(dblContractRatio,1)) as dblContractPrice
 	, convert(decimal(24,6),((ISNULL(dblContractBasis,0)+ISNULL(dblCosts,0))-ISNULL(dblMarketBasis,0))*ISNULL(dblResultBasis1,0)) + convert(decimal(24,6),((ISNULL(dblFutures,0)- ISNULL(dblFuturePrice,0))*ISNULL(dblMarketFuturesResult1,0))) dblResult
-	, convert(decimal(24,6),((ISNULL(dblContractBasis,0)+ISNULL(dblCosts,0))-ISNULL(dblMarketBasis,0))*ISNULL(dblResultBasis1,0)) dblResultBasis
-	, convert(decimal(24,6),((ISNULL(dblFutures,0)- ISNULL(dblFuturePrice,0))*ISNULL(dblMarketFuturesResult1,0))) dblMarketFuturesResult
+	, CASE WHEN intContractTypeId = 1 THEN 
+			convert(decimal(24,6),( ISNULL(dblMarketBasis,0) - (ISNULL(dblContractBasis,0) + ISNULL(dblCosts,0)))*ISNULL(dblOpenQty,0))
+		ELSE
+			convert(decimal(24,6),((ISNULL(dblContractBasis,0)+ISNULL(dblCosts,0))-ISNULL(dblMarketBasis,0))*ISNULL(dblOpenQty,0))
+	  END dblResultBasis
+	, CASE WHEN intContractTypeId = 1 THEN 
+		convert(decimal(24,6),((ISNULL(dblFuturePrice,0) - ISNULL(dblFutures,0))*ISNULL(dblOpenQty,0)))
+		ELSE
+		convert(decimal(24,6),((ISNULL(dblFutures,0)- ISNULL(dblFuturePrice,0))*ISNULL(dblOpenQty,0)))
+	  END dblMarketFuturesResult
 	, case when strPricingType='Cash' then convert(decimal(24,6),(ISNULL(dblCash,0)-ISNULL(dblCashPrice,0))*ISNULL(dblResult1,0))
 			else NULL end as dblResultCash
 INTO #Temp
@@ -1720,15 +1739,15 @@ FROM (
 ORDER BY intCommodityId,strContractSeq DESC
 
 ------------- Calculation of Results ----------------------
-UPDATE #Temp
-SET dblResultBasis = CASE WHEN intContractTypeId = 1 and (ISNULL(dblContractBasis,0) <= dblMarketBasis) THEN abs(dblResultBasis)
-						WHEN intContractTypeId = 1 and (ISNULL(dblContractBasis,0) > dblMarketBasis) THEN - abs(dblResultBasis)
-						WHEN intContractTypeId = 2  and (ISNULL(dblContractBasis,0) >= dblMarketBasis) THEN abs(dblResultBasis)
-						WHEN intContractTypeId = 2  and (ISNULL(dblContractBasis,0) < dblMarketBasis) THEN - abs(dblResultBasis) END
-	, dblMarketFuturesResult = CASE WHEN intContractTypeId = 1 and (ISNULL(dblFutures,0) <= ISNULL(dblFuturesClosingPrice,0)) THEN abs(dblMarketFuturesResult)
-									WHEN intContractTypeId = 1 and (ISNULL(dblFutures,0) > ISNULL(dblFuturesClosingPrice,0)) THEN - abs(dblMarketFuturesResult)
-									WHEN intContractTypeId = 2  and (ISNULL(dblFutures,0) >= ISNULL(dblFuturesClosingPrice,0)) THEN abs(dblMarketFuturesResult)
-									WHEN intContractTypeId = 2  and (ISNULL(dblFutures,0) < ISNULL(dblFuturesClosingPrice,0)) THEN - abs(dblMarketFuturesResult) END
+--UPDATE #Temp
+--SET dblResultBasis = CASE WHEN intContractTypeId = 1 and (ISNULL(dblContractBasis,0) <= dblMarketBasis) THEN abs(dblResultBasis)
+--						WHEN intContractTypeId = 1 and (ISNULL(dblContractBasis,0) > dblMarketBasis) THEN - abs(dblResultBasis)
+--						WHEN intContractTypeId = 2  and (ISNULL(dblContractBasis,0) >= dblMarketBasis) THEN abs(dblResultBasis)
+--						WHEN intContractTypeId = 2  and (ISNULL(dblContractBasis,0) < dblMarketBasis) THEN - abs(dblResultBasis) END
+	--, dblMarketFuturesResult = CASE WHEN intContractTypeId = 1 and (ISNULL(dblFutures,0) <= ISNULL(dblFuturesClosingPrice,0)) THEN abs(dblMarketFuturesResult)
+	--								WHEN intContractTypeId = 1 and (ISNULL(dblFutures,0) > ISNULL(dblFuturesClosingPrice,0)) THEN - abs(dblMarketFuturesResult)
+	--								WHEN intContractTypeId = 2  and (ISNULL(dblFutures,0) >= ISNULL(dblFuturesClosingPrice,0)) THEN abs(dblMarketFuturesResult)
+	--								WHEN intContractTypeId = 2  and (ISNULL(dblFutures,0) < ISNULL(dblFuturesClosingPrice,0)) THEN - abs(dblMarketFuturesResult) END
 --------------END ---------------
 
 IF ISNULL(@ysnIncludeInventoryM2M, 0) = 1
@@ -1909,8 +1928,18 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 	, intMarketZoneId
 	, strMarketZoneCode
 	, strLocationName 
-	, dblResult = case when strPricingType='Cash' then dblResultCash else (dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty end
-	, dblMarketFuturesResult = (dblFuturePrice - dblActualFutures) * dblOpenQty
+	, dblResult = case when strPricingType='Cash' then 
+							dblResultCash 
+						when intContractTypeId = 1 then
+							(dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty
+						else 
+							(dblAdjustedContractPrice - dblMarketPrice) * dblOpenQty 
+				  end
+	, dblMarketFuturesResult = CASE WHEN intContractTypeId = 1 THEN 
+										(dblFuturePrice - dblActualFutures ) * dblOpenQty
+									ELSE
+										 (dblActualFutures - dblFuturePrice) * dblOpenQty
+									END
 	, dblResultRatio = (CASE WHEN dblContractRatio IS NOT NULL AND dblMarketRatio IS NOT NULL THEN ((dblMarketPrice - dblContractPrice) * dblOpenQty)
 								- ((dblFuturePrice - dblActualFutures) * dblOpenQty) - dblResultBasis
 							ELSE 0 END)
