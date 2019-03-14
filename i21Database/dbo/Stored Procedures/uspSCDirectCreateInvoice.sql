@@ -87,7 +87,7 @@ BEGIN TRY
 		,[intItemId] = SC.intItemId
 		,[strItemDescription] = ICI.strItemNo
 		,[intOrderUOMId]= NULL
-		,[intItemUOMId] = NULL
+		,[intItemUOMId] =  SC.intItemUOMIdTo
 		,[dblQtyOrdered] = SC.dblNetUnits
 		,[dblQtyShipped] = SC.dblNetUnits
 		,[dblDiscount] = 0
