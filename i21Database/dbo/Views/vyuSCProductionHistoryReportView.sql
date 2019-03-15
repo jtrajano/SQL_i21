@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuSCProductionEvidenceReportView]
+﻿CREATE VIEW [dbo].[vyuSCProductionHistoryReportView]
 	AS SELECT SC.intTicketId, (CASE WHEN
     SC.strTicketStatus = 'O' THEN 'OPEN' WHEN
     SC.strTicketStatus = 'A' THEN 'PRINTED' WHEN
