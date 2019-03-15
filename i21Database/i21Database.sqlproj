@@ -7444,6 +7444,7 @@
     <Build Include="dbo\Stored Procedures\uspCFOptimizeFiltering.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutItemMovementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleGAB.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInsertTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
