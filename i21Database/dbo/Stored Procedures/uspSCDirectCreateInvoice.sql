@@ -86,10 +86,10 @@ BEGIN TRY
 		,[ysnResetDetails] = 0
 		,[intItemId] = SC.intItemId
 		,[strItemDescription] = ICI.strItemNo
-		,[intOrderUOMId]= LGD.intItemUOMId
-		,[intItemUOMId] =  SC.intItemUOMIdTo
+		,[intOrderUOMId] = ISNULL(LGD.intItemUOMId, SC.intItemUOMIdTo)
+		,[intItemUOMId]  = ISNULL(CTD.intItemUOMId,SC.intItemUOMIdTo)
 		,[dblQtyOrdered] = ISNULL(LGD.dblQuantity, SC.dblNetUnits)
-		,[dblQtyShipped] = SC.dblNetUnits
+		,[dblQtyShipped] = dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,CTD.intItemUOMId,SC.dblNetUnits)
 		,[dblDiscount] = 0
 		,[dblPrice] = SC.dblUnitPrice + dblUnitBasis
 		,[ysnRefreshPrice] = 0
