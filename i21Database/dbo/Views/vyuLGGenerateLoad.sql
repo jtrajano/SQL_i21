@@ -39,10 +39,12 @@ SELECT GL.intGenerateLoadId
 	  ,ESH.intEntityId			AS intSHaulerEntityId --obsolete
 	  ,ESH.strName				AS strSHaulerName --obsolete
 
+	  ,GL.dtmShipDate
+	  ,GL.dtmEndDate
 	  ,GL.intItemId
 	  ,I.strItemNo				AS strItemNo
 	  ,I.strDescription			AS strItemDescription
-	  ,ET.intEquipmentTypeId	AS intEquipmentType
+	  ,ET.intEquipmentTypeId	AS intEquipmentTypeId
 	  ,ET.strEquipmentType		AS strEquipmentType
 	  ,EH.intEntityId			AS intHaulerEntityId
 	  ,EH.strName				AS strHaulerName
