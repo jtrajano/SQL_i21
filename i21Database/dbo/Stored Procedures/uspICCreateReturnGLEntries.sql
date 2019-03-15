@@ -458,10 +458,10 @@ AS
 			,t.intItemLocationId
 			,t.intTransactionId 
 			,t.strTransactionId 
-			,t.dblQty 
+			,dblQty = t.dblQty 
 			,dblUOMQty = t.dblUOMQty
-			,t.dblCost 
-			,t.dblValue 
+			,dblCost = t.dblCost 
+			,dblValue = t.dblValue 
 			,t.intTransactionTypeId
 			,t.intCurrencyId 
 			,t.dblExchangeRate 
@@ -560,25 +560,6 @@ FROM	ForGLEntries_CTE
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount 
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
-		-- CROSS APPLY dbo.fnGetDebit(
-		-- 	dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReceiptUnitCost, 0)) 
-		-- ) Debit
-		-- CROSS APPLY dbo.fnGetCredit(
-		-- 	dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReceiptUnitCost, 0)) 
-		-- ) Credit
-		-- CROSS APPLY dbo.fnGetDebitForeign(
-		-- 	dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReceiptUnitCost, 0)) 
-		-- 	,ForGLEntries_CTE.intCurrencyId
-		-- 	,@intFunctionalCurrencyId
-		-- 	,ForGLEntries_CTE.dblForexRate
-		-- ) DebitForeign
-		-- CROSS APPLY dbo.fnGetCreditForeign(
-		-- 	dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReceiptUnitCost, 0)) 
-		-- 	,ForGLEntries_CTE.intCurrencyId
-		-- 	,@intFunctionalCurrencyId
-		-- 	,ForGLEntries_CTE.dblForexRate
-		-- ) CreditForeign
-
 		CROSS APPLY dbo.fnGetDebitFunctional(
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblReceiptUnitCost, 0)) 
 			,ForGLEntries_CTE.intCurrencyId
@@ -604,7 +585,6 @@ FROM	ForGLEntries_CTE
 			dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQty, 1)) 
 		) CreditUnit 
 
-
 WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			@InventoryTransactionTypeId_WriteOffSold
 			, @InventoryTransactionTypeId_RevalueSold
@@ -620,8 +600,8 @@ SELECT
 		,intAccountId				= tblGLAccount.intAccountId
 		,dblDebit					= Credit.Value
 		,dblCredit					= Debit.Value
-		,dblDebitUnit				= CreditUnit.Value
-		,dblCreditUnit				= DebitUnit.Value
+		,dblDebitUnit				= NULL --CreditUnit.Value
+		,dblCreditUnit				= NULL --DebitUnit.Value
 		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, (ISNULL(dblCost, 0) - ISNULL(dblReceiptUnitCost, 0))) 
 		,strCode					= 'IC' 
 		,strReference				= '' 
