@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuSTCheckoutItemMovementReport]
 	AS
-SELECT
-	   ST.intStoreId
+SELECT --ROW_NUMBER() OVER(ORDER BY IL.intItemLocationId ASC) AS intRowCount --ROW_NUMBER () OVER (PARTITION BY ST.intStoreId, IL.intItemLocationId ORDER BY IL.intItemLocationId ASC) AS intRowCount
+	 IL.intItemLocationId AS intRowCount
+	 , ST.intStoreId
 	 , ST.intStoreNo
 	 , IL.intFamilyId
 	 , Family.strSubcategoryId AS strFamily
@@ -96,5 +97,4 @@ LEFT JOIN dbo.tblICItemSpecialPricing ItemSpecial
 LEFT JOIN dbo.tblICItemPricing ItemPricing 
 	ON tblIMQty.intItemId = ItemPricing.intItemId
 	AND IL.intItemLocationId = ItemPricing.intItemLocationId 
---ORDER BY ST.intStoreId, tblIMQty.strLongUPCCode
-
+--ORDER BY Cat.strCategoryCode ASC
