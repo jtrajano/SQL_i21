@@ -1,8 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuAPRptCashRequirementDetail]
 
 AS
-SELECT * FROM 
-(
 SELECT DISTINCT
 	 strVendorName = E.strName 
 	,Item.strDescription
@@ -66,13 +64,7 @@ SELECT DISTINCT
 	,C.strCompanyName
 	,strCompanyAddress = dbo.fnConvertToFullAddress(C.strAddress, C.strCity, C.strState,C.strZip)
 	,ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode
-	FROM tblCMBankTransaction CBT
-	INNER JOIN tblAPPayment PYMT ON 
-		CBT.strTransactionId =  PYMT.strPaymentRecordNum
-	INNER JOIN tblAPPaymentDetail PYMTDTL 
-		ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-	INNER JOIN tblAPBill APB 
-		ON PYMTDTL.intBillId = APB.intBillId
+	FROM  tblAPBill APB 
 	INNER JOIN tblAPBillDetail APBD 
 		ON APB.intBillId = APBD.intBillId 
 	INNER JOIN tblICItem Item 
@@ -103,6 +95,8 @@ SELECT DISTINCT
 		ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	LEFT JOIN vyuSCGetScaleDistribution SD 
 		ON IR.intInventoryReceiptId = SD.intInventoryReceiptItemId
+	INNER JOIN tblICCommodityUnitMeasure CUM
+		ON CUM.intCommodityId = commodity.intCommodityId AND CUM.ysnStockUnit = 1
 	LEFT JOIN tblSCTicket SC 
 		ON SC.intTicketId = ISNULL(IRI.intSourceId, GRH.intTicketId)
 	LEFT JOIN tblEMEntityLocation EML
@@ -114,6 +108,10 @@ SELECT DISTINCT
 				FROM tblAPBillDetail D
 				WHERE D.intBillId = APB.intBillId														
 			) detailTransaction
-	WHERE APB.ysnPosted = 1 
-) tblMaintTable
-WHERE strTicketNumber IS NOT NULL
+	
+	WHERE APB.ysnPosted = 1  AND APBD.intItemId IS NOT NULL 
+		  AND APBD.intContractHeaderId IS NOT NULL --WILL SHOW ALL CONTRACT RELATED TRANSACTIONS 
+		  AND APB.intBillId NOT IN ( --WILL SHOW NOT PAID TRANSACTIONS ONLY
+			SELECT A.intBillId FROM [vyuAPBillPayment] A
+		  )
+	
