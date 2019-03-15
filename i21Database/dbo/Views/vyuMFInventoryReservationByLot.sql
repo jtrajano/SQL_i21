@@ -10,6 +10,8 @@ SELECT l.strLotNumber
 	,r.dblQty
 	,um.strUnitMeasure
 	,itt.strName strTransactionType
+	,r.intTransactionId 
+	,r.intInventoryTransactionType 
 FROM tblICStockReservation r
 JOIN tblICItem i1 ON i1.intItemId = r.intItemId
 	AND ISNULL(r.ysnPosted, 0) = 0
