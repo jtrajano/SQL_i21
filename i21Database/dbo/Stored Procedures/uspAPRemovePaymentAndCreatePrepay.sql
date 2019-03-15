@@ -154,7 +154,26 @@ BEGIN
 	WHERE pay.intPaymentId = @currentPaymentId
 	AND origBill.intBillId = @voucherKey --UPDATE ONLY THE CURRENT VOUCHER
 
-	
+	--update the payment to prepayment always update prepay wether combination of bill and prepay or not.
+	 UPDATE pay
+	 	SET pay.ysnPrepay = 1
+	 FROM tblAPPayment pay
+	 WHERE pay.intPaymentId = @currentPaymentId;
+
+	--update the payment to prepayment
+    --UPDATE pay
+    --    SET pay.ysnPrepay = CASE WHEN payDetails.intBillId IS NULL THEN 1 ELSE 0 END -- set to true if payment detail is all prepayment
+    --FROM tblAPPayment pay
+    --OUTER APPLY 
+    --(
+    --    SELECT 
+    --        voucher.intBillId 
+    --    FROM tblAPPaymentDetail payDetail 
+    --    INNER JOIN tblAPBill voucher ON voucher.intBillId = payDetail.intBillId AND voucher.intTransactionType != 2
+    --    WHERE payDetail.intPaymentId = pay.intPaymentId
+    --) payDetails
+    --WHERE pay.intPaymentId = @currentPaymentId;
+
 
 	--REMOVE OTHER BILL ASSOCIATED TO THE PAYMENT, IT SHOULD ONLY HAVE 1 BILL WHICH IS THE PREPAID CREATED
 	-- DELETE payDetail
@@ -169,19 +188,6 @@ BEGIN
 		payDetail.intPaymentId = @currentPaymentId
 	AND payDetail.intBillId = @voucherKey;
 
-	--update the payment to prepayment
-	UPDATE pay
-		SET pay.ysnPrepay = CASE WHEN payDetails.intBillId IS NULL THEN 1 ELSE 0 END -- set to true if payment detail is all prepayment
-	FROM tblAPPayment pay
-	OUTER APPLY 
-	(
-		SELECT 
-			voucher.intBillId 
-		FROM tblAPPaymentDetail payDetail 
-		INNER JOIN tblAPBill voucher ON voucher.intBillId = payDetail.intBillId AND voucher.intTransactionType != 2
-		WHERE payDetail.intPaymentId = pay.intPaymentId
-	) payDetails
-	WHERE pay.intPaymentId = @currentPaymentId;
 	--update the gl record of payment
 	--SET THE OTHER GL DETAIL OF PAYMENT TO UNPOSTED (DO NOT DELETE FOR HISTORY PURPOSES)
 	-- UPDATE gl
