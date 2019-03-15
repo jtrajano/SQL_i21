@@ -51,6 +51,7 @@ SELECT
 							0
 						END
 	,E.dblDefaultHours
+	,ysnProcessed = 0
 INTO #tmpTimecard
 FROM tblPRTimecard T LEFT JOIN tblPREmployeeEarning E 
 	ON T.intEmployeeEarningId = E.intEmployeeEarningId 
@@ -97,7 +98,7 @@ DECLARE @TimecardOvertime TABLE
 )
 
 /* Add Timecards to Pay Group Detail */
-WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
+WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard WHERE ysnProcessed = 0)
 BEGIN 
 	/* Select Timecard to Add */
 	SELECT TOP 1 
@@ -106,6 +107,7 @@ BEGIN
 		,@intWorkersCompensationId = intWorkersCompensationId
 		,@intEntityEmployeeId = intEntityEmployeeId
 	FROM #tmpTimecard
+	WHERE ysnProcessed = 0
 
 	/* Delete any Generated Hours that occupies this Period */
 	DELETE FROM tblPRPayGroupDetail
@@ -179,6 +181,7 @@ BEGIN
 				,intWorkersCompensationId
 				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
 			FROM #tmpTimecard
+			WHERE intEntityEmployeeId = @intEntityEmployeeId
 			GROUP BY intEntityEmployeeId
 				,intWorkersCompensationId
 		)TH
@@ -189,6 +192,7 @@ BEGIN
 				,intWorkersCompensationId
 				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
 			FROM #tmpTimecard
+			WHERE intEntityEmployeeId = @intEntityEmployeeId
 			GROUP BY intEntityEmployeeId
 				,intWorkersCompensationId) TH
 			WHERE TH.dblTotalHours = @dblLongestTotalHours) > 1
@@ -203,7 +207,7 @@ BEGIN
 				,intWorkersCompensationId
 				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
 			FROM #tmpTimecard
-
+			WHERE intEntityEmployeeId = @intEntityEmployeeId
 			GROUP BY intEntityEmployeeId
 				,intWorkersCompensationId) TH
 			WHERE TH.dblTotalHours = @dblLongestTotalHours
@@ -507,11 +511,13 @@ BEGIN
 	WHERE tblPRTimecard.intTimecardId = Y.intTimecardId
 
 	/* Loop Control */
-	DELETE FROM #tmpTimecard 
+	UPDATE #tmpTimecard 
+	SET ysnProcessed = 1
 	WHERE intEmployeeEarningId = @intEmployeeEarningId
 		AND intEmployeeDepartmentId = @intEmployeeDepartmentId 
 		AND intEntityEmployeeId = @intEntityEmployeeId
 		AND intWorkersCompensationId = @intWorkersCompensationId
+		AND ysnProcessed = 0
 END
 
 /* Insert Overtime Hours To Pay Group Detail */
