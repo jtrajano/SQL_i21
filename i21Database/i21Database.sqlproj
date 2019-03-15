@@ -7660,6 +7660,7 @@
     <None Include="Scripts\Post-Deployment\TM\6_SyncStartingNumberAndDispatchId.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\3_UpgradeTypeAndEnvironment.sql" />
     <None Include="Scripts\Post-Deployment\TM\7_GenerateManufacturerFromDevice.sql" />
+    <Build Include="dbo\Functions\fnHDCoalesceEntityResources.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -16,30 +16,58 @@ declare @queryResult cursor
 		,@intI int
 		,@intFixEightHours int = 8;
 
-set @queryResult = cursor for
-	select
-		intTimeOffRequestId
-		,dtmDateFrom
-		,intEntityEmployeeId
-		,strRequestId
-		,dblRequest
-		,intNoOfDays = datediff(day, dtmDateFrom, dtmDateTo) + 1
-	from
-		tblPRTimeOffRequest
-	where
-		intEntityEmployeeId = @intEntityId
+if (@intEntityId = 0)
+begin
+	set @queryResult = cursor for
+		select
+			intTimeOffRequestId
+			,dtmDateFrom
+			,intEntityEmployeeId
+			,strRequestId
+			,dblRequest
+			,intNoOfDays = datediff(day, dtmDateFrom, dtmDateTo) + 1
+		from
+			tblPRTimeOffRequest
 
-OPEN @queryResult
-FETCH NEXT
-FROM
-	@queryResult
-INTO
-	@intTimeOffRequestId
-	,@dtmDateFrom
-	,@intEntityEmployeeId
-	,@strRequestId
-	,@dblRequest
-	,@intNoOfDays
+	OPEN @queryResult
+	FETCH NEXT
+	FROM
+		@queryResult
+	INTO
+		@intTimeOffRequestId
+		,@dtmDateFrom
+		,@intEntityEmployeeId
+		,@strRequestId
+		,@dblRequest
+		,@intNoOfDays
+end
+else
+begin
+	set @queryResult = cursor for
+		select
+			intTimeOffRequestId
+			,dtmDateFrom
+			,intEntityEmployeeId
+			,strRequestId
+			,dblRequest
+			,intNoOfDays = datediff(day, dtmDateFrom, dtmDateTo) + 1
+		from
+			tblPRTimeOffRequest
+		where
+			intEntityEmployeeId = @intEntityId
+
+	OPEN @queryResult
+	FETCH NEXT
+	FROM
+		@queryResult
+	INTO
+		@intTimeOffRequestId
+		,@dtmDateFrom
+		,@intEntityEmployeeId
+		,@strRequestId
+		,@dblRequest
+		,@intNoOfDays
+end
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
