@@ -104,6 +104,7 @@ BEGIN TRY
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
 		LEFT JOIN tblICItem ICI ON ICI.intItemId = SC.intItemId		
 		LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = SC.intLoadId and LGD.intSContractDetailId = SC.intContractId
+		LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SC.intContractId
 		WHERE SC.intTicketId = @intTicketId
 
 	--FOR FREIGHT CHARGES
