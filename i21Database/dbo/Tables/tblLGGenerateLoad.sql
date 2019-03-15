@@ -34,6 +34,16 @@
 [intTransUsedBy] INT NULL, 
 [intCompanyId] INT NULL,
 
+[intEquipmentTypeId] INT NULL,
+[intHaulerEntityId] INT NULL,
+[intItemId] INT NULL,
+[dtmShipDate] DATETIME NULL,
+[dtmEndDate] DATETIME NULL,
+[dblFreightRate] NUMERIC(18, 6) NULL DEFAULT (0),
+[intFreightCurrencyId] INT NULL,
+[intFreightUOMId] INT NULL,
+[dblSurchargeRate] NUMERIC(18, 6) NULL DEFAULT (0),
+
 CONSTRAINT [PK_tblLGGenerateLoad] PRIMARY KEY ([intGenerateLoadId]), 
 CONSTRAINT [UK_tblLGGenerateLoad_intReferenceNumber] UNIQUE ([intReferenceNumber]),
 
