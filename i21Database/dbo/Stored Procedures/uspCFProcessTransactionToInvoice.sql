@@ -791,7 +791,7 @@ SELECT
 ,[ysnTaxAdjusted]			= 0
 ,[ysnSeparateOnInvoice]		= 0 
 ,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
-,[ysnTaxExempt]				= 0
+,[ysnTaxExempt]				= cfTransactionTax.ysnTaxExempt
 ,[ysnTaxOnly]				= cfTaxCode.ysnTaxOnly 
 ,[strNotes]					= ''
 ,[intTempDetailIdForTaxes]	= @TransactionId 
