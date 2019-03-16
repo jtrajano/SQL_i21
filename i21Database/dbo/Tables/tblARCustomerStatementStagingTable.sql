@@ -43,6 +43,8 @@
     [dblAmountApplied]             NUMERIC (18, 6) NULL,
     [dblPastDue]                   NUMERIC (18, 6) NULL,
     [dblMonthlyBudget]             NUMERIC (18, 6) NULL,
+	[dblBudgetPastDue]			   NUMERIC (18, 6) NULL,
+	[dblBudgetNowDue]			   NUMERIC (18, 6) NULL,
     [dblRunningBalance]            NUMERIC (18, 6) NULL,
     [dblCreditLimit]               NUMERIC (18, 6) NULL,
     [dblInvoiceTotal]              NUMERIC (18, 6) NULL,

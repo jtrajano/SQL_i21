@@ -7445,6 +7445,7 @@
     <Build Include="dbo\Views\vyuSTCheckoutItemMovementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportSampleGAB.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInsertTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
