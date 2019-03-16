@@ -62,6 +62,7 @@ CREATE TABLE #tempBillDetail (
 	[dblCostUnitQty] 				DECIMAL(38, 20) NOT NULL DEFAULT 0,
 	[dblUnitQty] 					DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[intCurrencyId] 				INT NULL,
+	[intSubLocationId]				INT NULL,
 	[intStorageLocationId] 			INT             NULL,
     [int1099Form] 					INT NOT NULL DEFAULT 0 , 
     [int1099Category] 				INT NOT NULL DEFAULT 0 , 
@@ -212,6 +213,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblCostUnitQty],
 			[dblUnitQty],
 			[intCurrencyId],
+			[intSubLocationId],
 			[intStorageLocationId],
 			[int1099Form],
 			[int1099Category],
@@ -278,6 +280,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblUnitQty]					=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
 			[intCurrencyId]					=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 												ELSE ISNULL(A.intCurrencyId,0) END,
+			[intSubLocationId]				=	B.intSubLocationId,
 			[intStorageLocationId]			=   B.intStorageLocationId,
 			[int1099Form]					=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
 														WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
@@ -346,6 +349,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblCostUnitQty],
 			[dblUnitQty],
 			[intCurrencyId],
+			[intSubLocationId],
 			[intStorageLocationId],
 			[int1099Form],
 			[int1099Category],
@@ -420,6 +424,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblUnitQty]				=	ItemUOM.dblUnitQty,
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
+			[intSubLocationId]			=	B.intSubLocationId,
 			[intStorageLocationId]		=   B.intStorageLocationId,
 			[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
 													WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
@@ -494,6 +499,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblCostUnitQty],
 			[dblUnitQty],
 			[intCurrencyId],
+			[intSubLocationId],
 			[intStorageLocationId],
 			[int1099Form],
 			[int1099Category],
@@ -567,6 +573,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblUnitQty]				=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
+			[intSubLocationId]			=	B.intSubLocationId,
 			[intStorageLocationId]		=   B.intStorageLocationId,
 			[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
 													WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
@@ -645,6 +652,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblCostUnitQty],
 			[dblUnitQty],
 			[intCurrencyId],
+			[intSubLocationId],
 			[intStorageLocationId],
 			[int1099Form],
 			[int1099Category],
@@ -725,6 +733,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[dblUnitQty]				=	ABS(ISNULL(ItemUOM.dblUnitQty,0)),
 			[intCurrencyId]				=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
 											ELSE ISNULL(A.intCurrencyId,0) END,
+			[intSubLocationId]			=	B.intSubLocationId,
 			[intStorageLocationId]		=   B.intStorageLocationId,
 			[int1099Form]				=	CASE WHEN (SELECT CHARINDEX('MISC', D2.str1099Form)) > 0 THEN 1 
 													WHEN (SELECT CHARINDEX('INT', D2.str1099Form)) > 0 THEN 2 
@@ -796,6 +805,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblCostUnitQty],
 		[dblUnitQty],
 		[intCurrencyId],
+		[intSubLocationId],
 		[intStorageLocationId],
 		[int1099Form],
 		[int1099Category],
@@ -836,6 +846,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblCostUnitQty],
 		[dblUnitQty],
 		[intCurrencyId],
+		[intSubLocationId],
 		[intStorageLocationId],
 		[int1099Form],
 		[int1099Category],
