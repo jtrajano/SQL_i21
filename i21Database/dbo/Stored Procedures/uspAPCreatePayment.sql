@@ -183,7 +183,9 @@ BEGIN
 	SELECT
 		@discount = SUM(ISNULL(A.dblDiscount,0))
 	FROM tblAPBill A
-	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	WHERE 
+		A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	AND A.ysnIsPaymentScheduled = 0
 
 	--Compute Interest Here
 	UPDATE A
@@ -200,8 +202,25 @@ BEGIN
 
 	IF @autoPay = 1 AND @amountPaid IS NULL AND @isPost = 0
 	BEGIN
-		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-		SET @amountPaid = @amountPaid + @interest - @discount 
+		SET @amountPaid = (
+							SELECT SUM(dblAmountDue)
+							FROM 
+							(
+							SELECT 
+								SUM(A.dblAmountDue) dblAmountDue
+							FROM tblAPBill A
+							WHERE 
+								A.intBillId IN (SELECT intID FROM #tmpBillsId)
+							AND A.ysnIsPaymentScheduled = 0
+							UNION ALL
+							SELECT SUM(dblPayment - dblDiscount) dblAmountDue
+							FROM tblAPVoucherPaymentSchedule B
+							WHERE 
+								B.intBillId IN (SELECT intID FROM #tmpBillsId)
+							AND B.ysnPaid = 0
+							) paymentData
+						) 
+		SET @amountPaid = @amountPaid + @interest - ISNULL(@discount,0)
 		SET @detailAmountPaid = @amountPaid; --discount subtracted
 	END
 	ELSE
@@ -290,33 +309,48 @@ BEGIN
 		[dblAmountDue],
 		[dblPayment],
 		[dblInterest],
-		[dblTotal])
+		[dblTotal],
+		[ysnOffset],
+		[intPayScheduleId])
 	SELECT 
 		[intPaymentId],
 		[intBillId],
 		[intAccountId],
 		[dblDiscount],
 		[dblWithheld],
-		SUM(dblAmountDue),
-		SUM(dblPayment) - dblDiscount + dblInterest,
+		dblAmountDue,
+		(dblPayment) - dblDiscount + dblInterest,
 		[dblInterest],
-		SUM(dblTotal)
+		dblTotal,
+		[ysnOffset],
+		[intPayScheduleId]
 		FROM (
 			SELECT 
 				[intPaymentId]	= @paymentId,
 				[intBillId]		= A.intBillId,
 				[intAccountId]	= A.intAccountId,
-				[dblDiscount]	= A.dblDiscount,
+				[dblDiscount]	= ISNULL(C.dblDiscount, A.dblDiscount),
 				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
-				[dblAmountDue]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)), --handle transaction with prepaid
-				[dblPayment]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)),
+				[dblAmountDue]	= ISNULL(C.dblPayment,
+									CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
+								),
+				[dblPayment]	= ISNULL(C.dblPayment,
+									CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
+								  ),
 				[dblInterest]	= A.dblInterest,
-				[dblTotal]		= (B.dblTotal + B.dblTax)
+				[dblTotal]		= ISNULL(C.dblPayment, (B.dblTotal + B.dblTax)),
+				[ysnOffset]		= CASE A.intTransactionType
+										WHEN 1  THEN 0
+										WHEN 14 THEN 0
+									ELSE 1 END,
+				[intPayScheduleId]= C.intId
 			FROM tblAPBill A
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			LEFT JOIN tblAPVoucherPaymentSchedule C
+				ON C.intBillId = A.intBillId AND C.ysnPaid = 0
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 		) vouchers
-	GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld
+	--GROUP BY intPaymentId, intAccountId, dblDiscount, dblInterest, dblWithheld, ysnOffset
 	'
 
 	EXEC sp_executesql @queryPayment,

@@ -200,6 +200,7 @@ BEGIN
 		CROSS APPLY (
 			SELECT COUNT(*) intVouchers FROM tblAPPaymentDetail B
 			WHERE B.dblPayment > 0 AND B.intPaymentId = A.intPaymentId
+			AND B.intPayScheduleId IS NULL
 			GROUP BY B.intBillId, B.intInvoiceId
 		) PaymentDetails
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
@@ -487,6 +488,7 @@ BEGIN
 			WHERE 
 				voucher.intTransactionType = 2
 			AND payDetail.intPaymentId = A.intPaymentId
+			AND payDetail.ysnOffset = 1
 			AND NOT EXISTS
 			(
 				SELECT

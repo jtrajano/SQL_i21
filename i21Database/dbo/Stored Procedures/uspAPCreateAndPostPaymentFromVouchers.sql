@@ -76,7 +76,8 @@ BEGIN
 	);
 
 	INSERT INTO @ids
-	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
+	--USE DISTINCT TO REMOVE DUPLICATE BILL ID FOR SCHEDULE PAYMENT
+	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
 
 	SELECT TOP 1
 		@currency = bank.intCurrencyId
@@ -166,6 +167,15 @@ BEGIN
 		,voucher.dblTempInterest
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
+		,ysnOffset = CASE WHEN voucher.intTransactionType IN (1, 14) THEN 0
+					ELSE
+						(
+							CASE WHEN voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 0
+								THEN 0
+							ELSE 1
+							END
+						)
+					END
 	INTO #tmpPartitionedVouchers
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
 	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
@@ -340,21 +350,26 @@ BEGIN
 			[dblAmountDue],
 			[dblPayment],
 			[dblInterest],
-			[dblTotal])
+			[dblTotal],
+			[ysnOffset],
+			[intPayScheduleId])
 		SELECT 
 			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
 			[intBillId]			=	tmp.intBillId,
 			[intAccountId]		=	vouchers.intAccountId,
-			[dblDiscount]		=	vouchers.dblTempDiscount,
+			[dblDiscount]		=	ISNULL(paySched.dblDiscount, vouchers.dblTempDiscount),
 			[dblWithheld]		=	vouchers.dblTempWithheld,
-			[dblAmountDue]		=	vouchers.dblAmountDue,
-			[dblPayment]		=	vouchers.dblTempPayment,
+			[dblAmountDue]		=	ISNULL(paySched.dblPayment,vouchers.dblAmountDue),
+			[dblPayment]		=	ISNULL(paySched.dblPayment - paySched.dblDiscount, vouchers.dblTempPayment),
 			[dblInterest]		=	vouchers.dblTempInterest,
-			[dblTotal]			=	vouchers.dblTotal
+			[dblTotal]			=	ISNULL(paySched.dblPayment, vouchers.dblTotal),
+			[ysnOffset]			=	0,
+			[intPayScheduleId]	=	paySched.intId
 		FROM tblAPBill vouchers
 		INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
 		INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId
-
+		LEFT JOIN tblAPVoucherPaymentSchedule paySched
+			ON vouchers.intBillId = paySched.intBillId AND paySched.ysnReadyForPayment = 1 AND paySched.ysnPaid = 0
 	END
 
 	SET @batchPaymentId = @batchId;

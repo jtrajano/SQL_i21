@@ -78,6 +78,7 @@
 	[ysnForApproval] BIT NOT NULL DEFAULT 0,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
 	[ysnDeleted] BIT NULL DEFAULT 0 ,
+	[ysnIsPaymentScheduled] BIT NOT NULL DEFAULT 0 ,
 	[ysnDiscountOverride] BIT NOT NULL DEFAULT 0,
 	[ysnReadyForPayment] BIT NULL DEFAULT 0 ,
 	[ysnRecurring] BIT NULL DEFAULT 0 ,

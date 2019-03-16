@@ -410,10 +410,21 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
-														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-														- B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherRate.dblExchangeRate,0),1))
-											AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+													(
+														CASE WHEN B.intPayScheduleId > 0 THEN B.dblPayment + B.dblDiscount
+															ELSE
+															dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+															- B.dblInterest, voucher.dblTotal)
+															END
+													)
+														*  ISNULL(NULLIF(voucherRate.dblExchangeRate,0),1))
+											AS DECIMAL(18,2))) * (
+																CASE WHEN (voucher.intTransactionType NOT IN (1,2,14) AND A.ysnPrepay = 0)
+																			OR
+																		  (voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 1)
+																		 THEN -1 
+																		 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -438,11 +449,22 @@ BEGIN
 		[intConcurrencyId]				=	1,
 		[dblDebitForeign]				=	CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
-													+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-													- B.dblInterest, voucher.dblTotal))
+													(
+														CASE WHEN B.intPayScheduleId > 0 THEN B.dblPayment + B.dblDiscount
+															ELSE
+															dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+															- B.dblInterest, voucher.dblTotal)
+															END
+													)
+												)
 											AS DECIMAL(18,2))
-											* (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),      
+											* (
+												CASE WHEN (voucher.intTransactionType NOT IN (1,2,14) AND A.ysnPrepay = 0)
+															OR
+															(voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 1)
+															THEN -1 
+															ELSE 1 END),      
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
@@ -465,6 +487,7 @@ BEGIN
 	rateType.strCurrencyExchangeRateType,
 	rateType.intCurrencyExchangeRateTypeId,
 	voucher.intTransactionType,
+	voucher.ysnPrepayHasPayment,
 	--voucherDetail.dblRate,
 	voucherRate.dblExchangeRate,
 	B.intBillId,
