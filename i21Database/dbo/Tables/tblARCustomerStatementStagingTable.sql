@@ -85,6 +85,7 @@
     [strCFEmail]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnCFShowDiscountOnInvoice]   BIT             NULL,
     [ysnStatementCreditLimit]      BIT             NULL,
+    [ysnStretchLogo]               BIT             NULL,
     [blbLogo]                      VARBINARY (MAX) NULL,
     [strCFTerm]                    NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCFTermCode]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
