@@ -7447,6 +7447,9 @@
     <Build Include="dbo\Stored Procedures\uspSMInsertTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderReport.sql" />
     <Build Include="dbo\Tables\tblAPVoucherPaymentSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspAROutboundTaxReport.sql" />
+    <Build Include="dbo\Tables\tblAROutboundTaxStagingTable.sql" />
+    <Build Include="dbo\Views\vyuAROutboundTaxReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
