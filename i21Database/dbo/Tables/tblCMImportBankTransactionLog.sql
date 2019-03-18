@@ -4,6 +4,7 @@ CREATE TABLE [dbo].[tblCMImportBankTransactionLog] (
     [dtmDate] [datetime] NOT NULL,
     [strFile] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
     [intEntityId] INT NOT NULL,
+    [strLogDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] [int] NOT NULL,
     primary key ([intImportLogId])
 );
