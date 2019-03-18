@@ -29,8 +29,8 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber 76, @strCountNo OUTPUT, @intLocationId
 
-	INSERT INTO tblICInventoryCount(strCountNo, intLocationId, dtmCountDate, ysnCountByLots, intCreatedByUserId, dtmDateCreated)
-	VALUES(@strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots, @intUserId, GETDATE())
+	INSERT INTO tblICInventoryCount(strCountNo, intLocationId, dtmCountDate, ysnCountByLots, intCreatedByUserId, dtmDateCreated, strDataSource)
+	VALUES(@strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots, @intUserId, GETDATE(), 'JSON Import')
 
 	SET @intCountId = SCOPE_IDENTITY()
 

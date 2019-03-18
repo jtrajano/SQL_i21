@@ -34,6 +34,7 @@
 	[dtmDateModified] DATETIME NULL,
 	[intCreatedByUserId] INT NULL,
 	[intModifiedByUserId] INT NULL,
+	[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblICInventoryCount] PRIMARY KEY ([intInventoryCountId]), 
     CONSTRAINT [FK_tblICInventoryCount_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryCount_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
