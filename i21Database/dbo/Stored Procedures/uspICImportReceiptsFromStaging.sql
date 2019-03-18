@@ -71,4 +71,10 @@ BEGIN
 
     EXEC dbo.[uspICImportReceipt] @ReceiptEntries, @OtherCharges, 1, @LotEntries
 
+    -- Cleanup
+    DELETE FROM tblICStagingReceipt
+    DELETE FROM tblICStagingReceiptItem
+    DELETE FROM tblICStagingReceiptCharge
+    DELETE FROM tblICStagingReceiptItemLot
+    
 END
