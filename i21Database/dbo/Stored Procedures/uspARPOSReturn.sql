@@ -379,7 +379,7 @@ AS
 				ON creditMemo.[intTempDetailIdForTaxes] = ARIDT.[intInvoiceDetailId]
 		INNER JOIN tblARInvoiceDetail INVDETAIL
 				ON creditMemo.[intTempDetailIdForTaxes] = INVDETAIL.intInvoiceDetailId
-		WHERE INVDETAIL.intInvoiceId = @intInvoiceId
+		WHERE INVDETAIL.intInvoiceId = @intInvoiceId AND ARIDT.strCalculationMethod <> ''
 		ORDER BY 
 			 creditMemo.[intTempDetailIdForTaxes] ASC
 			,ARIDT.[intInvoiceDetailTaxId] ASC
