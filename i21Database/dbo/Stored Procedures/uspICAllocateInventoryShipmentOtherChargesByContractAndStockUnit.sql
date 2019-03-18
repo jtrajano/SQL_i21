@@ -222,7 +222,7 @@ BEGIN
 	WHERE 
 		s.intInventoryShipmentId = @intInventoryShipmentId
 		AND (sc.dblAmount - a.dblTotal) <> 0 
-		AND (sc.dblAmount - a.dblTotal) BETWEEN 0 AND 1 -- Limit the fix on decimal discrepancies. 
+		AND (sc.dblAmount - a.dblTotal) BETWEEN -1 AND 1 -- Limit the fix on decimal discrepancies. 
 END 
 
 _Exit:

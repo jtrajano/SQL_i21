@@ -205,7 +205,7 @@ BEGIN
 	WHERE 
 		r.intInventoryReceiptId = @intInventoryReceiptId
 		AND (rc.dblAmount - a.dblTotal) <> 0 
-		AND (rc.dblAmount - a.dblTotal) BETWEEN 0 AND 1 -- Limit the fix on decimal discrepancies. 
+		AND (rc.dblAmount - a.dblTotal) BETWEEN -1 AND 1 -- Limit the fix on decimal discrepancies. 
 END 
 
 _Exit:
