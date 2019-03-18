@@ -247,7 +247,7 @@ LEFT JOIN (
 		 , ID.dblQtyShipped
 		 , ID.dblQtyOrdered
 		 , ID.dblDiscount
-		 , ID.dblPrice
+		 , dblPrice					= CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(ID.dblOriginalGrossPrice, ID.dblPrice) END
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
 		 , ID.strSCInvoiceNumber
@@ -351,6 +351,14 @@ LEFT JOIN (
 		FROM dbo.tblSCTicket SC WITH (NOLOCK)
 		LEFT JOIN dbo.tblLGLoad LG ON SC.intLoadId = LG.intLoadId
 	) SCALE ON ID.intTicketId = SCALE.intTicketId
+	LEFT JOIN (
+		SELECT intTransactionId
+			 , intTransactionDetailId
+			 , strPricing
+		FROM dbo.tblARPricingHistory WITH (NOLOCK)
+		WHERE ysnApplied = 1
+	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
+			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId
 	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
