@@ -482,7 +482,7 @@ BEGIN
 				,intSubBookId			= IntegrationData.intSubBookId
 				,dtmDateModified		= GETDATE()
 				,intModifiedByUserId 	= @intUserId
-                ,strDataSource          = "JSON Import"
+                ,strDataSource          = 'JSON Import'
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -566,7 +566,7 @@ BEGIN
 				/*intSubBookId*/				,IntegrationData.intSubBookId 
 				,GETDATE()
 				,@intUserId
-                ,"JSON Import"
+                ,'JSON Import'
 			)
 		;
 				
