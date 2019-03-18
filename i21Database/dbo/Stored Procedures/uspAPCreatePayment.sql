@@ -339,10 +339,15 @@ BEGIN
 								  ),
 				[dblInterest]	= A.dblInterest,
 				[dblTotal]		= ISNULL(C.dblPayment, (B.dblTotal + B.dblTax)),
-				[ysnOffset]		= CASE A.intTransactionType
-										WHEN 1  THEN 0
-										WHEN 14 THEN 0
-									ELSE 1 END,
+				[ysnOffset]		= CAST
+									(
+										CASE 
+										WHEN A.intTransactionType = 1  THEN 0
+										WHEN A.intTransactionType = 14 THEN 0
+										WHEN A.intTransactionType = 2 AND A.ysnPrepayHasPayment = 0 THEN 0
+										WHEN A.intTransactionType = 13 AND A.ysnPrepayHasPayment = 0 THEN 0
+										ELSE 1 END
+									AS BIT),
 				[intPayScheduleId]= C.intId
 			FROM tblAPBill A
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
