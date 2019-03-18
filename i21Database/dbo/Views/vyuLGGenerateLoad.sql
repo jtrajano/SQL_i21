@@ -90,6 +90,8 @@ SELECT GL.intGenerateLoadId
 		END COLLATE Latin1_General_CI_AS AS strTransportationMode	 
 	  ,GL.intAllocationDetailId
 	  ,AH.strAllocationNumber
+	  ,CP.intDefaultFreightItemId
+	  ,CP.intDefaultSurchargeItemId
 
 FROM tblLGGenerateLoad			GL
 
@@ -119,3 +121,4 @@ LEFT JOIN tblEMEntity			EH		ON		EH.intEntityId				=	GL.intHaulerEntityId
 LEFT JOIN tblSMCurrency			CUR		ON		CUR.intCurrencyID			=	GL.intFreightCurrencyId 
 LEFT JOIN tblICItemUOM			FUOM	ON		FUOM.intItemUOMId			=	GL.intFreightUOMId
 LEFT JOIN tblICUnitMeasure		FUM		ON		FUOM.intUnitMeasureId		=	FUM.intUnitMeasureId
+OUTER APPLY tblLGCompanyPreference CP
