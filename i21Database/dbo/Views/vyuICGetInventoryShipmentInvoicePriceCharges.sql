@@ -8,7 +8,7 @@ SELECT	Shipment.intInventoryShipmentId
 		,intEntityCustomerId = Shipment.intEntityCustomerId 
 		,strLocationName = fromLocation.strLocationName
 		,strDestination = toLocation.strLocationName
-		,strOrderType = ot.strOrderType
+		,strOrderType = ot.strOrderType COLLATE Latin1_General_CI_AS
 		,Shipment.strBOLNumber
 		,i.strItemNo
 		,strItemDescription = i.strDescription
@@ -22,8 +22,8 @@ SELECT	Shipment.intInventoryShipmentId
 		,dblInvoiceItemTotal = ShipmentAndInvoiceCharges.InvoiceItemTotal
 		,dblItemsReceivable = ShipmentAndInvoiceCharges.dblItemsReceivable
 		,dtmLastInvoiceDate = topInvoice.dtmDate
-		,strAllVouchers = CAST( ISNULL(allLinkedInvoiceId.strInvoiceIds, 'New Invoice') AS NVARCHAR(MAX)) 
-		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+		,strAllVouchers = CAST( ISNULL(allLinkedInvoiceId.strInvoiceIds, 'New Invoice') AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
+		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
 		
 FROM	tblICInventoryShipment Shipment 
 		INNER JOIN tblICInventoryShipmentCharge ShipmentCharge

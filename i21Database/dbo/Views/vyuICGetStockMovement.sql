@@ -52,7 +52,8 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.st
 											END
 										AS NVARCHAR(100)
 									)
-		,strEntity					= e.strName										
+		,strEntity					= e.strName		
+		,strParentLotNumber			= ParentLot.strParentLotNumber
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId
 		,t.intInventoryTransactionId
@@ -61,7 +62,7 @@ SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.st
 			CASE 
 				WHEN t.intOwnershipType = 1 THEN 'Own'
 				WHEN t.intOwnershipType = 2 THEN 'Storage'
-			END 
+			END COLLATE Latin1_General_CI_AS
 		,dtmCreated					= dbo.fnRemoveTimeOnDate(t.dtmCreated)
 		,subLoc.strStorageLocationSorter
 		,subLoc.intStorageLocationSorter
@@ -115,6 +116,9 @@ FROM 	tblICItem i
 			ON iuTransUOM.intItemUOMId = t.intItemUOMId
 		LEFT JOIN tblICLot l
 			ON l.intLotId = t.intLotId
+		LEFT JOIN tblICParentLot ParentLot
+			ON ParentLot.intItemId = l.intItemId
+			AND ParentLot.intParentLotId = l.intParentLotId
 
 		LEFT JOIN tblICInventoryReceipt receipt 
 			ON receipt.intInventoryReceiptId = t.intTransactionId

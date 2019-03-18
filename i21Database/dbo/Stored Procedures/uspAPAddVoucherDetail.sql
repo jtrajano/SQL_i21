@@ -124,13 +124,13 @@ USING
 		,dblNetWeight						=	A.dblNetWeight
 		,dblWeight							=	A.dblWeight
 		/*Cost info*/						
-		,intCostUOMId						=	CASE WHEN A.intTransactionType = 1
+		,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material')
 													THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
 												ELSE A.intCostUOMId END
-		,dblCostUnitQty						=	CASE WHEN A.intTransactionType = 1
+		,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material')
 													THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
 												ELSE A.dblCostUnitQty END
-		,dblCost							=	CASE WHEN A.intTransactionType = 1
+		,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material')
 													THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
 															THEN ctDetail.dblSeqPrice
 														ELSE 
@@ -142,10 +142,10 @@ USING
 												ELSE A.dblCost END
 		,dblOldCost							=	A.dblOldCost
 		/*Quantity info*/					
-		,intUnitOfMeasureId					=	CASE WHEN A.intTransactionType = 1 
+		,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material')
 													THEN ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
 												ELSE A.intQtyToBillUOMId END
-		,dblUnitQty							=	CASE WHEN A.intTransactionType = 1
+		,dblUnitQty							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material')
 													THEN 
 													(
 														CASE WHEN ctDetail.intContractDetailId IS NOT NULL
@@ -154,12 +154,12 @@ USING
 													)
 												ELSE A.dblQtyToBillUnitQty END
 		/*Ordered and Received should always the same*/
-		,dblQtyOrdered						=	CASE WHEN A.intTransactionType = 1
+		,dblQtyOrdered						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material')
 													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityBilled,0))
 														ELSE A.dblQuantityToBill END)
 												ELSE A.dblQuantityToBill END
-		,dblQtyReceived						=	CASE WHEN A.intTransactionType = 1
+		,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material')
 													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityBilled,0))
 														ELSE A.dblQuantityToBill END)
@@ -262,7 +262,7 @@ USING
 		-- 	AND ISNULL(vp.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
 		-- 	AND ISNULL(vp.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
 		-- 	AND ISNULL(vp.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
-	ORDER BY A.intBillId ASC
+	ORDER BY A.intBillId ASC, intInventoryReceiptItemId ASC 
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN

@@ -135,8 +135,13 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , strRequestId			= @strRequestId
 	 , strType				= INVOICE.strType
 	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
-	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN ISNULL(COMPANYPREFERENCE.strGrainInvoiceFormat, 'Standard') 
-											 ELSE ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard') 
+	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN ISNULL(COMPANYPREFERENCE.strGrainInvoiceFormat, 'Standard')
+											 ELSE CASE WHEN INVOICE.strTransactionType <> 'Credit Memo' THEN 
+															CASE WHEN ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard') = 'Format 3 - Swink' THEN 'Meter Billing'
+																  ELSE ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard') 
+															END
+													   ELSE 'Meter Billing'
+												  END
 										END
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN ISNULL(COMPANYPREFERENCE.strTankDeliveryInvoiceFormat, 'Standard')
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN ISNULL(COMPANYPREFERENCE.strTransportsInvoiceFormat, 'Standard')

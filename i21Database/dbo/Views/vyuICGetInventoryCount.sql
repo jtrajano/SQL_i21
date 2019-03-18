@@ -33,7 +33,7 @@ SELECT InventoryCount.intInventoryCountId,
 					WHEN InventoryCount.intStatus = 2 THEN 'Count Sheet Printed'
 					WHEN InventoryCount.intStatus = 3 THEN 'Inventory Locked'
 					WHEN InventoryCount.intStatus = 4 THEN 'Closed'
-				END),
+				END) COLLATE Latin1_General_CI_AS,
 	strShiftNo = InventoryCount.strShiftNo,
 	InventoryCount.intSort
 FROM tblICInventoryCount InventoryCount

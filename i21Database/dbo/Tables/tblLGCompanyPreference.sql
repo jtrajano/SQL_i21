@@ -17,6 +17,8 @@
 [strCarrierShipmentStandardText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [dblRouteHours] NUMERIC(18, 6) NULL,
 [intHaulerEntityId] INT NULL,
+[intDefaultFreightItemId] INT NULL,
+[intDefaultSurchargeItemId] INT NULL,
 [intDefaultShipmentType] INT NULL,
 [strShippingInstructionText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [strInvoiceText] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -70,5 +72,7 @@ CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICUnitMeasure_intWeightUOMId] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblCTPosition_intDefaultPositionId] FOREIGN KEY ([intDefaultPositionId]) REFERENCES [tblCTPosition]([intPositionId]),
-CONSTRAINT [FK_tblLGCompanyPreference_tblEMEntity_intEntityId] FOREIGN KEY ([intHaulerEntityId]) REFERENCES [tblEMEntity]([intEntityId])
+CONSTRAINT [FK_tblLGCompanyPreference_tblEMEntity_intEntityId] FOREIGN KEY ([intHaulerEntityId]) REFERENCES [tblEMEntity]([intEntityId]),
+CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intFreighItemId] FOREIGN KEY ([intDefaultFreightItemId]) REFERENCES [tblICItem]([intItemId]),
+CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intSurchargeItemId] FOREIGN KEY ([intDefaultSurchargeItemId]) REFERENCES [tblICItem]([intItemId])
 )

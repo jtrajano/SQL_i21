@@ -1356,7 +1356,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 140
 			,[strTransactionType]	= N'Bank Loan'
-			,[strPrefix]			= N'BLN-'
+			,[strPrefix]			= N'LN-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1

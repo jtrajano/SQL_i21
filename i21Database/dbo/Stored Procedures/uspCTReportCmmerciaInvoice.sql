@@ -17,7 +17,9 @@ BEGIN TRY
 			 @strCity				NVARCHAR(50),
 			 @strAddress			NVARCHAR(MAX),
 			 @intVendorId			INT,
-			 @blbFile				VARBINARY(MAX)
+			 @blbFile				VARBINARY(MAX),
+			 @intReportLogoHeight	INT,
+			 @intReportLogoWidth	INT
 			
     IF  LTRIM(RTRIM(@xmlParam)) = ''   
 	   SET @xmlParam = NULL   
@@ -51,6 +53,8 @@ BEGIN TRY
 			[endgroup]		NVARCHAR(50),  
 			[datatype]		NVARCHAR(50)  
 	)  
+
+	SELECT @intReportLogoHeight = intReportLogoHeight, @intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference WITH (NOLOCK)
     
 	SELECT	@intBrkgCommnId	=	  [from]
 	FROM	@temp_xml_table   
@@ -88,17 +92,17 @@ BEGIN TRY
 	SELECT	@strCity    =   CASE WHEN LTRIM(RTRIM(strCity)) = '' THEN NULL ELSE LTRIM(RTRIM(strCity)) END
 	FROM	tblSMCompanySetup
 
-	SELECT	@blbFile    AS  blbFile,
-			@strAddress AS  strAddress,
-			'YR VAT NO.: - '	  AS	 strVATNo,
-			'INVOICE NO. '  +	  @strInvoiceNumber	  AS	 strInvoiceNo,
+	SELECT	@blbFile AS blbFile,
+			@strAddress AS strAddress,
+			'YR VAT NO.: - ' AS strVATNo,
+			'INVOICE NO. ' + @strInvoiceNumber AS strInvoiceNo,
 			@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
 			'Issued for commission received as per enclosed list dated ' + CONVERT(NVARCHAR,GETDATE(),103) + ' = ' AS strIssued,
 			@strCurrency + '. ' + LTRIM(@dblRcvdPaidAmount) AS strPrice,
 			'Operazione non soggetta - Art. 7-ter DPR 633/72'   AS strOperazione,
-			'Imposta di bollo assolta virtualmente -  Aut. Prot. n. 5298/2015' AS strImposta
-
-
+			'Imposta di bollo assolta virtualmente -  Aut. Prot. n. 5298/2015' AS strImposta,
+			ISNULL(@intReportLogoHeight,0) AS intReportLogoHeight,
+			ISNULL(@intReportLogoWidth,0) AS intReportLogoWidth
 END TRY
 
 BEGIN CATCH

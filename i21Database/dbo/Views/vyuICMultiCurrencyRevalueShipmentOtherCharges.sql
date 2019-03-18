@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuICMultiCurrencyRevalueShipmentOtherCharges]
 AS
 SELECT
-	 strTransactionType			= CASE s.intOrderType WHEN 1 THEN 'Sales Contract' WHEN 2 THEN 'Sales Order' WHEN 3 THEN 'Transfer Order' WHEN 4 THEN 'Direct' END
+	 strTransactionType			= CASE s.intOrderType WHEN 1 THEN 'Sales Contract' WHEN 2 THEN 'Sales Order' WHEN 3 THEN 'Transfer Order' WHEN 4 THEN 'Direct' END COLLATE Latin1_General_CI_AS
 	,strTransactionId			= s.strShipmentNumber
 	,strTransactionDate			= s.dtmShipDate
 	,strTransactionDueDate		= s.dtmRequestedArrivalDate
@@ -9,7 +9,7 @@ SELECT
 	,strCommodity				= c.strCommodityCode
 	,strLineOfBusiness			= lob.strLineOfBusiness
 	,strLocation				= loc.strLocationName
-	,strTicket					= CAST(NULL AS NVARCHAR(50))
+	,strTicket					= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strContractNumber			= sc.strContractNumber
 	,strItemId					= sc.strItemNo
 	,dblQuantity				= CAST(1 AS NUMERIC(18, 6))

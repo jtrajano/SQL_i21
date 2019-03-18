@@ -46,6 +46,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @queryRunningBalanceBudget			AS NVARCHAR(MAX)	= ''
 	  , @intWriteOffPaymentMethodId			AS INT				= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULL
+		, @ysnStretchLogo							AS BIT	= 0
 
 DECLARE @temp_statement_table TABLE(
 	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -115,6 +116,9 @@ SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @strDateTo							= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
+
+SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo
+FROM tblARCompanyPreference WITH (NOLOCK)
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
@@ -657,6 +661,11 @@ UPDATE tblARCustomerStatementStagingTable
 SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
+
+UPDATE tblARCustomerStatementStagingTable
+SET ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
+WHERE intEntityUserId = @intEntityUserIdLocal
+	AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN

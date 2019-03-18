@@ -31,6 +31,7 @@ SELECT DISTINCT strCommodityCode
 	, intUnitMeasureId = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END)
 	, intConcurrencyId = 0
 	, i.strMarketValuation
+	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -78,6 +79,7 @@ UNION SELECT DISTINCT strCommodityCode
 	, intUnitMeasureId = (CASE WHEN ISNULL(mum.strUnitMeasure,'') = '' THEN um.intUnitMeasureId ELSE mum.intUnitMeasureId END)
 	, intConcurrencyId = 0
 	, i.strMarketValuation
+	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail  cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -126,6 +128,7 @@ UNION SELECT DISTINCT strCommodityCode
 	, intUnitMeasureId = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN intUOMId ELSE intFMUOMId END)
 	, intConcurrencyId = 0
 	, iis.strMarketValuation
+	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
 FROM (
 	SELECT *
 	FROM vyuRKGetInventoryTransaction

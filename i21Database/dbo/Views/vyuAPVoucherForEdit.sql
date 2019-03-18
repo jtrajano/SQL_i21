@@ -64,14 +64,14 @@ FROM
 WHERE 
 	A.ysnPaid = 0
 AND A.intTransactionType = 1
-AND details.intContractDetailId IS NULL
-AND (
-		(vendorTerm.intCount > 0 AND vendorTerm.intTermId = editField.intTermsId) --if there is term on edit field and term have data on restriction
-		OR
-		(vendorTerm.intCount > 0 AND NULLIF(editField.intTermsId, 0) IS NULL) --if there is term data restriction and no value of term on edit field
-		OR
-		(vendorTerm.intCount IS NULL) --no vendor term restriction setup
-	)
+--AND details.intContractDetailId IS NULL
+-- AND (
+-- 		(vendorTerm.intCount > 0 AND vendorTerm.intTermId = editField.intTermsId) --if there is term on edit field and term have data on restriction
+-- 		OR
+-- 		(vendorTerm.intCount > 0 AND NULLIF(editField.intTermsId, 0) IS NULL) --if there is term data restriction and no value of term on edit field
+-- 		OR
+-- 		(vendorTerm.intCount IS NULL) --no vendor term restriction setup
+-- 	)
 --ORDER BY A.intBillId OFFSET 1 ROWS FETCH NEXT 500 ROWS ONLY
 	
 

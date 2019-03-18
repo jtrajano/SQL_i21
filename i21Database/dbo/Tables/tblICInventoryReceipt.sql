@@ -51,7 +51,7 @@ Type the overview for the table here.
 		[intEntityId] [int] NULL,
 		[intConcurrencyId] [int] NULL DEFAULT ((0)),
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-		[strReceiptOriginId] NVARCHAR(8) NULL, 
+		[strReceiptOriginId] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 
 		[strWarehouseRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[ysnOrigin] BIT NULL, 
 		[intSourceInventoryReceiptId] [int] NULL,

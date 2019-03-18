@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuICGetShipmentAddSalesContract]
 AS
 --intKey = CAST(ROW_NUMBER() OVER(ORDER BY intCompanyLocationId, intEntityId, intContractDetailId) AS INT)
-SELECT	strOrderType = 'Sales Contract'
-		, strSourceType = 'None'
+SELECT	strOrderType = 'Sales Contract' COLLATE Latin1_General_CI_AS
+		, strSourceType = 'None' COLLATE Latin1_General_CI_AS
 		, intLocationId = intCompanyLocationId
 		, strShipFromLocation = strLocationName
 		, intEntityCustomerId = intEntityId
@@ -24,7 +24,7 @@ SELECT	strOrderType = 'Sales Contract'
 		, intStorageLocationId
 		, strStorageLocationName = strStorageLocationName
 		, intOrderUOMId = ContractView.intItemUOMId
-		, strOrderUOM = CASE WHEN ContractView.ysnLoad = 1 THEN 'Load' ELSE ContractView.strItemUOM END
+		, strOrderUOM = CASE WHEN ContractView.ysnLoad = 1 THEN 'Load' ELSE ContractView.strItemUOM END COLLATE Latin1_General_CI_AS
 		, dblOrderUOMConvFactor = dblItemUOMCF
 		, ContractView.intItemUOMId
 		, strItemUOM = ContractView.strItemUOM

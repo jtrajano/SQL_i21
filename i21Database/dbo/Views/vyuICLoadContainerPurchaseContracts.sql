@@ -34,10 +34,10 @@ SELECT LD.intLoadDetailId
 	,IM.strLotTracking
 	,CASE L.intPurchaseSale
 		WHEN 1
-			THEN 'Inbound'
+			THEN 'Inbound' COLLATE Latin1_General_CI_AS
 		WHEN 2
-			THEN 'Outbound'
-		ELSE 'Drop Ship'
+			THEN 'Outbound' COLLATE Latin1_General_CI_AS
+		ELSE 'Drop Ship' COLLATE Latin1_General_CI_AS
 		END AS strType
 	,UOM.strUnitMeasure
 	,ItemUOM.dblUnitQty AS dblItemUOMCF

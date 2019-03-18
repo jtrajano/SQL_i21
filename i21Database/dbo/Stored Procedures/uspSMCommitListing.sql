@@ -97,8 +97,8 @@ BEGIN TRANSACTION
 		'i21.view.Letters',
 		'i21.view.FileFieldMapping',
 		'i21.view.SecurityPolicy',
-		'i21.view.Signatures',
-		'i21.view.EntityUser'
+		'i21.view.Signatures'
+		--'i21.view.EntityUser'
 	)
 
 	--*************UPDATE tblSMScreen GroupName WHEN generating listing for contact user*************--

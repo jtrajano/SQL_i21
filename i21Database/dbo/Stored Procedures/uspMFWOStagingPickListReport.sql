@@ -98,6 +98,9 @@ BEGIN
 		,@strPhone = strPhone
 	FROM tblSMCompanySetup
 
+	DECLARE @rtLotalias NVARCHAR(500) = ISNULL(dbo.fnCTGetTranslatedExpression('Common', 1, 'Lot Alias'), 'Lot Alias');
+	DECLARE @rtContainerNo NVARCHAR(500) = ISNULL(dbo.fnCTGetTranslatedExpression('Common', 1, 'Container No'), 'Container No');
+
 	SELECT I.intItemId
 		,I.strItemNo
 		,I.strDescription
@@ -172,6 +175,10 @@ BEGIN
 				ELSE 'STARTED PICKING'
 				END
 			) AS strReportHeader3
+			,L.strLotAlias
+			,L.strContainerNo
+			,@rtLotalias AS strTitleLotAlias
+			,@rtContainerNo AS strTitleContainerNo
 	FROM tblMFOrderHeader OH
 	JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
 	JOIN tblMFTaskType TT ON TT.intTaskTypeId = T.intTaskTypeId

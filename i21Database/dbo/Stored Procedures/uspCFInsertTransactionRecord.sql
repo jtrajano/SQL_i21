@@ -2041,6 +2041,7 @@ BEGIN
 			,dblTaxCalculatedAmount
 			,intTaxCodeId
 			,dblTaxRate
+			,ysnTaxExempt
 		)
 		SELECT 
 			 @Pk
@@ -2048,6 +2049,7 @@ BEGIN
 			,dblTaxCalculatedAmount		
 			,intTaxCodeId	
 			,dblTaxRate	
+			,ysnTaxExempt
 		FROM tblCFTransactionTaxType
 
 

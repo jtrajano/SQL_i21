@@ -11,31 +11,57 @@ BEGIN
 
 	BEGIN TRY
 
-	DECLARE @recordsToUpdate INT;
-	DECLARE @recordsUpdated INT;
+	DECLARE @cntVoucher INT;
+	DECLARE @cntPaySched INT;
+	DECLARE @vouchersUpdated INT;
+	DECLARE @paySchedUpdated INT;
+	CREATE TABLE #tmpPaySchedVoucherId(intBillId INT);
+
 	DECLARE @transCount INT = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
 
 	DECLARE @ids AS Id;
+	DECLARE @schedIds AS Id;
 
 	INSERT INTO @ids
-	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
+	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds) WHERE intID > 0
 
-	SET @recordsToUpdate = (SELECT COUNT(*) FROM @ids);
+	SET @cntVoucher = (SELECT COUNT(*) FROM @ids);
 
-	UPDATE voucher
-		SET voucher.ysnReadyForPayment = 0, voucher.dblTempPayment = 0, voucher.dblTempWithheld = 0, voucher.strTempPaymentInfo = null
-	FROM tblAPBill voucher
-	INNER JOIN @ids ids ON voucher.intBillId = ids.intId
-	WHERE voucher.ysnPosted = 1
-	AND voucher.ysnPaid = 0
-	
-	SET @recordsUpdated = @@ROWCOUNT;
-
-	IF @recordsToUpdate != @recordsUpdated
+	IF @cntVoucher > 0
 	BEGIN
-		RAISERROR('PAYVOUCHERINVALIDROWSAFFECTED', 16, 1);
-		RETURN;
+		UPDATE voucher
+			SET voucher.ysnReadyForPayment = 0, voucher.dblTempPayment = 0, voucher.dblTempWithheld = 0, voucher.strTempPaymentInfo = null
+		FROM tblAPBill voucher
+		INNER JOIN @ids ids ON voucher.intBillId = ids.intId
+		WHERE voucher.ysnPosted = 1
+		AND voucher.ysnPaid = 0
+		AND voucher.ysnIsPaymentScheduled = 0
+
+		SET @vouchersUpdated = @@ROWCOUNT;
+
+		UPDATE paySched
+			SET paySched.ysnReadyForPayment = 0
+		OUTPUT inserted.intBillId INTO #tmpPaySchedVoucherId
+		FROM tblAPVoucherPaymentSchedule paySched
+		INNER JOIN @ids ids ON paySched.intBillId = ids.intId
+		INNER JOIN tblAPBill voucher ON voucher.intBillId = paySched.intBillId
+		WHERE 
+			voucher.ysnPosted = 1
+		AND voucher.ysnPaid = 0
+		AND voucher.dblAmountDue != 0
+		AND paySched.ysnPaid = 0
+		AND voucher.ysnIsPaymentScheduled = 1
+
+		SET @paySchedUpdated = (SELECT COUNT(DISTINCT intBillId) FROM #tmpPaySchedVoucherId)
+
+		SET @vouchersUpdated = @vouchersUpdated + @paySchedUpdated;
+
+		IF @cntVoucher != @vouchersUpdated
+		BEGIN
+			RAISERROR('PAYVOUCHERINVALIDROWSAFFECTED', 16, 1);
+			RETURN;
+		END
 	END
 
 	IF @transCount = 0 COMMIT TRANSACTION

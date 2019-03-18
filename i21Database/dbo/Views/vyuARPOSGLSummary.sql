@@ -10,8 +10,8 @@ FROM (
 	SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 		 , dblOpeningBalance	= EOD.dblOpeningBalance
 		 , dblEndingBalance		= EOD.dblFinalEndingBalance
-		 , dblDebit				= CASE WHEN GLA.strAccountCategory = 'AR Account' THEN SUM(GL.dblDebit) - SUM(GL.dblCredit) ELSE SUM(GL.dblDebit) END
-		 , dblCredit			= CASE WHEN GLA.strAccountCategory = 'AR Account' THEN 0.00000 ELSE SUM(GL.dblCredit) END
+		 , dblDebit				= CASE WHEN SUM(GL.dblDebit) - SUM(GL.dblCredit) <= 0.000000 THEN 0.000000 ELSE SUM(GL.dblDebit) - SUM(GL.dblCredit) END
+		 , dblCredit			= CASE WHEN SUM(GL.dblDebit) - SUM(GL.dblCredit) >= 0.000000 THEN 0.000000 ELSE SUM(GL.dblCredit) - SUM(GL.dblDebit) END
 		 , strAccountId			= GLA.strAccountId
 		 , strAccountCategory	= GLA.strAccountCategory
 		 , strDescription		= GLA.strDescription

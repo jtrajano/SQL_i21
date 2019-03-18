@@ -15,6 +15,8 @@ BEGIN TRY
 	DECLARE @VoucherDetailLoadNonInv AS VoucherDetailLoadNonInv
 	DECLARE @voucherDetailReceipt AS VoucherDetailReceipt
 	DECLARE @voucherDetailReceiptCharge AS VoucherDetailReceiptCharge
+	DECLARE @voucherPayable AS VoucherPayable
+	DECLARE @voucherPayableToProcess AS VoucherPayable
 	DECLARE @intItemId INT
 	DECLARE @ysnInventoryCost BIT
 	DECLARE @intAPAccount INT
@@ -42,6 +44,7 @@ BEGIN TRY
 		,intItemUOMId INT
 		,dblUnitQty DECIMAL(38,20)
 		,dblCostUnitQty DECIMAL(38,20)
+		,intCurrencyId INT
 		)
 	DECLARE @loadCosts TABLE (
 		intRecordId INT Identity(1, 1)
@@ -150,6 +153,7 @@ BEGIN TRY
 		,intItemUOMId
 		,dblUnitQty
 		,dblCostUnitQty
+		,intCurrencyId
 		)
 	SELECT V.intEntityVendorId
 		,LD.intLoadId
@@ -166,6 +170,7 @@ BEGIN TRY
 		,LD.intItemUOMId
 		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
 		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
+		,V.intCurrencyId
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -201,6 +206,7 @@ BEGIN TRY
 		,V.strCostMethod
 		,V.dblPrice
 		,V.dblTotal
+		,V.intCurrencyId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -230,6 +236,10 @@ BEGIN TRY
 
 	SELECT @intReceiptCount = COUNT(*) FROM @receiptData 
 
+	DECLARE @xmlVoucherIds XML
+	DECLARE @createVoucherIds NVARCHAR(MAX)
+	DECLARE @voucherIds TABLE (intBillId INT)
+
 	IF(@intReceiptCount = 0)
 	BEGIN
 		-- LOOP THROUGH EACH VENDOR AVAILABLE IN THE OTHER CHARGES
@@ -245,38 +255,107 @@ BEGIN TRY
 			FROM @distinctVendor
 			WHERE intRecordId = @intMinVendorRecordId
 
-			INSERT INTO @VoucherDetailLoadNonInv (
-				intContractHeaderId
-				,intContractDetailId
-				,intItemId
-				,intAccountId
-				,intLoadDetailId
-				,dblQtyReceived
-				,dblCost
-				,intCostUOMId
-				,intItemUOMId
-				,dblUnitQty
-				,dblCostUnitQty
-				)
-			SELECT intContractHeaderId
-				,intContractDetailId
-				,intItemId
-				,ISNULL(intAccountId, 0)
-				,intLoadDetailId
-				,dblQtyReceived
-				,dblCost
-				,intCostUOMId
-				,intItemUOMId
-				,dblUnitQty
-				,dblCostUnitQty
-			FROM @voucherDetailData
-			WHERE intVendorEntityId = @intVendorEntityId
+			INSERT INTO @voucherPayableToProcess(
+				[intEntityVendorId]
+				,[intTransactionType]
+				,[intLocationId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[strVendorOrderNumber]
+				,[strReference]
+				,[strSourceNumber]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[intContractSeqId]
+				,[intInventoryReceiptItemId]
+				,[intLoadShipmentId]
+				,[intLoadShipmentDetailId]
+				,[intItemId]
+				,[strMiscDescription]
+				,[dblOrderQty]
+				,[dblOrderUnitQty]
+				,[intOrderUOMId]
+				,[dblQuantityToBill]
+				,[dblQtyToBillUnitQty]
+				,[intQtyToBillUOMId]
+				,[dblCost]
+				,[dblCostUnitQty]
+				,[intCostUOMId]
+				,[dblNetWeight]
+				,[dblWeightUnitQty]
+				,[intWeightUOMId]
+				,[intCostCurrencyId]
+				,[dblTax]
+				,[dblDiscount]
+				,[dblExchangeRate]
+				,[ysnSubCurrency]
+				,[intSubCurrencyCents]
+				,[intAccountId]
+				,[strBillOfLading]
+				,[ysnReturn])
+			SELECT
+				[intEntityVendorId] = VDD.intVendorEntityId
+				,[intTransactionType] = 1
+				,[intLocationId] = CD.intCompanyLocationId
+				,[intCurrencyId] = VDD.intCurrencyId
+				,[dtmDate] = GETDATE()
+				,[strVendorOrderNumber] = ''
+				,[strReference] = ''
+				,[strSourceNumber] = LTRIM(L.strLoadNumber)
+				,[intContractHeaderId] = VDD.intContractHeaderId
+				,[intContractDetailId] = VDD.intContractDetailId
+				,[intContractSeqId] = CD.intContractSeq
+				,[intInventoryReceiptItemId] = NULL
+				,[intLoadShipmentId] = VDD.intLoadId
+				,[intLoadShipmentDetailId] = VDD.intLoadDetailId
+				,[intItemId] = VDD.intItemId
+				,[strMiscDescription] = I.strDescription
+				,[dblOrderQty] = VDD.dblQtyReceived
+				,[dblOrderUnitQty] = VDD.dblUnitQty
+				,[intOrderUOMId] = VDD.intItemUOMId
+				,[dblQuantityToBill] = VDD.dblQtyReceived
+				,[dblQtyToBillUnitQty] = VDD.dblUnitQty
+				,[intQtyToBillUOMId] = VDD.intItemUOMId
+				,[dblCost] = VDD.dblCost
+				,[dblCostUnitQty] = VDD.dblCostUnitQty
+				,[intCostUOMId] = VDD.intCostUOMId
+				,[dblNetWeight] = 0
+				,[dblWeightUnitQty] = 1
+				,[intWeightUOMId] = NULL
+				,[intCostCurrencyId] = VDD.intCurrencyId
+				,[dblTax] = 0
+				,[dblDiscount] = 0
+				,[dblExchangeRate] = 1
+				,[ysnSubCurrency] = CUR.ysnSubCurrency
+				,[intSubCurrencyCents] = CUR.intCent
+				,[intAccountId] = VDD.intAccountId
+				,[strBillOfLading] = L.strBLNumber
+				,[ysnReturn] = CAST(0 AS BIT)
+			FROM @voucherDetailData VDD
+				INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
+				INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
+				INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
+				LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
+			WHERE VDD.intVendorEntityId = @intVendorEntityId
 
-			EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
-				,@vendorId = @intVendorEntityId
-				,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
-				,@shipTo = @intShipTo
-				,@billId = @intBillId OUTPUT
+			EXEC uspAPCreateVoucher 
+				@voucherPayables = @voucherPayableToProcess
+				,@voucherPayableTax = DEFAULT
+				,@userId = @intEntityUserSecurityId
+				,@throwError = 1
+				,@error = @strErrorMessage OUTPUT
+				,@createdVouchersId = @createVoucherIds OUTPUT
+
+			SET @xmlVoucherIds = CAST('<A>'+ REPLACE(@createVoucherIds, ',', '</A><A>')+ '</A>' AS XML)
+
+			INSERT INTO @voucherIds 
+				(intBillId) 
+			SELECT 
+				RTRIM(LTRIM(T.value('.', 'INT'))) AS intBillId
+			FROM @xmlVoucherIds.nodes('/A') AS X(T) 
+			WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
+
+			SELECT TOP 1 @intBillId = intBillId FROM @voucherIds
 
 			UPDATE tblLGLoadCost
 			SET intBillId = @intBillId
@@ -284,15 +363,13 @@ BEGIN TRY
 					SELECT intLoadCostId
 					FROM @voucherDetailData
 					WHERE intVendorEntityId = @intVendorEntityId)
-				
-
-			UPDATE tblAPBillDetail 
-			SET intLoadId = @intLoadId 
-			WHERE intBillId = @intBillId
 
 			SELECT @intMinVendorRecordId = MIN(intRecordId)
 			FROM @distinctVendor
 			WHERE intRecordId > @intMinVendorRecordId
+
+			DELETE FROM @voucherPayableToProcess
+			DELETE FROM @voucherIds
 		END
 	END
 	ELSE 
@@ -318,39 +395,107 @@ BEGIN TRY
 					WHERE intVendorEntityId = @intVendorEntityId
 						AND ysnInventoryCost = 0)
 			BEGIN
-				INSERT INTO @VoucherDetailLoadNonInv (
-					intContractHeaderId
-					,intContractDetailId
-					,intItemId
-					,intAccountId
-					,intLoadDetailId
-					,dblQtyReceived
-					,dblCost
-					,intCostUOMId
-					,intItemUOMId
-					,dblUnitQty
-					,dblCostUnitQty
-					)
-				SELECT intContractHeaderId
-					,intContractDetailId
-					,intItemId
-					,ISNULL(intAccountId, 0)
-					,intLoadDetailId
-					,dblQtyReceived
-					,dblCost
-					,intCostUOMId
-					,intItemUOMId
-					,dblUnitQty
-					,dblCostUnitQty
-				FROM @voucherDetailData
-				WHERE intVendorEntityId = @intVendorEntityId
-					AND ysnInventoryCost = 0
+				INSERT INTO @voucherPayableToProcess(
+					[intEntityVendorId]
+					,[intTransactionType]
+					,[intLocationId]
+					,[intCurrencyId]
+					,[dtmDate]
+					,[strVendorOrderNumber]
+					,[strReference]
+					,[strSourceNumber]
+					,[intContractHeaderId]
+					,[intContractDetailId]
+					,[intContractSeqId]
+					,[intInventoryReceiptItemId]
+					,[intLoadShipmentId]
+					,[intLoadShipmentDetailId]
+					,[intItemId]
+					,[strMiscDescription]
+					,[dblOrderQty]
+					,[dblOrderUnitQty]
+					,[intOrderUOMId]
+					,[dblQuantityToBill]
+					,[dblQtyToBillUnitQty]
+					,[intQtyToBillUOMId]
+					,[dblCost]
+					,[dblCostUnitQty]
+					,[intCostUOMId]
+					,[dblNetWeight]
+					,[dblWeightUnitQty]
+					,[intWeightUOMId]
+					,[intCostCurrencyId]
+					,[dblTax]
+					,[dblDiscount]
+					,[dblExchangeRate]
+					,[ysnSubCurrency]
+					,[intSubCurrencyCents]
+					,[intAccountId]
+					,[strBillOfLading]
+					,[ysnReturn])
+				SELECT
+					[intEntityVendorId] = VDD.intVendorEntityId
+					,[intTransactionType] = 1
+					,[intLocationId] = CD.intCompanyLocationId
+					,[intCurrencyId] = VDD.intCurrencyId
+					,[dtmDate] = GETDATE()
+					,[strVendorOrderNumber] = ''
+					,[strReference] = ''
+					,[strSourceNumber] = LTRIM(L.strLoadNumber)
+					,[intContractHeaderId] = VDD.intContractHeaderId
+					,[intContractDetailId] = VDD.intContractDetailId
+					,[intContractSeqId] = CD.intContractSeq
+					,[intInventoryReceiptItemId] = NULL
+					,[intLoadShipmentId] = VDD.intLoadId
+					,[intLoadShipmentDetailId] = VDD.intLoadDetailId
+					,[intItemId] = VDD.intItemId
+					,[strMiscDescription] = I.strDescription
+					,[dblOrderQty] = VDD.dblQtyReceived
+					,[dblOrderUnitQty] = VDD.dblUnitQty
+					,[intOrderUOMId] = VDD.intItemUOMId
+					,[dblQuantityToBill] = VDD.dblQtyReceived
+					,[dblQtyToBillUnitQty] = VDD.dblUnitQty
+					,[intQtyToBillUOMId] = VDD.intItemUOMId
+					,[dblCost] = VDD.dblCost
+					,[dblCostUnitQty] = VDD.dblCostUnitQty
+					,[intCostUOMId] = VDD.intCostUOMId
+					,[dblNetWeight] = 0
+					,[dblWeightUnitQty] = 1
+					,[intWeightUOMId] = NULL
+					,[intCostCurrencyId] = VDD.intCurrencyId
+					,[dblTax] = 0
+					,[dblDiscount] = 0
+					,[dblExchangeRate] = 1
+					,[ysnSubCurrency] = CUR.ysnSubCurrency
+					,[intSubCurrencyCents] = CUR.intCent
+					,[intAccountId] = VDD.intAccountId
+					,[strBillOfLading] = L.strBLNumber
+					,[ysnReturn] = CAST(0 AS BIT)
+				FROM @voucherDetailData VDD
+					INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
+					INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
+					INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
+					LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
+				WHERE VDD.intVendorEntityId = @intVendorEntityId AND VDD.ysnInventoryCost = 0
+			
+				EXEC uspAPCreateVoucher 
+					@voucherPayables = @voucherPayableToProcess
+					,@voucherPayableTax = DEFAULT
+					,@userId = @intEntityUserSecurityId
+					,@throwError = 1
+					,@error = @strErrorMessage OUTPUT
+					,@createdVouchersId = @createVoucherIds OUTPUT
 
-				EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
-					,@vendorId = @intVendorEntityId
-					,@voucherDetailLoadNonInv = @VoucherDetailLoadNonInv
-					,@shipTo = @intShipTo
-					,@billId = @intBillId OUTPUT
+				SET @xmlVoucherIds = CAST('<A>'+ REPLACE(@createVoucherIds, ',', '</A><A>')+ '</A>' AS XML)
+
+				INSERT INTO @voucherIds 
+					(intBillId) 
+				SELECT 
+					RTRIM(LTRIM(T.value('.', 'INT'))) AS intBillId
+				FROM @xmlVoucherIds.nodes('/A') AS X(T) 
+				WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
+
+				SELECT TOP 1 @intBillId = intBillId FROM @voucherIds
 
 				UPDATE tblLGLoadCost
 				SET intBillId = @intBillId
@@ -360,47 +505,128 @@ BEGIN TRY
 						WHERE intVendorEntityId = @intVendorEntityId
 							AND ysnInventoryCost = 0)
 
-				UPDATE tblAPBillDetail 
-				SET intLoadId = @intLoadId 
-				WHERE intBillId = @intBillId
+				DELETE FROM @voucherPayableToProcess
+				DELETE FROM @voucherIds
 			END
 
-			
-			IF EXISTS (SELECT TOP 1 1
-					FROM @voucherDetailData
-					WHERE intVendorEntityId = @intVendorEntityId
-						AND ysnInventoryCost = 1)
+			IF EXISTS (
+				SELECT TOP 1 1
+				FROM @voucherDetailData
+				WHERE ysnInventoryCost = 1
+				)
 			BEGIN
-				SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId), @intBillId = NULL
+				SELECT @intMinInventoryReceiptId = MIN(intInventoryReceiptId)
+					,@intBillId = NULL
 				FROM @receiptData
 
-				INSERT INTO @voucherDetailReceiptCharge (intInventoryReceiptChargeId,dblQtyReceived,dblCost)
-				SELECT intInventoryReceiptChargeId
-					,C.dblQuantity
-					,LC.dblRate
-				FROM tblICInventoryReceiptCharge C
-				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = C.intContractDetailId
-				JOIN tblLGLoadCost LC ON LC.intLoadId = LD.intLoadId
-					AND C.intChargeId = LC.intItemId
-					AND LC.intVendorId = C.intEntityVendorId
-				WHERE C.ysnInventoryCost = 1
-					AND LD.intLoadId = @intLoadId
-					AND LC.intLoadCostId IN (SELECT intLoadCostId FROM @voucherDetailData WHERE ysnInventoryCost = 1) 
-					AND  C.intEntityVendorId = @intVendorEntityId 
-				GROUP BY intInventoryReceiptChargeId
-					,LC.dblRate
-					,C.dblQuantity
-					,LC.intLoadId
+				INSERT INTO @voucherPayableToProcess(
+					[intEntityVendorId]
+					,[intTransactionType]
+					,[intLocationId]
+					,[intCurrencyId]
+					,[dtmDate]
+					,[strVendorOrderNumber]
+					,[strReference]
+					,[strSourceNumber]
+					,[intContractHeaderId]
+					,[intContractDetailId]
+					,[intContractSeqId]
+					,[intInventoryReceiptItemId]
+					,[intInventoryReceiptChargeId]
+					,[intLoadShipmentId]
+					,[intLoadShipmentDetailId]
+					,[intItemId]
+					,[strMiscDescription]
+					,[dblOrderQty]
+					,[dblOrderUnitQty]
+					,[intOrderUOMId]
+					,[dblQuantityToBill]
+					,[dblQtyToBillUnitQty]
+					,[intQtyToBillUOMId]
+					,[dblCost]
+					,[dblCostUnitQty]
+					,[intCostUOMId]
+					,[dblNetWeight]
+					,[dblWeightUnitQty]
+					,[intWeightUOMId]
+					,[intCostCurrencyId]
+					,[dblTax]
+					,[dblDiscount]
+					,[dblExchangeRate]
+					,[ysnSubCurrency]
+					,[intSubCurrencyCents]
+					,[intAccountId]
+					,[strBillOfLading]
+					,[ysnReturn])
+				SELECT
+					[intEntityVendorId] = VDD.intVendorEntityId
+					,[intTransactionType] = 1
+					,[intLocationId] = CD.intCompanyLocationId
+					,[intCurrencyId] = VDD.intCurrencyId
+					,[dtmDate] = GETDATE()
+					,[strVendorOrderNumber] = ''
+					,[strReference] = ''
+					,[strSourceNumber] = LTRIM(L.strLoadNumber)
+					,[intContractHeaderId] = VDD.intContractHeaderId
+					,[intContractDetailId] = VDD.intContractDetailId
+					,[intContractSeqId] = CD.intContractSeq
+					,[intInventoryReceiptItemId] = NULL
+					,[intInventoryReceiptChargeId] = IRC.intInventoryReceiptChargeId
+					,[intLoadShipmentId] = VDD.intLoadId
+					,[intLoadShipmentDetailId] = VDD.intLoadDetailId
+					,[intItemId] = VDD.intItemId
+					,[strMiscDescription] = I.strDescription
+					,[dblOrderQty] = VDD.dblQtyReceived
+					,[dblOrderUnitQty] = VDD.dblUnitQty
+					,[intOrderUOMId] = VDD.intItemUOMId
+					,[dblQuantityToBill] = VDD.dblQtyReceived
+					,[dblQtyToBillUnitQty] = VDD.dblUnitQty
+					,[intQtyToBillUOMId] = VDD.intItemUOMId
+					,[dblCost] = VDD.dblCost
+					,[dblCostUnitQty] = VDD.dblCostUnitQty
+					,[intCostUOMId] = VDD.intCostUOMId
+					,[dblNetWeight] = 0
+					,[dblWeightUnitQty] = 1
+					,[intWeightUOMId] = NULL
+					,[intCostCurrencyId] = VDD.intCurrencyId
+					,[dblTax] = 0
+					,[dblDiscount] = 0
+					,[dblExchangeRate] = 1
+					,[ysnSubCurrency] = CUR.ysnSubCurrency
+					,[intSubCurrencyCents] = CUR.intCent
+					,[intAccountId] = VDD.intAccountId
+					,[strBillOfLading] = L.strBLNumber
+					,[ysnReturn] = CAST(0 AS BIT)
+				FROM @voucherDetailData VDD
+					INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
+					INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
+					INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
+					LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
+					CROSS APPLY (SELECT intInventoryReceiptChargeId, dblQuantity
+									FROM tblICInventoryReceiptCharge C
+									WHERE intInventoryReceiptId = @intMinInventoryReceiptId
+										AND ysnInventoryCost = 1
+										AND intChargeId = VDD.intItemId) IRC
+				WHERE VDD.intVendorEntityId = @intVendorEntityId AND VDD.ysnInventoryCost = 1
+			
+				EXEC uspAPCreateVoucher 
+					@voucherPayables = @voucherPayableToProcess
+					,@voucherPayableTax = DEFAULT
+					,@userId = @intEntityUserSecurityId
+					,@throwError = 1
+					,@error = @strErrorMessage OUTPUT
+					,@createdVouchersId = @createVoucherIds OUTPUT
 
-				--SELECT intInventoryReceiptChargeId
-				--FROM tblICInventoryReceiptCharge C
-				--WHERE intInventoryReceiptId = @intMinInventoryReceiptId AND intEntityVendorId = @intVendorEntityId AND ysnInventoryCost = 1
-				
-				EXEC uspAPCreateBillData @userId = @intEntityUserSecurityId
-					,@vendorId = @intVendorEntityId
-					,@voucherDetailReceiptCharge = @voucherDetailReceiptCharge
-					,@shipTo = @intShipTo
-					,@billId = @intBillId OUTPUT
+				SET @xmlVoucherIds = CAST('<A>'+ REPLACE(@createVoucherIds, ',', '</A><A>')+ '</A>' AS XML)
+
+				INSERT INTO @voucherIds 
+					(intBillId) 
+				SELECT 
+					RTRIM(LTRIM(T.value('.', 'INT'))) AS intBillId
+				FROM @xmlVoucherIds.nodes('/A') AS X(T) 
+				WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
+
+				SELECT TOP 1 @intBillId = intBillId FROM @voucherIds
 
 				UPDATE tblLGLoadCost
 				SET intBillId = @intBillId
@@ -409,6 +635,9 @@ BEGIN TRY
 						FROM @voucherDetailData
 						WHERE intVendorEntityId = @intVendorEntityId
 							AND ysnInventoryCost = 1)
+
+				DELETE FROM @voucherPayableToProcess
+				DELETE FROM @voucherIds
 			END
 
 			SELECT @intMinVendorRecordId = MIN(intRecordId)

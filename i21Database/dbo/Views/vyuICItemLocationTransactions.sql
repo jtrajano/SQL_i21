@@ -2,7 +2,7 @@ CREATE VIEW [dbo].[vyuICItemLocationTransactions]
 AS
 
 SELECT DISTINCT
-	strTransaction = 'Receipt',
+	strTransaction = 'Receipt' COLLATE Latin1_General_CI_AS,
 	strTransactionNo = r.strReceiptNumber,
 	intTransactionId = r.intInventoryReceiptId,
 	intItemLocationId = il.intItemLocationId,
@@ -19,7 +19,7 @@ UNION
 
 -- Shipments
 SElECT DISTINCT 
-	strTransaction = 'Shipment',
+	strTransaction = 'Shipment' COLLATE Latin1_General_CI_AS,
 	strTransactionNo = s.strShipmentNumber,
 	intTransactionId = s.intInventoryShipmentId,
 	intItemLocationId = il.intItemLocationId,
@@ -36,7 +36,7 @@ UNION
 
 -- Transfers
 SELECT DISTINCT 
-	strTransaction = 'Transfer',
+	strTransaction = 'Transfer' COLLATE Latin1_General_CI_AS,
 	strTransactionNo = t.strTransferNo,
 	intTransactionId = t.intInventoryTransferId,
 	intItemLocationId = il.intItemLocationId,
@@ -53,7 +53,7 @@ UNION
 
 -- Adjustments
 SELECT DISTINCT
-	strTransaction = 'Adjustment',
+	strTransaction = 'Adjustment' COLLATE Latin1_General_CI_AS,
 	strTransactionNo = a.strAdjustmentNo,
 	intTransactionId = a.intInventoryAdjustmentId,
 	intItemLocationId = il.intItemLocationId,
@@ -70,7 +70,7 @@ UNION
 
 -- Inv. Count
 SELECT DISTINCT 
-	strTransaction = 'Count',
+	strTransaction = 'Count' COLLATE Latin1_General_CI_AS,
 	strTransactionNo = c.strCountNo,
 	intTransactionId = c.intInventoryCountId,
 	intItemLocationId = il.intItemLocationId,

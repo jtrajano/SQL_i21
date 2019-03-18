@@ -1,26 +1,39 @@
 GO
-PRINT('Begin cleaning up Undeposited Funds table')
+PRINT('Begin cleaning Bank Transaction Detail table')
 GO
 -- Clean up tblCMUndepositedFund
 BEGIN TRY
 	DELETE FROM tblCMBankTransactionDetail 	WHERE dblDebit = 0 AND dblCredit = 0 
+END TRY
+BEGIN CATCH
+	PRINT 'Deleting Bank Transaction Detail with 0 debit and credit: ' + ERROR_MESSAGE()
+END CATCH
+GO
+PRINT('Finished cleaning Bank Transaction Detail table')
+GO
+
+PRINT('Begin cleaning Undeposited Table')
+GO
+
+BEGIN TRY
 	DELETE FROM tblCMUndepositedFund WHERE dblAmount = 0
 END TRY
 BEGIN CATCH
-	PRINT ERROR_MESSAGE()
+	PRINT 'Delete Undeposited Fund with dblAmount = 0 :' + ERROR_MESSAGE()
 END CATCH
-
-GO
-PRINT('Finished cleaning up Undeposited Funds table')
-
-PRINT('Begin updating Undeposited table')
 GO
 
-DELETE Undep
-FROM tblCMUndepositedFund Undep
-INNER JOIN tblARPayment Pay
-ON Pay.strRecordNumber = Undep.strSourceTransactionId
-WHERE Pay.intPaymentMethodId = 9 -- REMOVE CF INVOICE
+BEGIN TRY
+	DELETE Undep
+	FROM tblCMUndepositedFund Undep
+	INNER JOIN tblARPayment Pay
+	ON Pay.strRecordNumber = Undep.strSourceTransactionId
+	WHERE Pay.intPaymentMethodId = 9 -- REMOVE CF INVOICE
+END TRY
+BEGIN CATCH
+	PRINT 'Deleting RCV with CF Invoice payment method: ' + ERROR_MESSAGE()
+END CATCH
+GO
 
 ;WITH AR AS(
 	SELECT strRecordNumber strTransactionId

@@ -26,11 +26,11 @@ SELECT
 	,ItemLocation.intAllowNegativeInventory
 	,strAllowNegativeInventory = (CASE WHEN ItemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
 							 WHEN ItemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
-							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END)
+							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END) COLLATE Latin1_General_CI_AS
 	,ItemLocation.intCostingMethod
 	,strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
 							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
-							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END)
+							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END) COLLATE Latin1_General_CI_AS
 	,dblAmountPercent = ISNULL(ItemPricing.dblAmountPercent, 0.00)
 	,dblSalePrice = ISNULL(ItemPricing.dblSalePrice, 0.00)
 	,dblMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0.00)
@@ -66,6 +66,8 @@ SELECT
 	,dblPercentFull = ISNULL(ItemStockUOM.dblPercentFull, 0.00)
 	,dtmLastPurchaseDate = ItemStockUOM.dtmLastPurchaseDate
 	,dtmLastSaleDate = ItemStockUOM.dtmLastSaleDate
+	,strEntityVendor = VendorEntity.strName
+	,dblAverageUsagePerPeriod = CAST(ISNULL(AvgUsagePerPeriod.dblAvgUsagePerPeriod, 0.00) AS NUMERIC(38, 7))
 FROM	
 	tblICItem Item 
 	LEFT JOIN tblICCategory Category 
@@ -80,6 +82,9 @@ FROM
 	)
 		ON ItemLocation.intItemId = Item.intItemId
 		AND ItemLocation.intLocationId IS NOT NULL
+	LEFT JOIN tblEMEntity VendorEntity
+		ON VendorEntity.intEntityId = ItemLocation.intVendorId
+
 	LEFT JOIN tblICItemPricing ItemPricing 
 		ON ItemPricing.intItemId = Item.intItemId 
 		AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
@@ -135,5 +140,49 @@ FROM
 				,ItemStockUOM.intItemLocationId
 	) ItemStockUOM
 
-
-
+	OUTER APPLY(
+		SELECT dblAvgUsagePerPeriod = dbo.fnDivide(SUM([dbo].[fnICConvertUOMtoStockUnit](Details.intItemId, Details.intItemUOMId, Details.dblQty)), MONTH(GETDATE()))
+		FROM (
+			SELECT	InvDet.intItemId
+					,InvDet.intItemUOMId
+					,ItemLocation.intItemLocationId
+					,dblQty = CASE WHEN Inv.strTransactionType = 'Credit Memo'
+							THEN -InvDet.dblQtyShipped
+							ELSE InvDet.dblQtyShipped
+						END
+			FROM tblARInvoice Inv
+			INNER JOIN tblARInvoiceDetail InvDet
+				ON InvDet.intInvoiceId = Inv.intInvoiceId
+			INNER JOIN tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = InvDet.intItemId
+				AND ItemLocation.intLocationId = Inv.intCompanyLocationId
+			WHERE Inv.ysnPosted = 1 
+				AND Inv.strTransactionType IN(
+					'Invoice'
+					,'Cash'
+					,'Credit Memo'
+					,'Debit Memo'
+				)
+				AND YEAR(Inv.dtmDate) = YEAR(GETDATE())
+			UNION ALL
+			SELECT	PrepaidDetail.intItemId
+					,PrepaidDetail.intItemUOMId
+					,ItemLocation.intItemLocationId
+					,dblQty = -PrepaidDetail.dblQtyShipped
+			FROM tblARInvoice Inv
+			INNER JOIN tblARPrepaidAndCredit Prepaid
+				ON Prepaid.intInvoiceId = Inv.intInvoiceId
+			INNER JOIN tblARInvoiceDetail PrepaidDetail
+				ON PrepaidDetail.intInvoiceId = Prepaid.intPrepaymentId
+			INNER JOIN tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = PrepaidDetail.intItemId
+				AND ItemLocation.intLocationId = Inv.intCompanyLocationId
+			WHERE Inv.ysnPosted = 1 
+				AND Inv.strTransactionType IN(
+					'Cash Refund'
+				)	
+				AND YEAR(Inv.dtmDate) = YEAR(GETDATE())
+		) Details
+		WHERE Details.intItemId = ItemStockUOM.intItemId
+			AND Details.intItemLocationId = ItemStockUOM.intItemLocationId
+	) AvgUsagePerPeriod

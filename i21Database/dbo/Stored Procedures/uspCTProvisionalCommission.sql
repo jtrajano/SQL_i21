@@ -16,11 +16,13 @@ BEGIN TRY
 			 @strAddress			NVARCHAR(MAX),
 			 @intVendorId			INT,
 			 @blbFile				VARBINARY(MAX),
-			@intLaguageId			INT,
-			@strExpressionLabelName	NVARCHAR(50) = 'Expression',
-			@strMonthLabelName		NVARCHAR(50) = 'Month',
-			@strBankTransferText	NVARCHAR(MAX),
-			@strComments			NVARCHAR(MAX)
+			 @intLaguageId			INT,
+			 @strExpressionLabelName	NVARCHAR(50) = 'Expression',
+			 @strMonthLabelName		NVARCHAR(50) = 'Month',
+			 @strBankTransferText	NVARCHAR(MAX),
+			 @strComments			NVARCHAR(MAX),
+			 @intReportLogoHeight	INT,
+			 @intReportLogoWidth	INT
 			
     IF  LTRIM(RTRIM(@xmlParam)) = ''   
 	   SET @xmlParam = NULL   
@@ -68,6 +70,8 @@ BEGIN TRY
 				[endgroup]		NVARCHAR(50),  
 				[datatype]		NVARCHAR(50)  
 	)  
+
+	SELECT @intReportLogoHeight = intReportLogoHeight, @intReportLogoWidth = intReportLogoWidth FROM tblLGCompanyPreference WITH (NOLOCK)
     
 	SELECT	@intBrkgCommnId =	  [from]
 	FROM	@temp_xml_table   
@@ -126,7 +130,9 @@ BEGIN TRY
 			ISNULL(isnull(rtrt4.strTranslation,IG.strCountry),isnull(rtrt5.strTranslation,OG.strCountry))	AS	strOrigin,
 			strCurrency,
 			dblReqstdAmount,
-			@strBankTransferText AS strBankTransferText
+			@strBankTransferText AS strBankTransferText,
+			ISNULL(@intReportLogoHeight,0) AS intReportLogoHeight,
+			ISNULL(@intReportLogoWidth,0) AS intReportLogoWidth
 
 	FROM	vyuCTGridBrokerageCommissionDetail  BD
 	JOIN	tblCTContractDetail		CD  ON	CD.intContractDetailId		=   BD.intContractDetailId			   

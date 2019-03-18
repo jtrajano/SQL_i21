@@ -65,7 +65,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 
 		,@intShipFrom = r.intShipFromId
 		,@intShipTo = r.intLocationId
-		,@strVendorRefNo = ISNULL(r.strBillOfLading, r.strVendorRefNo)
+		,@strVendorRefNo = ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
 		,@intCurrencyId = r.intCurrencyId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
@@ -127,7 +127,8 @@ BEGIN
 			,[intShipViaId]						
 			,[intTermId]						
 			,[strBillOfLading]					
-			,[ysnReturn]						
+			,[ysnReturn]
+			,[dtmVoucherDate]
 	)
 	SELECT 
 		GP.[intEntityVendorId]
@@ -179,8 +180,9 @@ BEGIN
 		,GP.[intShipViaId]						
 		,GP.[intTermId]						
 		,GP.[strBillOfLading]					
-		,GP.[ysnReturn]	 
-	FROM dbo.fnICGeneratePayables (@intReceiptId, 1) GP
+		,GP.[ysnReturn]	
+		,GP.dtmDate
+	FROM dbo.fnICGeneratePayables (@intReceiptId,	 1) GP
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 		ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
 	INNER JOIN tblICInventoryReceipt Receipt

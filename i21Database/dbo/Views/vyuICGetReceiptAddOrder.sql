@@ -8,7 +8,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 		, intEntityId = POView.intEntityVendorId
 		, strVendorId
 		, strVendorName = strName
-		, strReceiptType = 'Purchase Order'
+		, strReceiptType = 'Purchase Order' COLLATE Latin1_General_CI_AS
 		, intLineNo = intPurchaseDetailId
 		, intOrderId = intPurchaseId
 		, strOrderNumber = strPurchaseOrderNumber

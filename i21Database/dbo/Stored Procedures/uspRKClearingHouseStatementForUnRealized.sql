@@ -54,7 +54,8 @@ ysnExpired bit,
 dblVariationMargin  numeric(24,10) ,
 dblInitialMargin   numeric(24,10)
 ,LongWaitedPrice  numeric(24,10),
-ShortWaitedPrice  numeric(24,10))
+ShortWaitedPrice  numeric(24,10),
+intSelectedInstrumentTypeId int)
 
 INSERT INTO @Unrealized
 exec uspRKUnrealizedPnL	 @dtmFromDate =@dtmTransactionFromDate

@@ -534,6 +534,7 @@ BEGIN TRY
 						EXEC	uspCTCreateInvoiceFromShipment 
 								@ShipmentId				=	@intInventoryShipmentId
 								,@UserId				=	@intUserId
+								,@intContractDetailId	=	@intContractDetailId
 								,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
 				
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL

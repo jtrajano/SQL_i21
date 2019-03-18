@@ -1,19 +1,26 @@
 ﻿CREATE FUNCTION [dbo].[fnAPGetPayVoucherForPayment]
 (
 	@currencyId INT,
-	@paymentMethodId INT,
+	@paymentMethodId INT = 0,
 	@datePaid DATETIME,
-	@showDeferred BIT
+	@showDeferred BIT,
+	@vendorId INT = NULL,
+	@payToAddress INT = 0
 )
 RETURNS TABLE AS RETURN
 (
 	SELECT
-		forPay.intBillId
+		forPay.intForPaymentId
+		,forPay.intBillId
 		,forPay.intEntityVendorId
 		,forPay.intTransactionType
 		,forPay.intPayToAddressId
 		,forPay.ysnReadyForPayment
 		,forPay.dtmDueDate
+		,forPay.dtmDate
+		,forPay.dtmBillDate
+		,forPay.intAccountId
+		,forPay.strAccountId
 		,forPay.strVendorOrderNumber
 		,forPay.strBillId
 		,forPay.dblTotal
@@ -51,12 +58,23 @@ RETURNS TABLE AS RETURN
 		,forPay.strName
 		,forPay.strCheckPayeeName
 		,forPay.ysnDeferredPayment
+		,forPay.intPayScheduleId
 		,ysnPastDue = dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate)
 		,forPay.ysnPymtCtrlAlwaysDiscount
+		-- ,forPay.ysnPaySchedule
+		,forPay.ysnOffset
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId
 	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
-				ELSE (CASE WHEN forPay.intTransactionType = 14 THEN 0 ELSE 1 END) END)
+			ELSE 
+				(CASE WHEN forPay.intTransactionType = 14 THEN 0 ELSE 1 END) 
+			END)
+	AND 1 = (CASE WHEN @payToAddress > 0
+					THEN (CASE WHEN forPay.intPayToAddressId = @payToAddress THEN 1 ELSE 0 END)
+			ELSE 1 END)
+	AND 1 = (CASE WHEN @vendorId > 0
+					THEN (CASE WHEN forPay.intEntityVendorId = @vendorId THEN 1 ELSE 0 END)
+			ELSE 1 END)
 )

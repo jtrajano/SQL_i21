@@ -2143,8 +2143,10 @@ BEGIN
 		,@intTransactionId
 		,@intEntityUserSecurityId
 
-	-- Revert for 18.3 
-	--EXEC dbo.uspICProcessPayables @intTransactionId, default, @ysnPost, @intEntityUserSecurityId
+	EXEC dbo.uspICProcessPayables 
+		@intReceiptId = @intTransactionId
+		,@ysnPost = @ysnPost
+		,@intEntityUserSecurityId = @intEntityUserSecurityId
 	
 	COMMIT TRAN @TransactionName
 END 

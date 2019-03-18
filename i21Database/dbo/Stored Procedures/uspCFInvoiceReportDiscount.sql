@@ -1,311 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportDiscount](
-	@xmlParam NVARCHAR(MAX)=null
-	,@UserId NVARCHAR(MAX)
+	@UserId NVARCHAR(MAX)
 )
 AS
 BEGIN
-	SET NOCOUNT ON;
-	IF (ISNULL(@xmlParam,'') = '')
-	BEGIN 
-	SELECT 
-		 intAccountId				 = 0
-		,intInvoiceId				 = 0
-		,intTransactionId			 = 0
-		,intCustomerGroupId			 = 0
-		,intTermID					 = 0
-		,intBalanceDue				 = 0
-		,intDiscountDay				 = 0
-		,intDayofMonthDue			 = 0
-		,intDueNextMonth			 = 0
-		,intSort					 = 0
-		,intConcurrencyId			 = 0
-		,ysnAllowEFT				 = CAST(0 AS BIT)
-		,ysnActive					 = CAST(0 AS BIT)
-		,ysnEnergyTrac				 = CAST(0 AS BIT)
-		,dblQuantity				 = 0.0
-		,dblTotalQuantity			 = 0.0
-		,dblDiscountRate			 = 0.0
-		,dblDiscount				 = 0.0
-		,dblTotalAmount				 = 0.0
-		,dblAccountTotalAmount		 = 0.0
-		,dblAccountTotalDiscount	 = 0.0
-		,dblAccountTotalLessDiscount = 0.0
-		,dblDiscountEP				 = 0.0
-		,dblAPR						 = 0.0
-		,strInvoiceNumber			 = ''
-		,strInvoiceReportNumber		 = ''
-		,strTerm					 = ''
-		,strType					 = ''
-		,strTermCode				 = ''
-		,strNetwork					 = ''
-		,strCustomerName			 = ''
-		,strInvoiceCycle			 = ''
-		,strGroupName				 = ''
-		,dtmDiscountDate			 = GetDate()
-		,dtmDueDate					 = GetDate()
-		,dtmTransactionDate			 = GetDate()
-		,dtmPostedDate				 = GetDate()
-		RETURN;
-	END
-	ELSE
-	BEGIN 
-		DECLARE @idoc INT
-		DECLARE @whereClause NVARCHAR(MAX)
-		DECLARE @endWhereClause NVARCHAR(MAX)
-		
-		DECLARE @From NVARCHAR(MAX)
-		DECLARE @To NVARCHAR(MAX)
-		DECLARE @Condition NVARCHAR(MAX)
-		DECLARE @Fieldname NVARCHAR(MAX)
-
-		DECLARE @tblCFFieldList TABLE
-		(
-			[intFieldId]   INT , 
-			[strFieldId]   NVARCHAR(MAX)   
-		)
-		
-		SET @whereClause = ''
-		SET @endWhereClause = ''
-
-		INSERT INTO @tblCFFieldList(
-			 [intFieldId]
-			,[strFieldId]
-		)
-		SELECT 
-			 RecordKey
-			,Record
-		FROM [fnCFSplitString]('strCustomerNumber,intCustomerGroupId,intAccountId,strNetwork,dtmTransactionDate,dtmCreatedDate,dtmPostedDate,strInvoiceCycle,strPrintTimeStamp,dtmBillingDate',',') 
-
-
-		--READ XML
-		EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
-
-		--TEMP TABLE FOR PARAMETERS
-		DECLARE @temp_params TABLE (
-			 [fieldname] NVARCHAR(MAX)
-			,[condition] NVARCHAR(MAX)      
-			,[from] NVARCHAR(MAX)
-			,[to] NVARCHAR(MAX)
-			,[join] NVARCHAR(MAX)
-			,[begingroup] NVARCHAR(MAX)
-			,[endgroup] NVARCHAR(MAX) 
-			,[datatype] NVARCHAR(MAX)
-		) 
-
-		--XML DATA TO TABLE
-		INSERT INTO @temp_params
-		SELECT *
-		FROM OPENXML(@idoc, 'xmlparam/filters/filter',2)
-		WITH ([fieldname] NVARCHAR(MAX)
-			, [condition] NVARCHAR(MAX)
-			, [from] NVARCHAR(MAX)
-			, [to] NVARCHAR(MAX)
-			, [join] NVARCHAR(MAX)
-			, [begingroup] NVARCHAR(MAX)
-			, [endgroup] NVARCHAR(MAX)
-			, [datatype] NVARCHAR(MAX))
-
-
-
-		DECLARE @intCounter INT
-		DECLARE @strField	NVARCHAR(MAX)
-
-		WHILE (EXISTS(SELECT 1 FROM @tblCFFieldList))
-		BEGIN
-			SELECT @intCounter = [intFieldId] FROM @tblCFFieldList
-			SELECT @strField = [strFieldId] FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
-				
-		--MAIN LOOP			
-		SELECT TOP 1
-			 @From = [from]
-			,@To = [to]
-			,@Condition = [condition]
-			,@Fieldname = [fieldname]
-		FROM @temp_params WHERE [fieldname] = @strField
-
-
-		SELECT *
-		FROM @temp_params
-
-
-		IF (UPPER(@Condition) = 'BETWEEN')
-		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-			ELSE
-			BEGIN
-				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-		END
-		ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
-		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
-			END
-			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-			ELSE
-			BEGIN
-				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
-			END
-		END
-		ELSE IF (UPPER(@Condition) = 'IN')
-		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
-			END
-			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-			ELSE
-			BEGIN
-				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
-			END
-		END
-		ELSE IF (UPPER(@Condition) = 'GREATER THAN')
-		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
-			END
-			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-			ELSE
-			BEGIN
-				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
-			END
-		END
-		ELSE IF (UPPER(@Condition) = 'LESS THAN')
-		BEGIN
-			IF(@Fieldname = 'intAccountId' OR @Fieldname = 'intCustomerGroupId' OR @Fieldname = 'strInvoiceReportNumber' OR @Fieldname ='strCustomerNumber')
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
-			END
-			ELSE IF(@Fieldname IN ('dtmTransactionDate','dtmCreatedDate','dtmPostedDate'))
-			BEGIN
-				SET @endWhereClause = @endWhereClause + CASE WHEN RTRIM(@endWhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + 'DATEADD(dd, DATEDIFF(dd, 0, '+@Fieldname+'), 0)'  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-			END
-			ELSE
-			BEGIN
-				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
-			END
-		END
-		
-
-
-
-		SET @From = ''
-		SET @To = ''
-		SET @Condition = ''
-		SET @Fieldname = ''
-
-
-		IF OBJECT_ID('tempdb..##tblCFInvoiceDiscount') IS NOT NULL
-		BEGIN
-				DROP TABLE ##tblCFInvoiceDiscount
-		END
-
-		IF OBJECT_ID('tempdb..##tmpInvoiceDiscount') IS NOT NULL
-		BEGIN
-				DROP TABLE ##tmpInvoiceDiscount
-		END
-
-
-
-
-		--MAIN LOOP
-
-			DELETE FROM @tblCFFieldList WHERE [intFieldId] = @intCounter
-		END
-
-		--NON DISTRIBUTION LIST
-		SELECT TOP 1
-			 @From = [from]
-			,@To = [to]
-			,@Condition = [condition]
-			,@Fieldname = [fieldname]
-		FROM @temp_params WHERE [fieldname] = 'ysnNonDistibutionList'
-
-		IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','=') AND (@From = 'TRUE' OR @From = 1))
-		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				N' NOT (strEmailDistributionOption like ''%CF Invoice%'' AND (strEmail IS NOT NULL AND strEmail != ''''))'
-		END
-
-		SET @From = ''
-		SET @To = ''
-		SET @Condition = ''
-		SET @Fieldname = ''
-
-
-		DECLARE @ysnReprintInvoice NVARCHAR(MAX)
-		SELECT TOP 1
-			 @ysnReprintInvoice = [from]
-		FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
-
-		DECLARE @InvoiceDate NVARCHAR(MAX)
-		SELECT TOP 1
-			 @InvoiceDate = [from]
-		FROM @temp_params WHERE [fieldname] = 'dtmInvoiceDate'
-
-
-		DECLARE @CustomerName NVARCHAR(MAX)
-		DECLARE @CustomerNameValue NVARCHAR(MAX)
-		SELECT TOP 1
-			 @CustomerName = [from]
-			,@CustomerNameValue = [fieldname]
-		FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
-
-
-		DECLARE @ysnIncludePrintedTransaction AS BIT
-		SELECT TOP 1
-				 @ysnIncludePrintedTransaction = [from]
-			FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
-
-
-		IF(@ysnReprintInvoice = 1 AND @InvoiceDate IS NOT NULL)
-		BEGIN
-			SET @whereClause = 'WHERE ( dtmInvoiceDate = ' + '''' + @InvoiceDate + '''' + ' ) AND ( strInvoiceReportNumber IS NOT NULL AND strInvoiceReportNumber != '''' )'
-			IF (ISNULL(@CustomerName,'') != '')
-			BEGIN
-				SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' + 
-				' (' + @CustomerNameValue  + ' = ' + '''' + @CustomerName + '''' + ' )' END
-			END
-		END
-		ELSE IF(ISNULL(@ysnIncludePrintedTransaction,0) = 0)
-		BEGIN
-			SET @whereClause = @whereClause + CASE WHEN RTRIM(@whereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' ( ISNULL(strInvoiceReportNumber,'''') = '''')'
-		END
-
+	
 
 		DECLARE @SQL NVARCHAR(MAX)
 
@@ -548,7 +246,7 @@ BEGIN
 			,strPrintTimeStamp			
 			,strTermCode				
 		)
-		EXEC('
+		
 		SELECT 
 			 intCustomerId				
 			,intTransactionId			
@@ -596,7 +294,7 @@ BEGIN
 			,strPrintTimeStamp			
 			,strTermCode				
 		FROM vyuCFInvoiceDiscount 
-		'+ @whereClause)
+		WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId)
 		-----------------MAIN QUERY------------------
 
 		
@@ -1090,7 +788,7 @@ BEGIN
 		----------------------------------
 
 		-------------SELECT MAIN TABLE FOR OUTPUT---------------
-		EXEC('
+		
 		INSERT INTO tblCFInvoiceDiscountTempTable(
 			 intSalesPersonId
 			,intTermID
@@ -1147,11 +845,9 @@ BEGIN
 			,strDiscountSchedule
 			,ysnShowOnCFInvoice
 			,strUserId
-	    FROM tblCFInvoiceDiscountCalculationTempTable' + @endWhereClause) 
+	    FROM tblCFInvoiceDiscountCalculationTempTable
+		WHERE strUserId = @UserId
 
 	
 		-------------SELECT MAIN TABLE FOR OUTPUT---------------
-	
-
-	END
 END

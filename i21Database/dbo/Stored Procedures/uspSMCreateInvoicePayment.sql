@@ -241,6 +241,23 @@ BEGIN
 	SELECT @intPaymentIdNew = ISNULL(intPaymentId,0) FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1
 	SELECT @strPaymentIdNew = strRecordNumber FROM tblARPayment WHERE intPaymentId = @intPaymentIdNew
 
+	DECLARE @output INT
+	EXEC dbo.uspSMInsertTransaction
+		@screenNamespace = 'AccountsReceivable.view.ReceivePaymentsDetail',
+		@strTransactionNo = @intPaymentIdNew,
+		@intEntityId = @intUserId,
+		@intKeyValue = @intPaymentIdNew,
+		@output = @output
+
+	EXEC dbo.uspSMAuditLog 
+		 @keyValue			= @intPaymentIdNew
+		,@screenName		= 'AccountsReceivable.view.ReceivePaymentsDetail'
+		,@entityId			= @intUserId	
+		,@actionType		= 'Created'
+		,@changeDescription	= ''			
+		,@fromValue			= ''			
+		,@toValue			= ''
+
 	GOTO Exit_Routine
 END
 --================================================================

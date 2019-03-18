@@ -1,8 +1,7 @@
 ﻿
 CREATE PROCEDURE [dbo].[uspCMGetClearedDeposits]
 	@intBankAccountId INT = NULL,
-	@dtmStatementDate AS DATETIME = NULL,
-	@ysnCheckVoid BIT = 0
+	@dtmStatementDate AS DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -42,15 +41,12 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@LastReconDate AS DATETIME
 
 		SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
-
-
+		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
 FROM	[dbo].[tblCMBankTransaction]
 WHERE	ysnPosted = 1
 		AND ysnClr = 1
-		
-		AND @ysnCheckVoid = (CASE WHEN ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled THEN 1 ELSE 0 END )
 		AND intBankAccountId = @intBankAccountId
 		AND dblAmount <> 0
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)
@@ -74,4 +70,3 @@ WHERE	ysnPosted = 1
 			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 
 			ELSE 1 
 			END --CM-1143
-

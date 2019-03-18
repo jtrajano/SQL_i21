@@ -379,4 +379,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\14_CT\1910_ContractCostPaidByToParty.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\14_CT\1910_ContractCostPaidByToParty.sql" />
+  </ItemGroup>
 </Project>

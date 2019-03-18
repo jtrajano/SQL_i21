@@ -7435,6 +7435,23 @@
     <Build Include="dbo\Stored Procedures\uspLGGetLoadItemQuantity.sql" />
     <Build Include="dbo\Views\vyuRKGetInventoryTransaction.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
+    <Build Include="dbo\Tables\tblCFOptFilterParam.sql" />
+    <Build Include="dbo\Tables\tblCFOptFilterCountResult.sql" />
+    <Build Include="dbo\Tables\tblSMTaxReportType.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\41_TaxReportType.sql" />
+    <Build Include="dbo\Views\vyuCTContractInvoice.sql" />
+    <Build Include="dbo\Tables\tblCTContractInvoice.sql" />
+    <Build Include="dbo\Functions\fnRKGetSequencePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFOptimizeFiltering.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutItemMovementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMReportSampleGAB.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInsertTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderReport.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPaymentSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspAROutboundTaxReport.sql" />
+    <Build Include="dbo\Tables\tblAROutboundTaxStagingTable.sql" />
+    <Build Include="dbo\Views\vyuAROutboundTaxReport.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_UpdateVantivToWorldPay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7651,6 +7668,7 @@
     <None Include="Scripts\Post-Deployment\TM\6_SyncStartingNumberAndDispatchId.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\3_UpgradeTypeAndEnvironment.sql" />
     <None Include="Scripts\Post-Deployment\TM\7_GenerateManufacturerFromDevice.sql" />
+    <Build Include="dbo\Functions\fnHDCoalesceEntityResources.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
