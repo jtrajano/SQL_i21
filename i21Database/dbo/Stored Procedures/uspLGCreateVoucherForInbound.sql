@@ -230,7 +230,14 @@ BEGIN TRY
 		DELETE
 		FROM @VoucherDetailLoadNonInv
 
-		UPDATE tblAPBillDetail SET intLoadId = @intLoadId WHERE intBillId = @intBillId
+		UPDATE BD
+		SET intLoadId = @intLoadId
+			,intSubLocationId = ISNULL(LW.intSubLocationId, CD.intSubLocationId)
+			,intStorageLocationId = ISNULL(LW.intStorageLocationId, CD.intStorageLocationId) 
+		FROM tblAPBillDetail BD
+		LEFT JOIN tblCTContractDetail CD ON BD.intContractDetailId = CD.intContractDetailId
+		OUTER APPLY (SELECT TOP 1 intSubLocationId, intStorageLocationId FROM tblLGLoadWarehouse WHERE intLoadId = @intLoadId) LW
+		WHERE intBillId = @intBillId
 
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
