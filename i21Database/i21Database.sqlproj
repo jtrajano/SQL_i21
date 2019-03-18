@@ -7454,6 +7454,8 @@
     <None Include="Scripts\Post-Deployment\SM\1910_UpdateVantivToWorldPay.sql" />
     <Build Include="dbo\Stored Procedures\uspCTManagePayable.sql" />
     <Build Include="dbo\Functions\fnCTCreateVoucherPayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMEACustomerExport.sql" />
+    <Build Include="dbo\Tables\tblAREACustomerExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
