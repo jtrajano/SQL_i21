@@ -12,8 +12,7 @@ SET ANSI_WARNINGS OFF
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
     BEGIN 
-        SET @xmlParam = NULL
-        SELECT * FROM tblAROutboundTaxStagingTable
+        SET @xmlParam = NULL        
 	END
 
 -- Declare the variables.
@@ -43,7 +42,7 @@ DECLARE @dtmDateFrom            DATETIME
 	  , @strTaxClass            NVARCHAR(100)
 	  , @strTaxClassType        NVARCHAR(100)
 	  , @strTaxGroup            NVARCHAR(100)
-	  , @strTaxReportType       NVARCHAR(100)
+	  , @strSubTotalBy          NVARCHAR(100)
 	  , @ysnTaxExemptOnly       BIT
 	  , @xmlDocumentId          INT
 	  , @fieldname              NVARCHAR(50)
@@ -51,6 +50,7 @@ DECLARE @dtmDateFrom            DATETIME
 
 
 SET @AccountStatusFiltered = CAST(0 AS BIT)
+SET @strSubTotalBy = 'Tax Group'
 SELECT @UserName = [strName] FROM tblEMEntity WHERE[intEntityId] = @EntityUserId
 
 		
@@ -140,9 +140,9 @@ SELECT @strAccountStatusFrom   = REPLACE(ISNULL([from], ''), '''''', '''')
   FROM @temp_xml_table
  WHERE [fieldname] = 'strAccountStatusCode'
 
-SELECT @strTaxReportType = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT @strSubTotalBy = REPLACE(ISNULL([from], 'Tax Group'), '''''', '''')
   FROM @temp_xml_table
- WHERE [fieldname] = 'strTaxReportType'
+ WHERE [fieldname] = 'strSubTotalBy'
 
 SELECT @ysnTaxExemptOnly = [from] 
   FROM @temp_xml_table
@@ -286,14 +286,15 @@ END
 
 CREATE TABLE #INVOICES
     ([intInvoiceId]         INT PRIMARY KEY,
-    [strInvoiceNumber]      NVARCHAR(25)  COLLATE Latin1_General_CI_AS,
-	[strType]               NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-    [strSalespersonName]    NVARCHAR(150) COLLATE Latin1_General_CI_AS)
+    [strInvoiceNumber]      NVARCHAR(25)  COLLATE Latin1_General_CI_AS NOT NULL,
+	[strType]               NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strSalespersonName]    NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+    [dtmDate]               DATETIME                                   NULL)
 
 IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND ISNULL(@strInvoiceNumberFrom, '') <> '')
     BEGIN
-        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName])
-        SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName
+        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
+        SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName, I.dtmDate
           FROM dbo.tblARInvoice I WITH (NOLOCK)
                LEFT OUTER JOIN (
                                SELECT SP.intEntityId, E.strName
@@ -307,8 +308,8 @@ IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND I
     END
 ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> '')
     BEGIN
-        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName])
-        SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName
+        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
+        SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName, I.dtmDate
           FROM dbo.tblARInvoice I WITH (NOLOCK)
                LEFT OUTER JOIN (
                                SELECT SP.intEntityId, E.strName
@@ -322,8 +323,8 @@ ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> 
     END
 ELSE
     BEGIN
-        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName])
-        SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName
+        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
+        SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName, I.dtmDate
           FROM dbo.tblARInvoice I WITH (NOLOCK)
                LEFT OUTER JOIN (
                                SELECT SP.intEntityId, E.strName
@@ -334,18 +335,6 @@ ELSE
          WHERE I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
     END
-
-IF(OBJECT_ID('tempdb..#TAXGROUPS') IS NOT NULL)
-BEGIN
-    DROP TABLE #TAXGROUPS
-END
-
-CREATE TABLE #TAXGROUPS ([intTaxGroupId] INT PRIMARY KEY, [strTaxGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS)
-
-INSERT INTO #TAXGROUPS([intTaxGroupId], [strTaxGroup])
-SELECT [intTaxGroupId], [strTaxGroup]
-  FROM dbo.tblSMTaxGroup WITH (NOLOCK)
- WHERE (@strTaxGroup IS NULL OR [strTaxGroup] LIKE '%' + @strTaxGroup + '%')
 
 IF(OBJECT_ID('tempdb..#ITEMS') IS NOT NULL)
 BEGIN
@@ -388,249 +377,362 @@ ELSE
     END
 
 
-DELETE FROM tblAROutboundTaxStagingTable
-INSERT INTO tblAROutboundTaxStagingTable (
-     [strInvoiceNumber]
-    ,[strType]
-    ,[strCustomerNumber]
-    ,[strCustomerName]
-    ,[strAccountStatusCode]
-    ,[strCompanyNumber]
-    ,[strSalespersonName]
-    ,[dtmDate]
-    ,[intUserId]
-    ,[strUserName]
-    ,[strItemNo]
-    ,[strItemDescription]
-    ,[strCategoryCode]
-    ,[dblQtyShipped]
-    ,[dblPrice]
-    ,[dblTotalTax]
-    ,[dblTotal]
-    ,[strTaxGroup]
-    ,[strTaxCode]
-    ,[strState]
-    ,[strTaxClass]
-    ,[dblCheckoffTax]
-    ,[dblCitySalesTax]
-    ,[dblCityExciseTax]
-    ,[dblCountySalesTax]
-    ,[dblCountyExciseTax]
-    ,[dblFederalExciseTax]
-    ,[dblFederalLustTax]
-    ,[dblFederalOilSpillTax]
-    ,[dblFederalOtherTax]
-    ,[dblLocalOtherTax]
-    ,[dblPrepaidSalesTax]
-    ,[dblStateExciseTax]
-    ,[dblStateOtherTax]
-    ,[dblStateSalesTax]
-    ,[dblTonnageTax]
-    ,[dblSSTOnCheckoffTax]
-    ,[dblSSTOnCitySalesTax]
-    ,[dblSSTOnCityExciseTax]
-    ,[dblSSTOnCountySalesTax]
-    ,[dblSSTOnCountyExciseTax]
-    ,[dblSSTOnFederalExciseTax]
-    ,[dblSSTOnFederalLustTax]
-    ,[dblSSTOnFederalOilSpillTax]
-    ,[dblSSTOnFederalOtherTax]
-    ,[dblSSTOnLocalOtherTax]
-    ,[dblSSTOnPrepaidSalesTax]
-    ,[dblSSTOnStateExciseTax]
-    ,[dblSSTOnStateOtherTax]
-    ,[dblSSTOnTonnageTax]
-)
-SELECT
-       [strInvoiceNumber]             = I.[strInvoiceNumber]
-     , [strType]                      = I.[strType]
-     , [strCustomerNumber]            = C.[strCustomerNumber]
-     , [strCustomerName]              = C.[strCustomerName]
-     , [strAccountStatusCode]         = C.[strAccountStatusCode]
-     , [strCompanyNumber]             = CL.[strCompanyNumber]
-     , [strSalespersonName]           = I.[strSalespersonName]
-     , [dtmDate]                      = OT.[dtmDate]
-     , [intUserId]                    = @EntityUserId
-     , [strUserName]                  = @UserName
-     , [strItemNo]                    = ICI.[strItemNo]
-     , [strItemDescription]           = OT.[strItemDescription]
-     , [strCategoryCode]              = ICC.[strCategoryCode]
-     , [dblQtyShipped]                = OT.[dblQtyShipped]
-     , [dblPrice]                     = OT.[dblPrice]
-     , [dblTotalTax]                  = OT.[dblTotalTax]
-     , [dblTotal]                     = OT.[dblTotal]
-     , [strTaxGroup]                  = TG.[strTaxGroup]
-     , [strTaxCode]                   = '' --OT.[strTaxCode]
-     , [strState]                     = '' --OT.[strState]
-     , [strTaxClass]                  = '' --OT.[strTaxClass]
-     , [dblCheckoffTax]               = OT.[dblCheckoffTax]
-     , [dblCitySalesTax]              = OT.[dblCitySalesTax]
-     , [dblCityExciseTax]             = OT.[dblCityExciseTax]
-     , [dblCountySalesTax]            = OT.[dblCountySalesTax]
-     , [dblCountyExciseTax]           = OT.[dblCountyExciseTax]
-     , [dblFederalExciseTax]          = OT.[dblFederalExciseTax]
-     , [dblFederalLustTax]            = OT.[dblFederalLustTax]
-     , [dblFederalOilSpillTax]        = OT.[dblFederalOilSpillTax]
-     , [dblFederalOtherTax]           = OT.[dblFederalOtherTax]
-     , [dblLocalOtherTax]             = OT.[dblLocalOtherTax]
-     , [dblPrepaidSalesTax]           = OT.[dblPrepaidSalesTax]
-     , [dblStateExciseTax]            = OT.[dblStateExciseTax]
-     , [dblStateOtherTax]             = OT.[dblStateOtherTax]
-     , [dblStateSalesTax]             = OT.[dblStateSalesTax]
-     , [dblTonnageTax]                = OT.[dblTonnageTax]
-     , [dblSSTOnCheckoffTax]          = OT.[dblSSTOnCheckoffTax]
-     , [dblSSTOnCitySalesTax]         = OT.[dblSSTOnCitySalesTax]
-     , [dblSSTOnCityExciseTax]        = OT.[dblSSTOnCityExciseTax]
-     , [dblSSTOnCountySalesTax]       = OT.[dblSSTOnCountySalesTax]
-     , [dblSSTOnCountyExciseTax]      = OT.[dblSSTOnCountyExciseTax]
-     , [dblSSTOnFederalExciseTax]     = OT.[dblSSTOnFederalExciseTax]
-     , [dblSSTOnFederalLustTax]       = OT.[dblSSTOnFederalLustTax]
-     , [dblSSTOnFederalOilSpillTax]   = OT.[dblSSTOnFederalOilSpillTax]
-     , [dblSSTOnFederalOtherTax]      = OT.[dblSSTOnFederalOtherTax]
-     , [dblSSTOnLocalOtherTax]        = OT.[dblSSTOnLocalOtherTax]
-     , [dblSSTOnPrepaidSalesTax]      = OT.[dblSSTOnPrepaidSalesTax]
-     , [dblSSTOnStateExciseTax]       = OT.[dblSSTOnStateExciseTax]
-     , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
-     , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
-  FROM --dbo.vyuAROutboundTaxReport OT WITH (NOLOCK)
-       (
-       SELECT
-              TD.intInvoiceId
-            , TD.strInvoiceNumber
-            , TD.intEntityCustomerId
-            , TD.intCompanyLocationId
-            , TD.intEntitySalespersonId
-            , TD.dtmDate
-            , TD.intInvoiceDetailId
-            , TD.intItemId
-            , TD.strItemDescription
-            , TD.dblQtyShipped
-            , TD.dblPrice
-            , TD.dblTotalTax
-            , TD.dblTotal
-            , ISNULL(TD.intTaxGroupId, RT.intTaxGroupId) intTaxGroupId
-            , RT.intTaxReportTypeId
-            , RT.strType
-            , RT.dblCheckoffTax
-            , RT.dblCitySalesTax
-            , RT.dblCityExciseTax
-            , RT.dblCountySalesTax
-            , RT.dblCountyExciseTax
-            , RT.dblFederalExciseTax
-            , RT.dblFederalLustTax
-            , RT.dblFederalOilSpillTax
-            , RT.dblFederalOtherTax
-            , RT.dblLocalOtherTax
-            , RT.dblPrepaidSalesTax
-            , RT.dblStateExciseTax
-            , RT.dblStateOtherTax
-            , RT.dblStateSalesTax
-            , RT.dblTonnageTax
-            , RT.dblSSTOnCheckoffTax
-            , RT.dblSSTOnCitySalesTax
-            , RT.dblSSTOnCityExciseTax
-            , RT.dblSSTOnCountySalesTax
-            , RT.dblSSTOnCountyExciseTax
-            , RT.dblSSTOnFederalExciseTax
-            , RT.dblSSTOnFederalLustTax
-            , RT.dblSSTOnFederalOilSpillTax
-            , RT.dblSSTOnFederalOtherTax
-            , RT.dblSSTOnLocalOtherTax
-            , RT.dblSSTOnPrepaidSalesTax
-            , RT.dblSSTOnStateExciseTax
-            , RT.dblSSTOnStateOtherTax
-            , RT.dblSSTOnTonnageTax
-         FROM (
-              SELECT
-                     ARI.intInvoiceId
-                   , ARI.strInvoiceNumber
-                   , ARI.intEntityCustomerId
-                   , ARI.intCompanyLocationId
-                   , ARI.intEntitySalespersonId
-                   , ARI.dtmDate
-                   , ARID.intInvoiceDetailId
-                   , ARID.intItemId
-                   , ARID.strItemDescription
-                   , ARID.dblQtyShipped
-                   , ARID.dblPrice
-                   , ARID.dblTotalTax
-                   , ARID.dblTotal
-                   , ARID.intTaxGroupId
-                FROM tblARInvoiceDetail ARID WITH (NOLOCK)
-                     INNER JOIN tblARInvoice ARI WITH (NOLOCK)
-                                ON ARID.intInvoiceId = ARI.intInvoiceId
-						       AND ARI.ysnPosted = CAST(1 AS BIT)       
-               ) TD
-                 INNER JOIN (
-                            SELECT
-                                   ARIDT.intInvoiceDetailId
-                                 , ARIDT.intTaxGroupId
-                                 , SMTRT.intTaxReportTypeId
-                                 , SMTRT.strType
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 1 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCheckoffTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 2 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCitySalesTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 3 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCityExciseTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 4 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCountySalesTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 5 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCountyExciseTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 6 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblFederalExciseTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 7 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblFederalLustTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 8 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblFederalOilSpillTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 9 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblFederalOtherTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 10 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblLocalOtherTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 11 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblPrepaidSalesTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 12 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblStateExciseTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 13 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblStateOtherTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 14 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblStateSalesTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 15 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblTonnageTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 1 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCheckoffTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 2 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCitySalesTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 3 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCityExciseTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 4 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCountySalesTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 5 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCountyExciseTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 6 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnFederalExciseTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 7 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnFederalLustTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 8 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnFederalOilSpillTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 9 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnFederalOtherTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 10 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnLocalOtherTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 11 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnPrepaidSalesTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 12 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnStateExciseTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 13 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnStateOtherTax
-                                 , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 15 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnTonnageTax
-                              FROM tblARInvoiceDetailTax ARIDT WITH (NOLOCK)
-                                   INNER JOIN tblSMTaxCode SMTCode WITH (NOLOCK)
-                                              ON ARIDT.intTaxCodeId = SMTCode.intTaxCodeId
-                                   INNER JOIN tblSMTaxClass SMTC WITH (NOLOCK)
-                                              ON ARIDT.intTaxClassId = SMTC.intTaxClassId
-                                   INNER JOIN tblSMTaxReportType SMTRT WITH (NOLOCK)
-                                              ON SMTC.intTaxReportTypeId = SMTRT.intTaxReportTypeId
-                                   LEFT OUTER JOIN tblSMTaxGroup SMTG
-                                                   ON ARIDT.intTaxGroupId = SMTG.intTaxGroupId
-                             WHERE (@strTaxClass IS NULL OR SMTC.strTaxClass LIKE '%'+ @strTaxClass +'%')
-                               AND (@strTaxCode IS NULL OR SMTCode.strTaxCode LIKE '%'+ @strTaxCode +'%')
-                               AND (@strState IS NULL OR SMTCode.strState LIKE '%'+ @strState +'%')
-                               --AND ARIDT.ysnTaxExempt = 1
-                             GROUP BY
-                                   ARIDT.intInvoiceDetailId
-                                 , ARIDT.intTaxGroupId
-                                 , SMTRT.intTaxReportTypeId
-                                 , SMTRT.strType
-                            ) RT
-	                        ON TD.intInvoiceDetailId = RT.intInvoiceDetailId
-       ) OT
-         INNER JOIN #CUSTOMERS C 
-                    ON OT.intEntityCustomerId = C.intEntityCustomerId
-         INNER JOIN #COMPANYLOCATIONS CL
-                    ON OT.intCompanyLocationId = CL.intCompanyLocationId
-         INNER JOIN #INVOICES I
-                    ON OT.intInvoiceId = I.intInvoiceId
-         INNER JOIN #TAXGROUPS TG
-                    ON OT.intTaxGroupId = TG.intTaxGroupId
-         INNER JOIN #ITEMS ICI
-                    ON OT.[intItemId] = ICI.[intItemId]
-         INNER JOIN #CATEGORIES ICC
-                    ON ICI.[intCategoryId] = ICC.[intCategoryId]
+
+IF @strSubTotalBy = 'Tax Group'
+BEGIN
+    SELECT
+           [strInvoiceNumber]             = I.[strInvoiceNumber]
+         , [intInvoiceId]                 = I.[intInvoiceId]
+         , [intInvoiceDetailId]           = OT.[intInvoiceDetailId]
+         , [intEntityCustomerId]          = C.[intEntityCustomerId]
+         , [strType]                      = I.[strType]
+         , [strCustomerNumber]            = C.[strCustomerNumber]
+         , [strCustomerName]              = C.[strCustomerName]
+         , [strAccountStatusCode]         = C.[strAccountStatusCode]
+         , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strSalespersonName]           = I.[strSalespersonName]
+         , [dtmDate]                      = I.[dtmDate]
+         , [intUserId]                    = @EntityUserId
+         , [strUserName]                  = @UserName
+         , [strItemNo]                    = ICI.[strItemNo]
+         , [strItemDescription]           = OT.[strItemDescription]
+         , [strCategoryCode]              = ICC.[strCategoryCode]
+         , [dblQtyShipped]                = OT.[dblQtyShipped]
+         , [dblPrice]                     = OT.[dblPrice]
+         , [dblTotalTax]                  = OT.[dblTotalTax]
+         , [dblTotal]                     = OT.[dblTotal]
+         , [strTaxGroup]                  = OT.[strTaxGroup]
+         , [strTaxCode]                   = '' --OT.[strTaxCode]
+         , [strState]                     = '' --OT.[strState]
+         , [strTaxClass]                  = '' --OT.[strTaxClass]
+         , [dblCheckoffTax]               = OT.[dblCheckoffTax]
+         , [dblCitySalesTax]              = OT.[dblCitySalesTax]
+         , [dblCityExciseTax]             = OT.[dblCityExciseTax]
+         , [dblCountySalesTax]            = OT.[dblCountySalesTax]
+         , [dblCountyExciseTax]           = OT.[dblCountyExciseTax]
+         , [dblFederalExciseTax]          = OT.[dblFederalExciseTax]
+         , [dblFederalLustTax]            = OT.[dblFederalLustTax]
+         , [dblFederalOilSpillTax]        = OT.[dblFederalOilSpillTax]
+         , [dblFederalOtherTax]           = OT.[dblFederalOtherTax]
+         , [dblLocalOtherTax]             = OT.[dblLocalOtherTax]
+         , [dblPrepaidSalesTax]           = OT.[dblPrepaidSalesTax]
+         , [dblStateExciseTax]            = OT.[dblStateExciseTax]
+         , [dblStateOtherTax]             = OT.[dblStateOtherTax]
+         , [dblStateSalesTax]             = OT.[dblStateSalesTax]
+         , [dblTonnageTax]                = OT.[dblTonnageTax]
+         , [dblSSTOnCheckoffTax]          = OT.[dblSSTOnCheckoffTax]
+         , [dblSSTOnCitySalesTax]         = OT.[dblSSTOnCitySalesTax]
+         , [dblSSTOnCityExciseTax]        = OT.[dblSSTOnCityExciseTax]
+         , [dblSSTOnCountySalesTax]       = OT.[dblSSTOnCountySalesTax]
+         , [dblSSTOnCountyExciseTax]      = OT.[dblSSTOnCountyExciseTax]
+         , [dblSSTOnFederalExciseTax]     = OT.[dblSSTOnFederalExciseTax]
+         , [dblSSTOnFederalLustTax]       = OT.[dblSSTOnFederalLustTax]
+         , [dblSSTOnFederalOilSpillTax]   = OT.[dblSSTOnFederalOilSpillTax]
+         , [dblSSTOnFederalOtherTax]      = OT.[dblSSTOnFederalOtherTax]
+         , [dblSSTOnLocalOtherTax]        = OT.[dblSSTOnLocalOtherTax]
+         , [dblSSTOnPrepaidSalesTax]      = OT.[dblSSTOnPrepaidSalesTax]
+         , [dblSSTOnStateExciseTax]       = OT.[dblSSTOnStateExciseTax]
+         , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
+         , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
+      FROM (
+           SELECT intTaxGroupId, strTaxGroup, intInvoiceDetailId, intInvoiceId
+                , MIN(intEntityCustomerId) AS intEntityCustomerId
+                , MIN(intCompanyLocationId) AS intCompanyLocationId
+                , MIN(intItemId) AS intItemId
+                , MIN(strItemDescription) AS strItemDescription
+                , MIN(dblQtyShipped) AS dblQtyShipped
+                , MIN(dblPrice) AS dblPrice
+                , MIN(dblTotalTax) AS dblTotalTax
+                , MIN(dblTotal) AS dblTotal
+                , SUM(dblCheckoffTax) AS dblCheckoffTax
+                , SUM(dblCitySalesTax) AS dblCitySalesTax
+                , SUM(dblCityExciseTax) AS dblCityExciseTax
+                , SUM(dblCountySalesTax) AS dblCountySalesTax
+                , SUM(dblCountyExciseTax) AS dblCountyExciseTax
+                , SUM(dblFederalExciseTax) AS dblFederalExciseTax
+                , SUM(dblFederalLustTax) AS dblFederalLustTax
+                , SUM(dblFederalOilSpillTax) AS dblFederalOilSpillTax
+                , SUM(dblFederalOtherTax) AS dblFederalOtherTax
+                , SUM(dblLocalOtherTax) AS dblLocalOtherTax
+                , SUM(dblPrepaidSalesTax) AS dblPrepaidSalesTax
+                , SUM(dblStateExciseTax) AS dblStateExciseTax
+                , SUM(dblStateOtherTax) AS dblStateOtherTax
+                , SUM(dblStateSalesTax) AS dblStateSalesTax
+                , SUM(dblTonnageTax) AS dblTonnageTax
+                , SUM(dblSSTOnCheckoffTax) AS dblSSTOnCheckoffTax
+                , SUM(dblSSTOnCitySalesTax) AS dblSSTOnCitySalesTax
+                , SUM(dblSSTOnCityExciseTax) AS dblSSTOnCityExciseTax
+                , SUM(dblSSTOnCountySalesTax) AS dblSSTOnCountySalesTax
+                , SUM(dblSSTOnCountyExciseTax) AS dblSSTOnCountyExciseTax
+                , SUM(dblSSTOnFederalExciseTax) AS dblSSTOnFederalExciseTax
+                , SUM(dblSSTOnFederalLustTax) AS dblSSTOnFederalLustTax
+                , SUM(dblSSTOnFederalOilSpillTax) AS dblSSTOnFederalOilSpillTax
+                , SUM(dblSSTOnFederalOtherTax) AS dblSSTOnFederalOtherTax
+                , SUM(dblSSTOnLocalOtherTax) AS dblSSTOnLocalOtherTax
+                , SUM(dblSSTOnPrepaidSalesTax) AS dblSSTOnPrepaidSalesTax
+                , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
+                , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
+                , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
+             FROM vyuAROutboundTaxReport WITH (NOLOCK)
+            WHERE (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+              AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+              AND (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
+              AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+              AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
+             --AND ysnTaxExempt = 1
+            GROUP BY intTaxGroupId, strTaxGroup, intInvoiceDetailId, intInvoiceId
+           ) OT
+             INNER JOIN #CUSTOMERS C 
+                        ON OT.intEntityCustomerId = C.intEntityCustomerId
+             INNER JOIN #COMPANYLOCATIONS CL
+                        ON OT.intCompanyLocationId = CL.intCompanyLocationId
+             INNER JOIN #INVOICES I
+                        ON OT.intInvoiceId = I.intInvoiceId
+             INNER JOIN #ITEMS ICI
+                        ON OT.[intItemId] = ICI.[intItemId]
+             INNER JOIN #CATEGORIES ICC
+                        ON ICI.[intCategoryId] = ICC.[intCategoryId]
+		 ORDER BY OT.strTaxGroup, OT.intInvoiceId, OT.intInvoiceDetailId
+    RETURN 1;
+END
+
+IF @strSubTotalBy = 'Customer'
+BEGIN
+    SELECT
+           [strInvoiceNumber]             = I.[strInvoiceNumber]
+         , [intInvoiceId]                 = I.[intInvoiceId]
+         , [intInvoiceDetailId]           = OT.[intInvoiceDetailId]
+         , [intEntityCustomerId]          = C.[intEntityCustomerId]
+         , [strType]                      = I.[strType]
+         , [strCustomerNumber]            = C.[strCustomerNumber]
+         , [strCustomerName]              = C.[strCustomerName]
+         , [strAccountStatusCode]         = C.[strAccountStatusCode]
+         , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strSalespersonName]           = I.[strSalespersonName]
+         , [dtmDate]                      = I.[dtmDate]
+         , [intUserId]                    = @EntityUserId
+         , [strUserName]                  = @UserName
+         , [strItemNo]                    = ICI.[strItemNo]
+         , [strItemDescription]           = OT.[strItemDescription]
+         , [strCategoryCode]              = ICC.[strCategoryCode]
+         , [dblQtyShipped]                = OT.[dblQtyShipped]
+         , [dblPrice]                     = OT.[dblPrice]
+         , [dblTotalTax]                  = OT.[dblTotalTax]
+         , [dblTotal]                     = OT.[dblTotal]
+         , [strTaxGroup]                  = OT.[strTaxGroup]
+         , [strTaxCode]                   = '' --OT.[strTaxCode]
+         , [strState]                     = '' --OT.[strState]
+         , [strTaxClass]                  = '' --OT.[strTaxClass]
+         , [dblCheckoffTax]               = OT.[dblCheckoffTax]
+         , [dblCitySalesTax]              = OT.[dblCitySalesTax]
+         , [dblCityExciseTax]             = OT.[dblCityExciseTax]
+         , [dblCountySalesTax]            = OT.[dblCountySalesTax]
+         , [dblCountyExciseTax]           = OT.[dblCountyExciseTax]
+         , [dblFederalExciseTax]          = OT.[dblFederalExciseTax]
+         , [dblFederalLustTax]            = OT.[dblFederalLustTax]
+         , [dblFederalOilSpillTax]        = OT.[dblFederalOilSpillTax]
+         , [dblFederalOtherTax]           = OT.[dblFederalOtherTax]
+         , [dblLocalOtherTax]             = OT.[dblLocalOtherTax]
+         , [dblPrepaidSalesTax]           = OT.[dblPrepaidSalesTax]
+         , [dblStateExciseTax]            = OT.[dblStateExciseTax]
+         , [dblStateOtherTax]             = OT.[dblStateOtherTax]
+         , [dblStateSalesTax]             = OT.[dblStateSalesTax]
+         , [dblTonnageTax]                = OT.[dblTonnageTax]
+         , [dblSSTOnCheckoffTax]          = OT.[dblSSTOnCheckoffTax]
+         , [dblSSTOnCitySalesTax]         = OT.[dblSSTOnCitySalesTax]
+         , [dblSSTOnCityExciseTax]        = OT.[dblSSTOnCityExciseTax]
+         , [dblSSTOnCountySalesTax]       = OT.[dblSSTOnCountySalesTax]
+         , [dblSSTOnCountyExciseTax]      = OT.[dblSSTOnCountyExciseTax]
+         , [dblSSTOnFederalExciseTax]     = OT.[dblSSTOnFederalExciseTax]
+         , [dblSSTOnFederalLustTax]       = OT.[dblSSTOnFederalLustTax]
+         , [dblSSTOnFederalOilSpillTax]   = OT.[dblSSTOnFederalOilSpillTax]
+         , [dblSSTOnFederalOtherTax]      = OT.[dblSSTOnFederalOtherTax]
+         , [dblSSTOnLocalOtherTax]        = OT.[dblSSTOnLocalOtherTax]
+         , [dblSSTOnPrepaidSalesTax]      = OT.[dblSSTOnPrepaidSalesTax]
+         , [dblSSTOnStateExciseTax]       = OT.[dblSSTOnStateExciseTax]
+         , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
+         , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
+      FROM (
+           SELECT intEntityCustomerId, intInvoiceDetailId, intInvoiceId
+                , MIN(intCompanyLocationId) AS intCompanyLocationId
+                , MIN(intItemId) AS intItemId
+                , MIN(strItemDescription) AS strItemDescription
+                , MIN(dblQtyShipped) AS dblQtyShipped
+                , MIN(dblPrice) AS dblPrice
+                , MIN(dblTotalTax) AS dblTotalTax
+                , MIN(dblTotal) AS dblTotal
+                , MIN(intTaxGroupId) AS intTaxGroupId
+                , MIN(strTaxGroup) AS strTaxGroup
+                , SUM(dblCheckoffTax) AS dblCheckoffTax
+                , SUM(dblCitySalesTax) AS dblCitySalesTax
+                , SUM(dblCityExciseTax) AS dblCityExciseTax
+                , SUM(dblCountySalesTax) AS dblCountySalesTax
+                , SUM(dblCountyExciseTax) AS dblCountyExciseTax
+                , SUM(dblFederalExciseTax) AS dblFederalExciseTax
+                , SUM(dblFederalLustTax) AS dblFederalLustTax
+                , SUM(dblFederalOilSpillTax) AS dblFederalOilSpillTax
+                , SUM(dblFederalOtherTax) AS dblFederalOtherTax
+                , SUM(dblLocalOtherTax) AS dblLocalOtherTax
+                , SUM(dblPrepaidSalesTax) AS dblPrepaidSalesTax
+                , SUM(dblStateExciseTax) AS dblStateExciseTax
+                , SUM(dblStateOtherTax) AS dblStateOtherTax
+                , SUM(dblStateSalesTax) AS dblStateSalesTax
+                , SUM(dblTonnageTax) AS dblTonnageTax
+                , SUM(dblSSTOnCheckoffTax) AS dblSSTOnCheckoffTax
+                , SUM(dblSSTOnCitySalesTax) AS dblSSTOnCitySalesTax
+                , SUM(dblSSTOnCityExciseTax) AS dblSSTOnCityExciseTax
+                , SUM(dblSSTOnCountySalesTax) AS dblSSTOnCountySalesTax
+                , SUM(dblSSTOnCountyExciseTax) AS dblSSTOnCountyExciseTax
+                , SUM(dblSSTOnFederalExciseTax) AS dblSSTOnFederalExciseTax
+                , SUM(dblSSTOnFederalLustTax) AS dblSSTOnFederalLustTax
+                , SUM(dblSSTOnFederalOilSpillTax) AS dblSSTOnFederalOilSpillTax
+                , SUM(dblSSTOnFederalOtherTax) AS dblSSTOnFederalOtherTax
+                , SUM(dblSSTOnLocalOtherTax) AS dblSSTOnLocalOtherTax
+                , SUM(dblSSTOnPrepaidSalesTax) AS dblSSTOnPrepaidSalesTax
+                , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
+                , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
+                , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
+             FROM vyuAROutboundTaxReport WITH (NOLOCK)
+            WHERE (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+              AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+              AND (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
+              AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+              AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
+             --AND ysnTaxExempt = 1
+            GROUP BY intEntityCustomerId, intInvoiceDetailId, intInvoiceId
+           ) OT
+             INNER JOIN #CUSTOMERS C 
+                        ON OT.intEntityCustomerId = C.intEntityCustomerId
+             INNER JOIN #COMPANYLOCATIONS CL
+                        ON OT.intCompanyLocationId = CL.intCompanyLocationId
+             INNER JOIN #INVOICES I
+                        ON OT.intInvoiceId = I.intInvoiceId
+             INNER JOIN #ITEMS ICI
+                        ON OT.[intItemId] = ICI.[intItemId]
+             INNER JOIN #CATEGORIES ICC
+                        ON ICI.[intCategoryId] = ICC.[intCategoryId]
+		 ORDER BY C.strCustomerName, OT.intInvoiceId, OT.intInvoiceDetailId
+    RETURN 1;
+END
+
+IF @strSubTotalBy = 'Tax Code'
+BEGIN
+    SELECT
+           [strInvoiceNumber]             = I.[strInvoiceNumber]
+         , [intInvoiceId]                 = I.[intInvoiceId]
+         , [intInvoiceDetailId]           = OT.[intInvoiceDetailId]
+         , [intEntityCustomerId]          = C.[intEntityCustomerId]
+         , [strType]                      = I.[strType]
+         , [strCustomerNumber]            = C.[strCustomerNumber]
+         , [strCustomerName]              = C.[strCustomerName]
+         , [strAccountStatusCode]         = C.[strAccountStatusCode]
+         , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strSalespersonName]           = I.[strSalespersonName]
+         , [dtmDate]                      = I.[dtmDate]
+         , [intUserId]                    = @EntityUserId
+         , [strUserName]                  = @UserName
+         , [strItemNo]                    = ICI.[strItemNo]
+         , [strItemDescription]           = OT.[strItemDescription]
+         , [strCategoryCode]              = ICC.[strCategoryCode]
+         , [dblQtyShipped]                = OT.[dblQtyShipped]
+         , [dblPrice]                     = OT.[dblPrice]
+         , [dblTotalTax]                  = OT.[dblTotalTax]
+         , [dblTotal]                     = OT.[dblTotal]
+         , [strTaxGroup]                  = OT.[strTaxGroup]
+         , [strTaxCode]                   = OT.[strTaxCode]
+         , [strState]                     = '' --OT.[strState]
+         , [strTaxClass]                  = '' --OT.[strTaxClass]
+         , [dblCheckoffTax]               = OT.[dblCheckoffTax]
+         , [dblCitySalesTax]              = OT.[dblCitySalesTax]
+         , [dblCityExciseTax]             = OT.[dblCityExciseTax]
+         , [dblCountySalesTax]            = OT.[dblCountySalesTax]
+         , [dblCountyExciseTax]           = OT.[dblCountyExciseTax]
+         , [dblFederalExciseTax]          = OT.[dblFederalExciseTax]
+         , [dblFederalLustTax]            = OT.[dblFederalLustTax]
+         , [dblFederalOilSpillTax]        = OT.[dblFederalOilSpillTax]
+         , [dblFederalOtherTax]           = OT.[dblFederalOtherTax]
+         , [dblLocalOtherTax]             = OT.[dblLocalOtherTax]
+         , [dblPrepaidSalesTax]           = OT.[dblPrepaidSalesTax]
+         , [dblStateExciseTax]            = OT.[dblStateExciseTax]
+         , [dblStateOtherTax]             = OT.[dblStateOtherTax]
+         , [dblStateSalesTax]             = OT.[dblStateSalesTax]
+         , [dblTonnageTax]                = OT.[dblTonnageTax]
+         , [dblSSTOnCheckoffTax]          = OT.[dblSSTOnCheckoffTax]
+         , [dblSSTOnCitySalesTax]         = OT.[dblSSTOnCitySalesTax]
+         , [dblSSTOnCityExciseTax]        = OT.[dblSSTOnCityExciseTax]
+         , [dblSSTOnCountySalesTax]       = OT.[dblSSTOnCountySalesTax]
+         , [dblSSTOnCountyExciseTax]      = OT.[dblSSTOnCountyExciseTax]
+         , [dblSSTOnFederalExciseTax]     = OT.[dblSSTOnFederalExciseTax]
+         , [dblSSTOnFederalLustTax]       = OT.[dblSSTOnFederalLustTax]
+         , [dblSSTOnFederalOilSpillTax]   = OT.[dblSSTOnFederalOilSpillTax]
+         , [dblSSTOnFederalOtherTax]      = OT.[dblSSTOnFederalOtherTax]
+         , [dblSSTOnLocalOtherTax]        = OT.[dblSSTOnLocalOtherTax]
+         , [dblSSTOnPrepaidSalesTax]      = OT.[dblSSTOnPrepaidSalesTax]
+         , [dblSSTOnStateExciseTax]       = OT.[dblSSTOnStateExciseTax]
+         , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
+         , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
+      FROM (
+           SELECT intTaxCodeId, strTaxCode, intInvoiceDetailId, intInvoiceId
+                , MIN(intEntityCustomerId) AS intEntityCustomerId
+                , MIN(intCompanyLocationId) AS intCompanyLocationId
+                , MIN(intItemId) AS intItemId
+                , MIN(strItemDescription) AS strItemDescription
+                , MIN(dblQtyShipped) AS dblQtyShipped
+                , MIN(dblPrice) AS dblPrice
+                , MIN(dblTotalTax) AS dblTotalTax
+                , MIN(dblTotal) AS dblTotal
+                , MIN(intTaxGroupId) AS intTaxGroupId
+                , MIN(strTaxGroup) AS strTaxGroup
+                , SUM(dblCheckoffTax) AS dblCheckoffTax
+                , SUM(dblCitySalesTax) AS dblCitySalesTax
+                , SUM(dblCityExciseTax) AS dblCityExciseTax
+                , SUM(dblCountySalesTax) AS dblCountySalesTax
+                , SUM(dblCountyExciseTax) AS dblCountyExciseTax
+                , SUM(dblFederalExciseTax) AS dblFederalExciseTax
+                , SUM(dblFederalLustTax) AS dblFederalLustTax
+                , SUM(dblFederalOilSpillTax) AS dblFederalOilSpillTax
+                , SUM(dblFederalOtherTax) AS dblFederalOtherTax
+                , SUM(dblLocalOtherTax) AS dblLocalOtherTax
+                , SUM(dblPrepaidSalesTax) AS dblPrepaidSalesTax
+                , SUM(dblStateExciseTax) AS dblStateExciseTax
+                , SUM(dblStateOtherTax) AS dblStateOtherTax
+                , SUM(dblStateSalesTax) AS dblStateSalesTax
+                , SUM(dblTonnageTax) AS dblTonnageTax
+                , SUM(dblSSTOnCheckoffTax) AS dblSSTOnCheckoffTax
+                , SUM(dblSSTOnCitySalesTax) AS dblSSTOnCitySalesTax
+                , SUM(dblSSTOnCityExciseTax) AS dblSSTOnCityExciseTax
+                , SUM(dblSSTOnCountySalesTax) AS dblSSTOnCountySalesTax
+                , SUM(dblSSTOnCountyExciseTax) AS dblSSTOnCountyExciseTax
+                , SUM(dblSSTOnFederalExciseTax) AS dblSSTOnFederalExciseTax
+                , SUM(dblSSTOnFederalLustTax) AS dblSSTOnFederalLustTax
+                , SUM(dblSSTOnFederalOilSpillTax) AS dblSSTOnFederalOilSpillTax
+                , SUM(dblSSTOnFederalOtherTax) AS dblSSTOnFederalOtherTax
+                , SUM(dblSSTOnLocalOtherTax) AS dblSSTOnLocalOtherTax
+                , SUM(dblSSTOnPrepaidSalesTax) AS dblSSTOnPrepaidSalesTax
+                , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
+                , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
+                , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
+             FROM vyuAROutboundTaxReport WITH (NOLOCK)
+            WHERE (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+              AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+              AND (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
+              AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+              AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
+             --AND ysnTaxExempt = 1
+            GROUP BY intTaxCodeId, strTaxCode, intInvoiceDetailId, intInvoiceId
+           ) OT
+             INNER JOIN #CUSTOMERS C 
+                        ON OT.intEntityCustomerId = C.intEntityCustomerId
+             INNER JOIN #COMPANYLOCATIONS CL
+                        ON OT.intCompanyLocationId = CL.intCompanyLocationId
+             INNER JOIN #INVOICES I
+                        ON OT.intInvoiceId = I.intInvoiceId
+             INNER JOIN #ITEMS ICI
+                        ON OT.[intItemId] = ICI.[intItemId]
+             INNER JOIN #CATEGORIES ICC
+                        ON ICI.[intCategoryId] = ICC.[intCategoryId]
+		 ORDER BY OT.strTaxCode, OT.intInvoiceId, OT.intInvoiceDetailId
+    RETURN 1;
+END
 
 
-
-
-SELECT strTaxReportType = ISNULL(@strTaxReportType, 'Tax Detail')

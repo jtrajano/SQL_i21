@@ -3,11 +3,9 @@ AS
 
 SELECT
        TD.intInvoiceId
-     , TD.strInvoiceNumber
      , TD.intEntityCustomerId
      , TD.intCompanyLocationId
      , TD.intEntitySalespersonId
-     , TD.dtmDate
      , TD.intInvoiceDetailId
      , TD.intItemId
      , TD.strItemDescription
@@ -16,6 +14,16 @@ SELECT
      , TD.dblTotalTax
      , TD.dblTotal
      , ISNULL(TD.intTaxGroupId, RT.intTaxGroupId) intTaxGroupId
+     , SMTG.strTaxGroup
+     , RT.intTaxCodeId
+     , RT.strTaxCode
+     , RT.strState
+     , RT.intTaxClassId
+     , RT.strTaxClass
+     , RT.intTaxReportTypeId
+     , RT.strType
+     , RT.ysnTaxExempt
+     , RT.ysnInvalidSetup
      , RT.dblCheckoffTax
      , RT.dblCitySalesTax
      , RT.dblCityExciseTax
@@ -48,11 +56,9 @@ SELECT
   FROM (
        SELECT
               ARI.intInvoiceId
-            , ARI.strInvoiceNumber
             , ARI.intEntityCustomerId
             , ARI.intCompanyLocationId
             , ARI.intEntitySalespersonId
-            , ARI.dtmDate
             , ARID.intInvoiceDetailId
             , ARID.intItemId
             , ARID.strItemDescription
@@ -70,44 +76,52 @@ SELECT
                      SELECT
                             ARIDT.intInvoiceDetailId
                           , ARIDT.intTaxGroupId
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 1 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCheckoffTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 2 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCitySalesTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 3 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCityExciseTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 4 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCountySalesTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 5 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblCountyExciseTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 6 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblFederalExciseTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 7 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblFederalLustTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 8 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblFederalOilSpillTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 9 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblFederalOtherTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 10 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblLocalOtherTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 11 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblPrepaidSalesTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 12 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblStateExciseTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 13 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblStateOtherTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 14 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblStateSalesTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 15 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END)) AS dblTonnageTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 1 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCheckoffTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 2 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCitySalesTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 3 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCityExciseTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 4 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCountySalesTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 5 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnCountyExciseTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 6 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnFederalExciseTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 7 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnFederalLustTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 8 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnFederalOilSpillTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 9 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnFederalOtherTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 10 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnLocalOtherTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 11 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnPrepaidSalesTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 12 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnStateExciseTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 13 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnStateOtherTax
-                          , SUM((CASE WHEN SMTRT.intTaxReportTypeId = 15 THEN 0.000000 ELSE 0.000000 END)) AS dblSSTOnTonnageTax
+                          , ARIDT.ysnTaxExempt
+                          , ARIDT.ysnInvalidSetup
+                          , STC.intTaxCodeId
+                          , STC.strTaxCode
+                          , STC.strState
+                          , SMTC.intTaxClassId
+                          , SMTC.strTaxClass
+                          , SMTRT.intTaxReportTypeId
+                          , SMTRT.strType
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 1 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblCheckoffTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 2 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblCitySalesTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 3 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblCityExciseTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 4 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblCountySalesTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 5 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblCountyExciseTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 6 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblFederalExciseTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 7 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblFederalLustTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 8 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblFederalOilSpillTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 9 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblFederalOtherTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 10 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblLocalOtherTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 11 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblPrepaidSalesTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 12 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblStateExciseTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 13 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblStateOtherTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 14 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblStateSalesTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 15 THEN ARIDT.dblAdjustedTax ELSE 0.000000 END) AS dblTonnageTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 1 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnCheckoffTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 2 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnCitySalesTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 3 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnCityExciseTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 4 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnCountySalesTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 5 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnCountyExciseTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 6 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnFederalExciseTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 7 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnFederalLustTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 8 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnFederalOilSpillTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 9 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnFederalOtherTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 10 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnLocalOtherTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 11 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnPrepaidSalesTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 12 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnStateExciseTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 13 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnStateOtherTax
+                          , (CASE WHEN SMTRT.intTaxReportTypeId = 15 THEN 0.000000 ELSE 0.000000 END) AS dblSSTOnTonnageTax
                        FROM tblARInvoiceDetailTax ARIDT
+                            INNER JOIN tblSMTaxCode STC
+                                       ON ARIDT.intTaxCodeId = STC.intTaxCodeId
                             INNER JOIN tblSMTaxClass SMTC
                                        ON ARIDT.intTaxClassId = SMTC.intTaxClassId
                             INNER JOIN tblSMTaxReportType SMTRT
                                        ON SMTC.intTaxReportTypeId = SMTRT.intTaxReportTypeId
-                      GROUP BY
-                            ARIDT.intInvoiceDetailId
-                          , ARIDT.intTaxGroupId
-                          , SMTRT.intTaxReportTypeId
-                          , SMTRT.strType
                      ) RT
 	                 ON TD.intInvoiceDetailId = RT.intInvoiceDetailId
+          LEFT OUTER JOIN tblSMTaxGroup SMTG
+                          ON ISNULL(TD.intTaxGroupId, RT.intTaxGroupId) = SMTG.intTaxGroupId
