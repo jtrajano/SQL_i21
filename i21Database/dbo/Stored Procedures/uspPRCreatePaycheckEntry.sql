@@ -6,9 +6,9 @@
 	,@strPayGroupIds			NVARCHAR(MAX) = ''
 	,@strDepartmentIds			NVARCHAR(MAX) = ''
 	,@ysnUseStandardHours		BIT = 1
-	,@ysnExcludeDeductions		BIT = 0
 	,@ysnOverrideDirectDeposit	BIT = 0
 	,@intUserId					INT = NULL
+	,@strExcludeDeductions		NVARCHAR(MAX) = ''
 	,@intPaycheckId				INT = NULL OUTPUT
 AS
 BEGIN
@@ -21,6 +21,7 @@ DECLARE @intEmployee INT
 	   ,@ysnUseStandard BIT
 	   ,@ysnOverrideDD BIT
 	   ,@xmlDepartments XML
+	   ,@xmlExcludeDeductions XML
 
 /* Localize Parameters for Optimal Performance */
 SELECT @intEmployee		= @intEmployeeId
@@ -31,6 +32,7 @@ SELECT @intEmployee		= @intEmployeeId
 	  ,@ysnOverrideDD	= @ysnOverrideDirectDeposit
 	  ,@xmlPayGroups	= CAST('<A>'+ REPLACE(@strPayGroupIds, ',', '</A><A>')+ '</A>' AS XML) 
 	  ,@xmlDepartments  = CAST('<A>'+ REPLACE(@strDepartmentIds, ',', '</A><A>')+ '</A>' AS XML) 
+	  ,@xmlExcludeDeductions = CAST('<A>'+ REPLACE(@strExcludeDeductions, ',', '</A><A>')+ '</A>' AS XML)
 
 --Parse the Departments Parameter to Temporary Table
 SELECT RTRIM(LTRIM(T.value('.', 'INT'))) AS intDepartmentId
@@ -283,15 +285,22 @@ DECLARE @intPaycheckDeductionId INT
 DECLARE @intEmployeeDeductionId INT
 DECLARE @udtPRPaycheckDeductionIn TABLE(intPaycheckDeductionId INT)
 
+--Parse the Excluded Deductions Parameter to Temporary Table
+SELECT RTRIM(LTRIM(T.value('.', 'INT'))) AS intTypeDeductionId
+INTO #tmpExcludeDeductions
+FROM @xmlExcludeDeductions.nodes('/A') AS X(T) 
+WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
+
 /* Insert Deductions to Temp Table for iteration */
-SELECT tblPREmployeeDeduction.intEmployeeDeductionId 
+SELECT tblPREmployeeDeduction.intEmployeeDeductionId
+	,tblPREmployeeDeduction.intTypeDeductionId
 INTO #tmpDeductions FROM tblPREmployeeDeduction 
-WHERE [intEntityEmployeeId] = @intEmployee AND @ysnExcludeDeductions = 0
+WHERE [intEntityEmployeeId] = @intEmployee
+	AND [intTypeDeductionId] NOT IN (SELECT intTypeDeductionId FROM #tmpExcludeDeductions)
 
 /* Add Each Deduction to Paycheck */
 WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 	BEGIN
-
 		/* Select Employee Deduction to Add */
 		SELECT TOP 1 @intEmployeeDeductionId = intEmployeeDeductionId, @intPaycheckDeductionId = NULL FROM #tmpDeductions
 	
@@ -390,5 +399,5 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayGroups')) DROP TABLE #tmpPayGroups
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayGroupDetail')) DROP TABLE #tmpPayGroupDetail
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarnings')) DROP TABLE #tmpEarnings
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpExcludeDeductions')) DROP TABLE #tmpExcludeDeductions
 END
-GO

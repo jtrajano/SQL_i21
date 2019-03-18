@@ -6,7 +6,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strMeterKey				= MAD.strMeterKey
 	 , dblLastReading			= MRD.dblLastReading
 	 , dblCurrentReading		= MRD.dblCurrentReading
-	 , dblQtyShipped			= ID.dblQtyShipped
+	 , dblQtyShipped			= ISNULL(MRD.dblCurrentReading, 0) - ISNULL(MRD.dblLastReading, 0)
 FROM tblARInvoice I 
 INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblMBMeterReading MR ON I.intMeterReadingId = MR.intMeterReadingId AND I.intInvoiceId = MR.intInvoiceId

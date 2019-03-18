@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuHDTimeEntryTimeOffNotification]
 	AS
 		select
-		b.intEntityId
+		intId = convert(int,ROW_NUMBER() over (order by b.intEntityId))
+		,b.intEntityId
 		,a.intTimeOffRequestId
 		,strFullName = ltrim(rtrim(isnull(b.strFirstName, ''))) + ' ' + ltrim(rtrim(isnull(b.strMiddleName,''))) + ' ' + ltrim(rtrim(isnull(b.strLastName,''))) COLLATE Latin1_General_CI_AS
 		,a.dtmDateFrom

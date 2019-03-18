@@ -9,7 +9,6 @@ SELECT
 	ETP.dtmBeginDate,
 	ETP.dtmEndDate,
 	ETP.dtmPayDate,
-	ETP.ysnExcludeDeductions,
 	intPayGroupIds = LEFT(ETP.intPayGroupIds, LEN(ETP.intPayGroupIds)-1) COLLATE Latin1_General_CI_AS,
 	strPayGroupIds = LEFT(ETP.strPayGroupIds, LEN(ETP.strPayGroupIds)-1) COLLATE Latin1_General_CI_AS,
 	ETP.dblHours,
@@ -26,7 +25,6 @@ FROM
 			PG2.dtmPayDate,
 			PG2.dtmBeginDate,
 			PG2.dtmEndDate,
-			PG2.ysnExcludeDeductions,
 			intPayGroupIds = (
                 SELECT 
 					CONVERT(NVARCHAR(8), PG1.intPayGroupId) + ', ' AS [text()]
@@ -69,7 +67,6 @@ FROM
 			PG2.dtmPayDate,
 			PG2.dtmBeginDate,
 			PG2.dtmEndDate,
-			PG2.ysnExcludeDeductions,
 			EMP.intConcurrencyId
     ) ETP
 WHERE 

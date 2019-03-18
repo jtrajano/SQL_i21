@@ -38,7 +38,7 @@ BEGIN TRY
 			,@intLocationId			INT
 			,@intSalesPersonId		INT
 			,@intProfitCenter		INT
-			,@voucherNonInvDetails	VoucherDetailNonInventory
+			,@voucherNonInvDetails	VoucherPayable
 			,@InvoiceEntries		InvoiceIntegrationStagingTable	
 			,@LineItemTaxEntries	LineItemTaxDetailStagingTable
 			,@strSourceContractNo	NVARCHAR(50)
@@ -185,17 +185,32 @@ BEGIN TRY
 
     IF @strDocType = 'AP Debit Memo' OR @strDocType = 'AP Voucher'
     BEGIN
-		INSERT	INTO @voucherNonInvDetails(intItemId, dblQtyReceived, dblDiscount, dblCost,intAccountId)
-		SELECT	NULL, 1, 0, ABS(@dblAmount),dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Cost of Goods')
-	   
-		SELECT	@type = CASE WHEN @strDocType = 'AP Voucher' THEN 1 ELSE 3 END
 
-		EXEC	uspAPCreateBillData
-				@userId					=   @intCreatedById,
-				@vendorId				=   @intEntityId,
-				@type					=   @type,
+		SELECT	@type = CASE WHEN @strDocType = 'AP Voucher' THEN 1 ELSE 3 END
+		
+		INSERT	INTO @voucherNonInvDetails
+		(
+			intItemId
+			,dblQuantityToBill
+			,dblDiscount
+			,dblCost
+			,intAccountId
+			,intEntityVendorId
+			,intTransactionType
+			,intShipToId
+		)
+		SELECT	NULL
+				,1
+				,0
+				,ABS(@dblAmount)
+				,dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Cost of Goods')
+				,@intEntityId
+				,@type
+				,@intLocationId
+
+		EXEC	uspAPCreateVoucher
 				@voucherNonInvDetails	=   @voucherNonInvDetails,
-				@shipTo					=	@intLocationId,
+				@userId					=   @intCreatedById,
 				@billId					=   @intBillInvoiceId OUTPUT
 
 		SELECT	@strBillInvoice =	 strBillId FROM tblAPBill WHERE intBillId = @intBillInvoiceId	   
