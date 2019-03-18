@@ -7451,6 +7451,8 @@
     <Build Include="dbo\Tables\tblAROutboundTaxStagingTable.sql" />
     <Build Include="dbo\Views\vyuAROutboundTaxReport.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_UpdateVantivToWorldPay.sql" />
+    <Build Include="dbo\Views\vyuEMEAExportCustomer.sql" />
+    <Build Include="dbo\Tables\tblAREACustomerExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
