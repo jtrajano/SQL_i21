@@ -180,4 +180,40 @@ BEGIN
 	;
 END 
 
+-- Fix any decimal discrepancy 
+BEGIN 
+	UPDATE	fixDiscrepancy
+	SET
+		fixDiscrepancy.dblAmount += (sc.dblAmount - a.dblTotal) 
+	FROM	
+		tblICInventoryShipment s INNER JOIN tblICInventoryShipmentCharge sc
+			ON s.intInventoryShipmentId = sc.intInventoryShipmentId	
+		CROSS APPLY (
+			SELECT 
+				dblTotal = SUM(a.dblAmount)
+			FROM
+				tblICInventoryShipmentItemAllocatedCharge a
+			WHERE 
+				a.intInventoryShipmentId = s.intInventoryShipmentId
+				AND a.intInventoryShipmentChargeId = sc.intInventoryShipmentChargeId
+		) a
+		CROSS APPLY (
+			SELECT TOP 1 
+				discrepancy.intInventoryShipmentItemAllocatedChargeId
+			FROM
+				tblICInventoryShipmentItemAllocatedCharge discrepancy
+			WHERE 
+				discrepancy.intInventoryShipmentId = s.intInventoryShipmentId
+				AND discrepancy.intInventoryShipmentChargeId = sc.intInventoryShipmentChargeId
+			ORDER BY 
+				discrepancy.intInventoryShipmentItemId DESC
+		) findDiscrepancy
+		INNER JOIN tblICInventoryShipmentItemAllocatedCharge fixDiscrepancy
+			ON fixDiscrepancy.intInventoryShipmentItemAllocatedChargeId = findDiscrepancy.intInventoryShipmentItemAllocatedChargeId
+	WHERE 
+		s.intInventoryShipmentId = @intInventoryShipmentId
+		AND (sc.dblAmount - a.dblTotal) <> 0 
+		AND (sc.dblAmount - a.dblTotal) BETWEEN 0 AND 1 -- Limit the fix on decimal discrepancies. 
+END 
+
 _Exit:
