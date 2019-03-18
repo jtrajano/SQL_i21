@@ -1,6 +1,7 @@
 CREATE TABLE tblICStagingAdjustmentDetail (
 	  intStagingAdjustmentDetailId INT IDENTITY(1,1)
 	, intItemId INT NULL -- Used when this field is included in export
+	, intAdjustmentId INT NULL -- Normally used when this field is included in export
 	, strAdjustmentNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL -- Used in export but required to have an initial value in import for grouping details
 	, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 	, strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

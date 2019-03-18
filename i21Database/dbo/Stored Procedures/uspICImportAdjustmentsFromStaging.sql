@@ -29,8 +29,8 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber 30, @strAdjustmentNo OUTPUT, @intLocationId
 	
-	INSERT INTO tblICInventoryAdjustment(strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription, intCreatedByUserId, dtmDateCreated)
-	VALUES(@strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription, @intUserId, GETDATE())
+	INSERT INTO tblICInventoryAdjustment(strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription, intCreatedByUserId, dtmDateCreated, strDataSource)
+	VALUES(@strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription, @intUserId, GETDATE(),  'JSON Import')
 	
 	SET @intAdjustmentId = SCOPE_IDENTITY()
 
@@ -71,5 +71,9 @@ END
 
 CLOSE cur
 DEALLOCATE cur
+
+---- Cleanup staging
+DELETE FROM tblICStagingAdjustment
+DELETE FROM tblICStagingAdjustmentDetail
 
 END
