@@ -1,6 +1,7 @@
 CREATE TABLE tblICStagingCountDetail (
 	  intStagingCountDetailId INT IDENTITY(1, 1)
 	, strCountNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL -- Used for grouping or when exporting
+	, intCountId INT NULL -- Normally used when this field is included in export
 	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 	, dblPhysicalCount NUMERIC(38, 20) NULL
 	, strCountUom NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL

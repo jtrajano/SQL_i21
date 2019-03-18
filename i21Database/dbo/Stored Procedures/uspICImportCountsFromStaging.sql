@@ -40,8 +40,8 @@ BEGIN
 		, intCreatedByUserId, dtmDateCreated, strCountLine)
 	SELECT @intCountId, item.intItemId, il.intItemLocationId, sub.intCompanyLocationSubLocationId, sl.intStorageLocationId, cg.intCountGroupId
 		, lot.intLotId, sd.strLotNo, sd.strLotAlias, pLot.intParentLotId, ISNULL(pLot.strParentLotNumber, sd.strParentLotNo), ISNULL(pLot.strParentLotAlias, sd.strParentLotAlias)
-		, stockUom.intItemUOMId, dbo.fnICGetItemRunningStockQty(item.intItemId, @intLocationId, lot.intLotId, sub.intCompanyLocationSubLocationId, sl.intStorageLocationId, item.intCommodityId, item.intCategoryId, @dtmCountDate, 0)
-		, COALESCE(sd.dblLastCost, dbo.fnICGetItemRunningCost(item.intItemId, @intLocationId, lot.intLotId, sub.intCompanyLocationSubLocationId, sl.intStorageLocationId, item.intCommodityId, item.intCategoryId, @dtmCountDate, 0), pricing.dblLastCost)
+		, stockUom.intItemUOMId, ISNULL(dbo.fnICGetItemRunningStockQty(item.intItemId, @intLocationId, lot.intLotId, sub.intCompanyLocationSubLocationId, sl.intStorageLocationId, item.intCommodityId, item.intCategoryId, @dtmCountDate, 0), 0)
+		, ISNULL(COALESCE(sd.dblLastCost, dbo.fnICGetItemRunningCost(item.intItemId, @intLocationId, lot.intLotId, sub.intCompanyLocationSubLocationId, sl.intStorageLocationId, item.intCommodityId, item.intCategoryId, @dtmCountDate, 0), pricing.dblLastCost), 0)
 		, sd.dblPallets, sd.dblQtyPerPallet, sd.dblPhysicalCount
 		, itemUom.intItemUOMId, weightUom.intItemUOMId, sd.dblWeightQty, sd.dblWeightQty, ISNULL(sd.ysnRecount, 0)
 		, @intUserId, @intUserId, GETDATE()
@@ -66,6 +66,7 @@ BEGIN
 			AND weightUom.strUnitMeasure = sd.strWeightUom
 		LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = item.intItemId AND pricing.intItemLocationId = il.intItemLocationId
 	WHERE sd.strCountNo = @strTempCountNo
+		AND ((item.strLotTracking = 'No' AND @ysnCountByLots = 0) OR (item.strLotTracking <> 'No' AND @ysnCountByLots = 1))
 
 	UPDATE tblICInventoryCount
 	SET strCountNo = @strCountNo
@@ -76,5 +77,9 @@ END
 
 CLOSE cur
 DEALLOCATE cur
+
+-- Cleanup Staging
+DELETE FROM tblICStagingCount
+DELETE FROM tblICStagingCountDetail
 
 END
