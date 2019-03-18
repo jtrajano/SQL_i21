@@ -57,6 +57,16 @@ DECLARE @AUTO_VARIANCE AS INT = 1
 
 DECLARE @intReturnValue AS INT 
 
+IF OBJECT_ID('tempdb..#tmpAutoVarianceBatchesForAVGCosting') IS NULL  
+BEGIN
+	CREATE TABLE #tmpAutoVarianceBatchesForAVGCosting (
+		intItemId INT
+		,intItemLocationId INT
+		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	)
+END
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
@@ -770,6 +780,7 @@ BEGIN
 			,@intInventoryTransactionId AS INT 
 
 	-- Get the qualified items for auto-negative. 
+	-- For stock rebuild, it will only do this on the last 'in' transaction. 
 	INSERT INTO @ItemsForAutoNegative (
 			intItemId
 			,intItemLocationId
@@ -784,20 +795,24 @@ BEGIN
 			,intTransactionTypeId
 	)
 	SELECT 
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intLotId
-			,dblQty
-			,intSubLocationId
-			,intStorageLocationId
-			,dtmDate
-			,intTransactionId
-			,strTransactionId
-			,intTransactionTypeId
-	FROM	@ItemsToPost
-	WHERE	dbo.fnGetCostingMethod(intItemId, intItemLocationId) = @AVERAGECOST
-			AND dblQty > 0 
+			tp.intItemId
+			,tp.intItemLocationId
+			,tp.intItemUOMId
+			,tp.intLotId
+			,tp.dblQty
+			,tp.intSubLocationId
+			,tp.intStorageLocationId
+			,tp.dtmDate
+			,tp.intTransactionId
+			,tp.strTransactionId
+			,tp.intTransactionTypeId
+	FROM	@ItemsToPost tp INNER JOIN #tmpAutoVarianceBatchesForAVGCosting tmp 
+				ON tp.intItemId = tmp.intItemId
+				AND tp.intItemLocationId = tmp.intItemLocationId
+				AND tp.strTransactionId = tmp.strTransactionId
+				AND tmp.strBatchId = @strBatchId
+	WHERE	dbo.fnGetCostingMethod(tp.intItemId, tp.intItemLocationId) = @AVERAGECOST
+			AND tp.dblQty > 0 
 
 	SET @intInventoryTransactionId = NULL 
 

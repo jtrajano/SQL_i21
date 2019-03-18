@@ -7456,6 +7456,7 @@
     <Build Include="dbo\Stored Procedures\uspEMEACustomerExport.sql" />
     <Build Include="dbo\Tables\tblAREACustomerExport.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceHistory.sql" />
+    <Build Include="dbo\Functions\fnICGetMovingAverageCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
