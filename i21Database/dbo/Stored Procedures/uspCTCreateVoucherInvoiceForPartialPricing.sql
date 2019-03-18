@@ -531,6 +531,8 @@ BEGIN TRY
 					ELSE
 					BEGIN
 
+						UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId
+
 						EXEC	uspCTCreateInvoiceFromShipment 
 								@ShipmentId				=	@intInventoryShipmentId
 								,@UserId				=	@intUserId
