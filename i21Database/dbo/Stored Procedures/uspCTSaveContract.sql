@@ -360,7 +360,7 @@ BEGIN TRY
 
 	EXEC	uspCTCreateDetailHistory		@intContractHeaderId
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
-	
+	EXEC	uspCTManagePayable				@intContractHeaderId, 'header', 0
 
 END TRY
 

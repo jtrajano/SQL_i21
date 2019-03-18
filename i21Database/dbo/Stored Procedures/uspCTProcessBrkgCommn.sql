@@ -9,7 +9,7 @@ BEGIN TRY
     DECLARE @ErrMsg							NVARCHAR(MAX),
 			@ysnReceivable					BIT,
 			@dblRcvdPaidAmount				NUMERIC(18,6),
-			@VoucherDetailNonInvContract	VoucherDetailNonInvContract,
+			@VoucherDetailNonInvContract	[VoucherPayable],
 			@voucherPODetails				VoucherPODetail,
 			@intEntityId					INT,
 			@strBatchNumber					NVARCHAR(50),
@@ -70,16 +70,36 @@ BEGIN TRY
 
     IF  ISNULL(@ysnReceivable,0)	=   0
     BEGIN
-	   INSERT INTO @VoucherDetailNonInvContract(intItemId,dblQtyReceived,dblCost,intContractHeaderId,intContractDetailId,intAccountId,intContractSeq,intContractCostId)
-	   SELECT @intVoucherItemId,1,@dblRcvdPaidAmount,@intContractHeaderId,@intContractDetailId,dbo.fnGetItemGLAccount(@intCostItemId, @intCostItemLocationId, 'Cost of Goods'),@intContractSeq,@intContractCostId
+	   INSERT INTO @VoucherDetailNonInvContract
+	   (
+			intItemId
+			,dblQuantityToBill
+			,dblCost
+			,intContractHeaderId
+			,intContractDetailId
+			,intAccountId
+			,intContractSeqId
+			,intContractCostId
+			,intEntityVendorId
+			,strVendorOrderNumber
+			,intShipToId
+		)
+	   SELECT @intVoucherItemId
+			  ,1
+			  ,@dblRcvdPaidAmount
+			  ,@intContractHeaderId
+			  ,@intContractDetailId
+			  ,dbo.fnGetItemGLAccount(@intCostItemId, @intCostItemLocationId, 'Cost of Goods')
+			  ,@intContractSeq
+			  ,@intContractCostId
+			  ,@intEntityId
+			  ,@strBatchNumber
+			  ,@intCompanyLocationId
 
 	   EXEC [dbo].[uspAPCreateBillData] 
-			 @userId						=	 @intUserId
-			,@vendorId						=	 @intEntityId
-			,@voucherDetailNonInvContract	=	 @VoucherDetailNonInvContract
-			,@vendorOrderNumber				=	 @strBatchNumber
-			,@shipTo						=	 @intCompanyLocationId   
-			,@billId						=	 @intNewId OUTPUT
+			 @voucherDetailNonInvContract	=	 @VoucherDetailNonInvContract
+			 ,@userId						=	 @intUserId
+			 ,@billId						=	 @intNewId OUTPUT
 
 		  UPDATE tblCTBrkgCommn SET intVoucherId  = @intNewId	WHERE   intBrkgCommnId = @intBrkgCommnId
     END

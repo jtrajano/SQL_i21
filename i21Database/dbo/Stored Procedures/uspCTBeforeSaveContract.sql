@@ -23,7 +23,9 @@ BEGIN TRY
 			@intUniqueId				INT,
 			@strRowState				NVARCHAR(100),
 			@ysnSlice					BIT,
-			@intParentDetailId			INT
+			@intParentDetailId			INT,
+			@intContractCostId			INT,
+			@intCostUniqueId			INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber
@@ -35,6 +37,9 @@ BEGIN TRY
 		SET	@Action = @strXML
 		SET @Condition = 'intContractHeaderId = ' + STR(@intContractHeaderId)
 		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTContractDetail', @Condition, @strXML OUTPUT,null,'intContractDetailId,''Delete'' AS strRowState'
+
+		-- DELETE ALL PAYABLES
+		EXEC uspCTManagePayable @intContractHeaderId, 'header', 1
 	END
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML   
@@ -91,6 +96,9 @@ BEGIN TRY
 			END
 
 			UPDATE tblCTContractDetail SET intParentDetailId = NULL WHERE intParentDetailId = @intContractDetailId
+
+			-- DELETE ALL PAYABLES UNDER DELETED DETAILS
+			EXEC uspCTManagePayable @intContractDetailId, 'detail', 1
 		END
 		ELSE IF(@strRowState = 'Modified')
 		BEGIN
@@ -102,8 +110,40 @@ BEGIN TRY
 					UPDATE tblCTContractDetail SET ysnPriceChanged = 1 WHERE intContractDetailId = @intContractDetailId
 				END
 			END
+
+			--------------- START CONTRACT COST -------------------
+			IF OBJECT_ID('tempdb..#ContractCosts') IS NOT NULL
+				DROP TABLE #ContractCosts
+
+			SELECT  * 
+			INTO	#ContractCosts
+			FROM	OPENXML(@idoc,'tblCTContractDetails/tblCTContractDetail/tblCTContractCosts',2)
+			WITH	(intContractCostId INT,intContractDetailId INT,strRowState NVARCHAR(50))     
+
+			IF OBJECT_ID('tempdb..##ProcessCost') IS NOT NULL
+				DROP TABLE #ProcessCost
+			
+			SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intCostUniqueId,*					
+			INTO	#ProcessCost
+			FROM	#ContractCosts
+			WHERE	intContractDetailId = @intContractDetailId
+
+			SELECT @intCostUniqueId = MIN(intCostUniqueId) FROM #ProcessCost
+
+			WHILE ISNULL(@intCostUniqueId,0) > 0
+			BEGIN
+				SELECT	@intContractCostId = intContractCostId
+				FROM	#ProcessCost 
+				WHERE	intCostUniqueId = @intCostUniqueId
+				AND		intContractDetailId = @intContractDetailId
+			
+				-- DELETE SPECIFIC PAYABLES
+				EXEC uspCTManagePayable @intContractCostId, 'cost', 1
+
+				SELECT @intCostUniqueId = MIN(intCostUniqueId) FROM #ProcessCost WHERE intCostUniqueId > @intCostUniqueId
+			END
+			--------------- END CONTRACT COST -------------------
 		END
-		
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail WHERE intUniqueId > @intUniqueId
 	END
@@ -113,7 +153,7 @@ BEGIN TRY
 	EXEC uspQMSampleContractUnSlice @intContractHeaderId,@intUserId
 	EXEC uspLGLoadContractUnSlice @intContractHeaderId
 
-	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
+	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId	
 
 END TRY
 
