@@ -7,24 +7,31 @@ DECLARE @LotEntries ReceiptItemLotStagingTable
 
 
 INSERT INTO @ReceiptEntries(strReceiptType, intSourceType, intEntityVendorId, intShipFromId, intLocationId,  intItemId, intItemLocationId, intItemUOMId
-	, dtmDate, intCurrencyId, intFreightTermId, strVendorRefNo, intTaxGroupId, intBookId, intSubBookId, intSubLocationId, intStorageLocationId, /* Hack: Use strSourceScreenName to store the receipt number */ strSourceScreenName)
-SELECT 'Direct', 0, vs.intEntityId, el.intEntityLocationId, c.intCompanyLocationId, item.intItemId, il.intItemLocationId, uom.intItemUOMId, r.dtmReceiptDate, cr.intCurrencyID,
-	ft.intFreightTermId, r.strVendorRefNo, tg.intTaxGroupId, bk.intBookId, sb.intSubBookId, sbl.intCompanyLocationSubLocationId, sl.intStorageLocationId, r.strReceiptNo
+	, dtmDate, intCurrencyId, intFreightTermId, strVendorRefNo, intTaxGroupId, intBookId, intSubBookId, intSubLocationId, intStorageLocationId
+	, dblQty, dblCost, dblGross, dblNet, intGrossNetUOMId, intForexRateTypeId, intCostUOMId, dblUnitRetail
+	, /* Hack: Use strSourceScreenName to store the receipt number */ strSourceScreenName)
+SELECT 'Direct', 0, e.intEntityId, el.intEntityLocationId, c.intCompanyLocationId, item.intItemId, il.intItemLocationId, uom.intItemUOMId, r.dtmReceiptDate, cr.intCurrencyID,
+	ft.intFreightTermId, r.strVendorRefNo, tg.intTaxGroupId, bk.intBookId, sb.intSubBookId, sbl.intCompanyLocationSubLocationId, sl.intStorageLocationId
+	, ri.dblReceiptQty, ri.dblCost, ri.dblGrossQty, ri.dblNetQty, grossUom.intItemUOMId, forex.intCurrencyExchangeRateTypeId, costUom.intItemUOMId, ri.dblUnitRetail
+	, r.strReceiptNo
 FROM tblICStagingReceipt r
-	LEFT OUTER JOIN tblICStagingReceiptItem ri ON ri.strReceiptNo = r.strReceiptNo
-	LEFT OUTER JOIN tblICItem item ON item.strItemNo = ri.strItemNo
+	INNER JOIN tblICStagingReceiptItem ri ON ri.strReceiptNo = r.strReceiptNo
+	INNER JOIN tblICItem item ON item.strItemNo = ri.strItemNo
 	LEFT OUTER JOIN tblSMFreightTerms ft ON ft.strFreightTerm = r.strFreightTerms
 	INNER JOIN tblSMCompanyLocation c ON c.strLocationName = r.strShipToLocation
-	LEFT OUTER JOIN vyuEMEntityVendorSearch vs ON vs.strCustomerNumber = r.strVendorNo
-	LEFT OUTER JOIN vyuEMEntityLocationWithType vl ON vl.intEntityId = vs.intEntityId
-		AND vl.strLocationName = r.strShipFromLocation
-	LEFT OUTER JOIN tblEMEntityLocation el ON el.strLocationName = r.strShipFromLocation
-		AND el.intEntityId = vl.intEntityId
+	INNER JOIN tblEMEntity e ON e.strEntityNo = r.strVendorNo
+	INNER JOIN tblEMEntityLocation el ON el.strLocationName = r.strShipFromLocation
+		AND el.intEntityId = e.intEntityId
 	INNER JOIN tblICItemLocation il ON il.intLocationId = c.intCompanyLocationId
 		AND item.intItemId = il.intItemId
-	LEFT OUTER JOIN vyuICItemUOM uom ON uom.intItemId = item.intItemId
+	INNER JOIN vyuICItemUOM uom ON uom.intItemId = item.intItemId
 		AND uom.strUnitMeasure = ri.strReceiveUom
-	LEFT OUTER JOIN tblSMCurrency cr ON cr.strCurrency = r.strCurrency
+	LEFT OUTER JOIN vyuICItemUOM grossUom ON grossUom.intItemId = item.intItemId
+		AND grossUom.strUnitMeasure = ri.strGrossUom
+	LEFT OUTER JOIN vyuICItemUOM costUom ON costUom.intItemId = item.intItemId
+		AND costUom.strUnitMeasure = ri.strCostUom
+	LEFT OUTER JOIN tblSMCurrencyExchangeRateType forex ON forex.strCurrencyExchangeRateType = ri.strForexRateType
+	INNER JOIN tblSMCurrency cr ON cr.strCurrency = r.strCurrency
 	LEFT OUTER JOIN tblSMTaxGroup tg ON tg.strTaxGroup = ri.strTaxGroup
 	LEFT OUTER JOIN tblCTBook bk ON bk.strBook = r.strBook
 	LEFT OUTER JOIN tblCTSubBook sb ON sb.strSubBook = r.strSubBook
@@ -40,13 +47,13 @@ BEGIN
         , intChargeId, strCostMethod, dblRate, dblAmount, intCostUOMId, intOtherChargeEntityVendorId
         , ysnInventoryCost, ysnPrice, strAllocateCostBy)
     SELECT e.intEntityVendorId, e.strReceiptType, e.intLocationId, e.intShipFromId, e.intCurrencyId,
-        i.intItemId, rc.strCostMethod, rc.dblRate, rc.dblAmount, um.intItemUOMId, vs.intEntityId
+        i.intItemId, rc.strCostMethod, rc.dblRate, rc.dblAmount, um.intItemUOMId, v.intEntityId
         , rc.ysnInventoryCost, rc.ysnChargeEntity, rc.strAllocateCostBy
     FROM @ReceiptEntries e
         INNER JOIN tblICStagingReceiptCharge rc ON rc.strReceiptNo COLLATE Latin1_General_CI_AS = e.strSourceScreenName COLLATE Latin1_General_CI_AS
         INNER JOIN tblICItem i ON i.strItemNo = rc.strChargeNo
-        LEFT OUTER JOIN vyuEMEntityVendorSearch vs ON vs.strCustomerNumber = rc.strVendorNo
-        LEFT OUTER JOIN vyuICItemUOM um ON um.strUnitMeasure = rc.strCostUom
+        LEFT OUTER JOIN tblEMEntity v ON v.strEntityNo = rc.strVendorNo
+        INNER JOIN vyuICItemUOM um ON um.strUnitMeasure = rc.strCostUom
             AND um.intItemId = i.intItemId
     WHERE i.strType = 'Other Charge'
 
@@ -62,6 +69,6 @@ BEGIN
     -- Remove hack value from screen name
     UPDATE @ReceiptEntries SET strSourceScreenName = NULL
 
-    EXEC dbo.uspICAddItemReceipt @ReceiptEntries, @OtherCharges, 1, @LotEntries
+    EXEC dbo.[uspICImportReceipt] @ReceiptEntries, @OtherCharges, 1, @LotEntries
 
 END
