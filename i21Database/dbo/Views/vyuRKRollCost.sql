@@ -27,4 +27,4 @@ JOIN tblICCommodity c on ft.intCommodityId=c.intCommodityId
 JOIN tblRKFuturesMonth fm on ft.intFutureMarketId=fm.intFutureMarketId and ft.intFutureMonthId=fm.intFutureMonthId
 LEFT JOIN tblCTBook book ON book.intBookId = ft.intBookId
 LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = ft.intSubBookId
-WHERE intSelectedInstrumentTypeId = 1 AND intInstrumentTypeId = 1
+WHERE intSelectedInstrumentTypeId in(1,3) AND intInstrumentTypeId = 1
