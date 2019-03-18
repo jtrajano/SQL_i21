@@ -6,14 +6,13 @@
 		intId 				= a.intEntityId,
 		[Id]				= a.strEntityNo COLLATE Latin1_General_CI_AS,
 		[Description]		= a.strName COLLATE Latin1_General_CI_AS,
-		[GroupRequired]		= cast(1 as bit),
+		[GroupRequired]		= cast(0 as bit),
 		[LocationRequired]	= cast(1 as bit),
-		[CreditHold]		= cast(1 as bit),
-		[Taxable]			= cast(1 as bit),
-		[VFDDealer]			= cast(1 as bit),
-		[VFDAcknowledged]	= cast(1 as bit),
-		[OrganicType]		= cast(1 as int),
-	
+		[CreditHold]		= cast(c.ysnCreditHold as bit),
+		[Taxable]			= cast(c.ysnApplySalesTax as bit),
+		[VFDDealer]			= cast(0 as bit),
+		[VFDAcknowledged]	= cast(0 as bit),
+		[OrganicType]		= cast(0 as int),	
 	
 		LastName			= ISNULL ( SUBSTRING((CASE WHEN CHARINDEX(' ', e.strName) > 0 THEN SUBSTRING(SUBSTRING(e.strName,1,30),CHARINDEX(' ',e.strName) + 1, LEN(e.strName))END), 1, 20) , '') COLLATE Latin1_General_CI_AS,	
 		FirstName			= ISNULL ( SUBSTRING((CASE WHEN CHARINDEX(' ', e.strName) > 0 THEN SUBSTRING(SUBSTRING(e.strName,1,30), 0, CHARINDEX(' ',e.strName)) ELSE SUBSTRING(e.strName,1,30)END), 1, 20) , '') COLLATE Latin1_General_CI_AS,
@@ -30,8 +29,8 @@
 		Fax					= ISNULL ( j.strFax, '') COLLATE Latin1_General_CI_AS,
 		Email				= ISNULL ( e.strEmail, '') COLLATE Latin1_General_CI_AS,
 		Website				= ISNULL ( i.strWebsite, '') COLLATE Latin1_General_CI_AS,
-		ModifiedDate		= coalesce(c.dtmDateModified,c.dtmDateCreated )
-	
+		ModifiedDate		= coalesce(c.dtmDateModified,c.dtmDateCreated ),
+		Comment				= ''
 
 	from tblEMEntity a
 	join tblEMEntityType b

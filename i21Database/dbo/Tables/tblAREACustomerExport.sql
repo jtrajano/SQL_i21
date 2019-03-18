@@ -44,5 +44,7 @@
 	strEmail				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,	
 	--Website
 	strWebsite				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
+	--Comment
+	strComment				NVARCHAR(0100) COLLATE Latin1_General_CI_AS NOT NULL,
 	
 )
