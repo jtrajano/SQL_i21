@@ -52,7 +52,7 @@ SELECT GL.intGenerateLoadId
 	  ,GL.intFreightCurrencyId
 	  ,CUR.strCurrency			AS strFreightCurrency
 	  ,GL.intFreightUOMId
-	  ,FUM.strSymbol			AS strFreightUnitMeasure
+	  ,FUM.strUnitMeasure		AS strFreightUnitMeasure
 	  ,GL.dblSurchargeRate
 	  ,GL.intType			
 	  ,CASE GL.intType
