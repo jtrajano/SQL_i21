@@ -7450,6 +7450,7 @@
     <Build Include="dbo\Stored Procedures\uspAROutboundTaxReport.sql" />
     <Build Include="dbo\Tables\tblAROutboundTaxStagingTable.sql" />
     <Build Include="dbo\Views\vyuAROutboundTaxReport.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_UpdateVantivToWorldPay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
