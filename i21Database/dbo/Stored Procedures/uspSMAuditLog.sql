@@ -60,6 +60,9 @@ SET @jsonData = '{"action":"' + ISNULL(@actionType,'') + '","change":"Updated - 
 INSERT INTO #tmpAuditEntries
 SELECT [intID] FROM fnGetRowsFromDelimitedValues(@keyValue)
 
+declare @output INT;
+--INSERT on tblSMTransaction
+EXEC uspSMInsertTransaction @intKeyValue = @keyValue , @screenNamespace = @screenName, @output = @output
 
 WHILE EXISTS (SELECT TOP (1) 1 FROM #tmpAuditEntries)
 BEGIN
