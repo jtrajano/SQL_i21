@@ -150,7 +150,9 @@ BEGIN
 			MIN(CASE SourceTable.[name] WHEN 'keyValue'				THEN [value] END)	AS [strKeyValue], 
 			MIN(CASE SourceTable.[name] WHEN 'from'					THEN [value] END)	AS [strFrom], 
 			MIN(CASE SourceTable.[name] WHEN 'to'					THEN [value] END)	AS [strTo], 
-			MIN(CASE SourceTable.[name] WHEN 'changeDescription'	THEN [value] END)	AS [strAlias]
+			MIN(CASE SourceTable.[name] WHEN 'changeDescription'	THEN [value] END)	AS [strAlias],
+			MIN(CASE SourceTable.[name] WHEN 'hidden'				THEN [value] END)	AS [ysnHidden],
+			MIN(CASE SourceTable.[name] WHEN 'isField'				THEN [value] END)	AS [ysnField]
 		FROM (
 			SELECT * 
 			FROM fnSMJson_Parse(REPLACE(REPLACE(@strJsonData, ':null', ':"null"'), ',"children":[]', ''))
@@ -211,7 +213,9 @@ BEGIN
 			intKeyValue, 
 			strFrom, 
 			strTo, 
-			strAlias, 
+			strAlias,
+			ysnHidden,
+			ysnField, 
 			intConcurrencyId
 	)
 	SELECT	intAuditId, 
@@ -222,7 +226,9 @@ BEGIN
 			CAST(strKeyValue AS INT) intKeyValue, 
 			strFrom, 
 			strTo, 
-			strAlias, 
+			strAlias,
+			CASE WHEN (ISNULL(strAction,'') = '' AND ISNULL(strAlias,'') = '') THEN 1 ELSE ysnHidden END AS 'ysnHidden',
+			ysnField, 
 			1 
 	FROM Final_CTE
 	WHERE intAuditId > @maxAuditId + 1
