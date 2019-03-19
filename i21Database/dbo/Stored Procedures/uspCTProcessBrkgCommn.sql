@@ -96,7 +96,7 @@ BEGIN TRY
 			  ,@strBatchNumber
 			  ,@intCompanyLocationId
 
-	   EXEC [dbo].[uspAPCreateBillData] 
+	   EXEC [dbo].[uspAPCreateVoucher] 
 			 @voucherDetailNonInvContract	=	 @VoucherDetailNonInvContract
 			 ,@userId						=	 @intUserId
 			 ,@billId						=	 @intNewId OUTPUT
