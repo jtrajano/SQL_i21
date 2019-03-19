@@ -29,9 +29,11 @@ BEGIN TRY
 	  , @ysnItemizeSurcharge	BIT
 	  , @HasBlend BIT = 0
 
+	SELECT @intFreightItemId = intFreightItemId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId
+
 	SELECT TOP 1
-		   @intFreightItemId	= intItemForFreightId
-		 , @intSurchargeItemId	= intSurchargeItemId
+		  --@intFreightItemId	= intItemForFreightId
+		  @intSurchargeItemId	= intSurchargeItemId
 		 , @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
 	FROM tblTRCompanyPreference
 

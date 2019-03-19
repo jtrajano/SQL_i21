@@ -67,6 +67,7 @@ BEGIN TRY
 		, @intShipVia = TL.intShipViaId
 		, @intSeller = TL.intSellerId
 		, @intDriver = TL.intDriverId
+		, @intFreightItemId = TL.intFreightItemId
 	FROM tblTRLoadHeader TL
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 
@@ -87,9 +88,12 @@ BEGIN TRY
 		RAISERROR('Invalid Driver', 16, 1)
 	END
 
-	SELECT TOP 1 @intFreightItemId = intItemForFreightId
-		, @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
-	FROM tblTRCompanyPreference
+	--SELECT * FROM tblTRLoadHeader WHERE 
+
+	--SELECT TOP 1 @intFreightItemId = intItemForFreightId
+	--	, @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
+	--FROM tblTRCompanyPreference
+	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 
 	IF (@ysnItemizeSurcharge = 0)
 		SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
