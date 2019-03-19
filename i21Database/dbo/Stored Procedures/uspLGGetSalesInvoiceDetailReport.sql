@@ -92,7 +92,7 @@ BEGIN
 		strContractNumber = CH.strContractNumber,
 		intContractSeq = CD.intContractSeq,
 		strContainerNumber = Cont.strContainerNumber,
-		strMarks = Cont.strMarks,
+		strMarks = ISNULL(ReceiptLot.strMarkings, Cont.strMarks),
 		strLotNumber = ReceiptLot.strLotNumber,
 		strParentLotNumber = ReceiptLot.strParentLotNumber,
 		dblInvoiceSubtotal = Inv.dblInvoiceSubtotal,
