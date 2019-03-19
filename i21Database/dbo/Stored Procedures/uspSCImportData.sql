@@ -933,6 +933,7 @@ BEGIN TRY
 				AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
 				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE QM.intTicketId = ERT.intTicketId)
+				ORDER BY QM.intSort ASC
 				
 				INSERT INTO tblSCTicketSplit(
 					[intTicketId], 
@@ -1265,6 +1266,7 @@ BEGIN TRY
 				[strDistributionOption] NVARCHAR(3),
 				[intStorageScheduleRuleId] INT
 			)
+
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
 				INSERT INTO tblSCDeliverySheet (
@@ -1353,6 +1355,8 @@ BEGIN TRY
 				FROM @temp_xml_qmdstable QM
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+				WHERE QM.strSourceType = 'Delivery Sheet'
+				ORDER BY QM.intSort ASC
 
 				INSERT INTO tblSCDeliverySheetSplit(
 					[intDeliverySheetId],
@@ -1407,26 +1411,25 @@ BEGIN TRY
 				AND DS.intTicketTypeId = SCD.intTicketTypeId
 
 				UPDATE QM SET
-					QM.dblGradeReading				= QM.dblGradeReading
-					,QM.strCalcMethod				= QM.strCalcMethod			
-					,QM.strShrinkWhat				= QM.strShrinkWhat 
-					,QM.dblShrinkPercent			= QM.dblShrinkPercent
-					,QM.dblDiscountAmount			= QM.dblDiscountAmount
-					,QM.dblDiscountDue				= QM.dblDiscountDue
-					,QM.dblDiscountPaid				= QM.dblDiscountPaid
-					,QM.ysnGraderAutoEntry 			= QM.ysnGraderAutoEntry
-					,QM.intDiscountScheduleCodeId	= QM.intDiscountScheduleCodeId
-					,QM.dtmDiscountPaidDate 	 	= QM.dtmDiscountPaidDate
+					QM.dblGradeReading				= QMT.dblGradeReading
+					,QM.strCalcMethod				= QMT.strCalcMethod			
+					,QM.strShrinkWhat				= QMT.strShrinkWhat 
+					,QM.dblShrinkPercent			= QMT.dblShrinkPercent
+					,QM.dblDiscountAmount			= QMT.dblDiscountAmount
+					,QM.dblDiscountDue				= QMT.dblDiscountDue
+					,QM.dblDiscountPaid				= QMT.dblDiscountPaid
+					,QM.ysnGraderAutoEntry 			= QMT.ysnGraderAutoEntry
+					,QM.intDiscountScheduleCodeId	= QMT.intDiscountScheduleCodeId
+					,QM.dtmDiscountPaidDate 	 	= QMT.dtmDiscountPaidDate
 					,QM.intTicketId					= NULL
 					,QM.intTicketFileId				= DS.intDeliverySheetId
-					,QM.strSourceType				= QM.strSourceType
-					,QM.intSort						= QM.intSort
-					,QM.strDiscountChargeType		= QM.strDiscountChargeType
-				FROM @temp_xml_qmtable QMT
+					,QM.strSourceType				= QMT.strSourceType
+					,QM.intSort						= QMT.intSort
+					,QM.strDiscountChargeType		= QMT.strDiscountChargeType
+				FROM @temp_xml_qmdstable QMT
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = QMT.intTicketFileId AND QMT.strSourceType = 'Delivery Sheet'
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				INNER JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = DS.intDeliverySheetId AND QM.strSourceType = 'Delivery Sheet'
-				AND QM.intDiscountScheduleCodeId = QMT.intDiscountScheduleCodeId
 
 				UPDATE DSCS SET
 					DSCS.intEntityId					= SCST.intEntityId 
@@ -1520,7 +1523,7 @@ BEGIN TRY
 					,[intDiscountScheduleCodeId]		= QM.intDiscountScheduleCodeId
 					,[dtmDiscountPaidDate] 	 			= QM.dtmDiscountPaidDate
 					,[intTicketId]						= NULL
-					,[intTicketFileId]					= SCD.intDeliverySheetId
+					,[intTicketFileId]					= DS.intDeliverySheetId
 					,[strSourceType]					= QM.strSourceType
 					,[intSort]							= QM.intSort
 					,[strDiscountChargeType]			= QM.strDiscountChargeType
@@ -1528,7 +1531,14 @@ BEGIN TRY
 				FROM @temp_xml_qmdstable QM
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
 				LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE DS.strDeliverySheetNumber IS NULL
+				WHERE --DS.strDeliverySheetNumber IS NULL
+					NOT EXISTS(		SELECT TOP 1 1 
+									FROM tblQMTicketDiscount Z 
+									WHERE Z.intTicketFileId = DS.intDeliverySheetId 
+										AND QM.intDiscountScheduleCodeId = Z.intDiscountScheduleCodeId
+										AND Z.strSourceType = 'Delivery Sheet')
+					AND QM.strSourceType = 'Delivery Sheet'
+				ORDER BY intSort ASC
 
 				INSERT INTO tblSCDeliverySheetSplit(
 					[intDeliverySheetId],
