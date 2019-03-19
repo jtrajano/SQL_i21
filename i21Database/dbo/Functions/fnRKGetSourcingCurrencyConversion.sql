@@ -4,7 +4,8 @@
 	@intToCurrencyId	int,
 	@Price numeric(18,6),
 	@intCostCurrencyId int = NULL,
-	@intFromBasisCurrencyId int = null
+	@intFromBasisCurrencyId int = null,
+	@intFromMarketCurrency int=null
 ) 
 RETURNS numeric(38,20)
 AS 
@@ -20,7 +21,9 @@ BEGIN
 	DECLARE @intExchangeRateFromId INT
 	DECLARE @intExchangeRateToId INT
 	
-	SELECT  @intFromCurrencyId=case when isnull(@intFromBasisCurrencyId,0)<>0 then @intFromBasisCurrencyId else case when isnull(@intCostCurrencyId,0)<> 0 then @intCostCurrencyId else intCurrencyId end end, 
+	SELECT  @intFromCurrencyId=case when isnull(@intFromBasisCurrencyId,0)<>0 then @intFromBasisCurrencyId 
+							        when isnull(@intFromMarketCurrency,0)<>0 then @intFromMarketCurrency 
+			else case when isnull(@intCostCurrencyId,0)<> 0 then @intCostCurrencyId else intCurrencyId end end, 
 				@intItemId=d.intItemId ,
 			@intFromUom=PU.intUnitMeasureId ,@dblRate = dblRate ,@intCurrencyExchangeRateId=intCurrencyExchangeRateId
 	FROM  tblCTContractDetail d
