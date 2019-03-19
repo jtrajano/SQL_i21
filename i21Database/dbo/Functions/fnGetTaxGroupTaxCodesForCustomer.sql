@@ -47,6 +47,7 @@ RETURNS @returntable TABLE
 	,[strNotes]						NVARCHAR(500)
 	,[intUnitMeasureId]				INT NULL
 	,[strUnitMeasure]				NVARCHAR(30)
+	,[strTaxClass]					NVARCHAR(100)
 )
 AS
 BEGIN
@@ -88,6 +89,7 @@ BEGIN
 		,[strNotes]
 		,[intUnitMeasureId]
 		,[strUnitMeasure]
+		,[strTaxClass]
 		)
 	SELECT
 		 [intTransactionDetailTaxId]	= 0
@@ -113,6 +115,7 @@ BEGIN
 		,[strNotes]						= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN 'No Valid Tax Code Detail!' ELSE E.[strExemptionNotes] END
 		,[intUnitMeasureId]				= R.[intUnitMeasureId]
 		,[strUnitMeasure]				= R.[strUnitMeasure]
+		,[strTaxClass]					= TCLASS.[strTaxClass]
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN
@@ -121,6 +124,9 @@ BEGIN
 	INNER JOIN
 		tblSMTaxGroup TG
 			ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+	INNER JOIN
+		tblSMTaxClass TCLASS
+			ON TC.[intTaxClassId] = TCLASS.[intTaxClassId]
 	CROSS APPLY
 		[dbo].[fnGetCustomerTaxCodeExemptionDetails](@CustomerId, @TransactionDate, TG.[intTaxGroupId], TC.[intTaxCodeId], TC.[intTaxClassId], TC.[strState], @ItemId, @ItemCategoryId, @ShipToLocationId, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote) E
 	CROSS APPLY

@@ -58,7 +58,8 @@ AS
 				,[strTaxGroup]
 				,[strNotes]
 				,ISNULL([intUnitMeasureId],0)	AS [intUnitMeasureId]
-				,[strUnitMeasure] AS [strUnitMeasure]
+				,[strUnitMeasure] 				AS [strUnitMeasure]
+				,[strTaxClass]					AS [strTaxClass]
 			FROM
 				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1,1, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @LocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 				
