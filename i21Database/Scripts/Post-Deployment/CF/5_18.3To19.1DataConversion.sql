@@ -51,6 +51,10 @@ BEGIN
 	---CF-2064---
 
 
+	---CF-1755---
+	UPDATE tblCFPriceProfileDetail set strBasis = 'Index' WHERE strBasis IN ('Remote Index Cost','Local Index Retail','Local Index Cost','Local Index Fixed')
+	---CF-1755---
+
 
 
 
