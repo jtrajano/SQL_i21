@@ -374,10 +374,12 @@ BEGIN TRY
 		END
 	END
 
-	SELECT @dblWorkOrderReservedQty = SUM(dblQuantity)
-	FROM tblMFWorkOrderInputLot
-	WHERE intDestinationLotId = @intLotId
-		AND ysnConsumptionReversed = 0
+	SELECT @dblWorkOrderReservedQty = SUM(WI.dblQuantity)
+	FROM tblMFWorkOrderInputLot WI
+	JOIN tblMFWorkOrder W on W.intWorkOrderId =WI.intWorkOrderId
+	WHERE WI.intDestinationLotId = @intLotId
+		AND WI.ysnConsumptionReversed = 0
+		AND W.intStatusId<>13
 
 	IF @dblWorkOrderReservedQty IS NULL
 	BEGIN
