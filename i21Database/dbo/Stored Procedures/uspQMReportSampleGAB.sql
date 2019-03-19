@@ -168,7 +168,7 @@ BEGIN TRY
 		,@strBrokerRef = CC.strReference
 	FROM tblQMSample S
 	LEFT JOIN tblCTContractCost CC ON CC.intContractDetailId = S.intContractDetailId
-		AND CC.strPaidBy = 'Broker'
+		AND CC.strParty = 'Broker'
 	LEFT JOIN tblEMEntity E ON E.intEntityId = CC.intVendorId
 	WHERE S.intSampleId = @intSampleId
 	ORDER BY CC.intContractCostId
