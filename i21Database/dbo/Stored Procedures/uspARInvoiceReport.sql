@@ -171,7 +171,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblDiscount				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									ISNULL(INVOICEDETAIL.dblDiscount, 0) / 100
 								  ELSE NULL END
-	 , dblTotalTax				= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblTax, 0) * -1 ELSE ISNULL(INV.dblTax, 0) END
+	 , dblTotalTax				= dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) ELSE ISNULL(TOTALTAX.dblTotalTax, 0) END
 	 , dblPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) ELSE NULL END
 	 , dblItemPrice				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotal, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotal, 0) END
@@ -242,12 +242,12 @@ LEFT JOIN (
 	SELECT ID.intInvoiceId
 	     , ID.intInvoiceDetailId
 		 , ID.intCommentTypeId
-		 , ID.dblTotalTax
+		 , dblTotalTax				= CASE WHEN ISNULL(ID.dblComputedGrossPrice, 0) = 0 THEN ID.dblTotalTax ELSE 0 END
 		 , ID.dblContractBalance
 		 , ID.dblQtyShipped
 		 , ID.dblQtyOrdered
 		 , ID.dblDiscount
-		 , dblPrice					= CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(ID.dblOriginalGrossPrice, ID.dblPrice) END
+		 , dblPrice					= CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(ID.dblComputedGrossPrice, ID.dblPrice) END
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
 		 , ID.strSCInvoiceNumber
@@ -401,8 +401,15 @@ OUTER APPLY (
 ) COMPANY
 OUTER APPLY (
 	SELECT TOP 1 ysnPrintInvoicePaymentDetail
+			   , strInvoiceReportName
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) ARPREFERENCE
+OUTER APPLY (
+	SELECT dblTotalTax = SUM(dblAdjustedTax)
+	FROM vyuARTaxDetailReport
+	WHERE strTaxTransactionType = 'Invoice'
+	  AND intTransactionId = INV.intInvoiceId
+) TOTALTAX
 OUTER APPLY (
 	SELECT COUNT(*) AS intInvoiceDetailCount
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
