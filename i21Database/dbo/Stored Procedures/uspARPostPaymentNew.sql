@@ -208,6 +208,8 @@ CREATE TABLE #ARPostPaymentDetail
     ,[dblBasePayment]                   NUMERIC(18,6)   NULL
     ,[dblDiscount]                      NUMERIC(18,6)   NULL
     ,[dblBaseDiscount]                  NUMERIC(18,6)   NULL
+	,[dblWriteOffAmount]				NUMERIC(18,6)   NULL
+	,[dblBaseWriteOffAmount]			NUMERIC(18,6)   NULL
     ,[dblInterest]                      NUMERIC(18,6)   NULL
     ,[dblBaseInterest]                  NUMERIC(18,6)   NULL
     ,[dblInvoiceTotal]                  NUMERIC(18,6)   NULL
@@ -219,6 +221,7 @@ CREATE TABLE #ARPostPaymentDetail
     ,[ysnExcludedFromPayment]           BIT             NULL
     ,[ysnForgiven]                      BIT             NULL
 	,[intBillId]                        INT             NULL
+	,[intWriteOffAccountDetailId]		INT				NULL
     ,[strTransactionNumber]             NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strTransactionType]               NVARCHAR(25)    COLLATE Latin1_General_CI_AS    NULL
     ,[strType]                          NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
