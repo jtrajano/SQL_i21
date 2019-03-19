@@ -39,8 +39,14 @@
     [ysnNetworkTotals] BIT NULL, 
     [intPeriodNo] INT NULL, 
     [intSetNo] INT NULL, 
+
     [strSapphirePullType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [strSapphireIpAddress] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+	[strSAPPHIREUserName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[strSAPPHIREPassword] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[intSAPPHIRECheckoutPullTimePeriodId] INT NULL, 
+	[intSAPPHIRECheckoutPullTimeSetId] INT NULL, 
+
     [ysnDealTotals] BIT NULL, 
     [ysnHourlyTotals] BIT NULL, 
     [ysnTaxTotals] BIT NULL, 
