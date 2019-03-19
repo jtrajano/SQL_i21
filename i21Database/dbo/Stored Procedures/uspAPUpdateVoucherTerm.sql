@@ -15,7 +15,7 @@ BEGIN
 		SET 
 			A.intTermsId = @termId,
 			A.dtmDueDate = ISNULL(dbo.fnGetDueDateBasedOnTerm(A.dtmDate, A.intTermsId), A.dtmDueDate),
-			A.dblDiscount = dbo.fnGetDiscountBasedOnTerm(GETDATE(), A.dtmDate, A.intTermsId, A.dblTotal),
+			A.dblDiscount = CASE WHEN A.ysnDiscountOverride = 1 THEN A.dblDiscount ELSE dbo.fnGetDiscountBasedOnTerm(GETDATE(), A.dtmDate, A.intTermsId, A.dblTotal) END,
 			A.dtmDeferredInterestDate = (CASE WHEN term.ysnDeferredPay = 1 THEN A.dtmBillDate ELSE NULL END)
 	FROM tblAPBill A
 	INNER JOIN tblAPBillEdit B
