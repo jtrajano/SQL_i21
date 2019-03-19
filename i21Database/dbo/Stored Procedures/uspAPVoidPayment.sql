@@ -150,7 +150,7 @@ BEGIN
 		SET A.dtmDatePaid = @voidDate
 		,A.strNotes = CASE WHEN ISNULL(A.strNotes,'') = '' THEN  @description + OldPayments.strPaymentRecordNum ELSE ' ' + @description + OldPayments.strPaymentRecordNum END
 		,A.strPaymentRecordNum = OldPayments.strPaymentRecordNum + 'V'
-		,A.strPaymentInfo = 'Voided-' + A.strPaymentInfo
+		-- ,A.strPaymentInfo = 'Voided-' + A.strPaymentInfo
 		,A.dblAmountPaid = A.dblAmountPaid * -1
 		,A.dblWithheld = A.dblWithheld * -1
 	FROM tblAPPayment A
