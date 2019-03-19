@@ -131,7 +131,7 @@ BEGIN TRY
 
 	SELECT S.intSampleId
 		,S.strSampleNumber
-		,S.dtmSampleReceivedDate
+		,DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), S.dtmSampleReceivedDate) AS dtmSampleReceivedDate
 		,ST.strSampleTypeName
 		,ISNULL(CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq), '') AS strContractNumber
 		,ISNULL(CH.strCustomerContract, '') AS strBuyerReferenceNo

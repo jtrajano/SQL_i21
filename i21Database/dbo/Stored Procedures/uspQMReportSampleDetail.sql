@@ -145,7 +145,7 @@ BEGIN TRY
 		,ISNULL(S.strCountry, '') AS strCountry
 		,dbo.fnRemoveTrailingZeroes(ISNULL(S.dblSampleQty, 0)) + ' ' + UM.strUnitMeasure AS strSampleQtyUOM
 		,dbo.fnRemoveTrailingZeroes(ISNULL(S.dblRepresentingQty, 0)) + ' ' + UM1.strUnitMeasure AS strRepresentingQtyUOM
-		,S.dtmSampleReceivedDate
+		,DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), S.dtmSampleReceivedDate) AS dtmSampleReceivedDate
 		,ISNULL(S.strSampleNote, '') AS strSampleNote
 		,SS.strStatus AS strSampleStatus
 		,ISNULL(S.strRefNo, '') AS strRefNo

@@ -266,14 +266,14 @@ BEGIN TRY
 		,@intLotStatusId
 		,@strLotNumber
 		,'Auto populated by the system'
-		,@dtmCurrentDate
+		,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmCurrentDate)
 		,@dtmCurrentDateTime
 		--,@intUserId
 		,@dblWeight
 		,@intUnitMeasureId
-		,@dtmCurrentDate
-		,@dtmCurrentDate
-		,@dtmCurrentDate
+		,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmCurrentDate)
+		,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmCurrentDate)
+		,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmCurrentDate)
 		,@dtmBusinessDate
 		,@intShiftId
 		,@intLocationId
