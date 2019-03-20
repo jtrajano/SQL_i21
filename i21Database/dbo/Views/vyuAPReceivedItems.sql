@@ -661,7 +661,7 @@ SELECT * FROM (
 			,[dblOrderQty]								=	1
 			,[dblPOOpenReceive]							=	0
 			,[dblOpenReceive]							=	1
-			,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity),1) ELSE 1 END
+			,[dblQuantityToBill]						=	1
 			,[dblQuantityBilled]						=	0
 			,[intLineNo]								=	CD.intContractDetailId
 			,[intInventoryReceiptItemId]				=	NULL
@@ -672,11 +672,7 @@ SELECT * FROM (
 																			CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END) /
 																			CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
                                                                			WHEN	CC.strCostMethod = 'Per Unit' THEN       
-																			
-																				ROUND (CD.dblQuantity * dbo.fnCalculateQtyBetweenUOM(
-																				  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
-																				, CD.intItemUOMId
-																				, ISNULL(CC.dblRate,0)), 2)/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+																				CC.dblAmount
 																	ELSE	ISNULL(CC.dblRate,0) 
 															END,0)
 			,[dblDiscount]								=	0
@@ -792,7 +788,7 @@ SELECT * FROM (
 			,[dblOrderQty]								=	1
 			,[dblPOOpenReceive]							=	0
 			,[dblOpenReceive]							=	1
-			,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,CD.intUnitMeasureId,CC.intUnitMeasureId,CD.dblQuantity),1) ELSE 1 END
+			,[dblQuantityToBill]						=	1
 			,[dblQuantityBilled]						=	0
 			,[intLineNo]								=	CD.intContractDetailId
 			,[intInventoryReceiptItemId]				=	NULL
@@ -803,10 +799,7 @@ SELECT * FROM (
 																			CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END) /
 																			CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
                                                                			WHEN	CC.strCostMethod = 'Per Unit' THEN       
-																				((CD.dblBalance * CD.dblCashPrice) - (CD.dblBalance * dbo.fnCalculateQtyBetweenUOM(
-																				  dbo.fnGetMatchingItemUOMId(CD.intItemId, CC.intItemUOMId)
-																				, CD.intItemUOMId
-																				, ISNULL(CC.dblRate,0))))/CASE WHEN ISNULL(CD.dblQuantity,0) = 0 THEN 1 ELSE CD.dblQuantity END
+																				CC.dblAmount
 																	ELSE	ISNULL(CC.dblRate,0) 
 															END,0)
 			,[dblDiscount]								=	0
