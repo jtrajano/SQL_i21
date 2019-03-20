@@ -418,6 +418,10 @@ BEGIN TRY
 																							THEN	PF.intContractDetailId 
 																							ELSE	CD.intContractDetailId 
 																					END		
+											AND	CD.intRowNum					=	CASE	WHEN	PF.intContractDetailId IS NOT NULL 
+																							THEN	CD.intRowNum 
+																							ELSE	1
+																					END		
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
 	JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId			LEFT
