@@ -284,7 +284,7 @@ AS
 									FROM #OPENCREDITS
 									WHERE intEntityCustomerId = @entityId
 
-									WHILE EXISTS (SELECT TOP 1 NULL FROM #OPENINVOICES WHERE intEntityCustomerId = @entityId AND ysnCreditApplied = 0 AND @dblCreditAvailable > 0)
+									WHILE EXISTS (SELECT TOP 1 NULL FROM #OPENINVOICES WHERE intEntityCustomerId = @entityId AND (ysnCreditApplied = 0 OR (ysnCreditApplied = 1 AND dblAmountDue > 0)) AND @dblCreditAvailable > 0)
 										BEGIN
 											DECLARE @intOpenInvoiceId 	INT = NULL
 												  , @dblAmountDue		NUMERIC(18, 6) = 0
