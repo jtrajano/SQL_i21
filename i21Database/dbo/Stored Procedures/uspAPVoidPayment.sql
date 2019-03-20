@@ -18,6 +18,7 @@ BEGIN
 	DECLARE @GLEntries AS RecapTableType 
 	DECLARE @batchId NVARCHAR(20)
 	DECLARE @createdPayments NVARCHAR(MAX)
+	DECLARE @paymentKeys AS Id;
 	DECLARE @transCount INT = @@TRANCOUNT;
 
 	IF @transCount = 0 BEGIN TRANSACTION
@@ -26,21 +27,22 @@ BEGIN
 
 	CREATE TABLE #tmpPayables (
 		[intPaymentId] INT,
-		[intNewPaymentId] INT);
+		[intNewPaymentId] INT
+	);
 
-	INSERT INTO #tmpPayables(intPaymentId)
+	INSERT INTO @paymentKeys
 	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
 	--Validate
 	--Do not allow to void if not yet posted
-	IF EXISTS(SELECT 1 FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND ysnPosted = 0)
+	IF EXISTS(SELECT 1 FROM tblAPPayment WHERE intPaymentId IN (SELECT intId FROM @paymentKeys) AND ysnPosted = 0)
 	BEGIN
 		RAISERROR('Void failed. Payment not yet posted', 16, 1);
 	END
 
 	IF EXISTS(SELECT 1 FROM tblAPPayment A
 				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
-				WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND A.ysnPosted = 1 AND (B.dtmCheckPrinted IS NULL OR B.ysnCheckVoid = 1 OR B.ysnClr = 1))
+				WHERE intPaymentId IN (SELECT intId FROM @paymentKeys) AND A.ysnPosted = 1 AND (B.dtmCheckPrinted IS NULL OR B.ysnCheckVoid = 1 OR B.ysnClr = 1))
 	BEGIN
 		RAISERROR('Void failed. Payment already void or not yet printed or it has been cleared.', 16, 1);
 	END
@@ -51,7 +53,7 @@ BEGIN
 					INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 					INNER JOIN tblAPAppliedPrepaidAndDebit D ON C.intBillId = D.intTransactionId
 					INNER JOIN tblAPBill E ON D.intBillId = E.intBillId
-					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+					WHERE A.intPaymentId IN (SELECT intId FROM @paymentKeys)
 					AND D.dblAmountApplied > 0
 					AND E.ysnPosted = 1
 					AND A.ysnPrepay = 1))
@@ -60,7 +62,7 @@ BEGIN
 	END
 
 	--DO NOT ALLOW TO VOID IF PAYMENT WAS CREATED FROM IMPORTING.
-	IF(EXISTS(SELECT 1 FROM tblAPPayment A WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND ysnOrigin = 1))
+	IF(EXISTS(SELECT 1 FROM tblAPPayment A WHERE A.intPaymentId IN (SELECT intId FROM @paymentKeys) AND ysnOrigin = 1))
 	BEGIN
 		RAISERROR('Unable to void payment created from origin.', 16, 1);
 	END
@@ -70,7 +72,7 @@ BEGIN
 	*
 	INTO #tmpPayment
 	FROM tblAPPayment A
-	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+	WHERE A.intPaymentId IN (SELECT intId FROM @paymentKeys)
 
 	--DELETE FROM #tmpPayables
 	IF OBJECT_ID('dbo.[UK_dbo.tblAPPayment_strPaymentRecordNum]', 'UQ') IS NOT NULL 
@@ -339,7 +341,7 @@ BEGIN
 			ON A.intPaymentId = B.intPaymentId
 		LEFT JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
-	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+	WHERE A.intPaymentId IN (SELECT intId FROM @paymentKeys)
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 	UPDATE C
@@ -355,16 +357,16 @@ BEGIN
 						ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C
 						ON B.intOrigBillId = C.intBillId
-				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+				WHERE A.intPaymentId IN (SELECT intId FROM @paymentKeys)
 
 	--UPDATE INVOICES
 	DECLARE @invoices Id
 	INSERT INTO @invoices
 	SELECT DISTINCT
 		B.intPaymentDetailId
-	FROM #tmpPayables A
+	FROM @paymentKeys A
 	INNER JOIN tblAPPaymentDetail B
-		ON A.intPaymentId = B.intPaymentId
+		ON A.intId = B.intPaymentId
 	WHERE B.intOrigInvoiceId > 0
 	IF EXISTS(SELECT 1 FROM @invoices)
 	BEGIN
@@ -374,7 +376,7 @@ BEGIN
 	--REMOVE OVERPAYMENT CREATED
 	DELETE A
 	FROM tblAPBill A INNER JOIN tblAPPayment B ON A.strReference = B.strPaymentRecordNum
-	WHERE B.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+	WHERE B.intPaymentId IN (SELECT intId FROM @paymentKeys)
 	AND A.intTransactionType = 8
 
 	ALTER TABLE tblAPPayment ADD CONSTRAINT [UK_dbo.tblAPPayment_strPaymentRecordNum] UNIQUE (strPaymentRecordNum);
@@ -386,14 +388,14 @@ BEGIN
 	INSERT INTO @voucherHistory
 	SELECT
 		DISTINCT intPaymentDetailId
-	FROM #tmpPayables payments
-	INNER JOIN tblAPPaymentDetail B ON payments.intPaymentId = B.intPaymentId
+	FROM @paymentKeys payments
+	INNER JOIN tblAPPaymentDetail B ON payments.intId = B.intPaymentId
 	EXEC uspAPUpdateVoucherHistory @paymentDetailIds = @voucherHistory, @post = 0
 
-	SET @totalRecords = (SELECT COUNT(*) FROM #tmpPayables)
+	SET @totalRecords = (SELECT COUNT(*) FROM @paymentKeys)
 	WHILE(@paymentCounter != (@totalRecords))
 	BEGIN
-		SELECT @Id = CAST((SELECT TOP(1) intPaymentId FROM #tmpPayables) AS NVARCHAR(50))
+		SELECT @Id = CAST((SELECT TOP(1) intId FROM @paymentKeys) AS NVARCHAR(50))
 		
 		EXEC dbo.uspSMAuditLog 
 		   @screenName = 'AccountsPayable.view.PayVouchersDetail'		-- Screen Namespace
@@ -404,7 +406,7 @@ BEGIN
 		  ,@fromValue = ''									-- Previous Value
 		  ,@toValue = ''
 		SET @paymentCounter = @paymentCounter + 1
-		DELETE FROM #tmpPayables WHERE intPaymentId = @Id
+		DELETE FROM @paymentKeys WHERE intId = @Id
 	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
