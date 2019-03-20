@@ -151,7 +151,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotalTax, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotalTax, 0) END
 								  ELSE NULL END
-	 , dblInvoiceTotal			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceTotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblProvisionalAmount, 0)  END
+	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(NONSSTTAX.dblTotalTax, 0) END 
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
@@ -409,7 +409,15 @@ OUTER APPLY (
 	FROM vyuARTaxDetailReport
 	WHERE strTaxTransactionType = 'Invoice'
 	  AND intTransactionId = INV.intInvoiceId
+	  AND UPPER(strTaxClass) = 'STATE SALES TAX (SST)'
 ) TOTALTAX
+OUTER APPLY (
+	SELECT dblTotalTax = SUM(dblAdjustedTax)
+	FROM vyuARTaxDetailReport
+	WHERE strTaxTransactionType = 'Invoice'
+	  AND intTransactionId = INV.intInvoiceId
+	  AND UPPER(strTaxClass) <> 'STATE SALES TAX (SST)'
+) NONSSTTAX
 OUTER APPLY (
 	SELECT COUNT(*) AS intInvoiceDetailCount
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
