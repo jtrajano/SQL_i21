@@ -126,6 +126,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,CL.strLocationName
 				,FT.strFreightTerm
 				,dbo.[fnCTGetSeqDisplayField](CD.intShipViaId,'tblEMEntity') strShipVia--SV.strName AS strShipVia
+				,dbo.[fnCTGetSeqDisplayField](CD.intShipToId,'tblEMEntityLocation') strShipTo--SV.strName AS strShipVia
 				,CU.strCurrency
 				,CY.strCurrency strMainCurrency
 				,CU.intMainCurrencyId
