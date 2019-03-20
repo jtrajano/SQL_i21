@@ -13,11 +13,17 @@ BEGIN TRY
 			@intScreenId			INT,
 			@intContractScreenId	INT,
 			@intAmendmentScreenId	INT,
-			@strScreenName			NVARCHAR(100)
+			@strScreenName			NVARCHAR(100),
+			@ysnOnceApproved		BIT
 
 	SELECT	@intContractScreenId = intScreenId from tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 	SELECT	@intAmendmentScreenId = intScreenId from tblSMScreen WHERE strNamespace = 'ContractManagement.view.Amendments'
-	SELECT  @intTransactionId	=	intTransactionId FROM tblSMTransaction WHERE intRecordId = @intContractHeaderId AND intScreenId = @intContractScreenId
+
+	SELECT  @intTransactionId	=	intTransactionId,@ysnOnceApproved = ysnOnceApproved FROM tblSMTransaction WHERE intRecordId = @intContractHeaderId AND intScreenId = @intContractScreenId
+	
+	IF	ISNULL(@ysnOnceApproved,0) <> 1
+		RETURN
+
 	IF EXISTS(SELECT * FROM tblSMApproval WHERE intTransactionId  = @intTransactionId AND intScreenId = @intAmendmentScreenId)
 	BEGIN
 		SELECT @intScreenId = @intAmendmentScreenId
