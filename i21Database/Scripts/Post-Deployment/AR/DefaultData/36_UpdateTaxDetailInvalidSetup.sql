@@ -40,3 +40,19 @@ WHERE
 			
 GO
 print('/*******************  END Update Tax Detail Isvalid Setup  *******************/')
+
+print('/******************* BEGIN Update Tax Detail TaxExempt for CF Tran *******************/')
+GO
+
+UPDATE IDT
+SET ysnTaxExempt = 1
+FROM tblARInvoiceDetailTax IDT
+INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId=IDT.intInvoiceDetailId
+INNER JOIN tblARInvoice I ON I.intInvoiceId=ID.intInvoiceId
+WHERE ISNULL(IDT.dblTax, 0) = 0 
+  AND ISNULL(IDT.dblRate, 0) <> 0 
+  AND ISNULL(IDT.ysnTaxExempt, 0) = 0 
+  AND I.strType='CF Tran'
+
+GO
+print('/******************* END Update Tax Detail TaxExempt for CF Tran *******************/')
