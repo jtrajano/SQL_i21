@@ -73,6 +73,7 @@ SELECT
 	,intSubBookId					=I.intSubBookId
 	,strBook						=BOOK.strBook
 	,strSubBook						=SUBBOOK.strSubBook
+	,blbSignature					=I.blbSignature
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId

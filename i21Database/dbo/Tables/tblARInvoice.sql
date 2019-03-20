@@ -117,6 +117,7 @@
 	[ysnRefundProcessed]				BIT             								NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnRefundProcessed] DEFAULT ((0)),
 	[intCompanyId]						INT												NULL,
 	[intConcurrencyId]					INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
+	[blbSignature]						VARBINARY(MAX)								    NULL,
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
