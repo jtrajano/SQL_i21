@@ -3,6 +3,7 @@ AS
 SELECT TAXDETAIL.*
      , SMT.strTaxCode
 	 , SMT.strDescription
+	 , TC.strTaxClass
 FROM (
 	SELECT intTransactionDetailTaxId	= IDT.intInvoiceDetailTaxId
 		 , intTransactionDetailId		= IDT.intInvoiceDetailId
@@ -19,7 +20,7 @@ FROM (
 		SELECT DISTINCT intInvoiceId
 		FROM tblARInvoiceReportStagingTable
 	) STAGING ON ID.intInvoiceId = STAGING.intInvoiceId
-	WHERE IDT.dblAdjustedTax <> 0 
+	WHERE (IDT.ysnTaxExempt = 1 OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
 	  AND ID.intItemId <> ISNULL((SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference), 0)
 
 	UNION ALL
@@ -42,6 +43,3 @@ OUTER APPLY (
 	SELECT TOP 1 strInvoiceReportName
 	FROM tblARCompanyPreference
 ) CP
-WHERE ISNULL(strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh'
-  OR ((ISNULL(strInvoiceReportName, 'Standard') = 'Format 2 - Mcintosh' AND TAXDETAIL.dblComputedGrossPrice = 0)
-   OR (ISNULL(strInvoiceReportName, 'Standard') = 'Format 2 - Mcintosh' AND TAXDETAIL.dblComputedGrossPrice <> 0 AND UPPER(strTaxClass) = 'STATE SALES TAX (SST)'))
