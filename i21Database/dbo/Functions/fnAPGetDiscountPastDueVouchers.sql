@@ -1,4 +1,8 @@
-﻿CREATE FUNCTION [dbo].[fnAPGetDiscountPastDueVouchers]
+﻿/*
+If Discount Days have passed and there are overridden discount, 
+use this view to identify those vouchers
+*/
+CREATE FUNCTION [dbo].[fnAPGetDiscountPastDueVouchers]
 (
 	@currencyId INT,
 	@paymentMethodId INT = NULL,
@@ -63,7 +67,6 @@ BEGIN
 			AND voucher.ysnDiscountOverride = 1
 			AND voucher.dblDiscount != 0
 			AND dbo.fnIsDiscountPastDue(voucher.intTermsId, @datePaid, voucher.dtmDate) = 1
-			AND forPay.ysnPymtCtrlAlwaysDiscount = 0
 			AND voucher.intBillId
 			IN
 			(
@@ -72,6 +75,7 @@ BEGIN
 				FROM tblAPPaymentDetail payDetail
 				WHERE payDetail.intPaymentId = @paymentId
 			)
+			AND forPay.ysnPymtCtrlAlwaysDiscount = 0
 		END
 	END
 	RETURN @vouchers;
