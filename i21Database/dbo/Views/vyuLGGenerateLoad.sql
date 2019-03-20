@@ -44,6 +44,10 @@ SELECT GL.intGenerateLoadId
 	  ,GL.intItemId
 	  ,I.strItemNo				AS strItemNo
 	  ,I.strDescription			AS strItemDescription
+	  ,UM.intItemUOMId			AS intItemUOMId
+	  ,UM.intUnitMeasureId		AS intUnitMeasureId
+	  ,UM.strUnitMeasure		AS strUnitMeasure
+
 	  ,ET.intEquipmentTypeId	AS intEquipmentTypeId
 	  ,ET.strEquipmentType		AS strEquipmentType
 	  ,EH.intEntityId			AS intHaulerEntityId
@@ -121,4 +125,7 @@ LEFT JOIN tblEMEntity			EH		ON		EH.intEntityId				=	GL.intHaulerEntityId
 LEFT JOIN tblSMCurrency			CUR		ON		CUR.intCurrencyID			=	GL.intFreightCurrencyId 
 LEFT JOIN tblICItemUOM			FUOM	ON		FUOM.intItemUOMId			=	GL.intFreightUOMId
 LEFT JOIN tblICUnitMeasure		FUM		ON		FUOM.intUnitMeasureId		=	FUM.intUnitMeasureId
+OUTER APPLY (SELECT TOP 1 IUOM.intItemUOMId, IUOM.intUnitMeasureId, UM.strUnitMeasure 
+				FROM tblICItemUOM IUOM INNER JOIN tblICUnitMeasure UM ON IUOM.intUnitMeasureId = UM.intUnitMeasureId
+				WHERE IUOM.intItemId = GL.intItemId AND UM.intUnitMeasureId = GL.intUnitMeasureId) UM
 OUTER APPLY tblLGCompanyPreference CP
