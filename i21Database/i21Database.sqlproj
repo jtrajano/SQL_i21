@@ -7455,6 +7455,7 @@
     <Build Include="dbo\Functions\fnCTCreateVoucherPayable.sql" />
     <Build Include="dbo\Stored Procedures\uspEMEACustomerExport.sql" />
     <Build Include="dbo\Tables\tblAREACustomerExport.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
