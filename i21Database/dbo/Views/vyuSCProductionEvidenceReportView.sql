@@ -4,8 +4,8 @@
     SC.strTicketStatus = 'A' THEN 'PRINTED' WHEN
     SC.strTicketStatus = 'C' THEN 'COMPLETED' WHEN
     SC.strTicketStatus = 'V' THEN 'VOID' WHEN
-    SC.strTicketStatus = 'R' THEN 'REOPENED' END
-	) COLLATE Latin1_General_CI_AS AS strTicketStatusDescription, 
+    SC.strTicketStatus = 'R' THEN 'REOPENED' END) COLLATE Latin1_General_CI_AS AS
+    strTicketStatusDescription, 
 	SC.strTicketStatus,
     SC.strTicketNumber, 
 	SC.intScaleSetupId,
@@ -82,14 +82,12 @@
 	SC.strDistributionOption = 'SPL' THEN 'Split' WHEN
 	SC.strDistributionOption = 'HLD' THEN 'Hold' END) AS
 	strStorageTypeDescription,
-	tblEMEntity.strEntityNo,
 	tblEMEntity.strName,
 	EMLocation.strAddress,
 	EMLocation.strCity,
 	EMLocation.strCountry,
 	EMLocation.strPhone,
 	tblSCListTicketTypes.strTicketType,
-	tblSMCompanyLocation.strLocationNumber,
 	tblSMCompanyLocation.strLocationName,
 	tblSMCompanyLocationSubLocation.strSubLocationName, 
 	tblEMEntitySplit.strSplitNumber,
@@ -104,15 +102,12 @@
 	tblSMCompanySetup.strCompanyPhone,
 	tblSMCompanySetup.strCompanyCity,
 	tblSMCompanySetup.strCompanyCountry,
-	ReceiptItem.intInventoryReceiptId,
-	ReceiptItem.intInventoryReceiptItemId,
 	ReceiptItem.strReceiptNumber,
+	ReceiptItem.intInventoryReceiptId,
 	ReceiptItem.dblGross,
-	ReceiptItem.dblShrinkage,
 	ReceiptItem.dblNet,
-	(ReceiptItem.dblNet / SC.dblNetUnits * (SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2)) AS dblLineGrossWeight,
-	((ReceiptItem.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) AS dblLineNetWeight,
-	tblGRDiscountId.strDiscountId,
+	ReceiptItem.dblShrinkage,
+	ReceiptItem.totalTicket,
 	ISNULL(Voucher.dtmDate, ReceiptItem.dtmReceiptDate) AS dtmReceiptDate,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
   FROM tblSCTicket SC
@@ -137,7 +132,7 @@
 		,strCountry AS strCompanyCountry
 	 FROM tblSMCompanySetup
   )AS tblSMCompanySetup
- OUTER APPLY(
+  OUTER APPLY(
 	SELECT IC.intInventoryReceiptId
 		,IC.strReceiptNumber
 		,IC.dtmReceiptDate 
@@ -160,4 +155,4 @@
 	INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId
 	WHERE APD.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
   )AS Voucher
-  WHERE SC.strTicketStatus = 'C' AND SC.intEntityId > 0
+  WHERE SC.strTicketStatus = 'C' AND SC.intEntityId > 0 AND ISNULL(ReceiptItem.intInventoryReceiptId, 0) > 0
