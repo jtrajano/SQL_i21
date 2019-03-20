@@ -95,18 +95,17 @@ BEGIN TRY
 	--FROM tblTRCompanyPreference
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 
-	IF (@ysnItemizeSurcharge = 0)
-		SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
-	ELSE
-		SELECT TOP 1 @intSurchargeItemId = intSurchargeItemId FROM tblTRCompanyPreference
-
-	IF (ISNULL(@intSurchargeItemId, '') <> '')
+	--IF (@ysnItemizeSurcharge = 0)
+	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+	--ELSE
+	--	SELECT TOP 1 @intSurchargeItemId = intSurchargeItemId FROM tblTRCompanyPreference
+	IF (NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId) AND @intSurchargeItemId IS NOT NULL)
 	BEGIN
-		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId)
-		BEGIN
-			RAISERROR('Surcharge Item is not setup for the Freight Item specified from Company Configuration', 16, 1)
-		END
+		RAISERROR('Surcharge Item is not setup for the Freight Item', 16, 1)
 	END
+	--IF (ISNULL(@intSurchargeItemId, '') <> '')
+	--BEGIN
+	--END
 
 	SELECT TL.intLoadHeaderId
 		, TR.intLoadReceiptId
@@ -174,6 +173,7 @@ BEGIN TRY
 			BEGIN
 				RAISERROR('Invalid Bulk Location', 16, 1)
 			END
+			
 			IF (@intItemId IS NULL)
 			BEGIN
 				RAISERROR('Invalid Purchase Item', 16, 1)
@@ -182,15 +182,23 @@ BEGIN TRY
 			BEGIN
 				RAISERROR('Freight Item not found. Please setup in Company Configuration', 16, 1)
 			END
-			IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
+			ELSE IF (ISNULL(@dblFreight, 0) > 0  AND ISNULL(@intFreightItemId, '') != '')
 			BEGIN
-				IF ISNULL(@intSurchargeItemId, '') = ''
-					SET @err = ' Surcharge Item is null. Please setup in Company Configuration'
-				ELSE
-					SET @err = CAST(@intSurchargeItemId AS NVARCHAR(10)) + ' Surcharge Item not found. Please setup in Company Configuration'
-
-				RAISERROR(@err, 16, 1)
+				IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
+				BEGIN
+					RAISERROR('Surcharge Item is not found. Please setup the on cost item.', 16, 1)
+				END
 			END
+			
+			--IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
+			--BEGIN
+			--	IF ISNULL(@intSurchargeItemId, '') = ''
+			--		SET @err = ' Surcharge Item is null. Please setup the on cost.'
+			--	ELSE
+			--		SET @err = CAST(@intSurchargeItemId AS NVARCHAR(10)) + ' Surcharge Item not found. Please setup in Company Configuration'
+
+			--	RAISERROR(@err, 16, 1)
+			--END
 			
 			IF (@intStockUOMId IS NULL)
 			BEGIN
@@ -423,9 +431,12 @@ BEGIN TRY
 			BEGIN
 				RAISERROR('Freight Item not found. Please setup in Company Configuration', 16, 1)
 			END
-			IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
+			ELSE IF (ISNULL(@dblFreight, 0) = 0  AND ISNULL(@intFreightItemId, '') != '')
 			BEGIN
-				RAISERROR('Surcharge Item not found. Please setup in Company Configuration', 16, 1)
+				IF (ISNULL(@dblSurcharge, 0) > 0 )
+				BEGIN
+					RAISERROR('Transport load has surcharge. You must input freight rate or zero out the surcharge.', 16, 1)
+				END
 			END
 		END
 		IF (@intCompanyLocationId IS NULL)

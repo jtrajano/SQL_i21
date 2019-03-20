@@ -30,12 +30,8 @@ BEGIN TRY
 	  , @HasBlend BIT = 0
 
 	SELECT @intFreightItemId = intFreightItemId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId
-
-	SELECT TOP 1
-		  --@intFreightItemId	= intItemForFreightId
-		  @intSurchargeItemId	= intSurchargeItemId
-		 , @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0)
-	FROM tblTRCompanyPreference
+	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 
 	BEGIN TRANSACTION
 
