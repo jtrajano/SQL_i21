@@ -313,36 +313,22 @@ DECLARE @cfPriceProfile TABLE
 (
 
 	intAccountId			INT,
-
 	intCustomerId			INT,
-
 	intDiscountDays			INT,
-
 	intDiscountScheduleId	INT,
-
 	intSalesPersonId		INT,
-
 	intPriceProfileDetailId	INT,
-
 	intPriceProfileHeaderId	INT,
-
 	intItemId				INT,
-
 	intNetworkId			INT,
-
 	intSiteGroupId			INT,
-
 	intSiteId				INT,
-
 	intLocalPricingIndex	INT,
-
 	dblRate					NUMERIC(18,6),
-
 	strBasis				NVARCHAR(MAX),
-
 	strType					NVARCHAR(MAX),
-		
-	intLinkedProfile		INT
+	intLinkedProfile		INT,
+	strIndexType			NVARCHAR(MAX)
 
 )
 
@@ -350,92 +336,54 @@ DECLARE @cfPriceProfile TABLE
 	BEGIN
 
 		INSERT INTO @cfPriceProfile 
-
-	(
-
-		intAccountId,			
-
-		intCustomerId,			
-
-		intDiscountDays,			
-
-		intDiscountScheduleId,	
-
-		intSalesPersonId,		
-
-		intPriceProfileDetailId,	
-
-		intPriceProfileHeaderId,	
-
-		intItemId,				
-
-		intNetworkId,			
-
-		intSiteGroupId,			
-
-		intSiteId,				
-
-		intLocalPricingIndex,	
-
-		dblRate,					
-
-		strBasis,				
-
-		strType,
-		
-		intLinkedProfile					
-
-	)		
+		(
+			intAccountId,			
+			intCustomerId,			
+			intDiscountDays,			
+			intDiscountScheduleId,	
+			intSalesPersonId,		
+			intPriceProfileDetailId,	
+			intPriceProfileHeaderId,	
+			intItemId,				
+			intNetworkId,			
+			intSiteGroupId,			
+			intSiteId,				
+			intLocalPricingIndex,	
+			dblRate,					
+			strBasis,				
+			strType,
+			intLinkedProfile,
+			strIndexType				
+		)		
 
 	SELECT 
-
 		intAccountId,			
-
 		intCustomerId,			
-
 		intDiscountDays,			
-
 		intDiscountScheduleId,	
-
 		intSalesPersonId,		
-
 		cfPProfileDetail.intPriceProfileDetailId,	
-
 		cfPProfileHeader.intPriceProfileHeaderId,	
-
 		intItemId,				
-
 		intNetworkId,			
-
 		intSiteGroupId,			
-
 		intSiteId,				
-
 		intLocalPricingIndex,	
-
 		dblRate,					
-
 		strBasis,				
-
-		strType,		
-
-		intLinkedProfile
-
+		cfPProfileHeader.strType,		
+		intLinkedProfile,
+		cfPriceIndex.strType
 	FROM tblCFAccount cfAccount
-
 	INNER JOIN tblCFPriceProfileHeader cfPProfileHeader
-
 	ON cfAccount.intLocalPriceProfileId = cfPProfileHeader.intPriceProfileHeaderId
-
 	INNER JOIN tblCFPriceProfileDetail cfPProfileDetail
-
 	ON cfPProfileHeader.intPriceProfileHeaderId = cfPProfileDetail.intPriceProfileHeaderId
-
+	LEFT JOIN tblCFPriceIndex cfPriceIndex
+	ON cfPriceIndex.intPriceIndexId = cfPProfileDetail.intLocalPricingIndex
 	WHERE 
-
-		cfAccount.intCustomerId = @CFCustomerId AND 
-
-		cfPProfileHeader.strType = @CFTransactionType
+	cfAccount.intCustomerId = @CFCustomerId AND 
+	cfPProfileHeader.strType = @CFTransactionType
 
 	END
 	
@@ -443,92 +391,53 @@ DECLARE @cfPriceProfile TABLE
 	BEGIN
 
 		INSERT INTO @cfPriceProfile 
-
-	(
-
-		intAccountId,			
-
-		intCustomerId,			
-
-		intDiscountDays,			
-
-		intDiscountScheduleId,	
-
-		intSalesPersonId,		
-
-		intPriceProfileDetailId,	
-
-		intPriceProfileHeaderId,	
-
-		intItemId,				
-
-		intNetworkId,			
-
-		intSiteGroupId,			
-
-		intSiteId,				
-
-		intLocalPricingIndex,	
-
-		dblRate,					
-
-		strBasis,				
-
-		strType,
-		
-		intLinkedProfile						
-
-	)		
-
-	SELECT 
-
-		intAccountId,			
-
-		intCustomerId,			
-
-		intDiscountDays,			
-
-		intDiscountScheduleId,	
-
-		intSalesPersonId,		
-
-		cfPProfileDetail.intPriceProfileDetailId,	
-
-		cfPProfileHeader.intPriceProfileHeaderId,	
-
-		intItemId,				
-
-		intNetworkId,			
-
-		intSiteGroupId,			
-
-		intSiteId,				
-
-		intLocalPricingIndex,	
-
-		dblRate,					
-
-		strBasis,				
-
-		strType,
-		
-		intLinkedProfile			
-
-	FROM tblCFAccount cfAccount
-
-	INNER JOIN tblCFPriceProfileHeader cfPProfileHeader
-
-	ON cfAccount.intRemotePriceProfileId = cfPProfileHeader.intPriceProfileHeaderId
-
-	INNER JOIN tblCFPriceProfileDetail cfPProfileDetail
-
-	ON cfPProfileHeader.intPriceProfileHeaderId = cfPProfileDetail.intPriceProfileHeaderId
-
-	WHERE 
-
-		cfAccount.intCustomerId = @CFCustomerId AND 
-
-		cfPProfileHeader.strType = @CFTransactionType
+		(
+			intAccountId,			
+			intCustomerId,			
+			intDiscountDays,			
+			intDiscountScheduleId,	
+			intSalesPersonId,		
+			intPriceProfileDetailId,	
+			intPriceProfileHeaderId,	
+			intItemId,				
+			intNetworkId,			
+			intSiteGroupId,			
+			intSiteId,				
+			intLocalPricingIndex,	
+			dblRate,					
+			strBasis,				
+			strType,
+			intLinkedProfile,
+			strIndexType	
+		)		
+		SELECT 
+			intAccountId,			
+			intCustomerId,			
+			intDiscountDays,			
+			intDiscountScheduleId,	
+			intSalesPersonId,		
+			cfPProfileDetail.intPriceProfileDetailId,	
+			cfPProfileHeader.intPriceProfileHeaderId,	
+			intItemId,				
+			intNetworkId,			
+			intSiteGroupId,			
+			intSiteId,				
+			intLocalPricingIndex,	
+			dblRate,					
+			strBasis,				
+			cfPProfileHeader.strType,
+			intLinkedProfile,
+			cfPriceIndex.strType
+		FROM tblCFAccount cfAccount
+		INNER JOIN tblCFPriceProfileHeader cfPProfileHeader
+		ON cfAccount.intRemotePriceProfileId = cfPProfileHeader.intPriceProfileHeaderId
+		INNER JOIN tblCFPriceProfileDetail cfPProfileDetail
+		ON cfPProfileHeader.intPriceProfileHeaderId = cfPProfileDetail.intPriceProfileHeaderId
+		LEFT JOIN tblCFPriceIndex cfPriceIndex
+		ON cfPriceIndex.intPriceIndexId = cfPProfileDetail.intLocalPricingIndex
+		WHERE 
+			cfAccount.intCustomerId = @CFCustomerId AND 
+			cfPProfileHeader.strType = @CFTransactionType
 
 	END
 
@@ -536,193 +445,105 @@ DECLARE @cfPriceProfile TABLE
 	BEGIN
 
 		INSERT INTO @cfPriceProfile 
-
-	(
-
-		intAccountId,			
-
-		intCustomerId,			
-
-		intDiscountDays,			
-
-		intDiscountScheduleId,	
-
-		intSalesPersonId,		
-
-		intPriceProfileDetailId,	
-
-		intPriceProfileHeaderId,	
-
-		intItemId,				
-
-		intNetworkId,			
-
-		intSiteGroupId,			
-
-		intSiteId,				
-
-		intLocalPricingIndex,	
-
-		dblRate,					
-
-		strBasis,				
-
-		strType,
-		
-		intLinkedProfile						
-
-	)		
-
-	SELECT 
-
-		intAccountId,			
-
-		intCustomerId,			
-
-		intDiscountDays,			
-
-		intDiscountScheduleId,	
-
-		intSalesPersonId,		
-
-		cfPProfileDetail.intPriceProfileDetailId,	
-
-		cfPProfileHeader.intPriceProfileHeaderId,	
-
-		intItemId,				
-
-		intNetworkId,			
-
-		intSiteGroupId,			
-
-		intSiteId,				
-
-		intLocalPricingIndex,	
-
-		dblRate,					
-
-		strBasis,				
-
-		strType,
-		
-		intLinkedProfile			
-
-	FROM tblCFAccount cfAccount
-
-	INNER JOIN tblCFPriceProfileHeader cfPProfileHeader
-
-	ON cfAccount.intExtRemotePriceProfileId = cfPProfileHeader.intPriceProfileHeaderId
-
-	INNER JOIN tblCFPriceProfileDetail cfPProfileDetail
-
-	ON cfPProfileHeader.intPriceProfileHeaderId = cfPProfileDetail.intPriceProfileHeaderId
-
-	WHERE 
-
-		cfAccount.intCustomerId = @CFCustomerId AND 
-
-		cfPProfileHeader.strType = @CFTransactionType
-
-	END
-	
+		(
+			intAccountId,			
+			intCustomerId,			
+			intDiscountDays,			
+			intDiscountScheduleId,	
+			intSalesPersonId,		
+			intPriceProfileDetailId,	
+			intPriceProfileHeaderId,	
+			intItemId,				
+			intNetworkId,			
+			intSiteGroupId,			
+			intSiteId,				
+			intLocalPricingIndex,	
+			dblRate,					
+			strBasis,				
+			strType,
+			intLinkedProfile,
+			strIndexType						
+		)		
+		SELECT 
+			intAccountId,			
+			intCustomerId,			
+			intDiscountDays,			
+			intDiscountScheduleId,	
+			intSalesPersonId,		
+			cfPProfileDetail.intPriceProfileDetailId,	
+			cfPProfileHeader.intPriceProfileHeaderId,	
+			intItemId,				
+			intNetworkId,			
+			intSiteGroupId,			
+			intSiteId,				
+			intLocalPricingIndex,	
+			dblRate,					
+			strBasis,				
+			cfPProfileHeader.strType,
+			intLinkedProfile,
+			cfPriceIndex.strType				
+		FROM tblCFAccount cfAccount
+		INNER JOIN tblCFPriceProfileHeader cfPProfileHeader
+		ON cfAccount.intExtRemotePriceProfileId = cfPProfileHeader.intPriceProfileHeaderId
+		INNER JOIN tblCFPriceProfileDetail cfPProfileDetail
+		ON cfPProfileHeader.intPriceProfileHeaderId = cfPProfileDetail.intPriceProfileHeaderId
+		LEFT JOIN tblCFPriceIndex cfPriceIndex
+		ON cfPriceIndex.intPriceIndexId = cfPProfileDetail.intLocalPricingIndex
+		WHERE 
+			cfAccount.intCustomerId = @CFCustomerId AND 
+			cfPProfileHeader.strType = @CFTransactionType
+		END
 	ELSE
 	BEGIN
 
 		INSERT INTO @cfPriceProfile 
-
-	(
-
-		intAccountId,			
-
-		intCustomerId,			
-
-		intDiscountDays,			
-
-		intDiscountScheduleId,	
-
-		intSalesPersonId,		
-
-		intPriceProfileDetailId,	
-
-		intPriceProfileHeaderId,	
-
-		intItemId,				
-
-		intNetworkId,			
-
-		intSiteGroupId,			
-
-		intSiteId,				
-
-		intLocalPricingIndex,	
-
-		dblRate,					
-
-		strBasis,				
-
-		strType,
-		
-		intLinkedProfile					
-
-	)		
-
-	SELECT 
-
-		NULL,			
-
-		NULL,			
-
-		NULL,			
-
-		NULL,	
-
-		NULL,		
-
-		cfPProfileDetail.intPriceProfileDetailId,	
-
-		cfPProfileHeader.intPriceProfileHeaderId,	
-
-		intItemId,				
-
-		intNetworkId,			
-
-		intSiteGroupId,			
-
-		intSiteId,				
-
-		intLocalPricingIndex,	
-
-		dblRate,					
-
-		strBasis,				
-
-		strType,
-		
-		intLinkedProfile		
-
+		(
+			intAccountId,			
+			intCustomerId,			
+			intDiscountDays,			
+			intDiscountScheduleId,	
+			intSalesPersonId,		
+			intPriceProfileDetailId,	
+			intPriceProfileHeaderId,	
+			intItemId,				
+			intNetworkId,			
+			intSiteGroupId,			
+			intSiteId,				
+			intLocalPricingIndex,	
+			dblRate,					
+			strBasis,				
+			strType,
+			intLinkedProfile,			
+			strIndexType
+		)		
+		SELECT 
+			NULL,			
+			NULL,			
+			NULL,			
+			NULL,	
+			NULL,		
+			cfPProfileDetail.intPriceProfileDetailId,	
+			cfPProfileHeader.intPriceProfileHeaderId,	
+			intItemId,				
+			intNetworkId,			
+			intSiteGroupId,			
+			intSiteId,				
+			intLocalPricingIndex,	
+			dblRate,					
+			strBasis,				
+			cfPProfileHeader.strType,
+			intLinkedProfile,
+			cfPriceIndex.strType	
 	FROM tblCFPriceProfileHeader cfPProfileHeader
-
 	INNER JOIN tblCFPriceProfileDetail cfPProfileDetail
-
 	ON cfPProfileHeader.intPriceProfileHeaderId = cfPProfileDetail.intPriceProfileHeaderId
-
+	LEFT JOIN tblCFPriceIndex cfPriceIndex
+	ON cfPriceIndex.intPriceIndexId = cfPProfileDetail.intLocalPricingIndex
 	WHERE 
-
 		cfPProfileHeader.strType = @CFTransactionType
 		AND cfPProfileHeader.intPriceProfileHeaderId = @intLinkedProfileId
-
-
 	END
 
-
-
---DECLARE @ValidSiteItem INT
-
---SET @ValidSiteItem = (SELECT TOP 1 intARItemId FROM @cfSiteItem)
-
---IF(@ValidSiteItem IS NOT NULL) 
-
---BEGIN
 
 	DECLARE @Rate NUMERIC(18,6)
 	DECLARE @SiteGroupId INT
@@ -733,35 +554,21 @@ DECLARE @cfPriceProfile TABLE
 	DECLARE @cfMatchProfileCount INT
 	DECLARE @cfMatchPriceProfile TABLE 
 	(
-
 		intAccountId			INT,
-
 		intCustomerId			INT,
-
 		intDiscountDays			INT,
-
 		intDiscountScheduleId	INT,
-
 		intSalesPersonId		INT,
-
 		intPriceProfileDetailId	INT,
-
 		intPriceProfileHeaderId	INT,
-
 		intItemId				INT,
-
 		intNetworkId			INT,
-
 		intSiteGroupId			INT,
-
 		intSiteId				INT,
-
 		intLocalPricingIndex	INT,
-
 		dblRate					NUMERIC(18,6),
-
 		strBasis				NVARCHAR(MAX),
-
+		strIndexType			NVARCHAR(MAX),
 		strType					NVARCHAR(MAX)
 
 	)
@@ -805,7 +612,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -822,7 +630,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intSiteId = @CFSiteId
 			AND intItemId = @CFItemId
@@ -861,7 +670,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType		
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -878,7 +688,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType	
 			FROM @cfPriceProfile 
 			WHERE intSiteId = @CFSiteId 
 			AND ISNULL(intItemId,0) = 0 -- ALL ITEMS
@@ -918,7 +729,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -935,7 +747,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
 			AND intSiteGroupId = @CFSiteGroupId
@@ -976,7 +789,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -993,7 +807,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
 			AND intNetworkId = @CFNetworkId
@@ -1034,7 +849,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -1051,7 +867,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
 			AND intItemId = @CFItemId
@@ -1092,7 +909,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -1109,7 +927,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
 			AND ISNULL(intItemId,0) = 0 -- ALL ITEMS
@@ -1152,7 +971,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -1169,7 +989,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
 			AND intNetworkId = @CFNetworkId
@@ -1214,7 +1035,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -1231,7 +1053,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intNetworkId = @CFNetworkId
 			AND ISNULL(intItemId,0) = 0 -- ALL ITEMS
@@ -1276,7 +1099,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -1293,7 +1117,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intItemId = @CFItemId
 			AND ISNULL(intSiteId,0) = 0 -- ALL SITES
@@ -1337,7 +1162,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType					
+				strType,
+				strIndexType					
 			)
 			SELECT TOP 1
 				intAccountId,			
@@ -1354,7 +1180,8 @@ DECLARE @cfPriceProfile TABLE
 				intLocalPricingIndex,	
 				dblRate,					
 				strBasis,				
-				strType		
+				strType,
+				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE ISNULL(intItemId,0) = 0 -- ALL ITEMS
 			AND ISNULL(intSiteId,0) = 0 -- ALL SITES
@@ -1374,8 +1201,10 @@ DECLARE @cfPriceProfile TABLE
 	--SELECT @CFSiteGroupId = intAdjustmentSiteGroupId
 	--FROM tblCFSite WHERE intSiteId = @CFSiteId
 
+	DECLARE @indextype NVARCHAR(MAX)
+	SELECT TOP 1 @CFPriceBasis = strBasis , @indextype = strIndexType FROM @cfMatchPriceProfile
+
 	
-	SET @CFPriceBasis = (SELECT TOP 1 strBasis FROM @cfMatchPriceProfile)
 	
 	IF(@CFTransactionType = 'Local/Network')
 	BEGIN 
@@ -1397,7 +1226,7 @@ DECLARE @cfPriceProfile TABLE
 				SET @CFPricingOut = 'Price Profile' 
 				--RETURN 1;   
 		END
-		ELSE IF(@CFPriceBasis IS NOT NULL)
+		ELSE IF(@CFPriceBasis = 'Index')
 			BEGIN 
 				--SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
 				--					FROM @cfMatchPriceProfile) 
@@ -1426,11 +1255,14 @@ DECLARE @cfPriceProfile TABLE
 					END
 					
 				SET @CFPricingOut = 'Price Profile' 
+				SET @CFPriceBasis = @CFPriceBasis + ' ' + @indextype
+
+
 			END
 	END
 	ELSE IF (@CFTransactionType = 'Remote')
 	BEGIN
-		IF(@CFPriceBasis = 'Remote Index Cost')
+		IF(@CFPriceBasis = 'Index')
 			BEGIN
 				
 				--SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
@@ -1461,6 +1293,7 @@ DECLARE @cfPriceProfile TABLE
 
 					
 				SET @CFPricingOut = 'Price Profile' 
+				SET @CFPriceBasis = @CFPriceBasis + ' ' + @indextype
 
 			END
 		ELSE IF(@CFPriceBasis = 'Transfer Cost' OR @CFPriceBasis = 'Transfer Price')

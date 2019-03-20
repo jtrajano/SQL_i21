@@ -178,7 +178,9 @@ BEGIN
 			[strKeyValue],
 			[strFrom],
 			[strTo],
-			[strAlias]
+			[strAlias],
+			[ysnHidden],
+			[ysnField]
 		FROM Json_CTE
 	), Final_CTE AS (
 		SELECT
@@ -189,7 +191,9 @@ BEGIN
 			A.[strKeyValue],
 			A.[strFrom],
 			A.[strTo],
-			A.[strAlias]
+			A.[strAlias],
+			A.[ysnHidden],
+			A.[ysnField]
 		FROM Corrected_CTE A 
 		OUTER APPLY (
 			SELECT TOP 1 *

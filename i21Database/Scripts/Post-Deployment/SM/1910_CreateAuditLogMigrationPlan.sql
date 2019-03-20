@@ -40,6 +40,13 @@ BEGIN
 	IF ISNULL(@isUserHasValidRole, 0) = 1
 	BEGIN
 		PRINT N'USER IS SYSADMIN/SERVERADMIN - VALID FOR CREATION OF MAINTENANCE PLAN'
+		
+			--FAKE TURN ON just placed for the sake of..
+			EXEC sp_configure'SHOW ADVANCE',1
+			RECONFIGURE
+			EXEC sp_configure'AGENT XPs',1
+			RECONFIGURE
+
 		 --Get the current database
 		DECLARE @currentDBName varchar(100)
 		DECLARE @jobId BINARY(16)

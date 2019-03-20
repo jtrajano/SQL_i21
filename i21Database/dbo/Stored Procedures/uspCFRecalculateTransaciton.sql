@@ -2591,8 +2591,7 @@ BEGIN
 
 
 				END
-				ELSE IF (LOWER(@strPriceBasis) = 'local index fixed'
-				OR @ysnBackoutDueToRouding = 1)
+				ELSE IF (LOWER(@strPriceBasis) = 'index fixed' OR @ysnBackoutDueToRouding = 1)
 				BEGIN
 
 					IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
@@ -3931,7 +3930,7 @@ BEGIN
 					--SELECT * FROM @tblCFOriginalTax
 
 				END
-				ELSE IF (LOWER(@strPriceBasis) = 'local index fixed'
+				ELSE IF (LOWER(@strPriceBasis) = 'index fixed'
 				OR @ysnBackoutDueToRouding = 1)
 				BEGIN
 
@@ -5364,7 +5363,7 @@ BEGIN
 		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 
 	END
-	ELSE IF (LOWER(@strPriceBasis) = 'local index cost' OR LOWER(@strPriceBasis) = 'remote index cost'  )
+	ELSE IF (LOWER(@strPriceBasis) = 'index cost')
 		BEGIN
 
 		DECLARE @dblLocalIndexCostGrossPrice NUMERIC(18,6)
@@ -5392,7 +5391,7 @@ BEGIN
 
 		
 	END
-	ELSE IF (LOWER(@strPriceBasis) = 'local index retail' )
+	ELSE IF (LOWER(@strPriceBasis) = 'index retail' )
 		BEGIN
 
 		DECLARE @dblLocalIndexRetailGrossPrice NUMERIC(18,6)
@@ -5421,7 +5420,7 @@ BEGIN
 
 	
 	END
-	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed')
+	ELSE IF (LOWER(@strPriceBasis) = 'index fixed')
 		BEGIN
 
 		DECLARE @dblLocalIndexFixedGrossPrice NUMERIC(18,6)

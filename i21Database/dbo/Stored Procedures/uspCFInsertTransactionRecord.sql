@@ -1143,6 +1143,14 @@ BEGIN
 			SET @ysnIgnoreVehicleError = 1
 		END
 	END
+
+
+	IF(ISNULL(@intVehicleId,0) = 0)
+	BEGIN
+		SELECT TOP 1 @intVehicleId = intDefaultFixVehicleNumber FROM tblCFCard 
+		WHERE intCardId = @intCardId
+	END
+
 	------------------------------------------------------------
 
 

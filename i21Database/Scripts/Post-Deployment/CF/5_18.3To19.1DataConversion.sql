@@ -51,6 +51,42 @@ BEGIN
 	---CF-2064---
 
 
+	---CF-1755---
+	
+	--Convert Price Index Type by using Price Profiles to Update Index Type.
+	UPDATE tblCFPriceIndex SET strType = 'Cost'
+	WHERE intPriceIndexId IN (
+	SELECT DISTINCT
+	intLocalPricingIndex 
+	FROM tblCFPriceProfileDetail 
+	WHERE strBasis like '%Index Cost%')
+
+	UPDATE tblCFPriceIndex SET strType = 'Fixed'
+	WHERE intPriceIndexId IN (
+	SELECT DISTINCT
+	intLocalPricingIndex 
+	FROM tblCFPriceProfileDetail 
+	WHERE strBasis like '%Index Fixed%')
+
+	UPDATE tblCFPriceIndex SET strType = 'Retail'
+	WHERE intPriceIndexId IN (
+	SELECT DISTINCT
+	intLocalPricingIndex 
+	FROM tblCFPriceProfileDetail 
+	WHERE strBasis like '%Index Retail%')
+
+
+	--Convert Transactions Price Basis to new Standard Description
+	UPDATE tblCFTransaction SET strPriceBasis = 'Index Cost' WHERE strPriceBasis like '%Index Cost%'
+	UPDATE tblCFTransaction SET strPriceBasis = 'Index Retail' WHERE strPriceBasis like '%Index Retail%' 
+	UPDATE tblCFTransaction SET strPriceBasis = 'Index Fixed' WHERE strPriceBasis like '%Index Fixed%'
+
+
+	--Convert Price Profiles Price Basis
+	UPDATE tblCFPriceProfileDetail set strBasis = 'Index' WHERE strBasis like '%Index%'
+
+	---CF-1755---
+
 
 
 

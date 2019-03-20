@@ -108,3 +108,10 @@ INCLUDE ( 	[strWorkOrderNo],
 	[dblQuantity],
 	[dtmPlannedDate],
 	[strComment]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+Go
+CREATE NONCLUSTERED INDEX IX_tblMFWorkOrder_intStatusId ON [dbo].[tblMFWorkOrder]
+(
+	[intStatusId] ASC,
+	[intWorkOrderId] ASC
+)
+INCLUDE ( 	[dtmPlannedDate]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

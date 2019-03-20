@@ -111,7 +111,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, dblOpenContract = (SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, dblOpenContract = History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
@@ -154,7 +154,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, dblOpenContract = (SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, dblOpenContract = - (History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0))
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
@@ -197,7 +197,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, dblOpenContract = (SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, dblOpenContract = History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
@@ -240,7 +240,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, dblOpenContract = (SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId)
+					, dblOpenContract = - (History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0))
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
@@ -278,7 +278,8 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, intOpenContract = ISNULL((SELECT SUM(dblOpenContract) FROM [dbo].[fnRKGetOpenContractHistory](@dtmToDate) WHERE intFutOptTransactionId = History.intFutOptTransactionId), History.dblNewNoOfContract)
+					, intOpenContract = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0)
+											ELSE - (History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0)) END
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))

@@ -46,3 +46,9 @@ CREATE NONCLUSTERED INDEX IX_tblMFWorkOrderInputLot_intWorkOrderInputLotId ON [d
 )
 INCLUDE ( 	[strReferenceNo],
 	[dtmActualInputDateTime]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+Go
+CREATE NONCLUSTERED INDEX IX_tblMFWorkOrderInputLot_intWorkOrderId ON [dbo].[tblMFWorkOrderInputLot]
+(
+	[intWorkOrderId] ASC,
+	[intDestinationLotId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

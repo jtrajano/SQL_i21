@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPOProcessItemReceipt]
 	@poId INT
 	,@userId INT
+	,@receiveNonInventory BIT = 0
 	,@receiptNumber NVARCHAR(50) OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -157,7 +158,7 @@ BEGIN
 				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 				AND PO.intShipToId = ItemLocation.intLocationId
 	WHERE	PODetail.intPurchaseId = @poId
-			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+			AND 1 = CASE WHEN dbo.fnIsStockTrackingItem(PODetail.intItemId) = 0 AND @receiveNonInventory = 0 THEN 0 ELSE 1 END
 			AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
 	
 	INSERT INTO	@OtherCharges

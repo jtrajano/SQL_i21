@@ -21,3 +21,11 @@
 		,CONSTRAINT [FK_tblMFOrderHeader_tblMFOrderType_intOrderTypeId] FOREIGN KEY ([intOrderTypeId]) REFERENCES [tblMFOrderType]([intOrderTypeId])
 		,CONSTRAINT [FK_tblMFOrderHeader_tblMFOrderDirection_intOrderDirectionId] FOREIGN KEY ([intOrderDirectionId]) REFERENCES [tblMFOrderDirection]([intOrderDirectionId])
 		)
+Go
+CREATE NONCLUSTERED INDEX IX_tblMFOrderHeader_intOrderDirectionId ON [dbo].[tblMFOrderHeader]
+(
+	[intOrderDirectionId] ASC,
+	[intOrderStatusId] ASC,
+	[intOrderHeaderId] ASC
+)
+INCLUDE ( 	[strOrderNo]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

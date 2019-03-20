@@ -660,6 +660,15 @@ BEGIN
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_lookup]
 		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [strTransactionId] ASC, [intItemId] ASC, [intTransactionDetailId] ASC, [intLotId] ASC, [intItemLocationId] ASC);
 
+	CREATE TABLE #tmpAutoVarianceBatchesForAVGCosting (
+		intItemId INT
+		,intItemLocationId INT
+		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	)
+
+	CREATE NONCLUSTERED INDEX [IX_tmpAutoVarianceBatchesForAVGCosting]
+		ON #tmpAutoVarianceBatchesForAVGCosting(intItemId ASC, intItemLocationId ASC, strTransactionId ASC, strBatchId ASC);
 
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
@@ -743,7 +752,51 @@ BEGIN
 				WHEN dblValue <> 0 THEN 6
 				ELSE 7
 			END   
-			ASC 			
+			ASC 	
+			
+		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
+			intItemId
+			,intItemLocationId
+			,strTransactionId
+			,strBatchId
+		)
+		SELECT 
+			t.intItemId
+			,t.intItemLocationId
+			,t2.strTransactionId
+			,t2.strBatchId
+		FROM 
+			tblICItem i 
+			CROSS APPLY (
+				SELECT DISTINCT 
+					t.intItemId
+					,t.intItemLocationId
+				FROM 
+					#tmpICInventoryTransaction t 
+				WHERE 
+					t.dblQty > 0 
+					AND t.intCostingMethod = 1
+					AND t.intItemId = i.intItemId
+			) t
+			CROSS APPLY (
+				SELECT TOP 1 
+					t2.strBatchId
+					,t2.strTransactionId					
+				FROM 
+					#tmpICInventoryTransaction t2
+				WHERE 
+					t2.intItemId = t.intItemId
+					AND t2.intItemLocationId = t.intItemLocationId					
+					AND t2.intCostingMethod = 1	
+					AND 1 = 
+						CASE 
+							WHEN t2.dblQty > 0 THEN 1
+							WHEN t2.dblValue <> 0 AND t2.intTransactionTypeId = 26 THEN 1
+							ELSE 0 
+						END 
+				ORDER BY
+					t2.dtmDate DESC, t2.id DESC, t2.intSortByQty DESC
+			) t2
 	END
 	ELSE 
 	BEGIN 
@@ -803,6 +856,50 @@ BEGIN
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
 			intInventoryTransactionId ASC 
+
+		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
+			intItemId
+			,intItemLocationId
+			,strTransactionId
+			,strBatchId
+		)
+		SELECT 
+			t.intItemId
+			,t.intItemLocationId
+			,t2.strTransactionId
+			,t2.strBatchId
+		FROM 
+			tblICItem i 
+			CROSS APPLY (
+				SELECT DISTINCT 
+					t.intItemId
+					,t.intItemLocationId
+				FROM 
+					#tmpICInventoryTransaction t 
+				WHERE 
+					t.dblQty > 0 
+					AND t.intCostingMethod = 1
+					AND t.intItemId = i.intItemId
+			) t
+			CROSS APPLY (
+				SELECT TOP 1 
+					t2.strBatchId
+					,t2.strTransactionId					
+				FROM 
+					#tmpICInventoryTransaction t2
+				WHERE 
+					t2.intItemId = t.intItemId
+					AND t2.intItemLocationId = t.intItemLocationId					
+					AND t2.intCostingMethod = 1	
+					AND 1 = 
+						CASE 
+							WHEN t2.dblQty > 0 THEN 1
+							WHEN t2.dblValue <> 0 AND t2.intTransactionTypeId = 26 THEN 1
+							ELSE 0 
+						END 
+				ORDER BY
+					t2.id2 DESC, t2.id DESC
+			) t2
 	END
 END
 
@@ -4443,6 +4540,9 @@ BEGIN
 
 	IF OBJECT_ID('tempdb..#tmpPriorityTransactions') IS NOT NULL  
 		DROP TABLE #tmpPriorityTransactions
+
+	IF OBJECT_ID('tempdb..#tmpAutoVarianceBatchesForAVGCosting') IS NOT NULL  
+		DROP TABLE #tmpAutoVarianceBatchesForAVGCosting
 END 
 
 RETURN @intReturnValue; 

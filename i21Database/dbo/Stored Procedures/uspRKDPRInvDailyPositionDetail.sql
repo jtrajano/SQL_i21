@@ -638,6 +638,7 @@ BEGIN
 					, ch.strFutureMonth
 					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), ch.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), ch.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
+					, c.ysnIncludeInPriceRiskAndCompanyTitled
 				FROM tblRKCollateral c
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 				JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
@@ -1188,9 +1189,9 @@ BEGIN
 				, strFutureMonth)
 			SELECT * FROM (
 				SELECT intSeqId = 8
-					, strSeqHeader = 'Collateral Receipts - Sales' COLLATE Latin1_General_CI_AS
+					, strSeqHeader = CASE WHEN ysnIncludeInPriceRiskAndCompanyTitled = 1 THEN 'Warehouse Receipts - Sales' ELSE 'Collateral Receipts - Sales' END COLLATE Latin1_General_CI_AS
 					, strCommodityCode = @strCommodityCode
-					, strType = 'Collateral Receipts - Sales' COLLATE Latin1_General_CI_AS
+					, strType = CASE WHEN ysnIncludeInPriceRiskAndCompanyTitled = 1 THEN 'Warehouse Receipts - Sales' ELSE 'Collateral Receipts - Sales' END COLLATE Latin1_General_CI_AS
 					, dblTotal
 					, intCollateralId
 					, strLocationName
@@ -1245,9 +1246,9 @@ BEGIN
 				, strFutureMonth)
 			SELECT * FROM (
 				SELECT intSeqId = 9 
-					, strSeqHeader = 'Collateral Receipts - Purchase' COLLATE Latin1_General_CI_AS
+					, strSeqHeader = CASE WHEN ysnIncludeInPriceRiskAndCompanyTitled = 1 THEN 'Warehouse Receipts - Purchase' ELSE 'Collateral Receipts - Purchase' END COLLATE Latin1_General_CI_AS
 					, strCommodityCode = @strCommodityCode
-					, strType = 'Collateral Receipts - Purchase' COLLATE Latin1_General_CI_AS
+					, strType = CASE WHEN ysnIncludeInPriceRiskAndCompanyTitled = 1 THEN 'Warehouse Receipts - Purchase' ELSE 'Collateral Receipts - Purchase' END COLLATE Latin1_General_CI_AS
 					, dblTotal
 					, intCollateralId
 					, strLocationName
@@ -1956,7 +1957,7 @@ BEGIN
 						, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 						, strCommodityCode = @strCommodityCode
 						, strType
-						, dblTotal = CASE WHEN strType = 'Collateral Receipts - Purchase' THEN ISNULL(dblTotal, 0) ELSE - ISNULL(dblTotal, 0) END
+						, dblTotal = CASE WHEN strType = 'Warehouse Receipts - Purchase' THEN ISNULL(dblTotal, 0) ELSE - ISNULL(dblTotal, 0) END
 						, intCommodityId = @intCommodityId
 						, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 						, strLocationName
@@ -1973,7 +1974,7 @@ BEGIN
 						, strContractNumber
 						, intContractHeaderId
 					FROM @Final
-					WHERE intSeqId IN (9,8) AND strType IN ('Collateral Receipts - Purchase','Collateral Receipts - Sales') AND intCommodityId = @intCommodityId
+					WHERE intSeqId IN (9,8) AND strType IN ('Warehouse Receipts - Purchase','Warehouse Receipts - Sales') AND intCommodityId = @intCommodityId
 				) t GROUP BY intSeqId
 					, strSeqHeader
 					, strCommodityCode

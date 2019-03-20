@@ -23,6 +23,7 @@ BEGIN TRY
 		,@intLanguageId INT
 		,@strMonthLabelName NVARCHAR(50) = 'Month'
 		,@strSampleLabelName NVARCHAR(50) = 'SampleGab'
+		,@dtmSampleReceivedDate DATETIME
 
 	SELECT @intReportLogoHeight = intReportLogoHeight
 		,@intReportLogoWidth = intReportLogoWidth
@@ -131,6 +132,7 @@ BEGIN TRY
 		,@strWHRef = S.strRefNo
 		,@strCourier = S.strCourier
 		,@strCourierRef = S.strCourierRef
+		,@dtmSampleReceivedDate = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), S.dtmSampleReceivedDate)
 	FROM tblQMSample S
 	LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
 	LEFT JOIN tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
@@ -166,7 +168,7 @@ BEGIN TRY
 		,@strBrokerRef = CC.strReference
 	FROM tblQMSample S
 	LEFT JOIN tblCTContractCost CC ON CC.intContractDetailId = S.intContractDetailId
-		AND CC.strPaidBy = 'Broker'
+		AND CC.strParty = 'Broker'
 	LEFT JOIN tblEMEntity E ON E.intEntityId = CC.intVendorId
 	WHERE S.intSampleId = @intSampleId
 	ORDER BY CC.intContractCostId
@@ -201,7 +203,7 @@ BEGIN TRY
 					ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country', rtc10.intCountryID, @intLanguageId, 'Country', rtc10.strCountry)))
 					END, '')
 			) AS strOtherPartyAddress
-		,ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY, S.dtmSampleReceivedDate), 2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLanguageId, DATENAME(MONTH, S.dtmSampleReceivedDate)), DATENAME(MONTH, S.dtmSampleReceivedDate)) + ' ' + LEFT(DATENAME(YEAR, S.dtmSampleReceivedDate), 4) AS strCompanyCityAndDate
+		,ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY, @dtmSampleReceivedDate), 2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLanguageId, DATENAME(MONTH, @dtmSampleReceivedDate)), DATENAME(MONTH, @dtmSampleReceivedDate)) + ' ' + LEFT(DATENAME(YEAR, @dtmSampleReceivedDate), 4) AS strCompanyCityAndDate
 		,@rtSample + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strSampleLabelName, @intLanguageId, SD.strAttributeValue), SD.strAttributeValue) AS strTitleText
 		,S.strSampleNumber
 		,dbo.fnCTGetTranslation('Quality.view.SampleType', ST.intSampleTypeId, @intLanguageId, 'Sample Type', ST.strSampleTypeName) AS strSampleTypeName
