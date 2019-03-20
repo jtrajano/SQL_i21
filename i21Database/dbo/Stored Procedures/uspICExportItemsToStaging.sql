@@ -1,5 +1,5 @@
 CREATE PROCEDURE [dbo].[uspICExportItemsToStaging]
-	@dtmDate DATETIME,
+	@dtmDate DATETIME = NULL,
 	@ysnIncludeDetails BIT = 1
 AS
 
