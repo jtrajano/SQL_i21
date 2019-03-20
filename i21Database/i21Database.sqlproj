@@ -2891,8 +2891,10 @@
     <Build Include="dbo\Tables\tblICStagingAdjustmentDetail.sql" />
     <Build Include="dbo\Tables\tblICStagingCount.sql" />
     <Build Include="dbo\Tables\tblICStagingCountDetail.sql" />
+    <Build Include="dbo\Tables\tblICStagingReorderPoint.sql" />
     <Build Include="dbo\Functions\fnICGetItemRunningStockQty.sql" />
     <Build Include="dbo\Functions\fnICGetItemRunningCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateReorderPointFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportAdjustmentsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportCountsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICExportItemsToStaging.sql" />
