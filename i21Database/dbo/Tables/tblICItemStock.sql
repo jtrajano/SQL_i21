@@ -74,6 +74,8 @@ This table holds stock information like quantity on hand and etc.
 		[dblOpenPurchaseContract] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[dblOpenSalesContract] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
+		[dtmLastPurchaseDate] DATETIME NULL,
+		[dtmLastSaleDate] DATETIME NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,
         [dtmDateModified] DATETIME NULL,
