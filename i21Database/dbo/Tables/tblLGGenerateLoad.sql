@@ -32,6 +32,7 @@
 [intPCompanyLocationId] INT NULL,
 [intSCompanyLocationId] INT NULL,
 [intTransUsedBy] INT NULL, 
+[ysnLoadBased] BIT NULL DEFAULT ((0)),
 [intCompanyId] INT NULL,
 
 [intEquipmentTypeId] INT NULL,

@@ -1561,6 +1561,7 @@ BEGIN
 			AND I.[intContractDetailId] = CTCD.[intContractDetailId] 
 	WHERE
 		I.[strItemType] <> 'Other Charge'
+		AND I.strTransactionType <> 'Credit Memo'
 		AND I.[dblPrice] = @ZeroDecimal			
 		AND CTCD.[strPricingType] <> 'Index'
 		AND ISNULL(I.[intLoadDetailId],0) = 0
@@ -1599,6 +1600,7 @@ BEGIN
 	WHERE
 		I.[dblUnitPrice] <> @ZeroDecimal				
 		AND I.[strItemType] <> 'Other Charge'
+		AND I.strTransactionType <> 'Credit Memo'
 		AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(I.[dblUnitPrice], @ZeroDecimal) AS MONEY)
 		AND ARCC.[strPricingType] <> 'Index'
 		AND ISNULL(I.[intLoadDetailId],0) = 0

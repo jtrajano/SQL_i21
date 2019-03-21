@@ -763,7 +763,7 @@ SELECT intContractHeaderId
 	, dblNoOfLots
 	, dblLotsFixed
 	, dblPriceWORollArb
-	, CASE WHEN intPricingTypeId = 6 THEN dblMarketBasis1 ELSE 0 END dblCashPrice
+	, CASE WHEN intPricingTypeId = 6 THEN dblMarketCashPrice ELSE 0 END dblCashPrice
 FROM (
 	SELECT DISTINCT cd.intContractHeaderId
 		, cd.intContractDetailId

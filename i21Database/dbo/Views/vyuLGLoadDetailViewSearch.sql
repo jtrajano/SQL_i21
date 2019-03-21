@@ -1,64 +1,64 @@
 ﻿CREATE VIEW vyuLGLoadDetailViewSearch
 AS
-SELECT   Load.intLoadId
-		,Load.intConcurrencyId
-		,Load.[strLoadNumber]
-		,Load.intPurchaseSale
-		,Load.intEquipmentTypeId
-		,Load.intHaulerEntityId
-		,Load.intTicketId
-		,Load.intGenerateLoadId
-		,Load.intUserSecurityId
-		,Load.intTransportLoadId
-		,Load.intLoadHeaderId
-		,Load.intDriverEntityId
-		,Load.intDispatcherId
-        ,Load.strExternalLoadNumber
-		,Load.strExternalShipmentNumber
-		,Load.dtmETAPOD
-		,Load.dtmETAPOL
-		,Load.dtmETSPOL
+SELECT   L.intLoadId
+		,L.intConcurrencyId
+		,L.[strLoadNumber]
+		,L.intPurchaseSale
+		,L.intEquipmentTypeId
+		,L.intHaulerEntityId
+		,L.intTicketId
+		,L.intGenerateLoadId
+		,L.intUserSecurityId
+		,L.intTransportLoadId
+		,L.intLoadHeaderId
+		,L.intDriverEntityId
+		,L.intDispatcherId
+        ,L.strExternalLoadNumber
+		,L.strExternalShipmentNumber
+		,L.dtmETAPOD
+		,L.dtmETAPOL
+		,L.dtmETSPOL
 		,POS.strPosition
 		,POS.strPositionType
-        ,strType = CASE WHEN Load.intPurchaseSale = 1 THEN 
+        ,strType = CASE WHEN L.intPurchaseSale = 1 THEN 
 						'Inbound' 
 						ELSE 
-							CASE WHEN Load.intPurchaseSale = 2 THEN 
+							CASE WHEN L.intPurchaseSale = 2 THEN 
 							'Outbound' 
 							ELSE
 							'Drop Ship'
 							END
 						END COLLATE Latin1_General_CI_AS
-        ,intGenerateSequence = Load.intGenerateSequence
-        ,Load.dtmScheduledDate
-        ,ysnInProgress = IsNull(Load.ysnInProgress, 0)
-        ,Load.dtmDeliveredDate
-        ,Load.strCustomerReference
-        ,Load.strTruckNo
-        ,Load.strTrailerNo1
-        ,Load.strTrailerNo2
-        ,Load.strTrailerNo3
-        ,Load.strCarNumber
-        ,Load.strEmbargoNo
-        ,Load.strEmbargoPermitNo
-        ,Load.strComments
-        ,ysnDispatched = CASE WHEN Load.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
-		,Load.dtmDispatchedDate
-		,Load.ysnDispatchMailSent
-		,Load.dtmDispatchMailSent
-		,Load.dtmCancelDispatchMailSent
-		,Load.intCompanyLocationId
-		,Load.intTransUsedBy
+        ,intGenerateSequence = L.intGenerateSequence
+        ,L.dtmScheduledDate
+        ,ysnInProgress = IsNull(L.ysnInProgress, 0)
+        ,L.dtmDeliveredDate
+        ,L.strCustomerReference
+        ,L.strTruckNo
+        ,L.strTrailerNo1
+        ,L.strTrailerNo2
+        ,L.strTrailerNo3
+        ,L.strCarNumber
+        ,L.strEmbargoNo
+        ,L.strEmbargoPermitNo
+        ,L.strComments
+        ,ysnDispatched = CASE WHEN L.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
+		,L.dtmDispatchedDate
+		,L.ysnDispatchMailSent
+		,L.dtmDispatchMailSent
+		,L.dtmCancelDispatchMailSent
+		,L.intCompanyLocationId
+		,L.intTransUsedBy
 		,strTransUsedBy = CASE 
-			WHEN Load.intTransUsedBy = 1 
+			WHEN L.intTransUsedBy = 1 
 				THEN 'None'
-			WHEN Load.intTransUsedBy = 2
+			WHEN L.intTransUsedBy = 2
 				THEN 'Scale Ticket'
-			WHEN Load.intTransUsedBy = 3
-				THEN 'Transport Load'
+			WHEN L.intTransUsedBy = 3
+				THEN 'Transport L'
 			END COLLATE Latin1_General_CI_AS
-		,Load.intSourceType
-		,Load.ysnPosted
+		,L.intSourceType
+		,L.ysnPosted
 		,LoadDetail.intLoadDetailId
 		,LoadDetail.intItemId
 		,LoadDetail.dblQuantity
@@ -89,8 +89,9 @@ SELECT   Load.intLoadId
 		,LoadDetail.strExternalBatchNo
         ,intGenerateReferenceNumber = GLoad.intReferenceNumber
         ,intNumberOfLoads = GLoad.intNumberOfLoads
-		,CASE WHEN Load.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END intContractHeaderId
+		,CASE WHEN L.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END intContractHeaderId
 		,PHeader.intContractHeaderId AS intPContractHeaderId 
+		,L.ysnLoadBased
 
 -- Inbound Company Location
         ,strPLocationName = PCL.strLocationName
@@ -154,11 +155,11 @@ SELECT   Load.intLoadId
         ,strHauler = Hauler.strName
         ,strDriver = Driver.strName
 		,strDispatcher = US.strUserName 
-        ,strScaleTicketNo = CASE WHEN IsNull(Load.intTicketId, 0) <> 0 
+        ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 
 								 THEN 
 									CAST(ST.strTicketNumber AS VARCHAR(100))
 								 ELSE 
-									CASE WHEN IsNull(Load.intLoadHeaderId, 0) <> 0 
+									CASE WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
 										THEN 
 											TR.strTransaction
 										ELSE 
@@ -169,10 +170,10 @@ SELECT   Load.intLoadId
 		,PLH.strPickLotNumber
 		,ALH.intAllocationHeaderId
 		,ALH.strAllocationNumber
-		,Load.intLoadShippingInstructionId
+		,L.intLoadShippingInstructionId
 		,LSI.strLoadNumber AS strShippingInstructionNo
-		,Load.intShipmentType
-		,strShipmentType = CASE Load.intShipmentType
+		,L.intShipmentType
+		,strShipmentType = CASE L.intShipmentType
 			WHEN 1
 				THEN 'Shipment'
 			WHEN 2
@@ -185,7 +186,7 @@ SELECT   Load.intLoadId
 		,CA.intCommodityAttributeId
 		,CO.strCountry AS strOrigin
 		,LoadDetail.intNumberOfContainers
-		,strShipmentStatus = CASE Load.intShipmentStatus
+		,strShipmentStatus = CASE L.intShipmentStatus
 			WHEN 1
 				THEN 'Scheduled'
 			WHEN 2
@@ -211,11 +212,11 @@ SELECT   Load.intLoadId
 			ELSE ''
 			END COLLATE Latin1_General_CI_AS
 		,strTransportationMode = CASE 
-			WHEN Load.intTransportationMode = 1 
+			WHEN L.intTransportationMode = 1 
 				THEN 'Truck'
-			WHEN Load.intTransportationMode = 2
+			WHEN L.intTransportationMode = 2
 				THEN 'Ocean Vessel'
-			WHEN Load.intTransportationMode = 3
+			WHEN L.intTransportationMode = 3
 				THEN 'Rail'
 			END COLLATE Latin1_General_CI_AS
 		,strPCompanyLocation = PCL.strLocationName
@@ -226,13 +227,13 @@ SELECT   Load.intLoadId
 		,PTP.strPricingType AS strPPricingType
 		,SDetail.intPricingTypeId AS intSPricingTypeId
 		,PTS.strPricingType AS strSPricingType
-		,Load.intBookId
+		,L.intBookId
 		,BO.strBook
-		,Load.intSubBookId
+		,L.intSubBookId
 		,SB.strSubBook
 FROM tblLGLoadDetail LoadDetail
-JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
-LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
+JOIN tblLGLoad L ON L.intLoadId = LoadDetail.intLoadId
+LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
 LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
@@ -252,19 +253,19 @@ LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureI
 LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
-LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
-LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
-LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = Load.intHaulerEntityId
-LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
+LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
+LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
+LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
+LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
 LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
-LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
-LEFT JOIN tblSMUserSecurity US ON US.[intEntityId]	= Load.intDispatcherId
+LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
+LEFT JOIN tblSMUserSecurity US ON US.[intEntityId]	= L.intDispatcherId
 LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LoadDetail.intPickLotDetailId
 LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LoadDetail.intAllocationDetailId
 LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId	
-LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = Load.intLoadShippingInstructionId
+LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
 	AND PDetail.intItemContractId = ICI.intItemContractId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
@@ -274,6 +275,6 @@ LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
 			ELSE ICI.intCountryId
 			END
 		)
-LEFT JOIN tblCTPosition POS ON POS.intPositionId = Load.intPositionId
-LEFT JOIN tblCTBook BO ON BO.intBookId = Load.intBookId
-LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = Load.intSubBookId
+LEFT JOIN tblCTPosition POS ON POS.intPositionId = L.intPositionId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId

@@ -1,11 +1,11 @@
 CREATE TABLE [dbo].[tblCMImportBankTransactionLog] (
-    [intImportLogId] [int] NOT NULL IDENTITY(1,1),
-    [strBuildNumber] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
-    [dtmDate] [datetime] NOT NULL,
-    [strFile] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+    [intImportLogId] INT NOT NULL IDENTITY(1,1),
+    [strBuildNumber] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+    [dtmDate] DATETIME NOT NULL,
+    [strFileName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [intEntityId] INT NOT NULL,
     [strLogDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyId] [int] NOT NULL,
+    [intConcurrencyId] INT NOT NULL,
     primary key ([intImportLogId])
 );
 GO

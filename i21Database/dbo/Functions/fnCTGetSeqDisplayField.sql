@@ -91,5 +91,8 @@ BEGIN
 		END
 
 	END
+	ELSE IF  @strTable = 'tblEMEntityLocation'
+		SELECT @strDisplayField = strLocationName from tblEMEntityLocation WHERE intEntityLocationId = @intId
+
 	RETURN @strDisplayField;
 END

@@ -91,6 +91,8 @@ BEGIN
 				, ysnApplyTermDiscount
 				, dblDiscount
 				, dblDiscountAvailable
+				, dblWriteOffAmount
+				, dblBaseWriteOffAmount
 				, dblInterest
 				, dblPayment
 				, dblAmountDue
@@ -131,6 +133,8 @@ BEGIN
 				, ysnApplyTermDiscount			= 0
 				, dblDiscount					= INVOICE.dblDiscount
 				, dblDiscountAvailable			= INVOICE.dblDiscountAvailable
+				, dblWriteOffAmount				= 0
+				, dblBaseWriteOffAmount			= 0
 				, dblInterest					= INVOICE.dblInterest
 				, dblPayment					= ISNULL(PAYMENTS.dblPayment, 0)
 				, dblAmountDue					= INVOICE.dblAmountDue - ISNULL(PAYMENTS.dblPayment, 0)
