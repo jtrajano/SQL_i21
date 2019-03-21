@@ -680,8 +680,12 @@ BEGIN TRY
 							FROM @tblICItem
 							WHERE IsNULL(intOldProductTypeId, 0) <> IsNULL(intNewProductTypeId, 0)
 							)
-						SELECT @strDetails += '{"change":"intProductTypeId","iconCls":"small-gear","from":"' + Ltrim(intOldProductTypeId) + '","to":"' + Ltrim(intNewProductTypeId) + '","leaf":true,"changeDescription":"Product Type"},'
-						FROM @tblICItem
+					BEGIN
+						SELECT @strDetails += '{"change":"intProductTypeId","iconCls":"small-gear","from":"' + ISNULL(CA.strDescription, '') + '","to":"' + ISNULL(CA1.strDescription, '') + '","leaf":true,"changeDescription":"Product Type"},'
+						FROM @tblICItem I
+						LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOldProductTypeId
+						LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intNewProductTypeId
+					END
 
 					IF EXISTS (
 							SELECT *

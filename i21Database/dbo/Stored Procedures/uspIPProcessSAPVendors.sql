@@ -647,11 +647,19 @@ BEGIN TRY
 					UPDATE tblEMEntityLocation
 					SET intTermsId = @intTermId
 					OUTPUT 'intTermsId'
-						,'Terms Id'
+						,'Terms'
 						,deleted.intTermsId
 						,Inserted.intTermsId
 					INTO @tblEMEntity
 					WHERE intEntityLocationId = @intEntityLocationId
+
+					UPDATE @tblEMEntity
+					SET strOldValue = T.strTermCode
+						,strNewValue = T1.strTermCode
+					FROM @tblEMEntity E
+					LEFT JOIN tblSMTerm T ON T.intTermID = E.strOldValue
+					LEFT JOIN tblSMTerm T1 ON T1.intTermID = E.strNewValue
+					WHERE strColumnName = 'intTermsId'
 
 					UPDATE tblAPVendor
 					SET intTermsId = @intTermId
@@ -704,14 +712,24 @@ BEGIN TRY
 
 				--Vendor table update
 				IF ISNULL(@strCurrency, '/') <> '/'
+				BEGIN
 					UPDATE tblAPVendor
 					SET intCurrencyId = @intCurrencyId
 					OUTPUT 'intCurrencyId'
-						,'Currency Id'
+						,'Currency'
 						,deleted.intCurrencyId
 						,Inserted.intCurrencyId
 					INTO @tblEMEntity
 					WHERE [intEntityId] = @intEntityId
+
+					UPDATE @tblEMEntity
+					SET strOldValue = C.strCurrency
+						,strNewValue = C1.strCurrency
+					FROM @tblEMEntity E
+					LEFT JOIN tblSMCurrency C ON C.intCurrencyID = E.strOldValue
+					LEFT JOIN tblSMCurrency C1 ON C1.intCurrencyID = E.strNewValue
+					WHERE strColumnName = 'intCurrencyId'
+				END
 
 				IF ISNULL(@strFLOId, '/') <> '/'
 					UPDATE tblAPVendor
