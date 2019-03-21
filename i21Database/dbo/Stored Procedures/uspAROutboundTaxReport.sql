@@ -47,11 +47,15 @@ DECLARE @dtmDateFrom            DATETIME
 	  , @xmlDocumentId          INT
 	  , @fieldname              NVARCHAR(50)
       , @UserName               NVARCHAR(150)
-
+	  , @strCompanyName         NVARCHAR(100)
+	  , @strCompanyAddress      NVARCHAR(500)
 
 SET @AccountStatusFiltered = CAST(0 AS BIT)
 SET @strSubTotalBy = 'Tax Group'
 SELECT @UserName = [strName] FROM tblEMEntity WHERE[intEntityId] = @EntityUserId
+SELECT TOP 1 @strCompanyName = strCompanyName
+     , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
+ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 		
 -- Create a table variable to hold the XML data. 		
@@ -165,6 +169,8 @@ IF @dtmDateFrom IS NOT NULL
 ELSE 			  
     SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
+
+--SET FMTONLY OFF
 IF(OBJECT_ID('tempdb..#STATUSCODES') IS NOT NULL)
 BEGIN
     DROP TABLE #STATUSCODES
@@ -305,6 +311,7 @@ IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND I
          WHERE I.strInvoiceNumber BETWEEN @strInvoiceNumberFrom AND @strInvoiceNumberTo
            AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
+           AND I.dblTax <> 0.000000
     END
 ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> '')
     BEGIN
@@ -320,6 +327,7 @@ ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> 
          WHERE I.strInvoiceNumber = @strInvoiceNumberFrom
            AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
+           AND I.dblTax <> 0.000000
     END
 ELSE
     BEGIN
@@ -334,6 +342,7 @@ ELSE
                                ) S ON I.intEntitySalespersonId = S.intEntityId
          WHERE I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
+           AND I.dblTax <> 0.000000
     END
 
 IF(OBJECT_ID('tempdb..#ITEMS') IS NOT NULL)
@@ -377,7 +386,7 @@ ELSE
     END
 
 
-
+--SET FMTONLY ON
 IF @strSubTotalBy = 'Tax Group'
 BEGIN
     SELECT
@@ -390,17 +399,20 @@ BEGIN
          , [strCustomerName]              = C.[strCustomerName]
          , [strAccountStatusCode]         = C.[strAccountStatusCode]
          , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strCompanyName]               = @strCompanyName
+         , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
          , [intUserId]                    = @EntityUserId
          , [strUserName]                  = @UserName
          , [strItemNo]                    = ICI.[strItemNo]
-         , [strItemDescription]           = OT.[strItemDescription]
+         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
          , [strCategoryCode]              = ICC.[strCategoryCode]
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
          , [dblTotal]                     = OT.[dblTotal]
+         , [dblLineTotal]                 = OT.[dblTotal] + OT.[dblTotalTax]
          , [strTaxGroup]                  = OT.[strTaxGroup]
          , [strTaxCode]                   = '' --OT.[strTaxCode]
          , [strState]                     = '' --OT.[strState]
@@ -508,17 +520,20 @@ BEGIN
          , [strCustomerName]              = C.[strCustomerName]
          , [strAccountStatusCode]         = C.[strAccountStatusCode]
          , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strCompanyName]               = @strCompanyName
+         , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
          , [intUserId]                    = @EntityUserId
          , [strUserName]                  = @UserName
          , [strItemNo]                    = ICI.[strItemNo]
-         , [strItemDescription]           = OT.[strItemDescription]
+         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
          , [strCategoryCode]              = ICC.[strCategoryCode]
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
          , [dblTotal]                     = OT.[dblTotal]
+         , [dblLineTotal]                 = OT.[dblTotal] + OT.[dblTotalTax]
          , [strTaxGroup]                  = OT.[strTaxGroup]
          , [strTaxCode]                   = '' --OT.[strTaxCode]
          , [strState]                     = '' --OT.[strState]
@@ -627,17 +642,20 @@ BEGIN
          , [strCustomerName]              = C.[strCustomerName]
          , [strAccountStatusCode]         = C.[strAccountStatusCode]
          , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strCompanyName]               = @strCompanyName
+         , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
          , [intUserId]                    = @EntityUserId
          , [strUserName]                  = @UserName
          , [strItemNo]                    = ICI.[strItemNo]
-         , [strItemDescription]           = OT.[strItemDescription]
+         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
          , [strCategoryCode]              = ICC.[strCategoryCode]
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
          , [dblTotal]                     = OT.[dblTotal]
+         , [dblLineTotal]                 = OT.[dblTotal] + OT.[dblTotalTax]
          , [strTaxGroup]                  = OT.[strTaxGroup]
          , [strTaxCode]                   = OT.[strTaxCode]
          , [strState]                     = '' --OT.[strState]
