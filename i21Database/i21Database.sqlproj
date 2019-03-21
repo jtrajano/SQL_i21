@@ -7460,6 +7460,7 @@
     <Build Include="dbo\Views\vyuCFInvoiceHistory.sql" />
     <Build Include="dbo\Functions\fnICGetMovingAverageCost.sql" />
     <Build Include="dbo\Functions\fnAPGetVouchersPaymentInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryTransferReportMCP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
