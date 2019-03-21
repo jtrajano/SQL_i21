@@ -139,7 +139,7 @@ FROM
 WHERE 
 	intInvoiceId = @InvoiceId
 
-IF ((ABS(@InvoiceAmountDue) + @Interest) < (ABS(@Payment) + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END)) AND @InvoicePrepayment = 0)
+IF (ABS(@InvoiceAmountDue) + @Interest) < (ABS(@Payment) + (CASE WHEN @ApplyTermDiscount = 1 THEN @TermDiscount ELSE @Discount END))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('Payment on %s is over the transaction''s amount due.', 16, 1, @InvoiceNumber);
