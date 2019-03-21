@@ -2,6 +2,7 @@
 CREATE VIEW [dbo].[vyuCFSearchTransaction]
 AS
 
+
 SELECT   
 	cfVehicle.strVehicleNumber
 	,cfVehicle.strVehicleDescription
@@ -67,6 +68,7 @@ SELECT
 	,cfTransaction.strPriceMethod
 	,cfTransaction.strPriceBasis
 	,cfTransaction.dblTransferCost
+	,dblTotalTransferCost = ROUND((ISNULL(cfTransaction.dblQuantity,0) * ISNULL(cfTransaction.dblTransferCost,0)),2)
 	,cfTransaction.dtmPostedDate
 	,cfTransaction.dblMargin 
 	,cfTransaction.dtmInvoiceDate
