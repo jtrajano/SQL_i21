@@ -1,101 +1,133 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryValuationSummary]
-AS
+AS 
 SELECT * FROM tblICInventoryValuationSummary
+
+
+--CREATE VIEW [dbo].[vyuICGetInventoryValuationSummary]
+--AS
+
 --SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY Item.intItemId) AS INT)
+--		,f.strPeriod
 --		,Item.intItemId
---		,strItemNo = Item.strItemNo
+--		,Item.strItemNo
 --		,strItemDescription = Item.strDescription 
 --		,ItemLocation.intItemLocationId
 --		,strLocationName = 
---				CASE WHEN t.ysnInTransit = 1 THEN 
---						[Location].strLocationName + ' (In-Transit)'
---					ELSE 
---						[Location].strLocationName
---				END 
---		--,dblQuantity = ISNULL(dblQuantityInStockUOM, 0)
---		,dblRunningQuantity = CAST(dblQuantityInStockUOM AS NUMERIC(38, 20)) 
---		--,dblValue = ISNULL(dblValue, 0)
---		,dblRunningValue = ISNULL(dblValue, 0)
---		--,dblLastCost = ISNULL(ROUND(dblQuantityInStockUOM * ItemPricing.dblLastCost, 2), 0)
---		,dblRunningLastCost = ISNULL(ROUND(dblQuantityInStockUOM * ItemPricing.dblLastCost, 2), 0)
---		--,dblStandardCost = ISNULL( ROUND(dblQuantityInStockUOM * ItemPricing.dblStandardCost, 2),0)
---		,dblRunningStandardCost = ISNULL( ROUND(dblQuantityInStockUOM * ItemPricing.dblStandardCost, 2),0)
---		--,dblAverageCost = ISNULL( ROUND(dblQuantityInStockUOM * ItemPricing.dblAverageCost, 2),0)
---		,dblRunningAverageCost = ISNULL( ROUND(dblQuantityInStockUOM * ItemPricing.dblAverageCost, 2),0)
---		,strStockUOM = umStock.strUnitMeasure
---		--,t.dblQuantityInStockUOM
---		,Category.strCategoryCode
---		,Commodity.strCommodityCode
+--			CASE WHEN InTransit.intItemLocationId IS NOT NULL THEN 
+--					ItemLocation.strLocationName + ' (In-Transit)'
+--				ELSE 
+--					ItemLocation.strLocationName
+--			END
+--		,dblRunningQuantity = ISNULL(t.dblQuantityInStockUOM, 0)
+--		,dblRunningValue = ISNULL(t.dblValue, 0) 
+--		,dblRunningLastCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblLastCost, 2), 0)
+--		,dblRunningStandardCost = ISNULL(ROUND(dblQuantityInStockUOM * ItemPricing.dblStandardCost, 2),0)
+--		,dblRunningAverageCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblAverageCost, 2), 0)
+--		,strStockUOM = stockUOM.strUnitMeasure
+--		,Item.strCategoryCode
+--		,Item.strCommodityCode
 --		,strInTransitLocationName = ''
---		,t.intLocationId
---		,intInTransitLocationId = null  
---		,t.ysnInTransit
---		,strPeriod = f.strPeriod
---FROM	tblGLFiscalYearPeriod f	INNER JOIN tblGLCurrentFiscalYear c 
---			ON c.intFiscalYearId = f.intFiscalYearId
---			AND f.ysnOpen = 1 
---        INNER JOIN tblGLFiscalYear y 
---			ON y.intFiscalYearId = f.intFiscalYearId 
---		LEFT JOIN  tblICItem Item 
---			ON 1 = 1
---		LEFT JOIN tblICItemUOM stockUOM 
---			ON stockUOM.intItemId = Item.intItemId
---			AND stockUOM.ysnStockUnit = 1  
---		LEFT JOIN tblICUnitMeasure umStock
---			ON umStock.intUnitMeasureId = stockUOM.intUnitMeasureId 
---		LEFT JOIN tblICCategory Category 
---			ON Category.intCategoryId = Item.intCategoryId
---		LEFT JOIN tblICCommodity Commodity 
---			ON Commodity.intCommodityId = Item.intCommodityId
+--		,intLocationId = ItemLocation.intCompanyLocationId
+--		,intInTransitLocationId = NULL  
+--		,ysnInTransit = CAST(CASE WHEN InTransit.intItemLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
+--		,t.intInTransitSourceLocationId
+--FROM	tblGLFiscalYearPeriod f	
 --		OUTER APPLY (
 --			SELECT 
---					intLocationId = ISNULL(InTransit.intLocationId, l.intLocationId) 
---					,ysnInTransit = CASE WHEN l.intLocationId IS NULL THEN 1 ELSE 0 END 
---					--,intMonth = MONTH(t.dtmDate)
---					--,intYear = YEAR(t.dtmDate) 
---					,dblQuantity = SUM(ISNULL(t.dblQty, 0)) 
---					,dblQuantityInStockUOM = 
---						SUM(
---							dbo.fnCalculateQtyBetweenUOM (
---								t.intItemUOMId
---								,stockUOM.intItemUOMId
---								,t.dblQty
---							)
---						) 
---					,dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))					
---			FROM	tblICInventoryTransaction t INNER JOIN tblICItemLocation l
---						ON t.intItemLocationId = l.intItemLocationId
---					LEFT JOIN tblICItemUOM stockUOM 
---						ON stockUOM.intItemId = t.intItemId
---						AND stockUOM.ysnStockUnit = 1  
---					LEFT JOIN tblICItemLocation InTransit
---						ON InTransit.intItemLocationId = t.intInTransitSourceLocationId
---						AND t.intInTransitSourceLocationId IS NOT NULL 
---			WHERE	Item.intItemId = t.intItemId					
---					AND dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
+--				Item.intItemId
+--				,Item.strItemNo
+--				,Item.strDescription
+--				,Category.strCategoryCode
+--				,Commodity.strCommodityCode
+--				,ItemLocation.intItemLocationId
+--			FROM 
+--				tblICItem Item INNER JOIN tblICItemLocation ItemLocation
+--					ON Item.intItemId = ItemLocation.intItemId				
+--				LEFT JOIN tblICCategory Category 
+--					ON Category.intCategoryId = Item.intCategoryId
+--				LEFT JOIN tblICCommodity Commodity
+--					ON Commodity.intCommodityId = Item.intCommodityId
+--			WHERE
+--				Item.strType NOT IN ('Other Charge', 'Non-Inventory', 'Service', 'Software', 'Comment', 'Bundle')
+--		) Item		
+--		OUTER APPLY (
+--			SELECT 
+--				dblQuantity = SUM(ISNULL(t.dblQty, 0))
+--				,dblQuantityInStockUOM = SUM(
+--						dbo.fnCalculateQtyBetweenUOM(
+--							t.intItemUOMId
+--							, dbo.fnGetItemStockUOM(t.intItemId)
+--							, t.dblQty
+--						)
+--					)
+--				,dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))
+--				,t.intItemId
+--				,t.intItemLocationId
+--				,t.intInTransitSourceLocationId
+--			FROM 
+--				tblICInventoryTransaction t 
+--				CROSS APPLY (
+--					SELECT TOP 1
+--						f.strPeriod
+--						,f.intGLFiscalYearPeriodId
+--					FROM 
+--						tblGLFiscalYearPeriod f	INNER JOIN tblGLCurrentFiscalYear c 
+--							ON c.intFiscalYearId = f.intFiscalYearId
+--							AND f.ysnOpen = 1 
+--						INNER JOIN tblGLFiscalYear y 
+--							ON y.intFiscalYearId = f.intFiscalYearId 					
+--					WHERE
+--						dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
+--					ORDER BY 
+--						f.dtmEndDate ASC 
+--				) fy
+
+--			WHERE
+--				fy.intGLFiscalYearPeriodId = f.intGLFiscalYearPeriodId
+--				AND t.intItemId = Item.intItemId
+--				AND t.intItemLocationId = Item.intItemLocationId
+--				AND t.dblQty <> 0 
 --			GROUP BY 
---				ISNULL(InTransit.intLocationId, l.intLocationId) 
---				,CASE WHEN l.intLocationId IS NULL THEN 1 ELSE 0 END 
---				--,MONTH(t.dtmDate)
---				--,YEAR(t.dtmDate) 
---		) t							
-
---		LEFT JOIN tblICItemLocation ItemLocation 
---			ON ItemLocation.intLocationId = t.intLocationId
---			AND ItemLocation.intItemId = Item.intItemId 
-
+--				t.intItemId
+--				,t.intItemLocationId
+--				,t.intInTransitSourceLocationId				
+--			HAVING 
+--				SUM(ISNULL(t.dblQty, 0)) <> 0 
+--		) t
+--		OUTER APPLY (
+--			SELECT TOP 1 
+--				iu.intItemUOMId
+--				,u.strUnitMeasure
+--			FROM 
+--				tblICItemUOM iu LEFT JOIN tblICUnitMeasure u
+--					ON u.intUnitMeasureId = iu.intUnitMeasureId 
+--			WHERE 
+--				iu.intItemId = t.intItemId
+--				AND iu.ysnStockUnit = 1  			
+--		) stockUOM
+--		OUTER APPLY (
+--			SELECT
+--				cl.strLocationName
+--				,cl.intCompanyLocationId
+--				,il.intItemLocationId
+--			FROM	
+--				tblICItemLocation il INNER JOIN tblSMCompanyLocation cl
+--					ON il.intLocationId = cl.intCompanyLocationId
+--			WHERE
+--				il.intItemLocationId = t.intInTransitSourceLocationId
+--		) InTransit
+--		OUTER APPLY (
+--			SELECT
+--				cl.strLocationName
+--				,cl.intCompanyLocationId
+--				,il.intItemLocationId
+--			FROM	
+--				tblICItemLocation il INNER JOIN tblSMCompanyLocation cl
+--					ON il.intLocationId = cl.intCompanyLocationId
+--			WHERE
+--				il.intItemLocationId = COALESCE(InTransit.intItemLocationId, t.intItemLocationId, Item.intItemLocationId) 
+--		) ItemLocation
 --		LEFT JOIN tblICItemPricing ItemPricing 
---			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId	
-
---		LEFT JOIN tblSMCompanyLocation [Location]
---			ON [Location].intCompanyLocationId = t.intLocationId
-
-
---WHERE	Item.strType NOT IN (
---			'Other Charge'
---			,'Non-Inventory'
---			,'Service'
---			,'Software'
---			,'Comment'
---			,'Bundle'
---		)
+--			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+--WHERE
+--	ItemLocation.intItemLocationId IS NOT NULL 
