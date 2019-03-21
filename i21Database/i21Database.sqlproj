@@ -7376,8 +7376,6 @@
     <Build Include="dbo\Stored Procedures\uspRKSaveCurrencyExposure.sql" />
     <Build Include="dbo\Views\vyuRKGetCurExpSummary.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyExposure.sql" />
-    <Build Include="dbo\Views\vyuRKGetBankBalance.sql" />
-    <Build Include="dbo\Views\vyuRKGetMoneyMarket.sql" />
     <Build Include="dbo\Views\vyuRKGetNonOTC.sql" />
     <Build Include="dbo\Views\vyuRKGetOTC.sql" />
     <Build Include="dbo\Views\vyuRKGetStock.sql" />
@@ -7464,6 +7462,7 @@
     <Build Include="dbo\Functions\fnAPGetYTDPurchases.sql" />
     <Build Include="dbo\Functions\fnAPGetLYPurchases.sql" />
     <Build Include="dbo\Functions\fnAPGetLastVoucherTotal.sql" />
+    <Build Include="dbo\Views\vyuRKCurExpMoneyMarket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

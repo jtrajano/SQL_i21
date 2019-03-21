@@ -3,8 +3,7 @@
 	,@dtmFutureClosingDate datetime=null
 	,@intCurrencyId int
 	,@dblAP numeric(24,10)
-	,@dblAR numeric(24,10)
-	,@dblMoneyMarket numeric(24,10)
+	,@dblAR numeric(24,10)	
 
 AS
 
@@ -20,23 +19,10 @@ SELECT sum(case when strBuySell = 'Buy' then -dblMatchAmount else dblMatchAmount
 	JOIN tblSMCurrency c on c.strCurrency =ft.strFromCurrency
 	LEFT JOIN tblSMMultiCompany mc on mc.intMultiCompanyId=t.intCompanyId
 	WHERE ft.intCommodityId=@intCommodityId and isnull(ft.ysnLiquidation,0) =0 
-UNION
-SELECT sum(Balance.Value) as dblAmount
-FROM vyuCMBankAccount CM
-OUTER APPLY (SELECT [dbo].[fnGetBankBalance] (intBankAccountId, getdate()) Value) Balance
-OUTER APPLY (SELECT TOP 1 strCompanyName from tblSMCompanySetup)SM
-OUTER APPLY (SELECT TOP 1 intCompanySetupID from tblSMCompanySetup)SM1
-LEFT JOIN tblSMCurrency SMC on SMC.intCurrencyID =  CM.intCurrencyId
-LEFT JOIN vyuGLAccountDetail GL on CM.strGLAccountId = GL.strAccountId
-WHERE GL.strAccountType='Asset' 
-
-UNION
-SELECT @dblMoneyMarket dblAmount
 )t
 
 INSERT INTO @tblRKSummary (strSum,dblValue) 
-select '2. Liabilities/Receivables',isnull(@dblAR,0)-isnull(@dblAP,0)
-
+SELECT '2. Liabilities/Receivables',isnull(@dblAR,0)-isnull(@dblAP,0)
 
 INSERT INTO @tblRKSummary (strSum,dblValue)
 SELECT 
@@ -76,7 +62,7 @@ SELECT '4. Non-USD Sales',-sum(dblQuantity*dblPrice) dblUSDValue
 			, 1 as intConcurrencyId,cd.intContractDetailId,ch.intEntityId,u.intUnitMeasureId,cd.intCurrencyId,ch.intCompanyId,
 			 [dbo].[fnRKGetCurrencyConvertion](cd.intCurrencyId,@intCurrencyId)*(dbo.fnRKGetSequencePrice(cd.intContractDetailId,
 																					 dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId
-																														, @dtmFutureClosingDate),@dtmFutureClosingDate)) dblPrice
+																						, @dtmFutureClosingDate),@dtmFutureClosingDate)) dblPrice
 		FROM tblCTContractHeader ch
 		JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and ch.intContractTypeId=2
 		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=cd.intFutureMarketId

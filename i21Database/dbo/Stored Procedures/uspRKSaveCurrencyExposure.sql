@@ -1,13 +1,11 @@
-﻿CREATE PROC uspRKSaveCurrencyExposure
+﻿CREATE PROC [dbo].[uspRKSaveCurrencyExposure]
 	@intCommodityId int,
 	@dtmFutureClosingDate datetime,
 	@intCurrencyId int,
 	@intCurrencyExposureId int
 	,@dblAP numeric(24,10)
-	,@dblAR numeric(24,10)
-	,@dblMoneyMarket numeric(24,10)
+	,@dblAR numeric(24,10)	
 
-	--select @intWeightUOMId=19,@intCompanyId=0,@intCommodityId =1,@dtmMarketPremium='2019-02-07 00:00:00',@dtmFutureClosingDate='2019-02-07 00:00:00',@intCurrencyId=3,@intCurrencyExposureId=9
 AS
 
 BEGIN TRY
@@ -65,38 +63,6 @@ EXEC uspRKCurrencyExposureForStock
 					 @intCommodityId =@intCommodityId
 					, @dtmClosingPrice  = @dtmFutureClosingDate
 					, @intCurrencyId =@intCurrencyId
-
-DECLARE @tblRKBankBalance TABLE (
-						intRowNum int,
-						strCompanyName nvarchar(100)
-						,strBankName nvarchar(100)
-						,strBankAccountNo nvarchar(100)
-						,strCurrency nvarchar(100)
-						,strGLAccountId nvarchar(100)
-						,strAccountType nvarchar(100)
-						,dblAmount numeric(24,10)
-						,intConcurrencyId int
-						,intBankId int
-						,intCurrencyId int
-						,intCompanyId int
-						,intBankAccountId int
-						)
-
-INSERT INTO @tblRKBankBalance (intRowNum,
-						strCompanyName 
-						,strBankName
-						,strBankAccountNo
-						,strCurrency
-						,strGLAccountId 
-						,strAccountType 
-						,dblAmount
-						,intConcurrencyId 
-						,intBankId 
-						,intCurrencyId 
-						,intCompanyId
-						,intBankAccountId) 
-
-EXEC uspRKCurExpBankBalance
 
 DECLARE @tblRKExposureForOTC TABLE (
 						intRowNum int,
@@ -207,8 +173,23 @@ EXEC uspRKCurrencyExposureSummary
 					, @dtmFutureClosingDate  = @dtmFutureClosingDate
 					, @intCurrencyId =@intCurrencyId
 					, @dblAP = @dblAP
-					, @dblAR = @dblAR
-					, @dblMoneyMarket = @dblMoneyMarket
+					, @dblAR = @dblAR					
+-- Addded money market and bank balance value while saving -- start
+DECLARE @intRowNum int
+SELECT @intRowNum=max(intRowNum) from @tblRKExposureSummary 
+INSERT INTO @tblRKExposureSummary (	intRowNum 
+							,strSum 
+							,dblUSD                                                                                       
+							,intConcurrencyId                            
+							) 
+SELECT ISNULL(@intRowNum,0)+1,'1. Treasury',sum(dblAmount),1 from(
+SELECT  ISNULL(SUM(dblAmount),0) dblAmount FROM tblRKCurExpBankBalance WHERE intCurrencyExposureId=@intCurrencyExposureId
+UNION ALL
+SELECT  ISNULL(SUM(dblAmount),0) dblAmount FROM tblRKCurExpMoneyMarket WHERE intCurrencyExposureId=@intCurrencyExposureId)t
+-- end 
+
+insert into a
+select dblUSD from @tblRKExposureSummary
 
 BEGIN TRANSACTION    
 
@@ -245,10 +226,6 @@ SELECT 1,
 		isnull(dblValue,0.0),
 		intCompanyId FROM @tblRKStock
 
-
-INSERT INTO tblRKCurExpBankBalance(intConcurrencyId,intCurrencyExposureId,intBankId,intBankAccountId,dblAmount,intCurrencyId,intCompanyId)			
-SELECT 1,@intCurrencyExposureId,intBankId,intBankAccountId,dblAmount,intCurrencyId,intCompanyId from @tblRKBankBalance 
-
 insert into tblRKCurExpCurrencyContract(intConcurrencyId,
 intCurrencyExposureId,
 intFutOptTransactionId,
@@ -280,7 +257,7 @@ SELECT 1,@intCurrencyExposureId,
 		intCompanyId 
 FROM @tblRKExposureForOTC
 
-insert into tblRKCurExpNonOpenSales(intConcurrencyId,
+INSERT INTO tblRKCurExpNonOpenSales(intConcurrencyId,
 intCurrencyExposureId,
 intCustomerId,
 dblQuantity,
@@ -305,11 +282,11 @@ strContractType,
 dblUSDValue,
 intCompanyId,intContractDetailId from @tblRKExposureForNonOTC
 
-insert into tblRKCurExpSummary(intConcurrencyId,
+INSERT INTO tblRKCurExpSummary(intConcurrencyId,
 intCurrencyExposureId,
 strTotalSum,
 dblUSD)
-SELECT 1,@intCurrencyExposureId,strSum,dblUSD FROM @tblRKExposureSummary 
+SELECT 1,@intCurrencyExposureId,strSum,sum(dblUSD) FROM @tblRKExposureSummary group by  strSum
 					
 COMMIT TRAN    
     

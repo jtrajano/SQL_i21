@@ -4,7 +4,6 @@
 	, @intCurrencyId int
 
 AS
-
 SET @dtmClosingPrice = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmClosingPrice, 110), 110)
 
 BEGIN
@@ -50,6 +49,7 @@ FROM (
 	join tblICUnitMeasure um on um.intUnitMeasureId=iu.intUnitMeasureId
 	join tblSMCurrency cur on cur.intCurrencyID=fm.intCurrencyId
 	LEFT join tblSMMultiCompany mc on mc.intMultiCompanyId=ch.intCompanyId
-	WHERE ch.intCommodityId=@intCommodityId  and dblQty<>0
+	WHERE ch.intCommodityId=@intCommodityId  and dblQty<>0 
+
 ) t
 END

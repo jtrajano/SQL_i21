@@ -8,9 +8,7 @@ AS
 BEGIN
 	SELECT *
 		, [dbo].[fnRKGetCurrencyConvertion] (intCurrencyId, @intCurrencyId) * dblOrigPrice dblPrice
-		, [dbo].[fnRKGetCurrencyConvertion] (intCurrencyId, @intCurrencyId) * dblOrigPrice * dblQuantity dblUSDValue
-		, intCurrencyId
-		, @intCurrencyId
+		, [dbo].[fnRKGetCurrencyConvertion] (intCurrencyId, @intCurrencyId) * dblOrigPrice * dblQuantity dblUSDValue		
 	FROM (
 		SELECT CONVERT(INT, ROW_NUMBER() OVER(ORDER BY intContractSeq)) as intRowNum
 			, (ch.strContractNumber + '-' + CONVERT(NVARCHAR, cd.intContractSeq)) COLLATE Latin1_General_CI_AS strContractNumber
