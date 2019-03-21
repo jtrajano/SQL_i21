@@ -7461,6 +7461,9 @@
     <Build Include="dbo\Functions\fnICGetMovingAverageCost.sql" />
     <Build Include="dbo\Functions\fnAPGetVouchersPaymentInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryTransferReportMCP.sql" />
+    <Build Include="dbo\Functions\fnAPGetYTDPurchases.sql" />
+    <Build Include="dbo\Functions\fnAPGetLYPurchases.sql" />
+    <Build Include="dbo\Functions\fnAPGetLastVoucherTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
