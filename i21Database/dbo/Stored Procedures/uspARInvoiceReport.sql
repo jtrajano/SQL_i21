@@ -247,9 +247,7 @@ LEFT JOIN (
 		 , ID.dblQtyShipped
 		 , ID.dblQtyOrdered
 		 , ID.dblDiscount
-		 , dblPrice					= CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice
-										   WHEN ID.dblOriginalGrossPrice = 0.00000 THEN dblPrice
-										   ELSE ISNULL(ID.dblOriginalGrossPrice, ID.dblPrice) END
+		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
 		 , ID.strSCInvoiceNumber
