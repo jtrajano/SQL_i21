@@ -120,3 +120,34 @@ BEGIN
 END
 GO
 
+/*
+* Set Load-Based value on Load Schedule table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'ysnLoadBased')
+BEGIN
+	EXEC ('UPDATE tblLGLoad
+			SET ysnLoadBased = CASE WHEN EXISTS(SELECT TOP 1 1 FROM vyuLGLoadDetailView WHERE intLoadId = tblLGLoad.intLoadId AND (ysnPLoad = 1 OR ysnSLoad = 1)) THEN 1 ELSE 0 END
+			WHERE ysnLoadBased IS NULL 
+				OR ysnLoadBased <> CASE WHEN EXISTS(SELECT TOP 1 1 FROM vyuLGLoadDetailView WHERE intLoadId = tblLGLoad.intLoadId AND (ysnPLoad = 1 OR ysnSLoad = 1)) THEN 1 ELSE 0 END
+	')
+END
+GO
+
+/*
+* Set Load-Based value on Generate Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGGenerateLoad') AND name = 'ysnLoadBased')
+BEGIN
+	EXEC ('UPDATE GL
+			SET ysnLoadBased = CASE WHEN (ISNULL(PCH.ysnLoad, 0) = 1 OR ISNULL(SCH.ysnLoad, 0) = 1) THEN 1 ELSE 0 END
+			FROM tblLGGenerateLoad GL
+				LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = GL.intPContractDetailId
+				LEFT JOIN tblCTContractHeader PCH ON PCD.intContractHeaderId = PCH.intContractHeaderId
+				LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = GL.intSContractDetailId
+				LEFT JOIN tblCTContractHeader SCH ON PCD.intContractHeaderId = SCH.intContractHeaderId
+			WHERE 
+				GL.ysnLoadBased IS NULL
+				OR GL.ysnLoadBased <> CASE WHEN (ISNULL(PCH.ysnLoad, 0) = 1 OR ISNULL(SCH.ysnLoad, 0) = 1) THEN 1 ELSE 0 END
+	')
+END
+GO
