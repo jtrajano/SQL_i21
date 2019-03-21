@@ -70,6 +70,7 @@ DECLARE @Source TABLE([intItemId] [int] NOT NULL,
 	[strCounted] [nvarchar](50) NULL,
 	[intCountGroupId] [int] NULL,
 	[ysnCountedDaily] [bit] NULL DEFAULT ((0)),
+	[ysnAllowZeroCost] [bit] NULL DEFAULT ((0)),
 	[ysnLockedInventory] [bit] NULL DEFAULT ((0)),
 	[strStorageUnitNo] [nvarchar](100) NULL,
 	[ysnStorageUnitRequired] BIT NULL DEFAULT ((1)),
@@ -92,7 +93,7 @@ INSERT INTO @Source(
 	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-	, ysnLockedInventory, ysnStorageUnitRequired, intSort
+	, ysnLockedInventory, ysnStorageUnitRequired, ysnAllowZeroCost, intSort
 )
 SELECT 
 	intItemId
@@ -111,7 +112,7 @@ SELECT
 	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-	, ysnLockedInventory, ysnStorageUnitRequired, intSort
+	, ysnLockedInventory, ysnStorageUnitRequired, ysnAllowZeroCost, intSort
 FROM tblICItemLocation
 WHERE intItemId = @intSourceItemId AND (@intSourceLocationId IS NULL OR intLocationId = @intSourceLocationId)
 
@@ -178,6 +179,7 @@ SET
       ,[ysnLockedInventory] = s.ysnLockedInventory
 	  ,[strStorageUnitNo] = s.strStorageUnitNo
 	  ,[ysnStorageUnitRequired] = s.ysnStorageUnitRequired
+	  ,[ysnAllowZeroCost] = s.ysnAllowZeroCost
       ,[intSort] = s.intSort
 FROM tblICItemLocation d
 	INNER JOIN @Source s 
@@ -249,6 +251,7 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 	[strCounted] [nvarchar](50) NULL,
 	[intCountGroupId] [int] NULL,
 	[ysnCountedDaily] [bit] NULL DEFAULT ((0)),
+	[ysnAllowZeroCost] [bit] NULL DEFAULT ((0)),
 	[ysnLockedInventory] [bit] NULL DEFAULT ((0)),
 	[strStorageUnitNo] [nvarchar](100) NULL,
 	[ysnStorageUnitRequired] BIT NULL DEFAULT ((1)),
@@ -282,7 +285,7 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 		, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 		, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 		, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-		, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort)
+		, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, ysnAllowZeroCost, intSort)
 	SELECT
 		  NewItemLocation.Value
 		  , s.intLocationId
@@ -300,7 +303,7 @@ DECLARE @New TABLE([intItemId] [int] NOT NULL,
 		, s.ysnDepositRequired, s.intDepositPLUId, s.intBottleDepositNo, s.ysnSaleable, s.ysnQuantityRequired, s.ysnScaleItem, s.ysnFoodStampable, s.ysnReturnable, s.ysnPrePriced, s.ysnOpenPricePLU, s.ysnLinkedItem, s.strVendorCategory
 		, s.ysnCountBySINo, s.strSerialNoBegin, s.strSerialNoEnd, s.ysnIdRequiredLiquor, s.ysnIdRequiredCigarette, s.intMinimumAge, s.ysnApplyBlueLaw1, s.ysnApplyBlueLaw2, s.ysnCarWash, s.intItemTypeCode, s.intItemTypeSubCode
 		, s.ysnAutoCalculateFreight, s.intFreightMethodId, s.dblFreightRate, s.intShipViaId, s.intNegativeInventory, s.dblReorderPoint, s.dblMinOrder, s.dblSuggestedQty, s.dblLeadTime, s.strCounted, s.intCountGroupId, s.ysnCountedDaily
-		, s.ysnLockedInventory, s.strStorageUnitNo, s.ysnStorageUnitRequired, s.intSort
+		, s.ysnLockedInventory, s.strStorageUnitNo, s.ysnStorageUnitRequired, s.ysnAllowZeroCost, s.intSort
 	FROM @Source s
 		LEFT OUTER JOIN tblICItemLocation d 
 			ON d.intLocationId = s.intLocationId AND d.intItemId = s.intItemId
@@ -330,7 +333,7 @@ INSERT INTO tblICItemLocation(
 	, ysnDepositRequired, intDepositPLUId, intBottleDepositNo, ysnSaleable, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable, ysnReturnable, ysnPrePriced, ysnOpenPricePLU, ysnLinkedItem, strVendorCategory
 	, ysnCountBySINo, strSerialNoBegin, strSerialNoEnd, ysnIdRequiredLiquor, ysnIdRequiredCigarette, intMinimumAge, ysnApplyBlueLaw1, ysnApplyBlueLaw2, ysnCarWash, intItemTypeCode, intItemTypeSubCode
 	, ysnAutoCalculateFreight, intFreightMethodId, dblFreightRate, intShipViaId, intNegativeInventory, dblReorderPoint, dblMinOrder, dblSuggestedQty, dblLeadTime, strCounted, intCountGroupId, ysnCountedDaily
-	, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, intSort)
+	, ysnLockedInventory, strStorageUnitNo, ysnStorageUnitRequired, ysnAllowZeroCost, intSort)
 SELECT 
 	NewDetails.intItemId
 	, NewDetails.intLocationId
@@ -348,7 +351,7 @@ SELECT
 	, NewDetails.ysnDepositRequired, NewDetails.intDepositPLUId, NewDetails.intBottleDepositNo, NewDetails.ysnSaleable, NewDetails.ysnQuantityRequired, NewDetails.ysnScaleItem, NewDetails.ysnFoodStampable, NewDetails.ysnReturnable, NewDetails.ysnPrePriced, NewDetails.ysnOpenPricePLU, NewDetails.ysnLinkedItem, NewDetails.strVendorCategory
 	, NewDetails.ysnCountBySINo, NewDetails.strSerialNoBegin, NewDetails.strSerialNoEnd, NewDetails.ysnIdRequiredLiquor, NewDetails.ysnIdRequiredCigarette, NewDetails.intMinimumAge, NewDetails.ysnApplyBlueLaw1, NewDetails.ysnApplyBlueLaw2, NewDetails.ysnCarWash, NewDetails.intItemTypeCode, NewDetails.intItemTypeSubCode
 	, NewDetails.ysnAutoCalculateFreight, NewDetails.intFreightMethodId, NewDetails.dblFreightRate, NewDetails.intShipViaId, NewDetails.intNegativeInventory, NewDetails.dblReorderPoint, NewDetails.dblMinOrder, NewDetails.dblSuggestedQty, NewDetails.dblLeadTime, NewDetails.strCounted, NewDetails.intCountGroupId, NewDetails.ysnCountedDaily
-	, NewDetails.ysnLockedInventory, NewDetails.strStorageUnitNo, NewDetails.ysnStorageUnitRequired, NewDetails.intSort
+	, NewDetails.ysnLockedInventory, NewDetails.strStorageUnitNo, NewDetails.ysnStorageUnitRequired, NewDetails.ysnAllowZeroCost, NewDetails.intSort
 FROM @New NewDetails
 LEFT JOIN tblICItemLocation ItemLocation
 	ON ItemLocation.intLocationId = NewDetails.intLocationId AND ItemLocation.intItemId = NewDetails.intItemId

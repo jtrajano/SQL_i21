@@ -79,12 +79,12 @@ BEGIN
 
 	/* Item Locations */
 	INSERT INTO tblICStagingItemLocation(intItemId, intItemLocationId, intLocationId, strLocationName
-		, strCostingMethod, ysnAllowNegativeInventory, ysnRequireStorageUnit, strDefaultVendorNo
+		, strCostingMethod, ysnAllowNegativeInventory, intAllowZeroCostTypeId, ysnRequireStorageUnit, strDefaultVendorNo
 		, strDefaultStorageLocation, strDefaultStorageUnit, strDefaultSaleUom, strDefaultPurchaseUom
 		, strDefaultGrossUom, strInventoryCountGroup)
 	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName
 		, cm.strCostingMethod
-		, il.intAllowNegativeInventory, il.ysnStorageUnitRequired, e.strName AS strDefaultVendorNo
+		, il.intAllowNegativeInventory, il.intAllowZeroCostTypeId, il.ysnStorageUnitRequired, e.strName AS strDefaultVendorNo
 		, sl.strSubLocationName AS strDefaultStorageLocation, su.strName AS strDefaultStorageUnit
 		, us.strUnitMeasure AS strDefaultSaleUom, up.strUnitMeasure AS strDefaultPurchaseUom
 		, ug.strUnitMeasure AS strDefaultGrossUom, cg.strCountGroup AS strInventoryCountGroup

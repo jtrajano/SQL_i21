@@ -53,6 +53,19 @@ RETURN (
 				)
 				AND @intItemId IS NOT NULL 	
 
+		-- Check for an item location that doesn't allow zero cost
+		UNION ALL
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnICGetErrorMessage(80229)
+				,intErrorCode = 80229
+		FROM dbo.tblICItem Item
+			INNER JOIN dbo.tblICItemLocation ItemLocation ON Item.intItemId = ItemLocation.intItemId
+			INNER JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = ItemLocation.intLocationId
+		WHERE ItemLocation.intItemId = @intItemId 
+				AND ItemLocation.intItemLocationId = @intItemLocationId
+				AND ISNULL(intAllowZeroCostTypeId, 1) <> 1
+
 		-- Check for invalid item UOM Id
 		UNION ALL 
 		SELECT	intItemId = @intItemId
