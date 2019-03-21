@@ -161,6 +161,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
      , ysnAddonParent						= INV.ysnAddonParent
 	 , dblAddOnQuantity						= INV.dblAddOnQuantity
 	 , dblPriceAdjustment					= INV.dblPriceAdjustment
+	 , strBOLNumberDetail					= INV.strBOLNumberDetail
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
