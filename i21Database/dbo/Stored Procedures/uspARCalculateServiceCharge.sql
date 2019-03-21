@@ -168,7 +168,7 @@ AS
 						, dblTotalAR
 					)
 					SELECT intEntityId	= AGING.intEntityCustomerId
-						, dblTotalAR   = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
+						 , dblTotalAR   = SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) 
 					FROM tblARCustomerAgingStagingTable AGING
 					INNER JOIN #tmpCustomers TC ON AGING.intEntityCustomerId = TC.intEntityId
 					INNER JOIN (
@@ -177,11 +177,28 @@ AS
 						WHERE YEAR(ISNULL(dtmLastServiceCharge, '01/01/1900')) * 100 + MONTH(ISNULL(dtmLastServiceCharge, '01/01/1900')) < YEAR(@asOfDate) * 100 + MONTH(@asOfDate)
 					) C ON C.intEntityId = AGING.intEntityCustomerId	
 					WHERE AGING.intEntityUserId = @intEntityUserId 
-					AND AGING.strAgingType = 'Detail'	
+					  AND AGING.strAgingType = 'Detail'	
 					GROUP BY AGING.intEntityCustomerId
 					HAVING SUM(dbl10Days) + SUM(dbl30Days) + SUM(dbl60Days) + SUM(dbl90Days) + SUM(dbl120Days) + SUM(dbl121Days) + SUM(dblCredits) + SUM(dblPrepayments) > @zeroDecimal
 
 					DELETE FROM @tblServiceCharges WHERE intServiceChargeId = @intSCtoCompute
+
+					--UPDATE CUSTOMERS LAST SERVICE CHARGE DATE
+					IF @isRecap = 0 AND @upToDateCustomer = 1 AND @calculation = 'By Customer Balance'
+						BEGIN
+							UPDATE C
+							SET dtmLastServiceCharge = @serviceChargeDate 
+							FROM tblARCustomer C 
+							INNER JOIN (
+								SELECT intEntityCustomerId 
+								FROM tblARCustomerAgingStagingTable
+								WHERE strAgingType = 'Detail'
+								  AND intEntityUserId = @intEntityUserId
+								GROUP BY intEntityCustomerId
+							) CB ON C.intEntityId = CB.intEntityCustomerId
+							WHERE dtmLastServiceCharge IS NULL 
+							   OR dtmLastServiceCharge < @asOfDate
+						END
 				END
 		END	
 	ELSE
@@ -494,11 +511,4 @@ AS
 		END
 
 	DROP TABLE #tmpCustomers
-
-	IF @isRecap = 0 and @upToDateCustomer = 1 and @calculation = 'By Customer Balance'
-	BEGIN
-		UPDATE tblARCustomer set dtmLastServiceCharge = @serviceChargeDate WHERE dtmLastServiceCharge is null or dtmLastServiceCharge < @asOfDate
-	END
 GO
-
-
