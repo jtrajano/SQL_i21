@@ -418,7 +418,7 @@ BEGIN
 								AND CH.intStoreId = ST.intStoreId	
 							JOIN vyuEMEntityCustomerSearch vC 
 								ON ST.intCheckoutCustomerId = vC.intEntityId
-							OUTER APPLY dbo.fnConstructLineItemTaxDetail (
+							CROSS APPLY dbo.fnConstructLineItemTaxDetail (
 																				ISNULL(CPT.dblQuantity, 0)						-- Qty
 																				, ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
 																				, @LineItems
@@ -431,7 +431,7 @@ BEGIN
 																				, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																				, vC.intShipToId						-- Ship to Location
 																				, 1
-																				, 0			                            --@IncludeInvalidCodes
+																				, 1			                            --@IncludeInvalidCodes
 																				, NULL
 																				, vC.intFreightTermId					-- FreightTermId
 																				, NULL
@@ -2102,7 +2102,7 @@ BEGIN
 							LEFT JOIN tblICItemPricing IP 
 								ON I.intItemId = IP.intItemId
 								AND IL.intItemLocationId = IP.intItemLocationId	
-							OUTER APPLY dbo.fnConstructLineItemTaxDetail (
+							CROSS APPLY dbo.fnConstructLineItemTaxDetail (
 																				-- ISNULL(CC.dblQuantity, 0)						    -- Qty
 																				CASE
 																					-- IF Item is Fuel
@@ -2144,7 +2144,7 @@ BEGIN
 																				, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																				, vC.intShipToId						-- Ship to Location
 																				, 1
-																				, 0			                            --@IncludeInvalidCodes
+																				, 1			                            --@IncludeInvalidCodes
 																				, NULL
 																				, vC.intFreightTermId					-- FreightTermId
 																				, NULL
@@ -2839,7 +2839,7 @@ BEGIN
 						LEFT JOIN tblICItemPricing IP 
 							ON I.intItemId = IP.intItemId
 							AND IL.intItemLocationId = IP.intItemLocationId	
-						OUTER APPLY dbo.fnConstructLineItemTaxDetail (
+						CROSS APPLY dbo.fnConstructLineItemTaxDetail (
 																			-- ISNULL(CC.dblQuantity, 0)						    -- Qty
 																			CASE
 																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
@@ -2868,7 +2868,7 @@ BEGIN
 																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
 																			, 1
-																			, 0			                            --@IncludeInvalidCodes
+																			, 1			                            --@IncludeInvalidCodes
 																			, NULL
 																			, vC.intFreightTermId					-- FreightTermId
 																			, NULL
