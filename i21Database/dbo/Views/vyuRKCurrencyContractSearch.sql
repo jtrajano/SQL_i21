@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuRKCurrencyContractSearch
+﻿CREATE VIEW [dbo].[vyuRKCurrencyContractSearch]
 AS
 SELECT Top 100 percent convert(int,ROW_NUMBER() OVER (ORDER BY strStatus)) intRowNum,* FROM (
 SELECT  cc.intCurrencyContractId,cc.strCurrencyContractNumber, cc.dtmContractDate,ct.strContractType,cb.strBankName,cc.dtmMaturityDate, 
@@ -21,3 +21,4 @@ JOIN tblRKCurrencyContract cc on cs.intCurrencyContractId=cc.intCurrencyContract
 JOIN tblCMBank cb on cb.intBankId=cc.intBankId
 JOIN tblSMCurrencyExchangeRateType rt on rt.intCurrencyExchangeRateTypeId=cc.intCurrencyExchangeRateTypeId
 JOIN tblCTContractType sct on sct.intContractTypeId=cc.intContractTypeId) t ORDER BY strCurrencyContractNumber,strContractType,dtmContractDate
+GO

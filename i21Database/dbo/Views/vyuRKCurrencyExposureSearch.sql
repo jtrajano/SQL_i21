@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuRKCurrencyExposureSearch
+﻿CREATE VIEW [dbo].[vyuRKCurrencyExposureSearch]
 
 AS
 
@@ -18,3 +18,6 @@ FROM tblRKCurrencyExposure e
 LEFT JOIN tblICCommodity c ON c.intCommodityId = e.intCommodityId
 LEFT JOIN tblICUnitMeasure ic ON ic.intUnitMeasureId = e.intWeightUnit
 LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = e.intCurrencyId
+GO
+
+
