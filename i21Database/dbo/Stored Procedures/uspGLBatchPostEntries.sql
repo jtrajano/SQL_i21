@@ -26,7 +26,7 @@ BEGIN
 	SELECT	Errors.strTransactionId
 		,Errors.strText
 		,Errors.intErrorCode
-	FROM dbo.fnGetGLEntriesErrors(@GLEntries) Errors
+	FROM dbo.fnGetGLEntriesErrors(@GLEntries, @ysnPost) Errors
 
 	INSERT INTO tblGLPostResult (strBatchId,intTransactionId,strTransactionId,strDescription,dtmDate,intEntityId,strTransactionType)
 			SELECT DISTINCT @strBatchId AS strBatchId,A.intTransactionId AS intTransactionId,A.strTransactionId as strTransactionId, B.strText AS strDescription,
