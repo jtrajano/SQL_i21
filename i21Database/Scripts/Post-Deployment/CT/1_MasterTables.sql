@@ -736,6 +736,7 @@ UPDATE tblCTContractHeader
 	SET intFreightTermId = (SELECT intFreightTermId FROM tblSMFreightTerms 
 								WHERE strContractBasis IN (SELECT strContractBasis FROM tblCTContractBasis 
 															WHERE intContractBasisId = tblCTContractHeader.intContractBasisId)) 
+	WHERE intFreightTermId IS NULL
 
 GO
 	PRINT N'END UPDATE'
