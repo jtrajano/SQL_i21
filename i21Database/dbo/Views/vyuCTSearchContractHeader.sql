@@ -68,7 +68,10 @@ SELECT	CH.intContractHeaderId,
 		PY.strName AS strCounterParty,
 		CD.intUnitMeasureId	AS	intDefaultCommodityUnitMeasureId,
 		BK.strBook,
-		SB.strSubBook
+		SB.strSubBook,
+		
+		FT.intFreightTermId,
+		FT.strFreightTerm
 
 FROM	tblCTContractHeader					CH	
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
@@ -107,4 +110,5 @@ JOIN	tblEMEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
 JOIN	tblEMEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
 JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId					LEFT
 JOIN	tblCTBook							BK	ON	BK.intBookId						=		CH.intBookId						LEFT
-JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						
+JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						LEFT
+JOIN	tblSMFreightTerms					FT	ON	FT.intFreightTermId					=		CH.intFreightTermId

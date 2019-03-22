@@ -33,6 +33,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 
 	[intApprovalBasisId] [INT] NULL,
 	[intContractBasisId] [INT] NULL,
+	[intFreightTermId] [INT] NULL,
 	[intPositionId] [INT] NULL,
 	[intInsuranceById] [INT] NULL,
 	[intInvoiceTypeId] [INT] NULL,
@@ -97,7 +98,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblCTPricingType_intPricingTypeId] FOREIGN KEY ([intPricingTypeId]) REFERENCES [tblCTPricingType]([intPricingTypeId]),
 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTApprovalBasis_intApprovalBasisId] FOREIGN KEY ([intApprovalBasisId]) REFERENCES [tblCTApprovalBasis]([intApprovalBasisId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblCTContractBasis_intContractBasisId] FOREIGN KEY ([intContractBasisId]) REFERENCES [tblCTContractBasis]([intContractBasisId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblSMFreightTerms_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTPosition_intPositionId] FOREIGN KEY ([intPositionId]) REFERENCES [tblCTPosition]([intPositionId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTInsuranceBy_intInsuranceById] FOREIGN KEY ([intInsuranceById]) REFERENCES [tblCTInsuranceBy]([intInsuranceById]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTInvoiceType_intInvoiceTypeId] FOREIGN KEY ([intInvoiceTypeId]) REFERENCES [tblCTInvoiceType]([intInvoiceTypeId]),
@@ -135,10 +136,10 @@ GO
 CREATE STATISTICS [_dta_stat_34411492_4_30] ON [dbo].[tblCTContractHeader]([intEntityId], [intPositionId])
 GO
 
-CREATE STATISTICS [_dta_stat_34411492_1_30_29] ON [dbo].[tblCTContractHeader]([intContractHeaderId], [intPositionId], [intContractBasisId])
+CREATE STATISTICS [_dta_stat_34411492_1_30_29] ON [dbo].[tblCTContractHeader]([intContractHeaderId], [intPositionId])
 GO
 
-CREATE STATISTICS [_dta_stat_34411492_29_30_4_1] ON [dbo].[tblCTContractHeader]([intContractBasisId], [intPositionId], [intEntityId], [intContractHeaderId])
+CREATE STATISTICS [_dta_stat_34411492_29_30_4_1] ON [dbo].[tblCTContractHeader]([intPositionId], [intEntityId], [intContractHeaderId])
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblCTContractHeader_intEntityId] ON [dbo].[tblCTContractHeader]
@@ -166,7 +167,6 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblCTContractHeader_197_752721734__K1_K32_
 INCLUDE (     [intCommodityUOMId],
        [strContractNumber],
        [dtmContractDate],
-       [intContractBasisId],
        [ysnMultiplePriceFixation],
        [dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 go
