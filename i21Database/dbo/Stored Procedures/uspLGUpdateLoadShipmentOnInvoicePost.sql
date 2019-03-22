@@ -66,7 +66,11 @@ BEGIN TRY
 
 		SELECT @intPContractDetailId = intPContractDetailId
 		      ,@intSContractDetailId = intSContractDetailId
-			  ,@dblLoadDetailQty = CASE WHEN ISNULL(@Post,0) =  1 THEN dblQuantity ELSE -dblQuantity END
+			  ,@dblLoadDetailQty = CASE WHEN ISNULL(@Post,0) = 1 THEN 
+										dblQuantity 
+									ELSE -dblQuantity END
+									* CASE WHEN (@strInvoiceType = 'Credit Memo') 
+										THEN -1 ELSE 1 END
 			  ,@intLoadId = intLoadId
 		FROM tblLGLoadDetail
 		WHERE intLoadDetailId = @intLoadDetailId
