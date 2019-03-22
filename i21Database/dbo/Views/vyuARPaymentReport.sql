@@ -25,6 +25,7 @@ SELECT PAYMENTS.intPaymentId
 	 , PAYMENTS.dtmDueDate
 	 , PAYMENTS.dblInterest
 	 , PAYMENTS.dblDiscount
+	 , PAYMENTS.dblWriteOffAmount
 	 , PAYMENTS.dblPayment
 	 , strCompanyName       = CASE WHEN SMCL.strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END COLLATE Latin1_General_CI_AS
      , strCompanyAddress	= CASE WHEN SMCL.strUseLocationAddress IS NULL OR SMCL.strUseLocationAddress IN ('','No','Always')
@@ -55,11 +56,13 @@ FROM (
 		 , dtmDueDate           = ARPD.dtmDueDate
 		 , dblInterest          = ISNULL(ARPD.dblInterest, 0.00)
 		 , dblDiscount          = ISNULL(ARPD.dblDiscount, 0.00)
+		 , dblWriteOffAmount		= ISNULL(ARPD.dblWriteOffAmount, 0.00)
 		 , dblPayment           = ISNULL(ARPD.dblPayment, 0.00)     
 	FROM tblARPayment ARP
 	LEFT OUTER JOIN (
 		SELECT PD.intPaymentId
 			 , PD.dblDiscount
+			 , PD.dblWriteOffAmount
 			 , PD.dblInterest
 			 , PD.dblPayment
 			 , ARI.*
@@ -71,7 +74,7 @@ FROM (
 						 , dblInvoiceTotal = dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * dblInvoiceTotal
 					FROM dbo.tblARInvoice 
 		) ARI ON PD.intInvoiceId = ARI.intInvoiceId
-		WHERE PD.dblPayment <> 0
+		WHERE PD.dblPayment <> 0 OR ISNULL(PD.dblWriteOffAmount, 0) <> 0
 	) ARPD ON ARP.intPaymentId = ARPD.intPaymentId
 
 	UNION ALL
@@ -95,6 +98,7 @@ FROM (
 		 , dtmDueDate           = I.dtmDueDate
 		 , dblInterest          = I.dblInterest
 		 , dblDiscount          = I.dblDiscount
+		 , dblWriteOffAmount	  = 0.00
 		 , dblPayment           = I.dblInvoiceTotal
 	FROM tblARPayment ARP
 	INNER JOIN (
