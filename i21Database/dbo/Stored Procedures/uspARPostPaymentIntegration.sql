@@ -382,9 +382,9 @@ BEGIN
         FROM
             #ARPostPaymentDetail A
         WHERE
-           -- A.[ysnInvoicePrepayment] = @ZeroBit
-			 A.[ysnPost] = @OneBit
-          --  AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId] WHERE ARID.[intPrepayTypeId] > 0 AND ARID.[intInvoiceId] = A.[intInvoiceId] AND ARI.[intPaymentId] = A.[intTransactionId])						
+            A.[ysnInvoicePrepayment] = @ZeroBit
+			AND A.[ysnPost] = @OneBit
+             AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId] WHERE ARID.[intPrepayTypeId] > 0 AND ARID.[intInvoiceId] = A.[intInvoiceId] AND ARI.[intPaymentId] = A.[intTransactionId])						
         GROUP BY
             A.intInvoiceId,
 			A.strTransactionType
@@ -417,9 +417,9 @@ BEGIN
         tblARInvoice C
             ON B.intInvoiceId = C.intInvoiceId
     WHERE
-      --  NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = B.intInvoiceId AND ARI.intPaymentId = B.[intTransactionId])						
-      --  AND ISNULL(B.[ysnInvoicePrepayment],0) = 0
-    B.[ysnPost] = @OneBit
+        NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = B.intInvoiceId AND ARI.intPaymentId = B.[intTransactionId])						
+        AND ISNULL(B.[ysnInvoicePrepayment],0) = 0
+        AND B.[ysnPost] = @OneBit
 
 
     UPDATE
@@ -649,17 +649,17 @@ IF @Post = 0
 			DELETE FROM #ARPostOverPayment WHERE [intTransactionId] = @PaymentIdToDelete
 		END	
 				
-	--DELETE Prepayment
-	WHILE EXISTS(SELECT TOP 1 NULL FROM #ARPostPrePayment)
-		BEGIN			
-			DECLARE @PaymentIdToDeletePre int		
-			SELECT TOP 1 @PaymentIdToDeletePre = [intTransactionId] FROM #ARPostPrePayment
+	----DELETE Prepayment
+	--WHILE EXISTS(SELECT TOP 1 NULL FROM #ARPostPrePayment)
+	--	BEGIN			
+	--		DECLARE @PaymentIdToDeletePre int		
+	--		SELECT TOP 1 @PaymentIdToDeletePre = [intTransactionId] FROM #ARPostPrePayment
 					
-			EXEC [dbo].[uspARDeletePrePayment] @PaymentIdToDeletePre, 1, @BatchId ,@UserId 
+	--		EXEC [dbo].[uspARDeletePrePayment] @PaymentIdToDeletePre, 1, @BatchId ,@UserId 
 					
-			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToDeletePre
+	--		DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToDeletePre
 					
-		END												
+	--	END												
 
 	END
 ELSE
@@ -682,7 +682,7 @@ ELSE
 			DECLARE @PaymentIdToAddPre int
 			SELECT TOP 1 @PaymentIdToAddPre = [intTransactionId] FROM #ARPostPrePayment
 					
-			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId 
+			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId, Null, 1 
 					
 			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToAddPre
 		END				
