@@ -57,7 +57,6 @@ BEGIN TRY
 		, @dblReceivedQuantity DECIMAL(18, 6) = 0
 		, @dblDistributedQuantity DECIMAL(18, 6) = 0
 		, @intFreightItemId INT
-		, @strFreighItemNo NVARCHAR(100) = NULL
 		, @intSurchargeItemId INT
 		, @ysnItemizeSurcharge BIT
 		, @ReceiptLink NVARCHAR(50)
@@ -91,11 +90,10 @@ BEGIN TRY
 		RAISERROR('Invalid Driver', 16, 1)
 	END
 
-	SELECT @strFreighItemNo = strItemNo FROM vyuICGetOtherCharges WHERE intItemId = @intFreightItemId
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 
-	DECLARE @MsgSurcharge NVARCHAR(MAX) = CONCAT('Transports Load has a Surcharge. You must setup the Freight Item ''',  @strFreighItemNo, ''' so it is linked to a Surcharge Item, or zero-out the Surcharge in both Receipt and Distribution Detail.')
+	DECLARE @MsgSurcharge NVARCHAR(MAX) = CONCAT('Transports Load has a Surcharge. You must link the Surcharge Item to the Freight Item (using the On Cost dropdown from the Surcharge Item''s Setup tab > Cost tab), or zero-out the Surcharge amount in both Receipt and Distribution Detail.')
 
 	--IF (NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId) AND @intSurchargeItemId IS NOT NULL)
 	--BEGIN
