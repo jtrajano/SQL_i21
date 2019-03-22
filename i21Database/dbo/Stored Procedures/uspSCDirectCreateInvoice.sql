@@ -86,10 +86,10 @@ BEGIN TRY
 		,[ysnResetDetails] = 0
 		,[intItemId] = SC.intItemId
 		,[strItemDescription] = ICI.strItemNo
-		,[intOrderUOMId]= NULL
-		,[intItemUOMId] = NULL
-		,[dblQtyOrdered] = SC.dblNetUnits
-		,[dblQtyShipped] = SC.dblNetUnits
+		,[intOrderUOMId] = ISNULL(LGD.intItemUOMId, SC.intItemUOMIdTo)
+		,[intItemUOMId]  = ISNULL(CTD.intItemUOMId,SC.intItemUOMIdTo)
+		,[dblQtyOrdered] = ISNULL(LGD.dblQuantity, SC.dblNetUnits)
+		,[dblQtyShipped] = dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,CTD.intItemUOMId,SC.dblNetUnits)
 		,[dblDiscount] = 0
 		,[dblPrice] = SC.dblUnitPrice + dblUnitBasis
 		,[ysnRefreshPrice] = 0
@@ -103,6 +103,8 @@ BEGIN TRY
 		LEFT JOIN tblARCustomer AR ON AR.intEntityId = SC.intEntityId
 		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
 		LEFT JOIN tblICItem ICI ON ICI.intItemId = SC.intItemId		
+		LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = SC.intLoadId and LGD.intSContractDetailId = SC.intContractId
+		LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SC.intContractId
 		WHERE SC.intTicketId = @intTicketId
 
 	--FOR FREIGHT CHARGES

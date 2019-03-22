@@ -557,3 +557,7 @@ INCLUDE ( 	[intContractSeq],
 	[intPricingTypeId],
 	[dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 go
+
+CREATE NONCLUSTERED INDEX [IX_tblCTContractDetail_intSplitFromId] 
+ON [dbo].[tblCTContractDetail](intSplitFromId);
+GO

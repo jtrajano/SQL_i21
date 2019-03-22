@@ -7,9 +7,10 @@ AS
 BEGIN
 	DECLARE @lastVoucherAmount DECIMAL(18,2)
 
-	SELECT
-		@lastVoucherAmount
+	SELECT TOP 1
+		@lastVoucherAmount = dblTotal
 	FROM tblAPBill A
+	ORDER BY intBillId DESC
 
 	RETURN @lastVoucherAmount;
 END
