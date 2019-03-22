@@ -1403,6 +1403,50 @@ BEGIN
 							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 							,@intEntityUserSecurityId
 
+					--IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					
+					-- Create GL Entries for Non-Stock Items
+					-- 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue =
+					 uspICCreateReceiptGLEntriesForNonStockItems
+							@strBatchId 
+							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+							,@intEntityUserSecurityId
+				
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
 					--BEGIN 

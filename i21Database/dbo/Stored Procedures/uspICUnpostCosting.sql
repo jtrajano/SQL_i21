@@ -771,6 +771,13 @@ BEGIN
 		,@strTransactionId
 		,@intEntityUserSecurityId
 	;
+
+	EXEC dbo.uspICCreateReversalGLEntriesForNonStockItems
+		@strBatchId
+		,@intTransactionId
+		,@strTransactionId
+		,@intEntityUserSecurityId
+	;
 END 
 
 -------------------------------------------

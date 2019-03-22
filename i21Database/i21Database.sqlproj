@@ -993,6 +993,7 @@
     <Build Include="dbo\User Defined Types\UnpostItemsTableType.sql" />
     <Build Include="dbo\Functions\fnRecalculateAverageCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetNewID.sql" />
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Functions\fnGeti21FiscalPeriodIdFromOriginPeriod.sql" />
@@ -5171,6 +5172,7 @@
     <Build Include="dbo\Views\vyuICLoadContainerPurchaseContracts.sql" />
     <Build Include="dbo\Tables\tblTRState.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Functions\fnGetAddCostFromInventoryReceiptCharges.sql" />
     <Build Include="dbo\Functions\fnFormatMessage.sql" />
     <Build Include="dbo\Views\vyuCTSequenceCombo.sql" />

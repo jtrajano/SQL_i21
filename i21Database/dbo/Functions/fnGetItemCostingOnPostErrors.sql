@@ -263,7 +263,8 @@ RETURN (
 		FROM	tblICItem i 
 		WHERE	i.intItemId = @intItemId
 				AND dbo.fnGetItemStockUOM(@intItemId) IS NULL 
-				AND @intItemId IS NOT NULL 
+				AND @intItemId IS NOT NULL
+				AND i.strType NOT IN ('Non-Inventory', 'Service', 'Software')
 
 		-- Check for locked inventory. 
 		-- Inventory count ongoing. 
