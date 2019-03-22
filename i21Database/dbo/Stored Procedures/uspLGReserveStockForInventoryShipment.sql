@@ -49,8 +49,8 @@ BEGIN
 	SELECT DISTINCT @intLoadId, PLH.intPickLotHeaderId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-	JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LD.intPickLotDetailId
-	JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLH.intPickLotHeaderId
+	LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LD.intPickLotDetailId
+	LEFT JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLH.intPickLotHeaderId
 	WHERE L.intLoadId = @intLoadId
 END
 
@@ -67,7 +67,7 @@ BEGIN
 		FROM #tblLoadDetailPickLots
 		WHERE intLoadDetailPickLotId = @intLoadDetailPickLotId
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICStockReservation WHERE intTransactionId = @intPickLotHeaderId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICStockReservation WHERE intTransactionId = ISNULL(@intPickLotHeaderId, 0))
 		BEGIN
 			BREAK;
 		END
