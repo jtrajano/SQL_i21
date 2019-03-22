@@ -24,13 +24,13 @@ AS
 				CH.strLoadCategoryUnitMeasure,		CH.strINCOLocation,				BL.dblAppliedQty,
 				CH.dtmCreated,						CH.strContractPlan,				CH.dtmSigned,
 				CH.strCreatedBy,					CH.strLastModifiedBy,			CH.ysnExported,
-				CH.dtmExported,						CH.strCropYear,
+				CH.dtmExported,						CH.strCropYear,					CH.strFreightTerm,
 
 				CH.intContractPlanId,				CH.intEntityId,					CH.intCommodityId,
 				CH.intGradeId,						CH.intWeightId,					CH.intContractTextId,
 				CH.intAssociationId,				CH.intTermId,					CH.intPositionId,
 				CH.intCountryId,					CH.intContractBasisId,			CH.intContractTypeId,
-				CH.intCommodityUnitMeasureId,		
+				CH.intCommodityUnitMeasureId,		CH.intFreightTermId,
 
 				CASE	WHEN	CH.strStatuses LIKE '%Open%'
 						THEN	'Open'
