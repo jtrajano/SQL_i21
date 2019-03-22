@@ -27,6 +27,7 @@
 	[strShiftNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intImportFlagInternal] INT NULL,
     [intLockType] INT NULL,
+	[ysnPrintVarianceItemsOnly] BIT NULL,
     [intSort] INT NULL, 
 	[intCompanyId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
