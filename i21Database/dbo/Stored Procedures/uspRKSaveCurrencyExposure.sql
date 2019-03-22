@@ -188,9 +188,6 @@ UNION ALL
 SELECT  ISNULL(SUM(dblAmount),0) dblAmount FROM tblRKCurExpMoneyMarket WHERE intCurrencyExposureId=@intCurrencyExposureId)t
 -- end 
 
-insert into a
-select dblUSD from @tblRKExposureSummary
-
 BEGIN TRANSACTION    
 
 INSERT INTO tblRKCurExpStock (intConcurrencyId,

@@ -1605,8 +1605,8 @@ BEGIN
 		 [dtmDate]                
 		,[strBatchId]             
 		,[intAccountId]           
-		,[dblDebit]               
-		,[dblCredit]              
+		,ROUND([dblDebit],2)
+		,ROUND([dblCredit],2)
 		,[dblDebitUnit]           
 		,[dblCreditUnit]          
 		,[strDescription]         

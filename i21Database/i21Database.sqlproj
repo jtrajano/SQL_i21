@@ -7462,10 +7462,11 @@
     <Build Include="dbo\Functions\fnAPGetVouchersPaymentInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryTransferReportMCP.sql" />
     <Build Include="dbo\Functions\fnAPGetYTDPurchases.sql" />
-    <Build Include="dbo\Functions\fnAPGetLYPurchases.sql" />
+    <Build Include="dbo\Functions\fnAPGetLYVoucher.sql" />
     <Build Include="dbo\Functions\fnAPGetLastVoucherTotal.sql" />
     <Build Include="dbo\Views\vyuRKCurExpMoneyMarket.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
+    <Build Include="dbo\Views\vyuAPAging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

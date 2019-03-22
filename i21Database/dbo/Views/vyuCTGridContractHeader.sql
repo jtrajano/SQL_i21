@@ -35,6 +35,7 @@ AS
 			CH.intPricingTypeId,
 			CH.intApprovalBasisId,
 			CH.intContractBasisId,
+			CH.intFreightTermId,
 			CH.intPositionId,
 			CH.intInsuranceById,
 			CH.intInvoiceTypeId,
@@ -89,6 +90,7 @@ AS
 			NM.intUnitMeasureId,
 
 			NM.strContractBasis,
+			NM.strFreightTerm,
 			NM.strCommodityUOM,
 			NM.strPosition,
 			NM.strGrade,

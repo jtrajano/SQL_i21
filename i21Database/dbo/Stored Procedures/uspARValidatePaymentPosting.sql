@@ -404,7 +404,7 @@ SELECT DISTINCT
     ,[intErrorCode]
     ,[strModuleName]
 FROM
-    [dbo].[fnGetGLEntriesErrors](@GLEntries)
+    [dbo].[fnGetGLEntriesErrors](@GLEntries,@Post)
 
 SELECT TOP 1 @ErrorMessage = strText FROM @InvalidGLEntries
 

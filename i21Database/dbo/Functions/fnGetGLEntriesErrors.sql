@@ -10,7 +10,8 @@
 */
 
 CREATE FUNCTION [dbo].[fnGetGLEntriesErrors] (
-	@GLEntriesToValidate RecapTableType READONLY
+	@GLEntriesToValidate RecapTableType READONLY,
+	@ysnPost BIT
 )
 RETURNS  @tbl TABLE (
 		strTransactionId nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
@@ -111,6 +112,7 @@ BEGIN
 				CROSS APPLY (SELECT  dbo.fnGLCheckScale(A.dblDebit) Passed) DebitScale
 				CROSS APPLY (SELECT  dbo.fnGLCheckScale(A.dblCredit) Passed) CreditScale
 				WHERE (DebitScale.Passed = -1 OR CreditScale.Passed = -1)
+				AND @ysnPost = 1
 				AND strTransactionType NOT IN('Origin Journal','Adjusted Origin Journal')
 		) --END WITH
 		INSERT INTO @tbl 

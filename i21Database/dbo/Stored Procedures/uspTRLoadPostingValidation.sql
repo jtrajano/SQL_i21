@@ -93,8 +93,6 @@ BEGIN TRY
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 
-	DECLARE @MsgSurcharge NVARCHAR(MAX) = CONCAT('Transports Load has a Surcharge. You must link the Surcharge Item to the Freight Item (using the On Cost dropdown from the Surcharge Item''s Setup tab > Cost tab), or zero-out the Surcharge amount in both Receipt and Distribution Detail.')
-
 	--IF (NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId) AND @intSurchargeItemId IS NOT NULL)
 	--BEGIN
 	--	RAISERROR(@MsgSurcharge, 16, 1)
@@ -159,7 +157,7 @@ BEGIN TRY
 		BEGIN
 			IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
 			BEGIN
-				RAISERROR(@MsgSurcharge, 16, 1)
+				RAISERROR('Transports Load has a Surcharge. You must link the Surcharge Item to the Freight Item (using the On Cost dropdown from the Surcharge Item''s Setup tab > Cost tab), or zero-out the Surcharge amount in both Receipt and Distribution Detail.', 16, 1)
 			END
 		END
 		

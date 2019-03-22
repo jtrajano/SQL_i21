@@ -722,4 +722,25 @@ IF EXISTS(SELECT 1 FROM tblSMGridLayout WHERE strGridLayoutFields LIKE '%{"strFi
 		WHERE strScreen LIKE 'ContractManagement.view.Overview%' and strGrid = 'grdSearch'
  END
 GO
+
+
+--=====================================================================================================================================
+-- 	MOVE CONTRACT BASIS TO FREIGHT TERMS
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN UPDATE'
+GO
+
+UPDATE tblCTContractHeader 
+	SET intFreightTermId = (SELECT intFreightTermId FROM tblSMFreightTerms 
+								WHERE strContractBasis IN (SELECT strContractBasis FROM tblCTContractBasis 
+															WHERE intContractBasisId = tblCTContractHeader.intContractBasisId)) 
+	WHERE intFreightTermId IS NULL
+
+GO
+	PRINT N'END UPDATE'
+GO
+
+
 PRINT('Contract 1_MasterTables End')
