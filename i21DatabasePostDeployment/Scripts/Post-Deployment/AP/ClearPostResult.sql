@@ -1,0 +1,3 @@
+﻿GO
+DELETE FROM tblAPPostResult
+GO

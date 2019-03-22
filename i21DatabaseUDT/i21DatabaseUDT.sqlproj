@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>i21DatabaseUDT</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{fdab4cc8-c44c-4ca0-8e08-304ba0f6c5e5}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>i21DatabaseUDT</RootNamespace>
+    <AssemblyName>i21DatabaseUDT</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="dbo" />
+    <Folder Include="dbo\User Defined Types" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\User Defined Types\ApprovalConfigurationType.sql" />
+    <Build Include="dbo\User Defined Types\AuditLogStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\BankTransactionBatchDetailTable.sql" />
+    <Build Include="dbo\User Defined Types\BankTransactionDetailTable.sql" />
+    <Build Include="dbo\User Defined Types\BankTransactionTable.sql" />
+    <Build Include="dbo\User Defined Types\BillDiscountTableType.sql" />
+    <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
+    <Build Include="dbo\User Defined Types\BillStorageTableType.sql" />
+    <Build Include="dbo\User Defined Types\CommissionPostingTable.sql" />
+    <Build Include="dbo\User Defined Types\CustomerStorageStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\DestinationShipmentCharge.sql" />
+    <Build Include="dbo\User Defined Types\DestinationShipmentItem.sql" />
+    <Build Include="dbo\User Defined Types\Entity.sql" />
+    <Build Include="dbo\User Defined Types\EntityContact.sql" />
+    <Build Include="dbo\User Defined Types\ETTranslateRPToReceivePaymentTable.sql" />
+    <Build Include="dbo\User Defined Types\ETTranslateSDToInvoiceTable.sql" />
+    <Build Include="dbo\User Defined Types\FilterTableType.sql" />
+    <Build Include="dbo\User Defined Types\Id.sql" />
+    <Build Include="dbo\User Defined Types\InTransitTableType.sql" />
+    <Build Include="dbo\User Defined Types\InventoryCountStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
+    <Build Include="dbo\User Defined Types\InventoryTransferStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceId.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceIntegrationLogStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceIntegrationStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceItemAccount.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceItemTableType.sql" />
+    <Build Include="dbo\User Defined Types\InvoicePostingTable.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceReportTable.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ItemCostAdjustmentTableType.sql" />
+    <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
+    <Build Include="dbo\User Defined Types\ItemCostingZeroStockTableType.sql" />
+    <Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
+    <Build Include="dbo\User Defined Types\ItemInTransitCostingTableType.sql" />
+    <Build Include="dbo\User Defined Types\ItemLotTableType.sql" />
+    <Build Include="dbo\User Defined Types\ItemOtherChargesGLAccount.sql" />
+    <Build Include="dbo\User Defined Types\ItemReservationTableType.sql" />
+    <Build Include="dbo\User Defined Types\ItemsOpenPurchaseContractTableType.sql" />
+    <Build Include="dbo\User Defined Types\JournalIDTableType.sql" />
+    <Build Include="dbo\User Defined Types\LineItemTaxDetailStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
+    <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
+    <Build Include="dbo\User Defined Types\OriginImportOptions.sql" />
+    <Build Include="dbo\User Defined Types\OtherChargeCostAdjustmentTableType.sql" />
+    <Build Include="dbo\User Defined Types\PatronIdTable.sql" />
+    <Build Include="dbo\User Defined Types\PaymentDetailStaging.sql" />
+    <Build Include="dbo\User Defined Types\PaymentId.sql" />
+    <Build Include="dbo\User Defined Types\PaymentIntegrationLogStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\PaymentIntegrationStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\PlaceHolderTable.sql" />
+    <Build Include="dbo\User Defined Types\QualityInspectionTable.sql" />
+    <Build Include="dbo\User Defined Types\QualityPropertyValueTable.sql" />
+    <Build Include="dbo\User Defined Types\RecapTableType.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptItemLotStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptItemTableType.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptOtherChargesTableType.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ReceivePaymentPostingTable.sql" />
+    <Build Include="dbo\User Defined Types\RouteOrdersTableType.sql" />
+    <Build Include="dbo\User Defined Types\SalesOrderItemTableType.sql" />
+    <Build Include="dbo\User Defined Types\ScaleDestinationStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualCostingTableType.sql" />
+    <Build Include="dbo\User Defined Types\ScaleTransactionTableType.sql" />
+    <Build Include="dbo\User Defined Types\ScheduleConstraintTable.sql" />
+    <Build Include="dbo\User Defined Types\ScheduleTable.sql" />
+    <Build Include="dbo\User Defined Types\ServiceChargeInvoiceParam.sql" />
+    <Build Include="dbo\User Defined Types\ServiceChargeTableType.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentChargeStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentItemLotsOnlyStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentItemLotStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentItemTableType.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\StorageHistoryStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\StorageSchedulePeriodTableType.sql" />
+    <Build Include="dbo\User Defined Types\TFCommonDetailTax.sql" />
+    <Build Include="dbo\User Defined Types\TFCommonTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFFilingPackets.sql" />
+    <Build Include="dbo\User Defined Types\TFInventoryDetailTax.sql" />
+    <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetail.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetailTax.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFInvoiceTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFOriginDestinationStates.sql" />
+    <Build Include="dbo\User Defined Types\TFProductCodes.sql" />
+    <Build Include="dbo\User Defined Types\TFReceiptItem.sql" />
+    <Build Include="dbo\User Defined Types\TFReceiptTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponent.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponentConfigurations.sql" />
+    <Build Include="dbo\User Defined Types\TFReportingComponentOutputDesigners.sql" />
+    <Build Include="dbo\User Defined Types\TFReportOR7351334MSub.sql" />
+    <Build Include="dbo\User Defined Types\TFReportOR7351334MSubSummary.sql" />
+    <Build Include="dbo\User Defined Types\TFReportTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFScheduleCodeParam.sql" />
+    <Build Include="dbo\User Defined Types\TFTaxCategory.sql" />
+    <Build Include="dbo\User Defined Types\TFTaxCriteria.sql" />
+    <Build Include="dbo\User Defined Types\TFTerminalControlNumbers.sql" />
+    <Build Include="dbo\User Defined Types\TFTransaction.sql" />
+    <Build Include="dbo\User Defined Types\TFTransactionSummaryItem.sql" />
+    <Build Include="dbo\User Defined Types\TFTransactionSummaryTotal.sql" />
+    <Build Include="dbo\User Defined Types\TFValidDestinationStates.sql" />
+    <Build Include="dbo\User Defined Types\TFValidOriginStates.sql" />
+    <Build Include="dbo\User Defined Types\TFValidProductCodes.sql" />
+    <Build Include="dbo\User Defined Types\TMCompactContract.sql" />
+    <Build Include="dbo\User Defined Types\TMCompactItem.sql" />
+    <Build Include="dbo\User Defined Types\TMGPSUpdateByIdTable.sql" />
+    <Build Include="dbo\User Defined Types\TMGPSUpdateTable.sql" />
+    <Build Include="dbo\User Defined Types\TMSite.sql" />
+    <Build Include="dbo\User Defined Types\UdtCompanyLocations.sql" />
+    <Build Include="dbo\User Defined Types\UnpostItemsTableType.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailCC.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailClaim.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailData.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailDirectInventory.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailLoadNonInv.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailNonInvContract.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailNonInventory.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailReceipt.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailReceiptCharge.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailStorage.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailTax.sql" />
+    <Build Include="dbo\User Defined Types\VoucherPayable.sql" />
+    <Build Include="dbo\User Defined Types\VoucherPayableItem.sql" />
+    <Build Include="dbo\User Defined Types\VoucherPODetail.sql" />
+  </ItemGroup>
+</Project>

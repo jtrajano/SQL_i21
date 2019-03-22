@@ -1,0 +1,14 @@
+﻿CREATE TABLE [dbo].[tblSCDeviceInterfaceFile]
+(
+	[intDeviceInterfaceFileId] INT NOT NULL IDENTITY, 
+    [intConcurrencyId] INT NOT NULL, 
+    [intScaleDeviceId] INT NOT NULL, 
+    [dtmTicketVoidDateTime] DATETIME NULL, 
+    [strDeviceCommodity] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [strDeviceData] NVARCHAR(256) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[dtmScaleTime] DATETIME NULL,
+	[intEntityId] [int] NULL,
+	[intDeviceType] [int] NULL,
+    CONSTRAINT [PK_tblSCDeviceInterfaceFile_intDeviceInterfaceFileId] PRIMARY KEY ([intDeviceInterfaceFileId]),
+	CONSTRAINT [UK_tblSCDeviceInterfaceFile_intScaleDeviceId_intDeviceType] UNIQUE ([intScaleDeviceId],[intDeviceType])
+)

@@ -1,0 +1,51 @@
+﻿--This is a Stub View for the original Integration View
+CREATE VIEW [dbo].[vyuPROriginEmployee]
+AS
+SELECT TOP 0
+	strEmployeeNo			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strLastName			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strFirstName			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strMiddleName			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strAddress				= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strAddress2			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strCity				= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strState				= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strZip					= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strWorkState			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strSSN					= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strPhone				= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,dblPayRate				= CAST(0.000000 AS NUMERIC(18, 6))
+	,strDepartment			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strEmploymentType		= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strStatus				= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strPayType				= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strPayCycle			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,dtmLastCheckDate		= CAST(NULL AS DATETIME)
+	,dblStandardHours		= CAST(0.000000 AS NUMERIC(18, 6))
+	,ysnVacAwardCalculated	= CAST(0 AS BIT)
+	,strVacAwardAnnivOrYtd	= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strVacMethod			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,dblAccrual				= CAST(0.000000 AS NUMERIC(18, 6))
+	,dblCurrentAccrual		= CAST(0.000000 AS NUMERIC(18, 6))
+	,dtmVacationEligDate	= CAST(NULL AS DATETIME)
+	,ysnVacAwarded			= CAST(0 AS BIT)
+	,dtmVacationAwardDate	= CAST(NULL AS DATETIME)
+	,dblVacationCarried		= CAST(0.000000 AS NUMERIC(18, 6))
+	,dblVacationEarned		= CAST(0.000000 AS NUMERIC(18, 6))
+	,dblVacHrsPd			= CAST(0.000000 AS NUMERIC(18, 6))
+	,strSicAwardAnnivorYtd	= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,ysnSicAwardCalculated	= CAST(0 AS BIT)
+	,strJobTitle			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strEEOC				= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strEthnicity			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strGender				= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,strMaritalStatus		= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,dtmBirthDate			= CAST(NULL AS DATETIME)
+	,dtmTermDate			= CAST(NULL AS DATETIME)
+	,strTermCode			= CAST('' AS NVARCHAR(100)) COLLATE Latin1_General_CI_AS 
+	,dtmOriginalHireDate	= CAST(NULL AS DATETIME)
+	,dtmLastHireDate		= CAST(NULL AS DATETIME)
+	,dtmReviewDate			= CAST(NULL AS DATETIME)
+	,dtmNextReviewDate		= CAST(NULL AS DATETIME)
+	,dtmInsuranceDate		= CAST(NULL AS DATETIME)
+	,intIdentityKey		= CAST(-999 AS INT)

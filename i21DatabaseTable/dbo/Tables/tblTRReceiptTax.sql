@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[tblTRReceiptTax]
+(
+	[intReceiptTaxId] INT NOT NULL IDENTITY, 
+    [intTransportReceiptId] INT NOT NULL, 
+    [intTaxGroupMasterId] INT NOT NULL, 
+    [intTaxGroupId] INT NOT NULL, 
+    [intTaxCodeId] INT NOT NULL, 
+    [intTaxClassId] INT NOT NULL, 
+	[strTaxableByOtherTaxes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+    [strCalculationMethod] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+    [numRate] NUMERIC(18, 6) NULL, 
+    [intPurchaseTaxAccountId] INT NULL, 
+    [dblTax] NUMERIC(18, 6) NULL, 
+    [dblAdjustedTax] NUMERIC(18, 6) NULL, 
+	[ysnTaxAdjusted] BIT NULL DEFAULT ((0)), 
+	[ysnSeparateOnInvoice] BIT NULL DEFAULT ((0)), 
+	[ysnCheckoffTax] BIT NULL DEFAULT ((0)), 
+    [intConcurrencyId] INT CONSTRAINT [DF_tblTRReceiptTax_intConcurrencyId] DEFAULT ((0)) NOT NULL,	
+    CONSTRAINT [PK_tblTRReceiptTax_intReceiptTaxId] PRIMARY KEY CLUSTERED ([intReceiptTaxId] ASC),
+	CONSTRAINT [FK_tblTRReceiptTax_tblTRTransportReceipt_intTransportReceiptId] FOREIGN KEY ([intTransportReceiptId]) REFERENCES [dbo].[tblTRTransportReceipt] ([intTransportReceiptId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblTRReceiptTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),
+	CONSTRAINT [FK_tblTRReceiptTax_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
+	CONSTRAINT [FK_tblTRReceiptTax_tblSMTaxCode_intTaxCodeId] FOREIGN KEY ([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
+	CONSTRAINT [FK_tblTRReceiptTax_tblSMTaxClass_intTaxClassId] FOREIGN KEY ([intTaxClassId]) REFERENCES [dbo].[tblSMTaxClass] ([intTaxClassId]),
+	CONSTRAINT [FK_tblTRReceiptTax_tblGLAccount_intPurchaseTaxAccountId] FOREIGN KEY ([intPurchaseTaxAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+)

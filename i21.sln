@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21Database", "i21Database\i21Database.sqlproj", "{2E49B212-114B-4CFD-A343-2A2061E987BC}"
 EndProject
@@ -14,6 +14,16 @@ EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tSQLt", "tSQLt\tSQLt.sqlproj", "{EC6666E5-B9E5-4A93-A016-5D8D65D2EE28}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TestAP", "TestAP\TestAP.sqlproj", "{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21DatabaseTable", "i21DatabaseTable\i21DatabaseTable.sqlproj", "{30683E10-3957-4FA2-9B35-D0F752130DE8}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21DatabaseUDT", "i21DatabaseUDT\i21DatabaseUDT.sqlproj", "{FDAB4CC8-C44C-4CA0-8E08-304BA0F6C5E5}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21DatabaseProcedure", "i21DatabaseProcedure\i21DatabaseProcedure.sqlproj", "{40F8AE57-84D3-47BC-A157-3B2822700CBA}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21DatabaseView", "i21DatabaseView\i21DatabaseView.sqlproj", "{01049A6B-2402-4AEA-A741-7FAB68FAF876}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21DatabasePostDeployment", "i21DatabasePostDeployment\i21DatabasePostDeployment.sqlproj", "{E91FF38C-BB80-4B1E-B926-353EF7AA6F3B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,8 +67,41 @@ Global
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1B2349E4-8D1A-4A26-91D2-3040DA431DFE}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{30683E10-3957-4FA2-9B35-D0F752130DE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30683E10-3957-4FA2-9B35-D0F752130DE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30683E10-3957-4FA2-9B35-D0F752130DE8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{30683E10-3957-4FA2-9B35-D0F752130DE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30683E10-3957-4FA2-9B35-D0F752130DE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30683E10-3957-4FA2-9B35-D0F752130DE8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{FDAB4CC8-C44C-4CA0-8E08-304BA0F6C5E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDAB4CC8-C44C-4CA0-8E08-304BA0F6C5E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDAB4CC8-C44C-4CA0-8E08-304BA0F6C5E5}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{FDAB4CC8-C44C-4CA0-8E08-304BA0F6C5E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDAB4CC8-C44C-4CA0-8E08-304BA0F6C5E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDAB4CC8-C44C-4CA0-8E08-304BA0F6C5E5}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{40F8AE57-84D3-47BC-A157-3B2822700CBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40F8AE57-84D3-47BC-A157-3B2822700CBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40F8AE57-84D3-47BC-A157-3B2822700CBA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{40F8AE57-84D3-47BC-A157-3B2822700CBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40F8AE57-84D3-47BC-A157-3B2822700CBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40F8AE57-84D3-47BC-A157-3B2822700CBA}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{01049A6B-2402-4AEA-A741-7FAB68FAF876}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01049A6B-2402-4AEA-A741-7FAB68FAF876}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01049A6B-2402-4AEA-A741-7FAB68FAF876}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{01049A6B-2402-4AEA-A741-7FAB68FAF876}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01049A6B-2402-4AEA-A741-7FAB68FAF876}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01049A6B-2402-4AEA-A741-7FAB68FAF876}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{E91FF38C-BB80-4B1E-B926-353EF7AA6F3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E91FF38C-BB80-4B1E-B926-353EF7AA6F3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E91FF38C-BB80-4B1E-B926-353EF7AA6F3B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{E91FF38C-BB80-4B1E-B926-353EF7AA6F3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E91FF38C-BB80-4B1E-B926-353EF7AA6F3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E91FF38C-BB80-4B1E-B926-353EF7AA6F3B}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DD10FA4F-8F32-4821-AEE0-67A7C16B6845}
 	EndGlobalSection
 EndGlobal

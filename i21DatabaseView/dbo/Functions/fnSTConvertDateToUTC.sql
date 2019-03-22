@@ -1,0 +1,12 @@
+﻿CREATE FUNCTION [dbo].[fnSTConvertDateToUTC] 
+(
+	@dtmDate AS DATETIME
+)
+RETURNS DATETIME
+AS BEGIN
+
+    DECLARE @dtmDateUTC AS DATETIME
+	SET @dtmDateUTC = DATEADD(second, DATEDIFF(second, GETDATE(), GETUTCDATE()), @dtmDate)
+
+    RETURN @dtmDateUTC
+END

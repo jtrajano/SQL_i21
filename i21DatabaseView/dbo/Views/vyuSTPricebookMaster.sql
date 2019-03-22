@@ -1,0 +1,55 @@
+﻿CREATE VIEW dbo.vyuSTPricebookMaster
+AS
+SELECT
+	IL.intItemLocationId AS intUniqueId
+	, IP.intItemPricingId
+	, IP.dblSalePrice
+	, IP.dblLastCost
+	, IP.dblStandardCost
+	, IP.dblAverageCost
+	, CASE
+		WHEN IP.dblSalePrice > 0
+			THEN (IP.dblSalePrice - IP.dblLastCost) / IP.dblSalePrice
+		ELSE 0
+	END AS dblGrossMargin
+	, CL.intCompanyLocationId
+	, CL.strLocationName, I.intItemId
+	, I.strItemNo
+	, I.strDescription
+	, UOM.intItemUOMId
+	, UOM.strUpcCode
+	, UOM.strLongUPCCode
+	, IL.intItemLocationId
+	, IL.strDescription AS strPosDescription
+	, IL.intVendorId AS intEntityVendorId
+	, Entity.strName
+	, Vendor.strVendorId
+	, IC.intCategoryId
+	, IC.strCategoryCode
+	, VX.intItemVendorXrefId
+	, VX.strVendorProduct
+	, Family.intSubcategoryId AS intFamilyId
+	, Family.strSubcategoryId AS strFamily
+	, Class.intSubcategoryId AS intClassId
+	, Class.strSubcategoryId AS strClass
+FROM dbo.tblICItemPricing AS IP 
+LEFT OUTER JOIN dbo.tblICItem AS I 
+	ON I.intItemId = IP.intItemId 
+LEFT OUTER JOIN dbo.tblICItemUOM AS UOM 
+	ON IP.intItemId = UOM.intItemId 
+LEFT OUTER JOIN dbo.tblICCategory AS IC 
+	ON IC.intCategoryId = I.intCategoryId 
+LEFT OUTER JOIN dbo.tblICItemLocation AS IL 
+	ON IL.intItemLocationId = IP.intItemLocationId 
+LEFT OUTER JOIN dbo.tblSTSubcategory AS Family 
+	ON Family.intSubcategoryId = IL.intFamilyId 
+LEFT OUTER JOIN dbo.tblSTSubcategory AS Class 
+	ON Class.intSubcategoryId = IL.intClassId 
+LEFT OUTER JOIN dbo.tblSMCompanyLocation AS CL 
+	ON CL.intCompanyLocationId = IL.intLocationId 
+LEFT OUTER JOIN dbo.tblAPVendor AS Vendor 
+	ON Vendor.intEntityId = IL.intVendorId 
+LEFT OUTER JOIN dbo.tblEMEntity AS Entity 
+	ON Entity.intEntityId = IL.intVendorId 
+LEFT OUTER JOIN dbo.tblICItemVendorXref AS VX 
+	ON VX.intItemLocationId = IL.intItemLocationId

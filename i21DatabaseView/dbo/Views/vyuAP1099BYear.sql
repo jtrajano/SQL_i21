@@ -1,0 +1,16 @@
+﻿CREATE VIEW [dbo].[vyuAP1099BYear]
+AS
+
+SELECT DISTINCT
+	 A.strVendorId
+	, A.intYear
+	, CASE WHEN SUM(A.dbl1099B) >= MIN(C.dbl1099B) THEN SUM(A.dbl1099B) ELSE 0 END AS dbl1099B
+FROM vyuAP1099 A
+CROSS JOIN tblSMCompanySetup B
+CROSS JOIN tblAP1099Threshold C
+WHERE A.int1099Form = 3
+GROUP BY intYear, A.strVendorId
+HAVING SUM(ISNULL(A.dbl1099B,0)) > 0
+
+
+GO

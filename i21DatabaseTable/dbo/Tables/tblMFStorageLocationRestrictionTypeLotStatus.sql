@@ -1,0 +1,7 @@
+﻿Create table tblMFStorageLocationRestrictionTypeLotStatus 
+(
+intStorageLocationRestrictionTypeLotStatusId int not null identity(1,1),
+intRestrictionId int,
+intLotStatusId int
+,CONSTRAINT [PK_tblMFStorageLocationRestrictionTypeLotStatus_intStorageLocationRestrictionTypeLotStatusId] PRIMARY KEY (intStorageLocationRestrictionTypeLotStatusId)
+)

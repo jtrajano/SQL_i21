@@ -1,0 +1,13 @@
+﻿--CHANGE ALL BILL TEMPLATE TO RECURRING
+IF EXISTS(SELECT 1 FROM tblAPBill WHERE intTransactionType = 6)
+BEGIN
+
+	--CHANGE ALL UNPOSTED TO 1
+	--CHANGE THE TRANSACTION TYPE TO BILL
+	UPDATE A
+		SET A.ysnRecurring = (CASE WHEN A.ysnPosted = 0 THEN 1 ELSE 0 END),
+		A.intTransactionType = 1
+	FROM tblAPBill A
+	WHERE intTransactionType = 6
+
+END
