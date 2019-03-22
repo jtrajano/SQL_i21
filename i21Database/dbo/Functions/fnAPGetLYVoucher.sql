@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnAPGetLYPurchases]
+﻿CREATE FUNCTION [dbo].[fnAPGetLYVoucher]
 (
 
 )
