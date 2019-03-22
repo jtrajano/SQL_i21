@@ -3,7 +3,8 @@
 	, @Post			AS BIT			= 1
 	, @BatchId		AS NVARCHAR(20)	= NULL
 	, @UserId		AS INT			
-	, @NewInvoiceId	AS INT			= NULL OUTPUT			
+	, @NewInvoiceId	AS INT			= NULL OUTPUT	
+	, @PostPrepayment	AS INT		= 0	
 AS
 
 BEGIN
@@ -290,8 +291,73 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemVirtualMeterReading			= @ItemVirtualMeterReading
 	      
 		  
-SET @NewInvoiceId = @NewId		
+SET @NewInvoiceId = @NewId	
+
+
+
+
+---Add Prepayment detail
+		IF(ISNULL(@NewInvoiceId, 0) <> 0)
+		BEGIN 
+
+		IF @PostPrepayment = 1
+			BEGIN
+				INSERT INTO [tblARPaymentDetail]
+					([intPaymentId]
+					,[intInvoiceId]
+					,[intBillId]
+					,[strTransactionNumber] 
+					,[intTermId]
+					,[intAccountId]
+					,[dblInvoiceTotal]
+					,[dblBaseInvoiceTotal]
+					,[dblDiscount]
+					,[dblBaseDiscount]
+					,[dblDiscountAvailable]
+					,[dblBaseDiscountAvailable]
+					,[dblInterest]
+					,[dblBaseInterest]
+					,[dblAmountDue]
+					,[dblBaseAmountDue]
+					,[dblPayment]        
+					,[dblBasePayment]        
+					,[strInvoiceReportNumber]
+					,[intConcurrencyId]
+					,[dtmDiscountDate]
+					)
+				SELECT
+					 [intPaymentId]                = @PaymentId
+					,[intInvoiceId]                = ARI.[intInvoiceId] 
+					,[intBillId]                = NULL
+					,[strTransactionNumber]        = ARI.[strInvoiceNumber]
+					,[intTermId]                = ARI.[intTermId] 
+					,[intAccountId]                = ARI.[intAccountId] 
+					,[dblInvoiceTotal]            =  @ItemPrice  
+					,[dblBaseInvoiceTotal]         =  @ItemPrice
+					,[dblDiscount]                
+					,[dblBaseDiscount]            
+					,[dblDiscountAvailable]       
+					,[dblBaseDiscountAvailable]   
+					,[dblInterest]                
+					,[dblBaseInterest]            
+					,[dblAmountDue]                  
+					,[dblBaseAmountDue]              
+					,[dblPayment]                =  @ItemPrice
+					,[dblBasePayment]            =  @ItemPrice  
+					,[strInvoiceReportNumber]    = ''
+					,[intConcurrencyId]            = 0
+					,[dtmDiscountDate]            = NULL
+				FROM    
+					tblARInvoice ARI    
+				WHERE
+					ARI.[intInvoiceId] = @NewInvoiceId
+				
+				UPDATE tblARPayment SET intCurrentStatus = 5, ysnInvoicePrepayment = 1
+				WHERE intPaymentId = @PaymentId
+			
+			END
+		  END
         
-RETURN @NewId
+  RETURN @NewId
 
 END

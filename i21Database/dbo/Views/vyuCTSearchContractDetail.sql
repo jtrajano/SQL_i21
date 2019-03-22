@@ -49,7 +49,6 @@ AS
 			U4.strUnitMeasure				AS	strWeightUOM,
 			IM.strItemNo,		
 			IM.strShortName					AS	strItemShortName,		
-			FT.strFreightTerm,				
 			IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						
 			PT.strPricingType,				
@@ -128,7 +127,6 @@ AS
 	JOIN	tblICUnitMeasure				U4	ON	U4.intUnitMeasureId			=	WU.intUnitMeasureId			LEFT
 
 	JOIN	tblICItemContract				IC	ON	IC.intItemContractId		=	CD.intItemContractId		LEFT
-	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
 	JOIN	tblSMShipVia					SV	ON	SV.[intEntityId]		=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
 	JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT

@@ -816,7 +816,7 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
         ,[intErrorCode]
         ,[strModuleName]
     FROM
-        [dbo].[fnGetGLEntriesErrors](@GLEntries)
+        [dbo].[fnGetGLEntriesErrors](@GLEntries,@Post)
 
 
     DECLARE @invalidGLCount INT

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLValidateGLEntries]
-	@GLEntriesToValidate RecapTableType READONLY
+	@GLEntriesToValidate RecapTableType READONLY,
+	@ysnPost BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -21,7 +22,7 @@ SELECT	Errors.strTransactionId
 		,Errors.strText
 		,Errors.intErrorCode
 		,Errors.strModuleName
-FROM	dbo.fnGetGLEntriesErrors(@GLEntriesToValidate) Errors; 
+FROM	dbo.fnGetGLEntriesErrors(@GLEntriesToValidate,@ysnPost) Errors; 
 
 DECLARE @intErrorCode INT = 0
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors)

@@ -14,7 +14,7 @@ SET ANSI_WARNINGS OFF
 IF (ISNULL(@SkipValidation,0)  = 0)
 BEGIN 
 	DECLARE @errorCode INT
-	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries;
+	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries, @ysnPost
 	IF @errorCode > 0	RETURN @errorCode
 END 
 ;

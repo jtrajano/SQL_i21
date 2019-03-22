@@ -421,21 +421,21 @@ BEGIN
 		AND EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)	
 					
 	--+prepayment
-	INSERT INTO
-		#ARPostPrePayment
-	SELECT
-		A.[intPaymentId]
-	FROM
-		tblARPayment A 
-	INNER JOIN
-		(
-		SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [ysnPost] = @OneBit
-		) P
-			ON A.[intPaymentId] = P.[intTransactionId]				
-	WHERE
-		(A.[dblAmountPaid]) <> @ZeroDecimal
-		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId]), @ZeroDecimal) = @ZeroDecimal	
-		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)											
+	--INSERT INTO
+	--	#ARPostPrePayment
+	--SELECT
+	--	A.[intPaymentId]
+	--FROM
+	--	tblARPayment A 
+	--INNER JOIN
+	--	(
+	--	SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [ysnPost] = @OneBit
+	--	) P
+	--		ON A.[intPaymentId] = P.[intTransactionId]				
+	--WHERE
+	--	(A.[dblAmountPaid]) <> @ZeroDecimal
+	--	AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId]), @ZeroDecimal) = @ZeroDecimal	
+	--	AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)											
 
 						 																
 END
@@ -733,7 +733,7 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
         ,[intErrorCode]
         ,[strModuleName]
     FROM
-        [dbo].[fnGetGLEntriesErrors](@GLEntries)
+        [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
 
     DECLARE @invalidGLCount INT
