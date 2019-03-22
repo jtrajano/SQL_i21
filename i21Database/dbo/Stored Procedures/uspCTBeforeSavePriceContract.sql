@@ -18,7 +18,8 @@ BEGIN TRY
 			@Condition					NVARCHAR(MAX),
 			@intPriceFixationDetailId	INT,
 			@intFutOptTransactionId		INT,
-			@strAction					NVARCHAR(50) = ''
+			@strAction					NVARCHAR(50) = '',
+			@intFutOptTransactionHeaderId INT = NULL
 
 
 	IF @strXML = 'Delete'
@@ -88,6 +89,9 @@ BEGIN TRY
 
 			IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
 			BEGIN
+				-- DERIVATIVE ENTRY HISTORY
+				SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
+				EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'DELETE'
 				UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 				EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
 			END
@@ -127,6 +131,9 @@ BEGIN TRY
 
 		IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
 		BEGIN
+			-- DERIVATIVE ENTRY HISTORY
+			SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
+			EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'DELETE'
 			UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 			EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
 		END

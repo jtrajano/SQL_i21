@@ -7463,6 +7463,7 @@
     <Build Include="dbo\Functions\fnAPGetLYPurchases.sql" />
     <Build Include="dbo\Functions\fnAPGetLastVoucherTotal.sql" />
     <Build Include="dbo\Views\vyuRKCurExpMoneyMarket.sql" />
+    <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

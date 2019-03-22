@@ -162,8 +162,7 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     					ON A.A4GLIdentity = B.ID
     					WHERE isnull(B.glije_date,0) < 19000000 or isnull(B.glije_date,0) > 21000000
     			END;
-				
-				THROW 51000, ''Invalid Date found.'', 1;    
+				RAISERROR(''Invalid Date found'', 16, 1);  
     		END
 
     		DECLARE @uid UNIQUEIDENTIFIER, @beforePosting INT = 0

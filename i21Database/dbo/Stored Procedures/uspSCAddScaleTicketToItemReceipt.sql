@@ -141,11 +141,14 @@ SELECT
 										END
 									END
 		,intLocationId				= SC.intProcessingLocationId
-		,intShipFromId				= CASE 
-										WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId), 0) > 0
-										THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
-										ELSE (SELECT TOP 1 intEntityLocationId from tblEMEntityLocation where intEntityId = @intEntityId AND ysnDefaultLocation = 1)
-									END
+		,intShipFromId				=	ISNULL(FRM.intEntityLocationId,(
+																		CASE 
+																			WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId), 0) > 0
+																				THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
+										
+																			ELSE (SELECT TOP 1 intEntityLocationId from tblEMEntityLocation where intEntityId = @intEntityId AND ysnDefaultLocation = 1)
+																		END)
+										)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
@@ -224,7 +227,7 @@ SELECT
 											CASE WHEN SC.dblShrink > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty) ELSE (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight) END
 										ELSE LI.dblQty 
 									END
-		,intFreightTermId			= CNT.intFreightTermId
+		,intFreightTermId			= ISNULL(CNT.intFreightTermId,FRM.intFreightTermId)
 		,intLoadReceive				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
 		,ysnAllowVoucher			= CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
 										CASE  
@@ -233,36 +236,39 @@ SELECT
 										END
 									END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
-		LEFT JOIN (
-			SELECT CTD.intContractHeaderId
-			,CTD.intContractDetailId
-			,CTD.intItemId
-			,CTD.intItemUOMId
-			,CTD.intFutureMarketId
-			,CTD.intFutureMonthId
-			,CTD.intRateTypeId 
-			,CTD.intPriceItemUOMId
-			,CTD.ysnUseFXPrice
-			,CTD.intCurrencyExchangeRateId 
-			,CTD.dblRate 
-			,CTD.intFXPriceUOMId 
-			,CTD.intInvoiceCurrencyId 
-			,CTD.intCurrencyId
-			,CTD.intAdjItemUOMId
-			,CTD.intPricingTypeId
-			,CTD.intBasisUOMId
-			,CTD.dtmEndDate
-			,CTD.intFreightTermId
-			,AD.dblSeqPrice
-			,CU.intCent
-			,CU.ysnSubCurrency
-			,CTH.ysnLoad
-			FROM tblCTContractDetail CTD 
-			INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
-			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
-			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
-		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
-		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
+LEFT JOIN (
+	SELECT CTD.intContractHeaderId
+	,CTD.intContractDetailId
+	,CTD.intItemId
+	,CTD.intItemUOMId
+	,CTD.intFutureMarketId
+	,CTD.intFutureMonthId
+	,CTD.intRateTypeId 
+	,CTD.intPriceItemUOMId
+	,CTD.ysnUseFXPrice
+	,CTD.intCurrencyExchangeRateId 
+	,CTD.dblRate 
+	,CTD.intFXPriceUOMId 
+	,CTD.intInvoiceCurrencyId 
+	,CTD.intCurrencyId
+	,CTD.intAdjItemUOMId
+	,CTD.intPricingTypeId
+	,CTD.intBasisUOMId
+	,CTD.dtmEndDate
+	,CTD.intFreightTermId
+	,AD.dblSeqPrice
+	,CU.intCent
+	,CU.ysnSubCurrency
+	,CTH.ysnLoad
+	FROM tblCTContractDetail CTD 
+	INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
+	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
+) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+INNER JOIN tblICItem IC 
+	ON IC.intItemId = LI.intItemId
+LEFT JOIN tblEMEntityLocation FRM
+	ON SC.intFarmFieldId = FRM.intEntityLocationId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 

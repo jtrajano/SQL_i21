@@ -135,10 +135,10 @@ FROM (
 	WHERE dblQuantity > 0
 		AND strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN strLotTracking ELSE 'No' END)) iis
 LEFT JOIN (
-	SELECT cd.intItemId
+	SELECT DISTINCT cd.intItemId
 		, cd.intCompanyLocationId
-		, cd.intFutureMarketId
-		, cd.intFutureMonthId
+		, fm.intFutureMarketId
+		, fmon.intFutureMonthId
 		, cd.intItemUOMId
 		, ch.intCommodityId
 		, c.strCommodityCode
@@ -158,15 +158,17 @@ LEFT JOIN (
 		, intUOMId = um.intUnitMeasureId
 		, strUOM = um.strUnitMeasure
 	FROM tblCTContractDetail cd
-	LEFT JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-	LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
-	LEFT JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
-	LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
+	JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+	JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
+	JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
+	JOIN tblICCommodity c ON c.intCommodityId = ch.intCommodityId
+	JOIN tblRKCommodityMarketMapping mm ON mm.intCommodityId = c.intCommodityId
+	LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = mm.intFutureMarketId
 	LEFT JOIN tblRKFuturesMonth fmon ON fmon.intFutureMonthId = cd.intFutureMonthId
 	LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
 	LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 	LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
-	LEFT JOIN tblICCommodity c ON c.intCommodityId = ch.intCommodityId
 	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 ) ct ON iis.intItemId = ct.intItemId
+	
