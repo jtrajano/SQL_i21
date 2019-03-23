@@ -956,7 +956,7 @@ BEGIN TRY
         ,[intErrorCode]
         ,[strModuleName]
     FROM
-        [dbo].[fnGetGLEntriesErrors](@GLEntries)
+        [dbo].[fnGetGLEntriesErrors](@GLEntries, @Post)
 
 
     DECLARE @invalidGLCount INT
