@@ -358,7 +358,10 @@ BEGIN TRY
 	declare @rtStrGABAssociation3 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'We confirm having sold to you today, at the conditions'), 'We confirm having sold to you today, at the conditions');
 	declare @rtStrGABAssociation2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'latest edition'), 'latest edition');
 	declare @rtStriDealAssociation nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Re today phone conversation we confirm to you the following sale at the conditions'),'Re today phone conversation we confirm to you the following sale at the conditions');
-	
+	declare @rtStrBrokerCommissionMessage1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'It is understood that your commission is'),'It is understood that your commission is');
+	declare @rtStrBrokerCommissionMessage2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'and will be paid by'),'and will be paid by');
+	declare @rtStrBrokerCommissionMessage3 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'to you directly.'),'to you directly.');
+	declare @rtStrBrokerCommissionPer nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'per'),'per');
 	
 	SELECT @TotalAtlasLots= CASE 
 								 WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, UOM.intUnitMeasureId, MA.intUnitMeasureId, CD.dblQuantity) / MA.dblContractSize) < 1 THEN 1
@@ -462,7 +465,7 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EB.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EB.strEntityState))   END,'') + 
 														ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EB.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EB.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
 														ISNULL(CASE WHEN LTRIM(RTRIM(EB.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
-			,strBrokerCommissionMessage				= 'It is understood that your commission is ' + EB.strBrokerCommission + ' and will be paid by us to you directly.'
+			,strBrokerCommissionMessage				= @rtStrBrokerCommissionMessage1 + ' ' + EB.strBrokerCommission + ' ' + @rtStrBrokerCommissionMessage2 + ' ' + dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId, 'us') + ' ' + @rtStrBrokerCommissionMessage3
 			,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 			,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 			,strAtlasSeller							= CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'') END
@@ -490,8 +493,8 @@ BEGIN TRY
 			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtPriceBasis + ' :'					ELSE NULL END
 			,lblIncoTerms							= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Incoterms :'					ELSE NULL END
 			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers + ' :'						ELSE NULL END
-			,lblAtlasContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers						ELSE NULL END
-			,lblAtlasContractTextColon						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN ':'						ELSE NULL END
+			,lblAtlasContractText					= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers						ELSE NULL END
+			,lblAtlasContractTextColon				= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN ':'						ELSE NULL END
 			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtCondition + ' :'					ELSE NULL END
 			,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN @rtProducer + ' :'					ELSE NULL END
 			,lblProducer							= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN @rtShipper + ' :'						ELSE NULL END
@@ -573,7 +576,7 @@ BEGIN TRY
 			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,getdate()),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)), LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + LEFT(DATENAME(YEAR,getdate()),4)
 			,strGABCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
 			,strCompanyName							=	@strCompanyName
-			,striDealShipment						=  ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH, SQ.dtmStartDate)), DATENAME(MONTH, SQ.dtmStartDate)) +'('+ RIGHT(YEAR(SQ.dtmStartDate), 2)+')'
+			,striDealShipment						=	ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH, SQ.dtmStartDate)), DATENAME(MONTH, SQ.dtmStartDate)) +'('+ RIGHT(YEAR(SQ.dtmStartDate), 2)+')'
 			,striDealSeller							=   LTRIM(RTRIM(EV.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(LTRIM(RTRIM(EV.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(LTRIM(RTRIM(EV.strEntityCity)),'') + 
@@ -607,14 +610,14 @@ BEGIN TRY
 												AND EC.strEntityType				=	'Customer'		
 	LEFT JOIN 
 	(
-		SELECT	c.intContractHeaderId,
+		SELECT c.intContractHeaderId,
 				a.strEntityName,
 				a.strEntityAddress,
 				a.strEntityCity,
 				a.strEntityState,
 				a.strEntityZipCode,
 				a.strEntityCountry,
-				strBrokerCommission = CONVERT(NVARCHAR,CAST(b.dblRate  AS Money),1) + ' ' + d.strCurrency + ' per ' + e.strUnitMeasure
+				strBrokerCommission =	CONVERT(NVARCHAR,CAST(b.dblRate  AS Money),1) + ' ' + d.strCurrency + ' ' + @rtStrBrokerCommissionPer + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',e.intUnitMeasureId,@intLaguageId,'Name',e.strUnitMeasure)
 		FROM vyuCTEntity a
 		INNER JOIN tblCTContractCost b ON a.intEntityId = b.intVendorId AND b.strParty = 'Broker' AND a.strEntityType = 'Broker'
 		INNER JOIN tblCTContractDetail c ON b.intContractDetailId = c.intContractDetailId
