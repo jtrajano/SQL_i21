@@ -43,7 +43,7 @@ DECLARE @dtmDateFrom            DATETIME
 	  , @strTaxClassType        NVARCHAR(100)
 	  , @strTaxGroup            NVARCHAR(100)
 	  , @strSubTotalBy          NVARCHAR(100)
-	  , @ysnTaxExemptOnly       BIT
+	  , @ysnInvoiceDetail       BIT
 	  , @xmlDocumentId          INT
 	  , @fieldname              NVARCHAR(50)
       , @UserName               NVARCHAR(150)
@@ -104,7 +104,7 @@ SELECT @strSalespersonName = REPLACE(ISNULL([from], ''), '''''', '''')
 
 SELECT @strTaxClassType = REPLACE(ISNULL([from], ''), '''''', '''')
   FROM @temp_xml_table
- WHERE [fieldname] = 'strTaxClassType'
+ WHERE [fieldname] = 'strTaxReportType'
 
 SELECT @strTaxClass = REPLACE(ISNULL([from], ''), '''''', '''')
   FROM @temp_xml_table
@@ -148,9 +148,9 @@ SELECT @strSubTotalBy = REPLACE(ISNULL([from], 'Tax Group'), '''''', '''')
   FROM @temp_xml_table
  WHERE [fieldname] = 'strSubTotalBy'
 
-SELECT @ysnTaxExemptOnly = [from] 
+SELECT @ysnInvoiceDetail = [from] 
   FROM @temp_xml_table
- WHERE [fieldname] = 'ysnTaxExemptOnly'
+ WHERE [fieldname] = 'ysnInvoiceDetail'
 
 SELECT @dtmDateFrom     = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
      , @dtmDateTo       = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
@@ -411,12 +411,17 @@ BEGIN
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
+         , [dblTotalTaxOnTax]             = OT.[dblSSTOnCheckoffTax] + OT.[dblSSTOnCitySalesTax] + OT.[dblSSTOnCityExciseTax] + OT.[dblSSTOnCountySalesTax] + OT.[dblSSTOnCountyExciseTax] + OT.[dblSSTOnFederalExciseTax] + OT.[dblSSTOnFederalLustTax]
+                                            + OT.[dblSSTOnFederalOilSpillTax] + OT.[dblSSTOnFederalOtherTax] + OT.[dblSSTOnLocalOtherTax] + OT.[dblSSTOnPrepaidSalesTax] + OT.[dblSSTOnStateExciseTax] + OT.[dblSSTOnStateOtherTax] + OT.[dblSSTOnTonnageTax]
          , [dblTotal]                     = OT.[dblTotal]
          , [dblLineTotal]                 = OT.[dblTotal] + OT.[dblTotalTax]
          , [strTaxGroup]                  = OT.[strTaxGroup]
          , [strTaxCode]                   = '' --OT.[strTaxCode]
          , [strState]                     = '' --OT.[strState]
          , [strTaxClass]                  = '' --OT.[strTaxClass]
+         , [strGrouping]                  = OT.[strTaxGroup]
+         , [strGroupingLabel]             = 'Tax Group : '
+         , [ysnInvoiceDetail]             = @ysnInvoiceDetail
          , [dblCheckoffTax]               = OT.[dblCheckoffTax]
          , [dblCitySalesTax]              = OT.[dblCitySalesTax]
          , [dblCityExciseTax]             = OT.[dblCityExciseTax]
@@ -532,12 +537,17 @@ BEGIN
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
+         , [dblTotalTaxOnTax]             = OT.[dblSSTOnCheckoffTax] + OT.[dblSSTOnCitySalesTax] + OT.[dblSSTOnCityExciseTax] + OT.[dblSSTOnCountySalesTax] + OT.[dblSSTOnCountyExciseTax] + OT.[dblSSTOnFederalExciseTax] + OT.[dblSSTOnFederalLustTax]
+                                            + OT.[dblSSTOnFederalOilSpillTax] + OT.[dblSSTOnFederalOtherTax] + OT.[dblSSTOnLocalOtherTax] + OT.[dblSSTOnPrepaidSalesTax] + OT.[dblSSTOnStateExciseTax] + OT.[dblSSTOnStateOtherTax] + OT.[dblSSTOnTonnageTax]
          , [dblTotal]                     = OT.[dblTotal]
          , [dblLineTotal]                 = OT.[dblTotal] + OT.[dblTotalTax]
          , [strTaxGroup]                  = OT.[strTaxGroup]
          , [strTaxCode]                   = '' --OT.[strTaxCode]
          , [strState]                     = '' --OT.[strState]
          , [strTaxClass]                  = '' --OT.[strTaxClass]
+         , [strGrouping]                  = C.[strCustomerName]
+         , [strGroupingLabel]             = 'Customer : '
+         , [ysnInvoiceDetail]             = @ysnInvoiceDetail
          , [dblCheckoffTax]               = OT.[dblCheckoffTax]
          , [dblCitySalesTax]              = OT.[dblCitySalesTax]
          , [dblCityExciseTax]             = OT.[dblCityExciseTax]
@@ -654,12 +664,17 @@ BEGIN
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
+         , [dblTotalTaxOnTax]             = OT.[dblSSTOnCheckoffTax] + OT.[dblSSTOnCitySalesTax] + OT.[dblSSTOnCityExciseTax] + OT.[dblSSTOnCountySalesTax] + OT.[dblSSTOnCountyExciseTax] + OT.[dblSSTOnFederalExciseTax] + OT.[dblSSTOnFederalLustTax]
+                                            + OT.[dblSSTOnFederalOilSpillTax] + OT.[dblSSTOnFederalOtherTax] + OT.[dblSSTOnLocalOtherTax] + OT.[dblSSTOnPrepaidSalesTax] + OT.[dblSSTOnStateExciseTax] + OT.[dblSSTOnStateOtherTax] + OT.[dblSSTOnTonnageTax]
          , [dblTotal]                     = OT.[dblTotal]
          , [dblLineTotal]                 = OT.[dblTotal] + OT.[dblTotalTax]
          , [strTaxGroup]                  = OT.[strTaxGroup]
          , [strTaxCode]                   = OT.[strTaxCode]
          , [strState]                     = '' --OT.[strState]
          , [strTaxClass]                  = '' --OT.[strTaxClass]
+         , [strGrouping]                  = OT.[strTaxCode]
+         , [strGroupingLabel]             = 'Tax Code : '
+         , [ysnInvoiceDetail]             = @ysnInvoiceDetail
          , [dblCheckoffTax]               = OT.[dblCheckoffTax]
          , [dblCitySalesTax]              = OT.[dblCitySalesTax]
          , [dblCityExciseTax]             = OT.[dblCityExciseTax]
