@@ -13,7 +13,7 @@ FROM (
 		,voucher.dtmDueDate
 		,voucher.dtmDate
 		,voucher.dtmBillDate
-		,voucher.intAccountId
+		,CASE WHEN voucher.intTransactionType IN (2, 13) THEN prepaidDetail.intAccountId ELSE voucher.intAccountId END AS intAccountId
 		,glAccount.strAccountId
 		,voucher.strVendorOrderNumber
 		,voucher.strBillId
@@ -70,6 +70,10 @@ FROM (
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID
 	LEFT JOIN tblGLAccount glAccount ON glAccount.intAccountId = voucher.intAccountId
+	OUTER APPLY 
+	(
+		SELECT TOP 1 intAccountId FROM tblAPBillDetail prepay WHERE prepay.intBillId = voucher.intBillId
+	) prepaidDetail
 	WHERE voucher.ysnPosted = 1 
 	AND voucher.ysnPaid = 0
 	AND voucher.intTransactionType NOT IN (11, 12)

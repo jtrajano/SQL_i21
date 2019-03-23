@@ -5,7 +5,8 @@
 	@datePaid DATETIME,
 	@showDeferred BIT,
 	@vendorId INT = NULL,
-	@payToAddress INT = 0
+	@payToAddress INT = 0,
+	@paymentId INT = 0
 )
 RETURNS TABLE AS RETURN
 (
@@ -65,6 +66,9 @@ RETURNS TABLE AS RETURN
 		,forPay.ysnOffset
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
+	LEFT JOIN tblAPPaymentDetail payDetail
+		ON voucher.intBillId = payDetail.intBillId 
+		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId
 	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
@@ -77,4 +81,33 @@ RETURNS TABLE AS RETURN
 	AND 1 = (CASE WHEN @vendorId > 0
 					THEN (CASE WHEN forPay.intEntityVendorId = @vendorId THEN 1 ELSE 0 END)
 			ELSE 1 END)
+	AND 1 = (CASE WHEN @paymentId > 0 
+					THEN 
+						(CASE WHEN payDetail.intPaymentDetailId > 0 AND payDetail.intPaymentId = @paymentId THEN 1 ELSE 0 END)
+					ELSE 1 END)
+	-- UNION ALL
+	-- SELECT
+	-- 	CAST(ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS INT) AS intForPaymentId
+	-- 	,NULL
+	-- 	,A.intInvoiceId
+	-- 	,A.intEntityCustomerId
+	-- 	,NULL
+	-- 	,strTransactionType
+	-- 	,NULL
+	-- 	,NULL
+	-- FROM vyuARInvoicesForPayment A
+	-- LEFT JOIN tblAPPaymentDetail payDetail
+	-- 	ON A.intInvoiceId = payDetail.intInvoiceId
+	-- WHERE 
+	-- 	A.strTransactionType IN ('Invoice','Debit Memo','Cash','Cash Refund')
+	-- AND A.dblAmountDue != 0
+	-- AND A.intCurrencyId = @currencyId
+	-- AND 1 = (CASE WHEN @vendorId > 0
+	-- 				THEN (CASE WHEN A.intEntityCustomerId = @vendorId THEN 1 ELSE 0 END)
+	-- 		ELSE 1 END)
+	-- AND 1 = (CASE WHEN @paymentId > 0 
+	-- 				THEN 
+	-- 					(CASE WHEN payDetail.intPaymentDetailId > 0 THEN 1 ELSE 0 END)
+	-- 				ELSE 0 END)
+
 )
