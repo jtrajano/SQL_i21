@@ -465,7 +465,8 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EB.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EB.strEntityState))   END,'') + 
 														ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EB.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EB.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
 														ISNULL(CASE WHEN LTRIM(RTRIM(EB.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
-			,strBrokerCommissionMessage				= @rtStrBrokerCommissionMessage1 + ' ' + EB.strBrokerCommission + ' ' + @rtStrBrokerCommissionMessage2 + ' ' + dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId, 'us') + ' ' + @rtStrBrokerCommissionMessage3
+			,strBrokerCommissionMessage				= @rtStrBrokerCommissionMessage1 + ' ' + EB.strBrokerCommission + ' ' + @rtStrBrokerCommissionMessage2 + ' ' 
+														+ dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId, CASE WHEN EB.strPaidBy = 'Company' THEN 'us' ELSE EB.strPaidBy END) + ' ' + @rtStrBrokerCommissionMessage3
 			,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 			,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 			,strAtlasSeller							= CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'') END
@@ -617,7 +618,8 @@ BEGIN TRY
 				a.strEntityState,
 				a.strEntityZipCode,
 				a.strEntityCountry,
-				strBrokerCommission =	CONVERT(NVARCHAR,CAST(b.dblRate  AS Money),1) + ' ' + d.strCurrency + ' ' + @rtStrBrokerCommissionPer + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',e.intUnitMeasureId,@intLaguageId,'Name',e.strUnitMeasure)
+				strBrokerCommission =	CONVERT(NVARCHAR,CAST(b.dblRate  AS Money),1) + ' ' + d.strCurrency + ' ' + @rtStrBrokerCommissionPer + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',e.intUnitMeasureId,@intLaguageId,'Name',e.strUnitMeasure),
+				strPaidBy			=	ISNULL(NULLIF(b.strPaidBy, ''), 'Company')
 		FROM vyuCTEntity a
 		INNER JOIN tblCTContractCost b ON a.intEntityId = b.intVendorId AND b.strParty = 'Broker' AND a.strEntityType = 'Broker'
 		INNER JOIN tblCTContractDetail c ON b.intContractDetailId = c.intContractDetailId
