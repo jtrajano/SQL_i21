@@ -3,6 +3,12 @@
   @recordId INT
 AS
 BEGIN
+	DECLARE @intTransactionApprovedLogId INT
+
+	INSERT INTO [tblCTSMTransactionApprovedLog](strType,intRecordId,dtmLog)
+	SELECT @type,@recordId,GETDATE()
+
+	SELECT @intTransactionApprovedLogId = SCOPE_IDENTITY()
 
     IF @type = 'ContractManagement.view.Contract' OR @type = 'ContractManagement.view.Amendments'
 		BEGIN
@@ -13,8 +19,10 @@ BEGIN
 
 			BEGIN TRY
 				EXEC	uspCTContractApproved @recordId,@intApprovalId,NULL,1
+				UPDATE [tblCTSMTransactionApprovedLog] SET strErrMsg = 'Success' WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
 			END TRY
 			BEGIN CATCH
+				UPDATE [tblCTSMTransactionApprovedLog] SET strErrMsg = ERROR_MESSAGE() WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
 			END CATCH
 		RETURN
 	END
