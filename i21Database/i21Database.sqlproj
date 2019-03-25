@@ -7475,6 +7475,11 @@
     <Build Include="dbo\Views\vyuICGetItemSpecialPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitSequenceAndCreateNewContract.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceSourceList.sql" />
+    <Build Include="dbo\Tables\tblRKDPIHeader.sql" />
+    <Build Include="dbo\Tables\tblRKDPISummary.sql" />
+    <Build Include="dbo\Tables\tblRKDPIInventory.sql" />
+    <Build Include="dbo\Tables\tblRKDPICompanyOwnership.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateDPI.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
