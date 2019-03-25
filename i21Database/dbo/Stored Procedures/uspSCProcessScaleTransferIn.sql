@@ -3,7 +3,8 @@
 	,@intMatchTicketId AS INT
 	,@intUserId AS INT
 AS
-	SET QUOTED_IDENTIFIER OFF
+AS
+SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -66,7 +67,7 @@ BEGIN TRY
 			,intItemId
 			,intItemLocationId
 			,intItemUOMId
-			,intGrossNetUOMId
+			--,intGrossNetUOMId
 			,intCostUOMId				
 			,intContractHeaderId
 			,intContractDetailId
@@ -74,7 +75,7 @@ BEGIN TRY
 			,dblQty
 			,dblCost				
 			,dblExchangeRate
-			,intLotId
+			--,intLotId
 			,intSubLocationId
 			,intStorageLocationId
 			,ysnIsStorage
@@ -87,8 +88,9 @@ BEGIN TRY
 			,intInventoryTransferDetailId
 			,intSourceType	
 			,strSourceScreenName
+			,intSort
 	)	
-	SELECT 
+	SELECT DISTINCT
 			strReceiptType				= 'Transfer Order'
 			,intEntityVendorId			= NULL
 			,intTransferorId			= SC.intProcessingLocationId
@@ -103,29 +105,29 @@ BEGIN TRY
 			,intItemId					= SC.intItemId
 			,intItemLocationId			= SC.intProcessingLocationId
 			,intItemUOMId				= SC.intItemUOMIdTo
-			,intGrossNetUOMId			= CASE
-											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
-											ELSE SC.intItemUOMIdTo
-										END
+			--,intGrossNetUOMId			= CASE
+			--								WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
+			--								ELSE SC.intItemUOMIdTo
+			--							END
 			,intCostUOMId				= SC.intItemUOMIdTo
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime
-			,dblQty						= SC.dblNetUnits
+			,dblQty						= ICTran.dblQty
 			,dblCost					= ICTran.dblCost
 			,dblExchangeRate			= 1 -- Need to check this
-			,intLotId					= SC.intLotId
+			--,intLotId					= SC.intLotId
 			,intSubLocationId			= SC.intSubLocationId
 			,intStorageLocationId		= SC.intStorageLocationId
 			,ysnIsStorage				= 0
 			,dblFreightRate				= SC.dblFreightRate
 			,dblGross					=  CASE
-											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (SC.dblGrossWeight - SC.dblTareWeight)
-											ELSE SC.dblGrossUnits
+											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN ((ICTran.dblQty / SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight))
+											ELSE (ICTran.dblQty / SC.dblNetUnits) * SC.dblGrossUnits
 										END
 			,dblNet						= CASE
-											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblNetUnits)
-											ELSE SC.dblNetUnits 
+											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (ICTran.dblQty / SC.dblNetUnits) * dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblNetUnits)
+											ELSE (ICTran.dblQty / SC.dblNetUnits) * SC.dblNetUnits 
 										END
 			,intSourceId                    = SC.intTicketId
             ,intTicketId                    = SC.intTicketId
@@ -133,12 +135,19 @@ BEGIN TRY
             ,intInventoryTransferDetailId   = ICTD.intInventoryTransferDetailId
             ,intSourceType                  = 1 -- Source type for scale is 1 
             ,strSourceScreenName            = 'Scale Ticket'
+			,intSort						= RANK() OVER( ORDER BY ICTran.dblQty ASC)--RANK() OVER (ORDER BY ICTran.dblQty)
 	FROM	tblSCTicket SC 
 	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
 	INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
 	LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
 	LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
-	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
+	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND (ICTran.dblQty >= 0 and ICTD.dblQuantity >= SC.dblNetUnits) AND ICTran.intTransactionTypeId = 13
+	--FROM	tblSCTicket SC 
+	--INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
+	--INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
+	--LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
+	--LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
+	--WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
@@ -223,7 +232,7 @@ BEGIN TRY
 	--		,[ysnAccrue]						= 1
  --   FROM	@ReceiptStagingTable RE 
 	--WHERE	RE.dblSurcharge != 0 
-
+	
 	-- No Records to process so exit
     SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
     IF (@total = 0)
@@ -234,7 +243,7 @@ BEGIN TRY
 		INSERT INTO @ReceiptItemLotStagingTable(
 			[strReceiptType]
 			,[intItemId]
-			,[intLotId]
+			--,[intLotId]
 			,[strLotNumber]
 			,[intLocationId]
 			,[intShipFromId]
@@ -251,14 +260,15 @@ BEGIN TRY
 			,[dtmManufacturedDate]
 			,[strBillOfLadding]
 			,[intSourceType]
+			,[intSort]
 		)
 		SELECT 
 			[strReceiptType]		= RE.strReceiptType
 			,[intItemId]			= RE.intItemId
-			,[intLotId]				= RE.intLotId
+			--,[intLotId]				= RE.intLotId
 			,[strLotNumber]			= CASE
-										WHEN SC.strLotNumber = '' THEN NULL
-										ELSE SC.strLotNumber
+										WHEN SCM.strLotNumber = '' THEN NULL
+										ELSE SCM.strLotNumber
 									END
 			,[intLocationId]		= RE.intLocationId
 			,[intShipFromId]		= RE.intShipFromId
@@ -275,8 +285,10 @@ BEGIN TRY
 			,[dtmManufacturedDate]	= RE.dtmDate
 			,[strBillOfLadding]		= ''
 			,[intSourceType]		= RE.intSourceType
+			,[intSort]				= RE.intSort
 			FROM @ReceiptStagingTable RE 
 			INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
+			INNER JOIN tblSCTicket SCM ON SCM.intTicketId = SC.intMatchTicketId
 			INNER JOIN tblICItem IC ON IC.intItemId = RE.intItemId
 	END
 
@@ -285,7 +297,7 @@ BEGIN TRY
 			,@OtherCharges
 			,@intUserId
 			,@ReceiptItemLotStagingTable;
-
+	--SELECT * FROM @ReceiptItemLotStagingTable
 	-- Update the Inventory Receipt Key to the Transaction Table
 	UPDATE	SC
 	SET		SC.intInventoryReceiptId = addResult.intInventoryReceiptId
