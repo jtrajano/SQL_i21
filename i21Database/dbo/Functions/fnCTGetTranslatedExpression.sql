@@ -1,6 +1,6 @@
 ﻿create FUNCTION [dbo].[fnCTGetTranslatedExpression]
 (
-	@strLabelName nvarchar(50),
+	@strLabelName nvarchar(500),
 	@intLanguageId int,
 	@strExpression nvarchar(500)
 

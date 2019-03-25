@@ -7470,6 +7470,7 @@
     <Build Include="dbo\Views\vyuAPAging.sql" />
     <None Include="Scripts\Post-Deployment\ET\ETCompanyPreferenceUpdate.sql" />
     <Build Include="dbo\Functions\fnAPGetPayableKeyInfo.sql" />
+    <Build Include="dbo\Functions\fnCTGetReportLanguage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
