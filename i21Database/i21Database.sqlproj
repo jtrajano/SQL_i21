@@ -7689,6 +7689,7 @@
     <None Include="Scripts\Post-Deployment\TM\7_GenerateManufacturerFromDevice.sql" />
     <Build Include="dbo\Functions\fnHDCoalesceEntityResources.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateOffsetField.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePrepayDetailAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

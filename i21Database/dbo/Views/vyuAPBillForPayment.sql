@@ -14,7 +14,7 @@ FROM (
 		,voucher.dtmDate
 		,voucher.dtmBillDate
 		,CASE WHEN voucher.intTransactionType IN (2, 13) THEN prepaidDetail.intAccountId ELSE voucher.intAccountId END AS intAccountId
-		,glAccount.strAccountId
+		,CASE WHEN voucher.intTransactionType IN (2, 13) THEN prepaidDetail.strAccountId ELSE glAccount.strAccountId END strAccountId
 		,voucher.strVendorOrderNumber
 		,voucher.strBillId
 		,CASE WHEN voucher.intTransactionType IN (3,8) AND voucher.dblTotal > 0 THEN voucher.dblTotal * -1
@@ -72,7 +72,12 @@ FROM (
 	LEFT JOIN tblGLAccount glAccount ON glAccount.intAccountId = voucher.intAccountId
 	OUTER APPLY 
 	(
-		SELECT TOP 1 intAccountId FROM tblAPBillDetail prepay WHERE prepay.intBillId = voucher.intBillId
+		SELECT TOP 1 prepay.intAccountId, detailAccnt.strAccountId
+		FROM tblAPBillDetail prepay 
+		INNER JOIN tblGLAccount detailAccnt
+			ON prepay.intAccountId = detailAccnt.intAccountId
+		WHERE prepay.intBillId = voucher.intBillId
+
 	) prepaidDetail
 	WHERE voucher.ysnPosted = 1 
 	AND voucher.ysnPaid = 0
