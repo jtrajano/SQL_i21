@@ -187,6 +187,7 @@
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3" />
     <Folder Include="Scripts\Post-Deployment\PAT\18.3\" />
     <Folder Include="Scripts\Post-Deployment\MB" />
+    <Folder Include="Scripts\Post-Deployment\ET" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -7467,6 +7468,7 @@
     <Build Include="dbo\Views\vyuRKCurExpMoneyMarket.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
     <Build Include="dbo\Views\vyuAPAging.sql" />
+    <None Include="Scripts\Post-Deployment\ET\ETCompanyPreferenceUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
