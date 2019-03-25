@@ -24,6 +24,7 @@ SELECT
      , RT.strType
      , RT.ysnTaxExempt
      , RT.ysnInvalidSetup
+     , RT.ysnManualTaxExempt
      , RT.dblCheckoffTax
      , RT.dblCitySalesTax
      , RT.dblCityExciseTax
@@ -78,6 +79,7 @@ SELECT
                           , ARIDT.intTaxGroupId
                           , ARIDT.ysnTaxExempt
                           , ARIDT.ysnInvalidSetup
+                          , (CASE WHEN ARIDT.ysnTaxAdjusted = CAST(1 AS BIT) AND ARIDT.dblAdjustedTax = 0.000000 AND ARIDT.dblTax <> 0.000000 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END) ysnManualTaxExempt
                           , STC.intTaxCodeId
                           , STC.strTaxCode
                           , STC.strState

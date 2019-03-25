@@ -15,6 +15,15 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	END
 
 -- Declare the variables.
+
+DECLARE	@ZeroBit        BIT
+       ,@OneBit         BIT
+       --,@ZeroDecimal    DECIMAL(18,6)
+
+--SET @ZeroDecimal = CAST(0.000000 AS DECIMAL(18,6))
+SET @OneBit = CAST(1 AS BIT)
+SET @ZeroBit = CAST(0 AS BIT)
+
 DECLARE @dtmDateFrom            DATETIME
 	  , @dtmDateTo              DATETIME
 	  , @conditionDate          NVARCHAR(20)
@@ -45,6 +54,7 @@ DECLARE @dtmDateFrom            DATETIME
 	  , @strTaxClassType        NVARCHAR(100)
 	  , @strTaxGroup            NVARCHAR(100)
 	  , @strSubTotalBy          NVARCHAR(100)
+	  , @strIncludeExemptOnly   NVARCHAR(100)
 	  , @ysnInvoiceDetail       BIT
 	  , @xmlDocumentId          INT
 	  , @fieldname              NVARCHAR(50)
@@ -52,8 +62,9 @@ DECLARE @dtmDateFrom            DATETIME
 	  , @strCompanyName         NVARCHAR(100)
 	  , @strCompanyAddress      NVARCHAR(500)
 
-SET @AccountStatusFiltered = CAST(0 AS BIT)
+SET @AccountStatusFiltered = @ZeroBit
 SET @strSubTotalBy = 'Tax Group'
+SET @strIncludeExemptOnly = 'No'
 --SELECT @UserName = [strName] FROM tblEMEntity WHERE[intEntityId] = @EntityUserId
 SELECT TOP 1 @strCompanyName = strCompanyName
      , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
@@ -156,6 +167,10 @@ SELECT @strSubTotalBy = REPLACE(ISNULL([from], 'Tax Group'), '''''', '''')
   FROM @temp_xml_table
  WHERE [fieldname] = 'strSubTotalBy'
 
+SELECT @strIncludeExemptOnly = REPLACE(ISNULL([from], 'No'), '''''', '''')
+  FROM @temp_xml_table
+ WHERE [fieldname] = 'strIncludeExemptOnly'
+
 SELECT @ysnInvoiceDetail = [from] 
   FROM @temp_xml_table
  WHERE [fieldname] = 'ysnInvoiceDetail'
@@ -189,7 +204,7 @@ DECLARE @STATUSCODES AS TABLE([intAccountStatusId] INT PRIMARY KEY, [strAccountS
 
 IF (@conditionAccountStatus IS NOT NULL AND UPPER(@conditionAccountStatus) = 'BETWEEN' AND ISNULL(@strAccountStatusFrom, '') <> '')
     BEGIN
-        SET @AccountStatusFiltered = CAST(1 AS BIT)
+        SET @AccountStatusFiltered = @OneBit
         INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
         SELECT [intAccountStatusId], [strAccountStatusCode]
           FROM dbo.tblARAccountStatus WITH (NOLOCK)
@@ -197,7 +212,7 @@ IF (@conditionAccountStatus IS NOT NULL AND UPPER(@conditionAccountStatus) = 'BE
     END
 ELSE IF (@conditionAccountStatus IS NOT NULL AND ISNULL(@strAccountStatusFrom, '') <> '')
     BEGIN
-        SET @AccountStatusFiltered = CAST(1 AS BIT)
+        SET @AccountStatusFiltered = @OneBit
         INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
         SELECT [intAccountStatusId], [strAccountStatusCode]
           FROM dbo.tblARAccountStatus WITH (NOLOCK)
@@ -205,7 +220,7 @@ ELSE IF (@conditionAccountStatus IS NOT NULL AND ISNULL(@strAccountStatusFrom, '
     END
 ELSE
     BEGIN
-        SET @AccountStatusFiltered = CAST(0 AS BIT)
+        SET @AccountStatusFiltered = @ZeroBit
         INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
         SELECT [intAccountStatusId], [strAccountStatusCode]
           FROM dbo.tblARAccountStatus WITH (NOLOCK)
@@ -235,8 +250,8 @@ IF (@conditionCustomer IS NOT NULL AND UPPER(@conditionCustomer) = 'BETWEEN' AND
                           ) E ON C.intEntityId = E.intEntityId
                LEFT OUTER JOIN @STATUSCODES SC
                                ON C.[intAccountStatusId] = SC.[intAccountStatusId]
-         WHERE (@AccountStatusFiltered = CAST(1 AS BIT) AND SC.[intAccountStatusId] IS NOT NULL)
-            OR @AccountStatusFiltered = CAST(0 AS BIT)
+         WHERE (@AccountStatusFiltered = @OneBit AND SC.[intAccountStatusId] IS NOT NULL)
+            OR @AccountStatusFiltered = @ZeroBit
 	END
 ELSE IF (@conditionCustomer IS NOT NULL AND ISNULL(@strCustomerNameFrom, '') <> '')
 	BEGIN
@@ -250,8 +265,8 @@ ELSE IF (@conditionCustomer IS NOT NULL AND ISNULL(@strCustomerNameFrom, '') <> 
                           ) E ON C.intEntityId = E.intEntityId
                LEFT OUTER JOIN @STATUSCODES SC
                                ON C.[intAccountStatusId] = SC.[intAccountStatusId]
-         WHERE (@AccountStatusFiltered = CAST(1 AS BIT) AND SC.[intAccountStatusId] IS NOT NULL)
-            OR @AccountStatusFiltered = CAST(0 AS BIT)
+         WHERE (@AccountStatusFiltered = @OneBit AND SC.[intAccountStatusId] IS NOT NULL)
+            OR @AccountStatusFiltered = @ZeroBit
 	END
 ELSE
 	BEGIN
@@ -346,7 +361,7 @@ IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND I
          WHERE I.strInvoiceNumber BETWEEN @strInvoiceNumberFrom AND @strInvoiceNumberTo
            AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
-           AND I.dblTax <> 0.000000
+           --AND I.dblTax <> 0.000000
     END
 ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> '')
     BEGIN
@@ -362,7 +377,7 @@ ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> 
          WHERE I.strInvoiceNumber = @strInvoiceNumberFrom
            AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
-           AND I.dblTax <> 0.000000
+           --AND I.dblTax <> 0.000000
     END
 ELSE
     BEGIN
@@ -377,7 +392,7 @@ ELSE
                                ) S ON I.intEntitySalespersonId = S.intEntityId
          WHERE I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
-           AND I.dblTax <> 0.000000
+           --AND I.dblTax <> 0.000000
     END
 
 --IF(OBJECT_ID('tempdb..#ITEMS') IS NOT NULL)
@@ -528,12 +543,34 @@ BEGIN
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
              FROM vyuAROutboundTaxReport WITH (NOLOCK)
-            WHERE (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
-              AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
-              AND (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
-              AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+            WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
               AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
-             --AND ysnTaxExempt = 1
+              AND (
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'No'
+                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Code'
+                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Class'
+                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Report Type'
+                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  )
             GROUP BY intTaxGroupId, strTaxGroup, intInvoiceDetailId, intInvoiceId
            ) OT
              INNER JOIN @CUSTOMERS C 
@@ -657,12 +694,34 @@ BEGIN
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
              FROM vyuAROutboundTaxReport WITH (NOLOCK)
-            WHERE (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
-              AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
-              AND (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
-              AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+            WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
               AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
-             --AND ysnTaxExempt = 1
+              AND (
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'No'
+                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Code'
+                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Class'
+                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Report Type'
+                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  )
             GROUP BY intEntityCustomerId, intInvoiceDetailId, intInvoiceId
            ) OT
              INNER JOIN @CUSTOMERS C 
@@ -787,11 +846,34 @@ BEGIN
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
              FROM vyuAROutboundTaxReport WITH (NOLOCK)
-            WHERE (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
-              AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
-              AND (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
-              AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+            WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
               AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
+              AND (
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'No'
+                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Code'
+                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Class'
+                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  OR
+                       (
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Report Type'
+                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+                        AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
+					   )
+                  )
              --AND ysnTaxExempt = 1
             GROUP BY intTaxCodeId, strTaxCode, intInvoiceDetailId, intInvoiceId
            ) OT
