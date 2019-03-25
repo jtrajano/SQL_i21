@@ -337,7 +337,9 @@ END
  
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation CTPF
+				  CROSS APPLY dbo.fnCTGetTopOneSequence(0,CTPF.intContractDetailId) CD
+				  WHERE CTPF.intContractDetailId = @intContractDetailId and CD.strPricingType <> 'Priced')
 		BEGIN
 			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
 		END
@@ -436,7 +438,8 @@ END
 		LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
 		LEFT JOIN tblCTPriceFixation CTP ON CTP.intContractDetailId = CT.intContractDetailId
 		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1 
-		AND CTP.intPriceFixationId IS NULL AND ri.ysnAllowVoucher = 1
+		AND ri.ysnAllowVoucher = 1
+		
 		-- Assemble the voucher items 
 		BEGIN 
 			INSERT INTO @voucherItems (
