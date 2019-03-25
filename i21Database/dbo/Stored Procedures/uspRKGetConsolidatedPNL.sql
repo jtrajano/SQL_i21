@@ -34,7 +34,7 @@ BEGIN TRY
 		, intContractHeaderId INT
 		, strContractType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intContractBasisId INT
+		, intFreightTermId INT
 		, intTransactionType INT
 		, strTransaction NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strTransactionType NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -292,7 +292,7 @@ BEGIN TRY
 		, intContractHeaderId
 		, strContractType
 		, strContractNumber
-		, intContractBasisId
+		, intFreightTermId
 		, intTransactionType
 		, strTransaction
 		, strTransactionType
