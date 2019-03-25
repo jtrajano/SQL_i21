@@ -33,7 +33,8 @@ SELECT
 	intBookId,
 	strBook,
 	intSubBookId,
-	strSubBook
+	strSubBook,
+	CAST(CASE WHEN lien.intEntityVendorId IS NULL THEN 0 ELSE 1 END AS BIT) ysnHasLien
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -62,6 +63,8 @@ FROM
 		ON B.intTermsId = J2.intTermID
 	LEFT JOIN dbo.tblGLAccount K
 		ON B.intGLAccountExpenseId = K.intAccountId
+	LEFT JOIN tblAPVendorLien lien
+		ON lien.intEntityVendorId = A.intEntityId
 	OUTER APPLY (
 		SELECT TOP 1
 			bookEntity.intEntityId

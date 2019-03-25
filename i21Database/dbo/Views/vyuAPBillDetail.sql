@@ -76,7 +76,11 @@ SELECT
 	PG.strName as strPurchasingGroupName,
 	CB.strContractBasis as strINCO,
 	A2.ysnPaid,
-	A2.strPaymentInfo
+	A2.strPaymentInfo,
+	A2.dtmDatePaid,
+	A2.dtmPaymentDateReconciled,
+	A2.dblPayment,
+	A2.ysnClr
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
