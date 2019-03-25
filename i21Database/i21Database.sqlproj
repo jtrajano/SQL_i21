@@ -7469,6 +7469,7 @@
     <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
     <Build Include="dbo\Views\vyuAPAging.sql" />
     <None Include="Scripts\Post-Deployment\ET\ETCompanyPreferenceUpdate.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayableKeyInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
