@@ -125,7 +125,7 @@ SET NOCOUNT ON
 
 			-----Create Detail for New Contract
 
-			EXEC uspCTSplitSequence @intContractDetailId, @dblSplitQuantity, @intUserId, @intContractDetailId, 'Split', @intNewContractDetailId OUTPUT,@intNewContractHeaderid
+			EXEC uspCTSplitSequence @intContractDetailId, @dblSplitQuantity, @intUserId, @intContractDetailId, 'Split', @intNewContractDetailId OUTPUT,@intNewContractHeaderId
 
 			UPDATE	tblCTSequenceUsageHistory 
 			SET		intExternalId		=	@intNewContractDetailId, 
