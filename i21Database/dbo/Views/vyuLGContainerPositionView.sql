@@ -39,7 +39,7 @@ FROM (
 	JOIN tblCTPosition Pos ON Pos.intPositionId = CH.intPositionId
 		AND Pos.strPosition = 'Spot'
 	JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId
-	JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+	JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 	JOIN tblICItemUOM UOM ON UOM.intItemUOMId = CD.intPriceItemUOMId
 	JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = UOM.intUnitMeasureId

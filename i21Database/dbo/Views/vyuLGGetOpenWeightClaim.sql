@@ -111,7 +111,7 @@ FROM
 				WHERE IU.intItemId = CD.intItemId
 					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
 				), AD.intSeqPriceUOMId, 1)
-		,intContractBasisId = CH.intContractBasisId
+		,intContractBasisId = CH.intFreightTermId
 		,strContractBasis = CB.strContractBasis
 		,strERPPONumber = CD.strERPPONumber
 		,strERPItemNumber = CD.strERPItemNumber
@@ -132,7 +132,7 @@ FROM
 	JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
 	JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
-	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 	LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId AND CA.strType = 'Origin'
@@ -279,7 +279,7 @@ FROM
 				WHERE IU.intItemId = CD.intItemId
 					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
 				), AD.intSeqPriceUOMId, 1)
-		,intContractBasisId = CH.intContractBasisId
+		,intContractBasisId = CH.intFreightTermId
 		,strContractBasis = CB.strContractBasis
 		,strERPPONumber = CD.strERPPONumber
 		,strERPItemNumber = CD.strERPItemNumber
@@ -300,7 +300,7 @@ FROM
 	JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
 	JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
-	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 	LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId AND CA.strType = 'Origin'

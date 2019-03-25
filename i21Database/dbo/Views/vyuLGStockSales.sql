@@ -22,7 +22,7 @@ SELECT SH.intStockSalesHeaderId
 	  ,PO.intPositionId 
 	  ,PO.strPosition
 	  ,PO.strPositionType
-	  ,CB.intContractBasisId
+	  ,intContractBasisId = CH.intFreightTermId
 	  ,CB.strContractBasis AS strIncoTerms
 	  ,CH.intPricingTypeId AS intPricingType
 	  ,PT.strPricingType
@@ -54,7 +54,7 @@ LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = SH.intPickLotHeader
 LEFT JOIN tblEMEntity SP ON SP.intEntityId = CH.intSalespersonId
 LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CH.intPricingTypeId
 LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
-LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 LEFT JOIN tblCTInsuranceBy IB ON IB.intInsuranceById = CH.intInsuranceById
 LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CD.intFutureMarketId 
 LEFT JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId		

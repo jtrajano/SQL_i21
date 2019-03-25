@@ -96,7 +96,8 @@ AS
 			CC.strCurrency					AS	strConvertedCurrency,
 			CC.ysnSubCurrency				AS	ysnConvertedSubCurrency,
 			BM.strUnitMeasure				AS	strBasisUOM,
-			VM.strUnitMeasure				AS	strConvertedUOM
+			VM.strUnitMeasure				AS	strConvertedUOM,
+			CH.ysnLoad						AS	ysnLoad
 
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	

@@ -182,7 +182,7 @@ BEGIN
 			,LDCL.dblQuantity AS dblContainerContractQty
 			,CH.strCustomerContract AS strCustomerContractNo
 			,CH.dtmContractDate
-			,CB.strContractBasis
+			,strContractBasis = CB.strContractBasis
 			,CB.strDescription strContractBasisDescription
 			,AB.strApprovalBasis
 			,(
@@ -216,7 +216,7 @@ BEGIN
 		JOIN vyuLGLoadDetailViewSearch LDV ON LDV.intLoadDetailId = LDCL.intLoadDetailId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LDV.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN tblCTApprovalBasis AB ON AB.intApprovalBasisId = CH.intApprovalBasisId
 		LEFT JOIN tblICCommodity IC ON IC.intCommodityId = CH.intCommodityId
 		LEFT JOIN tblICItemContract ITM ON ITM.intItemContractId = CD.intItemContractId
