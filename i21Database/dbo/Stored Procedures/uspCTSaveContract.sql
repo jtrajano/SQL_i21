@@ -64,12 +64,6 @@ BEGIN TRY
 	LEFT JOIN tblCTPosition		PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId		=	@intContractHeaderId
 
-	IF LTRIM(RTRIM(ISNULL(@strCustomerContract,''))) <> '' AND EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE strCustomerContract = @strCustomerContract)
-	BEGIN
-		SELECT @ErrMsg = 'The Vendor/Customer Ref '+@strCustomerContract+' is already available for the selected vendor.'
-		RAISERROR(@ErrMsg,16,1)
-	END
-
 	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = ysnBasisComponent from tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
