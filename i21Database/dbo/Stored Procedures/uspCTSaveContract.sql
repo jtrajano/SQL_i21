@@ -264,6 +264,7 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractCertification WHERE intContractDetailId = @intContractDetailId)
 		BEGIN 
+			SELECT	@strCertificationName = NULL
 			SELECT	@strCertificationName = COALESCE(@strCertificationName + ', ', '') + CAST(strCertificationName AS NVARCHAR(100))
 			FROM	tblCTContractCertification	CF
 			JOIN	tblICCertification			IC	ON	IC.intCertificationId	=	CF.intCertificationId
