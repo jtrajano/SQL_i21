@@ -589,6 +589,53 @@ BEGIN
 					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 			)t
 
+			--========================
+			-- TRANSFER
+			--========================
+			DECLARE @transfer TABLE (dblTotal numeric(24,10)
+				, Ticket NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				, intCommodityId int
+				, intFromCommodityUnitMeasureId int
+				, intLocationId int
+				, strTransactionId  NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				, strTransactionType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				, intItemId int
+				, strDistributionOption NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				, strTicketStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				, intEntityId INT)
+
+			INSERT INTO @transfer
+			SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity , 0)))
+				, t.strTicketNumber Ticket
+				, s.strLocationName
+				, s.strItemNo
+				, i.intCommodityId intCommodityId
+				, intCommodityUnitMeasureId intFromCommodityUnitMeasureId
+				, s.intLocationId intLocationId
+				, strTransactionId
+				, strTransactionType
+				, i.intItemId
+				, t.strDistributionOption
+				, strTicketStatus
+				, s.intEntityId
+			FROM vyuRKGetInventoryValuation s
+			JOIN tblICItem i on i.intItemId=s.intItemId
+			JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+			JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+			JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
+			LEFT JOIN tblSCTicket t on s.intSourceId = t.intTicketId
+			LEFT JOIN tblICInventoryReceiptItem IRI ON s.intTransactionId = IRI.intInventoryTransferId --Join here to determine if an IT has a corresponding transfer in
+			WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity, 0) <>0 
+				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId) AND ISNULL(strTicketStatus,'') <> 'V'
+				AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
+				AND convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
+				AND ysnInTransit = 1
+				AND strTransactionForm IN('Inventory Transfer')
+				AND IRI.intInventoryReceiptItemId IS NULL
+				AND s.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+
 			-- inventory
 			INSERT INTO @InventoryStock(strCommodityCode
 				, strItemNo
@@ -626,6 +673,7 @@ BEGIN
 					AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					AND strTransactionId NOT IN (SELECT strTransactionId FROM @transfer)
 			) t
 
 			--Collateral
