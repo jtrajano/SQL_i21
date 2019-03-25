@@ -7296,6 +7296,9 @@
     <Build Include="dbo\Views\vyuSTCheckoutItemMovementReport.sql" />
     <Build Include="dbo\Functions\fnICGetMovingAverageCost.sql" />
     <Build Include="dbo\Views\vyuRKCurExpMoneyMarket.sql" />
+    <Build Include="dbo\Tables\tblCTSMTransactionApprovedLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFeedNotSentEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSendMissingFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
