@@ -22,8 +22,8 @@ SELECT SH.intStockSalesHeaderId
 	  ,PO.intPositionId 
 	  ,PO.strPosition
 	  ,PO.strPositionType
-	  ,intContractBasisId = CH.intFreightTermId
-	  ,CB.strContractBasis AS strIncoTerms
+	  ,CH.intFreightTermId
+	  ,CB.strFreightTerm AS strIncoTerms
 	  ,CH.intPricingTypeId AS intPricingType
 	  ,PT.strPricingType
 	  ,CH.intInsuranceById
