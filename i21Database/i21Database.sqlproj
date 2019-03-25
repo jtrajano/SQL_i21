@@ -7471,6 +7471,8 @@
     <None Include="Scripts\Post-Deployment\ET\ETCompanyPreferenceUpdate.sql" />
     <Build Include="dbo\Functions\fnAPGetPayableKeyInfo.sql" />
     <Build Include="dbo\Functions\fnCTGetReportLanguage.sql" />
+    <Build Include="dbo\Views\vyuICGetItemPricingLevel.sql" />
+    <Build Include="dbo\Views\vyuICGetItemSpecialPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
