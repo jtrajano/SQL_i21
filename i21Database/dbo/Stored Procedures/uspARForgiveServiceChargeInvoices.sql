@@ -249,7 +249,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 								, intEntityCustomerId			= CM.intEntityCustomerId
 								, intCompanyLocationId			= CM.intCompanyLocationId
 								, intCurrencyId					= CM.intCurrencyId
-								, dtmDatePaid					= CM.dtmPostDate
+								, dtmDatePaid					= SCF.dtmForgiveDate
 								, intPaymentMethodId			= @intPaymentMethodId
 								, strPaymentMethod				= @strPaymentMethod
 								, strNotes						= 'Forgiven Service Charge ' + INV.strInvoiceOriginId
@@ -275,6 +275,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 							FROM dbo.vyuARInvoicesForPayment CM
 							INNER JOIN tblARInvoice INV ON CM.intInvoiceId = INV.intInvoiceId
 							INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strCreatedCreditMemo) CCM ON CCM.intID = CM.intInvoiceId
+							INNER JOIN #SERVICECHARGETOFORGIVE SCF ON SCF.strInvoiceNumber = INV.strInvoiceOriginId
 
 							UNION ALL
 

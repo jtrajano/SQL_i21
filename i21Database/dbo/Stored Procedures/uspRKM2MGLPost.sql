@@ -418,10 +418,10 @@ BEGIN TRANSACTION
 	SELECT [dtmDate]
 		,@batchId
 		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
+		,ROUND([dblDebit],2)
+		,ROUND([dblCredit],2)
+		,ROUND([dblDebitUnit],2)
+		,ROUND([dblCreditUnit],2)
 		,[strDescription]
 		,[intCurrencyId]
 		,[dtmTransactionDate]
@@ -485,10 +485,10 @@ BEGIN TRANSACTION
 		SELECT @dtmGLReverseDate
 			,@strReversalBatchId
 			,[intAccountId]
-			,[dblCredit] --Reversal - credit value will become debit value
-			,[dblDebit]
-			,[dblCreditUnit]
-			,[dblDebitUnit]
+			,ROUND([dblCredit],2) --Reversal - credit value will become debit value
+			,ROUND([dblDebit],2)
+			,ROUND([dblCreditUnit],2)
+			,ROUND([dblDebitUnit],2)
 			,[strDescription]
 			,[intCurrencyId]
 			,@dtmGLReverseDate --[dtmTransactionDate]

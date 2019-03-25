@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPAging]
 AS
 
-SELECT
+SELECT TOP 100 PERCENT
 	intEntityVendorId
 	,SUM(dblCurrent) AS dblCurrent
 	,SUM(dbl10) AS dbl10

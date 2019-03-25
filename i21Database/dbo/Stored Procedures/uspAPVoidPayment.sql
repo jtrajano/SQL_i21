@@ -165,9 +165,9 @@ BEGIN
 			,D.strPaymentRecordNum
 		FROM #tmpPayables C
 			INNER JOIN tblAPPayment D ON C.intPaymentId = D.intPaymentId
-		WHERE intNewPaymentId IS NULL AND C.intPaymentId = B.intPaymentId
+		WHERE C.intPaymentId = B.intPaymentId
 	) OldPayments
-	WHERE B.intNewPaymentId IS NOT NULL
+	--WHERE B.intNewPaymentId IS NOT NULL
 
 	IF OBJECT_ID(N'tempdb..#tmpPaymentDetail') IS NOT NULL DROP TABLE #tmpPaymentDetail
 
@@ -206,7 +206,7 @@ BEGIN
 	--REVERSE ONLY THOSE ORIGINAL payments
 	INSERT INTO #tmpCMBankTransaction
 		SELECT strPaymentRecordNum FROM tblAPPayment A
-		INNER JOIN #tmpPayables B ON A.intPaymentId = B.intPaymentId AND B.intNewPaymentId IS NULL
+		INNER JOIN #tmpPayables B ON A.intPaymentId = B.intPaymentId --AND B.intNewPaymentId IS NULL
 
 	-- Calling the stored procedure
 	EXEC dbo.uspCMBankTransactionReversal @intUserId, @voidDate, @isSuccessful OUTPUT
@@ -321,7 +321,7 @@ BEGIN
 		ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblCMBankTransaction C
 		ON A.strPaymentRecordNum = C.strTransactionId
-	WHERE B.intNewPaymentId IS NULL
+	--WHERE B.intNewPaymentId IS NULL
 
 	--Unposting Process
 	UPDATE B
