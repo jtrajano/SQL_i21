@@ -7473,6 +7473,7 @@
     <Build Include="dbo\Functions\fnCTGetReportLanguage.sql" />
     <Build Include="dbo\Views\vyuICGetItemPricingLevel.sql" />
     <Build Include="dbo\Views\vyuICGetItemSpecialPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSplitSequenceAndCreateNewContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

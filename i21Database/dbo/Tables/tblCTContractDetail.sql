@@ -145,6 +145,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intContractDetailRefId] INT,
 	ysnStockSale BIT,
 	strCertifications NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	ysnSplit		BIT,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
