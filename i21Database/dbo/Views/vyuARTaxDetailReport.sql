@@ -16,10 +16,6 @@ FROM (
 		 , strTaxTransactionType		= 'Invoice' COLLATE Latin1_General_CI_AS
 	FROM tblARInvoiceDetailTax IDT 	
 	INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
-	INNER JOIN (
-		SELECT DISTINCT intInvoiceId
-		FROM tblARInvoiceReportStagingTable
-	) STAGING ON ID.intInvoiceId = STAGING.intInvoiceId
 	WHERE (IDT.ysnTaxExempt = 1 OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
 	  AND ID.intItemId <> ISNULL((SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference), 0)
 
@@ -39,7 +35,3 @@ FROM (
 ) AS TAXDETAIL
 INNER JOIN tblSMTaxCode SMT ON TAXDETAIL.intTaxCodeId = SMT.intTaxCodeId
 INNER JOIN tblSMTaxClass TC ON SMT.intTaxClassId = TC.intTaxClassId 
-OUTER APPLY (
-	SELECT TOP 1 strInvoiceReportName
-	FROM tblARCompanyPreference
-) CP
