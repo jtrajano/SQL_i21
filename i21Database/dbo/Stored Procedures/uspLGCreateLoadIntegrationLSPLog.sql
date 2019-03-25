@@ -227,7 +227,7 @@ BEGIN TRY
 					SELECT TOP 1 CB.strContractBasis
 					FROM tblCTContractHeader CH
 					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-					JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 					WHERE LD.intLoadId = L.intLoadId
 					)
@@ -235,7 +235,7 @@ BEGIN TRY
 					SELECT TOP 1 CB.strDescription
 					FROM tblCTContractHeader CH
 					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-					JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 					WHERE LD.intLoadId = L.intLoadId
 					)
@@ -640,7 +640,7 @@ BEGIN TRY
 				SELECT TOP 1 CB.strContractBasis
 				FROM tblCTContractHeader CH
 				JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-				JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+				JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 				WHERE LD.intLoadId = L.intLoadId
 				)
@@ -648,7 +648,7 @@ BEGIN TRY
 				SELECT TOP 1 CB.strDescription
 				FROM tblCTContractHeader CH
 				JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-				JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+				JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 				WHERE LD.intLoadId = L.intLoadId
 				)

@@ -56,7 +56,7 @@ SELECT
 	WC.intSubBookId, 
 	SB.strSubBook,
 	CH.intContractTypeId,
-	CH.intContractBasisId,
+	intContractBasisId = CH.intFreightTermId,
 	CB.strContractBasis,
 	CD.strERPPONumber,
 	CD.strERPItemNumber,
@@ -80,7 +80,7 @@ JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
 JOIN tblICItem I ON I.intItemId = CD.intItemId
 JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
-LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId
 	AND CONI.intItemId = I.intItemId

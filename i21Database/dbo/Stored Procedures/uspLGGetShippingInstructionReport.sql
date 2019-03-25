@@ -1005,7 +1005,7 @@ FROM (
 	LEFT JOIN tblSMCurrency DesCurrency ON DesCurrency.intCurrencyID = L.intDespatchCurrencyId
 	LEFT JOIN tblICUnitMeasure LoadUnit ON LoadUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
 	LEFT JOIN tblICUnitMeasure DisUnit ON DisUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
-	LEFT JOIN tblCTContractBasis Basis ON Basis.intContractBasisId = CH.intContractBasisId
+	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	CROSS APPLY tblLGCompanyPreference CP
 	WHERE L.intLoadId = @intLoadId
 	) tbl

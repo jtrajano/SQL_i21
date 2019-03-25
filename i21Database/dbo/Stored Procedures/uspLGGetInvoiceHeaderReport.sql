@@ -143,7 +143,7 @@ BEGIN
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblCTContractDetail CD on CD.intContractDetailId = LD.intSContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 	CROSS APPLY tblLGCompanyPreference CP
 	WHERE Inv.intInvoiceId = @intInvoiceId

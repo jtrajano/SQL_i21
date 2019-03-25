@@ -9,7 +9,7 @@ AS
 			CD.intItemId, 					
 			Item.strItemNo,
 			Item.strDescription as strItemDescription,
-			CH.intContractBasisId,
+			intContractBasisId = CH.intFreightTermId,
 			CB.strContractBasis	AS strINCOTerm,
 			CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance ELSE CD.dblQuantity END as dblDetailQuantity,
 			CD.intUnitMeasureId,
@@ -59,7 +59,7 @@ AS
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	JOIN tblSMCurrency Curr ON Curr.intCurrencyID = CD.intCurrencyId
 	JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
-	JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+	JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblSMCountry Country ON Country.intCountryID = CA.intCountryID
 	LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = CH.intCommodityId
