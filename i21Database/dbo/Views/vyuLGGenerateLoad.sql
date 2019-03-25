@@ -98,6 +98,8 @@ SELECT GL.intGenerateLoadId
 	  ,AH.strAllocationNumber
 	  ,CP.intDefaultFreightItemId
 	  ,CP.intDefaultSurchargeItemId
+	  ,FT.intFreightTermId
+	  ,FT.strFreightTerm
 
 FROM tblLGGenerateLoad			GL
 
@@ -133,3 +135,4 @@ OUTER APPLY (SELECT TOP 1 IUOM.intItemUOMId, IUOM.intUnitMeasureId, UM.strUnitMe
 OUTER APPLY tblLGCompanyPreference CP
 LEFT JOIN tblICItemUOM			WUOM	ON		WUOM.intItemUOMId = COALESCE(PCD.intNetWeightUOMId, SCD.intNetWeightUOMId, CP.intWeightUOMId)
 LEFT JOIN tblICUnitMeasure		WUM		ON		WUOM.intUnitMeasureId = WUM.intUnitMeasureId
+LEFT JOIN tblSMFreightTerms		FT		ON		FT.intFreightTermId = COALESCE(PCH.intFreightTermId, SCH.intFreightTermId, CP.intDefaultFreightTermId)
