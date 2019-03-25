@@ -11,6 +11,9 @@ SELECT CD.intContractDetailId
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId
 	,U1.strUnitMeasure AS strUnitMeasure
+	,CD.intNetWeightUOMId
+	,U2.intUnitMeasureId AS intWeightUnitMeasureId
+	,U2.strUnitMeasure AS strWeightUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
 	,ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0) AS dblUnLoadedQuantity
@@ -120,8 +123,9 @@ LEFT JOIN tblSMCurrency PCU ON PCU.intCurrencyID = AD.intSeqCurrencyId
 LEFT JOIN tblSMCurrency FXC ON FXC.intCurrencyID = CD.intInvoiceCurrencyId
 LEFT JOIN tblSMCurrency CPCU ON CPCU.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
-LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICItemUOM WIU ON WIU.intItemUOMId = CD.intNetWeightUOMId
+LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = WIU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
@@ -129,6 +133,7 @@ LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTy
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
@@ -176,6 +181,9 @@ SELECT CD.intContractDetailId
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId
 	,U1.strUnitMeasure AS strUnitMeasure
+	,CD.intNetWeightUOMId
+	,U2.intUnitMeasureId AS intWeightUnitMeasureId
+	,U2.strUnitMeasure AS strWeightUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
 	,ISNULL(CD.dblQuantity, 0) - (CASE WHEN ISNULL(CD.dblShippingInstructionQty,0)<=0 THEN 0 ELSE ISNULL(CD.dblShippingInstructionQty,0) END) AS dblUnLoadedQuantity
@@ -287,8 +295,9 @@ LEFT JOIN tblSMCurrency PCU ON PCU.intCurrencyID = AD.intSeqCurrencyId
 LEFT JOIN tblSMCurrency FXC ON FXC.intCurrencyID = CD.intInvoiceCurrencyId
 LEFT JOIN tblSMCurrency CPCU ON CPCU.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
-LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblICItemUOM WIU ON WIU.intItemUOMId = CD.intNetWeightUOMId
+LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = WIU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
@@ -296,6 +305,7 @@ LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTy
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
@@ -340,6 +350,9 @@ GROUP BY CD.intContractDetailId
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId
 	,U1.strUnitMeasure
+	,CD.intNetWeightUOMId
+	,U2.intUnitMeasureId
+	,U2.strUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName
 	,CD.dblBalance
