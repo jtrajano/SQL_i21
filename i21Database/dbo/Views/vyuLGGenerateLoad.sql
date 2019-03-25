@@ -47,7 +47,9 @@ SELECT GL.intGenerateLoadId
 	  ,UM.intItemUOMId			AS intItemUOMId
 	  ,UM.intUnitMeasureId		AS intUnitMeasureId
 	  ,UM.strUnitMeasure		AS strUnitMeasure
-
+	  ,WUOM.intItemUOMId		AS intWeightUOMId
+	  ,WUM.intUnitMeasureId		AS intWeightUnitMeasureId
+	  ,WUM.strUnitMeasure		AS strWeightUnitMeasure
 	  ,ET.intEquipmentTypeId	AS intEquipmentTypeId
 	  ,ET.strEquipmentType		AS strEquipmentType
 	  ,EH.intEntityId			AS intHaulerEntityId
@@ -129,3 +131,5 @@ OUTER APPLY (SELECT TOP 1 IUOM.intItemUOMId, IUOM.intUnitMeasureId, UM.strUnitMe
 				FROM tblICItemUOM IUOM INNER JOIN tblICUnitMeasure UM ON IUOM.intUnitMeasureId = UM.intUnitMeasureId
 				WHERE IUOM.intItemId = GL.intItemId AND UM.intUnitMeasureId = GL.intUnitMeasureId) UM
 OUTER APPLY tblLGCompanyPreference CP
+LEFT JOIN tblICItemUOM			WUOM	ON		WUOM.intItemUOMId = COALESCE(PCD.intNetWeightUOMId, SCD.intNetWeightUOMId, CP.intWeightUOMId)
+LEFT JOIN tblICUnitMeasure		WUM		ON		WUOM.intUnitMeasureId = WUM.intUnitMeasureId
