@@ -380,7 +380,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\Reports\PaycheckMiddle.sql
 :r .\PR\Reports\PaycheckBottom.sql
 
-:r .\ET\Reports\ETCompanyPreferenceUpdate.sql
+-- EnergyTrac
+:r .\ET\ETCompanyPreferenceUpdate.sql
 -- Version Update
 :r .\VersionUpdate.sql
 
