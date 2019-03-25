@@ -67,8 +67,6 @@ ELSE
 
 SELECT 
 	v.*
-	, dblGross = ISNULL(v.dblGross, 0)
-	, dblLineTotal = dbo.fnMultiply(v.dblQuantity, ISNULL(v.dblCost, 0))
 	, CASE WHEN Location.strUseLocationAddress IS NULL OR
           Location.strUseLocationAddress = 'No' OR
           Location.strUseLocationAddress = '' OR

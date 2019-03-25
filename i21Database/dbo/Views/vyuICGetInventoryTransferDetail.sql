@@ -101,10 +101,11 @@ AS
 	, ysnWeights
 	, [Transfer].strDescription
 	, COALESCE(TransferDetail.strItemType, Item.strType) AS strItemType
-	, TransferDetail.dblGross
+	, dblGross = ISNULL(TransferDetail.dblGross, 0)
 	, TransferDetail.dblNet
 	, TransferDetail.dblTare
 	, TransferDetail.intGrossNetUOMId
+	, dblLineTotal = dbo.fnMultiply(TransferDetail.dblQuantity, ISNULL(TransferDetail.dblCost, 0))
 	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
 	, strNewLotId = ISNULL(TransferDetail.strNewLotId, '')
 	, strGrossNetUOMSymbol = COALESCE(GrossNetUOM.strSymbol, GrossNetUOM.strUnitMeasure)
