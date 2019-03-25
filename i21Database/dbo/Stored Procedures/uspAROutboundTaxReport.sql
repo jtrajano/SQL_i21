@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAROutboundTaxReport]
     @xmlParam      NVARCHAR(MAX) = NULL
-    ,@EntityUserId INT           = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -22,6 +21,9 @@ DECLARE @dtmDateFrom            DATETIME
 	  , @strInvoiceNumberFrom   NVARCHAR(100)
 	  , @strInvoiceNumberTo     NVARCHAR(100)
 	  , @conditionInvoice       NVARCHAR(20)
+	  , @strTypeFrom            NVARCHAR(100)
+	  , @strTypeTo              NVARCHAR(100)
+	  , @conditionType          NVARCHAR(20)
 	  , @strCustomerNameFrom    NVARCHAR(100)
 	  , @strCustomerNameTo      NVARCHAR(100)
 	  , @conditionCustomer      NVARCHAR(20)
@@ -52,7 +54,7 @@ DECLARE @dtmDateFrom            DATETIME
 
 SET @AccountStatusFiltered = CAST(0 AS BIT)
 SET @strSubTotalBy = 'Tax Group'
-SELECT @UserName = [strName] FROM tblEMEntity WHERE[intEntityId] = @EntityUserId
+--SELECT @UserName = [strName] FROM tblEMEntity WHERE[intEntityId] = @EntityUserId
 SELECT TOP 1 @strCompanyName = strCompanyName
      , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
  FROM dbo.tblSMCompanySetup WITH (NOLOCK)
@@ -126,6 +128,12 @@ SELECT @strInvoiceNumberFrom = REPLACE(ISNULL([from], ''), '''''', '''')
   FROM @temp_xml_table
  WHERE [fieldname] = 'strInvoiceNumber'
 
+SELECT @strTypeFrom = REPLACE(ISNULL([from], ''), '''''', '''')
+     , @strTypeTo   = REPLACE(ISNULL([to], ''), '''''', '''')
+     , @conditionType     = [condition]
+  FROM @temp_xml_table
+ WHERE [fieldname] = 'strType'
+
 SELECT @strLocationNameFrom = REPLACE(ISNULL([from], ''), '''''', '''')
      , @strLocationNameTo   = REPLACE(ISNULL([to], ''), '''''', '''')
      , @conditionLocation   = [condition]
@@ -171,17 +179,18 @@ ELSE
 
 
 --SET FMTONLY OFF
-IF(OBJECT_ID('tempdb..#STATUSCODES') IS NOT NULL)
-BEGIN
-    DROP TABLE #STATUSCODES
-END
+--IF(OBJECT_ID('tempdb..#STATUSCODES') IS NOT NULL)
+--BEGIN
+--    DROP TABLE #STATUSCODES
+--END
 
-CREATE TABLE #STATUSCODES ([intAccountStatusId] INT PRIMARY KEY, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS)
+--CREATE TABLE #STATUSCODES ([intAccountStatusId] INT PRIMARY KEY, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS)
+DECLARE @STATUSCODES AS TABLE([intAccountStatusId] INT PRIMARY KEY, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS)
 
 IF (@conditionAccountStatus IS NOT NULL AND UPPER(@conditionAccountStatus) = 'BETWEEN' AND ISNULL(@strAccountStatusFrom, '') <> '')
     BEGIN
         SET @AccountStatusFiltered = CAST(1 AS BIT)
-        INSERT INTO #STATUSCODES([intAccountStatusId], [strAccountStatusCode])
+        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
         SELECT [intAccountStatusId], [strAccountStatusCode]
           FROM dbo.tblARAccountStatus WITH (NOLOCK)
          WHERE [strAccountStatusCode] BETWEEN @strAccountStatusFrom AND @strAccountStatusTo
@@ -189,7 +198,7 @@ IF (@conditionAccountStatus IS NOT NULL AND UPPER(@conditionAccountStatus) = 'BE
 ELSE IF (@conditionAccountStatus IS NOT NULL AND ISNULL(@strAccountStatusFrom, '') <> '')
     BEGIN
         SET @AccountStatusFiltered = CAST(1 AS BIT)
-        INSERT INTO #STATUSCODES([intAccountStatusId], [strAccountStatusCode])
+        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
         SELECT [intAccountStatusId], [strAccountStatusCode]
           FROM dbo.tblARAccountStatus WITH (NOLOCK)
          WHERE [strAccountStatusCode] = @strAccountStatusFrom
@@ -197,17 +206,18 @@ ELSE IF (@conditionAccountStatus IS NOT NULL AND ISNULL(@strAccountStatusFrom, '
 ELSE
     BEGIN
         SET @AccountStatusFiltered = CAST(0 AS BIT)
-        INSERT INTO #STATUSCODES([intAccountStatusId], [strAccountStatusCode])
+        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
         SELECT [intAccountStatusId], [strAccountStatusCode]
           FROM dbo.tblARAccountStatus WITH (NOLOCK)
     END
 
-IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
-BEGIN
-    DROP TABLE #CUSTOMERS
-END
+--IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
+--BEGIN
+--    DROP TABLE #CUSTOMERS
+--END
 
-CREATE TABLE #CUSTOMERS(
+--CREATE TABLE #CUSTOMERS(
+DECLARE @CUSTOMERS AS TABLE(
     [intEntityCustomerId]   INT PRIMARY KEY,
     [strCustomerNumber]     NVARCHAR(15)  COLLATE Latin1_General_CI_AS,
     [strCustomerName]       NVARCHAR(150) COLLATE Latin1_General_CI_AS,
@@ -215,7 +225,7 @@ CREATE TABLE #CUSTOMERS(
 
 IF (@conditionCustomer IS NOT NULL AND UPPER(@conditionCustomer) = 'BETWEEN' AND ISNULL(@strCustomerNameFrom, '') <> '')
 	BEGIN
-        INSERT INTO #CUSTOMERS([intEntityCustomerId], [strCustomerNumber], [strCustomerName], [strAccountStatusCode])
+        INSERT INTO @CUSTOMERS([intEntityCustomerId], [strCustomerNumber], [strCustomerName], [strAccountStatusCode])
         SELECT C.intEntityId, C.strCustomerNumber, E.strName, SC.[strAccountStatusCode]
           FROM tblARCustomer C WITH (NOLOCK) 
                INNER JOIN (
@@ -223,14 +233,14 @@ IF (@conditionCustomer IS NOT NULL AND UPPER(@conditionCustomer) = 'BETWEEN' AND
                             FROM dbo.tblEMEntity WITH (NOLOCK)
                            WHERE strName BETWEEN @strCustomerNameFrom AND @strCustomerNameTo
                           ) E ON C.intEntityId = E.intEntityId
-               LEFT OUTER JOIN #STATUSCODES SC
+               LEFT OUTER JOIN @STATUSCODES SC
                                ON C.[intAccountStatusId] = SC.[intAccountStatusId]
          WHERE (@AccountStatusFiltered = CAST(1 AS BIT) AND SC.[intAccountStatusId] IS NOT NULL)
             OR @AccountStatusFiltered = CAST(0 AS BIT)
 	END
 ELSE IF (@conditionCustomer IS NOT NULL AND ISNULL(@strCustomerNameFrom, '') <> '')
 	BEGIN
-        INSERT INTO #CUSTOMERS([intEntityCustomerId], [strCustomerNumber], [strCustomerName], [strAccountStatusCode])
+        INSERT INTO @CUSTOMERS([intEntityCustomerId], [strCustomerNumber], [strCustomerName], [strAccountStatusCode])
         SELECT C.intEntityId, C.strCustomerNumber, E.strName, SC.[strAccountStatusCode]
           FROM tblARCustomer C WITH (NOLOCK) 
                INNER JOIN (
@@ -238,59 +248,84 @@ ELSE IF (@conditionCustomer IS NOT NULL AND ISNULL(@strCustomerNameFrom, '') <> 
                             FROM dbo.tblEMEntity WITH (NOLOCK)
                            WHERE strName = @strCustomerNameFrom
                           ) E ON C.intEntityId = E.intEntityId
-               LEFT OUTER JOIN #STATUSCODES SC
+               LEFT OUTER JOIN @STATUSCODES SC
                                ON C.[intAccountStatusId] = SC.[intAccountStatusId]
          WHERE (@AccountStatusFiltered = CAST(1 AS BIT) AND SC.[intAccountStatusId] IS NOT NULL)
             OR @AccountStatusFiltered = CAST(0 AS BIT)
 	END
 ELSE
 	BEGIN
-        INSERT INTO #CUSTOMERS([intEntityCustomerId], [strCustomerNumber], [strCustomerName], [strAccountStatusCode])
+        INSERT INTO @CUSTOMERS([intEntityCustomerId], [strCustomerNumber], [strCustomerName], [strAccountStatusCode])
         SELECT C.intEntityId, C.strCustomerNumber, E.strName, SC.[strAccountStatusCode]
           FROM tblARCustomer C WITH (NOLOCK)
                INNER JOIN (
                           SELECT intEntityId, strName
                             FROM dbo.tblEMEntity WITH (NOLOCK)
                           ) E ON C.intEntityId = E.intEntityId
-               LEFT OUTER JOIN #STATUSCODES SC
+               LEFT OUTER JOIN @STATUSCODES SC
                                ON C.[intAccountStatusId] = SC.[intAccountStatusId]
 
 	END
 
-IF(OBJECT_ID('tempdb..#COMPANYLOCATIONS') IS NOT NULL)
-BEGIN
-    DROP TABLE #COMPANYLOCATIONS
-END
+--IF(OBJECT_ID('tempdb..#COMPANYLOCATIONS') IS NOT NULL)
+--BEGIN
+--    DROP TABLE #COMPANYLOCATIONS
+--END
 
-CREATE TABLE #COMPANYLOCATIONS ([intCompanyLocationId] INT PRIMARY KEY, [strCompanyNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS)
+--CREATE TABLE #COMPANYLOCATIONS ([intCompanyLocationId] INT PRIMARY KEY, [strCompanyNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS)
+DECLARE @COMPANYLOCATIONS AS TABLE ([intCompanyLocationId] INT PRIMARY KEY, [strCompanyNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS)
 
 IF (@conditionLocation IS NOT NULL AND UPPER(@conditionLocation) = 'BETWEEN' AND ISNULL(@strLocationNameFrom, '') <> '')
     BEGIN
-        INSERT INTO #COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
+        INSERT INTO @COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
         SELECT intCompanyLocationId, strLocationNumber
           FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
          WHERE strLocationName BETWEEN @strLocationNameFrom AND @strLocationNameTo
     END
 ELSE IF (@conditionLocation IS NOT NULL AND ISNULL(@strLocationNameFrom, '') <> '')
     BEGIN
-        INSERT INTO #COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
+        INSERT INTO @COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
         SELECT intCompanyLocationId, strLocationNumber
           FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 		WHERE strLocationName = @strLocationNameFrom
     END
 ELSE
     BEGIN
-        INSERT INTO #COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
+        INSERT INTO @COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
         SELECT intCompanyLocationId, strLocationNumber
           FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
     END
 
-IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
-BEGIN
-    DROP TABLE #INVOICES
-END
+--IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
+--BEGIN
+--    DROP TABLE #INVOICES
+--END
 
-CREATE TABLE #INVOICES
+DECLARE @TYPES AS TABLE ([strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS PRIMARY KEY)
+
+IF (@conditionType IS NOT NULL AND UPPER(@conditionType) = 'BETWEEN' AND ISNULL(@strTypeFrom, '') <> '')
+    BEGIN
+        INSERT INTO @TYPES([strType])
+        SELECT [strInvoiceSource]
+          FROM [dbo].[fnARGetInvoiceSourceList]()
+         WHERE [strInvoiceSource] BETWEEN @strLocationNameFrom AND @strLocationNameTo
+    END
+ELSE IF (@conditionType IS NOT NULL AND ISNULL(@strTypeFrom, '') <> '')
+    BEGIN
+        INSERT INTO @TYPES([strType])
+        SELECT [strInvoiceSource]
+          FROM [dbo].[fnARGetInvoiceSourceList]()
+		WHERE [strInvoiceSource] = @strTypeFrom
+    END
+ELSE
+    BEGIN
+        INSERT INTO @TYPES([strType])
+        SELECT [strInvoiceSource]
+          FROM [dbo].[fnARGetInvoiceSourceList]()
+    END
+
+--CREATE TABLE #INVOICES
+DECLARE @INVOICES AS TABLE
     ([intInvoiceId]         INT PRIMARY KEY,
     [strInvoiceNumber]      NVARCHAR(25)  COLLATE Latin1_General_CI_AS NOT NULL,
 	[strType]               NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -299,7 +334,7 @@ CREATE TABLE #INVOICES
 
 IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND ISNULL(@strInvoiceNumberFrom, '') <> '')
     BEGIN
-        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
+        INSERT INTO @INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
         SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName, I.dtmDate
           FROM dbo.tblARInvoice I WITH (NOLOCK)
                LEFT OUTER JOIN (
@@ -315,7 +350,7 @@ IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND I
     END
 ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> '')
     BEGIN
-        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
+        INSERT INTO @INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
         SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName, I.dtmDate
           FROM dbo.tblARInvoice I WITH (NOLOCK)
                LEFT OUTER JOIN (
@@ -331,7 +366,7 @@ ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strInvoiceNumberFrom, '') <> 
     END
 ELSE
     BEGIN
-        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
+        INSERT INTO @INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
         SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName, I.dtmDate
           FROM dbo.tblARInvoice I WITH (NOLOCK)
                LEFT OUTER JOIN (
@@ -345,42 +380,44 @@ ELSE
            AND I.dblTax <> 0.000000
     END
 
-IF(OBJECT_ID('tempdb..#ITEMS') IS NOT NULL)
-BEGIN
-    DROP TABLE #ITEMS
-END
+--IF(OBJECT_ID('tempdb..#ITEMS') IS NOT NULL)
+--BEGIN
+--    DROP TABLE #ITEMS
+--END
 
-CREATE TABLE #ITEMS ([intItemId] INT PRIMARY KEY, [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS, [intCategoryId] INT)
+--CREATE TABLE #ITEMS ([intItemId] INT PRIMARY KEY, [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS, [intCategoryId] INT)
+DECLARE @ITEMS AS TABLE ([intItemId] INT PRIMARY KEY, [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS, [intCategoryId] INT)
 
-INSERT INTO #ITEMS([intItemId], [strItemNo], [intCategoryId])
+INSERT INTO @ITEMS([intItemId], [strItemNo], [intCategoryId])
 SELECT [intItemId], [strItemNo], [intCategoryId]
   FROM dbo.tblICItem WITH (NOLOCK)
  WHERE (@strItemNo IS NULL OR [strItemNo] LIKE '%' + @strItemNo + '%')
 
-IF(OBJECT_ID('tempdb..#CATEGORIES') IS NOT NULL)
-BEGIN
-    DROP TABLE #CATEGORIES
-END
+--IF(OBJECT_ID('tempdb..#CATEGORIES') IS NOT NULL)
+--BEGIN
+--    DROP TABLE #CATEGORIES
+--END
 
-CREATE TABLE #CATEGORIES ([intCategoryId] INT PRIMARY KEY, [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+--CREATE TABLE #CATEGORIES ([intCategoryId] INT PRIMARY KEY, [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+DECLARE @CATEGORIES AS TABLE ([intCategoryId] INT PRIMARY KEY, [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS)
 
 IF (@conditionCategory IS NOT NULL AND UPPER(@conditionCategory) = 'BETWEEN' AND ISNULL(@strCategoryFrom, '') <> '')
     BEGIN
-        INSERT INTO #CATEGORIES([intCategoryId], [strCategoryCode])
+        INSERT INTO @CATEGORIES([intCategoryId], [strCategoryCode])
         SELECT [intCategoryId], [strCategoryCode]
           FROM dbo.tblICCategory WITH (NOLOCK)
          WHERE [strCategoryCode] BETWEEN @strCategoryFrom AND @strCategoryTo
     END
 ELSE IF (@conditionCategory IS NOT NULL AND ISNULL(@strCategoryFrom, '') <> '')
     BEGIN
-        INSERT INTO #CATEGORIES([intCategoryId], [strCategoryCode])
+        INSERT INTO @CATEGORIES([intCategoryId], [strCategoryCode])
         SELECT [intCategoryId], [strCategoryCode]
           FROM dbo.tblICCategory WITH (NOLOCK)
          WHERE [strCategoryCode] = @strCategoryFrom
     END
 ELSE
     BEGIN
-        INSERT INTO #CATEGORIES([intCategoryId], [strCategoryCode])
+        INSERT INTO @CATEGORIES([intCategoryId], [strCategoryCode])
         SELECT [intCategoryId], [strCategoryCode]
           FROM dbo.tblICCategory WITH (NOLOCK)
     END
@@ -403,7 +440,7 @@ BEGIN
          , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
-         , [intUserId]                    = @EntityUserId
+         , [intUserId]                    = null --@EntityUserId
          , [strUserName]                  = @UserName
          , [strItemNo]                    = ICI.[strItemNo]
          , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
@@ -499,15 +536,17 @@ BEGIN
              --AND ysnTaxExempt = 1
             GROUP BY intTaxGroupId, strTaxGroup, intInvoiceDetailId, intInvoiceId
            ) OT
-             INNER JOIN #CUSTOMERS C 
+             INNER JOIN @CUSTOMERS C 
                         ON OT.intEntityCustomerId = C.intEntityCustomerId
-             INNER JOIN #COMPANYLOCATIONS CL
+             INNER JOIN @COMPANYLOCATIONS CL
                         ON OT.intCompanyLocationId = CL.intCompanyLocationId
-             INNER JOIN #INVOICES I
+             INNER JOIN @INVOICES I
                         ON OT.intInvoiceId = I.intInvoiceId
-             INNER JOIN #ITEMS ICI
+             INNER JOIN @TYPES T
+                        ON I.strType = T.strType
+             INNER JOIN @ITEMS ICI
                         ON OT.[intItemId] = ICI.[intItemId]
-             INNER JOIN #CATEGORIES ICC
+             INNER JOIN @CATEGORIES ICC
                         ON ICI.[intCategoryId] = ICC.[intCategoryId]
 		 ORDER BY OT.strTaxGroup, OT.intInvoiceId, OT.intInvoiceDetailId
     RETURN 1;
@@ -529,7 +568,7 @@ BEGIN
          , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
-         , [intUserId]                    = @EntityUserId
+         , [intUserId]                    = null --@EntityUserId
          , [strUserName]                  = @UserName
          , [strItemNo]                    = ICI.[strItemNo]
          , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
@@ -626,15 +665,17 @@ BEGIN
              --AND ysnTaxExempt = 1
             GROUP BY intEntityCustomerId, intInvoiceDetailId, intInvoiceId
            ) OT
-             INNER JOIN #CUSTOMERS C 
+             INNER JOIN @CUSTOMERS C 
                         ON OT.intEntityCustomerId = C.intEntityCustomerId
-             INNER JOIN #COMPANYLOCATIONS CL
+             INNER JOIN @COMPANYLOCATIONS CL
                         ON OT.intCompanyLocationId = CL.intCompanyLocationId
-             INNER JOIN #INVOICES I
+             INNER JOIN @INVOICES I
                         ON OT.intInvoiceId = I.intInvoiceId
-             INNER JOIN #ITEMS ICI
+             INNER JOIN @TYPES T
+                        ON I.strType = T.strType
+             INNER JOIN @ITEMS ICI
                         ON OT.[intItemId] = ICI.[intItemId]
-             INNER JOIN #CATEGORIES ICC
+             INNER JOIN @CATEGORIES ICC
                         ON ICI.[intCategoryId] = ICC.[intCategoryId]
 		 ORDER BY C.strCustomerName, OT.intInvoiceId, OT.intInvoiceDetailId
     RETURN 1;
@@ -656,7 +697,7 @@ BEGIN
          , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
-         , [intUserId]                    = @EntityUserId
+         , [intUserId]                    = null --@EntityUserId
          , [strUserName]                  = @UserName
          , [strItemNo]                    = ICI.[strItemNo]
          , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
@@ -754,15 +795,17 @@ BEGIN
              --AND ysnTaxExempt = 1
             GROUP BY intTaxCodeId, strTaxCode, intInvoiceDetailId, intInvoiceId
            ) OT
-             INNER JOIN #CUSTOMERS C 
+             INNER JOIN @CUSTOMERS C 
                         ON OT.intEntityCustomerId = C.intEntityCustomerId
-             INNER JOIN #COMPANYLOCATIONS CL
+             INNER JOIN @COMPANYLOCATIONS CL
                         ON OT.intCompanyLocationId = CL.intCompanyLocationId
-             INNER JOIN #INVOICES I
+             INNER JOIN @INVOICES I
                         ON OT.intInvoiceId = I.intInvoiceId
-             INNER JOIN #ITEMS ICI
+             INNER JOIN @TYPES T
+                        ON I.strType = T.strType
+             INNER JOIN @ITEMS ICI
                         ON OT.[intItemId] = ICI.[intItemId]
-             INNER JOIN #CATEGORIES ICC
+             INNER JOIN @CATEGORIES ICC
                         ON ICI.[intCategoryId] = ICC.[intCategoryId]
 		 ORDER BY OT.strTaxCode, OT.intInvoiceId, OT.intInvoiceDetailId
     RETURN 1;
