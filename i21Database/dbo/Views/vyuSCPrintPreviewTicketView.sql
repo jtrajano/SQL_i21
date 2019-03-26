@@ -185,7 +185,30 @@ AS SELECT
 	,SO.strSalesOrderNumber
 
 	,SMCompanySetup.strCompanyName
-	,SMCompanySetup.strAddress
+	,strAddress = CASE WHEN Origin.strUseLocationAddress = 'No'
+					THEN
+						LTRIM(dbo.fnICFormatTransferAddressFormat2(
+										SMCompanySetup.strPhone
+										,SMCompanySetup.strFax
+										,null
+										,null
+										,SMCompanySetup.strAddress
+										,SMCompanySetup.strCity
+										,SMCompanySetup.strState
+										,SMCompanySetup.strZip
+										,null))
+					ELSE
+						LTRIM(dbo.fnICFormatTransferAddressFormat2(
+										tblSCScaleSetup.strPhone
+										,null
+										,null
+										,null
+										,tblSCScaleSetup.strAddress
+										,tblSCScaleSetup.strCity
+										,tblSCScaleSetup.strState
+										,tblSCScaleSetup.strZipCode
+										,null))
+					END 
 	,SMS.blbDetail AS blbSignature
 	,SMS.intEntityId AS intUserId
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
