@@ -348,13 +348,14 @@ BEGIN
 		DECLARE @EntityId INT
 		if not exists(select top 1 1 from tblSMUserSecurity where strEmployeeOriginId = @originEmployee)
 		begin
-			
+			DECLARE @ysnDefault BIT
+			SET @ysnDefault = 1
 
 			IF EXISTS(SELECT TOP 1 1 FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originEmployee))  )
 			BEGIN
 
 				SELECT TOP 1 @EntityId = intEntityId FROM tblEMEntity where LTRIM(RTRIM(strEntityNo)) = RTRIM(LTRIM(@originEmployee)) 				
-
+				SET @ysnDefault = 0
 			END
 			ELSE
 			BEGIN
@@ -389,13 +390,13 @@ BEGIN
 			
 
 			INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [ysnDefaultLocation])
-			VALUES								(@EntityId, @originEmployee + '''' + @strName, @strAddress, @strCity, @strState, @strZip, 1)
+			VALUES								(@EntityId, @originEmployee + '''' + @strName, @strAddress, @strCity, @strState, @strZip, @ysnDefault)
 
 			DECLARE @EntityLocationId INT
 			SET @EntityLocationId = SCOPE_IDENTITY()
 
 			INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
-			VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, 1)/**/
+			VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, @ysnDefault)/**/
 
 		end
 		else
