@@ -198,14 +198,14 @@ AS SELECT
 										,null))
 					ELSE
 						LTRIM(dbo.fnICFormatTransferAddressFormat2(
-										Origin.strPhone
-										,Origin.strFax
+										tblSCScaleSetup.strPhone
 										,null
 										,null
-										,Origin.strAddress
-										,Origin.strCity
-										,Origin.strStateProvince
-										,Origin.strZipPostalCode
+										,null
+										,tblSCScaleSetup.strAddress
+										,tblSCScaleSetup.strCity
+										,tblSCScaleSetup.strState
+										,tblSCScaleSetup.strZipCode
 										,null))
 					END 
 	,SMS.blbDetail AS blbSignature
