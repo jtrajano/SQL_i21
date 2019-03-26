@@ -178,7 +178,7 @@ BEGIN
 													ELSE costUOM.strUnitMeasure END
 			,[dblNetWeight]						=	A.dblNetWeight
 			,[dblWeightUnitQty]					=	A.dblWeightUnitQty
-			,[intWeightUOMId]					=	A.intWeightUOMId
+			,[intWeightUOMId]					=	NULLIF(A.intWeightUOMId,0)
 			,[strWeightUOM]						=	weightUOM.strUnitMeasure
 			,[intCostCurrencyId]				=	CASE WHEN A.intCostCurrencyId > 0 THEN A.intCostCurrencyId ELSE A.intCurrencyId END
 			,[strCostCurrency]					=	ISNULL(costCur.strCurrency, tranCur.strCurrency)

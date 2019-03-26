@@ -1196,7 +1196,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WETC.strName + CHAR(13) + 
 				'Phone: ' + WETCP.strPhone + CHAR(13) + 
 				'E-Mail: ' + WETC.strEmail strWarehouseContractInfo,
-				CH.intContractBasisId,
+				intContractBasisId = CH.intFreightTermId,
 				Basis.strContractBasis,
 				Basis.strDescription AS strContractBasisDescription,
 				strWeightTerms = WG.strWeightGradeDesc,
@@ -1246,7 +1246,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN   tblEMEntity SLETC ON SLETC .intEntityId = SLEC.intEntityContactId
 		LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = L.intInsuranceCurrencyId
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
-		LEFT JOIN	tblCTContractBasis Basis ON Basis.intContractBasisId = CH.intContractBasisId
+		LEFT JOIN	tblSMFreightTerms Basis ON Basis.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN	tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 		CROSS APPLY tblLGCompanyPreference CP
 		WHERE LW.intLoadWarehouseId = @intLoadWarehouseId

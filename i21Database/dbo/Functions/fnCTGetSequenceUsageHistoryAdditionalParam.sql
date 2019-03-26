@@ -174,6 +174,12 @@ BEGIN
 				@strNumber						=	'',
 				@strHeaderIdColumn				=	''
 	END
+	ELSE IF @strScreenName = 'Split'
+	BEGIN
+		SELECT	@intExternalHeaderId			=	-1,
+				@strNumber						=	'Split',
+				@strHeaderIdColumn				=	'intContractHeaderId'
+	END
 
 	IF ISNULL(@strNumber,'')  = ''
 	BEGIN

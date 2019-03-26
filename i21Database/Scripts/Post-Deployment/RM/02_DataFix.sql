@@ -297,5 +297,18 @@ BEGIN
 	WHERE intLFutOptTransactionId NOT IN (SELECT intLFutOptTransactionId FROM tblRKMatchDerivativesHistory)
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'intFreightTermId')
+BEGIN
+	UPDATE tblRKM2MConfiguration
+	SET intFreightTermId = tblPatch.intFreightTermId
+	FROM (
+		SELECT FT.*
+			, CB.intContractBasisId
+		FROM tblCTContractBasis CB
+		JOIN tblSMFreightTerms FT ON FT.strContractBasis = CB.strContractBasis
+	) tblPatch 
+	WHERE tblPatch.intContractBasisId = tblRKM2MConfiguration.intContractBasisId
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

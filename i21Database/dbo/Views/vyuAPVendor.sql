@@ -89,6 +89,7 @@ SELECT
 	storeDescription = I.strDescription,
 	ysnTransportTerminal
 	,strTerm = J.strTerm
+	,CAST(CASE WHEN lien.intEntityVendorId IS NULL THEN 0 ELSE 1 END AS BIT) ysnHasLien
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -114,3 +115,5 @@ FROM
 		ON I.intStoreId = B.intStoreStoreId
 	LEFT JOIN tblSMTerm J
 		ON B.intTermsId = J.intTermID
+	LEFT JOIN tblAPVendorLien lien
+		ON lien.intEntityVendorId = A.intEntityId

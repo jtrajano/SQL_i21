@@ -1,5 +1,14 @@
 ﻿CREATE VIEW vyuRKGetM2MConfigurationMapping
+
 AS
-select c.intM2MConfigurationId,i.intItemId,i.strItemNo,b.intContractBasisId,b.strContractBasis, c.intConcurrencyId,strAdjustmentType from tblRKM2MConfiguration c
-join tblICItem i on c.intItemId=i.intItemId
-join tblCTContractBasis b on b.intContractBasisId=c.intContractBasisId
+
+SELECT c.intM2MConfigurationId
+	, i.intItemId
+	, i.strItemNo
+	, c.intFreightTermId
+	, ft.strFreightTerm
+	, c.intConcurrencyId
+	, strAdjustmentType
+FROM tblRKM2MConfiguration c
+JOIN tblICItem i on c.intItemId = i.intItemId
+JOIN tblSMFreightTerms ft on ft.intFreightTermId = c.intFreightTermId

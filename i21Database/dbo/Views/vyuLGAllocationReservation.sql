@@ -35,7 +35,7 @@ SELECT LR.intReservationId AS intReservationId
 	,CH.intEntityId AS intContractEntityId
 	,CH.intCommodityId AS intCommodityId
 	,CH.strContractNumber AS strContractNumber
-	,CH.intContractBasisId AS intContractBasisId
+	,CH.intFreightTermId AS intContractBasisId
 	,CH.dtmContractDate AS dtmContractDate
 	,CH.strCustomerContract AS strCustomerContract
 	,CH.intSalespersonId AS intSalespersonId
@@ -61,7 +61,7 @@ INNER JOIN tblSMUserSecurity AS US ON LR.intUserSecurityId = US.intEntityId
 INNER JOIN tblCTContractDetail AS CD ON LR.intContractDetailId = CD.intContractDetailId
 INNER JOIN tblCTContractHeader AS CH ON CD.intContractHeaderId = CH.intContractHeaderId
 INNER JOIN tblEMEntity AS E ON CH.intEntityId = E.intEntityId
-LEFT OUTER JOIN tblCTContractBasis AS CB ON CH.intContractBasisId = CB.intContractBasisId
+LEFT OUTER JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 LEFT OUTER JOIN tblICItem AS I ON CD.intItemId = I.intItemId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 LEFT JOIN tblSMCountry Country ON Country.intCountryID = CA.intCountryID

@@ -119,7 +119,7 @@ USING
 		,dblActual							=	A.dblActual
 		,dblDifference						=	A.dblDifference
 		/*Weight info*/						
-		,intWeightUOMId						=	A.intWeightUOMId
+		,intWeightUOMId						=	NULLIF(A.intWeightUOMId,0)
 		,dblWeightUnitQty					=	ISNULL(A.dblWeightUnitQty, 1)
 		,dblNetWeight						=	A.dblNetWeight
 		,dblWeight							=	A.dblWeight

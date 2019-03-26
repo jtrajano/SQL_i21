@@ -8,7 +8,7 @@ SELECT DISTINCT CH.intContractHeaderId
 	,SP.strName AS strSalespersonId
 	,CH.intPositionId
 	,PO.strPosition
-	,CH.intContractBasisId
+	,intContractBasisId = CH.intFreightTermId
 	,CB.strContractBasis
 	,CH.intINCOLocationTypeId
 	,CT.strCity AS strINCOLocationTypeId
@@ -39,7 +39,7 @@ JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 JOIN tblEMEntity SP ON SP.intEntityId = CH.intSalespersonId
 JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
-JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 JOIN tblCTPricingType PT ON PT.intPricingTypeId = CH.intPricingTypeId
 LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = CH.intCountryId

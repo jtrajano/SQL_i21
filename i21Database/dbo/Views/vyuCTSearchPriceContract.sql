@@ -1,8 +1,54 @@
 ﻿CREATE VIEW [dbo].[vyuCTSearchPriceContract]
 
 AS 
+	with x as (
+		select
+			intContractHeaderId
+			,ysnLoad = isnull(ysnLoad,convert(bit,0))
+			,intContractDetailId
+			,dblQuantityPriced = case when isnull(ysnLoad, convert(bit,0)) = convert(bit,1) then 0.00 else isnull(dblQuantityPriceFixed,0.00) end
+			,dblQuantityUnpriced = case when isnull(ysnLoad, convert(bit,0)) = convert(bit,1) then 0.00 else isnull(dblQuantity,0.00) - isnull(dblQuantityPriceFixed,0.00) end
+			,dblAppliedQty = case when isnull(ysnLoad, convert(bit,0)) = convert(bit,1) then 0.00 else isnull(dblAppliedQty,0.00) end
+			,dblQuantityAppliedUnpriced =
+				case
+					when isnull(ysnLoad, convert(bit,0)) = convert(bit,1)
+					then 0.00
+					else 
+						case
+							when (isnull(dblAppliedQty,0.00) - isnull(dblQuantityPriceFixed,0.00)) > 0
+							then (isnull(dblAppliedQty,0.00) - isnull(dblQuantityPriceFixed,0.00))
+							else 0.00
+						end
+				end
+			,dblLoadPriced = case when isnull(ysnLoad, convert(bit,0)) = convert(bit,0) then 0.00 else isnull(dblQuantityPriceFixed,0.00) end
+			,dblLoadUnpriced = case when isnull(ysnLoad, convert(bit,0)) = convert(bit,0) then 0.00 else isnull(dblQuantity,0.00) - isnull(dblQuantityPriceFixed,0.00) end
+			,dblAppliedLoad = case when isnull(ysnLoad, convert(bit,0)) = convert(bit,0) then 0.00 else isnull(dblAppliedQty,0.00) end
+			,dblLoadAppliedUnpriced =
+				case
+					when isnull(ysnLoad, convert(bit,0)) = convert(bit,0)
+					then 0.00
+					else 
+						case
+							when (isnull(dblAppliedQty,0.00) - isnull(dblQuantityPriceFixed,0.00)) > 0
+							then (isnull(dblAppliedQty,0.00) - isnull(dblQuantityPriceFixed,0.00))
+							else 0.00
+						end
+				end
+		from
+			vyuCTGridContractDetail
+	)
 
-	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractHeaderId) AS INT) AS intUniqueId,* 
+	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY t.intContractHeaderId) AS INT) AS intUniqueId
+			,t.*
+			,x.dblQuantityPriced
+			,x.dblQuantityUnpriced
+			,x.dblAppliedQty
+			,x.dblQuantityAppliedUnpriced
+			,x.dblLoadPriced
+			,x.dblLoadUnpriced
+			,x.dblAppliedLoad
+			,x.dblLoadAppliedUnpriced 
+			,x.ysnLoad
 	FROM
 	(
 		SELECT 		CAST (NULL AS INT) AS intPriceContractId,
@@ -344,4 +390,5 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					--,CD.strItemNo,
 					--CD.strItemDescription,
 					--CD.strShortName
-	)t
+	)t,x
+	where x.intContractHeaderId = t.intContractHeaderId and x.intContractDetailId = t.intContractDetailId
