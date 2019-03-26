@@ -27,7 +27,7 @@ BEGIN
 	DECLARE		@dblCashPrice		NUMERIC(18,6),
 				@intCurrencyId		INT,
 				@intPriceItemUOMId	INT,
-				@dblRate			NUMERIC(18,6),
+				@dblRate			NUMERIC(38,20),
 				@intFXPriceUOMId	INT,
 				@intExchangeRateId	INT,
 				@intSeqCurrencyId	INT,
