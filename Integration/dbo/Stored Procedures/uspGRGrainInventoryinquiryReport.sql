@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspGrainInventoryReport]
+CREATE PROCEDURE [dbo].[uspGRGrainInventoryInquiryReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 SET FMTONLY OFF
@@ -554,7 +554,7 @@ BEGIN
 				ON D.intCommodityId = B.intCommodityId
 			INNER JOIN tblSMCompanyLocation CL
 				ON CL.intCompanyLocationId = B.intCompanyLocationId 
-			WHERE A.intTransactionTypeId = 5
+			WHERE (A.intTransactionTypeId = 5 OR A.strType = 'From Transfer')
 				AND D.intCommodityId = @intCommodityId2
 				AND A.dtmHistoryDate BETWEEN @dtmReportDate AND @dateToday
 				AND B.intCompanyLocationId = ISNULL(@intLocationId,B.intCompanyLocationId)
