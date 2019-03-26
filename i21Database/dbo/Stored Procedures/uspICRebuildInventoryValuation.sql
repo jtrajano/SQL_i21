@@ -3280,6 +3280,84 @@ BEGIN
 
 					SET @strAccountToCounterInventory = NULL 
 
+					--INSERT INTO @ItemsForInTransitCosting (
+					--		[intItemId] 
+					--		,[intItemLocationId] 
+					--		,[intItemUOMId] 
+					--		,[dtmDate] 
+					--		,[dblQty] 
+					--		,[dblUOMQty] 
+					--		,[dblCost] 
+					--		,[dblValue] 
+					--		,[dblSalesPrice] 
+					--		,[intCurrencyId] 
+					--		,[dblExchangeRate] 
+					--		,[intTransactionId] 
+					--		,[intTransactionDetailId] 
+					--		,[strTransactionId] 
+					--		,[intTransactionTypeId] 
+					--		,[intLotId] 
+					--		,[intSourceTransactionId] 
+					--		,[strSourceTransactionId] 
+					--		,[intSourceTransactionDetailId]
+					--		,[intFobPointId]
+					--		,[intInTransitSourceLocationId]
+					--		,[intForexRateTypeId]
+					--		,[dblForexRate]
+					--)
+					--SELECT
+					--		t.[intItemId] 
+					--		,t.[intItemLocationId] 
+					--		,iu.intItemUOMId 
+					--		,r.[dtmReceiptDate] 
+					--		,dblQty = -ri.dblOpenReceive  
+					--		,t.[dblUOMQty] 
+					--		,t.[dblCost] 
+					--		,t.[dblValue] 
+					--		,t.[dblSalesPrice] 
+					--		,t.[intCurrencyId] 
+					--		,t.[dblExchangeRate] 
+					--		,[intTransactionId] = r.intInventoryReceiptId 
+					--		,[intTransactionDetailId] = ri.intInventoryReceiptItemId
+					--		,[strTransactionId] = r.strReceiptNumber
+					--		,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
+					--		,t.[intLotId]
+					--		,t.[intTransactionId] 
+					--		,t.[strTransactionId] 
+					--		,t.[intTransactionDetailId] 
+					--		,t.[intFobPointId] 
+					--		,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+					--		,[intForexRateTypeId] = t.intForexRateTypeId
+					--		,[dblForexRate] = t.dblForexRate
+					--FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+					--			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					--		INNER JOIN (
+					--			tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
+					--				ON td.intInventoryTransferId = th.intInventoryTransferId
+					--		)
+					--			ON 
+					--				(
+					--					td.intInventoryTransferDetailId = ri.intSourceId
+					--					AND td.intInventoryTransferId = ri.intOrderId
+					--					AND ri.intInventoryTransferDetailId IS NULL 
+					--					AND ri.intInventoryTransferId IS NULL 
+					--				)
+					--				OR (
+					--					td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
+					--					AND td.intInventoryTransferId = ri.intInventoryTransferId
+					--				)
+					--		INNER JOIN tblICInventoryTransaction t 
+					--			ON t.strTransactionId = th.strTransferNo
+					--			AND t.intTransactionDetailId = td.intInventoryTransferDetailId
+					--		LEFT JOIN tblICItemUOM iu 
+					--			ON iu.intItemUOMId = ri.intUnitMeasureId
+					--		LEFT JOIN tblICItem i 
+					--			ON ri.intItemId = i.intItemId 
+					--WHERE	r.strReceiptNumber = @strTransactionId
+					--		AND t.ysnIsUnposted = 0 
+					--		AND t.dblQty > 0
+					--		AND i.strType <> 'Bundle'
+
 					INSERT INTO @ItemsForInTransitCosting (
 							[intItemId] 
 							,[intItemLocationId] 
@@ -3288,7 +3366,6 @@ BEGIN
 							,[dblQty] 
 							,[dblUOMQty] 
 							,[dblCost] 
-							,[dblValue] 
 							,[dblSalesPrice] 
 							,[intCurrencyId] 
 							,[dblExchangeRate] 
@@ -3299,38 +3376,39 @@ BEGIN
 							,[intLotId] 
 							,[intSourceTransactionId] 
 							,[strSourceTransactionId] 
-							,[intSourceTransactionDetailId]
-							,[intFobPointId]
+							,[intSourceTransactionDetailId]					
 							,[intInTransitSourceLocationId]
 							,[intForexRateTypeId]
 							,[dblForexRate]
 					)
-					SELECT
-							t.[intItemId] 
-							,t.[intItemLocationId] 
-							,iu.intItemUOMId 
-							,r.[dtmReceiptDate] 
-							,dblQty = -ri.dblOpenReceive  
-							,t.[dblUOMQty] 
-							,t.[dblCost] 
-							,t.[dblValue] 
-							,t.[dblSalesPrice] 
-							,t.[intCurrencyId] 
-							,t.[dblExchangeRate] 
-							,[intTransactionId] = r.intInventoryReceiptId 
-							,[intTransactionDetailId] = ri.intInventoryReceiptItemId
-							,[strTransactionId] = r.strReceiptNumber
-							,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
-							,t.[intLotId]
-							,t.[intTransactionId] 
-							,t.[strTransactionId] 
-							,t.[intTransactionDetailId] 
-							,t.[intFobPointId] 
+					SELECT 
+							[intItemId]				= t.intItemId  
+							,[intItemLocationId]	= t.intItemLocationId
+							,[intItemUOMId]			= t.intItemUOMId
+							,[dtmDate]				= t.dtmDate 
+							,[dblQty]				= -t.dblQty
+							,[dblUOMQty]			= t.dblUOMQty
+							,[dblCost]				= t.dblCost
+							,[dblSalesPrice]		= t.dblSalesPrice
+							,[intCurrencyId]		= t.intCurrencyId
+							,[dblExchangeRate]		= t.dblExchangeRate
+							,[intTransactionId]		= t.intTransactionId
+							,[intTransactionDetailId]	= t.intTransactionDetailId
+							,[strTransactionId]			= t.strTransactionId
+							,[intTransactionTypeId]		= @INVENTORY_RECEIPT_TYPE
+							,[intLotId]					= td.intLotId
+							,[intSourceTransactionId]	= th.intInventoryTransferId
+							,[strSourceTransactionId]	= th.strTransferNo
+							,[intSourceTransactionDetailId] = ri.intInventoryTransferDetailId
 							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-							,[intForexRateTypeId] = t.intForexRateTypeId
-							,[dblForexRate] = t.dblForexRate
-					FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-								ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+							,[intForexRateTypeId]			= t.intForexRateTypeId
+							,[dblForexRate]					= t.dblForexRate
+
+					FROM	@ItemsToPost t INNER JOIN tblICItem i 
+								ON t.intItemId = i.intItemId
+							INNER JOIN tblICInventoryReceiptItem ri
+								ON ri.intInventoryReceiptId = t.intTransactionId						
+								AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
 							INNER JOIN (
 								tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
 									ON td.intInventoryTransferId = th.intInventoryTransferId
@@ -3346,17 +3424,9 @@ BEGIN
 										td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
 										AND td.intInventoryTransferId = ri.intInventoryTransferId
 									)
-							INNER JOIN tblICInventoryTransaction t 
-								ON t.strTransactionId = th.strTransferNo
-								AND t.intTransactionDetailId = td.intInventoryTransferDetailId
-							LEFT JOIN tblICItemUOM iu 
-								ON iu.intItemUOMId = ri.intUnitMeasureId
-							LEFT JOIN tblICItem i 
-								ON ri.intItemId = i.intItemId 
-					WHERE	r.strReceiptNumber = @strTransactionId
-							AND t.ysnIsUnposted = 0 
-							AND t.dblQty > 0
-							AND i.strType <> 'Bundle'
+					WHERE	dblQty > 0 
+							AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
+
 
 					IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 					BEGIN 
