@@ -886,8 +886,8 @@ BEGIN
 				WHERE strCity = L.strDestinationPort
 				) AS strContractText
 			,CD.strERPPONumber
-			,Basis.strContractBasis
-			,Basis.strDescription AS strContractBasisDescription
+			,CB.strContractBasis
+			,CB.strDescription AS strContractBasisDescription
 			,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
 			,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
 			,CASE 

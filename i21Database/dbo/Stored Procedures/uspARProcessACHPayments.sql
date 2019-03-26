@@ -104,7 +104,7 @@ SELECT
 	 [intBankAccountId]				= UF.intBankAccountId
 	,[strTransactionId]				= 'temp'
 	,[intCurrencyId]				= P.intCurrencyId
-	,[intBankTransactionTypeId]		= CASE WHEN SUM(UF.dblAmount) >= 0 THEN 1 ELSE 2 END
+	,[intBankTransactionTypeId]		= 1
 	,[dtmDate]						= P.dtmDatePaid
 	,[dblAmount]					= SUM(UF.dblAmount)
 	,[strMemo]						= CASE WHEN P.ysnVendorRefund = 1 THEN 'Vendor Refund' ELSE 'AR ACH' END
@@ -124,7 +124,7 @@ GROUP BY UF.intBankAccountId
 	   , UF.intLocationId
 	   , P.ysnVendorRefund
 	   , ISNULL(@intUserId, UF.intLastModifiedUserId)
-	   , CASE WHEN P.dblAmountPaid >=  0 then 1 ELSE 2 end
+	   
 --PaymentDup
 INSERT INTO @BankTransactionDup(
 	  [intBankAccountId]
@@ -222,10 +222,6 @@ BEGIN
 	  AND [intCompanyLocationId] = @DupLocation 
 	  AND [intTransactionId] = @intBankTransactionDupID
  	
-
-	DECLARE @ISPOSITIVE  INT = 0;
-
-	SELECT  @ISPOSITIVE  = CASE WHEN T.[dblAmount] >=  0 then 1 ELSE 2 end from @BankTransactionDup T WHERE T.[intTransactionId] = @intBankTransactionDupID
 	--GETTING THE DETAIL
 	INSERT INTO @BankTransactionDetail(
 		  [intTransactionId]
@@ -264,7 +260,6 @@ BEGIN
 	) PAYMENTS 
 	WHERE UF.intBankAccountId = @DupBankId 
 	  AND UF.intLocationId = @DupLocation 
-	  AND @ISPOSITIVE = CASE WHEN UF.dblAmount >=  0 then 1 ELSE 2 end
 
 	SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
 
