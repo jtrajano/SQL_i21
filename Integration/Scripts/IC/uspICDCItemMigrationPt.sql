@@ -18,53 +18,72 @@ SET ANSI_WARNINGS OFF
 -- Inventory/Item data migration from ptitmmst origin table to tblICItem i21 table 
 -- Section 1
 --------------------------------------------------------------------------------------------------------------------------------------------
-MERGE tblICItem AS [Target]
-USING
-(
+
+INSERT INTO tblICItem(strItemNo, strType, strDescription, strStatus, strInventoryTracking, strLotTracking, intCategoryId, intPatronageCategoryId, intLifeTime, ysnLandedCost, ysnDropShip
+	,ysnSpecialCommission, ysnStockedItem, ysnDyedFuel, strBarcodePrint, ysnMSDSRequired, ysnAvailableTM, dblDefaultFull, ysnExtendPickTicket, ysnExportEDI, ysnHazardMaterial
+	,ysnMaterialFee, strCountCode, ysnTaxable, strKeywords, intConcurrencyId, ysnCommisionable)
+SELECT
+	strItemNo				
+	, strType				
+	, strDescription		
+	, strStatus				
+	, strInventoryTracking	
+	, strLotTracking		
+	, intCategoryId			
+	, intPatronageCategoryId
+	, intLifeTime			
+	, ysnLandedCost			
+	, ysnDropShip			
+	, ysnSpecialCommission	
+	, ysnStockedItem		
+	, ysnDyedFuel			
+	, strBarcodePrint		
+	, ysnMSDSRequired		
+	, ysnAvailableTM		
+	, dblDefaultFull		
+	, ysnExtendPickTicket	
+	, ysnExportEDI			
+	, ysnHazardMaterial		
+	, ysnMaterialFee		
+	, strCountCode			
+	, ysnTaxable			
+	, strKeywords			
+	, intConcurrencyId		
+	, ysnCommisionable
+FROM (
 	SELECT
-		  strItemNo					= RTRIM(ptitm_itm_no) COLLATE Latin1_General_CI_AS
-		, strType					= CASE WHEN (min(ptitm_phys_inv_yno) = 'N') THEN 'Other Charge' ELSE 'Inventory' END COLLATE Latin1_General_CI_AS
-		, strDescription			= RTRIM(min(ptitm_desc)) COLLATE Latin1_General_CI_AS
-		, strStatus					= 'Active'
-		, strInventoryTracking		= 'Item Level' COLLATE Latin1_General_CI_AS
-		, strLotTracking			= 'No' COLLATE Latin1_General_CI_AS
-		, intCategoryId				= (SELECT TOP 1 min(intCategoryId) FROM tblICCategory AS cls WHERE (cls.strCategoryCode) COLLATE SQL_Latin1_General_CP1_CS_AS = min(inv.ptitm_class) COLLATE SQL_Latin1_General_CP1_CS_AS)
-		, intPatronageCategoryId	= (SELECT TOP 1 min(intPatronageCategoryId) FROM tblPATPatronageCategory INNER JOIN ptitmmst ON (strCategoryCode) COLLATE SQL_Latin1_General_CP1_CS_AS = (ptitm_class) COLLATE SQL_Latin1_General_CP1_CS_AS)
-		, intLifeTime				= 1
-		, ysnLandedCost				= CAST(0 AS BIT)
-		, ysnDropShip				= CAST(0 AS BIT)
-		, ysnSpecialCommission		= CAST(0 AS BIT)
-		, ysnStockedItem			= CAST(CASE WHEN (min(ptitm_stock_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, ysnDyedFuel				= CAST(CASE WHEN (min(ptitm_dyed_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, strBarcodePrint			= CASE WHEN (min(ptitm_bar_code_ind) = 'I') THEN 'Item' WHEN (min(ptitm_bar_code_ind) = 'U') THEN 'UPC' ELSE 'None' END COLLATE Latin1_General_CI_AS
-		, ysnMSDSRequired			= CAST(CASE WHEN (min(ptitm_msds_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, ysnAvailableTM			= CAST(CASE WHEN (max(ptitm_avail_tm) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, dblDefaultFull			= max(ptitm_deflt_percnt)
-		, ysnExtendPickTicket		= CAST(CASE WHEN (min(ptitm_ext_pic_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, ysnExportEDI				= CAST(CASE WHEN (min(ptitm_edi_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, ysnHazardMaterial			= CAST(CASE WHEN (min(ptitm_hazmat_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, ysnMaterialFee			= CAST(CASE WHEN (min(ptitm_amf_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, strCountCode				= RTRIM(min(ptitm_phys_inv_yno)) COLLATE Latin1_General_CI_AS
-		, ysnTaxable				= CAST(CASE WHEN (min(ptitm_sst_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
-		, strKeywords				= RTRIM(min(ptitm_search)) COLLATE Latin1_General_CI_AS
-		, intConcurrencyId			= 1
-		, ysnCommisionable			= CAST(CASE WHEN (min(ptitm_comm_ind_uag) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			  strItemNo					= RTRIM(ptitm_itm_no) COLLATE Latin1_General_CI_AS
+			, strType					= CASE WHEN (min(ptitm_phys_inv_yno) = 'N') THEN 'Other Charge' ELSE 'Inventory' END COLLATE Latin1_General_CI_AS
+			, strDescription			= RTRIM(min(ptitm_desc)) COLLATE Latin1_General_CI_AS
+			, strStatus					= 'Active'
+			, strInventoryTracking		= 'Item Level' COLLATE Latin1_General_CI_AS
+			, strLotTracking			= 'No' COLLATE Latin1_General_CI_AS
+			, intCategoryId				= (SELECT TOP 1 min(intCategoryId) FROM tblICCategory AS cls WHERE (cls.strCategoryCode) COLLATE SQL_Latin1_General_CP1_CS_AS = min(inv.ptitm_class) COLLATE SQL_Latin1_General_CP1_CS_AS)
+			, intPatronageCategoryId	= (SELECT TOP 1 min(intPatronageCategoryId) FROM tblPATPatronageCategory INNER JOIN ptitmmst ON (strCategoryCode) COLLATE SQL_Latin1_General_CP1_CS_AS = (ptitm_class) COLLATE SQL_Latin1_General_CP1_CS_AS)
+			, intLifeTime				= 1
+			, ysnLandedCost				= CAST(0 AS BIT)
+			, ysnDropShip				= CAST(0 AS BIT)
+			, ysnSpecialCommission		= CAST(0 AS BIT)
+			, ysnStockedItem			= CAST(CASE WHEN (min(ptitm_stock_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnDyedFuel				= CAST(CASE WHEN (min(ptitm_dyed_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, strBarcodePrint			= CASE WHEN (min(ptitm_bar_code_ind) = 'I') THEN 'Item' WHEN (min(ptitm_bar_code_ind) = 'U') THEN 'UPC' ELSE 'None' END COLLATE Latin1_General_CI_AS
+			, ysnMSDSRequired			= CAST(CASE WHEN (min(ptitm_msds_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnAvailableTM			= CAST(CASE WHEN (max(ptitm_avail_tm) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, dblDefaultFull			= max(ptitm_deflt_percnt)
+			, ysnExtendPickTicket		= CAST(CASE WHEN (min(ptitm_ext_pic_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnExportEDI				= CAST(CASE WHEN (min(ptitm_edi_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnHazardMaterial			= CAST(CASE WHEN (min(ptitm_hazmat_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, ysnMaterialFee			= CAST(CASE WHEN (min(ptitm_amf_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, strCountCode				= RTRIM(min(ptitm_phys_inv_yno)) COLLATE Latin1_General_CI_AS
+			, ysnTaxable				= CAST(CASE WHEN (min(ptitm_sst_yn) = 'Y') THEN 1 ELSE 0 END AS BIT)
+			, strKeywords				= RTRIM(min(ptitm_search)) COLLATE Latin1_General_CI_AS
+			, intConcurrencyId			= 1
+			, ysnCommisionable			= CAST(CASE WHEN (min(ptitm_comm_ind_uag) = 'Y') THEN 1 ELSE 0 END AS BIT)
 	FROM ptitmmst AS inv 
 	where ptitm_phys_inv_yno <> 'O'
 	GROUP BY ptitm_itm_no
-) AS [Source] (strItemNo, strType, strDescription, strStatus, strInventoryTracking, strLotTracking, intCategoryId, intPatronageCategoryId, intLifeTime, ysnLandedCost, ysnDropShip
-	,ysnSpecialCommission, ysnStockedItem, ysnDyedFuel, strBarcodePrint, ysnMSDSRequired, ysnAvailableTM, dblDefaultFull, ysnExtendPickTicket, ysnExportEDI, ysnHazardMaterial
-	,ysnMaterialFee, strCountCode, ysnTaxable, strKeywords, intConcurrencyId, ysnCommisionable)
-ON [Target].strItemNo = [Source].strItemNo
-WHEN NOT MATCHED THEN
-INSERT (strItemNo, strType, strDescription, strStatus, strInventoryTracking, strLotTracking, intCategoryId, intPatronageCategoryId, intLifeTime, ysnLandedCost, ysnDropShip
-	,ysnSpecialCommission, ysnStockedItem, ysnDyedFuel, strBarcodePrint, ysnMSDSRequired, ysnAvailableTM, dblDefaultFull, ysnExtendPickTicket, ysnExportEDI, ysnHazardMaterial
-	,ysnMaterialFee, strCountCode, ysnTaxable, strKeywords, intConcurrencyId, ysnCommisionable)
-VALUES ([Source].strItemNo, [Source].strType, [Source].strDescription, [Source].strStatus, [Source].strInventoryTracking, [Source].strLotTracking, [Source].intCategoryId,
-	[Source].intPatronageCategoryId, [Source].intLifeTime, [Source].ysnLandedCost, [Source].ysnDropShip, [Source].ysnSpecialCommission, [Source].ysnStockedItem, [Source].ysnDyedFuel,
-	[Source].strBarcodePrint, [Source].ysnMSDSRequired, [Source].ysnAvailableTM, [Source].dblDefaultFull, [Source].ysnExtendPickTicket, [Source].ysnExportEDI, [Source].ysnHazardMaterial,
-	[Source].ysnMaterialFee, [Source].strCountCode, [Source].ysnTaxable, [Source].strKeywords, [Source].intConcurrencyId, [Source].ysnCommisionable);
-
+) AS i
+WHERE NOT EXISTS(SELECT * FROM tblICItem where strItemNo = i.strItemNo)
 
 --update items Inventory type from Category table
 update	tblICItem 
@@ -72,7 +91,6 @@ set		strType = C.strInventoryType
 from	tblICCategory C
 where	C.intCategoryId = tblICItem.intCategoryId
 		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
-
 
 --====Delete obsolete items. It is not required in i21 as history is not imported===
 --Delete from tblICItem where strStatus = 'Discontinued'
@@ -87,135 +105,146 @@ where	C.intCategoryId = tblICItem.intCategoryId
 -- ItemUOM data migration from ptitmmst origin table to tblICItemUOM i21 table 
 -- Section 2
 --------------------------------------------------------------------------------------------------------------------------------------------
-DECLARE @item NVARCHAR(MAX)
-DECLARE @unit NVARCHAR(MAX)
-DECLARE @package NVARCHAR(MAX)
-DECLARE @unitvalue INT
+DECLARE @ItemUoms TABLE (
+	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+	strUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+	strPack NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+	strUpcCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	dblPackQty NUMERIC(38, 20),
+	ysnStockUnit BIT,
+	ysnAllowSale BIT,
+	ysnAllowPurchase BIT)
 
-DECLARE itm_cursor CURSOR
-FOR
-SELECT ptitm_itm_no
-	  ,ptitm_unit
-	  ,ptitm_pak_desc
-	  ,min(ptitm_pak_qty)
+INSERT INTO @ItemUoms(strItemNo, strUnit, strPack, strUpcCode, dblPackQty, ysnAllowPurchase, ysnAllowSale, ysnStockUnit)
+SELECT DISTINCT LTRIM(RTRIM(ptitm_itm_no))
+	  ,LTRIM(RTRIM(ptitm_unit))
+	  ,LTRIM(RTRIM(ptitm_pak_desc))
+	  ,CASE WHEN LTRIM(RTRIM(min(ptitm_upc_code))) = '' THEN NULL ELSE LTRIM(RTRIM(min(ptitm_upc_code))) END 
+	  ,MIN(ptitm_pak_qty)
+	  ,1,1,0
 FROM   ptitmmst
-where ptitm_phys_inv_yno <> 'O'
+where RTRIM(LTRIM(ptitm_phys_inv_yno)) <> 'O'
 group by ptitm_itm_no,ptitm_unit,ptitm_pak_desc
 
-OPEN itm_cursor
+DECLARE @PackUnits TABLE (
+	intItemId INT,
+	intUnitMeasureId INT,
+	dblUnitQty NUMERIC(38, 20),
+	strUpcCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	ysnStockUnit BIT,
+	ysnAllowSale BIT,
+	ysnAllowPurchase BIT)
 
-SET @unit = NULL
---** Cursor variable equivalent for ptitm_unit column **.
-SET @item = NULL
---** Cursor variable equivalent for ptitm_itm_no column **.
-SET @package = NULL
---** Cursor variable equivalent for ptitm_pak_desc column **.
-SET @unitvalue = 0
---** Cursor variable equivalent for ptitm_pak_qty column **.
+DECLARE @BaseUnits TABLE (
+	intItemId INT,
+	intUnitMeasureId INT,
+	dblUnitQty NUMERIC(38, 20),
+	strUpcCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	ysnStockUnit BIT,
+	ysnAllowSale BIT,
+	ysnAllowPurchase BIT)
 
-FETCH NEXT
-FROM itm_cursor
-INTO @item
-	,@unit
-	,@package
-	,@unitvalue
+INSERT INTO @BaseUnits(intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale)
+SELECT inv.intItemId, u.intUnitMeasureId, uom.dblPackQty, uom.strUpcCode, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
+FROM @ItemUoms uom
+	INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
+	INNER JOIN tblICUnitMeasure u ON UPPER(u.strSymbol) = UPPER(uom.strUnit)
+WHERE NULLIF(uom.strUnit, '') IS NOT NULL
+	AND NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = inv.intItemId AND intUnitMeasureId = u.intUnitMeasureId)
 
---** Using Cursor method we associate the Unit from UnitMeasure table with item from tblICItem table for each item record by record. **
+;WITH CTE AS 
+(
+    SELECT intItemId, intUnitMeasureId, ROW_NUMBER() OVER 
+    (
+        PARTITION BY intItemId, intUnitMeasureId ORDER BY intItemId, intUnitMeasureId
+    ) RowNumber
+    FROM  @BaseUnits
+)
+DELETE
+FROM CTE 
+WHERE RowNumber > 1
 
-WHILE @@FETCH_STATUS = 0
-BEGIN
-	MERGE tblICItemUOM AS [Target]
-	USING
-	(
-		SELECT
-			  intItemId			= inv.intItemId
-			, intUnitMeasureId	= unm.intUnitMeasureId
-			, dblUnitQty		= min(itm.ptitm_pak_qty)
-			, strUpcCode		= CASE WHEN RTRIM(min(itm.ptitm_upc_code)) COLLATE Latin1_General_CI_AS = '' 
-									   THEN NULL 
-									   ELSE RTRIM(min(itm.ptitm_upc_code)) COLLATE Latin1_General_CI_AS END 
-			, ysnStockUnit		= CAST(1 AS BIT)
-			, ysnAllowPurchase	= CAST(1 AS BIT)
-			, ysnAllowSale		= CAST(1 AS BIT)
-			, intConcurrencyId	= 1
-		FROM ptitmmst AS itm
-			INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
-			INNER JOIN tblICUnitMeasure AS unm ON Upper(unm.strSymbol) COLLATE SQL_Latin1_General_CP1_CS_AS = Upper(itm.ptitm_unit) COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE ptitm_unit = @unit AND ptitm_itm_no = @item 
-		GROUP BY inv.intItemId, unm.intUnitMeasureId
-	) AS [Source] (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
-	ON [Target].intItemId = [Source].intItemId
-		AND [Target].intUnitMeasureId = [Source].intUnitMeasureId
-	WHEN NOT MATCHED THEN
-	INSERT (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
-	VALUES ([Source].intItemId, [Source].intUnitMeasureId, [Source].dblUnitQty, [Source].strUpcCode, [Source].ysnStockUnit, 
-		[Source].ysnAllowPurchase, [Source].ysnAllowSale, [Source].intConcurrencyId);
+;WITH CTE AS 
+(
+    SELECT intItemId, strUpcCode, ROW_NUMBER() OVER 
+    (
+        PARTITION BY strUpcCode ORDER BY strUpcCode
+    ) RowNumber
+    FROM  @BaseUnits
+	WHERE strUpcCode IS NOT NULL
+)
+UPDATE CTE 
+SET strUpcCode = NULL
+WHERE RowNumber > 1
 
---** If unit of an Item (@unitvalue) is > 1, then UnitMeasure is considered in terms of package. So we need to update package record also.
---   Hence to fetch package, we join strSymbol column from tblICUnitMeasure table with ptitm_pak_desc column from ptitmmst table. **
+MERGE INTO tblICItemUOM AS Target
+USING (
+	SELECT pu.intItemId, pu.intUnitMeasureId, pu.dblUnitQty, pu.strUpcCode, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId
+	FROM @BaseUnits pu
+) AS Source ON ((Source.strUpcCode = Target.strUpcCode AND Source.strUpcCode IS NOT NULL) OR (Source.strUpcCode IS NULL AND Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId))
+WHEN NOT MATCHED THEN
+INSERT (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+VALUES(Source.intItemId, Source.intUnitMeasureId, Source.dblUnitQty, Source.strUpcCode, Source.ysnStockUnit, Source.ysnAllowPurchase, Source.ysnAllowSale, Source.intConcurrencyId)
+;
 
-	IF @unitvalue > 1
-	BEGIN
-		MERGE tblICItemUOM AS [Target]
-		USING
-		(
-			SELECT
-				  intItemId			= inv.intItemId
-				, intUnitMeasureId	= unm.intUnitMeasureId
-				, dblUnitQty		= min(itm.ptitm_pak_qty)
-				, strUpcCode		= RTRIM(min(itm.ptitm_upc_code)) COLLATE Latin1_General_CI_AS
-				, ysnStockUnit		= CAST(0 AS BIT)
-				, ysnAllowPurchase	= CAST(1 AS BIT)
-				, ysnAllowSale		= CAST(1 AS BIT)
-				, intConcurrencyId	= 1
-			FROM ptitmmst AS itm 
-				INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
-				INNER JOIN tblICUnitMeasure AS unm ON Upper(unm.strSymbol) COLLATE SQL_Latin1_General_CP1_CS_AS = Upper(itm.ptitm_pak_desc) COLLATE SQL_Latin1_General_CP1_CS_AS
-			WHERE ptitm_pak_desc = @package AND ptitm_itm_no = @item
-			GROUP BY inv.intItemId, unm.intUnitMeasureId
-		) AS [Source] (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
-		ON [Target].intItemId = [Source].intItemId
-			AND [Target].intUnitMeasureId = [Source].intUnitMeasureId
-		WHEN NOT MATCHED THEN
-		INSERT (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
-		VALUES ([Source].intItemId, [Source].intUnitMeasureId, [Source].dblUnitQty, [Source].strUpcCode, [Source].ysnStockUnit, 
-			[Source].ysnAllowPurchase, [Source].ysnAllowSale, [Source].intConcurrencyId);
-	END
+---- =============================== PACK UNITS ================================================================================
+INSERT INTO @PackUnits(intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale)
+SELECT inv.intItemId, u.intUnitMeasureId, uom.dblPackQty, uom.strUpcCode, 0 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
+FROM @ItemUoms uom
+	INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
+	INNER JOIN tblICUnitMeasure u ON UPPER(u.strSymbol) = UPPER(uom.strPack)
+WHERE NULLIF(uom.strPack, '') IS NOT NULL
+	AND NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = inv.intItemId AND intUnitMeasureId = u.intUnitMeasureId)
 
-	FETCH NEXT
-	FROM itm_cursor
-	INTO @item
-		,@unit
-		,@package
-		,@unitvalue
-END
-
-CLOSE itm_cursor
-
-DEALLOCATE itm_cursor
+MERGE INTO tblICItemUOM AS Target
+USING (
+	SELECT pu.intItemId, pu.intUnitMeasureId, pu.dblUnitQty, pu.strUpcCode, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId
+	FROM @PackUnits pu
+) AS Source ON ((Source.strUpcCode = Target.strUpcCode AND Source.strUpcCode IS NOT NULL) OR (Source.strUpcCode IS NULL AND Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId))
+WHEN NOT MATCHED THEN
+INSERT (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+VALUES(Source.intItemId, Source.intUnitMeasureId, Source.dblUnitQty, Source.strUpcCode, Source.ysnStockUnit, Source.ysnAllowPurchase, Source.ysnAllowSale, Source.intConcurrencyId)
+;
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- ItemLocation data migration from ptlocmst/ptitmmst origin tables to tblICItemLocation i21 table 
 -- Section 3
 --------------------------------------------------------------------------------------------------------------------------------------------
+DECLARE @Loc TABLE (intItemId INT, intLocationId INT, intVendorId INT, intCostingMethod INT, intIssueUOMId INT, intReceiveUOMId INT, intAllowNegativeInventory INT, intConcurrencyId INT)
+INSERT INTO @Loc(intItemId, intLocationId, intVendorId, intCostingMethod, intIssueUOMId, intReceiveUOMId, intAllowNegativeInventory, intConcurrencyId)
+SELECT
+		intItemId						= inv.intItemId
+	, intLocationId					= loc.intCompanyLocationId
+	, intVendorId					= vnd.intEntityId
+	, intCostingMethod				= 1
+	, intIssueUOMId					= intItemUOMId
+	, intReceiveUOMId				= intItemUOMId
+	, intAllowNegativeInventory		= 1
+	, intConcurrencyId				= 1
+FROM ptitmmst AS itm
+	INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
+	INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS)
+	LEFT JOIN vyuEMEntity AS vnd ON (itm.ptitm_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = vnd.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS	AND vnd.strType = 'Vendor')
+	LEFT JOIN tblICItemUOM AS uom ON (uom.intItemId) = (inv.intItemId) WHERE uom.ysnStockUnit = 1	
+	AND ptitm_phys_inv_yno <> 'O'
+
+;WITH CTE AS 
+(
+    SELECT intItemId, intLocationId, ROW_NUMBER() OVER 
+    (
+        PARTITION BY intItemId, intLocationId ORDER BY intItemId, intLocationId
+    ) RowNumber
+    FROM  @Loc
+)
+DELETE
+FROM CTE 
+WHERE RowNumber > 1
+
 MERGE tblICItemLocation AS [Target]
 USING
 (
-	SELECT
-		  intItemId						= inv.intItemId
-		, intLocationId					= loc.intCompanyLocationId
-		, intVendorId					= vnd.intEntityId
-		, intCostingMethod				= 1
-		, intIssueUOMId					= intItemUOMId
-		, intReceiveUOMId				= intItemUOMId
-		, intAllowNegativeInventory		= 1
-		, intConcurrencyId				= 1
-	FROM ptitmmst AS itm
-		INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
-		INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS)
-		LEFT JOIN vyuEMEntity AS vnd ON (itm.ptitm_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = vnd.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS	AND vnd.strType = 'Vendor')
-		LEFT JOIN tblICItemUOM AS uom ON (uom.intItemId) = (inv.intItemId) WHERE uom.ysnStockUnit = 1	
-		AND ptitm_phys_inv_yno <> 'O'
+	SELECT intItemId, intLocationId, intVendorId, intCostingMethod, intIssueUOMId, intReceiveUOMId, intAllowNegativeInventory, intConcurrencyId
+	FROM @Loc
 ) AS [Source] (intItemId, intLocationId, intVendorId, intCostingMethod, intIssueUOMId, intReceiveUOMId, intAllowNegativeInventory, intConcurrencyId)
 ON [Target].intItemId = [Source].intItemId
 	AND [Target].intLocationId = [Source].intLocationId
@@ -228,10 +257,10 @@ VALUES ([Source].intItemId, [Source].intLocationId, [Source].intVendorId, [Sourc
 -- ItemPricing data migration from ptitmmst origin table to tblICItemPricing i21 table 
 -- Section 4
 --------------------------------------------------------------------------------------------------------------------------------------------
-MERGE tblICItemPricing AS [Target]
-USING
-(
-	SELECT
+DECLARE @Pricing TABLE(intItemId INT, intItemLocationId INT, strPricingMethod NVARCHAR(100), dblLastCost NUMERIC(38, 20),
+	dblStandardCost NUMERIC(38, 20), dblAverageCost NUMERIC(38, 20),  dblAmountPercent NUMERIC(38, 20), dblSalePrice NUMERIC(38, 20), intConcurrencyId INT)
+INSERT INTO @Pricing
+SELECT
 		  [intItemId]			= inv.intItemId
 		, [intItemLocationId]	= iloc.intItemLocationId
 		, [strPricingMethod]	= 'None' COLLATE Latin1_General_CI_AS
@@ -245,6 +274,24 @@ USING
 		INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 		INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 		INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
+
+;WITH CTE AS 
+(
+    SELECT intItemId, intItemLocationId, ROW_NUMBER() OVER 
+    (
+        PARTITION BY intItemId, intItemLocationId ORDER BY intItemId, intItemLocationId
+    ) RowNumber
+    FROM  @Pricing
+)
+DELETE
+FROM CTE 
+WHERE RowNumber > 1
+
+MERGE tblICItemPricing AS [Target]
+USING
+(
+	SELECT *
+	FROM @Pricing
 ) AS [Source] (intItemId, intItemLocationId, strPricingMethod, dblLastCost, dblStandardCost, dblAverageCost, dblAmountPercent, dblSalePrice, intConcurrencyId)
 ON [Target].intItemId = [Source].intItemId
 	AND [Target].intItemLocationId = [Source].intItemLocationId
