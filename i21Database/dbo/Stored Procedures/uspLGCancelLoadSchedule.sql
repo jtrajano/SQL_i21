@@ -17,6 +17,8 @@ BEGIN TRY
 	DECLARE @strScreenName NVARCHAR(100)
 	DECLARE @intLoadShippingInstructionId INT
 	DECLARE @strAuditLogActionType NVARCHAR(MAX)
+	DECLARE	@dblScheduleQty	NUMERIC(18,6)
+	DECLARE	@intNoOfLoad	INT
 	DECLARE @tblLoadDetail TABLE (intLoadDetailRecordId INT Identity(1, 1)
 								 ,intLoadDetailId INT
 								 ,intPContractDetailId INT
@@ -55,15 +57,21 @@ BEGIN TRY
 				SET @intExternalId = NULL
 				SET @strScreenName = NULL
 
+				SELECT	@dblScheduleQty = dblScheduleQty,@intNoOfLoad = ISNULL(intNoOfLoad,0) FROM tblCTContractDetail WHERE intContractDetailId = ISNULL(@intPContractDetailId,@intSContractDetailId)
+
 				SELECT @intPContractDetailId = intPContractDetailId
 					,@intSContractDetailId = intSContractDetailId
-					,@dblQuantityToUpdate = - dblLoadDetailQuantity
+					,@dblQuantityToUpdate = CASE WHEN @intNoOfLoad = 0 THEN - dblLoadDetailQuantity ELSE -1 END
 					,@intExternalId = @intMinLoadDetailId
 					,@strScreenName = 'Load Schedule'
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
-				IF (ISNULL(@intPContractDetailId,0) > 0)
+				
+				IF @dblScheduleQty < ABS(@dblQuantityToUpdate)
+					SET @dblQuantityToUpdate = - @dblScheduleQty
+
+				IF (ISNULL(@intPContractDetailId,0) > 0) AND ABS(@dblQuantityToUpdate) > 0
 				BEGIN 
 					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
 						,@dblQuantityToUpdate = @dblQuantityToUpdate
@@ -72,7 +80,7 @@ BEGIN TRY
 						,@strScreenName = @strScreenName
 				END
 
-				IF (ISNULL(@intSContractDetailId,0) > 0)
+				IF (ISNULL(@intSContractDetailId,0) > 0) AND ABS(@dblQuantityToUpdate) > 0
 				BEGIN 
 					EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
 						,@dblQuantityToUpdate = @dblQuantityToUpdate

@@ -310,6 +310,11 @@ BEGIN TRY
 			UPDATE	tblCTContractDetail SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
 		END
 
+		IF @intContractStatusId IN (3,6)
+		BEGIN
+			EXEC uspCTCancelOpenLoadSchedule @intContractDetailId
+		END
+
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 

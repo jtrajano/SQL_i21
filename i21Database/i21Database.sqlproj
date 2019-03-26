@@ -7478,6 +7478,7 @@
     <Build Include="dbo\Views\vyuICGetItemSpecialPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitSequenceAndCreateNewContract.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceSourceList.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCancelOpenLoadSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
