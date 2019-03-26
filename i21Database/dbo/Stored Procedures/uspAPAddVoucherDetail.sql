@@ -83,6 +83,7 @@ USING
 													THEN ROW_NUMBER() OVER(PARTITION BY A.intBillId ORDER BY A.intBillId)
 												ELSE A.intLineNo END
 		,intStorageLocationId				=	A.intStorageLocationId
+		,intSubLocationId					=	A.intSubLocationId
 		/*Deferred voucher info*/			
 		,intDeferredVoucherId				=	A.intDeferredVoucherId
 		/*Integration fields*/				
@@ -91,7 +92,7 @@ USING
 		,intPaycheckHeaderId				=	A.intPaycheckHeaderId
 		,intPurchaseDetailId				=	A.intPurchaseDetailId
 		,intCustomerStorageId				=	A.intCustomerStorageId
-		,intLocationId						=	A.intLocationId
+		,intLocationId						=	A.intItemLocationId
 		,intLoadDetailId					=	A.intLoadShipmentDetailId
 		,intLoadId							=	A.intLoadShipmentId
 		,intScaleTicketId					=	A.intScaleTicketId
@@ -276,6 +277,7 @@ INSERT
 	,ysnSubCurrency						
 	,intLineNo							
 	,intStorageLocationId				
+	,intSubLocationId				
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
 	/*Integration fields*/				
@@ -356,8 +358,9 @@ VALUES
 	,intItemId							
 	,dblDiscount						
 	,ysnSubCurrency						
-	,intLineNo							
-	,intStorageLocationId				
+	,intLineNo		
+	,intStorageLocationId						
+	,intSubLocationId				
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
 	/*Integration fields*/				
