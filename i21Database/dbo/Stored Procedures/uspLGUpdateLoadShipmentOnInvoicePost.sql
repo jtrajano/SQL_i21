@@ -104,7 +104,9 @@ BEGIN TRY
 				WHERE LD.intLoadDetailId = @intOutboundLoadDetailId
 						
 				UPDATE tblCTContractDetail
-				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + CASE WHEN ISNULL(@Post,0) =  1 THEN @dblPurchasedLotQty ELSE @dblPurchasedLotQty *(-1) END
+				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) 
+									+ (CASE WHEN ISNULL(@Post,0) =  1 THEN @dblPurchasedLotQty ELSE @dblPurchasedLotQty *(-1) END 
+										* CASE WHEN (@strInvoiceType = 'Credit Memo') THEN -1 ELSE 1 END)
 				WHERE intContractDetailId = @intAllocationPContractDetailId
 			END
 		END
