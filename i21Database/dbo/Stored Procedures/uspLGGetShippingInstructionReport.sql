@@ -927,8 +927,8 @@ FROM (
 			) AS strContractText
 		,L.strDestinationCity
 		,CD.strERPPONumber
-		,Basis.strContractBasis
-		,Basis.strDescription AS strContractBasisDescription
+		,CB.strContractBasis
+		,CB.strDescription AS strContractBasisDescription
 		,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
 		,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
 		,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo
@@ -1000,7 +1000,7 @@ FROM (
 	LEFT JOIN tblCMBank ConsigneeNotifyBank ON ConsigneeNotifyBank.intBankId = CLNP.intBankId
 	LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
 	LEFT JOIN tblSMCompanyLocation CNCompanyLocation ON CNCompanyLocation.intCompanyLocationId = CLNP.intCompanyLocationId
-	LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationId
+	LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationIdCB
 	LEFT JOIN tblSMCurrency DemCurrency ON DemCurrency.intCurrencyID = L.intDemurrageCurrencyId
 	LEFT JOIN tblSMCurrency DesCurrency ON DesCurrency.intCurrencyID = L.intDespatchCurrencyId
 	LEFT JOIN tblICUnitMeasure LoadUnit ON LoadUnit.intUnitMeasureId = L.intLoadingUnitMeasureId
