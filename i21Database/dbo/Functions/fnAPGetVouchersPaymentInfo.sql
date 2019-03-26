@@ -11,7 +11,8 @@ RETURNS @returntable TABLE
 	strPaymentInfo NVARCHAR(MAX),
 	strPaymentInfoKey NVARCHAR(MAX),
 	dtmPaymentDateReconciled DATETIME,
-	ysnClr BIT
+	ysnClr BIT, 
+    PRIMARY KEY CLUSTERED ([intBillId] ASC)
 )
 AS
 BEGIN
