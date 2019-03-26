@@ -2238,6 +2238,9 @@ BEGIN
 	
 	COMMIT TRAN @TransactionName
 END 
+
+-- Recalculate Totals
+EXEC dbo.uspICInventoryReceiptCalculateTotals @ReceiptId = @intTransactionId, @ForceRecalc = 1
     
 -- Create an Audit Log
 IF @ysnRecap = 0 
