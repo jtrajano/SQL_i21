@@ -26,7 +26,6 @@ SET ANSI_WARNINGS OFF
 
 
 DECLARE @defaultCurrencyPref INT = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId > 0);
-DECLARE @USDCur INT = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = 'USD');
 
 --IF(@Update = 0 AND @VendorId IS NULL)
 BEGIN	
