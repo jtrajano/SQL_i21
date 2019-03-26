@@ -248,6 +248,7 @@ INSERT INTO tblARTaxStagingTable (
 	, intCompanyLocationId
 	, intShipToLocationId
 	, intTaxCodeId
+	, intTaxClassId
 	, intInvoiceId
 	, intInvoiceDetailId
 	, intItemId
@@ -298,70 +299,103 @@ INSERT INTO tblARTaxStagingTable (
 	, dblTotalSales
 	, dblTaxCollected
 	, dblQtyTonShipped
+	, dblCheckOffTax
+	, dblCitySalesTax
+	, dblCityExciseTax
+	, dblCountySalesTax
+	, dblCountyExciseTax
+	, dblFederalExciseTax
+	, dblFederalLustTax
+	, dblFederalOilSpillTax
+	, dblFederalOtherTax
+	, dblLocalOtherTax
+	, dblPrepaidSalesTax
+	, dblStateExciseTax
+	, dblStateOtherTax
+	, dblStateSalesTax
+	, dblTonnageTax
 	, ysnTaxExempt
 	, strFederalTaxId
 	, strStateTaxId
 )
-SELECT TAX.intEntityCustomerId
-	, TAX.intEntitySalespersonId
-	, TAX.intCurrencyId
-	, TAX.intCompanyLocationId
-	, TAX.intShipToLocationId
-	, TAX.intTaxCodeId
-	, TAX.intInvoiceId
-	, TAX.intInvoiceDetailId
-	, TAX.intItemId
-	, TAX.intItemUOMId
-	, TAX.intTaxGroupId
-	, TAX.intTonnageTaxUOMId
-	, TAX.dtmDate
-	, TAX.strInvoiceNumber
-	, TAX.strCalculationMethod
-	, TAX.strCustomerNumber
-	, TAX.strCustomerName
-	, TAX.strDisplayName
-	, TAX.strTaxNumber
-	, TAX.strSalespersonNumber
-	, TAX.strSalespersonName
-	, TAX.strSalespersonDisplayName
-	, TAX.strCompanyName
-	, TAX.strCompanyAddress
-	, TAX.strCurrency
-	, TAX.strCurrencyDescription
-	, TAX.strTaxGroup
-	, TAX.strTaxAgency
-	, TAX.strTaxCode
-	, TAX.strTaxCodeDescription
-	, TAX.strCountry
-	, TAX.strState
-	, TAX.strCounty
-	, TAX.strCity
-	, TAX.strTaxClass
-	, TAX.strSalesTaxAccount
-	, TAX.strPurchaseTaxAccount
-	, TAX.strLocationName
-	, TAX.strShipToLocationAddress
-	, TAX.strItemNo
-	, TAX.strCategoryCode
-	, @strTaxReportType
-	, TAX.dblRate
-	, TAX.dblUnitPrice
-	, TAX.dblQtyShipped
-	, TAX.dblAdjustedTax
-	, TAX.dblTax
-	, TAX.dblTotalAdjustedTax
-	, TAX.dblTotalTax
-	, TAX.dblTaxDifference
-	, TAX.dblTaxAmount
-	, TAX.dblNonTaxable
-	, TAX.dblTaxable
-	, TAX.dblTotalSales
-	, TAX.dblTaxCollected
-	, TAX.dblQtyTonShipped
-	, TAX.ysnTaxExempt
-	, TAX.strFederalTaxId
-	, TAX.strStateTaxId
+SELECT intEntityCustomerId			= TAX.intEntityCustomerId
+	, intEntitySalespersonId		= TAX.intEntitySalespersonId
+	, intCurrencyId					= TAX.intCurrencyId
+	, intCompanyLocationId			= TAX.intCompanyLocationId
+	, intShipToLocationId			= TAX.intShipToLocationId
+	, intTaxCodeId					= TAX.intTaxCodeId
+	, intTaxClassId					= TAX.intTaxClassId
+	, intInvoiceId					= TAX.intInvoiceId
+	, intInvoiceDetailId			= TAX.intInvoiceDetailId
+	, intItemId						= TAX.intItemId
+	, intItemUOMId					= TAX.intItemUOMId
+	, intTaxGroupId					= TAX.intTaxGroupId
+	, intTonnageTaxUOMId			= TAX.intTonnageTaxUOMId
+	, dtmDate						= TAX.dtmDate
+	, strInvoiceNumber				= TAX.strInvoiceNumber
+	, strCalculationMethod			= TAX.strCalculationMethod
+	, strCustomerNumber				= TAX.strCustomerNumber
+	, strCustomerName				= TAX.strCustomerName
+	, strDisplayName				= TAX.strDisplayName
+	, strTaxNumber					= TAX.strTaxNumber
+	, strSalespersonNumber			= TAX.strSalespersonNumber
+	, strSalespersonName			= TAX.strSalespersonName
+	, strSalespersonDisplayName		= TAX.strSalespersonDisplayName
+	, strCompanyName				= TAX.strCompanyName
+	, strCompanyAddress				= TAX.strCompanyAddress
+	, strCurrency					= TAX.strCurrency
+	, strCurrencyDescription		= TAX.strCurrencyDescription
+	, strTaxGroup					= TAX.strTaxGroup
+	, strTaxAgency					= TAX.strTaxAgency
+	, strTaxCode					= TAX.strTaxCode
+	, strTaxCodeDescription			= TAX.strTaxCodeDescription
+	, strCountry					= TAX.strCountry
+	, strState						= TAX.strState
+	, strCounty						= TAX.strCounty
+	, strCity						= TAX.strCity
+	, strTaxClass					= TAX.strTaxClass
+	, strSalesTaxAccount			= TAX.strSalesTaxAccount
+	, strPurchaseTaxAccount			= TAX.strPurchaseTaxAccount
+	, strLocationName				= TAX.strLocationName
+	, strShipToLocationAddress		= TAX.strShipToLocationAddress
+	, strItemNo						= TAX.strItemNo
+	, strCategoryCode				= TAX.strCategoryCode
+	, strTaxReportType				= @strTaxReportType
+	, dblRate						= TAX.dblRate
+	, dblUnitPrice					= TAX.dblUnitPrice
+	, dblQtyShipped					= TAX.dblQtyShipped
+	, dblAdjustedTax				= TAX.dblAdjustedTax
+	, dblTax						= TAX.dblTax
+	, dblTotalAdjustedTax			= TAX.dblTotalAdjustedTax
+	, dblTotalTax					= TAX.dblTotalTax
+	, dblTaxDifference				= TAX.dblTaxDifference
+	, dblTaxAmount					= TAX.dblTaxAmount
+	, dblNonTaxable					= TAX.dblNonTaxable
+	, dblTaxable					= TAX.dblTaxable
+	, dblTotalSales					= TAX.dblTotalSales
+	, dblTaxCollected				= TAX.dblTaxCollected
+	, dblQtyTonShipped				= TAX.dblQtyTonShipped
+	, dblCheckOffTax		 		= CASE WHEN TRT.strType = 'Checkoff Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblCitySalesTax		 		= CASE WHEN TRT.strType = 'City Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblCityExciseTax		 		= CASE WHEN TRT.strType = 'City Excise Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblCountySalesTax		 		= CASE WHEN TRT.strType = 'County Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblCountyExciseTax	 		= CASE WHEN TRT.strType = 'County Excise Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblFederalExciseTax	 		= CASE WHEN TRT.strType = 'Federal Excise Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblFederalLustTax		 		= CASE WHEN TRT.strType = 'Federal Lust Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblFederalOilSpillTax	 		= CASE WHEN TRT.strType = 'Federal Oil Spill Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblFederalOtherTax	 		= CASE WHEN TRT.strType = 'Federal Other Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblLocalOtherTax		 		= CASE WHEN TRT.strType = 'Local Other Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblPrepaidSalesTax	 		= CASE WHEN TRT.strType = 'Prepaid Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblStateExciseTax	 	 		= CASE WHEN TRT.strType = 'State Excise Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblStateOtherTax		 		= CASE WHEN TRT.strType = 'State Other Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblStateSalesTax		 		= CASE WHEN TRT.strType = 'State Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, dblTonnageTax			 		= CASE WHEN TRT.strType = 'Tonnage Tax' THEN TAX.dblTaxAmount ELSE 0 END
+	, ysnTaxExempt					= TAX.ysnTaxExempt
+	, strFederalTaxId				= TAX.strFederalTaxId
+	, strStateTaxId					= TAX.strStateTaxId
 FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
+LEFT JOIN tblSMTaxClass TCLASS ON TAX.intTaxClassId = TCLASS.intTaxClassId
+LEFT JOIN tblSMTaxReportType TRT ON TCLASS.intTaxReportTypeId = TRT.intTaxReportTypeId
 INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
 INNER JOIN #INVOICES I ON TAX.intInvoiceId = I.intInvoiceId
