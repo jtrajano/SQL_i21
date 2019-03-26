@@ -151,6 +151,7 @@ AS SELECT
 	,SCD.strSplitDescription
 
 	,tblEMEntity.strName
+	,tblEMEntity.strEntityNo
 	,tblEMEntitySplit.strSplitNumber
 	,vyuEMSearchShipVia.strName AS strHaulerName
 	--,EMDriver.strName AS strDriverName
