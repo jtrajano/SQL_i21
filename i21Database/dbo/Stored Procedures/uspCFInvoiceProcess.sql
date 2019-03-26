@@ -229,7 +229,6 @@ BEGIN TRY
 		,dblDiscountEligibleQuantity
 		,dblDiscountAmount
 		,dtmInvoiceDate
-		,ysnRemittancePage
 		,strInvoiceNumberHistory
 		,strReportName
 		,dtmBalanceForwardDate
@@ -247,10 +246,6 @@ BEGIN TRY
 		,dblInvoiceQuantity
 		,dblInvoiceDiscount
 		,dtmInvoiceDate
-		,  (CASE WHEN
-                             ((SELECT        COUNT(*)
-                                 FROM        tblARCustomerStatementStagingTable
-                                 WHERE        strInvoiceReportNumber = ipr.strInvoiceReportNumber) > 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END)
 		,strInvoiceReportNumber
 		,@reportName
 		,@balanceForwardDate
