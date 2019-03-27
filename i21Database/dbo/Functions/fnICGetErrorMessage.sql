@@ -243,6 +243,7 @@ BEGIN
 		WHEN @msgId = 80227 THEN 'The other charges in %s are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
 		WHEN @msgId = 80228 THEN 'Billed Qty for %s is already %f. You cannot over bill the transaction'
 		WHEN @msgId = 80229 THEN 'Zero cost is not allowed in "%s" location of item "%s".'
+		WHEN @msgId = 80230 THEN 'Only items of type "Inventory", "Raw Material", "Finished Good" and "Non-Inventory" can be received.'
 	END 
 
 	RETURN @msg

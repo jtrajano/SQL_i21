@@ -58,7 +58,7 @@ FROM	(
 					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 					AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
-					AND i.strType NOT IN ('Non-Inventory', 'Service', 'Software')
+					AND i.strType <> 'Non-Inventory'
 		) Query
 
 -- Validate the GL Accounts
