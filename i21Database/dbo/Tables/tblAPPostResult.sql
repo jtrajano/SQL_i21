@@ -4,6 +4,7 @@
     [strTransactionType] NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strTransactionId]   NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strBatchNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnLienExists] BIT NOT NULL DEFAULT(0),
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [intTransactionId] INT NULL, 
     PRIMARY KEY CLUSTERED ([intId] ASC)
