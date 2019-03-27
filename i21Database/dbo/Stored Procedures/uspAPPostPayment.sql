@@ -124,12 +124,12 @@ FROM #tmpPayablePostData
 ORDER BY intPaymentId
 
 --GET ALL PREPAY
-INSERT INTO @prepayIds
-SELECT 
-	A.intPaymentId
-FROM #tmpPayablePostData A
-INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
-WHERE B.ysnPrepay = 1 
+-- INSERT INTO @prepayIds
+-- SELECT 
+-- 	A.intPaymentId
+-- FROM #tmpPayablePostData A
+-- INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
+-- WHERE B.ysnPrepay = 1 
 
 --GET ALL PAYMENTS
 INSERT INTO @payments
@@ -707,7 +707,7 @@ BEGIN
 	EXEC [uspAPUpdateBill1099] @param
 
 	--UPDATE tblAPBill.ysnPrepayHasPayment
-	EXEC [uspAPUpdatePrepayStatus] @prepayIds
+	EXEC [uspAPUpdatePrepayStatus] @payments
 	
 	--UPDATE INVOICES
 	DECLARE @invoices Id

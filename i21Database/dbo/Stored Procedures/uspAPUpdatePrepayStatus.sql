@@ -19,7 +19,7 @@ SELECT
 FROM tblAPPaymentDetail A
 INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
 INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
-WHERE C.intTransactionType = 2
+WHERE C.intTransactionType IN (2,13)
 
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
@@ -41,8 +41,8 @@ OUTER APPLY
 	WHERE 
 		B.intId = payDetail.intBillId
 	AND payDetail.dblPayment != 0
-	AND pay.ysnPrepay = 1
-	AND A.intTransactionType = 2
+	--AND pay.ysnPrepay = 1
+	AND A.intTransactionType IN (2,13)
 	AND pay.ysnPosted = 1
 ) prepayment
 
