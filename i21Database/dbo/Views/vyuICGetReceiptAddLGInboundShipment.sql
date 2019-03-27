@@ -129,3 +129,4 @@ AS
 		AND LogisticsView.intPurchaseSale = 1
 		AND LogisticsView.ysnPosted = 1
 		AND ISNULL(LC.ysnRejected,0) <> 1
+		AND LogisticsView.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')

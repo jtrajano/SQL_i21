@@ -94,5 +94,6 @@ FROM (
 			FROM	 tblICCompanyPreference			
 		) ICPreference
 	WHERE ysnCompleted = 0
+		AND POView.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
 		
 ) tblAddOrders
