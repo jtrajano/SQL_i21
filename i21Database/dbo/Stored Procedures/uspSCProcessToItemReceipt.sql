@@ -474,9 +474,11 @@ BEGIN TRY
  
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation CTPF
+				  CROSS APPLY dbo.fnCTGetTopOneSequence(0,CTPF.intContractDetailId) CD
+				  WHERE CTPF.intContractDetailId = @intContractDetailId and CD.strPricingType <> 'Priced')
 		BEGIN
-		EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
 		END
 		SELECT @intContractDetailId = MIN(ri.intLineNo)
 		FROM tblICInventoryReceipt r 
