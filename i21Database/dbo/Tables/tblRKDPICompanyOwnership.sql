@@ -13,5 +13,5 @@
 	, intReceiptId INT
 	, intConcurrencyId INT NULL DEFAULT ((0))
     , CONSTRAINT [PK_tblRKDPICompanyOwnership] PRIMARY KEY ([intDPICompanyOwnershipId])
-	, CONSTRAINT [FK_tblRKDPICompanyOwnership_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId])
+	, CONSTRAINT [FK_tblRKDPICompanyOwnership_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId]) ON DELETE CASCADE
 )

@@ -927,8 +927,8 @@ FROM (
 			) AS strContractText
 		,L.strDestinationCity
 		,CD.strERPPONumber
-		,Basis.strContractBasis
-		,Basis.strDescription AS strContractBasisDescription
+		,CB.strContractBasis
+		,CB.strDescription AS strContractBasisDescription
 		,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
 		,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
 		,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo

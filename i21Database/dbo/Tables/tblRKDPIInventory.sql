@@ -2,7 +2,7 @@
 (
 	intDPIInventoryId INT IDENTITY NOT NULL
 	, intDPIHeaderId INT NOT NULL
-	, dtmTransactionDate DATETIME NOT NULL
+	, dtmTransactionDate DATETIME NULL
 	, strReceiptNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strDistribution NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, dblIn NUMERIC(18, 6) NULL
@@ -26,5 +26,5 @@
 	, strTicketNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, intConcurrencyId INT NULL DEFAULT ((0))
     , CONSTRAINT [PK_tblRKDPIInventory] PRIMARY KEY ([intDPIInventoryId])
-	, CONSTRAINT [FK_tblRKDPIInventory_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId]) 
+	, CONSTRAINT [FK_tblRKDPIInventory_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId]) ON DELETE CASCADE
 )

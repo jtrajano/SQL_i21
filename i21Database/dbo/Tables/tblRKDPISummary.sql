@@ -2,7 +2,7 @@
 (
 	intDPISummaryId INT IDENTITY NOT NULL 
 	, intDPIHeaderId INT NOT NULL
-	, dtmTransactionDate DATETIME NOT NULL
+	, dtmTransactionDate DATETIME NULL
 	, dblReceiveIn NUMERIC(18, 6) NULL
 	, dblShipOut NUMERIC(18, 6) NULL
 	, dblAdjustments NUMERIC(18, 6) NULL
@@ -62,5 +62,5 @@
 	, dblUnpaidBalance NUMERIC(18, 6) NULL
 	, intConcurrencyId INT NULL DEFAULT ((0)) 
     , CONSTRAINT [PK_tblRKDPISummary] PRIMARY KEY ([intDPISummaryId])
-	, CONSTRAINT [FK_tblRKDPISummary_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId])
+	, CONSTRAINT [FK_tblRKDPISummary_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId]) ON DELETE CASCADE
 )
