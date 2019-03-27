@@ -13,7 +13,6 @@
     [dblDiscountAmount]           NUMERIC (18, 6) NULL,
     [dtmInvoiceDate]              DATETIME        NULL,
     [strInvoiceNumberHistory]     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-    [ysnRemittancePage]           BIT             NULL,
     [strReportName]               NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
     [dtmBalanceForwardDate]       DATETIME        NULL,
     [intConcurrencyId]            INT             CONSTRAINT [DF_tblCFInvoiceProcessHistoryId_intConcurrencyId] DEFAULT ((1)) NULL,

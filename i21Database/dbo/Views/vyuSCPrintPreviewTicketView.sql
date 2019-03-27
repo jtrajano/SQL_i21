@@ -151,6 +151,7 @@ AS SELECT
 	,SCD.strSplitDescription
 
 	,tblEMEntity.strName
+	,tblEMEntity.strEntityNo
 	,tblEMEntitySplit.strSplitNumber
 	,vyuEMSearchShipVia.strName AS strHaulerName
 	--,EMDriver.strName AS strDriverName
@@ -184,7 +185,30 @@ AS SELECT
 	,SO.strSalesOrderNumber
 
 	,SMCompanySetup.strCompanyName
-	,SMCompanySetup.strAddress
+	,strAddress = CASE WHEN SetupLocation.strUseLocationAddress = 'No'
+					THEN
+						LTRIM(dbo.fnICFormatTransferAddressFormat2(
+										SMCompanySetup.strPhone
+										,SMCompanySetup.strFax
+										,null
+										,null
+										,SMCompanySetup.strAddress
+										,SMCompanySetup.strCity
+										,SMCompanySetup.strState
+										,SMCompanySetup.strZip
+										,null))
+					ELSE
+						LTRIM(dbo.fnICFormatTransferAddressFormat2(
+										tblSCScaleSetup.strPhone
+										,null
+										,null
+										,null
+										,tblSCScaleSetup.strAddress
+										,tblSCScaleSetup.strCity
+										,tblSCScaleSetup.strState
+										,tblSCScaleSetup.strZipCode
+										,null))
+					END 
 	,SMS.blbDetail AS blbSignature
 	,SMS.intEntityId AS intUserId
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
@@ -195,6 +219,8 @@ AS SELECT
   LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = SC.intSplitId
   LEFT JOIN tblSCScaleSetup tblSCScaleSetup on tblSCScaleSetup.intScaleSetupId = SC.intScaleSetupId
   LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intProcessingLocationId
+  LEFT JOIN tblSMCompanyLocation Origin on Origin.intCompanyLocationId = SC.intProcessingLocationId
+  LEFT JOIN tblSMCompanyLocation SetupLocation on SetupLocation.intCompanyLocationId = tblSCScaleSetup.intLocationId
   LEFT JOIN tblSCListTicketTypes tblSCListTicketTypes on (tblSCListTicketTypes.intTicketType = SC.intTicketType AND tblSCListTicketTypes.strInOutIndicator = SC.strInOutFlag)
   LEFT JOIN tblGRStorageType tblGRStorageType on tblGRStorageType.strStorageTypeCode = SC.strDistributionOption
   LEFT JOIN tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation on tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationId
@@ -240,6 +266,6 @@ AS SELECT
 	AND IC.ysnUseWeighScales = 1
 	GROUP BY intSalesOrderId
   ) SOD
-  CROSS APPLY(
-	SELECT strCompanyName,strAddress FROM tblSMCompanySetup
+,(
+	SELECT TOP 1 strCompanyName,strCity, strState, strZip,strPhone, strFax, strAddress FROM tblSMCompanySetup
   ) SMCompanySetup

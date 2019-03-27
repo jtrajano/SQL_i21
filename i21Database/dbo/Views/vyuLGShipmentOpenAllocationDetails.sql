@@ -7,6 +7,7 @@ FROM (
 		,AH.intAllocationHeaderId
 		,AD.intAllocationDetailId
 		,AD.intPContractDetailId
+		,CHP.intContractHeaderId AS intPurchaseContractHeaderId
 		,CHP.strContractNumber AS strPurchaseContractNumber
 		,CDP.intContractSeq AS intPContractSeq
 		,CHP.intEntityId AS intPEntityId
@@ -29,6 +30,7 @@ FROM (
 		,CP.intCountryID AS intPOriginId
 		,UP.strUnitType AS strPUnitType
 		,AD.intSContractDetailId
+		,CHS.intContractHeaderId AS intSalesContractHeaderId
 		,CHS.strContractNumber AS strSalesContractNumber
 		,CDS.intContractSeq AS intSContractSeq
 		,CHS.intEntityId AS intSEntityId

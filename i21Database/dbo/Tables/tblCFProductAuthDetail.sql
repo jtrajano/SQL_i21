@@ -9,4 +9,10 @@
 );
 
 
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [CFUniqueProdAuthItem_intProductAuthId_intItemId]
+    ON [dbo].[tblCFProductAuthDetail]([intItemId] ASC, [intProductAuthId] ASC);
+
+
+
 

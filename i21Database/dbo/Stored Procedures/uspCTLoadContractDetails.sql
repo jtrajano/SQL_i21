@@ -20,6 +20,12 @@ BEGIN TRY
 			dblQuantity				NUMERIC(18,6)
 	)
 
+	DECLARE @OpenLoad TABLE 
+	(  
+			intContractDetailId		INT,        
+			ysnOpenLoad				BIT
+	)
+
 	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity)
 	SELECT 
 		   intContractHeaderId  = ShipmentItem.intOrderId
@@ -41,6 +47,15 @@ BEGIN TRY
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo AND CD.intContractHeaderId = ReceiptItem.intOrderId
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 	GROUP BY ReceiptItem.intLineNo
+
+	INSERT  INTO @OpenLoad
+	SELECT	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId) AS intContractDetailId, CAST(LD.intLoadDetailId AS BIT) ysnOpenLoad 
+	FROM	tblLGLoad		LO
+	JOIN	tblLGLoadDetail LD	ON LD.intLoadId = LO.intLoadId
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId)
+	WHERE	intTicketId IS NULL 
+	AND		LO.intShipmentStatus <> 10
+	AND		CD.intContractHeaderId	=	@intContractHeaderId
 
 	;With ContractDetail AS (
 	   SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId --1247
@@ -238,6 +253,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,CT.strAdjustmentType
 				,dblShipmentQuantity = Shipment.dblQuantity
 				,dblBillQty          = Bill.dblQuantity
+				,ISNULL(OL.ysnOpenLoad,0)	AS ysnOpenLoad
 
 		FROM			ContractDetail					CD
 				JOIN    CTE1							CT	ON CT.intContractDetailId				=		CD.intContractDetailId
@@ -272,6 +288,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 															AND	CM.intUnitMeasureId					=		CO.intUnitMeasureId
 		LEFT   JOIN     @tblShipment				Shipment ON Shipment.intContractDetailId        =       CD.intContractDetailId
 		LEFT   JOIN     @tblBill						Bill ON Bill.intContractDetailId			=       CD.intContractDetailId
+		LEFT   JOIN     @OpenLoad						OL	ON OL.intContractDetailId				=       CD.intContractDetailId
 	)t ORDER BY intContractSeq
 
 END TRY

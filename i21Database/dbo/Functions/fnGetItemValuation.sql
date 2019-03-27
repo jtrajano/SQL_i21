@@ -21,6 +21,6 @@ RETURN
 		AND i.intItemId = @intItemId
 		AND il.intItemLocationId = @intItemLocationId
 		AND fyp.strPeriod = @strPeriod
-		AND fyp.ysnOpen = 1
+		--AND fyp.ysnOpen = 1 -- Do not restrict on open fiscal periods. It should load any fiscal period. 
 	GROUP BY ISNULL(it.intLocationId, il.intLocationId), CASE WHEN il.intLocationId IS NULL THEN 1 ELSE 0 END
 )

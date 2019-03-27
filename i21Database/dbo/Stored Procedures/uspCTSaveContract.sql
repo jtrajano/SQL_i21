@@ -297,6 +297,7 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractCertification WHERE intContractDetailId = @intContractDetailId)
 		BEGIN 
+			SELECT	@strCertificationName = NULL
 			SELECT	@strCertificationName = COALESCE(@strCertificationName + ', ', '') + CAST(strCertificationName AS NVARCHAR(100))
 			FROM	tblCTContractCertification	CF
 			JOIN	tblICCertification			IC	ON	IC.intCertificationId	=	CF.intCertificationId
@@ -307,6 +308,11 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE	tblCTContractDetail SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
+		END
+
+		IF @intContractStatusId IN (3,6)
+		BEGIN
+			EXEC uspCTCancelOpenLoadSchedule @intContractDetailId
 		END
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId

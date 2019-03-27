@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCFInvoiceHistoryStagingTable] (
-    [intCustomerGroupId]           INT             NULL,
+    [intInvoiceHistoryStagingId]   INT            IDENTITY (1, 1) NOT NULL,
+	[intCustomerGroupId]           INT             NULL,
     [intTransactionId]             INT             NULL,
     [intOdometer]                  INT             NULL,
     [intOdometerAging]             INT             NULL,
@@ -149,7 +150,8 @@
     [ysnSummaryByDriverPin]        BIT             NULL,
     [strDetailDisplay]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnMPGCalculation]		       BIT             NULL,
-    CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC) WITH (FILLFACTOR = 70)
+    CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC) WITH (FILLFACTOR = 70),
+	CONSTRAINT [PK_tblCFInvoiceHistoryStagingTable] PRIMARY KEY CLUSTERED ([intInvoiceHistoryStagingId] ASC)
 );
 
 
