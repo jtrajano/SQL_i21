@@ -21,8 +21,8 @@ BEGIN TRY
 
 	SELECT  @intTransactionId	=	intTransactionId,@ysnOnceApproved = ysnOnceApproved FROM tblSMTransaction WHERE intRecordId = @intContractHeaderId AND intScreenId = @intContractScreenId
 	
-	IF	ISNULL(@ysnOnceApproved,0) <> 1
-		RETURN
+	--IF	ISNULL(@ysnOnceApproved,0) <> 1
+	--	RETURN
 
 	IF EXISTS(SELECT * FROM tblSMApproval WHERE intTransactionId  = @intTransactionId AND intScreenId = @intAmendmentScreenId)
 	BEGIN
