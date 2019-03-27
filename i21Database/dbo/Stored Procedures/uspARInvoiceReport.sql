@@ -39,6 +39,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dtmDueDate
 	 , strFreightTerm
 	 , strDeliverPickup
+	 , strComments
 	 , strInvoiceHeaderComment
 	 , strInvoiceFooterComment
 	 , dblInvoiceSubtotal
@@ -144,6 +145,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dtmDueDate				= INV.dtmDueDate
 	 , strFreightTerm			= FREIGHT.strFreightTerm
 	 , strDeliverPickup			= FREIGHT.strFobPoint
+	 , strComments				= dbo.fnEliminateHTMLTags(INV.strComments, 0)
 	 , strInvoiceHeaderComment	= INV.strComments
 	 , strInvoiceFooterComment	= INV.strFooterComments
 	 , dblInvoiceSubtotal		= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceSubtotal, 0) END
