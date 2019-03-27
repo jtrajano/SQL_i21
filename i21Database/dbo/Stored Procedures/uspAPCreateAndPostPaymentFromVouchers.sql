@@ -168,15 +168,6 @@ BEGIN
 		,voucher.dblTempInterest
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
-		,ysnOffset = CASE WHEN voucher.intTransactionType IN (1, 14) THEN 0
-					ELSE
-						(
-							CASE WHEN voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 0
-								THEN 0
-							ELSE 1
-							END
-						)
-					END
 		,ysnLienExists = CAST(CASE WHEN lienInfo.intEntityLienId IS NULL THEN 0 ELSE 1 END AS BIT)
 		,strPayee = payTo.strCheckPayeeName
 	INTO #tmpPartitionedVouchers
@@ -260,7 +251,7 @@ BEGIN
 				[strPaymentRecordNum]				= 	NULL,
 				[strNotes]							= 	NULL,
 				[strPayee]							= 	NULL,
-				[strOverridePayee]							= 	NULL,
+				[strOverridePayee]					= 	NULL,
 				[dtmDatePaid]						= 	@datePaid,
 				[dblAmountPaid]						= 	vouchersPay.dblAmountPaid - vouchersPay.dblWithheld,
 				[dblUnapplied]						= 	0,
@@ -391,7 +382,15 @@ BEGIN
 			[dblPayment]		=	ISNULL(paySched.dblPayment - paySched.dblDiscount, vouchers.dblTempPayment),
 			[dblInterest]		=	vouchers.dblTempInterest,
 			[dblTotal]			=	ISNULL(paySched.dblPayment, vouchers.dblTotal),
-			[ysnOffset]			=	0,
+			[ysnOffset]			=	CASE WHEN vouchers.intTransactionType IN (1, 14) THEN 0
+									ELSE
+										(
+											CASE WHEN vouchers.intTransactionType IN (2, 13) AND vouchers.ysnPrepayHasPayment = 0
+												THEN 0
+											ELSE 1
+											END
+										)
+									END,
 			[intPayScheduleId]	=	paySched.intId
 		FROM tblAPBill vouchers
 		INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId

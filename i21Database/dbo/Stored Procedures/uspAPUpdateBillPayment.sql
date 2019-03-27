@@ -53,6 +53,7 @@ BEGIN
 		GROUP BY B.intBillId
 	) paySchedDetails
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND A2.ysnOffset = 0 THEN 0 ELSE 1 END
 END
 ELSE IF @post = 1
 BEGIN
@@ -100,5 +101,6 @@ BEGIN
 		GROUP BY B.intBillId
 	) paySchedDetails
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND A2.ysnOffset = 0 THEN 0 ELSE 1 END
 
 END
