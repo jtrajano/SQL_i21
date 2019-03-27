@@ -4,5 +4,6 @@
 	strType NVARCHAR(MAX),
 	intRecordId INT,
 	dtmLog DATETIME,
+	ysnOnceApproved BIT,
 	strErrMsg NVARCHAR(MAX)
 )
