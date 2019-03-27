@@ -6842,9 +6842,9 @@ INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@R
 UPDATE tblSMMasterMenu SET intParentMenuID = @RiskManagementPortalParentMenuId WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @GrainPortalParentMenuId
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Position Report (Portal)', N'Risk Management', @RiskManagementPortalParentMenuId, N'Position Report (Portal)', N'Portal Menu', N'Screen', N' RiskManagement.view.PositionReport', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Position Report (Portal)', N'Risk Management', @RiskManagementPortalParentMenuId, N'Position Report (Portal)', N'Portal Menu', N'Screen', N'RiskManagement.view.PositionReport', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N' RiskManagement.view.PositionReport' WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementPortalParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'RiskManagement.view.PositionReport' WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementPortalParentMenuId
 
 DECLARE @RKPositionReportMenuId INT
 SELECT  @RKPositionReportMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementPortalParentMenuId
