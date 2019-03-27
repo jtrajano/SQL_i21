@@ -127,7 +127,7 @@ WITH Invoices AS(
 ) 
 SELECT TOP 10 
 a.*
-,b.strTermCode
+,b.strTerm
 ,c.strCurrency
 FROM Invoices a
 LEFT JOIN tblSMTerm b on a.intTermsId = b.intTermID
