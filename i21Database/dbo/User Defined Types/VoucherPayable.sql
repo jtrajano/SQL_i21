@@ -53,7 +53,9 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intAccountId]					INT NULL, --account to use for voucher detail, if not provided, we will use default vendor expense account
 	[ysnReturn]						BIT DEFAULT(0), --this should be 1 if transaction type is 3 (Debit Memo)
 	[intLineNo]						INT	NULL, --Provide value if what order we will insert the data
+	[intItemLocationId]				INT NULL,
 	[intStorageLocationId]			INT NULL,
+	[intSubLocationId]				INT NULL,
 	[dblBasis]						DECIMAL(18, 6) NOT NULL DEFAULT(0),
 	[dblFutures]					DECIMAL(18, 6) NOT NULL DEFAULT(0),
 	/*Integration fields*/
