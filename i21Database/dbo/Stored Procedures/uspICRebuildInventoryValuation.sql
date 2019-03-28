@@ -3214,6 +3214,8 @@ BEGIN
 						AND ItemLocation.intLocationId IS NOT NULL 
 						AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
+				ORDER BY
+					ReceiptItem.intInventoryReceiptItemId ASC 
 
 				-- Get the Vendor Entity Id 
 				SELECT	@intEntityId = intEntityVendorId
@@ -3426,7 +3428,8 @@ BEGIN
 									)
 					WHERE	dblQty > 0 
 							AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
-
+					ORDER BY 
+						ri.intInventoryReceiptItemId ASC 
 
 					IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 					BEGIN 
@@ -3488,7 +3491,7 @@ BEGIN
 							GOTO _EXIT_WITH_ERROR
 						END 
 					END
-				END
+				END											
 
 				ELSE IF (
 					@intReceiptSourceType = @RECEIPT_SOURCE_TYPE_InboundShipment
@@ -3719,11 +3722,38 @@ BEGIN
 				BEGIN 
 					-- Get the cost from the in-transit
 					UPDATE	owned
-					SET		owned.dblCost = inTransit.dblCost
-					FROM	@ItemsToPost owned INNER JOIN @ItemsForInTransitCosting inTransit
-								ON owned.intItemId = inTransit.intItemId
-								AND owned.strTransactionId  = inTransit.strTransactionId
-								AND owned.intTransactionDetailId  = inTransit.intTransactionDetailId
+					SET		owned.dblCost = 
+								CASE 
+									WHEN owned_total.dblQty = 0 THEN owned.dblCost
+									ELSE 
+										dbo.fnDivide(t.dblValue, owned_total.dblQty)
+								END 
+					FROM	@ItemsToPost owned CROSS APPLY (
+								SELECT 
+									dblValue = SUM(-t.dblQty * t.dblCost + t.dblValue) 
+								FROM 
+									tblICInventoryTransaction t
+								WHERE
+									t.strTransactionId = owned.strTransactionId
+									AND t.strBatchId = @strBatchId
+									AND t.intTransactionId = owned.intTransactionId									
+									AND t.intTransactionDetailId = owned.intTransactionDetailId
+									AND t.intItemId = owned.intItemId								
+									AND t.dblQty < 0 
+							) t
+							CROSS APPLY (
+								SELECT 
+									dblQty = SUM(owned_total.dblQty) 
+								FROM
+									@ItemsToPost owned_total
+								WHERE
+									owned_total.strTransactionId = owned.strTransactionId 
+									AND owned_total.intItemId = owned.intItemId
+									AND owned_total.intTransactionId = owned.intTransactionId
+									AND owned_total.intTransactionDetailId = owned.intTransactionDetailId
+							) owned_total
+					WHERE 
+						owned_total.dblQty <> 0 
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
@@ -3787,7 +3817,7 @@ BEGIN
 					BEGIN 
 						--PRINT 'Error found in uspICCreateGLEntries for Transfer Orders'
 						GOTO _EXIT_WITH_ERROR
-					END 				
+					END 
 				END
 
 				ELSE IF @strTransactionType = 'Inventory Return'
