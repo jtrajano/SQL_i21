@@ -7489,6 +7489,8 @@
     <Build Include="dbo\Tables\tblRKDPICompanyOwnership.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPI.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
+    <Build Include="dbo\Tables\tblCTAOPComponent.sql" />
+    <Build Include="dbo\Views\vyuCTAOPComponent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
