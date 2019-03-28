@@ -7484,6 +7484,7 @@
     <Build Include="dbo\Tables\tblRKDPIInventory.sql" />
     <Build Include="dbo\Tables\tblRKDPICompanyOwnership.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPI.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
