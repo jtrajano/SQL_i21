@@ -2,7 +2,8 @@
 	@intTicketId INT,
 	@intEntityId INT,
 	@intLocationId INT,
-	@intUserId INT
+	@intUserId INT,
+	@intInvoiceId INT = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -370,7 +371,7 @@ BEGIN TRY
 			,@ErrorMessage = @ErrorMessage OUTPUT
 			,@CreatedIvoices = @CreatedInvoices OUTPUT
 			,@UpdatedIvoices = @UpdatedInvoices OUTPUT
-
+		SET @intInvoiceId = CAST(@CreatedInvoices AS INT)
 		EXEC [dbo].[uspARPostInvoice]
 			@batchId			= NULL,
 			@post				= 1,

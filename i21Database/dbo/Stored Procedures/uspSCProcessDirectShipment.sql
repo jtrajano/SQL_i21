@@ -7,7 +7,9 @@
 	@strInOutFlag NVARCHAR(5),
 	@intMatchTicketId INT = 0,
 	@strTicketType NVARCHAR(10) = '',
-	@ysnPostDestinationWeight BIT = 0
+	@ysnPostDestinationWeight BIT = 0,
+	@intInvoiceId AS INT = NULL OUTPUT,
+	@intBillid AS INT = NULL OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -143,7 +145,7 @@ BEGIN TRY
 
 			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
 			BEGIN
-				EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
+				EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId,@intBillId OUT
 
 				IF ISNULL(@intContractDetailId,0) != 0
 				BEGIN
@@ -151,7 +153,7 @@ BEGIN TRY
 					EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
 				END
 
-				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
+				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUT
 			END
 		END
 		ELSE
@@ -165,8 +167,7 @@ BEGIN TRY
 
 			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
 			BEGIN
-				DECLARE @intInvoiceId AS INT;
-				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId OUTPUT, 1;
+				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId OUT, 1;
 				DECLARE @dblNetUnits NUMERIC(18,6)
 				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
 				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
@@ -196,7 +197,7 @@ BEGIN TRY
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
 				END
-				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId
+				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
 			END
 			INSERT INTO @ItemsToIncreaseInTransitDirect(
 				[intItemId]
@@ -238,7 +239,7 @@ BEGIN TRY
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
 				END
 					
-				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
+				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId, @intInvoiceId OUT
 			END
 		END
 	END
