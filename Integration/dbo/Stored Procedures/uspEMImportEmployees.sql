@@ -243,7 +243,7 @@ BEGIN
 	-- INSERT new records for tblCMBank, prerequisite for importing direct deposit information
 	exec uspCMImportBanksFromOrigin
 
-	SELECT (@strPrefix + premp_emp) INTO #tmpprempmst 
+	SELECT premp_emp = (@strPrefix + premp_emp) INTO #tmpprempmst 
 	FROM prempmst
 		where (premp_emp COLLATE Latin1_General_CI_AS not in (select isnull(strEmployeeOriginId, '''') from tblSMUserSecurity ) AND @strPrefix + LTRIM(RTRIM((premp_emp))) COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee))
 		and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
