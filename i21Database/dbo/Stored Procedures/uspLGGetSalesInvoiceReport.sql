@@ -101,7 +101,7 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	WHERE InvDet.intInvoiceId = @intInvoiceId
 
-	SELECT @strFreightConditions = RTRIM(LTRIM(FT.strContractBasis + ' ' + ISNULL(CT.strCity, CLSL.strSubLocationName) + ' ' + WG.strWeightGradeDesc))
+	SELECT @strFreightConditions = RTRIM(LTRIM(FT.strContractBasis + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, '') + ' ' + WG.strWeightGradeDesc))
 	FROM tblARInvoiceDetail InvDet
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -109,7 +109,6 @@ BEGIN
 	LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId AND FT.strINCOLocationType = 'City'
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CH.intWarehouseId AND FT.strINCOLocationType <> 'City'
 	LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-	
 	WHERE InvDet.intInvoiceId = @intInvoiceId
 
 	SELECT TOP 1 @strCompanyName = tblSMCompanySetup.strCompanyName
@@ -143,6 +142,7 @@ BEGIN
 	declare @ref nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Ref.'),'Ref.');
 	declare @from nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'from'),'from');
 	declare @to nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'to'),'to');
+	declare @dated nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'dated'),'dated');
 
 	SELECT Inv.intInvoiceId
 		,intSerialNo = ROW_NUMBER() OVER (
@@ -191,6 +191,7 @@ BEGIN
 		,strTareUOM = isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) 
 		,dblNetWt = ROUND(InvDet.dblShipmentNetWt, 2) 
 		,strNetUOM = isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) 
+		,strNetWtInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) 
 		,strPriceInfo = LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' ' + PriceCur.strCurrency + ' '+@per+' ' + isnull(rtPriceUOMTranslation.strTranslation,PriceUOM.strUnitMeasure)
 		,InvDet.dblTotal
 		,strQtyOrderedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblQtyOrdered, 2))) + ' ' + isnull(rtOUOMTranslation.strTranslation,OUOM.strUnitMeasure)
@@ -212,11 +213,15 @@ BEGIN
 		,intLineCount = 1
 		,FT.strFreightTerm
 		,L.strMVessel
-		,strVesselDirection = L.strMVessel + ' ' + @from + ' ' + L.strOriginPort + @to + L.strDestinationPort
+		,strVesselDirection = L.strMVessel + CASE WHEN (ISNULL(L.strOriginPort, '') <>  '' AND ISNULL(L.strDestinationPort, '') <> '') 
+												THEN ' ' + @from + ' ' + L.strOriginPort + ' ' + @to + ' ' + L.strDestinationPort ELSE '' END
 		,L.strBLNumber
 		,L.dtmBLDate
-		,strBLNoDated = L.strBLNumber + ' dated ' + CONVERT(NVARCHAR,L.dtmBLDate,106) 
-		,strForwardAgentLot = L.strForwardingAgentRef + '-' + @ref + ' ' + Cont.strLotNumber
+		,strBLNoDated = L.strBLNumber + ' ' + @dated + ' ' + CONVERT(NVARCHAR,L.dtmBLDate,106) 
+		,strForwardAgentLot = CASE WHEN (L.intPurchaseSale = 3) 
+									THEN ISNULL(LFA.strName, '') + '-' + @ref + CASE WHEN ISNULL(Cont.strLotNumber, '') <> '' THEN ', ' + ISNULL(Cont.strLotNumber, '') ELSE '' END
+									ELSE ISNULL(PLFA.strName, '') + '-' + @ref + CASE WHEN ISNULL(Cont.strLotNumber, '') <> '' THEN ', ' + ISNULL(Cont.strLotNumber, '') ELSE '' END 
+								END
 		,strDocument = @strContractDocuments 
 		,strCondition = @strContractConditions 
 		,strFreightCondition = @strFreightConditions
@@ -251,12 +256,16 @@ BEGIN
 	LEFT JOIN tblLGLoad L ON L.intLoadId = Inv.intLoadId
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
+	LEFT JOIN tblEMEntity LFA ON LFA.intEntityId = L.intForwardingAgentEntityId
 	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId --AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
+	LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = ReceiptItem.intSourceId
+	LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
+	LEFT JOIN tblEMEntity PLFA ON PLFA.intEntityId = PL.intForwardingAgentEntityId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = Inv.intFreightTermId
 	LEFT JOIN tblSMTerm TM ON TM.intTermID = CH.intTermId
 	CROSS APPLY tblLGCompanyPreference CP
