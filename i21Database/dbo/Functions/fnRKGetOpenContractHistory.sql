@@ -1,72 +1,36 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetOpenContractHistory] (
-	@dtmDateAsOf DATETIME)
+	@dtmDateAsOf DATETIME
+	, @intFutOptTransactionId INT)
 
-RETURNS @Result TABLE(
-	intFutOptTransactionId INT
-	, intOpenContract INT)
+RETURNS NUMERIC(18, 6)
 
 AS
 
 BEGIN
-
+	DECLARE @dblMatchContract NUMERIC(18, 6)
+		, @strBuySell NVARCHAR(10)
 	SET @dtmDateAsOf = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmDateAsOf, 110), 110)
+	
+	SELECT TOP 1 @strBuySell = strNewBuySell
+	FROM vyuRKGetFutOptTransactionHistory
+	WHERE intFutOptTransactionId = @intFutOptTransactionId
+		AND dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmDateAsOf AS FLOAT)) AS DATETIME)))
+		ORDER BY dtmTransactionDate DESC
 
-	INSERT INTO @Result
-	SELECT DISTINCT intFutOptTransactionId
-		, (intNoOfContract - ISNULL(intOpenContract, 0)) intOpenContract
-	FROM (
-		SELECT ot.intFutOptTransactionId
-			, SUM(ot.intNoOfContract) intNoOfContract
-			, (SELECT SUM(CONVERT(int, mf.dblMatchQty))
-				FROM tblRKMatchDerivativesHistory mf
-				WHERE ot.intFutOptTransactionId = mf.intLFutOptTransactionId
-					AND mf.dtmMatchDate <= @dtmDateAsOf) intOpenContract
-		FROM tblRKFutOptTransaction ot
-		WHERE ot.strBuySell = 'Buy' AND intInstrumentTypeId = 1
-		GROUP BY intFutOptTransactionId
-	) t
+	IF (@strBuySell = 'Buy')
+	BEGIN
+		SELECT @dblMatchContract = SUM(mf.dblMatchQty)
+		FROM tblRKMatchDerivativesHistory mf
+		WHERE mf.intLFutOptTransactionId = @intFutOptTransactionId
+			AND mf.dtmMatchDate <= @dtmDateAsOf
+	END
+	ELSE
+	BEGIN
+		SELECT @dblMatchContract = - SUM(mf.dblMatchQty)
+		FROM tblRKMatchDerivativesHistory mf
+		WHERE mf.intSFutOptTransactionId = @intFutOptTransactionId
+			AND mf.dtmMatchDate <= @dtmDateAsOf
+	END
 
-	UNION ALL SELECT DISTINCT intFutOptTransactionId
-		, - (intNoOfContract - ISNULL(intOpenContract, 0)) intOpenContract
-	FROM (
-		SELECT ot.intFutOptTransactionId
-			, SUM(ot.intNoOfContract) intNoOfContract
-			, (SELECT SUM(CONVERT(int, mf.dblMatchQty))
-				FROM tblRKMatchDerivativesHistory mf
-				WHERE ot.intFutOptTransactionId = mf.intSFutOptTransactionId
-					AND mf.dtmMatchDate <= @dtmDateAsOf) intOpenContract
-		FROM tblRKFutOptTransaction ot
-		WHERE ot.strBuySell = 'Sell' AND intInstrumentTypeId = 1
-		GROUP BY intFutOptTransactionId
-	) t
-
-	UNION ALL SELECT DISTINCT intFutOptTransactionId
-		, (ISNULL(intNoOfContract, 0) - ISNULL(intOpenContract, 0)) intOpenContract
-	FROM (
-		SELECT ot.intFutOptTransactionId
-			, SUM(ISNULL(ot.intNoOfContract, 0)) intNoOfContract
-			, (SELECT SUM(CONVERT(int, mf.intMatchQty))
-				FROM tblRKMatchDerivativesHistoryForOption mf
-				WHERE ot.intFutOptTransactionId = mf.intLFutOptTransactionId
-					AND mf.dtmMatchDate <= @dtmDateAsOf) intOpenContract
-		FROM tblRKFutOptTransaction ot
-		WHERE ot.strBuySell = 'Buy' AND intInstrumentTypeId = 2
-		GROUP BY intFutOptTransactionId
-	) t
-
-	UNION ALL SELECT DISTINCT intFutOptTransactionId
-		, - (intNoOfContract - ISNULL(intOpenContract, 0)) intOpenContract
-	FROM (
-		SELECT ot.intFutOptTransactionId
-			, SUM(ot.intNoOfContract) intNoOfContract
-			, (SELECT SUM(CONVERT(int, mf.intMatchQty))
-				FROM tblRKMatchDerivativesHistoryForOption mf
-				WHERE ot.intFutOptTransactionId = mf.intSFutOptTransactionId
-					AND mf.dtmMatchDate <= @dtmDateAsOf) intOpenContract
-		FROM tblRKFutOptTransaction ot
-		WHERE ot.strBuySell = 'Sell' AND intInstrumentTypeId = 2
-		GROUP BY intFutOptTransactionId
-	) t
-
-RETURN
+	RETURN @dblMatchContract
 END
