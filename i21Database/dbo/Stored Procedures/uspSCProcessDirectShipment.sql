@@ -9,7 +9,7 @@
 	@strTicketType NVARCHAR(10) = '',
 	@ysnPostDestinationWeight BIT = 0,
 	@intInvoiceId AS INT = NULL OUTPUT,
-	@intBillid AS INT = NULL OUTPUT
+	@intBillId AS INT = NULL OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON

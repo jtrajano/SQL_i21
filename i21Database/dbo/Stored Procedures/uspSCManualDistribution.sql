@@ -4,7 +4,7 @@
 	@intUserId AS INT,
 	@intEntityId AS INT,
 	@InventoryReceiptId AS INT OUTPUT,
-	@intBillid AS INT OUTPUT
+	@intBillId AS INT OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
