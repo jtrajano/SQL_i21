@@ -49,6 +49,8 @@
 	[strMobileBillingShiftNo]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
     [strPONumber]						NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
 	[strBOLNumber]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,    
+	[strBOLNumber]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
+	[strPaymentInfo]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL,
     [strComments]						NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,	
 	[strFooterComments]					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
     [intShipToLocationId]				INT												NULL,
