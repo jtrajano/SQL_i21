@@ -124,5 +124,6 @@ FROM (
 	LEFT JOIN tblSMCurrency LCU ON LCU.intCurrencyID = L.intCurrencyId
 	LEFT JOIN (tblICInventoryReceipt receipt INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
 	ON LD.intLoadDetailId = receiptItem.intSourceId AND receipt.intSourceType = 2
-	WHERE L.ysnPosted = 1 AND L.intPurchaseSale IN (1, 3) AND L.intShipmentStatus IN (1,3)
+	WHERE L.ysnPosted = 1 AND L.intPurchaseSale IN (1, 3) 
+		AND (L.intShipmentStatus IN (1,3) OR (L.intPurchaseSale = 3 AND L.intShipmentStatus = 6))
 ) t1
