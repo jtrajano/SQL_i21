@@ -1049,8 +1049,8 @@ BEGIN
 			, strNotes
 			, ysnPreCrush
 		FROM @List
-		WHERE dblTotal IS NULL
-			OR dblTotal <> 0
+		WHERE (dblTotal IS NULL
+			OR dblTotal <> 0)
 			AND strType NOT LIKE '%' + @strPurchaseSales + '%'
 			AND strType <> 'Net Hedge'
 		ORDER BY  CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END

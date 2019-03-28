@@ -50,6 +50,18 @@ BEGIN
 		INSERT INTO @Commodity(intCommodity)
 		SELECT Item COLLATE Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')
 	END
+
+	if isnull(@strPurchaseSales,'') <> ''
+	BEGIN
+	if @strPurchaseSales='Purchase'
+	BEGIN
+	select @strPurchaseSales='Sale'
+	END
+	ELSE
+	BEGIN
+	SELECT @strPurchaseSales='Purchase'
+	END
+	END
 	
 	DECLARE @tempFinal AS TABLE (intRow INT IDENTITY
 		, intContractHeaderId INT
