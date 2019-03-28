@@ -35,7 +35,9 @@ FROM (
 		, ft.intCommodityId
 		, strBankName
 		, strBankAccountNo
-		, strSelectedInstrumentType = (CASE WHEN intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' ELSE 'OTC' END) COLLATE Latin1_General_CI_AS
+		, strSelectedInstrumentType = (CASE WHEN intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' 
+											WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
+										ELSE 'OTC - Others' END) COLLATE Latin1_General_CI_AS
 		, ft.dtmMaturityDate
 		, strCurrencyExchangeRateType
 		, ft.strFromCurrency

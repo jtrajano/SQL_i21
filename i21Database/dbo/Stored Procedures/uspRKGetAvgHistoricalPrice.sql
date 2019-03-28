@@ -173,7 +173,7 @@ FROM (
 	JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=m.intUnitMeasureId
 	JOIN tblSMCurrency mc on m.intCurrencyId=mc.intCurrencyID
 	LEFT JOIN tblRKFuturesMonth rfm on rfm.intFutureMonthId=ft.intRollingMonthId
-	WHERE intSelectedInstrumentTypeId = 1 AND intInstrumentTypeId = 1
+	WHERE intSelectedInstrumentTypeId in(1,3) AND intInstrumentTypeId = 1
 		AND CONVERT(DATETIME,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFromDate and @dtmToDate
 ) t
 ORDER BY strFutureMonth
