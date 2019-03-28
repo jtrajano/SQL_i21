@@ -42,9 +42,9 @@ CREATE TABLE #tmpPayablePostData (
 );
 
 CREATE TABLE #tmpPayableInvalidData (
-	[strError] [NVARCHAR](1000),
-	[strTransactionType] [NVARCHAR](50),
-	[strTransactionId] [NVARCHAR](50),
+	[strError] [NVARCHAR](1000) COLLATE Latin1_General_CI_AS,
+	[strTransactionType] [NVARCHAR](50) COLLATE Latin1_General_CI_AS,
+	[strTransactionId] [NVARCHAR](50) COLLATE Latin1_General_CI_AS,
 	[intTransactionId] INT
 );
 
@@ -124,12 +124,12 @@ FROM #tmpPayablePostData
 ORDER BY intPaymentId
 
 --GET ALL PREPAY
-INSERT INTO @prepayIds
-SELECT 
-	A.intPaymentId
-FROM #tmpPayablePostData A
-INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
-WHERE B.ysnPrepay = 1 
+-- INSERT INTO @prepayIds
+-- SELECT 
+-- 	A.intPaymentId
+-- FROM #tmpPayablePostData A
+-- INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
+-- WHERE B.ysnPrepay = 1 
 
 --GET ALL PAYMENTS
 INSERT INTO @payments
@@ -166,9 +166,10 @@ END
 IF(@totalInvalid > 0)
 BEGIN
 
-	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, ysnLienExists, intTransactionId)
 	OUTPUT inserted.intId INTO @postResult
-	SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpPayableInvalidData
+	SELECT A.strError, A.strTransactionType, A.strTransactionId, @batchId, pay.ysnLienExists, A.intTransactionId FROM #tmpPayableInvalidData A
+	INNER JOIN tblAPPayment pay ON pay.strPaymentRecordNum = A.strTransactionId COLLATE Latin1_General_CI_AS
 
 	SET @invalidCount = @totalInvalid
 
@@ -598,14 +599,17 @@ BEGIN
 	WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
 
 	--INSERT THE RESULT FOR SHOWING ON THE USER
-	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, intTransactionId, strBatchNumber)
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, ysnLienExists, intTransactionId, strBatchNumber)
 	SELECT 
 		A.strDescription
 		,A.strTransactionType
 		,A.strTransactionId
 		,A.intTransactionId
+		,pay.ysnLienExists
 		,@batchId
 	FROM tblGLPostResult A
+	INNER JOIN tblAPPayment pay
+		ON pay.strPaymentRecordNum = A.strTransactionId COLLATE Latin1_General_CI_AS
 	WHERE A.strBatchId = @batchId
 
 	--MAKE SURE THAT ALL GL ENTRIES ARE VALID
@@ -638,12 +642,13 @@ BEGIN
 	EXEC uspAPUpdatePaymentBankTransaction @paymentIds = @paymentForBankTransaction, @post = @post, @userId = @userId, @batchId = @batchIdUsed
 
 	--Insert Successfully posted transactions.
-	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, ysnLienExists, intTransactionId)
 	SELECT 
 		CASE WHEN @post = 1 THEN @PostSuccessfulMsg ELSE @UnpostSuccessfulMsg END,
 		'Payable',
 		A.strPaymentRecordNum,
 		@batchId,
+		A.ysnLienExists,
 		A.intPaymentId
 	FROM tblAPPayment A
 	WHERE intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
@@ -702,7 +707,7 @@ BEGIN
 	EXEC [uspAPUpdateBill1099] @param
 
 	--UPDATE tblAPBill.ysnPrepayHasPayment
-	EXEC [uspAPUpdatePrepayStatus] @prepayIds
+	EXEC [uspAPUpdatePrepayStatus] @payments
 	
 	--UPDATE INVOICES
 	DECLARE @invoices Id

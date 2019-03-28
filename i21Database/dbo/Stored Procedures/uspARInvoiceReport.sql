@@ -97,6 +97,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , intEntityUserId
 	 , strRequestId
 	 , strInvoiceFormat
+	 , blbSignature
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -215,6 +216,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
+	 , blbSignature				= INV.blbSignature
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (

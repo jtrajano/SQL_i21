@@ -393,12 +393,12 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 					DECLARE @successfulCount INT 
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
     				
-					EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,1, @successfulCount OUTPUT
+					EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Imported Journal'',@intUserId,1, @successfulCount OUTPUT
 
     				IF  @successfulCount > @beforePosting
     				BEGIN
 						SET @beforePosting = @successfulCount
-    					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
+    					UPDATE tblGLJournal SET strJournalType = ''Imported Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
     					INSERT INTO @tblLogSuccess(
 							strEventDescription,
 							dtePostDate,
