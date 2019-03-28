@@ -7845,4 +7845,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\MB\ImportFileDefault.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\14_DegreeDayClock.sql" />
+  </ItemGroup>
 </Project>
