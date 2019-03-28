@@ -214,6 +214,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, intContainerWeightUOMId = LogisticsView.intWeightUOMId
 		, dblContainerWeightUOMConvFactor = LogisticsView.dblWeightUOMConvFactor
 		, Item.ysnLotWeightsRequired
+		, ItemLocation.intAllowZeroCostTypeId
 		, intContractSeq = (
 				CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
 					THEN ContractView.intContractSeq

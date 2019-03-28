@@ -54,6 +54,9 @@ RETURN (
 				AND @intItemId IS NOT NULL 	
 
 		-- Check for an item location that doesn't allow zero cost
+		-- 1 or NULL: No
+		-- 2: Yes
+		-- 3: Yes, with warning message
 		UNION ALL
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
@@ -62,10 +65,17 @@ RETURN (
 		FROM dbo.tblICItem Item
 			INNER JOIN dbo.tblICItemLocation ItemLocation ON Item.intItemId = ItemLocation.intItemId
 			INNER JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = ItemLocation.intLocationId
+			INNER JOIN tblICInventoryReceiptItem ri ON ri.intItemId = Item.intItemId
+			INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				AND r.intLocationId = ItemLocation.intLocationId
 		WHERE ItemLocation.intItemId = @intItemId 
 				AND ItemLocation.intItemLocationId = @intItemLocationId
-				AND ISNULL(intAllowZeroCostTypeId, 1) <> 1
+				AND ISNULL(intAllowZeroCostTypeId, 1) = 1
+				AND r.strReceiptNumber = @strTransactionId
+				AND ri.dblUnitCost <= 0
+				
 
+	
 		-- Check for invalid item UOM Id
 		UNION ALL 
 		SELECT	intItemId = @intItemId
