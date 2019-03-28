@@ -16,7 +16,7 @@ FROM (
 		 , strTaxTransactionType		= 'Invoice' COLLATE Latin1_General_CI_AS
 	FROM tblARInvoiceDetailTax IDT 	
 	INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
-	WHERE (IDT.ysnTaxExempt = 1 OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
+	WHERE ((IDT.ysnTaxExempt = 1 AND ISNULL(ID.dblComputedGrossPrice, 0) <> 0) OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
 	  AND ID.intItemId <> ISNULL((SELECT TOP 1 intItemForFreightId FROM tblTRCompanyPreference), 0)
 
 	UNION ALL
