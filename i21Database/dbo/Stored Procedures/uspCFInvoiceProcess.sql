@@ -90,8 +90,16 @@ BEGIN TRY
 	--EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
 	--------------------------------------
 
-	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
-	SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
+	--UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
+	--SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
+
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = cfS.strTempInvoiceReportNumber
+	FROM (
+		SELECT intTransactionId,strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
+	) as cfS
+	WHERE cfS.intTransactionId = tblCFTransaction.intTransactionId
+
+	SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
 
 	------------GROUP BY CUSTOMER-----------
 	--INSERT INTO #tblCFDisctinctCustomerInvoice(

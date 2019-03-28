@@ -109,6 +109,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\11_ApplianceType.sql
 :r .\TM\DefaultData\12_BudgetCalculation.sql
 :r .\TM\DefaultData\13_GlobalJulianCalendar.sql
+:r .\TM\DefaultData\14_DegreeDayClock.sql
 :r .\TM\Tables\tblTMCOBOLWRITE.sql
 
 ----TM Reports

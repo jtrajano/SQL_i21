@@ -66,14 +66,14 @@ SELECT
 ,strBillTo =  dbo.fnARFormatCustomerAddress (
 				 NULL
 				,NULL
-				,emEntity.strBillToLocationName
+				,NULL
 				,emEntity.strBillToAddress
 				,emEntity.strBillToCity
 				,emEntity.strBillToState
 				,emEntity.strBillToZipCode
 				,emEntity.strBillToCountry
 				,emEntity.strName
-				,NULL)
+				,1)
 ,arInv.strShipTo
 ,arInv.strType
 ,arInv.strLocationName

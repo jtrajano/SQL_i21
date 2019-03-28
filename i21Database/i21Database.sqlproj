@@ -7479,6 +7479,10 @@
     <Build Include="dbo\Stored Procedures\uspCTSplitSequenceAndCreateNewContract.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceSourceList.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCancelOpenLoadSchedule.sql" />
+    <Build Include="dbo\Tables\tblCTSMTransactionApprovedLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFeedNotSentEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSendMissingFeed.sql" />
+    <Build Include="dbo\Tables\tblCFFactorTaxGroupXRef.sql" />
     <Build Include="dbo\Tables\tblRKDPIHeader.sql" />
     <Build Include="dbo\Tables\tblRKDPISummary.sql" />
     <Build Include="dbo\Tables\tblRKDPIInventory.sql" />
@@ -7846,5 +7850,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\MB\ImportFileDefault.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\14_DegreeDayClock.sql" />
   </ItemGroup>
 </Project>

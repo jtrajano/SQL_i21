@@ -26,12 +26,13 @@ BEGIN
 		LEFT JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND B.ysnOffset = 0 THEN 0 ELSE 1 END --DO NOTHING IF PREPAID/BASIS IS NOT AN OFFSET
 END
 ELSE IF @post = 1
 BEGIN
 	UPDATE B
 		SET B.dblAmountDue = CASE WHEN CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2)) = CAST(B.dblAmountDue AS DECIMAL(18,2))
-								THEN 0 ELSE CAST((B.dblAmountDue) - (B.dblPayment) AS DECIMAL(18,2)) END
+									THEN 0 ELSE CAST((B.dblAmountDue) - (B.dblPayment) AS DECIMAL(18,2)) END
 		--B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
 		--					THEN B.dblDiscount ELSE 0 END,
 		--B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
@@ -39,5 +40,8 @@ BEGIN
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
+		LEFT JOIN tblAPBill C
+			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
+	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND B.ysnOffset = 0 THEN 0 ELSE 1 END
 END

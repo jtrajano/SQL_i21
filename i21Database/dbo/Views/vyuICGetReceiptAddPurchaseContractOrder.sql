@@ -154,7 +154,7 @@ FROM (
 
 	WHERE ContractView.ysnAllowedToShow = 1
 		AND ContractView.strContractType = 'Purchase'
-	
+		AND POView.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
 	--UNION ALL	
 	--SELECT 	
 	--	intLocationId				= intCompanyLocationId			

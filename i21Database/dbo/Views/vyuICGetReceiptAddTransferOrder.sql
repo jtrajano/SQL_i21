@@ -255,5 +255,5 @@ FROM (
 		AND h.ysnShipmentRequired = 1
 		AND (h.intStatusId = 1 OR h.intStatusId = 2)
 		AND ISNULL(t.intInventoryTransactionId, storage.intInventoryTransactionStorageId) IS NOT NULL 
-	
+		AND item.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
 ) tblAddOrders

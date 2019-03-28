@@ -36,7 +36,7 @@ BEGIN
 				FROM	dbo.tblICInventoryTransaction ItemTransactions 
 					LEFT OUTER JOIN tblICItem Item ON Item.intItemId = ItemTransactions.intItemId
 				WHERE	ItemTransactions.strBatchId = @strBatchId
-					AND Item.strType IN ('Non-Inventory', 'Service', 'Software')
+					AND Item.strType = 'Non-Inventory'
 			) Query
 END 
 

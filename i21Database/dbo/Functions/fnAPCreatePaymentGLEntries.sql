@@ -422,9 +422,9 @@ BEGIN
 													)
 														*  ISNULL(NULLIF(voucherRate.dblExchangeRate,0),1))
 											AS DECIMAL(18,2))) * (
-																CASE WHEN (voucher.intTransactionType NOT IN (1,2,14) AND A.ysnPrepay = 0)
+																CASE WHEN (voucher.intTransactionType NOT IN (1,2,13,14) AND A.ysnPrepay = 0)
 																			OR
-																		  (voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 1)
+																		  (voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 1)
 																		 THEN -1 
 																		 ELSE 1 END),
 		[dblCredit]						=	0,
@@ -462,9 +462,9 @@ BEGIN
 												)
 											AS DECIMAL(18,2))
 											* (
-												CASE WHEN (voucher.intTransactionType NOT IN (1,2,14) AND A.ysnPrepay = 0)
+												CASE WHEN (voucher.intTransactionType NOT IN (1,2,13, 14) AND A.ysnPrepay = 0)
 															OR
-															(voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 1)
+															(voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 1)
 															THEN -1 
 															ELSE 1 END),      
 		[dblDebitReport]				=	0,
