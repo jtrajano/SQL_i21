@@ -108,8 +108,10 @@ BEGIN TRY
 			SET @strStockUOM = NULL
 			SET @strDescription = NULL
 			SET @ysnDeleted = 0
-
-			SELECT @strProductType = NULL
+			SET @intStageItemId = NULL
+			SET @stri21ProductType = NULL
+			SET @intCommodityAttributeId = NULL
+			SET @strProductType = NULL
 
 			SELECT @intStageItemId = intStageItemId
 				,@strItemNo = strItemNo
@@ -722,30 +724,42 @@ BEGIN TRY
 			--Move to Archive
 			INSERT INTO tblIPItemArchive (
 				strItemNo
+				,strDescription
+				,strItemType
+				,strShortName
+				,strCommodity
+				,strCategoryCode
+				,strItemStatus
+				,strStockUOM
+				,ysnStockUOM
+				,ysnDeleted
+				,strSessionId
+				,dtmTransactionDate
+				,strProductType
 				,dtmCreated
 				,strCreatedUserName
 				,dtmLastModified
 				,strLastModifiedUserName
-				,ysnDeleted
-				,strItemType
-				,strStockUOM
 				,strSKUItemNo
-				,strDescription
-				,strSessionId
-				,strProductType
 				)
 			SELECT strItemNo
+				,strDescription
+				,strItemType
+				,strShortName
+				,strCommodity
+				,strCategoryCode
+				,strItemStatus
+				,strStockUOM
+				,ysnStockUOM
+				,ysnDeleted
+				,strSessionId
+				,dtmTransactionDate
+				,strProductType
 				,dtmCreated
 				,strCreatedUserName
 				,dtmLastModified
 				,strLastModifiedUserName
-				,ysnDeleted
-				,strItemType
-				,strStockUOM
 				,strSKUItemNo
-				,strDescription
-				,strSessionId
-				,strProductType
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intStageItemId
 
@@ -797,34 +811,46 @@ BEGIN TRY
 			--Move to Error
 			INSERT INTO tblIPItemError (
 				strItemNo
+				,strDescription
+				,strItemType
+				,strShortName
+				,strCommodity
+				,strCategoryCode
+				,strItemStatus
+				,strStockUOM
+				,ysnStockUOM
+				,ysnDeleted
+				,strSessionId
+				,dtmTransactionDate
+				,strProductType
 				,dtmCreated
 				,strCreatedUserName
 				,dtmLastModified
 				,strLastModifiedUserName
-				,ysnDeleted
-				,strItemType
-				,strStockUOM
 				,strSKUItemNo
-				,strDescription
 				,strErrorMessage
 				,strImportStatus
-				,strSessionId
-				,strProductType
 				)
 			SELECT strItemNo
+				,strDescription
+				,strItemType
+				,strShortName
+				,strCommodity
+				,strCategoryCode
+				,strItemStatus
+				,strStockUOM
+				,ysnStockUOM
+				,ysnDeleted
+				,strSessionId
+				,dtmTransactionDate
+				,strProductType
 				,dtmCreated
 				,strCreatedUserName
 				,dtmLastModified
 				,strLastModifiedUserName
-				,ysnDeleted
-				,strItemType
-				,strStockUOM
 				,strSKUItemNo
-				,strDescription
 				,@ErrMsg
 				,'Failed'
-				,strSessionId
-				,strProductType
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intStageItemId
 
