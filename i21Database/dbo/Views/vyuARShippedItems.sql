@@ -884,7 +884,7 @@ FROM (
 	     , intItemId						= intItemId
 	     , strItemDescription				= strItemDescription
 	     , intItemUOMId						= intItemUOMId
-		 , intPriceUOMId					= intWeightUOMId
+		 , intPriceUOMId					= intShipmentItemUOMId
 	     , intOrderUOMId					= intOrderUOMId
 	     , intShipmentItemUOMId				= intShipmentItemUOMId
 		 , intWeightUOMId					= intItemUOMId
