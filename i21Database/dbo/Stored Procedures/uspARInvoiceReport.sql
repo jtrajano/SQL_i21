@@ -62,9 +62,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblItemPrice
 	 , strPaid
 	 , strPosted
-	 , intTaxCodeId
-	 , strTaxCode
-	 , dblTaxDetail
 	 , strTransactionType
 	 , intDetailCount
 	 , intRecipeId
@@ -181,9 +178,6 @@ SELECT intInvoiceId				= INV.intInvoiceId
 								  ELSE NULL END
 	 , strPaid					= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , strPosted				= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
-	 , intTaxCodeId				= INVOICEDETAIL.intTaxCodeId
-	 , strTaxCode				= INVOICEDETAIL.strTaxCode
-	 , dblTaxDetail				= INVOICEDETAIL.dblAdjustedTax
 	 , strTransactionType		= INV.strTransactionType
 	 , intDetailCount			= ISNULL(INVOICEITEMS.intInvoiceDetailCount, 0)
 	 , intRecipeId				= INVOICEDETAIL.intRecipeId
@@ -259,9 +253,6 @@ LEFT JOIN (
 		 , CONTRACTS.dblBalance
 		 , CONTRACTS.strContractNumber
 		 , CONTRACTS.strCustomerContract
-		 , TAX.intTaxCodeId
-		 , TAX.dblAdjustedTax
-		 , TAX.strTaxCode
 		 , ITEM.strItemNo
 		 , ITEM.strInvoiceComments
 		 , strItemType			= ITEM.strType
@@ -306,21 +297,7 @@ LEFT JOIN (
 		SELECT intSalesOrderId
 			 , strBOLNumber
 		FROM dbo.tblSOSalesOrder WITH (NOLOCK)
-	) SO ON SOD.intSalesOrderId = SO.intSalesOrderId
-	LEFT JOIN (
-		SELECT IDT.intInvoiceDetailId
-			 , IDT.intTaxCodeId
-			 , IDT.dblAdjustedTax
-			 , TAXCODE.strTaxCode
-		FROM dbo.tblARInvoiceDetailTax IDT WITH (NOLOCK)
-		LEFT JOIN (
-			SELECT intTaxCodeId
-				 , strTaxCode
-			FROM dbo.tblSMTaxCode WITH (NOLOCK)
-		) TAXCODE ON IDT.intTaxCodeId = TAXCODE.intTaxCodeId
-		WHERE dblAdjustedTax <> 0
-	) TAX ON ID.intInvoiceDetailId = TAX.intInvoiceDetailId
-	     AND ID.intItemId <> ISNULL((SELECT TOP 1 intItemForFreightId FROM dbo.tblTRCompanyPreference WITH (NOLOCK)), 0)
+	) SO ON SOD.intSalesOrderId = SO.intSalesOrderId	
 	LEFT JOIN (
 		SELECT CH.intContractHeaderId
 			 , CD.intContractDetailId
