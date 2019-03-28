@@ -33,8 +33,7 @@ SELECT TOP 1 @dtmFutureMonthsDate=dtmFutureMonthsDate,@strParamFutureMonth=strFu
 
 SELECT TOP 1 @strUnitMeasure= strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId=@intUOMId  
 declare @intoldUnitMeasureId int 
-set @intoldUnitMeasureId = @intUOMId
-select @intUOMId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId and intUnitMeasureId=@intUOMId  
+select @intoldUnitMeasureId=intUnitMeasureId from tblICCommodityUnitMeasure where intCommodityUnitMeasureId=@intUOMId  
 SELECT @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge FROM tblRKCompanyPreference  
 SELECT @strRiskView = strRiskView FROM tblRKCompanyPreference 
 
