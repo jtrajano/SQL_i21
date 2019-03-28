@@ -79,7 +79,7 @@ FROM (
 	SELECT ROW_NUMBER() OVER (PARTITION BY intFutOptTransactionId ORDER BY dtmTransactionDate DESC) intRowNum
 		, *
 	FROM (
-		--Futures Buy
+		--Futures Buy & Sell
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
@@ -117,55 +117,13 @@ FROM (
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
 			) t WHERE intRowNum = 1
 		) History
-		WHERE FOT.strBuySell = 'Buy' AND FOT.strInstrumentType = 'Futures'
+		WHERE FOT.strInstrumentType = 'Futures'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			
-		UNION ALL
-		--Futures Sell
-		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-										ELSE History.dtmTransactionDate END
-			, FOT.intFutOptTransactionId
-			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.dblOpenContract END
-			, FOT.strCommodityCode
-			, FOT.strInternalTradeNo
-			, FOT.strLocationName
-			, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
-									ELSE History.dblContractSize END
-			, FOT.strFutMarketName
-			, FOT.strFutureMonth AS strFutureMonth
-			, FOT.strOptionMonthYear AS strOptionMonth
-			, FOT.dblStrike
-			, FOT.strOptionType
-			, FOT.strInstrumentType
-			, FOT.strBrokerageAccount AS strBrokerAccount
-			, FOT.strName AS strBroker
-			, strBuySell
-			, FOTH.intFutOptTransactionHeaderId
-			, FOT.intFutureMarketId
-			, FOT.intFutureMonthId
-			, FOT.strBrokerTradeNo
-			, FOT.strNotes
-			, FOT.ysnPreCrush
-		FROM tblRKFutOptTransactionHeader FOTH
-		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-		OUTER APPLY (
-			SELECT * FROM (
-				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
-					, *
-					, dblOpenContract = - (History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0))
-				FROM vyuRKGetFutOptTransactionHistory History 
-				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
-					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
-			) t WHERE intRowNum = 1
-		) History
-		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Futures'
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			
 		UNION ALL
-		--Options Buy
+		--Options Buy & Sell
 		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END
 			, FOT.intFutOptTransactionId
@@ -203,58 +161,16 @@ FROM (
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
 			) t WHERE intRowNum = 1
 		) History
-		WHERE FOT.strBuySell = 'BUY' AND FOT.strInstrumentType = 'Options'
+		WHERE FOT.strInstrumentType = 'Options'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 				
-		UNION ALL
-		--Options Sell
-		SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-										ELSE History.dtmTransactionDate END
-			, FOT.intFutOptTransactionId
-			, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-									ELSE History.dblOpenContract END
-			, FOT.strCommodityCode
-			, FOT.strInternalTradeNo
-			, FOT.strLocationName
-			, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
-									ELSE History.dblContractSize END
-			, FOT.strFutMarketName
-			, FOT.strFutureMonth AS strFutureMonth
-			, FOT.strOptionMonthYear AS strOptionMonth
-			, FOT.dblStrike
-			, FOT.strOptionType
-			, FOT.strInstrumentType
-			, FOT.strBrokerageAccount AS strBrokerAccount
-			, FOT.strName AS strBroker
-			, strBuySell
-			, FOTH.intFutOptTransactionHeaderId
-			, FOT.intFutureMarketId
-			, FOT.intFutureMonthId
-			, FOT.strBrokerTradeNo
-			, FOT.strNotes
-			, FOT.ysnPreCrush
-		FROM tblRKFutOptTransactionHeader FOTH
-		INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
-		OUTER APPLY (
-			SELECT * FROM (
-				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
-					, *
-					, dblOpenContract = - (History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0))
-				FROM vyuRKGetFutOptTransactionHistory History 
-				WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
-					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
-			) t WHERE intRowNum = 1
-		) History
-		WHERE FOT.strBuySell = 'Sell' AND FOT.strInstrumentType = 'Options'
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 
 		UNION ALL
 		-- Deleted Derivatives but with values prior to As Of Date
 		SELECT History.dtmTransactionDate
 			, History.intFutOptTransactionId
-			, intOpenContract = History.intOpenContract
+			, dblOpenContract = History.dblOpenContract
 			, History.strCommodity
 			, History.strInternalTradeNo
 			, History.strLocationName
@@ -278,8 +194,7 @@ FROM (
 			SELECT * FROM (
 				SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 					, *
-					, intOpenContract = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0)
-											ELSE - (History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0)) END
+					, dblOpenContract = History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmToDate, History.intFutOptTransactionId), 0)
 				FROM vyuRKGetFutOptTransactionHistory History 
 				WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
 					AND History.dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)))
