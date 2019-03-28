@@ -465,3 +465,138 @@ IF NOT EXISTS (
 GO
 UPDATE tblIPSAPProductType SET stri21ProductType = 'Cocoa Butter' where stri21ProductType = 'Cococa Butter'
 GO
+
+
+
+------- Hershey's Phase II -------
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '706'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '706'
+		,'Sugar'
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '708'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '708'
+		,'Corn Sweeteners'
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '712'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '712'
+		,'Peanuts'
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '710'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '710'
+		,'Almonds'
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '716'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '716'
+		,'Dairy'
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '717'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '717'
+		,'Dairy Blends'
+GO
+
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPLocation
+		WHERE stri21Location = 'United States'
+		)
+	INSERT INTO tblIPSAPLocation (
+		strSAPLocation
+		,stri21Location
+		,ysnEnabledERPFeed
+		)
+	SELECT '100'
+		,'United States'
+		,0
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPLocation
+		WHERE stri21Location = 'Canada'
+		)
+	INSERT INTO tblIPSAPLocation (
+		strSAPLocation
+		,stri21Location
+		,ysnEnabledERPFeed
+		)
+	SELECT '101'
+		,'Canada'
+		,0
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPLocation
+		WHERE stri21Location = 'Mexico'
+		)
+	INSERT INTO tblIPSAPLocation (
+		strSAPLocation
+		,stri21Location
+		,ysnEnabledERPFeed
+		)
+	SELECT '102'
+		,'Mexico'
+		,0
+GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPLocation
+		WHERE stri21Location = 'Malaysia'
+		)
+	INSERT INTO tblIPSAPLocation (
+		strSAPLocation
+		,stri21Location
+		,ysnEnabledERPFeed
+		)
+	SELECT '632'
+		,'Malaysia'
+		,0
+GO
