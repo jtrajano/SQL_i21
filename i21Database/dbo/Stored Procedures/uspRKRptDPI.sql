@@ -7,6 +7,10 @@ DECLARE @idoc INT
 	, @intDPIHeaderId INTEGER
 	, @dtmFrom DATETIME
 	, @dtmTo DATETIME
+	, @Commodity NVARCHAR(100)
+	, @Item NVARCHAR(100)
+	, @Location NVARCHAR(100)
+	, @License NVARCHAR(100)
 
 IF LTRIM(RTRIM(@xmlParam)) = ''
   SET @xmlParam = NULL
@@ -41,6 +45,10 @@ FROM OPENXML(@idoc, 'xmlparam/filters/filter', 2) WITH (
 SELECT @intDPIHeaderId = [from] FROM @temp_xml_table WHERE [fieldname] = 'intDPIHeaderId' 
 SELECT @dtmFrom = [from] FROM @temp_xml_table WHERE [fieldname] = 'dtmFrom'
 SELECT @dtmTo = [from] FROM @temp_xml_table WHERE [fieldname] = 'dtmTo'
+SELECT @Commodity = [from] FROM @temp_xml_table WHERE [fieldname] = 'Commodity' 
+SELECT @Item = [from] FROM @temp_xml_table WHERE [fieldname] = 'Item'
+SELECT @Location = [from] FROM @temp_xml_table WHERE [fieldname] = 'Location'
+SELECT @License = [from] FROM @temp_xml_table WHERE [fieldname] = 'License'
 
 IF (ISNULL(@xmlParam ,'') = '')
 BEGIN
@@ -106,12 +114,20 @@ BEGIN
 		, dblUnpaidBalance = NULL
 		, dtmFrom = GETDATE()
 		, dtmTo = GETDATE()
+		, Commodity = @Commodity
+		, Item = @Item
+		, [Location] = @Location
+		, License = @License
 END
 ELSE
 BEGIN
 	SELECT TOP 1 *
 		, dtmFrom = @dtmFrom
 		, dtmTo = @dtmTo
+		, Commodity = @Commodity
+		, Item = @Item
+		, [Location] = @Location
+		, License = @License
 	FROM tblRKDPISummary
 	WHERE intDPIHeaderId = @intDPIHeaderId
 		AND dtmTransactionDate >= @dtmFrom
