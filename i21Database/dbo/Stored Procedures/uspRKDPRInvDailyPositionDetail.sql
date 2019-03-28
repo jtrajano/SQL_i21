@@ -47,7 +47,7 @@ BEGIN
 	BEGIN
 		IF @strPurchaseSales = 'Purchase'
 		BEGIN
-			SELECT @strPurchaseSales = 'Sales'
+			SELECT @strPurchaseSales = 'Sale'
 		END
 		ELSE
 		BEGIN
@@ -2696,7 +2696,7 @@ BEGIN
 		FROM @FinalTable 
 		WHERE strSeqHeader <> 'Company Titled Stock'
 			AND strType <> 'Receipt' 
-			-- and strType not like '%'+@strPurchaseSales+'%'
+			AND strType not like '%'+@strPurchaseSales+'%'
 		ORDER BY strCommodityCode, intSeqId ASC, intContractHeaderId DESC
 	END
 END
