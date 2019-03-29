@@ -452,4 +452,6 @@ ELSE
          dtmDateFrom, dtmDateTo,@periods,1,0 
          FROM tblGLFiscalYear
          WHERE intFiscalYearId = @intFiscalYearId
+UPDATE tblGLFiscalYear set ysnCurrent = 1 WHERE intFiscalYearId = @intFiscalYearId
+
 END')

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessACHPayments]
 	@strPaymentIds			NVARCHAR(MAX),
 	@intBankAccountId		INT,
+	@intCompanyLocationId	INT,
 	@intUserId				INT,
 	@strNewTransactionId	NVARCHAR(100) = '' OUTPUT
 AS
@@ -79,6 +80,12 @@ IF ISNULL(@intBankAccountId, 0) = 0
 		RETURN;
 	END
 
+IF ISNULL(@intCompanyLocationId, 0) = 0
+	BEGIN
+		RAISERROR('Current Location is required when processing ACH Payments.', 16, 1)
+		RETURN;
+	END
+
 IF ISNULL(@intUserId, 0) = 0
 	BEGIN
 		RAISERROR('User is required when processing ACH Payments.', 16, 1)
@@ -108,7 +115,7 @@ SELECT
 	,[dtmDate]						= P.dtmDatePaid
 	,[dblAmount]					= SUM(UF.dblAmount)
 	,[strMemo]						= CASE WHEN P.ysnVendorRefund = 1 THEN 'Vendor Refund' ELSE 'AR ACH' END
-	,[intCompanyLocationId]			= UF.intLocationId
+	,[intCompanyLocationId]			= @intCompanyLocationId
 	,[intEntityId]					= ISNULL(@intUserId, UF.intLastModifiedUserId)
 	,[intCreatedUserId]				= ISNULL(@intUserId, UF.intLastModifiedUserId)
 	,[intLastModifiedUserId]		= ISNULL(@intUserId, UF.intLastModifiedUserId)
@@ -121,7 +128,6 @@ CROSS APPLY (
 GROUP BY UF.intBankAccountId
 	   , P.intCurrencyId
 	   , P.dtmDatePaid
-	   , UF.intLocationId
 	   , P.ysnVendorRefund
 	   , ISNULL(@intUserId, UF.intLastModifiedUserId)
 	   
@@ -258,8 +264,7 @@ BEGIN
 		  AND P.dtmDatePaid = @DupDatePaid
 		
 	) PAYMENTS 
-	WHERE UF.intBankAccountId = @DupBankId 
-	  AND UF.intLocationId = @DupLocation 
+	WHERE UF.intBankAccountId = @DupBankId 	  
 
 	SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
 

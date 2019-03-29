@@ -3,7 +3,8 @@
 	@intTicketId AS INT, 
 	@intUserId AS INT,
 	@intEntityId AS INT,
-	@InventoryReceiptId AS INT OUTPUT 
+	@InventoryReceiptId AS INT OUTPUT,
+	@intBillId AS INT OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -40,7 +41,6 @@ DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
 		,@intStorageScheduleTypeId INT
-		,@intBillId AS INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
 		,@success AS INT
@@ -339,9 +339,7 @@ END
  
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation CTPF
-				  CROSS APPLY dbo.fnCTGetTopOneSequence(0,CTPF.intContractDetailId) CD
-				  WHERE CTPF.intContractDetailId = @intContractDetailId and CD.strPricingType <> 'Priced')
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
 			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
 		END
@@ -442,8 +440,7 @@ END
 		LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
 		LEFT JOIN tblCTPriceFixation CTP ON CTP.intContractDetailId = CT.intContractDetailId
 		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND ri.intOwnershipType = 1 
-		AND ri.ysnAllowVoucher = 1
-		
+		AND CTP.intPriceFixationId IS NULL AND ri.ysnAllowVoucher = 1
 		-- Assemble the voucher items 
 		BEGIN 
 			INSERT INTO @voucherItems (
@@ -591,8 +588,8 @@ END
 					,[ysnTaxOnly]
 			FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
 			BEGIN /* Create Voucher */
-
-			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId
+			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId OUTPUT
+			
 			
 			END
 		END

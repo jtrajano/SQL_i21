@@ -3,7 +3,8 @@
 	@intEntityId INT,
 	@intLocationId INT,
 	@dtmScaleDate DATETIME,
-	@intUserId INT
+	@intUserId INT,
+	@intBillId INT = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -21,7 +22,6 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@voucherDetailDirectInventory AS VoucherDetailDirectInventory
 		,@invoiceIntegrationStagingTable AS InvoiceIntegrationStagingTable
 		,@InTransitTableType AS InTransitTableType
-		,@intBillId INT
 		,@success INT
 		,@intInvoiceId INT
 		,@intFreightTermId INT

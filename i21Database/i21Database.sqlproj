@@ -7483,6 +7483,18 @@
     <Build Include="dbo\Stored Procedures\uspCTFeedNotSentEmailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSendMissingFeed.sql" />
     <Build Include="dbo\Tables\tblCFFactorTaxGroupXRef.sql" />
+    <Build Include="dbo\Tables\tblRKDPIHeader.sql" />
+    <Build Include="dbo\Tables\tblRKDPISummary.sql" />
+    <Build Include="dbo\Tables\tblRKDPIInventory.sql" />
+    <Build Include="dbo\Tables\tblRKDPICompanyOwnership.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateDPI.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
+    <Build Include="dbo\Tables\tblCTAOPComponent.sql" />
+    <Build Include="dbo\Views\vyuCTAOPComponent.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
+    <Build Include="dbo\Tables\tblSMTermCutoff.sql" />
+    <Build Include="dbo\User Defined Types\AROriginTaxCodeTableType.sql" />
+    <Build Include="dbo\Views\vyuEMEAExportCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

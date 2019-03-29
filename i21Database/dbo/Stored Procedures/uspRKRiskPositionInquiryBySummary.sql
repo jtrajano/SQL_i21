@@ -55,8 +55,7 @@ SELECT TOP 1 @strUnitMeasure= strUnitMeasure FROM tblICUnitMeasure WHERE intUnit
 
 DECLARE @intoldUnitMeasureId int
 
-SET @intoldUnitMeasureId = @intUOMId
-SELECT @intUOMId=intCommodityUnitMeasureId FROM tblICCommodityUnitMeasure where intCommodityId=@intCommodityId and intUnitMeasureId=@intUOMId  
+SELECT @intoldUnitMeasureId=intUnitMeasureId from tblICCommodityUnitMeasure where intCommodityUnitMeasureId=@intUOMId  
 SELECT TOP 1 @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge, @strRiskView = strRiskView FROM tblRKCompanyPreference
 
 DECLARE @intForecastWeeklyConsumptionUOMId1 INT

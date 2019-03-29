@@ -7,7 +7,8 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	,@intContractId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intStorageScheduleId AS INT = NULL
-	,@InventoryReceiptId AS INT OUTPUT 
+	,@InventoryReceiptId AS INT OUTPUT
+	,@intBillId AS INT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -54,7 +55,6 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intOrderId INT
 		,@intOwnershipType INT
 		,@intPricingTypeId INT
-		,@intBillId AS INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
 		,@success AS INT
@@ -722,7 +722,7 @@ BEGIN TRY
 			FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
 			BEGIN /* Create Voucher */
 
-			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId
+			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId OUTPUT
 			
 			END
 		END

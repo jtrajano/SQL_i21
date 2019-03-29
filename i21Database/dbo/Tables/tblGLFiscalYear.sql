@@ -6,6 +6,7 @@
     [dtmDateTo]        DATETIME      NULL,
     [ysnStatus]        BIT           DEFAULT 1 NOT NULL,
     [intConcurrencyId] INT           DEFAULT 1 NOT NULL,
+    [ysnCurrent]       BIT           NULL
     CONSTRAINT [PK_tblGLFiscalYearPeriod_1] PRIMARY KEY CLUSTERED ([intFiscalYearId] ASC)
 );
 

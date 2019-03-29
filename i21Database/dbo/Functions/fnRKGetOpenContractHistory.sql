@@ -10,10 +10,12 @@ BEGIN
 	DECLARE @dblMatchContract NUMERIC(18, 6)
 		, @strBuySell NVARCHAR(10)
 	SET @dtmDateAsOf = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmDateAsOf, 110), 110)
+	
 	SELECT TOP 1 @strBuySell = strNewBuySell
 	FROM vyuRKGetFutOptTransactionHistory
 	WHERE intFutOptTransactionId = @intFutOptTransactionId
 		AND dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmDateAsOf AS FLOAT)) AS DATETIME)))
+		ORDER BY dtmTransactionDate DESC
 
 	IF (@strBuySell = 'Buy')
 	BEGIN

@@ -42,6 +42,7 @@ BEGIN
 		,[strCurrency] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL
 		,[strWeightUOM] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL      
 		,[dblTotalPremium] NUMERIC(18,6)	
+		,[strStorageLocation] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL
 	)
     
 	IF OBJECT_ID('tempdb..#tblRequiredColumns') IS NOT NULL
@@ -56,9 +57,10 @@ BEGIN
 
 	  INSERT INTO #tblRequiredColumns ([intBasisItemId], [strColumnName])
 	  SELECT DISTINCT 
-	  AD.intBasisItemId,Item.strItemNo FROM tblCTAOPDetail AD 
+	  AC.intBasisItemId,Item.strItemNo FROM tblCTAOPDetail AD 
 	  JOIN tblCTAOP A ON A.intAOPId=AD.intAOPId
-	  JOIN tblICItem Item ON Item.intItemId=AD.intBasisItemId
+	  JOIN tblCTAOPComponent AC ON AC.intAOPDetailId = AD.intAOPDetailId
+	  JOIN tblICItem Item ON Item.intItemId=AC.intBasisItemId
 	  WHERE A.intCommodityId=1 AND A.strYear=@strYear
 	  UNION
 	  SELECT intItemId,strItemNo FROM tblICItem Where strType='Other Charge' AND  ysnBasisContract=1 
@@ -135,7 +137,7 @@ BEGIN
 		
 		  SET @SqlInsert = 'IF NOT EXISTS(SELECT 1 FROM #tblCoffeeNeedPlan)
 							BEGIN
-								INSERT INTO #tblCoffeeNeedPlan([intAOPDetailId],[strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM])
+								INSERT INTO #tblCoffeeNeedPlan([intAOPDetailId],[strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM],[strStorageLocation])
 								SELECT DISTINCT
 								AD.intAOPDetailId,
 								CO.strCommodityCode,
@@ -146,30 +148,34 @@ BEGIN
 								AD.dblVolume,
 								VM.strUnitMeasure	AS strVolumeUOM,
 								Currency.strCurrency,
-								WM.strUnitMeasure	AS strWeightUOM
+								WM.strUnitMeasure	AS strWeightUOM,
+								SL.strSubLocationName AS strStorageLocation
 								FROM	tblCTAOPDetail		AD
+								JOIN tblCTAOPComponent		AC ON AC.intAOPDetailId = AD.intAOPDetailId
 								JOIN	tblCTAOP			AP	ON	AD.intAOPId			=	AP.intAOPId
 								LEFT  JOIN     tblSMCurrency     Currency ON Currency.intCurrencyID=AD.intCurrencyId
 								LEFT  JOIN	tblICCommodity		CO	On	CO.intCommodityId	=	AP.intCommodityId	LEFT
 								JOIN	tblICItem			IM	ON	IM.intItemId		=	AD.intItemId		LEFT
-								JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId	LEFT
+								JOIN	tblICItem			BI	ON	BI.intItemId		=	AC.intBasisItemId	LEFT
 								JOIN	tblICItemUOM		VU	ON	VU.intItemUOMId		=	AD.intVolumeUOMId	LEFT
 								JOIN	tblICUnitMeasure	VM	ON	VM.intUnitMeasureId	=	VU.intUnitMeasureId	LEFT
 								JOIN	tblICItemUOM		WU	ON	WU.intItemUOMId		=	AD.intWeightUOMId	LEFT
 								JOIN	tblICUnitMeasure	WM	ON	WM.intUnitMeasureId	=	WU.intUnitMeasureId LEFT
 								JOIN	tblSMCompanyLocation	CL  ON	CL.intCompanyLocationId	=	AP.intCompanyLocationId
+								LEFT	JOIN	tblSMCompanyLocationSubLocation	SL	ON	SL.intCompanyLocationSubLocationId = AD.intStorageLocationId
 								LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId							
-								WHERE AD.dblCost >0 AND AP.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +'
+								WHERE AC.dblCost >0 AND AP.intCommodityId='+LTRIM(@IntCommodityId)+' AND AP.strYear='+@strYear +'
 							END'
 		
 
 		--SELECT @SqlInsert
 		EXEC (@SqlInsert)
 		SET @SqlUpdate='UPDATE AP
-						SET ['+ @strColumnName + ']=AD.dblCost
+						SET ['+ @strColumnName + ']=AC.dblCost
 						FROM	tblCTAOPDetail		AD
+						JOIN tblCTAOPComponent AC ON AC.intAOPDetailId = AD.intAOPDetailId
 						JOIN	#tblCoffeeNeedPlan			AP	ON	AD.intAOPDetailId			=	AP.intAOPDetailId
-						JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId								
+						JOIN	tblICItem			BI	ON	BI.intItemId		=	AC.intBasisItemId								
 						WHERE BI.strItemNo='''+@strColumnName+''''
 		
 		--SELECT @SqlUpdate
@@ -177,10 +183,11 @@ BEGIN
 		
 		--SELECT * INTO tblCoffeeNeedPlan_1 FROM  #tblCoffeeNeedPlan
 		SET @SqlTotalPremiumCalculation='UPDATE AP 
-										 SET [dblTotalPremium]=ISNULL([dblTotalPremium],0)+AD.dblCost
+										 SET [dblTotalPremium]=ISNULL([dblTotalPremium],0)+AC.dblCost
 										 FROM	#tblCoffeeNeedPlan AP
 										 JOIN   tblCTAOPDetail		AD ON AD.intAOPDetailId			=	AP.intAOPDetailId
-										 JOIN	tblICItem			BI	ON	BI.intItemId		=	AD.intBasisItemId 
+										 JOIN	tblCTAOPComponent AC ON AC.intAOPDetailId = AD.intAOPDetailId
+										 JOIN	tblICItem			BI	ON	BI.intItemId		=	AC.intBasisItemId 
 										 WHERE  BI.strItemNo='''+@strColumnName+''''
 		--SELECT @SqlTotalPremiumCalculation
 
@@ -191,14 +198,14 @@ BEGIN
 	END
 
 		SET @SqlInsert=NULL
-		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan([strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM])
+		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan([strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM],[strStorageLocation])
 							SELECT 
 							Item.strCommodity AS strCommodityCode
 							,null
 							,Item.strShortName
 							,Item.strItemNo
 							,ProductType.strDescription AS strProductType
-							,NULL [dblVolume],NULL [strVolumnUOM],NULL [strCurrency],NULL [strWeightUOM] FROM vyuICGetCompactItem Item
+							,NULL [dblVolume],NULL [strVolumnUOM],NULL [strCurrency],NULL [strWeightUOM],NULL [strStorageLocation] FROM vyuICGetCompactItem Item
 							JOIN tblICItem IM ON IM.intItemId=Item.intItemId 
 							LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = IM.intProductTypeId
 							LEFT JOIN tblCTAOPDetail AD ON AD.intItemId=Item.intItemId
@@ -208,7 +215,7 @@ BEGIN
 
 		--SELECT * FROM #tblCoffeeNeedPlan 
 
-		SET @SqlSelect ='SELECT [intNeedPlanKey],[strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],dbo.fnRemoveTrailingZeroes([dblVolume]) AS[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM]'
+		SET @SqlSelect ='SELECT [intNeedPlanKey],[strCommodityCode],strLocationName,[strShortName],[strItemNo],[strProductType],dbo.fnRemoveTrailingZeroes([dblVolume]) AS[dblVolume],[strVolumnUOM],[strCurrency],[strWeightUOM],[strStorageLocation]'
 
 		IF 	@FirstBasisItem  IS NOT NULL
 		SET @SqlSelect=@SqlSelect+',dbo.fnRemoveTrailingZeroes([' + @FirstBasisItem + ']) AS Column1'

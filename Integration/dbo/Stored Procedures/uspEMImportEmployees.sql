@@ -24,6 +24,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 --SET ANSI_WARNINGS OFF
 
+DECLARE @strPrefix NVARCHAR(10)
+SET @strPrefix = ''E''
+
 if @TermDate is null
 begin
 	set @TermDate = ''1/1/'' + CAST(DATEPART(YEAR, getdate()) AS NVARCHAR(4))
@@ -240,9 +243,9 @@ BEGIN
 	-- INSERT new records for tblCMBank, prerequisite for importing direct deposit information
 	exec uspCMImportBanksFromOrigin
 
-	SELECT premp_emp INTO #tmpprempmst 
+	SELECT premp_emp = (@strPrefix + premp_emp) INTO #tmpprempmst 
 	FROM prempmst
-		where (premp_emp COLLATE Latin1_General_CI_AS not in (select isnull(strEmployeeOriginId, '''') from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee))
+		where (premp_emp COLLATE Latin1_General_CI_AS not in (select isnull(strEmployeeOriginId, '''') from tblSMUserSecurity ) AND @strPrefix + LTRIM(RTRIM((premp_emp))) COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee))
 		and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
 		
 	WHILE (EXISTS(SELECT 1 FROM #tmpprempmst))
@@ -252,7 +255,7 @@ BEGIN
 
 		SELECT @originEmployee = premp_emp FROM #tmpprempmst
 
-		IF(EXISTS(SELECT 1 FROM prempmst WHERE premp_emp = @originEmployee))
+		IF(EXISTS(SELECT 1 FROM prempmst WHERE @strPrefix + LTRIM(RTRIM((premp_emp))) = @originEmployee))
 		BEGIN
 
 			SET @continue = 1;
@@ -275,7 +278,7 @@ BEGIN
                 @strState			= premp_state,
                 @strZip				= dbo.fnTrim(premp_zip),
                 --Employee
-                @originEmployee		= premp_emp,
+                @originEmployee		= @strPrefix + LTRIM(RTRIM((premp_emp))),
 				@dtmOrigHireDate	= case when premp_orig_hire_dt = 0 then null else premp_orig_hire_dt end,
 				@dtmLastHireDate	= case when premp_last_hire_dt = 0 then null else premp_last_hire_dt end,
 				@dtmBirthDate		= case when premp_last_hire_dt = 0 then null else premp_birth_dt end,
@@ -330,7 +333,7 @@ BEGIN
 				@strDepartment		= premp_dept
 					
             FROM prempmst
-            WHERE premp_emp = @originEmployee
+            WHERE @strPrefix + LTRIM(RTRIM((premp_emp))) = @originEmployee
 		END
 		
 		 SET @ysnEmployeeActive = 1
@@ -642,7 +645,7 @@ IF(@Update = 1 AND @EmployeId IS NULL)
 BEGIN
 	SELECT @Total = COUNT(premp_emp)  			
 	FROM prempmst
-	where (premp_emp COLLATE Latin1_General_CI_AS not in (select isnull(strEmployeeOriginId, '''') from tblSMUserSecurity ) AND premp_emp COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)) 	
+	where (premp_emp COLLATE Latin1_General_CI_AS not in (select isnull(strEmployeeOriginId, '''') from tblSMUserSecurity ) AND (@strPrefix + LTRIM(RTRIM(premp_emp))) COLLATE Latin1_General_CI_AS not in (select strEmployeeId from tblPREmployee)) 	
 	and ( premp_term_dt = 0 or premp_term_dt > replace(convert(nvarchar, @TermDate, 102),''.'', '''') )
 END
 

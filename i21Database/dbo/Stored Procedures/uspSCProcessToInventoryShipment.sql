@@ -8,7 +8,8 @@ CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	,@intContractId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intStorageScheduleId AS INT = NULL
-	,@InventoryShipmentId AS INT OUTPUT 
+	,@InventoryShipmentId AS INT OUTPUT
+	,@intInvoiceId AS INT = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -41,7 +42,6 @@ DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @totalShipment AS INT
 DECLARE @totalContract AS INT
 DECLARE @intInventoryShipmentItemId AS INT
-		,@intInvoiceId AS INT
 		,@intOwnershipType AS INT
 		,@intItemId INT
 		,@intPricingTypeId AS INT

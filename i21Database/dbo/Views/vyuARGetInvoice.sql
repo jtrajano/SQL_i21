@@ -100,6 +100,7 @@ SELECT
     INV.ysnProcessedToNSF,
     INV.intLineOfBusinessId,
 	INV.strBOLNumber,
+    INV.strPaymentInfo,
 	INV.intICTId,
     INV.intSalesOrderId,
 	INV.intBookId,

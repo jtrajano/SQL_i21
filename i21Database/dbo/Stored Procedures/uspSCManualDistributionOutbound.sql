@@ -3,7 +3,8 @@
 	@intTicketId AS INT, 
 	@intUserId AS INT,
 	@intEntityId AS INT,
-	@InventoryShipmentId AS INT OUTPUT 
+	@InventoryShipmentId AS INT OUTPUT ,
+	@intInvoiceId AS INT OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -40,7 +41,6 @@ DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
 		,@intStorageScheduleTypeId INT
 		,@intInventoryShipmentItemId AS INT
-		,@intInvoiceId AS INT
 		,@intOwnershipType AS INT
 		,@intPricingTypeId AS INT
 		,@intShipmentOrderId AS INT

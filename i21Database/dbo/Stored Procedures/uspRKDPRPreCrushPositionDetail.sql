@@ -1322,7 +1322,7 @@ FROM (
 								ELSE LEFT(fm.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END COLLATE Latin1_General_CI_AS
 		, m.intUnitMeasureId
 		, UOM.strUnitMeasure
-		, (e.strName + '-' + ba.strAccountNumber) COLLATE Latin1_General_CI_AS strAccountNumber
+		, (oc.strBroker+ '-' + ba.strAccountNumber) COLLATE Latin1_General_CI_AS strAccountNumber
 		, strTranType = strNewBuySell
 		, ba.intBrokerageAccountId
 		, strInstrumentType = oc.strInstrumentType
@@ -1340,7 +1340,6 @@ FROM (
 	JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
 	JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 	LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
-	INNER JOIN tblEMEntity e ON e.strName = oc.strBroker AND oc.strInstrumentType = 'Futures'
 	JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c) AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cuc1.intUnitMeasureId
 	INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
@@ -1414,7 +1413,7 @@ FROM (
 		, strContractEndMonth = CASE WHEN CONVERT(DATETIME, '01 ' + om.strOptionMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
 								ELSE LEFT(om.strOptionMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END COLLATE Latin1_General_CI_AS
 		, m.intUnitMeasureId
-		, e.strName + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
+		, oc.strBroker + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
 		, strTranType = strNewBuySell
 		, ba.intBrokerageAccountId
 		, strInstrumentType
@@ -1437,7 +1436,6 @@ FROM (
 	JOIN tblSMCompanyLocation l ON l.strLocationName = oc.strLocationName
 	JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
 	LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
-	INNER JOIN tblEMEntity e ON e.strName = oc.strBroker AND oc.strInstrumentType = 'Futures'
 	JOIN tblICCommodityUnitMeasure cuc1 ON th.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 	JOIN tblRKOptionsMonth om ON om.strOptionMonth = oc.strOptionMonth
 	AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
@@ -1507,7 +1505,7 @@ BEGIN
 			, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
 					else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS strFutureMonth
 			, m.intUnitMeasureId
-			, e.strName + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
+			, oc.strBroker + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
 			, strNewBuySell AS strTranType
 			, ba.intBrokerageAccountId
 			, strInstrumentType
@@ -1524,7 +1522,6 @@ BEGIN
 		JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
 		JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 		LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
-		INNER JOIN tblEMEntity e ON e.strName = oc.strBroker AND oc.strInstrumentType = 'Futures'
 		JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c) AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cuc1.intUnitMeasureId
 		INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0

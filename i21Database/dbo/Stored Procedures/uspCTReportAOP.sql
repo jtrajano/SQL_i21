@@ -99,9 +99,10 @@ BEGIN
   
   INSERT INTO @tblRequiredColumns ([intBasisItemId], [strColumnName])
   SELECT DISTINCT 
-  AD.intBasisItemId,Item.strItemNo FROM tblCTAOPDetail AD 
+  AC.intBasisItemId,Item.strItemNo FROM tblCTAOPDetail AD 
   JOIN tblCTAOP A ON A.intAOPId=AD.intAOPId
-  JOIN tblICItem Item ON Item.intItemId=AD.intBasisItemId
+  JOIN tblCTAOPComponent AC ON AC.intAOPDetailId = AD.intAOPDetailId
+  JOIN tblICItem Item ON Item.intItemId=AC.intBasisItemId
   WHERE A.intCommodityId=@IntCommodityId AND A.strYear=@strYear
   UNION
   SELECT intItemId,strItemNo FROM tblICItem Where strType='Other Charge' AND  ysnBasisContract=1 
