@@ -351,7 +351,7 @@ BEGIN TRY
 	
 	SELECT @intShipmentKey = MIN(Ship.intShipmentKey) 
 	FROM @Shipment Ship
-	JOIN @PriceFixation PF ON PF.intContractHeaderId = Ship.intContractHeaderId
+	JOIN @PriceFixation PF ON PF.intContractHeaderId = Ship.intContractHeaderId AND Ship.intContractDetailId = PF.intContractDetailId
 	WHERE Ship.dblQuantity > ISNULL(Ship.dblAllocatedQuantity,0) 
 	AND PF.dblQuantity > PF.dblShippedQty
 	
@@ -381,7 +381,7 @@ BEGIN TRY
 
 		SELECT @intShipmentKey = MIN(Ship.intShipmentKey) 
 		FROM @Shipment Ship
-		JOIN @PriceFixation PF ON PF.intContractHeaderId = Ship.intContractHeaderId
+		JOIN @PriceFixation PF ON PF.intContractHeaderId = Ship.intContractHeaderId AND Ship.intContractDetailId = PF.intContractDetailId
 		WHERE ISNULL(Ship.dblQuantity,0) > ISNULL(Ship.dblAllocatedQuantity,0) 
 		AND PF.dblQuantity > PF.dblShippedQty
 		
