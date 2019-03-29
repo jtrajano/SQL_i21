@@ -317,7 +317,7 @@ BEGIN
 						AND cb.intItemUOMId = @intItemUOMId
 						AND cb.intSubLocationId = @intSubLocationId 
 						AND cb.intItemLocationId = @intItemLocationId 						
-				ORDER BY cb.dtmCreated DESC
+				ORDER BY cb.intInventoryLotId ASC
 
 				IF @intStorageLocationId IS NULL
 				BEGIN
@@ -354,7 +354,7 @@ BEGIN
 							AND cb.intSubLocationId = @intSubLocationId 
 							AND cb.intItemLocationId = @intItemLocationId 							
 							AND (ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)) > 0
-					ORDER BY cb.dtmCreated DESC
+					ORDER BY cb.intInventoryLotId ASC
 
 					IF @intStorageLocationId IS NULL
 					 	BEGIN
