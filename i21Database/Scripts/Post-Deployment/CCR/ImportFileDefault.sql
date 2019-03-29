@@ -260,7 +260,7 @@ BEGIN
 
 	-- Transaction Date
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Transaction Date', 2, 3, 1)
+	VALUES (@FileHeaderId, 'Transaction Date', 2, 0, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -269,7 +269,7 @@ BEGIN
 
 	-- Site Number
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Site Number', 2, 0, 1)
+	VALUES (@FileHeaderId, 'Site Number', 2, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -278,7 +278,7 @@ BEGIN
 
 	-- Gross
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Gross', 2, 9, 1)
+	VALUES (@FileHeaderId, 'Gross', 2, 6, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -287,22 +287,37 @@ BEGIN
 
 	-- Fee
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Fee', 2, 10, 1)
+	VALUES (@FileHeaderId, 'Fee', 2, 7, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
 	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
 	VALUES (@FileHeaderId, @DetailId, 4, 'tblCCImportDealerCreditCardReconDetail', 'dblFee', 1, 1)
 
+END
+ELSE
+BEGIN
+	PRINT ('DCC - Shell Excentus Format - Update')
+
+	SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle 
+
+	-- Transaction Date
+	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 0 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Transaction Date'
+
+	-- Site Number
+	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 1 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Site Number'
+
+	-- Gross
+	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 6 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Gross'
+
+	-- Fee
+	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 7 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Fee'
+
 	-- Net
-	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Net', 2, 11, 1)
+	DELETE tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId 
+	AND intImportFileRecordMarkerId = (SELECT intImportFileRecordMarkerId FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Net')
 
-	SET @DetailId = SCOPE_IDENTITY()
-
-	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
-	VALUES (@FileHeaderId, @DetailId, 5, 'tblCCImportDealerCreditCardReconDetail', 'dblNet', 1, 1)
-
+	DELETE tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Net'
 END
 
 -- Heartland Format
@@ -454,7 +469,3 @@ BEGIN
 	VALUES (@FileHeaderId, @DetailId, 6, 'tblCCImportDealerCreditCardReconDetail', 'dblNet', 1, 1)
 
 END
-
-
-
-
