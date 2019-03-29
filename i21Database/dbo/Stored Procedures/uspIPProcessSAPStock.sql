@@ -40,6 +40,11 @@ DECLARE @tblStock TABLE (
 
 if @ysnProcessDeadLockEntry=1
 Begin
+	if not exists(Select 1
+	From tblIPStockError Where isNULL(ysnDeadlockError,0)=1)
+	Begin
+		Return
+	End
 	Insert Into tblIPStockStage(strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,ysnDeadlockError)
 	Select strItemNo,strSubLocation,strStockType,dblInspectionQuantity,dblBlockedQuantity,dblUnrestrictedQuantity,dblInTransitQuantity,dblQuantity,strSessionId,ysnDeadlockError
 	From tblIPStockError Where isNULL(ysnDeadlockError,0)=1
