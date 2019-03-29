@@ -57,17 +57,21 @@ BEGIN TRY
 				SET @intExternalId = NULL
 				SET @strScreenName = NULL
 
-				SELECT	@dblScheduleQty = dblScheduleQty,@intNoOfLoad = ISNULL(intNoOfLoad,0) FROM tblCTContractDetail WHERE intContractDetailId = ISNULL(@intPContractDetailId,@intSContractDetailId)
-
 				SELECT @intPContractDetailId = intPContractDetailId
 					,@intSContractDetailId = intSContractDetailId
-					,@dblQuantityToUpdate = CASE WHEN @intNoOfLoad = 0 THEN - dblLoadDetailQuantity ELSE -1 END
+					,@dblQuantityToUpdate = - dblLoadDetailQuantity
 					,@intExternalId = @intMinLoadDetailId
 					,@strScreenName = 'Load Schedule'
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
-				
+				SELECT	@dblScheduleQty = dblScheduleQty,@intNoOfLoad = ISNULL(intNoOfLoad,0) FROM tblCTContractDetail WHERE intContractDetailId = ISNULL(@intPContractDetailId,@intSContractDetailId)
+
+				IF @intNoOfLoad > 0
+				BEGIN
+					SET @dblQuantityToUpdate = -1
+				END
+
 				IF @dblScheduleQty < ABS(@dblQuantityToUpdate)
 					SET @dblQuantityToUpdate = - @dblScheduleQty
 
