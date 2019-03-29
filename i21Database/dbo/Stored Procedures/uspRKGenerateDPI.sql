@@ -1566,52 +1566,52 @@ AND I.intCompanyLocationId IN (
 		) a
 
 		--Storage Settlement 
-		UNION ALL SELECT dtmDate
-			, strDistributionOption
-			, strDistributionOption strShipDistributionOption
-			, '' as strAdjDistributionOption
-			, '' as strCountDistributionOption
-			, strSettleTicket tranShipmentNumber
-			, dblOutQty tranShipQty
-			, strSettleTicket tranReceiptNumber
-			, dblInQty tranRecQty
-			, '' tranAdjNumber
-			, 0.0 dblAdjustmentQty
-			, '' tranCountNumber
-			, 0.0 dblCountQty
-			, '' tranInvoiceNumber
-			, 0.0 dblInvoiceQty
-			, intSettleStorageId intInventoryReceiptId
-			, intSettleStorageId intInventoryShipmentId
-			, null intInventoryAdjustmentId
-			, null intInventoryCountId
-			, null intInvoiceId
-			, null intDeliverySheetId
-			, '' AS deliverySheetNumber
-			, null intTicketId
-			, '' AS ticketNumber
-		FROM (
-			SELECT CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
-				, S.strStorageTypeCode strDistributionOption
-				, CASE WHEN strType = 'Reverse Settlement' THEN ABS(dblUnits)
-						ELSE 0 END AS dblOutQty
-				, CASE WHEN strType = 'Settlement' THEN ABS(dblUnits)
-						ELSE 0 END AS dblInQty
-				, S.intStorageScheduleTypeId
-				, SH.intSettleStorageId
-				, SH.strSettleTicket
-			FROM tblGRCustomerStorage CS
-			INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
-			INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10),SH.dtmHistoryDate,110),110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
-				AND CS.intCommodityId = @intCommodityId
-				AND CS.intItemId = ISNULL(@intItemId, CS.intItemId)
-				AND CS.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-				AND CS.intCompanyLocationId = ISNULL(@intLocationId, CS.intCompanyLocationId)
-				AND strType IN ('Settlement','Reverse Settlement')
-				AND SH.intSettleStorageId IS NULL
-				AND S.ysnDPOwnedType <> 1
-		) a
+		--UNION ALL SELECT dtmDate
+		--	, strDistributionOption
+		--	, strDistributionOption strShipDistributionOption
+		--	, '' as strAdjDistributionOption
+		--	, '' as strCountDistributionOption
+		--	, strSettleTicket tranShipmentNumber
+		--	, dblOutQty tranShipQty
+		--	, strSettleTicket tranReceiptNumber
+		--	, dblInQty tranRecQty
+		--	, '' tranAdjNumber
+		--	, 0.0 dblAdjustmentQty
+		--	, '' tranCountNumber
+		--	, 0.0 dblCountQty
+		--	, '' tranInvoiceNumber
+		--	, 0.0 dblInvoiceQty
+		--	, intSettleStorageId intInventoryReceiptId
+		--	, intSettleStorageId intInventoryShipmentId
+		--	, null intInventoryAdjustmentId
+		--	, null intInventoryCountId
+		--	, null intInvoiceId
+		--	, null intDeliverySheetId
+		--	, '' AS deliverySheetNumber
+		--	, null intTicketId
+		--	, '' AS ticketNumber
+		--FROM (
+		--	SELECT CONVERT(VARCHAR(10),SH.dtmHistoryDate,110) dtmDate
+		--		, S.strStorageTypeCode strDistributionOption
+		--		, CASE WHEN strType = 'Reverse Settlement' THEN ABS(dblUnits)
+		--				ELSE 0 END AS dblOutQty
+		--		, CASE WHEN strType = 'Settlement' THEN ABS(dblUnits)
+		--				ELSE 0 END AS dblInQty
+		--		, S.intStorageScheduleTypeId
+		--		, SH.intSettleStorageId
+		--		, SH.strSettleTicket
+		--	FROM tblGRCustomerStorage CS
+		--	INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+		--	INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+		--	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10),SH.dtmHistoryDate,110),110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
+		--		AND CS.intCommodityId = @intCommodityId
+		--		AND CS.intItemId = ISNULL(@intItemId, CS.intItemId)
+		--		AND CS.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+		--		AND CS.intCompanyLocationId = ISNULL(@intLocationId, CS.intCompanyLocationId)
+		--		AND strType IN ('Settlement','Reverse Settlement')
+		--		AND SH.intSettleStorageId IS NULL
+		--		AND S.ysnDPOwnedType <> 1
+		--) a
 	)t
 	
 	INSERT INTO tblRKDPIInventory(intDPIHeaderId
