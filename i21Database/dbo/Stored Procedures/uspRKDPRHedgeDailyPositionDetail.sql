@@ -699,7 +699,6 @@ BEGIN
 					JOIN tblRKFutureMarket m ON m.strFutMarketName = t.strFutureMarket
 					JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 					LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = t.strBrokerAccount
-					INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType = 'Futures'
 					JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId = @intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 					INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
 					WHERE th.intCommodityId = @intCommodityId
@@ -748,7 +747,7 @@ BEGIN
 																ORDER BY dtmPriceDate DESC), 0) * m.dblContractSize
 					, m.intUnitMeasureId
 					, th.intCommodityId 
-					, strAccountNumber = e.strName + '-' + strAccountNumber COLLATE Latin1_General_CI_AS
+					, strAccountNumber = t.strBroker + '-' + strAccountNumber COLLATE Latin1_General_CI_AS
 					, strTranType = strNewBuySell
 					, dblNoOfLot = intOpenContract
 					, dblDelta = ISNULL((SELECT TOP 1 dblDelta
@@ -774,7 +773,6 @@ BEGIN
 				JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 				JOIN tblRKOptionsMonth om ON om.strOptionMonth = t.strOptionMonth
 				INNER JOIN tblRKBrokerageAccount ba ON t.strBrokerAccount = ba.strAccountNumber
-				INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType = 'Options'
 				INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
 				WHERE th.intCommodityId = @intCommodityId
 					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
@@ -846,7 +844,7 @@ BEGIN
 							, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
 									else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS strFutureMonth
 							, m.intUnitMeasureId
-							, e.strName + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
+							, oc.strBroker + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
 							, strNewBuySell AS strTranType
 							, ba.intBrokerageAccountId
 							, strInstrumentType
@@ -863,7 +861,6 @@ BEGIN
 						JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
 						JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 						LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
-						INNER JOIN tblEMEntity e ON e.strName = oc.strBroker AND oc.strInstrumentType = 'Futures'
 						JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c) AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 						LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cuc1.intUnitMeasureId
 						INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
