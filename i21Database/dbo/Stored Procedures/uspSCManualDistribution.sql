@@ -588,7 +588,7 @@ END
 					,[ysnTaxOnly]
 			FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
 			BEGIN /* Create Voucher */
-			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillid OUTPUT
+			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId OUTPUT
 			
 			
 			END
