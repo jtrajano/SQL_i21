@@ -113,6 +113,9 @@ BEGIN
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptlclmst')
 		 BEGIN			
 			select @Total = count(strGroup) from @tax_group_table
-		 END		
+		 END
+		 
+		 
+		 EXEC [uspARImportTaxGroupDetail]		
 	 END	
 END

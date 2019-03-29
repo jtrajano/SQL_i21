@@ -7492,6 +7492,8 @@
     <Build Include="dbo\Tables\tblCTAOPComponent.sql" />
     <Build Include="dbo\Views\vyuCTAOPComponent.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
+    <Build Include="dbo\User Defined Types\AROriginTaxCodeTableType.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
