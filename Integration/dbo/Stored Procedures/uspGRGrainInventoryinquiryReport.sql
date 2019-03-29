@@ -89,7 +89,8 @@ DECLARE @dateToday DATETIME
 SET @dateToday = dbo.fnRemoveTimeOnDate(GETDATE())
 
 /*==START==INVENTORY BALANCE==*/
-IF(SELECT TOP 1 dtmDate FROM tblICStagingDailyStockPosition) <> @dtmReportDate
+IF (SELECT COUNT(*) FROM tblICStagingDailyStockPosition) = 0
+	OR (SELECT TOP 1 dtmDate FROM tblICStagingDailyStockPosition) <> @dtmReportDate
 BEGIN
 	EXEC uspICGetDailyStockPosition @dtmReportDate, @guid
 END
