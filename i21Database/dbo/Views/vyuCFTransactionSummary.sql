@@ -10,7 +10,8 @@ cfSite.intSiteId,
 cfSite.strSiteAddress,
 RTRIM(LTRIM(cfSite.strSiteName)) AS strSiteName,
 cfSite.strSiteNumber,
-
+cfSite.strSiteCity,
+cfSite.intAdjustmentSiteGroupId,
 (CASE 
 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN cfNetwork.intCustomerId
 ELSE  cfCard.intEntityId
