@@ -97,10 +97,16 @@ intContractDetailId INT,
 intSelectedInstrumentTypeId INT
 )      
 
-INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId,dtmTransactionDate,intSelectedInstrumentTypeId,strSelectedInstrumentType)  
-	VALUES(1,@dtmTransactionDate,@intSelectedInstrumentTypeId,case when isnull(@intSelectedInstrumentTypeId,1)=1 then 'Exchange Traded'
-												WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
-												ELSE 'OTC - Others' END)
+INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId
+	, dtmTransactionDate
+	, intSelectedInstrumentTypeId
+	, strSelectedInstrumentType)
+VALUES(1
+	, @dtmTransactionDate
+	, @intSelectedInstrumentTypeId
+	, CASE WHEN ISNULL(@intSelectedInstrumentTypeId, 1) = 1 then 'Exchange Traded'
+		WHEN @intSelectedInstrumentTypeId = 2 THEN 'OTC'
+		ELSE 'OTC - Others' END)
 SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY() 
 
 IF EXISTS

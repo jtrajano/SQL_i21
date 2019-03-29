@@ -3,7 +3,7 @@ BEGIN
 	UPDATE tblRKFutOptTransactionHeader
 	SET dtmTransactionDate = B.dtmTransactionDate,intSelectedInstrumentTypeId = B.intSelectedInstrumentTypeId,
 		strSelectedInstrumentType = case when isnull(B.intSelectedInstrumentTypeId,1) = 1 then 'Exchange Traded' 
-		WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
+		WHEN B.intSelectedInstrumentTypeId = 2 THEN 'OTC'
 										ELSE 'OTC - Others' END
 	FROM tblRKFutOptTransactionHeader A
 	JOIN tblRKFutOptTransaction B
