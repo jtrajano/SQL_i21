@@ -86,7 +86,7 @@ INNER JOIN(SELECT
 		AND PE.intQuarter = PT.intQuarter
 ) tblPRPaycheck ON tblPREmployee.[intEntityId] = tblPRPaycheck.intEntityEmployeeId
 
-LEFT JOIN(
+INNER JOIN(
 	SELECT DISTINCT intEntityEmployeeId
 		,dblAmount = SUM(dblAmount) OVER (PARTITION BY intEntityEmployeeId, YEAR(dtmPayDate), DATEPART(QQ,dtmPayDate))
 		,dblLimit = dblLimit
