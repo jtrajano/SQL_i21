@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE uspICPostInventoryAdjustmentQtyChange  
-	@intTransactionId INT = NULL,
-	@intEntityUserSecurityId INT = NULL,
-	@ysnPost BIT = 0
+	@intTransactionId INT = NULL
+	,@strBatchId NVARCHAR(40)
+	,@intEntityUserSecurityId INT = NULL
+	,@ysnPost BIT = 0
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -43,9 +44,8 @@ DECLARE @StorageItemsForPost AS ItemCostingTableType
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 DECLARE @intReturnValue AS INT 
-DECLARE @strBatchId NVARCHAR(40)
-	,@intLocationId INT
-	,@STARTING_NUMBER_BATCH AS INT = 3  
+DECLARE @intLocationId INT
+		,@STARTING_NUMBER_BATCH AS INT = 3  
 --------------------------------------------------------------------------------
 -- Validate the UOM
 --------------------------------------------------------------------------------
@@ -101,13 +101,6 @@ BEGIN
 		RETURN -1
 	END
 END 
-
--- Get the next batch number
-BEGIN 
-	SET @strBatchId = NULL 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId  
-	IF @@ERROR <> 0 GOTO Post_Exit;
-END
 
 DECLARE @intCreateUpdateLotError AS INT 
 
