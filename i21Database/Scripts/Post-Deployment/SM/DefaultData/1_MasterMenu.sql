@@ -9,7 +9,8 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Position Report (Portal)' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Risk Management (Portal)' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.PositionReport')
+		 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Taxes by Site/Customer' AND strModuleName = 'Card Fueling' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Card Fueling') AND strCommand = N'CardFueling.view.SiteCustomerTaxReport')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4573,11 +4574,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Summary B
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Reporting.view.ReportManager?group=Card Fueling&report=TransactionSummaryByCustomerProdPeriod&direct=true&showCriteria=true', intSort = 4 WHERE strMenuName = 'Summary By Customer/Product/Period' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Taxes by Site/Customer' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Taxes by Site/Customer', N'Card Fueling', @CardFuelingReportParentMenuId, N'Taxes by Site/Customer', N'Report', N'Screen', N'CardFueling.view.SiteCustomerTaxReport', N'small-menu-report', 0, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.SiteCustomerTaxReport', intSort = 5 WHERE strMenuName = 'Taxes by Site/Customer' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
+
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Top Card Lock Customer' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Top Card Lock Customer', N'Card Fueling', @CardFuelingReportParentMenuId, N'Top Card Lock Customer', N'Report', N'Screen', N'CardFueling.view.TopCardLockCustomer', N'small-menu-report', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Top Card Lock Customer', N'Card Fueling', @CardFuelingReportParentMenuId, N'Top Card Lock Customer', N'Report', N'Screen', N'CardFueling.view.TopCardLockCustomer', N'small-menu-report', 0, 0, 0, 1, 6, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.TopCardLockCustomer', intSort = 5 WHERE strMenuName = 'Top Card Lock Customer' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.TopCardLockCustomer', intSort = 6 WHERE strMenuName = 'Top Card Lock Customer' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
