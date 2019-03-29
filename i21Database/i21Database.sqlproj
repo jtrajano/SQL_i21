@@ -7495,6 +7495,9 @@
     <Build Include="dbo\Tables\tblSMTermCutoff.sql" />
     <Build Include="dbo\User Defined Types\AROriginTaxCodeTableType.sql" />
     <Build Include="dbo\Views\vyuEMEAExportCustomer.sql" />
+    <Build Include="dbo\Views\vyuAPInboundTaxReport.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherSourceList.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptInboundTaxReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
