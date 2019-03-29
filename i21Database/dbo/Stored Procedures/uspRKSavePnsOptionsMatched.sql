@@ -254,12 +254,18 @@ WHILE @mRowNumber IS NOT NULL
 BEGIN  
 	
    DECLARE @intOptionsPnSExercisedAssignedId int  
-   
+   DECLARE @strSelectedInstrumentType nvarchar(100)
+   DECLARE @intSelectedInstrumentTypeId int
    SELECT @strExercisedAssignedNo=isnull(max(convert(int,strTranNo)),0)+1 from tblRKOptionsPnSExercisedAssigned     
    SELECT @intFutOptTransactionId=intFutOptTransactionId,@dblLots=dblLots,@dtmTranDate=dtmTranDate,@ysnAssigned=ysnAssigned FROM @tblExercisedAssignedDetail WHERE RowNumber=@mRowNumber    
+   SELECT @intSelectedInstrumentTypeId=intSelectedInstrumentTypeId 
+		  ,@strSelectedInstrumentType =CASE WHEN ISNULL(intSelectedInstrumentTypeId, 1) = 1 then 'Exchange Traded'
+										WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
+										ELSE 'OTC - Others' END
+			FROM tblRKFutOptTransaction where intFutOptTransactionId=@intFutOptTransactionId
 
    	INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId,dtmTransactionDate,intSelectedInstrumentTypeId,strSelectedInstrumentType)  
-	VALUES (1,@dtmTranDate,1,'Exchange Traded')  
+	VALUES (1,@dtmTranDate,@intSelectedInstrumentTypeId,@strSelectedInstrumentType)  
 	SELECT @NewFutOptTransactionHeaderId = SCOPE_IDENTITY();  
 
   INSERT INTO tblRKOptionsPnSExercisedAssigned  
@@ -291,7 +297,7 @@ BEGIN
          strOptionType,dblPrice,strReference,strStatus,  
          dtmFilledDate,strReserveForFix,intBookId,intSubBookId,ysnOffset,dtmCreateDateTime)  
            
-SELECT @NewFutOptTransactionHeaderId,1,1,@dtmTranDate,  
+SELECT @NewFutOptTransactionHeaderId,1,@intSelectedInstrumentTypeId,@dtmTranDate,  
   t.intEntityId,t.intBrokerageAccountId,t.intFutureMarketId, 1,t.intCommodityId,  
   t.intLocationId,t.intTraderId,t.intCurrencyId,'O-'+CONVERT(nvarchar(50),@intInternalTradeNo)as strInternalTradeNo,  
   t.strBrokerTradeNo,t.strBuySell,@dblLots as dblLots,om.intFutureMonthId as intFutureMonthId,t.intOptionMonthId,  
