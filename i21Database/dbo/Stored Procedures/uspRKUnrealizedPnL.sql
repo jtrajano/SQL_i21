@@ -61,7 +61,7 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (
 	- abs(dblFutCommission1) dblFutCommission1,
 	MatchLong dblMatchLong,
 	MatchShort dblMatchShort,
-	NetPnL dblNetPnL,
+	GrossPnL - abs(dblFutCommission) dblNetPnL,
 	intFutureMarketId,
 	intFutureMonthId,
 	dblOriginalQty dblOriginalQty,
@@ -76,9 +76,7 @@ SELECT CONVERT(INT, DENSE_RANK() OVER (
 	intSelectedInstrumentTypeId
 INTO #temp
 FROM (
-	SELECT *,
-		(GrossPnL1 * (dblClosing - dblPrice) - dblFutCommission2) NetPnL
-		--,intNet * dblVariationMargin1 dblVariationMargin    
+	SELECT *			
 		,
 		GrossPnL1 * (dblClosing - dblPrice) GrossPnL,
 		- dblFutCommission2 dblFutCommission,
