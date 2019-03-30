@@ -7498,6 +7498,14 @@
     <Build Include="dbo\Views\vyuAPInboundTaxReport.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherSourceList.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptInboundTaxReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPExportVendorStagingSynergy.sql" />
+    <Build Include="dbo\Tables\tblAPVendorStagingSynergy.sql" />
+    <Build Include="dbo\Tables\tblAPVendorSynergyExported.sql" />
+    <Build Include="dbo\Tables\tblAPVendorContactSynergy.sql" />
+    <Build Include="dbo\Tables\tblAPVendorContactInfoSynergy.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVendorExportTransformSynergy.sql" />
+    <Build Include="dbo\Views\vyuAPVendorSynergy.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVendorExportSynergy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
