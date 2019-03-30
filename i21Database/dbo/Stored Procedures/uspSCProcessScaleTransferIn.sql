@@ -137,16 +137,60 @@ BEGIN TRY
 			,intSort						= RANK() OVER( ORDER BY ICTran.dblQty ASC)--RANK() OVER (ORDER BY ICTran.dblQty)
 	FROM	tblSCTicket SC 
 	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
+	INNER JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
 	INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
 	LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
 	LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
-	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND (ICTran.dblQty >= 0 and ICTD.dblQuantity >= SC.dblNetUnits) AND ICTran.intTransactionTypeId = 13
-	--FROM	tblSCTicket SC 
-	--INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
-	--INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
-	--LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
-	--LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
-	--WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
+	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND (ICTran.dblQty >= 0) AND ICTran.intTransactionTypeId = 13
+
+
+	IF((SELECT TOP 1 intAdjustInventoryTransfer FROM tblICItem ICI 
+		INNER JOIN tblICCommodity ICC ON ICC.intCommodityId = ICI.intCommodityId
+		INNER JOIN tblSCTicket SC ON SC.intItemId = ICI.intItemId WHERE intTicketId = @intTicketId) = 1)
+	BEGIN
+		-- Validate if multiple cost bucket
+			DECLARE @_qtyToAdjust AS DECIMAL(18,6)
+			SELECT @_qtyToAdjust = T.dblNetUnits - MT.dblNetUnits
+			FROM tblSCTicket T 
+			INNER JOIN tblSCTicket MT ON T.intMatchTicketId = MT.intTicketId
+			INNER JOIN tblICItem ICI
+				ON ICI.intItemId = T.intItemId
+			INNER JOIN tblICCommodity ICC
+				ON ICC.intCommodityId = ICI.intCommodityId
+			WHERE T.intTicketId = @intTicketId and ICC.intAdjustInventoryTransfer = 1;
+
+			--1.) Check if Line new quantity is less than the transaction line quantity (for multiple cost bucket)
+			IF(@_qtyToAdjust < 0 and (SELECT COUNT(1) FROM @ReceiptStagingTable) > 1)
+			BEGIN 
+				DECLARE @_remainingQty AS DECIMAL(18,6)
+				DECLARE @_dblQty AS DECIMAL(18,6)
+				DECLARE @_intId INT
+				DECLARE a CURSOR FOR
+				SELECT dblQty,intId FROM @ReceiptStagingTable ORDER BY intId DESC
+				OPEN a
+				FETCH NEXT FROM a
+				INTO @_dblQty,@_intId
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					IF(@_qtyToAdjust < 0 AND ((@_qtyToAdjust) * -1 ) > @_dblQty)
+						BEGIN
+							SET @_qtyToAdjust = @_qtyToAdjust + @_dblQty
+							DELETE FROM @ReceiptStagingTable WHERE intId = @_intId
+						END
+				FETCH NEXT FROM a
+				INTO @_dblQty,@_intId
+				END
+				CLOSE a;
+				DEALLOCATE a;
+			END;
+
+
+			WITH CTE as
+			(SELECT TOP 1 * FROM @ReceiptStagingTable ORDER BY intId DESC)
+			UPDATE CTE
+			SET dblQty = CASE WHEN @_qtyToAdjust < 0 THEN dblQty - (@_qtyToAdjust *-1) ELSE dblQty + @_qtyToAdjust END;			
+	END
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
