@@ -1,5 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuHDTicket]
 AS
+	with x as (
+		select hr.intTicketId, dblEstimatedHours = sum(hr.dblEstimatedHours) from tblHDTicketHoursWorked hr group by hr.intTicketId
+	)
 	select
 		tic.intTicketId
 		,tic.strTicketNumber
@@ -68,6 +71,9 @@ AS
 								   when typ.intTicketTypeTypeId = 4 then 'Statement of Work'
 								   else null
 							  end) COLLATE Latin1_General_CI_AS
+		,tic.dblActualHours
+		,tic.dblNonBillableHours
+		,x.dblEstimatedHours
 	from
 		tblHDTicket tic
 		join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
@@ -86,3 +92,4 @@ AS
 		left join tblEMEntityLocation enloc on enloc.intEntityLocationId = tic.intEntityLocationId
 		left join tblEMEntity lastcomment on lastcomment.intEntityId = tic.intLastCommentedByEntityId
 		left join tblEMEntity assignto on assignto.intEntityId = tic.intAssignedToEntity
+		left join x on x.intTicketId = tic.intTicketId
