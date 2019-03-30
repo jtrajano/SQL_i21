@@ -34,6 +34,7 @@
 	[ysnPrepay] BIT NOT NULL DEFAULT 0, 
 	[ysnLienExists] BIT NOT NULL DEFAULT 0, 
 	[ysnOverrideCheckPayee] BIT NOT NULL DEFAULT 0, 
+	[ysnOverrideSettlement] BIT NOT NULL DEFAULT 0, 
 	[ysnOverridePayTo] BIT NOT NULL DEFAULT 0, 
 	[ysnDeleted] BIT NULL DEFAULT 0,
 	[dtmDateDeleted] DATETIME NULL,

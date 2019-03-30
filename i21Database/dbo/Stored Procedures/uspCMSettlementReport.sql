@@ -115,7 +115,10 @@ BEGIN
 
 	--Vendor Address
 	strEntityName = ENTITY.strName,
-	strVendorAddress = dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode),
+	strVendorAddress = CASE WHEN PYMT.ysnOverrideSettlement = 1 THEN PYMT.ysnOverrideCheckPayee
+				ELSE 
+					dbo.fnConvertToFullAddress(Bill.strShipFromAddress, Bill.strShipFromCity, Bill.strShipFromState, Bill.strShipFromZipCode)
+				END,
 	CASE WHEN INVRCPT.intSourceType = 4 THEN
 		(SELECT TOP 1 SC.intTicketId FROM tblGRCustomerStorage GR INNER JOIN tblSCTicket SC ON GR.intTicketId = SC.intTicketId WHERE intCustomerStorageId = INVRCPTITEM.intSourceId)
 		ELSE
