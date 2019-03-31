@@ -33,6 +33,10 @@ RETURNS TABLE AS RETURN
 												THEN voucher.dblDiscount
 											WHEN forPay.intPayScheduleId > 0
 												THEN forPay.dblTempDiscount
+												--calculate discount base on voucher date to make sure there is a discount
+												--always discount bypasses due date
+											WHEN forPay.ysnPymtCtrlAlwaysDiscount = 1 
+												THEN dbo.fnGetDiscountBasedOnTerm(voucher.dtmDate, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
 											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
 										END
 									) 
