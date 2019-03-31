@@ -17,27 +17,22 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	END
 
 -- Declare the variables.
-DECLARE @dtmDateTo				DATETIME
-      , @dtmDateFrom			DATETIME
-	  , @strSalesperson			NVARCHAR(100)
-	  , @strCustomerName		NVARCHAR(100)
-	  , @strAccountStatusCode	NVARCHAR(5)
-	  , @strCompanyLocation		NVARCHAR(100)
-	  , @xmlDocumentId			INT
-	  , @query					NVARCHAR(MAX)
-	  , @filter					NVARCHAR(MAX) = ''
-	  , @fieldname				NVARCHAR(50)
-	  , @condition				NVARCHAR(20)
-	  , @id						INT 
-	  , @from					NVARCHAR(100)
-	  , @to						NVARCHAR(100)
-	  , @join					NVARCHAR(10)
-	  , @begingroup				NVARCHAR(50)
-	  , @endgroup				NVARCHAR(50)
-	  , @datatype				NVARCHAR(50)
-	  , @strSourceTransaction	NVARCHAR(50)
-	  , @ysnPrintOnlyOverCreditLimit	AS BIT
-	  , @intEntityUserId		INT
+DECLARE @dtmDateTo						DATETIME
+      , @dtmDateFrom					DATETIME
+	  , @strSalespersonIds				NVARCHAR(MAX)
+	  , @strCustomerIds					NVARCHAR(MAX)	  
+	  , @strAccountStatusIds			NVARCHAR(MAX)
+	  , @strCompanyLocationIds			NVARCHAR(MAX)
+	  , @xmlDocumentId					INT
+	  , @fieldname						NVARCHAR(50)
+	  , @condition						NVARCHAR(20)
+	  , @id								INT 
+	  , @from							NVARCHAR(100)
+	  , @to								NVARCHAR(100)
+	  , @strSourceTransaction			NVARCHAR(50)
+	  , @ysnPrintOnlyOverCreditLimit	BIT
+	  , @ysnRollCredits					BIT
+	  , @intEntityUserId				INT
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -72,37 +67,152 @@ WITH (
 	, [datatype]   NVARCHAR(50)
 )
 
-INSERT INTO @temp_xml_table
-SELECT *
-FROM OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)
-WITH (
-	  [fieldname]  NVARCHAR(50)
-	, [condition]  NVARCHAR(20)
-	, [from]	   NVARCHAR(MAX)
-	, [to]		   NVARCHAR(MAX)
-	, [join]	   NVARCHAR(10)
-	, [begingroup] NVARCHAR(50)
-	, [endgroup]   NVARCHAR(50)
-	, [datatype]   NVARCHAR(50)
-)
+WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation'))
+	BEGIN
+		SELECT TOP 1 @condition = [condition]
+				   , @from		= REPLACE(ISNULL([from], ''), '''''', '''')
+				   , @to		= REPLACE(ISNULL([to], ''), '''''', '''')
+				   , @fieldname = [fieldname]
+		FROM @temp_xml_table 
+		WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation')
 
--- Gather the variables values from the xml table.
-SELECT  @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'strCustomerName'
+		IF @condition = 'Equal To'
+			BEGIN
+				IF @fieldname = 'strCustomerName'
+					BEGIN
+						SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
+							FROM vyuARCustomerSearch 
+							WHERE strName = @from
+							FOR XML PATH ('')
+						) C (intEntityCustomerId)
+					END
+				ELSE IF @fieldname = 'strSalespersonName'
+					BEGIN
+						SELECT @strSalespersonIds = LEFT(intEntityId, LEN(intEntityId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
+							FROM vyuEMSalesperson 
+							WHERE strSalespersonName = @from
+							FOR XML PATH ('')
+						) C (intEntityId)
+					END
+				ELSE IF @fieldname = 'strAccountStatusCode'
+					BEGIN
+						SELECT @strAccountStatusIds = LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intAccountStatusId AS VARCHAR(200))  + ', '
+							FROM tblARAccountStatus 
+							WHERE strAccountStatusCode = @from
+							FOR XML PATH ('')
+						) C (intAccountStatusId)
+					END
+				ELSE IF @fieldname = 'strCompanyLocation'
+					BEGIN
+						SELECT @strCompanyLocationIds = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(200))  + ', '
+							FROM tblSMCompanyLocation 
+							WHERE strLocationName = @from
+							FOR XML PATH ('')
+						) C (intCompanyLocationId)
+					END
+			END
+		ELSE IF @condition = 'Not Equal To'
+			BEGIN
+				IF @fieldname = 'strCustomerName'
+					BEGIN
+						SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
+							FROM vyuARCustomerSearch 
+							WHERE strName <> @from
+							FOR XML PATH ('')
+						) C (intEntityCustomerId)
+					END
+				ELSE IF @fieldname = 'strSalespersonName'
+					BEGIN
+						SELECT @strSalespersonIds = LEFT(intEntityId, LEN(intEntityId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
+							FROM vyuEMSalesperson 
+							WHERE strSalespersonName <> @from
+							FOR XML PATH ('')
+						) C (intEntityId)
+					END
+				ELSE IF @fieldname = 'strAccountStatusCode'
+					BEGIN
+						SELECT @strAccountStatusIds = LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intAccountStatusId AS VARCHAR(200))  + ', '
+							FROM tblARAccountStatus 
+							WHERE strAccountStatusCode <> @from
+							FOR XML PATH ('')
+						) C (intAccountStatusId)
+					END
+				ELSE IF @fieldname = 'strCompanyLocation'
+					BEGIN
+						SELECT @strCompanyLocationIds = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(200))  + ', '
+							FROM tblSMCompanyLocation 
+							WHERE strLocationName <> @from
+							FOR XML PATH ('')
+						) C (intCompanyLocationId)
+					END
+			END
+		ELSE IF @condition = 'Between'
+			BEGIN
+				IF @fieldname = 'strCustomerName'
+					BEGIN
+						SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
+							FROM vyuARCustomerSearch 
+							WHERE strName BETWEEN @from AND @to
+							FOR XML PATH ('')
+						) C (intEntityCustomerId)
+					END
+				ELSE IF @fieldname = 'strSalespersonName'
+					BEGIN
+						SELECT @strSalespersonIds = LEFT(intEntityId, LEN(intEntityId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
+							FROM vyuEMSalesperson 
+							WHERE strSalespersonName BETWEEN @from AND @to
+							FOR XML PATH ('')
+						) C (intEntityId)
+					END
+				ELSE IF @fieldname = 'strAccountStatusCode'
+					BEGIN
+						SELECT @strAccountStatusIds = LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intAccountStatusId AS VARCHAR(200))  + ', '
+							FROM tblARAccountStatus 
+							WHERE strAccountStatusCode BETWEEN @from AND @to
+							FOR XML PATH ('')
+						) C (intAccountStatusId)
+					END
+				ELSE IF @fieldname = 'strCompanyLocation'
+					BEGIN
+						SELECT @strCompanyLocationIds = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+						FROM (
+							SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(200))  + ', '
+							FROM tblSMCompanyLocation 
+							WHERE strLocationName BETWEEN @from AND @to
+							FOR XML PATH ('')
+						) C (intCompanyLocationId)
+					END
+			END
 
-SELECT  @strSalesperson = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'strSalespersonName'
-
-SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAccountStatusCode'
-
-SELECT  @strCompanyLocation = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'strCompanyLocation'
-
+		DELETE FROM @temp_xml_table WHERE [fieldname] = @fieldname
+		SET @condition = NULL
+		SET @from = NULL
+		SET @to = NULL
+		SET @fieldname = NULL
+	END
+	
 SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
 FROM	@temp_xml_table 
@@ -115,6 +225,10 @@ WHERE	[fieldname] = 'strSourceTransaction'
 SELECT	@ysnPrintOnlyOverCreditLimit = CASE WHEN ISNULL([from], 'False') = 'False' THEN 0 ELSE 1 END
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'ysnPrintOnlyOverCreditLimit'
+
+SELECT	@ysnRollCredits = CASE WHEN ISNULL([from], 'False') = 'False' THEN 0 ELSE 1 END
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'ysnRollCredits'
 
 SELECT	@intEntityUserId = [from]
 FROM	@temp_xml_table 
@@ -133,20 +247,160 @@ ELSE
 
 SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
-EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
-											  , @dtmDateTo = @dtmDateTo
-											  , @strSalesperson = @strSalesperson
-											  , @strSourceTransaction = @strSourceTransaction
-											  , @strCompanyLocation = @strCompanyLocation
-											  , @strCustomerName = @strCustomerName
-											  , @strAccountStatusCode = @strAccountStatusCode
-											  , @ysnInclude120Days = 0
-											  , @intEntityUserId = @intEntityUserId
+EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom			= @dtmDateFrom
+											  , @dtmDateTo				= @dtmDateTo											  
+											  , @strSourceTransaction	= @strSourceTransaction
+											  , @strCustomerIds			= @strCustomerIds
+											  , @strSalespersonIds		= @strSalespersonIds
+											  , @strCompanyLocationIds	= @strCompanyLocationIds
+											  , @strAccountStatusIds	= @strAccountStatusIds
+											  , @ysnInclude120Days		= 0
+											  , @intEntityUserId		= @intEntityUserId
 
 IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
 BEGIN
     DROP TABLE #AGEDBALANCES
 END
+
+IF(OBJECT_ID('tempdb..#CUSTOMERSWITHCREDITS') IS NOT NULL)
+BEGIN
+    DROP TABLE #CUSTOMERSWITHCREDITS
+END
+
+IF(OBJECT_ID('tempdb..#OPENINVOICES') IS NOT NULL)
+BEGIN
+    DROP TABLE #OPENINVOICES
+END
+
+IF(OBJECT_ID('tempdb..#OPENCREDITS') IS NOT NULL)
+BEGIN
+    DROP TABLE #OPENCREDITS
+END
+
+IF ISNULL(@ysnRollCredits, 0) = 1
+	BEGIN
+		--GET CUSTOMERS WITH OPEN CREDITS AND INVOICES
+		SELECT DISTINCT intEntityCustomerId
+		INTO #CUSTOMERSWITHCREDITS
+		FROM tblARCustomerAgingStagingTable
+		WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+		GROUP BY intEntityCustomerId 
+		HAVING SUM(ABS(ISNULL(dblCredits, 0)) + ABS(ISNULL(dblPrepayments, 0))) <> 0
+		   AND SUM(ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) + ISNULL(dbl120Days, 0)) <> 0
+
+		WHILE EXISTS (SELECT TOP 1 NULL FROM #CUSTOMERSWITHCREDITS)
+			BEGIN
+				DECLARE @intEntityCustomerId INT = NULL
+				SELECT TOP 1 @intEntityCustomerId = intEntityCustomerId FROM #CUSTOMERSWITHCREDITS
+
+				--GET OPEN CREDITS
+				SELECT intInvoiceId
+				     , dtmDate
+					 , dblTotalAR	= ABS(dblTotalAR)
+				INTO #OPENCREDITS
+				FROM tblARCustomerAgingStagingTable
+				WHERE intEntityUserId = @intEntityUserId 
+				  AND strAgingType = 'Detail'
+				  AND intEntityCustomerId = @intEntityCustomerId
+				  AND strTransactionType IN ('Overpayment', 'Customer Prepayment', 'Credit Memo')
+
+				--GET OPEN INVOICES
+				SELECT intInvoiceId
+				     , dtmDate		= MIN(dtmDate)
+					 , dblTotalAR	= SUM(dblTotalAR)
+				INTO #OPENINVOICES
+				FROM tblARCustomerAgingStagingTable
+				WHERE intEntityUserId = @intEntityUserId 
+				  AND strAgingType = 'Detail'
+				  AND intEntityCustomerId = @intEntityCustomerId
+				  AND strTransactionType NOT IN ('Overpayment', 'Customer Prepayment', 'Credit Memo')
+				GROUP BY intInvoiceId
+
+				--APPLY CREDITS TO OLDEST INVOICE
+				WHILE EXISTS (SELECT TOP 1 NULL FROM #OPENCREDITS)
+					BEGIN
+						DECLARE @intPrepaidId		INT = NULL
+							  , @dblCreditToApply	NUMERIC(18, 6) = 0
+
+						SELECT TOP 1 @intPrepaidId		= intInvoiceId
+								   , @dblCreditToApply	= dblTotalAR
+						FROM #OPENCREDITS ORDER BY dtmDate ASC
+
+						WHILE EXISTS (SELECT TOP 1 NULL FROM #OPENINVOICES) AND @dblCreditToApply > 0
+							BEGIN
+								DECLARE @intInvoiceId	INT = NULL
+									  , @dblInvoiceDue	NUMERIC(18, 6) = 0
+								
+								SELECT TOP 1 @intInvoiceId	= intInvoiceId
+										   , @dblInvoiceDue	= dblTotalAR
+								FROM #OPENINVOICES ORDER BY dtmDate ASC
+
+								--APPLY FULL CREDIT AMOUNT IF INVOICE IS LARGER THAN CREDIT
+								--UPDATE INVOICE BALANCE AND DELETE CREDIT 
+								IF @dblInvoiceDue > @dblCreditToApply
+									BEGIN
+										UPDATE #OPENINVOICES
+										SET dblTotalAR = dblTotalAR - @dblCreditToApply
+										WHERE intInvoiceId = @intInvoiceId
+
+										UPDATE tblARCustomerAgingStagingTable 
+										SET dblTotalAR	= dblTotalAR - @dblCreditToApply
+										  , dbl0Days	= CASE WHEN ISNULL(dbl0Days, 0) <> 0 THEN dbl0Days - @dblCreditToApply END
+										  , dbl10Days	= CASE WHEN ISNULL(dbl10Days, 0) <> 0 THEN dbl10Days - @dblCreditToApply END
+										  , dbl30Days	= CASE WHEN ISNULL(dbl30Days, 0) <> 0 THEN dbl30Days - @dblCreditToApply END
+										  , dbl60Days	= CASE WHEN ISNULL(dbl60Days, 0) <> 0 THEN dbl60Days - @dblCreditToApply END
+										  , dbl90Days	= CASE WHEN ISNULL(dbl90Days, 0) <> 0 THEN dbl90Days - @dblCreditToApply END
+										  , dbl120Days	= CASE WHEN ISNULL(dbl120Days, 0) <> 0 THEN dbl120Days - @dblCreditToApply END
+										  , dbl121Days	= CASE WHEN ISNULL(dbl121Days, 0) <> 0 THEN dbl121Days - @dblCreditToApply END
+										  , dblTotalDue = dblTotalDue - @dblCreditToApply
+										WHERE intEntityUserId = @intEntityUserId
+										  AND strAgingType = 'Detail' 
+										  AND intInvoiceId = @intInvoiceId
+										  AND strRecordNumber IS NULL
+
+										DELETE FROM tblARCustomerAgingStagingTable 
+										WHERE intEntityUserId = @intEntityUserId 
+										  AND strAgingType = 'Detail' 
+										  AND intInvoiceId = @intPrepaidId
+
+										SET @dblCreditToApply = 0
+									END
+								--IF CREDIT IS LARGER THAN THE OPEN INVOICE
+								--DELETE OPEN INVOICE AND UPDATE CREDIT
+								ELSE 
+									BEGIN
+										UPDATE #OPENINVOICES
+										SET dblTotalAR = 0
+										WHERE intInvoiceId = @intInvoiceId
+										
+										UPDATE tblARCustomerAgingStagingTable 
+										SET dblTotalAR	= dblTotalAR + @dblInvoiceDue										
+										  , dblTotalDue = dblTotalDue + @dblInvoiceDue
+										  , dblPrepayments = dblPrepayments + @dblInvoiceDue
+										  , dblPrepaids = dblPrepaids + @dblInvoiceDue
+										WHERE intEntityUserId = @intEntityUserId
+										  AND strAgingType = 'Detail' 
+										  AND intInvoiceId = @intPrepaidId										  
+
+										DELETE FROM tblARCustomerAgingStagingTable 
+										WHERE intEntityUserId = @intEntityUserId
+										  AND strAgingType = 'Detail' 
+										  AND intInvoiceId = @intInvoiceId
+
+										SET @dblCreditToApply = @dblCreditToApply - @dblInvoiceDue
+									END
+
+								DELETE FROM #OPENINVOICES WHERE intInvoiceId = @intInvoiceId AND dblTotalAR = 0
+							END
+						--SELECT * FROM #OPENCREDITS
+						DELETE FROM #OPENCREDITS WHERE intInvoiceId = @intPrepaidId
+					END
+
+				DELETE FROM #CUSTOMERSWITHCREDITS WHERE intEntityCustomerId = @intEntityCustomerId
+				DELETE FROM #OPENCREDITS
+				DELETE FROM #OPENINVOICES
+			END
+	END
 
 SELECT strAgedBalances = ISNULL([from], 'All')
 INTO #AGEDBALANCES
