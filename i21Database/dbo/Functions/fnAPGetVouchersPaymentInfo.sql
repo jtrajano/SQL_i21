@@ -12,6 +12,7 @@ RETURNS @returntable TABLE
 	strPaymentInfoKey NVARCHAR(MAX),
 	dtmPaymentDateReconciled DATETIME,
 	ysnClr BIT, 
+	dtmClr DATETIME,
     PRIMARY KEY CLUSTERED ([intBillId] ASC)
 )
 AS
@@ -39,11 +40,12 @@ BEGIN
 									FOR XML PATH('')),1,1,''
 								),
 		dtmPaymentDateReconciled=	latestPay.dtmDateReconciled,
-		ysnClr =	latestPay.ysnClr
+		ysnClr =	latestPay.ysnClr,
+		dtmClr =	latestPay.dtmClr
 	FROM tblAPBill A
 	OUTER APPLY (
 		SELECT TOP 1
-			D.dtmDateReconciled, D.ysnClr
+			D.dtmDateReconciled, D.ysnClr, D.dtmClr
 		FROM tblAPPayment B
 		INNER JOIN tblAPPaymentDetail C
 			ON B.intPaymentId = C.intPaymentId
