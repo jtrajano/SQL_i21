@@ -29,7 +29,10 @@ RETURNS TABLE AS RETURN
 		,dblTempDiscount =  CAST(CASE WHEN voucher.intTransactionType = 1 
 									THEN 
 									(
-										CASE WHEN voucher.ysnDiscountOverride = 1 THEN voucher.dblDiscount
+										CASE WHEN voucher.ysnDiscountOverride = 1 AND forPay.intPayScheduleId <= 0
+												THEN voucher.dblDiscount
+											WHEN forPay.intPayScheduleId > 0
+												THEN forPay.dblTempDiscount
 											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
 										END
 									) 

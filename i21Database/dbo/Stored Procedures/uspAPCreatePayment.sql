@@ -61,6 +61,8 @@ BEGIN
 	DECLARE @rate DECIMAL(18,6) = 1;
 	DECLARE @rateType INT;
 	DECLARE @currency INT, @functionalCurrency INT;
+	DECLARE @lienExists BIT = 0;
+	DECLARE @payee NVARCHAR(100);
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -255,6 +257,11 @@ BEGIN
 		SET @paymentInfo = @defaultPaymentInfo
 	END
 
+	SELECT TOP 1 
+		@lienExists = CAST(CASE WHEN lien.intEntityLienId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
+	FROM tblAPVendorLien lien
+	WHERE lien.intEntityVendorId = @vendorId AND lien.ysnActive = 1 AND ISNULL(@datePaid, GETDATE()) BETWEEN lien.dtmStartDate AND lien.dtmEndDate
+
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
 		[intAccountId],
@@ -275,6 +282,7 @@ BEGIN
 		[ysnPosted],
 		[dblWithheld],
 		[intEntityId],
+		[ysnLienExists],
 		[intConcurrencyId])
 	SELECT
 		[intAccountId]			= @bankGLAccountId,
@@ -295,6 +303,7 @@ BEGIN
 		[ysnPosted]				= @isPost,
 		[dblWithheld]			= CAST(ISNULL(@withholdAmount,0) AS DECIMAL(18,2)),
 		[intEntityId]			= @userId,
+		[ysnLienExists]			= @lienExists,
 		[intConcurrencyId]		= 0
 	
 	SELECT @paymentId = SCOPE_IDENTITY()'
@@ -376,6 +385,7 @@ BEGIN
 	 @rateType INT,
 	 @rate DECIMAL(18,6),
 	 @currency INT,
+	 @lienExists BIT,
 	 @location INT,
 	 @paymentId INT OUTPUT',
 	 @location = @location,
@@ -396,6 +406,7 @@ BEGIN
 	 @rateType = @rateType,
 	 @rate = @rate,
 	 @currency = @currency,
+	 @lienExists = @lienExists,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 
