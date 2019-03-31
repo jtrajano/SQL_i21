@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTImportAOP]
-@intExternalId		INT,
+	@intExternalId		INT,
 	@strScreenName		NVARCHAR(50),
 	@intUserId		INT,
 	@XML				NVARCHAR(MAX)
@@ -9,44 +9,46 @@ BEGIN TRY
     DECLARE	 @ErrMsg				NVARCHAR(MAX),
 			 @strYear				NVARCHAR(200),
 			 @dtmFromDate			DATETIME,
-			 @dtmToDate			DATETIME,
+			 @dtmToDate				DATETIME,
 			 @strBook				NVARCHAR(200),
 			 @strSubBook			NVARCHAR(200),
 			 @strCommodity			NVARCHAR(200),
 			 @strCompanyLocation	NVARCHAR(200),
 			 @strItem				NVARCHAR(200),
-			 @dblVolume			NUMERIC(18, 6),
+			 @dblVolume				NUMERIC(18, 6),
 			 @strVolumeUOM			NVARCHAR(200),
 			 @strCurrency			NVARCHAR(200),
 			 @strWeightUOM			NVARCHAR(200),
 			 @strPriceUOM			NVARCHAR(200),
-			 @dblComponent1		NUMERIC(18, 6),
-			 @dblComponent2		NUMERIC(18, 6),
-			 @dblComponent3		NUMERIC(18, 6),
-			 @dblComponent4		NUMERIC(18, 6),
-			 @dblComponent5		NUMERIC(18, 6),
-			 @dblComponent6		NUMERIC(18, 6),
-			 @dblComponent7		NUMERIC(18, 6),
-			 @dblComponent8		NUMERIC(18, 6),
-			 @dblComponent9		NUMERIC(18, 6),
+			 @dblComponent1			NUMERIC(18, 6),
+			 @dblComponent2			NUMERIC(18, 6),
+			 @dblComponent3			NUMERIC(18, 6),
+			 @dblComponent4			NUMERIC(18, 6),
+			 @dblComponent5			NUMERIC(18, 6),
+			 @dblComponent6			NUMERIC(18, 6),
+			 @dblComponent7			NUMERIC(18, 6),
+			 @dblComponent8			NUMERIC(18, 6),
+			 @dblComponent9			NUMERIC(18, 6),
 			 @dblComponent10		NUMERIC(18, 6),
-			 @intAOPId			INT,
-			 @intBookId			INT,
+			 @intAOPId				INT,
+			 @intBookId				INT,
 			 @intSubBookId			INT,
 			 @intCommodityId		INT,
 			 @intCompanyLocationId	INT,
-			 @intItemId			INT,
+			 @intStorageLocationId	INT,
+			 @intItemId				INT,
 			 @intVolumeUOMId		INT,
-			 @intCurrencyId		INT,
+			 @intCurrencyId			INT,
 			 @intWeightUOMId		INT,
-			 @intPriceUOMId		INT
+			 @intPriceUOMId			INT,
+			 @intAOPDetailId		INT
 
-    DECLARE	 @Detail TABLE
-    (
-	   intItemId	    INT, 
-	   dblCost	    NUMERIC(18,6),
-	   intAOPDetailId  INT
-    )
+	DECLARE	 @Component TABLE
+	(
+		intItemId			INT, 
+		dblCost				NUMERIC(18,6),
+		intAOPComponentId	INT
+	)
 
     UPDATE  B
     SET		B.intAOPId  =   A.intAOPId
@@ -108,6 +110,7 @@ BEGIN TRY
 			@intCurrencyId		=	CY.intCurrencyID,
 			@intWeightUOMId		=	WM.intItemUOMId,
 			@intPriceUOMId		=	PM.intItemUOMId,
+			@intStorageLocationId=	SL.intCompanyLocationSubLocationId,
 
 			@intAOPId			=	intAOPId
 
@@ -128,10 +131,11 @@ BEGIN TRY
 	LEFT JOIN	 tblCTBook				BK  ON  BK.strBook			=		AO.strBook
 	LEFT JOIN	 tblCTSubBook			SB  ON  SB.strSubBook		=		AO.strSubBook
 											AND SB.intBookId		=		BK.intBookId
+	LEFT JOIN	 tblSMCompanyLocationSubLocation	SL	ON	SL.strSubLocationName = AO.strStorageLocation
 	WHERE		 intImportAOPId	 = @intExternalId
 
-    INSERT INTO @Detail
-    SELECT M.intItemId, Cost AS dblCost,D.intAOPDetailId
+    INSERT INTO @Component
+    SELECT M.intItemId, Cost AS dblCost,C.intAOPComponentId
     FROM tblCTImportAOP 
     UNPIVOT 
     (
@@ -140,9 +144,14 @@ BEGIN TRY
 			 dblComponent1,dblComponent2,dblComponent3,dblComponent4,dblComponent5,dblComponent6,dblComponent7,dblComponent8,dblComponent9
 		  )
     ) unpvt
-    JOIN tblCTComponentMap M ON M.strComponent = REPLACE(unpvt.strComponent,'dbl','') COLLATE Latin1_General_CI_AS
-    LEFT JOIN tblCTAOPDetail D ON D.intBasisItemId = M.intItemId AND D.intAOPId = ISNULL(unpvt.intAOPId,0) AND D.intItemId = @intItemId
-    WHERE intImportAOPId	 = @intExternalId AND M.intItemId IS NOT NULL
+    JOIN tblCTComponentMap		M	ON	M.strComponent		=	REPLACE(unpvt.strComponent,'dbl','') COLLATE Latin1_General_CI_AS
+    LEFT JOIN tblCTAOPDetail	D	ON	D.intAOPId			=	ISNULL(unpvt.intAOPId,0) 
+									AND D.intItemId			=	@intItemId 
+									AND ISNULL(D.intStorageLocationId,0) = @intStorageLocationId
+	LEFT JOIN tblCTAOPComponent C	ON	C.intBasisItemId	=	M.intItemId 
+									AND C.intAOPDetailId	=	D.intAOPDetailId
+    WHERE	intImportAOPId = @intExternalId 
+	AND		M.intItemId IS NOT NULL
 
 	IF @strYear IS NULL
 	BEGIN
@@ -193,25 +202,46 @@ BEGIN TRY
 
 	   SELECT @intAOPId = SCOPE_IDENTITY()
 
-	   INSERT INTO tblCTAOPDetail(intAOPId,intItemId,dblVolume,intVolumeUOMId,intCurrencyId,intWeightUOMId,intPriceUOMId,intConcurrencyId,intBasisItemId,dblCost)
-	   SELECT @intAOPId,@intItemId,@dblVolume,@intVolumeUOMId,@intCurrencyId,@intWeightUOMId,@intPriceUOMId,1,M.intItemId, M.dblCost
-	   FROM @Detail M
-	   WHERE intAOPDetailId	 IS NULL
+	   IF EXISTS(SELECT TOP 1 1 FROM tblCTAOPDetail WHERE intAOPId = @intAOPId AND intItemId = @intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(@intStorageLocationId,0))
+	   BEGIN
+			SET @ErrMsg = 'Storage location is already available.'
+			RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
+	   END
+
+	   INSERT INTO tblCTAOPDetail(intAOPId,intItemId,dblVolume,intVolumeUOMId,intCurrencyId,intWeightUOMId,intPriceUOMId,intConcurrencyId,intStorageLocationId)
+	   SELECT @intAOPId,@intItemId,@dblVolume,@intVolumeUOMId,@intCurrencyId,@intWeightUOMId,@intPriceUOMId,1, @intStorageLocationId
+
+	   SELECT @intAOPDetailId = SCOPE_IDENTITY()
+
+	   INSERT INTO tblCTAOPComponent(intAOPDetailId, intBasisItemId, dblCost, intConcurrencyId)
+	   SELECT @intAOPDetailId,M.intItemId, M.dblCost, 1
+	   FROM @Component M
+	   WHERE intAOPComponentId	 IS NULL
     END
     ELSE
     BEGIN
 	   UPDATE AD
 	   SET AD.dblCost = D.dblCost
-	   FROM @Detail D
-	   JOIN tblCTAOPDetail AD ON AD.intAOPDetailId = D.intAOPDetailId
-	   WHERE D.intAOPDetailId IS NOT NULL
+	   FROM @Component D
+	   JOIN tblCTAOPComponent AD ON AD.intAOPComponentId = D.intAOPComponentId
+	   WHERE D.intAOPComponentId IS NOT NULL
 
-	   INSERT INTO tblCTAOPDetail(intAOPId,intItemId,dblVolume,intVolumeUOMId,intCurrencyId,intWeightUOMId,intPriceUOMId,intConcurrencyId,intBasisItemId,dblCost)
-	   SELECT @intAOPId,@intItemId,@dblVolume,@intVolumeUOMId,@intCurrencyId,@intWeightUOMId,@intPriceUOMId,1,M.intItemId, M.dblCost
-	   FROM @Detail M
-	   WHERE intAOPDetailId	 IS NULL
+	   SELECT @intAOPDetailId = intAOPDetailId FROM tblCTAOPDetail WHERE intAOPId = @intAOPId AND intItemId = @intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(@intStorageLocationId,0)
+
+	   IF @intAOPDetailId IS NULL
+	   BEGIN
+			INSERT INTO tblCTAOPDetail(intAOPId,intItemId,dblVolume,intVolumeUOMId,intCurrencyId,intWeightUOMId,intPriceUOMId,intConcurrencyId,intStorageLocationId)
+			SELECT @intAOPId,@intItemId,@dblVolume,@intVolumeUOMId,@intCurrencyId,@intWeightUOMId,@intPriceUOMId,1, @intStorageLocationId
+
+			SELECT @intAOPDetailId = SCOPE_IDENTITY()
+	   END
+
+	   INSERT INTO tblCTAOPComponent(intAOPDetailId, intBasisItemId, dblCost, intConcurrencyId)
+	   SELECT @intAOPDetailId,M.intItemId, M.dblCost, 1
+	   FROM @Component M
+	   WHERE intAOPComponentId	 IS NULL
     END
-    SELECT * FROM @Detail
+    SELECT * FROM @Component
 END TRY      
 BEGIN CATCH       
 	SET @ErrMsg = ERROR_MESSAGE()      
