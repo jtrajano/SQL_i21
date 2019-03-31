@@ -7507,6 +7507,8 @@
     <Build Include="dbo\Views\vyuAPVendorSynergy.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVendorExportSynergy.sql" />
     <Build Include="dbo\Views\vyuAPVoucherInfo.sql" />
+    <Build Include="dbo\Tables\tblCTPriceFixationTicket.sql" />
+    <Build Include="dbo\Views\vyuCTPriceFixationTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
