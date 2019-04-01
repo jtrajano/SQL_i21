@@ -657,7 +657,7 @@ BEGIN
 	INNER JOIN tblSMPaymentMethod SM ON INV.intPaymentMethodId = SM.intPaymentMethodID	
 	WHERE SM.strPaymentMethod = 'Check'
 	  AND INV.strTransactionType = 'Cash'
-	  AND ISNULL(INV.strPaymentMethod, '') = ''
+	  AND ISNULL(INV.strPaymentInfo, '') = ''
 
 	--INSERT INTO @returntable(
 	--	 [intInvoiceId]
