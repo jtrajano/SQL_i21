@@ -1,32 +1,16 @@
 ﻿CREATE VIEW [dbo].[vyuAPVoucherInfo]
 AS 
 
-WITH 
-lastVoucher
-(
-	dblLastVoucherTotal,
-	dblLastVoucherDate
-)
-AS
-(
-	SELECT TOP 1
-		dblLastVoucherTotal		=	A.dblTotal,
-		dblLastVoucherDate		=	A.dtmDate
-	FROM tblAPBill A
-	ORDER BY intBillId DESC
-),
-lastYearVoucherTotal(dblLastYearVoucherTotal)
-AS
-(
-	SELECT dbo.[fnAPGetLYVoucher]()
-),
-ytdVouchers(dblYTDVoucherTotal)
-AS
-(
-	SELECT dbo.[fnAPGetYTDPurchases]()
-)
-
-SELECT 
-	CAST(ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS INT) AS intVoucherInfoId,
-	* 
-FROM lastVoucher, lastYearVoucherTotal, ytdVouchers;
+SELECT
+	vendor.intEntityId AS intEntityVendorId,
+	A.dtmDate AS dtmLastVoucherDate,
+	ISNULL(A.dblTotal,0) AS dblLastVoucherTotal,
+	ISNULL(B.dblTotal,0) AS dblLastYearVoucherTotal,
+	ISNULL(C.dblTotal,0) AS dblYearToDateVoucherTotal
+FROM tblAPVendor vendor
+LEFT JOIN dbo.fnAPGetLastVoucherTotal() A 
+	ON vendor.intEntityId = A.intEntityVendorId
+LEFT JOIN dbo.fnAPGetLYVoucher() B
+	ON A.intEntityVendorId = B.intEntityVendorId
+LEFT JOIN dbo.fnAPGetYTDPurchases() C
+	ON B.intEntityVendorId = C.intEntityVendorId
