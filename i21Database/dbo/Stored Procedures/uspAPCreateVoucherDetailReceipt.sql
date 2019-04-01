@@ -1040,8 +1040,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 	IF  EXISTS (SELECT 1 FROM tblAPBillDetail where intBillDetailId  IN (SELECT intBillDetailId FROM @detailCreated) and intContractDetailId > 0)
 	BEGIN
 		DECLARE @voucherDetailId INT
-		SELECT  @voucherDetailId = intBillDetailId FROM @detailCreated 		
-		EXEC [uspAPUpdateQty] @voucherDetailId
+		DECLARE curr CURSOR FOR
+		SELECT  intBillDetailId FROM @detailCreated 
+		FETCH NEXT FROM curr INTO @voucherDetailId
+		WHILE @@FETCH_STATUS = 0	
+		BEGIN	
+			EXEC [uspAPUpdateQty] @voucherDetailId
+		END
+		CLOSE curr
+		DEALLOCATE curr
 	END
 
 IF @transCount = 0 COMMIT TRANSACTION
