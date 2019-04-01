@@ -40,6 +40,7 @@ AS
 		,J.intVendorSetupId 
 		,A.intInvoiceId
 		,strVendorName = P.strName
+		,ysnActive = I.ysnActive
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
@@ -96,6 +97,7 @@ AS
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND A.ysnPosted = 1
 		AND A.strTransactionType IN ('Invoice', 'Credit Memo')
-		AND I.ysnActive = 1) A
+		--AND I.ysnActive = 1
+	) A
 
 GO
