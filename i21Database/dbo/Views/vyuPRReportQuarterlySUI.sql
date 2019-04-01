@@ -15,10 +15,10 @@ SELECT DISTINCT intEntityId = tblPRPaycheck.intEntityEmployeeId
 	,dblGrossYTD = MAX(tblPRPaycheck.dblGrossYTD)
 	,dblAdjustedGrossYTD = MAX(dblAdjustedGrossYTD)
 
-	,dblTaxable = vyuPRPaycheckTax.dblTaxableAmount
-	,dblRate = vyuPRPaycheckTax.dblAmount
+	,dblTaxable = SUM(vyuPRPaycheckTax.dblTaxableAmount) OVER (PARTITION BY tblPRPaycheck.intEntityEmployeeId, tblPRPaycheck.intYear, tblPRPaycheck.intQuarter)
+	,dblRate = SUM(vyuPRPaycheckTax.dblAmount) OVER (PARTITION BY tblPRPaycheck.intEntityEmployeeId, tblPRPaycheck.intYear, tblPRPaycheck.intQuarter)
 	,dblLimit = vyuPRPaycheckTax.dblLimit
-	,dblTotal = vyuPRPaycheckTax.dblTotal
+	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal) OVER (PARTITION BY tblPRPaycheck.intEntityEmployeeId, tblPRPaycheck.intYear, tblPRPaycheck.intQuarter)
 	,vyuPRPaycheckTax.strTaxId
 
 	,dblTotalHours = MAX(tblPRPaycheck.dblTotalHoursYTD)
@@ -35,7 +35,7 @@ INNER JOIN(SELECT
 		,dblGrossYTD = PE.dblGrossYTD
 		,dblPretaxYTD = PD.dblPretaxYTD
 		,dblAdjustedGrossYTD = ISNULL(PE.dblGrossYTD, 0) - ISNULL(PD.dblPretaxYTD, 0)
-		,dblTotalHoursYTD = PE.dblTotalHoursYTD
+		,dblTotalHoursYTD = PE.dblTotalHoursYTD 
 	FROM (SELECT intPaycheckId
 			,intEntityEmployeeId
 			,intYear = YEAR(dtmPayDate)
@@ -56,7 +56,8 @@ INNER JOIN(SELECT
 			,dblPretax = SUM(dblTotal)
 			,dblPretaxYTD = SUM(dblTotalYTD)
 		FROM vyuPRPaycheckDeduction 
-		WHERE ysnSUITaxable = 1 AND strPaidBy = 'Employee'
+		WHERE ysnSUITaxable = 1 
+			AND strPaidBy = 'Employee'
 		GROUP BY intPaycheckId
 			,YEAR(dtmPayDate)
 			,DATEPART(QQ, dtmPayDate)
@@ -88,23 +89,24 @@ INNER JOIN(SELECT
 
 INNER JOIN(
 	SELECT DISTINCT intEntityEmployeeId
-		,dblAmount = SUM(dblAmount) OVER (PARTITION BY intEntityEmployeeId, YEAR(dtmPayDate), DATEPART(QQ,dtmPayDate))
+		,dblAmount = SUM(dblAmount)
 		,dblLimit = dblLimit
-		,dblTaxableAmount = SUM(dblTaxableAmount) OVER (PARTITION BY intEntityEmployeeId, YEAR(dtmPayDate), DATEPART(QQ,dtmPayDate))
-		,dblTotal = SUM(dblTotal) OVER (PARTITION BY intEntityEmployeeId, YEAR(dtmPayDate), DATEPART(QQ,dtmPayDate))
+		,dblTaxableAmount = SUM(dblTaxableAmount)
+		,dblTotal = SUM(dblTotal)
 		,intYear = YEAR(dtmPayDate)
 		,intQuarter = DATEPART(QQ,dtmPayDate)
 		,strTaxId
 	FROM vyuPRPaycheckTax
-	WHERE strCalculationType = 'USA SUTA' AND ysnVoid = 0
+	WHERE strCalculationType = 'USA SUTA' 
+		AND ysnVoid = 0
 	GROUP BY intEntityEmployeeId
-	,YEAR(dtmPayDate)
-	,DATEPART(QQ,dtmPayDate)
-	,dblAmount
-	,dblTaxableAmount
-	,dblLimit
-	,dblTotal
-	,strTaxId 
+		,YEAR(dtmPayDate)
+		,DATEPART(QQ,dtmPayDate)
+		,dblAmount
+		,dblTaxableAmount
+		,dblLimit
+		,dblTotal
+		,strTaxId 
 )vyuPRPaycheckTax ON tblPRPaycheck.intEntityEmployeeId = vyuPRPaycheckTax.intEntityEmployeeId
 	AND tblPRPaycheck.intYear = vyuPRPaycheckTax.intYear
 	AND tblPRPaycheck.intQuarter = vyuPRPaycheckTax.intQuarter
