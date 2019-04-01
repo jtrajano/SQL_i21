@@ -1,21 +1,20 @@
 CREATE VIEW [dbo].[vyuICGetStockMovement]
 AS
 
---SELECT	intInventoryValuationKeyId  = COALESCE(t.intInventoryStockMovementId, i.intItemId) --ISNULL(t.intInventoryStockMovementId, 0) 		
-SELECT	intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER(ORDER BY commodity.strCommodityCode, c.strCategoryCode, i.strItemNo, [Location].strLocationName, t.dtmDate, t.strTransactionId) AS INT)
-									--subLoc.strStorageLocationSorter, subLoc.intStorageLocationSorter, strgLoc.strStorageUnitSorter, strgLoc.intStorageUnitSorter, t.dtmDate) AS INT)
+SELECT	intInventoryValuationKeyId = 
+			t.intInventoryStockMovementId
 		,i.intItemId
 		,strItemNo					= i.strItemNo
 		,strItemDescription			= i.strDescription
-		,intLocationId				= [Location].intCompanyLocationId
+		,t.intLocationId
 		,t.intItemLocationId
 		,strLocationName			= [Location].strLocationName
 		,t.intSubLocationId
 		,subLoc.strSubLocationName
 		,t.intStorageLocationId
 		,strStorageLocationName		= strgLoc.strName
-		,dtmDate					= dbo.fnRemoveTimeOnDate(t.dtmDate)
-		,i.intCategoryId
+		,dtmDate					= t.dtmDate 
+		,c.intCategoryId
 		,strCategory				= c.strCategoryCode
 		,commodity.intCommodityId
 		,strCommodity				= commodity.strCommodityCode 
@@ -78,12 +77,12 @@ FROM 	tblICItem i
 			WHERE	iuStock.intItemId = i.intItemId
 					AND iuStock.ysnStockUnit = 1 
 		) iuStock
-		LEFT JOIN tblICCategory c 
-			ON c.intCategoryId = i.intCategoryId
-		LEFT JOIN tblICCommodity commodity
-			ON commodity.intCommodityId = i.intCommodityId
-		LEFT JOIN tblICInventoryStockMovement t 
+		INNER JOIN tblICInventoryStockMovement t 
 			ON i.intItemId = t.intItemId
+		LEFT JOIN tblICCategory c 
+			ON c.intCategoryId = t.intCategoryId
+		LEFT JOIN tblICCommodity commodity
+			ON commodity.intCommodityId = t.intCommodityId
 		LEFT JOIN tblICInventoryTransactionType ty 
 			ON ty.intTransactionTypeId = t.intTransactionTypeId
 		LEFT JOIN (SELECT	intStorageLocationId
@@ -93,11 +92,8 @@ FROM 	tblICItem i
 					FROM tblICStorageLocation
 			) strgLoc 
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
-		LEFT JOIN (
-			tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
-				ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
-		)
-			ON t.intItemLocationId = ItemLocation.intItemLocationId
+		LEFT JOIN tblSMCompanyLocation [Location] 
+			ON [Location].intCompanyLocationId = t.intLocationId
 		LEFT JOIN (SELECT 
 					intCompanyLocationSubLocationId
 					,strSubLocationName
