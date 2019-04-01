@@ -600,7 +600,7 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, dtmAsOfDate				= @dtmDateToLocal
 	, strCustomerNumber			= SR.strCustomerNumber
 	, strCustomerName			= SR.strCustomerName
-	, strInvoiceNumber			= SR.strInvoiceNumber
+	, strInvoiceNumber			= CASE WHEN SR.strTransactionType = 'Payment' THEN SR.strRecordNumber ELSE SR.strInvoiceNumber END
 	, strBOLNumber				= SR.strBOLNumber
 	, strRecordNumber			= SR.strRecordNumber
 	, strTransactionType		= SR.strTransactionType
