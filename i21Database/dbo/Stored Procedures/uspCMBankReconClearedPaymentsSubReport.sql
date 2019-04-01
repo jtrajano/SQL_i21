@@ -126,9 +126,11 @@ DECLARE @lastDateReconciled datetime
 	
 	SELECT @lastDateReconciled = DATEADD(SECOND, -1, DATEADD(DAY,1,@lastDateReconciled))
 
-DECLARE @filterDate DATETIME
-	SELECT @filterDate = DATEADD(SECOND, -1, DATEADD(DAY,1,  @dtmStatementDate))
 
+DECLARE @filterDate DATETIME, @ysnMaskedPCHKPayee BIT
+
+SELECT @filterDate = DATEADD(SECOND, -1, DATEADD(DAY,1,  @dtmStatementDate))	
+SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference  
 	
 	
 -- SANITIZE THE BANK ACCOUNT ID
@@ -147,7 +149,7 @@ SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,dtmDate = BankTrans.dtmDate
 		,dtmDateReconciled = BankTrans.dtmDateReconciled
 		,strReferenceNo = BankTrans.strReferenceNo
-		,strPayee = BankTrans.strPayee
+		,strPayee = CASE WHEN  BankTrans.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE BankTrans.strPayee END 
 		,strMemo = BankTrans.strMemo
 		,strRecordNo = BankTrans.strTransactionId
 		,dblPayment = ABS(BankTrans.dblAmount)
