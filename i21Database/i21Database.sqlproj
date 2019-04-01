@@ -6442,6 +6442,8 @@
     <Build Include="dbo\Tables\tblCTSMTransactionApprovedLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTFeedNotSentEmailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSendMissingFeed.sql" />
+    <Build Include="dbo\User Defined Types\TMCompactContract.sql" />
+    <Build Include="dbo\User Defined Types\TMCompactItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
