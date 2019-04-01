@@ -551,9 +551,15 @@ OUTER APPLY (
 ) BUDGETPASTDUE
 OUTER APPLY (
 	SELECT dblAmountDue = SUM(dblBudgetAmount) - SUM(dblAmountPaid) 
-	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
-	WHERE intEntityCustomerId = SR.intEntityCustomerId 
-	  AND DATEADD(MONTH, 1, @dtmDateToLocal) BETWEEN dtmBudgetDate AND DATEADD(MONTH, 1, dtmBudgetDate)
+	FROM dbo.tblARCustomerBudget BUDGET WITH (NOLOCK)
+	CROSS APPLY (
+		SELECT TOP 1 dtmBudgetDate = CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmBudgetDate)))		
+		FROM tblARCustomerBudget B
+		WHERE intEntityCustomerId = SR.intEntityCustomerId  
+		AND @dtmDateToLocal <= dtmBudgetDate
+	) NEAREST
+	WHERE BUDGET.intEntityCustomerId = SR.intEntityCustomerId
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) <= NEAREST.dtmBudgetDate
 ) BUDGETNOWDUE
 
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Budget Reminder'
