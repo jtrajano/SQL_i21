@@ -151,7 +151,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotalTax, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotalTax, 0) END
 								  ELSE NULL END
-	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(NONSSTTAX.dblTotalTax, 0) END 
+	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' OR ISNULL(INVOICEDETAIL.dblComputedGrossPrice, 0) = 0 THEN 0 ELSE ISNULL(NONSSTTAX.dblTotalTax, 0) END 
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
@@ -171,7 +171,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblDiscount				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									ISNULL(INVOICEDETAIL.dblDiscount, 0) / 100
 								  ELSE NULL END
-	 , dblTotalTax				= dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) ELSE ISNULL(TOTALTAX.dblTotalTax, 0) END
+	 , dblTotalTax				= dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' OR ISNULL(INVOICEDETAIL.dblComputedGrossPrice, 0) = 0 THEN ISNULL(INV.dblTax, 0) ELSE ISNULL(TOTALTAX.dblTotalTax, 0) END
 	 , dblPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) ELSE NULL END
 	 , dblItemPrice				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotal, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotal, 0) END
@@ -239,12 +239,13 @@ INNER JOIN (
 LEFT JOIN (
 	SELECT ID.intInvoiceId
 	     , ID.intInvoiceDetailId
-		 , ID.intCommentTypeId
+		 , ID.intCommentTypeId		 
 		 , dblTotalTax				= CASE WHEN ISNULL(ID.dblComputedGrossPrice, 0) = 0 THEN ID.dblTotalTax ELSE 0 END
 		 , ID.dblContractBalance
 		 , ID.dblQtyShipped
 		 , ID.dblQtyOrdered
 		 , ID.dblDiscount
+		 , ID.dblComputedGrossPrice	
 		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
