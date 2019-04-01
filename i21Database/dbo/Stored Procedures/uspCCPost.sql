@@ -74,7 +74,7 @@ BEGIN TRY
 		,@recap = 0
 		,@success = @success OUTPUT
 		,@errorMessage = @errorMessage OUTPUT
-		,@createdBillId = @billId OUTPUT
+		--,@createdBillId = @billId OUTPUT
 
 	-- AR Transaction and Posting
 	EXEC [dbo].[uspCCTransactionToARInvoice] 
