@@ -101,7 +101,7 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	WHERE InvDet.intInvoiceId = @intInvoiceId
 
-	SELECT @strFreightConditions = RTRIM(LTRIM(FT.strContractBasis + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, '') + ' ' + WG.strWeightGradeDesc))
+	SELECT @strFreightConditions = RTRIM(LTRIM(ISNULL(FT.strContractBasis, '') + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, '') + ' ' + ISNULL(WG.strWeightGradeDesc, '')))
 	FROM tblARInvoiceDetail InvDet
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -213,7 +213,7 @@ BEGIN
 		,intLineCount = 1
 		,FT.strFreightTerm
 		,L.strMVessel
-		,strVesselDirection = L.strMVessel + CASE WHEN (ISNULL(L.strOriginPort, '') <>  '' AND ISNULL(L.strDestinationPort, '') <> '') 
+		,strVesselDirection = ISNULL(L.strMVessel, '') + CASE WHEN (ISNULL(L.strOriginPort, '') <>  '' AND ISNULL(L.strDestinationPort, '') <> '') 
 												THEN ' ' + @from + ' ' + L.strOriginPort + ' ' + @to + ' ' + L.strDestinationPort ELSE '' END
 		,L.strBLNumber
 		,L.dtmBLDate
