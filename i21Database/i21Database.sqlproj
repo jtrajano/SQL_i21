@@ -7509,6 +7509,7 @@
     <Build Include="dbo\Views\vyuAPVoucherInfo.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationTicket.sql" />
     <Build Include="dbo\Views\vyuCTPriceFixationTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetDueDateBasedOnTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
