@@ -6444,6 +6444,7 @@
     <Build Include="dbo\Tables\tblCTSMTransactionApprovedLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTFeedNotSentEmailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSendMissingFeed.sql" />
+    <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
