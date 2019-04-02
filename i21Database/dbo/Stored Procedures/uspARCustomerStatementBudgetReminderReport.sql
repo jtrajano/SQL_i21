@@ -471,6 +471,53 @@ LEFT JOIN (
 	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
+--BUDGET
+IF @ysnIncludeBudgetLocal = 1
+	BEGIN
+		INSERT INTO #STATEMENTREPORT (
+			   intEntityCustomerId
+			 , intInvoiceId
+			 , strCustomerNumber
+			 , strCustomerName
+			 , strRecordNumber
+			 , strTransactionType
+			 , strType
+			 , strFullAddress
+			 , strStatementFooterComment
+			 , dtmDate
+			 , dtmDueDate
+			 , dblPayment
+			 , dblInvoiceTotal
+			 , dblCreditLimit	 
+			 , dblCreditAvailable
+			 , dblBalance
+			 , dblARBalance
+			 , ysnStatementCreditLimit
+		)
+		SELECT intEntityCustomerId			= C.intEntityCustomerId 
+			 , intInvoiceId					= CB.intCustomerBudgetId
+			 , strCustomerNumber			= C.strCustomerNumber
+			 , strCustomerName				= C.strCustomerName
+			 , strRecordNumber				= 'Budget due for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
+			 , strTransactionType			= 'Customer Budget'
+			 , strType						= 'Customer Budget'
+			 , strFullAddress				= C.strFullAddress
+			 , strStatementFooterComment	= C.strStatementFooterComment
+			 , dtmDate						= CB.dtmBudgetDate
+			 , dtmDueDate					= DATEADD(DAY, -1, DATEADD(MONTH, 1, CB.dtmBudgetDate))
+			 , dblPayment					= 0.00
+			 , dblInvoiceTotal				= CB.dblBudgetAmount - CB.dblAmountPaid
+			 , dblCreditLimit				= C.dblCreditLimit
+			 , dblCreditAvailable			= C.dblCreditAvailable
+			 , dblBalance					= 0.00
+			 , dblARBalance					= C.dblARBalance
+			 , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
+        FROM tblARCustomerBudget CB
+		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
+        WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+          AND CB.dblAmountPaid < CB.dblBudgetAmount
+	END
+
 UPDATE #STATEMENTREPORT SET dblBalance = dblPayment * -1 WHERE strTransactionType = 'Payment'
 UPDATE TSS
 SET dblBalance = I.dblAmountDue
@@ -618,7 +665,7 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, dtmAsOfDate				= @dtmDateToLocal
 	, strCustomerNumber			= SR.strCustomerNumber
 	, strCustomerName			= SR.strCustomerName
-	, strInvoiceNumber			= CASE WHEN SR.strTransactionType = 'Payment' THEN SR.strRecordNumber ELSE SR.strInvoiceNumber END
+	, strInvoiceNumber			= CASE WHEN SR.strTransactionType IN ('Payment', 'Customer Budget') THEN SR.strRecordNumber ELSE SR.strInvoiceNumber END
 	, strBOLNumber				= SR.strBOLNumber
 	, strRecordNumber			= SR.strRecordNumber
 	, strTransactionType		= SR.strTransactionType
