@@ -164,11 +164,11 @@ SELECT
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
 												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 										   END)
-	,[dblAmountDue]						= ABS([dbo].fnRoundBanker(ISNULL(RFP.[dblAmountDue], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
+	,[dblAmountDue]						= ISNULL(PE.dblAmountDue, ABS([dbo].fnRoundBanker(ISNULL(RFP.[dblAmountDue], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
 										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
 												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
-										   END)	
+										   END))
 	,[strInvoiceReportNumber]			= PE.[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]	= RFP.[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]		= RFP.[intCurrencyExchangeRateId]
@@ -280,11 +280,11 @@ SELECT
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
 												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 										   END)
-	,[dblAmountDue]						= ABS([dbo].fnRoundBanker(ISNULL(RFP.[dblAmountDue], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
+	,[dblAmountDue]						= ISNULL(PE.dblAmountDue, ABS([dbo].fnRoundBanker(ISNULL(RFP.[dblAmountDue], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
 										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
 												ELSE (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
-										   END)	
+										   END))	
 	,[strInvoiceReportNumber]			= PE.[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]	= RFP.[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]		= RFP.[intCurrencyExchangeRateId]

@@ -221,6 +221,7 @@ BEGIN
 		,[dblBaseWriteOffAmount]
 		,[dblInterest]
 		,[dblPayment]
+		,[dblAmountDue]
 		,[strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]
@@ -277,6 +278,7 @@ BEGIN
 		,[dblBaseWriteOffAmount]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblBaseWriteOffAmount] ELSE NULL END)
 		,[dblInterest]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblInterest] ELSE NULL END) 
 		,[dblPayment]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblPayment] ELSE NULL END) 
+		,[dblAmountDue]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblAmountDue] ELSE NULL END) 
 		,[strInvoiceReportNumber]				= (CASE WHEN @GroupingOption = 0 THEN IE.[strInvoiceReportNumber] ELSE NULL END) 
 		,[intCurrencyExchangeRateTypeId]		= (CASE WHEN @GroupingOption = 0 THEN IE.[intCurrencyExchangeRateTypeId] ELSE NULL END) 
 		,[intCurrencyExchangeRateId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intCurrencyExchangeRateId] ELSE NULL END) 
@@ -413,6 +415,7 @@ BEGIN
 			,[dblBaseWriteOffAmount]
 			,[dblInterest]
 			,[dblPayment]
+			,[dblAmountDue]
 			,[strInvoiceReportNumber]
 			,[intCurrencyExchangeRateTypeId]
 			,[intCurrencyExchangeRateId]
@@ -468,6 +471,7 @@ BEGIN
 			,[dblBaseWriteOffAmount]				= ITG.[dblBaseWriteOffAmount]
 			,[dblInterest]							= ITG.[dblInterest]
 			,[dblPayment]							= ITG.[dblPayment]
+			,[dblAmountDue]							= ITG.[dblAmountDue]
 			,[strInvoiceReportNumber]				= ITG.[strInvoiceReportNumber]
 			,[intCurrencyExchangeRateTypeId]		= ITG.[intCurrencyExchangeRateTypeId]
 			,[intCurrencyExchangeRateId]			= ITG.[intCurrencyExchangeRateId]
