@@ -1111,7 +1111,7 @@ BEGIN
 
 				SET @intVehicleId =
 				(SELECT TOP 1 intVehicleId
-				FROM @tblCFNumericVehicle
+				FROM @tblCFCharVehicle
 				WHERE strVehicleNumber = @strVehicleId)
 
 			END
