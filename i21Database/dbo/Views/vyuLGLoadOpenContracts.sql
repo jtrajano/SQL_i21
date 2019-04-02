@@ -12,8 +12,8 @@ SELECT CD.intContractDetailId
 	,CD.intItemUOMId
 	,U1.strUnitMeasure AS strUnitMeasure
 	,CD.intNetWeightUOMId
-	,U2.intUnitMeasureId AS intWeightUnitMeasureId
-	,U2.strUnitMeasure AS strWeightUnitMeasure
+	,U2.intUnitMeasureId AS intNetWeightUnitMeasureId
+	,U2.strUnitMeasure AS strNetWeightUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
 	,ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0) AS dblUnLoadedQuantity
@@ -182,8 +182,8 @@ SELECT CD.intContractDetailId
 	,CD.intItemUOMId
 	,U1.strUnitMeasure AS strUnitMeasure
 	,CD.intNetWeightUOMId
-	,U2.intUnitMeasureId AS intWeightUnitMeasureId
-	,U2.strUnitMeasure AS strWeightUnitMeasure
+	,U2.intUnitMeasureId AS intNetWeightUnitMeasureId
+	,U2.strUnitMeasure AS strNetWeightUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
 	,ISNULL(CD.dblQuantity, 0) - (CASE WHEN ISNULL(CD.dblShippingInstructionQty,0)<=0 THEN 0 ELSE ISNULL(CD.dblShippingInstructionQty,0) END) AS dblUnLoadedQuantity
