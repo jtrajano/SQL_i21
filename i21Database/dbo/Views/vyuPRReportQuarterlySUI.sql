@@ -21,7 +21,7 @@ SELECT DISTINCT intEntityId = tblPRPaycheck.intEntityEmployeeId
 	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal) OVER (PARTITION BY tblPRPaycheck.intEntityEmployeeId, tblPRPaycheck.intYear, tblPRPaycheck.intQuarter)
 	,vyuPRPaycheckTax.strTaxId
 
-	,dblTotalHours = MAX(tblPRPaycheck.dblTotalHoursYTD)
+	,dblTotalHours = SUM(tblPRPaycheck.dblTotalHours)
 	,intPaychecks = COUNT(tblPRPaycheck.intPaycheckId)
 FROM tblPREmployee 
 INNER JOIN(SELECT
@@ -35,7 +35,7 @@ INNER JOIN(SELECT
 		,dblGrossYTD = PE.dblGrossYTD
 		,dblPretaxYTD = PD.dblPretaxYTD
 		,dblAdjustedGrossYTD = ISNULL(PE.dblGrossYTD, 0) - ISNULL(PD.dblPretaxYTD, 0)
-		,dblTotalHoursYTD = PE.dblTotalHoursYTD 
+		,dblTotalHours = PE.dblTotalHours
 	FROM (SELECT intPaycheckId
 			,intEntityEmployeeId
 			,intYear = YEAR(dtmPayDate)
@@ -43,7 +43,6 @@ INNER JOIN(SELECT
 			,dblGross = SUM(dblTotal)
 			,dblTotalHours = SUM(dblHours)
 			,dblGrossYTD = SUM(dblTotalYTD)
-			,dblTotalHoursYTD = SUM(dblHoursYTD)
 	FROM vyuPRPaycheckEarning WHERE ysnSUITaxable = 1 
 	GROUP BY intPaycheckId
 		,intEntityEmployeeId
