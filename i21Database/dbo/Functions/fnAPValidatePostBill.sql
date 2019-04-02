@@ -496,7 +496,7 @@ BEGIN
 		--BILL WAS POSTED FROM ORIGIN
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
-			'Modification not allowed. Transaction is from Origin System.',
+			'Modification not allowed. Transaction is from Origin System or no matching General Ledger entry exists.',
 			'Bill',
 			A.strBillId,
 			A.intBillId,
