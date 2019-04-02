@@ -6732,4 +6732,10 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\EM\1810_Fix_CustomTab_ControlName.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\User Defined Types\TMCompactItem.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\User Defined Types\TMCompactContract.sql" />
+  </ItemGroup>
 </Project>
