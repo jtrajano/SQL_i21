@@ -112,6 +112,8 @@ SELECT CD.intContractDetailId
 	,CET.strCurrencyExchangeRateType
 	,CD.intFreightTermId
 	,FT.strFreightTerm
+	,CD.intShipToId
+	,strShipTo = SH.strLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -142,6 +144,7 @@ LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
+LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -284,6 +287,8 @@ SELECT CD.intContractDetailId
 	,CET.strCurrencyExchangeRateType
 	,CD.intFreightTermId
 	,FT.strFreightTerm
+	,CD.intShipToId
+	,strShipTo = SH.strLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -314,6 +319,7 @@ LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
+LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -406,6 +412,8 @@ GROUP BY CD.intContractDetailId
 	,CD.intFreightTermId
 	,CO.strCountry
 	,CO2.strCountry
+	,CD.intShipToId
+	,SH.strLocationName
 	,FT.strFreightTerm
 	,CD.intBookId
 	,BO.strBook
