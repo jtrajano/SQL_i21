@@ -93,9 +93,10 @@ BEGIN TRY
 	--UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
 	--SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
 
-	UPDATE tblCFTransaction SET strInvoiceReportNumber = cfS.strTempInvoiceReportNumber
+
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = cfS.strTempInvoiceReportNumber , dtmInvoiceDate = cfs.dtmInvoiceDate
 	FROM (
-		SELECT intTransactionId,strTempInvoiceReportNumber FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
+		SELECT intTransactionId,strTempInvoiceReportNumber,dtmInvoiceDate FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
 	) as cfS
 	WHERE cfS.intTransactionId = tblCFTransaction.intTransactionId
 
