@@ -90,8 +90,8 @@ BEGIN
 		END
 
 
-	PRINT 'VALIDATE'
-	PRINT @dtmQtyChange
+	--PRINT 'VALIDATE'
+	--PRINT @dtmQtyChange
 
 	-- Validate the date against the FY Periods  
 	IF EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDate(@dtmQtyChange) = 0) 
@@ -102,8 +102,7 @@ BEGIN
 	END
 	
 
-	PRINT 'VALIDATE'
-
+	--PRINT 'VALIDATE'
 
 	-- Validate Item Id
 	IF NOT EXISTS (SELECT 1 FROM tblICItem where intItemId = @intItemId)
@@ -215,7 +214,7 @@ BEGIN
 	-- Transaction: Quantity Adjustment -- 
 	--------------------------------------
 
-	PRINT 'PROCESS LOT ADJUST QTY'
+	--PRINT 'PROCESS LOT ADJUST QTY'
 
 	 -- Check if item is Lot-Tracked or not
 	 IF EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intItemId AND strLotTracking ='No')
