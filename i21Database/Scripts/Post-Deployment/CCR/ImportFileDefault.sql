@@ -287,7 +287,7 @@ BEGIN
 
 	-- Fee
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Fee', 2, 7, 1)
+	VALUES (@FileHeaderId, 'Fee', 2, 10, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -311,7 +311,7 @@ BEGIN
 	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 6 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Gross'
 
 	-- Fee
-	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 7 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Fee'
+	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 10 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Fee'
 
 	-- Net
 	DELETE tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId 
