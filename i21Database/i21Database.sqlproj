@@ -7510,6 +7510,7 @@
     <Build Include="dbo\Tables\tblCTPriceFixationTicket.sql" />
     <Build Include="dbo\Views\vyuCTPriceFixationTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetDueDateBasedOnTerm.sql" />
+    <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
