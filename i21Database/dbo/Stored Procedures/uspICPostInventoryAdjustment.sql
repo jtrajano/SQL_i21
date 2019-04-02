@@ -33,6 +33,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
+		,@DummyGLEntries AS RecapTableType 
 		,@adjustmentTypeRequiresGLEntries AS BIT 
 		,@intReturnValue AS INT
 
@@ -393,6 +394,40 @@ BEGIN
 		-----------------------------------------
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust)
 		BEGIN 
+			INSERT INTO @DummyGLEntries(
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+			)
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForAdjust  
 					,@strBatchId  
