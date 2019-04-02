@@ -98,6 +98,7 @@ CREATE TABLE #CUSTOMERS (
 	, strFullAddress				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	, strStatementFooterComment		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	, dblCreditLimit				NUMERIC(18, 6)
+	, dblCreditAvailable			NUMERIC(18, 6)
 	, dblARBalance					NUMERIC(18, 6)
 	, ysnStatementCreditLimit		BIT
 )
@@ -125,6 +126,7 @@ CREATE TABLE #STATEMENTREPORT (
 	 , dblPayment					NUMERIC(18, 6)
 	 , dblInvoiceTotal				NUMERIC(18, 6)
 	 , dblCreditLimit				NUMERIC(18, 6)
+	 , dblCreditAvailable			NUMERIC(18, 6)
 	 , dblBalance					NUMERIC(18, 6)
 	 , dblARBalance					NUMERIC(18, 6)
 	 , dblMonthlyBudget				NUMERIC(18, 6)
@@ -136,12 +138,13 @@ CREATE TABLE #STATEMENTREPORT (
 --CUSTOMER FILTER
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblARBalance)
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance)
 		SELECT TOP 1 intEntityCustomerId	= C.intEntityId 
 			       , strCustomerNumber		= C.strCustomerNumber
 				   , strCustomerName		= EC.strName
 				   , strStatementFormat		= C.strStatementFormat
 				   , dblCreditLimit			= C.dblCreditLimit
+				   , dblCreditAvailable		= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
 				   , dblARBalance			= C.dblARBalance		
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
@@ -155,12 +158,13 @@ IF @strCustomerNumberLocal IS NOT NULL
 	END
 ELSE IF @strCustomerIdsLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblARBalance)
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance)
 		SELECT intEntityCustomerId	= C.intEntityId 
 			 , strCustomerNumber	= C.strCustomerNumber
 			 , strCustomerName      = EC.strName
 			 , strStatementFormat	= C.strStatementFormat
 			 , dblCreditLimit       = C.dblCreditLimit
+			 , dblCreditAvailable	= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
 			 , dblARBalance			= C.dblARBalance        
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
@@ -177,12 +181,13 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 	END
 ELSE
 	BEGIN
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblARBalance)
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance)
 		SELECT intEntityCustomerId	= C.intEntityId 
 			 , strCustomerNumber	= C.strCustomerNumber
 			 , strCustomerName		= EC.strName
 			 , strStatementFormat	= C.strStatementFormat
 			 , dblCreditLimit		= C.dblCreditLimit
+			 , dblCreditAvailable	= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
 			 , dblARBalance			= C.dblARBalance
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
@@ -356,7 +361,8 @@ INSERT INTO #STATEMENTREPORT (
 	 , dtmDatePaid
 	 , dblPayment
 	 , dblInvoiceTotal
-	 , dblCreditLimit
+	 , dblCreditLimit	 
+	 , dblCreditAvailable
 	 , dblBalance
 	 , dblARBalance
 	 , ysnStatementCreditLimit
@@ -367,7 +373,6 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , strCustomerNumber			= C.strCustomerNumber
 	 , strCustomerName				= C.strCustomerName
 	 , strInvoiceNumber				= TRANSACTIONS.strInvoiceNumber
-	 --, strBOLNumber					= CASE WHEN TRANSACTIONS.strTransactionType = 'Customer Prepayment' THEN 'Prepayment: ' + ISNULL(TRANSACTIONS.strPaymentInfo, '') ELSE 'BOL# ' + TRANSACTIONS.strBOLNumber END
 	 , strRecordNumber				= TRANSACTIONS.strRecordNumber
 	 , strTransactionType			= TRANSACTIONS.strTransactionType
 	 , strType						= TRANSACTIONS.strType
@@ -381,6 +386,7 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , dblPayment					= ISNULL(TRANSACTIONS.dblPayment, 0)
 	 , dblInvoiceTotal				= TRANSACTIONS.dblInvoiceTotal
 	 , dblCreditLimit				= C.dblCreditLimit
+	 , dblCreditAvailable			= C.dblCreditAvailable
 	 , dblBalance					= TRANSACTIONS.dblBalance
 	 , dblARBalance					= C.dblARBalance
 	 , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
@@ -487,6 +493,7 @@ INSERT INTO #STATEMENTREPORT (
 	 , dblBalance
 	 , dblPayment
 	 , dblCreditLimit
+	 , dblCreditAvailable
 )
 SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , strCustomerNumber			= C.strCustomerNumber
@@ -500,6 +507,7 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , dblBalance					= ISNULL(BFA.dblTotalAR, 0)
 	 , dblPayment					= 0
 	 , dblCreditLimit				= C.dblCreditLimit
+	 , dblCreditAvailable			= C.dblCreditAvailable
 FROM #CUSTOMERS C
 LEFT JOIN #BALANCEFORWARDAGING BFA ON C.intEntityCustomerId = BFA.intEntityCustomerId
 
@@ -590,6 +598,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strCompanyAddress
 	, strStatementFormat
 	, dblCreditLimit
+	, dblCreditAvailable
 	, dblInvoiceTotal
 	, dblPayment
 	, dblBalance
@@ -621,6 +630,7 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, strCompanyAddress			= SR.strCompanyAddress
 	, strStatementFormat		= 'Budget Reminder'
 	, dblCreditLimit			= SR.dblCreditLimit
+	, dblCreditAvailable		= SR.dblCreditAvailable
 	, dblInvoiceTotal			= SR.dblInvoiceTotal
 	, dblPayment				= SR.dblPayment
 	, dblBalance				= SR.dblBalance
