@@ -48,6 +48,7 @@ SELECT   L.intLoadId
 		,LC.intAmountCurrencyId
 		,ACU.strCurrency AS strAmountCurrency
 		,LC.strRemarks
+		,LC.intSort
 
 		,LDCL.intLoadDetailContainerLinkId
 		,LDCL.strIntegrationNumber
