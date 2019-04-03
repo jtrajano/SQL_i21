@@ -28,6 +28,10 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnETEnableIntegratio
 				,[strBEExportPath] = @ExportPath
 				,[strBEUploadPath] = @UploadPath
 				,[strBEArchivePath] = @ArchivePath
+				,[strBasePath]  = ''
+				,[strExportPath] = ''
+				,[strUploadPath] = ''
+				,[strArchivePath] = ''
 				,ysnBEEnableIntegration = 1
 			END
 		ELSE IF @integration = 'Digital Dispatcher' 
@@ -37,6 +41,10 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'ysnETEnableIntegratio
 				,[strDDExportPath] = @ExportPath
 				,[strDDUploadPath] = @UploadPath
 				,[strDDArchivePath] = @ArchivePath
+				,[strBasePath]  = ''
+				,[strExportPath] = ''
+				,[strUploadPath] = ''
+				,[strArchivePath] = ''
 				,ysnDDEnableIntegration = 1
 			END
 
