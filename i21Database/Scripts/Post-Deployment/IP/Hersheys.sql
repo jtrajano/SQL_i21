@@ -542,6 +542,18 @@ IF NOT EXISTS (
 	SELECT '717'
 		,'Dairy Blends'
 GO
+IF NOT EXISTS (
+		SELECT 1
+		FROM tblIPSAPProductType
+		WHERE strSAPProductType = '420'
+		)
+	INSERT INTO tblIPSAPProductType (
+		strSAPProductType
+		,stri21ProductType
+		)
+	SELECT '420'
+		,'Palm'
+GO
 
 GO
 IF NOT EXISTS (
