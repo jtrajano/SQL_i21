@@ -7511,6 +7511,7 @@
     <Build Include="dbo\Views\vyuCTPriceFixationTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetDueDateBasedOnTerm.sql" />
     <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSUpdateCashPaymentReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

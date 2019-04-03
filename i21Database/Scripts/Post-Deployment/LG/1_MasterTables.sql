@@ -151,3 +151,22 @@ BEGIN
 	')
 END
 GO
+
+/*
+* Apply default Sort value on Containers table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoadContainer') AND name = 'intSort')
+BEGIN
+	EXEC ('UPDATE LC
+				SET intSort = LC_Sorted.intSort
+			FROM 
+				tblLGLoadContainer LC
+				INNER JOIN 
+				(SELECT intLoadContainerId
+					,intSort = DENSE_RANK() OVER(PARTITION BY intLoadId ORDER BY intLoadContainerId)
+				FROM tblLGLoadContainer) LC_Sorted
+					ON LC.intLoadContainerId = LC_Sorted.intLoadContainerId
+			WHERE LC.intSort IS NULL
+	')
+END
+GO

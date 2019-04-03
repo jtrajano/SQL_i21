@@ -2,6 +2,7 @@
     [intPOSPaymentId]	INT             IDENTITY (1, 1) NOT NULL,
     [intPOSId]			INT             NOT NULL,
     [intPaymentId]		INT             NULL,
+	[intPOSEndOfDayId]	INT				NULL,
     [strPaymentMethod]	NVARCHAR (35)   COLLATE Latin1_General_CI_AS NULL,
     [strReferenceNo]	NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [dblAmount]			NUMERIC (18, 6) NOT NULL,
