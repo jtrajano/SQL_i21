@@ -14,7 +14,7 @@ BEGIN
 	SELECT intCompanyLocationId
 	INTO #LicensedLocations
 	FROM tblSMCompanyLocation
-	WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE ISNULL(ysnLicensed, 0) END
+	WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 ELSE ISNULL(ysnLicensed, 0) END
 
 	IF (ISNULL(@intLocationId, 0) = 0)
 	BEGIN
@@ -347,149 +347,124 @@ BEGIN
 			AND C.intCommodityId = @intCommodityId 
 			AND IAD.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN IAD.intItemId ELSE @intItemId END 
 			--AND Itm.intLocationId = case when ISNULL(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
+	)a
 
-		)a
+	--Delivery Sheet
+	UNION ALL SELECT strItemNo
+		, dtmDate
+		, dblInQty AS dblUnpaidIn
+		, 0 AS dblUnpaidOut
+		, dblInQty AS dblUnpaidBalance
+		, 0 as dblPaidBalance
+		, strDistributionOption
+		, strReceiptNumber
+		, intInventoryReceiptItemId
+	FROM (
+		SELECT CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
+			, RI.dblUnitCost dblUnitCost1
+			, RI.intInventoryReceiptItemId
+			, I.strItemNo
+			, ISNULL(RI.dblNet, 0) - ISNULL(RI.dblBillQty,0) dblInQty
+			, 0 AS dblOutQty
+			, GST.strStorageTypeCode strDistributionOption
+			, R.strReceiptNumber
+			, R.intInventoryReceiptId
+		FROM tblSCDeliverySheetSplit DSS 
+		INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
+		INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
+		INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+		INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+		INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
+		WHERE ST.strTicketStatus = 'C'
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+		AND ST.intCommodityId = @intCommodityId 
+		AND ST.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
+		AND ST.intProcessingLocationId = case when ISNULL(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
+		AND ST.intProcessingLocationId IN (
+				SELECT intCompanyLocationId
+				FROM tblSMCompanyLocation
+				WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE ISNULL(ysnLicensed, 0) END
+				)
+		AND RI.intOwnershipType = 1
+		AND R.intSourceType = 1
+		AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
+		--AND RI.dblBillQty = 0
+	)t
 
-UNION 
-SELECT --Delivery Sheet
- strItemNo
-	, dtmDate
-	,dblInQty AS dblUnpaidIn
-	,0 AS dblUnpaidOut
-	,dblInQty AS dblUnpaidBalance
-	,0 as dblPaidBalance
-	,strDistributionOption
-	,strReceiptNumber
-	,intInventoryReceiptItemId
-FROM (
-	SELECT 
-		CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
-		,RI.dblUnitCost dblUnitCost1
-		,RI.intInventoryReceiptItemId
-		,I.strItemNo
-		,ISNULL(RI.dblNet, 0) - ISNULL(RI.dblBillQty,0) dblInQty
-		,0 AS dblOutQty
-		,GST.strStorageTypeCode strDistributionOption
-		,R.strReceiptNumber
-        ,R.intInventoryReceiptId
-		--,Inv.strInvoiceNumber AS strReceiptNumber
-		--,Inv.intInvoiceId AS intReceiptId
-	FROM tblSCDeliverySheetSplit DSS 
-	INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
-	INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
-	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
-	INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
-	WHERE ST.strTicketStatus = 'C'
-	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-	AND ST.intCommodityId = @intCommodityId 
-	AND ST.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
-	AND ST.intProcessingLocationId = case when ISNULL(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
-	AND ST.intProcessingLocationId IN (
-			SELECT intCompanyLocationId
-			FROM tblSMCompanyLocation
-			WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE ISNULL(ysnLicensed, 0) END
-			)
-	AND RI.intOwnershipType = 1
-	AND R.intSourceType = 1
-	AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
-	--AND RI.dblBillQty = 0
-	
+	--Delivery Sheet With Voucher
+	UNION ALL SELECT strItemNo
+		, dtmDate
+		, dblInQty AS dblUnpaidIn
+		, 0 AS dblUnpaidOut
+		, dblInQty AS dblUnpaidBalance
+		, 0 as dblPaidBalance
+		, strDistributionOption
+		, strReceiptNumber
+		, intInventoryReceiptItemId
+	FROM (
+		SELECT CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
+			, RI.dblUnitCost dblUnitCost1
+			, RI.intInventoryReceiptItemId
+			, I.strItemNo
+			, ISNULL(BD.dblQtyReceived, 0) dblInQty
+			, 0 AS dblOutQty
+			, GST.strStorageTypeCode strDistributionOption
+			, Bill.strBillId AS strReceiptNumber
+			, Bill.intBillId AS intReceiptId
+		FROM tblSCDeliverySheetSplit DSS 
+		INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
+		INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
+		INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+		INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
+		INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
+		INNER JOIN tblAPBillDetail BD ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+		INNER JOIN tblAPBill Bill ON BD.intBillId = Bill.intBillId
+		WHERE ST.strTicketStatus = 'C'
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+		AND ST.intCommodityId = @intCommodityId 
+		AND ST.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
+		AND ST.intProcessingLocationId = case when ISNULL(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
+		AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+		AND RI.intOwnershipType = 1
+		AND R.intSourceType = 1
+		AND Bill.ysnPosted = 1
+		AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
+		AND RI.dblBillQty <> 0
+	)t
 
-)t
-
-UNION 
-SELECT --Delivery Sheet With Voucher
- strItemNo
-    , dtmDate
-    ,dblInQty AS dblUnpaidIn
-    ,0 AS dblUnpaidOut
-    ,dblInQty AS dblUnpaidBalance
-    ,0 as dblPaidBalance
-    ,strDistributionOption
-    ,strReceiptNumber
-    ,intInventoryReceiptItemId
-FROM (
-    SELECT 
-        CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110) dtmDate
-        ,RI.dblUnitCost dblUnitCost1
-        ,RI.intInventoryReceiptItemId
-        ,I.strItemNo
-        ,ISNULL(BD.dblQtyReceived, 0) dblInQty
-        ,0 AS dblOutQty
-        ,GST.strStorageTypeCode strDistributionOption
-        ,Bill.strBillId AS strReceiptNumber
-        ,Bill.intBillId AS intReceiptId
-        --,Inv.strInvoiceNumber AS strReceiptNumber
-        --,Inv.intInvoiceId AS intReceiptId
-    FROM tblSCDeliverySheetSplit DSS 
-    INNER JOIN vyuSCTicketView ST ON DSS.intDeliverySheetId = ST.intDeliverySheetId
-    INNER JOIN tblICInventoryReceiptItem RI ON ST.intTicketId = RI.intSourceId
-    INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-    INNER JOIN tblICItem I ON I.intItemId = ST.intItemId
-    INNER JOIN tblGRStorageType GST ON DSS.intStorageScheduleTypeId = GST.intStorageScheduleTypeId
-    INNER JOIN tblAPBillDetail BD ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-    INNER JOIN tblAPBill Bill ON BD.intBillId = Bill.intBillId
-    WHERE ST.strTicketStatus = 'C'
-    AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ST.dtmTicketDateTime, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-    AND ST.intCommodityId = @intCommodityId 
-    AND ST.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN ST.intItemId ELSE @intItemId END 
-    AND ST.intProcessingLocationId = case when ISNULL(@intLocationId,0)=0 then ST.intProcessingLocationId else @intLocationId end 
-    AND ST.intProcessingLocationId IN (
-            SELECT intCompanyLocationId
-            FROM tblSMCompanyLocation
-            WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE ISNULL(ysnLicensed, 0) END
-            )
-    AND RI.intOwnershipType = 1
-    AND R.intSourceType = 1
-    AND Bill.ysnPosted = 1
-    AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = 1)--Contract, Spot and DP
-    AND RI.dblBillQty <> 0
-    
-)t
-
-
-
-UNION
-SELECT --Direct from Invoice
- strItemNo
-	, dtmDate
-	,dblInQty AS dblUnpaidIn
-	,0 AS dblUnpaidOut
-	,0 AS dblUnpaidBalance
-	,ABS(dblInQty) + ABS(ISNULL(dblOutQty, 0)) * -1 as dblPaidBalance
-	,strDistributionOption
-	,strReceiptNumber
-	,intInventoryReceiptItemId
-FROM (
-SELECT
-	CONVERT(VARCHAR(10), I.dtmPostDate, 110) dtmDate
-	,0 dblUnitCost1
-	,I.intInvoiceId intInventoryReceiptItemId
-	,Itm.strItemNo
-	,CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(ID.dblQtyShipped, 0) ELSE 0.0  END dblInQty
-	,CASE WHEN I.strTransactionType = 'Credit Memo' THEN 0.0 ELSE ISNULL(ID.dblQtyShipped, 0)  END dblOutQty
-	,'' strDistributionOption
-	,I.strInvoiceNumber AS strReceiptNumber
-	,I.intInvoiceId AS intReceiptId
-FROM 
-tblARInvoice I
-INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-INNER JOIN tblICItem Itm ON ID.intItemId = Itm.intItemId
-INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
-WHERE I.ysnPosted = 1
-AND ID.intInventoryShipmentItemId IS NULL
-AND ISNULL(ID.strShipmentNumber,'') = ''
-AND CONVERT(DATETIME, CONVERT(VARCHAR(10), I.dtmPostDate, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-AND C.intCommodityId = @intCommodityId 
-AND ID.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN ID.intItemId ELSE @intItemId END 
-AND I.intCompanyLocationId = case when ISNULL(@intLocationId,0)=0 then I.intCompanyLocationId else @intLocationId end 
-AND I.intCompanyLocationId IN (
-		SELECT intCompanyLocationId
-		FROM tblSMCompanyLocation
-		WHERE ISNULL(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE ISNULL(ysnLicensed, 0) END
-		)
-)t
+	--Direct from Invoice
+	UNION ALL SELECT strItemNo
+		, dtmDate
+		, dblInQty AS dblUnpaidIn
+		, 0 AS dblUnpaidOut
+		, 0 AS dblUnpaidBalance
+		, ABS(dblInQty) + ABS(ISNULL(dblOutQty, 0)) * -1 as dblPaidBalance
+		, strDistributionOption
+		, strReceiptNumber
+		, intInventoryReceiptItemId
+	FROM (
+		SELECT CONVERT(VARCHAR(10), I.dtmPostDate, 110) dtmDate
+			, 0 dblUnitCost1
+			, I.intInvoiceId intInventoryReceiptItemId
+			, Itm.strItemNo
+			, CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(ID.dblQtyShipped, 0) ELSE 0.0  END dblInQty
+			, CASE WHEN I.strTransactionType = 'Credit Memo' THEN 0.0 ELSE ISNULL(ID.dblQtyShipped, 0)  END dblOutQty
+			, '' strDistributionOption
+			, I.strInvoiceNumber AS strReceiptNumber
+			, I.intInvoiceId AS intReceiptId
+		FROM tblARInvoice I
+		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+		INNER JOIN tblICItem Itm ON ID.intItemId = Itm.intItemId
+		INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+		WHERE I.ysnPosted = 1
+			AND ID.intInventoryShipmentItemId IS NULL
+			AND ISNULL(ID.strShipmentNumber,'') = ''
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), I.dtmPostDate, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+			AND C.intCommodityId = @intCommodityId 
+			AND ID.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN ID.intItemId ELSE @intItemId END 
+			AND I.intCompanyLocationId = case when ISNULL(@intLocationId,0)=0 then I.intCompanyLocationId else @intLocationId end 
+			AND I.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+	)t
 
 	--Direct Inventory Shipment (This will show the Invoice Number once Shipment is invoiced)
 	UNION ALL SELECT strItemNo
@@ -926,32 +901,65 @@ AND I.intCompanyLocationId IN (
 		, dblUnpaidBalance)
 	SELECT DISTINCT @intDPIHeaderId
 		, dtmDate
-		, dblReceiveIn
-		, dblShipOut
-		, dblAdjustments
-		, dblCount
-		, dblInvoiceQty
-		, dblInventoryBalance
-		, dblSalesInTransit
-		, strDistributionA,[dblAIn],[dblAOut], [dblANet]
-		, strDistributionB,[dblBIn],[dblBOut], [dblBNet]
-		, strDistributionC,[dblCIn],[dblCOut], [dblCNet]
-		, strDistributionD,[dblDIn],[dblDOut], [dblDNet]
-		, strDistributionE,[dblEIn],[dblEOut], [dblENet]
-		, strDistributionF,[dblFIn],[dblFOut], [dblFNet]
-		, strDistributionG,[dblGIn],[dblGOut], [dblGNet]
-		, strDistributionH,[dblHIn],[dblHOut], [dblHNet]
-		, strDistributionI,[dblIIn],[dblIOut], [dblINet]
-		, strDistributionJ,[dblJIn],[dblJOut], [dblJNet]
-		, strDistributionK,[dblKIn],[dblKOut], [dblKNet]
-		, dblUnpaidIn
-		, dblUnpaidOut
-		, dblBalance
-		, ISNULL(dblPaidBalance, 0) dblPaidBalance
-		, (ISNULL(dblBalance, 0) + ISNULL(dblTotalCompanyOwned, 0)) dblTotalCompanyOwned
-		, dblUnpaidBalance
+		, dblReceiveIn = ISNULL(dblReceiveIn, 0)
+		, dblShipOut = ISNULL(dblShipOut, 0)
+		, dblAdjustments = ISNULL(dblAdjustments, 0)
+		, dblCount = ISNULL(dblCount, 0)
+		, dblInvoiceQty = ISNULL(dblInvoiceQty, 0)
+		, dblInventoryBalance = ISNULL(dblInventoryBalance, 0)
+		, dblSalesInTransit = ISNULL(dblSalesInTransit, 0)
+		, strDistributionA
+		, [dblAIn] = CASE WHEN strDistributionA IS NULL THEN NULL ELSE ISNULL([dblAIn], 0) END
+		, [dblAOut] = CASE WHEN strDistributionA IS NULL THEN NULL ELSE ISNULL([dblAOut], 0) END
+		, [dblANet] = CASE WHEN strDistributionA IS NULL THEN NULL ELSE ISNULL([dblANet], 0) END
+		, strDistributionB
+		, [dblBIn] = CASE WHEN strDistributionB IS NULL THEN NULL ELSE ISNULL([dblBIn], 0) END
+		, [dblBOut] = CASE WHEN strDistributionB IS NULL THEN NULL ELSE ISNULL([dblBOut], 0) END
+		, [dblBNet] = CASE WHEN strDistributionB IS NULL THEN NULL ELSE ISNULL([dblBNet], 0) END
+		, strDistributionC
+		, [dblCIn] = CASE WHEN strDistributionC IS NULL THEN NULL ELSE ISNULL([dblCIn], 0) END
+		, [dblCOut] = CASE WHEN strDistributionC IS NULL THEN NULL ELSE ISNULL([dblCOut], 0) END
+		, [dblCNet] = CASE WHEN strDistributionC IS NULL THEN NULL ELSE ISNULL([dblCNet], 0) END
+		, strDistributionD
+		, [dblDIn] = CASE WHEN strDistributionD IS NULL THEN NULL ELSE ISNULL([dblDIn], 0) END
+		, [dblDOut] = CASE WHEN strDistributionD IS NULL THEN NULL ELSE ISNULL([dblDOut], 0) END
+		, [dblDNet] = CASE WHEN strDistributionD IS NULL THEN NULL ELSE ISNULL([dblDNet], 0) END
+		, strDistributionE
+		, [dblEIn] = CASE WHEN strDistributionE IS NULL THEN NULL ELSE ISNULL([dblEIn], 0) END
+		, [dblEOut] = CASE WHEN strDistributionE IS NULL THEN NULL ELSE ISNULL([dblEOut], 0) END
+		, [dblENet] = CASE WHEN strDistributionE IS NULL THEN NULL ELSE ISNULL([dblENet], 0) END
+		, strDistributionF
+		, [dblFIn] = CASE WHEN strDistributionF IS NULL THEN NULL ELSE ISNULL([dblFIn], 0) END
+		, [dblFOut] = CASE WHEN strDistributionF IS NULL THEN NULL ELSE ISNULL([dblFOut], 0) END
+		, [dblFNet] = CASE WHEN strDistributionF IS NULL THEN NULL ELSE ISNULL([dblFNet], 0) END
+		, strDistributionG
+		, [dblGIn] = CASE WHEN strDistributionG IS NULL THEN NULL ELSE ISNULL([dblGIn], 0) END
+		, [dblGOut] = CASE WHEN strDistributionG IS NULL THEN NULL ELSE ISNULL([dblGOut], 0) END
+		, [dblGNet] = CASE WHEN strDistributionG IS NULL THEN NULL ELSE ISNULL([dblGNet], 0) END
+		, strDistributionH
+		, [dblHIn] = CASE WHEN strDistributionH IS NULL THEN NULL ELSE ISNULL([dblHIn], 0) END
+		, [dblHOut] = CASE WHEN strDistributionH IS NULL THEN NULL ELSE ISNULL([dblHOut], 0) END
+		, [dblHNet] = CASE WHEN strDistributionH IS NULL THEN NULL ELSE ISNULL([dblHNet], 0) END
+		, strDistributionI
+		, [dblIIn] = CASE WHEN strDistributionI IS NULL THEN NULL ELSE ISNULL([dblIIn], 0) END
+		, [dblIOut] = CASE WHEN strDistributionI IS NULL THEN NULL ELSE ISNULL([dblIOut], 0) END
+		, [dblINet] = CASE WHEN strDistributionI IS NULL THEN NULL ELSE ISNULL([dblINet], 0) END
+		, strDistributionJ
+		, [dblJIn] = CASE WHEN strDistributionJ IS NULL THEN NULL ELSE ISNULL([dblJIn], 0) END
+		, [dblJOut] = CASE WHEN strDistributionJ IS NULL THEN NULL ELSE ISNULL([dblJOut], 0) END
+		, [dblJNet] = CASE WHEN strDistributionJ IS NULL THEN NULL ELSE ISNULL([dblJNet], 0) END
+		, strDistributionK
+		, [dblKIn] = CASE WHEN strDistributionK IS NULL THEN NULL ELSE ISNULL([dblKIn], 0) END
+		, [dblKOut] = CASE WHEN strDistributionK IS NULL THEN NULL ELSE ISNULL([dblKOut], 0) END
+		, [dblKNet] = CASE WHEN strDistributionK IS NULL THEN NULL ELSE ISNULL([dblKNet], 0) END
+		, dblUnpaidIn = ISNULL(dblUnpaidIn, 0)
+		, dblUnpaidOut = ISNULL(dblUnpaidOut, 0)
+		, dblBalance = ISNULL(dblBalance, 0)
+		, dblPaidBalance = ISNULL(dblPaidBalance, 0)
+		, dblTotalCompanyOwned = (ISNULL(dblBalance, 0) + ISNULL(dblTotalCompanyOwned, 0))
+		, dblUnpaidBalance = ISNULL(dblUnpaidBalance, 0)
 	FROM (
-		SELECT intRowNum
+		SELECT DISTINCT intRowNum
 			, list.dtmDate dtmDate
 			, dblReceiveIn
 			, abs(dblShipOut) dblShipOut
@@ -960,28 +968,50 @@ AND I.intCompanyLocationId IN (
 			, dblInvoiceQty
 			, dblInventoryBalance
 			, abs(ISNULL(list.dblSalesInTransit, 0)) dblSalesInTransit
-			, (CASE WHEN strDistributionA is null then (SELECT DISTINCT TOP 1 strDistributionA FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionA,'') <>'') else strDistributionA end) strDistributionA
-			, [dblAIn],[dblAOut],(SELECT SUM(dblANet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblANet]
-			, (CASE WHEN strDistributionB is null then (SELECT DISTINCT TOP 1 strDistributionB FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionB,'') <>'') else strDistributionB end) strDistributionB
-			, [dblBIn],[dblBOut],(SELECT SUM(dblBNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblBNet]
-			, (CASE WHEN strDistributionC is null then (SELECT DISTINCT TOP 1 strDistributionC FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionC,'') <>'') else strDistributionC end) strDistributionC
-			, [dblCIn],[dblCOut],(SELECT SUM(dblCNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblCNet]
-			, (CASE WHEN strDistributionD is null then (SELECT DISTINCT TOP 1 strDistributionD FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionD,'') <>'') else strDistributionD end) strDistributionD
-			, [dblDIn],[dblDOut],(SELECT SUM(dblDNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblDNet]
-			, (CASE WHEN strDistributionE is null then (SELECT DISTINCT TOP 1 strDistributionE FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionE,'') <>'') else strDistributionE end) strDistributionE
-			, [dblEIn],[dblEOut],(SELECT SUM(dblENet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblENet]
-			, (CASE WHEN strDistributionF is null then (SELECT DISTINCT TOP 1 strDistributionF FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionF,'') <>'') else strDistributionF end) strDistributionF
-			, [dblFIn],[dblFOut],(SELECT SUM(dblFNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblFNet]
-			, (CASE WHEN strDistributionG is null then (SELECT DISTINCT TOP 1 strDistributionG FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionG,'') <>'') else strDistributionG end) strDistributionG
-			, [dblGIn],[dblGOut],(SELECT SUM(dblGNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblGNet]
-			, (CASE WHEN strDistributionH is null then (SELECT DISTINCT TOP 1 strDistributionH FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionH,'') <>'') else strDistributionH end) strDistributionH
-			, [dblHIn],[dblHOut],(SELECT SUM(dblHNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblHNet]
-			, (CASE WHEN strDistributionI is null then (SELECT DISTINCT TOP 1 strDistributionI FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionI,'') <>'') else strDistributionI end) strDistributionI
-			, [dblIIn],[dblIOut],(SELECT SUM(dblINet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblINet]
-			, (CASE WHEN strDistributionJ is null then (SELECT DISTINCT TOP 1 strDistributionJ FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionJ,'') <>'') else strDistributionJ end) strDistributionJ
-			, [dblJIn],[dblJOut],(SELECT SUM(dblJNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblJNet]
-			, (CASE WHEN strDistributionK is null then (SELECT DISTINCT TOP 1 strDistributionK FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionK,'') <>'') else strDistributionK end) strDistributionK
-			, [dblKIn],[dblKOut],(SELECT SUM(dblKNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900')) [dblKNet]
+			, strDistributionA = (CASE WHEN strDistributionA is null then (SELECT DISTINCT TOP 1 strDistributionA FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionA,'') <>'') else strDistributionA end)
+			, [dblAIn]
+			, [dblAOut]
+			, [dblANet] = (SELECT SUM(dblANet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionB = (CASE WHEN strDistributionB is null then (SELECT DISTINCT TOP 1 strDistributionB FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionB,'') <>'') else strDistributionB end)
+			, [dblBIn]
+			, [dblBOut]
+			, [dblBNet] = (SELECT SUM(dblBNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionC = (CASE WHEN strDistributionC is null then (SELECT DISTINCT TOP 1 strDistributionC FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionC,'') <>'') else strDistributionC end)
+			, [dblCIn]
+			, [dblCOut]
+			, [dblCNet] = (SELECT SUM(dblCNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionD = (CASE WHEN strDistributionD is null then (SELECT DISTINCT TOP 1 strDistributionD FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionD,'') <>'') else strDistributionD end)
+			, [dblDIn]
+			, [dblDOut]
+			, [dblDNet] = (SELECT SUM(dblDNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionE = (CASE WHEN strDistributionE is null then (SELECT DISTINCT TOP 1 strDistributionE FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionE,'') <>'') else strDistributionE end)
+			, [dblEIn]
+			, [dblEOut]
+			, [dblENet] = (SELECT SUM(dblENet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionF = (CASE WHEN strDistributionF is null then (SELECT DISTINCT TOP 1 strDistributionF FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionF,'') <>'') else strDistributionF end)
+			, [dblFIn]
+			, [dblFOut]
+			, [dblFNet] = (SELECT SUM(dblFNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionG = (CASE WHEN strDistributionG is null then (SELECT DISTINCT TOP 1 strDistributionG FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionG,'') <>'') else strDistributionG end)
+			, [dblGIn]
+			, [dblGOut]
+			, [dblGNet] = (SELECT SUM(dblGNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionH = (CASE WHEN strDistributionH is null then (SELECT DISTINCT TOP 1 strDistributionH FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionH,'') <>'') else strDistributionH end)
+			, [dblHIn]
+			, [dblHOut]
+			, [dblHNet] = (SELECT SUM(dblHNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionI = (CASE WHEN strDistributionI is null then (SELECT DISTINCT TOP 1 strDistributionI FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionI,'') <>'') else strDistributionI end)
+			, [dblIIn]
+			, [dblIOut]
+			, [dblINet] = (SELECT SUM(dblINet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionJ = (CASE WHEN strDistributionJ is null then (SELECT DISTINCT TOP 1 strDistributionJ FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionJ,'') <>'') else strDistributionJ end)
+			, [dblJIn]
+			, [dblJOut]
+			, [dblJNet] = (SELECT SUM(dblJNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
+			, strDistributionK = (CASE WHEN strDistributionK is null then (SELECT DISTINCT TOP 1 strDistributionK FROM tblRKDailyPositionForCustomer WHERE ISNULL(strDistributionK,'') <>'') else strDistributionK end)
+			, [dblKIn]
+			, [dblKOut]
+			, [dblKNet] = (SELECT SUM(dblKNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
 			, dblUnpaidIn
 			, dblUnpaidOut
 			, dblBalance
