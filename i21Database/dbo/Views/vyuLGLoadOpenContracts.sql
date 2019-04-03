@@ -58,6 +58,7 @@ SELECT CD.intContractDetailId
 	,intNoOfLoad = CONVERT(INT,((ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0)) / NULLIF(CD.dblQuantityPerLoad, 0))) 
 	,Item.strType AS strItemType
 	,CH.intPositionId
+	,CTP.strPositionType
 	,CD.intLoadingPortId
 	,CD.intDestinationPortId
 	,CD.intDestinationCityId
@@ -136,6 +137,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLoca
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
+LEFT JOIN tblCTPosition CTP ON CTP.intPositionId = CH.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
@@ -233,6 +235,7 @@ SELECT CD.intContractDetailId
 	,CD.intNoOfLoad
 	,Item.strType AS strItemType
 	,CH.intPositionId
+	,CTP.strPositionType
 	,CD.intLoadingPortId
 	,CD.intDestinationPortId
 	,CD.intDestinationCityId
@@ -311,6 +314,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLoca
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
+LEFT JOIN tblCTPosition CTP ON CTP.intPositionId = CH.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
@@ -380,6 +384,7 @@ GROUP BY CD.intContractDetailId
 	,CD.intNoOfLoad
 	,Item.strType
 	,CH.intPositionId
+	,CTP.strPositionType
 	,CD.intLoadingPortId
 	,CD.intDestinationPortId
 	,CD.intDestinationCityId

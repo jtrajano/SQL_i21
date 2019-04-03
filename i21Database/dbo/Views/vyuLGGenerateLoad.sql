@@ -19,6 +19,7 @@ SELECT GL.intGenerateLoadId
 	  ,ETP.strEquipmentType		AS strPEquipmentType --obsolete
 	  ,EPH.intEntityId			AS intPHaulerEntityId --obsolete
 	  ,EPH.strName				AS strPHaulerName --obsolete
+	  ,PPT.strPositionType		AS strPPositionType
 
 	  ,SCH.intEntityId			AS intCustomerEntityId
 	  ,EC.strName				AS strCustomerName
@@ -38,6 +39,7 @@ SELECT GL.intGenerateLoadId
 	  ,ETS.strEquipmentType		AS strSEquipmentType --obsolete
 	  ,ESH.intEntityId			AS intSHaulerEntityId --obsolete
 	  ,ESH.strName				AS strSHaulerName --obsolete
+	  ,SPT.strPositionType		AS strSPositionType
 
 	  ,GL.dtmShipDate
 	  ,GL.dtmEndDate
@@ -105,6 +107,7 @@ FROM tblLGGenerateLoad			GL
 
 LEFT JOIN tblCTContractDetail	PCD		ON		PCD.intContractDetailId		=	GL.intPContractDetailId
 LEFT JOIN tblCTContractHeader	PCH		ON		PCH.intContractHeaderId		=	PCD.intContractHeaderId
+LEFT JOIN tblCTPosition			PPT		ON		PPT.intPositionId			=	PCH.intPositionId
 LEFT JOIN tblEMEntity			EV		ON		EV.intEntityId				=	PCH.intEntityId
 LEFT JOIN tblEMEntityLocation	EVL		ON		EVL.intEntityLocationId		=	GL.intPEntityLocationId
 LEFT JOIN tblICItem				PIM		ON		PIM.intItemId				=	PCD.intItemId --obsolete
@@ -114,6 +117,7 @@ LEFT JOIN tblEMEntity			EPH		ON		EPH.intEntityId				=	GL.intPHaulerEntityId --ob
 
 LEFT JOIN tblCTContractDetail	SCD		ON		SCD.intContractDetailId		=	GL.intSContractDetailId
 LEFT JOIN tblCTContractHeader	SCH		ON		SCH.intContractHeaderId		=	SCD.intContractHeaderId
+LEFT JOIN tblCTPosition			SPT		ON		SPT.intPositionId			=	SCH.intPositionId
 LEFT JOIN tblEMEntity			EC		ON		EC.intEntityId				=	SCH.intEntityId
 LEFT JOIN tblEMEntityLocation	ECL		ON		ECL.intEntityLocationId		=	GL.intSEntityLocationId
 LEFT JOIN tblICItem				SIM		ON		SIM.intItemId				=	SCD.intItemId --obsolete
