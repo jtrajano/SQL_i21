@@ -37,7 +37,7 @@ BEGIN
 	SELECT intCompanyLocationId
 	INTO #LicensedLocations
 	FROM tblSMCompanyLocation
-	WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
+	WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 ELSE isnull(ysnLicensed, 0) END
 
 	IF (ISNULL(@intLocationId, 0) = 0)
 	BEGIN
@@ -231,10 +231,7 @@ BEGIN
 		JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(12)
 		join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
-		JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																										WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																										ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
 			and isnull(il.strDescription,'') <> 'In-Transit'
 		WHERE i.intCommodityId=@intCommodityId  
 			and i.intItemId = isnull(@intItemId, i.intItemId)

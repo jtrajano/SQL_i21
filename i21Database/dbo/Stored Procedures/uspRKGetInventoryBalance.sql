@@ -36,6 +36,13 @@ END
 DECLARE @intCommodityUnitMeasureId INT= NULL
 SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
 
+SELECT intCompanyLocationId
+INTO #LicensedLocation
+FROM tblSMCompanyLocation
+WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
+ELSE isnull(ysnLicensed, 0) END
+
 SELECT *
 	, isnull(tranRecQty,0) - isnull(ABS(tranShipQty),0) +isnull(dblAdjustmentQty,0)+isnull(dblCountQty,0)+isnull(dblInvoiceQty,0) BalanceForward
 INTO #temp
@@ -57,10 +64,7 @@ FROM (
 	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(4, 5, 15, 10, 23, 33, 45, 47)
 	join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
-	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																									ELSE isnull(ysnLicensed, 0) END)
+	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		and isnull(il.strDescription,'') <> 'In-Transit'
 	WHERE i.intCommodityId=@intCommodityId  
 	and i.intItemId = isnull(@intItemId, i.intItemId)
@@ -85,10 +89,7 @@ FROM (
 	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(8,9,46)
 	join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
-	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																									ELSE isnull(ysnLicensed, 0) END)
+	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		and isnull(il.strDescription,'') <> 'In-Transit'
 	WHERE i.intCommodityId=@intCommodityId  
 	and i.intItemId = isnull(@intItemId, i.intItemId)
@@ -113,10 +114,7 @@ FROM (
 	JOIN tblICItem i on i.intItemId=it.intItemId and it.ysnIsUnposted=0 and it.intTransactionTypeId in(12)
 	join tblICItemUOM u on it.intItemId=u.intItemId and u.intItemUOMId=it.intItemUOMId 
 	JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId  
-	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																									WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																									WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																									ELSE isnull(ysnLicensed, 0) END)
+	JOIN tblICItemLocation il on it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		and isnull(il.strDescription,'') <> 'In-Transit'
 	WHERE i.intCommodityId=@intCommodityId  
 	and i.intItemId = isnull(@intItemId, i.intItemId)
@@ -150,10 +148,7 @@ FROM (
 			AND i.intCommodityId=@intCommodityId  
 			AND i.intItemId = isnull(@intItemId, i.intItemId)
 			AND IA.intAdjustmentType <> 3
-			AND IA.intLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																						ELSE isnull(ysnLicensed, 0) END)
+			AND IA.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	) a
 	
 	UNION ALL --Direct From Scale
@@ -175,10 +170,7 @@ FROM (
 			, CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblInQty
 			, r.strReceiptNumber
 		FROM tblSCTicket st
-		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																						ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId
 		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
@@ -209,10 +201,7 @@ FROM (
 			, CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,dblNetUnits) ELSE 0 END dblInQty
 			, r.strReceiptNumber
 		FROM tblSCTicket st
-		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																						ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId
 		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
@@ -227,10 +216,7 @@ FROM (
 			,CASE WHEN strInOutFlag='I' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(u.intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblOpenReceive) ELSE 0 END dblInQty
 			,r.strReceiptNumber
 		FROM tblSCTicket st
-		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																						ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		JOIN tblICInventoryReceiptItem ri on ri.intSourceId=st.intTicketId
 		join tblICInventoryReceipt r on r.intInventoryReceiptId=ri.intInventoryReceiptId 
 		JOIN tblICItemUOM u on st.intItemId=u.intItemId and u.ysnStockUnit=1
@@ -261,10 +247,7 @@ FROM (
 			, ROUND(CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on ia.intInvoiceId=ad.intInvoiceId WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 1) THEN 0
 						ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
 		FROM tblSCTicket st
-		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																						ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=st.intTicketId
 		join tblICInventoryShipment r on r.intInventoryShipmentId=ri.intInventoryShipmentId
 		JOIN tblGRStorageType gs on gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId  
@@ -296,10 +279,7 @@ FROM (
 						ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
 		FROM tblICInventoryShipment r
 		JOIN tblICInventoryShipmentItem ri on ri.intInventoryShipmentId = r.intInventoryShipmentId
-		JOIN tblICItem i on i.intItemId = ri.intItemId AND r.intShipFromLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																						WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																						WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																						ELSE isnull(ysnLicensed, 0) END)
+		JOIN tblICItem i on i.intItemId = ri.intItemId AND r.intShipFromLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		JOIN tblICItemUOM u on ri.intItemId=u.intItemId and u.ysnStockUnit=1
 		WHERE i.intCommodityId = @intCommodityId and i.intItemId = isnull(@intItemId, i.intItemId) and isnull(strType,'') <> 'Other Charge'
 			and ri.intOwnershipType = 1 and r.intShipFromLocationId = isnull(@intLocationId, r.intShipFromLocationId)
@@ -348,10 +328,7 @@ FROM (
 		JOIN tblICItem i on i.intItemId=st.intItemId
 		WHERE i.intCommodityId = @intCommodityId AND i.intItemId = isnull(@intItemId, i.intItemId) and isnull(strType,'') <> 'Other Charge'
 			AND st.intProcessingLocationId = isnull(@intLocationId, st.intProcessingLocationId)
-			AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM tblSMCompanyLocation
-												WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1
-												WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
-												ELSE isnull(ysnLicensed, 0) END)
+			AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			AND st.intDeliverySheetId IS NULL AND st.strTicketStatus = 'H'
 	) t1
 
@@ -395,12 +372,7 @@ FROM (
 			--					AND
 								 CS.intCommodityId= @intCommodityId
 								and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
-								AND  CS.intCompanyLocationId  IN (
-																			SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																			WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																			WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
-																			ELSE isnull(ysnLicensed, 0) END)
-				
+								AND  CS.intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 								AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
 								AND strType IN ('Settlement','Reverse Settlement')
 								AND SH.intSettleStorageId IS NULL
@@ -452,6 +424,8 @@ FROM (
 	WHERE CONVERT(DATETIME,CONVERT(VARCHAR(10),dtmDate,110),110) BETWEEN
 		 convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
 ) t
+
+DROP TABLE #LicensedLocation
 
 SELECT *
 FROM (

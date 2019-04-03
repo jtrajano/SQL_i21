@@ -123,8 +123,8 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 							and CS.intItemId= case when isnull(@intItemId,0)=0 then CS.intItemId else @intItemId end 
 							AND  CS.intCompanyLocationId  IN (
 																		SELECT intCompanyLocationId FROM tblSMCompanyLocation
-																		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-																		WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+																		WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+																		WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 																		ELSE isnull(ysnLicensed, 0) END)
 				
 							AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
@@ -187,8 +187,8 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 				and i.intItemId= case when isnull(@intItemId,0)=0 then i.intItemId else @intItemId end and isnull(strType,'') <> 'Other Charge'
 				AND  st.intProcessingLocationId  IN (
 															SELECT intCompanyLocationId FROM tblSMCompanyLocation
-															WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'licensed storage' THEN 1 
-															WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0 
+															WHERE isnull(ysnLicensed, 0) = CASE WHEN @strPositionIncludes = 'Licensed Storage' THEN 1 
+															WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0 
 															ELSE isnull(ysnLicensed, 0) END
 													)
 				AND st.intProcessingLocationId = case when isnull(@intLocationId,0)=0 then st.intProcessingLocationId else @intLocationId end
