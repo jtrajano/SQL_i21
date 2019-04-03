@@ -36,14 +36,14 @@ RETURNS TABLE AS RETURN
 												--calculate discount base on voucher date to make sure there is a discount
 												--always discount bypasses due date
 											WHEN forPay.ysnPymtCtrlAlwaysDiscount = 1 
-												THEN dbo.fnGetDiscountBasedOnTerm(voucher.dtmDate, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
-											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
+												THEN dbo.fnGetDiscountBasedOnTerm(voucher.dtmDate, voucher.dtmDate, forPay.intTermsId, forPay.dblTotal)
+											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, forPay.intTermsId, forPay.dblTotal)
 										END
 									) 
 							ELSE 0 END AS DECIMAL(18,2))
 		,forPay.dblInterest 
 		,dblTempInterest = CAST(CASE WHEN voucher.intTransactionType = 1 
-								THEN dbo.fnGetInterestBasedOnTerm(voucher.dblTotal, voucher.dtmDate, @datePaid, voucher.intTermsId)
+								THEN dbo.fnGetInterestBasedOnTerm(forPay.dblTotal, voucher.dtmDate, @datePaid, forPay.intTermsId)
 								ELSE 0 END AS DECIMAL(18,2))
 		,forPay.dblAmountDue
 		,forPay.dblPayment
@@ -63,6 +63,7 @@ RETURNS TABLE AS RETURN
 		,forPay.strVendorId
 		,forPay.strCommodityCode
 		,forPay.strTerm
+		,forPay.intTermsId
 		,forPay.strName
 		,forPay.strCheckPayeeName
 		,forPay.ysnDeferredPayment
