@@ -32,6 +32,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @strSourceTransaction			NVARCHAR(50)
 	  , @ysnPrintOnlyOverCreditLimit	BIT
 	  , @ysnRollCredits					BIT
+	  , @ysnExcludeAccountStatus		BIT
 	  , @intEntityUserId				INT
 		
 -- Create a table variable to hold the XML data. 		
@@ -147,9 +148,11 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 						FROM (
 							SELECT DISTINCT CAST(intAccountStatusId AS VARCHAR(200))  + ', '
 							FROM tblARAccountStatus 
-							WHERE strAccountStatusCode <> @from
+							WHERE strAccountStatusCode = @from
 							FOR XML PATH ('')
 						) C (intAccountStatusId)
+
+						SET @ysnExcludeAccountStatus = CAST(1 AS BIT)
 					END
 				ELSE IF @fieldname = 'strCompanyLocation'
 					BEGIN
@@ -247,15 +250,16 @@ ELSE
 
 SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
-EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom			= @dtmDateFrom
-											  , @dtmDateTo				= @dtmDateTo											  
-											  , @strSourceTransaction	= @strSourceTransaction
-											  , @strCustomerIds			= @strCustomerIds
-											  , @strSalespersonIds		= @strSalespersonIds
-											  , @strCompanyLocationIds	= @strCompanyLocationIds
-											  , @strAccountStatusIds	= @strAccountStatusIds
-											  , @ysnInclude120Days		= 0
-											  , @intEntityUserId		= @intEntityUserId
+EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom				= @dtmDateFrom
+											  , @dtmDateTo					= @dtmDateTo											  
+											  , @strSourceTransaction		= @strSourceTransaction
+											  , @strCustomerIds				= @strCustomerIds
+											  , @strSalespersonIds			= @strSalespersonIds
+											  , @strCompanyLocationIds		= @strCompanyLocationIds
+											  , @strAccountStatusIds		= @strAccountStatusIds
+											  , @ysnInclude120Days			= 0
+											  , @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
+											  , @intEntityUserId			= @intEntityUserId
 
 IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
 BEGIN

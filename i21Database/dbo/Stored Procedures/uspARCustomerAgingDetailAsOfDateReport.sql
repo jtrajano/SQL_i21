@@ -9,6 +9,7 @@
 	, @intEntityUserId			INT = NULL
 	, @ysnPaidInvoice			BIT = NULL
 	, @ysnInclude120Days		BIT = 0
+	, @ysnExcludeAccountStatus	BIT = 0
 	, @intGracePeriod			INT = 0
 AS
 
@@ -109,11 +110,21 @@ IF ISNULL(@strAccountStatusIdsLocal, '') <> ''
 			FROM dbo.fnGetRowsFromDelimitedValues(@strAccountStatusIdsLocal)
 		) ACCOUNTSTATUS ON ACCS.intAccountStatusId = ACCOUNTSTATUS.intID
 
-		DELETE CUSTOMERS 
-		FROM @tblCustomers CUSTOMERS
-		LEFT JOIN tblARCustomerAccountStatus CAS ON CUSTOMERS.intEntityCustomerId = CAS.intEntityCustomerId
-		LEFT JOIN @tblAccountStatus ACCSTATUS ON CAS.intAccountStatusId = ACCSTATUS.intAccountStatusId
-		WHERE CAS.intAccountStatusId IS NULL
+		IF @ysnExcludeAccountStatus = 0
+			BEGIN
+				DELETE CUSTOMERS 
+				FROM @tblCustomers CUSTOMERS
+				LEFT JOIN tblARCustomerAccountStatus CAS ON CUSTOMERS.intEntityCustomerId = CAS.intEntityCustomerId
+				LEFT JOIN @tblAccountStatus ACCSTATUS ON CAS.intAccountStatusId = ACCSTATUS.intAccountStatusId
+				WHERE CAS.intAccountStatusId IS NULL
+			END
+		ELSE 
+			BEGIN
+				DELETE CUSTOMERS 
+				FROM @tblCustomers CUSTOMERS
+				INNER JOIN tblARCustomerAccountStatus CAS ON CUSTOMERS.intEntityCustomerId = CAS.intEntityCustomerId
+				INNER JOIN @tblAccountStatus ACCSTATUS ON CAS.intAccountStatusId = ACCSTATUS.intAccountStatusId
+			END
 	END
 
 --DROP TEMP TABLES
