@@ -475,6 +475,16 @@ FROM tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
 
+
+IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail')
+	BEGIN
+		UPDATE AGING
+		SET dblTotalCustomerAR = ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) + ISNULL(dblCredits, 0) + ISNULL(dblPrepayments, 0)
+		FROM tblARCustomerAgingStagingTable AGING
+		WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+	END
+
+
 IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable AGING INNER JOIN @temp_open_invoices UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail')
 	BEGIN
 		INSERT INTO tblARCustomerAgingStagingTable (

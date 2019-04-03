@@ -226,4 +226,11 @@ IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEn
 		) COMPANY
 	END
 
+IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary')
+	BEGIN
+		UPDATE AGING
+		SET dblTotalCustomerAR = ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) + ISNULL(dblCredits, 0) + ISNULL(dblPrepayments, 0)
+		FROM tblARCustomerAgingStagingTable AGING
+		WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
+	END
 SELECT * FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
