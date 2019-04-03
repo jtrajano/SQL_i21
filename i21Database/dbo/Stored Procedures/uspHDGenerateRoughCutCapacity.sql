@@ -92,7 +92,7 @@ planed as (
 						when d.ysnAllDayEvent = convert(bit,1)
 						then 8.00
 						when datediff(day,d.dtmStartDate, d.dtmEndDate) = 0 and (d.ysnAllDayEvent is null or d.ysnAllDayEvent = convert(bit,0))
-						then sum(convert(numeric(18,6),datediff(hour,d.dtmStartDate, d.dtmEndDate)))
+						then sum(convert(numeric(18,6),datediff(minute,d.dtmStartDate, d.dtmEndDate))/60.00)
 						else 0.00
 					end)
 	from
