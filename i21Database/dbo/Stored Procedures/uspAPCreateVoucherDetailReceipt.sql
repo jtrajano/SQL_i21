@@ -1031,6 +1031,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		DECLARE @voucherDetailId INT
 		DECLARE curr CURSOR FOR
 		SELECT  intBillDetailId FROM @detailCreated 
+		OPEN curr
 		FETCH NEXT FROM curr INTO @voucherDetailId
 		WHILE @@FETCH_STATUS = 0	
 		BEGIN	
