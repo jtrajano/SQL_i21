@@ -66,28 +66,22 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 				[Id] int
 		)
 
+		BEGIN TRY
+    	BEGIN TRANSACTION
 
-    	IF NOT EXISTS (SELECT * FROM glijemst WHERE glije_period between @startingPeriod and @endingPeriod)
+    	IF NOT EXISTS (SELECT TOP 1 1 FROM glijemst WHERE glije_period between @startingPeriod and @endingPeriod)
     	BEGIN
-    		INSERT INTO @tblLog ([strEventDescription]) 
-			SELECT ''No Data to import from the Origin on a given period.''
+    		RAISERROR(''No Data to import from the Origin on a given period.'', 16, 1);  
     	END
 
 		IF EXISTS(SELECT TOP 1 1 FROM vyuAPOriginCCDTransaction) -- AP-3144 check for non-imported Credit Card Reconciliation records
 		BEGIN
-			INSERT INTO @tblLog ([strEventDescription]) 
-			SELECT ''There are non imported Credit Card Reconciliation entries. Import voucher from origin first.''
+			RAISERROR(''There are non imported Credit Card Reconciliation entries. Import voucher from origin first.'', 16, 1);  
 		END
 
-		IF EXISTS(SELECT TOP 1 1 FROM @tblLog)
-		BEGIN
-			-- INSERT TO COA IMPORT LOG TABLE HERE
-			RETURN
-		END
-    	IF NOT EXISTS( SELECT * FROM tblGLCOACrossReference)
+    	IF NOT EXISTS( SELECT TOP 1 1 FROM tblGLCOACrossReference)
     	BEGIN
-    		INSERT INTO @tblLog ([strEventDescription]) SELECT ''Unable to Post because there is no cross reference between i21 and Origin.''
-    		SET @isCOAPresent = 0
+			RAISERROR(''Unable to Post because there is no cross reference between i21 and Origin.'', 16, 1);  
     	END
     	ELSE
     	BEGIN
@@ -111,8 +105,7 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			WHERE glije_period between @startingPeriod and @endingPeriod
     			
 
-    		BEGIN TRY
-    		BEGIN TRANSACTION
+    		
 
 			IF EXISTS (SELECT * FROM @tmpID WHERE isnull(glije_date,0) < 19000000 or isnull(glije_date,0) > 21000000)
     		BEGIN
