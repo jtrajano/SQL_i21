@@ -45,7 +45,7 @@ SELECT CHK.dtmDate
 						WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate < = DATEADD (dd, DATEDIFF (dd, 0, GETDATE ()),0) 
 						AND intEntityId = ENTITY.intEntityId ORDER BY dtmEffectiveDate desc), '') 
 			+ ' on ' + 
-			FORMAT(PYMT.dtmDatePaid, 'dd MMM yyyy') 
+			CONVERT(varchar(11), PYMT.dtmDatePaid,106)
 FROM dbo.tblCMBankTransaction CHK 
 LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum 
 INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 
