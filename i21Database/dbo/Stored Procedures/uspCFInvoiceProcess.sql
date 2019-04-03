@@ -94,7 +94,7 @@ BEGIN TRY
 	--SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
 
 
-	UPDATE tblCFTransaction SET strInvoiceReportNumber = cfS.strTempInvoiceReportNumber , dtmInvoiceDate = cfs.dtmInvoiceDate
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = cfS.strTempInvoiceReportNumber , dtmInvoiceDate = cfS.dtmInvoiceDate
 	FROM (
 		SELECT intTransactionId,strTempInvoiceReportNumber,dtmInvoiceDate FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
 	) as cfS
