@@ -19,7 +19,6 @@ SELECT GL.intGenerateLoadId
 	  ,ETP.strEquipmentType		AS strPEquipmentType --obsolete
 	  ,EPH.intEntityId			AS intPHaulerEntityId --obsolete
 	  ,EPH.strName				AS strPHaulerName --obsolete
-	  ,PPT.strPositionType		AS strPPositionType
 
 	  ,SCH.intEntityId			AS intCustomerEntityId
 	  ,EC.strName				AS strCustomerName
@@ -39,7 +38,6 @@ SELECT GL.intGenerateLoadId
 	  ,ETS.strEquipmentType		AS strSEquipmentType --obsolete
 	  ,ESH.intEntityId			AS intSHaulerEntityId --obsolete
 	  ,ESH.strName				AS strSHaulerName --obsolete
-	  ,SPT.strPositionType		AS strSPositionType
 
 	  ,GL.dtmShipDate
 	  ,GL.dtmEndDate
@@ -102,6 +100,8 @@ SELECT GL.intGenerateLoadId
 	  ,CP.intDefaultSurchargeItemId
 	  ,FT.intFreightTermId
 	  ,FT.strFreightTerm
+	  ,intPositionId = CASE WHEN GL.intType = 2 THEN SCH.intPositionId ELSE PCH.intPositionId END
+	  ,strPositionType = CASE WHEN GL.intType = 2 THEN SPT.strPositionType ELSE PPT.strPositionType END
 
 FROM tblLGGenerateLoad			GL
 
