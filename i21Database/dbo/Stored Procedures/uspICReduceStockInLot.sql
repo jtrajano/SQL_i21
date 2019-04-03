@@ -80,7 +80,24 @@ BEGIN
 	BEGIN 
 		-- Get the available stock in the cost bucket. 
 		DECLARE @strCostBucketDate AS VARCHAR(20) 
-		SELECT	@strCostBucketDate = CONVERT(NVARCHAR(20), MIN(cb.dtmDate), 101)
+				,@dtmCostBucketDate AS DATETIME
+				,@dblCostBucketQty AS NUMERIC(18, 6)
+				,@dblTotalCostBucketQty AS NUMERIC(18, 6)
+		--SELECT	@strCostBucketDate = CONVERT(NVARCHAR(20), MIN(cb.dtmDate), 101)
+		--FROM	tblICInventoryLot cb
+		--WHERE	cb.intItemId = @intItemId
+		--		AND cb.intItemLocationId = @intItemLocationId
+		--		AND cb.intLotId = @intLotId
+		--		AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+		--		AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
+		--		AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0 
+		--HAVING 
+		--	SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
+
+		DECLARE findBestDateToPost CURSOR LOCAL FAST_FORWARD
+		FOR 
+		SELECT	dblQty = ROUND((ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)), 6)
+				,cb.dtmDate
 		FROM	tblICInventoryLot cb
 		WHERE	cb.intItemId = @intItemId
 				AND cb.intItemLocationId = @intItemLocationId
@@ -88,9 +105,28 @@ BEGIN
 				AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0 
-		HAVING 
-			SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
+		ORDER BY 
+			cb.dtmDate ASC 
 
+		OPEN findBestDateToPost;
+		FETCH NEXT FROM findBestDateToPost INTO @dblCostBucketQty, @dtmCostBucketDate
+
+		SET @dblTotalCostBucketQty = 0 
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 
+			SET @dblTotalCostBucketQty += @dblCostBucketQty
+			IF @dblTotalCostBucketQty >= ROUND(@dblQty, 6)
+			BEGIN 
+				SET @strCostBucketDate = CONVERT(NVARCHAR(20), @dtmCostBucketDate, 101) 
+				GOTO breakLoopFindBestDateToPost
+			END 
+			
+			FETCH NEXT FROM findBestDateToPost INTO @dblCostBucketQty, @dtmCostBucketDate
+		END 
+		breakLoopFindBestDateToPost: 
+		CLOSE findBestDateToPost;
+		DEALLOCATE findBestDateToPost;
+		
 		IF @strCostBucketDate IS NOT NULL 
 		BEGIN 
 			--'Stock is not available for {Item} at {Location} as of {Transaction Date}. Use the nearest stock available date of {Cost Bucket Date} or later.'
