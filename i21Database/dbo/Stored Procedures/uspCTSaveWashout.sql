@@ -209,9 +209,10 @@ BEGIN TRY
 				,@intLocationId
 
 		EXEC	uspAPCreateVoucher
-				@voucherNonInvDetails	=   @voucherNonInvDetails,
+				@voucherPayables		=   @voucherNonInvDetails,
 				@userId					=   @intCreatedById,
-				@billId					=   @intBillInvoiceId OUTPUT
+				@throwError				=	1,
+				@createdVouchersId		=   @intBillInvoiceId OUT
 
 		SELECT	@strBillInvoice =	 strBillId FROM tblAPBill WHERE intBillId = @intBillInvoiceId	   
 		SET		@strMiscComment = ''
