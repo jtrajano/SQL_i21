@@ -59,6 +59,7 @@ BEGIN
 		dblAmountPaid DECIMAL(18,2),
 		dblWithheld DECIMAL(18,2),
 		strPaymentInfo NVARCHAR(50),
+		strPayee NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
 		intSortId INT IDENTITY(1,1)
 	);
 
@@ -168,9 +169,9 @@ BEGIN
 		,voucher.dblTempInterest
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
-		,ysnLienExists = CAST(CASE WHEN lienInfo.intEntityLienId IS NULL THEN 0 ELSE 1 END AS BIT)
-		,strPayee = payTo.strCheckPayeeName
-	INTO #tmpPartitionedVouchers
+		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
+		,strPayee = payTo.strCheckPayeeName + ' ' + lienInfo.strPayee
+	INTO #tmpPartitionedVouchers 
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
 	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
@@ -180,23 +181,38 @@ BEGIN
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID 
 	OUTER APPLY (
-		SELECT TOP 1 lien.intEntityLienId
-				FROM tblAPVendorLien lien
-				-- INNER JOIN tblEMEntity ent ON lien.intEntityLienId = ent.intEntityId
-				WHERE lien.intEntityVendorId = vendor.intEntityId AND lien.ysnActive = 1 AND @datePaid BETWEEN lien.dtmStartDate AND lien.dtmEndDate
-				-- AND lien.intCommodityId IN (SELECT intCommodityId FROM
-				-- 							tblAPPayment Pay 
-				-- 							INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
-				-- 							INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
-				-- 							WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
+		SELECT STUFF((
+			SELECT DISTINCT ' and ' + strName
+			FROM tblAPVendorLien LIEN
+			INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
+			WHERE LIEN.intEntityVendorId = vendor.intEntityId AND LIEN.ysnActive = 1 AND @datePaid BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+			-- AND LIEN.intCommodityId IN (SELECT intCommodityId FROM
+			-- 							tblAPPayment Pay 
+			-- 							INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+			-- 							INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+			-- 							WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
+			FOR XML PATH('')), 
+			1, 1, '') AS strPayee
 	) lienInfo
 
 	--ALL TRANSACTIONS THAT VENDOR IS NOT ONE BILL PER PAYMENT
 	SET @script = 
 	'
-	INSERT INTO #tmpMultiVouchers(intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblAmountPaid, dblWithheld, strPaymentInfo, ysnLienExists, intPartitionId)
+	INSERT INTO #tmpMultiVouchers
+	(
+		intBillId,
+		intPayToAddressId,
+		intEntityVendorId,
+		intPaymentId,
+		dblAmountPaid,
+		dblWithheld,
+		strPaymentInfo,
+		strPayee,
+		ysnLienExists,
+		intPartitionId
+	)
 	SELECT
-		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, ysnLienExists, intPartitionId
+		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intPartitionId
 	FROM
 	(
 		SELECT 
@@ -250,7 +266,7 @@ BEGIN
 				[strPaymentInfo]					= 	vouchersPay.strPaymentInfo,
 				[strPaymentRecordNum]				= 	NULL,
 				[strNotes]							= 	NULL,
-				[strPayee]							= 	NULL,
+				[strPayee]							= 	vouchersPay.strPayee,
 				[strOverridePayee]					= 	NULL,
 				[dtmDatePaid]						= 	@datePaid,
 				[dblAmountPaid]						= 	vouchersPay.dblAmountPaid - vouchersPay.dblWithheld,
@@ -278,6 +294,7 @@ BEGIN
 				vouchersPay.intPayToAddressId,
 				vouchersPay.intEntityVendorId,
 				vouchersPay.strPaymentInfo,
+				vouchersPay.strPayee,
 				vouchersPay.dblWithheld,
 				vouchersPay.ysnLienExists,
 				vouchersPay.intPartitionId

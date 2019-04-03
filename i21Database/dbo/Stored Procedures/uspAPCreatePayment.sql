@@ -62,7 +62,8 @@ BEGIN
 	DECLARE @rateType INT;
 	DECLARE @currency INT, @functionalCurrency INT;
 	DECLARE @lienExists BIT = 0;
-	DECLARE @payee NVARCHAR(100);
+	DECLARE @payee NVARCHAR(300);
+	DECLARE @lien NVARCHAR(300);
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -76,11 +77,14 @@ BEGIN
 		,@paymentMethodId = CASE WHEN @paymentMethodId IS NULL THEN C.intPaymentMethodId ELSE @paymentMethodId END
 		,@payToAddress = A.intPayToAddressId
 		,@currency = A.intCurrencyId
+		,@payee = loc.strCheckPayeeName
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
 			ON A.[intEntityVendorId] = C.[intEntityId]
+		LEFT JOIN tblEMEntityLocation loc
+			ON loc.intEntityLocationId = A.intPayToAddressId
 
 	SELECT TOP 1 
 		@functionalCurrency = intDefaultCurrencyId 
@@ -257,10 +261,18 @@ BEGIN
 		SET @paymentInfo = @defaultPaymentInfo
 	END
 
-	SELECT TOP 1 
-		@lienExists = CAST(CASE WHEN lien.intEntityLienId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
-	FROM tblAPVendorLien lien
-	WHERE lien.intEntityVendorId = @vendorId AND lien.ysnActive = 1 AND ISNULL(@datePaid, GETDATE()) BETWEEN lien.dtmStartDate AND lien.dtmEndDate
+	SET @lien =  STUFF((
+								SELECT DISTINCT ' and ' + strName
+								FROM tblAPVendorLien LIEN
+								INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
+								WHERE LIEN.intEntityVendorId = @vendorId AND LIEN.ysnActive = 1 AND ISNULL(@datePaid,GETDATE()) BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+								FOR XML PATH('')), 
+								1, 1, '')
+	IF @lien IS NOT NULL
+	BEGIN
+		SET @payee = @payee + ' ' + @lien
+		SET @lienExists = 1;
+	END
 
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
@@ -273,6 +285,7 @@ BEGIN
 		[intEntityVendorId],
 		[intCurrencyExchangeRateTypeId],
 		[strPaymentInfo],
+		[strPayee],
 		[strPaymentRecordNum],
 		[strNotes],
 		[dtmDatePaid],
@@ -294,6 +307,7 @@ BEGIN
 		[intEntityVendorId]		= @vendorId,
 		[intCurrencyExchangeRateTypeId] = @rateType,
 		[strPaymentInfo]		= @paymentInfo,
+		[strPayee]				= @payee,
 		[strPaymentRecordNum]	= @paymentRecordNum,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(@datePaid, GETDATE())), 0),
@@ -340,14 +354,15 @@ BEGIN
 				[intAccountId]	= A.intAccountId,
 				[dblDiscount]	= ISNULL(C.dblDiscount, A.dblDiscount),
 				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
-				[dblAmountDue]	= ISNULL(C.dblPayment,
-									CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
+				[dblAmountDue]	= ISNULL(C.dblPayment, A.dblAmountDue
+									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
 								),
 				[dblPayment]	= ISNULL(C.dblPayment,
-									CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
+									A.dblAmountDue
+									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
 								  ),
 				[dblInterest]	= A.dblInterest,
-				[dblTotal]		= ISNULL(C.dblPayment, (B.dblTotal + B.dblTax)),
+				[dblTotal]		= ISNULL(C.dblPayment, A.dblTotal),
 				[ysnOffset]		= CAST
 									(
 										CASE 
@@ -359,12 +374,12 @@ BEGIN
 									AS BIT),
 				[intPayScheduleId]= C.intId
 			FROM tblAPBill A
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 			LEFT JOIN tblAPVoucherPaymentSchedule C
 				ON C.intBillId = A.intBillId AND C.ysnPaid = 0
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 		) vouchers
-	--GROUP BY intPaymentId, intAccountId, dblDiscount, dblInterest, dblWithheld, ysnOffset
+	--GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld, ysnOffset
 	'
 
 	EXEC sp_executesql @queryPayment,
@@ -383,6 +398,7 @@ BEGIN
 	 @isPost BIT,
 	 @payToAddress INT,
 	 @rateType INT,
+	 @payee NVARCHAR(300),
 	 @rate DECIMAL(18,6),
 	 @currency INT,
 	 @lienExists BIT,
@@ -406,6 +422,7 @@ BEGIN
 	 @rateType = @rateType,
 	 @rate = @rate,
 	 @currency = @currency,
+	 @payee = @payee,
 	 @lienExists = @lienExists,
 	 @paymentId = @paymentId OUTPUT;
 
