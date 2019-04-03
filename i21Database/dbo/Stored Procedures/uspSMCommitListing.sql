@@ -52,6 +52,7 @@ BEGIN TRANSACTION
 		intConcurrencyId
 	)
 	SELECT 
+		DISTINCT
 		A.strControlId,
 		A.strControlName,
 		A.strControlType,

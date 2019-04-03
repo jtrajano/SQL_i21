@@ -59,6 +59,7 @@ BEGIN TRANSACTION
 		INNER JOIN tblSMScreenStage 
 			ON tblSMControlStage.intScreenStageId = tblSMScreenStage.intScreenStageId
 		WHERE tblSMControlStage.intScreenStageId IN (SELECT intScreenStageId FROM tblSMScreenStage WHERE ISNULL(strChange, '') = '')
+		AND ISNULL(tblSMControlStage.strControlId,'') <> '' AND ISNULL(tblSMControlStage.strControlName,'') <> ''
 	) A
 	LEFT OUTER JOIN (
 		SELECT tblSMControl.strControlId, 
