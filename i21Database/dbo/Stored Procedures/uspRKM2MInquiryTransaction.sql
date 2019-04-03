@@ -462,30 +462,34 @@ WHERE CH.intCommodityId = @intCommodityId
 	AND CONVERT(DATETIME,CONVERT(VARCHAR, OCD.dtmContractDate, 101),101) <= @dtmTransactionDateUpTo
 
 SELECT intContractDetailId
-	, SUM(dblCosts) dblCosts
+	, sum(dblCosts) dblCosts
 INTO #tblContractCost
-FROM (
-	SELECT CASE WHEN strAdjustmentType = 'Add'
-					THEN ABS(CASE WHEN dc.strCostMethod ='Amount' THEN SUM(dc.dblRate)
-								ELSE SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate,0))) END)
+FROM ( 
+	SELECT  dbo.fnRKGetCurrencyConvertion(case when isnull(CU.ysnSubCurrency,0) = 1 then CU.intMainCurrencyId else dc.intCurrencyId end,@intCurrencyUOMId)* CASE WHEN strAdjustmentType = 'Add'
+					THEN ABS(CASE WHEN dc.strCostMethod ='Amount' THEN 
+					SUM(dc.dblRate)
+								ELSE 								
+								SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate,0))) END)
 				WHEN strAdjustmentType = 'Reduce'
-					THEN CASE WHEN dc.strCostMethod ='Amount' THEN SUM(dc.dblRate)
+					THEN CASE WHEN dc.strCostMethod ='Amount' THEN 
+					 SUM(dc.dblRate)
 							ELSE - SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate,0))) END
 					ELSE 0 END dblCosts
 		, strAdjustmentType
-		, dc.intContractDetailId
+		, dc.intContractDetailId,cu.intCommodityUnitMeasureId a,cu1.intCommodityUnitMeasureId b,strCostMethod
 	FROM @GetContractDetailView cd
 	INNER JOIN vyuRKM2MContractCost dc ON dc.intContractDetailId = cd.intContractDetailId
 	INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 	INNER JOIN tblRKM2MConfiguration M2M ON dc.intItemId = M2M.intItemId AND ch.intFreightTermId = M2M.intFreightTermId
 	INNER JOIN tblICCommodityUnitMeasure cu ON cu.intCommodityId = @intCommodityId AND cu.intUnitMeasureId = @intPriceUOMId
+	LEFT  JOIN tblSMCurrency CU ON CU.intCurrencyID = dc.intCurrencyId
 	LEFT  JOIN tblICCommodityUnitMeasure cu1 ON cu1.intCommodityId = @intCommodityId AND cu1.intUnitMeasureId = dc.intUnitMeasureId
 	GROUP BY cu.intCommodityUnitMeasureId
 		, cu1.intCommodityUnitMeasureId
 		, strAdjustmentType
 		, dc.intContractDetailId
-		, dc.strCostMethod
-) t
+		, dc.strCostMethod,CU.ysnSubCurrency,CU.intMainCurrencyId,dc.intCurrencyId
+) t 
 GROUP BY intContractDetailId
 
 DECLARE @tblSettlementPrice TABLE (intContractDetailId INT
