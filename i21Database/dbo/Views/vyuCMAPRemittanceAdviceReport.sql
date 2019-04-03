@@ -29,7 +29,7 @@ SELECT CHK.dtmDate
 			THEN BILL.dblTotal * - 1 
 			ELSE BILL.dblTotal END
 		, dblDiscount = PYMTDTL.dblDiscount, dblNet = 
-			CASE WHEN BILL.intTransactionType = 3 THEN PYMTDTL.dblPayment * - 1 
+			CASE WHEN BILL.intTransactionType IN (2,3) THEN PYMTDTL.dblPayment * - 1 
 			ELSE PYMTDTL.dblPayment END
 		, strBankAccountNo = STUFF(ACCT.strBankAccountNo, 1, LEN (ACCT.strBankAccountNo) - 4
 		, REPLICATE ('x', LEN (ACCT.strBankAccountNo) - 4))
