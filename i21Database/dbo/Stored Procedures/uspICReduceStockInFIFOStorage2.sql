@@ -72,16 +72,53 @@ BEGIN
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN 
+		---- Get the available stock in the cost bucket. 
+		--DECLARE @strCostBucketDate AS VARCHAR(20) 
+		--SELECT	@strCostBucketDate = CONVERT(NVARCHAR(20), MIN(cb.dtmDate), 101)
+		--FROM	tblICInventoryFIFOStorage cb
+		--WHERE	cb.intItemId = @intItemId
+		--		AND cb.intItemLocationId = @intItemLocationId
+		--		AND cb.intItemUOMId = @intItemUOMId
+		--		AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+		--HAVING 
+		--	SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
+
 		-- Get the available stock in the cost bucket. 
 		DECLARE @strCostBucketDate AS VARCHAR(20) 
-		SELECT	@strCostBucketDate = CONVERT(NVARCHAR(20), MIN(cb.dtmDate), 101)
+				,@dtmCostBucketDate AS DATETIME
+				,@dblCostBucketQty AS NUMERIC(18, 6)
+				,@dblTotalCostBucketQty AS NUMERIC(18, 6)
+
+		DECLARE findBestDateToPost CURSOR LOCAL FAST_FORWARD
+		FOR 
+		SELECT	dblQty = ROUND((ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)), 6)
+				,cb.dtmDate
 		FROM	tblICInventoryFIFOStorage cb
 		WHERE	cb.intItemId = @intItemId
 				AND cb.intItemLocationId = @intItemLocationId
 				AND cb.intItemUOMId = @intItemUOMId
-				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-		HAVING 
-			SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
+				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0 
+		ORDER BY 
+			cb.dtmDate ASC 
+
+		OPEN findBestDateToPost;
+		FETCH NEXT FROM findBestDateToPost INTO @dblCostBucketQty, @dtmCostBucketDate
+
+		SET @dblTotalCostBucketQty = 0 
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 
+			SET @dblTotalCostBucketQty += @dblCostBucketQty
+			IF @dblTotalCostBucketQty >= ROUND(@dblQty, 6)
+			BEGIN 
+				SET @strCostBucketDate = CONVERT(NVARCHAR(20), @dtmCostBucketDate, 101) 
+				GOTO breakLoopFindBestDateToPost
+			END 
+			
+			FETCH NEXT FROM findBestDateToPost INTO @dblCostBucketQty, @dtmCostBucketDate
+		END 
+		breakLoopFindBestDateToPost: 
+		CLOSE findBestDateToPost;
+		DEALLOCATE findBestDateToPost;
 
 		IF @strCostBucketDate IS NOT NULL 
 		BEGIN 
