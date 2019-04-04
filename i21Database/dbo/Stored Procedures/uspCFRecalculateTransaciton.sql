@@ -432,6 +432,10 @@ BEGIN
 	@CFAdjustmentRate			=	@dblAdjustmentRate			output
 
 	
+	IF(LOWER(@strPriceMethod) = 'network cost' OR LOWER(@strPriceBasis) = 'transfer cost')
+	BEGIN
+		SET @dblOriginalPrice = @dblTransferCost
+	END
 
 	SELECT TOP 1 
 	@strPriceProfileId = cfPriceProfile.strPriceProfile
@@ -2589,7 +2593,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-                        SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity						
+                        SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity				
 						END
 					END
 
@@ -2985,7 +2989,7 @@ BEGIN
                         IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity			
 						END
 					END
 
@@ -3375,7 +3379,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxZeroQuantity			
 						END
 					END
 
@@ -3925,7 +3929,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity			
 						END
 					END
 
@@ -4327,7 +4331,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity			
 						END
 					END
 
@@ -4717,7 +4721,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity			
 						END
 					END
 
@@ -5603,57 +5607,57 @@ BEGIN
 
 	IF (ISNULL(@dblCalculatedTotalPrice,0) != 0)
 	BEGIN
-		IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
+	IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
+	BEGIN
+		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
+	END
+	ELSE IF (@strTransactionType = 'Foreign Sale')
+	BEGIN
+		--Foreign Sale 
+		--would be NetTransfer Cost - Inventory Average Cost
+		--or if Avg Cost = 0, then Net Price - Net Transfer Cost
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
+
+		IF(ISNULL(@dblInventoryCost,0) = 0)
 		BEGIN
 			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 		END
-		ELSE IF (@strTransactionType = 'Foreign Sale')
+		ELSE
 		BEGIN
-			--Foreign Sale 
-			--would be NetTransfer Cost - Inventory Average Cost
-			--or if Avg Cost = 0, then Net Price - Net Transfer Cost
-			SELECT
-			@dblInventoryCost = dblAverageCost
-			FROM vyuICGetItemPricing 
-			WHERE intItemId = @intItemId
-			AND intLocationId = @intLocationId
+			SET @dblMargin = ISNULL(@dblNetTransferCost,0) - ISNULL(@dblInventoryCost,0)
+		END
+	END
+	ELSE
+	BEGIN
+		--Local Trans would be NetPrice - Inventory Average Cost.
+		--Or if Avg Cost = 0, then NetPrice - Net Transfer Cost
 
-			SELECT
-			@dblInventoryCost = dblAverageCost
-			FROM vyuICGetItemPricing 
-			WHERE intItemId = @intItemId
-			AND intLocationId = @intLocationId
+		SELECT
+		@dblInventoryCost = dblAverageCost
+		FROM vyuICGetItemPricing 
+		WHERE intItemId = @intItemId
+		AND intLocationId = @intLocationId
 
-			IF(ISNULL(@dblInventoryCost,0) = 0)
-			BEGIN
-				SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
-			END
-			ELSE
-			BEGIN
-				SET @dblMargin = ISNULL(@dblNetTransferCost,0) - ISNULL(@dblInventoryCost,0)
-			END
+		IF(ISNULL(@dblInventoryCost,0) = 0)
+		BEGIN
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
 		END
 		ELSE
 		BEGIN
-			--Local Trans would be NetPrice - Inventory Average Cost.
-			--Or if Avg Cost = 0, then NetPrice - Net Transfer Cost
-
-			SELECT
-			@dblInventoryCost = dblAverageCost
-			FROM vyuICGetItemPricing 
-			WHERE intItemId = @intItemId
-			AND intLocationId = @intLocationId
-
-			IF(ISNULL(@dblInventoryCost,0) = 0)
-			BEGIN
-				SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
-			END
-			ELSE
-			BEGIN
-				SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
-			END
-
+			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
 		END
+
+	END
 	END
 	ELSE
 	BEGIN
@@ -5858,11 +5862,11 @@ BEGIN
 		BEGIN
 			IF((ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
 			BEGIN
-				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 				VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required')
-				SET @ysnInvalid = 1
-			END
+			SET @ysnInvalid = 1
 		END
+	END
 	END
 
 	---------------------------------------------------
