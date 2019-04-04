@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTValidatePriceFixationDetailUpdateDelete]
 		
 	@intPriceFixationId			INT = NULL,
-	@intPriceFixationDetailId	INT = NULL
+	@intPriceFixationDetailId	INT = NULL,
+	@intPriceFixationTicketId	INT = NULL
 	
 AS
 BEGIN TRY
@@ -11,20 +12,24 @@ BEGIN TRY
 
 	SELECT  @List = COALESCE(@List + ',', '') + BL.strBillId
 	FROM	tblCTPriceFixationDetailAPAR	DA
+	JOIN	vyuCTPriceFixationTicket		FT	ON	FT.intDetailId				=	DA.intBillDetailId
 	JOIN	tblCTPriceFixationDetail		FD	ON	FD.intPriceFixationDetailId =	DA.intPriceFixationDetailId
 	JOIN	tblCTPriceFixation				PF	ON	PF.intPriceFixationId		=	FD.intPriceFixationId
 	JOIN	tblAPBill						BL	ON	BL.intBillId				=	DA.intBillId
 	WHERE	PF.intPriceFixationId		=	ISNULL(@intPriceFixationId, PF.intPriceFixationId)
 	AND		FD.intPriceFixationDetailId	=	ISNULL(@intPriceFixationDetailId,FD.intPriceFixationDetailId)
+	AND		FT.intPriceFixationTicketId	=	ISNULL(@intPriceFixationTicketId,FT.intPriceFixationTicketId)
 	AND		BL.ysnPosted = 1
 
 	SELECT  @List = COALESCE(@List + ',', '') + IV.strInvoiceNumber
 	FROM	tblCTPriceFixationDetailAPAR	DA
+	JOIN	vyuCTPriceFixationTicket		FT	ON	FT.intDetailId				=	DA.intBillDetailId
 	JOIN	tblCTPriceFixationDetail		FD	ON	FD.intPriceFixationDetailId =	DA.intPriceFixationDetailId
 	JOIN	tblCTPriceFixation				PF	ON	PF.intPriceFixationId		=	FD.intPriceFixationId
 	JOIN	tblARInvoice					IV	ON	IV.intInvoiceId				=	DA.intInvoiceId
 	WHERE	PF.intPriceFixationId		=	ISNULL(@intPriceFixationId, PF.intPriceFixationId)
 	AND		FD.intPriceFixationDetailId	=	ISNULL(@intPriceFixationDetailId,FD.intPriceFixationDetailId)
+	AND		FT.intPriceFixationTicketId	=	ISNULL(@intPriceFixationTicketId,FT.intPriceFixationTicketId)
 	AND		IV.ysnPosted = 1
 
 	IF ISNULL(@List,'') <> ''
