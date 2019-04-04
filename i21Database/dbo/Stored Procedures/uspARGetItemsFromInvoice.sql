@@ -14,6 +14,7 @@ SELECT
 	 [intInvoiceId]					= I.[intInvoiceId]
 	,[strInvoiceNumber]				= I.[strInvoiceNumber]
 	,[intEntityCustomerId]			= I.[intEntityCustomerId]
+	,[strTransactionType]			= I.[strTransactionType]
 	,[dtmDate]						= I.[dtmDate]
 	,[intCurrencyId]				= I.[intCurrencyId]
 	,[intCompanyLocationId]			= I.[intCompanyLocationId]
