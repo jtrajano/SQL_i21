@@ -79,6 +79,7 @@ USING
 		,intItemId							=	A.intItemId
 		,dblDiscount						=	A.dblDiscount
 		,ysnSubCurrency						=	ISNULL(A.ysnSubCurrency,0)
+		,intCurrencyId						=	A.intCostCurrencyId
 		,intLineNo							=	CASE WHEN A.intLineNo IS NULL
 													THEN ROW_NUMBER() OVER(PARTITION BY A.intBillId ORDER BY A.intBillId)
 												ELSE A.intLineNo END
@@ -274,7 +275,8 @@ INSERT
 	,intAccountId						
 	,intItemId							
 	,dblDiscount						
-	,ysnSubCurrency						
+	,ysnSubCurrency	
+	,intCurrencyId					
 	,intLineNo							
 	,intStorageLocationId				
 	,intSubLocationId				
@@ -357,7 +359,8 @@ VALUES
 	,intAccountId						
 	,intItemId							
 	,dblDiscount						
-	,ysnSubCurrency						
+	,ysnSubCurrency		
+	,intCurrencyId				
 	,intLineNo		
 	,intStorageLocationId						
 	,intSubLocationId				
