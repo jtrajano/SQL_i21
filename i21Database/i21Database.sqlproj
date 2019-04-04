@@ -7513,6 +7513,7 @@
     <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSUpdateCashPaymentReceived.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryShipmentReceipt.sql" />
+    <Build Include="dbo\Views\vyuGRBasisSettleStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
