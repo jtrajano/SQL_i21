@@ -24,11 +24,14 @@ SELECT TOP 100 PERCENT * FROM (
         ,ticketTrans.strBillOfLading
         ,ticketTrans.intShipFromId
         ,ticketTrans.intItemId
+        ,ticketTrans.intStorageLocationId
+        ,ticketTrans.intSubLocationId
         ,commodity.intCommodityId
         ,commodity.strDescription
         ,0.00 AS dblFuture
         ,cur.strCurrency
         ,ctd.intSeqCurrencyId AS intCurrencyId
+        ,ticketTrans.intItemUOMId
         ,ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0) AS dblQuantity
         ,(ISNULL(basisFutures.dblPrice, 0) 
                 + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
@@ -169,6 +172,8 @@ SELECT TOP 100 PERCENT * FROM (
             receipt.intFreightTermId,
             CASE WHEN receiptItem.intWeightUOMId > 0 THEN receiptItem.intWeightUOMId ELSE receiptItem.intUnitMeasureId END AS intItemUOMId,
             receipt.intCurrencyId,
+            receiptItem.intStorageLocationId,
+            receiptItem.intSubLocationId,
             receiptItem.intForexRateTypeId,
             receiptItem.dblForexRate
         FROM tblICInventoryReceipt receipt 
@@ -221,6 +226,8 @@ SELECT TOP 100 PERCENT * FROM (
             NULL,
             intItemUOMId,
             intCurrencyId,
+            intStorageLocationId,
+            intCompanyLocationSubLocationId,
             NULL,
             NULL
         FROM vyuGRBasisSettleStorage settleStorage

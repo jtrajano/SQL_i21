@@ -15,6 +15,8 @@ SELECT
     ,CS.dtmDeliveryDate
     ,CS.intShipFromLocationId
     ,CS.intItemUOMId
+    ,CS.intStorageLocationId
+    ,CS.intCompanyLocationSubLocationId
     ,CS.intCurrencyId
     ,dblGross			= SC.dblUnits
     ,dblDiscountAmount	= SC.dblUnits * CS.dblDiscountsDue
