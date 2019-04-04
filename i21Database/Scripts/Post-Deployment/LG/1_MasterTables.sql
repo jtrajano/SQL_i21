@@ -188,15 +188,7 @@ BEGIN
 				LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = LG.intLoadId
 				OUTER APPLY 
 					(SELECT TOP 1 
-						CTC.intContractCostId
-						,CTC.intItemId
-						,CTC.intVendorId
-						,CTC.dblRate
-						,CTC.strCostMethod
-						,CTC.intItemUOMId
-						,CTC.dblAccruedAmount
-						,CTD.intContractDetailId
-						,CTD.dblQuantity
+						CTD.intContractDetailId
 						FROM tblCTContractCost CTC
 						INNER JOIN tblCTContractDetail CTD
 							ON CTC.intContractDetailId = CTD.intContractDetailId
@@ -219,15 +211,7 @@ BEGIN
 				LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = LG.intLoadId
 				OUTER APPLY 
 					(SELECT TOP 1 
-						CTC.intContractCostId
-						,CTC.intItemId
-						,CTC.intVendorId
-						,CTC.dblRate
-						,CTC.strCostMethod
-						,CTC.intItemUOMId
-						,CTC.dblAccruedAmount
-						,CTD.intContractDetailId
-						,CTD.dblQuantity
+						CTD.intContractDetailId
 						FROM tblCTContractCost CTC
 						INNER JOIN tblCTContractDetail CTD
 							ON CTC.intContractDetailId = CTD.intContractDetailId
