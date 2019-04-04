@@ -200,30 +200,48 @@ ELSE
 --END
 
 --CREATE TABLE #STATUSCODES ([intAccountStatusId] INT PRIMARY KEY, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS)
-DECLARE @STATUSCODES AS TABLE([intAccountStatusId] INT PRIMARY KEY, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS)
+DECLARE @STATUSCODES AS TABLE([intAccountStatusId] INT PRIMARY KEY, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS, [intEntityCustomerId] INT)
 
 IF (@conditionAccountStatus IS NOT NULL AND UPPER(@conditionAccountStatus) = 'BETWEEN' AND ISNULL(@strAccountStatusFrom, '') <> '')
     BEGIN
         SET @AccountStatusFiltered = @OneBit
-        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
-        SELECT [intAccountStatusId], [strAccountStatusCode]
-          FROM dbo.tblARAccountStatus WITH (NOLOCK)
+        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode], [intEntityCustomerId])
+        SELECT S.[intAccountStatusId], S.[strAccountStatusCode], CAS.intEntityCustomerId
+          FROM dbo.tblARAccountStatus S WITH (NOLOCK)
+               INNER JOIN (
+                           SELECT MIN(intAccountStatusId) intAccountStatusId, intEntityCustomerId
+						     FROM tblARCustomerAccountStatus WITH (NOLOCK)
+                            GROUP BY intEntityCustomerId
+                          ) CAS 
+                               ON S.intAccountStatusId = CAS.intAccountStatusId 
          WHERE [strAccountStatusCode] BETWEEN @strAccountStatusFrom AND @strAccountStatusTo
     END
 ELSE IF (@conditionAccountStatus IS NOT NULL AND ISNULL(@strAccountStatusFrom, '') <> '')
     BEGIN
         SET @AccountStatusFiltered = @OneBit
-        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
-        SELECT [intAccountStatusId], [strAccountStatusCode]
-          FROM dbo.tblARAccountStatus WITH (NOLOCK)
+        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode], [intEntityCustomerId])
+        SELECT S.[intAccountStatusId], S.[strAccountStatusCode], CAS.intEntityCustomerId
+          FROM dbo.tblARAccountStatus S WITH (NOLOCK)
+               INNER JOIN (
+                           SELECT MIN(intAccountStatusId) intAccountStatusId, intEntityCustomerId
+						     FROM tblARCustomerAccountStatus WITH (NOLOCK)
+                            GROUP BY intEntityCustomerId
+                          ) CAS 
+                               ON S.intAccountStatusId = CAS.intAccountStatusId 
          WHERE [strAccountStatusCode] = @strAccountStatusFrom
     END
 ELSE
     BEGIN
         SET @AccountStatusFiltered = @ZeroBit
-        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode])
-        SELECT [intAccountStatusId], [strAccountStatusCode]
-          FROM dbo.tblARAccountStatus WITH (NOLOCK)
+        INSERT INTO @STATUSCODES([intAccountStatusId], [strAccountStatusCode], [intEntityCustomerId])
+        SELECT S.[intAccountStatusId], S.[strAccountStatusCode], CAS.intEntityCustomerId
+          FROM dbo.tblARAccountStatus S WITH (NOLOCK)
+               INNER JOIN (
+                           SELECT MIN(intAccountStatusId) intAccountStatusId, intEntityCustomerId
+						     FROM tblARCustomerAccountStatus WITH (NOLOCK)
+                            GROUP BY intEntityCustomerId
+                          ) CAS 
+                               ON S.intAccountStatusId = CAS.intAccountStatusId 
     END
 
 --IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
@@ -249,7 +267,7 @@ IF (@conditionCustomer IS NOT NULL AND UPPER(@conditionCustomer) = 'BETWEEN' AND
                            WHERE strName BETWEEN @strCustomerNameFrom AND @strCustomerNameTo
                           ) E ON C.intEntityId = E.intEntityId
                LEFT OUTER JOIN @STATUSCODES SC
-                               ON C.[intAccountStatusId] = SC.[intAccountStatusId]
+                               ON SC.[intEntityCustomerId] = C.intEntityId
          WHERE (@AccountStatusFiltered = @OneBit AND SC.[intAccountStatusId] IS NOT NULL)
             OR @AccountStatusFiltered = @ZeroBit
 	END
@@ -264,7 +282,7 @@ ELSE IF (@conditionCustomer IS NOT NULL AND ISNULL(@strCustomerNameFrom, '') <> 
                            WHERE strName = @strCustomerNameFrom
                           ) E ON C.intEntityId = E.intEntityId
                LEFT OUTER JOIN @STATUSCODES SC
-                               ON C.[intAccountStatusId] = SC.[intAccountStatusId]
+                               ON SC.[intEntityCustomerId] = C.intEntityId
          WHERE (@AccountStatusFiltered = @OneBit AND SC.[intAccountStatusId] IS NOT NULL)
             OR @AccountStatusFiltered = @ZeroBit
 	END
@@ -278,7 +296,9 @@ ELSE
                             FROM dbo.tblEMEntity WITH (NOLOCK)
                           ) E ON C.intEntityId = E.intEntityId
                LEFT OUTER JOIN @STATUSCODES SC
-                               ON C.[intAccountStatusId] = SC.[intAccountStatusId]
+                               ON SC.[intEntityCustomerId] = C.intEntityId
+         WHERE (@AccountStatusFiltered = @OneBit AND SC.[intAccountStatusId] IS NOT NULL)
+            OR @AccountStatusFiltered = @ZeroBit
 
 	END
 
