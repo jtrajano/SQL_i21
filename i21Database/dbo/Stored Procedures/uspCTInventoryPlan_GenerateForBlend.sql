@@ -496,7 +496,7 @@ BEGIN TRY
 					--		)
 					SET @ForecastedConsumption = (
 							--SELECT ISNULL(SUM(BD.dblQuantity), 0)
-							SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, MIN(IUOM.intUnitMeasureId), @TargetUOMKey, ISNULL(SUM(BD.dblQuantity), 0))
+							SELECT ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, MIN(IUOM.intUnitMeasureId), @TargetUOMKey, ISNULL(SUM(BD.dblQuantity), 0)), 0)
 							FROM tblCTBlendDemand BD
 							JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = BD.intItemUOMId
 							WHERE BD.intItemId = @intItemId
@@ -538,7 +538,7 @@ BEGIN TRY
 				--		)
 				SET @ForecastedConsumption = (
 						--SELECT ISNULL(SUM(BD.dblQuantity), 0)
-						SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, MIN(IUOM.intUnitMeasureId), @TargetUOMKey, ISNULL(SUM(BD.dblQuantity), 0))
+						SELECT ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, MIN(IUOM.intUnitMeasureId), @TargetUOMKey, ISNULL(SUM(BD.dblQuantity), 0)), 0)
 						FROM tblCTBlendDemand BD
 						JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = BD.intItemUOMId
 						WHERE BD.intItemId = @intItemId
