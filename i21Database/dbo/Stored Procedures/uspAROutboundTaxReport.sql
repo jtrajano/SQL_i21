@@ -36,8 +36,8 @@ DECLARE @dtmDateFrom            DATETIME
 	  , @strCustomerNameFrom    NVARCHAR(100)
 	  , @strCustomerNameTo      NVARCHAR(100)
 	  , @conditionCustomer      NVARCHAR(20)
-	  , @strLocationNameFrom    NVARCHAR(100)
-	  , @strLocationNameTo      NVARCHAR(100)
+	  , @strLocationNumberFrom    NVARCHAR(100)
+	  , @strLocationNumberTo      NVARCHAR(100)
 	  , @conditionLocation      NVARCHAR(20)
 	  , @strItemNo              NVARCHAR(100)
 	  , @strCategoryFrom        NVARCHAR(100)
@@ -145,11 +145,11 @@ SELECT @strTypeFrom = REPLACE(ISNULL([from], ''), '''''', '''')
   FROM @temp_xml_table
  WHERE [fieldname] = 'strType'
 
-SELECT @strLocationNameFrom = REPLACE(ISNULL([from], ''), '''''', '''')
-     , @strLocationNameTo   = REPLACE(ISNULL([to], ''), '''''', '''')
+SELECT @strLocationNumberFrom = REPLACE(ISNULL([from], ''), '''''', '''')
+     , @strLocationNumberTo   = REPLACE(ISNULL([to], ''), '''''', '''')
      , @conditionLocation   = [condition]
   FROM @temp_xml_table
- WHERE [fieldname] = 'strLocationName'
+ WHERE [fieldname] = 'strLocationNumber'
 
 SELECT @strCategoryFrom   = REPLACE(ISNULL([from], ''), '''''', '''')
      , @strCategoryTo     = REPLACE(ISNULL([to], ''), '''''', '''')
@@ -290,19 +290,19 @@ ELSE
 --CREATE TABLE #COMPANYLOCATIONS ([intCompanyLocationId] INT PRIMARY KEY, [strCompanyNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS)
 DECLARE @COMPANYLOCATIONS AS TABLE ([intCompanyLocationId] INT PRIMARY KEY, [strCompanyNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS)
 
-IF (@conditionLocation IS NOT NULL AND UPPER(@conditionLocation) = 'BETWEEN' AND ISNULL(@strLocationNameFrom, '') <> '')
+IF (@conditionLocation IS NOT NULL AND UPPER(@conditionLocation) = 'BETWEEN' AND ISNULL(@strLocationNumberFrom, '') <> '')
     BEGIN
         INSERT INTO @COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
         SELECT intCompanyLocationId, strLocationNumber
           FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-         WHERE strLocationName BETWEEN @strLocationNameFrom AND @strLocationNameTo
+         WHERE strLocationNumber BETWEEN @strLocationNumberFrom AND @strLocationNumberTo
     END
-ELSE IF (@conditionLocation IS NOT NULL AND ISNULL(@strLocationNameFrom, '') <> '')
+ELSE IF (@conditionLocation IS NOT NULL AND ISNULL(@strLocationNumberFrom, '') <> '')
     BEGIN
         INSERT INTO @COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
         SELECT intCompanyLocationId, strLocationNumber
           FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-		WHERE strLocationName = @strLocationNameFrom
+		WHERE strLocationNumber = @strLocationNumberFrom
     END
 ELSE
     BEGIN
@@ -323,7 +323,7 @@ IF (@conditionType IS NOT NULL AND UPPER(@conditionType) = 'BETWEEN' AND ISNULL(
         INSERT INTO @TYPES([strType])
         SELECT [strInvoiceSource]
           FROM [dbo].[fnARGetInvoiceSourceList]()
-         WHERE [strInvoiceSource] BETWEEN @strLocationNameFrom AND @strLocationNameTo
+         WHERE [strInvoiceSource] BETWEEN @strLocationNumberFrom AND @strLocationNumberTo
     END
 ELSE IF (@conditionType IS NOT NULL AND ISNULL(@strTypeFrom, '') <> '')
     BEGIN
