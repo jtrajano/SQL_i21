@@ -82,11 +82,10 @@ BEGIN
 
 	DECLARE	
 			@CostAdjustment AS NUMERIC(38, 20)			
-			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
 			,@CurrentCostAdjustment AS NUMERIC(38, 20)
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
-			,@CostAdjustmentPerCb AS NUMERIC(38, 20) 
+			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
 
 			,@t_intInventoryTransactionId AS INT 
 			,@t_intItemId AS INT 
@@ -251,7 +250,7 @@ END
 -- There could be more than one lot record per item received. 
 -- Calculate how much cost adjustment goes for each cost bucket. 
 BEGIN 
-	SELECT	@CostAdjustmentPerCb = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
+	SELECT	@CostAdjustmentPerQty = dbo.fnDivide(@CostAdjustment, SUM(ISNULL(cb.dblStockIn, 0))) 
 	FROM	tblICInventoryActualCost cb
 	WHERE	cb.intItemId = @intItemId
 			AND cb.intItemLocationId = @intItemLocationId
@@ -263,7 +262,7 @@ BEGIN
 			AND cb.strActualCostId = @strActualCostId
 
 	-- If value of cost adjustment is zero, then exit immediately. 
-	IF @CostAdjustmentPerCb IS NULL 
+	IF @CostAdjustmentPerQty IS NULL 
 		RETURN; 
 END 
 
@@ -393,7 +392,7 @@ BEGIN
 							@dblNewAverageCost 
 						ELSE 
 							--(@CostBucketOriginalValue + @CostAdjustment) / @t_dblQty
-							(@CostBucketOriginalValue + @CostAdjustmentPerCb * @t_dblQty) / @t_dblQty
+							(@CostBucketOriginalValue + @CostAdjustmentPerQty * @t_dblQty) / @t_dblQty
 					END 
 				ELSE
 					@CostBucketNewCost
@@ -407,7 +406,7 @@ BEGIN
 								(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
 							ELSE 
 								--@CostAdjustment 
-								@CostAdjustmentPerCb * @t_dblQty
+								@CostAdjustmentPerQty * @t_dblQty
 						END 
 					WHEN 
 						@t_dblQty < 0 
@@ -429,7 +428,7 @@ BEGIN
 				1 = CASE 
 						WHEN ISNULL(@dblNewAverageCost, 0) < 0 THEN 1
 						--WHEN (@CostBucketOriginalValue + @CostAdjustment) < 0 THEN 1
-						WHEN (@CostBucketOriginalValue + @CostAdjustmentPerCb * @t_dblQty) < 0 THEN 1
+						WHEN (@CostBucketOriginalValue + @CostAdjustmentPerQty * @t_dblQty) < 0 THEN 1
 						ELSE 0
 					END 
 			)
@@ -467,7 +466,7 @@ BEGIN
 							ELSE  
 								dbo.fnDivide(
 									--(@CostBucketOriginalValue + @CostAdjustment) 
-									(@CostBucketOriginalValue + @CostAdjustmentPerCb * @t_dblQty)
+									(@CostBucketOriginalValue + @CostAdjustmentPerQty * @t_dblQty)
 									,cb.dblStockIn 
 								) 
 						END 
@@ -642,7 +641,7 @@ BEGIN
 									WHEN @dblNewAverageCost IS NOT NULL THEN 
 										(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
 									ELSE 
-										@CostAdjustmentPerCb * @t_dblQty
+										@CostAdjustmentPerQty * @t_dblQty
 								END 
 							WHEN @t_dblQty < 0 THEN 
 								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
@@ -665,7 +664,7 @@ BEGIN
 								WHEN @dblNewAverageCost IS NOT NULL THEN 
 									(@t_dblQty * @dblNewAverageCost) - (@t_dblQty * @CostBucketOriginalCost) 
 								ELSE 
-									@CostAdjustmentPerCb * @t_dblQty
+									@CostAdjustmentPerQty * @t_dblQty
 							END 
 						WHEN @t_dblQty < 0 THEN 
 							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
