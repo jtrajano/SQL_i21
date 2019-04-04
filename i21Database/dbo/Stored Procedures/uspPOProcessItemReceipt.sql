@@ -158,9 +158,12 @@ BEGIN
 				ON PODetail.intItemId = ItemLocation.intItemId
 				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 				AND PO.intShipToId = ItemLocation.intLocationId
+			INNER JOIN dbo.tblICItem item
+				ON item.intItemId = PODetail.intItemId
 	WHERE	PODetail.intPurchaseId = @poId
 			AND 1 = CASE WHEN dbo.fnIsStockTrackingItem(PODetail.intItemId) = 0 AND @receiveNonInventory = 0 THEN 0 ELSE 1 END
 			AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
+			AND item.strType IN ('Inventory','Non-Inventory','Finished Good','Raw Material')
 	
 	INSERT INTO	@OtherCharges
 	(
