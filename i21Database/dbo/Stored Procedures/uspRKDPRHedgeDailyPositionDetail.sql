@@ -1073,7 +1073,7 @@ BEGIN
 					, strFutureMonth)
 				SELECT @strCommodityCode
 					, strType = 'Price Risk' COLLATE Latin1_General_CI_AS
-					, strContractType = 'PurBasisDelivary' COLLATE Latin1_General_CI_AS
+					, strContractType = 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS
 					, - SUM(dblTotal)
 					, intInventoryReceiptId
 					, strReceiptNumber
@@ -1083,7 +1083,7 @@ BEGIN
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, strCategory
+					, strCategoryCode
 					, intFutureMarketId
 					, strFutMarketName
 					, intFutureMonthId
@@ -1127,7 +1127,7 @@ BEGIN
 					, strCurrency
 					, intItemId
 					, strItemNo
-					, strCategory
+					, strCategoryCode
 					, intFutureMarketId
 					, strFutMarketName
 					, intFutureMonthId
