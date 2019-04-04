@@ -567,16 +567,16 @@ BEGIN
 												, 0)
 						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 OR (i.dtmPostDate IS NULL AND SI.strDestinationWeights <> 'DESTINATION') THEN 1 ELSE 0 END )
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
-						,fmnt.strFutureMonth
-						,strDeliveryDate =  dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
+						,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblCTContractDetail cd INNER JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId =  fmnt.intFutureMonthId WHERE intContractHeaderId = SI.intLineNo)
+						,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
 					FROM vyuRKGetInventoryValuation Inv
 					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
 					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
 					LEFT JOIN vyuICGetInventoryShipmentItem SI ON Inv.intTransactionDetailId = SI.intInventoryShipmentItemId
 					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
 					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
-					LEFT JOIN tblCTContractDetail cd ON cd.intContractHeaderId = SI.intLineNo 
-					LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
+					--LEFT JOIN tblCTContractDetail cd ON cd.intContractHeaderId = SI.intLineNo 
+					--LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
 					WHERE Inv.ysnInTransit = 1  
 						AND Inv.strTransactionType = 'Inventory Shipment'
 						AND C.intCommodityId = @intCommodityId
@@ -598,8 +598,8 @@ BEGIN
 						,Inv.intCategoryId
 						,i.ysnPosted
 						,i.dtmPostDate
-						,fmnt.strFutureMonth
-						,cd.dtmEndDate
+						--,fmnt.strFutureMonth
+						--,cd.dtmEndDate
 						,strOrderNumber
 						,SI.intContractSeq
 						,intOrderId
@@ -607,6 +607,7 @@ BEGIN
 						,SI.intSourceId
 						,Inv.intTransactionDetailId
 						,SI.strDestinationWeights
+						,SI.intLineNo 
 				) tbl
 				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
 			)t
