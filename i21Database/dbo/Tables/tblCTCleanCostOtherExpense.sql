@@ -11,6 +11,7 @@
 	[dblValueInOtherCurrency] NUMERIC(18,6),
 	[intOtherCurrencyId] INT,
 	[dblFX] NUMERIC(18,6),
+	[strComments]  NVARCHAR(500) COLLATE Latin1_General_CI_AS,
 	
 	CONSTRAINT [PK_tblCTCleanCostOtherExpense_intOtherExpenseId] PRIMARY KEY CLUSTERED ([intOtherExpenseId] ASC),
 	CONSTRAINT [FK_tblCTCleanCostOtherExpense_tblCTCleanCost_intCleanCostId] FOREIGN KEY ([intCleanCostId]) REFERENCES [tblCTCleanCost]([intCleanCostId]) ON DELETE CASCADE,

@@ -22,7 +22,7 @@ FROM (
 		, strBrokerageAccount = acc.strAccountNumber
 		, dblGetNoOfContract = CASE WHEN (N'Sell' = ft.[strBuySell]) THEN - (ft.[dblNoOfContract]) ELSE ft.[dblNoOfContract] END
 		, fot.dblContractSize
-		, dblOpenContract = (SELECT CONVERT(DECIMAL, SUM(dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
+		, dblOpenContract = (SELECT CONVERT(DECIMAL, SUM(goc.dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
 		, um.strUnitMeasure
 		, ft.strBuySell
 		, ft.dblPrice
@@ -35,7 +35,9 @@ FROM (
 		, ft.intCommodityId
 		, strBankName
 		, strBankAccountNo
-		, strSelectedInstrumentType = (CASE WHEN intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' ELSE 'OTC' END) COLLATE Latin1_General_CI_AS
+		, strSelectedInstrumentType = (CASE WHEN intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' 
+											WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
+										ELSE 'OTC - Others' END) COLLATE Latin1_General_CI_AS
 		, ft.dtmMaturityDate
 		, strCurrencyExchangeRateType
 		, ft.strFromCurrency

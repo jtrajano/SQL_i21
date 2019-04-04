@@ -9,6 +9,7 @@ BEGIN
 		,UM.strUnitMeasure AS strUOM
 		,I.strItemNo
 		,B.strBillId
+		,I.intOnCostTypeId
 	FROM tblLGLoadCost LC
 	JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 	LEFT JOIN tblEMEntity E ON E.intEntityId = LC.intVendorId

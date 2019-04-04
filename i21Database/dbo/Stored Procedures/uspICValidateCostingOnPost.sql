@@ -156,6 +156,24 @@ BEGIN
 	RETURN -80023
 END 
 
+-- Check for Zero Cost in item location if Allow Zero Cost is No
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END,
+		@strLocationName = CASE WHEN ISNULL(Location.strLocationName, '') = '' THEN '(Item Location id: ' + CAST(ItemLocation.intItemLocationId AS NVARCHAR(10)) + ')' ELSE Location.strLocationName END 
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item ON Errors.intItemId = Item.intItemId
+		INNER JOIN tblICItemLocation ItemLocation ON Errors.intItemLocationId = ItemLocation.intItemLocationId
+		INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
+WHERE	intErrorCode = 80229
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- 'Zero cost is not allowed in %s location of item %s.'
+	EXEC uspICRaiseError 80229, @strLocationName, @strItemNo
+	RETURN -80229
+END 
+
 -- Check for "Discontinued" status
 SELECT @strItemNo = NULL, @intItemId = NULL
 SELECT TOP 1 

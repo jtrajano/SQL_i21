@@ -1,9 +1,7 @@
 ﻿
 CREATE PROCEDURE [dbo].[uspCMGetClearedPayments]
 	@intBankAccountId INT = NULL,
-	@dtmStatementDate AS DATETIME = NULL,
-	@ysnCheckVoid BIT = 0
-
+	@dtmStatementDate AS DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -47,7 +45,6 @@ SELECT	totalCount = ISNULL(COUNT(1), 0)
 FROM	tblCMBankTransaction 
 WHERE	ysnPosted = 1
 		AND ysnClr = 1
-		AND @ysnCheckVoid = (CASE WHEN ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled THEN 1 ELSE 0 END )
 		AND intBankAccountId = @intBankAccountId
 		AND dblAmount <> 0		
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmStatementDate, dtmDate) AS FLOAT)) AS DATETIME)

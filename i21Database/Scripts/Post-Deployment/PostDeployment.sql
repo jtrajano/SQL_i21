@@ -79,11 +79,13 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\38_ReplicationConfigurationTable.sql
 :r .\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql
 :r .\SM\DefaultData\40_DisconnectedReplicationTable.sql 
+:r .\SM\DefaultData\41_TaxReportType.sql 
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
 :r .\SM\1830_Encrypt_Merchant_Password.sql
 :r .\SM\1910_MigrateINCOToFreightTerm.sql
+:r .\SM\1910_UpdateVantivToWorldPay.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -107,6 +109,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\11_ApplianceType.sql
 :r .\TM\DefaultData\12_BudgetCalculation.sql
 :r .\TM\DefaultData\13_GlobalJulianCalendar.sql
+:r .\TM\DefaultData\14_DegreeDayClock.sql
 :r .\TM\Tables\tblTMCOBOLWRITE.sql
 
 ----TM Reports
@@ -146,6 +149,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\4_MigrateLeaseIdFromDeviceToLeaseDeviceTable.sql
 :r .\TM\5_ObsoletingSeasonReset.sql
 :r .\TM\6_SyncStartingNumberAndDispatchId.sql
+:r .\TM\7_GenerateManufacturerFromDevice.sql
 
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
@@ -292,6 +296,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateVendorCreatePostVoucher.sql
 :r .\AP\VoucherPayableDefaultData.sql
 :r .\AP\FixStartingNumbers.sql
+:r .\AP\UpdateOffsetField.sql
+:r .\AP\UpdatePrepayDetailAccount.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -308,6 +314,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\12_StockTypes.sql 
 :r .\IC\13_Add_Default_Edi_Mapping_Template.sql 
 :r .\IC\14_Add_Inventory_Report_Templates.sql 
+:r .\IC\15_Migrate_Old_Receipt_Totals.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -376,6 +383,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PR\Reports\PaycheckMiddle.sql
 :r .\PR\Reports\PaycheckBottom.sql
 
+-- EnergyTrac
+:r .\ET\ETCompanyPreferenceUpdate.sql
 -- Version Update
 :r .\VersionUpdate.sql
 
@@ -513,6 +522,7 @@ print 'BEGIN POST DEPLOYMENT'
 --CCR
 :r .\CCR\SiteDataFix.sql
 :r .\CCR\RemoveCCRObsoleteScreen.sql
+:r .\CCR\ImportFileDefault.sql
 
 --TR
 :r .\TR\RemoveObsoleteScreen.sql
@@ -552,6 +562,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
+-- MB - Meter Billing
+:r .\MB\ImportFileDefault.sql
 
 
 print 'END POST DEPLOYMENT'

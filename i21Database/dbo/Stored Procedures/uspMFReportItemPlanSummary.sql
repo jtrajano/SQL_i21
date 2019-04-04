@@ -84,6 +84,11 @@ BEGIN
 				WHERE strProcessName = @strProcessName
 				)
 
+		IF len(@strBlendAttributeValue) > 0
+		BEGIN
+			SELECT @strBlendAttributeValue = Left(@strBlendAttributeValue, len(@strBlendAttributeValue) - 1)
+		END
+
 		IF @strBlendAttributeValue IS NULL
 			OR @strBlendAttributeValue = ''
 		BEGIN
@@ -243,7 +248,7 @@ BEGIN
 				,II.strItemNo
 				,II.strDescription
 				,CL.strLocationName
-				,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, IU.intItemUOMId, (RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity))) dblMaxPoundsRequired
+				,SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, IU.intItemUOMId, (RI.dblCalculatedQuantity * dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, R.intItemUOMId, (W.dblQuantity - W.dblProducedQuantity))  / R.dblQuantity))) dblMaxPoundsRequired
 				,II.intItemId
 				,0 dblSafetyStockPounds
 				,0 dblUnPackedPounds

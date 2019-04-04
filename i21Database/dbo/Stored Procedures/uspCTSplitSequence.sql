@@ -4,7 +4,8 @@
 	@intUserId					INT,
 	@intExternalId				INT,		
 	@strScreenName				NVARCHAR(100),
-	@intNewContractDetailId		INT OUTPUT
+	@intNewContractDetailId		INT OUTPUT,
+	@intNewContractHeaderid		INT = NULL
 AS
 
 BEGIN TRY
@@ -22,9 +23,9 @@ SET NOCOUNT ON
 		SELECT	@intContractHeaderId	=	intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		SELECT	@dblHeaderQuantity		=	dblQuantity FROM tblCTContractHeader WHERE 	intContractHeaderId = @intContractHeaderId						
 		
-		SELECT	@intNextSequence	=	MAX(intContractSeq) + 1 
+		SELECT	@intNextSequence	=	ISNULL(MAX(intContractSeq),0) + 1 
 		FROM	tblCTContractDetail 
-		WHERE	intContractHeaderId = @intContractHeaderId
+		WHERE	intContractHeaderId = ISNULL(@intNewContractHeaderid, @intContractHeaderId)
 
 		SET @dblQuantityToDecrease = @dblQuantity * -1
 		
@@ -48,7 +49,8 @@ SET NOCOUNT ON
 				dblScheduleQty		=	NULL,
 				intConcurrencyId	=	1,
 				intContractStatusId =	1,
-				intContractSeq		=	@intNextSequence
+				intContractSeq		=	@intNextSequence,
+				intContractHeaderId	=	ISNULL(@intNewContractHeaderid, @intContractHeaderId)
 
 		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',null,@XML OUTPUT							
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@XML,@intNewContractDetailId OUTPUT
@@ -102,6 +104,7 @@ SET NOCOUNT ON
 		SET		dblQuantity	=	@dblHeaderQuantity 
 		FROM	tblCTContractHeader 
 		WHERE 	intContractHeaderId = @intContractHeaderId	
+		AND		@intNewContractHeaderid IS NULL
 		
 END TRY
 

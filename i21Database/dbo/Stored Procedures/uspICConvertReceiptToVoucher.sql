@@ -23,8 +23,8 @@ DECLARE @intEntityVendorId AS INT
 		,@voucherItems AS VoucherPayable
 		,@voucherItemsTax AS VoucherDetailTax
 		--,@voucherItems AS VoucherDetailReceipt 
-		--,@voucherOtherCharges AS VoucherDetailReceiptCharge 
-		--,@voucherDetailClaim AS VoucherDetailClaim
+		,@voucherOtherCharges AS VoucherDetailReceiptCharge 
+		,@voucherDetailClaim AS VoucherDetailClaim
 
 		,@intShipFrom AS INT
 		,@intShipTo AS INT 
@@ -65,7 +65,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 
 		,@intShipFrom = r.intShipFromId
 		,@intShipTo = r.intLocationId
-		,@strVendorRefNo = r.strVendorRefNo
+		,@strVendorRefNo = ISNULL(NULLIF(LTRIM(RTRIM(r.strBillOfLading)), ''), r.strVendorRefNo)
 		,@intCurrencyId = r.intCurrencyId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
@@ -127,7 +127,8 @@ BEGIN
 			,[intShipViaId]						
 			,[intTermId]						
 			,[strBillOfLading]					
-			,[ysnReturn]						
+			,[ysnReturn]
+			,[dtmVoucherDate]
 	)
 	SELECT 
 		GP.[intEntityVendorId]
@@ -179,8 +180,9 @@ BEGIN
 		,GP.[intShipViaId]						
 		,GP.[intTermId]						
 		,GP.[strBillOfLading]					
-		,GP.[ysnReturn]	 
-	FROM dbo.fnICGeneratePayables (@intReceiptId, 1) GP
+		,GP.[ysnReturn]	
+		,GP.dtmDate
+	FROM dbo.fnICGeneratePayables (@intReceiptId,	 1) GP
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 		ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
 	INNER JOIN tblICInventoryReceipt Receipt
@@ -307,7 +309,6 @@ BEGIN
 		--	,@error = @throwedError OUTPUT
 		--	,@billId = @intBillId OUTPUT
 		--	,@voucherDate = @dtmReceiptDate
-
 
 		EXEC [dbo].[uspAPCreateVoucher]
 			@voucherPayables = @voucherItems

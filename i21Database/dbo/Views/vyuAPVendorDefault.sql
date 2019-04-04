@@ -28,6 +28,7 @@ SELECT
 	B.intGLAccountExpenseId,
 	K.strAccountId,
 	B.intBillToId,
+	B.ysnPymtCtrlAlwaysDiscount,
 	CASE WHEN B.intBillToId > 0 THEN C2.strCheckPayeeName ELSE C.strCheckPayeeName END AS strPayTo,
 	intBookId,
 	strBook,

@@ -157,7 +157,7 @@ BEGIN
 		[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
 		[intAccountId]					=	ComPref.intAPClearingGLAccount,
 		[dblDebit]						=	0,
-		[dblCredit]						=	ROUND(A.dblFaceValue,2),
+		[dblCredit]						=	ROUND(A.dblFaceValue, 2),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	'Posted AP Clearing for Retire Stock',

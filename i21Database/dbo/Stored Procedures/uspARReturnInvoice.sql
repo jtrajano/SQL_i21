@@ -396,7 +396,8 @@ END CATCH
 SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 
 UPDATE I 
-SET dblDiscountAvailable = @ZeroDecimal
+SET ysnReturned = 1 
+  , dblDiscountAvailable = @ZeroDecimal
   , dblBaseDiscountAvailable = @ZeroDecimal
 FROM tblARInvoice I
 INNER JOIN (

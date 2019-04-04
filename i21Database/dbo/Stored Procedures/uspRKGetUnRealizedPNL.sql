@@ -87,7 +87,7 @@ BEGIN TRY
 		, intContractHeaderId INT
 		, strContractType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intContractBasisId INT
+		, intFreightTermId INT
 		, intTransactionType INT
 		, strTransaction NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strTransactionType NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -239,7 +239,7 @@ BEGIN TRY
 		, intContractHeaderId
 		, strContractType
 		, strContractNumber
-		, intContractBasisId
+		, intFreightTermId
 		, intTransactionType
 		, strTransaction
 		, strTransactionType
@@ -338,7 +338,7 @@ BEGIN TRY
 		, intContractHeaderId						= CH.intContractHeaderId
 		, strContractType							= TP.strContractType
 		, strContractNumber							= CH.strContractNumber
-		, intContractBasisId						= CH.intContractBasisId
+		, intFreightTermId						= CH.intFreightTermId
 		, intTransactionType						= 1
 		, strTransaction							= '1.Contract' COLLATE Latin1_General_CI_AS
 		, strTransactionType						= ('Contract(' + CASE WHEN CH.intContractTypeId=1 THEN 'P'
@@ -467,7 +467,7 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 	LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
 	LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
-	LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+	LEFT JOIN tblSMFreightTerms				CB				 ON  CB.intFreightTermId			 = CH.intFreightTermId
 	LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 	LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 	JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
@@ -490,7 +490,7 @@ BEGIN TRY
 		,intContractHeaderId						= CH.intContractHeaderId
 		,strContractType							= TP.strContractType
 		,strContractNumber							= CH.strContractNumber
-		,intContractBasisId							= CH.intContractBasisId
+		,intFreightTermId							= CH.intFreightTermId
 		,intTransactionType							= 2
 		,strTransaction								= '2.In-transit' COLLATE Latin1_General_CI_AS
 		,strTransactionType							= 'In-transit(P)' COLLATE Latin1_General_CI_AS
@@ -628,7 +628,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
 		LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
-		LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms				CB				 ON  CB.intFreightTermId			 = CH.intFreightTermId
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
@@ -664,7 +664,7 @@ BEGIN TRY
 		,intContractHeaderId						= CH.intContractHeaderId
 		,strContractType							= TP.strContractType
 		,strContractNumber							= CH.strContractNumber
-		,intContractBasisId							= CH.intContractBasisId
+		,intFreightTermId							= CH.intFreightTermId
 		,intTransactionType							= 5
 		,strTransaction								= '5.Delivered Not Invoiced' COLLATE Latin1_General_CI_AS
 		,strTransactionType							= 'Delivered Not Invoiced (S)' COLLATE Latin1_General_CI_AS
@@ -802,7 +802,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
 		LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
-		LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms				CB				 ON  CB.intFreightTermId			 = CH.intFreightTermId
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
@@ -839,7 +839,7 @@ BEGIN TRY
 		,intContractHeaderId						= CH.intContractHeaderId
 		,strContractType							= TP.strContractType
 		,strContractNumber							= CH.strContractNumber
-		,intContractBasisId							= CH.intContractBasisId
+		,intFreightTermId							= CH.intFreightTermId
 		,intTransactionType							= 5
 		,strTransaction								= '5.Delivered Not Invoiced' COLLATE Latin1_General_CI_AS
 		,strTransactionType							= 'Delivered Not Invoiced (P)' COLLATE Latin1_General_CI_AS
@@ -994,7 +994,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
 		LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
-		LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms				CB				 ON  CB.intFreightTermId			 = CH.intFreightTermId
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
@@ -1029,7 +1029,7 @@ BEGIN TRY
 		,intContractHeaderId						= CH.intContractHeaderId
 		,strContractType							= TP.strContractType
 		,strContractNumber							= CH.strContractNumber
-		,intContractBasisId							= CH.intContractBasisId
+		,intFreightTermId							= CH.intFreightTermId
 		,intTransactionType							= 2
 		,strTransaction								= '2.In-transit' COLLATE Latin1_General_CI_AS
 		,strTransactionType							= ('In-transit('+CASE WHEN  L.intPurchaseSale =2 THEN 'S' ELSE 'P' END +')') COLLATE Latin1_General_CI_AS
@@ -1170,7 +1170,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
 		LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
-		LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms				CB				 ON  CB.intFreightTermId			 = CH.intFreightTermId
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
@@ -1203,7 +1203,7 @@ BEGIN TRY
 		,intContractHeaderId						= CH.intContractHeaderId
 		,strContractType							= TP.strContractType
 		,strContractNumber							= CH.strContractNumber
-		,intContractBasisId							= CH.intContractBasisId
+		,intFreightTermId							= CH.intFreightTermId
 		,intTransactionType							= 2
 		,strTransaction								= '2.In-transit' COLLATE Latin1_General_CI_AS
 		,strTransactionType							= ('In-transit('+CASE WHEN  L.intPurchaseSale =2 THEN 'S' ELSE 'P' END +')') COLLATE Latin1_General_CI_AS
@@ -1344,7 +1344,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
 		LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
-		LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms				CB				 ON  CB.intFreightTermId			 = CH.intFreightTermId
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
@@ -1378,7 +1378,7 @@ BEGIN TRY
 		,intContractHeaderId						= CH.intContractHeaderId
 		,strContractType							= TP.strContractType
 		,strContractNumber							= CH.strContractNumber
-		,intContractBasisId							= CH.intContractBasisId
+		,intFreightTermId							= CH.intFreightTermId
 		,intTransactionType							= 3
 		,strTransaction								= '3.Inventory' COLLATE Latin1_General_CI_AS
 		,strTransactionType							= 'Inventory (P)' COLLATE Latin1_General_CI_AS
@@ -1530,7 +1530,7 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM					BASISUOM		 ON	BASISUOM.intItemUOMId			 = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure				BUOM			 ON	BUOM.intUnitMeasureId			 = BASISUOM.intUnitMeasureId
 		LEFT JOIN tblEMEntity					SP				 ON  SP.intEntityId					 = CH.intSalespersonId
-		LEFT JOIN tblCTContractBasis			CB				 ON  CB.intContractBasisId			 = CH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms				CB				 ON  CB.intFreightTermId			 = CH.intFreightTermId
 		LEFT JOIN tblSMTerm						Term			 ON  Term.intTermID					 = CH.intTermId
 		LEFT JOIN tblCTWeightGrade				WG				 ON  WG.intWeightGradeId			 = CH.intWeightId
 		JOIN tblICItemUOM						ItemUOM			 ON ItemUOM.intItemUOMId		     = CD.intItemUOMId
@@ -1566,7 +1566,7 @@ BEGIN TRY
 		,intContractHeaderId						= NULL
 		,strContractType							= 'Purchase' COLLATE Latin1_General_CI_AS
 		,strContractNumber							= NULL
-		,intContractBasisId							= NULL
+		,intFreightTermId							= NULL
 		,intTransactionType							=  4
 		,strTransaction								= '4.Inventory(FG)' COLLATE Latin1_General_CI_AS
 		,strTransactionType							= 'Inventory (FG)' COLLATE Latin1_General_CI_AS								 
@@ -1744,7 +1744,7 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CC.intItemUOMId
 	LEFT JOIN tblSMCurrency	FCY ON FCY.intCurrencyID = CC.intCurrencyId
 	LEFT JOIN tblRKM2MConfiguration M2M ON M2M.intItemId = CC.intItemId 
-								AND M2M.intContractBasisId = RealizedPNL.intContractBasisId 
+								AND M2M.intFreightTermId = RealizedPNL.intFreightTermId
 	WHERE Item.strCostType <> 'Commission'
 	
 
@@ -1888,7 +1888,7 @@ BEGIN TRY
 												  CD.intItemId
 												 ,CD.intFutureMarketUnitMeasureId												
 												 ,CD.intPriceUnitMeasureId												
-												 ,[dbo].[fnRKGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice)
+												 ,[dbo].[fnRKGetSequencePrice](CD.intContractDetailId,CD.dblSettlementPrice,getdate())
 												)
 		/ CASE WHEN ISNULL(Detail.dblFXPrice,0) = 0 THEN ISNULL(EX.dblRate,1) ELSE ISNULL(Detail.dblRate,1) END
 		/ CASE WHEN FCY.ysnSubCurrency = 1 THEN FCY.intCent ELSE 1 END	
@@ -1987,7 +1987,7 @@ BEGIN TRY
 	  ,intContractHeaderId				
 	  ,strContractType					
 	  ,strContractNumber					
-	  ,intContractBasisId					
+	  ,intFreightTermId					
 	  ,intTransactionType					
 	  ,strTransaction						
 	  ,strTransactionType					
@@ -2094,4 +2094,3 @@ BEGIN CATCH
  RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
      
 END CATCH
-

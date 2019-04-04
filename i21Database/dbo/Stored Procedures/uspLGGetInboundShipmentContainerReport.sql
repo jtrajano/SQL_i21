@@ -64,9 +64,9 @@ BEGIN
 			,LDV.strInboundPricingType
 			,LDV.strInboundTaxGroup
 			,CASE 
-				WHEN ISNULL(CD.strContractItemName, '') = ''
+				WHEN ISNULL(ITM.strContractItemName, '') = ''
 					THEN LDV.strItemDescription
-				ELSE CD.strContractItemName
+				ELSE ITM.strContractItemName
 				END AS strItemDescription
 			,LDV.strItemNo
 			,LDV.strItemUOM
@@ -143,16 +143,16 @@ BEGIN
 			,LDV.strWeightItemUOM
 			,LDV.strZipCode
 			,LC.dblQuantity AS dblContainerContractQty
-			,CD.strCustomerContract AS strCustomerContractNo
-			,CD.dtmContractDate
-			,CD.strContractBasis
-			,CD.strContractBasisDescription
-			,CD.strApprovalBasis
+			,CH.strCustomerContract AS strCustomerContractNo
+			,CH.dtmContractDate
+			,CB.strContractBasis
+			,strContractBasisDescription = CB.strFreightTerm
+			,AB.strApprovalBasis
 			,LC.dblGrossWt AS dblContainerGrossWt
 			,LC.dblNetWt AS dblContainerNetWt
 			,LC.dblTareWt AS dblContainerTareWt
 			,LDV.strPContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberWithSeq
-			,CD.strCommodityCode
+			,IC.strCommodityCode
 			,LDCL.dblQuantity AS dblContainerLinkQty
 			,LDCL.dblLinkGrossWt AS dblContainerLinkGrossWt
 			,LDCL.dblLinkNetWt AS dblContainerLinkNetWt
@@ -162,7 +162,12 @@ BEGIN
 		JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
-		LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = LDV.intPContractDetailId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LDV.intPContractDetailId
+		LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		LEFT JOIN tblCTApprovalBasis AB ON AB.intApprovalBasisId = CH.intApprovalBasisId
+		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
+		LEFT JOIN tblICCommodity IC ON IC.intCommodityId = CH.intCommodityId
+		LEFT JOIN tblICItemContract ITM ON ITM.intItemContractId = CD.intItemContractId
 		WHERE LDV.strLoadNumber = @xmlParam
 	END
 	ELSE
@@ -182,7 +187,7 @@ BEGIN
 			,LDCL.dblQuantity AS dblContainerContractQty
 			,CH.strCustomerContract AS strCustomerContractNo
 			,CH.dtmContractDate
-			,CB.strContractBasis
+			,strContractBasis = CB.strContractBasis
 			,CB.strDescription strContractBasisDescription
 			,AB.strApprovalBasis
 			,(
@@ -216,7 +221,7 @@ BEGIN
 		JOIN vyuLGLoadDetailViewSearch LDV ON LDV.intLoadDetailId = LDCL.intLoadDetailId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LDV.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN tblCTApprovalBasis AB ON AB.intApprovalBasisId = CH.intApprovalBasisId
 		LEFT JOIN tblICCommodity IC ON IC.intCommodityId = CH.intCommodityId
 		LEFT JOIN tblICItemContract ITM ON ITM.intItemContractId = CD.intItemContractId

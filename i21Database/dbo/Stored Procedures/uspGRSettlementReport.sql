@@ -118,6 +118,9 @@ DECLARE @Settlement AS TABLE
 	,blbHeaderLogo				    VARBINARY(max)
 	,intEntityId						INT
 	,strDeliveryDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strDeliverySheetNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strSplitDescription					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strDSSplitNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 )
 	
 DECLARE @tblPayment AS TABLE 
@@ -270,6 +273,9 @@ BEGIN
 				,blbHeaderLogo
 				,intEntityId
 				,strDeliveryDate
+				,strDeliverySheetNumber
+				,strSplitDescription
+				,strDSSplitNumber
 			)
 			/*-------------------------------------------------------
 			*********NON-STORAGE DISTRIBUTION FROM SCALE*************
@@ -428,6 +434,9 @@ BEGIN
 				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
 			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
+				,strDeliverySheetNumber			= NULL
+				,strSplitDescription			= NULL
+				,strDSSplitNumber				= NULL
 			FROM tblCMBankTransaction BNKTRN
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -687,6 +696,9 @@ BEGIN
 			   ,blbHeaderLogo				 	= @companyLogo
 			   ,VENDOR.[intEntityId]
 			   ,strDeliveryDate				 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
+			   ,strDeliverySheetNumber			= NULL
+				,strSplitDescription			= NULL
+				,strDSSplitNumber				= NULL
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -958,7 +970,10 @@ BEGIN
 												END
 				,blbHeaderLogo					= @companyLogo
 			   	,VENDOR.[intEntityId]
-			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
+			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(CS.dtmDeliveryDate)
+				,strDeliverySheetNumber			= DS.strDeliverySheetNumber
+				,strSplitDescription			= DS.strSplitDescription
+				,strDSSplitNumber				= ES.strSplitNumber
 			FROM tblCMBankTransaction BNKTRN	
 			JOIN tblAPPayment PYMT 
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
@@ -996,6 +1011,8 @@ BEGIN
 			JOIN tblSCDeliverySheet DS 
 				ON DS.intDeliverySheetId = SC.intDeliverySheetId 
 					AND CS.intDeliverySheetId = SC.intDeliverySheetId
+			LEFT JOIN tblEMEntitySplit ES
+				ON ES.intSplitId = DS.intSplitId
 			LEFT JOIN (
 						SELECT 
 							A.intBillId

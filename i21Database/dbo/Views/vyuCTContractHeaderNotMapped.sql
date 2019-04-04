@@ -71,7 +71,9 @@ AS
 						PO.intNoOfDays				AS	intPositionNoOfDays,
 						BK.strBook,
 						SB.strSubBook,
-						MR.strCurrency				AS	strMarketMainCurrency
+						MR.strCurrency				AS	strMarketMainCurrency,
+						FT.intFreightTermId,
+						FT.strFreightTerm
 
 				FROM	tblCTContractHeader					CH	
 				
@@ -123,5 +125,7 @@ AS
 				JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						LEFT
 
 				JOIN	tblCTPriceFixation					PF	ON	CH.intContractHeaderId				=		PF.intContractHeaderId 
-																AND CH.ysnMultiplePriceFixation			=		1							
+																AND CH.ysnMultiplePriceFixation			=		1									LEFT
+				
+				JOIN	tblSMFreightTerms					FT	ON	FT.intFreightTermId					=		CH.intFreightTermId
 			)t

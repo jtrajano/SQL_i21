@@ -116,7 +116,7 @@ END
 	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = TL.intShipViaId
 	LEFT JOIN vyuTRGetLoadReceiptToDistribution TLD on TLD.intLoadHeaderId = TR.intLoadHeaderId AND TLD.intLoadReceiptId = TR.intLoadReceiptId AND TLD.intItemId = TR.intItemId
 	LEFT JOIN vyuTRGetLoadReceiptToBlendIngredient BID ON BID.intLoadHeaderId = TR.intLoadHeaderId and BID.intLoadReceiptId = TR.intLoadReceiptId and BID.intItemId = TR.intItemId
-	WHERE	TL.intLoadHeaderId = @intLoadHeaderId
+	WHERE	TL.intLoadHeaderId = @intLoadHeaderId --333333
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
 			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
@@ -129,6 +129,8 @@ END
 		,intShipFromId
 		,intSourceType
 		,intTaxGroupId
+	
+
 
 	-- Insert Entries to Stagging table that needs to processed to Transport Load
 	INSERT into @ReceiptStagingTable(
@@ -205,7 +207,8 @@ END
 		,strChargesLink			= strChargesLink
 	FROM #tmpReceipts
 
-	SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
+	--SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
+	SELECT TOP 1 @intFreightItemId = intFreightItemId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId 
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 
 	SELECT TOP 1 @FreightUOMId = intCostUOMId FROM tblICItem WHERE intItemId = @intFreightItemId

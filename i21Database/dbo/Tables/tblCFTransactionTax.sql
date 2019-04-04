@@ -5,6 +5,7 @@
     [dblTaxCalculatedAmount] NUMERIC (18, 6) NULL,
     [intTaxCodeId]           INT             NOT NULL,
     [dblTaxRate]             NUMERIC (18, 6) NULL,
+	[ysnTaxExempt]			 BIT			 NULL,
     [intConcurrencyId]       INT             CONSTRAINT [DF_tblCFTransactionTaxId_intConcurrencyId] DEFAULT ((1)) NOT NULL,
     CONSTRAINT [PK_tblCFTransactionTaxId] PRIMARY KEY CLUSTERED ([intTransactionTaxId] ASC),
     CONSTRAINT [FK_tblCFTransactionTax_tblCFTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblCFTransaction] ([intTransactionId]) ON DELETE CASCADE,

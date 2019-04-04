@@ -1809,7 +1809,7 @@ SELECT
 		join tblSMCompanyLocation L on L.strLocationNumber = ptpay_ivc_loc_no collate SQL_Latin1_General_CP1_CS_AS 
 		join tblARInvoice I on P1.ptpay_invc_no collate SQL_Latin1_General_CP1_CS_AS = I.strInvoiceOriginId 
 			and I.intEntityCustomerId = c.intEntityId and I.intCompanyLocationId = L.intCompanyLocationId
-		join tblARPayment P on [strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
+		join tblARPayment P on P.[strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
 		--	and P.[strNotes]  = ptpay_ref_no collate SQL_Latin1_General_CP1_CS_AS 
 		and P.[strNotes]  = ptpay_cus_no+CONVERT(CHAR(3),ptpay_loc_no)+CONVERT(CHAR(3),ptpay_no) collate SQL_Latin1_General_CP1_CS_AS 
 
@@ -1859,7 +1859,7 @@ SELECT
 		join tblSMCompanyLocation L on L.strLocationNumber = ptpay_ivc_loc_no collate SQL_Latin1_General_CP1_CS_AS 
 		join tblARInvoice I on P1.ptpay_invc_no collate SQL_Latin1_General_CP1_CS_AS = I.strInvoiceOriginId 
 			and I.intEntityCustomerId = c.intEntityId and I.intCompanyLocationId = L.intCompanyLocationId
-	join tblARPayment P on [strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
+		join tblARPayment P on P.[strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
 			and P.[strNotes]  = ptpay_cus_no+CONVERT(CHAR(3),ptpay_loc_no)+CONVERT(CHAR(3),ptpay_no) collate SQL_Latin1_General_CP1_CS_AS 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
@@ -1906,7 +1906,7 @@ SELECT
 		join tblSMCompanyLocation L on L.strLocationNumber = ptcrd_loc_no collate SQL_Latin1_General_CP1_CS_AS 
 		join tblARInvoice I on P1.ptpay_ref_no collate SQL_Latin1_General_CP1_CS_AS = I.strInvoiceOriginId 
 			and I.intEntityCustomerId = c.intEntityId and I.intCompanyLocationId = L.intCompanyLocationId 
-			join tblARPayment P on [strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
+		join tblARPayment P on P.[strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
 			and P.[strNotes]  = ptpay_cus_no+CONVERT(CHAR(3),ptpay_loc_no)+CONVERT(CHAR(3),ptpay_no) collate SQL_Latin1_General_CP1_CS_AS 
 		LEFT OUTER JOIN
 			[tblGLCOACrossReference] GL
@@ -2022,7 +2022,7 @@ SELECT
 													ELSE
 														NULL 
 												END)
-			join tblARPayment P on [strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
+		join tblARPayment P on P.[strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
 			and P.[strNotes]  = ptpay_cus_no+CONVERT(CHAR(3),ptpay_loc_no)+CONVERT(CHAR(3),ptpay_no) collate SQL_Latin1_General_CP1_CS_AS 
 		LEFT OUTER JOIN
 			[tblGLCOACrossReference] GL
@@ -2074,7 +2074,7 @@ SELECT
 													ELSE
 														NULL 
 												END)
-			join tblARPayment P on [strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS 
+		join tblARPayment P on P.[strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS 
 			and P.[strNotes]  = ptpay_cus_no+CONVERT(CHAR(3),ptpay_loc_no)+CONVERT(CHAR(3),ptpay_no) collate SQL_Latin1_General_CP1_CS_AS 
 
 		LEFT OUTER JOIN
@@ -2123,7 +2123,7 @@ SELECT
 		join tblARInvoice I on P1.ptpay_invc_no collate SQL_Latin1_General_CP1_CS_AS = I.strInvoiceOriginId 
 			and I.intEntityCustomerId = c.intEntityId and I.intCompanyLocationId = L.intCompanyLocationId
 			AND I.strComments = ''SERVICE CHARGES''	
-		join tblARPayment P on [strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
+		join tblARPayment P on P.[strPaymentInfo] = ltrim(rtrim(P1.[ptpay_invc_no])) COLLATE Latin1_General_CI_AS
 		and P.[strNotes]  = ptpay_cus_no+CONVERT(CHAR(3),ptpay_loc_no)+CONVERT(CHAR(3),ptpay_no) collate SQL_Latin1_General_CP1_CS_AS 
 		LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL

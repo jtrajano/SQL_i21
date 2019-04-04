@@ -131,31 +131,32 @@ BEGIN
 		,[dblForeignRate]				=	P.dblExchangeRate
 		,[strRateType]					=	rateType.strCurrencyExchangeRateType
 	FROM (
-	SELECT		
-			tmpSummaryPayment.intPaymentId
-			,ROUND(SUM([dblCredit]),2) as [dblCredit]
-			,ROUND(SUM([dblCreditForeign]),2) as [dblCreditForeign]	
-	FROM
-	(
-		SELECT		DISTINCT
-					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	CASE WHEN A.dblExchangeRate != 1 THEN CAST(
-														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
-															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
-															paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1) 
-														AS DECIMAL(18,6)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
-														ELSE
-															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END,
-					[dblCreditForeign]				=	
-														CASE WHEN A.dblExchangeRate != 1 THEN 
-														CAST(
-														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
-															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
-															paymentDetail.dblPayment, voucher.dblTotal)
-														AS DECIMAL(18,6)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
-														ELSE
-															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END												
-				
+		SELECT		
+				tmpSummaryPayment.intPaymentId
+				,ROUND(SUM([dblCredit]),2) as [dblCredit]
+				,ROUND(SUM([dblCreditForeign]),2) as [dblCreditForeign]	
+		FROM
+		(
+			SELECT		--DISTINCT
+						[intPaymentId]					=	A.intPaymentId,
+						[dblCredit]	 					=	--CASE WHEN A.dblExchangeRate != 1 THEN 
+															CAST(
+															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+																paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1) 
+															AS DECIMAL(18,6)) 
+																* (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END),
+															-- ELSE
+															-- 	CAST(A.dblAmountPaid AS DECIMAL(18,2)) END,
+						[dblCreditForeign]				=	--CASE WHEN A.dblExchangeRate != 1 THEN 
+															CAST(
+															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+																paymentDetail.dblPayment, voucher.dblTotal)
+															AS DECIMAL(18,6)) * (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END)
+															-- ELSE
+															-- 	CAST(A.dblAmountPaid AS DECIMAL(18,2)) END												
+					
 			FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
 			-- INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON paymentDetail.intBillId = paymentForex.intBillId
@@ -172,41 +173,42 @@ BEGIN
 			-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId IS NULL
-			GROUP BY 
-			A.intPaymentId, 
-			A.dblAmountPaid,
-			Details.dblTotal, 
-			voucher.dblTotal,
-			withHoldData.dblWithholdPercent,
-			A.ysnPrepay , 
-			A.dblWithheld,
-			paymentDetail.dblPayment, 
-			paymentDetail.dblWithheld,
-			paymentDetail.dblDiscount,
-			intTransactionType , 
-			A.dblExchangeRate
-			) AS tmpSummaryPayment
-			GROUP BY tmpSummaryPayment.intPaymentId
-			UNION ALL
-			SELECT		DISTINCT
-					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
-					[dblCreditForeign]				=	paymentDetail.dblPayment
-			FROM	[dbo].tblAPPayment A 
-			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
-			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
+			-- GROUP BY 
+			-- A.intPaymentId, 
+			-- A.dblAmountPaid,
+			-- Details.dblTotal, 
+			-- voucher.dblTotal,
+			-- withHoldData.dblWithholdPercent,
+			-- A.ysnPrepay , 
+			-- A.dblWithheld,
+			-- paymentDetail.dblPayment, 
+			-- paymentDetail.ysnOffset, 
+			-- paymentDetail.dblWithheld,
+			-- paymentDetail.dblDiscount,
+			-- intTransactionType , 
+			-- A.dblExchangeRate
+		) AS tmpSummaryPayment
+		GROUP BY tmpSummaryPayment.intPaymentId
+		-- UNION ALL
+		-- SELECT		DISTINCT
+		-- 		[intPaymentId]					=	A.intPaymentId,
+		-- 		[dblCredit]	 					=	CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
+		-- 		[dblCreditForeign]				=	paymentDetail.dblPayment
+		-- FROM	[dbo].tblAPPayment A 
+		-- INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+		-- WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+		-- AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
 
-			UNION ALL
-			SELECT		DISTINCT
-					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
-					[dblCreditForeign]				=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
-			FROM	[dbo].tblAPPayment A 
-			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
-			INNER JOIN tblARInvoice E ON E.intInvoiceId = paymentDetail.intInvoiceId
-			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
+		UNION ALL
+		SELECT		DISTINCT
+				[intPaymentId]					=	A.intPaymentId,
+				[dblCredit]	 					=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
+				[dblCreditForeign]				=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
+		FROM	[dbo].tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+		INNER JOIN tblARInvoice E ON E.intInvoiceId = paymentDetail.intInvoiceId
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
 	)MainQuery	
 	INNER JOIN tblAPPayment P on P.intPaymentId = MainQuery.intPaymentId
 	INNER JOIN tblAPVendor C ON P.intEntityVendorId = C.[intEntityId]
@@ -410,10 +412,21 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
-														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-														- B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherRate.dblExchangeRate,0),1))
-											AS DECIMAL(18,2))) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+													(
+														CASE WHEN B.intPayScheduleId > 0 THEN B.dblPayment + B.dblDiscount
+															ELSE
+															dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+															- B.dblInterest, voucher.dblTotal)
+															END
+													)
+														*  ISNULL(NULLIF(voucherRate.dblExchangeRate,0),1))
+											AS DECIMAL(18,2))) * (
+																CASE WHEN (voucher.intTransactionType NOT IN (1,2,13,14) AND A.ysnPrepay = 0)
+																			OR
+																		  (voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 1)
+																		 THEN -1 
+																		 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -438,11 +451,22 @@ BEGIN
 		[intConcurrencyId]				=	1,
 		[dblDebitForeign]				=	CAST(
 												SUM(
-													dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
-													+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-													- B.dblInterest, voucher.dblTotal))
+													(
+														CASE WHEN B.intPayScheduleId > 0 THEN B.dblPayment + B.dblDiscount
+															ELSE
+															dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
+															- B.dblInterest, voucher.dblTotal)
+															END
+													)
+												)
 											AS DECIMAL(18,2))
-											* (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),      
+											* (
+												CASE WHEN (voucher.intTransactionType NOT IN (1,2,13, 14) AND A.ysnPrepay = 0)
+															OR
+															(voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 1)
+															THEN -1 
+															ELSE 1 END),      
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
@@ -465,6 +489,7 @@ BEGIN
 	rateType.strCurrencyExchangeRateType,
 	rateType.intCurrencyExchangeRateTypeId,
 	voucher.intTransactionType,
+	voucher.ysnPrepayHasPayment,
 	--voucherDetail.dblRate,
 	voucherRate.dblExchangeRate,
 	B.intBillId,

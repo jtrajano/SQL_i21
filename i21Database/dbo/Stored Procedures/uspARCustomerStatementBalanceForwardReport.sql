@@ -52,6 +52,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @filter								AS NVARCHAR(MAX)	= ''
 	  , @intWriteOffPaymentMethodId			AS INT				= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULL
+		, @ysnStretchLogo							AS BIT	= 0
 
 DECLARE @temp_aging_table TABLE(
      [strCustomerName]          NVARCHAR(100)
@@ -175,6 +176,9 @@ SET @dtmDateFromLocal					= DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 SET @strDateTo							= ''''+ CONVERT(NVARCHAR(50),@dtmDateToLocal, 110) + ''''
 SET @strDateFrom						= ''''+ CONVERT(NVARCHAR(50),@dtmDateFromLocal, 110) + ''''
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
+
+SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo
+FROM tblARCompanyPreference WITH (NOLOCK)
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
@@ -459,7 +463,7 @@ INNER JOIN (
 	SELECT PD.intPaymentId
 	     , PD.intInvoiceId
 		 , I.strInvoiceNumber
-	     , dblPayment = SUM(PD.dblPayment) + SUM(PD.dblDiscount) - SUM(PD.dblInterest) 
+	     , dblPayment = SUM(PD.dblPayment) + SUM(PD.dblDiscount) + SUM(PD.dblWriteOffAmount) - SUM(PD.dblInterest) 
 		 , I.dblInvoiceTotal
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
@@ -474,7 +478,7 @@ INNER JOIN (
 	GROUP BY intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal	
 ) PD ON P.intPaymentId = PD.intPaymentId
 LEFT JOIN (
-	SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
+	SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)
 			, intInvoiceId 
 	FROM tblARPaymentDetail PD WITH (NOLOCK) 
 	INNER JOIN (
@@ -572,7 +576,7 @@ FROM vyuARCustomerSearch C
 			) INV (strTicketNumber)
 		) SCALETICKETS
 		LEFT JOIN (
-			SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) - SUM(dblInterest)
+			SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)
 				 , intInvoiceId 
 			FROM tblARPaymentDetail PD WITH (NOLOCK) 
 			INNER JOIN (
@@ -1047,6 +1051,11 @@ LEFT JOIN @temp_aging_table AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 ORDER BY MAINREPORT.dtmDate
+
+UPDATE tblARCustomerStatementStagingTable
+SET ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
+WHERE intEntityUserId = @intEntityUserIdLocal
+	AND strStatementFormat = 'Balance Forward'
 
 IF @ysnPrintFromCFLocal = 0
 	BEGIN

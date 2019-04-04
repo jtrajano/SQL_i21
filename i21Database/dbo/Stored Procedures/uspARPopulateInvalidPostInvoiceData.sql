@@ -634,6 +634,30 @@ BEGIN
 		ISNULL(I.[intPeriodsToAccrue],0) > 1  
 		AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(I.[intPeriodsToAccrue],1) - 1), ISNULL(I.[dtmPostDate], I.[dtmDate]))), @ZeroBit) = @ZeroBit
 
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Payment Method
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Check Number is required for Cash transaction type and Check payment method.'
+	FROM 
+		#ARPostInvoiceHeader I
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblSMPaymentMethod SM ON INV.intPaymentMethodId = SM.intPaymentMethodID	
+	WHERE SM.strPaymentMethod = 'Check'
+	  AND INV.strTransactionType = 'Cash'
+	  AND ISNULL(INV.strPaymentInfo, '') = ''
 
 	--INSERT INTO @returntable(
 	--	 [intInvoiceId]
@@ -1561,6 +1585,7 @@ BEGIN
 			AND I.[intContractDetailId] = CTCD.[intContractDetailId] 
 	WHERE
 		I.[strItemType] <> 'Other Charge'
+		AND I.strTransactionType <> 'Credit Memo'
 		AND I.[dblPrice] = @ZeroDecimal			
 		AND CTCD.[strPricingType] <> 'Index'
 		AND ISNULL(I.[intLoadDetailId],0) = 0
@@ -1599,6 +1624,7 @@ BEGIN
 	WHERE
 		I.[dblUnitPrice] <> @ZeroDecimal				
 		AND I.[strItemType] <> 'Other Charge'
+		AND I.strTransactionType <> 'Credit Memo'
 		AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(I.[dblUnitPrice], @ZeroDecimal) AS MONEY)
 		AND ARCC.[strPricingType] <> 'Index'
 		AND ISNULL(I.[intLoadDetailId],0) = 0

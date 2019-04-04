@@ -6,8 +6,8 @@ CREATE PROCEDURE [dbo].[uspGLPostJournal]
 	@strJournalType		AS NVARCHAR(30)		= '',
 	@intEntityId		AS INT				= 1,
 	@applyCurrentRate	AS BIT				= 1,
-	@successfulCount	AS INT				= 0 OUTPUT
-	
+	@successfulCount	AS INT				= 0 OUTPUT,
+	@ysnAudit			AS BIT				= 0	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -198,7 +198,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dblForeignRate]		= dblDebitRate
 			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
 			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
-			,[dtmDate]				= ISNULL(B.[dtmDate], @currentDateTime)
+			,[dtmDate]				= 
+										CASE 
+											WHEN @ysnAudit = 1 THEN COALESCE(A.dtmDate, B.[dtmDate], @currentDateTime) 
+											ELSE ISNULL(B.[dtmDate], @currentDateTime)
+										END 
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= B.intCurrencyId
@@ -279,7 +283,11 @@ ELSE
 			,[dblCreditForeign]		
 			,[dblDebitUnit]			= ISNULL(A.[dblDebitUnit], 0)
 			,[dblCreditUnit]		= ISNULL(A.[dblCreditUnit], 0)
-			,[dtmDate]				= ISNULL(B.[dtmDate], @currentDateTime)
+			,[dtmDate]				= 
+									CASE 
+										WHEN @ysnAudit = 1 THEN COALESCE(A.dtmDate, B.[dtmDate], @currentDateTime) 
+										ELSE ISNULL(B.[dtmDate], @currentDateTime)
+									END 				
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]

@@ -135,7 +135,7 @@
 [intBookId] INT NULL,
 [intSubBookId] INT NULL,
 [intLoadRefId] INT NULL,
-
+[ysnLoadBased] BIT NULL DEFAULT ((0)),
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

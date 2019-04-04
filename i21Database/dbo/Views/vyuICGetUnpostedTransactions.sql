@@ -4,7 +4,7 @@
 SELECT 
 	intTransactionId = intInventoryAdjustmentId
 	, strTransactionId = strAdjustmentNo
-	, strTransactionType = 'Inventory Adjustment'
+	, strTransactionType = 'Inventory Adjustment' COLLATE Latin1_General_CI_AS
 	, dtmDate = dtmAdjustmentDate
 	, strDescription
 	, Adjustment.intEntityId
@@ -17,7 +17,7 @@ UNION ALL
 SELECT 
 	intTransactionId = intInventoryReceiptId
 	, strTransactionId = strReceiptNumber
-	, strTransactionType = 'Inventory Receipt'
+	, strTransactionType = 'Inventory Receipt' COLLATE Latin1_General_CI_AS
 	, dtmDate = dtmReceiptDate
 	, strDescription = strReceiptNumber
 	, Receipt.intEntityId
@@ -30,7 +30,7 @@ UNION ALL
 SELECT
 	intTransactionId = intInventoryShipmentId
 	, strTransactionId = strShipmentNumber
-	, strTransactionType = 'Inventory Shipment'
+	, strTransactionType = 'Inventory Shipment' COLLATE Latin1_General_CI_AS
 	, dtmDate = dtmShipDate
 	, strDescription = strShipmentNumber
 	, Shipment.intEntityId
@@ -43,7 +43,7 @@ UNION ALL
 SELECT
 	intTransactionId = intInventoryTransferId
 	, strTransactionId = strTransferNo
-	, strTransactionType = 'Inventory Transfer'
+	, strTransactionType = 'Inventory Transfer' COLLATE Latin1_General_CI_AS
 	, dtmDate = dtmTransferDate
 	, strDescription
 	, Transfer.intEntityId

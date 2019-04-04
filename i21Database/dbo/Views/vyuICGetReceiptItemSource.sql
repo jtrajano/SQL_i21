@@ -17,7 +17,7 @@ SELECT
 			WHEN Receipt.intSourceType = 5 THEN 'Delivery Sheet'
 			WHEN Receipt.intSourceType = 6 THEN 'Purchase Order'
 			WHEN Receipt.intSourceType = 7 THEN 'Store'
-		END),
+		END) COLLATE Latin1_General_CI_AS,
 	strOrderNumber = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
@@ -30,7 +30,7 @@ SELECT
 				THEN NULL
 			ELSE NULL
 			END
-		),
+		) COLLATE Latin1_General_CI_AS,
 	dtmDate = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'

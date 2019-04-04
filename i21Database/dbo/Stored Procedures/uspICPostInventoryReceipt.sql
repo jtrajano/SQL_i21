@@ -958,7 +958,6 @@ BEGIN
 					,[dblQty] 
 					,[dblUOMQty] 
 					,[dblCost] 
-					,[dblValue] 
 					,[dblSalesPrice] 
 					,[intCurrencyId] 
 					,[dblExchangeRate] 
@@ -969,51 +968,39 @@ BEGIN
 					,[intLotId] 
 					,[intSourceTransactionId] 
 					,[strSourceTransactionId] 
-					,[intSourceTransactionDetailId]
-					,[intFobPointId]
+					,[intSourceTransactionDetailId]					
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
 			)
-			SELECT
-					t.[intItemId] 
-					,t.[intItemLocationId] 
-					,iu.intItemUOMId 
-					,r.[dtmReceiptDate] 
-					,dblQty = 
-						CASE		
-							-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
-							WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
-								-dbo.fnCalculateQtyBetweenUOM(
-									ri.intWeightUOMId
-									, ri.intUnitMeasureId
-									, ri.dblNet
-								)
-
-							-- If Gross/Net UOM is missing, then get the item/lot qty. 
-							ELSE 
-								-ri.dblOpenReceive  
-						END
-					,t.[dblUOMQty] 
-					,t.[dblCost] 
-					,t.[dblValue] 
-					,t.[dblSalesPrice] 
-					,t.[intCurrencyId] 
-					,t.[dblExchangeRate] 
-					,[intTransactionId] = r.intInventoryReceiptId 
-					,[intTransactionDetailId] = ri.intInventoryReceiptItemId
-					,[strTransactionId] = r.strReceiptNumber
-					,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE  
-					,t.[intLotId]
-					,t.[intTransactionId] 
-					,t.[strTransactionId] 
-					,t.[intTransactionDetailId] 
-					,t.[intFobPointId] 
+			SELECT 
+					[intItemId]				= t.intItemId  
+					,[intItemLocationId]	= t.intItemLocationId
+					,[intItemUOMId]			= t.intItemUOMId
+					,[dtmDate]				= t.dtmDate 
+					,[dblQty]				= -t.dblQty
+					,[dblUOMQty]			= t.dblUOMQty
+					,[dblCost]				= t.dblCost
+					,[dblSalesPrice]		= t.dblSalesPrice
+					,[intCurrencyId]		= t.intCurrencyId
+					,[dblExchangeRate]		= t.dblExchangeRate
+					,[intTransactionId]		= t.intTransactionId
+					,[intTransactionDetailId]	= t.intTransactionDetailId
+					,[strTransactionId]			= t.strTransactionId
+					,[intTransactionTypeId]		= @INVENTORY_RECEIPT_TYPE
+					,[intLotId]					= td.intLotId
+					,[intSourceTransactionId]	= th.intInventoryTransferId
+					,[strSourceTransactionId]	= th.strTransferNo
+					,[intSourceTransactionDetailId] = ri.intInventoryTransferDetailId
 					,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-					,[intForexRateTypeId] = t.intForexRateTypeId
-					,[dblForexRate] = t.dblForexRate
-			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					,[intForexRateTypeId]			= t.intForexRateTypeId
+					,[dblForexRate]					= t.dblForexRate
+
+			FROM	@ItemsForPost t INNER JOIN tblICItem i 
+						ON t.intItemId = i.intItemId
+					INNER JOIN tblICInventoryReceiptItem ri
+						ON ri.intInventoryReceiptId = t.intTransactionId						
+						AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
 					INNER JOIN (
 						tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
 							ON td.intInventoryTransferId = th.intInventoryTransferId
@@ -1029,17 +1016,74 @@ BEGIN
 								td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
 								AND td.intInventoryTransferId = ri.intInventoryTransferId
 							)
-					INNER JOIN tblICInventoryTransaction t 
-						ON t.strTransactionId = th.strTransferNo
-						AND t.intTransactionDetailId = td.intInventoryTransferDetailId
-					LEFT JOIN tblICItemUOM iu 
-						ON iu.intItemUOMId = ri.intUnitMeasureId
-					LEFT JOIN tblICItem i 
-						ON ri.intItemId = i.intItemId 
-			WHERE	r.strReceiptNumber = @strTransactionId
-					AND t.ysnIsUnposted = 0 
-					AND t.dblQty > 0
+			WHERE	dblQty > 0 
 					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
+
+			--SELECT
+			--		t.[intItemId] 
+			--		,t.[intItemLocationId] 
+			--		,iu.intItemUOMId 
+			--		,r.[dtmReceiptDate] 
+			--		,dblQty = 
+			--			CASE		
+			--				-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
+			--				WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
+			--					-dbo.fnCalculateQtyBetweenUOM(
+			--						ri.intWeightUOMId
+			--						, ri.intUnitMeasureId
+			--						, ri.dblNet
+			--					)
+
+			--				-- If Gross/Net UOM is missing, then get the item/lot qty. 
+			--				ELSE 
+			--					-ri.dblOpenReceive  
+			--			END
+			--		,t.[dblUOMQty] 
+			--		,t.[dblCost] 
+			--		,t.[dblValue] 
+			--		,t.[dblSalesPrice] 
+			--		,t.[intCurrencyId] 
+			--		,t.[dblExchangeRate] 
+			--		,[intTransactionId] = r.intInventoryReceiptId 
+			--		,[intTransactionDetailId] = ri.intInventoryReceiptItemId
+			--		,[strTransactionId] = r.strReceiptNumber
+			--		,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE  
+			--		,t.[intLotId]
+			--		,t.[intTransactionId] 
+			--		,t.[strTransactionId] 
+			--		,t.[intTransactionDetailId] 
+			--		,t.[intFobPointId] 
+			--		,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+			--		,[intForexRateTypeId] = t.intForexRateTypeId
+			--		,[dblForexRate] = t.dblForexRate
+			--FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+			--			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			--		INNER JOIN (
+			--			tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
+			--				ON td.intInventoryTransferId = th.intInventoryTransferId
+			--		)
+			--			ON 
+			--				(
+			--					td.intInventoryTransferDetailId = ri.intSourceId
+			--					AND td.intInventoryTransferId = ri.intOrderId
+			--					AND ri.intInventoryTransferDetailId IS NULL 
+			--					AND ri.intInventoryTransferId IS NULL 
+			--				)
+			--				OR (
+			--					td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
+			--					AND td.intInventoryTransferId = ri.intInventoryTransferId
+			--				)
+			--		INNER JOIN tblICInventoryTransaction t 
+			--			ON t.strTransactionId = th.strTransferNo
+			--			AND t.intTransactionDetailId = td.intInventoryTransferDetailId
+			--		LEFT JOIN tblICItemUOM iu 
+			--			ON iu.intItemUOMId = ri.intUnitMeasureId
+			--		LEFT JOIN tblICItem i 
+			--			ON ri.intItemId = i.intItemId 
+			--WHERE	r.strReceiptNumber = @strTransactionId
+			--		AND t.ysnIsUnposted = 0 
+			--		AND t.dblQty > 0
+			--		AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
 			BEGIN 
@@ -1403,6 +1447,50 @@ BEGIN
 							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 							,@intEntityUserSecurityId
 
+					--IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					
+					-- Create GL Entries for Non-Stock Items
+					-- 
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue =
+					 uspICCreateReceiptGLEntriesForNonStockItems
+							@strBatchId 
+							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+							,@intEntityUserSecurityId
+				
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
 					--BEGIN 
@@ -2143,10 +2231,16 @@ BEGIN
 		,@intTransactionId
 		,@intEntityUserSecurityId
 
-	EXEC dbo.uspICProcessPayables @intTransactionId, default, @ysnPost, @intEntityUserSecurityId
+	EXEC dbo.uspICProcessPayables 
+		@intReceiptId = @intTransactionId
+		,@ysnPost = @ysnPost
+		,@intEntityUserSecurityId = @intEntityUserSecurityId
 	
 	COMMIT TRAN @TransactionName
 END 
+
+-- Recalculate Totals
+EXEC dbo.uspICInventoryReceiptCalculateTotals @ReceiptId = @intTransactionId, @ForceRecalc = 1
     
 -- Create an Audit Log
 IF @ysnRecap = 0 

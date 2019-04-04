@@ -24,6 +24,7 @@ select distinct intCompanyLocationId, strLocationName, strLocationName strDescri
 from tblSMCompanyLocation L 
 join ptitmmst os on os.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = L.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS
 where ptitm_binloc is not null
+	AND NOT EXISTS(SELECT * FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = L.intCompanyLocationId AND strClassification = 'Inventory' AND strSubLocationName = L.strLocationName)
 
 
 ----====================================STEP 1=============================================

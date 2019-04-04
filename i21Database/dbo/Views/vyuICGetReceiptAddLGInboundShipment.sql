@@ -7,7 +7,7 @@ AS
 	, intEntityVendorId			= LogisticsView.intEntityVendorId
 	, strVendorId				= LogisticsView.strVendor
 	, strVendorName				= LogisticsView.strVendor
-	, strReceiptType			= 'Purchase Contract'
+	, strReceiptType			= 'Purchase Contract' COLLATE Latin1_General_CI_AS
 	, intLineNo					= LogisticsView.intPContractDetailId
 	, intOrderId				= LogisticsView.intPContractHeaderId
 	, strOrderNumber			= LogisticsView.strPContractNumber
@@ -66,8 +66,8 @@ AS
 	, dblForexRate				= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) THEN NULL ELSE ISNULL(LogisticsView.dblForexRate, defaultForexRate.dblRate) END
 	, ysnBundleItem				= CAST(0 AS BIT)
 	, intBundledItemId			= CAST(NULL AS INT)
-	, strBundledItemNo			= CAST(NULL AS NVARCHAR(50))
-	, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+	, strBundledItemNo			= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	, strBundledItemDescription = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	, ysnIsBasket = CAST(0 AS BIT)
 	, LogisticsView.intFreightTermId
 	, LogisticsView.strFreightTerm 
@@ -129,3 +129,4 @@ AS
 		AND LogisticsView.intPurchaseSale = 1
 		AND LogisticsView.ysnPosted = 1
 		AND ISNULL(LC.ysnRejected,0) <> 1
+		AND LogisticsView.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')

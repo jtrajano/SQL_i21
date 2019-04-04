@@ -624,3 +624,18 @@ SELECT inv.intItemId
 ----**** check if this is done in AR import ******
 --------------------------------------------------------------------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------------------------------------
+--Update Restricted Chemical & EPA Numbers
+---------------------------------------------------------------------------------------------------------------
+
+UPDATE item
+SET item.ysnRestrictedChemical = 1
+FROM tblICItem item
+	INNER JOIN agitmmst a ON item.strItemNo = a.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS
+WHERE a.agitm_rest_chem_rpt_yn = 'Y'
+
+UPDATE item
+SET item.strEPANumber = a.agitm_epa_no
+FROM tblICItem item
+	INNER JOIN agitmmst a ON item.strItemNo = a.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS
+WHERE a.agitm_rest_chem_rpt_yn = 'Y'

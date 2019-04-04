@@ -38,6 +38,6 @@ JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SSH.intCompanyLocation
 JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = SSH.intSubLocationId
 JOIN tblICCommodity CO ON CO.intCommodityId = CH.intCommodityId
 JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
-LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 LEFT JOIN tblCTBook BO ON BO.intBookId = SSH.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = SSH.intSubBookId

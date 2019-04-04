@@ -4,7 +4,7 @@
 	, @intFutureMarketId int
 	, @intCommodityId int
 	, @intOptionMonthId int
-	, @dblStrike int
+	, @dblStrike numeric(18,6)
 	, @dtmPositionAsOf datetime
 
 AS

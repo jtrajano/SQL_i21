@@ -21,6 +21,7 @@ Post-Deployment Script Template
 
 --We have to move it here due to schema changes before executing this store procedure
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
+:r "..\dbo\Stored Procedures\uspAPImportVendorLocations.sql"
 
 -- DROP temp table created from PreDeployment script
 IF OBJECT_ID('tempdb..##tblOriginMod') IS NOT NULL DROP TABLE ##tblOriginMod

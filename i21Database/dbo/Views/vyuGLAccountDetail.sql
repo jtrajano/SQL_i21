@@ -3,7 +3,6 @@ AS
 	SELECT      TOP 1000000 
 				account.intConcurrencyId,
 				account.strAccountId COLLATE Latin1_General_CI_AS strAccountId,
-				account.strAccountId COLLATE Latin1_General_CI_AS strAccountIdText,
 				replace(account.strAccountId,'-','') COLLATE Latin1_General_CI_AS strAccountId1,
 				account.strOldAccountId COLLATE Latin1_General_CI_AS strOldAccountId,
 				replace(account.strOldAccountId,'-','') COLLATE Latin1_General_CI_AS strOldAccountId1,

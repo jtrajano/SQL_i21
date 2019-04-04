@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFSyncInvoiceFormat]
+﻿
+CREATE PROCEDURE [dbo].[uspCFSyncInvoiceFormat]
 		@strInvoiceNumber NVARCHAR(MAX),
 		@intCustomerId	  INT  
 		AS 
@@ -10,6 +11,7 @@ BEGIN
 	DECLARE @strPrintRemittancePage				NVARCHAR(MAX)
 	DECLARE @strPrintPricePerGallon				NVARCHAR(MAX)
 	DECLARE @strPrintSiteAddress				NVARCHAR(MAX)
+	DECLARE @strDetailDisplay					NVARCHAR(MAX)
 	DECLARE @ysnSummaryByCard					BIT
 	DECLARE @ysnSummaryByProduct				BIT
 	DECLARE @ysnSummaryByCardProd				BIT
@@ -42,7 +44,8 @@ BEGIN
 	,@ysnSummaryByDeptVehicleProd		 =  ysnSummaryByDeptVehicleProd
 	,@ysnPrintTimeOnInvoices			 =  ysnPrintTimeOnInvoices		
 	,@ysnPrintTimeOnReports				 =  ysnPrintTimeOnReports		
-	,@ysnPrintMiscellaneous				 =  ysnPrintMiscellaneous		
+	,@ysnPrintMiscellaneous				 =  ysnPrintMiscellaneous
+	,@strDetailDisplay					 =  strDetailDisplay
 	FROM tblCFAccount
 	WHERE intCustomerId = @intCustomerId
 	
@@ -54,7 +57,8 @@ BEGIN
 	,strSecondarySortOptions		  = 	 @strSecondarySortOptions		
 	,strPrintRemittancePage			  = 	 @strPrintRemittancePage		
 	,strPrintPricePerGallon			  = 	 @strPrintPricePerGallon		
-	,strPrintSiteAddress			  = 	 @strPrintSiteAddress			
+	,strPrintSiteAddress			  = 	 @strPrintSiteAddress		
+	,strDetailDisplay				  =		 @strDetailDisplay
 	,ysnSummaryByCard				  = 	 @ysnSummaryByCard				
 	,ysnSummaryByProduct			  = 	 @ysnSummaryByProduct			
 	,ysnSummaryByCardProd			  = 	 @ysnSummaryByCardProd			

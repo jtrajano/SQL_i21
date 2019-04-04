@@ -276,4 +276,19 @@ BEGIN
 END
 
 
+
+IF EXISTS(select 1  from INFORMATION_SCHEMA.TABLES where TABLE_NAME = N'tblCFProductAuthDetail')
+BEGIN
+
+DELETE FROM tblCFProductAuthDetail WHERE intProductAuthDetailId IN (
+select intProductAuthDetailId from (
+
+SELECT intProductAuthId,intItemId,intProductAuthDetailId,row_number() over (partition by intItemId,intProductAuthId order by intItemId) as intRowNum FROM tblCFProductAuthDetail 
+
+) t where intRowNum > 1
+)
+
+END
+
+
 print 'end CF data fix - (pre deployment)'

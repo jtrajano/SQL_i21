@@ -136,7 +136,7 @@ SELECT
     ,[strTransactionId]                 = ARP.[strRecordNumber]
     ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
     ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
-    ,[strCustomerNumber]                = ARC.[strCustomerNumber]
+    ,[strCustomerNumber]                = ARC.[strEntityNo]
     ,[strCustomerName]                  = ARC.[strName]
     ,[intCompanyLocationId]             = ARP.[intLocationId]
     ,[strLocationName]                  = SMCL.[strLocationName]
@@ -221,10 +221,13 @@ FROM
     tblARPayment ARP
 INNER JOIN
     (
-	SELECT Emet.intEntityId, Emet.strCustomerNumber, EME.strName from 
-                (	SELECT intEntityId, strCustomerNumber FROM tblARCustomer UNION
-                SELECT intEntityId, strCustomerNumber = strVendorId  FROM tblAPVendor ) Emet
-        JOIN tblEMEntity EME ON EME.intEntityId = Emet.intEntityId
+	    SELECT DISTINCT 
+               intEntityId	= EM.intEntityId
+			 , strEntityNo	= EM.strEntityNo
+			 , strName		= EM.strName
+		FROM tblEMEntity EM
+		INNER JOIN tblEMEntityType EMT ON EM.intEntityId = EMT.intEntityId
+		WHERE EMT.strType IN ('Customer', 'Vendor')
     ) ARC
         ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
@@ -345,7 +348,7 @@ SELECT
     ,[strTransactionId]                 = ARP.[strRecordNumber]
     ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
     ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
-    ,[strCustomerNumber]                = ARC.[strCustomerNumber]
+    ,[strCustomerNumber]                = ARC.[strEntityNo]
     ,[strCustomerName]                  = ARC.[strName]
     ,[intCompanyLocationId]             = ARP.[intLocationId]
     ,[strLocationName]                  = SMCL.[strLocationName]
@@ -433,10 +436,13 @@ INNER JOIN
         ON ARP.[intPaymentId] = ARPILD.[intPaymentId]
 INNER JOIN
     (
-   SELECT Emet.intEntityId, Emet.strCustomerNumber, EME.strName from 
-                (	SELECT intEntityId, strCustomerNumber FROM tblARCustomer UNION
-                SELECT intEntityId, strCustomerNumber = strVendorId  FROM tblAPVendor ) Emet
-        JOIN tblEMEntity EME ON EME.intEntityId = Emet.intEntityId
+        SELECT DISTINCT
+               intEntityId	= EM.intEntityId
+			 , strEntityNo	= EM.strEntityNo
+			 , strName		= EM.strName
+		FROM tblEMEntity EM
+		INNER JOIN tblEMEntityType EMT ON EM.intEntityId = EMT.intEntityId
+		WHERE EMT.strType IN ('Customer', 'Vendor')
     ) ARC
         ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
@@ -631,7 +637,7 @@ INNER JOIN
         ON P.[intPaymentId] = ARP.[intPaymentId]
 INNER JOIN
     (
-    SELECT V.[intEntityId], EM.[strName], [strCustomerNumber] = V.[strVendorId] FROM tblAPVendor V
+        SELECT V.[intEntityId], EM.[strName], [strCustomerNumber] = V.[strVendorId] FROM tblAPVendor V
 			INNER JOIN tblEMEntity EM ON V.intEntityId = EM.intEntityId
     ) ARC
         ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
@@ -671,7 +677,7 @@ INSERT INTO #ARPostPaymentDetail
 	,[dblExchangeRate]
     ,[dtmDatePaid]
     ,[dtmPostDate]
-    ,[intWriteOffAccountId]
+    ,[intWriteOffAccountId]    
     ,[intAccountId]
     ,[intBankAccountId]
     ,[intARAccountId]
@@ -700,6 +706,8 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBasePayment]
     ,[dblDiscount]
     ,[dblBaseDiscount]
+    ,[dblWriteOffAmount]
+	,[dblBaseWriteOffAmount]
     ,[dblInterest]
     ,[dblBaseInterest]
     ,[dblInvoiceTotal]
@@ -711,6 +719,7 @@ INSERT INTO #ARPostPaymentDetail
     ,[ysnExcludedFromPayment]
     ,[ysnForgiven]
 	,[intBillId]
+    ,[intWriteOffAccountDetailId]
     ,[strTransactionNumber]
     ,[strTransactionType]
     ,[strType]
@@ -777,6 +786,8 @@ SELECT
     ,[dblBasePayment]                   = ARPD.[dblBasePayment]
     ,[dblDiscount]                      = ARPD.[dblDiscount]
     ,[dblBaseDiscount]                  = ARPD.[dblBaseDiscount]
+    ,[dblWriteOffAmount]                = ARPD.[dblWriteOffAmount]
+	,[dblBaseWriteOffAmount]            = ARPD.[dblBaseWriteOffAmount]
     ,[dblInterest]                      = ARPD.[dblInterest]
     ,[dblBaseInterest]                  = ARPD.[dblBaseInterest]
     ,[dblInvoiceTotal]                  = ARPD.[dblInvoiceTotal]
@@ -788,6 +799,7 @@ SELECT
     ,[ysnExcludedFromPayment]           = ARI.[ysnExcludeFromPayment]
     ,[ysnForgiven]                      = ARI.[ysnForgiven]
 	,[intBillId]                        = NULL
+    ,[intWriteOffAccountDetailId]       = ARPD.[intWriteOffAccountId]
     ,[strTransactionNumber]             = ARI.[strInvoiceNumber]
     ,[strTransactionType]               = ARI.[strTransactionType]
     ,[strType]                          = ARI.[strType]
@@ -866,6 +878,8 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBasePayment]
     ,[dblDiscount]
     ,[dblBaseDiscount]
+    ,[dblWriteOffAmount]
+	,[dblBaseWriteOffAmount]
     ,[dblInterest]
     ,[dblBaseInterest]
     ,[dblInvoiceTotal]
@@ -877,6 +891,7 @@ INSERT INTO #ARPostPaymentDetail
     ,[ysnExcludedFromPayment]
     ,[ysnForgiven]
 	,[intBillId]
+    ,[intWriteOffAccountDetailId]
     ,[strTransactionNumber]
     ,[strTransactionType]
     ,[strType]
@@ -943,6 +958,8 @@ SELECT
     ,[dblBasePayment]                   = ARPD.[dblBasePayment]
     ,[dblDiscount]                      = ARPD.[dblDiscount]
     ,[dblBaseDiscount]                  = ARPD.[dblBaseDiscount]
+    ,[dblWriteOffAmount]                = ARPD.[dblWriteOffAmount]
+	,[dblBaseWriteOffAmount]            = ARPD.[dblBaseWriteOffAmount]
     ,[dblInterest]                      = ARPD.[dblInterest]
     ,[dblBaseInterest]                  = ARPD.[dblBaseInterest]
     ,[dblInvoiceTotal]                  = ARPD.[dblInvoiceTotal]
@@ -954,6 +971,7 @@ SELECT
     ,[ysnExcludedFromPayment]           = @ZeroBit
     ,[ysnForgiven]                      = @ZeroBit
 	,[intBillId]                        = APB.[intBillId]
+    ,[intWriteOffAccountDetailId]       = ARPD.[intWriteOffAccountId]
     ,[strTransactionNumber]             = APB.[strBillId]
     ,[strTransactionType]               = (CASE WHEN APB.[intTransactionType] = 1 THEN 'Voucher'
 												WHEN APB.[intTransactionType] = 2 THEN 'Vendor Prepayment'

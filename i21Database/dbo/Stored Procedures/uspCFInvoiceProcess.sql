@@ -90,8 +90,17 @@ BEGIN TRY
 	--EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam=@xmlParam
 	--------------------------------------
 
-	UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
-	SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
+	--UPDATE tblCFTransaction SET strInvoiceReportNumber = strTempInvoiceReportNumber WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) -- AND (strTransactionType != 'Foreign Sale' OR ISNULL(ysnPostForeignSales,0) != 0)
+	--SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM #tblCFInvoice
+
+
+	UPDATE tblCFTransaction SET strInvoiceReportNumber = cfS.strTempInvoiceReportNumber , dtmInvoiceDate = cfS.dtmInvoiceDate
+	FROM (
+		SELECT intTransactionId,strTempInvoiceReportNumber,dtmInvoiceDate FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
+	) as cfS
+	WHERE cfS.intTransactionId = tblCFTransaction.intTransactionId
+
+	SELECT TOP 1 @dtmInvoiceDate = dtmInvoiceDate FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType
 
 	------------GROUP BY CUSTOMER-----------
 	--INSERT INTO #tblCFDisctinctCustomerInvoice(
@@ -229,7 +238,6 @@ BEGIN TRY
 		,dblDiscountEligibleQuantity
 		,dblDiscountAmount
 		,dtmInvoiceDate
-		,ysnRemittancePage
 		,strInvoiceNumberHistory
 		,strReportName
 		,dtmBalanceForwardDate
@@ -247,10 +255,6 @@ BEGIN TRY
 		,dblInvoiceQuantity
 		,dblInvoiceDiscount
 		,dtmInvoiceDate
-		,  (CASE WHEN
-                             ((SELECT        COUNT(*)
-                                 FROM        tblARCustomerStatementStagingTable
-                                 WHERE        strInvoiceReportNumber = ipr.strInvoiceReportNumber) > 0) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END)
 		,strInvoiceReportNumber
 		,@reportName
 		,@balanceForwardDate

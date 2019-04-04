@@ -55,8 +55,7 @@ SELECT TOP 1 @strUnitMeasure= strUnitMeasure FROM tblICUnitMeasure WHERE intUnit
 
 DECLARE @intoldUnitMeasureId int
 
-SET @intoldUnitMeasureId = @intUOMId
-SELECT @intUOMId=intCommodityUnitMeasureId FROM tblICCommodityUnitMeasure where intCommodityId=@intCommodityId and intUnitMeasureId=@intUOMId  
+SELECT @intoldUnitMeasureId=intUnitMeasureId from tblICCommodityUnitMeasure where intCommodityUnitMeasureId=@intUOMId  
 SELECT TOP 1 @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge, @strRiskView = strRiskView FROM tblRKCompanyPreference
 
 DECLARE @intForecastWeeklyConsumptionUOMId1 INT
@@ -1808,7 +1807,7 @@ SELECT intRowNumber
 	, intSubBookId
 	, strSubBook
 FROM @ListFinal where strFutureMonth NOT IN('Previous','Total')
-ORDER BY intRowNumber,PriceStatus,CONVERT(DATETIME,'01 '+strFutureMonth) ASC
+ORDER BY intRowNumber,strBook,strSubBook,PriceStatus,CONVERT(DATETIME,'01 '+strFutureMonth) ASC
 
 INSERT INTO @MonthOrder (intRowNumber
 	, strGroup
@@ -1868,16 +1867,13 @@ SELECT intRowNumber
 	, strSubBook
 FROM @ListFinal where strFutureMonth='Total'
 
-SELECT intRowNumber1 intRowNumFinal
-	, intRowNumber
+INSERT INTO @MonthOrder (intRowNumber
 	, strGroup
 	, Selection
 	, PriceStatus
 	, strFutureMonth
 	, strAccountNumber
-	, case when @strUomType='By Lot' and PriceStatus = '4.Market Coverage(Weeks)' THEN (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))/@intForecastWeeklyConsumption
-		when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
-		else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) end dblNoOfContract
+	, dblNoOfContract
 	, strTradeNo
 	, TransactionDate
 	, TranType
@@ -1898,9 +1894,75 @@ SELECT intRowNumber1 intRowNumFinal
 	, intBookId
 	, strBook
 	, intSubBookId
+	, strSubBook)
+SELECT DISTINCT intRowNumber
+	, strGroup
+	, Selection
+	, PriceStatus
+	, b.strFutureMonth
+	, strAccountNumber
+	, 0--CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))
+	, strTradeNo = ''
+	, TransactionDate = ''
+	, TranType
+	, CustVendor
+	, dblNoOfLot = 0
+	, dblQuantity = 0
+	, intOrderByHeading
+	, intContractHeaderId = null
+	, intFutOptTransactionHeaderId = null
+	, strProductType = null
+	, strProductLine = null
+	, strShipmentPeriod = ''
+	, strLocation = ''
+	, strOrigin = null
+	, intItemId = null
+	, strItemNo = ''
+	, strItemDescription = ''
+	, intBookId = null
+	, strBook = null
+	, intSubBookId = null
+	, strSubBook = null
+FROM @ListFinal a
+ LEFT JOIN (
+SELECT DISTINCT strFutureMonth FROM @ListFinal
+) b ON a.strFutureMonth = b.strFutureMonth
+WHERE intRowNumber = 1
+
+SELECT intRowNumber1 intRowNumFinal
+	, intRowNumber
+	, strGroup
+	, Selection
+	, PriceStatus
+	, strFutureMonth
+	, strAccountNumber
+	, case when @strUomType='By Lot' and PriceStatus = '4.Market Coverage(Weeks)' THEN (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))/@intForecastWeeklyConsumption
+		when @strUomType='By Lot' and strAccountNumber <> 'Avg Long Price' then (CONVERT(DOUBLE PRECISION,ROUND(dblNoOfLot,@intDecimal)))
+		else  CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal)) end dblNoOfContract
+	, strTradeNo
+	, TransactionDate
+	, TranType
+	, CustVendor
+	, dblNoOfLot
+	, dblQuantity
+	, isnull(intOrderByHeading,0) intOrderByHeading
+	, intContractHeaderId
+	, intFutOptTransactionHeaderId
+	, strProductType
+	, strProductLine
+	, strShipmentPeriod
+	, strLocation
+	, strOrigin
+	, intItemId
+	, strItemNo
+	, strItemDescription
+	, intBookId
+	, strBook
+	, intSubBookId
 	, strSubBook
 FROM @MonthOrder
-ORDER BY strGroup
+ORDER BY strGroup,
+strBook,strSubBook
 	, PriceStatus
 	, CASE WHEN strFutureMonth ='Previous' THEN '01/01/1900'
 			WHEN strFutureMonth ='Total' THEN '01/01/9999'

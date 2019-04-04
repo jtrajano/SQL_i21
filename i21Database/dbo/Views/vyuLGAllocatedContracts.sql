@@ -125,7 +125,7 @@ LEFT JOIN tblICItem IM ON IM.intItemId = PCT.intItemId
 LEFT JOIN tblICCommodityAttribute PTP ON PTP.intCommodityAttributeId = IM.intProductTypeId AND PTP.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute PCA ON PCA.intCommodityAttributeId = IM.intOriginId AND PCA.strType = 'Origin'
 LEFT JOIN tblSMCountry PCO ON PCO.intCountryID = PCA.intCountryID
-LEFT JOIN tblCTContractBasis PCB ON PCB.intContractBasisId = PCH.intContractBasisId
+LEFT JOIN tblSMFreightTerms PCB ON PCB.intFreightTermId = PCH.intFreightTermId
 LEFT JOIN tblCTContractStatus PCS ON PCS.intContractStatusId = PCT.intContractStatusId
 LEFT JOIN tblSMCurrency PBC ON PBC.intCurrencyID = PCT.intBasisCurrencyId
 LEFT JOIN tblICItemUOM PBIU ON PBIU.intItemUOMId = PCT.intBasisUOMId
@@ -146,7 +146,7 @@ LEFT JOIN tblICItem SIM ON SIM.intItemId = SCT.intItemId
 LEFT JOIN tblICCommodityAttribute PTS ON PTS.intCommodityAttributeId = SIM.intProductTypeId AND PTS.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute SCA ON SCA.intCommodityAttributeId = SIM.intOriginId AND SCA.strType = 'Origin'
 LEFT JOIN tblSMCountry SCO ON SCO.intCountryID = SCA.intCountryID
-LEFT JOIN tblCTContractBasis SCB ON SCB.intContractBasisId = SCH.intContractBasisId
+LEFT JOIN tblSMFreightTerms SCB ON SCB.intFreightTermId = SCH.intFreightTermId
 LEFT JOIN tblCTContractStatus SCS ON SCS.intContractStatusId = SCT.intContractStatusId
 LEFT JOIN tblSMCurrency SBC ON SBC.intCurrencyID = SCT.intBasisCurrencyId
 LEFT JOIN tblICItemUOM SBIU ON SBIU.intItemUOMId = SCT.intBasisUOMId

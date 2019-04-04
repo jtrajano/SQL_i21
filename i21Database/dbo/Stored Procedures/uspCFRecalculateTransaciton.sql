@@ -2591,8 +2591,7 @@ BEGIN
 
 
 				END
-				ELSE IF (LOWER(@strPriceBasis) = 'local index fixed'
-				OR @ysnBackoutDueToRouding = 1)
+				ELSE IF (LOWER(@strPriceBasis) = 'index fixed' OR @ysnBackoutDueToRouding = 1)
 				BEGIN
 
 					IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
@@ -3931,7 +3930,7 @@ BEGIN
 					--SELECT * FROM @tblCFOriginalTax
 
 				END
-				ELSE IF (LOWER(@strPriceBasis) = 'local index fixed'
+				ELSE IF (LOWER(@strPriceBasis) = 'index fixed'
 				OR @ysnBackoutDueToRouding = 1)
 				BEGIN
 
@@ -5364,7 +5363,7 @@ BEGIN
 		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 
 	END
-	ELSE IF (LOWER(@strPriceBasis) = 'local index cost' OR LOWER(@strPriceBasis) = 'remote index cost'  )
+	ELSE IF (LOWER(@strPriceBasis) = 'index cost')
 		BEGIN
 
 		DECLARE @dblLocalIndexCostGrossPrice NUMERIC(18,6)
@@ -5392,7 +5391,7 @@ BEGIN
 
 		
 	END
-	ELSE IF (LOWER(@strPriceBasis) = 'local index retail' )
+	ELSE IF (LOWER(@strPriceBasis) = 'index retail' )
 		BEGIN
 
 		DECLARE @dblLocalIndexRetailGrossPrice NUMERIC(18,6)
@@ -5421,7 +5420,7 @@ BEGIN
 
 	
 	END
-	ELSE IF (LOWER(@strPriceBasis) = 'local index fixed')
+	ELSE IF (LOWER(@strPriceBasis) = 'index fixed')
 		BEGIN
 
 		DECLARE @dblLocalIndexFixedGrossPrice NUMERIC(18,6)
@@ -6074,6 +6073,7 @@ BEGIN
 				,intTaxCodeId
 				,dblTaxRate 
 				,intTransactionId
+				,ysnTaxExempt
 			)
 			SELECT 
 				dblCalculatedTax AS 'dblTaxCalculatedAmount'
@@ -6081,6 +6081,7 @@ BEGIN
 				,intTaxCodeId
 				,dblRate AS 'dblTaxRate'
 				,intTransactionId = @intTransactionId
+				,ysnTaxExempt
 			FROM @tblCFTransactionTax AS T
 			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 			---------------------------------------------------------------------------
@@ -6276,6 +6277,7 @@ BEGIN
 					,dblTaxCalculatedAmount
 					,intTaxCodeId
 					,dblTaxRate
+					,ysnTaxExempt
 				)
 				SELECT
 					 @overfillId
@@ -6283,6 +6285,7 @@ BEGIN
 					,dblTaxCalculatedAmount
 					,intTaxCodeId
 					,dblTaxRate
+					,ysnTaxExempt
 				FROM
 				tblCFTransactionTax
 				WHERE intTransactionId = @intTransactionId
@@ -6653,6 +6656,7 @@ BEGIN
 				,intTaxGroupId
 				,strTaxGroup
 				,strCalculationMethod
+				,ysnTaxExempt
 				)
 				SELECT 
 				 ISNULL(dblCalculatedTax,0) AS 'dblTaxCalculatedAmount'
@@ -6663,6 +6667,7 @@ BEGIN
 				,intTaxGroupId
 				,(SELECT TOP 1 strTaxGroup FROM tblSMTaxGroup WHERE intTaxGroupId = T.intTaxGroupId) as 'strTaxGroup'
 				,strCalculationMethod
+				,ysnTaxExempt
 				FROM @tblCFTransactionTax AS T
 				WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 			END
@@ -6678,6 +6683,7 @@ BEGIN
 				,intTaxGroupId
 				,strTaxGroup
 				,strCalculationMethod
+				,ysnTaxExempt
 				)
 				SELECT 
 				 ISNULL(dblCalculatedTax,0) / @dblZeroQuantity AS 'dblTaxCalculatedAmount'
@@ -6688,6 +6694,7 @@ BEGIN
 				,intTaxGroupId
 				,(SELECT TOP 1 strTaxGroup FROM tblSMTaxGroup WHERE intTaxGroupId = T.intTaxGroupId) as 'strTaxGroup'
 				,strCalculationMethod
+				,ysnTaxExempt
 				FROM @tblCFTransactionTaxZeroQuantity AS T
 				WHERE ISNULL(ysnInvalidSetup,0) = 0 AND ISNULL(ysnTaxExempt,0) = 0
 			END
@@ -6700,6 +6707,7 @@ BEGIN
 			,intTaxCodeId
 			,dblRate AS 'dblTaxRate'
 			,(SELECT TOP 1 strTaxCode FROM tblSMTaxCode WHERE intTaxCodeId = T.intTaxCodeId) AS 'strTaxCode'
+			,ysnTaxExempt
 			FROM @tblCFTransactionTax AS T
 			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 

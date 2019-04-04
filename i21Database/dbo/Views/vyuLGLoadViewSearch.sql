@@ -45,6 +45,7 @@ SELECT L.intLoadId
 		END COLLATE Latin1_General_CI_AS
 	,intGenerateReferenceNumber = GL.intReferenceNumber
 	,L.intGenerateSequence
+	,L.ysnLoadBased
 	,intNumberOfLoads = GL.intNumberOfLoads
 	,L.dtmScheduledDate
 	,strHauler = Hauler.strName

@@ -9,7 +9,7 @@ FROM (
 		, intEntityId = POView.intEntityVendorId
 		, strVendorId
 		, strVendorName = strName
-		, strReceiptType = 'Purchase Order'
+		, strReceiptType = 'Purchase Order' COLLATE Latin1_General_CI_AS
 		, intLineNo = intPurchaseDetailId
 		, intOrderId = intPurchaseId
 		, strOrderNumber = strPurchaseOrderNumber
@@ -59,7 +59,7 @@ FROM (
 		, dblContainerWeightPerQty = 0.00
 		, ysnSubCurrency = CAST(0  AS BIT)
 		, intCurrencyId = POView.intCurrencyId
-		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) 
+		, strSubCurrency = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 		, dblGross = CAST(0 AS NUMERIC(38, 20)) -- There is no gross from PO
 		, dblNet = CAST(0 AS NUMERIC(38, 20)) -- There is no net from PO
 		, intForexRateTypeId = POView.intForexRateTypeId
@@ -67,8 +67,8 @@ FROM (
 		, dblForexRate = POView.dblForexRate
 		, ysnBundleItem = CAST(0 AS BIT)
 		, intBundledItemId = CAST(NULL AS INT)
-		, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
-		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+		, strBundledItemNo = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+		, strBundledItemDescription = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 		, ysnIsBasket = CAST(0 AS BIT)
 		, POView.intFreightTermId
 		, POView.strFreightTerm
@@ -94,5 +94,6 @@ FROM (
 			FROM	 tblICCompanyPreference			
 		) ICPreference
 	WHERE ysnCompleted = 0
+		AND POView.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
 		
 ) tblAddOrders

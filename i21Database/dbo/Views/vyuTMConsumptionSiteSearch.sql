@@ -26,6 +26,7 @@ AS
 	,A.intLocationId
 	,ysnSiteActive = ISNULL(A.ysnActive,0)
 	,strFillMethod = H.strFillMethod
+	,A.intProduct -- TM-3031
 	,strItemNo = ISNULL(I.strItemNo,'')
 	,dtmLastDeliveryDate = A.dtmLastDeliveryDate
 	,dtmNextDeliveryDate = A.dtmNextDeliveryDate
@@ -39,8 +40,10 @@ AS
 	,A.dtmOnHoldStartDate
 	,A.dtmOnHoldEndDate
 	,D.dblCreditLimit
+	,A.intDeliveryTermID -- TM-3031
 	,strTerm = M.strTerm
 	,A.strInstruction
+	,A.intDriverID -- TM-3031
 	,strDriverId = O.strEntityNo
 	,P.strRouteId
 	,A.dblTotalCapacity

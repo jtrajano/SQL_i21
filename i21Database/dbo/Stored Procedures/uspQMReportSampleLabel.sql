@@ -49,7 +49,7 @@ BEGIN TRY
 	SELECT TOP 1 I.strItemNo
 		,I.strDescription
 		,S.strSampleNumber
-		,S.dtmSampleReceivedDate
+		,DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), S.dtmSampleReceivedDate) AS dtmSampleReceivedDate
 		,CASE 
 			WHEN S.intProductTypeId = 11
 				THEN ISNULL(L.strLotNumber,'')

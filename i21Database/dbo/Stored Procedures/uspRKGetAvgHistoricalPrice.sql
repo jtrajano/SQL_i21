@@ -90,10 +90,10 @@ FROM (
 		, rfm.strFutureMonth strRollMonth
 		, dblContractSize
 		, ysnSubCurrency
-		, ISNULL((SELECT SUM(dblOpenContract) FROM vyuRKGetOpenContract fc
+		, ISNULL((SELECT SUM(dblNoOfContract) FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell = 'Buy'
 				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId AND isnull(fc.dblOpenContract,0) > 0),0) dblOpenContract
-		, ISNULL((SELECT SUM(dblOpenContract) FROM vyuRKGetOpenContract fc
+		, ISNULL((SELECT SUM(dblNoOfContract) FROM vyuRKGetOpenContract fc
 				JOIN tblRKFutOptTransaction foot on foot.intFutOptTransactionId=fc.intFutOptTransactionId and strBuySell='Buy'
 				WHERE ft.intFutOptTransactionId = fc.intFutOptTransactionId  AND isnull(fc.dblOpenContract,0) > 0)*isnull(ft.dblPrice,0),0) dblContratPrice
 		, (SELECT SUM(dblMatchQty) dblNoOfContract
@@ -173,7 +173,7 @@ FROM (
 	JOIN tblICCommodityUnitMeasure cuc on  cuc.intCommodityUnitMeasureId=m.intUnitMeasureId
 	JOIN tblSMCurrency mc on m.intCurrencyId=mc.intCurrencyID
 	LEFT JOIN tblRKFuturesMonth rfm on rfm.intFutureMonthId=ft.intRollingMonthId
-	WHERE intSelectedInstrumentTypeId = 1 AND intInstrumentTypeId = 1
+	WHERE intSelectedInstrumentTypeId in(1,3) AND intInstrumentTypeId = 1
 		AND CONVERT(DATETIME,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFromDate and @dtmToDate
 ) t
 ORDER BY strFutureMonth

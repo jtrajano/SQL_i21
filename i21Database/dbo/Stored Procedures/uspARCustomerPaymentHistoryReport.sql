@@ -168,7 +168,7 @@ FROM (
 			AND P.strPaymentMethod <> 'CF Invoice'
 		WHERE P.ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-		  AND (@strPaymentMethod IS NULL OR strPaymentMethod LIKE '%'+@strPaymentMethod+'%')
+		  AND (@strPaymentMethod IS NULL OR strPaymentMethod LIKE '%'+@strPaymentMethod+'%' OR (@strPaymentMethod LIKE '%Credit Card%' AND P.intEntityCardInfoId IS NOT NULL))
 		  AND (@strRecordNumberFrom IS NULL OR strRecordNumber LIKE '%'+@strRecordNumberFrom+'%')
 
 		UNION ALL
@@ -231,7 +231,7 @@ FROM (
 		FROM dbo.tblARPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFrom AND @dtmDateTo
-		  AND (@strPaymentMethod IS NULL OR strPaymentMethod LIKE '%'+@strPaymentMethod+'%')
+		  AND (@strPaymentMethod IS NULL OR strPaymentMethod LIKE '%'+@strPaymentMethod+'%' OR (@strPaymentMethod LIKE '%Credit Card%' AND intEntityCardInfoId IS NOT NULL))
 		  AND (@strRecordNumberFrom IS NULL OR strRecordNumber LIKE '%'+@strRecordNumberFrom+'%')
 	) PREPAYMENT ON I.intEntityCustomerId = PREPAYMENT.intEntityCustomerId 
 				AND I.intPaymentId = PREPAYMENT.intPaymentId

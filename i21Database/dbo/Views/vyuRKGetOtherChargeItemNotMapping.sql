@@ -1,7 +1,13 @@
 ﻿CREATE VIEW vyuRKGetOtherChargeItemNotMapping
+
 AS
-select c.intM2MConfigurationId,c.intContractBasisId,c.intItemId,strItemNo,strContractBasis,0 as intConcurrencyId from tblRKM2MConfiguration  c
-JOIN tblICItem i on i.intItemId=c.intItemId
-JOIN tblCTContractBasis ct on ct.intContractBasisId=c.intContractBasisId
 
-
+SELECT c.intM2MConfigurationId
+	, c.intFreightTermId
+	, c.intItemId
+	, strItemNo
+	, strFreightTerm
+	, 0 as intConcurrencyId
+FROM tblRKM2MConfiguration  c
+JOIN tblICItem i on i.intItemId = c.intItemId
+JOIN tblSMFreightTerms ft on ft.intFreightTermId = c.intFreightTermId

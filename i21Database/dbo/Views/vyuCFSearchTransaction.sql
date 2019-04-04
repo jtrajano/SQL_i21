@@ -48,6 +48,7 @@ SELECT
 	,cfSite.strTaxState
 	,cfSite.strTaxGroup
 	,cfSite.strSiteName
+	,cfSite.strSiteAddress
 	,cfItem.strProductNumber
 	,cfItem.strItemNo
 	,cfItem.strDescription
@@ -67,6 +68,7 @@ SELECT
 	,cfTransaction.strPriceMethod
 	,cfTransaction.strPriceBasis
 	,cfTransaction.dblTransferCost
+	,dblTotalTransferCost = ROUND((ISNULL(cfTransaction.dblQuantity,0) * ISNULL(cfTransaction.dblTransferCost,0)),2)
 	,cfTransaction.dtmPostedDate
 	,cfTransaction.dblMargin 
 	,cfTransaction.dtmInvoiceDate
@@ -126,7 +128,7 @@ LEFT OUTER JOIN
 			ON cfNetwork.intCustomerId = emEntity.intEntityId) as cfNetwork  
 	ON cfNetwork.intNetworkId = cfTransaction.intNetworkId
 LEFT OUTER JOIN
-	(	SELECT   smiCompanyLocation.strLocationName, cfiSite.intSiteId, cfiSite.strSiteNumber, cfiSite.strSiteName, cfiSite.strTaxState, TG.strTaxGroup
+	(	SELECT   smiCompanyLocation.strLocationName, cfiSite.intSiteId, cfiSite.strSiteNumber, cfiSite.strSiteName, cfiSite.strTaxState, TG.strTaxGroup,cfiSite.strSiteAddress
 			,SG.strSiteGroup
         FROM dbo.tblCFSite AS cfiSite 
 		LEFT OUTER JOIN	dbo.tblSMCompanyLocation AS smiCompanyLocation 
@@ -234,9 +236,6 @@ LEFT OUTER JOIN (SELECT intTransactionId,
   SELECT TOP 1 COUNT(*) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0  
  ) AS cfDuplicateUnpostedTransaction
  
-
-
-
 
 GO
 

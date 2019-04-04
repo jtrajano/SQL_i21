@@ -8,7 +8,8 @@ CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	,@intContractId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intStorageScheduleId AS INT = NULL
-	,@InventoryShipmentId AS INT OUTPUT 
+	,@InventoryShipmentId AS INT OUTPUT
+	,@intInvoiceId AS INT = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -41,7 +42,6 @@ DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @totalShipment AS INT
 DECLARE @totalContract AS INT
 DECLARE @intInventoryShipmentItemId AS INT
-		,@intInvoiceId AS INT
 		,@intOwnershipType AS INT
 		,@intItemId INT
 		,@intPricingTypeId AS INT
@@ -192,6 +192,7 @@ BEGIN TRY
 					,intStorageLocationId
 					,ysnIsStorage
 					,intStorageScheduleTypeId 
+					,ysnAllowVoucher
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnitStorage , @intEntityId, @strDistributionOption, NULL
 				SELECT TOP 1 @dblQtyShipped = dblQty FROM @ItemsForItemShipment IIS
@@ -217,6 +218,7 @@ BEGIN TRY
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 							,ysnIsStorage 
+							,ysnAllowVoucher
 						)
 						EXEC dbo.uspSCGetScaleItemForItemShipment 
 							 @intTicketId
@@ -250,6 +252,7 @@ BEGIN TRY
 				,intSubLocationId
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 				,ysnIsStorage 
+				,ysnAllowVoucher
 			)
 			EXEC dbo.uspSCGetScaleItemForItemShipment 
 				@intTicketId
@@ -363,8 +366,10 @@ BEGIN TRY
 								,intTransactionTypeId
 								,intLotId
 								,intSubLocationId
-								,intStorageLocationId
-								,ysnIsStorage 
+								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+								,ysnIsStorage
+								,intStorageScheduleTypeId 
+								,ysnAllowVoucher
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @intEntityId, @ysnDPStorage;
@@ -400,6 +405,7 @@ BEGIN TRY
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage
 					,intStorageScheduleTypeId 
+					,ysnAllowVoucher
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
 				SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
@@ -470,6 +476,7 @@ BEGIN TRY
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 							,ysnIsStorage 
+							,ysnAllowVoucher
 						)
 						EXEC dbo.uspSCGetScaleItemForItemShipment
 							@intTicketId
@@ -503,6 +510,7 @@ BEGIN TRY
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 							,ysnIsStorage 
+							,ysnAllowVoucher
 						)
 						EXEC dbo.uspSCGetScaleItemForItemShipment
 							@intTicketId

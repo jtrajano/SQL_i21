@@ -85,7 +85,7 @@ OUTER APPLY (
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2, 13)
-	AND A.ysnPrepay = 1
+	AND B.ysnOffset = 0
 	AND NOT EXISTS (
 		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
 	)
@@ -246,7 +246,7 @@ OUTER APPLY (
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2, 13)
-	AND A.ysnPrepay = 0
+	AND B.ysnOffset = 1
 	AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = B.intBillId
 )

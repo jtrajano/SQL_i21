@@ -39,6 +39,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dtmDueDate
 	 , strFreightTerm
 	 , strDeliverPickup
+	 , strComments
 	 , strInvoiceHeaderComment
 	 , strInvoiceFooterComment
 	 , dblInvoiceSubtotal
@@ -53,7 +54,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strItem
 	 , strItemDescription
 	 , strUnitMeasure
-	 , strUnitMeasureSymbol
 	 , dblQtyShipped
 	 , dblQtyOrdered
 	 , dblDiscount
@@ -62,9 +62,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblItemPrice
 	 , strPaid
 	 , strPosted
-	 , intTaxCodeId
-	 , strTaxCode
-	 , dblTaxDetail
 	 , strTransactionType
 	 , intDetailCount
 	 , intRecipeId
@@ -73,7 +70,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strItemType
 	 , dblTotalWeight
 	 , strVFDDocumentNumber
-	 , strBOLNumberDetail
 	 , ysnHasEmailSetup
 	 , ysnHasRecipeItem
 	 , ysnHasVFDDrugItem
@@ -98,6 +94,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , intEntityUserId
 	 , strRequestId
 	 , strInvoiceFormat
+	 , blbSignature
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -146,6 +143,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dtmDueDate				= INV.dtmDueDate
 	 , strFreightTerm			= FREIGHT.strFreightTerm
 	 , strDeliverPickup			= FREIGHT.strFobPoint
+	 , strComments				= dbo.fnEliminateHTMLTags(INV.strComments, 0)
 	 , strInvoiceHeaderComment	= INV.strComments
 	 , strInvoiceFooterComment	= INV.strFooterComments
 	 , dblInvoiceSubtotal		= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceSubtotal, 0) END
@@ -153,7 +151,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotalTax, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotalTax, 0) END
 								  ELSE NULL END
-	 , dblInvoiceTotal			= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceTotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblProvisionalAmount, 0)  END
+	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
@@ -164,7 +162,6 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
-	 , strUnitMeasureSymbol		= INVOICEDETAIL.strSymbol
 	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblQtyShipped, 0) END
 								  ELSE NULL END
@@ -174,16 +171,13 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblDiscount				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									ISNULL(INVOICEDETAIL.dblDiscount, 0) / 100
 								  ELSE NULL END
-	 , dblTotalTax				= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblTax, 0) * -1 ELSE ISNULL(INV.dblTax, 0) END
+	 , dblTotalTax				= dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) ELSE ISNULL(TOTALTAX.dblSSTTax, 0) END
 	 , dblPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) ELSE NULL END
 	 , dblItemPrice				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotal, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotal, 0) END
 								  ELSE NULL END
 	 , strPaid					= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , strPosted				= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
-	 , intTaxCodeId				= INVOICEDETAIL.intTaxCodeId
-	 , strTaxCode				= INVOICEDETAIL.strTaxCode
-	 , dblTaxDetail				= INVOICEDETAIL.dblAdjustedTax
 	 , strTransactionType		= INV.strTransactionType
 	 , intDetailCount			= ISNULL(INVOICEITEMS.intInvoiceDetailCount, 0)
 	 , intRecipeId				= INVOICEDETAIL.intRecipeId
@@ -192,7 +186,6 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strItemType				= INVOICEDETAIL.strItemType
 	 , dblTotalWeight			= ISNULL(INV.dblTotalWeight, 0)
 	 , strVFDDocumentNumber		= INVOICEDETAIL.strVFDDocumentNumber
-	 , strBOLNumberDetail		= INVOICEDETAIL.strBOLNumberDetail
 	 , ysnHasEmailSetup			= CASE WHEN (ISNULL(EMAILSETUP.intEmailSetupCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , ysnHasRecipeItem			= CASE WHEN (ISNULL(RECIPEITEM.intRecipeItemCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , ysnHasVFDDrugItem        = CASE WHEN (ISNULL(VFDDRUGITEM.intVFDDrugItemCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -217,6 +210,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
+	 , blbSignature				= INV.blbSignature
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
@@ -245,25 +239,21 @@ INNER JOIN (
 LEFT JOIN (
 	SELECT ID.intInvoiceId
 	     , ID.intInvoiceDetailId
-		 , ID.intCommentTypeId
-		 , ID.dblTotalTax
+		 , ID.intCommentTypeId		 
+		 , dblTotalTax				= CASE WHEN ISNULL(ID.dblComputedGrossPrice, 0) = 0 THEN ID.dblTotalTax ELSE 0 END
 		 , ID.dblContractBalance
 		 , ID.dblQtyShipped
 		 , ID.dblQtyOrdered
 		 , ID.dblDiscount
-		 , ID.dblPrice
+		 , ID.dblComputedGrossPrice	
+		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
-		 , ID.strBOLNumberDetail
 		 , ID.strSCInvoiceNumber
 		 , UOM.strUnitMeasure
-		 , UOM.strSymbol
 		 , CONTRACTS.dblBalance
 		 , CONTRACTS.strContractNumber
 		 , CONTRACTS.strCustomerContract
-		 , TAX.intTaxCodeId
-		 , TAX.dblAdjustedTax
-		 , TAX.strTaxCode
 		 , ITEM.strItemNo
 		 , ITEM.strInvoiceComments
 		 , strItemType			= ITEM.strType
@@ -296,8 +286,7 @@ LEFT JOIN (
 		SELECT intItemUOMId
 			 , intItemId
 			 , strUnitMeasure
-			 , strSymbol
-		FROM dbo.vyuARItemUOM WITH (NOLOCK)
+		FROM dbo. vyuARItemUOM WITH (NOLOCK)
 	) UOM ON ID.intItemUOMId = UOM.intItemUOMId
 	     AND ID.intItemId = UOM.intItemId
 	LEFT JOIN (
@@ -309,21 +298,7 @@ LEFT JOIN (
 		SELECT intSalesOrderId
 			 , strBOLNumber
 		FROM dbo.tblSOSalesOrder WITH (NOLOCK)
-	) SO ON SOD.intSalesOrderId = SO.intSalesOrderId
-	LEFT JOIN (
-		SELECT IDT.intInvoiceDetailId
-			 , IDT.intTaxCodeId
-			 , IDT.dblAdjustedTax
-			 , TAXCODE.strTaxCode
-		FROM dbo.tblARInvoiceDetailTax IDT WITH (NOLOCK)
-		LEFT JOIN (
-			SELECT intTaxCodeId
-				 , strTaxCode
-			FROM dbo.tblSMTaxCode WITH (NOLOCK)
-		) TAXCODE ON IDT.intTaxCodeId = TAXCODE.intTaxCodeId
-		WHERE dblAdjustedTax <> 0
-	) TAX ON ID.intInvoiceDetailId = TAX.intInvoiceDetailId
-	     AND ID.intItemId <> ISNULL((SELECT TOP 1 intItemForFreightId FROM dbo.tblTRCompanyPreference WITH (NOLOCK)), 0)
+	) SO ON SOD.intSalesOrderId = SO.intSalesOrderId	
 	LEFT JOIN (
 		SELECT CH.intContractHeaderId
 			 , CD.intContractDetailId
@@ -358,6 +333,14 @@ LEFT JOIN (
 		FROM dbo.tblSCTicket SC WITH (NOLOCK)
 		LEFT JOIN dbo.tblLGLoad LG ON SC.intLoadId = LG.intLoadId
 	) SCALE ON ID.intTicketId = SCALE.intTicketId
+	LEFT JOIN (
+		SELECT intTransactionId
+			 , intTransactionDetailId
+			 , strPricing
+		FROM dbo.tblARPricingHistory WITH (NOLOCK)
+		WHERE ysnApplied = 1
+	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
+			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId
 	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
@@ -400,8 +383,16 @@ OUTER APPLY (
 ) COMPANY
 OUTER APPLY (
 	SELECT TOP 1 ysnPrintInvoicePaymentDetail
+			   , strInvoiceReportName
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) ARPREFERENCE
+OUTER APPLY (
+	SELECT dblSSTTax 		= SUM(CASE WHEN UPPER(strTaxClass) = 'STATE SALES TAX (SST)' OR dblComputedGrossPrice = 0 THEN dblAdjustedTax ELSE 0 END)
+		 , dblNonSSTTax 	= SUM(CASE WHEN UPPER(strTaxClass) <> 'STATE SALES TAX (SST)' AND dblComputedGrossPrice <> 0 THEN dblAdjustedTax ELSE 0 END)
+	FROM vyuARTaxDetailReport
+	WHERE strTaxTransactionType = 'Invoice'
+	  AND intTransactionId = INV.intInvoiceId	  
+) TOTALTAX
 OUTER APPLY (
 	SELECT COUNT(*) AS intInvoiceDetailCount
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)

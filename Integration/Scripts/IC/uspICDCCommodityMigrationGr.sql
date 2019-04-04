@@ -214,7 +214,7 @@ join
 (select distinct IL.intLocationId, I.intCommodityId
 from tblICItemLocation IL
 join tblICItem I on IL.intItemId = I.intItemId
-where I.intCommodityId is not null) CL
+where I.intCommodityId is not null AND IL.intLocationId IS NOT NULL) CL
 on CL.intCommodityId = I.intCommodityId
 WHERE NOT EXISTS (select * from tblICItemLocation where intItemId = I.intItemId and intLocationId = CL.intLocationId)
 ----====================================STEP 13======================================

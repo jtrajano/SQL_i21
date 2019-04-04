@@ -20,7 +20,9 @@
 	[intUnitMeasureId] INT NULL, 
     [ysnShowOpenContract] BIT NOT NULL DEFAULT 1, 
     [ysnShowStorage] BIT NOT NULL DEFAULT 1, 
-	[strRemoteExportFilePath] NVARCHAR(MAX) DEFAULT('') NULL
+	[strRemoteExportFilePath] NVARCHAR(MAX) DEFAULT('') NULL,
+	[intScaleRemoteFrequencyCheck] INT NOT NULL DEFAULT 1800, 
+	[ysnIsRemote] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])

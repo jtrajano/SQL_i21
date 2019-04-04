@@ -188,7 +188,7 @@ BEGIN
 		  ,(SELECT TOP 1 CB.strContractBasis
 			FROM tblCTContractHeader CH
 			JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-			JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+			JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 			WHERE CD.intContractDetailId = LD.intSContractDetailId
 			) AS strSalesContractIncoTerm
 		  ,(SELECT E1.strPhone

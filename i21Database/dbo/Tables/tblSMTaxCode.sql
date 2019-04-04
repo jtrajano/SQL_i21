@@ -24,13 +24,20 @@
 	[intTaxCategoryId]			INT		NULL, 
 	[strStoreTaxNumber]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
 	[intPayToVendorId]			INT		NULL, 
+    [intPurchaseTaxExemptionAccountId] INT		NULL, 
+    [intSalesTaxExemptionAccountId] INT		NULL, 
     [intConcurrencyId]			INT		NOT NULL	DEFAULT 1, 
     CONSTRAINT [FK_tblSMTaxCode_tblSMTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES tblSMTaxClass(intTaxClassId),
     CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_salesTax] FOREIGN KEY ([intSalesTaxAccountId]) REFERENCES tblGLAccount(intAccountId),
     CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_purchaseTax] FOREIGN KEY ([intPurchaseTaxAccountId]) REFERENCES tblGLAccount(intAccountId), 
     CONSTRAINT [AK_tblSMTaxCode_strTaxCode] UNIQUE ([strTaxCode]), 
     CONSTRAINT [FK_tblSMTaxCode_tblTFTaxCategory] FOREIGN KEY ([intTaxCategoryId]) REFERENCES [tblTFTaxCategory]([intTaxCategoryId]),
-	CONSTRAINT [FK_tblSMTaxCode_tblEMEntity] FOREIGN KEY ([intPayToVendorId]) REFERENCES [tblEMEntity]([intEntityId])
+	CONSTRAINT [FK_tblSMTaxCode_tblEMEntity] FOREIGN KEY ([intPayToVendorId]) REFERENCES [tblEMEntity]([intEntityId]),
+
+    CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_purchaseExemptionTax] FOREIGN KEY ([intPurchaseTaxExemptionAccountId]) REFERENCES tblGLAccount(intAccountId), 
+    CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_salesExemptionTax] FOREIGN KEY ([intSalesTaxExemptionAccountId]) REFERENCES tblGLAccount(intAccountId), 
+
+
 )
 GO
 

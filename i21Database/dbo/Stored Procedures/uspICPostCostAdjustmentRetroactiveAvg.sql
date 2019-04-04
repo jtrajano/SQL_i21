@@ -37,6 +37,24 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @isStockRebuilding AS BIT 
+
+IF OBJECT_ID('tempdb..#tmpAutoVarianceBatchesForAVGCosting') IS NULL  
+BEGIN
+	SET @isStockRebuilding = 0
+
+	CREATE TABLE #tmpAutoVarianceBatchesForAVGCosting (
+		intItemId INT
+		,intItemLocationId INT
+		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	)
+END
+ELSE 
+BEGIN 
+	SET @isStockRebuilding = 1 
+END 
+
 -- Create the CONSTANT variables for the costing methods
 BEGIN 
 	DECLARE @AVERAGECOST AS INT = 1
@@ -314,28 +332,33 @@ BEGIN
 	SET @NewRunningValue = @OriginalRunningValue
 
 	-- Get the original average cost. 
-	SELECT @OriginalAverageCost = 
-		CASE	WHEN @RunningQty > 0 AND ISNULL(@OriginalRunningValue, 0) / @RunningQty > 0 THEN 
-					ISNULL(@OriginalRunningValue, 0) / @RunningQty
-				ELSE 
-					(
-						SELECT	TOP 1 
-								dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @StockItemUOMId, t.dblCost)
-						FROM	tblICInventoryTransaction t LEFT JOIN tblICCostingMethod c
-									ON t.intCostingMethod = c.intCostingMethodId 
-						WHERE	t.intItemId = @intItemId
-								AND t.intItemLocationId = @intItemLocationId
-								AND ISNULL(t.ysnIsUnposted, 0) = 0 
-								AND t.intInventoryTransactionId < @InventoryTransactionStartId
-								AND t.dblQty <> 0 
-								AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
-						ORDER BY 
-							t.intInventoryTransactionId DESC 
-					)
-		END 		
+	SELECT @OriginalAverageCost = dbo.fnICGetMovingAverageCost (
+				@intItemId
+				,@intItemLocationId
+				,@InventoryTransactionStartId
+			)
+				
+		--CASE	WHEN @RunningQty > 0 AND ISNULL(@OriginalRunningValue, 0) / @RunningQty > 0 THEN 
+		--			ISNULL(@OriginalRunningValue, 0) / @RunningQty
+		--		ELSE 
+		--			(
+		--				SELECT	TOP 1 
+		--						dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @StockItemUOMId, t.dblCost)
+		--				FROM	tblICInventoryTransaction t LEFT JOIN tblICCostingMethod c
+		--							ON t.intCostingMethod = c.intCostingMethodId 
+		--				WHERE	t.intItemId = @intItemId
+		--						AND t.intItemLocationId = @intItemLocationId
+		--						AND ISNULL(t.ysnIsUnposted, 0) = 0 
+		--						AND t.intInventoryTransactionId < @InventoryTransactionStartId
+		--						AND t.dblQty <> 0 
+		--						AND (c.strCostingMethod <> 'ACTUAL COST' OR t.strActualCostId IS NULL)
+		--				ORDER BY 
+		--					t.intInventoryTransactionId DESC 
+		--			)
+		--END 		
 
 	SET @OriginalAverageCost = ISNULL(@OriginalAverageCost, 0) 
-	SET @NewAverageCost = @OriginalAverageCost 		
+	SET @NewAverageCost = @OriginalAverageCost
 END 
 
 -- Loop to perform the retroactive computation
@@ -488,41 +511,78 @@ BEGIN
 		--	END
 		--END 
 
+		-- Convert the cost to stock unit
+		SELECT 
+			@t_dblCost = ISNULL(
+				dbo.fnCalculateCostBetweenUOM(cb.intItemUOMId, @StockItemUOMId, cb.dblCost)
+				,dbo.fnCalculateCostBetweenUOM(@t_intItemUOMId, @StockItemUOMId, @t_dblCost)				
+			) 
+		FROM
+			tblICInventoryFIFO cb 
+		WHERE
+			cb.intItemId = @t_intItemId
+			AND cb.intItemLocationId = @t_intItemLocationId
+			AND cb.strTransactionId = @t_strTransactionId
+			AND cb.intTransactionId = @t_intTransactionId
+			AND cb.intTransactionDetailId = @t_intTransactionDetailId
+			AND cb.ysnIsUnposted = 0 
+
 		-- Calculate the Original Average Cost 
-		SET @OriginalAverageCost = 
-			CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 AND @OriginalRunningValue / (@RunningQty + @t_dblQty) > 0 THEN 
-						@OriginalRunningValue / (@RunningQty + @t_dblQty) 
-					WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
-						CASE 
-							WHEN @t_intTransactionId = @intSourceTransactionId
-							AND @t_intTransactionDetailId = @intSourceTransactionDetailId
-							AND @t_strTransactionId = @strSourceTransactionId THEN 
-								@CostBucketOriginalCost 
-							ELSE 
-								@t_dblCost
-						END 
-					ELSE 
-						@OriginalAverageCost
-			END 
+		SET @OriginalAverageCost = dbo.fnCalculateAverageCost (
+						@t_dblQty
+						,@t_dblCost
+						,@RunningQty
+						,@OriginalAverageCost 
+					)
+
+			--CASE	WHEN @t_dblQty > 0 AND @RunningQty > 0 AND @OriginalRunningValue / (@RunningQty + @t_dblQty) > 0 THEN 
+			--			@OriginalRunningValue / (@RunningQty + @t_dblQty) 
+			--		WHEN @t_dblQty > 0 AND @RunningQty <= 0 THEN 
+			--			CASE 
+			--				WHEN @t_intTransactionId = @intSourceTransactionId
+			--				AND @t_intTransactionDetailId = @intSourceTransactionDetailId
+			--				AND @t_strTransactionId = @strSourceTransactionId THEN 
+			--					@CostBucketOriginalCost 
+			--				ELSE 
+			--					@t_dblCost
+			--			END 
+			--		ELSE 
+			--			@OriginalAverageCost
+			--END 
 
 		-- Calculate the New Average Cost 
-		SET @NewAverageCost = 
-			CASE	WHEN 
-						@t_dblQty > 0 AND @RunningQty > 0 THEN 
-							@NewRunningValue / (@RunningQty + @t_dblQty) 
-					WHEN 
-						@t_dblQty > 0 AND @RunningQty <= 0 THEN 
-							CASE 
-								WHEN @t_intTransactionId = @intSourceTransactionId
+		SET @NewAverageCost = dbo.fnCalculateAverageCost (
+						@t_dblQty
+						,CASE 
+							WHEN 
+								@t_dblQty > 0 								
+								AND @t_intTransactionId = @intSourceTransactionId
 								AND @t_intTransactionDetailId = @intSourceTransactionDetailId
 								AND @t_strTransactionId = @strSourceTransactionId THEN 
 									(@CostBucketOriginalValue + @CostAdjustment) / @CostBucketOriginalStockIn
-								ELSE 
-									@t_dblCost
-							END 				
-					ELSE 
-						@NewAverageCost
-			END	 
+							ELSE  
+								@t_dblCost
+						END
+						,@RunningQty
+						,@NewAverageCost 
+					)
+
+			--CASE	WHEN 
+			--			@t_dblQty > 0 AND @RunningQty > 0 THEN 
+			--				@NewRunningValue / (@RunningQty + @t_dblQty) 
+			--		WHEN 
+			--			@t_dblQty > 0 AND @RunningQty <= 0 THEN 
+			--				CASE 
+			--					WHEN @t_intTransactionId = @intSourceTransactionId
+			--					AND @t_intTransactionDetailId = @intSourceTransactionDetailId
+			--					AND @t_strTransactionId = @strSourceTransactionId THEN 
+			--						(@CostBucketOriginalValue + @CostAdjustment) / @CostBucketOriginalStockIn
+			--					ELSE 
+			--						@t_dblCost
+			--				END 				
+			--		ELSE 
+			--			@NewAverageCost
+			--END	 
 
 		SET @NewAverageCost = 
 				CASE WHEN ISNULL(@NewAverageCost, 0) < 0 THEN @OriginalAverageCost ELSE @NewAverageCost END 
@@ -756,6 +816,7 @@ BEGIN
 END 
 
 -- Book the cost adjustment. 
+IF @costAdjustmentType = @costAdjustmentType_SUMMARIZED
 BEGIN 
 	SET @strNewCost = CONVERT(NVARCHAR, CAST(@CostAdjustment AS MONEY), 1)
 
@@ -809,14 +870,104 @@ BEGIN
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
 	END
-END 
 
--- Update the log with correct inventory transaction id
-IF @InventoryTransactionIdentityId IS NOT NULL 
+	-- Update the log with correct inventory transaction id
+	IF @InventoryTransactionIdentityId IS NOT NULL 
+	BEGIN 
+		UPDATE	tblICInventoryFIFOCostAdjustmentLog 
+		SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+		WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+	END 
+END 
+ELSE IF @costAdjustmentType = @costAdjustmentType_DETAILED
 BEGIN 
-	UPDATE	tblICInventoryFIFOCostAdjustmentLog 
-	SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+
+	DECLARE @strTransactionIdCostAdjLog AS NVARCHAR(50)
+			,@intTransactionIdCostAdjLog AS INT
+			,@intTransactionDetailIdCostAdjLog AS INT 
+			,@intCostAdjId AS INT 
+
+	DECLARE loopCostAdjustmentLog CURSOR LOCAL FAST_FORWARD
+	FOR 
+	SELECT	
+			ROUND(ISNULL(dblValue, 0), 2)
+			,strRelatedTransactionId
+			,intRelatedTransactionId
+			,intRelatedTransactionDetailId
+			,intId 
+	FROM	tblICInventoryFIFOCostAdjustmentLog	
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost		
+
+	OPEN loopCostAdjustmentLog
+	FETCH NEXT FROM loopCostAdjustmentLog INTO 
+		@CurrentValue 
+		,@strTransactionIdCostAdjLog
+		,@intTransactionIdCostAdjLog
+		,@intTransactionDetailIdCostAdjLog
+		,@intCostAdjId
+
+	WHILE @@FETCH_STATUS = 0 
+	BEGIN
+		SET @InventoryTransactionIdentityId = NULL 
+		EXEC [uspICPostInventoryTransaction]
+			@intItemId								= @intItemId
+			,@intItemLocationId						= @intItemLocationId
+			,@intItemUOMId							= @intItemUOMId
+			,@intSubLocationId						= @intSubLocationId
+			,@intStorageLocationId					= @intStorageLocationId
+			,@dtmDate								= @dtmDate
+			,@dblQty								= 0
+			,@dblUOMQty								= 0
+			,@dblCost								= 0
+			,@dblValue								= @CurrentValue
+			,@dblSalesPrice							= 0
+			,@intCurrencyId							= NULL 
+			,@intTransactionId						= @intTransactionId
+			,@intTransactionDetailId				= @intTransactionDetailId
+			,@strTransactionId						= @strTransactionId
+			,@strBatchId							= @strBatchId
+			,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
+			,@intLotId								= NULL  
+			,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
+			,@intRelatedTransactionId				= @intTransactionIdCostAdjLog
+			,@strRelatedTransactionId				= @strTransactionIdCostAdjLog
+			,@strTransactionForm					= @strTransactionForm
+			,@intEntityUserSecurityId				= @intEntityUserSecurityId
+			,@intCostingMethod						= @AVERAGECOST -- TODO: Double check the costing method. Make sure it matches with the SP. 
+			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+			,@intFobPointId							= @intFobPointId 
+			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+			,@intForexRateTypeId					= NULL
+			,@dblForexRate							= 1
+			,@strDescription						= @strDescription	
+
+		-- Update ysnIsUnposted flag. 
+		BEGIN 
+			UPDATE	tblICInventoryTransaction 
+			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+		END 
+
+		-- Update the log with correct inventory transaction id
+		IF @InventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			UPDATE	tblICInventoryFIFOCostAdjustmentLog 
+			SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+			WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+					AND intId = @intCostAdjId
+		END 
+
+		FETCH NEXT FROM loopCostAdjustmentLog INTO 
+			@CurrentValue 
+			,@strTransactionIdCostAdjLog
+			,@intTransactionIdCostAdjLog
+			,@intTransactionDetailIdCostAdjLog
+			,@intCostAdjId
+	END 
+
+	CLOSE loopCostAdjustmentLog;
+	DEALLOCATE loopCostAdjustmentLog;
 END 
 
 -- Update the average cost
@@ -961,8 +1112,32 @@ BEGIN
 	FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 				ON ItemPricing.intItemId = Stock.intItemId
 				AND ItemPricing.intItemLocationId = Stock.intItemLocationId
+			CROSS APPLY (
+				SELECT 
+					TOP 1
+					intItemId = @intItemId
+					,intItemLocationId = @intItemLocationId
+				FROM 
+					#tmpAutoVarianceBatchesForAVGCosting tmp
+				WHERE
+					1 = 
+						CASE 
+							WHEN @isStockRebuilding = 0 THEN 
+								1
+							WHEN 
+								@isStockRebuilding = 1 
+								AND tmp.intItemId = @intItemId
+								AND tmp.intItemLocationId = @intItemLocationId
+								AND tmp.strTransactionId = @strTransactionId
+								AND tmp.strBatchId = @strBatchId							
+							THEN 
+								1							
+							ELSE 
+								0
+						END 
+			) allowAutoVariance 
 	WHERE	ItemPricing.intItemId = @intItemId
 			AND ItemPricing.intItemLocationId = @intItemLocationId			
 			AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId), 2) <> 0
-
+			
 END

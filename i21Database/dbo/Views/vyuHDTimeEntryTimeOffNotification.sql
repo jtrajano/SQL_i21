@@ -1,9 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuHDTimeEntryTimeOffNotification]
 	AS
 		select
-		b.intEntityId
+		intId = convert(int,ROW_NUMBER() over (order by b.intEntityId))
+		,b.intEntityId
 		,a.intTimeOffRequestId
-		,strFullName = ltrim(rtrim(isnull(b.strFirstName, ''))) + ' ' + ltrim(rtrim(isnull(b.strMiddleName,''))) + ' ' + ltrim(rtrim(isnull(b.strLastName,''))) COLLATE Latin1_General_CI_AS
+		--,strFullName = ltrim(rtrim(isnull(b.strFirstName, ''))) + ' ' + ltrim(rtrim(isnull(b.strMiddleName,''))) + ' ' + ltrim(rtrim(isnull(b.strLastName,''))) COLLATE Latin1_General_CI_AS
+		,strFullName = be.strName
 		,a.dtmDateFrom
 		,a.dtmDateTo
 		,c.intTypeTimeOffId
@@ -21,6 +23,7 @@
 		from
 		tblPRTimeOffRequest a
 		join tblPREmployee b on b.intEntityId = a.intEntityEmployeeId and b.ysnActive = convert(bit,1)
+		join tblEMEntity be on be.intEntityId = b.intEntityId
 		join tblPRTypeTimeOff c on c.intTypeTimeOffId = a.intTypeTimeOffId
 		left join tblHDTimeEntryResources d on d.intEntityId = a.intEntityEmployeeId
 		left join tblEMEntity e on e.intEntityId = d.intResourcesEntityId

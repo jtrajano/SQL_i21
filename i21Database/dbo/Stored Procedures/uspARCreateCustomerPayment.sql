@@ -154,6 +154,8 @@ DECLARE  @NewId INT
 		,@AddDetailError NVARCHAR(MAX)
 
 BEGIN TRY
+
+
 	INSERT INTO [tblARPayment]
 		([intEntityCustomerId]
 		,[intCurrencyId]
@@ -190,7 +192,7 @@ BEGIN TRY
 		,[intBankAccountId]				= @BankAccountId
 		,[intPaymentMethodId]			= @PaymentMethodId
 		,[intLocationId]				= @CompanyLocationId
-		,[dblAmountPaid]				= @AmountPaid
+		,[dblAmountPaid]				= @AmountPaid 
 		,[dblBaseAmountPaid]			= @AmountPaid
 		,[dblUnappliedAmount]			= @AmountPaid
 		,[dblBaseUnappliedAmount]		= @AmountPaid
@@ -244,11 +246,15 @@ BEGIN
 	SET @Discount = ROUND(@Discount, [dbo].[fnARGetDefaultDecimal]())
 	SET @Interest = ROUND(@Interest, [dbo].[fnARGetDefaultDecimal]())
 
+
+
 	BEGIN TRY
+
+		
 		EXEC [dbo].[uspARAddInvoiceToPayment]		
 			 @PaymentId				= @NewId
 			,@InvoiceId				= @InvoiceId
-			,@Payment				= @Payment
+			,@Payment				= @Payment 
 			,@ApplyTermDiscount		= @ApplyTermDiscount
 			,@Discount				= @Discount	
 			,@Interest				= @Interest

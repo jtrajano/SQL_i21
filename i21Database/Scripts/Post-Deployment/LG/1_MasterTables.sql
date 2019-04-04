@@ -29,6 +29,7 @@ BEGIN
 			WHERE ysnDocumentsReceived IS NULL AND EXISTS(SELECT TOP 1 1 FROM tblLGLoadDocuments WHERE intLoadId = tblLGLoad.intLoadId)
 	')
 END
+GO
 
 /*
 * Set Container Numbers value 
@@ -48,3 +49,124 @@ BEGIN
 													 WHERE LDCL.intLoadDetailId = LD.intLoadDetailId)
 	')
 END
+
+/* 
+* Generate Load - Data Migration to New Fields 
+*/
+
+--Transport Mode
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGGenerateLoad') AND name = 'intTransportationMode')
+BEGIN
+	EXEC('UPDATE tblLGGenerateLoad
+		SET intTransportationMode = ISNULL((SELECT TOP 1 intTransportationMode FROM tblLGLoad WHERE intGenerateLoadId = tblLGGenerateLoad.intGenerateLoadId),
+										   (SELECT TOP 1 intDefaultTransportationMode FROM tblLGCompanyPreference))
+		WHERE intTransportationMode IS NULL
+	')
+END
+GO
+
+--Hauler
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGGenerateLoad') AND name = 'intHaulerEntityId')
+BEGIN
+	EXEC('UPDATE tblLGGenerateLoad
+		SET intHaulerEntityId = CASE WHEN (intType IN (1, 3)) THEN intPHaulerEntityId ELSE intSHaulerEntityId END
+		WHERE intHaulerEntityId IS NULL
+	')
+END
+GO
+
+--Equipment Type
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGGenerateLoad') AND name = 'intEquipmentTypeId')
+BEGIN
+	EXEC('UPDATE tblLGGenerateLoad
+		SET intEquipmentTypeId = CASE WHEN (intType IN (1, 3)) THEN intPHaulerEntityId ELSE intSHaulerEntityId END
+		WHERE intEquipmentTypeId IS NULL
+	')
+END
+GO
+
+--Item Id
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGGenerateLoad') AND name = 'intItemId')
+BEGIN
+	EXEC('UPDATE GL
+		SET intItemId = CASE WHEN (GL.intType IN (1, 3)) THEN VGL.intPItemId ELSE VGL.intSItemId END
+		FROM tblLGGenerateLoad GL
+		INNER JOIN vyuLGGenerateLoad VGL ON GL.intGenerateLoadId = VGL.intGenerateLoadId
+		WHERE GL.intItemId IS NULL
+	')
+END
+GO
+
+--Ship Date
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGGenerateLoad') AND name = 'dtmShipDate')
+BEGIN
+	EXEC('UPDATE tblLGGenerateLoad
+		SET dtmShipDate = CASE WHEN (intType IN (1, 3)) THEN dtmPArrivalDate ELSE dtmSShipToDate END
+		WHERE intEquipmentTypeId IS NULL
+	')
+END
+GO
+
+--End Date
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGGenerateLoad') AND name = 'dtmEndDate')
+BEGIN
+	EXEC('UPDATE GL
+		SET dtmEndDate = CASE WHEN (intType IN (1, 3)) THEN PCD.dtmEndDate ELSE SCD.dtmEndDate END
+		FROM tblLGGenerateLoad GL
+		LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = GL.intPContractDetailId
+		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = GL.intSContractDetailId
+		WHERE GL.dtmEndDate IS NULL
+	')
+END
+GO
+
+/*
+* Set Load-Based value on Load Schedule table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'ysnLoadBased')
+BEGIN
+	EXEC ('UPDATE tblLGLoad
+			SET ysnLoadBased = CASE WHEN EXISTS(SELECT TOP 1 1 FROM vyuLGLoadDetailView WHERE intLoadId = tblLGLoad.intLoadId AND (ysnPLoad = 1 OR ysnSLoad = 1)) THEN 1 ELSE 0 END
+			WHERE ysnLoadBased IS NULL 
+				OR ysnLoadBased <> CASE WHEN EXISTS(SELECT TOP 1 1 FROM vyuLGLoadDetailView WHERE intLoadId = tblLGLoad.intLoadId AND (ysnPLoad = 1 OR ysnSLoad = 1)) THEN 1 ELSE 0 END
+	')
+END
+GO
+
+/*
+* Set Load-Based value on Generate Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGGenerateLoad') AND name = 'ysnLoadBased')
+BEGIN
+	EXEC ('UPDATE GL
+			SET ysnLoadBased = CASE WHEN (ISNULL(PCH.ysnLoad, 0) = 1 OR ISNULL(SCH.ysnLoad, 0) = 1) THEN 1 ELSE 0 END
+			FROM tblLGGenerateLoad GL
+				LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = GL.intPContractDetailId
+				LEFT JOIN tblCTContractHeader PCH ON PCD.intContractHeaderId = PCH.intContractHeaderId
+				LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = GL.intSContractDetailId
+				LEFT JOIN tblCTContractHeader SCH ON PCD.intContractHeaderId = SCH.intContractHeaderId
+			WHERE 
+				GL.ysnLoadBased IS NULL
+				OR GL.ysnLoadBased <> CASE WHEN (ISNULL(PCH.ysnLoad, 0) = 1 OR ISNULL(SCH.ysnLoad, 0) = 1) THEN 1 ELSE 0 END
+	')
+END
+GO
+
+/*
+* Apply default Sort value on Containers table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoadContainer') AND name = 'intSort')
+BEGIN
+	EXEC ('UPDATE LC
+				SET intSort = LC_Sorted.intSort
+			FROM 
+				tblLGLoadContainer LC
+				INNER JOIN 
+				(SELECT intLoadContainerId
+					,intSort = DENSE_RANK() OVER(PARTITION BY intLoadId ORDER BY intLoadContainerId)
+				FROM tblLGLoadContainer) LC_Sorted
+					ON LC.intLoadContainerId = LC_Sorted.intLoadContainerId
+			WHERE LC.intSort IS NULL
+	')
+END
+GO

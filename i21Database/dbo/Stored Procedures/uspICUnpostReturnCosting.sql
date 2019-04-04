@@ -54,6 +54,7 @@ DECLARE @intItemId AS INT
 		,@dblQty AS NUMERIC(38,20) 
 		,@dblUOMQty AS NUMERIC(38,20)
 		,@dblCost AS NUMERIC(38,20)
+		,@intTransactionTypeId AS INT
 		,@intLotId AS INT
 		,@dtmDate AS DATETIME
 		,@intCurrencyId AS INT 
@@ -76,6 +77,7 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 			,intInventoryTransactionId
+			,intTransactionTypeId
 			,intCostingMethod
 			,intFobPointId
 	)
@@ -89,6 +91,7 @@ BEGIN
 			,t.intSubLocationId
 			,t.intStorageLocationId
 			,t.intInventoryTransactionId
+			,t.intTransactionTypeId
 			,t.intCostingMethod
 			,t.intFobPointId
 	FROM	dbo.tblICInventoryTransaction t
@@ -387,6 +390,7 @@ BEGIN
 					,dblUOMQty 
 					,dblCost
 					,intLotId 
+					,intTransactionTypeId
 					,intCostingMethod
 					,intFobPointId
 			FROM	@ItemsToUnpost 
@@ -404,6 +408,7 @@ BEGIN
 				,@dblUOMQty 
 				,@dblCost
 				,@intLotId
+				,@intTransactionTypeId
 				,@intCostingMethod
 				,@intFobPointId
 				;
@@ -471,6 +476,8 @@ BEGIN
 						,@dblQty
 						,@dblUOMQty
 						,@intLotId
+						,@intTransactionTypeId
+						,@dtmDate
 				END 
 
 				FETCH NEXT FROM loopItemsToUnpost INTO 

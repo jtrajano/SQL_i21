@@ -149,7 +149,7 @@ FROM (
 		LEFT JOIN tblICCommodityAttribute CA ON	CA.intCommodityAttributeId = Item.intOriginId AND CA.strType = 'Origin'
 		LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 		LEFT JOIN tblICCommodityAttribute CG ON	CG.intCommodityAttributeId = Item.intGradeId AND CG.strType = 'Grade'
-		LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CTHeader.intContractBasisId
+		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CTHeader.intFreightTermId
 		LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CTHeader.intPricingTypeId
 		LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
 		LEFT JOIN tblCTBook BO ON BO.intBookId = CTDetail.intBookId

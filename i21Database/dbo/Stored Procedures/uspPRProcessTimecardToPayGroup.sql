@@ -51,6 +51,7 @@ SELECT
 							0
 						END
 	,E.dblDefaultHours
+	,ysnProcessed = 0
 INTO #tmpTimecard
 FROM tblPRTimecard T LEFT JOIN tblPREmployeeEarning E 
 	ON T.intEmployeeEarningId = E.intEmployeeEarningId 
@@ -74,6 +75,7 @@ DECLARE @intEmployeeDepartmentId INT
 DECLARE @intWorkersCompensationId INT
 DECLARE @intEntityEmployeeId INT
 DECLARE @intPayGroupDetailId INT
+DECLARE @dblLongestTotalHours NUMERIC(18, 6)
 DECLARE @intDefaultWorkersCompensationId INT
 
 DECLARE @TimecardOvertime TABLE
@@ -96,7 +98,7 @@ DECLARE @TimecardOvertime TABLE
 )
 
 /* Add Timecards to Pay Group Detail */
-WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard)
+WHILE EXISTS(SELECT TOP 1 1 FROM #tmpTimecard WHERE ysnProcessed = 0)
 BEGIN 
 	/* Select Timecard to Add */
 	SELECT TOP 1 
@@ -105,6 +107,7 @@ BEGIN
 		,@intWorkersCompensationId = intWorkersCompensationId
 		,@intEntityEmployeeId = intEntityEmployeeId
 	FROM #tmpTimecard
+	WHERE ysnProcessed = 0
 
 	/* Delete any Generated Hours that occupies this Period */
 	DELETE FROM tblPRPayGroupDetail
@@ -168,27 +171,47 @@ BEGIN
 	/* Get the Created Pay Group Detail Id*/
 	SELECT @intPayGroupDetailId = @@IDENTITY
 
-	/* Check if Employee has multiple WC code in their time cards */
-	IF(SELECT COUNT(DISTINCT intWorkersCompensationId)FROM tblPRTimecard WHERE intEntityEmployeeId = @intEntityEmployeeId) > 1
+	/* Check if Employee has multiple WC code in their time card within Paygroup period */
+	IF(SELECT COUNT(DISTINCT intWorkersCompensationId)FROM #tmpTimecard WHERE intEntityEmployeeId = @intEntityEmployeeId) > 1
 	BEGIN
-		SELECT TOP(1) @intDefaultWorkersCompensationId = intWorkersCompensationId
-		FROM tblPRTimecard
-		WHERE intEntityEmployeeId = @intEntityEmployeeId
-		GROUP BY
-			intEntityEmployeeId
-			,intWorkersCompensationId
-		HAVING SUM(ISNULL(dblHours,0)) = (
-			SELECT MAX(dblTotalHours)
-			FROM(
+		/* Get the longest amount of hours rendered by Employee within Paygroup period*/
+		SELECT @dblLongestTotalHours = MAX(TH.dblTotalHours)
+		FROM (
 			SELECT intEntityEmployeeId
 				,intWorkersCompensationId
-				,dblTotalHours = SUM(ISNULL(dblHours,0))
-			FROM tblPRTimecard
+				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
+			FROM #tmpTimecard
 			WHERE intEntityEmployeeId = @intEntityEmployeeId
-			GROUP BY
-				intEntityEmployeeId
+			GROUP BY intEntityEmployeeId
 				,intWorkersCompensationId
-		) T)
+		)TH
+
+		/* Check if the longest total hours rendered has more than one WC Code within Paygroup period
+		   If true, get the default WC Code on Employee level */
+		IF(SELECT COUNT(intWorkersCompensationId) FROM (SELECT intEntityEmployeeId
+				,intWorkersCompensationId
+				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
+			FROM #tmpTimecard
+			WHERE intEntityEmployeeId = @intEntityEmployeeId
+			GROUP BY intEntityEmployeeId
+				,intWorkersCompensationId) TH
+			WHERE TH.dblTotalHours = @dblLongestTotalHours) > 1
+		BEGIN
+			SELECT @intDefaultWorkersCompensationId = intWorkersCompensationId
+			FROM tblPREmployee WHERE intEntityId = @intEntityEmployeeId
+		END
+		ELSE
+		BEGIN
+			SELECT @intDefaultWorkersCompensationId = intWorkersCompensationId
+			FROM (SELECT intEntityEmployeeId
+				,intWorkersCompensationId
+				,dblTotalHours = SUM(dblRegularHours + dblOvertimeHours)
+			FROM #tmpTimecard
+			WHERE intEntityEmployeeId = @intEntityEmployeeId
+			GROUP BY intEntityEmployeeId
+				,intWorkersCompensationId) TH
+			WHERE TH.dblTotalHours = @dblLongestTotalHours
+		END
 	END
 	ELSE 
 	BEGIN
@@ -488,11 +511,13 @@ BEGIN
 	WHERE tblPRTimecard.intTimecardId = Y.intTimecardId
 
 	/* Loop Control */
-	DELETE FROM #tmpTimecard 
+	UPDATE #tmpTimecard 
+	SET ysnProcessed = 1
 	WHERE intEmployeeEarningId = @intEmployeeEarningId
 		AND intEmployeeDepartmentId = @intEmployeeDepartmentId 
 		AND intEntityEmployeeId = @intEntityEmployeeId
 		AND intWorkersCompensationId = @intWorkersCompensationId
+		AND ysnProcessed = 0
 END
 
 /* Insert Overtime Hours To Pay Group Detail */

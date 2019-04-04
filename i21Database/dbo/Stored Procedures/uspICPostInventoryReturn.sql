@@ -1373,7 +1373,10 @@ BEGIN
 		,@intTransactionId
 		,@intEntityUserSecurityId
 
-	EXEC dbo.uspICProcessPayables @intTransactionId, default, @ysnPost, @intEntityUserSecurityId
+	EXEC dbo.uspICProcessPayables 
+		@intReceiptId = @intTransactionId
+		,@ysnPost = @ysnPost
+		,@intEntityUserSecurityId = @intEntityUserSecurityId
 
 	COMMIT TRAN @TransactionName
 END 

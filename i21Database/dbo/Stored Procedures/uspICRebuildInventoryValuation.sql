@@ -660,6 +660,15 @@ BEGIN
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_lookup]
 		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [strTransactionId] ASC, [intItemId] ASC, [intTransactionDetailId] ASC, [intLotId] ASC, [intItemLocationId] ASC);
 
+	CREATE TABLE #tmpAutoVarianceBatchesForAVGCosting (
+		intItemId INT
+		,intItemLocationId INT
+		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	)
+
+	CREATE NONCLUSTERED INDEX [IX_tmpAutoVarianceBatchesForAVGCosting]
+		ON #tmpAutoVarianceBatchesForAVGCosting(intItemId ASC, intItemLocationId ASC, strTransactionId ASC, strBatchId ASC);
 
 	IF ISNULL(@isPeriodic, 0) = 1
 	BEGIN 	
@@ -743,7 +752,51 @@ BEGIN
 				WHEN dblValue <> 0 THEN 6
 				ELSE 7
 			END   
-			ASC 			
+			ASC 	
+			
+		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
+			intItemId
+			,intItemLocationId
+			,strTransactionId
+			,strBatchId
+		)
+		SELECT 
+			t.intItemId
+			,t.intItemLocationId
+			,t2.strTransactionId
+			,t2.strBatchId
+		FROM 
+			tblICItem i 
+			CROSS APPLY (
+				SELECT DISTINCT 
+					t.intItemId
+					,t.intItemLocationId
+				FROM 
+					#tmpICInventoryTransaction t 
+				WHERE 
+					t.dblQty > 0 
+					AND t.intCostingMethod = 1
+					AND t.intItemId = i.intItemId
+			) t
+			CROSS APPLY (
+				SELECT TOP 1 
+					t2.strBatchId
+					,t2.strTransactionId					
+				FROM 
+					#tmpICInventoryTransaction t2
+				WHERE 
+					t2.intItemId = t.intItemId
+					AND t2.intItemLocationId = t.intItemLocationId					
+					AND t2.intCostingMethod = 1	
+					AND 1 = 
+						CASE 
+							WHEN t2.dblQty > 0 THEN 1
+							WHEN t2.dblValue <> 0 AND t2.intTransactionTypeId = 26 THEN 1
+							ELSE 0 
+						END 
+				ORDER BY
+					t2.dtmDate DESC, t2.id DESC, t2.intSortByQty DESC
+			) t2
 	END
 	ELSE 
 	BEGIN 
@@ -803,6 +856,50 @@ BEGIN
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
 			intInventoryTransactionId ASC 
+
+		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
+			intItemId
+			,intItemLocationId
+			,strTransactionId
+			,strBatchId
+		)
+		SELECT 
+			t.intItemId
+			,t.intItemLocationId
+			,t2.strTransactionId
+			,t2.strBatchId
+		FROM 
+			tblICItem i 
+			CROSS APPLY (
+				SELECT DISTINCT 
+					t.intItemId
+					,t.intItemLocationId
+				FROM 
+					#tmpICInventoryTransaction t 
+				WHERE 
+					t.dblQty > 0 
+					AND t.intCostingMethod = 1
+					AND t.intItemId = i.intItemId
+			) t
+			CROSS APPLY (
+				SELECT TOP 1 
+					t2.strBatchId
+					,t2.strTransactionId					
+				FROM 
+					#tmpICInventoryTransaction t2
+				WHERE 
+					t2.intItemId = t.intItemId
+					AND t2.intItemLocationId = t.intItemLocationId					
+					AND t2.intCostingMethod = 1	
+					AND 1 = 
+						CASE 
+							WHEN t2.dblQty > 0 THEN 1
+							WHEN t2.dblValue <> 0 AND t2.intTransactionTypeId = 26 THEN 1
+							ELSE 0 
+						END 
+				ORDER BY
+					t2.id2 DESC, t2.id DESC
+			) t2
 	END
 END
 
@@ -3214,6 +3311,8 @@ BEGIN
 						AND ItemLocation.intLocationId IS NOT NULL 
 						AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
+				ORDER BY
+					ReceiptItem.intInventoryReceiptItemId ASC 
 
 				-- Get the Vendor Entity Id 
 				SELECT	@intEntityId = intEntityVendorId
@@ -3280,6 +3379,84 @@ BEGIN
 
 					SET @strAccountToCounterInventory = NULL 
 
+					--INSERT INTO @ItemsForInTransitCosting (
+					--		[intItemId] 
+					--		,[intItemLocationId] 
+					--		,[intItemUOMId] 
+					--		,[dtmDate] 
+					--		,[dblQty] 
+					--		,[dblUOMQty] 
+					--		,[dblCost] 
+					--		,[dblValue] 
+					--		,[dblSalesPrice] 
+					--		,[intCurrencyId] 
+					--		,[dblExchangeRate] 
+					--		,[intTransactionId] 
+					--		,[intTransactionDetailId] 
+					--		,[strTransactionId] 
+					--		,[intTransactionTypeId] 
+					--		,[intLotId] 
+					--		,[intSourceTransactionId] 
+					--		,[strSourceTransactionId] 
+					--		,[intSourceTransactionDetailId]
+					--		,[intFobPointId]
+					--		,[intInTransitSourceLocationId]
+					--		,[intForexRateTypeId]
+					--		,[dblForexRate]
+					--)
+					--SELECT
+					--		t.[intItemId] 
+					--		,t.[intItemLocationId] 
+					--		,iu.intItemUOMId 
+					--		,r.[dtmReceiptDate] 
+					--		,dblQty = -ri.dblOpenReceive  
+					--		,t.[dblUOMQty] 
+					--		,t.[dblCost] 
+					--		,t.[dblValue] 
+					--		,t.[dblSalesPrice] 
+					--		,t.[intCurrencyId] 
+					--		,t.[dblExchangeRate] 
+					--		,[intTransactionId] = r.intInventoryReceiptId 
+					--		,[intTransactionDetailId] = ri.intInventoryReceiptItemId
+					--		,[strTransactionId] = r.strReceiptNumber
+					--		,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
+					--		,t.[intLotId]
+					--		,t.[intTransactionId] 
+					--		,t.[strTransactionId] 
+					--		,t.[intTransactionDetailId] 
+					--		,t.[intFobPointId] 
+					--		,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+					--		,[intForexRateTypeId] = t.intForexRateTypeId
+					--		,[dblForexRate] = t.dblForexRate
+					--FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+					--			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					--		INNER JOIN (
+					--			tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
+					--				ON td.intInventoryTransferId = th.intInventoryTransferId
+					--		)
+					--			ON 
+					--				(
+					--					td.intInventoryTransferDetailId = ri.intSourceId
+					--					AND td.intInventoryTransferId = ri.intOrderId
+					--					AND ri.intInventoryTransferDetailId IS NULL 
+					--					AND ri.intInventoryTransferId IS NULL 
+					--				)
+					--				OR (
+					--					td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
+					--					AND td.intInventoryTransferId = ri.intInventoryTransferId
+					--				)
+					--		INNER JOIN tblICInventoryTransaction t 
+					--			ON t.strTransactionId = th.strTransferNo
+					--			AND t.intTransactionDetailId = td.intInventoryTransferDetailId
+					--		LEFT JOIN tblICItemUOM iu 
+					--			ON iu.intItemUOMId = ri.intUnitMeasureId
+					--		LEFT JOIN tblICItem i 
+					--			ON ri.intItemId = i.intItemId 
+					--WHERE	r.strReceiptNumber = @strTransactionId
+					--		AND t.ysnIsUnposted = 0 
+					--		AND t.dblQty > 0
+					--		AND i.strType <> 'Bundle'
+
 					INSERT INTO @ItemsForInTransitCosting (
 							[intItemId] 
 							,[intItemLocationId] 
@@ -3288,7 +3465,6 @@ BEGIN
 							,[dblQty] 
 							,[dblUOMQty] 
 							,[dblCost] 
-							,[dblValue] 
 							,[dblSalesPrice] 
 							,[intCurrencyId] 
 							,[dblExchangeRate] 
@@ -3299,38 +3475,39 @@ BEGIN
 							,[intLotId] 
 							,[intSourceTransactionId] 
 							,[strSourceTransactionId] 
-							,[intSourceTransactionDetailId]
-							,[intFobPointId]
+							,[intSourceTransactionDetailId]					
 							,[intInTransitSourceLocationId]
 							,[intForexRateTypeId]
 							,[dblForexRate]
 					)
-					SELECT
-							t.[intItemId] 
-							,t.[intItemLocationId] 
-							,iu.intItemUOMId 
-							,r.[dtmReceiptDate] 
-							,dblQty = -ri.dblOpenReceive  
-							,t.[dblUOMQty] 
-							,t.[dblCost] 
-							,t.[dblValue] 
-							,t.[dblSalesPrice] 
-							,t.[intCurrencyId] 
-							,t.[dblExchangeRate] 
-							,[intTransactionId] = r.intInventoryReceiptId 
-							,[intTransactionDetailId] = ri.intInventoryReceiptItemId
-							,[strTransactionId] = r.strReceiptNumber
-							,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
-							,t.[intLotId]
-							,t.[intTransactionId] 
-							,t.[strTransactionId] 
-							,t.[intTransactionDetailId] 
-							,t.[intFobPointId] 
+					SELECT 
+							[intItemId]				= t.intItemId  
+							,[intItemLocationId]	= t.intItemLocationId
+							,[intItemUOMId]			= t.intItemUOMId
+							,[dtmDate]				= t.dtmDate 
+							,[dblQty]				= -t.dblQty
+							,[dblUOMQty]			= t.dblUOMQty
+							,[dblCost]				= t.dblCost
+							,[dblSalesPrice]		= t.dblSalesPrice
+							,[intCurrencyId]		= t.intCurrencyId
+							,[dblExchangeRate]		= t.dblExchangeRate
+							,[intTransactionId]		= t.intTransactionId
+							,[intTransactionDetailId]	= t.intTransactionDetailId
+							,[strTransactionId]			= t.strTransactionId
+							,[intTransactionTypeId]		= @INVENTORY_RECEIPT_TYPE
+							,[intLotId]					= td.intLotId
+							,[intSourceTransactionId]	= th.intInventoryTransferId
+							,[strSourceTransactionId]	= th.strTransferNo
+							,[intSourceTransactionDetailId] = ri.intInventoryTransferDetailId
 							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-							,[intForexRateTypeId] = t.intForexRateTypeId
-							,[dblForexRate] = t.dblForexRate
-					FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-								ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+							,[intForexRateTypeId]			= t.intForexRateTypeId
+							,[dblForexRate]					= t.dblForexRate
+
+					FROM	@ItemsToPost t INNER JOIN tblICItem i 
+								ON t.intItemId = i.intItemId
+							INNER JOIN tblICInventoryReceiptItem ri
+								ON ri.intInventoryReceiptId = t.intTransactionId						
+								AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
 							INNER JOIN (
 								tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
 									ON td.intInventoryTransferId = th.intInventoryTransferId
@@ -3346,17 +3523,10 @@ BEGIN
 										td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
 										AND td.intInventoryTransferId = ri.intInventoryTransferId
 									)
-							INNER JOIN tblICInventoryTransaction t 
-								ON t.strTransactionId = th.strTransferNo
-								AND t.intTransactionDetailId = td.intInventoryTransferDetailId
-							LEFT JOIN tblICItemUOM iu 
-								ON iu.intItemUOMId = ri.intUnitMeasureId
-							LEFT JOIN tblICItem i 
-								ON ri.intItemId = i.intItemId 
-					WHERE	r.strReceiptNumber = @strTransactionId
-							AND t.ysnIsUnposted = 0 
-							AND t.dblQty > 0
-							AND i.strType <> 'Bundle'
+					WHERE	dblQty > 0 
+							AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
+					ORDER BY 
+						ri.intInventoryReceiptItemId ASC 
 
 					IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 					BEGIN 
@@ -3418,7 +3588,7 @@ BEGIN
 							GOTO _EXIT_WITH_ERROR
 						END 
 					END
-				END
+				END											
 
 				ELSE IF (
 					@intReceiptSourceType = @RECEIPT_SOURCE_TYPE_InboundShipment
@@ -3649,11 +3819,38 @@ BEGIN
 				BEGIN 
 					-- Get the cost from the in-transit
 					UPDATE	owned
-					SET		owned.dblCost = inTransit.dblCost
-					FROM	@ItemsToPost owned INNER JOIN @ItemsForInTransitCosting inTransit
-								ON owned.intItemId = inTransit.intItemId
-								AND owned.strTransactionId  = inTransit.strTransactionId
-								AND owned.intTransactionDetailId  = inTransit.intTransactionDetailId
+					SET		owned.dblCost = 
+								CASE 
+									WHEN owned_total.dblQty = 0 THEN owned.dblCost
+									ELSE 
+										dbo.fnDivide(t.dblValue, owned_total.dblQty)
+								END 
+					FROM	@ItemsToPost owned CROSS APPLY (
+								SELECT 
+									dblValue = SUM(-t.dblQty * t.dblCost + t.dblValue) 
+								FROM 
+									tblICInventoryTransaction t
+								WHERE
+									t.strTransactionId = owned.strTransactionId
+									AND t.strBatchId = @strBatchId
+									AND t.intTransactionId = owned.intTransactionId									
+									AND t.intTransactionDetailId = owned.intTransactionDetailId
+									AND t.intItemId = owned.intItemId								
+									AND t.dblQty < 0 
+							) t
+							CROSS APPLY (
+								SELECT 
+									dblQty = SUM(owned_total.dblQty) 
+								FROM
+									@ItemsToPost owned_total
+								WHERE
+									owned_total.strTransactionId = owned.strTransactionId 
+									AND owned_total.intItemId = owned.intItemId
+									AND owned_total.intTransactionId = owned.intTransactionId
+									AND owned_total.intTransactionDetailId = owned.intTransactionDetailId
+							) owned_total
+					WHERE 
+						owned_total.dblQty <> 0 
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
@@ -3717,7 +3914,7 @@ BEGIN
 					BEGIN 
 						--PRINT 'Error found in uspICCreateGLEntries for Transfer Orders'
 						GOTO _EXIT_WITH_ERROR
-					END 				
+					END 
 				END
 
 				ELSE IF @strTransactionType = 'Inventory Return'
@@ -4443,6 +4640,9 @@ BEGIN
 
 	IF OBJECT_ID('tempdb..#tmpPriorityTransactions') IS NOT NULL  
 		DROP TABLE #tmpPriorityTransactions
+
+	IF OBJECT_ID('tempdb..#tmpAutoVarianceBatchesForAVGCosting') IS NOT NULL  
+		DROP TABLE #tmpAutoVarianceBatchesForAVGCosting
 END 
 
 RETURN @intReturnValue; 

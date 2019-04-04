@@ -26,7 +26,7 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 	UPDATE BL
-	SET strBankLoanId = 'LN-' + CAST(BL.intBankLoanId AS NVARCHAR(10))
+	SET strBankLoanId = 'BLN-' + CAST(BL.intBankLoanId AS NVARCHAR(10))
 	FROM tblCMBankLoan BL JOIN
 	inserted I on I.intBankLoanId = BL.intBankLoanId
 	--SELECT IDENT_CURRENT('Employees') + IDENT_INCR('Employees')

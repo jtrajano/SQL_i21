@@ -69,7 +69,7 @@ SELECT distinct fm.intFutureMonthId,cv.strFutureMonth,strFutMarketName,
     dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(cv.dblDetailQuantity,0)) -
   sum(
   case when intPricingTypeId=1 then 
-  case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else isnull(iq1.dblSalesInvoiceQty,0) end 
+  case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else 0 end 
   else 0 END) OVER (PARTITION BY cv.intContractDetailId ) dblNoOfContract,   
   LEFT(strContractType,1)+' - '+ strContractNumber +' - '+convert(nvarchar,intContractSeq) as strTradeNo, 
   dtmStartDate as TransactionDate,  
@@ -79,7 +79,7 @@ SELECT distinct fm.intFutureMonthId,cv.strFutureMonth,strFutMarketName,
     dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId,um1.intCommodityUnitMeasureId,isnull(cv.dblDetailQuantity,0)) -
   sum(
   case when intPricingTypeId=1 then 
-  case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else isnull(iq1.dblSalesInvoiceQty,0) end 
+  case when intContractTypeId=1 then isnull(iq.dblPurchaseInvoiceQty,0) else 0 end 
   else 0 END) OVER (PARTITION BY cv.intContractDetailId ) dblQuantity,
   cv.intContractHeaderId,null as intFutOptTransactionHeaderId  
   ,intPricingTypeId

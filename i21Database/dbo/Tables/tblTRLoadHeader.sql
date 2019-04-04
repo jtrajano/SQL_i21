@@ -16,11 +16,12 @@
 	[intConcurrencyId] [int] NOT NULL,
 	[strImportVerificationNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strPurchaserSignedStatementNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	CONSTRAINT [PK_tblTRLoadHeader] PRIMARY KEY ([intLoadHeaderId]),
+	[intFreightItemId] INT NULL, 
+    CONSTRAINT [PK_tblTRLoadHeader] PRIMARY KEY ([intLoadHeaderId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),
 	CONSTRAINT [FK_tblTRLoadHeader_tblSMShipVia_intSellerId] FOREIGN KEY ([intSellerId]) REFERENCES [dbo].[tblSMShipVia] (intEntityId),
 	CONSTRAINT [FK_tblTRLoadHeader_tblARSalesperson_intDriverId] FOREIGN KEY ([intDriverId]) REFERENCES [dbo].[tblARSalesperson] (intEntityId),
 	CONSTRAINT [FK_tblTRLoadHeader_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [dbo].[tblLGLoad] ([intLoadId]),
-	CONSTRAINT [FK_tblTRLoadHeader_tblTRState_intStateId] FOREIGN KEY ([intStateId]) REFERENCES [dbo].[tblTRState] ([intStateId])
-
+	CONSTRAINT [FK_tblTRLoadHeader_tblTRState_intStateId] FOREIGN KEY ([intStateId]) REFERENCES [dbo].[tblTRState] ([intStateId]),
+	CONSTRAINT [FK_tblTRLoadHeader_tblICItem_intItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 )

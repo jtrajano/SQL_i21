@@ -392,7 +392,7 @@ BEGIN
 			,I.strDescription
 			,Round(SUM(CASE 
 						WHEN (W.dblQuantity - W.dblProducedQuantity) > 0
-							THEN (W.dblQuantity - W.dblProducedQuantity) * RI.dblCalculatedQuantity / R.dblQuantity
+							THEN dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId,RI.intItemUOMId,(W.dblQuantity - W.dblProducedQuantity)) * RI.dblCalculatedQuantity / R.dblQuantity
 						ELSE 0
 						END), 0) AS dblPlannedQty
 			,UM.intUnitMeasureId

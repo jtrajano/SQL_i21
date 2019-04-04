@@ -17,6 +17,7 @@
     [strSalespersonName]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strSourceTransaction]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strType]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strTransactionType]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyName]            NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strCompanyAddress]         NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strAgingType]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,

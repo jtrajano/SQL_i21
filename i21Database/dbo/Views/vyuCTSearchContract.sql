@@ -76,7 +76,9 @@ AS
 			CH.intDefaultCommodityUnitMeasureId,
 			CH.ysnBrokerage,
 			CH.strBook,
-			CH.strSubBook
+			CH.strSubBook,
+			CH.intFreightTermId,
+			CH.strFreightTerm
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN

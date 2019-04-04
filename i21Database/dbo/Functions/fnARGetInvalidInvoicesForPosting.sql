@@ -1438,6 +1438,7 @@ IF(ISNULL(@Post,0)) = 1
 				AND ARID.[intContractDetailId] = CTCD.[intContractDetailId] 
 		WHERE
 			ARID.[dblPrice] = @ZeroDecimal
+			AND I.strTransactionType <> 'Credit Memo'
 			AND CTCD.[strPricingType] <> 'Index'
 			AND ISNULL(ARID.[intLoadDetailId],0) = 0
 
@@ -1476,6 +1477,7 @@ IF(ISNULL(@Post,0)) = 1
 			ARID.[dblUnitPrice] <> @ZeroDecimal				
 			AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(ARID.[dblUnitPrice], @ZeroDecimal) AS MONEY)
 			AND ARCC.[strPricingType] <> 'Index'
+			AND I.strTransactionType <> 'Credit Memo'
 			AND ISNULL(ARID.[intLoadDetailId],0) = 0
 			AND ISNULL(ARID.[intShipmentId],0) = 0
 			AND ISNULL(ARID.[intInventoryShipmentItemId],0) = 0

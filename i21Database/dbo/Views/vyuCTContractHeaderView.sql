@@ -20,7 +20,7 @@ AS
 			CH.intLoadCategoryUnitMeasureId,CH.intContractPlanId,			CH.ysnExported,
 			CH.dtmExported,					CH.dtmSigned,					CH.intCreatedById,
 			CH.intLastModifiedById,			CH.dtmCreated,					CH.dtmLastModified,
-			CH.ysnBrokerage,				CH.strCPContract,
+			CH.ysnBrokerage,				CH.strCPContract,				CH.intFreightTermId,
 
 			EY.intEntityId,					EY.strEntityName,				NM.strCommodityDescription,
 			EY.strEntityNumber,				EY.strEntityAddress,			U2.strUnitMeasure	AS strHeaderUnitMeasure,
@@ -37,6 +37,7 @@ AS
 			NM.strINCOLocationType,			NM.strContractPlan,				CE.strName AS strCreatedBy,
 			NM.strTermCode,					NM.strCropYear,					UE.strName AS strLastModifiedBy,					
 																			PE.strName AS strCounterPartyName,
+																			NM.strFreightTerm,
 								
 			CASE WHEN NM.strINCOLocationType = 'City' THEN NM.strINCOLocation ELSE NM.strSubLocationName	END	AS	strINCOLocation,
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId) COLLATE Latin1_General_CI_AS AS	strStatuses
@@ -61,6 +62,6 @@ AS
 	JOIN	tblEMEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
 	JOIN	tblEMEntity							PE	ON	PE.intEntityId						=		CH.intCounterPartyId				LEFT
 	JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
-	JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId							
+	JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					
 	
 				

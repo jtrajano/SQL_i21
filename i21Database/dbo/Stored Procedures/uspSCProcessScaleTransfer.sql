@@ -62,7 +62,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
     )
 	SELECT      
 		-- Header
-		[dtmTransferDate]           = GETDATE()
+		[dtmTransferDate]           = dtmTicketDateTime
 		,[strTransferType]          = 'Location to Location'
 		,[intSourceType]            = 1
 		,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)

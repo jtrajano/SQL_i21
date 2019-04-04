@@ -87,7 +87,7 @@ FROM (
 	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
 	JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId
-	LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = CH.intContractBasisId
+	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblCTPriceFixation PF ON PF.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId

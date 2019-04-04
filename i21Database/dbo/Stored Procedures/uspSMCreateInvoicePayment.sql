@@ -52,15 +52,16 @@ BEGIN
 			INTO #RAWVALUE  
 			FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceAndPayment)
 
-			SELECT strInvoiceNumber	= A.InvoiceNumber
-				, dblPayment		= CONVERT(NUMERIC(18,6),Split.a.value('.', 'VARCHAR(100)'))
+			SELECT strInvoiceNumber	= INVOICENUM.POS
+				, dblPayment		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, PAYMENT.POS + 1, DISCOUNT.POS - PAYMENT.POS - 1))
+				, dblDiscount		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, DISCOUNT.POS + 1, INTEREST.POS - DISCOUNT.POS -1))
+				, dblInterest		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, INTEREST.POS + 1, 100))
 			INTO #INVOICEANDPAYMENT
-			FROM (
-				SELECT InvoiceNumber	= LEFT(strRawValue, CHARINDEX('|', strRawValue) - 1)
-					, String			= CAST('<M>' + REPLACE(SUBSTRING(strRawValue, CHARINDEX('|', strRawValue) + 1, len(strRawValue) - CHARINDEX('|', strRawValue)), ',', '</M><M>') + '</M>' AS XML)
-				FROM #RAWVALUE
-			) AS A
-			CROSS APPLY String.nodes('/M') AS Split(a);
+			FROM #RAWVALUE
+			CROSS APPLY (SELECT LEFT(strRawValue, CHARINDEX('|', strRawValue) - 1)) AS INVOICENUM(POS)
+			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue))) AS PAYMENT(POS)
+			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, PAYMENT.POS+1))) AS DISCOUNT(POS)
+			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, DISCOUNT.POS+1))) AS INTEREST(POS)
 
 			INSERT INTO @EntriesForPayment (
 				intId
@@ -91,6 +92,8 @@ BEGIN
 				, ysnApplyTermDiscount
 				, dblDiscount
 				, dblDiscountAvailable
+				, dblWriteOffAmount
+				, dblBaseWriteOffAmount
 				, dblInterest
 				, dblPayment
 				, dblAmountDue
@@ -129,12 +132,14 @@ BEGIN
 				, dblInvoiceTotal				= INVOICE.dblInvoiceTotal
 				, dblBaseInvoiceTotal			= INVOICE.dblBaseInvoiceTotal
 				, ysnApplyTermDiscount			= 0
-				, dblDiscount					= INVOICE.dblDiscount
+				, dblDiscount					= PAYMENTS.dblDiscount
 				, dblDiscountAvailable			= INVOICE.dblDiscountAvailable
-				, dblInterest					= INVOICE.dblInterest
-				, dblPayment					= ISNULL(PAYMENTS.dblPayment, 0)
-				, dblAmountDue					= INVOICE.dblAmountDue - ISNULL(PAYMENTS.dblPayment, 0)
-				, dblBaseAmountDue				= INVOICE.dblBaseAmountDue - ISNULL(PAYMENTS.dblPayment, 0)
+				, dblWriteOffAmount				= 0
+				, dblBaseWriteOffAmount			= 0
+				, dblInterest					= PAYMENTS.dblInterest
+				, dblPayment					= PAYMENTS.dblPayment
+				, dblAmountDue					= (INVOICE.dblAmountDue + PAYMENTS.dblInterest) - PAYMENTS.dblPayment - PAYMENTS.dblDiscount
+				, dblBaseAmountDue				= (INVOICE.dblBaseAmountDue + PAYMENTS.dblInterest) - PAYMENTS.dblPayment - PAYMENTS.dblDiscount
 				, strInvoiceReportNumber		= INVOICE.strInvoiceReportNumber
 				, intCurrencyExchangeRateTypeId	= INVOICE.intCurrencyExchangeRateTypeId
 				, intCurrencyExchangeRateId		= INVOICE.intCurrencyExchangeRateId
@@ -145,7 +150,9 @@ BEGIN
 			INNER JOIN tblSMCompanyLocation CL ON INVOICE.intCompanyLocationId = CL.intCompanyLocationId
 			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 			CROSS APPLY (
-				SELECT TOP 1 dblPayment 
+				SELECT TOP 1 dblPayment		= ISNULL(dblPayment, 0)
+						   , dblDiscount	= ISNULL(dblDiscount, 0)
+						   , dblInterest 	= ISNULL(dblInterest, 0)
 				FROM #INVOICEANDPAYMENT 
 				WHERE strInvoiceNumber COLLATE Latin1_General_CI_AS = INVOICE.strInvoiceNumber
 			) PAYMENTS
@@ -240,6 +247,23 @@ BEGIN
 
 	SELECT @intPaymentIdNew = ISNULL(intPaymentId,0) FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1
 	SELECT @strPaymentIdNew = strRecordNumber FROM tblARPayment WHERE intPaymentId = @intPaymentIdNew
+
+	DECLARE @output INT
+	EXEC dbo.uspSMInsertTransaction
+		@screenNamespace = 'AccountsReceivable.view.ReceivePaymentsDetail',
+		@strTransactionNo = @intPaymentIdNew,
+		@intEntityId = @intUserId,
+		@intKeyValue = @intPaymentIdNew,
+		@output = @output
+
+	EXEC dbo.uspSMAuditLog 
+		 @keyValue			= @intPaymentIdNew
+		,@screenName		= 'AccountsReceivable.view.ReceivePaymentsDetail'
+		,@entityId			= @intUserId	
+		,@actionType		= 'Created'
+		,@changeDescription	= ''			
+		,@fromValue			= ''			
+		,@toValue			= ''
 
 	GOTO Exit_Routine
 END

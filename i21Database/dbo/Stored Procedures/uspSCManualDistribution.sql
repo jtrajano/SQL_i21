@@ -3,7 +3,8 @@
 	@intTicketId AS INT, 
 	@intUserId AS INT,
 	@intEntityId AS INT,
-	@InventoryReceiptId AS INT OUTPUT 
+	@InventoryReceiptId AS INT OUTPUT,
+	@intBillId AS INT OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -40,7 +41,6 @@ DECLARE @strLotTracking AS NVARCHAR(100)
 DECLARE @intItemId AS INT
 DECLARE @intStorageScheduleId AS INT
 		,@intStorageScheduleTypeId INT
-		,@intBillId AS INT
 		,@successfulCount AS INT
 		,@invalidCount AS INT
 		,@success AS INT
@@ -588,8 +588,8 @@ END
 					,[ysnTaxOnly]
 			FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
 			BEGIN /* Create Voucher */
-
-			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId
+			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId OUTPUT
+			
 			
 			END
 		END

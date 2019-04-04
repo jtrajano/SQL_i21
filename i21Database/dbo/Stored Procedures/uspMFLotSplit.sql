@@ -49,6 +49,8 @@ BEGIN TRY
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@intTransactionId INT
 		,@ItemsToUnReserve AS dbo.ItemReservationTableType
+		,@dblTaskQty NUMERIC(38, 20)
+		,@intTaskItemUOMId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -97,9 +99,19 @@ BEGIN TRY
 	IF @dtmDate IS NULL
 		SELECT @dtmDate = GETDATE()
 
-	SELECT @intTransactionId = intOrderHeaderId
+	SELECT @intTransactionId = intOrderHeaderId,@dblTaskQty=dblQty,@intTaskItemUOMId=intItemUOMId
 	FROM tblMFTask
 	WHERE intTaskId = @intTaskId
+
+	IF @intTaskId IS NOT NULL and dbo.fnMFConvertQuantityToTargetItemUOM(@intSplitItemUOMId,@intTaskItemUOMId,@dblSplitQty)>@dblTaskQty
+	BEGIN
+		RAISERROR (
+				'Split qty cannot be more than task qty.'
+				,16
+				,1
+				)
+		Return
+	End
 
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))
 	FROM tblICStockReservation

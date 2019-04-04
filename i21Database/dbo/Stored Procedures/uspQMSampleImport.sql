@@ -593,7 +593,7 @@ BEGIN TRY
 			,NULL
 			,NULL
 			,@strSampleNote
-			,@dtmSampleReceivedDate
+			,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmSampleReceivedDate)
 			,@dtmCurrentDate
 			,@intCreatedUserId
 			,NULL
@@ -601,9 +601,9 @@ BEGIN TRY
 			,@dblSequenceQuantity
 			,@intRepresentingUOMId
 			,NULL
-			,@dtmSampleReceivedDate
-			,@dtmSampleReceivedDate
-			,@dtmSampleReceivedDate
+			,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmSampleReceivedDate)
+			,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmSampleReceivedDate)
+			,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmSampleReceivedDate)
 			,NULL
 			,@strContainerNumber
 			,@strMarks

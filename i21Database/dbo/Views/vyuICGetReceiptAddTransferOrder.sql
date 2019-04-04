@@ -9,7 +9,7 @@ FROM (
 			, intEntityVendorId			= CAST(h.intToLocationId AS INT) 
 			, strVendorId				= CAST(Loc.strLocationName AS NVARCHAR(50))
 			, strVendorName				= CAST(Loc.strLocationName AS NVARCHAR(50))
-			, strReceiptType			= 'Transfer Order'
+			, strReceiptType			= 'Transfer Order' COLLATE Latin1_General_CI_AS
 			, intLineNo					= d.intInventoryTransferDetailId
 			, intOrderId				= h.intInventoryTransferId
 			, strOrderNumber			= h.strTransferNo
@@ -100,7 +100,7 @@ FROM (
 			, strLotTracking			= item.strLotTracking
 			, intCommodityId			= item.intCommodityId
 			, intContainerId			= CAST(NULL AS INT)
-			, strContainer				= CAST(NULL AS NVARCHAR(50))
+			, strContainer				= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, intSubLocationId			= toSubLocation.intCompanyLocationSubLocationId
 			, strSubLocationName		= toSubLocation.strSubLocationName 
 			, intStorageLocationId		= toStorageLocation.intStorageLocationId
@@ -110,7 +110,7 @@ FROM (
 			, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
 			, intItemUOMId				= ItemUOM.intItemUOMId
 			, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
-			, strUnitType				= CAST(NULL AS NVARCHAR(50))
+			, strUnitType				= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			-- Gross/Net UOM --------------------------------------------------------
 			, intWeightUOMId			= GrossNetUOM.intItemUOMId
 			, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure
@@ -140,7 +140,7 @@ FROM (
 			, strLifeTimeType			= item.strLifeTimeType
 			, ysnLoad					= CAST(0 AS BIT) 
 			, dblAvailableQty			= CAST(0 AS NUMERIC(38, 20))
-			, strBOL					= CAST(NULL AS NVARCHAR(50))
+			, strBOL					= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, dblFranchise				= CAST(0 AS NUMERIC(18, 6))
 			, dblContainerWeightPerQty	= CAST(0 AS NUMERIC(18, 6))
 			, ysnSubCurrency			= CAST(0 AS BIT) 
@@ -150,8 +150,8 @@ FROM (
 			, dblNet					= ISNULL(d.dblNet-st.dblReceiptNet, 0) -- There is no net from transfer
 			, ysnBundleItem = CAST(0 AS BIT)
 			, intBundledItemId = CAST(NULL AS INT)
-			, strBundledItemNo = CAST(NULL AS NVARCHAR(50))
-			, strBundledItemDescription = CAST(NULL AS NVARCHAR(50))
+			, strBundledItemNo = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+			, strBundledItemDescription = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, ysnIsBasket = CAST(0 AS BIT)
 			, item.strBundleType
 			, d.intOwnershipType 
@@ -255,5 +255,5 @@ FROM (
 		AND h.ysnShipmentRequired = 1
 		AND (h.intStatusId = 1 OR h.intStatusId = 2)
 		AND ISNULL(t.intInventoryTransactionId, storage.intInventoryTransactionStorageId) IS NOT NULL 
-	
+		AND item.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
 ) tblAddOrders

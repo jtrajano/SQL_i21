@@ -72,6 +72,7 @@ Type the overview for the table here.
 		[strCounted] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intCountGroupId] INT NULL, 
 		[ysnCountedDaily] BIT NULL DEFAULT ((0)), 
+		[intAllowZeroCostTypeId] INT NULL, -- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
 		[ysnLockedInventory] BIT NULL DEFAULT ((0)),
 		[ysnStorageUnitRequired] BIT NULL DEFAULT ((1)),
 		[strStorageUnitNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

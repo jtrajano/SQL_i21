@@ -7,4 +7,11 @@ GO
 	 UPDATE tblGLFiscalYearPeriod SET  ysnCMOpen = 1 WHERE ysnCMOpen IS NULL
 	 UPDATE tblGLFiscalYearPeriod SET  ysnCTOpen = 1 WHERE ysnCTOpen IS NULL
 	 UPDATE tblGLFiscalYearPeriod SET  ysnFAOpen = 1 WHERE ysnFAOpen IS NULL
+	 
+	 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLFiscalYear WHERE ysnCurrent = 1)
+	 BEGIN
+	 	DECLARE @intFiscalYearId INT
+	 	SELECT TOP 1 @intFiscalYearId = intFiscalYearId from tblGLCurrentFiscalYear
+		UPDATE fy SET ysnCurrent = 1 FROM tblGLFiscalYear fy JOIN tblGLCurrentFiscalYear cu on cu.intFiscalYearId =  fy.intFiscalYearId
+	 END
 GO

@@ -38,7 +38,7 @@ SELECT
 	strReceiveUOMType = COALESCE(rUOM.strUnitType, sUOM.strUnitType),
 	strIssueUOMType = COALESCE(iUOM.strUnitType, sUOM.strUnitType),
 	strReceiveUOM = COALESCE(rUOM.strUnitMeasure, sUOM.strUnitMeasure),
-	strReceiveUPC = COALESCE(ReceiveUOM.strUpcCode, StockUOM.strUpcCode, ''),
+	strReceiveUPC = COALESCE(ReceiveUOM.strLongUPCCode, StockUOM.strLongUPCCode, COALESCE(ReceiveUOM.strUpcCode, StockUOM.strUpcCode, '')),
 	strReceieveLongUPC = COALESCE(ReceiveUOM.strLongUPCCode, StockUOM.strLongUPCCode, ''),
 	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
@@ -49,7 +49,7 @@ SELECT
 	ysnReceiveUOMAllowPurchase = COALESCE(ReceiveUOM.ysnAllowPurchase, StockUOM.ysnAllowPurchase), 
 	ysnReceiveUOMAllowSale = COALESCE(ReceiveUOM.ysnAllowSale, StockUOM.ysnAllowSale), 
 	strIssueUOM = COALESCE(iUOM.strUnitMeasure, sUOM.strUnitMeasure),
-	strIssueUPC = COALESCE(IssueUOM.strUpcCode, StockUOM.strUpcCode, ''),
+	strIssueUPC = COALESCE(IssueUOM.strLongUPCCode, StockUOM.strLongUPCCode, COALESCE(IssueUOM.strUpcCode, StockUOM.strUpcCode, '')),
 	strIssueLongUPC = COALESCE(IssueUOM.strLongUPCCode, StockUOM.strLongUPCCode, ''),
 	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	dblIssueMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0) * COALESCE(IssueUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
@@ -81,11 +81,11 @@ SELECT
 	ItemLocation.intAllowNegativeInventory,
 	strAllowNegativeInventory = (CASE WHEN ItemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
 							 WHEN ItemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
-							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END),
+							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END) COLLATE Latin1_General_CI_AS,
 	ItemLocation.intCostingMethod,
 	strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
 							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
-							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END),
+							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END) COLLATE Latin1_General_CI_AS,
 	dblAmountPercent = ISNULL(ItemPricing.dblAmountPercent, 0),
 	dblSalePrice = ISNULL(ItemPricing.dblSalePrice, 0),
 	dblMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice, 0),

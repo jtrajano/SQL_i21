@@ -1,4 +1,5 @@
 ﻿print N'BEGIN Syncing Starting Number and Dispatch Id'
+GO
 
 declare @currentStartingNumber int;
 declare @lastDispatchId int;

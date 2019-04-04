@@ -37,7 +37,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 													ELSE ''
 												END
 											ELSE ''
-										END
+										END COLLATE Latin1_General_CI_AS
 		,strSourceNumber			= CASE 
 										WHEN receipt.intInventoryReceiptId IS NOT NULL THEN
 											CASE	
@@ -75,6 +75,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strStockUOM				= iuStock.strUnitMeasure
 		,dblQuantityInStockUOM		= ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblQty), 0)
 		,dblCostInStockUOM			= ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblCost), 0)
+		,dblPrice					= ISNULL(ItemPricing.dblSalePrice ,0)
 		,strBOLNumber				= CAST (
 											CASE	ty.intTransactionTypeId 
 													WHEN 4 THEN receipt.strBillOfLading 
@@ -86,7 +87,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 											END
 										AS NVARCHAR(100)
 									)
-		,strEntity					= e.strName										
+		,strEntity					= e.strName		
+		,strParentLotNumber			= ParentLot.strParentLotNumber
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId
 		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
@@ -132,6 +134,12 @@ FROM 	tblICItem i
 			ON iuTransUOM.intItemUOMId = t.intItemUOMId
 		LEFT JOIN tblICLot l
 			ON l.intLotId = t.intLotId
+		LEFT JOIN tblICParentLot ParentLot
+			ON ParentLot.intItemId = l.intItemId
+			AND ParentLot.intParentLotId = l.intParentLotId
+		LEFT JOIN tblICItemPricing ItemPricing
+			ON ItemPricing.intItemId = t.intItemId
+			AND ItemPricing.intItemLocationId = t.intItemLocationId
 
 		LEFT JOIN tblICInventoryReceipt receipt 
 			ON receipt.intInventoryReceiptId = t.intTransactionId

@@ -200,6 +200,7 @@ BEGIN
 		CROSS APPLY (
 			SELECT COUNT(*) intVouchers FROM tblAPPaymentDetail B
 			WHERE B.dblPayment > 0 AND B.intPaymentId = A.intPaymentId
+			AND B.intPayScheduleId IS NULL
 			GROUP BY B.intBillId, B.intInvoiceId
 		) PaymentDetails
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
@@ -411,10 +412,12 @@ BEGIN
 		INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 		INNER JOIN tblAPBillDetail D ON C.intBillId = D.intBillId
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		AND ((C.intTransactionType = 2 AND D.intContractDetailId > 0) 
-				OR (C.intTransactionType = 13 AND D.intScaleTicketId > 0) ) 
-		AND D.ysnRestricted = 1 
+		AND B.ysnOffset = 1
 		AND B.dblPayment > 0 
+		AND (D.ysnRestricted = 1 
+			OR ((C.intTransactionType = 2 AND D.intContractDetailId > 0) 
+				OR (C.intTransactionType = 13 AND D.intScaleTicketId > 0) )
+			)
 
 		--DO NOT ALLOW TO POST NOT PAY TO ADDRESS SPECIFIED AND MULTIPLE PAY TO HAS BEEN ON THE DETAILS
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -487,6 +490,7 @@ BEGIN
 			WHERE 
 				voucher.intTransactionType = 2
 			AND payDetail.intPaymentId = A.intPaymentId
+			AND payDetail.ysnOffset = 1
 			AND NOT EXISTS
 			(
 				SELECT

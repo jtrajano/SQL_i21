@@ -54,7 +54,7 @@ strISO = (CASE WHEN (LOWER(cfNet.strNetworkType) != 'nbs')
 ,intCardTypeCardLength = ISNULL(cfCardType.intCardLength,0)
 ,intEntryCode = ISNULL(cfCard.intEntryCode,0)
 ,cfNet.strNetworkType
-,strCustomerNumber = emEnt.strEntityNo
+,strCustomerNumber = emEnt.strCustomerNumber
 ,strCustomerName = emEnt.strName
 ,cfCard.strCardNumber
 ,cfCard.strCardDescription
@@ -69,17 +69,40 @@ strISO = (CASE WHEN (LOWER(cfNet.strNetworkType) != 'nbs')
 ,cfEncodeCard.intConcurrencyId
 ,cfCard.dtmCardExpiratioYearMonth
 ,cfNet.dtmGlobalCardExpirationDate
+,strCompanyName				= smCompSetup.strCompanyName
+,strCompanyAddress			= smCompSetup.strCompanyAddress
+,strCompanyPhone		 = smCompSetup.strPhone
+,strCompanyEmail		 = smCompSetup.strEmail
+,strBillTo =  dbo.fnARFormatCustomerAddress (
+				 NULL
+				,NULL
+				,emEnt.strBillToLocationName
+				,emEnt.strBillToAddress
+				,emEnt.strBillToCity
+				,emEnt.strBillToState
+				,emEnt.strBillToZipCode
+				,emEnt.strBillToCountry
+				,emEnt.strName
+				,NULL)
 FROM tblCFEncodeCard as cfEncodeCard
 INNER JOIN tblCFCard as cfCard
 ON cfEncodeCard.intCardId = cfCard.intCardId
-INNER JOIN tblCFCardType as cfCardType
+LEFT JOIN tblCFCardType as cfCardType
 ON cfCard.intCardTypeId = cfCardType.intCardTypeId
 INNER JOIN tblCFAccount as cfAct
 ON cfAct.intAccountId = cfCard.intAccountId
-INNER JOIN tblEMEntity as emEnt
+INNER JOIN vyuCFCustomerEntity as emEnt
 ON emEnt.intEntityId = cfAct.intCustomerId
 INNER JOIN tblCFNetwork as cfNet
 ON cfNet.intNetworkId = cfCard.intNetworkId
+OUTER APPLY (
+	SELECT TOP 1 
+		strCompanyName 
+		,strCompanyAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0)
+		,strPhone
+		,strEmail
+	FROM tblSMCompanySetup
+) AS smCompSetup
 
 GO
 

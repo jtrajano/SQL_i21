@@ -150,8 +150,7 @@ FROM
 		ysnVoid 
 	FROM 
 		tblPRPaycheck
-	WHERE 
-		ysnPosted = 1 AND ysnVoid = 0) [tblPRPaycheck] 
+	WHERE ysnPosted = 1) [tblPRPaycheck] 
 	LEFT JOIN 
 		(SELECT 
 			tblPREmployee.*,

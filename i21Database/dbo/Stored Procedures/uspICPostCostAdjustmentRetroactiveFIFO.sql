@@ -595,6 +595,7 @@ BEGIN
 END 
 
 -- Book the cost adjustment. 
+IF @costAdjustmentType = @costAdjustmentType_SUMMARIZED
 BEGIN 
 	-- Calculate the value to book. 
 	-- Formula: (Remaining Qty x New Cost) - (Remaining Qty x Original Cost)
@@ -654,15 +655,105 @@ BEGIN
 			UPDATE	tblICInventoryTransaction 
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+
+			-- Update the log with correct inventory transaction id
+			IF @InventoryTransactionIdentityId IS NOT NULL 
+			BEGIN 
+				UPDATE	tblICInventoryFIFOCostAdjustmentLog 
+				SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+				WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+			END 
 	END
 END 
-
--- Update the log with correct inventory transaction id
-IF @InventoryTransactionIdentityId IS NOT NULL 
+ELSE IF @costAdjustmentType = @costAdjustmentType_DETAILED
 BEGIN 
-	UPDATE	tblICInventoryFIFOCostAdjustmentLog 
-	SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+
+	DECLARE @strTransactionIdCostAdjLog AS NVARCHAR(50)
+			,@intTransactionIdCostAdjLog AS INT
+			,@intTransactionDetailIdCostAdjLog AS INT 
+			,@intCostAdjId AS INT 
+
+	DECLARE loopCostAdjustmentLog CURSOR LOCAL FAST_FORWARD
+	FOR 
+	SELECT	
+			ROUND(ISNULL(dblValue, 0), 2)
+			,strRelatedTransactionId
+			,intRelatedTransactionId
+			,intRelatedTransactionDetailId
+			,intId 
+	FROM	tblICInventoryFIFOCostAdjustmentLog	
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost		
+
+	OPEN loopCostAdjustmentLog
+	FETCH NEXT FROM loopCostAdjustmentLog INTO 
+		@CurrentCostAdjustment 
+		,@strTransactionIdCostAdjLog
+		,@intTransactionIdCostAdjLog
+		,@intTransactionDetailIdCostAdjLog
+		,@intCostAdjId
+
+	WHILE @@FETCH_STATUS = 0 
+	BEGIN
+		SET @InventoryTransactionIdentityId = NULL 
+		EXEC [uspICPostInventoryTransaction]
+			@intItemId								= @intItemId
+			,@intItemLocationId						= @intItemLocationId
+			,@intItemUOMId							= @intItemUOMId
+			,@intSubLocationId						= @intSubLocationId
+			,@intStorageLocationId					= @intStorageLocationId
+			,@dtmDate								= @dtmDate
+			,@dblQty								= 0
+			,@dblUOMQty								= 0
+			,@dblCost								= 0
+			,@dblValue								= @CurrentCostAdjustment
+			,@dblSalesPrice							= 0
+			,@intCurrencyId							= NULL 
+			,@intTransactionId						= @intTransactionId
+			,@intTransactionDetailId				= @intTransactionDetailId
+			,@strTransactionId						= @strTransactionId
+			,@strBatchId							= @strBatchId
+			,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
+			,@intLotId								= NULL  
+			,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
+			,@intRelatedTransactionId				= @intTransactionIdCostAdjLog
+			,@strRelatedTransactionId				= @strTransactionIdCostAdjLog
+			,@strTransactionForm					= @strTransactionForm
+			,@intEntityUserSecurityId				= @intEntityUserSecurityId
+			,@intCostingMethod						= @FIFO -- TODO: Double check the costing method. Make sure it matches with the SP. 
+			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+			,@intFobPointId							= @intFobPointId 
+			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+			,@intForexRateTypeId					= NULL
+			,@dblForexRate							= 1
+			,@strDescription						= @strDescription	
+
+		-- Update ysnIsUnposted flag. 
+		BEGIN 
+			UPDATE	tblICInventoryTransaction 
+			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+		END 
+
+		-- Update the log with correct inventory transaction id
+		IF @InventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			UPDATE	tblICInventoryFIFOCostAdjustmentLog 
+			SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+			WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+					AND intId = @intCostAdjId
+		END 
+
+		FETCH NEXT FROM loopCostAdjustmentLog INTO 
+			@CurrentCostAdjustment 
+			,@strTransactionIdCostAdjLog
+			,@intTransactionIdCostAdjLog
+			,@intTransactionDetailIdCostAdjLog
+			,@intCostAdjId
+	END 
+
+	CLOSE loopCostAdjustmentLog;
+	DEALLOCATE loopCostAdjustmentLog;
 END 
 
 -- Update the last cost and standard cost. 

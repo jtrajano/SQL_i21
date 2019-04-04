@@ -32,3 +32,10 @@
 		,CONSTRAINT [FK_tblMFOrderLineItem_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY ([intOrderHeaderId]) REFERENCES [tblMFOrderHeader]([intOrderHeaderId]) ON DELETE CASCADE
 		,CONSTRAINT [FK_tblMFOrderLineItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 		)
+Go
+CREATE NONCLUSTERED INDEX IX_tblMFOrderDetail_intOrderHeaderId ON [dbo].[tblMFOrderDetail]
+(
+	[intOrderHeaderId] ASC,
+	[intOrderDetailId] ASC
+)
+INCLUDE ( 	[dblRequiredQty]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

@@ -108,8 +108,10 @@ BEGIN TRY
 			SET @strStockUOM = NULL
 			SET @strDescription = NULL
 			SET @ysnDeleted = 0
-
-			SELECT @strProductType = NULL
+			SET @intStageItemId = NULL
+			SET @stri21ProductType = NULL
+			SET @intCommodityAttributeId = NULL
+			SET @strProductType = NULL
 
 			SELECT @intStageItemId = intStageItemId
 				,@strItemNo = strItemNo
@@ -680,8 +682,12 @@ BEGIN TRY
 							FROM @tblICItem
 							WHERE IsNULL(intOldProductTypeId, 0) <> IsNULL(intNewProductTypeId, 0)
 							)
-						SELECT @strDetails += '{"change":"intProductTypeId","iconCls":"small-gear","from":"' + Ltrim(intOldProductTypeId) + '","to":"' + Ltrim(intNewProductTypeId) + '","leaf":true,"changeDescription":"Product Type"},'
-						FROM @tblICItem
+					BEGIN
+						SELECT @strDetails += '{"change":"intProductTypeId","iconCls":"small-gear","from":"' + ISNULL(CA.strDescription, '') + '","to":"' + ISNULL(CA1.strDescription, '') + '","leaf":true,"changeDescription":"Product Type"},'
+						FROM @tblICItem I
+						LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOldProductTypeId
+						LEFT JOIN tblICCommodityAttribute CA1 ON CA1.intCommodityAttributeId = I.intNewProductTypeId
+					END
 
 					IF EXISTS (
 							SELECT *
@@ -718,30 +724,42 @@ BEGIN TRY
 			--Move to Archive
 			INSERT INTO tblIPItemArchive (
 				strItemNo
+				,strDescription
+				,strItemType
+				,strShortName
+				,strCommodity
+				,strCategoryCode
+				,strItemStatus
+				,strStockUOM
+				,ysnStockUOM
+				,ysnDeleted
+				,strSessionId
+				,dtmTransactionDate
+				,strProductType
 				,dtmCreated
 				,strCreatedUserName
 				,dtmLastModified
 				,strLastModifiedUserName
-				,ysnDeleted
-				,strItemType
-				,strStockUOM
 				,strSKUItemNo
-				,strDescription
-				,strSessionId
-				,strProductType
 				)
 			SELECT strItemNo
+				,strDescription
+				,strItemType
+				,strShortName
+				,strCommodity
+				,strCategoryCode
+				,strItemStatus
+				,strStockUOM
+				,ysnStockUOM
+				,ysnDeleted
+				,strSessionId
+				,dtmTransactionDate
+				,strProductType
 				,dtmCreated
 				,strCreatedUserName
 				,dtmLastModified
 				,strLastModifiedUserName
-				,ysnDeleted
-				,strItemType
-				,strStockUOM
 				,strSKUItemNo
-				,strDescription
-				,strSessionId
-				,strProductType
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intStageItemId
 
@@ -793,34 +811,46 @@ BEGIN TRY
 			--Move to Error
 			INSERT INTO tblIPItemError (
 				strItemNo
+				,strDescription
+				,strItemType
+				,strShortName
+				,strCommodity
+				,strCategoryCode
+				,strItemStatus
+				,strStockUOM
+				,ysnStockUOM
+				,ysnDeleted
+				,strSessionId
+				,dtmTransactionDate
+				,strProductType
 				,dtmCreated
 				,strCreatedUserName
 				,dtmLastModified
 				,strLastModifiedUserName
-				,ysnDeleted
-				,strItemType
-				,strStockUOM
 				,strSKUItemNo
-				,strDescription
 				,strErrorMessage
 				,strImportStatus
-				,strSessionId
-				,strProductType
 				)
 			SELECT strItemNo
+				,strDescription
+				,strItemType
+				,strShortName
+				,strCommodity
+				,strCategoryCode
+				,strItemStatus
+				,strStockUOM
+				,ysnStockUOM
+				,ysnDeleted
+				,strSessionId
+				,dtmTransactionDate
+				,strProductType
 				,dtmCreated
 				,strCreatedUserName
 				,dtmLastModified
 				,strLastModifiedUserName
-				,ysnDeleted
-				,strItemType
-				,strStockUOM
 				,strSKUItemNo
-				,strDescription
 				,@ErrMsg
 				,'Failed'
-				,strSessionId
-				,strProductType
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intStageItemId
 

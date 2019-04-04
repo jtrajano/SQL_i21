@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspPOProcessItemReceipt]
 	@poId INT
 	,@userId INT
+	,@receiveNonInventory BIT = 0
 	,@receiptNumber NVARCHAR(50) OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -27,6 +28,7 @@ BEGIN
 	IF NOT EXISTS(SELECT 1 FROM tblPOPurchaseDetail A
 					INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
 					WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') AND intPurchaseId = @poId)
+		AND @receiveNonInventory = 0
 	BEGIN
 		RAISERROR('There is no receivable item on this purchase order.', 16, 1);
 		RETURN;
@@ -123,9 +125,9 @@ BEGIN
 			,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 			,intShipViaId			= PO.intShipViaId
 			,dblQty					= ISNULL(PODetail.dblQtyOrdered,0) - ISNULL(PODetail.dblQtyReceived,0)
-			,intGrossNetUOMId		= PODetail.intWeightUOMId
-			,dblGross				= PODetail.dblQtyOrdered
-			,dblNet					= PODetail.dblNetWeight
+			,intGrossNetUOMId		= NULL
+			,dblGross				= NULL
+			,dblNet					= NULL
 			,dblCost				= PODetail.dblCost - (PODetail.dblCost * (ISNULL(PODetail.dblDiscount,0) / 100))
 			,intCostUOMId			= PODetail.intCostUOMId
 			,intCurrencyId			= PO.intCurrencyId
@@ -157,7 +159,7 @@ BEGIN
 				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 				AND PO.intShipToId = ItemLocation.intLocationId
 	WHERE	PODetail.intPurchaseId = @poId
-			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+			AND 1 = CASE WHEN dbo.fnIsStockTrackingItem(PODetail.intItemId) = 0 AND @receiveNonInventory = 0 THEN 0 ELSE 1 END
 			AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
 	
 	INSERT INTO	@OtherCharges

@@ -1107,7 +1107,7 @@ BEGIN TRY
         ,[intErrorCode]
         ,[strModuleName]
     FROM
-        [dbo].[fnGetGLEntriesErrors](@GLEntries)
+        [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)

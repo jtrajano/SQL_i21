@@ -241,137 +241,218 @@ ELSE
 	END
 
 TRUNCATE TABLE tblARTaxStagingTable
-INSERT INTO tblARTaxStagingTable (
-	  intEntityCustomerId
-	, intEntitySalespersonId
-	, intCurrencyId
-	, intCompanyLocationId
-	, intShipToLocationId
-	, intTaxCodeId
-	, intInvoiceId
-	, intInvoiceDetailId
-	, intItemId
-	, intItemUOMId
-	, intTaxGroupId
-	, intTonnageTaxUOMId
-	, dtmDate
-	, strInvoiceNumber
-	, strCalculationMethod
-	, strCustomerNumber
-	, strCustomerName
-	, strDisplayName
-	, strTaxNumber
-	, strSalespersonNumber
-	, strSalespersonName
-	, strSalespersonDisplayName
-	, strCompanyName
-	, strCompanyAddress
-	, strCurrency
-	, strCurrencyDescription
-	, strTaxGroup
-	, strTaxAgency
-	, strTaxCode
-	, strTaxCodeDescription
-	, strCountry
-	, strState
-	, strCounty
-	, strCity
-	, strTaxClass
-	, strSalesTaxAccount
-	, strPurchaseTaxAccount
-	, strLocationName
-	, strShipToLocationAddress
-	, strItemNo
-	, strCategoryCode
-	, strTaxReportType
-	, dblRate
-	, dblUnitPrice
-	, dblQtyShipped
-	, dblAdjustedTax
-	, dblTax
-	, dblTotalAdjustedTax
-	, dblTotalTax
-	, dblTaxDifference
-	, dblTaxAmount
-	, dblNonTaxable
-	, dblTaxable
-	, dblTotalSales
-	, dblTaxCollected
-	, dblQtyTonShipped
-	, ysnTaxExempt
-	, strFederalTaxId
-	, strStateTaxId
-)
-SELECT TAX.intEntityCustomerId
-	, TAX.intEntitySalespersonId
-	, TAX.intCurrencyId
-	, TAX.intCompanyLocationId
-	, TAX.intShipToLocationId
-	, TAX.intTaxCodeId
-	, TAX.intInvoiceId
-	, TAX.intInvoiceDetailId
-	, TAX.intItemId
-	, TAX.intItemUOMId
-	, TAX.intTaxGroupId
-	, TAX.intTonnageTaxUOMId
-	, TAX.dtmDate
-	, TAX.strInvoiceNumber
-	, TAX.strCalculationMethod
-	, TAX.strCustomerNumber
-	, TAX.strCustomerName
-	, TAX.strDisplayName
-	, TAX.strTaxNumber
-	, TAX.strSalespersonNumber
-	, TAX.strSalespersonName
-	, TAX.strSalespersonDisplayName
-	, TAX.strCompanyName
-	, TAX.strCompanyAddress
-	, TAX.strCurrency
-	, TAX.strCurrencyDescription
-	, TAX.strTaxGroup
-	, TAX.strTaxAgency
-	, TAX.strTaxCode
-	, TAX.strTaxCodeDescription
-	, TAX.strCountry
-	, TAX.strState
-	, TAX.strCounty
-	, TAX.strCity
-	, TAX.strTaxClass
-	, TAX.strSalesTaxAccount
-	, TAX.strPurchaseTaxAccount
-	, TAX.strLocationName
-	, TAX.strShipToLocationAddress
-	, TAX.strItemNo
-	, TAX.strCategoryCode
-	, @strTaxReportType
-	, TAX.dblRate
-	, TAX.dblUnitPrice
-	, TAX.dblQtyShipped
-	, TAX.dblAdjustedTax
-	, TAX.dblTax
-	, TAX.dblTotalAdjustedTax
-	, TAX.dblTotalTax
-	, TAX.dblTaxDifference
-	, TAX.dblTaxAmount
-	, TAX.dblNonTaxable
-	, TAX.dblTaxable
-	, TAX.dblTotalSales
-	, TAX.dblTaxCollected
-	, TAX.dblQtyTonShipped
-	, TAX.ysnTaxExempt
-	, TAX.strFederalTaxId
-	, TAX.strStateTaxId
-FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
-INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
-INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
-INNER JOIN #INVOICES I ON TAX.intInvoiceId = I.intInvoiceId
-WHERE TAX.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-AND (@strTaxCode IS NULL OR TAX.strTaxCode LIKE '%'+ @strTaxCode +'%')
-AND (@strTaxAgency IS NULL OR TAX.strTaxAgency LIKE '%'+ @strTaxAgency +'%')
-AND (@strTaxClass IS NULL OR TAX.strTaxClass LIKE '%'+ @strTaxClass +'%')
-AND (@strTaxGroup IS NULL OR TAX.strTaxGroup LIKE '%'+ @strTaxGroup +'%')
-AND (@strState IS NULL OR TAX.strState LIKE '%'+ @strState +'%')
-AND (@strSalespersonName IS NULL OR TAX.strSalespersonName LIKE '%' + @strSalespersonName + '%')
+
+IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
+	BEGIN
+		INSERT INTO tblARTaxStagingTable (
+			intEntityCustomerId
+			, intEntitySalespersonId
+			, intCurrencyId
+			, intCompanyLocationId
+			, intShipToLocationId
+			, intTaxCodeId
+			, intInvoiceId
+			, intInvoiceDetailId
+			, intItemId
+			, intItemUOMId
+			, intTaxGroupId
+			, intTonnageTaxUOMId
+			, dtmDate
+			, strInvoiceNumber
+			, strCalculationMethod
+			, strCustomerNumber
+			, strCustomerName
+			, strDisplayName
+			, strTaxNumber
+			, strSalespersonNumber
+			, strSalespersonName
+			, strSalespersonDisplayName
+			, strCurrency
+			, strCurrencyDescription
+			, strTaxGroup
+			, strTaxAgency
+			, strTaxCode
+			, strTaxCodeDescription
+			, strCountry
+			, strState
+			, strCounty
+			, strCity
+			, strTaxClass
+			, strSalesTaxAccount
+			, strPurchaseTaxAccount
+			, strLocationName
+			, strShipToLocationAddress
+			, strItemNo
+			, strCategoryCode
+			, strTaxReportType
+			, dblRate
+			, dblUnitPrice
+			, dblQtyShipped
+			, dblAdjustedTax
+			, dblTax
+			, dblTotalAdjustedTax
+			, dblTotalTax
+			, dblTaxDifference
+			, dblTaxAmount
+			, dblNonTaxable
+			, dblTaxable
+			, dblTotalSales
+			, dblTaxCollected
+			, dblQtyTonShipped
+			, ysnTaxExempt
+			, strFederalTaxId
+			, strStateTaxId
+		)
+		SELECT intEntityCustomerId			= TAX.intEntityCustomerId
+			, intEntitySalespersonId		= TAX.intEntitySalespersonId
+			, intCurrencyId					= TAX.intCurrencyId
+			, intCompanyLocationId			= TAX.intCompanyLocationId
+			, intShipToLocationId			= TAX.intShipToLocationId
+			, intTaxCodeId					= TAX.intTaxCodeId
+			, intInvoiceId					= TAX.intInvoiceId
+			, intInvoiceDetailId			= TAX.intInvoiceDetailId
+			, intItemId						= TAX.intItemId
+			, intItemUOMId					= TAX.intItemUOMId
+			, intTaxGroupId					= TAX.intTaxGroupId
+			, intTonnageTaxUOMId			= TAX.intTonnageTaxUOMId
+			, dtmDate						= TAX.dtmDate
+			, strInvoiceNumber				= TAX.strInvoiceNumber
+			, strCalculationMethod			= TAX.strCalculationMethod
+			, strCustomerNumber				= TAX.strCustomerNumber
+			, strCustomerName				= TAX.strCustomerName
+			, strDisplayName				= TAX.strDisplayName
+			, strTaxNumber					= TAX.strTaxNumber
+			, strSalespersonNumber			= TAX.strSalespersonNumber
+			, strSalespersonName			= TAX.strSalespersonName
+			, strSalespersonDisplayName		= TAX.strSalespersonDisplayName
+			, strCurrency					= TAX.strCurrency
+			, strCurrencyDescription		= TAX.strCurrencyDescription
+			, strTaxGroup					= TAX.strTaxGroup
+			, strTaxAgency					= TAX.strTaxAgency
+			, strTaxCode					= TAX.strTaxCode
+			, strTaxCodeDescription			= TAX.strTaxCodeDescription
+			, strCountry					= TAX.strCountry
+			, strState						= TAX.strState
+			, strCounty						= TAX.strCounty
+			, strCity						= TAX.strCity
+			, strTaxClass					= TAX.strTaxClass
+			, strSalesTaxAccount			= TAX.strSalesTaxAccount
+			, strPurchaseTaxAccount			= TAX.strPurchaseTaxAccount
+			, strLocationName				= TAX.strLocationName
+			, strShipToLocationAddress		= TAX.strShipToLocationAddress
+			, strItemNo						= TAX.strItemNo
+			, strCategoryCode				= TAX.strCategoryCode
+			, strTaxReportType				= @strTaxReportType
+			, dblRate						= TAX.dblRate
+			, dblUnitPrice					= TAX.dblUnitPrice
+			, dblQtyShipped					= TAX.dblQtyShipped
+			, dblAdjustedTax				= TAX.dblAdjustedTax
+			, dblTax						= TAX.dblTax
+			, dblTotalAdjustedTax			= TAX.dblTotalAdjustedTax
+			, dblTotalTax					= TAX.dblTotalTax
+			, dblTaxDifference				= TAX.dblTaxDifference
+			, dblTaxAmount					= TAX.dblTaxAmount
+			, dblNonTaxable					= TAX.dblNonTaxable
+			, dblTaxable					= TAX.dblTaxable
+			, dblTotalSales					= TAX.dblTotalSales
+			, dblTaxCollected				= TAX.dblTaxCollected
+			, dblQtyTonShipped				= TAX.dblQtyTonShipped
+			, ysnTaxExempt					= TAX.ysnTaxExempt
+			, strFederalTaxId				= TAX.strFederalTaxId
+			, strStateTaxId					= TAX.strStateTaxId
+		FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
+		INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
+		INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
+		INNER JOIN #INVOICES I ON TAX.intInvoiceId = I.intInvoiceId
+		WHERE TAX.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+		AND (@strTaxCode IS NULL OR TAX.strTaxCode LIKE '%'+ @strTaxCode +'%')
+		AND (@strTaxAgency IS NULL OR TAX.strTaxAgency LIKE '%'+ @strTaxAgency +'%')
+		AND (@strTaxClass IS NULL OR TAX.strTaxClass LIKE '%'+ @strTaxClass +'%')
+		AND (@strTaxGroup IS NULL OR TAX.strTaxGroup LIKE '%'+ @strTaxGroup +'%')
+		AND (@strState IS NULL OR TAX.strState LIKE '%'+ @strState +'%')
+		AND (@strSalespersonName IS NULL OR TAX.strSalespersonName LIKE '%' + @strSalespersonName + '%')
+	END
+ELSE
+	BEGIN
+		INSERT INTO tblARTaxStagingTable (
+			  intEntityCustomerId
+			, strDisplayName
+			, strTaxNumber
+			, strTaxGroup
+			, strState
+			, strTaxReportType
+			, dblNonTaxable
+			, dblTaxable
+			, dblTotalSales
+			, dblCheckOffTax
+			, dblCitySalesTax
+			, dblCityExciseTax
+			, dblCountySalesTax
+			, dblCountyExciseTax
+			, dblFederalExciseTax
+			, dblFederalLustTax
+			, dblFederalOilSpillTax
+			, dblFederalOtherTax
+			, dblLocalOtherTax
+			, dblPrepaidSalesTax
+			, dblStateExciseTax
+			, dblStateOtherTax
+			, dblStateSalesTax
+			, dblTonnageTax
+		)
+		SELECT intEntityCustomerId			= TAX.intEntityCustomerId
+			, strDisplayName				= TAX.strDisplayName
+			, strTaxNumber					= TAX.strTaxNumber
+			, strTaxGroup					= TAX.strTaxGroup
+			, strState						= TAX.strState
+			, strTaxReportType				= @strTaxReportType
+			, dblNonTaxable					= SUM(TAX.dblNonTaxable)
+			, dblTaxable					= SUM(TAX.dblTaxable)
+			, dblTotalSales					= SUM(TAX.dblTotalSales)
+			, dblCheckOffTax		 		= SUM(CASE WHEN TRT.strType = 'Checkoff Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblCitySalesTax		 		= SUM(CASE WHEN TRT.strType = 'City Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblCityExciseTax		 		= SUM(CASE WHEN TRT.strType = 'City Excise Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblCountySalesTax		 		= SUM(CASE WHEN TRT.strType = 'County Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblCountyExciseTax	 		= SUM(CASE WHEN TRT.strType = 'County Excise Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblFederalExciseTax	 		= SUM(CASE WHEN TRT.strType = 'Federal Excise Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblFederalLustTax		 		= SUM(CASE WHEN TRT.strType = 'Federal Lust Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblFederalOilSpillTax	 		= SUM(CASE WHEN TRT.strType = 'Federal Oil Spill Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblFederalOtherTax	 		= SUM(CASE WHEN TRT.strType = 'Federal Other Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblLocalOtherTax		 		= SUM(CASE WHEN TRT.strType = 'Local Other Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblPrepaidSalesTax	 		= SUM(CASE WHEN TRT.strType = 'Prepaid Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblStateExciseTax	 	 		= SUM(CASE WHEN TRT.strType = 'State Excise Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblStateOtherTax		 		= SUM(CASE WHEN TRT.strType = 'State Other Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblStateSalesTax		 		= SUM(CASE WHEN TRT.strType = 'State Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, dblTonnageTax			 		= SUM(CASE WHEN TRT.strType = 'Tonnage Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+		FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
+		LEFT JOIN tblSMTaxClass TCLASS ON TAX.intTaxClassId = TCLASS.intTaxClassId
+		LEFT JOIN tblSMTaxReportType TRT ON TCLASS.intTaxReportTypeId = TRT.intTaxReportTypeId
+		INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
+		INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
+		INNER JOIN #INVOICES I ON TAX.intInvoiceId = I.intInvoiceId
+		WHERE TAX.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+		AND (@strTaxCode IS NULL OR TAX.strTaxCode LIKE '%'+ @strTaxCode +'%')
+		AND (@strTaxAgency IS NULL OR TAX.strTaxAgency LIKE '%'+ @strTaxAgency +'%')
+		AND (@strTaxClass IS NULL OR TAX.strTaxClass LIKE '%'+ @strTaxClass +'%')
+		AND (@strTaxGroup IS NULL OR TAX.strTaxGroup LIKE '%'+ @strTaxGroup +'%')
+		AND (@strState IS NULL OR TAX.strState LIKE '%'+ @strState +'%')
+		AND (@strSalespersonName IS NULL OR TAX.strSalespersonName LIKE '%' + @strSalespersonName + '%')
+		GROUP BY TAX.intEntityCustomerId
+			   , TAX.strDisplayName
+			   , TAX.strTaxNumber
+			   , TAX.strTaxGroup
+			   , TAX.strState
+	END
+
+UPDATE TST 
+SET strCompanyName 		= COMPANY.strCompanyName
+  , strCompanyAddress	= COMPANY.strCompanyAddress
+FROM tblARTaxStagingTable TST
+OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+			   , strCompanyAddress = dbo.fnARFormatCustomerAddress (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+) COMPANY
 
 IF ISNULL(@ysnTaxExemptOnly, 0) = 1 
 	DELETE FROM tblARTaxStagingTable WHERE ysnTaxExempt = 0

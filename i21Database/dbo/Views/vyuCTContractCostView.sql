@@ -17,6 +17,7 @@ AS
 				CC.ysnAdditionalCost,
 				CC.ysnBasis,
 				CC.ysnReceivable,
+				CC.strParty,
 				CC.strPaidBy,
 				CC.dtmDueDate,
 				CC.ysn15DaysFromShipment,
@@ -50,6 +51,7 @@ AS
 				IM.strCostType,
 				IM.ysnInventoryCost,
 				CH.strContractNumber,
+				CH.dtmContractDate,
 				MY.strCurrency	AS	strMainCurrency,
 				CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate

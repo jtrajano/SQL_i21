@@ -95,6 +95,7 @@ BEGIN
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
+		AND Item.strType <> 'Non-Inventory'
 
 	SELECT	TOP 1 
 			@strLocationName = c.strLocationName
@@ -103,9 +104,11 @@ BEGIN
 			INNER JOIN @GLAccounts ItemGLAccount
 				ON ItemGLAccount.intItemId = il.intItemId
 				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+			INNER JOIN tblICItem Item ON Item.intItemId = il.intItemId
 	WHERE	il.intItemId = @intItemId
 			AND ItemGLAccount.intAutoNegativeId IS NULL 				 			
-	
+			AND Item.strType <> 'Non-Inventory'
+
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.

@@ -273,7 +273,7 @@ BEGIN TRY
 			SET @ErrMsg = 'M2M Date is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END
-		IF	@dblNewQuantity > 99999999.999999
+		IF	@dblNewQuantity > 9999999999.999999
 		BEGIN
 			SET @ErrMsg = 'Quantity cannot be greater than 99999999.999999.'
 			RAISERROR(@ErrMsg,16,1)
@@ -357,14 +357,14 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1) 
 		END
 
-		IF @intNewStatusId IN (3) AND @intOldStatusId NOT IN (3) AND 
-		EXISTS(	SELECT * FROM tblLGLoadDetail LD JOIN tblLGLoad LO ON LO.intLoadId = LD.intLoadId 
-				WHERE (LD.intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND ISNULL(LO.ysnCancelled,0) <> 1)
-		BEGIN
-			SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
-			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as loads are associated with the sequence.'
-			RAISERROR(@ErrMsg,16,1) 
-		END
+		--IF @intNewStatusId IN (3) AND @intOldStatusId NOT IN (3) AND 
+		--EXISTS(	SELECT * FROM tblLGLoadDetail LD JOIN tblLGLoad LO ON LO.intLoadId = LD.intLoadId 
+		--		WHERE (LD.intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND ISNULL(LO.ysnCancelled,0) <> 1)
+		--BEGIN
+		--	SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
+		--	SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as loads are associated with the sequence.'
+		--	RAISERROR(@ErrMsg,16,1) 
+		--END
 
 		IF @intNewStatusId IN (6) AND @intOldStatusId NOT IN (6) AND ISNULL(@dblAllocatedQty,0) > 0 AND
 		@dblAllocatedQty > @dblNewQuantity - @dblNewBalance

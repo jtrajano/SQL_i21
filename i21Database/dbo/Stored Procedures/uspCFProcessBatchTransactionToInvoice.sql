@@ -602,7 +602,7 @@ SELECT * FROM @tmpForeignTransactionId
 				,[ysnTaxAdjusted]			= 0
 				,[ysnSeparateOnInvoice]		= 0 
 				,[ysnCheckoffTax]			= cfTaxCode.ysnCheckoffTax
-				,[ysnTaxExempt]				= 0
+				,[ysnTaxExempt]				= cfTransactionTax.ysnTaxExempt
 				,[ysnTaxOnly]				= cfTaxCode.[ysnTaxOnly]
 				,[strNotes]					= ''
 				,[intTempDetailIdForTaxes]	= TI.intTransactionId
@@ -648,6 +648,8 @@ SELECT * FROM @tmpForeignTransactionId
 	
 	DECLARE @LogId INT
 
+	SELECT * INTO #tblCFEntriesForInvoice FROM @EntriesForInvoice
+
 	EXEC [dbo].[uspARProcessInvoicesByBatch]
 		 --@InvoiceEntries	= @InvoiceEntriesTEMP
 		 @InvoiceEntries	= @EntriesForInvoice
@@ -692,7 +694,7 @@ SELECT * FROM @tmpForeignTransactionId
 		tblCFTransaction CFTran
 		INNER JOIN tblARInvoice ARL
 		ON CFTran.intTransactionId = ARL.intTransactionId
-		INNER JOIN @EntriesForInvoice EFI
+		INNER JOIN #tblCFEntriesForInvoice EFI
 		ON CFTran.intTransactionId = EFI.intSourceId
 
 
@@ -708,7 +710,7 @@ SELECT * FROM @tmpForeignTransactionId
 				tblCFTransaction CFTran
 				INNER JOIN tblARInvoice ARL
 				ON CFTran.intTransactionId = ARL.intTransactionId 
-				INNER JOIN @EntriesForInvoice EFI
+				INNER JOIN #tblCFEntriesForInvoice EFI
 				ON CFTran.intTransactionId = EFI.intSourceId
 				WHERE ARL.ysnPosted = 1
 				GROUP BY  CFTran.intCardId
@@ -728,7 +730,7 @@ SELECT * FROM @tmpForeignTransactionId
 		tblCFTransaction CFTran
 		INNER JOIN tblARInvoice ARL
 		ON CFTran.intTransactionId = ARL.intTransactionId
-		INNER JOIN @EntriesForInvoice EFI
+		INNER JOIN #tblCFEntriesForInvoice EFI
 		ON CFTran.intTransactionId = EFI.intSourceId
 
 	END

@@ -10,7 +10,8 @@ cfSite.intSiteId,
 cfSite.strSiteAddress,
 RTRIM(LTRIM(cfSite.strSiteName)) AS strSiteName,
 cfSite.strSiteNumber,
-
+cfSite.strSiteCity,
+cfSite.intAdjustmentSiteGroupId,
 (CASE 
 WHEN cfTransaction.strTransactionType = 'Foreign Sale' THEN cfNetwork.intCustomerId
 ELSE  cfCard.intEntityId
@@ -29,6 +30,7 @@ END) AS strName
 
 ,cfTransaction.strTransactionType
 ,DATEADD(dd, DATEDIFF(dd, 0, cfTransaction.dtmTransactionDate ), 0) as dtmTransactionDate
+,dtmTransactionDate as dtmTransactionDateTime
 ,DATEADD(dd, DATEDIFF(dd, 0, cfTransaction.dtmPostedDate ), 0) as dtmPostedDate
 ,cfTransaction.intTransactionId
 

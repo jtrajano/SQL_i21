@@ -39,7 +39,7 @@ BEGIN
 								WHEN L.intWeightUOMId IS NULL
 									THEN L.dblQty
 								ELSE L.dblWeight
-								END, LI1.dblRequiredQty))
+								END, LI.dblRequiredQty))
 			ELSE NULL
 			END AS dblRequiredQty
 	FROM dbo.tblICLot L
@@ -56,8 +56,8 @@ BEGIN
 	JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN dbo.tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 		AND UT.strInternalCode IN (
-			'STAGING'
-			,'PROD_STAGING'
+			--'STAGING'
+			'PROD_STAGING'
 			)
 	JOIN dbo.tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 	LEFT OUTER JOIN dbo.tblEMEntity E ON E.intEntityId = IO1.intOwnerId
@@ -70,16 +70,8 @@ BEGIN
 			,10
 			)
 	LEFT JOIN dbo.tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
-	LEFT JOIN dbo.tblMFOrderManifest M1 ON M1.intLotId = L.intLotId
-	LEFT JOIN dbo.tblMFOrderDetail LI1 ON (
-			LI1.intOrderDetailId = M1.intOrderDetailId
-			OR (
-				LI1.intItemId = L.intItemId
-				AND LI1.dblQty = 0
-				)
-			)
-	LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intOrderHeaderId = LI1.intOrderHeaderId
-	LEFT JOIN dbo.tblMFWorkOrder W1 ON W1.intWorkOrderId = SW.intWorkOrderId
+	LEFT JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intDestinationLotId = L.intLotId
+	LEFT JOIN dbo.tblMFWorkOrder W1 ON W1.intWorkOrderId = WI.intWorkOrderId
 		AND W1.intStatusId <> 13
 	GROUP BY L.intLotId
 		,L.strLotNumber

@@ -9,7 +9,7 @@ BEGIN TRY
 	
 	DECLARE @SQL						NVARCHAR(MAX) = '',
 			@ErrMsg						NVARCHAR(MAX),
-			@strCustomerContract		NVARCHAR(1000),
+			@strCustomerContract		NVARCHAR(100),
 			@idoc						INT,
 
 			@intCommodityId				INT,
@@ -370,6 +370,13 @@ BEGIN TRY
 				RAISERROR(@ErrMsg,16,1)
 			END
 		END
+	END
+
+	--Common added and modified
+	IF LTRIM(RTRIM(ISNULL(@strCustomerContract,''))) <> '' AND EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE strCustomerContract = @strCustomerContract)
+	BEGIN
+		SELECT @ErrMsg = 'The Vendor/Customer Ref '+@strCustomerContract+' is already available for the selected vendor.'
+		RAISERROR(@ErrMsg,16,1)
 	END
 
 END TRY

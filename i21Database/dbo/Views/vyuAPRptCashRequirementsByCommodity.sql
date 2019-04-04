@@ -38,7 +38,7 @@ AS
 		  AND APBD.intContractHeaderId IS NOT NULL --WILL SHOW ALL CONTRACT RELATED TRANSACTIONS 
 		  AND APB.intBillId NOT IN ( --WILL SHOW NOT PAID TRANSACTIONS ONLY
 			SELECT A.intBillId FROM [vyuAPBillPayment] A
-		  )
+		  ) AND APB.ysnPosted = 1
 		GROUP BY strCommodityCode, 
 		APBD.dblUnitQty,
 		APBD.dblTotal,

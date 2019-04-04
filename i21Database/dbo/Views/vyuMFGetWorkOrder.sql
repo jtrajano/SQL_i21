@@ -93,6 +93,8 @@ SELECT C.intManufacturingCellId
 		) AS intOrderId
 		,W.dtmActualProductionStartDate
 		,W.dtmActualProductionEndDate
+		,SO.strSalesOrderNumber
+		,E.strName AS strSalesRepresentative
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
@@ -125,3 +127,5 @@ LEFT JOIN tblSMCompanyLocationSubLocation csl ON W.intSubLocationId = csl.intCom
 LEFT JOIN vyuARCustomer cs ON W.intCustomerId = cs.intEntityId
 LEFT JOIN tblMFDepartment d ON W.intDepartmentId = d.intDepartmentId
 LEFT JOIN tblMFWorkOrderStatus WS1 ON WS1.intStatusId = W.intCountStatusId
+LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = W.intSalesOrderLineItemId
+LEFT JOIN tblEMEntity E ON E.intEntityId = SO.intEntitySalespersonId

@@ -11,6 +11,7 @@
 	@intSubBookId INT = NULL,
 	@intSelectedInstrumentTypeId INT = NULL
 AS
+
 SET @dtmFromDate = convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), isnull(@dtmToDate, getdate()), 110), 110)
 
@@ -208,20 +209,18 @@ EXEC uspRKRealizedPnL @dtmFromDate = @dtmFromDate,
 	@intSubBookId = @intSubBookId,
 	@intSelectedInstrumentTypeId = @intSelectedInstrumentTypeId
 
-
-UPDATE r
-SET r.dblClosing = LS.dblLastSettle
-FROM @Relaized r
-OUTER APPLY (
-	SELECT TOP 1 dblLastSettle,
-		intFutureMarketId,
-		intFutureMonthId
+	SELECT * INTO #TempSettlementPrice  from (
+	SELECT dblLastSettle, p.intFutureMarketId , pm.intFutureMonthId,dtmPriceDate
+	,ROW_NUMBER() OVER (PARTITION BY p.intFutureMarketId,pm.intFutureMonthId ORDER BY CONVERT(NVARCHAR, dtmPriceDate, 111) desc) intRowNum
 	FROM tblRKFuturesSettlementPrice p
 	INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-	WHERE p.intFutureMarketId = r.intFutureMarketId AND pm.intFutureMonthId = r.intFutureMonthId AND CONVERT(NVARCHAR, dtmPriceDate, 111) <= CONVERT(NVARCHAR, @dtmToDate, 111)
-	ORDER BY dtmPriceDate DESC
-	) LS
-
+	WHERE  CONVERT(NVARCHAR, dtmPriceDate, 111) <= CONVERT(NVARCHAR, @dtmToDate, 111))t where intRowNum=1
+	
+	UPDATE r
+	SET r.dblClosing = t.dblLastSettle from @Relaized r
+	left join #TempSettlementPrice t on t.intFutureMarketId=r.intFutureMarketId and r.intFutureMonthId=t.intFutureMonthId
+	
+	
 BEGIN
 	DECLARE @Summary AS TABLE (
 		intFutureMarketId INT,

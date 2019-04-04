@@ -1,12 +1,15 @@
 ﻿CREATE TABLE [dbo].[tblCTPriceFixationDetail]
 (
-	[intPriceFixationDetailId]		INT IDENTITY NOT NULL,
-	[intConcurrencyId]				INT NOT NULL,
+	[intPriceFixationDetailId]		INT IDENTITY NOT NULL,	
 	[intPriceFixationId]			INT NOT NULL,
+	[intNumber]						INT NULL,
 	[strTradeNo]					NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL ,
 	[strOrder]						NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL ,
 	[dtmFixationDate]				DATETIME NOT NULL,
 	[dblQuantity]					NUMERIC(18,6) NULL,
+	[dblQuantityAppliedAndPriced]	NUMERIC(18,6) NULL,
+	[dblLoadAppliedAndPriced]		NUMERIC(18,6) NULL,
+	[dblLoadPriced]					NUMERIC(18,6) NULL,
 	[intQtyItemUOMId]				INT NULL,
 	[dblNoOfLots]					NUMERIC(18,6) NOT NULL,
 	[intFutureMarketId]				INT NOT NULL,
@@ -32,6 +35,7 @@
 	intBillDetailId					INT,
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
+	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),
 	CONSTRAINT [UK_tblCTPackingDescriptionDetail_strTradeNo] UNIQUE ([strTradeNo]),

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessACHPayments]
 	@strPaymentIds			NVARCHAR(MAX),
 	@intBankAccountId		INT,
+	@intCompanyLocationId	INT,
 	@intUserId				INT,
 	@strNewTransactionId	NVARCHAR(100) = '' OUTPUT
 AS
@@ -79,6 +80,12 @@ IF ISNULL(@intBankAccountId, 0) = 0
 		RETURN;
 	END
 
+IF ISNULL(@intCompanyLocationId, 0) = 0
+	BEGIN
+		RAISERROR('Current Location is required when processing ACH Payments.', 16, 1)
+		RETURN;
+	END
+
 IF ISNULL(@intUserId, 0) = 0
 	BEGIN
 		RAISERROR('User is required when processing ACH Payments.', 16, 1)
@@ -104,11 +111,11 @@ SELECT
 	 [intBankAccountId]				= UF.intBankAccountId
 	,[strTransactionId]				= 'temp'
 	,[intCurrencyId]				= P.intCurrencyId
-	,[intBankTransactionTypeId]		= CASE WHEN SUM(UF.dblAmount) >= 0 THEN 1 ELSE 2 END
+	,[intBankTransactionTypeId]		= 1
 	,[dtmDate]						= P.dtmDatePaid
 	,[dblAmount]					= SUM(UF.dblAmount)
 	,[strMemo]						= CASE WHEN P.ysnVendorRefund = 1 THEN 'Vendor Refund' ELSE 'AR ACH' END
-	,[intCompanyLocationId]			= UF.intLocationId
+	,[intCompanyLocationId]			= @intCompanyLocationId
 	,[intEntityId]					= ISNULL(@intUserId, UF.intLastModifiedUserId)
 	,[intCreatedUserId]				= ISNULL(@intUserId, UF.intLastModifiedUserId)
 	,[intLastModifiedUserId]		= ISNULL(@intUserId, UF.intLastModifiedUserId)
@@ -121,10 +128,9 @@ CROSS APPLY (
 GROUP BY UF.intBankAccountId
 	   , P.intCurrencyId
 	   , P.dtmDatePaid
-	   , UF.intLocationId
 	   , P.ysnVendorRefund
 	   , ISNULL(@intUserId, UF.intLastModifiedUserId)
-	   , CASE WHEN P.dblAmountPaid >=  0 then 1 ELSE 2 end
+	   
 --PaymentDup
 INSERT INTO @BankTransactionDup(
 	  [intBankAccountId]
@@ -222,10 +228,6 @@ BEGIN
 	  AND [intCompanyLocationId] = @DupLocation 
 	  AND [intTransactionId] = @intBankTransactionDupID
  	
-
-	DECLARE @ISPOSITIVE  INT = 0;
-
-	SELECT  @ISPOSITIVE  = CASE WHEN T.[dblAmount] >=  0 then 1 ELSE 2 end from @BankTransactionDup T WHERE T.[intTransactionId] = @intBankTransactionDupID
 	--GETTING THE DETAIL
 	INSERT INTO @BankTransactionDetail(
 		  [intTransactionId]
@@ -262,9 +264,7 @@ BEGIN
 		  AND P.dtmDatePaid = @DupDatePaid
 		
 	) PAYMENTS 
-	WHERE UF.intBankAccountId = @DupBankId 
-	  AND UF.intLocationId = @DupLocation 
-	  AND @ISPOSITIVE = CASE WHEN UF.dblAmount >=  0 then 1 ELSE 2 end
+	WHERE UF.intBankAccountId = @DupBankId 	  
 
 	SELECT TOP 1 @intEntityId = intEntityCustomerId FROM @tblACHPayments
 

@@ -126,7 +126,8 @@ FROM (
 				AND CONVERT(DATETIME,CONVERT(VARCHAR(10),psh.dtmMatchDate,110),110) BETWEEN @dtmFromDate AND @dtmToDate
 				AND psh.strType = 'Realize'
 				AND ISNULL(ysnExpired,0) = case when ISNULL(@ysnExpired,0)= 1 then ISNULL(ysnExpired,0) else @ysnExpired end
-				AND ot.intInstrumentTypeId =1  and ot.intSelectedInstrumentTypeId=@intSelectedInstrumentTypeId
+				AND ot.intInstrumentTypeId =1
+				AND ISNULL(ot.intSelectedInstrumentTypeId,0)= CASE WHEN ISNULL(@intSelectedInstrumentTypeId,0)=0 then ot.intSelectedInstrumentTypeId else @intSelectedInstrumentTypeId end
 		)t
 	)t1
 )t ORDER BY RowNum ASC

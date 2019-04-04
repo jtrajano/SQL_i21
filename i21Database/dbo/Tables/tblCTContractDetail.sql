@@ -9,6 +9,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intContractStatusId] [int] NULL,
 	[intContractSeq] [int] NOT NULL,
 	[intCompanyLocationId] [int] NOT NULL,
+	[intShipToId] INT,
 	[dtmStartDate] [datetime] NOT NULL,
 	[dtmEndDate] [datetime] NOT NULL,
 	[intFreightTermId] [int] NULL,
@@ -144,6 +145,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intContractDetailRefId] INT,
 	ysnStockSale BIT,
 	strCertifications NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	ysnSplit		BIT,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
@@ -181,6 +183,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntity_intShippingLineId_intEntityId] FOREIGN KEY ([intShippingLineId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEMEntity_intProducerId_intEntityId] FOREIGN KEY (intProducerId) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEMEntityLocation_intShipToId] FOREIGN KEY (intShipToId) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
@@ -555,3 +558,7 @@ INCLUDE ( 	[intContractSeq],
 	[intPricingTypeId],
 	[dblNoOfLots]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 go
+
+CREATE NONCLUSTERED INDEX [IX_tblCTContractDetail_intSplitFromId] 
+ON [dbo].[tblCTContractDetail](intSplitFromId);
+GO

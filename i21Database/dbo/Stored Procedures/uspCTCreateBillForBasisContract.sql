@@ -14,7 +14,7 @@ BEGIN TRY
 	DECLARE @intCommodityStockUomId INT
 	DECLARE @intCreatedUserId INT
 	DECLARE @intCreatedBillId AS INT
-	DECLARE @voucherDetailStorage AS [VoucherDetailStorage]
+	DECLARE @voucherDetailStorage AS VoucherPayable
 	DECLARE @dtmDate AS DATETIME
 	
 	DECLARE @TicketNo NVARCHAR(20)
@@ -92,33 +92,41 @@ BEGIN TRY
 					 [intCustomerStorageId]
 					,[intItemId]
 					,[intAccountId]
-					,[dblQtyReceived]
+					,[dblQuantityToBill]
 					,[strMiscDescription]
 					,[dblCost]
 					,[intContractHeaderId]
 					,[intContractDetailId]
-					,[intUnitOfMeasureId]
+					,[intQtyToBillUOMId]
 					,[intCostUOMId]
 					,[dblWeightUnitQty]
 					,[dblCostUnitQty]
-					,[dblUnitQty]
+					,[dblQtyToBillUnitQty]
 					,[dblNetWeight]
+					,[intShipToId]
+					,[intEntityVendorId]
+					,[intTransactionType]
+					,[dtmVoucherDate]
 				 )
 			 SELECT 
 			 intCustomerStorageId	= SST.intCustomerStorageId
 			,intItemId				= SS.intItemId
 			,[intAccountId]			= NULL
-			,[dblQtyReceived]		= CASE WHEN SST.dblUnits <= SC.dblUnits THEN ROUND(SST.dblUnits,2) ELSE ROUND(SC.dblUnits,2) END
+			,[dblQuantityToBill]	= CASE WHEN SST.dblUnits <= SC.dblUnits THEN ROUND(SST.dblUnits,2) ELSE ROUND(SC.dblUnits,2) END
 			,[strMiscDescription]	= Item.[strItemNo]
 			,[dblCost]				= @dblCashPrice
 			,intContractHeaderId	= @intBasisContractHeaderId
 			,intContractDetailId	= @intBasisContractDetailId
-			,[intUnitOfMeasureId]	= SS.intCommodityStockUomId
+			,[intQtyToBillUOMId]	= SS.intCommodityStockUomId
 			,[intCostUOMId]			= SS.intCommodityStockUomId
 			,[dblWeightUnitQty]		= 1 
 			,[dblCostUnitQty]		= 1 
-			,[dblUnitQty]			= 1
-			,[dblNetWeight]			= 0 
+			,[dblQtyToBillUnitQty]	= 1
+			,[dblNetWeight]			= 0
+			,[intShipToId]			= @LocationId
+			,[intEntityVendorId]	= @EntityId
+			,[intTransactionType]	= 1
+			,[dtmVoucherDate]		= @dtmDate
 			FROM tblGRSettleContract SC
 			JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
 			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageId = SC.intSettleStorageId AND SST.intSettleStorageId = SS.intSettleStorageId
@@ -144,7 +152,7 @@ BEGIN TRY
 			  ,intContractDetailId		
 			  ,dblStorageUnits			
 			  ,dblDiscountUnPaid			
-			  ,intPricingTypeId	
+			  ,intPricingTypeId
 			)
 			EXEC uspGRCalculateSettleDiscountForContract @intSettleStorageId
 
@@ -153,51 +161,54 @@ BEGIN TRY
 				 [intCustomerStorageId]
 				,[intItemId]
 				,[intAccountId]
-				,[dblQtyReceived]
+				,[dblQuantityToBill]
 				,[strMiscDescription]
 				,[dblCost]
 				,[intContractHeaderId]
 				,[intContractDetailId]
-				,[intUnitOfMeasureId]
+				,[intQtyToBillUOMId]
 				,[intCostUOMId]
 				,[dblWeightUnitQty]
 				,[dblCostUnitQty]
-				,[dblUnitQty]
+				,[dblQtyToBillUnitQty]
 				,[dblNetWeight]
+				,[intShipToId]
+				,[intEntityVendorId]
+				,[intTransactionType]
+				,[dtmVoucherDate]
 				)
 			SELECT 
 			 [intCustomerStorageId]   = SS.[intCustomerStorageId]
 			,[intItemId]			  = SS.[intItemId]
 			,[intAccountId]			  = NULL
-			,[dblQtyReceived]		  = SS.dblStorageUnits
+			,[dblQuantityToBill]		  = SS.dblStorageUnits
 			,[strMiscDescription]	  = Item.[strItemNo]
 			,[dblCost]				  = SS.dblDiscountUnPaid
 			,[intContractHeaderId]	  = @intBasisContractHeaderId
 			,[intContractDetailId]	  = @intBasisContractDetailId
-			,[intUnitOfMeasureId]	  = @intCommodityStockUomId
+			,[intQtyToBillUOMId]	  = @intCommodityStockUomId
 			,[intCostUOMId]			  = @intCommodityStockUomId
 			,[dblWeightUnitQty]		  = 1 
 			,[dblCostUnitQty]		  = 1 
-			,[dblUnitQty]			  = 1
+			,[dblQtyToBillUnitQty]	  = 1
 			,[dblNetWeight] 		  = 0 
+			,[intShipToId]			  = @LocationId
+			,[intEntityVendorId]	  = @EntityId
+			,[intTransactionType]	  = 1
+			,[dtmVoucherDate]		  = @dtmDate
 			FROM
 			@SettleDiscountForContract SS
 			JOIN tblICItem Item ON Item.intItemId = SS.intItemId
 			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = SS.intSettleStorageTicketId
 			WHERE intContractDetailId = @intBasisContractDetailId AND SST.intSettleStorageId = @intSettleStorageId
 			
-			UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
+			UPDATE @voucherDetailStorage SET dblQuantityToBill = dblQuantityToBill* -1 WHERE ISNULL(dblCost,0) < 0
 			UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
 			
-			EXEC [dbo].[uspAPCreateBillData] 
-			 @userId = @intCreatedUserId
-			,@vendorId = @EntityId
-			,@type = 1
-			,@voucherDetailStorage = @voucherDetailStorage
-			,@shipTo = @LocationId
-			,@vendorOrderNumber = NULL
-			,@voucherDate = @dtmDate
-			,@billId = @intCreatedBillId OUTPUT
+			EXEC [dbo].[uspAPCreateVoucher]
+			@voucherPayables = @voucherDetailStorage
+			,@userId = @intCreatedUserId
+			,@createdVouchersId = @intCreatedBillId OUTPUT
 
 			IF @intCreatedBillId IS NOT NULL
 			BEGIN

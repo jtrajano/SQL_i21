@@ -49,7 +49,8 @@ BEGIN TRY
 			@intCurrencyId				INT,
 			@intHeaderPricingTypeId		INT,
 			@intProducerId				INT,
-			@strCertificationName		NVARCHAR(MAX)
+			@strCertificationName		NVARCHAR(MAX),
+			@strCustomerContract		NVARCHAR(100)
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -57,11 +58,11 @@ BEGIN TRY
 			@dblFutures					=	dblFutures,
 			@intHeaderPricingTypeId		=	intPricingTypeId,
 			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0),
-			@intProducerId				=	intProducerId
+			@intProducerId				=	intProducerId,
+			@strCustomerContract		=	CH.strCustomerContract
 	FROM	tblCTContractHeader CH
-	LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
-	WHERE	intContractHeaderId			=	@intContractHeaderId
-
+	LEFT JOIN tblCTPosition		PO ON PO.intPositionId = CH.intPositionId
+	WHERE	intContractHeaderId		=	@intContractHeaderId
 
 	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = ysnBasisComponent from tblCTCompanyPreference
 
@@ -296,6 +297,7 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractCertification WHERE intContractDetailId = @intContractDetailId)
 		BEGIN 
+			SELECT	@strCertificationName = NULL
 			SELECT	@strCertificationName = COALESCE(@strCertificationName + ', ', '') + CAST(strCertificationName AS NVARCHAR(100))
 			FROM	tblCTContractCertification	CF
 			JOIN	tblICCertification			IC	ON	IC.intCertificationId	=	CF.intCertificationId
@@ -306,6 +308,11 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE	tblCTContractDetail SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
+		END
+
+		IF @intContractStatusId IN (3,6)
+		BEGIN
+			EXEC uspCTCancelOpenLoadSchedule @intContractDetailId
 		END
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
@@ -353,7 +360,7 @@ BEGIN TRY
 
 	EXEC	uspCTCreateDetailHistory		@intContractHeaderId
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
-	
+	EXEC	uspCTManagePayable				@intContractHeaderId, 'header', 0
 
 END TRY
 

@@ -20,7 +20,12 @@ WITH (HOLDLOCK)
 AS	stockMovement
 USING (
 	SELECT	t.*
-	FROM	tblICInventoryTransaction t
+			,i.intCommodityId
+			,il.intLocationId 
+	FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
+				ON t.intItemId = i.intItemId
+			INNER JOIN tblICItemLocation il
+				ON il.intItemLocationId = t.intItemLocationId 
 	WHERE	t.intInventoryTransactionId = @InventoryTransactionId	
 			AND @InventoryTransactionId IS NOT NULL 
 			AND t.intInTransitSourceLocationId IS NULL 
@@ -81,6 +86,9 @@ WHEN NOT MATCHED THEN
 		,intInventoryTransactionId
 		,intInventoryTransactionStorageId
 		,intOwnershipType
+		,intCommodityId
+		,intCategoryId
+		,intLocationId
 	) VALUES (
 		t.intItemId
 		,t.intItemLocationId
@@ -88,7 +96,7 @@ WHEN NOT MATCHED THEN
 		,t.intSubLocationId
 		,t.intStorageLocationId
 		,t.intLotId
-		,t.dtmDate
+		,dbo.fnRemoveTimeOnDate(t.dtmDate)
 		,t.dblQty
 		,t.dblUOMQty
 		,t.dblCost
@@ -116,6 +124,9 @@ WHEN NOT MATCHED THEN
 		,t.intInventoryTransactionId
 		,NULL -- intInventoryTransactionStorageId
 		,@Ownership_Own	 -- intOwnershipType	
+		,t.intCommodityId
+		,t.intCategoryId
+		,t.intLocationId 
 	)
 ;
 -- Get the stock movement id. 
@@ -132,7 +143,13 @@ WITH (HOLDLOCK)
 AS	stockMovement
 USING (
 	SELECT	s.*
-	FROM	tblICInventoryTransactionStorage s
+			,i.intCommodityId
+			,i.intCategoryId
+			,il.intLocationId
+	FROM	tblICInventoryTransactionStorage s INNER JOIN tblICItem i
+				ON s.intItemId = i.intItemId 
+			INNER JOIN tblICItemLocation il
+				ON il.intItemLocationId = s.intItemLocationId 
 	WHERE	s.intInventoryTransactionStorageId = @InventoryTransactionStorageId	
 			AND @InventoryTransactionStorageId IS NOT NULL 
 			AND s.dblQty <> 0
@@ -192,6 +209,9 @@ WHEN NOT MATCHED THEN
 		,intInventoryTransactionId
 		,intInventoryTransactionStorageId
 		,intOwnershipType
+		,intCommodityId
+		,intCategoryId
+		,intLocationId
 	) VALUES (
 		s.intItemId
 		,s.intItemLocationId
@@ -199,7 +219,7 @@ WHEN NOT MATCHED THEN
 		,s.intSubLocationId
 		,s.intStorageLocationId
 		,s.intLotId
-		,s.dtmDate
+		,dbo.fnRemoveTimeOnDate(s.dtmDate)
 		,s.dblQty
 		,s.dblUOMQty
 		,s.dblCost
@@ -227,6 +247,9 @@ WHEN NOT MATCHED THEN
 		,NULL -- intInventoryTransactionId
 		,s.intInventoryTransactionStorageId 
 		,@Ownership_Storage -- intOwnershipType
+		,s.intCommodityId
+		,s.intCategoryId
+		,s.intLocationId
 	)
 ;
 

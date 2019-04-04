@@ -145,6 +145,8 @@ BEGIN
 			,PD.dblBaseDiscount                =  i.dblBaseDiscount              
 			,PD.dblDiscountAvailable           =  i.dblDiscountAvailable         
 			,PD.dblBaseDiscountAvailable       =  i.dblBaseDiscountAvailable     
+			,PD.dblWriteOffAmount			   =  i.dblWriteOffAmount
+			,PD.dblBaseWriteOffAmount		   =  i.dblBaseWriteOffAmount
 			,PD.dblInterest                    =  i.dblInterest                  
 			,PD.dblBaseInterest                =  i.dblBaseInterest              
 			,PD.dblAmountDue                   =  i.dblAmountDue                 

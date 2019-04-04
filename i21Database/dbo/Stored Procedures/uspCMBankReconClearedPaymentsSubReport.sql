@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMBankReconClearedPaymentsSubReport]
 	@intBankAccountId AS INT
 	,@dtmStatementDate AS DATETIME
-	,@ysnCheckVoid BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -121,15 +120,17 @@ IF @dtmStatementDate IS NOT NULL
 	SELECT @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
 
 DECLARE @lastDateReconciled datetime
-	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankReconciliation 
+	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankTransaction 
 	WHERE intBankAccountId = @intBankAccountId
 	ORDER BY dtmDateReconciled DESC
 	
 	SELECT @lastDateReconciled = DATEADD(SECOND, -1, DATEADD(DAY,1,@lastDateReconciled))
 
-DECLARE @filterDate DATETIME
-	SELECT @filterDate = DATEADD(SECOND, -1, DATEADD(DAY,1,  @dtmStatementDate))
 
+DECLARE @filterDate DATETIME, @ysnMaskedPCHKPayee BIT
+
+SELECT @filterDate = DATEADD(SECOND, -1, DATEADD(DAY,1,  @dtmStatementDate))	
+SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference  
 	
 	
 -- SANITIZE THE BANK ACCOUNT ID
@@ -141,16 +142,14 @@ DECLARE @filterDate DATETIME
 SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,dtmStatementDate = @dtmStatementDate
 		,strCbkNo = BankAccnt.strCbkNo
-		,ysnClr = CASE WHEN (@lastDateReconciled >= @filterDate  
-		AND BankTrans.dtmDateReconciled IS NULL 
-		AND BankTrans.ysnClr =1)
+		,ysnClr = CASE WHEN (@lastDateReconciled >= @filterDate  AND BankTrans.dtmDateReconciled IS NULL AND BankTrans.ysnClr =1)
 			OR BankTrans.dtmDateReconciled > @filterDate THEN 0
 			ELSE BankTrans.ysnClr 
 			END
 		,dtmDate = BankTrans.dtmDate
 		,dtmDateReconciled = BankTrans.dtmDateReconciled
 		,strReferenceNo = BankTrans.strReferenceNo
-		,strPayee = BankTrans.strPayee
+		,strPayee = CASE WHEN  BankTrans.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE BankTrans.strPayee END 
 		,strMemo = BankTrans.strMemo
 		,strRecordNo = BankTrans.strTransactionId
 		,dblPayment = ABS(BankTrans.dblAmount)
@@ -165,19 +164,18 @@ FROM	[dbo].[tblCMBankTransaction] BankTrans INNER JOIN [dbo].[tblCMBankAccount] 
 			ON BankTrans.intBankTransactionTypeId = BankTypes.intBankTransactionTypeId
 			
 WHERE	BankTrans.ysnPosted = 1
-		AND 
-		BankTrans.intBankAccountId = @intBankAccountId
+		AND BankTrans.intBankAccountId = @intBankAccountId
 		AND BankTrans.dblAmount <> 0		
 		AND BankTrans.dtmDate <= ISNULL(@filterDate, BankTrans.dtmDate)
-		AND ISNULL(BankTrans.dtmDateReconciled, @dtmStatementDate) >= ISNULL(@dtmStatementDate,BankTrans.dtmDateReconciled)
+		AND ISNULL(BankTrans.dtmDateReconciled, @dtmStatementDate) >= ISNULL(@dtmStatementDate, BankTrans.dtmDateReconciled)
 		AND (
 			-- Filter for all the bank payments and debits:
 			BankTrans.intBankTransactionTypeId IN (@BANK_WITHDRAWAL,@NSF,@BANK_INTEREST,@BANK_LOAN,@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
 			OR ( BankTrans.dblAmount < 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
-		AND @ysnCheckVoid = (CASE WHEN ysnCheckVoid = 1 and @dtmStatementDate >= dtmDateReconciled THEN 1 ELSE 0 END )
 
 )
 SELECT * FROM R WHERE ysnClr = 1
+		
 GO
 

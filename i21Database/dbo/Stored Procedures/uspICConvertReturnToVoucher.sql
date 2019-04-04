@@ -263,8 +263,7 @@ BEGIN
 		BEGIN 				
 			DECLARE @throwedError AS NVARCHAR(1000);		
 			SELECT @intShipFrom_DebitMemo = CASE WHEN @originalEntityVendorId = @intEntityVendorId THEN @intShipFrom ELSE NULL END 
-
-
+			
 			EXEC [dbo].[uspAPCreateVoucher]
 				@voucherPayables = @voucherItems
 				,@voucherPayableTax = @voucherItemsTax

@@ -21,7 +21,7 @@ A.intBillId
 ,BankAccount.strSWIFT
 ,Term.strTerm
 ,A.strRemarks
-,CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
+,A.dtmDueDate--CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
 ,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
 FROM tblAPBill A 
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityId = B2.intEntityId)

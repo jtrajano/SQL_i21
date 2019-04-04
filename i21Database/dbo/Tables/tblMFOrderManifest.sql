@@ -13,3 +13,9 @@
 		,CONSTRAINT [FK_tblMFOrderManifest_tblMFOrderHeader_intOrderHeaderId] FOREIGN KEY ([intOrderHeaderId]) REFERENCES [tblMFOrderHeader]([intOrderHeaderId])
 		,CONSTRAINT [FK_tblMFOrderManifest_tblICLot_intLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId])
 		)
+Go
+CREATE NONCLUSTERED INDEX IX_tblMFOrderManifest_intOrderDetailId ON [dbo].[tblMFOrderManifest]
+(
+	[intOrderDetailId] ASC,
+	[intLotId] ASC
+)WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

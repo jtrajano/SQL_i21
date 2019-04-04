@@ -85,6 +85,10 @@ SELECT CP.intCompanyPreferenceId
 	,SM.strShippingMode
 	,CP.intHaulerEntityId
 	,EN.strName AS strHaulerEntityName
+	,CP.intDefaultFreightItemId
+	,strFreightItem = FI.strItemNo
+	,CP.intDefaultSurchargeItemId
+	,strSurchargeItem = SI.strItemNo
 	,CP.intDefaultShipmentType
 	,CASE CP.intDefaultShipmentType
 		WHEN 1
@@ -242,3 +246,5 @@ LEFT JOIN tblLGShippingMode SM ON SM.intShippingModeId = CP.intShippingMode
 LEFT JOIN tblEMEntity EN ON EN.intEntityId = CP.intHaulerEntityId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CP.intCompanyLocationId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CP.intDefaultFreightTermId
+LEFT JOIN tblICItem FI ON CP.intDefaultFreightItemId = FI.intItemId
+LEFT JOIN tblICItem SI ON CP.intDefaultSurchargeItemId = SI.intItemId

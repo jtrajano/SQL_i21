@@ -118,10 +118,10 @@ BEGIN TRY
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId 
 	
 	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId 
-	EXEC "dbo"."uspCFInvoiceReportSummary"	@xmlParam	=	@xmlParam , @UserId = @UserId 
+	EXEC "dbo"."uspCFInvoiceReportSummary"@UserId = @UserId 
 
 	DELETE FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId
-	EXEC "dbo"."uspCFInvoiceReportDiscount" @xmlParam	=	@xmlParam , @UserId = @UserId
+	EXEC "dbo"."uspCFInvoiceReportDiscount" @UserId = @UserId
 
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --

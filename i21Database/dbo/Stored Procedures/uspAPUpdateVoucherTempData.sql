@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherTempData](
-	@voucherIds NVARCHAR(MAX)
+	@voucherIds NVARCHAR(MAX) = NULL
+	,@paySchedIds NVARCHAR(MAX) = NULL
 	,@selectDue BIT = NULL
 	,@datePaid DATETIME = GETDATE
 	,@tempDiscount DECIMAL(18,6) = 0
@@ -24,76 +25,152 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	DECLARE @recordsToUpdate INT;
-	DECLARE @recordsUpdated INT;
+	DECLARE @vouchers NVARCHAR(MAX) = @voucherIds;
+	DECLARE @paySched NVARCHAR(MAX) = @paySchedIds;
+	DECLARE @voucherRecordsUpdated INT;
+	DECLARE @paySchedRecordsUpdated INT;
 	DECLARE @updatedPaymentAmt DECIMAL(18,2) = 0;
 	DECLARE @updatedWithheld DECIMAL(18,2) = 0;
 	DECLARE @amountDue DECIMAL(18,2);
 	DECLARE @ids AS Id;
+	DECLARE @schedIds AS Id;
+	DECLARE @cntVoucher INT = 0;
+	DECLARE @cntPaySched INT = 0;
 	DECLARE @vouchersForPaymentTran NVARCHAR(MAX);
 
 	INSERT INTO @ids
-	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
-
-	IF OBJECT_ID('tempdb..#tmpNegativePayment') IS NOT NULL DROP TABLE #tmpNegativePayment
-	CREATE TABLE #tmpNegativePayment(intBillId INT);
+	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@vouchers) WHERE intID > 0
 
 	--REMOVE INVALID VOUCHERS
 	DELETE A
 	FROM @ids A
 	INNER JOIN tblAPBill B ON A.intId = B.intBillId
-	WHERE (B.ysnPosted = 0 
-	OR B.ysnPaid = 1
-	OR B.dblTotal = 0
-	OR B.dblAmountDue > B.dblTotal) 
+	WHERE 
+	(
+		B.ysnPosted = 0 
+	OR	B.ysnPaid = 1
+	OR	B.dblTotal = 0
+	OR	B.dblAmountDue > B.dblTotal
+	)  
 
-	SET @recordsToUpdate = (SELECT COUNT(*) FROM @ids);
+	SELECT @cntVoucher = COUNT(*) FROM @ids
+
+	IF OBJECT_ID('tempdb..#tmpNegativePayment') IS NOT NULL DROP TABLE #tmpNegativePayment
+	CREATE TABLE #tmpNegativePayment(intBillId INT);
+
+	INSERT INTO @schedIds
+	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@paySched) WHERE intID > 0
+
+	DELETE A
+	FROM @schedIds A
+	INNER JOIN tblAPVoucherPaymentSchedule A2 ON A.intId = A2.intId
+	INNER JOIN tblAPBill B ON A2.intBillId = B.intBillId
+	WHERE 
+	(
+		B.ysnPosted = 0 
+	OR	B.ysnPaid = 1
+	OR	B.dblTotal = 0
+	OR	B.dblAmountDue > B.dblTotal
+	OR	A2.ysnPaid = 1
+	) 
+
+	SELECT @cntPaySched = COUNT(*) FROM @schedIds
 
 	BEGIN TRY
 
 	DECLARE @transCount INT = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
 	
-	IF (SELECT COUNT(*) FROM @ids) > 1
+	--VOUCHERS
+	IF @cntVoucher > 0
 	BEGIN
-		--MULTIPLE UPDATE
-		IF @selectDue IS NULL
+		IF (SELECT COUNT(*) FROM @ids) > 1
 		BEGIN
-			UPDATE voucher
-				SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
-					,@amountDue = voucher.dblAmountDue
-					,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
-													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
-												ELSE 0 END
-					,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
-					,voucher.dblTempWithheld = @updatedWithheld
-					,voucher.ysnReadyForPayment = 1
-			FROM tblAPBill voucher
-			INNER JOIN @ids ids ON voucher.intBillId = ids.intId
-			INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
-			INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
-			WHERE voucher.ysnPosted = 1
-			AND voucher.ysnPaid = 0
-			AND voucher.dblTotal != 0
+			--MULTIPLE UPDATE
+			IF @selectDue IS NULL
+			BEGIN
+				UPDATE voucher
+					SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
+						,@amountDue = voucher.dblAmountDue
+						,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
+														CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
+													ELSE 0 END
+						,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
+						,voucher.dblTempWithheld = @updatedWithheld
+						,voucher.ysnReadyForPayment = 1
+				FROM tblAPBill voucher
+				INNER JOIN @ids ids ON voucher.intBillId = ids.intId
+				INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
+				INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
+				WHERE voucher.ysnPosted = 1
+				AND voucher.ysnPaid = 0
+				AND voucher.dblTotal != 0
+			END
+			ELSE
+			BEGIN
+				--MARK ALL DUE VOUCHERS AS READY FOR PAYMENT
+				UPDATE voucher
+					SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
+						,@amountDue = voucher.dblAmountDue
+						,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
+														CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
+													ELSE 0 END
+						,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
+						,voucher.dblTempWithheld = @updatedWithheld
+						,voucher.ysnReadyForPayment = CASE WHEN @selectDue = 1
+															THEN 
+																CASE WHEN @datePaid >= dbo.fnGetDueDateBasedOnTerm(voucher.dtmDate, voucher.intTermsId)
+																THEN 1
+																ELSE 0
+																END
+															ELSE 0
+														END
+				FROM tblAPBill voucher
+				INNER JOIN @ids ids ON voucher.intBillId = ids.intId
+				INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
+				INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
+				WHERE voucher.ysnPosted = 1
+				AND voucher.ysnPaid = 0
+				AND voucher.dblTotal != 0
+			END
+
+			SET @voucherRecordsUpdated = @@ROWCOUNT;
 		END
 		ELSE
-		BEGIN
+			BEGIN
+			--Validate
+			IF @tempDiscount != 0
+			BEGIN
+				--DO NOT ALLOW NEGATIVE DISCOUNT
+				IF @tempDiscount < 0 
+				BEGIN
+					RAISERROR('PAYVOUCHERNEGATIVEDISCOUNT', 16, 1);
+					RETURN;
+				END
+
+				--DO NOT ALLOW NEGATIVE INTEREST
+				IF @tempInterest < 0 
+				BEGIN
+					RAISERROR('PAYVOUCHERNEGATIVEINTEREST', 16, 1);
+					RETURN;
+				END
+			END
+
 			UPDATE voucher
-				SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
+				SET	@updatedPaymentAmt = CASE WHEN @tempPayment != voucher.dblTempPayment --Payment have been edited
+						THEN @tempPayment
+						ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest
+						END
 					,@amountDue = voucher.dblAmountDue
 					,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 												ELSE 0 END
-					,voucher.dblTempPayment = CASE WHEN NOT @updatedPaymentAmt > @amountDue THEN @updatedPaymentAmt - @updatedWithheld ELSE @amountDue END
-					,voucher.dblTempWithheld = @updatedWithheld
-					,voucher.ysnReadyForPayment = CASE WHEN @selectDue = 1
-														THEN 
-															CASE WHEN @datePaid >= dbo.fnGetDueDateBasedOnTerm(voucher.dtmDate, voucher.intTermsId)
-															THEN 1
-															ELSE 0
-															END
-														ELSE 0
-													END
+					,voucher.dblTempDiscount = @tempDiscount
+					,voucher.dblTempInterest = @tempInterest
+					,voucher.dblTempPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END --when not ready for payment, set the payment to 0
+					,voucher.dblTempWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END
+					,voucher.strTempPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END
+					,voucher.ysnReadyForPayment = @readyForPayment
 			FROM tblAPBill voucher
 			INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 			INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
@@ -101,73 +178,97 @@ BEGIN
 			WHERE voucher.ysnPosted = 1
 			AND voucher.ysnPaid = 0
 			AND voucher.dblTotal != 0
-		END
 
-		SET @recordsUpdated = @@ROWCOUNT;
-	END
-	ELSE
-		BEGIN
-		--Validate
-		IF @tempDiscount != 0
-		BEGIN
-			--DO NOT ALLOW NEGATIVE DISCOUNT
-			IF @tempDiscount < 0 
-			BEGIN
-				RAISERROR('PAYVOUCHERNEGATIVEDISCOUNT', 16, 1);
-				RETURN;
-			END
+			SET @voucherRecordsUpdated = @@ROWCOUNT;
+			SET @newPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END; 
+			--return the new payment if ready for payment only
+			SET @newPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END; 
+			SET @newWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END;
 
-			--DO NOT ALLOW NEGATIVE INTEREST
-			IF @tempInterest < 0 
+			--DO NOT ALLOW OVER PAY
+			IF @readyForPayment = 1 AND @newPayment > (@amountDue + @tempInterest - @tempDiscount)
 			BEGIN
-				RAISERROR('PAYVOUCHERNEGATIVEINTEREST', 16, 1);
+				RAISERROR('PAYVOUCHEROVERPAY', 16, 1);
 				RETURN;
 			END
 		END
 
-		UPDATE voucher
-			SET	@updatedPaymentAmt = CASE WHEN @tempPayment != voucher.dblTempPayment --Payment have been edited
-					THEN @tempPayment
-					ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest
-					END
-				,@amountDue = voucher.dblAmountDue
-				,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
-												CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
-											ELSE 0 END
-				,voucher.dblTempDiscount = @tempDiscount
-				,voucher.dblTempInterest = @tempInterest
-				,voucher.dblTempPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END --when not ready for payment, set the payment to 0
-				,voucher.dblTempWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END
-				,voucher.strTempPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END
-				,voucher.ysnReadyForPayment = @readyForPayment
-		FROM tblAPBill voucher
-		INNER JOIN @ids ids ON voucher.intBillId = ids.intId
-		INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
-		INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
-		WHERE voucher.ysnPosted = 1
-		AND voucher.ysnPaid = 0
-		AND voucher.dblTotal != 0
-
-		SET @recordsUpdated = @@ROWCOUNT;
-		SET @newPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END; 
-		--return the new payment if ready for payment only
-		SET @newPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END; 
-		SET @newWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END;
-
-		--DO NOT ALLOW OVER PAY
-		IF @readyForPayment = 1 AND @newPayment > (@amountDue + @tempInterest - @tempDiscount)
+		IF @cntVoucher != @voucherRecordsUpdated
 		BEGIN
-			RAISERROR('PAYVOUCHEROVERPAY', 16, 1);
+			RAISERROR('PAYVOUCHERINVALIDROWSAFFECTED', 16, 1);
 			RETURN;
 		END
 	END
-
-	IF @recordsToUpdate != @recordsUpdated
+	
+	IF @cntPaySched > 0
 	BEGIN
-		RAISERROR('PAYVOUCHERINVALIDROWSAFFECTED', 16, 1);
-		RETURN;
-	END
+		--MULTIPLE
+		IF @cntPaySched > 1
+		BEGIN
+			IF @selectDue IS NULL
+			BEGIN
+				UPDATE A
+					SET A.ysnReadyForPayment = @readyForPayment
+				FROM tblAPVoucherPaymentSchedule A
+				INNER JOIN @schedIds A2 ON A.intId = A2.intId
+				INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+				WHERE 
+					A.ysnPaid = 0
+				AND B.ysnPosted = 1
+				AND B.dblAmountDue != 0
+			END
+			ELSE
+			BEGIN
+				UPDATE A
+					SET A.ysnReadyForPayment = CASE WHEN @selectDue = 1
+															THEN 
+																CASE WHEN @datePaid >= A.dtmDueDate
+																THEN 1
+																ELSE 0
+																END
+															ELSE 0
+														END
+				FROM tblAPVoucherPaymentSchedule A
+				INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+				WHERE 
+					A.ysnPaid = 0
+				AND B.ysnPosted = 1
+				AND B.dblAmountDue != 0
+			END
 
+			SET @paySchedRecordsUpdated = @@ROWCOUNT;
+		END
+		ELSE
+		BEGIN
+			UPDATE A
+				SET A.ysnReadyForPayment = @readyForPayment
+				,@updatedPaymentAmt = A.dblPayment - A.dblDiscount
+				,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
+													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
+												ELSE 0 END
+			FROM tblAPVoucherPaymentSchedule A
+			INNER JOIN @schedIds A2 ON A.intId = A2.intId
+			INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+			INNER JOIN tblAPVendor vendor ON B.intEntityVendorId = vendor.intEntityId
+			INNER JOIN tblSMCompanyLocation loc ON B.intShipToId = loc.intCompanyLocationId
+			WHERE 
+				A.ysnPaid = 0
+			AND B.ysnPosted = 1
+			AND B.dblAmountDue != 0
+
+			SET @paySchedRecordsUpdated = @@ROWCOUNT;
+			
+			SET @newPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END; 
+			SET @newPayment = CASE WHEN @readyForPayment = 1 THEN @updatedPaymentAmt ELSE 0 END; 
+			SET @newWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END;
+		END
+
+		IF @cntPaySched != @paySchedRecordsUpdated
+		BEGIN
+			RAISERROR('PAYVOUCHERINVALIDROWSAFFECTED', 16, 1);
+			RETURN;
+		END
+	END
 	--CHECK IF THERE ARE NEGATIVE PAYMENT
 	-- INSERT INTO #tmpNegativePayment
 	-- SELECT 

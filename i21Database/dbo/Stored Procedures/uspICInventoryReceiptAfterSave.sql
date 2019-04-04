@@ -974,3 +974,9 @@ FROM tblICInventoryReceiptItemLot rl
 	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = rl.intInventoryReceiptItemId
 WHERE l.strNotes != rl.strRemarks
 	AND ri.intInventoryReceiptId = @ReceiptId
+
+IF @ForDelete = 0
+BEGIN
+	-- Recalculate Totals
+	EXEC dbo.uspICInventoryReceiptCalculateTotals @ReceiptId = @ReceiptId, @ForceRecalc = 0
+END

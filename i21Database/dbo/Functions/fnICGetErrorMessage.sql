@@ -21,7 +21,7 @@ BEGIN
 		WHEN @msgId = 80005 THEN 'Please specify the lot numbers for %s.'
 		WHEN @msgId = 80006 THEN 'The Qty to Receive for %s is %f. Total Lot Quantity is %f. The difference is %f.'
 		WHEN @msgId = 80007 THEN 'Not enough stocks for %s. Available Qty after reserved is %f. Please verify if correct Storage Location and/or Unit is selected.'
-		WHEN @msgId = 80008 THEN '%s at %s is missing a GL account setup for %s account category.'
+		WHEN @msgId = 80008 THEN 'Item %s at location %s is missing a GL account setup for %s account category.'
 		WHEN @msgId = 80009 THEN 'Unable to generate the serial lot number for %s.'
 		WHEN @msgId = 80010 THEN 'Failed to process the lot number for %s. It may have been used on a different sub-location or storage location.'
 		WHEN @msgId = 80011 THEN 'Lot %s exists in %s. Cannot retrieve in %s. Change the receiving UOM to %s or create a new lot.'
@@ -242,6 +242,8 @@ BEGIN
 		WHEN @msgId = 80226 THEN 'The items in %s are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
 		WHEN @msgId = 80227 THEN 'The other charges in %s are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
 		WHEN @msgId = 80228 THEN 'Billed Qty for %s is already %f. You cannot over bill the transaction'
+		WHEN @msgId = 80229 THEN 'Zero cost is not allowed in "%s" location of item "%s".'
+		WHEN @msgId = 80230 THEN 'Only items of type "Inventory", "Raw Material", "Finished Good" and "Non-Inventory" can be received.'
 	END 
 
 	RETURN @msg

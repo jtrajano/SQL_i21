@@ -7,6 +7,7 @@
 	,@Quantity					NUMERIC(18,6)
 	,@Price						NUMERIC(18,6)	= NULL OUTPUT
 	,@UnitPrice					NUMERIC(18,6)	= NULL OUTPUT
+	,@OriginalGrossPrice		NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing					NVARCHAR(250)	= NULL OUTPUT	
 	,@ContractHeaderId			INT				= NULL OUTPUT
 	,@ContractDetailId			INT				= NULL OUTPUT
@@ -57,6 +58,7 @@ AS
 	SELECT
 		 @Price							= dblPrice
 		,@UnitPrice						= dblUnitPrice
+		,@OriginalGrossPrice			= dblOriginalGrossPrice
 		,@Pricing						= strPricing
 		,@ContractHeaderId				= intContractHeaderId
 		,@ContractDetailId				= intContractDetailId

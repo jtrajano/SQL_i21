@@ -1404,7 +1404,16 @@ BEGIN
 		DELETE FROM #tmpEmployeeTimeOffHours WHERE intTypeTimeOffId = @intTypeTimeOffId
 	END
 
-	EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
+	IF (@ysnPost = 0 AND @ysnRecap = 0) 
+	BEGIN
+		DELETE FROM tblPRPaycheckTimeOff
+		WHERE intPaycheckId = @intPaycheckId
+	END
+	ELSE
+	BEGIN
+		EXEC uspPRInsertPaycheckTimeOff @intPaycheckId
+	END
+	
 END
 END
 

@@ -55,9 +55,11 @@ BEGIN
 		intEntityVendorId INT,
 		intPaymentId INT,
 		intPartitionId INT,
+		ysnLienExists BIT,
 		dblAmountPaid DECIMAL(18,2),
 		dblWithheld DECIMAL(18,2),
 		strPaymentInfo NVARCHAR(50),
+		strPayee NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
 		intSortId INT IDENTITY(1,1)
 	);
 
@@ -76,7 +78,8 @@ BEGIN
 	);
 
 	INSERT INTO @ids
-	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
+	--USE DISTINCT TO REMOVE DUPLICATE BILL ID FOR SCHEDULE PAYMENT
+	SELECT DISTINCT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
 
 	SELECT TOP 1
 		@currency = bank.intCurrencyId
@@ -166,7 +169,9 @@ BEGIN
 		,voucher.dblTempInterest
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
-	INTO #tmpPartitionedVouchers
+		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
+		,strPayee = payTo.strCheckPayeeName + ' ' + lienInfo.strPayee
+	INTO #tmpPartitionedVouchers 
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
 	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
@@ -175,12 +180,39 @@ BEGIN
 	LEFT JOIN tblSMTerm term ON voucher.intTermsId = term.intTermID
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID 
+	OUTER APPLY (
+		SELECT STUFF((
+			SELECT DISTINCT ' and ' + strName
+			FROM tblAPVendorLien LIEN
+			INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
+			WHERE LIEN.intEntityVendorId = vendor.intEntityId AND LIEN.ysnActive = 1 AND @datePaid BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+			-- AND LIEN.intCommodityId IN (SELECT intCommodityId FROM
+			-- 							tblAPPayment Pay 
+			-- 							INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+			-- 							INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+			-- 							WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
+			FOR XML PATH('')), 
+			1, 1, '') AS strPayee
+	) lienInfo
 
 	--ALL TRANSACTIONS THAT VENDOR IS NOT ONE BILL PER PAYMENT
 	SET @script = 
-	'INSERT INTO #tmpMultiVouchers(intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblAmountPaid, dblWithheld, strPaymentInfo, intPartitionId)
+	'
+	INSERT INTO #tmpMultiVouchers
+	(
+		intBillId,
+		intPayToAddressId,
+		intEntityVendorId,
+		intPaymentId,
+		dblAmountPaid,
+		dblWithheld,
+		strPaymentInfo,
+		strPayee,
+		ysnLienExists,
+		intPartitionId
+	)
 	SELECT
-		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, intPartitionId
+		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, strPayee, ysnLienExists, intPartitionId
 	FROM
 	(
 		SELECT 
@@ -234,11 +266,15 @@ BEGIN
 				[strPaymentInfo]					= 	vouchersPay.strPaymentInfo,
 				[strPaymentRecordNum]				= 	NULL,
 				[strNotes]							= 	NULL,
+				[strPayee]							= 	vouchersPay.strPayee,
+				[strOverridePayee]					= 	NULL,
 				[dtmDatePaid]						= 	@datePaid,
 				[dblAmountPaid]						= 	vouchersPay.dblAmountPaid - vouchersPay.dblWithheld,
 				[dblUnapplied]						= 	0,
 				[dblExchangeRate]					= 	@rate,
 				[ysnPosted]							= 	0,
+				[ysnLienExists]						= 	vouchersPay.ysnLienExists,
+				[ysnOverrideCheckPayee]				= 	0,
 				[dblWithheld]						= 	vouchersPay.dblWithheld,
 				[intEntityId]						= 	@currentUser,
 				[intConcurrencyId]					= 	0,
@@ -258,7 +294,9 @@ BEGIN
 				vouchersPay.intPayToAddressId,
 				vouchersPay.intEntityVendorId,
 				vouchersPay.strPaymentInfo,
+				vouchersPay.strPayee,
 				vouchersPay.dblWithheld,
+				vouchersPay.ysnLienExists,
 				vouchersPay.intPartitionId
 			ORDER BY MIN(vouchersPay.intSortId)
 		) AS SourceData
@@ -277,11 +315,15 @@ BEGIN
 			[strPaymentInfo],
 			[strPaymentRecordNum],
 			[strNotes],
+			[strPayee],
+			[strOverridePayee],
 			[dtmDatePaid],
 			[dblAmountPaid],
 			[dblUnapplied],
 			[dblExchangeRate],
 			[ysnPosted],
+			[ysnLienExists],
+			[ysnOverrideCheckPayee],
 			[dblWithheld],
 			[intEntityId],
 			[intConcurrencyId],
@@ -299,11 +341,15 @@ BEGIN
 			[strPaymentInfo],
 			[strPaymentRecordNum],
 			[strNotes],
+			[strPayee],
+			[strOverridePayee],
 			[dtmDatePaid],
 			[dblAmountPaid],
 			[dblUnapplied],
 			[dblExchangeRate],
 			[ysnPosted],
+			[ysnLienExists],
+			[ysnOverrideCheckPayee],
 			[dblWithheld],
 			[intEntityId],
 			[intConcurrencyId],
@@ -340,21 +386,34 @@ BEGIN
 			[dblAmountDue],
 			[dblPayment],
 			[dblInterest],
-			[dblTotal])
+			[dblTotal],
+			[ysnOffset],
+			[intPayScheduleId])
 		SELECT 
 			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
 			[intBillId]			=	tmp.intBillId,
 			[intAccountId]		=	vouchers.intAccountId,
-			[dblDiscount]		=	vouchers.dblTempDiscount,
+			[dblDiscount]		=	ISNULL(paySched.dblDiscount, vouchers.dblTempDiscount),
 			[dblWithheld]		=	vouchers.dblTempWithheld,
-			[dblAmountDue]		=	vouchers.dblAmountDue,
-			[dblPayment]		=	vouchers.dblTempPayment,
+			[dblAmountDue]		=	ISNULL(paySched.dblPayment,vouchers.dblAmountDue),
+			[dblPayment]		=	ISNULL(paySched.dblPayment - paySched.dblDiscount, vouchers.dblTempPayment),
 			[dblInterest]		=	vouchers.dblTempInterest,
-			[dblTotal]			=	vouchers.dblTotal
+			[dblTotal]			=	ISNULL(paySched.dblPayment, vouchers.dblTotal),
+			[ysnOffset]			=	CASE WHEN vouchers.intTransactionType IN (1, 14) THEN 0
+									ELSE
+										(
+											CASE WHEN vouchers.intTransactionType IN (2, 13) AND vouchers.ysnPrepayHasPayment = 0
+												THEN 0
+											ELSE 1
+											END
+										)
+									END,
+			[intPayScheduleId]	=	paySched.intId
 		FROM tblAPBill vouchers
 		INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
 		INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId
-
+		LEFT JOIN tblAPVoucherPaymentSchedule paySched
+			ON vouchers.intBillId = paySched.intBillId AND paySched.ysnReadyForPayment = 1 AND paySched.ysnPaid = 0
 	END
 
 	SET @batchPaymentId = @batchId;
@@ -377,10 +436,13 @@ BEGIN
 		SET @unpostedCount = @totalUnpostedPayment;
 	END TRY
 	BEGIN CATCH
+		DECLARE @spError NVARCHAR(100) = ERROR_MESSAGE()
 		SELECT TOP 1
 			@postError = strMessage
 		FROM tblAPPostResult
 		WHERE strBatchNumber = @batchIdUsed;
+
+		SET @postError = ISNULL(@postError, @spError)
 		RAISERROR(@postError, 16, 1);
 		RETURN;
 	END CATCH

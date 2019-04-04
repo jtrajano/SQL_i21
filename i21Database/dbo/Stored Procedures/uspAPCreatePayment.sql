@@ -61,6 +61,9 @@ BEGIN
 	DECLARE @rate DECIMAL(18,6) = 1;
 	DECLARE @rateType INT;
 	DECLARE @currency INT, @functionalCurrency INT;
+	DECLARE @lienExists BIT = 0;
+	DECLARE @payee NVARCHAR(300);
+	DECLARE @lien NVARCHAR(300);
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -74,11 +77,14 @@ BEGIN
 		,@paymentMethodId = CASE WHEN @paymentMethodId IS NULL THEN C.intPaymentMethodId ELSE @paymentMethodId END
 		,@payToAddress = A.intPayToAddressId
 		,@currency = A.intCurrencyId
+		,@payee = loc.strCheckPayeeName
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
 			ON A.[intEntityVendorId] = C.[intEntityId]
+		LEFT JOIN tblEMEntityLocation loc
+			ON loc.intEntityLocationId = A.intPayToAddressId
 
 	SELECT TOP 1 
 		@functionalCurrency = intDefaultCurrencyId 
@@ -183,7 +189,9 @@ BEGIN
 	SELECT
 		@discount = SUM(ISNULL(A.dblDiscount,0))
 	FROM tblAPBill A
-	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	WHERE 
+		A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	AND A.ysnIsPaymentScheduled = 0
 
 	--Compute Interest Here
 	UPDATE A
@@ -200,8 +208,25 @@ BEGIN
 
 	IF @autoPay = 1 AND @amountPaid IS NULL AND @isPost = 0
 	BEGIN
-		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-		SET @amountPaid = @amountPaid + @interest - @discount 
+		SET @amountPaid = (
+							SELECT SUM(dblAmountDue)
+							FROM 
+							(
+							SELECT 
+								SUM(A.dblAmountDue) dblAmountDue
+							FROM tblAPBill A
+							WHERE 
+								A.intBillId IN (SELECT intID FROM #tmpBillsId)
+							AND A.ysnIsPaymentScheduled = 0
+							UNION ALL
+							SELECT SUM(dblPayment - dblDiscount) dblAmountDue
+							FROM tblAPVoucherPaymentSchedule B
+							WHERE 
+								B.intBillId IN (SELECT intID FROM #tmpBillsId)
+							AND B.ysnPaid = 0
+							) paymentData
+						) 
+		SET @amountPaid = @amountPaid + @interest - ISNULL(@discount,0)
 		SET @detailAmountPaid = @amountPaid; --discount subtracted
 	END
 	ELSE
@@ -236,6 +261,19 @@ BEGIN
 		SET @paymentInfo = @defaultPaymentInfo
 	END
 
+	SET @lien =  STUFF((
+								SELECT DISTINCT ' and ' + strName
+								FROM tblAPVendorLien LIEN
+								INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
+								WHERE LIEN.intEntityVendorId = @vendorId AND LIEN.ysnActive = 1 AND ISNULL(@datePaid,GETDATE()) BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+								FOR XML PATH('')), 
+								1, 1, '')
+	IF @lien IS NOT NULL
+	BEGIN
+		SET @payee = @payee + ' ' + @lien
+		SET @lienExists = 1;
+	END
+
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
 		[intAccountId],
@@ -247,6 +285,7 @@ BEGIN
 		[intEntityVendorId],
 		[intCurrencyExchangeRateTypeId],
 		[strPaymentInfo],
+		[strPayee],
 		[strPaymentRecordNum],
 		[strNotes],
 		[dtmDatePaid],
@@ -256,6 +295,7 @@ BEGIN
 		[ysnPosted],
 		[dblWithheld],
 		[intEntityId],
+		[ysnLienExists],
 		[intConcurrencyId])
 	SELECT
 		[intAccountId]			= @bankGLAccountId,
@@ -267,6 +307,7 @@ BEGIN
 		[intEntityVendorId]		= @vendorId,
 		[intCurrencyExchangeRateTypeId] = @rateType,
 		[strPaymentInfo]		= @paymentInfo,
+		[strPayee]				= @payee,
 		[strPaymentRecordNum]	= @paymentRecordNum,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= DATEADD(dd, DATEDIFF(dd, 0, ISNULL(@datePaid, GETDATE())), 0),
@@ -276,6 +317,7 @@ BEGIN
 		[ysnPosted]				= @isPost,
 		[dblWithheld]			= CAST(ISNULL(@withholdAmount,0) AS DECIMAL(18,2)),
 		[intEntityId]			= @userId,
+		[ysnLienExists]			= @lienExists,
 		[intConcurrencyId]		= 0
 	
 	SELECT @paymentId = SCOPE_IDENTITY()'
@@ -290,33 +332,54 @@ BEGIN
 		[dblAmountDue],
 		[dblPayment],
 		[dblInterest],
-		[dblTotal])
+		[dblTotal],
+		[ysnOffset],
+		[intPayScheduleId])
 	SELECT 
 		[intPaymentId],
 		[intBillId],
 		[intAccountId],
 		[dblDiscount],
 		[dblWithheld],
-		SUM(dblAmountDue),
-		SUM(dblPayment) - dblDiscount + dblInterest,
+		dblAmountDue,
+		(dblPayment) - dblDiscount + dblInterest,
 		[dblInterest],
-		SUM(dblTotal)
+		dblTotal,
+		[ysnOffset],
+		[intPayScheduleId]
 		FROM (
 			SELECT 
 				[intPaymentId]	= @paymentId,
 				[intBillId]		= A.intBillId,
 				[intAccountId]	= A.intAccountId,
-				[dblDiscount]	= A.dblDiscount,
+				[dblDiscount]	= ISNULL(C.dblDiscount, A.dblDiscount),
 				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
-				[dblAmountDue]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)), --handle transaction with prepaid
-				[dblPayment]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)),
+				[dblAmountDue]	= ISNULL(C.dblPayment, A.dblAmountDue
+									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
+								),
+				[dblPayment]	= ISNULL(C.dblPayment,
+									A.dblAmountDue
+									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
+								  ),
 				[dblInterest]	= A.dblInterest,
-				[dblTotal]		= (B.dblTotal + B.dblTax)
+				[dblTotal]		= ISNULL(C.dblPayment, A.dblTotal),
+				[ysnOffset]		= CAST
+									(
+										CASE 
+										WHEN A.intTransactionType = 1  THEN 0
+										WHEN A.intTransactionType = 14 THEN 0
+										WHEN A.intTransactionType = 2 AND A.ysnPrepayHasPayment = 0 THEN 0
+										WHEN A.intTransactionType = 13 AND A.ysnPrepayHasPayment = 0 THEN 0
+										ELSE 1 END
+									AS BIT),
+				[intPayScheduleId]= C.intId
 			FROM tblAPBill A
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			LEFT JOIN tblAPVoucherPaymentSchedule C
+				ON C.intBillId = A.intBillId AND C.ysnPaid = 0
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 		) vouchers
-	GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld
+	--GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld, ysnOffset
 	'
 
 	EXEC sp_executesql @queryPayment,
@@ -335,8 +398,10 @@ BEGIN
 	 @isPost BIT,
 	 @payToAddress INT,
 	 @rateType INT,
+	 @payee NVARCHAR(300),
 	 @rate DECIMAL(18,6),
 	 @currency INT,
+	 @lienExists BIT,
 	 @location INT,
 	 @paymentId INT OUTPUT',
 	 @location = @location,
@@ -357,6 +422,8 @@ BEGIN
 	 @rateType = @rateType,
 	 @rate = @rate,
 	 @currency = @currency,
+	 @payee = @payee,
+	 @lienExists = @lienExists,
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 

@@ -6,6 +6,7 @@ CREATE TABLE [dbo].[tblICStagingItemLocation] (
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strCostingMethod NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, ysnAllowNegativeInventory BIT NULL
+	, intAllowZeroCostTypeId INT NULL -- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
 	, ysnRequireStorageUnit BIT NULL
 	, strDefaultVendorNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strDefaultStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

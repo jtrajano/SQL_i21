@@ -100,6 +100,7 @@ SELECT
     INV.ysnProcessedToNSF,
     INV.intLineOfBusinessId,
 	INV.strBOLNumber,
+    INV.strPaymentInfo,
 	INV.intICTId,
     INV.intSalesOrderId,
 	INV.intBookId,
@@ -107,6 +108,7 @@ SELECT
 	INV.strMobileBillingShiftNo,
     INV.ysnRefundProcessed,
     INV.ysnServiceChargeCredit,
+	INV.blbSignature,
 	
 	strPONumber = CASE WHEN INV.strType = 'Service Charge' THEN '' ELSE INV.strPONumber END,                                    
 	strDeliverPickup = '' COLLATE Latin1_General_CI_AS,

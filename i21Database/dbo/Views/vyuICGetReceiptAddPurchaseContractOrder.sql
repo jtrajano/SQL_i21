@@ -9,7 +9,7 @@ FROM (
 		, intEntityVendorId			= ContractView.intEntityId
 		, strVendorId				= POView.strVendorId
 		, strVendorName				= ContractView.strEntityName
-		, strReceiptType			= 'Purchase Contract'
+		, strReceiptType			= 'Purchase Contract' COLLATE Latin1_General_CI_AS
 		, intLineNo					= POView.intContractDetailId
 		, intOrderId				= ContractView.intContractHeaderId
 		, strOrderNumber			= ContractView.strContractNumber
@@ -52,7 +52,7 @@ FROM (
 		, strLotTracking			= ContractView.strLotTracking
 		, intCommodityId			= ContractView.intCommodityId
 		, intContainerId			= CAST(NULL AS INT) 
-		, strContainer				= CAST(NULL AS NVARCHAR(50)) 
+		, strContainer				= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 		, intSubLocationId			= ContractView.intCompanyLocationSubLocationId
 		, strSubLocationName		= ContractView.strSubLocationName
 		, intStorageLocationId		= ContractView.intStorageLocationId
@@ -85,7 +85,7 @@ FROM (
 		--, strLifeTimeType			= CASE WHEN ContractView.strBundleType = 'Basket' THEN BasketItem.strLifeTimeType ELSE ContractView.strLifeTimeType END
 		, intLifeTime				= ContractView.intLifeTime
 		, strLifeTimeType			= ContractView.strLifeTimeType
-		, strBOL					= CAST(NULL AS NVARCHAR(50))
+		, strBOL					= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 		, dblFranchise				= CAST(NULL AS NUMERIC(18, 6))
 		, dblContainerWeightPerQty	= CAST(NULL AS NUMERIC(18, 6))
 		, ysnSubCurrency			= CAST(ContractView.ysnSubCurrency AS BIT)
@@ -154,7 +154,7 @@ FROM (
 
 	WHERE ContractView.ysnAllowedToShow = 1
 		AND ContractView.strContractType = 'Purchase'
-	
+		AND POView.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
 	--UNION ALL	
 	--SELECT 	
 	--	intLocationId				= intCompanyLocationId			

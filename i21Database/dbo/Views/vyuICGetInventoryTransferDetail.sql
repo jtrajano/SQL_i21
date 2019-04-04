@@ -13,7 +13,7 @@ AS
 						WHEN [Transfer].intSourceType = 2 THEN 'Inbound Shipment'
 						WHEN [Transfer].intSourceType = 3 THEN 'Transports'
 						ELSE 'None'
-					END
+					END COLLATE Latin1_General_CI_AS
 	, TransferDetail.intSourceId
 	, strSourceNumber = (
 		CASE WHEN [Transfer].intSourceType = 1 -- Scale
@@ -33,7 +33,7 @@ AS
 		WHERE TransportView.intLoadReceiptId = TransferDetail.intSourceId)
 			ELSE NULL
 			END
-	)
+	) COLLATE Latin1_General_CI_AS
 	, TransferDetail.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
@@ -95,16 +95,17 @@ AS
 	, strOwnershipType = (CASE WHEN TransferDetail.intOwnershipType = 1 THEN 'Own'
 								WHEN TransferDetail.intOwnershipType = 2 THEN 'Storage'
 								WHEN TransferDetail.intOwnershipType = 3 THEN 'Consigned Purchase'
-								ELSE NULL END)
+								ELSE NULL END) COLLATE Latin1_General_CI_AS
 	, [Transfer].ysnPosted
 	, TransferDetail.dblCost
 	, ysnWeights
 	, [Transfer].strDescription
 	, COALESCE(TransferDetail.strItemType, Item.strType) AS strItemType
-	, TransferDetail.dblGross
+	, dblGross = ISNULL(TransferDetail.dblGross, 0)
 	, TransferDetail.dblNet
 	, TransferDetail.dblTare
 	, TransferDetail.intGrossNetUOMId
+	, dblLineTotal = dbo.fnMultiply(TransferDetail.dblQuantity, ISNULL(TransferDetail.dblCost, 0))
 	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
 	, strNewLotId = ISNULL(TransferDetail.strNewLotId, '')
 	, strGrossNetUOMSymbol = COALESCE(GrossNetUOM.strSymbol, GrossNetUOM.strUnitMeasure)
@@ -127,7 +128,7 @@ AS
 		,FromLoc.strCountry
 		,DEFAULT 
 		,DEFAULT 
-	)
+	) COLLATE Latin1_General_CI_AS
 	, strTransferToAddress = [dbo].[fnARFormatCustomerAddress](
 		DEFAULT
 		,DEFAULT 
@@ -139,7 +140,7 @@ AS
 		,ToLoc.strCountry
 		,DEFAULT 
 		,DEFAULT 
-	)
+	) COLLATE Latin1_General_CI_AS
 	, TransferDetail.strLotCondition
 	, TransferDetail.intNewLotStatusId
 	, strNewLotStatus = NewLotStatus.strPrimaryStatus

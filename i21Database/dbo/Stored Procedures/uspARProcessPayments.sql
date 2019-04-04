@@ -210,14 +210,18 @@ BEGIN
 		,[intInvoiceId]
 		,[strTransactionType]
 		,[intBillId]
+		,[intWriteOffAccountDetailId]
 		,[strTransactionNumber]
 		,[intTermId]
 		,[intInvoiceAccountId]
 		,[ysnApplyTermDiscount]
 		,[dblDiscount]
 		,[dblDiscountAvailable]
+		,[dblWriteOffAmount]
+		,[dblBaseWriteOffAmount]
 		,[dblInterest]
 		,[dblPayment]
+		,[dblAmountDue]
 		,[strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]
@@ -262,15 +266,19 @@ BEGIN
 		,[intPaymentDetailId]					= IE.[intPaymentDetailId]
 		,[intInvoiceId]							= (CASE WHEN @GroupingOption = 0 THEN IE.[intInvoiceId] ELSE NULL END)
 		,[strTransactionType]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strTransactionType] ELSE NULL END)
-		,[intBillId]							= (CASE WHEN @GroupingOption = 0 THEN IE.[intBillId] ELSE NULL END) 
+		,[intBillId]							= (CASE WHEN @GroupingOption = 0 THEN IE.[intBillId] ELSE NULL END)
+		,[intWriteOffAccountDetailId] 			= (CASE WHEN @GroupingOption = 0 THEN IE.[intWriteOffAccountDetailId] ELSE NULL END)
 		,[strTransactionNumber]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strTransactionNumber] ELSE NULL END) 
 		,[intTermId]							= (CASE WHEN @GroupingOption = 0 THEN IE.[intTermId] ELSE NULL END) 
 		,[intInvoiceAccountId]					= (CASE WHEN @GroupingOption = 0 THEN IE.[intInvoiceAccountId] ELSE NULL END) 
 		,[ysnApplyTermDiscount]					= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnApplyTermDiscount] ELSE NULL END) 
 		,[dblDiscount]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblDiscount] ELSE NULL END) 
-		,[dblDiscountAvailable]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblDiscountAvailable] ELSE NULL END) 
+		,[dblDiscountAvailable]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblDiscountAvailable] ELSE NULL END)
+		,[dblWriteOffAmount] 					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblWriteOffAmount] ELSE NULL END) 
+		,[dblBaseWriteOffAmount]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblBaseWriteOffAmount] ELSE NULL END)
 		,[dblInterest]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblInterest] ELSE NULL END) 
 		,[dblPayment]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblPayment] ELSE NULL END) 
+		,[dblAmountDue]							= (CASE WHEN @GroupingOption = 0 THEN IE.[dblAmountDue] ELSE NULL END) 
 		,[strInvoiceReportNumber]				= (CASE WHEN @GroupingOption = 0 THEN IE.[strInvoiceReportNumber] ELSE NULL END) 
 		,[intCurrencyExchangeRateTypeId]		= (CASE WHEN @GroupingOption = 0 THEN IE.[intCurrencyExchangeRateTypeId] ELSE NULL END) 
 		,[intCurrencyExchangeRateId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intCurrencyExchangeRateId] ELSE NULL END) 
@@ -396,14 +404,18 @@ BEGIN
 			,[intInvoiceId]
 			,[strTransactionType]
 			,[intBillId]
+			,[intWriteOffAccountDetailId]
 			,[strTransactionNumber]
 			,[intTermId]
 			,[intInvoiceAccountId]
 			,[ysnApplyTermDiscount]
 			,[dblDiscount]
 			,[dblDiscountAvailable]
+			,[dblWriteOffAmount]
+			,[dblBaseWriteOffAmount]
 			,[dblInterest]
 			,[dblPayment]
+			,[dblAmountDue]
 			,[strInvoiceReportNumber]
 			,[intCurrencyExchangeRateTypeId]
 			,[intCurrencyExchangeRateId]
@@ -448,14 +460,18 @@ BEGIN
 			,[intInvoiceId]							= ITG.[intInvoiceId]
 			,[strTransactionType]					= ITG.[strTransactionType]
 			,[intBillId]							= ITG.[intBillId]
+			,[intWriteOffAccountDetailId]			= ITG.[intWriteOffAccountDetailId]
 			,[strTransactionNumber]					= ITG.[strTransactionNumber]
 			,[intTermId]							= ITG.[intTermId]
 			,[intInvoiceAccountId]					= ITG.[intInvoiceAccountId]
 			,[ysnApplyTermDiscount]					= ITG.[ysnApplyTermDiscount]
 			,[dblDiscount]							= ITG.[dblDiscount]
 			,[dblDiscountAvailable]					= ITG.[dblDiscountAvailable]
+			,[dblWriteOffAmount]					= ITG.[dblWriteOffAmount]
+			,[dblBaseWriteOffAmount]				= ITG.[dblBaseWriteOffAmount]
 			,[dblInterest]							= ITG.[dblInterest]
 			,[dblPayment]							= ITG.[dblPayment]
+			,[dblAmountDue]							= ITG.[dblAmountDue]
 			,[strInvoiceReportNumber]				= ITG.[strInvoiceReportNumber]
 			,[intCurrencyExchangeRateTypeId]		= ITG.[intCurrencyExchangeRateTypeId]
 			,[intCurrencyExchangeRateId]			= ITG.[intCurrencyExchangeRateId]

@@ -270,5 +270,45 @@ BEGIN
 END
 GO
 
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKFutOptTransactionHistory' AND COLUMN_NAME = 'ysnPreCrush')
+BEGIN
+	UPDATE tblRKFutOptTransactionHistory
+	SET ysnPreCrush = ISNULL(tblRKFutOptTransaction.ysnPreCrush, 0)
+	FROM tblRKFutOptTransaction
+	WHERE tblRKFutOptTransaction.intFutOptTransactionId = tblRKFutOptTransactionHistory.intFutOptTransactionId
+END
+
+GO
+
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKMatchDerivativesHistory')
+BEGIN
+	INSERT INTO tblRKMatchDerivativesHistory
+	SELECT psd.intMatchFuturesPSHeaderId
+		, intMatchFuturesPSDetailId
+		, dblMatchQty
+		, dtmMatchDate
+		, dblFutCommission
+		, intLFutOptTransactionId
+		, intSFutOptTransactionId
+		, dtmMatchDate
+		, strUserName = 'irelyadmin'
+	FROM tblRKMatchFuturesPSDetail psd
+	LEFT JOIN tblRKMatchFuturesPSHeader psh ON psh.intMatchFuturesPSHeaderId = psd.intMatchFuturesPSHeaderId
+	WHERE intLFutOptTransactionId NOT IN (SELECT intLFutOptTransactionId FROM tblRKMatchDerivativesHistory)
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'intFreightTermId')
+BEGIN
+	UPDATE tblRKM2MConfiguration
+	SET intFreightTermId = tblPatch.intFreightTermId
+	FROM (
+		SELECT FT.*
+			, CB.intContractBasisId
+		FROM tblCTContractBasis CB
+		JOIN tblSMFreightTerms FT ON FT.strContractBasis = CB.strContractBasis
+	) tblPatch 
+	WHERE tblPatch.intContractBasisId = tblRKM2MConfiguration.intContractBasisId
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

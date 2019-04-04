@@ -15,8 +15,14 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @FOB_ORIGIN AS INT = 1
-		,@FOB_DESTINATION AS INT = 2
+		,@FOB_DESTINATION AS INT = 2;
 
+DECLARE @TransactionType_Invoice AS INT;
+
+SELECT	TOP 1 @TransactionType_Invoice = intTransactionTypeId
+FROM	tblICInventoryTransactionType 
+WHERE	strName = 'Invoice';
+		
 -- Validate the item-location. 
 BEGIN 
 	DECLARE @intItemId AS INT 
@@ -41,7 +47,7 @@ BEGIN
 		GOTO _Exit
 	END 
 END 
-		
+	
 -- Do an upsert for the Item Stock table when updating the In-Transit Outbound Qty
 MERGE	
 INTO	dbo.tblICItemStock 
@@ -50,6 +56,8 @@ AS		ItemStock
 USING (
 		SELECT	ob.intItemId
 				,ob.intItemLocationId
+				,ob.dtmTransactionDate
+				,ob.intTransactionTypeId
 				,Aggregrate_Qty =  SUM(dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty))   --SUM(ISNULL(dbo.fnCalculateCostBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty), 0)) 	-- Convert the qty to stock unit. 			
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
 				CROSS APPLY (
@@ -63,6 +71,8 @@ USING (
 		--WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
+				, ob.intTransactionTypeId
+				, ob.dtmTransactionDate
 ) AS Source_Query  
 	ON ItemStock.intItemId = Source_Query.intItemId
 	AND ItemStock.intItemLocationId = Source_Query.intItemLocationId
@@ -102,6 +112,8 @@ USING (
 				,ob.intItemUOMId
 				,ob.intSubLocationId
 				,ob.intStorageLocationId
+				,ob.intTransactionTypeId
+				,ob.dtmTransactionDate
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
 				CROSS APPLY (
@@ -122,6 +134,8 @@ USING (
 				, ob.intItemUOMId
 				, ob.intSubLocationId
 				, ob.intStorageLocationId
+				, ob.intTransactionTypeId
+				, ob.dtmTransactionDate
 		-- Convert all the In-Transit Outbound Qty to 'Stock UOM' before doing the aggregrate.
 		UNION ALL 
 		SELECT	ob.intItemId
@@ -129,6 +143,8 @@ USING (
 				,StockUOM.intItemUOMId
 				,ob.intSubLocationId
 				,ob.intStorageLocationId
+				,ob.intTransactionTypeId
+				,ob.dtmTransactionDate
 				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty)) 
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
 				CROSS APPLY (
@@ -145,6 +161,8 @@ USING (
 				, StockUOM.intItemUOMId
 				, ob.intSubLocationId
 				, ob.intStorageLocationId
+				, ob.intTransactionTypeId
+				, ob.dtmTransactionDate
 ) AS Source_Query  
 	ON ItemStockUOM.intItemId = Source_Query.intItemId
 	AND ItemStockUOM.intItemLocationId = Source_Query.intItemLocationId
@@ -154,6 +172,12 @@ USING (
 WHEN MATCHED THEN 
 	UPDATE 
 	SET		dblInTransitOutbound = ISNULL(ItemStockUOM.dblInTransitOutbound, 0) + Source_Query.Aggregrate_Qty 
+			,dtmLastSaleDate = CASE 
+								WHEN Source_Query.intTransactionTypeId = @TransactionType_Invoice AND Source_Query.Aggregrate_Qty < 0
+									AND (Source_Query.dtmTransactionDate IS NOT NULL AND Source_Query.dtmTransactionDate > ISNULL(ItemStockUOM.dtmLastSaleDate, '2000-01-01'))
+								THEN Source_Query.dtmTransactionDate
+								ELSE ItemStockUOM.dtmLastSaleDate
+							END
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -162,6 +186,7 @@ WHEN NOT MATCHED THEN
 		,intItemLocationId
 		,intItemUOMId
 		,dblInTransitOutbound
+		,dtmLastSaleDate
 		,intConcurrencyId
 	)
 	VALUES (
@@ -169,6 +194,7 @@ WHEN NOT MATCHED THEN
 		,Source_Query.intItemLocationId
 		,Source_Query.intItemUOMId
 		,Source_Query.Aggregrate_Qty 
+		,CASE WHEN Source_Query.intTransactionTypeId = @TransactionType_Invoice AND Source_Query.Aggregrate_Qty < 0 THEN Source_Query.dtmTransactionDate ELSE NULL END
 		,1	
 	)
 ;
