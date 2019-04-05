@@ -101,7 +101,8 @@ ELSE SAVE TRAN @SavePoint
 		SELECT TOP 1 1
 			FROM tblAPVoucherPayable A
 			INNER JOIN @validPayables C
-				ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+				ON	A.intTransactionType = C.intTransactionType
+				AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 				AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 				AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
 				AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
@@ -115,7 +116,8 @@ ELSE SAVE TRAN @SavePoint
 			SELECT TOP 1 1
 			FROM tblAPVoucherPayableCompleted A
 			INNER JOIN @validPayables C
-				ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+				ON 	A.intTransactionType = C.intTransactionType
+				AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 				AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 				AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
 				AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
@@ -148,7 +150,8 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayable B
 		INNER JOIN @validPayables C
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
-			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			ON 	B.intTransactionType = C.intTransactionType
+			AND ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
 			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
@@ -255,7 +258,8 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intVoucherPayableId]
 			FROM tblAPVoucherPayable B
 			INNER JOIN @validPayables C
-			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			ON 		C.intTransactionType = B.intTransactionType
+				AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 				AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
 				AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
@@ -586,7 +590,8 @@ ELSE SAVE TRAN @SavePoint
 			-- INNER JOIN @voucherIds C ON B.intBillId = C.intId
 			FROM @validPayables B
 			INNER JOIN tblAPVoucherPayableCompleted D --ON A.intBillDetailId = D.intBillDetailId
-					ON ISNULL(D.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+					ON D.intTransactionType = B.intTransactionType
+			AND	ISNULL(D.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(D.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
 			AND ISNULL(D.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(D.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
@@ -830,7 +835,8 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayable B
 		INNER JOIN @validPayables C
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
-			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			ON 	C.intTransactionType = B.intTransactionType
+			AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
 			AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
 			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
