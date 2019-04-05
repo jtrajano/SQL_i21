@@ -409,6 +409,7 @@ BEGIN TRY
 		,strInvoiceNumberHistory
 		,dtmDueDateBaseOnTermsHistory
 		,ysnMPGCalculation
+		,dblAccountTotalDiscountQuantity
 	)
 	SELECT 
 		intCustomerGroupId
@@ -556,6 +557,7 @@ BEGIN TRY
 		,strTempInvoiceReportNumber
 		,dbo.fnGetDueDateBasedOnTerm(dtmInvoiceDate, intTermID)
 		,ysnMPGCalculation
+		,dblAccountTotalDiscountQuantity
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username
@@ -646,7 +648,6 @@ BEGIN TRY
 	,strCFInvoiceNumber
 	,strInvoiceNumberHistory
 	,dtmDueDateBaseOnTermsHistory
-	,dblAccountTotalDiscountQuantity
 	)
 	SELECT 
 	intEntityCustomerId
@@ -731,7 +732,6 @@ BEGIN TRY
 	,strCFTempInvoiceReportNumber
 	,strCFTempInvoiceReportNumber
 	,dbo.fnGetDueDateBasedOnTerm(dtmCFInvoiceDate, intCFTermID)
-	,dblAccountTotalDiscountQuantity
 	FROM
 	tblARCustomerStatementStagingTable
 	WHERE intEntityUserId = @entityId
