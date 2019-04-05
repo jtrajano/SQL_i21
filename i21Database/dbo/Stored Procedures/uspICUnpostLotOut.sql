@@ -98,7 +98,7 @@ FROM	(
 					, inserted.intTransactionTypeId
 					, inserted.dblQty 
 		) AS Data_Changes (
-			Action
+			action
 			, intInventoryTransactionId
 			, intTransactionId
 			, strTransactionId
@@ -107,7 +107,7 @@ FROM	(
 			, intTransactionTypeId
 			, dblQty 
 		)
-WHERE	Data_Changes.Action = 'UPDATE'
+WHERE	Data_Changes.action = 'UPDATE'
 ;
 
 -- If Lot_bucket was from a negative stock, let dblStockIn equal to dblStockOut. 

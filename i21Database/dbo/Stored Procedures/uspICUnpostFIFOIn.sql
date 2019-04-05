@@ -115,7 +115,7 @@ FROM	(
 					, inserted.intTransactionTypeId
 					, inserted.dblQty 
 		) AS Changes (
-			Action
+			action
 			, intInventoryTransactionId
 			, intTransactionId
 			, strTransactionId
@@ -124,7 +124,7 @@ FROM	(
 			, intTransactionTypeId
 			, dblQty 
 		)
-WHERE	Changes.Action = 'UPDATE'
+WHERE	Changes.action = 'UPDATE'
 ;
 
 -- If there are revalue records, reduce the In-qty of the negative stock buckets
