@@ -1,4 +1,4 @@
-ALTER PROCEDURE dbo.uspICProcessPayables
+CREATE PROCEDURE dbo.uspICProcessPayables
 	@intReceiptId INT = NULL,
 	@intShipmentId INT = NULL,
 	@ysnPost BIT,
