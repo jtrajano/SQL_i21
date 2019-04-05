@@ -86,7 +86,7 @@ BEGIN
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
 			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
-
+			,@CostAdjustmentPerCb AS NUMERIC(38, 20)
 			,@t_intInventoryTransactionId AS INT 
 			,@t_intItemId AS INT 
 			,@t_intItemLocationId AS INT 
