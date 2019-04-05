@@ -646,6 +646,7 @@ BEGIN TRY
 	,strCFInvoiceNumber
 	,strInvoiceNumberHistory
 	,dtmDueDateBaseOnTermsHistory
+	,dblAccountTotalDiscountQuantity
 	)
 	SELECT 
 	intEntityCustomerId
@@ -730,6 +731,7 @@ BEGIN TRY
 	,strCFTempInvoiceReportNumber
 	,strCFTempInvoiceReportNumber
 	,dbo.fnGetDueDateBasedOnTerm(dtmCFInvoiceDate, intCFTermID)
+	,dblAccountTotalDiscountQuantity
 	FROM
 	tblARCustomerStatementStagingTable
 	WHERE intEntityUserId = @entityId

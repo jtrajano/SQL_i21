@@ -86,6 +86,7 @@
     [dtmInvoiceDate]               DATETIME        NULL,
     [dtmStartDate]                 DATETIME        NULL,
     [dtmEndDate]                   DATETIME        NULL,
+	[dblAccountTotalDiscountQuantity] NUMERIC (18, 6) NULL,
     [dblTotalMiles]                NUMERIC (18, 6) NULL,
     [dblQuantity]                  NUMERIC (18, 6) NULL,
     [dblCalculatedTotalAmount]     NUMERIC (18, 6) NULL,
