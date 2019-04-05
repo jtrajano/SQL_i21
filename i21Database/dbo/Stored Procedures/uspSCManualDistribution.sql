@@ -329,25 +329,6 @@ END
 	INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
 	INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 	WHERE SC.intTicketId = @intTicketId
-
-	SELECT @intContractDetailId = MIN(ri.intLineNo)
-	FROM tblICInventoryReceipt r 
-	JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
- 
-	WHILE ISNULL(@intContractDetailId,0) > 0
-	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation CTPF
-				  CROSS APPLY dbo.fnCTGetTopOneSequence(0,CTPF.intContractDetailId) CD
-				  WHERE CTPF.intContractDetailId = @intContractDetailId and CD.strPricingType <> 'Priced')
-		BEGIN
-			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-		END
-		SELECT @intContractDetailId = MIN(ri.intLineNo)
-		FROM tblICInventoryReceipt r 
-		JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
-	END
 	
 	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 	IF @intLotType != 0
@@ -520,7 +501,88 @@ END
 				,@currencyId = @intCurrencyId
 				,@billId = @intBillId OUTPUT
 		END
+		DECLARE @ysnHasBasisContract INT = 0,
+				@_intInventoryReceiptItemId INT,
+				@_dblNetUnits DECIMAL(18,6),
+				@_dblRemainingNetUnits DECIMAL(18,6),
+				@_intContractDetailId INT,
+				@_intPriceFixationDetailId INT,
+				@_dblPriceQty DECIMAL(18,6),
+				@_dblQtyShipped DECIMAL(18,6),
+				@_dblPricedAvailableQty DECIMAL(18,6),
+				@_dblCashPrice DECIMAL(18,6),
+				@_dtmFixationDate DATETIME,
+				@_intPricingTypeId INT,
+				@_intTaxGroupId INT
+		SELECT @ysnHasBasisContract = CASE WHEN COUNT(DISTINCT intPricingTypeId) > 0 THEN 1 ELSE 0 END,@_dblRemainingNetUnits = SUM(dblReceived) FROM tblICInventoryReceiptItem IRI
+		INNER JOIN tblCTContractDetail CT
+			ON CT.intContractDetailId = IRI.intContractDetailId
+		WHERE intInventoryReceiptId = @InventoryReceiptId and CT.intPricingTypeId = 2
+		GROUP BY intInventoryReceiptId
+		SELECT @ysnHasBasisContract
+		IF(@ysnHasBasisContract = 1)
+		BEGIN
+			DECLARE @tblPriceContractAvailableFixation AS TABLE(
+				intContractDetailId INT,
+				intInventoryReceiptItemId INT,
+				dblNetUnits DECIMAL(18,6),
+				intPriceFixationDetailId INT,
+				dblPriceQty DECIMAL(18,6),
+				dblQtyReceived DECIMAL(18,6),
+				dblPricedAvailableQty DECIMAL(18,6),
+				dblCashPrice DECIMAL(18,6),
+				dtmFixationDate DATETIME,
+				intTaxGroupId INT
+			)
+			
+			INSERT INTO @tblPriceContractAvailableFixation
+			SELECT CT.intContractDetailId, RI.intInventoryReceiptItemId, RI.dblReceived,CTP.intPriceFixationDetailId,SUM(ISNULL(CTP.dblQuantity,0)) dblPricedQty, SUM(ISNULL(APBD.dblQtyReceived,0)) as dblQtyShipped, SUM(ISNULL(CTP.dblQuantity,0)) - SUM(ISNULL(APBD.dblQtyReceived,0)) dblPricedAvailableQty,CTP.dblCashPrice,CTP.dtmFixationDate, RI.intTaxGroupId FROM vyuCTPriceContractFixationDetail CTP
+			INNER JOIN tblCTPriceFixation CPX
+				ON CPX.intPriceFixationId = CTP.intPriceFixationId
+			INNER JOIN tblCTContractDetail CT
+				ON CPX.intContractDetailId = CT.intContractDetailId
+			INNER JOIN tblICInventoryReceiptItem RI
+				ON RI.intLineNo= CT.intContractDetailId AND ysnAllowVoucher = 0	
+			LEFT JOIN tblCTPriceFixationDetailAPAR APAR
+				ON APAR.intPriceFixationDetailId = CTP.intPriceFixationDetailId
+			LEFT JOIN tblAPBillDetail APBD
+				ON APBD.intBillDetailId = APAR.intBillDetailId
+			WHERE RI.intInventoryReceiptId = @InventoryReceiptId
+			GROUP BY CT.intContractDetailId, CTP.intPriceFixationDetailId, CTP.dblCashPrice,CTP.dtmFixationDate, RI.dblReceived, RI.intInventoryReceiptItemId,RI.intTaxGroupId
+			ORDER BY CTP.dtmFixationDate;		
+			SELECT * FROM @tblPriceContractAvailableFixation
+			IF EXISTS(SELECT NULL FROM @tblPriceContractAvailableFixation)
+			BEGIN	
+					DECLARE cur CURSOR FOR
+					SELECT * FROM @tblPriceContractAvailableFixation
+					OPEN cur
+					FETCH NEXT FROM cur INTO @_intContractDetailId,	@_intInventoryReceiptItemId, @_dblNetUnits, @_intPriceFixationDetailId, @_dblPriceQty, @_dblQtyShipped, @_dblPricedAvailableQty, @_dblCashPrice, @_dtmFixationDate,@_intTaxGroupId
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+						IF(@_dblPricedAvailableQty > 0)
+						BEGIN	
+							DELETE FROM @voucherItems
+							DECLARE @intBillDetailId INT
+							INSERT	INTO @voucherItems([intInventoryReceiptType], [intInventoryReceiptItemId], [dblQtyReceived], [dblCost])
+							SELECT	2,@_intInventoryReceiptItemId, CASE WHEN @_dblRemainingNetUnits > @_dblPricedAvailableQty THEN @_dblPricedAvailableQty ELSE @_dblRemainingNetUnits END, @_dblCashPrice
+							
+							EXEC	uspAPCreateVoucherDetailReceipt @intBillId,@voucherItems
+							
+							SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @_intContractDetailId AND intInventoryReceiptChargeId IS NULL
+							
+							EXEC	uspAPUpdateCost @intBillDetailId,@_dblCashPrice,1
 
+							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
+							SELECT @_intPriceFixationDetailId,@intBillId,@intBillDetailId,1
+
+							SELECT * FROM @voucherItems
+						END
+				FETCH NEXT FROM cur INTO @_intContractDetailId,	@_intInventoryReceiptItemId, @_dblNetUnits, @_intPriceFixationDetailId, @_dblPriceQty, @_dblQtyShipped, @_dblPricedAvailableQty, @_dblCashPrice, @_dtmFixationDate,@_intTaxGroupId
+			END
+			CLOSE cur
+			DEALLOCATE cur
+		END
+		END
 		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
 		BEGIN
 			IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL

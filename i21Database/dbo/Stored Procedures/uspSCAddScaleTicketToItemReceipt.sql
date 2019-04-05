@@ -178,15 +178,19 @@ SELECT
 													 AND CNT.dblRate IS NOT NULL 
 													 AND CNT.intFXPriceUOMId IS NOT NULL 
 												THEN 
-													(SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice),0) + LI.dblCost
-													FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId,ISNULL(CNT.intInvoiceCurrencyId,CNT.intCurrencyId))
+													ISNULL((SELECT ISNULL(dbo.fnCalculateCostBetweenUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice),0)  --settlement price
+													FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),CNT.intPricingTypeId,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId,ISNULL(CNT.intInvoiceCurrencyId,CNT.intCurrencyId))
 													LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId 
-													WHERE futureUOM.intItemId = LI.intItemId)
+													WHERE futureUOM.intItemId = LI.intItemId),0) + LI.dblCost
 												ELSE 
-													(SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,LI.dblCost),0)),0) 
+													ISNULL((SELECT ISNULL(dbo.fnCalculateCostBetweenUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice),0)  --settlement price
 													FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId,ISNULL(CNT.intInvoiceCurrencyId,CNT.intCurrencyId))
 													LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId 
-													WHERE futureUOM.intItemId = LI.intItemId)
+													WHERE futureUOM.intItemId = LI.intItemId),0)
+													+ ISNULL((SELECT ISNULL(dbo.fnCalculateCostBetweenUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblBasis),LI.dblCost) --basis entry price
+													FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),1,CNT.intFutureMarketId,CNT.intFutureMonthId,SC.intProcessingLocationId,NULL,0 ,SC.intItemId,ISNULL(CNT.intInvoiceCurrencyId,CNT.intCurrencyId))
+													LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intBasisUOMId 
+													WHERE futureUOM.intItemId = LI.intItemId),0)
 											END 
 										ELSE
 											CASE 

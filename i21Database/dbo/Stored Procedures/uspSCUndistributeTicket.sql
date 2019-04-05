@@ -194,6 +194,8 @@ BEGIN TRY
 										RETURN;
 									END
 								END
+								
+								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 								FETCH NEXT FROM voucherCursor INTO @intBillId;
 							END
@@ -271,7 +273,10 @@ BEGIN TRY
 							,@success = @success OUTPUT
 						END
 						IF ISNULL(@intBillId, 0) > 0
-							EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+							BEGIN							
+								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
+								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+							END
 						UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
 						DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 						DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
