@@ -24,6 +24,12 @@ BEGIN
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
+	IF ((SELECT ISNULL(MA.intCompanyLocationId, 0) FROM tblMBMeterReading MR INNER JOIN tblMBMeterAccount MA ON MA.intMeterAccountId = MR.intMeterAccountId where intMeterReadingId = @TransactionId) = 0)
+    BEGIN
+		RAISERROR('Company Location is required!', 16, 1)
+		RETURN
+    END
+
 	BEGIN TRANSACTION
 
 	INSERT INTO @EntriesForInvoice(
