@@ -1,4 +1,4 @@
-CREATE PROCEDURE dbo.uspICProcessPayables
+ALTER PROCEDURE dbo.uspICProcessPayables
 	@intReceiptId INT = NULL,
 	@intShipmentId INT = NULL,
 	@ysnPost BIT,
@@ -377,7 +377,7 @@ BEGIN
 				,VoucherPayable.[intShipViaId]						
 				,[intTermId]						
 				,VoucherPayable.[strBillOfLading]					
-				,VoucherPayable.[ysnReturn]	 
+
 			FROM tblICInventoryShipmentCharge ShipmentCharge 
 			INNER JOIN tblICInventoryShipment Shipment 
 				ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
@@ -385,7 +385,7 @@ BEGIN
 				ON vShipmentCharge.intInventoryShipmentChargeId = ShipmentCharge.intInventoryShipmentChargeId
 			LEFT JOIN tblAPVoucherPayable VoucherPayable 
 				ON VoucherPayable.intInventoryShipmentChargeId = ShipmentCharge.intInventoryShipmentChargeId
-		
+
 			OUTER APPLY (
 				SELECT
 					A.intInventoryShipmentItemId
@@ -396,6 +396,7 @@ BEGIN
 			OUTER APPLY dbo.fnICGetScaleTicketIdForShipmentCharge(Shipment.intInventoryShipmentId, Shipment.strShipmentNumber) ScaleTicket
 			WHERE Shipment.intInventoryShipmentId = @intShipmentId
 				AND Shipment.ysnPosted = 0
+				AND VoucherPayable.[intEntityVendorId] IS NOT NULL
 
 	END
 
