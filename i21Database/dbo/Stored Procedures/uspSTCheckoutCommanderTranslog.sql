@@ -543,8 +543,34 @@ BEGIN
 			END
 			ELSE IF(@intCountRows = 0)
 			BEGIN
-				SET @strStatusMsg = 'Register file is already been exported'
+				SET @strStatusMsg = 'Transaction Log file is already been exported.'
 				SET @intCountRows = 0
+
+				-- ================================================================================================================== 
+				-- START - Insert message if Transaction Log is already been exported
+				-- ================================================================================================================== 
+				INSERT INTO tblSTCheckoutErrorLogs 
+				(
+						strErrorType
+						, strErrorMessage 
+						, strRegisterTag
+						, strRegisterTagValue
+						, intCheckoutId
+						, intConcurrencyId
+				)
+				VALUES
+				(
+						'Transaction Log'
+						, @strStatusMsg
+						, ''
+						, ''
+						, @intCheckoutId
+						, 1
+				)
+				-- ==================================================================================================================  
+				-- END - Insert message if Transaction Log is already been exported
+				-- ==================================================================================================================
+
 				GOTO ExitWithCommit
 			END
 		END
