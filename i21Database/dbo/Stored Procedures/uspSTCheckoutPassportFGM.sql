@@ -6,21 +6,12 @@ AS
 BEGIN
 	BEGIN TRY
 		
+		BEGIN TRANSACTION 
+
+
+
 		DECLARE @intStoreId Int
 		Select @intStoreId = intStoreId from dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
-
-
-		-- ==================================================================================================================  
-		-- Create Save Point.  
-		-- ------------------------------------------------------------------------------------------------------------------    
-		-- Create a unique transaction name. 
-		--DECLARE @TransactionName AS VARCHAR(500) = 'CheckoutPassportFGM' + CAST(NEWID() AS NVARCHAR(100));
-		BEGIN TRANSACTION --@TransactionName 
-		--SAVE TRAN @TransactionName --> Save point		
-		-- ------------------------------------------------------------------------------------------------------------------  
-		-- END Create Save Point.  
-		-- ==================================================================================================================- 
-
 
 
 		-- ==================================================================================================================  
@@ -65,7 +56,7 @@ BEGIN
 
 		-- ================================================================================================================== 
 		-- Get Error logs. Check Register XML that is not configured in i21
-		-- Compare <FuelGradeID> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
+		-- Compare <FGMDetailFuelGradeID> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
 		-- ------------------------------------------------------------------------------------------------------------------ 
 		INSERT INTO tblSTCheckoutErrorLogs 
 		(
@@ -80,21 +71,21 @@ BEGIN
 			'NO MATCHING TAG' as strErrorType
 			, 'No Matching Fuel Grade in Inventory' as strErrorMessage
 			, 'FuelGradeId' as strRegisterTag
-			, ISNULL(Chk.FuelGradeID, '') AS strRegisterTagValue
+			, ISNULL(Chk.FGMDetailFuelGradeID, '') AS strRegisterTagValue
 			, @intCheckoutId
 			, 1
 		FROM #tempCheckoutInsert Chk
-		WHERE ISNULL(Chk.FuelGradeID, '') NOT IN
+		WHERE ISNULL(Chk.FGMDetailFuelGradeID, '') NOT IN
 		(
 			SELECT DISTINCT 
 				tbl.strXmlRegisterFuelGradeID
 			FROM
 			(
 				SELECT DISTINCT
-					Chk.FuelGradeID AS strXmlRegisterFuelGradeID
+					Chk.FGMDetailFuelGradeID AS strXmlRegisterFuelGradeID
 				FROM #tempCheckoutInsert Chk
 				JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					ON ISNULL(Chk.FGMDetailFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 				JOIN dbo.tblICItem I 
 					ON I.intItemId = IL.intItemId
 				JOIN dbo.tblICItemUOM UOM 
@@ -104,12 +95,10 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-				AND ISNULL(Chk.FuelGradeID, '') != ''
+				AND ISNULL(Chk.FGMDetailFuelGradeID, '') != ''
 			) AS tbl
 		)
-		AND ISNULL(Chk.FuelGradeID, '') != ''
-
-
+		AND ISNULL(Chk.FGMDetailFuelGradeID, '') != ''
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
@@ -117,15 +106,19 @@ BEGIN
 
 		--Update values that are '' empty
 		Update #tempCheckoutInsert
-		Set FuelGradeSalesVolume = 1
-		WHERE FuelGradeSalesVolume IS NULL OR FuelGradeSalesVolume = '' OR FuelGradeSalesVolume = '0'
+		Set FGMSalesTotalsFuelGradeSalesVolume = 1
+		WHERE FGMSalesTotalsFuelGradeSalesVolume IS NULL 
+			OR FGMSalesTotalsFuelGradeSalesVolume = '' 
+			OR FGMSalesTotalsFuelGradeSalesVolume = '0'
 
-		Select * FROM #tempCheckoutInsert
+		-- Select * FROM #tempCheckoutInsert
 
 		-- Company Currency Decimal
 		DECLARE @intCompanyCurrencyDecimal INT
 		SET @intCompanyCurrencyDecimal = 0
-		SELECT @intCompanyCurrencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+
+		SELECT @intCompanyCurrencyDecimal = intCurrencyDecimal 
+		FROM tblSMCompanyPreference
 
 		DECLARE @SQL NVARCHAR(MAX) = ''
 
@@ -149,14 +142,14 @@ BEGIN
 					, [intPumpCardCouponId]			= UOM.intItemUOMId
 					, [intCategoryId]			    = I.intCategoryId
 					, [strDescription]				= I.strDescription
-					, [dblPrice]					= CAST((ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))
-					, [dblQuantity]					= ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0)
-					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.FuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.FuelGradeSalesVolume as decimal(18,6)), 0))) AS DECIMAL(18,6))
+					, [dblPrice]					= CAST((ISNULL(CAST(Chk.FGMSalesTotalsFuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FGMSalesTotalsFuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))
+					, [dblQuantity]					= ISNULL(CAST(Chk.FGMSalesTotalsFuelGradeSalesVolume as decimal(18,6)), 0)
+					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.FGMSalesTotalsFuelGradeSalesAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.FGMSalesTotalsFuelGradeSalesVolume as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.FGMSalesTotalsFuelGradeSalesVolume as decimal(18,6)), 0))) AS DECIMAL(18,6))
 					, [intConcurrencyId]			= 0
 				 FROM #tempCheckoutInsert Chk
 				 JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-					AND Chk.FuelGradeSalesAmount <> '0'
+					ON ISNULL(Chk.FGMDetailFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					AND Chk.FGMSalesTotalsFuelGradeSalesAmount <> '0'
 				 --JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE 
 					--																							WHEN ISNULL(IL.strPassportFuelId1, '') <> '' 
 					--																								THEN IL.strPassportFuelId1
@@ -181,9 +174,9 @@ BEGIN
 
 					--SELECT ISNULL(Chk.FuelGradeSalesAmount, 0), ISNULL(Chk.FuelGradeSalesVolume, 0), ISNULL(Chk.FuelGradeSalesAmount, 0), CPT.* 
 					UPDATE CPT
-					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.FuelGradeSalesAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.FuelGradeSalesVolume AS DECIMAL(18,6)),0),0)
-						, CPT.[dblQuantity] = CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
-						, CPT.[dblAmount] = (ISNULL(NULLIF(CAST(Chk.FuelGradeSalesAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.FuelGradeSalesVolume AS DECIMAL(18,6)),0),0)) * CAST(ISNULL(Chk.FuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.FGMSalesTotalsFuelGradeSalesAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.FGMSalesTotalsFuelGradeSalesVolume AS DECIMAL(18,6)),0),0)
+						, CPT.[dblQuantity] = CAST(ISNULL(Chk.FGMSalesTotalsFuelGradeSalesVolume, 0) AS DECIMAL(18,6))
+						, CPT.[dblAmount] = (ISNULL(NULLIF(CAST(Chk.FGMSalesTotalsFuelGradeSalesAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.FGMSalesTotalsFuelGradeSalesVolume AS DECIMAL(18,6)),0),0)) * CAST(ISNULL(Chk.FGMSalesTotalsFuelGradeSalesVolume, 0) AS DECIMAL(18,6))
 					FROM dbo.tblSTCheckoutPumpTotals CPT
 					INNER JOIN tblSTCheckoutHeader CH
 						ON CPT.intCheckoutId = CH.intCheckoutId
@@ -197,8 +190,8 @@ BEGIN
 						ON Item.intItemId = IL.intItemId
 						AND ST.intCompanyLocationId = IL.intLocationId
 					INNER JOIN #tempCheckoutInsert Chk
-						ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-						AND Chk.FuelGradeSalesAmount <> '0'
+						ON ISNULL(Chk.FGMDetailFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						AND Chk.FGMSalesTotalsFuelGradeSalesAmount <> '0'
 					WHERE CPT.intCheckoutId = @intCheckoutId
 
 					--UPDATE dbo.tblSTCheckoutPumpTotals

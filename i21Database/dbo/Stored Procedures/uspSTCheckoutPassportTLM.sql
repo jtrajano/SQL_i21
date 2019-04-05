@@ -9,33 +9,14 @@ BEGIN
     SET XACT_ABORT ON
        
 	   BEGIN TRY
+
+			  BEGIN TRANSACTION
               
+
 			  DECLARE @intStoreId int
               SELECT @intStoreId = intStoreId
               FROM dbo.tblSTCheckoutHeader
               WHERE intCheckoutId = @intCheckoutId
-
-			  -------------------------------------------------------------------------------------------- 
-			  -- Create Save Point. 
-			  --------------------------------------------------------------------------------------------   
-			  -- Create a unique transaction name.
-			  --DECLARE @SavedPointTransaction AS VARCHAR(500) = 'CheckoutPassportTLM' + CAST(NEWID() AS NVARCHAR(100));
-			  --DECLARE @intTransactionCount INT = @@TRANCOUNT;
-
-			  --IF(@intTransactionCount = 0)
-				 -- BEGIN
-					--  BEGIN TRAN @SavedPointTransaction
-				 -- END
-			  --ELSE
-				 -- BEGIN
-					--  SAVE TRAN @SavedPointTransaction --> Save point
-				 -- END
-			  BEGIN TRANSACTION
-			  -------------------------------------------------------------------------------------------- 
-			  -- END Create Save Point. 
-			  --------------------------------------------------------------------------------------------
-
-
 
 			-- ==================================================================================================================  
 			-- Start Validate if TLM xml file matches the Mapping on i21 
@@ -90,26 +71,26 @@ BEGIN
 					'NO MATCHING TAG' as strErrorType
 					, 'No Matching Register Tax Code' as strErrorMessage
 					, 'TaxLevelID' as strRegisterTag
-					, ISNULL(Chk.TaxLevelID, '') AS strRegisterTagValue
+					, ISNULL(Chk.TLMDetailTaxLevelID, '') AS strRegisterTagValue
 					, @intCheckoutId
 					, 1
 				FROM #tempCheckoutInsert Chk
-				WHERE ISNULL(Chk.TaxLevelID, '') NOT IN
+				WHERE ISNULL(Chk.TLMDetailTaxLevelID, '') NOT IN
 				(
 					SELECT DISTINCT 
 						tbl.strXmlRegisterTaxLevelID
 					FROM
 					(
 						SELECT DISTINCT
-							Chk.TaxLevelID AS strXmlRegisterTaxLevelID
+							Chk.TLMDetailTaxLevelID AS strXmlRegisterTaxLevelID
 						FROM #tempCheckoutInsert Chk
 						JOIN tblSTCheckoutSalesTaxTotals STT
-							ON ISNULL(Chk.TaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+							ON ISNULL(Chk.TLMDetailTaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
 						WHERE STT.intCheckoutId = @intCheckoutId
-						AND ISNULL(Chk.TaxLevelID, '') != ''
+						AND ISNULL(Chk.TLMDetailTaxLevelID, '') != ''
 					) AS tbl
 				)
-				AND ISNULL(Chk.TaxLevelID, '') != ''
+				AND ISNULL(Chk.TLMDetailTaxLevelID, '') != ''
 				-- ------------------------------------------------------------------------------------------------------------------  
 				-- END Get Error logs. Check Register XML that is not configured in i21.  
 				-- ==================================================================================================================
@@ -165,19 +146,19 @@ BEGIN
 			  -- TLM FILE
               UPDATE STT
               SET dblTotalTax = (
-                                 SELECT CAST(ISNULL(TaxCollectedAmount, 0) AS DECIMAL(18,6))
+                                 SELECT CAST(ISNULL(TLMDetailTaxCollectedAmount, 0) AS DECIMAL(18,6))
                                  FROM #tempCheckoutInsert
-                                 WHERE ISNULL(TaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+                                 WHERE ISNULL(TLMDetailTaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
                               ) 
 			  , dblTaxableSales =  (
-                                        SELECT CAST(ISNULL(TaxableSalesAmount, 0) AS DECIMAL(18,6))
+                                        SELECT CAST(ISNULL(TLMDetailTaxableSalesAmount, 0) AS DECIMAL(18,6))
                                         FROM #tempCheckoutInsert
-                                        WHERE ISNULL(TaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+                                        WHERE ISNULL(TLMDetailTaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
                                      )          
 			  , dblTaxExemptSales = (
-										SELECT CAST(ISNULL(TaxExemptSalesAmount, 0) AS DECIMAL(18,6))
+										SELECT CAST(ISNULL(TLMDetailTaxExemptSalesAmount, 0) AS DECIMAL(18,6))
 										FROM #tempCheckoutInsert
-										WHERE ISNULL(TaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+										WHERE ISNULL(TLMDetailTaxLevelID, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
 									)  
               FROM dbo.tblSTCheckoutSalesTaxTotals STT
               WHERE STT.intCheckoutId = @intCheckoutId
