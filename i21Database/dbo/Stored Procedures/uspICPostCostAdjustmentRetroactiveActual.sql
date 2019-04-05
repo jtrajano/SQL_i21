@@ -86,7 +86,7 @@ BEGIN
 			,@CostBucketNewCost AS NUMERIC(38, 20)			
 			,@TotalCostAdjustment AS NUMERIC(38, 20)
 			,@CostAdjustmentPerQty AS NUMERIC(38, 20) 
-			,@CostAdjustmentPerCb AS NUMERIC(38, 20)
+			
 			,@t_intInventoryTransactionId AS INT 
 			,@t_intItemId AS INT 
 			,@t_intItemLocationId AS INT 
@@ -657,7 +657,7 @@ BEGIN
 								END 
 							WHEN @t_dblQty < 0 THEN 
 								--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-								@t_dblQty * @CostAdjustmentPerCb
+								@t_dblQty * @CostAdjustmentPerQty
 							ELSE 
 								0
 					END 
@@ -680,7 +680,7 @@ BEGIN
 							END 
 						WHEN @t_dblQty < 0 THEN 
 							--(@t_dblQty * @CostBucketNewCost) - (@t_dblQty * @CostBucketOriginalCost)
-							@t_dblQty * @CostAdjustmentPerCb
+							@t_dblQty * @CostAdjustmentPerQty
 						ELSE 
 							0
 				END <> 0 
