@@ -47,6 +47,9 @@ WHERE strSourceSystem = 'AR'
 
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
+DECLARE @intCurrencyId  INT
+SELECT TOP 1 @intCurrencyId = intCurrencyId FROM tblCMBankAccount where intBankAccountId = @intBankAccountId
+
 -- Insert records from the Deposit Entry
 ;WITH CTE AS (
 SELECT	
@@ -107,11 +110,9 @@ UNION SELECT DISTINCT
 	strEODNumber,
 	strEODDrawer = strDrawerName,		
     ysnEODComplete = ysnCompleted 	,
-	b.intCurrencyId
-FROM vyuARUndepositedPayment v LEFT JOIN tblCMBankAccount b
-
-			ON b.intBankAccountId = v.intBankAccountId --OR ISNULL(v.intBankAccountId,0) = 0 --Include payments without bank account
-			left join tblARPayment p on p.strRecordNumber = v.strSourceTransactionId
+	intCurrencyId = @intCurrencyId
+FROM vyuARUndepositedPayment 
+LEFT JOIN tblARPayment p on p.strRecordNumber = v.strSourceTransactionId
 WHERE	v.intBankAccountId = @intBankAccountId
 		OR 
 		ISNULL(v.intBankAccountId,0) = 0 -- AR-2379
