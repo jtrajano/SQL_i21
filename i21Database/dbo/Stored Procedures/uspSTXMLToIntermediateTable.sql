@@ -12,6 +12,12 @@ BEGIN
 
 	SET NOCOUNT ON;
 
+--PRINT '@intImportFileHeaderId: ' + CAST(@intImportFileHeaderId AS NVARCHAR(50))
+--PRINT '@intRegisterFileConfigId: ' + CAST(@intRegisterFileConfigId AS NVARCHAR(50))
+--PRINT '@intCheckoutId: ' + CAST(@intCheckoutId AS NVARCHAR(50))
+--PRINT '@strSPName: ' + CAST(@strSPName AS NVARCHAR(50))
+--PRINT '@intImportFileHeaderId: ' + CAST(@intImportFileHeaderId AS NVARCHAR(50))
+
 	-- XML Layout version
 	DECLARE @strXmlLayoutVersion AS NVARCHAR(20) = ''
 
@@ -33,11 +39,18 @@ BEGIN
 	AND intLevel <= 1
 
 	--GET XML Initiator
-	DECLARE @strXMLinitiator nvarchar(200)
-	Select @strXMLinitiator = strXMLInitiater FROM dbo.tblSMImportFileHeader WHERE intImportFileHeaderId = @intImportFileHeaderId
-
+	DECLARE @strXMLinitiator nvarchar(200) = ''
+	SELECT @strXMLinitiator = strXMLInitiater FROM dbo.tblSMImportFileHeader WHERE intImportFileHeaderId = @intImportFileHeaderId
+	SET @strXMLinitiator = ISNULL(@strXMLinitiator, '')
 
 	DECLARE @NamespaceVar NVARCHAR(200) = '', @NamespaceVendor NVARCHAR(200) = ''
+
+	-- GET FILE PREFIX
+	DECLARE @strFilePrefix AS NVARCHAR(50) = (
+												SELECT strFilePrefix 
+												FROM tblSTRegisterFileConfiguration 
+												WHERE intRegisterFileConfigId = @intRegisterFileConfigId
+											 )
 
 	-- ===============================================================================================================================================================
 	-- START GET ROOT TAG Namespace
@@ -160,19 +173,27 @@ BEGIN
 												SELECT intRegisterId FROM tblSTStore
 												WHERE intStoreId = 
 												(
-													SELECT intStoreId FROM tblSTCheckoutHeader
+													SELECT intStoreId 
+													FROM tblSTCheckoutHeader
 													WHERE intCheckoutId = @intCheckoutId
 												)
 											))
 
-				IF(@strRegisterClassName = 'RADIANT' OR @strRegisterClassName = 'PASSPORT')
+				IF(@strRegisterClassName IN ('RADIANT', 'PASSPORT', 'SAPPHIRE'))
 					BEGIN
-						SET @FROMNODES = @FROMNODES + 'CROSS APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+						IF(@strFilePrefix = 'vtransset-tlog')
+							BEGIN
+								SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+							END
+						ELSE
+							BEGIN
+								SET @FROMNODES = @FROMNODES + 'CROSS APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+							END
 					END
-				ELSE --IF(@strRegisterClassName <> 'RADIANT')
-					BEGIN
-						SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
-					END
+				--ELSE --IF(@strRegisterClassName <> 'RADIANT')
+				--	BEGIN
+				--		SET @FROMNODES = @FROMNODES + 'OUTER APPLY ' + REPLACE(@ParentTag, '-', '') + '.nodes(''' + @NamespaceVar + @strXMLTag + ''') ' + @strCompressTag + '(' + @strCompressTag + ')' + CHAR(13)
+				--	END
 			END
 
 		
@@ -291,12 +312,12 @@ BEGIN
 									BEGIN
 										IF(@strXMLTag like '%:%')
 										BEGIN
-											SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @ParentTag + '.value(''(' + @strXMLTag + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + '' + CHAR(13)
+											SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @ParentTag + '.value(''(' + @strXMLTag + ')[1]'', ''NVARCHAR(200)''), '''') AS ' + @ParentTag + @strCompressTag + '' + CHAR(13)
 										END
 
 										ELSE
 										BEGIN
-											SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @ParentTag + '.value(''(' + @NamespaceVar + @strXMLTag + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + '' + CHAR(13)
+											SET @SELECTCOLUMNS = @SELECTCOLUMNS + 'ISNULL(' + @ParentTag + '.value(''(' + @NamespaceVar + @strXMLTag + ')[1]'', ''NVARCHAR(200)''), '''') AS ' + @ParentTag + @strCompressTag + '' + CHAR(13)
 									END
 								END
 
@@ -304,12 +325,12 @@ BEGIN
 									BEGIN
 										IF(@strXMLTag like '%:%')
 										BEGIN
-											SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @ParentTag + '.value(''(' + @strXMLTag + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + '' + CHAR(13)
+											SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @ParentTag + '.value(''(' + @strXMLTag + ')[1]'', ''NVARCHAR(200)''), '''') AS ' + @ParentTag + @strCompressTag + '' + CHAR(13)
 										END
 
 										ELSE
 										BEGIN
-											SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @ParentTag + '.value(''(' + @NamespaceVar + @strXMLTag + ')[1]'', ''nvarchar(200)''), '''') as ' + @strCompressTag + '' + CHAR(13)
+											SET @SELECTCOLUMNS = @SELECTCOLUMNS + ', ISNULL(' + @ParentTag + '.value(''(' + @NamespaceVar + @strXMLTag + ')[1]'', ''NVARCHAR(200)''), '''') AS ' + @ParentTag + @strCompressTag + '' + CHAR(13)
 									END
 								END
 							END		
@@ -323,12 +344,15 @@ BEGIN
 	SET @intLevelMin = @intLevelMin + 1
 	END
 
+	--PRINT '@strRegisterClassName: ' + ISNULL(@strRegisterClassName, 'NULL')
 
 	-- =========================================================================================================== 
 	-- Start Validate Xml version
 	-- ===========================================================================================================
 	IF(@strRegisterClassName = 'PASSPORT' OR @strRegisterClassName = 'RADIANT')
 		BEGIN
+			-- COMMANDER and SAPPHIRE has no versioning
+
 		    ------------------------------------------------------------------------------------------------------------------------
 			-- XML Version
 			DECLARE @strXmlVersion AS NVARCHAR(20)
@@ -349,11 +373,7 @@ BEGIN
 
 			IF(@strXmlVersion != @strXmlLayoutVersion)
 				BEGIN
-					DECLARE @strFilePrefix AS NVARCHAR(50) = (
-																SELECT strFilePrefix 
-																FROM tblSTRegisterFileConfiguration 
-																WHERE intRegisterFileConfigId = @intRegisterFileConfigId
-															 )
+					
 					SET @intCountRows = 0
 					SET @strStatusMsg = 'ERROR: ' + @strFilePrefix + ' - Cannot map xml content to table. Version did not match. Layout setup is ' + @strXmlLayoutVersion + ' while Register xml is ' + @strXmlVersion
 
@@ -427,6 +447,11 @@ BEGIN
 				 + ', @intCheckoutIdParam INT'
 	             + ', @strStatusMsg NVARCHAR(250) OUTPUT'
 	             + ', @intCountRows INT OUTPUT';
+
+	--EXEC CopierDB.dbo.LongPrint @SQL
+	--EXEC CopierDB.dbo.LongPrint @strXML
+	--PRINT @SQL
+	--PRINT @strXML
 
 	EXEC sp_executesql @SQL, @ParmDef, @strXML, @strXMLinitiator, @strRootTagNamespace, @strSPName, @intCheckoutId, @strStatusMsg OUTPUT, @intCountRows OUTPUT
 	-- ===========================================================================================================

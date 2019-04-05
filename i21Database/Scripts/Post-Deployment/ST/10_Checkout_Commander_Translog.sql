@@ -14,9 +14,9 @@ SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHe
        ,[strFileType] = 'XML'
        ,[strFieldDelimiter] = NULL
        ,[strXMLType] = 'Inbound'
-       ,[strXMLInitiater] = '<?xml version="1.0"?>'
+       ,[strXMLInitiater] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 106
+       ,[intConcurrencyId] = 107
   WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 ----DELETE FROM dbo.tblSMXMLTagAttribute
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Commander - Trans Log','XML',NULL,'Inbound','<?xml version="1.0"?>',1,106)
+      ('Commander - Trans Log','XML',NULL,'Inbound',NULL,1,107)
 END
 --END CHECK HEADER
 

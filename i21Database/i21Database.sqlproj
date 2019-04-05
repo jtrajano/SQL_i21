@@ -7514,6 +7514,16 @@
     <Build Include="dbo\Stored Procedures\uspARPOSUpdateCashPaymentReceived.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryShipmentReceipt.sql" />
     <Build Include="dbo\Views\vyuGRBasisSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderFPHose.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderPLU.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTax.sql" />
+    <None Include="Scripts\Post-Deployment\ST\26_FileFieldMapping_Commander_Department.sql" />
+    <None Include="Scripts\Post-Deployment\ST\27_FileFieldMapping_Commander_FPHose.sql" />
+    <None Include="Scripts\Post-Deployment\ST\28_FileFieldMapping_Commander_PLU.sql" />
+    <None Include="Scripts\Post-Deployment\ST\29_FileFieldMapping_Commander_Summary.sql" />
+    <None Include="Scripts\Post-Deployment\ST\30_FileFieldMapping_Commander_Tax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -61,7 +61,7 @@ BEGIN
 			END
 
 		-- Check Register if (RADIANT or PASSPORT)
-		ELSE IF (@strRegisterClass NOT IN ('RADIANT', 'PASSPORT'))
+		ELSE IF (@strRegisterClass NOT IN ('RADIANT', 'PASSPORT', 'SAPPHIRE'))
 			BEGIN
 				INSERT INTO @tempTableError
 				(
@@ -155,7 +155,7 @@ BEGIN
 			JOIN tblSTStore ST
 				ON Reg.intRegisterId = ST.intRegisterId
 			WHERE ST.intStoreNo = @intStoreNo
-			AND RegConfig.strFileType = 'Outbound'
+				AND RegConfig.strFileType = 'Outbound'
 		)
 			BEGIN
 				INSERT INTO @tempTableError
@@ -175,15 +175,27 @@ BEGIN
 			JOIN tblSTStore ST
 				ON Reg.intRegisterId = ST.intRegisterId
 			WHERE ST.intStoreNo = @intStoreNo
-			AND RegConfig.strFileType = 'Inbound'
-			AND RegConfig.strFilePrefix = 'ISM'
+				AND RegConfig.strFileType = 'Inbound'
+				AND RegConfig.strFilePrefix = CASE
+												WHEN @strRegisterClass IN ('RADIANT', 'PASSPORT')
+													THEN 'ISM'
+												WHEN (@strRegisterClass IN ('SAPPHIRE'))
+													THEN 'vrubyrept-department'
+
+												-- Transactionlog should be included in checkout
+												--WHEN (@strRegisterClass IN ('SAPPHIRE') AND Reg.ysnTransctionLog = CAST(1 AS BIT))
+												--	THEN 'vtransset-tlog'
+												--WHEN (@strRegisterClass IN ('SAPPHIRE') AND Reg.ysnDepartmentTotals = CAST(1 AS BIT))
+												--	THEN 'vrubyrept-department'
+												ELSE NULL
+											END
 		)
 			BEGIN
 				INSERT INTO @tempTableError
 				(
 					[strErrorMessage]
 				)
-				SELECT 'Register ' + @strRegisterClass + ' XML Configuration has no ISM setup'
+				SELECT 'Register ' + @strRegisterClass + ' XML Configuration has no main xml setup'
 			END
 
 		IF EXISTS(SELECT intErrorId FROM @tempTableError)
@@ -199,4 +211,3 @@ BEGIN
 		SET @strResult = ERROR_MESSAGE()
 	END CATCH
 END
-
