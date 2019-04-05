@@ -134,7 +134,7 @@ BEGIN
 		GP.[intEntityVendorId]
 		,GP.[intTransactionType]
 		,GP.[intLocationId]	
-		,[intShipToId] = NULL	
+		,[intShipToId] = GP.intLocationId	
 		,[intShipFromId] = NULL	 		
 		,[intShipFromEntityId] = NULL
 		,[intPayToAddressId] = NULL
