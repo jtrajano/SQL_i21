@@ -20,7 +20,7 @@ select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPr
 SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId
  into #tempCustomer 
  FROM (
-   SELECT dtmDate,strStorageTypeDescription,sum(round(dblInQty,2)) dblIn,sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2))dblOut,round(sum(dblInQty),2)-sum(round(isnull(dblOutQty,0)+isnull(dblSettleUnit,0),2)) dblNet,intStorageScheduleTypeId FROM(		
+   SELECT dtmDate,strStorageTypeDescription,sum(dblInQty) dblIn,sum(isnull(dblOutQty,0)+isnull(dblSettleUnit,0))dblOut,sum(dblInQty)-sum(isnull(dblOutQty,0)+isnull(dblSettleUnit,0)) dblNet,intStorageScheduleTypeId FROM(		
 		--SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate,strStorageTypeDescription,	CASE WHEN strInOutFlag='I' THEN dblNetUnits ELSE 0 END dblInQty,
 		--																						CASE WHEN strInOutFlag='O' THEN dblNetUnits ELSE 0 END dblOutQty,gs.intStorageScheduleTypeId  
 		--	,(select sum(SH.dblUnits) from tblGRStorageHistory SH
