@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 (
-		intPriceFixationDetailAPARId	INT IDENTITY NOT NULL,
+	intPriceFixationDetailAPARId	INT IDENTITY NOT NULL,
 	intPriceFixationDetailId		INT	NOT NULL,
 	intBillId						INT,
 	intBillDetailId					INT,

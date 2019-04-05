@@ -74,9 +74,11 @@ BEGIN TRY
 		@ItemsFromInvoice I
 	WHERE
 		I.intContractDetailId IS NOT NULL
-		AND I.[intInventoryShipmentItemId] IS NULL
-		AND I.[intShipmentPurchaseSalesContractId] IS NULL
-		AND ISNULL(I.[intLoadDetailId],0) = 0
+		AND	(
+			(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND I.[intLoadDetailId] IS  NULL)
+			OR
+			(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL))
+			)
 		AND ISNULL(I.[intTransactionId],0) = 0
 		AND intTicketId IS NULL
 

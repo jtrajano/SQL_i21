@@ -90,7 +90,12 @@ BEGIN TRY
 				@toValue				= '',
 				@details				= @details 		
 
-		UPDATE tblCTContractDetail SET intContractStatusId = @intContractStatusId WHERE intContractDetailId = @intId
+		UPDATE tblCTContractDetail SET intContractStatusId = @intContractStatusId,intLastModifiedById = @intEntityId WHERE intContractDetailId = @intId
+
+		IF @intContractStatusId IN (3,6)
+		BEGIN
+			EXEC uspCTCancelOpenLoadSchedule @intId
+		END
 
 		EXEC	uspCTCreateDetailHistory	NULL, @intId
 

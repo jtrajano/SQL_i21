@@ -18,29 +18,32 @@ SELECT TOP 100 PERCENT * FROM (
         ,loc.intPurchaseAdvAccount AS intAccountId
         ,loc.intCompanyLocationId
         ,loc.strLocationName
-        ,receipt.intInventoryReceiptId
-        ,receiptItem.intInventoryReceiptItemId
-        ,receipt.strReceiptNumber
-        ,receipt.strBillOfLading
-        ,receipt.intShipFromId
-        ,receiptItem.intItemId
+        ,ticketTrans.intInventoryReceiptId
+        ,ticketTrans.intInventoryReceiptItemId
+        ,ticketTrans.strReceiptNumber
+        ,ticketTrans.strBillOfLading
+        ,ticketTrans.intShipFromId
+        ,ticketTrans.intItemId
+        ,ticketTrans.intStorageLocationId
+        ,ticketTrans.intSubLocationId
         ,commodity.intCommodityId
         ,commodity.strDescription
         ,0.00 AS dblFuture
         ,cur.strCurrency
         ,ctd.intSeqCurrencyId AS intCurrencyId
-        ,ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) - ISNULL(pricedSequence.dblQtyPriced, 0) AS dblQuantity
+        ,ticketTrans.intItemUOMId
+        ,ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0) AS dblQuantity
         ,(ISNULL(basisFutures.dblPrice, 0) 
                 + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
-            * (ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) - ISNULL(pricedSequence.dblQtyPriced, 0)) AS dblGross
+            * (ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0)) AS dblGross
         ,ISNULL(taxes.dblTax,0.00) AS dblTax
         ,0.00 AS dblAdvance
         ,CAST(((
                     ((ISNULL(basisFutures.dblPrice, 0) 
                         + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
-                        * (ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
-                    + ISNULL(discounts.dblAmount,0)
-                    + ISNULL(charges.dblAmount, 0)
+                        * (ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
+                    + ISNULL(ticketTrans.dblDiscountAmount,0)
+                    + ISNULL(ticketTrans.dblChargeAmount, 0)
                     + ISNULL(taxes.dblTax,0.00)) 
                     ) AS DECIMAL(18,2)) AS dblNetAdvance
         ,CAST(
@@ -51,7 +54,7 @@ SELECT TOP 100 PERCENT * FROM (
                     / 
                     --compute the net base on last price made on the ticket to get the percentage
                     (
-                        ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) * ISNULL(priorAdvances.dblContractPrice, 1)
+                        ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) * ISNULL(priorAdvances.dblContractPrice, 1)
                     )
             ELSE
             --selected
@@ -67,9 +70,9 @@ SELECT TOP 100 PERCENT * FROM (
                             CAST(
                                 ((((ISNULL(basisFutures.dblPrice, 0) 
                                     + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
-                                    * (ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
-                                + ISNULL(discounts.dblAmount,0)
-                                + ISNULL(charges.dblAmount, 0)
+                                    * (ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
+                                + ISNULL(ticketTrans.dblDiscountAmount,0)
+                                + ISNULL(ticketTrans.dblChargeAmount, 0)
                                 + ISNULL(taxes.dblTax,0.00)) 
                                 - ISNULL(priorAdvances.dblPriorAdvance,0.00)) --subtract first the prior advance to get the percentage
                                 * (ISNULL(basisCommodity.dblPercentage,0.00) / 100) 
@@ -88,9 +91,9 @@ SELECT TOP 100 PERCENT * FROM (
                         THEN --if selected, but did not input yet a future price, use the last price made on the prior advance if not 0
                             CAST(((
                             ((ISNULL(priorAdvances.dblContractPrice, 0)) 
-                                * (ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
-                            + ISNULL(discounts.dblAmount,0)
-                            + ISNULL(charges.dblAmount, 0)
+                                * (ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
+                            + ISNULL(ticketTrans.dblDiscountAmount,0)
+                            + ISNULL(ticketTrans.dblChargeAmount, 0)
                             + ISNULL(taxes.dblTax,0.00)) 
                             ) AS DECIMAL(18,2)) 
                     WHEN (ISNULL(basisFutures.dblPrice,0) = 0 OR ISNULL(basisCommodity.dblPercentage,0) = 0)
@@ -98,18 +101,18 @@ SELECT TOP 100 PERCENT * FROM (
                         THEN
                             CAST(((
                             ((1) 
-                                * (ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
-                            + ISNULL(discounts.dblAmount,0)
-                            + ISNULL(charges.dblAmount, 0)
+                                * (ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
+                            + ISNULL(ticketTrans.dblDiscountAmount,0)
+                            + ISNULL(ticketTrans.dblChargeAmount, 0)
                             + ISNULL(taxes.dblTax,0.00)) 
                             ) AS DECIMAL(18,2)) 
                     ELSE
                         CAST(((
                             ((ISNULL(basisFutures.dblPrice, 0) 
                                 + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
-                                * (ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
-                            + ISNULL(discounts.dblAmount,0)
-                            + ISNULL(charges.dblAmount, 0)
+                                * (ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
+                            + ISNULL(ticketTrans.dblDiscountAmount,0)
+                            + ISNULL(ticketTrans.dblChargeAmount, 0)
                             + ISNULL(taxes.dblTax,0.00)) 
                             ) AS DECIMAL(18,2))
                     END
@@ -122,9 +125,9 @@ SELECT TOP 100 PERCENT * FROM (
                 ELSE CAST(((
                     ((ISNULL(basisFutures.dblPrice, 0) 
                         + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
-                        * (ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
-                    + ISNULL(discounts.dblAmount,0)
-                    + ISNULL(charges.dblAmount, 0)
+                        * (ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0))) 
+                    + ISNULL(ticketTrans.dblDiscountAmount,0)
+                    + ISNULL(ticketTrans.dblChargeAmount, 0)
                     + ISNULL(taxes.dblTax,0.00)) 
                     - ISNULL(priorAdvances.dblPriorAdvance,0.00))
                     * (ISNULL(basisCommodity.dblPercentage,0.00) / 100)
@@ -134,8 +137,8 @@ SELECT TOP 100 PERCENT * FROM (
         ,uom.strUnitMeasure
         ,ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0) AS dblUnitBasis
         ,CASE WHEN staging.intBasisAdvanceStagingId IS NULL THEN 0 ELSE ISNULL(basisFutures.dblPrice, 0) END AS dblFuturesPrice
-        ,ISNULL(discounts.dblAmount,0) AS dblDiscountAmount
-        ,ISNULL(charges.dblAmount,0) AS dblChargeAmount
+        ,ISNULL(ticketTrans.dblDiscountAmount,0) AS dblDiscountAmount
+        ,ISNULL(ticketTrans.dblChargeAmount,0) AS dblChargeAmount
         ,futureMarket.intFutureMarketId
         ,futureMarket.strFutMarketName
         ,futureMonth.intFutureMonthId
@@ -150,99 +153,138 @@ SELECT TOP 100 PERCENT * FROM (
     LEFT JOIN tblEMEntitySplit split ON ticket.intSplitId = split.intSplitId
     -- LEFT JOIN tblSCTicketSplit tcktSPlit ON ticket.intTicketId = tcktSPlit.intTicketId
     --Load basis ticket that is always have receipt or delivered
-    LEFT JOIN (tblICInventoryReceipt receipt LEFT JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
-        ON ticket.intTicketId = receiptItem.intSourceId AND receipt.intSourceType = 1
-    LEFT JOIN (
-        SELECT 
-            CS.intCustomerStorageId
-            ,CS.intEntityId
-            ,CH.intContractHeaderId
-            ,CH.strContractNumber
-            ,CD.intContractDetailId
-            ,CD.intContractSeq
-            ,CS.strStorageTicketNumber
-            ,CS.intTicketId
-            ,CH.intCommodityId
-            ,dblGross			= SC.dblUnits
-            ,dblDiscountAmount	= SC.dblUnits * CS.dblDiscountsDue
-            ,dblChargeAmount	= (SC.dblUnits / SS.dblSelectedUnits) * SS.dblStorageDue
-        FROM tblGRSettleContract SC
-        INNER JOIN tblCTContractDetail CD
-            ON CD.intContractDetailId = SC.intContractDetailId
-        INNER JOIN tblCTContractHeader CH
-            ON CH.intContractHeaderId = CD.intContractHeaderId
-        INNER JOIN tblGRSettleStorage SS
-            ON SS.intSettleStorageId = SC.intSettleStorageId
-                AND SS.intParentSettleStorageId IS NOT NULL
-        INNER JOIN tblGRSettleStorageTicket SST
-            ON SST.intSettleStorageId = SS.intSettleStorageId
-        INNER JOIN tblGRCustomerStorage CS
-            ON CS.intCustomerStorageId = SST.intCustomerStorageId
-        WHERE CD.intPricingTypeId = 2
-            AND SC.dblUnits > 0
-    ) settleStorage
-    ON settleStorage.intTicketId = ticket.intTicketId
+    INNER JOIN 
+    (
+        SELECT
+            receiptItem.intLineNo AS intContractDetailId,
+            receiptItem.intSourceId AS intTicketId,
+            receiptCharge.dblAmount AS dblChargeAmount,
+            discounts.dblAmount AS dblDiscountAmount,
+            receiptItem.dblOpenReceive AS dblQuantity,
+            receiptItem.intInventoryReceiptItemId,
+            receipt.intInventoryReceiptId,
+            receipt.strReceiptNumber,
+            receipt.strBillOfLading,
+            receipt.intShipFromId,
+            receiptItem.intItemId,
+            receipt.dtmReceiptDate,
+            receiptItem.intTaxGroupId,
+            receipt.intFreightTermId,
+            CASE WHEN receiptItem.intWeightUOMId > 0 THEN receiptItem.intWeightUOMId ELSE receiptItem.intUnitMeasureId END AS intItemUOMId,
+            receipt.intCurrencyId,
+            receiptItem.intStorageLocationId,
+            receiptItem.intSubLocationId,
+            receiptItem.intForexRateTypeId,
+            receiptItem.dblForexRate
+        FROM tblICInventoryReceipt receipt 
+        INNER JOIN tblICInventoryReceiptItem receiptItem 
+            ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+        OUTER APPLY
+        (
+            SELECT
+                SUM(CASE WHEN charge.ysnPrice > 0 THEN -charge.dblAmount ELSE charge.dblAmount END) AS dblAmount
+            FROM tblQMTicketDiscount tktDiscount
+            INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
+            INNER JOIN tblICInventoryReceiptCharge charge ON dscntCode.intItemId = charge.intChargeId
+            WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId
+            AND tktDiscount.dblGradeReading != 0
+            AND tktDiscount.intTicketId = receiptItem.intSourceId --filter by ticketid
+            AND tktDiscount.strSourceType = 'Scale'
+            GROUP BY charge.intInventoryReceiptId
+        ) receiptCharge
+        OUTER APPLY
+        (
+            SELECT
+                SUM(CASE WHEN charge.ysnPrice > 0 THEN -charge.dblAmount ELSE charge.dblAmount END) AS dblAmount
+            FROM tblQMTicketDiscount tktDiscount
+            INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
+            INNER JOIN tblICInventoryReceiptCharge charge ON dscntCode.intItemId = charge.intChargeId
+            WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId
+            AND tktDiscount.dblGradeReading != 0
+            AND tktDiscount.intTicketId = receiptItem.intSourceId
+            AND tktDiscount.strSourceType = 'Scale'
+            GROUP BY charge.intInventoryReceiptId
+        ) discounts
+        WHERE 
+            receipt.intSourceType = 1 
+        AND receiptItem.intLineNo > 0
+        UNION ALL
+        SELECT
+            intContractDetailId,
+            intTicketId,
+            dblChargeAmount,
+            dblDiscountAmount,
+            dblGross,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            intShipFromLocationId,
+            intItemId,
+            dtmDeliveryDate,
+            NULL,
+            NULL,
+            intItemUOMId,
+            intCurrencyId,
+            intStorageLocationId,
+            intCompanyLocationSubLocationId,
+            NULL,
+            NULL
+        FROM vyuGRBasisSettleStorage settleStorage
+    ) ticketTrans
+    ON ticketTrans.intTicketId = ticket.intTicketId
     -- INNER JOIN (tblCTContractHeader ct INNER JOIN tblCTContractDetail ctd ON ct.intContractHeaderId =  ctd.intContractHeaderId)
     --     ON receiptItem.intLineNo = ctd.intContractDetailId
-    INNER JOIN vyuCTContractDetailView ctd ON ISNULL(NULLIF(receiptItem.intLineNo,0), settleStorage.intTicketId) = ctd.intContractDetailId
+    INNER JOIN vyuCTContractDetailView ctd ON ticketTrans.intContractDetailId = ctd.intContractDetailId
     INNER JOIN tblRKFutureMarket futureMarket ON ctd.intFutureMarketId = futureMarket.intFutureMarketId
     INNER JOIN tblRKFuturesMonth futureMonth ON ctd.intFutureMonthId = futureMonth.intFutureMonthId
     INNER JOIN tblICCommodity commodity ON ticket.intCommodityId = commodity.intCommodityId
     INNER JOIN tblSMCurrency cur ON ctd.intSeqCurrencyId = cur.intCurrencyID
     INNER JOIN (tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure uom ON itemUOM.intUnitMeasureId = uom.intUnitMeasureId)
         ON itemUOM.intItemId = ticket.intItemId AND itemUOM.ysnStockUnit = 1
-    OUTER APPLY (
-        SELECT
-            SUM(CASE WHEN charge.ysnPrice > 0 THEN -charge.dblAmount ELSE charge.dblAmount END) AS dblAmount
-			
-        FROM tblQMTicketDiscount tktDiscount
-        INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
-        INNER JOIN tblICInventoryReceiptCharge charge ON dscntCode.intItemId = charge.intChargeId
-        WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId
-        AND tktDiscount.dblGradeReading != 0
-        AND tktDiscount.intTicketId = ticket.intTicketId
-        AND tktDiscount.strSourceType = 'Scale'
-        GROUP BY charge.intInventoryReceiptId
-    ) discounts
-     OUTER APPLY (
-		SELECT SUM(dblAmount) AS dblAmount
-		FROM (
-			SELECT
-				 (ISNULL(charge.dblAmount,0) * (CASE WHEN charge.ysnPrice = 1 THEN -1 ELSE 1 END))
-					+ (
-						ISNULL((CASE WHEN ISNULL(charge.intEntityVendorId, receipt.intEntityVendorId) != receipt.intEntityVendorId
-									THEN (CASE WHEN charge.ysnPrice = 1 AND chargeTax.ysnCheckoffTax = 0 THEN -charge.dblTax --negate, inventory receipt will bring postive tax
-											   WHEN chargeTax.ysnCheckoffTax = 0 THEN ABS(charge.dblTax) ELSE charge.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
-									ELSE (CASE WHEN charge.ysnPrice = 1 AND chargeTax.ysnCheckoffTax = 1 THEN charge.dblTax * -1 ELSE charge.dblTax END ) END),0)
-					)
-				AS dblAmount
-			FROM tblICInventoryReceiptCharge charge
-			OUTER APPLY
-			(
-				SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
-				WHERE IRCT.intInventoryReceiptChargeId = charge.intInventoryReceiptChargeId
-			)  chargeTax
-			WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId
-			AND charge.intChargeId NOT IN (
-				SELECT
-					dscntCode.intItemId
-				FROM tblQMTicketDiscount tktDiscount
-				INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
-				WHERE tktDiscount.intTicketId = ticket.intTicketId
-			)
-		) chargesAmount
-    ) charges
+    -- OUTER APPLY (
+    --     SELECT
+    --         SUM(CASE WHEN charge.ysnPrice > 0 THEN -charge.dblAmount ELSE charge.dblAmount END) AS dblAmount
+    --     FROM tblQMTicketDiscount tktDiscount
+    --     INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
+    --     INNER JOIN tblICInventoryReceiptCharge charge ON dscntCode.intItemId = charge.intChargeId
+    --     WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId
+    --     AND tktDiscount.dblGradeReading != 0
+    --     AND tktDiscount.intTicketId = ticket.intTicketId
+    --     AND tktDiscount.strSourceType = 'Scale'
+    --     GROUP BY charge.intInventoryReceiptId
+    -- ) discounts
+    --  OUTER APPLY (
+	-- 	SELECT SUM(dblAmount) AS dblAmount
+	-- 	FROM (
+	-- 		SELECT
+	-- 			 (ISNULL(charge.dblAmount,0) * (CASE WHEN charge.ysnPrice = 1 THEN -1 ELSE 1 END))
+	-- 				+ (
+	-- 					ISNULL((CASE WHEN ISNULL(charge.intEntityVendorId, receipt.intEntityVendorId) != receipt.intEntityVendorId
+	-- 								THEN (CASE WHEN charge.ysnPrice = 1 AND chargeTax.ysnCheckoffTax = 0 THEN -charge.dblTax --negate, inventory receipt will bring postive tax
+	-- 										   WHEN chargeTax.ysnCheckoffTax = 0 THEN ABS(charge.dblTax) ELSE charge.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
+	-- 								ELSE (CASE WHEN charge.ysnPrice = 1 AND chargeTax.ysnCheckoffTax = 1 THEN charge.dblTax * -1 ELSE charge.dblTax END ) END),0)
+	-- 				)
+	-- 			AS dblAmount
+	-- 		FROM tblICInventoryReceiptCharge charge
+	-- 		OUTER APPLY
+	-- 		(
+	-- 			SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
+	-- 			WHERE IRCT.intInventoryReceiptChargeId = charge.intInventoryReceiptChargeId
+	-- 		)  chargeTax
+	-- 		WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId
+	-- 		AND charge.intChargeId NOT IN (
+	-- 			SELECT
+	-- 				dscntCode.intItemId
+	-- 			FROM tblQMTicketDiscount tktDiscount
+	-- 			INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
+	-- 			WHERE tktDiscount.intTicketId = ticket.intTicketId
+	-- 		)
+	-- 	) chargesAmount
+    -- ) charges
     OUTER APPLY (
 		SELECT 
 			SUM(voucherDetail.dblTotal + voucherDetail.dblTax) AS dblPriorAdvance,
-            -- SUM(CASE WHEN ISNULL(voucherDetail.dblPrepayPercentage,0) = 0
-            --         THEN (voucherDetail.dblTotal / (voucherDetail.dblQtyReceived * --handle old data which we do not save the dblPrepayPercentage
-            --                                     (CASE WHEN ISNULL(voucherDetail.dblContractCost,0) = 0
-            --                                         THEN voucherDetail.dblBasis + voucherDetail.dblFutures
-            --                                         ELSE voucherDetail.dblContractCost END))) * 100 --handle old data which we do not enter basis and futures data
-            --         ELSE ISNULL(voucherDetail.dblPrepayPercentage,0)
-            --     END) + 
-            --     SUM(DISTINCT ISNULL(commodity.dblPercentage,0))
             --get the actual percentage made base on the remaining amount to pay
             SUM(ISNULL(voucherDetail.dblTotal,0)) AS dblTotalPriorAdvance,
             -- MIN(lastPrice.dblContractPrice) AS dblContractPrice,
@@ -264,21 +306,6 @@ SELECT TOP 100 PERCENT * FROM (
         INNER JOIN (tblAPPaymentDetail payDetail INNER JOIN tblAPPayment pay ON payDetail.intPaymentId = pay.intPaymentId AND pay.ysnPosted = 1) --prior advances should have payment
             ON payDetail.intBillId = voucher.intBillId
         LEFT JOIN tblAPBasisAdvanceCommodity commodity ON commodity.intCommodityId = ticket.intCommodityId
-        -- OUTER APPLY (
-        --     SELECT TOP 1
-        --         CASE WHEN lastVoucherDetail.dblContractCost > 0 AND lastVoucherDetail.dblBasis = 0
-        --             THEN --older version we use the contract cost to fill futures + basis
-        --                 lastVoucherDetail.dblContractCost
-        --             ELSE
-        --                 lastVoucherDetail.dblBasis + lastVoucherDetail.dblFutures
-        --             END
-        --         AS dblContractPrice
-        --     FROM tblAPBillDetail lastVoucherDetail
-        --     INNER JOIN tblAPBill lastVoucher ON lastVoucher.intBillId = lastVoucherDetail.intBillId
-        --     WHERE lastVoucherDetail.intScaleTicketId = ticket.intTicketId
-        --     AND lastVoucher.intTransactionType = 13
-        --     ORDER BY lastVoucherDetail.intBillId DESC
-        -- ) lastPrice
 		WHERE voucherDetail.intScaleTicketId = ticket.intTicketId
         AND voucher.intTransactionType = 13
     ) priorAdvances
@@ -287,7 +314,7 @@ SELECT TOP 100 PERCENT * FROM (
             SUM(voucherDetail.dblQtyReceived) AS dblQtyPriced
         FROM tblAPBill voucher
         INNER JOIN tblAPBillDetail voucherDetail ON voucher.intBillId = voucherDetail.intBillId
-        WHERE voucherDetail.intContractDetailId = ctd.intContractDetailId AND voucherDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+        WHERE voucherDetail.intContractDetailId = ctd.intContractDetailId --AND voucherDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
         AND voucherDetail.intItemId = ctd.intItemId
         AND voucher.intTransactionType = 1
     ) pricedSequence
@@ -320,23 +347,23 @@ SELECT TOP 100 PERCENT * FROM (
         SELECT
             SUM(taxData.dblTax) AS dblTax
         FROM dbo.fnGetItemTaxComputationForVendor(
-            receiptItem.intItemId
-            ,receipt.intEntityVendorId
-            ,receipt.dtmReceiptDate
+            ticketTrans.intItemId
+            ,ticket.intEntityId
+            ,ticketTrans.dtmReceiptDate
             ,(ISNULL(basisFutures.dblPrice, 0) 
                     + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0))
-            ,ISNULL(ticket.dblNetUnits,ISNULL(settleStorage.dblGross,0))
-            ,receiptItem.intTaxGroupId
-            ,receipt.intLocationId
-            ,receipt.intShipFromId
+            ,ticketTrans.dblQuantity
+            ,ticketTrans.intTaxGroupId
+            ,ticket.intProcessingLocationId
+            ,ticketTrans.intShipFromId
             ,1
 			,0
-            ,receipt.intFreightTermId
+            ,ticketTrans.intFreightTermId
             ,0
-            ,CASE WHEN receiptItem.intWeightUOMId > 0 THEN receiptItem.intWeightUOMId ELSE receiptItem.intUnitMeasureId END
-            ,receipt.intCurrencyId
-            ,receiptItem.intForexRateTypeId
-            ,receiptItem.dblForexRate
+            ,ticketTrans.intItemUOMId
+            ,ticketTrans.intCurrencyId
+            ,ticketTrans.intForexRateTypeId
+            ,ticketTrans.dblForexRate
         ) taxData
     ) taxes
     WHERE ctd.intPricingTypeId = 2

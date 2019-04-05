@@ -490,8 +490,9 @@ BEGIN
 					,@dblUOMQty 
 					,@dblCost
 					,@intLotId
+					,@intTransactionTypeId
 					,@intCostingMethod
-					,@intFobPointId					
+					,@intFobPointId
 					;
 			END;
 

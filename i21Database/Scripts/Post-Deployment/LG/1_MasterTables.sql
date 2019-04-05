@@ -170,3 +170,59 @@ BEGIN
 	')
 END
 GO
+
+/*
+* Attempt to link Load Costs to corresponding Contract Detail (one-time run)
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoadCost') AND name = 'intContractDetailId')
+BEGIN
+	--Inbound/Drop Ship costs
+	EXEC ('
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblLGLoadCost WHERE intContractDetailId IS NOT NULL)
+
+			UPDATE LGC
+			SET intContractDetailId = CTC.intContractDetailId
+			FROM
+				tblLGLoadCost LGC
+				INNER JOIN tblLGLoad LG ON LG.intLoadId = LGC.intLoadId
+				LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = LG.intLoadId
+				OUTER APPLY 
+					(SELECT TOP 1 
+						CTD.intContractDetailId
+						FROM tblCTContractCost CTC
+						INNER JOIN tblCTContractDetail CTD
+							ON CTC.intContractDetailId = CTD.intContractDetailId
+						WHERE CTC.intItemId = LGC.intItemId
+							AND CTC.intVendorId = LGC.intVendorId
+							AND CTC.strCostMethod = LGC.strCostMethod
+							AND CTC.intContractDetailId = LGD.intPContractDetailId
+						) [CTC]
+			WHERE LG.intPurchaseSale IN (1 , 3) AND LGC.intContractDetailId IS NULL')
+
+		--Outbound/Drop Ship costs
+		EXEC ('
+			IF NOT EXISTS (SELECT TOP 1 1 FROM tblLGLoadCost WHERE intContractDetailId IS NOT NULL)
+
+			UPDATE LGC
+			SET intContractDetailId = CTC.intContractDetailId
+			FROM
+				tblLGLoadCost LGC
+				INNER JOIN tblLGLoad LG ON LG.intLoadId = LGC.intLoadId
+				LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = LG.intLoadId
+				OUTER APPLY 
+					(SELECT TOP 1 
+						CTD.intContractDetailId
+						FROM tblCTContractCost CTC
+						INNER JOIN tblCTContractDetail CTD
+							ON CTC.intContractDetailId = CTD.intContractDetailId
+						WHERE CTC.intItemId = LGC.intItemId
+							AND CTC.intVendorId = LGC.intVendorId
+							AND CTC.strCostMethod = LGC.strCostMethod
+							AND CTC.intContractDetailId = LGD.intSContractDetailId
+						) [CTC]
+			WHERE LG.intPurchaseSale IN (2, 3) AND LGC.intContractDetailId IS NULL
+		')
+END
+GO
+
+

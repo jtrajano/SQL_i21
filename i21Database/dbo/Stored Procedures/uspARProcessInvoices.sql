@@ -387,7 +387,7 @@ BEGIN
 		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@ContractHeaderId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Sales Contract' THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
 		,@LoadId						= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Load Schedule', 'Weight Claim') THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
-		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional' OR (ISNULL([strSourceTransaction],'') = 'Invoice' AND ISNULL([strTransactionType],'') = 'Credit Memo') OR ISNULL([strTransactionType],'') = 'Cash Refund' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
+		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional' OR ((ISNULL([strSourceTransaction],'') = 'Invoice' OR ISNULL([strSourceTransaction],'') = 'Direct') AND ISNULL([strTransactionType],'') = 'Credit Memo') OR ISNULL([strTransactionType],'') = 'Cash Refund' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
 		,@TruckDriverId					= [intTruckDriverId]
 		,@TruckDriverReferenceId		= [intTruckDriverReferenceId]

@@ -165,7 +165,7 @@ BEGIN TRY
 		 [strTransactionType]					= 'Credit Memo'
 		,[strType]								= ARI.[strType]
 		,[strSourceTransaction]					= 'Direct'--'Invoice'
-		,[intSourceId]							= NULL--ARI.[intInvoiceId] 
+		,[intSourceId]							= ARI.[intInvoiceId] 
 		,[strSourceId]							= ARI.[strInvoiceNumber]
 		,[intInvoiceId]							= NULL
 		,[intEntityCustomerId]					= ARI.[intEntityCustomerId]
@@ -203,7 +203,7 @@ BEGIN TRY
 		,[intMeterReadingId]					= ARI.[intMeterReadingId]
 		,[intContractHeaderId]					= ARI.[intContractHeaderId]
 		,[intLoadId]							= ARI.[intLoadId]
-		,[intOriginalInvoiceId]					= NULL--ARI.[intInvoiceId]
+		,[intOriginalInvoiceId]					= ARI.[intInvoiceId]
 		,[intEntityId]							= @UserId
 		,[intTruckDriverId]						= ARI.[intTruckDriverId]
 		,[intTruckDriverReferenceId]			= ARI.[intTruckDriverReferenceId]

@@ -127,5 +127,6 @@ LEFT JOIN tblSMCompanyLocationSubLocation csl ON W.intSubLocationId = csl.intCom
 LEFT JOIN vyuARCustomer cs ON W.intCustomerId = cs.intEntityId
 LEFT JOIN tblMFDepartment d ON W.intDepartmentId = d.intDepartmentId
 LEFT JOIN tblMFWorkOrderStatus WS1 ON WS1.intStatusId = W.intCountStatusId
-LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = W.intSalesOrderLineItemId
+LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = W.intSalesOrderLineItemId
+LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 LEFT JOIN tblEMEntity E ON E.intEntityId = SO.intEntitySalespersonId

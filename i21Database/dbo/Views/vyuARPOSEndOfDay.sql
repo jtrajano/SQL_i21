@@ -23,7 +23,7 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , ysnClosed					= EOD.ysnClosed
 	 , ysnAllowMultipleUser			= DRAWER.ysnAllowMultipleUser
 	 , dblTotalCashReceipt          = EOD.dblExpectedEndingBalance
-	 , dblCashReceived				= ISNULL(CASHPAYMENTRECEIVED.dblCashReceived, 0.000000)
+	 , dblCashReceived				= ISNULL(EOD.dblCashPaymentReceived,0.000000)
 FROM tblARPOSEndOfDay EOD
 INNER JOIN tblSMCompanyLocationPOSDrawer DRAWER ON  EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 INNER JOIN (
@@ -65,15 +65,5 @@ LEFT JOIN (
 		strDescription
 	FROM tblSTStore
 ) ST ON EOD.intStoreId = ST.intStoreId
-OUTER APPLY(
-	SELECT SUM(PPAYMENT.dblAmountPaid) AS dblCashReceived
-	FROM tblARPayment PPAYMENT
-	INNER JOIN tblARPOSPayment PPOSPAYMENT ON PPAYMENT.intPaymentId = PPOSPAYMENT.intPaymentId
-	INNER JOIN tblSMPaymentMethod PPAYMENTMETHOD ON PPAYMENT.intPaymentMethodId = PPAYMENTMETHOD.intPaymentMethodID
-	WHERE PPAYMENTMETHOD.strPaymentMethod = 'Cash'
-		AND PPOSPAYMENT.intPOSEndOfDayId = EOD.intPOSEndOfDayId
-		AND PPOSPAYMENT.strPaymentMethod = 'On Account'
-		AND PPAYMENT.ysnPosted = 1
-)CASHPAYMENTRECEIVED --Cash payment received from On Account Transaction of POS
 
 GO 

@@ -50,6 +50,7 @@ BEGIN
 				,A.intLocationId
 				,ysnSiteActive = ISNULL(A.ysnActive,0)
 				,strFillMethod = H.strFillMethod
+				,A.intProduct
 				,strItemNo = ISNULL(I.vwitm_no,'''')
 				,dtmLastDeliveryDate = A.dtmLastDeliveryDate
 				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
@@ -63,8 +64,10 @@ BEGIN
 				,A.dtmOnHoldStartDate
 				,A.dtmOnHoldEndDate
 				,dblCreditLimit = C.vwcus_cred_limit
+				,A.intDeliveryTermID
 				,strTerm = M.vwtrm_desc COLLATE Latin1_General_CI_AS      
 				,A.strInstruction
+				,A.intDriverID
 				,strDriverId = O.vwsls_slsmn_id COLLATE Latin1_General_CI_AS      
 				,P.strRouteId
 				,A.dblTotalCapacity
@@ -163,6 +166,7 @@ BEGIN
 				,ysnSiteActive = ISNULL(A.ysnActive,0)
 				,intCntId = CAST((ROW_NUMBER()OVER (ORDER BY A.intSiteID)) AS INT)
 				,strFillMethod = H.strFillMethod
+				,A.intProduct
 				,strItemNo = ISNULL(I.strItemNo,'''')
 				,dtmLastDeliveryDate = A.dtmLastDeliveryDate
 				,dtmNextDeliveryDate = A.dtmNextDeliveryDate
@@ -174,9 +178,11 @@ BEGIN
 				,L.strHoldReason
 				,A.dtmOnHoldStartDate
 				,A.dtmOnHoldEndDate
+				,A.intDeliveryTermID
 				,D.dblCreditLimit
 				,strTerm = M.strTerm COLLATE Latin1_General_CI_AS      
 				,A.strInstruction
+				,A.intDriverID
 				,strDriverId = O.strEntityNo COLLATE Latin1_General_CI_AS      
 				,P.strRouteId
 				,A.dblTotalCapacity

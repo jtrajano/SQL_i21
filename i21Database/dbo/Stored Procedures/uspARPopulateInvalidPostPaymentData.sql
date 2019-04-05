@@ -903,6 +903,7 @@ BEGIN
         WHERE
                 PD.[dblDiscount] <> @ZeroDecimal
             AND I.[dblAmountDue] = @ZeroDecimal
+			AND P.[ysnPosted] = 1
         ) P1
             ON P.[intInvoiceId] = P1.[intInvoiceId] AND P.[intTransactionId] <> P1.[intPaymentId] 
     WHERE

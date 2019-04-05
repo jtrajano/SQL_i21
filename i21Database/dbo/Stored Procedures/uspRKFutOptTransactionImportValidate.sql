@@ -218,7 +218,7 @@ WHILE @mRowNumber > 0
 			SELECT @intEntityId=intEntityId from tblEMEntity WHERE strName= @strName
 
 			--Broker Trade No already exists in the transactions for the respective Broker
-			IF EXISTS(SELECT * FROM tblRKFutOptTransaction WHERE strBrokerTradeNo=@strBrokerTradeNo and intEntityId = @intEntityId and isnull(strBrokerTradeNo,'')<>'' and isnull(intSelectedInstrumentTypeId,1) = 1)
+			IF EXISTS(SELECT * FROM tblRKFutOptTransaction WHERE strBrokerTradeNo=@strBrokerTradeNo and intEntityId = @intEntityId and isnull(strBrokerTradeNo,'')<>'' and isnull(intSelectedInstrumentTypeId,1) in(1,3))
 			BEGIN
 				SET @ErrMsg = @ErrMsg + ' Broker Trade No already exists.'
 			END
