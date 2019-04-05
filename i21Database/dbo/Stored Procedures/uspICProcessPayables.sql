@@ -377,7 +377,7 @@ BEGIN
 				,VoucherPayable.[intShipViaId]						
 				,[intTermId]						
 				,VoucherPayable.[strBillOfLading]					
-
+				,VoucherPayable.ysnReturn
 			FROM tblICInventoryShipmentCharge ShipmentCharge 
 			INNER JOIN tblICInventoryShipment Shipment 
 				ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
