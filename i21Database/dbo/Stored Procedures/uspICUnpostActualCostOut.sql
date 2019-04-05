@@ -85,7 +85,7 @@ FROM	(
 			, intTransactionTypeId
 			, dblQty 
 		)
-WHERE	changes.action = 'UPDATE'
+WHERE	Changes.action = 'UPDATE'
 ;
 
 -- If ActualCostBucket was from a negative stock, let dblStockIn equal to dblStockOut. 
