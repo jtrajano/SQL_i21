@@ -120,3 +120,141 @@ WHERE	ShipmentCharge.ysnAccrue = 1
 				AND ROUND(ShipmentCharge.dblAmount, 6) = 0 
 			)
 		)
+
+UNION ALL
+
+--VOUCHER CHARGES FROM LOAD SHIPMENT COST TAB
+	  	SELECT 
+		 [intInventoryShipmentId] = V.intLoadId		
+		,[intEntityVendorId] = V.intEntityVendorId			
+		,[dtmDate] = V.dtmProcessDate					
+		,[strReference]	= V.strLoadNumber				
+		,[strSourceNumber] = V.strLoadNumber				
+		,[intItemId] = 	V.intItemId				
+		,[strMiscDescription] = V.strItemDescription			
+		,[strItemNo] = V.strItemNo					
+		,[strDescription] = V.strItemDescription				
+		,[dblOrderQty]	= 1				
+		,[dblPOOpenReceive] = 1 				
+		,[dblOpenReceive] = 1			
+		,[dblQuantityToBill] = 1 			
+		,[dblQuantityBilled] = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 1 ELSE 0 END 			
+		,[intLineNo] = 1					
+		,[intInventoryShipmentItemId]  =  NULL	
+		,[intInventoryShipmentChargeId]	=  V.intLoadId		
+		,[dblUnitCost]	= dblPrice					
+		,[dblTax] = 0						
+		,[intAccountId]	 = NULL				
+		,[strAccountId]	= NULL				
+		,[strName]	= V.strCustomerName				
+		,[strVendorId] = ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'') 					
+		,[strContractNumber] = NULL			
+		,[intContractHeaderId] = V.intContractHeaderId			
+		,[intContractDetailId]	= V.intContractDetailId
+		,[intCurrencyId] = V.intCurrencyId				
+		,[ysnSubCurrency] = V.intCurrencyId			
+		,[intMainCurrencyId] = V.intCurrencyId					
+		,[intSubCurrencyCents] = V.intCurrencyId					 			
+		,[strCostUnitMeasure]	= V.strPriceUOM		
+		,[intCostUnitMeasureId]  = V.intItemUOMId       
+		,[intScaleTicketId]	 = 	NULL		
+		,[strScaleTicketNumber]	= NULL		
+		,[intLocationId]	= 	NULL		
+		,intForexRateTypeId	= NULL			
+		,dblForexRate	= NULL				
+		,[strBillOfLading] = NULL				
+		,[intSourceType]	=  NULL		
+		,[dblShipmentChargeLineTotal] = V.dblTotal
+		, dblAmount = V.dblTotal
+	FROM vyuLGLoadCostForVendor V
+	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
+				THEN LD.intSContractDetailId
+			ELSE LD.intPContractDetailId
+			END
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
+		AND ItemLoc.intLocationId = CD.intCompanyLocationId
+	JOIN tblICItem I ON I.intItemId = V.intItemId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
+	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
+	LEFT JOIN vyuAPVendor Vendor
+			ON Vendor.intEntityId = V.intEntityVendorId
+	LEFT JOIN (
+		SELECT DISTINCT 
+			  Header.strBillId
+			, Header.dtmBillDate
+			, Header.dtmDate
+			, Header.dtmDueDate
+			, Header.intBillId
+			, Header.dblAmountDue
+			, Header.intTransactionType
+			, Header.ysnPaid
+			, Header.ysnPosted
+			, Header.intEntityVendorId
+			, Detail.intLoadId
+			, Detail.dblQtyReceived
+			, Detail.dblDetailTotal
+			, Header.dblTotal
+			, Header.intShipFromEntityId
+			, T.strTerm
+		FROM tblAPBill Header
+		LEFT JOIN dbo.tblSMTerm T  ON Header.intTermsId = T.intTermID
+		OUTER APPLY (
+				SELECT 
+					intLoadId,
+					SUM(dblQtyReceived) AS dblQtyReceived,
+					SUM(A.dblTotal)	+ SUM(A.dblTax) AS dblDetailTotal
+				FROM dbo.tblAPBillDetail A
+				WHERE Header.intBillId = A.intBillId AND A.intLoadId IS NOT NULL
+				GROUP BY intLoadId
+			) Detail		
+		WHERE ISNULL(intLoadId, '') <> '' 
+	) Bill ON Bill.intLoadId = V.intLoadId AND Bill.intEntityVendorId NOT IN (V.intEntityVendorId)
+	WHERE  V.intLoadId NOT IN (SELECT DISTINCT intLoadId FROM tblAPBillDetail A INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intLoadId IS NOT NULL AND B.ysnPosted = 1)
+	GROUP BY V.intEntityVendorId
+		,Vendor.strVendorId
+		,Vendor.strName
+		,CH.intContractHeaderId
+		,CD.intContractDetailId
+		,ItemLoc.intItemLocationId
+		,V.intItemId
+		,V.intLoadId
+		,V.strLoadNumber
+		,V.dblNet
+		,LD.intLoadId
+		,LD.intLoadDetailId
+		,V.intLoadCostId
+		,I.ysnInventoryCost
+		,LD.intItemUOMId
+		,V.intPriceItemUOMId
+		,ItemUOM.dblUnitQty
+		,CostUOM.dblUnitQty
+		,LD.dblQuantity
+		,V.strCostMethod
+		,V.dblPrice
+		,V.dblTotal
+		,V.dtmProcessDate
+		,V.intLoadId
+		,Bill.dtmDate
+		,Bill.dblQtyReceived
+		,Bill.strBillId
+		,Bill.ysnPosted
+		,Bill.dblDetailTotal
+		,V.strCustomerName 
+		,Bill.dtmDueDate
+		,V.ysnPosted
+		,Bill.ysnPaid
+		,Bill.strTerm
+		,Bill.intShipFromEntityId
+		,V.strItemDescription
+		,V.strItemNo
+		,V.intContractDetailId
+		,V.intContractHeaderId
+		,V.intCurrencyId
+		,V.strPriceUOM
+		,V.intItemUOMId
+GO
+
+
