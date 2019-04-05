@@ -7301,6 +7301,7 @@
     <Build Include="dbo\Stored Procedures\uspCTSendMissingFeed.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -469,6 +469,5 @@
     <None Include="Scripts\MB\uspMBDCMeterAccountMigration.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportCreateInitialScaleSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromOrigin.sql" />
-    <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
   </ItemGroup>
 </Project>
