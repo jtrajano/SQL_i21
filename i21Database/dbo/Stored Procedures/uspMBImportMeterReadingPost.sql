@@ -49,7 +49,7 @@ BEGIN
 
 			IF((SELECT COUNT(intMeterAccountDetailId) FROM tblMBMeterAccountDetail MAD INNER JOIN tblMBMeterAccount MA ON MA.intMeterAccountId = MAD.intMeterAccountId) > 1)
 			BEGIN		
-				DECLARE @Msg NVARCHAR(MAX) = CONCAT('Invalid setup on meter account with meter customer id ',  @intMeterCustomerId , ' and meter number ', @intMeterNumber)
+				DECLARE @Msg NVARCHAR(MAX) = 'Invalid setup on meter account with meter customer id ' + CONVERT(NVARCHAR(20),@intMeterCustomerId) + ' and meter number ' + CONVERT(NVARCHAR(20),@intMeterNumber) 
 				RAISERROR(@Msg, 2 ,16,1)
 			END
 
