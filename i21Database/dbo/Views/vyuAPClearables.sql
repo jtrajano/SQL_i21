@@ -832,6 +832,8 @@ UNION ALL
 	JOIN tblICItem I ON I.intItemId = V.intItemId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
+	LEFT JOIN vyuAPVendor Vendor
+			ON Vendor.intEntityId = V.intEntityVendorId
 	LEFT JOIN (
 		SELECT DISTINCT 
 			  Header.strBillId
@@ -897,6 +899,9 @@ UNION ALL
 		,Bill.ysnPaid
 		,Bill.strTerm
 		,Bill.intShipFromEntityId
+		,Vendor.strVendorId
+		,Vendor.strName
+
 GO
 
 
