@@ -98,13 +98,14 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 			,CASE WHEN strType = 'From Delivery Sheet' 
 					OR strType = 'From Scale'  
 					OR strType = 'From Transfer' 
-					OR strType = 'From Inventory Adjustment' THEN
-				dblUnits
+					OR (strType = 'From Inventory Adjustment' AND dblUnits > 0 )THEN
+						dblUnits
 				ELSE 0 END AS dblInQty
 			,CASE WHEN strType = 'Reduced By Inventory Shipment' 
 					OR strType = 'Settlement' 
-					OR strType = 'Transfer'  THEN
-				ABS(dblUnits)
+					OR strType = 'Transfer'  
+					OR (strType = 'From Inventory Adjustment' AND dblUnits < 0 )THEN
+						ABS(dblUnits)
 				WHEN  strType = 'Reverse Settlement'  THEN
 					ABS(dblUnits) * -1
 				ELSE 0 END AS dblOutQty
