@@ -2120,5 +2120,25 @@ WHERE
     ARID.[intItemId] IS NULL
     OR ARID.[intItemId] = 0
 
+UPDATE ID
+SET dblTaxesAddToCost       = IDD.dblTaxesAddToCost
+  , dblBaseTaxesAddToCost   = IDD.dblBaseTaxesAddToCost
+FROM #ARPostInvoiceDetail ID
+INNER JOIN (
+    SELECT dblTaxesAddToCost       = SUM(TAXES.dblTaxesAddToCost)
+         , dblBaseTaxesAddToCost   = SUM(TAXES.dblBaseTaxesAddToCost)
+         , intInvoiceDetailId      = ID.intInvoiceDetailId
+    FROM #ARPostInvoiceDetail ID
+    CROSS APPLY (
+        SELECT dblTaxesAddToCost        = [dbo].fnRoundBanker(IDT.dblRate * ID.dblQtyShipped, [dbo].[fnARGetDefaultDecimal]())
+            , dblBaseTaxesAddToCost    = [dbo].fnRoundBanker(IDT.dblRate * ID.dblQtyShipped * ISNULL(ID.dblCurrencyExchangeRate, 1), [dbo].[fnARGetDefaultDecimal]())
+        FROM tblARInvoiceDetailTax IDT
+        INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
+        WHERE TC.ysnAddToCost = 1
+        AND IDT.intInvoiceDetailId = ID.intInvoiceDetailId    
+    ) TAXES
+    GROUP BY ID.intInvoiceDetailId
+) IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
+
 
 RETURN 1

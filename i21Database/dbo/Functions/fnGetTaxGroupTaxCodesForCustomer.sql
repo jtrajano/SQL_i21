@@ -48,6 +48,7 @@ RETURNS @returntable TABLE
 	,[intUnitMeasureId]				INT NULL
 	,[strUnitMeasure]				NVARCHAR(30)
 	,[strTaxClass]					NVARCHAR(100)
+	,[ysnAddToCost]					BIT
 )
 AS
 BEGIN
@@ -90,6 +91,7 @@ BEGIN
 		,[intUnitMeasureId]
 		,[strUnitMeasure]
 		,[strTaxClass]
+		,[ysnAddToCost]
 		)
 	SELECT
 		 [intTransactionDetailTaxId]	= 0
@@ -116,6 +118,7 @@ BEGIN
 		,[intUnitMeasureId]				= R.[intUnitMeasureId]
 		,[strUnitMeasure]				= R.[strUnitMeasure]
 		,[strTaxClass]					= TCLASS.[strTaxClass]
+		,[ysnAddToCost]					= ISNULL(TC.[ysnAddToCost], 0)
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN
