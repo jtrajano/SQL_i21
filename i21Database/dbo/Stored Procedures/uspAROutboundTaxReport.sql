@@ -200,7 +200,7 @@ ELSE
 --END
 
 --CREATE TABLE #STATUSCODES ([intAccountStatusId] INT PRIMARY KEY, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS)
-DECLARE @STATUSCODES AS TABLE([intAccountStatusId] INT PRIMARY KEY, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS, [intEntityCustomerId] INT)
+DECLARE @STATUSCODES AS TABLE([intAccountStatusId] INT, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS, [intEntityCustomerId] INT)
 
 IF (@conditionAccountStatus IS NOT NULL AND UPPER(@conditionAccountStatus) = 'BETWEEN' AND ISNULL(@strAccountStatusFrom, '') <> '')
     BEGIN
