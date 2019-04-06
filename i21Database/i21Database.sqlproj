@@ -7514,6 +7514,7 @@
     <Build Include="dbo\Stored Procedures\uspARPOSUpdateCashPaymentReceived.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryShipmentReceipt.sql" />
     <Build Include="dbo\Views\vyuGRBasisSettleStorage.sql" />
+    <Build Include="dbo\Functions\fnARParseReportParameter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
