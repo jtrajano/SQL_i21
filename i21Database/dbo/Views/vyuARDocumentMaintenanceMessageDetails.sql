@@ -5,12 +5,14 @@ SELECT intDocumentMaintenanceId
 	 , strTitle
 	 , strHeader	= ISNULL(Header,'') COLLATE Latin1_General_CI_AS
 	 , strFooter	= ISNULL(Footer,'') COLLATE Latin1_General_CI_AS
+	 , strMessageHtml
 FROM (
 	SELECT intDocumentMaintenanceId
 		 , strCode
 		 , strTitle
 		 , strHeaderFooter
 		 , strMessage
+		 , strMessageHtml
 	FROM vyuARDocumentMaintenanceMessage
 ) tblARMessages
 PIVOT (

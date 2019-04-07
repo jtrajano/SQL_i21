@@ -255,7 +255,8 @@ FROM (
 		FROM @JsonTransformed B  
 		WHERE  B.[intRowId] = A.[intRowId] - 1
 		AND   
-		1 = CASE WHEN ISNULL(A.[strAction], '') IN ('Created', 'Updated', 'Deleted')  AND ISNULL(B.[strAction], '') = 'ARRAY' THEN 1  ELSE 0  END  AND ISNULL(A.[ysnField], '') = ''  
+		1 = --CASE WHEN ISNULL(A.[strAction], '') IN ('Created', 'Updated', 'Deleted')  AND 
+		CASE WHEN ISNULL(B.[strAction], '') = 'ARRAY' THEN 1  ELSE 0  END  AND ISNULL(A.[ysnField], '') = ''  
 		ORDER BY B.[intRowId] DESC
 	) C   
  ), SecondLayer AS (

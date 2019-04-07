@@ -29,7 +29,8 @@ BEGIN
 		SELECT TOP 1 1
 		FROM tblAPVoucherPayable A
 		INNER JOIN @voucherPayable C
-			ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+			ON C.intTransactionType = A.intTransactionType
+			AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
 			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
@@ -49,6 +50,7 @@ BEGIN
 	USING (
 		SELECT
 			[intVoucherPayableId]				=	A.intVoucherPayableId
+			,[intTransactionType]				=	A.intTransactionType
 			,[intEntityVendorId]				=	A.intEntityVendorId
 			,[strVendorId]						=	vendor.strVendorId
 			,[strName]							=	entity.strName
@@ -264,7 +266,8 @@ BEGIN
 	 ON (1=0)
 	 WHEN NOT MATCHED THEN
 	INSERT (
-		[intEntityVendorId]				
+		[intEntityVendorId]		
+		,[intTransactionType]		
 		,[strVendorId]					
 		,[strName]						
 		,[intLocationId]					
@@ -332,7 +335,8 @@ BEGIN
 		,[ysnReturn]			
 	)
 	VALUES (
-		[intEntityVendorId]				
+		[intEntityVendorId]		
+		,[intTransactionType]		
 		,[strVendorId]					
 		,[strName]						
 		,[intLocationId]					

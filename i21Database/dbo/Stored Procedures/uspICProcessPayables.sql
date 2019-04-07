@@ -1,4 +1,4 @@
-ALTER PROCEDURE dbo.uspICProcessPayables
+CREATE PROCEDURE dbo.uspICProcessPayables
 	@intReceiptId INT = NULL,
 	@intShipmentId INT = NULL,
 	@ysnPost BIT,
@@ -377,7 +377,7 @@ BEGIN
 				,VoucherPayable.[intShipViaId]						
 				,[intTermId]						
 				,VoucherPayable.[strBillOfLading]					
-
+				,VoucherPayable.ysnReturn
 			FROM tblICInventoryShipmentCharge ShipmentCharge 
 			INNER JOIN tblICInventoryShipment Shipment 
 				ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId

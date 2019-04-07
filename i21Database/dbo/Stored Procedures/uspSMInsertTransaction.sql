@@ -42,7 +42,7 @@ BEGIN
 		END
 
 
-		SELECT @output
+		--SELECT @output
 
 
 END

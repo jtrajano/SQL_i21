@@ -827,8 +827,8 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = I.[intItemAccountId]
-    ,[dblDebit]                     = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
-    ,[dblCredit]                    = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblDebit]                     = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + ISNULL(I.[dblBaseTaxesAddToCost], 0) END
+    ,[dblCredit]                    = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblBaseLineItemGLAmount] + ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
     ,[dblCreditUnit]                = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
     ,[strDescription]               = I.[strDescription]
@@ -849,10 +849,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblDebitReport]               = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblCreditForeign]             = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
-    ,[dblCreditReport]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblDebitForeign]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
+    ,[dblDebitReport]               = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
+    ,[dblCreditForeign]             = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
@@ -1232,8 +1232,8 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = I.[intSalesAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
-    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + ISNULL(I.[dblBaseTaxesAddToCost], 0) END
+    ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] + ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
     ,[dblCreditUnit]                = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
     ,[strDescription]               = I.[strDescription]
@@ -1254,10 +1254,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
-    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash')  THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
+    ,[dblDebitForeign]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
+    ,[dblDebitReport]               = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
+    ,[dblCreditForeign]             = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash')  THEN I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
@@ -1436,8 +1436,8 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = I.[intSalesAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseLineItemGLAmount] ELSE @ZeroDecimal END
-    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseLineItemGLAmount] + ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + ISNULL(I.[dblBaseTaxesAddToCost], 0) END
     ,[dblDebitUnit]                 = @ZeroDecimal
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
@@ -1458,10 +1458,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
-    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblLineItemGLAmount] ELSE @ZeroDecimal END
-    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0)ELSE @ZeroDecimal END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
@@ -1534,8 +1534,8 @@ SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = I.[intSalesAccountId]
-    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
-    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] END
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + ISNULL(I.[dblBaseTaxesAddToCost], 0) END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + ISNULL(I.[dblBaseTaxesAddToCost], 0) END
     ,[dblDebitUnit]                 = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
     ,[dblCreditUnit]                = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
     ,[strDescription]               = I.[strDescription]
@@ -1556,10 +1556,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
-    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] END
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + ISNULL(I.[dblTaxesAddToCost], 0) END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
@@ -1889,5 +1889,103 @@ LEFT OUTER JOIN
        AND I.[intCompanyLocationId] = IA.[intLocationId]
 WHERE
     I.[dblBaseDiscountAmount] <> @ZeroDecimal
+
+INSERT #ARInvoiceGLEntries
+    ([dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[strDocument]
+    ,[strComments]
+    ,[strSourceDocumentId]
+    ,[intSourceLocationId]
+    ,[intSourceUOMId]
+    ,[dblSourceUnitDebit]
+    ,[dblSourceUnitCredit]
+    ,[intCommodityId]
+    ,[intSourceEntityId]
+    ,[ysnRebuild])
+SELECT
+     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = TAX.intSalesTaxAccountId
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseTaxesAddToCost] ELSE @ZeroDecimal END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN I.[dblBaseTaxesAddToCost] ELSE @ZeroDecimal END
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = 'Tax Exempt Amount'
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = @POSTDESC + I.[strTransactionType]
+    ,[intJournalLineNo]             = I.[intInvoiceId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblTaxesAddToCost] ELSE @ZeroDecimal END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblTaxesAddToCost] ELSE @ZeroDecimal END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN I.[dblTaxesAddToCost] ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN I.[dblTaxesAddToCost] ELSE @ZeroDecimal END
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]
+    ,[strDocument]                  = NULL
+    ,[strComments]                  = NULL
+    ,[strSourceDocumentId]          = NULL
+    ,[intSourceLocationId]          = NULL
+    ,[intSourceUOMId]               = NULL
+    ,[dblSourceUnitDebit]           = NULL
+    ,[dblSourceUnitCredit]          = NULL
+    ,[intCommodityId]               = NULL
+    ,[intSourceEntityId]            = NULL
+    ,[ysnRebuild]                   = NULL
+FROM
+    #ARPostInvoiceDetail I
+CROSS APPLY (
+    SELECT TOP 1 IDT.intSalesTaxAccountId
+    FROM tblARInvoiceDetailTax IDT
+    INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
+    WHERE IDT.intInvoiceDetailId = I.intInvoiceDetailId
+      AND TC.ysnAddToCost = 1
+) TAX
+WHERE
+    I.[dblBaseTaxesAddToCost] <> @ZeroDecimal
 
 RETURN 1 

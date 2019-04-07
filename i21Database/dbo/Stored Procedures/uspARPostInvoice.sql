@@ -216,6 +216,8 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[dblBaseMaintenanceAmount]             NUMERIC(18,6)   NULL
     ,[dblMaintenanceGLAmount]               NUMERIC(18,6)   NULL
     ,[dblBaseMaintenanceGLAmount]           NUMERIC(18,6)   NULL
+	,[dblTaxesAddToCost]					NUMERIC(18,6)   NULL
+	,[dblBaseTaxesAddToCost]				NUMERIC(18,6)   NULL
     ,[ysnTankRequired]                      BIT             NULL
     ,[ysnLeaseBilling]                      BIT             NULL
     ,[intSiteId]                            INT             NULL
@@ -371,6 +373,8 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[dblBaseMaintenanceAmount]             NUMERIC(18,6)   NULL
     ,[dblMaintenanceGLAmount]               NUMERIC(18,6)   NULL
     ,[dblBaseMaintenanceGLAmount]           NUMERIC(18,6)   NULL
+	,[dblTaxesAddToCost]					NUMERIC(18,6)   NULL
+	,[dblBaseTaxesAddToCost]				NUMERIC(18,6)   NULL
     ,[ysnTankRequired]                      BIT             NULL
     ,[ysnLeaseBilling]                      BIT             NULL
     ,[intSiteId]                            INT             NULL

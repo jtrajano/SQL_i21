@@ -486,10 +486,10 @@ BEGIN CATCH
 	BEGIN
 		ROLLBACK TRANSACTION
 	END
-	ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
-	BEGIN
-		ROLLBACK TRANSACTION  @SavePoint
-	END
+	-- ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
+	-- BEGIN
+	-- 	ROLLBACK TRANSACTION  @SavePoint
+	-- END
 
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
