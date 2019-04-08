@@ -179,7 +179,7 @@ BEGIN
 												)
 											))
 
-				IF(@strRegisterClassName IN ('RADIANT', 'PASSPORT', 'SAPPHIRE'))
+				IF(@strRegisterClassName IN ('RADIANT', 'PASSPORT', 'SAPPHIRE', 'SAPPHIRE/COMMANDER'))
 					BEGIN
 						IF(@strFilePrefix = 'vtransset-tlog')
 							BEGIN

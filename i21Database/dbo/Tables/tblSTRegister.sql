@@ -3,7 +3,7 @@
 	[intRegisterId] INT NOT NULL IDENTITY, 
     [intStoreId] INT NOT NULL, 
     [strRegisterName] NVARCHAR(15) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strRegisterClass] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strRegisterClass] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
     [ysnRegisterDataLoad] BIT NULL, 
     [ysnCheckoutLoad] BIT NULL, 
     [ysnPricebookBuild] BIT NULL, 

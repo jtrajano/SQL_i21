@@ -7525,6 +7525,7 @@
     <None Include="Scripts\Post-Deployment\ST\29_FileFieldMapping_Commander_Summary.sql" />
     <None Include="Scripts\Post-Deployment\ST\30_FileFieldMapping_Commander_Tax.sql" />
     <Build Include="dbo\Functions\fnARParseReportParameter.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdateAfterSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
