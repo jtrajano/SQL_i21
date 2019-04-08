@@ -202,13 +202,18 @@ FROM	dbo.tblCMBankTransaction CHK
 		
 		) Payee
 		OUTER APPLY (
-			SELECT CASE	
+			SELECT 
+				CASE WHEN PYMT.ysnOverrideCheckPayee = 1 THEN 
+					PYMT.strOverridePayee
+				ELSE					
+			CASE	
 				WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
 					dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
 				ELSE 
 					dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
-										
-			END Value
+			END 
+			END
+			Value
 		)Address
 		OUTER APPLY(
 			SELECT CASE 
