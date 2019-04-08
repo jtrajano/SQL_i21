@@ -358,6 +358,10 @@ BEGIN
 			FROM tblSMPaymentMethod
 			WHERE strPaymentMethod = 'Debit Memos and Payments'
 					
+			UPDATE tblARInvoice
+			SET  ysnReturned = 1
+				,ysnRefundProcessed = 1
+			WHERE intInvoiceId = @intNewCreditMemoId
 
 			UPDATE tblARPOS
 			SET
