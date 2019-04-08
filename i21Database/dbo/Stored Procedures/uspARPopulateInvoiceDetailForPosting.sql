@@ -116,6 +116,7 @@ INSERT #ARPostInvoiceHeader
     ,[ysnForApproval]
     ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]
@@ -265,6 +266,7 @@ SELECT
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
     ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
+    ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = @OneDecimal THEN @OneBit ELSE @ZeroBit END)
 
     ,[intInvoiceDetailId]               = NULL
@@ -462,6 +464,7 @@ INSERT #ARPostInvoiceHeader
     ,[ysnForApproval]
     ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]
@@ -611,6 +614,7 @@ SELECT
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
     ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
+    ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
 
     ,[intInvoiceDetailId]               = NULL
@@ -794,6 +798,7 @@ INSERT #ARPostInvoiceHeader
     ,[ysnForApproval]
     ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]
@@ -943,6 +948,7 @@ SELECT
     ,[ysnForApproval]                   = (CASE WHEN FAT.[intTransactionId] IS NOT NULL THEN @OneBit ELSE @ZeroBit END)
     ,[ysnProvisionalWithGL]             = (CASE WHEN ARI.[strType] = 'Provisional' THEN @ImpactForProvisional ELSE ISNULL(ARI.[ysnProvisionalWithGL], @ZeroBit) END)
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
+    ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
 
     ,[intInvoiceDetailId]               = NULL
@@ -1125,6 +1131,7 @@ INSERT #ARPostInvoiceDetail
     ,[ysnForApproval]
     ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]
@@ -1274,6 +1281,7 @@ SELECT
     ,[ysnForApproval]                   = ARI.[ysnForApproval]
     ,[ysnProvisionalWithGL]             = ARI.[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
@@ -1477,6 +1485,7 @@ INSERT #ARPostInvoiceDetail
     ,[ysnForApproval]
     ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]
@@ -1626,6 +1635,7 @@ SELECT
     ,[ysnForApproval]                   = ARI.[ysnForApproval]
     ,[ysnProvisionalWithGL]             = ARI.[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
@@ -1882,6 +1892,7 @@ INSERT #ARPostInvoiceDetail
     ,[ysnForApproval]
     ,[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]
@@ -2027,6 +2038,7 @@ SELECT
     ,[ysnForApproval]                   = ARI.[ysnForApproval]
     ,[ysnProvisionalWithGL]             = ARI.[ysnProvisionalWithGL]
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
+    ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
