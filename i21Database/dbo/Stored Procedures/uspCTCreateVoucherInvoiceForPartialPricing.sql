@@ -336,6 +336,8 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
+						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 1 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
 						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
 
 						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
@@ -368,6 +370,8 @@ BEGIN TRY
 						END
 
 						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+
+						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 					END
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
