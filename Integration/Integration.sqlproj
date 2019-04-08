@@ -470,8 +470,8 @@
     <None Include="Scripts\IC\uspICDCCommoditySetupAg.sql" />
     <None Include="Scripts\IC\uspICDCBeginInventoryGr.sql" />
     <None Include="Scripts\MB\uspMBDCMeterAccountMigration.sql" />
-    <None Include="dbo\Stored Procedures\uspSMImportTaxGroup.sql" />
-    <None Include="dbo\Stored Procedures\uspSMImportTaxClass.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMImportTaxGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMImportTaxClass.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportCreateInitialScaleSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
