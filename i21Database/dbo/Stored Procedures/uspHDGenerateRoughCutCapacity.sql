@@ -54,6 +54,7 @@ with booked as (
 		intAgentEntityId = b.intAssignedToEntity
 		,a.intTicketId
 		,dblHours = sum(a.intHours)
+		,dblEstimatedHours = sum(a.dblEstimatedHours)
 		,intDate = convert(int, convert(nvarchar(8), a.dtmDate, 112))
 	from
 		tblHDTicketHoursWorked a, tblHDTicket b
@@ -65,6 +66,7 @@ with booked as (
 		,a.intTicketId
 		,a.dtmDate
 ),
+/*
 estimate as (
 	select
 		a.intAssignedToEntity
@@ -78,6 +80,7 @@ estimate as (
 		a.dtmDueDate is not null
 		and convert(int, convert(nvarchar(8), a.dtmDueDate, 112)) between @intDateFrom and @intDateTo
 ),
+*/
 planed as (
 	select
 		a.intTicketId
@@ -187,18 +190,18 @@ INSERT INTO tblHDRoughCountCapacity
 						,dblPlanEleventhWeek = (select sum(planed.dblHours) from planed where planed.intAssignedToEntity = b.intAssignedToEntity and planed.intTicketId = b.intTicketId and planed.intDate between @intEleventhWeekDateFrom and @intEleventhWeekDateTo)
 						,dblPlanTwelfthWeek = (select sum(planed.dblHours) from planed where planed.intAssignedToEntity = b.intAssignedToEntity and planed.intTicketId = b.intTicketId and planed.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)
 						
-						,dblEstimateFirstWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intFirstWeekDateFrom and @intFirstWeekDateTo)
-						,dblEstimateSecondWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intSecondWeekDateFrom and @intSecondWeekDateTo)
-						,dblEstimateThirdWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intThirdWeekDateFrom and @intThirdWeekDateTo)
-						,dblEstimateForthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intFourthWeekDateFrom and @intFourthWeekDateTo)
-						,dblEstimateFifthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intFifthWeekDateFrom and @intFifthWeekDateTo)
-						,dblEstimateSixthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intSixthWeekDateFrom and @intSixthWeekDateTo)
-						,dblEstimateSeventhWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intSeventhWeekDateFrom and @intSeventhWeekDateTo)
-						,dblEstimateEighthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intEighthWeekDateFrom and @intEighthWeekDateTo)
-						,dblEstimateNinthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intNinthWeekDateFrom and @intNinthWeekDateTo)
-						,dblEstimateTenthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intTenthWeekDateFrom and @intTenthWeekDateTo)
-						,dblEstimateEleventhWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intEleventhWeekDateFrom and @intEleventhWeekDateTo)
-						,dblEstimateTwelfthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)
+						,dblEstimateFirstWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intFirstWeekDateFrom and @intFirstWeekDateTo)
+						,dblEstimateSecondWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intSecondWeekDateFrom and @intSecondWeekDateTo)
+						,dblEstimateThirdWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intThirdWeekDateFrom and @intThirdWeekDateTo)
+						,dblEstimateForthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intFourthWeekDateFrom and @intFourthWeekDateTo)
+						,dblEstimateFifthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intFifthWeekDateFrom and @intFifthWeekDateTo)
+						,dblEstimateSixthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intSixthWeekDateFrom and @intSixthWeekDateTo)
+						,dblEstimateSeventhWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intSeventhWeekDateFrom and @intSeventhWeekDateTo)
+						,dblEstimateEighthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intEighthWeekDateFrom and @intEighthWeekDateTo)
+						,dblEstimateNinthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intNinthWeekDateFrom and @intNinthWeekDateTo)
+						,dblEstimateTenthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intTenthWeekDateFrom and @intTenthWeekDateTo)
+						,dblEstimateEleventhWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intEleventhWeekDateFrom and @intEleventhWeekDateTo)
+						,dblEstimateTwelfthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)
 						
 						,dblFirstWeek = (select sum(booked.dblHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intFirstWeekDateFrom and @intFirstWeekDateTo)
 						,dblSecondWeek = (select sum(booked.dblHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intSecondWeekDateFrom and @intSecondWeekDateTo)
@@ -243,18 +246,18 @@ INSERT INTO tblHDRoughCountCapacity
 						,dblPlanEleventhWeek = (select sum(planed.dblHours) from planed where planed.intAssignedToEntity = b.intAssignedToEntity and planed.intTicketId = b.intTicketId and planed.intDate between @intEleventhWeekDateFrom and @intEleventhWeekDateTo)
 						,dblPlanTwelfthWeek = (select sum(planed.dblHours) from planed where planed.intAssignedToEntity = b.intAssignedToEntity and planed.intTicketId = b.intTicketId and planed.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)
 						
-						,dblEstimateFirstWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intFirstWeekDateFrom and @intFirstWeekDateTo)
-						,dblEstimateSecondWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intSecondWeekDateFrom and @intSecondWeekDateTo)
-						,dblEstimateThirdWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intThirdWeekDateFrom and @intThirdWeekDateTo)
-						,dblEstimateForthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intFourthWeekDateFrom and @intFourthWeekDateTo)
-						,dblEstimateFifthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intFifthWeekDateFrom and @intFifthWeekDateTo)
-						,dblEstimateSixthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intSixthWeekDateFrom and @intSixthWeekDateTo)
-						,dblEstimateSeventhWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intSeventhWeekDateFrom and @intSeventhWeekDateTo)
-						,dblEstimateEighthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intEighthWeekDateFrom and @intEighthWeekDateTo)
-						,dblEstimateNinthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intNinthWeekDateFrom and @intNinthWeekDateTo)
-						,dblEstimateTenthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intTenthWeekDateFrom and @intTenthWeekDateTo)
-						,dblEstimateEleventhWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intEleventhWeekDateFrom and @intEleventhWeekDateTo)
-						,dblEstimateTwelfthWeek = (select sum(estimate.dblHours) from estimate where estimate.intAssignedToEntity = b.intAssignedToEntity and estimate.intTicketId = b.intTicketId and estimate.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)
+						,dblEstimateFirstWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intFirstWeekDateFrom and @intFirstWeekDateTo)
+						,dblEstimateSecondWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intSecondWeekDateFrom and @intSecondWeekDateTo)
+						,dblEstimateThirdWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intThirdWeekDateFrom and @intThirdWeekDateTo)
+						,dblEstimateForthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intFourthWeekDateFrom and @intFourthWeekDateTo)
+						,dblEstimateFifthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intFifthWeekDateFrom and @intFifthWeekDateTo)
+						,dblEstimateSixthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intSixthWeekDateFrom and @intSixthWeekDateTo)
+						,dblEstimateSeventhWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intSeventhWeekDateFrom and @intSeventhWeekDateTo)
+						,dblEstimateEighthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intEighthWeekDateFrom and @intEighthWeekDateTo)
+						,dblEstimateNinthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intNinthWeekDateFrom and @intNinthWeekDateTo)
+						,dblEstimateTenthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intTenthWeekDateFrom and @intTenthWeekDateTo)
+						,dblEstimateEleventhWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intEleventhWeekDateFrom and @intEleventhWeekDateTo)
+						,dblEstimateTwelfthWeek = (select sum(booked.dblEstimatedHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)
 						
 						,dblFirstWeek = (select sum(booked.dblHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intFirstWeekDateFrom and @intFirstWeekDateTo)
 						,dblSecondWeek = (select sum(booked.dblHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intSecondWeekDateFrom and @intSecondWeekDateTo)

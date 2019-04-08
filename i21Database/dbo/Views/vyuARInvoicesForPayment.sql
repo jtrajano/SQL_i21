@@ -227,7 +227,8 @@ FROM (
 			AND strPaymentMethod = 'On Account'
 		) ONACCOUNT
 		WHERE ARI.[ysnPosted] = 1
-			AND ysnCancelled = 0			
+			AND ISNULL(ARI.ysnCancelled, 0) = 0
+			AND ISNULL(ARI.ysnRefundProcessed, 0) = 0
 			AND strTransactionType != 'Credit Note'
 			AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
 	
