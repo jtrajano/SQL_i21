@@ -91,7 +91,7 @@ FROM (
 		,voucher.intEntityVendorId
 		,voucher.intTransactionType
 		,paySched.ysnReadyForPayment
-		,voucher.dtmDueDate
+		,paySched.dtmDueDate
 		,voucher.dtmDate
 		,voucher.dtmBillDate
 		,voucher.intAccountId
@@ -152,4 +152,5 @@ FROM (
 	AND voucher.intTransactionType IN (1)
 	AND voucher.intTransactionReversed IS NULL
 	AND voucher.ysnIsPaymentScheduled = 1
+	AND paySched.ysnPaid = 0
 ) forPayment
