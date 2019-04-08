@@ -1827,7 +1827,7 @@ BEGIN
 				, (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =c.intFutureMarketId  ORDER BY 1 DESC) intFutureMonthId
 				, c.intFutureMarketId
 				, fm.strFutMarketName
-				, dbo.fnCTConvertQuantityToTargetCommodityUOM(cu2.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,SUM(ISNULL(p.dblAverageCost, 0))) dblNotLotTrackedPrice
+				, ISNULL(dbo.fnICGetMovingAverageCost(i.intItemId, s.intItemLocationId, (select  max(intInventoryTransactionId) from tblICInventoryTransaction where dbo.fnDateLessThanEquals(dtmDate, @dtmTransactionDateUpTo) = 1)), 0) dblNotLotTrackedPrice
 				, cu2.intCommodityUnitMeasureId intToPriceUOM
 				, cu3.intCommodityUnitMeasureId intFutMarketCurrency
 			FROM vyuRKGetInventoryValuation s
@@ -1849,6 +1849,7 @@ BEGIN
 				AND ysnInTransit = 0
 			GROUP BY i.intItemId
 					,i.strItemNo
+					,s.intItemLocationId
 					,s.intLocationId
 					,strLocationName
 					,strFutMarketName
