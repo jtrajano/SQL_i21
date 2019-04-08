@@ -184,7 +184,7 @@ BEGIN
 			,[strWeightUOM]						=	weightUOM.strUnitMeasure
 			,[intCostCurrencyId]				=	CASE WHEN A.intCostCurrencyId > 0 THEN A.intCostCurrencyId ELSE A.intCurrencyId END
 			,[strCostCurrency]					=	ISNULL(costCur.strCurrency, tranCur.strCurrency)
-			,[dblTax]							=	0
+			,[dblTax]							=	A.dblTax
 			,[dblDiscount]						=	A.dblDiscount
 			,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
 			,[strRateType]						=	exRates.strCurrencyExchangeRateType
