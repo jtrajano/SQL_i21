@@ -101,7 +101,7 @@ SELECT DISTINCT
 	,[strMiscDescription]		=	C.strDescription
 	,[strItemNo]				=	C.strItemNo
 	,[strDescription]			=	C.strDescription
-	,[intPurchaseTaxGroupId]	=	NULL
+	,[intPurchaseTaxGroupId]	=	B.intTaxGroupId
 	,[dblOrderQty]				=	CASE WHEN CD.intContractDetailId > 0 THEN ROUND(CD.dblQuantity,2) ELSE B.dblOpenReceive END
 	,[dblPOOpenReceive]			=	B.dblReceived
 	,[dblOpenReceive]			=	B.dblOpenReceive
@@ -302,7 +302,7 @@ SELECT DISTINCT
 		,[strMiscDescription]						=	A.strMiscDescription
 		,[strItemNo]								=	A.strItemNo
 		,[strDescription]							=	A.strDescription
-		,[intPurchaseTaxGroupId]					=	NULL
+		,[intPurchaseTaxGroupId]					=	A.intTaxGroupId
 		,[dblOrderQty]								=	A.dblOrderQty
 		,[dblPOOpenReceive]							=	A.dblPOOpenReceive
 		,[dblOpenReceive]							=	A.dblOpenReceive
