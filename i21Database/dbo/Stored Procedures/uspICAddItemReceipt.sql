@@ -493,6 +493,7 @@ BEGIN
 				,intSubBookId			= IntegrationData.intSubBookId
 				,dtmDateModified		= GETDATE()
 				,intModifiedByUserId 	= @intUserId
+				,strDataSource			= IntegrationData.strReceiptType
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -534,6 +535,7 @@ BEGIN
 				,intSubBookId
 				,dtmDateCreated
 				,intCreatedByUserId
+				,strDataSource
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -575,6 +577,7 @@ BEGIN
 				/*intSubBookId*/				,IntegrationData.intSubBookId 
 				,GETDATE()
 				,@intUserId
+				/*strDataSource*/				,IntegrationData.strReceiptType
 			)
 		;
 				
