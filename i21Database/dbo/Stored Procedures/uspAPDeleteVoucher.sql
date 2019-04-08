@@ -12,6 +12,11 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+
+	DECLARE @transCount INT;
+	SET @transCount = @@TRANCOUNT;
+	IF @transCount = 0 BEGIN TRANSACTION
+
 	DECLARE @UserEntityID INT
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
 	
@@ -24,6 +29,14 @@ BEGIN TRY
 
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
+	
+	--clear original transaction if this is a reversal
+	UPDATE A
+		SET A.intTransactionReversed = NULL
+	FROM tblAPBill A
+	INNER JOIN tblAPBill B
+		ON A.intTransactionReversed = B.intBillId
+	WHERE A.intBillId = @intBillId
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
@@ -50,6 +63,8 @@ BEGIN TRY
 		,@changeDescription	= ''								-- Description
 		,@fromValue			= ''								-- Previous Value
 		,@toValue			= ''								-- New Value
+
+	IF @transCount = 0 COMMIT TRANSACTION
 
 END TRY
 BEGIN CATCH	
