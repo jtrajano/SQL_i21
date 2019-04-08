@@ -743,4 +743,21 @@ GO
 GO
 
 
+--=====================================================================================================================================
+-- 	UPDATE INCO SHIP TERM TO FREIGHT TERM
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN UPDATE'
+GO
+
+UPDATE tblSMControl SET strControlId = 'cboFreightTerm', strControlName = 'Freight Term'
+					WHERE strControlType = 'Combo Box' AND strControlId = 'cboINCOShipTerm' 
+					AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strScreenName = 'Contract' AND strModule = 'Contract Management')
+
+GO
+	PRINT N'END UPDATE'
+GO
+
+
 PRINT('Contract 1_MasterTables End')
