@@ -12,7 +12,7 @@ RETURNS TABLE AS RETURN
 			voucher.intBillId
 			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
-			,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
+			,1 AS intPaymentId--DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
 			,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0))
 					OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempPayment
 			,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempWithheld ELSE voucher.dblTempWithheld END), 0))
@@ -27,14 +27,15 @@ RETURNS TABLE AS RETURN
 		AND 1 = (CASE WHEN voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 0 THEN 0 ELSE 1 END) --do not include basis/prepaid w/o actual payment
 		UNION ALL
 		--BASIS AND PREPAID WITH NO ACTUAL PAYMENT YET
+		--ALL PAYMENT FOR BASIS/PREPAID SHOULD BE IN A SINGLE PAYMENT
 		SELECT
 			voucher.intBillId
 			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
-			,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
-			,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0))
+			,2--DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
+			,SUM(ISNULL((voucher.dblTempPayment), 0))
 					OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempPayment
-			,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempWithheld ELSE voucher.dblTempWithheld END), 0))
+			,SUM(ISNULL((voucher.dblTempWithheld), 0))
 					OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempWithheld
 			,voucher.strTempPaymentInfo
 		FROM tblAPBill voucher
@@ -51,7 +52,7 @@ RETURNS TABLE AS RETURN
 			voucher.intBillId
 			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
-			,ROW_NUMBER() OVER(ORDER BY voucher.intEntityVendorId DESC) AS intPaymentId
+			,3 --ROW_NUMBER() OVER(ORDER BY voucher.intEntityVendorId DESC) AS intPaymentId
 			,ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) 
 					THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0) AS dblTempPayment
 			,ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) 

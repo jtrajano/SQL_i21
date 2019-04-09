@@ -487,6 +487,7 @@ BEGIN
 			WHERE 
 				voucher.intTransactionType = 2
 			AND payDetail.intPaymentId = A.intPaymentId
+			AND voucher.ysnPrepayHasPayment = 1
 			AND NOT EXISTS
 			(
 				SELECT

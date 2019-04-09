@@ -53,6 +53,7 @@ BEGIN
 		intBillId INT,
 		intPayToAddressId INT,
 		intEntityVendorId INT,
+		ysnPrepay BIT,
 		intPaymentId INT,
 		intPartitionId INT,
 		dblAmountPaid DECIMAL(18,2),
@@ -166,6 +167,7 @@ BEGIN
 		,voucher.dblTempInterest
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
+		,ysnPrepay = CASE WHEN voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 0 THEN 1 ELSE 0 END
 	INTO #tmpPartitionedVouchers
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
 	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
@@ -178,9 +180,9 @@ BEGIN
 
 	--ALL TRANSACTIONS THAT VENDOR IS NOT ONE BILL PER PAYMENT
 	SET @script = 
-	'INSERT INTO #tmpMultiVouchers(intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblAmountPaid, dblWithheld, strPaymentInfo, intPartitionId)
+	'INSERT INTO #tmpMultiVouchers(intBillId, intPayToAddressId, intEntityVendorId, ysnPrepay, intPaymentId, dblAmountPaid, dblWithheld, strPaymentInfo, intPartitionId)
 	SELECT
-		intBillId, intPayToAddressId, intEntityVendorId, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, intPartitionId
+		intBillId, intPayToAddressId, intEntityVendorId, ysnPrepay, intPaymentId, dblTempPayment, dblTempWithheld, strTempPaymentInfo, intPartitionId
 	FROM
 	(
 		SELECT 
@@ -240,6 +242,7 @@ BEGIN
 				[dblExchangeRate]					= 	@rate,
 				[ysnPosted]							= 	0,
 				[dblWithheld]						= 	vouchersPay.dblWithheld,
+				[ysnPrepay]							=	vouchersPay.ysnPrepay, 
 				[intEntityId]						= 	@currentUser,
 				[intConcurrencyId]					= 	0,
 				[strBatchId]						=	@batchId,
@@ -257,6 +260,7 @@ BEGIN
 				vouchersPay.dblAmountPaid,
 				vouchersPay.intPayToAddressId,
 				vouchersPay.intEntityVendorId,
+				vouchersPay.ysnPrepay,
 				vouchersPay.strPaymentInfo,
 				vouchersPay.dblWithheld,
 				vouchersPay.intPartitionId
@@ -283,6 +287,7 @@ BEGIN
 			[dblExchangeRate],
 			[ysnPosted],
 			[dblWithheld],
+			[ysnPrepay],
 			[intEntityId],
 			[intConcurrencyId],
 			[strBatchId]
@@ -305,6 +310,7 @@ BEGIN
 			[dblExchangeRate],
 			[ysnPosted],
 			[dblWithheld],
+			[ysnPrepay],
 			[intEntityId],
 			[intConcurrencyId],
 			[strBatchId]
@@ -344,7 +350,7 @@ BEGIN
 		SELECT 
 			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
 			[intBillId]			=	tmp.intBillId,
-			[intAccountId]		=	vouchers.intAccountId,
+			[intAccountId]		=	CASE WHEN vouchers.ysnPrepayHasPayment = 0 THEN details.intAccountId ELSE vouchers.intAccountId END,
 			[dblDiscount]		=	vouchers.dblTempDiscount,
 			[dblWithheld]		=	vouchers.dblTempWithheld,
 			[dblAmountDue]		=	vouchers.dblAmountDue,
@@ -354,6 +360,10 @@ BEGIN
 		FROM tblAPBill vouchers
 		INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
 		INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId
+		CROSS APPLY
+		(
+			SELECT TOP 1 intAccountId, intBillId FROM tblAPBillDetail dtls WHERE dtls.intBillId = vouchers.intBillId
+		) details
 
 	END
 
