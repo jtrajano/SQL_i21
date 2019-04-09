@@ -325,33 +325,26 @@ BEGIN
 	SELECT	DISTINCT 
 			i2p.intItemId
 			,i2p.intItemLocationId
-	FROM	@ItemsToPost i2p INNER JOIN tblICItemStock i
-				on i2p.intItemId = i.intItemId
-				AND i2p.intItemLocationId = i.intItemLocationId			
-	WHERE	dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId) <> @AVERAGECOST
-			AND i.dblUnitOnHand = 0 
+	FROM	@ItemsToPost i2p 
+	WHERE	ISNULL(dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId), 0) <> @AVERAGECOST
 
-	--SELECT	TOP 1 
-	--		@intInventoryTransactionId	= intInventoryTransactionId
-	--		,@intCurrencyId				= intCurrencyId
-	--		,@dtmDate					= dtmDate
-	--		--,@dblExchangeRate			= dblExchangeRate
-	--		,@intTransactionId			= intTransactionId
-	--		,@strTransactionId			= strTransactionId
-	--		,@strTransactionForm		= strTransactionForm
-	--FROM	dbo.tblICInventoryTransaction
-	--WHERE	strBatchId = @strBatchId
-	--		AND ISNULL(ysnIsUnposted, 0) = 0 
+	DELETE	ZeroList
+	FROM	@ItemsWithZeroStock ZeroList
+			OUTER APPLY (
+				SELECT	dblQty = SUM(ROUND(t.dblQty, 6)) 
+				FROM	tblICInventoryTransaction t
+				WHERE	t.intItemId = ZeroList.intItemId
+						AND t.intItemLocationId = ZeroList.intItemLocationId
+			) currentValuation	
+	WHERE	ISNULL(currentValuation.dblQty, 0) <> 0 
 
 	SELECT	TOP 1 
 			@dtmDate					= i2p.dtmDate
 			,@intTransactionId			= i2p.intTransactionId
 			,@strTransactionId			= i2p.strTransactionId
 			,@intCurrencyId				= i2p.intCurrencyId
-	FROM	@ItemsToPost i2p INNER JOIN tblICItemStock i
-				on i2p.intItemId = i.intItemId
-				AND i2p.intItemLocationId = i.intItemLocationId			
-	WHERE	ROUND(i.dblUnitOnHand, 6) = 0 
+	FROM	@ItemsToPost i2p 
+
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
 	BEGIN 
@@ -421,7 +414,7 @@ BEGIN
 															dbo.fnFormatMessage(
 																dbo.fnICGetErrorMessage(80093) 
 																, i.strItemNo
-																, cl.strLocationName														
+																, CAST(il.strDescription AS NVARCHAR(100)) 
 																, DEFAULT
 																, DEFAULT
 																, DEFAULT
@@ -435,24 +428,21 @@ BEGIN
 				,[intInTransitSourceLocationId]			= @intInTransitSourceLocationId
 				,[intForexRateTypeId]					= @intForexRateTypeId
 				,[dblForexRate]							= @dblForexRate
-		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
-					ON iWithZeroStock.intItemId = iStock.intItemId
-					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId
-				INNER JOIN tblICItem i
+		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItem i
 					ON i.intItemId = iWithZeroStock.intItemId
 				INNER JOIN tblICItemLocation il
 					ON il.intItemId = iWithZeroStock.intItemId
 					AND il.intItemLocationId = iWithZeroStock.intItemLocationId
-				INNER JOIN tblSMCompanyLocation cl
-					ON cl.intCompanyLocationId = il.intLocationId
 				OUTER APPLY (
 					SELECT	floatingValue = SUM(
 								ROUND(t.dblQty * t.dblCost + t.dblValue, 2)
 							)
+							,dblQty = SUM(ROUND(t.dblQty, 6)) 
 					FROM	tblICInventoryTransaction t
 					WHERE	t.intItemId = iWithZeroStock.intItemId
 							AND t.intItemLocationId = iWithZeroStock.intItemLocationId
 				) currentValuation
 		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
+				AND ISNULL(currentValuation.dblQty, 0) = 0 
 	END 
 END 
