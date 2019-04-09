@@ -53,7 +53,8 @@ DECLARE @intStorageScheduleId AS INT
 		,@strWhereFinalizedGrade NVARCHAR(20)
 		,@ysnCustomerStorage BIT
 		,@intContractDetailId INT
-		,@ysnPriceFixation BIT = 0;
+		,@ysnPriceFixation BIT = 0
+		,@ysnAllowInvoiceVoucher BIT = 0;
 
 SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId
@@ -71,7 +72,7 @@ DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38,20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher,@ysnAllowInvoiceVoucher
 FROM @LineItem;
 
 OPEN intListCursor;
@@ -284,7 +285,7 @@ OPEN intListCursor;
 					END
 			END		   
 			-- Attempt to fetch next row from cursor
-			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId,@ysnAllowInvoiceVoucher;
 		END;
 
 CLOSE intListCursor;
