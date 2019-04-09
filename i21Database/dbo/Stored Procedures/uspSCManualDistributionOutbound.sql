@@ -72,13 +72,13 @@ DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38,20);
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher,@ysnAllowInvoiceVoucher
+SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher
 FROM @LineItem;
 
 OPEN intListCursor;
 
 		-- Initial fetch attempt
-		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
+		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId, @ysnAllowInvoiceVoucher;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
