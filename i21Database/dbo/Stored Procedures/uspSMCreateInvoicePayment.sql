@@ -165,6 +165,13 @@ BEGIN
 				  , @intCompanyLocationId	INT = NULL
 				  , @intBankAccountId		INT = NULL
 
+			SELECT TOP 1 @intCompanyLocationId = CL.intCompanyLocationId
+					   , @intUndepositedFundId = CL.intUndepositedFundsId
+					   , @intBankAccountId	   = BA.intBankAccountId
+			FROM tblSMCompanyLocation CL
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			WHERE CL.ysnLocationActive = 1
+
 			--VALIDATIONS			
 			IF ISNULL(@intEntityCustomerId, 0) = 0
 				BEGIN
@@ -173,17 +180,9 @@ BEGIN
 					GOTO Exit_Routine
 				END
 
-			SELECT TOP 1 @intCompanyLocationId = CL.intCompanyLocationId
-					   , @intUndepositedFundId = CL.intUndepositedFundsId
-					   , @intBankAccountId	   = BA.intBankAccountId
-			FROM vyuARCustomerSearch C
-			INNER JOIN tblSMCompanyLocation CL ON C.intWarehouseId = CL.intCompanyLocationId
-			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
-			WHERE C.intEntityId = @intEntityCustomerId
-
 			IF ISNULL(@intCompanyLocationId, 0) = 0
 				BEGIN
-					SET @ErrorMessage = 'Customer''s Warehouse is required when creating prepayment!'
+					SET @ErrorMessage = 'Company Location is required when creating prepayment!'
 					RAISERROR(@ErrorMessage, 16, 1);
 					GOTO Exit_Routine
 				END
