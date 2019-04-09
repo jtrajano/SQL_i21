@@ -1095,7 +1095,7 @@ BEGIN
 			,0 as intConcurrencyId
 	FROM
 		tblGLDetail
-	WHERE ysnIsUnposted = 0	
+	--WHERE ysnIsUnposted = 0	
 	GROUP BY intAccountId, dtmDate, strCode
 END
 

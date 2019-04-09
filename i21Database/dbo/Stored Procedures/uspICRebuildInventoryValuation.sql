@@ -4487,7 +4487,7 @@ BEGIN
 		,intConcurrencyId = 1 
 	FROM
 		tblGLDetail
-	WHERE ysnIsUnposted = 0	
+	--WHERE ysnIsUnposted = 0	
 	GROUP BY   
 		intAccountId
 		,ISNULL(intMultiCompanyId, @intCompanyId)
