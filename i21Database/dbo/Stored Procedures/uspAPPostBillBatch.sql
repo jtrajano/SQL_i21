@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspAPPostBillBatch
-	@batchId			AS NVARCHAR(20)		= NULL,
+	@batchId			AS NVARCHAR(200)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
@@ -14,7 +14,7 @@
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
-	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
+	@batchIdUsed		AS NVARCHAR(200)		= NULL OUTPUT,
 	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 AS
 
@@ -45,11 +45,12 @@ CREATE TABLE #tmpInvalidBillBatchData (
 DECLARE @BillBatchId int
 
 --DECLARRE VARIABLES
+DECLARE @voucherBatchIdUsed NVARCHAR(200);
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 SET @recapId = '1'
 
-IF(@batchId IS NULL)
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
+-- IF(@batchId IS NULL)
+-- 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 INSERT INTO #tmpPostBillBatchData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
 
@@ -58,9 +59,18 @@ SELECT TOP 1 @BillBatchId = intBillBatchId FROM #tmpPostBillBatchData
 SET @invalidCount = 0;
 SET @successfulCount = 0;
 
-EXEC uspAPPostBill  @batchId = @batchId, @isBatch = @isBatch, @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @exclude = @exclude, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT, @invalidCount = @invalidCount OUTPUT
+EXEC uspAPPostBill  @isBatch = @isBatch,
+ @billBatchId = @BillBatchId,
+ @post = @post,
+ @recap = @recap,
+ @userId = @userId,
+ @exclude = @exclude,
+ @success = @success OUTPUT,
+ @successfulCount = @successfulCount OUTPUT,
+ @invalidCount = @invalidCount OUTPUT,
+ @batchIdUsed = @voucherBatchIdUsed OUTPUT
 		
-SET @batchIdUsed = @batchId
+SET @batchIdUsed = @voucherBatchIdUsed
 
 IF(@success = 1 AND @successfulCount > 0 AND @post = 1)
 BEGIN

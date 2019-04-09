@@ -88,7 +88,13 @@ MonthOrder nvarchar(100),
 RowNum int,
 intCommodityId int,
 ysnExpired bit,
-intFutureMonthId int
+intFutureMonthId int,
+strLInternalTradeNo nvarchar(100),
+strSInternalTradeNo nvarchar(100),
+strLRollingMonth nvarchar(100),
+strSRollingMonth nvarchar(100),
+intLFutOptTransactionHeaderId int,
+intSFutOptTransactionHeaderId int
 )
 
 
@@ -101,7 +107,7 @@ EXEC uspRKUnrealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@int
 
 INSERT INTO @Relaized(RowNum,MonthOrder,dblNetPL,dblGrossPL,intMatchFuturesPSHeaderId ,intMatchFuturesPSDetailId ,intFutOptTransactionId ,intLFutOptTransactionId ,
 intSFutOptTransactionId ,dblMatchQty,dtmLTransDate ,dtmSTransDate ,dblLPrice,dblSPrice,strLBrokerTradeNo,strSBrokerTradeNo,dblContractSize,dblFutCommission,
-strFutMarketName,strFutureMonth,intMatchNo ,dtmMatchDate ,strName,strAccountNumber,strCommodityCode,strLocationName,intFutureMarketId ,intCommodityId ,ysnExpired,intFutureMonthId 
+strFutMarketName,strFutureMonth,intMatchNo ,dtmMatchDate ,strName,strAccountNumber,strCommodityCode,strLocationName,intFutureMarketId ,intCommodityId ,ysnExpired,intFutureMonthId,strLInternalTradeNo ,strSInternalTradeNo,strLRollingMonth,strSRollingMonth,intLFutOptTransactionHeaderId,intSFutOptTransactionHeaderId
 )
 EXEC uspRKRealizedPnL  @dtmFromDate = @dtmFromDate, @dtmToDate=@dtmToDate,@intCommodityId = @intCommodityId,@ysnExpired = @ysnExpired,@intFutureMarketId = @intFutureMarketId ,@intEntityId=@intEntityId,@intBrokerageAccountId=@intBrokerageAccountId,@intFutureMonthId=@intFutureMonthId,@strBuySell=@strBuySell
 
