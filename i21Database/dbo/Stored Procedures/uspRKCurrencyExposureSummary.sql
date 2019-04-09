@@ -6,8 +6,8 @@
 	,@dblAR numeric(24,10)	
 
 AS
-
-DECLARE @tblRKSummary TABLE (strSum nvarchar(100),dblValue numeric(24,10))
+SET @dtmFutureClosingDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFutureClosingDate, 110), 110)
+DECLARE @tblRKSummary TABLE (strSum nvarchar(100),dblValue NUMERIC(24,10))
 
 INSERT INTO @tblRKSummary (strSum,dblValue)
 SELECT '1. Treasury', sum(dblAmount) FROM(
@@ -25,19 +25,19 @@ INSERT INTO @tblRKSummary (strSum,dblValue)
 SELECT '2. Liabilities/Receivables',isnull(@dblAR,0)-isnull(@dblAP,0)
 
 INSERT INTO @tblRKSummary (strSum,dblValue)
-SELECT 
-	 '3. Stock Value ',sum(dblQty * (isnull(dblSettlementPrice,0)+isnull(dblMarketPremium,0))) dblValue
-
+SELECT  '3. Stock Value '
+		, sum(dblQty * (isnull(dblSettlementPrice,0)+isnull(dblMarketPremium,0))) dblValue
 FROM (
 	SELECT 
 		[dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId,@intCurrencyId)*
-		dbo.fnRKGetLatestClosingPrice(cd.intFutureMarketId, cd.intFutureMonthId,@dtmFutureClosingDate) dblSettlementPrice
+		dbo.fnRKGetLatestClosingPrice(fm.intFutureMarketId, (SELECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth mon
+																WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND mon.intFutureMarketId = fm.intFutureMarketId 
+																ORDER BY 1 DESC), @dtmFutureClosingDate) dblSettlementPrice
 		,[dbo].[fnRKGetCurrencyConvertion](fm.intCurrencyId,@intCurrencyId)
-			*dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,um.intUnitMeasureId,fm.intUnitMeasureId,dblBasis) dblMarketPremium		
+			*dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,um.intUnitMeasureId,fm.intUnitMeasureId,dblBasis) dblMarketPremium
 		, l.dblQty
-
 	FROM tblCTContractHeader ch
-	JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intCurrencyId=@intCurrencyId
+	JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId
 	join tblRKFutureMarket fm on cd.intFutureMarketId=fm.intFutureMarketId
 	JOIN tblICInventoryReceiptItem ri on cd.intContractDetailId=ri.intLineNo
 	JOIN tblICInventoryReceiptItemLot rl on ri.intInventoryReceiptItemId=rl.intInventoryReceiptItemId
@@ -48,9 +48,8 @@ FROM (
 	join tblICItemUOM iu on iu.intItemUOMId=cd.intBasisUOMId
 	join tblICUnitMeasure um on um.intUnitMeasureId=iu.intUnitMeasureId
 	join tblSMCurrency cur on cur.intCurrencyID=fm.intCurrencyId
-	LEFT join tblSMMultiCompany mc on mc.intMultiCompanyId=ch.intCompanyId
-	WHERE ch.intCommodityId=@intCommodityId and dblQty<>0
-) t 
+	WHERE ch.intCommodityId=@intCommodityId  and dblQty<>0 
+) t
 
 
 INSERT INTO @tblRKSummary (strSum,dblValue)
