@@ -2323,6 +2323,31 @@ BEGIN
 	  AND ISNULL(INV.ysnServiceChargeCredit, 0) = @OneBit
 	  AND INV.strTransactionType = 'Credit Memo'
 
+	
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--CREDIT MEMO WITH CASH REFUND
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'You cannot unpost this Credit Memo (' + I.strInvoiceNumber + '). Cash Refund(' + INV.strInvoiceNumber + ') created.'
+	FROM #ARPostInvoiceHeader I
+	LEFT OUTER JOIN tblARInvoice INV 
+         ON I.intInvoiceId = INV.intOriginalInvoiceId
+	WHERE @Recap = @ZeroBit
+	  AND ISNULL(I.[ysnRefundProcessed], 0) = @OneBit
+	  AND I.strTransactionType = 'Credit Memo'
+
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration

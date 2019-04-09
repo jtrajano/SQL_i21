@@ -7526,6 +7526,7 @@
     <None Include="Scripts\Post-Deployment\ST\30_FileFieldMapping_Commander_Tax.sql" />
     <Build Include="dbo\Functions\fnARParseReportParameter.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdateAfterSave.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

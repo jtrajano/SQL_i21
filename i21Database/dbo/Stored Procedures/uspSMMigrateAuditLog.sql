@@ -279,7 +279,8 @@ FROM (
 		FROM FirstLayer B  
 		WHERE  B.[intRowId] = A.[intRowId] + 1
 		AND   
-		1 = CASE WHEN (ISNULL(A.[strAction], '') = '' OR  ISNULL(A.[strAction], '') IN ('Created', 'Updated', 'Deleted')) AND ISNULL(B.[strAction], '') = 'ARRAY' THEN 1  ELSE 0  END  AND ISNULL(A.[ysnField], '') = ''  
+		1 = --CASE WHEN (ISNULL(A.[strAction], '') = '' OR  ISNULL(A.[strAction], '') IN ('Created', 'Updated', 'Deleted')) AND 
+		CASE WHEN ISNULL(B.[strAction], '') = 'ARRAY' THEN 1  ELSE 0  END  AND ISNULL(A.[ysnField], '') = ''  
 		ORDER BY B.[intRowId]
 	) C
  ), ThirdLayer AS (
@@ -367,7 +368,8 @@ FROM (
 	strFrom,   
 	strTo,   
 	strAlias,  
-	CASE WHEN (ISNULL(strAction,'') = '' AND ISNULL(strAlias,'') = '') THEN 1 ELSE ysnHidden END AS 'ysnHidden',  
+	CASE WHEN (ISNULL(strAction,'') = '' AND ISNULL(strAlias,'') = '') 
+	AND (ISNULL(strFrom,'') = '' AND ISNULL(strTo, '') = '') THEN 1 ELSE ysnHidden END AS 'ysnHidden',  
 	ysnField,   
 	1   
  FROM FifthLayer  
