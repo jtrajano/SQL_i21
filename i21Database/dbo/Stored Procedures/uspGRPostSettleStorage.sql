@@ -104,6 +104,10 @@ BEGIN TRY
 
 	DECLARE @adjustCostOfDelayedPricingStock AS ItemCostAdjustmentTableType
 
+	--Cost UOM in contract
+	DECLARE @intContractUOMId INT
+	DECLARE @dblCostUnitQty DECIMAL(24, 10)
+
 	SET @dtmDate = GETDATE()
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId
@@ -134,6 +138,8 @@ BEGIN TRY
 		,dblCashPrice DECIMAL(24, 10)
 		,intPricingTypeId INT
 		,dblBasis DECIMAL(24, 10)
+		,intContractUOMId INT
+		,dblCostUnitQty DECIMAL(24, 10)
 	)
 	
 	DECLARE @tblDepletion AS TABLE 
@@ -166,6 +172,8 @@ BEGIN TRY
 		,intTicketDiscountId INT NULL
 		,intPricingTypeId INT
 		,dblBasis DECIMAL(24, 10)
+		,intContractUOMId INT NULL
+		,dblCostUnitQty DECIMAL(24, 10) NULL
 	)
 
 	/*	intItemType
@@ -321,6 +329,8 @@ BEGIN TRY
 				,dblCashPrice
 				,intPricingTypeId
 				,dblBasis
+				,intContractUOMId	
+				,dblCostUnitQty
 			)
 			SELECT 
 				 intSettleContractId = SSC.intSettleContractId 
@@ -330,6 +340,8 @@ BEGIN TRY
 				,dblCashPrice		 = CD.dblCashPriceInCommodityStockUOM
 				,intPricingTypeId    = CD.intPricingTypeId
 				,dblBasis			 = CD.dblBasisInCommodityStockUOM
+				,intContractUOMId	 = CD.intContractUOMId
+				,dblCostUnitQty		 = CD.dblCostUnitQty
 			FROM tblGRSettleContract SSC
 			JOIN vyuGRGetContracts CD ON CD.intContractDetailId = SSC.intContractDetailId
 			WHERE intSettleStorageId = @intSettleStorageId AND SSC.dblUnits > 0
@@ -567,11 +579,13 @@ BEGIN TRY
 					WHILE @SettleContractKey > 0
 					BEGIN
 						SELECT 
-							 @intContractDetailId = intContractDetailId
-							,@dblContractUnits = dblContractUnits
-							,@dblCashPrice = dblCashPrice
-							,@intPricingTypeId = intPricingTypeId
-							,@dblContractBasis=dblBasis
+							 @intContractDetailId	= intContractDetailId
+							,@dblContractUnits		= dblContractUnits
+							,@dblCashPrice			= dblCashPrice
+							,@intPricingTypeId		= intPricingTypeId
+							,@dblContractBasis		= dblBasis
+							,@intContractUOMId		= intContractUOMId
+							,@dblCostUnitQty		= dblCostUnitQty
 						FROM @SettleContract
 						WHERE intSettleContractKey = @SettleContractKey
 
@@ -626,20 +640,24 @@ BEGIN TRY
 								,IsProcessed
 								,intPricingTypeId
 								,dblBasis
+								,intContractUOMId
+								,dblCostUnitQty
 							)
 							SELECT 
-								 intCustomerStorageId = @intCustomerStorageId
-								,strOrderType		  = 'Contract'
-								,intCompanyLocationId = @intCompanyLocationId
-								,intContractHeaderId  = @intContractHeaderId
-								,intContractDetailId  = @intContractDetailId
-								,dblUnits			  = @dblStorageUnits
-								,dblCashPrice		  = @dblCashPrice
-								,intItemId			  = @ItemId
-								,intItemType		  = 1
-								,IsProcessed		  = 0
-								,intPricingTypeId     = @intPricingTypeId
-								,dblBasis             = @dblContractBasis
+								 intCustomerStorageId	= @intCustomerStorageId
+								,strOrderType			= 'Contract'
+								,intCompanyLocationId	= @intCompanyLocationId
+								,intContractHeaderId	= @intContractHeaderId
+								,intContractDetailId	= @intContractDetailId
+								,dblUnits				= @dblStorageUnits
+								,dblCashPrice			= @dblCashPrice
+								,intItemId				= @ItemId
+								,intItemType			= 1
+								,IsProcessed			= 0
+								,intPricingTypeId		= @intPricingTypeId
+								,dblBasis				= @dblContractBasis
+								,intContractUOMId		= @intContractUOMId
+								,dblCostUnitQty			= @dblCostUnitQty
 
 							BREAK;
 						END
@@ -690,6 +708,8 @@ BEGIN TRY
 								,IsProcessed
 								,intPricingTypeId
 								,dblBasis
+								,intContractUOMId	
+								,dblCostUnitQty
 							)
 							SELECT 
 								 intCustomerStorageId   = @intCustomerStorageId
@@ -704,6 +724,8 @@ BEGIN TRY
 								,IsProcessed            = 0
 								,intPricingTypeId		= @intPricingTypeId
 								,dblBasis				= @dblContractBasis
+								,intContractUOMId		= @intContractUOMId
+								,dblCostUnitQty			= @dblCostUnitQty
 
 							BREAK;
 						END
@@ -1120,14 +1142,17 @@ BEGIN TRY
 					,[intContractHeaderId]		= a.[intContractHeaderId]
 					,[intContractDetailId]		= a.[intContractDetailId]
 					,[intUnitOfMeasureId]		= b.intItemUOMId
-					,[intCostUOMId]				= b.intItemUOMId
+					,[intCostUOMId]				= CASE
+													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.intContractUOMId
+													ELSE b.intItemUOMId
+												END
 					,[dblWeightUnitQty]			= 1 
-					,[dblCostUnitQty]			= 1 
+					,[dblCostUnitQty]			= ISNULL(a.dblCostUnitQty,1)
 					,[dblUnitQty]				= 1
 					,[dblNetWeight]				= CASE 
 													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
 													ELSE 0 
-												END 
+												END
 					,[intInventoryReceiptItemId] = CASE 
 													WHEN ST.ysnDPOwnedType = 0 THEN NULL
 													ELSE
