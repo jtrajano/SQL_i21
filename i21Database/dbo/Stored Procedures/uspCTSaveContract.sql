@@ -315,6 +315,13 @@ BEGIN TRY
 			EXEC uspCTCancelOpenLoadSchedule @intContractDetailId
 		END
 
+		SELECT @dblLotsFixed = dblLotsFixed,@intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+		IF	@dblLotsFixed IS NOT NULL AND @dblNoOfLots IS NOT NULL AND @dblNoOfLots = @dblLotsFixed AND
+			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId = 2 )
+		BEGIN
+			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
+		END
+
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 
