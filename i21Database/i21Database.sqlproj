@@ -7527,6 +7527,8 @@
     <Build Include="dbo\Functions\fnARParseReportParameter.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdateAfterSave.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
+    <Build Include="dbo\Tables\tblSTstgCommanderOutboundPLUs.sql" />
+    <None Include="Scripts\Post-Deployment\ST\31_FileFieldMapping_Commander_uPLUs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

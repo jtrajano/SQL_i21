@@ -32,7 +32,7 @@ BEGIN
 
 
 		-- =========================================================================================================
-		-- Check if register has intImportFileHeaderId
+		-- Get Register Values
 		DECLARE @strRegisterName NVARCHAR(200)
 				, @strRegisterClass NVARCHAR(200)
 				, @strXmlVersion NVARCHAR(10)
@@ -42,53 +42,75 @@ BEGIN
 			   , @strXmlVersion = strXmlVersion
 		FROM dbo.tblSTRegister 
 		WHERE intRegisterId = @intRegisterId
+		-- =========================================================================================================
 
-		IF(UPPER(@strRegisterClass) = UPPER('SAPPHIRE') or UPPER(@strRegisterClass) = UPPER('COMMANDER'))
-			BEGIN
-				IF EXISTS(SELECT IFH.intImportFileHeaderId 
-						  FROM dbo.tblSMImportFileHeader IFH
-						  JOIN dbo.tblSTRegisterFileConfiguration FC 
-							ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
-						  WHERE IFH.strLayoutTitle = 'Pricebook Send Sapphire' 
-						  AND IFH.strFileType = 'XML' 
-						  AND FC.intRegisterId = @intRegisterId)
-					BEGIN
-						SELECT @intImportFileHeaderId = IFH.intImportFileHeaderId 
-						FROM dbo.tblSMImportFileHeader IFH
-						JOIN dbo.tblSTRegisterFileConfiguration FC 
-							ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
-						WHERE IFH.strLayoutTitle = 'Pricebook Send Sapphire' 
-						AND IFH.strFileType = 'XML' 
-						AND FC.intRegisterId = @intRegisterId
-					END
-				ELSE
-					BEGIN
-						SET @intImportFileHeaderId = 0
-					END	
+		--IF(UPPER(@strRegisterClass) = UPPER('SAPPHIRE') or UPPER(@strRegisterClass) = UPPER('COMMANDER'))
+		--IF(UPPER(@strRegisterClass) IN ('SAPPHIRE/COMMANDER'))
+		--	BEGIN
+		--		IF EXISTS(SELECT IFH.intImportFileHeaderId 
+		--				  FROM dbo.tblSMImportFileHeader IFH
+		--				  JOIN dbo.tblSTRegisterFileConfiguration FC 
+		--						ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+		--				  WHERE IFH.strLayoutTitle = 'Pricebook Send Sapphire' 
+		--				  AND IFH.strFileType = 'XML' 
+		--				  AND FC.intRegisterId = @intRegisterId)
+		--			BEGIN
+		--				SELECT @intImportFileHeaderId = IFH.intImportFileHeaderId 
+		--				FROM dbo.tblSMImportFileHeader IFH
+		--				JOIN dbo.tblSTRegisterFileConfiguration FC 
+		--					ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
+		--				WHERE IFH.strLayoutTitle = 'Pricebook Send Sapphire' 
+		--				AND IFH.strFileType = 'XML' 
+		--				AND FC.intRegisterId = @intRegisterId
+		--			END
+		--		ELSE
+		--			BEGIN
+		--				SET @intImportFileHeaderId = 0
+		--			END	
 		
+		--	END
+		--ELSE
+		--	BEGIN
+		--		IF EXISTS(SELECT * FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @intRegisterId AND strFilePrefix = @strFilePrefix)
+		--			BEGIN
+		--				SELECT @intImportFileHeaderId = intImportFileHeaderId 
+		--				FROM tblSTRegisterFileConfiguration 
+		--				WHERE intRegisterId = @intRegisterId 
+		--				AND strFilePrefix = @strFilePrefix
+		--			END
+		--		ELSE
+		--			BEGIN
+		--				SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
+		--				SET @strGeneratedXML = ''
+		--				SET @intImportFileHeaderId = 0
+		--				SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Pricebook File (' + @strFilePrefix + ')'
+
+		--				RETURN
+		--			END	
+		--	END
+
+		-- ================================================================================================================================================
+		-- [START] - GET 'intImportFileHeaderId'
+		-- ================================================================================================================================================
+		IF EXISTS(SELECT TOP 1 1 FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @intRegisterId AND strFilePrefix = @strFilePrefix)
+			BEGIN
+				SELECT @intImportFileHeaderId = intImportFileHeaderId
+				FROM tblSTRegisterFileConfiguration 
+				WHERE intRegisterId = @intRegisterId 
+				AND strFilePrefix = @strFilePrefix
 			END
 		ELSE
 			BEGIN
-				IF EXISTS(SELECT * FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @intRegisterId AND strFilePrefix = @strFilePrefix)
-					BEGIN
-						SELECT @intImportFileHeaderId = intImportFileHeaderId 
-						FROM tblSTRegisterFileConfiguration 
-						WHERE intRegisterId = @intRegisterId 
-						AND strFilePrefix = @strFilePrefix
-					END
-				ELSE
-					BEGIN
-						SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
-						SET @strGeneratedXML = ''
-						SET @intImportFileHeaderId = 0
-						SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Pricebook File (' + @strFilePrefix + ')'
+				SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
+				SET @strGeneratedXML = ''
+				SET @intImportFileHeaderId = 0
+				SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Pricebook File (' + @strFilePrefix + ')'
 
-						RETURN
-					END	
+				RETURN
 			END
-		-- =========================================================================================================
-
-
+		-- ================================================================================================================================================
+		-- [END] - GET 'intImportFileHeaderId'
+		-- ================================================================================================================================================
 
 
 		DECLARE @XMLGatewayVersion nvarchar(100)
@@ -138,14 +160,15 @@ BEGIN
 		)
 		AND intCompanyLocationId = 
 		(
-			SELECT TOP (1) intCompanyLocationId 
+			SELECT intCompanyLocationId 
 			FROM tblSTStore
 			WHERE intStoreId = @intStoreId
 		)
 		--------------------------------------------------------------------------------------------------------------
 		----------------- End Get Inventory Items that has modified/added date between date range --------------------
 		--------------------------------------------------------------------------------------------------------------
-
+----TEST
+--SELECT * FROM @tempTableItems
 
 
 
@@ -1055,6 +1078,169 @@ BEGIN
 							SET @ysnSuccessResult = CAST(0 AS BIT)
 							SET @strMessageResult = 'No result found to generate Pricebook - ' + @strFilePrefix + ' Outbound file'
 					END	
+			END
+		ELSE IF(@strRegisterClass = 'SAPPHIRE/COMMANDER')
+			BEGIN
+				-- NO versioning for Register Class 'SAPPHIRE/COMMANDER'
+				-- XML prefix is 'uPLUs'
+
+				-- Create Temp Table
+				DECLARE @tblTempSapphireCommanderUPLUs TABLE 
+				(
+					[intCommanderOutboundPLUsId] INT, 
+					[strSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+					[strUpc] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+					[strUpcModifier] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+					[strDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+					[strDepartment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+					[strFee] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+					[strPCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+					[dblPrice] DECIMAL(18, 2) NULL,
+					[intFlagSysid] INT NULL, 
+					[intTaxRateSysid] INT NULL, 
+					[dblSellUnit] DECIMAL(18, 6) NULL
+				)
+
+				-- Insert values to Temp table
+				INSERT INTO @tblTempSapphireCommanderUPLUs
+				SELECT
+					[intCommanderOutboundPLUsId]	= ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+					, [strSource]					= 'keyboard'
+					, [strUpc]						= CAST(UOM.strLongUPCCode AS NVARCHAR(50))
+					, [strUpcModifier]				= '000'
+					, [strDescription]				= REPLACE(REPLACE(REPLACE(REPLACE(Item.strDescription, '''', ''), '"', ''), '/', ''), '\', '')
+					, [strDepartment]				= CAST(CategoryLoc.intRegisterDepartmentId AS NVARCHAR(50))
+					, [strFee]						= '00'
+					, [strPCode]					= ISNULL(StorePCode.strRegProdCode, '')
+					, [dblPrice]					= ISNULL(ItemPrice.dblSalePrice, 0)
+					, [intFlagSysid]				= 1 
+					, [intTaxRateSysid]				= 1
+					, [dblSellUnit]					= 1
+				FROM tblICItem Item
+				INNER JOIN @tempTableItems tempItem
+					ON Item.intItemId = tempItem.intItemId
+				INNER JOIN tblICItemUOM UOM
+					ON Item.intItemId = UOM.intItemId
+					AND UOM.ysnStockUnit = 1
+				INNER JOIN tblICCategory Category
+					ON Item.intCategoryId = Category.intCategoryId
+				INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
+					ON Category.intCategoryId = CategoryLoc.intCategoryId
+				INNER JOIN tblSTStore Store
+					ON CategoryLoc.intLocationId = Store.intCompanyLocationId
+				INNER JOIN 
+				(
+					SELECT
+						intStoreId
+						, strRegProdCode
+					FROM tblSTSubcategoryRegProd 
+				) AS StorePCode
+				ON Store.intStoreId = StorePCode.intStoreId
+				INNER JOIN tblICItemLocation ItemLoc
+					ON Item.intItemId = ItemLoc.intItemId
+					AND Store.intCompanyLocationId = ItemLoc.intLocationId
+				INNER JOIN tblICItemPricing ItemPrice
+					ON Item.intItemId = ItemPrice.intItemId
+					AND ItemLoc.intItemLocationId = ItemPrice.intItemLocationId
+				WHERE Store.intStoreId = @intStoreId
+					AND UOM.strLongUPCCode IS NOT NULL
+					AND UOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+					AND ISNULL(SUBSTRING(UOM.strLongUPCCode, PATINDEX('%[^0]%',UOM.strLongUPCCode), LEN(UOM.strLongUPCCode)), 0) NOT IN ('')
+				ORDER BY UOM.strLongUPCCode ASC
+
+
+
+				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderUPLUs)
+					BEGIN
+----TEST
+--SELECT * FROM @tblTempSapphireCommanderUPLUs					
+						DECLARE @xml XML = N''
+
+						-- Add namespaces of 'xmlns'
+						;WITH XMLNAMESPACES (
+												'http://www.w3.org/2001/XMLSchema-instance' AS xsi
+												, 'urn:vfi-sapphire:np.domain.2001-07-01' AS domain
+											 )
+				
+						SELECT @xml =
+						(
+							SELECT
+								plu.[strSource]				AS 'upc/@source'
+								, plu.[strUpc]				AS 'upc'
+								, plu.[strUpcModifier]		AS 'upcModifier'
+								, plu.[strDescription]		AS 'description'
+								, plu.[strDepartment]		AS 'department'
+								, plu.[strFee]				AS 'fee'
+								, plu.[strPCode]			AS 'pcode'
+								, plu.[dblPrice]			AS 'price'
+								,(	
+											SELECT TOP (2)
+												CASE 
+													WHEN ROW_NUMBER() OVER(ORDER BY (SELECT 1)) = 1 
+														THEN 1
+													WHEN ROW_NUMBER() OVER(ORDER BY (SELECT 1)) = 2 
+														THEN 4
+													ELSE CAST(ROW_NUMBER() OVER(ORDER BY (SELECT 1)) AS NVARCHAR(50))
+												END AS [@sysid]
+											FROM @tblTempSapphireCommanderUPLUs
+											--WHERE strDepartment = a.strDepartment
+											FOR XML PATH('domain:flag'),
+											ROOT('flags'), TYPE
+			
+								)
+								,(	
+											SELECT TOP (1)
+												1 AS [@sysid]
+											FROM @tblTempSapphireCommanderUPLUs
+											FOR XML PATH('domain:taxRate'),
+											ROOT('taxRates'), TYPE
+			
+								)
+								, 1 AS 'SellUnit'
+							FROM @tblTempSapphireCommanderUPLUs plu
+							FOR XML PATH('domain:PLU'), 
+							ROOT('domain:PLUs'), TYPE
+						);
+
+
+						DECLARE @intPage INT = 1
+								, @intOfPages INT = 1
+								, @strSchemaLocation NVARCHAR(100) = 'urn:vfi-sapphire:np.domain.2001-07-01 /SapphireVM1/xml/SapphireV1.1/vsmsPLUs.xsd'
+
+						DECLARE @strNamesSpace AS NVARCHAR(150) = 'domain:PLU xmlns:domain="urn:vfi-sapphire:np.domain.2001-07-01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
+								, @strDomainPlu AS NVARCHAR(50) = 'domain:PLU'
+
+						-- INSERT Attributes 'page' and 'ofpages' to Root header
+						SET @xml.modify('insert 
+									   (
+											attribute xsi:schemaLocation { 
+																			 sql:variable("@strSchemaLocation")
+																		 }
+											,		  attribute page { 
+																		sql:variable("@intPage") 
+																	 }
+										   ,       attribute ofpages { 
+																		sql:variable("@intOfPages")
+																	 }
+				   
+										) into (/*:PLUs)[1]');
+
+						DECLARE @strXML AS NVARCHAR(MAX) = CAST(@xml AS NVARCHAR(MAX))
+						SET @strXML = REPLACE(@strXML, 'flags xmlns:domain="urn:vfi-sapphire:np.domain.2001-07-01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"', 'flags')
+						SET @strXML = REPLACE(@strXML, 'taxRates xmlns:domain="urn:vfi-sapphire:np.domain.2001-07-01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"', 'taxRates')
+						
+						SET @strGeneratedXML = @strXML
+						SET @ysnSuccessResult = CAST(1 AS BIT)
+						SET @strMessageResult = ''
+					END
+				ELSE
+					BEGIN
+						SET @strGeneratedXML = ''
+						SET @ysnSuccessResult = CAST(0 AS BIT)
+						SET @strMessageResult = 'No result found to generate Pricebook - ' + @strFilePrefix + ' Outbound file'
+					END
+
+				
 			END
 	END TRY
 
