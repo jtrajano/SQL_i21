@@ -45,6 +45,8 @@ BEGIN TRY
 		,dblUnitQty DECIMAL(38,20)
 		,dblCostUnitQty DECIMAL(38,20)
 		,intCurrencyId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT
 		)
 	DECLARE @loadCosts TABLE (
 		intRecordId INT Identity(1, 1)
@@ -154,6 +156,8 @@ BEGIN TRY
 		,dblUnitQty
 		,dblCostUnitQty
 		,intCurrencyId
+		,intSubLocationId
+		,intStorageLocationId
 		)
 	SELECT V.intEntityVendorId
 		,LD.intLoadId
@@ -171,6 +175,8 @@ BEGIN TRY
 		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
 		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
 		,V.intCurrencyId
+		,V.intSubLocationId
+		,V.intStorageLocationId
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -207,6 +213,8 @@ BEGIN TRY
 		,V.dblPrice
 		,V.dblTotal
 		,V.intCurrencyId
+		,V.intSubLocationId
+		,V.intStorageLocationId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -292,7 +300,9 @@ BEGIN TRY
 				,[intSubCurrencyCents]
 				,[intAccountId]
 				,[strBillOfLading]
-				,[ysnReturn])
+				,[ysnReturn]
+				,[intSubLocationId]
+				,[intStorageLocationId])
 			SELECT
 				[intEntityVendorId] = VDD.intVendorEntityId
 				,[intTransactionType] = 1
@@ -331,6 +341,8 @@ BEGIN TRY
 				,[intAccountId] = VDD.intAccountId
 				,[strBillOfLading] = L.strBLNumber
 				,[ysnReturn] = CAST(0 AS BIT)
+				,[intSubLocationId] = VDD.intSubLocationId
+				,[intStorageLocationId] = VDD.intStorageLocationId
 			FROM @voucherDetailData VDD
 				INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 				INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
@@ -432,7 +444,9 @@ BEGIN TRY
 					,[intSubCurrencyCents]
 					,[intAccountId]
 					,[strBillOfLading]
-					,[ysnReturn])
+					,[ysnReturn]
+					,[intSubLocationId]
+					,[intStorageLocationId])
 				SELECT
 					[intEntityVendorId] = VDD.intVendorEntityId
 					,[intTransactionType] = 1
@@ -471,6 +485,8 @@ BEGIN TRY
 					,[intAccountId] = VDD.intAccountId
 					,[strBillOfLading] = L.strBLNumber
 					,[ysnReturn] = CAST(0 AS BIT)
+					,[intSubLocationId] = VDD.intSubLocationId
+					,[intStorageLocationId] = VDD.intStorageLocationId
 				FROM @voucherDetailData VDD
 					INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 					INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
@@ -557,7 +573,9 @@ BEGIN TRY
 					,[intSubCurrencyCents]
 					,[intAccountId]
 					,[strBillOfLading]
-					,[ysnReturn])
+					,[ysnReturn]
+					,[intSubLocationId]
+					,[intStorageLocationId])
 				SELECT
 					[intEntityVendorId] = VDD.intVendorEntityId
 					,[intTransactionType] = 1
@@ -597,6 +615,8 @@ BEGIN TRY
 					,[intAccountId] = VDD.intAccountId
 					,[strBillOfLading] = L.strBLNumber
 					,[ysnReturn] = CAST(0 AS BIT)
+					,[intSubLocationId] = VDD.intSubLocationId
+					,[intStorageLocationId] = VDD.intStorageLocationId
 				FROM @voucherDetailData VDD
 					INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 					INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
