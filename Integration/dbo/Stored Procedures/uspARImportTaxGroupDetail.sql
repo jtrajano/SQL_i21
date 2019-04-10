@@ -345,8 +345,8 @@ BEGIN
 				[strZipCode],
 				[strCity] 
 			) SELECT [intTaxClassId],
-				[strTaxCode],
-				[strDescription],
+				REPLACE(REPLACE(REPLACE(REPLACE([strTaxCode],'&', ' '),'/',' '),'(',' '),')',' ',
+				REPLACE(REPLACE(REPLACE(REPLACE([strDescription],'&', ' '),'/',' '),'(',' '),')',' ',
 				[strTaxableByOtherTaxes],
 				[strState],
 				[strCountry],
