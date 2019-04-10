@@ -7302,7 +7302,9 @@
     <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMRecalBankAccountRegister.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
