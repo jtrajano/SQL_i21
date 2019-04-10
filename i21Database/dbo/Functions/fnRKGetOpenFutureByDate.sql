@@ -118,6 +118,8 @@ FROM (
 			) t WHERE intRowNum = 1
 		) History
 		WHERE FOT.strInstrumentType = 'Futures'
+			AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
+			AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			
@@ -162,6 +164,8 @@ FROM (
 			) t WHERE intRowNum = 1
 		) History
 		WHERE FOT.strInstrumentType = 'Options'
+			AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
+			AND FOT.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
 										ELSE History.dtmTransactionDate END, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 				
