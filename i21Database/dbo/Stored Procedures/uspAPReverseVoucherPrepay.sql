@@ -19,9 +19,18 @@ DECLARE @GLEntries AS RecapTableType;
 DECLARE @transCount INT;
 DECLARE @ids AS Id;
 DECLARE @oldPrepay BIT;
+DECLARE @tranType INT;
 DECLARE @newBillId NVARCHAR(50);
 
 BEGIN TRY
+
+--MAKE SURE PREPAY/BASIS TYPE ONLY
+SELECT @tranType = intTransactionType FROM tblAPBill WHERE intBillId = @billId
+IF (@tranType <> 2) AND (@tranType <> 13)
+BEGIN
+	RAISERROR('Invalid transaction type for prepaid reversal.', 16, 1);
+	RETURN;
+END
 
 SET @transCount = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
