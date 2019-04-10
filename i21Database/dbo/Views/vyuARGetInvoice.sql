@@ -107,6 +107,7 @@ SELECT
 	INV.intSubBookId,
 	INV.strMobileBillingShiftNo,
     INV.ysnRefundProcessed,
+    INV.ysnValidCreditCode,
     INV.ysnServiceChargeCredit,
 	INV.blbSignature,
 	

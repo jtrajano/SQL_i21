@@ -260,7 +260,7 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-	--Inactive Customer
+	--Customer Credit Limit
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
 		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
@@ -268,17 +268,15 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]            = I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Customer credit limit is blank! Only Cash Sale transaction is allowed.'
+		,[strPostingError]		= 'Customer credit limit is either blank or COD! Only Cash Sale transaction is allowed.'
 	FROM 
-		#ARPostInvoiceHeader I                       
+		#ARPostInvoiceHeader I 
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId                      
 	WHERE
 		I.[dblCustomerCreditLimit] IS NULL 
-		AND I.[strTransactionType] != 'Cash'
-		AND I.[strTransactionType] != 'Cash Refund'
-		AND I.[strType] != 'POS'
-
-
-		
+		AND I.[strTransactionType] NOT IN ('Cash', 'Cash Refund')
+		AND I.[strType] != 'POS'	
+		AND ISNULL(INV.[ysnValidCreditCode], 0) = 0
 
 			
 	INSERT INTO #ARInvalidInvoiceData
