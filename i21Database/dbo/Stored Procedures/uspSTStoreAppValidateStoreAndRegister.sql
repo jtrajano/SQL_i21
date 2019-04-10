@@ -61,7 +61,7 @@ BEGIN
 			END
 
 		-- Check Register if (RADIANT or PASSPORT)
-		ELSE IF (@strRegisterClass NOT IN ('RADIANT', 'PASSPORT', 'SAPPHIRE'))
+		ELSE IF (@strRegisterClass NOT IN ('RADIANT', 'PASSPORT', 'SAPPHIRE/COMMANDER'))
 			BEGIN
 				INSERT INTO @tempTableError
 				(
@@ -179,7 +179,7 @@ BEGIN
 				AND RegConfig.strFilePrefix = CASE
 												WHEN @strRegisterClass IN ('RADIANT', 'PASSPORT')
 													THEN 'ISM'
-												WHEN (@strRegisterClass IN ('SAPPHIRE'))
+												WHEN (@strRegisterClass IN ('SAPPHIRE/COMMANDER'))
 													THEN 'vrubyrept-department'
 
 												-- Transactionlog should be included in checkout
