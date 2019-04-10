@@ -16,6 +16,7 @@ DECLARE @batchId NVARCHAR(50);
 DECLARE @error NVARCHAR(200);
 DECLARE @debitMemoRecordNum NVARCHAR(50);
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPCreateBillReversal';
+DECLARE @transCount INT;
 
 BEGIN TRY
 
@@ -118,11 +119,5 @@ BEGIN CATCH
 	-- 			ROLLBACK TRANSACTION  @SavePoint
 	-- 		END
 	-- 	END	
-
-	SET @error = @ErrorMessage;
-	
-	IF @throwError = 1
-	BEGIN
-		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-	END
+	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
