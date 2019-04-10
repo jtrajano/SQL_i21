@@ -156,10 +156,11 @@ BEGIN
 	AND origBill.intBillId = @voucherKey --UPDATE ONLY THE CURRENT VOUCHER
 
 	--update the payment to prepayment always update prepay wether combination of bill and prepay or not.
-	 UPDATE pay
-	 	SET pay.ysnPrepay = 1
-	 FROM tblAPPayment pay
-	 WHERE pay.intPaymentId = @currentPaymentId;
+	--  UPDATE pay
+	--  	SET pay.ysnPrepay = 1
+	--  FROM tblAPPayment pay
+	--  WHERE pay.intPaymentId = @currentPaymentId;
+	--We don't need the ysnPrepay, we check if prepay using ysnPrepayHasPayment and ysnOffset
 
 	--update the payment to prepayment
     --UPDATE pay
