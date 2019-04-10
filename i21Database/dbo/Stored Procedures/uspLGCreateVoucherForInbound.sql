@@ -141,10 +141,7 @@ BEGIN TRY
 		,[dblQuantityToBill] = LD.dblQuantity
 		,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 		,[intQtyToBillUOMId] = LD.intItemUOMId
-		,[dblCost] = CASE WHEN AD.ysnSeqSubCurrency = 1
-						THEN ISNULL(AD.dblSeqPrice, 0) / 100
-						ELSE ISNULL(AD.dblSeqPrice, 0)
-						END
+		,[dblCost] = ISNULL(AD.dblSeqPrice, 0)
 		,[dblCostUnitQty] = CAST(ISNULL(CostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 		,[intCostUOMId] = AD.intSeqPriceUOMId
 		,[dblNetWeight] = ISNULL(LD.dblNet,0)
