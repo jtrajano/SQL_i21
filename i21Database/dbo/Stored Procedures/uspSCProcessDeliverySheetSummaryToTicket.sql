@@ -101,7 +101,7 @@ BEGIN TRY
 		INNER JOIN tblSCTicket SC ON SC.intDeliverySheetId = SDS.intDeliverySheetId
 		WHERE SDS.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
 		
-		IF (SELECT COUNT(intTicketId) FROM @splitTable) > 1
+		IF EXISTS(SELECT NULL FROM @splitTable)
 		BEGIN
 			INSERT INTO tblSCTicketSplit
 			SELECT * FROM @splitTable
