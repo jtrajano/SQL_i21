@@ -57,7 +57,7 @@ BEGIN
 			,@UnitsOnHand AS NUMERIC(38, 20)
 
 	-- Get the on-hand qty for the item location regardless of date. 
-	SELECT	@UnitsOnHand = s.dblUnitOnHand 
+	SELECT	@UnitsOnHand = dbo.fnCalculateQtyBetweenUOM(o.intItemUOMId, @intItemUOMId, s.dblUnitOnHand )
 	FROM	tblICItemStock s
 	WHERE	s.intItemId = @intItemId
 			AND s.intItemLocationId = @intItemLocationId
