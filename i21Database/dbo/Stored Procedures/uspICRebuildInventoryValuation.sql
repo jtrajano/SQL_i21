@@ -3499,7 +3499,7 @@ BEGIN
 							,[intSourceTransactionId]	= th.intInventoryTransferId
 							,[strSourceTransactionId]	= th.strTransferNo
 							,[intSourceTransactionDetailId] = ri.intInventoryTransferDetailId
-							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId) -- t.intInTransitSourceLocationId
 							,[intForexRateTypeId]			= t.intForexRateTypeId
 							,[dblForexRate]					= t.dblForexRate
 
@@ -3508,6 +3508,8 @@ BEGIN
 							INNER JOIN tblICInventoryReceiptItem ri
 								ON ri.intInventoryReceiptId = t.intTransactionId						
 								AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+							INNER JOIN tblICInventoryReceipt r
+								ON r.intInventoryReceiptId = ri.intInventoryReceiptId 
 							INNER JOIN (
 								tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
 									ON td.intInventoryTransferId = th.intInventoryTransferId
