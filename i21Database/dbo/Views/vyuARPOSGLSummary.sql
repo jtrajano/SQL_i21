@@ -10,8 +10,15 @@ FROM (
 	SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 		 , dblOpeningBalance	= EOD.dblOpeningBalance
 		 , dblEndingBalance		= EOD.dblFinalEndingBalance
-		 , dblDebit				= CASE WHEN SUM(GL.dblDebit) - SUM(GL.dblCredit) <= 0.000000 THEN 0.000000 ELSE SUM(GL.dblDebit) - SUM(GL.dblCredit) END
-		 , dblCredit			= CASE WHEN SUM(GL.dblDebit) - SUM(GL.dblCredit) >= 0.000000 THEN 0.000000 ELSE SUM(GL.dblCredit) - SUM(GL.dblDebit) END
+		 , dblDebit				= CASE 
+									   WHEN SUM(GL.dblDebit) - SUM(GL.dblCredit) <= 0.000000 THEN 0.000000
+									   WHEN GLA.strAccountCategory = 'Undeposited Funds' AND UNDEPOSITED.dblAmount >= 0.000000 THEN UNDEPOSITED.dblAmount
+									   WHEN GLA.strAccountCategory = 'AR Account' AND ARACCOUNT.dblAmount >= 0.000000 THEN ARACCOUNT.dblAmount
+									   ELSE SUM(GL.dblDebit) - SUM(GL.dblCredit) END
+		 , dblCredit			= CASE WHEN SUM(GL.dblDebit) - SUM(GL.dblCredit) >= 0.000000 THEN 0.000000
+									   WHEN GLA.strAccountCategory = 'Undeposited Funds' AND UNDEPOSITED.dblAmount <= 0.000000 THEN ABS(UNDEPOSITED.dblAmount)
+									   WHEN GLA.strAccountCategory = 'AR Account' AND ARACCOUNT.dblAmount <= 0.000000 THEN ABS(ARACCOUNT.dblAmount)
+									   ELSE SUM(GL.dblCredit) - SUM(GL.dblDebit) END
 		 , strAccountId			= GLA.strAccountId
 		 , strAccountCategory	= GLA.strAccountCategory
 		 , strDescription		= GLA.strDescription
@@ -52,7 +59,7 @@ FROM (
 			WHERE ysnPosted = 1
 		) PAYMENT ON POSP.intPaymentId = PAYMENT.intPaymentId
 		WHERE POSP.intPOSId = POS.intPOSId
-		  AND POSP.strPaymentMethod <> 'On Account'
+		  --AND POSP.strPaymentMethod <> 'On Account'
 
 		UNION ALL 
 
@@ -63,6 +70,22 @@ FROM (
 		WHERE EODT.ysnClosed = 1 AND EODT.intCashOverShortId IS NOT NULL
 		AND EOD.intPOSEndOfDayId = EODT.intPOSEndOfDayId
 	) TRANSACTIONS
+	OUTER APPLY(
+		SELECT dblAmount = SUM(ISNULL(UPOSPAYMENT.dblAmount,0.000000))
+		FROM tblARPOSPayment UPOSPAYMENT
+		WHERE 
+			(UPOSPAYMENT.intPOSEndOfDayId = EOD.intPOSEndOfDayId AND UPOSPAYMENT.strPaymentMethod <> 'On Account') OR
+			(UPOSPAYMENT.intPOSEndOfDayId = EOD.intPOSEndOfDayId AND 
+				UPOSPAYMENT.strPaymentMethod = 'On Account' AND 
+				UPOSPAYMENT.intPaymentId IS NOT NULL)		
+	) UNDEPOSITED
+	OUTER APPLY(
+		SELECT dblAmount = SUM(ISNULL(APOSPAYMENT.dblAmount,0.000000))
+		FROM tblARPOSPayment APOSPAYMENT
+		WHERE APOSPAYMENT.intPOSEndOfDayId = EOD.intPOSEndOfDayId
+			AND strPaymentMethod = 'On Account'
+			AND intPaymentId IS NULL
+	) ARACCOUNT
 	INNER JOIN (
 		SELECT intTransactionId
 			 , strTransactionId
@@ -84,7 +107,11 @@ FROM (
 	WHERE EOD.ysnClosed = 1
 	GROUP BY EOD.intPOSEndOfDayId
 		   , EOD.dblFinalEndingBalance
+		   , EOD.dblExpectedEndingBalance
 		   , EOD.dblOpeningBalance
+		   , EOD.dblCashReturn
+		   , UNDEPOSITED.dblAmount
+		   , ARACCOUNT.dblAmount
 		   , GLA.strAccountId
 		   , GLA.strAccountCategory
 		   , GLA.strDescription
