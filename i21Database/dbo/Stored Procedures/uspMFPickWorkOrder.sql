@@ -73,6 +73,7 @@ BEGIN TRY
 		,@intLotCodeStartingPosition INT
 		,@intLotCodeNoOfDigits INT
 		,@dblLowerToleranceReqQty NUMERIC(18, 6)
+		,@dblUpperToleranceReqQty NUMERIC(18, 6)
 		,@intLotItemId INT
 		,@intPMCategoryId INT
 		,@intPMStageLocationId INT
@@ -280,6 +281,7 @@ BEGIN TRY
 		,dblLowerToleranceReqQty NUMERIC(18, 6)
 		,intMainItemId INT
 		,intCategoryId INT
+		,dblUpperToleranceReqQty NUMERIC(18, 6)
 		)
 	DECLARE @tblSubstituteItem TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -344,6 +346,7 @@ BEGIN TRY
 		,dblLowerToleranceReqQty
 		,intMainItemId
 		,intCategoryId
+		,dblUpperToleranceReqQty
 		)
 	SELECT ri.intItemId
 		,CASE 
@@ -474,6 +477,67 @@ BEGIN TRY
 			END
 		,ri.intItemId
 		,I.intCategoryId
+		,CASE 
+			WHEN C.strCategoryCode = @strPackagingCategory
+				AND @ysnProducedQtyByWeight = 1
+				AND P.dblMaxWeightPerPack > 0
+				THEN (
+						CASE 
+							WHEN ri.ysnScaled = 1
+								THEN (
+										CAST(CEILING((ri.dblCalculatedUpperTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack)) + CASE 
+													WHEN ri.ysnPartialFillConsumption = 1
+														THEN (ri.dblCalculatedUpperTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / P.dblMaxWeightPerPack))
+													ELSE 0
+													END) AS NUMERIC(38, 20))
+										)
+							ELSE CAST(CEILING(ri.dblCalculatedUpperTolerance) AS NUMERIC(38, 20))
+							END
+						)
+			WHEN C.strCategoryCode = @strPackagingCategory
+				THEN (
+						CASE 
+							WHEN ri.ysnScaled = 1
+								THEN (
+										CAST(CEILING((ri.dblCalculatedUpperTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity)) + CASE 
+													WHEN ri.ysnPartialFillConsumption = 1
+														THEN (ri.dblCalculatedUpperTolerance * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / r.dblQuantity))
+													ELSE 0
+													END) AS NUMERIC(38, 20))
+										)
+							ELSE CAST(CEILING(ri.dblCalculatedUpperTolerance) AS NUMERIC(38, 20))
+							END
+						)
+			ELSE (
+					CASE 
+						WHEN ri.ysnScaled = 1
+							THEN (
+									ri.dblCalculatedUpperTolerance * (
+										dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
+											CASE 
+												WHEN r.intRecipeTypeId = 1
+													THEN r.dblQuantity
+												ELSE 1
+												END
+											)
+										) + CASE 
+										WHEN ri.ysnPartialFillConsumption = 1
+											THEN ri.dblCalculatedUpperTolerance * (
+													dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / (
+														CASE 
+															WHEN r.intRecipeTypeId = 1
+																THEN r.dblQuantity
+															ELSE 1
+															END
+														)
+													)
+										ELSE 0
+										END
+									)
+						ELSE ri.dblCalculatedUpperTolerance
+						END
+					)
+			END
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -643,6 +707,53 @@ BEGIN TRY
 			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
 		,ri.intItemId
 		,I.intCategoryId
+		,(
+			CASE 
+				WHEN C.strCategoryCode = @strPackagingCategory
+					AND @ysnProducedQtyByWeight = 1
+					AND P.dblMaxWeightPerPack > 0
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / P.dblMaxWeightPerPack))) + CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / P.dblMaxWeightPerPack))) AS NUMERIC(38, 20)))
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				WHEN C.strCategoryCode = @strPackagingCategory
+					THEN (
+							CASE 
+								WHEN ri.ysnScaled = 1
+									THEN (CAST(CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / r.dblQuantity))) + CEILING((ri.dblCalculatedQuantity * (dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / r.dblQuantity))) AS NUMERIC(38, 20)))
+								ELSE CAST(CEILING(ri.dblCalculatedQuantity) AS NUMERIC(38, 20))
+								END
+							)
+				ELSE (
+						CASE 
+							WHEN ri.ysnScaled = 1
+								THEN (
+										ri.dblCalculatedQuantity * (
+											dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProduceQty) / (
+												CASE 
+													WHEN r.intRecipeTypeId = 1
+														THEN r.dblQuantity
+													ELSE 1
+													END
+												)
+											) + ri.dblCalculatedQuantity * (
+											dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMId, r.intItemUOMId, @dblProducePartialQty) / (
+												CASE 
+													WHEN r.intRecipeTypeId = 1
+														THEN r.dblQuantity
+													ELSE 1
+													END
+												)
+											)
+										)
+							ELSE ri.dblCalculatedQuantity
+							END
+						)
+				END
+			) - WC.dblQuantity / rs.dblSubstituteRatio AS RequiredQty
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 		AND r.intWorkOrderId = ri.intWorkOrderId
@@ -837,6 +948,7 @@ BEGIN TRY
 			,dblLowerToleranceReqQty
 			,intMainItemId
 			,intCategoryId
+			,dblUpperToleranceReqQty
 			)
 		SELECT WI.intItemId
 			,Round(I.dblReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
@@ -847,6 +959,7 @@ BEGIN TRY
 			,Round(I.dblLowerToleranceReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
 			,I.intMainItemId
 			,I.intCategoryId
+			,Round(I.dblUpperToleranceReqQty * WI.dblRatio / 100, @intNoOfDecimalPlacesOnConsumption)
 		FROM @tblMFWorkOrderInputItem WI
 		JOIN @tblItem I ON I.intItemId = WI.intMainItemId
 		WHERE NOT EXISTS (
@@ -858,6 +971,7 @@ BEGIN TRY
 		UPDATE @tblItem
 		SET dblReqQty = Round(dblReqQty * IsNULL(dblRatio, 0) / 100, @intNoOfDecimalPlacesOnConsumption)
 			,dblLowerToleranceReqQty = Round(dblLowerToleranceReqQty * IsNULL(dblRatio, 0) / 100, @intNoOfDecimalPlacesOnConsumption)
+			,dblUpperToleranceReqQty = Round(dblUpperToleranceReqQty * IsNULL(dblRatio, 0) / 100, @intNoOfDecimalPlacesOnConsumption)
 		FROM @tblItem I
 		JOIN @tblMFWorkOrderInputItem WI ON WI.intItemId = I.intItemId
 		WHERE NOT EXISTS (
@@ -890,6 +1004,8 @@ BEGIN TRY
 
 		SELECT @intCategoryId = NULL
 
+		SELECT @dblUpperToleranceReqQty = NULL
+
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
 			,@intRecipeItemUOMId = intItemUOMId
@@ -897,6 +1013,7 @@ BEGIN TRY
 			,@intConsumptionMethodId = intConsumptionMethodId
 			,@strLotTracking = strLotTracking
 			,@dblLowerToleranceReqQty = dblLowerToleranceReqQty
+			,@dblUpperToleranceReqQty = dblUpperToleranceReqQty
 			,@intCategoryId = intCategoryId
 		FROM @tblItem
 		WHERE intItemRecordId = @intItemRecordId
@@ -2183,31 +2300,31 @@ BEGIN TRY
 
 				SELECT @intWorkOrderConsumedLotId = SCOPE_IDENTITY()
 
-				Select @dblPhysicalCount=[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
+				SELECT @dblPhysicalCount = [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
 
 				EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmCurrentDateTime
-						,@intTransactionTypeId = 8
-						,@intItemId = @intItemId
-						,@intSourceLotId = @intLotId
-						,@intDestinationLotId = NULL
-						,@dblQty = @dblPhysicalCount
-						,@intItemUOMId = @intItemUOMId
-						,@intOldItemId = NULL
-						,@dtmOldExpiryDate = NULL
-						,@dtmNewExpiryDate = NULL
-						,@intOldLotStatusId = NULL
-						,@intNewLotStatusId = NULL
-						,@intUserId = @intUserId
-						,@strNote = NULL
-						,@strReason = NULL
-						,@intLocationId = @intLocationId
-						,@intInventoryAdjustmentId = NULL
-						,@intStorageLocationId  = @intStorageLocationId
-						,@intDestinationStorageLocationId  = NULL
-						,@intWorkOrderInputLotId  = NULL
-						,@intWorkOrderProducedLotId  = NULL
-						,@intWorkOrderId  = @intWorkOrderId
-						,@intWorkOrderConsumedLotId=@intWorkOrderConsumedLotId
+					,@intTransactionTypeId = 8
+					,@intItemId = @intItemId
+					,@intSourceLotId = @intLotId
+					,@intDestinationLotId = NULL
+					,@dblQty = @dblPhysicalCount
+					,@intItemUOMId = @intItemUOMId
+					,@intOldItemId = NULL
+					,@dtmOldExpiryDate = NULL
+					,@dtmNewExpiryDate = NULL
+					,@intOldLotStatusId = NULL
+					,@intNewLotStatusId = NULL
+					,@intUserId = @intUserId
+					,@strNote = NULL
+					,@strReason = NULL
+					,@intLocationId = @intLocationId
+					,@intInventoryAdjustmentId = NULL
+					,@intStorageLocationId = @intStorageLocationId
+					,@intDestinationStorageLocationId = NULL
+					,@intWorkOrderInputLotId = NULL
+					,@intWorkOrderProducedLotId = NULL
+					,@intWorkOrderId = @intWorkOrderId
+					,@intWorkOrderConsumedLotId = @intWorkOrderConsumedLotId
 
 				IF NOT EXISTS (
 						SELECT *
@@ -2247,6 +2364,8 @@ BEGIN TRY
 						,intItemTypeId
 						,intMachineId
 						,intStageLocationId
+						,dblUpperToleranceQty
+						,dblLowerToleranceQty
 						)
 					SELECT @intWorkOrderId
 						,@intLotItemId
@@ -2269,12 +2388,16 @@ BEGIN TRY
 							END
 						,@intMachineId
 						,@intStageLocationId
+						,@dblUpperToleranceReqQty
+						,@dblLowerToleranceReqQty
 				END
 				ELSE
 				BEGIN
 					UPDATE tblMFProductionSummary
 					SET dblConsumedQuantity = dblConsumedQuantity + @dblReqQty
 						,intStageLocationId = @intStageLocationId
+						,dblUpperToleranceQty = @dblUpperToleranceReqQty
+						,dblLowerToleranceQty = @dblLowerToleranceReqQty
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
 						AND IsNULL(intMachineId, 0) = CASE 
@@ -2355,31 +2478,31 @@ BEGIN TRY
 
 				SELECT @intWorkOrderConsumedLotId = SCOPE_IDENTITY()
 
-				Select @dblPhysicalCount=[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
+				SELECT @dblPhysicalCount = [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intItemUOMId, @dblReqQty)
 
 				EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmCurrentDateTime
-						,@intTransactionTypeId = 8
-						,@intItemId = @intItemId
-						,@intSourceLotId = @intLotId
-						,@intDestinationLotId = NULL
-						,@dblQty = @dblQty
-						,@intItemUOMId = @intItemUOMId
-						,@intOldItemId = NULL
-						,@dtmOldExpiryDate = NULL
-						,@dtmNewExpiryDate = NULL
-						,@intOldLotStatusId = NULL
-						,@intNewLotStatusId = NULL
-						,@intUserId = @intUserId
-						,@strNote = NULL
-						,@strReason = NULL
-						,@intLocationId = @intLocationId
-						,@intInventoryAdjustmentId = NULL
-						,@intStorageLocationId  = @intStorageLocationId
-						,@intDestinationStorageLocationId  = NULL
-						,@intWorkOrderInputLotId  = NULL
-						,@intWorkOrderProducedLotId  = NULL
-						,@intWorkOrderId  = @intWorkOrderId
-						,@intWorkOrderConsumedLotId=@intWorkOrderConsumedLotId
+					,@intTransactionTypeId = 8
+					,@intItemId = @intItemId
+					,@intSourceLotId = @intLotId
+					,@intDestinationLotId = NULL
+					,@dblQty = @dblQty
+					,@intItemUOMId = @intItemUOMId
+					,@intOldItemId = NULL
+					,@dtmOldExpiryDate = NULL
+					,@dtmNewExpiryDate = NULL
+					,@intOldLotStatusId = NULL
+					,@intNewLotStatusId = NULL
+					,@intUserId = @intUserId
+					,@strNote = NULL
+					,@strReason = NULL
+					,@intLocationId = @intLocationId
+					,@intInventoryAdjustmentId = NULL
+					,@intStorageLocationId = @intStorageLocationId
+					,@intDestinationStorageLocationId = NULL
+					,@intWorkOrderInputLotId = NULL
+					,@intWorkOrderProducedLotId = NULL
+					,@intWorkOrderId = @intWorkOrderId
+					,@intWorkOrderConsumedLotId = @intWorkOrderConsumedLotId
 
 				IF NOT EXISTS (
 						SELECT *
