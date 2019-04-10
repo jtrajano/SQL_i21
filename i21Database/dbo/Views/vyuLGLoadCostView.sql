@@ -2,6 +2,7 @@
 AS
 SELECT LC.intLoadCostId
 	  ,LC.intLoadId
+	  ,LC.intContractDetailId
 	  ,LC.intItemId
 	  ,LC.intVendorId AS intEntityId
 	  ,LC.strEntityType
