@@ -348,7 +348,7 @@ BEGIN
 				[strTaxCode],
 				[strDescription],
 				[strTaxableByOtherTaxes],
-				[strState] = '',
+				[strState],
 				[strCountry],
 				[intSalesTaxAccountId],
 				[intPurchaseTaxAccountId],
@@ -359,7 +359,7 @@ BEGIN
 					ORIG.[strTaxCode],
 					ORIG.[strDescription],
 					ORIG.[strTaxableByOtherTaxes],
-					[strState] = '',
+					ORIG.[strState],
 					ORIG.[strCountry],
 					ORIG.[intSalesTaxAccountId],
 					ORIG.[intPurchaseTaxAccountId],
@@ -394,16 +394,14 @@ BEGIN
 						intUnitMeasureId		= ORIG.intUnitMeasureId, 
 						dblRate					= ORIG.dblRate, 
 						dtmEffectiveDate		= ORIG.dtmEffectiveDate,
-						intRN					= ROW_NUMBER() OVER (PARTITION BY SRC.intTaxCodeId,ORIG.intUnitMeasureId,ORIG.dtmEffectiveDate ORDER BY SRC.intTaxCodeId, ORIG.dblRate DESC)
+						intRN					= ROW_NUMBER() OVER (PARTITION BY SRC.intTaxCodeId ORDER BY SRC.intTaxCodeId, ORIG.dblRate DESC)
 				FROM tblSMTaxCode SRC
 				INNER JOIN @ORIGINTAXCODE ORIG
 				ON ORIG.strTaxCode = SRC.strTaxCode
 				LEFT JOIN tblSMTaxCodeRate TAXRATE
 				ON SRC.intTaxCodeId = TAXRATE.intTaxCodeId AND
-					ORIG.strCalculationMethod = TAXRATE.strCalculationMethod AND
-					ORIG.dtmEffectiveDate = TAXRATE.dtmEffectiveDate AND
-					ORIG.intUnitMeasureId = TAXRATE.intUnitMeasureId
-				WHERE TAXRATE.intTaxCodeId IS NULL AND ORIG.intUnitMeasureId IS NOT NULL)
+					ORIG.dtmEffectiveDate = TAXRATE.dtmEffectiveDate 
+				WHERE TAXRATE.intTaxCodeId IS NULL)
 			INSERT INTO tblSMTaxCodeRate(
 						intTaxCodeId,
 						strCalculationMethod,
