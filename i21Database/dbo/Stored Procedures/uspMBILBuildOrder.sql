@@ -157,6 +157,7 @@ CREATE TABLE #tempOrderTaxCode (
 	,[strNotes]					NVARCHAR(MAX)
 	,[intUnitMeasureId]			INT
 	,[strUnitMeasure]			NVARCHAR(MAX)
+	,[strTaxClass]				NVARCHAR(MAX)
 );
 
 WHILE EXISTS(SELECT 1 FROM #tempDriverOrder)
@@ -206,7 +207,8 @@ BEGIN
 									,[strTaxGroup]
 									,[strNotes]
 									,[intUnitMeasureId]
-									,[strUnitMeasure])
+									,[strUnitMeasure]
+									,[strTaxClass])
 	EXEC uspARGetItemTaxes @ItemId
 						  ,@LocationId
 						  ,@CustomerId
@@ -221,6 +223,7 @@ BEGIN
 						  ,@ItemUOMId
 						  ,@CFSiteId
 						  ,@IsDeliver
+						  , NULL
 						  ,@CurrencyId
 						  ,@CurrencyExchangeRateTypeId
 						  ,@CurrencyExchangeRate

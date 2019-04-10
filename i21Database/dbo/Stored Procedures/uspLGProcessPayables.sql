@@ -97,8 +97,7 @@ BEGIN
 		LEFT JOIN tblICInventoryReceiptItem IRI ON A.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 		WHERE A.intLoadId = @intLoadId
 			AND A.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
-										  WHERE BD.intItemId = A.intItemId AND Item.strType <> 'Other Charge') 
-			AND A.dtmPostedDate IS NOT NULL
+										  WHERE BD.intItemId = A.intItemId AND Item.strType <> 'Other Charge')
 		
 		UNION ALL
 		
@@ -158,10 +157,8 @@ BEGIN
 			WHERE A.intLoadId = @intLoadId
 				AND A.intLoadCostId = ISNULL(@intLoadCostId, A.intLoadCostId)
 				AND A.intLoadDetailId NOT IN 
-				(SELECT IsNull(BD.intLoadDetailId, 0) 
-					FROM tblAPBillDetail BD 
-				JOIN tblICItem Item ON Item.intItemId = BD.intItemId
-				WHERE BD.intItemId = A.intItemId AND Item.strType = 'Other Charge' AND ISNULL(A.ysnAccrue,0) = 1) AND ISNULL(L.ysnPosted,0) = 1
+					(SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
+					WHERE BD.intItemId = A.intItemId AND Item.strType = 'Other Charge' AND ISNULL(A.ysnAccrue,0) = 1)
 
 	END
 

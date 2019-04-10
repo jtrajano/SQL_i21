@@ -93,6 +93,8 @@ BEGIN
 		BEGIN
 			insert into tblSMTaxGroup(strTaxGroup, strDescription) select strGroup, strDescription from @tax_group_table order by strGroup
 		END
+
+		 EXEC [uspARImportTaxGroupDetail]		
 	END
 
 	
@@ -115,7 +117,6 @@ BEGIN
 			select @Total = count(strGroup) from @tax_group_table
 		 END
 		 
-		 
-		 EXEC [uspARImportTaxGroupDetail]		
+		
 	 END	
 END

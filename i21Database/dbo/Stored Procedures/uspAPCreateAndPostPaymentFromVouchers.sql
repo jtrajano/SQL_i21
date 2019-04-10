@@ -392,7 +392,7 @@ BEGIN
 		SELECT 
 			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
 			[intBillId]			=	tmp.intBillId,
-			[intAccountId]		=	vouchers.intAccountId,
+			[intAccountId]		=	CASE WHEN vouchers.ysnPrepayHasPayment = 0 AND vouchers.intTransactionType IN (2, 13) THEN details.intAccountId ELSE vouchers.intAccountId END,
 			[dblDiscount]		=	ISNULL(paySched.dblDiscount, vouchers.dblTempDiscount),
 			[dblWithheld]		=	vouchers.dblTempWithheld,
 			[dblAmountDue]		=	ISNULL(paySched.dblPayment,vouchers.dblAmountDue),
@@ -412,6 +412,10 @@ BEGIN
 		FROM tblAPBill vouchers
 		INNER JOIN #tmpMultiVouchers tmp ON vouchers.intBillId = tmp.intBillId
 		INNER JOIN #tmpMultiVouchersAndPayment tmpVoucherAndPay ON tmp.intBillId = tmpVoucherAndPay.intBillId
+		CROSS APPLY
+		(
+			SELECT TOP 1 intAccountId, intBillId FROM tblAPBillDetail dtls WHERE dtls.intBillId = vouchers.intBillId
+		) details
 		LEFT JOIN tblAPVoucherPaymentSchedule paySched
 			ON vouchers.intBillId = paySched.intBillId AND paySched.ysnReadyForPayment = 1 AND paySched.ysnPaid = 0
 	END

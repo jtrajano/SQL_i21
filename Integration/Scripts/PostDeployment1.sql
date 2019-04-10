@@ -12,6 +12,8 @@ Post-Deployment Script Template
 --Accounts Payable
 :r "..\dbo\Views\vyuAPOriginCCDTransaction.sql"
 
+
+
 --General Ledger
 :r "..\dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
@@ -116,3 +118,8 @@ GO
 GO
 :r "..\Scripts\CC\uspCCDealerSiteCompanyOwnedMigration.sql"
 GO
+
+-- System Manager
+:r "..\dbo\Stored Procedures\uspSMImportTaxClass.sql"
+:r "..\dbo\Stored Procedures\uspSMImportTaxGroup.sql"
+Go

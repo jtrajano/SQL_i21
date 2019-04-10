@@ -558,10 +558,10 @@ BEGIN
 	SELECT
 		 [intInvoiceDetailId]		= @NewId
 		,[intLotId]					= [intLotId] 
-		,[dblQuantityShipped]		= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ID.intItemUOMId, [dblNet])
-		,[dblGrossWeight]			= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ID.intItemUOMId, [dblGross])
-		,[dblTareWeight]			= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ID.intItemUOMId, [dblTare])
-		,[dblWeightPerQty]			= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ID.intItemUOMId, [dblNet])
+		,[dblQuantityShipped]		= [dblNet]
+		,[dblGrossWeight]			= [dblGross]
+		,[dblTareWeight]			= [dblTare]
+		,[dblWeightPerQty]			= [dblNet]
 		,[strWarehouseCargoNumber]	= [strWarehouseCargoNumber]
 		,[intSort]					= 1
 		,[dtmDateCreated]			= GETDATE()

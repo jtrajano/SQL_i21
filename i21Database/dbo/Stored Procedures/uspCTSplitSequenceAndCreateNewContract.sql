@@ -137,6 +137,13 @@ SET NOCOUNT ON
 			UPDATE	tblCTContractDetail SET intContractStatusId = 3,ysnSplit = 1 WHERE intContractDetailId = @intContractDetailId
 			UPDATE	tblCTContractDetail SET intContractStatusId = 1, intSplitFromId = @intContractDetailId WHERE intContractDetailId = @intNewContractHeaderId
 
+			EXEC uspCTUpdateAdditionalCost @intContractHeaderId
+			IF @intNewContractHeaderId IS NOT NULL
+			BEGIN
+				EXEC uspCTUpdateAdditionalCost @intNewContractHeaderId
+				EXEC uspCTCreateDetailHistory @intNewContractHeaderId,NULL,'Split Sequence And Create New Contract' 
+			END
+
 			SELECT	@intSplitDetailId = MIN(intSplitDetailId) FROM tblEMEntitySplitDetail WHERE intSplitId = @intSplitId AND intSplitDetailId > @intSplitDetailId
 		END
 		

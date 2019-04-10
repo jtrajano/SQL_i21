@@ -228,11 +228,12 @@ BEGIN TRY
 				@dblQty							=	NULL,
 				@intSalesOrderDetailId			=	NULL
 
-		SELECT	@intContractDetailId			=	[intContractDetailId],
-				@intFromItemUOMId				=	[intItemUOMId],
-				@dblQty							=	[dblQty] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
-				@intSalesOrderDetailId			=	[intSalesOrderDetailId]
-		FROM	@tblToProcess 
+		SELECT	@intContractDetailId			=	P.[intContractDetailId],
+				@intFromItemUOMId				=	P.[intItemUOMId],
+				@dblQty							=	(CASE WHEN P.[dblQty] > CTD.[dblBalance] THEN CTD.[dblBalance] ELSE P.[dblQty] END) * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
+				@intSalesOrderDetailId			=	P.[intSalesOrderDetailId]
+		FROM	@tblToProcess P
+		INNER JOIN tblCTContractDetail CTD ON P.[intContractDetailId] = CTD.[intContractDetailId]
 		WHERE	[intUniqueId]					=	 @intUniqueId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)

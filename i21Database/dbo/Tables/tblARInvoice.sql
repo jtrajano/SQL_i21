@@ -116,6 +116,7 @@
 	[intSalesOrderId]					INT												NULL,
 	[dtmForgiveDate]					DATETIME										NULL,
 	[ysnRefundProcessed]				BIT             								NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnRefundProcessed] DEFAULT ((0)),
+	[ysnValidCreditCode]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnValidCreditCode] DEFAULT ((0)),
 	[intCompanyId]						INT												NULL,
 	[intConcurrencyId]					INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
 	[blbSignature]						VARBINARY(MAX)								    NULL,

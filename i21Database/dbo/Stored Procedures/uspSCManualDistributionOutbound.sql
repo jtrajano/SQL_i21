@@ -54,7 +54,25 @@ DECLARE @intStorageScheduleId AS INT
 		,@ysnCustomerStorage BIT
 		,@intContractDetailId INT
 		,@ysnPriceFixation BIT = 0
-		,@ysnAllowInvoiceVoucher BIT = 0;
+		,@ysnAllowInvoiceVoucher BIT = 0
+		,@ysnUpdateContractWeightGrade BIT = 0;
+
+SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
+IF (@ysnUpdateContractWeightGrade = 1)
+BEGIN
+	DECLARE @intContractId int;
+	SELECT TOP 1 @intContractId = intTransactionDetailId FROM @LineItem ORDER BY intId ASC
+	
+	UPDATE SC
+	SET  SC.intWeightId = ContractDetail.intWeightId
+		,SC.intGradeId = ContractDetail.intGradeId
+	FROM tblSCTicket SC
+	OUTER APPLY (SELECT TOP 1 CH.* FROM @LineItem LI 
+								INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = LI.intTransactionDetailId 
+								INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				 ORDER BY intId ASC) ContractDetail
+WHERE intTicketId = @intTicketId
+END
 
 SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId

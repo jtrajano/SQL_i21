@@ -796,7 +796,7 @@ UNION ALL
 		,intBillId = 0
 		,strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
 		,dblAmoundPaid = 0
-		,dblTotal = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN ISNULL(V.dblTotal, V.dblPrice) ELSE ISNULL(V.dblPrice, V.dblTotal) END 
+		,dblTotal = ISNULL(V.dblTotal, V.dblPrice)
 		, dblAmountDue = ISNULL(Bill.dblDetailTotal,V.dblTotal)  
 		, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) * -1 ELSE 0 END  
 		, dblWithheld = 0

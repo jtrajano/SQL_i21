@@ -362,7 +362,11 @@ BEGIN TRY
 						FROM	tblAPBillDetail BD
 						JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
 						JOIN	tblSCTicket		TK  ON TK.intTicketId =  BD.intScaleTicketId
-						WHERE	BD.intContractDetailId = @intContractDetailId AND BD.intScaleTicketId = @intTicketId AND BL.intTransactionType IN (2, 13)
+						WHERE	BD.intContractDetailId	=	@intContractDetailId 
+						AND		BD.intScaleTicketId		=	@intTicketId 
+						AND		BL.intTransactionType	IN (2, 13)
+						AND		BL.ysnPosted			=	1 
+						AND		BL.ysnPaid				=	0 
 
 						IF EXISTS(SELECT * FROM	@prePayId)
 						BEGIN
