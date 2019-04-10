@@ -29,5 +29,8 @@
        [strSubBook] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
 	   ysnMailSent BIT DEFAULT 0,
     [ysnPost] BIT NULL, 
+	[strSAPBrokerAccountNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[strSAPGLAccountNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	[strSAPInternalOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
     CONSTRAINT [PK_tblRKStgMatchPnS_intStgMatchPnSId] PRIMARY KEY (intStgMatchPnSId),  	  
 )
