@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateOverageContracts]
-	  @intInvoiceId		INT
-	, @intScaleUOMId	INT
-	, @intUserId		INT
-	, @dblNetWeight		NUMERIC(18, 6) = 0
+	  @intInvoiceId			INT
+	, @intScaleUOMId		INT = NULL
+	, @intUserId			INT 
+	, @dblNetWeight			NUMERIC(18, 6) = 0
+	, @ysnFromSalesOrder	BIT = 0
 AS
 
 DECLARE @tblInvoiceIds				InvoiceId
@@ -69,7 +70,6 @@ FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
-  --AND dblQtyShipped > ID.dblQtyOrdered
 
 INSERT INTO @tblInvoiceIds (intHeaderId)
 SELECT DISTINCT intInvoiceId FROM #INVOICEDETAILS
@@ -116,7 +116,7 @@ INNER JOIN (
 ) I ON ID.intItemId = I.intItemId 
 WHERE intInvoiceId = @intInvoiceId
 
-IF ISNULL(@strInvalidItem, '') <> ''
+IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0
 	BEGIN
 		DECLARE @strErrorMsg NVARCHAR(MAX) = 'Item ' + @strInvalidItem + ' doesn''t have UOM setup for ' + @strUnitMeasure + '.'
 
@@ -153,13 +153,26 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		FROM #INVOICEDETAILS
 
 		--UPDATE INVOICE DETAIL QTY SHIPPED = AVAILABLE CONTRACT QTY
-		UPDATE ID
-		SET dblQtyShipped	= ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
-		  , dblUnitQuantity	= ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
-		  , @dblQtyOverAged	= @dblNetWeight - ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
-		FROM tblARInvoiceDetail ID
-		INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
-		WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+		IF ISNULL(@ysnFromSalesOrder, 0) = 0
+			BEGIN		
+				UPDATE ID
+				SET dblQtyShipped	= ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
+				  , dblUnitQuantity	= ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
+				  , @dblQtyOverAged	= @dblNetWeight - ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
+				FROM tblARInvoiceDetail ID
+				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+			END
+		ELSE
+			BEGIN
+				UPDATE ID
+				SET dblQtyShipped	= CTD.dblBalance
+				  , dblUnitQuantity	= CTD.dblBalance
+				  , @dblQtyOverAged	= ID.dblQtyOrdered - CTD.dblBalance
+				FROM tblARInvoiceDetail ID
+				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
+				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+			END
 				
 		IF @dblQtyOverAged > 0
 			BEGIN
