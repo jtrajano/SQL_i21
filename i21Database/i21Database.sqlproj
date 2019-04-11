@@ -7519,6 +7519,8 @@
     <Build Include="dbo\Tables\tblIPSAPAccount.sql" />
     <Build Include="dbo\Tables\tblIPSAPInternalOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRebuildSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMRecalcBankAccountRegister.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
