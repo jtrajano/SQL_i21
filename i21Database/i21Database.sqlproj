@@ -4331,7 +4331,6 @@
     <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPS.sql" />
     <Build Include="dbo\Stored Procedures\uspETImportBaseEngineeringToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBEExportPrice.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPaymentCSV.sql" />
     <Build Include="dbo\Views\vyuICTMProductPricing.sql" />
     <Build Include="dbo\Views\vyuTMBEExportPrice.sql" />
