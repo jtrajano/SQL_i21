@@ -165,7 +165,7 @@ BEGIN TRY
 		 [strTransactionType]					= 'Credit Memo'
 		,[strType]								= ARI.[strType]
 		,[strSourceTransaction]					= 'Direct'--'Invoice'
-		,[intSourceId]							= ARI.[intInvoiceId] 
+		,[intSourceId]							= NULL 
 		,[strSourceId]							= ARI.[strInvoiceNumber]
 		,[intInvoiceId]							= NULL
 		,[intEntityCustomerId]					= ARI.[intEntityCustomerId]
@@ -394,16 +394,6 @@ BEGIN CATCH
 END CATCH
 		
 SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
-
-UPDATE I 
-SET ysnReturned = 1 
-  , dblDiscountAvailable = @ZeroDecimal
-  , dblBaseDiscountAvailable = @ZeroDecimal
-FROM tblARInvoice I
-INNER JOIN (
-	SELECT intID 
-	FROM fnGetRowsFromDelimitedValues(@CreatedIvoices)
-) CI ON I.intInvoiceId = CI.intID
 
 UPDATE tblARInvoice 
 SET ysnReturned = 1 
