@@ -1,5 +1,6 @@
 ﻿
 
+
 CREATE VIEW [dbo].[vyuCFARInvoiceRemittance]
 AS
 
@@ -19,7 +20,7 @@ FROM
 ,strCustomerName						AS strCustomerName
 ,strCFEmail								AS strEmail								
 ,strCFEmailDistributionOption			AS strEmailDistributionOption	
-,strCustomerNumber						AS strCustomerNumber	
+,arStaging.strCustomerNumber			AS strCustomerNumber	
 ,intEntityUserId	
 , CASE 
 			WHEN (ISNULL(strCFEmail,'') != '') AND (strCFEmailDistributionOption like '%CF Invoice%') THEN CAST(1 AS BIT)
@@ -27,7 +28,10 @@ FROM
 			END
 			AS ysnEmail,
 dblCFTotalFuelExpensed					AS dblTotalFuelExpensed
-FROM            dbo.tblARCustomerStatementStagingTable 
+,arCust.ysnActive						AS ysnActive
+FROM            dbo.tblARCustomerStatementStagingTable arStaging
+INNER JOIN tblARCustomer as arCust
+ON arCust.intEntityId = arStaging.intEntityCustomerId 
 GROUP BY 
 intEntityCustomerId, 
 strCFTempInvoiceReportNumber, 
@@ -40,9 +44,10 @@ dblCFEligableGallon,
 strCustomerName,
 strCFEmail, 
 strCFEmailDistributionOption,
-strCustomerNumber,
+arStaging.strCustomerNumber,
 intEntityUserId,
-dblCFTotalFuelExpensed) as tbl1
+dblCFTotalFuelExpensed,
+arCust.ysnActive) as tbl1
 INNER JOIN 
 
 (SELECT intEntityCustomerId,
