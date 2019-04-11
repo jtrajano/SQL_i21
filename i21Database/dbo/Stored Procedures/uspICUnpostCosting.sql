@@ -61,6 +61,7 @@ DECLARE @intItemId AS INT
 		,@dtmDate AS DATETIME
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS DECIMAL (38, 20) 
+		,@intTransactionTypeId AS INT
 		,@strTransactionForm AS NVARCHAR(255)
 		,@intCostingMethod AS INT
 		,@intFobPointId AS TINYINT
@@ -83,6 +84,7 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 			,intInventoryTransactionId
+			,intTransactionTypeId
 			,intCostingMethod
 			,intFobPointId
 			,intInTransitSourceLocationId
@@ -97,6 +99,7 @@ BEGIN
 			,t.intSubLocationId
 			,t.intStorageLocationId
 			,t.intInventoryTransactionId
+			,t.intTransactionTypeId
 			,t.intCostingMethod
 			,t.intFobPointId
 			,t.intInTransitSourceLocationId 
@@ -469,6 +472,7 @@ BEGIN
 					,intCostingMethod
 					,intFobPointId
 					,intInTransitSourceLocationId
+					,intTransactionTypeId
 			FROM	@ItemsToUnpost 
 
 			OPEN loopItemsToUnpost;	
@@ -487,6 +491,7 @@ BEGIN
 				,@intCostingMethod
 				,@intFobPointId
 				,@intInTransitSourceLocationId
+				,@intTransactionTypeId
 				;
 
 			-----------------------------------------------------------------------------------------------------------------------------
@@ -590,6 +595,9 @@ BEGIN
 						,@dblQty
 						,@dblUOMQty
 						,@intLotId
+						,@intTransactionTypeId
+						,NULL
+						,0
 				END 
 
 				FETCH NEXT FROM loopItemsToUnpost INTO 
@@ -605,6 +613,7 @@ BEGIN
 					,@intCostingMethod
 					,@intFobPointId	
 					,@intInTransitSourceLocationId				
+					,@intTransactionTypeId
 					;
 			END;
 
