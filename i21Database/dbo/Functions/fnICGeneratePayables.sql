@@ -146,8 +146,8 @@ SELECT DISTINCT
 	,[strContractNumber]		=	F1.strContractNumber
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
-	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
-	,[intContractSequence]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN CD.intContractSeq ELSE NULL END
+	,[intContractDetailId]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN B.intLineNo ELSE NULL END
+	,[intContractSequence]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN CD.intContractSeq ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(200))
 	,[intShipmentId]			=	0

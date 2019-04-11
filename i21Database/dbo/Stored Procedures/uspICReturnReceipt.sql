@@ -109,7 +109,10 @@ BEGIN
 			,strReceiptOriginId
 			,strWarehouseRefNo
 			,ysnOrigin
-			,intSourceInventoryReceiptId 
+			,intSourceInventoryReceiptId
+			,dtmDateCreated
+			,intCreatedByUserId
+			,strDataSource
 	)
 	SELECT	strReceiptType = @receiptType
 			,intSourceType
@@ -152,6 +155,9 @@ BEGIN
 			,strWarehouseRefNo
 			,ysnOrigin
 			,intSourceInventoryReceiptId = r.intInventoryReceiptId 
+			,dtmDateCreated = GETDATE()
+			,intCreatedByUserId = @intEntityUserSecurityId
+			,strDataSource = 'Inventory Receipt'
 	FROM	tblICInventoryReceipt r 
 	WHERE	r.intInventoryReceiptId = @intReceiptId
 
@@ -197,6 +203,10 @@ BEGIN
 		,intSourceInventoryReceiptItemId
 		,intForexRateTypeId
 		,dblForexRate
+		,dtmDateCreated
+		,intCreatedByUserId
+		,intContractHeaderId
+		,intContractDetailId
 	)
 	SELECT	intInventoryReceiptId = @intInventoryReturnId
 			,ri.intLineNo
@@ -271,6 +281,10 @@ BEGIN
 			,intSourceInventoryReceiptItemId = ri.intInventoryReceiptItemId 
 			,ri.intForexRateTypeId
 			,ri.dblForexRate
+			,GETDATE()
+			,@intEntityUserSecurityId
+			,intContractHeaderId			= ri.intContractHeaderId
+			,intContractDetailId			= ri.intContractDetailId
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			LEFT JOIN tblICItemLocation il
@@ -316,6 +330,8 @@ BEGIN
 			,strParentLotAlias
 			,intSort
 			,intConcurrencyId	
+			,dtmDateCreated
+			,intCreatedByUserId
 	)
 	SELECT 
 			ri.intInventoryReceiptItemId
@@ -351,6 +367,8 @@ BEGIN
 			,ril.strParentLotAlias
 			,ril.intSort
 			,intConcurrencyId = 1
+			,GETDATE()
+			,@intEntityUserSecurityId
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblICInventoryReceiptItemLot ril
@@ -385,6 +403,8 @@ BEGIN
 			,strTaxCode
 			,intSort
 			,intConcurrencyId	
+			,dtmDateCreated
+			,intCreatedByUserId
 	)
 	SELECT	
 			ri.intInventoryReceiptItemId
@@ -403,6 +423,8 @@ BEGIN
 			,tx.strTaxCode
 			,tx.intSort
 			,intConcurrencyId = 1
+			,GETDATE()
+			,@intEntityUserSecurityId
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			INNER JOIN tblICInventoryReceiptItemTax tx
