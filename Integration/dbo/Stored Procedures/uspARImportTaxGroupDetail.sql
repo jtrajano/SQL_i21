@@ -345,8 +345,8 @@ BEGIN
 				[strZipCode],
 				[strCity] 
 			) SELECT [intTaxClassId],
-				REPLACE(REPLACE(REPLACE(REPLACE([strTaxCode],'&', ' '),'/',' '),'(',' '),')',' ',
-				REPLACE(REPLACE(REPLACE(REPLACE([strDescription],'&', ' '),'/',' '),'(',' '),')',' ',
+				REPLACE(REPLACE(REPLACE(REPLACE([strTaxCode],'&', ' '),'/',' '),'(',' '),')',' '),
+				REPLACE(REPLACE(REPLACE(REPLACE([strDescription],'&', ' '),'/',' '),'(',' '),')',' '),
 				[strTaxableByOtherTaxes],
 				[strState],
 				[strCountry],
@@ -373,7 +373,7 @@ BEGIN
 			) taxcodes
 			WHERE intRowNumber = 1
 
-
+			
 			--UPDATE intUnitMeasureId
 			UPDATE ORIG
 			SET ORIG.intUnitMeasureId  = ICUnit.intUnitMeasureId,
