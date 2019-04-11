@@ -163,6 +163,7 @@ BEGIN
 
 		SELECT TOP 1 @strDescription = strCommodityCode
 			, @ysnExchangeTraded = ysnExchangeTraded
+			, @strCommodityCode = strCommodityCode
 		FROM tblICCommodity
 		WHERE intCommodityId = @intCommodityId
 
@@ -911,44 +912,46 @@ BEGIN
 				, strFutureMonth
 				, strDeliveryDate
 			FROM (
-				SELECT cd.intContractHeaderId
-					, cd.strContractNumber
-					, cd.intCommodityId
-					, cd.strCommodityCode
+				SELECT DISTINCT cd.intContractHeaderId
+					, ch.strContractNumber
+					, ch.intCommodityId
+					, strCommodityCode = @strCommodityCode
 					, strType = 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS
 					, cd.intCompanyLocationId
-					, cd.strLocationName
+					, cl.strLocationName
 					, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
 					, strContractEndMonthNearBy = 'Near By' COLLATE Latin1_General_CI_AS
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(v.dblQuantity ,0))
+					, sblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(v.dblQuantity ,0))
 					, intSeqNo = 5
 					, um.strUnitMeasure
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-					, cd.strEntityName
+					, strEntityName = v.strEntity
 					, intOrderId = 5
 					, v.intItemId
 					, v.strItemNo
 					, v.intCategoryId
 					, v.strCategory
 					, cd.intFutureMarketId
-					, cd.strFutMarketName
+					, fm.strFutMarketName
 					, cd.intFutureMonthId
-					, cd.strFutureMonth
-					, strDeliveryDate = dbo.fnRKFormatDate(det.dtmEndDate, 'MMM yyyy')
-					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
-					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
+					, mnt.strFutureMonth
+					, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
+					, strTicketNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryReceipt r ON r.strReceiptNumber = v.strTransactionId
-				INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
-				INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT') AND ISNULL(ysnInTransit, 0) = 0
-				INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
-				JOIN (SELECT intContractDetailId, dtmEndDate FROM tblCTContractDetail) det ON cd.intContractDetailId = det.intContractDetailId
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
-				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
-				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
-				WHERE v.strTransactionType = 'Inventory Receipt' AND cd.intCommodityId = @intCommodityId
-					AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate) AND ISNULL(strTicketStatus, '') <> 'V'
+				INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND ri.intInventoryReceiptItemId = v.intTransactionDetailId AND r.strReceiptType = 'Purchase Contract'
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+				INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 1
+				INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
+				INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
+				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
+				LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
+				WHERE v.strTransactionType = 'Inventory Receipt' AND ch.intCommodityId = @intCommodityId
+					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate) 
+
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			GROUP BY intContractHeaderId
 				, strContractNumber
@@ -972,6 +975,7 @@ BEGIN
 				, intFutureMonthId
 				, strFutureMonth
 				, strDeliveryDate
+				, strTicketNumber
 		END
 		SELECT @mRowNumber = MIN(intCommodityIdentity)
 		FROM @Commodity
