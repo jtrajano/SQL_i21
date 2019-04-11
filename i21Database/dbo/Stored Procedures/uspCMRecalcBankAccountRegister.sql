@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspCMRecalBankAccountRegister
+CREATE PROCEDURE uspCMRecalcBankAccountRegister
 (
 	@intBankAccountId INT
 )
