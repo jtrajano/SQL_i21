@@ -423,13 +423,98 @@ BEGIN TRY
 			)
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	DECLARE @strError NVARCHAR(Max)
+		,@strConsumedQuantity NVARCHAR(50)
+		,@strUpperToleranceQty NVARCHAR(50)
+		,@strLowerToleranceQty NVARCHAR(50)
+		,@intInputItemId INT
+
+	IF EXISTS (
+			SELECT *
+			FROM tblMFProductionSummary
+			WHERE intItemTypeId IN (
+					1
+					,3
+					)
+				AND dblYieldQuantity > 0
+				AND dblConsumedQuantity - (dblYieldQuantity) < dblLowerToleranceQty
+				AND dblRequiredQty <> dblLowerToleranceQty
+			)
+	BEGIN
+		SELECT @strConsumedQuantity = dblConsumedQuantity - dblYieldQuantity
+			,@strLowerToleranceQty = dblLowerToleranceQty
+			,@intInputItemId = intItemId
+		FROM tblMFProductionSummary
+		WHERE intItemTypeId IN (
+				1
+				,3
+				)
+			AND dblYieldQuantity > 0
+			AND dblConsumedQuantity - dblYieldQuantity < dblLowerToleranceQty
+
+		SELECT @strItemNo = strItemNo
+		FROM tblICItem
+		WHERE intItemId = @intInputItemId
+
+		SELECT @strError = 'System is trying to consume ' + [dbo].[fnRemoveTrailingZeroes](@strConsumedQuantity) + ' for the item ' + @strItemNo + ' that is less than the lower tolerance qty of ' + [dbo].[fnRemoveTrailingZeroes](@strLowerToleranceQty) + '. It can consume only within the tolerance limits specified at the recipe level.'
+
+		RAISERROR (
+				@strError
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM tblMFProductionSummary
+			WHERE intItemTypeId IN (
+					1
+					,3
+					)
+				AND dblYieldQuantity < 0
+				AND dblConsumedQuantity + abs(dblYieldQuantity) > dblUpperToleranceQty
+				AND dblRequiredQty <> dblUpperToleranceQty
+			)
+	BEGIN
+		SELECT @strConsumedQuantity = dblConsumedQuantity + abs(dblYieldQuantity)
+			,@strUpperToleranceQty = dblUpperToleranceQty
+			,@intInputItemId = intItemId
+		FROM tblMFProductionSummary
+		WHERE intItemTypeId IN (
+				1
+				,3
+				)
+			AND dblYieldQuantity < 0
+			AND dblConsumedQuantity + abs(dblYieldQuantity) > dblUpperToleranceQty
+
+		SELECT @strItemNo = strItemNo
+		FROM tblICItem
+		WHERE intItemId = @intInputItemId
+
+		SELECT @strError = 'System is trying to consume ' + [dbo].[fnRemoveTrailingZeroes](@strConsumedQuantity) + ' for the item ' + @strItemNo + ' that is more than the upper tolerance qty of ' + [dbo].[fnRemoveTrailingZeroes](@strUpperToleranceQty) + '. It can consume only within the tolerance limits specified at the recipe level.'
+
+		RAISERROR (
+				@strError
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM tblMFProductionSummary F
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
 	WHERE F.intWorkOrderId = @intWorkOrderId
 		AND F.dblYieldQuantity <> 0
-		AND F.intItemTypeId in (1,3)
-		
+		AND F.intItemTypeId IN (
+			1
+			,3
+			)
+
 	WHILE @intProductionSummaryId IS NOT NULL
 	BEGIN
 		SELECT @intItemId = NULL

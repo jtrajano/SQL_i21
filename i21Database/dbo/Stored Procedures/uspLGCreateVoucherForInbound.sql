@@ -117,7 +117,9 @@ BEGIN TRY
 		,[intSubCurrencyCents]
 		,[intAccountId]
 		,[strBillOfLading]
-		,[ysnReturn])
+		,[ysnReturn]
+		,[intSubLocationId]
+		,[intStorageLocationId])
 	SELECT
 		[intEntityVendorId] = intVendorEntityId
 		,[intTransactionType] = 1
@@ -141,10 +143,7 @@ BEGIN TRY
 		,[dblQuantityToBill] = LD.dblQuantity
 		,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 		,[intQtyToBillUOMId] = LD.intItemUOMId
-		,[dblCost] = CASE WHEN AD.ysnSeqSubCurrency = 1
-						THEN ISNULL(AD.dblSeqPrice, 0) / 100
-						ELSE ISNULL(AD.dblSeqPrice, 0)
-						END
+		,[dblCost] = ISNULL(AD.dblSeqPrice, 0)
 		,[dblCostUnitQty] = CAST(ISNULL(CostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 		,[intCostUOMId] = AD.intSeqPriceUOMId
 		,[dblNetWeight] = ISNULL(LD.dblNet,0)
@@ -159,6 +158,8 @@ BEGIN TRY
 		,[intAccountId] = [dbo].[fnGetItemGLAccount](LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
+		,[intSubLocationId] = ISNULL(LW.intSubLocationId, CD.intSubLocationId)
+		,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, CD.intStorageLocationId)
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -166,12 +167,17 @@ BEGIN TRY
 	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
 		AND ItemLoc.intLocationId = CD.intCompanyLocationId
-	LEFT JOIN tblSMCompanyLocationSubLocation SLCL ON SLCL.intCompanyLocationSubLocationId = LD.intPSubLocationId
-		AND ItemLoc.intLocationId = SLCL.intCompanyLocationId
+	LEFT JOIN tblSMCompanyLocation SMCL ON LD.intPCompanyLocationId = SMCL.intCompanyLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 	LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = LD.intWeightItemUOMId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = CD.intPriceItemUOMId
+	OUTER APPLY (SELECT TOP 1 W.intSubLocationId, W.intStorageLocationId, 
+			strSubLocation = CLSL.strSubLocationName, strStorageLocation = SL.strName FROM tblLGLoadWarehouse W
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
+			WHERE intLoadId = L.intLoadId) LW
 	WHERE L.intLoadId = @intLoadId
 	GROUP BY LD.intVendorEntityId
 		,L.intCompanyLocationId
@@ -198,6 +204,8 @@ BEGIN TRY
 		,ItemUOM.dblUnitQty
 		,CostUOM.dblUnitQty
 		,WeightUOM.dblUnitQty
+		,ISNULL(LW.intSubLocationId, CD.intSubLocationId)
+		,ISNULL(LW.intStorageLocationId, CD.intStorageLocationId)
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intEntityVendorId
@@ -288,7 +296,9 @@ BEGIN TRY
 			,[intSubCurrencyCents]
 			,[intAccountId]
 			,[strBillOfLading]
-			,[ysnReturn])
+			,[ysnReturn]
+			,[intSubLocationId]
+			,[intStorageLocationId])
 		SELECT
 			[intEntityVendorId]
 			,[intTransactionType]
@@ -327,6 +337,8 @@ BEGIN TRY
 			,[intAccountId]
 			,[strBillOfLading]
 			,[ysnReturn]
+			,[intSubLocationId]
+			,[intStorageLocationId]
 		FROM @voucherPayable
 		WHERE intEntityVendorId = @intVendorEntityId
 

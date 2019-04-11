@@ -330,7 +330,9 @@ BEGIN TRY
 			,[ysnSubCurrency]
 			,[intSubCurrencyCents]
 			,[intAccountId]
-			,[ysnReturn])
+			,[ysnReturn]
+			,[intSubLocationId]
+			,[intStorageLocationId])
 		SELECT
 			[intEntityVendorId] = VDD.intPartyEntityId
 			,[intTransactionType] = @intVoucherType
@@ -372,6 +374,8 @@ BEGIN TRY
 								THEN (SELECT TOP 1 intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'AP Clearing') 
 								ELSE V.intGLAccountExpenseId END
 			,[ysnReturn] = CAST(0 AS BIT)
+			,[intSubLocationId] = VDD.intSubLocationId
+			,[intStorageLocationId] = VDD.intStorageLocationId
 		FROM @voucherDetailData VDD
 			INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 			INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId

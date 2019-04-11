@@ -46,7 +46,9 @@ BEGIN
 			,[intSubCurrencyCents]
 			,[intAccountId]
 			,[strBillOfLading]
-			,[ysnReturn])
+			,[ysnReturn]
+			,[intStorageLocationId]
+			,[intSubLocationId])
 		SELECT
 			[intEntityVendorId] = A.intVendorEntityId
 			,[intTransactionType] = 1
@@ -85,6 +87,8 @@ BEGIN
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = A.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
+			,[intStorageLocationId] = A.intStorageLocationId
+			,[intSubLocationId] = A.intSubLocationId
 		FROM vyuLGLoadPurchaseContracts A
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.intVendorEntityId = D1.[intEntityId]  
 		LEFT JOIN tblICItem item ON item.intItemId = A.intItemId 
@@ -139,6 +143,8 @@ BEGIN
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
+			,[intStorageLocationId] = A.intStorageLocationId
+			,[intSubLocationId] = A.intSubLocationId
 		FROM vyuLGLoadCostForVendor A
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId

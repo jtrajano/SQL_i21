@@ -79,7 +79,7 @@ BEGIN
 			,[intPurchaseDetailId]				
 			,[intContractHeaderId]				
 			,[intContractDetailId]				
-			,[intContractSeqId] = NULL					
+			,[intContractSeqId]	= intContractSequence				
 			,[intScaleTicketId]					
 			,[intInventoryReceiptItemId]		
 			,[intInventoryReceiptChargeId]		

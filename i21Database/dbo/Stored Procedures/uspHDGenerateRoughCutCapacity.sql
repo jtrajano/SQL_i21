@@ -85,7 +85,7 @@ planed as (
 	select
 		a.intTicketId
 		,a.intAssignedToEntity
-		,intDate = convert(int, convert(nvarchar(8), a.dtmDueDate, 112))
+		,intDate = convert(int, convert(nvarchar(8), d.dtmStartDate, 112))
 		--,dblHours = sum((convert(numeric(18,6),datediff(hour,d.dtmStartDate, d.dtmEndDate)) / convert(numeric(18,6),24.00)) * convert(numeric(18,6),8.00))
 		,dblHours = (case
 						when datediff(day,d.dtmStartDate, d.dtmEndDate) > 0 and datediff(hour,d.dtmStartDate, d.dtmEndDate) > 8 and (d.ysnAllDayEvent is null or d.ysnAllDayEvent = convert(bit,0))
@@ -105,7 +105,7 @@ planed as (
 		,tblSMActivity d
 	where
 		a.dtmDueDate is not null
-		and convert(int, convert(nvarchar(8), a.dtmDueDate, 112)) between @intDateFrom and @intDateTo
+		and convert(int, convert(nvarchar(8), d.dtmStartDate, 112)) between @intDateFrom and @intDateTo
 		and c.strModule = 'Help Desk'
 		and c.strNamespace = 'HelpDesk.view.Ticket'
 		and b.intRecordId = a.intTicketId

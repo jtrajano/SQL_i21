@@ -24,6 +24,12 @@ DECLARE @intStgMatchPnSId INT
 	,@strReferenceNo NVARCHAR(MAX)
 	,@strText nvarchar(MAX)
 	,@strMessageCode nvarchar(50)
+	,@intCommodityId INT
+	,@strSAPBrokerAccountNo NVARCHAR(50)
+	,@strSAPGLAccountNo NVARCHAR(50)
+	,@strSAPInternalOrderNo NVARCHAR(50)
+	,@intYearDiff INT
+	,@strBook NVARCHAR(100)
 DECLARE @tblOutput AS TABLE (
 	intRowNo INT IDENTITY(1, 1)
 	,strStgMatchPnSId NVARCHAR(MAX)
@@ -54,6 +60,8 @@ DECLARE @tblRKStgMatchPnS TABLE (
 	,strReferenceNo NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,ysnFuture BIT
 	,strText nvarchar(MAX)
+	,intCommodityId INT
+	,strBook NVARCHAR(100)
 	)
 DECLARE @intToCurrencyId INT
 
@@ -63,6 +71,14 @@ WHERE strCurrency = 'USD'
 
 Update tblRKStgMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0 AND IsNULL(strStatus,'')=''
 Update tblRKStgOptionMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0 AND IsNULL(strStatus,'')=''
+
+-- Updating intCommodityId for Options
+UPDATE m
+SET m.intCommodityId = ft.intCommodityId
+FROM tblRKStgOptionMatchPnS m
+JOIN tblRKOptionsMatchPnS op ON op.intMatchNo = m.intMatchNo
+JOIN tblRKFutOptTransaction ft ON ft.intFutOptTransactionId = op.intLFutOptTransactionId
+WHERE ISNULL(m.strStatus, '') = ''
 
 INSERT INTO @tblRKStgMatchPnS (
 	intStgMatchPnSId
@@ -75,6 +91,8 @@ INSERT INTO @tblRKStgMatchPnS (
 	,strReferenceNo
 	,ysnFuture
 	,strText
+	,intCommodityId
+	,strBook
 	)
 SELECT S.intStgMatchPnSId
 	,S.intMatchNo
@@ -86,6 +104,8 @@ SELECT S.intStgMatchPnSId
 	,Left('F-'+ISNULL(CONVERT(VARCHAR, S.intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(FM.strFutMarketName, ''),16) AS strReference
 	,1
 	,ISNULL(S.strBook+' - ', '')+ISNULL(CONVERT(VARCHAR, S.intMatchNo), '')  
+	,S.intCommodityId
+	,S.strBook
 FROM tblRKStgMatchPnS S
 JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = S.intFutureMarketId
 JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = S.intCompanyLocationId
@@ -103,6 +123,8 @@ INSERT INTO @tblRKStgMatchPnS (
 	,strReferenceNo
 	,ysnFuture
 	,strText
+	,intCommodityId
+	,strBook
 	)
 SELECT intStgOptionMatchPnSId
 	,intMatchNo
@@ -114,6 +136,8 @@ SELECT intStgOptionMatchPnSId
 	,Left('O-'+ISNULL(CONVERT(VARCHAR, intMatchNo), '') + ISNULL('-' + strBook, '') + '-' + ISNULL(strFutMarketName, ''),16) AS strReference
 	,0
 	,ISNULL(PS.strBook+' - ', '')+ISNULL(CONVERT(VARCHAR, PS.intMatchNo), '') 
+	,PS.intCommodityId
+	,PS.strBook
 FROM tblRKStgOptionMatchPnS PS
 JOIN tblSMCurrency C ON C.strCurrency = PS.strCurrency
 WHERE ISNULL(strStatus, '') = ''AND IsNULL(PS.ysnPost,0)=1
@@ -123,6 +147,24 @@ FROM @tblRKStgMatchPnS
 
 WHILE (@intRecordId IS NOT NULL)
 BEGIN
+	SELECT @intStgMatchPnSId = NULL
+		,@intMatchNo = NULL
+		,@dtmMatchDate = NULL
+		,@strCurrency = ''
+		,@dblGrossPnL = NULL
+		,@dtmPostingDate = NULL
+		,@strLocationName = ''
+		,@strReferenceNo = ''
+		,@ysnFuture=NULL
+		,@strText=''
+		,@intCommodityId = NULL
+		,@strSAPLocation = ''
+		,@strSAPBrokerAccountNo = ''
+		,@strSAPGLAccountNo = ''
+		,@strSAPInternalOrderNo = ''
+		,@intYearDiff = NULL
+		,@strBook = ''
+
 	SELECT @intStgMatchPnSId = intStgMatchPnSId
 		,@intMatchNo = intMatchNo
 		,@dtmMatchDate = dtmMatchDate
@@ -133,12 +175,60 @@ BEGIN
 		,@strReferenceNo = strReferenceNo
 		,@ysnFuture=ysnFuture
 		,@strText=strText
+		,@intCommodityId = intCommodityId
+		,@strBook = strBook
 	FROM @tblRKStgMatchPnS
 	WHERE intRecordId = @intRecordId
 
 	SELECT @strSAPLocation = strSAPLocation
 	FROM tblIPSAPLocation
 	WHERE stri21Location = @strLocationName
+
+	-- Updating Account No
+	SELECT @strSAPBrokerAccountNo = strSAPAccountNo
+	FROM tblIPSAPAccount
+	WHERE intCommodityId = @intCommodityId
+		AND ysnGLAccount = 0
+
+	SELECT @strSAPGLAccountNo = strSAPAccountNo
+	FROM tblIPSAPAccount
+	WHERE intCommodityId = @intCommodityId
+		AND ysnGLAccount = 1
+
+	-- Updating Internal Order No based on the year
+	IF ISNUMERIC(LEFT(@strBook, 4)) = 1
+	BEGIN
+		SELECT @intYearDiff = DATEDIFF(year, @dtmMatchDate, LEFT(@strBook, 4))
+
+		IF ISNULL(@intYearDiff, 0) >= 0
+		BEGIN
+			SELECT @strSAPInternalOrderNo = strSAPInternalOrderNo
+			FROM tblIPSAPInternalOrder
+			WHERE intCommodityId = @intCommodityId
+				AND intYearDiff = @intYearDiff
+		END
+	END
+
+	IF ISNULL(@strSAPBrokerAccountNo, '') = ''
+		OR ISNULL(@strSAPGLAccountNo, '') = ''
+	BEGIN
+		IF @ysnFuture = 1
+		BEGIN
+			UPDATE tblRKStgMatchPnS
+			SET strStatus = 'Ack Rcvd'
+				,strMessage = 'Margin / GL Account No is not configured. '
+			WHERE intStgMatchPnSId = @intStgMatchPnSId
+		END
+		ELSE
+		BEGIN
+			UPDATE tblRKStgOptionMatchPnS
+			SET strStatus = 'Ack Rcvd'
+				,strMessage = 'Margin / GL Account No is not configured. '
+			WHERE intStgOptionMatchPnSId = @intStgMatchPnSId
+		END
+
+		GOTO NEXT_GL
+	END
 
 	BEGIN
 		SET @strXml = '<FIDCCP02>'
@@ -165,7 +255,8 @@ BEGIN
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), ABS(@dblGrossPnL))), '') + '</WRBTR>'
 		SET @strXml += '<SGTXT>' + ISNULL(@strText,'') + '</SGTXT>'
 		SET @strXml += '<KOSTL>' + '' + '</KOSTL>'
-		SET @strXml += '<HKONT>' + '115501' + '</HKONT>'
+		SET @strXml += '<AUFNR>' + '' + '</AUFNR>'
+		SET @strXml += '<HKONT>' + ISNULL(@strSAPBrokerAccountNo, '') + '</HKONT>'
 		SET @strXml += '<PRCTR>' + '1134' + '</PRCTR>'
 		SET @strXml += '</E1FISEG>'
 		--GL account details (TM account)
@@ -177,7 +268,8 @@ BEGIN
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), ABS(@dblGrossPnL))), '') + '</WRBTR>'
 		SET @strXml += '<SGTXT>' + ISNULL(@strText,'') + '</SGTXT>'
 		SET @strXml += '<KOSTL>' + '9012' + '</KOSTL>'
-		SET @strXml += '<HKONT>' + '439282' + '</HKONT>'
+		SET @strXml += '<AUFNR>' + ISNULL(@strSAPInternalOrderNo, '') + '</AUFNR>'
+		SET @strXml += '<HKONT>' + ISNULL(@strSAPGLAccountNo, '') + '</HKONT>'
 		SET @strXml += '<PRCTR>' + '1162' + '</PRCTR>'
 		SET @strXml += '</E1FISEG>'
 		SET @strXml += '</E1FIKPF>'
@@ -205,6 +297,9 @@ BEGIN
 			UPDATE tblRKStgMatchPnS
 			SET strStatus = 'Awt Ack'
 				,strReferenceNo = @strReferenceNo
+				,strSAPBrokerAccountNo = @strSAPBrokerAccountNo
+				,strSAPGLAccountNo = @strSAPGLAccountNo
+				,strSAPInternalOrderNo = @strSAPInternalOrderNo
 			WHERE intStgMatchPnSId = @intStgMatchPnSId
 		END
 		ELSE
@@ -212,9 +307,14 @@ BEGIN
 			UPDATE tblRKStgOptionMatchPnS
 			SET strStatus = 'Awt Ack'
 				,strReferenceNo = @strReferenceNo
+				,strSAPBrokerAccountNo = @strSAPBrokerAccountNo
+				,strSAPGLAccountNo = @strSAPGLAccountNo
+				,strSAPInternalOrderNo = @strSAPInternalOrderNo
 			WHERE intStgOptionMatchPnSId = @intStgMatchPnSId
 		END
 	END
+
+	NEXT_GL:
 
 	SELECT @intRecordId = Min(intRecordId)
 	FROM @tblRKStgMatchPnS
