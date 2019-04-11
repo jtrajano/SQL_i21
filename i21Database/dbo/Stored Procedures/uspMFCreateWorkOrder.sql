@@ -46,6 +46,7 @@ BEGIN TRY
 		,@dblActualQuantity NUMERIC(18, 6)
 		,@dblNoOfUnits NUMERIC(18, 6)
 		,@intNoOfUnitsItemUOMId INT
+		,@intTransactionFrom int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -79,6 +80,7 @@ BEGIN TRY
 		,@dblActualQuantity = dblActualQuantity
 		,@dblNoOfUnits = dblNoOfUnits
 		,@intNoOfUnitsItemUOMId = intNoOfUnitsItemUOMId
+		,@intTransactionFrom=intTransactionFrom
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strWorkOrderNo NVARCHAR(50)
 			,intManufacturingProcessId INT
@@ -109,6 +111,7 @@ BEGIN TRY
 			,dblActualQuantity NUMERIC(18, 6)
 			,dblNoOfUnits NUMERIC(18, 6)
 			,intNoOfUnitsItemUOMId INT
+			,intTransactionFrom int
 			)
 
 	BEGIN TRANSACTION
@@ -247,6 +250,7 @@ BEGIN TRY
 		,dblActualQuantity
 		,dblNoOfUnits
 		,intNoOfUnitsItemUOMId
+		,intTransactionFrom
 		)
 	SELECT @strWorkOrderNo
 		,@intManufacturingProcessId
@@ -289,6 +293,7 @@ BEGIN TRY
 		,@dblActualQuantity
 		,@dblNoOfUnits
 		,@intNoOfUnitsItemUOMId
+		,@intTransactionFrom
 
 	SET @intWorkOrderId = SCOPE_IDENTITY()
 
