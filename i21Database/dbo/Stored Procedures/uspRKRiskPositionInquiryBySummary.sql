@@ -1868,67 +1868,67 @@ SELECT intRowNumber
 	, strSubBook
 FROM @ListFinal where strFutureMonth='Total'
 
-INSERT INTO @MonthOrder (intRowNumber
-	, strGroup
-	, Selection
-	, PriceStatus
-	, strFutureMonth
-	, strAccountNumber
-	, dblNoOfContract
-	, strTradeNo
-	, TransactionDate
-	, TranType
-	, CustVendor
-	, dblNoOfLot
-	, dblQuantity
-	, intOrderByHeading
-	, intContractHeaderId
-	, intFutOptTransactionHeaderId
-	, strProductType
-	, strProductLine
-	, strShipmentPeriod
-	, strLocation
-	, strOrigin
-	, intItemId
-	, strItemNo
-	, strItemDescription
-	, intBookId
-	, strBook
-	, intSubBookId
-	, strSubBook)
-SELECT DISTINCT intRowNumber
-	, strGroup
-	, Selection
-	, PriceStatus
-	, b.strFutureMonth
-	, strAccountNumber
-	, 0--CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))
-	, strTradeNo = ''
-	, TransactionDate = ''
-	, TranType
-	, CustVendor
-	, dblNoOfLot = 0
-	, dblQuantity = 0
-	, intOrderByHeading
-	, intContractHeaderId = null
-	, intFutOptTransactionHeaderId = null
-	, strProductType = null
-	, strProductLine = null
-	, strShipmentPeriod = ''
-	, strLocation = ''
-	, strOrigin = null
-	, intItemId = null
-	, strItemNo = ''
-	, strItemDescription = ''
-	, intBookId = null
-	, strBook = null
-	, intSubBookId = null
-	, strSubBook = null
-FROM @ListFinal a
- LEFT JOIN (
-SELECT DISTINCT strFutureMonth FROM @ListFinal
-) b ON a.strFutureMonth = b.strFutureMonth
-WHERE intRowNumber = 1
+--INSERT INTO @MonthOrder (intRowNumber
+--	, strGroup
+--	, Selection
+--	, PriceStatus
+--	, strFutureMonth
+--	, strAccountNumber
+--	, dblNoOfContract
+--	, strTradeNo
+--	, TransactionDate
+--	, TranType
+--	, CustVendor
+--	, dblNoOfLot
+--	, dblQuantity
+--	, intOrderByHeading
+--	, intContractHeaderId
+--	, intFutOptTransactionHeaderId
+--	, strProductType
+--	, strProductLine
+--	, strShipmentPeriod
+--	, strLocation
+--	, strOrigin
+--	, intItemId
+--	, strItemNo
+--	, strItemDescription
+--	, intBookId
+--	, strBook
+--	, intSubBookId
+--	, strSubBook)
+--SELECT DISTINCT intRowNumber
+--	, strGroup
+--	, Selection
+--	, PriceStatus
+--	, b.strFutureMonth
+--	, strAccountNumber
+--	, 0--CONVERT(DOUBLE PRECISION,ROUND(dblNoOfContract,@intDecimal))
+--	, strTradeNo = ''
+--	, TransactionDate = ''
+--	, TranType
+--	, CustVendor
+--	, dblNoOfLot = 0
+--	, dblQuantity = 0
+--	, intOrderByHeading
+--	, intContractHeaderId = null
+--	, intFutOptTransactionHeaderId = null
+--	, strProductType = null
+--	, strProductLine = null
+--	, strShipmentPeriod = ''
+--	, strLocation = ''
+--	, strOrigin = null
+--	, intItemId = null
+--	, strItemNo = ''
+--	, strItemDescription = ''
+--	, intBookId = null
+--	, strBook = null
+--	, intSubBookId = null
+--	, strSubBook = null
+--FROM @ListFinal a
+-- LEFT JOIN (
+--SELECT DISTINCT strFutureMonth FROM @ListFinal
+--) b ON a.strFutureMonth = b.strFutureMonth
+--WHERE intRowNumber = 1
 
 SELECT intRowNumber1 intRowNumFinal
 	, intRowNumber
