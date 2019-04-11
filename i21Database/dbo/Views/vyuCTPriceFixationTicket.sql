@@ -37,9 +37,9 @@ FROM
 	FROM tblCTPriceFixationTicket a
 	INNER JOIN vyuSCTicketInventoryShipmentView b ON a.intTicketId = b.intTicketId AND a.intInventoryShipmentId = b.intInventoryShipmentId
 	INNER JOIN tblCTPriceFixationDetail c ON a.intPricingId = c.intPriceFixationDetailId
-	INNER JOIN tblCTPriceFixationDetailAPAR d ON c.intPriceFixationDetailId = d.intPriceFixationDetailId
-	INNER JOIN tblARInvoiceDetail e ON d.intInvoiceDetailId = e.intInvoiceDetailId and b.intInventoryShipmentItemId = e.intInventoryShipmentItemId
-	INNER JOIN tblARInvoice f ON e.intInvoiceId = f.intInvoiceId
+	LEFT JOIN tblCTPriceFixationDetailAPAR d ON c.intPriceFixationDetailId = d.intPriceFixationDetailId
+	LEFT JOIN tblARInvoiceDetail e ON d.intInvoiceDetailId = e.intInvoiceDetailId and b.intInventoryShipmentItemId = e.intInventoryShipmentItemId
+	LEFT JOIN tblARInvoice f ON e.intInvoiceId = f.intInvoiceId
 	UNION ALL
 	SELECT intPriceFixationTicketId
 	,a.intPriceFixationId
@@ -60,7 +60,7 @@ FROM
 	FROM tblCTPriceFixationTicket a
 	INNER JOIN vyuSCTicketInventoryReceiptView b ON a.intTicketId = b.intTicketId AND a.intInventoryReceiptId = b.intInventoryReceiptId
 	INNER JOIN tblCTPriceFixationDetail c ON a.intPricingId = c.intPriceFixationDetailId
-	INNER JOIN tblCTPriceFixationDetailAPAR d ON c.intPriceFixationDetailId = d.intPriceFixationDetailId
-	INNER JOIN tblAPBillDetail e ON  d.intBillDetailId = e.intBillDetailId and b.intInventoryReceiptItemId = e.intInventoryReceiptItemId
-	INNER JOIN tblAPBill f ON e.intBillId = f.intBillId
+	LEFT JOIN tblCTPriceFixationDetailAPAR d ON c.intPriceFixationDetailId = d.intPriceFixationDetailId
+	LEFT JOIN tblAPBillDetail e ON  d.intBillDetailId = e.intBillDetailId and b.intInventoryReceiptItemId = e.intInventoryReceiptItemId
+	LEFT JOIN tblAPBill f ON e.intBillId = f.intBillId
 )tbl
