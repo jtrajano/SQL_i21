@@ -280,7 +280,10 @@ INSERT INTO tblHDRoughCountCapacity
 				join tblHDTicketHoursWorked a on b.intTicketId = a.intTicketId
 			where
 				convert(int, convert(nvarchar(8), a.dtmDate, 112)) between @intDateFrom and @intDateTo
-				and ( b.dtmDueDate is null or convert(int, convert(nvarchar(8), b.dtmDueDate, 112)) < @intDateFrom)
-				and ( b.dtmDueDate is null or convert(int, convert(nvarchar(8), b.dtmDueDate, 112)) > @intDateTo)
+				and (
+						(b.dtmDueDate is null or convert(int, convert(nvarchar(8), b.dtmDueDate, 112)) < @intDateFrom)
+						or
+						(b.dtmDueDate is null or convert(int, convert(nvarchar(8), b.dtmDueDate, 112)) > @intDateTo)
+					)
 
 END
