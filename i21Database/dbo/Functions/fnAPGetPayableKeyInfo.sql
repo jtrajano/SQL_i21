@@ -11,7 +11,8 @@ RETURN
 		,A.intVoucherPayableId AS intNewPayableId
 	FROM tblAPVoucherPayable A
 	INNER JOIN @voucherPayables C
-		ON ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
+		ON 	A.intTransactionType = C.intTransactionType
+		AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(A.intPurchaseDetailId,-1)
 		AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 		AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
 		AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)

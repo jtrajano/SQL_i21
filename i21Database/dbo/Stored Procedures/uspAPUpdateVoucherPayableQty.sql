@@ -15,11 +15,17 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-DECLARE @deleted TABLE(intVoucherPayableId INT);
+/**
+intVoucherPayableId = key of deleted payable
+intNewPayableId = key of the inserted payable
+intVoucherPayableKey = key of VoucherPayable parameter
+*/
+DECLARE @deleted TABLE(intVoucherPayableId INT, intNewPayableId INT, intVoucherPayableKey INT);
 DECLARE @taxDeleted TABLE(intVoucherPayableId INT);
 DECLARE @invalidPayables TABLE(intVoucherPayableId INT, strError NVARCHAR(1000));
 DECLARE @validPayables AS VoucherPayable
 DECLARE @validPayablesTax AS VoucherDetailTax
+DECLARE @payablesKey TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
 
@@ -140,6 +146,14 @@ ELSE SAVE TRAN @SavePoint
 
 	IF @post = 1
 	BEGIN
+
+		--IF ALREADY EXISTS GET PAYABLES KEY
+		INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
+		SELECT
+			intOldPayableId
+			,intNewPayableId
+		FROM dbo.fnAPGetPayableKeyInfo(@validPayables)
+
 		--UPDATE THE QTY BEFORE BACKING UP AND DELETING, SO WE COULD ACTUAL QTY WHEN RE-INSERTING
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
@@ -148,27 +162,32 @@ ELSE SAVE TRAN @SavePoint
 				B.dblQuantityBilled = CASE WHEN @post = 0 THEN (B.dblQuantityBilled - C.dblQuantityToBill) 
 										ELSE (B.dblQuantityBilled + C.dblQuantityToBill) END
 		FROM tblAPVoucherPayable B
+		INNER JOIN @payablesKey B2
+			ON B.intVoucherPayableId = B2.intNewPayableId
 		INNER JOIN @validPayables C
+			ON B2.intOldPayableId = C.intVoucherPayableId
 		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
-			ON 	B.intTransactionType = C.intTransactionType
-			AND ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
-			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
-			AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
-			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
-			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
-			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
-			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
+			-- ON 	B.intTransactionType = C.intTransactionType
+			-- AND ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			-- AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
+			-- AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			-- AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+			-- AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+			-- AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+			-- --AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A
 			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
+		INNER JOIN @payablesKey A2
+			ON A.intVoucherPayableId = A2.intNewPayableId
 		INNER JOIN @validPayables B
-			ON A.intVoucherPayableId = B.intVoucherPayableId
+			ON A2.intOldPayableId = B.intVoucherPayableId
 		INNER JOIN tblAPVoucherPayable C
-			ON B.intVoucherPayableId = C.intVoucherPayableId
+			ON A2.intNewPayableId = C.intVoucherPayableId
 		CROSS APPLY (
 			SELECT
 				*
@@ -180,7 +199,8 @@ ELSE SAVE TRAN @SavePoint
 		MERGE INTO tblAPVoucherPayableCompleted AS destination
 		USING (
 			SELECT
-				B.[intEntityVendorId]				
+				B.intTransactionType
+				,B.[intEntityVendorId]				
 				,B.[strVendorId]					
 				,B.[strName]						
 				,B.[intLocationId]					
@@ -256,25 +276,28 @@ ELSE SAVE TRAN @SavePoint
 				,B.[str1099Type]					
 				,B.[ysnReturn]	
 				,B.[intVoucherPayableId]
+				,C.intOldPayableId AS intVoucherPayableKey
 			FROM tblAPVoucherPayable B
-			INNER JOIN @validPayables C
-			ON 		C.intTransactionType = B.intTransactionType
-				AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
-				AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
-				AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
-				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
-				AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
-				AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
-				--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
+			INNER JOIN @payablesKey C
+				ON B.intVoucherPayableId = C.intNewPayableId
+			-- ON 		C.intTransactionType = B.intTransactionType
+			-- 	AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			-- 	AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			-- 	AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+			-- 	AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
+			-- 	AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+			-- 	AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+			-- 	--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- 	AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- 	AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
-			AND B.dblQuantityToBill = 0
+			WHERE B.dblQuantityToBill = 0
 		) AS SourceData
 		ON (1=0)
 		WHEN NOT MATCHED THEN
 		INSERT (
-			[intEntityVendorId]				
+			[intTransactionType]
+			,[intEntityVendorId]				
 			,[strVendorId]					
 			,[strName]						
 			,[intLocationId]					
@@ -351,7 +374,8 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnReturn]		
 		)
 		VALUES (
-			[intEntityVendorId]				
+			[intTransactionType]
+			,[intEntityVendorId]				
 			,[strVendorId]					
 			,[strName]						
 			,[intLocationId]					
@@ -428,14 +452,17 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnReturn]			
 		)
 		OUTPUT
-			SourceData.intVoucherPayableId
+			SourceData.intVoucherPayableId,
+			inserted.intVoucherPayableId,
+			SourceData.intVoucherPayableKey
 		INTO @deleted;
 
 		--Back up taxes with 0 tax amount
 		MERGE INTO tblAPVoucherPayableTaxCompleted AS destination
 		USING (
 			SELECT
-				taxes.[intVoucherPayableId]		
+				del.[intNewPayableId]
+				,taxes.intVoucherPayableId
 				,taxes.[intTaxGroupId]				
 				,taxes.[intTaxCodeId]				
 				,taxes.[intTaxClassId]				
@@ -454,7 +481,25 @@ ELSE SAVE TRAN @SavePoint
 			INNER JOIN @deleted del ON taxes.intVoucherPayableId = del.intVoucherPayableId
 			WHERE taxes.dblTax = 0
 		) AS SourceData
-		ON (1=0)
+		 --handle key clashing, there could be already payable id exists on tax completed
+		ON (destination.intVoucherPayableId = SourceData.intNewPayableId)
+		WHEN MATCHED THEN
+		UPDATE 
+			SET 
+			[intTaxGroupId]				=	SourceData.intTaxGroupId,				
+			[intTaxCodeId]				=	SourceData.intTaxCodeId,				
+			[intTaxClassId]				=	SourceData.intTaxClassId,		
+			[strTaxableByOtherTaxes]	=	SourceData.strTaxableByOtherTaxes,
+			[strCalculationMethod]		=	SourceData.strCalculationMethod,
+			[dblRate]					=	SourceData.dblRate,
+			[intAccountId]				=	SourceData.intAccountId,
+			[dblTax]					=	SourceData.dblTax,
+			[dblAdjustedTax]			=	SourceData.dblAdjustedTax,
+			[ysnTaxAdjusted]			=	SourceData.ysnTaxAdjusted,
+			[ysnSeparateOnBill]			=	SourceData.ysnSeparateOnBill,
+			[ysnCheckOffTax]			=	SourceData.ysnCheckOffTax,
+			[ysnTaxOnly]				=	SourceData.ysnTaxOnly,
+			[ysnTaxExempt]				=	SourceData.ysnTaxExempt
 		WHEN NOT MATCHED THEN
 		INSERT (
 			[intVoucherPayableId]		
@@ -474,7 +519,7 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnTaxExempt]
 		)
 		VALUES (
-			[intVoucherPayableId]		
+			[intNewPayableId]		
 			,[intTaxGroupId]				
 			,[intTaxCodeId]				
 			,[intTaxClassId]				
@@ -505,11 +550,20 @@ ELSE SAVE TRAN @SavePoint
 	END
 	ELSE IF @post = 0
 	BEGIN
+	
+		--IF ALREADY EXISTS GET PAYABLES KEY
+		INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
+		SELECT
+			intOldPayableId
+			,intNewPayableId
+		FROM dbo.fnAPGetPayableCompletedKeyInfo(@validPayables)
+		
 		--if unpost and the record were already removed because it has 0 qty, re-insert
 		MERGE INTO tblAPVoucherPayable AS destination
 		USING (
 			SELECT
-				D.[intEntityVendorId]				
+				D.[intTransactionType]
+				,D.[intEntityVendorId]				
 				,D.[strVendorId]					
 				,D.[strName]						
 				,D.[intLocationId]					
@@ -549,7 +603,7 @@ ELSE SAVE TRAN @SavePoint
 				,D.[dblOrderUnitQty]				
 				,D.[intOrderUOMId]					
 				,D.[strOrderUOM]					
-				,D.[dblQuantityToBill]				
+				,D.[dblQuantityToBill]	
 				,D.[dblQtyToBillUnitQty]			
 				,D.[intQtyToBillUOMId]				
 				,D.[strQtyToBillUOM]				
@@ -584,27 +638,32 @@ ELSE SAVE TRAN @SavePoint
 				,D.[dbl1099]			
 				,D.[str1099Type]					
 				,D.[ysnReturn]		
-				,D.[intVoucherPayableId]			
+				,D.[intVoucherPayableId]	
+				,B.intVoucherPayableId AS intVoucherPayableKey
 			-- FROM tblAPBillDetail A
 			-- INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 			-- INNER JOIN @voucherIds C ON B.intBillId = C.intId
 			FROM @validPayables B
+			INNER JOIN @payablesKey B2
+				ON B.intVoucherPayableId = B2.intOldPayableId
 			INNER JOIN tblAPVoucherPayableCompleted D --ON A.intBillDetailId = D.intBillDetailId
-					ON D.intTransactionType = B.intTransactionType
-			AND	ISNULL(D.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
-			AND ISNULL(D.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
-			AND ISNULL(D.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
-			AND ISNULL(D.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
-			AND ISNULL(D.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
-			AND ISNULL(D.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
-			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-			AND ISNULL(D.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-			AND ISNULL(D.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
+				ON B2.intNewPayableId = D.intVoucherPayableId
+			-- 		ON D.intTransactionType = B.intTransactionType
+			-- AND	ISNULL(D.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+			-- AND ISNULL(D.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+			-- AND ISNULL(D.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
+			-- AND ISNULL(D.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+			-- AND ISNULL(D.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+			-- AND ISNULL(D.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+			-- --AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- AND ISNULL(D.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			-- AND ISNULL(D.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		) AS SourceData
 		ON (1=0)
 		WHEN NOT MATCHED THEN
 		INSERT (
-			[intEntityVendorId]				
+			[intTransactionType]
+			,[intEntityVendorId]				
 			,[strVendorId]					
 			,[strName]						
 			,[intLocationId]					
@@ -644,7 +703,7 @@ ELSE SAVE TRAN @SavePoint
 			,[dblOrderUnitQty]				
 			,[intOrderUOMId]					
 			,[strOrderUOM]					
-			,[dblQuantityToBill]				
+			,[dblQuantityToBill]
 			,[dblQtyToBillUnitQty]			
 			,[intQtyToBillUOMId]				
 			,[strQtyToBillUOM]				
@@ -681,7 +740,8 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnReturn]	
 		)
 		VALUES(
-			[intEntityVendorId]				
+			[intTransactionType]
+			,[intEntityVendorId]				
 			,[strVendorId]					
 			,[strName]						
 			,[intLocationId]					
@@ -721,7 +781,7 @@ ELSE SAVE TRAN @SavePoint
 			,[dblOrderUnitQty]				
 			,[intOrderUOMId]					
 			,[strOrderUOM]					
-			,[dblQuantityToBill]				
+			,[dblQuantityToBill]
 			,[dblQtyToBillUnitQty]			
 			,[intQtyToBillUOMId]				
 			,[strQtyToBillUOM]				
@@ -757,12 +817,13 @@ ELSE SAVE TRAN @SavePoint
 			,[str1099Type]					
 			,[ysnReturn]	
 		)
-		OUTPUT SourceData.intVoucherPayableId INTO @deleted;
+		OUTPUT SourceData.intVoucherPayableId, inserted.intVoucherPayableId, SourceData.intVoucherPayableKey INTO @deleted;
 
 		MERGE INTO tblAPVoucherPayableTaxStaging AS destination
 		USING (
 			SELECT
-				taxes.[intVoucherPayableId]		
+				del.[intNewPayableId]
+				,taxes.intVoucherPayableId	
 				,taxes.[intTaxGroupId]				
 				,taxes.[intTaxCodeId]				
 				,taxes.[intTaxClassId]				
@@ -800,7 +861,7 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnTaxExempt]
 		)
 		VALUES (
-			[intVoucherPayableId]		
+			[intNewPayableId]		
 			,[intTaxGroupId]				
 			,[intTaxCodeId]				
 			,[intTaxClassId]				
@@ -817,6 +878,7 @@ ELSE SAVE TRAN @SavePoint
 			,[ysnTaxExempt]
 		);
 
+		--when deleting voucher we should remove the payables on completed
 		DELETE A
 		FROM tblAPVoucherPayableCompleted A
 		INNER JOIN @deleted B ON A.intVoucherPayableId = B.intVoucherPayableId
@@ -833,27 +895,32 @@ ELSE SAVE TRAN @SavePoint
 				B.dblQuantityBilled = CASE WHEN @post = 0 THEN (B.dblQuantityBilled - C.dblQuantityToBill) 
 										ELSE (B.dblQuantityBilled + C.dblQuantityToBill) END
 		FROM tblAPVoucherPayable B
+		INNER JOIN @deleted B2
+			ON B.intVoucherPayableId = B2.intNewPayableId
 		INNER JOIN @validPayables C
-		--LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
-			ON 	C.intTransactionType = B.intTransactionType
-			AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
-			AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
-			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
-			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
-			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
-			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
-			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
-		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
+			ON B2.intVoucherPayableKey = C.intVoucherPayableId
+		-- --LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
+		-- 	ON 	C.intTransactionType = B.intTransactionType
+		-- 	AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
+		-- 	AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
+		-- 	AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
+		-- 	AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
+		-- 	AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
+		-- 	AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
+		-- 	--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+		-- 	AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+		-- 	AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
+		-- --WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A
 			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
+		INNER JOIN @deleted del
+			ON del.intNewPayableId = A.intVoucherPayableId
 		INNER JOIN @validPayables B
-			ON A.intVoucherPayableId = B.intVoucherPayableId
+			ON del.intVoucherPayableKey = B.intVoucherPayableId
 		INNER JOIN tblAPVoucherPayable C
-			ON B.intVoucherPayableId = C.intVoucherPayableId
+			ON del.intNewPayableId = C.intVoucherPayableId
 		CROSS APPLY (
 			SELECT
 				*
