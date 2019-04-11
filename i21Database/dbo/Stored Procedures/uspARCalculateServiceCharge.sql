@@ -190,14 +190,17 @@ AS
 							SET dtmLastServiceCharge = @serviceChargeDate 
 							FROM tblARCustomer C 
 							INNER JOIN (
-								SELECT intEntityCustomerId 
-								FROM tblARCustomerAgingStagingTable
-								WHERE strAgingType = 'Detail'
-								  AND intEntityUserId = @intEntityUserId
-								GROUP BY intEntityCustomerId
+								SELECT intEntityCustomerId
+								FROM tblARCustomerAgingStagingTable 
+								WHERE intEntityUserId = @intEntityUserId 
+								  AND strAgingType = 'Detail'
+								GROUP BY intEntityCustomerId 
+								HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+									OR SUM(ISNULL(dblCredits, 0)) <> 0
+									OR SUM(ISNULL(dblPrepayments, 0)) <> 0
 							) CB ON C.intEntityId = CB.intEntityCustomerId
-							WHERE dtmLastServiceCharge IS NULL 
-							   OR dtmLastServiceCharge < @asOfDate
+							WHERE C.ysnActive = 1
+							  AND (dtmLastServiceCharge IS NULL OR dtmLastServiceCharge < @asOfDate)
 						END
 				END
 		END	
@@ -393,11 +396,6 @@ AS
 										, 0
 									FROM @tblComputedBalances BALANCE
 									WHERE BALANCE.intEntityId = @entityId
-
-									IF ISNULL(@isRecap, 0) = 0
-										BEGIN
-											UPDATE tblARCustomer SET dtmLastServiceCharge = @asOfDate WHERE intEntityId = @entityId
-										END
 								END					
 						END
 
@@ -463,7 +461,16 @@ AS
 								 , intServiceChargeDays 
 							FROM @tempTblTypeServiceCharge 
 							WHERE ISNULL(dblAmountDue, @zeroDecimal) <> @zeroDecimal 
-							  AND ISNULL(dblTotalAmount, @zeroDecimal) <> @zeroDecimal							  
+							  AND ISNULL(dblTotalAmount, @zeroDecimal) <> @zeroDecimal
+							  
+							IF ISNULL(@isRecap, 0) = 0
+								BEGIN
+									UPDATE C
+									SET C.dtmLastServiceCharge = @asOfDate 
+									FROM tblARCustomer C
+									INNER JOIN @tempTblTypeServiceCharge SC ON C.intEntityId = SC.intEntityCustomerId
+									WHERE C.intEntityId = @entityId
+								END
 						END
 					ELSE
 						BEGIN
