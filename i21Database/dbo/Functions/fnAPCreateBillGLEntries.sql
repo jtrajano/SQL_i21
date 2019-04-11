@@ -474,14 +474,14 @@ BEGIN
 			LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1					
 			OUTER APPLY( --	AP-4269 TIMEOUT ISSUE
 					SELECT
-							(CASE WHEN item.intItemId IS NULL OR item.strType != 'Inventory' THEN billDetails.dblQtyReceived ELSE
+							(CASE WHEN item.intItemId IS NULL OR item.strType NOT IN  ('Inventory','Finished Good', 'Raw Material') THEN billDetails.dblQtyReceived ELSE
 														CASE WHEN item.strType = 'Inventory' THEN --units is only of inventory item
 															dbo.fnCalculateQtyBetweenUOM((CASE WHEN billDetails.intWeightUOMId > 0 
 																							THEN billDetails.intWeightUOMId ELSE billDetails.intUnitOfMeasureId END), 
 																						itemUOM.intItemUOMId,
 																						CASE WHEN billDetails.intWeightUOMId > 0 THEN billDetails.dblNetWeight ELSE billDetails.dblQtyReceived END)
 														ELSE 0 END
-									END) as dblTotalUnits
+									END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END) as dblTotalUnits
 						FROM tblAPBillDetail billDetails
 						LEFT JOIN tblICItem item ON F.intItemId = item.intItemId
 						WHERE billDetails.intBillDetailId = B.intBillDetailId	
