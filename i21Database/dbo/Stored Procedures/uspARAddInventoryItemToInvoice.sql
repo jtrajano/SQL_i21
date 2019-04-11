@@ -558,7 +558,7 @@ BEGIN
 	SELECT
 		 [intInvoiceDetailId]		= @NewId
 		,[intLotId]					= [intLotId] 
-		,[dblQuantityShipped]		= [dblNet]
+		,[dblQuantityShipped]		= [dblLotQuantity]
 		,[dblGrossWeight]			= [dblGross]
 		,[dblTareWeight]			= [dblTare]
 		,[dblWeightPerQty]			= [dblNet]
