@@ -7523,6 +7523,7 @@
     <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixVoucherPayable.sql" />
     <Build Include="dbo\Functions\fnAPGetPayableCompletedKeyInfo.sql" />
+    <Build Include="dbo\Functions\fnICGetPreviousTransactionDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
