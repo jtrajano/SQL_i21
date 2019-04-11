@@ -524,11 +524,12 @@ BEGIN TRY
 											ELSE (CASE	
 													WHEN LOWER(strPrimarySortOptions) = 'card' THEN strDriverPinNumber + ' - ' + strDriverDescription
 													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN strCardNumber + ' - ' + strCardDescription
+													WHEN LOWER(strPrimarySortOptions) = 'driver pin' THEN strCardNumber + ' - ' + strCardDescription
 													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN strDriverPinNumber + ' - ' + strDriverDescription
 												  END)
 										  END)
 
-								  WHEN LOWER(strDetailDisplay) = 'driverpin'
+								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
 									THEN (CASE
 											WHEN ISNULL(strDriverPinNumber,'') != '' THEN strDriverPinNumber + ' - ' + strDriverDescription
 											ELSE (CASE 
@@ -548,11 +549,12 @@ BEGIN TRY
 											ELSE (CASE	
 													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 'Driver Pin'
 													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN 'Card'
+													WHEN LOWER(strPrimarySortOptions) = 'driver pin' THEN 'Card'
 													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 'Driver Pin'
 												  END)
 										  END)
 
-								  WHEN LOWER(strDetailDisplay) = 'driverpin'
+								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
 									THEN (CASE
 											WHEN ISNULL(strDriverPinNumber,'') != '' THEN  'Driver Pin'
 											ELSE (CASE 
