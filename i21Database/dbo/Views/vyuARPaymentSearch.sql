@@ -31,7 +31,7 @@ SELECT intPaymentId				= P.intPaymentId
      , strCurrencyDescription	= SMC.strDescription
 	 , strPaymentInfo			= P.strPaymentInfo
 	 , ysnProcessedToNSF		= P.ysnProcessedToNSF
-	 , strTransactionId			= ARP.strTransactionId
+	 , strTransactionId			= ISNULL(ARP.strTransactionId, '')
 FROM (
 	SELECT intPaymentId
 		 , strRecordNumber 
