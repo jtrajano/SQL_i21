@@ -340,7 +340,18 @@ AND (
 			OR 
 		CD.intContractDetailId = @intContractDetailId
 	)
-AND CD.intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblARInvoiceDetail)
+AND CD.intContractDetailId NOT IN 
+(
+	SELECT ISNULL(intContractDetailId,0) 
+	FROM tblARInvoiceDetail 
+	-- TICKET BASED IS EXEMPTED
+	WHERE intContractDetailId NOT IN
+	(
+		SELECT b.intContractDetailId
+		FROM tblCTPriceFixationTicket a 
+		INNER JOIN tblCTPriceFixation b on a.intPriceFixationId = b.intPriceFixationId AND a.intInventoryShipmentId IS NOT NULL
+	)
+)
 
 INSERT INTO @TaxDetails(
 	 [intDetailId]
