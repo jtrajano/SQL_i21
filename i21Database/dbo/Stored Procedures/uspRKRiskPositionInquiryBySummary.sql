@@ -1950,7 +1950,7 @@ SELECT intRowNumber1 intRowNumFinal
 	, TranType
 	, CustVendor
 	, dblNoOfLot
-	, dblQuantity
+	, ROUND(dblQuantity,@intDecimal) dblQuantity
 	, isnull(intOrderByHeading,0) intOrderByHeading
 	, intContractHeaderId
 	, intFutOptTransactionHeaderId
