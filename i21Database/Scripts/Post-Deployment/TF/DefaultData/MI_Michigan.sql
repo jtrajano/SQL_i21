@@ -540,6 +540,7 @@ select strQuery = 'UNION ALL SELECT intTaxCriteriaId = ' + CAST(intReportingComp
  UNION ALL SELECT intTaxCriteriaId = 396, strTaxCategory = 'MI Excise Tax Gasoline', strState = 'MI', strFormCode = '3791', strScheduleCode = '1', strType = 'Ethanol Blends (E70 - E99)', strCriteria = '<> 0', intMasterId = 22255
  UNION ALL SELECT intTaxCriteriaId = 397, strTaxCategory = 'MI Excise Tax Diesel Clear', strState = 'MI', strFormCode = '3992', strScheduleCode = '1', strType = 'Undyed Diesel', strCriteria = '<> 0', intMasterId = 22287
  UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MI Excise Tax Propane', strState = 'MI', strFormCode = '5494', strScheduleCode = 'LPG', strType = 'Propane', strCriteria = '<> 0', intMasterId = 22355
+ UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MI Excise Tax Gasoline', strState = 'MI', strFormCode = '680-3', strScheduleCode = 'Gasoline', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 22356
 
 
 EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
@@ -9800,6 +9801,11 @@ UNION ALL SELECT intScheduleColumnId = 9759, strFormCode = '4004', strScheduleCo
 UNION ALL SELECT intScheduleColumnId = 9760, strFormCode = '4004', strScheduleCode = '7B', strType = 'Other', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 2221195
 UNION ALL SELECT intScheduleColumnId = 9761, strFormCode = '4004', strScheduleCode = '7B', strType = 'Other', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 2221196
 UNION ALL SELECT intScheduleColumnId = 9762, strFormCode = '4004', strScheduleCode = '7B', strType = 'Other', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 2221197
+UNION ALL SELECT intScheduleColumnId = 9763, strFormCode = '5494', strScheduleCode = 'CNG', strType = 'Compressed Natural Gas', strColumn = 'strInvoiceNumber', strCaption = 'Invoice Num', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 2221198
+UNION ALL SELECT intScheduleColumnId = 9764, strFormCode = '5494', strScheduleCode = 'LNG', strType = 'Liquified Natural Gas', strColumn = 'strInvoiceNumber', strCaption = 'Invoice Num', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 2221199
+UNION ALL SELECT intScheduleColumnId = 9765, strFormCode = '5494', strScheduleCode = 'LPG', strType = 'Propane', strColumn = 'strInvoiceNumber', strCaption = 'Invoice Num', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 2221200
+UNION ALL SELECT intScheduleColumnId = 9766, strFormCode = '680-3', strScheduleCode = 'Gasoline', strType = 'Gasoline', strColumn = 'strInvoiceNumber', strCaption = 'Invoice Number', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 2221201
+
 
 EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 
