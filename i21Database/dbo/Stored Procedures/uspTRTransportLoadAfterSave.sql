@@ -272,27 +272,26 @@ BEGIN
         
         UNION ALL
 
-		-- Check Updated rows
+		-- Add another row if there was a change on Contract Detail Id used, for the old Contract Detail Id
 		SELECT previousSnapshot.intTransactionId
 			, previousSnapshot.intTransactionDetailId
 			, previousSnapshot.strSourceType
 			, 2 --Update
-			, CASE WHEN (currentSnapshot.intContractDetailId = previousSnapshot.intContractDetailId) THEN (currentSnapshot.dblQuantity - previousSnapshot.dblQuantity)
-					ELSE (previousSnapshot.dblQuantity * -1) END -- Check if there was a change on Contract Detail Id used, insert record negating previous Contract Detail Id
+			, previousSnapshot.dblQuantity * -1 
 			, previousSnapshot.intContractDetailId
 		FROM @tmpCurrentSnapshot currentSnapshot
 		INNER JOIN #tmpPreviousSnapshot previousSnapshot
 			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
 		WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' AND ISNULL(previousSnapshot.intContractDetailId, '') <> '')
-			AND (ISNULL(currentSnapshot.dblQuantity, 0) <> ISNULL(previousSnapshot.dblQuantity, 0))
+			--AND (ISNULL(currentSnapshot.dblQuantity, 0) <> ISNULL(previousSnapshot.dblQuantity, 0))
 
-		UNION ALL 
+		UNION ALL
 
 		-- Add another row if there was a change on Contract Detail Id used, for the new Contract Detail Id
 		SELECT currentSnapshot.intTransactionId
 			, currentSnapshot.intTransactionDetailId
 			, currentSnapshot.strSourceType
-			, 2 --Update
+			, 1 --Update
 			, currentSnapshot.dblQuantity
 			, currentSnapshot.intContractDetailId
 		FROM @tmpCurrentSnapshot currentSnapshot
@@ -300,6 +299,8 @@ BEGIN
 			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
 		WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' OR ISNULL(previousSnapshot.intContractDetailId, '') <> '')
 			AND ISNULL(currentSnapshot.intContractDetailId, '') != ISNULL(previousSnapshot.intContractDetailId, '')
+
+		
 
 
 		-- Check first instance of Load Schedule processed load

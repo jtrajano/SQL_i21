@@ -148,7 +148,7 @@ BEGIN TRY
 		,ISNULL(S.strLotNumber, '') AS strLotNumber
 		,ISNULL(CS.strSubLocationName, '') AS strWarehouse
 		,ISNULL(CY.strCropYear, '') AS strCropYear
-		,dbo.fnGRConvertDateToReportDateFormat(CD.dtmStartDate) + ' - ' + dbo.fnGRConvertDateToReportDateFormat(CD.dtmEndDate) AS strPeriod
+		,dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat(CD.dtmEndDate, 0) AS strPeriod
 		,ISNULL(EF.strFarmNumber, '') AS strFarmNumber
 		,@strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress

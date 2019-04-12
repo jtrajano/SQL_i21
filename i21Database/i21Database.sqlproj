@@ -7536,6 +7536,7 @@
     <Build Include="dbo\Stored Procedures\uspAPFixVoucherPayable.sql" />
     <Build Include="dbo\Functions\fnAPGetPayableCompletedKeyInfo.sql" />
     <Build Include="dbo\Functions\fnICGetPreviousTransactionDate.sql" />
+    <Build Include="dbo\Functions\fnConvertDateToReportDateFormat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

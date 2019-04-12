@@ -730,7 +730,7 @@ SELECT 1 intRowNumber
 	, TransactionDate
 	, TranType
 	, CustVendor
-	, dblNoOfLot dblNoOfLot
+	, case when strContractType='Purchase' then dblNoOfLot else -(abs(dblNoOfLot)) end as  dblNoOfLot
 	, case when strContractType='Purchase' then dblQuantity else -(abs(dblQuantity)) end as dblQuantity
 	, 1 intOrderByHeading
 	, intContractHeaderId
@@ -1950,7 +1950,7 @@ SELECT intRowNumber1 intRowNumFinal
 	, TranType
 	, CustVendor
 	, dblNoOfLot
-	, dblQuantity
+	, ROUND(dblQuantity,@intDecimal) dblQuantity
 	, isnull(intOrderByHeading,0) intOrderByHeading
 	, intContractHeaderId
 	, intFutOptTransactionHeaderId

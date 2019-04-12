@@ -120,7 +120,7 @@ IF @dtmStatementDate IS NOT NULL
 	SELECT @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
 
 DECLARE @lastDateReconciled datetime
-	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankTransaction 
+	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankReconciliation 
 	WHERE intBankAccountId = @intBankAccountId
 	ORDER BY dtmDateReconciled DESC
 	
