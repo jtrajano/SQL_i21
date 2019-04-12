@@ -379,6 +379,9 @@ FROM (
  UPDATE tblSMAuditLog SET ysnProcessed = 1 WHERE intAuditLogId = @intAuditLogId  
   
  DELETE FROM @tblSMAuditLog WHERE intAuditLogId = @intAuditLogId  
+
+ DELETE FROM @JsonData
+ DELETE FROM @JsonTransformed
 END   
   
 SET IDENTITY_INSERT dbo.tblSMAudit OFF;
