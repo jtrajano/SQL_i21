@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetBlendProductions] @intManufacturingCellId INT
 	,@ysnProduced BIT = 0
-	,@intLocationId int=0
+	,@intLocationId INT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -43,7 +43,7 @@ IF ISNULL(@ysnProduced, 0) = 0
 		,w.strERPOrderNo
 		,i.dblRiskScore
 		,w.intManufacturingProcessId
-		,i.intCategoryId 
+		,i.intCategoryId
 	FROM tblMFWorkOrder w
 	JOIN tblICItem i ON w.intItemId = i.intItemId
 	JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -60,10 +60,7 @@ IF ISNULL(@ysnProduced, 0) = 0
 			,11
 			,12
 			)
-		AND ISNULL(w.intTransactionFrom, 0) NOT IN (
-			4
-			,5
-			) --Exclude Blends Produced/Reversed from Simple Blend Production(4), AutoBlend(5) 
+		AND ISNULL(w.intTransactionFrom, 0) <> 5 --Exclude Blends Produced/Reversed from Simple Blend Production(4), AutoBlend(5) 
 	ORDER BY w.dtmExpectedDate
 		,w.intExecutionOrder
 
@@ -102,7 +99,7 @@ BEGIN
 			,mc.strCellName
 			,i.strLotTracking
 			,i.intItemId
-			,i.intCategoryId 
+			,i.intCategoryId
 		FROM tblMFWorkOrder w
 		JOIN tblICItem i ON w.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -147,7 +144,7 @@ BEGIN
 			,mc.strCellName
 			,i.strLotTracking
 			,i.intItemId
-			,i.intCategoryId 
+			,i.intCategoryId
 		FROM tblMFWorkOrder w
 		JOIN tblICItem i ON w.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -158,6 +155,7 @@ BEGIN
 		LEFT JOIN tblSMUserSecurity us ON w.intCreatedUserId = us.[intEntityId]
 		LEFT JOIN tblICStorageLocation sl ON w.intStorageLocationId = sl.intStorageLocationId
 		WHERE ISNULL(w.intBlendRequirementId, 0) > 0
-			AND w.intStatusId = 13 and w.intLocationId=@intLocationId
+			AND w.intStatusId = 13
+			AND w.intLocationId = @intLocationId
 		ORDER BY w.dtmCompletedDate DESC
 END

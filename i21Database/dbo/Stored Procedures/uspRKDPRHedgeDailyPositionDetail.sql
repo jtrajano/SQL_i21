@@ -1106,7 +1106,7 @@ BEGIN
 						, mnt.strFutureMonth
 					FROM vyuRKGetInventoryValuation v
 						JOIN tblICInventoryReceipt r ON r.strReceiptNumber = v.strTransactionId
-						INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
+						INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND ri.intInventoryReceiptItemId = v.intTransactionDetailId AND r.strReceiptType = 'Purchase Contract'
 						INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
 						INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 1
 						INNER JOIN tblICItem i on cd.intItemId = i.intItemId
@@ -1185,7 +1185,7 @@ BEGIN
 							, mnt.strFutureMonth
 					FROM vyuRKGetInventoryValuation v
 					JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
-					INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
+					INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId AND ri.intInventoryShipmentItemId =  v.intTransactionDetailId
 					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
 					INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
 					INNER JOIN tblICItem i on cd.intItemId = i.intItemId

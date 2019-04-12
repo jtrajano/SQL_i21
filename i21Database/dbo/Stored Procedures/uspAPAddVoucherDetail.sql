@@ -481,10 +481,11 @@ INNER JOIN @voucherDetailsInfo C
 INSERT INTO @voucherDetailIds
 SELECT intBillDetailId FROM @voucherDetailsInfo
 
---UPDATE AVAILABLE QTY
-EXEC uspAPUpdateIntegrationPayableAvailableQty @billDetailIds = @voucherDetailIds, @decrease = 1
 --UPDATE ADD PAYABLES AVAILABLE QTY
 EXEC uspAPUpdateVoucherPayable @voucherDetailIds = @voucherDetailIds, @decrease = 0
+
+--UPDATE AVAILABLE QTY
+EXEC uspAPUpdateIntegrationPayableAvailableQty @billDetailIds = @voucherDetailIds, @decrease = 1
 
 IF @transCount = 0
 	BEGIN

@@ -73,12 +73,12 @@ Update tblRKStgMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0 AND IsN
 Update tblRKStgOptionMatchPnS Set strStatus='IGNORE' Where IsNULL(ysnPost,0)=0 AND IsNULL(strStatus,'')=''
 
 -- Updating intCommodityId for Options
-UPDATE m
-SET m.intCommodityId = ft.intCommodityId
-FROM tblRKStgOptionMatchPnS m
-JOIN tblRKOptionsMatchPnS op ON op.intMatchNo = m.intMatchNo
-JOIN tblRKFutOptTransaction ft ON ft.intFutOptTransactionId = op.intLFutOptTransactionId
-WHERE ISNULL(m.strStatus, '') = ''
+--UPDATE m
+--SET m.intCommodityId = ft.intCommodityId
+--FROM tblRKStgOptionMatchPnS m
+--JOIN tblRKOptionsMatchPnS op ON op.intMatchNo = m.intMatchNo
+--JOIN tblRKFutOptTransaction ft ON ft.intFutOptTransactionId = op.intLFutOptTransactionId
+--WHERE ISNULL(m.strStatus, '') = ''
 
 INSERT INTO @tblRKStgMatchPnS (
 	intStgMatchPnSId

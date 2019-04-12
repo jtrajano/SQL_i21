@@ -12,7 +12,7 @@ BEGIN
 	IF(@intReceiptId IS NOT NULL)
 	BEGIN
 		INSERT INTO @voucherPayable(
-				[intEntityVendorId]			
+			[intEntityVendorId]			
 			,[intTransactionType]		
 			,[intLocationId]	
 			,[intShipToId]	

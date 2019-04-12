@@ -16,10 +16,10 @@ SELECT [strTransactionType] = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	,L.intLoadId
 	,LD.intLoadDetailId
 	,L.[strLoadNumber]
-	,[intContractHeaderId] = CH.intContractHeaderId
-	,[strContractNumber] = CH.strContractNumber
-	,[intContractDetailId] = CD.intContractDetailId
-	,[intContractSeq] = CD.intContractSeq
+	,[intContractHeaderId] = NULL --CH.intContractHeaderId
+	,[strContractNumber] = NULL --CH.strContractNumber
+	,[intContractDetailId] = NULL --CD.intContractDetailId
+	,[intContractSeq] = NULL --CD.intContractSeq
 	,[intCompanyLocationId] = LD.intPCompanyLocationId
 	,[strLocationName] = SMCL.[strLocationName]
 	,[intItemId] = ICI.[intItemId]
@@ -62,7 +62,7 @@ FROM tblLGLoad L
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
 	JOIN tblAPVendor ARC ON LC.intVendorId = ARC.[intEntityId]
 	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
-	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LC.intContractDetailId
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LC.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId

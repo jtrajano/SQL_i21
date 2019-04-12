@@ -41,22 +41,6 @@ BEGIN
 	FROM	tblICInventoryTransactionType 
 	WHERE	strName = 'Invoice';
 
-
-	-- Get Previous date available on Unpost
-	IF(@ysnPost = 0)
-	BEGIN
-		SELECT TOP 1 @dtmTransactionDate = dtmDate
-		FROM tblICInventoryTransaction
-		WHERE intItemId = @intItemId
-			AND intItemLocationId = @intItemLocationId
-			AND (intSubLocationId = @intSubLocationId OR ISNULL(intSubLocationId, 0) = 0)
-			AND (intStorageLocationId = @intStorageLocationId OR ISNULL(intStorageLocationId, 0) = 0)
-			AND ysnIsUnposted <> 1
-			AND intTransactionTypeId IN(@TransactionType_InventoryReceipt, @TransactionType_Invoice)
-			AND intTransactionTypeId = @intTransactionTypeId
-		ORDER BY dtmDate DESC
-			
-	END
 END
 ------------------------------------------------------------
 -- If item is a Lot, retrieve Weight UOM and Weight Per Qty
@@ -109,7 +93,11 @@ BEGIN
 									ELSE 
 										ROUND(dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) , 6)
 							END
-					,dtmTransactionDate = @dtmTransactionDate
+					,dtmTransactionDate = CASE 
+											WHEN @ysnPost = 1 
+											THEN @dtmTransactionDate 
+											ELSE [dbo].[fnICGetPreviousTransactionDate](@intItemId, @intItemLocationId, @intSubLocationId, @intStorageLocationId, @intTransactionTypeId) 
+										END
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
 		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -175,7 +163,11 @@ BEGIN
 						,intSubLocationId 
 						,intStorageLocationId 
 						,Qty = ROUND(SUM(Qty), 6)
-						,dtmTransactionDate = @dtmTransactionDate
+						,dtmTransactionDate = CASE 
+											WHEN @ysnPost = 1 
+											THEN @dtmTransactionDate 
+											ELSE [dbo].[fnICGetPreviousTransactionDate](@intItemId, @intItemLocationId, @intSubLocationId, @intStorageLocationId, @intTransactionTypeId) 
+										END
 				FROM (
 
 					-------------------------------------------
