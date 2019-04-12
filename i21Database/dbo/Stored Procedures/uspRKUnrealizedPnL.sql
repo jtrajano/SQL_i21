@@ -110,7 +110,7 @@ FROM (
 				acc.strAccountNumber,
 				cb.strBook,
 				csb.strSubBook,
-				sp.strSalespersonId,
+				sp.strName strSalespersonId,
 				icc.strCommodityCode,
 				sl.strLocationName,
 				ot.dblNoOfContract AS dblOriginalQty,
@@ -155,7 +155,7 @@ FROM (
 			JOIN tblRKBrokerageAccount acc ON acc.intBrokerageAccountId = ot.intBrokerageAccountId
 			JOIN tblICCommodity icc ON icc.intCommodityId = ot.intCommodityId
 			JOIN tblSMCompanyLocation sl ON sl.intCompanyLocationId = ot.intLocationId
-			JOIN tblARSalesperson sp ON sp.intEntityId = ot.intTraderId
+			JOIN tblEMEntity sp ON sp.intEntityId = ot.intTraderId
 			JOIN tblEMEntity e ON e.intEntityId = ot.intEntityId
 			JOIN tblRKFutureMarket fm ON ot.intFutureMarketId = fm.intFutureMarketId
 			JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
