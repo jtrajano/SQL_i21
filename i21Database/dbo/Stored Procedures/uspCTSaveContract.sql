@@ -317,7 +317,7 @@ BEGIN TRY
 
 		SELECT @dblLotsFixed = dblLotsFixed,@intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
 		IF	@dblLotsFixed IS NOT NULL AND @dblNoOfLots IS NOT NULL AND @dblNoOfLots = @dblLotsFixed AND
-			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId = 2 )
+			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
 		BEGIN
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END
