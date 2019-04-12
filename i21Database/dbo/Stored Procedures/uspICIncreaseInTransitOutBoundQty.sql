@@ -60,7 +60,7 @@ USING (
 				,ob.intTransactionTypeId
 				,dtmTransactionDate = CASE 
 										WHEN ARI.ysnPosted = 0 
-										THEN [dbo].[fnICGetPreviousTransactionDate](ob.intItemId, ob.intItemLocationId, ob.intSubLocationId, ob.intStorageLocationId, ob.intTransactionTypeId) 
+										THEN [dbo].[fnICGetPreviousTransactionDate](ob.intItemId, ob.intItemLocationId, NULL, NULL, ob.intTransactionTypeId) 
 										ELSE ob.dtmTransactionDate 
 									END
 				,Aggregrate_Qty =  SUM(dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty))   --SUM(ISNULL(dbo.fnCalculateCostBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty), 0)) 	-- Convert the qty to stock unit. 			
