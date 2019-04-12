@@ -99,8 +99,10 @@ BEGIN TRY
 
 	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 	
-	IF NOT EXISTS( SELECT 1  FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate)
-    BEGIN
+	--Delete the data from tblCTContractBalance table with the passed param dtmEndDate
+	--This is to make sure we are regenerating the data real time
+	DELETE FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate
+
 
 	INSERT INTO @Shipment
 	  (
@@ -791,7 +793,7 @@ BEGIN TRY
 		AND ItemStockUOM.ysnStockUnit = 1
 	WHERE FR.dtmEndDate = @dtmEndDate
 
-  END	
+
 
     IF ISNULL(@strCallingApp,'') <> 'DPR'
 	BEGIN
