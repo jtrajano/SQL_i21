@@ -254,7 +254,7 @@ SELECT intRowNum,t.intContractDetailId,strEntityName,t.intContractHeaderId,strCo
 							and a.intCompanyLocationId=cd.intCompanyLocationId
 							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
-							and b.intStorageLocationId = case when isnull(cd.intSubLocationId,0)=0 then isnull(b.intStorageLocationId,0) else cd.intSubLocationId end
+							and isnull(b.intStorageLocationId,0) = case when isnull(cd.intSubLocationId,0)=0 then isnull(b.intStorageLocationId,0) else cd.intSubLocationId end
 							)t)  dblStandardPrice,
 
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,j.intUnitMeasureId,
@@ -318,7 +318,7 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
 							and a.intCompanyLocationId=cd.intCompanyLocationId
 							and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
 							and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
-							and b.intStorageLocationId = case when isnull(cd.intSubLocationId,0)=0 then isnull(b.intStorageLocationId,0) else cd.intSubLocationId end
+							and isnull(b.intStorageLocationId,0) = case when isnull(cd.intSubLocationId,0)=0 then isnull(b.intStorageLocationId,0) else cd.intSubLocationId end
 							)t)  dblStandardPrice,
 							strLocationName	,strPricingType,strItemNo,strOrigin,strProductType,cd.intCurrencyId,ysnSubCurrency,cd.intUnitMeasureId
  FROM @GetStandardQty t
