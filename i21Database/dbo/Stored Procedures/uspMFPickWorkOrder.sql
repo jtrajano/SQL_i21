@@ -2374,7 +2374,7 @@ BEGIN TRY
 						,@strReason = NULL
 						,@intLocationId = @intLocationId
 						,@intInventoryAdjustmentId = NULL
-						,@intStorageLocationId  = @intStorageLocationId
+						,@intStorageLocationId  = @intStageLocationId
 						,@intDestinationStorageLocationId  = NULL
 						,@intWorkOrderInputLotId  = NULL
 						,@intWorkOrderProducedLotId  = NULL
