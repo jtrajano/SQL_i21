@@ -66,7 +66,10 @@ BEGIN
 			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
 									ELSE (CASE WHEN (EE.dblDefaultHours <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess) END
 			,EE.dblRateAmount
-			,dblTotal = ROUND(CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime')) THEN
+			,dblTotal = ROUND(CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime') 
+										OR (EE.strCalculationType IN ('Fixed Amount', 'Salary') 
+												AND EE.dblDefaultHours <> 0 
+												AND EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningLinkId = EE.intTypeEarningId AND intEntityEmployeeId = EE.intEntityEmployeeId))) THEN
 									CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
 										ELSE (CASE WHEN (EE.dblHoursToProcess <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
 										END * EE.dblRateAmount
