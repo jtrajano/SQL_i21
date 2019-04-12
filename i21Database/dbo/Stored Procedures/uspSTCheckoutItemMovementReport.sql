@@ -26,18 +26,32 @@ SELECT
 	 , tblIMQty.strItemDescription
 	 , tblIMQty.intQtySoldSum AS intQtySold
 	 , ItemPricing.dblSalePrice AS dblCurrentPrice
-	 , tblIMQty.dblItemCostSum AS dblItemCost
-	 , (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) AS dblTotalSales
+	 --, tblIMQty.dblItemCostAvgSum AS dblItemCost
+
+	 , (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) AS dblTotalSales
+	 --, (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) AS dblTotalSales
+
+	 -- ADDED
+	 , ((tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) / tblIMQty.intQtySoldSum) AS dblAveragePrice
+	 , (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblTotalCost
+	 , (tblIMQty.dblItemCostSum / tblIMQty.intQtySoldSum) AS dblAverageCost
+	 , ItemPricing.dblLastCost AS dblCurrentCost
 
 	 -- Formula: Gross Margin $ = Totals Sales - (Qty * Item Movement Item Cost)
-	 , (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostSum) AS dblGrossMarginDollar
+	 , (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblGrossMarginDollar
+	 --, (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostAvgSum) AS dblGrossMarginDollar
 
 	 -- Formula: Gross Margin % = Total Sales - (Qty * Item Movement Item Cost) / Total Sales
 	 , CASE 
-		WHEN (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) <> 0
-			THEN ( (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostSum) ) / (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum)
+		WHEN (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) <> 0
+			THEN ( (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) )   / (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) 
 		ELSE 0
 	 END AS dblGrossMarginPercent
+	 --, CASE 
+		--WHEN (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) <> 0
+		--	THEN ( (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostAvgSum) ) / (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum)
+		--ELSE 0
+	 --END AS dblGrossMarginPercent
 FROM
 (
 	SELECT 
@@ -48,8 +62,11 @@ FROM
 		, Item.strItemNo
 		, Item.strDescription AS strItemDescription
 		, Item.intCategoryId
+		, SUM(ISNULL(IM.dblDiscountAmount, 0)) AS dblDiscountAmountSum
+		, SUM(ISNULL(IM.dblGrossSales, 0)) AS dblGrossSalesSum
 		, SUM(ISNULL(IM.intQtySold, 0)) AS intQtySoldSum
-		, AVG(ISNULL(IM.dblItemStandardCost, 0)) AS dblItemCostSum
+		, SUM(ISNULL(IM.dblItemStandardCost, 0)) AS dblItemCostSum
+		-- , AVG(ISNULL(IM.dblItemStandardCost, 0)) AS dblItemCostAvgSum
 		, MIN(CH.dtmCheckoutDate) AS dtmCheckoutDateMin
 		, MAX(CH.dtmCheckoutDate) AS dtmCheckoutDateMax
 	FROM tblSTCheckoutItemMovements IM
@@ -68,9 +85,9 @@ FROM
 		AND CL.intCompanyLocationId = IL.intLocationId
 	LEFT JOIN tblSTSubcategory Family
 		ON IL.intFamilyId = Family.intSubcategoryId
-	AND Family.strSubcategoryType = 'F'
-		LEFT JOIN tblSTSubcategory Class
-	ON IL.intFamilyId = Class.intSubcategoryId
+		AND Family.strSubcategoryType = 'F'
+	LEFT JOIN tblSTSubcategory Class
+		ON IL.intFamilyId = Class.intSubcategoryId
 		AND Class.strSubcategoryType = 'C'
 	WHERE UOM.strLongUPCCode IS NOT NULL 
 		AND (
@@ -154,7 +171,8 @@ LEFT JOIN dbo.tblICItemSpecialPricing ItemSpecial
 LEFT JOIN dbo.tblICItemPricing ItemPricing 
 	ON tblIMQty.intItemId = ItemPricing.intItemId
 	AND IL.intItemLocationId = ItemPricing.intItemLocationId 
-ORDER BY Cat.intCategoryId, tblIMQty.strLongUPCCode ASC
+ORDER BY Cat.intCategoryId
+       , tblIMQty.strLongUPCCode ASC
 
 
 
