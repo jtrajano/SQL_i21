@@ -12,7 +12,7 @@
 	@serviceChargeDate	DATE,
 	@serviceChargePostDate	DATE,
 	@batchId			NVARCHAR(100) = NULL OUTPUT,
-	@totalAmount		NUMERIC(18,6) = NULL OUTPUT,
+	@totalAmount		NUMERIC(18,6) = 0 OUTPUT,
 	@upToDateCustomer 	BIT = 0,
 	@intEntityUserId	INT = NULL
 AS
@@ -517,5 +517,6 @@ AS
 			DELETE FROM #tmpCustomers WHERE intEntityId = @entityId
 		END
 
+	SET @totalAmount = ISNULL(@totalAmount, 0)
 	DROP TABLE #tmpCustomers
 GO
