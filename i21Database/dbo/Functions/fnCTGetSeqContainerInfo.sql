@@ -15,10 +15,11 @@ RETURNS	@returntable	TABLE
 
 AS
 BEGIN
-	DECLARE @intCountryId	INT
+	DECLARE @intCountryId	INT,@ysnLoadContainerTypeByOrigin BIT
 	SELECT	@intCountryId	=	intCountryID FROM tblSMCountry WHERE strCountry = @strCountry
+	SELECT	@ysnLoadContainerTypeByOrigin	=	ysnLoadContainerTypeByOrigin FROM tblLGCompanyPreference
 
-    IF EXISTS(SELECT TOP 1 1 FROM tblLGContainerType WHERE intContainerTypeId = ISNULL(@intContainerTypeId,0)) AND @intCountryId IS NOT NULL
+    IF EXISTS(SELECT TOP 1 1 FROM tblLGContainerType WHERE intContainerTypeId = ISNULL(@intContainerTypeId,0)) AND @intCountryId IS NOT NULL AND ISNULL(@ysnLoadContainerTypeByOrigin,0) = 1
     BEGIN
 	   INSERT INTO @returntable(dblBulkQuantity,dblBagQuantity,strContainerType,strContainerUOM)	
 	   SELECT 	dblBulkQuantity,dblBagQuantity,strContainerType,RM.strUnitMeasure
@@ -42,6 +43,10 @@ BEGIN
 	    AND		CQ.intContainerTypeId		=	@intContainerTypeId 
 	    AND		CQ.intCountryId				=	@intCountryId
     END
-
+	ELSE
+	BEGIN
+		INSERT INTO @returntable(dblBulkQuantity,dblBagQuantity,strContainerType,strContainerUOM)
+		SELECT NULL,NULL,strContainerType,NULL FROM tblLGContainerType WHERE intContainerTypeId	=	@intContainerTypeId 
+	END
     RETURN;
 END

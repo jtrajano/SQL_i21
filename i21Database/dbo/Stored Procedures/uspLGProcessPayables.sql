@@ -50,58 +50,68 @@ BEGIN
 			,[intStorageLocationId]
 			,[intSubLocationId])
 		SELECT
-			[intEntityVendorId] = A.intVendorEntityId
+			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
-			,[intLocationId] = A.intCompanyLocationId
-			,[intCurrencyId] = A.intCurrencyId
-			,[dtmDate] = A.dtmPostedDate
+			,[intLocationId] = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
+			,[intCurrencyId] = L.intCurrencyId
+			,[dtmDate] = L.dtmPostedDate
 			,[strVendorOrderNumber] = ''
 			,[strReference] = ''
-			,[strSourceNumber] = LTRIM(A.strLoadNumber)
-			,[intContractHeaderId] = A.intContractHeaderId
-			,[intContractDetailId] = A.intPContractDetailId
-			,[intContractSeqId] = A.intContractSeq
-			,[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
-			,[intLoadShipmentId] = A.intLoadId
-			,[intLoadShipmentDetailId] = A.intLoadDetailId
-			,[intItemId] = A.intItemId
-			,[strMiscDescription] = A.strItemDescription
-			,[dblOrderQty] = A.dblQuantity
+			,[strSourceNumber] = LTRIM(L.strLoadNumber)
+			,[intContractHeaderId] = CH.intContractHeaderId
+			,[intContractDetailId] = LD.intPContractDetailId
+			,[intContractSeqId] = CT.intContractSeq
+			,[intInventoryReceiptItemId] = receiptItem.intInventoryReceiptItemId
+			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentDetailId] = LD.intLoadDetailId
+			,[intItemId] = LD.intItemId
+			,[strMiscDescription] = item.strDescription
+			,[dblOrderQty] = LD.dblQuantity
 			,[dblOrderUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
-			,[intOrderUOMId] = A.intItemUOMId
-			,[dblQuantityToBill] = A.dblQuantity
+			,[intOrderUOMId] = LD.intItemUOMId
+			,[dblQuantityToBill] = LD.dblQuantity
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
-			,[intQtyToBillUOMId] = A.intItemUOMId
-			,[dblCost] = CAST(ISNULL(A.dblCashPrice,0) AS DECIMAL(38,20))
+			,[intQtyToBillUOMId] = LD.intItemUOMId
+			,[dblCost] = CAST(ISNULL(CT.dblCashPrice,0) AS DECIMAL(38,20))
 			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-			,[intCostUOMId] = A.intPriceItemUOMId
-			,[dblNetWeight] = ISNULL(A.dblNet,0)
+			,[intCostUOMId] = CT.intPriceItemUOMId
+			,[dblNetWeight] = ISNULL(LD.dblNet,0)
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
-			,[intWeightUOMId] = A.intWeightItemUOMId
-			,[intCostCurrencyId] = A.intContractCurrencyId
-			,[dblTax] = ISNULL(IRI.dblTax, 0)
+			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
+			,[intCostCurrencyId] = CT.intCurrencyId
+			,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = 1
-			,[ysnSubCurrency] =	CASE WHEN ISNULL(A.intSubCurrencyCents,0) > 0 THEN 1 ELSE 0 END
-			,[intSubCurrencyCents] = ISNULL(A.intSubCurrencyCents,0)
+			,[ysnSubCurrency] =	ISNULL(CY.ysnSubCurrency,0)
+			,[intSubCurrencyCents] = ISNULL(CY.intCent,0)
 			,[intAccountId] = apClearing.intAccountId
-			,[strBillOfLading] = A.strBLNumber
+			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
-			,[intStorageLocationId] = A.intStorageLocationId
-			,[intSubLocationId] = A.intSubLocationId
-		FROM vyuLGLoadPurchaseContracts A
-		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.intVendorEntityId = D1.[intEntityId]  
-		LEFT JOIN tblICItem item ON item.intItemId = A.intItemId 
-		LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
-		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
-		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = A.intWeightItemUOMId
-		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = A.intCostUOMId
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
+			,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
+			,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
+		FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
+		JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CH.intEntityId = D1.[intEntityId]  
+		LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CT.intCurrencyId
+		LEFT JOIN (tblICInventoryReceipt receipt 
+					INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
+					ON LD.intLoadDetailId = receiptItem.intSourceId AND receipt.intSourceType = 2
+		LEFT JOIN tblICItem item ON item.intItemId = LD.intItemId 
+		LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId and ItemLoc.intLocationId = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
+		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
+		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemId = LD.intItemId and ItemWeightUOM.intUnitMeasureId = L.intWeightUnitMeasureId
+		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = CT.intPriceItemUOMId
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable(LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
+		OUTER APPLY (SELECT TOP 1 W.intSubLocationId, W.intStorageLocationId, strSubLocation = CLSL.strSubLocationName, strStorageLocation = SL.strName FROM tblLGLoadWarehouse W
+					LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+					LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
+					WHERE intLoadId = L.intLoadId) LW
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
-		LEFT JOIN tblICInventoryReceiptItem IRI ON A.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-		WHERE A.intLoadId = @intLoadId
-			AND A.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
-										  WHERE BD.intItemId = A.intItemId AND Item.strType <> 'Other Charge')
+		WHERE L.intLoadId = @intLoadId
+			AND LD.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
+										  WHERE BD.intItemId = LD.intItemId AND Item.strType <> 'Other Charge')
 		
 		UNION ALL
 		

@@ -4331,7 +4331,6 @@
     <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPS.sql" />
     <Build Include="dbo\Stored Procedures\uspETImportBaseEngineeringToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBEExportPrice.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPaymentCSV.sql" />
     <Build Include="dbo\Views\vyuICTMProductPricing.sql" />
     <Build Include="dbo\Views\vyuTMBEExportPrice.sql" />
@@ -7531,6 +7530,12 @@
     <None Include="Scripts\Post-Deployment\ST\31_FileFieldMapping_Commander_uPLUs.sql" />
     <Build Include="dbo\Tables\tblIPSAPAccount.sql" />
     <Build Include="dbo\Tables\tblIPSAPInternalOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRebuildSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMRecalcBankAccountRegister.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixVoucherPayable.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayableCompletedKeyInfo.sql" />
+    <Build Include="dbo\Functions\fnICGetPreviousTransactionDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

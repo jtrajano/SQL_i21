@@ -1,9 +1,10 @@
-﻿CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
+﻿
+CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
 AS
 
 SELECT  
 	 strCustomerNumber,
-	 strUserId,
+	 strUserId
 	 intCustomerId, 
 	 strTempInvoiceReportNumber, 
 	 dblAccountTotalAmount , 
@@ -24,7 +25,8 @@ SELECT
 			ELSE CAST(0 AS BIT)
 			END
 			AS ysnEmail,
-	 dblTotalFuelExpensed
+	 dblTotalFuelExpensed,
+	 ysnActive
 
 FROM (
 	SELECT        
@@ -57,8 +59,11 @@ FROM (
 		cfInv.strEmailDistributionOption, 
 		dblTotalFuelExpensed,
 		cfInv.strStatementType,
-		'Ready' AS strStatus
+		'Ready' AS strStatus,
+		arCust.ysnActive
 	FROM            dbo.tblCFInvoiceStagingTable AS cfInv 
+	INNER JOIN tblARCustomer as arCust
+	ON arCust.intEntityId = cfInv.intCustomerId 
 	LEFT JOIN
 	(SELECT        dblFeeTotalAmount 
 	, intAccountId, strUserId
@@ -66,8 +71,9 @@ FROM (
 	GROUP BY intAccountId, dblFeeTotalAmount, strUserId) AS cfInvFee 
 	ON cfInv.intAccountId = cfInvFee.intAccountId
 	AND cfInv.strUserId  COLLATE Latin1_General_CI_AS = cfInvFee.strUserId) AS outertable
+	
 	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, intTermID, dtmInvoiceDate, dblFeeTotalAmount, 
-	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType
+	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType,ysnActive
 GO
 
 

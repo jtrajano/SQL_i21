@@ -140,12 +140,10 @@ _Order AS
 			a.*
 			,b.strTermCode
 			,c.strCurrency
-			,ROW_NUMBER() OVER (ORDER BY intPaymentDetailId ASC) AS [row_number]
-
+			,ROW_NUMBER() OVER (ORDER BY strInvoice, intPaymentDetailId) AS [row_number]
 	 FROM Invoices a
 	 LEFT JOIN tblSMTerm b ON a.intTermsId = b.intTermID
 	 LEFT JOIN tblSMCurrency c ON a.intCurrencyId = c.intCurrencyID
 )
 SELECT * FROM _Order
- 
 WHERE [row_number] > 10

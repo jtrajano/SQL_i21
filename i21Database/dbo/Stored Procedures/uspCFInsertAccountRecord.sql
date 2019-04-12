@@ -401,7 +401,7 @@ BEGIN
 
 	--Detail Display
 	
-	IF(@strDetailDisplay NOT IN ('Card','Vehicle','DriverPin'))
+	IF(@strDetailDisplay NOT IN ('Card','Vehicle','DriverPin','Driver Pin'))
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
 		VALUES (@strCustomerId,'Invalid detail display value '+ @strDetailDisplay +'. Value should be Card, Vehicle, DriverPin only')

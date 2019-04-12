@@ -14,8 +14,15 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 	DECLARE @transCount INT;
+	DECLARE @voucherBillDetailIds AS Id;
+	DECLARE @vendorOrderNumber NVARCHAR(100);
 	SET @transCount = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
+
+	INSERT INTO @voucherBillDetailIds
+	SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId
+
+	SELECT @vendorOrderNumber = strVendorOrderNumber FROM tblAPBill WHERE intBillId = @intBillId
 
 	DECLARE @UserEntityID INT
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
@@ -38,6 +45,19 @@ BEGIN TRY
 		ON A.intTransactionReversed = B.intBillId
 	WHERE A.intBillId = @intBillId
 
+	--EXECUTE uspAPUpdateVoucherPayable for deleted.
+	EXEC [dbo].[uspAPUpdateVoucherPayable]
+		@voucherDetailIds = @voucherBillDetailIds,
+		@decrease = 1
+	
+	EXEC [dbo].[uspAPUpdateIntegrationPayableAvailableQty]
+		@billDetailIds = @voucherBillDetailIds,
+		@decrease = 0
+
+	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
+
+	EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
+
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
 
@@ -53,7 +73,7 @@ BEGIN TRY
 	DELETE FROM dbo.tblSMTransaction
 	WHERE intRecordId = @intBillId 
 	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
-	
+
 	--Audit Log          
 	EXEC dbo.uspSMAuditLog 
 		 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 

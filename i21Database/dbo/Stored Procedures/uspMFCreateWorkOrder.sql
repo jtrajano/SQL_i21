@@ -34,8 +34,19 @@ BEGIN TRY
 		,@strCurrentDate NVARCHAR(50)
 		,@intWorkOrderConsumedLotId INT
 		,@intWorkOrderInputLotId INT
-		,@intCategoryId int
-		,@ysnKittingEnabled bit
+		,@intCategoryId INT
+		,@ysnKittingEnabled BIT
+		,@intAttributeTypeId INT
+		,@intBlendRequirementId INT
+		,@intUnitMeasureId INT
+		,@strDemandNo NVARCHAR(50)
+		,@strReferenceNo NVARCHAR(50)
+		,@strLotAlias NVARCHAR(50)
+		,@strVesselNo NVARCHAR(50)
+		,@dblActualQuantity NUMERIC(18, 6)
+		,@dblNoOfUnits NUMERIC(18, 6)
+		,@intNoOfUnitsItemUOMId INT
+		,@intTransactionFrom int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -63,6 +74,13 @@ BEGIN TRY
 		,@strSalesOrderNo = strSalesOrderNo
 		,@intSupervisorId = intSupervisorId
 		,@intStatusId = intStatusId
+		,@strReferenceNo = strReferenceNo
+		,@strLotAlias = strLotAlias
+		,@strVesselNo = strVesselNo
+		,@dblActualQuantity = dblActualQuantity
+		,@dblNoOfUnits = dblNoOfUnits
+		,@intNoOfUnitsItemUOMId = intNoOfUnitsItemUOMId
+		,@intTransactionFrom=intTransactionFrom
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strWorkOrderNo NVARCHAR(50)
 			,intManufacturingProcessId INT
@@ -87,6 +105,13 @@ BEGIN TRY
 			,strSalesOrderNo NVARCHAR(50)
 			,intSupervisorId INT
 			,intStatusId INT
+			,strReferenceNo NVARCHAR(50)
+			,strLotAlias NVARCHAR(50)
+			,strVesselNo NVARCHAR(50)
+			,dblActualQuantity NUMERIC(18, 6)
+			,dblNoOfUnits NUMERIC(18, 6)
+			,intNoOfUnitsItemUOMId INT
+			,intTransactionFrom int
 			)
 
 	BEGIN TRANSACTION
@@ -100,9 +125,6 @@ BEGIN TRY
 	IF @strWorkOrderNo IS NULL
 		OR @strWorkOrderNo = ''
 	BEGIN
-		--EXEC dbo.uspSMGetStartingNumber 70
-		--	,@strWorkOrderNo OUTPUT
-
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
 			,@intItemId = @intItemId
 			,@intManufacturingId = @intManufacturingCellId
@@ -135,6 +157,61 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 27 --PM Staging Location
 
+	SELECT @intAttributeTypeId = intAttributeTypeId
+	FROM tblMFManufacturingProcess
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+
+	IF @intAttributeTypeId = 2
+	BEGIN
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
+			,@intItemId = @intItemId
+			,@intManufacturingId = NULL
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 46
+			,@ysnProposed = 0
+			,@strPatternString = @strDemandNo OUTPUT
+
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intItemUOMId
+
+		INSERT INTO tblMFBlendRequirement (
+			strDemandNo
+			,intItemId
+			,dblQuantity
+			,intUOMId
+			,dtmDueDate
+			,intLocationId
+			,intStatusId
+			,dblIssuedQty
+			,intCreatedUserId
+			,dtmCreated
+			,intLastModifiedUserId
+			,dtmLastModified
+			,intMachineId
+			)
+		VALUES (
+			@strDemandNo
+			,@intItemId
+			,@dblQuantity
+			,@intUnitMeasureId
+			,@dtmPlannedDate
+			,@intLocationId
+			,2
+			,@dblQuantity
+			,@intUserId
+			,@dtmCurrentDate
+			,@intUserId
+			,@dtmCurrentDate
+			,NULL
+			)
+
+		SELECT @intBlendRequirementId = SCOPE_IDENTITY()
+	END
+
 	INSERT INTO dbo.tblMFWorkOrder (
 		strWorkOrderNo
 		,intManufacturingProcessId
@@ -166,6 +243,14 @@ BEGIN TRY
 		,ysnKittingEnabled
 		,dblPlannedQuantity
 		,intKitStatusId
+		,intBlendRequirementId
+		,strReferenceNo
+		,strLotAlias
+		,strVesselNo
+		,dblActualQuantity
+		,dblNoOfUnits
+		,intNoOfUnitsItemUOMId
+		,intTransactionFrom
 		)
 	SELECT @strWorkOrderNo
 		,@intManufacturingProcessId
@@ -194,9 +279,21 @@ BEGIN TRY
 		,@intSalesRepresentativeId
 		,@intSupervisorId
 		,@dtmPlannedDate
-		,@ysnKittingEnabled
+		,0
 		,@dblQuantity
-		,Case When @ysnKittingEnabled=1 Then 6 Else NULL End
+		,CASE 
+			WHEN @ysnKittingEnabled = 1
+				THEN 6
+			ELSE NULL
+			END
+		,@intBlendRequirementId
+		,@strReferenceNo
+		,@strLotAlias
+		,@strVesselNo
+		,@dblActualQuantity
+		,@dblNoOfUnits
+		,@intNoOfUnitsItemUOMId
+		,@intTransactionFrom
 
 	SET @intWorkOrderId = SCOPE_IDENTITY()
 
@@ -221,7 +318,11 @@ BEGIN TRY
 		,intWeightUOMId
 		,dblQty
 		,intItemUOMId
-		,ISNULL((SELECT MAX(intSequenceNo) FROM dbo.tblMFWorkOrderInputLot WHERE intWorkOrderId =@intWorkOrderId),0)+1
+		,ISNULL((
+				SELECT MAX(intSequenceNo)
+				FROM dbo.tblMFWorkOrderInputLot
+				WHERE intWorkOrderId = @intWorkOrderId
+				), 0) + 1
 		,@dtmCurrentDate
 		,@intUserId
 		,@dtmCurrentDate
@@ -251,6 +352,7 @@ BEGIN TRY
 		,intCreatedUserId
 		,dtmLastModified
 		,intLastModifiedUserId
+		,ysnStaged
 		)
 	SELECT @intWorkOrderId
 		,intLotId
@@ -259,11 +361,16 @@ BEGIN TRY
 		,intWeightUOMId
 		,dblQty
 		,intItemUOMId
-		,ISNULL((SELECT MAX(intSequenceNo) FROM dbo.tblMFWorkOrderConsumedLot WHERE intWorkOrderId =@intWorkOrderId),0)+1
+		,ISNULL((
+				SELECT MAX(intSequenceNo)
+				FROM dbo.tblMFWorkOrderConsumedLot
+				WHERE intWorkOrderId = @intWorkOrderId
+				), 0) + 1
 		,@dtmCurrentDate
 		,@intUserId
 		,@dtmCurrentDate
 		,@intUserId
+		,ysnStaged
 	FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (
 			intLotId INT
 			,intItemId INT
@@ -272,9 +379,21 @@ BEGIN TRY
 			,dblQty NUMERIC(38, 20)
 			,intItemUOMId INT
 			,intUserId INT
+			,ysnStaged BIT
 			) x
 
 	SELECT @intWorkOrderConsumedLotId = SCOPE_IDENTITY()
+
+	IF @intStatusId = 10
+	BEGIN
+		EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
+			,@intLocationId = @intLocationId
+			,@intUserId = @intUserId
+			,@intWorkOrderId = @intWorkOrderId
+	END
+
+	IF @intAttributeTypeId = 2
+		GOTO X
 
 	--Create Reservation
 	EXEC [uspMFCreateLotReservation] @intWorkOrderId = @intWorkOrderId
@@ -287,8 +406,8 @@ BEGIN TRY
 		,@strBOLNo NVARCHAR(50)
 		,@intEntityId INT
 		,@intOrderHeaderId INT
-		,@strItemNo nvarchar(50)
-		,@intSanitizationStagingUnitId int
+		,@strItemNo NVARCHAR(50)
+		,@intSanitizationStagingUnitId INT
 
 	SELECT @intOwnerId = IO.intOwnerId
 	FROM dbo.tblICItemOwner IO
@@ -297,17 +416,9 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intItemId INT) x
 			)
 
-	--SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
-	--FROM dbo.tblMFCompanyPreference
-
-	--SELECT @intStorageLocationId = intStorageLocationId
-	--FROM dbo.tblICStorageLocation
-	--WHERE strName = @strSanitizationStagingLocation
-	--	AND intLocationId = @intLocationId
-
-	SELECT @intSanitizationStagingUnitId=intSanitizationStagingUnitId
+	SELECT @intSanitizationStagingUnitId = intSanitizationStagingUnitId
 	FROM tblSMCompanyLocation
-	WHERE intCompanyLocationId=@intLocationId
+	WHERE intCompanyLocationId = @intLocationId
 
 	SELECT @intEntityId = E.intEntityId
 	FROM dbo.tblEMEntity E
@@ -323,34 +434,35 @@ BEGIN TRY
 	FROM tblSMUserSecurity
 	WHERE [intEntityId] = @intUserId
 
-	--EXEC dbo.uspSMGetStartingNumber 75
-	--	,@strBOLNo OUTPUT
-
 	EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-				,@intItemId = @intItemId
-				,@intManufacturingId = @intManufacturingCellId
-				,@intSubLocationId = @intSubLocationId
-				,@intLocationId = @intLocationId
-				,@intOrderTypeId = 8
-				,@intBlendRequirementId = NULL
-				,@intPatternCode = 75
-				,@ysnProposed = 0
-				,@strPatternString = @strBOLNo OUTPUT
+		,@intItemId = @intItemId
+		,@intManufacturingId = @intManufacturingCellId
+		,@intSubLocationId = @intSubLocationId
+		,@intLocationId = @intLocationId
+		,@intOrderTypeId = 8
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 75
+		,@ysnProposed = 0
+		,@strPatternString = @strBOLNo OUTPUT
 
 	DECLARE @tblWHOrderHeader TABLE (intOrderHeaderId INT)
 
 	IF @intOwnerId IS NULL
 	BEGIN
-		SELECT @strItemNo = I.strItemNo 
+		SELECT @strItemNo = I.strItemNo
 		FROM dbo.tblICItem I
 		WHERE intItemId IN (
-			SELECT intItemId
-			FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intItemId INT) x
-			)
+				SELECT intItemId
+				FROM OPENXML(@idoc, 'root/Lots/Lot', 2) WITH (intItemId INT) x
+				)
 
-		RAISERROR('Owner is not configured for the item %s.',14,1,@strItemNo)
+		RAISERROR (
+				'Owner is not configured for the item %s.'
+				,14
+				,1
+				,@strItemNo
+				)
 	END
-
 
 	SELECT @strXML = '<root>'
 
@@ -398,7 +510,6 @@ BEGIN TRY
 		,intReceiptQtyUOMId
 		,intLastUpdateId
 		,dtmLastUpdateOn
-		--,intPreferenceId
 		,dblRequiredQty
 		,intUnitsPerLayer
 		,intLayersPerPallet
@@ -420,24 +531,9 @@ BEGIN TRY
 		,IU1.intUnitMeasureId
 		,CL.intCreatedUserId
 		,CL.dtmCreated
-		--,(
-		--	SELECT TOP 1 intPickPreferenceId
-		--	FROM dbo.tblWHPickPreference
-		--	WHERE ysnDefault = 1
-		--	)
 		,CL.dblIssuedQuantity
-		,ISNULL((
-				--SELECT MAX(intUnitPerLayer)
-				--FROM tblWHSKU S
-				--WHERE S.intLotId = CL.intLotId
-				NULL
-				), I.intUnitPerLayer)
-		,ISNULL((
-				--SELECT MAX(intLayerPerPallet)
-				--FROM tblWHSKU S1
-				--WHERE S1.intLotId = CL.intLotId
-				NULL
-				), I.intLayerPerPallet)
+		,ISNULL((NULL), I.intUnitPerLayer)
+		,ISNULL((NULL), I.intLayerPerPallet)
 		,intSequenceNo
 		,CL.dblIssuedQuantity
 		,IU1.intUnitMeasureId
@@ -455,6 +551,8 @@ BEGIN TRY
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = CL.intItemUOMId
 	JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = CL.intItemIssuedUOMId
 	WHERE CL.intWorkOrderId = @intWorkOrderId
+
+	X:
 
 	COMMIT TRANSACTION
 

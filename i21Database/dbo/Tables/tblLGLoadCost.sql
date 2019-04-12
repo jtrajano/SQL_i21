@@ -4,7 +4,6 @@ CREATE TABLE [dbo].[tblLGLoadCost]
 	[intConcurrencyId] [int] NOT NULL,
 	[intLoadId] [int] NOT NULL,
 	[intItemId] [int] NOT NULL,
-	[intContractDetailId] [int] NULL,
 	[intVendorId] [int] NULL,
 	[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,

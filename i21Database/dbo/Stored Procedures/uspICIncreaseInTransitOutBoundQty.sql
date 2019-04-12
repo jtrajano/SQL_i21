@@ -58,6 +58,11 @@ USING (
 				,ob.intItemLocationId
 				,ob.dtmTransactionDate
 				,ob.intTransactionTypeId
+				,dtmTransactionDate = CASE 
+										WHEN ARI.ysnPosted = 0 
+										THEN [dbo].[fnICGetPreviousTransactionDate](ob.intItemId, ob.intItemLocationId, NULL, NULL, ob.intTransactionTypeId) 
+										ELSE ob.dtmTransactionDate 
+									END
 				,Aggregrate_Qty =  SUM(dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty))   --SUM(ISNULL(dbo.fnCalculateCostBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty), 0)) 	-- Convert the qty to stock unit. 			
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
 				CROSS APPLY (
@@ -68,10 +73,14 @@ USING (
 					WHERE	iUOM.intItemId = ob.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
+				LEFT JOIN tblARInvoice ARI
+					ON ARI.intInvoiceId = ob.intTransactionId
+					AND ob.intTransactionTypeId = @TransactionType_Invoice
 		--WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 				, ob.intTransactionTypeId
+				, ARI.ysnPosted
 				, ob.dtmTransactionDate
 ) AS Source_Query  
 	ON ItemStock.intItemId = Source_Query.intItemId
@@ -81,6 +90,14 @@ USING (
 WHEN MATCHED THEN 
 	UPDATE 
 	SET		dblInTransitOutbound = ISNULL(ItemStock.dblInTransitOutbound, 0) + Source_Query.Aggregrate_Qty 
+			,dtmLastSaleDate = CASE 
+								WHEN Source_Query.intTransactionTypeId = @TransactionType_Invoice 
+									AND ((Source_Query.Aggregrate_Qty < 0 AND Source_Query.dtmTransactionDate IS NOT NULL 
+										AND Source_Query.dtmTransactionDate > ISNULL(ItemStock.dtmLastSaleDate, '2000-01-01'))
+									OR Source_Query.Aggregrate_Qty > 0)
+								THEN Source_Query.dtmTransactionDate
+								ELSE ItemStock.dtmLastSaleDate
+							END
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -113,7 +130,11 @@ USING (
 				,ob.intSubLocationId
 				,ob.intStorageLocationId
 				,ob.intTransactionTypeId
-				,ob.dtmTransactionDate
+				,dtmTransactionDate = CASE 
+										WHEN ARI.ysnPosted = 0 
+										THEN [dbo].[fnICGetPreviousTransactionDate](ob.intItemId, ob.intItemLocationId, ob.intSubLocationId, ob.intStorageLocationId, ob.intTransactionTypeId) 
+										ELSE ob.dtmTransactionDate 
+									END
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
 				CROSS APPLY (
@@ -124,6 +145,9 @@ USING (
 					WHERE	iUOM.intItemId = ob.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
+				LEFT JOIN tblARInvoice ARI
+					ON ARI.intInvoiceId = ob.intTransactionId
+					AND ob.intTransactionTypeId = @TransactionType_Invoice
 		WHERE	ob.intItemUOMId <> StockUOM.intItemUOMId
 				--AND ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
 				--AND ob.intFOBPointId IS NOT NULL
@@ -135,7 +159,8 @@ USING (
 				, ob.intSubLocationId
 				, ob.intStorageLocationId
 				, ob.intTransactionTypeId
-				, ob.dtmTransactionDate
+				, ARI.ysnPosted
+				, ob.dtmTransactionDate 
 		-- Convert all the In-Transit Outbound Qty to 'Stock UOM' before doing the aggregrate.
 		UNION ALL 
 		SELECT	ob.intItemId
@@ -144,7 +169,11 @@ USING (
 				,ob.intSubLocationId
 				,ob.intStorageLocationId
 				,ob.intTransactionTypeId
-				,ob.dtmTransactionDate
+				,dtmTransactionDate = CASE 
+										WHEN ARI.ysnPosted = 0 
+										THEN [dbo].[fnICGetPreviousTransactionDate](ob.intItemId, ob.intItemLocationId, ob.intSubLocationId, ob.intStorageLocationId, ob.intTransactionTypeId) 
+										ELSE ob.dtmTransactionDate 
+									END
 				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty)) 
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
 				CROSS APPLY (
@@ -155,6 +184,9 @@ USING (
 					WHERE	iUOM.intItemId = ob.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
+				LEFT JOIN tblARInvoice ARI
+					ON ARI.intInvoiceId = ob.intTransactionId
+					AND ob.intTransactionTypeId = @TransactionType_Invoice
 		--WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
@@ -162,6 +194,7 @@ USING (
 				, ob.intSubLocationId
 				, ob.intStorageLocationId
 				, ob.intTransactionTypeId
+				, ARI.ysnPosted
 				, ob.dtmTransactionDate
 ) AS Source_Query  
 	ON ItemStockUOM.intItemId = Source_Query.intItemId
@@ -173,8 +206,10 @@ WHEN MATCHED THEN
 	UPDATE 
 	SET		dblInTransitOutbound = ISNULL(ItemStockUOM.dblInTransitOutbound, 0) + Source_Query.Aggregrate_Qty 
 			,dtmLastSaleDate = CASE 
-								WHEN Source_Query.intTransactionTypeId = @TransactionType_Invoice AND Source_Query.Aggregrate_Qty < 0
-									AND (Source_Query.dtmTransactionDate IS NOT NULL AND Source_Query.dtmTransactionDate > ISNULL(ItemStockUOM.dtmLastSaleDate, '2000-01-01'))
+								WHEN Source_Query.intTransactionTypeId = @TransactionType_Invoice 
+									AND ((Source_Query.Aggregrate_Qty < 0 AND Source_Query.dtmTransactionDate IS NOT NULL 
+										AND Source_Query.dtmTransactionDate > ISNULL(ItemStockUOM.dtmLastSaleDate, '2000-01-01'))
+									OR Source_Query.Aggregrate_Qty > 0)
 								THEN Source_Query.dtmTransactionDate
 								ELSE ItemStockUOM.dtmLastSaleDate
 							END

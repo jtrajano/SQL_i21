@@ -20,6 +20,7 @@ BEGIN TRY
 	DECLARE @voucherPayablesData AS VoucherPayable;
 	DECLARE @voucherDetailTaxData AS VoucherDetailTax;
 	DECLARE @APAccount INT;
+	DECLARE @idsCreated NVARCHAR(MAX); 
 	DECLARE @deleted TABLE(intVoucherPayableId INT);
 	DECLARE @voucherIds AS Id;
 	DECLARE @createdVouchers TABLE(
@@ -453,8 +454,11 @@ BEGIN TRY
 	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 	EXEC uspAPUpdateVoucherTotal @voucherIds
 
-	SELECT @createdVouchersId = COALESCE(@createdVouchersId + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+	SELECT @idsCreated = COALESCE(@idsCreated + ',', '') +  CONVERT(VARCHAR(12),intBillId) 
 	FROM @createdVouchers
+	
+	SET @createdVouchersId = @idsCreated 
+	SELECT @createdVouchersId
 	
 	IF @transCount = 0 COMMIT TRANSACTION;
 
