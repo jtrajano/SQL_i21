@@ -345,8 +345,8 @@ BEGIN
 				,dblInvoiceTotal				= IFP.dblInvoiceTotal
 				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal
 				,dblPayment						= ISNULL(POSPAYMENTS.dblAmount, 0)
-				,dblAmountDue					= ISNULL(@dblOnAccountAmount, 0)
-				,dblBaseAmountDue				= ISNULL(@dblOnAccountAmount, 0)
+				,dblAmountDue					= IFP.dblInvoiceTotal
+				,dblBaseAmountDue				= IFP.dblInvoiceTotal
 				,strInvoiceReportNumber			= IFP.strInvoiceNumber
 				,intCurrencyExchangeRateTypeId	= IFP.intCurrencyExchangeRateTypeId
 				,intCurrencyExchangeRateId		= IFP.intCurrencyExchangeRateId
