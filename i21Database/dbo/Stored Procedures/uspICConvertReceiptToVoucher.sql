@@ -185,9 +185,19 @@ BEGIN
 	FROM dbo.fnICGeneratePayables (@intReceiptId,	 1) GP
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 		ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
+	INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt
 		ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		AND Receipt.intEntityVendorId = GP.intEntityVendorId
+		AND Item.strType <> 'Bundle'
+		AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
+			AND 1 = 
+				CASE 
+					WHEN @intScreenId = @intScreenId_InventoryReceipt AND ReceiptItem.ysnAllowVoucher = 0 THEN 
+						0
+					ELSE 
+						1
+				END 
 
 	END 
 
