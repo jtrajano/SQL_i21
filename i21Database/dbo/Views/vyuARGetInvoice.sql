@@ -155,7 +155,8 @@ SELECT
 	strEODStatus = CASE WHEN POS.ysnClosed = 1 THEN 'Completed' ELSE 'Open' END,
 	strEODPOSDrawerName = POS.strPOSDrawerName,
 	intCreditLimitReached = CUS.intCreditLimitReached,
-	dtmCreditLimitReached = CUS.dtmCreditLimitReached
+	dtmCreditLimitReached = CUS.dtmCreditLimitReached,
+    ysnFromReturnedInvoice = CASE WHEN ISNULL(RI.intInvoiceId, 0) <> 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM 
 tblARInvoice INV
 JOIN (SELECT intEntityId,					strCustomerNumber, 
@@ -260,3 +261,9 @@ LEFT OUTER JOIN (
     WHERE intCreditMemoId IS NOT NULL
 ) POSMixedTransactionCreditMemo ON INV.intInvoiceId = POSMixedTransactionCreditMemo.intCreditMemoId
 AND INV.strType = 'POS'
+OUTER APPLY (
+    SELECT TOP 1 intInvoiceId
+    FROM dbo.tblARInvoice RI WITH (NOLOCK)
+    WHERE RI.strInvoiceNumber = INV.strInvoiceOriginId
+      AND RI.ysnReturned = 1
+) RI
