@@ -56,7 +56,6 @@ AS		ItemStock
 USING (
 		SELECT	ob.intItemId
 				,ob.intItemLocationId
-				,ob.dtmTransactionDate
 				,ob.intTransactionTypeId
 				,dtmTransactionDate = CASE 
 										WHEN ARI.ysnPosted = 0 
