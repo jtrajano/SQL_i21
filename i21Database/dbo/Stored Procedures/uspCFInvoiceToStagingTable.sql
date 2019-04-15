@@ -544,25 +544,10 @@ BEGIN TRY
 									THEN 'Card'
 
 								  WHEN LOWER(strDetailDisplay) = 'vehicle'
-									THEN (CASE	
-											WHEN ISNULL(strVehicleNumber,'') != '' THEN 'Vehicle'
-											ELSE (CASE	
-													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 'Driver Pin'
-													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN 'Card'
-													WHEN LOWER(strPrimarySortOptions) = 'driver pin' THEN 'Card'
-													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 'Driver Pin'
-												  END)
-										  END)
+									THEN 'Vehicle'
 
 								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
-									THEN (CASE
-											WHEN ISNULL(strDriverPinNumber,'') != '' THEN  'Driver Pin'
-											ELSE (CASE 
-													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 'Vehicle'
-													WHEN LOWER(strPrimarySortOptions) = 'vehicle' THEN 'Card'
-													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 'Vehicle'
-												  END)
-											END)
+									THEN  'Driver Pin'
 							 END
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
