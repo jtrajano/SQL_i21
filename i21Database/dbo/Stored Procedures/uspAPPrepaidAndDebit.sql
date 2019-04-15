@@ -465,7 +465,7 @@ UNION ALL
 SELECT
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	NULL, 
-	[intLineApplied]		=	NULL, 
+	[intLineApplied]		=	CAST(1 AS INT), 
 	[intTransactionId]		=	A.intBillId,
 	[strTransactionNumber]	=	A.strBillId,
 	[intItemId]				=	NULL,

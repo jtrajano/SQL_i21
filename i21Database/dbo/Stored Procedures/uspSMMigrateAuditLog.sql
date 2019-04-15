@@ -368,7 +368,7 @@ FROM (
 	strFrom,   
 	strTo,   
 	strAlias,  
-	CASE WHEN (ISNULL(strAction,'') = '' AND ISNULL(strAlias,'') = '') 
+	CASE WHEN (ISNULL(strAction,'') = '' AND ISNULL(strAlias,'') = '') AND ISNULL(ysnField,'') = ''
 	AND (ISNULL(strFrom,'') = '' AND ISNULL(strTo, '') = '') THEN 1 ELSE ysnHidden END AS 'ysnHidden',  
 	ysnField,   
 	1   

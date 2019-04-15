@@ -280,7 +280,7 @@ WHERE
 		) 
 	)
 	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
-	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
+	--AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType != 2
 	AND A.intInventoryReceiptId = @intReceiptId

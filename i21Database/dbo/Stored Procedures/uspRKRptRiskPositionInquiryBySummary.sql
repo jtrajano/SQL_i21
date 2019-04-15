@@ -446,9 +446,9 @@ BEGIN
 			@strSubBookH strSubBookH,
 			@dtmPositionAsOf dtmPositionAsOf,
 			intOrderByHeading = 1,intBookId,intSubBookId,
-			case when isnull(@ysnSubTotalByBook,0) = 0 then '' else 
+			case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strBook,'')='' then '(blank)' else strBook end END strBook,
-			case when isnull(@ysnSubTotalByBook,0) = 0 then '' else 
+			case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strSubBook,'')='' then '(blank)' else strSubBook end END strSubBook
 			,@ysnSubTotalByBook ysnSubTotalByBook
 		FROM #temp1
@@ -473,9 +473,9 @@ BEGIN
 			@strSubBookH strSubBookH,
 			@dtmPositionAsOf dtmPositionAsOf,
 			intOrderByHeading = 2,intBookId,intSubBookId,				
-				case when isnull(@ysnSubTotalByBook,0) = 0 then '' else 
+				case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strBook,'')='' then '(blank)' else strBook end END strBook,
-				case when isnull(@ysnSubTotalByBook,0) = 0 then '' else 
+				case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strSubBook,'')='' then '(blank)' else strSubBook end END strSubBook
 				,@ysnSubTotalByBook ysnSubTotalByBook
 		FROM #temp1
@@ -501,9 +501,9 @@ BEGIN
 			@strSubBookH strSubBookH,
 			@dtmPositionAsOf dtmPositionAsOf,
 			intOrderByHeading = CASE WHEN strGroup = '1.Outright Coverage' THEN 1 ELSE 2 END,intBookId,intSubBookId,
-				case when isnull(@ysnSubTotalByBook,0) = 0 then '' else 
+				case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strBook,'')='' then '(blank)' else strBook end END strBook,
-				case when isnull(@ysnSubTotalByBook,0) = 0 then '' else 
+				case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strSubBook,'')='' then '(blank)' else strSubBook end END strSubBook
 				,@ysnSubTotalByBook ysnSubTotalByBook
 		FROM #temp1
