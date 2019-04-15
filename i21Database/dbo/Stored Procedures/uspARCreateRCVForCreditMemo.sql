@@ -25,11 +25,12 @@ WHERE LOWER(strPaymentMethod) = LOWER(@strPaymentMethod)
 --GET PREPAID/CREDIT AMOUNTS
 INSERT @tblPrepaids(intPrepaymentId, dblAppliedAmount)
 SELECT intPrepaymentId			= intPrepaymentId
-	 , dblAppliedInvoiceAmount	= ISNULL(dblAppliedInvoiceDetailAmount, 0)
+	 , dblAppliedInvoiceAmount	= SUM(ISNULL(dblAppliedInvoiceDetailAmount, 0))
 FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)
 WHERE intInvoiceId = @intInvoiceId 
   AND ysnApplied = 1
   AND ISNULL(dblAppliedInvoiceDetailAmount, 0) > 0
+GROUP BY intPrepaymentId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @tblPrepaids)
 BEGIN

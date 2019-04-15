@@ -195,8 +195,8 @@ BEGIN TRY
 								THEN	@strSummary
 								ELSE	''
 						END,
-			strBuyer = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END,
-			strSeller = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END,
+			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
+			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
 			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
 			strCurrencyExchangeRate = FY.strCurrency + '/' + TY.strCurrency,
