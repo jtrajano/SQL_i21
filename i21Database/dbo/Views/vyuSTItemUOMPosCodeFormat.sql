@@ -2,6 +2,7 @@
 AS
 SELECT Item.intItemId
 	   , UOM.intItemUOMId
+	   , ItemLoc.intLocationId
        , Item.strItemNo
 	   , Item.strDescription
 	   , UOM.strLongUPCCode
@@ -184,8 +185,10 @@ FROM
 		   , U.* 
 	FROM tblICItemUOM U
 ) AS UOM
-JOIN tblICItem Item
+INNER JOIN tblICItem Item
 	ON UOM.intItemId = Item.intItemId
+INNER JOIN tblICItemLocation ItemLoc
+	ON Item.intItemId = ItemLoc.intItemId
 WHERE Item.ysnFuelItem = CAST(0 AS BIT) 
 	AND UOM.strLongUPCCode IS NOT NULL
 	AND UOM.strLongUPCCode NOT LIKE '%[^0-9]%'

@@ -44,50 +44,8 @@ BEGIN
 		WHERE intRegisterId = @intRegisterId
 		-- =========================================================================================================
 
-		--IF(UPPER(@strRegisterClass) = UPPER('SAPPHIRE') or UPPER(@strRegisterClass) = UPPER('COMMANDER'))
-		--IF(UPPER(@strRegisterClass) IN ('SAPPHIRE/COMMANDER'))
-		--	BEGIN
-		--		IF EXISTS(SELECT IFH.intImportFileHeaderId 
-		--				  FROM dbo.tblSMImportFileHeader IFH
-		--				  JOIN dbo.tblSTRegisterFileConfiguration FC 
-		--						ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
-		--				  WHERE IFH.strLayoutTitle = 'Pricebook Send Sapphire' 
-		--				  AND IFH.strFileType = 'XML' 
-		--				  AND FC.intRegisterId = @intRegisterId)
-		--			BEGIN
-		--				SELECT @intImportFileHeaderId = IFH.intImportFileHeaderId 
-		--				FROM dbo.tblSMImportFileHeader IFH
-		--				JOIN dbo.tblSTRegisterFileConfiguration FC 
-		--					ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
-		--				WHERE IFH.strLayoutTitle = 'Pricebook Send Sapphire' 
-		--				AND IFH.strFileType = 'XML' 
-		--				AND FC.intRegisterId = @intRegisterId
-		--			END
-		--		ELSE
-		--			BEGIN
-		--				SET @intImportFileHeaderId = 0
-		--			END	
-		
-		--	END
-		--ELSE
-		--	BEGIN
-		--		IF EXISTS(SELECT * FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @intRegisterId AND strFilePrefix = @strFilePrefix)
-		--			BEGIN
-		--				SELECT @intImportFileHeaderId = intImportFileHeaderId 
-		--				FROM tblSTRegisterFileConfiguration 
-		--				WHERE intRegisterId = @intRegisterId 
-		--				AND strFilePrefix = @strFilePrefix
-		--			END
-		--		ELSE
-		--			BEGIN
-		--				SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
-		--				SET @strGeneratedXML = ''
-		--				SET @intImportFileHeaderId = 0
-		--				SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Pricebook File (' + @strFilePrefix + ')'
 
-		--				RETURN
-		--			END	
-		--	END
+
 
 		-- ================================================================================================================================================
 		-- [START] - GET 'intImportFileHeaderId'
@@ -158,12 +116,11 @@ BEGIN
 			OR 
 			dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
 		)
-		AND intCompanyLocationId = 
-		(
-			SELECT intCompanyLocationId 
-			FROM tblSTStore
-			WHERE intStoreId = @intStoreId
-		)
+		AND intCompanyLocationId = (
+										SELECT intCompanyLocationId 
+										FROM tblSTStore
+										WHERE intStoreId = @intStoreId
+								   )
 		--------------------------------------------------------------------------------------------------------------
 		----------------- End Get Inventory Items that has modified/added date between date range --------------------
 		--------------------------------------------------------------------------------------------------------------
@@ -1088,6 +1045,7 @@ BEGIN
 				DECLARE @tblTempSapphireCommanderUPLUs TABLE 
 				(
 					[intCommanderOutboundPLUsId] INT, 
+					[intItemLocationId] INT, 
 					[strSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 					[strUpc] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 					[strUpcModifier] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -1096,28 +1054,77 @@ BEGIN
 					[strFee] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 					[strPCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 					[dblPrice] DECIMAL(18, 2) NULL,
+
+					[strFlagColumnType] NVARCHAR(50),
 					[intFlagSysid] INT NULL, 
+
+					[strTaxRateColumnType] NVARCHAR(50),
 					[intTaxRateSysid] INT NULL, 
+
+					[intIdCheckSysId] INT NULL,
+
+					[intBlueLawsSysId] INT NULL,
+
 					[dblSellUnit] DECIMAL(18, 6) NULL
 				)
 
 				-- Insert values to Temp table
+				-- Refference http://inet.irelyserver.com/display/ST/Commander+-+XML+Pricebook+Export+Map+to+i21+Database
 				INSERT INTO @tblTempSapphireCommanderUPLUs
-				SELECT
-					[intCommanderOutboundPLUsId]	= ROW_NUMBER() OVER(ORDER BY (SELECT 1))
-					, [strSource]					= 'keyboard'
-					, [strUpc]						= CAST(UOM.strLongUPCCode AS NVARCHAR(50))
-					, [strUpcModifier]				= '000'
-					, [strDescription]				= REPLACE(REPLACE(REPLACE(REPLACE(Item.strDescription, '''', ''), '"', ''), '/', ''), '\', '')
-					, [strDepartment]				= CAST(CategoryLoc.intRegisterDepartmentId AS NVARCHAR(50))
-					, [strFee]						= '00'
-					, [strPCode]					= ISNULL(StorePCode.strRegProdCode, '')
-					, [dblPrice]					= ISNULL(ItemPrice.dblSalePrice, 0)
-					, [intFlagSysid]				= 1 
-					, [intTaxRateSysid]				= 1
-					, [dblSellUnit]					= 1
+				SELECT DISTINCT
+					[intCommanderOutboundPLUsId]	=	ROW_NUMBER() OVER(ORDER BY (SELECT 1))
+					, [intItemLocationId]			=	ItemLoc.intItemLocationId
+					, [strSource]					=	'keyboard'
+					, [strUpc]						=	PCF.strUPCwthOrwthOutCheckDigit --CAST(UOM.strLongUPCCode AS NVARCHAR(50)) -- Add check digit here
+					, [strUpcModifier]				=	'000'
+					, [strDescription]				=	LEFT(  REPLACE(REPLACE(REPLACE(REPLACE(Item.strDescription, '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
+					, [strDepartment]				=	CAST(CategoryLoc.intRegisterDepartmentId AS NVARCHAR(50))
+					, [strFee]						=	CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
+					, [strPCode]					=	ISNULL(StorePCode.strRegProdCode, '') -- ISNULL(StorePCode.strRegProdCode, '')
+					, [dblPrice]					=	ISNULL(ItemPrice.dblSalePrice, 0)
+					, [strFlagColumnType]			=	UNPIVOTItemLoc.strColumnName
+					, [intFlagSysid]				=	CASE
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnPromotionalItem' -- Always INCLUDE
+																THEN 1
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnReturnable' AND UNPIVOTItemLoc.ysnValue = 1
+																THEN 3
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnFoodStampable'  AND UNPIVOTItemLoc.ysnValue = 1
+																THEN 4
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnOpenPricePLU'  AND UNPIVOTItemLoc.ysnValue = 1
+																THEN 6
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnScaleItem' AND UNPIVOTItemLoc.ysnValue = 1
+																THEN 8
+														END
+					, [strTaxRateColumnType]		=   UNPIVOTItemLoc.strColumnName
+					, [intTaxRateSysid]				=	CASE
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnTaxFlag1' AND UNPIVOTItemLoc.ysnValue = 1
+																THEN 1
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnTaxFlag2' AND UNPIVOTItemLoc.ysnValue = 1
+																THEN 2
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnTaxFlag3'  AND UNPIVOTItemLoc.ysnValue = 1
+																THEN 3
+															WHEN UNPIVOTItemLoc.strColumnName = 'ysnTaxFlag4'  AND UNPIVOTItemLoc.ysnValue = 1
+																THEN 4
+														END
+					, [intIdCheckSysId]				=	CASE
+															WHEN (UNPIVOTItemLoc.strColumnName = 'ysnIdRequiredLiquor') AND  UNPIVOTItemLoc.ysnValue = 1
+																THEN 1
+															WHEN (UNPIVOTItemLoc.strColumnName = 'ysnIdRequiredCigarette') AND  UNPIVOTItemLoc.ysnValue = 1
+																THEN 2
+														END
+					, [intBlueLawsSysId]			=	CASE
+															WHEN (UNPIVOTItemLoc.strColumnName = 'ysnApplyBlueLaw1') AND  UNPIVOTItemLoc.ysnValue = 1
+																THEN 1
+															WHEN (UNPIVOTItemLoc.strColumnName = 'ysnApplyBlueLaw2') AND  UNPIVOTItemLoc.ysnValue = 1
+																THEN 2
+														END
+					, [dblSellUnit]					=	1
 				FROM tblICItem Item
-				INNER JOIN @tempTableItems tempItem
+				INNER JOIN 
+				(
+					SELECT DISTINCT intItemId
+					FROM @tempTableItems
+				) tempItem
 					ON Item.intItemId = tempItem.intItemId
 				INNER JOIN tblICItemUOM UOM
 					ON Item.intItemId = UOM.intItemId
@@ -1128,32 +1135,95 @@ BEGIN
 					ON Category.intCategoryId = CategoryLoc.intCategoryId
 				INNER JOIN tblSTStore Store
 					ON CategoryLoc.intLocationId = Store.intCompanyLocationId
-				INNER JOIN 
-				(
-					SELECT
-						intStoreId
-						, strRegProdCode
-					FROM tblSTSubcategoryRegProd 
-				) AS StorePCode
-				ON Store.intStoreId = StorePCode.intStoreId
+				INNER JOIN tblSTSubcategoryRegProd StorePCode
+					ON Store.intStoreId = StorePCode.intStoreId
 				INNER JOIN tblICItemLocation ItemLoc
 					ON Item.intItemId = ItemLoc.intItemId
 					AND Store.intCompanyLocationId = ItemLoc.intLocationId
+					AND StorePCode.intRegProdId = ItemLoc.intProductCodeId
+				INNER JOIN 
+				(
+						SELECT 
+						   intPrimaryId
+						   , strColumnName
+						   , ysnValue
+						FROM 
+						(
+							SELECT
+								intItemLocationId
+
+								-- Flags
+							   , ISNULL(ysnPromotionalItem, 0) AS ysnPromotionalItem 
+							   , ysnReturnable
+							   , ysnFoodStampable
+							   , ysnOpenPricePLU
+							   , ysnScaleItem
+
+							   -- taxRates
+							   , ysnTaxFlag1			-- [sysid=1]
+							   , ysnTaxFlag2			-- [sysid=2]
+							   , ysnTaxFlag3			-- [sysid=3]
+							   , ysnTaxFlag4			-- [sysid=4]
+
+							   -- idChecks
+							   , ysnIdRequiredLiquor	-- [sysid=1]
+							   , ysnIdRequiredCigarette -- [sysid=2]
+
+							   -- blueLaws
+							   , ysnApplyBlueLaw1		-- [sysid=1]
+							   , ysnApplyBlueLaw2		-- [sysid=2]
+							FROM tblICItemLocation
+						) t
+						UNPIVOT
+						(
+							intPrimaryId FOR intItemLocationIds IN (intItemLocationId)
+						) o
+						UNPIVOT
+						(
+							ysnValue FOR strColumnName IN (
+															-- Flags
+														   ysnPromotionalItem	 
+														   , ysnReturnable
+														   , ysnFoodStampable
+														   , ysnOpenPricePLU
+														   , ysnScaleItem
+
+														   -- taxRates
+														   , ysnTaxFlag1			-- [sysid=1]
+														   , ysnTaxFlag2			-- [sysid=2]
+														   , ysnTaxFlag3			-- [sysid=3]
+														   , ysnTaxFlag4			-- [sysid=4]
+
+														   -- idChecks
+														   , ysnIdRequiredLiquor	-- [sysid=1]
+														   , ysnIdRequiredCigarette -- [sysid=2]
+
+														   -- blueLaws
+														   , ysnApplyBlueLaw1		-- [sysid=1]
+														   , ysnApplyBlueLaw2		-- [sysid=2]
+														  )
+						) n
+						WHERE n.ysnValue = 1
+							OR n.strColumnName = 'ysnPromotionalItem'
+				) UNPIVOTItemLoc
+					ON ItemLoc.intItemLocationId = UNPIVOTItemLoc.intPrimaryId
+				INNER JOIN vyuSTItemUOMPosCodeFormat PCF
+					ON Item.intItemId = PCF.intItemId
+					AND UOM.intItemUOMId = PCF.intItemUOMId
+					AND ItemLoc.intLocationId = PCF.intLocationId
 				INNER JOIN tblICItemPricing ItemPrice
 					ON Item.intItemId = ItemPrice.intItemId
 					AND ItemLoc.intItemLocationId = ItemPrice.intItemLocationId
 				WHERE Store.intStoreId = @intStoreId
 					AND UOM.strLongUPCCode IS NOT NULL
 					AND UOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-					AND ISNULL(SUBSTRING(UOM.strLongUPCCode, PATINDEX('%[^0]%',UOM.strLongUPCCode), LEN(UOM.strLongUPCCode)), 0) NOT IN ('')
-				ORDER BY UOM.strLongUPCCode ASC
-
+					AND ISNULL(SUBSTRING(PCF.strUPCwthOrwthOutCheckDigit, PATINDEX('%[^0]%', PCF.strUPCwthOrwthOutCheckDigit), LEN(PCF.strUPCwthOrwthOutCheckDigit)), 0) NOT IN ('')
+				ORDER BY PCF.strUPCwthOrwthOutCheckDigit ASC
 
 
 				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderUPLUs)
 					BEGIN
-----TEST
---SELECT * FROM @tblTempSapphireCommanderUPLUs					
+				
 						DECLARE @xml XML = N''
 
 						-- Add namespaces of 'xmlns'
@@ -1174,30 +1244,58 @@ BEGIN
 								, plu.[strPCode]			AS 'pcode'
 								, plu.[dblPrice]			AS 'price'
 								,(	
-											SELECT TOP (2)
-												CASE 
-													WHEN ROW_NUMBER() OVER(ORDER BY (SELECT 1)) = 1 
-														THEN 1
-													WHEN ROW_NUMBER() OVER(ORDER BY (SELECT 1)) = 2 
-														THEN 4
-													ELSE CAST(ROW_NUMBER() OVER(ORDER BY (SELECT 1)) AS NVARCHAR(50))
-												END AS [@sysid]
-											FROM @tblTempSapphireCommanderUPLUs
-											--WHERE strDepartment = a.strDepartment
+											SELECT
+												plus.intFlagSysid AS [@sysid]
+											FROM @tblTempSapphireCommanderUPLUs plus
+											WHERE plus.intItemLocationId = plu.intItemLocationId
+												AND plus.intFlagSysid IS NOT NULL
 											FOR XML PATH('domain:flag'),
-											ROOT('flags'), TYPE
-			
+											ROOT('flags'), TYPE			
 								)
 								,(	
-											SELECT TOP (1)
-												1 AS [@sysid]
-											FROM @tblTempSapphireCommanderUPLUs
+											SELECT
+												plus.intTaxRateSysid AS [@sysid]
+											FROM @tblTempSapphireCommanderUPLUs plus
+											WHERE plus.intItemLocationId = plu.intItemLocationId
+												AND plus.intTaxRateSysid IS NOT NULL
 											FOR XML PATH('domain:taxRate'),
 											ROOT('taxRates'), TYPE
 			
 								)
+								,(	
+											SELECT
+												plus.intIdCheckSysId AS [@sysid]
+											FROM @tblTempSapphireCommanderUPLUs plus
+											WHERE plus.intItemLocationId = plu.intItemLocationId
+												AND plus.intIdCheckSysId IS NOT NULL
+											FOR XML PATH('domain:idCheck'),
+											ROOT('idChecks'), TYPE			
+								)
+								,(	
+											SELECT
+												plus.intIdCheckSysId AS [@sysid]
+											FROM @tblTempSapphireCommanderUPLUs plus
+											WHERE plus.intItemLocationId = plu.intItemLocationId
+												AND plus.intBlueLawsSysId IS NOT NULL
+											FOR XML PATH('domain:blueLaw'),
+											ROOT('blueLaws'), TYPE			
+								)
 								, 1 AS 'SellUnit'
-							FROM @tblTempSapphireCommanderUPLUs plu
+							--FROM @tblTempSapphireCommanderUPLUs plu
+							FROM 
+							(
+								SELECT DISTINCT
+									intItemLocationId
+									, strSource
+									, strUpc
+									, strUpcModifier
+									, strDescription
+									, strDepartment
+									, strFee
+									, strPCode
+									, dblPrice
+								FROM @tblTempSapphireCommanderUPLUs
+							) plu
 							FOR XML PATH('domain:PLU'), 
 							ROOT('domain:PLUs'), TYPE
 						);
@@ -1228,6 +1326,8 @@ BEGIN
 						DECLARE @strXML AS NVARCHAR(MAX) = CAST(@xml AS NVARCHAR(MAX))
 						SET @strXML = REPLACE(@strXML, 'flags xmlns:domain="urn:vfi-sapphire:np.domain.2001-07-01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"', 'flags')
 						SET @strXML = REPLACE(@strXML, 'taxRates xmlns:domain="urn:vfi-sapphire:np.domain.2001-07-01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"', 'taxRates')
+						SET @strXML = REPLACE(@strXML, 'idChecks xmlns:domain="urn:vfi-sapphire:np.domain.2001-07-01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"', 'idChecks')
+						SET @strXML = REPLACE(@strXML, 'blueLaws xmlns:domain="urn:vfi-sapphire:np.domain.2001-07-01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"', 'blueLaws')
 						
 						SET @strGeneratedXML = @strXML
 						SET @ysnSuccessResult = CAST(1 AS BIT)
