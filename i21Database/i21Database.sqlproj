@@ -6451,6 +6451,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.1\14_PopulateStockMovement.sql" />
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRValidateStorageStmtFormNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
