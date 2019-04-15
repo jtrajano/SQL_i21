@@ -7296,6 +7296,19 @@
     <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
+    <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMRecalcBankAccountRegister.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRebuildSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageByDiscountFactorReport.sql" />
+    <Build Include="dbo\Tables\tblRKDPIHeader.sql" />
+    <Build Include="dbo\Tables\tblRKDPICompanyOwnership.sql" />
+    <Build Include="dbo\Tables\tblRKDPIInventory.sql" />
+    <Build Include="dbo\Tables\tblRKDPISummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateDPI.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
