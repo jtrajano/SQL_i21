@@ -166,7 +166,7 @@ BEGIN
 		,[dblCost] = GP.dblUnitCost							
 		,GP.[dblCostUnitQty]					
 		,GP.[intCostUOMId]						
-		,[dblNetWeight]						
+		,GP.[dblNetWeight]						
 		,[dblWeightUnitQty]					
 		,GP.[intWeightUOMId]					
 		,GP.[intCostCurrencyId]
