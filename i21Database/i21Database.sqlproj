@@ -7524,6 +7524,7 @@
     <Build Include="dbo\Functions\fnAPGetPayableCompletedKeyInfo.sql" />
     <Build Include="dbo\Functions\fnICGetPreviousTransactionDate.sql" />
     <Build Include="dbo\Functions\fnConvertDateToReportDateFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTicketPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
