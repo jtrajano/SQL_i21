@@ -508,7 +508,7 @@ BEGIN
 	) t
 
 	--Get Balance Forward
-	INSERT INTO #tmpCompanyOwnership (dblUnpaidBalance
+	INSERT INTO @CompanyOwnershipResult (dblUnpaidBalance
 		, InventoryBalanceCarryForward)
 	select sum(dblUnpaidBalance), sum(dblPaidBalance) from #tmpCompanyOwnership WHERE dtmDate < @dtmOrigFromTransactionDate
 
