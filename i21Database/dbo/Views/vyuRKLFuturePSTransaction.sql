@@ -40,7 +40,8 @@ FROM (
 			, ISNULL(ot.intSubBookId,0) as intSubBookId
 			, intFutOptTransactionId
 			, fm.dblContractSize
-			, dblFutCommission = ISNULL((select TOP 1 (case when bc.intFuturesRateType = 2 then 0
+			, dblFutCommission = ISNULL((select TOP 1 (case when bc.intFuturesRateType = 2 then 
+														isnull(bc.dblFutCommission,0)* 2 / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END
 															else  isnull(bc.dblFutCommission,0) / case when cur.ysnSubCurrency = 1 then cur.intCent else 1 end end) as dblFutCommission
 										from tblRKBrokerageCommission bc
 										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
