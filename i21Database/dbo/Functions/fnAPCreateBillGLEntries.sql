@@ -185,7 +185,7 @@ BEGIN
 									dbo.fnCalculateQtyBetweenUOM(CASE WHEN R.intWeightUOMId > 0 
 											THEN R.intWeightUOMId ELSE R.intUnitOfMeasureId END, 
 											itemUOM.intItemUOMId, CASE WHEN R.intWeightUOMId > 0 THEN R.dblNetWeight ELSE R.dblQtyReceived END)
-								END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END)
+								END) * (CASE WHEN A.intTransactionType NOT IN (1,14) OR dblQtyReceived < 0 THEN -1 ELSE 1 END)
                 FROM dbo.tblAPBillDetail R
 				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
 				LEFT JOIN tblICItemUOM itemUOM ON item.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1
@@ -481,7 +481,7 @@ BEGIN
 																						itemUOM.intItemUOMId,
 																						CASE WHEN billDetails.intWeightUOMId > 0 THEN billDetails.dblNetWeight ELSE billDetails.dblQtyReceived END)
 														ELSE 0 END
-									END) * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END) as dblTotalUnits
+									END) * (CASE WHEN A.intTransactionType NOT IN (1,14) OR dblQtyReceived < 0 THEN -1 ELSE 1 END) as dblTotalUnits
 						FROM tblAPBillDetail billDetails
 						LEFT JOIN tblICItem item ON F.intItemId = item.intItemId
 						WHERE billDetails.intBillDetailId = B.intBillDetailId	
