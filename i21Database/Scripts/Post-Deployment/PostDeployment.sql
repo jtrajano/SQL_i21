@@ -480,6 +480,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\30_FileFieldMapping_Commander_Tax.sql
 :r .\ST\31_FileFieldMapping_Commander_uPLUs.sql
 :r .\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql
+:r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
+:r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
 
 -- Motor Fuel Tax
 :r .\TF\DefaultData\01_TaxAuthority.sql

@@ -7542,6 +7542,8 @@
     <None Include="Scripts\Post-Deployment\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTicketPayables.sql" />
     <Build Include="dbo\Views\vyuSTPromotionSalesList.sql" />
+    <None Include="Scripts\Post-Deployment\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql" />
+    <None Include="Scripts\Post-Deployment\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
