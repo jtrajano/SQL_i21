@@ -7520,6 +7520,7 @@
     <Build Include="dbo\Stored Procedures\uspGLRebuildSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspCMRecalcBankAccountRegister.sql" />
     <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalance.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixVoucherPayable.sql" />
     <Build Include="dbo\Functions\fnAPGetPayableCompletedKeyInfo.sql" />
     <Build Include="dbo\Functions\fnICGetPreviousTransactionDate.sql" />
