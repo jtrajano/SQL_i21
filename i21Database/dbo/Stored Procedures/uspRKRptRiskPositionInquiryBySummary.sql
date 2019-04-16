@@ -117,6 +117,7 @@ SELECT  intRowNumber ,
    CONVERT(NUMERIC(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
    (PARTITION BY NULL ORDER BY 
    CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
+   , strReportName = 'Risk Position Inquiry'
   FROM @temp 
 
 END
@@ -146,6 +147,7 @@ SELECT  intRowNumber ,strGroup,Selection ,
    convert(numeric(24,10),CONVERT(NVARCHAR,DENSE_RANK() OVER   
    (PARTITION BY null ORDER BY 
    CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900'  WHEN  strFutureMonth ='Total' THEN '01/01/9999' ELSE CONVERT(DATETIME,'01 '+strFutureMonth) END ))+ '.1234567890') AS [Rank] 
+   , strReportName = 'Coverage Inquiry'
 INTO #temp
 FROM @temp where isnull(dblNoOfContract,0) <> 0
 
