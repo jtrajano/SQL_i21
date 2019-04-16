@@ -195,7 +195,7 @@ BEGIN TRY
 		IF ISNULL(@dblAdjustByQuantity,0) != 0
 		BEGIN
 			DECLARE @strAdjustmentDescription  VARCHAR(MAX) = 'Delivery Sheet Posting';
-			SELECT @strAdjustmentDescription = CASE WHEN ISNULL(strDeliverySheetNumber, '') != '' THEN  '- ' + strDeliverySheetNumber ELSE '' END FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId
+			SELECT @strAdjustmentDescription += CASE WHEN ISNULL(strDeliverySheetNumber, '') != '' THEN  '- ' + strDeliverySheetNumber ELSE '' END FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId
 			EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
 				@intItemId
 				,@dtmDate
