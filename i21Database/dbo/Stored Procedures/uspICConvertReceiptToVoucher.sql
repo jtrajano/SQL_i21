@@ -129,6 +129,8 @@ BEGIN
 			,[strBillOfLading]					
 			,[ysnReturn]
 			,[dtmVoucherDate]
+			,[intStorageLocationId]
+			,[intSubLocationId]
 	)
 	SELECT 
 		GP.[intEntityVendorId]
@@ -182,6 +184,8 @@ BEGIN
 		,GP.[strBillOfLading]					
 		,GP.[ysnReturn]	
 		,GP.dtmDate
+		,GP.intStorageLocationId
+		,GP.intSubLocationId
 	FROM dbo.fnICGeneratePayables (@intReceiptId,	 1) GP
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 		ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
