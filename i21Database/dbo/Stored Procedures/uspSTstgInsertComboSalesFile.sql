@@ -47,7 +47,7 @@ BEGIN
 		-- =========================================================================================================
 
 
-		-- PASSPORT
+
 		IF(@strRegisterClass = 'PASSPORT')
 			BEGIN
 				-- Create Unique Identifier
@@ -154,7 +154,6 @@ BEGIN
 					
 					END
 			END
-		-- RADIANT
 		ELSE IF(@strRegisterClass = 'RADIANT')
 			BEGIN
 				INSERT INTO tblSTstgComboSalesFile
@@ -248,6 +247,172 @@ BEGIN
 							SET @strMessageResult = 'No result found to generate Combo - ' + @strFilePrefix + ' Outbound file'
 					END
 				
+			END
+		ELSE IF(@strRegisterClass = 'SAPPHIRE/COMMANDER')
+			BEGIN
+
+				DECLARE @tblTempSapphireCommanderCombos TABLE 
+				(
+					[intPrimaryId] INT,
+					[strStoreNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+					[strVendorName] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
+					[strVendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+
+					[strRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+
+					[strPromotionID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+					[strComboDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+
+					[strItemListID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+					[strComboItemQuantity] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+					[strComboItemUnitPrice] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+
+					[strStartDate] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+					[strStartTime] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
+					[strStopDate] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+					[strStopTime] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL
+				)
+
+
+				INSERT INTO @tblTempSapphireCommanderCombos
+				SELECT
+					[intPrimaryId]						=	CAST(SL.intPromoSalesListId AS NVARCHAR(50)), 
+					[strStoreNo]						=	CAST(Store.intStoreNo AS NVARCHAR(50)), 
+					[strVendorName]						=	'iRely', 
+					[strVendorModelVersion]				=	(SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
+
+					[strRecordActionType]				=	CASE
+																WHEN (SL.ysnDeleteFromRegister = 1)
+																	THEN 'delete'
+																ELSE 'addchange'
+														    END, 
+					[strPromotionID]					=	CAST(SL.intPromoSalesId AS NVARCHAR(50)),
+					[strComboDescription]				=	SL.strPromoSalesDescription,
+
+					[strItemListID]						=	PIL.strPromoItemListId,
+					[strComboItemQuantity]				=	CAST(SLD.intQuantity AS NVARCHAR(50)),
+					[strComboItemUnitPrice]				=	CAST(CAST(SLD.dblPrice AS DECIMAL(18, 2)) AS NVARCHAR(50)),
+
+					[strStartDate]						=	CAST(CONVERT(DATE, SL.dtmPromoBegPeriod) AS NVARCHAR(10)),
+					[strStartTime]						=	CAST(CONVERT(TIME, SL.dtmPromoBegPeriod) AS NVARCHAR(8)),
+					[strStopDate]						=	CAST(CONVERT(DATE, SL.dtmPromoEndPeriod) AS NVARCHAR(10)),
+					[strStopTime]						=	CAST(CONVERT(TIME, SL.dtmPromoEndPeriod) AS NVARCHAR(8))
+				FROM tblSTPromotionSalesListDetail SLD
+				INNER JOIN tblSTPromotionSalesList SL
+					ON SLD.intPromoSalesListId = SL.intPromoSalesListId
+				INNER JOIN tblSTPromotionItemList PIL
+					ON SLD.intPromoItemListId = PIL.intPromoItemListId
+				INNER JOIN tblSTStore Store
+					ON SL.intStoreId = Store.intStoreId
+				WHERE SL.intStoreId = @intStoreId
+					AND SL.strPromoType = 'C'
+
+
+				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderCombos)
+					BEGIN
+						
+						DECLARE @xml XML = N''
+				
+						SELECT @xml =
+						(
+							SELECT
+								trans.strStoreNo				AS 'TransmissionHeader/StoreLocationID',
+								trans.strVendorName 			AS 'TransmissionHeader/VendorName',
+								trans.strVendorModelVersion 	AS 'TransmissionHeader/VendorModelVersion'
+								,(	
+									SELECT
+										'update' AS [TableAction/@type],
+										'addchange' AS [RecordAction/@type],
+										(	
+											SELECT
+												Combo.strRecordActionType		AS [RecordAction/@type],
+												(
+													SELECT
+														Promo.strPromotionID	AS [PromotionID]
+													FROM 
+													(
+														SELECT DISTINCT
+															strPromotionID
+														FROM @tblTempSapphireCommanderCombos
+													) Promo
+													WHERE Combo.strPromotionID = Promo.strPromotionID
+													ORDER BY Promo.strPromotionID ASC
+													FOR XML PATH('Promotion'), TYPE
+												),
+												Combo.strComboDescription		AS [ComboDescription],
+												(
+													SELECT
+														comboItem.strItemListID	AS [ItemListID],
+														comboItem.strComboItemQuantity	AS [ComboItemQuantity],
+														comboItem.strComboItemUnitPrice	AS [ComboItemUnitPrice]
+													FROM 
+													(
+														SELECT DISTINCT
+															strPromotionID
+															, strItemListID
+															, strComboItemQuantity
+															, strComboItemUnitPrice
+														FROM @tblTempSapphireCommanderCombos
+													) comboItem
+													WHERE Combo.strPromotionID = comboItem.strPromotionID
+													ORDER BY comboItem.strPromotionID ASC
+													FOR XML PATH('ComboItemList'),
+													ROOT('ComboList'), TYPE
+												),
+												Combo.strStartDate		AS [StartDate],
+												Combo.strStartTime		AS [StartTime],
+												Combo.strStopDate		AS [StopDate],
+												Combo.strStopTime		AS [StopTime]
+											FROM 
+											(
+												SELECT DISTINCT
+													strPromotionID
+													, strRecordActionType
+													, strComboDescription
+													, strStartDate
+													, strStartTime
+													, strStopDate
+													, strStopTime
+												FROM @tblTempSapphireCommanderCombos
+											) Combo
+											ORDER BY Combo.strPromotionID ASC
+											FOR XML PATH('CBTDetail'), TYPE
+										)
+									FOR XML PATH('ComboMaintenance'), TYPE		
+								)
+							FROM 
+							(
+								SELECT DISTINCT
+									[strStoreNo], 
+									[strVendorName], 
+									[strVendorModelVersion]
+								FROM @tblTempSapphireCommanderCombos
+							) trans
+							FOR XML PATH('NAXML-MaintenanceRequest'), TYPE
+						);
+
+
+						DECLARE @strXmlns AS NVARCHAR(50) = 'http://www.naxml.org/POSBO/Vocabulary/2003-10-16'
+								, @strVersion NVARCHAR(50) = '3.4'
+
+						-- INSERT Attributes 'page' and 'ofpages' to Root header
+						SET @xml.modify('insert 
+									   (
+											attribute version { 
+																	sql:variable("@strVersion")
+															  }		   
+										) into (/*:NAXML-MaintenanceRequest)[1]');
+
+						DECLARE @strXML AS NVARCHAR(MAX) = CAST(@xml AS NVARCHAR(MAX))
+						SET @strXML = REPLACE(@strXML, '<NAXML-MaintenanceRequest', '<NAXML-MaintenanceRequest xmlns="http://www.naxml.org/POSBO/Vocabulary/2003-10-16"')
+						
+						SET @strGeneratedXML = REPLACE(@strXML, '><', '>' + CHAR(13) + '<')
+					END
+				ELSE 
+					BEGIN
+						SET @ysnSuccessResult = CAST(0 AS BIT)
+						SET @strMessageResult = 'No result found to generate Combo - ' + @strFilePrefix + ' Outbound file'
+					END
 			END
 
 	END TRY

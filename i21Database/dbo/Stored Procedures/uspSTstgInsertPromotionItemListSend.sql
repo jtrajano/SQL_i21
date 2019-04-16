@@ -387,7 +387,7 @@ BEGIN
 					AND IL.intLocationId = PCF.intLocationId
 					AND IUOM.intItemUOMId = PCF.intItemUOMId
 				WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-					AND ST.intStoreId = 1
+					AND ST.intStoreId = @intStoreId
 					AND IUOM.strLongUPCCode IS NOT NULL
 					AND IUOM.strLongUPCCode <> ''
 					AND IUOM.strLongUPCCode <> '0'
