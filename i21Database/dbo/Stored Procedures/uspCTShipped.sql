@@ -36,7 +36,9 @@ BEGIN TRY
 				@intLoadDetailId				INT,
 				@dblReduceSchQty				NUMERIC(18,6),
 				@dblReverseSchQty				NUMERIC(18,6),
-				@intSContractDetailId			INT
+				@intSContractDetailId			INT,
+				@dblAppliedQty					NUMERIC(18,6),
+				@dblDistributedLoadQty			NUMERIC(18,6)
 
 	SELECT @intOrderType = intOrderType,@intSourceType = intSourceType,@strShipmentId= strShipmentId FROM @ItemsFromInventoryShipment
 	SELECT @ysnReduceScheduleByLogisticsLoad = ysnReduceScheduleByLogisticsLoad FROM tblCTCompanyPreference
@@ -86,7 +88,7 @@ BEGIN TRY
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
 
-		SELECT	@intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+		SELECT	@intPricingTypeId = intPricingTypeId,@dblAppliedQty = dblQuantity - dblBalance FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		SELECT @intSourceId = intSourceId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
@@ -151,13 +153,22 @@ BEGIN TRY
 						IF ABS(@dblSchQuantityToUpdate) < @dblLoadQuantity AND @dblSchQuantityToUpdate < 0
 						BEGIN
 							
-							SELECT  @dblReduceSchQty = (@dblLoadQuantity - ABS(@dblSchQuantityToUpdate)) * -1
-							EXEC	uspCTUpdateScheduleQuantity 
-							@intContractDetailId	=	@intContractDetailId,
-							@dblQuantityToUpdate	=	@dblReduceSchQty,
-							@intUserId				=	@intUserId,
-							@intExternalId			=	@intLoadDetailId,
-							@strScreenName			=	'Auto - Load Schedule'
+							SELECT @dblDistributedLoadQty = SUM(LD.dblQuantity)
+							FROM tblSCTicket TK
+							JOIN tblLGLoadDetail LD	ON LD.intLoadId = TK.intLoadId
+							WHERE intSContractDetailId = @intSourceId
+							AND TK.strTicketStatus = 'C'
+
+							IF @dblAppliedQty <= @dblDistributedLoadQty --CT-3051
+							BEGIN
+								SELECT  @dblReduceSchQty = (@dblLoadQuantity - ABS(@dblSchQuantityToUpdate)) * -1
+								EXEC	uspCTUpdateScheduleQuantity 
+								@intContractDetailId	=	@intContractDetailId,
+								@dblQuantityToUpdate	=	@dblReduceSchQty,
+								@intUserId				=	@intUserId,
+								@intExternalId			=	@intLoadDetailId,
+								@strScreenName			=	'Auto - Load Schedule'
+							END
 						END
 
 						IF	EXISTS(SELECT TOP 1 1 FROM tblCTSequenceUsageHistory WHERE intContractDetailId = @intContractDetailId AND strScreenName = 'Auto - Load Schedule' AND intExternalId = @intLoadDetailId) AND
