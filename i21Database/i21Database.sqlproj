@@ -7490,7 +7490,6 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
     <Build Include="dbo\Tables\tblCTAOPComponent.sql" />
     <Build Include="dbo\Views\vyuCTAOPComponent.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Tables\tblSMTermCutoff.sql" />
     <Build Include="dbo\User Defined Types\AROriginTaxCodeTableType.sql" />
     <Build Include="dbo\Views\vyuEMEAExportCustomer.sql" />
@@ -7526,6 +7525,7 @@
     <Build Include="dbo\Functions\fnICGetPreviousTransactionDate.sql" />
     <Build Include="dbo\Functions\fnConvertDateToReportDateFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTicketPayables.sql" />
+    <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
