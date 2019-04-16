@@ -61,7 +61,7 @@ BEGIN TRY
 
 				SELECT @dblQuantity = dblGross, @dblTempSplitQty = dblGross FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId
 				DECLARE ticketCursor CURSOR FOR
-				select strAdjustmentNo, intInventoryAdjustmentId from tblICInventoryAdjustment where intSourceId = @intDeliverySheetId and strDescription = 'Delivery Sheet Posting'
+				select strAdjustmentNo, intInventoryAdjustmentId from tblICInventoryAdjustment where intSourceId = @intDeliverySheetId and strDescription LIKE 'Delivery Sheet Posting%'
 				OPEN ticketCursor;  
 				FETCH NEXT FROM ticketCursor INTO @strTransactionId, @intInventoryAdjustmentId
 				WHILE @@FETCH_STATUS = 0  
