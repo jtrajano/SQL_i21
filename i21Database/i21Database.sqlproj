@@ -7312,6 +7312,7 @@
     <Build Include="dbo\Tables\tblRKDPISummary.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPI.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

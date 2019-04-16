@@ -1,42 +1,10 @@
-CREATE VIEW [dbo].[vyuCMBankAccountRegisterRunningBalance]
+CREATE VIEW [dbo].[vyuCMBankAccountRegisterRunningBalanceCount]
 AS
-WITH cteOrdered as
-(
-	select row_number() over(order by dtmDate, intTransactionId) rowId, 
-	dblAmount, 
-	b.intTransactionId,
-	b.intBankAccountId,
-	b.dtmDate 
-	from
-	tblCMBankTransaction b
-	where b.ysnPosted = 1
-),
-cteRunningTotal as (
-select a.rowId, sum(b.dblAmount) balance from cteOrdered a join cteOrdered b on a.rowId>= b.rowId 
-group by a.rowId , a.intBankAccountId
-),
-cteBalance as(
-	select 
-	a.rowId, 
-	a.intTransactionId, 
-	a.dtmDate, 
-	intBankAccountId,
-	( b.balance - a.dblAmount)   dblOpeningBalance,
-	b.balance dblEndingBalance
-FROM cteOrdered a 
-JOIN cteRunningTotal b on a.rowId = b.rowId 
-OUTER APPLY (
-    SELECT TOP 1 dblStatementOpeningBalance FROM tblCMBankReconciliation WHERE intBankAccountId = a.intBankAccountId
 
-) BankRecon
-)
-select --TOP 100
-Balance.rowId, 
-Balance.intTransactionId, 
-Balance.dtmDate, 
-Balance.intBankAccountId,
-Balance.dblOpeningBalance,
-Balance.dblEndingBalance,
+select
+CM.intTransactionId,
+dtmDate, 
+intBankAccountId,
 CM.dtmDateReconciled,
 CM.intBankTransactionTypeId,
 CM.intCompanyLocationId,
@@ -58,7 +26,6 @@ CM.strTransactionId,
 CM.ysnCheckVoid,
 CM.ysnClr
 FROM tblCMBankTransaction CM 
-JOIN cteBalance Balance ON CM.intTransactionId= Balance.intTransactionId
 LEFT JOIN tblCMBankTransactionType T on T.intBankTransactionTypeId = CM.intBankTransactionTypeId
 LEFT JOIN tblSMCompanyLocation L on L.intCompanyLocationId = CM.intCompanyLocationId
 OUTER APPLY 
@@ -68,5 +35,3 @@ OUTER APPLY
     FROM   tblPRCompanyPreference 
 ) Employee
 GO
-
-
