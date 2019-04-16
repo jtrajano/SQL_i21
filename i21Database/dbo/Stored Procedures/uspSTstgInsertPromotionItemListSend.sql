@@ -328,6 +328,156 @@ BEGIN
 						SET @strMessageResult = 'No result found to generate Item List - ' + @strFilePrefix + ' Outbound file'
 					END
 			END
+		ELSE IF(@strRegisterClass = 'SAPPHIRE/COMMANDER')
+			BEGIN
+
+				DECLARE @tblTempSapphireCommanderItemLists TABLE 
+				(
+					[intItemLocationId] INT,
+					[strStoreNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+					[strVendorName] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
+					[strVendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+
+					[strRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+					[strItemListID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+					[strItemListDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+
+					[strPOSCodeFormatFormat] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+					[strPOSCode] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+					[strPOSCodeModifier] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL
+				)
+
+
+
+				INSERT INTO @tblTempSapphireCommanderItemLists
+				SELECT
+					[intItemLocationId]					=	IL.intItemLocationId, 
+					[strStoreNo]						=	CAST(ST.intStoreNo AS NVARCHAR(50)), 
+					[strVendorName]						=	'iRely', 
+					[strVendorModelVersion]				=	(SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
+
+					[strRecordActionType]				=	CASE
+																WHEN (PIL.ysnDeleteFromRegister = 1)
+																	THEN 'delete'
+																ELSE 'addchange'
+														    END, 
+					[strItemListID]						=	PIL.strPromoItemListId,
+					[strItemListDescription]			=	PIL.strPromoItemListDescription,
+
+					[strPOSCodeFormatFormat]			=	PCF.strPosCodeFormat,
+					[strPOSCode]						=	PCF.strUPCwthOrwthOutCheckDigit,
+					[strPOSCodeModifier]				=	'000'
+				FROM tblSTPromotionItemListDetail ILT
+				INNER JOIN tblSTPromotionItemList PIL
+					ON ILT.intPromoItemListId = PIL.intPromoItemListId
+				INNER JOIN tblICItemUOM IUOM 
+					ON IUOM.intItemUOMId = ILT.intItemUOMId
+				INNER JOIN tblICItem I
+					ON IUOM.intItemId = I.intItemId	
+				INNER JOIN tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
+				INNER JOIN tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				INNER JOIN tblSTStore ST 
+					ON  CL.intCompanyLocationId =	ST.intCompanyLocationId
+					AND CL.intCompanyLocationId =	IL.intLocationId
+					AND PIL.intStoreId			=	ST.intStoreId 
+				INNER JOIN vyuSTItemUOMPosCodeFormat PCF
+					ON I.intItemId = PCF.intItemId
+					AND IL.intLocationId = PCF.intLocationId
+					AND IUOM.intItemUOMId = PCF.intItemUOMId
+				WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+					AND ST.intStoreId = 1
+					AND IUOM.strLongUPCCode IS NOT NULL
+					AND IUOM.strLongUPCCode <> ''
+					AND IUOM.strLongUPCCode <> '0'
+					AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+					AND IUOM.ysnStockUnit = 1
+				ORDER BY PIL.intPromoItemListNo ASC
+
+
+				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderItemLists)
+					BEGIN
+						
+						DECLARE @xml XML = N''
+				
+						SELECT @xml =
+						(
+							SELECT
+								trans.strStoreNo				AS 'TransmissionHeader/StoreLocationID',
+								trans.strVendorName 			AS 'TransmissionHeader/VendorName',
+								trans.strVendorModelVersion 	AS 'TransmissionHeader/VendorModelVersion'
+								,(	
+									SELECT
+										'update' AS [TableAction/@type],
+										'addchange' AS [RecordAction/@type],
+										(	
+											SELECT
+												ILM.strRecordActionType		AS [RecordAction/@type],
+												ILM.strItemListID			AS [ItemListID],
+												ILM.strItemListDescription	AS [ItemListDescription],
+												(
+													SELECT
+														IL.strPOSCodeFormatFormat	AS [ItemCode/POSCodeFormat/@format],
+														IL.strPOSCode				AS [ItemCode/POSCode],
+														IL.strPOSCodeModifier		AS [ItemCode/POSCodeModifier]
+													FROM @tblTempSapphireCommanderItemLists IL
+													WHERE ILM.strItemListID = IL.strItemListID
+													ORDER BY IL.strPOSCode ASC
+													FOR XML PATH('ItemListEntry'), TYPE
+												)
+											FROM 
+											(
+												SELECT DISTINCT
+													strItemListID
+													, strRecordActionType
+													, strItemListDescription
+												FROM @tblTempSapphireCommanderItemLists
+											) ILM
+											ORDER BY ILM.strItemListID ASC
+											FOR XML PATH('ILTDetail'), TYPE
+										)
+									FOR XML PATH('ItemListMaintenance'), TYPE		
+								)
+							FROM 
+							(
+								SELECT DISTINCT
+									[strStoreNo], 
+									[strVendorName], 
+									[strVendorModelVersion]
+								FROM @tblTempSapphireCommanderItemLists
+							) trans
+							FOR XML PATH('NAXML-MaintenanceRequest'), TYPE
+							--FOR XML PATH('TransmissionHeader'), 
+							--ROOT('NAXML-MaintenanceRequest'), TYPE
+						);
+
+
+						DECLARE @strXmlns AS NVARCHAR(50) = 'http://www.naxml.org/POSBO/Vocabulary/2003-10-16'
+								, @strVersion NVARCHAR(50) = '3.4'
+
+						DECLARE @strNamesSpace AS NVARCHAR(150) = 'domain:PLU xmlns:domain="urn:vfi-sapphire:np.domain.2001-07-01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
+								, @strDomainPlu AS NVARCHAR(50) = 'domain:PLU'
+
+						-- INSERT Attributes 'page' and 'ofpages' to Root header
+						SET @xml.modify('insert 
+									   (
+											attribute version { 
+																	sql:variable("@strVersion")
+															  }		   
+										) into (/*:NAXML-MaintenanceRequest)[1]');
+
+						DECLARE @strXML AS NVARCHAR(MAX) = CAST(@xml AS NVARCHAR(MAX))
+						SET @strXML = REPLACE(@strXML, '<NAXML-MaintenanceRequest', '<NAXML-MaintenanceRequest xmlns="http://www.naxml.org/POSBO/Vocabulary/2003-10-16"')
+						
+						SET @strGeneratedXML = REPLACE(@strXML, '><', '>' + CHAR(13) + '<')
+					END
+				ELSE 
+					BEGIN
+						SET @ysnSuccessResult = CAST(0 AS BIT)
+						SET @strMessageResult = 'No result found to generate Item List - ' + @strFilePrefix + ' Outbound file'
+					END
+			END
 
 	END TRY
 
