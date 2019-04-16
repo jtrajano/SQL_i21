@@ -782,6 +782,124 @@ WHERE Shipment.ysnPosted = 1 AND ShipmentCharge.ysnAccrue = 1
 	  -- 																			  INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intInventoryShipmentChargeId IS NOT NULL AND B.ysnPosted = 1)
 	  AND (ShipmentCharge.dblQuantity - ISNULL(ShipmentCharge.dblQuantityBilled, 0)) != 0
 	  AND ShipmentCharge.dblAmount != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
-GO
+UNION ALL
 
+--VOUCHER CHARGES FROM LOAD SHIPMENT COST TAB
+	  	SELECT 
+		dtmReceiptDate = V.dtmProcessDate
+		,strReceiptNumber = V.strLoadNumber
+		,intInventoryReceiptId = V.intLoadId
+		,strBillOfLading = NULL
+		,strOrderNumber = NULL
+		,dtmDate = Bill.dtmDate
+		,Bill.dtmDate AS dtmBillDate
+		,intBillId = 0
+		,strBillId = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.strBillId ELSE 'New Voucher' END	
+		,dblAmoundPaid = 0
+		,dblTotal = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN ISNULL(V.dblTotal, V.dblPrice) ELSE ISNULL(V.dblPrice, V.dblTotal) END 
+		, dblAmountDue = ISNULL(Bill.dblDetailTotal,V.dblTotal)  
+		, dblVoucherAmount = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN ISNULL(Bill.dblDetailTotal,0) * -1 ELSE 0 END  
+		, dblWithheld = 0
+		, dblDiscount = 0 
+		, dblInterest = 0 
+		, strVendorId = Vendor.strVendorId
+		, strVendorIdName = ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'')  
+		, Bill.dtmDueDate
+		, V.ysnPosted
+		, Bill.ysnPaid
+		, strTerm = Bill.strTerm
+		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress 
+		, dblQtyToReceive =  CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+		, dblQtyVouchered = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN 1 ELSE 0 END 
+		, dblQtyToVoucher = (ISNULL(1,0) - ISNULL(Bill.dblQtyReceived, 0)) 
+		, dblAmountToVoucher =  CAST(((ISNULL(V.dblTotal,0))) AS DECIMAL (18,2)) 
+		, 0 AS dblChargeAmount
+		, ''AS strContainer
+		, dblVoucherQty = ISNULL(Bill.dblQtyReceived,0)
+		, dblReceiptQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+		, strLocationName = (SELECT strLocationName FROM tblSMCompanyLocation where intCompanyLocationId =  Bill.intShipFromEntityId )
+	
+	FROM vyuLGLoadCostForVendor V
+	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
+			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
+				THEN LD.intSContractDetailId
+			ELSE LD.intPContractDetailId
+			END
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
+		AND ItemLoc.intLocationId = CD.intCompanyLocationId
+	JOIN tblICItem I ON I.intItemId = V.intItemId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
+	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
+	LEFT JOIN vyuAPVendor Vendor
+			ON Vendor.intEntityId = V.intEntityVendorId
+	LEFT JOIN (
+		SELECT DISTINCT 
+			  Header.strBillId
+			, Header.dtmBillDate
+			, Header.dtmDate
+			, Header.dtmDueDate
+			, Header.intBillId
+			, Header.dblAmountDue
+			, Header.intTransactionType
+			, Header.ysnPaid
+			, Header.ysnPosted
+			, Header.intEntityVendorId
+			, Detail.intLoadId
+			, Detail.dblQtyReceived
+			, Detail.dblDetailTotal
+			, Header.dblTotal
+			, Header.intShipFromEntityId
+			, T.strTerm
+		FROM tblAPBill Header
+		LEFT JOIN dbo.tblSMTerm T  ON Header.intTermsId = T.intTermID
+		OUTER APPLY (
+				SELECT 
+					intLoadId,
+					SUM(dblQtyReceived) AS dblQtyReceived,
+					SUM(A.dblTotal)	+ SUM(A.dblTax) AS dblDetailTotal
+				FROM dbo.tblAPBillDetail A
+				WHERE Header.intBillId = A.intBillId AND A.intLoadId IS NOT NULL
+				GROUP BY intLoadId
+			) Detail		
+		WHERE ISNULL(intLoadId, '') <> '' 
+	) Bill ON Bill.intLoadId = V.intLoadId AND Bill.intEntityVendorId NOT IN (V.intEntityVendorId)
+	WHERE  V.intLoadId NOT IN (SELECT DISTINCT intLoadId FROM tblAPBillDetail A INNER JOIN tblAPBill B ON A.intBillId = B.intBillId WHERE intLoadId IS NOT NULL AND B.ysnPosted = 1)
+	GROUP BY V.intEntityVendorId
+		,CH.intContractHeaderId
+		,CD.intContractDetailId
+		,ItemLoc.intItemLocationId
+		,V.intItemId
+		,V.intLoadId
+		,V.strLoadNumber
+		,V.dblNet
+		,LD.intLoadId
+		,LD.intLoadDetailId
+		,V.intLoadCostId
+		,I.ysnInventoryCost
+		,LD.intItemUOMId
+		,V.intPriceItemUOMId
+		,ItemUOM.dblUnitQty
+		,CostUOM.dblUnitQty
+		,LD.dblQuantity
+		,V.strCostMethod
+		,V.dblPrice
+		,V.dblTotal
+		,V.dtmProcessDate
+		,V.intLoadId
+		,Bill.dtmDate
+		,Bill.dblQtyReceived
+		,Bill.strBillId
+		,Bill.ysnPosted
+		,Bill.dblDetailTotal
+		,V.strCustomerName 
+		,Bill.dtmDueDate
+		,V.ysnPosted
+		,Bill.ysnPaid
+		,Bill.strTerm
+		,Bill.intShipFromEntityId
+		,Vendor.strVendorId
+		,Vendor.strName
+GO
 
