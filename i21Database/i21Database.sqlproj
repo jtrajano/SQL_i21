@@ -7533,12 +7533,14 @@
     <Build Include="dbo\Stored Procedures\uspGLRebuildSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspCMRecalcBankAccountRegister.sql" />
     <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalance.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
     <Build Include="dbo\Stored Procedures\uspAPFixVoucherPayable.sql" />
     <Build Include="dbo\Functions\fnAPGetPayableCompletedKeyInfo.sql" />
     <Build Include="dbo\Functions\fnICGetPreviousTransactionDate.sql" />
     <Build Include="dbo\Functions\fnConvertDateToReportDateFormat.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemList.sql" />
     <None Include="Scripts\Post-Deployment\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTicketPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
