@@ -3,27 +3,30 @@ CREATE VIEW [dbo].[vyuCMBankAccountRegisterRunningBalance]
 AS
 WITH cteOrdered as
 (
-	select row_number() over(order by dtmDate, intTransactionId) rowId, 
+	SELECT row_number() over(PARTITION by intBankAccountId ORDER BY dtmDate, intTransactionId) rowId, 
 	CM.dblAmount,
 	CM.intTransactionId,
 	CM.intBankAccountId,
-	CM.dtmDate ,
+	CM.dtmDate,
 	dblPayment = 
 		CASE WHEN CM.intBankTransactionTypeId IN ( 3, 9, 12, 13, 14, 15, 16, 20, 21, 22, 23 ) THEN CM.dblAmount 
 		WHEN CM.intBankTransactionTypeId IN ( 2, 5 ) AND ISNULL(CM.dblAmount,0) < 0 THEN CM.dblAmount * -1 ELSE 0 END                        , 
-		dblDeposit = CASE WHEN CM.intBankTransactionTypeId IN ( 1, 10, 11, 18, 19, 103, 116, 121, 122, 123 ) THEN CM.dblAmount 
-	WHEN CM.intBankTransactionTypeId = 5 AND ISNULL(CM.dblAmount,0) > 0 THEN CM.dblAmount ELSE 0 END
-	from
+	dblDeposit = 
+		CASE WHEN CM.intBankTransactionTypeId IN ( 1, 10, 11, 18, 19, 103, 116, 121, 122, 123 ) THEN CM.dblAmount 
+		WHEN CM.intBankTransactionTypeId = 5 AND ISNULL(CM.dblAmount,0) > 0 THEN CM.dblAmount ELSE 0 END
+	FROM
 	tblCMBankTransaction CM
 	where CM.ysnPosted = 1
-),
+	
+)
+,
 cteRunningTotal as 
 (
-	select a.rowId, sum(b.dblDeposit - b.dblPayment) balance from cteOrdered a join cteOrdered b on a.rowId>= b.rowId 
-	group by a.rowId , a.intBankAccountId
+	SELECT a.rowId, a.intBankAccountId, sum(b.dblDeposit - b.dblPayment) balance 
+	FROM cteOrdered a join cteOrdered b on a.rowId>= b.rowId AND a.intBankAccountId = b.intBankAccountId
+	GROUP BY a.rowId , a.intBankAccountId
 )
-
-select
+SELECT
 Ordered.rowId, 
 dblPayment = Ordered.dblPayment,
 dblDeposit = Ordered.dblDeposit,
@@ -49,7 +52,7 @@ CM.ysnCheckVoid,
 CM.ysnClr
 FROM tblCMBankTransaction CM 
 JOIN cteOrdered Ordered ON CM.intTransactionId= Ordered.intTransactionId
-JOIN cteRunningTotal Total ON Ordered.rowId = Total.rowId
+JOIN cteRunningTotal Total ON Ordered.rowId = Total.rowId AND Total.intBankAccountId = Ordered.intBankAccountId
 LEFT JOIN tblCMBankTransactionType T on T.intBankTransactionTypeId = CM.intBankTransactionTypeId
 LEFT JOIN tblSMCompanyLocation L on L.intCompanyLocationId = CM.intCompanyLocationId
 OUTER APPLY 
