@@ -1079,7 +1079,7 @@ BEGIN
 					, [strUpcModifier]				=	'000'
 					, [strDescription]				=	LEFT(  REPLACE(REPLACE(REPLACE(REPLACE(Item.strDescription, '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
 					, [strDepartment]				=	CAST(CategoryLoc.intRegisterDepartmentId AS NVARCHAR(50))
-					, [strFee]						=	CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
+					, [strFee]						=	CAST(ItemLoc.intBottleDepositNo AS NVARCHAR(10)) -- CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
 					, [strPCode]					=	ISNULL(StorePCode.strRegProdCode, '') -- ISNULL(StorePCode.strRegProdCode, '')
 					, [dblPrice]					=	ISNULL(ItemPrice.dblSalePrice, 0)
 					, [strFlagColumnType]			=	UNPIVOTItemLoc.strColumnName
@@ -1223,7 +1223,95 @@ BEGIN
 
 				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderUPLUs)
 					BEGIN
-				
+						
+						-- -----------------------------------------------------------------------------
+						-- [Start] - Create Preview
+						-- -----------------------------------------------------------------------------
+						-- INSERT TO UPDATE REGISTER PREVIEW TABLE
+						INSERT INTO tblSTUpdateRegisterItemReport
+						(
+							strGuid, 
+							strActionType,
+							strUpcCode,
+							strDescription,
+							dblSalePrice,
+							ysnSalesTaxed,
+							ysnIdRequiredLiquor,
+							ysnIdRequiredCigarette,
+							strRegProdCode,
+							intItemId,
+							intConcurrencyId
+						)
+						SELECT 
+							strGuid = @strGuid,
+							strActionType = t1.strActionType,
+							strUpcCode = t1.strUpcCode,
+							strDescription = t1.strDescription,
+							dblSalePrice = t1.dblSalePrice,
+							ysnSalesTaxed = t1.ysnSalesTaxed,
+							ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
+							ysnIdRequiredCigarette = t1.ysnIdRequiredCigarette,
+							strRegProdCode = t1.strRegProdCode,
+							intItemId = t1.intItemId,
+							intConcurrencyId = 1
+						FROM  
+						(
+							SELECT *,
+									rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+							FROM 
+							(
+								SELECT DISTINCT
+									CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+									, IUOM.strLongUPCCode AS strUpcCode
+									, I.strDescription AS strDescription
+									, Prc.dblSalePrice AS dblSalePrice
+									, IL.ysnTaxFlag1 AS ysnSalesTaxed
+									, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+									, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+									, SubCat.strRegProdCode AS strRegProdCode
+									, I.intItemId AS intItemId
+								FROM tblICItem I
+								JOIN tblICCategory Cat 
+									ON Cat.intCategoryId = I.intCategoryId
+								JOIN @tempTableItems tmpItem 
+									ON tmpItem.intItemId = I.intItemId
+								JOIN tblICItemLocation IL 
+									ON IL.intItemId = I.intItemId
+								LEFT JOIN tblSTSubcategoryRegProd SubCat 
+									ON SubCat.intRegProdId = IL.intProductCodeId
+								JOIN tblSTStore ST 
+									ON ST.intStoreId = SubCat.intStoreId
+									AND IL.intLocationId = ST.intCompanyLocationId
+								JOIN tblSMCompanyLocation L 
+									ON L.intCompanyLocationId = IL.intLocationId
+								JOIN tblICItemUOM IUOM 
+									ON IUOM.intItemId = I.intItemId
+								JOIN tblICUnitMeasure IUM 
+									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+								JOIN tblSTRegister R 
+									ON R.intStoreId = ST.intStoreId
+								JOIN tblICItemPricing Prc 
+									ON Prc.intItemLocationId = IL.intItemLocationId
+								LEFT JOIN tblICItemSpecialPricing SplPrc 
+									ON SplPrc.intItemId = I.intItemId
+								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+									AND ST.intStoreId = @intStoreId
+									AND IUOM.strLongUPCCode IS NOT NULL
+									--AND IUOM.strLongUPCCode <> ''
+									--AND IUOM.strLongUPCCode <> '0'
+									AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+									AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
+							) as t
+						) t1
+						WHERE rn = 1
+						-- -----------------------------------------------------------------------------
+						-- [END] - Create Preview
+						-- -----------------------------------------------------------------------------
+
+
+
+
+
 						DECLARE @xml XML = N''
 
 						-- Add namespaces of 'xmlns'
@@ -1273,7 +1361,7 @@ BEGIN
 								)
 								,(	
 											SELECT
-												plus.intIdCheckSysId AS [@sysid]
+												plus.intBlueLawsSysId AS [@sysid]
 											FROM @tblTempSapphireCommanderUPLUs plus
 											WHERE plus.intItemLocationId = plu.intItemLocationId
 												AND plus.intBlueLawsSysId IS NOT NULL

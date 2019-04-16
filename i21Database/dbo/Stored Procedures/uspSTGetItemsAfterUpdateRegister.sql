@@ -27,19 +27,26 @@ BEGIN TRY
 
 
 
-	DECLARE @tableGetItems TABLE(
-									strActionType NVARCHAR(3)
-									, strUpcCode NVARCHAR(20)
-									, strDescription NVARCHAR(150)
-									, dblSalePrice DECIMAL(18, 6)
-									, ysnSalesTaxed BIT
-									, ysnIdRequiredLiquor BIT
-									, ysnIdRequiredCigarette BIT
-									, strRegProdCode NVARCHAR(200)
-									, intItemId INT
-								)
+	DECLARE @tableGetItems TABLE
+	(
+		strActionType NVARCHAR(3)
+		, strUpcCode NVARCHAR(20)
+		, strDescription NVARCHAR(150)
+		, dblSalePrice DECIMAL(18, 6)
+		, ysnSalesTaxed BIT
+		, ysnIdRequiredLiquor BIT
+		, ysnIdRequiredCigarette BIT
+		, strRegProdCode NVARCHAR(200)
+		, intItemId INT
+	)
 	
-	DECLARE @tablePricebookFileOne TABLE(intItemId int, strActionType nvarchar(20), dtmDate DATETIME)
+	DECLARE @tablePricebookFileOne TABLE
+	(	
+		intItemId INT
+		, strActionType NVARCHAR(20)
+		, dtmDate DATETIME
+	)
+
 	--DECLARE @tablePricebookFileTwo TABLE(intItemId int, strActionType nvarchar(20), dtmDate DATETIME)
 
 
@@ -456,9 +463,50 @@ BEGIN TRY
 		, @intCurrentUserId
 	)
 
+	--INSERT INTO @tableGetItems
+	--SELECT DISTINCT
+	--	CASE
+	--		WHEN a.dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC 
+	--			THEN 'ADD' 
+	--		ELSE 'CHG'
+	--	END AS strActionType	
+	--	, UOM.strLongUPCCode AS strUpcCode
+	--	, Item.strDescription
+	--	, ItemPrice.dblSalePrice
+	--	, ItemLoc.ysnTaxFlag1 AS ysnSalesTaxed
+	--	, ItemLoc.ysnIdRequiredLiquor
+	--	, ItemLoc.ysnIdRequiredCigarette
+	--	, StoreSubCat.strRegProdCode 
+	--	, Item.intItemId
+	--FROM vyuSTItemsToRegister a
+	--INNER JOIN tblICItem Item
+	--	ON a.intItemId = Item.intItemId
+	--INNER JOIN tblICItemUOM UOM
+	--	ON Item.intItemId = UOM.intItemId
+	--INNER JOIN tblSTStore Store
+	--	ON a.intStoreId = Store.intStoreId
+	--INNER JOIN tblSTSubcategoryRegProd StoreSubCat
+	--	ON Store.intStoreId = StoreSubCat.intStoreId
+	--INNER JOIN tblICItemLocation ItemLoc
+	--	ON Item.intItemId = ItemLoc.intItemId
+	--	AND Store.intCompanyLocationId = ItemLoc.intLocationId
+	--INNER JOIN tblICItemPricing ItemPrice
+	--	ON Item.intItemId = ItemPrice.intItemId
+	--	AND ItemLoc.intItemLocationId = ItemPrice.intItemLocationId
+	--WHERE 
+	--(
+	--	a.dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	--	OR 
+	--	a.dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
+	--)
+	--	AND UOM.ysnStockUnit = 1
+	--	AND Store.intStoreId = @intStoreId
+
+
 
 	-- Send query to server side 
-	SELECT DISTINCT strActionType
+	SELECT DISTINCT 
+		strActionType
 		, strUpcCode
 		, strDescription
 		, dblSalePrice
@@ -467,7 +515,7 @@ BEGIN TRY
 		, ysnIdRequiredCigarette
 		, strRegProdCode 
 	FROM @tableGetItems
-	--ORDER BY intItemId ASC
+	ORDER BY strActionType ASC
 
 END TRY
 
