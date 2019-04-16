@@ -106,6 +106,8 @@ BEGIN TRY
 	DECLARE @shipFromEntityId INT	
 	DECLARE @strCommodityCode NVARCHAR(50)
 
+	DECLARE @dblVoucherTotal DECIMAL(18,6)
+
 	DECLARE @SettleStorage AS TABLE 
 	(
 		 intSettleStorageKey INT IDENTITY(1, 1)
@@ -1573,19 +1575,26 @@ BEGIN TRY
 
 				UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived * -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherDetailStorage SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
-								 
-				EXEC [dbo].[uspAPCreateBillData] 
-					 @userId = @intCreatedUserId
-					,@vendorId = @EntityId
-					,@type = 1
-					,@voucherDetailStorage = @voucherDetailStorage
-					,@voucherDetailReceiptCharge = @VoucherDetailReceiptCharge
-					,@shipTo = @LocationId
-					,@shipFrom = @intShipFrom
-					,@shipFromEntityId = @shipFromEntityId
-					,@vendorOrderNumber = NULL
-					,@voucherDate = @dtmDate
-					,@billId = @intCreatedBillId OUTPUT
+				
+				SELECT
+					@dblVoucherTotal = SUM(dblQtyReceived * dblCost)
+				FROM @voucherDetailStorage
+
+				IF @dblVoucherTotal > 0
+				BEGIN
+					EXEC [dbo].[uspAPCreateBillData] 
+						@userId = @intCreatedUserId
+						,@vendorId = @EntityId
+						,@type = 1
+						,@voucherDetailStorage = @voucherDetailStorage
+						,@voucherDetailReceiptCharge = @VoucherDetailReceiptCharge
+						,@shipTo = @LocationId
+						,@shipFrom = @intShipFrom
+						,@shipFromEntityId = @shipFromEntityId
+						,@vendorOrderNumber = NULL
+						,@voucherDate = @dtmDate
+						,@billId = @intCreatedBillId OUTPUT
+				END
 
 				IF @intCreatedBillId IS NOT NULL
 				BEGIN
