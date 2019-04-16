@@ -502,6 +502,7 @@ BEGIN /* RECEIPT CHARGES */
 		SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
 		WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 	) J
+	WHERE A.intEntityVendorId = IR.intEntityVendorId
 
 END
 

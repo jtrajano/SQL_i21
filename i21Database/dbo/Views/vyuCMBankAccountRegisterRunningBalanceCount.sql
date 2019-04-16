@@ -34,4 +34,5 @@ OUTER APPLY
     SELECT TOP 1 ysnMaskEmployeeName 
     FROM   tblPRCompanyPreference 
 ) Employee
+WHERE ysnPosted = 1
 GO
