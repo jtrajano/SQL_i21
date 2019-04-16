@@ -7298,7 +7298,6 @@
     <Build Include="dbo\Tables\tblCTSMTransactionApprovedLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTFeedNotSentEmailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSendMissingFeed.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
@@ -7313,6 +7312,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPI.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
     <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
+    <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
