@@ -8,6 +8,7 @@
 	[intSellerId] INT NOT NULL,	
 	[intDriverId] INT NOT NULL,	
     [strTractor] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[intTruckDriverReferenceId] INT NULL,
 	[strTrailer] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPosted]  BIT  DEFAULT ((0)) NOT NULL,
 	[ysnDiversion]  BIT  NULL,
@@ -24,4 +25,5 @@
 	CONSTRAINT [FK_tblTRLoadHeader_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [dbo].[tblLGLoad] ([intLoadId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblTRState_intStateId] FOREIGN KEY ([intStateId]) REFERENCES [dbo].[tblTRState] ([intStateId]),
 	CONSTRAINT [FK_tblTRLoadHeader_tblICItem_intItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
+
 )

@@ -435,6 +435,21 @@ BEGIN
         NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = B.intInvoiceId AND ARI.intPaymentId = B.[intTransactionId])
         AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
 		AND B.[ysnPost] = @OneBit	
+
+	--Paid if prepayment
+	UPDATE
+        C
+    SET 
+        C.ysnPaid = 1
+    FROM 
+        #ARPostPaymentDetail B
+    INNER JOIN
+        tblARInvoice C
+            ON B.intInvoiceId = C.intInvoiceId
+    WHERE
+        C.strTransactionType = 'Customer Prepayment'	
+		AND B.[ysnPost] = @OneBit
+
 		
     UPDATE 
         ARPD
@@ -682,7 +697,7 @@ ELSE
 			DECLARE @PaymentIdToAddPre int
 			SELECT TOP 1 @PaymentIdToAddPre = [intTransactionId] FROM #ARPostPrePayment
 					
-			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId, Null, 1 
+			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId, Null, 1, 1 
 					
 			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToAddPre
 		END				

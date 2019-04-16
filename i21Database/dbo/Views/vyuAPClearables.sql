@@ -802,7 +802,7 @@ UNION ALL
 		, dblWithheld = 0
 		, dblDiscount = 0 
 		, dblInterest = 0 
-		, strVendorId = V.intEntityVendorId
+		, strVendorId = Vendor.strVendorId
 		, strVendorIdName = ISNULL(Vendor.strVendorId,'') + ' ' + ISNULL(Vendor.strName,'')  
 		, Bill.dtmDueDate
 		, V.ysnPosted

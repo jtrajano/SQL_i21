@@ -68,13 +68,8 @@ AS
 			RETURN 0
 		END
 
-	IF (@isRecap = 1)
-		BEGIN
-			SET @batchId = CONVERT(NVARCHAR(100), NEWID())
-			SET @totalAmount = @zeroDecimal
-		END
-	ELSE
-		SET @batchId = NULL
+	SET @batchId = CONVERT(NVARCHAR(100), NEWID())
+	SET @totalAmount = @zeroDecimal
 
 	--GET SELECTED CUSTOMERS
 	IF (@customerIds = '')
@@ -481,23 +476,23 @@ AS
 								 , @entityId
 								 , 'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
 								 , NULL
-								 , dblAmountDue
+								 , ISNULL(dblAmountDue, 0)
 								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > 
-											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > dblAmountDue
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > ISNULL(dblAmountDue, 0)
 												 THEN 0
-												 ELSE dblTotalAmount
+												 ELSE ISNULL(dblTotalAmount, 0)
 											END
-										THEN @dblMinimumSC 
+										THEN ISNULL(@dblMinimumSC, 0)
 										ELSE 
-											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > dblAmountDue
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > ISNULL(dblAmountDue, 0)
 												 THEN 0
-												 ELSE dblTotalAmount
+												 ELSE ISNULL(dblTotalAmount, 0)
 											END
 								   END
 								 , intServiceChargeDays
 							FROM @tempTblTypeServiceCharge 
-							WHERE dblAmountDue > @zeroDecimal 
-							  AND dblTotalAmount > @zeroDecimal
+							WHERE ISNULL(dblAmountDue, 0) > @zeroDecimal 
+							  AND ISNULL(dblTotalAmount, 0) > @zeroDecimal
 						END
 
 					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue <= @dblMinFinanceSC

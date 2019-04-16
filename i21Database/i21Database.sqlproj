@@ -7490,7 +7490,6 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
     <Build Include="dbo\Tables\tblCTAOPComponent.sql" />
     <Build Include="dbo\Views\vyuCTAOPComponent.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Tables\tblSMTermCutoff.sql" />
     <Build Include="dbo\User Defined Types\AROriginTaxCodeTableType.sql" />
     <Build Include="dbo\Views\vyuEMEAExportCustomer.sql" />
@@ -7544,6 +7543,7 @@
     <Build Include="dbo\Views\vyuSTPromotionSalesList.sql" />
     <None Include="Scripts\Post-Deployment\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql" />
     <None Include="Scripts\Post-Deployment\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql" />
+    <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
