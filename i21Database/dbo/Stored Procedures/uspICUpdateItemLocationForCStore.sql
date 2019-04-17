@@ -519,595 +519,1258 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog)
 BEGIN 
-	DECLARE @json1 AS NVARCHAR(2000) = '{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
+	--DECLARE @json1 AS NVARCHAR(2000) = '{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
 	
-	DECLARE @json2_int AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%i","to":"%i","leaf":true}'
-	DECLARE @json2_float AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
-	DECLARE @json2_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
-	DECLARE @json2_date AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
+	--DECLARE @json2_int AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%i","to":"%i","leaf":true}'
+	--DECLARE @json2_float AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
+	--DECLARE @json2_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
+	--DECLARE @json2_date AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
 
-	-- Add audit logs for Standard Cost changes. 
-	INSERT INTO tblSMAuditLog(
-			strActionType
-			, strTransactionType
-			, strRecordNo
-			, strDescription
-			, strRoute
-			, strJsonData
-			, dtmDate
-			, intEntityId
-			, intConcurrencyId
-	)
-	SELECT 
-			strActionType = 'Updated'
-			, strTransactionType =  'Inventory.view.ItemLocation'
-			, strRecordNo = auditLog.intItemLocationId
-			, strDescription = ''
-			, strRoute = null 
-			, strJsonData = auditLog.strJsonData
-			, dtmDate = GETUTCDATE()
-			, intEntityId = @intEntityUserSecurityId 
-			, intConcurrencyId = 1
-	FROM	(
-		SELECT	intItemLocationId
-				,strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Tax Flag 1'
-							, ysnTaxFlag1_Original
-							, ysnTaxFlag1_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					) 
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnTaxFlag1_Original, 0) <> ISNULL(ysnTaxFlag1_New, 0)
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Tax Flag 2'
-							, ysnTaxFlag2_Original
-							, ysnTaxFlag2_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnTaxFlag2_Original, 0) <> ISNULL(ysnTaxFlag2_New, 0)
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Tax Flag 3'
-							, ysnTaxFlag3_Original
-							, ysnTaxFlag3_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnTaxFlag3_Original, 0) <> ISNULL(ysnTaxFlag3_New, 0)	
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Tax Flag 4'
-							, ysnTaxFlag4_Original
-							, ysnTaxFlag4_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnTaxFlag4_Original, 0) <> ISNULL(ysnTaxFlag4_New, 0)	
+	---- Add audit logs for Standard Cost changes. 
+	--INSERT INTO tblSMAuditLog(
+	--		strActionType
+	--		, strTransactionType
+	--		, strRecordNo
+	--		, strDescription
+	--		, strRoute
+	--		, strJsonData
+	--		, dtmDate
+	--		, intEntityId
+	--		, intConcurrencyId
+	--)
+	--SELECT 
+	--		strActionType = 'Updated'
+	--		, strTransactionType =  'Inventory.view.ItemLocation'
+	--		, strRecordNo = auditLog.intItemLocationId
+	--		, strDescription = ''
+	--		, strRoute = null 
+	--		, strJsonData = auditLog.strJsonData
+	--		, dtmDate = GETUTCDATE()
+	--		, intEntityId = @intEntityUserSecurityId 
+	--		, intConcurrencyId = 1
+	--FROM	(
+	--	SELECT	intItemLocationId
+	--			,strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Tax Flag 1'
+	--						, ysnTaxFlag1_Original
+	--						, ysnTaxFlag1_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				) 
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnTaxFlag1_Original, 0) <> ISNULL(ysnTaxFlag1_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Tax Flag 2'
+	--						, ysnTaxFlag2_Original
+	--						, ysnTaxFlag2_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnTaxFlag2_Original, 0) <> ISNULL(ysnTaxFlag2_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Tax Flag 3'
+	--						, ysnTaxFlag3_Original
+	--						, ysnTaxFlag3_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnTaxFlag3_Original, 0) <> ISNULL(ysnTaxFlag3_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Tax Flag 4'
+	--						, ysnTaxFlag4_Original
+	--						, ysnTaxFlag4_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnTaxFlag4_Original, 0) <> ISNULL(ysnTaxFlag4_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Deposit Required'
-							, ysnDepositRequired_Original
-							, ysnDepositRequired_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnDepositRequired_Original, 0) <> ISNULL(ysnDepositRequired_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Deposit Required'
+	--						, ysnDepositRequired_Original
+	--						, ysnDepositRequired_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnDepositRequired_Original, 0) <> ISNULL(ysnDepositRequired_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Deposit PLU Id'
-							, intDepositPLUId_Original
-							, intDepositPLUId_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(intDepositPLUId_Original, 0) <> ISNULL(intDepositPLUId_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Deposit PLU Id'
+	--						, intDepositPLUId_Original
+	--						, intDepositPLUId_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(intDepositPLUId_Original, 0) <> ISNULL(intDepositPLUId_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Quantity Required'
-							, ysnQuantityRequired_Original
-							, ysnQuantityRequired_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnQuantityRequired_Original, 0) <> ISNULL(ysnQuantityRequired_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Quantity Required'
+	--						, ysnQuantityRequired_Original
+	--						, ysnQuantityRequired_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnQuantityRequired_Original, 0) <> ISNULL(ysnQuantityRequired_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Scale Item'
-							, ysnScaleItem_Original
-							, ysnScaleItem_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnScaleItem_Original, 0) <> ISNULL(ysnScaleItem_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Scale Item'
+	--						, ysnScaleItem_Original
+	--						, ysnScaleItem_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnScaleItem_Original, 0) <> ISNULL(ysnScaleItem_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Food Stampable'
-							, ysnFoodStampable_Original
-							, ysnFoodStampable_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnFoodStampable_Original, 0) <> ISNULL(ysnFoodStampable_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Food Stampable'
+	--						, ysnFoodStampable_Original
+	--						, ysnFoodStampable_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnFoodStampable_Original, 0) <> ISNULL(ysnFoodStampable_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Returnable'
-							, ysnReturnable_Original
-							, ysnReturnable_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnReturnable_Original, 0) <> ISNULL(ysnReturnable_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Returnable'
+	--						, ysnReturnable_Original
+	--						, ysnReturnable_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnReturnable_Original, 0) <> ISNULL(ysnReturnable_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Saleable'
-							, ysnSaleable_Original
-							, ysnSaleable_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnSaleable_Original, 0) <> ISNULL(ysnSaleable_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Saleable'
+	--						, ysnSaleable_Original
+	--						, ysnSaleable_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnSaleable_Original, 0) <> ISNULL(ysnSaleable_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Required Liquor'
-							, ysnIdRequiredLiquor_Original
-							, ysnIdRequiredLiquor_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnIdRequiredLiquor_Original, 0) <> ISNULL(ysnIdRequiredLiquor_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Required Liquor'
+	--						, ysnIdRequiredLiquor_Original
+	--						, ysnIdRequiredLiquor_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnIdRequiredLiquor_Original, 0) <> ISNULL(ysnIdRequiredLiquor_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Required Cigarette'
-							, ysnIdRequiredCigarette_Original
-							, ysnIdRequiredCigarette_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnIdRequiredCigarette_Original, 0) <> ISNULL(ysnIdRequiredCigarette_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Required Cigarette'
+	--						, ysnIdRequiredCigarette_Original
+	--						, ysnIdRequiredCigarette_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnIdRequiredCigarette_Original, 0) <> ISNULL(ysnIdRequiredCigarette_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Promotional Item'
-							, ysnPromotionalItem_Original
-							, ysnPromotionalItem_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnPromotionalItem_Original, 0) <> ISNULL(ysnPromotionalItem_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Promotional Item'
+	--						, ysnPromotionalItem_Original
+	--						, ysnPromotionalItem_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnPromotionalItem_Original, 0) <> ISNULL(ysnPromotionalItem_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Pre Priced'
-							, ysnPrePriced_Original
-							, ysnPrePriced_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnPrePriced_Original, 0) <> ISNULL(ysnPrePriced_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Pre Priced'
+	--						, ysnPrePriced_Original
+	--						, ysnPrePriced_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnPrePriced_Original, 0) <> ISNULL(ysnPrePriced_New, 0)	
 	
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Apply Blue Law 1'
-							, ysnApplyBlueLaw1_Original
-							, ysnApplyBlueLaw1_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnApplyBlueLaw1_Original, 0) <> ISNULL(ysnApplyBlueLaw1_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Apply Blue Law 1'
+	--						, ysnApplyBlueLaw1_Original
+	--						, ysnApplyBlueLaw1_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnApplyBlueLaw1_Original, 0) <> ISNULL(ysnApplyBlueLaw1_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Apply Blue Law 2'
-							, ysnApplyBlueLaw2_Original
-							, ysnApplyBlueLaw2_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnApplyBlueLaw2_Original, 0) <> ISNULL(ysnApplyBlueLaw2_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Apply Blue Law 2'
+	--						, ysnApplyBlueLaw2_Original
+	--						, ysnApplyBlueLaw2_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnApplyBlueLaw2_Original, 0) <> ISNULL(ysnApplyBlueLaw2_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Counted Daily'
-							, ysnCountedDaily_Original
-							, ysnCountedDaily_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnCountedDaily_Original, 0) <> ISNULL(ysnCountedDaily_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Counted Daily'
+	--						, ysnCountedDaily_Original
+	--						, ysnCountedDaily_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnCountedDaily_Original, 0) <> ISNULL(ysnCountedDaily_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_string
-							, 'C-Store updates Counted'
-							, strCounted_Original
-							, strCounted_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(strCounted_Original, '') <> ISNULL(strCounted_New, '')	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_string
+	--						, 'C-Store updates Counted'
+	--						, strCounted_Original
+	--						, strCounted_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(strCounted_Original, '') <> ISNULL(strCounted_New, '')	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Count By Serial No.'
-							, ysnCountBySINo_Original
-							, ysnCountBySINo_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(ysnCountBySINo_Original, 0) <> ISNULL(ysnCountBySINo_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Count By Serial No.'
+	--						, ysnCountBySINo_Original
+	--						, ysnCountBySINo_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(ysnCountBySINo_Original, 0) <> ISNULL(ysnCountBySINo_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Family Id'
-							, intFamilyId_Original
-							, intFamilyId_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(intFamilyId_Original, 0) <> ISNULL(intFamilyId_New, 0)	
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Family Id'
+	--						, intFamilyId_Original
+	--						, intFamilyId_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(intFamilyId_Original, 0) <> ISNULL(intFamilyId_New, 0)	
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Class Id'
-							, intClassId_Original
-							, intClassId_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(intClassId_Original, 0) <> ISNULL(intClassId_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Class Id'
+	--						, intClassId_Original
+	--						, intClassId_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(intClassId_Original, 0) <> ISNULL(intClassId_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Product Code Id'
-							, intProductCodeId_Original
-							, intProductCodeId_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(intProductCodeId_Original, 0) <> ISNULL(intProductCodeId_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Product Code Id'
+	--						, intProductCodeId_Original
+	--						, intProductCodeId_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(intProductCodeId_Original, 0) <> ISNULL(intProductCodeId_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_string
-							, 'C-Store updates the Vendor Id'
-							, vendor_Original.strVendorId
-							, vendor_New.strVendorId
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog auditLog 
-				LEFT JOIN tblAPVendor vendor_Original
-					ON auditLog.intVendorId_Original = vendor_Original.intEntityId 
-				LEFT JOIN tblAPVendor vendor_New
-					ON auditLog.intVendorId_New = vendor_New.intEntityId 
-		WHERE	ISNULL(intVendorId_Original, 0) <> ISNULL(intVendorId_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_string
+	--						, 'C-Store updates the Vendor Id'
+	--						, vendor_Original.strVendorId
+	--						, vendor_New.strVendorId
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog auditLog 
+	--			LEFT JOIN tblAPVendor vendor_Original
+	--				ON auditLog.intVendorId_Original = vendor_Original.intEntityId 
+	--			LEFT JOIN tblAPVendor vendor_New
+	--				ON auditLog.intVendorId_New = vendor_New.intEntityId 
+	--	WHERE	ISNULL(intVendorId_Original, 0) <> ISNULL(intVendorId_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Minimum Age'
-							, intMinimumAge_Original
-							, intMinimumAge_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(intMinimumAge_Original, 0) <> ISNULL(intMinimumAge_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Minimum Age'
+	--						, intMinimumAge_Original
+	--						, intMinimumAge_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(intMinimumAge_Original, 0) <> ISNULL(intMinimumAge_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_float
-							, 'C-Store updates the Minimum Order'
-							, dblMinOrder_Original
-							, dblMinOrder_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(dblMinOrder_Original, 0) <> ISNULL(dblMinOrder_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_float
+	--						, 'C-Store updates the Minimum Order'
+	--						, dblMinOrder_Original
+	--						, dblMinOrder_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(dblMinOrder_Original, 0) <> ISNULL(dblMinOrder_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_float
-							, 'C-Store updates the Suggested Qty'
-							, dblSuggestedQty_Original
-							, dblSuggestedQty_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(dblSuggestedQty_Original, 0) <> ISNULL(dblSuggestedQty_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_float
+	--						, 'C-Store updates the Suggested Qty'
+	--						, dblSuggestedQty_Original
+	--						, dblSuggestedQty_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(dblSuggestedQty_Original, 0) <> ISNULL(dblSuggestedQty_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Suggested Qty'
-							, intCountGroupId_Original
-							, intCountGroupId_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(intCountGroupId_Original, 0) <> ISNULL(intCountGroupId_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Suggested Qty'
+	--						, intCountGroupId_Original
+	--						, intCountGroupId_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(intCountGroupId_Original, 0) <> ISNULL(intCountGroupId_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_int
-							, 'C-Store updates the Storage Location Id'
-							, intStorageLocationId_Original
-							, intStorageLocationId_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(intStorageLocationId_Original, 0) <> ISNULL(intStorageLocationId_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_int
+	--						, 'C-Store updates the Storage Location Id'
+	--						, intStorageLocationId_Original
+	--						, intStorageLocationId_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(intStorageLocationId_Original, 0) <> ISNULL(intStorageLocationId_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_float
-							, 'C-Store updates the Reorder Point'
-							, dblReorderPoint_Original
-							, dblReorderPoint_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(dblReorderPoint_Original, 0) <> ISNULL(dblReorderPoint_New, 0)
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_float
+	--						, 'C-Store updates the Reorder Point'
+	--						, dblReorderPoint_Original
+	--						, dblReorderPoint_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(dblReorderPoint_Original, 0) <> ISNULL(dblReorderPoint_New, 0)
 
-		UNION ALL
-		SELECT	intItemLocationId
-				, strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemLocationId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_string
-							, 'C-Store updates the Description'
-							, strDescription_Original
-							, strDescription_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					)
-		FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		WHERE	ISNULL(strDescription_Original, '') <> ISNULL(strDescription_New, '')
+	--	UNION ALL
+	--	SELECT	intItemLocationId
+	--			, strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemLocationId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_string
+	--						, 'C-Store updates the Description'
+	--						, strDescription_Original
+	--						, strDescription_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				)
+	--	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+	--	WHERE	ISNULL(strDescription_Original, '') <> ISNULL(strDescription_New, '')
 
 
-	) auditLog
-	WHERE auditLog.strJsonData IS NOT NULL 
+	--) auditLog
+	--WHERE auditLog.strJsonData IS NOT NULL 
+
+
+	DECLARE @auditLog_strDescription AS NVARCHAR(255) 
+			,@auditLog_actionType AS NVARCHAR(50) = 'Updated'
+
+	DECLARE 
+		@auditLog_intItemId INT
+		,@auditLog_intItemLocationId INT 
+		-- Original Fields
+		,@auditLog_ysnTaxFlag1_Original BIT
+		,@auditLog_ysnTaxFlag2_Original BIT
+		,@auditLog_ysnTaxFlag3_Original BIT
+		,@auditLog_ysnTaxFlag4_Original BIT
+		,@auditLog_ysnDepositRequired_Original BIT
+		,@auditLog_intDepositPLUId_Original INT
+		,@auditLog_ysnQuantityRequired_Original BIT 
+		,@auditLog_ysnScaleItem_Original BIT 
+		,@auditLog_ysnFoodStampable_Original BIT 
+		,@auditLog_ysnReturnable_Original BIT 
+		,@auditLog_ysnSaleable_Original BIT 
+		,@auditLog_ysnIdRequiredLiquor_Original BIT
+		,@auditLog_ysnIdRequiredCigarette_Original BIT 
+		,@auditLog_ysnPromotionalItem_Original BIT
+		,@auditLog_ysnPrePriced_Original BIT
+		,@auditLog_ysnApplyBlueLaw1_Original BIT
+		,@auditLog_ysnApplyBlueLaw2_Original BIT
+		,@auditLog_ysnCountedDaily_Original BIT
+		,@auditLog_strCounted_Original NVARCHAR(50)
+		,@auditLog_ysnCountBySINo_Original BIT
+		,@auditLog_intFamilyId_Original INT
+		,@auditLog_intClassId_Original INT
+		,@auditLog_intProductCodeId_Original INT
+		,@auditLog_intVendorId_Original INT
+		,@auditLog_intMinimumAge_Original INT
+		,@auditLog_dblMinOrder_Original NUMERIC(18, 6)
+		,@auditLog_dblSuggestedQty_Original NUMERIC(18, 6)
+		,@auditLog_intCountGroupId_Original INT
+		,@auditLog_intStorageLocationId_Original INT
+		,@auditLog_dblReorderPoint_Original NUMERIC(18, 6)
+		,@auditLog_strDescription_Original NVARCHAR(1000)
+		-- Modified Fields
+		,@auditLog_ysnTaxFlag1_New BIT
+		,@auditLog_ysnTaxFlag2_New BIT
+		,@auditLog_ysnTaxFlag3_New BIT
+		,@auditLog_ysnTaxFlag4_New BIT
+		,@auditLog_ysnDepositRequired_New BIT
+		,@auditLog_intDepositPLUId_New INT
+		,@auditLog_ysnQuantityRequired_New BIT
+		,@auditLog_ysnScaleItem_New BIT
+		,@auditLog_ysnFoodStampable_New BIT
+		,@auditLog_ysnReturnable_New BIT
+		,@auditLog_ysnSaleable_New BIT
+		,@auditLog_ysnIdRequiredLiquor_New BIT
+		,@auditLog_ysnIdRequiredCigarette_New BIT
+		,@auditLog_ysnPromotionalItem_New BIT
+		,@auditLog_ysnPrePriced_New BIT
+		,@auditLog_ysnApplyBlueLaw1_New BIT
+		,@auditLog_ysnApplyBlueLaw2_New BIT
+		,@auditLog_ysnCountedDaily_New BIT
+		,@auditLog_strCounted_New NVARCHAR(50)
+		,@auditLog_ysnCountBySINo_New BIT
+		,@auditLog_intFamilyId_New INT
+		,@auditLog_intClassId_New INT
+		,@auditLog_intProductCodeId_New INT
+		,@auditLog_intVendorId_New INT
+		,@auditLog_intMinimumAge_New INT 
+		,@auditLog_dblMinOrder_New NUMERIC(18, 6)
+		,@auditLog_dblSuggestedQty_New NUMERIC(18, 6)
+		,@auditLog_intCountGroupId_New INT
+		,@auditLog_intStorageLocationId_New INT
+		,@auditLog_dblReorderPoint_New NUMERIC(18, 6)
+		,@auditLog_strDescription_New NVARCHAR(1000)
+
+
+	DECLARE loopAuditLog CURSOR LOCAL FAST_FORWARD
+	FOR 	
+	SELECT	
+			intItemId
+			,intItemLocationId
+			-- Original Fields
+			,ysnTaxFlag1_Original
+			,ysnTaxFlag2_Original
+			,ysnTaxFlag3_Original
+			,ysnTaxFlag4_Original
+			,ysnDepositRequired_Original
+			,intDepositPLUId_Original
+			,ysnQuantityRequired_Original
+			,ysnScaleItem_Original
+			,ysnFoodStampable_Original
+			,ysnReturnable_Original
+			,ysnSaleable_Original
+			,ysnIdRequiredLiquor_Original
+			,ysnIdRequiredCigarette_Original
+			,ysnPromotionalItem_Original
+			,ysnPrePriced_Original
+			,ysnApplyBlueLaw1_Original
+			,ysnApplyBlueLaw2_Original
+			,ysnCountedDaily_Original
+			,strCounted_Original
+			,ysnCountBySINo_Original
+			,intFamilyId_Original
+			,intClassId_Original
+			,intProductCodeId_Original
+			,intVendorId_Original
+			,intMinimumAge_Original 
+			,dblMinOrder_Original 
+			,dblSuggestedQty_Original 
+			,intCountGroupId_Original 
+			,intStorageLocationId_Original 
+			,dblReorderPoint_Original 
+			,strDescription_Original 
+			-- Modified Fields
+			,ysnTaxFlag1_New 
+			,ysnTaxFlag2_New
+			,ysnTaxFlag3_New
+			,ysnTaxFlag4_New
+			,ysnDepositRequired_New
+			,intDepositPLUId_New 
+			,ysnQuantityRequired_New 
+			,ysnScaleItem_New 
+			,ysnFoodStampable_New 
+			,ysnReturnable_New 
+			,ysnSaleable_New 
+			,ysnIdRequiredLiquor_New 
+			,ysnIdRequiredCigarette_New 
+			,ysnPromotionalItem_New 
+			,ysnPrePriced_New 
+			,ysnApplyBlueLaw1_New 
+			,ysnApplyBlueLaw2_New 
+			,ysnCountedDaily_New 
+			,strCounted_New 
+			,ysnCountBySINo_New 
+			,intFamilyId_New 
+			,intClassId_New 
+			,intProductCodeId_New 
+			,intVendorId_New 
+			,intMinimumAge_New 
+			,dblMinOrder_New 
+			,dblSuggestedQty_New 
+			,intCountGroupId_New 
+			,intStorageLocationId_New 
+			,dblReorderPoint_New 
+			,strDescription_New 
+	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+
+	OPEN loopAuditLog;
+
+	FETCH NEXT FROM loopAuditLog INTO 
+		@auditLog_intItemId 
+		,@auditLog_intItemLocationId 
+		-- Original Fields
+		,@auditLog_ysnTaxFlag1_Original 
+		,@auditLog_ysnTaxFlag2_Original 
+		,@auditLog_ysnTaxFlag3_Original 
+		,@auditLog_ysnTaxFlag4_Original 
+		,@auditLog_ysnDepositRequired_Original 
+		,@auditLog_intDepositPLUId_Original 
+		,@auditLog_ysnQuantityRequired_Original 
+		,@auditLog_ysnScaleItem_Original 
+		,@auditLog_ysnFoodStampable_Original 
+		,@auditLog_ysnReturnable_Original 
+		,@auditLog_ysnSaleable_Original 
+		,@auditLog_ysnIdRequiredLiquor_Original 
+		,@auditLog_ysnIdRequiredCigarette_Original 
+		,@auditLog_ysnPromotionalItem_Original 
+		,@auditLog_ysnPrePriced_Original 
+		,@auditLog_ysnApplyBlueLaw1_Original 
+		,@auditLog_ysnApplyBlueLaw2_Original 
+		,@auditLog_ysnCountedDaily_Original 
+		,@auditLog_strCounted_Original 
+		,@auditLog_ysnCountBySINo_Original 
+		,@auditLog_intFamilyId_Original 
+		,@auditLog_intClassId_Original 
+		,@auditLog_intProductCodeId_Original 
+		,@auditLog_intVendorId_Original 
+		,@auditLog_intMinimumAge_Original 
+		,@auditLog_dblMinOrder_Original 
+		,@auditLog_dblSuggestedQty_Original 
+		,@auditLog_intCountGroupId_Original 
+		,@auditLog_intStorageLocationId_Original 
+		,@auditLog_dblReorderPoint_Original 
+		,@auditLog_strDescription_Original 
+		-- Modified Fields
+		,@auditLog_ysnTaxFlag1_New 
+		,@auditLog_ysnTaxFlag2_New 
+		,@auditLog_ysnTaxFlag3_New 
+		,@auditLog_ysnTaxFlag4_New 
+		,@auditLog_ysnDepositRequired_New 
+		,@auditLog_intDepositPLUId_New 
+		,@auditLog_ysnQuantityRequired_New 
+		,@auditLog_ysnScaleItem_New 
+		,@auditLog_ysnFoodStampable_New 
+		,@auditLog_ysnReturnable_New 
+		,@auditLog_ysnSaleable_New 
+		,@auditLog_ysnIdRequiredLiquor_New 
+		,@auditLog_ysnIdRequiredCigarette_New 
+		,@auditLog_ysnPromotionalItem_New 
+		,@auditLog_ysnPrePriced_New 
+		,@auditLog_ysnApplyBlueLaw1_New 
+		,@auditLog_ysnApplyBlueLaw2_New 
+		,@auditLog_ysnCountedDaily_New 
+		,@auditLog_strCounted_New 
+		,@auditLog_ysnCountBySINo_New 
+		,@auditLog_intFamilyId_New 
+		,@auditLog_intClassId_New 
+		,@auditLog_intProductCodeId_New 
+		,@auditLog_intVendorId_New 
+		,@auditLog_intMinimumAge_New 
+		,@auditLog_dblMinOrder_New 
+		,@auditLog_dblSuggestedQty_New 
+		,@auditLog_intCountGroupId_New 
+		,@auditLog_intStorageLocationId_New 
+		,@auditLog_dblReorderPoint_New 
+		,@auditLog_strDescription_New 
+	;
+	WHILE @@FETCH_STATUS = 0
+	BEGIN 
+		IF ISNULL(@auditLog_ysnTaxFlag1_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag1_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Tax Flag 1'
+				,@fromValue = @auditLog_ysnTaxFlag1_Original
+				,@toValue = @auditLog_ysnTaxFlag1_New
+		END
+
+		IF ISNULL(@auditLog_ysnTaxFlag2_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag2_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Tax Flag 2'
+				,@fromValue = @auditLog_ysnTaxFlag2_Original
+				,@toValue = @auditLog_ysnTaxFlag2_New
+		END
+
+		IF ISNULL(@auditLog_ysnTaxFlag3_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag3_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Tax Flag 3'
+				,@fromValue = @auditLog_ysnTaxFlag3_Original
+				,@toValue = @auditLog_ysnTaxFlag3_New
+		END
+
+		IF ISNULL(@auditLog_ysnTaxFlag4_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag4_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Tax Flag 4'
+				,@fromValue = @auditLog_ysnTaxFlag4_Original
+				,@toValue = @auditLog_ysnTaxFlag4_New
+		END
+
+		IF ISNULL(@auditLog_ysnDepositRequired_Original, 0) <> ISNULL(@auditLog_ysnDepositRequired_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Deposit Required'
+				,@fromValue = @auditLog_ysnDepositRequired_Original
+				,@toValue = @auditLog_ysnDepositRequired_New
+		END
+
+		IF ISNULL(@auditLog_intDepositPLUId_Original, 0) <> ISNULL(@auditLog_intDepositPLUId_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Deposit PLU Id'
+				,@fromValue = @auditLog_intDepositPLUId_Original
+				,@toValue = @auditLog_intDepositPLUId_New
+		END
+
+		IF ISNULL(@auditLog_ysnQuantityRequired_Original, 0) <> ISNULL(@auditLog_ysnQuantityRequired_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Quantity Required'
+				,@fromValue = @auditLog_ysnQuantityRequired_Original
+				,@toValue = @auditLog_ysnQuantityRequired_New
+		END
+
+		IF ISNULL(@auditLog_ysnScaleItem_Original, 0) <> ISNULL(@auditLog_ysnScaleItem_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Scale Item'
+				,@fromValue = @auditLog_ysnScaleItem_Original
+				,@toValue = @auditLog_ysnScaleItem_New
+		END
+
+		IF ISNULL(@auditLog_ysnFoodStampable_Original, 0) <> ISNULL(@auditLog_ysnFoodStampable_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Food Stampable'
+				,@fromValue = @auditLog_ysnFoodStampable_Original
+				,@toValue = @auditLog_ysnFoodStampable_New
+		END
+
+		IF ISNULL(@auditLog_ysnReturnable_Original, 0) <> ISNULL(@auditLog_ysnReturnable_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Returnable'
+				,@fromValue = @auditLog_ysnReturnable_Original
+				,@toValue = @auditLog_ysnReturnable_New
+		END
+
+		IF ISNULL(@auditLog_ysnSaleable_Original, 0) <> ISNULL(@auditLog_ysnSaleable_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Saleable'
+				,@fromValue = @auditLog_ysnSaleable_Original
+				,@toValue = @auditLog_ysnSaleable_New
+		END
+
+		IF ISNULL(@auditLog_ysnIdRequiredLiquor_Original, 0) <> ISNULL(@auditLog_ysnIdRequiredLiquor_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Required Liquor'
+				,@fromValue = @auditLog_ysnIdRequiredLiquor_Original
+				,@toValue = @auditLog_ysnIdRequiredLiquor_New
+		END
+
+
+		IF ISNULL(@auditLog_ysnIdRequiredCigarette_Original, 0) <> ISNULL(@auditLog_ysnIdRequiredCigarette_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Required Cigarette'
+				,@fromValue = @auditLog_ysnIdRequiredCigarette_Original
+				,@toValue = @auditLog_ysnIdRequiredCigarette_New
+		END
+
+		IF ISNULL(@auditLog_ysnPromotionalItem_Original, 0) <> ISNULL(@auditLog_ysnPromotionalItem_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Promotional Item'
+				,@fromValue = @auditLog_ysnPromotionalItem_Original
+				,@toValue = @auditLog_ysnPromotionalItem_New
+		END
+
+		IF ISNULL(@auditLog_ysnPrePriced_Original, 0) <> ISNULL(@auditLog_ysnPrePriced_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Pre Priced'
+				,@fromValue = @auditLog_ysnPrePriced_Original
+				,@toValue = @auditLog_ysnPrePriced_New
+		END
+
+		IF ISNULL(@auditLog_ysnApplyBlueLaw1_Original, 0) <> ISNULL(@auditLog_ysnApplyBlueLaw1_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Apply Blue Law 1'
+				,@fromValue = @auditLog_ysnApplyBlueLaw1_Original
+				,@toValue = @auditLog_ysnApplyBlueLaw1_New
+		END
+
+		IF ISNULL(@auditLog_ysnApplyBlueLaw2_Original, 0) <> ISNULL(@auditLog_ysnApplyBlueLaw2_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Apply Blue Law 2'
+				,@fromValue = @auditLog_ysnApplyBlueLaw2_Original
+				,@toValue = @auditLog_ysnApplyBlueLaw2_New
+		END
+
+		IF ISNULL(@auditLog_ysnCountedDaily_Original, 0) <> ISNULL(@auditLog_ysnCountedDaily_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Counted Daily'
+				,@fromValue = @auditLog_ysnCountedDaily_Original
+				,@toValue = @auditLog_ysnCountedDaily_New
+		END
+
+		IF ISNULL(@auditLog_strCounted_Original, 0) <> ISNULL(@auditLog_strCounted_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Counted'
+				,@fromValue = @auditLog_strCounted_Original
+				,@toValue = @auditLog_strCounted_New
+		END
+
+
+		IF ISNULL(@auditLog_ysnCountBySINo_Original, 0) <> ISNULL(@auditLog_ysnCountBySINo_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Count By Serial No.'
+				,@fromValue = @auditLog_ysnCountBySINo_Original
+				,@toValue = @auditLog_ysnCountBySINo_New
+		END
+
+		IF ISNULL(@auditLog_intFamilyId_Original, 0) <> ISNULL(@auditLog_intFamilyId_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Family Id'
+				,@fromValue = @auditLog_intFamilyId_Original
+				,@toValue = @auditLog_intFamilyId_New
+		END
+		
+		IF ISNULL(@auditLog_intClassId_Original, 0) <> ISNULL(@auditLog_intClassId_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Class Id'
+				,@fromValue = @auditLog_intClassId_Original
+				,@toValue = @auditLog_intClassId_New
+		END
+
+		IF ISNULL(@auditLog_intProductCodeId_Original, 0) <> ISNULL(@auditLog_intProductCodeId_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Product Code Id'
+				,@fromValue = @auditLog_intProductCodeId_Original
+				,@toValue = @auditLog_intProductCodeId_New
+		END
+
+		IF ISNULL(@auditLog_intVendorId_Original, 0) <> ISNULL(@auditLog_intVendorId_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Vendor Id'
+				,@fromValue = @auditLog_intVendorId_Original
+				,@toValue = @auditLog_intVendorId_New
+		END
+
+		IF ISNULL(@auditLog_intMinimumAge_Original, 0) <> ISNULL(@auditLog_intMinimumAge_Original, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Minimum Age'
+				,@fromValue = @auditLog_intMinimumAge_Original
+				,@toValue = @auditLog_intMinimumAge_New
+		END
+
+		IF ISNULL(@auditLog_dblMinOrder_Original, 0) <> ISNULL(@auditLog_dblMinOrder_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Minimum Order'
+				,@fromValue = @auditLog_dblMinOrder_Original
+				,@toValue = @auditLog_dblMinOrder_New
+		END
+
+		IF ISNULL(@auditLog_dblSuggestedQty_Original, 0) <> ISNULL(@auditLog_dblSuggestedQty_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Suggested Qty'
+				,@fromValue = @auditLog_dblSuggestedQty_Original
+				,@toValue = @auditLog_dblSuggestedQty_New
+		END
+
+		IF ISNULL(@auditLog_intCountGroupId_Original, 0) <> ISNULL(@auditLog_intCountGroupId_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Count Group Id'
+				,@fromValue = @auditLog_intCountGroupId_Original
+				,@toValue = @auditLog_intCountGroupId_New
+		END
+		
+		IF ISNULL(@auditLog_intStorageLocationId_Original, 0) <> ISNULL(@auditLog_intStorageLocationId_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Storage Location Id'
+				,@fromValue = @auditLog_intStorageLocationId_Original
+				,@toValue = @auditLog_intStorageLocationId_New
+		END
+		
+		IF ISNULL(@auditLog_dblReorderPoint_Original, 0) <> ISNULL(@auditLog_dblReorderPoint_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Reorder Point'
+				,@fromValue = @auditLog_dblReorderPoint_Original
+				,@toValue = @auditLog_dblReorderPoint_New
+		END
+
+		IF ISNULL(@auditLog_strDescription_Original, '') <> ISNULL(@auditLog_strDescription_New, '')
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Description'
+				,@fromValue = @auditLog_strDescription_Original
+				,@toValue = @auditLog_strDescription_New
+		END
+
+
+		FETCH NEXT FROM loopAuditLog INTO 
+			@auditLog_intItemId 
+			,@auditLog_intItemLocationId 
+			-- Original Fields
+			,@auditLog_ysnTaxFlag1_Original 
+			,@auditLog_ysnTaxFlag2_Original 
+			,@auditLog_ysnTaxFlag3_Original 
+			,@auditLog_ysnTaxFlag4_Original 
+			,@auditLog_ysnDepositRequired_Original 
+			,@auditLog_intDepositPLUId_Original 
+			,@auditLog_ysnQuantityRequired_Original 
+			,@auditLog_ysnScaleItem_Original 
+			,@auditLog_ysnFoodStampable_Original 
+			,@auditLog_ysnReturnable_Original 
+			,@auditLog_ysnSaleable_Original 
+			,@auditLog_ysnIdRequiredLiquor_Original 
+			,@auditLog_ysnIdRequiredCigarette_Original 
+			,@auditLog_ysnPromotionalItem_Original 
+			,@auditLog_ysnPrePriced_Original 
+			,@auditLog_ysnApplyBlueLaw1_Original 
+			,@auditLog_ysnApplyBlueLaw2_Original 
+			,@auditLog_ysnCountedDaily_Original 
+			,@auditLog_strCounted_Original 
+			,@auditLog_ysnCountBySINo_Original 
+			,@auditLog_intFamilyId_Original 
+			,@auditLog_intClassId_Original 
+			,@auditLog_intProductCodeId_Original 
+			,@auditLog_intVendorId_Original 
+			,@auditLog_intMinimumAge_Original 
+			,@auditLog_dblMinOrder_Original 
+			,@auditLog_dblSuggestedQty_Original 
+			,@auditLog_intCountGroupId_Original 
+			,@auditLog_intStorageLocationId_Original 
+			,@auditLog_dblReorderPoint_Original 
+			,@auditLog_strDescription_Original 
+			-- Modified Fields
+			,@auditLog_ysnTaxFlag1_New 
+			,@auditLog_ysnTaxFlag2_New 
+			,@auditLog_ysnTaxFlag3_New 
+			,@auditLog_ysnTaxFlag4_New 
+			,@auditLog_ysnDepositRequired_New 
+			,@auditLog_intDepositPLUId_New 
+			,@auditLog_ysnQuantityRequired_New 
+			,@auditLog_ysnScaleItem_New 
+			,@auditLog_ysnFoodStampable_New 
+			,@auditLog_ysnReturnable_New 
+			,@auditLog_ysnSaleable_New 
+			,@auditLog_ysnIdRequiredLiquor_New 
+			,@auditLog_ysnIdRequiredCigarette_New 
+			,@auditLog_ysnPromotionalItem_New 
+			,@auditLog_ysnPrePriced_New 
+			,@auditLog_ysnApplyBlueLaw1_New 
+			,@auditLog_ysnApplyBlueLaw2_New 
+			,@auditLog_ysnCountedDaily_New 
+			,@auditLog_strCounted_New 
+			,@auditLog_ysnCountBySINo_New 
+			,@auditLog_intFamilyId_New 
+			,@auditLog_intClassId_New 
+			,@auditLog_intProductCodeId_New 
+			,@auditLog_intVendorId_New 
+			,@auditLog_intMinimumAge_New 
+			,@auditLog_dblMinOrder_New 
+			,@auditLog_dblSuggestedQty_New 
+			,@auditLog_intCountGroupId_New 
+			,@auditLog_intStorageLocationId_New 
+			,@auditLog_dblReorderPoint_New 
+			,@auditLog_strDescription_New 
+		;
+	END 
+	CLOSE loopAuditLog;
+	DEALLOCATE loopAuditLog;
 END 

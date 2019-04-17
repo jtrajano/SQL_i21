@@ -187,108 +187,186 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemVendorXrefForCStore_itemAuditLog)
 BEGIN 
-	DECLARE @json1 AS NVARCHAR(2000) = '{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
+	--DECLARE @json1 AS NVARCHAR(2000) = '{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
 		
-	DECLARE @json2_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
+	--DECLARE @json2_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
 
-	DECLARE @json2_created_string AS NVARCHAR(2000) = '{"change":"tblICItemVendorXrefs","children":[{"action":"Created","change":"Created - Record: Location is %s, Vendor Product is %s","keyValue":%i,"iconCls":"small-new-plus","leaf":true}],"iconCls":"small-tree-grid","changeDescription":"Vendor Item Cross Reference Grid"}'
-	DECLARE @json2_updated_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
+	--DECLARE @json2_created_string AS NVARCHAR(2000) = '{"change":"tblICItemVendorXrefs","children":[{"action":"Created","change":"Created - Record: Location is %s, Vendor Product is %s","keyValue":%i,"iconCls":"small-new-plus","leaf":true}],"iconCls":"small-tree-grid","changeDescription":"Vendor Item Cross Reference Grid"}'
+	--DECLARE @json2_updated_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
 
-	-- Add audit logs for Standard Cost changes. 
-	INSERT INTO tblSMAuditLog(
-			strActionType
-			, strTransactionType
-			, strRecordNo
-			, strDescription
-			, strRoute
-			, strJsonData
-			, dtmDate
-			, intEntityId
-			, intConcurrencyId
-	)
-	SELECT 
-			strActionType = 'Updated'
-			, strTransactionType =  'Inventory.view.Item'
-			, strRecordNo = auditLog.intItemId
-			, strDescription = ''
-			, strRoute = null 
-			, strJsonData = auditLog.strJsonData
-			, dtmDate = GETUTCDATE()
-			, intEntityId = @intEntityUserSecurityId 
-			, intConcurrencyId = 1
-	FROM	(
-		SELECT	auditLog.intItemId
-				,strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(auditLog.intItemId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_created_string
-							, cl.strLocationName 
-							, auditLog.strVendorProduct_New
-							, auditLog.intItemVendorXrefId
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					) 
-		FROM	#tmpUpdateItemVendorXrefForCStore_itemAuditLog auditLog LEFT JOIN tblICItemLocation il
+	---- Add audit logs for Standard Cost changes. 
+	--INSERT INTO tblSMAuditLog(
+	--		strActionType
+	--		, strTransactionType
+	--		, strRecordNo
+	--		, strDescription
+	--		, strRoute
+	--		, strJsonData
+	--		, dtmDate
+	--		, intEntityId
+	--		, intConcurrencyId
+	--)
+	--SELECT 
+	--		strActionType = 'Updated'
+	--		, strTransactionType =  'Inventory.view.Item'
+	--		, strRecordNo = auditLog.intItemId
+	--		, strDescription = ''
+	--		, strRoute = null 
+	--		, strJsonData = auditLog.strJsonData
+	--		, dtmDate = GETUTCDATE()
+	--		, intEntityId = @intEntityUserSecurityId 
+	--		, intConcurrencyId = 1
+	--FROM	(
+	--	SELECT	auditLog.intItemId
+	--			,strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(auditLog.intItemId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_created_string
+	--						, cl.strLocationName 
+	--						, auditLog.strVendorProduct_New
+	--						, auditLog.intItemVendorXrefId
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				) 
+	--	FROM	#tmpUpdateItemVendorXrefForCStore_itemAuditLog auditLog LEFT JOIN tblICItemLocation il
+	--				ON auditLog.intItemLocationId = il.intItemLocationId
+	--			LEFT JOIN tblSMCompanyLocation cl
+	--				ON cl.intCompanyLocationId = il.intLocationId 
+	--	WHERE	ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '')
+	--			AND auditLog.strAction = 'INSERT'
+	--) auditLog
+	--WHERE auditLog.strJsonData IS NOT NULL 
+
+	--UNION ALL 
+	--SELECT 
+	--		strActionType = 'Updated'
+	--		, strTransactionType =  'Inventory.view.Item'
+	--		, strRecordNo = auditLog.intItemId
+	--		, strDescription = ''
+	--		, strRoute = null 
+	--		, strJsonData = auditLog.strJsonData
+	--		, dtmDate = GETUTCDATE()
+	--		, intEntityId = @intEntityUserSecurityId 
+	--		, intConcurrencyId = 1
+	--FROM	(
+	--	SELECT	intItemId
+	--			,strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_updated_string
+	--						, 'C-Store updates the Vendor Product in the Vendor Item Cross Reference Grid'
+	--						, strVendorProduct_Original
+	--						, strVendorProduct_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				) 
+	--	FROM	#tmpUpdateItemVendorXrefForCStore_itemAuditLog auditLog 
+	--	WHERE	ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '')
+	--			AND auditLog.strAction = 'UPDATE'
+				
+	--	UNION ALL
+	--	SELECT	intItemId
+	--			,strJsonData = 
+	--				dbo.fnFormatMessage(
+	--					@json1
+	--					, CAST(intItemId AS NVARCHAR(20)) 
+	--					, dbo.fnFormatMessage(
+	--						@json2_updated_string
+	--						, 'C-Store updates the Product Description in the Vendor Item Cross Reference Grid'
+	--						, strVendorProductDescription_Original
+	--						, strVendorProductDescription_New
+	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--					) 
+	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
+	--				) 
+	--	FROM	#tmpUpdateItemVendorXrefForCStore_itemAuditLog auditLog 
+	--	WHERE	ISNULL(strVendorProductDescription_Original, '') <> ISNULL(strVendorProductDescription_New, '')
+	--			AND auditLog.strAction = 'UPDATE'
+	--) auditLog
+	--WHERE auditLog.strJsonData IS NOT NULL 
+
+	DECLARE @auditLog_strDescription AS NVARCHAR(255) 
+			,@auditLog_actionType AS NVARCHAR(50) = 'Updated'
+			,@auditLog_id AS INT 
+			,@auditLog_Old AS NVARCHAR(255)
+			,@auditLog_New AS NVARCHAR(255)
+
+	DECLARE loopAuditLog CURSOR LOCAL FAST_FORWARD
+	FOR 	
+	SELECT	intItemId
+			,strDescription = 
+				CASE 
+					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'INSERT' THEN 
+						'C-Store adds a Vendor Product in the Vendor Item Cross Reference Grid'
+					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'UPDATE' THEN 
+						'C-Store updates the Vendor Product in the Vendor Item Cross Reference Grid'
+					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
+						'C-Store updates the Discount Amount/Percent in Promotional Pricing and Exemptions Grid'
+					WHEN ISNULL(strVendorProductDescription_Original, '') <> ISNULL(strVendorProductDescription_New, '') THEN 
+						'C-Store updates the Product Description in the Vendor Item Cross Reference Grid'
+				END 
+			,strOld = 
+				CASE 
+					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'INSERT' THEN 
+						''
+					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'UPDATE' THEN 
+						strVendorProduct_Original
+					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
+						dblDiscount_Original
+					WHEN ISNULL(strVendorProductDescription_Original, '') <> ISNULL(strVendorProductDescription_New, '') THEN 
+						strVendorProductDescription_Original
+				END 
+			,strNew = 
+				CASE 
+					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'INSERT' THEN 
+						strVendorProduct_New
+					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'UPDATE' THEN 
+						strVendorProduct_New
+					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
+						dblDiscount_New
+					WHEN ISNULL(strVendorProductDescription_Original, '') <> ISNULL(strVendorProductDescription_New, '') THEN 
+						strVendorProductDescription_New
+				END 
+	FROM	#tmpUpdateItemVendorXrefForCStore_itemAuditLog auditLog LEFT JOIN tblICItemLocation il
 					ON auditLog.intItemLocationId = il.intItemLocationId
 				LEFT JOIN tblSMCompanyLocation cl
 					ON cl.intCompanyLocationId = il.intLocationId 
-		WHERE	ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '')
-				AND auditLog.strAction = 'INSERT'
-	) auditLog
-	WHERE auditLog.strJsonData IS NOT NULL 
 
-	UNION ALL 
-	SELECT 
-			strActionType = 'Updated'
-			, strTransactionType =  'Inventory.view.Item'
-			, strRecordNo = auditLog.intItemId
-			, strDescription = ''
-			, strRoute = null 
-			, strJsonData = auditLog.strJsonData
-			, dtmDate = GETUTCDATE()
-			, intEntityId = @intEntityUserSecurityId 
-			, intConcurrencyId = 1
-	FROM	(
-		SELECT	intItemId
-				,strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_updated_string
-							, 'C-Store updates the Vendor Product in the Vendor Item Cross Reference Grid'
-							, strVendorProduct_Original
-							, strVendorProduct_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					) 
-		FROM	#tmpUpdateItemVendorXrefForCStore_itemAuditLog auditLog 
-		WHERE	ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '')
-				AND auditLog.strAction = 'UPDATE'
-				
-		UNION ALL
-		SELECT	intItemId
-				,strJsonData = 
-					dbo.fnFormatMessage(
-						@json1
-						, CAST(intItemId AS NVARCHAR(20)) 
-						, dbo.fnFormatMessage(
-							@json2_updated_string
-							, 'C-Store updates the Product Description in the Vendor Item Cross Reference Grid'
-							, strVendorProductDescription_Original
-							, strVendorProductDescription_New
-							, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-						) 
-						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-					) 
-		FROM	#tmpUpdateItemVendorXrefForCStore_itemAuditLog auditLog 
-		WHERE	ISNULL(strVendorProductDescription_Original, '') <> ISNULL(strVendorProductDescription_New, '')
-				AND auditLog.strAction = 'UPDATE'
-	) auditLog
-	WHERE auditLog.strJsonData IS NOT NULL 
+	OPEN loopAuditLog;
+
+	FETCH NEXT FROM loopAuditLog INTO 
+		@auditLog_id
+		,@auditLog_strDescription
+		,@auditLog_Old
+		,@auditLog_New
+	;
+	WHILE @@FETCH_STATUS = 0
+	BEGIN 
+		IF @auditLog_strDescription IS NOT NULL 
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_id
+				,@screenName = 'Inventory.view.Item'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = @auditLog_strDescription
+				,@fromValue = @auditLog_Old
+				,@toValue = @auditLog_New
+		END
+		FETCH NEXT FROM loopAuditLog INTO 
+			@auditLog_id
+			,@auditLog_strDescription
+			,@auditLog_Old
+			,@auditLog_New
+		;
+	END 
+	CLOSE loopAuditLog;
+	DEALLOCATE loopAuditLog;
 	
 END 

@@ -161,7 +161,7 @@ BEGIN TRY
 		SELECT I.intInvoiceId
 			 , intInvoiceDetailId = NULL		 
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
-		WHERE I.strTransactionType = 'Credit Memo'
+		WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment')
 		  AND I.ysnPosted = 1
 		  AND I.ysnPaid = 0
 		  AND I.intEntityCustomerId = @EntityCustomerId
@@ -176,7 +176,7 @@ BEGIN TRY
 		JOIN @AppliedInvoices B
 			ON A.intPrepaymentId = B.intPrepaymentId
 				AND A.intInvoiceId = B.intInvoiceId
-				AND A.intPrepaymentDetailId = B.intPrepaymentDetailId
+				AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
 		
 END TRY
 BEGIN CATCH	

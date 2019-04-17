@@ -345,6 +345,8 @@ BEGIN
             [intInvoiceId] IN (SELECT [intInvoiceId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
             OR
             [intBillId] IN (SELECT [intBillId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
+            OR
+            ([intInvoiceId] IS NULL AND [intBillId] IS NULL AND [dblPayment] = @ZeroDecimal)
             )
 
     -- Update the posted flag in the transaction table
@@ -565,10 +567,12 @@ EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @PaymentIds, @Po
 --PROCESS CUSTOMER BUDGET TO ACH
 IF (@Post = 1)
     BEGIN
-        DECLARE @strPaymentACHIds NVARCHAR(MAX) = NULL
-        DECLARE @intBankAccountId INT = NULL
+        DECLARE @strPaymentACHIds		NVARCHAR(MAX)	= NULL
+			  , @intBankAccountId		INT				= NULL
+			  , @intCompanyLocationId	INT				= NULL
 
-        SELECT TOP 1 @intBankAccountId = intBankAccountId
+        SELECT TOP 1 @intBankAccountId		= intBankAccountId
+				   , @intCompanyLocationId	= intLocationId
         FROM dbo.tblARPayment P 
         INNER JOIN @NonZeroPaymentIds PI ON P.intPaymentId = PI.intId
         WHERE P.ysnApplytoBudget = 1
@@ -587,7 +591,12 @@ IF (@Post = 1)
         ) P (intPaymentId)
 
         IF ISNULL(@strPaymentACHIds, '') <> '' AND @intBankAccountId IS NOT NULL
-            EXEC dbo.uspARProcessACHPayments @strPaymentACHIds, @intBankAccountId, @UserId
+			BEGIN
+				EXEC dbo.uspARProcessACHPayments @strPaymentIds			= @strPaymentACHIds
+											   , @intBankAccountId		= @intBankAccountId
+											   , @intCompanyLocationId	= @intCompanyLocationId
+											   , @intUserId				= @UserId
+			END
     END
 
 --AUDIT LOG

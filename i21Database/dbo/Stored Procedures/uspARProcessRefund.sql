@@ -258,12 +258,11 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 					@fromValue = '',											-- Previous Value
 					@toValue = @strInvoiceNumberCashRefund  
 
+				--UPDATE YSNPROCESSED
+				UPDATE tblARInvoice
+				SET ysnRefundProcessed = 1
+				WHERE intInvoiceId = @intInvoiceId
 			END
-		
-		--UPDATE YSNPROCESSED
-		UPDATE tblARInvoice
-		SET ysnRefundProcessed = 1
-		WHERE intInvoiceId = @intInvoiceId
 	END
 ELSE IF ISNULL(@strErrorMessage, '') <> ''
 	BEGIN

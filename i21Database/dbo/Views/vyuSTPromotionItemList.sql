@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuSTPromotionItemList
+CREATE VIEW [dbo].[vyuSTPromotionItemList]
 AS
 SELECT IL.*
      , ST.intStoreNo 
