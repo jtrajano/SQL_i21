@@ -7528,6 +7528,7 @@
     <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
     <Build Include="dbo\Views\vyuSTPromotionSalesList.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemList.sql" />
+    <Build Include="dbo\Views\vyuSTCurrentUserRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
