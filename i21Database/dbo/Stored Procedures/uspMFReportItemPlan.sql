@@ -209,6 +209,11 @@ BEGIN
 				WHERE strProcessName = @strProcessName
 				)
 
+		if len(@strBlendAttributeValue)>0
+		Begin
+			Select @strBlendAttributeValue=Left(@strBlendAttributeValue,len(@strBlendAttributeValue)-1)
+		End
+
 		IF @strBlendAttributeValue IS NULL
 			OR @strBlendAttributeValue = ''
 		BEGIN
@@ -616,6 +621,7 @@ BEGIN
 			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 				AND RI.intRecipeItemTypeId = 1
 			JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
+			AND II.strType <> 'Other Charge'
 			JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
 				AND C.strCategoryCode IN (
 					SELECT Item Collate Latin1_General_CI_AS
@@ -679,8 +685,8 @@ BEGIN
 				,CL.strLocationName
 				,CASE 
 					WHEN C.strCategoryCode = @strPackagingCategory
-						THEN Convert(DECIMAL(38, 20), Ceiling(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, I.intItemUOMId, (RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)))))
-					ELSE SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, I.intItemUOMId, (RI.dblCalculatedQuantity * (W.dblQuantity - W.dblProducedQuantity) / R.dblQuantity)))
+						THEN Convert(DECIMAL(38, 20), Ceiling(SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, I.intItemUOMId, (RI.dblCalculatedQuantity * dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, R.intItemUOMId, (W.dblQuantity - W.dblProducedQuantity))  / R.dblQuantity)))))
+					ELSE SUM(dbo.fnMFConvertQuantityToTargetItemUOM(RI.intItemUOMId, I.intItemUOMId, (RI.dblCalculatedQuantity * dbo.fnMFConvertQuantityToTargetItemUOM(W.intItemUOMId, R.intItemUOMId, (W.dblQuantity - W.dblProducedQuantity)) / R.dblQuantity)))
 					END
 				,'' AS strName
 				,W.dtmPlannedDate
@@ -694,6 +700,7 @@ BEGIN
 			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 				AND RI.intRecipeItemTypeId = 1
 			JOIN dbo.tblICItem II ON II.intItemId = RI.intItemId
+			AND II.strType <> 'Other Charge'
 			JOIN dbo.tblICCategory C ON C.intCategoryId = II.intCategoryId
 				AND C.strCategoryCode IN (
 					SELECT Item Collate Latin1_General_CI_AS

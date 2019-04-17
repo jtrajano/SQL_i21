@@ -2,7 +2,7 @@
  AS   
 	SELECT   
 	patr_no = b.strCustomerNumber,   
-	item_no = ICItems.strItemNo,  
+	item_no = CAST(ICItems.strItemNo AS VARCHAR(15)),  
 	patr_price = c.dblPrice  
 	,c.strPricing  COLLATE Latin1_General_CI_AS AS strPricing
 	  

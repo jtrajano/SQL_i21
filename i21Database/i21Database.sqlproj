@@ -4302,7 +4302,6 @@
     <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPS.sql" />
     <Build Include="dbo\Stored Procedures\uspETImportBaseEngineeringToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBEExportPrice.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPaymentCSV.sql" />
     <Build Include="dbo\Views\vyuICTMProductPricing.sql" />
     <Build Include="dbo\Views\vyuTMBEExportPrice.sql" />
@@ -7274,8 +7273,6 @@
     <Build Include="dbo\Stored Procedures\uspRKSaveCurrencyExposure.sql" />
     <Build Include="dbo\Views\vyuRKGetCurExpSummary.sql" />
     <Build Include="dbo\Views\vyuRKCurrencyExposure.sql" />
-    <Build Include="dbo\Views\vyuRKGetBankBalance.sql" />
-    <Build Include="dbo\Views\vyuRKGetMoneyMarket.sql" />
     <Build Include="dbo\Views\vyuRKGetNonOTC.sql" />
     <Build Include="dbo\Views\vyuRKGetOTC.sql" />
     <Build Include="dbo\Views\vyuRKGetStock.sql" />
@@ -7291,11 +7288,14 @@
     <Build Include="dbo\Views\vyuCFEncodeCard.sql" />
     <Build Include="dbo\Tables\tblCFEncodeCardStagingTable.sql" />
     <Build Include="dbo\Tables\tblCFMaximaPrinterCardSoftware.sql" />
-    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
-        <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
     <Build Include="dbo\Functions\fnRKGetOpenContractHistory.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfDuplicateFutOptTransactionHistory.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutItemMovementReport.sql" />
+    <Build Include="dbo\Functions\fnICGetMovingAverageCost.sql" />
+    <Build Include="dbo\Views\vyuRKCurExpMoneyMarket.sql" />
+    <Build Include="dbo\Tables\tblCTSMTransactionApprovedLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFeedNotSentEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSendMissingFeed.sql" />
     <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
@@ -7309,6 +7309,11 @@
     <Build Include="dbo\Tables\tblRKDPISummary.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPI.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
+    <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
+    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

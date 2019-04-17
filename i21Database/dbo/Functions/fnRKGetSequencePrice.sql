@@ -1,7 +1,8 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetSequencePrice] 
 (
 		 @intContractDetailId INT
-		,@dblSettlementPrice NUMERIC(24, 6) = NULL
+		,@dblSettlementPrice NUMERIC(24, 6) = NULL,
+		 @dtmClosingPrice datetime = null
 )
 RETURNS NUMERIC(24, 6)
 AS
@@ -70,8 +71,8 @@ BEGIN
 			,6
 			)
 	BEGIN
-		SELECT @dblSeqPrice = dblSeqPrice
-		FROM dbo.fnRKGetAdditionalColumnForDetailView(@intContractDetailId)
+	SELECT @dblSeqPrice = dblCashPrice
+		FROM tblCTContractDetail where intContractDetailId=@intContractDetailId
 	END
 	ELSE IF @intPricingTypeId = 2
 	BEGIN
@@ -83,7 +84,7 @@ BEGIN
 
 			IF @dblSettlementPrice IS NULL
 			BEGIN
-					SELECT @dblSeqPrice = ((@dbldblNoOfLots - @dblLotsFixed) * dbo.fnRKGetLatestClosingPrice(@intFutureMarketId, @intFutureMonthId, GETDATE()) + @dblWtdAvg) / @dbldblNoOfLots
+					SELECT @dblSeqPrice = ((@dbldblNoOfLots - @dblLotsFixed) * isnull(dbo.fnRKGetLatestClosingPrice(@intFutureMarketId, @intFutureMonthId, @dtmClosingPrice),0) + @dblWtdAvg) / @dbldblNoOfLots
 			END
 			ELSE
 			BEGIN
@@ -116,7 +117,7 @@ BEGIN
 		ELSE
 		BEGIN
 			IF @dblSettlementPrice IS NULL
-				SELECT @dblSeqPrice = dbo.fnRKGetLatestClosingPrice(@intFutureMarketId,@intFutureMonthId,GETDATE()) + @dblBasis
+				SELECT @dblSeqPrice = isnull(dbo.fnRKGetLatestClosingPrice(@intFutureMarketId,@intFutureMonthId,@dtmClosingPrice),0) + @dblBasis
 			ELSE 
 				SELECT @dblSeqPrice = @dblSettlementPrice + dbo.fnGRConvertQuantityToTargetItemUOM(@intItemId,@intFutureMarketUnitMeasureId,@intBasisUnitMeasureId,@dblBasis)
 

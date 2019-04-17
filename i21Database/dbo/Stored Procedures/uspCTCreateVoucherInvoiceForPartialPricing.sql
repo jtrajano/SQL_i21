@@ -536,6 +536,7 @@ BEGIN TRY
 						EXEC	uspCTCreateInvoiceFromShipment 
 								@ShipmentId				=	@intInventoryShipmentId
 								,@UserId				=	@intUserId
+								,@intContractDetailId	=	@intContractDetailId
 								,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
 				
 						DELETE FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId IS NOT NULL AND intContractDetailId <> @intContractDetailId

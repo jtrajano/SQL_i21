@@ -410,6 +410,8 @@ SELECT * FROM #tmpForeignTransactionId
 	
 	DECLARE @LogId INT
 
+	SELECT * INTO #tblCFEntriesForInvoice FROM @EntriesForInvoice
+
 	EXEC [dbo].[uspARProcessInvoicesByBatch]
 		 --@InvoiceEntries	= @InvoiceEntriesTEMP
 		 @InvoiceEntries	= @EntriesForInvoice
@@ -439,7 +441,7 @@ SELECT * FROM #tmpForeignTransactionId
 		tblCFTransaction CFTran
 		INNER JOIN tblARInvoice ARL
 		ON CFTran.intTransactionId = ARL.intTransactionId
-		INNER JOIN @EntriesForInvoice EFI
+		INNER JOIN #tblCFEntriesForInvoice EFI
 		ON CFTran.intTransactionId = EFI.intSourceId
 
 
@@ -455,7 +457,7 @@ SELECT * FROM #tmpForeignTransactionId
 				tblCFTransaction CFTran
 				INNER JOIN tblARInvoice ARL
 				ON CFTran.intTransactionId = ARL.intTransactionId 
-				INNER JOIN @EntriesForInvoice EFI
+				INNER JOIN #tblCFEntriesForInvoice EFI
 				ON CFTran.intTransactionId = EFI.intSourceId
 				WHERE ARL.ysnPosted = 1
 				GROUP BY  CFTran.intCardId
@@ -475,7 +477,7 @@ SELECT * FROM #tmpForeignTransactionId
 		tblCFTransaction CFTran
 		INNER JOIN tblARInvoice ARL
 		ON CFTran.intTransactionId = ARL.intTransactionId
-		INNER JOIN @EntriesForInvoice EFI
+		INNER JOIN #tblCFEntriesForInvoice EFI
 		ON CFTran.intTransactionId = EFI.intSourceId
 
 	END

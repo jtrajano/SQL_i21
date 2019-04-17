@@ -137,85 +137,84 @@ IF ISNULL(@InvoiceIds, '') <> ''
 			END
 			/****************** AUDIT LOG ******************/
 
-			INSERT INTO tblGLDetail (
-					intCompanyId
-				, dtmDate
-				, strBatchId
-				, intAccountId
-				, dblDebit
-				, dblCredit
-				, dblDebitUnit
-				, dblCreditUnit
-				, strDescription
-				, strCode
-				, strReference
-				, intCurrencyId
-				, dblExchangeRate
-				, dtmDateEntered
-				, dtmTransactionDate
-				, strJournalLineDescription
-				, intJournalLineNo
-				, ysnIsUnposted
-				, intUserId
-				, intEntityId
-				, strTransactionId
-				, intTransactionId
-				, strTransactionType
-				, strTransactionForm
-				, strModuleName
-				, intConcurrencyId
-				, dblDebitForeign
-				, dblDebitReport
-				, dblCreditForeign
-				, dblCreditReport
-				, dblReportingRate
-				, dblForeignRate
-				, intReconciledId
-				, dtmReconciled
-				, ysnReconciled
-				, ysnRevalued
+			DECLARE @GLEntries		RecapTableType
+
+			INSERT INTO @GLEntries (
+				 [dtmDate]
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]
+				,[dblDebitReport]
+				,[dblCreditForeign]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
 			)
-			SELECT intCompanyId					= GL.intCompanyId
-				, dtmDate						= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
-				, strBatchId					= @strBatchId
-				, intAccountId					= GL.intAccountId
-				, dblDebit						= CASE WHEN @ysnForgive = 0 THEN GL.dblDebit ELSE GL.dblCredit END
-				, dblCredit						= CASE WHEN @ysnForgive = 0 THEN GL.dblCredit ELSE GL.dblDebit END
-				, dblDebitUnit					= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitUnit ELSE GL.dblCreditUnit END
-				, dblCreditUnit					= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END
-				, strDescription				= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge: ' ELSE 'Forgiven Service Charge: ' END + ISNULL(GL.strDescription, '')
-				, strCode						= GL.strCode
-				, strReference					= GL.strReference
-				, intCurrencyId					= GL.intCurrencyId
-				, dblExchangeRate				= GL.dblExchangeRate
-				, dtmDateEntered				= @dtmDateToday
-				, dtmTransactionDate			= GL.dtmTransactionDate
-				, strJournalLineDescription		= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge' ELSE 'Forgiven Service Charge' END
-				, intJournalLineNo				= GL.intJournalLineNo
-				, ysnIsUnposted					= 0
-				, intUserId						= GL.intUserId
-				, intEntityId					= GL.intEntityId
-				, strTransactionId				= GL.strTransactionId
-				, intTransactionId				= GL.intTransactionId
-				, strTransactionType			= 'Invoice'
-				, strTransactionForm			= 'Invoice'
-				, strModuleName					= 'Accounts Receivable'
-				, intConcurrencyId				= 1
-				, dblDebitForeign				= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitForeign ELSE GL.dblCreditForeign END
-				, dblDebitReport				= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitReport ELSE GL.dblCreditReport END
-				, dblCreditForeign				= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditForeign ELSE GL.dblDebitForeign END
-				, dblCreditReport				= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditReport ELSE GL.dblDebitReport END
-				, dblReportingRate				= GL.dblReportingRate
-				, dblForeignRate				= GL.dblForeignRate
-				, intReconciledId				= GL.intReconciledId
-				, dtmReconciled					= GL.dtmReconciled
-				, ysnReconciled					= GL.ysnReconciled
-				, ysnRevalued					= GL.ysnRevalued
+			SELECT
+				 [dtmDate]					= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
+				,[strBatchID]				= @strBatchId
+				,[intAccountId]				= GL.intAccountId
+				,[dblDebit]					= CASE WHEN @ysnForgive = 0 THEN GL.dblDebit ELSE GL.dblCredit END
+				,[dblCredit]				= CASE WHEN @ysnForgive = 0 THEN GL.dblCredit ELSE GL.dblDebit END
+				,[dblDebitUnit]				= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitUnit ELSE GL.dblCreditUnit END
+				,[dblCreditUnit]			= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END
+				,[strDescription]			= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge: ' ELSE 'Forgiven Service Charge: ' END + ISNULL(GL.strDescription, '')
+				,[strCode]					= GL.strCode
+				,[strReference]				= GL.strReference
+				,[intCurrencyId]			= GL.intCurrencyId
+				,[dblExchangeRate]			= GL.dblExchangeRate
+				,[dtmDateEntered]			= @dtmDateToday
+				,[dtmTransactionDate]		= GL.dtmTransactionDate
+				,[strJournalLineDescription]= CASE WHEN @ysnForgive = 0 THEN 'Unforgive Service Charge' ELSE 'Forgiven Service Charge' END
+				,[intJournalLineNo]			= GL.intJournalLineNo
+				,[ysnIsUnposted]			= 0
+				,[intUserId]				= GL.intUserId
+				,[intEntityId]				= GL.intEntityId
+				,[strTransactionId]			= GL.strTransactionId
+				,[intTransactionId]			= GL.intTransactionId
+				,[strTransactionType]		= GL.strTransactionType
+				,[strTransactionForm]		= GL.strTransactionForm
+				,[strModuleName]			= GL.strModuleName
+				,[intConcurrencyId]			= 1
+				,[dblDebitForeign]			= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitForeign ELSE GL.dblCreditForeign END
+				,[dblDebitReport]			= CASE WHEN @ysnForgive = 0 THEN GL.dblDebitReport ELSE GL.dblCreditReport END
+				,[dblCreditForeign]			= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditForeign ELSE GL.dblDebitForeign END
+				,[dblCreditReport]			= CASE WHEN @ysnForgive = 0 THEN GL.dblCreditReport ELSE GL.dblDebitReport END
+				,[dblReportingRate]			= GL.dblReportingRate
+				,[dblForeignRate]			= GL.dblForeignRate
 			FROM dbo.tblGLDetail GL WITH (NOLOCK)
 			INNER JOIN @ServiceChargeToForgive SCI
 				ON GL.intTransactionId = SCI.intInvoiceId
 				AND GL.strTransactionId = SCI.strInvoiceNumber
 			WHERE GL.ysnIsUnposted = 0
 				AND ISNULL(GL.strJournalLineDescription, '') NOT IN ('Forgiven Service Charge', 'Unforgive Service Charge')
+
+			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
+										, @ysnPost			= 1
+			END
 		END
 	END

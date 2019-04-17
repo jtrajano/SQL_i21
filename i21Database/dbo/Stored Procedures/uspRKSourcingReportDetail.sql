@@ -218,39 +218,29 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
 						dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblBalanceQty) dblBalanceQty,
 							t.dblNoOfLots,
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,i.intUnitMeasureId,
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblFuturesPrice,0),null,null))	dblFuturesPrice,	
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblFuturesPrice,0),null,null,null))	dblFuturesPrice,	
 													
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,m.intUnitMeasureId,
-							dbo.[fnRKGetCurrencyConvertion](m.intCurrencyId,@intCurrencyId)*isnull(dblSettlementPrice,0))	dblSettlementPrice,
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,cd.intCurrencyId,isnull(dblSettlementPrice,0),null,null,m.intCurrencyId)
+							,null,null,null)
+							)/case when isnull(c.ysnSubCurrency,0)=1 then c.intCent else 1 end	dblSettlementPrice,
 
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,j.intUnitMeasureId,
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null,intBasisCurrencyId))	dblBasis,
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(t.dblBasis,0),null,intBasisCurrencyId,null))	dblBasis,
 							
-							t.dblRatio,	dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,cost.dblRate,null,null) dblRate,
+							t.dblRatio,	dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,cost.dblRate,null,null,null) dblRate,
 							
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,m.intUnitMeasureId,						
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null,null))	dblPrice,
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblPrice,0),null,null,null))	dblPrice,
 							t.intCompanyLocationId, ca.dblRatio dblStandardRatio, 
 							ic.intItemId,						
 							
-							--dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
-							--isnull((
-							--SELECT sum(dbo.[fnCTConvertQuantityToTargetItemUOM](b.intItemId,@intUnitMeasureId,ic1.intUnitMeasureId,isnull(dblCost,0))) from tblCTAOP a
-							-- JOIN tblCTAOPDetail b on a.intAOPId=b.intAOPId 
-							-- JOIN tblICItemUOM ic1 on b.intPriceUOMId=ic1.intItemUOMId 
-							-- where a.dtmFromDate=@dtmAOPFromDate and dtmToDate=@dtmAOPToDate and strYear=@strYear
-							--and b.intItemId=cd.intItemId
-							--and a.intCommodityId=ic.intCommodityId
-							--and a.intCompanyLocationId=cd.intCompanyLocationId
-							--and isnull(a.intBookId,0)= case when isnull(@intBookId,0)=0 then isnull(a.intBookId,0) else @intBookId end
-							--and isnull(a.intSubBookId,0)= case when isnull(@intSubBookId,0)=0 then isnull(a.intSubBookId,0) else @intSubBookId end
-							--),0),null,null)  dblStandardPrice,
-
 							
 							(SELECT sum(dblQty) FROM
 							(SELECT 
 								dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,ic1.intUnitMeasureId,
-								dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblCost,0),b.intCurrencyId,null)) dblQty
+								dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblCost,0),b.intCurrencyId,null,null)) dblQty
 
 							FROM tblCTAOP a
 							 JOIN tblCTAOPDetail b on a.intAOPId=b.intAOPId 
@@ -265,7 +255,7 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
 
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,j.intUnitMeasureId,
 							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,
-											isnull(cost.dblRate,t.dblBasis),null,null))	dblPPVBasis,
+											isnull(cost.dblRate,t.dblBasis),null,null,null))	dblPPVBasis,
 							strLocationName	,strPricingType,strItemNo,ca.strDescription strProductType,cd.intCurrencyId,ysnSubCurrency,cd.intUnitMeasureId
  FROM @GetStandardQty t
 JOIN tblCTContractDetail cd on t.intContractDetailId=cd.intContractDetailId
@@ -307,13 +297,13 @@ t.intContractDetailId,strEntityName,t.intContractHeaderId,strContractSeq,
 					dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblReturnQty) dblReturnQty,
 						dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,cd.intUnitMeasureId,@intUnitMeasureId, dblBalanceQty) dblBalanceQty,
 							dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,i.intUnitMeasureId,
-							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cd.dblCashPrice,0),null,null))	dblPrice,	
+							dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(cd.dblCashPrice,0),null,null,null))	dblPrice,	
 							t.intCompanyLocationId, 
 							ic.intItemId,							
 							(SELECT sum(dblQty) FROM
 							(SELECT 
 								dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId,@intUnitMeasureId,ic1.intUnitMeasureId,
-								dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblCost,0),b.intCurrencyId,null)) dblQty
+								dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId,@intCurrencyId,isnull(dblCost,0),b.intCurrencyId,null,null)) dblQty
 							FROM tblCTAOP a
 							 JOIN tblCTAOPDetail b on a.intAOPId=b.intAOPId 
 							 JOIN tblICItemUOM ic1 on b.intPriceUOMId=ic1.intItemUOMId 

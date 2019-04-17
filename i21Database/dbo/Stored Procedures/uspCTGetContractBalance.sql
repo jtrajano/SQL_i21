@@ -31,6 +31,7 @@ BEGIN TRY
 		intPricingTypeId	INT,
 		dtmHistoryCreated   DATETIME
 	)
+
 	DECLARE @Balance TABLE 
 	(  
 			intContractTypeId		INT,
@@ -84,8 +85,6 @@ BEGIN TRY
 			intNoOfLoad				INT,
 			intShippedNoOfLoad		INT
 	)
-
-	
     
 	IF @dtmEndDate IS NOT NULL
 		SET @dtmEndDate = dbo.fnRemoveTimeOnDate(@dtmEndDate)
@@ -100,10 +99,12 @@ BEGIN TRY
 
 	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 	
-	IF NOT EXISTS( SELECT 1  FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate)
-    BEGIN
+	--Delete the data from tblCTContractBalance table with the passed param dtmEndDate
+	--This is to make sure we are regenerating the data real time
+	DELETE FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate
 
-	 INSERT INTO @Shipment
+
+	INSERT INTO @Shipment
 	  (
 	    intContractTypeId
 	   ,intContractHeaderId	
@@ -120,8 +121,12 @@ BEGIN TRY
 	  ,CH.intContractHeaderId
 	  ,CD.intContractDetailId
 	  ,InvTran.dtmDate	  
-	  ,@dtmEndDate  AS dtmEndDate
-	  ,SUM(InvTran.dblQty * - 1) AS dblQuantity
+	  ,@dtmEndDate AS dtmEndDate
+	  ,dblQuantity = CASE
+					 	WHEN SUM(ISNULL(ShipmentItem.dblDestinationNet, 0)) = 0 OR SUM(ShipmentItem.dblDestinationNet * 1) > SUM(CD.dblQuantity)
+					 		THEN SUM(InvTran.dblQty * - 1) 
+					 	ELSE SUM(ShipmentItem.dblDestinationNet * 1)
+					 END
 	  ,0
 	  ,COUNT(DISTINCT Shipment.intInventoryShipmentId)
 	  ,Shipment.intInventoryShipmentId	  
@@ -145,7 +150,7 @@ BEGIN TRY
 		,InvTran.dtmDate
 		,Shipment.intInventoryShipmentId
 		
-	 INSERT INTO @Shipment
+	INSERT INTO @Shipment
 	  (
 	    intContractTypeId
 	   ,intContractHeaderId	
@@ -174,7 +179,7 @@ BEGIN TRY
 	   AND InvoiceDetail.intInvoiceDetailId = InvTran.intTransactionDetailId
 	   JOIN tblCTContractHeader CH ON CH.intContractHeaderId = InvoiceDetail.intContractHeaderId
 	   JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvoiceDetail.intContractDetailId
-	   JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = InvoiceDetail.intSalesOrderDetailId
+	   LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = InvoiceDetail.intSalesOrderDetailId
 	   AND CD.intContractHeaderId = CH.intContractHeaderId
 	   WHERE InvTran.strTransactionForm = 'Invoice'
 	   	AND InvTran.ysnIsUnposted = 0
@@ -188,7 +193,7 @@ BEGIN TRY
 		,InvTran.dtmDate
 		,Invoice.intInvoiceId
 
-	  INSERT INTO @Shipment
+	INSERT INTO @Shipment
 	  (
 	    intContractTypeId
 	   ,intContractHeaderId	
@@ -223,7 +228,7 @@ BEGIN TRY
 	  GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 	  	,CD.intContractDetailId,InvTran.dtmDate, LD.intLoadId
 
-	  INSERT INTO @Shipment
+	INSERT INTO @Shipment
 	  (
 	    intContractTypeId
 	   ,intContractHeaderId	
@@ -262,7 +267,7 @@ BEGIN TRY
 	  GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 	  	,CD.intContractDetailId,InvTran.dtmDate,Receipt.intInventoryReceiptId
 
-	  INSERT INTO @Shipment
+	INSERT INTO @Shipment
 	  (
 	    intContractTypeId
 	   ,intContractHeaderId	
@@ -294,10 +299,8 @@ BEGIN TRY
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 		GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 			,CD.intContractDetailId,SS.dtmCreated,SS.intSettleStorageId
-	
-	 
-	 
-	 INSERT INTO @Balance(intContractTypeId,strType,intContractHeaderId,intContractDetailId,dblQuantity)
+		  
+	INSERT INTO @Balance(intContractTypeId,strType,intContractHeaderId,intContractDetailId,dblQuantity)
 	 SELECT
 	  CH.intContractTypeId 
 	 ,'Audit'
@@ -310,9 +313,7 @@ BEGIN TRY
 	 AND Audi.intSequenceUsageHistoryId <> -3	
 	 AND dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) > CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Audi.dtmTransactionDate) END
 	 GROUP BY CH.intContractTypeId,Audi.intContractHeaderId
-	 	,Audi.intContractDetailId    
-	
-	
+	 	,Audi.intContractDetailId    	
 	
 	INSERT INTO @PriceFixation
 	(
@@ -346,8 +347,6 @@ BEGIN TRY
 	JOIN tblCTContractDetail		 CD ON CD.intContractDetailId = PF.intContractDetailId
 	AND     dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
 	GROUP BY CH.intContractTypeId,PF.intContractHeaderId,PF.intContractDetailId,FD.dtmFixationDate,FD.dblFutures,FD.dblBasis,FD.dblCashPrice,CD.dblQuantityPerLoad
-	
-	
 	
 	SELECT @intShipmentKey = MIN(Ship.intShipmentKey) 
 	FROM @Shipment Ship
@@ -398,8 +397,6 @@ BEGIN TRY
 	INSERT INTO @BalanceTotal(intContractHeaderId,intContractDetailId,dblQuantity,intNoOfLoad)
 	SELECT intContractHeaderId,intContractDetailId,SUM(dblQuantity),SUM(intNoOfLoad) FROM @Balance 
 	GROUP BY intContractHeaderId,intContractDetailId
-
-	
 
 	INSERT INTO tblCTContractBalance
 	( 
@@ -520,6 +517,7 @@ BEGIN TRY
 	,strCategory 				= Category.strCategoryCode
 
 	FROM tblCTContractDetail					CD	
+	JOIN tblCTContractStatus					CS	ON CS.intContractStatusId			=	CD.intContractStatusId
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
 	AND												   CD.intContractDetailId          =    BL.intContractDetailId
@@ -562,6 +560,7 @@ BEGIN TRY
 														WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	  
 														ELSE	 dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
 												   END
+		AND CS.strContractStatus <> 'Unconfirmed'
 
 	INSERT INTO @tblChange(intSequenceHistoryId,intContractDetailId)
 	SELECT MAX(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 
@@ -794,7 +793,7 @@ BEGIN TRY
 		AND ItemStockUOM.ysnStockUnit = 1
 	WHERE FR.dtmEndDate = @dtmEndDate
 
-  END	
+
 
     IF ISNULL(@strCallingApp,'') <> 'DPR'
 	BEGIN

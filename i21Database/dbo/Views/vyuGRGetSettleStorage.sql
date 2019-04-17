@@ -37,10 +37,7 @@ SELECT DISTINCT
 	,strBillId					= ISNULL(Bill.strBillId,'')
 	,strContractIds				= _strContractIds.strContractIds
 	,strContractNumbers         = STUFF(_strContractNumbers.strContractNumbers,1,1,'') 
-	,strUnits                   =  CASE
-										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
-										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol
-								END
+	,strUnits                   = (CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol) COLLATE Latin1_General_CI_AS
 	,intTransactionId			= CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN 99999999
 									ELSE
@@ -58,8 +55,8 @@ SELECT DISTINCT
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
 											ELSE TS.strTransferStorageTicket
 										END
-								END
-	,CASE 
+								END COLLATE Latin1_General_CI_AS
+	,strTransactionCode			= CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN ''
 									ELSE
 										CASE
@@ -67,9 +64,9 @@ SELECT DISTINCT
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'SC' --SCALE TICKET
 											ELSE 'TS' --TRANSFER STORAGE
 										END
-								END COLLATE Latin1_General_CI_AS as strTransactionCode
+								END COLLATE Latin1_General_CI_AS
 	, strCommodityCode
-	, strCategoryCode	= Category.strCategoryCode
+	, strCategoryCode			= Category.strCategoryCode
 FROM tblGRSettleStorage SS
 JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
@@ -103,7 +100,6 @@ LEFT JOIN (tblSCDeliverySheet DeliverySheet
 			AND DSS.intEntityId = E.intEntityId
 			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
             AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
-
 LEFT JOIN (tblGRTransferStorageSplit TSS
 			INNER JOIN tblGRTransferStorage TS
 				ON TS.intTransferStorageId = TSS.intTransferStorageId

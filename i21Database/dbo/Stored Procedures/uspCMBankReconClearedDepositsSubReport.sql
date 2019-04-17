@@ -115,14 +115,16 @@ IF @dtmStatementDate IS NOT NULL
 	SELECT @dtmStatementDate = CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME)		
 
 DECLARE @lastDateReconciled datetime
-	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankTransaction 
+	SELECT TOP 1 @lastDateReconciled = dtmDateReconciled FROM tblCMBankReconciliation 
 	WHERE intBankAccountId = @intBankAccountId
 	ORDER BY dtmDateReconciled DESC
 	
 	SELECT @lastDateReconciled = DATEADD(SECOND, -1, DATEADD(DAY,1,@lastDateReconciled))
 
-DECLARE @filterDate DATETIME
-	SELECT @filterDate = DATEADD(SECOND, -1, DATEADD(DAY,1,  @dtmStatementDate))	
+DECLARE @filterDate DATETIME, @ysnMaskedPCHKPayee BIT
+
+SELECT @filterDate = DATEADD(SECOND, -1, DATEADD(DAY,1,  @dtmStatementDate))	
+SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference  
 	
 -- SANITIZE THE BANK ACCOUNT ID
 --SET @intBankAccountIdFrom = ISNULL(@intBankAccountIdFrom, 0)
@@ -140,7 +142,7 @@ SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,dtmDate = BankTrans.dtmDate
 		,dtmDateReconciled = BankTrans.dtmDateReconciled
 		,strReferenceNo = BankTrans.strReferenceNo
-		,strPayee = BankTrans.strPayee
+		,strPayee = CASE WHEN  BankTrans.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE BankTrans.strPayee END 
 		,strMemo = BankTrans.strMemo
 		,strRecordNo = BankTrans.strTransactionId
 		,dblPayment = 0

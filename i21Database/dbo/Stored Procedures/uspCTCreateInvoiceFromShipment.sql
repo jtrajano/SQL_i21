@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateInvoiceFromShipment]
-	@ShipmentId        INT
-    ,@UserId            INT
-    ,@LogId             INT = NULL  OUTPUT
-	,@NewInvoiceId      INT OUTPUT
+	@ShipmentId				INT
+    ,@UserId				INT
+	,@intContractDetailId	INT
+    ,@LogId					INT = NULL  OUTPUT
+	,@NewInvoiceId			INT OUTPUT
 AS
 
 BEGIN TRY
@@ -331,9 +332,15 @@ FROM
 INNER JOIN
     vyuARShippedItems ARSI
         ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId]
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ARSI.intContractDetailId 
 WHERE
-        ICIS.[intInventoryShipmentId] = @ShipmentId
-        
+ICIS.[intInventoryShipmentId] = @ShipmentId
+AND (
+		(CD.intContractDetailId <> @intContractDetailId AND CD.dblCashPrice IS NOT NULL) 
+			OR 
+		CD.intContractDetailId = @intContractDetailId
+	)
+AND CD.intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblARInvoiceDetail)
 
 INSERT INTO @TaxDetails(
 	 [intDetailId]

@@ -145,8 +145,8 @@ BEGIN TRY
 		,x.dtmEarliestStartDate
 		,MC.intPackTypeId
 		,P.strPackName
-		,x.dblBalance * PTD.dblConversionFactor
-		,PTD.dblConversionFactor
+		,x.dblBalance * IsNULL(PTD.dblConversionFactor,1)
+		,IsNULL(PTD.dblConversionFactor,1)
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId

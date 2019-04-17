@@ -6,8 +6,7 @@ WITH cte as (
 		,CO.strCommodityCode
 		,CS.intCompanyLocationId
 		,CL.strLocationName
-		,dblSubTotal = CS.dblOriginalBalance
-		,YEAR(CS.dtmDeliveryDate) dtmDeliveryYear
+		,dblSubTotal = CS.dblOpenBalance
 		,IM.strDescription
 		,IM.strItemNo
 		,QM.dblGradeReading
@@ -32,24 +31,24 @@ cte1 as (
 		,strCommodityCode
 		,strLocationName
 		,dblSubTotal
-		,dtmDeliveryYear
 		,A.strItemNo strDiscountCode
 		,A.strItemNo
+		,A.intCompanyLocationId
 	FROM cte A	
 	LEFT JOIN tblGRReadingRanges RR
 		ON A.dblGradeReading BETWEEN RR.intMinValue 
 			AND RR.intMaxValue
 			AND RR.intReadingType = 1
 	WHERE A.strDescription = 'TEST WEIGHT' 
-	UNION
+	UNION ALL
 	SELECT 
 		RR.strReadingRange
 		,strCommodityCode
 		,strLocationName
 		,dblSubTotal
-		,dtmDeliveryYear
 		,A.strItemNo strDiscountCode
 		,A.strItemNo
+		,A.intCompanyLocationId
 	FROM cte A
 	LEFT JOIN tblGRReadingRanges RR
 	ON (A.dblGradeReading BETWEEN RR.intMinValue AND RR.intMaxValue)
@@ -60,15 +59,14 @@ SELECT
 	TW.strReadingRange strReadingRange
 	,TW.strCommodityCode strCommodityCode
 	,REPLACE(REPLACE(TW.strLocationName,'[',''),']','') strLocationName
-	,TW.dtmDeliveryYear dtmDeliveryYear
-	,strCommodityCode + CAST(dtmDeliveryYear AS NVARCHAR(4)) CommodityYear
 	,SUM(ISNULL(TW.dblSubTotal,0)) dblSubTotalByLocation
 	,TW.strDiscountCode strDiscountCode
 	,TW.strItemNo
+	,TW.intCompanyLocationId
 FROM cte1 TW
 GROUP BY TW.strReadingRange
 		,TW.strCommodityCode
 		,TW.strLocationName
-		,TW.dtmDeliveryYear
 		,TW.strDiscountCode
 		,TW.strItemNo
+		,TW.intCompanyLocationId

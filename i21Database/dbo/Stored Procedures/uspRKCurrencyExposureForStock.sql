@@ -1,10 +1,9 @@
-﻿CREATE PROC uspRKCurrencyExposureForStock
+﻿CREATE PROC [dbo].[uspRKCurrencyExposureForStock]
 	  @intCommodityId int
 	, @dtmClosingPrice datetime = null
 	, @intCurrencyId int
 
 AS
-
 SET @dtmClosingPrice = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmClosingPrice, 110), 110)
 
 BEGIN
@@ -38,7 +37,7 @@ FROM (
 		um.intUnitMeasureId intMarketPremiumUOMId,
 		cur.intCurrencyID intMarketPriceCurrencyId,l.intItemId,cd.intFutureMarketId,ch.intCompanyId
 	FROM tblCTContractHeader ch
-	JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId and cd.intCurrencyId=@intCurrencyId
+	JOIN tblCTContractDetail cd on ch.intContractHeaderId=cd.intContractHeaderId
 	join tblRKFutureMarket fm on cd.intFutureMarketId=fm.intFutureMarketId
 	JOIN tblICInventoryReceiptItem ri on cd.intContractDetailId=ri.intLineNo
 	JOIN tblICInventoryReceiptItemLot rl on ri.intInventoryReceiptItemId=rl.intInventoryReceiptItemId
@@ -50,6 +49,7 @@ FROM (
 	join tblICUnitMeasure um on um.intUnitMeasureId=iu.intUnitMeasureId
 	join tblSMCurrency cur on cur.intCurrencyID=fm.intCurrencyId
 	LEFT join tblSMMultiCompany mc on mc.intMultiCompanyId=ch.intCompanyId
-	WHERE ch.intCommodityId=@intCommodityId  and dblQty<>0
+	WHERE ch.intCommodityId=@intCommodityId  and dblQty<>0 
+
 ) t
 END

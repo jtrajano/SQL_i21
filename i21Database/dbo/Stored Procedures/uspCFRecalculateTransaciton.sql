@@ -499,6 +499,10 @@ BEGIN
 	@CFAdjustmentRate			=	@dblAdjustmentRate			output
 
 	
+	IF(LOWER(@strPriceMethod) = 'network cost' OR LOWER(@strPriceBasis) = 'transfer cost')
+	BEGIN
+		SET @dblOriginalPrice = @dblTransferCost
+	END
 
 	SELECT TOP 1 
 	@strPriceProfileId = cfPriceProfile.strPriceProfile
@@ -2652,7 +2656,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-                        SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity						
+                        SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity				
 						END
 					END
 
@@ -3049,7 +3053,7 @@ BEGIN
                         IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity			
 						END
 					END
 
@@ -3439,7 +3443,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxZeroQuantity			
 						END
 					END
 
@@ -3989,7 +3993,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity			
 						END
 					END
 
@@ -4391,7 +4395,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity			
 						END
 					END
 
@@ -4781,7 +4785,7 @@ BEGIN
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
 						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
+						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity			
 						END
 					END
 
@@ -5640,7 +5644,8 @@ BEGIN
 	--FROM @tblTransactionPrice  
 	--WHERE strTransactionPriceId = 'Net Price'
 
-
+	IF (ISNULL(@dblCalculatedTotalPrice,0) != 0)
+	BEGIN
 	IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote')
 	BEGIN
 		SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblNetTransferCost,0)
@@ -5691,6 +5696,11 @@ BEGIN
 			SET @dblMargin = ISNULL(@dblMarginNetPrice,0) - ISNULL(@dblInventoryCost,0)
 		END
 
+	END
+	END
+	ELSE
+	BEGIN
+		SET @dblMargin = 0
 	END
 
 	---------------------------------------------------
@@ -5849,18 +5859,30 @@ BEGIN
 	-------------- End get card type/ dual card
 	------------------------------------------------------
 
-	IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0 ) AND @strTransactionType != 'Foreign Sale')
+	--IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 AND (ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0 ) AND @strTransactionType != 'Foreign Sale')
+	--BEGIN
+	--	SET @intVehicleId = NULL
+	--	IF(ISNULL(@ysnVehicleRequire,0) = 1)
+	--	BEGIN
+	--		INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+	--		VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required.')
+	--		SET @ysnInvalid = 1
+	--	END
+	--END
+	
+	IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@IsImporting,0) = 0 )
 	BEGIN
 		SET @intVehicleId = NULL
 		IF(ISNULL(@ysnVehicleRequire,0) = 1)
 		BEGIN
+			IF((ISNULL(@ysnDualCard,0) = 1 OR ISNULL(@intCardTypeId,0) = 0) AND @strTransactionType != 'Foreign Sale')
+			BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required.')
+				VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Vehicle is required')
 			SET @ysnInvalid = 1
 		END
 	END
-	
-	
+	END
 
 	---------------------------------------------------
 	--					ZERO PRICING				 --

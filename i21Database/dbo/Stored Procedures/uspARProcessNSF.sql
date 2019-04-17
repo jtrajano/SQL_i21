@@ -16,6 +16,7 @@ DECLARE @intNSFPaymentMethodId 	INT = NULL
 DECLARE @intPaymentId 			INT = NULL
 DECLARE @strErrorMsg			NVARCHAR(MAX) = NULL
 DECLARE @strInvoiceNumbers		NVARCHAR(MAX) = NULL
+DECLARE @GLEntries				RecapTableType
 
 SELECT TOP 1 @intNSFPaymentMethodId = intPaymentMethodID
 FROM dbo.tblSMPaymentMethod 
@@ -153,84 +154,81 @@ IF EXISTS(SELECT TOP 1 NULL FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1)
 	END
 
 --REVERSE GL ENTRIES
-INSERT INTO tblGLDetail (
-		intCompanyId
-	  , dtmDate
-	  , strBatchId
-	  , intAccountId
-	  , dblDebit
-	  , dblCredit
-	  , dblDebitUnit
-	  , dblCreditUnit
-	  , strDescription
-	  , strCode
-	  , strReference
-	  , intCurrencyId
-	  , dblExchangeRate
-	  , dtmDateEntered
-	  , dtmTransactionDate
-	  , strJournalLineDescription
-	  , intJournalLineNo
-	  , ysnIsUnposted
-	  , intUserId
-	  , intEntityId
-	  , strTransactionId
-	  , intTransactionId
-	  , strTransactionType
-	  , strTransactionForm
-	  , strModuleName
-	  , intConcurrencyId
-	  , dblDebitForeign
-	  , dblDebitReport
-	  , dblCreditForeign
-	  , dblCreditReport
-	  , dblReportingRate
-	  , dblForeignRate
-	  , intReconciledId
-	  , dtmReconciled
-	  , ysnReconciled
-	  , ysnRevalued
+INSERT INTO @GLEntries (
+	 [dtmDate]
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]
+	,[dblDebitReport]
+	,[dblCreditForeign]
+	,[dblCreditReport]
+	,[dblReportingRate]
+	,[dblForeignRate]
 )
-SELECT intCompanyId					= GL.intCompanyId
-	 , dtmDate						= GL.dtmDate
-	 , strBatchId					= GL.strBatchId
-	 , intAccountId					= GL.intAccountId
-	 , dblDebit						= GL.dblCredit
-	 , dblCredit					= GL.dblDebit
-	 , dblDebitUnit					= GL.dblCreditUnit
-	 , dblCreditUnit				= GL.dblDebitUnit
-	 , strDescription				= 'NSF: ' + GL.strDescription
-	 , strCode						= GL.strCode
-	 , strReference					= GL.strReference
-	 , intCurrencyId				= GL.intCurrencyId
-	 , dblExchangeRate				= GL.dblExchangeRate
-	 , dtmDateEntered				= P.dtmDate
-	 , dtmTransactionDate			= GL.dtmTransactionDate
-	 , strJournalLineDescription	= 'NSF'
-	 , intJournalLineNo				= GL.intJournalLineNo
-	 , ysnIsUnposted				= 0
-	 , intUserId					= GL.intUserId
-	 , intEntityId					= GL.intEntityId
-	 , strTransactionId				= GL.strTransactionId
-	 , intTransactionId				= GL.intTransactionId
-	 , strTransactionType			= GL.strTransactionType
-	 , strTransactionForm			= GL.strTransactionForm
-	 , strModuleName				= GL.strModuleName
-	 , intConcurrencyId				= 1
-	 , dblDebitForeign				= GL.dblCreditForeign
-	 , dblDebitReport				= GL.dblCreditReport
-	 , dblCreditForeign				= GL.dblDebitForeign
-	 , dblCreditReport				= GL.dblDebitReport
-	 , dblReportingRate				= GL.dblReportingRate
-	 , dblForeignRate				= GL.dblForeignRate
-	 , intReconciledId				= GL.intReconciledId
-	 , dtmReconciled				= GL.dtmReconciled
-	 , ysnReconciled				= GL.ysnReconciled
-	 , ysnRevalued					= GL.ysnRevalued
+SELECT
+	 [dtmDate]					= GL.dtmDate
+	,[strBatchID]				= GL.strBatchId
+	,[intAccountId]				= GL.intAccountId
+	,[dblDebit]					= GL.dblCredit
+	,[dblCredit]				= GL.dblDebit
+	,[dblDebitUnit]				= GL.dblCreditUnit
+	,[dblCreditUnit]			= GL.dblDebitUnit
+	,[strDescription]			= 'NSF: ' + GL.strDescription
+	,[strCode]					= GL.strCode
+	,[strReference]				= GL.strReference
+	,[intCurrencyId]			= GL.intCurrencyId
+	,[dblExchangeRate]			= GL.dblExchangeRate
+	,[dtmDateEntered]			= P.dtmDate
+	,[dtmTransactionDate]		= GL.dtmTransactionDate
+	,[strJournalLineDescription]= 'NSF'
+	,[intJournalLineNo]			= GL.intJournalLineNo
+	,[ysnIsUnposted]			= 0
+	,[intUserId]				= GL.intUserId
+	,[intEntityId]				= GL.intEntityId
+	,[strTransactionId]			= GL.strTransactionId
+	,[intTransactionId]			= GL.intTransactionId
+	,[strTransactionType]		= GL.strTransactionType
+	,[strTransactionForm]		= GL.strTransactionForm
+	,[strModuleName]			= GL.strModuleName
+	,[intConcurrencyId]			= 1
+	,[dblDebitForeign]			= GL.dblCreditForeign
+	,[dblDebitReport]			= GL.dblCreditReport
+	,[dblCreditForeign]			= GL.dblDebitForeign
+	,[dblCreditReport]			= GL.dblDebitReport
+	,[dblReportingRate]			= GL.dblReportingRate
+	,[dblForeignRate]			= GL.dblForeignRate
 FROM dbo.tblGLDetail GL WITH (NOLOCK)
 INNER JOIN #SELECTEDPAYMENTS P ON GL.intTransactionId = P.intPaymentId
 							  AND GL.strTransactionId = P.strRecordNumber
 WHERE GL.ysnIsUnposted = 0
+
+IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN
+		EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
+								, @ysnPost			= 1
+	END
 
 --UPDATE PAYMENT RECORDS
 UPDATE P

@@ -31,7 +31,7 @@ BEGIN
 			ON A.intSiteID = D.intSiteID 
 		INNER JOIN tblSMTerm E
 			ON D.intDeliveryTermID = E.intTermID
-				AND E.intBalanceDue <> 0
+				AND 0 <> (case when E.strType = 'Standard' then E.intBalanceDue when E.strType = 'Date Driven' then E.intDayofMonthDue else 1 end)
 		WHERE D.ysnLockPrice = 0
 	) Z
 	CROSS APPLY 
