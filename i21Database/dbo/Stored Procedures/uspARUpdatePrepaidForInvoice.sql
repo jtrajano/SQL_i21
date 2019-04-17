@@ -158,7 +158,7 @@ BEGIN TRY
 		SELECT I.intInvoiceId
 			 , intInvoiceDetailId = NULL		 
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
-		WHERE I.strTransactionType = 'Credit Memo'
+		WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment')
 		  AND I.ysnPosted = 1
 		  AND I.ysnPaid = 0
 		  AND I.intEntityCustomerId = @EntityCustomerId
