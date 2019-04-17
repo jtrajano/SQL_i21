@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessACHPayments]
 	@strPaymentIds			NVARCHAR(MAX),
 	@intBankAccountId		INT,
-	@intCompanyLocationId	INT,
+	@intCompanyLocationId	INT = NULL,
 	@intUserId				INT,
 	@strNewTransactionId	NVARCHAR(100) = '' OUTPUT
 AS
