@@ -176,7 +176,7 @@ BEGIN TRY
 		JOIN @AppliedInvoices B
 			ON A.intPrepaymentId = B.intPrepaymentId
 				AND A.intInvoiceId = B.intInvoiceId
-				AND A.intPrepaymentDetailId = B.intPrepaymentDetailId
+				AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
 		
 END TRY
 BEGIN CATCH	
