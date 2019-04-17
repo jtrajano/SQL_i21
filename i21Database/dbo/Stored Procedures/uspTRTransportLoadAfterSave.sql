@@ -282,7 +282,7 @@ BEGIN
 		FROM @tmpCurrentSnapshot currentSnapshot
 		INNER JOIN #tmpPreviousSnapshot previousSnapshot
 			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
-		WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' AND ISNULL(previousSnapshot.intContractDetailId, '') <> '')
+		--WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' AND ISNULL(previousSnapshot.intContractDetailId, '') <> '')
 			--AND (ISNULL(currentSnapshot.dblQuantity, 0) <> ISNULL(previousSnapshot.dblQuantity, 0))
 
 		UNION ALL
