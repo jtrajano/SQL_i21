@@ -12,8 +12,8 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 	 , dblQuantity				= RECIPE.dblQuantity
 	 , dblNewQuantity			= RECIPE.dblQuantity
 	 , dblAvailableQuantity		= I.dblAvailable	 
-	 , dblPrice					= RECIPE.dblQuantity * I.dblStandardCost
-	 , dblNewPrice				= RECIPE.dblQuantity * I.dblStandardCost
+	 , dblPrice					= I.dblStandardCost
+	 , dblNewPrice				= I.dblStandardCost
 	 , strItemType				= I.strType
 	 , strType					= 'Finished Good' COLLATE Latin1_General_CI_AS
 	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	 
