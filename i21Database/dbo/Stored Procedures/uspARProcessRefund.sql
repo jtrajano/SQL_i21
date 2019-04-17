@@ -239,12 +239,12 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 						RAISERROR(@strErrorMessage, 16, 1) 
 						RETURN 0;
 					END
+
+				--UPDATE YSNPROCESSED
+				UPDATE tblARInvoice
+				SET ysnRefundProcessed = 1
+				WHERE intInvoiceId = @intInvoiceId
 			END
-		
-		--UPDATE YSNPROCESSED
-		UPDATE tblARInvoice
-		SET ysnRefundProcessed = 1
-		WHERE intInvoiceId = @intInvoiceId
 	END
 ELSE IF ISNULL(@strErrorMessage, '') <> ''
 	BEGIN
