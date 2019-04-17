@@ -85,8 +85,8 @@ IF @Post = 1
 		        ON A.intPaymentId = P.[intTransactionId]				
         WHERE
             (A.dblAmountPaid) <> 0
-            AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0	
-            AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)											
+            AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL)), 0) = 0	
+            AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0 AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL))											
     END
 ELSE	
     BEGIN

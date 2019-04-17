@@ -345,6 +345,8 @@ BEGIN
             [intInvoiceId] IN (SELECT [intInvoiceId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
             OR
             [intBillId] IN (SELECT [intBillId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
+            OR
+            ([intInvoiceId] IS NULL AND [intBillId] IS NULL AND [dblPayment] = @ZeroDecimal)
             )
 
     -- Update the posted flag in the transaction table
