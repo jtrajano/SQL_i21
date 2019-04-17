@@ -7526,6 +7526,8 @@
     <Build Include="dbo\Functions\fnConvertDateToReportDateFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTicketPayables.sql" />
     <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
+    <Build Include="dbo\Views\vyuSTPromotionSalesList.sql" />
+    <Build Include="dbo\Views\vyuSTPromotionItemList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
