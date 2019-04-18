@@ -7529,6 +7529,8 @@
     <Build Include="dbo\Views\vyuSTPromotionSalesList.sql" />
     <Build Include="dbo\Views\vyuSTPromotionItemList.sql" />
     <Build Include="dbo\Views\vyuSTCurrentUserRole.sql" />
+    <Build Include="dbo\Views\vyuRKBrokerList.sql" />
+    <Build Include="dbo\Views\vyuRKBrokerAccountList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
