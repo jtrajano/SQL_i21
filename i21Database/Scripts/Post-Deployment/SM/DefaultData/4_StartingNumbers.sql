@@ -1425,9 +1425,12 @@ GO
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Derivative Entry')
 	BEGIN
-		UPDATE tblSMStartingNumber
-		SET [strPrefix] = 'DER-'
-		WHERE strTransactionType = N'Derivative Entry'
+		IF NOT EXISTS(select top 1 * from tblRKFutOptTransaction)
+		BEGIN
+			UPDATE tblSMStartingNumber
+			SET [strPrefix] = 'DER-'
+			WHERE strTransactionType = N'Derivative Entry'
+		END
 	END 
 
 GO
