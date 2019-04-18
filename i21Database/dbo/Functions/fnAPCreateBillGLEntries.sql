@@ -101,8 +101,8 @@ BEGIN
 											-- 												ELSE (ISNULL(A.dblPayment,0) / A.dblTotal) * Details.dblTotal END)) * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 											CAST((CASE WHEN A.intTransactionType IN (2, 3, 11, 13) AND Details.dblTotal <> 0 THEN Details.dblTotal * -1 
 													 ELSE Details.dblTotal END)  * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
-		[dblDebitUnit]					=	0,
-		[dblCreditUnit]					=	ISNULL(Details.dblUnits,0),--ISNULL(units.dblTotalUnits,0),
+		[dblDebitUnit]					=	CASE WHEN ISNULL(Details.dblUnits,0) < 0 THEN ISNULL(Details.dblUnits,0) * -1 ELSE 0 END,
+		[dblCreditUnit]					=	CASE WHEN ISNULL(Details.dblUnits,0) < 0 THEN 0 ELSE ISNULL(Details.dblUnits,0) END,--ISNULL(units.dblTotalUnits,0),
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
@@ -387,8 +387,8 @@ BEGIN
 														END
 												* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) , --Bill Detail
 		[dblCredit]						=	0, -- Bill
-		[dblDebitUnit]					=	ISNULL(units.dblTotalUnits,0),
-		[dblCreditUnit]					=	0,
+		[dblDebitUnit]					=	CASE WHEN ISNULL(units.dblTotalUnits,0) < 0 THEN 0 ELSE ISNULL(units.dblTotalUnits,0) END,
+		[dblCreditUnit]					=	CASE WHEN ISNULL(units.dblTotalUnits,0) < 0 THEN ISNULL(units.dblTotalUnits,0) * -1 ELSE 0 END,
 		[strDescription]				=	A.strReference,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
