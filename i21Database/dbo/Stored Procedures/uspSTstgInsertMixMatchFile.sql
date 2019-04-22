@@ -47,7 +47,6 @@ BEGIN
 		-- =========================================================================================================
 
 
-		-- PASSPORT
 		IF(@strRegisterClass = 'PASSPORT')
 			BEGIN
 				-- Create Unique Identifier
@@ -164,7 +163,6 @@ BEGIN
 								END
 					END
 			END
-		-- RADIANT
 		ELSE IF(@strRegisterClass = 'RADIANT')
 			BEGIN
 				INSERT INTO tblSTstgMixMatchFile
@@ -263,6 +261,188 @@ BEGIN
 					BEGIN
 							SET @ysnSuccessResult = CAST(0 AS BIT)
 							SET @strMessageResult = 'No result found to generate Mix/Match - ' + @strFilePrefix + ' Outbound file'
+					END
+			END
+		ELSE IF(@strRegisterClass = 'SAPPHIRE/COMMANDER')
+			BEGIN
+				
+				DECLARE @tblTempSapphireCommanderMixMatch TABLE 
+				(
+					[intPrimaryId] INT,
+					[strStoreNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+					[strVendorName] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
+					[strVendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+
+					[strRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+
+					-- TOP 1 Promotion Item List Id
+					[strPromotionID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			
+					[strMixMatchDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+
+					[strMixMatchStrictHighFlag] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+					[strMixMatchStrictLowFlag] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+					[strItemListID] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+
+					[strStartDate] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+					[strStartTime] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
+					[strStopDate] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+					[strStopTime] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
+
+					-- TOP 1 from Promotion Item List Id
+					[strMixMatchUnits] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,			
+					[strMixMatchPrice] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+					[strPriority] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+				)
+
+
+
+
+
+				INSERT INTO @tblTempSapphireCommanderMixMatch
+				SELECT
+					[intPrimaryId]						=	CAST(SalesList.intPromoSalesListId AS NVARCHAR(50)), 
+					[strStoreNo]						=	CAST(SalesList.intStoreNo AS NVARCHAR(50)), 
+					[strVendorName]						=	'iRely', 
+					[strVendorModelVersion]				=	(SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
+
+					[strRecordActionType]				=	CASE
+																WHEN (SalesList.ysnDeleteFromRegister = 1)
+																	THEN 'delete'
+																ELSE 'addchange'
+														    END, 
+
+					-- TOP 1 Promotion Item List Id
+					[strPromotionID]					=	CAST(SalesList.intPromoSalesId AS NVARCHAR(50)),			
+					[strMixMatchDescription]			=	SalesList.strPromoSalesDescription,
+
+					[strMixMatchStrictHighFlag]			=	'yes',
+					[strMixMatchStrictLowFlag]			=	'yes',
+					[strItemListID]						=	CAST(PIL.intPromoItemListNo AS NVARCHAR(50)),
+
+					[strStartDate]						=	CAST(CONVERT(DATE, SalesList.dtmPromoBegPeriod) AS NVARCHAR(10)),
+					[strStartTime]						=	CAST(CONVERT(TIME, SalesList.dtmPromoBegPeriod) AS NVARCHAR(8)),
+					[strStopDate]						=	CAST(CONVERT(DATE, SalesList.dtmPromoEndPeriod) AS NVARCHAR(10)),
+					[strStopTime]						=	CAST(CONVERT(TIME, SalesList.dtmPromoEndPeriod) AS NVARCHAR(8)),
+
+					-- TOP 1 from Promotion Item List Id
+					[strMixMatchUnits]					=	CAST(SalesList.intQuantity AS NVARCHAR(50)),			
+					[strMixMatchPrice]					=	CAST(CAST(SalesList.dblPrice AS DECIMAL(18,4)) AS NVARCHAR(50)),
+					[strPriority]						=	NULL
+				FROM
+				(   
+					SELECT ST.intStoreNo
+						 , PSL.ysnDeleteFromRegister
+						 , PSL.intPromoSalesId
+						 , PSL.strPromoSalesDescription
+						 , PSL.dtmPromoBegPeriod
+						 , PSL.dtmPromoEndPeriod
+						 , PSLD.* 
+						 , ROW_NUMBER() OVER (PARTITION BY PSLD.intPromoSalesListId ORDER BY PSLD.intPromoSalesListId DESC) AS rn
+					FROM tblSTPromotionSalesList PSL
+					JOIN tblSTPromotionSalesListDetail PSLD
+						ON PSL.intPromoSalesListId = PSLD.intPromoSalesListId
+					JOIN tblSTStore ST
+						ON PSL.intStoreId = ST.intStoreId 
+					WHERE ST.intStoreId = @intStoreId
+						AND PSL.strPromoType = 'M'
+						AND (PSLD.intQuantity IS NOT NULL AND PSLD.intQuantity != 0)
+						AND (PSLD.dblPrice IS NOT NULL AND PSLD.dblPrice != 0)
+					--ORDER BY PSLD.intPromoSalesListDetailId ASC
+				) SalesList 
+				JOIN tblSTPromotionItemList PIL
+					ON SalesList.intPromoItemListId = PIL.intPromoItemListId
+				WHERE SalesList.rn = 1	-- Only get Top 1 record from PSLD on every PSL
+
+
+
+
+
+				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderMixMatch)
+					BEGIN
+						DECLARE @xml XML = N''
+				
+						SELECT @xml =
+						(
+							SELECT
+								trans.strStoreNo				AS 'TransmissionHeader/StoreLocationID',
+								trans.strVendorName 			AS 'TransmissionHeader/VendorName',
+								trans.strVendorModelVersion 	AS 'TransmissionHeader/VendorModelVersion',
+								(
+									SELECT
+										'update' AS [TableAction/@type],
+										'addchange' AS [RecordAction/@type],
+										(
+											SELECT 
+												MixMatch.strRecordActionType		AS [RecordAction/@type],
+												MixMatch.strPromotionID				AS [Promotion/PromotionID],
+												MixMatch.strMixMatchDescription		AS [MixMatchDescription],
+												MixMatch.strMixMatchStrictHighFlag	AS [MixMatchStrictHighFlag/@value],
+												MixMatch.strMixMatchStrictLowFlag	AS [MixMatchStrictLowFlag/@value],
+												MixMatch.strItemListID				AS [ItemListID],
+												MixMatch.strStartDate				AS [StartDate],
+												MixMatch.strStartTime				AS [StartTime],
+												MixMatch.strStopDate				AS [StopDate],
+												MixMatch.strStopTime				AS [StopTime],
+												MixMatch.strMixMatchUnits			AS [MixMatchEntry/MixMatchUnits],
+												MixMatch.strMixMatchPrice			AS [MixMatchEntry/MixMatchPrice],
+												(select MixMatch.strPriority for xml path('Priority'), type)
+												--MixMatch.strPriority				AS [Priority]
+											FROM 
+											(
+												SELECT DISTINCT
+													strPromotionID
+													, strRecordActionType
+													, strMixMatchDescription
+													, strMixMatchStrictHighFlag
+													, strMixMatchStrictLowFlag
+													, strItemListID
+													, strStartDate
+													, strStartTime
+													, strStopDate
+													, strStopTime
+													, strMixMatchUnits
+													, strMixMatchPrice
+													, strPriority
+												FROM @tblTempSapphireCommanderMixMatch
+											) MixMatch
+											ORDER BY MixMatch.strPromotionID ASC
+											FOR XML PATH('MMTDetail'), TYPE --elements xsinil
+										)
+									FOR XML PATH('MixMatchMaintenance'), TYPE	
+								)
+							FROM 
+							(
+								SELECT DISTINCT
+									[strStoreNo], 
+									[strVendorName], 
+									[strVendorModelVersion]
+								FROM @tblTempSapphireCommanderMixMatch
+							) trans
+							FOR XML PATH('NAXML-MaintenanceRequest'), TYPE
+						);
+
+
+
+						DECLARE @strXmlns AS NVARCHAR(50) = 'http://www.naxml.org/POSBO/Vocabulary/2003-10-16'
+								, @strVersion NVARCHAR(50) = '3.4'
+
+						-- INSERT Attributes 'page' and 'ofpages' to Root header
+						SET @xml.modify('insert 
+									   (
+											attribute version { 
+																	sql:variable("@strVersion")
+															  }		   
+										) into (/*:NAXML-MaintenanceRequest)[1]');
+
+						DECLARE @strXML AS NVARCHAR(MAX) = CAST(@xml AS NVARCHAR(MAX))
+						SET @strXML = REPLACE(@strXML, '<NAXML-MaintenanceRequest', '<NAXML-MaintenanceRequest xmlns="http://www.naxml.org/POSBO/Vocabulary/2003-10-16"')
+						
+						SET @strGeneratedXML = REPLACE(@strXML, '><', '>' + CHAR(13) + '<')
+					END
+				ELSE 
+					BEGIN
+						SET @ysnSuccessResult = CAST(0 AS BIT)
+						SET @strMessageResult = 'No result found to generate MixMatch - ' + @strFilePrefix + ' Outbound file'
 					END
 			END
 
