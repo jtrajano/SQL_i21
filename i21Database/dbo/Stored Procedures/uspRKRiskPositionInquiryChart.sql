@@ -67,23 +67,14 @@ BEGIN
 		 ,@intBookId  = @intBookId, 
 		 @intSubBookId = @intSubBookId 
 		
-
-	-- SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutureMonth ASC)) intRowNum,
-	-- 	(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.Selection = 'Physical position / Basis risk' and t1.strFutureMonth= t.strFutureMonth) dblPhysicalPosition,
-	-- 	(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.strAccountNumber='Market risk' and t1.strFutureMonth= t.strFutureMonth) dblNetMarketRisk,
-	-- 	 strFutureMonth,'' as Selection  FROM @tblFinalDetail t WHERE (Selection = 'Physical position / Basis risk' or strAccountNumber='Market risk') 
-	-- group by  strFutureMonth
-	-- ORDER BY  CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END
-
 	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutureMonth ASC)) intRowNum,
 		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.strGroup = 'Physical position / Basis risk' and t1.strFutureMonth= t.strFutureMonth) dblPhysicalPosition,
 		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.strAccountNumber='Market risk' and t1.strFutureMonth= t.strFutureMonth) dblNetMarketRisk,
 		dbo.fnRKFormatDate(CONVERT(DATETIME, strFutureMonth), 'MMM yyyy') strFutureMonth,'' as Selection  FROM @tblFinalDetail t 
 	WHERE (strGroup = 'Physical position / Basis risk' or strAccountNumber='Market risk') 
-		AND ISNULL(strFutureMonth, '') <> ''
+		AND ISNULL(strFutureMonth, '') <> '' and strFutureMonth <> 'Previous'
 	group by  strFutureMonth
-	ORDER BY CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
-		  WHEN  strFutureMonth ='Total' THEN '01/01/9999'
+	ORDER BY CASE  WHEN  strFutureMonth ='Total' THEN '01/01/9999'
 		else dbo.fnRKFormatDate(CONVERT(DATETIME, strFutureMonth), 'MMM yyyy') END
 
 END
@@ -102,21 +93,13 @@ BEGIN
 		 ,@intBookId  = @intBookId, 
 		 @intSubBookId = @intSubBookId
 
-
-	-- SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutureMonth ASC)) intRowNum,
-	-- 	(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.PriceStatus = 'Outright coverage' and t1.strFutureMonth= t.strFutureMonth) dblPhysicalPosition,
-	-- 	(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.PriceStatus='Futures Required' and t1.strFutureMonth= t.strFutureMonth) dblNetMarketRisk,
-	-- 	 strFutureMonth,'' as Selection  FROM @tblFinalDetail t WHERE PriceStatus in('Outright coverage','Futures Required') 
-	-- group by  strFutureMonth
-	-- ORDER BY  CASE WHEN  strFutureMonth <>'Previous' THEN CONVERT(DATETIME,'01 '+strFutureMonth) END
-
 	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strFutureMonth ASC)) intRowNum,
 		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE LOWER(t1.Selection) = LOWER('Outright coverage') and t1.strFutureMonth= t.strFutureMonth  AND PriceStatus = '3.Outright coverage' AND PriceStatus <> '4.Outright coverage(Weeks)') dblPhysicalPosition,
 		(select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE LOWER(t1.Selection) = LOWER('Futures Required') and t1.strFutureMonth= t.strFutureMonth AND PriceStatus = '4.Futures Required') dblNetMarketRisk,
-		 strFutureMonth,'' as Selection  FROM @tblFinalDetail t WHERE LOWER(Selection) in('outright coverage','futures required') 
-	group by  strFutureMonth
-	ORDER BY CASE WHEN  strFutureMonth ='Previous' THEN '01/01/1900' 
-		  WHEN  strFutureMonth ='Total' THEN '01/01/9999'
+		 strFutureMonth,'' as Selection  FROM @tblFinalDetail t 
+	WHERE LOWER(Selection) in('outright coverage','futures required') and strFutureMonth <> 'Previous'
+	GROUP BY  strFutureMonth
+	ORDER BY CASE  WHEN  strFutureMonth ='Total' THEN '01/01/9999'
 		else CONVERT(DATETIME,'01 '+strFutureMonth) END
 
 END
