@@ -315,10 +315,12 @@ BEGIN TRY
 			EXEC uspCTCancelOpenLoadSchedule @intContractDetailId
 		END
 
+		SELECT @dblLotsFixed = NULL,@intPriceFixationId = NULL
 		SELECT @dblLotsFixed = dblLotsFixed,@intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
 		IF	@dblLotsFixed IS NOT NULL AND @dblNoOfLots IS NOT NULL AND @dblNoOfLots = @dblLotsFixed AND
 			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
 		BEGIN
+			UPDATE	tblCTPriceFixation SET dblTotalLots = @dblNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END
 

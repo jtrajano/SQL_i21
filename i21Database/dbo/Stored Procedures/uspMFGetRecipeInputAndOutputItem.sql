@@ -1348,7 +1348,6 @@ BEGIN TRY
 			AND ysnInputItem = 1
 	END
 
-	
 	DECLARE @intRecordId INT
 		,@dblInputQuantity NUMERIC(38, 20)
 		,@ysnPickByLotCode BIT
@@ -1372,7 +1371,7 @@ BEGIN TRY
 		)
 	DECLARE @tblMFPickLots TABLE (
 		intLotRecordId INT Identity(1, 1)
-		,intItemId int
+		,intItemId INT
 		,intLotId INT
 		,dblQty NUMERIC(38, 20)
 		,intItemUOMId INT
@@ -1390,8 +1389,12 @@ BEGIN TRY
 	FROM tblMFCompanyPreference
 
 	SELECT @intRecordId = min(intRowNo)
-	FROM #tblMFConsumptionDetail
+	FROM #tblMFConsumptionDetail CD
 	WHERE dblInputQuantity > 0
+		AND CD.intInputItemId NOT IN (
+			SELECT CI.intItemId
+			FROM @tblMFConsumeItem CI
+			)
 
 	WHILE @intRecordId IS NOT NULL
 	BEGIN
@@ -1572,7 +1575,7 @@ BEGIN TRY
 					,dblQty
 					,intItemUOMId
 					)
-				SELECT @intInputItemId 
+				SELECT @intInputItemId
 					,@intLotId
 					,[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRequiredQuantityItemUOMId, @intItemUOMId, @dblRequiredQuantity)
 					,@intItemUOMId
@@ -1589,7 +1592,7 @@ BEGIN TRY
 					,dblQty
 					,intItemUOMId
 					)
-				SELECT @intInputItemId 
+				SELECT @intInputItemId
 					,@intLotId
 					,@dblQty
 					,@intItemUOMId
@@ -1604,15 +1607,20 @@ BEGIN TRY
 		END
 
 		SELECT @intRecordId = min(intRowNo)
-		FROM #tblMFConsumptionDetail
+		FROM #tblMFConsumptionDetail CD
 		WHERE dblInputQuantity > 0
 			AND intRowNo > @intRecordId
+			AND CD.intInputItemId NOT IN (
+				SELECT CI.intItemId
+				FROM @tblMFConsumeItem CI
+				)
 	END
+
 	SELECT WC.intContainerId
 		,WC.strContainerId
 		,SL.intStorageLocationId
-		,SL.strName As strStorageLocationName
-		,SL.intSubLocationId As intStorageSubLocationId
+		,SL.strName AS strStorageLocationName
+		,SL.intSubLocationId AS intStorageSubLocationId
 		,WC.intInputItemId
 		,WC.strInputItemNo
 		,WC.strInputItemDescription
@@ -1620,27 +1628,26 @@ BEGIN TRY
 		,WC.intInputItemUOMId
 		,WC.intUnitMeasureId
 		,WC.strInputItemUnitMeasure
-		,PL.intLotId intInputLotId
+		,L.intLotId intInputLotId
 		,L.strLotNumber strInputLotNumber
-		,PL.dblQty dblInputLotQuantity
+		,IsNULL(PL.dblQty, WC.dblInputQuantity) dblInputLotQuantity
 		,UM.strUnitMeasure strInputLotUnitMeasure
 		,WC.ysnEmptyOutSource
 		,WC.dtmFeedTime
 		,WC.strReferenceNo
 		,WC.dtmActualInputDateTime
 		,WC.intRowNo
-		,PL.dblQty dblReadingQuantity
+		,IsNULL(PL.dblQty, WC.dblInputQuantity) dblReadingQuantity
 	FROM #tblMFConsumptionDetail WC
-	Left JOIN @tblMFPickLots PL on PL.intItemId=WC.intInputItemId
-	Left JOIN tblICLot L on L.intLotId=PL.intLotId
-	Left JOIN tblICItemUOM IU on IU.intItemUOMId=L.intItemUOMId
-	Left JOIN tblICUnitMeasure UM On UM.intUnitMeasureId =IU.intUnitMeasureId 
-	Left JOIN tblICStorageLocation SL on SL.intStorageLocationId=IsNULL(L.intStorageLocationId,WC.intStorageLocationId)
-
+	LEFT JOIN @tblMFPickLots PL ON PL.intItemId = WC.intInputItemId
+	LEFT JOIN tblICLot L ON L.intLotId = IsNULL(PL.intLotId, WC.intInputLotId)
+	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = IsNULL(L.intStorageLocationId, WC.intStorageLocationId)
 	WHERE dblInputQuantity > 0
+
 	EXEC sp_xml_removedocument @idoc
 END TRY
-
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()

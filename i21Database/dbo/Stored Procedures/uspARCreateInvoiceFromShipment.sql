@@ -618,10 +618,13 @@ WHERE
 		)
 	AND ICIS.strShipmentNumber NOT IN (SELECT strTransactionNumber FROM vyuARShippedItems WHERE strTransactionNumber = @ShipmentNumber)
 
+DECLARE @ErrorMessage NVARCHAR(250)
+
 IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
 	BEGIN
 		IF ISNULL(@IgnoreNoAvailableItemError,0) = 1 RETURN 0;
-		RAISERROR('There is no available item to Invoice.', 16, 1);
+		SET @ErrorMessage = 'The items in ' + @ShipmentNumber + ' are not allowed to be converted to Invoice. It could be a DP or Zero Spot Priced.'
+		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
 
@@ -717,8 +720,6 @@ BEGIN
 			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId] 
 	WHERE
 		ICISI.[intInventoryShipmentId] = @ShipmentId 
-
-	DECLARE @ErrorMessage NVARCHAR(250)
 
 	SET @ErrorMessage = 'Invoice(' + @InvoiceNumber + ') was already created for ' + @ShipmentNumber;
 
