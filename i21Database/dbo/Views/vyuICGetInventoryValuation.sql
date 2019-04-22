@@ -86,7 +86,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 											END
 										AS NVARCHAR(100)
 									)
-		,strEntity					= e.strName										
+		,strEntity					= e.strName
+		,e.intEntityId
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId
 		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
