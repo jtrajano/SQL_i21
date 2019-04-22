@@ -91,18 +91,38 @@ FROM (
 		, intCurrencyId				= dbo.fnICGetCurrency(ContractView.intContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
 		, strSubCurrency			= SubCurrency.strCurrency
 		, dblGross					= 
-									--CASE WHEN ContractView.strBundleType = 'Basket' THEN 
-									--	CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20)) 
-									--ELSE 
-										CAST(0 AS NUMERIC(38, 20))									
-									--END
+									----CASE WHEN ContractView.strBundleType = 'Basket' THEN 
+									----	CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20)) 
+									----ELSE 
+									--	CAST(0 AS NUMERIC(38, 20))									
+									----END
+									CASE 
+										WHEN GrossNetUOM.intItemUOMId IS NOT NULL AND ISNULL(ContractView.ysnLoad, 0) <> 1 THEN
+											dbo.fnCalculateQtyBetweenUOM(
+												ItemUOM.intItemUOMId
+												,GrossNetUOM.intItemUOMId
+												,ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance) 
+											)
+										ELSE 
+											CAST(0 AS NUMERIC(38, 20))
+									END 
 									
 		, dblNet					= 
-									--CASE WHEN ContractView.strBundleType = 'Basket' THEN 
-									--	CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20))
-									--ELSE 
-										CAST(0 AS NUMERIC(38, 20))									
-									--END
+									----CASE WHEN ContractView.strBundleType = 'Basket' THEN 
+									----	CAST(dbo.fnCalculateQtyBetweenUOM(ItemUOM.intItemUOMId, BasketWeightUOM.intItemUOMId, dblDetailQuantity - (dblDetailQuantity - dblBalance)) AS NUMERIC(38, 20))
+									----ELSE 
+									--	CAST(0 AS NUMERIC(38, 20))									
+									----END
+									CASE 
+										WHEN GrossNetUOM.intItemUOMId IS NOT NULL AND ISNULL(ContractView.ysnLoad, 0) <> 1 THEN
+											dbo.fnCalculateQtyBetweenUOM(
+												ItemUOM.intItemUOMId
+												,GrossNetUOM.intItemUOMId
+												,ContractView.dblDetailQuantity - (ContractView.dblDetailQuantity - ContractView.dblBalance) 
+											)
+										ELSE 
+											CAST(0 AS NUMERIC(38, 20))
+									END 
 
 		, intForexRateTypeId		= ISNULL(ContractView.intRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId)
 		, strForexRateType			= ISNULL(ContractView.strCurrencyExchangeRateType, CompanyPreferenceForexRateType.strCurrencyExchangeRateType)
