@@ -4,9 +4,9 @@
 -- Date Created: 05/26/2016
 -- Created by: Smith de Jesus
 -- --------------------------------------------------
-
+GO
 print('/*******************  BEGIN Cash Management Data Fixes *******************/')
-
+GO
 --This will insert the old data from strBankAccountNo to strMICRBankAccountNo and strRTN to strMICRRoutingNo (CM-1215)
 IF EXISTS (SELECT * FROM tblCMBankAccount WHERE strMICRRoutingNo IS NULL OR strMICRBankAccountNo IS NULL)
 BEGIN
@@ -297,4 +297,12 @@ BEGIN
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Include Old Transations in Archive Tab','1')
 END    
 
+-- UPDATES NULL intEntityId columns that is causing batch post error GL-6595
+UPDATE Trans SET Trans.intEntityId = Undep.intLastModifiedUserId 
+FROM tblCMBankTransactionDetail TransDetail 
+JOIN tblCMUndepositedFund Undep ON Undep.intUndepositedFundId = TransDetail.intUndepositedFundId
+JOIN tblCMBankTransaction Trans ON Trans.intTransactionId = TransDetail.intTransactionId
+WHERE Trans.intEntityId is null AND Trans.ysnPosted = 0
+GO
 print('/*******************  END Cash Management Data Fixess *******************/')
+GO
