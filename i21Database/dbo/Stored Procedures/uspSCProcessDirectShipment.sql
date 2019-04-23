@@ -184,7 +184,9 @@ BEGIN TRY
 				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
 				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
-				IF(@intInvoiceId IS NOT NULL)
+				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT SUM(dblQtyShipped) FROM tblARInvoiceDetail A
+					INNER JOIN tblICInventoryShipmentItem B on A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
+					WHERE intInvoiceId = @intInvoiceId))
 				BEGIN
 					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits
 				END
