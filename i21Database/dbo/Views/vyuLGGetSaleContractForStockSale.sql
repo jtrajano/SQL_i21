@@ -8,7 +8,7 @@ SELECT DISTINCT CH.intContractHeaderId
 	,SP.strName AS strSalespersonId
 	,CH.intPositionId
 	,PO.strPosition
-	,intContractBasisId = CH.intFreightTermId
+	,CH.intFreightTermId
 	,CB.strContractBasis
 	,CH.intINCOLocationTypeId
 	,CT.strCity AS strINCOLocationTypeId
