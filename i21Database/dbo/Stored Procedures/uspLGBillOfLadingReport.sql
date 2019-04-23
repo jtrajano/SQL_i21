@@ -174,9 +174,10 @@ BEGIN TRY
 				,ISNULL(LUOM.strUnitMeasure, UOM.strUnitMeasure) AS strUOM
 				,(
 					CASE 
-						WHEN LUOM.strUnitMeasure <> ISNULL(WUOM.strUnitMeasure, '')
-							THEN (ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) * Item.dblWeight)
-						ELSE ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0))
+						WHEN LUOM.strUnitMeasure <> ISNULL(LWUOM.strUnitMeasure, '')
+							THEN (ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) * 
+									dbo.fnCalculateQtyBetweenUOM(LotItemUOM.intItemUOMId, LotWeightUOM.intItemUOMId, 1))
+						ELSE ISNULL(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0), ISNULL(LoadDetail.dblNet, 0))
 						END
 					) AS dblNetWeight
 				,SUM(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0)) OVER () AS dblTotalWeight
@@ -226,14 +227,15 @@ BEGIN TRY
 			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 			LEFT JOIN tblICLot Lot ON Lot.intLotId = LoadDetailLot.intLotId
-			LEFT JOIN tblICItemUOM ItemUOM1 ON ItemUOM1.intItemUOMId = Lot.intItemUOMId
-			LEFT JOIN tblICUnitMeasure LUOM ON LUOM.intUnitMeasureId = ItemUOM1.intUnitMeasureId
+			LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+			LEFT JOIN tblICUnitMeasure LUOM ON LUOM.intUnitMeasureId = LotItemUOM.intUnitMeasureId
 			LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId
-			LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Item.intWeightUOMId
+			LEFT JOIN tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+			LEFT JOIN tblICUnitMeasure LWUOM ON LWUOM.intUnitMeasureId = LotWeightUOM.intUnitMeasureId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
 			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
 			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = LoadDetail.intCustomerEntityId
-			LEFT JOIN	tblEMEntity Via ON Via.intEntityId = Load.intHaulerEntityId
+			LEFT JOIN tblEMEntity Via ON Via.intEntityId = Load.intHaulerEntityId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Load.intFreightTermId
 				AND Load.intPurchaseSale = 2 -- 'Outbound Order'
 			CROSS APPLY tblLGCompanyPreference CP
