@@ -184,7 +184,7 @@ BEGIN TRY
 				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
 				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
-				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT SUM(dblQtyShipped) FROM tblARInvoiceDetail A
+				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(A.intItemUOMId,@intTicketItemUOMId,dblQtyShipped)) AS DECIMAL(18,6)) FROM tblARInvoiceDetail A
 					INNER JOIN tblICInventoryShipmentItem B on A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
 					WHERE intInvoiceId = @intInvoiceId))
 				BEGIN
