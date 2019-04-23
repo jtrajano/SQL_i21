@@ -299,15 +299,13 @@ BEGIN
 
 	DECLARE loopAuditLog CURSOR LOCAL FAST_FORWARD
 	FOR 	
-	SELECT	intItemId
+	SELECT	auditLog.intItemId
 			,strDescription = 
 				CASE 
 					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'INSERT' THEN 
 						'C-Store adds a Vendor Product in the Vendor Item Cross Reference Grid'
 					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'UPDATE' THEN 
 						'C-Store updates the Vendor Product in the Vendor Item Cross Reference Grid'
-					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
-						'C-Store updates the Discount Amount/Percent in Promotional Pricing and Exemptions Grid'
 					WHEN ISNULL(strVendorProductDescription_Original, '') <> ISNULL(strVendorProductDescription_New, '') THEN 
 						'C-Store updates the Product Description in the Vendor Item Cross Reference Grid'
 				END 
@@ -317,8 +315,6 @@ BEGIN
 						''
 					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'UPDATE' THEN 
 						strVendorProduct_Original
-					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
-						dblDiscount_Original
 					WHEN ISNULL(strVendorProductDescription_Original, '') <> ISNULL(strVendorProductDescription_New, '') THEN 
 						strVendorProductDescription_Original
 				END 
@@ -328,8 +324,6 @@ BEGIN
 						strVendorProduct_New
 					WHEN ISNULL(strVendorProduct_Original, '') <> ISNULL(strVendorProduct_New, '') AND auditLog.strAction = 'UPDATE' THEN 
 						strVendorProduct_New
-					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
-						dblDiscount_New
 					WHEN ISNULL(strVendorProductDescription_Original, '') <> ISNULL(strVendorProductDescription_New, '') THEN 
 						strVendorProductDescription_New
 				END 

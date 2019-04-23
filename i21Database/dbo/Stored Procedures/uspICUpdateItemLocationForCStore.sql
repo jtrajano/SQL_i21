@@ -287,7 +287,8 @@ BEGIN
 					WITH	(HOLDLOCK) 
 					AS		itemLocation	
 					USING (
-						SELECT	itemLocation.intItemLocationId
+						SELECT	
+								DISTINCT itemLocation.intItemLocationId
 						FROM	tblICItemLocation itemLocation INNER JOIN tblICItem i
 									ON i.intItemId = itemLocation.intItemId 
 									AND itemLocation.intLocationId IS NOT NULL 
