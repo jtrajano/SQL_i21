@@ -267,7 +267,13 @@ BEGIN
 		SET @strXml += '<MWSKZ>' + '' + '</MWSKZ>'
 		SET @strXml += '<WRBTR>' + ISNULL(LTRIM(CONVERT(NUMERIC(38, 2), ABS(@dblGrossPnL))), '') + '</WRBTR>'
 		SET @strXml += '<SGTXT>' + ISNULL(@strText,'') + '</SGTXT>'
-		SET @strXml += '<KOSTL>' + '9012' + '</KOSTL>'
+		
+		--cost center only for swiss and internal order no only for US
+		IF ISNULL(@strSAPInternalOrderNo, '') = ''
+			SET @strXml += '<KOSTL>' + '9012' + '</KOSTL>'
+		ELSE
+			SET @strXml += '<KOSTL>' + '' + '</KOSTL>'
+		
 		SET @strXml += '<AUFNR>' + ISNULL(@strSAPInternalOrderNo, '') + '</AUFNR>'
 		SET @strXml += '<HKONT>' + ISNULL(@strSAPGLAccountNo, '') + '</HKONT>'
 		SET @strXml += '<PRCTR>' + '1162' + '</PRCTR>'

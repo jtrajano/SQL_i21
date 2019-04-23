@@ -740,3 +740,66 @@ BEGIN
 	SELECT '7053572',@intCommodityId,3
 END
 GO
+
+-- Internal Order No script for Dev Server. Should not run this in Production Server
+/*
+GO
+DECLARE @intCommodityId INT
+SELECT @intCommodityId = intCommodityId FROM tblICCommodity WHERE strCommodityCode = 'Sugar'
+
+IF NOT EXISTS (SELECT 1 FROM tblIPSAPInternalOrder WHERE intCommodityId = @intCommodityId) AND (ISNULL(@intCommodityId, 0) > 0)
+BEGIN
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001356',@intCommodityId,0
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001357',@intCommodityId,1
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001358',@intCommodityId,2
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001359',@intCommodityId,3
+END
+GO
+
+GO
+DECLARE @intCommodityId INT
+SELECT @intCommodityId = intCommodityId FROM tblICCommodity WHERE strCommodityCode = 'Corn'
+
+IF NOT EXISTS (SELECT 1 FROM tblIPSAPInternalOrder WHERE intCommodityId = @intCommodityId) AND (ISNULL(@intCommodityId, 0) > 0)
+BEGIN
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001360',@intCommodityId,0
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001361',@intCommodityId,1
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001362',@intCommodityId,2
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001363',@intCommodityId,3
+END
+GO
+
+GO
+DECLARE @intCommodityId INT
+SELECT @intCommodityId = intCommodityId FROM tblICCommodity WHERE strCommodityCode = 'Dairy'
+
+IF NOT EXISTS (SELECT 1 FROM tblIPSAPInternalOrder WHERE intCommodityId = @intCommodityId) AND (ISNULL(@intCommodityId, 0) > 0)
+BEGIN
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001364',@intCommodityId,0
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001365',@intCommodityId,1
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001366',@intCommodityId,2
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7001367',@intCommodityId,3
+END
+GO
+*/

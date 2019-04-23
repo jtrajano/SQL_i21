@@ -72,7 +72,7 @@ BEGIN
 			VALUES 
 				(@strTransactionId
 				,@intMeterAccountId
-				,GETDATE()
+				,@dtmTransactionDate
 				,0
 				,@intUserId
 				,1)

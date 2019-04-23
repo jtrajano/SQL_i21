@@ -746,7 +746,7 @@ BEGIN TRY
 		,NULL --strSalespersonName
 		,NULL --strAccountStatusCode
 		,NULL
-		,NULL --strFullAddress
+		,LTRIM(REPLACE(strBillTo,strCustomerName,'')) --strFullAddress
 		,NULL --strStatementFooterComment
 		,strCompanyName
 		,strCompanyAddress
@@ -814,6 +814,8 @@ BEGIN TRY
 		,strTermCode
 		,dblTotalFuelExpensed
 		,dblFeeAmount
+		,strBillTo
+		
 
 		--SELECT '2',* FROM tblARCustomerStatementStagingTable
 

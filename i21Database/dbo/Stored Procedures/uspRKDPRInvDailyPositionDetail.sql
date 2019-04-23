@@ -509,107 +509,37 @@ BEGIN
 			INTO #tblGetSalesIntransitWOPickLot
 			FROM(
 				SELECT 
-					strTransactionId AS strShipmentNumber
-					,intTransactionId AS intInventoryShipmentId
-					,strContractNumber
-					,intContractHeaderId
-					,strTicketNumber
-					,intTicketId
-					,dtmDate AS dtmTicketDateTime
-					,intLocationId AS intCompanyLocationId
-					,strLocationName
-					,strUOM
-					,intEntityId
-					,strEntity AS strCustomerReference
-					,intCommodityId
-					,intItemId
-					,strItemNo
-					,strCategory
-					,intCategoryId
-					,dblBalanceToInvoice 
-					,strContractEndMonth
-					,strFutureMonth
-					,strDeliveryDate
-				FROM (
-					SELECT 
-						 Inv.strTransactionId
-						,Inv.intTransactionId
-						,strContractNumber = SI.strOrderNumber + '-' + CONVERT(NVARCHAR, SI.intContractSeq) COLLATE Latin1_General_CI_AS 
-						,intContractHeaderId = SI.intOrderId 
-						,strTicketNumber = SI.strSourceNumber
-						,intTicketId = SI.intSourceId
-						,Inv.dtmDate
-						,Inv.intLocationId
-						,Inv.strLocationName
-						,Inv.strUOM
-						,Inv.intEntityId
-						,Inv.strEntity
-						,C.intCommodityId
-						,Inv.intItemId
-						,Inv.strItemNo
-						,Inv.strCategory
-						,Inv.intCategoryId
-						,dblBalanceToInvoice = SUM(Inv.dblQuantity)
-						 + ISNULL((SELECT SUM(iv.dblQty)
-											FROM tblARInvoiceDetail id 
-												JOIN tblARInvoice i on id.intInvoiceId = i.intInvoiceId
-												JOIN tblICInventoryTransaction iv ON id.intInvoiceDetailId = iv.intTransactionDetailId
-											WHERE 
-												iv.intInTransitSourceLocationId IS NOT NULL 
-												AND intTransactionTypeId = 33 --'Invoice'
-												and iv.intItemId = Inv.intItemId
-												and id.strDocumentNumber = Inv.strTransactionId
-												and CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110)
-												and iv.ysnIsUnposted = 0
-												and id.intInventoryShipmentItemId = Inv.intTransactionDetailId
-												)
-												
-												, 0)
-						,ysnInvoicePosted = (CASE WHEN  CONVERT(DATETIME,@dtmToDate) >= CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 OR (i.dtmPostDate IS NULL AND SI.strDestinationWeights <> 'DESTINATION') THEN 1 ELSE 0 END )
-						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
-						,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblCTContractDetail cd INNER JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId =  fmnt.intFutureMonthId WHERE intContractHeaderId = SI.intLineNo)
-						,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
-					FROM vyuRKGetInventoryValuation Inv
-					INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
-					INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId 
-					LEFT JOIN vyuICGetInventoryShipmentItem SI ON Inv.intTransactionDetailId = SI.intInventoryShipmentItemId
-					LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId 
-					LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
-					--LEFT JOIN tblCTContractDetail cd ON cd.intContractHeaderId = SI.intLineNo 
-					--LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
-					WHERE Inv.ysnInTransit = 1  
-						AND Inv.strTransactionType = 'Inventory Shipment'
-						AND C.intCommodityId = @intCommodityId
-						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
-						AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
-					GROUP BY 
-						 Inv.strTransactionId
-						,Inv.intTransactionId
-						,Inv.dtmDate
-						,Inv.intLocationId
-						,Inv.strLocationName
-						,Inv.strUOM
-						,Inv.intEntityId
-						,Inv.strEntity
-						,C.intCommodityId
-						,Inv.intItemId
-						,Inv.strItemNo
-						,Inv.strCategory
-						,Inv.intCategoryId
-						,i.ysnPosted
-						,i.dtmPostDate
-						--,fmnt.strFutureMonth
-						--,cd.dtmEndDate
-						,strOrderNumber
-						,SI.intContractSeq
-						,intOrderId
-						,SI.strSourceNumber
-						,SI.intSourceId
-						,Inv.intTransactionDetailId
-						,SI.strDestinationWeights
-						,SI.intLineNo 
-				) tbl
-				WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
+					 strShipmentNumber = InTran.strTransactionId
+					,intInventoryShipmentId = InTran.intTransactionId
+					,strContractNumber = SI.strOrderNumber + '-' + CONVERT(NVARCHAR, SI.intContractSeq) COLLATE Latin1_General_CI_AS 
+					,intContractHeaderId = SI.intOrderId 
+					,strTicketNumber = SI.strSourceNumber
+					,intTicketId = SI.intSourceId
+					,dtmTicketDateTime = InTran.dtmDate
+					,intCompanyLocationId = InTran.intItemLocationId
+					,strLocationName = SI.strShipFromLocation
+					,strUOM = InTran.strUnitMeasure
+					,Inv.intEntityId
+					,strCustomerReference = SI.strCustomerName
+					,Com.intCommodityId
+					,Itm.intItemId
+					,Itm.strItemNo
+					,strCategory = Cat.strCategoryCode
+					,Cat.intCategoryId
+					,dblBalanceToInvoice = InTran.dblInTransitQty
+					,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), InTran.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
+					,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblCTContractDetail cd INNER JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId =  fmnt.intFutureMonthId WHERE intContractHeaderId = SI.intLineNo)
+					,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
+				FROM dbo.fnICOutstandingInTransitAsOf(@dtmToDate) InTran
+					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+					INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
+					INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
+					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
+					LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
+				WHERE Com.intCommodityId = @intCommodityId
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+					AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+				
 			)t
 		
 			SELECT * INTO #tempCollateral

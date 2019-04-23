@@ -18,49 +18,73 @@ SELECT intPriceFixationTicketId
 ,intConcurrencyId
 FROM 
 (
-	SELECT distinct intPriceFixationTicketId
-	,a.intPriceFixationId
+	SELECT intPriceFixationTicketId
+	,ft.intPriceFixationId
 	,intPricingId
-	,intPricingNumber = c.intNumber
-	,dblCash = c.dblCashPrice
-	,a.intTicketId
-	,strTicketNumber = b.strTicketNumber
-	,a.intInventoryShipmentId
-	,a.intInventoryReceiptId
-	,intInventoryShipmentReceiptId = a.intInventoryShipmentId
-	,strShipmentReceiptNumber = b.strShipmentNumber
-	,a.dblQuantity
-	,dtmDeliveryDate = GETDATE()
-	,strInvoiceVoucher = f.strInvoiceNumber
-	,intDetailId = d.intInvoiceDetailId
-	,a.intConcurrencyId 
-	FROM tblCTPriceFixationTicket a
-	INNER JOIN vyuSCTicketInventoryShipmentView b ON a.intTicketId = b.intTicketId AND a.intInventoryShipmentId = b.intInventoryShipmentId
-	INNER JOIN tblCTPriceFixationDetail c ON a.intPricingId = c.intPriceFixationDetailId
-	LEFT JOIN tblCTPriceFixationDetailAPAR d ON c.intPriceFixationDetailId = d.intPriceFixationDetailId
-	LEFT JOIN tblARInvoiceDetail e ON d.intInvoiceDetailId = e.intInvoiceDetailId and b.intInventoryShipmentItemId = e.intInventoryShipmentItemId
-	LEFT JOIN tblARInvoice f ON e.intInvoiceId = f.intInvoiceId
+	,intPricingNumber = fd.intNumber
+	,dblCash = fd.dblCashPrice
+	,ft.intTicketId
+	,strTicketNumber
+	,ft.intInventoryShipmentId
+	,ft.intInventoryReceiptId
+	,intInventoryShipmentReceiptId = ft.intInventoryShipmentId
+	,strShipmentReceiptNumber
+	,ft.dblQuantity
+	,dtmDeliveryDate
+	,strInvoiceVoucher
+	,intDetailId
+	,ft.intConcurrencyId 
+	FROM tblCTPriceFixationTicket ft
+	INNER JOIN tblCTPriceFixationDetail fd ON ft.intPricingId = fd.intPriceFixationDetailId
+	OUTER APPLY
+	(
+		SELECT a.intInventoryShipmentId
+		,a.strTicketNumber
+		,strShipmentReceiptNumber = a.strShipmentNumber
+		,dtmDeliveryDate = GETDATE()	
+		,strInvoiceVoucher = d.strInvoiceNumber
+		,intDetailId = c.intBillDetailId
+		,c.intPriceFixationDetailId
+		FROM vyuSCTicketInventoryShipmentView a
+		INNER JOIN tblARInvoiceDetail b ON b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
+		INNER JOIN tblCTPriceFixationDetailAPAR c ON c.intInvoiceDetailId = b.intInvoiceDetailId
+		INNER JOIN tblARInvoice d ON d.intInvoiceId = c.intInvoiceId
+		WHERE a.intInventoryShipmentId = ft.intInventoryShipmentId AND c.intPriceFixationDetailId = ft.intPricingId
+	) details1
+	WHERE ft.intInventoryShipmentId IS NOT NULL
 	UNION ALL
 	SELECT intPriceFixationTicketId
-	,a.intPriceFixationId
+	,ft.intPriceFixationId
 	,intPricingId
-	,intPricingNumber = c.intNumber
-	,dblCash = c.dblCashPrice
-	,a.intTicketId
-	,strTicketNumber = b.strTicketNumber
-	,a.intInventoryShipmentId
-	,a.intInventoryReceiptId
-	,intInventoryShipmentReceiptId = a.intInventoryReceiptId
-	,strShipmentReceiptNumber = b.strReceiptNumber
-	,a.dblQuantity
-	,dtmDeliveryDate = GETDATE()
-	,strInvoiceVoucher = f.strBillId
-	,intDetailId = d.intBillDetailId
-	,a.intConcurrencyId 
-	FROM tblCTPriceFixationTicket a
-	INNER JOIN vyuSCTicketInventoryReceiptView b ON a.intTicketId = b.intTicketId AND a.intInventoryReceiptId = b.intInventoryReceiptId
-	INNER JOIN tblCTPriceFixationDetail c ON a.intPricingId = c.intPriceFixationDetailId
-	LEFT JOIN tblCTPriceFixationDetailAPAR d ON c.intPriceFixationDetailId = d.intPriceFixationDetailId
-	LEFT JOIN tblAPBillDetail e ON  d.intBillDetailId = e.intBillDetailId and b.intInventoryReceiptItemId = e.intInventoryReceiptItemId
-	LEFT JOIN tblAPBill f ON e.intBillId = f.intBillId
+	,intPricingNumber = fd.intNumber
+	,dblCash = fd.dblCashPrice
+	,ft.intTicketId
+	,strTicketNumber
+	,ft.intInventoryShipmentId
+	,ft.intInventoryReceiptId
+	,intInventoryShipmentReceiptId = ft.intInventoryReceiptId
+	,strShipmentReceiptNumber
+	,ft.dblQuantity
+	,dtmDeliveryDate
+	,strInvoiceVoucher
+	,intDetailId
+	,ft.intConcurrencyId 
+	FROM tblCTPriceFixationTicket ft
+	INNER JOIN tblCTPriceFixationDetail fd ON ft.intPricingId = fd.intPriceFixationDetailId
+	OUTER APPLY
+	(
+		SELECT a.intInventoryReceiptId
+		,a.strTicketNumber
+		,strShipmentReceiptNumber = a.strReceiptNumber
+		,dtmDeliveryDate = GETDATE()	
+		,strInvoiceVoucher = d.strBillId
+		,intDetailId = c.intBillDetailId
+		,c.intPriceFixationDetailId
+		FROM vyuSCTicketInventoryReceiptView a
+		INNER JOIN tblAPBillDetail b ON b.intInventoryReceiptItemId = a.intInventoryReceiptItemId
+		INNER JOIN tblCTPriceFixationDetailAPAR c ON c.intBillDetailId = b.intBillDetailId
+		INNER JOIN tblAPBill d ON d.intBillId = c.intBillId	
+		WHERE a.intInventoryReceiptId = ft.intInventoryReceiptId AND c.intPriceFixationDetailId = ft.intPricingId
+	) details2
+	WHERE ft.intInventoryReceiptId IS NOT NULL
 )tbl

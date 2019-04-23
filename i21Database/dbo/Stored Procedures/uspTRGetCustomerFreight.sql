@@ -199,11 +199,11 @@ set @dblInvoiceSurchargeRate =0;
 	 END
      
 _Exit:	   
-if @ysnFreightOnly = 1
-BEGIN
-    set @dblReceiptFreightRate = 0;
-	set @dblReceiptSurchargeRate = 0;
-END
+--if @ysnFreightOnly = 1
+--BEGIN
+--    set @dblReceiptFreightRate = 0;
+--	set @dblReceiptSurchargeRate = 0;
+--END
 
 if (@dblInvoiceFreightRate is null or @dblInvoiceFreightRate = 0)
 BEGIN

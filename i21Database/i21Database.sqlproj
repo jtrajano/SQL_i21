@@ -7547,6 +7547,7 @@
     <Build Include="dbo\Views\vyuSTCurrentUserRole.sql" />
     <Build Include="dbo\Views\vyuRKBrokerList.sql" />
     <Build Include="dbo\Views\vyuRKBrokerAccountList.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTRefreshContractBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
