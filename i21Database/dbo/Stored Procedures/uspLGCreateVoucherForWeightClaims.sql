@@ -150,7 +150,7 @@ BEGIN TRY
 		,dblCostUnitQty = ISNULL(IU.dblUnitQty,1)
 		,dblWeightUnitQty = ISNULL(WeightItemUOM.dblUnitQty,1)
 		,dblClaimAmount
-		,dblUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
+		,dblUnitQty = ISNULL(WeightItemUOM.dblUnitQty,1)
 		,intWeightUOMId = (
 			SELECT TOP (1) IU.intItemUOMId
 			FROM tblICItemUOM IU
