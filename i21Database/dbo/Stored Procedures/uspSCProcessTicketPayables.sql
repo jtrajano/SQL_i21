@@ -169,6 +169,7 @@ BEGIN
 			[intShipToId],
 			[intInventoryReceiptChargeId],
 			[intPurchaseDetailId],
+			[intPurchaseTaxGroupId],
 			[dblTax],
 			[intEntityVendorId],
 			[strVendorOrderNumber],
