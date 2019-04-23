@@ -157,6 +157,18 @@ BEGIN TRY
 	JOIN	tblSMCurrency		CY	ON CY.intCurrencyID = CD.intCurrencyId
 	WHERE	CD.intPricingTypeId	IN (1,6)
 	AND		intContractHeaderId =	@intContractHeaderId
+
+	SELECT	@ErrMsg = COALESCE(@ErrMsg,'') + '#'+ LTRIM(CC.strItemNo)  + '@' + LTRIM(CD.intContractSeq) +'^'+ CD.strItemUOM + '.' +CHAR(13) + CHAR(10) 
+	FROM	vyuCTContractCostView	CC
+	JOIN	vyuCTContractSequence	CD	ON CD.intContractDetailId	=	CC.intContractDetailId
+	WHERE	NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = CC.intItemId AND intUnitMeasureId = CD.intUnitMeasureId)
+	AND		CD.intContractHeaderId	=	@intContractHeaderId
+
+	SELECT @ErrMsg = REPLACE(REPLACE(REPLACE(REPLACE(@ErrMsg,'#','Cost item '),'@',' of sequence '),'^',' don''t have '),'.',' UOM configured for it. Configure the UOM to the cost item to proceed with save.')
+
+	IF	@ErrMsg IS NOT NULL
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
+
 	------------------------
 
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
