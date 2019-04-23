@@ -432,7 +432,8 @@ SELECT
 												THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1
 											ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END
 										 ) < 0
-										THEN -(ABS(ISNULL(NULLIF(C.aphgl_gl_un,0),1))) --when line total is negative, get the cost by dividing to negative as well
+										THEN CASE WHEN C2.apivc_trans_type IN ('I') THEN (ABS(ISNULL(NULLIF(C.aphgl_gl_un,0),1))) --reverse the cost to possitive since we do not allow negative cost
+											 ELSE -(ABS(ISNULL(NULLIF(C.aphgl_gl_un,0),1))) END --when line total is negative, get the cost by dividing to negative as well
 										ELSE ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									END),
 	[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
