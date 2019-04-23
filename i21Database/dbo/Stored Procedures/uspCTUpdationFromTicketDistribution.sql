@@ -46,7 +46,8 @@ BEGIN TRY
 			@dblBalanceLoad			NUMERIC(18,6),
 			@ysnAutoIncreaseQty		BIT = 0,
 			@ysnAutoIncreaseSchQty	BIT = 0,
-			@intTicketContractDetailId INT
+			@intTicketContractDetailId INT,
+			@dblNetUnitsToCompare	NUMERIC(18,6)	
 	
 	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
 					LTRIM(@intTicketId) +',' + 
@@ -251,6 +252,8 @@ BEGIN TRY
  CROSS  APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
+		SELECT @dblNetUnitsToCompare = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)
+
 		IF @ysnDP = 1
 		BEGIN
 
@@ -292,10 +295,18 @@ BEGIN TRY
 
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 		BEGIN
+			--SET @ErrMsg = '@ysnAutoIncreaseQty = '+LTRIM(@ysnAutoIncreaseQty) + 
+			--',@ysnAutoIncreaseSchQty = '+LTRIM(@ysnAutoIncreaseSchQty) +
+			--',@dblScheduleQty = '+LTRIM(@dblScheduleQty) +
+			--',@dblNetUnits = '+LTRIM(@dblNetUnits) +
+			--',@dblNetUnitsToCompare = '+LTRIM(@dblNetUnitsToCompare) +
+			--',@intTicketContractDetailId = '+LTRIM(@intTicketContractDetailId) +
+			--',@intContractDetailId = '+LTRIM(@intContractDetailId) 
+			--RAISERROR(@ErrMsg,16,1)
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0
-			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnits AND @intTicketContractDetailId = @intContractDetailId
+			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnitsToCompare AND @intTicketContractDetailId = @intContractDetailId
 			BEGIN
-				SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+				SET @dblInreaseSchBy  = @dblNetUnitsToCompare - @dblScheduleQty
 				EXEC	uspCTUpdateScheduleQuantity 
 						@intContractDetailId	=	@intContractDetailId,
 						@dblQuantityToUpdate	=	@dblInreaseSchBy,
@@ -312,7 +323,7 @@ BEGIN TRY
 		BEGIN
 			IF @ysnAutoIncreaseQty = 1
 			BEGIN
-				SET		@dblInreaseSchBy  = @dblNetUnits - @dblAvailable
+				SET		@dblInreaseSchBy  = @dblNetUnitsToCompare - @dblAvailable
 
 				EXEC	uspCTUpdateSequenceQuantity 
 						@intContractDetailId	=	@intContractDetailId,
