@@ -450,7 +450,24 @@ INSERTDATE:
 					,strStorageLocation
 					,strRowState
 					,dtmFeedCreated)
-			SELECT *
+			SELECT intLoadStdId
+				,intLoadId
+				,intLoadContainerId
+				,strContainerNumber
+				,strContainerSizeCode
+				,strPackagingMaterialType
+				,strExternalShipmentNumber
+				,Seq
+				,dblQuantity
+				,strItemUOM
+				,dblNetWt
+				,dblGrossWt
+				,strWeightUnitMeasure
+				,strExternalContainerId
+				,strSubLocationName
+				,strStorageLocationName
+				,strRowState
+				,dtmFeedCreated
 			FROM (
 				SELECT @intLoadStdId intLoadStdId
 					,@intLoadId intLoadId
@@ -491,6 +508,7 @@ INSERTDATE:
 						END strStorageLocationName		
 					,'Modified' strRowState
 					,GETDATE() dtmFeedCreated
+					,LC.intSort
 				FROM tblLGLoadContainer LC
 				JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LC.intUnitMeasureId
@@ -510,25 +528,27 @@ INSERTDATE:
 	
 				SELECT @intLoadStdId
 					,@intLoadId
-					,intLoadContainerId
-					,strContainerNo COLLATE Latin1_General_CI_AS
-					,strContainerSizeCode COLLATE Latin1_General_CI_AS
+					,LCL.intLoadContainerId
+					,LCL.strContainerNo COLLATE Latin1_General_CI_AS
+					,LCL.strContainerSizeCode COLLATE Latin1_General_CI_AS
 					,'0002' COLLATE Latin1_General_CI_AS
-					,strExternalPONumber COLLATE Latin1_General_CI_AS
-					,strSeq COLLATE Latin1_General_CI_AS
-					,dblContainerQty
-					,strContainerUOM COLLATE Latin1_General_CI_AS
-					,dblNetWt
-					,dblGrossWt
-					,strWeightUOM
-					,strExternalContainerId
-					,strSubLocation
-					,strStorageLocation
+					,LCL.strExternalPONumber COLLATE Latin1_General_CI_AS
+					,LCL.strSeq COLLATE Latin1_General_CI_AS
+					,LCL.dblContainerQty
+					,LCL.strContainerUOM COLLATE Latin1_General_CI_AS
+					,LCL.dblNetWt
+					,LCL.dblGrossWt
+					,LCL.strWeightUOM
+					,LCL.strExternalContainerId
+					,LCL.strSubLocation
+					,LCL.strStorageLocation
 					,'Delete' Collate Latin1_General_CI_AS
 					,GETDATE()
-				FROM tblLGLoadContainerLog
-				WHERE intLoadId = @intLoadId
-					AND intLoadContainerId NOT IN (
+					,LC.intSort
+				FROM tblLGLoadContainerLog LCL
+				JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LCL.intLoadContainerId
+				WHERE LCL.intLoadId = @intLoadId
+					AND LCL.intLoadContainerId NOT IN (
 						SELECT LC.intLoadContainerId
 						FROM tblLGLoadContainer LC
 						JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
@@ -539,7 +559,7 @@ INSERTDATE:
 						WHERE LC.intLoadId = @intLoadId
 						)
 				) tbl
-			ORDER BY intLoadContainerId
+			ORDER BY intSort
 		END
 	END
 		
