@@ -46,6 +46,23 @@ DELETE FROM tblRKFutOptTransactionImport_ErrLog
 GOTO EXIT_ROUTINE
 END
 
+IF (SELECT COUNT(ysnOTCOthers) FROM(
+	SELECT DISTINCT (isnull(ysnOTCOthers,0)) ysnOTCOthers from tblRKFutOptTransactionImport i
+	join tblRKBrokerageAccount b on b.strAccountNumber=i.strAccountNumber
+	join tblEMEntity e on i.strName=e.strName)t) > 1
+BEGIN
+INSERT INTO tblRKFutOptTransactionImport_ErrLog(intFutOptTransactionId,strErrorMsg,intConcurrencyId)
+VALUES (1,'File contains mixed instruments.',1)
+
+SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
+		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,dblNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
+		'' dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg, '' dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog
+
+DELETE FROM tblRKFutOptTransactionImport_ErrLog
+GOTO EXIT_ROUTINE
+END
+
+
 IF (@strDateTimeFormat = 'MM DD YYYY HH:MI' OR @strDateTimeFormat ='YYYY MM DD HH:MI')
 SELECT @ConvertYear=101
 ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD MM HH:MI')

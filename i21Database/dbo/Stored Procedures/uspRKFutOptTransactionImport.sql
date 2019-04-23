@@ -24,8 +24,18 @@ BEGIN TRY
 	
 	IF NOT EXISTS(SELECT intFutOptTransactionId FROM tblRKFutOptTransactionImport_ErrLog)
 	BEGIN
+		declare @intInstrument int
+		declare @strInstrument nvarchar(30)
+		SELECT top 1 @strInstrument=case when isnull(ysnOTCOthers,1)=0 then 'Exchange Traded' else 'OTC - Others' end,
+					 @intInstrument=case when isnull(ysnOTCOthers,1)=0 then 1 else 3 end	
+		 FROM(
+		SELECT DISTINCT (isnull(ysnOTCOthers,0)) ysnOTCOthers from tblRKFutOptTransactionImport i
+		join tblRKBrokerageAccount b on b.strAccountNumber=i.strAccountNumber
+		join tblEMEntity e on i.strName=e.strName)t
+
+
 		INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId, dtmTransactionDate, intSelectedInstrumentTypeId, strSelectedInstrumentType)
-		VALUES (1, GETDATE(), 1, 'Exchange Traded')
+		VALUES (1, GETDATE(), @intInstrument, @strInstrument)
 		
 		SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY()
 		
@@ -108,7 +118,7 @@ BEGIN TRY
 				, intBookId
 				, intSubBookId
 				, dtmCreateDateTime)
-			SELECT 1
+			SELECT @intInstrument
 				, intFutOptTransactionHeaderId
 				, intConcurrencyId
 				, dtmTransactionDate
@@ -134,7 +144,7 @@ BEGIN TRY
 				, dtmFilledDate
 				, intBookId
 				, intSubBookId
-				, dtmCreateDateTime 
+				, dtmCreateDateTime				
 			FROM #temp 
 			WHERE strInternalTradeNo = @id
 
