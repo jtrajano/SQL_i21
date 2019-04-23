@@ -1,5 +1,6 @@
 ﻿CREATE FUNCTION [dbo].[fnICOutstandingInTransitAsOf](
-	@intItemId INT
+	@intItemId INT 
+	,@intCommodityId INT 
 	,@dtmDate DATETIME 
 )
 RETURNS TABLE 
@@ -70,7 +71,8 @@ FROM
 			AND (cb.dblStockIn - isnull(t.totalOut, 0)) > 0			
 	) tblInTransit	
 WHERE
-	i.intItemId = @intItemId
+	(i.intItemId = @intItemId OR @intItemId IS NULL)
+	AND (i.intCommodityId = @intCommodityId OR @intCommodityId IS NULL) 
 	AND i.strLotTracking NOT LIKE 'Yes%'		
 
 UNION ALL 
@@ -139,6 +141,7 @@ FROM
 			AND (cb.dblStockIn - isnull(t.totalOut, 0)) > 0				
 	) tblInTransit	
 WHERE
-	i.intItemId = @intItemId
+	(i.intItemId = @intItemId OR @intItemId IS NULL)
+	AND (i.intCommodityId = @intCommodityId OR @intCommodityId IS NULL) 
 	AND i.strLotTracking LIKE 'Yes%'		
 
