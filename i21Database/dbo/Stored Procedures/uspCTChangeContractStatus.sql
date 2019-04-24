@@ -6,6 +6,7 @@
 AS
 
 BEGIN TRY
+	SET ANSI_WARNINGS OFF
 
 	DECLARE @ErrMsg					NVARCHAR(MAX),
 			@intId					INT,

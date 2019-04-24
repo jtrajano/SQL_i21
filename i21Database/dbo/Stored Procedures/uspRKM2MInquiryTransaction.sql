@@ -903,49 +903,17 @@ FROM (
 SELECT *
 INTO #tempIntransit
 FROM (
-	SELECT intLineNo = (SELECT TOP 1 intLineNo FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)
-		, dblBalanceToInvoice = SUM(Inv.dblQuantity)
-			+ ISNULL((SELECT SUM(iv.dblQty) FROM tblARInvoiceDetail id
-					JOIN tblARInvoice i on id.intInvoiceId = i.intInvoiceId
-					JOIN tblICInventoryTransaction iv ON id.intInvoiceDetailId = iv.intTransactionDetailId
-					WHERE iv.intInTransitSourceLocationId IS NOT NULL
-						AND intTransactionTypeId = 33 --'Invoice'
-						and iv.intItemId = Inv.intItemId
-						and id.strDocumentNumber = Inv.strTransactionId
-						and CONVERT(DATETIME,@dtmTransactionDateUpTo) = CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110)), 0)
-		, ysnInvoicePosted = (CASE WHEN CONVERT(DATETIME,@dtmTransactionDateUpTo) = CONVERT(DATETIME, CONVERT(VARCHAR(10), i.dtmPostDate, 110), 110) AND i.ysnPosted = 1 THEN 1 ELSE 0 END)
+	SELECT intLineNo = (SELECT TOP 1 intLineNo FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentItemId = InTran.intTransactionDetailId AND intOrderId IS NOT NULL)
+		, dblBalanceToInvoice = dblInTransitQty
 		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
-	FROM vyuRKGetInventoryValuation Inv
-	INNER JOIN tblICItem I ON Inv.intItemId = I.intItemId
-	INNER JOIN tblICCommodity C ON I.intCommodityId = C.intCommodityId
-	LEFT JOIN tblARInvoiceDetail invD ON  Inv.intTransactionDetailId = invD.intInventoryShipmentItemId AND invD.strDocumentNumber = Inv.strTransactionId
-	LEFT JOIN tblARInvoice i ON invD.intInvoiceId = i.intInvoiceId
-	OUTER APPLY (SELECT ch.intContractHeaderId, strFutureMonth, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
-				FROM @GetContractDetailView ch
-				WHERE ch.intContractHeaderId = (SELECT TOP 1  intOrderId FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)
-					AND intContractSeq = (SELECT TOP 1  intContractSeq FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentId = Inv.intTransactionId AND intOrderId IS NOT NULL)) CT
-	WHERE Inv.ysnInTransit = 1
-		AND Inv.strTransactionType = 'Inventory Shipment'
-		AND C.intCommodityId = @intCommodityId
-		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmTransactionDateUpTo)
-	GROUP BY Inv.strTransactionId
-		, Inv.intTransactionId
-		, Inv.dtmDate
-		, Inv.strLocationName
-		, Inv.strUOM
-		, Inv.intEntityId
-		, Inv.strEntity
-		, C.intCommodityId
-		, Inv.intItemId
-		, Inv.strItemNo
-		, Inv.strCategory
-		, Inv.intCategoryId
-		, i.ysnPosted
-		, i.dtmPostDate
-		, CT.strFutureMonth
-		, CT.strDeliveryDate
+	FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmTransactionDateUpTo) InTran
+				INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+				INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
+				INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
+				INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
+				LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
+	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmTransactionDateUpTo)
 ) tbl
-WHERE dblBalanceToInvoice <> 0 AND ISNULL(ysnInvoicePosted,0) <> 1
 
 -- intransit
 INSERT INTO @tblFinalDetail (intContractHeaderId
