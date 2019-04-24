@@ -18,8 +18,9 @@ WHERE intTransactionType = 1
  )
  AND A.ysnRecurring = 0
 UNION ALL
-SELECT 'Payable' AS strTransactionType,
-       intPaymentId,
+SELECT DISTINCT
+	   'Payable' AS strTransactionType,
+       A.intPaymentId,
        strPaymentRecordNum,
        dblAmountPaid,
        '' AS strVendorInvoiceNumber,
@@ -28,9 +29,11 @@ SELECT 'Payable' AS strTransactionType,
        dtmDatePaid,
        strNotes AS strReference,
        NULL AS intCompanyLocationId
-FROM tblAPPayment
+FROM tblAPPayment A
+INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 WHERE (ysnPosted = 0 AND ISNULL(strPaymentInfo, '') NOT LIKE 'Voided%')
 and dblAmountPaid != 0
+AND NOT EXISTS  ( SELECT intBillId FROM vyuAPBillPayment C WHERE C.ysnPaid = 1 AND C.ysnVoid = 0 AND B.intBillId = C.intBillId )
 UNION ALL
 SELECT 'Debit Memo' AS strTransactionType,
        intBillId,
