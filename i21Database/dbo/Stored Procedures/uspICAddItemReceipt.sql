@@ -912,7 +912,7 @@ BEGIN
 										CASE	
 											WHEN RawData.intGrossNetUOMId < 1 OR RawData.intGrossNetUOMId IS NULL THEN NULL 
 											ELSE dbo.fnGetMatchingItemUOMIdByTypes(RawData.intItemId, 
-												COALESCE(defaultGrossNetUOM.intItemUOMId, RawData.intGrossNetUOMId, defaultGrossNetUOM.intItemUOMId)
+												COALESCE(GrossNetUOM.intItemUOMId, RawData.intGrossNetUOMId, defaultGrossNetUOM.intItemUOMId)
 												, 'Weight,Volume')
 										END 
 										
