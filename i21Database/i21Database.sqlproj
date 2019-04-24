@@ -7533,6 +7533,7 @@
     <Build Include="dbo\Views\vyuRKBrokerAccountList.sql" />
     <Build Include="dbo\Stored Procedures\uspCTRefreshContractBalance.sql" />
     <Build Include="dbo\Views\vyuRKBrokerageAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetBundleComponents2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
