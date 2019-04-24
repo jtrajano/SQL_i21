@@ -38,7 +38,8 @@ BEGIN TRY
 		, ysnDiversion
 		, strDiversionNumber
 		, intStateId
-		, intConcurrencyId)
+		, intConcurrencyId
+		, intFreightItemId)
 	SELECT @TransactionNumber 
 		, dtmLoadDateTime
 		, intShipViaId
@@ -50,6 +51,7 @@ BEGIN TRY
 		, strDiversionNumber
 		, intStateId
 		, 1
+		, intFreightItemId
 	FROM tblTRLoadHeader
 	WHERE intLoadHeaderId = @TransportLoadId
 

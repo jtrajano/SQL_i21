@@ -204,19 +204,19 @@ LEFT OUTER JOIN dbo.tblCTContractHeader AS ctContracts
 LEFT OUTER JOIN (SELECT intTransactionId, 
 					ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount 
 				FROM   dbo.vyuCFTransactionTax AS FETTaxes 
-				WHERE  ( strTaxClass LIKE '%(FET)%' ) 
+				WHERE  ( strTaxClass LIKE '%FET%' ) 
 				GROUP  BY intTransactionId) AS FETTaxes_1 
 	ON cfTransaction.intTransactionId = FETTaxes_1.intTransactionId 
 LEFT OUTER JOIN (SELECT intTransactionId, 
 					ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount
                 FROM   dbo.vyuCFTransactionTax AS SETTaxes 
-                WHERE  ( strTaxClass LIKE '%(SET)%' ) 
+                WHERE  ( strTaxClass LIKE '%SET%' ) 
                 GROUP  BY intTransactionId) AS SETTaxes_1 
     ON cfTransaction.intTransactionId = SETTaxes_1.intTransactionId 
 LEFT OUTER JOIN (SELECT intTransactionId, 
                         ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount
                 FROM   dbo.vyuCFTransactionTax AS SSTTaxes 
-                WHERE  ( strTaxClass LIKE '%(SST)%' ) 
+                WHERE  ( strTaxClass LIKE '%SST%' ) 
                 GROUP  BY intTransactionId) AS SSTTaxes_1 
 	ON cfTransaction.intTransactionId = SSTTaxes_1.intTransactionId 
 LEFT JOIN tblEMEntity exportuser
@@ -224,11 +224,11 @@ LEFT JOIN tblEMEntity exportuser
 LEFT OUTER JOIN (SELECT intTransactionId, 
                         ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount 
                 FROM   dbo.vyuCFTransactionTax AS LCTaxes 
-                WHERE  ( strTaxClass NOT LIKE '%(SET)%' ) 
+                WHERE  ( strTaxClass NOT LIKE '%SET%' ) 
                         AND ( strTaxClass <> 'SET' ) 
-                        AND ( strTaxClass NOT LIKE '%(FET)%' ) 
+                        AND ( strTaxClass NOT LIKE '%FET%' ) 
                         AND ( strTaxClass <> 'FET' ) 
-                        AND ( strTaxClass NOT LIKE '%(SST)%' ) 
+                        AND ( strTaxClass NOT LIKE '%SST%' ) 
                         AND ( strTaxClass <> 'SST' ) 
                 GROUP  BY intTransactionId) AS LCTaxes_1 
     ON cfTransaction.intTransactionId = LCTaxes_1.intTransactionId 

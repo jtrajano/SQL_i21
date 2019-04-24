@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -136,6 +135,7 @@ BEGIN
 	
 	DECLARE @dblGrossTransferCost			NUMERIC(18,6)
 	DECLARE @dblNetTransferCost				NUMERIC(18,6)
+	DECLARE @dblNetTransferCostZeroQuantity	NUMERIC(18,6)
 	DECLARE @dblAdjustments					NUMERIC(18,6)
 	DECLARE @dblAdjustmentWithIndex			NUMERIC(18,6)
 
@@ -5821,12 +5821,6 @@ BEGIN
 	DECLARE @totalCalculatedTaxExemptZeroQuantity			NUMERIC(18,6) = 0
 
 	SELECT 
-	 @totalCalculatedTaxZeroQuantity = ISNULL(SUM(dblCalculatedTax),0)
-	FROM
-	@tblCFTransactionTaxZeroQuantity
-	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
-
-	SELECT 
 	 @totalCalculatedTaxExemptZeroQuantity = ISNULL(SUM(cftx.dblTax),0)
 	FROM
 	@tblCFTransactionTaxZeroQuantity as cft
@@ -5835,6 +5829,24 @@ BEGIN
 	AND cft.intTaxCodeId = cftx.intTaxCodeId
 	WHERE cft.ysnTaxExempt = 1 AND 
 	(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
+
+
+	SELECT 
+	 @totalCalculatedTaxZeroQuantity = ISNULL(SUM(dblCalculatedTax),0)
+	FROM
+	@tblCFTransactionTaxZeroQuantity
+	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+
+
+	DECLARE @totalOriginalTaxZeroQuantity					NUMERIC(18,6) = 0
+
+	SELECT 
+	 @totalOriginalTaxZeroQuantity = ISNULL(SUM(dblOriginalTax),0)
+	FROM
+	@tblCFTransactionTaxZeroQuantity
+	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+
+
 	-------------------ZERO QTY TAX CALC------------------------
 	
 
@@ -5842,6 +5854,8 @@ BEGIN
 	SET @dblNetTransferCost = ISNULL(@dblGrossTransferCost,0) - (ISNULL(@totalOriginalTax,0) / ISNULL(@dblQuantity,0))
 	SET @dblAdjustments = ISNULL(@dblPriceProfileRate,0)+ ISNULL(@dblAdjustmentRate	,0)
 	SET @dblAdjustmentWithIndex = ISNULL(@dblPriceProfileRate,0) + ISNULL(@dblPriceIndexRate,0)	+ ISNULL(@dblAdjustmentRate	,0)
+	
+	SET @dblNetTransferCostZeroQuantity = ISNULL(@dblGrossTransferCost,0) - (ISNULL(@totalOriginalTaxZeroQuantity,0) / ISNULL(@dblZeroQuantity,0))
 	
 
 	--select * from @tblCFTransactionTax
@@ -6052,7 +6066,7 @@ BEGIN
 
 			IF(@ysnTransferCostTaxRecalc = 1)
 			BEGIN
-				SET @dblPrice = ISNULL(@dblNetTransferCost,0) + ISNULL(@dblAdjustments,0)
+				SET @dblPrice = ISNULL(@dblNetTransferCostZeroQuantity,0) + ISNULL(@dblAdjustments,0)
 				------CLEAN TAX TABLE--------
 				DELETE FROM @tblCFOriginalTax				
 				DELETE FROM @tblCFCalculatedTax				
@@ -6071,37 +6085,24 @@ BEGIN
 				GOTO TAXCOMPUTATION
 			END
 
-
-
-			
-			DECLARE @dblTransferCostGrossPriceNew NUMERIC(18,6)
-			SET @dblTransferCostGrossPriceNew = ROUND(@dblPrice + ROUND((@totalCalculatedTax / @dblQuantity),6), 6)
-
-
-			
-
-			DECLARE @dblTransferCostGrossPrice NUMERIC(18,6)
-			SET @dblTransferCostGrossPrice = ROUND(ISNULL(@dblGrossTransferCost,0) + ISNULL(@dblAdjustments,0) - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) , 6)
-
 			DECLARE @dblTransferCostGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblTransferCostGrossPriceZeroQty = ROUND(ISNULL(@dblGrossTransferCost,0) + ISNULL(@dblAdjustments,0)  - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) , 6)
-
+			SET @dblTransferCostGrossPriceZeroQty = ROUND(ISNULL(@dblPrice,0) + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6), 6)
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
-				SELECT @dblTransferCostGrossPrice = dbo.fnCFForceRounding(@dblTransferCostGrossPrice)
 				SELECT @dblTransferCostGrossPriceZeroQty = dbo.fnCFForceRounding(@dblTransferCostGrossPriceZeroQty)
 			END
 
-			SET @dblCalculatedGrossPrice	 =	   @dblTransferCostGrossPriceNew
+
+			SET @dblCalculatedGrossPrice	 =	   @dblTransferCostGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 =	   @dblGrossTransferCost
-			SET @dblCalculatedNetPrice		 =	   @dblPrice
+			SET @dblCalculatedNetPrice		 =	   ROUND(((Round((@dblTransferCostGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 			SET @dblOriginalNetPrice		 =	   @dblNetTransferCost
-			SET @dblCalculatedTotalPrice	 =	   ROUND((@dblTransferCostGrossPriceNew * @dblQuantity),2)
+			SET @dblCalculatedTotalPrice	 =	   ROUND((@dblTransferCostGrossPriceZeroQty * @dblQuantity),2)
 			SET @dblOriginalTotalPrice		 =	   ROUND(@dblGrossTransferCost * @dblQuantity,2)
 
 			SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
-			SET @dblQuoteNetPrice			 =   @dblOriginalNetPrice
+			SET @dblQuoteNetPrice			 =   @dblCalculatedNetPrice
 
 		END
 	END

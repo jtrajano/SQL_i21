@@ -115,7 +115,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,@strPhone AS strCompanyPhone
 	,@strCity + ', ' + @strState + ', ' + @strZip + ', ' AS strCityStateZip
 	--,@strCity + ', '+ CONVERT(NVARCHAR,GETDATE(),106) AS strCityAndDate
-	,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
+	,@strCity + ', '+ DATENAME(dd,WC.dtmTransDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,WC.dtmTransDate),3)),LEFT(DATENAME(MONTH,WC.dtmTransDate),3)) + ' ' + DATENAME(yyyy,WC.dtmTransDate) AS strCityAndDate
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
@@ -176,6 +176,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,IRI.dblNet AS dblReceivedNet
 	,(ISNULL(IRI.dblGross,0) - ISNULL(IRI.dblNet,0)) AS dblReceivedTare
 	,WC.dtmActualWeighingDate
+	,VEN.strTaxNumber
 	,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
 	,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth	
 FROM tblLGWeightClaim WC
@@ -206,6 +207,7 @@ LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ISNULL(LD.intVendor
 LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+LEFT JOIN tblAPVendor VEN ON VEN.intEntityId = E.intEntityId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItemUOM PUM ON PUM.intItemUOMId = WCD.intPriceItemUOMId
@@ -241,12 +243,14 @@ WHERE WC.intWeightClaimId = @intWeightClaimId
 GROUP BY WC.intWeightClaimId
 	,WC.intLoadId
 	,WC.strReferenceNumber
+	,WC.dtmTransDate
 	,L.intLoadId
 	,CH.strContractNumber
 	,CH.strCustomerContract
 	,L.strLoadNumber
 	,E.intEntityId
 	,E.strName
+	,VEN.strTaxNumber
 	,EL.strAddress
 	,EL.strZipCode
 	,EL.strCity
