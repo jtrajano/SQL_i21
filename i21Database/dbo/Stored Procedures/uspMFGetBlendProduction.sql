@@ -96,13 +96,15 @@ SELECT w.intWorkOrderId
 	,@intShiftId AS intShiftId
 	,@strShiftName AS strShiftName
 	,w.intManufacturingProcessId
-	,strLotAlias
-	,strVesselNo
-	,dblActualQuantity
-	,dblNoOfUnits
-	,intNoOfUnitsItemUOMId
-	,dtmPlannedDate
+	,w.strLotAlias
+	,w.strVesselNo
+	,w.dblActualQuantity
+	,w.dblNoOfUnits
+	,w.intNoOfUnitsItemUOMId
+	,w.dtmPlannedDate
 	,w.intTransactionFrom
+	,um1.intUnitMeasureId AS intNoOfUnitsUnitMeasureId
+	,um1.strUnitMeasure AS strNoOfUnitsUnitMeasure
 FROM tblMFWorkOrder w
 JOIN tblICItem i ON w.intItemId = i.intItemId
 JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -112,6 +114,8 @@ JOIN tblMFWorkOrderStatus ws ON w.intStatusId = ws.intStatusId
 LEFT JOIN tblSMUserSecurity us ON w.intCreatedUserId = us.[intEntityId]
 LEFT JOIN tblICStorageLocation sl ON w.intStorageLocationId = sl.intStorageLocationId
 LEFT JOIN tblMFPickList pl ON w.intPickListId = pl.intPickListId
+LEFT JOIN tblICItemUOM iu1 ON w.intNoOfUnitsItemUOMId = iu1.intItemUOMId
+LEFT JOIN tblICUnitMeasure um1 ON iu1.intUnitMeasureId = um1.intUnitMeasureId
 WHERE w.intWorkOrderId = @intWorkOrderId
 	AND w.intStatusId IN (
 		9
