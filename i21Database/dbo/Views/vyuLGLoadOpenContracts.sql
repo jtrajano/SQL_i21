@@ -67,6 +67,7 @@ SELECT CD.intContractDetailId
 	,DestCity.strCity AS strDestinationCity
 	,CD.strPackingDescription
 	,CD.intShippingLineId AS intShippingLineEntityId
+	,ShipLine.strName AS strShippingLine
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
 	,Cont.strContainerType
@@ -132,6 +133,7 @@ LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = WIU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblEMEntity ShipLine ON ShipLine.intEntityId = CD.intShippingLineId
 LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
@@ -244,6 +246,7 @@ SELECT CD.intContractDetailId
 	,DestCity.strCity AS strDestinationCity
 	,CD.strPackingDescription
 	,CD.intShippingLineId AS intShippingLineEntityId
+	,ShipLine.strName AS strShippingLine
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
 	,Cont.strContainerType
@@ -309,6 +312,7 @@ LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = WIU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblEMEntity ShipLine ON ShipLine.intEntityId = CD.intShippingLineId
 LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
@@ -393,6 +397,7 @@ GROUP BY CD.intContractDetailId
 	,DestPort.strCity
 	,CD.strPackingDescription
 	,CD.intShippingLineId
+	,ShipLine.strName
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
 	,Cont.strContainerType

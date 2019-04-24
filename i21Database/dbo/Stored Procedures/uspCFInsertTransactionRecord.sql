@@ -229,30 +229,8 @@ BEGIN
 		BEGIN
 			SET @intSalesPersonId = NULL
 		END
-	IF(@intSiteId = 0)
-		BEGIN
-			SELECT TOP 1 @intSiteId = intSiteId 
-						,@intCustomerLocationId = intARLocationId
-						,@intTaxMasterId = intTaxGroupId
-						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
-						,@strSiteType = strSiteType
-						FROM tblCFSite
-						WHERE strSiteNumber = @strSiteId
 
-			IF (@intSiteId = 0)
-			BEGIN 
-				SET @intSiteId = NULL
-			END
-		END
-		ELSE
-		BEGIN
-			SELECT TOP 1 @intCustomerLocationId = intARLocationId
-						,@intTaxMasterId = intTaxGroupId
-						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
-						,@strSiteType = strSiteType
-						FROM tblCFSite
-						WHERE intSiteId = @intSiteId
-		END
+	
 
 	IF(@intNetworkId = 0)
 		BEGIN
@@ -277,6 +255,40 @@ BEGIN
 			,@intNetworkLocation	= intLocationId
 			FROM tblCFNetwork
 			WHERE intNetworkId = @intNetworkId
+		END
+
+	IF(@intSiteId = 0)
+		BEGIN
+			SELECT TOP 1 @intSiteId = intSiteId 
+						,@intCustomerLocationId = intARLocationId
+						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
+						,@strSiteType = strSiteType
+						FROM tblCFSite
+						WHERE strSiteNumber = @strSiteId
+						AND intNetworkId = @intNetworkId
+
+			IF (@intSiteId = 0)
+			BEGIN 
+				SET @intSiteId = NULL
+			END
+		END
+		ELSE
+		BEGIN
+			DECLARE @tempSiteId AS INT = 0
+			SELECT TOP 1 @tempSiteId = intSiteId 
+						,@intCustomerLocationId = intARLocationId
+						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
+						,@strSiteType = strSiteType
+						FROM tblCFSite
+						WHERE intSiteId = @intSiteId
+						AND intNetworkId = @intNetworkId
+
+			IF (ISNULL(@tempSiteId,0) = 0)
+			BEGIN 
+				SET @intSiteId = NULL
+			END
 		END
 
 	

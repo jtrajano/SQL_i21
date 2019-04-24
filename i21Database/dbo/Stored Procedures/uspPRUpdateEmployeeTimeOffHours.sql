@@ -56,8 +56,11 @@ SELECT E.intEntityId
 							THEN CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()), 0) AS DATE)
 						WHEN strAwardPeriod = 'End of Year' 
 							THEN CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1) AS DATE)
-						WHEN strAwardPeriod = 'Anniversary Date' 
-							THEN CAST(DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired),dtmDateHired) AS DATE)
+						WHEN strAwardPeriod = 'Anniversary Date' THEN 
+							CASE WHEN DATEDIFF(D, CAST(DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired),dtmDateHired) AS DATE),GETDATE()) >= 0
+								THEN CAST(DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired),dtmDateHired) AS DATE)
+							ELSE DATEADD(YYYY, -1, CAST(DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired),dtmDateHired) AS DATE))
+							END
 						ELSE dtmLastAward
 						END
 INTO #tmpEmployees

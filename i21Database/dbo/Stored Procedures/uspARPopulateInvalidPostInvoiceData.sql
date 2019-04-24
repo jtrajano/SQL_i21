@@ -1438,7 +1438,8 @@ BEGIN
 		vyuARGetItemComponents ARIC
 	INNER JOIN			
 		#ARPostInvoiceDetail I
-			ON ARIC.[intItemId] = I.[intItemId]	
+			ON ARIC.[intItemId] = I.[intItemId]
+			AND ARIC.[intCompanyLocationId] = I.[intCompanyLocationId]
 	INNER JOIN tblICItem ICI
 			ON ARIC.[intComponentItemId] = ICI.[intItemId]
 	LEFT OUTER JOIN  #ARInvoiceItemAccount ARIA
@@ -1536,6 +1537,7 @@ BEGIN
 	INNER JOIN			
 		#ARPostInvoiceDetail I
 			ON ARIC.[intItemId] = I.[intItemId]
+			AND ARIC.[intCompanyLocationId] = I.[intCompanyLocationId]
 	INNER JOIN tblICItem ICI
 			ON ARIC.[intComponentItemId] = ICI.[intItemId]
 	LEFT OUTER JOIN #ARInvoiceItemAccount ARIA

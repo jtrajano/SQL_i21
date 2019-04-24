@@ -79,7 +79,7 @@ SET NOCOUNT ON
 			EXEC	uspCTGetTableDataInXML '#tblCTContractHeader',null,@XML OUTPUT							
 			EXEC	uspCTInsertINTOTableFromXML 'tblCTContractHeader',@XML,@intNewContractHeaderId OUTPUT
 
-			SELECT	@ErrMsg = 'Splitted from contract ' + @strSourceContractNumber + ' and sequence ' + LTRIM(@intContractSeq)
+			SELECT	@ErrMsg = 'Split from contract ' + @strSourceContractNumber + ' and sequence ' + LTRIM(@intContractSeq)
 			SELECT	@strStartingNumber = LTRIM(@intNewContractHeaderId)
 			exec uspSMAuditLog 'ContractManagement.view.Contract',@strStartingNumber,@intUserId,@ErrMsg,'small-new-plus'
 
