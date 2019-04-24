@@ -1,9 +1,12 @@
 ﻿CREATE VIEW vyuSTItemUOMUpcCodeToNumeric
 AS
-SELECT Item.strItemNo
+SELECT 
+       Item.strStatus
+     , Item.strItemNo
 	 , UOM.intItemUOMId
 	 , UOM.intItemId
 	 , UOM.strLongUPCCode
+	 , UOM.ysnStockUnit
 	 , CASE 
 		 WHEN UOM.strLongUPCCode NOT LIKE '%[^0-9]%' 
 			 THEN CONVERT(NUMERIC(32, 0),CAST(UOM.strLongUPCCode AS FLOAT))
