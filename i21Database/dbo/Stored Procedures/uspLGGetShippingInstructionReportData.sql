@@ -858,7 +858,7 @@ BEGIN
 					THEN ISNULL(CNLocation.strZipCode, '')
 				ELSE ''
 				END strConsigneeZipCode
-			,LC.strMarks
+			,strMarks = L.strMarks
 			,L.strMarkingInstructions
 			,L.strMarks AS strSIMarks
 			,L.strComments
@@ -912,7 +912,6 @@ BEGIN
 		LEFT JOIN tblEMEntity DProducer ON DProducer.intEntityId = CD.intProducerId
 		LEFT JOIN tblEMEntityToContact DPEC ON DPEC.intEntityId = DProducer.intEntityId
 		LEFT JOIN tblEMEntity DPETC ON DPETC.intEntityId = DPEC.intEntityContactId
-		LEFT JOIN tblLGLoadContainer LC ON L.intLoadId = LC.intLoadId
 		LEFT JOIN tblLGLoadNotifyParties LNP ON LNP.intLoadId = L.intLoadId
 		LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN [tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId 
