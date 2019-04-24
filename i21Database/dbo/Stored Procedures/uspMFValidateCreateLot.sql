@@ -160,7 +160,7 @@ BEGIN TRY
 			FROM tblICStorageLocation
 			WHERE intStorageLocationId = @intStorageLocationId
 
-			SELECT @strErrorMsg = 'Item category ''' + @strCategoryCode + ''' is not allowed into the storage unit ''' + @strName +'''.'
+			SELECT @strErrorMsg = 'Item category ''' + @strCategoryCode + ''' is not allowed into the storage unit ''' + @strName + '''.'
 
 			RAISERROR (
 					@strErrorMsg
@@ -318,9 +318,10 @@ BEGIN TRY
 						AND intItemId <> @intItemId
 					)
 			BEGIN
-				SELECT @strName=strName 
-				FROM tblICStorageLocation 
+				SELECT @strName = strName
+				FROM tblICStorageLocation
 				WHERE intStorageLocationId = @intStorageLocationId
+
 				RAISERROR (
 						'The Storage Location ''%s'' is already used by other Lot.'
 						,11
@@ -368,19 +369,22 @@ BEGIN TRY
 			END
 		END
 
-		SELECT @intLotId = intLotId
-		FROM tblICLot
-		WHERE strLotNumber = @strLotNumber
-			AND intStorageLocationId = CASE 
-				WHEN @ysnSubLotAllowed = 1
-					THEN @intStorageLocationId
-				ELSE intStorageLocationId
-				END
+		IF @strLotNumber IS NOT NULL and @strLotNumber<>''
+		BEGIN
+			SELECT @intLotId = intLotId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intStorageLocationId = CASE 
+					WHEN @ysnSubLotAllowed = 1
+						THEN @intStorageLocationId
+					ELSE intStorageLocationId
+					END
 
-		SELECT @intExistingiItemId = intItemId
-			,@intExistingStorageLocationId = intStorageLocationId
-		FROM tblICLot
-		WHERE strLotNumber = @strLotNumber
+			SELECT @intExistingiItemId = intItemId
+				,@intExistingStorageLocationId = intStorageLocationId
+			FROM tblICLot
+			WHERE strLotNumber = @strLotNumber
+		END
 
 		IF @intLotId IS NOT NULL
 			AND @ysnMergeOnMove = 0
