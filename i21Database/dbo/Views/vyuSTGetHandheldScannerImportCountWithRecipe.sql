@@ -104,5 +104,5 @@ INNER JOIN tblICItemUOM ItemUOM
 							   END
 INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-WHERE (RI.intRecipeItemTypeId = 1
-	OR RI.intRecipeItemTypeId IS NULL)
+WHERE (RI.intRecipeItemTypeId = 1 OR RI.intRecipeItemTypeId IS NULL)
+    AND HandheldItem.strStatus = 'Active'
