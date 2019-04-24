@@ -101,12 +101,13 @@ BEGIN
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	WHERE InvDet.intInvoiceId = @intInvoiceId
 
-	SELECT @strFreightConditions = RTRIM(LTRIM(ISNULL(FT.strContractBasis, '') + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, '') + ' ' + ISNULL(WG.strWeightGradeDesc, '')))
+	SELECT @strFreightConditions = RTRIM(LTRIM(ISNULL(FT.strContractBasis, '') + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, CN.strCountry, '') + ' ' + ISNULL(WG.strWeightGradeDesc, '')))
 	FROM tblARInvoiceDetail InvDet
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblSMFreightTerms FT ON CH.intFreightTermId = FT.intFreightTermId
 	LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId AND FT.strINCOLocationType = 'City'
+	LEFT JOIN tblSMCountry CN ON CN.intCountryID = CH.intCountryId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CH.intWarehouseId AND FT.strINCOLocationType <> 'City'
 	LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 	WHERE InvDet.intInvoiceId = @intInvoiceId
@@ -204,23 +205,32 @@ BEGIN
 		,strContractNumber = LTRIM(CH.strContractNumber) +'/'+ LTRIM(CD.intContractSeq)
 		,strContractNumberOnly = LTRIM(CH.strContractNumber)
 		,CD.intContractSeq
-		,Cont.strContainerNumber
-		,Cont.strMarks
+		,strContainerNumber = CASE WHEN (L.intPurchaseSale = 3) THEN ISNULL(DSCont.strContainerNumber, Cont.strContainerNumber) ELSE Cont.strContainerNumber END
+		,strMarks = CASE WHEN (L.intPurchaseSale = 3) THEN ISNULL(DSCont.strMarks, Cont.strMarks) ELSE Cont.strMarks END
 		,Inv.dblInvoiceSubtotal
 		,Inv.dblTax
 		,Inv.dblInvoiceTotal
 		,strTaxDescription = TaxG.strDescription
 		,intLineCount = 1
 		,FT.strFreightTerm
-		,L.strMVessel
-		,strVesselDirection = ISNULL(L.strMVessel, '') + CASE WHEN (ISNULL(L.strOriginPort, '') <>  '' AND ISNULL(L.strDestinationPort, '') <> '') 
+		,strMVessel = CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.strMVessel, L.strMVessel) ELSE L.strMVessel END
+		,strVesselDirection = CASE WHEN L.intPurchaseSale = 2 THEN
+							  	COALESCE(PL.strMVessel, L.strMVessel, '') + CASE WHEN (COALESCE(PL.strOriginPort, L.strOriginPort, '') <>  '' AND COALESCE(PL.strDestinationPort, L.strDestinationPort, '') <> '') 
+									THEN ' ' + @from + ' ' + ISNULL(PL.strOriginPort, L.strOriginPort) + ' ' + @to + ' ' + ISNULL(PL.strDestinationPort, L.strDestinationPort)  ELSE '' END
+							  ELSE
+								 ISNULL(L.strMVessel, '') + CASE WHEN (ISNULL(L.strOriginPort, '') <>  '' AND ISNULL(L.strDestinationPort, '') <> '') 
 												THEN ' ' + @from + ' ' + L.strOriginPort + ' ' + @to + ' ' + L.strDestinationPort ELSE '' END
-		,L.strBLNumber
-		,L.dtmBLDate
-		,strBLNoDated = L.strBLNumber + ' ' + @dated + ' ' + CONVERT(NVARCHAR,L.dtmBLDate,106) 
+							  END
+		,strBLNumber = CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.strBLNumber, L.strBLNumber) ELSE L.strBLNumber END
+		,dtmBLDate = CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.dtmBLDate, L.dtmBLDate) ELSE L.dtmBLDate END
+		,strBLNoDated = CASE WHEN L.intPurchaseSale = 2 THEN 
+								ISNULL(PL.strBLNumber, L.strBLNumber) + ' ' + @dated + ' ' + CONVERT(NVARCHAR,ISNULL(PL.dtmBLDate, L.dtmBLDate),106) 
+							ELSE 
+								L.strBLNumber + ' ' + @dated + ' ' + CONVERT(NVARCHAR,L.dtmBLDate,106) 
+							END
 		,strForwardAgentLot = CASE WHEN (L.intPurchaseSale = 3) 
-									THEN ISNULL(LFA.strName, '') + '-' + @ref + CASE WHEN ISNULL(Cont.strLotNumber, '') <> '' THEN ', ' + ISNULL(Cont.strLotNumber, '') ELSE '' END
-									ELSE ISNULL(PLFA.strName, '') + '-' + @ref + CASE WHEN ISNULL(Cont.strLotNumber, '') <> '' THEN ', ' + ISNULL(Cont.strLotNumber, '') ELSE '' END 
+									THEN ISNULL(LFA.strName, '') + CASE WHEN COALESCE(DSCont.strLotNumber, Cont.strLotNumber, '') <> '' THEN ', -' + @ref + ' ' + COALESCE(DSCont.strLotNumber, Cont.strLotNumber, '') ELSE '' END
+									ELSE ISNULL(PLFA.strName, '') + CASE WHEN ISNULL(Cont.strLotNumber, '') <> '' THEN ', -' + @ref + ' ' + ISNULL(Cont.strLotNumber, '') ELSE '' END 
 								END
 		,strDocument = @strContractDocuments 
 		,strCondition = @strContractConditions 
@@ -263,6 +273,8 @@ BEGIN
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId --AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
+	LEFT JOIN tblLGLoadDetailContainerLink DSLDCLink ON DSLDCLink.intLoadDetailId = LD.intLoadDetailId
+	LEFT JOIN tblLGLoadContainer DSCont ON DSCont.intLoadContainerId = DSLDCLink.intLoadContainerId
 	LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = ReceiptItem.intSourceId
 	LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
 	LEFT JOIN tblEMEntity PLFA ON PLFA.intEntityId = PL.intForwardingAgentEntityId
