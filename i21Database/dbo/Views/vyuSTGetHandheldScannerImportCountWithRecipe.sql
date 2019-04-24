@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuSTGetHandheldScannerImportCountWithRecipe]
-	AS
+AS
 SELECT IC.intHandheldScannerImportCountId
 	, IC.intHandheldScannerId
 	, HS.intStoreId
@@ -88,13 +88,21 @@ INNER JOIN tblICItemUOM ItemUOM
 									WHEN RI.intItemUOMId IS NOT NULL
 										THEN RI.intItemUOMId
 									ELSE (
-											SELECT intItemUOMId 
-											FROM tblICItemUOM 
-											WHERE strLongUPCCode COLLATE Latin1_General_CI_AS = ISNULL(IC.strUPCNo, '')
-												OR CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT)) = IC.strUPCNo
+											SELECT DISTINCT 
+												UOM.intItemUOMId 
+											FROM tblICItemUOM UOM
+											INNER JOIN tblICItem Item
+												ON UOM.intItemId = Item.intItemId
+											WHERE Item.intItemId = IC.intItemId
+												AND UOM.ysnStockUnit = 1
+
+											--SELECT intItemUOMId 
+											--FROM tblICItemUOM 
+											--WHERE strLongUPCCode COLLATE Latin1_General_CI_AS = ISNULL(IC.strUPCNo, '')
+											--	OR CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT)) = IC.strUPCNo
 										 )
 							   END
 INNER JOIN tblICUnitMeasure UOM
 	ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-WHERE (RI.intRecipeItemTypeId = 1
-	OR RI.intRecipeItemTypeId IS NULL)
+WHERE (RI.intRecipeItemTypeId = 1 OR RI.intRecipeItemTypeId IS NULL)
+    AND HandheldItem.strStatus = 'Active'
