@@ -146,10 +146,9 @@ SELECT
 		,blbSecondSignatureDetail = (SELECT TOP 1 blbDetail FROM tblSMSignature WHERE intSignatureId = BNKACCNT.intSecondSignatureId)
 		
 		-- A/P Related fields: 
-		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
-		,strVendorName = ISNULL(ENTITY.strName, CHK.strPayee)
+		,strVendor = ISNULL(LTRIM(RTRIM(VENDOR.strVendorId)) + ' ', '-- ') + ISNULL(ISNULL(RTRIM(LTRIM(ENTITY.strName)) + ' ', RTRIM(LTRIM(CHK.strPayee))),'-- ') + RTRIM(LTRIM (COMPANY.strCompanyName))
 		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
-			,strVendorAddress = CASE	
+		,strVendorAddress = CASE	
 									WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
 										dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
 									ELSE 
