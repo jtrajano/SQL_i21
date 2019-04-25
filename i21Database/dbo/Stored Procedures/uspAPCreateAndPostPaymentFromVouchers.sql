@@ -350,7 +350,7 @@ BEGIN
 		SELECT 
 			[intPaymentId]		=	tmpVoucherAndPay.intCreatePaymentId,
 			[intBillId]			=	tmp.intBillId,
-			[intAccountId]		=	CASE WHEN vouchers.ysnPrepayHasPayment = 0  AND intTransactionType = 2 THEN details.intAccountId ELSE vouchers.intAccountId END,
+			[intAccountId]		=	CASE WHEN vouchers.ysnPrepayHasPayment = 0  AND vouchers.intTransactionType IN (2, 13) THEN details.intAccountId ELSE vouchers.intAccountId END,
 			[dblDiscount]		=	vouchers.dblTempDiscount,
 			[dblWithheld]		=	vouchers.dblTempWithheld,
 			[dblAmountDue]		=	vouchers.dblAmountDue,
