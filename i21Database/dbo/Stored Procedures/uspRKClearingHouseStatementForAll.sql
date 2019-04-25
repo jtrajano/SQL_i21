@@ -115,6 +115,7 @@ SET @query = '
 		JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 		JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
 		WHERE  strName= case when '''+isnull(@strName,'')+''' ='''' then strName else '''+isnull(@strName,'')+''' end
+		AND intSelectedInstrumentTypeId=1
 			AND strAccountNumber = case when '''+isnull(@strAccountNumber,'')+'''='''' then strAccountNumber else '''+isnull(@strAccountNumber,'')+''' end
 			AND CONVERT(VARCHAR(10), dtmFilledDate, 110) between '''+CONVERT(VARCHAR(10), @dtmTransactionFromDate, 110)+''' and '''+CONVERT(VARCHAR(10), @dtmTransactionToDate, 110)+'''
 
@@ -140,7 +141,7 @@ SET @query = '
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell=''Sell''
 		JOIN tblEMEntity e on e.intEntityId=t.intEntityId
 		JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=t.intBrokerageAccountId
-		WHERE   strName= case when '''+isnull(@strName,'')+''' ='''' then strName else '''+isnull(@strName,'')+''' end
+		WHERE   strName= case when '''+isnull(@strName,'')+''' ='''' then strName else '''+isnull(@strName,'')+''' end AND intSelectedInstrumentTypeId=1
 		AND strAccountNumber = case when '''+isnull(@strAccountNumber,'')+'''='''' then strAccountNumber else '''+isnull(@strAccountNumber,'')+''' end
 		AND CONVERT(VARCHAR(10), dtmFilledDate, 110) between '''+CONVERT(VARCHAR(10), @dtmTransactionFromDate, 110)+''' and '''+CONVERT(VARCHAR(10), @dtmTransactionToDate, 110)+'''
 )t 
