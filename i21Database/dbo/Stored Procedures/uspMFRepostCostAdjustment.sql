@@ -356,11 +356,7 @@ BEGIN TRY
 			,intFobPointId
 			,dblVoucherCost = NULL
 		FROM tblICInventoryTransaction t
-		INNER JOIN (
-			tblMFWorkOrderProducedLot pl LEFT JOIN tblMFWorkOrder wo ON pl.intWorkOrderId = wo.intWorkOrderId
-				AND pl.ysnProductionReversed = 0
-			) ON t.strTransactionId = wo.strWorkOrderNo
-			AND t.intLotId = ISNULL(pl.intProducedLotId, pl.intLotId)
+		INNER JOIN tblMFWorkOrderProducedLot pl On pl.intWorkOrderProducedLotId =t.intTransactionDetailId 
 		WHERE t.strBatchId = @strCostAdjustmentBatchId
 			AND t.strTransactionId = t.strRelatedTransactionId
 			AND t.ysnIsUnposted = 0
