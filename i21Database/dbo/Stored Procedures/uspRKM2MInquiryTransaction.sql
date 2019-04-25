@@ -600,7 +600,7 @@ SELECT
 	FM.strFutMarketName,    
 	IM.intOriginId,    
 	IM.strLotTracking,    
-	CD.dblNoOfLots,
+	case when isnull(ysnMultiplePriceFixation,0)=1 then CH.dblNoOfLots else  CD.dblNoOfLots end dblNoOfLots,
 	PF.dblLotsFixed,  
 	PF.dblPriceWORollArb,      
 	CH.dblNoOfLots dblHeaderNoOfLots ,
