@@ -3484,37 +3484,55 @@ BEGIN
 							[intItemId]				= t.intItemId  
 							,[intItemLocationId]	= t.intItemLocationId
 							,[intItemUOMId]			= t.intItemUOMId
-							,[dtmDate]				= t.dtmDate 
-							,[dblQty]				= -t.dblQty
+							,[dtmDate]				= tp.dtmDate 
+							,[dblQty]				= dbo.fnCalculateQtyBetweenUOM(tp.intItemUOMId, t.intItemUOMId, -tp.dblQty)
 							,[dblUOMQty]			= t.dblUOMQty
 							,[dblCost]				= t.dblCost
-							,[dblSalesPrice]		= t.dblSalesPrice
-							,[intCurrencyId]		= t.intCurrencyId
-							,[dblExchangeRate]		= t.dblExchangeRate
-							,[intTransactionId]		= t.intTransactionId
-							,[intTransactionDetailId]	= t.intTransactionDetailId
-							,[strTransactionId]			= t.strTransactionId
+							,[dblSalesPrice]		= tp.dblSalesPrice
+							,[intCurrencyId]		= tp.intCurrencyId
+							,[dblExchangeRate]		= tp.dblExchangeRate
+							,[intTransactionId]		= tp.intTransactionId
+							,[intTransactionDetailId]	= tp.intTransactionDetailId
+							,[strTransactionId]			= tp.strTransactionId
 							,[intTransactionTypeId]		= @INVENTORY_RECEIPT_TYPE
-							,[intLotId]					= td.intLotId
-							,[intSourceTransactionId]	= th.intInventoryTransferId
-							,[strSourceTransactionId]	= th.strTransferNo
+							,[intLotId]					= t.intLotId
+							,[intSourceTransactionId]	= t.intInventoryTransferId
+							,[strSourceTransactionId]	= t.strTransferNo
 							,[intSourceTransactionDetailId] = ri.intInventoryTransferDetailId
 							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId) -- t.intInTransitSourceLocationId
-							,[intForexRateTypeId]			= t.intForexRateTypeId
-							,[dblForexRate]					= t.dblForexRate
-
-					FROM	@ItemsToPost t INNER JOIN tblICItem i 
-								ON t.intItemId = i.intItemId
-							INNER JOIN tblICInventoryReceiptItem ri
-								ON ri.intInventoryReceiptId = t.intTransactionId						
-								AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
-							INNER JOIN tblICInventoryReceipt r
-								ON r.intInventoryReceiptId = ri.intInventoryReceiptId 
+							,[intForexRateTypeId]			= tp.intForexRateTypeId
+							,[dblForexRate]					= tp.dblForexRate
+					FROM	@ItemsToPost tp INNER JOIN tblICItem i 
+								ON tp.intItemId = i.intItemId
 							INNER JOIN (
-								tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
-									ON td.intInventoryTransferId = th.intInventoryTransferId
+								tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+									ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 							)
 								ON 
+								r.intInventoryReceiptId = tp.intTransactionId
+								AND r.strReceiptNumber = tp.strTransactionId			
+								AND ri.intInventoryReceiptItemId = tp.intTransactionDetailId
+
+							CROSS APPLY (
+								SELECT TOP 1
+									th.strTransferNo
+									,th.intInventoryTransferId
+									,td.intInventoryTransferDetailId
+									,t.intLotId 
+									,t.intItemId
+									,t.intItemLocationId
+									,t.intItemUOMId
+									,t.dblUOMQty
+									,t.dblCost 
+								FROM 				
+									tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
+										ON th.intInventoryTransferId = td.intInventoryTransferId						
+									INNER JOIN tblICInventoryTransaction t 
+										ON t.strTransactionId = th.strTransferNo
+										AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
+										AND t.intItemId = tp.intItemId 
+										AND t.dblQty > 0 
+								WHERE
 									(
 										td.intInventoryTransferDetailId = ri.intSourceId
 										AND td.intInventoryTransferId = ri.intOrderId
@@ -3524,11 +3542,11 @@ BEGIN
 									OR (
 										td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
 										AND td.intInventoryTransferId = ri.intInventoryTransferId
-									)
-					WHERE	dblQty > 0 
-							AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
+									)						
+							) t																
+					WHERE	i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 					ORDER BY 
-						ri.intInventoryReceiptItemId ASC 
+						ri.intInventoryReceiptItemId ASC
 
 					IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 					BEGIN 
