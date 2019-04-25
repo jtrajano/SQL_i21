@@ -977,35 +977,59 @@ BEGIN
 					[intItemId]				= t.intItemId  
 					,[intItemLocationId]	= t.intItemLocationId
 					,[intItemUOMId]			= t.intItemUOMId
-					,[dtmDate]				= t.dtmDate 
-					,[dblQty]				= -t.dblQty
+					,[dtmDate]				= tp.dtmDate 
+					,[dblQty]				= dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, -ri.dblOpenReceive)
 					,[dblUOMQty]			= t.dblUOMQty
 					,[dblCost]				= t.dblCost
-					,[dblSalesPrice]		= t.dblSalesPrice
-					,[intCurrencyId]		= t.intCurrencyId
-					,[dblExchangeRate]		= t.dblExchangeRate
-					,[intTransactionId]		= t.intTransactionId
-					,[intTransactionDetailId]	= t.intTransactionDetailId
-					,[strTransactionId]			= t.strTransactionId
+					,[dblSalesPrice]		= tp.dblSalesPrice
+					,[intCurrencyId]		= tp.intCurrencyId
+					,[dblExchangeRate]		= tp.dblExchangeRate
+					,[intTransactionId]		= tp.intTransactionId
+					,[intTransactionDetailId]	= tp.intTransactionDetailId
+					,[strTransactionId]			= tp.strTransactionId
 					,[intTransactionTypeId]		= @INVENTORY_RECEIPT_TYPE
-					,[intLotId]					= td.intLotId
-					,[intSourceTransactionId]	= th.intInventoryTransferId
-					,[strSourceTransactionId]	= th.strTransferNo
-					,[intSourceTransactionDetailId] = ri.intInventoryTransferDetailId
-					,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-					,[intForexRateTypeId]			= t.intForexRateTypeId
-					,[dblForexRate]					= t.dblForexRate
+					,[intLotId]					= t.intLotId
+					,[intSourceTransactionId]	= t.intInventoryTransferId
+					,[strSourceTransactionId]	= t.strTransferNo
+					,[intSourceTransactionDetailId] = t.intInventoryTransferDetailId
+					,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId)
+					,[intForexRateTypeId]			= tp.intForexRateTypeId
+					,[dblForexRate]					= tp.dblForexRate
 
-			FROM	@ItemsForPost t INNER JOIN tblICItem i 
-						ON t.intItemId = i.intItemId
-					INNER JOIN tblICInventoryReceiptItem ri
-						ON ri.intInventoryReceiptId = t.intTransactionId						
-						AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+			FROM	@ItemsForPost tp INNER JOIN tblICItem i 
+						ON tp.intItemId = i.intItemId
 					INNER JOIN (
-						tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
-							ON td.intInventoryTransferId = th.intInventoryTransferId
+						tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+							ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 					)
 						ON 
+						r.intInventoryReceiptId = tp.intTransactionId
+						AND r.strReceiptNumber = tp.strTransactionId			
+						AND ri.intInventoryReceiptItemId = tp.intTransactionDetailId
+
+					CROSS APPLY (
+						SELECT TOP 1
+							th.strTransferNo
+							,th.intInventoryTransferId
+							,td.intInventoryTransferDetailId
+							,t.intLotId 
+							,t.intItemId
+							,t.intItemLocationId
+							,intItemUOMId = ISNULL(l.intItemUOMId, t.intItemUOMId) 
+							,t.dblUOMQty
+							,t.dblCost 
+						FROM 				
+							tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
+								ON th.intInventoryTransferId = td.intInventoryTransferId
+							INNER JOIN (
+								tblICInventoryTransaction t LEFT JOIN tblICLot l
+									ON t.intLotId = l.intLotId
+							)
+								ON t.strTransactionId = th.strTransferNo
+								AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
+								AND t.intItemId = tp.intItemId 
+								AND t.dblQty > 0 
+						WHERE
 							(
 								td.intInventoryTransferDetailId = ri.intSourceId
 								AND td.intInventoryTransferId = ri.intOrderId
@@ -1015,75 +1039,9 @@ BEGIN
 							OR (
 								td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
 								AND td.intInventoryTransferId = ri.intInventoryTransferId
-							)
-			WHERE	dblQty > 0 
-					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
-
-			--SELECT
-			--		t.[intItemId] 
-			--		,t.[intItemLocationId] 
-			--		,iu.intItemUOMId 
-			--		,r.[dtmReceiptDate] 
-			--		,dblQty = 
-			--			CASE		
-			--				-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
-			--				WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
-			--					-dbo.fnCalculateQtyBetweenUOM(
-			--						ri.intWeightUOMId
-			--						, ri.intUnitMeasureId
-			--						, ri.dblNet
-			--					)
-
-			--				-- If Gross/Net UOM is missing, then get the item/lot qty. 
-			--				ELSE 
-			--					-ri.dblOpenReceive  
-			--			END
-			--		,t.[dblUOMQty] 
-			--		,t.[dblCost] 
-			--		,t.[dblValue] 
-			--		,t.[dblSalesPrice] 
-			--		,t.[intCurrencyId] 
-			--		,t.[dblExchangeRate] 
-			--		,[intTransactionId] = r.intInventoryReceiptId 
-			--		,[intTransactionDetailId] = ri.intInventoryReceiptItemId
-			--		,[strTransactionId] = r.strReceiptNumber
-			--		,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE  
-			--		,t.[intLotId]
-			--		,t.[intTransactionId] 
-			--		,t.[strTransactionId] 
-			--		,t.[intTransactionDetailId] 
-			--		,t.[intFobPointId] 
-			--		,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-			--		,[intForexRateTypeId] = t.intForexRateTypeId
-			--		,[dblForexRate] = t.dblForexRate
-			--FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-			--			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			--		INNER JOIN (
-			--			tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
-			--				ON td.intInventoryTransferId = th.intInventoryTransferId
-			--		)
-			--			ON 
-			--				(
-			--					td.intInventoryTransferDetailId = ri.intSourceId
-			--					AND td.intInventoryTransferId = ri.intOrderId
-			--					AND ri.intInventoryTransferDetailId IS NULL 
-			--					AND ri.intInventoryTransferId IS NULL 
-			--				)
-			--				OR (
-			--					td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
-			--					AND td.intInventoryTransferId = ri.intInventoryTransferId
-			--				)
-			--		INNER JOIN tblICInventoryTransaction t 
-			--			ON t.strTransactionId = th.strTransferNo
-			--			AND t.intTransactionDetailId = td.intInventoryTransferDetailId
-			--		LEFT JOIN tblICItemUOM iu 
-			--			ON iu.intItemUOMId = ri.intUnitMeasureId
-			--		LEFT JOIN tblICItem i 
-			--			ON ri.intItemId = i.intItemId 
-			--WHERE	r.strReceiptNumber = @strTransactionId
-			--		AND t.ysnIsUnposted = 0 
-			--		AND t.dblQty > 0
-			--		AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
+							)						
+					) t																
+			WHERE	i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
 			BEGIN 

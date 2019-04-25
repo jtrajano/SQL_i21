@@ -81,14 +81,21 @@ BEGIN
 
 			-- METER READING DETAIL
 			DECLARE @dblCurrentReading AS NUMERIC(18,6) = NULL,
-				@dblCurrentAmount AS NUMERIC(18,6) = NULL
+				@dblCurrentAmount AS NUMERIC(18,6) = NULL,
+				@dblSalePrice AS NUMERIC(18,6) = NULL
 
 			DECLARE @CursorMeterDetail AS CURSOR
 			SET @CursorMeterDetail = CURSOR FOR
 			SELECT MRD.dblCurrentReading
 				, MRD.dblCurrentAmount
+				, ItemPrice.dblSalePrice
 			FROM tblMBImportMeterReadingDetail MRD
 			INNER JOIN tblMBImportMeterReading MR ON MR.intImportMeterReadingId = MRD.intImportMeterReadingId
+			LEFT JOIN tblMBMeterAccountDetail MAD ON MAD.strMeterCustomerId = MRD.intMeterCustomerId AND MAD.strMeterFuelingPoint = MRD.intMeterNumber
+			LEFT JOIN tblMBMeterAccount MA ON MA.intMeterAccountId = MAD.intMeterAccountId
+			LEFT JOIN tblICItem Item ON Item.intItemId = MAD.intItemId
+			LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = MA.intCompanyLocationId
+			LEFT JOIN tblICItemPricing ItemPrice ON ItemPrice.intItemId = Item.intItemId AND ItemPrice.intItemLocationId = ItemLocation.intItemLocationId
 			WHERE MR.intImportMeterReadingId = @intImportMeterReadingId and ysnValid = 1
 				AND MRD.intMeterCustomerId = @intMeterCustomerId
 				AND MRD.intMeterNumber = @intMeterNumber
@@ -96,7 +103,7 @@ BEGIN
 			ORDER BY MRD.dtmTransactionDate, MRD.dblCurrentReading
 
 			OPEN @CursorMeterDetail
-			FETCH NEXT FROM @CursorMeterDetail INTO @dblCurrentReading, @dblCurrentAmount
+			FETCH NEXT FROM @CursorMeterDetail INTO @dblCurrentReading, @dblCurrentAmount, @dblSalePrice
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 				
@@ -120,8 +127,8 @@ BEGIN
 				 VALUES
 					(@intMeterReadingId
 					,@intMeterAccountDetailId
-					,0
-					,0
+					,@dblSalePrice
+					,@dblSalePrice
 					,@dblLastReading
 					,@dblCurrentReading
 					,@dblLastAmount
@@ -131,7 +138,7 @@ BEGIN
 				-- UPDATE METER READING ACCOUNT DETAILS
 				UPDATE tblMBMeterAccountDetail SET dblLastMeterReading = @dblCurrentReading, dblLastTotalSalesDollar = @dblCurrentAmount WHERE intMeterAccountDetailId = @intMeterAccountDetailId
 
-				FETCH NEXT FROM @CursorMeterDetail INTO @dblCurrentReading, @dblCurrentAmount
+				FETCH NEXT FROM @CursorMeterDetail INTO @dblCurrentReading, @dblCurrentAmount, @dblSalePrice
 			END
 			CLOSE @CursorMeterDetail
 			DEALLOCATE @CursorMeterDetail

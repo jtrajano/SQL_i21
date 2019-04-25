@@ -59,6 +59,7 @@ BEGIN
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_InventoryReceipt
+			AND intSourceId IS NOT NULL
 
 		UNION ALL
 
@@ -72,6 +73,7 @@ BEGIN
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_InventoryTransfer
+			AND intSourceId IS NOT NULL
 
 		UNION ALL
 		-- Delete Invoices associated to this deleted Transport Load
@@ -84,6 +86,7 @@ BEGIN
 		WHERE intTransactionId = @LoadHeaderId
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_Invoice
+			AND intSourceId IS NOT NULL
 			
 	END
 	ELSE

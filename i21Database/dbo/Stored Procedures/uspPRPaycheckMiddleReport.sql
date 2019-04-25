@@ -133,7 +133,8 @@ SELECT DISTINCT
 	dblGrossYTD = Sum(ISNULL(tblPaycheckYTD.dblGrossYTD, 0)), 
 	dblTaxYTD = Sum(ISNULL(tblPaycheckYTD.dblTaxTotalYTD, 0)),
 	dblDeductionYTD = Sum(ISNULL(tblPaycheckYTD.dblDeductionTotalYTD, 0)),
-	dblNetYTD = Sum(ISNULL(tblPaycheckYTD.dblNetPayTotalYTD, 0))
+	dblNetYTD = Sum(ISNULL(tblPaycheckYTD.dblNetPayTotalYTD, 0)),
+	intPayToDown = ISNULL(tblCMBankAccount.intPayToDown, 0)
 FROM 
 	tblSMCompanySetup, 
 	(SELECT
@@ -251,4 +252,5 @@ GROUP BY
 	tblPRPaycheck.dtmDateFrom, tblPRPaycheck.dtmDateTo,
 	tblPRPaycheck.dblGross, tblPRPaycheck.dblTaxTotal,
 	tblPRPaycheck.dblDeductionTotal, tblPRPaycheck.dblNetPayTotal,
-	tblPRPaycheck.ysnVoid
+	tblPRPaycheck.ysnVoid,
+	tblCMBankAccount.intPayToDown

@@ -26,8 +26,8 @@ SELECT
 			END
 			AS ysnEmail,
 	 dblTotalFuelExpensed,
-	 ysnActive
-
+	 ysnActive,
+	 strUserId
 FROM (
 	SELECT        
 		cfInv.strCustomerNumber,
@@ -73,7 +73,8 @@ FROM (
 	AND cfInv.strUserId  COLLATE Latin1_General_CI_AS = cfInvFee.strUserId) AS outertable
 	
 	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, intTermID, dtmInvoiceDate, dblFeeTotalAmount, 
-	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType,ysnActive
+	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType,ysnActive,
+	strUserId
 GO
 
 

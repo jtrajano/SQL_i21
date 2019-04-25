@@ -5,6 +5,7 @@
 		@dtmTransactionToDate datetime = null
 AS
 --Sanitize the parameters, set to null if empty string. We are catching it on where clause by isnull function
+
 IF @strName = ''
 BEGIN
 	SET @strName = NULL
@@ -14,6 +15,8 @@ IF @strAccountNumber = ''
 BEGIN
 	SET @strAccountNumber = NULL
 END
+
+declare @intSelectedInstrumentTypeId int =1
 
 declare @Unrealized table(
 RowNum int, 
@@ -69,7 +72,7 @@ exec uspRKUnrealizedPnL	 @dtmFromDate =@dtmTransactionFromDate
 						,@strBuySell =NULL
 						,@intBookId =NULL
 						,@intSubBookId =NULL
-
+						,@intSelectedInstrumentTypeId=@intSelectedInstrumentTypeId
 
 SELECT * FROM (
 SELECT RANK() OVER(PARTITION BY strFutMarketName order by strFutMarketName,CONVERT(DATETIME,'01 '+strFutureMonth) Asc) AS intRowNumber ,*,

@@ -828,6 +828,9 @@ BEGIN
 		,intInventoryTransactionId
 		,intInventoryTransactionStorageId
 		,intOwnershipType
+		,intCommodityId
+		,intCategoryId
+		,intLocationId
 	)
 	SELECT 
 		t.intItemId
@@ -864,6 +867,9 @@ BEGIN
 		,t.intInventoryTransactionId
 		,t.intInventoryTransactionStorageId
 		,t.intOwnershipType
+		,t.intCommodityId
+		,t.intCategoryId
+		,t.intLocationId
 	FROM	#tmpInventoryTransactionStockToReverse tmp INNER JOIN dbo.tblICInventoryStockMovement t
 				ON tmp.intInventoryTransactionId = t.intInventoryTransactionId 
 		
