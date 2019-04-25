@@ -1071,6 +1071,12 @@ BEGIN
 	FROM tblCFAccount 
 	WHERE intAccountId = @intAccountId
 
+	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
+	BEGIN
+		SET @strPONumber = ''
+		SELECT TOP 1 @strPONumber = strPurchaseOrderNo FROM tblCFPurchaseOrder WHERE intAccountId = @intAccountId AND  DATEADD(dd, DATEDIFF(dd, 0, dtmExpirationDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, @dtmTransactionDate), 0) ORDER BY dtmExpirationDate ASC
+	END
+
 
 	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
 	BEGIN
