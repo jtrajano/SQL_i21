@@ -3498,7 +3498,7 @@ BEGIN
 							,[intLotId]					= t.intLotId
 							,[intSourceTransactionId]	= t.intInventoryTransferId
 							,[strSourceTransactionId]	= t.strTransferNo
-							,[intSourceTransactionDetailId] = ri.intInventoryTransferDetailId
+							,[intSourceTransactionDetailId] = t.intInventoryTransferDetailId
 							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId) -- t.intInTransitSourceLocationId
 							,[intForexRateTypeId]			= tp.intForexRateTypeId
 							,[dblForexRate]					= tp.dblForexRate
