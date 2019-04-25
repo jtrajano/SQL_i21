@@ -978,7 +978,7 @@ BEGIN
 					,[intItemLocationId]	= t.intItemLocationId
 					,[intItemUOMId]			= t.intItemUOMId
 					,[dtmDate]				= tp.dtmDate 
-					,[dblQty]				= dbo.fnCalculateQtyBetweenUOM(tp.intItemUOMId, t.intItemUOMId, -tp.dblQty)
+					,[dblQty]				= dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, -ri.dblOpenReceive)
 					,[dblUOMQty]			= t.dblUOMQty
 					,[dblCost]				= t.dblCost
 					,[dblSalesPrice]		= tp.dblSalesPrice
@@ -1015,13 +1015,16 @@ BEGIN
 							,t.intLotId 
 							,t.intItemId
 							,t.intItemLocationId
-							,t.intItemUOMId
+							,intItemUOMId = ISNULL(l.intItemUOMId, t.intItemUOMId) 
 							,t.dblUOMQty
 							,t.dblCost 
 						FROM 				
 							tblICInventoryTransfer th INNER JOIN tblICInventoryTransferDetail td 
-								ON th.intInventoryTransferId = td.intInventoryTransferId						
-							INNER JOIN tblICInventoryTransaction t 
+								ON th.intInventoryTransferId = td.intInventoryTransferId
+							INNER JOIN (
+								tblICInventoryTransaction t LEFT JOIN tblICLot l
+									ON t.intLotId = l.intLotId
+							)
 								ON t.strTransactionId = th.strTransferNo
 								AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
 								AND t.intItemId = tp.intItemId 
