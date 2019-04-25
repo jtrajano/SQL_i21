@@ -24,6 +24,9 @@ USING	(
 		UNION ALL 
 		SELECT	id = 3
 				,PrimaryStatus = 'Quarantine'
+		UNION ALL
+		SELECT  id = 4
+				,PrimaryStatus = 'Pre-Sanitized'
 ) AS PrimaryLotStatusHardValues
 	ON  LotStatus.intLotStatusId = PrimaryLotStatusHardValues.id
 
