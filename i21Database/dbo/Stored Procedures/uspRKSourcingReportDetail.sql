@@ -205,7 +205,7 @@ SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContra
 							dblStandardPrice,dblPPVBasis,
 							
 							((case when isnull(dblFuturesPrice,0)=0 then dblSettlementPrice else dblFuturesPrice end 
-								*isnull(dblRatio,1))+isnull(dblBasis,0)) - isnull(dblRate,0) dblNewPPVPrice
+								*isnull(dblRatio,1))+isnull(dblBasis,0))-(dblBasis - isnull(dblRate,0)) dblNewPPVPrice
 							
 							,strLocationName,
 							
