@@ -169,6 +169,7 @@ BEGIN
 			SET @ContractOverFillQuantity = 0
 			SET @strStatus = ''
 			SET @strContractNumber = ''
+			SET @intContractDetailId = NULL
 			SET @dblQuantity = 0
 			SET @getARPrice = 0
 			--SET @ysnProcessNextAsHeader = 0
@@ -242,95 +243,94 @@ BEGIN
 			
 			
 			IF(LTRIM(RTRIM(@strContractNumber)) <> '')
-			BEGIN
-			--Get contract ID
-			--SET @intContractDetailId = (SELECT TOP 1 B.intContractDetailId 
-			--								FROM tblCTContractHeader A
-			--								INNER JOIN tblCTContractDetail B
-			--									ON A.intContractHeaderId = B.intContractHeaderId
-			--								WHERE A.strContractNumber = @strContractNumber
-			--								AND A.intEntityId = @intCustomerEntityId
-			--								AND B.intContractSeq = @intContractSequence)
-			SET @intContractDetailId = NULL
-			SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
-						,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
-			FROM
-				[vyuCTCustomerContract] ARCC
-			WHERE
-				ARCC.[intEntityCustomerId] = @intCustomerEntityId
-				AND ARCC.[intItemId] = @intItemId
-				AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
-													CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
-				AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
-				AND (ARCC.[dblAvailableQty] > 0) 
-
-				AND ARCC.strContractNumber = @strContractNumber
-				--AND ARCC.intEntityId = @intCustomerEntityId
-				AND ARCC.intContractSeq = @intContractSequence
-			ORDER BY
-					dtmStartDate
-				,intContractSeq
-
-			--get another contract if contract number from file does not available
-			IF(@intContractDetailId IS NULL)
 				BEGIN
-				SET @intContractDetailId = NULL
-				SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
-							,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
-				FROM
-					[vyuCTCustomerContract] ARCC
-				WHERE
-					ARCC.[intEntityCustomerId] = @intCustomerEntityId
-					AND ARCC.[intItemId] = @intItemId
-					AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
-														CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
-					AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
-					AND (ARCC.[dblAvailableQty] > 0) 				
-				ORDER BY
-						dtmStartDate
-					,intContractSeq
+					--Get contract ID
+					--SET @intContractDetailId = (SELECT TOP 1 B.intContractDetailId 
+					--								FROM tblCTContractHeader A
+					--								INNER JOIN tblCTContractDetail B
+					--									ON A.intContractHeaderId = B.intContractHeaderId
+					--								WHERE A.strContractNumber = @strContractNumber
+					--								AND A.intEntityId = @intCustomerEntityId
+					--								AND B.intContractSeq = @intContractSequence)
+					SET @intContractDetailId = NULL
+					SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
+								,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
+					FROM
+						[vyuCTCustomerContract] ARCC
+					WHERE
+						ARCC.[intEntityCustomerId] = @intCustomerEntityId
+						AND ARCC.[intItemId] = @intItemId
+						AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
+															CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
+						AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+						AND (ARCC.[dblAvailableQty] > 0) 
 
-				SET @getARPrice = 1
-				SET @strStatus = @strStatus + ', Has Contract Discrepancy' --Has contract number from file - but contract does not have available qty
+						AND ARCC.strContractNumber = @strContractNumber
+						--AND ARCC.intEntityId = @intCustomerEntityId
+						AND ARCC.intContractSeq = @intContractSequence
+					ORDER BY
+							dtmStartDate
+						,intContractSeq
 
-					IF(NOT @intContractDetailId IS NULL)
+					--get another contract if contract number from file does not available
+					IF(@intContractDetailId IS NULL)
+						BEGIN
+						
+							SELECT TOP 1 @intContractDetailId	= ARCC.[intContractDetailId]
+										,@ContractAvailableQuantity = ARCC.[dblAvailableQty]
+							FROM
+								[vyuCTCustomerContract] ARCC
+							WHERE
+								ARCC.[intEntityCustomerId] = @intCustomerEntityId
+								AND ARCC.[intItemId] = @intItemId
+								AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
+																	CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
+								AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+								AND (ARCC.[dblAvailableQty] > 0) 				
+							ORDER BY
+									dtmStartDate
+								,intContractSeq
+
+							SET @getARPrice = 1
+							SET @strStatus = @strStatus + ', Has Contract Discrepancy' --Has contract number from file - but contract does not have available qty
+
+								IF(NOT @intContractDetailId IS NULL)
+									BEGIN
+										SET @ContractOverFillQuantity = (@dblQuantity - @ContractAvailableQuantity )
+								
+										IF(@ContractOverFillQuantity > 0) 
+											BEGIN
+												SET @dblQuantity = @ContractAvailableQuantity
+												--SET @strStatus = @strStatus + ', Has Contract Discrepancy'
+											END
+									END
+				  --              ELSE
+									--BEGIN
+									--	--SET @strStatus = @strStatus + ', Has Contract Discrepancy'
+									--END
+						END
+					ELSE
 						BEGIN
 							SET @ContractOverFillQuantity = (@dblQuantity - @ContractAvailableQuantity )
 								
-							IF(@ContractOverFillQuantity > 0) 
+							IF(@ContractOverFillQuantity > 0) -- Has contract number from file - but it overfills the contract.
 							BEGIN
 								SET @dblQuantity = @ContractAvailableQuantity
-								--SET @strStatus = @strStatus + ', Has Contract Discrepancy'
+								SET @strStatus = @strStatus + ', Has Contract Discrepancy'
 							END
+
+							SET @getARPrice = 0
 						END
-      --              ELSE
-						--BEGIN
-						--	--SET @strStatus = @strStatus + ', Has Contract Discrepancy'
-						--END
-		
-				END
-			ELSE
-				BEGIN
-					SET @ContractOverFillQuantity = (@dblQuantity - @ContractAvailableQuantity )
-								
-					IF(@ContractOverFillQuantity > 0) -- Has contract number from file - but it overfills the contract.
-					BEGIN
-						SET @dblQuantity = @ContractAvailableQuantity
-						SET @strStatus = @strStatus + ', Has Contract Discrepancy'
-					END
-
-					SET @getARPrice = 0
-				END
-			--IF(NOT @intContractDetailId IS NULL) 
-			--BEGIN 
+					--IF(NOT @intContractDetailId IS NULL) 
+					--BEGIN 
 				
-			--END
-			--ELSE
-			--BEGIN
-			--	SET @strStatus = @strStatus + ', Has Contract Discrepancy' -- Has contract number from file - but no available contract found upon import.
-			--END
+					--END
+					--ELSE
+					--BEGIN
+					--	SET @strStatus = @strStatus + ', Has Contract Discrepancy' -- Has contract number from file - but no available contract found upon import.
+					--END
 
-			END
+				END
 
 				--TM----------------------------------------------------------------------------------------------------------------------------
 				--Get Site Id 
