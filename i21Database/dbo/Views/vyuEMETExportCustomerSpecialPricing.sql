@@ -56,7 +56,7 @@
 	 SELECT   
 	  --DISTINCT  
 	  patr_no = b.strCustomerNumber,  
-	  item_no = g.strItemNo,  
+	  item_no = CAST(g.strItemNo AS VARCHAR(15)),  
 	  patr_price = c.dblPrice  
 	  ,c.strPricing
 	 from tblARCustomerSpecialPrice a  
