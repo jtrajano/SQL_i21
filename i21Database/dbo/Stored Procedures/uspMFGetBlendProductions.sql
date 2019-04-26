@@ -44,6 +44,7 @@ IF ISNULL(@ysnProduced, 0) = 0
 		,i.dblRiskScore
 		,w.intManufacturingProcessId
 		,i.intCategoryId
+		,w.intTransactionFrom
 	FROM tblMFWorkOrder w
 	JOIN tblICItem i ON w.intItemId = i.intItemId
 	JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -100,6 +101,7 @@ BEGIN
 			,i.strLotTracking
 			,i.intItemId
 			,i.intCategoryId
+			,w.intTransactionFrom
 		FROM tblMFWorkOrder w
 		JOIN tblICItem i ON w.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -145,6 +147,7 @@ BEGIN
 			,i.strLotTracking
 			,i.intItemId
 			,i.intCategoryId
+			,w.intTransactionFrom
 		FROM tblMFWorkOrder w
 		JOIN tblICItem i ON w.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
