@@ -199,25 +199,12 @@ BEGIN
 		@intEmployeeId = [intEntityId]
 	FROM #tmpEmployees 
 
-	SELECT dblHoursEarned
-		,dblHoursAccrued
-	FROM tblPREmployeeTimeOff
-	WHERE intEntityEmployeeId = @intEntityEmployeeId
-		AND intTypeTimeOffId = @intTypeTimeOffId
-
 	--Update Accrued Hours
 	UPDATE tblPREmployeeTimeOff
 		SET dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour') THEN ISNULL(dblHoursAccrued,0) + T.dblAccruedHours ELSE 0 END
 	FROM #tmpEmployees T
 	WHERE T.[intEntityId] = @intEmployeeId
 		AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
-		AND intTypeTimeOffId = @intTypeTimeOffId
-		AND GETDATE() < T.dtmNextAward
-
-	SELECT dblHoursEarned
-		,dblHoursAccrued
-	FROM tblPREmployeeTimeOff
-	WHERE intEntityEmployeeId = @intEntityEmployeeId
 		AND intTypeTimeOffId = @intTypeTimeOffId
 
 	--Update Earned Hours
