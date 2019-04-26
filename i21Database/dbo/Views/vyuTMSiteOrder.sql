@@ -70,7 +70,7 @@ LEFT JOIN tblICItem D
 	ON A.intProduct = D.intItemId
 LEFT JOIN tblTMRoute F
 	ON A.intRouteId = F.intRouteId	
-INNER JOIN tblTMDispatch G
+LEFT JOIN tblTMDispatch G
 	ON A.intSiteID = G.intSiteID
 LEFT JOIN tblICCategory H
 	ON D.intCategoryId = H.intCategoryId	
