@@ -102,27 +102,34 @@ FROM
 				AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
 			ORDER BY dtmDate ASC
 		) FIFO 
-		LEFT OUTER JOIN (
+		OUTER APPLY (
 			SELECT
-			Lot.strLotNumber,
-			ISNULL(Lot.dblQty, 0) dblOnHand,
-			ISNULL(Lot.dblWeight, 0) dblWeight,
-			Lot.intItemLocationId,
-			Lot.intItemId,
-			Lot.intItemUOMId,
-			Lot.intWeightUOMId,
-			Lot.intStorageLocationId,
-			Lot.intSubLocationId,
-			Lot.intLotId
-		FROM tblICLot Lot
-			INNER JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
-		WHERE Item.strLotTracking <> 'No'
-		) lotted ON lotted.intItemId = cd.intItemId
-			AND lotted.intItemLocationId = cd.intItemLocationId
-			AND lotted.intItemUOMId = cd.intItemUOMId
-			AND lotted.intSubLocationId = cd.intSubLocationId
-			AND lotted.intStorageLocationId = cd.intStorageLocationId
-			AND lotted.strLotNumber = cd.strLotNo
+				Lot.strLotNumber,
+				ISNULL(lotQtyAsOf.dblQty, 0) dblOnHand,
+				ISNULL(lotQtyAsOf.dblWeight, 0) dblWeight,
+				Lot.intItemLocationId,
+				Lot.intItemId,
+				Lot.intItemUOMId,
+				Lot.intWeightUOMId,
+				Lot.intStorageLocationId,
+				Lot.intSubLocationId,
+				Lot.intLotId
+			FROM 
+				tblICLot Lot INNER JOIN tblICItem Item 
+					ON Item.intItemId = Lot.intItemId
+				OUTER APPLY dbo.fnICLotQtyAsOf (
+					Item.intItemId
+					,c.dtmCountDate
+				) lotQtyAsOf
+			WHERE Item.strLotTracking <> 'No'
+				AND Lot.intLotId = lotQtyAsOf.intLotId 
+				AND Lot.intItemId = cd.intItemId
+				AND Lot.intItemLocationId = cd.intItemLocationId
+				AND Lot.intItemUOMId = cd.intItemUOMId
+				AND Lot.intSubLocationId = cd.intSubLocationId
+				AND Lot.intStorageLocationId = cd.intStorageLocationId
+				AND Lot.strLotNumber = cd.strLotNo
+		) lotted 
 	WHERE c.ysnPosted != 1
 ) x
 --WHERE ((ROUND(x.dblNewOnHand - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
