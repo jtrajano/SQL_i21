@@ -67,22 +67,12 @@ END
 
 DROP TABLE #tmpCardNumbers
 
-SET @jsonData = '{"action":"' + @action  + '","change":"' + @action + ' ' + CONVERT(NVARCHAR(MAX),@count) + ' cards' + '","iconCls":"' + 'small-gear' + '","children":['+ @children +']}'
-INSERT INTO tblSMAuditLog (
-		strActionType,
-		strDescription,
-		strJsonData,
-		strRecordNo,
-		strTransactionType,
-		intEntityId,
-		intConcurrencyId,
-		dtmDate
-	) SELECT 
-		@action,
-		'',
-		@jsonData,
-		@keyValue,
-		@screenName,
-		@entityId,
-		1,
-		GETUTCDATE()
+
+exec uspSMAuditLog
+@screenName				 = @screenName,
+@keyValue				 = @keyValue,
+@entityId				 = @entityId,
+@actionType				 = @action,
+@changeDescription  	 = 'Locked Cards',
+@details				 = @children
+
