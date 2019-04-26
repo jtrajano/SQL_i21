@@ -1016,7 +1016,7 @@ FROM(
 					null 
 			 END dblCash
 			,dblFuturePrice as dblFuturesClosingPrice1
-			,CASE WHEN cd.intPricingTypeId=2 THEN 
+			,CASE WHEN cd.intPricingTypeId=2 and strPricingStatus='Unpriced' THEN 
 					dblFuturePrice
 				ELSE                                                        
 					case when cd.intPricingTypeId in(1,3) then isnull(p.dblFutures,0) else dblFuture end 
@@ -2169,7 +2169,7 @@ FROM(
 
 	SELECT 
 		*
-		,isnull(dblContractBasis,0) + (isnull(dblFutures,0) * isnull(dblContractRatio,1)) as dblContractPrice
+		,isnull(dblContractBasis,0) + (isnull(dblFutures,0)) * (case when isnull(dblContractRatio,0) =0 then 1 else dblContractRatio end) as dblContractPrice
 		--,convert(decimal(24,6),(isnull(dblAdjustedContractPrice,0)-isnull(dblMarketPrice,0))*isnull(dblResult1,0)) dblResult
 		,convert(decimal(24,6),((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0))*isnull(dblResultBasis1,0)) + convert(decimal(24,6),((isnull(dblFutures,0)- isnull(dblFuturePrice,0))*isnull(dblMarketFuturesResult1,0))) dblResult
 		,convert(decimal(24,6),((isnull(dblContractBasis,0)+isnull(dblCosts,0))-isnull(dblMarketBasis,0))*isnull(dblResultBasis1,0)) dblResultBasis
