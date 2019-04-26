@@ -4,7 +4,6 @@ AS
 
 SELECT  
 	 strCustomerNumber,
-	 strUserId
 	 intCustomerId, 
 	 strTempInvoiceReportNumber, 
 	 dblAccountTotalAmount , 
