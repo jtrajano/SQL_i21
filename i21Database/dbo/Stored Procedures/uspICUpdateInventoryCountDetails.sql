@@ -57,11 +57,11 @@ BEGIN
 			, Lot.intParentLotId
 			, ParentLot.strParentLotNumber
 			, ParentLot.strParentLotAlias
-			, intLotId
+			, Lot.intLotId 
 			, strLotNumber
 			, strLotAlias
-			, dblSystemCount = ISNULL(dblQty, 0)
-			, dblWeightQty = Lot.dblWeight
+			, dblSystemCount = ISNULL(lotQty.dblQty, 0)
+			, dblWeightQty = ISNULL(lotQty.dblWeight, 0)
 			, dblLastCost = 
 				-- Convert the last cost from Stock UOM to Lot's Pack UOM. 
 				dbo.fnCalculateCostBetweenUOM(
@@ -78,23 +78,32 @@ BEGIN
 			, intConcurrencyId = 1
 			, intSort = 1
 			, dblPhysicalCount = NULL
-	FROM	tblICLot Lot INNER JOIN tblICItem Item 
+	FROM	(
+				tblICLot Lot LEFT JOIN tblICParentLot ParentLot 
+					ON ParentLot.intParentLotId = Lot.intParentLotId
+			)	
+			INNER JOIN tblICItem Item 
 				ON Item.intItemId = Lot.intItemId
 			INNER JOIN tblICItemLocation ItemLocation 
 				ON ItemLocation.intItemLocationId = Lot.intItemLocationId
 			INNER JOIN tblICItemUOM StockUOM
 				ON StockUOM.intItemId = Item.intItemId
 				AND StockUOM.ysnStockUnit = 1
-			LEFT JOIN tblICParentLot ParentLot 
-				ON ParentLot.intParentLotId = Lot.intParentLotId
-	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
+			OUTER APPLY dbo.fnICLotQtyAsOf (
+				Item.intItemId
+				,@AsOfDate
+			) lotQty
+
+	WHERE 
+		Lot.intLotId = lotQty.intLotId 
+		AND (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
 		AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
 		AND (intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
 		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (Lot.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 		AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)			
 		AND Item.strLotTracking <> 'No'
-		AND ((dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND ((lotQty.dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1)) 
 END
 ELSE
 BEGIN
