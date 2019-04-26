@@ -88,23 +88,26 @@ BEGIN
 						,[strCustomerNumber]
 					)
 					SELECT 
-						[intContractId] = A4GLIdentity
-						,[strContractNumber] = vwcnt_cnt_no
-						,[strLocation] = vwcnt_loc_no
-						,[strItemOrClass] = vwcnt_itm_or_cls
-						,[strCustomerNumber] = vwcnt_cus_no
-					FROM vwcntmst
-					WHERE vwcnt_cus_no = @strCustomerNumber
-						AND vwcnt_loc_no <> ''000''
-						--AND vwcnt_loc_no = @strLocationNo
-						AND vwcnt_due_rev_dt >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
-						AND vwcnt_un_bal > 0
-						AND A4GLIdentity NOT IN (SELECT DISTINCT intContractID 
+						[intContractId] = vwcntmst.A4GLIdentity
+						,[strContractNumber] = vwcntmst.vwcnt_cnt_no
+						,[strLocation] = vwcntmst.vwcnt_loc_no
+						,[strItemOrClass] = vwcntmst.vwcnt_itm_or_cls
+						,[strCustomerNumber] = vwcntmst.vwcnt_cus_no
+					FROM vwcntmst, vwitmmst
+					WHERE vwcntmst.vwcnt_cus_no = @strCustomerNumber
+						AND vwcntmst.vwcnt_loc_no <> ''000''
+						--AND vwcntmst.vwcnt_loc_no = @strLocationNo
+						AND vwcntmst.vwcnt_due_rev_dt >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
+						AND vwcntmst.vwcnt_un_bal > 0
+						AND vwcntmst.A4GLIdentity NOT IN (SELECT DISTINCT intContractID 
 												FROM tblTMSiteLink
 												WHERE intSiteID <> @intSiteId
 													AND intContractID NOT IN (SELECT DISTINCT intContractID
 																			  FROM tblTMSiteLink
 																			  WHERE intSiteID = @intSiteId))
+						AND vwitmmst.vwitm_avail_tm = ''Y''
+						and vwitmmst.vwitm_no = vwcnt_itm_or_cls 
+						and vwitmmst.vwitm_loc_no = vwcnt_loc_no
 
 					---------------------------------------------------------------------------------------------
 					--Linked Site to Contract with Same Item and Contract Item is Available for TM
@@ -118,7 +121,7 @@ BEGIN
 					INNER JOIN vwcntmst A
 						ON A.A4GLIdentity = C.intContractID
 					INNER JOIN vwitmmst B
-						ON A.vwcnt_itm_or_cls = B.vwitm_no
+						ON A.vwcnt_itm_or_cls = B.vwitm_no AND vwitm_avail_tm = ''Y''
 					INNER JOIN @ContractTable E
 						ON A.A4GLIdentity = E.intContractId
 					INNER JOIN tblTMSite G
@@ -149,7 +152,7 @@ BEGIN
 					INNER JOIN vwcntmst A
 						ON A.A4GLIdentity = C.intContractID
 					INNER JOIN vwitmmst B
-						ON A.vwcnt_itm_or_cls = B.vwitm_no
+						ON A.vwcnt_itm_or_cls = B.vwitm_no AND vwitm_avail_tm = ''Y''
 					INNER JOIN @ContractTable E
 						ON A.A4GLIdentity = E.intContractId
 					INNER JOIN @ItemTable F
@@ -173,7 +176,11 @@ BEGIN
 						,@ysnMaxPrice = A.ysnMaxPrice
 						,@dblPrice = A.vwcnt_un_prc
 					FROM vwcntmst A
-		
+					
+					INNER JOIN vwitmmst I
+						ON I.vwitm_avail_tm = ''Y''
+						and I.vwitm_no = A.vwcnt_itm_or_cls 
+						and I.vwitm_loc_no = A.vwcnt_loc_no
 					INNER JOIN tblTMSiteLink C
 						ON A.A4GLIdentity = C.intContractID
 					INNER JOIN @ContractTable E
@@ -199,7 +206,7 @@ BEGIN
 						,@dblPrice = A.vwcnt_un_prc
 					FROM vwcntmst A
 					INNER JOIN vwitmmst B
-						ON A.vwcnt_itm_or_cls = B.vwitm_no
+						ON A.vwcnt_itm_or_cls = B.vwitm_no AND vwitm_avail_tm = ''Y''
 					INNER JOIN @ContractTable E
 						ON A.A4GLIdentity = E.intContractId
 					INNER JOIN @ItemTable F
@@ -228,7 +235,7 @@ BEGIN
 							,@dblPrice = A.vwcnt_un_prc
 						FROM vwcntmst A
 						INNER JOIN vwitmmst B
-							ON A.vwcnt_itm_or_cls = B.vwitm_no
+							ON A.vwcnt_itm_or_cls = B.vwitm_no AND vwitm_avail_tm = ''Y''
 						INNER JOIN @ContractTable E
 							ON A.A4GLIdentity = E.intContractId
 						INNER JOIN @ItemTable F
@@ -255,6 +262,11 @@ BEGIN
 							,@ysnMaxPrice = A.ysnMaxPrice
 							,@dblPrice = A.vwcnt_un_prc
 						FROM vwcntmst A
+						
+						INNER JOIN vwitmmst I
+							ON I.vwitm_avail_tm = ''Y''
+							and I.vwitm_no = A.vwcnt_itm_or_cls 
+							and I.vwitm_loc_no = A.vwcnt_loc_no
 						INNER JOIN @ContractTable E
 							ON A.A4GLIdentity = E.intContractId
 						
@@ -277,7 +289,7 @@ BEGIN
 						,@dblPrice = A.vwcnt_un_prc
 					FROM vwcntmst A
 					INNER JOIN vwitmmst B
-						ON A.vwcnt_itm_or_cls = B.vwitm_class
+						ON A.vwcnt_itm_or_cls = B.vwitm_class AND vwitm_avail_tm = ''Y''
 					INNER JOIN @ContractTable E
 						ON A.A4GLIdentity = E.intContractId
 					INNER JOIN @ItemTable F
