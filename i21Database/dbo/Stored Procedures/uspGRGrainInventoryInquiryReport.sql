@@ -81,6 +81,67 @@ DECLARE @tblCommodities TABLE
 	,strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 
+DECLARE @tblStorageQuantitiesMain TABLE
+(
+	intCommodityId INT
+	,intDPIHeaderId INT
+	,strStorageTypeDescriptionA NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionB NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionC NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionD NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionE NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionF NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionG NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionH NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionI NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionJ NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strStorageTypeDescriptionK NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,dtmTransactionDate DATETIME
+	,dblReceived DECIMAL(18,6)
+	,dblShipped DECIMAL(18,6)
+	,dblIssuedA DECIMAL(18,6)
+	,dblIssuedB DECIMAL(18,6)
+	,dblIssuedC DECIMAL(18,6)
+	,dblIssuedD DECIMAL(18,6)
+	,dblIssuedE DECIMAL(18,6)
+	,dblIssuedF DECIMAL(18,6)
+	,dblIssuedG DECIMAL(18,6)
+	,dblIssuedH DECIMAL(18,6)
+	,dblIssuedI DECIMAL(18,6)
+	,dblIssuedJ DECIMAL(18,6)
+	,dblIssuedK DECIMAL(18,6)
+	,dblCancelledA DECIMAL(18,6)
+	,dblCancelledB DECIMAL(18,6)
+	,dblCancelledC DECIMAL(18,6)
+	,dblCancelledD DECIMAL(18,6)
+	,dblCancelledE DECIMAL(18,6)
+	,dblCancelledF DECIMAL(18,6)
+	,dblCancelledG DECIMAL(18,6)
+	,dblCancelledH DECIMAL(18,6)
+	,dblCancelledI DECIMAL(18,6)
+	,dblCancelledJ DECIMAL(18,6)
+	,dblCancelledK DECIMAL(18,6)
+	,dblQuantityA DECIMAL(18,6)
+	,dblQuantityB DECIMAL(18,6)
+	,dblQuantityC DECIMAL(18,6)
+	,dblQuantityD DECIMAL(18,6)
+	,dblQuantityE DECIMAL(18,6)
+	,dblQuantityF DECIMAL(18,6)
+	,dblQuantityG DECIMAL(18,6)
+	,dblQuantityH DECIMAL(18,6)
+	,dblQuantityI DECIMAL(18,6)
+	,dblQuantityJ DECIMAL(18,6)
+	,dblQuantityK DECIMAL(18,6)
+)
+
+DECLARE @tblStorageQuantities TABLE
+(
+	dtmTransactionDate DATETIME
+	,dblIssued DECIMAL(18,6)
+	,dblCancelled DECIMAL(18,6)
+	,dblQuantity DECIMAL(18,6)
+)
+
 SET @dtmReportDate = CASE WHEN @dtmReportDate IS NULL THEN dbo.fnRemoveTimeOnDate(GETDATE()) ELSE @dtmReportDate END
 SET @intCommodityId = CASE WHEN @intCommodityId = 0 THEN NULL ELSE @intCommodityId END
 SET @intLocationId = CASE WHEN @intLocationId = 0 THEN NULL ELSE @intLocationId END
@@ -110,76 +171,7 @@ GROUP BY strCommodityCode
 	,intCommodityId
 /*==END==INVENTORY BALANCE==*/
 
-/*==START==RECEIVED AND SHIPPED==*/
-DECLARE @tblDateList TABLE (Id INT IDENTITY(1,1), DateData DATETIME)
-DECLARE @StartDateTime DATETIME
-DECLARE @EndDateTime DATETIME
-SET @StartDateTime = @dtmReportDate
-SET @EndDateTime = @dateToday;
-
-WITH DateRange(DateData) AS (
-    SELECT @StartDateTime as Date
-    UNION ALL
-    SELECT DATEADD(d,1,DateData)
-    FROM DateRange 
-    WHERE DateData < @EndDateTime
-)
-INSERT INTO @tblDateList(DateData)
-SELECT DateData FROM DateRange
-OPTION (MAXRECURSION 0)
-
-DECLARE @tblResult TABLE 
-(
-	Id INT IDENTITY(1,1)
-	,intRowNum INT
-	,dtmDate DATETIME
-	,[Distribution] NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	,[Unpaid IN] NUMERIC(24,10)
-	,[Unpaid Out] NUMERIC(24,10)
-	,[Unpaid Balance] NUMERIC(24,10)
-	,[Paid Balance] NUMERIC(24,10)
-	,[InventoryBalanceCarryForward] NUMERIC(24,10)
-	,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	,intReceiptId INT
-)
-
-DECLARE @tblFirstResult TABLE
- (
-	Id INT identity(1,1)
-	,intRowNum INT
-	,dtmDate DATETIME
-	,tranShipQty NUMERIC(24,10)
-	,tranRecQty NUMERIC(24,10)
-	,dblAdjustmentQty NUMERIC(24,10)
-	,dblCountQty NUMERIC(24,10)
-	,dblInvoiceQty NUMERIC(24,10)
-	,BalanceForward NUMERIC(24,10)
-	,dblSalesInTransit NUMERIC(24,10)
-	,tranDSInQty NUMERIC(24,10)
-)
-
-DECLARE @tblResultFinal TABLE 
-(
-	Id INT IDENTITY(1,1)
-	,dtmDate DATETIME
-	,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	,dblUnpaidIn NUMERIC(24,10)
-	,dblUnpaidOut NUMERIC(24,10)
-	,dblUnpaidBalance NUMERIC(24,10)
-	,dblPaidBalance NUMERIC(24,10)
-	,BalanceForward NUMERIC(24,10)
-	,InventoryBalanceCarryForward NUMERIC(24,10)
-)
-
-DECLARE @tblConsolidatedResult TABLE 
-(
-	Id INT IDENTITY(1,1)
-	,dtmDate DATETIME
-	,[Receive In] NUMERIC(24,10)
-	,[Ship Out] NUMERIC(24,10)
-	,tranDSInQty NUMERIC(24,10)
-)
-
+/*==START==GENERATE DPI==*/
 INSERT INTO @tblCommodities
 SELECT DISTINCT
 	CO.intCommodityId
@@ -199,120 +191,55 @@ BEGIN
 		,@strCommodityCode	= strCommodityCode
 	FROM @tblCommodities
 
-	-- Customer Ownership START
-	EXEC uspRKGetCustomerOwnership @dtmFromTransactionDate = @dtmReportDate
+	EXEC uspRKGenerateDPI
+		@dtmFromTransactionDate = @dtmReportDate
 		,@dtmToTransactionDate = @dateToday
 		,@intCommodityId = @intCommodityId2
-		,@intItemId = 0
-		,@strPositionIncludes = 'All storage'
+		,@intItemId = NULL
+		,@strPositionIncludes = 'All Storage'
 		,@intLocationId = @intLocationId
-	
-	DELETE FROM @tblResult
-	-- Customer ownershiip END
-	INSERT INTO @tblResult 
-	(
-		intRowNum
-		,dtmDate
-		,[Distribution]
-		,[Unpaid IN]
-		,[Unpaid Out]
-		,[Unpaid Balance]
-		,[Paid Balance]
-		,InventoryBalanceCarryForward
-		,strReceiptNumber
-		,intReceiptId
-	)
-	EXEC uspRKGetCompanyOwnership @dtmFromTransactionDate = @dtmReportDate
-		,@dtmToTransactionDate = @dateToday
-		,@intCommodityId = @intCommodityId2
-		,@intItemId = 0
-		,@strPositionIncludes = 'All storage'
-		,@intLocationId = @intLocationId
-
-	DELETE FROM @tblFirstResult
-	INSERT INTO @tblFirstResult 
-	(
-		dtmDate
-		,tranShipQty
-		,tranRecQty
-		,dblAdjustmentQty
-		,dblCountQty
-		,dblInvoiceQty
-		,BalanceForward
-		,dblSalesInTransit
-		,tranDSInQty
-	)
-	EXEC uspRKGetInventoryBalance @dtmFromTransactionDate = @dtmReportDate
-		, @dtmToTransactionDate = @dateToday
-		, @intCommodityId = @intCommodityId2
-		, @intItemId = 0
-		, @strPositionIncludes = 'All storage'
-		, @intLocationId = @intLocationId
-	
-	DELETE FROM @tblResultFinal 
-	INSERT INTO @tblResultFinal 
-	(
-		dtmDate
-		,dblUnpaidIn
-		,dblUnpaidOut
-		,BalanceForward
-		,dblUnpaidBalance
-		,dblPaidBalance
-		,InventoryBalanceCarryForward
-	)
-	SELECT
-		dtmDate
-		,tranRecQty						= SUM([Unpaid IN])
-		,tranShipQty					= SUM([Unpaid Out])
-		,dblUnpaidBalance				= SUM([Unpaid Balance])
-		,[Unpaid Balance]				= (SELECT SUM([Unpaid Balance]) FROM @tblResult AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(T1.dtmDate,'01/01/1900'))
-		,dblPaidBalance					= SUM(T1.[Paid Balance])
-		,InventoryBalanceCarryForward	= SUM(InventoryBalanceCarryForward)
-	FROM @tblResult T1 
-	GROUP BY dtmDate	
-
-	DELETE FROM @tblConsolidatedResult 
-	INSERT INTO @tblConsolidatedResult 
-	(
-		dtmDate
-		,[Receive In]
-		,[Ship Out]
-	)
+		,@GUID = @guid
+		
+	INSERT INTO @tblStorageQuantitiesMain
 	SELECT 
-		ISNULL(a.dtmDate,b.dtmDate) [Date]
-		,ISNULL(a.tranRecQty, 0) [Receive In]
-		,ISNULL(a.tranShipQty, 0) [Ship Out]
-	FROM @tblFirstResult a
-	FULL JOIN @tblResultFinal b 
-		ON a.dtmDate = b.dtmDate 
-	ORDER BY b.dtmDate
-		,a.dtmDate ASC
+		@intCommodityId2
+		,A.intDPIHeaderId
+		,A.strDistributionA,A.strDistributionB,A.strDistributionC,A.strDistributionD,A.strDistributionE,A.strDistributionF,A.strDistributionG,A.strDistributionH,A.strDistributionI,A.strDistributionJ,A.strDistributionK		
+		,A.dtmTransactionDate
+		,A.dblReceiveIn
+		,A.dblShipOut
+		,A.dblAIn,A.dblBIn,A.dblCIn,A.dblDIn,A.dblEIn,A.dblFIn,A.dblGIn,A.dblHIn,A.dblIIn,A.dblJIn,A.dblKIn
+		,A.dblAOut,A.dblBOut,A.dblCOut,A.dblDOut,A.dblEOut,A.dblFOut,A.dblGOut,A.dblHOut,A.dblIOut,A.dblJOut,A.dblKOut
+		,A.dblANet,A.dblBNet,A.dblCNet,A.dblDNet,A.dblENet,A.dblFNet,A.dblGNet,A.dblHNet,A.dblINet,A.dblJNet,A.dblKNet
+	FROM tblRKDPISummary A
+	INNER JOIN tblRKDPIHeader B
+		ON B.intDPIHeaderId = A.intDPIHeaderId
+	WHERE B.imgReportId = @guid	
 
-	SELECT CONVERT(INT,ROW_NUMBER() OVER (ORDER BY dtmDate)) intRowNum
-		, *
-	INTO #final
-	FROM (
-		SELECT DISTINCT 
-			dtmDate
-			,dblReceiveIn	= [Receive In] + ISNULL(tranDSInQty, 0)
-			,dblShipOut		= ISNULL([Ship Out], 0)
-		FROM (
-			SELECT 
-				dtmDate
-				,[Receive In]
-				,tranDSInQty
-				,[Ship Out]
-			FROM (
-				SELECT DateData dtmDate
-					,[Receive In]
-					,tranDSInQty
-					,[Ship Out]
-				FROM @tblConsolidatedResult T1
-				FULL JOIN @tblDateList list 
-					ON T1.dtmDate = list.DateData
-			)t 
-		)t1
-	)t2 ORDER BY dtmDate
+	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
+END
+
+/*==END==GENERATE DPI*/
+
+/*==START==RECEIVED AND SHIPPED==*/
+INSERT INTO @tblCommodities
+SELECT DISTINCT
+	CO.intCommodityId
+	,ID.strCommodityCode
+FROM @InventoryData ID
+INNER JOIN tblICCommodity CO
+	ON CO.strCommodityCode = ID.strCommodityCode COLLATE Latin1_General_CI_AS
+WHERE strLabel = 'INVENTORY BALANCE'
+
+WHILE EXISTS(SELECT TOP 1 1 FROM @tblCommodities)
+BEGIN
+	SET @intCommodityId2 = NULL
+	SET @strCommodityCode = NULL
+	
+	SELECT TOP 1
+		@intCommodityId2	= intCommodityId
+		,@strCommodityCode	= strCommodityCode
+	FROM @tblCommodities
 
 	INSERT INTO @InventoryData
 	SELECT 
@@ -324,21 +251,9 @@ BEGIN
 		,@intCommodityId2
 	FROM (
 		SELECT 
-			dblReceiveIn = SUM(dblReceiveIn)
-		FROM (	
-			SELECT	 	
-				dtmDate
-				,dblReceiveIn
-			FROM (
-				SELECT 
-					dtmDate			= list.dtmDate
-					,dblReceiveIn
-				FROM #final list
-				FULL JOIN tblRKDailyPositionForCustomer t 
-					ON ISNULL(t.dtmDate,'1900-01-01') = ISNULL(list.dtmDate,'1900-01-01')
-				WHERE list.dtmDate > @dtmReportDate
-			)t
-		) A
+			dblReceiveIn = SUM(dblReceived)
+		FROM @tblStorageQuantitiesMain
+		WHERE intCommodityId = @intCommodityId2
 	) B
 
 
@@ -352,21 +267,9 @@ BEGIN
 		,@intCommodityId2
 	FROM (
 		SELECT
-			dblShipOut = SUM(dblShipOut)
-		FROM (	
-			SELECT	 	
-				dtmDate
-				,dblShipOut
-			FROM (
-				SELECT 
-					dtmDate			= list.dtmDate
-					,dblShipOut		= ABS(dblShipOut)
-				FROM #final list
-				FULL JOIN tblRKDailyPositionForCustomer t 
-					ON ISNULL(t.dtmDate,'1900-01-01') = ISNULL(list.dtmDate,'1900-01-01')
-				WHERE list.dtmDate > @dtmReportDate
-			)t
-		) A
+			dblShipOut = SUM(dblShipped)
+		FROM @tblStorageQuantitiesMain
+		WHERE intCommodityId = @intCommodityId2
 	)B
 
 	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
@@ -445,7 +348,7 @@ SELECT
 	,strStorageTypeDescription 
 FROM tblGRStorageType 
 WHERE intStorageScheduleTypeId > 0 
-	AND ysnCustomerStorage = 0 
+	--AND ysnCustomerStorage = 0 
 	AND ysnDPOwnedType = 0
 
 DECLARE @StorageObligationData TABLE
@@ -498,6 +401,64 @@ BEGIN
 		) ST		
 		WHERE intRowCnt = @intCnt
 
+		DELETE FROM @tblStorageQuantities
+
+		INSERT INTO @tblStorageQuantities
+		SELECT dtmTransactionDate,dblIssuedA,dblCancelledA,dblQuantityA
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionA = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedB,dblCancelledB,dblQuantityB
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionB = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedC,dblCancelledC,dblQuantityC
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionC = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedD,dblCancelledD,dblQuantityD
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionD = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedE,dblCancelledE,dblQuantityE
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionE = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedF,dblCancelledF,dblQuantityF
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionF = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedG,dblCancelledG,dblQuantityG
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionG = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedH,dblCancelledH,dblQuantityH
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionH = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedI,dblCancelledI,dblQuantityI
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionI = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedJ,dblCancelledJ,dblQuantityJ
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionJ = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2
+		UNION ALL
+		SELECT dtmTransactionDate,dblIssuedK,dblCancelledK,dblQuantityK
+		FROM @tblStorageQuantitiesMain
+		WHERE strStorageTypeDescriptionK = @strStorageTypeDescription
+			AND intCommodityId = @intCommodityId2		
+
 		SET @intTotalRowCnt = CASE WHEN (SELECT ISNULL(MAX(intRowNum),0) FROM @StorageObligationData) = 0 THEN 8 ELSE (SELECT MAX(intRowNum) FROM @StorageObligationData) END
 
 		INSERT INTO @StorageObligationData
@@ -506,26 +467,16 @@ BEGIN
 			,@intStorageScheduleTypeId
 			,@strStorageTypeDescription + ' BALANCE'
 			,'' AS [Sign]
-			,0
+			,NULL
 			,@strCommodityCode
 			,@intCommodityId2
 
 		UPDATE @StorageObligationData
-		SET dblUnits = CASE WHEN A.Units = 0 THEN NULL ELSE A.Units END
+		SET dblUnits = dblQuantity
 		FROM (
-			SELECT
-				SUM(A.dblOpenBalance) AS Units
-			FROM tblGRCustomerStorage  A
-			INNER JOIN tblGRStorageType B
-				ON A. intStorageTypeId = B.intStorageScheduleTypeId  
-			INNER JOIN tblICCommodity C
-				ON A.intCommodityId = C.intCommodityId
-			INNER JOIN tblSMCompanyLocation CL
-				ON CL.intCompanyLocationId = A.intCompanyLocationId 
-			WHERE C.intCommodityId = @intCommodityId2
-				AND A.intCompanyLocationId = ISNULL(@intLocationId,A.intCompanyLocationId)
-				AND A.dtmDeliveryDate BETWEEN @dtmReportDate AND @dateToday
-				AND A.intStorageTypeId = @intStorageScheduleTypeId
+			SELECT TOP 1 dblQuantity
+			FROM @tblStorageQuantities
+			ORDER BY dtmTransactionDate DESC
 		) A
 		WHERE strCommodityCode = @strCommodityCode
 			AND strLabel = @strStorageTypeDescription + ' BALANCE'
@@ -536,29 +487,15 @@ BEGIN
 			,@intStorageScheduleTypeId
 			,@strStorageTypeDescription + ' ISSUED'
 			,'+' AS [Sign]
-			,0
+			,NULL
 			,@strCommodityCode
 			,@intCommodityId2
 
 		UPDATE @StorageObligationData
-		SET dblUnits = B.Units
+		SET dblUnits = dblIssued
 		FROM (
-			SELECT
-				SUM(ABS(A.dblUnits)) AS Units
-			FROM tblGRStorageHistory A 
-			INNER JOIN tblGRCustomerStorage B
-				ON A.intCustomerStorageId  = B.intCustomerStorageId
-			INNER JOIN tblGRStorageType C
-				ON B.intStorageTypeId = C.intStorageScheduleTypeId
-			INNER JOIN tblICCommodity D
-				ON D.intCommodityId = B.intCommodityId
-			INNER JOIN tblSMCompanyLocation CL
-				ON CL.intCompanyLocationId = B.intCompanyLocationId 
-			WHERE (A.intTransactionTypeId = 5 OR A.strType = 'From Transfer')
-				AND D.intCommodityId = @intCommodityId2
-				AND A.dtmHistoryDate BETWEEN @dtmReportDate AND @dateToday
-				AND B.intCompanyLocationId = ISNULL(@intLocationId,B.intCompanyLocationId)
-				AND B.intStorageTypeId = @intStorageScheduleTypeId
+			SELECT SUM(dblIssued) dblIssued
+			FROM @tblStorageQuantities
 		) B
 		WHERE strCommodityCode = @strCommodityCode
 			AND strLabel = @strStorageTypeDescription + ' ISSUED'
@@ -569,30 +506,15 @@ BEGIN
 			,@intStorageScheduleTypeId
 			,@strStorageTypeDescription + ' CANCELLED'
 			,'-' AS [Sign]
-			,0
+			,NULL
 			,@strCommodityCode
 			,@intCommodityId2
 		
 		UPDATE @StorageObligationData
-		SET dblUnits = C.Units
+		SET dblUnits = dblCancelled
 		FROM (
-			SELECT
-				SUM(CASE WHEN B.ysnTransferStorage = 1 AND A.strType = 'Transfer' THEN 0 ELSE ABS(A.dblUnits) END) AS Units
-			FROM tblGRStorageHistory A 
-			INNER JOIN tblGRCustomerStorage B
-				ON A.intCustomerStorageId  = B.intCustomerStorageId
-			INNER JOIN tblGRStorageType C
-				ON B.intStorageTypeId = C.intStorageScheduleTypeId
-			INNER JOIN tblICCommodity D
-				ON D.intCommodityId = B.intCommodityId
-			INNER JOIN tblSMCompanyLocation CL
-				ON CL.intCompanyLocationId = B.intCompanyLocationId 
-			WHERE A.intTransactionTypeId NOT IN (2,6)
-				AND A.strType IN ('Settlement', 'Transfer', 'Storage Adjustment', 'From Inventory Adjustment')
-				AND D.intCommodityId = @intCommodityId2
-				AND A.dtmHistoryDate BETWEEN @dtmReportDate AND @dateToday
-				AND B.intCompanyLocationId = ISNULL(@intLocationId,B.intCompanyLocationId)
-				AND B.intStorageTypeId = @intStorageScheduleTypeId
+			SELECT SUM(dblCancelled) dblCancelled
+			FROM @tblStorageQuantities
 		) C
 		WHERE strCommodityCode = @strCommodityCode
 			AND strLabel = @strStorageTypeDescription + ' CANCELLED'
@@ -727,32 +649,80 @@ BEGIN
 	FROM tblGRStorageType
 	WHERE ysnDPOwnedType = 1
 
+	DELETE FROM @tblStorageQuantities
+
+	INSERT INTO @tblStorageQuantities
+	SELECT dtmTransactionDate,dblIssuedA,dblCancelledA,dblQuantityA
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionA = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedB,dblCancelledB,dblQuantityB
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionB = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedC,dblCancelledC,dblQuantityC
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionC = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedD,dblCancelledD,dblQuantityD
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionD = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedE,dblCancelledE,dblQuantityE
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionE = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedF,dblCancelledF,dblQuantityF
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionF = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedG,dblCancelledG,dblQuantityG
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionG = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedH,dblCancelledH,dblQuantityH
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionH = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedI,dblCancelledI,dblQuantityI
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionI = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedJ,dblCancelledJ,dblQuantityJ
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionJ = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+	UNION ALL
+	SELECT dtmTransactionDate,dblIssuedK,dblCancelledK,dblQuantityK
+	FROM @tblStorageQuantitiesMain
+	WHERE strStorageTypeDescriptionK = @strStorageTypeDescription
+		AND intCommodityId = @intCommodityId2
+
 	INSERT INTO @StorageObligationData
 	SELECT 
 		@intTotalRowCnt + 16
 		,@intStorageScheduleTypeId
 		,@strStorageTypeDescription + ' BALANCE'
 		,'' AS [Sign]
-		,0
+		,NULL
 		,@strCommodityCode
 		,@intCommodityId2
 
 	UPDATE @StorageObligationData
-	SET dblUnits = A.Units
+	SET dblUnits = dblQuantity
 	FROM (
-		SELECT
-			SUM(A.dblOpenBalance) AS Units
-		FROM tblGRCustomerStorage  A
-		INNER JOIN tblGRStorageType B
-			ON A. intStorageTypeId = B.intStorageScheduleTypeId  
-		INNER JOIN tblICCommodity C
-			ON A.intCommodityId = C.intCommodityId
-		INNER JOIN tblSMCompanyLocation CL
-			ON CL.intCompanyLocationId = A.intCompanyLocationId 
-		WHERE C.intCommodityId = @intCommodityId2
-			AND A.intCompanyLocationId = ISNULL(@intLocationId,A.intCompanyLocationId)
-			AND A.dtmDeliveryDate BETWEEN @dtmReportDate AND @dateToday
-			AND A.intStorageTypeId = @intStorageScheduleTypeId
+		SELECT TOP 1 dblQuantity
+		FROM @tblStorageQuantities
+		ORDER BY dtmTransactionDate DESC
 	) A
 	WHERE strCommodityCode = @strCommodityCode
 		AND strLabel = @strStorageTypeDescription + ' BALANCE'
@@ -768,24 +738,10 @@ BEGIN
 		,@intCommodityId2
 
 	UPDATE @StorageObligationData
-	SET dblUnits = B.Units
+	SET dblUnits = dblIssued
 	FROM (
-		SELECT
-			SUM(ABS(A.dblUnits)) AS Units
-		FROM tblGRStorageHistory A 
-		INNER JOIN tblGRCustomerStorage B
-			ON A.intCustomerStorageId  = B.intCustomerStorageId
-		INNER JOIN tblGRStorageType C
-			ON B.intStorageTypeId = C.intStorageScheduleTypeId
-		INNER JOIN tblICCommodity D
-			ON D.intCommodityId = B.intCommodityId
-		INNER JOIN tblSMCompanyLocation CL
-			ON CL.intCompanyLocationId = B.intCompanyLocationId 
-		WHERE A.intTransactionTypeId = 5
-			AND D.intCommodityId = @intCommodityId2
-			AND A.dtmHistoryDate BETWEEN @dtmReportDate AND @dateToday
-			AND B.intCompanyLocationId = ISNULL(@intLocationId,B.intCompanyLocationId)
-			AND B.intStorageTypeId = @intStorageScheduleTypeId
+		SELECT SUM(dblIssued) dblIssued
+		FROM @tblStorageQuantities
 	) B
 	WHERE strCommodityCode = @strCommodityCode
 		AND strLabel = @strStorageTypeDescription + ' ISSUED'
@@ -801,25 +757,10 @@ BEGIN
 		,@intCommodityId2
 
 	UPDATE @StorageObligationData
-	SET dblUnits = C.Units
+	SET dblUnits = dblCancelled
 	FROM (
-		SELECT
-			SUM(CASE WHEN B.ysnTransferStorage = 1 AND A.strType = 'Transfer' THEN 0 ELSE ABS(A.dblUnits) END) AS Units
-		FROM tblGRStorageHistory A 
-		INNER JOIN tblGRCustomerStorage B
-			ON A.intCustomerStorageId  = B.intCustomerStorageId
-		INNER JOIN tblGRStorageType C
-			ON B.intStorageTypeId = C.intStorageScheduleTypeId
-		INNER JOIN tblICCommodity D
-			ON D.intCommodityId = B.intCommodityId
-		INNER JOIN tblSMCompanyLocation CL
-			ON CL.intCompanyLocationId = B.intCompanyLocationId 
-		WHERE A.intTransactionTypeId NOT IN (2,6)
-			AND A.strType IN ('Settlement', 'Transfer', 'Storage Adjustment')
-			AND D.intCommodityId = @intCommodityId2
-			AND A.dtmHistoryDate BETWEEN @dtmReportDate AND @dateToday
-			AND B.intCompanyLocationId = ISNULL(@intLocationId,B.intCompanyLocationId)
-			AND B.intStorageTypeId = @intStorageScheduleTypeId
+		SELECT SUM(dblCancelled) dblCancelled
+		FROM @tblStorageQuantities
 	) C
 	WHERE strCommodityCode = @strCommodityCode
 		AND strLabel = @strStorageTypeDescription + ' CANCELLED'
