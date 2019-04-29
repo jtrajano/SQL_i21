@@ -416,3 +416,16 @@ BEGIN
 	END
 	')
 END
+
+/*
+* Paycheck - PR-1854
+* 1. Remove 'VOIDED' prefix on Reference No. on Paycheck
+* 2...
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblPRPaycheck') AND name = 'strReferenceNo')
+BEGIN
+	EXEC('
+	UPDATE tblPRPaycheck SET strReferenceNo = REPLACE(strReferenceNo,''Voided-'','''')
+	WHERE CHARINDEX(''Voided'', strReferenceNo) > 0
+	')
+END

@@ -94,6 +94,8 @@ FROM 	tblICItem i
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
 		LEFT JOIN tblSMCompanyLocation [Location] 
 			ON [Location].intCompanyLocationId = t.intLocationId
+		LEFT JOIN tblICItemLocation ItemLocation
+			ON ItemLocation.intItemLocationId = t.intItemLocationId
 		LEFT JOIN (SELECT 
 					intCompanyLocationSubLocationId
 					,strSubLocationName
@@ -103,8 +105,9 @@ FROM 	tblICItem i
 					FROM tblSMCompanyLocationSubLocation
 			) subLoc
 			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
+		
 		LEFT JOIN tblICCostingMethod CostingMethod
-			ON CostingMethod.intCostingMethodId = t.intCostingMethod
+			ON CostingMethod.intCostingMethodId = ItemLocation.intCostingMethod
 		LEFT JOIN (
 			tblICItemUOM iuTransUOM INNER JOIN tblICUnitMeasure umTransUOM
 				ON umTransUOM.intUnitMeasureId = iuTransUOM.intUnitMeasureId			

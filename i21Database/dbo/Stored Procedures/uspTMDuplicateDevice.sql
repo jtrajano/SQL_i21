@@ -54,6 +54,7 @@ BEGIN
 		,intApplianceTypeID
 		,intLocationId
 		,intLeaseId
+		,intManufacturerId
 	)
 	SELECT 
 		strSerialNumber = @strSerialNumberToUse
@@ -87,6 +88,7 @@ BEGIN
 		,intApplianceTypeID
 		,intLocationId
 		,intLeaseId = NULL
+		,intManufacturerId
 	FROM tblTMDevice
 	WHERE intDeviceId = @DeviceId
 	

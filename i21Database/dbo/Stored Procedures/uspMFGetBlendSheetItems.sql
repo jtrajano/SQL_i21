@@ -3,7 +3,9 @@
 	@intLocationId int,
 	@dblQtyToProduce decimal(38,20),
 	@dtmDueDate DateTime,
-	@strHandAddIngredientXml nvarchar(max)=''
+	@strHandAddIngredientXml nvarchar(max)='',
+	@intWorkOrderId int=NULL
+	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -218,6 +220,18 @@ Join tblMFRecipeSubstituteItem rs on rs.intSubstituteItemId=sr.intItemId
 where rs.intRecipeId=@intRecipeId AND ISNULL(sr.ysnPosted,0)=0
 group by rs.intSubstituteItemId
 
+Declare @tblConfirmedQty table
+(
+	intItemId int,
+	dblConfirmedQty numeric(38,20)
+)
+
+Insert into @tblConfirmedQty(intItemId,dblConfirmedQty)
+Select intItemId, SUM(dblQuantity)
+From tblMFWorkOrderConsumedLot
+Where intWorkOrderId=@intWorkOrderId and IsNULL(ysnStaged,0) =1
+Group by intItemId
+
 Select i.intItemId,i.strItemNo,i.strDescription,a.dblRequiredQty,ISNULL(b.dblPhysicalQty,0) AS dblPhysicalQty,
 ISNULL(c.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0) AS dblAvailableQty,
 0.0 AS dblSelectedQty,
@@ -226,9 +240,10 @@ a.ysnIsSubstitute,a.intParentItemId,a.ysnHasSubstitute,a.intRecipeItemId,a.intPa
 a.dblLowerToleranceQty,a.dblUpperToleranceQty,
 a.ysnMinorIngredient,a.ysnScaled,a.dblRecipeQty,
 a.dblRecipeItemQty,a.strRecipeItemUOM,a.strConsumptionStorageLocation,a.intConsumptionMethodId,ISNULL(i.ysnHandAddIngredient,0) AS ysnHandAddIngredient,@intRecipeId AS intRecipeId,a.intConsumptionStorageLocationId,
-@intManufacturingProcessId AS intManufacturingProcessId,@strBlendItemLotTracking AS strBlendItemLotTracking
+@intManufacturingProcessId AS intManufacturingProcessId,@strBlendItemLotTracking AS strBlendItemLotTracking,IsNULL(cq.dblConfirmedQty,0) AS dblConfirmedQty
 from @tblRequiredQty a 
 Left Join @tblPhysicalQty b on a.intItemId=b.intItemId
 Left Join @tblReservedQty c on a.intItemId=c.intItemId
 Join tblICItem i on a.intItemId=i.intItemId
+Left JOIN @tblConfirmedQty cq on cq.intItemId=i.intItemId
 
