@@ -58,6 +58,7 @@ FROM (
 		,TR.strPropertyValue
 	FROM tblQMTestResult TR
 	INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+		AND ISNUMERIC(TR.strPropertyValue) = 1
 		AND P.strPropertyName IN (
 			'Moisture'
 			,'Density'
