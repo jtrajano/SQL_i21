@@ -56,13 +56,13 @@ DECLARE  @totalRecords INT = 0
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
-IF ISNULL(@RaiseError,0) = 0	
-BEGIN
+--IF ISNULL(@RaiseError,0) = 0	
+--BEGIN
 	IF @InitTranCount = 0
 		BEGIN TRANSACTION
 	ELSE
 		SAVE TRANSACTION @Savepoint
-END
+--END
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 SET @Success = 1
@@ -1228,8 +1228,8 @@ END
 	RETURN 1;
 
 Do_Rollback:
-	IF @RaiseError = 0
-		BEGIN
+	--IF @RaiseError = 0
+	--	BEGIN
 			IF @InitTranCount = 0
 				IF (XACT_STATE()) <> 0
 					ROLLBACK TRANSACTION
@@ -1270,7 +1270,7 @@ Do_Rollback:
 					IF (XACT_STATE()) = -1
 						ROLLBACK TRANSACTION  @CurrentSavepoint
 				END	
-		END
+		--END
 	IF @RaiseError = 1
 		RAISERROR(@ErrorMerssage, 11, 1)	
 	    
