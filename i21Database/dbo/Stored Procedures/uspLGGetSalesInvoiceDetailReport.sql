@@ -42,8 +42,8 @@ BEGIN
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
+	LEFT JOIN tblARInvoiceDetailLot InvDetLot ON InvDetLot.intInvoiceDetailId = InvDet.intInvoiceDetailId
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = InvDetLot.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId
@@ -77,12 +77,14 @@ BEGIN
 		dblPrice = InvDet.dblPrice,
 		strPrice2Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice,2) AS NUMERIC(18,2))),
 		strPrice4Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice,4) AS NUMERIC(18,4))),
-		dblQtyOrdered = InvDet.dblQtyOrdered,
-		dblQtyShipped = InvDet.dblQtyShipped,
-		dblShipmentGrossWt = InvDet.dblShipmentGrossWt,
-		dblShipmentTareWt = InvDet.dblShipmentTareWt,
-		dblShipmentNetWt = InvDet.dblShipmentNetWt,
-		dblTotal = InvDet.dblTotal,
+		dblQtyOrdered = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN InvDetLot.dblQuantityShipped ELSE InvDet.dblQtyOrdered END,
+		dblQtyShipped = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN dbo.fnCalculateQtyBetweenUOM(InvDet.intOrderUOMId, InvDet.intPriceUOMId, InvDetLot.dblQuantityShipped) ELSE InvDet.dblQtyShipped END,
+		dblShipmentGrossWt = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN InvDetLot.dblGrossWeight ELSE InvDet.dblShipmentGrossWt END,
+		dblShipmentTareWt = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN InvDetLot.dblTareWeight ELSE InvDet.dblShipmentTareWt END,
+		dblShipmentNetWt = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN (InvDetLot.dblGrossWeight - InvDetLot.dblTareWeight) ELSE InvDet.dblShipmentNetWt END,
+		dblTotal = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN dbo.fnCalculateQtyBetweenUOM(InvDet.intOrderUOMId, InvDet.intPriceUOMId, InvDetLot.dblQuantityShipped) * InvDet.dblPrice 
+						/ CASE WHEN (PriceCur.ysnSubCurrency = 1)  THEN PriceCur.intCent ELSE 1 END
+					ELSE InvDet.dblTotal END,
 		dblProvisionalAmount = ISNULL(Inv.dblProvisionalAmount,0),
 		strInvoiceCurrency = InvCur.strCurrency,
 		strPriceCurrency = PriceCur.strCurrency,
@@ -117,8 +119,8 @@ BEGIN
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId	
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
+	LEFT JOIN tblARInvoiceDetailLot InvDetLot ON InvDetLot.intInvoiceDetailId = InvDet.intInvoiceDetailId
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = InvDetLot.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = ReceiptItem.intContainerId
