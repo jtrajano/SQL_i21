@@ -115,6 +115,8 @@ FROM (
 	   ,intFutureMarketId = FM.intFutureMarketId
 	   ,intDefaultCurrencyId = C.intCurrencyID
 	   ,strDefaultCurrency = C.strCurrency
+	   ,ysnSubCurrency = C.ysnSubCurrency
+	   ,intSubCurrencyCents = C.intCent
 	   ,intDefaultUOMId = UM.intUnitMeasureId
 	   ,strDefaultUOM = UM.strUnitMeasure
 	   ,intDefaultItemUOMId = IU.intItemUOMId

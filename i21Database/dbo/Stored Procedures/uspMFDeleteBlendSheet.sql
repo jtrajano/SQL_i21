@@ -19,6 +19,7 @@ BEGIN TRY
 		,@intPickListId int
 		,@strWorkOrderNos nvarchar(max)
 		,@strPickListNo nvarchar(50)
+		,@intTransactionFrom int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -33,10 +34,11 @@ BEGIN TRY
 		intManufacturingCellId int,
 		dtmDueDate DateTime,
 		intExecutionOrder int,
-		intUserId int
+		intUserId int,
+		intTransactionFrom int
 	)
 
-	insert into @tblWO(intWorkOrderId,intStatusId,dblQuantity,strWorkOrderNo,intBlendRequirementId,intManufacturingCellId,dtmDueDate,intExecutionOrder,intUserId)
+	insert into @tblWO(intWorkOrderId,intStatusId,dblQuantity,strWorkOrderNo,intBlendRequirementId,intManufacturingCellId,dtmDueDate,intExecutionOrder,intUserId,intTransactionFrom)
 	SELECT	 w.intWorkOrderId
 			,w.intStatusId
 			,w.dblQuantity
@@ -46,6 +48,7 @@ BEGIN TRY
 			,w.dtmExpectedDate
 			,w.intExecutionOrder
 			,x.intUserId
+			,IsNULL(w.intTransactionFrom,0)
 	FROM OPENXML(@idoc, 'root/workorder', 2) WITH (
 			 intWorkOrderId INT
 			,intUserId INT
@@ -60,7 +63,7 @@ BEGIN TRY
 		Select @intWorkOrderId=intWorkOrderId,@intStatusId=intStatusId,@dblQuantity=dblQuantity,
 				@strWorkOrderNo=strWorkOrderNo,@intBlendRequirementId=intBlendRequirementId,@intManufacturingCellId=intManufacturingCellId,
 				@dtmDueDate=dtmDueDate,@intExecutionOrder=intExecutionOrder,
-				@intUserId=intUserId from @tblWO where intRowNo=@intRowCount
+				@intUserId=intUserId,@intTransactionFrom=intTransactionFrom from @tblWO where intRowNo=@intRowCount
 
 		Select @intPickListId=ISNULL(intPickListId,0) From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 
@@ -73,7 +76,7 @@ BEGIN TRY
 			RaisError(@strErrMsg,16,1)
 		End
 
-		If @intStatusId in (2,9)
+		If @intStatusId in (2,9) or (@intTransactionFrom=4 and @intStatusId=10)
 		Begin			
 			Delete from tblMFWorkOrder where intWorkOrderId=@intWorkOrderId
 			Update tblMFBlendRequirement Set dblIssuedQty=ISNULL(dblIssuedQty,0) - ISNULL(@dblQuantity,0) where intBlendRequirementId=@intBlendRequirementId
@@ -83,7 +86,7 @@ BEGIN TRY
 			Else
 				Update tblMFBlendRequirement Set intStatusId=2 where intBlendRequirementId=@intBlendRequirementId
 
-			If @intStatusId=9
+			If @intStatusId=9 or (@intTransactionFrom=4 and @intStatusId=10)
 				Begin
 					UPDATE tblMFWorkOrder
 					SET intExecutionOrder = intExecutionOrder - 1
