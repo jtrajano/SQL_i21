@@ -645,8 +645,6 @@ FROM @UnsortedEntriesForInvoice
 ALTER TABLE #TempTable
 DROP COLUMN intId
 
-SELECT * FROM #TempTable
-
 IF EXISTS (SELECT NULL FROM #TempTable WHERE ISNULL(intRecipeId, 0) > 0)
 	BEGIN
 		DECLARE @tblItemsWithRecipe TABLE(intSalesOrderDetailId INT, intRecipeId INT)
