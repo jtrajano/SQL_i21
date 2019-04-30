@@ -24,25 +24,10 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--UPDATE DETAIL TOTAL
 	UPDATE A
 		SET --A.dblTotal = CAST((A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL (18,2)) 
-			[dblTotal]					=	ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
-												THEN (CASE 
-														WHEN A.intWeightUOMId > 0 
-															THEN CAST(A.dblCost / ISNULL(C.intSubCurrencyCents,1)  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
-														WHEN (A.intUnitOfMeasureId > 0 AND A.intCostUOMId > 0)
-															THEN CAST((A.dblQtyReceived) *  (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-														ELSE CAST((A.dblQtyReceived) * (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
-													END)
-												ELSE (CASE 
-														WHEN A.intWeightUOMId > 0 --CHECK IF SUB-CURRENCY
-															THEN CAST(A.dblCost  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
-														WHEN (A.intUnitOfMeasureId > 0 AND A.intCostUOMId > 0)
-															THEN CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-														ELSE CAST((A.dblQtyReceived) * (A.dblCost)  AS DECIMAL(18,2))  --Orig Calculation
-													END)
-												END),0),	
-			[dblClaimAmount]			=	CASE WHEN C.intTransactionType = 11 
+			[dblTotal]					=	CASE WHEN C.intTransactionType = 11
 											THEN 
-											(
+												CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
+											ELSE
 												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN (CASE 
 														WHEN A.intWeightUOMId > 0 
@@ -58,7 +43,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 															THEN CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 														ELSE CAST((A.dblQtyReceived) * (A.dblCost)  AS DECIMAL(18,2))  --Orig Calculation
 													END)
-												END),0)	
+												END),0)
+											END,	
+			[dblClaimAmount]			=	CASE WHEN C.intTransactionType = 11 
+											THEN 
+											(
+												CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
 											)
 											ELSE 0 END
 

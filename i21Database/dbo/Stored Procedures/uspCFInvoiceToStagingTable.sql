@@ -108,7 +108,7 @@ BEGIN TRY
 
 
 
-	IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
+	--IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
 
 	-- EXECUTE INVOICE REPORT SP's--
 	-----------------------------------------------------------
@@ -1099,7 +1099,7 @@ BEGIN TRY
 	--select * from vyuCFCardAccount
 
 
-	IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
+	--IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 
 END TRY 
 BEGIN CATCH
@@ -1115,7 +1115,7 @@ BEGIN CATCH
 		print @CatchErrorSeverity
 		print @CatchErrorState
 
-	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
+	--IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
   --IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 	--SELECT   
 	--	@CatchErrorMessage = ERROR_MESSAGE(),  

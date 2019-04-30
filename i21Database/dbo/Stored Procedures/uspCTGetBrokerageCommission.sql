@@ -89,8 +89,10 @@ AS
 				AND	    LO.intPurchaseSale  = 1
 				GROUP BY intPContractDetailId
 		)								LDL ON	LDL.intPContractDetailId =	SEQ.intContractDetailId
+		WHERE	CST.strParty IN ('Customer','Vendor') OR (CST.strParty = ('Broker') AND CST.strPaidBy = 'Company')
 	)t
 	WHERE	ISNULL(strStatus,'')	=   ISNULL(@strStatus,ISNULL(strStatus,''))
+	
 
 	IF @ysnSummary = 0
 	BEGIN

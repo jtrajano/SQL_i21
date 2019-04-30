@@ -20,19 +20,21 @@ BEGIN TRY
 	SELECT TOP 1 @InvoiceId =  intInvoiceId FROM tblARInvoice
 	WHERE intMeterReadingId = @MeterReadingId
 
-	UPDATE tblARInvoice
-	SET intMeterReadingId = NULL
-		, intConcurrencyId	= intConcurrencyId + 1
-	WHERE intInvoiceId = @InvoiceId
-		AND ISNULL(ysnPosted, 0) <> 1
+	IF (@InvoiceId IS NOT NULL)
+	BEGIN
+		UPDATE tblARInvoice
+		SET intMeterReadingId = NULL
+			, intConcurrencyId	= intConcurrencyId + 1
+		WHERE intInvoiceId = @InvoiceId
+			AND ISNULL(ysnPosted, 0) <> 1
 
-	/*Update the tblMBMeterReading > intInvoiceId=null to delete the Invoice (coz this will cause constraint error)*/
-	update tblMBMeterReading
-	set intInvoiceId = null
-	where intMeterReadingId = @MeterReadingId
+		/*Update the tblMBMeterReading > intInvoiceId=null to delete the Invoice (coz this will cause constraint error)*/
+		update tblMBMeterReading
+		set intInvoiceId = null
+		where intMeterReadingId = @MeterReadingId
 
-	EXEC uspARDeleteInvoice @InvoiceId, @UserId
-
+		EXEC uspARDeleteInvoice @InvoiceId, @UserId
+	END
 END TRY
 BEGIN CATCH
 	SELECT 

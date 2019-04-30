@@ -2,6 +2,7 @@
 		@tableName NVARCHAR(MAX)
 		,@field NVARCHAR(MAX)
 		,@guid NVARCHAR(MAX)
+		,@outTable NVARCHAR(MAX)
 	)
 	AS
 	BEGIN 
@@ -11,13 +12,22 @@
 	
 	DECLARE @dynamicsql NVARCHAR(MAX)
 	DECLARE @temptable NVARCHAR(MAX)
-	SET @temptable = '##'+REPLACE(@guid,'-','')
+	SET @temptable = @outTable
+
 	
+	DECLARE @tempCountResultTable NVARCHAR(MAX)
+	SET @tempCountResultTable = '##tblCFOptFilterCountResult'+REPLACE(@guid,'-','')
 	
 
-	IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
+	--IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
+	--BEGIN
+	--	SET @dynamicsql = 'DROP TABLE ' + @temptable
+	--	EXEC(@dynamicsql)
+	--END
+
+	IF OBJECT_ID('tempdb..' + @tempCountResultTable) IS NOT NULL
 	BEGIN
-		SET @dynamicsql = 'DROP TABLE ' + @temptable
+		SET @dynamicsql = 'DROP TABLE ' + @tempCountResultTable
 		EXEC(@dynamicsql)
 	END
 
@@ -41,12 +51,13 @@
 		,strFilter			
 		,strDataType	
 		,strGuid	
-	FROM tblCFOptFilterParam
+	FROM tblCFOptFilterParam WITH (NOLOCK)
 	WHERE strGuid = @guid
 
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @tblCFOptFilterParamTemp)
 	BEGIN
+		
 		
 		DECLARE @loopFilter NVARCHAR(MAX)
 		DECLARE @loopDataType NVARCHAR(MAX)
@@ -58,6 +69,7 @@
 		PRINT @loopDataType
 
 		SELECT TOP 1 @loopFilter = strFilter , @loopDataType = strDataType , @loopOptFilterParamId = intOptFilterParamId FROM @tblCFOptFilterParamTemp WHERE strGuid = @guid
+	--	SELECT * FROM tblCFOptFilterCountResult
 		INSERT INTO tblCFOptFilterCountResult
 		(
 			strFilter
@@ -71,9 +83,48 @@
 			,@loopOptFilterParamId
 			,@guid
 
-		SET @dynamicsql = 'UPDATE tblCFOptFilterCountResult SET intRecordCount = (' + 'SELECT COUNT(*) FROM ' 
+		IF OBJECT_ID('tempdb..' + @tempCountResultTable) IS NULL
+		BEGIN
+			
+			EXEC('CREATE TABLE ' 
+				+ @tempCountResultTable
+			+ ' (
+				 strFilter					NVARCHAR(MAX)
+				,strDataType				NVARCHAR(MAX)
+				,intOptFilterParamId		INT	
+				,strGuid					NVARCHAR(MAX)
+				,intRecordCount				INT
+				,intOptFilterCountResultId	INT
+			)')
+
+		END
+		
+			
+		SET @dynamicsql =
+		'INSERT INTO ' 
+		+  @tempCountResultTable 
+		+' (
+			strFilter
+			,strDataType
+			,intOptFilterParamId
+			,strGuid
+			,intOptFilterCountResultId
+		)
+		SELECT
+		strFilter
+		,strDataType
+		,intOptFilterParamId
+		,strGuid
+		,intOptFilterCountResultId
+		FROM tblCFOptFilterCountResult WHERE strGuid = ' + '''' + @guid + ''''
+
+		EXEC(@dynamicsql)
+
+		
+
+		SET @dynamicsql = 'UPDATE ' +@tempCountResultTable+ ' SET intRecordCount = (' + 'SELECT COUNT(*) FROM ' 
 		+ @tableName 
-		+ ' WHERE ' 
+		+ ' WITH (NOLOCK) WHERE ' 
 		+  @loopFilter 
 		+ ')' 
 		+ 'WHERE intOptFilterParamId = ' 
@@ -81,6 +132,7 @@
 
 		EXEC (@dynamicsql)
 
+		DELETE FROM tblCFOptFilterCountResult  WHERE strGuid = @guid
 		DELETE FROM @tblCFOptFilterParamTemp WHERE intOptFilterParamId = @loopOptFilterParamId
 		
 	END
@@ -122,7 +174,7 @@
 		BEGIN
 			SET @dynamicsql = 'SELECT * INTO ' + @temptable + ' FROM ' 
 						+ @tableName
-						+ ' WHERE '
+						+ ' WITH (NOLOCK) WHERE '
 						+ @loop2Filter
 		END
 		ELSE
@@ -147,22 +199,28 @@
 	IF (@intProcess = 0)
 	BEGIN
 		SET @intProcess = 1
-		INSERT INTO @tblCFOptFilterCountResultTemp
-		(
+
+		SET @dynamicsql = 'SELECT TOP 1
+		 intOptFilterCountResultId	
+		,intOptFilterParamId		
+		,strFilter					
+		,strDataType				
+		,intRecordCount				
+		FROM '+ @tempCountResultTable + '
+		ORDER BY intRecordCount ASC'
+
+		--EXEC(@dynamicsql)
+		
+		INSERT INTO  @tblCFOptFilterCountResultTemp 
+		 (
 			 intOptFilterCountResultId	
 			,intOptFilterParamId		
 			,strFilter					
 			,strDataType				
 			,intRecordCount				
 		)
-		SELECT TOP 1
-		 intOptFilterCountResultId	
-		,intOptFilterParamId		
-		,strFilter					
-		,strDataType				
-		,intRecordCount				
-		FROM tblCFOptFilterCountResult 
-		ORDER BY intRecordCount ASC
+		EXEC(@dynamicsql)
+
 		GOTO FILTERTABLE
 	END
 
@@ -179,14 +237,14 @@
 			,strDataType				
 			,intRecordCount				
 		)
-		SELECT 
+		EXEC('SELECT 
 		 intOptFilterCountResultId	
 		,intOptFilterParamId		
 		,strFilter					
 		,strDataType				
 		,intRecordCount				
-		FROM tblCFOptFilterCountResult 
-		WHERE strDataType = 'int' ORDER BY intRecordCount ASC
+		FROM  '+ @tempCountResultTable + ' 
+		WHERE strDataType = ''int'' ORDER BY intRecordCount ASC')
 		GOTO FILTERTABLE
 	END
 
@@ -201,14 +259,14 @@
 			,strDataType				
 			,intRecordCount				
 		)
-		SELECT 
+		EXEC('SELECT 
 		 intOptFilterCountResultId	
 		,intOptFilterParamId		
 		,strFilter					
 		,strDataType				
 		,intRecordCount				
-		FROM tblCFOptFilterCountResult 
-		WHERE strDataType = 'string' ORDER BY intRecordCount ASC
+		FROM  '+ @tempCountResultTable + ' WITH (NOLOCK)
+		WHERE strDataType = ''string'' ORDER BY intRecordCount ASC')
 		GOTO FILTERTABLE
 	END
 	
@@ -224,14 +282,14 @@
 			,strDataType				
 			,intRecordCount				
 		)
-		SELECT 
+		EXEC('SELECT 
 		 intOptFilterCountResultId	
 		,intOptFilterParamId		
 		,strFilter					
 		,strDataType				
 		,intRecordCount				
-		FROM tblCFOptFilterCountResult 
-		WHERE strDataType = 'date' ORDER BY intRecordCount ASC
+		FROM  '+ @tempCountResultTable + ' WITH (NOLOCK)
+		WHERE strDataType = ''date'' ORDER BY intRecordCount ASC')
 		GOTO FILTERTABLE
 	END
 
@@ -246,14 +304,14 @@
 			,strDataType				
 			,intRecordCount				
 		)
-		SELECT 
+		EXEC('SELECT 
 		 intOptFilterCountResultId	
 		,intOptFilterParamId		
 		,strFilter					
 		,strDataType				
 		,intRecordCount				
-		FROM tblCFOptFilterCountResult 
-		WHERE strDataType = 'boolean' ORDER BY intRecordCount ASC
+		FROM  '+ @tempCountResultTable + ' WITH (NOLOCK)
+		WHERE strDataType = ''boolean'' ORDER BY intRecordCount ASC')
 		GOTO FILTERTABLE
 	END
 
@@ -261,14 +319,21 @@
 
 	--INSERT RECORD TO OUTPUT TABLE
 	
-	SET @dynamicsql = 'SELECT ' + @field + ' FROM ' + @temptable
-	EXEC(@dynamicsql)
+	--SET @dynamicsql = 'SELECT Top 1 ' + @field + ' FROM ' + @temptable
+	--EXEC(@dynamicsql)
 
 
 	--DROP TEMP TABLE
-	IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
+	--IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
+	--BEGIN
+	--	SET @dynamicsql = 'DROP TABLE ' + @temptable
+	--	EXEC(@dynamicsql)
+	--END
+
+	--DROP TEMP TABLE
+	IF OBJECT_ID('tempdb..' + @tempCountResultTable) IS NOT NULL
 	BEGIN
-		SET @dynamicsql = 'DROP TABLE ' + @temptable
+		SET @dynamicsql = 'DROP TABLE ' + @tempCountResultTable
 		EXEC(@dynamicsql)
 	END
 
@@ -280,10 +345,17 @@
 	END TRY
 
 	BEGIN CATCH 
-		PRINT ERROR_MESSAGE()
+		
 		IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
 		BEGIN
 			SET @dynamicsql = 'DROP TABLE ' + @temptable
+			EXEC(@dynamicsql)
+		END
+
+		--DROP TEMP TABLE
+		IF OBJECT_ID('tempdb..' + @tempCountResultTable) IS NOT NULL
+		BEGIN
+			SET @dynamicsql = 'DROP TABLE ' + @tempCountResultTable
 			EXEC(@dynamicsql)
 		END
 

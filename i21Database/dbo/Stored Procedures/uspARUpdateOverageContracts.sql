@@ -71,6 +71,29 @@ INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
 
+IF (SELECT COUNT(*) FROM #INVOICEDETAILS) > 1
+	BEGIN
+		DECLARE @intContractHeaderIdToCompute	INT
+
+		SELECT TOP 1 @intContractHeaderIdToCompute = intContractHeaderId 
+		FROM #INVOICEDETAILS
+		ORDER BY intContractDetailId ASC
+
+		DELETE FROM #INVOICEDETAILS
+		WHERE intContractHeaderId <> @intContractHeaderIdToCompute
+
+		DELETE FROM tblARInvoiceDetail
+		WHERE intContractHeaderId <> @intContractHeaderIdToCompute
+		AND intInvoiceId = @intInvoiceId
+
+		UPDATE #INVOICEDETAILS
+		SET dblQtyShipped = @dblNetWeight
+		WHERE intContractHeaderId = @intContractHeaderIdToCompute
+		  AND intInventoryShipmentItemId IS NOT NULL
+
+		EXEC dbo.uspARUpdateInvoiceIntegrations @intInvoiceId, 0, @intUserId
+	END
+
 INSERT INTO @tblInvoiceIds (intHeaderId)
 SELECT DISTINCT intInvoiceId FROM #INVOICEDETAILS
 
@@ -95,6 +118,7 @@ INNER JOIN tblQMTicketDiscount QM ON QM.intDiscountScheduleCodeId = GRDSC.intDis
 INNER JOIN tblICInventoryShipmentItem ICS ON ICS.intSourceId = SC.intTicketId
 INNER JOIN tblICInventoryShipmentCharge IC ON IC.intChargeId = GRDSC.intItemId AND IC.intInventoryShipmentId = ICS.intInventoryShipmentId
 WHERE SC.intTicketId = @intTicketForDiscountId
+GROUP BY SC.intTicketId, QM.intTicketDiscountId, IC.intCostUOMId, IC.intChargeId
 
 --VALIDATE ITEMS IF HAS SCALE UOM
 SELECT @intUnitMeasureId 	= IUOM.intUnitMeasureId
@@ -156,11 +180,12 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		IF ISNULL(@ysnFromSalesOrder, 0) = 0
 			BEGIN		
 				UPDATE ID
-				SET dblQtyShipped	= ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
-				  , dblUnitQuantity	= ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
-				  , @dblQtyOverAged	= @dblNetWeight - ISNULL(ISI.dblDestinationQuantity, ISI.dblQuantity)
+				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
+				  , dblUnitQuantity	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
+				  , @dblQtyOverAged	= @dblNetWeight - ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
 			END
 		ELSE
