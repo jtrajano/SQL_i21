@@ -1068,8 +1068,18 @@ BEGIN
 							lotPackUOM.intItemUOMId
 				END
 			,intLotId				= sil.intLotId
-			,intSubLocationId		= si.intSubLocationId
-			,intStorageLocationId	= si.intStorageLocationId
+			-- ,intSubLocationId		= si.intSubLocationId
+			-- ,intStorageLocationId	= si.intStorageLocationId
+			,intSubLocationId		= CASE	WHEN  l.intLotId   IS NULL THEN 
+												si.intSubLocationId
+											ELSE
+												l.intSubLocationId
+									END	
+			,intStorageLocationId	= CASE	WHEN  l.intLotId  IS NULL THEN 
+													si.intStorageLocationId
+												ELSE
+													l.intStorageLocationId
+										END	
 			,dblQty	=	
 				CASE	WHEN  l.intLotId IS NULL THEN 
 							-ISNULL(si.dblQuantity, 0) 
