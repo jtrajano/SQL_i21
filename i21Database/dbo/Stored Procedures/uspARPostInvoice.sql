@@ -1202,8 +1202,8 @@ SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
 
 Do_Commit:
-IF ISNULL(@raiseError,0) = 0
-BEGIN
+--IF ISNULL(@raiseError,0) = 0
+--BEGIN
 
 	IF @InitTranCount = 0
 		BEGIN
@@ -1219,7 +1219,7 @@ BEGIN
 			--IF (XACT_STATE()) = 1
 			--	COMMIT TRANSACTION  @Savepoint
 		END	
-END
+--END
 
 	RETURN 1;
 

@@ -1206,8 +1206,8 @@ END CATCH
 
 
 Do_Commit:
-IF ISNULL(@RaiseError,0) = 0
-BEGIN
+--IF ISNULL(@RaiseError,0) = 0
+--BEGIN
 
 	IF @InitTranCount = 0
 		BEGIN
@@ -1223,7 +1223,7 @@ BEGIN
 			--IF (XACT_STATE()) = 1
 			--	COMMIT TRANSACTION  @Savepoint
 		END	
-END
+--END
 
 	RETURN 1;
 
