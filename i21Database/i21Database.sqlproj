@@ -7537,6 +7537,7 @@
     <Build Include="dbo\Functions\fnICLotQtyAsOf.sql" />
     <Build Include="dbo\Views\vyuICInventoryAdjustmentSourceLink.sql" />
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryDailySummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
