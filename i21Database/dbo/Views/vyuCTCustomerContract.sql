@@ -69,6 +69,10 @@ AS
 					, strBook							=	NULL
 					, strSubBook						=	NULL
 					, ysnBestPriceOnly					=	CH.ysnBestPriceOnly
+					, intStorageLocationId				=	CD.intStorageLocationId
+					, intSubLocationId					= 	CD.intSubLocationId
+					, strStorageLocation				=	SL.strName
+					, strSubLocation					=	UL.strSubLocationName
     
 			FROM	tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON  CH.intContractHeaderId				=   CD.intContractHeaderId
@@ -91,3 +95,5 @@ AS
 	LEFT	JOIN	tblCTWeightGrade				GR	ON  GR.intWeightGradeId					=   CH.intGradeId
 	LEFT	JOIN	tblSMCurrency					CU	ON  CU.intCurrencyID					=	AD.intSeqCurrencyId
 	LEFT	JOIN	tblSMCurrencyExchangeRateType	ER	ON  ER.intCurrencyExchangeRateTypeId	=   CD.intRateTypeId
+	LEFT	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId				=	CD.intStorageLocationId
+	LEFT	JOIN	tblSMCompanyLocationSubLocation	UL	ON	UL.intCompanyLocationSubLocationId	=	CD.intSubLocationId
