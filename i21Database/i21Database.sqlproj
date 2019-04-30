@@ -7535,6 +7535,7 @@
     <Build Include="dbo\Views\vyuRKBrokerageAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents2.sql" />
     <Build Include="dbo\Functions\fnICLotQtyAsOf.sql" />
+    <Build Include="dbo\Views\vyuICInventoryAdjustmentSourceLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

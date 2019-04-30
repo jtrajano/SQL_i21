@@ -31,6 +31,10 @@ SELECT
 	, Adj.intSourceId
 	, Adj.intSourceTransactionTypeId
 	, Adj.intConcurrencyId
+	, Link.strTransactionFrom
+	, Link.strSource
 FROM tblICInventoryAdjustment Adj
+LEFT JOIN vyuICInventoryAdjustmentSourceLink Link
+	on Link.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Adj.intLocationId
 LEFT JOIN tblEMEntity UserEntity ON UserEntity.intEntityId = Adj.intEntityId
