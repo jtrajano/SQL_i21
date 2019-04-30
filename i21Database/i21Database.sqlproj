@@ -7536,6 +7536,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents2.sql" />
     <Build Include="dbo\Functions\fnICLotQtyAsOf.sql" />
     <Build Include="dbo\Views\vyuICInventoryAdjustmentSourceLink.sql" />
+    <Build Include="dbo\Functions\fnDateFromParts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
