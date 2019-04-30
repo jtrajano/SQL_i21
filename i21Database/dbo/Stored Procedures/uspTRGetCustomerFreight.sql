@@ -33,6 +33,7 @@ DECLARE @freight decimal(18,6),
 		@intMiles int,
 		@intTariffType int,
 		@dblRate decimal(18,6),
+		@dblSurchargeRate decimal(18,6),
 		@dblMinimumUnits decimal(18,6),
 		@dblCostRatePerUnit decimal(18,6),
 		@dblInvoiceRatePerUnit decimal(18,6);
@@ -49,57 +50,74 @@ set @dblInvoiceSurchargeRate =0;
      BEGIN
 		RAISERROR('Category is not setup for Item', 16, 1);
 	 END
+
 	 IF @ysnToBulkPlant = 0
-	     BEGIN
-	          select top 1 @ysnFreightOnly = CF.ysnFreightOnly,
-	                       @strFreightType = CF.strFreightType,
-	           		       @intEntityShipViaId = CF.intShipViaId,
-	           		       @intMiles = convert(int,CF.dblFreightMiles),
-	           		       @dblRate = CF.dblFreightRate,
-	           		       @ysnFreightInPrice = CF.ysnFreightInPrice, 
-	           		       @dblMinimumUnits = CF.dblMinimumUnits,
-						   @intTariffType   = AR.intEntityTariffTypeId
-	          from tblARCustomerFreightXRef CF 
-			       join tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
-	                   where CF.intEntityCustomerId = @intEntityCustomerId 
-	      	   	         and CF.strZipCode = @strZipCode
-	           			     and CF.intCategoryId = @intCategoryid
-                              and CF.intEntityLocationId = @intShipToId
-			 
-         END
+	 BEGIN
+	    select top 1 @ysnFreightOnly = CF.ysnFreightOnly,
+	                @strFreightType = CF.strFreightType,
+	           		@intEntityShipViaId = CF.intShipViaId,
+	           		@intMiles = convert(int,CF.dblFreightMiles),
+	           		@dblRate = ISNULL(CF.dblFreightRate, 0),
+	           		@ysnFreightInPrice = CF.ysnFreightInPrice, 
+	           		@dblMinimumUnits = CF.dblMinimumUnits,
+					@intTariffType   = AR.intEntityTariffTypeId
+	    from tblARCustomerFreightXRef CF 
+			join tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
+	            where CF.intEntityCustomerId = @intEntityCustomerId 
+	      	   	    and CF.strZipCode = @strZipCode
+	           			and CF.intCategoryId = @intCategoryid
+                        and CF.intEntityLocationId = @intShipToId			  
+        END
 	 ELSE
-	     BEGIN
-	          select top 1 @ysnFreightOnly = convert(bit,0),
-	                       @strFreightType = BPF.strFreightType,
-	           		       @intEntityShipViaId = BPF.intShipViaId,
-	           		       @intMiles = convert(int,BPF.dblFreightMiles),
-	           		       @dblRate = BPF.dblFreightRate,
-	           		       @ysnFreightInPrice = convert(bit,0), 
-	           		       @dblMinimumUnits = BPF.dblMinimumUnits,
-						   @intTariffType   = BPF.intEntityTariffTypeId
-	          from tblTRBulkPlantFreight BPF 
-	                   where BPF.strZipCode = @strZipCode
-	           			     and BPF.intCategoryId = @intCategoryid
-                              and BPF.intCompanyLocationId = @intShipToId
-         END
+	 BEGIN
+	    select top 1 @ysnFreightOnly = convert(bit,0),
+	                @strFreightType = BPF.strFreightType,
+	           		@intEntityShipViaId = BPF.intShipViaId,
+	           		@intMiles = convert(int,BPF.dblFreightMiles),
+	           		@dblRate = ISNULL(BPF.dblFreightRate, 0),
+	           		@ysnFreightInPrice = convert(bit,0), 
+	           		@dblMinimumUnits = BPF.dblMinimumUnits,
+					@intTariffType   = BPF.intEntityTariffTypeId
+	    from tblTRBulkPlantFreight BPF 
+	            where BPF.strZipCode = @strZipCode
+	           			and BPF.intCategoryId = @intCategoryid
+                        and BPF.intCompanyLocationId = @intShipToId
+     END
+
+
 
      IF ((isNull(@dblMinimumUnits,0) > isNull(@dblInvoiceGallons,0)) or (isNull(@dblMinimumUnits,0) > isNull(@dblReceiptGallons,0)) )
      BEGIN
 	     RAISERROR('Gallons less than Minimum Freight Units' , 16, 1);
 	 END
 	 
-	  IF isNull(@strFreightType,0) = '0'
-	  BEGIN
-	     GOTO _Exit
-      END
-	 IF isNull(@strFreightType,0) = 'Rate'
+	 IF isNull(@strFreightType,0) = '0'
 	 BEGIN
-	     set @dblInvoiceFreightRate = isNull(@dblRate,0)
-		 set @dblReceiptFreightRate = isNull(@dblRate,0)
-	     set @dblReceiptSurchargeRate = 0
-		 set @dblInvoiceSurchargeRate = 0
-	  
+	     GOTO _Exit
+     END
+
+
+	 -- SURCHAREGE OF RATE
+	 IF ISNULL(@strFreightType,0) = 'Rate'
+	 BEGIN
+
+		SET @dblInvoiceFreightRate = @dblRate
+		SET @dblReceiptFreightRate = @dblRate
+		
+		 SELECT TOP 1 @dblSurchargeRate=ISNULL(FS.dblFuelSurcharge, 0) 
+		 FROM [tblEMEntityTariff] TA INNER JOIN [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId
+	  		LEFT JOIN [tblEMEntityTariffFuelSurcharge] FS ON FS.intEntityTariffId = TC.intEntityTariffId				   
+	  	 WHERE TA.intEntityId = ISNULL(@intEntityShipViaId,@intShipViaId)
+	  		AND TC.intCategoryId = @intCategoryid
+			AND TA.dtmEffectiveDate <= @dtmReceiptDate
+	  	    AND FS.dtmEffectiveDate <= @dtmReceiptDate
+			AND TA.intEntityTariffTypeId = @intTariffType 
+	  	 ORDER BY TA.dtmEffectiveDate DESC,FS.dtmEffectiveDate DESC
+
+		SET @dblReceiptSurchargeRate = @dblSurchargeRate
+		SET @dblInvoiceSurchargeRate = @dblSurchargeRate
 	 END
+
      IF isNull(@strFreightType,0) = 'Miles'
 	 BEGIN
 	
