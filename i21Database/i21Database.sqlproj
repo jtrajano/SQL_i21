@@ -7313,6 +7313,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
     <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
     <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
+    <Build Include="dbo\Functions\fnDateFromParts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
