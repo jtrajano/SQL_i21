@@ -234,10 +234,7 @@ IF ISNULL(@ErrorMessage, '') = ''
 		SET ysnReturn = 1, intInvoiceId = @createdCreditMemoId
 		WHERE intPOSId = @intPOSId
 		
-		UPDATE tblARInvoice
-		SET  ysnReturned = 1
-			,ysnRefundProcessed = 1
-		WHERE intInvoiceId = @createdCreditMemoId
+		
 
 		IF(OBJECT_ID('tempdb..#POSRETURNPAYMENTS') IS NOT NULL)
 		BEGIN
@@ -292,9 +289,17 @@ IF ISNULL(@ErrorMessage, '') = ''
 		END
 		ELSE
 		BEGIN
+			UPDATE tblARInvoice
+			SET  ysnReturned = 1
+				,ysnRefundProcessed = 1
+				,strTransactionType = 'Credit Memo'
+			WHERE intInvoiceId = @createdCreditMemoId
+
 			DELETE FROM tblARPOSPayment
 			WHERE intPOSId = @intPOSId
 			RETURN 0;
+
+
 		END
 
 
