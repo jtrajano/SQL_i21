@@ -442,7 +442,7 @@ BEGIN
 	UPDATE
         C
     SET 
-        C.ysnPaid = 1
+        C.ysnPaidCPP = 1
     FROM 
         #ARPostPaymentDetail B
     INNER JOIN

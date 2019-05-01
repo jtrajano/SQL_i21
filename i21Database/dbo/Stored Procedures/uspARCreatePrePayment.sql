@@ -5,7 +5,7 @@
 	, @UserId		AS INT			
 	, @NewInvoiceId	AS INT			= NULL OUTPUT	
 	, @PostPrepayment	AS INT		= 0	
-	, @Paid			AS BIT			= 0
+	, @PaidCPP			AS BIT			= 0
 AS
 
 BEGIN
@@ -290,7 +290,7 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemPerformerId					= @ItemPerformerId
 	,@ItemLeaseBilling					= @ItemLeaseBilling
 	,@ItemVirtualMeterReading			= @ItemVirtualMeterReading
-	,@Paid								= @Paid
+	,@PaidCPP							= @PaidCPP
 	      
 		  
 SET @NewInvoiceId = @NewId	

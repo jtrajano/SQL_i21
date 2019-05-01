@@ -138,7 +138,7 @@
 	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
 	,@ItemAddonParent				BIT				= NULL
 	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
-	,@Paid							BIT				= 0
+	,@PaidCPP						BIT				= 0
 AS
 
 BEGIN
@@ -460,6 +460,7 @@ BEGIN TRY
 		,[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]
 		,[ysnPaid]
+		,[ysnPaidCPP]
 		,[ysnRecurring]
 		,[ysnForgiven]
 		,[ysnCalculated]
@@ -542,7 +543,8 @@ BEGIN TRY
 												ELSE 0 END)
 		,[ysnImportedFromOrigin]		= ISNULL(@ImportedFromOrigin, 0)
 		,[ysnImportedAsPosted]			= ISNULL(@ImportedAsPosted, 0)
-		,[ysnPaid]						= @Paid
+		,[ysnPaid]						= 0
+		,[ysnPaidCPP]					= @PaidCPP
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
 		,[ysnCalculated]				= ISNULL(@Calculated,0)
