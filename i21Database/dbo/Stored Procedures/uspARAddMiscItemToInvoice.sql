@@ -8,8 +8,8 @@
 	,@RaiseError					BIT				= 0			
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL
-	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
-	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
+	,@ItemQtyOrdered				NUMERIC(38,20)	= 0.000000
+	,@ItemQtyShipped				NUMERIC(38,20)	= 0.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
 	,@ItemUnitPrice					NUMERIC(18,6)	= 0.000000
@@ -40,7 +40,7 @@
 	,@ItemTicketId					INT				= NULL
 	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
 	,@ItemAddonParent				BIT				= NULL
-	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
+	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
 	,@ItemBOLNumber					NVARCHAR(50)	= NULL
 AS
 

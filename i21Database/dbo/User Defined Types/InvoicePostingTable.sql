@@ -85,11 +85,11 @@
     ,[intLicenseAccountId]                  INT             NULL
     ,[intMaintenanceAccountId]              INT             NULL
     ,[intConversionAccountId]               INT             NULL
-    ,[dblQtyShipped]                        NUMERIC(18,6)   NULL	
-    ,[dblUnitQtyShipped]                    NUMERIC(18,6)   NULL
-    ,[dblShipmentNetWt]                     NUMERIC(18,6)   NULL	
-    ,[dblUnitQty]                           NUMERIC(38,20)  NULL
-    ,[dblUnitOnHand]                        NUMERIC(18,6)   NULL
+    ,[dblQtyShipped]                        NUMERIC(38, 20) NULL	
+    ,[dblUnitQtyShipped]                    NUMERIC(38, 20) NULL
+    ,[dblShipmentNetWt]                     NUMERIC(38, 20) NULL	
+    ,[dblUnitQty]                           NUMERIC(38, 20) NULL
+    ,[dblUnitOnHand]                        NUMERIC(38, 20) NULL
     ,[intAllowNegativeInventory]            INT             NULL
     ,[ysnStockTracking]                     BIT             NULL
     ,[intItemLocationId]                    INT             NULL
