@@ -21,7 +21,7 @@ RETURNS TABLE AS RETURN
 		,[intSubCurrencyCents]				=	A.intSubCurrencyCents
 		,[intShipViaId]						=	A.intShipViaId
 		,[intTermId]						=	A.intTermsId
-		,[strBillOfLading]					=	NULL
+		,[strBillOfLading]					=	B.strBillOfLading
 		,[intAPAccount]						=	A.intAccountId
 		,[strMiscDescription]				=	B.strMiscDescription
 		,[intItemId]						=	B.intItemId
