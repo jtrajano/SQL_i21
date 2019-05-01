@@ -95,12 +95,28 @@ FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item
 
 	LEFT JOIN tblICUnitMeasure CostUOM 
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
+
 	OUTER APPLY (
-		SELECT
+		SELECT 
+			TOP 1 
 			A.intInventoryShipmentItemId
-		FROM tblICInventoryShipmentItem A
-		WHERE A.intInventoryShipmentId = Shipment.intInventoryShipmentId
-	) ShipmentItem 
+		FROM 
+			tblICInventoryShipmentItem A
+		WHERE 
+			A.intInventoryShipmentId = Shipment.intInventoryShipmentId
+			AND (
+				1 = 
+				CASE 
+					WHEN (				
+						A.intOrderId = ShipmentCharge.intContractId
+						AND A.intLineNo = ShipmentCharge.intContractDetailId
+						AND ISNULL(A.strChargesLink, '') = ISNULL(ShipmentCharge.strChargesLink, '') 
+					) THEN 1
+					WHEN A.strChargesLink = ShipmentCharge.strChargesLink THEN 1
+					ELSE 0 
+				END 				
+			)
+	) ShipmentItem  
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForShipmentCharge(Shipment.intInventoryShipmentId, Shipment.strShipmentNumber) ScaleTicket
 
