@@ -939,6 +939,59 @@ BEGIN
 			AND m.intInventoryTransactionId IS NOT NULL
 END 
 
+-- Re-update the "Out" quantities one more time to be sure. 
+BEGIN 
+	UPDATE	LotCostBucket
+	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
+	FROM	dbo.tblICInventoryLot LotCostBucket		
+			OUTER APPLY (
+				SELECT	dblQty = SUM(LotOut.dblQty) 
+				FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN tblICInventoryTransaction t
+							ON LotOut.intInventoryTransactionId = t.intInventoryTransactionId
+							
+				WHERE	LotOut.intInventoryLotId = LotCostBucket.intInventoryLotId 
+			) cbOut 
+	WHERE	LotCostBucket.intItemId = ISNULL(@intItemId, LotCostBucket.intItemId)
+			AND LotCostBucket.dblStockIn <> LotCostBucket.dblStockOut
+
+	UPDATE	FIFOCostBucket
+	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
+	FROM	dbo.tblICInventoryFIFO FIFOCostBucket
+			OUTER APPLY (
+				SELECT	dblQty = SUM(FIFOOut.dblQty)
+				FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN tblICInventoryTransaction t
+							ON FIFOOut.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	FIFOOut.intInventoryFIFOId = FIFOCostBucket.intInventoryFIFOId 
+			) cbOut
+	WHERE	FIFOCostBucket.intItemId = ISNULL(@intItemId, FIFOCostBucket.intItemId)
+			AND FIFOCostBucket.dblStockIn <> FIFOCostBucket.dblStockOut
+
+	UPDATE	LIFOCostBucket
+	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
+	FROM	dbo.tblICInventoryLIFO LIFOCostBucket
+			OUTER APPLY (
+				SELECT	dblQty = SUM(LIFOOut.dblQty) 
+				FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN tblICInventoryTransaction t
+							ON LIFOOut.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	LIFOOut.intInventoryLIFOId = LIFOCostBucket.intInventoryLIFOId						
+			) cbOut
+	WHERE	LIFOCostBucket.intItemId = ISNULL(@intItemId, LIFOCostBucket.intItemId)
+			AND LIFOCostBucket.dblStockIn <> LIFOCostBucket.dblStockOut
+
+	UPDATE	ActualCostBucket
+	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
+	FROM	dbo.tblICInventoryActualCost ActualCostBucket
+			OUTER APPLY (
+				SELECT	dblQty = SUM(ActualCostOut.dblQty)
+				FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN tblICInventoryTransaction t
+							ON ActualCostOut.intInventoryTransactionId = t.intInventoryTransactionId
+				WHERE	ActualCostOut.intInventoryActualCostId = ActualCostBucket.intInventoryActualCostId 						
+			) cbOut
+	WHERE	ActualCostBucket.intItemId = ISNULL(@intItemId, ActualCostBucket.intItemId)
+			AND ActualCostBucket.dblStockIn <> ActualCostBucket.dblStockOut
+END 
+
+
 --------------------------------------------------------------------
 -- Retroactively compute the lot Qty and Weight. 
 --------------------------------------------------------------------
