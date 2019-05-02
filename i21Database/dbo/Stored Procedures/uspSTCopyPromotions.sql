@@ -858,18 +858,22 @@ BEGIN TRY
 						AND intStoreId = @intFromStoreId
 						AND strPromoType = 'M'
 
+--PRINT '@intMixMatchAddedCount: ' + CAST(@intMixMatchAddedCount AS NVARCHAR(50))
+
 				   SET @intMixMatchAdded = @intMixMatchAdded + @intMixMatchAddedCount
 
 				   -- ====================================================================================================================
 				   -- [START] - Loop to all PROMOTION MIX_MATCH LIST
 				   -- ====================================================================================================================
 				   SELECT @intMIXMATCHPrimaryID = MIN(intPrimaryID)
-				   FROM @temptblPromoCOMBOList
+				   FROM @temptblPromoMIXMATCHList
 
 				   WHILE (@intMIXMATCHPrimaryID > 0) --EXISTS (SELECT TOP (1) 1 FROM @temptblPromoMIXMATCHList)
 						BEGIN
 							
 						   SELECT TOP 1 @intPromotionMixMatchListId = intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHList WHERE intPrimaryID = @intMIXMATCHPrimaryID
+
+--PRINT '@intPromotionMixMatchListId: ' + CAST(@intPromotionMixMatchListId AS NVARCHAR(50))
 
 						   ----Inserting Mix-Match Header From to ToStore
 						   INSERT INTO tblSTPromotionSalesList 
@@ -948,7 +952,7 @@ BEGIN TRY
 						   -- Get new primary ID
 						   SET @intNewPromotionMIXMATCHListId = SCOPE_IDENTITY();
 
-
+--PRINT '@intNewPromotionMIXMATCHListId: ' + CAST(@intNewPromotionMIXMATCHListId AS NVARCHAR(50))
 
 						   -- ==========================================================================
 						   -- [START] - AUDIT LOG - Mark as Created
