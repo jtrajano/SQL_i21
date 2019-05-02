@@ -15,7 +15,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
+DECLARE @ErrorNumber INT
+
+BEGIN TRY
+
+	BEGIN TRANSACTION
 
 	DECLARE @UserEntityId INT
 	DECLARE @DefaultCurrency INT
@@ -29,8 +35,6 @@ BEGIN
 		RAISERROR('Company Location is required!', 16, 1)
 		RETURN
     END
-
-	BEGIN TRANSACTION
 
 	INSERT INTO @EntriesForInvoice(
 		[strType]
@@ -275,4 +279,16 @@ BEGIN
 			WHERE MRDetail.intMeterAccountDetailId = tblMBMeterAccountDetail.intMeterAccountDetailId
 		END
 	END
-END
+
+END TRY
+BEGIN CATCH
+		
+	ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE()
+		--SET @ErrorMessage = ERROR_MESSAGE()
+	SET @ErrorSeverity = ERROR_SEVERITY()
+	SET @ErrorState = ERROR_STATE()
+	SET @ErrorNumber   = ERROR_NUMBER()
+		
+	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState ,@ErrorNumber)
+END CATCH
