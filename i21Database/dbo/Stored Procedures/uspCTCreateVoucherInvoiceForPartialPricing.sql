@@ -640,7 +640,13 @@ BEGIN TRY
 								,@intContractDetailId	=	@intContractDetailId
 								,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
 				
-						DELETE FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId IS NOT NULL AND intContractDetailId <> @intContractDetailId
+						DELETE	AD
+						FROM	tblARInvoiceDetail	AD 
+						JOIN	tblCTContractDetail CD	ON AD.intContractDetailId = CD.intContractDetailId
+						WHERE	AD.intInvoiceId		=	@intNewInvoiceId
+						AND		AD.intInventoryShipmentChargeId IS NULL
+						AND		CD.intPricingTypeId NOT IN (1,6)
+						AND NOT EXISTS(SELECT * FROM tblARInvoiceDetail WHERE  intContractDetailId = CD.intContractDetailId AND intInvoiceId <> @intNewInvoiceId)
 
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
 
