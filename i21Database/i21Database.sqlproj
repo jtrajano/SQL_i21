@@ -7315,6 +7315,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
+    <Build Include="dbo\Functions\fnPRRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
