@@ -145,6 +145,8 @@ BEGIN
 
 	DECLARE @intCardTypeId					INT				= 0
 	DECLARE @ysnDualCard					BIT				= 0
+	
+	DECLARE @ysnInvalid	BIT = 0
 
 	DECLARE @companyConfigFreightTermId	INT = NULL
 	SELECT TOP 1 @companyConfigFreightTermId = intFreightTermId FROM tblCFCompanyPreference
@@ -476,12 +478,9 @@ BEGIN
 	--	SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
 	--END
 
-	DECLARE @ynsRecalcFromSpecialTax AS INT
-	SET @ynsRecalcFromSpecialTax = 0
-
 	
-	DECLARE @ysnTransferCostTaxRecalc BIT
-	SET @ysnTransferCostTaxRecalc = 1;
+	DECLARE @ysnReRunCalcTax BIT
+	SET @ysnReRunCalcTax = 0;
 
 
 	TAXCOMPUTATION:
@@ -1117,8 +1116,9 @@ BEGIN
 					SELECT '@tblCFRemoteTax1', * from @tblCFRemoteTax --HERE
 				END
 
-				--LOG INVALID TAX SETUP--
-				IF (@intTransactionId is not null)
+				--LOG INVALID TAX SETUP-- 
+				-- @ysnReRunCalcTax = 0, Insert logs during first run
+				IF (@intTransactionId is not null AND @ysnReRunCalcTax = 0)
 				BEGIN
 					INSERT INTO tblCFTransactionNote (
 						intTransactionId
@@ -1135,6 +1135,15 @@ BEGIN
 						,@guid
 					FROM @tblCFRemoteTax
 					WHERE (ysnInvalidSetup =1 AND LOWER(strReason) NOT LIKE '%item category%') AND (ysnTaxExempt IS NULL OR  ysnTaxExempt = 0)
+
+					IF EXISTS(SELECT TOP 1 * FROM @tblCFRemoteTax WHERE ysnInvalidSetup = 1 AND strReason like '%Unable to find match for%')
+					BEGIN
+						SET @ysnInvalid = 1
+
+						INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason)
+						SELECT @intTransactionId, strReason FROM @tblCFRemoteTax WHERE ysnInvalidSetup = 1 AND strReason like '%Unable to find match for%'
+
+					END
 				END
 				--LOG INVALID TAX SETUP--
 
@@ -5702,7 +5711,7 @@ BEGIN
 				---------------------------------------------------
 				--				LOG INVALID TAX SETUP			 --
 				---------------------------------------------------
-				IF (@intTransactionId is not null)
+				IF (@intTransactionId is not null AND @ysnReRunCalcTax = 0)
 				BEGIN
 					INSERT INTO tblCFTransactionNote (
 						intTransactionId
@@ -5745,7 +5754,7 @@ BEGIN
 
 	IF(ISNULL(@dblSpecialTax,0) > 0)
 	BEGIN
-		IF(@ynsRecalcFromSpecialTax = 0)
+		IF(@ysnReRunCalcTax = 0)
 		BEGIN
 			------CLEAN TAX TABLE--------
 			DELETE FROM @tblCFOriginalTax				
@@ -5761,7 +5770,7 @@ BEGIN
 
 			DELETE FROM @LineItemTaxDetailStagingTable
 
-			SET @ynsRecalcFromSpecialTax = 1 
+			SET @ysnReRunCalcTax = 1 
 			SET @dblPrice = @dblPrice +  ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6)
 			GOTO TAXCOMPUTATION
 		END
@@ -6064,7 +6073,7 @@ BEGIN
 		BEGIN
 			
 
-			IF(@ysnTransferCostTaxRecalc = 1)
+			IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				SET @dblPrice = ISNULL(@dblNetTransferCostZeroQuantity,0) + ISNULL(@dblAdjustments,0)
 				------CLEAN TAX TABLE--------
@@ -6081,7 +6090,7 @@ BEGIN
 
 				DELETE FROM @LineItemTaxDetailStagingTable
 
-				SET @ysnTransferCostTaxRecalc = 0
+				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
 
@@ -6241,7 +6250,6 @@ BEGIN
 	---------------------------------------------------
 	DECLARE @intDupTransCount INT = 0
 	DECLARE @ysnDuplicate BIT = 0
-	DECLARE @ysnInvalid	BIT = 0
 	DECLARE @intParentId INT = 0
 
 	IF (@strTransactionType != 'Foreign Sale')
