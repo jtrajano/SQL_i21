@@ -7314,6 +7314,7 @@
     <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
     <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
+    <Build Include="dbo\Functions\fnPRRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
