@@ -32,6 +32,7 @@ FROM (
 		ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE CD.dblBalance > 0
 		AND Item.ysnUseWeighScales = 1
+		AND CD.intContractStatusId NOT IN (2,3)
 ) A
 GROUP BY A.intEntityId
 		,A.ItemName
