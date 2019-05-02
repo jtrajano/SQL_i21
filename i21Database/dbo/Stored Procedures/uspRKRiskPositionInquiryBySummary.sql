@@ -12,6 +12,7 @@
 	@dtmPositionAsOf DATETIME = NULL,
 	@strUomType NVARCHAR(100) = NULL
 AS
+
 DECLARE @dtmToDate DATETIME
 
 SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
@@ -810,7 +811,9 @@ SELECT 1 intRowNumber,
 	intSubBookId,
 	strSubBook
 FROM @ContractTransaction
-WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId) AND intFutureMarketId = @intFutureMarketId AND ISNULL(dblNoOfContract, 0) <> 0
+WHERE intPricingTypeId = 1 AND intCommodityId = @intCommodityId 
+AND intFutureMarketId=@intFutureMarketId
+AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId) AND intFutureMarketId = @intFutureMarketId AND ISNULL(dblNoOfContract, 0) <> 0
 
 INSERT INTO @ListFinal (
 	intRowNumber,
@@ -1238,7 +1241,8 @@ FROM (
 		intSubBookId,
 		strSubBook
 	FROM @ContractTransaction
-	WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId) AND intFutureMarketId = @intFutureMarketId
+	WHERE ysnExpired = 0 AND intPricingTypeId <> 1 AND intCommodityId = @intCommodityId AND intFutureMarketId=@intFutureMarketId
+	AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId) AND intFutureMarketId = @intFutureMarketId
 	) T1
 
 INSERT INTO @ListFinal (
