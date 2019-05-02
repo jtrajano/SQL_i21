@@ -211,7 +211,7 @@ BEGIN TRY
 				,@strPatternString = @intBatchId OUTPUT
 
 			DECLARE @tblMFMachine TABLE (intMachineId INT)
-			DECLARE @intMachineId INT
+			DECLARE @intMachineId INT, @ysnProducedByPackUnit int
 
 			INSERT INTO @tblMFMachine (intMachineId)
 			SELECT DISTINCT intMachineId
@@ -224,10 +224,12 @@ BEGIN TRY
 
 			WHILE @intMachineId IS NOT NULL
 			BEGIN
-				SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
+				SELECT 
+					@dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
 					,@intItemUOMId = @intWOItemUOMId
 					,@dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
 					,@intPhysicalItemUOMId = @intWOItemUOMId
+					,@ysnProducedByPackUnit=Case When MIN(WP.intItemUOMId) =MAX(WP.intPhysicalItemUOMId)  Then 0 Else 1 End
 				FROM dbo.tblMFWorkOrderProducedLot WP
 				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
 					AND IU.intUnitMeasureId = @intUnitMeasureId
@@ -247,7 +249,7 @@ BEGIN TRY
 						FROM tblMFWorkOrderRecipe
 						WHERE intWorkOrderId = @intWorkOrderId
 							AND intItemUOMId = @intItemUOMId
-						)
+						) and @ysnProducedByPackUnit=0
 				BEGIN
 					IF EXISTS (
 							SELECT *
