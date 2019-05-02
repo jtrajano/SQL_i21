@@ -7,29 +7,29 @@ BEGIN TRY
 
      DECLARE @ErrMsg				 	  NVARCHAR(MAX),
 	         @idoc				          INT,
-	     	 @intFromStoreId                   INT,
+	     	 @intFromStoreId              INT,
 	         @ToStore                     NVARCHAR(MAX),
-			 @intBeginningComboID               INT,
-			 @intEndingComboID                 INT,
-             @intBeginingMixMatchID          INT,
-			 @intEndingMixMatchID            INT,
-			 @intBeginningItemsListNo           INT,
-			 @intEndingItemsListNo             INT,
+			 @intBeginningComboID         INT,
+			 @intEndingComboID            INT,
+             @intBeginingMixMatchID       INT,
+			 @intEndingMixMatchID         INT,
+			 @intBeginningItemsListNo     INT,
+			 @intEndingItemsListNo        INT,
 	  		 @ReplaceDuplicateRecordsysn  NVARCHAR(1),
-			 @intUserEntityId				INT,
+			 @intUserEntityId			  INT,
 
-			 @intItemListAddedCount                    INT,
+			 @intItemListAddedCount       INT,
 			 @Itlreplaced                 INT,
-			 @intComboListAddedCount                    INT,
-			 @intComboReplacedCount                 INT, 
-			 @intMixMatchAddedCount                    INT,
-			 @intMixMatchReplacedCount                 INT,
-		     @intPromotionItemListAdded      INT,
-			 @intPromoItemListReplaced       INT,
-			 @intComboAdded                  INT,
-			 @intComboReplaced               INT,
-			 @intMixMatchAdded               INT,
-			 @intMixMatchReplaced            INT,
+			 @intComboListAddedCount      INT,
+			 @intComboReplacedCount       INT, 
+			 @intMixMatchAddedCount       INT,
+			 @intMixMatchReplacedCount    INT,
+		     @intPromotionItemListAdded   INT,
+			 @intPromoItemListReplaced    INT,
+			 @intComboAdded               INT,
+			 @intComboReplaced            INT,
+			 @intMixMatchAdded            INT,
+			 @intMixMatchReplaced         INT,
 
 			 @intPromotionItemListId		INT,
 			 @intPromotionComboListId       INT,
@@ -242,25 +242,43 @@ BEGIN TRY
 									 -- ==========================================================================
 									 -- [START] - AUDIT LOG - Mark as Deleted
 									 -- ==========================================================================
-									 DECLARE @strPromoCOMBOListIds AS NVARCHAR(1000) = STUFF((
-																								SELECT ',' + CAST(CL.intPromoSalesListId AS NVARCHAR(50)) 
-																								FROM tblSTPromotionSalesList CL
-																								WHERE intPromoSalesId IN (SELECT temp.intPromoComboSalesId FROM @temptblPromoCOMBOList temp)
-																									AND CL.intStoreId = @intStoreId 
-																									AND CL.strPromoType = 'C'
-																								FOR XML PATH('')
-																							 ) ,1,1,'')
+									 --DECLARE @strPromoCOMBOListIds AS NVARCHAR(1000) = STUFF((
+										--														SELECT ',' + CAST(CL.intPromoSalesListId AS NVARCHAR(50)) 
+										--														FROM tblSTPromotionSalesList CL
+										--														WHERE intPromoSalesId IN (SELECT temp.intPromoComboSalesId FROM @temptblPromoCOMBOList temp)
+										--															AND CL.intStoreId = @intStoreId 
+										--															AND CL.strPromoType = 'C'
+										--														FOR XML PATH('')
+										--													 ) ,1,1,'')
+									 
+									 -- Get the lowest primary id
+									 DECLARE @intLoopCOMBOPrimaryId AS INT = 0
 
-									 EXEC dbo.uspSMAuditLog 
-											@screenName				=		'Store.view.PromotionSales'		    -- Screen Namespace
-											,@keyValue				=		@strPromoCOMBOListIds				-- Primary Key Value of the Voucher. 
-											,@entityId				=		@intUserEntityId					-- Entity Id.
-											,@actionType			=		'Deleted'							-- Action Type
-							    			,@actionIcon			=		'small-new-minus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
-											,@changeDescription		=		''									-- Description
-											,@fromValue				=		''									-- Previous Value
-											,@toValue				=		''									-- New Value
+									 SELECT @intLoopCOMBOPrimaryId = MIN(intPrimaryID)
+									 FROM @temptblPromoCOMBOList
 
+									 -- Loop through all records
+									 WHILE (@intLoopCOMBOPrimaryId > 0)
+										BEGIN
+
+										   EXEC dbo.uspSMAuditLog 
+												@screenName				=		'Store.view.PromotionSales'		    -- Screen Namespace
+												,@keyValue				=		@intLoopCOMBOPrimaryId				-- Primary Key Value of the Voucher. 
+												,@entityId				=		@intUserEntityId					-- Entity Id.
+												,@actionType			=		'Deleted'							-- Action Type
+							    				,@actionIcon			=		'small-new-minus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
+												,@changeDescription		=		''									-- Description
+												,@fromValue				=		''									-- Previous Value
+												,@toValue				=		''									-- New Value
+
+										   -- Use the next primary ID
+										   SET @intLoopCOMBOPrimaryId = @intLoopCOMBOPrimaryId + 1
+										   IF NOT EXISTS(SELECT TOP 1 1 FROM @temptblPromoCOMBOList WHERE intPrimaryID = @intLoopCOMBOPrimaryId)
+												BEGIN
+													SET @intLoopCOMBOPrimaryId = 0 -- This will exit the loop
+												END
+
+										END
 									 -- ==========================================================================
 									 -- [START] - AUDIT LOG - Mark as Deleted
 									 -- ==========================================================================
@@ -292,7 +310,7 @@ BEGIN TRY
 					 --IF(@intBeginingMixMatchID != 0 AND @intEndingMixMatchID != 2147483647)
 					 IF EXISTS(SELECT TOP 1 1 FROM @temptblPromoMIXMATCHList)
 						BEGIN
-							 
+
 							 IF EXISTS(
 											SELECT TOP 1 1 
 											FROM tblSTPromotionSalesList  
@@ -307,8 +325,8 @@ BEGIN TRY
 									 FROM tblSTPromotionSalesList  
 									 WHERE intPromoSalesId IN (SELECT temp.intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHList temp)
 										AND intStoreId = @intStoreId
-										AND strPromoType = 'M' 
-					 
+										AND strPromoType = 'M'	 
+									 
 									 SET @intMixMatchReplaced = @intMixMatchReplaced + @intMixMatchReplacedCount
 
 
@@ -316,24 +334,43 @@ BEGIN TRY
 									 -- ==========================================================================
 									 -- [START] - AUDIT LOG - Mark as Deleted
 									 -- ==========================================================================
-									 DECLARE @strPromoMIXMATCHListIds AS NVARCHAR(1000) = STUFF((
-																								SELECT ',' + CAST(SL.intPromoSalesListId AS NVARCHAR(50)) 
-																								FROM tblSTPromotionSalesList SL
-																								WHERE intPromoSalesId IN (SELECT temp.intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHList temp)
-																									AND SL.intStoreId = @intStoreId 
-																									AND SL.strPromoType = 'M'
-																								FOR XML PATH('')
-																							 ) ,1,1,'')
+									 --DECLARE @strPromoMIXMATCHListIds AS NVARCHAR(1000) = STUFF((
+										--														SELECT ',' + CAST(SL.intPromoSalesListId AS NVARCHAR(50)) 
+										--														FROM tblSTPromotionSalesList SL
+										--														WHERE intPromoSalesId IN (SELECT temp.intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHList temp)
+										--															AND SL.intStoreId = @intStoreId 
+										--															AND SL.strPromoType = 'M'
+										--														FOR XML PATH('')
+										--													 ) ,1,1,'')
 
-									 EXEC dbo.uspSMAuditLog 
-											@screenName				=		'Store.view.PromotionSales'		    -- Screen Namespace
-											,@keyValue				=		@strPromoMIXMATCHListIds			-- Primary Key Value of the Voucher. 
-											,@entityId				=		@intUserEntityId					-- Entity Id.
-											,@actionType			=		'Deleted'							-- Action Type
-							    			,@actionIcon			=		'small-new-minus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
-											,@changeDescription		=		''									-- Description
-											,@fromValue				=		''									-- Previous Value
-											,@toValue				=		''									-- New Value
+									 -- Get the lowest primary id
+									 DECLARE @intLoopMIXMATCHPrimaryId AS INT = 0
+
+									 SELECT @intLoopMIXMATCHPrimaryId = MIN(intPrimaryID)
+									 FROM  @temptblPromoMIXMATCHList
+
+									 -- Loop through all records
+									 WHILE (@intLoopMIXMATCHPrimaryId > 0)
+										BEGIN
+
+										   EXEC dbo.uspSMAuditLog 
+												@screenName				=		'Store.view.PromotionSales'		    -- Screen Namespace
+												,@keyValue				=		@intLoopMIXMATCHPrimaryId			-- Primary Key Value of the Voucher. 
+												,@entityId				=		@intUserEntityId					-- Entity Id.
+												,@actionType			=		'Deleted'							-- Action Type
+							    				,@actionIcon			=		'small-new-minus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
+												,@changeDescription		=		''									-- Description
+												,@fromValue				=		''									-- Previous Value
+												,@toValue				=		''									-- New Value
+
+										   -- Use the next primary ID
+										   SET @intLoopMIXMATCHPrimaryId = @intLoopMIXMATCHPrimaryId + 1
+										   IF NOT EXISTS(SELECT TOP 1 1 FROM @temptblPromoMIXMATCHList WHERE intPrimaryID = @intLoopMIXMATCHPrimaryId)
+												BEGIN
+													SET @intLoopMIXMATCHPrimaryId = 0 -- This will exit the loop
+												END
+
+										END
 									 -- ==========================================================================
 									 -- [START] - AUDIT LOG - Mark as Deleted
 									 -- ==========================================================================
@@ -384,23 +421,44 @@ BEGIN TRY
 									 -- ==========================================================================
 									 -- [START] - AUDIT LOG - Mark as Deleted
 									 -- ==========================================================================
-									 DECLARE @strPromoITEMListIds AS NVARCHAR(1000) = STUFF((
-																								SELECT ',' + CAST(IL.intPromoItemListId AS NVARCHAR(50)) 
-																								FROM tblSTPromotionItemList IL
-																								WHERE intPromoItemListNo IN (SELECT temp.intPromoItemListNo FROM @temptblPromoITEMList temp)
-																									AND IL.intStoreId = @intStoreId 
-																								FOR XML PATH('')
-																						   ) ,1,1,'')
+									 --DECLARE @strPromoITEMListIds AS NVARCHAR(1000) = STUFF((
+										--														SELECT ',' + CAST(IL.intPromoItemListId AS NVARCHAR(50)) 
+										--														FROM tblSTPromotionItemList IL
+										--														WHERE intPromoItemListNo IN (SELECT temp.intPromoItemListNo FROM @temptblPromoITEMList temp)
+										--															AND IL.intStoreId = @intStoreId 
+										--														FOR XML PATH('')
+										--												   ) ,1,1,'')
 
-									 EXEC dbo.uspSMAuditLog 
-										   @screenName			=		'Store.view.PromotionItemList'		-- Screen Namespace
-										  ,@keyValue			=		@strPromoITEMListIds				-- Primary Key Value of the Voucher. 
-										  ,@entityId			=		@intUserEntityId					-- Entity Id.
-										  ,@actionType			=		'Deleted'							-- Action Type
-										  ,@actionIcon			=		'small-new-minus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
-										  ,@changeDescription	=		''									-- Description
-										  ,@fromValue			=		''									-- Previous Value
-										  ,@toValue				=		''									-- New Value
+									 -- Get the lowest primary id
+									 DECLARE @intLoopITEMPrimaryId AS INT = 0
+
+									 SELECT @intLoopITEMPrimaryId = MIN(intPrimaryID)
+									 FROM  @temptblPromoITEMList
+
+									 -- Loop through all records
+									 WHILE (@intLoopITEMPrimaryId > 0)
+										BEGIN
+
+										   EXEC dbo.uspSMAuditLog 
+											   @screenName			=		'Store.view.PromotionItemList'		-- Screen Namespace
+											  ,@keyValue			=		@intLoopITEMPrimaryId				-- Primary Key Value of the Voucher. 
+											  ,@entityId			=		@intUserEntityId					-- Entity Id.
+											  ,@actionType			=		'Deleted'							-- Action Type
+											  ,@actionIcon			=		'small-new-minus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
+											  ,@changeDescription	=		''									-- Description
+											  ,@fromValue			=		''									-- Previous Value
+											  ,@toValue				=		''									-- New Value
+
+										   -- Use the next primary ID
+										   SET @intLoopITEMPrimaryId = @intLoopITEMPrimaryId + 1
+										   IF NOT EXISTS(SELECT TOP 1 1 FROM @temptblPromoITEMList WHERE intPrimaryID = @intLoopITEMPrimaryId)
+												BEGIN
+													SET @intLoopITEMPrimaryId = 0 -- This will exit the loop
+												END
+
+										END
+
+									
 									 -- ==========================================================================
 									 -- [START] - AUDIT LOG - Mark as Deleted
 									 -- ==========================================================================
@@ -443,6 +501,8 @@ BEGIN TRY
 	 SELECT @intPrimaryID = MIN(intPrimaryID)
 	 FROM @temptblStore
 
+--PRINT '[START] - CLONE PROMOTIONS'
+
 	 -- ===========================================================================================
 	 -- [START] - CLONE PROMOTIONS
 	 -- ===========================================================================================
@@ -458,6 +518,7 @@ BEGIN TRY
 ---- TEST
 --SELECT 'intStoreId', @intStoreId, 'Primary ID', @intPrimaryID
 
+--PRINT '[START] - ITEM LIST PROMOTIONS'
 		   -- ======================================================================================
 		   -- [START] - ITEM LIST PROMOTIONS
 		   -- ======================================================================================
@@ -542,15 +603,15 @@ BEGIN TRY
 									-- ==========================================================================
 									-- [START] - AUDIT LOG - Mark as Created
 									-- ==========================================================================
-									SET @strPromoITEMListIds = CAST(@intNewPromotionITEMListId AS NVARCHAR(50))
+									-- SET @strPromoITEMListIds = CAST(@intNewPromotionITEMListId AS NVARCHAR(50))
 
 									EXEC dbo.uspSMAuditLog 
 										   @screenName			=		'Store.view.PromotionItemList'		-- Screen Namespace
-										  ,@keyValue			=		@strPromoITEMListIds				-- Primary Key Value of the Voucher. 
+										  ,@keyValue			=		@intNewPromotionITEMListId			-- Primary Key Value of the Voucher. 
 										  ,@entityId			=		@intUserEntityId					-- Entity Id.
 										  ,@actionType			=		'Created'							-- Action Type
 										  ,@actionIcon			=		'small-new-plus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
-										  ,@changeDescription	=		'Created by Copy Promotion screen'									-- Description
+										  ,@changeDescription	=		'Created by Copy Promotion screen'	-- Description
 										  ,@fromValue			=		''									-- Previous Value
 										  ,@toValue				=		''									-- New Value
 									-- ==========================================================================
@@ -609,7 +670,7 @@ BEGIN TRY
 
 
 
-
+--PRINT '[START] - COMBO LIST'
 		   -- ======================================================================================
 		   -- [START] - COMBO LIST
 		   -- ======================================================================================
@@ -709,19 +770,18 @@ BEGIN TRY
 						   FROM tblSTPromotionSalesList 
 						   WHERE intPromoSalesId = @intPromotionComboListId --IN (SELECT intPromoComboSalesId FROM @temptblPromoCOMBOList)
 								AND intStoreId = @intFromStoreId 
-						   
+								AND strPromoType = 'C'
+
 						   -- Get new primary ID
 						   SET @intNewPromotionCOMBOListId = SCOPE_IDENTITY();
-
 
 						   -- ==========================================================================
 						   -- [START] - AUDIT LOG - Mark as Created
 						   -- ==========================================================================
-						   SET @strPromoCOMBOListIds = CAST(@intNewPromotionCOMBOListId AS NVARCHAR(50))
-
+						   -- SET @strPromoCOMBOListIds = CAST(@intNewPromotionCOMBOListId AS NVARCHAR(50))
 						   EXEC dbo.uspSMAuditLog 
 									@screenName				=		'Store.view.PromotionSales'		    -- Screen Namespace
-									,@keyValue				=		@strPromoCOMBOListIds				-- Primary Key Value of the Voucher. 
+									,@keyValue				=		@intNewPromotionCOMBOListId			-- Primary Key Value of the Voucher. 
 									,@entityId				=		@intUserEntityId					-- Entity Id.
 									,@actionType			=		'Created'							-- Action Type
 									,@actionIcon			=		'small-new-plus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
@@ -729,9 +789,8 @@ BEGIN TRY
 									,@fromValue				=		''									-- Previous Value
 									,@toValue				=		''									-- New Value
 						   -- ==========================================================================
-						   -- [START] - AUDIT LOG - Mark as Created
+						   -- [END] - AUDIT LOG - Mark as Created
 						   -- ==========================================================================
-
 
 						   -----Inserting Combo Details From to ToStore
 						   INSERT INTO tblSTPromotionSalesListDetail 
@@ -780,11 +839,11 @@ BEGIN TRY
 		   -- ======================================================================================
 		   -- [START] - COMBO LIST
 		   -- ======================================================================================
+--PRINT '[END] - COMBO LIST'
 
 
 
-
-
+--PRINT '[START] - MIX-MATCH LIST'
 		   -- ======================================================================================
 		   -- [START] - MIX-MATCH LIST
 		   -- ======================================================================================
@@ -884,6 +943,7 @@ BEGIN TRY
 						   FROM tblSTPromotionSalesList 
 						   WHERE intPromoSalesId = @intPromotionMixMatchListId 
 								AND intStoreId = @intFromStoreId 
+								AND strPromoType = 'M'
 						   
 						   -- Get new primary ID
 						   SET @intNewPromotionMIXMATCHListId = SCOPE_IDENTITY();
@@ -893,17 +953,24 @@ BEGIN TRY
 						   -- ==========================================================================
 						   -- [START] - AUDIT LOG - Mark as Created
 						   -- ==========================================================================
-						   SET @strPromoMIXMATCHListIds = @intNewPromotionMIXMATCHListId
-
+						   -- SET @strPromoMIXMATCHListIds = @intNewPromotionMIXMATCHListId
+						   BEGIN TRY
 						   EXEC dbo.uspSMAuditLog 
 									@screenName				=		'Store.view.PromotionSales'		    -- Screen Namespace
-									,@keyValue				=		@strPromoMIXMATCHListIds			-- Primary Key Value of the Voucher. 
+									,@keyValue				=		@intNewPromotionMIXMATCHListId		-- Primary Key Value of the Voucher. 
 									,@entityId				=		@intUserEntityId					-- Entity Id.
 									,@actionType			=		'Created'							-- Action Type
 							    	,@actionIcon			=		'small-new-minus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
 									,@changeDescription		=		''									-- Description
 									,@fromValue				=		''									-- Previous Value
 									,@toValue				=		''									-- New Value
+							END TRY
+							BEGIN CATCH
+								SET @strStatusMsg = 'Script Error: ' + ERROR_MESSAGE()
+
+								-- ROLLBACK
+								GOTO ExitWithRollback
+							END CATCH
 							-- ==========================================================================
 							-- [START] - AUDIT LOG - Mark as Created
 							-- ==========================================================================
@@ -956,27 +1023,14 @@ BEGIN TRY
 		   -- ======================================================================================
 		   -- [END] - MIX-MATCH LIST
 		   -- ======================================================================================
+--PRINT '[END] - MIX-MATCH LIST'
 
---SELECT * FROM tblSTPromotionItemList
---WHERE intStoreId = @intStoreId
-
---SELECT * FROM tblSTPromotionSalesList
---WHERE intStoreId = @intStoreId
---	AND strPromoType IN ('C', 'M')
 
 		   SET @intPrimaryID = @intPrimaryID + 1
 		   IF NOT EXISTS(SELECT TOP 1 1 FROM @temptblStore WHERE intPrimaryID = @intPrimaryID)
 				BEGIN
 					SET @intPrimaryID = 0 -- This will exit the loop
 				END
-
----- TEST
---SELECT @intPrimaryID, @intStoreId FROM @temptblStore WHERE intPrimaryID = @intPrimaryID
---SELECT 'Last intStoreId', @intStoreId, 'Primary ID', @intPrimaryID
-
-			--SELECT @intPrimaryID = MIN(intPrimaryID)
-			--FROM @temptblStore
-		 --   WHERE intPrimaryID > @intPrimaryID
 
 		END	  
 	 
