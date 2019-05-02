@@ -105,7 +105,7 @@ Begin
 			Join tblSMCompanyLocationSubLocation csl on ri.strSubLocation=csl.strSubLocationName AND csl.intCompanyLocationId=@intLocationId
 			Join tblICStorageLocation sl on ri.strStorageLocation=sl.strName AND sl.intSubLocationId=csl.intCompanyLocationSubLocationId
 			Join vyuAPVendor v on ld.intVendorEntityId=v.[intEntityId]
-			Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
+			--Join tblEMEntityLocation el on ld.intVendorEntityId=el.intEntityId
 			Join tblCTContractDetail ct on ld.intPContractDetailId=ct.intContractDetailId
 			Join tblLGLoad l on l.intLoadId=ld.intLoadId
 			Join tblLGLoadDetailContainerLink cl on ld.intLoadDetailId=cl.intLoadDetailId AND cl.strExternalContainerId=ri.strDeliveryItemNo
