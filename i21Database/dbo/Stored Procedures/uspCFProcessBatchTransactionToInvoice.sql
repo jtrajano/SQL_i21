@@ -736,7 +736,7 @@ SELECT * FROM @tmpForeignTransactionId
 	END
 
 
-	SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
+	SET @SuccessfulCount = @SuccessfulCount --+ @intForeignTransCount
 
 	--================--
 
