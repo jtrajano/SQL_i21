@@ -116,6 +116,13 @@ BEGIN
 	RETURN -80048
 END 
 
+-- Validate Invalid Item Stock UOM Setup
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80231)
+BEGIN 
+	EXEC uspICRaiseError 80231; 
+	RETURN -80231
+END
+
 -- Check for negative stock qty 
 -- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'	
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80003)
@@ -289,6 +296,7 @@ BEGIN
 	EXEC uspICRaiseError 80196, @strItemNo
 	RETURN -80196
 END 
+
 
 -- Check if system is trying to post stocks for bundle types
 SELECT @strItemNo = NULL, @intItemId = NULL

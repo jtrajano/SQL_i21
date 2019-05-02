@@ -91,6 +91,19 @@ RETURN (
 				AND @intItemId IS NOT NULL 	
 				AND @intItemUOMId IS NOT NULL
 
+
+		UNION ALL
+		SELECT
+			intItemId = @intItemId
+			,intItemLocationId = @intItemLocationId
+			,strText = dbo.fnICGetErrorMessage(80231)
+			,intErrorCode = 80231
+		FROM tblICItemUOM u
+		WHERE u.intItemId = @intItemId
+			AND u.ysnStockUnit = 1
+			AND u.dblUnitQty = 1
+		HAVING COUNT(u.intItemUOMId) > 1
+
 		-- Check for missing costing method. 
 		UNION ALL 
 		SELECT	intItemId = @intItemId
