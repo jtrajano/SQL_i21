@@ -8,6 +8,7 @@
 	,@tempPayment DECIMAL(18,6) = 0
 	,@tempWithheld DECIMAL(18,6) = 0
 	,@readyForPayment BIT = 0
+	,@discountOverride BIT = 0
 	,@tempPaymentInfo NVARCHAR(MAX) = NULL
 	,@negativePayment NVARCHAR(MAX) = NULL OUTPUT
 	,@newPayment DECIMAL(18,2) = 0 OUTPUT
@@ -171,6 +172,8 @@ BEGIN
 					,voucher.dblTempWithheld = CASE WHEN @readyForPayment = 1 THEN @updatedWithheld ELSE 0 END
 					,voucher.strTempPaymentInfo = CASE WHEN @readyForPayment = 1 THEN @tempPaymentInfo ELSE NULL END
 					,voucher.ysnReadyForPayment = @readyForPayment
+					,voucher.ysnDiscountOverride = CASE WHEN @discountOverride = 1 THEN 1 ELSE voucher.ysnDiscountOverride END
+					,voucher.dblDiscount = CASE WHEN @discountOverride = 1 THEN @tempDiscount ELSE voucher.dblDiscount END
 			FROM tblAPBill voucher
 			INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 			INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId

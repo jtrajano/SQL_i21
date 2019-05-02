@@ -24,8 +24,8 @@ CREATE TYPE [dbo].[InvoiceItemTableType] AS TABLE
 		,[intSCInvoiceId]				INT				NULL
 		,[strSCInvoiceNumber]			NVARCHAR (25)   COLLATE Latin1_General_CI_AS  NULL
 		,[intItemUOMId]					INT             NULL
-		,[dblQtyOrdered]				NUMERIC (18, 6) NULL
-		,[dblQtyShipped]				NUMERIC (18, 6) NULL
+		,[dblQtyOrdered]				NUMERIC (38, 20) NULL
+		,[dblQtyShipped]				NUMERIC (38, 20) NULL
 		,[dblDiscount]					NUMERIC (18, 6) NULL
 		,[dblPrice]						NUMERIC (18, 6) NULL
 		,[dblTotalTax]					NUMERIC (18, 6) NULL

@@ -116,17 +116,17 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[strDocumentNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Document Number (Transaction Number(Provisional/Inbound Shipment/Inventory Shipment))
     ,[strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Line Item Description(If NULL the item's description will be used)
 	,[intOrderUOMId]						INT												NULL		-- The order UOM Id
-    ,[dblQtyOrdered]						NUMERIC(18, 6)									NULL		-- The quantity ordered
+    ,[dblQtyOrdered]						NUMERIC(38, 20)									NULL		-- The quantity ordered
 	,[intItemUOMId]							INT												NULL		-- The UOM Id
 	,[intPriceUOMId]						INT												NULL		-- The UOM Id From Contract Sequence/Inventory Shipment
 	,[dblContractPriceUOMQty]				NUMERIC(18, 6)									NULL		-- The Contract Quantity based on Price UOM
-    ,[dblQtyShipped]						NUMERIC(18, 6)									NULL		-- The quantity to ship
+    ,[dblQtyShipped]						NUMERIC(38, 20)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
 	,[dblItemTermDiscount]					NUMERIC(18, 6)									NULL		-- The Term discount to apply to a line item upon payment
 	,[strItemTermDiscountBy]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values(Term Discount Calculation Method) 
 																											-- 1. "Amount"
 																											-- 2. "Percentage"	
-	,[dblItemWeight]						NUMERIC(18, 6)									NULL
+	,[dblItemWeight]						NUMERIC(38, 20)									NULL
 	,[intItemWeightUOMId]					INT												NULL	
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
 	,[dblUnitPrice]							NUMERIC(18, 6)									NULL		-- The line item unit price
@@ -164,9 +164,9 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[strSalesOrderNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Sales Order Number (Sales Order)
 	,[intContractDetailId]					INT												NULL		-- Key Value from tblCTContractDetail (Sales Contract)
 	,[intShipmentPurchaseSalesContractId]	INT												NULL		-- Key Value from tblLGShipmentPurchaseSalesContract (Inbound Shipment)
-	,[dblShipmentGrossWt]					NUMERIC(18, 6)									NULL
-	,[dblShipmentTareWt]					NUMERIC(18, 6)									NULL
-	,[dblShipmentNetWt]						NUMERIC(18, 6)									NULL
+	,[dblShipmentGrossWt]					NUMERIC(38, 20)									NULL
+	,[dblShipmentTareWt]					NUMERIC(38, 20)									NULL
+	,[dblShipmentNetWt]						NUMERIC(38, 20)									NULL
 	,[intTicketId]							INT												NULL		-- Key Value from tblSCTicket (Scale Ticket)
 	,[intTicketHoursWorkedId]				INT												NULL		-- Key Value from tblHDTicketHoursWorked (Help Desk)
 	,[intCustomerStorageId]					INT												NULL		-- Key Value from tblGRCustomerStorage (Grain)
@@ -202,5 +202,5 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 
     ,[strAddonDetailKey]                    NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[ysnAddonParent]                       BIT                                             NULL
-    ,[dblAddOnQuantity]                     NUMERIC(18, 6)                                  NULL
+    ,[dblAddOnQuantity]                     NUMERIC(38, 20)                                  NULL
 )

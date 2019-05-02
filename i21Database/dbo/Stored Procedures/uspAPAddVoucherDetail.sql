@@ -89,6 +89,7 @@ USING
 		,intDeferredVoucherId				=	A.intDeferredVoucherId
 		/*Integration fields*/				
 		,intInventoryReceiptItemId			=	A.intInventoryReceiptItemId
+		,strBillOfLading					=	A.strBillOfLading
 		,intInventoryReceiptChargeId		=	A.intInventoryReceiptChargeId
 		,intPaycheckHeaderId				=	A.intPaycheckHeaderId
 		,intPurchaseDetailId				=	A.intPurchaseDetailId
@@ -283,7 +284,8 @@ INSERT
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
 	/*Integration fields*/				
-	,intInventoryReceiptItemId			
+	,intInventoryReceiptItemId	
+	,strBillOfLading		
 	,intInventoryReceiptChargeId		
 	,intPaycheckHeaderId				
 	,intPurchaseDetailId				
@@ -367,7 +369,8 @@ VALUES
 	/*Deferred voucher info*/			
 	,intDeferredVoucherId				
 	/*Integration fields*/				
-	,intInventoryReceiptItemId			
+	,intInventoryReceiptItemId		
+	,strBillOfLading	
 	,intInventoryReceiptChargeId		
 	,intPaycheckHeaderId				
 	,intPurchaseDetailId				

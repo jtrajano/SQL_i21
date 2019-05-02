@@ -523,6 +523,7 @@ BEGIN
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN	
 		BEGIN TRY
+			IF NOT EXISTS( SELECT TOP 1 1 FROM @adjustedEntries WHERE dblQty < 0) --CALL THE ADJUSTMENTS ONLY IF POSSITIVE
 			EXEC @intReturnValue = uspICPostCostAdjustment 
 					@adjustedEntries
 					, @batchId
@@ -893,6 +894,7 @@ BEGIN
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN	
 		BEGIN TRY
+			IF NOT EXISTS( SELECT TOP 1 1 FROM @adjustedEntries WHERE dblQty < 0) --CALL THE ADJUSTMENTS ONLY IF POSSITIVE
 			EXEC @intReturnValue = uspICPostCostAdjustment 
 					@adjustedEntries
 					, @batchId

@@ -63,6 +63,7 @@ SELECT
     INV.strBillToCountry,
     INV.ysnPosted,
     INV.ysnPaid,
+	INV.ysnPaidCPP,
     INV.ysnProcessed,
     INV.ysnRecurring,
     INV.ysnForgiven,

@@ -70,40 +70,49 @@ BEGIN TRY
 			,intForexRateTypeId
 			,dblForexRate
 			)
-		SELECT intItemId = LD.intItemId
+		SELECT 
+			intItemId = LD.intItemId
 			,intItemLocationId = IL.intItemLocationId
 			,intItemUOMId = LD.intItemUOMId
 			,dtmDate = GETDATE()
 			,dblQty = LD.dblQuantity
-			,IU.dblUnitQty
-			,dblCost = ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN  CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)
-						/ (CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) 
+			,dblUOMQty = IU.dblUnitQty
+			,dblCost = CASE WHEN (AD.dblSeqPrice IS NULL) THEN
+							CASE WHEN (LD.dblUnitPrice > 0) 
+								THEN LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END
+								ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) END
+							ELSE AD.dblSeqPrice / CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+						END
 						* AD.dblQtyToPriceUOMConvFactor
 						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
-			,dblValue = ISNULL(CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN  CD.dblCashPrice ELSE AD.dblSeqPrice END, 0)
-						/ (CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) 
+			,dblValue = CASE WHEN (AD.dblSeqPrice IS NULL) THEN
+							CASE WHEN (LD.dblUnitPrice > 0) 
+								THEN LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END
+								ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) END
+							ELSE AD.dblSeqPrice / CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+						END
 						* AD.dblQtyToPriceUOMConvFactor 
 						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
 						* LD.dblQuantity 
-			,0.0
+			,dblSalesPrice = 0.0
 			,intCurrencyId = CASE WHEN L.intPurchaseSale = 3 AND CD.ysnUseFXPrice = 1 THEN 
 								ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) 
 							ELSE 
 								ISNULL(LD.intForexCurrencyId, L.intCurrencyId) 
 							END
-			,ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
-			,L.intLoadId
-			,intLoadDetailId
-			,L.strLoadNumber
-			,22 intTransactionTypeId
-			,NULL
-			,L.intLoadId
-			,strLoadNumber
-			,0
-			,CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
-			,IL.intItemLocationId
-			,CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId) ELSE LD.intForexRateTypeId END
-			,CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) ELSE ISNULL(LD.dblForexRate,1) END
+			,dblExchangeRate = ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
+			,intTransactionId = L.intLoadId
+			,intTransactionDetailId = LD.intLoadDetailId
+			,strTransactionId = L.strLoadNumber
+			,intTransactionTypeId = 22
+			,intLotId = NULL
+			,intSourceTransactionId = L.intLoadId
+			,strSourceTransactionId = L.strLoadNumber
+			,intSourceTransactionDetailId = LD.intLoadDetailId
+			,intFobPointId = CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
+			,intInTransitSourceLocationId = IL.intItemLocationId
+			,intForexRateTypeId = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId) ELSE LD.intForexRateTypeId END
+			,dblForexRate = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) ELSE ISNULL(LD.dblForexRate,1) END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
@@ -133,6 +142,7 @@ BEGIN TRY
 			,FP.intFobPointId
 			,AD.dblQtyToPriceUOMConvFactor
 			,AD.ysnSeqSubCurrency
+			,CD.intContractDetailId
 			,CD.intRateTypeId
 			,CD.dblRate
 			,CD.ysnUseFXPrice
@@ -141,6 +151,7 @@ BEGIN TRY
 			,LD.intPriceUOMId
 			,LD.dblUnitPrice
 			,CUR.ysnSubCurrency
+			,CUR.intCent
 			,LD.intForexRateTypeId
 			,LD.dblForexRate
 			,LD.intForexCurrencyId

@@ -234,11 +234,11 @@ DECLARE  @Id									INT
 		,@ItemDocumentNumber					NVARCHAR(100)
 		,@ItemDescription						NVARCHAR(250)
 		,@ItemOrderUOMId						INT
-		,@ItemQtyOrdered						NUMERIC(18, 6)
+		,@ItemQtyOrdered						NUMERIC(38, 20)
 		,@ItemUOMId								INT
 		,@ItemPriceUOMId						INT
-		,@ItemQtyShipped						NUMERIC(18, 6)
-		,@ItemUnitQuantity						NUMERIC(18, 6)
+		,@ItemQtyShipped						NUMERIC(38, 20)
+		,@ItemUnitQuantity						NUMERIC(38, 20)
 		,@ItemDiscount							NUMERIC(18, 6)
 		,@ItemTermDiscount						NUMERIC(18, 6)
 		,@ItemTermDiscountBy					NVARCHAR(50)
@@ -277,10 +277,10 @@ DECLARE  @Id									INT
 		,@ItemContractDetailId					INT
 		,@ItemShipmentPurchaseSalesContractId	INT
 		,@ItemWeightUOMId						INT
-		,@ItemWeight							NUMERIC(18,6)
-		,@ItemShipmentGrossWt					NUMERIC(18,6)
-		,@ItemShipmentTareWt					NUMERIC(18,6)
-		,@ItemShipmentNetWt						NUMERIC(18,6)
+		,@ItemWeight							NUMERIC(38, 20)
+		,@ItemShipmentGrossWt					NUMERIC(38, 20)
+		,@ItemShipmentTareWt					NUMERIC(38, 20)
+		,@ItemShipmentNetWt						NUMERIC(38, 20)
 		,@ItemTicketId							INT
 		,@ItemTicketHoursWorkedId				INT
 		,@ItemCustomerStorageId					INT
@@ -312,7 +312,7 @@ DECLARE  @Id									INT
 		,@ItemDestinationWeightId				INT
         ,@ItemAddonDetailKey                    NVARCHAR(100)
 		,@ItemAddonParent                       BIT
-		,@ItemAddOnQuantity                     NUMERIC(18, 8)
+		,@ItemAddOnQuantity                     NUMERIC(38, 20)
 
 --INSERT
 BEGIN TRY

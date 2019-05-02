@@ -68,6 +68,7 @@
     [strBillToCountry]					NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS	NULL,	
     [ysnPosted]							BIT             								NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPosted] DEFAULT ((0)),
     [ysnPaid]							BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPaid] DEFAULT ((0)),
+    [ysnPaidCPP]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPaidCPP] DEFAULT ((0)),
 	[ysnProcessed]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnProcessed] DEFAULT ((0)),
 	[ysnReturned]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnReturned] DEFAULT ((0)),
 	[ysnRecurring]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnTemplate] DEFAULT ((0)),

@@ -390,13 +390,13 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intPrepayTypeId]					INT												NULL
 	,[dblPrepayRate]					NUMERIC(18, 6)									NULL
 	,[strItemDescription]				NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
-	,[dblQtyOrdered]					NUMERIC(18, 6)									NULL
+	,[dblQtyOrdered]					NUMERIC(38,20)									NULL
 	,[intOrderUOMId]					INT												NULL
-	,[dblQtyShipped]					NUMERIC(18, 6)									NULL
+	,[dblQtyShipped]					NUMERIC(38,20)									NULL
 	,[intItemUOMId]						INT												NULL
 	,[intPriceUOMId]					INT												NULL
-	,[dblUnitQuantity]					NUMERIC(18, 6)									NULL
-	,[dblItemWeight]					NUMERIC(18, 6)									NULL
+	,[dblUnitQuantity]					NUMERIC(38,20)									NULL
+	,[dblItemWeight]					NUMERIC(38,20)									NULL
 	,[intItemWeightUOMId]				INT												NULL
 	,[dblDiscount]						NUMERIC(18, 6)									NULL
 	,[dblItemTermDiscount]				NUMERIC(18, 6)									NULL
@@ -460,9 +460,9 @@ CREATE TABLE #InvoiceInventoryItem
 	,[dblContractAvailable]				NUMERIC(18, 6)									NULL
 	,[intShipmentId]					INT												NULL
 	,[intShipmentPurchaseSalesContractId]	INT											NULL
-	,[dblShipmentGrossWt]				NUMERIC(18, 6)									NULL
-	,[dblShipmentTareWt]				NUMERIC(18, 6)									NULL
-	,[dblShipmentNetWt]					NUMERIC(18, 6)									NULL
+	,[dblShipmentGrossWt]				NUMERIC(38,20)									NULL
+	,[dblShipmentTareWt]				NUMERIC(38,20)									NULL
+	,[dblShipmentNetWt]					NUMERIC(38,20)									NULL
 	,[intTicketId]						INT												NULL
 	,[intTicketHoursWorkedId]			INT												NULL
 	,[intCustomerStorageId]				INT												NULL
@@ -494,7 +494,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intDestinationWeightId]			INT												NULL
     ,[strAddonDetailKey]                NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[ysnAddonParent]                   BIT                                             NULL
-    ,[dblAddOnQuantity]                 NUMERIC(18, 6)                                  NULL
+    ,[dblAddOnQuantity]                 NUMERIC(38,20)                                  NULL
 	,[intConcurrencyId]					INT												NULL
 	,[ysnRecomputeTax]					BIT												NULL
 	,[intEntityId]						INT												NULL

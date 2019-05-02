@@ -29,7 +29,7 @@ RETURNS TABLE AS RETURN
 		,dblTempDiscount =  CAST(CASE WHEN voucher.intTransactionType = 1 
 									THEN 
 									(
-										CASE WHEN voucher.ysnDiscountOverride = 1 AND forPay.intPayScheduleId <= 0
+										CASE WHEN voucher.ysnDiscountOverride = 1 AND NULLIF(forPay.intPayScheduleId,0) IS NULL
 												THEN voucher.dblDiscount
 											WHEN forPay.intPayScheduleId > 0
 												THEN forPay.dblTempDiscount

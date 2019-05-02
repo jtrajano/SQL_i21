@@ -18,7 +18,8 @@ SELECT
 	,dtmPostDate					= I.dtmPostDate
 	,dtmShipDate					= I.dtmShipDate
 	,ysnPosted						= I.ysnPosted
-	,ysnPaid						= I.ysnPaid
+	,ysnPaid						= CASE WHEN (I.strTransactionType  IN ('Customer Prepayment') AND I.ysnPaid = 0)  THEN I.ysnPaidCPP ELSE I.ysnPaid END
+	,ysnPaidCPP						= I.ysnPaidCPP
 	,ysnProcessed					= I.ysnProcessed
 	,ysnForgiven					= I.ysnForgiven
 	,ysnCalculated					= I.ysnCalculated
