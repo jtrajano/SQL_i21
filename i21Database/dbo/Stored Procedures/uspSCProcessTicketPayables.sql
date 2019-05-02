@@ -63,6 +63,7 @@ INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInven
 LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = ri.intLineNo
 LEFT JOIN tblCTPriceFixation CTP ON CTP.intContractDetailId = CT.intContractDetailId
 WHERE ri.intInventoryReceiptId = @intInventoryReceiptId AND ri.intOwnershipType = 1 AND CTP.intPriceFixationId IS NULL
+	AND ri.ysnAllowVoucher = 1
 
 /* GET VOUCHER ITEMS */
 
