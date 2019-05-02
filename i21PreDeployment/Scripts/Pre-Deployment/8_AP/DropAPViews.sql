@@ -39,9 +39,9 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAP
 	DROP VIEW vyuAPBillForApproval
 GO
 
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPBillPayment')
-	DROP VIEW vyuAPBillPayment
-GO
+-- IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPBillPayment')
+-- 	DROP VIEW vyuAPBillPayment
+-- GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPBillPaymentActual')
 	DROP VIEW vyuAPBillPaymentActual
 GO
