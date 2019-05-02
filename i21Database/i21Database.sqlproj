@@ -6452,6 +6452,7 @@
     <Build Include="dbo\Views\vyuPREmployeeTimeOff.sql" />
     <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGRValidateStorageStmtFormNo.sql" />
+    <Build Include="dbo\Functions\fnPRRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
