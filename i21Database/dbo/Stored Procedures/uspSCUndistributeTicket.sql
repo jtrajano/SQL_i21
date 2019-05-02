@@ -193,7 +193,11 @@ BEGIN TRY
 									END
 								END
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
-								EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 0, @strErrorMessage = @ErrorMessage OUT, @intBillId = DEFAULT
+								/*
+									uspAPDeleteVoucher removes the payables from Voucher
+									uspICPostInventoryReceipt deletes payable
+								*/
+								--EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 0, @strErrorMessage = @ErrorMessage OUT, @intBillId = DEFAULT
 								FETCH NEXT FROM voucherCursor INTO @intBillId;
 							END
 
