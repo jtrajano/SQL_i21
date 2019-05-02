@@ -106,16 +106,7 @@ SELECT DISTINCT
 	,[dblPOOpenReceive]			=	B.dblReceived
 	,[dblOpenReceive]			=	B.dblOpenReceive
 	,[dblQuantityToBill]		=	CAST (
-									CASE 
-										WHEN CD.intContractDetailId > 0  THEN 
-											dbo.fnCalculateQtyBetweenUOM(
-												(CASE WHEN B.intWeightUOMId > 0 THEN B.intWeightUOMId ELSE B.intUnitMeasureId END)
-												,CD.intItemUOMId
-												,(B.dblOpenReceive - B.dblBillQty)
-											) 
-										ELSE 
-											(B.dblOpenReceive - B.dblBillQty) 
-									END 
+									(B.dblOpenReceive - B.dblBillQty)
 									AS DECIMAL(18,6)) 
 	,[dblQtyToBillUnitQty]		=	ISNULL(ItemUOM.dblUnitQty, 1)
 	,[intQtyToBillUOMId]		=	B.intUnitMeasureId
