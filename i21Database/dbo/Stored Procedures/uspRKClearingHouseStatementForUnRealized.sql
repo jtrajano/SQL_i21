@@ -1,19 +1,24 @@
-﻿CREATE PROC uspRKClearingHouseStatementForUnRealized	
-		@strName nvarchar(100) = null,
-		@strAccountNumber nvarchar(100) = null,
-		@dtmTransactionFromDate datetime = null,
-		@dtmTransactionToDate datetime = null
+﻿CREATE PROC [dbo].[uspRKClearingHouseStatementForUnRealized]    
+              @strName nvarchar(100) = null,
+              @strAccountNumber nvarchar(100) = null,
+              @dtmTransactionFromDate datetime = null,
+              @dtmTransactionToDate datetime = null
 AS
 --Sanitize the parameters, set to null if empty string. We are catching it on where clause by isnull function
 
+if  (@dtmTransactionFromDate is null)
+set @dtmTransactionFromDate ='1900-01-01'
+
+if(@dtmTransactionToDate is null)
+set @dtmTransactionToDate =getdate()
 IF @strName = ''
 BEGIN
-	SET @strName = NULL
+       SET @strName = NULL
 END
 
 IF @strAccountNumber = ''
 BEGIN
-	SET @strAccountNumber = NULL
+       SET @strAccountNumber = NULL
 END
 
 declare @intSelectedInstrumentTypeId int =1
@@ -61,18 +66,18 @@ ShortWaitedPrice  numeric(24,10),
 intSelectedInstrumentTypeId int)
 
 INSERT INTO @Unrealized
-exec uspRKUnrealizedPnL	 @dtmFromDate =@dtmTransactionFromDate
-						,@dtmToDate = @dtmTransactionToDate
-						,@intCommodityId=NULL
-						,@ysnExpired=0
-						,@intFutureMarketId  = NULL
-						,@intEntityId  = NULL
-						,@intBrokerageAccountId  = NULL
-						,@intFutureMonthId  = NULL
-						,@strBuySell =NULL
-						,@intBookId =NULL
-						,@intSubBookId =NULL
-						,@intSelectedInstrumentTypeId=@intSelectedInstrumentTypeId
+exec uspRKUnrealizedPnL    @dtmFromDate =@dtmTransactionFromDate
+                                         ,@dtmToDate = @dtmTransactionToDate
+                                         ,@intCommodityId=NULL
+                                         ,@ysnExpired=0
+                                         ,@intFutureMarketId  = NULL
+                                         ,@intEntityId  = NULL
+                                         ,@intBrokerageAccountId  = NULL
+                                         ,@intFutureMonthId  = NULL
+                                         ,@strBuySell =NULL
+                                         ,@intBookId =NULL
+                                         ,@intSubBookId =NULL
+                                         ,@intSelectedInstrumentTypeId=@intSelectedInstrumentTypeId
 
 SELECT * FROM (
 SELECT RANK() OVER(PARTITION BY strFutMarketName order by strFutMarketName,CONVERT(DATETIME,'01 '+strFutureMonth) Asc) AS intRowNumber ,*,
@@ -81,8 +86,8 @@ FROM (
 SELECT p.strFutMarketName,strInternalTradeNo,strFutureMonth,
 LEFT(REPLACE(CONVERT(VARCHAR(9), dtmTradeDate, 6), ' ', '-') + ' ' + convert(varchar(8), dtmTradeDate, 8),9) dtmTradeDate,
 dblLong,dblShort,isnull(dblLong,0) - isnull(dblShort,0) dblNet,dblPrice,
-	IsNull(dbo.fnRKGetLatestClosingPrice (p.intFutureMarketId,p.intFutureMonthId ,dtmTradeDate), 0.0) dblClosingPrice,dblGrossPnL,dblFutCommission,
-	case when isnull(c.ysnSubCurrency,0) = 1 then p.dblContractSize/100 else p.dblContractSize end dblContractSize
+       dblClosing dblClosingPrice,dblGrossPnL,dblFutCommission,
+       case when isnull(c.ysnSubCurrency,0) = 1 then p.dblContractSize/100 else p.dblContractSize end dblContractSize
 FROM @Unrealized p
 join tblRKFutureMarket fm on p.intFutureMarketId=fm.intFutureMarketId
 join tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
