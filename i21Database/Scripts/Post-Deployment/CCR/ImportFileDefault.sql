@@ -6,6 +6,9 @@ DECLARE @LayoutTitle NVARCHAR(100)
 
 -- BP Format
 SET @LayoutTitle = 'DCC - BP Format'
+
+UPDATE tblSMImportFileHeader SET  strFieldDelimiter = 'Tab' WHERE strLayoutTitle = @LayoutTitle AND strFieldDelimiter = 'Comma'
+
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
 	PRINT ('Deploying DCC - BP Format')
@@ -17,7 +20,7 @@ BEGIN
 		, intConcurrencyId)
 	VALUES (@LayoutTitle
 		, 'Delimiter'
-		, 'Comma'
+		, 'Tab'
 		, 1
 		, 1)
 
