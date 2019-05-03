@@ -36,6 +36,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULLIF(@strLocationName, '')
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULLIF(@strCustomerName, '')
 	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULLIF(@strCustomerIds, '')
+	  , @strCompanyLocationIdsLocal			AS NVARCHAR(MAX)
 	  , @strCompanyName						AS NVARCHAR(MAX)
 	  , @strCompanyAddress					AS NVARCHAR(MAX)
 	  , @intEntityUserIdLocal				AS INT				= NULLIF(@intEntityUserId, 0)
@@ -233,6 +234,14 @@ IF @strLocationNameLocal IS NOT NULL
 		SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 		WHERE strLocationName = @strLocationNameLocal
+
+		SELECT @strCompanyLocationIdsLocal = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(MAX))  + ', '
+			FROM tblSMCompanyLocation
+			WHERE strLocationName = @strLocationNameLocal
+			FOR XML PATH ('')
+		) C (intCompanyLocationId)
 	END
 
 --CUSTOMER ADDRESS AND FOOTER COMMENT
@@ -251,12 +260,12 @@ FROM (
 	FOR XML PATH ('')
 ) C (intEntityCustomerId)
 
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal
-										  , @strCompanyLocation = @strLocationNameLocal											
-										  , @strCustomerIds = @strCustomerIdsLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
-										  , @ysnFromBalanceForward = 1
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmBalanceForwardDateLocal
+										  , @intEntityUserId			= @intEntityUserIdLocal
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
+										  , @ysnFromBalanceForward		= 1
 
 SELECT *
 INTO #BALANCEFORWARDAGING 

@@ -18,6 +18,7 @@ AS
 
 DECLARE @strLocationNameLocal		AS NVARCHAR(MAX)	= NULL
 	  , @strAccountStatusCodeLocal	AS NVARCHAR(MAX)	= NULL
+	  , @strCompanyLocationIdsLocal	AS NVARCHAR(MAX)	= NULL
 	  , @dtmAsOfDate				AS DATETIME			= NULL
 	  , @dtmAsOfDateFrom			AS DATETIME			= NULL
 	  , @ysnDetailedFormatLocal		AS BIT				= 0
@@ -41,9 +42,20 @@ BEGIN
 	set @dtmAsOfDate = dateadd(SECOND,-1,dateadd(day,1, @dtmAsOfDate))
 END
 
+IF @strLocationNameLocal IS NOT NULL
+	BEGIN
+		SELECT @strCompanyLocationIdsLocal = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(MAX))  + ', '
+			FROM tblSMCompanyLocation
+			WHERE strLocationName = @strLocationNameLocal
+			FOR XML PATH ('')
+		) C (intCompanyLocationId)
+	END
+
 EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
-										, @strCompanyLocation 			= @strCompanyLocation
-										, @intEntityUserId 				= @intEntityUserId										
+										, @intEntityUserId 				= @intEntityUserId
+										, @strCompanyLocationIds		= @strCompanyLocationIdsLocal
 										, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId

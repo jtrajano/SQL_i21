@@ -42,6 +42,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strCompanyLocationIdsLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strDateTo							AS NVARCHAR(50)
 	  , @strDateFrom						AS NVARCHAR(50)
 	  , @query								AS NVARCHAR(MAX)
@@ -282,16 +283,27 @@ FROM (
 	FROM #CUSTOMERS
 	FOR XML PATH ('')
 ) C (intEntityCustomerId)
+
+IF @strLocationNameLocal IS NOT NULL
+	BEGIN
+		SELECT @strCompanyLocationIdsLocal = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(MAX))  + ', '
+			FROM tblSMCompanyLocation
+			WHERE strLocationName = @strLocationNameLocal
+			FOR XML PATH ('')
+		) C (intCompanyLocationId)
+	END
 	
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
-										  , @strCompanyLocation = @strLocationNameLocal
-										  , @strCustomerIds = @strCustomerIdsLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
-										  , @ysnFromBalanceForward = 0
-										  , @dtmBalanceForwardDate = @dtmBalanceForwardDateLocal
-										  , @ysnPrintFromCF = @ysnPrintFromCFLocal
-											, @strUserId = @strUserId
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmDateToLocal
+										  , @dtmBalanceForwardDate		= @dtmBalanceForwardDateLocal
+										  , @intEntityUserId			= @intEntityUserIdLocal										  
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @strUserId					= @strUserId
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
+										  , @ysnFromBalanceForward		= 0										  
+										  , @ysnPrintFromCF				= @ysnPrintFromCFLocal										  
 
 INSERT INTO @temp_aging_table
 SELECT strCustomerName
@@ -320,12 +332,12 @@ FROM tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
 
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal
-										  , @strCompanyLocation = @strLocationNameLocal											
-										  , @strCustomerIds = @strCustomerIdsLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
-										  , @ysnFromBalanceForward = 1										  
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmBalanceForwardDateLocal
+										  , @intEntityUserId			= @intEntityUserIdLocal
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
+										  , @ysnFromBalanceForward		= 1
 
 INSERT INTO @temp_balanceforward_table
 SELECT strCustomerName
