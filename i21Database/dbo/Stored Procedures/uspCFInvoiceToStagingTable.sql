@@ -339,7 +339,7 @@ BEGIN TRY
 	,strTransactionType
 	,strInvoiceReportNumber
 	,strTempInvoiceReportNumber
-	,strMiscellaneous
+	,ISNULL(strMiscellaneous,'')
 	,strName
 	,strCardNumber = CASE WHEN ((select top 1 strNetworkType from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) = 'Voyager')
 					 THEN  
