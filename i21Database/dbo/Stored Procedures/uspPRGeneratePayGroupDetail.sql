@@ -65,11 +65,14 @@ BEGIN
 									ELSE (CASE WHEN (EE.dblDefaultHours <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblDefaultHours) END					
 			,dblHoursToProcess = CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
 									ELSE (CASE WHEN (EE.dblDefaultHours <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess) END
-			,EE.dblRateAmount
-			,dblTotal = ROUND(CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime') 
-										OR (EE.strCalculationType IN ('Fixed Amount', 'Salary') 
-												AND EE.dblDefaultHours <> 0 
-												AND EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningLinkId = EE.intTypeEarningId AND intEntityEmployeeId = EE.intEntityEmployeeId))) THEN
+			,dblRateAmount = CASE WHEN EE.strCalculationType IN ('Overtime', 'Rate Factor') 
+						THEN CASE WHEN ELink.strCalculationType IN ('Fixed Amount', 'Salary') 
+								THEN CAST(dbo.fnPRRounding((ELink.dblAmount / (CASE WHEN ISNULL(ELink.dblDefaultHours, 1) <= 0 THEN 1 ELSE ISNULL(ELink.dblDefaultHours, 1) END)) * EE.dblAmount, 2) AS DECIMAL(18, 2))
+								ELSE CAST(dbo.fnPRRounding(ELink.dblAmount * EE.dblAmount, 2) AS DECIMAL(18,2))
+							END
+						ELSE EE.dblRateAmount
+					END
+			,dblTotal = ROUND(CASE WHEN (EE.strCalculationType IN ('Hourly Rate', 'Overtime')) THEN
 									CASE WHEN (@ysnStandardHours = 0) THEN @dblOverrideHours 
 										ELSE (CASE WHEN (EE.dblHoursToProcess <> 0) THEN @dblOverrideHours ELSE 0 END + EE.dblHoursToProcess)
 										END * EE.dblRateAmount

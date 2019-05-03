@@ -7554,6 +7554,7 @@
     <Build Include="dbo\Views\vyuICInventoryAdjustmentSourceLink.sql" />
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
     <Build Include="dbo\Views\vyuHDTimeEntryDailySummary.sql" />
+    <Build Include="dbo\Functions\fnPRRounding.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

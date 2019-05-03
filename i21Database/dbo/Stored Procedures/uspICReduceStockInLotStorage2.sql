@@ -62,18 +62,33 @@ BEGIN
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
 			OUTER APPLY (
-				SELECT	intInventoryLotStorageId = MIN(cb.intInventoryLotStorageId)
-				FROM	tblICInventoryLotStorage cb
+				SELECT 
+					dblAvailable = SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6))
+				FROM
+					tblICInventoryLotStorage cb
+				WHERE
+					cb.intItemId = @intItemId
+					AND cb.intItemLocationId = @intItemLocationId
+					AND cb.intLotId = @intLotId
+					AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+					AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
+					AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+					AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1			
+			) cbAvailable
+			OUTER APPLY (
+				SELECT	TOP 1 
+						intInventoryLotStorageId
+				FROM	tblICInventoryLotStorage cb 
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intLotId = @intLotId
 						AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 						AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
-				HAVING 
-					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
-			) cb 
+						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1						
+						AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
+				ORDER BY cb.dtmDate ASC
+			) cb
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN 

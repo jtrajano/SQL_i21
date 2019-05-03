@@ -280,7 +280,7 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 			, i.dblUnitQty
 			, i.ysnStockUnit
 	) stock 
-	CROSS APPLY(
+	OUTER APPLY(
 		SELECT TOP 1
 			dblCost
 			, intItemUOMId

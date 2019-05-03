@@ -90,6 +90,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strTruckDriver
 	 , blbLogo
 	 , strAddonDetailKey
+	 , strBOLNumberDetail
 	 , ysnHasAddOnItem
 	 , intEntityUserId
 	 , strRequestId
@@ -206,6 +207,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strTruckDriver			= INVOICEDETAIL.strTruckName
 	 , blbLogo					= LOGO.blbLogo
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
+	 , strBOLNumberDetail		= INVOICEDETAIL.strBOLNumberDetail
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
@@ -272,6 +274,7 @@ LEFT JOIN (
 		 , ID.dblPercentFull
 		 , ID.strAddonDetailKey
 		 , ID.ysnAddonParent
+		 , ID.strBOLNumberDetail
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId

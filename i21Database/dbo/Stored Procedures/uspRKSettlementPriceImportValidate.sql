@@ -35,6 +35,7 @@ DELETE FROM tblRKSettlementPriceImport_ErrLog
 GOTO EXIT_ROUTINE
 END
 
+
 IF (@strDateTimeFormat = 'MM DD YYYY HH:MI' OR @strDateTimeFormat ='YYYY MM DD HH:MI')
 SELECT @ConvertYear=101
 ELSE IF (@strDateTimeFormat = 'DD MM YYYY HH:MI' OR @strDateTimeFormat ='YYYY DD MM HH:MI')
@@ -93,6 +94,29 @@ BEGIN
 	END
 END
 
+IF (SELECT COUNT(*) FROM (SELECT DISTINCT intImportSettlementPriceId
+							FROM tblRKSettlementPriceImport where strFutureMarket=@strFutureMarket 
+							AND strFutureMonth=@strFutureMonth and isnull(strFutureMonth,'') <> '' and strInstrumentType='Futures')t) > 1							
+BEGIN
+	IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where strErrorMsg='Multiple entries are available for ' + @strFutureMarket +' - ' + @strFutureMonth +'. Please correct and try again.' )
+	BEGIN
+		INSERT INTO tblRKSettlementPriceImport_ErrLog(intImportSettlementPriceId,strErrorMsg,intConcurrencyId)
+		VALUES (1,'Multiple entries are available for ' + @strFutureMarket +' - ' + @strFutureMonth +'. Please correct and try again.',1)
+	END
+END
+
+
+IF (SELECT COUNT(*) FROM (SELECT DISTINCT intImportSettlementPriceId
+							FROM tblRKSettlementPriceImport where strFutureMarket=@strFutureMarket 
+							AND strFutureMonth=@strFutureMonth and isnull(strFutureMonth,'') <> '' 
+							AND strInstrumentType='Options' AND dblStrike=@dblStrike)t) > 1							
+BEGIN
+	IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where strErrorMsg='Multiple entries are available for ' + @strFutureMarket +' - ' + @strFutureMonth +'  - ' + convert(nvarchar,convert(numeric(18,4), @dblStrike)) +'. Please correct and try again.' )
+	BEGIN
+		INSERT INTO tblRKSettlementPriceImport_ErrLog(intImportSettlementPriceId,strErrorMsg,intConcurrencyId)
+		VALUES (1,'Multiple entries are available for ' + @strFutureMarket +' - ' + @strFutureMonth +'  - ' + convert(nvarchar,convert(numeric(18,4), @dblStrike)) +'. Please correct and try again.',1)
+	END
+END
 
 BEGIN TRY	
 	SELECT  @dtmPriceDate=convert(datetime,dtmPriceDate,@ConvertYear) 
@@ -101,34 +125,12 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 
-	--INSERT INTO tblRKSettlementPriceImport_ErrLog(intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,
-	--																  dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,strErrorMsg,intConcurrencyId)
-	--					SELECT intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,
-	--															  dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,'Error at Line No. '  + Convert(nvarchar(50),@counter) + '. Invalid Price Date/Time.',1
-	--					FROM  tblRKSettlementPriceImport WHERE intImportSettlementPriceId = @mRowNumber and strFutureMarket=@strFutureMarket
-
-
 	SET @ErrMsg = ' Invalid Price Date/Time, format should be in ' + @strDateTimeFormat +' Format.'
 	SET @dtmPriceDate = NULL
 END CATCH
 
 IF NOT EXISTS(SELECT * FROM tblRKFutureMarket WHERE strFutMarketName= @strFutureMarket) AND ISNULL(@strFutureMarket,'') <> ''
 BEGIN
-	--IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where strFutureMarket=@strFutureMarket)
-		--BEGIN
-			--INSERT INTO tblRKSettlementPriceImport_ErrLog(intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,
-			--												dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,strErrorMsg,intConcurrencyId)
-			--SELECT intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,
-			--											dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,'Error at Line No. '  + Convert(nvarchar(50),@counter) + '. Invalid Market Name.',1
-			--FROM  tblRKSettlementPriceImport WHERE intImportSettlementPriceId = @mRowNumber and strFutureMarket=@strFutureMarket
-		--END
-		--ELSE
-		--BEGIN					
-		--	SELECT @PreviousErrMsg=strErrorMsg from tblRKSettlementPriceImport_ErrLog WHERE intImportSettlementPriceId = @mRowNumber  and strFutureMarket=@strFutureMarket
-		--	UPDATE tblRKSettlementPriceImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Invalid market name.' WHERE intImportSettlementPriceId = @mRowNumber 
-		--		and strFutureMarket=@strFutureMarket
-		--END
-
 		SET @ErrMsg = @ErrMsg + ' Futures Market does not exist in the system.'
 END
 	
@@ -147,21 +149,6 @@ END
 		END
 		ELSE IF NOT EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth=replace(@strFutureMonth,'-',' ') and intFutureMarketId=@intFutureMarketId)
 		BEGIN
-			--IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where intImportSettlementPriceId=@mRowNumber and strFutureMarket=@strFutureMarket)
-			--	BEGIN
-			--		INSERT INTO tblRKSettlementPriceImport_ErrLog(intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,
-			--													  dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,strErrorMsg,intConcurrencyId)
-			--		SELECT intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,
-			--												  dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,'Invalid Future Month.',1
-			--		FROM  tblRKSettlementPriceImport WHERE intImportSettlementPriceId = @mRowNumber and strInstrumentType='Futures' and strFutureMarket=@strFutureMarket
-			--	END
-			--	ELSE
-			--	BEGIN					
-			--		SELECT @PreviousErrMsg=strErrorMsg from tblRKSettlementPriceImport_ErrLog WHERE intImportSettlementPriceId = @mRowNumber  and strFutureMarket=@strFutureMarket
-			--		UPDATE tblRKSettlementPriceImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Invalid Future Month.' WHERE intImportSettlementPriceId = @mRowNumber 
-			--			and strFutureMarket=@strFutureMarket
-			--	END
-
 			SET @ErrMsg = @ErrMsg + ' Futures Month does not exist for Future Market: ' + @strFutureMarket + '.'
 		END
 	END
@@ -174,22 +161,6 @@ END
 		END
 		ELSE IF NOT EXISTS(SELECT * FROM tblRKOptionsMonth WHERE strOptionMonth=replace(@strFutureMonth,'-',' ') and intFutureMarketId=@intFutureMarketId)
 		BEGIN
-
-			--IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where intImportSettlementPriceId=@mRowNumber AND strFutureMarket=@strFutureMarket)
-			--	BEGIN
-			--		INSERT INTO tblRKSettlementPriceImport_ErrLog(intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,
-			--													  dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,strErrorMsg,intConcurrencyId)
-			--		SELECT intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle,
-			--												  dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,dblSettle,dblDelta,'Invalid Option Month.',1
-			--		FROM  tblRKSettlementPriceImport WHERE intImportSettlementPriceId = @mRowNumber and strInstrumentType='Options' AND strFutureMarket=@strFutureMarket
-			--	END
-			--	ELSE
-			--	BEGIN					
-			--		SELECT @PreviousErrMsg=strErrorMsg from tblRKSettlementPriceImport_ErrLog WHERE intImportSettlementPriceId = @mRowNumber  
-			--		UPDATE tblRKSettlementPriceImport_ErrLog set strErrorMsg=@PreviousErrMsg+'Invalid Option Month.' WHERE intImportSettlementPriceId = @mRowNumber
-			--							AND strFutureMarket=@strFutureMarket
-			--	END
-
 			SET @ErrMsg = @ErrMsg + ' Options Month does not exist for Future Market: ' + @strFutureMarket + '.'
 		END
 
