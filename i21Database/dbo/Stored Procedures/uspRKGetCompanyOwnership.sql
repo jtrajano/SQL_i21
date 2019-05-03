@@ -112,8 +112,8 @@ BEGIN
 		, intReceiptId
 	FROM (
 		SELECT *
-			, round(dblInQty, 2) dblUnpaidIn
-			, round(dblOutQty, 2) dblUnpaidOut
+			, dblInQty as dblUnpaidIn
+			, dblOutQty as dblUnpaidOut
 		FROM (
 			SELECT CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
 				, dblUnitCost dblUnitCost1
@@ -271,7 +271,7 @@ BEGIN
 	FROM (
 		--Own
 		SELECT CONVERT(VARCHAR(10),IT.dtmDate,110) dtmDate
-			, round(dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,IT.dblQty) ,6) dblAdjustmentQty
+			, dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,IT.dblQty) as dblAdjustmentQty
 			, IT.strTransactionId strAdjustmentNo
 			, IT.intTransactionId intInventoryAdjustmentId
 			, strItemNo
