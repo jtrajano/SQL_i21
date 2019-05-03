@@ -94,6 +94,7 @@ RETURNS TABLE AS RETURN
 	) rate
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0 AND
+	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
 	CASE 
 		WHEN @type = 'header' AND CH.intContractHeaderId = @id THEN 1
 		WHEN @type = 'detail' AND CD.intContractDetailId = @id THEN 1
