@@ -14,8 +14,13 @@ SET @ZeroDecimal = 0.000000
 DECLARE @TransType NVARCHAR(50) 
 SET @TransType = 'Receivable'
 
+DECLARE @ZeroBit BIT
+SET @ZeroBit = CAST(0 AS BIT)
+DECLARE @OneBit BIT
+SET @OneBit = CAST(1 AS BIT)
 
-IF @Post = 1
+
+IF @Post = @OneBit
 BEGIN
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -35,7 +40,7 @@ BEGIN
     FROM
         #ARPostPaymentHeader P
     WHERE
-        P.[ysnPost] = 1
+        P.[ysnPost] = @OneBit
         AND ISNULL(P.[intUndepositedFundsId], 0) = 0
 
     INSERT INTO #ARInvalidPaymentData
@@ -56,7 +61,7 @@ BEGIN
     FROM
         #ARPostPaymentHeader P
     WHERE
-        P.[ysnPost] = 1
+        P.[ysnPost] = @OneBit
         AND ISNULL(P.[intARAccountId], 0) = 0
 
     INSERT INTO #ARInvalidPaymentData
@@ -77,7 +82,7 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[dblAmountPaid] = @ZeroDecimal
     GROUP BY
          P.[intTransactionId]
@@ -107,7 +112,7 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[dblAmountPaid] = @ZeroDecimal
     GROUP BY
          P.[intTransactionId]
@@ -135,8 +140,8 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
-        AND P.[ysnTransactionPosted] = 0
+            P.[ysnPost] = @OneBit
+        AND P.[ysnTransactionPosted] = @ZeroBit
         AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
         AND P.[strTransactionType] <> 'Claim'
 
@@ -158,10 +163,10 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intTransactionDetailId] IS NOT NULL
         AND P.[intInvoiceId] IS NOT NULL
-        AND P.[ysnInvoicePrepayment] = 1
+        AND P.[ysnInvoicePrepayment] = @OneBit
         AND (P.[dblInvoiceTotal] <> P.[dblPayment] OR P.[dblInvoiceTotal] <> P.[dblAmountPaid])
 
     INSERT INTO #ARInvalidPaymentData
@@ -182,10 +187,10 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND P.[strType] = 'Service Charge'
-        AND P.[ysnForgiven] = 1
+        AND P.[ysnForgiven] = @OneBit
         AND P.[dblPayment] <> @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
@@ -206,9 +211,9 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[strPaymentMethod] NOT IN ('ACH', 'CF Invoice', 'Cash', 'Debit Card', 'Credit Card', 'Manual Credit Card')
-        AND P.[ysnInvoicePrepayment] = 0
+        AND P.[ysnInvoicePrepayment] = @ZeroBit
         AND P.[dblAmountPaid] < @ZeroDecimal
 
  --   This is being handled by [uspGLValidateGLEntries]
@@ -251,7 +256,7 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intCompanyLocationId] IS NULL
 
     INSERT INTO #ARInvalidPaymentData
@@ -272,7 +277,7 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND P.[dblDiscount] <> @ZeroDecimal
         AND ISNULL(P.[intDiscountAccount], 0) = 0
@@ -295,7 +300,7 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND P.[dblInterest] <> @ZeroDecimal
         AND ISNULL(P.[intInterestAccount], 0) = 0
@@ -318,7 +323,7 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND UPPER(P.[strPaymentMethod]) = UPPER('Write Off')
         AND ISNULL(P.[intWriteOffAccountId], 0) = 0
 
@@ -340,7 +345,7 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND UPPER(P.[strPaymentMethod]) = UPPER('CF Invoice')
         AND ISNULL(P.[intCFAccountId], 0) = 0
 
@@ -362,7 +367,7 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND CAST(P.[dtmTransactionPostDate] AS DATE) > CAST(P.[dtmDatePaid] AS DATE)
         AND P.[dblPayment] <> @ZeroDecimal
@@ -385,7 +390,7 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND ISNULL(P.[intGainLossAccount],0) = 0
 		AND P.[strTransactionType] <> 'Claim'
@@ -410,7 +415,7 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND ISNULL(P.[intBankAccountId], 0) = 0
         AND P.[strPaymentMethod] = 'ACH'
 
@@ -432,7 +437,7 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
     GROUP BY
          P.[intTransactionId]
         ,P.[strTransactionId]
@@ -460,9 +465,9 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
-        AND P.[ysnPosted] = 1
-		AND @Recap = 0
+            P.[ysnPost] = @OneBit
+        AND P.[ysnPosted] = @OneBit
+		AND @Recap = @ZeroBit
 		AND @Post = 1
 
     INSERT INTO #ARInvalidPaymentData
@@ -483,12 +488,12 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND P.[dblPayment] <> @ZeroDecimal
         AND P.[ysnTransactionPaid] = 1
-		AND @Recap = 0
-		AND @Post = 1
+		AND @Recap = @ZeroBit
+		AND @Post = @OneBit
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -508,10 +513,10 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND P.[dblPayment] <> @ZeroDecimal
-        AND P.[ysnTransactionPaid] = 0
+        AND P.[ysnTransactionPaid] = @ZeroBit
         AND [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]) < @ZeroDecimal
     GROUP BY
          P.[intTransactionId]
@@ -540,10 +545,10 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND P.[dblPayment] <> @ZeroDecimal
-        AND P.[ysnTransactionPaid] = 0
+        AND P.[ysnTransactionPaid] = @ZeroBit
         AND [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]) > @ZeroDecimal
     GROUP BY
          P.[intTransactionId]
@@ -572,9 +577,9 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intEntityId] <> [intUserId]
-        AND P.[ysnUserAllowedToPostOtherTrans] = 1
+        AND P.[ysnUserAllowedToPostOtherTrans] = @OneBit
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -594,10 +599,10 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND ISNULL(P.[intEntityCardInfoId], 0) <> 0 
-        AND ISNULL(P.[ysnProcessCreditCard], 0) = 0
-        AND @Recap = 0
+        AND ISNULL(P.[ysnProcessCreditCard], 0) = @ZeroBit
+        AND @Recap = @ZeroBit
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -624,12 +629,12 @@ BEGIN
           AND SM.strPaymentMethod = 'Credit Card'
     ) SMPAY
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intTransactionDetailId] IS NULL
         AND ISNULL(P.[intEntityCardInfoId], 0) <> 0 
-        AND ISNULL(P.[ysnProcessCreditCard], 0) = 1
+        AND ISNULL(P.[ysnProcessCreditCard], 0) = @OneBit
         AND ISNULL(SMPAY.intPaymentId, 0) = 0
-        AND @Recap = 0
+        AND @Recap = @ZeroBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -652,10 +657,10 @@ BEGIN
 		#ARPaymentAccount GLA
 			ON P.[intUndepositedFundsId] = GLA.[intAccountId] 
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intCompanyLocationId] IS NOT NULL
         AND P.[intUndepositedFundsId] IS NOT NULL
-        AND GLA.[ysnActive] != 1
+        AND GLA.[ysnActive] != @OneBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -678,7 +683,7 @@ BEGIN
 		#ARPaymentAccount GLA
 			ON P.[intUndepositedFundsId] = GLA.[intAccountId] 
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND P.[intCompanyLocationId] IS NOT NULL
         AND P.[intUndepositedFundsId] IS NOT NULL
         AND GLA.[intAccountId] IS NULL
@@ -703,8 +708,8 @@ BEGIN
     INNER JOIN (SELECT [intBankAccountId], [ysnActive], [strBankAccountNo] FROM tblCMBankAccount) CMBA
         ON P.[intBankAccountId] = CMBA.[intBankAccountId] 
     WHERE
-            P.[ysnPost] = 1
-        AND CMBA.[ysnActive] != 1
+            P.[ysnPost] = @OneBit
+        AND CMBA.[ysnActive] != @OneBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -730,9 +735,55 @@ BEGIN
 		(SELECT [intBankAccountId], [ysnActive], [intGLAccountId] FROM tblCMBankAccount) CMBA
 			ON P.[intAccountId] = CMBA.[intGLAccountId]
     WHERE
-            P.[ysnPost] = 1
+            P.[ysnPost] = @OneBit
         AND GLAD.[strAccountCategory] = 'Cash Account'
-        AND (CMBA.[ysnActive] != 1 OR  CMBA.[intGLAccountId] IS NULL)
+        AND (CMBA.[ysnActive] != @OneBit OR  CMBA.[intGLAccountId] IS NULL)
+
+
+	INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Invalid Base Amounts - Header
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Payment ' + P.[strTransactionId] + ' has invalid currency field(s).'
+	FROM
+		#ARPostPaymentHeader P
+    WHERE
+            P.[ysnPost] = @OneBit
+        AND P.[dblExchangeRate] = 1.000000
+        AND (P.[dblAmountPaid] <> P.[dblBaseAmountPaid] OR P.[dblUnappliedAmount] <> P.[dblBaseUnappliedAmount])
+
+
+	INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Invalid Base Amounts - Header
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Payment ' + P.[strTransactionId] + ' has invalid currency field(s).'
+	FROM
+		#ARPostPaymentDetail P
+    WHERE
+            P.[ysnPost] = @OneBit
+        AND P.[dblCurrencyExchangeRate] = 1.000000
+        AND (P.[dblPayment] <> P.[dblBasePayment] OR P.[dblDiscount] <> P.[dblBaseDiscount] OR P.[dblInterest] <> P.[dblBaseInterest])
 
 
 	--DECLARE @InvoiceIdsForChecking TABLE (
@@ -862,7 +913,7 @@ BEGIN
 		FROM
 			#ARPostPaymentDetail PD 
 		WHERE
-			PD.[ysnPost] = 1
+			PD.[ysnPost] = @OneBit
 			AND PD.[dblPayment] <> 0
 		GROUP BY
 			PD.[intInvoiceId]
@@ -871,7 +922,7 @@ BEGIN
 		) ARI2
 			ON ARI.[intInvoiceId] = ARI2.[intInvoiceId]
 	WHERE
-		ARPD.[ysnPost] = 1
+		ARPD.[ysnPost] = @OneBit
 		AND ARI.[dblAmountDue] < ARI2.[dblPayment]
 	ORDER BY
 		ARI.[intInvoiceId]
@@ -900,10 +951,10 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 0
-        AND P.[ysnPosted] = 0
-		AND @Recap = 0
-		AND @Post = 0
+            P.[ysnPost] = @ZeroBit
+        AND P.[ysnPosted] = @ZeroBit
+		AND @Recap = @ZeroBit
+		AND @Post = @ZeroBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -923,9 +974,9 @@ BEGIN
 	FROM
 		#ARPostPaymentDetail P    
     WHERE
-            P.[ysnPost] = 0
+            P.[ysnPost] = @ZeroBit
         AND P.[strType] = 'Provisional'
-        AND P.[ysnTransactionProcessed] = 1
+        AND P.[ysnTransactionProcessed] = @OneBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -945,9 +996,9 @@ BEGIN
 	FROM
 		#ARPostPaymentHeader P
     WHERE
-            P.[ysnPost] = 0
+            P.[ysnPost] = @ZeroBit
         AND P.[intEntityId] <> [intUserId]
-        AND P.[ysnUserAllowedToPostOtherTrans] = 1
+        AND P.[ysnUserAllowedToPostOtherTrans] = @OneBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -984,7 +1035,7 @@ BEGIN
         ) P1
             ON P.[intInvoiceId] = P1.[intInvoiceId] AND P.[intTransactionId] <> P1.[intPaymentId] 
     WHERE
-            P.[ysnPost] = 0
+            P.[ysnPost] = @ZeroBit
         AND P.[intTransactionDetailId] IS NOT NULL
         AND P.[intInvoiceId] IS NOT NULL
 
@@ -1023,7 +1074,7 @@ BEGIN
         ) P1
             ON P.[intInvoiceId] = P1.[intInvoiceId] AND P.[intTransactionId] <> P1.[intPaymentId] 
     WHERE
-            P.[ysnPost] = 0
+            P.[ysnPost] = @ZeroBit
         AND P.[intInvoiceId] IS NOT NULL
 
 	INSERT INTO #ARInvalidPaymentData
@@ -1046,8 +1097,8 @@ BEGIN
     INNER JOIN (SELECT [ysnClr], [strTransactionId] FROM tblCMBankTransaction) CMBT
         ON P.[strTransactionId] = CMBT.[strTransactionId] 
     WHERE
-            P.[ysnPost] = 0
-        AND CMBT.[ysnClr] = 1
+            P.[ysnPost] = @ZeroBit
+        AND CMBT.[ysnClr] = @OneBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1072,9 +1123,9 @@ BEGIN
     INNER JOIN (SELECT [intUndepositedFundId] FROM tblCMBankTransactionDetail) CMBTD
         ON CMUF.[intUndepositedFundId] = CMBTD.[intUndepositedFundId]
     WHERE
-            P.[ysnPost] = 0
+            P.[ysnPost] = @ZeroBit
         AND CMUF.[strSourceSystem] = 'AR'
-		AND @Recap = 0
+		AND @Recap = @ZeroBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1102,7 +1153,7 @@ BEGIN
     INNER JOIN (SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment) ARP
         ON  ARPD.[intPaymentId] =  ARP.[intPaymentId] 
     WHERE
-		P.[ysnPost] = 0
+		P.[ysnPost] = @ZeroBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1130,7 +1181,7 @@ BEGIN
     INNER JOIN (SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment) ARP
         ON  ARPD.[intPaymentId] =  ARP.[intPaymentId] 
     WHERE
-        P.[ysnPost] = 0
+        P.[ysnPost] = @ZeroBit
 
 END
 
