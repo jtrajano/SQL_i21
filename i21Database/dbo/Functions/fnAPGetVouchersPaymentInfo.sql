@@ -36,7 +36,7 @@ BEGIN
 									FROM tblAPPayment B
 									INNER JOIN tblAPPaymentDetail C
 										ON B.intPaymentId = C.intPaymentId
-									WHERE A.ysnPosted = 1 AND C.intBillId = A.intBillId
+									WHERE A.ysnPosted = 1 AND ISNULL(C.intBillId, C.intOrigBillId) = A.intBillId
 									FOR XML PATH('')),1,1,''
 								),
 		dtmPaymentDateReconciled=	latestPay.dtmDateReconciled,
