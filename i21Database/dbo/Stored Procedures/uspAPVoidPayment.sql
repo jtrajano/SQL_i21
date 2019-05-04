@@ -182,10 +182,10 @@ BEGIN
 		,A.dblPayment = A.dblPayment * -1
 		,A.dblDiscount = A.dblDiscount * -1
 		,A.dblTotal = A.dblTotal * -1
-		,A.intOrigBillId = A.intBillId
-		,A.intBillId = NULL
-		,A.intOrigInvoiceId = A.intInvoiceId
-		,A.intInvoiceId = NULL
+		-- ,A.intOrigBillId = A.intBillId
+		-- ,A.intBillId = NULL
+		-- ,A.intOrigInvoiceId = A.intInvoiceId
+		-- ,A.intInvoiceId = NULL
 	FROM #tmpPaymentDetail A
 	INNER JOIN #tmpPayables B
 		ON A.intPaymentId = B.intPaymentId
@@ -330,10 +330,10 @@ BEGIN
 										ELSE (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest) --this will handle issue on voiding which the first payment is voided
 									END)
 							END
-		,B.intOrigBillId = B.intBillId
-		,B.intBillId = NULL
-		,B.intOrigInvoiceId = B.intInvoiceId
-		,B.intInvoiceId = NULL
+		-- ,B.intOrigBillId = B.intBillId
+		-- ,B.intBillId = NULL
+		-- ,B.intOrigInvoiceId = B.intInvoiceId
+		-- ,B.intInvoiceId = NULL
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
@@ -354,7 +354,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C
-						ON B.intOrigBillId = C.intBillId
+						ON B.intBillId = C.intBillId
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--UPDATE INVOICES
