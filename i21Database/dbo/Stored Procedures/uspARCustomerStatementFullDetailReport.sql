@@ -36,6 +36,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strCompanyLocationIdsLocal			AS NVARCHAR(MAX)	= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULL
 	  , @query								AS NVARCHAR(MAX)	= NULL
 	  , @queryRunningBalance				AS NVARCHAR(MAX)	= NULL
@@ -184,13 +185,24 @@ IF ISNULL(@strCustomerIdsLocal, '') = ''
 		) C (intEntityCustomerId)
 	END
 
+IF @strLocationNameLocal IS NOT NULL
+	BEGIN
+		SELECT @strCompanyLocationIdsLocal = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(MAX))  + ', '
+			FROM tblSMCompanyLocation
+			WHERE strLocationName = @strLocationNameLocal
+			FOR XML PATH ('')
+		) C (intCompanyLocationId)
+	END
+
 --BEGINNING BALANCE
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal 
-										  , @strCompanyLocation = @strLocationNameLocal
-										  , @strCustomerIds = @strCustomerIdsLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
-										  , @ysnFromBalanceForward = 1
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmBalanceForwardDateLocal 
+										  , @intEntityUserId			= @intEntityUserIdLocal
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
+										  , @ysnFromBalanceForward		= 1
 
 SELECT *
 INTO #BEGINNINGBALANCE
@@ -203,13 +215,13 @@ SET dblTotalAR = dblTotalAR - ISNULL(dblFuture, 0)
   , dblFuture = 0.000000
 
 --AGING SUMMARY
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal 
-										  , @strCompanyLocation = @strLocationNameLocal
-										  , @strCustomerIds = @strCustomerIdsLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
-										  , @ysnFromBalanceForward = 0
-										  , @dtmBalanceForwardDate = @dtmBalanceForwardDateLocal
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmDateToLocal 
+										  , @dtmBalanceForwardDate		= @dtmBalanceForwardDateLocal
+										  , @intEntityUserId			= @intEntityUserIdLocal
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal
+										  , @ysnFromBalanceForward		= 0								  
 
 SELECT *
 INTO #AGINGSUMMARY

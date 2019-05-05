@@ -95,8 +95,8 @@ SELECT DISTINCT
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
 	,[strVendorOrderNumber]		=	ISNULL(NULLIF(LTRIM(RTRIM(A.strBillOfLading)), ''), A.strVendorRefNo) 
-	,[strPurchaseOrderNumber]	=	NULL--A.strReceiptNumber
-	,[intPurchaseDetailId]		=	NULL
+	,[strPurchaseOrderNumber]	=	po.strPurchaseOrderNumber
+	,[intPurchaseDetailId]		=	po.intPurchaseDetailId
 	,[intItemId]				=	B.intItemId
 	,[strMiscDescription]		=	C.strDescription
 	,[strItemNo]				=	C.strItemNo
@@ -234,6 +234,9 @@ FROM tblICInventoryReceipt A
 	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblICItemUOM ctOrderUOM ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure ctUOM ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
+	LEFT JOIN vyuPODetails po ON po.intPurchaseId = B.intOrderId
+		AND po.intPurchaseDetailId = B.intLineNo
+		AND A.strReceiptType = 'Purchase Order'
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL

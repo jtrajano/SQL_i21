@@ -94,7 +94,7 @@ BEGIN
 		,@strUserPhoneNo = EPN.strPhone
 	FROM tblSMUserSecurity S
 	JOIN tblEMEntity E ON E.intEntityId = S.intEntityId
-	JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
+	JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId AND EC.ysnDefaultContact = 1
 	JOIN tblEMEntity ETC ON ETC.intEntityId = EC.intEntityContactId
 	JOIN tblEMEntityPhoneNumber EPN ON EPN.intEntityId = ETC.intEntityId
 	WHERE strUserName = @strUserName
@@ -907,19 +907,19 @@ BEGIN
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 		LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
-		LEFT JOIN tblEMEntityToContact PEC ON PEC.intEntityId = Producer.intEntityId
+		LEFT JOIN tblEMEntityToContact PEC ON PEC.intEntityId = Producer.intEntityId AND PEC.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity PETC ON PETC.intEntityId = PEC.intEntityContactId
 		LEFT JOIN tblEMEntity DProducer ON DProducer.intEntityId = CD.intProducerId
-		LEFT JOIN tblEMEntityToContact DPEC ON DPEC.intEntityId = DProducer.intEntityId
+		LEFT JOIN tblEMEntityToContact DPEC ON DPEC.intEntityId = DProducer.intEntityId AND DPEC.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity DPETC ON DPETC.intEntityId = DPEC.intEntityContactId
 		LEFT JOIN tblLGLoadNotifyParties LNP ON LNP.intLoadId = L.intLoadId
 		LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN [tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId 
 			AND VLocation.intEntityLocationId = Vendor.intDefaultLocationId
-		LEFT JOIN tblEMEntityToContact VEC ON VEC.intEntityId = Vendor.intEntityId
+		LEFT JOIN tblEMEntityToContact VEC ON VEC.intEntityId = Vendor.intEntityId AND PEC.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity VETC ON VETC.intEntityId = VEC.intEntityContactId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
-		LEFT JOIN tblEMEntityToContact CEC ON CEC.intEntityId = Customer.intEntityId
+		LEFT JOIN tblEMEntityToContact CEC ON CEC.intEntityId = Customer.intEntityId AND CEC.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity CETC ON CETC.intEntityId = CEC.intEntityContactId
 		LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
@@ -936,28 +936,28 @@ BEGIN
 		LEFT JOIN tblLGLoadNotifyParties CLNP ON L.intLoadId = CLNP.intLoadId
 			AND CLNP.strNotifyOrConsignee = 'Consignee'
 		LEFT JOIN tblEMEntity FirstNotify ON FirstNotify.intEntityId = FLNP.intEntityId
-		LEFT JOIN tblEMEntityToContact FirstNotifyContact ON FirstNotifyContact.intEntityId = FirstNotify.intEntityId
+		LEFT JOIN tblEMEntityToContact FirstNotifyContact ON FirstNotifyContact.intEntityId = FirstNotify.intEntityId AND FirstNotifyContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity FirstNotifyContactEntity ON FirstNotifyContactEntity.intEntityId = FirstNotifyContact.intEntityContactId
 		LEFT JOIN tblCMBank FirstNotifyBank ON FirstNotifyBank.intBankId = FLNP.intBankId
 		LEFT JOIN tblSMCompanySetup FirstNotifyCompany ON FirstNotifyCompany.intCompanySetupID = FLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation FNCompanyLocation ON FNCompanyLocation.intCompanyLocationId = FLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation FNLocation ON FNLocation.intEntityLocationId = FLNP.intEntityLocationId
 		LEFT JOIN tblEMEntity SecondNotify ON SecondNotify.intEntityId = SLNP.intEntityId
-		LEFT JOIN tblEMEntityToContact SecondNotifyContact ON SecondNotifyContact.intEntityId = SecondNotify.intEntityId
+		LEFT JOIN tblEMEntityToContact SecondNotifyContact ON SecondNotifyContact.intEntityId = SecondNotify.intEntityId AND SecondNotifyContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity SecondNotifyContactEntity ON SecondNotifyContactEntity.intEntityId = SecondNotifyContact.intEntityContactId
 		LEFT JOIN tblCMBank SecondNotifyBank ON SecondNotifyBank.intBankId = SLNP.intBankId
 		LEFT JOIN tblSMCompanySetup SecondNotifyCompany ON SecondNotifyCompany.intCompanySetupID = SLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation SNCompanyLocation ON SNCompanyLocation.intCompanyLocationId = SLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation SNLocation ON SNLocation.intEntityLocationId = SLNP.intEntityLocationId
 		LEFT JOIN tblEMEntity ThirdNotify ON ThirdNotify.intEntityId = TLNP.intEntityId
-		LEFT JOIN tblEMEntityToContact ThirdNotifyContact ON ThirdNotifyContact.intEntityId = ThirdNotify.intEntityId
+		LEFT JOIN tblEMEntityToContact ThirdNotifyContact ON ThirdNotifyContact.intEntityId = ThirdNotify.intEntityId AND ThirdNotifyContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity ThirdNotifyContactEntity ON ThirdNotifyContactEntity.intEntityId = ThirdNotifyContact.intEntityContactId
 		LEFT JOIN tblCMBank ThirdNotifyBank ON ThirdNotifyBank.intBankId = TLNP.intBankId
 		LEFT JOIN tblSMCompanySetup ThirdNotifyCompany ON ThirdNotifyCompany.intCompanySetupID = TLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation TNCompanyLocation ON TNCompanyLocation.intCompanyLocationId = TLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation TNLocation ON TNLocation.intEntityLocationId = TLNP.intEntityLocationId
 		LEFT JOIN tblEMEntity ConsigneeNotify ON ConsigneeNotify.intEntityId = CLNP.intEntityId
-		LEFT JOIN tblEMEntityToContact ConsigneeNotifyContact ON ConsigneeNotifyContact.intEntityId = ConsigneeNotify.intEntityId
+		LEFT JOIN tblEMEntityToContact ConsigneeNotifyContact ON ConsigneeNotifyContact.intEntityId = ConsigneeNotify.intEntityId AND ConsigneeNotifyContact.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity ConsigneeNotifyContactEntity ON ConsigneeNotifyContactEntity.intEntityId = ConsigneeNotifyContact.intEntityContactId
 		LEFT JOIN tblCMBank ConsigneeNotifyBank ON ConsigneeNotifyBank.intBankId = CLNP.intBankId
 		LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID

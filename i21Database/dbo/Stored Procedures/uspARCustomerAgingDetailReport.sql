@@ -38,14 +38,14 @@ DECLARE @dtmDateTo						DATETIME
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
-	,[fieldname]	NVARCHAR(50)
-	,[condition]	NVARCHAR(20)
-	,[from]			NVARCHAR(100)
-	,[to]			NVARCHAR(100)
-	,[join]			NVARCHAR(10)
-	,[begingroup]	NVARCHAR(50)
-	,[endgroup]		NVARCHAR(50)
-	,[datatype]		NVARCHAR(50)
+	,[fieldname]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[condition]	NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+	,[from]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[to]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[join]			NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL
+	,[begingroup]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[endgroup]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[datatype]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
 DECLARE @temp_open_invoices TABLE (intInvoiceId INT)
@@ -74,48 +74,57 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 				   , @from		= REPLACE(ISNULL([from], ''), '''''', '''')
 				   , @to		= REPLACE(ISNULL([to], ''), '''''', '''')
 				   , @fieldname = [fieldname]
+				   , @id		= [id]
 		FROM @temp_xml_table 
 		WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation')
 
 		IF @condition = 'Equal To'
-			BEGIN
+			BEGIN				
 				IF @fieldname = 'strCustomerName'
 					BEGIN
 						SELECT @strCustomerIds = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
 						FROM (
-							SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(200))  + ', '
-							FROM vyuARCustomerSearch 
-							WHERE strName = @from
+							SELECT DISTINCT CAST(C.intEntityCustomerId AS VARCHAR(200))  + ', '
+							FROM vyuARCustomerSearch C
+							INNER JOIN @temp_xml_table TT ON C.strName = REPLACE(ISNULL(TT.[from], ''), '''''', '''')
+							WHERE TT.fieldname = 'strCustomerName'
+							  AND TT.condition = 'Equal To'
 							FOR XML PATH ('')
 						) C (intEntityCustomerId)
 					END
 				ELSE IF @fieldname = 'strSalespersonName'
 					BEGIN
-						SELECT @strSalespersonIds = LEFT(intEntityId, LEN(intEntityId) - 1)
+						SELECT @strSalespersonIds = ISNULL(@strSalespersonIds, '') + LEFT(intEntityId, LEN(intEntityId) - 1)
 						FROM (
-							SELECT DISTINCT CAST(intEntityId AS VARCHAR(200))  + ', '
-							FROM vyuEMSalesperson 
-							WHERE strSalespersonName = @from
+							SELECT DISTINCT CAST(S.intEntityId AS VARCHAR(200))  + ', '
+							FROM vyuEMSalesperson S
+							INNER JOIN @temp_xml_table TT ON S.strSalespersonName = REPLACE(ISNULL(TT.[from], ''), '''''', '''')
+							WHERE TT.fieldname = 'strSalespersonName'
+							  AND TT.condition = 'Equal To'
 							FOR XML PATH ('')
 						) C (intEntityId)
 					END
 				ELSE IF @fieldname = 'strAccountStatusCode'
 					BEGIN
-						SELECT @strAccountStatusIds = LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1)
+						SELECT @strAccountStatusIds = ISNULL(@strAccountStatusIds, '') + LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1)
 						FROM (
-							SELECT DISTINCT CAST(intAccountStatusId AS VARCHAR(200))  + ', '
-							FROM tblARAccountStatus 
-							WHERE strAccountStatusCode = @from
+							SELECT DISTINCT CAST(S.intAccountStatusId AS VARCHAR(200))  + ', '
+							FROM tblARAccountStatus S
+							INNER JOIN @temp_xml_table TT ON S.strAccountStatusCode = REPLACE(ISNULL(TT.[from], ''), '''''', '''')
+							WHERE TT.fieldname = 'strAccountStatusCode'
+							  AND TT.condition = 'Equal To'
 							FOR XML PATH ('')
 						) C (intAccountStatusId)
 					END
 				ELSE IF @fieldname = 'strCompanyLocation'
 					BEGIN
-						SELECT @strCompanyLocationIds = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+						SELECT @strCompanyLocationIds = ISNULL(@strCompanyLocationIds, '') + LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
 						FROM (
 							SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(200))  + ', '
-							FROM tblSMCompanyLocation 
-							WHERE strLocationName = @from
+							FROM tblSMCompanyLocation CL
+							INNER JOIN @temp_xml_table TT ON CL.strLocationName = REPLACE(ISNULL(TT.[from], ''), '''''', '''')
+							WHERE TT.fieldname = 'strCompanyLocation'
+							  AND TT.condition = 'Equal To'
 							FOR XML PATH ('')
 						) C (intCompanyLocationId)
 					END
@@ -214,7 +223,10 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 		SET @from = NULL
 		SET @to = NULL
 		SET @fieldname = NULL
+		SET @id =  NULL
 	END
+
+SELECT @strCustomerIds
 	
 SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)

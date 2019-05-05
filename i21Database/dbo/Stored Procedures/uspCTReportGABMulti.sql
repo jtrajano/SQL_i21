@@ -16,9 +16,9 @@ BEGIN
 							END 
 			END strPart1, 
 			CASE	WHEN	@strType = 'MULTIPLE'  
-					THEN	' - ' + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + 
+					THEN	' - ' + dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' '+
 							dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) 	    + 
-							ISNULL(' '+dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'in')+' ' + CD.strPackingDescription,'') + 
+							--ISNULL(' '+dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'in')+' ' + CD.strPackingDescription,'') + 
 							ISNULL('(' + LTRIM(CD.intNumberOfContainers) + ' '+dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Containers')+')','') 
 					ELSE	NULL 
 			END AS strPart2 ,

@@ -545,6 +545,7 @@ END
 			[intShipToId],
 			[intInventoryReceiptChargeId],
 			[intPurchaseDetailId],
+			[intPurchaseTaxGroupId],
 			[dblTax],
 			[intEntityVendorId],
 			[strVendorOrderNumber],

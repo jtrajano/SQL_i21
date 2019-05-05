@@ -524,7 +524,7 @@ BEGIN
 				ON CL.intCompanyLocationId = A.intCompanyLocationId 
 			WHERE C.intCommodityId = @intCommodityId2
 				AND A.intCompanyLocationId = ISNULL(@intLocationId,A.intCompanyLocationId)
-				AND A.dtmDeliveryDate BETWEEN @dtmReportDate AND @dateToday
+				AND A.dtmDeliveryDate < @dtmReportDate + 1
 				AND A.intStorageTypeId = @intStorageScheduleTypeId
 		) A
 		WHERE strCommodityCode = @strCommodityCode
@@ -556,7 +556,7 @@ BEGIN
 				ON CL.intCompanyLocationId = B.intCompanyLocationId 
 			WHERE (A.intTransactionTypeId = 5 OR A.strType = 'From Transfer')
 				AND D.intCommodityId = @intCommodityId2
-				AND A.dtmHistoryDate BETWEEN @dtmReportDate AND @dateToday
+				AND A.dtmHistoryDate < @dtmReportDate + 1
 				AND B.intCompanyLocationId = ISNULL(@intLocationId,B.intCompanyLocationId)
 				AND B.intStorageTypeId = @intStorageScheduleTypeId
 		) B
@@ -590,7 +590,7 @@ BEGIN
 			WHERE A.intTransactionTypeId NOT IN (2,6)
 				AND A.strType IN ('Settlement', 'Transfer', 'Storage Adjustment', 'From Inventory Adjustment')
 				AND D.intCommodityId = @intCommodityId2
-				AND A.dtmHistoryDate BETWEEN @dtmReportDate AND @dateToday
+				AND A.dtmHistoryDate < @dtmReportDate + 1
 				AND B.intCompanyLocationId = ISNULL(@intLocationId,B.intCompanyLocationId)
 				AND B.intStorageTypeId = @intStorageScheduleTypeId
 		) C

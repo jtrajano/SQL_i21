@@ -327,6 +327,7 @@ BEGIN
 					, strFutureMonth = '' COLLATE Latin1_General_CI_AS
 					, intContractNumber = t.intContractId
 					, strContractNumber = ISNULL((SELECT strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = t.intContractId), '')
+					, intTransactionTypeId
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -397,6 +398,7 @@ BEGIN
 					, strFutureMonth = '' COLLATE Latin1_General_CI_AS
 					, intContractNumber = NULL
 					, strContractNumber = ''
+					, intTransactionTypeId
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -2174,6 +2176,7 @@ BEGIN
 					WHERE ch.intCommodityId  = @intCommodityId
 						AND ysnDPOwnedType = 1
 						AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
+						AND ch.intTransactionTypeId <> 9
 					)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				GROUP BY intTicketId
 					, strTicketType

@@ -100,7 +100,7 @@ SELECT
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
 		,strPayee =  Payee.Name 
-		,strPayeeAddress = Address1.Value
+		,strPayeeAddress = Address.Value
 		,strAmountInWords = AmtInWords.Val
 		,CHK.strMemo
 		,CHK.strTransactionId
@@ -215,16 +215,7 @@ FROM	dbo.tblCMBankTransaction CHK
 			END
 			Value
 		)Address
-		OUTER APPLY(
-			SELECT CASE 
-				WHEN LEN(Payee.Name) BETWEEN 151 AND 200 THEN -- Payee name reached 3rd line
-					LEFT(Address.Value,50)
-				
-				WHEN LEN(Payee.Name) > 200 THEN '' -- Payee name reached 4th line
-				ELSE
-					Address.Value
-			END Value
-		)Address1
+	
 
 
 WHERE	CHK.intBankAccountId = @intBankAccountId
