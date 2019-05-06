@@ -155,15 +155,16 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= dbo.fnCalculateQtyBetweenUOM(Detail.intNewItemUOMId, Detail.intItemUOMId, Detail.dblNewQuantity) * -1
+			,dblQty					= Detail.dblAdjustByQuantity			
+									--dbo.fnCalculateQtyBetweenUOM(Detail.intNewItemUOMId, Detail.intItemUOMId, Detail.dblNewQuantity) * -1
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= ISNULL(
 											Detail.dblCost
-													,dbo.fnCalculateCostBetweenUOM( 
-														dbo.fnGetItemStockUOM(Detail.intItemId)
-														,Detail.intItemUOMId
-														,ItemPricing.dblLastCost
-													)
+											,dbo.fnCalculateCostBetweenUOM( 
+												dbo.fnGetItemStockUOM(Detail.intItemId)
+												,Detail.intItemUOMId
+												,ItemPricing.dblLastCost
+											)
 										)	
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
