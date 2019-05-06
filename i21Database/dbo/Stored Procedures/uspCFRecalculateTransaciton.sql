@@ -5766,7 +5766,10 @@ BEGIN
 			DELETE FROM @tblCFOriginalTaxZeroQuantity				
 			DELETE FROM @tblCFCalculatedTaxZeroQuantity				
 			DELETE FROM @tblCFTransactionTaxZeroQuantity			
-			DELETE FROM @tblCFBackoutTaxZeroQuantity				
+			DELETE FROM @tblCFBackoutTaxZeroQuantity		
+
+			DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
+			DELETE FROM @tblCFCalculatedTaxExempt						
 
 			DELETE FROM @LineItemTaxDetailStagingTable
 
@@ -6086,7 +6089,10 @@ BEGIN
 				DELETE FROM @tblCFOriginalTaxZeroQuantity				
 				DELETE FROM @tblCFCalculatedTaxZeroQuantity				
 				DELETE FROM @tblCFTransactionTaxZeroQuantity			
-				DELETE FROM @tblCFBackoutTaxZeroQuantity				
+				DELETE FROM @tblCFBackoutTaxZeroQuantity		
+				
+				DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
+				DELETE FROM @tblCFCalculatedTaxExempt						
 
 				DELETE FROM @LineItemTaxDetailStagingTable
 
@@ -6134,7 +6140,10 @@ BEGIN
 				 DELETE FROM @tblCFOriginalTaxZeroQuantity				
 				 DELETE FROM @tblCFCalculatedTaxZeroQuantity				
 				 DELETE FROM @tblCFTransactionTaxZeroQuantity			
-				 DELETE FROM @tblCFBackoutTaxZeroQuantity				
+				 DELETE FROM @tblCFBackoutTaxZeroQuantity		
+				 
+				 DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
+				 DELETE FROM @tblCFCalculatedTaxExempt				
 
 				 DELETE FROM @LineItemTaxDetailStagingTable
 
