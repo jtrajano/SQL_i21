@@ -68,10 +68,10 @@ SELECT intInvoiceId					= ID.intInvoiceId
 INTO #INVOICEDETAILS 
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
 
-IF (SELECT COUNT(*) FROM #INVOICEDETAILS) > 1
+IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
 	BEGIN
 		DECLARE @intContractHeaderIdToCompute	INT
 
@@ -156,6 +156,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 			  , @intContractDetailId		INT = NULL
 			  , @intContractHeaderId		INT = NULL
 			  , @intItemId					INT = NULL
+			  , @intItemUOMId				INT = NULL
 			  , @intContractSeq				INT = NULL
 			  , @intInventoryShipmentItemId	INT = NULL
 			  , @intTicketId				INT = NULL
@@ -169,6 +170,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				   , @intContractDetailId			= intContractDetailId
 				   , @intContractHeaderId			= intContractHeaderId
 				   , @intItemId						= intItemId
+				   , @intItemUOMId					= intItemUOMId
 				   , @intContractSeq				= intContractSeq
 				   , @intInventoryShipmentItemId	= intInventoryShipmentItemId
 				   , @intTicketId					= intTicketId
@@ -188,15 +190,51 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
 			END
-		ELSE
+		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
 				UPDATE ID
-				SET dblQtyShipped	= CTD.dblBalance
-				  , dblUnitQuantity	= CTD.dblBalance
-				  , @dblQtyOverAged	= ID.dblQtyOrdered - CTD.dblBalance
+				SET dblQtyShipped	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance THEN CTD.dblBalance ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) END
+				  , dblUnitQuantity	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance THEN CTD.dblBalance ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) END
+				  , @dblQtyOverAged	= CASE WHEN @dblNetWeight > 0 THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) - CTD.dblBalance ELSE ID.dblQtyOrdered - CTD.dblBalance END
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
+				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId				
+			END
+		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NULL
+			BEGIN
+				UPDATE ID
+				SET dblQtyShipped	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0)
+				  , dblUnitQuantity	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0)
+				  , @dblQtyOverAged	= 0
+				FROM tblARInvoiceDetail ID
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+			END
+
+		IF ISNULL(@ysnFromSalesOrder, 0) = 1
+			BEGIN
+				--UPDATE ADD ON ITEMS QTY.
+				UPDATE ID
+				SET dblQtyShipped	= PARENT.dblQtyShipped * dblAddOnQuantity
+				  , dblUnitQuantity	= PARENT.dblQtyShipped * dblAddOnQuantity
+				FROM tblARInvoiceDetail ID
+				CROSS APPLY (
+					SELECT TOP 1 intItemId
+							   , intCompanyLocationId
+							   , dblQtyOrdered
+							   , dblQtyShipped 
+					FROM tblARInvoiceDetail ADDON
+					INNER JOIN tblARInvoice I ON ADDON.intInvoiceId = I.intInvoiceId
+					WHERE ADDON.strAddonDetailKey = ID.strAddonDetailKey
+					  AND ISNULL(ADDON.ysnAddonParent, 0) = 1
+					  AND I.intInvoiceId = @intInvoiceId
+				) PARENT
+				INNER JOIN vyuARGetAddOnItems ADDONITEMS ON ID.intItemId = ADDONITEMS.intComponentItemId
+														AND PARENT.intItemId = ADDONITEMS.intItemId
+														AND PARENT.intCompanyLocationId = ADDONITEMS.intCompanyLocationId
+				WHERE ID.intContractDetailId IS NULL 
+				  AND ID.intContractHeaderId IS NULL
+				  AND ISNULL(ID.ysnAddonParent, 0) = 0
+				  AND ID.intInvoiceId = @intInvoiceId
 			END
 				
 		IF @dblQtyOverAged > 0
@@ -341,8 +379,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						     , intContractDetailId	= NULL
 							 , intContractHeaderId	= NULL
 							 , intTicketId			= NULL
-							 , intItemId			= NULL
-							 , intItemUOMId			= NULL
+							 , intItemId			= @intItemId
+							 , intItemUOMId			= @intItemUOMId
 							 , dblQtyShipped		= @dblQtyOverAged
 							 , dblPrice				= 0
 							 , ysnCharge			= CAST(0 AS BIT)
@@ -370,7 +408,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 	BEGIN
 		DECLARE @tblInvoiceDetailEntries	InvoiceStagingTable
-		
+		DECLARE @strAddOnKey				NVARCHAR(100) = NEWID()
+
 		INSERT INTO @tblInvoiceDetailEntries (
 			  intInvoiceDetailId
 			, strSourceTransaction
@@ -396,6 +435,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intTicketId
 			, intTaxGroupId
 			, dblCurrencyExchangeRate
+			, strAddonDetailKey
+			, ysnAddonParent
 		)
 		SELECT intInvoiceDetailId			= NULL
 		    , strSourceTransaction			= 'Direct'
@@ -421,6 +462,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intTicketId					= IDTOADD.intTicketId
 			, intTaxGroupId					= ID.intTaxGroupId
 			, dblCurrencyExchangeRate		= ID.dblCurrencyExchangeRate
+			, strAddonDetailKey				= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
+			, ysnAddonParent				= ISNULL(ID.ysnAddonParent, 0)
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
@@ -434,7 +477,52 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 		) ID
 		LEFT JOIN tblICItem ITEM ON ITEM.intItemId = CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemId ELSE IDTOADD.intItemId END
 		LEFT JOIN tblCTContractDetail CTD ON IDTOADD.intContractDetailId = CTD.intContractDetailId
-			
+		
+		UNION ALL
+
+		--GET AUTO-ADD, ADD-ON ITEMS
+		SELECT intInvoiceDetailId			= NULL
+		    , strSourceTransaction			= 'Direct'
+			, strSourceId					= ''
+			, intEntityCustomerId			= ID.intEntityCustomerId
+			, intCompanyLocationId			= ID.intCompanyLocationId
+			, dtmDate						= ID.dtmDate
+			, intEntityId					= ID.intEntityId
+			, intInvoiceId					= @intInvoiceId
+			, intItemId						= ADDON.intComponentItemId
+			, strItemDescription			= ADDON.strDescription
+			, intOrderUOMId					= ADDON.intItemUnitMeasureId
+			, dblQtyOrdered					= 0
+			, intItemUOMId					= ADDON.intItemUnitMeasureId
+			, intPriceUOMId					= ADDON.intItemUnitMeasureId
+			, dblQtyShipped					= IDTOADD.dblQtyShipped * ADDON.dblQuantity
+			, dblPrice						= ADDON.dblPrice
+			, dblUnitPrice					= ADDON.dblPrice
+			, dblContractPriceUOMQty		= 0
+			, intItemWeightUOMId			= NULL
+			, intContractDetailId			= NULL
+			, intContractHeaderId			= NULL
+			, intTicketId					= IDTOADD.intTicketId
+			, intTaxGroupId					= ID.intTaxGroupId
+			, dblCurrencyExchangeRate		= ID.dblCurrencyExchangeRate
+			, strAddonDetailKey				= @strAddOnKey
+			, ysnAddonParent				= CAST(0 AS BIT)
+		FROM #INVOICEDETAILSTOADD IDTOADD
+		CROSS APPLY (
+			SELECT TOP 1 ID.*
+					   , I.intCompanyLocationId
+					   , I.intEntityCustomerId
+					   , I.dtmDate 
+					   , I.intEntityId
+			FROM tblARInvoiceDetail ID
+			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+			WHERE intInvoiceDetailId = IDTOADD.intInvoiceDetailId
+		) ID
+		INNER JOIN vyuARGetAddOnItems ADDON ON IDTOADD.intItemId = ADDON.intItemId
+										   AND ID.intCompanyLocationId = ADDON.intCompanyLocationId
+		WHERE ADDON.ysnAutoAdd = 1		  
+		  AND ISNULL(@ysnFromSalesOrder, 0) = 1
+
 		EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
 									  , @IntegrationLogId	= NULL
 									  , @UserId				= @intUserId
