@@ -612,7 +612,7 @@ BEGIN
 		EXEC [dbo].[uspARProcessInvoicesByBatch]
 		 @InvoiceEntries	= @InvoiceEntriesTEMP
 		,@LineItemTaxEntries = @TaxDetails
-		,@UserId			= 1
+		,@UserId			= @entityId
 		,@GroupingOption	= 1
 		,@RaiseError		= 1
 		,@ErrorMessage		= @ErrorMessage OUTPUT

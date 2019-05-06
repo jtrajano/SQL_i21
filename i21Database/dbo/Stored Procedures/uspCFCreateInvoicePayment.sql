@@ -446,7 +446,7 @@ BEGIN
 		DECLARE @LogId INT
 		EXEC [dbo].[uspARProcessPayments]
 		 @PaymentEntries	= @PaymentEntriesTEMP
-		,@UserId			= 1
+		,@UserId			= @entityId
 		,@GroupingOption	= 1
 		,@RaiseError		= 1
 		,@ErrorMessage		= @ErrorMessage OUTPUT
