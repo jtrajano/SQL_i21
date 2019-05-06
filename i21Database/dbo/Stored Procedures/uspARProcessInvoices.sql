@@ -314,25 +314,41 @@ DECLARE  @Id									INT
 BEGIN TRY
 WHILE EXISTS(SELECT NULL FROM #EntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1 AND ISNULL([ysnProcessed],0) = 0)
 BEGIN
-	DECLARE @NewSourceId INT = 0					
+	DECLARE @NewSourceId				INT = 0
+			,@EntityCustomerIdTop1		INT	
+			,@SourceIdTop1				INT		
+			,@CompanyLocationIdTop1		INT	
+			,@CurrencyIdTop1			INT		
+			,@DateTop11					DATETIME					
+			,@TermIdTop1				INT
+			,@CommentTop1				NVARCHAR(MAX)		
+			,@ShipViaIdTop1				INT		
+			,@EntitySalespersonIdTop1	INT			
+			,@PONumberTop1				NVARCHAR(25)		
+			,@BOLNumberTop1				NVARCHAR(50)
+			,@AccountIdTop1				INT
+			,@FreightTermIdTop1			INT
+			,@PaymentMethodIdTop1		INT
+			,@InvoiceOriginIdTop1		NVARCHAR(25)
+			,@ImpactInventoryTop1		BIT
 	SELECT TOP 1
 		 @Id						= [intId]				
-		,@EntityCustomerId			= [intEntityCustomerId]		
-		,@SourceId					= [intSourceId]				
-		,@CompanyLocationId			= [intCompanyLocationId]		
-		,@CurrencyId				= [intCurrencyId]			
-		,@Date						= CAST([dtmDate] AS DATE)					
-		,@TermId					= [intTermId]
-		,@Comment					= [strComments]				
-		,@ShipViaId					= [intShipViaId]			
-		,@EntitySalespersonId		= [intEntitySalespersonId]				
-		,@PONumber					= [strPONumber]				
-		,@BOLNumber					= [strBOLNumber]
-		,@AccountId					= [intAccountId]
-		,@FreightTermId				= [intFreightTermId]
-		,@PaymentMethodId			= [intPaymentMethodId]
-		,@InvoiceOriginId			= [strInvoiceOriginId]
-        ,@ImpactInventory           = [ysnImpactInventory]
+		,@EntityCustomerIdTop1		= [intEntityCustomerId]		
+		,@SourceIdTop1				= [intSourceId]				
+		,@CompanyLocationIdTop1		= [intCompanyLocationId]		
+		,@CurrencyIdTop1			= [intCurrencyId]			
+		,@DateTop11					= CAST([dtmDate] AS DATE)					
+		,@TermIdTop1				= [intTermId]
+		,@CommentTop1				= [strComments]				
+		,@ShipViaIdTop1				= [intShipViaId]			
+		,@EntitySalespersonIdTop1	= [intEntitySalespersonId]				
+		,@PONumberTop1				= [strPONumber]				
+		,@BOLNumberTop1				= [strBOLNumber]
+		,@AccountIdTop1				= [intAccountId]
+		,@FreightTermIdTop1			= [intFreightTermId]
+		,@PaymentMethodIdTop1		= [intPaymentMethodId]
+		,@InvoiceOriginIdTop1		= [strInvoiceOriginId]
+        ,@ImpactInventoryTop1       = [ysnImpactInventory]
 		
 	FROM 
 		#EntriesForProcessing
@@ -491,22 +507,22 @@ BEGIN
 		@InvoiceEntries
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
-		AND ([intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
-		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
-		AND (ISNULL([intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (CAST([dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
-		AND (ISNULL([intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
-		AND (ISNULL([intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
-		AND (ISNULL([intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
-		AND (ISNULL([strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
-		AND (ISNULL([strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
-		AND (ISNULL([strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
-		AND (ISNULL([intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
-		AND (ISNULL([intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
-		AND (ISNULL([intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
-		AND (ISNULL([strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
-		AND (ISNULL([ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventory, CAST(1 AS BIT)) OR (@ImpactInventory IS NULL AND @GroupingOption < 16))
+		AND ([intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
+		AND ([intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND ([intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
+		AND (ISNULL([intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
+		AND (CAST([dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
+		AND (ISNULL([intTermId],0) = ISNULL(@TermIdTop1,0) OR (@TermIdTop1 IS NULL AND @GroupingOption < 6))		
+		AND (ISNULL([intShipViaId],0) = ISNULL(@ShipViaIdTop1,0) OR (@ShipViaIdTop1 IS NULL AND @GroupingOption < 7))
+		AND (ISNULL([intEntitySalespersonId],0) = ISNULL(@EntitySalespersonIdTop1,0) OR (@EntitySalespersonIdTop1 IS NULL AND @GroupingOption < 8))
+		AND (ISNULL([strPONumber],'') = ISNULL(@PONumberTop1,'') OR (@PONumberTop1 IS NULL AND @GroupingOption < 9))			
+		AND (ISNULL([strBOLNumber],'') = ISNULL(@BOLNumberTop1,'') OR (@BOLNumberTop1 IS NULL AND @GroupingOption < 10))
+		AND (ISNULL([strComments],'') = ISNULL(@CommentTop1,'') OR (@CommentTop1 IS NULL AND @GroupingOption < 11))
+		AND (ISNULL([intAccountId],0) = ISNULL(@AccountIdTop1,0) OR (@AccountIdTop1 IS NULL AND @GroupingOption < 12))
+		AND (ISNULL([intFreightTermId],0) = ISNULL(@FreightTermIdTop1,0) OR (@FreightTermIdTop1 IS NULL AND @GroupingOption < 13))
+		AND (ISNULL([intPaymentMethodId],0) = ISNULL(@PaymentMethodIdTop1,0) OR (@PaymentMethodIdTop1 IS NULL AND @GroupingOption < 14))            
+		AND (ISNULL([strInvoiceOriginId],'') = ISNULL(@InvoiceOriginIdTop1,'') OR (@InvoiceOriginIdTop1 IS NULL AND @GroupingOption < 15))
+		AND (ISNULL([ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventoryTop1, CAST(1 AS BIT)) OR (@ImpactInventoryTop1 IS NULL AND @GroupingOption < 16))
 	ORDER BY
 		[intId]
 
@@ -793,22 +809,22 @@ BEGIN
 		@InvoiceEntries I
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
-		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
-		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
-		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
-		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
-		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
-		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
-		AND (ISNULL(I.[strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
-		AND (ISNULL(I.[strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
-		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
-		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
-		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
-		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
-		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
-		AND (ISNULL(I.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventory, CAST(1 AS BIT)) OR (@ImpactInventory IS NULL AND @GroupingOption < 16))
+		AND (I.[intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
+		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND (I.[intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
+		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
+		AND (CAST(I.[dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
+		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermIdTop1,0) OR (@TermIdTop1 IS NULL AND @GroupingOption < 6))		
+		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaIdTop1,0) OR (@ShipViaIdTop1 IS NULL AND @GroupingOption < 7))
+		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonIdTop1,0) OR (@EntitySalespersonIdTop1 IS NULL AND @GroupingOption < 8))
+		AND (ISNULL(I.[strPONumber],'') = ISNULL(@PONumberTop1,'') OR (@PONumberTop1 IS NULL AND @GroupingOption < 9))			
+		AND (ISNULL(I.[strBOLNumber],'') = ISNULL(@BOLNumberTop1,'') OR (@BOLNumberTop1 IS NULL AND @GroupingOption < 10))
+		AND (ISNULL(I.[strComments],'') = ISNULL(@CommentTop1,'') OR (@CommentTop1 IS NULL AND @GroupingOption < 11))
+		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountIdTop1,0) OR (@AccountIdTop1 IS NULL AND @GroupingOption < 12))
+		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermIdTop1,0) OR (@FreightTermIdTop1 IS NULL AND @GroupingOption < 13))
+		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodIdTop1,0) OR (@PaymentMethodIdTop1 IS NULL AND @GroupingOption < 14))            
+		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginIdTop1,'') OR (@InvoiceOriginIdTop1 IS NULL AND @GroupingOption < 15))
+		AND (ISNULL(I.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventoryTop1, CAST(1 AS BIT)) OR (@ImpactInventoryTop1 IS NULL AND @GroupingOption < 16))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
@@ -1163,22 +1179,22 @@ BEGIN
 		@InvoiceEntries I
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
-		AND (I.[intEntityCustomerId] = @EntityCustomerId OR (@EntityCustomerId IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceId OR (@SourceId IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
-		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
-		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyId,0) OR (@CurrencyId IS NULL AND @GroupingOption < 4))
-		AND (CAST(I.[dtmDate] AS DATE) = @Date OR (@Date IS NULL AND @GroupingOption < 5))
-		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermId,0) OR (@TermId IS NULL AND @GroupingOption < 6))		
-		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaId,0) OR (@ShipViaId IS NULL AND @GroupingOption < 7))
-		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonId,0) OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
-		AND (ISNULL(I.[strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
-		AND (ISNULL(I.[strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
-		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
-		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountId,0) OR (@AccountId IS NULL AND @GroupingOption < 12))
-		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermId,0) OR (@FreightTermId IS NULL AND @GroupingOption < 13))
-		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodId,0) OR (@PaymentMethodId IS NULL AND @GroupingOption < 14))            
-		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginId,'') OR (@InvoiceOriginId IS NULL AND @GroupingOption < 15))
-		AND (ISNULL(I.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventory, CAST(1 AS BIT)) OR (@ImpactInventory IS NULL AND @GroupingOption < 16))
+		AND (I.[intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
+		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND (I.[intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
+		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
+		AND (CAST(I.[dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
+		AND (ISNULL(I.[intTermId],0) = ISNULL(@TermIdTop1,0) OR (@TermIdTop1 IS NULL AND @GroupingOption < 6))		
+		AND (ISNULL(I.[intShipViaId],0) = ISNULL(@ShipViaIdTop1,0) OR (@ShipViaIdTop1 IS NULL AND @GroupingOption < 7))
+		AND (ISNULL(I.[intEntitySalespersonId],0) = ISNULL(@EntitySalespersonIdTop1,0) OR (@EntitySalespersonIdTop1 IS NULL AND @GroupingOption < 8))
+		AND (ISNULL(I.[strPONumber],'') = ISNULL(@PONumberTop1,'') OR (@PONumberTop1 IS NULL AND @GroupingOption < 9))			
+		AND (ISNULL(I.[strBOLNumber],'') = ISNULL(@BOLNumberTop1,'') OR (@BOLNumberTop1 IS NULL AND @GroupingOption < 10))
+		AND (ISNULL(I.[strComments],'') = ISNULL(@CommentTop1,'') OR (@CommentTop1 IS NULL AND @GroupingOption < 11))
+		AND (ISNULL(I.[intAccountId],0) = ISNULL(@AccountIdTop1,0) OR (@AccountIdTop1 IS NULL AND @GroupingOption < 12))
+		AND (ISNULL(I.[intFreightTermId],0) = ISNULL(@FreightTermIdTop1,0) OR (@FreightTermIdTop1 IS NULL AND @GroupingOption < 13))
+		AND (ISNULL(I.[intPaymentMethodId],0) = ISNULL(@PaymentMethodIdTop1,0) OR (@PaymentMethodIdTop1 IS NULL AND @GroupingOption < 14))            
+		AND (ISNULL(I.[strInvoiceOriginId],'') = ISNULL(@InvoiceOriginIdTop1,'') OR (@InvoiceOriginIdTop1 IS NULL AND @GroupingOption < 15))
+		AND (ISNULL(I.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(@ImpactInventoryTop1, CAST(1 AS BIT)) OR (@ImpactInventoryTop1 IS NULL AND @GroupingOption < 16))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
