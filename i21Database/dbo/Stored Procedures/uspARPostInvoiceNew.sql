@@ -707,10 +707,14 @@ BEGIN TRY
 	IF @Recap = 1
     BEGIN
         EXEC [dbo].[uspARPostInvoiceRecap]
-		        @BatchId         = @BatchIdUsed
+                @Post            = @Post
+		       ,@Recap           = @Recap
+		       ,@BatchId         = @BatchId
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @UserId
+		       ,@BatchIdUsed     = @BatchIdUsed OUT
 		       ,@raiseError      = @RaiseError
+
         GOTO Do_Commit
     END
 
