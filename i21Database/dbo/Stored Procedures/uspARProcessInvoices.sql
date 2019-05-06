@@ -567,10 +567,16 @@ BEGIN
 						SET @SourceTable = 'tblCTContractHeader'
 					END
 
-				IF ISNULL(@SourceTransaction,'') IN ('Load Schedule', 'Weight Claim')
+				IF ISNULL(@SourceTransaction,'') IN ('Load Schedule')
 					BEGIN
 						SET @SourceColumn = 'intLoadId'
 						SET @SourceTable = 'tblLGLoad'
+					END
+
+				IF ISNULL(@SourceTransaction,'') IN ('Weight Claim')
+					BEGIN
+						SET @SourceColumn = 'intWeightClaimId'
+						SET @SourceTable = 'tblLGWeightClaim'
 					END
 
 				IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction', 'CF Tran', 'Meter Billing', 'Provisional', 'Inventory Shipment', 'Sales Contract', 'Load Schedule', 'Weight Claim')
