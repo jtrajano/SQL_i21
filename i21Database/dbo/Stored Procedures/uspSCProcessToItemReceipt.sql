@@ -531,7 +531,11 @@ BEGIN TRY
 	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
 	IF ISNULL(@createVoucher, 0) = 1 OR ISNULL(@postVoucher, 0) = 1
 	BEGIN
-		EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 1, @strErrorMessage = @ErrorMessage OUT, @intBillId = @intBillId OUT
+		--EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 1, @strErrorMessage = @ErrorMessage OUT, @intBillId = @intBillId OUT
+		IF(@InventoryReceiptId IS NOT NULL)
+		BEGIN
+			EXEC dbo.uspICProcessToBill @intReceiptId = @InventoryReceiptId, @intUserId = @intUserId, @intBillId = @intBillId OUT
+		END
 		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
 		BEGIN
 			SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
