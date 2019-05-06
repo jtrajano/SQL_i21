@@ -6,11 +6,11 @@
 	, strItemDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS
 	, intItemLocationId INT
 	, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	, dblRunningQuantity NUMERIC(38, 20)
-	, dblRunningValue NUMERIC(38, 20)
-	, dblRunningLastCost NUMERIC(38, 20)
-	, dblRunningStandardCost NUMERIC(38, 20)
-	, dblRunningAverageCost NUMERIC(38, 20)
+	, dblRunningQuantity NUMERIC(38, 6)
+	, dblRunningValue NUMERIC(38, 6)
+	, dblRunningLastCost NUMERIC(38, 6)
+	, dblRunningStandardCost NUMERIC(38, 6)
+	, dblRunningAverageCost NUMERIC(38, 6)
 	, strStockUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
