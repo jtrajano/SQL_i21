@@ -154,7 +154,7 @@ BEGIN TRY
 		,intTruckDriverId = CASE WHEN TL.intDriverId IS NULL THEN NULL ELSE TL.intDriverId END
 		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
-		,strBOLNumberDetail  = DD.strBillOfLading
+		,strBOLNumberDetail  = TR.strBillOfLading
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
