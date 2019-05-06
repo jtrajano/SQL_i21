@@ -275,7 +275,32 @@ CREATE TABLE #tmpDailyStockPosition
 		t.intTransactionTypeId,
 		t.intLotId,
 		t.intInTransitSourceLocationId
-
+	UNION ALL
+	SELECT	7,
+			t.intItemId,
+			ItemLocation.intLocationId,
+			t.intTransactionTypeId,
+			t.intLotId,
+			t.intInTransitSourceLocationId,
+			dblQty = -1 * SUM(dbo.fnICConvertUOMtoStockUnit(b.intItemId, b.intUnitMeasureId, b.dblOpenReceive))
+			
+	FROM @Transactions t
+	INNER JOIN tblICInventoryTransfer InvTransfer ON InvTransfer.intInventoryTransferId = t.intTransactionId 
+		AND InvTransfer.ysnShipmentRequired = 1
+	INNER JOIN tblICInventoryReceiptItem b
+		on t.intTransactionId = ISNULL(b.intInventoryTransferId, b.intOrderId )
+	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = t.intItemId 
+		AND ItemLocation.intLocationId = InvTransfer.intToLocationId
+	WHERE t.intTransactionTypeId IN(
+		@InventoryTransferwithShipment
+	)
+	AND t.intInTransitSourceLocationId IS NOT NULL
+	GROUP BY t.intItemId,
+		ItemLocation.intLocationId,
+		t.intTransactionTypeId,
+		t.intLotId,
+		t.intInTransitSourceLocationId
+		
 	-----===== SOURCE 8 - In Transit Outbound
 	INSERT INTO #tmpDailyStockPosition
 	SELECT	8,
