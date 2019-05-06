@@ -46,8 +46,6 @@ SELECT
 						 + (CASE WHEN A.intTransactionType !=1 THEN A.dblDiscount * -1 ELSE A.dblDiscount END)
 						 - (CASE WHEN A.intTransactionType !=1 THEN A.dblInterest * -1 ELSE A.dblInterest END)) AS DECIMAL(18,2)))
 			THEN 'Invalid Paid Status. Bill was already fully paid.'
-		WHEN A.ysnPosted = 1 AND A.intTransactionType = 2 AND ISNULL(Prepayments.dblPrepayment,0) = 0
-			THEN 'Prepayment was posted but not payment transaction created.'
 		WHEN A.ysnPosted = 1 AND A.intTransactionType = 2 AND A.dblPayment != 0 AND ISNULL(Payments.dblPayment,0) = 0
 			THEN 'Prepayment has payment but did no offset transaction'
 			ELSE 'OK' END AS strStatus
@@ -59,15 +57,32 @@ OUTER APPLY (
 	WHERE A.intBillId = B.intBillId
 ) Details
 OUTER APPLY (
-	SELECT
-		SUM(D.dblPayment) dblPayment
-		,SUM(D.dblDiscount) dblDiscount
-		,SUM(D.dblInterest) dblInterest
-		,SUM(D.dblWithheld) dblWithheld
-	FROM tblAPPayment C
-	INNER JOIN tblAPPaymentDetail D ON C.intPaymentId = D.intPaymentId
-	WHERE D.intBillId = A.intBillId
-	AND C.ysnPrepay = 0 AND C.ysnPosted = 1
+	SELECT 
+		SUM(dblPayment) dblPayment
+		,SUM(dblDiscount) dblDiscount
+		,SUM(dblInterest) dblInterest
+		,SUM(dblWithheld) dblWithheld
+	FROM (
+		SELECT
+			SUM(D.dblPayment) dblPayment
+			,SUM(D.dblDiscount) dblDiscount
+			,SUM(D.dblInterest) dblInterest
+			,SUM(D.dblWithheld) dblWithheld
+		FROM tblAPPayment C
+		INNER JOIN tblAPPaymentDetail D ON C.intPaymentId = D.intPaymentId
+		WHERE D.intBillId = A.intBillId
+		AND C.ysnPrepay = 0 AND C.ysnPosted = 1
+		UNION ALL
+		SELECT
+			SUM(D.dblPayment) dblPayment
+			,SUM(D.dblDiscount) dblDiscount
+			,SUM(D.dblInterest) dblInterest
+			,0 dblWithheld
+		FROM tblARPayment C
+		INNER JOIN tblARPaymentDetail D ON C.intPaymentId = D.intPaymentId
+		WHERE D.intBillId = A.intBillId
+		AND C.ysnPosted = 1
+	) allPayment
 ) Payments
 OUTER APPLY (
 	SELECT
@@ -75,7 +90,7 @@ OUTER APPLY (
 	FROM tblAPPayment E
 	INNER JOIN tblAPPaymentDetail F ON E.intPaymentId = F.intPaymentId
 	WHERE F.intBillId = A.intBillId
-	AND E.ysnPrepay = 1 AND E.ysnPosted = 1
+	AND (E.ysnPrepay = 1) AND E.ysnPosted = 1
 ) Prepayments
 OUTER APPLY 
 (
