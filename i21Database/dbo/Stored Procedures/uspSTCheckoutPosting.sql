@@ -3660,105 +3660,118 @@ BEGIN
 										ELSE IF(@ysnRecap = CAST(1 AS BIT))
 											BEGIN -- Start: @ysnRecap = 1
 											
-											-- Get Batch Id
-											SELECT @strBatchIdForNewPostRecap = ISNULL(strBatchIdForNewPostRecap, '')
-											FROM tblARInvoiceIntegrationLog 
-											WHERE intIntegrationLogId = @intIntegrationLogId
+												-- Get Batch Id
+												
+												-- http://jira.irelyserver.com/browse/ST-1277
+												-- tblARInvoiceIntegrationLog.strBatchIdForNewPostRecap value is always empty
+												-- tblARInvoiceIntegrationLogDetail.strBatchId Top (1) has Batch Id
+												SELECT TOP (1) @strBatchIdForNewPostRecap = strBatchId 
+												FROM tblARInvoiceIntegrationLogDetail 
+												WHERE intIntegrationLogId = @intIntegrationLogId
+													AND ysnHeader = 1 
+													AND ysnPost = @ysnPost 
+													AND ysnRecap = @ysnRecap 
+												ORDER BY intIntegrationLogDetailId ASC
+												--SELECT @strBatchIdForNewPostRecap = ISNULL(strBatchIdForNewPostRecap, '')
+												--FROM tblARInvoiceIntegrationLog 
+												--WHERE intIntegrationLogId = @intIntegrationLogId
 
-											IF(@strBatchIdForNewPostRecap IS NOT NULL AND @strBatchIdForNewPostRecap != '')
-												BEGIN -- Start:@strBatchIdForNewPostRecap
+												IF(@strBatchIdForNewPostRecap IS NOT NULL AND @strBatchIdForNewPostRecap != '')
+													BEGIN -- Start:@strBatchIdForNewPostRecap
 
-													IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
-														BEGIN
-															SET @strCreateGuidBatch = NEWID();
+														IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdForNewPostRecap)
+															BEGIN
+																SET @strCreateGuidBatch = NEWID();
 
-															-- GET POST PREVIEW on GL Entries
-															INSERT INTO @GLEntries (
-																					[dtmDate] 
-																					,[strBatchId]
-																					,[intAccountId]
-																					,[dblDebit]
-																					,[dblCredit]
-																					,[dblDebitUnit]
-																					,[dblCreditUnit]
-																					,[strDescription]
-																					,[strCode]
-																					,[strReference]
-																					,[intCurrencyId]
-																					,[dblExchangeRate]
-																					,[dtmDateEntered]
-																					,[dtmTransactionDate]
-																					,[strJournalLineDescription]
-																					,[intJournalLineNo]
-																					,[ysnIsUnposted]
-																					,[intUserId]
-																					,[intEntityId]
-																					,[strTransactionId]
-																					,[intTransactionId]
-																					,[strTransactionType]
-																					,[strTransactionForm]
-																					,[strModuleName]
-																					,[intConcurrencyId]
-																					,[dblDebitForeign]	
-																					--,[dblDebitReport]	
-																					,[dblCreditForeign]	
-																					--,[dblCreditReport]	
-																					--,[dblReportingRate]	
-																					--,[dblForeignRate]
-																					,[strRateType]
-																			)
-																		SELECT [dtmDate] 
-																					,[strBatchId] = @strCreateGuidBatch
-																					,[intAccountId]
-																					,[dblDebit]
-																					,[dblCredit]
-																					,[dblDebitUnit]
-																					,[dblCreditUnit]
-																					,[strDescription]
-																					,[strCode]
-																					,[strReference]
-																					,[intCurrencyId]
-																					,[dblExchangeRate]
-																					,[dtmDateEntered]
-																					,[dtmTransactionDate]
-																					,[strJournalLineDescription]
-																					,[intJournalLineNo]
-																					,[ysnIsUnposted]
-																					,[intUserId]
-																					,[intEntityId]
-																					,[strTransactionId]
-																					,[intTransactionId]
-																					,[strTransactionType]
-																					,[strTransactionForm]
-																					,[strModuleName]
-																					,[intConcurrencyId]
-																					,[dblDebitForeign]	
-																					--,[dblDebitReport]	
-																					,[dblCreditForeign]	
-																					--,[dblCreditReport]	
-																					--,[dblReportingRate]	
-																					--,[dblForeignRate]
-																					,[strRateType]
-																			FROM tblGLPostRecap
-																			WHERE strBatchId = @strBatchIdForNewPostRecap
+																-- GET POST PREVIEW on GL Entries
+																INSERT INTO @GLEntries (
+																						[dtmDate] 
+																						,[strBatchId]
+																						,[intAccountId]
+																						,[dblDebit]
+																						,[dblCredit]
+																						,[dblDebitUnit]
+																						,[dblCreditUnit]
+																						,[strDescription]
+																						,[strCode]
+																						,[strReference]
+																						,[intCurrencyId]
+																						,[dblExchangeRate]
+																						,[dtmDateEntered]
+																						,[dtmTransactionDate]
+																						,[strJournalLineDescription]
+																						,[intJournalLineNo]
+																						,[ysnIsUnposted]
+																						,[intUserId]
+																						,[intEntityId]
+																						,[strTransactionId]
+																						,[intTransactionId]
+																						,[strTransactionType]
+																						,[strTransactionForm]
+																						,[strModuleName]
+																						,[intConcurrencyId]
+																						,[dblDebitForeign]	
+																						--,[dblDebitReport]	
+																						,[dblCreditForeign]	
+																						--,[dblCreditReport]	
+																						--,[dblReportingRate]	
+																						--,[dblForeignRate]
+																						,[strRateType]
+																				)
+																			SELECT [dtmDate] 
+																						,[strBatchId] = @strCreateGuidBatch
+																						,[intAccountId]
+																						,[dblDebit]
+																						,[dblCredit]
+																						,[dblDebitUnit]
+																						,[dblCreditUnit]
+																						,[strDescription]
+																						,[strCode]
+																						,[strReference]
+																						,[intCurrencyId]
+																						,[dblExchangeRate]
+																						,[dtmDateEntered]
+																						,[dtmTransactionDate]
+																						,[strJournalLineDescription]
+																						,[intJournalLineNo]
+																						,[ysnIsUnposted]
+																						,[intUserId]
+																						,[intEntityId]
+																						,[strTransactionId]
+																						,[intTransactionId]
+																						,[strTransactionType]
+																						,[strTransactionForm]
+																						,[strModuleName]
+																						,[intConcurrencyId]
+																						,[dblDebitForeign]	
+																						--,[dblDebitReport]	
+																						,[dblCreditForeign]	
+																						--,[dblCreditReport]	
+																						--,[dblReportingRate]	
+																						--,[dblForeignRate]
+																						,[strRateType]
+																				FROM tblGLPostRecap
+																				WHERE strBatchId = @strBatchIdForNewPostRecap
 
-															ROLLBACK TRANSACTION 
+																ROLLBACK TRANSACTION 
 
-															BEGIN TRANSACTION
-																EXEC dbo.uspGLPostRecap 
-																		@GLEntries
-																		,@intCurrentUserId
+																BEGIN TRANSACTION
+																	EXEC dbo.uspGLPostRecap 
+																			@GLEntries
+																			,@intCurrentUserId
 																	
-																SET @strBatchIdForNewPostRecap = @strCreateGuidBatch
+																	SET @strBatchIdForNewPostRecap = @strCreateGuidBatch
 
-																GOTO ExitWithCommit
-														END
+																	GOTO ExitWithCommit
+															END
 
-												END -- End:@strBatchIdForNewPostRecap
-											ELSE
-
-												GOTO ExitWithRollback
-										END -- End: @ysnRecap = 1
+													END -- End:@strBatchIdForNewPostRecap
+												ELSE
+													BEGIN
+														GOTO ExitWithRollback
+													END
+													
+											END -- End: @ysnRecap = 1
 											
 									END TRY
 
@@ -4061,50 +4074,50 @@ BEGIN
 					----------------------------------------------------------------------
 					-- END CREATE RECIEVE PAYMENTS from Customer Payments
 
-				IF EXISTS(SELECT * FROM @PaymentsForInsert)
-					BEGIN
+					IF EXISTS(SELECT * FROM @PaymentsForInsert)
+						BEGIN
 
-						-- POST Recieve Payments
-						EXEC [dbo].[uspARProcessPayments]
-								@PaymentEntries	    = @PaymentsForInsert
-								,@UserId			= @intCurrentUserId
-								,@GroupingOption	= 8 --6
-								,@RaiseError		= 0
-								,@ErrorMessage		= @ErrorMessage OUTPUT
-								,@LogId				= @intIntegrationLogId OUTPUT
+							-- POST Recieve Payments
+							EXEC [dbo].[uspARProcessPayments]
+									@PaymentEntries	    = @PaymentsForInsert
+									,@UserId			= @intCurrentUserId
+									,@GroupingOption	= 8 --6
+									,@RaiseError		= 0
+									,@ErrorMessage		= @ErrorMessage OUTPUT
+									,@LogId				= @intIntegrationLogId OUTPUT
 
-						IF EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
-							BEGIN
+							IF EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId) AND ISNULL(@ErrorMessage, '') = ''
+								BEGIN
 
-								IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-									BEGIN
+									IF NOT EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+										BEGIN
 
-										-- Posting to Recieve Payments is successfull
-										UPDATE tblSTCheckoutHeader
-										SET intReceivePaymentsIntegrationLogId = @intIntegrationLogId
-										WHERE intCheckoutId = @intCheckoutId
-									END
-								 ELSE
-									BEGIN
+											-- Posting to Recieve Payments is successfull
+											UPDATE tblSTCheckoutHeader
+											SET intReceivePaymentsIntegrationLogId = @intIntegrationLogId
+											WHERE intCheckoutId = @intCheckoutId
+										END
+									 ELSE
+										BEGIN
 
-										-- SELECT * FROM tblARPaymentIntegrationLogDetail
-										SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
-										SET @strStatusMsg = 'Receive Payments was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
+											-- SELECT * FROM tblARPaymentIntegrationLogDetail
+											SET @ErrorMessage = (SELECT TOP 1 strPostingMessage FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = CAST(0 AS BIT))
+											SET @strStatusMsg = 'Receive Payments was not Posted correctly. ' + ISNULL(@ErrorMessage, '')
 
-										-- ROLLBACK
-										GOTO ExitWithRollback
-								-- -- RETURN
-									END
-							END
-						ELSE
-							BEGIN
-								SET @strStatusMsg = 'Post Recieve Payments error: ' + @ErrorMessage
+											-- ROLLBACK
+											GOTO ExitWithRollback
+									-- -- RETURN
+										END
+								END
+							ELSE
+								BEGIN
+									SET @strStatusMsg = 'Post Recieve Payments error: ' + @ErrorMessage
 
-								-- ROLLBACK
-								GOTO ExitWithRollback
-								-- -- RETURN
-							END
-					END
+									-- ROLLBACK
+									GOTO ExitWithRollback
+									-- -- RETURN
+								END
+						END
 				----------------------------------------------------------------------
 				----------------- END POST TO AR RECIEVE PAYMENT ---------------------
 				----------------------------------------------------------------------
