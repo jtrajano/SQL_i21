@@ -227,7 +227,7 @@ BEGIN
 	WHERE
 		I.[dblQtyShipped] = @ZeroDecimal 
 		AND I.[ysnStockTracking] = @OneBit
-		AND I.[intSiteId] IS NULL
+		AND I.[strType] <> 'Tank Delivery'
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
