@@ -72,18 +72,18 @@ BEGIN
 			,[dblQuantityToBill] = LD.dblQuantity
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = CAST(ISNULL(CT.dblCashPrice,0) AS DECIMAL(38,20))
+			,[dblCost] = ISNULL(AD.dblSeqPrice, 0)
 			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-			,[intCostUOMId] = CT.intPriceItemUOMId
+			,[intCostUOMId] = AD.intSeqPriceUOMId
 			,[dblNetWeight] = ISNULL(LD.dblNet,0)
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
-			,[intCostCurrencyId] = CT.intCurrencyId
+			,[intCostCurrencyId] = AD.intSeqCurrencyId
 			,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = 1
-			,[ysnSubCurrency] =	ISNULL(CY.ysnSubCurrency,0)
-			,[intSubCurrencyCents] = ISNULL(CY.intCent,0)
+			,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
+			,[intSubCurrencyCents] = CY.intCent
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
@@ -93,8 +93,9 @@ BEGIN
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
+		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CT.intContractDetailId) AD
 		JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CH.intEntityId = D1.[intEntityId]  
-		LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CT.intCurrencyId
+		LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = AD.intSeqCurrencyId
 		LEFT JOIN (tblICInventoryReceipt receipt 
 					INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
 					ON LD.intLoadDetailId = receiptItem.intSourceId AND receipt.intSourceType = 2
