@@ -51,6 +51,7 @@ BEGIN TRY
 		,@intShiftId int
 		,@strParentLotNumber NVARCHAR(50)
 		,@strReferenceNo NVARCHAR(50)
+		,@intTransactionFrom INT
 
 	DECLARE @tblQuantityBreakup AS Table
 	(
@@ -111,6 +112,7 @@ BEGIN TRY
 		SELECT @intStatusId = intStatusId
 			,@strWorkOrderNo = strWorkOrderNo
 			,@intManufacturingProcessId = ISNULL(intManufacturingProcessId, 0)
+			,@intTransactionFrom = intTransactionFrom
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -119,7 +121,7 @@ BEGIN TRY
 			FROM tblMFWorkOrderRecipe
 			WHERE intWorkOrderId = @intWorkOrderId
 
-		IF (@intStatusId <> 12)
+		IF (@intStatusId <> 12 AND @intTransactionFrom <> 4)
 		BEGIN
 			SET @strErrMsg = 'Blend Sheet ' + @strWorkOrderNo + ' is either not staged or already produced. Please reload the blend sheet.'
 
