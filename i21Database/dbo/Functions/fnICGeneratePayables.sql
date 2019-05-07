@@ -87,6 +87,25 @@ RETURNS @table TABLE
 AS
 BEGIN
 
+
+DECLARE 
+		  @SourceType_STORE AS INT = 7		 
+		, @type_Voucher AS INT = 1
+		, @type_DebitMemo AS INT = 3
+		, @billTypeToUse INT
+
+	SELECT TOP 1 @billTypeToUse = 
+		CASE 
+			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+				@type_DebitMemo
+			ELSE 
+				@type_Voucher
+		END 
+	FROM tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	WHERE r.ysnPosted = 1
+		AND r.intInventoryReceiptId = @intReceiptId
+
 INSERT INTO @table
 SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
@@ -104,10 +123,8 @@ SELECT DISTINCT
 	,[intPurchaseTaxGroupId]	=	B.intTaxGroupId
 	,[dblOrderQty]				=	CASE WHEN CD.intContractDetailId > 0 THEN ROUND(CD.dblQuantity,2) ELSE B.dblOpenReceive END
 	,[dblPOOpenReceive]			=	B.dblReceived
-	,[dblOpenReceive]			=	B.dblOpenReceive
-	,[dblQuantityToBill]		=	CAST (
-									(B.dblOpenReceive - B.dblBillQty)
-									AS DECIMAL(18,6)) 
+	,[dblOpenReceive]			=	CASE WHEN @billTypeToUse = @type_DebitMemo THEN -B.dblOpenReceive ELSE B.dblOpenReceive END
+	,[dblQuantityToBill]		=	CAST (CASE WHEN @billTypeToUse = @type_DebitMemo THEN -(B.dblOpenReceive - B.dblBillQty) ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,6)) 
 	,[dblQtyToBillUnitQty]		=	ISNULL(ItemUOM.dblUnitQty, 1)
 	,[intQtyToBillUOMId]		=	B.intUnitMeasureId
 	,[dblQuantityBilled]		=	B.dblBillQty
