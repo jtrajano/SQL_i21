@@ -596,7 +596,38 @@ END
 		END
 		*/
 
-		IF(@InventoryReceiptId IS NOT NULL)
+		SELECT @total = COUNT(1)
+		FROM	tblICInventoryReceiptItem ri
+		WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
+				AND ri.intOwnershipType = 1
+
+		DECLARE @ysnHasBasisContract INT = 0
+		SELECT @ysnHasBasisContract = CASE WHEN COUNT(DISTINCT intPricingTypeId) > 0 THEN 1 ELSE 0 END FROM tblICInventoryReceiptItem IRI
+		INNER JOIN tblCTContractDetail CT
+			ON CT.intContractDetailId = IRI.intContractDetailId
+		WHERE intInventoryReceiptId = @InventoryReceiptId and CT.intPricingTypeId = 2
+		GROUP BY intInventoryReceiptId
+		IF(@ysnHasBasisContract = 1)
+		BEGIN
+				SELECT @intContractDetailId = MIN(ri.intLineNo)
+				FROM tblICInventoryReceipt r 
+				JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+				WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
+			
+				WHILE ISNULL(@intContractDetailId,0) > 0
+				BEGIN
+					IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+					BEGIN
+						EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+					END
+					SELECT @intContractDetailId = MIN(ri.intLineNo)
+					FROM tblICInventoryReceipt r 
+					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+					WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+				END
+		END
+
+		IF(@InventoryReceiptId IS NOT NULL AND @total > 0 AND @ysnHasBasisContract = 0)
 		BEGIN
 			EXEC dbo.uspICProcessToBill @intReceiptId = @InventoryReceiptId, @intUserId = @intUserId, @intBillId = @intBillId OUT
 		END
