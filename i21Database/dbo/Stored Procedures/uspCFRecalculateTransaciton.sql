@@ -5751,37 +5751,6 @@ BEGIN
 	--SELECT * FROM @tblCFCalculatedTax
 	--SELECT * FROM @tblCFOriginalTax
 
-
-	IF(ISNULL(@dblSpecialTax,0) > 0)
-	BEGIN
-		IF(@ysnReRunCalcTax = 0)
-		BEGIN
-			------CLEAN TAX TABLE--------
-			DELETE FROM @tblCFOriginalTax				
-			DELETE FROM @tblCFCalculatedTax				
-			DELETE FROM @tblCFTransactionTax			
-			DELETE FROM @tblCFBackoutTax				
-			DELETE FROM @tblCFRemoteTax					
-
-			DELETE FROM @tblCFOriginalTaxZeroQuantity				
-			DELETE FROM @tblCFCalculatedTaxZeroQuantity				
-			DELETE FROM @tblCFTransactionTaxZeroQuantity			
-			DELETE FROM @tblCFBackoutTaxZeroQuantity		
-
-			DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
-			DELETE FROM @tblCFCalculatedTaxExempt						
-
-			DELETE FROM @LineItemTaxDetailStagingTable
-
-			SET @ysnReRunCalcTax = 1 
-			SET @dblPrice = @dblPrice +  ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6)
-			GOTO TAXCOMPUTATION
-		END
-	END
-
-
-
-
 	---------------------------------------------------
 	--				 PRICE CALCULATION				 --
 	---------------------------------------------------
@@ -6166,6 +6135,34 @@ BEGIN
 
 
 			END
+	END
+
+
+	IF(ISNULL(@dblSpecialTax,0) > 0)
+	BEGIN
+		IF(@ysnReRunCalcTax = 0)
+		BEGIN
+			------CLEAN TAX TABLE--------
+			DELETE FROM @tblCFOriginalTax				
+			DELETE FROM @tblCFCalculatedTax				
+			DELETE FROM @tblCFTransactionTax			
+			DELETE FROM @tblCFBackoutTax				
+			DELETE FROM @tblCFRemoteTax					
+
+			DELETE FROM @tblCFOriginalTaxZeroQuantity				
+			DELETE FROM @tblCFCalculatedTaxZeroQuantity				
+			DELETE FROM @tblCFTransactionTaxZeroQuantity			
+			DELETE FROM @tblCFBackoutTaxZeroQuantity		
+
+			DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
+			DELETE FROM @tblCFCalculatedTaxExempt						
+
+			DELETE FROM @LineItemTaxDetailStagingTable
+
+			SET @ysnReRunCalcTax = 1 
+			SET @dblPrice = @dblPrice +  ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6)
+			GOTO TAXCOMPUTATION
+		END
 	END
 
 	
