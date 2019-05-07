@@ -645,8 +645,8 @@ IF(@totalInvalid > 0)
 		IF @RaiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
-				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
+				--RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Do_Rollback
 			END	
 			
         DELETE FROM #ARInvalidInvoiceData
@@ -694,8 +694,8 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		IF @RaiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strPostingMessage] FROM tblARInvoiceIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId AND [ysnPost] IS NOT NULL
-				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
+				--RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Do_Rollback
 			END				
 		GOTO Post_Exit	
 	END
