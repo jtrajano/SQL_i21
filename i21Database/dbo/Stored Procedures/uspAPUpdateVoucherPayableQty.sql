@@ -157,10 +157,8 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE THE QTY BEFORE BACKING UP AND DELETING, SO WE COULD ACTUAL QTY WHEN RE-INSERTING
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
-			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQuantityToBill) 
-										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END,
-				B.dblQuantityBilled = CASE WHEN @post = 0 THEN (B.dblQuantityBilled - C.dblQuantityToBill) 
-										ELSE (B.dblQuantityBilled + C.dblQuantityToBill) END
+			SET B.dblQuantityToBill = (B.dblQuantityToBill - C.dblQuantityToBill),
+				B.dblQuantityBilled = (B.dblQuantityBilled + C.dblQuantityToBill)
 		FROM tblAPVoucherPayable B
 		INNER JOIN @payablesKey B2
 			ON B.intVoucherPayableId = B2.intNewPayableId
@@ -890,10 +888,8 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE QTY AFTER REINSERTING
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
-			SET B.dblQuantityToBill = CASE WHEN @post = 0 THEN (B.dblQuantityToBill + C.dblQuantityToBill) 
-										ELSE (B.dblQuantityToBill - C.dblQuantityToBill) END,
-				B.dblQuantityBilled = CASE WHEN @post = 0 THEN (B.dblQuantityBilled - C.dblQuantityToBill) 
-										ELSE (B.dblQuantityBilled + C.dblQuantityToBill) END
+			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
+				B.dblQuantityBilled = 0 --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
 		FROM tblAPVoucherPayable B
 		INNER JOIN @deleted B2
 			ON B.intVoucherPayableId = B2.intNewPayableId
