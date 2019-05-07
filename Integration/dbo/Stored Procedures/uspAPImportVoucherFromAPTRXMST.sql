@@ -354,9 +354,7 @@ SELECT
 	[dblTotal]				=	CASE WHEN  C2.aptrx_trans_type IN ('C','A') 
 											THEN C.apegl_gl_amt * (-1) 
 										ELSE C.apegl_gl_amt END,
-	[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN ('C','A','I') THEN
-										(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END) --Cost should always positive
-									ELSE C.apegl_gl_amt END) / (CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
+	[dblCost]				=	ABS(C.apegl_gl_amt / (CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END)),
 	[intLineNo]				=	C.apegl_dist_no
 FROM tblAPBill A
 	INNER JOIN tblAPVendor B
