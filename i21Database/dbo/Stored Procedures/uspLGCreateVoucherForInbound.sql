@@ -154,7 +154,7 @@ BEGIN TRY
 		,[dblDiscount] = 0
 		,[dblExchangeRate] = 1
 		,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
-		,[intSubCurrencyCents] = AD.ysnSeqSubCurrency
+		,[intSubCurrencyCents] = CUR.intCent
 		,[intAccountId] = [dbo].[fnGetItemGLAccount](LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
@@ -167,6 +167,7 @@ BEGIN TRY
 	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
 		AND ItemLoc.intLocationId = CD.intCompanyLocationId
+	LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = AD.intSeqCurrencyId
 	LEFT JOIN tblSMCompanyLocation SMCL ON LD.intPCompanyLocationId = SMCL.intCompanyLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 	LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
@@ -201,6 +202,7 @@ BEGIN TRY
 		,AD.dblSeqPrice
 		,AD.intSeqPriceUOMId
 		,AD.intSeqCurrencyId
+		,CUR.intCent
 		,ItemUOM.dblUnitQty
 		,CostUOM.dblUnitQty
 		,WeightUOM.dblUnitQty

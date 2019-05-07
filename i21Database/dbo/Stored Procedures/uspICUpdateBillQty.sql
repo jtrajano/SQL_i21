@@ -26,12 +26,72 @@ BEGIN
 	-- Validate if the item is over billed
 	SET @BilledQty = 0;
 
+	DECLARE 
+		  @SourceType_STORE AS INT = 7		 
+		, @type_Voucher AS INT = 1
+		, @type_DebitMemo AS INT = 3
+		, @billTypeToUse INT
+
+	SELECT TOP 1 @billTypeToUse = 
+		CASE 
+			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+				@type_DebitMemo
+			ELSE 
+				@type_Voucher
+		END 
+	FROM tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		INNER JOIN @updateDetails d ON d.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+			AND ri.intItemId = d.intItemId
+	WHERE r.ysnPosted = 1
+
+	DECLARE @ReceiptToBills TABLE(strReceiptNumber NVARCHAR(100), dblOpenReceive NUMERIC(38, 20), dblBillQty NUMERIC(38, 20), intItemId INT, intInventoryReceiptItemId INT)
+	INSERT INTO @ReceiptToBills
+	SELECT
+		  r.strReceiptNumber
+		, dblOpenReceive = CASE WHEN @billTypeToUse = @type_DebitMemo THEN -ri.dblOpenReceive ELSE ri.dblOpenReceive END
+		, dblBillQty = CASE WHEN @billTypeToUse = @type_DebitMemo THEN -ri.dblBillQty ELSE ri.dblBillQty END
+		, ri.intItemId
+		, ri.intInventoryReceiptItemId
+	FROM tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		INNER JOIN @updateDetails d ON d.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+			AND ri.intItemId = d.intItemId
+
 	SELECT TOP 1 
-		@TransactionNo = Receipt.strReceiptNumber,
+		@TransactionNo = ReceiptItem.strReceiptNumber,
 		@ItemNo = Item.strItemNo,
 		@ReceiptQty = ReceiptItem.dblOpenReceive,
 		@BilledQty = ReceiptItem.dblBillQty
 	FROM @updateDetails UpdateTbl
+	INNER JOIN @ReceiptToBills ReceiptItem 
+		ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND ReceiptItem.intItemId = UpdateTbl.intItemId
+	INNER JOIN tblICItem Item
+		ON Item.intItemId = UpdateTbl.intItemId
+	WHERE (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) > ReceiptItem.dblOpenReceive -- Throw error if Bill Qty is greater than Receipt Qty
+		OR (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
+		AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
+		AND UpdateTbl.intInventoryReceiptChargeId IS NULL
+
+	--SELECT TOP 1 
+	--	@TransactionNo = Receipt.strReceiptNumber,
+	--	@ItemNo = Item.strItemNo,
+	--	@ReceiptQty = ReceiptItem.dblOpenReceive,
+	--	@BilledQty = ReceiptItem.dblBillQty
+	--FROM @updateDetails UpdateTbl
+	--INNER JOIN tblICInventoryReceiptItem ReceiptItem 
+	--	ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND ReceiptItem.intItemId = UpdateTbl.intItemId
+	--INNER JOIN tblICInventoryReceipt Receipt
+	--	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+	--INNER JOIN tblICItem Item
+	--	ON Item.intItemId = UpdateTbl.intItemId
+	--WHERE (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) > ReceiptItem.dblOpenReceive -- Throw error if Bill Qty is greater than Receipt Qty
+	--	OR (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
+	--	AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
+	--	AND UpdateTbl.intInventoryReceiptChargeId IS NULL
+	
+	SELECT * FROM @updateDetails
+	SElECT * FROM @updateDetails UpdateTbl
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 		ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND ReceiptItem.intItemId = UpdateTbl.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt
@@ -42,8 +102,6 @@ BEGIN
 		OR (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
 		AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
 		AND UpdateTbl.intInventoryReceiptChargeId IS NULL
-	
-
 	IF (ISNULL(@TransactionNo,'') != '')
 	BEGIN
 		--'Billed Qty for {Item No} is already {Billed Qty}. You cannot overbill the transaction'

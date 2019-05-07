@@ -29,9 +29,12 @@ RETURNS TABLE AS RETURN
 													CASE WHEN B.intWeightUOMId > 0 THEN B.dblNetWeight ELSE B.dblQtyReceived END)
 					ELSE 0 END
 		END) as dblTotalUnits
-		,CASE WHEN B.intInventoryReceiptChargeId > 0 
+		,CASE 
+			WHEN B.intInventoryReceiptChargeId > 0
 				THEN [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense')
-				ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
+			WHEN F.strType = 'Non-Inventory'
+				THEN [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'General')
+			ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
 			END AS intAccountId
 		,G.intCurrencyExchangeRateTypeId
 		,G.strCurrencyExchangeRateType

@@ -229,7 +229,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,P.intTypeEarningId
 			,P.strCalculationType
 			,P.dblHoursToProcess
-			,P.dblAmount
+			,ISNULL(P.dblAmount, 0)
 			,P.dblTotal
 			,E.strW2Code
 			,P.intDepartmentId
