@@ -533,6 +533,7 @@ BEGIN TRY
 			FROM	tblICInventoryReceiptItem ri
 			WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
 					AND ri.intOwnershipType = 1
+					AND ISNULL(ri.ysnAllowVoucher,1) = 1
 
 	DECLARE @ysnHasBasisContract INT = 0
 		SELECT @ysnHasBasisContract = CASE WHEN COUNT(DISTINCT intPricingTypeId) > 0 THEN 1 ELSE 0 END FROM tblICInventoryReceiptItem IRI
