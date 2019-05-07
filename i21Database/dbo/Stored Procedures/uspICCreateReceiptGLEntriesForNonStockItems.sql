@@ -608,7 +608,7 @@ FROM	ForGLEntries_CTE
 			AND (ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId)
 		INNER JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intNonInventoryId
 		
-		LEFT OUTER JOIN @GLAccounts GLPOAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+		LEFT OUTER JOIN @GLAccounts GLPOAccounts ON ForGLEntries_CTE.intItemId = GLPOAccounts.intItemId
 			AND ForGLEntries_CTE.intItemLocationId = GLPOAccounts.intItemLocationId
 			AND (ForGLEntries_CTE.intTransactionTypeId = -GLPOAccounts.intTransactionTypeId)
 		LEFT OUTER JOIN dbo.tblGLAccount tblGLPOAccount  ON tblGLPOAccount.intAccountId = GLPOAccounts.intPOId
