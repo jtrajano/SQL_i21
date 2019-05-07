@@ -58,21 +58,21 @@ BEGIN
 		INNER JOIN @updateDetails d ON d.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 			AND ri.intItemId = d.intItemId
 
-	SELECT TOP 1 
-		@TransactionNo = ReceiptItem.strReceiptNumber,
-		@ItemNo = Item.strItemNo,
-		@ReceiptQty = ReceiptItem.dblOpenReceive,
-		@BilledQty = ReceiptItem.dblBillQty
-	FROM @updateDetails UpdateTbl
-		INNER JOIN @ReceiptToBills ReceiptItem 
-			ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND ReceiptItem.intItemId = UpdateTbl.intItemId
-		INNER JOIN tblICInventoryReceiptItem SourceReceiptItem ON SourceReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND SourceReceiptItem.intItemId = UpdateTbl.intItemId
-		INNER JOIN tblICItem Item
-			ON Item.intItemId = UpdateTbl.intItemId
-	WHERE (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) > ReceiptItem.dblOpenReceive -- Throw error if Bill Qty is greater than Receipt Qty
-		OR (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
-		AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
-		AND UpdateTbl.intInventoryReceiptChargeId IS NULL
+	--SELECT TOP 1 
+	--	@TransactionNo = ReceiptItem.strReceiptNumber,
+	--	@ItemNo = Item.strItemNo,
+	--	@ReceiptQty = ReceiptItem.dblOpenReceive,
+	--	@BilledQty = ReceiptItem.dblBillQty
+	--FROM @updateDetails UpdateTbl
+	--	INNER JOIN @ReceiptToBills ReceiptItem 
+	--		ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND ReceiptItem.intItemId = UpdateTbl.intItemId
+	--	INNER JOIN tblICInventoryReceiptItem SourceReceiptItem ON SourceReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND SourceReceiptItem.intItemId = UpdateTbl.intItemId
+	--	INNER JOIN tblICItem Item
+	--		ON Item.intItemId = UpdateTbl.intItemId
+	--WHERE (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) > ReceiptItem.dblOpenReceive -- Throw error if Bill Qty is greater than Receipt Qty
+	--	OR (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
+	--	AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
+	--	AND UpdateTbl.intInventoryReceiptChargeId IS NULL
 
 	--SELECT UpdateTbl.dblToBillQty, 'Receipt', SourceReceiptItem.dblOpenReceive, SourceReceiptItem.dblBillQty, 'DebitMemo', ReceiptItem.dblOpenReceive, ReceiptItem.dblBillQty
 	--FROM @updateDetails UpdateTbl
@@ -99,6 +99,22 @@ BEGIN
 	--	AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
 	--	AND UpdateTbl.intInventoryReceiptChargeId IS NULL
 
+	SELECT TOP 1 
+		@TransactionNo = ReceiptItem.strReceiptNumber,
+		@ItemNo = Item.strItemNo,
+		@ReceiptQty = ReceiptItem.dblOpenReceive,
+		@BilledQty = ReceiptItem.dblBillQty
+	FROM @updateDetails UpdateTbl
+		INNER JOIN @ReceiptToBills ReceiptItem 
+			ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND ReceiptItem.intItemId = UpdateTbl.intItemId
+		INNER JOIN tblICInventoryReceiptItem SourceReceiptItem ON SourceReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND SourceReceiptItem.intItemId = UpdateTbl.intItemId
+		INNER JOIN tblICItem Item
+			ON Item.intItemId = UpdateTbl.intItemId
+	WHERE (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) > ReceiptItem.dblOpenReceive -- Throw error if Bill Qty is greater than Receipt Qty
+		OR (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
+		AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
+		AND UpdateTbl.intInventoryReceiptChargeId IS NULL
+
 	IF (ISNULL(@TransactionNo,'') != '')
 	BEGIN
 		--'Billed Qty for {Item No} is already {Billed Qty}. You cannot overbill the transaction'
@@ -107,12 +123,12 @@ BEGIN
 	END
 
 	UPDATE SourceReceiptItem
-	SET SourceReceiptItem.dblBillQty = ISNULL(ReceiptItem.dblBillQty, 0) + CASE WHEN @type_BillToUse = @type_DebitMemo THEN -UpdateTbl.dblToBillQty ELSE UpdateTbl.dblToBillQty END
+	SET SourceReceiptItem.dblBillQty = ISNULL(SourceReceiptItem.dblBillQty, 0) + CASE WHEN @type_BillToUse = @type_DebitMemo THEN -UpdateTbl.dblToBillQty ELSE UpdateTbl.dblToBillQty END
 	FROM tblICInventoryReceiptItem SourceReceiptItem
 		INNER JOIN @updateDetails UpdateTbl
 			ON UpdateTbl.intInventoryReceiptItemId = SourceReceiptItem.intInventoryReceiptItemId
-		INNER JOIN @ReceiptToBills ReceiptItem 
-				ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND ReceiptItem.intItemId = UpdateTbl.intItemId
+		--INNER JOIN @ReceiptToBills ReceiptItem 
+		--		ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND ReceiptItem.intItemId = UpdateTbl.intItemId
 	WHERE UpdateTbl.intInventoryReceiptItemId IS NOT NULL
 		AND UpdateTbl.intInventoryReceiptChargeId IS NULL
 END
