@@ -62,7 +62,7 @@ SELECT	intInventoryValuationKeyId =
 				WHEN t.intOwnershipType = 1 THEN 'Own'
 				WHEN t.intOwnershipType = 2 THEN 'Storage'
 			END COLLATE Latin1_General_CI_AS
-		,dtmCreated					= dbo.fnRemoveTimeOnDate(t.dtmCreated)
+		,dtmCreated					= t.dtmCreated --dbo.fnRemoveTimeOnDate(t.dtmCreated)
 		,subLoc.strStorageLocationSorter
 		,subLoc.intStorageLocationSorter
 		,strgLoc.strStorageUnitSorter
@@ -77,7 +77,7 @@ FROM 	tblICItem i
 			WHERE	iuStock.intItemId = i.intItemId
 					AND iuStock.ysnStockUnit = 1 
 		) iuStock
-		INNER JOIN tblICInventoryStockMovement t 
+		INNER JOIN tblICInventoryStockMovementReport t 
 			ON i.intItemId = t.intItemId
 		LEFT JOIN tblICCategory c 
 			ON c.intCategoryId = t.intCategoryId
