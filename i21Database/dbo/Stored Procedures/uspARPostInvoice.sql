@@ -652,8 +652,8 @@ IF(@totalInvalid > 0)
 		IF @raiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
-				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
+				--RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Do_Rollback
 			END					
 
         DELETE FROM #ARInvalidInvoiceData
@@ -695,8 +695,8 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		IF @raiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed
-				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
+				--RAISERROR(@ErrorMerssage, 11, 1)							
+				GOTO Do_Rollback
 			END				
 		GOTO Post_Exit	
 	END
@@ -1141,8 +1141,8 @@ BEGIN TRY
 	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
 	BEGIN
 		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
-		RAISERROR(@ErrorMerssage, 11, 1)							
-		GOTO Post_Exit
+		--RAISERROR(@ErrorMerssage, 11, 1)							
+		GOTO Do_Rollback
 	END					
 
     DELETE FROM #ARInvoiceGLEntries
