@@ -66,28 +66,22 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 				[Id] int
 		)
 
+		BEGIN TRY
+    	BEGIN TRANSACTION
 
-    	IF NOT EXISTS (SELECT * FROM glijemst WHERE glije_period between @startingPeriod and @endingPeriod)
+    	IF NOT EXISTS (SELECT TOP 1 1 FROM glijemst WHERE glije_period between @startingPeriod and @endingPeriod)
     	BEGIN
-    		INSERT INTO @tblLog ([strEventDescription]) 
-			SELECT ''No Data to import from the Origin on a given period.''
+    		RAISERROR(''No Data to import from the Origin on a given period.'', 16, 1);  
     	END
 
 		IF EXISTS(SELECT TOP 1 1 FROM vyuAPOriginCCDTransaction) -- AP-3144 check for non-imported Credit Card Reconciliation records
 		BEGIN
-			INSERT INTO @tblLog ([strEventDescription]) 
-			SELECT ''There are non imported Credit Card Reconciliation entries. Import voucher from origin first.''
+			RAISERROR(''There are non imported Credit Card Reconciliation entries. Import voucher from origin first.'', 16, 1);  
 		END
 
-		IF EXISTS(SELECT TOP 1 1 FROM @tblLog)
-		BEGIN
-			-- INSERT TO COA IMPORT LOG TABLE HERE
-			RETURN
-		END
-    	IF NOT EXISTS( SELECT * FROM tblGLCOACrossReference)
+    	IF NOT EXISTS( SELECT TOP 1 1 FROM tblGLCOACrossReference)
     	BEGIN
-    		INSERT INTO @tblLog ([strEventDescription]) SELECT ''Unable to Post because there is no cross reference between i21 and Origin.''
-    		SET @isCOAPresent = 0
+			RAISERROR(''Unable to Post because there is no cross reference between i21 and Origin.'', 16, 1);  
     	END
     	ELSE
     	BEGIN
@@ -111,7 +105,9 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			WHERE glije_period between @startingPeriod and @endingPeriod
     			
 
-    		IF EXISTS (SELECT * FROM @tmpID WHERE glije_date = 0)
+    		
+
+			IF EXISTS (SELECT * FROM @tmpID WHERE isnull(glije_date,0) < 19000000 or isnull(glije_date,0) > 21000000)
     		BEGIN
     			--EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
     			BEGIN
@@ -157,19 +153,13 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
 						A4GLIdentity
 						FROM glijemst A JOIN @tmpID B 
     					ON A.A4GLIdentity = B.ID
-    					WHERE B.glije_date = 0
-    			END
-				-- INSERT TO COA IMPORT LOG TABLE HERE
-				
-    			--RETURN
+    					WHERE isnull(B.glije_date,0) < 19000000 or isnull(B.glije_date,0) > 21000000
+    			END;
+				RAISERROR(''Invalid Date found'', 16, 1);  
     		END
 
-    		BEGIN TRY
-    		BEGIN TRANSACTION
     		DECLARE @uid UNIQUEIDENTIFIER, @beforePosting INT = 0
     		SELECT @uid =NEWID()
-    		
-
 			INSERT INTO tblGLIjemst(
 				glije_period,
 				glije_acct_no,
@@ -451,10 +441,8 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			CLOSE cursor_postdate
 				DEALLOCATE cursor_postdate
 
-				set @success = 1
 				SELECT @intErrorCount = COUNT(1) FROM @tblLog
 				
-
 				IF @importLogId = 0
     				EXEC dbo.uspGLCreateImportLogHeader 
 					@msg=''Successful Transaction'', 
@@ -531,12 +519,15 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     		BEGIN CATCH
 				IF @@TRANCOUNT > 0
     			ROLLBACK TRANSACTION
-				INSERT INTO @tblLog (strEventDescription) SELECT  ERROR_MESSAGE()
+				DECLARE @strError NVARCHAR(100) = ''''
+
+				SELECT @strError = ISNULL(ERROR_MESSAGE(),''Failed Transaction'')
+				
 				SELECT @intErrorCount = COUNT(1) FROM @tblLog
 
 				IF @importLogId = 0
     				EXEC dbo.uspGLCreateImportLogHeader 
-					@msg=''Failed Transaction'', 
+					@msg=@strError, 
 					@user = @intUserId,
 					@version= @version,
 					@intSuccessCount= 0,
