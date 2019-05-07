@@ -417,7 +417,7 @@ SELECT DISTINCT CH.intCommodityUOMId intCommodityUnitMeasureId
 	, FM.strFutMarketName
 	, IM.intOriginId
 	, IM.strLotTracking
-	, case when isnull(ysnMultiplePriceFixation,0)=1 then CH.dblNoOfLots else  CD.dblNoOfLots end dblNoOfLots,
+	, case when isnull(ysnMultiplePriceFixation,0)=1 then CH.dblNoOfLots else  CD.dblNoOfLots end dblNoOfLots
 	, PF.dblLotsFixed
 	, PF.dblPriceWORollArb
 	, CH.dblNoOfLots dblHeaderNoOfLots
@@ -794,8 +794,11 @@ FROM (
 		, CASE WHEN cd.intPricingTypeId = 6 THEN dblCashPrice
 				ELSE NULL END dblCash
 		, dblFuturePrice as dblFuturesClosingPrice1
-		, CASE WHEN cd.intPricingTypeId=2 THEN dblFuturePrice
-				ELSE case when cd.intPricingTypeId in(1,3) then ISNULL(p.dblFutures,0) else dblFuture end END AS dblFutures
+		,CASE WHEN cd.intPricingTypeId=2 and strPricingStatus='Unpriced' THEN 
+					dblFuturePrice
+				ELSE                                                        
+					case when cd.intPricingTypeId in(1,3) then isnull(p.dblFutures,0) else dblFuture end 
+			 END AS dblFutures
 		, (SELECT TOP 1 dblRatio FROM tblRKM2MBasisDetail temp
 			LEFT JOIN tblSMCurrency c on temp.intCurrencyId=c.intCurrencyID
 			WHERE temp.intM2MBasisId=@intM2MBasisId and temp.intCommodityId=@intCommodityId
