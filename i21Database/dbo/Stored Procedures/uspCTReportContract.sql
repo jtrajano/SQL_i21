@@ -54,7 +54,10 @@ BEGIN TRY
 			@intReportLogoWidth			INT,
 			@intFirstHalfNoOfDocuments	INT,
 			@strFirstHalfDocuments		NVARCHAR(MAX),
-			@strSecondHalfDocuments		NVARCHAR(MAX)
+			@strSecondHalfDocuments		NVARCHAR(MAX),
+			@strReportTo				NVARCHAR(MAX),
+			@strOurCommn				NVARCHAR(MAX),
+			@strBrkgCommn				NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -146,7 +149,8 @@ BEGIN TRY
 	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
 	SELECT	@strCommodityCode	=	CM.strCommodityCode,
-			@ysnPrinted			=	CH.ysnPrinted
+			@ysnPrinted			=	CH.ysnPrinted,
+			@strReportTo		=	strReportTo
 	FROM	tblCTContractHeader CH	WITH (NOLOCK)
 	JOIN	tblICCommodity		CM	WITH (NOLOCK) ON	CM.intCommodityId		=	CH.intCommodityId
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
@@ -383,6 +387,34 @@ BEGIN TRY
 										  		FOR XML PATH('')
 										  		), 1, 1, '')
 	END
+	
+	----Commission
+	SELECT  @strOurCommn	= 
+			CASE	WHEN @strReportTo = 'Seller' 
+					THEN	dbo.fnCTChangeNumericScale(dblRate,2) + ' ' + strCurrency + ' / ' + strUOM + ' included, payable by sellers'
+				ELSE	'' 
+			END
+	FROM	vyuCTContractCostView 
+	WHERE	intContractHeaderId = @intContractHeaderId 
+	AND		strParty = 'Vendor'
+
+	SELECT  @strBrkgCommn	=
+			CASE	WHEN strParty = 'Broker' AND @strReportTo = strPaidBy
+						THEN	dbo.fnCTChangeNumericScale(CC.dblRate,2) + ' ' + CC.strCurrency + ' / ' + CC.strUOM + ' included to be paid directly to:' + CHAR(13)+CHAR(10) +
+								LTRIM(RTRIM(EY.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
+								ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+								ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
+								ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
+								ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + CHAR(13)+CHAR(10) +
+								ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',CY.intCountryID,@intLaguageId,'Country',CY.strCountry))) END,'')
+					ELSE	'' 
+			END
+	FROM	vyuCTContractCostView	CC
+	JOIN	vyuCTEntity				EY ON EY.intEntityId = CC.intVendorId AND EY.strEntityType = 'Broker'
+	LEFT	JOIN tblSMCountry		CY ON lower(rtrim(ltrim(CY.strCountry))) = lower(rtrim(ltrim(EY.strEntityCountry)))
+	WHERE	CC.intContractHeaderId = @intContractHeaderId 
+	AND		strParty = 'Broker'
+	--------------------
 
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
@@ -597,6 +629,8 @@ BEGIN TRY
 			,intLaguageId							=	@intLaguageId
 			,intReportLogoHeight					=	ISNULL(@intReportLogoHeight,0)
 			,intReportLogoWidth						=	ISNULL(@intReportLogoWidth,0)
+			,strOurCommn							=	@strOurCommn
+			,strBrkgCommn							=	@strBrkgCommn
 
 	FROM	tblCTContractHeader				CH
 	JOIN	tblICCommodity					CM	WITH (NOLOCK) ON	CM.intCommodityId				=	CH.intCommodityId

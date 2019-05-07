@@ -529,12 +529,22 @@ BEGIN /* Direct Inventory */
 		[intLoadShipmentId]				,
 		[intScaleTicketId]				,
 		[intPurchaseTaxGroupId]			,
-		[dblTax]
+		--[dblTax]						,
+		[intEntityVendorId]				,
+		strVendorOrderNumber			,
+		strReference					,
+		strSourceNumber					,
+		intLocationId					,
+		intSubLocationId				,
+		intStorageLocationId			,
+		intItemLocationId				,
+		ysnSubCurrency					,
+		intCurrencyId
 		)
 		SELECT
-		[intTransactionType]			=	1							,
+		[intTransactionType]			=	1,
 		[intAccountId]					=	dbo.[fnGetItemGLAccount](A.intItemId, loc.intItemLocationId, 'AP Clearing'),
-		[intItemId]						=	C.[intItemId],					
+		[intItemId]						=	A.[intItemId],					
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
 		[intUnitOfMeasureId]			=	CASE WHEN ctd.intItemUOMId > 0 
 												THEN ctd.intItemUOMId
@@ -575,21 +585,32 @@ BEGIN /* Direct Inventory */
 		[intLoadId]						=	lgDetail.intLoadId,
 		[intScaleTicketId]				=	A.[intScaleTicketId],
 		[intPurchaseTaxGroupId]			=	A.intTaxGroupId,
-		[dblTax]						=	B.dblTax
+		--[dblTax]						=	B.dblTax,
+		[intEntityVendorId]				=	SC.intEntityId,
+		[strVendorOrderNumber]			=	'TKT-' + SC.strTicketNumber,
+		strReference					=	'TKT-' + SC.strTicketNumber,
+		strSourceNumber					=	SC.strTicketNumber,
+		intLocationId					=	SC.intProcessingLocationId,
+		intSubLocationId				=	SC.intSubLocationId,
+		intStorageLocationId			=   SC.intStorageLocationId,
+		intItemLocationId				=	C.intItemLocationId,
+		ysnSubCurrency					=	0,
+		intCurrencyId					=	SC.intCurrencyId
 	FROM @voucherDetailDirect A
-	CROSS APPLY tblAPBill B
-	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
+	INNER JOIN tblSCTicket SC ON A.intScaleTicketId = SC.intTicketId
+	INNER JOIN tblAPVendor D ON SC.intEntityId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
 	LEFT JOIN vyuCTContractDetailView ctd ON A.intContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblLGLoadDetail lgDetail ON A.intLoadDetailId = lgDetail.intLoadDetailId
-	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND B.intShipToId = C.intLocationId
-	LEFT JOIN tblICItemLocation loc ON loc.intItemId = A.intItemId AND loc.intLocationId = B.intShipToId
-	LEFT JOIN vyuPATEntityPatron patron ON B.intEntityVendorId = patron.intEntityId
+	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND SC.intProcessingLocationId = C.intLocationId
+	LEFT JOIN tblICItemLocation loc ON loc.intItemId = A.intItemId AND loc.intLocationId = SC.intProcessingLocationId
+	LEFT JOIN vyuPATEntityPatron patron ON SC.intEntityId = patron.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
 END
 
 BEGIN /* RESULT */
-	SELECT [intTransactionType],
+	SELECT	DISTINCT
+			[intTransactionType],
 			[intItemId],
 			[strMiscDescription],
 			[intInventoryReceiptItemId],
@@ -630,6 +651,10 @@ BEGIN /* RESULT */
 			[dblTax],
 			[intEntityVendorId],
 			[strVendorOrderNumber],
-			[intLoadShipmentId]
+			[intLoadShipmentId],
+			[strReference],
+			[strSourceNumber],
+			[intSubLocationId],
+			[intItemLocationId]
 	FROM @VoucherPayable
 END

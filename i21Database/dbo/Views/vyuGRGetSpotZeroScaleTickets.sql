@@ -45,5 +45,7 @@ WHERE ISNULL(SC.dblUnitPrice,0) = 0
 	AND SC.intStorageScheduleTypeId IN(-3,-4)	-- Spot,Split
 	AND SC.strTicketStatus = 'C'
 	AND CASE WHEN (lower(Wght.strWhereFinalized) = 'destination' and lower(Grd.strWhereFinalized) = 'destination') THEN SC.ysnDestinationWeightGradePost ELSE 1 END = 1
-	AND CASE WHEN TicketType.strInOutIndicator='I' THEN ISNULL(IRI.dblUnitCost,0) ELSE ISNULL(ISI.dblUnitPrice,0) END = 0
+	AND CASE WHEN TicketType.strInOutIndicator='I' THEN ISNULL(IRI.ysnAllowVoucher,1) ELSE ISNULL(ISI.ysnAllowInvoice,1) END = 0
+	AND ISNULL(SC.dblUnitBasis,0) = 0
+	AND ISNULL(SC.dblUnitBasis,0) = 0
 	AND SC.intTicketTypeId != 10

@@ -209,7 +209,7 @@ IF @strStatementFormat = 'Balance Forward'
 			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
 			, @intEntityUserId				= @intEntityUserId
 	END
-ELSE IF ISNULL(@strStatementFormat, 'Open Item') IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
+ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
 	BEGIN
 		EXEC dbo.uspARCustomerStatementReport
 		      @dtmDateTo					= @dtmDateTo
@@ -295,7 +295,7 @@ SELECT @strCustomerName
 	 , ISNULL(@ysnPrintCreditBalance, 1)
 	 , ISNULL(@ysnIncludeBudget, 0)
 	 , ISNULL(@ysnPrintOnlyPastDue, 0)
-	 , ISNULL(@strStatementFormat, 'Open Item')
+	 , @strStatementFormat
 	 , @dtmDateFrom
 	 , @dtmDateTo
 	 , @intEntityUserId

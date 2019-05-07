@@ -18,7 +18,7 @@ BEGIN
 	DECLARE @intProducerEntityId INT
 	DECLARE @strInstoreLetterName NVARCHAR(MAX)
 
-	IF (@strReportName = 'ShippingInstruction' or @strReportName = 'ShippingInstruction2')
+	IF (@strReportName IN  ('ShippingInstruction','ShippingInstruction2','ShippingInstruction3','ShippingInstruction4','ShippingInstruction5'))
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 				@intPurchaseSaleId = intPurchaseSale

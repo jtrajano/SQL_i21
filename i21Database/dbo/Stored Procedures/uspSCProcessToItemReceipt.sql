@@ -525,13 +525,50 @@ BEGIN TRY
 
         CLOSE lotCursor;
         DEALLOCATE lotCursor;
-    END
+    END			
 
 	-- VOUCHER INTEGRATION
+
+	SELECT @total = COUNT(1)
+			FROM	tblICInventoryReceiptItem ri
+			WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
+					AND ri.intOwnershipType = 1
+					AND ISNULL(ri.ysnAllowVoucher,1) = 1
+
+	DECLARE @ysnHasBasisContract INT = 0
+		SELECT @ysnHasBasisContract = CASE WHEN COUNT(DISTINCT intPricingTypeId) > 0 THEN 1 ELSE 0 END FROM tblICInventoryReceiptItem IRI
+		INNER JOIN tblCTContractDetail CT
+			ON CT.intContractDetailId = IRI.intContractDetailId
+		WHERE intInventoryReceiptId = @InventoryReceiptId and CT.intPricingTypeId = 2
+		GROUP BY intInventoryReceiptId
+		IF(@ysnHasBasisContract = 1)
+		BEGIN
+				SELECT @intContractDetailId = MIN(ri.intLineNo)
+				FROM tblICInventoryReceipt r 
+				JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+				WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
+			
+				WHILE ISNULL(@intContractDetailId,0) > 0
+				BEGIN
+					IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+					BEGIN
+						EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+					END
+					SELECT @intContractDetailId = MIN(ri.intLineNo)
+					FROM tblICInventoryReceipt r 
+					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+					WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+				END
+		END
+
 	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
 	IF ISNULL(@createVoucher, 0) = 1 OR ISNULL(@postVoucher, 0) = 1
 	BEGIN
-		EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 1, @strErrorMessage = @ErrorMessage OUT, @intBillId = @intBillId OUT
+		--EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 1, @strErrorMessage = @ErrorMessage OUT, @intBillId = @intBillId OUT
+		IF(@InventoryReceiptId IS NOT NULL and @total > 0 and @ysnHasBasisContract = 0)
+		BEGIN
+			EXEC dbo.uspICProcessToBill @intReceiptId = @InventoryReceiptId, @intUserId = @intUserId, @intBillId = @intBillId OUT
+		END
 		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
 		BEGIN
 			SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId

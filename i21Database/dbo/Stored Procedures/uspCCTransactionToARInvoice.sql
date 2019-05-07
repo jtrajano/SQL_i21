@@ -124,6 +124,7 @@ BEGIN
 	INNER JOIN tblICItemAccount ItemAcc ON ItemAcc.intItemId = ccItem.intItemId AND ItemAcc.intAccountCategoryId = @intSalesAccountCategory
 	--LEFT JOIN tblARInvoiceDetail ARInvoiceDetail ON ARInvoiceDetail.intSiteDetailId = ccSiteDetail.intSiteDetailId
     WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId AND ccSite.intSiteId IS NOT NULL and ccSite.intCustomerId is not null
+	AND ccSite.strSiteType != 'Company Owned'
 	--Fixes for CCR-315
 	-- and ccSite.ysnPostNetToArCustomer = 1
 

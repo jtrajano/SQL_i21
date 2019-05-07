@@ -37,8 +37,8 @@ SELECT
 			ELSE 
 				ItemLocation.strLocationName
 		END
-	,dblRunningQuantity = ISNULL(t.dblQuantityInStockUOM, 0)
-	,dblRunningValue = ISNULL(t.dblValue, 0) 
+	,dblRunningQuantity = ISNULL(ROUND(t.dblQuantityInStockUOM, 6), 0)
+	,dblRunningValue = ISNULL(ROUND(t.dblValue, 6), 0) 
 	,dblRunningLastCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblLastCost, 2), 0)
 	,dblRunningStandardCost = ISNULL(ROUND(dblQuantityInStockUOM * ItemPricing.dblStandardCost, 2),0)
 	,dblRunningAverageCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblAverageCost, 2), 0)

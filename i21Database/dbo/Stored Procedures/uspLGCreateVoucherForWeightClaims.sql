@@ -377,8 +377,8 @@ BEGIN TRY
 			,[intSubLocationId] = VDD.intSubLocationId
 			,[intStorageLocationId] = VDD.intStorageLocationId
 		FROM @voucherDetailData VDD
-			INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 			INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
+			LEFT JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 			LEFT JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = VDD.intWeightClaimId
 			LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimDetailId = VDD.intWeightClaimDetailId
 			LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
