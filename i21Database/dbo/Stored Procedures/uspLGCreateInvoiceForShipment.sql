@@ -269,7 +269,7 @@ DECLARE
 		,[intInvoiceId]							= NULL
 		,[intEntityCustomerId]					= @EntityCustomerId 
 		,[intCompanyLocationId]					= @CompanyLocationId 
-		,[intCurrencyId]						= @CurrencyId 
+		,[intCurrencyId]						= ARSI.intCurrencyId 
 		,[intTermId]							= @TermId 
 		,[intPeriodsToAccrue]					= @PeriodsToAccrue 
 		,[dtmDate]								= @Date 
