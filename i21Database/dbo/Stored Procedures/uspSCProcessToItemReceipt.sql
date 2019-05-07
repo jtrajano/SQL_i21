@@ -525,14 +525,20 @@ BEGIN TRY
 
         CLOSE lotCursor;
         DEALLOCATE lotCursor;
-    END
+    END			
 
 	-- VOUCHER INTEGRATION
+
+	SELECT @total = COUNT(1)
+			FROM	tblICInventoryReceiptItem ri
+			WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
+					AND ri.intOwnershipType = 1
+
 	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
 	IF ISNULL(@createVoucher, 0) = 1 OR ISNULL(@postVoucher, 0) = 1
 	BEGIN
 		--EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 1, @strErrorMessage = @ErrorMessage OUT, @intBillId = @intBillId OUT
-		IF(@InventoryReceiptId IS NOT NULL)
+		IF(@InventoryReceiptId IS NOT NULL and @total > 0)
 		BEGIN
 			EXEC dbo.uspICProcessToBill @intReceiptId = @InventoryReceiptId, @intUserId = @intUserId, @intBillId = @intBillId OUT
 		END
