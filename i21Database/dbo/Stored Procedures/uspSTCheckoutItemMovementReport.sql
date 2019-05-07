@@ -28,23 +28,23 @@ SELECT
 	 , ItemPricing.dblSalePrice AS dblCurrentPrice
 	 --, tblIMQty.dblItemCostAvgSum AS dblItemCost
 
-	 , (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) AS dblTotalSales
+	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) AS dblTotalSales
 	 --, (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) AS dblTotalSales
 
 	 -- ADDED
-	 , ((tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) / tblIMQty.intQtySoldSum) AS dblAveragePrice
+	 , ((tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) / tblIMQty.intQtySoldSum) AS dblAveragePrice
 	 , (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblTotalCost
 	 , (tblIMQty.dblItemCostSum / tblIMQty.intQtySoldSum) AS dblAverageCost
 	 , ItemPricing.dblLastCost AS dblCurrentCost
 
 	 -- Formula: Gross Margin $ = Totals Sales - (Qty * Item Movement Item Cost)
-	 , (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblGrossMarginDollar
+	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblGrossMarginDollar
 	 --, (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostAvgSum) AS dblGrossMarginDollar
 
 	 -- Formula: Gross Margin % = Total Sales - (Qty * Item Movement Item Cost) / Total Sales
 	 , CASE 
-		WHEN (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) <> 0
-			THEN ( (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) )   / (tblIMQty.dblGrossSalesSum - tblIMQty.dblDiscountAmountSum) 
+		WHEN (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) <> 0
+			THEN ( (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) )  /  (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) 
 		ELSE 0
 	 END AS dblGrossMarginPercent
 	 --, CASE 
