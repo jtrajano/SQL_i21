@@ -494,7 +494,7 @@ BEGIN
 	
 	SELECT * INTO #tempCollateral
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmOpenDate DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY c.dtmTransactionDate DESC)
 			, c.intCollateralId
 			, cl.strLocationName
 			, ch.intItemId
@@ -517,13 +517,13 @@ BEGIN
 			, ch.strFutMarketName
 			, ch.intFutureMonthId
 			, ch.strFutureMonth
-		FROM tblRKCollateral c
+		FROM tblRKCollateralHistory c
 		JOIN tblICCommodity co ON co.intCommodityId = c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 		JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
 		LEFT JOIN @tblGetOpenContractDetail ch ON c.intContractHeaderId = ch.intContractHeaderId AND ch.intContractStatusId <> 3
 		WHERE c.intCommodityId IN (SELECT intCommodity FROM @Commodity)
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			AND c.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			AND c.ysnIncludeInPriceRiskAndCompanyTitled = 1
 	) a where a.intRowNum = 1

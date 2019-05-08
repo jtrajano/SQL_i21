@@ -388,7 +388,7 @@ BEGIN
 	INSERT INTO @tempCollateral
 	SELECT * 
 	FROM (
-		SELECT ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmOpenDate DESC) intRowNum
+		SELECT ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY c.dtmTransactionDate DESC) intRowNum
 			, c.intCollateralId
 			, cl.strLocationName
 			, ch.strItemNo
@@ -404,13 +404,13 @@ BEGIN
 			, c.intLocationId intCompanyLocationId
 			, case when c.strType='Purchase' then 1 else 2 end	intContractTypeId
 			, c.intLocationId,intEntityId,co.strCommodityCode
-		FROM tblRKCollateral c
+		FROM tblRKCollateralHistory c
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 		LEFT JOIN @tblGetOpenContractDetail ch on c.intContractHeaderId=ch.intContractHeaderId AND ch.intContractStatusId <> 3
 		WHERE c.intCommodityId in (select intCommodity from @Commodity)
-			AND convert(DATETIME, CONVERT(VARCHAR(10), dtmOpenDate, 110), 110) <= convert(datetime,@dtmToDate) 
+			AND convert(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
 			AND  c.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)	
 			AND c.ysnIncludeInPriceRiskAndCompanyTitled = 1				
 	) a WHERE a.intRowNum =1
