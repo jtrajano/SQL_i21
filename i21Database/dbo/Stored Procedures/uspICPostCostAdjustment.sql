@@ -478,7 +478,7 @@ BEGIN
 	END CATCH
 
 	-- Lot Costing
-	IF (@CostingMethod = @LOTCOST) AND (@intLotId IS NOT NULL)
+	IF (@CostingMethod = @LOTCOST) --AND (@intLotId IS NOT NULL)
 	BEGIN TRY
 		EXEC @ReturnValue = dbo.uspICPostCostAdjustmentRetroactiveLot 
 			@dtmDate 
