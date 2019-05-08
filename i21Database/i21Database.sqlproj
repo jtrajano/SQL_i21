@@ -7558,6 +7558,7 @@
     <Build Include="dbo\Tables\tblICInventoryStockMovementReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICGenerateStockMovementReport.sql" />
     <Build Include="dbo\Views\vyuICGenerateStockMovement.sql" />
+    <Build Include="dbo\Views\vyuSTLocationItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
