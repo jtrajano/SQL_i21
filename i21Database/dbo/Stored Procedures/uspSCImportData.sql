@@ -5,7 +5,9 @@
 	@xmlParamDS  NVARCHAR(MAX) = NULL,
 	@xmlParamDSS  NVARCHAR(MAX) = NULL,
 	@ysnDeliverySheet BIT,
-	@ysnUpdateData BIT = 0
+	@ysnUpdateData BIT = 0,
+	@intRemoteLocationId INT = NULL,
+	@xmlParamDSXref NVARCHAR(MAX) = NULL 
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -13,6 +15,10 @@ BEGIN TRY
 			@Columns NVARCHAR(MAX),
 			@InsertColumns NVARCHAR(MAX),
 			@ValueColumns NVARCHAR(MAX);
+	
+	DECLARE @ysnRemote BIT = 0
+
+	SELECT TOP 1 @ysnRemote = ISNULL(ysnIsRemote,0) FROM tblGRCompanyPreference
 
 	IF LTRIM(RTRIM(@xmlParam1)) = ''
 		SET @xmlParam1 = NULL
@@ -24,6 +30,33 @@ BEGIN TRY
 		SET @xmlParamDS = NULL
 	IF LTRIM(RTRIM(@xmlParamDS)) = ''
 		SET @xmlParamDSS = NULL
+	IF  LTRIM(RTRIM(@xmlParamDSXref)) = ''
+		SET @xmlParamDSXref = NULL
+	
+	----------------------------------------------------------------------------------------
+	--DELIVERY SHEET X Reference
+	----------------------------------------------------------------------------------------
+
+	DECLARE @deliverysheet_xref TABLE 
+	(
+		[intMainId] INT NULL,
+		[intRemoteId] INT NULL, 
+		[intLocationId] INT NOT NULL 
+	)
+	EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParamDSXref
+
+	INSERT INTO @deliverysheet_xref
+	SELECT *
+	FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblSCRemoteXrefDeliverySheet', 2) WITH 
+	(
+		[intMainId] INT,
+		[intRemoteId] INT, 
+		[intRemoteLocationId] INT 
+	)
+
+	----------------------------------------------------------------------------------------
+	----------------------------------------------------------------------------------------
+
 
 		IF @ysnDeliverySheet = 0
 		BEGIN
@@ -540,6 +573,34 @@ BEGIN TRY
 				LEFT JOIN tblSCDeliverySheet DSDestination ON DSDestination.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				WHERE DSDestination.strDeliverySheetNumber IS NULL
 
+				----------------------------------------------------------------------------------------------------------------------
+				---   Construct the cross reference for the delivery sheet
+				----------------------------------------------------------------------------------------------------------------------
+
+				IF(@ysnRemote = 0)
+				BEGIN
+					INSERT INTO tblSCRemoteXrefDeliverySheet (
+						intMainId
+						,intRemoteId
+						,intRemoteLocationId
+					)
+					SELECT
+						intMainId					= MDS.intDeliverySheetId
+						,intRemoteId				= RDS.intDeliverySheetId
+						,intRemoteLocationId		= @intRemoteLocationId
+					FROM @temp_xml_deliverysheet_sc RDS
+					INNER JOIN tblSCDeliverySheet MDS 
+						ON MDS.strDeliverySheetNumber = RDS.strDeliverySheetNumber
+					LEFT JOIN tblSCRemoteXrefDeliverySheet XREF
+						ON XREF.intRemoteId = RDS.intDeliverySheetId
+							AND XREF.intMainId = MDS.intDeliverySheetId
+							AND XREF.intRemoteLocationId = @intRemoteLocationId
+					WHERE XREF.intRemoteXrefDeliverySheetId IS NULL
+				END
+				----------------------------------------------------------------------------------------------------------------------
+				----------------------------------------------------------------------------------------------------------------------
+
+
 				INSERT INTO tblQMTicketDiscount
 				(
 					[dblGradeReading]
@@ -964,6 +1025,8 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				SELECT 'UPDATE TICKET'
+
 				UPDATE SC SET
 					SC.strTicketStatus							= SCT.strTicketStatus 
 					,SC.strTicketNumber							= SCT.strTicketNumber 
@@ -1077,7 +1140,7 @@ BEGIN TRY
 					,SC.strCostMethod  							= SCT.strCostMethod
 					,SC.intGradeId  							= SCT.intGradeId
 					,SC.intWeightId  							= SCT.intWeightId
-					,SC.intDeliverySheetId  					= SCT.intDeliverySheetId
+					,SC.intDeliverySheetId  					= DSXREF.intRemoteId
 					,SC.intCommodityAttributeId  				= SCT.intCommodityAttributeId
 					,SC.strElevatorReceiptNumber  				= SCT.strElevatorReceiptNumber
 					,SC.ysnRailCar  							= SCT.ysnRailCar
@@ -1090,12 +1153,16 @@ BEGIN TRY
 					,SC.ysnReadyToTransfer  					= SCT.ysnReadyToTransfer
 					,SC.ysnExport  								= SCT.ysnExport 
 				FROM tblSCTicket SC
-				INNER JOIN @temp_xml_table SCT ON SC.strTicketNumber = SCT.strTicketNumber 
-				AND SC.intTicketPoolId = SCT.intTicketPoolId
-				AND SC.intTicketType = SCT.intTicketType
-				AND SC.strInOutFlag = SCT.strInOutFlag
-				AND SC.intEntityId = SCT.intEntityId
-				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
+				INNER JOIN @temp_xml_table SCT 
+					ON SC.strTicketNumber = SCT.strTicketNumber 
+						AND SC.intTicketPoolId = SCT.intTicketPoolId
+						AND SC.intTicketType = SCT.intTicketType
+						AND SC.strInOutFlag = SCT.strInOutFlag
+						AND SC.intEntityId = SCT.intEntityId
+						AND SC.intProcessingLocationId = SCT.intProcessingLocationId
+				LEFT JOIN @deliverysheet_xref DSXREF
+					ON SCT.intDeliverySheetId = DSXREF.intMainId
+						AND DSXREF.intLocationId = @intRemoteLocationId
 				
 				UPDATE QM SET 
 					QM.dblGradeReading					= QMT.dblGradeReading
@@ -1196,6 +1263,9 @@ BEGIN TRY
 				[ysnExport] BIT,
 				[strCountyProducer] NVARCHAR(MAX)
 			)
+
+		
+
 
 			--DELIVERY SHEET DISCOUNT
 			DECLARE @temp_xml_qmdstable TABLE 
@@ -1315,6 +1385,34 @@ BEGIN TRY
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
 				FROM @temp_xml_deliverysheet SCD ORDER BY strDeliverySheetNumber ASC
+
+
+				----------------------------------------------------------------------------------------------------------------------
+				---  Construct the cross reference for the delivery sheet
+				----------------------------------------------------------------------------------------------------------------------
+				IF(@ysnRemote = 0)
+				BEGIN
+					INSERT INTO tblSCRemoteXrefDeliverySheet (
+						intMainId
+						,intRemoteId
+						,intRemoteLocationId
+					)
+					SELECT
+						intMainId					= MDS.intDeliverySheetId
+						,intRemoteId				= RDS.intDeliverySheetId
+						,intRemoteLocationId		= @intRemoteLocationId
+					FROM @temp_xml_deliverysheet RDS
+					INNER JOIN tblSCDeliverySheet MDS 
+						ON MDS.strDeliverySheetNumber = RDS.strDeliverySheetNumber
+					LEFT JOIN tblSCRemoteXrefDeliverySheet XREF
+						ON XREF.intRemoteId = RDS.intDeliverySheetId
+							AND XREF.intMainId = MDS.intDeliverySheetId
+							AND XREF.intRemoteLocationId = @intRemoteLocationId
+					WHERE XREF.intRemoteXrefDeliverySheetId IS NULL
+				END
+				----------------------------------------------------------------------------------------------------------------------
+				----------------------------------------------------------------------------------------------------------------------
+
 
 				INSERT INTO tblQMTicketDiscount
 				(
@@ -1491,6 +1589,32 @@ BEGIN TRY
 				FROM @temp_xml_deliverysheet  SCD
 				LEFT JOIN tblSCDeliverySheet DSDestination ON DSDestination.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				WHERE DSDestination.strDeliverySheetNumber IS NULL
+
+				----------------------------------------------------------------------------------------------------------------------
+				---  Construct the cross reference for the delivery sheet
+				----------------------------------------------------------------------------------------------------------------------
+				IF(@ysnRemote = 0)
+				BEGIN
+					INSERT INTO tblSCRemoteXrefDeliverySheet (
+						intMainId
+						,intRemoteId
+						,intRemoteLocationId
+					)
+					SELECT
+						intMainId					= MDS.intDeliverySheetId
+						,intRemoteId				= RDS.intDeliverySheetId
+						,intRemoteLocationId		= @intRemoteLocationId
+					FROM @temp_xml_deliverysheet RDS
+					INNER JOIN tblSCDeliverySheet MDS 
+						ON MDS.strDeliverySheetNumber = RDS.strDeliverySheetNumber
+					LEFT JOIN tblSCRemoteXrefDeliverySheet XREF
+						ON XREF.intRemoteId = RDS.intDeliverySheetId
+							AND XREF.intMainId = MDS.intDeliverySheetId
+							AND XREF.intRemoteLocationId = @intRemoteLocationId
+					WHERE XREF.intRemoteXrefDeliverySheetId IS NULL
+				END
+				----------------------------------------------------------------------------------------------------------------------
+				----------------------------------------------------------------------------------------------------------------------
 
 				INSERT INTO tblQMTicketDiscount
 				(

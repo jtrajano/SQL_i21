@@ -7316,6 +7316,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
     <Build Include="dbo\Functions\fnPRRounding.sql" />
+    <Build Include="dbo\Tables\tblSCRemoteXrefDeliverySheet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
