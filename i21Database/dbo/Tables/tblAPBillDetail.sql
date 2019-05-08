@@ -23,6 +23,7 @@
 	[intSubLocationId] INT             NULL,
 	[intLocationId] INT             NULL,
 	[intLoadDetailId]    INT             NULL,
+	[intLoadShipmentCostId]    INT             NULL,
 	[intLoadId]    INT             NULL,
 	[intScaleTicketId]    INT             NULL,
 	[intCCSiteDetailId]    INT             NULL,

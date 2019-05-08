@@ -27,6 +27,7 @@
 	[intInventoryShipmentChargeId]	INT NULL,
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
+	[intLoadShipmentCostId]			INT NULL,
 	[intItemId]						INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
