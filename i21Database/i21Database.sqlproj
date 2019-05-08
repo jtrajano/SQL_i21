@@ -7539,6 +7539,9 @@
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
     <Build Include="dbo\Views\vyuHDTimeEntryDailySummary.sql" />
     <Build Include="dbo\Functions\fnPRRounding.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStockMovementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGenerateStockMovementReport.sql" />
+    <Build Include="dbo\Views\vyuICGenerateStockMovement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

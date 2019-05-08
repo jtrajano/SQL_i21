@@ -14,7 +14,7 @@ AS
 SELECT TOP 1 @strHeaderComment =  strDefaultComment,
 		@intDocumentUsedId = intDocumentMaintenanceId
 	FROM 
-		[dbo].[fnARGetDefaultCommentTable](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, 'Header', @DocumentMaintenanceId, 0)
+		[dbo].[fnARGetDefaultCommentTable](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, 'Header', @DocumentMaintenanceId, 1)
 
 IF @intDocumentUsedId IS NOT NULL
 BEGIN
@@ -23,4 +23,4 @@ BEGIN
 		WHERE intDocumentMaintenanceId = @intDocumentUsedId
 END
 
-SET @strFooterComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, 'Footer', @DocumentMaintenanceId, 0)
+SET @strFooterComment = [dbo].[fnARGetDefaultComment](@intCompanyLocationId, @intEntityCustomerId, @strTransactionType, @strType, 'Footer', @DocumentMaintenanceId, 1)
