@@ -17,9 +17,9 @@ SELECT
 	  Item.intItemId
 	, Item.strItemNo
 	, Item.strType
-	, UOM.strUnitMeasure
+	, CASE WHEN @intLotId IS NOT NULL THEN LotUOM.strUnitMeasure ELSE UOM.strUnitMeasure END strUnitMeasure
 	, Lot.strLotNumber
-	, dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, Transactions.dblOnHand))
+	, dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, CASE WHEN @intLotId IS NOT NULL THEN Lot.intItemUOMId ELSE StockUOM.intItemUOMId END, Transactions.dblOnHand))
 FROM tblICItem Item
 	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 	INNER JOIN (
@@ -39,6 +39,7 @@ FROM tblICItem Item
 		AND StockUOM.ysnStockUnit = 1
 	INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
 	LEFT OUTER JOIN tblICLot Lot ON Lot.intLotId = @intLotId
+	LEFT OUTER JOIN tblICUnitMeasure LotUOM ON LotUOM.intUnitMeasureId = Lot.intItemUOMId
 WHERE 
 	(Item.intItemId BETWEEN ISNULL(@intItemId, 1) AND ISNULL(@intItemId, 2147483647))
 	AND dbo.fnDateLessThanEquals(Transactions.dtmDate, @dtmAsOfDate) = 1
@@ -49,5 +50,5 @@ WHERE
 	AND (Item.intCommodityId = @intCommodityId OR @intCommodityId IS NULL)
 	AND Item.strType IN ('Inventory', 'Raw Material', 'Finished Good')
 	AND (Item.strStatus = 'Active' AND @ysnActiveOnly = 1 OR NULLIF(@ysnActiveOnly, 0) IS NULL)
-GROUP BY Item.intItemId, Item.strItemNo, Item.strType, UOM.strUnitMeasure, Lot.strLotNumber
+GROUP BY Item.intItemId, Item.strItemNo, Item.strType, UOM.strUnitMeasure, Lot.strLotNumber, LotUOM.strUnitMeasure
 ORDER BY Item.strItemNo
