@@ -71,6 +71,7 @@ WHERE AR.intEntityId = @intEntityId
 
 SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 
+
 IF ISNULL(@intShipToId, 0) = 0
 BEGIN
 	RAISERROR('Customer is missing The "Ship To" information, To correct, click on customer link and fill up "Ship To" on the Customer tab', 11, 1);
@@ -340,8 +341,6 @@ BEGIN
 	RETURN;
 END
 
-IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
-BEGIN
 	-- INSERT OTHER CHARGES 
 	BEGIN 
 		SELECT @intFreightItemId = SCSetup.intFreightItemId
@@ -1439,7 +1438,7 @@ BEGIN
 			INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 			INNER JOIN tblICItem IC ON IC.intItemId = SE.intItemId
 	END
-END
+
 EXEC dbo.uspICAddItemShipment
 		@Items = @ShipmentStagingTable
 		,@Charges = @ShipmentChargeStagingTable
