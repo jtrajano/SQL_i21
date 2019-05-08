@@ -1,216 +1,125 @@
 CREATE VIEW [dbo].[vyuICItemUOMDetail]
 AS
-	SELECT
-		intKey = CAST(ROW_NUMBER() OVER(ORDER BY x.intItemUOMId, x.intItemId, x.intItemLocationId, x.intSubLocationId, x.intStorageLocationId) AS INT)
-	, x.intItemId
-	, Item.strItemNo
-	, Item.strType
-	, Item.strDescription
-	, Item.strLotTracking
-	, Item.strInventoryTracking
-	, Item.strStatus
-	, intLocationId = CompanyLocation.intCompanyLocationId
-	, x.intItemLocationId
-	, x.intSubLocationId
-	, Item.intCategoryId
-	, Category.strCategoryCode
-	, Item.intCommodityId
-	, Commodity.strCommodityCode
-	, StorageLocation.strName AS strStorageLocationName
-	, SubLocation.strSubLocationName AS strSubLocationName
-	, x.intStorageLocationId
-	, CompanyLocation.strLocationName strLocationName
-	, CompanyLocation.strLocationType strLocationType
-	, intStockUOMId = x.intItemUOMId
-	, strStockUOM = x.strUnitMeasure
-	, strStockUOMType = x.strUnitType
-	, x.strUpcCode
-	, x.strLongUPCCode
-	, dblStockUnitQty = x.dblUnitQty
-	, ItemLocation.intAllowNegativeInventory
-	, strAllowNegativeInventory = (CASE WHEN ItemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
-							 WHEN ItemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
-							 WHEN ItemLocation.intAllowNegativeInventory = 3 THEN 'No' END) COLLATE Latin1_General_CI_AS
-	, ItemLocation.intCostingMethod
-	, strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
-							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
-							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END) COLLATE Latin1_General_CI_AS
-	, dblAmountPercent = ISNULL((ItemPricing.dblAmountPercent), 0.00)
-	, dblSalePrice = ISNULL((ItemPricing.dblSalePrice), 0.00)
-	, dblMSRPPrice = ISNULL((ItemPricing.dblMSRPPrice), 0.00)
-	, ItemPricing.strPricingMethod
-	, dblLastCost = ISNULL((ItemPricing.dblLastCost), 0.00)
-	, dblStandardCost = ISNULL((ItemPricing.dblStandardCost), 0.00)
-	, dblAverageCost = ISNULL((ItemPricing.dblAverageCost), 0.00)
-	, dblEndMonthCost = ISNULL((ItemPricing.dblEndMonthCost), 0.00)
+SELECT 
+	intKey = CAST(ROW_NUMBER() OVER(ORDER BY stockUOM.intItemStockUOMId) AS INT)
+	, item.intItemId
+	, item.strItemNo
+	, item.strType
+	, item.strDescription
+	, item.strLotTracking
+	, item.strInventoryTracking
+	, item.strStatus
+	, intLocationId = companyLocation.intCompanyLocationId
+	, stockUOM.intItemLocationId
+	, stockUOM.intSubLocationId
+	, item.intCategoryId
+	, category.strCategoryCode
+	, item.intCommodityId
+	, commodity.strCommodityCode
+	, strStorageLocationName = storageLocation.strName 
+	, strSubLocationName = subLocation.strSubLocationName 
+	, stockUOM.intStorageLocationId
+	, strLocationName = companyLocation.strLocationName 
+	, strLocationType = companyLocation.strLocationType 
+	, intStockUOMId = stockUOM.intItemUOMId
+	, strStockUOM = unitmeasure.strUnitMeasure
+	, strStockUOMType = unitmeasure.strUnitType
+	, itemUOM.strUpcCode
+	, itemUOM.strLongUPCCode
+	, dblStockUnitQty = itemUOM.dblUnitQty
+	, itemLocation.intAllowNegativeInventory
+	, strAllowNegativeInventory = (
+			CASE 
+				WHEN itemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
+				WHEN itemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
+				WHEN itemLocation.intAllowNegativeInventory = 3 THEN 'No' 
+			END
+		) COLLATE Latin1_General_CI_AS
+	, itemLocation.intCostingMethod
+	, strCostingMethod = (
+			CASE 
+				WHEN itemLocation.intCostingMethod = 1 THEN 'AVG'
+				WHEN itemLocation.intCostingMethod = 2 THEN 'FIFO'
+				WHEN itemLocation.intCostingMethod = 3 THEN 'LIFO' 
+			END
+		) COLLATE Latin1_General_CI_AS
+	, dblAmountPercent = ISNULL((itemPricing.dblAmountPercent), 0.00)
+	, dblSalePrice = ISNULL((itemPricing.dblSalePrice), 0.00)
+	, dblMSRPPrice = ISNULL((itemPricing.dblMSRPPrice), 0.00)
+	, itemPricing.strPricingMethod
+	, dblLastCost = ISNULL((itemPricing.dblLastCost), 0.00)
+	, dblStandardCost = ISNULL((itemPricing.dblStandardCost), 0.00)
+	, dblAverageCost = ISNULL((itemPricing.dblAverageCost), 0.00)
+	, dblEndMonthCost = ISNULL((itemPricing.dblEndMonthCost), 0.00)
 
-	, dblOnOrder = SUM(x.dblOnOrder) 
-	, dblInTransitInbound = SUM(x.dblInTransitInbound)
-	, dblUnitOnHand = SUM(x.dblOnHand)
-	, dblInTransitOutbound = SUM(x.dblInTransitOutbound)
-	, dblBackOrder =	SUM(x.dblOnHand)
-	, dblOrderCommitted = SUM(x.dblOrderCommitted)
-	, dblUnitStorage = SUM(x.dblUnitStorage)
-	, dblConsignedPurchase = SUM(x.dblConsignedPurchase)
-	, dblConsignedSale = SUM(x.dblConsignedSale)
-	, dblUnitReserved = SUM(x.dblUnitReserved)
-	, dblAvailable = SUM(x.dblOnHand) - (SUM(x.dblUnitReserved) + SUM(x.dblConsignedSale))
-	, dblExtended = (SUM(x.dblOnHand) + SUM(x.dblUnitStorage) + SUM(x.dblConsignedPurchase)) * (ItemPricing.dblAverageCost)
-	, dblMinOrder = (ItemLocation.dblMinOrder)
-	, dblReorderPoint = (ItemLocation.dblReorderPoint)
-	, dblNearingReorderBy = CAST(SUM(x.dblOnHand) - (ItemLocation.dblReorderPoint) AS NUMERIC(38, 7))
-	, x.ysnStockUnit
-	FROM (
-		SELECT
-			intSubLocationId = ISNULL(StockUOM.intSubLocationId,  CASE WHEN StockUnit.intItemUOMId = ItemUOM.intItemUOMId THEN StockUnit.intSubLocationId ELSE NULL END) 
-			,intStorageLocationId = ISNULL(StockUOM.intStorageLocationId, CASE WHEN StockUnit.intItemUOMId = ItemUOM.intItemUOMId THEN StockUnit.intStorageLocationId ELSE NULL END) 
-			,UnitMeasure.strUnitMeasure
-			,UnitMeasure.strUnitType
-			,ItemUOM.strUpcCode
-			,ItemUOM.dblUnitQty
-			,ItemUOM.strLongUPCCode
-			,ItemUOM.ysnStockUnit
-			,ItemUOM.intItemId
-			,ItemUOM.intItemUOMId
-			,dblOnOrder = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblOnOrder 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId,StockUnit.intItemUOMId, StockUOM.dblOnOrder)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-				ELSE 
-					StockUOM.dblOnOrder
-				END 
-			,dblConsignedPurchase = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblConsignedPurchase 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, StockUnit.intItemUOMId, StockUOM.dblConsignedPurchase)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-					ELSE 
-						StockUOM.dblConsignedPurchase
-				END
-			,dblConsignedSale = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblConsignedSale 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, StockUnit.intItemUOMId, StockUOM.dblConsignedSale)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-					ELSE 
-						StockUOM.dblConsignedSale
-				END 
-			,dblInTransitInbound = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblInTransitInbound 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, StockUnit.intItemUOMId, StockUOM.dblInTransitInbound)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-					ELSE 
-						StockUOM.dblInTransitInbound
-				END
-			,dblInTransitOutbound = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblInTransitOutbound 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, StockUnit.intItemUOMId, StockUOM.dblInTransitOutbound)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-					ELSE 
-						StockUOM.dblInTransitOutbound
-				END
-			,dblOrderCommitted = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblOrderCommitted 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, StockUnit.intItemUOMId, StockUOM.dblOrderCommitted)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-					ELSE 
-						StockUOM.dblOrderCommitted
-				END 
-			,dblUnitReserved = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblUnitReserved 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, StockUnit.intItemUOMId, StockUOM.dblUnitReserved)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-		            ELSE 
-						StockUOM.dblUnitReserved
-				END
-			,dblUnitStorage = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblUnitStorage 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, StockUnit.intItemUOMId, StockUOM.dblUnitStorage)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-					ELSE 
-						StockUOM.dblUnitStorage
-				END
-			,dblOnHand = 
-				CASE 
-					WHEN ItemUOM.ysnStockUnit = 1 THEN 
-						ROUND(
-							StockUnit.dblOnHand 
-							/*- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(StockUOM.intItemUOMId, StockUnit.intItemUOMId, StockUOM.dblOnHand)) OVER (PARTITION BY StockUnit.intItemLocationId), 0)*/
-						, 2)
-					ELSE 
-						StockUOM.dblOnHand 
-				END
-			,ItemLocation.intItemLocationId
+	, dblOnOrder = ISNULL(stockUOM.dblOnOrder, 0)
+	, dblInTransitInbound = ISNULL(stockUOM.dblInTransitInbound, 0)
+	, dblUnitOnHand = ISNULL(stockUOM.dblOnHand, 0)
+	, dblInTransitOutbound = ISNULL(stockUOM.dblInTransitOutbound, 0)
+	, dblBackOrder = ISNULL(stockUOM.dblOnHand, 0)
+	, dblOrderCommitted = ISNULL(stockUOM.dblOrderCommitted, 0)
+	, dblUnitStorage = ISNULL(stockUOM.dblUnitStorage, 0)
+	, dblConsignedPurchase = ISNULL(stockUOM.dblConsignedPurchase, 0)
+	, dblConsignedSale = ISNULL(stockUOM.dblConsignedSale, 0)
+	, dblUnitReserved = ISNULL(stockUOM.dblUnitReserved, 0)
+	, dblAvailable = ISNULL(stockUOM.dblOnHand, 0) - (ISNULL(stockUOM.dblUnitReserved, 0) + ISNULL(stockUOM.dblConsignedSale, 0))
+	, dblExtended = (ISNULL(stockUOM.dblOnHand, 0) + ISNULL(stockUOM.dblUnitStorage, 0) + ISNULL(stockUOM.dblConsignedPurchase, 0)) * ISNULL(itemPricing.dblAverageCost, 0)
+	, dblMinOrder = ISNULL(itemLocation.dblMinOrder, 0)
+	, dblReorderPoint = ISNULL(itemLocation.dblReorderPoint, 0)
+	, dblNearingReorderBy = CAST(ISNULL(stockUOM.dblOnHand, 0) - ISNULL(itemLocation.dblReorderPoint, 0) AS NUMERIC(38, 7))
+	, itemUOM.ysnStockUnit
+FROM
+	tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitmeasure
+		ON itemUOM.intUnitMeasureId = unitmeasure.intUnitMeasureId
+	INNER JOIN tblICItem item
+		ON itemUOM.intItemId = item.intItemId
+	INNER JOIN (
+		tblICItemLocation itemLocation INNER JOIN tblSMCompanyLocation companyLocation
+			ON companyLocation.intCompanyLocationId = itemLocation.intLocationId
+	)
+		ON itemLocation.intItemId = item.intItemId
+	INNER JOIN tblICItemPricing itemPricing
+		ON itemPricing.intItemId = item.intItemId
+		AND itemPricing.intItemLocationId = itemLocation.intItemLocationId	
+
+	OUTER APPLY (
+		SELECT 
+			stockUOM.intItemStockUOMId
+			,stockUOM.intItemId
+			,stockUOM.intItemLocationId
+			,stockUOM.intItemUOMId
+			,stockUOM.intStorageLocationId
+			,stockUOM.intSubLocationId
+			,dblOnHand = SUM(stockUOM.dblOnHand) 
+			,dblInTransitInbound = SUM(stockUOM.dblInTransitInbound) 
+			,dblInTransitOutbound = SUM(stockUOM.dblInTransitOutbound) 
+			,dblConsignedPurchase = SUM(stockUOM.dblConsignedPurchase) 
+			,dblConsignedSale = SUM(stockUOM.dblConsignedSale) 
+			,dblOrderCommitted = SUM(stockUOM.dblOrderCommitted) 
+			,dblUnitReserved = SUM(stockUOM.dblUnitReserved) 
+			,dblOnOrder = SUM(stockUOM.dblOnOrder) 
+			,dblUnitStorage = SUM(stockUOM.dblUnitStorage) 
 		FROM 
-			tblICItemUOM ItemUOM INNER JOIN tblICItemLocation ItemLocation 
-				ON ItemLocation.intItemId = ItemUOM.intItemId
-			INNER JOIN tblICUnitMeasure UnitMeasure 
-				ON UnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
-			LEFT OUTER JOIN tblICItemStockUOM StockUOM 
-				ON StockUOM.intItemId = ItemUOM.intItemId
-				AND StockUOM.intItemUOMId = ItemUOM.intItemUOMId
-				AND StockUOM.intItemLocationId = ItemLocation.intItemLocationId
-				AND ItemUOM.ysnStockUnit <> 1
-			LEFT JOIN (
-				SELECT
-					ItemUOM.intItemId,
-					ItemLocation.intItemLocationId,
-					ItemUOM.intItemUOMId,
-					SUM(StockUOM.dblOnHand) dblOnHand,
-					SUM(StockUOM.dblInTransitInbound) dblInTransitInbound,
-					SUM(StockUOM.dblInTransitOutbound) dblInTransitOutbound,
-					SUM(StockUOM.dblConsignedPurchase) dblConsignedPurchase,
-					SUM(StockUOM.dblConsignedSale) dblConsignedSale,
-					SUM(StockUOM.dblOrderCommitted) dblOrderCommitted,
-					SUM(StockUOM.dblUnitReserved) dblUnitReserved,
-					SUM(StockUOM.dblOnOrder) dblOnOrder,
-					SUM(StockUOM.dblUnitStorage) dblUnitStorage,
-					StockUOM.intStorageLocationId,
-					StockUOM.intSubLocationId
-				FROM tblICItemUOM ItemUOM
-					INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = ItemUOM.intItemId
-					INNER JOIN tblICUnitMeasure UnitMeasure ON UnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
-					INNER JOIN tblICItemStockUOM StockUOM ON StockUOM.intItemUOMId = ItemUOM.intItemUOMId
-						AND StockUOM.intItemId = ItemUOM.intItemId
-						AND StockUOM.intItemLocationId = ItemLocation.intItemLocationId
-				WHERE ItemUOM.ysnStockUnit = 1
-				GROUP BY ItemUOM.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId, StockUOM.intStorageLocationId, StockUOM.intSubLocationId
-			) StockUnit ON StockUnit.intItemId = ItemUOM.intItemId
-				AND StockUnit.intItemLocationId = ItemLocation.intItemLocationId
-	) x
-		INNER JOIN tblICItem Item ON Item.intItemId = x.intItemId
-		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = x.intItemLocationId
-		LEFT OUTER JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
-		LEFT OUTER JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
-		LEFT OUTER JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = x.intStorageLocationId
-		LEFT OUTER JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = x.intSubLocationId
-		INNER JOIN tblSMCompanyLocation CompanyLocation ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
-		INNER JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId
-			AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-	GROUP BY x.strUnitMeasure, x.strUnitType, x.ysnStockUnit, x.intItemUOMId, x.intItemId, x.intItemLocationId, x.strLongUPCCode, x.strUpcCode, x.intStorageLocationId, x.intSubLocationId, x.dblUnitQty,
-	Item.strItemNo, Item.strType, Item.strDescription, Item.strLotTracking, Item.strInventoryTracking, Item.strStatus, CompanyLocation.intCompanyLocationId, Item.intCategoryId,
-	Category.strCategoryCode, Item.intCommodityId, Commodity.strCommodityCode, StorageLocation.strName, SubLocation.strSubLocationName, CompanyLocation.strLocationName, CompanyLocation.strLocationType,
-	ItemLocation.intAllowNegativeInventory, ItemLocation.intCostingMethod, ItemPricing.strPricingMethod, ItemPricing.dblAmountPercent, ItemPricing.dblSalePrice, ItemPricing.dblMSRPPrice,
-	ItemPricing.dblLastCost, ItemPricing.dblAverageCost, ItemPricing.dblStandardCost, ItemPricing.dblEndMonthCost, ItemLocation.dblMinOrder, ItemLocation.dblReorderPoint
+			tblICItemStockUOM stockUOM
+		WHERE
+			stockUOM.intItemId = item.intItemId
+			AND stockUOM.intItemUOMId = itemUOM.intItemUOMId
+			AND stockUOM.intItemLocationId = itemLocation.intItemLocationId	
+		GROUP BY 
+			stockUOM.intItemStockUOMId
+			,stockUOM.intItemId
+			,stockUOM.intItemLocationId
+			,stockUOM.intItemUOMId
+			,stockUOM.intStorageLocationId
+			,stockUOM.intSubLocationId
+	) stockUOM
+
+	LEFT JOIN tblICCategory category
+		ON category.intCategoryId = item.intCategoryId
+	LEFT JOIN tblICCommodity commodity 
+		ON commodity.intCommodityId = item.intCommodityId	
+	LEFT JOIN tblICStorageLocation storageLocation 
+		ON storageLocation.intStorageLocationId = stockUOM.intStorageLocationId	
+	LEFT JOIN tblSMCompanyLocationSubLocation subLocation 
+		ON subLocation.intCompanyLocationSubLocationId = stockUOM.intSubLocationId
+

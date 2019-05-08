@@ -103,7 +103,6 @@ BEGIN TRY
 	--This is to make sure we are regenerating the data real time
 	DELETE FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate
 
-
 	INSERT INTO @Shipment
 	  (
 	    intContractTypeId
@@ -246,7 +245,7 @@ BEGIN TRY
 	  ,CD.intContractDetailId
 	  ,InvTran.dtmDate
 	  ,@dtmEndDate  AS dtmEndDate
-	  ,SUM(ReceiptItem.dblOpenReceive) dblQuantity
+	  ,MAX(ReceiptItem.dblOpenReceive) dblQuantity
 	  ,0
 	  ,COUNT(DISTINCT Receipt.intInventoryReceiptId)
 	  ,Receipt.intInventoryReceiptId
@@ -299,6 +298,34 @@ BEGIN TRY
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 		GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 			,CD.intContractDetailId,SS.dtmCreated,SS.intSettleStorageId
+
+	INSERT INTO @Shipment
+	  (
+	    intContractTypeId
+	   ,intContractHeaderId	
+	   ,intContractDetailId	
+	   ,dtmDate
+	   ,dtmEndDate			
+	   ,dblQuantity
+	   ,dblAllocatedQuantity
+	   ,intNoOfLoad
+	   ,intSourceId			
+	  )
+	SELECT
+		CH.intContractTypeId 
+		,CH.intContractHeaderId
+		,CD.intContractDetailId
+		,IB.dtmImported
+		,@dtmEndDate  AS dtmEndDate
+		,SUM(IB.dblReceivedQty) dblQuantity
+		,0
+		,COUNT(DISTINCT IB.intImportBalanceId)
+		,IB.intImportBalanceId
+	FROM tblCTImportBalance IB
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = IB.intContractHeaderId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = IB.intContractDetailId
+	WHERE dbo.fnRemoveTimeOnDate(IB.dtmImported) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(IB.dtmImported) END
+	GROUP BY CH.intContractTypeId,CH.intContractHeaderId,CD.intContractDetailId,IB.dtmImported,IB.intImportBalanceId
 		  
 	INSERT INTO @Balance(intContractTypeId,strType,intContractHeaderId,intContractDetailId,dblQuantity)
 	 SELECT
@@ -480,7 +507,7 @@ BEGIN TRY
 	,strBasisUOM			= BUOM.strUnitMeasure
 	,dblQuantity			= CASE 
 									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
-										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
+										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity + ISNULL(BL.dblQuantity,0)) ,0)
 									ELSE
 										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,(CD.intNoOfLoad -ISNULL(BL.intNoOfLoad,0)) * CD.dblQuantityPerLoad),0) 
 							  END
@@ -793,7 +820,9 @@ BEGIN TRY
 		AND ItemStockUOM.ysnStockUnit = 1
 	WHERE FR.dtmEndDate = @dtmEndDate
 
-
+	DELETE 
+	FROM tblCTContractBalance
+	WHERE dblQuantity <= 0 AND dtmEndDate = @dtmEndDate
 
     IF ISNULL(@strCallingApp,'') <> 'DPR'
 	BEGIN

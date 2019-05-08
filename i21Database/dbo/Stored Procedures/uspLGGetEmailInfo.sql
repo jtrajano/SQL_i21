@@ -130,7 +130,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName = 'DeliveryOrder')
+	ELSE IF (@strReportName IN ('DeliveryOrder','DeliveryOrder2','DeliveryOrder3'))
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
@@ -157,7 +157,7 @@ BEGIN
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
-		SET @Subject = 'Load/Shipment Schedule - Deliver Order - ' + @strLoadNumber
+		SET @Subject = 'Load/Shipment Schedule - Delivery Order - ' + @strLoadNumber
 		SET @body += '<!DOCTYPE html>'
 		SET @body += '<html>'
 		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
@@ -173,7 +173,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName = 'ShippingAdvice')
+	ELSE IF (@strReportName IN ('ShippingAdvice','ShippingAdvice2','ShippingAdvice3'))
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 				@intPurchaseSaleId = intPurchaseSale
@@ -216,7 +216,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName = 'In_store' Or @strReportName = 'In_store2')
+	ELSE IF (@strReportName IN ('In_store','In_store2','In_store3'))
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
