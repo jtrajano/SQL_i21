@@ -368,6 +368,7 @@ BEGIN
 			 ,strGroupName				NVARCHAR(MAX)
 			 ,strInvoiceNumber			NVARCHAR(MAX)
 			 ,strInvoiceReportNumber	NVARCHAR(MAX)
+			 ,strCustomerNumber			NVARCHAR(MAX)
 			 ,dtmDiscountDate			DATETIME
 			 ,dtmDueDate				DATETIME
 			 ,dtmTransactionDate		DATETIME
@@ -412,6 +413,7 @@ BEGIN
 			 ,strGroupName				NVARCHAR(MAX)
 			 ,strInvoiceNumber			NVARCHAR(MAX)
 			 ,strInvoiceReportNumber	NVARCHAR(MAX)
+			 ,strCustomerNumber			NVARCHAR(MAX)
 			 ,dtmDiscountDate			DATETIME
 			 ,dtmDueDate				DATETIME
 			 ,dtmTransactionDate		DATETIME
@@ -459,6 +461,7 @@ BEGIN
 			 ,strGroupName						NVARCHAR(MAX)
 			 ,strInvoiceNumber					NVARCHAR(MAX)
 			 ,strInvoiceReportNumber			NVARCHAR(MAX)
+			 ,strCustomerNumber			NVARCHAR(MAX)
 			 ,dtmDiscountDate					DATETIME
 			 ,dtmDueDate						DATETIME
 			 ,dtmTransactionDate				DATETIME
@@ -541,6 +544,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strCustomerNumber			
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -590,6 +594,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strCustomerNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -658,6 +663,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strCustomerNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -707,6 +713,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strCustomerNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -784,6 +791,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strCustomerNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -829,6 +837,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strCustomerNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -903,6 +912,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strCustomerNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -948,6 +958,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strCustomerNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
