@@ -94,42 +94,61 @@ BEGIN
 			FROM @temp_params WHERE [fieldname] = @strField
 			IF (UPPER(@Condition) = 'BETWEEN')
 			BEGIN
-				SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
-
-
-				
-				----------------------------------------------------------
 				IF(@Fieldname = 'dtmDate')
 				BEGIN
 					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + CONVERT(varchar, DATEADD(year, -1, @From), 101) + '''' + ' AND ' +  '''' + CONVERT(varchar, DATEADD(year, -1, @To), 101) + '''' + ' )'
+					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) ' + @Condition + ' ' + '''' + CONVERT(varchar, DATEADD(year, -1, @From), 120) + '''' + ' AND ' +  '''' + CONVERT(varchar, DATEADD(year, -1, @To), 120) + '''' + ' )'
+
+					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
 				END
 				ELSE
 				BEGIN
 					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
+
+					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' ' + @Condition + ' ' + '''' + @From + '''' + ' AND ' +  '''' + @To + '''' + ' )'
 				END
-				-----------------------------------------------------------
 			END
 			ELSE IF (UPPER(@Condition) in ('EQUAL','EQUALS','EQUAL TO','EQUALS TO','='))
 			BEGIN
-				SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+				IF(@Fieldname = 'dtmDate')
+				BEGIN
+					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) ' + ' = ' + '''' + @From  + '''' + ' )'
 
-				SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) '  + ' = ' + '''' + CONVERT(varchar, DATEADD(year, -1, @From), 120)  + '''' + ' )'
+				END
+				ELSE
+					BEGIN
+					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+
+					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' = ' + '''' + @From + '''' + ' )'
+				END
 			END
 			ELSE IF (UPPER(@Condition) = 'IN')
 			BEGIN
-				SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 
-				SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
-				' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
+					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					' (' + @Fieldname  + ' IN ' + '(' + '''' + REPLACE(@From,'|^|',''',''') + '''' + ')' + ' )'
 			END
 			ELSE IF (UPPER(@Condition) = 'GREATER THAN')
 			BEGIN
+				IF(@Fieldname = 'dtmDate')
+				BEGIN
+					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) '  + ' >= ' + '''' + @From + '''' + ' )'
+
+					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) '  + ' >= ' + '''' + CONVERT(varchar, DATEADD(year, -1, @From), 120) + '''' + ' )'
+				END
+				ELSE
 				BEGIN
 					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 					' (' + @Fieldname  + ' >= ' + '''' + @From + '''' + ' )'
@@ -140,6 +159,15 @@ BEGIN
 			END
 			ELSE IF (UPPER(@Condition) = 'LESS THAN')
 			BEGIN
+				IF(@Fieldname = 'dtmDate')
+				BEGIN
+					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) '  + ' <= ' + '''' + @From + '''' + ' )'
+
+					SET @PYTDwhereClause = @PYTDwhereClause + CASE WHEN RTRIM(@PYTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
+					'( DATEADD(dd, DATEDIFF(dd, 0, '  + @Fieldname + ' ), 0) '  + ' <= ' + '''' + CONVERT(varchar, DATEADD(year, -1, @To), 120) + '''' + ' )'
+				END
+				ELSE
 				BEGIN
 					SET @YTDwhereClause = @YTDwhereClause + CASE WHEN RTRIM(@YTDwhereClause) = '' THEN ' WHERE ' ELSE ' AND ' END + 
 					' (' + @Fieldname  + ' <= ' + '''' + @To + '''' + ' )'
