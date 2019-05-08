@@ -27,6 +27,27 @@ SET XACT_ABORT ON
 DECLARE @strPrefix NVARCHAR(10)
 SET @strPrefix = ''E''
 
+--Import all Workers Compensation from Origin
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblPRWorkersCompensation
+	WHERE LTRIM(RTRIM(strWCCode)) IN (SELECT prwcc_code COLLATE Latin1_General_CI_AS FROM prwccmst)) 
+AND EXISTS(SELECT TOP 1 1 FROM prwccmst)
+BEGIN
+	INSERT INTO tblPRWorkersCompensation (
+		 strWCCode
+		,strDescription
+		,dblRate
+		,strCalculationType
+		,intConcurrencyId
+	)
+	SELECT LTRIM(RTRIM(prwcc_code)) COLLATE Latin1_General_CI_AS 
+		,(LTRIM(RTRIM(prwcc_desc)) + '' '' + LTRIM(RTRIM(prwcc_desc2))) COLLATE Latin1_General_CI_AS
+		,prwcc_company_rate
+		,CASE WHEN prwcc_rate_type = 1 THEN ''Per Hour'' ELSE ''Per Dollar'' END
+		,1
+	FROM prwccmst
+	WHERE prwcc_code COLLATE Latin1_General_CI_AS NOT IN (SELECT LTRIM(RTRIM(strWCCode)) FROM tblPRWorkersCompensation)
+END
+
 if @TermDate is null
 begin
 	set @TermDate = ''1/1/'' + CAST(DATEPART(YEAR, getdate()) AS NVARCHAR(4))
@@ -330,8 +351,9 @@ BEGIN
 				@ysnRetirementPlan	= premp_pension_flag_9,
 				@dblRegularHours	= premp_std_hrs,
 				@dtmLastModified	= CASE WHEN ISNULL(premp_user_rev_dt,0) = 0 THEN NULL ELSE premp_user_rev_dt END,
-				@strDepartment		= premp_dept
-					
+				@strDepartment		= premp_dept,
+				@strWCCode			= LTRIM(RTRIM(premp_prwcc_code)) COLLATE Latin1_General_CI_AS
+
             FROM prempmst
             WHERE @strPrefix + LTRIM(RTRIM((premp_emp))) = @originEmployee
 		END
@@ -412,6 +434,14 @@ BEGIN
 			INSERT INTO tblEMEntityType ( intEntityId, strType, intConcurrencyId)
 			VALUES (@EntityId, ''Employee'', 0)
 		end
+
+		--GET intWorkersCompensationId
+		IF EXISTS(SELECT TOP 1 1 FROM tblPRWorkersCompensation WHERE LTRIM(RTRIM(strWCCode)) = @strWCCode)
+		BEGIN
+			SELECT @intWC = intWorkersCompensationId
+			FROM tblPRWorkersCompensation
+			WHERE LTRIM(RTRIM(strWCCode)) = @strWCCode 
+		END
 		
 		insert into tblPREmployee(intEntityId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType, intWorkersCompensationId, ysnActive)
 		values(@EntityId, @originEmployee, @strPhone, 0, @dtmOrigHireDate, @dtmLastHireDate, @dtmBirthDate, @strSex, @strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType, @intWC, @ysnEmployeeActive)
