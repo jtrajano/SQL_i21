@@ -545,7 +545,7 @@ BEGIN
 		
 			SELECT * INTO #tempCollateral
 			FROM (
-				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmOpenDate DESC)
+				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY c.dtmTransactionDate DESC)
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((c.dblRemainingQuantity),0))
 					, c.intCollateralId
 					, cl.strLocationName
@@ -572,11 +572,11 @@ BEGIN
 					, ch.strFutureMonth
 					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), ch.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), ch.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
-				FROM tblRKCollateral c
+				FROM tblRKCollateralHistory c
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 				JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
 				LEFT JOIN #tblGetOpenContractDetail ch ON c.intContractHeaderId = ch.intContractHeaderId AND ch.intContractStatusId <> 3
-				WHERE c.intCommodityId = @intCommodityId AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				WHERE c.intCommodityId = @intCommodityId AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 					and cl.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			) a WHERE a.intRowNum = 1
