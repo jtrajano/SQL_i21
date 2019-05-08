@@ -199,6 +199,10 @@ AS
 				GROUP BY ItemUOM.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId, StockUOM.intStorageLocationId, StockUOM.intSubLocationId
 			) StockUnit ON StockUnit.intItemId = ItemUOM.intItemId
 				AND StockUnit.intItemLocationId = ItemLocation.intItemLocationId
+				-- and isnull(StockUnit.intSubLocationId, 0) = isnull(StockUOM.intSubLocationId,0)
+				-- and isnull(StockUnit.intStorageLocationId, 0) = isnull(StockUOM.intStorageLocationId, 0)
+				AND (ISNULL(StockUnit.intSubLocationId, 0) = 0 OR StockUnit.intSubLocationId = StockUOM.intSubLocationId)
+				AND (ISNULL(StockUnit.intStorageLocationId, 0) = 0 OR StockUnit.intStorageLocationId = StockUOM.intStorageLocationId)		
 	) x
 		INNER JOIN tblICItem Item ON Item.intItemId = x.intItemId
 		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = x.intItemLocationId
