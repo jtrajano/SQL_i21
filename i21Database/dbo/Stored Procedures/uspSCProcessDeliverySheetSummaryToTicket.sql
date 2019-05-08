@@ -30,7 +30,8 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@dblFinalSplitQty			NUMERIC (38,20)
 		,@intInventoryReceiptId		INT
 		,@strFreightCostMethod		NVARCHAR(40)
-		,@strFeesCostMethod			NVARCHAR(40);
+		,@strFeesCostMethod			NVARCHAR(40)
+		,@intBillId					INT
 
 BEGIN TRY
 	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
@@ -118,7 +119,7 @@ BEGIN TRY
 			ELSE
 				SET @dblFinalSplitQty = @dblTempSplitQty
 
-			EXEC [dbo].[uspSCProcessToItemReceipt] @intTicketId, @intUserId, @dblFinalSplitQty, 0, @intSplitEntityId, 0 , @strDistributionOption, @intStorageScheduleId, @intInventoryReceiptId OUTPUT
+			EXEC [dbo].[uspSCProcessToItemReceipt] @intTicketId, @intUserId, @dblFinalSplitQty, 0, @intSplitEntityId, 0 , @strDistributionOption, @intStorageScheduleId, @intInventoryReceiptId OUTPUT, @intBillId OUTPUT
 			
 			FETCH NEXT FROM splitCursor INTO @intSplitEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId;
 		END
