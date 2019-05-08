@@ -161,13 +161,11 @@ BEGIN TRY
 		,intCostUOMId = LWS.intItemUOMId
 		,intWarehouseServicesId = LWS.intLoadWarehouseServicesId
 		,ysnInventoryCost = Item.ysnInventoryCost
-		,intItemUOMId = CASE WHEN (WRMD.intCalculateQty = 7) THEN LD.intItemUOMId 
-							WHEN (WRMD.intCalculateQty = 8) THEN LWS.intItemUOMId
+		,intItemUOMId = CASE WHEN (WRMD.intCalculateQty IN (7, 8)) THEN LWS.intItemUOMId
 							ELSE LD.intWeightItemUOMId END
-		,dblUnitQty = CASE WHEN (WRMD.intCalculateQty = 7) THEN ItemUOM.dblUnitQty 
-							WHEN (WRMD.intCalculateQty = 8) THEN CostUOM.dblUnitQty
+		,dblUnitQty = CASE WHEN (WRMD.intCalculateQty IN (7, 8)) THEN CostUOM.dblUnitQty
 							ELSE WeightUOM.dblUnitQty END
-		,dblCostUnitQty = 1 --CostUOM.dblUnitQty
+		,dblCostUnitQty = 1
 		,intSubLocationId = LW.intSubLocationId
 		,intStorageLocationId = LW.intStorageLocationId
 	FROM tblLGLoad L
@@ -209,9 +207,7 @@ BEGIN TRY
 		,LWS.dblUnitRate
 		,LWS.intItemUOMId
 		,Item.ysnInventoryCost
-		,LD.intItemUOMId
 		,LD.intWeightItemUOMId
-		,ItemUOM.dblUnitQty
 		,CostUOM.dblUnitQty
 		,WeightUOM.dblUnitQty
 		,LW.intSubLocationId
