@@ -299,6 +299,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateOffsetField.sql
 :r .\AP\UpdatePrepayDetailAccount.sql
 :r .\AP\UpdateVoucherPayableTranType.sql
+:r .\AP\PurgePayableCompleted.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

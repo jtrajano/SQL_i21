@@ -40,7 +40,11 @@ BEGIN
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
-			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1))
+			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
+			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
+			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+			AND C.ysnStage = 1
+		)
 	BEGIN
 		IF @transCount = 0
 		BEGIN
@@ -79,6 +83,7 @@ BEGIN
 			,[intLoadShipmentId]				=	A.intLoadShipmentId
 			,[intLoadShipmentDetailId]			=	A.intLoadShipmentDetailId
 			,[intLoadShipmentCostId]			=	A.intLoadShipmentCostId
+			,[intCustomerStorageId]				=	A.intCustomerStorageId
 			,[intItemId]						=	A.intItemId
 			,[strItemNo]						=	item.strItemNo
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
@@ -193,7 +198,7 @@ BEGIN
 			,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
 			,[strRateType]						=	exRates.strCurrencyExchangeRateType
 			,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,-1)
-			,[ysnSubCurrency]					=	ISNULL(A.ysnSubCurrency,costCur.ysnSubCurrency)
+			,[ysnSubCurrency]					=	ISNULL(ISNULL(A.ysnSubCurrency,costCur.ysnSubCurrency),0)
 			,[intSubCurrencyCents]				=	CASE WHEN costCur.intCurrencyID > 0 AND costCur.ysnSubCurrency = 1 THEN A.intSubCurrencyCents ELSE 1 END
 			,[intAccountId]						=	ISNULL(A.intAccountId, vendor.intGLAccountExpenseId)
 			,[strAccountId]						=	ISNULL(accnt.strAccountId, vendorAccnt.strAccountId)
@@ -266,6 +271,7 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure contractCostUOM ON contractCostUOM.intUnitMeasureId = contractItemCostUOM.intUnitMeasureId
 		LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intScaleTicketId
 		LEFT JOIN tblSMTerm contractTerm ON ctDetail.intTermId = contractTerm.intTermID
+		WHERE A.ysnStage = 1
 	) AS SourceData
 	 ON (1=0)
 	 WHEN NOT MATCHED THEN
@@ -296,6 +302,7 @@ BEGIN
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		
 		,[intLoadShipmentCostId]	
+		,[intCustomerStorageId]	
 		,[intItemId]						
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]			
@@ -366,6 +373,7 @@ BEGIN
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]	
 		,[intLoadShipmentCostId]		
+		,[intCustomerStorageId]
 		,[intItemId]						
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]			

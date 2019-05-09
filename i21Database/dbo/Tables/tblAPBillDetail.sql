@@ -68,6 +68,7 @@
 	[ysn1099Printed] BIT NULL DEFAULT 0 ,
 	[ysnRestricted] BIT NOT NULL DEFAULT 0 ,
 	[ysnSubCurrency] BIT NOT NULL DEFAULT 0 ,
+	[ysnStage] BIT NOT NULL DEFAULT 0 ,
     [intLineNo] INT NOT NULL DEFAULT 1,
     [intTaxGroupId] INT NULL, 
 	[intInventoryShipmentChargeId] INT NULL,

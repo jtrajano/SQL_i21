@@ -169,6 +169,7 @@ SELECT
 	,[dblActual]						
 	,[dblDifference]
 FROM dbo.fnAPCreateVoucherPayableFromDetail(@billDetailIds)
+WHERE ysnStage = 0
 
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
