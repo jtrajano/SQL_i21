@@ -413,6 +413,11 @@ BEGIN TRY
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
 		WHERE intRecordId > @intMinRecord
+
+		UPDATE tblLGLoadCost 
+		SET intBillId = (SELECT intBillId FROM tblAPBillDetail 
+						WHERE intLoadShipmentCostId = tblLGLoadCost.intLoadCostId)
+		WHERE intLoadId = @intLoadId AND intBillId IS NULL
 	END
 END TRY
 
