@@ -652,7 +652,7 @@ BEGIN
 					, strInternalTradeNo
 					, intFutOptTransactionHeaderId
 					, 'Net Hedge' COLLATE Latin1_General_CI_AS
-					, strContractType = 'Future' COLLATE Latin1_General_CI_AS
+					, strContractType = strInstrumentType
 					, strLocationName
 					, strFutureMonth
 					, HedgedQty
@@ -684,7 +684,7 @@ BEGIN
 						, strAccountNumber = t.strBroker + '-' + t.strBrokerAccount COLLATE Latin1_General_CI_AS
 						, strTranType = strNewBuySell
 						, ba.intBrokerageAccountId
-						, strInstrumentType = 'Future' COLLATE Latin1_General_CI_AS
+						, strInstrumentType = strInstrumentType
 						, dblNoOfLot = intOpenContract
 						, cu.strCurrency
 						, m.intFutureMarketId
@@ -706,7 +706,7 @@ BEGIN
 						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 						AND ISNULL(t.ysnPreCrush, 0) = 0
 				) t
-				
+
 				-- Option NetHEdge
 				INSERT INTO @tempFinal (strCommodityCode
 					, strInternalTradeNo
