@@ -87,7 +87,20 @@ BEGIN
 			AND strTransactionType = @TransactionType_TransportLoad
 			AND strSourceType = @SourceType_Invoice
 			AND intSourceId IS NOT NULL
-			
+
+		UNION ALL 
+		-- Add another row if there was change on qty, for the old Contract Detail Id
+		SELECT previousSnapshot.intTransactionId
+			, previousSnapshot.intTransactionDetailId
+			, previousSnapshot.strSourceType
+			, 2 --Update
+			, previousSnapshot.dblQuantity * -1 
+			, previousSnapshot.intContractDetailId
+		FROM @tmpCurrentSnapshot currentSnapshot
+		INNER JOIN #tmpPreviousSnapshot previousSnapshot
+			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
+		--WHERE ISNULL(currentSnapshot.intContractDetailId, 0) != ISNULL(previousSnapshot.intContractDetailId, 0) 
+		
 	END
 	ELSE
 	BEGIN
@@ -285,8 +298,7 @@ BEGIN
 		FROM @tmpCurrentSnapshot currentSnapshot
 		INNER JOIN #tmpPreviousSnapshot previousSnapshot
 			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
-		--WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' AND ISNULL(previousSnapshot.intContractDetailId, '') <> '')
-			--AND (ISNULL(currentSnapshot.dblQuantity, 0) <> ISNULL(previousSnapshot.dblQuantity, 0))
+		WHERE ISNULL(currentSnapshot.intContractDetailId, 0) != ISNULL(previousSnapshot.intContractDetailId, 0)
 
 		UNION ALL
 
@@ -294,16 +306,44 @@ BEGIN
 		SELECT currentSnapshot.intTransactionId
 			, currentSnapshot.intTransactionDetailId
 			, currentSnapshot.strSourceType
-			, 1 --Update
+			, 1 --Add
 			, currentSnapshot.dblQuantity
 			, currentSnapshot.intContractDetailId
 		FROM @tmpCurrentSnapshot currentSnapshot
 		INNER JOIN #tmpPreviousSnapshot previousSnapshot
 			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
-		WHERE (ISNULL(currentSnapshot.intContractDetailId, '') <> '' OR ISNULL(previousSnapshot.intContractDetailId, '') <> '')
-			AND ISNULL(currentSnapshot.intContractDetailId, '') != ISNULL(previousSnapshot.intContractDetailId, '')
+		WHERE ISNULL(currentSnapshot.intContractDetailId, 0) != ISNULL(previousSnapshot.intContractDetailId, 0)
 
-		
+
+		UNION ALL 
+
+		-- Add another row if there was change on qty, for the old Contract Detail Id
+		SELECT previousSnapshot.intTransactionId
+			, previousSnapshot.intTransactionDetailId
+			, previousSnapshot.strSourceType
+			, 2 --Update
+			, previousSnapshot.dblQuantity * -1 
+			, previousSnapshot.intContractDetailId
+		FROM @tmpCurrentSnapshot currentSnapshot
+		INNER JOIN #tmpPreviousSnapshot previousSnapshot
+			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
+		WHERE ISNULL(currentSnapshot.intContractDetailId, 0) = ISNULL(previousSnapshot.intContractDetailId, 0) 
+		AND ISNULL(currentSnapshot.dblQuantity, 0) != ISNULL(previousSnapshot.dblQuantity, 0)
+
+		UNION ALL
+
+		-- Add another row if there was a change on qty, for the new Contract Detail Id
+		SELECT currentSnapshot.intTransactionId
+			, currentSnapshot.intTransactionDetailId
+			, currentSnapshot.strSourceType
+			, 1 --Add
+			, currentSnapshot.dblQuantity
+			, currentSnapshot.intContractDetailId
+		FROM @tmpCurrentSnapshot currentSnapshot
+		INNER JOIN #tmpPreviousSnapshot previousSnapshot
+			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
+		WHERE ISNULL(currentSnapshot.intContractDetailId, 0) = ISNULL(previousSnapshot.intContractDetailId, 0) 
+		AND ISNULL(currentSnapshot.dblQuantity, 0) != ISNULL(previousSnapshot.dblQuantity, 0)
 
 
 		-- Check first instance of Load Schedule processed load
