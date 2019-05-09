@@ -47,7 +47,8 @@ BEGIN TRY
 			@ysnAutoIncreaseQty		BIT = 0,
 			@ysnAutoIncreaseSchQty	BIT = 0,
 			@intTicketContractDetailId INT,
-			@dblNetUnitsToCompare	NUMERIC(18,6)	
+			@dblNetUnitsToCompare	NUMERIC(18,6),
+			@intDistributionMethod	INT
 	
 	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
 					LTRIM(@intTicketId) +',' + 
@@ -69,7 +70,14 @@ BEGIN TRY
 	)			
 	
 	SELECT	@ysnAutoCreateDP = ysnAutoCreateDP FROM tblCTCompanyPreference
-	SELECT  @intTicketContractDetailId = intContractId, @intStorageScheduleTypeId = intStorageScheduleTypeId, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
+	/*
+		Manual		1 
+		Auto		2 
+		Batch		3 
+		In Transit	4
+		Print Only	5
+	*/
+	SELECT  @intDistributionMethod = intDistributionMethod, @intTicketContractDetailId = intContractId, @intStorageScheduleTypeId = intStorageScheduleTypeId, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 	IF @ysnDeliverySheet = 0
 		BEGIN
@@ -345,6 +353,16 @@ BEGIN TRY
 			END		
 			ELSE
 			BEGIN
+				IF @intDistributionMethod = 1 AND @dblScheduleQty < @dblAvailable AND @ysnAutoIncreaseSchQty = 1
+				BEGIN
+					SET @dblInreaseSchBy  = @dblAvailable - @dblScheduleQty
+					EXEC	uspCTUpdateScheduleQuantity 
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblInreaseSchBy,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intTicketId,
+							@strScreenName			=	'Auto - Scale'
+				END
 				INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0
 			
 				SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
