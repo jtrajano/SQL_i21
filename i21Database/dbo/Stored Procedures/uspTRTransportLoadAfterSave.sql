@@ -44,9 +44,34 @@ BEGIN
 		[intContractDetailId] INT NULL
 	)
 
+	-- Create snapshot of Transport Loads before Save
+	SELECT strTransactionType
+		, intTransactionId
+		, intTransactionDetailId
+		, strSourceType
+		, intSourceId
+		, dblQuantity
+		, intItemId
+		, intItemUOMId
+		, intContractDetailId
+	INTO #tmpPreviousSnapshot
+	FROM tblTRTransactionDetailLog
+	WHERE intTransactionId = @LoadHeaderId
+		AND strTransactionType = @TransactionType_TransportLoad
+
 	IF (@ForDelete = 1)
 	BEGIN
 
+		INSERT INTO @tblToProcess(intLoadHeaderId, intTransactionId, strTransactionType, intActivity, dblQuantity, intContractDetailId)
+		-- Add another row if delete the TR
+		SELECT previousSnapshot.intTransactionId
+			, previousSnapshot.intTransactionDetailId
+			, previousSnapshot.strSourceType
+			, 2 --Update
+			, previousSnapshot.dblQuantity * -1 
+			, previousSnapshot.intContractDetailId
+		FROM #tmpPreviousSnapshot previousSnapshot
+		
 		-- Delete Receipts associated to this deleted Transport Load
 		INSERT INTO @tblToProcess(intLoadHeaderId, intTransactionId, strTransactionType, intActivity, dblQuantity)
 
@@ -88,37 +113,9 @@ BEGIN
 			AND strSourceType = @SourceType_Invoice
 			AND intSourceId IS NOT NULL
 
-		UNION ALL 
-		-- Add another row if there was change on qty, for the old Contract Detail Id
-		SELECT previousSnapshot.intTransactionId
-			, previousSnapshot.intTransactionDetailId
-			, previousSnapshot.strSourceType
-			, 2 --Update
-			, previousSnapshot.dblQuantity * -1 
-			, previousSnapshot.intContractDetailId
-		FROM @tmpCurrentSnapshot currentSnapshot
-		INNER JOIN #tmpPreviousSnapshot previousSnapshot
-			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
-		--WHERE ISNULL(currentSnapshot.intContractDetailId, 0) != ISNULL(previousSnapshot.intContractDetailId, 0) 
-		
 	END
 	ELSE
 	BEGIN
-
-		-- Create snapshot of Transport Loads before Save
-		SELECT strTransactionType
-			, intTransactionId
-			, intTransactionDetailId
-			, strSourceType
-			, intSourceId
-			, dblQuantity
-			, intItemId
-			, intItemUOMId
-			, intContractDetailId
-		INTO #tmpPreviousSnapshot
-		FROM tblTRTransactionDetailLog
-		WHERE intTransactionId = @LoadHeaderId
-			AND strTransactionType = @TransactionType_TransportLoad
 
 		-- Create snapshot of Transport Loads after Save
 		INSERT INTO @tmpCurrentSnapshot(
