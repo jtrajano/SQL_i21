@@ -22,6 +22,7 @@ DECLARE @vouchers AS TABLE(
 	,intInventoryReceiptItemId INT NULL
 	,intInventoryShipmentChargeId INT NULL
 	,intLoadShipmentDetailId INT NULL
+	,intLoadShipmentCostId INT NULL
 	,intTransactionType INT NOT NULL
 	);
 DECLARE @payablesDeleted AS TABLE(
@@ -34,6 +35,7 @@ DECLARE @payablesDeleted AS TABLE(
 	,intInventoryReceiptItemId INT NULL
 	,intInventoryShipmentChargeId INT NULL
 	,intLoadShipmentDetailId INT NULL
+	,intLoadShipmentCostId INT NULL
 	,intTransactionType INT NOT NULL
 	);
 DECLARE @voucherIds NVARCHAR(MAX);
@@ -61,6 +63,7 @@ BEGIN
 		,B.intInventoryReceiptItemId
 		,B.intInventoryShipmentChargeId
 		,B.intLoadDetailId
+		,B.intLoadShipmentCostId
 		,A.intTransactionType
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
@@ -72,6 +75,7 @@ BEGIN
 		AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
 		AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
 		AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadDetailId,-1)
+		AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 		AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 	
@@ -88,6 +92,7 @@ BEGIN
 			,deleted.intInventoryReceiptItemId
 			,deleted.intInventoryShipmentChargeId
 			,deleted.intLoadShipmentDetailId
+			,deleted.intLoadShipmentCostId
 			,deleted.intTransactionType
 		INTO @payablesDeleted
 		FROM tblAPVoucherPayable A
@@ -100,6 +105,7 @@ BEGIN
 			AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
 			AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 		WHERE A.dblQuantityToBill = 0
 
 		SET @recordCountDeleted = @recordCountDeleted + @@ROWCOUNT;
@@ -122,6 +128,7 @@ BEGIN
 			AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
 			AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 	END
 
 	--IF THERE IS STILL VOUCHERS TO DELETE, MEANS IT IS NOT VALID AS THERE ARE VOUCHERS CREATED AND THERE STILL REMAINING QTY TO BILL
@@ -146,6 +153,7 @@ BEGIN
 			,deleted.intInventoryReceiptItemId
 			,deleted.intInventoryShipmentChargeId
 			,deleted.intLoadShipmentDetailId
+			,deleted.intLoadShipmentCostId
 			,deleted.intTransactionType
 		INTO @payablesDeleted
 		FROM tblAPVoucherPayable A
@@ -158,6 +166,7 @@ BEGIN
 			AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
 			AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
+			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 		LEFT JOIN @vouchers C ON ISNULL(A.intEntityVendorId,-1) = ISNULL(C.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(C.intPurchaseDetailId,-1)
 			AND ISNULL(A.intContractDetailId,-1) = ISNULL(C.intContractDetailId,-1)
@@ -166,6 +175,7 @@ BEGIN
 			AND ISNULL(A.intInventoryReceiptItemId,-1) = ISNULL(C.intInventoryReceiptItemId,-1)
 			AND ISNULL(A.intInventoryShipmentChargeId,-1) = ISNULL(C.intInventoryShipmentChargeId,-1)
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(C.intLoadShipmentDetailId,-1)
+			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 		WHERE C.intEntityVendorId IS NULL --make sure to delete only if no voucher created
 
 		SET @recordCountDeleted = @recordCountDeleted + @@ROWCOUNT;

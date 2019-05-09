@@ -296,7 +296,8 @@ INSERT
 	,intPurchaseDetailId				
 	,intCustomerStorageId				
 	,intLocationId						
-	,intLoadDetailId					
+	,intLoadDetailId
+	,intLoadShipmentCostId					
 	,intLoadId							
 	,intScaleTicketId					
 	,intCCSiteDetailId					
@@ -381,7 +382,8 @@ VALUES
 	,intPurchaseDetailId				
 	,intCustomerStorageId				
 	,intLocationId						
-	,intLoadDetailId					
+	,intLoadDetailId	
+	,intLoadShipmentCostId				
 	,intLoadId							
 	,intScaleTicketId					
 	,intCCSiteDetailId					
