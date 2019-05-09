@@ -653,7 +653,7 @@ BEGIN
 					, strInternalTradeNo
 					, intFutOptTransactionHeaderId
 					, 'Net Hedge' COLLATE Latin1_General_CI_AS
-					, strContractType = 'Future' COLLATE Latin1_General_CI_AS
+					, strContractType = strInstrumentType
 					, strLocationName
 					, strFutureMonth
 					, HedgedQty
@@ -685,7 +685,7 @@ BEGIN
 						, strAccountNumber = t.strBroker + '-' + t.strBrokerAccount COLLATE Latin1_General_CI_AS
 						, strTranType = strNewBuySell
 						, ba.intBrokerageAccountId
-						, strInstrumentType = 'Future' COLLATE Latin1_General_CI_AS
+						, strInstrumentType = strInstrumentType
 						, dblNoOfLot = dblOpenContract
 						, cu.strCurrency
 						, m.intFutureMarketId
