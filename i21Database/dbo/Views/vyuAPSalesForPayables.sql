@@ -32,9 +32,7 @@ UNION ALL
 SELECT  A.dtmDatePaid AS dtmDate,    
 	 C.intInvoiceId,   
 	 C.strInvoiceNumber ,
-	 CAST(
-		 	(CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
-						 THEN B.dblPayment * -1 ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
+	 CAST(B.dblPayment * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
