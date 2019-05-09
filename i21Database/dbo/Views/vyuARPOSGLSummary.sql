@@ -1,17 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSGLSummary]
 AS
 SELECT intPOSEndOfDayId		= GLSUMMARY.intPOSEndOfDayId
-	 , dblDebit				= CASE WHEN GLSUMMARY.strAccountCategory = 'Undeposited Funds' THEN GLSUMMARY.dblEndingBalance - GLSUMMARY.dblOpeningBalance ELSE GLSUMMARY.dblDebit END
-	 , dblCredit			= GLSUMMARY.dblCredit
+	 , dblDebit				= CASE WHEN GLSUMMARY.dblDebit - GLSUMMARY.dblCredit > 0 THEN ABS(GLSUMMARY.dblDebit - GLSUMMARY.dblCredit) ELSE 0 END
+	 , dblCredit			= CASE WHEN GLSUMMARY.dblDebit - GLSUMMARY.dblCredit < 0 THEN ABS(GLSUMMARY.dblDebit - GLSUMMARY.dblCredit) ELSE 0 END
 	 , strAccountId			= GLSUMMARY.strAccountId
 	 , strAccountCategory	= GLSUMMARY.strAccountCategory
 	 , strDescription		= GLSUMMARY.strDescription
 FROM ( 
 	SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
-		 , dblOpeningBalance	= EOD.dblOpeningBalance
-		 , dblEndingBalance		= EOD.dblFinalEndingBalance
-		 , dblDebit				= CASE WHEN GLA.strAccountCategory = 'AR Account' THEN SUM(GL.dblDebit) - SUM(GL.dblCredit) ELSE SUM(GL.dblDebit) END
-		 , dblCredit			= CASE WHEN GLA.strAccountCategory = 'AR Account' THEN 0.00000 ELSE SUM(GL.dblCredit) END
+		 , dblDebit				= SUM(GL.dblDebit)
+		 , dblCredit			= SUM(GL.dblCredit)
 		 , strAccountId			= GLA.strAccountId
 		 , strAccountCategory	= GLA.strAccountCategory
 		 , strDescription		= GLA.strDescription
@@ -72,8 +70,6 @@ FROM (
 		FROM dbo.vyuGLAccountDetail WITH (NOLOCK)	
 	) GLA ON GL.intAccountId = GLA.intAccountId
 	GROUP BY EOD.intPOSEndOfDayId
-		   , EOD.dblFinalEndingBalance
-		   , EOD.dblOpeningBalance
 		   , GLA.strAccountId
 		   , GLA.strAccountCategory
 		   , GLA.strDescription
@@ -81,8 +77,6 @@ FROM (
 	UNION ALL
 
 	SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
-		 , dblOpeningBalance	= EOD.dblOpeningBalance
-		 , dblEndingBalance		= EOD.dblFinalEndingBalance
 		 , dblDebit				= BTD.dblDebit
 		 , dblCredit			= BTD.dblCredit
 		 , strAccountId			= GLA.strAccountId
