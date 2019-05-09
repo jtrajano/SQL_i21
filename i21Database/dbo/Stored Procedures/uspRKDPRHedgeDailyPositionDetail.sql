@@ -494,7 +494,7 @@ BEGIN
 	
 	SELECT * INTO #tempCollateral
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY c.dtmTransactionDate DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intCollateralId ORDER BY c.dtmOpenDate DESC)
 			, c.intCollateralId
 			, cl.strLocationName
 			, ch.intItemId
@@ -506,7 +506,7 @@ BEGIN
 			, strContractNumber
 			, c.dtmOpenDate
 			, dblOriginalQuantity = ISNULL(c.dblOriginalQuantity, 0)
-			, dblRemainingQuantity = ISNULL(c.dblRemainingQuantity, 0)
+			, dblRemainingQuantity = ISNULL(c.dblOriginalQuantity, 0) - ISNULL(ca.dblAdjustmentAmount,0)
 			, c.intCommodityId as intCommodityId
 			, c.intUnitMeasureId
 			, c.intLocationId intCompanyLocationId
@@ -517,13 +517,19 @@ BEGIN
 			, ch.strFutMarketName
 			, ch.intFutureMonthId
 			, ch.strFutureMonth
-		FROM tblRKCollateralHistory c
+		FROM tblRKCollateral c
+		LEFT JOIN (
+			SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
+			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmAdjustmentDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			GROUP BY intCollateralId
+
+		) ca on c.intCollateralId = ca.intCollateralId
 		JOIN tblICCommodity co ON co.intCommodityId = c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 		JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
 		LEFT JOIN @tblGetOpenContractDetail ch ON c.intContractHeaderId = ch.intContractHeaderId AND ch.intContractStatusId <> 3
 		WHERE c.intCommodityId IN (SELECT intCommodity FROM @Commodity)
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			AND c.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	) a where a.intRowNum = 1
 	
