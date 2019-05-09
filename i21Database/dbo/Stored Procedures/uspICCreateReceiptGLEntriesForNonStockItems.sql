@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspICCreateReceiptGLEntriesForNonStockItems]
 	@strBatchId AS NVARCHAR(40)
-	,@AccountCategory_ContraNonInventory AS NVARCHAR(255) = 'AP Clearing'
+	,@AccountCategory_APClearing AS NVARCHAR(255) = 'AP Clearing'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	,@intContraNonInventory_ItemLocationId AS INT = NULL 
@@ -16,7 +16,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
-DECLARE @AccountCategory_NonInventory AS NVARCHAR(30) = 'General'
+DECLARE @AccountCategory_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
+DECLARE @AccountCategory_General AS NVARCHAR(30) = 'General'
 DECLARE @strTransactionForm NVARCHAR(255)
 DECLARE @InventoryTransactionTypeId_AutoVariance AS INT = 1;
 DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
@@ -33,10 +34,34 @@ DECLARE @GLAccounts AS TABLE
 	,intTransactionTypeId INT 
 	,intNonInventoryId INT
 	,intContraNonInventoryId INT
+	,strNonInventoryAccountCategory NVARCHAR(30)
+	,strContraNonInventoryAccountCategory NVARCHAR(30)
+	,intOrder INT
 )
 
+DECLARE @UnitTrans TABLE (intItemId INT, intItemLocationId INT, intTransactionTypeId INT)
+INSERT INTO @UnitTrans
+SELECT	DISTINCT 
+		intItemId
+		, intItemLocationId 
+		, intTransactionTypeId
+FROM	(
+	SELECT	DISTINCT 
+			t.intItemId
+			, t.intItemLocationId 
+			, t.intTransactionTypeId
+	FROM	dbo.tblICInventoryTransaction t
+		INNER JOIN tblICItem i ON t.intItemId = i.intItemId
 
--- Get the GL Account ids to use
+	WHERE	t.strBatchId = @strBatchId
+			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+			AND i.strType = 'Non-Inventory'
+) InnerQuery
+
+
+-- Get the GL Account Other Charge Expense ids to use
 INSERT INTO @GLAccounts (
 	intItemId 
 	,intItemLocationId 
@@ -44,33 +69,44 @@ INSERT INTO @GLAccounts (
 	,intContraNonInventoryId 
 	,intPOId
 	,intTransactionTypeId
+	,strNonInventoryAccountCategory
+	,strContraNonInventoryAccountCategory
+	,intOrder
 )
 SELECT	Query.intItemId
 		,Query.intItemLocationId
-		,intNonInventory = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_NonInventory)
-		,intContraNonInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraNonInventory) 
+		,intNonInventory = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherChargeExpense)
+		,intContraNonInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_APClearing) 
 		,NULL
 		,intTransactionTypeId
-FROM	(
-			SELECT	DISTINCT 
-					intItemId
-					, intItemLocationId 
-					, intTransactionTypeId
-			FROM	(
-				SELECT	DISTINCT 
-						t.intItemId
-						, t.intItemLocationId 
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t
-					INNER JOIN tblICItem i ON t.intItemId = i.intItemId
+		,@AccountCategory_OtherChargeExpense
+		,@AccountCategory_APClearing
+		,1
+FROM @UnitTrans Query
 
-				WHERE	t.strBatchId = @strBatchId
-						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
-						AND i.strType = 'Non-Inventory'
-			) InnerQuery
-		) Query
+
+-- Get Fallback General account ids
+INSERT INTO @GLAccounts (
+	intItemId 
+	,intItemLocationId 
+	,intNonInventoryId 
+	,intContraNonInventoryId 
+	,intPOId
+	,intTransactionTypeId
+	,strNonInventoryAccountCategory
+	,strContraNonInventoryAccountCategory
+	,intOrder
+)
+SELECT	Query.intItemId
+		,Query.intItemLocationId
+		,intNonInventory = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_General)
+		,intContraNonInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_APClearing) 
+		,NULL
+		,intTransactionTypeId
+		,@AccountCategory_General
+		,@AccountCategory_APClearing
+		,2
+FROM @UnitTrans Query
 
 -- Get Accounts from PO
 MERGE INTO @GLAccounts AS target
@@ -79,9 +115,12 @@ USING
 	SELECT
 		  t.intItemId
 		, t.intItemLocationId
-		, ap.intAccountId
-		, intContraNonInventoryId = dbo.fnGetItemGLAccount(i.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, t.intItemLocationId), @AccountCategory_ContraNonInventory) 
-		, intTransactionTypeId = -t.intTransactionTypeId
+		, intAccountId = dbo.fnGetLocationAwareItemGLAccount(ap.intAccountId, ISNULL(@intContraNonInventory_ItemLocationId, t.intItemLocationId), @AccountCategory_OtherChargeExpense)
+		, intContraNonInventoryId = dbo.fnGetItemGLAccount(i.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, t.intItemLocationId), @AccountCategory_APClearing) 
+		, intTransactionTypeId = t.intTransactionTypeId
+		,strNonInventoryAccountCategory = @AccountCategory_OtherChargeExpense
+		,strContraNonInventoryAccountCategory = @AccountCategory_APClearing
+		,intOrder = 0
 	FROM tblICInventoryReceipt r
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 		INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
@@ -97,12 +136,37 @@ USING
 		AND i.strType = 'Non-Inventory'
 		AND t.strTransactionForm = 'Inventory Receipt'
 		AND ap.intAccountId IS NOT NULL
-) AS source (intItemId, intItemLocationId, intAccountId, intContraNonInventoryId, intTransactionTypeId)
+) AS source (intItemId, intItemLocationId, intAccountId, intContraNonInventoryId, intTransactionTypeId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
 	ON target.intItemId = source.intItemId AND target.intItemLocationId = source.intItemLocationId AND target.intNonInventoryId = source.intAccountId AND target.intTransactionTypeId = source.intTransactionTypeId
-WHEN MATCHED THEN UPDATE SET intNonInventoryId = source.intAccountId, intTransactionTypeId = -source.intTransactionTypeId
+WHEN MATCHED THEN UPDATE SET intNonInventoryId = source.intAccountId, intTransactionTypeId = source.intTransactionTypeId, intOrder = 0
 WHEN NOT MATCHED BY target THEN
-INSERT (intPOId, intNonInventoryId, intItemId, intItemLocationId, intTransactionTypeId, intContraNonInventoryId)
-VALUES(source.intAccountId, source.intAccountId, source.intItemId, source.intItemLocationId, source.intTransactionTypeId, source.intContraNonInventoryId);
+INSERT (intPOId, intNonInventoryId, intItemId, intItemLocationId, intTransactionTypeId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
+VALUES(source.intAccountId, source.intAccountId, source.intItemId, source.intItemLocationId, source.intTransactionTypeId, source.intContraNonInventoryId, source.strNonInventoryAccountCategory, source.strContraNonInventoryAccountCategory, source.intOrder);
+
+DECLARE @NonStockGLAccounts AS TABLE
+(
+	intItemId INT NOT NULL 
+	,intItemLocationId INT NOT NULL 
+	,intPOId INT
+	,intTransactionTypeId INT 
+	,intNonInventoryId INT
+	,intContraNonInventoryId INT
+	,strNonInventoryAccountCategory NVARCHAR(30)
+	,strContraNonInventoryAccountCategory NVARCHAR(30)
+	,intOrder INT
+)
+
+;WITH cte AS
+(
+   SELECT *,
+         ROW_NUMBER() OVER (PARTITION BY a.intItemId, a.intItemLocationId ORDER BY intOrder ASC) AS rn
+   FROM @GLAccounts a
+   WHERE a.intNonInventoryId IS NOT NULL
+)
+INSERT INTO @NonStockGLAccounts(intItemId, intItemLocationId, intPOId, intTransactionTypeId, intNonInventoryId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
+SELECT intItemId, intItemLocationId, intPOId, intTransactionTypeId, intNonInventoryId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder
+FROM cte
+WHERE rn = 1
 
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -114,7 +178,7 @@ BEGIN
 	SELECT	TOP 1 
 			@intItemId = Item.intItemId 
 			,@strItemNo = Item.strItemNo
-	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+	FROM	tblICItem Item INNER JOIN @NonStockGLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
 	WHERE	ItemGLAccount.intNonInventoryId IS NULL
 
@@ -122,7 +186,7 @@ BEGIN
 			@strLocationName = c.strLocationName
 	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
 				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @GLAccounts ItemGLAccount
+			INNER JOIN @NonStockGLAccounts ItemGLAccount
 				ON ItemGLAccount.intItemId = il.intItemId
 				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
 	WHERE	il.intItemId = @intItemId
@@ -131,14 +195,16 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_NonInventory;
+		DECLARE @msg NVARCHAR(800) = 'The non-inventory item <b>' + @strItemNo + '</b> at location <b>' + @strLocationName + '</b> is missing a setup for <b>' + @AccountCategory_OtherChargeExpense + '</b> or <b>' + @AccountCategory_General + '</b> GL accounts. (1) Verify if these accounts are properly set up in the <i>item</i> or <i>category</i> screen. (2) Make sure these accounts exist in the GL chart of accounts.'
+		--EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_OtherChargeExpense;
+		RAISERROR(@msg, 11, 1)
 		RETURN -1;
 	END 
 END 
 ;
 
 -- Check for missing Contra-Account Id
-IF @AccountCategory_ContraNonInventory IS NOT NULL 
+IF @AccountCategory_APClearing IS NOT NULL 
 BEGIN 
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
@@ -146,7 +212,7 @@ BEGIN
 	SELECT	TOP 1 
 			@intItemId = Item.intItemId 
 			,@strItemNo = Item.strItemNo
-	FROM	dbo.tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+	FROM	dbo.tblICItem Item INNER JOIN @NonStockGLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
 			--LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
 			--	ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
@@ -157,7 +223,7 @@ BEGIN
 			@strLocationName = c.strLocationName
 	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
 				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @GLAccounts ItemGLAccount
+			INNER JOIN @NonStockGLAccounts ItemGLAccount
 				ON ItemGLAccount.intItemId = il.intItemId
 				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
 	WHERE	il.intItemId = @intItemId
@@ -166,12 +232,11 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_ContraNonInventory;
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_APClearing;
 		RETURN -1;
 	END 
 END 
 ;
-
 -- Log the g/l account used in this batch. 
 INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
 		intItemId
@@ -186,7 +251,7 @@ SELECT
 		,intNonInventoryId
 		,intContraNonInventoryId
 		,@strBatchId
-FROM	@GLAccounts
+FROM	@NonStockGLAccounts
 ;
 
 -- Get the default transaction form name
@@ -603,15 +668,11 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE  
-		INNER JOIN @GLAccounts GLAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+		INNER JOIN @NonStockGLAccounts GLAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND (ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId)
 		INNER JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intNonInventoryId
-		
-		LEFT OUTER JOIN @GLAccounts GLPOAccounts ON ForGLEntries_CTE.intItemId = GLPOAccounts.intItemId
-			AND ForGLEntries_CTE.intItemLocationId = GLPOAccounts.intItemLocationId
-			AND (ForGLEntries_CTE.intTransactionTypeId = -GLPOAccounts.intTransactionTypeId)
-		LEFT OUTER JOIN dbo.tblGLAccount tblGLPOAccount  ON tblGLPOAccount.intAccountId = GLPOAccounts.intPOId
+		LEFT OUTER JOIN dbo.tblGLAccount tblGLPOAccount  ON tblGLPOAccount.intAccountId = GLAccounts.intPOId
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)
 		) DebitForeign
@@ -680,12 +741,10 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
-		INNER JOIN @GLAccounts GLAccounts
-			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+		INNER JOIN @NonStockGLAccounts GLAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ISNULL(ForGLEntries_CTE.intInTransitSourceLocationId, ForGLEntries_CTE.intItemLocationId) = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intContraNonInventoryId
+		INNER JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intContraNonInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)			
 		) DebitForeign
