@@ -5,11 +5,12 @@
 	, @intPaymentMethodID	INT			  = NULL
 	, @intNewTransactionId	INT			  = NULL OUTPUT
 	, @strErrorMessage		NVARCHAR(MAX) = NULL OUTPUT
+	, @strPaymentIds		NVARCHAR(MAX) = NULL OUTPUT
 AS
 BEGIN
 
 	DECLARE @EntriesForPayment		PaymentIntegrationStagingTable
-	DECLARE	@tblTaxEntries			LineItemTaxDetailStagingTable
+	DECLARE	@tblTaxEntries			LineItemTaxDetailStagingTable	
 
 	DECLARE 
 		--payment headers
@@ -147,11 +148,25 @@ END
 
 IF((SELECT TOP 1 1 FROM @EntriesForPayment) = 1)
 BEGIN
+	DECLARE @LogId 	INT = NULL
+
 	EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
 											, @UserId			= 1
 											, @GroupingOption	= 5
 											, @RaiseError		= 1
 											, @ErrorMessage		= @strErrorMessage OUTPUT
+											, @LogId			= @LogId OUTPUT
+
+	--GET NEWLY CREATED PAYMENT IDs
+	SELECT @strPaymentIds = LEFT(intPaymentId, LEN(intPaymentId) - 1)
+	FROM (
+		SELECT CAST(intPaymentId AS VARCHAR(200))  + ', '
+		FROM tblARPaymentIntegrationLogDetail 
+		WHERE intIntegrationLogId = @LogId 
+			AND ysnSuccess = 1 
+			AND ysnHeader = 1
+	FOR XML PATH ('')
+	) INV (intPaymentId)
 END
 ELSE
 BEGIN
