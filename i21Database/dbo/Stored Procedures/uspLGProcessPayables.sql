@@ -24,6 +24,7 @@ BEGIN
 			,[intInventoryReceiptItemId]
 			,[intLoadShipmentId]
 			,[intLoadShipmentDetailId]
+			,[intLoadShipmentCostId]
 			,[intItemId]
 			,[strMiscDescription]
 			,[dblOrderQty]
@@ -64,6 +65,7 @@ BEGIN
 			,[intInventoryReceiptItemId] = receiptItem.intInventoryReceiptItemId
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentDetailId] = LD.intLoadDetailId
+			,[intLoadShipmentCostId] = NULL
 			,[intItemId] = LD.intItemId
 			,[strMiscDescription] = item.strDescription
 			,[dblOrderQty] = LD.dblQuantity
@@ -125,12 +127,13 @@ BEGIN
 			,[strVendorOrderNumber] = ''
 			,[strReference] = ''
 			,[strSourceNumber] = LTRIM(A.strLoadNumber)
-			,[intContractHeaderId] = A.intContractHeaderId
-			,[intContractDetailId] = A.intContractDetailId
-			,[intContractSeqId] = A.intContractSeq
+			,[intContractHeaderId] = CH.intContractHeaderId
+			,[intContractDetailId] = CT.intContractDetailId
+			,[intContractSeqId] = CT.intContractSeq
 			,[intInventoryReceiptItemId] = NULL
 			,[intLoadShipmentId] = A.intLoadId
 			,[intLoadShipmentDetailId] = A.intLoadDetailId
+			,[intLoadShipmentCostId] = A.intLoadCostId
 			,[intItemId] = A.intItemId
 			,[strMiscDescription] = A.strItemDescription
 			,[dblOrderQty] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
@@ -159,6 +162,8 @@ BEGIN
 		FROM vyuLGLoadCostForVendor A
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+			JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
 			JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
 			LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = A.intCurrencyId
 			LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
