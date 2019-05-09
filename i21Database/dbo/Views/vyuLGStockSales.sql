@@ -4,27 +4,27 @@ SELECT SH.intStockSalesHeaderId
 	  ,SH.strStockSalesNumber
 	  ,SLD.intStockSalesLotDetailId
 	  ,SL.strLocationName 
-	  ,E.strName AS strCustomerName
+	  ,strCustomerName = E.strName
 	  ,SH.intCommodityId
-	  ,C.strDescription AS strCommodity
+	  ,strCommodity = C.strDescription
 	  ,SH.intSubLocationId
-	  ,SLCL.strSubLocationName AS strSubLocationName
+	  ,strSubLocationName = SLCL.strSubLocationName
 	  ,SH.intWeightUnitMeasureId
-	  ,UM.strUnitMeasure AS strWeightUOM
+	  ,strWeightUOM = UM.strUnitMeasure
 	  ,SH.intContractHeaderId
 	  ,CH.strContractNumber
 	  ,SH.intAllocationHeaderId
 	  ,AH.strAllocationNumber
 	  ,SH.intPickLotHeaderId
 	  ,PLH.strPickLotNumber
-	  ,SP.intEntityId AS intSalesPersonId
-	  ,SP.strName AS strSalesPerson
+	  ,intSalesPersonId = SP.intEntityId
+	  ,strSalesPerson = SP.strName
 	  ,PO.intPositionId 
 	  ,PO.strPosition
 	  ,PO.strPositionType
 	  ,CH.intFreightTermId
-	  ,CB.strFreightTerm AS strIncoTerms
-	  ,CH.intPricingTypeId AS intPricingType
+	  ,strIncoTerms = CB.strFreightTerm
+	  ,intPricingType = CH.intPricingTypeId 
 	  ,PT.strPricingType
 	  ,CH.intInsuranceById
 	  ,IB.strInsuranceBy
@@ -37,9 +37,10 @@ SELECT SH.intStockSalesHeaderId
 	  ,TE.strTerm
 	  ,TE.strTermCode
 	  ,CH.intGradeId 
-	  ,AG.strWeightGradeDesc AS strApprovalGrade
+	  ,strApprovalGrade = AG.strWeightGradeDesc
 	  ,CH.intWeightId
-	  ,WG.strWeightGradeDesc AS strWeightGrade
+	  ,strWeightGrade = WG.strWeightGradeDesc
+	  ,ysnShipped = CAST(CASE WHEN EXISTS (SELECT TOP 1 1 FROM tblLGLoadDetail WHERE intSContractDetailId = CD.intContractDetailId) THEN 1 ELSE 0 END AS BIT)
 FROM tblLGStockSalesHeader SH
 JOIN tblLGStockSalesLotDetail SLD ON SLD.intStockSalesHeaderId = SH.intStockSalesHeaderId
 JOIN tblEMEntity E ON E.intEntityId = SH.intCustomerEntityId
