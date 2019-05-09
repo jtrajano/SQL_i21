@@ -460,8 +460,8 @@ BEGIN
 					join prcmtmst b
 						on a.premp_emp = b.prcmt_emp
 					join tblEMEntity c
-						on a.premp_emp COLLATE Latin1_General_CI_AS = c.strEntityNo COLLATE Latin1_General_CI_AS 
-							and c.strEntityNo = @originEmployee
+						on a.premp_emp COLLATE Latin1_General_CI_AS = STUFF(c.strEntityNo, 1, 1, '''') COLLATE Latin1_General_CI_AS 
+							and STUFF(c.strEntityNo, 1, 1, '''') = STUFF(@originEmployee, 1, 1, '''')
 
 		DECLARE @Bank_code NVARCHAR(50)
 		DECLARE @Bank_name NVARCHAR(50)
@@ -482,7 +482,7 @@ BEGIN
 					@Bank_account = premp_dir_dep_acct,
 					@Bank_type = premp_dd_acct_type_cs
 				FROM prempmst where premp_dir_dep_bank is not null
-					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + @originEmployee +  '''''' ''
+					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + STUFF(@originEmployee, 1, 1, '''') +  '''''' ''
 
 			SET @Bank_code = null
 	
@@ -562,7 +562,7 @@ BEGIN
 					@Bank_account = premp_ded_ref_no_'' + Cast(@Bank_count as nvarchar)+ '',
 					@Bank_type = premp_ded_dd_acct_type_'' + Cast(@Bank_count as nvarchar)+ ''
 				FROM prempmst where premp_ded_dep_bank_'' + Cast(@Bank_count as nvarchar)+ '' is not null
-					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + @originEmployee +  '''''' ''
+					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + STUFF(@originEmployee, 1, 1, '''') +  '''''' ''
 
 			SET @Bank_code = null
 
