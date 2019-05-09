@@ -157,7 +157,7 @@ SET ANSI_WARNINGS OFF
 	BEGIN TRY
 	-----====== BEGIN - Merge Patronage Volume ======-----
 	MERGE tblPATCustomerVolume AS CustVol
-	USING @tempPatronageVolumes AS PatVol
+	USING (SELECT intCustomerPatronId,intPatronageCategoryId, intFiscalYearId, SUM(dblVolume) 'dblVolume', ysnPosted FROM @tempPatronageVolumes group by intCustomerPatronId,intPatronageCategoryId, intFiscalYearId, ysnPosted ) AS PatVol
 		ON (CustVol.intCustomerPatronId = PatVol.intCustomerPatronId AND CustVol.intPatronageCategoryId = PatVol.intPatronageCategoryId 
 			AND CustVol.intFiscalYear = PatVol.intFiscalYearId)
 		WHEN MATCHED
