@@ -698,15 +698,21 @@ BEGIN
 					, intFromCommodityUnitMeasureId
 					, strInventoryType = 'Collateral' COLLATE Latin1_General_CI_AS
 				FROM (
-					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmTransactionDate DESC)
-						, dblTotal = CASE WHEN c.strType = 'Purchase' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((c.dblRemainingQuantity), 0))
-										ELSE - ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((c.dblRemainingQuantity), 0))) END
+					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intCollateralId ORDER BY c.dtmOpenDate DESC)
+						, dblTotal = CASE WHEN c.strType = 'Purchase' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(c.dblOriginalQuantity, 0) - ISNULL(ca.dblAdjustmentAmount, 0))
+										ELSE - ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(c.dblOriginalQuantity, 0) - ISNULL(ca.dblAdjustmentAmount, 0))) END
 						, intCommodityId = @intCommodityId
 						, co.strCommodityCode
 						, cl.strLocationName
 						, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 						, ysnIncludeInPriceRiskAndCompanyTitled
-					FROM tblRKCollateralHistory c
+					FROM tblRKCollateral c
+					LEFT JOIN (
+						SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
+						WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmAdjustmentDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+						GROUP BY intCollateralId
+
+					) ca on c.intCollateralId = ca.intCollateralId
 					JOIN tblICCommodity co ON co.intCommodityId = c.intCommodityId
 					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
@@ -714,7 +720,7 @@ BEGIN
 					LEFT JOIn tblCTContractDetail det ON ch.intContractDetailId = det.intContractDetailId
 					WHERE c.intCommodityId = @intCommodityId 
 						AND c.intLocationId = ISNULL(@intLocationId, c.intLocationId)
-						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 				) a WHERE a.intRowNum = 1 AND ysnIncludeInPriceRiskAndCompanyTitled = 1
 			) t GROUP BY strCommodityCode
 				, strLocationName

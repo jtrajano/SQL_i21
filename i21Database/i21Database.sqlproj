@@ -7545,6 +7545,7 @@
     <Build Include="dbo\Stored Procedures\uspICGenerateStockMovementReport.sql" />
     <Build Include="dbo\Views\vyuICGenerateStockMovement.sql" />
     <Build Include="dbo\Views\vyuSTLocationItems.sql" />
+    <None Include="Scripts\Post-Deployment\IC\17_Inventory_Constraints.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
