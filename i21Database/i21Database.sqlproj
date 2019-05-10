@@ -1047,7 +1047,6 @@
     <Build Include="dbo\Stored Procedures\uspPOReceived.sql" />
     <Build Include="dbo\Views\vyuCTPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoPrice.sql" />
-    <Build Include="dbo\Tables\tblSTStoreGLAccount.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrderDetail.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrder.sql" />
     <Build Include="dbo\Views\vyuSOSalesOrderSearch.sql" />
