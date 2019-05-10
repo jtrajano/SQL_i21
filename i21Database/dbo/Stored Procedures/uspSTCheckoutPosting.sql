@@ -134,7 +134,8 @@ BEGIN
 
 		DECLARE @tblTempInvoiceIds TABLE
 		(
-			intInvoiceId INT
+			intInvoiceId INT,
+			ysnPosted BIT
 		)
 
 		DECLARE @tblTempRank TABLE
@@ -3582,7 +3583,7 @@ BEGIN
 
 										--SELECT * FROM @LineItemTaxEntries
 
-										--SELECT * FROM @EntriesForInvoiceBatchPost
+										SELECT * FROM @EntriesForInvoiceBatchPost
 
 										-- POST Main Checkout Invoice (Batch Posting)
 										EXEC [dbo].[uspARProcessInvoicesByBatch]
@@ -3619,11 +3620,15 @@ BEGIN
 
 															INSERT INTO @tblTempInvoiceIds
 															(
-																intInvoiceId
+																intInvoiceId,
+																ysnPosted
 															)
 															SELECT DISTINCT 
-																intInvoiceId
-															FROM tblARInvoiceIntegrationLogDetail
+																LogDetail.intInvoiceId,
+																Inv.ysnPosted
+															FROM tblARInvoiceIntegrationLogDetail LogDetail
+															INNER JOIN tblARInvoice Inv
+																ON LogDetail.intInvoiceId = Inv.intInvoiceId
 															WHERE intIntegrationLogId = (
 																							SELECT intSalesInvoiceIntegrationLogId
 																							FROM tblSTCheckoutHeader
@@ -4020,7 +4025,7 @@ BEGIN
 										,[ysnInvoicePrepayment]					= 0
 										,[ysnImportedFromOrigin]				= NULL
 										,[ysnImportedAsPosted]					= NULL
-										,[ysnAllowPrepayment]					= 1
+										,[ysnAllowPrepayment]					= 0
 										,[ysnPost]								= 1			-- 1. Post, 0. UnPost
 										,[ysnRecap]								= @ysnRecap
 										,[ysnUnPostAndUpdate]					= NULL
@@ -4126,289 +4131,6 @@ BEGIN
 		ELSE IF(@ysnPost = 0)
 			BEGIN
 
-				----------------------------------------------------------------------
-				--------------- START UN-POST SALES INVOICE --------------------------
-				----------------------------------------------------------------------
---PRINT 'START UN-POST SALES INVOICE'
-				SET @strCurrentAllInvoiceIdList = NULL
-
-				-- Insert to Temp Table
-				DELETE FROM @tblTempInvoiceIds
-
-				INSERT INTO @tblTempInvoiceIds
-				(
-					intInvoiceId
-				)
-				SELECT DISTINCT 
-					intInvoiceId
-				FROM tblARInvoiceIntegrationLogDetail
-				WHERE intIntegrationLogId = (
-												SELECT intSalesInvoiceIntegrationLogId
-												FROM tblSTCheckoutHeader
-												WHERE intCheckoutId =  @intCheckoutId
-											)
---PRINT 'Populate variable with Invoice Ids'
-				-- Populate variable with Invoice Ids
-				SELECT @strCurrentAllInvoiceIdList = COALESCE(@strCurrentAllInvoiceIdList + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
-				FROM @tblTempInvoiceIds
-
-
-				IF(@strCurrentAllInvoiceIdList IS NOT NULL AND @strCurrentAllInvoiceIdList != '')
-					BEGIN
-
-						SET @ysnSuccess = 1
-
-						BEGIN TRY
---PRINT 'Un-Post from AR Invoice'
-							EXEC [dbo].[uspARPostInvoice]
-											@batchId			= NULL,
-											@post				= 0, -- 0 = UnPost
-											@recap				= @ysnRecap,
-											@param				= @strCurrentAllInvoiceIdList,
-											@userId				= @intCurrentUserId,
-											@beginDate			= NULL,
-											@endDate			= NULL,
-											@beginTransaction	= NULL,
-											@endTransaction		= NULL,
-											@exclude			= NULL,
-											@successfulCount	= @intSuccessfullCount OUTPUT,
-											@invalidCount		= @intInvalidCount OUTPUT,
-											@success			= @ysnSuccess OUTPUT,
-											@batchIdUsed		= @strBatchIdUsed OUTPUT,
-											@transType			= N'all',
-											@raiseError			= 1
-				
-										-- Check if Recap
-										IF(@ysnRecap = CAST(1 AS BIT))
-											BEGIN
-
-												IF(@strBatchIdUsed IS NOT NULL)
-													BEGIN
-
-														IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdUsed)
-															BEGIN
-																SET @strCreateGuidBatch = NEWID();
-
-																-- GET POST PREVIEW on GL Entries
-																INSERT INTO @GLEntries (
-																					[dtmDate] 
-																					,[strBatchId]
-																					,[intAccountId]
-																					,[dblDebit]
-																					,[dblCredit]
-																					,[dblDebitUnit]
-																					,[dblCreditUnit]
-																					,[strDescription]
-																					,[strCode]
-																					,[strReference]
-																					,[intCurrencyId]
-																					,[dblExchangeRate]
-																					,[dtmDateEntered]
-																					,[dtmTransactionDate]
-																					,[strJournalLineDescription]
-																					,[intJournalLineNo]
-																					,[ysnIsUnposted]
-																					,[intUserId]
-																					,[intEntityId]
-																					,[strTransactionId]
-																					,[intTransactionId]
-																					,[strTransactionType]
-																					,[strTransactionForm]
-																					,[strModuleName]
-																					,[intConcurrencyId]
-																					,[dblDebitForeign]	
-																					--,[dblDebitReport]	
-																					,[dblCreditForeign]	
-																					--,[dblCreditReport]	
-																					--,[dblReportingRate]	
-																					--,[dblForeignRate]
-																					,[strRateType]
-																			)
-																		SELECT [dtmDate] 
-																					,[strBatchId] = @strCreateGuidBatch
-																					,[intAccountId]
-																					,[dblDebit]
-																					,[dblCredit]
-																					,[dblDebitUnit]
-																					,[dblCreditUnit]
-																					,[strDescription]
-																					,[strCode]
-																					,[strReference]
-																					,[intCurrencyId]
-																					,[dblExchangeRate]
-																					,[dtmDateEntered]
-																					,[dtmTransactionDate]
-																					,[strJournalLineDescription]
-																					,[intJournalLineNo]
-																					,[ysnIsUnposted]
-																					,[intUserId]
-																					,[intEntityId]
-																					,[strTransactionId]
-																					,[intTransactionId]
-																					,[strTransactionType]
-																					,[strTransactionForm]
-																					,[strModuleName]
-																					,[intConcurrencyId]
-																					,[dblDebitForeign]	
-																					--,[dblDebitReport]	
-																					,[dblCreditForeign]	
-																					--,[dblCreditReport]	
-																					--,[dblReportingRate]	
-																					--,[dblForeignRate]
-																					,[strRateType]
-																			FROM tblGLPostRecap
-																			WHERE strBatchId = @strBatchIdUsed
-
-																ROLLBACK TRANSACTION 
-
-																BEGIN TRANSACTION
-
-																	EXEC dbo.uspGLPostRecap 
-																			@GLEntries
-																			,@intCurrentUserId
-																	
-																	SET @strBatchIdForNewPostRecap = @strCreateGuidBatch
-
-																GOTO ExitWithCommit
-															END
-														ELSE
-															GOTO ExitWithRollback
-													END
-											END
-						END TRY
-
-						BEGIN CATCH
-							SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
-							SET @ysnSuccess = CAST(0 AS BIT)
-							SET @strStatusMsg = 'Unpost Sales Invoice error: ' + ERROR_MESSAGE()
-
-							-- ROLLBACK
-							GOTO ExitWithRollback
-							-- -- RETURN
-
-						END CATCH
-
-						-- Example OutPut params
-						-- @intSuccessfullCount: 1
-						-- @intInvalidCount: 0
-						-- @ysnSuccess: 1
-						-- @strBatchIdUsed: BATCH-722
-
-						IF(@ysnSuccess = CAST(1 AS BIT))
-							BEGIN
-								-----------------------------------------------------------------------
-								------------------- START DELETE Invoice  -----------------------------
-								-----------------------------------------------------------------------
-								DECLARE @tblInvoiceIds TABLE ([intInvoiceId] INT NULL)
---PRINT 'START DELETE Invoice'
-								-- Insert to temp table
-								INSERT INTO @tblInvoiceIds(intInvoiceId)
-								SELECT CAST(intID AS INT) AS intInvoiceId 
-								FROM [dbo].[fnGetRowsFromDelimitedValues](@strCurrentAllInvoiceIdList) ORDER BY [intID] ASC
-
-								DECLARE @intCurrentInvoiceLoop AS INT
-
-								IF EXISTS(SELECT intInvoiceId FROM @tblInvoiceIds)
-									BEGIN
-										-- Update tblSTCheckoutHeader
-										UPDATE tblSTCheckoutHeader
-										SET intInvoiceId = NULL, strAllInvoiceIdList = NULL
-										WHERE intCheckoutId = @intCheckoutId
-
-										-- Update tblSTCheckoutCustomerCharges
-										UPDATE tblSTCheckoutCustomerCharges
-										SET intCustomerChargesInvoiceId = NULL
-										WHERE intCheckoutId = @intCheckoutId
-									END
-								
---PRINT 'Start While Loop'
-								WHILE EXISTS (SELECT TOP (1) 1 FROM @tblInvoiceIds)
-									BEGIN
-										SELECT TOP 1 @intCurrentInvoiceLoop = CAST(intInvoiceId AS INT)
-										FROM @tblInvoiceIds
-
-										-- DELETE Invoice
-										BEGIN TRY	
-											EXEC [dbo].[uspARDeleteInvoice]
-													@InvoiceId	= @intCurrentInvoiceLoop,
-													@UserId		= @intCurrentUserId
-										END TRY
-										BEGIN CATCH
-											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
-											SET @ysnSuccess = CAST(0 AS BIT)
-											SET @strStatusMsg = 'Deleting Sales Invoice Error: ' + ERROR_MESSAGE()
-
-											-- ROLLBACK
-											GOTO ExitWithRollback
-											-- RETURN
-
-										END CATCH
-
-										DELETE TOP (1) FROM @tblInvoiceIds
-									END
-								-----------------------------------------------------------------------
-								-------------------- END DELETE Invoice -------------------------------
-								-----------------------------------------------------------------------
---PRINT 'START UNPOST MArk Up / Down'
-								SET @ysnInvoiceStatus = 0
-								-----------------------------------------------------------------------
-								------------- START UNPOST MArk Up / Down -----------------------------
-								-----------------------------------------------------------------------
-								IF EXISTS(SELECT * FROM tblSTCheckoutMarkUpDowns WHERE intCheckoutId = @intCheckoutId)
-									BEGIN
-										-- UNPOST	
-										BEGIN TRY
-											IF (@strAllowMarkUpDown = 'I' OR @strAllowMarkUpDown = 'D')
-												BEGIN
-													EXEC uspSTMarkUpDownCheckoutPosting
-															@intCheckoutId
-															,@intCurrentUserId
-															,0 -- UNPOST
-															,@strMarkUpDownPostingStatusMsg OUTPUT
-															,@strBatchId OUTPUT
-															,@ysnIsPosted OUTPUT
-												END
-										END TRY
-
-										BEGIN CATCH
-											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
-											SET @ysnSuccess = CAST(0 AS BIT)
-											SET @strStatusMsg = 'Unpost Mark Up/Down error: ' + ERROR_MESSAGE()
-
-											-- ROLLBACK
-											GOTO ExitWithRollback
-											-- RETURN
-
-										END CATCH
---PRINT '@strStatusMsg: ' + ISNULL(@strMarkUpDownPostingStatusMsg, 'NULL')
-										IF(@strMarkUpDownPostingStatusMsg = '')
-											BEGIN
-												SET @strStatusMsg = 'Success' -- Should return to 'Success'
-											END
-										ELSE
-											BEGIN
-												SET @strStatusMsg = @strMarkUpDownPostingStatusMsg
-											END
-										
-									END
-								-----------------------------------------------------------------------
-								------------- END UNPOST MArk Up / Down -------------------------------
-								-----------------------------------------------------------------------
-							END
-					END
-				ELSE 
-					BEGIN
-						SET @strStatusMsg = 'There are no Invoice to Unpost'
-
-						-- ROLLBACK
-						GOTO ExitWithRollback
-						-- RETURN
-					END
-				----------------------------------------------------------------------
-				---------------- END UN-POST SALES INVOICE ---------------------------
-				----------------------------------------------------------------------
-
-
 
 				----------------------------------------------------------------------
 				--------------- START UN-POST RECEIVE PAYMENTS -----------------------
@@ -4416,6 +4138,7 @@ BEGIN
 				-- Check if Checkout has value on column 'intReceivePaymentsIntegrationLogId'
 				IF EXISTS(SELECT intReceivePaymentsIntegrationLogId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId AND intReceivePaymentsIntegrationLogId IS NOT NULL)
 					BEGIN
+
 						SET @intIntegrationLogId = (
 														SELECT intReceivePaymentsIntegrationLogId 
 														FROM tblSTCheckoutHeader 
@@ -4425,6 +4148,7 @@ BEGIN
 
 						IF EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId AND ysnPosted = 1)
 							BEGIN
+									-- List of Received Payments
 									INSERT INTO @PaymentsForInsert(
 											[intId]
 											,[strSourceTransaction]
@@ -4503,17 +4227,18 @@ BEGIN
 											,[ysnUseOriginalIdAsPaymentNumber]		= NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
 											,[ysnApplytoBudget]						= 0
 											,[ysnApplyOnAccount]					= 0
-											,[ysnInvoicePrepayment]					= 0
+											,[ysnInvoicePrepayment]					= 1 -- TEST
 											,[ysnImportedFromOrigin]				= NULL
 											,[ysnImportedAsPosted]					= NULL
-											,[ysnAllowPrepayment]					= 1
-											,[ysnPost]								= 0			-- 1. Post, 0. UnPost
+											,[ysnAllowPrepayment]					= 1  -- TEST
+											,[ysnPost]								= @ysnPost			-- 1. Post, 0. UnPost
 											,[ysnRecap]								= @ysnRecap
 											,[ysnUnPostAndUpdate]					= 1 -- To UNPOST
 											,[intEntityId]							= @intCurrentUserId
+
 											--Detail																																															
-											,[intPaymentDetailId]					= NULL --ILD.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
-											,[intInvoiceId]							= @intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
+											,[intPaymentDetailId]					= PaymentDetail.intPaymentDetailId --ILD.intPaymentDetailId		-- Payment Detail Id(Insert new Payment Detail if NULL, else Update existing)
+											,[intInvoiceId]							= PaymentDetail.intInvoiceId --TEST		--@intCreatedInvoiceId		-- Use Main Checkout intInvoiceId
 											,[strTransactionType]					= NULL
 											,[intBillId]							= NULL		-- Key Value from tblARInvoice ([tblAPBill].[intBillId]) 
 											,[strTransactionNumber]					= NULL		-- Transaction Number 
@@ -4528,77 +4253,228 @@ BEGIN
 											,[intCurrencyExchangeRateTypeId]		= NULL		-- Invoice Forex Rate Type Key Value from tblARInvoicedetail.intCurrencyExchangeRateTypeId - TOP 1
 											,[intCurrencyExchangeRateId]			= NULL		-- Invoice Detail Forex Rate Key Value from tblARInvoicedetail.intCurrencyExchangeRateId - Top 1
 											,[dblCurrencyExchangeRate]				= NULL		-- Average Invoice Detail Forex Rate - tblARInvoice.dblCurrencyExchangeRate 
-											,[ysnAllowOverpayment]					= 0
+											,[ysnAllowOverpayment]					= 1 -- TEST
 											,[ysnFromAP]							= NULL 
 										FROM tblSTCheckoutCustomerPayments CCP
-										--JOIN tblICItem I 
-										--	ON CCP.intItemId = I.intItemId
-										--JOIN tblICItemUOM UOM 
-										--	ON I.intItemId = UOM.intItemId
 										JOIN tblSTCheckoutHeader CH 
 											ON CCP.intCheckoutId = CH.intCheckoutId
-
 										JOIN tblARPaymentIntegrationLogDetail ILD
 											ON CH.intReceivePaymentsIntegrationLogId = ILD.intIntegrationLogId
 											AND CCP.intCustPaymentsId = ILD.intSourceId
 										JOIN tblARPayment Payment
 											ON ILD.intPaymentId = Payment.intPaymentId
-
-										--JOIN tblICItemLocation IL 
-										--	ON I.intItemId = IL.intItemId
-										--JOIN tblICItemPricing IP 
-										--	ON I.intItemId = IP.intItemId
-										--	AND IL.intItemLocationId = IP.intItemLocationId
+										INNER JOIN tblARPaymentDetail PaymentDetail
+											ON Payment.intPaymentId = PaymentDetail.intPaymentId
+										INNER JOIN tblARInvoice Inv
+											ON PaymentDetail.intInvoiceId = Inv.intInvoiceId
 										JOIN tblSTStore ST 
-											--ON IL.intLocationId = ST.intCompanyLocationId
 											ON CH.intStoreId = ST.intStoreId
 										JOIN vyuEMEntityCustomerSearch vC 
 											ON CCP.intCustomerId = vC.intEntityId
 										LEFT JOIN tblSMPaymentMethod PM	
 											ON CCP.intPaymentMethodID = PM.intPaymentMethodID
 										WHERE CCP.intCheckoutId = @intCheckoutId
-										AND CCP.dblPaymentAmount > 0
-										--AND UOM.ysnStockUnit = CAST(1 AS BIT)
+											AND CCP.dblPaymentAmount > 0
+											AND Inv.ysnPosted = 1
+											--AND UOM.ysnStockUnit = CAST(1 AS BIT)
 										ORDER BY
 											[intId]
 
+---- TEST
+--SELECT '@PaymentsForInsert', * FROM @PaymentsForInsert
+
 									IF EXISTS(SELECT TOP 1 1 FROM @PaymentsForInsert)
 										BEGIN
-											-- UnPost Recieve Payments
-											EXEC [dbo].[uspARProcessPayments]
-													@PaymentEntries	    = @PaymentsForInsert
-													,@UserId			= @intCurrentUserId
-													,@GroupingOption	= 6
-													,@RaiseError		= 0
-													,@ErrorMessage		= @ErrorMessage OUTPUT
-													,@LogId				= @intIntegrationLogId OUTPUT
+
+											BEGIN TRY
+												-- UnPost Recieve Payments
+												--DECLARE @IdsForUnPosting PaymentId
+												--DECLARE @RCVSuccess AS BIT
+												--		, @RCVBatchIdUsed AS NVARCHAR(100)
+												--		, @RCVBatchId AS NVARCHAR(100)
+
+												---- Get batch id
+												--SELECT @RCVBatchId = strBatchId 
+												--FROM tblARPaymentIntegrationLogDetail
+												--WHERE intIntegrationLogId = @intIntegrationLogId
+
+												--EXEC [dbo].[uspARPostPaymentNew]
+												--			 @BatchId			= @RCVBatchId
+												--			,@Post				= 0
+												--			,@Recap				= 0
+												--			,@UserId			= @intCurrentUserId
+												--			,@PaymentIds		= @IdsForUnPosting
+												--			,@IntegrationLogId	= @intIntegrationLogId
+												--			,@BeginDate			= NULL
+												--			,@EndDate			= NULL
+												--			,@BeginTransaction	= NULL
+												--			,@EndTransaction	= NULL
+												--			,@Exclude			= NULL
+												--			,@BatchIdUsed		= @RCVBatchIdUsed OUTPUT
+												--			,@Success			= @RCVSuccess OUTPUT
+												--			,@RaiseError		= 1
+
+---- TEST
+----PRINT '@RCVSuccess: ' + CAST(@RCVSuccess AS NVARCHAR(50))
+--SELECT '@PaymentsForInsert', * FROM @PaymentsForInsert
+
+												EXEC [dbo].[uspARProcessPayments]
+														@PaymentEntries	    = @PaymentsForInsert
+														,@UserId			= @intCurrentUserId
+														,@GroupingOption	= 6
+														,@RaiseError		= 0
+														,@ErrorMessage		= @ErrorMessage OUTPUT
+														,@LogId				= @intIntegrationLogId OUTPUT
+											END TRY
+											BEGIN CATCH
+												SET @ysnSuccess = CAST(0 AS BIT)
+												SET @strStatusMsg = 'Unposting Recieve Payments error: ' + ERROR_MESSAGE()
+												SET @ErrorMessage = @ErrorMessage
+
+												-- ROLLBACK
+												GOTO ExitWithRollback
+											END CATCH
+											
+---- TEST
+--SELECT 'tblARPaymentIntegrationLogDetail', * 
+--FROM tblARPaymentIntegrationLogDetail
+--WHERE intIntegrationLogId = @intIntegrationLogId
 
 											-- After Un-Posting is successfull delete the recieve payment record
 											IF(@ErrorMessage IS NULL) --AND EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId))
 												BEGIN
+													
+													-- 01
+													--INSERT INTO @tblIds
+													--(
+													--	intId
+													--)
+													--SELECT DISTINCT intPaymentId 
+													--FROM tblARPaymentIntegrationLogDetail 
+													--WHERE intIntegrationLogId = (
+													--								SELECT intReceivePaymentsIntegrationLogId
+													--								FROM tblSTCheckoutHeader
+													--								WHERE intCheckoutId = @intCheckoutId
+													--							)
+
 													-- Un-Post Success 
-				
-													INSERT INTO @tblIds
+													--DECLARE @intRCVPaymentId AS INT
+													--DECLARE @ysnRCVPaymentIsPosted AS INT
+
+
+													-- Handle more than one 
+													DECLARE @tempRCVPaymentsDetails TABLE
 													(
-														intId
+														intRCVPaymentsId INT,
+														ysnRCVPosted BIT,
+														intCPPInvoiceId INT
 													)
-													SELECT DISTINCT intPaymentId 
-													FROM tblARPaymentIntegrationLogDetail 
-													WHERE intIntegrationLogId = (
-																					SELECT intReceivePaymentsIntegrationLogId
-																					FROM tblSTCheckoutHeader
-																					WHERE intCheckoutId = @intCheckoutId
-																				)
-
-													-- Delete Recieve Payments
-													EXEC [dbo].[uspARDeletePayment]
-																  @PaymentIds	    =	@tblIds
-																, @intEntityUserId	=	@intCurrentUserId
-																, @ysnRaiseError    =	0
-																, @strErrorMessage  =	@ErrorMessage
 
 
-													IF(@ErrorMessage IS NOT NULL)
+													-- GET RCV Payment Id
+													INSERT INTO @tempRCVPaymentsDetails
+													(
+														intRCVPaymentsId,
+														ysnRCVPosted,
+														intCPPInvoiceId
+													)
+													SELECT DISTINCT 
+														Payment.intPaymentId,
+														Payment.ysnPosted,
+														PaymentDetail.intInvoiceId
+													FROM tblARPaymentIntegrationLogDetail LogDetail
+													INNER JOIN tblARPayment Payment
+														ON LogDetail.intPaymentId = Payment.intPaymentId
+													INNER JOIN tblARPaymentDetail PaymentDetail
+														ON Payment.intPaymentId = PaymentDetail.intPaymentId
+													WHERE LogDetail.intIntegrationLogId = (
+																								SELECT intReceivePaymentsIntegrationLogId
+																								FROM tblSTCheckoutHeader
+																								WHERE intCheckoutId = @intCheckoutId
+																						  )
+													
+													
+
+
+
+													-- Store all RCV details to get all CPP's
+													
+													--SELECT 
+													--	@intRCVPaymentId,
+													--	@ysnRCVPaymentIsPosted,
+													--	intInvoiceId
+													--FROM tblARPaymentDetail
+													--WHERE intPaymentId = @intRCVPaymentId
+
+
+---- TEST
+--SELECT '@tempRCVPaymentsDetails', * FROM @tempRCVPaymentsDetails
+
+  												    -- LOOP Here
+													DECLARE @intCPPInvoiceIdLoop AS INT
+													      , @intRCVPaymentIdLoop AS INT
+													WHILE EXISTS(SELECT TOP (1) intRCVPaymentsId FROM @tempRCVPaymentsDetails)
+														BEGIN
+															SELECT TOP (1) 
+																@intCPPInvoiceIdLoop = intCPPInvoiceId,
+																@intRCVPaymentIdLoop = intRCVPaymentsId
+															FROM @tempRCVPaymentsDetails
+
+---- TEST
+--SELECT 'tblARPayment', * FROM tblARPayment WHERE intPaymentId = @intRCVPaymentIdLoop
+
+
+															BEGIN TRY
+																IF EXISTS(SELECT intPaymentId FROM tblARPayment WHERE intPaymentId = @intRCVPaymentIdLoop AND ysnPosted = 0)
+																	BEGIN
+																		-- Delete Recieve Payments
+																		EXEC [dbo].[uspARProcessPaymentFromInvoice]
+																			 @InvoiceId						= @intCPPInvoiceIdLoop -- Invoice Id of CPP
+																			,@EntityId						= 1			
+																			,@RaiseError					= 0				
+																			,@PaymentId						= @intRCVPaymentIdLoop OUTPUT
+																			,@ErrorMessage					= @ErrorMessage OUTPUT
+
+
+																		IF(@ErrorMessage IS NULL)
+																			BEGIN
+
+																				-- DELETE CPP here
+																				EXEC [dbo].[uspARDeleteInvoice]
+																						@InvoiceId	= @intCPPInvoiceIdLoop,
+																						@UserId		= @intCurrentUserId
+
+																			END
+																		-- 01
+																		--EXEC [dbo].[uspARDeletePayment]
+																		--			  @PaymentIds	    =	@tblIds
+																		--			, @intEntityUserId	=	@intCurrentUserId
+																		--			, @ysnRaiseError    =	0
+																		--			, @strErrorMessage  =	@ErrorMessage
+																	END
+																ELSE 
+																	BEGIN
+																		SET @ysnSuccess = CAST(0 AS BIT)
+																		SET @strStatusMsg = 'RCV should be UnPosted before deleting'
+																		SET @ErrorMessage = @ErrorMessage
+
+																		-- ROLLBACK
+																		GOTO ExitWithRollback
+																	END
+
+														
+															END TRY
+															BEGIN CATCH
+																SET @ysnSuccess = CAST(0 AS BIT)
+																SET @strStatusMsg = 'Deleting Recieve Payments error: ' + ERROR_MESSAGE()
+																SET @ErrorMessage = @ErrorMessage
+
+																-- ROLLBACK
+																GOTO ExitWithRollback
+															END CATCH
+													
+
+															IF(@ErrorMessage IS NOT NULL)
 														BEGIN
 															-- DELETE Failed
 
@@ -4608,6 +4484,14 @@ BEGIN
 															GOTO ExitWithRollback
 															-- RETURN
 														END
+
+
+
+
+															DELETE TOP (1) FROM @tempRCVPaymentsDetails
+														END
+
+													
 												END
 											ELSE
 												BEGIN
@@ -4625,6 +4509,368 @@ BEGIN
 				----------------------------------------------------------------------
 				---------------- END UN-POST RECEIVE PAYMENTS ------------------------
 				----------------------------------------------------------------------
+
+
+
+
+
+				----------------------------------------------------------------------
+				--------------- START UN-POST SALES INVOICE --------------------------
+				----------------------------------------------------------------------
+--PRINT 'START UN-POST SALES INVOICE'
+				SET @strCurrentAllInvoiceIdList = NULL
+
+				-- Insert to Temp Table
+				DELETE FROM @tblTempInvoiceIds
+
+				INSERT INTO @tblTempInvoiceIds
+				(
+					intInvoiceId,
+					ysnPosted
+				)
+				SELECT DISTINCT 
+					Inv.intInvoiceId,
+					Inv.ysnPosted
+				FROM tblARInvoiceIntegrationLogDetail LogDetail
+				INNER JOIN tblARInvoice Inv
+					ON LogDetail.intInvoiceId = Inv.intInvoiceId
+				WHERE intIntegrationLogId = (
+												SELECT intSalesInvoiceIntegrationLogId
+												FROM tblSTCheckoutHeader
+												WHERE intCheckoutId =  @intCheckoutId
+											)
+				ORDER BY Inv.intInvoiceId DESC
+
+--PRINT 'Populate variable with Invoice Ids'
+
+				-- Populate variable with Invoice Ids
+				--SELECT @strCurrentAllInvoiceIdList = COALESCE(@strCurrentAllInvoiceIdList + ',', '') + CAST(Inv.intInvoiceId AS VARCHAR(50))
+				--FROM @tblTempInvoiceIds temp
+				--INNER JOIN tblARInvoice Inv
+				--	ON temp.intInvoiceId = Inv.intInvoiceId
+				--WHERE Inv.ysnPosted = 1
+
+
+				--IF(@strCurrentAllInvoiceIdList IS NOT NULL AND @strCurrentAllInvoiceIdList != '')
+				IF EXISTS(SELECT TOP 1 intInvoiceId FROM @tblTempInvoiceIds)
+					BEGIN -- 01
+
+						SET @ysnSuccess = 1
+
+						DECLARE @intInvoiceIdLoop AS INT
+								, @ysnPostedLoop AS BIT
+						WHILE EXISTS(SELECT TOP (1) intInvoiceId FROM @tblTempInvoiceIds)
+							BEGIN -- while
+								
+								SELECT TOP (1)
+									@intInvoiceIdLoop	=	intInvoiceId,
+									@ysnPostedLoop		=	ysnPosted
+								FROM @tblTempInvoiceIds
+
+								IF(@ysnPostedLoop = 1)
+									BEGIN
+										BEGIN TRY
+											EXEC [dbo].[uspARPostInvoice]
+													@batchId			= NULL,
+													@post				= 0, -- 0 = UnPost
+													@recap				= @ysnRecap,
+													@param				= @intInvoiceIdLoop,
+													@userId				= @intCurrentUserId,
+													@beginDate			= NULL,
+													@endDate			= NULL,
+													@beginTransaction	= NULL,
+													@endTransaction		= NULL,
+													@exclude			= NULL,
+													@successfulCount	= @intSuccessfullCount OUTPUT,
+													@invalidCount		= @intInvalidCount OUTPUT,
+													@success			= @ysnSuccess OUTPUT,
+													@batchIdUsed		= @strBatchIdUsed OUTPUT,
+													@transType			= N'all',
+													@raiseError			= 1
+				
+												-- Check if Recap
+												IF(@ysnRecap = CAST(1 AS BIT))
+													BEGIN
+
+														IF(@strBatchIdUsed IS NOT NULL)
+															BEGIN
+
+																IF EXISTS(SELECT strBatchId FROM tblGLPostRecap WHERE strBatchId = @strBatchIdUsed)
+																	BEGIN
+																		SET @strCreateGuidBatch = NEWID();
+
+																		-- GET POST PREVIEW on GL Entries
+																		INSERT INTO @GLEntries (
+																							[dtmDate] 
+																							,[strBatchId]
+																							,[intAccountId]
+																							,[dblDebit]
+																							,[dblCredit]
+																							,[dblDebitUnit]
+																							,[dblCreditUnit]
+																							,[strDescription]
+																							,[strCode]
+																							,[strReference]
+																							,[intCurrencyId]
+																							,[dblExchangeRate]
+																							,[dtmDateEntered]
+																							,[dtmTransactionDate]
+																							,[strJournalLineDescription]
+																							,[intJournalLineNo]
+																							,[ysnIsUnposted]
+																							,[intUserId]
+																							,[intEntityId]
+																							,[strTransactionId]
+																							,[intTransactionId]
+																							,[strTransactionType]
+																							,[strTransactionForm]
+																							,[strModuleName]
+																							,[intConcurrencyId]
+																							,[dblDebitForeign]	
+																							--,[dblDebitReport]	
+																							,[dblCreditForeign]	
+																							--,[dblCreditReport]	
+																							--,[dblReportingRate]	
+																							--,[dblForeignRate]
+																							,[strRateType]
+																					)
+																				SELECT [dtmDate] 
+																							,[strBatchId] = @strCreateGuidBatch
+																							,[intAccountId]
+																							,[dblDebit]
+																							,[dblCredit]
+																							,[dblDebitUnit]
+																							,[dblCreditUnit]
+																							,[strDescription]
+																							,[strCode]
+																							,[strReference]
+																							,[intCurrencyId]
+																							,[dblExchangeRate]
+																							,[dtmDateEntered]
+																							,[dtmTransactionDate]
+																							,[strJournalLineDescription]
+																							,[intJournalLineNo]
+																							,[ysnIsUnposted]
+																							,[intUserId]
+																							,[intEntityId]
+																							,[strTransactionId]
+																							,[intTransactionId]
+																							,[strTransactionType]
+																							,[strTransactionForm]
+																							,[strModuleName]
+																							,[intConcurrencyId]
+																							,[dblDebitForeign]	
+																							--,[dblDebitReport]	
+																							,[dblCreditForeign]	
+																							--,[dblCreditReport]	
+																							--,[dblReportingRate]	
+																							--,[dblForeignRate]
+																							,[strRateType]
+																					FROM tblGLPostRecap
+																					WHERE strBatchId = @strBatchIdUsed
+
+																		ROLLBACK TRANSACTION 
+
+																		BEGIN TRANSACTION
+
+																			EXEC dbo.uspGLPostRecap 
+																					@GLEntries
+																					,@intCurrentUserId
+																	
+																			SET @strBatchIdForNewPostRecap = @strCreateGuidBatch
+
+																		GOTO ExitWithCommit
+																	END
+																ELSE
+																	GOTO ExitWithRollback
+															END
+													END
+										END TRY
+
+										BEGIN CATCH
+											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+											SET @ysnSuccess = CAST(0 AS BIT)
+											SET @strStatusMsg = 'Unpost Sales Invoice error: ' + ERROR_MESSAGE()
+
+											-- ROLLBACK
+											GOTO ExitWithRollback
+											-- -- RETURN
+
+										END CATCH
+									END
+
+
+								-- Example OutPut params
+								-- @intSuccessfullCount: 1
+								-- @intInvalidCount: 0
+								-- @ysnSuccess: 1
+								-- @strBatchIdUsed: BATCH-722
+
+								IF(@ysnSuccess = CAST(1 AS BIT))
+									BEGIN
+										-----------------------------------------------------------------------
+										------------------- START DELETE Invoice  -----------------------------
+										-----------------------------------------------------------------------
+
+										-- Update tblSTCheckoutHeader to remove Invoice Id constraints
+										UPDATE tblSTCheckoutHeader
+										SET intInvoiceId = NULL, strAllInvoiceIdList = NULL
+										WHERE intCheckoutId = @intCheckoutId
+
+										-- Update tblSTCheckoutCustomerCharges
+										UPDATE tblSTCheckoutCustomerCharges
+										SET intCustomerChargesInvoiceId = NULL
+										WHERE intCheckoutId = @intCheckoutId
+
+										-- DELETE Invoice
+										BEGIN TRY	
+											EXEC [dbo].[uspARDeleteInvoice]
+													@InvoiceId	= @intInvoiceIdLoop,
+													@UserId		= @intCurrentUserId
+										END TRY
+
+										BEGIN CATCH
+											SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+											SET @ysnSuccess = CAST(0 AS BIT)
+											SET @strStatusMsg = 'Deleting Sales Invoice Error: ' + ERROR_MESSAGE()
+
+											-- ROLLBACK
+											GOTO ExitWithRollback
+										END CATCH
+
+--										DECLARE @tblInvoiceIds TABLE ([intInvoiceId] INT NULL)
+----PRINT 'START DELETE Invoice'
+--										-- Insert to temp table
+--										INSERT INTO @tblInvoiceIds(intInvoiceId)
+--										SELECT CAST(intID AS INT) AS intInvoiceId 
+--										FROM [dbo].[fnGetRowsFromDelimitedValues](@strCurrentAllInvoiceIdList) ORDER BY [intID] ASC
+
+--										DECLARE @intCurrentInvoiceLoop AS INT
+
+--										IF EXISTS(SELECT intInvoiceId FROM @tblInvoiceIds)
+--											BEGIN
+--												-- Update tblSTCheckoutHeader
+--												UPDATE tblSTCheckoutHeader
+--												SET intInvoiceId = NULL, strAllInvoiceIdList = NULL
+--												WHERE intCheckoutId = @intCheckoutId
+
+--												-- Update tblSTCheckoutCustomerCharges
+--												UPDATE tblSTCheckoutCustomerCharges
+--												SET intCustomerChargesInvoiceId = NULL
+--												WHERE intCheckoutId = @intCheckoutId
+--											END
+
+--		PRINT 'Will Un-Post INVOICEs'							
+--		--PRINT 'Start While Loop'
+--										WHILE EXISTS (SELECT TOP (1) 1 FROM @tblInvoiceIds)
+--											BEGIN
+--												SELECT TOP 1 @intCurrentInvoiceLoop = CAST(intInvoiceId AS INT)
+--												FROM @tblInvoiceIds
+
+--												-- DELETE Invoice
+--												BEGIN TRY	
+--		-- TEST
+--		PRINT 'Will Delete Invoice: ' + CAST(@intCurrentInvoiceLoop AS NVARCHAR(50))
+
+--													EXEC [dbo].[uspARDeleteInvoice]
+--															@InvoiceId	= @intCurrentInvoiceLoop,
+--															@UserId		= @intCurrentUserId
+--		-- TEST
+--		PRINT 'Delete Invoice: ' + CAST(@intCurrentInvoiceLoop AS NVARCHAR(50)) + ' successfully'
+
+--												END TRY
+--												BEGIN CATCH
+--													SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+--													SET @ysnSuccess = CAST(0 AS BIT)
+--													SET @strStatusMsg = 'Deleting Sales Invoice Error: ' + ERROR_MESSAGE()
+--		-- TEST
+--		PRINT 'Will Delete Invoice Error Found: ' + CAST(@intCurrentInvoiceLoop AS NVARCHAR(50)) + @strStatusMsg
+
+--													-- ROLLBACK
+--													GOTO ExitWithRollback
+--													-- RETURN
+
+--												END CATCH
+
+--												DELETE TOP (1) FROM @tblInvoiceIds
+--											END
+										-----------------------------------------------------------------------
+										-------------------- END DELETE Invoice -------------------------------
+										-----------------------------------------------------------------------
+
+
+
+--PRINT 'START UNPOST MArk Up / Down'
+										SET @ysnInvoiceStatus = 0
+										-----------------------------------------------------------------------
+										------------- START UNPOST MArk Up / Down -----------------------------
+										-----------------------------------------------------------------------
+										IF EXISTS(SELECT * FROM tblSTCheckoutMarkUpDowns WHERE intCheckoutId = @intCheckoutId)
+											BEGIN
+												-- UNPOST	
+												BEGIN TRY
+													IF (@strAllowMarkUpDown = 'I' OR @strAllowMarkUpDown = 'D')
+														BEGIN
+															EXEC uspSTMarkUpDownCheckoutPosting
+																	@intCheckoutId
+																	,@intCurrentUserId
+																	,0 -- UNPOST
+																	,@strMarkUpDownPostingStatusMsg OUTPUT
+																	,@strBatchId OUTPUT
+																	,@ysnIsPosted OUTPUT
+														END
+												END TRY
+
+												BEGIN CATCH
+													SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
+													SET @ysnSuccess = CAST(0 AS BIT)
+													SET @strStatusMsg = 'Unpost Mark Up/Down error: ' + ERROR_MESSAGE()
+
+													-- ROLLBACK
+													GOTO ExitWithRollback
+													-- RETURN
+
+												END CATCH
+		--PRINT '@strStatusMsg: ' + ISNULL(@strMarkUpDownPostingStatusMsg, 'NULL')
+												IF(@strMarkUpDownPostingStatusMsg = '')
+													BEGIN
+														SET @strStatusMsg = 'Success' -- Should return to 'Success'
+													END
+												ELSE
+													BEGIN
+														SET @strStatusMsg = @strMarkUpDownPostingStatusMsg
+													END
+										
+											END
+										-----------------------------------------------------------------------
+										------------- END UNPOST MArk Up / Down -------------------------------
+										-----------------------------------------------------------------------
+									END
+
+
+
+								DELETE TOP (1) FROM @tblTempInvoiceIds
+						END -- while
+
+						
+					END -- 01
+				ELSE 
+					BEGIN
+						SET @strStatusMsg = 'There are no Invoice to Unpost'
+
+						-- ROLLBACK
+						GOTO ExitWithRollback
+						-- RETURN
+					END
+				----------------------------------------------------------------------
+				---------------- END UN-POST SALES INVOICE ---------------------------
+				----------------------------------------------------------------------
+
+
+
+
+
+
 
 			END
 		----------------------------------------------------------------------
