@@ -180,10 +180,10 @@ BEGIN
 	ORDER BY
 		intCommodityId ASC 
 		,intLocationId ASC 
-		,intCategoryId ASC 
-		,intItemId ASC 
 		,dtmDate ASC
 		,dtmCreated ASC 
+		,intCategoryId ASC 
+		,intItemId ASC 
 END 
 
 ELSE IF @strResetType = @ResetType_Category_Location
@@ -234,10 +234,11 @@ BEGIN
 	ORDER BY
 		intCategoryId ASC 
 		,intLocationId ASC 
-		,intCommodityId ASC 
-		,intItemId ASC 
 		,dtmDate ASC
 		,dtmCreated ASC 
+		,intCommodityId ASC 
+		,intItemId ASC 
+
 END 
 
 ELSE IF @strResetType = @ResetType_Item_Location
@@ -288,10 +289,11 @@ BEGIN
 	ORDER BY
 		intItemId ASC 
 		,intLocationId ASC 
-		,intCommodityId ASC 
-		,intCategoryId ASC
 		,dtmDate ASC
 		,dtmCreated ASC 
+		,intCommodityId ASC 
+		,intCategoryId ASC
+
 END 
 
 ELSE

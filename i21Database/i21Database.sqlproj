@@ -7562,6 +7562,7 @@
     <Build Include="dbo\Views\vyuSTLocationItems.sql" />
     <None Include="Scripts\Post-Deployment\IC\17_Inventory_Constraints.sql" />
     <Build Include="dbo\Functions\fnCTGenerateReceiptDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesForInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

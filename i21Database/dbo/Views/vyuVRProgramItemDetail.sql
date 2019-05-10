@@ -22,6 +22,7 @@ FROM(
 		,B.dtmEndDate
 		,B.intConcurrencyId
 		,strCategoryCode =E.strCategoryCode -- '' COLLATE Latin1_General_CI_AS
+		, A.ysnActive
 	FROM tblVRProgram A
 	LEFT JOIN (
 		SELECT 
@@ -69,6 +70,7 @@ FROM(
 		,B.dtmEndDate
 		,B.intConcurrencyId
 		,strCategoryCode = E.strCategoryCode
+		, A.ysnActive
 	FROM tblVRProgram A
 	INNER JOIN tblVRProgramItem B
 		ON A.intProgramId = B.intProgramId
@@ -103,6 +105,7 @@ FROM(
 		,B.dtmEndDate
 		,intConcurrencyId = 0
 		,strCategoryCode = '' COLLATE Latin1_General_CI_AS
+		, A.ysnActive
 	FROM tblVRProgram A
 	LEFT JOIN tblVRProgramItem B
 		ON A.intProgramId = B.intProgramId

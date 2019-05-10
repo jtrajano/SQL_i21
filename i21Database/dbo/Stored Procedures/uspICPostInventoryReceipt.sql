@@ -1046,7 +1046,7 @@ BEGIN
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
 			BEGIN 
 				-- Call the post routine for the In-Transit costing. 
-				INSERT INTO @GLEntries (
+				INSERT INTO @DummyGLEntries (
 						[dtmDate] 
 						,[strBatchId]
 						,[intAccountId]
@@ -1082,9 +1082,52 @@ BEGIN
 				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 						@ItemsForTransferOrder  
 						,@strBatchId  
-						,NULL -- 'Inventory'
+						,'Inventory'
 						,@intEntityUserSecurityId
+
 			END 
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+			)
+			EXEC	@intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit
+					@strBatchId  
+					,'Inventory'
+					,@intEntityUserSecurityId
+					,DEFAULT 
+					,@intLocationId
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END 
@@ -1255,46 +1298,46 @@ BEGIN
 							,@intEntityUserSecurityId
 
 					-- Create the GL entries for Transfer Order 
-					INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm]
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]	
-						,[dblDebitReport]	
-						,[dblCreditForeign]	
-						,[dblCreditReport]	
-						,[dblReportingRate]	
-						,[dblForeignRate]
-						,[strRateType]
-					)
-					EXEC	@intReturnValue = uspICCreateGLEntries
-							@strBatchId 
-							,NULL 
-							,@intEntityUserSecurityId
-							,DEFAULT 
-
+					--INSERT INTO @GLEntries (
+					--	[dtmDate] 
+					--	,[strBatchId]
+					--	,[intAccountId]
+					--	,[dblDebit]
+					--	,[dblCredit]
+					--	,[dblDebitUnit]
+					--	,[dblCreditUnit]
+					--	,[strDescription]
+					--	,[strCode]
+					--	,[strReference]
+					--	,[intCurrencyId]
+					--	,[dblExchangeRate]
+					--	,[dtmDateEntered]
+					--	,[dtmTransactionDate]
+					--	,[strJournalLineDescription]
+					--	,[intJournalLineNo]
+					--	,[ysnIsUnposted]
+					--	,[intUserId]
+					--	,[intEntityId]
+					--	,[strTransactionId]
+					--	,[intTransactionId]
+					--	,[strTransactionType]
+					--	,[strTransactionForm]
+					--	,[strModuleName]
+					--	,[intConcurrencyId]
+					--	,[dblDebitForeign]	
+					--	,[dblDebitReport]	
+					--	,[dblCreditForeign]	
+					--	,[dblCreditReport]	
+					--	,[dblReportingRate]	
+					--	,[dblForeignRate]
+					--	,[strRateType]
+					--)
+					--EXEC	@intReturnValue = uspICCreateGLEntries
+					--		@strBatchId 
+					--		,NULL 
+					--		,@intEntityUserSecurityId
+					--		--,DEFAULT 
+										
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 				END 
 
@@ -1404,11 +1447,9 @@ BEGIN
 							@strBatchId 
 							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 							,@intEntityUserSecurityId
-
-					--IF @intReturnValue < 0 GOTO With_Rollback_Exit
+					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 					
 					-- Create GL Entries for Non-Stock Items
-					-- 
 					INSERT INTO @GLEntries (
 							[dtmDate] 
 							,[strBatchId]
@@ -1443,12 +1484,10 @@ BEGIN
 							,[dblForeignRate]
 							,[strRateType]
 					)
-					EXEC	@intReturnValue =
-					 uspICCreateReceiptGLEntriesForNonStockItems
+					EXEC	@intReturnValue = uspICCreateReceiptGLEntriesForNonStockItems
 							@strBatchId 
 							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-							,@intEntityUserSecurityId
-				
+							,@intEntityUserSecurityId				
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
 					--BEGIN 
@@ -1750,7 +1789,7 @@ BEGIN
 			@intTransactionId
 			,@strBatchId
 			,@intEntityUserSecurityId
-			,@INVENTORY_RECEIPT_TYPE			
+			,@INVENTORY_RECEIPT_TYPE		
 	END 
 END   
 

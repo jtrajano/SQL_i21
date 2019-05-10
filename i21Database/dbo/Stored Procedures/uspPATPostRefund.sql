@@ -228,7 +228,7 @@ BEGIN
 		[strDescription]				=	'Undistributed Equity',
 		[strCode]						=	@MODULE_CODE,
 		[strReference]					=	A.strRefundNo,
-		[intCurrencyId]					=	1,
+		[intCurrencyId]					=	V.intCurrencyId,
 		[dtmDateEntered]				=	DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0),
 		[dtmTransactionDate]			=	A.dtmRefundDate,
 		[strJournalLineDescription]		=	'Undistributed Equity',
@@ -253,6 +253,8 @@ BEGIN
 				ON A.intRefundId = B.intRefundId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
+			INNER JOIN tblAPVendor V
+				ON B.intCustomerId = V.intEntityId
 	WHERE	A.intRefundId = @intRefundId AND B.ysnEligibleRefund = 1
 	UNION ALL
 	--AP Clearing
@@ -267,7 +269,7 @@ BEGIN
 		[strDescription]				=	'AP Clearing',
 		[strCode]						=	@MODULE_CODE,
 		[strReference]					=	A.strRefundNo,
-		[intCurrencyId]					=	1,
+		[intCurrencyId]					=	V.intCurrencyId,
 		[dtmDateEntered]				=	DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0),
 		[dtmTransactionDate]			=	A.dtmRefundDate,
 		[strJournalLineDescription]		=	'AP Clearing',
@@ -292,6 +294,8 @@ BEGIN
 				ON A.intRefundId = B.intRefundId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
+			INNER JOIN tblAPVendor V
+				ON B.intCustomerId = V.intEntityId
 			CROSS JOIN tblPATCompanyPreference E
 	WHERE	A.intRefundId = @intRefundId AND B.ysnEligibleRefund = 1
 	UNION ALL
@@ -307,7 +311,7 @@ BEGIN
 		[strDescription]				=	'General Reserve',
 		[strCode]						=	@MODULE_CODE,
 		[strReference]					=	A.strRefundNo,
-		[intCurrencyId]					=	1,
+		[intCurrencyId]					=	V.intCurrencyId,
 		[dtmDateEntered]				=	DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0),
 		[dtmTransactionDate]			=	A.dtmRefundDate,
 		[strJournalLineDescription]		=	'General Reserve',
@@ -332,6 +336,8 @@ BEGIN
 				ON A.intRefundId = B.intRefundId
 			INNER JOIN tblPATRefundRate D
 				ON B.intRefundTypeId = D.intRefundTypeId
+			INNER JOIN tblAPVendor V
+				ON B.intCustomerId = V.intEntityId
 	WHERE	A.intRefundId = @intRefundId AND B.ysnEligibleRefund = 1
 
 ----------------------------------------------------------------------------------
