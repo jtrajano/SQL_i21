@@ -182,15 +182,28 @@ SELECT TOP 100 PERCENT * FROM (
         OUTER APPLY
         (
             SELECT
-                SUM(CASE WHEN charge.ysnPrice > 0 THEN -charge.dblAmount ELSE charge.dblAmount END) AS dblAmount
-            FROM tblQMTicketDiscount tktDiscount
-            INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
-            INNER JOIN tblICInventoryReceiptCharge charge ON dscntCode.intItemId = charge.intChargeId
+                    (ISNULL(charge.dblAmount,0) * (CASE WHEN charge.ysnPrice = 1 THEN -1 ELSE 1 END))
+                    + (
+                        ISNULL((CASE WHEN ISNULL(charge.intEntityVendorId, receipt.intEntityVendorId) != receipt.intEntityVendorId
+                                    THEN (CASE WHEN charge.ysnPrice = 1 AND chargeTax.ysnCheckoffTax = 0 THEN -charge.dblTax --negate, inventory receipt will bring postive tax
+                                                WHEN chargeTax.ysnCheckoffTax = 0 THEN ABS(charge.dblTax) ELSE charge.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
+                                    ELSE (CASE WHEN charge.ysnPrice = 1 AND chargeTax.ysnCheckoffTax = 1 THEN charge.dblTax * -1 ELSE charge.dblTax END ) END),0)
+                    )
+                AS dblAmount
+            FROM tblICInventoryReceiptCharge charge
+            OUTER APPLY
+            (
+                SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
+                WHERE IRCT.intInventoryReceiptChargeId = charge.intInventoryReceiptChargeId
+            )  chargeTax
             WHERE charge.intInventoryReceiptId = receipt.intInventoryReceiptId
-            AND tktDiscount.dblGradeReading != 0
-            AND tktDiscount.intTicketId = receiptItem.intSourceId --filter by ticketid
-            AND tktDiscount.strSourceType = 'Scale'
-            GROUP BY charge.intInventoryReceiptId
+            AND charge.intChargeId NOT IN (
+                SELECT
+                    dscntCode.intItemId
+                FROM tblQMTicketDiscount tktDiscount
+                INNER JOIN tblGRDiscountScheduleCode dscntCode ON tktDiscount.intDiscountScheduleCodeId = dscntCode.intDiscountScheduleCodeId
+                WHERE tktDiscount.intTicketId = receiptItem.intSourceId
+            )
         ) receiptCharge
         OUTER APPLY
         (

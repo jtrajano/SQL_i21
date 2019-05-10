@@ -119,6 +119,7 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@INVENTORY_RECEIPT_TYPE AS INT = 4
 
 		,@strFobPoint AS NVARCHAR(50)
+		,@receiptLocationId AS INT
 
 -- Create a snapshot of the gl values
 BEGIN
@@ -990,7 +991,6 @@ BEGIN
 	WHERE	ActualCostBucket.intItemId = ISNULL(@intItemId, ActualCostBucket.intItemId)
 			AND ActualCostBucket.dblStockIn <> ActualCostBucket.dblStockOut
 END 
-
 
 --------------------------------------------------------------------
 -- Retroactively compute the lot Qty and Weight. 
@@ -3369,37 +3369,12 @@ BEGIN
 				ORDER BY
 					ReceiptItem.intInventoryReceiptItemId ASC 
 
-				-- Get the Vendor Entity Id 
+				-- Get the Vendor Entity Id and intLocationId
 				SELECT	@intEntityId = intEntityVendorId
+						,@receiptLocationId = intLocationId
 				FROM	tblICInventoryReceipt r
 				WHERE	r.intInventoryReceiptId = @intTransactionId
 						AND r.strReceiptNumber = @strTransactionId
-
-				--IF @strTransactionType = 'Inventory Receipt'
-				--BEGIN 
-				--	EXEC @intReturnValue = dbo.uspICRepostCosting
-				--		@strBatchId
-				--		,@strAccountToCounterInventory
-				--		,@intEntityUserSecurityId
-				--		,@strGLDescription
-				--		,@ItemsToPost
-				--END 
-				--ELSE IF @strTransactionType = 'Inventory Return'
-				--BEGIN 
-				--	DELETE	tblICInventoryReturned
-				--	FROM	tblICInventoryReturned
-				--	WHERE	strBatchId = @strBatchId
-
-				--	UPDATE @ItemsToPost
-				--	SET dblQty = -dblQty 
-
-				--	EXEC @intReturnValue = dbo.uspICRepostReturnCosting
-				--		@strBatchId
-				--		,@strAccountToCounterInventory
-				--		,@intEntityUserSecurityId
-				--		,@strGLDescription
-				--		,@ItemsToPost
-				--END
 
 				-- Get the receipt type 
 				SET @strReceiptType = NULL 
@@ -3415,102 +3390,7 @@ BEGIN
 
 				IF @strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 				BEGIN 
-					-- Change the contra-account to In-Transit. 
-					--SET @strAccountToCounterInventory = 'Inventory In-Transit'
-					
-					---- Re-Assign the Source Location Id. 
-					--UPDATE	t
-					--SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
-					--FROM	tblICInventoryTransaction t INNER JOIN @ItemsToPost UDT
-					--			ON t.intItemId = UDT.intItemId
-					--			AND t.intItemLocationId = UDT.intItemLocationId
-					--			AND t.intItemUOMId = UDT.intItemUOMId
-					--			AND t.dblQty = UDT.dblQty
-					--			AND t.intTransactionId = UDT.intTransactionId
-					--			AND t.intTransactionDetailId = UDT.intTransactionDetailId
-					--			AND t.strTransactionId = UDT.strTransactionId
-					--WHERE	t.dblQty > 0 
-					--		AND UDT.intInTransitSourceLocationId IS NOT NULL 
-
 					SET @strAccountToCounterInventory = NULL 
-
-					--INSERT INTO @ItemsForInTransitCosting (
-					--		[intItemId] 
-					--		,[intItemLocationId] 
-					--		,[intItemUOMId] 
-					--		,[dtmDate] 
-					--		,[dblQty] 
-					--		,[dblUOMQty] 
-					--		,[dblCost] 
-					--		,[dblValue] 
-					--		,[dblSalesPrice] 
-					--		,[intCurrencyId] 
-					--		,[dblExchangeRate] 
-					--		,[intTransactionId] 
-					--		,[intTransactionDetailId] 
-					--		,[strTransactionId] 
-					--		,[intTransactionTypeId] 
-					--		,[intLotId] 
-					--		,[intSourceTransactionId] 
-					--		,[strSourceTransactionId] 
-					--		,[intSourceTransactionDetailId]
-					--		,[intFobPointId]
-					--		,[intInTransitSourceLocationId]
-					--		,[intForexRateTypeId]
-					--		,[dblForexRate]
-					--)
-					--SELECT
-					--		t.[intItemId] 
-					--		,t.[intItemLocationId] 
-					--		,iu.intItemUOMId 
-					--		,r.[dtmReceiptDate] 
-					--		,dblQty = -ri.dblOpenReceive  
-					--		,t.[dblUOMQty] 
-					--		,t.[dblCost] 
-					--		,t.[dblValue] 
-					--		,t.[dblSalesPrice] 
-					--		,t.[intCurrencyId] 
-					--		,t.[dblExchangeRate] 
-					--		,[intTransactionId] = r.intInventoryReceiptId 
-					--		,[intTransactionDetailId] = ri.intInventoryReceiptItemId
-					--		,[strTransactionId] = r.strReceiptNumber
-					--		,[intTransactionTypeId] = @INVENTORY_RECEIPT_TYPE
-					--		,t.[intLotId]
-					--		,t.[intTransactionId] 
-					--		,t.[strTransactionId] 
-					--		,t.[intTransactionDetailId] 
-					--		,t.[intFobPointId] 
-					--		,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
-					--		,[intForexRateTypeId] = t.intForexRateTypeId
-					--		,[dblForexRate] = t.dblForexRate
-					--FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
-					--			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-					--		INNER JOIN (
-					--			tblICInventoryTransferDetail td INNER JOIN tblICInventoryTransfer th
-					--				ON td.intInventoryTransferId = th.intInventoryTransferId
-					--		)
-					--			ON 
-					--				(
-					--					td.intInventoryTransferDetailId = ri.intSourceId
-					--					AND td.intInventoryTransferId = ri.intOrderId
-					--					AND ri.intInventoryTransferDetailId IS NULL 
-					--					AND ri.intInventoryTransferId IS NULL 
-					--				)
-					--				OR (
-					--					td.intInventoryTransferDetailId = ri.intInventoryTransferDetailId
-					--					AND td.intInventoryTransferId = ri.intInventoryTransferId
-					--				)
-					--		INNER JOIN tblICInventoryTransaction t 
-					--			ON t.strTransactionId = th.strTransferNo
-					--			AND t.intTransactionDetailId = td.intInventoryTransferDetailId
-					--		LEFT JOIN tblICItemUOM iu 
-					--			ON iu.intItemUOMId = ri.intUnitMeasureId
-					--		LEFT JOIN tblICItem i 
-					--			ON ri.intItemId = i.intItemId 
-					--WHERE	r.strReceiptNumber = @strTransactionId
-					--		AND t.ysnIsUnposted = 0 
-					--		AND t.dblQty > 0
-					--		AND i.strType <> 'Bundle'
 
 					INSERT INTO @ItemsForInTransitCosting (
 							[intItemId] 
@@ -3651,11 +3531,12 @@ BEGIN
 							,[dblReportingRate]
 							,[dblForeignRate]
 						)
-						EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
+						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
 							@strBatchId
-							,NULL 
+							,'Inventory'
 							,@intEntityUserSecurityId
 							,@strGLDescription
+							,@receiptLocationId
 							,@intItemId
 							,@strTransactionId
 							,@intCategoryId
@@ -3793,14 +3674,24 @@ BEGIN
 							,[dblReportingRate]
 							,[dblForeignRate]
 						)
-						EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
+						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
 							@strBatchId
-							,'Inventory'  
+							,'Inventory'
 							,@intEntityUserSecurityId
 							,@strGLDescription
+							,@receiptLocationId
 							,@intItemId
 							,@strTransactionId
 							,@intCategoryId
+
+						--EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
+						--	@strBatchId
+						--	,'Inventory'  
+						--	,@intEntityUserSecurityId
+						--	,@strGLDescription
+						--	,@intItemId
+						--	,@strTransactionId
+						--	,@intCategoryId
 
 						IF @intReturnValue <> 0 
 						BEGIN 
@@ -3875,22 +3766,6 @@ BEGIN
 						--PRINT 'Error found in uspICCreateReceiptGLEntries'
 						GOTO _EXIT_WITH_ERROR
 					END
-
-					---- Create the auto-variance when item was returned via IR. 
-					--BEGIN 
-					--	SET @intReturnValue = NULL 
-					--	EXEC @intReturnValue = [uspICCreateReceiptGLEntriesForReturnVariance]
-					--		@intTransactionId 
-					--		,@strTransactionId
-					--		,@strBatchId
-					--		,@intEntityUserSecurityId
-
-					--	IF @intReturnValue <> 0 
-					--	BEGIN 
-					--		--PRINT 'Error found in uspICRepostCosting - Inventory Receipt'
-					--		GOTO _EXIT_WITH_ERROR
-					--	END 	
-					--END 
 				END
 
 				ELSE IF @strTransactionType = 'Inventory Receipt' AND @strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
@@ -3901,7 +3776,11 @@ BEGIN
 								CASE 
 									WHEN owned_total.dblQty = 0 THEN owned.dblCost
 									ELSE 
-										dbo.fnDivide(t.dblValue, owned_total.dblQty)
+										dbo.fnDivide(
+											t.dblValue 
+											, owned_total.dblQty
+										)
+										+ dbo.fnGetOtherChargesFromInventoryReceipt(owned.intTransactionDetailId) -- If applicable, add the other charge to the item cost. 
 								END 
 					FROM	@ItemsToPost owned CROSS APPLY (
 								SELECT 
@@ -3943,50 +3822,50 @@ BEGIN
 						GOTO _EXIT_WITH_ERROR
 					END 	
 
-					SET @intReturnValue = NULL 
-					INSERT INTO @GLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm] 
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]
-							,[dblDebitReport]
-							,[dblCreditForeign]
-							,[dblCreditReport]
-							,[dblReportingRate]
-							,[dblForeignRate]
-							,[strRateType]
-					)			
-					EXEC @intReturnValue = dbo.uspICCreateGLEntries
-						@strBatchId 
-						,@strAccountToCounterInventory
-						,@intEntityUserSecurityId
-						,@strGLDescription
-						,NULL 
-						,@intItemId -- This is only used when rebuilding the stocks.
-						,@strTransactionId -- This is only used when rebuilding the stocks.
-						,@intCategoryId
+					--SET @intReturnValue = NULL 
+					--INSERT INTO @GLEntries (
+					--		[dtmDate] 
+					--		,[strBatchId]
+					--		,[intAccountId]
+					--		,[dblDebit]
+					--		,[dblCredit]
+					--		,[dblDebitUnit]
+					--		,[dblCreditUnit]
+					--		,[strDescription]
+					--		,[strCode]
+					--		,[strReference]
+					--		,[intCurrencyId]
+					--		,[dblExchangeRate]
+					--		,[dtmDateEntered]
+					--		,[dtmTransactionDate]
+					--		,[strJournalLineDescription]
+					--		,[intJournalLineNo]
+					--		,[ysnIsUnposted]
+					--		,[intUserId]
+					--		,[intEntityId]
+					--		,[strTransactionId]
+					--		,[intTransactionId]
+					--		,[strTransactionType]
+					--		,[strTransactionForm] 
+					--		,[strModuleName]
+					--		,[intConcurrencyId]
+					--		,[dblDebitForeign]
+					--		,[dblDebitReport]
+					--		,[dblCreditForeign]
+					--		,[dblCreditReport]
+					--		,[dblReportingRate]
+					--		,[dblForeignRate]
+					--		,[strRateType]
+					--)			
+					--EXEC @intReturnValue = dbo.uspICCreateGLEntries
+					--	@strBatchId 
+					--	,@strAccountToCounterInventory
+					--	,@intEntityUserSecurityId
+					--	,@strGLDescription
+					--	,NULL 
+					--	,@intItemId -- This is only used when rebuilding the stocks.
+					--	,@strTransactionId -- This is only used when rebuilding the stocks.
+					--	,@intCategoryId
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -4561,31 +4440,6 @@ BEGIN
 					GOTO _EXIT_WITH_ERROR
 				END 
 			END 
-				
-			---- Fix discrepancies when posting Consume and Produce. 
-			--IF ISNULL(@ysnPost, 1) = 1 
-			--AND EXISTS (SELECT TOP 1 1 FROM @GLEntries WHERE strTransactionType = 'Consume' OR strTransactionType = 'Produce')
-			--BEGIN 
-			--	--PRINT 'Update decimal issue for Produce'
-
-			--	UPDATE	@GLEntries 
-			--	SET		dblDebit = (
-			--				SELECT	SUM(ISNULL(dblCredit, 0)) 
-			--				FROM	@GLEntries 
-			--				WHERE	strTransactionType IN ('Consume', 'Inventory Auto Variance')
-			--			) 
-			--	WHERE	strTransactionType = 'Produce'
-			--			AND dblDebit <> 0 
-						
-			--	UPDATE	@GLEntries 
-			--	SET		dblCredit = (
-			--				SELECT	SUM(ISNULL(dblDebit, 0)) 
-			--				FROM	@GLEntries 
-			--				WHERE	strTransactionType IN ('Consume', 'Inventory Auto Variance')
-			--			) 
-			--	WHERE	strTransactionType = 'Produce'
-			--			AND dblCredit <> 0 
-			--END 
 		END 
 
 		-- Book the G/L Entries (except for cost adjustment)
