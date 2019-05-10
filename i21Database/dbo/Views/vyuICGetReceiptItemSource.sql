@@ -234,7 +234,7 @@ SELECT
 	, strFieldNo = 
 		CASE Receipt.intSourceType
 			-- None
-			WHEN 0 THEN ContractFarm.strFieldNumber
+			WHEN 0 THEN ContractFarm.strLocationName
 			-- Scale
 			WHEN 1 THEN ScaleFarm.strFieldNumber
 			ELSE NULL 
@@ -277,7 +277,7 @@ LEFT JOIN vyuCTCompactContractDetailView ContractView
 	ON ContractView.intContractDetailId = ReceiptItem.intLineNo
 	AND Receipt.strReceiptType = 'Purchase Contract'
 LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ContractView.intContractDetailId
-LEFT JOIN tblEMEntityFarm ContractFarm ON ContractFarm.intFarmFieldId = ContractDetail.intFarmFieldId
+LEFT JOIN tblEMEntityLocation ContractFarm ON ContractFarm.intEntityLocationId = ContractDetail.intFarmFieldId
 LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = ReceiptItem.intSourceId and Receipt.intSourceType = 1
 LEFT JOIN tblEMEntityFarm ScaleFarm ON ScaleFarm.intFarmFieldId = ticket.intFarmFieldId
 OUTER APPLY (
