@@ -62,7 +62,7 @@ BEGIN
 			, Lot.strLotAlias
 			, dblSystemCount = ISNULL(Transactions.dblOnHand, 0)
 			, dblWeightQty = Lot.dblWeight
-			, dblLastCost = Lot.dblLastCost
+			, dblLastCost = ISNULL(Transactions.dblCost, 0)
 			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
 			, Lot.intItemUOMId
 			, Lot.intWeightUOMId
@@ -86,10 +86,11 @@ BEGIN
 				, t.intStorageLocationId
 				, t.intItemUOMId
 				, t.intLotId
-				, dtmDate = CAST(CONVERT(VARCHAR(10), t.dtmDate,112) AS DATETIME)
+				, dblCost = MAX(t.dblCost)
 				, dblOnHand = SUM(t.dblQty)
 			FROM tblICInventoryTransaction t
-			GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intItemUOMId, t.intLotId, CONVERT(VARCHAR(10), t.dtmDate,112)
+			WHERE dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @AsOfDate) = 1
+			GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intItemUOMId, t.intLotId
 		) Transactions ON Transactions.intItemId = Item.intItemId
 			AND Transactions.intItemLocationId = ItemLocation.intItemLocationId
 			AND Transactions.intSubLocationId = Lot.intSubLocationId
@@ -102,7 +103,6 @@ BEGIN
 		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (Lot.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 		AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)	
-		AND dbo.fnDateLessThanEquals(Transactions.dtmDate, @AsOfDate) = 1		
 		AND Item.strLotTracking <> 'No'
 		AND ((dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 END
@@ -135,7 +135,7 @@ BEGIN
 		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
 			---- Convert the last cost from Stock UOM to stock.intItemUOMId
-			CASE 
+			ISNULL(CASE 
 				WHEN il.intCostingMethod = 1 THEN 
 					AVERAGE.dblCost
 				WHEN il.intCostingMethod = 2 THEN 
@@ -150,12 +150,7 @@ BEGIN
 						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 						, COALESCE(stock.dblLastCost, p.dblLastCost)
 					)
-			END
-			--dbo.fnCalculateCostBetweenUOM(
-			--	stockUOM.intItemUOMId
-			--	, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-			--	, COALESCE(stock.dblLastCost, p.dblLastCost)
-			--)
+			END, 0)
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 		, ysnRecount = 0

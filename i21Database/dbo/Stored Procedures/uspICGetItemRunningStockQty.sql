@@ -31,10 +31,10 @@ FROM tblICItem Item
 			, t.intStorageLocationId
 			, t.intLotId
 			, t.intItemUOMId
-			, dtmDate = CAST(CONVERT(VARCHAR(10), t.dtmDate,112) AS DATETIME)
 			, dblOnHand = SUM(t.dblQty)
 		FROM tblICInventoryTransaction t
-		GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intLotId, t.intItemUOMId, CONVERT(VARCHAR(10), t.dtmDate,112)
+		WHERE dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @dtmAsOfDate) = 1
+		GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intLotId, t.intItemUOMId
 	) Transactions ON Transactions.intItemId = Item.intItemId
 		AND Transactions.intItemLocationId = ItemLocation.intItemLocationId 
 	INNER JOIN tblICItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId
@@ -46,7 +46,6 @@ FROM tblICItem Item
 	LEFT OUTER JOIN tblICUnitMeasure LotUOM ON LotItemUOM.intUnitMeasureId = LotUOM.intUnitMeasureId
 WHERE 
 	(Item.intItemId BETWEEN ISNULL(@intItemId, 1) AND ISNULL(@intItemId, 2147483647))
-	AND dbo.fnDateLessThanEquals(Transactions.dtmDate, @dtmAsOfDate) = 1
 	AND (ItemLocation.intLocationId = @intLocationId OR @intLocationId IS NULL)
 	AND (Transactions.intSubLocationId = @intStorageLocationId OR @intStorageLocationId IS NULL)
 	AND (Transactions.intStorageLocationId = @intStorageUnitId OR @intStorageUnitId IS NULL)
