@@ -8,7 +8,7 @@ SELECT
 	 strTempInvoiceReportNumber, 
 	 dblAccountTotalAmount , 
 	 dblAccountTotalDiscount, 
-	 intTermID,
+	 --intTermID,
 	 dtmInvoiceDate, 
 	 dblFeeTotalAmount, 
 	 dblInvoiceTotal = dblInvoiceTotal + ISNULL(dblTotalFuelExpensed,0), 
@@ -35,11 +35,11 @@ FROM (
 		cfInv.strTempInvoiceReportNumber, 
 		cfInv.dblAccountTotalAmount, 
 		cfInv.dblAccountTotalDiscount, 
-		CASE strTransactionType
-			WHEN 'Foreign Sale' THEN NULL
-			ELSE cfInv.intTermID
-			END
-			AS intTermID,
+		--CASE strTransactionType
+		--	WHEN 'Foreign Sale' THEN NULL
+		--	ELSE cfInv.intTermID
+		--	END
+		--	AS intTermID,
 		cfInv.dtmInvoiceDate, 
 		dblFeeTotalAmount = CASE 
 								WHEN LOWER(strStatementType) = 'invoice'
@@ -71,7 +71,9 @@ FROM (
 	ON cfInv.intAccountId = cfInvFee.intAccountId
 	AND cfInv.strUserId  COLLATE Latin1_General_CI_AS = cfInvFee.strUserId) AS outertable
 	
-	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, intTermID, dtmInvoiceDate, dblFeeTotalAmount, 
+	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, 
+	--intTermID,
+	 dtmInvoiceDate, dblFeeTotalAmount, 
 	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType,ysnActive,
 	strUserId
 GO
