@@ -32,7 +32,7 @@ FROM
 		dblCountOnHand = cd.dblSystemCount,
 		cd.dblWeightQty,
 		dblNewWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0),
-		dblNewCost = ISNULL(CASE 
+		dblNewCost = ISNULL(CASE WHEN c.strDataSource = 'Import CSV' THEN cd.dblLastCost ELSE CASE 
 								WHEN ItemLocation.intCostingMethod = 1 AND Item.strLotTracking = 'No'  THEN -- AVG
 									dbo.fnGetItemAverageCost(
 										cd.intItemId
@@ -55,7 +55,7 @@ FROM
 									dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))
 								ELSE
 									dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost)
-							END, 0),
+							END END, 0),
 		dblCost = cd.dblLastCost,
 		intLotId = cd.intLotId,
 		strLotNo = cd.strLotNo

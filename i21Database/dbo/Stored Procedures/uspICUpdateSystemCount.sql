@@ -275,6 +275,6 @@ DEALLOCATE cur
 
 -- Reset Count Flag
 UPDATE ic
-SET ic.intImportFlagInternal = NULL
+SET ic.intImportFlagInternal = NULL, ic.strDataSource = 'Import CSV'
 FROM tblICInventoryCount ic
 WHERE ic.intImportFlagInternal = 1
