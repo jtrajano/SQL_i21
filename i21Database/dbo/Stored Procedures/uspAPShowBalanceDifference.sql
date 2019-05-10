@@ -7,6 +7,8 @@ AS
 DECLARE @intPayablesCategory INT, @prepaymentCategory INT;
 DECLARE @startDate DATETIME = CASE WHEN @dateFrom IS NULL THEN '1/1/1900' ELSE @dateFrom END
 DECLARE @endDate DATETIME = CASE WHEN @dateTo IS NULL THEN GETDATE() ELSE @dateTo END
+DECLARE @discAccnt INT = (SELECT TOP 1 intPurchaseAdvAccount FROM tblSMCompanyLocation WHERE intPurchaseAdvAccount > 0)
+DECLARE @intAccnt INT = (SELECT TOP 1 intInterestAccountId FROM tblSMCompanyLocation WHERE intInterestAccountId > 0)
 SELECT @intPayablesCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account'
 SELECT @prepaymentCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Vendor Prepayments';
 
@@ -116,7 +118,7 @@ glPayables (
 			INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 			INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
 			INNER JOIN tblAPBill C ON A.strJournalLineDescription = C.strBillId
-			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
+			WHERE A.intAccountId IN (SELECT TOP 1 intInterestAccountId FROM tblSMCompanyLocation WHERE intInterestAccountId > 0)
 			AND A.ysnIsUnposted = 0
 			AND A.strTransactionForm = 'Payable' AND A.strJournalLineDescription != 'Posted Payment'
 			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @startDate AND @endDate
@@ -148,7 +150,7 @@ glPayables (
 			INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 			INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
 			INNER JOIN tblAPBill C ON A.strJournalLineDescription = C.strBillId
-			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
+			WHERE A.intAccountId IN (SELECT intPurchaseAdvAccount FROM tblSMCompanyLocation WHERE intPurchaseAdvAccount > 0)
 			AND A.ysnIsUnposted = 0
 			AND A.strTransactionForm = 'Payable' AND A.strJournalLineDescription != 'Posted Payment'
 			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @startDate AND @endDate
