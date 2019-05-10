@@ -23,7 +23,7 @@ FROM (
 		 , strTransactionType	= I.strTransactionType
 		 , dblTransactionTotal	= ISNULL(I.dblInvoiceTotal, 0.00)
 		 , dblAmountPaid		= ISNULL(I.dblPayment, 0.00)
-		 , dblAmountDue			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo') THEN ISNULL(I.dblAmountDue, 0.00) * -1 ELSE ISNULL(I.dblAmountDue, 0.00) END
+		 , dblAmountDue			= ISNULL(I.dblAmountDue, 0.00) * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)
 		 , dblInterest			= 0.00
 		 , intEntityCustomerId
 		 , ysnPaid				= I.ysnPaid
