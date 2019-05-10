@@ -118,7 +118,6 @@
 		,dblLineNetWeight = ((IRD.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) 
 		,tblGRDiscountId.strDiscountId
 		,dtmReceiptDate = ISNULL(Voucher.dtmDate, IR.dtmReceiptDate) 
-		,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 		,DS.strSplitDescription
 		,DS.intDeliverySheetId
 	FROM tblSCDeliverySheet DS

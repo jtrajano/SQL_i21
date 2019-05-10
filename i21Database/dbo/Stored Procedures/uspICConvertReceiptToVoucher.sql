@@ -299,9 +299,18 @@ BEGIN
 		SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL
 	)
 	BEGIN 
-		-- Voucher is no longer needed. All items have Voucher. 
-		EXEC uspICRaiseError 80111; 
-		SET @intReturnValue = -80111;
+		IF @billTypeToUse = @type_Voucher
+		BEGIN
+			-- Voucher is no longer needed. All items have Voucher. 
+			EXEC uspICRaiseError 80111; 
+			SET @intReturnValue = -80111;
+		END
+		ELSE
+		BEGIN
+			-- Debit Memo is no longer needed. All items have Debit Memo. 
+			EXEC uspICRaiseError 80110; 
+			SET @intReturnValue = -80110;
+		END
 		GOTO Post_Exit;
 	END 
 

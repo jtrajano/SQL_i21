@@ -21,7 +21,7 @@ FROM(
 		,B.dtmBeginDate
 		,B.dtmEndDate
 		,B.intConcurrencyId
-		,strCategoryCode = '' COLLATE Latin1_General_CI_AS
+		,strCategoryCode =E.strCategoryCode -- '' COLLATE Latin1_General_CI_AS
 	FROM tblVRProgram A
 	LEFT JOIN (
 		SELECT 
