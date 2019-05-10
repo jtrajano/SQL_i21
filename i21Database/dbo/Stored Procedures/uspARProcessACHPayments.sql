@@ -87,7 +87,11 @@ IF NOT EXISTS (SELECT TOP 1 NULL FROM @tblACHPayments)
 		RAISERROR('No ACH Payments to process.', 16, 1)
 		RETURN;
 	END
-
+IF EXISTS (SELECT TOP 1 NULL FROM @tblACHPayments where dtmDatePaid > CAST(CURRENT_TIMESTAMP AS DATE))
+	BEGIN
+		RAISERROR('Unable to process, ACH Payment record/s should be less than or equal to date today.', 16, 1)
+		RETURN;
+	END
 IF ISNULL(@intBankAccountId, 0) = 0
 	BEGIN
 		RAISERROR('Bank Account is required when processing ACH Payments.', 16, 1)
