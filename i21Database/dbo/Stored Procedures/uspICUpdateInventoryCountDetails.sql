@@ -57,18 +57,12 @@ BEGIN
 			, Lot.intParentLotId
 			, ParentLot.strParentLotNumber
 			, ParentLot.strParentLotAlias
-			, Lot.intLotId 
-			, strLotNumber
-			, strLotAlias
-			, dblSystemCount = ISNULL(lotQty.dblQty, 0)
-			, dblWeightQty = ISNULL(lotQty.dblWeight, 0)
-			, dblLastCost = 
-				-- Convert the last cost from Stock UOM to Lot's Pack UOM. 
-				dbo.fnCalculateCostBetweenUOM(
-					StockUOM.intItemUOMId
-					, Lot.intItemUOMId
-					, Lot.dblLastCost
-				) 
+			, Lot.intLotId
+			, Lot.strLotNumber
+			, Lot.strLotAlias
+			, dblSystemCount = ISNULL(Transactions.dblOnHand, 0)
+			, dblWeightQty = Lot.dblWeight
+			, dblLastCost = Lot.dblLastCost
 			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
 			, Lot.intItemUOMId
 			, Lot.intWeightUOMId
@@ -78,32 +72,39 @@ BEGIN
 			, intConcurrencyId = 1
 			, intSort = 1
 			, dblPhysicalCount = NULL
-	FROM	(
-				tblICLot Lot LEFT JOIN tblICParentLot ParentLot 
-					ON ParentLot.intParentLotId = Lot.intParentLotId
-			)	
-			INNER JOIN tblICItem Item 
-				ON Item.intItemId = Lot.intItemId
-			INNER JOIN tblICItemLocation ItemLocation 
-				ON ItemLocation.intItemLocationId = Lot.intItemLocationId
-			INNER JOIN tblICItemUOM StockUOM
-				ON StockUOM.intItemId = Item.intItemId
-				AND StockUOM.ysnStockUnit = 1
-			OUTER APPLY dbo.fnICLotQtyAsOf (
-				Item.intItemId
-				,@AsOfDate
-			) lotQty
-
-	WHERE 
-		Lot.intLotId = lotQty.intLotId 
-		AND (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
+	FROM tblICLot Lot
+		INNER JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
+		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = Lot.intItemLocationId
+		INNER JOIN tblICItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId
+			AND StockUOM.ysnStockUnit = 1
+		LEFT JOIN tblICParentLot ParentLot ON ParentLot.intParentLotId = Lot.intParentLotId
+		INNER JOIN (
+			SELECT
+					t.intItemId
+				, t.intItemLocationId
+				, t.intSubLocationId
+				, t.intStorageLocationId
+				, t.intItemUOMId
+				, t.intLotId
+				, dtmDate = CAST(CONVERT(VARCHAR(10), t.dtmDate,112) AS DATETIME)
+				, dblOnHand = SUM(t.dblQty)
+			FROM tblICInventoryTransaction t
+			GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intItemUOMId, t.intLotId, CONVERT(VARCHAR(10), t.dtmDate,112)
+		) Transactions ON Transactions.intItemId = Item.intItemId
+			AND Transactions.intItemLocationId = ItemLocation.intItemLocationId
+			AND Transactions.intSubLocationId = Lot.intSubLocationId
+			AND Transactions.intStorageLocationId = Lot.intStorageLocationId
+			AND Transactions.intLotId = Lot.intLotId
+			AND Transactions.intItemUOMId = Lot.intItemUOMId
+	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
 		AND (intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
 		AND (intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
 		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (Lot.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
-		AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)			
+		AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)	
+		AND dbo.fnDateLessThanEquals(Transactions.dtmDate, @AsOfDate) = 1		
 		AND Item.strLotTracking <> 'No'
-		AND ((lotQty.dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1)) 
+		AND ((dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 END
 ELSE
 BEGIN
