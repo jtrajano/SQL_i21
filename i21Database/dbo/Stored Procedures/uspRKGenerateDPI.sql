@@ -454,6 +454,7 @@ BEGIN
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), IA.dtmPostedDate, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
 			AND C.intCommodityId = @intCommodityId 
 			AND IAD.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN IAD.intItemId ELSE @intItemId END 
+			AND IA.strDescription NOT LIKE ('%Delivery Sheet Posting%') -- RM-2916/RM-2917
 			--AND Itm.intLocationId = case when ISNULL(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
 	)a
 
