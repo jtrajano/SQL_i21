@@ -197,7 +197,7 @@ BEGIN
 			,[dblDiscount]						=	A.dblDiscount
 			,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
 			,[strRateType]						=	exRates.strCurrencyExchangeRateType
-			,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,-1)
+			,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,1)
 			,[ysnSubCurrency]					=	ISNULL(ISNULL(A.ysnSubCurrency,costCur.ysnSubCurrency),0)
 			,[intSubCurrencyCents]				=	CASE WHEN costCur.intCurrencyID > 0 AND costCur.ysnSubCurrency = 1 THEN A.intSubCurrencyCents ELSE 1 END
 			,[intAccountId]						=	ISNULL(A.intAccountId, vendor.intGLAccountExpenseId)
