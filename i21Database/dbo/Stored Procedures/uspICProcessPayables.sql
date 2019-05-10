@@ -157,7 +157,7 @@ BEGIN
 			,[dblWeightUnitQty]					
 			,[intWeightUOMId]					
 			,[intCostCurrencyId]
-			,ReceiptCharge.[dblTax]							
+			,ISNULL(ReceiptCharge.[dblTax], 0)
 			,VoucherPayable.[dblDiscount]
 			,VoucherPayable.[intCurrencyExchangeRateTypeId]	
 			,ReceiptCharge.[dblForexRate]
@@ -326,7 +326,7 @@ BEGIN
 			WHERE Shipment.intInventoryShipmentId = @intShipmentId
 				AND Shipment.ysnPosted = 1
 			UNION ALL
-			/* To get the unposted Receipt Charges */
+			/* To get the unposted Shipment Charges */
 			SELECT 
 				VoucherPayable.[intEntityVendorId]
 				,[intTransactionType] =	1
@@ -367,7 +367,7 @@ BEGIN
 				,[dblWeightUnitQty]					
 				,[intWeightUOMId]					
 				,[intCostCurrencyId]
-				,ShipmentCharge.[dblTax]							
+				,ISNULL(ShipmentCharge.[dblTax], 0)
 				,VoucherPayable.[dblDiscount]
 				,VoucherPayable.[intCurrencyExchangeRateTypeId]	
 				,ShipmentCharge.[dblForexRate]

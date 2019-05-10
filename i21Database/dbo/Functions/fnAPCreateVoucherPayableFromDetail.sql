@@ -81,6 +81,7 @@ RETURNS TABLE AS RETURN
 		,[dblFranchiseAmount]				=	B.dblFranchiseAmount
 		,[dblActual]						=	B.dblActual
 		,[dblDifference]					=	B.dblDifference
+		,[ysnStage]							=	B.ysnStage
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId

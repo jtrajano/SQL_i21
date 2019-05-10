@@ -495,7 +495,7 @@ AS
 							  AND ISNULL(dblTotalAmount, 0) > @zeroDecimal
 						END
 
-					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue <= @dblMinFinanceSC
+					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue < @dblMinFinanceSC
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN

@@ -119,6 +119,8 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
+				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 		AND NOT EXISTS(
 			SELECT TOP 1 1
@@ -136,6 +138,8 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
+				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 	BEGIN
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
@@ -228,6 +232,7 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intLoadShipmentId]				
 				,B.[intLoadShipmentDetailId]	
 				,B.[intLoadShipmentCostId]	
+				,B.[intCustomerStorageId]	
 				,B.[intItemId]						
 				,B.[strItemNo]						
 				,B.[intPurchaseTaxGroupId]			
@@ -326,6 +331,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
+			,[intCustomerStorageId]	
 			,[intItemId]						
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
@@ -405,6 +411,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
+			,[intCustomerStorageId]	
 			,[intItemId]						
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			

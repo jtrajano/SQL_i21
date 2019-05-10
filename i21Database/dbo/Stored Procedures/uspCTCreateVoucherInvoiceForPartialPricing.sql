@@ -320,6 +320,21 @@ BEGIN TRY
 				    
 						SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
 				    
+						---- CT-3167: HOLD SINCE THE CURRENT IS STILL WORKING
+						--DECLARE @voucherPayablesData VoucherPayable
+						--DELETE FROM @voucherPayablesData
+						--DECLARE @intEntityVendorId INT
+						--SELECT @intEntityVendorId = intEntityVendorId FROM tblAPBill WHERE intBillId = @intBillId
+						--DECLARE @intItemId INT
+						--SELECT	@intItemId = intItemId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+						--INSERT INTO @voucherPayablesData(intBillId, intTransactionType, intInventoryReceiptItemId, dblQuantityToBill, dblCost, intEntityVendorId, intItemId, strMiscDescription, intAccountId, intQtyToBillUOMId)
+						--SELECT	@intBillId, 1, @intInventoryReceiptItemId, @dblQtyToBill, @dblFinalPrice, @intEntityVendorId, @intItemId, 'Soybean Meal - NGMO', 7, 40
+						--EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @throwError = 1
+						--SELECT	TOP 1 @intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId 
+						----AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL 
+						--ORDER BY intBillDetailId DESC
+						---- CT-3167: HOLD SINCE THE CURRENT IS STILL WORKING
+
 						--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
@@ -341,10 +356,28 @@ BEGIN TRY
 						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
 
 						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
-
-						SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
+						
+						DECLARE @total DECIMAL(18,6)
+						SELECT	@intBillDetailId = intBillDetailId, @total = dblQtyReceived FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
 
 						UPDATE	tblAPBillDetail SET dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
+
+						DECLARE @receiptDetails AS InventoryUpdateBillQty
+
+						INSERT INTO @receiptDetails
+						(
+							[intInventoryReceiptItemId],
+							[intInventoryReceiptChargeId],
+							[intInventoryShipmentChargeId],
+							[intSourceTransactionNoId],
+							[strSourceTransactionNo],
+							[intItemId],
+							[intToBillUOMId],
+							[dblToBillQty]
+						)
+						SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intNewBillId, @intBillDetailId, @dblQtyToBill, @total)
+
+						EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 

@@ -255,7 +255,7 @@ BEGIN TRY
 				END
 					
 				--EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
-				SELECT @dblPricedContractQty = ISNULL(SUM(CTP.dblQuantity),0) FROM vyuCTPriceContractFixationDetail CTP
+				SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
 				INNER JOIN tblCTPriceFixation CPX
 					ON CPX.intPriceFixationId = CTP.intPriceFixationId
 				INNER JOIN tblCTContractDetail CT
@@ -264,9 +264,9 @@ BEGIN TRY
 					ON SC.intContractId = CT.intContractDetailId
 				WHERE CT.intContractDetailId = @intTicketId
 
-				IF(@dblPricedContractQty > 0)
+				IF(@dblPricedContractQty IS NULL OR @dblPricedContractQty > 0)
 				BEGIN
-					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
+					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
 				END
 			END
 		END

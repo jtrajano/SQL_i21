@@ -278,6 +278,7 @@ BEGIN TRY
 				,[intInventoryReceiptItemId]
 				,[intLoadShipmentId]
 				,[intLoadShipmentDetailId]
+				,[intLoadShipmentCostId]
 				,[intItemId]
 				,[strMiscDescription]
 				,[dblOrderQty]
@@ -318,6 +319,7 @@ BEGIN TRY
 				,[intInventoryReceiptItemId] = NULL
 				,[intLoadShipmentId] = VDD.intLoadId
 				,[intLoadShipmentDetailId] = VDD.intLoadDetailId
+				,[intLoadShipmentCostId] = VDD.intLoadCostId
 				,[intItemId] = VDD.intItemId
 				,[strMiscDescription] = I.strDescription
 				,[dblOrderQty] = VDD.dblQtyReceived
@@ -422,6 +424,7 @@ BEGIN TRY
 					,[intInventoryReceiptItemId]
 					,[intLoadShipmentId]
 					,[intLoadShipmentDetailId]
+					,[intLoadShipmentCostId]
 					,[intItemId]
 					,[strMiscDescription]
 					,[dblOrderQty]
@@ -462,6 +465,7 @@ BEGIN TRY
 					,[intInventoryReceiptItemId] = NULL
 					,[intLoadShipmentId] = VDD.intLoadId
 					,[intLoadShipmentDetailId] = VDD.intLoadDetailId
+					,[intLoadShipmentCostId] = VDD.intLoadCostId
 					,[intItemId] = VDD.intItemId
 					,[strMiscDescription] = I.strDescription
 					,[dblOrderQty] = VDD.dblQtyReceived
@@ -551,6 +555,7 @@ BEGIN TRY
 					,[intInventoryReceiptChargeId]
 					,[intLoadShipmentId]
 					,[intLoadShipmentDetailId]
+					,[intLoadShipmentCostId]
 					,[intItemId]
 					,[strMiscDescription]
 					,[dblOrderQty]
@@ -592,6 +597,7 @@ BEGIN TRY
 					,[intInventoryReceiptChargeId] = IRC.intInventoryReceiptChargeId
 					,[intLoadShipmentId] = VDD.intLoadId
 					,[intLoadShipmentDetailId] = VDD.intLoadDetailId
+					,[intLoadShipmentCostId] = VDD.intLoadCostId
 					,[intItemId] = VDD.intItemId
 					,[strMiscDescription] = I.strDescription
 					,[dblOrderQty] = VDD.dblQtyReceived

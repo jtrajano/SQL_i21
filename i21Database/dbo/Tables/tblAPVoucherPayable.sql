@@ -28,6 +28,7 @@
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intCustomerStorageId]			INT NULL,
 	[intItemId]						INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
@@ -92,7 +93,9 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
 								,intInventoryReceiptItemId
 								--,intInventoryShipmentItemId
 								,intInventoryShipmentChargeId
-								,intLoadShipmentDetailId DESC);
+								,intCustomerStorageId
+								,intLoadShipmentDetailId 
+								,intLoadShipmentCostId DESC);
 -- GO
 -- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intPurchaseDetailId]
 --     ON [dbo].[tblAPVoucherPayable]([intPurchaseDetailId] ASC);

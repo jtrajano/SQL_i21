@@ -43,6 +43,8 @@ IF NOT EXISTS(
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
+			AND C.ysnStage = 1
 	)
 	AND NOT EXISTS(
 		SELECT TOP 1 1
@@ -59,11 +61,223 @@ IF NOT EXISTS(
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
+			AND C.ysnStage = 1
 	)
 BEGIN
 	EXEC uspAPAddVoucherPayable @voucherPayable = @voucherDetails, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 END
 
+IF OBJECT_ID(N'tempdb..#tmpVoucherPayableData') IS NOT NULL DROP TABLE #tmpVoucherPayableData
+
+SELECT TOP 100 PERCENT
+	intVoucherPayableId					=	A.intVoucherPayableId
+	,intTransactionType					=	A.intTransactionType
+	,intBillId							=	A.intBillId
+	,strMiscDescription					=	A.strMiscDescription
+	,intAccountId						=	CASE WHEN A.intAccountId > 0 THEN A.intAccountId ELSE vendor.intGLAccountExpenseId END
+	,intItemId							=	A.intItemId
+	,dblDiscount						=	A.dblDiscount
+	,ysnSubCurrency						=	ISNULL(A.ysnSubCurrency,0)
+	,intCurrencyId						=	A.intCostCurrencyId
+	,intLineNo							=	CASE WHEN A.intLineNo IS NULL
+												THEN ROW_NUMBER() OVER(PARTITION BY A.intBillId ORDER BY A.intBillId)
+											ELSE A.intLineNo END
+	,intStorageLocationId				=	A.intStorageLocationId
+	,intSubLocationId					=	A.intSubLocationId
+	/*Deferred voucher info*/			
+	,intDeferredVoucherId				=	A.intDeferredVoucherId
+	/*Integration fields*/				
+	,intInventoryReceiptItemId			=	A.intInventoryReceiptItemId
+	,strBillOfLading					=	A.strBillOfLading
+	,intInventoryReceiptChargeId		=	A.intInventoryReceiptChargeId
+	,intPaycheckHeaderId				=	A.intPaycheckHeaderId
+	,intPurchaseDetailId				=	A.intPurchaseDetailId
+	,intCustomerStorageId				=	A.intCustomerStorageId
+	,intLocationId						=	A.intItemLocationId
+	,intLoadDetailId					=	A.intLoadShipmentDetailId
+	,intLoadId							=	A.intLoadShipmentId
+	,intLoadShipmentCostId				=	A.intLoadShipmentCostId
+	,intScaleTicketId					=	A.intScaleTicketId
+	,intCCSiteDetailId					=	A.intCCSiteDetailId
+	,intInventoryShipmentChargeId		=	A.intInventoryShipmentChargeId
+	,intInvoiceId						=	A.intInvoiceId
+	,intBuybackChargeId					=	A.intBuybackChargeId
+	,intContractCostId					=	A.intContractCostId
+	,intContractHeaderId				=	ctDetail.intContractHeaderId
+	,intContractDetailId				=	ctDetail.intContractDetailId
+	,intContractSeq						=	ctDetail.intContractSeq
+	/*Prepaid info*/					
+	,dblPrepayPercentage				=	A.dblPrepayPercentage
+	,intPrepayTypeId					=	A.intPrepayTypeId
+	,ysnRestricted						=	CASE WHEN B.intTransactionType IN (2,13) THEN 1 ELSE 0 END --default to 1 if basis/prepaid
+	/*Basis Advance*/					
+	,dblBasis							=	A.dblBasis
+	,dblFutures							=	A.dblFutures
+	/*Claim info*/						
+	,intPrepayTransactionId				=	prepayTransaction.intBillId
+	,dblNetShippedWeight				=	A.dblNetShippedWeight
+	,dblWeightLoss						=	A.dblWeightLoss
+	,dblFranchiseWeight					=	A.dblFranchiseWeight
+	,dblFranchiseAmount					=	A.dblFranchiseAmount
+	,dblActual							=	A.dblActual
+	,dblDifference						=	A.dblDifference
+	/*Weight info*/						
+	,intWeightUOMId						=	NULLIF(A.intWeightUOMId,0)
+	,dblWeightUnitQty					=	ISNULL(A.dblWeightUnitQty, 1)
+	,dblNetWeight						=	A.dblNetWeight
+	,dblWeight							=	A.dblWeight
+	/*Cost info*/						
+	,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+												THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
+											ELSE A.intCostUOMId END
+	,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
+											ELSE A.dblCostUnitQty END
+	,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+												THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
+														THEN ctDetail.dblSeqPrice
+													ELSE 
+														(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
+															THEN ctDetail.dblSeqPrice
+															ELSE A.dblCost
+														END)
+													END)
+											ELSE A.dblCost END
+	,dblOldCost							=	A.dblOldCost
+	/*Quantity info*/					
+	,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+												THEN ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
+											ELSE A.intQtyToBillUOMId END
+	,dblUnitQty							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+												THEN 
+												(
+													CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+														THEN contractItemQtyUOM.dblUnitQty
+													ELSE A.dblQtyToBillUnitQty END
+												)
+											ELSE A.dblQtyToBillUnitQty END
+	/*Ordered and Received should always the same*/
+	,dblQtyOrdered						=	A.dblOrderQty
+	,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+												THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+														THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
+													ELSE A.dblQuantityToBill END)
+											ELSE A.dblQuantityToBill END
+	/*Contract info*/					
+	,dblQtyContract						=	ISNULL(ctDetail.dblDetailQuantity,0)
+	,dblContractCost					=	CASE WHEN A.intTransactionType = 13
+												THEN A.dblFutures + A.dblBasis
+												ELSE ISNULL(ctDetail.dblSeqPrice,0)
+												END
+	/*1099 info*/						
+	,int1099Form						=	ISNULL(A.int1099Form,
+												(CASE WHEN patron.intEntityId IS NOT NULL 
+														AND item.intItemId > 0
+														AND item.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN 4
+													WHEN entity.str1099Form = '1099-MISC' THEN 1
+													WHEN entity.str1099Form = '1099-INT' THEN 2
+													WHEN entity.str1099Form = '1099-B' THEN 3
+												ELSE 0 END)
+											)
+	,int1099Category					=	ISNULL(A.int1099Category,
+												CASE 	WHEN patron.intEntityId IS NOT NULL 
+														AND item.intItemId > 0
+														AND item.ysn1099Box3 = 1
+														AND patron.ysnStockStatusQualified = 1 
+														THEN 3
+												ELSE ISNULL(category1099.int1099CategoryId, 0) END
+											)
+	,dbl1099							=	ISNULL(A.dbl1099, 0)
+	,ysn1099Printed						=	0
+	/*Exchange rate info*/				
+	,intCurrencyExchangeRateTypeId		=	CASE WHEN A.intCurrencyId != compPref.intDefaultCurrencyId --if foreign currency
+												THEN (
+													CASE WHEN A.intCurrencyExchangeRateTypeId > 0 THEN A.intCurrencyExchangeRateTypeId --use the value we recieved for exchange rate type if valid
+													ELSE multiCur.intAccountsPayableRateTypeId
+													END
+												)
+												ELSE NULL
+											END
+	,dblRate							=	CASE WHEN A.intCurrencyId != compPref.intDefaultCurrencyId
+												THEN (
+													CASE WHEN A.dblExchangeRate != 0 THEN A.dblExchangeRate --use the value we recieved for exchange rate if valid
+													ELSE defaultExchangeRate.dblExchangeRate
+													END
+												)
+												ELSE 1
+											END
+	/*Tax info*/						
+	,intTaxGroupId						=	A.intPurchaseTaxGroupId
+	,dblTax								=	A.dblTax
+	/*Bundle info*/						
+	,intBundletUOMId					=	NULL
+	,strBundleDescription				=	NULL
+	,intItemBundleId					=	NULL
+	,dblBundleTotal						=	0
+	,dblQtyBundleReceived				=	0
+	,dblBundleUnitQty					=	0
+	,ysnStage							=	A.ysnStage
+INTO #tmpVoucherPayableData
+FROM @voucherDetails A
+INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.[intEntityId]
+INNER JOIN tblEMEntity entity ON vendor.[intEntityId] = entity.intEntityId
+CROSS APPLY (SELECT TOP 1 * FROM tblSMCompanyPreference) compPref
+/*Currency info*/
+CROSS APPLY (SELECT TOP 1 * FROM tblSMMultiCurrency) multiCur
+OUTER APPLY (
+	SELECT 
+		TOP 1 dblRate AS dblExchangeRate 
+	FROM tblSMCurrencyExchangeRate forex
+	INNER JOIN tblSMCurrencyExchangeRateDetail forexDetail
+		ON forex.intCurrencyExchangeRateId = forexDetail.intCurrencyExchangeRateId
+	WHERE forexDetail.intRateTypeId = ISNULL(NULLIF(A.intCurrencyExchangeRateTypeId,0), multiCur.intAccountsPayableRateTypeId) --use default AP rate type if no rate type received
+		AND forex.intFromCurrencyId = A.intCurrencyId
+		AND forex.intToCurrencyId = compPref.intDefaultCurrencyId
+		AND forexDetail.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
+	ORDER BY forexDetail.dtmValidFromDate DESC
+) defaultExchangeRate
+/*Claim join*/
+LEFT JOIN (tblAPBill prepayTransaction 
+				INNER JOIN tblAPBillDetail prepayDetail ON prepayTransaction.intBillId = prepayDetail.intBillId AND prepayTransaction.intTransactionType = 2)
+		ON prepayDetail.intContractDetailId = A.intContractDetailId
+LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
+LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
+LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
+LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
+LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
+LEFT JOIN tblICItemUOM contractItemQtyUOM ON contractItemQtyUOM.intItemUOMId = ctDetail.intItemUOMId
+
+-- IF OBJECT_ID(N'tempdb..#tmpVoucherPayableDataStage') IS NOT NULL DROP TABLE #tmpVoucherPayableDataStage
+
+-- SELECT
+-- 	*
+-- INTO #tmpVoucherPayableDataStage
+-- FROM #tmpVoucherPayableData A
+-- WHERE A.ysnStage = 1
+
+--UPDATE THE QTY BASE ON THE QTY BILLED ON STAGING
+UPDATE A
+	SET A.dblQtyOrdered = A.dblQtyOrdered - ISNULL(vp.dblQuantityBilled,0),
+		A.dblQtyReceived = A.dblQtyReceived - ISNULL(
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, vp.dblQuantityBilled)
+									ELSE vp.dblQuantityBilled END)
+							ELSE vp.dblQuantityBilled END
+							,0)
+FROM #tmpVoucherPayableData A
+LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
+LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
+LEFT JOIN @payablesKey payableKeys
+	ON payableKeys.intOldPayableId = A.intVoucherPayableId
+LEFT JOIN tblAPVoucherPayable vp 
+	ON payableKeys.intNewPayableId = vp.intVoucherPayableId
+WHERE A.ysnStage = 1
+	
 --uspAPUpdateVoucherPayableQty updates the tblAPVoucherPayable table for valid payables only
 --make sure to add on tblAPBillDetail the valid payables
 INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
@@ -75,202 +289,14 @@ FROM dbo.fnAPGetPayableKeyInfo(@voucherDetails)
 MERGE INTO tblAPBillDetail AS destination
 USING
 (
-	SELECT TOP 100 PERCENT
-		intVoucherPayableId					=	A.intVoucherPayableId
-		,intBillId							=	A.intBillId
-		,strMiscDescription					=	A.strMiscDescription
-		,intAccountId						=	CASE WHEN A.intAccountId > 0 THEN A.intAccountId ELSE vendor.intGLAccountExpenseId END
-		,intItemId							=	A.intItemId
-		,dblDiscount						=	A.dblDiscount
-		,ysnSubCurrency						=	ISNULL(A.ysnSubCurrency,0)
-		,intCurrencyId						=	A.intCostCurrencyId
-		,intLineNo							=	CASE WHEN A.intLineNo IS NULL
-													THEN ROW_NUMBER() OVER(PARTITION BY A.intBillId ORDER BY A.intBillId)
-												ELSE A.intLineNo END
-		,intStorageLocationId				=	A.intStorageLocationId
-		,intSubLocationId					=	A.intSubLocationId
-		/*Deferred voucher info*/			
-		,intDeferredVoucherId				=	A.intDeferredVoucherId
-		/*Integration fields*/				
-		,intInventoryReceiptItemId			=	A.intInventoryReceiptItemId
-		,strBillOfLading					=	A.strBillOfLading
-		,intInventoryReceiptChargeId		=	A.intInventoryReceiptChargeId
-		,intPaycheckHeaderId				=	A.intPaycheckHeaderId
-		,intPurchaseDetailId				=	A.intPurchaseDetailId
-		,intCustomerStorageId				=	A.intCustomerStorageId
-		,intLocationId						=	A.intItemLocationId
-		,intLoadDetailId					=	A.intLoadShipmentDetailId
-		,intLoadId							=	A.intLoadShipmentId
-		,intLoadShipmentCostId				=	A.intLoadShipmentCostId
-		,intScaleTicketId					=	A.intScaleTicketId
-		,intCCSiteDetailId					=	A.intCCSiteDetailId
-		,intInventoryShipmentChargeId		=	A.intInventoryShipmentChargeId
-		,intInvoiceId						=	A.intInvoiceId
-		,intBuybackChargeId					=	A.intBuybackChargeId
-		,intContractCostId					=	A.intContractCostId
-		,intContractHeaderId				=	ctDetail.intContractHeaderId
-		,intContractDetailId				=	ctDetail.intContractDetailId
-		,intContractSeq						=	ctDetail.intContractSeq
-		/*Prepaid info*/					
-		,dblPrepayPercentage				=	A.dblPrepayPercentage
-		,intPrepayTypeId					=	A.intPrepayTypeId
-		,ysnRestricted						=	CASE WHEN B.intTransactionType IN (2,13) THEN 1 ELSE 0 END --default to 1 if basis/prepaid
-		/*Basis Advance*/					
-		,dblBasis							=	A.dblBasis
-		,dblFutures							=	A.dblFutures
-		/*Claim info*/						
-		,intPrepayTransactionId				=	prepayTransaction.intBillId
-		,dblNetShippedWeight				=	A.dblNetShippedWeight
-		,dblWeightLoss						=	A.dblWeightLoss
-		,dblFranchiseWeight					=	A.dblFranchiseWeight
-		,dblFranchiseAmount					=	A.dblFranchiseAmount
-		,dblActual							=	A.dblActual
-		,dblDifference						=	A.dblDifference
-		/*Weight info*/						
-		,intWeightUOMId						=	NULLIF(A.intWeightUOMId,0)
-		,dblWeightUnitQty					=	ISNULL(A.dblWeightUnitQty, 1)
-		,dblNetWeight						=	A.dblNetWeight
-		,dblWeight							=	A.dblWeight
-		/*Cost info*/						
-		,intCostUOMId						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN ISNULL(ctDetail.intPriceItemUOMId, A.intCostUOMId)
-												ELSE A.intCostUOMId END
-		,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
-												ELSE A.dblCostUnitQty END
-		,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
-															THEN ctDetail.dblSeqPrice
-														ELSE 
-															(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
-																THEN ctDetail.dblSeqPrice
-																ELSE A.dblCost
-															END)
-														END)
-												ELSE A.dblCost END
-		,dblOldCost							=	A.dblOldCost
-		/*Quantity info*/					
-		,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN ISNULL(ctDetail.intItemUOMId, A.intQtyToBillUOMId)
-												ELSE A.intQtyToBillUOMId END
-		,dblUnitQty							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN 
-													(
-														CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-															THEN contractItemQtyUOM.dblUnitQty
-														ELSE A.dblQtyToBillUnitQty END
-													)
-												ELSE A.dblQtyToBillUnitQty END
-		/*Ordered and Received should always the same*/
-		,dblQtyOrdered						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityBilled,0))
-														ELSE A.dblQuantityToBill END)
-												ELSE A.dblQuantityToBill END
-		,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-													THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
-															THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill - ISNULL(vp.dblQuantityBilled,0))
-														ELSE A.dblQuantityToBill END)
-												ELSE A.dblQuantityToBill END
-		/*Contract info*/					
-		,dblQtyContract						=	ISNULL(ctDetail.dblDetailQuantity,0)
-		,dblContractCost					=	CASE WHEN A.intTransactionType = 13
-													THEN A.dblFutures + A.dblBasis
-													ELSE ISNULL(ctDetail.dblSeqPrice,0)
-													END
-		/*1099 info*/						
-		,int1099Form						=	ISNULL(A.int1099Form,
-													(CASE WHEN patron.intEntityId IS NOT NULL 
-															AND item.intItemId > 0
-															AND item.ysn1099Box3 = 1
-															AND patron.ysnStockStatusQualified = 1 
-															THEN 4
-														WHEN entity.str1099Form = '1099-MISC' THEN 1
-														WHEN entity.str1099Form = '1099-INT' THEN 2
-														WHEN entity.str1099Form = '1099-B' THEN 3
-													ELSE 0 END)
-												)
-		,int1099Category					=	ISNULL(A.int1099Category,
-													CASE 	WHEN patron.intEntityId IS NOT NULL 
-															AND item.intItemId > 0
-															AND item.ysn1099Box3 = 1
-															AND patron.ysnStockStatusQualified = 1 
-															THEN 3
-													ELSE ISNULL(category1099.int1099CategoryId, 0) END
-												)
-		,dbl1099							=	ISNULL(A.dbl1099, 0)
-		,ysn1099Printed						=	0
-		/*Exchange rate info*/				
-		,intCurrencyExchangeRateTypeId		=	CASE WHEN A.intCurrencyId != compPref.intDefaultCurrencyId --if foreign currency
-													THEN (
-														CASE WHEN A.intCurrencyExchangeRateTypeId > 0 THEN A.intCurrencyExchangeRateTypeId --use the value we recieved for exchange rate type if valid
-														ELSE multiCur.intAccountsPayableRateTypeId
-														END
-													)
-													ELSE NULL
-												END
-		,dblRate							=	CASE WHEN A.intCurrencyId != compPref.intDefaultCurrencyId
-													THEN (
-														CASE WHEN A.dblExchangeRate != 0 THEN A.dblExchangeRate --use the value we recieved for exchange rate if valid
-														ELSE defaultExchangeRate.dblExchangeRate
-														END
-													)
-													ELSE 1
-												END
-		/*Tax info*/						
-		,intTaxGroupId						=	A.intPurchaseTaxGroupId
-		,dblTax								=	A.dblTax
-		/*Bundle info*/						
-		,intBundletUOMId					=	NULL
-		,strBundleDescription				=	NULL
-		,intItemBundleId					=	NULL
-		,dblBundleTotal						=	0
-		,dblQtyBundleReceived				=	0
-		,dblBundleUnitQty					=	0
-	FROM @voucherDetails A
-	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
-	INNER JOIN tblAPVendor vendor ON A.intEntityVendorId = vendor.[intEntityId]
-	INNER JOIN tblEMEntity entity ON vendor.[intEntityId] = entity.intEntityId
-	CROSS APPLY (SELECT TOP 1 * FROM tblSMCompanyPreference) compPref
-	/*Currency info*/
-	CROSS APPLY (SELECT TOP 1 * FROM tblSMMultiCurrency) multiCur
-	OUTER APPLY (
-		SELECT 
-			TOP 1 dblRate AS dblExchangeRate 
-		FROM tblSMCurrencyExchangeRate forex
-		INNER JOIN tblSMCurrencyExchangeRateDetail forexDetail
-			ON forex.intCurrencyExchangeRateId = forexDetail.intCurrencyExchangeRateId
-		WHERE forexDetail.intRateTypeId = ISNULL(NULLIF(A.intCurrencyExchangeRateTypeId,0), multiCur.intAccountsPayableRateTypeId) --use default AP rate type if no rate type received
-			AND forex.intFromCurrencyId = A.intCurrencyId
-			AND forex.intToCurrencyId = compPref.intDefaultCurrencyId
-			AND forexDetail.dtmValidFromDate < (SELECT CONVERT(char(10), GETDATE(),126))
-		ORDER BY forexDetail.dtmValidFromDate DESC
-	) defaultExchangeRate
-	/*Claim join*/
-	LEFT JOIN (tblAPBill prepayTransaction 
-					INNER JOIN tblAPBillDetail prepayDetail ON prepayTransaction.intBillId = prepayDetail.intBillId AND prepayTransaction.intTransactionType = 2)
-			ON prepayDetail.intContractDetailId = A.intContractDetailId
-	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
-	LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
-	LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
-	LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
-	LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
-	LEFT JOIN tblICItemUOM contractItemQtyUOM ON contractItemQtyUOM.intItemUOMId = ctDetail.intItemUOMId
-	--we should expect that if creating voucher, their record should exists in Add Payables
-	--if payable is fully vouchered, it should trap with fnAPValidateVoucherPayableQty
-	LEFT JOIN @payablesKey payableKeys
-		ON payableKeys.intOldPayableId = A.intVoucherPayableId
-	LEFT JOIN tblAPVoucherPayable vp 
-		ON payableKeys.intNewPayableId = vp.intVoucherPayableId
-		-- ON ISNULL(vp.intPurchaseDetailId,1) = ISNULL(A.intPurchaseDetailId,1)
-		-- 	AND ISNULL(vp.intContractDetailId,1) = ISNULL(A.intContractDetailId,1)
-		-- 	AND ISNULL(vp.intScaleTicketId,1) = ISNULL(A.intScaleTicketId,1)
-		-- 	AND ISNULL(vp.intInventoryReceiptChargeId,1) = ISNULL(A.intInventoryReceiptChargeId,1)
-		-- 	AND ISNULL(vp.intInventoryReceiptItemId,1) = ISNULL(A.intInventoryReceiptItemId,1)
-		-- 	AND ISNULL(vp.intInventoryShipmentChargeId,1) = ISNULL(A.intInventoryShipmentChargeId,1)
-		-- 	AND ISNULL(vp.intLoadShipmentDetailId,1) = ISNULL(A.intLoadShipmentDetailId,1)
-		-- 	AND ISNULL(vp.intEntityVendorId,1) = ISNULL(A.intEntityVendorId,1)
-	ORDER BY A.intBillId ASC, intInventoryReceiptItemId ASC 
+	SELECT --TOP 100 PERCENT
+		*
+	FROM #tmpVoucherPayableData A
+	-- UNION ALL --ysnStage = 0
+	-- SELECT TOP 100 PERCENT
+	-- 	*
+	-- FROM #tmpVoucherPayableData A
+	-- WHERE A.ysnStage = 0
 ) AS SourceData
 ON (1=0)
 WHEN NOT MATCHED THEN
@@ -296,7 +322,8 @@ INSERT
 	,intPurchaseDetailId				
 	,intCustomerStorageId				
 	,intLocationId						
-	,intLoadDetailId					
+	,intLoadDetailId
+	,intLoadShipmentCostId					
 	,intLoadId							
 	,intScaleTicketId					
 	,intCCSiteDetailId					
@@ -357,7 +384,8 @@ INSERT
 	,intItemBundleId					
 	,dblBundleTotal						
 	,dblQtyBundleReceived				
-	,dblBundleUnitQty					
+	,dblBundleUnitQty			
+	,ysnStage		
 )
 VALUES
 (
@@ -381,7 +409,8 @@ VALUES
 	,intPurchaseDetailId				
 	,intCustomerStorageId				
 	,intLocationId						
-	,intLoadDetailId					
+	,intLoadDetailId	
+	,intLoadShipmentCostId				
 	,intLoadId							
 	,intScaleTicketId					
 	,intCCSiteDetailId					
@@ -443,6 +472,7 @@ VALUES
 	,dblBundleTotal						
 	,dblQtyBundleReceived				
 	,dblBundleUnitQty		
+	,ysnStage
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
 

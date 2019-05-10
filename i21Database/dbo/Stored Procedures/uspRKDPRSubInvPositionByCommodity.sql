@@ -388,7 +388,7 @@ BEGIN
 	INSERT INTO @tempCollateral
 	SELECT * 
 	FROM (
-		SELECT ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY c.dtmTransactionDate DESC) intRowNum
+		SELECT ROW_NUMBER() OVER (PARTITION BY c.intCollateralId ORDER BY c.dtmOpenDate DESC) intRowNum
 			, c.intCollateralId
 			, cl.strLocationName
 			, ch.strItemNo
@@ -398,19 +398,25 @@ BEGIN
 			, strContractNumber
 			,  c.dtmOpenDate
 			, ISNULL(c.dblOriginalQuantity, 0) dblOriginalQuantity
-			, ISNULL(c.dblRemainingQuantity, 0) dblRemainingQuantity
+			, dblRemainingQuantity = ISNULL(c.dblOriginalQuantity, 0) - ISNULL(ca.dblAdjustmentAmount, 0)
 			, c.intCommodityId as intCommodityId
 			, c.intUnitMeasureId
 			, c.intLocationId intCompanyLocationId
 			, case when c.strType='Purchase' then 1 else 2 end	intContractTypeId
 			, c.intLocationId,intEntityId,co.strCommodityCode
-		FROM tblRKCollateralHistory c
+		FROM tblRKCollateral c
+		LEFT JOIN (
+			SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
+			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmAdjustmentDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			GROUP BY intCollateralId
+
+		) ca on c.intCollateralId = ca.intCollateralId
 		JOIN tblICCommodity co on co.intCommodityId=c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=c.intCommodityId AND c.intUnitMeasureId=ium.intUnitMeasureId 
 		JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=c.intLocationId
 		LEFT JOIN @tblGetOpenContractDetail ch on c.intContractHeaderId=ch.intContractHeaderId AND ch.intContractStatusId <> 3
 		WHERE c.intCommodityId in (select intCommodity from @Commodity)
-			AND convert(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= convert(datetime,@dtmToDate) 
+			AND convert(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= convert(datetime,@dtmToDate) 
 			AND  c.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)	
 			AND c.ysnIncludeInPriceRiskAndCompanyTitled = 1				
 	) a WHERE a.intRowNum =1

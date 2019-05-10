@@ -391,4 +391,4 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					--CD.strItemDescription,
 					--CD.strShortName
 	)t,x
-	where x.intContractHeaderId = t.intContractHeaderId and x.intContractDetailId = t.intContractDetailId
+	where (x.intContractHeaderId = t.intContractHeaderId and x.intContractDetailId = t.intContractDetailId) OR (x.intContractHeaderId = t.intContractHeaderId and t.ysnMultiplePriceFixation = 1 and t.intContractDetailId IS NULL and t.intPriceFixationId IS NULL and t.intPriceContractId IS NULL)
