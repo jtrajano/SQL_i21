@@ -39,7 +39,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '282', strDescription = '#1 High Sulfur Diesel – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35743
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '283', strDescription = '#2 High Sulfur Diesel – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35744
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '313', strDescription = 'Ultra Low Sulfur Diesel – Undyed ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35745
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B00 ', strDescription = 'Biodiesel - Undyed (100%) ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35746
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B00', strDescription = 'Biodiesel - Undyed (100%) ', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35746
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B02', strDescription = 'Biodiesel - Undyed (2%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35747
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B05', strDescription = 'Biodiesel - Undyed (5%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35748
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'B10', strDescription = 'Biodiesel - Undyed (10%)', strProductCodeGroup = 'CD - Clear Diesel', strNote = NULL, intMasterId = 35749
@@ -52,14 +52,14 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '125', strDescription = 'Aviation Gasoline ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35756
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '065', strDescription = 'Gasoline ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35757
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '071', strDescription = 'Gasoline MTBE ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35758
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00 ', strDescription = 'Ethanol (100%) ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35759
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E00', strDescription = 'Ethanol (100%) ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35759
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E06', strDescription = 'Ethanol (6%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35760
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E08', strDescription = 'Ethanol (8%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35761
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E10', strDescription = 'Ethanol (10%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35762
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E11', strDescription = 'Ethanol (11%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35763
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E75', strDescription = 'Ethanol (75%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35764
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'E85', strDescription = 'Ethanol (85%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35765
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'M00 ', strDescription = 'Methanol (100%) ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35766
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'M00', strDescription = 'Methanol (100%) ', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35766
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'M11', strDescription = 'Methanol (11%)', strProductCodeGroup = 'GA - Gasoline', strNote = NULL, intMasterId = 35767
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '153', strDescription = 'Diesel Fuel #4 – Dyed ', strProductCodeGroup = 'HD - High-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35768
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '226', strDescription = 'High Sulfur Diesel – Dyed ', strProductCodeGroup = 'HD - High-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35769
@@ -75,7 +75,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '314', strDescription = 'Ultra Low Sulfur Diesel – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35779
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '072', strDescription = 'Kerosene – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35780
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = '073', strDescription = 'Low Sulfur Kerosene – Dyed ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35781
-	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D00 ', strDescription = 'Biodiesel - Dyed (100%) ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35782
+	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D00', strDescription = 'Biodiesel - Dyed (100%) ', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35782
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D02', strDescription = 'Biodiesel - Dyed (2%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35783
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D05', strDescription = 'Biodiesel - Dyed (5%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35784
 	UNION ALL SELECT intProductCodeId = 0, strProductCode = 'D10', strDescription = 'Biodiesel - Dyed (10%)', strProductCodeGroup = 'LD - Low-Sulfur Dyed Diesel', strNote = NULL, intMasterId = 35785
@@ -494,6 +494,15 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MF2', strFormName = 'Fuel Dealer Return', strScheduleCode = '', strScheduleName = 'OH Electronic (Text) File', strType = 'Text File', strNote = NULL, strTransactionType = NULL, intSort = 1280, strStoredProcedure = NULL, intMasterId = 351118, intComponentTypeId = 4
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '', strScheduleName = 'OH Electronic (Text) File', strType = 'Text File', strNote = NULL, strTransactionType = NULL, intSort = 3110, strStoredProcedure = NULL, intMasterId = 351119, intComponentTypeId = 4
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'TR2', strFormName = 'Transporter Return', strScheduleCode = '', strScheduleName = 'OH Electronic (Text) File', strType = 'Text File', strNote = NULL, strTransactionType = NULL, intSort = 3580, strStoredProcedure = NULL, intMasterId = 351120, intComponentTypeId = 4
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'Gasoline', strNote = '', strTransactionType = 'Invoice', intSort = 2385, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351121, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'Clear Diesel', strNote = '', strTransactionType = 'Invoice', intSort = 2395, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351122, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'Low Sulfur Dyed Diesel', strNote = '', strTransactionType = 'Invoice', intSort = 2405, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351123, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'High Sulfur Dyed Diesel', strNote = '', strTransactionType = 'Invoice', intSort = 2415, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351124, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'Kerosene', strNote = '', strTransactionType = 'Invoice', intSort = 2425, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351125, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'CNG', strNote = '', strTransactionType = 'Invoice', intSort = 2435, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351126, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'LNG', strNote = '', strTransactionType = 'Invoice', intSort = 2445, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351127, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'Propane', strNote = '', strTransactionType = 'Invoice', intSort = 3555, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351128, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'EX2', strFormName = 'Exporter Return', strScheduleCode = '7AMI_Bulk', strScheduleName = 'Exported to MI, MI State Tax Paid (to Bulk Plant)', strType = 'Other', strNote = '', strTransactionType = 'Invoice', intSort = 3565, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 351129, intComponentTypeId = 1
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
@@ -648,154 +657,154 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355052
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355053
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355054
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355055
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355055
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355056
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355057
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355058
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355059
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355060
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355061
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355062
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355062
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355063
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355064
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355065
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355066
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355067
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355068
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355069
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355069
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355070
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355071
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355072
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355073
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355074
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355075
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355076
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355076
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Gasoline', intMasterId = 355077
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355078
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355079
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355080
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355081
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355082
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355083
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355083
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355084
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355085
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355086
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355087
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355088
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355089
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355090
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355090
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Gasoline', intMasterId = 355091
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355092
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355093
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355094
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355095
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355096
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355097
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355097
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355098
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355099
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355100
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355101
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355102
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355103
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355104
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355104
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Gasoline', intMasterId = 355105
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355106
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355107
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355108
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355109
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355110
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355111
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355111
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355112
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355113
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355114
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355115
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355116
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355117
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355118
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355118
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Gasoline', intMasterId = 355119
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355120
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355121
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355122
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355123
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355124
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355125
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355125
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355126
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355127
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355128
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355129
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355130
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355131
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355132
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355132
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Gasoline', intMasterId = 355133
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355134
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355135
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355136
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355137
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355138
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355139
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355139
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355140
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355141
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355142
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355143
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355144
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355145
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355146
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355146
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Gasoline', intMasterId = 355147
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355148
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355149
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355150
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355151
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355152
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355153
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355153
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355154
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355155
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355156
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355157
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355158
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355159
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355160
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355160
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Gasoline', intMasterId = 355161
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355162
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355163
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355164
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355165
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355166
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355167
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355167
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355168
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355169
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355170
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355171
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355172
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355173
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355174
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355174
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Gasoline', intMasterId = 355175
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355176
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355177
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355178
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355179
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355180
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355181
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355181
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355182
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355183
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355184
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355185
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355186
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355187
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355188
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355188
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Gasoline', intMasterId = 355189
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355190
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355191
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355192
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355193
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355194
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355195
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355195
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355196
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355197
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355198
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355199
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355200
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355201
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355202
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355202
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Gasoline', intMasterId = 355203
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355204
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355205
@@ -806,7 +815,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355210
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355211
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355212
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355213
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355213
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355214
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355215
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Clear Diesel', intMasterId = 355216
@@ -822,7 +831,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', intMasterId = 355226
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', intMasterId = 355227
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', intMasterId = 355228
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', intMasterId = 355229
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', intMasterId = 355229
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', intMasterId = 355230
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', intMasterId = 355231
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Clear Diesel', intMasterId = 355232
@@ -838,7 +847,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', intMasterId = 355242
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', intMasterId = 355243
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', intMasterId = 355244
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', intMasterId = 355245
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', intMasterId = 355245
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', intMasterId = 355246
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', intMasterId = 355247
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Clear Diesel', intMasterId = 355248
@@ -854,7 +863,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', intMasterId = 355258
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', intMasterId = 355259
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', intMasterId = 355260
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', intMasterId = 355261
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', intMasterId = 355261
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', intMasterId = 355262
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', intMasterId = 355263
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Clear Diesel', intMasterId = 355264
@@ -870,7 +879,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', intMasterId = 355274
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', intMasterId = 355275
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', intMasterId = 355276
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', intMasterId = 355277
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', intMasterId = 355277
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', intMasterId = 355278
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', intMasterId = 355279
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Clear Diesel', intMasterId = 355280
@@ -886,7 +895,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Clear Diesel', intMasterId = 355290
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Clear Diesel', intMasterId = 355291
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Clear Diesel', intMasterId = 355292
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Clear Diesel', intMasterId = 355293
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Clear Diesel', intMasterId = 355293
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Clear Diesel', intMasterId = 355294
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Clear Diesel', intMasterId = 355295
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Clear Diesel', intMasterId = 355296
@@ -902,7 +911,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Clear Diesel', intMasterId = 355306
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Clear Diesel', intMasterId = 355307
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Clear Diesel', intMasterId = 355308
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Clear Diesel', intMasterId = 355309
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Clear Diesel', intMasterId = 355309
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Clear Diesel', intMasterId = 355310
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Clear Diesel', intMasterId = 355311
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Clear Diesel', intMasterId = 355312
@@ -918,7 +927,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Clear Diesel', intMasterId = 355322
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Clear Diesel', intMasterId = 355323
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Clear Diesel', intMasterId = 355324
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Clear Diesel', intMasterId = 355325
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Clear Diesel', intMasterId = 355325
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Clear Diesel', intMasterId = 355326
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Clear Diesel', intMasterId = 355327
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Clear Diesel', intMasterId = 355328
@@ -934,7 +943,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Clear Diesel', intMasterId = 355338
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Clear Diesel', intMasterId = 355339
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Clear Diesel', intMasterId = 355340
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Clear Diesel', intMasterId = 355341
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Clear Diesel', intMasterId = 355341
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Clear Diesel', intMasterId = 355342
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Clear Diesel', intMasterId = 355343
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Clear Diesel', intMasterId = 355344
@@ -950,7 +959,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Clear Diesel', intMasterId = 355354
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Clear Diesel', intMasterId = 355355
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Clear Diesel', intMasterId = 355356
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Clear Diesel', intMasterId = 355357
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Clear Diesel', intMasterId = 355357
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Clear Diesel', intMasterId = 355358
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Clear Diesel', intMasterId = 355359
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Clear Diesel', intMasterId = 355360
@@ -966,7 +975,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Clear Diesel', intMasterId = 355370
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Clear Diesel', intMasterId = 355371
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Clear Diesel', intMasterId = 355372
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Clear Diesel', intMasterId = 355373
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Clear Diesel', intMasterId = 355373
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Clear Diesel', intMasterId = 355374
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Clear Diesel', intMasterId = 355375
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Clear Diesel', intMasterId = 355376
@@ -982,7 +991,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Clear Diesel', intMasterId = 355386
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Clear Diesel', intMasterId = 355387
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Clear Diesel', intMasterId = 355388
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Clear Diesel', intMasterId = 355389
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Clear Diesel', intMasterId = 355389
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Clear Diesel', intMasterId = 355390
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Clear Diesel', intMasterId = 355391
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Clear Diesel', intMasterId = 355392
@@ -998,7 +1007,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Clear Diesel', intMasterId = 355402
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Clear Diesel', intMasterId = 355403
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Clear Diesel', intMasterId = 355404
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Clear Diesel', intMasterId = 355405
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Clear Diesel', intMasterId = 355405
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Clear Diesel', intMasterId = 355406
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Clear Diesel', intMasterId = 355407
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Clear Diesel', intMasterId = 355408
@@ -1014,7 +1023,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Clear Diesel', intMasterId = 355418
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Clear Diesel', intMasterId = 355419
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Clear Diesel', intMasterId = 355420
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Clear Diesel', intMasterId = 355421
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Clear Diesel', intMasterId = 355421
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Clear Diesel', intMasterId = 355422
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Clear Diesel', intMasterId = 355423
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Clear Diesel', intMasterId = 355424
@@ -1030,7 +1039,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Clear Diesel', intMasterId = 355434
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Clear Diesel', intMasterId = 355435
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Clear Diesel', intMasterId = 355436
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Clear Diesel', intMasterId = 355437
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Clear Diesel', intMasterId = 355437
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Clear Diesel', intMasterId = 355438
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Clear Diesel', intMasterId = 355439
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Clear Diesel', intMasterId = 355440
@@ -1046,7 +1055,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Clear Diesel', intMasterId = 355450
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Clear Diesel', intMasterId = 355451
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Clear Diesel', intMasterId = 355452
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Clear Diesel', intMasterId = 355453
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Clear Diesel', intMasterId = 355453
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Clear Diesel', intMasterId = 355454
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Clear Diesel', intMasterId = 355455
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Clear Diesel', intMasterId = 355456
@@ -1062,7 +1071,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Clear Diesel', intMasterId = 355466
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Clear Diesel', intMasterId = 355467
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Clear Diesel', intMasterId = 355468
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Clear Diesel', intMasterId = 355469
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Clear Diesel', intMasterId = 355469
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Clear Diesel', intMasterId = 355470
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Clear Diesel', intMasterId = 355471
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Clear Diesel', intMasterId = 355472
@@ -1078,7 +1087,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Clear Diesel', intMasterId = 355482
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Clear Diesel', intMasterId = 355483
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Clear Diesel', intMasterId = 355484
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Clear Diesel', intMasterId = 355485
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Clear Diesel', intMasterId = 355485
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Clear Diesel', intMasterId = 355486
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Clear Diesel', intMasterId = 355487
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Clear Diesel', intMasterId = 355488
@@ -1094,7 +1103,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Clear Diesel', intMasterId = 355498
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Clear Diesel', intMasterId = 355499
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Clear Diesel', intMasterId = 355500
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Clear Diesel', intMasterId = 355501
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Clear Diesel', intMasterId = 355501
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Clear Diesel', intMasterId = 355502
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Clear Diesel', intMasterId = 355503
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Clear Diesel', intMasterId = 355504
@@ -1110,7 +1119,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Clear Diesel', intMasterId = 355514
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Clear Diesel', intMasterId = 355515
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Clear Diesel', intMasterId = 355516
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Clear Diesel', intMasterId = 355517
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Clear Diesel', intMasterId = 355517
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Clear Diesel', intMasterId = 355518
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Clear Diesel', intMasterId = 355519
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Clear Diesel', intMasterId = 355520
@@ -1123,7 +1132,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355527
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355528
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355529
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355530
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355530
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355531
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355532
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355533
@@ -1136,7 +1145,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355540
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355541
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355542
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355543
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355543
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355544
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355545
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355546
@@ -1149,7 +1158,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355553
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355554
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355555
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355556
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355556
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355557
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355558
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355559
@@ -1162,7 +1171,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355566
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355567
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355568
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355569
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355569
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355570
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355571
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355572
@@ -1175,7 +1184,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355579
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355580
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355581
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355582
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355582
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355583
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355584
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355585
@@ -1188,7 +1197,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355592
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355593
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355594
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355595
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355595
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355596
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355597
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355598
@@ -1201,7 +1210,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355605
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355606
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355607
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355608
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355608
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355609
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355610
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355611
@@ -1214,7 +1223,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355618
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355619
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355620
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355621
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355621
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355622
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355623
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355624
@@ -1227,7 +1236,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355631
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355632
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355633
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355634
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355634
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355635
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355636
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355637
@@ -1240,7 +1249,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355644
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355645
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355646
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355647
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355647
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355648
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355649
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355650
@@ -1253,7 +1262,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355657
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355658
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355659
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355660
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355660
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355661
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355662
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7AIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355663
@@ -1266,7 +1275,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355670
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355671
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355672
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355673
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355673
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355674
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355675
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7AKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355676
@@ -1279,7 +1288,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355683
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355684
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355685
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355686
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355686
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355687
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355688
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7AMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355689
@@ -1292,7 +1301,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355696
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355697
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355698
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355699
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355699
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355700
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355701
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7APA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355702
@@ -1305,7 +1314,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355709
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355710
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355711
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355712
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355712
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355713
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355714
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7AWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355715
@@ -1318,7 +1327,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355722
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355723
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355724
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355725
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355725
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355726
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355727
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7DIN', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355728
@@ -1331,7 +1340,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355735
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355736
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355737
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355738
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355738
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355739
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355740
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7DKY', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355741
@@ -1344,7 +1353,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355748
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355749
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355750
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355751
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355751
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355752
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355753
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7DMI', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355754
@@ -1357,7 +1366,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355761
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355762
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355763
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355764
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355764
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355765
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355766
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7DPA', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355767
@@ -1370,7 +1379,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355774
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355775
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355776
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355777
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355777
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355778
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355779
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7DWV', strType = 'Low Sulfur Dyed Diesel', intMasterId = 355780
@@ -1407,140 +1416,140 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353780
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353781
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353782
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353783
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353783
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353784
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353785
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353786
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353787
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353788
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353789
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353790
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353790
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 353791
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353792
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353793
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353794
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353795
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353796
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353797
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353797
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353798
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353799
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353800
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353801
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353802
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353803
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353804
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353804
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 353805
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353806
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353807
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353808
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353809
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353810
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353811
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353811
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353812
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353813
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353814
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353815
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353816
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353817
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353818
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353818
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 353819
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353820
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353821
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353822
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353823
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353824
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353825
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353825
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353826
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353827
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353828
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353829
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353830
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353831
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353832
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353832
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 353833
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353834
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353835
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353836
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353837
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353838
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353839
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353839
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353840
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353841
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353842
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353843
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353844
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353845
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353846
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353846
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Gasoline', intMasterId = 353847
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353848
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353849
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353850
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353851
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353852
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353853
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353853
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353854
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353855
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353856
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353857
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353858
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353859
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353860
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353860
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 353861
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353862
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353863
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353864
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353865
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353866
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353867
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353867
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353868
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353869
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353870
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353871
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353872
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353873
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353874
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353874
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 353875
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353876
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353877
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353878
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353879
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353880
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353881
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353881
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353882
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353883
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353884
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353885
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353886
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353887
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353888
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353888
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Gasoline', intMasterId = 353889
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353890
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353891
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353892
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353893
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353894
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353895
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353895
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353896
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353897
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353898
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353899
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353900
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353901
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353902
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353902
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 353903
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353904
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353905
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353906
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353907
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353908
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353909
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353909
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353910
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353911
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353912
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353913
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353914
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353915
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353916
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353916
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Gasoline', intMasterId = 353917
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353960
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353961
@@ -1551,7 +1560,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353966
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353967
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353968
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353969
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353969
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353970
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353971
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Clear Diesel', intMasterId = 353972
@@ -1567,7 +1576,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', intMasterId = 353982
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', intMasterId = 353983
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', intMasterId = 353984
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', intMasterId = 353985
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', intMasterId = 353985
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', intMasterId = 353986
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', intMasterId = 353987
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Clear Diesel', intMasterId = 353988
@@ -1583,7 +1592,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', intMasterId = 353998
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', intMasterId = 353999
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', intMasterId = 354000
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', intMasterId = 354001
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', intMasterId = 354001
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', intMasterId = 354002
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', intMasterId = 354003
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Clear Diesel', intMasterId = 354004
@@ -1599,7 +1608,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Clear Diesel', intMasterId = 354014
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Clear Diesel', intMasterId = 354015
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Clear Diesel', intMasterId = 354016
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Clear Diesel', intMasterId = 354017
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Clear Diesel', intMasterId = 354017
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Clear Diesel', intMasterId = 354018
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Clear Diesel', intMasterId = 354019
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Clear Diesel', intMasterId = 354020
@@ -1615,7 +1624,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Clear Diesel', intMasterId = 354030
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Clear Diesel', intMasterId = 354031
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Clear Diesel', intMasterId = 354032
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Clear Diesel', intMasterId = 354033
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Clear Diesel', intMasterId = 354033
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Clear Diesel', intMasterId = 354034
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Clear Diesel', intMasterId = 354035
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Clear Diesel', intMasterId = 354036
@@ -1631,7 +1640,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Clear Diesel', intMasterId = 354046
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Clear Diesel', intMasterId = 354047
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Clear Diesel', intMasterId = 354048
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Clear Diesel', intMasterId = 354049
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Clear Diesel', intMasterId = 354049
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Clear Diesel', intMasterId = 354050
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Clear Diesel', intMasterId = 354051
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Clear Diesel', intMasterId = 354052
@@ -1647,7 +1656,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', intMasterId = 354062
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', intMasterId = 354063
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', intMasterId = 354064
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', intMasterId = 354065
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', intMasterId = 354065
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', intMasterId = 354066
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', intMasterId = 354067
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Clear Diesel', intMasterId = 354068
@@ -1663,7 +1672,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Clear Diesel', intMasterId = 354078
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Clear Diesel', intMasterId = 354079
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Clear Diesel', intMasterId = 354080
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Clear Diesel', intMasterId = 354081
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Clear Diesel', intMasterId = 354081
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Clear Diesel', intMasterId = 354082
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Clear Diesel', intMasterId = 354083
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Clear Diesel', intMasterId = 354084
@@ -1679,7 +1688,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', intMasterId = 354094
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', intMasterId = 354095
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', intMasterId = 354096
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', intMasterId = 354097
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', intMasterId = 354097
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', intMasterId = 354098
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', intMasterId = 354099
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Clear Diesel', intMasterId = 354100
@@ -1695,7 +1704,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Clear Diesel', intMasterId = 354110
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Clear Diesel', intMasterId = 354111
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Clear Diesel', intMasterId = 354112
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Clear Diesel', intMasterId = 354113
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Clear Diesel', intMasterId = 354113
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Clear Diesel', intMasterId = 354114
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Clear Diesel', intMasterId = 354115
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Clear Diesel', intMasterId = 354116
@@ -1708,7 +1717,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354171
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354172
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354173
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354174
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354174
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354175
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354176
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '1', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354177
@@ -1721,7 +1730,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354184
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354185
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354186
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354187
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354187
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354188
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354189
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '2', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354190
@@ -1734,7 +1743,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354197
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354198
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354199
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354200
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354200
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354201
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354202
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '3', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354203
@@ -1747,7 +1756,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354210
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354211
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354212
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354213
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354213
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354214
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354215
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '4', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354216
@@ -1760,7 +1769,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354223
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354224
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354225
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354226
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354226
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354227
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354228
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '5AD', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354229
@@ -1773,7 +1782,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354236
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354237
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354238
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354239
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354239
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354240
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354241
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '5', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354242
@@ -1786,7 +1795,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354249
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354250
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354251
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354252
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354252
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354253
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354254
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '6', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354255
@@ -1799,7 +1808,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354262
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354263
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354264
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354265
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354265
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354266
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354267
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '7', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354268
@@ -1812,7 +1821,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354275
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354276
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354277
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354278
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354278
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354279
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354280
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '8', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354281
@@ -1825,7 +1834,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354288
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354289
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354290
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354291
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354291
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354292
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354293
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '10', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354294
@@ -1838,7 +1847,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354301
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354302
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354303
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354304
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354304
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354305
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354306
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'MF2', strScheduleCode = '10B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 354307
@@ -2301,126 +2310,126 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354926
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354927
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354928
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354929
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354929
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354930
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354931
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354932
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354933
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354934
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354935
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354936
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354936
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '1BIN', strType = 'Gasoline', intMasterId = 354937
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354938
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354939
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354940
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354941
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354942
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354943
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354943
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354944
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354945
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354946
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354947
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354948
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354949
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354950
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354950
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '1BKY', strType = 'Gasoline', intMasterId = 354951
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354952
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354953
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354954
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354955
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354956
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354957
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354957
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354958
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354959
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354960
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354961
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354962
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354963
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354964
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354964
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '1BMI', strType = 'Gasoline', intMasterId = 354965
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354966
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354967
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354968
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354969
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354970
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354971
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354971
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354972
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354973
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354974
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354975
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354976
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354977
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354978
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354978
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '1BPA', strType = 'Gasoline', intMasterId = 354979
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354980
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354981
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354982
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354983
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354984
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354985
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354985
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354986
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354987
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354988
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354989
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354990
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354991
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354992
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354992
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Gasoline', intMasterId = 354993
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 354994
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 354995
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 354996
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 354997
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 354998
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 354999
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 354999
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355000
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355001
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355002
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355003
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355004
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355005
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355006
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355006
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '2EIN', strType = 'Gasoline', intMasterId = 355007
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355008
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355009
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355010
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355011
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355012
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355013
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355013
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355014
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355015
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355016
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355017
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355018
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355019
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355020
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355020
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '2EKY', strType = 'Gasoline', intMasterId = 355021
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355022
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355023
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355024
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355025
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355026
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355027
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355027
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355028
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355029
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355030
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355031
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355032
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355033
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355034
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355034
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '2EMI', strType = 'Gasoline', intMasterId = 355035
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355036
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355037
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355038
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355039
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355040
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355041
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355041
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355042
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355043
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355044
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355045
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355046
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355047
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355048
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355048
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '2EPA', strType = 'Gasoline', intMasterId = 355049
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355050
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '2EWV', strType = 'Gasoline', intMasterId = 355051
@@ -3348,7 +3357,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356750
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356751
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356752
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356753
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356753
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356754
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356755
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356756
@@ -3361,7 +3370,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356763
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356764
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356765
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356766
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356766
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356767
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356768
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356769
@@ -3374,7 +3383,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356776
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356777
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356778
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00 ', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356779
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356779
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356780
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356781
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356782
@@ -3390,7 +3399,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', intMasterId = 356792
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', intMasterId = 356793
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', intMasterId = 356794
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', intMasterId = 356795
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', intMasterId = 356795
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', intMasterId = 356796
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', intMasterId = 356797
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Clear Diesel', intMasterId = 356798
@@ -3406,7 +3415,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Clear Diesel', intMasterId = 356808
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Clear Diesel', intMasterId = 356809
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Clear Diesel', intMasterId = 356810
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Clear Diesel', intMasterId = 356811
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Clear Diesel', intMasterId = 356811
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Clear Diesel', intMasterId = 356812
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Clear Diesel', intMasterId = 356813
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Clear Diesel', intMasterId = 356814
@@ -3422,7 +3431,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Clear Diesel', intMasterId = 356824
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Clear Diesel', intMasterId = 356825
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Clear Diesel', intMasterId = 356826
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00 ', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Clear Diesel', intMasterId = 356827
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Clear Diesel', intMasterId = 356827
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Clear Diesel', intMasterId = 356828
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Clear Diesel', intMasterId = 356829
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Clear Diesel', intMasterId = 356830
@@ -3434,44 +3443,130 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356836
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356837
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356838
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356839
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356839
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356840
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356841
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356842
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356843
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356844
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356845
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356846
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356846
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Gasoline', intMasterId = 356847
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356848
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356849
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356850
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356851
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356852
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356853
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356853
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356854
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356855
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356856
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356857
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356858
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356859
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356860
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356860
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'TR2', strScheduleCode = '14B', strType = 'Gasoline', intMasterId = 356861
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356862
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356863
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356864
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356865
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356866
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00 ', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356867
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356867
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356868
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356869
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356870
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356871
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356872
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356873
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00 ', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356874
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356874
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Gasoline', intMasterId = 356875
 	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356876
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356877
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356878
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356879
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356880
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E00', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356881
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E06', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356882
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E08', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356883
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E10', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356884
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E11', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356885
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E75', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356886
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'E85', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356887
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M00', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356888
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'M11', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', intMasterId = 356889
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356890
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356891
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356892
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356893
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356894
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356895
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356896
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356897
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '313', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356898
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B00', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356899
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B02', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356900
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B05', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356901
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B10', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356902
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B11', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356903
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B20', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356904
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'B99', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', intMasterId = 356905
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356906
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356907
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356908
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '314', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356909
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356910
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356911
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D00', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356912
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D02', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356913
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D05', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356914
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D10', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356915
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D11', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356916
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D20', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356917
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = 'D99', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', intMasterId = 356918
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', intMasterId = 356919
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', intMasterId = 356920
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', intMasterId = 356921
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', intMasterId = 356922	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', intMasterId = 356923
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', intMasterId = 356924
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', intMasterId = 356925
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', intMasterId = 356926		
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', intMasterId = 356927	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', intMasterId = 356928
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', intMasterId = 356929	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '175', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356930
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '188', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356931
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '196', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356932
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '198', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356933
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '199', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356934
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '223', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356935
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '248', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356936
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '249', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356937	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '259', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356938
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '265', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356939
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356940
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '280', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356941
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '281', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356942
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '285', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356943
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '301', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356944
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '302', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356945
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '960', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356946
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '001', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356947
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '052', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356948
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '055', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356949
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '058', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356950
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '059', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356951
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '061', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356952
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '075', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356953
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '076', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356954
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '077', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356955
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '090', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356956
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '091', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356957
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356958
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', intMasterId = 356959
+
+
 	INSERT INTO @ValidOriginStates(
 		intValidOriginStateId
 		, strFormCode
@@ -3670,6 +3765,17 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'LNG', strState = 'OH', strStatus = 'Include', intMasterId = 35621
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Propane', strState = 'OH', strStatus = 'Include', intMasterId = 35622
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '1BWV', strType = 'Other', strState = 'OH', strStatus = 'Include', intMasterId = 35623
+
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strState = 'OH', strStatus = 'Include', intMasterId = 35624
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35625
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35626
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strState = 'OH', strStatus = 'Include', intMasterId = 35627
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strState = 'OH', strStatus = 'Include', intMasterId = 35628
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strState = 'OH', strStatus = 'Include', intMasterId = 35629
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strState = 'OH', strStatus = 'Include', intMasterId = 35630
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strState = 'OH', strStatus = 'Include', intMasterId = 35631
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strState = 'OH', strStatus = 'Include', intMasterId = 35632
+
 
 	INSERT INTO @ValidDestinationStates(
 		intValidDestinationStateId
@@ -3950,6 +4056,17 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'TR2', strScheduleCode = '14A', strType = 'LNG', strState = 'OH', strStatus = 'Exclude', intMasterId = 35600
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Propane', strState = 'OH', strStatus = 'Exclude', intMasterId = 35601
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'TR2', strScheduleCode = '14A', strType = 'Other', strState = 'OH', strStatus = 'Exclude', intMasterId = 35602
+
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strState = 'MI', strStatus = 'Include', intMasterId = 35603
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 35604
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 35605
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strState = 'MI', strStatus = 'Include', intMasterId = 35606
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strState = 'MI', strStatus = 'Include', intMasterId = 35607
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strState = 'MI', strStatus = 'Include', intMasterId = 35608
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strState = 'MI', strStatus = 'Include', intMasterId = 35609
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strState = 'MI', strStatus = 'Include', intMasterId = 35610
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strState = 'MI', strStatus = 'Include', intMasterId = 35611
+
 
 	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 	EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
@@ -10047,6 +10164,180 @@ UNION ALL SELECT intScheduleColumnId = 124443, strFormCode = 'TR2', strScheduleC
 UNION ALL SELECT intScheduleColumnId = 124444, strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Other', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124444
 UNION ALL SELECT intScheduleColumnId = 124445, strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Other', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124445
 UNION ALL SELECT intScheduleColumnId = 124446, strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Other', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124446
+	
+
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124447
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124448	
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124449
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124450
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124451
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124452
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124453
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124454
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124455
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124456
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124457
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124458
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124459
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124460
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124461
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124462
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124463
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124464
+
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124465
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124466	
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124467
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124468
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124469
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124470
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124471
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124472
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124473
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124474
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124475
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124476
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124477
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124478
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124479
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124480
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124481
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124482
+	
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124483
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124484	
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124485
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124486
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124487
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124488
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124489
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124490
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124491
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124492
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124493
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124494
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124495
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124496
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124497
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124498
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124499
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124500
+
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124501
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124502	
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124503
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124504
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124505
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124506
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124507
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124508
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124509
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124510
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124511
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124512
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124513
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124514
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124515
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124516
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124517
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124518
+
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124519
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124520	
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124521
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124522
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124523
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124524
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124525
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124526
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124527
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124528
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124529
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124530
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124531
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124532
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124533
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124534
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124535
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124536
+
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124537
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124538	
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124539
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124540
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124541
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124542
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124543
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124544
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124545
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124546
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124547
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124548
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124549
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124550
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124551
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124552
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124553
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124554
+
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124555
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124556	
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124557
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124558
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124559
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124560
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124561
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124562
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124563
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124563
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124564
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124565
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124566
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124567
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124568
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124569
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124570
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124571
+
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124572
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124573	
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124574
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124575
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124576
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124577
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124578
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124579
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124580
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124581
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124582
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124583
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124584
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124585
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124586
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124587
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124588
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124589
+
+	UNION ALL SELECT intScheduleColumnId = 120883, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strScheduleCode', strCaption = 'Schedule', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124590
+	UNION ALL SELECT intScheduleColumnId = 120884, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124591
+	UNION ALL SELECT intScheduleColumnId = 120885, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strCustomerName', strCaption = 'Buyer Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124592
+	UNION ALL SELECT intScheduleColumnId = 120886, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strCustomerFederalTaxId', strCaption = 'Buyer FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124593
+	UNION ALL SELECT intScheduleColumnId = 120887, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124594
+	UNION ALL SELECT intScheduleColumnId = 120888, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strTransporterFederalTaxId', strCaption = 'Carrier FEIN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124595
+	UNION ALL SELECT intScheduleColumnId = 120889, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strTerminalControlNumber', strCaption = 'Origin TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124596
+	UNION ALL SELECT intScheduleColumnId = 120890, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124597
+	UNION ALL SELECT intScheduleColumnId = 120891, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strOriginState', strCaption = 'Origin State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124598
+	UNION ALL SELECT intScheduleColumnId = 120892, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strDestinationTCN', strCaption = 'Destination TCN', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124599
+	UNION ALL SELECT intScheduleColumnId = 120893, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124600
+	UNION ALL SELECT intScheduleColumnId = 120894, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124601
+	UNION ALL SELECT intScheduleColumnId = 120895, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'dtmDate', strCaption = 'Date Received', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124602
+	UNION ALL SELECT intScheduleColumnId = 120896, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strBillOfLading', strCaption = 'Document #', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124603
+	UNION ALL SELECT intScheduleColumnId = 120897, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'strTransportationMode', strCaption = 'Mode', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124604
+	UNION ALL SELECT intScheduleColumnId = 120898, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'dblNet', strCaption = 'Net Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124605
+	UNION ALL SELECT intScheduleColumnId = 120899, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'dblGross', strCaption = 'Gross Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124606
+	UNION ALL SELECT intScheduleColumnId = 120900, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', strColumn = 'dblBillQty', strCaption = 'Billed Gals', strFormat = '', strFooter = 'No', intWidth = 0, ysnFromConfiguration = 0, intMasterId = 35124607
+
+
 	EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 
 
@@ -10385,6 +10676,42 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Other', ysnStatus = 1, intFrequency = 1, intMasterId = 351409
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = '14C', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 351408
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'TR2', strScheduleCode = 'TR2', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 351410
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 351414
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351415
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'Low Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351416
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'High Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351417
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 351418
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351419
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351420
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 351421
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14A', strType = 'Other', ysnStatus = 1, intFrequency = 1, intMasterId = 351422
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 351423
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351424
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'Low Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351425
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'High Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351426
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 351427
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351428
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351429
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 351430
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14B', strType = 'Other', ysnStatus = 1, intFrequency = 1, intMasterId = 351431
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 351432
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351433
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'Low Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351434
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'High Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351435
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 351436
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351437
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351438
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 351439
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MF2', strScheduleCode = '14C', strType = 'Other', ysnStatus = 1, intFrequency = 1, intMasterId = 351440
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 351441
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Clear Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351442
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Low Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351443
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'High Sulfur Dyed Diesel', ysnStatus = 1, intFrequency = 1, intMasterId = 351444
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Kerosene', ysnStatus = 1, intFrequency = 1, intMasterId = 351445
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'CNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351446
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 351447
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Propane', ysnStatus = 1, intFrequency = 1, intMasterId = 351448
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'EX2', strScheduleCode = '7AMI_Bulk', strType = 'Other', ysnStatus = 1, intFrequency = 1, intMasterId = 351449
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
