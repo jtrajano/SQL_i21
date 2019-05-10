@@ -219,7 +219,8 @@ IF ISNULL(@ErrorMessage, '') = ''
 				@createdCreditMemoType AS VARCHAR(50),
 				@createdCreditMemoTransactionType AS VARCHAR(20),
 				@intCompanyLocationId AS INT,
-				@strMessage	AS VARCHAR(100)
+				@strMessage	AS VARCHAR(100),
+				@strPaymentIds AS NVARCHAR(MAX)
 
 		SELECT TOP 1
 				@createdCreditMemoId				= intInvoiceId,
@@ -262,11 +263,24 @@ IF ISNULL(@ErrorMessage, '') = ''
 						,@intUserId				= @intEntityUserId
 						,@intCompanyLocationId	= @intCompanyLocationId
 						,@strErrorMessage		= @strMessage	OUTPUT
+						,@strPaymentIds			= @strPaymentIds	OUTPUT
 		END
 
 		IF(LEN(ISNULL(@strMessage, '')) <= 0)
 		BEGIN
 			SET @strMessage = NULL
+
+			--UPDATE POS PAYMENTS REFERENCE
+			UPDATE POSPAYMENT
+			SET intPaymentId = CREATEDPAYMENTS.intPaymentId
+			FROM tblARPOSPayment POSPAYMENT
+			INNER JOIN (
+				SELECT intPaymentId
+						, strPaymentMethod = CASE WHEN strPaymentMethod = 'Manual Credit Card' THEN 'Credit Card' ELSE strPaymentMethod END
+				FROM tblARPayment P
+				INNER JOIN fnGetRowsFromDelimitedValues(@strPaymentIds) CP ON P.intPaymentId = CP.intID
+			) CREATEDPAYMENTS ON POSPAYMENT.strPaymentMethod = CREATEDPAYMENTS.strPaymentMethod
+			INNER JOIN #POSRETURNPAYMENTS PP ON POSPAYMENT.intPOSPaymentId = PP.intPOSPaymentId
 
 			UPDATE tblARPOSEndOfDay
 			SET dblCashReturn = ISNULL(dblCashReturn,0) + POSPAYMENT.dblAmount
