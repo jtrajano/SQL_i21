@@ -70,6 +70,7 @@
 	tblSCTicket.strVarietyType,
 	tblSCTicket.strFarmNumber,
 	tblSCTicket.strFieldNumber,
+	strFarmField = EMEntityFarm.strLocationName,
 	tblSCTicket.strDiscountComment,
 	tblSCTicket.intCommodityId,
 	tblSCTicket.intDiscountId,
@@ -109,5 +110,6 @@
   LEFT JOIN dbo.tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = tblSCTicket.intSplitId
   LEFT JOIN tblSCTicketPrintOption tblSCTicketPrintOption ON tblSCTicketPrintOption.intScaleSetupId = tblSCScaleSetup.intScaleSetupId
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
+  LEFT JOIN tblEMEntityLocation EMEntityFarm on EMEntityFarm.intEntityLocationId = tblSCTicket.intFarmFieldId
 
 
