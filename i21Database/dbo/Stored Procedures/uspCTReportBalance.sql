@@ -150,7 +150,7 @@ BEGIN TRY
 		 @intContractTypeId	   = 	@intContractTypeId
 		,@intEntityId		   =	@intEntityId
 		,@IntCommodityId	   =    @IntCommodityId		
-		,@dtmStartDate		   =    @dtmStartDate	
+		--,@dtmStartDate		   =    @dtmStartDate	
 		,@dtmEndDate		   =    @dtmEndDate		
 		,@intCompanyLocationId =	@intCompanyLocationId
 		,@IntFutureMarketId    =    @IntFutureMarketId
