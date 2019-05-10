@@ -312,6 +312,11 @@
 	) Basis ON Basis.intScaleTicketId = SCT.intTicketId
 	OUTER APPLY(
 		SELECT TOP 1 AP.dblPayment, APD.intScaleTicketId FROM tblAPBillDetail APD
-		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId AND AP.dblPayment > 0
+		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId --AND AP.dblPayment > 0
+		INNER JOIN tblAPPaymentDetail APPayDtl ON AP.intBillId = APPayDtl.intBillId
+		INNER JOIN tblAPPayment APPay ON APPayDtl.intPaymentId = APPay.intPaymentId
+		INNER JOIN tblCMBankTransaction BankTran ON APPay.strPaymentRecordNum = BankTran.strTransactionId
 		WHERE APD.intScaleTicketId = SCT.intTicketId
+		AND BankTran.ysnCheckVoid = 0
+		AND APPay.ysnPosted = 1
 	) APPayment 

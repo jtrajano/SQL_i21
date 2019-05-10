@@ -132,6 +132,7 @@ OUTER APPLY (
 		SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPPayment C ON B.intPaymentId = C.intPaymentId
 		WHERE B.intBillId = A.intBillId AND C.ysnPrepay = 1
 	)
+	AND A.ysnOrigin = 1
 UNION ALL
 --NEGATIVE PART
 SELECT
