@@ -17,7 +17,7 @@ SELECT
 	,dtmTransactionDate = cfTransaction.dtmTransactionDate
 	,dblQuantity = cfTransaction.dblQuantity
 	,dblTotal = cfTransaction.dblCalculatedTotalPrice
-	,strDriverPin = cfVehicle.strVehicleNumber
+	,strDriverPin = cfDriverPin.strDriverPinNumber
 	,intTransactionId = cfTransaction.intTransactionId
 	,strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, emcuslocation.strLocationName, emcuslocation.strAddress, emcuslocation.strCity, emcuslocation.strState, emcuslocation.strZipCode, emcuslocation.strCountry, NULL, 0) 
 	,intEntityId = cfcustomer.intEntityId
@@ -49,6 +49,8 @@ LEFT JOIN tblICItem icitem
 	ON cfiitem.intARItemId = icitem.intItemId
 LEFT JOIN tblCFSite cfsite
 	ON cfTransaction.intSiteId = cfsite.intSiteId
+LEFT JOIN tblCFDriverPin cfDriverPin
+	ON cfTransaction.intDriverPinId = cfDriverPin.intDriverPinId
 LEFT OUTER JOIN dbo.tblCFVehicle AS cfVehicle 
 	ON cfTransaction.intVehicleId = cfVehicle.intVehicleId 
 OUTER APPLY (
@@ -65,5 +67,6 @@ LEFT JOIN tblEMEntityLocation emcuslocation
 	ON cfcustomer.intEntityId = emcuslocation.intEntityId
 		AND emcuslocation.ysnDefaultLocation = 1
 WHERE cfTransaction.ysnPosted = 1
+GO
 
 
