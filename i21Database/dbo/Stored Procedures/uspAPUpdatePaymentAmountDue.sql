@@ -29,7 +29,7 @@ BEGIN
 		tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
 												THEN CAST((B.dblDiscount + B.dblPayment - B.dblInterest) AS DECIMAL(18,2))
 											ELSE (B.dblAmountDue + B.dblPayment) END),
-		tblAPPaymentDetail.dblDiscount = @discount,
+		tblAPPaymentDetail.dblDiscount = CASE WHEN C.ysnDiscountOverride = 1 THEN C.dblDiscount ELSE @discount END,
 		tblAPPaymentDetail.dblInterest = @interest
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
@@ -44,11 +44,13 @@ BEGIN
 	UPDATE B
 		SET 
 			B.dblAmountDue = CASE WHEN CAST((B.dblPayment + B.dblDiscount - B.dblInterest) AS DECIMAL(18,2)) = CAST(B.dblAmountDue AS DECIMAL(18,2))
-								THEN 0 ELSE CAST((B.dblAmountDue) - (B.dblPayment) AS DECIMAL(18,2)) END,
-			B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-								THEN B.dblDiscount ELSE 0 END,
-			B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
-								THEN B.dblInterest ELSE 0 END
+								THEN 0 ELSE CAST((B.dblAmountDue) - (B.dblPayment) AS DECIMAL(18,2)) END
+			--Do not update the discount/interest, we are using these fields to update the bill
+			--We are not honoring the discount if not fully paid and not override discount
+			-- B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+			-- 					THEN B.dblDiscount ELSE 0 END,
+			-- B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+			-- 					THEN B.dblInterest ELSE 0 END
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
