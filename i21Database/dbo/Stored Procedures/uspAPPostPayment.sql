@@ -717,7 +717,7 @@ BEGIN
 	FROM @payments A
 	INNER JOIN tblAPPaymentDetail B
 		ON A.intId = B.intPaymentId
-	WHERE B.intInvoiceId > 0
+	WHERE B.intInvoiceId > 0 AND dblPayment != 0
 	IF EXISTS(SELECT 1 FROM @invoices)
 	BEGIN
 		EXEC [uspARSettleInvoice] @PaymentDetailId = @invoices, @userId = @userId, @post = @post, @void = 0

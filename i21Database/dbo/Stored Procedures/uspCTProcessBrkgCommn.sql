@@ -124,7 +124,7 @@ BEGIN TRY
 				 strPONumber,			intEntityCustomerId,  intCompanyLocationId,	 intCurrencyId,
 				 intItemId,				dblQtyOrdered,		  dblPrice,				 dtmDate,		    
 				 intEntityId,			intInvoiceId,		  intSourceId,			dblQtyShipped,
-				 intContractHeaderId,	intContractDetailid
+				 intContractHeaderId,	intContractDetailId
 			 
 	   )
 

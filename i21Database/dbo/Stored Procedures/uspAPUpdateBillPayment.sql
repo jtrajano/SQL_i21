@@ -23,9 +23,17 @@ BEGIN
 	WHERE C.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	UPDATE tblAPBill
-		SET tblAPBill.dblAmountDue = C.dblAmountDue + ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment), --(CASE WHEN C.intTransactionType !=1 THEN B.dblAmountDue * -1 ELSE B.dblAmountDue END),
+		SET tblAPBill.dblAmountDue = C.dblAmountDue + 
+									(
+										ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment)
+									+ 	ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount)
+									), 
 			tblAPBill.ysnPaid = 0,
-			tblAPBill.dblPayment = (C.dblPayment - ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment)),
+			tblAPBill.dblPayment = C.dblPayment - 
+									(
+										ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment)
+									+ 	ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount)
+									),
 			tblAPBill.dtmDatePaid = NULL,
 			tblAPBill.dblDiscount = ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount),
 			tblAPBill.dblWithheld = 0
@@ -41,7 +49,9 @@ BEGIN
 			MIN(B.dblAmountDue) dblAmountDue,
 			B.intBillId 
 		FROM tblAPPaymentDetail B 
-		WHERE B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
+		WHERE 
+			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
+		AND B.intBillId = C.intBillId
 		GROUP BY B.intBillId
 	) payDetails
 	OUTER APPLY (
@@ -51,7 +61,9 @@ BEGIN
 			SUM(B.dblDiscount) dblDiscount,
 			B.intBillId 
 		FROM tblAPPaymentDetail B 
-		WHERE B.intPaymentId = A.intPaymentId AND B.intPayScheduleId > 0
+		WHERE 
+			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId > 0
+		AND B.intBillId = C.intBillId
 		GROUP BY B.intBillId
 	) paySchedDetails
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
@@ -89,7 +101,9 @@ BEGIN
 											THEN dbo.fnGetInterestBasedOnTerm(@amountDue, C.dtmDate, A.dtmDatePaid, C.intTermsId) 
 										ELSE 0 END
 									END),
-			tblAPBill.dblPayment = (C.dblPayment + ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment))
+			tblAPBill.dblPayment = (C.dblPayment + ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment)) --Include the first payment (if there is) + the current amount paid
+									+ ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount) 
+									- ISNULL(payDetails.dblInterest,0) 
 	FROM tblAPPayment A
 	INNER JOIN tblAPPaymentDetail A2 ON A.intPaymentId = A2.intPaymentId
 	INNER JOIN tblAPBill C
@@ -103,7 +117,9 @@ BEGIN
 			MIN(B.dblAmountDue) dblAmountDue,
 			B.intBillId 
 		FROM tblAPPaymentDetail B 
-		WHERE B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
+		WHERE 
+			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
+		AND B.intBillId = C.intBillId
 		GROUP BY B.intBillId
 	) payDetails
 	OUTER APPLY (
@@ -113,7 +129,9 @@ BEGIN
 			SUM(B.dblDiscount) dblDiscount,
 			B.intBillId 
 		FROM tblAPPaymentDetail B 
-		WHERE B.intPaymentId = A.intPaymentId AND B.intPayScheduleId > 0
+		WHERE 
+			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId > 0
+		AND B.intBillId = C.intBillId
 		GROUP BY B.intBillId
 	) paySchedDetails
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
