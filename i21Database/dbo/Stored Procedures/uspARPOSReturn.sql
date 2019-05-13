@@ -29,7 +29,7 @@ AS
 	SELECT TOP 1
 		@intInvoiceId = intInvoiceId
 	FROM tblARPOS
-	WHERE intPOSId = @intOriginalPOSTransactionId
+	WHERE intPOSId = @intPOSId
 
 	SELECT TOP 1
 		@ysnReturned = ysnReturned
@@ -451,7 +451,7 @@ AS
 			BEGIN
 				UPDATE tblARPOS
 				SET ysnReturn = 1
-				WHERE intPOSId = @intOriginalPOSTransactionId
+				WHERE intPOSId = @intPOSId
 
 				DECLARE @dblCashReturns DECIMAL(18,6) = 0.00000
 				SELECT @dblCashReturns = SUM(dblAmount)
