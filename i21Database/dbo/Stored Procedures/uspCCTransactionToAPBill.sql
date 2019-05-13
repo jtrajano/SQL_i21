@@ -45,7 +45,7 @@ BEGIN
 		INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
 		WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
 
-		INSERT INTO @Voucher (intTransactionType ,dtmDate, intEntityVendorId, intShipToId, strVendorOrderNumber, intAccountId, intCCSiteDetailId, strMiscDescription, dblCost, dblQuantityToBill)
+		INSERT INTO @Voucher (intTransactionType ,dtmDate, intEntityVendorId, intShipToId, strVendorOrderNumber, intAccountId, intCCSiteDetailId, strMiscDescription, dblCost, dblQuantityToBill, ysnStage)
 		SELECT intTransactionType = 3 
 			,dtmDate = @dtmDate
 			,intEntityVendorId = @intVendorId
@@ -56,6 +56,7 @@ BEGIN
 			,strItem
 			,SUM(dblCost)
 			,[dblQtyReceived]  = CASE WHEN strItem = 'Company Owned Fees' THEN -1 ELSE 1 END
+			,0
 		FROM (SELECT ccSiteDetail.intSiteDetailId
 				 ,ccItem.strItem
 				 ,(CASE WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSite.intAccountId 
