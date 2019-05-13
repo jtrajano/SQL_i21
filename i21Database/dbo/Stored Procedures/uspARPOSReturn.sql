@@ -472,7 +472,8 @@ AS
 				INNER JOIN #POSRETURNPAYMENTS PP ON POSPAYMENT.intPOSPaymentId = PP.intPOSPaymentId
 				
 				UPDATE tblARPOSEndOfDay
-				SET dblCashReturn = ISNULL(dblCashReturn ,0) + ISNULL(@dblCashReturns,0)
+				SET dblCashReturn = ISNULL(dblCashReturn, 0) + ISNULL(@dblCashReturns, 0)
+				  , dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance, 0) - ISNULL(@dblCashReturns, 0)
 				FROM tblARPOSEndOfDay EOD
 				INNER JOIN (
 					SELECT
