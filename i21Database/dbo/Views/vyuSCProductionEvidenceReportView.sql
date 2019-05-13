@@ -101,8 +101,8 @@
 		,ICCommodity.strCommodityCode
 		,tblICStorageLocation.strDescription
 		,vyuEMSearchShipVia.strName AS strHaulerName
-		,QM.strDiscountCode
-		,QM.dblGradeReading
+		,strDiscountCode = ISNULL(QM.strDiscountCode,'')
+		,dblGradeReading = ISNULL(QM.dblGradeReading,0.0)
 		,tblSMCompanySetup.strCompanyName
 		,tblSMCompanySetup.strCompanyAddress
 		,tblSMCompanySetup.strCompanyPhone
@@ -112,8 +112,8 @@
 		,IRD.intInventoryReceiptItemId
 		,IR.strReceiptNumber
 		,IRD.dblGross
-		,dblShrinkage = IRD.dblGross - IRD.dblNet
-		,IRD.dblNet
+		,dblShrinkage = CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END
+		,dblNet = IRD.dblGross - (CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END)
 		,dblLineGrossWeight =(IRD.dblNet / SC.dblNetUnits * (SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2)) 
 		,dblLineNetWeight = ((IRD.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) 
 		,tblGRDiscountId.strDiscountId
@@ -129,6 +129,7 @@
 	INNER JOIN tblICInventoryReceipt IR
 		ON IRD.intInventoryReceiptId = IR.intInventoryReceiptId
 			AND IR.intSourceType = 1
+			AND IR.intEntityVendorId = DS.intEntityId
 	LEFT JOIN tblICCommodity ICCommodity ON ICCommodity.intCommodityId = SC.intCommodityId
 	LEFT JOIN tblEMEntity EM 
 		on IR.intEntityVendorId = EM.intEntityId
@@ -142,12 +143,24 @@
 	LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SC.intDiscountId
 	LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
 	LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
-	LEFT JOIN vyuSCGradeReadingReport QM ON QM.intTicketId = SC.intTicketId AND QM.ysnDryingDiscount = 1
+	--LEFT JOIN vyuSCGradeReadingReport QM ON QM.intTicketId = SC.intTicketId AND QM.ysnDryingDiscount = 1
 	OUTER APPLY(
 		SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 
 		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId
 		WHERE APD.intInventoryReceiptItemId = IRD.intInventoryReceiptItemId
 	) Voucher
+	OUTER APPLY
+	(	
+		SELECT 
+			strDiscountCode = MAX(GR.strDiscountChargeType)
+			,dblGradeReading = SUM(ISNULL(QM.dblGradeReading,0.0)) 
+		FROM tblQMTicketDiscount QM 
+		INNER JOIN tblGRDiscountScheduleCode GR 
+			ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+		WHERE GR.ysnDryingDiscount = 1
+			AND QM.intTicketFileId = DS.intDeliverySheetId
+			AND QM.strSourceType = 'Delivery Sheet'
+	) QM
 	,(	SELECT TOP 1
 			strCompanyName
 			,strAddress AS strCompanyAddress
