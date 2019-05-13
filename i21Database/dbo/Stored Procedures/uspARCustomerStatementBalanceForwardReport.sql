@@ -75,6 +75,7 @@ DECLARE @temp_aging_table TABLE(
 	,[dblPrepayments]			NUMERIC(18,6)
     ,[dblPrepaids]              NUMERIC(18,6)
 	,[dblTempFuture]			NUMERIC(18,6)
+	,[dblUnInvoiced]			NUMERIC(18,6)
     ,[dtmAsOfDate]              DATETIME
     ,[strSalespersonName]		NVARCHAR(100)
 	,[strSourceTransaction]		NVARCHAR(100)
@@ -324,6 +325,7 @@ SELECT strCustomerName
         , dblCredits
 	    , dblPrepayments
         , dblPrepaids
+		, 0
 		, 0
         , dtmAsOfDate
         , strSalespersonName
@@ -746,8 +748,9 @@ IF @ysnPrintFromCFLocal = 1
 		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblFuture = AGINGREPORT.dblFuture - ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblTempFuture = ISNULL(CF.dblTotalFuture, 0)
+			, AGINGREPORT.dblUnInvoiced = ISNULL(CFDT.dblUnInvoiced, 0)
 		FROM @temp_aging_table AGINGREPORT
-		INNER JOIN (
+		LEFT JOIN (
 			SELECT intEntityCustomerId
 				 , dblTotalFuture = SUM(dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * dblAmountDue)
 			FROM tblARInvoice WITH (NOLOCK)
@@ -757,7 +760,20 @@ IF @ysnPrintFromCFLocal = 1
 			AND intInvoiceId IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable WHERE strUserId = @strUserId and LOWER(strStatementType) = 'invoice')
 			GROUP BY intEntityCustomerId
 		) CF ON AGINGREPORT.intEntityCustomerId = CF.intEntityCustomerId
-
+		LEFT JOIN (
+			SELECT I.intEntityCustomerId
+				 , dblUnInvoiced = SUM(dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblAmountDue)
+			FROM tblARInvoice I WITH (NOLOCK)
+			INNER JOIN tblCFTransaction CF ON I.strInvoiceNumber = CF.strTransactionId
+			WHERE I.strType = 'CF Tran'
+			AND I.ysnPaid = 0
+			AND I.ysnPosted = 1
+			AND ISNULL(CF.ysnInvoiced, 0) = 0
+			AND I.intInvoiceId NOT IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable WHERE strUserId = @strUserId and LOWER(strStatementType) = 'invoice')
+			AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+			GROUP BY I.intEntityCustomerId
+		) CFDT ON AGINGREPORT.intEntityCustomerId = CFDT.intEntityCustomerId
+		
 		IF @ysnReprintInvoiceLocal = 0
 			BEGIN
 				UPDATE AGINGREPORT
@@ -777,7 +793,7 @@ IF @ysnPrintFromCFLocal = 1
 				UPDATE AGINGREPORT
 				SET AGINGREPORT.dblFuture = 0.000000
 				  , AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days - ISNULL(AGINGREPORT.dblTempFuture, 0)
-				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblTempFuture, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - (ISNULL(AGINGREPORT.dblTempFuture, 0) + ISNULL(AGINGREPORT.dblUnInvoiced, 0))
 				FROM @temp_aging_table AGINGREPORT
 			END
 	END
