@@ -411,9 +411,12 @@ BEGIN
 								ON UOM.intItemId = I.intItemId
 							JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
-							JOIN tblICItemPricing IP 
-								ON I.intItemId = IP.intItemId
-								AND IL.intItemLocationId = IP.intItemLocationId
+
+							-- http://jira.irelyserver.com/browse/ST-1316
+							--JOIN tblICItemPricing IP 
+							--	ON I.intItemId = IP.intItemId
+							--	AND IL.intItemLocationId = IP.intItemLocationId
+
 							JOIN tblSTStore ST 
 								ON IL.intLocationId = ST.intCompanyLocationId
 								AND CH.intStoreId = ST.intStoreId	
@@ -449,8 +452,8 @@ BEGIN
 																		) TAX
 
 								WHERE CPT.intCheckoutId = @intCheckoutId
-								AND CPT.dblAmount > 0
-								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+									AND CPT.dblAmount > 0
+									-- AND UOM.ysnStockUnit = CAST(1 AS BIT)
 						end try
 						begin catch
 							SET @strStatusMsg = CAST(ERROR_MESSAGE() AS VARCHAR(MAX))
@@ -655,9 +658,12 @@ BEGIN
 								ON UOM.intItemId = I.intItemId
 							JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
-							JOIN tblICItemPricing IP 
-								ON I.intItemId = IP.intItemId
-								AND IL.intItemLocationId = IP.intItemLocationId
+							
+							-- http://jira.irelyserver.com/browse/ST-1316
+							--JOIN tblICItemPricing IP 
+							--	ON I.intItemId = IP.intItemId
+							--	AND IL.intItemLocationId = IP.intItemLocationId
+
 							JOIN tblSTStore ST 
 								ON IL.intLocationId = ST.intCompanyLocationId
 								AND CH.intStoreId = ST.intStoreId	
@@ -675,10 +681,10 @@ BEGIN
 									[intTempDetailIdForTaxes]
 									, [strSourceTransaction]
 							) Tax
-							ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
-							AND Tax.strSourceTransaction = @strtblSTCheckoutPumpTotals01
+								ON CPT.intPumpTotalsId = Tax.intTempDetailIdForTaxes
+								AND Tax.strSourceTransaction = @strtblSTCheckoutPumpTotals01
 							WHERE CPT.intCheckoutId = @intCheckoutId
-							AND CPT.dblAmount > 0
+								AND CPT.dblAmount > 0
 							
 
 						-- Insert Department Total Item with Pump Total negative amount 
@@ -823,9 +829,9 @@ BEGIN
 										,[intItemId]				= I.intItemId
 										,[ysnInventory]				= 1
 										,[strItemDescription]		= I.strDescription
-										,[intOrderUOMId]			= UOM.intItemUOMId
+										,[intOrderUOMId]			= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 										,[dblQtyOrdered]			= 0
-										,[intItemUOMId]				= UOM.intItemUOMId
+										,[intItemUOMId]				= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 										,[dblQtyShipped]			= -1
 										,[dblDiscount]				= 0
 										
@@ -875,25 +881,31 @@ BEGIN
 								ON DT.intCategoryId = CPT.intCategoryId
 							JOIN tblICItem I 
 								ON DT.intItemId = I.intItemId
-							JOIN tblICItemUOM UOM 
-								ON I.intItemId = UOM.intItemId
+
+							-- http://jira.irelyserver.com/browse/ST-1316
+							--JOIN tblICItemUOM UOM 
+							--	ON I.intItemId = UOM.intItemId
+
 							JOIN tblSTCheckoutHeader CH 
 								ON DT.intCheckoutId = CH.intCheckoutId
 								AND CPT.intCheckoutId = CH.intCheckoutId
 							JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
-							JOIN tblICItemPricing IP 
-								ON I.intItemId = IP.intItemId
-								AND IL.intItemLocationId = IP.intItemLocationId
+
+							-- http://jira.irelyserver.com/browse/ST-1316
+							--JOIN tblICItemPricing IP 
+							--	ON I.intItemId = IP.intItemId
+							--	AND IL.intItemLocationId = IP.intItemLocationId
+							
 							JOIN tblSTStore ST 
 								ON IL.intLocationId = ST.intCompanyLocationId
 								AND CH.intStoreId = ST.intStoreId
 							JOIN vyuEMEntityCustomerSearch vC 
 								ON ST.intCheckoutCustomerId = vC.intEntityId
 							WHERE CH.intCheckoutId = @intCheckoutId
-							AND UOM.ysnStockUnit = CAST(1 AS BIT)
-							AND DT.dblTotalSalesAmountComputed = 0
-							AND CPT.dblAmount > 0
+								-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
+								AND DT.dblTotalSalesAmountComputed = 0
+								AND CPT.dblAmount > 0
 
 						-- No need to check ysnStockUnit because ItemMovements have intItemUomId setup for Item
 					END
@@ -1097,15 +1109,25 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTCheckoutItemMovements IM
-								JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-								JOIN tblSTCheckoutHeader CH ON IM.intCheckoutId = CH.intCheckoutId
-								JOIN tblICItem I ON UOM.intItemId = I.intItemId
-								JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-														AND IL.intItemLocationId = IP.intItemLocationId
-								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
-													AND CH.intStoreId = ST.intStoreId
-								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
+								JOIN tblICItemUOM UOM 
+									ON IM.intItemUPCId = UOM.intItemUOMId
+								JOIN tblSTCheckoutHeader CH 
+									ON IM.intCheckoutId = CH.intCheckoutId
+								JOIN tblICItem I 
+									ON UOM.intItemId = I.intItemId
+								JOIN tblICItemLocation IL 
+									ON I.intItemId = IL.intItemId
+
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId
+
+								JOIN tblSTStore ST 
+									ON IL.intLocationId = ST.intCompanyLocationId
+									AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC 
+									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE IM.intCheckoutId = @intCheckoutId
 									--AND IM.dblTotalSales <> 0
 
@@ -1260,9 +1282,9 @@ BEGIN
 											,[intItemId]				= I.intItemId
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
-											,[intOrderUOMId]			= UOM.intItemUOMId
+											,[intOrderUOMId]			= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 											,[dblQtyOrdered]			= 0
-											,[intItemUOMId]				= UOM.intItemUOMId
+											,[intItemUOMId]				= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 											,[dblQtyShipped]			= DT.dblCalculatedInvoiceQty
 											,[dblDiscount]				= 0
 											,[dblPrice]					= DT.dblCalculatedInvoicePrice
@@ -1308,268 +1330,29 @@ BEGIN
 								FROM vyuSTCheckoutDepartmentInvoiceEntries DT
 								JOIN tblICItem I 
 									ON DT.intItemId = I.intItemId
-								JOIN tblICItemUOM UOM 
-									ON I.intItemId = UOM.intItemId
+
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--JOIN tblICItemUOM UOM 
+								--	ON I.intItemId = UOM.intItemId
+
 								JOIN tblSTCheckoutHeader CH 
 									ON DT.intCheckoutId = CH.intCheckoutId
 								JOIN tblICItemLocation IL 
 									ON I.intItemId = IL.intItemId
-								JOIN tblICItemPricing IP 
-									ON I.intItemId = IP.intItemId
-									AND IL.intItemLocationId = IP.intItemLocationId
+
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId
+
 								JOIN tblSTStore ST 
 									ON IL.intLocationId = ST.intCompanyLocationId
 									AND CH.intStoreId = ST.intStoreId
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE DT.intCheckoutId = @intCheckoutId
-									--AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
-									AND UOM.ysnStockUnit = CAST(1 AS BIT)
-
-
-
-								--				SELECT DISTINCT
-								--			 [strSourceTransaction]		= 'Invoice'
-								--			,[strTransactionType]		= @strInvoiceTransactionTypeMain
-								--		    ,[strType]					= @strInvoiceTypeMain
-								--			,[intSourceId]				= @intCheckoutId
-								--			,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
-								--			,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
-								--			,[intEntityCustomerId]		= @intEntityCustomerId
-								--			,[intCompanyLocationId]		= @intCompanyLocationId
-								--			,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
-								--			,[intTermId]				= vC.intTermsId						--ADDED
-								--			,[dtmDate]					= @dtmCheckoutDate --GETDATE()
-								--			,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
-								--			,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
-								--			,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
-								--			,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
-								--			,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
-								--			,[intFreightTermId]			= vC.intFreightTermId				--ADDED
-								--			,[intShipViaId]				= vC.intShipViaId					--ADDED
-								--			,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
-								--			,[strInvoiceOriginId]		= NULL -- not sure
-								--			,[strPONumber]				= NULL -- not sure
-								--			,[strBOLNumber]				= NULL -- not sure
-								--			,[strComments]				= @strComments
-								--			,[intShipToLocationId]		= vC.intShipToId					--ADDED
-								--			,[intBillToLocationId]		= NULL
-								--			,[ysnTemplate]				= 0
-								--			,[ysnForgiven]				= 0
-								--			,[ysnCalculated]			= 0 -- not sure
-								--			,[ysnSplitted]				= 0
-								--			,[intPaymentId]				= NULL
-								--			,[intSplitId]				= NULL
-								--			,[intLoadDistributionHeaderId]	= NULL
-								--			,[strActualCostId]			= NULL
-								--			,[intShipmentId]			= NULL
-								--			,[intTransactionId]			= NULL
-								--			,[intEntityId]				= @intCurrentUserId
-								--			,[ysnResetDetails]			= CASE
-								--											WHEN @intCurrentInvoiceId IS NOT NULL
-								--												THEN CAST(0 AS BIT)
-								--											ELSE CAST(1 AS BIT)
-								--									      END
-								--			,[ysnRecap]					= @ysnRecap
-								--			,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
-								--			,[intInvoiceDetailId]		= NULL
-								--			,[intItemId]				= I.intItemId
-								--			,[ysnInventory]				= 1
-								--			,[strItemDescription]		= I.strDescription
-								--			,[intOrderUOMId]			= UOM.intItemUOMId
-								--			,[dblQtyOrdered]			= 0
-								--			,[intItemUOMId]				= UOM.intItemUOMId
-								--			,[dblQtyShipped]			= CASE 
-								--												-- PUMP TOTALS
-								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed = CPT.dblAmount)
-								--													THEN 0
-								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
-								--													THEN 1
-								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount)
-								--													THEN -1
-
-								--												-- ITEM MOVEMENTS
-								--											    WHEN (
-								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-								--																													SELECT SUM(IM.dblTotalSales)
-								--																													FROM tblSTCheckoutItemMovements IM
-								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
-								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-								--																													WHERE IM.intCheckoutId = @intCheckoutId
-								--																													AND CATT.intCategoryId = DT.intCategoryId
-								--																							              ),0)
-								--														) AS NUMERIC(18, 6))
-								--															) > 0 
-								--														THEN 1
-								--												WHEN (
-								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-								--																													SELECT SUM(IM.dblTotalSales)
-								--																													FROM tblSTCheckoutItemMovements IM
-								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
-								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-								--																													WHERE IM.intCheckoutId = @intCheckoutId
-								--																													AND CATT.intCategoryId = DT.intCategoryId
-								--																							              ),0)
-								--														) AS NUMERIC(18, 6))
-								--															) < 0 
-								--														THEN -1
-								--												WHEN (
-								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-								--																													SELECT SUM(IM.dblTotalSales)
-								--																													FROM tblSTCheckoutItemMovements IM
-								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
-								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-								--																													WHERE IM.intCheckoutId = @intCheckoutId
-								--																													AND CATT.intCategoryId = DT.intCategoryId
-								--																							              ),0)
-								--														) AS NUMERIC(18, 6))
-								--															) = 0 
-								--														THEN 0
-								--												ELSE -1 
-								--										  END
-								--			,[dblDiscount]				= 0 --ISNULL(DT.dblManagerDiscountAmount, 0) + ISNULL(DT.dblPromotionalDiscountAmount, 0) + ISNULL(DT.dblRefundAmount, 0)
-								--			,[dblPrice]					= CASE
-								--												-- PUMP TOTALS
-								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed = CPT.dblAmount)
-								--													THEN 0
-								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
-								--													THEN DT.dblTotalSalesAmountComputed - (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed > CPT.dblAmount)
-								--												WHEN EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount)
-								--													THEN (SELECT SUM(CPT.dblAmount) FROM tblSTCheckoutPumpTotals CPT WHERE CPT.intCheckoutId = @intCheckoutId AND CPT.intCategoryId = DT.intCategoryId AND DT.dblTotalSalesAmountComputed < CPT.dblAmount) - DT.dblTotalSalesAmountComputed
-
-								--												-- ITEM MOVEMENTS
-								--												 WHEN (
-								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-								--																													SELECT SUM(IM.dblTotalSales)
-								--																													FROM tblSTCheckoutItemMovements IM
-								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
-								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-								--																													WHERE IM.intCheckoutId = @intCheckoutId
-								--																													AND CATT.intCategoryId = DT.intCategoryId
-								--																											     ),0)
-								--														) AS NUMERIC(18, 6))
-								--															) > 0 
-								--														THEN (
-								--																ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-								--																																SELECT SUM(IM.dblTotalSales)
-								--																																FROM tblSTCheckoutItemMovements IM
-								--																																JOIN tblICItemUOM UOM 
-								--																																	ON IM.intItemUPCId = UOM.intItemUOMId
-								--																																JOIN tblICItem I 
-								--																																	ON UOM.intItemId = I.intItemId
-								--																																JOIN tblICCategory CATT 
-								--																																	ON I.intCategoryId = CATT.intCategoryId 
-								--																																WHERE intCheckoutId = @intCheckoutId
-								--																																AND CATT.intCategoryId = DT.intCategoryId
-								--																															), 0)
-								--																	) AS NUMERIC(18, 6)))
-								--														)
-								--												 WHEN (
-								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-								--																													SELECT SUM(IM.dblTotalSales)
-								--																													FROM tblSTCheckoutItemMovements IM
-								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
-								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-								--																													WHERE IM.intCheckoutId = @intCheckoutId
-								--																													AND CATT.intCategoryId = DT.intCategoryId
-								--																											    ),0)
-								--														) AS NUMERIC(18, 6))
-								--															) < 0 
-								--														THEN (
-								--																ABS(CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-								--																																SELECT SUM(IM.dblTotalSales)
-								--																																FROM tblSTCheckoutItemMovements IM
-								--																																JOIN tblICItemUOM UOM 
-								--																																	ON IM.intItemUPCId = UOM.intItemUOMId
-								--																																JOIN tblICItem I 
-								--																																	ON UOM.intItemId = I.intItemId
-								--																																JOIN tblICCategory CATT 
-								--																																	ON I.intCategoryId = CATT.intCategoryId 
-								--																																WHERE intCheckoutId = @intCheckoutId
-								--																																AND CATT.intCategoryId = DT.intCategoryId
-								--																															), 0)
-								--																	) AS NUMERIC(18, 6)))
-								--														)
-								--												 WHEN (
-								--														CAST((ISNULL(DT.dblTotalSalesAmountComputed, 0) - ISNULL((
-								--																													SELECT SUM(IM.dblTotalSales)
-								--																													FROM tblSTCheckoutItemMovements IM
-								--																													JOIN tblICItemUOM UOM ON IM.intItemUPCId = UOM.intItemUOMId
-								--																													JOIN tblICItem I ON UOM.intItemId = I.intItemId
-								--																													JOIN tblICCategory CATT ON I.intCategoryId = CATT.intCategoryId 
-								--																													WHERE IM.intCheckoutId = @intCheckoutId
-								--																													AND CATT.intCategoryId = DT.intCategoryId
-								--																											   ),0)
-								--											            ) AS NUMERIC(18, 6))
-								--															) = 0 
-								--														THEN  0
-								--												ELSE ISNULL(DT.dblTotalSalesAmountComputed, 0) -- If not match on Pump Totals and Item Movements
-								--										END
-								--			,[ysnRefreshPrice]			= 0
-								--			,[strMaintenanceType]		= NULL
-								--			,[strFrequency]				= NULL
-								--			,[dtmMaintenanceDate]		= NULL
-								--			,[dblMaintenanceAmount]		= NULL
-								--			,[dblLicenseAmount]			= NULL
-								--			,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
-								--			,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
-								--			,[intSCInvoiceId]			= NULL
-								--			,[strSCInvoiceNumber]		= NULL
-								--			,[intInventoryShipmentItemId] = NULL
-								--			,[strShipmentNumber]		= NULL
-								--			,[intSalesOrderDetailId]	= NULL
-								--			,[strSalesOrderNumber]		= NULL
-								--			,[intContractHeaderId]		= NULL
-								--			,[intContractDetailId]		= NULL
-								--			,[intShipmentPurchaseSalesContractId]	= NULL
-								--			,[intTicketId]				= NULL
-								--			,[intTicketHoursWorkedId]	= NULL
-								--			,[intSiteId]				= NULL -- not sure
-								--			,[strBillingBy]				= NULL -- not sure
-								--			,[dblPercentFull]			= NULL
-								--			,[dblNewMeterReading]		= NULL
-								--			,[dblPreviousMeterReading]	= NULL -- not sure
-								--			,[dblConversionFactor]		= NULL -- not sure
-								--			,[intPerformerId]			= NULL -- not sure
-								--			,[ysnLeaseBilling]			= NULL
-								--			,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
-								--			,[strImportFormat]			= ''
-								--			,[dblCOGSAmount]			= 0 --IP.dblSalePrice
-								--			,[intTempDetailIdForTaxes]  = NULL
-								--			,[intConversionAccountId]	= NULL -- not sure
-								--			,[intCurrencyExchangeRateTypeId]	= NULL
-								--			,[intCurrencyExchangeRateId]		= NULL
-								--			,[dblCurrencyExchangeRate]	= 1.000000
-								--			,[intSubCurrencyId]			= NULL
-								--			,[dblSubCurrencyRate]		= 1.000000
-								--			--,0
-								--			--,1
-								--FROM tblSTCheckoutDepartmetTotals DT
-								--JOIN tblICItem I 
-								--	ON DT.intItemId = I.intItemId
-								--JOIN tblICItemUOM UOM 
-								--	ON I.intItemId = UOM.intItemId
-								--JOIN tblSTCheckoutHeader CH 
-								--	ON DT.intCheckoutId = CH.intCheckoutId
-								--JOIN tblICItemLocation IL 
-								--	ON I.intItemId = IL.intItemId
-								--JOIN tblICItemPricing IP 
-								--	ON I.intItemId = IP.intItemId
-								--	AND IL.intItemLocationId = IP.intItemLocationId
-								--JOIN tblSTStore ST 
-								--	ON IL.intLocationId = ST.intCompanyLocationId
-								--	AND CH.intStoreId = ST.intStoreId
-								--JOIN vyuEMEntityCustomerSearch vC 
-								--	ON ST.intCheckoutCustomerId = vC.intEntityId
-								--WHERE DT.intCheckoutId = @intCheckoutId
-								--	--AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
-								--	AND UOM.ysnStockUnit = CAST(1 AS BIT)
-
+									-- AND DT.dblTotalSalesAmountComputed <> 0 -- ST-1121
+									-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
 					END
 				----------------------------------------------------------------------
 				--------------------- END DEPARTMENT TOTALS --------------------------
@@ -1720,9 +1503,9 @@ BEGIN
 											,[intItemId]				= I.intItemId
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
-											,[intOrderUOMId]			= UOM.intItemUOMId
+											,[intOrderUOMId]			= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 											,[dblQtyOrdered]			= 0 -- 1
-											,[intItemUOMId]				= UOM.intItemUOMId
+											,[intItemUOMId]				= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 											,[dblQtyShipped]			= 1
 											,[dblDiscount]				= 0
 											,[dblPrice]					= ISNULL(STT.dblTotalTax, 0)
@@ -1766,18 +1549,31 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTCheckoutSalesTaxTotals STT
-								JOIN tblICItem I ON STT.intItemId = I.intItemId
-								JOIN tblICItemUOM UOM ON I.intItemId = UOM.intItemId
-								JOIN tblSTCheckoutHeader CH ON STT.intCheckoutId = CH.intCheckoutId
-								JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-								JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-														AND IL.intItemLocationId = IP.intItemLocationId
-								JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
-													AND CH.intStoreId = ST.intStoreId
-								JOIN vyuEMEntityCustomerSearch vC ON ST.intCheckoutCustomerId = vC.intEntityId
+								JOIN tblICItem I 
+									ON STT.intItemId = I.intItemId
+
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--JOIN tblICItemUOM UOM 
+								--	ON I.intItemId = UOM.intItemId
+								
+								JOIN tblSTCheckoutHeader CH 
+									ON STT.intCheckoutId = CH.intCheckoutId
+								JOIN tblICItemLocation IL 
+									ON I.intItemId = IL.intItemId
+								
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId
+
+								JOIN tblSTStore ST 
+									ON IL.intLocationId = ST.intCompanyLocationId
+									AND CH.intStoreId = ST.intStoreId
+								JOIN vyuEMEntityCustomerSearch vC 
+									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE STT.intCheckoutId = @intCheckoutId
-								AND STT.dblTotalTax > 0
-								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+									AND STT.dblTotalTax > 0
+									-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
 					END
 				----------------------------------------------------------------------
 				---------------------- END SALES TAX TOTALS --------------------------
@@ -1929,9 +1725,9 @@ BEGIN
 											,[intItemId]				= I.intItemId
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
-											,[intOrderUOMId]			= UOM.intItemUOMId
+											,[intOrderUOMId]			= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 											,[dblQtyOrdered]			= 0 -- 1
-											,[intItemUOMId]				= UOM.intItemUOMId
+											,[intItemUOMId]				= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 
 											,[dblQtyShipped]			= CASE
 																				WHEN ISNULL(CPO.dblAmount, 0) > 0
@@ -1991,23 +1787,29 @@ BEGIN
 								FROM tblSTCheckoutPaymentOptions CPO
 								JOIN tblICItem I 
 									ON CPO.intItemId = I.intItemId
-								JOIN tblICItemUOM UOM 
-									ON I.intItemId = UOM.intItemId
+
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--JOIN tblICItemUOM UOM 
+								--	ON I.intItemId = UOM.intItemId
+
 								JOIN tblSTCheckoutHeader CH 
 									ON CPO.intCheckoutId = CH.intCheckoutId
 								JOIN tblICItemLocation IL 
 									ON I.intItemId = IL.intItemId
-								JOIN tblICItemPricing IP 
-									ON I.intItemId = IP.intItemId
-									AND IL.intItemLocationId = IP.intItemLocationId
+
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId
+
 								JOIN tblSTStore ST 
 									ON IL.intLocationId = ST.intCompanyLocationId
 									AND CH.intStoreId = ST.intStoreId
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								WHERE CPO.intCheckoutId = @intCheckoutId
-								AND (ISNULL(CPO.dblAmount, 0) != 0)						-- Make No Entry on Sales Invoice If Payment Option Amount = 0
-								AND UOM.ysnStockUnit = CAST(1 AS BIT)
+									AND (ISNULL(CPO.dblAmount, 0) != 0)		-- Make No Entry on Sales Invoice If Payment Option Amount = 0
+									-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
 					END
 				----------------------------------------------------------------------
 				----------------------- END PAYMENT OPTIONS --------------------------
@@ -2100,9 +1902,12 @@ BEGIN
 							LEFT JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
 								AND ST.intCompanyLocationId = IL.intLocationId
-							LEFT JOIN tblICItemPricing IP 
-								ON I.intItemId = IP.intItemId
-								AND IL.intItemLocationId = IP.intItemLocationId	
+
+							-- http://jira.irelyserver.com/browse/ST-1316
+							--LEFT JOIN tblICItemPricing IP 
+							--	ON I.intItemId = IP.intItemId
+							--	AND IL.intItemLocationId = IP.intItemLocationId	
+
 							CROSS APPLY dbo.fnConstructLineItemTaxDetail (
 																				-- ISNULL(CC.dblQuantity, 0)						    -- Qty
 																				CASE
@@ -2152,19 +1957,19 @@ BEGIN
 																				, NULL
 																				, 0
 																				, 0
-																				, UOM.intItemUOMId
-																				,NULL									--@CFSiteId
-																				,0										--@IsDeliver
-																				,0                                      --@IsCFQuote
-																				,NULL
-																				,NULL
-																				,NULL
+																				, UOM.intItemUOMId -- http://jira.irelyserver.com/browse/ST-1316
+																				, NULL									--@CFSiteId
+																				, 0										--@IsDeliver
+																				, 0                                      --@IsCFQuote
+																				, NULL
+																				, NULL
+																				, NULL
 																		
 							) FuelTax
 							WHERE CC.intCheckoutId = @intCheckoutId
-							AND ISNULL(CC.dblAmount, 0) != 0
-							AND I.intItemId IS NOT NULL
-							AND I.ysnFuelItem = CAST(1 AS BIT)
+								AND ISNULL(CC.dblAmount, 0) != 0
+								AND I.intItemId IS NOT NULL
+								AND I.ysnFuelItem = CAST(1 AS BIT)
 						end try
 						begin catch
 							SET @strStatusMsg = CAST(ERROR_MESSAGE() AS VARCHAR(MAX))
@@ -2372,12 +2177,6 @@ BEGIN
 																					CASE
 																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
 																							THEN ABS(ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)) - ABS(FuelTax.dblAdjustedTax)) / ABS(ISNULL(CC.dblQuantity, 0))
-																							--THEN ABS((ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - ABS(FuelTax.dblAdjustedTax)) / CASE
-																							--																							WHEN (CC.dblAmount > 0)
-																							--																								THEN (CC.dblQuantity * -1)
-																							--																							WHEN (CC.dblAmount < 0)
-																							--																								THEN (CC.dblQuantity * -1)
-																							--																						END)
 																					END
 
 																			-- IF Item is BLANK
@@ -2458,9 +2257,12 @@ BEGIN
 								LEFT JOIN tblICItemLocation IL 
 									ON I.intItemId = IL.intItemId
 									AND ST.intCompanyLocationId = IL.intLocationId
-								LEFT JOIN tblICItemPricing IP 
-									ON I.intItemId = IP.intItemId
-									AND IL.intItemLocationId = IP.intItemLocationId	
+
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--LEFT JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId	
+
 								LEFT OUTER JOIN
 								(
 									SELECT 
@@ -2473,45 +2275,10 @@ BEGIN
 										[intTempDetailIdForTaxes]
 										, [strSourceTransaction]
 								) FuelTax
-								ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
-								AND FuelTax.strSourceTransaction = @strtblSTCheckoutCustomerCharges01
-								--OUTER APPLY 
-								--(
-								--	SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
-								--											ISNULL(CC.dblQuantity, 0)						-- Qty
-								--											, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
-								--											, @LineItems
-								--											, 1										-- is Reversal
-								--											--, I.intItemId							-- Item Id
-								--											, CASE
-								--												WHEN I.intItemId IS NOT NULL 
-								--													THEN I.intItemId
-								--												ELSE ST.intCustomerChargesItemId
-								--											END
-								--											, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
-								--											, ST.intCompanyLocationId				-- Company Location Id
-								--											, ST.intTaxGroupId						-- Tax Group Id
-								--											, 0										-- 0 Price if not reversal
-								--											, GETDATE()
-								--											, vC.intShipToId						-- Ship to Location
-								--											, 1
-								--											, NULL
-								--											, vC.intFreightTermId					-- FreightTermId
-								--											, NULL
-								--											, NULL
-								--											, 0
-								--											, 0
-								--											, UOM.intItemUOMId
-								--											,NULL									--@CFSiteId
-								--											,0										--@IsDeliver
-								--											,0                                      --@IsCFQuote
-								--											,NULL
-								--											,NULL
-								--											,NULL
-								--										)
-								--) FuelTax
+									ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
+									AND FuelTax.strSourceTransaction = @strtblSTCheckoutCustomerCharges01
 								WHERE CC.intCheckoutId = @intCheckoutId
-								AND ISNULL(CC.dblAmount, 0) != 0
+									AND ISNULL(CC.dblAmount, 0) != 0
 					END
 				----------------------------------------------------------------------
 				----------------------- END CUSTOMER CHARGES -------------------------
@@ -2665,9 +2432,9 @@ BEGIN
 											,[intItemId]				= I.intItemId
 											,[ysnInventory]				= 1
 											,[strItemDescription]		= I.strDescription
-											,[intOrderUOMId]			= UOM.intItemUOMId
+											,[intOrderUOMId]			= NULL -- UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0 -- 1
-											,[intItemUOMId]				= UOM.intItemUOMId
+											,[intItemUOMId]				= NULL -- UOM.intItemUOMId
 
 											,[dblQtyShipped]			= CASE
 																				WHEN ISNULL(CH.dblCashOverShort,0) > 0
@@ -2730,18 +2497,21 @@ BEGIN
 								JOIN tblICItemLocation IL
 									ON I.intItemId = IL.intItemId
 									AND ST.intCompanyLocationId = IL.intLocationId
-								JOIN tblICItemUOM UOM 
-									ON I.intItemId = UOM.intItemId
-								JOIN tblICItemPricing IP 
-									ON I.intItemId = IP.intItemId
-									AND IL.intItemLocationId = IP.intItemLocationId
+								
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--JOIN tblICItemUOM UOM 
+								--	ON I.intItemId = UOM.intItemId
+								--JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId
+
 								JOIN vyuEMEntityCustomerSearch vC 
 									ON ST.intCheckoutCustomerId = vC.intEntityId
 								JOIN tblSTCheckoutHeader CH 
 									ON ST.intStoreId = CH.intStoreId
 								WHERE CH.intCheckoutId = @intCheckoutId
-								AND UOM.ysnStockUnit = CAST(1 AS BIT)
-								AND ISNULL(CH.dblCashOverShort,0) <> 0
+									-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
+									AND ISNULL(CH.dblCashOverShort,0) <> 0
 					END
 				----------------------------------------------------------------------
 				------------------------- END CASH OVER SHORT ------------------------
@@ -2837,9 +2607,12 @@ BEGIN
 						LEFT JOIN tblICItemLocation IL 
 							ON I.intItemId = IL.intItemId
 							AND ST.intCompanyLocationId = IL.intLocationId
-						LEFT JOIN tblICItemPricing IP 
-							ON I.intItemId = IP.intItemId
-							AND IL.intItemLocationId = IP.intItemLocationId	
+
+						-- http://jira.irelyserver.com/browse/ST-1316
+						--LEFT JOIN tblICItemPricing IP 
+						--	ON I.intItemId = IP.intItemId
+						--	AND IL.intItemLocationId = IP.intItemLocationId	
+
 						CROSS APPLY dbo.fnConstructLineItemTaxDetail (
 																			-- ISNULL(CC.dblQuantity, 0)						    -- Qty
 																			CASE
@@ -2886,9 +2659,9 @@ BEGIN
 																		
 						) FuelTax
 						WHERE CC.intCheckoutId = @intCheckoutId
-						AND ISNULL(CC.dblAmount, 0) != 0
-						AND I.intItemId IS NOT NULL
-						AND I.ysnFuelItem = CAST(1 AS BIT)
+							AND ISNULL(CC.dblAmount, 0) != 0
+							AND I.intItemId IS NOT NULL
+							AND I.ysnFuelItem = CAST(1 AS BIT)
 						end try
 						begin catch
 							SET @strStatusMsg = CAST(ERROR_MESSAGE() AS VARCHAR(MAX))
@@ -3142,26 +2915,11 @@ BEGIN
 																					CASE
 																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
 																							THEN (ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)) - FuelTax.dblAdjustedTax) / ABS(CC.dblQuantity)
-																							--THEN (ABS(CAST(ISNULL(CC.dblAmount, 0) AS DECIMAL(18,2))) - FuelTax.dblAdjustedTax) / CASE
-																							--																							WHEN (CC.dblAmount > 0)
-																							--																								THEN CC.dblQuantity
-																							--																							WHEN (CC.dblAmount < 0)
-																							--																								THEN (CC.dblQuantity * -1)
-																							--																						END
-
-																							-- THEN ABS((ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) - FuelTax.dblAdjustedTax) / CC.dblQuantity)
-																							--THEN CC.dblUnitPrice
 																					END
 
 																			-- IF Item is BLANK
 																			WHEN (I.intItemId IS NULL)
 																				THEN ABS(CC.dblUnitPrice) -- Always set this to positive
-																					--CASE
-																					--	WHEN (CC.dblAmount > 0)
-																					--		THEN CC.dblUnitPrice
-																					--	WHEN (CC.dblAmount < 0)
-																					--		THEN (CC.dblUnitPrice * -1)
-																					--END
 																		END
 
 											,[ysnRefreshPrice]			= 0
@@ -3227,9 +2985,12 @@ BEGIN
 								LEFT JOIN tblICItemLocation IL 
 									ON I.intItemId = IL.intItemId
 									AND ST.intCompanyLocationId = IL.intLocationId
-								LEFT JOIN tblICItemPricing IP 
-									ON I.intItemId = IP.intItemId
-									AND IL.intItemLocationId = IP.intItemLocationId	
+
+								-- http://jira.irelyserver.com/browse/ST-1316
+								--LEFT JOIN tblICItemPricing IP 
+								--	ON I.intItemId = IP.intItemId
+								--	AND IL.intItemLocationId = IP.intItemLocationId	
+
 								LEFT OUTER JOIN
 								(
 									SELECT 
@@ -3242,45 +3003,10 @@ BEGIN
 										[intTempDetailIdForTaxes]
 										, [strSourceTransaction]
 								) FuelTax
-								ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
-								AND FuelTax.strSourceTransaction = @strtblSTCheckoutCustomerCharges02
-								--OUTER APPLY 
-								--(
-								--	SELECT SUM(dblTax) AS dblTax FROM dbo.fnConstructLineItemTaxDetail (
-								--											ISNULL(CC.dblQuantity, 0)						-- Qty
-								--											, ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0) --[dbo].[fnRoundBanker](CPT.dblPrice, 2) --CAST([dbo].fnRoundBanker(CPT.dblPrice, 2) AS DECIMAL(18,6))	-- Gross Amount
-								--											, @LineItems
-								--											, 1										-- is Reversal
-								--											--, I.intItemId							-- Item Id
-								--											, CASE
-								--												WHEN I.intItemId IS NOT NULL 
-								--													THEN I.intItemId
-								--												ELSE ST.intCustomerChargesItemId
-								--											END
-								--											, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
-								--											, ST.intCompanyLocationId				-- Company Location Id
-								--											, ST.intTaxGroupId						-- Tax Group Id
-								--											, 0										-- 0 Price if not reversal
-								--											, GETDATE()
-								--											, vC.intShipToId						-- Ship to Location
-								--											, 1
-								--											, NULL
-								--											, vC.intFreightTermId					-- FreightTermId
-								--											, NULL
-								--											, NULL
-								--											, 0
-								--											, 0
-								--											, UOM.intItemUOMId
-								--											,NULL									--@CFSiteId
-								--											,0										--@IsDeliver
-								--											,0                                      --@IsCFQuote
-								--											,NULL
-								--											,NULL
-								--											,NULL
-								--										)
-								--) FuelTax
+									ON CC.intCustChargeId = FuelTax.intTempDetailIdForTaxes
+									AND FuelTax.strSourceTransaction = @strtblSTCheckoutCustomerCharges02
 								WHERE CC.intCheckoutId = @intCheckoutId
-								AND ISNULL(CC.dblAmount, 0) != 0
+									AND ISNULL(CC.dblAmount, 0) != 0
 					END
 				------------------------------------------------------------------------
 				------------------------- END CUSTOMER CHARGES -------------------------
@@ -4050,27 +3776,16 @@ BEGIN
 										,[ysnAllowOverpayment]					= 0
 										,[ysnFromAP]							= NULL 
 									FROM tblSTCheckoutCustomerPayments CCP
-									--JOIN tblICItem I 
-									--	ON CCP.intItemId = I.intItemId
-									--JOIN tblICItemUOM UOM 
-									--	ON I.intItemId = UOM.intItemId
 									JOIN tblSTCheckoutHeader CH 
 										ON CCP.intCheckoutId = CH.intCheckoutId
-									--JOIN tblICItemLocation IL 
-									--	ON I.intItemId = IL.intItemId
-									--JOIN tblICItemPricing IP 
-									--	ON I.intItemId = IP.intItemId
-									--	AND IL.intItemLocationId = IP.intItemLocationId
 									JOIN tblSTStore ST 
-										--ON IL.intLocationId = ST.intCompanyLocationId
 										ON CH.intStoreId = ST.intStoreId
 									JOIN vyuEMEntityCustomerSearch vC 
 										ON CCP.intCustomerId = vC.intEntityId
 									LEFT JOIN tblSMPaymentMethod PM	
 										ON CCP.intPaymentMethodID = PM.intPaymentMethodID
 									WHERE CCP.intCheckoutId = @intCheckoutId
-									AND CCP.dblPaymentAmount > 0
-									--AND UOM.ysnStockUnit = CAST(1 AS BIT)
+										AND CCP.dblPaymentAmount > 0
 									ORDER BY
 										[intId]
 						END
@@ -4932,17 +4647,26 @@ BEGIN
 												ROW_NUMBER() OVER (ORDER BY intCustChargeId ASC) as intRowNumber
 												,intCustChargeId 
 											FROM tblSTCheckoutCustomerCharges C
-											JOIN tblICItemUOM UOM ON C.intProduct = UOM.intItemUOMId
-											JOIN tblICItem I ON UOM.intItemId = I.intItemId
-											JOIN tblSTCheckoutHeader CH ON C.intCheckoutId = CH.intCheckoutId
-											JOIN tblICItemLocation IL ON I.intItemId = IL.intItemId
-											JOIN tblICItemPricing IP ON I.intItemId = IP.intItemId
-																	AND IL.intItemLocationId = IP.intItemLocationId
-											JOIN tblSTStore ST ON IL.intLocationId = ST.intCompanyLocationId
-											AND CH.intStoreId = ST.intStoreId
+											LEFT JOIN tblICItemUOM UOM 
+												ON C.intProduct = UOM.intItemUOMId
+											JOIN tblICItem I 
+												ON UOM.intItemId = I.intItemId
+											JOIN tblSTCheckoutHeader CH 
+												ON C.intCheckoutId = CH.intCheckoutId
+											JOIN tblICItemLocation IL 
+												ON I.intItemId = IL.intItemId
+
+											-- http://jira.irelyserver.com/browse/ST-1316
+											--JOIN tblICItemPricing IP 
+											--	ON I.intItemId = IP.intItemId
+											--	AND IL.intItemLocationId = IP.intItemLocationId
+
+											JOIN tblSTStore ST 
+												ON IL.intLocationId = ST.intCompanyLocationId
+												AND CH.intStoreId = ST.intStoreId
 											WHERE C.intCheckoutId = @intCheckoutId
-											AND C.dblAmount > 0
-											AND UOM.ysnStockUnit = CAST(1 AS BIT)
+												AND C.dblAmount > 0
+												-- AND UOM.ysnStockUnit = CAST(1 AS BIT) http://jira.irelyserver.com/browse/ST-1316
 
 										) CCX ON CC.intCustChargeId = CCX.intCustChargeId
 										JOIN
