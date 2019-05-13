@@ -35,18 +35,22 @@ BEGIN TRY
 
 	IF(@intCompanyLocationId IS NULL)
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityUserSecurityId = @userId)
+		--IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityUserSecurityId = @userId)
+		--BEGIN
+			RAISERROR('Invalid Vendor Company Location!', 16, 1)
+		--END
+	END
+	ELSE
+	BEGIN
+		SELECT @intAPAccount = intAPAccount, @strCompanyLocation = rtrim(ltrim(strLocationName)) from tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId
+		IF(@intAPAccount IS NULL)
 		BEGIN
-			RAISERROR('Invalid Vendor Company Location Id found!',16,1)
+			SET @strAPAccountErrorMessage = 'Please setup AP Account for Vendor Company Location (' + @strCompanyLocation + ').';
+			RAISERROR(@strAPAccountErrorMessage, 16, 1)
 		END
 	END
 
-	select @intAPAccount = isnull(intAPAccount,0), @strCompanyLocation = rtrim(ltrim(strLocationName)) from tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId;
-	IF(@intAPAccount = 0)
-	BEGIN
-		set @strAPAccountErrorMessage = 'Please setup AP Account for Vendor Company Location (' + @strCompanyLocation + ').';
-		RAISERROR(@strAPAccountErrorMessage,16,1)
-	END
+	
 	
 	-- Validate Total Detail Gross, Fees and Net should equal to Header
 	DECLARE @dblGross NUMERIC(18,6) = NULL
