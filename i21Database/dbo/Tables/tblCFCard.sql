@@ -52,7 +52,6 @@
     CONSTRAINT [FK_tblCFCard_tblICItem] FOREIGN KEY ([intExpenseItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 );
 
-
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCFCard_intCardId]
     ON [dbo].[tblCFCard]([intCardId] ASC);
@@ -71,3 +70,6 @@ CREATE NONCLUSTERED INDEX [tblCFCard_intCardId]
 GO
 CREATE NONCLUSTERED INDEX [tblCFCard_intAccountId]
     ON [dbo].[tblCFCard]([intAccountId] ASC);
+
+GO
+ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
