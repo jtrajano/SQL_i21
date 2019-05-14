@@ -72,3 +72,7 @@ CREATE NONCLUSTERED INDEX [tblCFCard_intCardId]
 GO
 CREATE NONCLUSTERED INDEX [tblCFCard_intAccountId]
     ON [dbo].[tblCFCard]([intAccountId] ASC);
+
+GO
+ALTER TABLE [dbo].[tblCFCard] NOCHECK CONSTRAINT [FK_tblCFCard_tblCFVehicle];
+

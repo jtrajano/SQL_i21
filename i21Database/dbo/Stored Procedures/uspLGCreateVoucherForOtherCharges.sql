@@ -175,8 +175,8 @@ BEGIN TRY
 		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
 		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
 		,V.intCurrencyId
-		,V.intSubLocationId
-		,V.intStorageLocationId
+		,NULL --V.intSubLocationId
+		,NULL --V.intStorageLocationId
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
