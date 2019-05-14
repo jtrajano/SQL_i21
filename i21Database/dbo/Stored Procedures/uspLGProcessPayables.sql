@@ -152,7 +152,7 @@ BEGIN
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = 1
-			,[ysnSubCurrency] =	CASE WHEN ISNULL(CC.intMainCurrencyId, CC.intCurrencyID) > 0 THEN 1 ELSE 0 END
+			,[ysnSubCurrency] =	CC.ysnSubCurrency
 			,[intSubCurrencyCents] = ISNULL(CC.intCent,0)
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
