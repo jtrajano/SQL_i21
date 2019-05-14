@@ -26,7 +26,9 @@ BEGIN
 
 	IF NOT EXISTS(SELECT 1 FROM tblPOPurchaseDetail A
 					INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-					WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') AND intPurchaseId = @poId)
+					WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') 
+					AND A.dblQtyOrdered != A.dblQtyReceived
+					AND intPurchaseId = @poId)
 	BEGIN
 		RAISERROR('There is no receivable item on this purchase order.', 16, 1);
 		RETURN;
