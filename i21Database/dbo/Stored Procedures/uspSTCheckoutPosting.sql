@@ -3995,44 +3995,12 @@ BEGIN
 										ORDER BY
 											[intId]
 
----- TEST
---SELECT '@PaymentsForInsert', * FROM @PaymentsForInsert
-
 									IF EXISTS(SELECT TOP 1 1 FROM @PaymentsForInsert)
 										BEGIN
 
 											BEGIN TRY
-												-- UnPost Recieve Payments
-												--DECLARE @IdsForUnPosting PaymentId
-												--DECLARE @RCVSuccess AS BIT
-												--		, @RCVBatchIdUsed AS NVARCHAR(100)
-												--		, @RCVBatchId AS NVARCHAR(100)
 
-												---- Get batch id
-												--SELECT @RCVBatchId = strBatchId 
-												--FROM tblARPaymentIntegrationLogDetail
-												--WHERE intIntegrationLogId = @intIntegrationLogId
-
-												--EXEC [dbo].[uspARPostPaymentNew]
-												--			 @BatchId			= @RCVBatchId
-												--			,@Post				= 0
-												--			,@Recap				= 0
-												--			,@UserId			= @intCurrentUserId
-												--			,@PaymentIds		= @IdsForUnPosting
-												--			,@IntegrationLogId	= @intIntegrationLogId
-												--			,@BeginDate			= NULL
-												--			,@EndDate			= NULL
-												--			,@BeginTransaction	= NULL
-												--			,@EndTransaction	= NULL
-												--			,@Exclude			= NULL
-												--			,@BatchIdUsed		= @RCVBatchIdUsed OUTPUT
-												--			,@Success			= @RCVSuccess OUTPUT
-												--			,@RaiseError		= 1
-
----- TEST
-----PRINT '@RCVSuccess: ' + CAST(@RCVSuccess AS NVARCHAR(50))
---SELECT '@PaymentsForInsert', * FROM @PaymentsForInsert
-
+												-- http://jira.irelyserver.com/browse/ST-1053
 												EXEC [dbo].[uspARProcessPayments]
 														@PaymentEntries	    = @PaymentsForInsert
 														,@UserId			= @intCurrentUserId
@@ -4050,33 +4018,11 @@ BEGIN
 												GOTO ExitWithRollback
 											END CATCH
 											
----- TEST
---SELECT 'tblARPaymentIntegrationLogDetail', * 
---FROM tblARPaymentIntegrationLogDetail
---WHERE intIntegrationLogId = @intIntegrationLogId
 
 											-- After Un-Posting is successfull delete the recieve payment record
 											IF(@ErrorMessage IS NULL) --AND EXISTS(SELECT intIntegrationLogId FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intIntegrationLogId))
 												BEGIN
 													
-													-- 01
-													--INSERT INTO @tblIds
-													--(
-													--	intId
-													--)
-													--SELECT DISTINCT intPaymentId 
-													--FROM tblARPaymentIntegrationLogDetail 
-													--WHERE intIntegrationLogId = (
-													--								SELECT intReceivePaymentsIntegrationLogId
-													--								FROM tblSTCheckoutHeader
-													--								WHERE intCheckoutId = @intCheckoutId
-													--							)
-
-													-- Un-Post Success 
-													--DECLARE @intRCVPaymentId AS INT
-													--DECLARE @ysnRCVPaymentIsPosted AS INT
-
-
 													-- Handle more than one 
 													DECLARE @tempRCVPaymentsDetails TABLE
 													(
@@ -4107,23 +4053,7 @@ BEGIN
 																								FROM tblSTCheckoutHeader
 																								WHERE intCheckoutId = @intCheckoutId
 																						  )
-													
-													
 
-
-
-													-- Store all RCV details to get all CPP's
-													
-													--SELECT 
-													--	@intRCVPaymentId,
-													--	@ysnRCVPaymentIsPosted,
-													--	intInvoiceId
-													--FROM tblARPaymentDetail
-													--WHERE intPaymentId = @intRCVPaymentId
-
-
----- TEST
---SELECT '@tempRCVPaymentsDetails', * FROM @tempRCVPaymentsDetails
 
   												    -- LOOP Here
 													DECLARE @intCPPInvoiceIdLoop AS INT
@@ -4134,9 +4064,6 @@ BEGIN
 																@intCPPInvoiceIdLoop = intCPPInvoiceId,
 																@intRCVPaymentIdLoop = intRCVPaymentsId
 															FROM @tempRCVPaymentsDetails
-
----- TEST
---SELECT 'tblARPayment', * FROM tblARPayment WHERE intPaymentId = @intRCVPaymentIdLoop
 
 
 															BEGIN TRY
@@ -4160,12 +4087,6 @@ BEGIN
 																						@UserId		= @intCurrentUserId
 
 																			END
-																		-- 01
-																		--EXEC [dbo].[uspARDeletePayment]
-																		--			  @PaymentIds	    =	@tblIds
-																		--			, @intEntityUserId	=	@intCurrentUserId
-																		--			, @ysnRaiseError    =	0
-																		--			, @strErrorMessage  =	@ErrorMessage
 																	END
 																ELSE 
 																	BEGIN
@@ -4256,14 +4177,6 @@ BEGIN
 											)
 				ORDER BY Inv.intInvoiceId DESC
 
---PRINT 'Populate variable with Invoice Ids'
-
-				-- Populate variable with Invoice Ids
-				--SELECT @strCurrentAllInvoiceIdList = COALESCE(@strCurrentAllInvoiceIdList + ',', '') + CAST(Inv.intInvoiceId AS VARCHAR(50))
-				--FROM @tblTempInvoiceIds temp
-				--INNER JOIN tblARInvoice Inv
-				--	ON temp.intInvoiceId = Inv.intInvoiceId
-				--WHERE Inv.ysnPosted = 1
 
 
 				--IF(@strCurrentAllInvoiceIdList IS NOT NULL AND @strCurrentAllInvoiceIdList != '')
@@ -4453,69 +4366,13 @@ BEGIN
 											GOTO ExitWithRollback
 										END CATCH
 
---										DECLARE @tblInvoiceIds TABLE ([intInvoiceId] INT NULL)
-----PRINT 'START DELETE Invoice'
---										-- Insert to temp table
---										INSERT INTO @tblInvoiceIds(intInvoiceId)
---										SELECT CAST(intID AS INT) AS intInvoiceId 
---										FROM [dbo].[fnGetRowsFromDelimitedValues](@strCurrentAllInvoiceIdList) ORDER BY [intID] ASC
-
---										DECLARE @intCurrentInvoiceLoop AS INT
-
---										IF EXISTS(SELECT intInvoiceId FROM @tblInvoiceIds)
---											BEGIN
---												-- Update tblSTCheckoutHeader
---												UPDATE tblSTCheckoutHeader
---												SET intInvoiceId = NULL, strAllInvoiceIdList = NULL
---												WHERE intCheckoutId = @intCheckoutId
-
---												-- Update tblSTCheckoutCustomerCharges
---												UPDATE tblSTCheckoutCustomerCharges
---												SET intCustomerChargesInvoiceId = NULL
---												WHERE intCheckoutId = @intCheckoutId
---											END
-
---		PRINT 'Will Un-Post INVOICEs'							
---		--PRINT 'Start While Loop'
---										WHILE EXISTS (SELECT TOP (1) 1 FROM @tblInvoiceIds)
---											BEGIN
---												SELECT TOP 1 @intCurrentInvoiceLoop = CAST(intInvoiceId AS INT)
---												FROM @tblInvoiceIds
-
---												-- DELETE Invoice
---												BEGIN TRY	
---		-- TEST
---		PRINT 'Will Delete Invoice: ' + CAST(@intCurrentInvoiceLoop AS NVARCHAR(50))
-
---													EXEC [dbo].[uspARDeleteInvoice]
---															@InvoiceId	= @intCurrentInvoiceLoop,
---															@UserId		= @intCurrentUserId
---		-- TEST
---		PRINT 'Delete Invoice: ' + CAST(@intCurrentInvoiceLoop AS NVARCHAR(50)) + ' successfully'
-
---												END TRY
---												BEGIN CATCH
---													SET @ysnUpdateCheckoutStatus = CAST(0 AS BIT)
---													SET @ysnSuccess = CAST(0 AS BIT)
---													SET @strStatusMsg = 'Deleting Sales Invoice Error: ' + ERROR_MESSAGE()
---		-- TEST
---		PRINT 'Will Delete Invoice Error Found: ' + CAST(@intCurrentInvoiceLoop AS NVARCHAR(50)) + @strStatusMsg
-
---													-- ROLLBACK
---													GOTO ExitWithRollback
---													-- RETURN
-
---												END CATCH
-
---												DELETE TOP (1) FROM @tblInvoiceIds
---											END
 										-----------------------------------------------------------------------
 										-------------------- END DELETE Invoice -------------------------------
 										-----------------------------------------------------------------------
 
 
 
---PRINT 'START UNPOST MArk Up / Down'
+
 										SET @ysnInvoiceStatus = 0
 										-----------------------------------------------------------------------
 										------------- START UNPOST MArk Up / Down -----------------------------
@@ -4546,7 +4403,7 @@ BEGIN
 													-- RETURN
 
 												END CATCH
-		--PRINT '@strStatusMsg: ' + ISNULL(@strMarkUpDownPostingStatusMsg, 'NULL')
+
 												IF(@strMarkUpDownPostingStatusMsg = '')
 													BEGIN
 														SET @strStatusMsg = 'Success' -- Should return to 'Success'

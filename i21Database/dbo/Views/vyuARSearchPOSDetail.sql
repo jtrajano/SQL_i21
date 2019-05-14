@@ -4,6 +4,7 @@ SELECT intPOSId					= POS.intPOSId
 	 , intEntityCustomerId		= POS.intEntityCustomerId
 	 , intBillToId				= CUSTOMER.intBillToId
 	 , intShipToId				= CUSTOMER.intShipToId
+	 , intCompanyLocationId		= POS.intCompanyLocationId
 	 , dtmDate					= POS.dtmDate
 	 , strReceiptNumber			= POS.strReceiptNumber
 	 , strCustomerName			= CUSTOMER.strName
@@ -32,7 +33,6 @@ SELECT intPOSId					= POS.intPOSId
 	 , dblTax					= POSDetail.dblTax
 	 , dblExtendedPrice			= POSDetail.dblExtendedPrice
 	 , ysnPaid					= CASE WHEN POS.intInvoiceId IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-
 	 , dtmPOSDate				= POS.dtmDate
 	 , strInvoiceNumber			= INV.strInvoiceNumber
 	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
