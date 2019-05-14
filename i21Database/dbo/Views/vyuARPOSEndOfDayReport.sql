@@ -29,7 +29,7 @@ SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , OnAccount			= ISNULL(PAYMENT.dblOnAccountAmount, 0)
 	 , OnAccountCount		= ISNULL(PAYMENT.intOnAccountCount, 0)
 	 , dblCashReturn		= ISNULL(EOD.dblCashReturn,0)
-	 , dblCashSales			= ISNULL(EOD.dblExpectedEndingBalance, 0)
+	 , dblCashSales			= ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)
 	 , intReturnCount		= ISNULL(CASHRETURN.intReturnCount,0)
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN (
@@ -126,6 +126,6 @@ OUTER APPLY (
 		FROM tblARPOSEndOfDay
 	)REOD ON RPOSLOG.intPOSEndOfDayId = REOD.intPOSEndOfDayId
 	WHERE ysnReturn = 1
-	  AND dblTotal < 0
+	  --AND dblTotal < 0
 	  AND REOD.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 ) CASHRETURN
