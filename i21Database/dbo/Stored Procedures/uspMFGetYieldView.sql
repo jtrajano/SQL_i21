@@ -126,7 +126,7 @@ BEGIN TRY
 			,intPlannedShiftId
 			,intItemId
 			)
-		SELECT DISTINCT W.intWorkOrderId
+		SELECT W.intWorkOrderId
 			,ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
 			,W.intPlannedShiftId
 			,W.intItemId
@@ -144,7 +144,7 @@ BEGIN TRY
 			,intPlannedShiftId
 			,intItemId
 			)
-		SELECT DISTINCT W.intWorkOrderId
+		SELECT W.intWorkOrderId
 			,ISNULL(W.dtmPlannedDate, W.dtmExpectedDate)
 			,W.intPlannedShiftId
 			,W.intItemId
@@ -518,45 +518,7 @@ BEGIN TRY
 			,TR.intShiftId
 			,TR.intInputItemId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,CASE 
-				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST(
-						(Isnull((
-											SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
-											Else WP.dblQuantity End)
-											FROM tblMFWorkOrderProducedLot WP
-											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
-											WHERE WP.ysnFillPartialPallet =0
-												AND WP.ysnProductionReversed = 0
-												AND WP.intWorkOrderId = W.intWorkOrderId
-											), 0)
-									) 
-									* RI.dblCalculatedQuantity / (
-									CASE 
-										WHEN R.dblQuantity = 0
-											THEN 1
-										ELSE R.dblQuantity
-										END
-									) AS NUMERIC(18, 6)))
-				ELSE CAST(
-						(Isnull((
-											SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
-											Else WP.dblQuantity End)
-											FROM tblMFWorkOrderProducedLot WP
-											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
-											WHERE WP.ysnFillPartialPallet =0
-												AND WP.ysnProductionReversed = 0
-												AND WP.intWorkOrderId = W.intWorkOrderId
-											), 0)
-									) 
-									* RI.dblCalculatedQuantity / (
-									CASE 
-										WHEN R.dblQuantity = 0
-											THEN 1
-										ELSE R.dblQuantity
-										END
-									) AS NUMERIC(18, 6))
-				END AS dblRequiredQty
+			,isNULL(PS.dblRequiredQty,0)  AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
@@ -564,94 +526,95 @@ BEGIN TRY
 			,TR.intItemUOMId
 			,strTransactionType
 			,TR.intCategoryId
-			,RI.intRecipeItemTypeId
+			,PS.intItemTypeId AS intRecipeItemTypeId
 		INTO ##tblMFInputItemYield
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
-			AND RS.intWorkOrderId = W.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
-			AND RI.intWorkOrderId = W.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
-			AND R.intWorkOrderId = W.intWorkOrderId
-			AND R.intRecipeId = RI.intRecipeId
+		JOIN dbo.tblMFProductionSummary PS on PS.intWorkOrderId =W.intWorkOrderId and PS.intItemId = TR.intInputItemId 
+		--JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
+		--LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
+		--	AND RS.intWorkOrderId = W.intWorkOrderId
+		--JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
+		--	AND RI.intWorkOrderId = W.intWorkOrderId
+		--JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
+		--	AND R.intWorkOrderId = W.intWorkOrderId
+		--	AND R.intRecipeId = RI.intRecipeId
 		WHERE strTransactionType IN (
 				'INPUT'
 				,'OUTPUT'
 				,'dblOpeningQuantity'
 				)
 
-		INSERT INTO ##tblMFInputItemYield
-		SELECT DISTINCT TR.intWorkOrderId
-			,W.strWorkOrderNo
-			,TR.intItemId
-			,TR.dtmDate
-			,TR.intShiftId
-			,TR.intInputItemId
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,CASE 
-				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST(
-						(Isnull((
-											SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
-											Else WP.dblQuantity End)
-											FROM tblMFWorkOrderProducedLot WP
-											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
-											WHERE WP.ysnFillPartialPallet =1
-												AND WP.ysnProductionReversed = 0
-												AND WP.intWorkOrderId = W.intWorkOrderId
-											), 0)
-									) 
-									* RI.dblCalculatedQuantity / (
-									CASE 
-										WHEN R.dblQuantity = 0
-											THEN 1
-										ELSE R.dblQuantity
-										END
-									) AS NUMERIC(18, 6)))
-				ELSE CAST(
-						(Isnull((
-											SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
-											Else WP.dblQuantity End)
-											FROM tblMFWorkOrderProducedLot WP
-											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
-											WHERE WP.ysnFillPartialPallet =1
-												AND WP.ysnProductionReversed = 0
-												AND WP.intWorkOrderId = W.intWorkOrderId
-											), 0)
-									) 
-									* RI.dblCalculatedQuantity / (
-									CASE 
-										WHEN R.dblQuantity = 0
-											THEN 1
-										ELSE R.dblQuantity
-										END
-									) AS NUMERIC(18, 6))
-				END AS dblRequiredQty
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
-			,TR.intItemUOMId
-			,strTransactionType
-			,TR.intCategoryId
-			,RI.intRecipeItemTypeId
-		FROM ##tblMFTransaction TR
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
-			AND RS.intWorkOrderId = W.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
-			AND RI.intWorkOrderId = W.intWorkOrderId
-		LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
-			AND R.intWorkOrderId = W.intWorkOrderId
-			AND R.intRecipeId = RI.intRecipeId
-		WHERE strTransactionType IN (
-				'INPUT'
-				,'OUTPUT'
-				,'dblOpeningQuantity'
-				)
+		--INSERT INTO ##tblMFInputItemYield
+		--SELECT DISTINCT TR.intWorkOrderId
+		--	,W.strWorkOrderNo
+		--	,TR.intItemId
+		--	,TR.dtmDate
+		--	,TR.intShiftId
+		--	,TR.intInputItemId
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
+		--	,CASE 
+		--		WHEN I.intCategoryId = @intCategoryId
+		--			THEN CEILING(CAST(
+		--				(Isnull((
+		--									SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+		--									Else WP.dblQuantity End)
+		--									FROM tblMFWorkOrderProducedLot WP
+		--									JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+		--									WHERE WP.ysnFillPartialPallet =1
+		--										AND WP.ysnProductionReversed = 0
+		--										AND WP.intWorkOrderId = W.intWorkOrderId
+		--									), 0)
+		--							) 
+		--							* RI.dblCalculatedQuantity / (
+		--							CASE 
+		--								WHEN R.dblQuantity = 0
+		--									THEN 1
+		--								ELSE R.dblQuantity
+		--								END
+		--							) AS NUMERIC(18, 6)))
+		--		ELSE CAST(
+		--				(Isnull((
+		--									SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+		--									Else WP.dblQuantity End)
+		--									FROM tblMFWorkOrderProducedLot WP
+		--									JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+		--									WHERE WP.ysnFillPartialPallet =1
+		--										AND WP.ysnProductionReversed = 0
+		--										AND WP.intWorkOrderId = W.intWorkOrderId
+		--									), 0)
+		--							) 
+		--							* RI.dblCalculatedQuantity / (
+		--							CASE 
+		--								WHEN R.dblQuantity = 0
+		--									THEN 1
+		--								ELSE R.dblQuantity
+		--								END
+		--							) AS NUMERIC(18, 6))
+		--		END AS dblRequiredQty
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
+		--	,TR.intItemUOMId
+		--	,strTransactionType
+		--	,TR.intCategoryId
+		--	,RI.intRecipeItemTypeId
+		--FROM ##tblMFTransaction TR
+		--JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
+		--JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
+		--LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
+		--	AND RS.intWorkOrderId = W.intWorkOrderId
+		--JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
+		--	AND RI.intWorkOrderId = W.intWorkOrderId
+		--LEFT JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = W.intItemId
+		--	AND R.intWorkOrderId = W.intWorkOrderId
+		--	AND R.intRecipeId = RI.intRecipeId
+		--WHERE strTransactionType IN (
+		--		'INPUT'
+		--		,'OUTPUT'
+		--		,'dblOpeningQuantity'
+		--		)
 
 		SELECT intWorkOrderId
 			,strWorkOrderNo
@@ -1273,45 +1236,7 @@ BEGIN TRY
 			,TR.intShiftId
 			,TR.intInputItemId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,CASE 
-				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST(
-						(Isnull((
-											SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
-											Else WP.dblQuantity End)
-											FROM tblMFWorkOrderProducedLot WP
-											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
-											WHERE WP.ysnFillPartialPallet =0
-												AND WP.ysnProductionReversed = 0
-												AND WP.intWorkOrderId = W.intWorkOrderId
-											), 0)
-									) 
-									* RI.dblCalculatedQuantity / (
-									CASE 
-										WHEN R.dblQuantity = 0
-											THEN 1
-										ELSE R.dblQuantity
-										END
-									) AS NUMERIC(18, 6)))
-				ELSE CAST(
-						(Isnull((
-											SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
-											Else WP.dblQuantity End)
-											FROM tblMFWorkOrderProducedLot WP
-											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
-											WHERE WP.ysnFillPartialPallet =0
-												AND WP.ysnProductionReversed = 0
-												AND WP.intWorkOrderId = W.intWorkOrderId
-											), 0)
-									) 
-									* RI.dblCalculatedQuantity / (
-									CASE 
-										WHEN R.dblQuantity = 0
-											THEN 1
-										ELSE R.dblQuantity
-										END
-									) AS NUMERIC(18, 6))
-				END AS dblRequiredQty
+			,isNULL(PS.dblRequiredQty,0) AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
@@ -1320,98 +1245,99 @@ BEGIN TRY
 			,W.intItemId AS intPrimaryItemId
 			,strTransactionType
 			,TR.intCategoryId
-			,RI.intRecipeItemTypeId
+			,PS.intItemTypeId intRecipeItemTypeId
 		INTO ##tblMFInputItemYieldByDate
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
-			AND RS.intWorkOrderId = W.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
-			AND RI.intWorkOrderId = W.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
-			AND R.intWorkOrderId = TR.intWorkOrderId
-			AND R.intRecipeId = RI.intRecipeId
+		JOIN dbo.tblMFProductionSummary PS on PS.intWorkOrderId =W.intWorkOrderId and PS.intItemId =TR.intInputItemId
+		--LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
+		--	AND RS.intWorkOrderId = W.intWorkOrderId
+		--JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
+		--	AND RI.intWorkOrderId = W.intWorkOrderId
+		--JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
+		--	AND R.intWorkOrderId = TR.intWorkOrderId
+		--	AND R.intRecipeId = RI.intRecipeId
 		WHERE strTransactionType IN (
 				'INPUT'
 				,'OUTPUT'
 				,'dblOpeningQuantity'
 				)
 
-		INSERT INTO ##tblMFInputItemYieldByDate
-		SELECT DISTINCT Dense_Rank() OVER (
-				ORDER BY TR.intItemId
-					,TR.dtmDate
-					,TR.intShiftId
-				) AS intYieldId
-			,TR.intItemId
-			,TR.dtmDate
-			,TR.intShiftId
-			,TR.intInputItemId
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,CASE 
-				WHEN I.intCategoryId = @intCategoryId
-					THEN CEILING(CAST(
-						(Isnull((
-											SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
-											Else WP.dblQuantity End)
-											FROM tblMFWorkOrderProducedLot WP
-											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
-											WHERE WP.ysnFillPartialPallet =1
-												AND WP.ysnProductionReversed = 0
-												AND WP.intWorkOrderId = W.intWorkOrderId
-											), 0)
-									) 
-									* RI.dblCalculatedQuantity / (
-									CASE 
-										WHEN R.dblQuantity = 0
-											THEN 1
-										ELSE R.dblQuantity
-										END
-									) AS NUMERIC(18, 6)))
-				ELSE CAST(
-						(Isnull((
-											SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
-											Else WP.dblQuantity End)
-											FROM tblMFWorkOrderProducedLot WP
-											JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
-											WHERE WP.ysnFillPartialPallet =1
-												AND WP.ysnProductionReversed = 0
-												AND WP.intWorkOrderId = W.intWorkOrderId
-											), 0)
-									) 
-									* RI.dblCalculatedQuantity / (
-									CASE 
-										WHEN R.dblQuantity = 0
-											THEN 1
-										ELSE R.dblQuantity
-										END
-									) AS NUMERIC(18, 6))
-				END AS dblRequiredQty
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
-			,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
-			,TR.intItemUOMId
-			,W.intItemId AS intPrimaryItemId
-			,strTransactionType
-			,TR.intCategoryId
-			,RI.intRecipeItemTypeId 
-		FROM ##tblMFTransaction TR
-		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
-		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
-			AND RS.intWorkOrderId = W.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
-			AND RI.intWorkOrderId = W.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
-			AND R.intWorkOrderId = TR.intWorkOrderId
-			AND R.intRecipeId = RI.intRecipeId
-		WHERE strTransactionType IN (
-				'INPUT'
-				,'OUTPUT'
-				,'dblOpeningQuantity'
-				)
+		--INSERT INTO ##tblMFInputItemYieldByDate
+		--SELECT DISTINCT Dense_Rank() OVER (
+		--		ORDER BY TR.intItemId
+		--			,TR.dtmDate
+		--			,TR.intShiftId
+		--		) AS intYieldId
+		--	,TR.intItemId
+		--	,TR.dtmDate
+		--	,TR.intShiftId
+		--	,TR.intInputItemId
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
+		--	,CASE 
+		--		WHEN I.intCategoryId = @intCategoryId
+		--			THEN CEILING(CAST(
+		--				(Isnull((
+		--									SELECT SUm(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+		--									Else WP.dblQuantity End)
+		--									FROM tblMFWorkOrderProducedLot WP
+		--									JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+		--									WHERE WP.ysnFillPartialPallet =1
+		--										AND WP.ysnProductionReversed = 0
+		--										AND WP.intWorkOrderId = W.intWorkOrderId
+		--									), 0)
+		--							) 
+		--							* RI.dblCalculatedQuantity / (
+		--							CASE 
+		--								WHEN R.dblQuantity = 0
+		--									THEN 1
+		--								ELSE R.dblQuantity
+		--								END
+		--							) AS NUMERIC(18, 6)))
+		--		ELSE CAST(
+		--				(Isnull((
+		--									SELECT SUM(Case When W1.intItemUOMId =WP.intPhysicalItemUOMId Then  WP.dblPhysicalCount
+		--									Else WP.dblQuantity End)
+		--									FROM tblMFWorkOrderProducedLot WP
+		--									JOIN tblMFWorkOrder W1 on W1.intWorkOrderId =WP.intWorkOrderId 
+		--									WHERE WP.ysnFillPartialPallet =1
+		--										AND WP.ysnProductionReversed = 0
+		--										AND WP.intWorkOrderId = W.intWorkOrderId
+		--									), 0)
+		--							) 
+		--							* RI.dblCalculatedQuantity / (
+		--							CASE 
+		--								WHEN R.dblQuantity = 0
+		--									THEN 1
+		--								ELSE R.dblQuantity
+		--								END
+		--							) AS NUMERIC(18, 6))
+		--		END AS dblRequiredQty
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
+		--	,CAST(0.0 AS NUMERIC(18, 6)) AS dblVariance
+		--	,TR.intItemUOMId
+		--	,W.intItemId AS intPrimaryItemId
+		--	,strTransactionType
+		--	,TR.intCategoryId
+		--	,RI.intRecipeItemTypeId 
+		--FROM ##tblMFTransaction TR
+		--JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
+		--JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
+		--LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
+		--	AND RS.intWorkOrderId = W.intWorkOrderId
+		--JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
+		--	AND RI.intWorkOrderId = W.intWorkOrderId
+		--JOIN dbo.tblMFWorkOrderRecipe R ON R.intItemId = TR.intItemId
+		--	AND R.intWorkOrderId = TR.intWorkOrderId
+		--	AND R.intRecipeId = RI.intRecipeId
+		--WHERE strTransactionType IN (
+		--		'INPUT'
+		--		,'OUTPUT'
+		--		,'dblOpeningQuantity'
+		--		)
 
 		SELECT intYieldId
 			,intItemId
