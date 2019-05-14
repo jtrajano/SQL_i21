@@ -390,5 +390,7 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					--,CD.strItemNo,
 					--CD.strItemDescription,
 					--CD.strShortName
-	)t,x
-	where (x.intContractHeaderId = t.intContractHeaderId and x.intContractDetailId = t.intContractDetailId) OR (x.intContractHeaderId = t.intContractHeaderId and t.ysnMultiplePriceFixation = 1 and t.intContractDetailId IS NULL and t.intPriceFixationId IS NULL and t.intPriceContractId IS NULL)
+	)t
+	LEFT JOIN x ON x.intContractHeaderId = t.intContractHeaderId AND ISNULL(t.ysnMultiplePriceFixation,0) = 0
+	where 
+	 ISNULL(t.intContractDetailId,0) = CASE WHEN t.ysnMultiplePriceFixation = 1 THEN ISNULL(t.intContractDetailId,0) ELSE x.intContractDetailId END
