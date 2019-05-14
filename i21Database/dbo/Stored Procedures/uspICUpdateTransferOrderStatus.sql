@@ -55,6 +55,8 @@ END
 
 -- IF Status is updated in Posting
 -- t.intStatusId = CASE WHEN ri.dblOrderQty = (ISNULL(tf.dblReceiptQty, 0) + ri.dblOpenReceive) THEN @intStatusId ELSE 2 END
+/*
+
 UPDATE t
 SET t.intStatusId = CASE WHEN ri.dblOrderQty = (ISNULL(tf.dblReceiptQty, 0) ) THEN @intStatusId ELSE 2 END
 FROM tblICInventoryReceipt r
@@ -67,6 +69,57 @@ FROM tblICInventoryReceipt r
 	) tf ON tf.intInventoryTransferId = t.intInventoryTransferId
 WHERE r.intInventoryReceiptId = @ReceiptId
 	AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+*/
+---
+
+declare @tally_table table( ysnDone bit, intTransferId int)
+  --current receipt transaction for the transfer
+insert into @tally_table( ysnDone, intTransferId)
+select case when a.dblTotal = b.dblTotal then 1 else 0 end, a.intInventoryTransferId from (
+--select * from (
+	select 
+		dblTotal = sum(dbo.fnICConvertUOMtoStockUnit(st.intItemId, st.intReceiptGrossUOMId, st.dblReceiptGross)), 
+		st.intItemId, 
+		st.intInventoryTransferId, 
+		st.intInventoryTransferDetailId
+		FROM vyuICGetItemStockTransferred st 
+			join 		
+			(
+		
+				select distinct 					
+					intInventoryTransferId =  isnull(intInventoryTransferId, intOrderId) 
+				from tblICInventoryReceiptItem where intInventoryReceiptId = @ReceiptId
+			)	su	 on st.intInventoryTransferId = su.intInventoryTransferId
+			join tblICInventoryTransferDetail sv
+						on st.intInventoryTransferDetailId = sv.intInventoryTransferDetailId
+		
+		group by st.intItemId, st.intInventoryTransferId, st.intInventoryTransferDetailId
+	) a
+	join 
+		( 
+			select dblTotal = dbo.fnICConvertUOMtoStockUnit(intItemId, intItemUOMId, dblQuantity),  intItemId, intInventoryTransferId, intInventoryTransferDetailId
+				from tblICInventoryTransferDetail --where intInventoryTransferId = 529
+			)b 
+			on a.intInventoryTransferId = b.intInventoryTransferId and a.intInventoryTransferDetailId  = b.intInventoryTransferDetailId
+
+
+
+update a
+	SET a.intStatusId = CASE WHEN b.ysnDone = 1 THEN @intStatusId ELSE 2 END
+from tblICInventoryTransfer  a
+	join (
+		select distinct 
+			ysnDone = ISNULL((select top 1 0 from @tally_table  where ysnDone = 0 and intTransferId = A.intTransferId), A.ysnDone), 
+			intTransferId
+		from @tally_table  A
+	) b
+	on a.intInventoryTransferId = b.intTransferId
+
+
+
+---
+
+
 
 DECLARE @Count INT
 SELECT @Count = COUNT(*)

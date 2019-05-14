@@ -25,7 +25,8 @@ SELECT
 	tr.intStatusId,
 	s.strStatus,
 	r.intInventoryReceiptId,
-	ri.intInventoryReceiptItemId
+	ri.intInventoryReceiptItemId,
+	trd.intInventoryTransferDetailId
 FROM tblICInventoryTransfer tr
 	INNER JOIN tblICInventoryTransferDetail trd ON trd.intInventoryTransferId = tr.intInventoryTransferId
 	INNER JOIN tblICInventoryReceipt r ON r.strReceiptType = 'Transfer Order'
