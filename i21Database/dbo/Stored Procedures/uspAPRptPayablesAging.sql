@@ -236,23 +236,31 @@ BEGIN
 END
 ELSE
 BEGIN
-	SET @dateFrom = CONVERT(VARCHAR(10), '1/1/1900', 110)
-	--SET @dateTo = CONVERT(VARCHAR(10), '1/1/2100', 110)
-	SET @dateTo = GETDATE()
+	--SET @dateFrom = CONVERT(VARCHAR(10), '1/1/1900', 110)
+	SET @dateTo = CONVERT(VARCHAR(10), '1/1/2100', 110)
+	--SET @dateTo = GETDATE()
 	SET @dtmDateFilter =  '(SELECT ''' + CONVERT(VARCHAR(10), GETDATE(), 101) +''')';
 END
 
 
---IF @strAccountId IS NOT NULL
---BEGIN 
---	BEGIN
-	 
---		SET @innerQuery = @innerQuery + CASE WHEN @dateFrom IS NOT NULL THEN ' AND ' ELSE ' WHERE ' END + ' strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
---		SET @prepaidInnerQuery = @prepaidInnerQuery + CASE WHEN @dateFrom IS NOT NULL THEN ' AND ' ELSE ' WHERE ' END + ' strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
---	END
---END
+IF @strAccountId IS NOT NULL
+BEGIN 
+	BEGIN
+		SET @innerQuery = @innerQuery + CASE 
+										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										ELSE ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										END
+		SET @prepaidInnerQuery = @prepaidInnerQuery + 
+										CASE 
+										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										ELSE ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										END
+	END
+END
 
---DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
