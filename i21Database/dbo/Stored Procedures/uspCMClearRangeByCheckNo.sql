@@ -47,7 +47,7 @@ WHERE	ysnPosted = 1
 		AND ysnClr = 0
 		AND dtmDateReconciled IS NULL
 		AND intBankAccountId = @intBankAccountId
-		AND strReferenceNo BETWEEN @strCheckNoFrom AND @strCheckNoTo
+		AND LTRIM(RTRIM(ISNULL(strReferenceNo,''))) BETWEEN @strCheckNoFrom AND @strCheckNoTo
 		AND 1 = 
 			CASE	WHEN	@strSide = 'DEBIT' 
 							AND (
