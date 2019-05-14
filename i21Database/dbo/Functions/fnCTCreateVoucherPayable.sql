@@ -38,13 +38,16 @@ RETURNS TABLE AS RETURN
 		,[intItemId]								=	CC.intItemId
 		,[intPurchaseTaxGroupId]					=	NULL
 		,[strMiscDescription]						=	CC.strItemDescription
-		,[dblOrderQty]								=	1
+		,[dblOrderQty]								=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CH.dblQuantity,0) ELSE 1 END
 		,[dblOrderUnitQty]							=	0
 		,[intOrderUOMId]							=	0
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
+		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CH.dblQuantity,0) ELSE 1 END
 		,[dblQtyToBillUnitQty]						=	0
 		,[intQtyToBillUOMId]						=	0
-		,[dblCost]									=	0
+		,[dblCost]									=	CASE
+															WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CC.dblRate,0)
+															ELSE ISNULL(CC.dblAmount,0)
+														END
 		,[dblCostUnitQty]							=	ISNULL(CostUOM.dblUnitQty,1)
 		,[intCostUOMId]								=	CostUOM.intItemUOMId
 		,[dblNetWeight]								=	CAST(0 AS DECIMAL(38,20))--ISNULL(CD.dblNetWeight,0)      
