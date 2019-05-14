@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSCProductionHistoryReportView]
-	AS SELECT DISTINCT SC.intTicketId, (CASE WHEN
+	AS 	
+	SELECT DISTINCT SC.intTicketId, (CASE WHEN
     SC.strTicketStatus = 'O' THEN 'OPEN' WHEN
     SC.strTicketStatus = 'A' THEN 'PRINTED' WHEN
     SC.strTicketStatus = 'C' THEN 'COMPLETED' WHEN
@@ -105,14 +106,13 @@
 	tblSMCompanySetup.strCompanyPhone,
 	tblSMCompanySetup.strCompanyCity,
 	tblSMCompanySetup.strCompanyCountry,
-	ReceiptItem.intInventoryReceiptId,
-	ReceiptItem.intInventoryReceiptItemId,
-	ISNULL(ReceiptItem.strReceiptNumber,'') as strReceiptNumber,
-	CAST(ISNULL(ReceiptItem.dblGross,0) as DECIMAL(18,6)) as dblGross,
-	CAST(ISNULL(ReceiptItem.dblShrinkage,0) as DECIMAL(18,6)) as dblShrinkage,
-	CAST(ISNULL(ReceiptItem.dblNet,0) as DECIMAL(18,6)) dblNet,
-	ISNULL((ReceiptItem.dblNet / SC.dblNetUnits * (SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2)),0) AS dblLineGrossWeight,
-	ISNULL(((ReceiptItem.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)),0) AS dblLineNetWeight,
+	--ReceiptItem.intInventoryReceiptId,
+	----ReceiptItem.intInventoryReceiptItemId,
+	--ReceiptItem.strReceiptNumber,
+	SC.dblGrossUnits dblGross,
+	SC.dblNetUnits dblNet,
+	(SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2) AS dblLineGrossWeight,
+	(SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2) AS dblLineNetWeight,
 	tblGRDiscountId.strDiscountId,
 	ISNULL(Voucher.dtmDate, ReceiptItem.dtmReceiptDate) AS dtmReceiptDate,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
