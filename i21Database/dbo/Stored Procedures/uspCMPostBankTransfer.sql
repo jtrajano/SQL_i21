@@ -226,15 +226,23 @@ BEGIN
 	-- Check if the bank account is inactive
 	IF @ysnRecap = 0 
 	BEGIN
-		SELECT TOP 1 @ysnBankAccountIdInactive = 1
-		FROM	tblCMBankAccount
-		WHERE	intBankAccountId IN (@intBankAccountIdFrom, @intBankAccountIdTo) 
-				AND (ysnActive = 0 OR intGLAccountId IN (SELECT intAccountId FROM tblGLAccount WHERE ysnActive = 0))
+
+		DECLARE @GLAccountSetupIsValid INT = 0
+
+		SELECT	@GLAccountSetupIsValid = COUNT(1),	@ysnBankAccountIdInactive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
+		FROM	tblCMBankAccount CM JOIN vyuGLAccountDetail GL 
+		ON GL.intAccountId = CM.intGLAccountId
+		WHERE	intBankAccountId = @intBankAccountId
+		GROUP BY intBankAccountId, CM.ysnActive, GL.ysnActive
 	
 		IF @ysnBankAccountIdInactive = 1
 		BEGIN
-			-- 'The bank account is inactive.'
 			RAISERROR('The bank account or its associated GL account is inactive.', 11, 1)
+			GOTO Post_Rollback
+		END
+		IF (@GLAccountSetupIsValid = 0)
+		BEGIN
+		RAISERROR('The GL Account associated with the bank has invalid setup or non existent.', 11, 1)
 			GOTO Post_Rollback
 		END
 	END 
