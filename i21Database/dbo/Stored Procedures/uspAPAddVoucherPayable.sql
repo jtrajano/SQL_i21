@@ -239,6 +239,10 @@ BEGIN
 																	THEN 'Per-unit retain allocations'
 													ELSE entity.str1099Type END
 			,[ysnReturn]						=	A.ysnReturn
+			,[intStorageLocationId]				=	A.intStorageLocationId
+			,[strStorageLocationName]			=	storageLoc.strName
+			,[intSubLocationId]					=	A.intSubLocationId
+			,[strSubLocationName]				=	subLoc.strSubLocationName
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -271,6 +275,8 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure contractCostUOM ON contractCostUOM.intUnitMeasureId = contractItemCostUOM.intUnitMeasureId
 		LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intScaleTicketId
 		LEFT JOIN tblSMTerm contractTerm ON ctDetail.intTermId = contractTerm.intTermID
+		LEFT JOIN tblICStorageLocation storageLoc ON storageLoc.intStorageLocationId = A.intStorageLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation subLoc ON subLoc.intCompanyLocationSubLocationId = A.intSubLocationId
 		WHERE A.ysnStage = 1
 	) AS SourceData
 	 ON (1=0)
@@ -344,7 +350,11 @@ BEGIN
 		,[int1099Category]				
 		,[str1099Form]					
 		,[str1099Type]							
-		,[ysnReturn]			
+		,[ysnReturn]		
+		,[intStorageLocationId]
+		,[strStorageLocationName]
+		,[intSubLocationId]
+		,[strSubLocationName]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -415,7 +425,11 @@ BEGIN
 		,[int1099Category]				
 		,[str1099Form]					
 		,[str1099Type]							
-		,[ysnReturn]			
+		,[ysnReturn]		
+		,[intStorageLocationId]
+		,[strStorageLocationName]
+		,[intSubLocationId]
+		,[strSubLocationName]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,

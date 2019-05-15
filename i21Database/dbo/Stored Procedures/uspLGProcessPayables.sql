@@ -89,8 +89,8 @@ BEGIN
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
-			,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
-			,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
+			,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
+			,[intSubLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
