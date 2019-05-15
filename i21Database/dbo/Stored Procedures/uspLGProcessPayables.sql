@@ -157,8 +157,8 @@ BEGIN
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
-			,[intStorageLocationId] = A.intStorageLocationId
-			,[intSubLocationId] = A.intSubLocationId
+			,[intStorageLocationId] = NULL --A.intStorageLocationId
+			,[intSubLocationId] = NULL --A.intSubLocationId
 		FROM vyuLGLoadCostForVendor A
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId

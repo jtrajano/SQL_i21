@@ -251,7 +251,20 @@ BEGIN
 							,currentSnapshot.intItemUOMId
 						)
 						,ContractDetail.intItemUOMId
-						,(CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) END)
+						,(
+							CASE 
+								WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive 
+								--ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) 
+								ELSE (
+									currentSnapshot.dblOpenReceive
+									- dbo.fnCalculateQtyBetweenUOM (
+										previousSnapshot.intItemUOMId
+										,currentSnapshot.intItemUOMId
+										,previousSnapshot.dblOpenReceive
+									)
+								)
+							END
+						)
 					)
 				ELSE 
 					(CASE WHEN @ForDelete = 1 THEN currentSnapshot.intLoadReceive ELSE (currentSnapshot.intLoadReceive - previousSnapshot.intLoadReceive) END) 
@@ -823,7 +836,15 @@ BEGIN
 						, (
 							CASE 
 								WHEN @ForDelete = 1 THEN currentSnapshot.dblOpenReceive 
-								ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) 
+								--ELSE (currentSnapshot.dblOpenReceive - previousSnapshot.dblOpenReceive) 
+								ELSE (
+									currentSnapshot.dblOpenReceive
+									- dbo.fnCalculateQtyBetweenUOM (
+										previousSnapshot.intItemUOMId
+										,currentSnapshot.intItemUOMId
+										,previousSnapshot.dblOpenReceive
+									)
+								)
 							END
 						)
 					)

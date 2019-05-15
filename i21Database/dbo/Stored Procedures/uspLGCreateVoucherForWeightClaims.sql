@@ -208,16 +208,11 @@ BEGIN TRY
 		,dblQtyReceived = WCOC.dblQuantity
 		,dblCost = WCOC.dblRate
 		,dblCostUnitQty = ISNULL(CostUOM.dblUnitQty,1)
-		,dblWeightUnitQty = ISNULL(WeightItemUOM.dblUnitQty,1)
+		,dblWeightUnitQty = ISNULL(DamageWeightUOM.dblUnitQty,1)
 		,dblClaimAmount = WCOC.dblAmount
 		,dblUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
-		,intWeightUOMId = WCOC.intItemUOMId
-		,intUOMId = (
-			SELECT TOP (1) IU.intItemUOMId
-			FROM tblICItemUOM IU
-			WHERE IU.intItemId = WCOC.intItemId
-				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-			)
+		,intWeightUOMId = DamageWeightUOM.intItemUOMId
+		,intUOMId = WCOC.intItemUOMId 
 		,intCostUOMId = WCOC.intRateUOMId
 		,intItemId = WCOC.intItemId
 		,intContractHeaderId = NULL
@@ -235,7 +230,12 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CostUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCOC.intRateCurrencyId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = WCOC.intItemUOMId
-	LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = WCOC.intWeightUOMId
+	OUTER APPLY (SELECT TOP 1 
+					intItemUOMId = IU.intItemUOMId
+					,dblUnitQty = IU.dblUnitQty
+				FROM tblICItemUOM IU
+				WHERE IU.intItemId = WCOC.intItemId
+					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) DamageWeightUOM
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	SELECT @intVoucherType = CASE 
@@ -332,7 +332,7 @@ BEGIN TRY
 			[intEntityVendorId] = VDD.intPartyEntityId
 			,[intTransactionType] = @intVoucherType
 			,[intLocationId] = CD.intCompanyLocationId
-			,[intCurrencyId] = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)
+			,[intCurrencyId] = CUR.intCurrencyID
 			,[dtmDate] = GETDATE()
 			,[strVendorOrderNumber] = ''
 			,[strReference] = ''

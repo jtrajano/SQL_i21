@@ -89,7 +89,7 @@ BEGIN
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
 			,[strMiscDescription]				=	A.strMiscDescription
 			,[dblOrderQty]						=	CASE 
-													WHEN A.intTransactionType = 1 --Consider contract logic if voucher only
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 --Consider contract logic if voucher only
 													THEN 
 													(
 														CASE 
@@ -101,7 +101,7 @@ BEGIN
 													ELSE A.dblOrderQty 
 													END
 			,[dblOrderUnitQty]					=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
 													(
 														CASE
@@ -113,7 +113,7 @@ BEGIN
 													ELSE A.dblOrderUnitQty
 													END
 			,[intOrderUOMId]					=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
 													(
 														CASE 
@@ -125,7 +125,7 @@ BEGIN
 													ELSE A.intOrderUOMId 
 													END
 			,[strOrderUOM]						=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
 													(
 														CASE 
@@ -141,7 +141,7 @@ BEGIN
 			,[intQtyToBillUOMId]				=	A.intQtyToBillUOMId
 			,[strQtyToBillUOM]					=	qtyUOM.strUnitMeasure
 			,[dblCost]							=	CASE 
-													WHEN A.intTransactionType = 1 
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
 													THEN 
 													(
 														CASE 
@@ -153,7 +153,7 @@ BEGIN
 													ELSE A.dblCost
 													END
 			,[dblCostUnitQty]					=	CASE 
-													WHEN A.intTransactionType = 1 
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
 													THEN
 													(
 														CASE 
@@ -165,7 +165,7 @@ BEGIN
 													ELSE A.dblCostUnitQty 
 													END
 			,[intCostUOMId]						=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN 
 													(
 														CASE 
@@ -177,7 +177,7 @@ BEGIN
 													ELSE A.intCostUOMId 
 													END
 			,[strCostUOM]						=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
 													(
 														CASE 

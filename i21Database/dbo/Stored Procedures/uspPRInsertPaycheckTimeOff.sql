@@ -29,7 +29,7 @@ SELECT
 	,dblMaxEarned 
 	,dblMaxCarryover
 	,dblHoursAccrued
-	,dblHoursUsed = (tblPREmployeeTimeOff.dblHoursUsed + ISNULL(vyuPREmployeeTimeOffUsedYTD.dblHoursUsed, 0))
+	,dblHoursUsed = ISNULL(vyuPREmployeeTimeOffUsedYTD.dblHoursUsed, 0)
 	,dblHoursYTD = (dblHoursCarryover + dblHoursEarned) - (tblPREmployeeTimeOff.dblHoursUsed + ISNULL(vyuPREmployeeTimeOffUsedYTD.dblHoursUsed, 0))
 FROM 
 	tblPREmployeeTimeOff

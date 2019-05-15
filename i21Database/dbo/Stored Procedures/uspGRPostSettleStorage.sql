@@ -1289,7 +1289,7 @@ BEGIN TRY
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription]			= c.[strItemNo]
 					,[intItemId]					= a.[intItemId]
-					,[intAccountId]					= [dbo].[fnGetItemGLAccount](a.intItemId,@LocationId, CASE WHEN DSC.strDiscountChargeType = 'Dollar' OR a.intItemType IN (1,2) THEN 'AP Clearing' ELSE 'Other Charge Expense' END)					
+					,[intAccountId]					= [dbo].[fnGetItemGLAccount](a.intItemId,@ItemLocationId, CASE WHEN (a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType IN (1,2) THEN 'AP Clearing' ELSE 'Other Charge Expense' END)					
 					,[intContractHeaderId]			= a.[intContractHeaderId]
 					,[intContractDetailId]			= a.[intContractDetailId]
 					,[intInventoryReceiptItemId] 	= CASE 

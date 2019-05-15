@@ -63,6 +63,7 @@ RETURNS TABLE AS RETURN
 		,G.intCurrencyExchangeRateTypeId
 		,G.strCurrencyExchangeRateType
 		,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate
+		,B.strComment
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	LEFT JOIN tblICInventoryReceiptItem E
