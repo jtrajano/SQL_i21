@@ -17,7 +17,6 @@ BEGIN TRANSACTION
 DELETE	tblCMUndepositedFund 
 FROM	tblCMUndepositedFund f 
 WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
-		AND f.intBankAccountId = @intBankAccountId
 		AND f.intBankDepositId IS NULL 
 		AND NOT EXISTS (
 			SELECT	TOP 1 1 
@@ -53,7 +52,7 @@ SELECT TOP 1 @intCurrencyId = intCurrencyId FROM tblCMBankAccount where intBankA
 -- Insert records from the Deposit Entry
 ;WITH CTE AS (
 SELECT	
-		intBankAccountId = @intBankAccountId
+		b.intBankAccountId
 		,strSourceTransactionId = (
 				CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
 				+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
@@ -79,9 +78,7 @@ SELECT
 		
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
-WHERE	b.intBankAccountId = @intBankAccountId
-
-		AND NOT EXISTS (
+WHERE	NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
 			WHERE	f.strSourceTransactionId = ( 
@@ -93,7 +90,7 @@ WHERE	b.intBankAccountId = @intBankAccountId
 		)
 
 UNION SELECT DISTINCT
-	intBankAccountId = @intBankAccountId,
+	ISNULL(v.intBankAccountId,@intBankAccountId)  intBankAccountId,
 	strSourceTransactionId,
 	intSourceTransactionId,
 	v.intLocationId,
@@ -108,15 +105,13 @@ UNION SELECT DISTINCT
 	dtmLastModified = GETDATE(),
 	strPaymentSource,			
 	strEODNumber,
-	strEODDrawer = strDrawerName,		
-    ysnEODComplete = ysnCompleted 	,
-	intCurrencyId = @intCurrencyId
+	strEODDrawer = strDrawerName ,		
+    ysnEODComplete = ysnCompleted ,
+	p.intCurrencyId
 FROM vyuARUndepositedPayment v
+
 LEFT JOIN tblARPayment p on p.strRecordNumber = v.strSourceTransactionId
-WHERE	v.intBankAccountId = @intBankAccountId
-		OR 
-		ISNULL(v.intBankAccountId,0) = 0 -- AR-2379
-		AND	NOT EXISTS (
+WHERE	NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
 			WHERE	f.strSourceTransactionId = v.strSourceTransactionId)
