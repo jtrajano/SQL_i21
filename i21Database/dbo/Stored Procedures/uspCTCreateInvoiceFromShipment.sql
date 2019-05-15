@@ -335,12 +335,12 @@ INNER JOIN
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ARSI.intContractDetailId 
 WHERE
 ICIS.[intInventoryShipmentId] = @ShipmentId
-AND (
-		(CD.intContractDetailId <> @intContractDetailId AND CD.dblCashPrice IS NOT NULL) 
-			OR 
-		CD.intContractDetailId = @intContractDetailId
-	)
-AND CD.intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblARInvoiceDetail)
+--AND (
+--		(CD.intContractDetailId <> @intContractDetailId AND CD.dblCashPrice IS NOT NULL) 
+--			OR 
+--		CD.intContractDetailId = @intContractDetailId
+--	)
+--AND CD.intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblARInvoiceDetail)
 
 INSERT INTO @TaxDetails(
 	 [intDetailId]
