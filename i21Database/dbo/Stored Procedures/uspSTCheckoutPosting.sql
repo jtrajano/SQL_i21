@@ -4571,6 +4571,35 @@ BEGIN
 END
 
 ExitWithCommit:
+	
+	-- Add 'Unposted/Posted' to AuditLog
+	-- ==========================================================================
+	-- [START] - AUDIT LOG - Mark as Created
+	-- ==========================================================================
+	DECLARE @strPostDirectionAuditLog AS NVARCHAR(50)
+	IF(@ysnPost = 1)
+		BEGIN
+			SET @strPostDirectionAuditLog = 'Posted'
+		END
+	ELSE
+		BEGIN
+			SET @strPostDirectionAuditLog = 'Unposted'
+		END
+
+	EXEC dbo.uspSMAuditLog 
+			@screenName			=		'Store.view.CheckoutHeader'			-- Screen Namespace
+			,@keyValue			=		@intCheckoutId						-- Primary Key Value of the Voucher. 
+			,@entityId			=		@intCurrentUserId					-- Entity Id.
+			,@actionType		=		@strPostDirectionAuditLog			-- Action Type
+			,@actionIcon		=		'small-new-plus'					-- 'small-menu-maintenance', 'small-new-plus', 'small-new-minus',
+			,@changeDescription	=		''									-- Description
+			,@fromValue			=		''									-- Previous Value
+			,@toValue			=		''									-- New Value
+	-- ==========================================================================
+	-- [START] - AUDIT LOG - Mark as Created
+	-- ==========================================================================
+
+
 	-- Commit Transaction
 	COMMIT TRANSACTION
 	GOTO ExitPost
