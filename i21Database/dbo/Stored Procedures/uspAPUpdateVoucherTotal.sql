@@ -52,9 +52,12 @@ IF @transCount = 0 BEGIN TRANSACTION
 											END,	
 			[dblClaimAmount]			=	CASE WHEN C.intTransactionType = 11 
 											THEN 
-											(
-												CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
-											)
+												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
+												THEN
+													CAST((A.dblQtyReceived) *  (A.dblCost / ISNULL(C.intSubCurrencyCents,1))  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
+												ELSE 
+													CAST((A.dblQtyReceived) *  (A.dblCost)  * (A.dblUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))
+												END),0)
 											ELSE 0 END
 
 	FROM tblAPBillDetail A
