@@ -546,6 +546,7 @@ BEGIN TRY
 					,[ysnExport]
 					,[strCountyProducer]
 					,[intConcurrencyId]
+					,dtmImportedDate
 				)
 				SELECT  
 					[intEntityId]							= SCD.intEntityId
@@ -569,6 +570,7 @@ BEGIN TRY
 					,[ysnExport]							= SCD.ysnExport
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
+					,dtmImportedDate						= GETDATE()
 				FROM @temp_xml_deliverysheet_sc SCD
 				LEFT JOIN tblSCDeliverySheet DSDestination ON DSDestination.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				WHERE DSDestination.strDeliverySheetNumber IS NULL
@@ -814,6 +816,7 @@ BEGIN TRY
 					,[ysnReadyToTransfer]
 					,[ysnExport] 
 					,[intConcurrencyId]
+					,dtmImportedDate						
 				)
 				SELECT 
 					SCT.[strTicketStatus]
@@ -941,6 +944,7 @@ BEGIN TRY
 					,SCT.[ysnReadyToTransfer]
 					,SCT.[ysnExport] 
 					,1
+					,dtmImportedDate = GETDATE()
 				FROM @temp_xml_table SCT
 				LEFT JOIN (
 					SELECT DS.intDeliverySheetId,SCD.intDeliverySheetId AS dsId,SCD.intEntityId FROM @temp_xml_deliverysheet_sc SCD
@@ -1361,6 +1365,7 @@ BEGIN TRY
 					,[ysnExport]
 					,[strCountyProducer]
 					,[intConcurrencyId]
+					,dtmImportedDate
 				)
 				SELECT  
 					[intEntityId]							= SCD.intEntityId
@@ -1384,6 +1389,7 @@ BEGIN TRY
 					,[ysnExport]							= SCD.ysnExport
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
+					,dtmImportedDate						= GETDATE()
 				FROM @temp_xml_deliverysheet SCD ORDER BY strDeliverySheetNumber ASC
 
 
@@ -1563,6 +1569,7 @@ BEGIN TRY
 					,[ysnExport]
 					,[strCountyProducer]
 					,[intConcurrencyId]
+					,dtmImportedDate
 				)
 				SELECT  
 					[intEntityId]							= SCD.intEntityId
@@ -1586,6 +1593,7 @@ BEGIN TRY
 					,[ysnExport]							= 1
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
+					,dtmImportedDate						= GETDATE()
 				FROM @temp_xml_deliverysheet  SCD
 				LEFT JOIN tblSCDeliverySheet DSDestination ON DSDestination.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				WHERE DSDestination.strDeliverySheetNumber IS NULL
