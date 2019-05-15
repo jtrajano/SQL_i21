@@ -148,21 +148,11 @@ BEGIN TRY
 		,dblQtyReceived = (ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END)
 		,dblCost = WCD.dblUnitPrice
 		,dblCostUnitQty = ISNULL(IU.dblUnitQty,1)
-		,dblWeightUnitQty = ISNULL(WeightItemUOM.dblUnitQty,1)
+		,dblWeightUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
 		,dblClaimAmount
-		,dblUnitQty = ISNULL(WeightItemUOM.dblUnitQty,1)
-		,intWeightUOMId = (
-			SELECT TOP (1) IU.intItemUOMId
-			FROM tblICItemUOM IU
-			WHERE IU.intItemId = CD.intItemId
-				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-			)
-		,intUOMId = (
-			SELECT TOP (1) IU.intItemUOMId
-			FROM tblICItemUOM IU
-			WHERE IU.intItemId = CD.intItemId
-				AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
-			)
+		,dblUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
+		,intWeightUOMId = ItemUOM.intItemUOMId
+		,intUOMId = ItemUOM.intItemUOMId
 		,intCostUOMId = WCD.intPriceItemUOMId
 		,intItemId = WCD.intItemId
 		,intContractHeaderId = CH.intContractHeaderId
@@ -190,8 +180,12 @@ BEGIN TRY
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
 	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = WCD.intItemId AND ItemUOM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
-	LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = CD.intNetWeightUOMId
+	OUTER APPLY (SELECT TOP 1 
+					intItemUOMId = IU.intItemUOMId
+					,dblUnitQty = IU.dblUnitQty
+				FROM tblICItemUOM IU
+				WHERE IU.intItemId = WCD.intItemId
+					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) ItemUOM
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 		AND ISNULL(WCD.ysnNoClaim, 0) = 0
 		AND ISNULL(WCD.dblClaimAmount, 0) > 0
@@ -332,7 +326,7 @@ BEGIN TRY
 			[intEntityVendorId] = VDD.intPartyEntityId
 			,[intTransactionType] = @intVoucherType
 			,[intLocationId] = CD.intCompanyLocationId
-			,[intCurrencyId] = CUR.intCurrencyID
+			,[intCurrencyId] = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)
 			,[dtmDate] = GETDATE()
 			,[strVendorOrderNumber] = ''
 			,[strReference] = ''
