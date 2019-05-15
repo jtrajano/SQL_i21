@@ -55,15 +55,17 @@ END
 -- Create the backup header
 BEGIN 
 	DECLARE @strRemarks VARCHAR(200)
-	DECLARE @strItems VARCHAR(50)
+	DECLARE @strRebuildFilter VARCHAR(50)	
 
-	SET @strItems = (CASE WHEN @intItemId IS NOT NULL THEN '"' + @strItemNo + '" item' ELSE 'all items' END)
-	SET @strRemarks = 'Rebuild inventory for ' + @strItems + ' in a '+
+	SET @strRebuildFilter = (CASE WHEN @intItemId IS NOT NULL THEN '"' + @strItemNo + '" item' ELSE 'all items' END)
+	SET @strRebuildFilter = (CASE WHEN @strCategoryCode IS NOT NULL THEN '"' + @strCategoryCode + '" category' ELSE @strRebuildFilter END)
+
+	SET @strRemarks = 'Rebuild inventory for ' + @strRebuildFilter + ' in a '+
 		(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
 		' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
 
 	INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart)
-	SELECT GETDATE(), @intUserId, 'Rebuild Inventory', @strRemarks, 1, GETDATE()
+	SELECT @dtmStartDate, @intUserId, 'Rebuild Inventory', @strRemarks, 1, GETDATE()
 
 	SET @intBackupId = SCOPE_IDENTITY()
 END 
