@@ -47,7 +47,10 @@ BEGIN TRY
 			
 			@intFutureMarketId			INT,
 			@intFutureMonthId			INT,
-			@dblFutures					NUMERIC(18, 6)
+			@dblFutures					NUMERIC(18, 6),
+			@ysnUniqueEntityReference	BIT
+
+	SELECT	@ysnUniqueEntityReference = ysnUniqueEntityReference FROM tblCTCompanyPreference
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -373,7 +376,7 @@ BEGIN TRY
 	END
 
 	--Common added and modified
-	IF LTRIM(RTRIM(ISNULL(@strCustomerContract,''))) <> '' AND EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE strCustomerContract = @strCustomerContract)
+	IF ISNULL(@ysnUniqueEntityReference,0) = 1 AND LTRIM(RTRIM(ISNULL(@strCustomerContract,''))) <> '' AND EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE strCustomerContract = @strCustomerContract)
 	BEGIN
 		SELECT @ErrMsg = 'The Vendor/Customer Ref '+@strCustomerContract+' is already available for the selected vendor.'
 		RAISERROR(@ErrMsg,16,1)
