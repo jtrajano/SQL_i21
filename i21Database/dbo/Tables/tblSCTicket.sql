@@ -143,6 +143,7 @@
 	[strSourceType] NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL,
 	[ysnReadyToTransfer] BIT NOT NULL DEFAULT 0, 
 	[ysnExport] BIT NOT NULL DEFAULT 0, 
+	[dtmImportedDate] DATETIME NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

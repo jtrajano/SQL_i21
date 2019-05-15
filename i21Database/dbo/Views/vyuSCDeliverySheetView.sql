@@ -25,8 +25,8 @@ SELECT
 	,IC.intCommodityId
 	,ICC.strCommodityCode
 	,GR.strDiscountId
-	
 	,(SELECT COUNT(intTicketId) FROM tblSCTicket SCT WHERE SCT.intDeliverySheetId = SCD.intDeliverySheetId AND SCT.strTicketStatus = 'C') as dblTotalTickets
+	,SCD.dtmImportedDate
 
 FROM tblSCDeliverySheet SCD 
 LEFT JOIN tblEMEntity EM ON SCD.intEntityId = EM.intEntityId
