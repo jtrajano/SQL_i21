@@ -26,20 +26,28 @@ SELECT
 	 , tblIMQty.strItemDescription
 	 , tblIMQty.intQtySoldSum AS intQtySold
 	 , ItemPricing.dblSalePrice AS dblCurrentPrice
-	 --, tblIMQty.dblItemCostAvgSum AS dblItemCost
 
 	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) AS dblTotalSales
-	 --, (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) AS dblTotalSales
 
 	 -- ADDED
-	 , ((tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) / tblIMQty.intQtySoldSum) AS dblAveragePrice
+	 , CASE 
+		WHEN tblIMQty.intQtySoldSum <> 0
+			THEN ((tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) / NULLIF(tblIMQty.intQtySoldSum, 0)) 
+		ELSE 0
+	 END AS dblAveragePrice
+
 	 , (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblTotalCost
-	 , (tblIMQty.dblItemCostSum / tblIMQty.intQtySoldSum) AS dblAverageCost
+	 
+	 , CASE
+		WHEN tblIMQty.intQtySoldSum <> 0
+			THEN (tblIMQty.dblItemCostSum / NULLIF(tblIMQty.intQtySoldSum, 0)) 
+		ELSE 0
+	 END AS dblAverageCost
+	 
 	 , ItemPricing.dblLastCost AS dblCurrentCost
 
 	 -- Formula: Gross Margin $ = Totals Sales - (Qty * Item Movement Item Cost)
 	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblGrossMarginDollar
-	 --, (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostAvgSum) AS dblGrossMarginDollar
 
 	 -- Formula: Gross Margin % = Total Sales - (Qty * Item Movement Item Cost) / Total Sales
 	 , CASE 
@@ -47,11 +55,6 @@ SELECT
 			THEN ( (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) )  /  (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) 
 		ELSE 0
 	 END AS dblGrossMarginPercent
-	 --, CASE 
-		--WHEN (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) <> 0
-		--	THEN ( (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum) - (tblIMQty.intQtySoldSum * tblIMQty.dblItemCostAvgSum) ) / (ItemPricing.dblSalePrice * tblIMQty.intQtySoldSum)
-		--ELSE 0
-	 --END AS dblGrossMarginPercent
 FROM
 (
 	SELECT 
