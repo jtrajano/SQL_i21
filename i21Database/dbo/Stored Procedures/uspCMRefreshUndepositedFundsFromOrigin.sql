@@ -17,7 +17,6 @@ BEGIN TRANSACTION
 DELETE	tblCMUndepositedFund 
 FROM	tblCMUndepositedFund f 
 WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
-		AND f.intBankAccountId = @intBankAccountId
 		AND f.intBankDepositId IS NULL 
 		AND NOT EXISTS (
 			SELECT	TOP 1 1 
@@ -50,7 +49,7 @@ IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 -- Insert records from the Deposit Entry
 ;WITH CTE AS (
 SELECT	
-		intBankAccountId = @intBankAccountId
+		b.intBankAccountId
 		,strSourceTransactionId = (
 				CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
 				+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
@@ -70,9 +69,7 @@ SELECT
 		,dtmLastModified = GETDATE()
 FROM	vyuCMOriginDepositEntry v INNER JOIN tblCMBankAccount b
 			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
-WHERE	b.intBankAccountId = @intBankAccountId
-
-		AND NOT EXISTS (
+WHERE	NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
 			WHERE	f.strSourceTransactionId = ( 
@@ -84,7 +81,7 @@ WHERE	b.intBankAccountId = @intBankAccountId
 		)
 
 UNION SELECT DISTINCT
-	intBankAccountId = @intBankAccountId,
+	ISNULL(v.intBankAccountId,@intBankAccountId)  intBankAccountId,
 	strSourceTransactionId,
 	intSourceTransactionId,
 	intLocationId,
@@ -99,9 +96,7 @@ UNION SELECT DISTINCT
 	dtmLastModified = GETDATE()
 FROM vyuARUndepositedPayment v LEFT JOIN tblCMBankAccount b
 			ON b.intBankAccountId = v.intBankAccountId --OR ISNULL(v.intBankAccountId,0) = 0 --Include payments without bank account
-WHERE	v.intBankAccountId = @intBankAccountId
-		OR ISNULL(v.intBankAccountId,0) = 0 -- AR-2379
-		AND	NOT EXISTS (
+WHERE	NOT EXISTS (
 			SELECT TOP 1 1
 			FROM	tblCMUndepositedFund f
 			WHERE	f.strSourceTransactionId = v.strSourceTransactionId)
@@ -123,7 +118,7 @@ INSERT INTO tblCMUndepositedFund (
 		,dtmLastModified
 )
 SELECT 
-intBankAccountId
+		intBankAccountId
 		,strSourceTransactionId
 		,intSourceTransactionId
 		,intLocationId
