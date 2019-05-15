@@ -178,9 +178,9 @@ BEGIN
 	SELECT	TOP 1 
 			@intItemId = Item.intItemId 
 			,@strItemNo = Item.strItemNo
-	FROM	tblICItem Item INNER JOIN @NonStockGLAccounts ItemGLAccount
-				ON Item.intItemId = ItemGLAccount.intItemId
-	WHERE	ItemGLAccount.intNonInventoryId IS NULL
+	FROM tblICItem Item
+        INNER JOIN @NonStockGLAccounts ItemGLAccount ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE ItemGLAccount.intNonInventoryId IS NULL
 
 	SELECT	TOP 1 
 			@strLocationName = c.strLocationName
@@ -192,14 +192,34 @@ BEGIN
 	WHERE	il.intItemId = @intItemId
 			AND ItemGLAccount.intNonInventoryId IS NULL 
 
-	IF @intItemId IS NOT NULL 
+
+    IF NOT EXISTS(SELECT * FROM @NonStockGLAccounts)
+    BEGIN
+        SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+        FROM tblICItem Item
+            INNER JOIN @GLAccounts ItemGLAccount ON Item.intItemId = ItemGLAccount.intItemId
+        
+        SELECT	TOP 1 
+                @strLocationName = c.strLocationName
+        FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+                    ON il.intLocationId = c.intCompanyLocationId
+                INNER JOIN @GLAccounts ItemGLAccount
+                    ON ItemGLAccount.intItemId = il.intItemId
+                    AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+        WHERE	il.intItemId = @intItemId
+                 
+    END
+
+	IF @intItemId IS NOT NULL
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
 		DECLARE @msg NVARCHAR(800) = 'The non-inventory item <b>' + @strItemNo + '</b> at location <b>' + @strLocationName + '</b> is missing a setup for <b>' + @AccountCategory_OtherChargeExpense + '</b> or <b>' + @AccountCategory_General + '</b> GL accounts. (1) Verify if these accounts are properly set up in the <i>item</i> or <i>category</i> screen. (2) Make sure these accounts exist in the GL chart of accounts.'
 		--EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_OtherChargeExpense;
 		RAISERROR(@msg, 11, 1)
 		RETURN -1;
-	END 
+	END
 END 
 ;
 
@@ -637,12 +657,13 @@ AS
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
-		,intAccountId				= CASE WHEN ysnPO = 1 THEN tblGLPOAccount.intAccountId ELSE tblGLAccount.intAccountId END
+		,intAccountId				= tblGLAccount.intAccountId --CASE WHEN ysnPO = 1 THEN tblGLPOAccount.intAccountId ELSE tblGLAccount.intAccountId END
 		,dblDebit					= Debit.Value
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0--DebitUnit.Value 
 		,dblCreditUnit				= 0--CreditUnit.Value
-		,strDescription				= CASE WHEN ysnPO = 1 THEN ISNULL(@strGLDescription, ISNULL(tblGLPOAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) ELSE ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) END 
+		-- ,strDescription				= CASE WHEN ysnPO = 1 THEN ISNULL(@strGLDescription, ISNULL(tblGLPOAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) ELSE ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) END 
+		,strDescription				= CASE WHEN ysnPO = 1 THEN ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) ELSE ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) END 
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -671,8 +692,8 @@ FROM	ForGLEntries_CTE
 		INNER JOIN @NonStockGLAccounts GLAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 			AND (ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId)
-		INNER JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intNonInventoryId
-		LEFT OUTER JOIN dbo.tblGLAccount tblGLPOAccount  ON tblGLPOAccount.intAccountId = GLAccounts.intPOId
+		LEFT OUTER JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intNonInventoryId
+		--LEFT OUTER JOIN dbo.tblGLAccount tblGLPOAccount  ON tblGLPOAccount.intAccountId = GLAccounts.intPOId
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)
 		) DebitForeign
