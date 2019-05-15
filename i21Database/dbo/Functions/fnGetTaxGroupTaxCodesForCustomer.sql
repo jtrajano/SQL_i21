@@ -24,31 +24,32 @@
 )
 RETURNS @returntable TABLE
 (
-	 [intTransactionDetailTaxId]	INT
-	,[intTransactionDetailId]		INT
-	,[intTaxGroupId]				INT
-	,[intTaxCodeId]					INT
-	,[intTaxClassId]				INT
-	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-	,[strCalculationMethod]			NVARCHAR(30)
-	,[dblRate]						NUMERIC(18,6)
-	,[dblBaseRate]					NUMERIC(18,6)
-	,[dblExemptionPercent]			NUMERIC(18,6)
-	,[dblTax]						NUMERIC(18,6)
-	,[dblAdjustedTax]				NUMERIC(18,6)
-	,[intTaxAccountId]				INT
-	,[ysnSeparateOnInvoice]			BIT
-	,[ysnCheckoffTax]				BIT
-	,[strTaxCode]					NVARCHAR(100)						
-	,[ysnTaxExempt]					BIT
-	,[ysnTaxOnly]					BIT
-	,[ysnInvalidSetup]				BIT
-	,[strTaxGroup]					NVARCHAR(100)
-	,[strNotes]						NVARCHAR(500)
-	,[intUnitMeasureId]				INT NULL
-	,[strUnitMeasure]				NVARCHAR(30)
-	,[strTaxClass]					NVARCHAR(100)
-	,[ysnAddToCost]					BIT
+	 [intTransactionDetailTaxId]		INT
+	,[intTransactionDetailId]			INT
+	,[intTaxGroupId]					INT
+	,[intTaxCodeId]						INT
+	,[intTaxClassId]					INT
+	,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+	,[strCalculationMethod]				NVARCHAR(30)
+	,[dblRate]							NUMERIC(18,6)
+	,[dblBaseRate]						NUMERIC(18,6)
+	,[dblExemptionPercent]				NUMERIC(18,6)
+	,[dblTax]							NUMERIC(18,6)
+	,[dblAdjustedTax]					NUMERIC(18,6)
+	,[intTaxAccountId]					INT
+	,[intSalesTaxExemptionAccountId]	INT
+	,[ysnSeparateOnInvoice]				BIT
+	,[ysnCheckoffTax]					BIT
+	,[strTaxCode]						NVARCHAR(100)						
+	,[ysnTaxExempt]						BIT
+	,[ysnTaxOnly]						BIT
+	,[ysnInvalidSetup]					BIT
+	,[strTaxGroup]						NVARCHAR(100)
+	,[strNotes]							NVARCHAR(500)
+	,[intUnitMeasureId]					INT NULL
+	,[strUnitMeasure]					NVARCHAR(30)
+	,[strTaxClass]						NVARCHAR(100)
+	,[ysnAddToCost]						BIT
 )
 AS
 BEGIN
@@ -80,6 +81,7 @@ BEGIN
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
+		,[intSalesTaxExemptionAccountId]
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[strTaxCode]
@@ -107,6 +109,7 @@ BEGIN
 		,[dblTax]						= @ZeroDecimal
 		,[dblAdjustedTax]				= @ZeroDecimal
 		,[intTaxAccountId]				= TC.[intSalesTaxAccountId]
+		,[intSalesTaxExemptionAccountId]= TC.[intSalesTaxExemptionAccountId]
 		,[ysnSeparateOnInvoice]			= @ZeroBit
 		,[ysnCheckoffTax]				= ISNULL(TC.[ysnCheckoffTax], @ZeroBit)
 		,[strTaxCode]					= TC.[strTaxCode]

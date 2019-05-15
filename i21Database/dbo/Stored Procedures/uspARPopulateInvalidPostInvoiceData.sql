@@ -1225,6 +1225,32 @@ BEGIN
 		ARIDT.[dblAdjustedTax] <> @ZeroDecimal
 		AND (ISNULL(ISNULL(ARIDT.[intSalesTaxAccountId], SMTC.[intSalesTaxAccountId]), 0) = 0 OR GLA.[intAccountId] IS NULL)
 
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Sales Tax Exempt Account
+	SELECT
+		[intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The Tax Exemption Account of Tax Code - ' + SMTC.[strTaxCode] + ' was not set.'
+	FROM tblARInvoiceDetailTax ARIDT
+	INNER JOIN #ARPostInvoiceDetail I
+			ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]		
+	LEFT OUTER JOIN tblSMTaxCode  SMTC
+			ON ARIDT.[intTaxCodeId] = SMTC.[intTaxCodeId]	
+	WHERE
+		ARIDT.[dblAdjustedTax] <> @ZeroDecimal
+		AND ISNULL(ARIDT.[ysnAddToCost], 0) = 1
+		AND ISNULL(ARIDT.[intSalesTaxExemptionAccountId], 0) = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
