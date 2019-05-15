@@ -24,6 +24,7 @@ FROM (
 		SELECT intInvoiceId
 			 , intPOSLogId
 			 , intPOSId
+			 , ysnReturn
 		FROM dbo.tblARPOS POS WITH (NOLOCK)
 		WHERE intInvoiceId IS NOT NULL
 	) POS ON POSLOG.intPOSLogId = POS.intPOSLogId
@@ -36,6 +37,38 @@ FROM (
 		  AND ysnPosted = 1
 		  AND POS.intInvoiceId = intInvoiceId
 
+		UNION ALL
+
+		SELECT intTransactionId = intInvoiceId
+			 , strTransactionId = strInvoiceNumber
+			 , strTransaction   = 'Invoice'
+		FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE strType = 'POS'
+		  AND ysnPosted = 1
+		  AND strTransactionType = 'Invoice'
+		  AND POS.intPOSId = intSourceId
+		  AND POS.ysnReturn = 1
+
+		UNION ALL
+
+		SELECT intTransactionId = PAYMENT.intPaymentId
+			 , strTransactionId = PAYMENT.strRecordNumber
+			 , strTransaction   = 'Payment'
+		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		CROSS APPLY (
+			SELECT TOP 1 P.intPaymentId
+					   , P.strRecordNumber
+			FROM dbo.tblARPaymentDetail PD
+			INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+			WHERE PD.intInvoiceId = I.intInvoiceId
+			   AND P.ysnPosted = 1
+		) PAYMENT
+		WHERE I.strType = 'POS'
+		  AND I.ysnPosted = 1
+		  AND I.strTransactionType = 'Invoice'
+		  AND I.intSourceId = POS.intPOSId
+		  AND POS.ysnReturn = 1
+		  
 		UNION ALL
 
 		SELECT intTransactionId = PAYMENT.intPaymentId

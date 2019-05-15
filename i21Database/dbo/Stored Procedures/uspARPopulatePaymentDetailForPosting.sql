@@ -543,7 +543,7 @@ SELECT
     ,[strTransactionId]                 = ARP.[strRecordNumber]
     ,[strReceivePaymentType]            = ARP.[strReceivePaymentType]
     ,[intEntityCustomerId]              = ARP.[intEntityCustomerId]
-    ,[strCustomerNumber]                = ARC.[strCustomerNumber]
+    ,[strCustomerNumber]                = ARC.[strEntityNo]
     ,[strCustomerName]                  = ARC.[strName]
     ,[intCompanyLocationId]             = ARP.[intLocationId]
     ,[strLocationName]                  = SMCL.[strLocationName]
@@ -637,8 +637,13 @@ INNER JOIN
         ON P.[intPaymentId] = ARP.[intPaymentId]
 INNER JOIN
     (
-        SELECT V.[intEntityId], EM.[strName], [strCustomerNumber] = V.[strVendorId] FROM tblAPVendor V
-			INNER JOIN tblEMEntity EM ON V.intEntityId = EM.intEntityId
+	    SELECT DISTINCT 
+               intEntityId	= EM.intEntityId
+			 , strEntityNo	= EM.strEntityNo
+			 , strName		= EM.strName
+		FROM tblEMEntity EM
+		INNER JOIN tblEMEntityType EMT ON EM.intEntityId = EMT.intEntityId
+		WHERE EMT.strType IN ('Customer', 'Vendor')
     ) ARC
         ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN

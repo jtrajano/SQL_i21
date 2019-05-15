@@ -679,6 +679,7 @@ BEGIN TRY
 						WHERE	AD.intInvoiceId		=	@intNewInvoiceId
 						AND		AD.intInventoryShipmentChargeId IS NULL
 						AND		CD.intPricingTypeId NOT IN (1,6)
+						AND	NOT EXISTS(SELECT 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
 						AND NOT EXISTS(SELECT * FROM tblARInvoiceDetail WHERE  intContractDetailId = CD.intContractDetailId AND intInvoiceId <> @intNewInvoiceId)
 
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL

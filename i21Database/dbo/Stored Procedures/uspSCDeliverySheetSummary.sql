@@ -31,20 +31,21 @@ DECLARE @intEntityId INT
 		,@SplitAverage AS NUMERIC(38,6)
 		,@currencyDecimal INT
 		,@intDeliverySheetSplitId INT
-		,@ysnPost BIT;
+		,@ysnPost BIT
+		,@NetUnits AS NUMERIC(38,6)
 
-IF OBJECT_ID (N'tempdb.dbo.#tblSCDeliverySheetSummary') IS NOT NULL
+IF OBJECT_ID (N'tempdb.dbo.#temp') IS NOT NULL
    DROP TABLE #temp
 
 DECLARE @temp TABLE (fields NVARCHAR(50))
 INSERT INTO @temp (fields)
-VALUES ('Id') ,('Contract') ,('Cash') ,('Storage') ,('DP') ,('Basis'),('WHGB') ,('Hold')
+VALUES ('Id') ,('Contract') ,('Cash') ,('Storage') ,('DP') ,('Basis'),('WHGB') ,('Hold'),('SplitPercentage')
 
 SELECT *
 INTO #temp
 FROM (
     SELECT fields
-	, a = CAST(NULL AS NUMERIC(38,6)) 
+	, a = CAST(0 AS NUMERIC(38,6)) 
     FROM @temp
 ) 
 src
@@ -54,17 +55,38 @@ PIVOT
     FOR fields IN (Id, Contract, Cash, Storage, DP, Basis, WHGB, Hold)
 ) unpvt
 
+--------------------------------------------------------------------------------------------------------
+--- Start Additional Columns
+--------------------------------------------------------------------------------------------------------
+
 ALTER TABLE #temp
 DROP COLUMN Id
 
 ALTER TABLE #temp
-ADD Id INT
+ADD Id INT  
 
 ALTER TABLE #temp
 ADD EntityId INT
 
 ALTER TABLE #temp
 ADD EntityName NVARCHAR(MAX)
+
+ALTER TABLE #temp
+ADD SplitPercentage NUMERIC(38,6)
+
+ALTER TABLE #temp
+ADD strItemUOM NVARCHAR(MAX)
+
+ALTER TABLE #temp
+ADD intDeliverySheetId INT
+
+ALTER TABLE #temp
+ADD intDecimalPrecision INT
+
+--------------------------------------------------------------------------------------------------------
+--- End Additional Columns
+-----------------------------------------------------------------------------------------------------
+
 
 DELETE FROM #temp
 
@@ -78,7 +100,7 @@ WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 
-SELECT SCDS.intEntityId, EM.strName, SCDS.intStorageScheduleTypeId
+SELECT SCDS.intEntityId, EM.strName, SCDS.intStorageScheduleTypeId,dblSplitPercent 
 FROM tblSCDeliverySheetSplit SCDS 
 INNER JOIN tblEMEntity EM ON EM.intEntityId = SCDS.intEntityId
 WHERE SCDS.intDeliverySheetId = @intDeliverySheetId
@@ -88,7 +110,7 @@ SET @counter = 1
 OPEN intListCursor;
 
 -- Initial fetch attempt
-FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @intStorageScheduleTypeId;
+FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @intStorageScheduleTypeId,@SplitAverage
 
 --SPLIT
 WHILE @@FETCH_STATUS = 0
@@ -154,34 +176,24 @@ BEGIN
 		--For hold
 		SET @Hold = 0;
 		
+		
 	END
 	
-	INSERT INTO #temp (Id, Contract, Cash, Storage, DP, Basis, WHGB, Hold) 
-	VALUES(@counter, @Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold)
+	INSERT INTO #temp (Id, Contract, Cash, Storage, DP, Basis, WHGB, Hold,SplitPercentage) 
+	VALUES(@counter, @Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold,@SplitAverage)
 
 	update #temp SET EntityId = @intEntityId, EntityName = @strName WHERE Id = @counter
 
 	SET @counter = @counter+1
 
-	FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @intStorageScheduleTypeId;
+	FETCH NEXT FROM intListCursor INTO  @intEntityId, @strName, @intStorageScheduleTypeId,@SplitAverage
 END
 
 CLOSE intListCursor;
 DEALLOCATE intListCursor;
 
-ALTER TABLE #temp
-ADD intDecimalPrecision INT
-
 UPDATE #temp SET intDecimalPrecision = (SELECT intCurrencyDecimal FROM tblSMCompanyPreference)
-
-ALTER TABLE #temp
-ADD strItemUOM NVARCHAR(MAX)
-
 UPDATE #temp SET strItemUOM = (SELECT TOP 1 strItemUOM FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId)
-
-ALTER TABLE #temp
-ADD intDeliverySheetId INT
-
 UPDATE #temp SET intDeliverySheetId = @intDeliverySheetId
 
 SELECT * FROM #temp

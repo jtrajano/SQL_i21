@@ -12,6 +12,9 @@ BEGIN TRY
 		, A.dblTotalSalesAmountComputed
 		, A.dblRegisterSalesAmountComputed 
 		, ISNULL(SUM(A.dblTotalSalesAmountComputed) OVER (),0) AS CategoryTotalSale
+		, ISNULL(SUM(A.intTotalSalesCount) OVER (),0) AS TransactionTotalCount
+		, ISNULL(SUM(A.intItemsSold) OVER (),0) AS ItemsSoldTotalCount
+		, ISNULL(SUM(A.dblRegisterSalesAmountComputed) OVER (),0) AS RegisterSalesTotalAmount
 		, ISNULL(C.dblTotalTax,0) AS TotalTax
 		, ISNULL(D.dblAmount,0) AS TotalPayment
 		, ISNULL(E.dblAmount,0) AS TotalCustomerCharges

@@ -479,10 +479,10 @@ BEGIN
 		dtmDate ,
 	    strBatchId ,
 	    intAccountId ,
-	    dblDebit ,
-	    dblCredit ,
-	    dblDebitUnit ,
-	    dblCreditUnit ,
+	    Debit.Value ,
+	    Credit.Value ,
+	    DebitUnit.Value ,
+	    CreditUnit.Value ,
 	    strDescription ,
 	    strCode ,
 	    strReference ,
@@ -501,9 +501,9 @@ BEGIN
 	    strTransactionType ,
 	    strTransactionForm ,
 	    strModuleName ,
-	    dblDebitForeign ,
+	    DebitForeign.Value ,
 	    dblDebitReport ,
-	    dblCreditForeign ,
+	    CreditForeign.Value ,
 	    dblCreditReport ,
 	    dblReportingRate ,
 	    dblForeignRate ,
@@ -514,7 +514,13 @@ BEGIN
 		dblSourceUnitDebit,
 		intCommodityId,
 		intSourceLocationId	
-	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
+	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId) A
+	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
+	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
+	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
+	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign
+	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
+	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0))  CreditUnit
 	ORDER BY intTransactionId
 
 	-- Call the Item's Cost Adjustment

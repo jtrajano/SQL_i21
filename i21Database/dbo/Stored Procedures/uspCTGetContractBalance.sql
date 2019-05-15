@@ -472,7 +472,8 @@ BEGIN TRY
 	,strFutMarketName			
 	,strCategory 								
 	)				
-	
+	SELECT *
+	FROM (
 	SELECT				 			
 	 intContractTypeId		= CH.intContractTypeId
 	,intEntityId		   = CH.intEntityId
@@ -494,7 +495,7 @@ BEGIN TRY
 	,strCustomer			= EY.strEntityName
 	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
 	,intPricingTypeId		= CD.intPricingTypeId	
-	,strPricingType			= LEFT(PT.strPricingType,1)
+	,strPricingType			= 'B'
 	,strPricingTypeDesc	    = PT.strPricingType
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 	,strShipMethod			= FT.strFreightTerm
@@ -505,12 +506,7 @@ BEGIN TRY
 	,dblFutures				= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0)),0)
 	,dblBasis				= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(CD.dblBasis,0)),0)
 	,strBasisUOM			= BUOM.strUnitMeasure
-	,dblQuantity			= CASE 
-									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
-										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity + ISNULL(BL.dblQuantity,0)) ,0)
-									ELSE
-										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,(CD.intNoOfLoad -ISNULL(BL.intNoOfLoad,0)) * CD.dblQuantityPerLoad),0) 
-							  END
+	,dblQuantity = CASE WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, CD.dblQuantity), 0) + ISNULL(BL.dblQuantity, 0) ELSE ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0)) * CD.dblQuantityPerLoad), 0) END - ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, ISNULL(PF.dblQuantity, 0)), 0)
 	,strQuantityUOM			= IUM.strUnitMeasure
 	,dblCashPrice			= CASE 
 										WHEN CD.intPricingTypeId IN(1,2) THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
@@ -518,22 +514,8 @@ BEGIN TRY
 							  END											
 	,strPriceUOM			= PUOM.strUnitMeasure
 	,strStockUOM			= StockUM.strUnitMeasure
-	,dblAvailableQty		=  CASE 
-							  		WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
-							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
-							  		ELSE
-							  			ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,(CD.intNoOfLoad -ISNULL(BL.intNoOfLoad,0)) * CD.dblQuantityPerLoad),0) 
-							    END
-
-	,dblAmount				= (
-								CASE 
-									WHEN ISNULL(CD.intNoOfLoad,0) = 0 THEN 
-										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,CD.dblQuantity) ,0) + ISNULL(BL.dblQuantity,0)
-									ELSE
-										ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,(CD.intNoOfLoad -ISNULL(BL.intNoOfLoad,0)) * CD.dblQuantityPerLoad),0) 
-							    END
-							  ) 
-							  * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
+	,dblAvailableQty = CASE WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, CD.dblQuantity), 0) + ISNULL(BL.dblQuantity, 0) ELSE ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0)) * CD.dblQuantityPerLoad), 0) END - ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, ISNULL(PF.dblQuantity, 0)), 0)
+	,dblAmount = (CASE WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, CD.dblQuantity), 0) + ISNULL(BL.dblQuantity, 0) ELSE ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0)) * CD.dblQuantityPerLoad), 0) END - ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, ISNULL(PF.dblQuantity, 0)), 0)) * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId, dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures, 0) + ISNULL(CD.dblBasis, 0)), 0)
     ,intUnitMeasureId			= CD.intUnitMeasureId
 	,intContractStatusId		= CD.intContractStatusId
 	,intCurrencyId				= CD.intCurrencyId
@@ -588,7 +570,8 @@ BEGIN TRY
 														ELSE	 dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
 												   END
 		AND CS.strContractStatus <> 'Unconfirmed'
-
+			) t
+		WHERE dblQuantity <> 0
 	INSERT INTO @tblChange(intSequenceHistoryId,intContractDetailId)
 	SELECT MAX(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 
 	WHERE  dbo.fnRemoveTimeOnDate(dtmHistoryCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) END

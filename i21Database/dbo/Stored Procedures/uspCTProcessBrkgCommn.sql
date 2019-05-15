@@ -123,14 +123,16 @@ BEGIN TRY
 				 strTransactionType,	strType,			  strSourceTransaction,	 strSourceId,				
 				 strPONumber,			intEntityCustomerId,  intCompanyLocationId,	 intCurrencyId,
 				 intItemId,				dblQtyOrdered,		  dblPrice,				 dtmDate,		    
-				 intEntityId,			intInvoiceId,		  intSourceId,			dblQtyShipped
+				 intEntityId,			intInvoiceId,		  intSourceId,			dblQtyShipped,
+				 intContractHeaderId,	intContractDetailId
 			 
 	   )
 
 	   SELECT	 'Invoice',				'Standard',		   'Direct',				@strBatchNumber,
 				 @strBatchNumber,		@intEntityId,		@intCompanyLocationId,  @intCurrencyId,
 				 @intInvoiceItemId,		1,				    @dblRcvdPaidAmount,		GETDATE(),	   
-				 @intEntityId,			0,				    0,						1
+				 @intEntityId,			0,				    0,						1,
+				 @intContractHeaderId,	@intContractDetailId
 
 	   EXEC		[dbo].[uspARProcessInvoices]
 				@InvoiceEntries				=	@InvoiceEntries

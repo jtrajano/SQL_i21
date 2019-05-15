@@ -309,7 +309,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTSto
 	BEGIN
 		PRINT(N'Drop table tblSTStoreGLAccount')
 		EXEC('
-				DROP tblSTStoreGLAccount
+				DROP TABLE tblSTStoreGLAccount
 			')
 	END
 

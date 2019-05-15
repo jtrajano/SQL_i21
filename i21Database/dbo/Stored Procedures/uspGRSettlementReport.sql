@@ -305,8 +305,8 @@ BEGIN
 				,strVendorAddress				= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate		    	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId			    	= SC.intTicketId		
-				,strTicketNumber		    	= SC.strTicketNumber 
-				,strReceiptNumber		    	= SC.strElevatorReceiptNumber
+				,strTicketNumber		    	= SC.strTicketNumber 				
+				,strReceiptNumber		    	= ISNULL(INVRCPT.strReceiptNumber,SC.strElevatorReceiptNumber)
 				,intInventoryReceiptItemId  	= ISNULL(INVRCPTITEM.intInventoryReceiptItemId, 0) 
 				,intContractDetailId			= ISNULL(BillDtl.intContractDetailId, 0) 
 				,RecordId						= Bill.strBillId
@@ -589,7 +589,7 @@ BEGIN
 				,dtmDeliveryDate			 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId				 	= SC.intTicketId		
 				,strTicketNumber			 	= SC.strTicketNumber
-				,strReceiptNumber			 	= SC.strElevatorReceiptNumber
+				,strReceiptNumber			 	= ISNULL(ICIR.strReceiptNumber,SC.strElevatorReceiptNumber)
 				,intInventoryReceiptItemId   	= 0 
 				,intContractDetailId		 	= ISNULL(BillDtl.intContractDetailId, 0) 
 				,RecordId					 	= Bill.strBillId 		 
@@ -832,6 +832,8 @@ BEGIN
 					AND EntityFarm.intFarmFieldId = ISNULL(SC.intFarmFieldId, 0)	
 			LEFT JOIN tblICCommodityAttribute Attribute 
 				ON Attribute.intCommodityAttributeId = SC.intCommodityAttributeId
+			LEFT JOIN tblICInventoryReceipt ICIR
+				ON ICIR.intInventoryReceiptId = SC.intInventoryReceiptId
 			WHERE BNKTRN.intBankAccountId = @intBankAccountId 
 				AND BNKTRN.strTransactionId = @strPaymentNo
 

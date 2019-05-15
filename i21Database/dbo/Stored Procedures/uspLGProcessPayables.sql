@@ -89,8 +89,8 @@ BEGIN
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
-			,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
-			,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
+			,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
+			,[intSubLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
@@ -144,21 +144,21 @@ BEGIN
 			,[intQtyToBillUOMId] = A.intItemUOMId
 			,[dblCost] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN ISNULL(A.dblTotal, A.dblPrice) ELSE ISNULL(A.dblPrice, A.dblTotal) END 
 			,[dblCostUnitQty] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemCostUOM.dblUnitQty,1) END
-			,[intCostUOMId] = A.intPriceItemUOMId
-			,[dblNetWeight] = ISNULL(A.dblNet,0)
-			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
-			,[intWeightUOMId] = A.intWeightItemUOMId
+			,[intCostUOMId] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN NULL ELSE A.intPriceItemUOMId END
+			,[dblNetWeight] = 0
+			,[dblWeightUnitQty] = 1
+			,[intWeightUOMId] = NULL
 			,[intCostCurrencyId] = A.intCurrencyId
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = 1
-			,[ysnSubCurrency] =	CASE WHEN ISNULL(CC.intMainCurrencyId, CC.intCurrencyID) > 0 THEN 1 ELSE 0 END
+			,[ysnSubCurrency] =	CC.ysnSubCurrency
 			,[intSubCurrencyCents] = ISNULL(CC.intCent,0)
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
-			,[intStorageLocationId] = A.intStorageLocationId
-			,[intSubLocationId] = A.intSubLocationId
+			,[intStorageLocationId] = NULL
+			,[intSubLocationId] = NULL
 		FROM vyuLGLoadCostForVendor A
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId

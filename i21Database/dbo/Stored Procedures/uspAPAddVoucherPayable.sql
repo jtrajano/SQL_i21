@@ -89,7 +89,7 @@ BEGIN
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
 			,[strMiscDescription]				=	A.strMiscDescription
 			,[dblOrderQty]						=	CASE 
-													WHEN A.intTransactionType = 1 --Consider contract logic if voucher only
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 --Consider contract logic if voucher only
 													THEN 
 													(
 														CASE 
@@ -101,7 +101,7 @@ BEGIN
 													ELSE A.dblOrderQty 
 													END
 			,[dblOrderUnitQty]					=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
 													(
 														CASE
@@ -113,7 +113,7 @@ BEGIN
 													ELSE A.dblOrderUnitQty
 													END
 			,[intOrderUOMId]					=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
 													(
 														CASE 
@@ -125,7 +125,7 @@ BEGIN
 													ELSE A.intOrderUOMId 
 													END
 			,[strOrderUOM]						=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
 													(
 														CASE 
@@ -141,7 +141,7 @@ BEGIN
 			,[intQtyToBillUOMId]				=	A.intQtyToBillUOMId
 			,[strQtyToBillUOM]					=	qtyUOM.strUnitMeasure
 			,[dblCost]							=	CASE 
-													WHEN A.intTransactionType = 1 
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
 													THEN 
 													(
 														CASE 
@@ -153,7 +153,7 @@ BEGIN
 													ELSE A.dblCost
 													END
 			,[dblCostUnitQty]					=	CASE 
-													WHEN A.intTransactionType = 1 
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 
 													THEN
 													(
 														CASE 
@@ -165,7 +165,7 @@ BEGIN
 													ELSE A.dblCostUnitQty 
 													END
 			,[intCostUOMId]						=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN 
 													(
 														CASE 
@@ -177,7 +177,7 @@ BEGIN
 													ELSE A.intCostUOMId 
 													END
 			,[strCostUOM]						=	CASE 
-													WHEN A.intTransactionType = 1
+													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 													THEN
 													(
 														CASE 
@@ -197,7 +197,7 @@ BEGIN
 			,[dblDiscount]						=	A.dblDiscount
 			,[intCurrencyExchangeRateTypeId]	=	A.intCurrencyExchangeRateTypeId
 			,[strRateType]						=	exRates.strCurrencyExchangeRateType
-			,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,-1)
+			,[dblExchangeRate]					=	ISNULL(A.dblExchangeRate,1)
 			,[ysnSubCurrency]					=	ISNULL(ISNULL(A.ysnSubCurrency,costCur.ysnSubCurrency),0)
 			,[intSubCurrencyCents]				=	CASE WHEN costCur.intCurrencyID > 0 AND costCur.ysnSubCurrency = 1 THEN A.intSubCurrencyCents ELSE 1 END
 			,[intAccountId]						=	ISNULL(A.intAccountId, vendor.intGLAccountExpenseId)
@@ -239,6 +239,10 @@ BEGIN
 																	THEN 'Per-unit retain allocations'
 													ELSE entity.str1099Type END
 			,[ysnReturn]						=	A.ysnReturn
+			,[intStorageLocationId]				=	A.intStorageLocationId
+			,[strStorageLocationName]			=	storageLoc.strName
+			,[intSubLocationId]					=	A.intSubLocationId
+			,[strSubLocationName]				=	subLoc.strSubLocationName
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -271,6 +275,8 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure contractCostUOM ON contractCostUOM.intUnitMeasureId = contractItemCostUOM.intUnitMeasureId
 		LEFT JOIN tblSCTicket ticket ON ticket.intTicketId = A.intScaleTicketId
 		LEFT JOIN tblSMTerm contractTerm ON ctDetail.intTermId = contractTerm.intTermID
+		LEFT JOIN tblICStorageLocation storageLoc ON storageLoc.intStorageLocationId = A.intStorageLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation subLoc ON subLoc.intCompanyLocationSubLocationId = A.intSubLocationId
 		WHERE A.ysnStage = 1
 	) AS SourceData
 	 ON (1=0)
@@ -344,7 +350,11 @@ BEGIN
 		,[int1099Category]				
 		,[str1099Form]					
 		,[str1099Type]							
-		,[ysnReturn]			
+		,[ysnReturn]		
+		,[intStorageLocationId]
+		,[strStorageLocationName]
+		,[intSubLocationId]
+		,[strSubLocationName]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -415,7 +425,11 @@ BEGIN
 		,[int1099Category]				
 		,[str1099Form]					
 		,[str1099Type]							
-		,[ysnReturn]			
+		,[ysnReturn]		
+		,[intStorageLocationId]
+		,[strStorageLocationName]
+		,[intSubLocationId]
+		,[strSubLocationName]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,

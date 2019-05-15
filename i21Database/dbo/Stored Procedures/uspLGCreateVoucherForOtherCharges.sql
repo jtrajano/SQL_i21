@@ -159,24 +159,25 @@ BEGIN TRY
 		,intSubLocationId
 		,intStorageLocationId
 		)
-	SELECT V.intEntityVendorId
-		,LD.intLoadId
-		,LD.intLoadDetailId
-		,CH.intContractHeaderId
-		,CD.intContractDetailId
-		,V.intItemId
+	SELECT 
+		intVendorEntityId = V.intEntityVendorId
+		,intLoadId = LD.intLoadId
+		,intLoadDetailId = LD.intLoadDetailId
+		,intContractHeaderId = CH.intContractHeaderId
+		,intContractDetailId = CD.intContractDetailId
+		,intItemId = V.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](V.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,dblQtyReceived = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
 		,dblCost = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN ISNULL(V.dblTotal, V.dblPrice) ELSE ISNULL(V.dblPrice, V.dblTotal) END 
-		,V.intPriceItemUOMId
-		,V.intLoadCostId
-		,I.ysnInventoryCost
-		,LD.intItemUOMId
-		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
-		,CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
-		,V.intCurrencyId
-		,V.intSubLocationId
-		,V.intStorageLocationId
+		,intCostUOMId = V.intPriceItemUOMId
+		,intLoadCostId = V.intLoadCostId
+		,ysnInventoryCost = I.ysnInventoryCost
+		,intItemUOMId = LD.intItemUOMId
+		,dblUnitQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
+		,dblCostUnitQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
+		,intCurrencyId = V.intCurrencyId
+		,intSubLocationId = NULL
+		,intStorageLocationId = NULL
 	FROM vyuLGLoadCostForVendor V
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
