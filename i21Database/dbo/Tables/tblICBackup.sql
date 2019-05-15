@@ -9,5 +9,5 @@
 	[ysnRebuilding] BIT NULL DEFAULT(0), 
 	[dtmStart] DATETIME NULL,
 	[dtmEnd] DATETIME NULL,
-	CONSTRAINT [PK_tblICBackup] PRIMARY KEY NONCLUSTERED ([intBackupId])
+    CONSTRAINT [PK_tblICBackup] PRIMARY KEY NONCLUSTERED ([intBackupId])
 )
