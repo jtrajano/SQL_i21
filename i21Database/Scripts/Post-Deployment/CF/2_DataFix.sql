@@ -46,3 +46,21 @@ UPDATE tblCFInvoiceReportTempTable SET strStatementType = 'Invoice' WHERE ISNULL
 UPDATE tblCFInvoiceSummaryTempTable SET strStatementType = 'Invoice' WHERE ISNULL(strStatementType,'') = ''
 
 
+--CF-2292
+DECLARE @cfDuplicateCardNumber AS INT
+SET @cfDuplicateCardNumber = (SELECT COUNT(1) FROM tblCFCard WHERE strCardNumber IN (
+		SELECT strCardNumber FROM tblCFCard GROUP BY intNetworkId  , strCardNumber HAVING COUNT(1) > 1 
+	))
+
+-- CHECK IF DUPLICATES EXISTS
+IF (@cfDuplicateCardNumber <= 0)
+BEGIN
+	-- CREATE UNIQUE INDEX IF INDEX IS NOT YET EXISTS
+	IF NOT EXISTS(SELECT * FROM sys.indexes WHERE name = 'tblCFCard_UniqueNetworkCardNumber' AND object_id = OBJECT_ID('tblCFCard'))
+	BEGIN
+		--CREATE UNIQUE CONSTRAINTS FOR network , account , card number
+		CREATE UNIQUE NONCLUSTERED INDEX [tblCFCard_UniqueNetworkCardNumber]
+		ON [dbo].[tblCFCard]([intNetworkId] ASC, [strCardNumber] ASC) WITH (FILLFACTOR = 70);
+	END
+END
+	

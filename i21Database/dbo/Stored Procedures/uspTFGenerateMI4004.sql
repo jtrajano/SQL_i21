@@ -82,12 +82,12 @@ BEGIN TRY
 		SELECT @dtmFrom = MIN(dtmReportingPeriodBegin) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
-		SELECT @dblLine8_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '7A' AND strType = 'Gasoline'
-		SELECT @dblLine8_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '7A' AND strType = 'Dyed Diesel'
-		SELECT @dblLine8_Col3 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '7A' AND strType = 'Undyed Diesel'
-		SELECT @dblLine8_Col4 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '7A' AND strType = 'Aviation'
-		SELECT @dblLine8_Col5 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '7A' AND strType = 'Jet Fuel'
-		SELECT @dblLine8_Col6 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '7A' AND strType = 'Other'
+		SELECT @dblLine8_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('7AIN', '7AOH') AND strType = 'Gasoline'
+		SELECT @dblLine8_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('7AIN', '7AOH') AND strType = 'Dyed Diesel'
+		SELECT @dblLine8_Col3 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('7AIN', '7AOH') AND strType = 'Undyed Diesel'
+		SELECT @dblLine8_Col4 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('7AIN', '7AOH') AND strType = 'Aviation'
+		SELECT @dblLine8_Col5 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('7AIN', '7AOH') AND strType = 'Jet Fuel'
+		SELECT @dblLine8_Col6 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('7AIN', '7AOH') AND strType = 'Other'
 
 		SELECT @dblLine9_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '7B' AND strType = 'Gasoline'
 		SELECT @dblLine9_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = '7B' AND strType = 'Dyed Diesel'

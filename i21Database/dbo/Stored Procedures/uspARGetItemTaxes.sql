@@ -49,6 +49,7 @@ AS
 				,[dblAdjustedTax]
 				,[dblAdjustedTax]				AS [dblBaseAdjustedTax]
 				,[intTaxAccountId]				AS [intSalesTaxAccountId]
+				,[intSalesTaxExemptionAccountId]
 				,[ysnSeparateOnInvoice]
 				,[ysnCheckoffTax]
 				,[strTaxCode]
