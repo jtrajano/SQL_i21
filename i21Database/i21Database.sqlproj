@@ -1991,7 +1991,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostStockQuantity.sql" />
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
-	<Build Include="dbo\Stored Procedures\uspICFixStorageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixStorageQty.sql" />
     <Build Include="dbo\Tables\tblICFixLog.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
@@ -7317,6 +7317,7 @@
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
     <Build Include="dbo\Functions\fnPRRounding.sql" />
     <Build Include="dbo\Tables\tblSCRemoteXrefDeliverySheet.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersPaymentInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
