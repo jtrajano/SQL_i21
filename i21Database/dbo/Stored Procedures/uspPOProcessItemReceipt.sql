@@ -25,11 +25,28 @@ BEGIN
 		RETURN;
 	END
 
-	IF NOT EXISTS(SELECT 1 FROM tblPOPurchaseDetail A
-					INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-					WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') 
-					AND A.dblQtyOrdered != A.dblQtyReceived
-					AND intPurchaseId = @poId)
+	--CHECK IF ALL QUANTITY ARE RECEIVED
+	IF 
+	(
+		NOT EXISTS
+		(
+			SELECT 1 
+			FROM tblPOPurchaseDetail A
+			INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+			WHERE B.strType IN ('Non-Inventory', 'Finished Good', 'Raw Material') 
+			-- WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') 
+			AND A.dblQtyReceived < A.dblQtyOrdered
+			AND intPurchaseId = @poId
+			AND @receiveNonInventory = 1
+			UNION ALL
+			SELECT 1 
+			FROM tblPOPurchaseDetail A
+			INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+			WHERE B.strType IN ('Inventory') 
+			AND A.dblQtyReceived < A.dblQtyOrdered
+			AND intPurchaseId = @poId
+		)
+	)
 	BEGIN
 		RAISERROR('There is no receivable item on this purchase order.', 16, 1);
 		RETURN;
