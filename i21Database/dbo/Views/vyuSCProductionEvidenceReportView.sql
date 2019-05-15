@@ -62,7 +62,7 @@
 		,SC.intContractId
 		,SC.intDiscountLocationId
 		,SC.intItemId
-		,SC.intEntityId
+		,EM.intEntityId
 		,SC.intLoadId
 		,SC.intMatchTicketId
 		,SC.intSubLocationId
@@ -122,6 +122,8 @@
 		,DS.strSplitDescription
 		,DS.intDeliverySheetId
 	FROM tblSCDeliverySheet DS
+	INNER JOIN tblSCDeliverySheetSplit DSS
+		ON DS.intDeliverySheetId = DSS.intDeliverySheetId
 	INNER JOIN tblSCTicket SC 
 		ON SC.intDeliverySheetId = DS.intDeliverySheetId
 	INNER JOIN tblICInventoryReceiptItem IRD
@@ -130,11 +132,11 @@
 	INNER JOIN tblICInventoryReceipt IR
 		ON IRD.intInventoryReceiptId = IR.intInventoryReceiptId
 			AND IR.intSourceType = 1
-			AND IR.intEntityVendorId = DS.intEntityId
+			AND IR.intEntityVendorId = DSS.intEntityId
 	LEFT JOIN tblICCommodity ICCommodity ON ICCommodity.intCommodityId = SC.intCommodityId
 	LEFT JOIN tblEMEntity EM 
 		on IR.intEntityVendorId = EM.intEntityId
-	LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = SC.intEntityId AND EMLocation.ysnDefaultLocation = 1
+	LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = IR.intEntityId AND EMLocation.ysnDefaultLocation = 1
 	LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
 	LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = DS.intSplitId
 	LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intProcessingLocationId
