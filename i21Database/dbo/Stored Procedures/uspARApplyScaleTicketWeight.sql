@@ -79,6 +79,11 @@ BEGIN
 		END	
 	ELSE
 		BEGIN
+			SELECT @intScaleUOMId = intItemUOMIdTo
+				 , @dblNetWeight = dblNetUnits
+			FROM vyuSCTicketScreenView 
+			WHERE intTicketId = @intTicketId
+
 			EXEC dbo.uspARUpdateOverageContracts @intNewInvoiceId, @intScaleUOMId, @intUserId, @dblNetWeight, @ysnFromSalesOrder = 1
 			
 			UPDATE SO 
