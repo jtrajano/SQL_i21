@@ -38,21 +38,18 @@ RETURNS TABLE AS RETURN
 		,[intItemId]								=	CC.intItemId
 		,[intPurchaseTaxGroupId]					=	NULL
 		,[strMiscDescription]						=	CC.strItemDescription
-		,[dblOrderQty]								=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CH.dblQuantity,0) ELSE 1 END
-		,[dblOrderUnitQty]							=	0
-		,[intOrderUOMId]							=	0
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CH.dblQuantity,0) ELSE 1 END
-		,[dblQtyToBillUnitQty]						=	0
-		,[intQtyToBillUOMId]						=	0
-		,[dblCost]									=	CASE
-															WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CC.dblRate,0)
-															ELSE ISNULL(CC.dblAmount,0)
-														END
-		,[dblCostUnitQty]							=	ISNULL(CostUOM.dblUnitQty,1)
-		,[intCostUOMId]								=	CostUOM.intItemUOMId
-		,[dblNetWeight]								=	CAST(0 AS DECIMAL(38,20))--ISNULL(CD.dblNetWeight,0)      
+		,[dblOrderQty]								=	1
+		,[dblOrderUnitQty]							=	1
+		,[intOrderUOMId]							=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[dblQuantityToBill]						=	1
+		,[dblQtyToBillUnitQty]						=	1
+		,[intQtyToBillUOMId]						=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[dblCost]									=	CC.dblAmount
+		,[dblCostUnitQty]							=	1
+		,[intCostUOMId]								=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[dblNetWeight]								=	1--ISNULL(CD.dblNetWeight,0)      
 		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
-		,[intWeightUOMId]							=	0
+		,[intWeightUOMId]							=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
 		,[dblTax]									=	0
 		,[dblDiscount]								=	0
