@@ -157,6 +157,15 @@ BEGIN TRY
 			,dblDefaultResidueQty NUMERIC(38, 20)
 			)
 
+	IF @dtmActualInputDateTime>GETDATE()
+	BEGIN
+		RAISERROR (
+				'Feed time cannot be greater than current date and time.'
+				,14
+				,1
+				)
+	END
+
 	SELECT @dblEnteredQty = @dblInputWeight
 		,@intEnteredItemUOMId = @intInputWeightUOMId
 
