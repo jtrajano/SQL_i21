@@ -212,8 +212,8 @@ BEGIN TRY
 					DECLARE @dblNegContractAvailableQty AS DECIMAL(18,6);
 					SET @dblNegContractAvailableQty = @dblContractAvailableQty *-1
 					/* Remove Scheduled of Contract from Matched Ticket */
-					EXEC uspCTUpdateScheduleQuantity @intContractDetailId, @test, @intUserId, @intTicketId, 'Scale'
-					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblNegContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId, @dblNegContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
 				END
 				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId
 			END
