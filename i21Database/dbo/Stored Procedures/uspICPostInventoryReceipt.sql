@@ -692,10 +692,8 @@ BEGIN
 										+
 										CASE 
 											WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
-												-- Convert the other charge to the currency used by the detail item. 
 												dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) / DetailItem.dblForexRate
-											ELSE 
-												-- No conversion. Detail item is already in functional currency. 
+											ELSE 												
 												dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 										END 									
 									)										
@@ -728,10 +726,8 @@ BEGIN
 										+
 										CASE 
 											WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
-												-- Convert the other charge to the currency used by the detail item. 
 												dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) / DetailItem.dblForexRate
 											ELSE 
-												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 										END
 									)							
