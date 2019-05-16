@@ -109,7 +109,7 @@ DECLARE
 INSERT INTO @table
 SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
-	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
+	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE @billTypeToUse	 END 
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
