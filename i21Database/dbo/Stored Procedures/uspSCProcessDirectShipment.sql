@@ -209,7 +209,11 @@ BEGIN TRY
 				IF ISNULL(@intContractDetailId,0) != 0
 				BEGIN
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					DECLARE @dblNegContractAvailableQty AS DECIMAL(18,6);
+					SET @dblNegContractAvailableQty = @dblContractAvailableQty *-1
+					/* Remove Scheduled of Contract from Matched Ticket */
+					EXEC uspCTUpdateScheduleQuantity @intContractDetailId, @test, @intUserId, @intTicketId, 'Scale'
+					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblNegContractAvailableQty, @intUserId, @intTicketId, 'Scale'
 				END
 				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId
 			END
