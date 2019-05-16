@@ -907,7 +907,7 @@ SELECT *
 INTO #tempIntransit
 FROM (
 	SELECT intLineNo = (SELECT TOP 1 intLineNo FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentItemId = InTran.intTransactionDetailId AND intOrderId IS NOT NULL)
-		, dblBalanceToInvoice = dblInTransitQty
+		, dblBalanceToInvoice = SUM(dblInTransitQty)
 		, InTran.intItemId
 		, InTran.strItemNo
 		, InTran.intItemUOMId
@@ -929,8 +929,23 @@ FROM (
 				INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
 				LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmTransactionDateUpTo)
+	GROUP BY
+		 InTran.intItemId
+		, InTran.strItemNo
+		, InTran.intItemUOMId
+		, Com.intCommodityId
+		, Com.strCommodityCode
+		, Inv.strEntity
+		, Inv.intEntityId
+		, SI.dblPrice
+		, InTran.strTransactionId
+		, InTran.intTransactionDetailId
+		, intUnitMeasureId
+		, SI.intCurrencyId
+		, Inv.dtmDate
+		, Inv.intLocationId
+		, Inv.strLocationName
 ) tbl
-
 
 -- intransit
 INSERT INTO @tblFinalDetail (intContractHeaderId
