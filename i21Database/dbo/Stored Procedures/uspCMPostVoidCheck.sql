@@ -50,7 +50,7 @@ DECLARE
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT
 	,@intBankAccountId AS INT
-	,@ysnBankAccountIdInactive AS BIT
+	,@ysnBankAccountActive AS BIT
 	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
 	
@@ -204,13 +204,13 @@ BEGIN
 	
 	DECLARE @GLAccountSetupIsValid INT = 0
 
-	SELECT	@GLAccountSetupIsValid = COUNT(1),	@ysnBankAccountIdInactive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
+	SELECT	@GLAccountSetupIsValid = COUNT(1),	@ysnBankAccountActive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
 	FROM	tblCMBankAccount CM JOIN vyuGLAccountDetail GL 
 	ON GL.intAccountId = CM.intGLAccountId
 	WHERE	intBankAccountId = @intBankAccountId
 	GROUP BY intBankAccountId, CM.ysnActive, GL.ysnActive
 	
-	IF @ysnBankAccountIdInactive = 1
+	IF @ysnBankAccountActive = 0
 	BEGIN
 		-- 'The bank account is inactive.'
 		RAISERROR('The bank account or its associated GL account is inactive.', 11, 1)
