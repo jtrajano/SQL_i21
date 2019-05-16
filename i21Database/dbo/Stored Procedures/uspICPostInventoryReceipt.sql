@@ -689,7 +689,8 @@ BEGIN
 												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 										END 									
-
+										+
+										dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 									)										
 								ELSE 
 									(
@@ -716,7 +717,9 @@ BEGIN
 											ELSE 
 												-- No conversion. Detail item is already in functional currency. 
 												dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-										END
+										END									
+										+
+										dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 									)							
 							END
 

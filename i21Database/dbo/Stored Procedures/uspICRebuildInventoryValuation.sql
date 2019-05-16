@@ -3286,7 +3286,9 @@ BEGIN
 													ELSE 
 														-- No conversion. Detail item is already in functional currency. 
 														dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-												END 									
+												END																
+												+
+													dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) 									
 
 											)
 											-- (C) then convert the cost to the sub-currency value. 
