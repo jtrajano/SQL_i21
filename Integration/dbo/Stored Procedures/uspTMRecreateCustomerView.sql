@@ -84,7 +84,7 @@ BEGIN
 				,vwcus_budget_amt  = ISNULL(A.agcus_budget_amt,0.0)    
 				,vwcus_budget_beg_mm = CAST(ISNULL(A.agcus_budget_beg_mm,0) AS INT)   
 				,vwcus_budget_end_mm = CAST(ISNULL(A.agcus_budget_end_mm,0) AS INT)   
-				,vwcus_budget_end_mm_dbl = CAST(ISNULL(A.agcus_budget_end_mm,0.00) AS numeric(18,6))   
+				,vwcus_budget_end_mm_dbl = 0.00
 				,vwcus_active_yn  = ISNULL(A.agcus_active_yn,'''') COLLATE Latin1_General_CI_AS      
 				,vwcus_ar_future  = ISNULL(A.agcus_ar_future,0.0)    
 				,vwcus_ar_per1   = ISNULL(A.agcus_ar_per1,0.0)    
@@ -221,7 +221,7 @@ BEGIN
 				,vwcus_budget_amt  = CAST(ISNULL(A.ptcus_budget_amt,0.0) AS DECIMAL(18,6))    
 				,vwcus_budget_beg_mm = CAST(ISNULL(A.ptcus_budget_beg_mm,0) AS INT)   
 				,vwcus_budget_end_mm = CAST(ISNULL(A.ptcus_budget_end_mm,0) AS INT)   
-				,vwcus_budget_end_mm_dbl = CAST(ISNULL(A.ptcus_budget_end_mm,0.00) AS numeric(18,6))   
+				,vwcus_budget_end_mm_dbl = 0.00
 				,vwcus_active_yn  = ISNULL(A.ptcus_active_yn,'''') COLLATE Latin1_General_CI_AS    
 				,vwcus_ar_future  = CAST(0 AS DECIMAL(18,6))
 				,vwcus_ar_per1   = ISNULL(A.ptcus_ar_curr,0.0)    
@@ -355,7 +355,7 @@ BEGIN
 				,vwcus_ytd_sls = ISNULL(CI.dblYTDSales, 0.0)
 				,vwcus_ytd_cgs = 0.0  
 				,vwcus_budget_amt = Cus.dblMonthlyBudget
-				,vwcus_budget_beg_mm = cast(RIGHT(REPLACE(CONVERT(VARCHAR(10), CI.dtmBudgetMonth, 103), '/', ''), 6) as int)
+				,vwcus_budget_beg_mm = cast(RIGHT(REPLACE(CONVERT(VARCHAR(10), CI.dtmBudgetMonth, 103), ''/'', ''''), 6) as int)
 				,vwcus_budget_end_mm = CAST(ISNULL(Cus.strBudgetBillingEndMonth,0.00) AS numeric(18,6))   
 				,vwcus_budget_end_mm_dbl = CI.dblThru
 				,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END COLLATE Latin1_General_CI_AS 

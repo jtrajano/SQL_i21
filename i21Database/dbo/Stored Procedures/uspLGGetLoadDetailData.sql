@@ -13,6 +13,7 @@ BEGIN
 		,strPPricingType = PTP.strPricingType
 		,intPPricingTypeId = PDetail.intPricingTypeId
 		,ysnPLoad = PHeader.ysnLoad
+		,dblPQuantityPerLoad = PDetail.dblQuantityPerLoad
 		,strSContractNumber = SHeader.strContractNumber
 		,intSContractSeq = SDetail.intContractSeq
 		,intPPricingTypeId = PDetail.intPricingTypeId
@@ -20,6 +21,7 @@ BEGIN
 		,intSPricingTypeId = SDetail.intPricingTypeId
 		,strSPricingType = PTS.strPricingType
 		,ysnSLoad = SHeader.ysnLoad
+		,dblSQuantityPerLoad = SDetail.dblQuantityPerLoad
 		,strVendor = VEN.strName
 		,strCustomer = CEN.strName
 		,strShipFrom = VEL.strLocationName

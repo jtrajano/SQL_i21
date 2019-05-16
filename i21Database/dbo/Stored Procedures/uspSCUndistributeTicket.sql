@@ -246,8 +246,21 @@ BEGIN TRY
 								BEGIN
 									EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
 									SET @dblMatchDeliveredQuantity = @dblMatchDeliveredQuantity * -1;
+									SET @dblMatchLoadScheduledUnits = @dblMatchLoadScheduledUnits * -1;
+									
+									/*For Match Ticket */
 									EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
 									EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
+
+									DECLARE @reverseScheduleQty DECIMAL(18,6) = @dblScheduleQty * -1;
+									DECLARE @intMainTicketContractDetailId INT
+									SELECT @intMainTicketContractDetailId = intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId
+									
+									/*For Main Ticket */
+									EXEC uspCTUpdateSequenceBalance @intMainTicketContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
+									EXEC uspCTUpdateScheduleQuantity @intMainTicketContractDetailId, @reverseScheduleQty, @intUserId, @intTicketId, 'Scale'
+									
+
 									UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intLoadId = @intMatchLoadId
 								END
 							END
