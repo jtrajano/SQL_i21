@@ -115,7 +115,8 @@ BEGIN TRY
 		BEGIN
 			IF ABS(@dblScheduleQty + @dblQuantityToUpdate) > @dblTolerance
 			BEGIN
-				RAISERROR('Total scheduled quantity cannot be less than zero.',16,1)
+				SET @ErrMsg = 'Total scheduled quantity cannot be less than zero for contract '+@strContractNumber + ' and sequence ' +	@strContractSeq	+'.'
+				RAISERROR(@ErrMsg,16,1)
 			END
 			ELSE
 			BEGIN
