@@ -932,6 +932,63 @@ BEGIN
 					FROM @tempFinal
 					WHERE intCommodityId = @intCommodityId AND strType  = 'Crush'
 
+					--DP
+					If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1)
+					BEGIN
+					INSERT INTO @tempFinal(strCommodityCode
+						, strType
+						, strContractType
+						, dblTotal
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, strCurrency)
+					SELECT @strCommodityCode
+						, strType = 'Price Risk'
+						, strContractType = 'DP'
+						, dblTotal = -SUM(dblTotal)
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, strCurrency = NULL
+					FROM (
+						SELECT intTicketId
+							, strTicketType
+							, strTicketNumber
+							, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(dblBalance,0)))
+							, ch.intCompanyLocationId
+							, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
+							, intCommodityId
+							, strLocationName
+							, intItemId
+							, strItemNo
+							, intCategoryId
+							, strCategory
+						FROM #tblGetStorageDetailByDate ch
+						WHERE ch.intCommodityId  = @intCommodityId
+							AND ysnDPOwnedType = 1
+							AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
+						)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					GROUP BY intTicketId
+						, strTicketType
+						, strTicketNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+					END
+
 				END
 
 				-- Net Hedge option end
@@ -1467,7 +1524,7 @@ BEGIN
 					, strBrokerTradeNo
 					, strNotes
 					, ysnPreCrush
-				FROM @tempFinal WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'DP', 'Sales Basis Deliveries', 'OffSite') AND @ysnExchangeTraded = 1
+				FROM @tempFinal WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'DP', 'OffSite') AND @ysnExchangeTraded = 1
 				GROUP BY strCommodityCode
 					, strContractType
 					, intContractHeaderId
