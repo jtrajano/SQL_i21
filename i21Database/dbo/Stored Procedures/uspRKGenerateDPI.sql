@@ -108,7 +108,7 @@ BEGIN
 	IF (@ysnIncludeDPPurchasesInCompanyTitled = 1)
 	BEGIN
 		INSERT INTO @DPTable
-		SELECT *
+		SELECT DISTINCT *
 		FROM (
 			SELECT CONVERT(VARCHAR(10), gh.dtmDistributionDate,110) dtmDate
 				, dblBalance = (CASE WHEN gh.strType ='Reduced By Inventory Shipment' OR gh.strType = 'Settlement' THEN - gh.dblUnits ELSE gh.dblUnits END)
@@ -439,23 +439,23 @@ BEGIN
 			AND IT.intItemId = ISNULL(@intItemId, IT.intItemId)
 			AND il.intLocationId = ISNULL(@intLocationId, il.intLocationId)
 		
-		--Storage
-		UNION ALL SELECT CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
-			, round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
-			, IA.strAdjustmentNo strAdjustmentNo
-			, IA.intInventoryAdjustmentId intInventoryAdjustmentId
-			, strItemNo
-		FROM tblICInventoryAdjustment IA
-		INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
-		INNER JOIN tblICItem Itm ON IAD.intItemId = Itm.intItemId
-		INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
-		WHERE IAD.intOwnershipType = 2 --Storage
-			AND IA.ysnPosted = 1
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), IA.dtmPostedDate, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
-			AND C.intCommodityId = @intCommodityId 
-			AND IAD.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN IAD.intItemId ELSE @intItemId END 
-			AND IA.strDescription NOT LIKE ('%Delivery Sheet Posting%') -- RM-2916/RM-2917
-			--AND Itm.intLocationId = case when ISNULL(@intLocationId,0)=0 then il.intLocationId else @intLocationId end 
+		-- RM-2946 -> Do not include storage ownership type adjustments
+		----Storage
+		--UNION ALL SELECT CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
+		--	, round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
+		--	, IA.strAdjustmentNo strAdjustmentNo
+		--	, IA.intInventoryAdjustmentId intInventoryAdjustmentId
+		--	, strItemNo
+		--FROM tblICInventoryAdjustment IA
+		--INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+		--INNER JOIN tblICItem Itm ON IAD.intItemId = Itm.intItemId
+		--INNER JOIN tblICCommodity C ON Itm.intCommodityId = C.intCommodityId
+		--WHERE IAD.intOwnershipType = 2 --Storage
+		--	AND IA.ysnPosted = 1
+		--	AND CONVERT(DATETIME, CONVERT(VARCHAR(10), IA.dtmPostedDate, 110), 110) BETWEEN CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) 
+		--	AND C.intCommodityId = @intCommodityId 
+		--	AND IAD.intItemId = CASE WHEN ISNULL(@intItemId, 0) = 0 THEN IAD.intItemId ELSE @intItemId END 				
+		--	AND IA.strDescription NOT LIKE ('%Delivery Sheet Posting%') -- RM-2916/RM-2917
 	)a
 
 	--Delivery Sheet
@@ -735,7 +735,7 @@ BEGIN
 		, dblInventoryBalanceCarryForward
 		, strReceiptNumber
 		, intReceiptId)
-	SELECT @intDPIHeaderId
+	SELECT DISTINCT @intDPIHeaderId
 		, ISNULL(dtmDate,'') dtmDate
 		, strDistributionOption [strDistribution]
 		, dblUnpaidIn [dblUnpaidIN]
