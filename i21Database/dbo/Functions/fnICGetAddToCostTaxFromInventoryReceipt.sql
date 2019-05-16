@@ -20,10 +20,12 @@ BEGIN
 	FROM	tblICInventoryReceiptItem ReceiptItems 
 		INNER JOIN tblICInventoryReceiptItemTax ItemTaxes
 			ON ReceiptItems.intInventoryReceiptItemId = ItemTaxes.intInventoryReceiptItemId
-		INNER JOIN ( SELECT ysnAddToCost, intTaxCodeId from tblSMTaxCode where ysnAddToCost = 1) TaxCode
+		--INNER JOIN ( SELECT ysnAddToCost, intTaxCodeId from tblSMTaxCode where ysnAddToCost = 1) TaxCode
+		INNER JOIN tblSMTaxCode TaxCode
 			ON ItemTaxes.intTaxCodeId = TaxCode.intTaxCodeId
-		WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
-		
+		WHERE	
+			ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
+			AND TaxCode.ysnAddToCost = 1
 
 	SELECT	@units = 
 					CASE	WHEN ri.intWeightUOMId IS NOT NULL THEN ISNULL(AggregrateItemLots.dblTotalNet, ri.dblNet)
