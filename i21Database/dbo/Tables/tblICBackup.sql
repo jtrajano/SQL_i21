@@ -9,5 +9,7 @@
 	[ysnRebuilding] BIT NULL DEFAULT(0), 
 	[dtmStart] DATETIME NULL,
 	[dtmEnd] DATETIME NULL,
+    [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblICBackup] PRIMARY KEY NONCLUSTERED ([intBackupId])
 )
