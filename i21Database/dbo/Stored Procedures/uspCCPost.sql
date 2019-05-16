@@ -45,7 +45,7 @@ BEGIN TRY
 		BEGIN	
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission CL WHERE CL.intEntityId = @userId AND CL.intCompanyLocationId = @intCompanyLocationId)
 			BEGIN
-				RAISERROR('No permission to post transaction using this location!', 16, 1)
+				RAISERROR('You dont have permission to post transaction using this location!', 16, 1)
 			END
 		END
 	END
