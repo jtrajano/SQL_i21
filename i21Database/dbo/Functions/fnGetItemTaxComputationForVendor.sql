@@ -232,10 +232,14 @@ BEGIN
 					WHERE
 						[Id] = @TaxId
 						
-						
+					SET @TaxableAmount	= ISNULL(@ItemCost, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
 						
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
-					BEGIN						
+					BEGIN	
+					
+						IF @TaxOnly = 1
+							SET @TaxableAmount = @ZeroDecimal
+
 						IF(@TaxAdjustedTax = 1)
 						BEGIN
 							SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax
@@ -257,11 +261,7 @@ BEGIN
 						
 					DELETE FROM @TaxableByOtherTaxes WHERE [Id] = @TaxId
 				END
-				
-			IF @TaxOnly = 1
-				SET @TaxableAmount = @ZeroDecimal
-			ELSE
-				SET @TaxableAmount	= ISNULL(@ItemCost, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
+							
 
 			SET @TaxableAmount = @TaxableAmount + @OtherTaxAmount
 
@@ -269,7 +269,7 @@ BEGIN
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/100));
 			ELSE
-				SET @ItemTaxAmount = CASE WHEN @TaxOnly = 1 THEN @ZeroDecimal ELSE (@Quantity * @Rate) END;
+				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
 			IF(@TaxExempt = 1)
 				SET @ItemTaxAmount = 0.00;

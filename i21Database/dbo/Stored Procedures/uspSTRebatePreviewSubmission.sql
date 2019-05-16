@@ -210,7 +210,7 @@ BEGIN
 							WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 						) TRR 
 						WHERE TRR.rn = 1
-						AND TRR.ysnSubmitted = 0
+						AND TRR.ysnPMMSubmitted = 0
 				) TR
 				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
@@ -225,7 +225,7 @@ BEGIN
 				) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 				WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
 				AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
-				AND ysnSubmitted = 0
+				AND TR.ysnPMMSubmitted = 0
 				AND TR.strTrpPaycode != 'Change' --ST-680
 				AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
@@ -369,7 +369,7 @@ BEGIN
 						) TRR 
 						WHERE TRR.rn = 1		
 						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
-						AND TRR.ysnSubmitted = 0
+						AND TRR.ysnRJRSubmitted = 0
 					) TR
 					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
