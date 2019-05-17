@@ -237,7 +237,6 @@ IF @@ERROR <> 0 GOTO With_Rollback_Exit
 IF @ysnPost = 1  
 BEGIN  
 	DECLARE @ItemsForAdjust AS ItemCostingTableType  
-
 	-----------------------------------
 	--  Call Quantity Change 
 	-----------------------------------
@@ -302,7 +301,7 @@ BEGIN
 						WHEN Detail.intWeightUOMId IS NULL THEN 
 							ItemUOM.dblUnitQty
 						ELSE 
-							WeightUOM.dblUnitQty
+							CASE WHEN Detail.intLotId IS NOT NULL THEN LotWeightUOM.dblUnitQty ELSE WeightUOM.dblUnitQty END
 					END
 			,dblCost				= 
 					COALESCE
@@ -355,8 +354,8 @@ BEGIN
 		LEFT JOIN dbo.tblICItemUOM StockUOM 
 			ON Detail.intItemId = StockUOM.intItemId 
 			AND StockUOM.ysnStockUnit = 1
-		LEFT JOIN dbo.tblICItemUOM WeightUOM
-			ON WeightUOM.intItemUOMId = ItemLot.intWeightUOMId 
+		LEFT JOIN dbo.tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = ItemLot.intWeightUOMId 
+		LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = Detail.intWeightUOMId
 
 	WHERE 
 		Header.intInventoryCountId = @intTransactionId

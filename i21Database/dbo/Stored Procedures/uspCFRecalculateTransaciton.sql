@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿
+CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -2574,144 +2575,148 @@ BEGIN
 					,NULL	--@@CurrencyExchangeRate										 
 				)
 
-					INSERT INTO @tblCFCalculatedTax	
-				(
-						[intTaxGroupId]				
-					,[intTaxCodeId]					
-					,[intTaxClassId]				
-					,[strTaxableByOtherTaxes]		
-					,[strCalculationMethod]			
-					,[dblRate]		
-					,[dblBaseRate]	
-					,[dblExemptionPercent]			
-					,[dblTax]						
-					,[dblAdjustedTax]				
-					,[intSalesTaxAccountId]    			
-					,[ysnCheckoffTax]
-					,[ysnTaxExempt]
-					,[ysnInvalidSetup]				
-					,[strNotes]							
-				)	
-				SELECT 
-						[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]		
-					,[dblBaseRate]			
-					,[dblExemptionPercent]		
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[intTaxAccountId]			
-					,[ysnCheckoffTax]				
-					,[ysnTaxExempt]					
-					,[ysnInvalidSetup]				
-					,[strNotes]						
-				FROM [fnConstructLineItemTaxDetail] 
-				(
-						@dblQuantity
-					,(@dblPrice * @dblQuantity)
-					,@LineItemTaxDetailStagingTable
-					,1
-					,@intItemId
-					,@intCustomerId
-					,@intLocationId
-					,@intTaxGroupId
-					,0
-					,@dtmTransactionDate
-					,NULL
-					,1
-					,0			--@IncludeInvalidCodes
-					,NULL
-					,@companyConfigFreightTermId
-					,@intCardId		
-					,@intVehicleId
-					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
-					,0
-					, @intItemUOMId	--intItemUOMId
-					,@intSiteId
-					,0		--@IsDeliver	
-					,@isQuote
-					,NULL	--@CurrencyId
-					,NULL	--@@CurrencyExchangeRateTypeId
-					,NULL	--@@CurrencyExchangeRate										 
-				)
-					INSERT INTO @tblCFCalculatedTaxZeroQuantity	
-				(
-						[intTaxGroupId]				
-					,[intTaxCodeId]					
-					,[intTaxClassId]				
-					,[strTaxableByOtherTaxes]		
-					,[strCalculationMethod]			
-					,[dblRate]		
-					,[dblBaseRate]	
-					,[dblExemptionPercent]			
-					,[dblTax]						
-					,[dblAdjustedTax]				
-					,[intSalesTaxAccountId]    			
-					,[ysnCheckoffTax]
-					,[ysnTaxExempt]
-					,[ysnInvalidSetup]				
-					,[strNotes]							
-				)	
-				SELECT 
-						[intTaxGroupId]			
-					,[intTaxCodeId]				
-					,[intTaxClassId]			
-					,[strTaxableByOtherTaxes]	
-					,[strCalculationMethod]		
-					,[dblRate]		
-					,[dblBaseRate]			
-					,[dblExemptionPercent]		
-					,[dblTax]					
-					,[dblAdjustedTax]			
-					,[intTaxAccountId]			
-					,[ysnCheckoffTax]				
-					,[ysnTaxExempt]					
-					,[ysnInvalidSetup]				
-					,[strNotes]						
-				FROM [fnConstructLineItemTaxDetail] 
-				(
-						@dblZeroQuantity
-					,(@dblPrice * @dblZeroQuantity)
-					,@LineItemTaxDetailStagingTable
-					,1
-					,@intItemId
-					,@intCustomerId
-					,@intLocationId
-					,@intTaxGroupId
-					,0
-					,@dtmTransactionDate
-					,NULL
-					,1
-					,0			--@IncludeInvalidCodes
-					,NULL
-					,@companyConfigFreightTermId
-					,@intCardId		
-					,@intVehicleId
-					,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
-					,0
-					, @intItemUOMId	--intItemUOMId
-					,@intSiteId
-					,0		--@IsDeliver	
-					,@isQuote
-					,NULL	--@CurrencyId
-					,NULL	--@@CurrencyExchangeRateTypeId
-					,NULL	--@@CurrencyExchangeRate										 
-				)
-				
 					IF(ISNULL(@ysnDisregardTaxExemption,0) = 0)
 					BEGIN
-						INSERT INTO @tblCFCalculatedTaxExempt	
-						(
-								[intTaxGroupId]				
+						IF(LOWER(@strPriceBasis) = 'transfer cost')
+						BEGIN
+							INSERT INTO @tblCFCalculatedTaxExempt	
+							(   
+								 [intTaxGroupId]				
+								,[intTaxCodeId]					
+								,[intTaxClassId]				
+								,[strTaxableByOtherTaxes]		
+								,[strCalculationMethod]			
+								,[dblRate]		
+								,[dblBaseRate]	
+								,[dblExemptionPercent]			
+								,[dblTax]						
+								,[dblAdjustedTax]				
+								,[intSalesTaxAccountId]    			
+								,[ysnCheckoffTax]
+								,[ysnTaxExempt]
+								,[ysnInvalidSetup]				
+								,[strNotes]							
+							)	
+							SELECT 
+								 [intTaxGroupId]			
+								,[intTaxCodeId]				
+								,[intTaxClassId]			
+								,[strTaxableByOtherTaxes]	
+								,[strCalculationMethod]		
+								,[dblRate]
+								,[dblBaseRate]					
+								,[dblExemptionPercent]		
+								,[dblTax]					
+								,[dblAdjustedTax]			
+								,[intTaxAccountId]			
+								,[ysnCheckoffTax]				
+								,[ysnTaxExempt]					
+								,[ysnInvalidSetup]				
+								,[strNotes]						
+							FROM [fnConstructLineItemTaxDetail] 
+							(
+								 @dblQuantity
+								,0
+								,@LineItemTaxDetailStagingTable
+								,0
+								,@intItemId
+								,@intCustomerId
+								,@intLocationId
+								,@intTaxGroupId
+								,@dblPrice
+								,@dtmTransactionDate
+								,NULL
+								,1
+								,0			--@IncludeInvalidCodes
+								,NULL
+								,@companyConfigFreightTermId
+								,@intCardId		
+								,@intVehicleId
+								,1 --@DisregardExemptionSetup
+								,0
+								, @intItemUOMId	--intItemUOMId			
+								,@intSiteId
+								,0		--@IsDeliver	
+								,@isQuote								 
+								,NULL	--@CurrencyId
+								,NULL	--@@CurrencyExchangeRateTypeId
+								,NULL	--@@CurrencyExchangeRate	
+							)
+							INSERT INTO @tblCFCalculatedTaxExemptZeroQuantity	
+							(
+								 [intTaxGroupId]				
+								,[intTaxCodeId]					
+								,[intTaxClassId]				
+								,[strTaxableByOtherTaxes]		
+								,[strCalculationMethod]			
+								,[dblRate]	
+								,[dblBaseRate]		
+								,[dblExemptionPercent]			
+								,[dblTax]						
+								,[dblAdjustedTax]				
+								,[intSalesTaxAccountId]    			
+								,[ysnCheckoffTax]
+								,[ysnTaxExempt]
+								,[ysnInvalidSetup]				
+								,[strNotes]							
+							)	
+							SELECT 
+								 [intTaxGroupId]			
+								,[intTaxCodeId]				
+								,[intTaxClassId]			
+								,[strTaxableByOtherTaxes]	
+								,[strCalculationMethod]		
+								,[dblRate]
+								,[dblBaseRate]					
+								,[dblExemptionPercent]		
+								,[dblTax]					
+								,[dblAdjustedTax]			
+								,[intTaxAccountId]			
+								,[ysnCheckoffTax]				
+								,[ysnTaxExempt]					
+								,[ysnInvalidSetup]				
+								,[strNotes]						
+							FROM [fnConstructLineItemTaxDetail] 
+							(
+								 @dblZeroQuantity
+								,0
+								,@LineItemTaxDetailStagingTable
+								,0
+								,@intItemId
+								,@intCustomerId
+								,@intLocationId
+								,@intTaxGroupId
+								,@dblPrice
+								,@dtmTransactionDate
+								,NULL
+								,1
+								,0			--@IncludeInvalidCodes
+								,NULL
+								,@companyConfigFreightTermId
+								,@intCardId		
+								,@intVehicleId
+								,1 --@DisregardExemptionSetup
+								,0
+								, @intItemUOMId	--intItemUOMId			
+								,@intSiteId
+								,0		--@IsDeliver	
+								,@isQuote
+								,NULL	--@CurrencyId
+								,NULL	--@@CurrencyExchangeRateTypeId
+								,NULL	--@@CurrencyExchangeRate								 
+							)
+						END
+						ELSE
+						BEGIN
+							INSERT INTO @tblCFCalculatedTaxExempt	
+							(
+							 [intTaxGroupId]				
 							,[intTaxCodeId]					
 							,[intTaxClassId]				
 							,[strTaxableByOtherTaxes]		
 							,[strCalculationMethod]			
-							,[dblRate]	
-							,[dblBaseRate]		
+							,[dblRate]		
+							,[dblBaseRate]	
 							,[dblExemptionPercent]			
 							,[dblTax]						
 							,[dblAdjustedTax]				
@@ -2720,15 +2725,15 @@ BEGIN
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
 							,[strNotes]							
-						)	
-						SELECT 
-								[intTaxGroupId]			
+							)	
+							SELECT 
+							 [intTaxGroupId]			
 							,[intTaxCodeId]				
 							,[intTaxClassId]			
 							,[strTaxableByOtherTaxes]	
 							,[strCalculationMethod]		
-							,[dblRate]	
-							,[dblBaseRate]				
+							,[dblRate]		
+							,[dblBaseRate]			
 							,[dblExemptionPercent]		
 							,[dblTax]					
 							,[dblAdjustedTax]			
@@ -2737,72 +2742,72 @@ BEGIN
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
 							,[strNotes]						
-						FROM [fnConstructLineItemTaxDetail] 
-						(
+							FROM [fnConstructLineItemTaxDetail] 
+							(
 								@dblQuantity
-							,(@dblPrice * @dblQuantity)
-							,@LineItemTaxDetailStagingTable
-							,1
-							,@intItemId
-							,@intCustomerId
-							,@intLocationId
-							,@intTaxGroupId
-							,0
-							,@dtmTransactionDate
-							,NULL
-							,1
-							,0			--@IncludeInvalidCodes
-							,NULL
-							,@companyConfigFreightTermId
-							,@intCardId		
-							,@intVehicleId
-							,1 -- @DisregardExemptionSetup
-							,0
-							, @intItemUOMId	--intItemUOMId		
-							,@intSiteId
-							,0		--@IsDeliver		
-							,@isQuote
-							,NULL	--@CurrencyId
-							,NULL	--@@CurrencyExchangeRateTypeId
-							,NULL	--@@CurrencyExchangeRate									 
-						)
-						INSERT	INTO @tblCFCalculatedTaxExemptZeroQuantity
+								,(@dblPrice * @dblQuantity)
+								,@LineItemTaxDetailStagingTable
+								,1
+								,@intItemId
+								,@intCustomerId
+								,@intLocationId
+								,@intTaxGroupId
+								,0
+								,@dtmTransactionDate
+								,NULL
+								,1
+								,0			--@IncludeInvalidCodes
+								,NULL
+								,@companyConfigFreightTermId
+								,@intCardId		
+								,@intVehicleId
+								,1 -- @DisregardExemptionSetup
+								,0
+								,@intItemUOMId	--intItemUOMId
+								,@intSiteId
+								,0		--@IsDeliver
+								,@isQuote
+								,NULL	--@CurrencyId
+								,NULL	--@@CurrencyExchangeRateTypeId
+								,NULL	--@@CurrencyExchangeRate
+							)
+							INSERT INTO @tblCFCalculatedTaxExemptZeroQuantity	
 						(
-								[intTaxGroupId]				
-							,[intTaxCodeId]					
-							,[intTaxClassId]				
-							,[strTaxableByOtherTaxes]		
-							,[strCalculationMethod]			
-							,[dblRate]	
-							,[dblBaseRate]		
-							,[dblExemptionPercent]			
-							,[dblTax]						
-							,[dblAdjustedTax]				
-							,[intSalesTaxAccountId]    			
-							,[ysnCheckoffTax]
-							,[ysnTaxExempt]
-							,[ysnInvalidSetup]				
-							,[strNotes]							
+						 [intTaxGroupId]				
+						,[intTaxCodeId]					
+						,[intTaxClassId]				
+						,[strTaxableByOtherTaxes]		
+						,[strCalculationMethod]			
+						,[dblRate]	
+						,[dblBaseRate]		
+						,[dblExemptionPercent]			
+						,[dblTax]						
+						,[dblAdjustedTax]				
+						,[intSalesTaxAccountId]    			
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[ysnInvalidSetup]				
+						,[strNotes]							
 						)	
 						SELECT 
-								[intTaxGroupId]			
-							,[intTaxCodeId]				
-							,[intTaxClassId]			
-							,[strTaxableByOtherTaxes]	
-							,[strCalculationMethod]		
-							,[dblRate]	
-							,[dblBaseRate]				
-							,[dblExemptionPercent]		
-							,[dblTax]					
-							,[dblAdjustedTax]			
-							,[intTaxAccountId]			
-							,[ysnCheckoffTax]				
-							,[ysnTaxExempt]					
-							,[ysnInvalidSetup]				
-							,[strNotes]						
+						 [intTaxGroupId]			
+						,[intTaxCodeId]				
+						,[intTaxClassId]			
+						,[strTaxableByOtherTaxes]	
+						,[strCalculationMethod]		
+						,[dblRate]					
+						,[dblBaseRate]					
+						,[dblExemptionPercent]		
+						,[dblTax]					
+						,[dblAdjustedTax]			
+						,[intTaxAccountId]			
+						,[ysnCheckoffTax]				
+						,[ysnTaxExempt]					
+						,[ysnInvalidSetup]				
+						,[strNotes]						
 						FROM [fnConstructLineItemTaxDetail] 
 						(
-								@dblZeroQuantity
+							@dblZeroQuantity
 							,(@dblPrice * @dblZeroQuantity)
 							,@LineItemTaxDetailStagingTable
 							,1
@@ -2821,22 +2826,281 @@ BEGIN
 							,@intVehicleId
 							,1 -- @DisregardExemptionSetup
 							,0
-							, @intItemUOMId	--intItemUOMId		
+							,@intItemUOMId	--intItemUOMId
 							,@intSiteId
-							,0		--@IsDeliver	
+							,0		--@IsDeliver
 							,@isQuote
 							,NULL	--@CurrencyId
 							,NULL	--@@CurrencyExchangeRateTypeId
-							,NULL	--@@CurrencyExchangeRate									 
+							,NULL	--@@CurrencyExchangeRate
 						)
-                        
+						END
+
 						IF(ISNULL(@DevMode,0) = 1)
 						BEGIN
-						SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
-						SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity						
+							SELECT '@tblCFCalculatedTaxExempt',* FROM @tblCFCalculatedTaxExempt
+							SELECT '@tblCFCalculatedTaxExemptZeroQuantity',* FROM @tblCFCalculatedTaxExemptZeroQuantity
 						END
 					END
-
+				
+					IF(LOWER(@strPriceBasis) = 'transfer cost')
+					BEGIN
+						INSERT INTO @tblCFCalculatedTax	
+					(   
+						 [intTaxGroupId]				
+						,[intTaxCodeId]					
+						,[intTaxClassId]				
+						,[strTaxableByOtherTaxes]		
+						,[strCalculationMethod]			
+						,[dblRate]		
+						,[dblBaseRate]	
+						,[dblExemptionPercent]			
+						,[dblTax]						
+						,[dblAdjustedTax]				
+						,[intSalesTaxAccountId]    			
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[ysnInvalidSetup]				
+						,[strNotes]							
+					)	
+					SELECT 
+						 [intTaxGroupId]			
+						,[intTaxCodeId]				
+						,[intTaxClassId]			
+						,[strTaxableByOtherTaxes]	
+						,[strCalculationMethod]		
+						,[dblRate]
+						,[dblBaseRate]					
+						,[dblExemptionPercent]		
+						,[dblTax]					
+						,[dblAdjustedTax]			
+						,[intTaxAccountId]			
+						,[ysnCheckoffTax]				
+						,[ysnTaxExempt]					
+						,[ysnInvalidSetup]				
+						,[strNotes]						
+					FROM [fnConstructLineItemTaxDetail] 
+					(
+						 @dblQuantity
+						,0
+						,@LineItemTaxDetailStagingTable
+						,0
+						,@intItemId
+						,@intCustomerId
+						,@intLocationId
+						,@intTaxGroupId
+						,@dblPrice
+						,@dtmTransactionDate
+						,NULL
+						,1
+						,0			--@IncludeInvalidCodes
+						,NULL
+						,@companyConfigFreightTermId
+						,@intCardId		
+						,@intVehicleId
+						,@ysnDisregardTaxExemption --@DisregardExemptionSetup
+						,0
+						, @intItemUOMId	--intItemUOMId			
+						,@intSiteId
+						,0		--@IsDeliver	
+						,@isQuote								 
+						,NULL	--@CurrencyId
+						,NULL	--@@CurrencyExchangeRateTypeId
+						,NULL	--@@CurrencyExchangeRate	
+					)
+						INSERT INTO @tblCFCalculatedTaxZeroQuantity	
+					(
+						 [intTaxGroupId]				
+						,[intTaxCodeId]					
+						,[intTaxClassId]				
+						,[strTaxableByOtherTaxes]		
+						,[strCalculationMethod]			
+						,[dblRate]	
+						,[dblBaseRate]		
+						,[dblExemptionPercent]			
+						,[dblTax]						
+						,[dblAdjustedTax]				
+						,[intSalesTaxAccountId]    			
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[ysnInvalidSetup]				
+						,[strNotes]							
+					)	
+					SELECT 
+						 [intTaxGroupId]			
+						,[intTaxCodeId]				
+						,[intTaxClassId]			
+						,[strTaxableByOtherTaxes]	
+						,[strCalculationMethod]		
+						,[dblRate]
+						,[dblBaseRate]					
+						,[dblExemptionPercent]		
+						,[dblTax]					
+						,[dblAdjustedTax]			
+						,[intTaxAccountId]			
+						,[ysnCheckoffTax]				
+						,[ysnTaxExempt]					
+						,[ysnInvalidSetup]				
+						,[strNotes]						
+					FROM [fnConstructLineItemTaxDetail] 
+					(
+						 @dblZeroQuantity
+						,0
+						,@LineItemTaxDetailStagingTable
+						,0
+						,@intItemId
+						,@intCustomerId
+						,@intLocationId
+						,@intTaxGroupId
+						,@dblPrice
+						,@dtmTransactionDate
+						,NULL
+						,1
+						,0			--@IncludeInvalidCodes
+						,NULL
+						,@companyConfigFreightTermId
+						,@intCardId		
+						,@intVehicleId
+						,@ysnDisregardTaxExemption --@DisregardExemptionSetup
+						,0
+						, @intItemUOMId	--intItemUOMId			
+						,@intSiteId
+						,0		--@IsDeliver	
+						,@isQuote
+						,NULL	--@CurrencyId
+						,NULL	--@@CurrencyExchangeRateTypeId
+						,NULL	--@@CurrencyExchangeRate								 
+					)
+					END
+					ELSE
+					BEGIN
+						INSERT INTO @tblCFCalculatedTax	
+						(
+							[intTaxGroupId]				
+							,[intTaxCodeId]					
+							,[intTaxClassId]				
+							,[strTaxableByOtherTaxes]		
+							,[strCalculationMethod]			
+							,[dblRate]	
+							,[dblBaseRate]		
+							,[dblExemptionPercent]			
+							,[dblTax]						
+							,[dblAdjustedTax]				
+							,[intSalesTaxAccountId]    			
+							,[ysnCheckoffTax]
+							,[ysnTaxExempt]
+							,[ysnInvalidSetup]				
+							,[strNotes]							
+						)	
+						SELECT 
+							[intTaxGroupId]			
+							,[intTaxCodeId]				
+							,[intTaxClassId]			
+							,[strTaxableByOtherTaxes]	
+							,[strCalculationMethod]		
+							,[dblRate]
+							,[dblBaseRate]					
+							,[dblExemptionPercent]		
+							,[dblTax]					
+							,[dblAdjustedTax]			
+							,[intTaxAccountId]			
+							,[ysnCheckoffTax]				
+							,[ysnTaxExempt]					
+							,[ysnInvalidSetup]				
+							,[strNotes]						
+						FROM [fnConstructLineItemTaxDetail] 
+						(
+							@dblQuantity
+							,(@dblPrice * @dblQuantity)
+							,@LineItemTaxDetailStagingTable
+							,1
+							,@intItemId
+							,@intCustomerId
+							,@intLocationId
+							,@intTaxGroupId
+							,0
+							,@dtmTransactionDate
+							,NULL
+							,1
+							,0			--@IncludeInvalidCodes
+							,NULL
+							,@companyConfigFreightTermId
+							,@intCardId		
+							,@intVehicleId
+							,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
+							,0
+							,@intItemUOMId	--intItemUOMId
+							,@intSiteId
+							,0		--@IsDeliver
+							,@isQuote
+							,NULL	--@CurrencyId
+							,NULL	--@@CurrencyExchangeRateTypeId
+							,NULL	--@@CurrencyExchangeRate
+						)
+						INSERT INTO @tblCFCalculatedTaxZeroQuantity	
+						(
+						[intTaxGroupId]				
+						,[intTaxCodeId]					
+						,[intTaxClassId]				
+						,[strTaxableByOtherTaxes]		
+						,[strCalculationMethod]			
+						,[dblRate]	
+						,[dblBaseRate]		
+						,[dblExemptionPercent]			
+						,[dblTax]						
+						,[dblAdjustedTax]				
+						,[intSalesTaxAccountId]    			
+						,[ysnCheckoffTax]
+						,[ysnTaxExempt]
+						,[ysnInvalidSetup]				
+						,[strNotes]							
+						)	
+						SELECT 
+							[intTaxGroupId]			
+						,[intTaxCodeId]				
+						,[intTaxClassId]			
+						,[strTaxableByOtherTaxes]	
+						,[strCalculationMethod]		
+						,[dblRate]					
+						,[dblBaseRate]					
+						,[dblExemptionPercent]		
+						,[dblTax]					
+						,[dblAdjustedTax]			
+						,[intTaxAccountId]			
+						,[ysnCheckoffTax]				
+						,[ysnTaxExempt]					
+						,[ysnInvalidSetup]				
+						,[strNotes]						
+						FROM [fnConstructLineItemTaxDetail] 
+						(
+							@dblZeroQuantity
+							,(@dblPrice * @dblZeroQuantity)
+							,@LineItemTaxDetailStagingTable
+							,1
+							,@intItemId
+							,@intCustomerId
+							,@intLocationId
+							,@intTaxGroupId
+							,0
+							,@dtmTransactionDate
+							,NULL
+							,1
+							,0			--@IncludeInvalidCodes
+							,NULL
+							,@companyConfigFreightTermId
+							,@intCardId		
+							,@intVehicleId
+							,@ysnDisregardTaxExemption -- @DisregardExemptionSetup
+							,0
+							,@intItemUOMId	--intItemUOMId
+							,@intSiteId
+							,0		--@IsDeliver
+							,@isQuote
+							,NULL	--@CurrencyId
+							,NULL	--@@CurrencyExchangeRateTypeId
+							,NULL	--@@CurrencyExchangeRate
+						)
+					END
 
 				END
 				ELSE IF (LOWER(@strPriceBasis) = 'local index fixed'
@@ -6635,6 +6899,9 @@ BEGIN
 			,dblAdjustmentRate		   = ISNULL(@dblAdjustmentRate,0)
 			,dblInventoryCost		   = ISNULL(@dblInventoryCost,0)
 			,dblNetTransferCost		   = ISNULL(@dblNetTransferCost,0)
+			,strPriceProfileId		   = @strPriceProfileId			 
+			,strPriceIndexId		   = @strPriceIndexId			 
+			,strSiteGroup			   = @strSiteGroup		
 			WHERE intTransactionId	   = @intTransactionId
 			---------------------------------------------------------------------------
 			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId

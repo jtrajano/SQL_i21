@@ -666,7 +666,7 @@ BEGIN TRY
 			, @strCustomerNumber = @strCustomerNumber		
 			,@intEntityUserId = @intEntityUserId
 			,@ysnReprintInvoice = @ysnReprintInvoice
-
+			,@strUserId = @UserId
 
 		--SELECT '1',* FROM tblARCustomerStatementStagingTable
 
