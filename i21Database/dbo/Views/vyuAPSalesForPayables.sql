@@ -61,7 +61,7 @@ LEFT JOIN dbo.tblGLAccount accnt ON B.intAccountId = accnt.intAccountId
 	AND C.ysnPosted = 1
 	AND C.strTransactionType = 'Cash Refund'
 	AND A.ysnPrepay = 0
-UNION
+UNION ALL
 SELECT 
 	A.dtmDate
 	,A.intInvoiceId
