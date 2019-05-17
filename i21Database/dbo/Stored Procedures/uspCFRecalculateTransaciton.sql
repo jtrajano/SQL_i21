@@ -6133,6 +6133,9 @@ BEGIN
 			,dblAdjustmentRate		   = ISNULL(@dblAdjustmentRate,0)
 			,dblInventoryCost		   = ISNULL(@dblInventoryCost,0)
 			,dblNetTransferCost		   = ISNULL(@dblNetTransferCost,0)
+			,strPriceProfileId		   = @strPriceProfileId			 
+			,strPriceIndexId		   = @strPriceIndexId			 
+			,strSiteGroup			   = @strSiteGroup		
 			WHERE intTransactionId	   = @intTransactionId
 			---------------------------------------------------------------------------
 			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId
