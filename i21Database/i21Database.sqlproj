@@ -7318,6 +7318,8 @@
     <Build Include="dbo\Functions\fnPRRounding.sql" />
     <Build Include="dbo\Tables\tblSCRemoteXrefDeliverySheet.sql" />
     <Build Include="dbo\Functions\fnAPGetVouchersPaymentInfo.sql" />
+    <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
+    <Build Include="dbo\Views\vyuCTBasisDelivery.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
