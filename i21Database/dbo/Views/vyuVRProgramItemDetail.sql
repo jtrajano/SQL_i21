@@ -84,7 +84,7 @@ FROM(
 		ON F.intEntityId = G.intEntityId
 	INNER JOIN tblEMEntity H
 		ON G.intEntityId = H.intEntityId
-	WHERE B.intCategoryId IS NOT NULL
+	WHERE B.intCategoryId IS NOT NULL AND B.intItemId IS NULL
 
 	UNION ALL
 
@@ -117,7 +117,7 @@ FROM(
 		ON G.intEntityId = H.intEntityId
 	WHERE B.intCategoryId IS NULL AND B.intItemId IS NULL
 
-
 ) A
+
 GO
 
