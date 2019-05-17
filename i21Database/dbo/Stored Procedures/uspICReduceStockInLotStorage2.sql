@@ -184,9 +184,9 @@ USING (
 	AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
 	AND (cb.dblStockIn - cb.dblStockOut) > 0 
 	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
-	AND (cb.intInventoryLotStorageId = @CostBucketId OR @CostBucketId IS NULL) 
+	AND cb.intInventoryLotStorageId = ISNULL(@CostBucketId, cb.intInventoryLotStorageId)
 
--- Update an existing cost bucket
+	-- Update an existing cost bucket
 WHEN MATCHED THEN 
 	UPDATE 
 	SET	cb.dblStockOut = ISNULL(cb.dblStockOut, 0) 
