@@ -58,7 +58,7 @@ BEGIN
 				IF OBJECT_ID(''tempdb..#tmpStage1'') IS NOT NULL 
 				BEGIN DROP TABLE #tmpStage1 END
 
-				SELECT 
+				SELECT DISTINCT
 					strCustomerNumber = C.vwcus_key COLLATE Latin1_General_CI_AS
 					,strCustomerName = C.strFullCustomerName COLLATE Latin1_General_CI_AS
 					,strLocation = D.vwloc_loc_no COLLATE Latin1_General_CI_AS 
@@ -219,7 +219,7 @@ BEGIN
 				IF OBJECT_ID(''tempdb..#tmpStage1'') IS NOT NULL 
 				BEGIN DROP TABLE #tmpStage1 END
 
-				SELECT 
+				SELECT DISTINCT
 					strCustomerNumber = C.strEntityNo
 					,strCustomerName = C.strName
 					,strLocation = D.strLocationName 

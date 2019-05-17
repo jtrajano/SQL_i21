@@ -581,6 +581,9 @@ BEGIN
 							,intInvoiceId
 							,dblWillCallPercentLeft
 							,dblWillCallOriginalPercentLeft
+							,dtmNextDeliveryDate
+							,dtmRunOutDate
+							,dtmForecastedDelivery
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
@@ -634,6 +637,9 @@ BEGIN
 							,intInvoiceId = B.intInvoiceId
 							,dblWillCallPercentLeft = G.dblPercentLeft
 							,dblWillCallOriginalPercentLeft = G.dblOriginalPercentLeft
+							,dtmNextDeliveryDate = A.dtmNextDeliveryDate
+							,dtmRunOutDate = A.dtmRunOutDate
+							,dtmForecastedDelivery = A.dtmForecastedDelivery
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -778,6 +784,9 @@ BEGIN
 						,intInvoiceId
 						,dblWillCallPercentLeft
 						,dblWillCallOriginalPercentLeft
+						,dtmNextDeliveryDate
+						,dtmRunOutDate
+						,dtmForecastedDelivery
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -845,6 +854,9 @@ BEGIN
 						,intInvoiceId = B.intInvoiceId
 						,dblWillCallPercentLeft = G.dblPercentLeft
 						,dblWillCallOriginalPercentLeft = G.dblOriginalPercentLeft
+						,dtmNextDeliveryDate = A.dtmNextDeliveryDate
+						,dtmRunOutDate = A.dtmRunOutDate
+						,dtmForecastedDelivery = A.dtmForecastedDelivery
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -1198,6 +1210,9 @@ BEGIN
 			,ysnWillCallLeakCheckRequired
 			,dblWillCallPercentLeft
 			,dblWillCallOriginalPercentLeft
+			,dtmNextDeliveryDate
+			,dtmRunOutDate
+			,dtmForecastedDelivery
 		)
 		SELECT TOP 1
 			strInvoiceNumber = C.strInvoiceNumber
@@ -1253,6 +1268,9 @@ BEGIN
 			,ysnWillCallLeakCheckRequired = ISNULL(G.ysnLeakCheckRequired,0)
 			,dblWillCallPercentLeft = G.dblPercentLeft
 			,dblWillCallOriginalPercentLeft = G.dblOriginalPercentLeft
+			,dtmNextDeliveryDate = A.dtmNextDeliveryDate
+			,dtmRunOutDate = A.dtmRunOutDate
+			,dtmForecastedDelivery = A.dtmForecastedDelivery
 		FROM tblTMSite A
 		INNER JOIN tblARInvoiceDetail B
 			ON A.intSiteID = B.intSiteId

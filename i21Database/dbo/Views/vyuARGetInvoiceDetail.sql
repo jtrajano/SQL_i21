@@ -205,7 +205,7 @@ LEFT JOIN (
 		 , PT.strPricingType				
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH	ON CH.intContractHeaderId	= CD.intContractHeaderId
-							   AND CH.intContractTypeId		= 2
+							   --AND CH.intContractTypeId		= 2
 							   AND CD.intPricingTypeId		NOT IN(4,7)
 	JOIN tblCTPricingType PT ON PT.intPricingTypeId	 =	CD.intPricingTypeId
 ) CT ON INV.intContractDetailId = CT.intContractDetailId

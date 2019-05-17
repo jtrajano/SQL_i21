@@ -211,6 +211,14 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					DECLARE @dblScheduleQty AS DECIMAL(18,6)
+					SET @dblScheduleQty = @dblContractAvailableQty * -1 
+					EXEC uspCTUpdateScheduleQuantity
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblScheduleQty,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Scale'	
 				END
 				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
 			END
@@ -251,7 +259,17 @@ BEGIN TRY
 				IF ISNULL(@intContractDetailId,0) != 0
 				BEGIN
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+					DECLARE @dblScheduleQuantityToReduce DECIMAL(18,6);
+					SET @dblScheduleQuantityToReduce = @dblContractAvailableQty *-1
+					
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					EXEC uspCTUpdateScheduleQuantity
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Scale'	
 				END
 					
 				--EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId

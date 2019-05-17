@@ -178,7 +178,7 @@ SELECT
 	,[dblActual]                        
 	,[dblDifference]
 FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
-WHERE ysnStage = 0
+WHERE ysnStage = 1
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables) RETURN;
 

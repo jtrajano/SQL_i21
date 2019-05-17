@@ -470,6 +470,9 @@ BEGIN
 							,intNextDeliveryDegreeDay = A.intSiteNextDeliveryDegreeDay
 							,dtmLastReadingUpdate = A.dtmSiteLastReadingUpdate
 							,intConcurrencyId = A.intConcurrencyId + 1
+							,dtmNextDeliveryDate = A.dtmNextDeliveryDate
+							,dtmRunOutDate = A.dtmRunOutDate
+							,dtmForecastedDelivery = A.dtmForecastedDelivery
 						FROM(
 							SELECT TOP 1 * FROM tblTMDeliveryHistory
 							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
@@ -494,10 +497,12 @@ BEGIN
 			
 			
 						----Update Next Julian Calendar Date of the site
+						/*
 						UPDATE tblTMSite
 						SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
 							,intConcurrencyId = intConcurrencyId + 1
 						WHERE intSiteID = @intSiteId
+						*/
 
 						---DELETE Delivery History Header
 						DELETE FROM tblTMDeliveryHistory

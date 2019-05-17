@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[tblCMBankLoan](
 	[strComments] [nvarchar](800) NULL,
 	[intConcurrencyId] [int] NULL,
 	[dblLoanAmount] [decimal](18, 6) NULL,
+	[intCompanyLocationId] [int] NULL,
  CONSTRAINT [PK_tblBankLoan] PRIMARY KEY CLUSTERED 
 (
 	[intBankLoanId] ASC

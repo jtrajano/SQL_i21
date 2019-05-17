@@ -16,7 +16,8 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-DECLARE @insertedData TABLE(intOldPayableId int, intNewPayableId int);
+DECLARE @insertedData TABLE(intOldPayableId INT, intNewPayableId INT);
+DECLARE @taxGenerated TABLE(intVoucherPayableId INT, dblTax DECIMAL(18,6));
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPAddVoucherPayable';
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
@@ -93,6 +94,9 @@ BEGIN
 													THEN 
 													(
 														CASE 
+														 --ITEM IS FROM LOAD SHIPMENT DIRECT, USE THE ORDER QTY OF LOAD
+														WHEN A.intLoadShipmentId > 0 AND A.intInventoryReceiptItemId IS NULL
+															THEN A.dblOrderQty
 														WHEN A.intContractDetailId > 0
 														THEN ctDetail.dblDetailQuantity
 														ELSE A.dblOrderQty
@@ -105,8 +109,10 @@ BEGIN
 													THEN
 													(
 														CASE
+														WHEN A.intLoadShipmentId > 0 AND A.intInventoryReceiptItemId IS NULL
+															THEN A.dblOrderUnitQty
 														WHEN A.intContractDetailId > 0
-														THEN contractItemUOM.dblUnitQty
+															THEN contractItemUOM.dblUnitQty
 														ELSE A.dblOrderUnitQty 
 														END
 													)
@@ -117,8 +123,10 @@ BEGIN
 													THEN
 													(
 														CASE 
+														WHEN A.intLoadShipmentId > 0 AND A.intInventoryReceiptItemId IS NULL
+															THEN A.intOrderUOMId
 														WHEN A.intContractDetailId > 0
-														THEN ctDetail.intItemUOMId
+															THEN ctDetail.intItemUOMId
 														ELSE A.intOrderUOMId
 														END
 													)
@@ -537,7 +545,50 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM @ParamTable)
 	BEGIN
-		INSERT INTO tblAPVoucherPayableTaxStaging(
+		MERGE INTO tblAPVoucherPayableTaxStaging AS destination
+		USING
+		(
+			SELECT
+				[intVoucherPayableId]	=	A.intVoucherPayableId, 
+				[intTaxGroupId]			=	Taxes.intTaxGroupId, 
+				[intTaxCodeId]			=	Taxes.intTaxCodeId, 
+				[intTaxClassId]			=	Taxes.intTaxClassId, 
+				[strTaxableByOtherTaxes]=	Taxes.strTaxableByOtherTaxes, 
+				[strCalculationMethod]	=	Taxes.strCalculationMethod, 
+				[dblRate]				=	Taxes.dblRate, 
+				[intAccountId]			=	Taxes.intTaxAccountId, 
+				[dblTax]				=	ISNULL(Taxes.dblTax,0), 
+				[dblAdjustedTax]		=	ISNULL(Taxes.dblAdjustedTax,0), 
+				[ysnTaxAdjusted]		=	Taxes.ysnTaxAdjusted, 
+				[ysnSeparateOnBill]		=	Taxes.ysnSeparateOnInvoice, 
+				[ysnCheckOffTax]		=	Taxes.ysnCheckoffTax,
+				[ysnTaxOnly]			=	Taxes.ysnTaxOnly,
+				[ysnTaxExempt]			=	Taxes.ysnTaxExempt
+			FROM @ParamTable A	
+			CROSS APPLY fnGetItemTaxComputationForVendor
+				(intItemId
+				,intVendorId
+				,dtmTransactionDate
+				,dblItemCost
+				,dblQuantity
+				,intTaxGroupId
+				,intCompanyLocationId
+				,intVendorLocationId
+				,ysnIncludeExemptedCodes
+				,0 --@IncludeInvalidCodes
+				,intFreightTermId
+				,ysnExcludeCheckOff
+				,intItemUOMId
+				,NULL
+				,NULL
+				,NULL) Taxes
+			WHERE Taxes.dblTax IS NOT NULL
+		)
+		AS SourceData
+		ON (1=0)
+		WHEN NOT MATCHED THEN
+		INSERT
+		(
 			[intVoucherPayableId]		
 			,[intTaxGroupId]				
 			,[intTaxCodeId]				
@@ -552,43 +603,42 @@ BEGIN
 			,[ysnSeparateOnBill]			
 			,[ysnCheckOffTax]
 			,[ysnTaxOnly]	
-			,[ysnTaxExempt]		
+			,[ysnTaxExempt]
 		)
-		SELECT
-			[intVoucherPayableId]	=	A.intVoucherPayableId, 
-			[intTaxGroupId]			=	Taxes.intTaxGroupId, 
-			[intTaxCodeId]			=	Taxes.intTaxCodeId, 
-			[intTaxClassId]			=	Taxes.intTaxClassId, 
-			[strTaxableByOtherTaxes]=	Taxes.strTaxableByOtherTaxes, 
-			[strCalculationMethod]	=	Taxes.strCalculationMethod, 
-			[dblRate]				=	Taxes.dblRate, 
-			[intAccountId]			=	Taxes.intTaxAccountId, 
-			[dblTax]				=	ISNULL(Taxes.dblTax,0), 
-			[dblAdjustedTax]		=	ISNULL(Taxes.dblAdjustedTax,0), 
-			[ysnTaxAdjusted]		=	Taxes.ysnTaxAdjusted, 
-			[ysnSeparateOnBill]		=	Taxes.ysnSeparateOnInvoice, 
-			[ysnCheckOffTax]		=	Taxes.ysnCheckoffTax,
-			[ysnTaxOnly]			=	Taxes.ysnTaxOnly,
-			[ysnTaxExempt]			=	Taxes.ysnTaxExempt
-		FROM @ParamTable A	
-		CROSS APPLY fnGetItemTaxComputationForVendor
-			(intItemId
-			,intVendorId
-			,dtmTransactionDate
-			,dblItemCost
-			,dblQuantity
-			,intTaxGroupId
-			,intCompanyLocationId
-			,intVendorLocationId
-			,ysnIncludeExemptedCodes
-			,0 --@IncludeInvalidCodes
-			,intFreightTermId
-			,ysnExcludeCheckOff
-			,intItemUOMId
-			,NULL
-			,NULL
-			,NULL) Taxes
-		WHERE Taxes.dblTax IS NOT NULL
+		VALUES
+		(
+			[intVoucherPayableId]		
+			,[intTaxGroupId]				
+			,[intTaxCodeId]				
+			,[intTaxClassId]				
+			,[strTaxableByOtherTaxes]	
+			,[strCalculationMethod]		
+			,[dblRate]					
+			,[intAccountId]				
+			,[dblTax]					
+			,[dblAdjustedTax]			
+			,[ysnTaxAdjusted]			
+			,[ysnSeparateOnBill]			
+			,[ysnCheckOffTax]
+			,[ysnTaxOnly]	
+			,[ysnTaxExempt]
+		)
+		OUTPUT
+			inserted.intVoucherPayableId,
+			inserted.dblTax
+		INTO @taxGenerated;
+
+		--UPDATE THE TAX FOR VOUCHER PAYABLE
+		UPDATE A
+			SET A.dblTax = ISNULL(generatedTax.dblTax, 0)
+		FROM tblAPVoucherPayable A
+		OUTER APPLY 
+		(
+			SELECT 
+				SUM(C.dblTax) dblTax 
+			FROM @taxGenerated C
+			WHERE A.intVoucherPayableId = C.intVoucherPayableId
+		) generatedTax
 	END
 END
 

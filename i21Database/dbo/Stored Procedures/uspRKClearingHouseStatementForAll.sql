@@ -103,12 +103,12 @@ SET @query = '
 			,null SdblNoOfContract
 			,null SstrFutureMonth
 			,null SdblPrice
-			,dblFutCommission =(ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 2 THEN 0
-															ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END) as dblFutCommission
-										FROM tblRKBrokerageCommission bc
-										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
-										WHERE bc.intFutureMarketId = m.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId
-											and getdate() between bc.dtmEffectiveDate and ISNULL(bc.dtmEndDate,getdate())),0) * -1) * dblNoOfContract
+			,dblFutCommission =(ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 1 THEN 0 ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END)
+												FROM tblRKBrokerageCommission bc
+												LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = bc.intFutCurrencyId
+												WHERE bc.intFutureMarketId = t.intFutureMarketId
+													AND bc.intBrokerageAccountId = t.intBrokerageAccountId 
+													and '''+CONVERT(VARCHAR(10), @dtmTransactionToDate, 110)+'''  BETWEEN bc.dtmEffectiveDate AND ISNULL(bc.dtmEndDate, getdate())), 0)* -1)* dblNoOfContract
 		FROM tblRKFutOptTransaction t
 		JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell=''Buy''
@@ -130,12 +130,12 @@ SET @query = '
 			,dblNoOfContract SdblNoOfContract
 			,strFutureMonth SstrFutureMonth
 			,dblPrice SdblPrice
-			,dblFutCommission =(ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 2 THEN 0
-															ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END) as dblFutCommission
-										FROM tblRKBrokerageCommission bc
-										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId
-										WHERE bc.intFutureMarketId = m.intFutureMarketId and bc.intBrokerageAccountId = ba.intBrokerageAccountId
-											and getdate() between bc.dtmEffectiveDate and ISNULL(bc.dtmEndDate,getdate())),0) * -1) * dblNoOfContract
+			,dblFutCommission =(ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 1 THEN 0 ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END)
+												FROM tblRKBrokerageCommission bc
+												LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = bc.intFutCurrencyId
+												WHERE bc.intFutureMarketId = t.intFutureMarketId
+													AND bc.intBrokerageAccountId = t.intBrokerageAccountId 
+													and '''+CONVERT(VARCHAR(10), @dtmTransactionToDate, 110)+'''  BETWEEN bc.dtmEffectiveDate AND ISNULL(bc.dtmEndDate, getdate())), 0)* -1)* dblNoOfContract
 		FROM tblRKFutOptTransaction t
 		JOIN tblRKFutureMarket m on m.intFutureMarketId=t.intFutureMarketId
 		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId=t.intFutureMonthId AND intSelectedInstrumentTypeId=1 AND intInstrumentTypeId=1 AND strBuySell=''Sell''

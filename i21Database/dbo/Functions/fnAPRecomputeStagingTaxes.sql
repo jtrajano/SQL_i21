@@ -186,10 +186,13 @@ BEGIN
 				WHERE
 					[Id] = @TaxId
 						
-						
+				SET @TaxableAmount = ISNULL(@cost, @ZeroDecimal) * ISNULL(@quantity, @ZeroDecimal)		
 						
 				IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
-				BEGIN						
+				BEGIN		
+					IF @TaxOnly = 1
+       					SET @TaxableAmount = @ZeroDecimal				
+
 					IF(@TaxAdjustedTax = 1)
 					BEGIN
 						SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax
@@ -212,10 +215,10 @@ BEGIN
 				DELETE FROM @TaxableByOtherTaxes WHERE [Id] = @TaxId
 			END
 				
-		IF @TaxOnly = 1
-			SET @TaxableAmount = @ZeroDecimal
-		ELSE
-			SET @TaxableAmount	= ISNULL(@cost, @ZeroDecimal) * ISNULL(@quantity, @ZeroDecimal)
+		-- IF @TaxOnly = 1
+		-- 	SET @TaxableAmount = @ZeroDecimal
+		-- ELSE
+		-- 	SET @TaxableAmount	= ISNULL(@cost, @ZeroDecimal) * ISNULL(@quantity, @ZeroDecimal)
 
 		SET @TaxableAmount = @TaxableAmount + @OtherTaxAmount
 

@@ -46,6 +46,8 @@ BEGIN TRY
 	ELSE
 		BEGIN
 
+			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
+
 			DELETE FROM tblARInvoiceDetailTax 
 			WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 
@@ -54,8 +56,6 @@ BEGIN TRY
 
 			DELETE FROM tblARInvoice 
 			WHERE intInvoiceId = @InvoiceId
-
-			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID		
 
 			--Audit Log          
 			EXEC dbo.uspSMAuditLog 

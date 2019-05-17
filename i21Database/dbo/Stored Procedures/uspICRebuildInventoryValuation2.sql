@@ -130,7 +130,23 @@ BEGIN
 		,@ysnRegenerateBillGLEntries
 		,@intUserId
 END 
+ELSE
+BEGIN 
+	-- Create the backup header
+	DECLARE @strRemarks VARCHAR(200)
+	DECLARE @strRebuildFilter VARCHAR(50)	
 
+	SET @strRebuildFilter = (CASE WHEN @intItemId IS NOT NULL THEN '"' + @strItemNo + '" item' ELSE 'all items' END)
+	SET @strRebuildFilter = (CASE WHEN @strCategoryCode IS NOT NULL THEN '"' + @strCategoryCode + '" category' ELSE @strRebuildFilter END)
+
+	SET @strRemarks = 'Stocks are up to date. Rebuild is skipped for ' + @strRebuildFilter + ' in '+
+		(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
+		' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
+
+	INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, dtmEnd, strItemNo, strCategoryCode)
+	SELECT @dtmStartDate, @intUserId, 'Rebuild Inventory', @strRemarks, 0, GETDATE(), GETDATE(), @strItemNo, @strCategoryCode
+		
+END 
 _CLEAN_UP: 
 BEGIN 
 	IF OBJECT_ID('tempdb..#tmpICTransactionForDateSorting') IS NOT NULL  

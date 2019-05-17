@@ -229,49 +229,6 @@ IF @post = 1
 			 [dtmDate]					= @PostDate
 			,[strBatchID]				= @batchIdUsed
 			,[intAccountId]				= @intAPAccountId
-			,[dblDebit]					= COMM.dblTotalAmount
-			,[dblCredit]				= @ZeroDecimal
-			,[dblDebitUnit]				= @ZeroDecimal
-			,[dblCreditUnit]			= @ZeroDecimal
-			,[strDescription]			= ''
-			,[strCode]					= @CODE
-			,[strReference]				= E.strEntityNo
-			,[intCurrencyId]			= @intDefaultCurrencyId
-			,[dblExchangeRate]			= 1
-			,[dtmDateEntered]			= @PostDate
-			,[dtmTransactionDate]		= @PostDate
-			,[strJournalLineDescription]= @POSTDESC + 'Commission'
-			,[intJournalLineNo]			= COMM.intCommissionId
-			,[ysnIsUnposted]			= 0
-			,[intUserId]				= @userId
-			,[intEntityId]				= @intEntityUserId				
-			,[strTransactionId]			= COMM.strCommissionNumber
-			,[intTransactionId]			= COMM.intCommissionId
-			,[strTransactionType]		= 'Calculate Commission'
-			,[strTransactionForm]		= @SCREEN_NAME
-			,[strModuleName]			= @MODULE_NAME
-			,[intConcurrencyId]			= 1
-			,[dblDebitForeign]			= COMM.dblTotalAmount
-			,[dblDebitReport]			= COMM.dblTotalAmount
-			,[dblCreditForeign]			= @ZeroDecimal
-			,[dblCreditReport]			= @ZeroDecimal
-			,[dblReportingRate]			= @ZeroDecimal
-			,[dblForeignRate]			= @ZeroDecimal
-			,[strRateType]				= @strCurrencyExchangeRateType
-		FROM dbo.tblARCommission COMM
-		INNER JOIN @PostCommissionData PCD ON COMM.intCommissionId = PCD.intCommissionId
-		LEFT JOIN (
-			SELECT intEntityId
-				 , strEntityNo
-			FROM tblEMEntity WITH (NOLOCK)
-		) E ON COMM.intEntityId = E.intEntityId
-
-		UNION ALL
-
-		SELECT
-			 [dtmDate]					= @PostDate
-			,[strBatchID]				= @batchIdUsed
-			,[intAccountId]				= @intCommissionExpenseAccountId
 			,[dblDebit]					= @ZeroDecimal
 			,[dblCredit]				= COMM.dblTotalAmount
 			,[dblDebitUnit]				= @ZeroDecimal
@@ -298,6 +255,49 @@ IF @post = 1
 			,[dblDebitReport]			= @ZeroDecimal
 			,[dblCreditForeign]			= COMM.dblTotalAmount
 			,[dblCreditReport]			= COMM.dblTotalAmount
+			,[dblReportingRate]			= @ZeroDecimal
+			,[dblForeignRate]			= @ZeroDecimal
+			,[strRateType]				= @strCurrencyExchangeRateType
+		FROM dbo.tblARCommission COMM
+		INNER JOIN @PostCommissionData PCD ON COMM.intCommissionId = PCD.intCommissionId
+		LEFT JOIN (
+			SELECT intEntityId
+				 , strEntityNo
+			FROM tblEMEntity WITH (NOLOCK)
+		) E ON COMM.intEntityId = E.intEntityId
+
+		UNION ALL
+
+		SELECT
+			 [dtmDate]					= @PostDate
+			,[strBatchID]				= @batchIdUsed
+			,[intAccountId]				= @intCommissionExpenseAccountId
+			,[dblDebit]					= COMM.dblTotalAmount
+			,[dblCredit]				= @ZeroDecimal
+			,[dblDebitUnit]				= @ZeroDecimal
+			,[dblCreditUnit]			= @ZeroDecimal
+			,[strDescription]			= ''
+			,[strCode]					= @CODE
+			,[strReference]				= E.strEntityNo
+			,[intCurrencyId]			= @intDefaultCurrencyId
+			,[dblExchangeRate]			= 1
+			,[dtmDateEntered]			= @PostDate
+			,[dtmTransactionDate]		= @PostDate
+			,[strJournalLineDescription]= @POSTDESC + 'Commission'
+			,[intJournalLineNo]			= COMM.intCommissionId
+			,[ysnIsUnposted]			= 0
+			,[intUserId]				= @userId
+			,[intEntityId]				= @intEntityUserId				
+			,[strTransactionId]			= COMM.strCommissionNumber
+			,[intTransactionId]			= COMM.intCommissionId
+			,[strTransactionType]		= 'Calculate Commission'
+			,[strTransactionForm]		= @SCREEN_NAME
+			,[strModuleName]			= @MODULE_NAME
+			,[intConcurrencyId]			= 1
+			,[dblDebitForeign]			= COMM.dblTotalAmount
+			,[dblDebitReport]			= COMM.dblTotalAmount
+			,[dblCreditForeign]			= @ZeroDecimal
+			,[dblCreditReport]			= @ZeroDecimal
 			,[dblReportingRate]			= @ZeroDecimal
 			,[dblForeignRate]			= @ZeroDecimal
 			,[strRateType]				= @strCurrencyExchangeRateType
@@ -478,7 +478,7 @@ ELSE
 			BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
 										, @ysnPost			= @post
-										, @XACT_ABORT_ON	= @raiseError
+										--, @XACT_ABORT_ON	= @raiseError
 			END
 
 		DECLARE @tmpBatchId NVARCHAR(100)

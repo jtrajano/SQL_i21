@@ -64,8 +64,8 @@ BEGIN
 		(CASE @isPeriodic WHEN 1 THEN 'periodic' ELSE 'perpetual' END) + ' order' +
 		' from '+ CONVERT(VARCHAR(10), @dtmStartDate, 101) + ' onwards.' 
 
-	INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart)
-	SELECT @dtmStartDate, @intUserId, 'Rebuild Inventory', @strRemarks, 1, GETDATE()
+	INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, strItemNo, strCategoryCode)
+	SELECT @dtmStartDate, @intUserId, 'Rebuild Inventory', @strRemarks, 1, GETDATE(), @strItemNo, @strCategoryCode
 
 	SET @intBackupId = SCOPE_IDENTITY()
 END 
@@ -3286,7 +3286,14 @@ BEGIN
 													ELSE 
 														-- No conversion. Detail item is already in functional currency. 
 														dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
-												END 									
+												END																
+												+
+												CASE 
+													WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
+														dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) / DetailItem.dblForexRate
+													ELSE 
+														dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+												END							
 
 											)
 											-- (C) then convert the cost to the sub-currency value. 

@@ -340,8 +340,8 @@ BEGIN
 				,dblDockage						= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))		 
 				,dblCost						= BillDtl.dblCost
 				,Net							= CASE 
-													WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) > 0 AND ISNULL(BillDtl.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) 
-													ELSE BillDtl.dblQtyOrdered 
+													WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) > 0 AND ISNULL(BillDtl.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblNetWeight) 
+													ELSE BillDtl.dblNetWeight
 												END
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
@@ -614,8 +614,8 @@ BEGIN
 				,dblDockage						= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost						= [dbo].[fnRemoveTrailingZeroes](BillDtl.dblCost)
 				,Net							= CASE 
-													WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) > 0 AND ISNULL(BillDtl.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) 
-													ELSE BillDtl.dblQtyOrdered 
+													WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) > 0 AND ISNULL(BillDtl.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblNetWeight) 
+													ELSE BillDtl.dblNetWeight
 												END
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
@@ -891,8 +891,8 @@ BEGIN
 				,dblDockage						= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))
 				,dblCost						= [dbo].[fnRemoveTrailingZeroes](BillDtl.dblCost)
 				,Net							= CASE 
-													WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) > 0 AND ISNULL(BillDtl.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblQtyOrdered) 
-													ELSE BillDtl.dblQtyOrdered 
+													WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) > 0 AND ISNULL(BillDtl.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblNetWeight) 
+													ELSE BillDtl.dblNetWeight
 												END
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
