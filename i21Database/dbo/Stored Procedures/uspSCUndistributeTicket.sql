@@ -245,21 +245,25 @@ BEGIN TRY
 								BEGIN
 									EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
 									SET @dblMatchDeliveredQuantity = @dblMatchDeliveredQuantity * -1;
-									SET @dblMatchLoadScheduledUnits = @dblMatchLoadScheduledUnits * -1;
-									
 									/*For Match Ticket */
-									EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
-									EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
+									IF(@strMatchTicketStatus = 'O')
+									BEGIN
+										EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
+										EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
+									END
 
-									DECLARE @reverseScheduleQty DECIMAL(18,6) = @dblScheduleQty * -1;
-									DECLARE @intMainTicketContractDetailId INT
-									SELECT @intMainTicketContractDetailId = intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId
-									
-									/*For Main Ticket */
-									EXEC uspCTUpdateSequenceBalance @intMainTicketContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
-									EXEC uspCTUpdateScheduleQuantity @intMainTicketContractDetailId, @reverseScheduleQty, @intUserId, @intTicketId, 'Scale'
-									
+									SELECT @intLoadContractId = intContractId,@dblLoadScheduledUnits = dblNetUnits*-1 FROM tblSCTicket WHERE intTicketId = @intTicketId
+									EXEC uspCTUpdateSequenceBalance @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
 
+									DECLARE @dblToUpdateQty DECIMAL(18,6)
+									SET @dblToUpdateQty = @dblLoadScheduledUnits *-1
+									EXEC uspCTUpdateScheduleQuantity
+														@intContractDetailId	=	@intLoadContractId,
+														@dblQuantityToUpdate	=	@dblToUpdateQty,
+														@intUserId				=	@intUserId,
+														@intExternalId			=	@intTicketId,
+														@strScreenName			=	'Scale'	
+									
 									UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intLoadId = @intMatchLoadId
 								END
 							END
@@ -392,6 +396,28 @@ BEGIN TRY
 						END
 						IF ISNULL(@intInvoiceId, 0) > 0
 							EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+
+						/* For Direct Out Undistribute */
+						DECLARE @strTicketType VARCHAR(MAX)
+						DECLARE @dblNetUnit DECIMAL(18,6)
+						DECLARE @_intContractDetailId INT
+						SELECT @strTicketType = strTicketType,@dblNetUnit = dblNetUnits*-1,@_intContractDetailId = intContractId FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
+
+						IF(@strTicketType = 'Direct Out')
+						BEGIN
+						SELECT @dblNetUnit
+						
+							EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblNetUnit, @intUserId, @intTicketId, 'Scale'
+							SET @dblNetUnit = @dblNetUnit *-1
+							EXEC uspCTUpdateScheduleQuantity
+												@intContractDetailId	=	@_intContractDetailId,
+												@dblQuantityToUpdate	=	@dblNetUnit,
+												@intUserId				=	@intUserId,
+												@intExternalId			=	@intTicketId,
+												@strScreenName			=	'Scale'	
+												
+						END
+
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 					END 
 					ELSE
