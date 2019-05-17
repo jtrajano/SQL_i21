@@ -748,7 +748,7 @@ IF @ysnPrintFromCFLocal = 1
 		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblFuture = AGINGREPORT.dblFuture - ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblTempFuture = ISNULL(CF.dblTotalFuture, 0)
-			, AGINGREPORT.dblUnInvoiced = ISNULL(CFDT.dblUnInvoiced, 0)
+		  , AGINGREPORT.dblUnInvoiced = ISNULL(CFDT.dblUnInvoiced, 0)
 		FROM @temp_aging_table AGINGREPORT
 		LEFT JOIN (
 			SELECT intEntityCustomerId
@@ -778,9 +778,9 @@ IF @ysnPrintFromCFLocal = 1
 			BEGIN
 				UPDATE AGINGREPORT
 				SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFee, 0)
-				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR + ISNULL(CF.dblTotalFee, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblUnInvoiced, 0) + ISNULL(CF.dblTotalFee, 0)
 				FROM @temp_aging_table AGINGREPORT
-				INNER JOIN (
+				LEFT JOIN (
 					SELECT intCustomerId
 						 , dblTotalFee = SUM(ISNULL(dblFeeAmount, 0))
 					FROM dbo.tblCFInvoiceFeeStagingTable WITH (NOLOCK)
