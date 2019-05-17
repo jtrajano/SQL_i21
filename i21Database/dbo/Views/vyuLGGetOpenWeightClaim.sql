@@ -3,10 +3,10 @@ AS
 SELECT TOP 100 PERCENT Convert(INT, ROW_NUMBER() OVER (
 			ORDER BY intLoadId
 			)) AS intKeyColumn
-	,dblClaimableAmount = CASE WHEN (((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
+	,dblClaimableAmount = ROUND(CASE WHEN (((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
 								THEN ((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) * - 1
 								ELSE ((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END)
-								END
+								END, 2)
 	,*
 FROM 
 	--Inbound/Drop Ship side
