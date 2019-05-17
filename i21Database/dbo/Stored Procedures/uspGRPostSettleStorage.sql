@@ -1159,7 +1159,7 @@ BEGIN TRY
 														CASE
 															WHEN a.intItemType = 1 THEN
 																(
-																	SELECT intInventoryReceiptItemId 
+																	SELECT TOP 1 intInventoryReceiptItemId 
 																	FROM tblICInventoryReceiptItem 
 																	WHERE intInventoryReceiptId = (SELECT intInventoryReceiptId 
 																			FROM tblGRStorageHistory 
