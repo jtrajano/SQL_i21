@@ -63,6 +63,8 @@ BEGIN
 			,[strName]							=	entity.strName
 			,[intLocationId]					=	A.intLocationId
 			,[strLocationName] 					=	loc.strLocationName
+			,[intItemLocationId]				=	ISNULL(A.intItemLocationId, A.intLocationId)
+			,[strItemLocationName]				=	ISNULL(itemLoc.strLocationName, loc.strLocationName)
 			,[intCurrencyId]					=	A.intCurrencyId
 			,[strCurrency]						=	tranCur.strCurrency
 			,[dtmDate]							=	A.dtmDate
@@ -258,6 +260,7 @@ BEGIN
 		--IF NO ACCOUNT PROVIDED, USE VENDOR EXPENSE ACCOUNT
 		LEFT JOIN tblGLAccount vendorAccnt ON vendor.intGLAccountExpenseId = vendorAccnt.intAccountId
 		LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = A.intLocationId
+		LEFT JOIN tblSMCompanyLocation itemLoc ON itemLoc.intCompanyLocationId = A.intItemLocationId
 		LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 		LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 		LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
@@ -295,7 +298,9 @@ BEGIN
 		,[strVendorId]					
 		,[strName]						
 		,[intLocationId]					
-		,[strLocationName] 				
+		,[strLocationName] 	
+		,[intItemLocationId]			
+		,[strItemLocationName]
 		,[intCurrencyId]					
 		,[strCurrency]					
 		,[dtmDate]						
@@ -370,7 +375,9 @@ BEGIN
 		,[strVendorId]					
 		,[strName]						
 		,[intLocationId]					
-		,[strLocationName] 				
+		,[strLocationName]
+		,[intItemLocationId]			
+		,[strItemLocationName] 				
 		,[intCurrencyId]					
 		,[strCurrency]					
 		,[dtmDate]						
@@ -540,7 +547,7 @@ BEGIN
 	LEFT JOIN @voucherPayableTax tax
 		ON A.intVoucherPayableId = tax.intVoucherPayableId
 	LEFT JOIN [tblEMEntityLocation] D ON A.[intEntityVendorId] = D.intEntityId AND D.ysnDefaultLocation = 1
-	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = @companyLocation
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intLocationId
 	WHERE tax.intVoucherPayableId IS NULL --generate only for no tax provided
 
 	IF EXISTS(SELECT TOP 1 1 FROM @ParamTable)

@@ -544,22 +544,22 @@ BEGIN
 		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 		AND A.ysnPosted = 1
 
-		--BILL WAS POSTED FROM SETTLE STORAGE
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
-		SELECT 
-			'Please unpost the voucher on settle storage screen.',
-			'Bill',
-			A.strBillId,
-			A.intBillId,
-			25
-		FROM tblAPBill A 
-		CROSS APPLY (
-			SELECT TOP 1 intCustomerStorageId FROM tblAPBillDetail B
-			WHERE B.intBillId = A.intBillId
-		) details
-		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
-		AND A.ysnPosted = 1
-		AND details.intCustomerStorageId > 0
+		-- --BILL WAS POSTED FROM SETTLE STORAGE
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		-- SELECT 
+		-- 	'Please unpost the voucher on settle storage screen.',
+		-- 	'Bill',
+		-- 	A.strBillId,
+		-- 	A.intBillId,
+		-- 	25
+		-- FROM tblAPBill A 
+		-- CROSS APPLY (
+		-- 	SELECT TOP 1 intCustomerStorageId FROM tblAPBillDetail B
+		-- 	WHERE B.intBillId = A.intBillId
+		-- ) details
+		-- WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		-- AND A.ysnPosted = 1
+		-- AND details.intCustomerStorageId > 0
 
 		--NO FISCAL PERIOD
 		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
