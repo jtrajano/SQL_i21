@@ -75,7 +75,7 @@ RETURNS TABLE AS RETURN
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail
-		ON voucher.intBillId = payDetail.intBillId 
+		ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId
