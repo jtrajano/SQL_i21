@@ -31,7 +31,8 @@ BEGIN TRY
 			@ysnAllowOverSchedule	BIT,
 			@strReason				NVARCHAR(MAX),
 			@ysnLoad				BIT,
-			@intSequenceUsageHistoryId	INT
+			@intSequenceUsageHistoryId	INT,
+			@intContractStatusId	INT
 
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -42,7 +43,8 @@ BEGIN TRY
 
 	BEGINING:
 
-	SELECT	@dblQuantityToUpdate	=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN @dblQuantityToUpdate ELSE @dblQuantityToUpdate / ABS(@dblQuantityToUpdate) END
+	SELECT	@dblQuantityToUpdate	=	CASE WHEN ISNULL(ysnLoad,0) = 0 THEN @dblQuantityToUpdate ELSE @dblQuantityToUpdate / ABS(@dblQuantityToUpdate) END,
+			@intContractStatusId	=	CD.intContractStatusId
 	FROM	tblCTContractDetail		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
 	WHERE	intContractDetailId		=	@intContractDetailId
@@ -115,8 +117,15 @@ BEGIN TRY
 		BEGIN
 			IF ABS(@dblScheduleQty + @dblQuantityToUpdate) > @dblTolerance
 			BEGIN
-				SET @ErrMsg = 'Total scheduled quantity cannot be less than zero for contract '+@strContractNumber + ' and sequence ' +	@strContractSeq	+'.'
-				RAISERROR(@ErrMsg,16,1)
+				IF @intContractStatusId = 6 AND @strScreenName = 'Load Schedule'
+				BEGIN
+					SET @dblQuantityToUpdate = @dblQuantityToUpdate - (@dblScheduleQty + @dblQuantityToUpdate)
+				END
+				ELSE
+				BEGIN
+					SET @ErrMsg = 'Total scheduled quantity cannot be less than zero for contract '+@strContractNumber + ' and sequence ' +	@strContractSeq	+'.'
+					RAISERROR(@ErrMsg,16,1)
+				END
 			END
 			ELSE
 			BEGIN

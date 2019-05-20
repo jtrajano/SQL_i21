@@ -210,7 +210,7 @@ SELECT intRowNum,intContractDetailId,strEntityName,intContractHeaderId,strContra
 							dblNoOfLots, dblFuturesPrice,dblSettlementPrice,dblBasis,dblRatio,
 							 (case when isnull(dblFuturesPrice,0)=0 then dblSettlementPrice else dblFuturesPrice end *isnull(dblRatio,1))+isnull(dblBasis,0)  dblPrice,
 							 dblStandardRatio,dblBalanceQty*isnull(dblStandardRatio,1) dblStandardQty,intItemId,
-							dblStandardPrice,isnull(dblBasis,0)-isnull(dblPPVBasis,0) dblPPVBasis,
+							dblStandardPrice,isnull(dblPPVBasis,0) dblPPVBasis,
 							((case when isnull(dblFuturesPrice,0)=0 then dblSettlementPrice else dblFuturesPrice end 
 								*isnull(dblRatio,1))+isnull(dblBasis,0))-(dblBasis - isnull(dblRate,0)) dblNewPPVPrice
 							,strLocationName,

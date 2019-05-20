@@ -564,41 +564,6 @@ WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 --UPDATE CUSTOMER'S BUDGET
 EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @PaymentIds, @Post = @Post
 
---PROCESS CUSTOMER BUDGET TO ACH
-IF (@Post = 1)
-    BEGIN
-        DECLARE @strPaymentACHIds		NVARCHAR(MAX)	= NULL
-			  , @intBankAccountId		INT				= NULL
-			  , @intCompanyLocationId	INT				= NULL
-
-        SELECT TOP 1 @intBankAccountId		= intBankAccountId
-				   , @intCompanyLocationId	= intLocationId
-        FROM dbo.tblARPayment P 
-        INNER JOIN @NonZeroPaymentIds PI ON P.intPaymentId = PI.intId
-        WHERE P.ysnApplytoBudget = 1
-            AND P.strPaymentMethod = 'ACH'
-            AND P.intBankAccountId IS NOT NULL
-
-        SELECT @strPaymentACHIds = LEFT(P.intPaymentId, LEN(P.intPaymentId) - 1)
-        FROM (
-            SELECT DISTINCT CAST(P.intPaymentId AS VARCHAR(200))  + ', '
-            FROM dbo.tblARPayment P
-            INNER JOIN @NonZeroPaymentIds PI ON P.intPaymentId = PI.intId
-            WHERE P.ysnApplytoBudget = 1
-                AND P.strPaymentMethod = 'ACH'
-                AND P.intBankAccountId IS NOT NULL
-            FOR XML PATH ('')
-        ) P (intPaymentId)
-
-        IF ISNULL(@strPaymentACHIds, '') <> '' AND @intBankAccountId IS NOT NULL
-			BEGIN
-				EXEC dbo.uspARProcessACHPayments @strPaymentIds			= @strPaymentACHIds
-											   , @intBankAccountId		= @intBankAccountId
-											   , @intCompanyLocationId	= @intCompanyLocationId
-											   , @intUserId				= @UserId
-			END
-    END
-
 --AUDIT LOG
 DECLARE @IPaymentLog dbo.[AuditLogStagingTable]
 DELETE FROM @IPaymentLog

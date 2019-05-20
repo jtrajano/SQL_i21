@@ -540,23 +540,42 @@ BEGIN /* Direct Inventory */
 		intItemLocationId				,
 		ysnSubCurrency					,
 		intCurrencyId
+		,ysnStage
 		)
 		SELECT
 		[intTransactionType]			=	1,
 		[intAccountId]					=	dbo.[fnGetItemGLAccount](A.intItemId, loc.intItemLocationId, 'AP Clearing'),
 		[intItemId]						=	A.[intItemId],					
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
-		[intUnitOfMeasureId]			=	CASE WHEN ctd.intItemUOMId > 0 
+		[intQtyToBillUOMId]			=	CASE WHEN ctd.intItemUOMId > 0 
 												THEN ctd.intItemUOMId
 												ELSE A.intUnitOfMeasureId
 											END,
-		[dblQtyOrdered]					=	dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
+		
+		
+		[dblQuantityToBill]				=	dbo.fnCalculateCostBetweenUOM(A.intUnitOfMeasureId
 																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
 																			,A.dblQtyReceived),
-		[dblUnitQty]					=	CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
-		[dblQtyReceived]				=	dbo.fnCalculateCostBetweenUOM(A.intUnitOfMeasureId
-																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
-																			,A.dblQtyReceived),
+		[dblQtyToBillUnitQty]					=	CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
+		[dblOrderQty]					=	(CASE WHEN lgDetail.dblQuantity = NULL
+												THEN
+													 dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
+																						,CASE WHEN ctd.intItemUOMId > 0 
+																							THEN ctd.intItemUOMId 
+																							ELSE A.intUnitOfMeasureId 
+																						 END
+																						,A.dblQtyReceived)
+													
+												ELSE
+													
+													dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
+																						,CASE WHEN lgDetail.intItemUOMId > 0 
+																							THEN lgDetail.intItemUOMId 
+																							ELSE A.intUnitOfMeasureId 
+																						 END
+																						,lgDetail.dblQuantity )
+													
+											END),
 		[dblDiscount]					=	A.[dblDiscount],
 		[intCostUOMId]					=	CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END,
 		[dblCost]						=	dbo.fnCalculateCostBetweenUOM(A.intCostUOMId
@@ -596,6 +615,7 @@ BEGIN /* Direct Inventory */
 		intItemLocationId				=	C.intItemLocationId,
 		ysnSubCurrency					=	0,
 		intCurrencyId					=	SC.intCurrencyId
+		,ysnStage 						= 0
 	FROM @voucherDetailDirect A
 	INNER JOIN tblSCTicket SC ON A.intScaleTicketId = SC.intTicketId
 	INNER JOIN tblAPVendor D ON SC.intEntityId = D.[intEntityId]
@@ -606,7 +626,10 @@ BEGIN /* Direct Inventory */
 	LEFT JOIN tblICItemLocation loc ON loc.intItemId = A.intItemId AND loc.intLocationId = SC.intProcessingLocationId
 	LEFT JOIN vyuPATEntityPatron patron ON SC.intEntityId = patron.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
+	
 END
+
+
 
 BEGIN /* RESULT */
 	SELECT	DISTINCT
@@ -656,5 +679,6 @@ BEGIN /* RESULT */
 			[strSourceNumber],
 			[intSubLocationId],
 			[intItemLocationId]
+			
 	FROM @VoucherPayable
 END
