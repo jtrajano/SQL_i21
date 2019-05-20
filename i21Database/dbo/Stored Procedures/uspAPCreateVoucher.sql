@@ -53,8 +53,8 @@ BEGIN TRY
 	--Voucher Type
 	IF EXISTS(SELECT TOP 1 1
 		FROM tblSMCompanyLocation A
-		INNER JOIN @voucherPayables B ON B.intShipToId = A.intCompanyLocationId
-		AND A.intAPAccount IS NULL AND B.intAPAccount IS NULL AND B.intTransactionType IN (1,14)) 
+		INNER JOIN @voucherPayables B ON B.intLocationId = A.intCompanyLocationId
+		AND A.intAPAccount IS NULL AND B.intAPAccount IS NULL AND B.intTransactionType IN (1,3,14)) 
 	BEGIN
 		SET @error =  'Please setup default AP Account.';
 		IF @throwError = 1
@@ -67,7 +67,7 @@ BEGIN TRY
 	--Prepaid Type
 	IF EXISTS(SELECT TOP 1 1
 		FROM tblSMCompanyLocation A
-		INNER JOIN @voucherPayables B ON B.intShipToId = A.intCompanyLocationId
+		INNER JOIN @voucherPayables B ON B.intLocationId = A.intCompanyLocationId
 		AND A.intPurchaseAdvAccount IS NULL AND B.intAPAccount IS NULL AND B.intTransactionType IN  (2, 13)) 
 	BEGIN
 		SET @error =  'Please setup default Prepaid Account.';

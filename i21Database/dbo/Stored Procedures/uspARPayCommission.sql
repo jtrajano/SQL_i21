@@ -84,7 +84,7 @@ ELSE
 
 			DECLARE @intBankAccountId INT = NULL
 			
-			SELECT TOP 1 @intBankAccountId = CL.intCashAccount 
+			SELECT TOP 1 @intBankAccountId = BA.intBankAccountId 
 			FROM tblSMCompanyLocation CL
 			INNER JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 			WHERE CL.intCompanyLocationId = @intCompanyLocationId
@@ -130,7 +130,7 @@ ELSE
 			--CREATE AND POST PAYMENT
 			EXEC [dbo].[uspAPCreatePaymentData] @userId				= @intUserId
 											  , @notes				= @strCommissionNumber
-											  , @bankAccount		= @intBankAccountId
+											  --, @bankAccount		= @intBankAccountId
 											  , @payment			= @dblTotalAmount
 											  , @datePaid			= @dtmDatePaid
 											  , @paymentDetail		= @tblPaymentDetail

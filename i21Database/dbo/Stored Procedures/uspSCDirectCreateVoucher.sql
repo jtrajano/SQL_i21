@@ -432,6 +432,7 @@ BEGIN TRY
 				[strSourceNumber],
 				[intSubLocationId],
 				[intItemLocationId]
+				,ysnStage
 				)
 				EXEC [dbo].[uspSCGenerateVoucherDetails] @voucherItems,@voucherOtherCharges,@voucherDetailDirectInventory
 				IF EXISTS(SELECT NULL FROM @voucherPayable)

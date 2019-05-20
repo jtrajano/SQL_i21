@@ -101,6 +101,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTotalProvisional		= PROVISIONAL.dblProvisionalTotal
 	 , strCustomerComments		= CUSTOMERCOMMENTS.strCustomerComments
 	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
+	 , ysnStretchLogo			= ISNULL(ARPREFERENCE.ysnStretchLogo, 0)
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
@@ -273,6 +274,7 @@ OUTER APPLY (
 ) COMPANY
 OUTER APPLY (
 	SELECT TOP 1 ysnPrintInvoicePaymentDetail
+			   , ysnStretchLogo
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) ARPREFERENCE
 OUTER APPLY (

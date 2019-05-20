@@ -303,6 +303,7 @@ BEGIN TRY
 				,[intAccountId]
 				,[strBillOfLading]
 				,[ysnReturn]
+				,[ysnStage]
 				,[intSubLocationId]
 				,[intStorageLocationId])
 			SELECT
@@ -344,6 +345,7 @@ BEGIN TRY
 				,[intAccountId] = VDD.intAccountId
 				,[strBillOfLading] = L.strBLNumber
 				,[ysnReturn] = CAST(0 AS BIT)
+				,[ysnStage] = CAST(1 AS BIT)
 				,[intSubLocationId] = VDD.intSubLocationId
 				,[intStorageLocationId] = VDD.intStorageLocationId
 			FROM @voucherDetailData VDD
@@ -449,6 +451,7 @@ BEGIN TRY
 					,[intAccountId]
 					,[strBillOfLading]
 					,[ysnReturn]
+					,[ysnStage]
 					,[intSubLocationId]
 					,[intStorageLocationId])
 				SELECT
@@ -490,6 +493,7 @@ BEGIN TRY
 					,[intAccountId] = VDD.intAccountId
 					,[strBillOfLading] = L.strBLNumber
 					,[ysnReturn] = CAST(0 AS BIT)
+					,[ysnStage] = CAST(1 AS BIT)
 					,[intSubLocationId] = VDD.intSubLocationId
 					,[intStorageLocationId] = VDD.intStorageLocationId
 				FROM @voucherDetailData VDD
@@ -580,6 +584,7 @@ BEGIN TRY
 					,[intAccountId]
 					,[strBillOfLading]
 					,[ysnReturn]
+					,[ysnStage]
 					,[intSubLocationId]
 					,[intStorageLocationId])
 				SELECT
@@ -622,6 +627,7 @@ BEGIN TRY
 					,[intAccountId] = VDD.intAccountId
 					,[strBillOfLading] = L.strBLNumber
 					,[ysnReturn] = CAST(0 AS BIT)
+					,[ysnStage] = CAST(1 AS BIT)
 					,[intSubLocationId] = VDD.intSubLocationId
 					,[intStorageLocationId] = VDD.intStorageLocationId
 				FROM @voucherDetailData VDD

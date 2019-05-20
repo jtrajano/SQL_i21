@@ -62,6 +62,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dtmLoadedDate
 	 , dtmScaleDate
 	 , strCommodity
+	 , ysnStretchLogo
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -127,7 +128,8 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strTicketNumbers			= TICKETDETAILS.strTicketNumbers
 	 , dtmLoadedDate			= TICKETDETAILS.dtmLoadedDate
 	 , dtmScaleDate				= TICKETDETAILS.dtmScaleDate
-	 , strCommodity				= TICKETDETAILS.strCommodity	 
+	 , strCommodity				= TICKETDETAILS.strCommodity
+	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (

@@ -41,6 +41,7 @@ IF NOT EXISTS(
 			--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
@@ -60,6 +61,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND C.ysnStage = 1
@@ -94,7 +96,7 @@ SELECT TOP 100 PERCENT
 	,intPaycheckHeaderId				=	A.intPaycheckHeaderId
 	,intPurchaseDetailId				=	A.intPurchaseDetailId
 	,intCustomerStorageId				=	A.intCustomerStorageId
-	,intLocationId						=	A.intItemLocationId
+	,intLocationId						=	ISNULL(A.intItemLocationId, A.intLocationId)
 	,intLoadDetailId					=	A.intLoadShipmentDetailId
 	,intLoadId							=	A.intLoadShipmentId
 	,intLoadShipmentCostId				=	A.intLoadShipmentCostId
@@ -258,6 +260,14 @@ LEFT JOIN tblICItemUOM contractItemQtyUOM ON contractItemQtyUOM.intItemUOMId = c
 -- INTO #tmpVoucherPayableDataStage
 -- FROM #tmpVoucherPayableData A
 -- WHERE A.ysnStage = 1
+	
+--uspAPUpdateVoucherPayableQty updates the tblAPVoucherPayable table for valid payables only
+--make sure to add on tblAPBillDetail the valid payables
+INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
+SELECT
+	intOldPayableId
+	,intNewPayableId
+FROM dbo.fnAPGetPayableKeyInfo(@voucherDetails)
 
 --UPDATE THE QTY BASE ON THE QTY BILLED ON STAGING
 UPDATE A
@@ -268,7 +278,8 @@ UPDATE A
 										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, vp.dblQuantityBilled)
 									ELSE vp.dblQuantityBilled END)
 							ELSE vp.dblQuantityBilled END
-							,0)
+							,0),
+		A.dblTax = ISNULL(vp.dblTax, A.dblTax) --UPDATE THE TAX IF WE GENERATED IT
 FROM #tmpVoucherPayableData A
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
@@ -277,14 +288,6 @@ LEFT JOIN @payablesKey payableKeys
 LEFT JOIN tblAPVoucherPayable vp 
 	ON payableKeys.intNewPayableId = vp.intVoucherPayableId
 WHERE A.ysnStage = 1
-	
---uspAPUpdateVoucherPayableQty updates the tblAPVoucherPayable table for valid payables only
---make sure to add on tblAPBillDetail the valid payables
-INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
-SELECT
-	intOldPayableId
-	,intNewPayableId
-FROM dbo.fnAPGetPayableKeyInfo(@voucherDetails)
 
 MERGE INTO tblAPBillDetail AS destination
 USING

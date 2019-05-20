@@ -56,7 +56,7 @@ AS
 		ON A.intEntityCustomerId = G.intEntityId
 	INNER JOIN tblEMEntity H
 		ON G.intEntityId = H.intEntityId
-	INNER JOIN tblVRCustomerXref L
+	LEFT OUTER JOIN tblVRCustomerXref L
 		ON A.intEntityCustomerId = L.intEntityId
 	INNER JOIN tblVRVendorSetup J
 		ON L.intVendorSetupId = J.intVendorSetupId

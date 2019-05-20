@@ -936,7 +936,7 @@ BEGIN
 					, strCurrency)
 				SELECT @strCommodityCode
 					, 'Price Risk' COLLATE Latin1_General_CI_AS [strType]
-					, 'PurBasisDelivary' COLLATE Latin1_General_CI_AS strContractType
+					, 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS strContractType
 					, -sum(dblTotal)
 					, intInventoryReceiptId
 					, strReceiptNumber
@@ -1166,7 +1166,7 @@ BEGIN
 					, intCommodityId
 					, strLocationName
 				FROM @tempFinal
-				WHERE strType = 'Price Risk' and strContractType in('Inventory','Collateral','DP','OffSite')
+				WHERE strType = 'Price Risk' and strContractType in('Inventory','Collateral','DP','Purchase Basis Deliveries','Sales Basis Deliveries','OffSite')
 				group by strCommodityCode
 					, strContractType
 					, intContractHeaderId
