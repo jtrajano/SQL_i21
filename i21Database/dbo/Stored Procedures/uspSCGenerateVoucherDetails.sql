@@ -677,5 +677,6 @@ BEGIN /* RESULT */
 			[strSourceNumber],
 			[intSubLocationId],
 			[intItemLocationId]
+			,ysnStage = 0
 	FROM @VoucherPayable
 END
