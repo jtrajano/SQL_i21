@@ -19,7 +19,8 @@ BEGIN TRY
 			 @intVendorId			INT,
 			 @blbFile				VARBINARY(MAX),
 			 @intReportLogoHeight	INT,
-			 @intReportLogoWidth	INT
+			 @intReportLogoWidth	INT,
+			 @strVATNumber			NVARCHAR(100)
 			
     IF  LTRIM(RTRIM(@xmlParam)) = ''   
 	   SET @xmlParam = NULL   
@@ -82,11 +83,15 @@ BEGIN TRY
 	SELECT	@strAddress =
 			LTRIM(RTRIM(CH.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
+			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + 
+			ISNULL(', '+LTRIM(RTRIM(CH.strEntityCity)),'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + ', ' + CHAR(13)+CHAR(10) + 
+			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
 	FROM	vyuCTEntity CH
+	WHERE   intEntityId =   @intVendorId
+
+	SELECT	@strVATNumber = strVatNumber
+	FROM	tblARCustomer
 	WHERE   intEntityId =   @intVendorId
 
 	SELECT	@strCity    =   CASE WHEN LTRIM(RTRIM(strCity)) = '' THEN NULL ELSE LTRIM(RTRIM(strCity)) END
@@ -94,7 +99,7 @@ BEGIN TRY
 
 	SELECT	@blbFile AS blbFile,
 			@strAddress AS strAddress,
-			'YR VAT NO.: - ' AS strVATNo,
+			'YR VAT NO.: - ' + @strVATNumber AS strVATNo,
 			'INVOICE NO. ' + @strInvoiceNumber AS strInvoiceNo,
 			@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
 			'Issued for commission received as per enclosed list dated ' + CONVERT(NVARCHAR,GETDATE(),103) + ' = ' AS strIssued,
