@@ -363,6 +363,8 @@ BEGIN TRY
 						UPDATE	tblAPBillDetail SET dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
 						DECLARE @receiptDetails AS InventoryUpdateBillQty
+						
+						DELETE FROM @receiptDetails
 
 						INSERT INTO @receiptDetails
 						(
