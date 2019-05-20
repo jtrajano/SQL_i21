@@ -540,6 +540,7 @@ BEGIN /* Direct Inventory */
 		intItemLocationId				,
 		ysnSubCurrency					,
 		intCurrencyId
+		,ysnStage
 		)
 		SELECT
 		[intTransactionType]			=	1,
@@ -614,6 +615,7 @@ BEGIN /* Direct Inventory */
 		intItemLocationId				=	C.intItemLocationId,
 		ysnSubCurrency					=	0,
 		intCurrencyId					=	SC.intCurrencyId
+		,ysnStage 						= 0
 	FROM @voucherDetailDirect A
 	INNER JOIN tblSCTicket SC ON A.intScaleTicketId = SC.intTicketId
 	INNER JOIN tblAPVendor D ON SC.intEntityId = D.[intEntityId]
@@ -677,6 +679,6 @@ BEGIN /* RESULT */
 			[strSourceNumber],
 			[intSubLocationId],
 			[intItemLocationId]
-			,ysnStage = 0
+			
 	FROM @VoucherPayable
 END
