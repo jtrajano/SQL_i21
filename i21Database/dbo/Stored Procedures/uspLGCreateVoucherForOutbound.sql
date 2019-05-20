@@ -98,6 +98,7 @@ BEGIN TRY
 		,[intAccountId]
 		,[strBillOfLading]
 		,[ysnReturn]
+		,[ysnStage]
 		,[intSubLocationId]
 		,[intStorageLocationId])
 	SELECT
@@ -145,6 +146,7 @@ BEGIN TRY
 		,[intAccountId] = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
+		,[ysnStage] = CAST(0 AS BIT)
 		,[intSubLocationId] = LW.intSubLocationId
 		,[intStorageLocationId] = LW.intStorageLocationId
 	FROM tblLGLoad L
@@ -234,6 +236,7 @@ BEGIN TRY
 		,[intAccountId] = apClearing.intAccountId
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
+		,[ysnStage] = CAST(0 AS BIT)
 		,[intSubLocationId] = A.intSubLocationId
 		,[intStorageLocationId] = A.intStorageLocationId
 	FROM vyuLGLoadCostForVendor A
@@ -336,7 +339,8 @@ BEGIN TRY
 			,[intSubCurrencyCents]
 			,[intAccountId]
 			,[strBillOfLading]
-			,[ysnReturn])
+			,[ysnReturn]
+			,[ysnStage])
 		SELECT
 			[intEntityVendorId]
 			,[intTransactionType]
@@ -375,6 +379,7 @@ BEGIN TRY
 			,[intAccountId]
 			,[strBillOfLading]
 			,[ysnReturn]
+			,[ysnStage]
 		FROM @voucherPayable
 		WHERE intEntityVendorId = @intVendorEntityId
 

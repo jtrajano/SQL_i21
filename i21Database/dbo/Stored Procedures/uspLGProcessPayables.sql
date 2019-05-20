@@ -48,6 +48,7 @@ BEGIN
 			,[intAccountId]
 			,[strBillOfLading]
 			,[ysnReturn]
+			,[ysnStage]
 			,[intStorageLocationId]
 			,[intSubLocationId])
 		SELECT
@@ -89,6 +90,7 @@ BEGIN
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
+			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
 			,[intSubLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 		FROM tblLGLoad L
@@ -157,6 +159,7 @@ BEGIN
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
+			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = NULL
 			,[intSubLocationId] = NULL
 		FROM vyuLGLoadCostForVendor A

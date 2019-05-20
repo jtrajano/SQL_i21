@@ -119,6 +119,7 @@ BEGIN TRY
 		,[intAccountId]
 		,[strBillOfLading]
 		,[ysnReturn]
+		,[ysnStage]
 		,[intSubLocationId]
 		,[intStorageLocationId])
 	SELECT
@@ -160,6 +161,7 @@ BEGIN TRY
 		,[intAccountId] = apClearing.intAccountId
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
+		,[ysnStage] = CAST(1 AS BIT)
 		,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 		,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
 	FROM tblLGLoad L
@@ -228,6 +230,7 @@ BEGIN TRY
 		,[intAccountId] = apClearing.intAccountId
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
+		,[ysnStage] = CAST(1 AS BIT)
 		,[intStorageLocationId] = NULL
 		,[intSubLocationId] = NULL
 	FROM vyuLGLoadCostForVendor A
@@ -343,6 +346,7 @@ BEGIN TRY
 			,[intAccountId]
 			,[strBillOfLading]
 			,[ysnReturn]
+			,[ysnStage]
 			,[intSubLocationId]
 			,[intStorageLocationId])
 		SELECT
@@ -384,6 +388,7 @@ BEGIN TRY
 			,[intAccountId]
 			,[strBillOfLading]
 			,[ysnReturn]
+			,[ysnStage]
 			,[intSubLocationId]
 			,[intStorageLocationId]
 		FROM @voucherPayable
