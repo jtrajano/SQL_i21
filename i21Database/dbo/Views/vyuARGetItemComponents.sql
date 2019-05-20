@@ -111,3 +111,79 @@ left join tblICStorageLocation c
 	on c.intStorageLocationId = b.intStorageLocationId
 left join tblSMCompanyLocationSubLocation d
 	on d.intCompanyLocationSubLocationId = b.intSubLocationId
+INNER JOIN (
+	SELECT intItemId
+		 , strDescription
+		 , strItemNo
+		 , strType
+		 , strLotTracking
+		 , strBundleType
+	FROM dbo.tblICItem WITH (NOLOCK)) ITEM 
+			ON BUNDLE.intItemId = ITEM.intItemId
+			AND ISNULL(ITEM.strBundleType, '') <> 'Option'
+
+UNION ALL
+
+SELECT intRecipeId				= NULL
+	 , intItemId				= BUNDLE.intItemId
+	 , intCompanyLocationId		= I.intLocationId
+     , intComponentItemId		= BUNDLE.intBundleItemId
+	 , strItemNo				= I.strItemNo
+	 , strDescription			= BUNDLE.strDescription	 
+	 , intItemUnitMeasureId		= BUNDLE.intItemUnitMeasureId
+	 , intUnitMeasureId			= I.intStockUOMId
+	 , strUnitMeasure			= UOM.strUnitMeasure
+	 , dblQuantity				= BUNDLE.dblQuantity
+	 , dblNewQuantity			= BUNDLE.dblQuantity
+	 , dblAvailableQuantity		= I.dblAvailable
+	 , dblPrice					= I.dblSalePrice
+	 , dblNewPrice				= I.dblSalePrice
+	 , strItemType				= 'Inventory'
+	 , strType					= 'Bundle'
+	 , ysnAllowNegativeStock	= CONVERT(BIT, 0)
+	 , dblUnitQty				= UOM.dblUnitQty
+	 , strVFDDocumentNumber		= NULL
+	 , ysnAddOn					= CONVERT(BIT, BUNDLE.ysnAddOn)
+	 , dblMarkUpOrDown			= ISNULL(BUNDLE.dblMarkUpOrDown, 0)
+	 , dtmBeginDate				= BUNDLE.dtmBeginDate
+	 , dtmEndDate				= BUNDLE.dtmEndDate
+	 , intStorageLocationId 	= b.intStorageLocationId
+	 , intSubLocationId 		= b.intSubLocationId
+	 , strStorageUnit			= d.strSubLocationName
+	 , strStorageLocation		= c.strName
+FROM dbo.tblICItemBundle BUNDLE WITH (NOLOCK)
+INNER JOIN (
+	SELECT intItemId
+		 , intLocationId
+		 , intStockUOMId
+		 , strItemNo
+		 , dblAvailable
+		 , dblSalePrice
+		 , intItemLocationId
+		 , intStorageLocationId
+		 , intSubLocationId
+	FROM dbo.vyuICGetItemStock WITH (NOLOCK)
+) I ON BUNDLE.intBundleItemId = I.intItemId
+INNER JOIN (
+	SELECT intItemUOMId
+		 , intUnitMeasureId
+		 , strUnitMeasure
+		 , dblUnitQty
+	FROM dbo.vyuARItemUOM WITH (NOLOCK)
+) UOM ON UOM.intItemUOMId = I.intStockUOMId
+left join tblICItemLocation b
+		on I.intItemLocationId = b.intItemLocationId
+left join tblICStorageLocation c
+	on c.intStorageLocationId = b.intStorageLocationId
+left join tblSMCompanyLocationSubLocation d
+	on d.intCompanyLocationSubLocationId = b.intSubLocationId
+INNER JOIN (
+	SELECT intItemId
+		 , strDescription
+		 , strItemNo
+		 , strType
+		 , strLotTracking
+		 , strBundleType
+	FROM dbo.tblICItem WITH (NOLOCK)) ITEM 
+			ON BUNDLE.intItemId = ITEM.intItemId
+			AND ISNULL(ITEM.strBundleType, '') = 'Option'
