@@ -356,7 +356,7 @@ BEGIN
 				,vwcus_ytd_cgs = 0.0  
 				,vwcus_budget_amt = Cus.dblMonthlyBudget
 				,vwcus_budget_beg_mm = cast(RIGHT(REPLACE(CONVERT(VARCHAR(10), CI.dtmBudgetMonth, 103), ''/'', ''''), 6) as int)
-				,vwcus_budget_end_mm = CAST(ISNULL(Cus.strBudgetBillingEndMonth,0.00) AS numeric(18,6))   
+				,vwcus_budget_end_mm = CAST(ISNULL(Cus.strBudgetBillingEndMonth,0) AS int)   
 				,vwcus_budget_end_mm_dbl = CI.dblThru
 				,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END COLLATE Latin1_General_CI_AS 
 				,vwcus_ar_future = CAST(ISNULL(CI.dblFuture,0.0) AS NUMERIC(18,6))
