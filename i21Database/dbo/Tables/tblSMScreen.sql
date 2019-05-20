@@ -33,6 +33,10 @@ GO
 CREATE INDEX [IX_tblSMScreen_strScreenId] ON [dbo].[tblSMScreen] ([strScreenId])
 
 GO
+
+CREATE INDEX [IX_tblSMScreen_strNamespace] ON [dbo].[tblSMScreen] ([strNamespace])
+
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity field',
     @level0type = N'SCHEMA',

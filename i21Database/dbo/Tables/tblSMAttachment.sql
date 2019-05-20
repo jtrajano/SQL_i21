@@ -12,7 +12,15 @@
 	[ysnDisableDelete]	BIT				 NULL,
     [intConcurrencyId]  INT              NOT NULL,
     CONSTRAINT [PK_dbo.tblAttachment] PRIMARY KEY CLUSTERED ([intAttachmentId] ASC)
-);
+)
+GO
+
+CREATE INDEX [IX_tblSMAttachment_strScreen] ON [dbo].[tblSMAttachment] ([strScreen])
+GO
+
+CREATE INDEX [IX_tblSMAttachment_strRecordNo] ON [dbo].[tblSMAttachment] ([strRecordNo])
+GO
+
 
 
 
