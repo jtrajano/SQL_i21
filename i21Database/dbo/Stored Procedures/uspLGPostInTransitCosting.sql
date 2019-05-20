@@ -84,7 +84,9 @@ BEGIN TRY
 							ELSE AD.dblSeqPrice / CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
 						END
 						* AD.dblQtyToPriceUOMConvFactor
-						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
+						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1)
+							   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.dblFXRate
+									 ELSE 1 END
 			,dblValue = CASE WHEN (AD.dblSeqPrice IS NULL) THEN
 							CASE WHEN (LD.dblUnitPrice > 0) 
 								THEN LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END
@@ -92,14 +94,12 @@ BEGIN TRY
 							ELSE AD.dblSeqPrice / CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
 						END
 						* AD.dblQtyToPriceUOMConvFactor 
-						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) ELSE 1 END
+						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1)
+							   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.dblFXRate
+									 ELSE 1 END
 						* LD.dblQuantity 
 			,dblSalesPrice = 0.0
-			,intCurrencyId = CASE WHEN L.intPurchaseSale = 3 AND CD.ysnUseFXPrice = 1 THEN 
-								ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) 
-							ELSE 
-								ISNULL(LD.intForexCurrencyId, L.intCurrencyId) 
-							END
+			,intCurrencyId = @DefaultCurrencyId 
 			,dblExchangeRate = ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
 			,intTransactionId = L.intLoadId
 			,intTransactionDetailId = LD.intLoadDetailId
@@ -111,8 +111,12 @@ BEGIN TRY
 			,intSourceTransactionDetailId = LD.intLoadDetailId
 			,intFobPointId = CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
 			,intInTransitSourceLocationId = IL.intItemLocationId
-			,intForexRateTypeId = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId) ELSE LD.intForexRateTypeId END
-			,dblForexRate = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) ELSE ISNULL(LD.dblForexRate,1) END
+			,intForexRateTypeId = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId)
+									   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.intForexRateTypeId
+									   ELSE LD.intForexRateTypeId END
+			,dblForexRate = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) 
+								 WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.dblFXRate
+								 ELSE ISNULL(LD.dblForexRate,1) END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
@@ -125,6 +129,17 @@ BEGIN TRY
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
+		OUTER APPLY (SELECT	TOP 1  
+						intForexRateTypeId = RD.intRateTypeId
+						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+									THEN 1/RD.[dblRate] 
+									ELSE RD.[dblRate] END 
+						FROM tblSMCurrencyExchangeRate ER
+						JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+						WHERE @DefaultCurrencyId <> L.intCurrencyId
+							AND ((ER.intFromCurrencyId = L.intCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
+								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = L.intCurrencyId))
+						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intLoadId
 		GROUP BY LD.intItemId
 			,IL.intItemLocationId
@@ -160,6 +175,8 @@ BEGIN TRY
 			,CD.dblTotalCost
 			,CD.dblCashPrice
 			,AD.intSeqCurrencyId
+			,FX.intForexRateTypeId
+			,FX.dblFXRate
 
 		BEGIN
 			INSERT INTO @GLEntries (
