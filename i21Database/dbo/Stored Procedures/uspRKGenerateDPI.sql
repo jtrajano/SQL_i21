@@ -235,27 +235,6 @@ BEGIN
 				AND b.intShipToId = ISNULL(@intLocationId, b.intShipToId)
 				AND gs.strStorageTypeCode NOT IN ('CNT', '')
 
-			UNION ALL
-			SELECT CONVERT(VARCHAR(10), b.dtmDate, 110) dtmDate
-					, dblUnitCost dblUnitCost1
-					, iri.intInventoryReceiptItemId
-					, i.strItemNo
-					, isnull(bd.dblQtyReceived, 0) dblInQty
-					, (bd.dblQtyReceived/b.dblTotal) * (b.dblTotal - b.dblAmountDue) AS dblOutQty
-					, st.strDistributionOption
-					, b.strBillId AS strReceiptNumber
-					, b.intBillId AS intReceiptId
-					, b.ysnPaid
-				FROM tblAPBill b
-				JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId AND b.intShipToId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
-				INNER JOIN tblICInventoryReceiptItem iri ON bd.intInventoryReceiptItemId = iri.intInventoryReceiptItemId
-				INNER JOIN tblICInventoryReceipt ir ON iri.intInventoryReceiptId = ir.intInventoryReceiptId
-				INNER JOIN tblICItem i ON i.intItemId = bd.intItemId
-				INNER JOIN vyuSCTicketView st ON st.intTicketId = iri.intSourceId
-				WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN convert(DATETIME, CONVERT(VARCHAR(10), @dtmFromTransactionDate, 110), 110) AND convert(DATETIME, CONVERT(VARCHAR(10), @dtmToTransactionDate, 110), 110) AND i.intCommodityId = @intCommodityId
-					AND i.intItemId = isnull(@intItemId, i.intItemId) AND isnull(strType, '') <> 'Other Charge'
-					AND b.intShipToId = isnull(@intLocationId, b.intShipToId) AND ir.intSourceType = 1
-					AND iri.dblBillQty <> 0 -- Needed this on 18.3 (Voucher is updating dblBillQty once it is posted while in 19.1 when voucher is created) 
 		) t
 	) t2
 	
@@ -348,7 +327,7 @@ BEGIN
 			AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
 			AND RI.intOwnershipType = 1
 			AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = NULL)--Contract, Spot and DP
-			AND RI.dblBillQty = 0
+			--AND RI.dblBillQty = 0
 			AND R.intSourceType = 1
 			AND RI.intInventoryReceiptItemId NOT IN (select intInventoryReceiptItemId from tblGRSettleStorage gr 
 					INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId
