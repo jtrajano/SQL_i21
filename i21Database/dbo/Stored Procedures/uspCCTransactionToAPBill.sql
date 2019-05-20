@@ -45,11 +45,23 @@ BEGIN
 		INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
 		WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
 
-		INSERT INTO @Voucher (intTransactionType ,dtmDate, intEntityVendorId, intShipToId, strVendorOrderNumber, intAccountId, intCCSiteDetailId, strMiscDescription, dblCost, dblQuantityToBill, ysnStage)
+		INSERT INTO @Voucher (intTransactionType
+			, dtmDate
+			, intEntityVendorId
+			, intShipToId
+			, intLocationId
+			, strVendorOrderNumber
+			, intAccountId
+			, intCCSiteDetailId
+			, strMiscDescription
+			, dblCost
+			, dblQuantityToBill
+			, ysnStage)
 		SELECT intTransactionType = 3 
 			,dtmDate = @dtmDate
 			,intEntityVendorId = @intVendorId
 			,intShipToId = @intShipTo
+			,intLocationId = @intShipTo
 			,strVendorOrderNumber = @strCcdReference
 			,intAccountId
 			,intSiteDetailId
@@ -80,8 +92,30 @@ BEGIN
 		GROUP BY  intAccountId, intSiteDetailId, strItem 
 
 		-- 1099K Adjustment
-		INSERT INTO @Voucher1099K (intTransactionType ,dtmDate, intEntityVendorId, intShipToId, strVendorOrderNumber, intAccountId, intCCSiteDetailId, strMiscDescription, dblCost, dblQuantityToBill)
-		SELECT 9, dtmDate, intEntityVendorId, intShipToId, strVendorOrderNumber, intAccountId, intCCSiteDetailId, strMiscDescription, dblCost, dblQuantityToBill 
+		INSERT INTO @Voucher1099K (intTransactionType
+			, dtmDate
+			, intEntityVendorId
+			, intShipToId
+			, strVendorOrderNumber
+			, intAccountId
+			, intLocationId
+			, intCCSiteDetailId
+			, strMiscDescription
+			, dblCost
+			, dblQuantityToBill
+			, ysnStage)
+		SELECT 9
+			, dtmDate
+			, intEntityVendorId
+			, intShipToId
+			, strVendorOrderNumber
+			, intAccountId
+			, intLocationId
+			, intCCSiteDetailId
+			, strMiscDescription
+			, dblCost
+			, dblQuantityToBill
+			, 0 
 		FROM @Voucher WHERE strMiscDescription = 'Dealer Sites Net'
 
 		IF EXISTS(SELECT TOP 1 1 FROM @Voucher)
