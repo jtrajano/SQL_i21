@@ -100,6 +100,7 @@
 	[ysnPrintInvoicePaymentDetail]		BIT             NULL,
 	[ysnListBundleSeparately]			BIT             NULL,
 	[ysnHasAddOnItem]					BIT             NULL,
+	[ysnStretchLogo]					BIT             NULL,
 	[dtmDate]							DATETIME		NULL,
 	[dtmPostDate]						DATETIME		NULL,
 	[dtmShipDate]						DATETIME		NULL,

@@ -128,12 +128,14 @@ INSERT INTO @INVOICETABLE (
   , intEntityUserId
   , strRequestId
   , strType
+  , ysnStretchLogo
   , strInvoiceFormat  
 )
 SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , intEntityUserId		= @intEntityUserId
 	 , strRequestId			= @strRequestId
 	 , strType				= INVOICE.strType
+	 , ysnStretchLogo		= ISNULL(COMPANYPREFERENCE.ysnStretchLogo, 0)
 	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
 	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN ISNULL(COMPANYPREFERENCE.strGrainInvoiceFormat, 'Standard')
 											 ELSE CASE WHEN INVOICE.strTransactionType <> 'Credit Memo' THEN 
@@ -157,6 +159,7 @@ OUTER APPLY (
 			   , strTransportsInvoiceFormat
 			   , strGrainInvoiceFormat
 			   , strMeterBillingInvoiceFormat
+			   , ysnStretchLogo
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) COMPANYPREFERENCE
 OUTER APPLY (
