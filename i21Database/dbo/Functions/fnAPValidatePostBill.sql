@@ -202,19 +202,19 @@ BEGIN
 			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 			AND A.intTransactionType = 1
 
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
-		SELECT
-			'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',
-			'Bill',
-			A.strBillId,
-			A.intBillId,
-			13
-		FROM tblAPBill A 
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
-			INNER JOIN tblICItem D ON C.intItemId = D.intItemId
-		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)) > C.dblOpenReceive
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		-- SELECT
+		-- 	'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',
+		-- 	'Bill',
+		-- 	A.strBillId,
+		-- 	A.intBillId,
+		-- 	13
+		-- FROM tblAPBill A 
+		-- 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		-- 	INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
+		-- 	INNER JOIN tblICItem D ON C.intItemId = D.intItemId
+		-- WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		-- AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)) > C.dblOpenReceive
 
 		--VALIDATION FOR MISCELLANEOUS ITEM
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
