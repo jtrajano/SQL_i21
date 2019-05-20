@@ -54,7 +54,7 @@ BEGIN TRY
 	IF EXISTS(SELECT TOP 1 1
 		FROM tblSMCompanyLocation A
 		INNER JOIN @voucherPayables B ON B.intLocationId = A.intCompanyLocationId
-		AND A.intAPAccount IS NULL AND B.intAPAccount IS NULL AND B.intTransactionType IN (1,14)) 
+		AND A.intAPAccount IS NULL AND B.intAPAccount IS NULL AND B.intTransactionType IN (1,3,14)) 
 	BEGIN
 		SET @error =  'Please setup default AP Account.';
 		IF @throwError = 1
