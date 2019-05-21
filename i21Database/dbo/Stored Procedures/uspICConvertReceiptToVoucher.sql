@@ -29,6 +29,7 @@ DECLARE @intEntityVendorId AS INT
 		,@strVendorRefNo NVARCHAR(50)
 		,@intCurrencyId AS INT 
 		,@strBillOfLading NVARCHAR(50)
+		,@intShipFromEntity AS INT
 
 		,@intShipFrom_DebitMemo AS INT
 		,@intReturnValue AS INT
@@ -65,6 +66,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
 		,@dtmReceiptDate = r.dtmReceiptDate
+		,@intShipFromEntity = r.intShipFromEntityId
 FROM	tblICInventoryReceipt r
 WHERE	r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
@@ -250,6 +252,7 @@ BEGIN
 			,@error = @throwedError OUTPUT
 			,@billId = @intBillId OUTPUT
 			,@voucherDate = @dtmReceiptDate
+			,@shipFromEntityId = @intShipFromEntity
 
 		IF(@throwedError <> '')
 		BEGIN

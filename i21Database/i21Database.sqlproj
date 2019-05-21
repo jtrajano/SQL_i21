@@ -7317,6 +7317,7 @@
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
     <Build Include="dbo\Functions\fnPRRounding.sql" />
     <Build Include="dbo\Tables\tblSCRemoteXrefDeliverySheet.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
