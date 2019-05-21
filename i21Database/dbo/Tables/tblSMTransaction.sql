@@ -21,3 +21,10 @@
 	CONSTRAINT [FK_tblSMTransaction_tblEMEntity] FOREIGN KEY ([intLockedBy]) REFERENCES [tblEMEntity]([intEntityId]),
     CONSTRAINT [UC_tblSMTransaction_intScreenId_intRecordId] UNIQUE ([intScreenId] ASC, [intRecordId] ASC)
 )
+GO
+
+CREATE INDEX [IX_tblSMTransaction_intScreenId] ON [dbo].[tblSMTransaction] ([intScreenId])
+GO
+
+CREATE INDEX [IX_tblSMTransaction_intRecordId] ON [dbo].[tblSMTransaction] ([intRecordId])
+GO

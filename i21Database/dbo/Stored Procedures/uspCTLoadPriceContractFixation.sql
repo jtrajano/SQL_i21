@@ -66,7 +66,9 @@ BEGIN TRY
 			[dblRatio] [numeric](18, 6) NULL,
 			[dblAppliedQty] [numeric](18, 6) NULL,
 			strBook  [nvarchar](250) NULL,
-			strSubBook  [nvarchar](250) NULL
+			strSubBook  [nvarchar](250) NULL,
+			intNoOfLoad	INT,
+			dblQuantityPerLoad NUMERIC(18,6)
 		) 
 
 		SELECT * INTO #tblCTPriceFixation FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId
@@ -135,7 +137,9 @@ BEGIN TRY
 				CD.dblRatio,
 				CD.dblAppliedQty,
 				CD.strBook,
-				CD.strSubBook
+				CD.strSubBook,
+				CD.intNoOfLoad,
+				CD.dblQuantityPerLoad
 		
 
 		FROM	#tblCTPriceFixation			PF
@@ -209,7 +213,9 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CD.dblRatio,
 				CD.dblAppliedQty,
 				BK.strBook,
-				SB.strSubBook
+				SB.strSubBook,
+				CD.intNoOfLoad,
+				CD.dblQuantityPerLoad
 
 		FROM	#tblCTPriceFixation			PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
