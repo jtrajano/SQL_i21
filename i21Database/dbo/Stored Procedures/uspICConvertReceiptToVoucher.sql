@@ -252,7 +252,7 @@ BEGIN
 					AND ri.dblBillQty < ri.dblOpenReceive 
 					AND ri.intOwnershipType = @Own
 					AND i.strType <> 'Bundle'
-					AND @intScreenId IS NULL
+					AND NOT(@intScreenId = @intScreenId_InventoryReceipt)
 		)
 		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptItemId IS NOT NULL) 
 	) 
