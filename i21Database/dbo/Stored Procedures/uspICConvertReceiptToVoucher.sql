@@ -159,10 +159,10 @@ BEGIN
 		,GP.[intItemId]						
 		,GP.[intPurchaseTaxGroupId]			
 		,GP.[strMiscDescription]				
-		,GP.[dblOrderQty]						
+		, CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblOrderQty]	ELSE GP.dblOrderQty END
 		,[dblOrderUnitQty] = 0.00					
 		,[intOrderUOMId] = NULL	 				
-		,GP.[dblQuantityToBill]			
+		, CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblQuantityToBill]	ELSE GP.[dblQuantityToBill] END	
 		,GP.[dblQtyToBillUnitQty]				
 		,GP.[intQtyToBillUOMId]				
 		,[dblCost] = GP.dblUnitCost							
@@ -252,6 +252,7 @@ BEGIN
 					AND ri.dblBillQty < ri.dblOpenReceive 
 					AND ri.intOwnershipType = @Own
 					AND i.strType <> 'Bundle'
+					AND @intScreenId IS NULL
 		)
 		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptItemId IS NOT NULL) 
 	) 
