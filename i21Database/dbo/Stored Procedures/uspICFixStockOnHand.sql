@@ -4,6 +4,7 @@
 	This is a utility stored procedure used to fix on-hand stocks. 
 */
 CREATE PROCEDURE [dbo].[uspICFixStockOnHand]
+	@intItemId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,9 +15,13 @@ SET ANSI_WARNINGS OFF
 
 UPDATE tblICItemStock
 SET dblUnitOnHand = 0
+FROM tblICItemStock
+WHERE ISNULL(@intItemId, intItemId) = intItemId
 
 UPDATE tblICItemStockUOM
 SET dblOnHand = 0 
+FROM tblICItemStockUOM
+WHERE ISNULL(@intItemId, intItemId) = intItemId
 
 -----------------------------------
 -- Update the Item Stock table
@@ -50,7 +55,10 @@ BEGIN
 					LEFT JOIN tblICItemUOM WeightUOM
 						ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
 			--WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
-			GROUP BY ItemTransactions.intItemId, ItemTransactions.intItemLocationId
+			WHERE
+				ISNULL(@intItemId, ItemTransactions.intItemId) = ItemTransactions.intItemId
+			GROUP BY 
+				ItemTransactions.intItemId, ItemTransactions.intItemLocationId
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
 		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -114,6 +122,7 @@ BEGIN
 							ON ItemTransactions.intItemUOMId = ItemUOM.intItemUOMId
 				WHERE	--ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
 						ItemTransactions.intLotId IS NULL 
+						AND ISNULL(@intItemId, ItemTransactions.intItemId) = ItemTransactions.intItemId
 				GROUP BY ItemTransactions.intItemId, ItemTransactions.intItemUOMId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 		) AS RawStockData
 			ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -181,6 +190,7 @@ BEGIN
 							AND ISNULL(ItemUOM.ysnStockUnit, 0) = 0 
 				WHERE	--ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
 						ItemTransactions.intLotId IS NULL 
+						AND ISNULL(@intItemId, ItemTransactions.intItemId) = ItemTransactions.intItemId
 				GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 		) AS RawStockData
 			ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -250,6 +260,7 @@ BEGIN
 					,Qty = Lot.dblQty
 			FROM	dbo.tblICLot Lot 
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
+					AND ISNULL(@intItemId, Lot.intItemId) = Lot.intItemId
 						
 			-- Get the Weight Qty (Lot.intWeightUOMId) 
 			UNION ALL 
@@ -263,6 +274,7 @@ BEGIN
 			FROM	dbo.tblICLot Lot 
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
 					AND Lot.intItemUOMId <> Lot.intWeightUOMId 
+					AND ISNULL(@intItemId, Lot.intItemId) = Lot.intItemId
 
 			-- Convert pack to stock unit. 
 			UNION ALL 
@@ -284,6 +296,7 @@ BEGIN
 						AND LotStockUOM.intItemUOMId <> Lot.intItemUOMId 
 						AND LotStockUOM.intWeightUOMId <> Lot.intWeightUOMId 
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
+					AND ISNULL(@intItemId, Lot.intItemId) = Lot.intItemId
 
 			-- Convert weight to stock unit. 
 			UNION ALL 
@@ -306,6 +319,7 @@ BEGIN
 						AND LotStockUOM.intWeightUOMId <> Lot.intWeightUOMId 
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
 					AND Lot.intItemUOMId <> Lot.intWeightUOMId 
+					AND ISNULL(@intItemId, Lot.intItemId) = Lot.intItemId
 
 			---------------------------------------------
 			-- Lot does NOT have a Weight. 
@@ -321,7 +335,8 @@ BEGIN
 					,Qty = ISNULL(Lot.dblQty, 0) 
 			FROM	dbo.tblICLot Lot 
 			WHERE	Lot.intWeightUOMId IS NULL 
-					
+					AND ISNULL(@intItemId, Lot.intItemId) = Lot.intItemId
+
 			--------------------------------------------------------------------------------------
 			-- and then convert the Pack Qty to stock UOM. 
 			--------------------------------------------------------------------------------------
@@ -342,6 +357,7 @@ BEGIN
 						AND LotStockUOM.ysnStockUnit = 1
 			WHERE	Lot.intWeightUOMId IS NULL 
 					AND Lot.intItemUOMId <> LotStockUOM.intItemUOMId		
+					AND ISNULL(@intItemId, Lot.intItemId) = Lot.intItemId
 		) Query
 		GROUP BY intItemId 
 				,intItemUOMId 

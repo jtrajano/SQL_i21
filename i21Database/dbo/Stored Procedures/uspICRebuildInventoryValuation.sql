@@ -1061,7 +1061,7 @@ END
 -- Retroactively compute the stocks on Stock-UOM and Stock tables. 
 --------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICFixStockQuantities
+	EXEC dbo.uspICFixStockQuantities @intItemId 
 END 
 
 ------------------------------------------------------------------------------
@@ -3385,11 +3385,11 @@ BEGIN
 												END																
 												+
 												CASE 
-													WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
-														dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) / DetailItem.dblForexRate
+													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+														dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId) / ReceiptItem.dblForexRate
 													ELSE 
-														dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-												END							
+														dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+												END								
 
 											)
 											-- (C) then convert the cost to the sub-currency value. 
