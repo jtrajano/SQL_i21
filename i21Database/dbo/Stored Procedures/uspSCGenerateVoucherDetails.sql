@@ -567,13 +567,7 @@ BEGIN /* Direct Inventory */
 																						,A.dblQtyReceived)
 													
 												ELSE
-													
-													dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
-																						,CASE WHEN lgDetail.intItemUOMId > 0 
-																							THEN lgDetail.intItemUOMId 
-																							ELSE A.intUnitOfMeasureId 
-																						 END
-																						,lgDetail.dblQuantity )
+													lgDetail.dblQuantity 
 													
 											END),
 		[dblDiscount]					=	A.[dblDiscount],

@@ -1525,7 +1525,7 @@ BEGIN
 					, strBrokerTradeNo
 					, strNotes
 					, ysnPreCrush
-				FROM @tempFinal WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'DP','Purchase Basis Deliveries', 'Sales Basis Deliveries', 'OffSite') AND @ysnExchangeTraded = 1
+				FROM @tempFinal WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral',  'OffSite') AND @ysnExchangeTraded = 1
 				GROUP BY strCommodityCode
 					, strContractType
 					, intContractHeaderId

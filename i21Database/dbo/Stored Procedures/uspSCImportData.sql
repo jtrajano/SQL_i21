@@ -653,7 +653,7 @@ BEGIN TRY
 				AND SC.intTicketPoolId = SCT.intTicketPoolId
 				AND SC.intTicketType = SCT.intTicketType
 				AND SC.strInOutFlag = SCT.strInOutFlag
-				AND SC.intEntityId = SCT.intEntityId
+				--AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
 				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE QM.intTicketId = ERT.intTicketId)
 				ORDER BY QM.intSort ASC
@@ -681,7 +681,7 @@ BEGIN TRY
 				AND SC.intTicketPoolId = SCT.intTicketPoolId
 				AND SC.intTicketType = SCT.intTicketType
 				AND SC.strInOutFlag = SCT.strInOutFlag
-				AND SC.intEntityId = SCT.intEntityId
+				--AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
 			END
 			ELSE
