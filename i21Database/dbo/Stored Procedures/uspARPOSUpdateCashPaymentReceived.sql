@@ -25,6 +25,21 @@ BEGIN
 		INNER JOIN tblARPayment PAYMENT ON POSPAYMENT.intPaymentId = PAYMENT.intPaymentId
 		INNER JOIN tblSMPaymentMethod PAYMENTMETHOD ON PAYMENT.intPaymentMethodId = PAYMENTMETHOD.intPaymentMethodID
 		WHERE POSPAYMENT.intPaymentId = @intPaymentId AND PAYMENTMETHOD.strPaymentMethod IN('Cash', 'Check')
+
+
+		DECLARE @PAYMENT DECIMAL(18,6)	= 0.000000
+		SELECT @PAYMENT = PAYMENTDETAIL.dblPayment FROM
+		tblARPaymentDetail PAYMENTDETAIL
+		INNER JOIN tblARPayment PAYMENT ON PAYMENTDETAIL.intPaymentId = PAYMENT.intPaymentId
+		INNER JOIN tblSMPaymentMethod PAYMENTMETHOD ON PAYMENT.intPaymentMethodId = PAYMENTMETHOD.intPaymentMethodID
+		WHERE PAYMENT.intPaymentId = @intPaymentId AND PAYMENTMETHOD.strPaymentMethod IN('Cash', 'Check')
+		AND PAYMENT.intPaymentId NOT IN (SELECT ISNULL(intPaymentId,0) from tblARPOSPayment)
+		
+		UPDATE EOD
+		SET dblCashPaymentReceived = ISNULL(dblCashPaymentReceived, 0.000000) + @PAYMENT
+		FROM tblARPOSEndOfDay EOD 
+		WHERE EOD.intPOSEndOfDayId = @intPOSEndOfDayId
+
 	END
 
 END
