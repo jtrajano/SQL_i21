@@ -8,9 +8,10 @@ BEGIN
 	-- Generate Payables
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @voucherPayableTax VoucherDetailTax
-	
+
 	IF(@intReceiptId IS NOT NULL)
 	BEGIN
+
 		INSERT INTO @voucherPayable(
 			[intEntityVendorId]			
 			,[intTransactionType]		
@@ -64,57 +65,67 @@ BEGIN
 			,[ysnReturn]						
 		)
 		SELECT 
-			[intEntityVendorId]			
-			,[intTransactionType]
-			,[intLocationId]	
+			 GP.[intEntityVendorId]			
+			,GP.[intTransactionType]
+			,GP.[intLocationId]	
 			,[intShipToId] = NULL	
 			,[intShipFromId] = NULL	 		
 			,[intShipFromEntityId] = NULL
 			,[intPayToAddressId] = NULL
-			,[intCurrencyId]					
-			,[dtmDate]				
-			,[strVendorOrderNumber]		
-			,[strReference]						
-			,[strSourceNumber]					
-			,[intPurchaseDetailId]				
-			,[intContractHeaderId]				
-			,[intContractDetailId]				
-			,[intContractSeqId]	= intContractSequence				
-			,[intScaleTicketId]					
-			,[intInventoryReceiptItemId]		
-			,[intInventoryReceiptChargeId]		
-			,[intInventoryShipmentItemId]		
-			,[intInventoryShipmentChargeId]		
+			,GP.[intCurrencyId]					
+			,GP.[dtmDate]				
+			,GP.[strVendorOrderNumber]		
+			,GP.[strReference]						
+			,GP.[strSourceNumber]					
+			,GP.[intPurchaseDetailId]				
+			,GP.[intContractHeaderId]				
+			,GP.[intContractDetailId]				
+			,[intContractSeqId]	= GP.intContractSequence				
+			,GP.[intScaleTicketId]					
+			,GP.[intInventoryReceiptItemId]		
+			,GP.[intInventoryReceiptChargeId]		
+			,GP.[intInventoryShipmentItemId]		
+			,GP.[intInventoryShipmentChargeId]		
 			,[intLoadShipmentId] = NULL				
 			,[intLoadShipmentDetailId] = NULL			
-			,[intItemId]						
-			,[intPurchaseTaxGroupId]			
-			,[strMiscDescription]				
-			,[dblOrderQty]						
+			,GP.[intItemId]						
+			,GP.[intPurchaseTaxGroupId]			
+			,GP.[strMiscDescription]				
+			,GP.[dblOrderQty]						
 			,[dblOrderUnitQty] = 0.00					
 			,[intOrderUOMId] = NULL	 				
-			,[dblQuantityToBill]				
-			,[dblQtyToBillUnitQty]				
-			,[intQtyToBillUOMId]				
-			,[dblCost] = dblUnitCost							
-			,[dblCostUnitQty]					
-			,[intCostUOMId]						
-			,[dblNetWeight]						
-			,[dblWeightUnitQty]					
-			,[intWeightUOMId]					
-			,[intCostCurrencyId]
-			,[dblTax]							
-			,[dblDiscount]
-			,[intCurrencyExchangeRateTypeId]	
-			,[dblExchangeRate] = dblRate					
-			,[ysnSubCurrency]					
-			,[intSubCurrencyCents]				
-			,[intAccountId]						
-			,[intShipViaId]						
-			,[intTermId]						
-			,[strBillOfLading]					
-			,[ysnReturn]	 
-		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost)
+			,GP.[dblQuantityToBill]				
+			,GP.[dblQtyToBillUnitQty]				
+			,GP.[intQtyToBillUOMId]				
+			,[dblCost] = GP.dblUnitCost							
+			,GP.[dblCostUnitQty]					
+			,GP.[intCostUOMId]						
+			,GP.[dblNetWeight]						
+			,GP.[dblWeightUnitQty]					
+			,GP.[intWeightUOMId]					
+			,GP.[intCostCurrencyId]
+			,GP.[dblTax]							
+			,GP.[dblDiscount]
+			,GP.[intCurrencyExchangeRateTypeId]	
+			,[dblExchangeRate] = GP.dblRate					
+			,GP.[ysnSubCurrency]					
+			,GP.[intSubCurrencyCents]				
+			,GP.[intAccountId]						
+			,GP.[intShipViaId]						
+			,GP.[intTermId]						
+			,GP.[strBillOfLading]					
+			,GP.[ysnReturn]	 
+		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost) GP
+			INNER JOIN tblICInventoryReceiptItem ReceiptItem 
+			ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
+		INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
+		INNER JOIN tblICInventoryReceipt Receipt
+			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			AND Receipt.intEntityVendorId = GP.intEntityVendorId
+			AND Item.strType <> 'Bundle'
+			AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
+			AND ISNULL(ReceiptItem.ysnAllowVoucher, 0) = 1
+
 		UNION ALL
 		/* To get the unposted Receipt Charges */
 		SELECT 
