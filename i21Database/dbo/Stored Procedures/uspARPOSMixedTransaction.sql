@@ -229,7 +229,7 @@ BEGIN
 		,[intCurrencyId]						= POS.intCurrencyId
 		,[dtmDate]								= POS.dtmDate
 		,[dtmShipDate]							= POS.dtmDate
-		,[strComments]							= POS.strComment
+		,[strComments]							= 'POS Return:' + ISNULL(POS.strComment, '')
 		,[intEntityId]							= POS.intEntityUserId
 		,[ysnPost]								= 1
 		,[intItemId]							= DETAILS.intItemId
@@ -267,7 +267,7 @@ BEGIN
 		,[intCurrencyId]						= POS.intCurrencyId
 		,[dtmDate]								= POS.dtmDate
 		,[dtmShipDate]							= POS.dtmDate
-		,[strComments]							= POS.strComment
+		,[strComments]							= 'POS Return:' + ISNULL(POS.strComment, '')
 		,[intEntityId]							= POS.intEntityUserId
 		,[ysnPost]								= 1
 		,[intItemId]							= NULL
@@ -304,7 +304,7 @@ BEGIN
 	EXEC uspARProcessInvoices @InvoiceEntries		= @EntriesForInvoice
 							, @LineItemTaxEntries	= @TaxDetails
 							, @UserId				= @intEntityUserId
-							, @GroupingOption		= 0
+							, @GroupingOption		= 11
 							, @RaiseError			= 1
 							, @ErrorMessage			= @ErrorMessage OUTPUT
 							, @CreatedIvoices		= @CreatedInvoices OUTPUT
@@ -344,6 +344,9 @@ BEGIN
 			FROM tblSMPaymentMethod
 			WHERE strPaymentMethod = 'Cash'
 					
+			UPDATE tblARInvoice
+			SET  ysnReturned = 1				
+			WHERE intInvoiceId = @intNewCreditMemoId
 
 			UPDATE tblARPOS
 			SET
@@ -639,12 +642,14 @@ BEGIN
 													ELSE @intNewInvoiceId
 													END
 												 )
-
-				EXEC uspARProcessPayments @PaymentEntries	= @EntriesForAmountDuePayment
-										, @UserId			= @intEntityUserId
-										, @GroupingOption	= 0
-										, @RaiseError		= 1
-										, @ErrorMessage		= @ErrorMessage OUTPUT
+				IF (ISNULL(ABS(@dblCreditMemoTotal), 0) - ISNULL(@dblInvoiceTotal, 0)) <> 0
+					BEGIN
+						EXEC uspARProcessPayments @PaymentEntries	= @EntriesForAmountDuePayment
+												, @UserId			= @intEntityUserId
+												, @GroupingOption	= 0
+												, @RaiseError		= 1
+												, @ErrorMessage		= @ErrorMessage OUTPUT
+					END
 				END
 
 				--END OF CREATE PAYMENTS FOR AMOUNT DUE
