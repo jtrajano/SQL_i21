@@ -1166,7 +1166,7 @@ BEGIN
 					, intCommodityId
 					, strLocationName
 				FROM @tempFinal
-				WHERE strType = 'Price Risk' and strContractType in('Inventory','Collateral','DP','Purchase Basis Deliveries','Sales Basis Deliveries','OffSite')
+				WHERE strType = 'Price Risk' and strContractType in('Inventory','Collateral','OffSite')
 				group by strCommodityCode
 					, strContractType
 					, intContractHeaderId
