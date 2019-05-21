@@ -148,6 +148,9 @@ BEGIN
 			WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
 				AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+				AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+				AND a.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+				AND a.intCompanyLocationId = ISNULL(@intLocationId, a.intCompanyLocationId)
 				
 			UNION ALL
 			SELECT CONVERT(VARCHAR(10), gh.dtmDistributionDate,110) dtmDate
@@ -188,6 +191,9 @@ BEGIN
 			WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
 				AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+				AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+				AND a.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
+				AND a.intCompanyLocationId = ISNULL(@intLocationId, a.intCompanyLocationId)
 		)t
 	END	
 	
