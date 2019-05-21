@@ -31,6 +31,7 @@ BEGIN TRY
 	DECLARE @strOwnedPhysicalStock NVARCHAR(20)	
 	DECLARE @isParentSettleStorage AS BIT
 	DECLARE @intDecimalPrecision INT
+	DECLARE @success BIT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -126,6 +127,14 @@ BEGIN TRY
 					,@isBatch = 0
 					,@param = @BillId
 					,@userId = @UserId
+					,@success = @success OUTPUT
+			END
+
+			IF(@success = 0)
+			BEGIN
+				SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @BillId;
+				RAISERROR (@ErrMsg, 16, 1);
+				GOTO SettleStorage_Exit;
 			END
 
 			--2. DP Contract, Purchase Contract and Ticket Balance Increment

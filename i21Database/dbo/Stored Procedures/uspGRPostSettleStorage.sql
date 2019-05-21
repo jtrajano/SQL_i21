@@ -1661,9 +1661,13 @@ BEGIN TRY
 								,@userId = @intCreatedUserId
 								,@success = @success OUTPUT
 					END
-
-					IF @@ERROR <> 0
+					
+					IF(@success = 0)
+					BEGIN
+						SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
+						RAISERROR (@ErrMsg, 16, 1);
 						GOTO SettleStorage_Exit;
+					END
 				END
 			
 			END
@@ -1775,7 +1779,7 @@ BEGIN TRY
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 
 					,[dblPaidAmount]		= SV.dblCashPrice
-					,[intBillId]			= CASE WHEN @intCreatedBillId = 0 THEN NULL ELSE @intCreatedBillId END
+					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
 				FROM @SettleVoucherCreate SV
