@@ -260,7 +260,7 @@ FROM
 			,intSeqBasisCurrencyId = CY.intCurrencyID
 			,strSeqBasisCurrency = CY.strCurrency
 			,ysnSeqBasisSubCurrency = CY.ysnSubCurrency
-			,dblSeqPrice = CD.dblCashPrice / ISNULL(CY.intCent, 1) * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) ELSE ISNULL(CD.dblRate, 1) END)
+			,dblSeqPrice = CD.dblCashPrice * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) ELSE ISNULL(CD.dblRate, 1) END)
 		FROM tblCTContractDetail CD
 			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intPriceItemUOMId
 			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
