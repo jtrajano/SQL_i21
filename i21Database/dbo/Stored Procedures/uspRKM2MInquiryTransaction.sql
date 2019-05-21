@@ -2171,7 +2171,9 @@ BEGIN
 		, dblInvFuturePrice
 		, dblInvMarketBasis
 		, dblOpenQty
-		, dblResult)
+		, dblResult
+		, dblCashPrice
+		, intCurrencyId)
 	SELECT * FROM (
 		SELECT strContractOrInventoryType
 			, strCommodityCode
@@ -2192,6 +2194,8 @@ BEGIN
 			, dbo.fnCTConvertQuantityToTargetCommodityUOM(intToPriceUOM,PriceSourceUOMId,ISNULL(dblInvMarketBasis, 0)) dblInvMarketBasis
 			, SUM(dblOpenQty) dblOpenQty
 			, SUM(dblOpenQty1) dblResult
+			,dblCashOrFuture 
+			,intCurrencyId
 		FROM (
 			SELECT 
 				'Inventory' as strContractOrInventoryType
@@ -2216,6 +2220,20 @@ BEGIN
 							AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE i.intItemId END
 							AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(s.intLocationId,0) END
 							AND temp.strContractInventory = 'Inventory'),0) as dblInvMarketBasis
+				,ISNULL((SELECT TOP 1 ISNULL(dblCashOrFuture,0) FROM tblRKM2MBasisDetail temp
+						WHERE temp.intM2MBasisId = @intM2MBasisId
+							AND temp.intItemId = i.intItemId
+							AND ISNULL(temp.intFutureMarketId,0) = CASE WHEN ISNULL(temp.intFutureMarketId,0)= 0 THEN 0 ELSE c.intFutureMarketId END
+							AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE i.intItemId END
+							AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(s.intLocationId,0) END
+							AND temp.strContractInventory = 'Inventory'),0) as dblCashOrFuture
+				,ISNULL((SELECT TOP 1 ISNULL(intCurrencyId,0) FROM tblRKM2MBasisDetail temp
+						WHERE temp.intM2MBasisId = @intM2MBasisId
+							AND temp.intItemId = i.intItemId
+							AND ISNULL(temp.intFutureMarketId,0) = CASE WHEN ISNULL(temp.intFutureMarketId,0)= 0 THEN 0 ELSE c.intFutureMarketId END
+							AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE i.intItemId END
+							AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(s.intLocationId,0) END
+							AND temp.strContractInventory = 'Inventory'),0) as intCurrencyId
 				, (SELECT TOP 1 strFutureMonth strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =c.intFutureMarketId  ORDER BY 1 DESC) strFutureMonth
 				, (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =c.intFutureMarketId  ORDER BY 1 DESC) intFutureMonthId
 				, c.intFutureMarketId
@@ -2253,6 +2271,7 @@ BEGIN
 					,cu1.intCommodityUnitMeasureId
 					,cu2.intCommodityUnitMeasureId
 					,cu3.intCommodityUnitMeasureId
+					
 		) t1
 		GROUP BY strContractOrInventoryType
 			, strCommodityCode
@@ -2269,7 +2288,7 @@ BEGIN
 			, dblInvMarketBasis
 			, intToPriceUOM
 			, PriceSourceUOMId
-			, intFutMarketCurrency
+			, intFutMarketCurrency,intCurrencyId,dblCashOrFuture
 	)t2 WHERE ISNULL(dblOpenQty,0) > 0
 END
 
