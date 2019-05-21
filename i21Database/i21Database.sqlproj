@@ -7549,6 +7549,10 @@
     <Build Include="dbo\Functions\fnCTGenerateReceiptDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesForInTransit.sql" />
     <Build Include="dbo\Functions\fnICGetAddToCostTaxFromInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPArchiveVoucher.sql" />
+    <Build Include="dbo\Tables\tblAPBillArchive.sql" />
+    <Build Include="dbo\Tables\tblAPBillDetailArchive.sql" />
+    <Build Include="dbo\Tables\tblAPBillDetailTaxArchive.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

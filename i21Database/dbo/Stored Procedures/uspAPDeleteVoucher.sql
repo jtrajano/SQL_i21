@@ -62,6 +62,8 @@ BEGIN TRY
 
 	EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
 
+	EXEC uspAPArchiveVoucher @billId = @intBillId
+
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
 
