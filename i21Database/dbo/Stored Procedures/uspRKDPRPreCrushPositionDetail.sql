@@ -962,7 +962,7 @@ BEGIN
 				, strFutureMonth
 				, strDeliveryDate
 			FROM (
-				SELECT DISTINCT cd.intContractHeaderId
+				SELECT cd.intContractHeaderId
 					, ch.strContractNumber
 					, ch.intCommodityId
 					, strCommodityCode = @strCommodityCode

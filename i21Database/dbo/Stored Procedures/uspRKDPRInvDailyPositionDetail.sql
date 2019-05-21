@@ -1532,7 +1532,7 @@ BEGIN
 				, strContractEndMonth
 				, strDeliveryDate
 			FROM (
-				SELECT DISTINCT 13 intSeqId
+				SELECT 13 intSeqId
 					, strSeqHeader = 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS
 					, strCommodityCode = @strCommodityCode
 					, strType = 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS
