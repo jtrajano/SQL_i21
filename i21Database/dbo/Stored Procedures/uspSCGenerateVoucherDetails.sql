@@ -568,7 +568,7 @@ BEGIN /* Direct Inventory */
 											-- dbo.fnCalculateCostBetweenUOM(A.intCostUOMId
 											-- 							,CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END
 											-- 							,ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))),
-		,[dblCostUnitQty]				=	dblCostUnitQty, --CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
+		,[dblCostUnitQty]				=	A.dblCostUnitQty, --CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
 		[int1099Form]					=	(CASE WHEN patron.intEntityId IS NOT NULL 
 														AND C.intItemId > 0
 														AND C.ysn1099Box3 = 1
