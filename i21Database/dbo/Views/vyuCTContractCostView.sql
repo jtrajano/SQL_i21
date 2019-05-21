@@ -40,6 +40,7 @@ AS
 				IM.strDescription strItemDescription,
 				UM.strUnitMeasure strUOM, 
 				UM.intUnitMeasureId AS intUOMId,
+				UM.strSymbol,
 				EY.strName strVendorName, 
 				CD.intContractHeaderId, 
 				IU.intUnitMeasureId, 
