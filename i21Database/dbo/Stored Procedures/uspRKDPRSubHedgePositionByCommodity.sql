@@ -679,6 +679,49 @@ BEGIN
 						, intItemId
 						, strItemNo
 				END
+				ELSE
+				BEGIN
+					INSERT INTO @tempFinal(strCommodityCode
+							, strType
+							, strContractType
+							, dblTotal
+							, intItemId
+							, intFromCommodityUnitMeasureId
+							, intCommodityId
+							, strLocationName
+							, strCurrency)
+						SELECT @strCommodityCode
+							, strType = 'Price Risk'
+							, strContractType = 'DP'
+							, dblTotal = -SUM(dblTotal)
+							, intItemId
+							, intFromCommodityUnitMeasureId
+							, intCommodityId
+							, strLocationName
+							, strCurrency = NULL
+						FROM (
+							SELECT intTicketId
+								, strTicketNumber
+								, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL([Balance],0)))
+								, ch.intCompanyLocationId
+								, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
+								, intCommodityId
+								, strLocationName
+								, intItemId
+								, strItemNo
+							FROM @tblGetStorageDetailByDate ch
+							WHERE ch.intCommodityId  = @intCommodityId
+								AND ysnDPOwnedType = 1
+								AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
+							)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+						GROUP BY intTicketId
+							, strTicketNumber
+							, intFromCommodityUnitMeasureId
+							, intCommodityId
+							, strLocationName
+							, intItemId
+							, strItemNo
+				END
 
 				--Net Hedge Derivative Entry (Futures and Options)
 				-- Hedge
@@ -878,50 +921,7 @@ BEGIN
 							AND f.intLocationId = ISNULL(@intLocationId, f.intLocationId)
 					) t
 
-					--DP
-					If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1)
-					BEGIN
-						INSERT INTO @tempFinal(strCommodityCode
-							, strType
-							, strContractType
-							, dblTotal
-							, intItemId
-							, intFromCommodityUnitMeasureId
-							, intCommodityId
-							, strLocationName
-							, strCurrency)
-						SELECT @strCommodityCode
-							, strType = 'Price Risk'
-							, strContractType = 'DP'
-							, dblTotal = -SUM(dblTotal)
-							, intItemId
-							, intFromCommodityUnitMeasureId
-							, intCommodityId
-							, strLocationName
-							, strCurrency = NULL
-						FROM (
-							SELECT intTicketId
-								, strTicketNumber
-								, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL([Balance],0)))
-								, ch.intCompanyLocationId
-								, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
-								, intCommodityId
-								, strLocationName
-								, intItemId
-								, strItemNo
-							FROM @tblGetStorageDetailByDate ch
-							WHERE ch.intCommodityId  = @intCommodityId
-								AND ysnDPOwnedType = 1
-								AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
-							)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-						GROUP BY intTicketId
-							, strTicketNumber
-							, intFromCommodityUnitMeasureId
-							, intCommodityId
-							, strLocationName
-							, intItemId
-							, strItemNo
-					END
+				
 				END
 		
 				INSERT INTO @tempFinal(strCommodityCode
