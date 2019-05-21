@@ -7320,6 +7320,7 @@
     <Build Include="dbo\Functions\fnAPGetVouchersPaymentInfo.sql" />
     <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
     <Build Include="dbo\Views\vyuCTBasisDelivery.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

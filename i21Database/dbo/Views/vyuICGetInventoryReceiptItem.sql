@@ -72,6 +72,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.dblFranchise
 	, ReceiptItemSource.dblContainerWeightPerQty
 	, Receipt.strVendorRefNo
+	, Receipt.strShipFromEntity
 	, Receipt.strShipFrom
 	, Receipt.intCurrencyId
 	, Receipt.strCurrency 
