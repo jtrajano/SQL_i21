@@ -43,7 +43,9 @@ RETURNS @returntable	TABLE
 	intDiscountScheduleCodeId INT,
 	dblRatio				NUMERIC(18,6),
 	dblBalance				NUMERIC(18,6),
-	dblAppliedQty			NUMERIC(18,6)
+	dblAppliedQty			NUMERIC(18,6),
+	intNoOfLoad				INT,
+	dblQuantityPerLoad		NUMERIC(18,6)
 )
 AS
 BEGIN
@@ -59,7 +61,8 @@ BEGIN
 				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
 				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId,
-				dblRatio,						dblBalance,					dblAppliedQty
+				dblRatio,						dblBalance,					dblAppliedQty,					intNoOfLoad,
+				dblQuantityPerLoad
 
 		FROM	vyuCTContractSequence WHERE intContractDetailId = @intContractDetailId
 	ELSE
@@ -73,7 +76,8 @@ BEGIN
 				strItemDescription,				intContractDetailId,		strProductType,					ysnSubCurrency,
 				intContractStatusId,			strContractItemName,		strContractItemNo,				intBasisCurrencyId,
 				ysnBasisSubCurrency,			intBasisUOMId,				intBasisUnitMeasureId,			intDiscountScheduleCodeId,
-				dblRatio,						dblBalance,					dblAppliedQty
+				dblRatio,						dblBalance,					dblAppliedQty,					intNoOfLoad,
+				dblQuantityPerLoad
 				
 		FROM	vyuCTContractSequence WHERE intContractHeaderId = @intContractHeaderId
 	RETURN;

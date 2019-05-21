@@ -51,6 +51,7 @@ BEGIN TRY
 			@dblTotalBillQty			    NUMERIC(18,6),
 			@dblReceived			        NUMERIC(18,6),
 			@dblQtyToBill			        NUMERIC(18,6),
+			@dblTicketQty			        NUMERIC(18,6),
 			@intUniqueId					INT,
 			@dblFinalPrice					NUMERIC(18,6),
 			@intBillQtyUOMId				INT,
@@ -104,7 +105,8 @@ BEGIN TRY
 		intInventoryReceiptItemId	INT,
 		dblReceived					NUMERIC(26,16),
 		strReceiptNumber			NVARCHAR(50),
-		dblTotalIVForSHQty			NUMERIC(26,16)
+		dblTotalIVForSHQty			NUMERIC(26,16),
+		dblTicketQty				NUMERIC(26,16)
 	)
 
 	DECLARE @tblShipment TABLE
@@ -173,7 +175,8 @@ BEGIN TRY
 							SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
 							FROM	tblAPBillDetail ID 
 							WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
-						) AS dblTotalIVForSHQty
+						) AS dblTotalIVForSHQty,
+						FT.dblQuantity
 				FROM    tblICInventoryReceiptItem   RI
 				JOIN    tblICInventoryReceipt		IR  ON  IR.intInventoryReceiptId		=   RI.intInventoryReceiptId
 														AND IR.strReceiptType				=   'Purchase Contract'
@@ -202,8 +205,8 @@ BEGIN TRY
 							SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
 							FROM	tblAPBillDetail ID 
 							WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
-						) AS dblTotalIVForSHQty
-
+						) AS dblTotalIVForSHQty,
+						0
 				FROM    tblICInventoryReceiptItem   RI
 				JOIN    tblICInventoryReceipt		IR  ON  IR.intInventoryReceiptId		=   RI.intInventoryReceiptId
 														AND IR.strReceiptType				=   'Purchase Contract'
@@ -226,7 +229,8 @@ BEGIN TRY
 
 				SELECT	@dblTotalIVForSHQty		= ISNULL(dblTotalIVForSHQty,0),
 						@dblReceived			= dblReceived,
-						@intInventoryReceiptId = intInventoryReceiptId 
+						@intInventoryReceiptId	= intInventoryReceiptId,
+						@dblTicketQty			= dblTicketQty
 				FROM	@tblReceipt 
 				WHERE	intInventoryReceiptItemId = @intInventoryReceiptItemId
 
@@ -280,9 +284,9 @@ BEGIN TRY
 					IF @dblTotalIVForSHQty < @dblReceived
 					BEGIN
 						IF(@dblReceived - @dblTotalIVForSHQty) <= @dblPriceFxdQty
-						BEGIN
+						BEGIN							
 							INSERT	INTO @tblToProcess
-							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblReceived - @dblTotalIVForSHQty,@intPriceFixationDetailId
+							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,CASE WHEN @ysnTicketBased = 1 THEN @dblTicketQty ELSE @dblReceived - @dblTotalIVForSHQty END,@intPriceFixationDetailId
 							SELECT	@dblRemainingQty = @dblPriceFxdQty - (@dblReceived - @dblTotalIVForSHQty)
 						END
 						ELSE
@@ -363,6 +367,8 @@ BEGIN TRY
 						UPDATE	tblAPBillDetail SET dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
 						DECLARE @receiptDetails AS InventoryUpdateBillQty
+						
+						DELETE FROM @receiptDetails
 
 						INSERT INTO @receiptDetails
 						(

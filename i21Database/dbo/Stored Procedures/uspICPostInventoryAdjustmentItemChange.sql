@@ -59,8 +59,11 @@ BEGIN
 				UNION ALL
 				SELECT Detail.intNewItemId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+					LEFT JOIN tblICLot Lot
+						on Detail.intLotId = Lot.intLotId					
 				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
-					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId) IS NULL
+					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, 
+						coalesce(Lot.intWeightUOMId, Lot.intItemUOMId,Detail.intItemUOMId)) IS NULL
 				) Detail
 	
 		IF @intItemId IS NOT NULL 

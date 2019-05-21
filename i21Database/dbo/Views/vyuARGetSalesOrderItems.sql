@@ -35,15 +35,15 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 , strSalesOrderNumber				= SO.strSalesOrderNumber
 	 , strCustomerName					= E.strName
 	 , strLocationName					= LOCATION.strLocationName
-	 , strDescription					= CASE WHEN ISNULL(SODETAIL.intItemId, 0) <> 0 THEN ITEM.strDescription ELSE SODETAIL.strItemDescription END
+	 , strDescription					= SODETAIL.strItemDescription
 	 , strPricing						= SODETAIL.strPricing
 	 , strVFDDocumentNumber				= SODETAIL.strVFDDocumentNumber
-	 , strType							= ITEM.strType
-	 , strBundleType					= ITEM.strBundleType
-	 , strLotTracking					= ITEM.strLotTracking
+	 , strType							= SODETAIL.strType
+	 , strBundleType					= SODETAIL.strBundleType
+	 , strLotTracking					= SODETAIL.strLotTracking
 	 , intContractSeq					= CONTRACTS.intContractSeq
 	 , strContractNumber				= CONTRACTS.strContractNumber
-	 , strItemNo						= ITEM.strItemNo
+	 , strItemNo						= SODETAIL.strItemNo
 	 , strUnitMeasure					= UOM.strUnitMeasure
 	 , strPriceUnitMeasure				= PUOM.strUnitMeasure
 	 , dtmDate							= SO.dtmDate
@@ -58,46 +58,130 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 ,dblAddOnQuantity					= SODETAIL.dblAddOnQuantity
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
-	SELECT intSalesOrderId
-		 , intSalesOrderDetailId
-		 , intItemId
-		 , intItemUOMId
-		 , intPriceUOMId
-		 , intContractHeaderId
-		 , intContractDetailId
-		 , intRecipeId
-		 , intRecipeItemId
-		 , intSubLocationId
-		 , intCostTypeId
-		 , intMarginById
-		 , intCommentTypeId
-		 , intStorageScheduleTypeId
-		 , intCurrencyExchangeRateTypeId
-		 , intCurrencyExchangeRateId
-		 , intSubCurrencyId
-		 , dblQtyOrdered
-		 , dblQtyShipped
-		 , dblQtyRemaining = dblQtyOrdered - dblQtyShipped
-		 , dblPrice
-		 , dblBasePrice
-		 , dblUnitPrice
-		 , dblBaseUnitPrice
-		 , dblUnitQuantity
-		 , dblDiscount
-		 , dblCurrencyExchangeRate
-		 , dblSubCurrencyRate
-		 , strItemDescription
-		 , strPricing
-		 , strVFDDocumentNumber
-		 , ysnBlended
-		 , intTaxGroupId
-		 , intStorageLocationId
-		 , strAddonDetailKey
-		 , ysnAddonParent
-		 , dblAddOnQuantity
-	FROM dbo.tblSOSalesOrderDetail WITH (NOLOCK)
-	WHERE dblQtyShipped < dblQtyOrdered
-	 AND (ISNULL(intItemId, 0) <> 0 OR ISNULL(strItemDescription, '') <> '') 
+	SELECT SOD.intSalesOrderId
+		 , SOD.intSalesOrderDetailId
+		 , ITEM.intItemId
+		 , SOD.intItemUOMId
+		 , SOD.intPriceUOMId
+		 , SOD.intContractHeaderId
+		 , SOD.intContractDetailId
+		 , SOD.intRecipeId
+		 , SOD.intRecipeItemId
+		 , SOD.intSubLocationId
+		 , SOD.intCostTypeId
+		 , SOD.intMarginById
+		 , SOD.intCommentTypeId
+		 , SOD.intStorageScheduleTypeId
+		 , SOD.intCurrencyExchangeRateTypeId
+		 , SOD.intCurrencyExchangeRateId
+		 , SOD.intSubCurrencyId
+		 , SOD.dblQtyOrdered
+		 , SOD.dblQtyShipped
+		 , dblQtyRemaining = SOD.dblQtyOrdered - SOD.dblQtyShipped
+		 , SOD.dblPrice
+		 , SOD.dblBasePrice
+		 , SOD.dblUnitPrice
+		 , SOD.dblBaseUnitPrice
+		 , SOD.dblUnitQuantity
+		 , SOD.dblDiscount
+		 , SOD.dblCurrencyExchangeRate
+		 , SOD.dblSubCurrencyRate
+		 , strItemDescription = CASE WHEN ISNULL(SOD.intItemId, 0) <> 0 THEN ITEM.strDescription ELSE SOD.strItemDescription END
+		 , SOD.strPricing
+		 , SOD.strVFDDocumentNumber
+		 , SOD.ysnBlended
+		 , SOD.intTaxGroupId
+		 , SOD.intStorageLocationId
+		 , SOD.strAddonDetailKey
+		 , SOD.ysnAddonParent
+		 , SOD.dblAddOnQuantity
+		 , ITEM.strItemNo
+		 , ITEM.strType
+		 , ITEM.strLotTracking
+		 , ITEM.strBundleType
+	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
+	LEFT JOIN (
+	SELECT intItemId
+		 , strDescription
+		 , strItemNo
+		 , strType
+		 , strLotTracking
+		 , strBundleType
+	FROM dbo.tblICItem WITH (NOLOCK)) ITEM 
+			ON SOD.intItemId = ITEM.intItemId
+	WHERE SOD.dblQtyShipped < SOD.dblQtyOrdered
+		AND (SOD.intItemId IS NOT NULL OR (SOD.intItemId IS NULL AND ISNULL(SOD.strItemDescription, '') <> ''))
+		AND ISNULL(ITEM.strBundleType, '') <> 'Option'
+
+	UNION ALL
+
+	SELECT SOD.intSalesOrderId
+		 , SOD.intSalesOrderDetailId
+		 , ITEMCOMP.intItemId
+		 , intItemUOMId = COMP.intUnitMeasureId
+		 , intPriceUOMId = COMP.intUnitMeasureId
+		 , SOD.intContractHeaderId
+		 , SOD.intContractDetailId
+		 , SOD.intRecipeId
+		 , SOD.intRecipeItemId
+		 , SOD.intSubLocationId
+		 , SOD.intCostTypeId
+		 , SOD.intMarginById
+		 , SOD.intCommentTypeId
+		 , SOD.intStorageScheduleTypeId
+		 , SOD.intCurrencyExchangeRateTypeId
+		 , SOD.intCurrencyExchangeRateId
+		 , SOD.intSubCurrencyId
+		 , dblQtyOrdered = SOD.dblQtyOrdered * COMP.dblQuantity
+		 , dblQtyShipped = SOD.dblQtyShipped * COMP.dblQuantity
+		 , dblQtyRemaining = (SOD.dblQtyOrdered * COMP.dblQuantity) - (SOD.dblQtyShipped * COMP.dblQuantity)
+		 , dblPrice = COMP.dblPrice
+		 , dblBasePrice = COMP.dblPrice
+		 , dblUnitPrice =  COMP.dblPrice
+		 , dblBaseUnitPrice = COMP.dblPrice
+		 , dblUnitQuantity = COMP.dblQuantity
+		 , SOD.dblDiscount
+		 , SOD.dblCurrencyExchangeRate
+		 , SOD.dblSubCurrencyRate
+		 , strItemDescription = COMP.strDescription
+		 , SOD.strPricing
+		 , SOD.strVFDDocumentNumber
+		 , SOD.ysnBlended
+		 , SOD.intTaxGroupId
+		 , SOD.intStorageLocationId
+		 , SOD.strAddonDetailKey
+		 , SOD.ysnAddonParent
+		 , SOD.dblAddOnQuantity
+		 , ITEMCOMP.strItemNo
+		 , ITEMCOMP.strType
+		 , ITEMCOMP.strLotTracking
+		 , ITEMCOMP.strBundleType
+	FROM  vyuARGetItemComponents COMP
+	INNER JOIN 
+		dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
+				ON COMP.intItemId = SOD.intItemId
+	INNER JOIN (
+		SELECT intItemId
+			 , strDescription
+			 , strItemNo
+			 , strType
+			 , strLotTracking
+			 , strBundleType
+		FROM dbo.tblICItem WITH (NOLOCK)) ITEMCOMP
+			ON COMP.intComponentItemId = ITEMCOMP.intItemId
+	LEFT JOIN (
+		SELECT intItemId
+			 , strDescription
+			 , strItemNo
+			 , strType
+			 , strLotTracking
+			 , strBundleType
+		FROM dbo.tblICItem WITH (NOLOCK)) ITEM 
+			ON SOD.intItemId = ITEM.intItemId
+	WHERE SOD.dblQtyShipped < SOD.dblQtyOrdered
+		AND SOD.intItemId IS NOT NULL
+		AND ISNULL(ITEM.strBundleType, '') = 'Option'
+
 ) SODETAIL ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
 INNER JOIN (
 	SELECT intEntityId
@@ -109,15 +193,6 @@ INNER JOIN (
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) LOCATION ON SO.intCompanyLocationId = LOCATION.intCompanyLocationId
-LEFT JOIN (
-	SELECT IC.intItemId
-		 , strDescription
-		 , strItemNo
-		 , strType
-		 , strLotTracking
-		 , strBundleType
-	FROM dbo.tblICItem IC WITH (NOLOCK)	
-) ITEM ON SODETAIL.intItemId = ITEM.intItemId
 LEFT JOIN (
 	SELECT intItemId
 		 , intUnitMeasureId
@@ -179,7 +254,5 @@ LEFT JOIN (
 ) TAXGROUP ON TAXGROUP.intTaxGroupId = SODETAIL.intTaxGroupId
 WHERE SO.strTransactionType = 'Order'
   AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
-  AND (SODETAIL.intItemId IS NOT NULL OR (SODETAIL.intItemId IS NULL AND ISNULL(SODETAIL.strItemDescription, '') <> ''))
   AND SO.intSalesOrderId NOT IN (SELECT intTransactionId FROM vyuARForApprovalTransction WHERE strScreenName = 'Sales Order')
   AND SO.ysnRejected = 0
-  AND ISNULL(ITEM.strBundleType, '') <> 'Option'

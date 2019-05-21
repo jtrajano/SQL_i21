@@ -1061,7 +1061,7 @@ END
 -- Retroactively compute the stocks on Stock-UOM and Stock tables. 
 --------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICFixStockQuantities
+	EXEC dbo.uspICFixStockQuantities @intItemId 
 END 
 
 ------------------------------------------------------------------------------
@@ -1069,18 +1069,40 @@ END
 ------------------------------------------------------------------------------
 BEGIN 
 	UPDATE	ItemPricing 
-	SET		dblLastCost = ISNULL(q.dblFindLastCost, ItemPricing.dblLastCost) 
+	SET		dblLastCost = COALESCE(q.dblFindLastCost, NULLIF(ItemPricing.dblLastCost, 0), negativeStock.dblFindLastCost) 
 	FROM	tblICItemPricing ItemPricing INNER JOIN tblICItem i
 				ON ItemPricing.intItemId = i.intItemId
+			INNER JOIN tblICItemUOM StockUOM
+				ON StockUOM.intItemId = ItemPricing.intItemId
+				AND StockUOM.ysnStockUnit = 1
 			OUTER APPLY (
 				SELECT	TOP 1 
-						dblFindLastCost = dbo.fnMultiply(InvTrans.dblCost, InvTrans.dblUOMQty) 
+						dblFindLastCost = dbo.fnCalculateCostBetweenUOM (
+								InvTrans.intItemUOMId
+								,StockUOM.intItemUOMId
+								,InvTrans.dblCost
+							)	
 				FROM	dbo.tblICInventoryTransaction InvTrans 
 				WHERE	InvTrans.intItemId = ItemPricing.intItemId
 						AND InvTrans.intItemLocationId = ItemPricing.intItemLocationId
 						AND InvTrans.dblQty > 0 
-				ORDER BY InvTrans.dtmDate DESC 						
+						AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0
+				ORDER BY InvTrans.intInventoryTransactionId DESC 						
 			) q
+			OUTER APPLY (
+				SELECT	TOP 1 
+						dblFindLastCost = dbo.fnCalculateCostBetweenUOM (
+								InvTrans.intItemUOMId
+								,StockUOM.intItemUOMId
+								,InvTrans.dblCost
+							)	
+				FROM	dbo.tblICInventoryTransaction InvTrans 
+				WHERE	InvTrans.intItemId = ItemPricing.intItemId
+						AND InvTrans.intItemLocationId = ItemPricing.intItemLocationId
+						AND InvTrans.dblQty < 0 
+						AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0
+				ORDER BY InvTrans.intInventoryTransactionId DESC 						
+			) negativeStock
 	WHERE	ItemPricing.intItemId = ISNULL(@intItemId, ItemPricing.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
@@ -1088,19 +1110,42 @@ BEGIN
 	SET		dblLastCost = ISNULL(dblLastCost, 0.00) 
 
 	UPDATE	Lot
-	SET		dblLastCost = ISNULL(q.dblFindLastCost, Lot.dblLastCost) 
+	SET		dblLastCost = COALESCE(q.dblFindLastCost, NULLIF(Lot.dblLastCost, 0), negativeStock.dblFindLastCost) 
 	FROM	tblICLot Lot INNER JOIN tblICItem i
 				ON Lot.intItemId = i.intItemId
+			INNER JOIN tblICItemUOM StockUOM
+				ON StockUOM.intItemId = Lot.intItemId
+				AND StockUOM.ysnStockUnit = 1
 			OUTER APPLY (
 				SELECT	TOP 1 
-						dblFindLastCost = dbo.fnMultiply(InvTrans.dblCost, InvTrans.dblUOMQty) 
+						dblFindLastCost = dbo.fnCalculateCostBetweenUOM (
+								InvTrans.intItemUOMId
+								,StockUOM.intItemUOMId
+								,InvTrans.dblCost
+							)	
 				FROM	dbo.tblICInventoryTransaction InvTrans 
 				WHERE	InvTrans.intItemId = Lot.intItemId
 						AND InvTrans.intItemLocationId = Lot.intItemLocationId
 						AND InvTrans.intLotId = Lot.intLotId
 						AND InvTrans.dblQty > 0 
-				ORDER BY InvTrans.dtmDate DESC 
+						AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0
+				ORDER BY InvTrans.intInventoryTransactionId DESC 
 			) q
+			OUTER APPLY (
+				SELECT	TOP 1 
+						dblFindLastCost = dbo.fnCalculateCostBetweenUOM (
+								InvTrans.intItemUOMId
+								,StockUOM.intItemUOMId
+								,InvTrans.dblCost
+							)	
+				FROM	dbo.tblICInventoryTransaction InvTrans 
+				WHERE	InvTrans.intItemId = Lot.intItemId
+						AND InvTrans.intItemLocationId = Lot.intItemLocationId
+						AND InvTrans.intLotId = Lot.intLotId
+						AND InvTrans.dblQty < 0 
+						AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0
+				ORDER BY InvTrans.intInventoryTransactionId DESC 
+			) negativeStock
 	WHERE	Lot.intItemId = ISNULL(@intItemId, Lot.intItemId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
@@ -1348,13 +1393,10 @@ BEGIN
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty)
 						,dblCost  = 
-							dbo.fnMultiply(
-								CASE WHEN Lot.dblLastCost IS NULL THEN 
-											(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId) 
-										ELSE 
-											Lot.dblLastCost
-								END 
-								,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
+							dbo.fnCalculateCostBetweenUOM (
+								StockUOM.intItemUOMId
+								,ICTrans.intItemUOMId
+								,ISNULL(Lot.dblLastCost, itemPricing.dblLastCost) 
 							)
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
@@ -1370,11 +1412,23 @@ BEGIN
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
-				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICLot Lot
+				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemUOM StockUOM
+							ON StockUOM.intItemId = ICTrans.intItemId
+							AND StockUOM.ysnStockUnit = 1						
+						LEFT JOIN dbo.tblICLot Lot
 							ON ICTrans.intLotId = Lot.intLotId
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
+						OUTER APPLY  (
+							SELECT TOP 1 
+								dblLastCost 
+							FROM 
+								tblICItemPricing 
+							WHERE 
+								intItemId = ICTrans.intItemId 
+								AND intItemLocationId = ICTrans.intItemLocationId
+						) itemPricing
 				WHERE	strBatchId = @strBatchId
 						AND (
 							strTransactionForm = 'Consume'
@@ -1544,9 +1598,10 @@ BEGIN
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 						,dblCost  = 
-								dbo.fnMultiply(
-									ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId))
-									,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
+								dbo.fnCalculateCostBetweenUOM (
+									StockUOM.intItemUOMId
+									,ICTrans.intItemUOMId
+									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
 								)
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
@@ -1567,11 +1622,22 @@ BEGIN
 						INNER JOIN dbo.tblICInventoryTransferDetail Detail
 							ON Detail.intInventoryTransferId = Header.intInventoryTransferId
 							AND Detail.intInventoryTransferDetailId = ICTrans.intTransactionDetailId 
+						INNER JOIN tblICItemUOM StockUOM
+							ON StockUOM.intItemId = ICTrans.intItemId 
+							AND StockUOM.ysnStockUnit = 1
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 						LEFT JOIN dbo.tblICLot lot
 							ON lot.intLotId = ICTrans.intLotId
+						OUTER APPLY (
+							SELECT TOP 1 dblLastCost 
+							FROM 
+								tblICItemPricing 
+							WHERE 
+								intItemId = ICTrans.intItemId 
+								AND intItemLocationId = ICTrans.intItemLocationId
+						) itemPricing
 				WHERE	strBatchId = @strBatchId
 						AND ICTrans.dblQty < 0 
 
@@ -2453,9 +2519,10 @@ BEGIN
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 						,dblCost  = 
-								dbo.fnMultiply(
-									ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId))
-									,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
+								dbo.fnCalculateCostBetweenUOM (
+									StockUOM.intItemUOMId
+									,ICTrans.intItemUOMId
+									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
 								)
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
@@ -2474,11 +2541,25 @@ BEGIN
 
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
+						INNER JOIN tblICItemUOM StockUOM
+							ON StockUOM.intItemId = ICTrans.intItemId
+							AND StockUOM.ysnStockUnit = 1
+
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 						LEFT JOIN tblICLot lot
 							ON lot.intLotId = ICTrans.intLotId
+						OUTER APPLY (
+							SELECT TOP 1 
+								dblLastCost 
+							FROM 
+								tblICItemPricing 
+							WHERE 
+								intItemId = ICTrans.intItemId 
+								AND intItemLocationId = ICTrans.intItemLocationId
+						) itemPricing
+	
 				WHERE	strBatchId = @strBatchId
 						AND ICTrans.dblQty < 0 
 						AND ItemLocation.intLocationId IS NOT NULL
@@ -2897,9 +2978,10 @@ BEGIN
 															, RebuildInvTrans.intItemUOMId
 														) 
 													ELSE 
-														dbo.fnMultiply(
-															ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
-															,dblUOMQty
+														dbo.fnCalculateCostBetweenUOM (
+															StockUOM.intItemUOMId
+															,RebuildInvTrans.intItemUOMId
+															,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
 														)
 											END 
 
@@ -2916,9 +2998,8 @@ BEGIN
 														) 
 													ELSE
 														-- Otherwise, get the last cost. 
-														ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = RebuildInvTrans.intItemId and intItemLocationId = RebuildInvTrans.intItemLocationId))
+														ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
 											END 
-
 										ELSE 
 											RebuildInvTrans.dblCost
 									END 
@@ -2951,7 +3032,22 @@ BEGIN
 							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 						LEFT JOIN dbo.tblICLot lot
-							ON lot.intLotId = RebuildInvTrans.intLotId 
+							ON lot.intLotId = RebuildInvTrans.intLotId
+							
+						LEFT JOIN dbo.tblICItemUOM StockUOM
+							ON StockUOM.intItemId = RebuildInvTrans.intItemId
+							AND StockUOM.ysnStockUnit = 1
+
+						OUTER APPLY (
+							SELECT TOP 1 
+								dblLastCost 
+							FROM 
+								tblICItemPricing p
+							WHERE 
+								p.intItemId = RebuildInvTrans.intItemId 
+								AND p.intItemLocationId = RebuildInvTrans.intItemLocationId
+						) itemPricing
+
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
@@ -3289,11 +3385,11 @@ BEGIN
 												END																
 												+
 												CASE 
-													WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
-														dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) / DetailItem.dblForexRate
+													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+														dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId) / ReceiptItem.dblForexRate
 													ELSE 
-														dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-												END							
+														dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+												END								
 
 											)
 											-- (C) then convert the cost to the sub-currency value. 
@@ -3993,9 +4089,10 @@ BEGIN
 						,ICTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
 						,dblCost  = 
-								dbo.fnMultiply(
-									ISNULL(lot.dblLastCost, (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = ICTrans.intItemId and intItemLocationId = ICTrans.intItemLocationId))
-									,ISNULL(ItemUOM.dblUnitQty, ICTrans.dblUOMQty) 
+								dbo.fnCalculateCostBetweenUOM (
+									StockUOM.intItemUOMId
+									,ICTrans.intItemUOMId
+									,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
 								)
 						,ICTrans.dblSalesPrice  
 						,ICTrans.intCurrencyId  
@@ -4014,11 +4111,22 @@ BEGIN
 
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
+						INNER JOIN tblICItemUOM StockUOM
+							ON StockUOM.intItemId = ICTrans.intItemId
+							AND StockUOM.ysnStockUnit = 1
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
 						LEFT JOIN tblICLot lot
 							ON lot.intLotId = ICTrans.intLotId
+						OUTER APPLY (
+							SELECT TOP 1 dblLastCost 
+							FROM 
+								tblICItemPricing 
+							WHERE 
+								intItemId = ICTrans.intItemId 
+								AND intItemLocationId = ICTrans.intItemLocationId
+						) itemPricing
 				WHERE	strBatchId = @strBatchId
 						AND ICTrans.dblQty < 0 
 						AND ItemLocation.intLocationId IS NOT NULL

@@ -146,12 +146,21 @@ BEGIN TRY
 
 			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
 			BEGIN
-				EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId,@intBillId OUT
+				DECLARE @_strWhereFinalizedWeightIn VARCHAR(MAX)
+				DECLARE @_strWhereFinalizedGradeIn VARCHAR(MAX)
 
-				IF ISNULL(@intContractDetailId,0) != 0
+				SELECT @_strWhereFinalizedWeightIn = strWeightFinalized, @_strWhereFinalizedGradeIn = strGradeFinalized
+				FROM vyuSCTicketScreenView WHERE intTicketId = @intMatchTicketId
+
+				IF ISNULL(@_strWhereFinalizedWeightIn, 'Origin') = 'Destination' OR ISNULL(@_strWhereFinalizedGradeIn, 'Origin') = 'Destination'
 				BEGIN
-					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-					EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+					EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
+
+					IF ISNULL(@intContractDetailId,0) != 0
+					BEGIN
+						SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+						EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+					END
 				END
 				DECLARE @dblPricedContractQty AS DECIMAL(18,6)
 
@@ -164,7 +173,14 @@ BEGIN TRY
 					ON SC.intContractId = CT.intContractDetailId
 				WHERE  SC.intTicketId = @intTicketId
 
-				IF(@dblPricedContractQty > 0)
+				IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
+				INNER JOIN tblCTPriceFixation CPX
+					ON CPX.intPriceFixationId = CTP.intPriceFixationId
+				INNER JOIN tblCTContractDetail CT
+					ON CPX.intContractDetailId = CT.intContractDetailId
+				INNER JOIN tblSCTicket SC
+					ON SC.intContractId = CT.intContractDetailId
+				WHERE  SC.intTicketId = @intTicketId))
 				BEGIN
 					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 				END

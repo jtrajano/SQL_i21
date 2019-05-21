@@ -557,7 +557,7 @@ BEGIN /* Direct Inventory */
 																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
 																			,A.dblQtyReceived),
 		[dblQtyToBillUnitQty]					=	CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
-		[dblOrderQty]					=	(CASE WHEN lgDetail.dblQuantity = NULL
+		[dblOrderQty]					=	(CASE WHEN lgDetail.dblQuantity IS NULL
 												THEN
 													 dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
 																						,CASE WHEN ctd.intItemUOMId > 0 
@@ -567,13 +567,7 @@ BEGIN /* Direct Inventory */
 																						,A.dblQtyReceived)
 													
 												ELSE
-													
-													dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
-																						,CASE WHEN lgDetail.intItemUOMId > 0 
-																							THEN lgDetail.intItemUOMId 
-																							ELSE A.intUnitOfMeasureId 
-																						 END
-																						,lgDetail.dblQuantity )
+													lgDetail.dblQuantity 
 													
 											END),
 		[dblDiscount]					=	A.[dblDiscount],
@@ -679,6 +673,6 @@ BEGIN /* RESULT */
 			[strSourceNumber],
 			[intSubLocationId],
 			[intItemLocationId]
-			
+			,ysnStage
 	FROM @VoucherPayable
 END

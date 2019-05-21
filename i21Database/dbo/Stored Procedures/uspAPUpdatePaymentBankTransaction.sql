@@ -89,7 +89,7 @@ BEGIN
 		[strCity] = E.strCity,
 		[strState] = E.strState,
 		[strCountry] = E.strCountry,
-		[dblAmount] = A.dblAmountPaid + A.dblWithheld,
+		[dblAmount] = A.dblAmountPaid,
 		[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 		[strMemo] = A.strNotes,
 		[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE A.strPaymentInfo END,

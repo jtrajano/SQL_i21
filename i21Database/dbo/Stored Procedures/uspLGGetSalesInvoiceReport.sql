@@ -271,10 +271,12 @@ BEGIN
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
-	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId --AND LDCLink.intLoadContainerId = ReceiptItem.intContainerId
-	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
-	LEFT JOIN tblLGLoadDetailContainerLink DSLDCLink ON DSLDCLink.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblLGLoadContainer DSCont ON DSCont.intLoadContainerId = DSLDCLink.intLoadContainerId
+	OUTER APPLY (SELECT TOP 1 strContainerNumber = Cont.strContainerNumber, strLotNumber = Cont.strLotNumber, strMarks = Cont.strMarks FROM tblLGLoadDetailContainerLink LDCLink
+					LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = LDCLink.intLoadContainerId
+					WHERE LDCLink.intLoadDetailId = ReceiptItem.intSourceId) Cont
+	OUTER APPLY (SELECT TOP 1 strContainerNumber = DSCont.strContainerNumber, strLotNumber = DSCont.strLotNumber, strMarks = DSCont.strMarks FROM tblLGLoadDetailContainerLink DSLDCLink 
+					LEFT JOIN tblLGLoadContainer DSCont ON DSCont.intLoadContainerId = DSLDCLink.intLoadContainerId
+					WHERE DSLDCLink.intLoadDetailId = LD.intLoadDetailId) DSCont
 	LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = ReceiptItem.intSourceId
 	LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
 	LEFT JOIN tblEMEntity PLFA ON PLFA.intEntityId = PL.intForwardingAgentEntityId

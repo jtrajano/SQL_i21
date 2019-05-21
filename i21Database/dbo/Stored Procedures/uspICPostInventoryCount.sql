@@ -283,11 +283,10 @@ BEGIN
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
 						THEN 
 							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
-
 						WHEN Detail.intWeightUOMId IS NULL THEN 
 							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
 						ELSE 
-							ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0)
+							CASE WHEN Item.strLotTracking <> 'No' THEN ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0) ELSE ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) END
 					END
 			,dblUOMQty				= 
 					CASE 
