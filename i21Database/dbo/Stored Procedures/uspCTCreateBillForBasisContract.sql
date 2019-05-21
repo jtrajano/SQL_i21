@@ -64,7 +64,9 @@ BEGIN TRY
 	SELECT SC.intSettleStorageId,SS.strStorageTicket 
 	FROM tblGRSettleContract SC
 	JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
-	WHERE ISNULL(SS.intBillId,0) > 0 AND SC.intContractDetailId = @intBasisContractDetailId
+	WHERE SC.intContractDetailId = @intBasisContractDetailId
+	AND SS.intParentSettleStorageId IS NOT NULL
+	--AND NOT EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail WHERE intContractDetailId = @intBasisContractDetailId)
 
 	SELECT @SettleStorageKey = MIN(intSettleStorageKey)
 	FROM @SettleStorage
@@ -124,10 +126,10 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageId = SC.intSettleStorageId AND SST.intSettleStorageId = SS.intSettleStorageId
 			JOIN tblGRCustomerStorage     CS  ON CS.intCustomerStorageId = SST.intCustomerStorageId
 			JOIN tblICItem Item ON Item.intItemId = SS.intItemId
-			WHERE ISNULL(SS.intBillId,0) > 0 
-			AND SC.intContractDetailId	= @intBasisContractDetailId
+			WHERE SC.intContractDetailId	= @intBasisContractDetailId
 			AND SS.intSettleStorageId   = @intSettleStorageId
-
+			AND SS.intParentSettleStorageId IS NOT NULL
+			--AND NOT EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail WHERE intContractDetailId = @intBasisContractDetailId)
 			------------------------------Insert Discount Item-------------------------------------
 			DELETE @SettleDiscountForContract
 			
