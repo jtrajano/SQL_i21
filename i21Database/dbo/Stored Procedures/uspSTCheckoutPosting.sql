@@ -135,7 +135,8 @@ BEGIN
 		DECLARE @tblTempInvoiceIds TABLE
 		(
 			intInvoiceId INT,
-			ysnPosted BIT
+			ysnPosted BIT,
+			strTransactionType NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CS_AS
 		)
 
 		DECLARE @tblTempRank TABLE
@@ -1819,6 +1820,7 @@ BEGIN
 
 
 --PRINT 'CUSTOMER CHARGES'
+-- TEST
 				----------------------------------------------------------------------
 				--------- CUSTOMER CHARGES @strtblSTCheckoutCustomerCharges01---------
 				----------------------------------------------------------------------
@@ -3296,12 +3298,12 @@ BEGIN
 												UPDATE @LineItemTaxEntries
 												SET strSourceTransaction = ''
 												WHERE intTempDetailIdForTaxes IS NOT NULL
-												AND strSourceTransaction <> ''
+													OR strSourceTransaction <> ''
 
 												UPDATE @EntriesForInvoiceBatchPost
 												SET strImportFormat = ''
 												WHERE intTempDetailIdForTaxes IS NOT NULL
-												AND strImportFormat <> ''
+													OR strImportFormat <> ''
 											END
 										-------------------------------------------------------------------------------
 										------------------------------- End Rank --------------------------------------
@@ -3309,7 +3311,6 @@ BEGIN
 
 										--SELECT * FROM @LineItemTaxEntries
 
-										SELECT * FROM @EntriesForInvoiceBatchPost
 
 										-- POST Main Checkout Invoice (Batch Posting)
 										EXEC [dbo].[uspARProcessInvoicesByBatch]
@@ -3347,11 +3348,13 @@ BEGIN
 															INSERT INTO @tblTempInvoiceIds
 															(
 																intInvoiceId,
-																ysnPosted
+																ysnPosted,
+																strTransactionType
 															)
 															SELECT DISTINCT 
 																LogDetail.intInvoiceId,
-																Inv.ysnPosted
+																Inv.ysnPosted,
+																LogDetail.strTransactionType
 															FROM tblARInvoiceIntegrationLogDetail LogDetail
 															INNER JOIN tblARInvoice Inv
 																ON LogDetail.intInvoiceId = Inv.intInvoiceId
@@ -3529,13 +3532,13 @@ BEGIN
 
 						IF(@ErrorMessage IS NULL OR @ErrorMessage = '')
 							BEGIN
-							    -- Insert to temp table
-								INSERT INTO #tmpCustomerInvoiceIdList(intInvoiceId)
-								SELECT [intID] AS intInvoiceId 
-								FROM [dbo].[fnGetRowsFromDelimitedValues](@CreatedIvoices) ORDER BY [intID] ASC
+							 --   -- Insert to temp table
+								--INSERT INTO #tmpCustomerInvoiceIdList(intInvoiceId)
+								--SELECT [intID] AS intInvoiceId 
+								--FROM [dbo].[fnGetRowsFromDelimitedValues](@CreatedIvoices) ORDER BY [intID] ASC
 
 								-- Invoice MAIN Checkout
-								SET @intCreatedInvoiceId = (SELECT TOP 1 intInvoiceId FROM #tmpCustomerInvoiceIdList ORDER BY intInvoiceId ASC)
+								SET @intCreatedInvoiceId = (SELECT TOP 1 intInvoiceId FROM @tblTempInvoiceIds WHERE strTransactionType = @strInvoiceTransactionTypeMain)  --(SELECT TOP 1 intInvoiceId FROM #tmpCustomerInvoiceIdList WHERE strTransactionType = @strInvoiceTransactionTypeMain ORDER BY intInvoiceId ASC)
 
 
 								------------------------------------------------------------------------------------------------------
@@ -4162,11 +4165,13 @@ BEGIN
 				INSERT INTO @tblTempInvoiceIds
 				(
 					intInvoiceId,
-					ysnPosted
+					ysnPosted,
+					strTransactionType
 				)
 				SELECT DISTINCT 
 					Inv.intInvoiceId,
-					Inv.ysnPosted
+					Inv.ysnPosted,
+					LogDetail.strTransactionType
 				FROM tblARInvoiceIntegrationLogDetail LogDetail
 				INNER JOIN tblARInvoice Inv
 					ON LogDetail.intInvoiceId = Inv.intInvoiceId
@@ -4492,7 +4497,7 @@ BEGIN
 								WHERE intCheckoutId = @intCheckoutId
 
 
-								IF EXISTS (SELECT * FROM #tmpCustomerInvoiceIdList)
+								IF EXISTS (SELECT TOP 1 1 FROM @tblTempInvoiceIds WHERE strTransactionType != @strInvoiceTransactionTypeMain) --#tmpCustomerInvoiceIdList)
 									BEGIN
 										-- Update customer charges invoices on table tblSTCheckoutCustomerCharges
 										UPDATE CC
@@ -4531,7 +4536,9 @@ BEGIN
 											SELECT
 												ROW_NUMBER() OVER (ORDER BY intInvoiceId ASC) as intRowNumber
 												, intInvoiceId
-											FROM #tmpCustomerInvoiceIdList
+											FROM @tblTempInvoiceIds 
+											WHERE strTransactionType != @strInvoiceTransactionTypeMain
+											-- FROM #tmpCustomerInvoiceIdList
 
 										) IX ON CCX.intRowNumber = IX.intRowNumber
 									END

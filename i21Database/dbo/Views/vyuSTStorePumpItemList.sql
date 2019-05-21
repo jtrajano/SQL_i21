@@ -17,8 +17,8 @@ SELECT
 	,IP.dblSalePrice as dblPrice
 	,IL.intFamilyId
 	,IL.intClassId
-	,SPI.intStorePumpItemId
-	,SPI.intStoreId
+	--,SPI.intStorePumpItemId
+	,ST.intStoreId
 	,I.strType
 	,I.strStatus
 	,I.strLotTracking
@@ -29,14 +29,15 @@ INNER JOIN tblICItemLocation IL
 	ON UOM.intItemId =  IL.intItemId
 INNER JOIN tblICItemPricing IP 
 	ON IP.intItemLocationId = IL.intItemLocationId
+	AND I.intItemId = IP.intItemId
 INNER JOIN tblSMCompanyLocation CL 
 	ON IL.intLocationId = CL.intCompanyLocationId
 INNER JOIN tblSTStore ST 
 	ON CL.intCompanyLocationId = ST.intCompanyLocationId
-INNER JOIN tblSTPumpItem SPI 
-	ON ST.intStoreId = SPI.intStoreId
-LEFT JOIN tblICCategory C 
-	ON SPI.intCategoryId = C.intCategoryId
+--INNER JOIN tblSTPumpItem SPI 
+--	ON ST.intStoreId = SPI.intStoreId
+INNER JOIN tblICCategory C 
+	ON I.intCategoryId = C.intCategoryId
 --where I.strType = 'Inventory'
 --and I.strStatus = 'Active'
-WHERE SPI.intItemUOMId =  UOM.intItemUOMId
+--WHERE SPI.intItemUOMId =  UOM.intItemUOMId
