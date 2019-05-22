@@ -85,8 +85,8 @@ BEGIN TRY
 						END
 						* AD.dblQtyToPriceUOMConvFactor
 						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) --FX on LS detail level
-							   WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId) THEN CTFX.dblFXRate --FX on CT level
-							   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.dblFXRate --FX on LS header level
+							   WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1) --FX on CT level
+							   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1) --FX on LS header level
 							   ELSE 1 END
 			,dblValue = CASE WHEN (AD.dblSeqPrice IS NULL) THEN
 							CASE WHEN (LD.dblUnitPrice > 0) 
@@ -96,8 +96,8 @@ BEGIN TRY
 						END
 						* AD.dblQtyToPriceUOMConvFactor 
 						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) --FX on LS detail level
-							   WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId) THEN CTFX.dblFXRate --FX on CT level
-							   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.dblFXRate --FX on LS header level
+							   WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1) --FX on CT level
+							   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1) --FX on LS header level
 							   ELSE 1 END
 						* LD.dblQuantity 
 			,dblSalesPrice = 0.0
@@ -114,12 +114,12 @@ BEGIN TRY
 			,intFobPointId = CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
 			,intInTransitSourceLocationId = IL.intItemLocationId
 			,intForexRateTypeId = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId)
-									   WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId) THEN CTFX.intForexRateTypeId 
+									   WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN CTFX.intForexRateTypeId 
 									   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.intForexRateTypeId
 									   ELSE LD.intForexRateTypeId END
 			,dblForexRate = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) 
-								 WHEN (@DefaultCurrencyId <> AD.intSeqCurrencyId) THEN CTFX.dblFXRate
-								 WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.dblFXRate
+								 WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1)
+								 WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1)
 								 ELSE ISNULL(LD.dblForexRate,1) END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -133,6 +133,7 @@ BEGIN TRY
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
+		LEFT JOIN tblSMCurrency SeqCUR ON SeqCUR.intCurrencyID = AD.intSeqCurrencyId
 		OUTER APPLY (SELECT	TOP 1  
 						intForexRateTypeId = RD.intRateTypeId
 						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
@@ -151,9 +152,9 @@ BEGIN TRY
 							ELSE RD.[dblRate] END 
 				FROM tblSMCurrencyExchangeRate ER
 				JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
-				WHERE @DefaultCurrencyId <> AD.intSeqCurrencyId
-					AND ((ER.intFromCurrencyId = AD.intSeqCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
-						OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = AD.intSeqCurrencyId))
+				WHERE @DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)
+					AND ((ER.intFromCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
+						OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)))
 				ORDER BY RD.dtmValidFromDate DESC) CTFX
 		WHERE L.intLoadId = @intLoadId
 		GROUP BY LD.intItemId
@@ -190,6 +191,8 @@ BEGIN TRY
 			,CD.dblTotalCost
 			,CD.dblCashPrice
 			,AD.intSeqCurrencyId
+			,SeqCUR.intMainCurrencyId
+			,SeqCUR.intCurrencyID
 			,FX.intForexRateTypeId
 			,FX.dblFXRate
 			,CTFX.intForexRateTypeId
