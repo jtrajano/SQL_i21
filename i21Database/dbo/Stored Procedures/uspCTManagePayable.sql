@@ -68,6 +68,11 @@ INSERT INTO @voucherPayables(
 )
 SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type);
 
+IF NOT EXISTS(SELECT * FROM @voucherPayables)
+BEGIN
+	RETURN
+END
+
 IF @remove = 0
 BEGIN
 	EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @voucherPayableTax = @voucherPayableTax

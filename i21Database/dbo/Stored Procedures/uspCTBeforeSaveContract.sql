@@ -155,6 +155,12 @@ BEGIN TRY
 
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId	
 
+	UPDATE	CC
+	SET		CC.intPrevConcurrencyId = CC.intConcurrencyId
+	FROM	tblCTContractCost	CC
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+
 END TRY
 
 BEGIN CATCH
