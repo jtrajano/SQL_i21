@@ -16,7 +16,7 @@ BEGIN TRY
 	DECLARE @intOptionsMatchPnSHeaderId INT
 	DECLARE @strTranNo NVARCHAR(50)
 	DECLARE @dtmMatchDate DATETIME
-	DECLARE @intMatchQty INT
+	
 	DECLARE @intLFutOptTransactionId INT
 	DECLARE @intSFutOptTransactionId INT
 	DECLARE @strExpiredTranNo NVARCHAR(50)
@@ -131,14 +131,14 @@ BEGIN TRY
 	SELECT @intOptionsMatchPnSHeaderId as intOptionsMatchPnSHeaderId
 		, @strTranNo + ROW_NUMBER() OVER (ORDER BY intLFutOptTransactionId) strTranNo
 		, dtmMatchDate
-		, intMatchQty
+		, dblMatchQty
 		, intLFutOptTransactionId
 		, intSFutOptTransactionId
 		, 1 as intConcurrencyId
 	FROM OPENXML(@idoc,'root/Transaction', 2)
 	WITH ([intOptionsMatchPnSHeaderId] INT
 		, [dtmMatchDate]  DATETIME
-		, [intMatchQty] INT
+		, [dblMatchQty] Numeric(18,6)
 		, [intLFutOptTransactionId] INT
 		, [intSFutOptTransactionId] INT)
 	

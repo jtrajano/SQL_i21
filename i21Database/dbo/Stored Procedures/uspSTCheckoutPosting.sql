@@ -8,7 +8,8 @@
 	@ysnInvoiceStatus BIT OUTPUT,
 	@ysnCustomerChargesInvoiceStatus BIT OUTPUT,
 	@strBatchIdForNewPostRecap NVARCHAR(1000) OUTPUT,
-	@strErrorCode NVARCHAR(50) OUTPUT
+	@strErrorCode NVARCHAR(50) OUTPUT,
+	@ysnDebug BIT										=	0
 AS
 BEGIN
 
@@ -1820,12 +1821,11 @@ BEGIN
 
 
 --PRINT 'CUSTOMER CHARGES'
--- TEST
 				----------------------------------------------------------------------
 				--------- CUSTOMER CHARGES @strtblSTCheckoutCustomerCharges01---------
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1020
-				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
+				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0) --AND intProduct IS NOT NULL)
 					BEGIN
 						DECLARE @strtblSTCheckoutCustomerCharges01 AS NVARCHAR(150) = 'tblSTCheckoutCustomerCharges01'
 
@@ -1895,12 +1895,18 @@ BEGIN
 								ON CC.intCheckoutId = CH.intCheckoutId
 							JOIN tblSTStore ST 
 								ON CH.intStoreId = ST.intStoreId
+							JOIN tblICItemUOM STUOM
+								ON ST.intCustomerChargesItemId = STUOM.intItemId
 							JOIN vyuEMEntityCustomerSearch vC 
-								ON CC.intCustomerId = vC.intEntityId
-							LEFT JOIN tblICItemUOM UOM 
-								ON CC.intProduct = UOM.intItemUOMId
+								ON CC.intCustomerId = vC.intEntityId					
+							INNER JOIN tblICItemUOM UOM 
+								ON UOM.intItemUOMId = CASE 
+														WHEN CC.intProduct IS NOT NULL
+															THEN CC.intProduct
+														ELSE STUOM.intItemUOMId
+													END
 							LEFT JOIN tblICItem I 
-								ON UOM.intItemId = I.intItemId
+									ON UOM.intItemId = I.intItemId
 							LEFT JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
 								AND ST.intCompanyLocationId = IL.intLocationId
@@ -2249,11 +2255,16 @@ BEGIN
 									ON CC.intCheckoutId = CH.intCheckoutId
 								JOIN tblSTStore ST 
 									ON CH.intStoreId = ST.intStoreId
+								JOIN tblICItemUOM STUOM
+									ON ST.intCustomerChargesItemId = STUOM.intItemId
 								JOIN vyuEMEntityCustomerSearch vC 
-									ON ST.intCheckoutCustomerId = vC.intEntityId
-									--ON CC.intCustomerId = vC.intEntityId -- For separate Customer CHarges Only
-								LEFT JOIN tblICItemUOM UOM 
-									ON CC.intProduct = UOM.intItemUOMId
+									ON CC.intCustomerId = vC.intEntityId					
+								INNER JOIN tblICItemUOM UOM 
+									ON UOM.intItemUOMId = CASE 
+															WHEN CC.intProduct IS NOT NULL
+																THEN CC.intProduct
+															ELSE STUOM.intItemUOMId
+														END
 								LEFT JOIN tblICItem I 
 									ON UOM.intItemId = I.intItemId
 								LEFT JOIN tblICItemLocation IL 
@@ -2530,7 +2541,7 @@ BEGIN
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1019
 				--http://jira.irelyserver.com/browse/ST-1020
-				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
+				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0) --AND intProduct IS NOT NULL)
 					BEGIN
 						DECLARE @strtblSTCheckoutCustomerCharges02 AS NVARCHAR(150) = 'tblSTCheckoutCustomerCharges02'
 
@@ -2600,12 +2611,18 @@ BEGIN
 							ON CC.intCheckoutId = CH.intCheckoutId
 						JOIN tblSTStore ST 
 							ON CH.intStoreId = ST.intStoreId
+						JOIN tblICItemUOM STUOM
+							ON ST.intCustomerChargesItemId = STUOM.intItemId
 						JOIN vyuEMEntityCustomerSearch vC 
-							ON CC.intCustomerId = vC.intEntityId
-						LEFT JOIN tblICItemUOM UOM 
-							ON CC.intProduct = UOM.intItemUOMId
+							ON CC.intCustomerId = vC.intEntityId					
+						INNER JOIN tblICItemUOM UOM 
+							ON UOM.intItemUOMId = CASE 
+													WHEN CC.intProduct IS NOT NULL
+														THEN CC.intProduct
+													ELSE STUOM.intItemUOMId
+												END
 						LEFT JOIN tblICItem I 
-							ON UOM.intItemId = I.intItemId
+									ON UOM.intItemId = I.intItemId
 						LEFT JOIN tblICItemLocation IL 
 							ON I.intItemId = IL.intItemId
 							AND ST.intCompanyLocationId = IL.intLocationId
@@ -2978,10 +2995,16 @@ BEGIN
 									ON CC.intCheckoutId = CH.intCheckoutId
 								JOIN tblSTStore ST 
 									ON CH.intStoreId = ST.intStoreId
+								JOIN tblICItemUOM STUOM
+									ON ST.intCustomerChargesItemId = STUOM.intItemId
 								JOIN vyuEMEntityCustomerSearch vC 
-									ON CC.intCustomerId = vC.intEntityId
-								LEFT JOIN tblICItemUOM UOM 
-									ON CC.intProduct = UOM.intItemUOMId
+									ON CC.intCustomerId = vC.intEntityId					
+								INNER JOIN tblICItemUOM UOM 
+									ON UOM.intItemUOMId = CASE 
+															WHEN CC.intProduct IS NOT NULL
+																THEN CC.intProduct
+															ELSE STUOM.intItemUOMId
+														END
 								LEFT JOIN tblICItem I 
 									ON UOM.intItemId = I.intItemId
 								LEFT JOIN tblICItemLocation IL 
@@ -3251,7 +3274,21 @@ BEGIN
 											,[ysnRecap]
 										FROM @EntriesForInvoice
 
-										--SELECT * FROM @EntriesForInvoice
+
+
+-- ============================================================================================
+-- [START] TEST TO DEBUG
+-- ============================================================================================
+IF(@ysnDebug = 1)
+	BEGIN
+		SELECT '@EntriesForInvoiceBatchPost-All Items to send to Sales Invoice', * 
+		FROM @EntriesForInvoiceBatchPost
+	END
+-- ============================================================================================
+-- [END] TEST TO DEBUG
+-- ============================================================================================
+
+
 
 										-------------------------------------------------------------------------------
 										------------------------------- Start Rank ------------------------------------
@@ -3293,6 +3330,30 @@ BEGIN
 												INNER JOIN @tblTempRank Ranking
 													ON Tax.intTempDetailIdForTaxes = Ranking.intTempDetailIdForTaxes											-- Id
 													AND Tax.strSourceTransaction COLLATE SQL_Latin1_General_CP1_CS_AS = Ranking.strSourceTransaction			-- Table
+
+
+-- ============================================================================================
+-- [START] TEST TO DEBUG
+-- ============================================================================================
+IF(@ysnDebug = 1)
+	BEGIN
+		SELECT 'For Items that has Tax'
+
+		SELECT '@LineItemTaxEntries-List of Taxes on Items', intTempDetailIdForTaxes, strSourceTransaction, * 
+		FROM @LineItemTaxEntries
+		WHERE intTempDetailIdForTaxes IS NOT NULL
+			AND strSourceTransaction <> ''
+
+
+		SELECT '@EntriesForInvoiceBatchPost-Items that has Tax Calc', intTempDetailIdForTaxes, strSourceTransaction, strImportFormat, * 
+		FROM @EntriesForInvoiceBatchPost
+		WHERE intTempDetailIdForTaxes IS NOT NULL
+			OR strImportFormat <> ''
+	END
+-- ============================================================================================
+-- [END] TEST TO DEBUG
+-- ============================================================================================
+
 
 												-- Clear values
 												UPDATE @LineItemTaxEntries

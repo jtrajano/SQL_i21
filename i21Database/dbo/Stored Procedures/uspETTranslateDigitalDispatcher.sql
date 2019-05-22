@@ -32,6 +32,8 @@ BEGIN
  DECLARE @strDetailType       NVARCHAR(2)      
  DECLARE @strContractNumber      NVARCHAR(50)      
  DECLARE @intContractSequence      INT      
+ DECLARE @intContractDetailId		INT
+ DECLARE @intContractHeaderId		INT
  DECLARE @intImportDDToInvoiceId     INT      
  DECLARE @intCustomerEntityId     INT      
  DECLARE @intDriverEntityId      INT           
@@ -40,7 +42,7 @@ BEGIN
  DECLARE @intSiteId        INT      
  DECLARE @intTaxGroupId       INT        
  DECLARE @LogId         INT      
-       
+  
     
  DECLARE @intLocation INT    
  DECLARE @dblLatitude NUMERIC(18, 6)
@@ -97,8 +99,8 @@ BEGIN
 		,@strComment      = strComment      
 		,@intImportDDToInvoiceId   = intImportDDToInvoiceId      
 		,@strDetailType      = '' --strDetailType not in use as of this writing      
-		,@strContractNumber     = '' --strContractNumber no contract      
-		,@intContractSequence    = NULL --intContractSequence      
+		,@strContractNumber     = strContractNumber 
+		,@intContractSequence    = intContractSequence  --contract detail id (tblCTContractDetail primary key) from TM order export.
 		,@dblLatitude = dblLatitude
 		,@dblLongitude = dblLongitude
 	FROM #tmpDDToInvoice      
@@ -116,6 +118,29 @@ BEGIN
 	--Get Item id      
 	SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)      
     
+	/*Contract Management */    
+	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/    
+	--*note for now no checking. will get whatever what is in the file. no requirements yet in specs.
+	--as of this writing 05222019 the query below only purpose is to check if the contract number, detail id , using the same item Id , still exists
+	SET @intContractDetailId = NULL
+	SET @intContractHeaderId = NULL
+
+	SELECT TOP 1 @intContractDetailId = intContractDetailId
+				,@intContractHeaderId = intContractHeaderId
+	FROM
+		[vyuCTCustomerContract] ARCC
+	WHERE
+		ARCC.[intEntityCustomerId] = @intCustomerEntityId
+		AND ARCC.[intItemId] = @intItemId
+		--AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
+		--									CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
+		--*note AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete') -- for now will no checking. will get whatever what is in the file. no requirements yet in specs.
+		--*note AND (ARCC.[dblAvailableQty] > 0) 
+		AND ARCC.strContractNumber = @strContractNumber
+		AND ARCC.intContractDetailId = @intContractSequence
+	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/    
+
+
 	/*Tank Management */    
 	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/    
 	--SET @intSiteId = ( SELECT TOP 1 intSiteID FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID    
@@ -399,8 +424,8 @@ BEGIN
        ,[strShipmentNumber]  = NULL      
        ,[intSalesOrderDetailId] = NULL      
        ,[strSalesOrderNumber]  = NULL      
-       ,[intContractHeaderId]  = NULL      
-       ,[intContractDetailId]  = NULL      
+       ,[intContractHeaderId]  = @intContractHeaderId
+       ,[intContractDetailId]  = @intContractDetailId
        ,[intShipmentPurchaseSalesContractId] = NULL      
        ,[intTicketId]    = NULL      
        ,[intTicketHoursWorkedId] = NULL      
