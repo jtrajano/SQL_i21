@@ -351,7 +351,7 @@ BEGIN
 			SELECT 
 				[intPaymentId]	= @paymentId,
 				[intBillId]		= A.intBillId,
-				[intAccountId]	= A.intAccountId,
+				[intAccountId]	= CASE WHEN A.intTransactionType = 2 AND A.ysnPrepayHasPayment = 0 THEN details.intAccountId ELSE A.intAccountId END,
 				[dblDiscount]	= ISNULL(C.dblDiscount, A.dblDiscount),
 				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
 				[dblAmountDue]	= ISNULL(C.dblPayment, A.dblAmountDue
@@ -375,6 +375,10 @@ BEGIN
 				[intPayScheduleId]= C.intId
 			FROM tblAPBill A
 			-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			CROSS APPLY
+			(
+				SELECT TOP 1 intAccountId, intBillId FROM tblAPBillDetail dtls WHERE dtls.intBillId = A.intBillId
+			) details
 			LEFT JOIN tblAPVoucherPaymentSchedule C
 				ON C.intBillId = A.intBillId AND C.ysnPaid = 0
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)

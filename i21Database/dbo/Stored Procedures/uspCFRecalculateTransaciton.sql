@@ -6335,7 +6335,9 @@ BEGIN
 	END
 
 
-	IF(ISNULL(@dblSpecialTax,0) > 0)
+	IF(ISNULL(@dblSpecialTax,0) > 0 
+	AND ( LOWER(@strPriceBasis) = 'index retail' OR LOWER(@strPriceBasis) = 'pump price adjustment' ) 
+	 )
 	BEGIN
 		IF(@ysnReRunCalcTax = 0)
 		BEGIN
