@@ -390,8 +390,6 @@ BEGIN
 				,dblInvoiceTotal
 				,dblBaseInvoiceTotal
 				,dblPayment
-				-- ,dblAmountDue
-				-- ,dblBaseAmountDue
 				,strInvoiceReportNumber
 				,intCurrencyExchangeRateTypeId
 				,intCurrencyExchangeRateId
@@ -424,8 +422,6 @@ BEGIN
 					,dblInvoiceTotal				= INV.dblInvoiceTotal
 					,dblBaseInvoiceTotal			= INV.dblBaseInvoiceTotal
 					,dblPayment						= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN @dblInvoiceTotal ELSE @dblCreditMemoTotal END
-					-- ,dblAmountDue					= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END 
-					-- ,dblBaseAmountDue				= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
 					,strInvoiceReportNumber			= INV.strInvoiceNumber
 					,intCurrencyExchangeRateTypeId	= INV.intCurrencyExchangeRateTypeId
 					,intCurrencyExchangeRateId		= INV.intCurrencyExchangeRateId
@@ -433,7 +429,7 @@ BEGIN
 				FROM tblARPOS POS
 				INNER JOIN vyuARInvoicesForPayment INV ON POS.intPOSId = INV.intSourceId
 				INNER JOIN tblSMCompanyLocation CL ON INV.intCompanyLocationId = CL.intCompanyLocationId
-				INNER JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+				LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 				WHERE INV.intInvoiceId = @intNewInvoiceId
 				UNION
 				SELECT 
@@ -463,8 +459,6 @@ BEGIN
 					,dblInvoiceTotal				= CM.dblInvoiceTotal
 					,dblBaseInvoiceTotal			= CM.dblBaseInvoiceTotal
 					,dblPayment						= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN @dblInvoiceTotal ELSE @dblCreditMemoTotal END
-					-- ,dblAmountDue					= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
-					-- ,dblBaseAmountDue				= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
 					,strInvoiceReportNumber			= CM.strInvoiceNumber
 					,intCurrencyExchangeRateTypeId	= CM.intCurrencyExchangeRateTypeId
 					,intCurrencyExchangeRateId		= CM.intCurrencyExchangeRateId
@@ -472,7 +466,7 @@ BEGIN
 				FROM tblARPOS POS
 				INNER JOIN vyuARInvoicesForPayment CM ON POS.intPOSId = CM.intSourceId
 				INNER JOIN tblSMCompanyLocation CL ON CM.intCompanyLocationId = CL.intCompanyLocationId
-				INNER JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+				LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 				WHERE CM.intInvoiceId = @intNewCreditMemoId
 
 				EXEC uspARProcessPayments @PaymentEntries	= @EntriesForExchange
@@ -580,8 +574,6 @@ BEGIN
 						,dblInvoiceTotal
 						,dblBaseInvoiceTotal
 						,dblPayment
-						,dblAmountDue
-						,dblBaseAmountDue
 						,strInvoiceReportNumber
 						,intCurrencyExchangeRateTypeId
 						,intCurrencyExchangeRateId
@@ -614,8 +606,6 @@ BEGIN
 							,dblInvoiceTotal				= INV.dblInvoiceTotal
 							,dblBaseInvoiceTotal			= INV.dblBaseInvoiceTotal
 							,dblPayment						= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN ABS(ISNULL(POSPAYMENTS.dblAmount,0)) * -1 ELSE ISNULL(POSPAYMENTS.dblAmount,0) END
-							,dblAmountDue					= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN ISNULL(INV.dblAmountDue,0) ELSE ISNULL(@dblOnAccountAmount, 0) END 
-							,dblBaseAmountDue				= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN ISNULL(INV.dblAmountDue,0) ELSE ISNULL(@dblOnAccountAmount, 0) END
 							,strInvoiceReportNumber			= INV.strInvoiceNumber
 							,intCurrencyExchangeRateTypeId	= INV.intCurrencyExchangeRateTypeId
 							,intCurrencyExchangeRateId		= INV.intCurrencyExchangeRateId
@@ -629,7 +619,7 @@ BEGIN
 																		END
 																	 ) = INV.intInvoiceId
 						INNER JOIN tblSMCompanyLocation CL ON INV.intCompanyLocationId = CL.intCompanyLocationId
-						INNER JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+						LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 						CROSS APPLY(
 							SELECT TOP 1 intPaymentMethodID
 										,strPaymentMethod
