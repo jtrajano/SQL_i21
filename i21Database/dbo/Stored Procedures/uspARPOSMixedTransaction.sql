@@ -390,8 +390,8 @@ BEGIN
 				,dblInvoiceTotal
 				,dblBaseInvoiceTotal
 				,dblPayment
-				,dblAmountDue
-				,dblBaseAmountDue
+				-- ,dblAmountDue
+				-- ,dblBaseAmountDue
 				,strInvoiceReportNumber
 				,intCurrencyExchangeRateTypeId
 				,intCurrencyExchangeRateId
@@ -424,8 +424,8 @@ BEGIN
 					,dblInvoiceTotal				= INV.dblInvoiceTotal
 					,dblBaseInvoiceTotal			= INV.dblBaseInvoiceTotal
 					,dblPayment						= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN @dblInvoiceTotal ELSE @dblCreditMemoTotal END
-					,dblAmountDue					= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END 
-					,dblBaseAmountDue				= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
+					-- ,dblAmountDue					= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END 
+					-- ,dblBaseAmountDue				= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
 					,strInvoiceReportNumber			= INV.strInvoiceNumber
 					,intCurrencyExchangeRateTypeId	= INV.intCurrencyExchangeRateTypeId
 					,intCurrencyExchangeRateId		= INV.intCurrencyExchangeRateId
@@ -463,8 +463,8 @@ BEGIN
 					,dblInvoiceTotal				= CM.dblInvoiceTotal
 					,dblBaseInvoiceTotal			= CM.dblBaseInvoiceTotal
 					,dblPayment						= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN @dblInvoiceTotal ELSE @dblCreditMemoTotal END
-					,dblAmountDue					= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
-					,dblBaseAmountDue				= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
+					-- ,dblAmountDue					= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
+					-- ,dblBaseAmountDue				= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN 0 ELSE POS.dblTotal END
 					,strInvoiceReportNumber			= CM.strInvoiceNumber
 					,intCurrencyExchangeRateTypeId	= CM.intCurrencyExchangeRateTypeId
 					,intCurrencyExchangeRateId		= CM.intCurrencyExchangeRateId
@@ -642,6 +642,7 @@ BEGIN
 													ELSE @intNewInvoiceId
 													END
 												 )
+												 
 				IF (ISNULL(ABS(@dblCreditMemoTotal), 0) - ISNULL(@dblInvoiceTotal, 0)) <> 0
 					BEGIN
 						EXEC uspARProcessPayments @PaymentEntries	= @EntriesForAmountDuePayment
