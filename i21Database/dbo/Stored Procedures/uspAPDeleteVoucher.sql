@@ -34,6 +34,18 @@ BEGIN TRY
 	--WILL REVERT ONCE SCALE WITH CONTRACT FIXATION IS RELATED
 	UPDATE tblCTPriceFixationDetail SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 
+	DELETE FROM tblCTPriceFixationTicket
+	WHERE intPriceFixationTicketId IN 
+	(
+		SELECT pft.intPriceFixationTicketId 
+		FROM tblCTPriceFixationTicket pft 
+		INNER JOIN vyuCTPriceFixationTicket ft ON pft.intInventoryReceiptId = ft.intInventoryReceiptId 
+			AND pft.intPricingId = ft.intPricingId
+		INNER JOIN tblAPBillDetail bd ON ft.intDetailId = bd.intBillDetailId 
+			AND ft.intInventoryShipmentId IS NULL 
+		WHERE bd.intBillId = @intBillId
+	)
+
 	UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 
 	--WILL REVERT FIRST THE APPLIED BILL 

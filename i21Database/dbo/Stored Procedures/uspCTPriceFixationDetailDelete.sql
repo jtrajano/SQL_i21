@@ -51,6 +51,20 @@ BEGIN TRY
 			@actionIcon = 'small-tree-modified',
 			@keyValue = @Id,
 			@details = @details
+
+			-- DELETE VOUCHER IF ALL TICKETS WHERE DELETED
+			IF NOT EXISTS (	SELECT TOP 1 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id)
+			BEGIN
+				EXEC uspAPDeleteVoucher @Id,@intUserId
+		
+				--Audit Log
+				EXEC uspSMAuditLog
+				@screenName = 'AccountsPayable.view.Voucher',
+				@entityId = @intUserId,
+				@actionType = 'Deleted',
+				@actionIcon = 'small-tree-deleted',
+				@keyValue = @Id
+			END
 		END
 		ELSE
 		BEGIN
