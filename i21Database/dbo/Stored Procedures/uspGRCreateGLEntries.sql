@@ -28,6 +28,7 @@ BEGIN
 	,@ysnDeductFeesCusVen		    BIT
 	,@dblFreightRate				DECIMAL(24,10)
 	,@dblUnits						DECIMAL(24,10)
+	,@dblGrossUnits					DECIMAL(24,10)
 	,@intContractCostId				INT
 	,@ysnIsStorage					BIT
 	,@IntCommodityId				INT
@@ -82,13 +83,14 @@ BEGIN
 	
 	--Inventory Item
 	SELECT 
-		 @LocationId			 = CS.intCompanyLocationId
-		,@intCustomerStorageId   = CS.intCustomerStorageId
-		,@intScaleTicketId		 = CS.intTicketId
-		,@intEntityVendorId		 = CS.intEntityId 
-		,@intCurrencyId			 = CS.intCurrencyId
-		,@InventoryItemId		 = CS.intItemId  
-		,@dblUnits				 = SST.dblUnits
+		 @LocationId			= CS.intCompanyLocationId
+		,@intCustomerStorageId  = CS.intCustomerStorageId
+		,@intScaleTicketId		= CS.intTicketId
+		,@intEntityVendorId		= CS.intEntityId 
+		,@intCurrencyId			= CS.intCurrencyId
+		,@InventoryItemId		= CS.intItemId  
+		,@dblUnits				= SST.dblUnits
+		,@dblGrossUnits			= CS.dblGrossQuantity * (SST.dblUnits / CS.dblOpenBalance)
 	FROM tblGRCustomerStorage CS 
 	JOIN tblGRSettleStorageTicket SST 
 		ON  SST.intCustomerStorageId = CS.intCustomerStorageId
@@ -218,7 +220,7 @@ BEGIN
 											END
 		,[intTicketDiscountId]				= QM.intTicketDiscountId
 		,[intContractCostId]				= NULL
-		,[dblUnits]							= @dblUnits
+		,[dblUnits]							= CASE WHEN QM.strCalcMethod = 3 THEN @dblGrossUnits ELSE @dblUnits END
 	FROM tblGRSettleContract RE
 	JOIN tblGRSettleStorageTicket SST 
 		ON SST.intSettleStorageId = RE.intSettleStorageId
@@ -273,7 +275,7 @@ BEGIN
 											END
 		,[intTicketDiscountId]				= QM.intTicketDiscountId
 		,[intContractCostId]				= NULL
-		,[dblUnits]							= @dblUnits
+		,[dblUnits]							= CASE WHEN QM.strCalcMethod = 3 THEN @dblGrossUnits ELSE @dblUnits END
 	FROM tblGRSettleStorageTicket SST
 	JOIN tblGRSettleStorage SS 
 		ON SS.intSettleStorageId = SST.intSettleStorageId
@@ -720,7 +722,7 @@ BEGIN
 			,intAccountId				= GLAccount.intAccountId
 			,dblDebit					= Debit.Value
 			,dblCredit					= Credit.Value
-			,dblDebitUnit				= 0
+			,dblDebitUnit				= InventoryCostCharges.dblUnits
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
@@ -806,7 +808,7 @@ BEGIN
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblCreditUnit				= InventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge
 			,strCode					= @strCode
 			,strReference				= 'B'
@@ -897,7 +899,7 @@ BEGIN
 			,intAccountId			   = GLAccount.intAccountId
 			,dblDebit				   = Debit.Value
 			,dblCredit				   = Credit.Value
-			,dblDebitUnit			   = 0
+			,dblDebitUnit			   = InventoryCostCharges.dblUnits
 			,dblCreditUnit			   = 0
 			,strDescription			   = ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode				   = @strCode
@@ -967,7 +969,7 @@ BEGIN
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblCreditUnit				= InventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge
 			,strCode					= @strCode
 			,strReference				= 'D'
@@ -1042,7 +1044,7 @@ BEGIN
 			,intAccountId				= GLAccount.intAccountId
 			,dblDebit					= Debit.Value
 			,dblCredit					= Credit.Value
-			,dblDebitUnit				= 0
+			,dblDebitUnit				= InventoryCostCharges.dblUnits
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
@@ -1112,7 +1114,7 @@ BEGIN
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblCreditUnit				= InventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge
 			,strCode					= @strCode
 			,strReference				= 'F'
@@ -1188,9 +1190,9 @@ BEGIN
 				,intAccountId				= GLAccount.intAccountId
 				,dblDebit					= Debit.Value
 				,dblCredit					= Credit.Value
-				,dblDebitUnit				= 0
+				,dblDebitUnit				= NonInventoryCostCharges.dblUnits
 				,dblCreditUnit				= 0
-				,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge 
+				,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 				,strCode					= @strCode
 				,strReference				= 'G' 
 				,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
@@ -1258,7 +1260,7 @@ BEGIN
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblCreditUnit				= NonInventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
 			,strReference				= 'H' 
@@ -1333,7 +1335,7 @@ BEGIN
 			,intAccountId				= GLAccount.intAccountId
 			,dblDebit					= Debit.Value
 			,dblCredit					= Credit.Value
-			,dblDebitUnit				= 0
+			,dblDebitUnit				= NonInventoryCostCharges.dblUnits
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
@@ -1402,7 +1404,7 @@ BEGIN
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
+			,dblCreditUnit				= NonInventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
 			,strReference				= 'J' 
@@ -1476,7 +1478,7 @@ BEGIN
 			,intAccountId				= GLAccount.intAccountId
 			,dblDebit					= Debit.Value
 			,dblCredit					= Credit.Value
-			,dblDebitUnit				= 0
+			,dblDebitUnit				= NonInventoryCostCharges.dblUnits
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
@@ -1544,8 +1546,8 @@ BEGIN
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge 
+			,dblCreditUnit				= NonInventoryCostCharges.dblUnits
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
 			,strReference				= 'L' 
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
