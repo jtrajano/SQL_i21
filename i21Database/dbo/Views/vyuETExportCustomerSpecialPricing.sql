@@ -2,7 +2,7 @@
  AS   
 	SELECT   
 	patr_no = b.strCustomerNumber,   
-	item_no = ICItems.strItemNo,  
+	item_no = CAST(ICItems.strItemNo AS VARCHAR(15)),
 	patr_price = c.dblPrice  
 	,c.strPricing  COLLATE Latin1_General_CI_AS AS strPricing
 	  
@@ -56,12 +56,12 @@
 	 SELECT   
 	  --DISTINCT  
 	  patr_no = b.strCustomerNumber,  
-	  item_no = g.strItemNo,  
+	  item_no = CAST(g.strItemNo AS VARCHAR(15)),
 	  patr_price = c.dblPrice  
 	  ,c.strPricing
 	 from tblARCustomerSpecialPrice a  
 	  join tblARCustomer b  
-	   on a.intEntityCustomerId = b.[intEntityId]  and a.intItemId is null   
+	   on a.intEntityCustomerId = b.[intEntityId]  and a.intItemId is null
 	  join tblEMEntity z  
 	   on a.intEntityCustomerId = z.intEntityId  
 	  join tblEMEntityLocation d  
