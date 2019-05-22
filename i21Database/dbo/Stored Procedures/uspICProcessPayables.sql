@@ -69,8 +69,8 @@ BEGIN
 			,GP.[intTransactionType]
 			,GP.[intLocationId]	
 			,[intShipToId] = NULL	
-			,[intShipFromId] = NULL	 		
-			,[intShipFromEntityId] = NULL
+			,[intShipFromId] = GP.intShipFromId	 		
+			,[intShipFromEntityId] = GP.intShipFromEntityId
 			,[intPayToAddressId] = NULL
 			,GP.[intCurrencyId]					
 			,GP.[dtmDate]				

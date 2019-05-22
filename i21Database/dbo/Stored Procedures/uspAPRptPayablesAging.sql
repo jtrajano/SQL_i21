@@ -525,10 +525,10 @@ SET @query = '
 		AND D.strAccountCategory = ''AP Account''
 ) MainQuery'
 
-IF @dateTo IS NOT NULL
-BEGIN
-	SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
-END
+-- IF @dateTo IS NOT NULL
+-- BEGIN
+-- 	SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+-- END
 
 IF ISNULL(@filter,'') != ''
 BEGIN

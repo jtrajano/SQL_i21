@@ -547,35 +547,28 @@ BEGIN /* Direct Inventory */
 		[intAccountId]					=	dbo.[fnGetItemGLAccount](A.intItemId, loc.intItemLocationId, 'AP Clearing'),
 		[intItemId]						=	A.[intItemId],					
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
-		[intQtyToBillUOMId]			=	CASE WHEN ctd.intItemUOMId > 0 
-												THEN ctd.intItemUOMId
-												ELSE A.intUnitOfMeasureId
-											END,
+		[intQtyToBillUOMId]				=	A.intUnitOfMeasureId
+											-- CASE WHEN ctd.intItemUOMId > 0 
+											-- 	THEN ctd.intItemUOMId
+											-- 	ELSE A.intUnitOfMeasureId
+											-- END,
 		
 		
-		[dblQuantityToBill]				=	dbo.fnCalculateCostBetweenUOM(A.intUnitOfMeasureId
-																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
-																			,A.dblQtyReceived),
-		[dblQtyToBillUnitQty]					=	CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
-		[dblOrderQty]					=	(CASE WHEN lgDetail.dblQuantity IS NULL
+		,[dblQuantityToBill]			=	A.dblQtyReceived
+		,[dblQtyToBillUnitQty]			=	ISNULL(A.dblUnitQty,1) --CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
+		,[dblOrderQty]					=	(CASE WHEN lgDetail.dblQuantity IS NULL
 												THEN
-													 dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
-																						,CASE WHEN ctd.intItemUOMId > 0 
-																							THEN ctd.intItemUOMId 
-																							ELSE A.intUnitOfMeasureId 
-																						 END
-																						,A.dblQtyReceived)
-													
+													A.dblQtyReceived
 												ELSE
 													lgDetail.dblQuantity 
-													
 											END),
 		[dblDiscount]					=	A.[dblDiscount],
-		[intCostUOMId]					=	CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END,
-		[dblCost]						=	dbo.fnCalculateCostBetweenUOM(A.intCostUOMId
-																		,CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END
-																		,ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))),
-		[dblCostUnitQty]				=	CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
+		[intCostUOMId]					=	A.intCostUOMId --CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END,
+		,[dblCost]						=	ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))
+											-- dbo.fnCalculateCostBetweenUOM(A.intCostUOMId
+											-- 							,CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END
+											-- 							,ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))),
+		,[dblCostUnitQty]				=	A.dblCostUnitQty, --CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
 		[int1099Form]					=	(CASE WHEN patron.intEntityId IS NOT NULL 
 														AND C.intItemId > 0
 														AND C.ysn1099Box3 = 1

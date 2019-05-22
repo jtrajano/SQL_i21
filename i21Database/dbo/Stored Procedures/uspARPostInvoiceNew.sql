@@ -21,7 +21,8 @@ AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS OFF
+SET XACT_ABORT ON
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -53,13 +54,13 @@ DECLARE  @totalRecords INT = 0
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
---IF ISNULL(@RaiseError,0) = 0	
---BEGIN
+IF ISNULL(@RaiseError,0) = 0	
+BEGIN
 	IF @InitTranCount = 0
 		BEGIN TRANSACTION
 	ELSE
 		SAVE TRANSACTION @Savepoint
---END
+END
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 SET @Success = 1
@@ -645,8 +646,7 @@ IF(@totalInvalid > 0)
 		IF @RaiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
-				--RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Do_Rollback
+				RAISERROR(@ErrorMerssage, 11, 1)							
 			END	
 			
         DELETE FROM #ARInvalidInvoiceData
@@ -694,8 +694,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		IF @RaiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strPostingMessage] FROM tblARInvoiceIntegrationLogDetail WHERE [intIntegrationLogId] = @IntegrationLogId AND [ysnPost] IS NOT NULL
-				--RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Do_Rollback
+				RAISERROR(@ErrorMerssage, 11, 1)							
 			END				
 		GOTO Post_Exit	
 	END
@@ -1087,8 +1086,8 @@ END CATCH
 
 
 Do_Commit:
---IF ISNULL(@RaiseError,0) = 0
---BEGIN
+IF ISNULL(@RaiseError,0) = 0
+BEGIN
 
 	IF @InitTranCount = 0
 		BEGIN
@@ -1104,13 +1103,13 @@ Do_Commit:
 			--IF (XACT_STATE()) = 1
 			--	COMMIT TRANSACTION  @Savepoint
 		END	
---END
+END
 
 	RETURN 1;
 
 Do_Rollback:
-	--IF @RaiseError = 0
-	--	BEGIN
+	IF @RaiseError = 0
+		BEGIN
 			IF @InitTranCount = 0
 				IF (XACT_STATE()) <> 0
 					ROLLBACK TRANSACTION
@@ -1151,7 +1150,7 @@ Do_Rollback:
 					IF (XACT_STATE()) = -1
 						ROLLBACK TRANSACTION  @CurrentSavepoint
 				END	
-		--END
+		END
 	IF @RaiseError = 1
 		RAISERROR(@ErrorMerssage, 11, 1)	
 	    

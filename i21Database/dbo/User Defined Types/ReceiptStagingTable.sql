@@ -27,6 +27,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intTransferorId] INT NULL 
 	,[intBookId] INT NULL 
 	,[intSubBookId] INT NULL 
+	,[intShipFromEntityId] INT NULL 
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 
