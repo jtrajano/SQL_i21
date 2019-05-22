@@ -519,7 +519,7 @@ BEGIN
 									--)
 									CASE 
 										WHEN Detail.dblNewCost IS NULL THEN 
-											FromStock.dblCost
+											Detail.dblCost
 										ELSE
 											dbo.fnCalculateCostBetweenUOM ( 
 												dbo.fnGetItemStockUOM(Detail.intNewItemId)
