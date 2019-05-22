@@ -186,6 +186,113 @@ END
 		INNER JOIN tblGLAccount GL
 			ON ComPref.intARAccountId = GL.intAccountId
 	END
+ELSE
+	BEGIN
+		------------------------CREATE GL ENTRIES---------------------
+		INSERT INTO @GLEntries(
+			[dtmDate], 
+			[strBatchId], 
+			[intAccountId],
+			[dblDebit],
+			[dblCredit],
+			[dblDebitUnit],
+			[dblCreditUnit],
+			[strDescription],
+			[strCode],
+			[strReference],
+			[intCurrencyId],
+			[dtmDateEntered],
+			[dtmTransactionDate],
+			[strJournalLineDescription],
+			[intJournalLineNo],
+			[ysnIsUnposted],
+			[intUserId],
+			[intEntityId],
+			[strTransactionId],
+			[intTransactionId],
+			[strTransactionType],
+			[strTransactionForm],
+			[strModuleName],
+			[dblDebitForeign],
+			[dblDebitReport],
+			[dblCreditForeign],
+			[dblCreditReport],
+			[dblReportingRate],
+			[dblForeignRate],
+			[strRateType]
+		)
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	GL.intAccountId,
+			[dblDebit]						=	ROUND(A.dblFaceValue, 2),
+			[dblCredit]						=	0,
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	GL.strDescription,
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strCertificateNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	GL.strDescription,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strIssueNo, 
+			[intTransactionId]				=	A.intIssueStockId, 
+			[strTransactionType]			=	CASE WHEN A.strStockStatus = 'Voting' THEN 'Voting Stock' ELSE 'Non-Voting/Other' END,
+			[strTransactionForm]			=	@ISSUE_STOCK,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	#tempCustomerStock A
+		CROSS JOIN tblPATCompanyPreference ComPref
+		INNER JOIN tblGLAccount GL ON GL.intAccountId = CASE WHEN A.strStockStatus = 'Voting' THEN ComPref.intVotingStockId ELSE ComPref.intNonVotingStockId END
+		UNION ALL
+		--AR Account
+		SELECT	
+			[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmIssueDate), 0),
+			[strBatchID]					=	@batchId COLLATE Latin1_General_CI_AS,
+			[intAccountId]					=	ComPref.intARAccountId, 
+			[dblDebit]						=	0,
+			[dblCredit]						=	ROUND(A.dblFaceValue, 2),
+			[dblDebitUnit]					=	0,
+			[dblCreditUnit]					=	0,
+			[strDescription]				=	GL.strDescription,
+			[strCode]						=	@MODULE_CODE,
+			[strReference]					=	A.strCertificateNo,
+			[intCurrencyId]					=	1,
+			[dtmDateEntered]				=	GETDATE(),
+			[dtmTransactionDate]			=	NULL,
+			[strJournalLineDescription]		=	GL.strDescription,
+			[intJournalLineNo]				=	1,
+			[ysnIsUnposted]					=	0,
+			[intUserId]						=	@intUserId,
+			[intEntityId]					=	@intUserId,
+			[strTransactionId]				=	A.strIssueNo, 
+			[intTransactionId]				=	A.intIssueStockId, 
+			[strTransactionType]			=	'Voting Stock',
+			[strTransactionForm]			=	@ISSUE_STOCK,
+			[strModuleName]					=	@MODULE_NAME,
+			[dblDebitForeign]				=	0,      
+			[dblDebitReport]				=	0,
+			[dblCreditForeign]				=	0,
+			[dblCreditReport]				=	0,
+			[dblReportingRate]				=	0,
+			[dblForeignRate]				=	0,
+			[strRateType]					=	NULL
+		FROM	#tempCustomerStock A
+		CROSS APPLY tblARCompanyPreference ComPref
+		INNER JOIN tblGLAccount GL
+			ON ComPref.intARAccountId = GL.intAccountId
+	END
 
 
 IF(ISNULL(@ysnRecap, 0) = 1)
