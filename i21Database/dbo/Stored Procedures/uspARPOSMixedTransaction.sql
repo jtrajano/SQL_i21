@@ -168,7 +168,7 @@ BEGIN
 		,[intTempDetailIdForTaxes]				= @intPOSId
 		,[dblCurrencyExchangeRate]				= 1.000000
 		,[dblSubCurrencyRate]					= 1.000000
-		,[intSalesAccountId]					= ISNULL(COMPANYLOC.intDiscountAccountId, COMPANYPREF.intDiscountAccountId)
+		,[intSalesAccountId]					= ISNULL(COMPANYLOC.intSalesDiscounts, COMPANYPREF.intDiscountAccountId)
 		,[strPONumber]							= POS.strPONumber
 		,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN COMPANYLOC.intFreightTermId ELSE NULL END
 	FROM tblARPOS POS
@@ -177,7 +177,7 @@ BEGIN
 		FROM tblARCompanyPreference WITH (NOLOCK)
 	) COMPANYPREF
 	LEFT JOIN (
-		SELECT intDiscountAccountId
+		SELECT intSalesDiscounts
 			 , intCompanyLocationId
 			 , intFreightTermId
 		FROM tblSMCompanyLocation WITH (NOLOCK)
@@ -283,7 +283,7 @@ BEGIN
 		,[intTempDetailIdForTaxes]				= @intPOSId
 		,[dblCurrencyExchangeRate]				= 1.000000
 		,[dblSubCurrencyRate]					= 1.000000
-		,[intSalesAccountId]					= ISNULL(COMPANYLOC.intDiscountAccountId, COMPANYPREF.intDiscountAccountId)
+		,[intSalesAccountId]					= ISNULL(COMPANYLOC.intSalesDiscounts, COMPANYPREF.intDiscountAccountId)
 		,[strPONumber]							= POS.strPONumber
 		,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN COMPANYLOC.intFreightTermId ELSE NULL END
 	FROM tblARPOS POS
@@ -292,7 +292,7 @@ BEGIN
 		FROM tblARCompanyPreference WITH (NOLOCK)
 	) COMPANYPREF
 	LEFT JOIN (
-		SELECT intDiscountAccountId
+		SELECT intSalesDiscounts
 			 , intCompanyLocationId
 			 , intFreightTermId
 		FROM tblSMCompanyLocation WITH (NOLOCK)
