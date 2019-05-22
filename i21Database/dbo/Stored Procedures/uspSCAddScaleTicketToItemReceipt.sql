@@ -121,6 +121,7 @@ INSERT INTO @ReceiptStagingTable(
 		,intFreightTermId
 		,intLoadReceive
 		,ysnAllowVoucher
+		,intShipFromEntityId
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -141,14 +142,7 @@ SELECT
 										END
 									END
 		,intLocationId				= SC.intProcessingLocationId
-		,intShipFromId				=	ISNULL(FRM.intEntityLocationId,(
-																		CASE 
-																			WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId), 0) > 0
-																				THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
-										
-																			ELSE (SELECT TOP 1 intEntityLocationId from tblEMEntityLocation where intEntityId = @intEntityId AND ysnDefaultLocation = 1)
-																		END)
-										)
+		,intShipFromId				= COALESCE(SC.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)
 		,intShipViaId				= SC.intFreightCarrierId
 		,intDiscountSchedule		= SC.intDiscountId
 		,strVendorRefNo				= 'TKT-' + SC.strTicketNumber
@@ -231,7 +225,7 @@ SELECT
 											CASE WHEN SC.dblShrink > 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, LI.dblQty) ELSE (LI.dblQty /  SC.dblNetUnits) * (SC.dblGrossWeight - SC.dblTareWeight) END
 										ELSE LI.dblQty 
 									END
-		,intFreightTermId			= ISNULL(CNT.intFreightTermId,FRM.intFreightTermId)
+		,intFreightTermId			= COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)
 		,intLoadReceive				= CASE WHEN CNT.ysnLoad = 1 THEN 1 ELSE NULL END
 		,ysnAllowVoucher			= CASE WHEN LI.ysnIsStorage = 1 THEN 0 ELSE
 										CASE  
@@ -239,6 +233,7 @@ SELECT
 											ELSE LI.ysnAllowInvoiceVoucher 
 										END
 									END
+		,intShipFromEntityId		= SC.intEntityId
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
 	SELECT CTD.intContractHeaderId
@@ -273,6 +268,13 @@ INNER JOIN tblICItem IC
 	ON IC.intItemId = LI.intItemId
 LEFT JOIN tblEMEntityLocation FRM
 	ON SC.intFarmFieldId = FRM.intEntityLocationId
+LEFT JOIN tblAPVendor VND
+	ON SC.intEntityId = VND.intEntityId
+LEFT JOIN tblEMEntityLocation VNDL
+	ON VND.intEntityId = VNDL.intEntityId
+		AND VNDL.ysnDefaultLocation = 1
+LEFT JOIN tblEMEntityLocation VNDSF
+	ON VND.intShipFromId = VNDSF.intEntityLocationId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 

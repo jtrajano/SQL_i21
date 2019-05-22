@@ -98,6 +98,7 @@ INSERT into @ReceiptStagingTable(
 		,dblGross
 		,dblNet
 		,intFreightTermId
+		,intShipFromEntityId
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -114,11 +115,7 @@ SELECT
 										WHEN ISNULL(CNT.intContractDetailId,0) > 0 THEN CNT.intCurrencyId
 									END
 		,intLocationId				= SCD.intCompanyLocationId
-		,intShipFromId				= CASE 
-										WHEN ISNULL((SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId), 0) > 0
-										THEN (SELECT TOP 1 intShipFromId from tblAPVendor where intEntityId = @intEntityId)
-										ELSE (SELECT top 1 intEntityLocationId from tblEMEntityLocation where intEntityId = @intEntityId AND ysnDefaultLocation = 1)
-									END
+		,intShipFromId				= COALESCE(SCD.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)
 		,intShipViaId				= NULL
 		,intDiscountSchedule		= SCD.intDiscountId
 		,strVendorRefNo				= 'DS-' + SCD.strDeliverySheetNumber
@@ -161,7 +158,8 @@ SELECT
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					= (LI.dblQty / SCD.dblNet) * SCD.dblGross
 		,dblNet						= LI.dblQty
-		,intFreightTermId			= CNT.intFreightTermId
+		,intFreightTermId			= COALESCE(CNT.intFreightTermId,FRM.intFreightTermId,VNDSF.intFreightTermId,VNDL.intFreightTermId)
+		,intShipFromEntityId		= SCD.intEntityId
 FROM	@Items LI 
 		INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = LI.intTransactionId
 		INNER JOIN tblICItem IC ON IC.intItemId = SCD.intItemId
@@ -193,6 +191,16 @@ FROM	@Items LI
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
 			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
+LEFT JOIN tblEMEntityLocation FRM
+	ON SCD.intFarmFieldId = FRM.intEntityLocationId
+LEFT JOIN tblAPVendor VND
+	ON SCD.intEntityId = VND.intEntityId
+LEFT JOIN tblEMEntityLocation VNDL
+	ON VND.intEntityId = VNDL.intEntityId
+		AND VNDL.ysnDefaultLocation = 1
+LEFT JOIN tblEMEntityLocation VNDSF
+	ON VND.intShipFromId = VNDSF.intEntityLocationId
+
 WHERE	SCD.intDeliverySheetId = @intDeliverySheetId
 
 -- Get the identity value from tblICInventoryReceipt
