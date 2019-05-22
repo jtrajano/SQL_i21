@@ -10,6 +10,7 @@
 */
 CREATE PROCEDURE [dbo].[uspICFixStockQuantities]
 	@intItemId AS INT = NULL 
+	,@intCategoryId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -23,7 +24,9 @@ SET ANSI_WARNINGS OFF
 -- Fix the Stock On-Hand
 --------------------------------------
 BEGIN 
-	EXEC uspICFixStockOnHand @intItemId
+	EXEC uspICFixStockOnHand 
+		@intItemId
+		,@intCategoryId
 END 
 
 -------------------
@@ -32,9 +35,21 @@ END
 BEGIN 
 	UPDATE tblICItemStock
 	SET dblOnOrder = 0
+	FROM 
+		tblICItemStock s INNER JOIN tblICItem i
+			ON s.intItemId = i.intItemId
+	WHERE
+			ISNULL(@intItemId, i.intItemId) = i.intItemId
+			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 
 	UPDATE tblICItemStockUOM
 	SET dblOnOrder = 0 
+	FROM 
+		tblICItemStockUOM s INNER JOIN tblICItem i
+			ON s.intItemId = i.intItemId
+	WHERE
+			ISNULL(@intItemId, i.intItemId) = i.intItemId
+			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 
 	MERGE	
 	INTO	dbo.tblICItemStock 
@@ -42,9 +57,9 @@ BEGIN
 	AS		ItemStock	
 	USING (
 			SELECT
-				intItemId
-				,intItemLocationId
-				,SUM(dblOnOrder) dblOnOrder
+				ItemTransactions.intItemId
+				,ItemTransactions.intItemLocationId
+				,SUM(ItemTransactions.dblOnOrder) dblOnOrder
 			FROM (
 				SELECT	
 					B.intItemId
@@ -57,11 +72,14 @@ BEGIN
 				WHERE 
 					intOrderStatusId NOT IN (4, 3, 6)
 					OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
-			) ItemTransactions
+			) ItemTransactions INNER JOIN tblICItem i
+				ON ItemTransactions.intItemId = i.intItemId 
 			WHERE
-				ISNULL(@intItemId, ItemTransactions.intItemId) = ItemTransactions.intItemId
+				ISNULL(@intItemId, i.intItemId) = i.intItemId
+				AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 			GROUP BY 
-				intItemLocationId, intItemId
+				ItemTransactions.intItemLocationId
+				, ItemTransactions.intItemId
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
 		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -109,10 +127,15 @@ BEGIN
 			,dblOnOrder =  (CASE WHEN SUM(dblQtyReceived) > SUM(dblQtyOrdered) THEN 0 ELSE SUM(dblQtyOrdered) - SUM(dblQtyReceived) END)
 		FROM 
 			tblPOPurchase A INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
+			INNER JOIN tblICItem i ON i.intItemId = B.intItemId 
 			INNER JOIN tblICItemLocation C ON A.intShipToId = C.intLocationId AND B.intItemId = C.intItemId
 		WHERE 
-			intOrderStatusId NOT IN (4, 3, 6)
-			OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
+			ISNULL(@intItemId, i.intItemId) = i.intItemId
+			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+			AND (
+				intOrderStatusId NOT IN (4, 3, 6)
+				OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
+			)
 		GROUP BY 
 			B.intItemId,
 			B.intUnitOfMeasureId,
@@ -125,7 +148,6 @@ BEGIN
 		AND ItemStockUOM.intItemUOMId = RawStockData.intItemUOMId
 		AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(RawStockData.intSubLocationId, 0)
 		AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(RawStockData.intStorageLocationId, 0)	
-		AND ISNULL(@intItemId, RawStockData.intItemId) = RawStockData.intItemId
 
 	WHEN MATCHED THEN 
 		UPDATE 
@@ -162,11 +184,21 @@ END;
 BEGIN 
 	UPDATE tblICItemStock
 	SET dblInTransitOutbound = 0
-	WHERE ISNULL(@intItemId, tblICItemStock.intItemId) = tblICItemStock.intItemId
+	FROM 
+		tblICItemStock s INNER JOIN tblICItem i
+			ON s.intItemId = i.intItemId
+	WHERE 
+		ISNULL(@intItemId, i.intItemId) = i.intItemId
+		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 
 	UPDATE tblICItemStockUOM
 	SET dblInTransitOutbound = 0 
-	WHERE ISNULL(@intItemId, tblICItemStockUOM.intItemId) = tblICItemStockUOM.intItemId
+	FROM 
+		tblICItemStockUOM s INNER JOIN tblICItem i
+			ON s.intItemId = i.intItemId
+	WHERE 
+		ISNULL(@intItemId, i.intItemId) = i.intItemId
+		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 
 	MERGE	
 	INTO	dbo.tblICItemStock 
@@ -192,6 +224,7 @@ BEGIN
 				) t 
 		WHERE
 			ISNULL(@intItemId, i.intItemId) = i.intItemId
+			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
 		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -252,6 +285,7 @@ BEGIN
 				) t 
 		WHERE
 			ISNULL(@intItemId, i.intItemId) = i.intItemId
+			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 		GROUP BY 
 			i.intItemId
 			, il.intItemLocationId
@@ -321,6 +355,7 @@ BEGIN
 				) t 
 		WHERE
 			ISNULL(@intItemId, i.intItemId) = i.intItemId
+			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 		GROUP BY 
 			i.intItemId
 			, il.intItemLocationId
@@ -367,11 +402,20 @@ BEGIN
 
 	UPDATE	s
 	SET		dblUnitReserved = 0 
-	FROM	tblICItemStock s 
+	FROM	tblICItemStock s INNER JOIN tblICItem i
+				ON s.intItemId = i.intItemId
+	WHERE 
+		ISNULL(@intItemId, i.intItemId) = i.intItemId
+		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+
 
 	UPDATE	s
 	SET		dblUnitReserved = 0 
-	FROM	tblICItemStockUOM s
+	FROM	tblICItemStockUOM s INNER JOIN tblICItem i
+				ON s.intItemId = i.intItemId
+	WHERE 
+		ISNULL(@intItemId, i.intItemId) = i.intItemId
+		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 			
 	INSERT INTO @FixStockReservation (
 			intItemId
@@ -385,28 +429,31 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId	
 	)
-	SELECT	intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intLotId
-			,SUM(dblQty)
-			,intTransactionId
-			,strTransactionId
-			,intInventoryTransactionType
-			,intSubLocationId
-			,intStorageLocationId	 
-	FROM	tblICStockReservation r 
+	SELECT	r.intItemId
+			,r.intItemLocationId
+			,r.intItemUOMId
+			,r.intLotId
+			,SUM(r.dblQty)
+			,r.intTransactionId
+			,r.strTransactionId
+			,r.intInventoryTransactionType
+			,r.intSubLocationId
+			,r.intStorageLocationId	 
+	FROM	tblICStockReservation r INNER JOIN tblICItem i 
+				ON r.intItemId = i.intItemId
 	WHERE	r.ysnPosted = 0 
-			AND ISNULL(@intItemId, r.intItemId) = r.intItemId
-	GROUP BY intItemId
-			, intItemLocationId
-			, intItemUOMId
-			, intLotId
-			, intTransactionId
-			, strTransactionId
-			, intInventoryTransactionType
-			, intSubLocationId
-			, intStorageLocationId
+			AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+	GROUP BY 
+		r.intItemId
+		,r.intItemLocationId
+		,r.intItemUOMId
+		,r.intLotId
+		,r.intTransactionId
+		,r.strTransactionId
+		,r.intInventoryTransactionType
+		,r.intSubLocationId
+		,r.intStorageLocationId
 
 	-- Call this SP to increase the reserved qty. 
 	EXEC dbo.uspICIncreaseReservedQty
