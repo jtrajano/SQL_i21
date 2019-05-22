@@ -1061,7 +1061,9 @@ END
 -- Retroactively compute the stocks on Stock-UOM and Stock tables. 
 --------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICFixStockQuantities @intItemId 
+	EXEC dbo.uspICFixStockQuantities 
+		@intItemId 
+		,@intCategoryId
 END 
 
 ------------------------------------------------------------------------------
