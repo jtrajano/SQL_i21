@@ -2190,12 +2190,8 @@ BEGIN
 			, intFutureMarketId
 			, strFutMarketName
 			, dblNotLotTrackedPrice
-			, dbo.fnCTConvertQuantityToTargetCommodityUOM(intToPriceUOM, intFutMarketCurrency, (SELECT TOP 1 dblLastSettle
-																								FROM tblRKFuturesSettlementPrice p
-																								INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-																								WHERE p.intFutureMarketId = t1.intFutureMarketId AND pm.intFutureMonthId = @intSpotMonthId
-																								ORDER BY dtmPriceDate DESC)) dblInvFuturePrice
-			, dbo.fnCTConvertQuantityToTargetCommodityUOM(intToPriceUOM,PriceSourceUOMId,ISNULL(dblInvMarketBasis, 0)) dblInvMarketBasis
+			, dblInvFuturePrice = NULL
+			, dblInvMarketBasis = NULL
 			, SUM(dblOpenQty) dblOpenQty
 			, SUM(dblOpenQty1) dblResult
 			,dblCashOrFuture 
@@ -2217,13 +2213,7 @@ BEGIN
 							AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE i.intItemId END
 							AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(s.intLocationId,0) END
 							AND temp.strContractInventory = 'Inventory'),0) as PriceSourceUOMId
-				, ISNULL((SELECT TOP 1 ISNULL(dblBasisOrDiscount,0) FROM tblRKM2MBasisDetail temp
-						WHERE temp.intM2MBasisId = @intM2MBasisId
-							AND temp.intItemId = i.intItemId
-							AND ISNULL(temp.intFutureMarketId,0) = CASE WHEN ISNULL(temp.intFutureMarketId,0)= 0 THEN 0 ELSE c.intFutureMarketId END
-							AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE i.intItemId END
-							AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(s.intLocationId,0) END
-							AND temp.strContractInventory = 'Inventory'),0) as dblInvMarketBasis
+				, dblInvMarketBasis = NULL
 				,ISNULL((SELECT TOP 1 ISNULL(dblCashOrFuture,0) FROM tblRKM2MBasisDetail temp
 						WHERE temp.intM2MBasisId = @intM2MBasisId
 							AND temp.intItemId = i.intItemId
@@ -2242,7 +2232,7 @@ BEGIN
 				, (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =c.intFutureMarketId  ORDER BY 1 DESC) intFutureMonthId
 				, c.intFutureMarketId
 				, fm.strFutMarketName
-				, dbo.fnCTConvertQuantityToTargetCommodityUOM(cu2.intCommodityUnitMeasureId,cu1.intCommodityUnitMeasureId,SUM(ISNULL(p.dblAverageCost, 0))) dblNotLotTrackedPrice
+				, ISNULL(dbo.fnICGetMovingAverageCost(i.intItemId, s.intItemLocationId, (select  max(intInventoryTransactionId) from tblICInventoryTransaction where dbo.fnDateLessThanEquals(dtmDate, @dtmTransactionDateUpTo) = 1)), 0) dblNotLotTrackedPrice
 				, cu2.intCommodityUnitMeasureId intToPriceUOM
 				, cu3.intCommodityUnitMeasureId intFutMarketCurrency
 			FROM vyuRKGetInventoryValuation s
@@ -2264,6 +2254,7 @@ BEGIN
 				AND ysnInTransit = 0
 			GROUP BY i.intItemId
 					,i.strItemNo
+					,s.intItemLocationId
 					,s.intLocationId
 					,strLocationName
 					,strFutMarketName
@@ -2374,12 +2365,16 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 							(dblAdjustedContractPrice - dblMarketPrice) * dblOpenQty 
 				  end
 	, dblMarketFuturesResult = CASE WHEN intContractTypeId = 1 THEN 
-										(dblFuturePrice - dblActualFutures ) * dblOpenQty
+										(ISNULL(dblFuturePrice,0) - ISNULL(dblActualFutures,0) ) * dblOpenQty
+									WHEN strContractOrInventoryType = 'Inventory' THEN
+										NULL
 									ELSE
-										 (dblActualFutures - dblFuturePrice) * dblOpenQty
+										 (ISNULL(dblActualFutures,0) - ISNULL(dblFuturePrice,0)) * dblOpenQty
 									END
 	, dblResultRatio = (CASE WHEN dblContractRatio IS NOT NULL AND dblMarketRatio IS NOT NULL THEN ((dblMarketPrice - dblContractPrice) * dblOpenQty)
 								- ((dblFuturePrice - dblActualFutures) * dblOpenQty) - dblResultBasis
+							WHEN strContractOrInventoryType = 'Inventory' THEN
+								NULL
 							ELSE 0 END)
 FROM (
 	SELECT DISTINCT intConcurrencyId = 0
@@ -2588,21 +2583,21 @@ FROM (
 									THEN (CASE WHEN ISNULL(@ysnIncludeBasisDifferentialsInResults, 0) = 0 THEN 0
 											ELSE (CASE WHEN @ysnCanadianCustomer = 1 THEN dblCanadianFutures + dblCanadianContractBasis - ISNULL(dblFutures, 0)
 													ELSE dblContractBasis END) END)
-								ELSE 0 END)
+								ELSE NULL END)
 		, dblActualFutures = dblFutures
 		, dblFutures = (CASE WHEN strPricingType = 'Basis' THEN 0
 							ELSE dblFutures END)
 		, dblCash
 		, dblCosts = ABS(dblCosts)
-		, dblMarketBasis = ISNULL(dblInvMarketBasis, 0)
+		, dblMarketBasis = dblInvMarketBasis
 		, dblMarketRatio
-		, dblFuturePrice = ISNULL(dblInvFuturePrice, 0)
+		, dblFuturePrice = dblInvFuturePrice
 		, intContractTypeId
 		, dblAdjustedContractPrice = ISNULL(dblNotLotTrackedPrice, 0)  + ISNULL(dblCash,0)
-		, dblCashPrice
-		, dblMarketPrice = ISNULL(dblInvMarketBasis, 0) + ISNULL(dblInvFuturePrice, 0)
+		, dblCashPrice 
+		, dblMarketPrice = ISNULL(dblInvMarketBasis, 0) + ISNULL(dblInvFuturePrice, 0)  + ISNULL(dblCashPrice,0)
 		, dblResultBasis = NULL
-		, dblResultCash = NULL
+		, dblResultCash = CASE WHEN strContractOrInventoryType = 'Inventory' THEN (ISNULL(dblNotLotTrackedPrice, 0) - ISNULL(dblCashPrice,0)) * dblOpenQty ELSE NULL END
 		, dblContractPrice = ISNULL(dblNotLotTrackedPrice, 0)  + ISNULL(dblCash,0)
 		, intQuantityUOMId
 		, intCommodityUnitMeasureId
