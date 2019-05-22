@@ -7553,6 +7553,7 @@
     <Build Include="dbo\Tables\tblAPBillArchive.sql" />
     <Build Include="dbo\Tables\tblAPBillDetailArchive.sql" />
     <Build Include="dbo\Tables\tblAPBillDetailTaxArchive.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

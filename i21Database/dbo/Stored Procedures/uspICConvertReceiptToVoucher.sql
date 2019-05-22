@@ -30,6 +30,7 @@ DECLARE @intEntityVendorId AS INT
 		,@intShipTo AS INT 
 		,@strVendorRefNo NVARCHAR(50)
 		,@intCurrencyId AS INT 
+		,@intShipFromEntity AS INT
 
 		,@intShipFrom_DebitMemo AS INT
 		,@intReturnValue AS INT
@@ -70,6 +71,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
 		,@dtmReceiptDate = r.dtmReceiptDate
+		,@intShipFromEntity = r.intShipFromEntityId
 FROM	tblICInventoryReceipt r
 WHERE	r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
@@ -137,8 +139,8 @@ BEGIN
 		,GP.[intTransactionType]
 		,GP.[intLocationId]	
 		,[intShipToId] = GP.intLocationId	
-		,[intShipFromId] = NULL	 		
-		,[intShipFromEntityId] = NULL
+		,[intShipFromId] = GP.intShipFromId	 		
+		,[intShipFromEntityId] = GP.intShipFromEntityId
 		,[intPayToAddressId] = NULL
 		,GP.[intCurrencyId]					
 		,GP.[dtmDate]				

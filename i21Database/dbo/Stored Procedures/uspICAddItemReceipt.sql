@@ -127,8 +127,9 @@ DECLARE @DataForReceiptHeader TABLE(
     ,Vendor INT
     ,BillOfLadding NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,ReceiptType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,Location INT
+	,[Location] INT
 	,ShipVia INT
+	,ShipFromEntity INT NULL 
 	,ShipFrom INT
 	,Currency INT
 	,intSourceType INT
@@ -142,8 +143,9 @@ INSERT INTO @DataForReceiptHeader(
 		Vendor
 		,BillOfLadding
 		,ReceiptType
-		,Location
+		,[Location]
 		,ShipVia
+		,ShipFromEntity
 		,ShipFrom
 		,Currency
 		,intSourceType
@@ -155,22 +157,22 @@ SELECT	RawData.intEntityVendorId
 		,RawData.strReceiptType
 		,RawData.intLocationId
 		,RawData.intShipViaId
+		,RawData.intShipFromEntityId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
 		,RawData.strVendorRefNo
-		--,RawData.intTaxGroupId
 FROM	@ReceiptEntries RawData
 GROUP BY RawData.intEntityVendorId
 		,RawData.strBillOfLadding
 		,RawData.strReceiptType
 		,RawData.intLocationId
 		,RawData.intShipViaId
+		,RawData.intShipFromEntityId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
 		,RawData.strVendorRefNo
-		--,RawData.intTaxGroupId
 ;
 
 -- Validate if there is data to process. If there is no data, then raise an error. 
@@ -249,16 +251,39 @@ BEGIN
 		-- Validate Ship From Id --
 		DECLARE @valueShipFromId INT
 
-		IF EXISTS ( SELECT *
-					FROM @DataForReceiptHeader RawHeaderData
-					WHERE RawHeaderData.intId = @intId AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) <> 'transfer order'
-					      AND RawHeaderData.ShipFrom NOT IN (SELECT intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = RawHeaderData.Vendor)
-				  )
-			BEGIN
-				-- Ship From Id is invalid or missing.
-				EXEC uspICRaiseError 80136;
-				GOTO _Exit_With_Rollback;
-			END
+		IF EXISTS ( 
+			--SELECT *
+			--FROM @DataForReceiptHeader RawHeaderData
+			--WHERE 
+			--	RawHeaderData.intId = @intId 
+			--	AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) <> 'transfer order'
+			--	AND RawHeaderData.ShipFrom NOT IN (
+			--		SELECT intEntityLocationId 
+			--		FROM tblEMEntityLocation 
+			--		WHERE intEntityId = RawHeaderData.Vendor
+			--	)
+
+			SELECT TOP 1 *
+			FROM 
+				@DataForReceiptHeader RawHeaderData
+				OUTER APPLY (
+					SELECT TOP 1 intEntityLocationId
+					FROM 
+						tblEMEntityLocation entityLocation
+					WHERE	
+						entityLocation.intEntityLocationId = RawHeaderData.ShipFrom
+						AND entityLocation.intEntityId = ISNULL(RawHeaderData.ShipFromEntity, RawHeaderData.Vendor)						
+				) shipFrom
+			WHERE
+				RawHeaderData.intId = @intId 
+				AND RTRIM(LTRIM(LOWER(RawHeaderData.ReceiptType))) <> 'transfer order'
+				AND shipFrom.intEntityLocationId IS NULL 
+		)
+		BEGIN
+			-- Ship From Id is invalid or missing.
+			EXEC uspICRaiseError 80136;
+			GOTO _Exit_With_Rollback;
+		END
 
 		-- Validate Location Id
 		DECLARE @valueLocationId INT
@@ -443,11 +468,13 @@ BEGIN
 						ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 						AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
 						AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
-						AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+						AND ISNULL(RawHeaderData.[Location],0) = ISNULL(RawData.intLocationId,0)
 						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
 						AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)	
+						AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
+
 			WHERE	RawHeaderData.intId = @intId
 		) AS IntegrationData
 			ON Receipt.intInventoryReceiptId = IntegrationData.intInventoryReceiptId
@@ -494,6 +521,7 @@ BEGIN
 				,dtmDateModified		= GETDATE()
 				,intModifiedByUserId 	= @intUserId
 				,strDataSource			= IntegrationData.strReceiptType
+				,intShipFromEntityId	= ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -536,6 +564,7 @@ BEGIN
 				,dtmDateCreated
 				,intCreatedByUserId
 				,strDataSource
+				,intShipFromEntityId	
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -578,6 +607,7 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				/*strDataSource*/				,IntegrationData.strReceiptType
+				/*intShipFromEntityId*/			,ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
 			)
 		;
 				
@@ -967,7 +997,8 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
-					AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)	
+					--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
+					--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
 				INNER JOIN tblICItem Item
 					ON Item.intItemId = RawData.intItemId
 				INNER JOIN dbo.tblICItemUOM ItemUOM			
@@ -1332,11 +1363,14 @@ BEGIN
 			FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 						ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 						AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
-						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
-						AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
-						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
-						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 						AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
+						AND ISNULL(RawHeaderData.[Location],0) = ISNULL(RawData.intLocationId,0)
+						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)						
+						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
+						--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
+						--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
+						
 					LEFT JOIN tblSMCurrency subCurrency
 						ON subCurrency.intCurrencyID = RawData.intCostCurrencyId
 					LEFT JOIN tblSMCurrency receiptCurrency
@@ -1413,11 +1447,13 @@ BEGIN
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
-					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
-					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
-					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
-					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(RawData.intCurrencyId, @intFunctionalCurrencyId)
+					AND ISNULL(RawHeaderData.[Location],0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)					
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
+					--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)					
 
 				INNER JOIN tblICInventoryReceipt r
 					ON r.intInventoryReceiptId = @inventoryReceiptId
@@ -1879,13 +1915,15 @@ BEGIN
 			FROM	
 				@LotEntries ItemLot INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(ItemLot.intEntityVendorId, 0)
-					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
-					AND ISNULL(RawHeaderData.Location,0) = ISNULL(ItemLot.intLocationId,0)
-					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
-					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
-					AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(ItemLot.intCurrencyId, @intFunctionalCurrencyId)
-					AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding, '') = ISNULL(ItemLot.strBillOfLadding , '')
+					AND ISNULL(RawHeaderData.Currency, @intFunctionalCurrencyId) = ISNULL(ItemLot.intCurrencyId, @intFunctionalCurrencyId)
+					AND ISNULL(RawHeaderData.[Location],0) = ISNULL(ItemLot.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(ItemLot.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)					
+					--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(ItemLot.strVendorRefNo,0)
+					--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(ItemLot.intShipFromEntityId,0)											
 				INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 					ON ReceiptItem.intItemId = ItemLot.intItemId
 					AND ISNULL(ReceiptItem.intSubLocationId, 0) = ISNULL(ItemLot.intSubLocationId, 0)

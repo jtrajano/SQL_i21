@@ -113,6 +113,7 @@ BEGIN
 			,dtmDateCreated
 			,intCreatedByUserId
 			,strDataSource
+			,intShipFromEntityId
 	)
 	SELECT	strReceiptType = @receiptType
 			,intSourceType
@@ -158,6 +159,7 @@ BEGIN
 			,dtmDateCreated = GETDATE()
 			,intCreatedByUserId = @intEntityUserSecurityId
 			,strDataSource = 'Inventory Receipt'
+			,r.intShipFromEntityId
 	FROM	tblICInventoryReceipt r 
 	WHERE	r.intInventoryReceiptId = @intReceiptId
 
