@@ -33,6 +33,7 @@ select
 	a.strStateProvince [state],
 	a.strCity [city],
 	ISNULL(intTaxGroupId,'') as Authority1,
+	ISNULL(CAST(intTaxGroupId AS NVARCHAR(20)),'') as Authority1,
 	'' as Authority2
 	from tblSMCompanyLocation a
 		join tblETExportFilterLocation b
