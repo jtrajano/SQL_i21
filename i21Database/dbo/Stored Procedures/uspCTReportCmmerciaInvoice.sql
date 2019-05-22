@@ -73,7 +73,7 @@ BEGIN TRY
 	FROM	vyuCTGridBrokerageCommissionDetail
 	WHERE	intBrkgCommnId = @intBrkgCommnId
 	
-	SELECT	@dblRcvdPaidAmount = SUM(dblRcvdPaidAmount) FROM vyuCTGridBrokerageCommissionDetail WHERE intBrkgCommnId = @intBrkgCommnId
+	SELECT	@dblRcvdPaidAmount = CAST(ISNULL(SUM(dblRcvdPaidAmount),0) AS DECIMAL(16,2)) FROM vyuCTGridBrokerageCommissionDetail WHERE intBrkgCommnId = @intBrkgCommnId
 	
 	SELECT	@strInvoiceNumber	=	 IV.strInvoiceNumber 
 	FROM	tblARInvoiceDetail	AD
