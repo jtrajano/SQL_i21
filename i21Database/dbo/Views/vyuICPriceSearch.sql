@@ -1,6 +1,6 @@
 CREATE VIEW dbo.vyuICPriceSearch
 AS
-	SELECT dblAccumulatedAmount,dblAccumulatedQty,dblAmountPercent,dblAverageCost,dblDiscount,dblDiscountThruAmount,dblDiscountThruQty,dblDiscountedPrice,dblEndMonthCost,
+	SELECT strPricingCategory, dblAccumulatedAmount,dblAccumulatedQty,dblAmountPercent,dblAverageCost,dblDiscount,dblDiscountThruAmount,dblDiscountThruQty,dblDiscountedPrice,dblEndMonthCost,
 		dblLastCost,dblMSRPPrice,dblSalePrice,dblStandardCost,dblUnit,dblUnitAfterDiscount,dblUnitQty,dtmBeginDate,dtmEndDate,intCategoryId,intCommodityId,intConcurrencyId
 		,intCurrencyId,intDecimalPlaces,intEntityVendorId,intItemId,intItemLocationId,intItemPricingId,intItemSpecialPricingId,intItemUOMId,intItemUnitMeasureId,intKey = NEWID()
 		,intLocationId,intPricingKey,intSort,intUnitMeasureId,intVendorId,intVendorPricingId,strCategory,strCommodity,strCurrency,strDescription,strDiscountBy,strEntityLocation
