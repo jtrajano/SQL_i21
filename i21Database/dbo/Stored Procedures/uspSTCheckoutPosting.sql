@@ -1898,7 +1898,8 @@ BEGIN
 							JOIN tblICItemUOM STUOM
 								ON ST.intCustomerChargesItemId = STUOM.intItemId
 							JOIN vyuEMEntityCustomerSearch vC 
-								ON CC.intCustomerId = vC.intEntityId					
+								-- ON CC.intCustomerId = vC.intEntityId			 TEST ST-1343	Need to copy Customer of main checkout	
+								ON ST.intCheckoutCustomerId = vC.intEntityId
 							INNER JOIN tblICItemUOM UOM 
 								ON UOM.intItemUOMId = CASE 
 														WHEN CC.intProduct IS NOT NULL
@@ -2257,8 +2258,9 @@ BEGIN
 									ON CH.intStoreId = ST.intStoreId
 								JOIN tblICItemUOM STUOM
 									ON ST.intCustomerChargesItemId = STUOM.intItemId
-								JOIN vyuEMEntityCustomerSearch vC 
-									ON CC.intCustomerId = vC.intEntityId					
+								JOIN vyuEMEntityCustomerSearch vC 	
+									-- ON CC.intCustomerId = vC.intEntityId			 TEST ST-1343	Need to copy Customer of main checkout	
+									ON ST.intCheckoutCustomerId = vC.intEntityId
 								INNER JOIN tblICItemUOM UOM 
 									ON UOM.intItemUOMId = CASE 
 															WHEN CC.intProduct IS NOT NULL
@@ -2998,7 +3000,7 @@ BEGIN
 								JOIN tblICItemUOM STUOM
 									ON ST.intCustomerChargesItemId = STUOM.intItemId
 								JOIN vyuEMEntityCustomerSearch vC 
-									ON CC.intCustomerId = vC.intEntityId					
+									ON CC.intCustomerId = vC.intEntityId	-- TEST ST-1343	Need to follow the customer based on tblSTCheckoutCustomerCharges records				
 								INNER JOIN tblICItemUOM UOM 
 									ON UOM.intItemUOMId = CASE 
 															WHEN CC.intProduct IS NOT NULL
@@ -3281,8 +3283,20 @@ BEGIN
 -- ============================================================================================
 IF(@ysnDebug = 1)
 	BEGIN
-		SELECT '@EntriesForInvoiceBatchPost-All Items to send to Sales Invoice', * 
-		FROM @EntriesForInvoiceBatchPost
+		SELECT '@EntriesForInvoiceBatchPost-All Items to send to Sales Invoice', 
+				Item.strItemNo, 
+				Item.strDescription,
+				Inv.intTempDetailIdForTaxes, 
+				Inv.strSourceTransaction, 
+				Inv.strImportFormat, 
+				Inv.dblQtyShipped, 
+				Inv.dblPrice, 
+				Inv.strImportFormat, 
+				Inv.strComments,
+				Inv.* 
+		FROM @EntriesForInvoiceBatchPost Inv
+		INNER JOIN tblICItem Item
+			ON Inv.intItemId = Item.intItemId
 	END
 -- ============================================================================================
 -- [END] TEST TO DEBUG
@@ -3345,10 +3359,20 @@ IF(@ysnDebug = 1)
 			AND strSourceTransaction <> ''
 
 
-		SELECT '@EntriesForInvoiceBatchPost-Items that has Tax Calc', intTempDetailIdForTaxes, strSourceTransaction, strImportFormat, * 
-		FROM @EntriesForInvoiceBatchPost
+		SELECT '@EntriesForInvoiceBatchPost-Items that has Tax Calc', 
+				Item.strItemNo, 
+				Item.strDescription,
+				Inv.intTempDetailIdForTaxes, 
+				Inv.strSourceTransaction, 
+				Inv.strImportFormat, 
+				Inv.strComments,
+				Inv.* 
+		FROM @EntriesForInvoiceBatchPost Inv
+		JOIN tblICItem Item
+			ON Inv.intItemId = Item.intItemId
 		WHERE intTempDetailIdForTaxes IS NOT NULL
 			OR strImportFormat <> ''
+		ORDER BY Item.strItemNo ASC
 	END
 -- ============================================================================================
 -- [END] TEST TO DEBUG
@@ -3601,6 +3625,32 @@ IF(@ysnDebug = 1)
 								-- Invoice MAIN Checkout
 								SET @intCreatedInvoiceId = (SELECT TOP 1 intInvoiceId FROM @tblTempInvoiceIds WHERE strTransactionType = @strInvoiceTransactionTypeMain)  --(SELECT TOP 1 intInvoiceId FROM #tmpCustomerInvoiceIdList WHERE strTransactionType = @strInvoiceTransactionTypeMain ORDER BY intInvoiceId ASC)
 
+
+-- ============================================================================================
+-- [START] TEST TO DEBUG
+-- ============================================================================================
+IF(@ysnDebug = 1)
+	BEGIN
+
+		SELECT 'tblARInvoiceDetail', 
+				Item.strItemNo, 
+				Item.strDescription,
+				Inv.dblQtyShipped, 
+				Inv.dblPrice, 
+				Inv.dblTotalTax, 
+				Inv.*
+		FROM tblARInvoiceDetail Inv
+		INNER JOIN tblICItem Item
+			ON Inv.intItemId = Item.intItemId
+        OUTER APPLY dbo.tblSTCheckoutHeader CH
+        WHERE CH.intCheckoutId = @intCheckoutId
+			AND Inv.intInvoiceId = @intCreatedInvoiceId
+		ORDER BY Item.strItemNo ASC
+
+	END
+-- ============================================================================================
+-- [END] TEST TO DEBUG
+-- ============================================================================================
 
 								------------------------------------------------------------------------------------------------------
                                 ---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
