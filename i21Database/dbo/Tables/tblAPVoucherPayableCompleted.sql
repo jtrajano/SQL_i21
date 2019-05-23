@@ -20,6 +20,7 @@
 	[intContractCostId]				INT NULL,
 	[strContractNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intScaleTicketId]				INT NULL,
+	[intTicketId]				INT NULL,
 	[strScaleTicketNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intInventoryReceiptItemId]		INT NULL,
 	[intInventoryReceiptChargeId]	INT NULL,
