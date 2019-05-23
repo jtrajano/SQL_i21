@@ -124,7 +124,7 @@ BEGIN
 			AND Receipt.intEntityVendorId = GP.intEntityVendorId
 			AND Item.strType <> 'Bundle'
 			AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
-			AND ISNULL(ReceiptItem.ysnAllowVoucher, 0) = 1
+			AND ISNULL(ReceiptItem.ysnAllowVoucher, 1) = 1
 
 		UNION ALL
 		/* To get the unposted Receipt Charges */
