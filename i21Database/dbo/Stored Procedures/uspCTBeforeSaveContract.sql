@@ -120,7 +120,7 @@ BEGIN TRY
 			FROM	OPENXML(@idoc,'tblCTContractDetails/tblCTContractDetail/tblCTContractCosts',2)
 			WITH	(intContractCostId INT,intContractDetailId INT,strRowState NVARCHAR(50))     
 
-			IF OBJECT_ID('tempdb..##ProcessCost') IS NOT NULL
+			IF OBJECT_ID('tempdb..#ProcessCost') IS NOT NULL
 				DROP TABLE #ProcessCost
 			
 			SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intCostUniqueId,*					
@@ -154,6 +154,12 @@ BEGIN TRY
 	EXEC uspLGLoadContractUnSlice @intContractHeaderId
 
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId	
+
+	UPDATE	CC
+	SET		CC.intPrevConcurrencyId = CC.intConcurrencyId
+	FROM	tblCTContractCost	CC
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 
 END TRY
 

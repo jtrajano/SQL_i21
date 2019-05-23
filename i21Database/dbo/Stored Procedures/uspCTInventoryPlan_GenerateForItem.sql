@@ -692,7 +692,7 @@ BEGIN TRY
 					--		,0)
 					--	)
 					SET @ForecastedConsumption = (
-							SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @SourceUOMKey, @TargetUOMKey, ISNULL(SUM(TIA.dblQuantity * BD.dblQuantity), 0))
+							SELECT ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @SourceUOMKey, @TargetUOMKey, ISNULL(SUM(TIA.dblQuantity * BD.dblQuantity), 0)), 0)
 							FROM #TempInputALL TIA
 							JOIN tblCTBlendDemand BD ON BD.intItemId = TIA.intBlendDemandItemId
 								AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)
@@ -736,7 +736,7 @@ BEGIN TRY
 				--			,0)
 				--		)
 				SET @ForecastedConsumption = (
-						SELECT dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @SourceUOMKey, @TargetUOMKey, ISNULL(SUM(TIA.dblQuantity * BD.dblQuantity), 0))
+						SELECT ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId, @SourceUOMKey, @TargetUOMKey, ISNULL(SUM(TIA.dblQuantity * BD.dblQuantity), 0)), 0)
 						FROM #TempInputALL TIA
 						JOIN tblCTBlendDemand BD ON BD.intItemId = TIA.intBlendDemandItemId
 							AND RIGHT(RTRIM(LEFT(CONVERT(VARCHAR(11), BD.dtmDemandDate, 106), 7)), 3) = LEFT(CONVERT(CHAR(12), DATEADD(m, (@Cnt - 1), GETDATE()), 107), 3)

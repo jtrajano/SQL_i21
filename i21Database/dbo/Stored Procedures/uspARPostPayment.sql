@@ -434,8 +434,8 @@ BEGIN
 			ON A.[intPaymentId] = P.[intTransactionId]				
 	WHERE
 		(A.[dblAmountPaid]) <> @ZeroDecimal
-		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId]), @ZeroDecimal) = @ZeroDecimal	
-		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)											
+		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = A.[intPaymentId]), @ZeroDecimal) = @ZeroDecimal	
+		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)											
 
 						 																
 END

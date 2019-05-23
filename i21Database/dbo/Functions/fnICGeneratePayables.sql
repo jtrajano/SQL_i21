@@ -83,40 +83,51 @@ RETURNS @table TABLE
 , [ysnReturn]						BIT NULL 
 , [strTaxGroup]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , intShipViaId						INT NULL
+, intShipFromId						INT NULL
+, intShipFromEntityId				INT NULL
 )
 AS
 BEGIN
 
+
+DECLARE 
+		  @SourceType_STORE AS INT = 7		 
+		, @type_Voucher AS INT = 1
+		, @type_DebitMemo AS INT = 3
+		, @billTypeToUse INT
+
+	SELECT TOP 1 @billTypeToUse = 
+		CASE 
+			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+				@type_DebitMemo
+			ELSE 
+				@type_Voucher
+		END 
+	FROM tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	WHERE r.ysnPosted = 1
+		AND r.intInventoryReceiptId = @intReceiptId
+
 INSERT INTO @table
 SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
-	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
+	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE ISNULL(@billTypeToUse, 1)	 END 
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
 	,[strVendorOrderNumber]		=	ISNULL(NULLIF(LTRIM(RTRIM(A.strBillOfLading)), ''), A.strVendorRefNo) 
-	,[strPurchaseOrderNumber]	=	NULL--A.strReceiptNumber
-	,[intPurchaseDetailId]		=	NULL
+	,[strPurchaseOrderNumber]	=	po.strPurchaseOrderNumber
+	,[intPurchaseDetailId]		=	po.intPurchaseDetailId
 	,[intItemId]				=	B.intItemId
 	,[strMiscDescription]		=	C.strDescription
 	,[strItemNo]				=	C.strItemNo
 	,[strDescription]			=	C.strDescription
-	,[intPurchaseTaxGroupId]	=	NULL
+	,[intPurchaseTaxGroupId]	=	B.intTaxGroupId
 	,[dblOrderQty]				=	CASE WHEN CD.intContractDetailId > 0 THEN ROUND(CD.dblQuantity,2) ELSE B.dblOpenReceive END
 	,[dblPOOpenReceive]			=	B.dblReceived
-	,[dblOpenReceive]			=	B.dblOpenReceive
-	,[dblQuantityToBill]		=	CAST (
-									CASE 
-										WHEN CD.intContractDetailId > 0  THEN 
-											dbo.fnCalculateQtyBetweenUOM(
-												(CASE WHEN B.intWeightUOMId > 0 THEN B.intWeightUOMId ELSE B.intUnitMeasureId END)
-												,CD.intItemUOMId
-												,(B.dblOpenReceive - B.dblBillQty)
-											) 
-										ELSE 
-											(B.dblOpenReceive - B.dblBillQty) 
-									END 
-									AS DECIMAL(18,6)) 
+	,[dblOpenReceive]			=	B.dblOpenReceive --CASE WHEN @billTypeToUse = @type_DebitMemo THEN -B.dblOpenReceive ELSE B.dblOpenReceive END
+	--,[dblQuantityToBill]		=	CAST (CASE WHEN @billTypeToUse = @type_DebitMemo THEN -(B.dblOpenReceive - B.dblBillQty) ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,6)) 
+	,[dblQuantityToBill]		=	CAST (B.dblOpenReceive - B.dblBillQty AS DECIMAL(18,6))
 	,[dblQtyToBillUnitQty]		=	ISNULL(ItemUOM.dblUnitQty, 1)
 	,[intQtyToBillUOMId]		=	B.intUnitMeasureId
 	,[dblQuantityBilled]		=	B.dblBillQty
@@ -146,8 +157,8 @@ SELECT DISTINCT
 	,[strContractNumber]		=	F1.strContractNumber
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
-	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
-	,[intContractSequence]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN CD.intContractSeq ELSE NULL END
+	,[intContractDetailId]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN B.intLineNo ELSE NULL END
+	,[intContractSequence]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN CD.intContractSeq ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(200))
 	,[intShipmentId]			=	0
@@ -209,7 +220,9 @@ SELECT DISTINCT
 	,[intTaxGroupId]							=	B.intTaxGroupId
 	,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 	,[strTaxGroup]								=	TG.strTaxGroup
-	,intShipViaId                                = E.intEntityId
+	,intShipViaId                               =	E.intEntityId
+	,intShipFromId = A.intShipFromId
+	,intShipFromEntityId = A.intShipFromEntityId 
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -243,6 +256,9 @@ FROM tblICInventoryReceipt A
 	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblICItemUOM ctOrderUOM ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure ctUOM ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
+	LEFT JOIN vyuPODetails po ON po.intPurchaseId = B.intOrderId
+		AND po.intPurchaseDetailId = B.intLineNo
+		AND A.strReceiptType = 'Purchase Order'
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -262,11 +278,12 @@ WHERE
 	A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
 	AND A.ysnPosted = @ysnPosted 
 	--AND B.dblBillQty != B.dblOpenReceive 
-	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
-						CASE WHEN ISNULL(F1.intContractTypeId,1) = 1 
-									AND F2.intPricingTypeId NOT IN (2, 3, 4,5) --AP-4971
-							THEN 1 ELSE 0 END
-					ELSE 1 END)
+	--AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
+	--					CASE WHEN 
+	--							ISNULL(F1.intContractTypeId,1) = 1 
+	--							AND ISNULL(F2.intPricingTypeId, 0) NOT IN (2, 3, 4, 5) --AP-4971
+	--						THEN 1 ELSE 0 END
+	--				ELSE 1 END)
 	--AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND (
 		Billed.dblQty IS NULL
@@ -280,7 +297,7 @@ WHERE
 		) 
 	)
 	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
-	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
+	--AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType != 2
 	AND A.intInventoryReceiptId = @intReceiptId
@@ -302,7 +319,7 @@ SELECT DISTINCT
 		,[strMiscDescription]						=	A.strMiscDescription
 		,[strItemNo]								=	A.strItemNo
 		,[strDescription]							=	A.strDescription
-		,[intPurchaseTaxGroupId]					=	NULL
+		,[intPurchaseTaxGroupId]					=	A.intTaxGroupId
 		,[dblOrderQty]								=	A.dblOrderQty
 		,[dblPOOpenReceive]							=	A.dblPOOpenReceive
 		,[dblOpenReceive]							=	A.dblOpenReceive
@@ -393,7 +410,10 @@ SELECT DISTINCT
 		,[intTaxGroupId]							=	A.intTaxGroupId
 		,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 		,[strTaxGroup]								=	TG.strTaxGroup
-		,intShipViaId								=   NULL
+		,intShipViaId								=   NULL 
+		,intShipFromId								=	NULL 
+		,intShipFromEntityId						=	NULL 
+
 FROM [vyuICChargesForBilling] A
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 

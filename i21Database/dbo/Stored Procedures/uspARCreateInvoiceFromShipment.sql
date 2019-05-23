@@ -291,8 +291,8 @@ SELECT
 	,[dblDiscount]							= ARSI.[dblDiscount] 
 	,[dblItemWeight]						= ARSI.[dblWeight]  
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
-	,[dblPrice]								= ARSI.[dblShipmentUnitPrice]
-	,[dblUnitPrice]							= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblUnitPrice] ELSE ARSI.[dblShipmentUnitPrice] END 
+	,[dblPrice]								= CASE WHEN ARSI.[intOwnershipType] = 2 THEN 0 ELSE ARSI.[dblShipmentUnitPrice] END
+	,[dblUnitPrice]							= CASE WHEN ARSI.[intOwnershipType] = 2 THEN 0 ELSE (CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblUnitPrice] ELSE ARSI.[dblShipmentUnitPrice] END) END
 	,[strPricing]							= ARSI.[strPricing]
 	,[ysnRefreshPrice]						= 0
 	,[strMaintenanceType]					= NULL
@@ -618,10 +618,13 @@ WHERE
 		)
 	AND ICIS.strShipmentNumber NOT IN (SELECT strTransactionNumber FROM vyuARShippedItems WHERE strTransactionNumber = @ShipmentNumber)
 
+DECLARE @ErrorMessage NVARCHAR(250)
+
 IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
 	BEGIN
 		IF ISNULL(@IgnoreNoAvailableItemError,0) = 1 RETURN 0;
-		RAISERROR('There is no available item to Invoice.', 16, 1);
+		SET @ErrorMessage = 'The items in ' + @ShipmentNumber + ' are not allowed to be converted to Invoice. It could be a DP or Zero Spot Priced.'
+		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
 
@@ -641,8 +644,6 @@ FROM @UnsortedEntriesForInvoice
 
 ALTER TABLE #TempTable
 DROP COLUMN intId
-
-SELECT * FROM #TempTable
 
 IF EXISTS (SELECT NULL FROM #TempTable WHERE ISNULL(intRecipeId, 0) > 0)
 	BEGIN
@@ -717,8 +718,6 @@ BEGIN
 			ON ICISI.[intInventoryShipmentId] = ICIS.[intInventoryShipmentId] 
 	WHERE
 		ICISI.[intInventoryShipmentId] = @ShipmentId 
-
-	DECLARE @ErrorMessage NVARCHAR(250)
 
 	SET @ErrorMessage = 'Invoice(' + @InvoiceNumber + ') was already created for ' + @ShipmentNumber;
 

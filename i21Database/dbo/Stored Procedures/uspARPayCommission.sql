@@ -81,56 +81,71 @@ ELSE
 		--CREATE PAY VOUCHER
 		WHILE EXISTS (SELECT TOP 1 NULL FROM @tblCommissions WHERE ysnPayables = 1)
 			BEGIN
-				DECLARE @intCommissionPayableId INT = NULL
-					  , @intNewPaymentId		INT = NULL
-					  , @intVendorId			INT = NULL
-					  , @strCommissionNumber	NVARCHAR(25) = ''
-					  , @dblTotalAmount			NUMERIC(18, 6) = 0
-					  , @dtmDatePaid			DATETIME = GETDATE()
-					  , @tblPaymentDetail		PaymentDetailStaging
 
-				SELECT TOP 1 @intCommissionPayableId = intCommissionId
-						   , @intVendorId			 = intEntityId
-						   , @strCommissionNumber	 = strCommissionNumber
-						   , @dblTotalAmount		 = dblTotalAmount
-				FROM @tblCommissions 
-				WHERE ysnPayables = 1 ORDER BY intCommissionId ASC
+			DECLARE @intBankAccountId INT = NULL
+			
+			SELECT TOP 1 @intBankAccountId = BA.intBankAccountId 
+			FROM tblSMCompanyLocation CL
+			INNER JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			WHERE CL.intCompanyLocationId = @intCompanyLocationId
 
-				INSERT INTO @tblPaymentDetail (
-					  intAccountId
-					, dblDiscount
-					, dblAmountDue
-					, dblPayment
-					, dblInterest
-					, dblTotal
-					, dblWithheld
-				)
-				SELECT intAccountId	= @intAPAccountId
-					, dblDiscount	= 0.00000
-					, dblAmountDue	= 0.00000
-					, dblPayment	= @dblTotalAmount
-					, dblInterest	= 0.00000
-					, dblTotal		= @dblTotalAmount
-					, dblWithheld	= 0.00000
+			IF ISNULL(@intBankAccountId, 0) = 0
+				BEGIN
+					RAISERROR('Company Location has no default bank account assigned.', 16, 1)
+					RETURN;
+				END
+				
+			DECLARE @intCommissionPayableId INT = NULL
+					, @intNewPaymentId		INT = NULL
+					, @intVendorId			INT = NULL
+					, @strCommissionNumber	NVARCHAR(25) = ''
+					, @dblTotalAmount			NUMERIC(18, 6) = 0
+					, @dtmDatePaid			DATETIME = GETDATE()
+					, @tblPaymentDetail		PaymentDetailStaging
 
-				--CREATE AND POST PAYMENT
-				EXEC [dbo].[uspAPCreatePaymentData] @userId				= @intUserId
-												  , @notes				= @strCommissionNumber
-												  , @payment			= @dblTotalAmount
-												  , @datePaid			= @dtmDatePaid
-												  , @paymentDetail		= @tblPaymentDetail
-												  , @createdPaymentId	= @intNewPaymentId OUT
+			SELECT TOP 1 @intCommissionPayableId = intCommissionId
+						, @intVendorId			 = intEntityId
+						, @strCommissionNumber	 = strCommissionNumber
+						, @dblTotalAmount		 = dblTotalAmount
+			FROM @tblCommissions 
+			WHERE ysnPayables = 1 ORDER BY intCommissionId ASC
 
-				IF ISNULL(@intNewPaymentId, 0) <> 0
-					BEGIN
-						UPDATE dbo.tblARCommission
-						SET ysnPaid			= 1
-						  , intPaymentId	= @intNewPaymentId
-						WHERE intCommissionId = @intCommissionPayableId
-					END				
+			INSERT INTO @tblPaymentDetail (
+					intAccountId
+				, dblDiscount
+				, dblAmountDue
+				, dblPayment
+				, dblInterest
+				, dblTotal
+				, dblWithheld
+			)
+			SELECT intAccountId	= @intAPAccountId
+				, dblDiscount	= 0.00000
+				, dblAmountDue	= 0.00000
+				, dblPayment	= @dblTotalAmount
+				, dblInterest	= 0.00000
+				, dblTotal		= @dblTotalAmount
+				, dblWithheld	= 0.00000
 
-				DELETE FROM @tblCommissions WHERE intCommissionId = @intCommissionPayableId AND ysnPayables = 1
-			END		
+			--CREATE AND POST PAYMENT
+			EXEC [dbo].[uspAPCreatePaymentData] @userId				= @intUserId
+											  , @notes				= @strCommissionNumber
+											  --, @bankAccount		= @intBankAccountId
+											  , @payment			= @dblTotalAmount
+											  , @datePaid			= @dtmDatePaid
+											  , @paymentDetail		= @tblPaymentDetail
+											  , @createdPaymentId	= @intNewPaymentId OUT
+
+			IF ISNULL(@intNewPaymentId, 0) <> 0
+				BEGIN
+					UPDATE dbo.tblARCommission
+					SET ysnPaid			= 1
+						, intPaymentId	= @intNewPaymentId
+					WHERE intCommissionId = @intCommissionPayableId
+				END				
+
+			DELETE FROM @tblCommissions WHERE intCommissionId = @intCommissionPayableId AND ysnPayables = 1
+		END		
 
 		--CREATE PAYCHECK
 		WHILE EXISTS (SELECT TOP 1 NULL FROM @tblCommissions WHERE ysnPayroll = 1)

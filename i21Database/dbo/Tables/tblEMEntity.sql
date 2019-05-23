@@ -19,7 +19,7 @@
     [strPhone]				NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
     [strPhone2]				NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
     [strEmail2]				NVARCHAR (75)  COLLATE Latin1_General_CI_AS NULL,
-    [strFax]				NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
+    [strFax]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strNotes]				NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strContactMethod]		NVARCHAR (20)  COLLATE Latin1_General_CI_AS NULL,
     [strTimezone]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,

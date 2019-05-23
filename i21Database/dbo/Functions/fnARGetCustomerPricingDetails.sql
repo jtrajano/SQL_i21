@@ -142,7 +142,9 @@ BEGIN
 		C.[intEntityId] = @CustomerId
 		AND ((CAST(@TransactionDate AS DATE) BETWEEN CAST(SP.dtmBeginDate AS DATE) AND CAST(ISNULL(SP.dtmEndDate, GETDATE()) AS DATE)) OR (CAST(@TransactionDate AS DATE) >= CAST(SP.dtmBeginDate AS DATE) AND SP.dtmEndDate IS NULL))
 		AND ((@LocationId IS NOT NULL) OR (@LocationId IS NULL AND SP.strPriceBasis IN ('F', 'R', 'L', 'O')))
-		AND ISNULL(SP.intCurrencyId, @FunctionalCurrencyId) = @SpecialPricingCurrencyId 
+		AND ISNULL(SP.intCurrencyId, @FunctionalCurrencyId) = @SpecialPricingCurrencyId
+		AND (SP.intCategoryId IS NULL OR SP.intCategoryId = @ItemCategoryId) 
+		AND (SP.intItemId IS NULL OR SP.intItemId = @ItemId)
 
 
 	--Customer Special Pricing

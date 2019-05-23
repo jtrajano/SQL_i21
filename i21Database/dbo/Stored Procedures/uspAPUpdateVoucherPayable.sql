@@ -62,6 +62,7 @@ INSERT INTO @voucherPayables(
 	,[intInventoryShipmentChargeId]        
 	,[intLoadShipmentId]                
 	,[intLoadShipmentDetailId]            
+	,[intLoadShipmentCostId]     
 	,[intPaycheckHeaderId]                
 	,[intCustomerStorageId]                
 	,[intCCSiteDetailId]                
@@ -138,7 +139,8 @@ SELECT
 	,[intInventoryShipmentItemId]        
 	,[intInventoryShipmentChargeId]        
 	,[intLoadShipmentId]                
-	,[intLoadShipmentDetailId]            
+	,[intLoadShipmentDetailId]     
+	,[intLoadShipmentCostId]
 	,[intPaycheckHeaderId]                
 	,[intCustomerStorageId]                
 	,[intCCSiteDetailId]                
@@ -176,6 +178,7 @@ SELECT
 	,[dblActual]                        
 	,[dblDifference]
 FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
+WHERE ysnStage = 1
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables) RETURN;
 

@@ -227,7 +227,8 @@ FROM (
 			AND strPaymentMethod = 'On Account'
 		) ONACCOUNT
 		WHERE ARI.[ysnPosted] = 1
-			AND ysnCancelled = 0			
+			AND ISNULL(ARI.ysnCancelled, 0) = 0
+			AND ISNULL(ARI.ysnRefundProcessed, 0) = 0
 			AND strTransactionType != 'Credit Note'
 			AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
 	
@@ -356,13 +357,15 @@ FROM (
 			,ysnForgiven						= CAST(0 AS BIT)
 		FROM dbo.tblARCustomerBudget CB WITH (NOLOCK)
 		INNER JOIN (
-			SELECT intEntityId
+			SELECT C.intEntityId
 				, strCustomerNumber
 				, intPaymentMethodId
 				, intCurrencyId
 				, intTermsId
-				, strAccountNumber
-			FROM dbo.tblARCustomer WITH (NOLOCK)
+				, C.strAccountNumber
+			FROM dbo.tblARCustomer C WITH (NOLOCK)
+			INNER JOIN dbo.tblEMEntityEFTInformation EFT WITH (NOLOCK) ON C.intEntityId = EFT.intEntityId
+			WHERE EFT.ysnActive = 1
 		) AS ARC ON CB.intEntityCustomerId = ARC.[intEntityId]
 		INNER JOIN (
 			SELECT intEntityId

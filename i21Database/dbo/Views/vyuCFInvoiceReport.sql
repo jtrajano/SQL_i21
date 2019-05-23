@@ -1,5 +1,4 @@
-﻿
-CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 
@@ -360,7 +359,7 @@ ON cfTT.intTaxCodeId = smTCd.intTaxCodeId
 INNER JOIN dbo.tblSMTaxClass AS smTCl 
 ON smTCd.intTaxClassId = smTCl.intTaxClassId 
 WHERE  intTransactionId = cfTrans.intTransactionId   
-AND smTCl.strTaxClass = 'SST' 
+AND LOWER(smTCl.strTaxClass) like '%sst%' 
 GROUP  BY cfTT.intTransactionId      
 ) AS cfTransSSTTax
 -------------------------------------------------------------
@@ -373,7 +372,7 @@ ON cfTT.intTaxCodeId = smTCd.intTaxCodeId
 INNER JOIN dbo.tblSMTaxClass AS smTCl 
 ON smTCd.intTaxClassId = smTCl.intTaxClassId 
 WHERE  intTransactionId = cfTrans.intTransactionId   
-AND smTCl.strTaxClass != 'SST' 
+AND LOWER(smTCl.strTaxClass) not like '%sst%' 
 GROUP  BY cfTT.intTransactionId      
 ) AS cfTransExceptSSTTax
 -------------------------------------------------------------

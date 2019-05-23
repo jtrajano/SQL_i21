@@ -88,25 +88,29 @@ BEGIN
 			,intItemId
 			,intItemLocationId
 			,intItemUOMId
-			,intSubLocationId
+			-- ,intSubLocationId
 			,dblQty
 			,dblUOMQty
 			,intTransactionId
 			,intTransactionDetailId
 			,strTransactionId
 			,intTransactionTypeId
+			,intSubLocationId
+			,intStorageLocationId
 	)
 	SELECT	dtmDate					= PO.dtmDate
 			,intItemId				= POD.intItemId
 			,intItemLocationId		= il.intItemLocationId 
 			,intItemUOMId			= POD.intUnitOfMeasureId
-			,intSubLocationId		= NULL 
+			-- ,intSubLocationId		= NULL 
 			,dblQty					= -@dblQty
 			,dblUOMQty				= iu.dblUnitQty
 			,intTransactionId		= PO.intPurchaseId
 			,intTransactionDetailId = POD.intPurchaseDetailId
 			,strTransactionId		= PO.strPurchaseOrderNumber
 			,intTransactionTypeId	= -1 -- Any value
+			,POD.intSubLocationId
+			,POD.intStorageLocationId
 	FROM	tblPOPurchase PO INNER JOIN tblPOPurchaseDetail POD
 				ON PO.intPurchaseId = POD.intPurchaseId
 			LEFT JOIN tblICItemLocation il

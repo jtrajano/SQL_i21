@@ -136,37 +136,25 @@ BEGIN
 				THEN L.dblQty
 			ELSE L.dblWeight
 			END AS dblWeight
-		,(
-			SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-			) AS dblReservedQty
+		,(SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))) AS dblReservedQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
-				THEN (
-						SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-						)
-			ELSE (
-					SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))
-					)
+				THEN (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))
+			ELSE (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0)))
 			END AS dblReservedWeight
-		,L.dblQty - (
-			SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-			) AS dblAvailableQty
+		,L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))) AS dblAvailableQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
-				THEN L.dblQty - (
-						SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-						)
-			ELSE L.dblWeight - (
-					SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))
-					)
+				THEN L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))
+			ELSE L.dblWeight - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0)))
 			END AS dblAvailableWeight
 	FROM tblICLot L
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 		AND UT.ysnAllowPick = 1
-	LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0 and SR.intTransactionId<>@intOrderHeaderId
-	JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
-		AND R.strInternalCode = 'STOCK'
+	LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+		AND SR.ysnPosted = 0
+		AND SR.intTransactionId <> @intOrderHeaderId
 	LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 	JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -213,6 +201,11 @@ BEGIN
 				ELSE L.intLotId
 				END
 			)
+		AND SL.intRestrictionId NOT IN (
+			SELECT RT.intRestrictionId
+			FROM tblMFInventoryShipmentRestrictionType RT
+			)
+		AND LI.ysnPickAllowed = 1
 		AND L.intOwnershipType = IsNULL(@intOwnershipType, L.intOwnershipType)
 	GROUP BY L.intLotId
 		,L.intItemId
@@ -241,13 +234,7 @@ BEGIN
 							CAST(CASE 
 									WHEN (
 											(I.intUnitPerLayer * I.intLayerPerPallet > 0)
-											AND (
-												(
-													L.dblQty - (
-														SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-														)
-													) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
-												)
+											AND ((L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
 											)
 										THEN 1
 									ELSE 0
@@ -297,9 +284,7 @@ BEGIN
 										THEN L.dblQty
 									ELSE L.dblWeight
 									END
-								) - (
-								SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,IsNULL(L.intWeightUOMId,L.intItemUOMId), SR.dblQty), 0))
-								)
+								) - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNULL(L.intWeightUOMId, L.intItemUOMId), SR.dblQty), 0)))
 							) - @dblRequiredWeight)
 			ELSE 0
 			END ASC
@@ -324,37 +309,25 @@ BEGIN
 				THEN L.dblQty
 			ELSE L.dblWeight
 			END AS dblWeight
-		,(
-			SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-			) AS dblReservedQty
+		,(SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))) AS dblReservedQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
-				THEN (
-						SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-						)
-			ELSE (
-					SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))
-					)
+				THEN (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))
+			ELSE (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0)))
 			END AS dblReservedWeight
-		,L.dblQty - (
-			SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-			) AS dblAvailableQty
+		,L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))) AS dblAvailableQty
 		,CASE 
 			WHEN L.intWeightUOMId IS NULL
-				THEN L.dblQty - (
-						SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-						)
-			ELSE L.dblWeight - (
-					SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0))
-					)
+				THEN L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))
+			ELSE L.dblWeight - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intWeightUOMId, SR.dblQty), 0)))
 			END AS dblAvailableWeight
 	FROM tblICLot L
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 		AND UT.ysnAllowPick = 1
-	LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId and SR.ysnPosted =0 and SR.intTransactionId<>@intOrderHeaderId
-	JOIN dbo.tblICRestriction R ON R.intRestrictionId = IsNULL(SL.intRestrictionId, R.intRestrictionId)
-		AND R.strInternalCode = 'STOCK'
+	LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+		AND SR.ysnPosted = 0
+		AND SR.intTransactionId <> @intOrderHeaderId
 	LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 	JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
@@ -408,8 +381,17 @@ BEGIN
 				ELSE L.intLotId
 				END
 			)
+		AND SL.intRestrictionId NOT IN (
+			SELECT RT.intRestrictionId
+			FROM tblMFInventoryShipmentRestrictionType RT
+			)
+		AND LI.ysnPickAllowed = 1
 		AND L.intOwnershipType = IsNULL(@intOwnershipType, L.intOwnershipType)
-		AND L.intLotId NOT IN (Select IsNULL(T.intLotId,0) from tblMFTask Where intOrderHeaderId=@intOrderHeaderId)
+		AND L.intLotId NOT IN (
+			SELECT IsNULL(T.intLotId, 0)
+			FROM tblMFTask
+			WHERE intOrderHeaderId = @intOrderHeaderId
+			)
 	GROUP BY L.intLotId
 		,L.intItemId
 		,L.dblQty
@@ -437,13 +419,7 @@ BEGIN
 							CAST(CASE 
 									WHEN (
 											(I.intUnitPerLayer * I.intLayerPerPallet > 0)
-											AND (
-												(
-													L.dblQty - (
-														SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0))
-														)
-													) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0
-												)
+											AND ((L.dblQty - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, L.intItemUOMId, SR.dblQty), 0)))) % (I.intUnitPerLayer * I.intLayerPerPallet) > 0)
 											)
 										THEN 1
 									ELSE 0
@@ -493,9 +469,7 @@ BEGIN
 										THEN L.dblQty
 									ELSE L.dblWeight
 									END
-								) - (
-								SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId,IsNULL(L.intWeightUOMId,L.intItemUOMId), SR.dblQty), 0))
-								)
+								) - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNULL(L.intWeightUOMId, L.intItemUOMId), SR.dblQty), 0)))
 							) - @dblRequiredWeight)
 			ELSE 0
 			END ASC

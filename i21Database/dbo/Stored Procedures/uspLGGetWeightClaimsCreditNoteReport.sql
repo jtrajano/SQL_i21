@@ -112,7 +112,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,@strPhone AS strCompanyPhone
 	,@strCity + ', ' + @strState + ', ' + @strZip + ', ' AS strCityStateZip
 	--,@strCity + ', '+ CONVERT(NVARCHAR,GETDATE(),106) AS strCityAndDate
-	,@strCity + ', '+ DATENAME(dd,getdate()) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + DATENAME(yyyy,getdate()) AS strCityAndDate
+	,@strCity + ', '+ DATENAME(dd,WC.dtmTransDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,WC.dtmTransDate),3)),LEFT(DATENAME(MONTH,WC.dtmTransDate),3)) + ' ' + DATENAME(yyyy,WC.dtmTransDate) AS strCityAndDate
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
@@ -234,6 +234,7 @@ WHERE WC.intWeightClaimId = @intWeightClaimId
 GROUP BY WC.intWeightClaimId
 	,WC.intLoadId
 	,WC.strReferenceNumber
+	,WC.dtmTransDate
 	,L.intLoadId
 	,CH.strContractNumber
 	,CH.strCustomerContract

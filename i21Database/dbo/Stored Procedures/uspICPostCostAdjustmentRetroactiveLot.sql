@@ -779,32 +779,100 @@ BEGIN
 	DEALLOCATE loopRetroactive;
 END 
 
--- Book the cost adjustment. 
+---- Book the cost adjustment. 
+--IF @costAdjustmentType = @costAdjustmentType_SUMMARIZED
+--BEGIN 
+
+
+--	SET 	@CurrentCostAdjustment = NULL 
+--	SELECT	@CurrentCostAdjustment = SUM(ROUND(ISNULL(dblValue, 0), 2)) 
+--	FROM	tblICInventoryLotCostAdjustmentLog	
+--	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+--			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost	
+
+--	SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
+
+--	SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
+--	FROM	tblICItem i 
+--	WHERE	i.intItemId = @intItemId
+
+--	-- Create the 'Cost Adjustment' inventory transaction. 
+--	--IF ISNULL(@CurrentCostAdjustment, 0) <> 0
+--	BEGIN 
+--		EXEC [uspICPostInventoryTransaction]
+--			@intItemId								= @intItemId
+--			,@intItemLocationId						= @intItemLocationId
+--			,@intItemUOMId							= @intItemUOMId
+--			,@intSubLocationId						= @intSubLocationId
+--			,@intStorageLocationId					= @intStorageLocationId
+--			,@dtmDate								= @dtmDate
+--			,@dblQty								= 0
+--			,@dblUOMQty								= 0
+--			,@dblCost								= 0
+--			,@dblValue								= @CurrentCostAdjustment
+--			,@dblSalesPrice							= 0
+--			,@intCurrencyId							= NULL 
+--			,@intTransactionId						= @intTransactionId
+--			,@intTransactionDetailId				= @intTransactionDetailId
+--			,@strTransactionId						= @strTransactionId
+--			,@strBatchId							= @strBatchId
+--			,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment 
+--			,@intLotId								= @intLotId  
+--			,@intRelatedInventoryTransactionId		= @intRelatedInventoryTransactionId 
+--			,@intRelatedTransactionId				= @intSourceTransactionId
+--			,@strRelatedTransactionId				= @strSourceTransactionId
+--			,@strTransactionForm					= @strTransactionForm
+--			,@intEntityUserSecurityId				= @intEntityUserSecurityId
+--			,@intCostingMethod						= @LOTCOST -- TODO: Double check the costing method. Make sure it matches with the SP. 
+--			,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+--			,@intFobPointId							= @intFobPointId 
+--			,@intInTransitSourceLocationId			= @intInTransitSourceLocationId
+--			,@intForexRateTypeId					= NULL
+--			,@dblForexRate							= 1
+--			,@strDescription						= @strDescription	
+
+--			UPDATE	tblICInventoryTransaction 
+--			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+--			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+
+--			-- Update the log with correct inventory transaction id
+--			IF @InventoryTransactionIdentityId IS NOT NULL 
+--			BEGIN 
+--				UPDATE	tblICInventoryLotCostAdjustmentLog 
+--				SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+--				WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+--			END 
+--	END 
+--END 
 IF @costAdjustmentType = @costAdjustmentType_SUMMARIZED
 BEGIN 
-	-- Calculate the value to book. 
-	-- Formula: (Remaining Qty x New Cost) - (Remaining Qty x Original Cost)
-	-- SELECT	@CurrentCostAdjustment = 
-	-- 			SUM((cb.dblStockIn - cb.dblStockOut) * cb.dblCost)
-	-- 			- SUM((cb.dblStockIn - cb.dblStockOut) * cbo.dblCost) 
-	-- FROM	tblICInventoryLot cb INNER JOIN #tmpCostBucketOriginal cbo
-	-- 			ON cb.intInventoryLotId = cbo.intInventoryLotId
 
-	SET 	@CurrentCostAdjustment = NULL 
-	SELECT	@CurrentCostAdjustment = SUM(ROUND(ISNULL(dblValue, 0), 2)) 
-	FROM	tblICInventoryLotCostAdjustmentLog	
+	DECLARE loopCostAdjustmentLogSummarized CURSOR LOCAL FAST_FORWARD
+	FOR 
+	SELECT	dblCurrentAdjustment = SUM(ROUND(ISNULL(dblValue, 0), 2)) 
+			,intLotId 
+	FROM	tblICInventoryLotCostAdjustmentLog cbLog INNER JOIN tblICInventoryLot cb
+				ON cbLog.intInventoryLotId = cb.intInventoryLotId
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
-			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost	
+			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost
+	GROUP BY
+			cb.intLotId
 
-	SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
+	OPEN loopCostAdjustmentLogSummarized
+	FETCH NEXT FROM loopCostAdjustmentLogSummarized INTO 
+		@CurrentCostAdjustment 
+		,@intLotId 
 
-	SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
-	FROM	tblICItem i 
-	WHERE	i.intItemId = @intItemId
+	WHILE @@FETCH_STATUS = 0 
+	BEGIN
 
-	-- Create the 'Cost Adjustment' inventory transaction. 
-	--IF ISNULL(@CurrentCostAdjustment, 0) <> 0
-	BEGIN 
+		SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
+
+		SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
+		FROM	tblICItem i 
+		WHERE	i.intItemId = @intItemId
+
+		SET @InventoryTransactionIdentityId = NULL 
 		EXEC [uspICPostInventoryTransaction]
 			@intItemId								= @intItemId
 			,@intItemLocationId						= @intItemLocationId
@@ -837,19 +905,32 @@ BEGIN
 			,@dblForexRate							= 1
 			,@strDescription						= @strDescription	
 
+		-- Update ysnIsUnposted flag. 
+		BEGIN 
 			UPDATE	tblICInventoryTransaction 
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
+		END 
 
-			-- Update the log with correct inventory transaction id
-			IF @InventoryTransactionIdentityId IS NOT NULL 
-			BEGIN 
-				UPDATE	tblICInventoryLotCostAdjustmentLog 
-				SET		intInventoryTransactionId = @InventoryTransactionIdentityId
-				WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
-			END 
+		-- Update the log with correct inventory transaction id
+		IF @InventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			UPDATE	tblICInventoryLotCostAdjustmentLog 
+			SET		intInventoryTransactionId = @InventoryTransactionIdentityId
+			WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
+		END 
+
+		FETCH NEXT FROM loopCostAdjustmentLogSummarized INTO 
+			@CurrentCostAdjustment 
+			,@intLotId 
 	END 
+
+	CLOSE loopCostAdjustmentLogSummarized;
+	DEALLOCATE loopCostAdjustmentLogSummarized;
+
+
 END 
+
 ELSE IF @costAdjustmentType = @costAdjustmentType_DETAILED
 BEGIN 
 
@@ -861,12 +942,14 @@ BEGIN
 	DECLARE loopCostAdjustmentLog CURSOR LOCAL FAST_FORWARD
 	FOR 
 	SELECT	
-			dblValue
-			,strRelatedTransactionId
-			,intRelatedTransactionId
-			,intRelatedTransactionDetailId
-			,intId 
-	FROM	tblICInventoryLotCostAdjustmentLog	
+			ROUND(ISNULL(cbLog.dblValue, 0), 2) 
+			,cbLog.strRelatedTransactionId
+			,cbLog.intRelatedTransactionId
+			,cbLog.intRelatedTransactionDetailId
+			,cbLog.intId 
+			,cb.intLotId
+	FROM	tblICInventoryLotCostAdjustmentLog cbLog INNER JOIN tblICInventoryLot cb
+				ON cbLog.intInventoryLotId = cb.intInventoryLotId
 	WHERE	intInventoryTransactionId = @DummyInventoryTransactionId
 			AND intInventoryCostAdjustmentTypeId <> @COST_ADJ_TYPE_Original_Cost		
 
@@ -877,9 +960,16 @@ BEGIN
 		,@intTransactionIdCostAdjLog
 		,@intTransactionDetailIdCostAdjLog
 		,@intCostAdjId
+		,@intLotId 
 
 	WHILE @@FETCH_STATUS = 0 
 	BEGIN
+		SET @strNewCost = CONVERT(NVARCHAR, CAST(ISNULL(@CostAdjustment, 0) AS MONEY), 1)
+
+		SELECT	@strDescription = 'A value of ' + @strNewCost + ' is adjusted for ' + i.strItemNo + '. It is posted in ' + @strSourceTransactionId + '.'
+		FROM	tblICItem i 
+		WHERE	i.intItemId = @intItemId
+
 		SET @InventoryTransactionIdentityId = NULL 
 		EXEC [uspICPostInventoryTransaction]
 			@intItemId								= @intItemId
@@ -935,6 +1025,7 @@ BEGIN
 			,@intTransactionIdCostAdjLog
 			,@intTransactionDetailIdCostAdjLog
 			,@intCostAdjId
+			,@intLotId
 	END 
 
 	CLOSE loopCostAdjustmentLog;

@@ -302,4 +302,15 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpd
 -- End: Preview and Report table Clean Up
 ----------------------------------------------------------------------------------------------------------------------------------
 
+
+
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreGLAccount') 
+	BEGIN
+		PRINT(N'Drop table tblSTStoreGLAccount')
+		EXEC('
+				DROP TABLE tblSTStoreGLAccount
+			')
+	END
+
 PRINT('ST Cleanup - End')

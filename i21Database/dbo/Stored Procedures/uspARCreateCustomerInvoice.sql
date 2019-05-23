@@ -59,11 +59,11 @@
 	,@ItemDocumentNumber			NVARCHAR(100)	= NULL			
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@ItemOrderUOMId				INT				= NULL
-	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemQtyOrdered				NUMERIC(38,20)	= 0.000000
 	,@ItemUOMId						INT				= NULL
 	,@ItemPriceUOMId				INT				= NULL
-	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
-	,@ItemUnitQuantity				NUMERIC(18,6)	= 1.000000
+	,@ItemQtyShipped				NUMERIC(38,20)	= 0.000000
+	,@ItemUnitQuantity				NUMERIC(38,20)	= 1.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
@@ -100,10 +100,10 @@
 	,@ItemContractDetailId			INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
-	,@ItemWeight					NUMERIC(18,6)	= 0.000000		
-	,@ItemShipmentGrossWt			NUMERIC(18,6)	= 0.000000		
-	,@ItemShipmentTareWt			NUMERIC(18,6)	= 0.000000		
-	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000			
+	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
+	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
+	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000			
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL		
 	,@ItemCustomerStorageId			INT				= NULL		
@@ -137,7 +137,8 @@
 	,@intSalesOrderId				INT				= NULL
 	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
 	,@ItemAddonParent				BIT				= NULL
-	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
+	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
+	,@PaidCPP						BIT				= 0
 AS
 
 BEGIN
@@ -459,6 +460,7 @@ BEGIN TRY
 		,[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]
 		,[ysnPaid]
+		,[ysnPaidCPP]
 		,[ysnRecurring]
 		,[ysnForgiven]
 		,[ysnCalculated]
@@ -542,6 +544,7 @@ BEGIN TRY
 		,[ysnImportedFromOrigin]		= ISNULL(@ImportedFromOrigin, 0)
 		,[ysnImportedAsPosted]			= ISNULL(@ImportedAsPosted, 0)
 		,[ysnPaid]						= 0
+		,[ysnPaidCPP]					= @PaidCPP
 		,[ysnTemplate]					= ISNULL(@Template,0)
 		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
 		,[ysnCalculated]				= ISNULL(@Calculated,0)

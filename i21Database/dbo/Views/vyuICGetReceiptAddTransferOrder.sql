@@ -146,8 +146,8 @@ FROM (
 			, ysnSubCurrency			= CAST(0 AS BIT) 
 			, intCurrencyId				= dbo.fnSMGetDefaultCurrency('FUNCTIONAL')  
 			, strSubCurrency			= SubCurrency.strCurrency--CAST(NULL AS NVARCHAR(50)) 
-			, dblGross					= ISNULL(d.dblGross - st.dblReceiptGross, 0) -- There is no gross from transfer
-			, dblNet					= ISNULL(d.dblNet-st.dblReceiptNet, 0) -- There is no net from transfer
+			, dblGross					= ISNULL(d.dblGross - ISNULL(st.dblReceiptGross, 0), 0) -- There is no gross from transfer
+			, dblNet					= ISNULL(d.dblNet-ISNULL(st.dblReceiptNet, 0), 0) -- There is no net from transfer
 			, ysnBundleItem = CAST(0 AS BIT)
 			, intBundledItemId = CAST(NULL AS INT)
 			, strBundledItemNo = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
@@ -225,7 +225,7 @@ FROM (
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = toLocation.intLocationId
 			LEFT JOIN vyuICGetItemStockTransferred st ON st.intInventoryTransferId = h.intInventoryTransferId
-			
+				and st.intItemId = item.intItemId
 			LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 			OUTER APPLY (

@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspICCreateReceiptGLEntriesForNonStockItems]
 	@strBatchId AS NVARCHAR(40)
-	,@AccountCategory_ContraNonInventory AS NVARCHAR(255) = 'AP Clearing'
+	,@AccountCategory_APClearing AS NVARCHAR(255) = 'AP Clearing'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	,@intContraNonInventory_ItemLocationId AS INT = NULL 
@@ -16,7 +16,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables used by fnGetItemGLAccount
-DECLARE @AccountCategory_NonInventory AS NVARCHAR(30) = 'General'
+DECLARE @AccountCategory_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
+DECLARE @AccountCategory_General AS NVARCHAR(30) = 'General'
 DECLARE @strTransactionForm NVARCHAR(255)
 DECLARE @InventoryTransactionTypeId_AutoVariance AS INT = 1;
 DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
@@ -25,40 +26,147 @@ DECLARE @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock AS INT =
 
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
+DECLARE @GLAccounts AS TABLE
+(
+	intItemId INT NOT NULL 
+	,intItemLocationId INT NOT NULL 
+	,intPOId INT
+	,intTransactionTypeId INT 
+	,intNonInventoryId INT
+	,intContraNonInventoryId INT
+	,strNonInventoryAccountCategory NVARCHAR(30)
+	,strContraNonInventoryAccountCategory NVARCHAR(30)
+	,intOrder INT
+)
 
--- Get the GL Account ids to use
-DECLARE @GLAccounts AS dbo.ItemGLAccount; 
+DECLARE @UnitTrans TABLE (intItemId INT, intItemLocationId INT, intTransactionTypeId INT)
+INSERT INTO @UnitTrans
+SELECT	DISTINCT 
+		intItemId
+		, intItemLocationId 
+		, intTransactionTypeId
+FROM	(
+	SELECT	DISTINCT 
+			t.intItemId
+			, t.intItemLocationId 
+			, t.intTransactionTypeId
+	FROM	dbo.tblICInventoryTransaction t
+		INNER JOIN tblICItem i ON t.intItemId = i.intItemId
+
+	WHERE	t.strBatchId = @strBatchId
+			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+			AND i.strType = 'Non-Inventory'
+) InnerQuery
+
+
+-- Get the GL Account Other Charge Expense ids to use
 INSERT INTO @GLAccounts (
 	intItemId 
 	,intItemLocationId 
 	,intNonInventoryId 
 	,intContraNonInventoryId 
+	,intPOId
 	,intTransactionTypeId
+	,strNonInventoryAccountCategory
+	,strContraNonInventoryAccountCategory
+	,intOrder
 )
 SELECT	Query.intItemId
 		,Query.intItemLocationId
-		,intNonInventory = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_NonInventory) 
-		,intContraNonInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_ContraNonInventory) 
+		,intNonInventory = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_OtherChargeExpense)
+		,intContraNonInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_APClearing) 
+		,NULL
 		,intTransactionTypeId
-FROM	(
-			SELECT	DISTINCT 
-					intItemId
-					, intItemLocationId 
-					, intTransactionTypeId
-			FROM	(
-				SELECT	DISTINCT 
-						t.intItemId
-						, t.intItemLocationId 
-						, t.intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
-							ON t.intItemId = i.intItemId
-				WHERE	t.strBatchId = @strBatchId
-						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
-						AND i.strType = 'Non-Inventory'
-			) InnerQuery
-		) Query
+		,@AccountCategory_OtherChargeExpense
+		,@AccountCategory_APClearing
+		,1
+FROM @UnitTrans Query
+
+
+-- Get Fallback General account ids
+INSERT INTO @GLAccounts (
+	intItemId 
+	,intItemLocationId 
+	,intNonInventoryId 
+	,intContraNonInventoryId 
+	,intPOId
+	,intTransactionTypeId
+	,strNonInventoryAccountCategory
+	,strContraNonInventoryAccountCategory
+	,intOrder
+)
+SELECT	Query.intItemId
+		,Query.intItemLocationId
+		,intNonInventory = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_General)
+		,intContraNonInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, Query.intItemLocationId), @AccountCategory_APClearing) 
+		,NULL
+		,intTransactionTypeId
+		,@AccountCategory_General
+		,@AccountCategory_APClearing
+		,2
+FROM @UnitTrans Query
+
+-- Get Accounts from PO
+MERGE INTO @GLAccounts AS target
+USING
+(
+	SELECT
+		  t.intItemId
+		, t.intItemLocationId
+		, intAccountId = dbo.fnGetLocationAwareItemGLAccount(ap.intAccountId, ISNULL(@intContraNonInventory_ItemLocationId, t.intItemLocationId), @AccountCategory_OtherChargeExpense)
+		, intContraNonInventoryId = dbo.fnGetItemGLAccount(i.intItemId, ISNULL(@intContraNonInventory_ItemLocationId, t.intItemLocationId), @AccountCategory_APClearing) 
+		, intTransactionTypeId = t.intTransactionTypeId
+		,strNonInventoryAccountCategory = @AccountCategory_OtherChargeExpense
+		,strContraNonInventoryAccountCategory = @AccountCategory_APClearing
+		,intOrder = 0
+	FROM tblICInventoryReceipt r
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
+		INNER JOIN vyuPODetails ap ON ap.intItemId = ri.intItemId
+			AND ap.intPurchaseId = ri.intOrderId	
+			AND ap.intPurchaseDetailId = ri.intLineNo
+		INNER JOIN tblICInventoryTransaction t ON t.intTransactionId = r.intInventoryReceiptId
+			AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+	WHERE t.strBatchId = @strBatchId
+		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+		AND i.strType = 'Non-Inventory'
+		AND t.strTransactionForm = 'Inventory Receipt'
+		AND ap.intAccountId IS NOT NULL
+) AS source (intItemId, intItemLocationId, intAccountId, intContraNonInventoryId, intTransactionTypeId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
+	ON target.intItemId = source.intItemId AND target.intItemLocationId = source.intItemLocationId AND target.intNonInventoryId = source.intAccountId AND target.intTransactionTypeId = source.intTransactionTypeId
+WHEN MATCHED THEN UPDATE SET intNonInventoryId = source.intAccountId, intTransactionTypeId = source.intTransactionTypeId, intOrder = 0
+WHEN NOT MATCHED BY target THEN
+INSERT (intPOId, intNonInventoryId, intItemId, intItemLocationId, intTransactionTypeId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
+VALUES(source.intAccountId, source.intAccountId, source.intItemId, source.intItemLocationId, source.intTransactionTypeId, source.intContraNonInventoryId, source.strNonInventoryAccountCategory, source.strContraNonInventoryAccountCategory, source.intOrder);
+
+DECLARE @NonStockGLAccounts AS TABLE
+(
+	intItemId INT NOT NULL 
+	,intItemLocationId INT NOT NULL 
+	,intPOId INT
+	,intTransactionTypeId INT 
+	,intNonInventoryId INT
+	,intContraNonInventoryId INT
+	,strNonInventoryAccountCategory NVARCHAR(30)
+	,strContraNonInventoryAccountCategory NVARCHAR(30)
+	,intOrder INT
+)
+
+;WITH cte AS
+(
+   SELECT *,
+         ROW_NUMBER() OVER (PARTITION BY a.intItemId, a.intItemLocationId ORDER BY intOrder ASC) AS rn
+   FROM @GLAccounts a
+   WHERE a.intNonInventoryId IS NOT NULL
+)
+INSERT INTO @NonStockGLAccounts(intItemId, intItemLocationId, intPOId, intTransactionTypeId, intNonInventoryId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
+SELECT intItemId, intItemLocationId, intPOId, intTransactionTypeId, intNonInventoryId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder
+FROM cte
+WHERE rn = 1
 
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -70,31 +178,53 @@ BEGIN
 	SELECT	TOP 1 
 			@intItemId = Item.intItemId 
 			,@strItemNo = Item.strItemNo
-	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
-				ON Item.intItemId = ItemGLAccount.intItemId
-	WHERE	ItemGLAccount.intNonInventoryId IS NULL
+	FROM tblICItem Item
+        INNER JOIN @NonStockGLAccounts ItemGLAccount ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE ItemGLAccount.intNonInventoryId IS NULL
 
 	SELECT	TOP 1 
 			@strLocationName = c.strLocationName
 	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
 				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @GLAccounts ItemGLAccount
+			INNER JOIN @NonStockGLAccounts ItemGLAccount
 				ON ItemGLAccount.intItemId = il.intItemId
 				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
 	WHERE	il.intItemId = @intItemId
 			AND ItemGLAccount.intNonInventoryId IS NULL 
 
-	IF @intItemId IS NOT NULL 
+
+    IF NOT EXISTS(SELECT * FROM @NonStockGLAccounts)
+    BEGIN
+        SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+        FROM tblICItem Item
+            INNER JOIN @GLAccounts ItemGLAccount ON Item.intItemId = ItemGLAccount.intItemId
+        
+        SELECT	TOP 1 
+                @strLocationName = c.strLocationName
+        FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+                    ON il.intLocationId = c.intCompanyLocationId
+                INNER JOIN @GLAccounts ItemGLAccount
+                    ON ItemGLAccount.intItemId = il.intItemId
+                    AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+        WHERE	il.intItemId = @intItemId
+                 
+    END
+
+	IF @intItemId IS NOT NULL
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_NonInventory;
+		DECLARE @msg NVARCHAR(800) = 'The non-inventory item <b>' + @strItemNo + '</b> at location <b>' + @strLocationName + '</b> is missing a setup for <b>' + @AccountCategory_OtherChargeExpense + '</b> or <b>' + @AccountCategory_General + '</b> GL accounts. (1) Verify if these accounts are properly set up in the <i>item</i> or <i>category</i> screen. (2) Make sure these accounts exist in the GL chart of accounts.'
+		--EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_OtherChargeExpense;
+		RAISERROR(@msg, 11, 1)
 		RETURN -1;
-	END 
+	END
 END 
 ;
 
 -- Check for missing Contra-Account Id
-IF @AccountCategory_ContraNonInventory IS NOT NULL 
+IF @AccountCategory_APClearing IS NOT NULL 
 BEGIN 
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
@@ -102,7 +232,7 @@ BEGIN
 	SELECT	TOP 1 
 			@intItemId = Item.intItemId 
 			,@strItemNo = Item.strItemNo
-	FROM	dbo.tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+	FROM	dbo.tblICItem Item INNER JOIN @NonStockGLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
 			--LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
 			--	ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
@@ -113,7 +243,7 @@ BEGIN
 			@strLocationName = c.strLocationName
 	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
 				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @GLAccounts ItemGLAccount
+			INNER JOIN @NonStockGLAccounts ItemGLAccount
 				ON ItemGLAccount.intItemId = il.intItemId
 				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
 	WHERE	il.intItemId = @intItemId
@@ -122,12 +252,11 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
-		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_ContraNonInventory;
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_APClearing;
 		RETURN -1;
 	END 
 END 
 ;
-
 -- Log the g/l account used in this batch. 
 INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
 		intItemId
@@ -142,7 +271,7 @@ SELECT
 		,intNonInventoryId
 		,intContraNonInventoryId
 		,@strBatchId
-FROM	@GLAccounts
+FROM	@NonStockGLAccounts
 ;
 
 -- Get the default transaction form name
@@ -194,7 +323,7 @@ WITH ForGLEntries_CTE (
 	,strItemNo
 	,strRateType
 	,dblLineTotal
-	--,dblAddOnCostFromOtherCharge
+	,ysnPO
 )
 AS 
 (
@@ -233,41 +362,133 @@ AS
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
 					)						
-			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
-	FROM	dbo.tblICInventoryTransaction t 
-			INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON 
-				t.intTransactionTypeId = TransType.intTransactionTypeId
-			INNER JOIN tblICItem i
-				ON 
-				i.intItemId = t.intItemId
-			INNER JOIN tblICInventoryReceipt r
-				ON 
-				r.strReceiptNumber = t.strTransactionId
-				AND r.intInventoryReceiptId = t.intTransactionId			
-			LEFT JOIN tblICInventoryReceiptItem ri
-				ON 
-				ri.intInventoryReceiptId = r.intInventoryReceiptId
-				AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
-			OUTER APPLY (
-				SELECT  dblTotalNet = SUM(
-							CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
-										ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
-									ELSE 
-										ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
-							END 
-						)
-				FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
-							ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
-				WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-			) AggregrateItemLots
-			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-				ON 
-				currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+			, ysnPO = CAST(0 AS BIT)
+	FROM dbo.tblICInventoryTransaction t 
+		INNER JOIN dbo.tblICInventoryTransactionType TransType ON t.intTransactionTypeId = TransType.intTransactionTypeId
+		INNER JOIN tblICItem i ON i.intItemId = t.intItemId
+		INNER JOIN tblICInventoryReceipt r ON r.strReceiptNumber = t.strTransactionId
+			AND r.intInventoryReceiptId = t.intTransactionId			
+		LEFT JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+			AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+		OUTER APPLY (
+			SELECT  dblTotalNet = SUM(
+						CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+									ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+								ELSE 
+									ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+						END 
+					)
+			FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+						ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+			WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+		) AggregrateItemLots
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+		LEFT JOIN (
+			SELECT t.intTransactionId, t.intTransactionDetailId
+			FROM tblICInventoryReceipt r
+				INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+				INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
+				INNER JOIN vyuPODetails ap ON ap.intItemId = ri.intItemId
+					AND ap.intPurchaseId = ri.intOrderId	
+					AND ap.intPurchaseDetailId = ri.intLineNo
+				INNER JOIN tblICInventoryTransaction t ON t.intTransactionId = r.intInventoryReceiptId
+					AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+			WHERE t.strBatchId = @strBatchId
+				AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+				AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+				AND i.strType = 'Non-Inventory'
+				AND t.strTransactionForm = 'Inventory Receipt'
+				AND ap.intAccountId IS NOT NULL
+		) PO ON PO.intTransactionDetailId = t.intTransactionDetailId
 	WHERE	t.strBatchId = @strBatchId
-			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
-	UNION ALL 
+		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0)
+		AND PO.intTransactionDetailId IS NULL
+	
+	UNION ALL
+
+	SELECT	t.dtmDate
+			,t.intItemId
+			,t.intItemLocationId 
+			,t.intInTransitSourceLocationId
+			,t.intTransactionId
+			,t.strTransactionId
+			,t.dblQty
+			,t.dblUOMQty
+			,t.dblCost
+			,t.dblValue
+			,t.intTransactionTypeId
+			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
+			,t.dblExchangeRate
+			,t.intInventoryTransactionId
+			,strInventoryTransactionTypeName = TransType.strName
+			,t.strTransactionForm 
+			,t.strDescription
+			,t.dblForexRate	
+			,i.strItemNo
+			,strRateType = currencyRateType.strCurrencyExchangeRateType
+			,dblLineTotal = 
+					t.dblQty *
+					dbo.fnCalculateReceiptUnitCost(
+						ri.intItemId
+						,ri.intUnitMeasureId		
+						,ri.intCostUOMId
+						,ri.intWeightUOMId
+						,ri.dblUnitCost
+						,ri.dblNet
+						,t.intLotId
+						,t.intItemUOMId
+						,AggregrateItemLots.dblTotalNet
+						,ri.ysnSubCurrency
+						,r.intSubCurrencyCents
+					)						
+			, ysnPO = CAST(1 AS BIT)
+	FROM dbo.tblICInventoryTransaction t 
+		INNER JOIN dbo.tblICInventoryTransactionType TransType ON t.intTransactionTypeId = TransType.intTransactionTypeId
+		INNER JOIN tblICItem i ON i.intItemId = t.intItemId
+		INNER JOIN tblICInventoryReceipt r ON r.strReceiptNumber = t.strTransactionId
+			AND r.intInventoryReceiptId = t.intTransactionId			
+		LEFT JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+			AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+		OUTER APPLY (
+			SELECT  dblTotalNet = SUM(
+						CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
+									ISNULL(dbo.fnCalculateQtyBetweenUOM(ReceiptItemLot.intItemUnitMeasureId, ReceiptItem.intWeightUOMId, ReceiptItemLot.dblQuantity), 0) 
+								ELSE 
+									ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0)
+						END 
+					)
+			FROM	tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICInventoryReceiptItemLot ReceiptItemLot
+						ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
+			WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+		) AggregrateItemLots
+		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+		LEFT JOIN (
+			SELECT t.intTransactionId, t.intTransactionDetailId
+			FROM tblICInventoryReceipt r
+				INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+				INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
+				INNER JOIN vyuPODetails ap ON ap.intItemId = ri.intItemId
+					AND ap.intPurchaseId = ri.intOrderId	
+					AND ap.intPurchaseDetailId = ri.intLineNo
+				INNER JOIN tblICInventoryTransaction t ON t.intTransactionId = r.intInventoryReceiptId
+					AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+			WHERE t.strBatchId = @strBatchId
+				AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
+				AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+				AND i.strType = 'Non-Inventory'
+				AND t.strTransactionForm = 'Inventory Receipt'
+				AND ap.intAccountId IS NOT NULL
+		) PO ON PO.intTransactionDetailId = t.intTransactionDetailId
+	WHERE	t.strBatchId = @strBatchId
+		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0)
+		AND PO.intTransactionDetailId IS NOT NULL
+
+	UNION ALL
+
 	SELECT	
 			dtmDate = t.dtmDate
 			,intItemId = t.intItemId
@@ -365,6 +586,7 @@ AS
 			,strItemNo = i.strItemNo 
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,dblLineTotal = NULL 
+			,ysnPO = CAST(0 AS BIT)
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TransType.intTransactionTypeId = t.intTransactionTypeId
@@ -435,12 +657,13 @@ AS
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
-		,intAccountId				= tblGLAccount.intAccountId
+		,intAccountId				= tblGLAccount.intAccountId --CASE WHEN ysnPO = 1 THEN tblGLPOAccount.intAccountId ELSE tblGLAccount.intAccountId END
 		,dblDebit					= Debit.Value
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0--DebitUnit.Value 
 		,dblCreditUnit				= 0--CreditUnit.Value
-		,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) 
+		-- ,strDescription				= CASE WHEN ysnPO = 1 THEN ISNULL(@strGLDescription, ISNULL(tblGLPOAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) ELSE ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) END 
+		,strDescription				= CASE WHEN ysnPO = 1 THEN ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) ELSE ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) END 
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -466,12 +689,11 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE  
-		INNER JOIN @GLAccounts GLAccounts
-			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+		INNER JOIN @NonStockGLAccounts GLAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
-			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intNonInventoryId
+			AND (ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId)
+		LEFT OUTER JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intNonInventoryId
+		--LEFT OUTER JOIN dbo.tblGLAccount tblGLPOAccount  ON tblGLPOAccount.intAccountId = GLAccounts.intPOId
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)
 		) DebitForeign
@@ -540,12 +762,10 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 FROM	ForGLEntries_CTE 
-		INNER JOIN @GLAccounts GLAccounts
-			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
+		INNER JOIN @NonStockGLAccounts GLAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ISNULL(ForGLEntries_CTE.intInTransitSourceLocationId, ForGLEntries_CTE.intItemLocationId) = GLAccounts.intItemLocationId
 			AND ForGLEntries_CTE.intTransactionTypeId = GLAccounts.intTransactionTypeId
-		INNER JOIN dbo.tblGLAccount
-			ON tblGLAccount.intAccountId = GLAccounts.intContraNonInventoryId
+		INNER JOIN dbo.tblGLAccount ON tblGLAccount.intAccountId = GLAccounts.intContraNonInventoryId
 		CROSS APPLY dbo.fnGetDebit(
 			ISNULL(dblLineTotal, 0)			
 		) DebitForeign

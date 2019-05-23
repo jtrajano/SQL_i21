@@ -41,7 +41,7 @@ INNER JOIN (
 ) DETAIL ON INVOICE.intInvoiceId = DETAIL.intInvoiceId
 INNER JOIN (
 	SELECT intItemId
-		 , strItemNo		  = ISNULL(strItemNo, '') + ' - ' + ISNULL(strDescription, '')
+		 , strItemNo		  = ISNULL(strItemNo, '') -- + ' - ' + ISNULL(strDescription, '')
 		 , strItemDescription = strDescription
 	FROM dbo.tblICItem WITH (NOLOCK)
 ) ITEM ON DETAIL.intItemId = ITEM.intItemId

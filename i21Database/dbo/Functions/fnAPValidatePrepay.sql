@@ -74,7 +74,7 @@ BEGIN
 		INNER JOIN tblAPAppliedPrepaidAndDebit C ON B.intBillId = C.intTransactionId
 		INNER JOIN tblAPBill D ON C.intBillId = D.intBillId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
-		AND A.ysnPrepay = 1 AND D.ysnPosted = 1
+		AND B.ysnOffset = 1 AND D.ysnPosted = 1
 		
 	END
 

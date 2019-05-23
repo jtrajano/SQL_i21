@@ -4,7 +4,7 @@
 	[intInvoiceId]									INT NOT NULL,
 	[intInvoiceDetailId]							INT NULL,
     --[strInvoiceNumber]								NVARCHAR(25) COLLATE Latin1_General_CI_AS	NULL,												  
-    [dblQtyReceived]								NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblQtyReceived] DEFAULT ((0)) NULL,
+    [dblQtyReceived]								NUMERIC(38, 20) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblQtyReceived] DEFAULT ((0)) NULL,
     [dblPrice]										NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblPrice] DEFAULT ((0)) NULL,
     [dblCost]										NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblCost] DEFAULT ((0)) NULL,
     [dblAmountDue]									NUMERIC(18, 6) CONSTRAINT [DF_tblARInvoiceTransactionHistory_dblAmountDue] DEFAULT ((0)) NULL,

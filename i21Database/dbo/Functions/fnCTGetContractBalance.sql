@@ -573,8 +573,8 @@ BEGIN
 	AND   CD.intFutureMarketId    = CASE WHEN ISNULL(@IntFutureMarketId ,0) > 0	   THEN @IntFutureMarketId	  ELSE CD.intFutureMarketId	                 END
 	AND   CD.intFutureMonthId     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0     THEN @IntFutureMonthId     ELSE CD.intFutureMonthId                   END
 	AND   ISNULL(L.ysnLicensed, 0) = CASE 
-										WHEN @strPositionIncludes = 'licensed storage'     THEN 1
-										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
+										WHEN @strPositionIncludes = 'Licensed Storage'     THEN 1
+										WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0
 										ELSE ISNULL(ysnLicensed, 0) 
 									 END
 	
@@ -741,8 +741,8 @@ BEGIN
 	AND   CD.intFutureMonthId     = CASE WHEN ISNULL(@IntFutureMonthId ,0) > 0     THEN @IntFutureMonthId     ELSE CD.intFutureMonthId					 END
 	AND   ISNULL(BL.dblQuantity,0) <= 0
 	AND   ISNULL(L.ysnLicensed, 0) = CASE 
-										WHEN @strPositionIncludes = 'licensed storage'     THEN 1
-										WHEN @strPositionIncludes = 'Non-licensed storage' THEN 0
+										WHEN @strPositionIncludes = 'Licensed Storage'     THEN 1
+										WHEN @strPositionIncludes = 'Non-licensed Storage' THEN 0
 										ELSE ISNULL(ysnLicensed, 0) 
 									 END
 	

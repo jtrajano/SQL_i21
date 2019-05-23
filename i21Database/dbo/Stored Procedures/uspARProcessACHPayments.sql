@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARProcessACHPayments]
 	@strPaymentIds			NVARCHAR(MAX),
 	@intBankAccountId		INT,
-	@intCompanyLocationId	INT,
+	@intCompanyLocationId	INT = NULL,
 	@intUserId				INT,
 	@strNewTransactionId	NVARCHAR(100) = '' OUTPUT
 AS
@@ -11,6 +11,20 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
+
+-- FOR AR-10210: Patterned from uspARPostPaymentIntegration>PROCESS CUSTOMER BUDGET TO ACH
+IF @intCompanyLocationId IS NULL
+BEGIN
+	SELECT TOP 1 @intCompanyLocationId	= intLocationId
+	FROM dbo.tblARPayment P 
+	INNER JOIN 
+		(SELECT * FROM dbo.fnGetRowsFromDelimitedValues(@strPaymentIds) ) PI
+			ON P.intPaymentId = PI.intID
+	WHERE 
+		P.strPaymentMethod = 'ACH'
+		AND P.intBankAccountId IS NOT NULL
+END
+--
 
 DECLARE @tblACHPayments TABLE (
 	  intPaymentId			INT
@@ -73,7 +87,11 @@ IF NOT EXISTS (SELECT TOP 1 NULL FROM @tblACHPayments)
 		RAISERROR('No ACH Payments to process.', 16, 1)
 		RETURN;
 	END
-
+IF EXISTS (SELECT TOP 1 NULL FROM @tblACHPayments where dtmDatePaid > CAST(CURRENT_TIMESTAMP AS DATE))
+	BEGIN
+		RAISERROR('Unable to process, ACH Payment record/s should be less than or equal to date today.', 16, 1)
+		RETURN;
+	END
 IF ISNULL(@intBankAccountId, 0) = 0
 	BEGIN
 		RAISERROR('Bank Account is required when processing ACH Payments.', 16, 1)

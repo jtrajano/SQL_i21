@@ -76,7 +76,7 @@ DECLARE
 	,@ysnTransactionClearedFlag AS BIT
 	,@intBankAccountIdFrom AS INT
 	,@intBankAccountIdTo AS INT
-	,@ysnBankAccountIdInactive AS BIT
+	,@ysnBankAccountActive AS BIT
 	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
 	,@dblRate DECIMAL (18,6)
@@ -226,12 +226,13 @@ BEGIN
 	-- Check if the bank account is inactive
 	IF @ysnRecap = 0 
 	BEGIN
-		SELECT TOP 1 @ysnBankAccountIdInactive = 1
-		FROM	tblCMBankAccount
+		SELECT TOP 1 @ysnBankAccountActive = ISNULL(A.ysnActive,0) & ISNULL(B.ysnActive,0)
+		FROM	tblCMBankAccount A JOIN vyuGLAccountDetail B
+		ON A.intGLAccountId = B.intAccountId
 		WHERE	intBankAccountId IN (@intBankAccountIdFrom, @intBankAccountIdTo) 
-				AND (ysnActive = 0 OR intGLAccountId IN (SELECT intAccountId FROM tblGLAccount WHERE ysnActive = 0))
+
 	
-		IF @ysnBankAccountIdInactive = 1
+		IF @ysnBankAccountActive = 0
 		BEGIN
 			-- 'The bank account is inactive.'
 			RAISERROR('The bank account or its associated GL account is inactive.', 11, 1)

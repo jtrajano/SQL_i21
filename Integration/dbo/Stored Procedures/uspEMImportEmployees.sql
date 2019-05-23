@@ -27,6 +27,29 @@ SET XACT_ABORT ON
 DECLARE @strPrefix NVARCHAR(10)
 SET @strPrefix = ''E''
 
+--Import all Workers Compensation from Origin
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblPRWorkersCompensation
+	WHERE LTRIM(RTRIM(strWCCode)) IN (SELECT prwcc_code COLLATE Latin1_General_CI_AS FROM prwccmst)) 
+AND EXISTS(SELECT TOP 1 1 FROM prwccmst)
+BEGIN
+	INSERT INTO tblPRWorkersCompensation (
+		 strWCCode
+		,strDescription
+		,dblRate
+		,strCalculationType
+		,intConcurrencyId
+	)
+	SELECT LTRIM(RTRIM(prwcc_code)) COLLATE Latin1_General_CI_AS 
+		,(LTRIM(RTRIM(prwcc_desc)) + '' '' + LTRIM(RTRIM(prwcc_desc2))) COLLATE Latin1_General_CI_AS
+		,prwcc_company_rate
+		,CASE WHEN prwcc_rate_type = 1 THEN ''Per Dollar'' 
+			  WHEN prwcc_rate_type = 2 THEN ''Per Hour'' 
+			END
+		,1
+	FROM prwccmst
+	WHERE prwcc_code COLLATE Latin1_General_CI_AS NOT IN (SELECT LTRIM(RTRIM(strWCCode)) FROM tblPRWorkersCompensation)
+END
+
 if @TermDate is null
 begin
 	set @TermDate = ''1/1/'' + CAST(DATEPART(YEAR, getdate()) AS NVARCHAR(4))
@@ -330,8 +353,9 @@ BEGIN
 				@ysnRetirementPlan	= premp_pension_flag_9,
 				@dblRegularHours	= premp_std_hrs,
 				@dtmLastModified	= CASE WHEN ISNULL(premp_user_rev_dt,0) = 0 THEN NULL ELSE premp_user_rev_dt END,
-				@strDepartment		= premp_dept
-					
+				@strDepartment		= premp_dept,
+				@strWCCode			= LTRIM(RTRIM(premp_prwcc_code)) COLLATE Latin1_General_CI_AS
+
             FROM prempmst
             WHERE @strPrefix + LTRIM(RTRIM((premp_emp))) = @originEmployee
 		END
@@ -412,6 +436,14 @@ BEGIN
 			INSERT INTO tblEMEntityType ( intEntityId, strType, intConcurrencyId)
 			VALUES (@EntityId, ''Employee'', 0)
 		end
+
+		--GET intWorkersCompensationId
+		IF EXISTS(SELECT TOP 1 1 FROM tblPRWorkersCompensation WHERE LTRIM(RTRIM(strWCCode)) = @strWCCode)
+		BEGIN
+			SELECT @intWC = intWorkersCompensationId
+			FROM tblPRWorkersCompensation
+			WHERE LTRIM(RTRIM(strWCCode)) = @strWCCode 
+		END
 		
 		insert into tblPREmployee(intEntityId, strEmployeeId, strWorkPhone, intRank, dtmOriginalDateHired, dtmDateHired,	dtmBirthDate,	strGender,	strMaritalStatus,	strSpouse,	strEthnicity,	strEEOCCode,	strSocialSecurity,   	dtmTerminated,	strTerminatedReason,	strEmergencyContact,	strEmergencyPhone,	strEmergencyPhone2,	strPayPeriod,	dtmReviewDate,	dtmNextReview,	ysnRetirementPlan,	dblRegularHours,	dtmLastModified, strFirstName, strMiddleName, strLastName, strNameSuffix, strType, intWorkersCompensationId, ysnActive)
 		values(@EntityId, @originEmployee, @strPhone, 0, @dtmOrigHireDate, @dtmLastHireDate, @dtmBirthDate, @strSex, @strMaritalStatus,	@strSpouse, @strEthnicity,	 @strEEOCCode,	 @strSocialSecurity,  @dtmTerminated, @strTerminatedReason, @strEmergencyContact, @strEmergencyPhone,	  @strEmergencyPhone2, @strPayPeriod, @dtmReviewDate,	 @dtmNextReview,	 @ysnRetirementPlan,  @dblRegularHours,	 @dtmLastModified, @strFirstName, @strMiddleName, @strLastName, @strSuffix, @strType, @intWC, @ysnEmployeeActive)
@@ -430,8 +462,8 @@ BEGIN
 					join prcmtmst b
 						on a.premp_emp = b.prcmt_emp
 					join tblEMEntity c
-						on a.premp_emp COLLATE Latin1_General_CI_AS = c.strEntityNo COLLATE Latin1_General_CI_AS 
-							and c.strEntityNo = @originEmployee
+						on a.premp_emp COLLATE Latin1_General_CI_AS = STUFF(c.strEntityNo, 1, 1, '''') COLLATE Latin1_General_CI_AS 
+							and STUFF(c.strEntityNo, 1, 1, '''') = STUFF(@originEmployee, 1, 1, '''')
 
 		DECLARE @Bank_code NVARCHAR(50)
 		DECLARE @Bank_name NVARCHAR(50)
@@ -452,7 +484,7 @@ BEGIN
 					@Bank_account = premp_dir_dep_acct,
 					@Bank_type = premp_dd_acct_type_cs
 				FROM prempmst where premp_dir_dep_bank is not null
-					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + @originEmployee +  '''''' ''
+					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + STUFF(@originEmployee, 1, 1, '''') +  '''''' ''
 
 			SET @Bank_code = null
 	
@@ -532,7 +564,7 @@ BEGIN
 					@Bank_account = premp_ded_ref_no_'' + Cast(@Bank_count as nvarchar)+ '',
 					@Bank_type = premp_ded_dd_acct_type_'' + Cast(@Bank_count as nvarchar)+ ''
 				FROM prempmst where premp_ded_dep_bank_'' + Cast(@Bank_count as nvarchar)+ '' is not null
-					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + @originEmployee +  '''''' ''
+					AND premp_emp COLLATE Latin1_General_CI_AS = '''''' + STUFF(@originEmployee, 1, 1, '''') +  '''''' ''
 
 			SET @Bank_code = null
 

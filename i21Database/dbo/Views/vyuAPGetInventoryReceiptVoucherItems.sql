@@ -553,7 +553,7 @@ FROM	tblICInventoryReceipt Receipt
 WHERE	Receipt.ysnPosted = 1
 		AND receiptAndVoucheredItems.dblReceiptQty <> receiptAndVoucheredItems.dblVoucherQty
 		AND receiptAndVoucheredItems.dblUnitCost != 0 --WILL NOT SHOW RECEIPT FROM STORAGE
-		AND SC.strDistributionOption != 'DP' --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+		AND ISNULL(SC.strDistributionOption,'') != 'DP' --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 		
 GO
 

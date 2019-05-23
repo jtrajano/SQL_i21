@@ -35,6 +35,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strAccountStatusCodeLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strCompanyLocationIdsLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strDateTo							AS NVARCHAR(50)
 	  , @strDateFrom						AS NVARCHAR(50)
 	  , @query								AS NVARCHAR(MAX)
@@ -220,10 +221,28 @@ IF @ysnIncludeWriteOffPaymentLocal = 1
 		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
 	END
 
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCompanyLocation = @strLocationNameLocal
-										  , @strCustomerName = @strCustomerNameLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
+SELECT @strCustomerIdsLocal = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+FROM (
+	SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(MAX))  + ', '
+	FROM #CUSTOMERS
+	FOR XML PATH ('')
+) C (intEntityCustomerId)
+
+IF @strLocationNameLocal IS NOT NULL
+	BEGIN
+		SELECT @strCompanyLocationIdsLocal = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(MAX))  + ', '
+			FROM tblSMCompanyLocation
+			WHERE strLocationName = @strLocationNameLocal
+			FOR XML PATH ('')
+		) C (intCompanyLocationId)
+	END
+
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @intEntityUserId			= @intEntityUserIdLocal
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + 
 'SELECT * 

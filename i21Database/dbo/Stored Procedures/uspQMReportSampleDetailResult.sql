@@ -30,7 +30,7 @@ BEGIN TRY
 		,TR.dblMinValue
 		,TR.dblMaxValue
 		,TR.strComment
-		,TR.dtmLastModified
+		,dbo.fnConvertDateToReportDateFormat(TR.dtmLastModified, 1) AS strLastModified
 		,P.intDataTypeId
 	FROM tblQMTestResult TR
 	JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId

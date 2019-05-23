@@ -10,10 +10,10 @@
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@ItemOrderUOMId				INT				= NULL
 	,@ItemPriceUOMId				INT				= NULL
-	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemQtyOrdered				NUMERIC(38,20)	= 0.000000
 	,@ItemUOMId						INT				= NULL
-	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
-	,@ItemUnitQuantity				NUMERIC(18,6)	= 1.000000
+	,@ItemQtyShipped				NUMERIC(38,20)	= 0.000000
+	,@ItemUnitQuantity				NUMERIC(38,20)	= 1.000000
 	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscount				NUMERIC(18,6)	= 0.000000
 	,@ItemTermDiscountBy			NVARCHAR(50)	= NULL
@@ -54,10 +54,10 @@
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL
 	,@ItemWeightUOMId				INT				= NULL	
-	,@ItemWeight					NUMERIC(18,6)	= 0.000000		
-	,@ItemShipmentGrossWt			NUMERIC(18,6)	= 0.000000		
-	,@ItemShipmentTareWt			NUMERIC(18,6)	= 0.000000		
-	,@ItemShipmentNetWt				NUMERIC(18,6)	= 0.000000		
+	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
+	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
+	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000		
 	,@ItemTicketId					INT				= NULL		
 	,@ItemTicketHoursWorkedId		INT				= NULL	
 	,@ItemCustomerStorageId			INT				= NULL		
@@ -87,7 +87,7 @@
 	,@ItemSalesAccountId			INT				= NULL
 	,@ItemAddonDetailKey			NVARCHAR(100)	= NULL
 	,@ItemAddonParent				BIT				= NULL
-	,@ItemAddOnQuantity				NUMERIC(18,8)	= NULL
+	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
 AS
 
 BEGIN
@@ -206,7 +206,7 @@ DECLARE  @ContractNumber				NVARCHAR(50)
 		,@SpecialPrice					NUMERIC(18,6)	= 0.000000
 		,@ContractUOMId					INT
 		,@PriceUOMId					INT
-		,@PriceUOMQuantity				NUMERIC(18,6)	= 1.000000
+		,@PriceUOMQuantity				NUMERIC(38,20)	= 1.000000
 		,@CurrencyExchangeRateTypeId	INT
 		,@CurrencyExchangeRate			NUMERIC(18,6)
 		,@SubCurrencyId					INT
@@ -558,10 +558,10 @@ BEGIN
 	SELECT
 		 [intInvoiceDetailId]		= @NewId
 		,[intLotId]					= [intLotId] 
-		,[dblQuantityShipped]		= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ID.intItemUOMId, [dblNet])
-		,[dblGrossWeight]			= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ID.intItemUOMId, [dblGross])
-		,[dblTareWeight]			= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ID.intItemUOMId, [dblTare])
-		,[dblWeightPerQty]			= dbo.fnCalculateQtyBetweenUOM([intWeightUOMId], ID.intItemUOMId, [dblNet])
+		,[dblQuantityShipped]		= [dblLotQuantity]
+		,[dblGrossWeight]			= [dblGross]
+		,[dblTareWeight]			= [dblTare]
+		,[dblWeightPerQty]			= [dblNet]
 		,[strWarehouseCargoNumber]	= [strWarehouseCargoNumber]
 		,[intSort]					= 1
 		,[dtmDateCreated]			= GETDATE()

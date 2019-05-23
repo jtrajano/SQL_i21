@@ -64,6 +64,7 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 				CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 			ELSE 1 END)
 AND A.apivc_trans_type IN ('I', 'C', 'A')
+AND A.apivc_status_ind = 'U'
 AND NOT EXISTS(
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
@@ -85,7 +86,11 @@ AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL
 UNION ALL
 SELECT DISTINCT
 	CAST(A.apcbk_gl_ap AS NVARCHAR)+ ' is not a valid AP Account.'
-FROM apcbkmst A INNER JOIN apivcmst B ON A.apcbk_no = B.apivc_cbk_no WHERE ISNULL(A.apcbk_gl_ap,0) = 0
+FROM apcbkmst A INNER JOIN apivcmst B ON A.apcbk_no = B.apivc_cbk_no 
+WHERE 
+	ISNULL(A.apcbk_gl_ap,0) = 0
+AND B.apivc_status_ind = 'U'
+AND B.apivc_trans_type IN ('I', 'C', 'A')
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 			THEN
 				CASE WHEN ISDATE(B.apivc_gl_rev_dt) = 1  AND CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
@@ -105,7 +110,10 @@ FROM apcbkmst A
 WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
 AND A.apcbk_no IN (
 	SELECT apivc_cbk_no FROM apivcmst B
-	WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
+	WHERE 
+		B.apivc_status_ind = 'U'
+	AND B.apivc_trans_type IN ('I', 'C', 'A')
+	AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 					THEN
 						CASE WHEN ISDATE(B.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
 							AND B.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND B.apivc_status_ind = 'U' THEN 1 ELSE 0 END
@@ -145,6 +153,7 @@ SELECT DISTINCT
 FROM aphglmst A
 INNER JOIN apivcmst B ON A.aphgl_vnd_no = B.apivc_vnd_no AND A.aphgl_ivc_no = B.apivc_ivc_no
 WHERE A.aphgl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
+AND B.apivc_status_ind = 'U'
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 		THEN
 			CASE WHEN ISDATE(B.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo 
@@ -191,6 +200,7 @@ AND NOT EXISTS(
 -- END
 
 --GET ALL EXISTING INVOICE NUMBER IN apivcmst
+--We should not allow to re-insert same invoice number in apivcmst
 BEGIN
 INSERT INTO @log
 SELECT DISTINCT
@@ -199,7 +209,7 @@ FROM aptrxmst A WHERE
 aptrx_trans_type IN ('I', 'C', 'A')
 AND EXISTS (
 		SELECT 1 FROM apivcmst B
-	WHERE A.aptrx_ivc_no = B.apivc_ivc_no AND A.aptrx_vnd_no = B.apivc_vnd_no 
+		WHERE A.aptrx_ivc_no = B.apivc_ivc_no AND A.aptrx_vnd_no = B.apivc_vnd_no 
 )
 AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 		 THEN CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END

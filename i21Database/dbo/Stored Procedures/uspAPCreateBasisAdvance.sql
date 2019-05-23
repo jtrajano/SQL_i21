@@ -66,7 +66,7 @@ INSERT INTO @voucherPayables(
 )
 SELECT
     intPartitionId				    = ROW_NUMBER() OVER(ORDER BY (SELECT 1)) --1 voucher per 1 payable
-    ,intEntityVendorId               = basisAdvance.intEntityId
+    ,intEntityVendorId              = basisAdvance.intEntityId
     ,intTransactionType             = 13
     ,intLocationId                  = basisAdvance.intCompanyLocationId
     ,intCurrencyId                  = basisAdvance.intCurrencyId
@@ -75,34 +75,34 @@ SELECT
     ,intContractDetailId            = basisAdvance.intContractDetailId
     ,intContractHeaderId            = basisAdvance.intContractHeaderId
     ,intContractSeqId               = basisAdvance.intContractSeq
-    ,intItemId                      = receiptItem.intItemId
-    ,dblOrderQty                    = receiptItem.dblOpenReceive
+    ,intItemId                      = basisAdvance.intItemId
+    ,dblOrderQty                    = basisAdvance.dblQuantity
     ,dblOrderUnitQty                = ISNULL(ItemUOM.dblUnitQty,1)
-    ,intOrderUOMId                  = receiptItem.intUnitMeasureId
-    ,dblQuantityToBill              = receiptItem.dblOpenReceive
+    ,intOrderUOMId                  = basisAdvance.intItemUOMId
+    ,dblQuantityToBill              = basisAdvance.dblQuantity
     ,dblQtyToBillUnitQty            = ISNULL(ItemUOM.dblUnitQty,1)
-    ,intQtyToBillUOMId              = receiptItem.intUnitMeasureId
+    ,intQtyToBillUOMId              = basisAdvance.intItemUOMId
     ,dblExchangeRate                = @rate
     ,intCurrencyExchangeRateTypeId  = @rateType
     ,dblCost                        = basisAdvance.dblAmountToAdvance / basisAdvance.dblQuantity
     --,dblContractCost                = basisAdvance.dblFuturesPrice + basisAdvance.dblUnitBasis
-    ,intCostUOMId                   = receiptItem.intUnitMeasureId
+    ,intCostUOMId                   = basisAdvance.intItemUOMId
     ,dblCostUnitQty                 = 1
     ,dblBasis                       = basisAdvance.dblUnitBasis
     ,dblFutures                     = basisAdvance.dblFuturesPrice
     ,dblPrepayPercentage            = basisAdvance.dblPercentage
     ,intPrepayTypeId                = 2
-    ,intStorageLocationId           = receiptItem.intStorageLocationId
+    ,intStorageLocationId           = basisAdvance.intStorageLocationId
     ,intAccountId                   = loc.intAPAccount
 FROM tblAPBasisAdvanceStaging basisStaging
 INNER JOIN vyuAPBasisAdvance basisAdvance 
     ON basisStaging.intTicketId = basisAdvance.intTicketId AND basisStaging.intContractDetailId = basisAdvance.intContractDetailId
-INNER JOIN tblICInventoryReceiptItem receiptItem
-    ON basisAdvance.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+-- INNER JOIN tblICInventoryReceiptItem receiptItem
+--     ON basisAdvance.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 INNER JOIN tblSMCompanyLocation loc ON basisAdvance.intCompanyLocationId = loc.intCompanyLocationId
-LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = receiptItem.intWeightUOMId
-LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = receiptItem.intCostUOMId
-LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = receiptItem.intUnitMeasureId
+-- LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = receiptItem.intWeightUOMId
+-- LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = receiptItem.intCostUOMId
+LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = basisAdvance.intItemUOMId
 WHERE basisAdvance.dblAmountToAdvance > 0
 
 DECLARE @transCount INT = @@TRANCOUNT;

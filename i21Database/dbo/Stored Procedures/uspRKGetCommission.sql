@@ -19,7 +19,7 @@ BEGIN
 		LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = bc.intFutCurrencyId
 		WHERE bc.intFutureMarketId = @intFutureMarketId
 			AND bc.intBrokerageAccountId = @intBrokerageAccountId
-			AND @dtmTransactionDate BETWEEN bc.dtmEffectiveDate AND bc.dtmEndDate
+			AND @dtmTransactionDate BETWEEN bc.dtmEffectiveDate AND isnull(bc.dtmEndDate,getdate())
 	) tbl
 	
 	SET @dblCommission = ISNULL(@dblCommission,0)

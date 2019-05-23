@@ -190,8 +190,8 @@ BEGIN
 					,[strMiscDescription] = 'Service Fee'
 					,[intAccountId] = @intServiceFeeIncomeId
 					,[intLineNo] = 2
-					,[dblQuantityToBill] = 1
-					,[dblCost] = - ROUND(RefundCustomer.dblServiceFee, 2)
+					,[dblQuantityToBill] = -1
+					,[dblCost] =  ROUND(RefundCustomer.dblServiceFee, 2)
 					,[int1099Form] = 0
 					,[int1099Category] = 0
 					,[dbl1099] = 0

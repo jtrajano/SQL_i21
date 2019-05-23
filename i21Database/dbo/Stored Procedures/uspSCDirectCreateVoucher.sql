@@ -423,13 +423,18 @@ BEGIN TRY
 				[intShipToId],
 				[intInventoryReceiptChargeId],
 				[intPurchaseDetailId],
+				[intPurchaseTaxGroupId],
 				[dblTax],
 				[intEntityVendorId],
 				[strVendorOrderNumber],
-				[intLoadShipmentId]
+				[intLoadShipmentId],
+				[strReference],
+				[strSourceNumber],
+				[intSubLocationId],
+				[intItemLocationId]
+				,ysnStage
 				)
 				EXEC [dbo].[uspSCGenerateVoucherDetails] @voucherItems,@voucherOtherCharges,@voucherDetailDirectInventory
-
 				IF EXISTS(SELECT NULL FROM @voucherPayable)
 					BEGIN
 						INSERT INTO @voucherTaxDetail(
@@ -466,14 +471,24 @@ BEGIN TRY
 								,[ysnTaxOnly]
 						FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
 							BEGIN /* Create Voucher */
-
-							EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId
+								DECLARE @createVoucher BIT = 0
+								DECLARE @postVoucher   BIT = 0
+								--SELECT * FROM @voucherPayable
+								SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
+								IF ISNULL(@createVoucher, 0) = 1 OR ISNULL(@postVoucher, 0) = 1
+									EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage OUT, @createdVouchersId = @intBillId OUT
+								ELSE
+									EXEC [dbo].[uspAPUpdateVoucherPayableQty] @voucherPayable = @voucherPayable, @voucherPayableTax = @voucherTaxDetail, @post = 1, @throwError = 1,@error = @ErrorMessage OUT
 			
+								IF ISNULL(@ErrorMessage,'') <> ''
+								BEGIN
+									RAISERROR(@ErrorMessage,16,1);
+								END
 							END
 					END
 			END
 
-			IF ISNULL(@intBillId,0) > 0
+			IF ISNULL(@intBillId,0) > 0 AND @postVoucher = 1
 			BEGIN
 				UPDATE tblAPBillDetail SET intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
 				EXEC [dbo].[uspAPPostBill]

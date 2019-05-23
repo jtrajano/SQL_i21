@@ -816,7 +816,7 @@ FROM
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 	LEFT JOIN	tblSMTerm term ON term.intTermID =  CC.intTermId
-	OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
+	OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId, 'Other Charge Expense') itemAccnt
 	LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 	OUTER APPLY (
 		SELECT TOP 1 dblRate as forexRate from tblSMCurrencyExchangeRateDetail G1
@@ -952,7 +952,7 @@ FROM
 	LEFT JOIN	tblSMCurrencyExchangeRateDetail RateDetail ON Rate.intCurrencyExchangeRateId = RateDetail.intCurrencyExchangeRateId
 	LEFT JOIN 	vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	LEFT JOIN	tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
-	OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
+	OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId, 'Other Charge Expense') itemAccnt
 	LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 	OUTER APPLY (
 		SELECT TOP 1 dblRate as forexRate from tblSMCurrencyExchangeRateDetail G1

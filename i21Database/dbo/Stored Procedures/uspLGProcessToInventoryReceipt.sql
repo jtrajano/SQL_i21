@@ -665,7 +665,8 @@ BEGIN TRY
 				,dtmDate = GETDATE()
 				,intShipViaId = CD.intShipViaId
 				,dblQty = ISNULL(LDCL.dblQuantity, LD.dblQuantity) --
-				,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId) --
+				,intGrossNetUOMId = COALESCE((SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId), 
+											LD.intWeightItemUOMId, CD.intNetWeightUOMId)
 				,dblGross = ISNULL(LDCL.dblLinkGrossWt, LD.dblGross) --
 				,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) --
 				,dblCost = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0)) --

@@ -479,10 +479,10 @@ BEGIN
 		dtmDate ,
 	    strBatchId ,
 	    intAccountId ,
-	    dblDebit ,
-	    dblCredit ,
-	    dblDebitUnit ,
-	    dblCreditUnit ,
+	    Debit.Value ,
+	    Credit.Value ,
+	    DebitUnit.Value ,
+	    CreditUnit.Value ,
 	    strDescription ,
 	    strCode ,
 	    strReference ,
@@ -501,9 +501,9 @@ BEGIN
 	    strTransactionType ,
 	    strTransactionForm ,
 	    strModuleName ,
-	    dblDebitForeign ,
+	    DebitForeign.Value ,
 	    dblDebitReport ,
-	    dblCreditForeign ,
+	    CreditForeign.Value ,
 	    dblCreditReport ,
 	    dblReportingRate ,
 	    dblForeignRate ,
@@ -514,7 +514,13 @@ BEGIN
 		dblSourceUnitDebit,
 		intCommodityId,
 		intSourceLocationId	
-	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
+	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId) A
+	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
+	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit
+	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0)) DebitForeign
+	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign
+	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
+	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0))  CreditUnit
 	ORDER BY intTransactionId
 
 	-- Call the Item's Cost Adjustment
@@ -523,6 +529,7 @@ BEGIN
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN	
 		BEGIN TRY
+			IF NOT EXISTS( SELECT TOP 1 1 FROM @adjustedEntries WHERE dblQty < 0) --CALL THE ADJUSTMENTS ONLY IF POSSITIVE
 			EXEC @intReturnValue = uspICPostCostAdjustment 
 					@adjustedEntries
 					, @batchId
@@ -893,6 +900,7 @@ BEGIN
 	IF EXISTS(SELECT 1 FROM @adjustedEntries)
 	BEGIN	
 		BEGIN TRY
+			IF NOT EXISTS( SELECT TOP 1 1 FROM @adjustedEntries WHERE dblQty < 0) --CALL THE ADJUSTMENTS ONLY IF POSSITIVE
 			EXEC @intReturnValue = uspICPostCostAdjustment 
 					@adjustedEntries
 					, @batchId
@@ -1127,54 +1135,54 @@ BEGIN
 				(SELECT intBillId FROM #tmpPostBillData))
 
 		--Update Inventory Item Receipt
-		 UPDATE A
-		 	SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived --(CASE WHEN C.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)
-		 FROM tblICInventoryReceiptItem A
-		 	INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
-		 	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
-		 AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND B.intInventoryReceiptChargeId IS NULL
+		--  UPDATE A
+		--  	SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived --(CASE WHEN C.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)
+		--  FROM tblICInventoryReceiptItem A
+		--  	INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
+		--  	INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+		--  AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData) AND B.intInventoryReceiptChargeId IS NULL
 
-		--UPDATE CHARGES (Accrue)
-		 UPDATE	Charge
-		 SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) - BillDetail.dblTotal
-		 		,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) - BillDetail.dblQtyReceived
-		 FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
-		 			ON Bill.intBillId = BillDetail.intBillId
-		 		INNER JOIN #tmpPostBillData
-		 			ON #tmpPostBillData.intBillId = Bill.intBillId
-		 		INNER JOIN tblICInventoryReceiptCharge Charge 
-		 			ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
-		 			AND Charge.intEntityVendorId = Bill.intEntityVendorId
-		 WHERE	BillDetail.dblTotal > 0 
+		-- --UPDATE CHARGES (Accrue)
+		--  UPDATE	Charge
+		--  SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) - BillDetail.dblTotal
+		--  		,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) - BillDetail.dblQtyReceived
+		--  FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+		--  			ON Bill.intBillId = BillDetail.intBillId
+		--  		INNER JOIN #tmpPostBillData
+		--  			ON #tmpPostBillData.intBillId = Bill.intBillId
+		--  		INNER JOIN tblICInventoryReceiptCharge Charge 
+		--  			ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
+		--  			AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		--  WHERE	BillDetail.dblTotal > 0 
 
-		 --UPDATE CHARGES (Price)
-		 UPDATE	Charge
-		 SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmountPriced, 0) - BillDetail.dblTotal
-		 		,Charge.dblQuantityPriced = ISNULL(Charge.dblQuantityPriced, 0) - BillDetail.dblQtyReceived
-		 FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
-		 			ON Bill.intBillId = BillDetail.intBillId
-		 		INNER JOIN #tmpPostBillData
-		 			ON #tmpPostBillData.intBillId = Bill.intBillId
-		 		INNER JOIN tblICInventoryReceiptCharge Charge 
-		 			ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
-		 		INNER JOIN tblICInventoryReceipt Receipt
-		 			ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
-		 			AND Receipt.intEntityVendorId = Bill.intEntityVendorId
-		 WHERE	ISNULL(Charge.ysnPrice, 0) = 1
-		 		AND BillDetail.dblTotal < 0 
+		--  --UPDATE CHARGES (Price)
+		--  UPDATE	Charge
+		--  SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmountPriced, 0) - BillDetail.dblTotal
+		--  		,Charge.dblQuantityPriced = ISNULL(Charge.dblQuantityPriced, 0) - BillDetail.dblQtyReceived
+		--  FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+		--  			ON Bill.intBillId = BillDetail.intBillId
+		--  		INNER JOIN #tmpPostBillData
+		--  			ON #tmpPostBillData.intBillId = Bill.intBillId
+		--  		INNER JOIN tblICInventoryReceiptCharge Charge 
+		--  			ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
+		--  		INNER JOIN tblICInventoryReceipt Receipt
+		--  			ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+		--  			AND Receipt.intEntityVendorId = Bill.intEntityVendorId
+		--  WHERE	ISNULL(Charge.ysnPrice, 0) = 1
+		--  		AND BillDetail.dblTotal < 0 
 
-		 --UPDATE CHARGES (Accrue) FROM INVENTORY SHIPMENT
-		 UPDATE	Charge
-		 SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) - BillDetail.dblTotal
-		 		,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) - BillDetail.dblQtyReceived
-		 FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
-		 			ON Bill.intBillId = BillDetail.intBillId
-		 		INNER JOIN #tmpPostBillData
-		 			ON #tmpPostBillData.intBillId = Bill.intBillId
-		 		INNER JOIN tblICInventoryShipmentCharge Charge 
-		 			ON BillDetail.[intInventoryShipmentChargeId] = Charge.intInventoryShipmentChargeId
-		 			AND Charge.intEntityVendorId = Bill.intEntityVendorId
-		 WHERE	BillDetail.dblTotal > 0 
+		--  --UPDATE CHARGES (Accrue) FROM INVENTORY SHIPMENT
+		--  UPDATE	Charge
+		--  SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) - BillDetail.dblTotal
+		--  		,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) - BillDetail.dblQtyReceived
+		--  FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+		--  			ON Bill.intBillId = BillDetail.intBillId
+		--  		INNER JOIN #tmpPostBillData
+		--  			ON #tmpPostBillData.intBillId = Bill.intBillId
+		--  		INNER JOIN tblICInventoryShipmentCharge Charge 
+		--  			ON BillDetail.[intInventoryShipmentChargeId] = Charge.intInventoryShipmentChargeId
+		--  			AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		--  WHERE	BillDetail.dblTotal > 0 
 
 		--UPDATE CONTRACT COST
 		UPDATE  CC
@@ -1259,53 +1267,53 @@ BEGIN
 		WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		--Update Inventory Item Receipt
-		 UPDATE A
-		 	SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
-		 FROM tblICInventoryReceiptItem A
-		 	INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
-		 AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)  AND B.intInventoryReceiptChargeId IS NULL
+		--  UPDATE A
+		--  	SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
+		--  FROM tblICInventoryReceiptItem A
+		--  	INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
+		--  AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)  AND B.intInventoryReceiptChargeId IS NULL
 
-		 --UPDATE CHARGES (Accrue)
-		 UPDATE	Charge
-		 SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) + BillDetail.dblTotal
-		 		,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) + BillDetail.dblQtyReceived
-		 FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
-		 			ON Bill.intBillId = BillDetail.intBillId
-		 		INNER JOIN #tmpPostBillData
-		 			ON #tmpPostBillData.intBillId = Bill.intBillId
-		 		INNER JOIN tblICInventoryReceiptCharge Charge 
-		 			ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
-		 			AND Charge.intEntityVendorId = Bill.intEntityVendorId
-		 WHERE	BillDetail.dblTotal > 0 
+		--  --UPDATE CHARGES (Accrue)
+		--  UPDATE	Charge
+		--  SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) + BillDetail.dblTotal
+		--  		,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) + BillDetail.dblQtyReceived
+		--  FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+		--  			ON Bill.intBillId = BillDetail.intBillId
+		--  		INNER JOIN #tmpPostBillData
+		--  			ON #tmpPostBillData.intBillId = Bill.intBillId
+		--  		INNER JOIN tblICInventoryReceiptCharge Charge 
+		--  			ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
+		--  			AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		--  WHERE	BillDetail.dblTotal > 0 
 
-		 -- --UPDATE CHARGES (Price)
-		 UPDATE	Charge
-		 SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmountPriced, 0) + BillDetail.dblTotal
-		 		,Charge.dblQuantityPriced = ISNULL(Charge.dblQuantityPriced, 0) + BillDetail.dblQtyReceived
-		 FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
-		 			ON Bill.intBillId = BillDetail.intBillId
-		 		INNER JOIN #tmpPostBillData
-		 			ON #tmpPostBillData.intBillId = Bill.intBillId
-		 		INNER JOIN tblICInventoryReceiptCharge Charge 
-		 			ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
-		 		INNER JOIN tblICInventoryReceipt Receipt
-		 			ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
-		 			AND Receipt.intEntityVendorId = Bill.intEntityVendorId
-		 WHERE	ISNULL(Charge.ysnPrice, 0) = 1
-		 		AND BillDetail.dblTotal < 0 
+		--  -- --UPDATE CHARGES (Price)
+		--  UPDATE	Charge
+		--  SET		Charge.dblAmountPriced = ISNULL(Charge.dblAmountPriced, 0) + BillDetail.dblTotal
+		--  		,Charge.dblQuantityPriced = ISNULL(Charge.dblQuantityPriced, 0) + BillDetail.dblQtyReceived
+		--  FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+		--  			ON Bill.intBillId = BillDetail.intBillId
+		--  		INNER JOIN #tmpPostBillData
+		--  			ON #tmpPostBillData.intBillId = Bill.intBillId
+		--  		INNER JOIN tblICInventoryReceiptCharge Charge 
+		--  			ON BillDetail.[intInventoryReceiptChargeId] = Charge.intInventoryReceiptChargeId
+		--  		INNER JOIN tblICInventoryReceipt Receipt
+		--  			ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+		--  			AND Receipt.intEntityVendorId = Bill.intEntityVendorId
+		--  WHERE	ISNULL(Charge.ysnPrice, 0) = 1
+		--  		AND BillDetail.dblTotal < 0 
 
-		 --UPDATE CHARGES (Accrue) FROM INVENTORY SHIPMENT
-		 UPDATE	Charge
-		 SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) + BillDetail.dblTotal
-		 		,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) + BillDetail.dblQtyReceived
-		 FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
-		 			ON Bill.intBillId = BillDetail.intBillId
-		 		INNER JOIN #tmpPostBillData
-		 			ON #tmpPostBillData.intBillId = Bill.intBillId
-		 		INNER JOIN tblICInventoryShipmentCharge Charge 
-		 			ON BillDetail.[intInventoryShipmentChargeId] = Charge.intInventoryShipmentChargeId
-		 			AND Charge.intEntityVendorId = Bill.intEntityVendorId
-		 WHERE	BillDetail.dblTotal > 0 				
+		--  --UPDATE CHARGES (Accrue) FROM INVENTORY SHIPMENT
+		--  UPDATE	Charge
+		--  SET		Charge.dblAmountBilled = ISNULL(Charge.dblAmountBilled, 0) + BillDetail.dblTotal
+		--  		,Charge.dblQuantityBilled = ISNULL(Charge.dblQuantityBilled, 0) + BillDetail.dblQtyReceived
+		--  FROM	tblAPBill Bill INNER JOIN tblAPBillDetail BillDetail 
+		--  			ON Bill.intBillId = BillDetail.intBillId
+		--  		INNER JOIN #tmpPostBillData
+		--  			ON #tmpPostBillData.intBillId = Bill.intBillId
+		--  		INNER JOIN tblICInventoryShipmentCharge Charge 
+		--  			ON BillDetail.[intInventoryShipmentChargeId] = Charge.intInventoryShipmentChargeId
+		--  			AND Charge.intEntityVendorId = Bill.intEntityVendorId
+		--  WHERE	BillDetail.dblTotal > 0 				
 		
 		UPDATE  CC
 			SET     CC.dblActualAmount = ISNULL(CC.dblActualAmount,0) + tblBilled.dblTotal

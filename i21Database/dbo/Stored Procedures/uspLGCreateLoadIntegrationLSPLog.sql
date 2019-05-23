@@ -436,7 +436,7 @@ BEGIN TRY
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 			WHERE LC.intLoadId = @intLoadId
-			ORDER BY LC.intLoadContainerId
+			ORDER BY LC.intSort
 		END
 	END
 	ELSE
@@ -849,7 +849,7 @@ BEGIN TRY
 		JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 		WHERE LC.intLoadId = @intLoadId
-		ORDER BY LC.intLoadContainerId
+		ORDER BY LC.intSort
 	END
 
 END TRY

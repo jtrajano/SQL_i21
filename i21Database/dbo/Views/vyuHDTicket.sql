@@ -1,5 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuHDTicket]
 AS
+	with x as (
+		select hr.intTicketId, dblEstimatedHours = sum(hr.dblEstimatedHours) from tblHDTicketHoursWorked hr group by hr.intTicketId
+	)
 	select
 		tic.intTicketId
 		,tic.strTicketNumber
@@ -68,6 +71,25 @@ AS
 								   when typ.intTicketTypeTypeId = 4 then 'Statement of Work'
 								   else null
 							  end) COLLATE Latin1_General_CI_AS
+		,tic.dblActualHours
+		,tic.dblNonBillableHours
+		,x.dblEstimatedHours
+		,ut.intUpgradeTypeId
+		,strUpgradeType = ut.strType
+		,tic.strUpgradeEnvironmentId
+		,strUpgradeEnvironmentValue = tic.strUpgradeEnvironment
+		,tic.intUpgradeTargetVersionId
+		,strUpgradeTargetVersionNo = uv.strVersionNo
+		,tic.strUpgradeCompany
+		,tic.strUpgradeCustomerContactId
+		,tic.strUpgradeCustomerContact
+		,tic.dtmUpgradeStartTime
+		,tic.strUpgradeCustomerTimeZone
+		,tic.dtmUpgradeEndTime
+		,tic.intUpgradeTimeTook
+		,tic.strUpgradeCopyDataFrom
+		,tic.strUpgradeCopyDataTo
+		,tic.strUpgradeSpecialInstruction
 	from
 		tblHDTicket tic
 		join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
@@ -86,3 +108,6 @@ AS
 		left join tblEMEntityLocation enloc on enloc.intEntityLocationId = tic.intEntityLocationId
 		left join tblEMEntity lastcomment on lastcomment.intEntityId = tic.intLastCommentedByEntityId
 		left join tblEMEntity assignto on assignto.intEntityId = tic.intAssignedToEntity
+		left join x on x.intTicketId = tic.intTicketId
+		left join tblHDUpgradeType ut on ut.intUpgradeTypeId = tic.intUpgradeTypeId
+		left join tblHDVersion uv on uv.intVersionId = tic.intUpgradeTargetVersionId

@@ -12,8 +12,8 @@ SELECT CD.intContractDetailId
 	,CD.intItemUOMId
 	,U1.strUnitMeasure AS strUnitMeasure
 	,CD.intNetWeightUOMId
-	,U2.intUnitMeasureId AS intWeightUnitMeasureId
-	,U2.strUnitMeasure AS strWeightUnitMeasure
+	,U2.intUnitMeasureId AS intNetWeightUnitMeasureId
+	,U2.strUnitMeasure AS strNetWeightUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
 	,ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0) AS dblUnLoadedQuantity
@@ -58,6 +58,7 @@ SELECT CD.intContractDetailId
 	,intNoOfLoad = CONVERT(INT,((ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0)) / NULLIF(CD.dblQuantityPerLoad, 0))) 
 	,Item.strType AS strItemType
 	,CH.intPositionId
+	,CTP.strPositionType
 	,CD.intLoadingPortId
 	,CD.intDestinationPortId
 	,CD.intDestinationCityId
@@ -66,6 +67,7 @@ SELECT CD.intContractDetailId
 	,DestCity.strCity AS strDestinationCity
 	,CD.strPackingDescription
 	,CD.intShippingLineId AS intShippingLineEntityId
+	,ShipLine.strName AS strShippingLine
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
 	,Cont.strContainerType
@@ -112,6 +114,8 @@ SELECT CD.intContractDetailId
 	,CET.strCurrencyExchangeRateType
 	,CD.intFreightTermId
 	,FT.strFreightTerm
+	,CD.intShipToId
+	,strShipTo = SH.strLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -129,11 +133,13 @@ LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = WIU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblEMEntity ShipLine ON ShipLine.intEntityId = CD.intShippingLineId
 LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
+LEFT JOIN tblCTPosition CTP ON CTP.intPositionId = CH.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
@@ -142,6 +148,7 @@ LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
+LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -182,8 +189,8 @@ SELECT CD.intContractDetailId
 	,CD.intItemUOMId
 	,U1.strUnitMeasure AS strUnitMeasure
 	,CD.intNetWeightUOMId
-	,U2.intUnitMeasureId AS intWeightUnitMeasureId
-	,U2.strUnitMeasure AS strWeightUnitMeasure
+	,U2.intUnitMeasureId AS intNetWeightUnitMeasureId
+	,U2.strUnitMeasure AS strNetWeightUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
 	,ISNULL(CD.dblQuantity, 0) - (CASE WHEN ISNULL(CD.dblShippingInstructionQty,0)<=0 THEN 0 ELSE ISNULL(CD.dblShippingInstructionQty,0) END) AS dblUnLoadedQuantity
@@ -230,6 +237,7 @@ SELECT CD.intContractDetailId
 	,CD.intNoOfLoad
 	,Item.strType AS strItemType
 	,CH.intPositionId
+	,CTP.strPositionType
 	,CD.intLoadingPortId
 	,CD.intDestinationPortId
 	,CD.intDestinationCityId
@@ -238,6 +246,7 @@ SELECT CD.intContractDetailId
 	,DestCity.strCity AS strDestinationCity
 	,CD.strPackingDescription
 	,CD.intShippingLineId AS intShippingLineEntityId
+	,ShipLine.strName AS strShippingLine
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
 	,Cont.strContainerType
@@ -284,6 +293,8 @@ SELECT CD.intContractDetailId
 	,CET.strCurrencyExchangeRateType
 	,CD.intFreightTermId
 	,FT.strFreightTerm
+	,CD.intShipToId
+	,strShipTo = SH.strLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -301,11 +312,13 @@ LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = WIU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
+LEFT JOIN tblEMEntity ShipLine ON ShipLine.intEntityId = CD.intShippingLineId
 LEFT JOIN tblLGContainerType Cont ON Cont.intContainerTypeId = CD.intContainerTypeId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
+LEFT JOIN tblCTPosition CTP ON CTP.intPositionId = CH.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
@@ -314,6 +327,7 @@ LEFT JOIN tblSMCurrencyExchangeRateType CET ON CET.intCurrencyExchangeRateTypeId
 LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
+LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
 LEFT JOIN (
 	SELECT *
 	FROM (
@@ -374,6 +388,7 @@ GROUP BY CD.intContractDetailId
 	,CD.intNoOfLoad
 	,Item.strType
 	,CH.intPositionId
+	,CTP.strPositionType
 	,CD.intLoadingPortId
 	,CD.intDestinationPortId
 	,CD.intDestinationCityId
@@ -382,6 +397,7 @@ GROUP BY CD.intContractDetailId
 	,DestPort.strCity
 	,CD.strPackingDescription
 	,CD.intShippingLineId
+	,ShipLine.strName
 	,CD.intNumberOfContainers
 	,CD.intContainerTypeId
 	,Cont.strContainerType
@@ -406,6 +422,8 @@ GROUP BY CD.intContractDetailId
 	,CD.intFreightTermId
 	,CO.strCountry
 	,CO2.strCountry
+	,CD.intShipToId
+	,SH.strLocationName
 	,FT.strFreightTerm
 	,CD.intBookId
 	,BO.strBook

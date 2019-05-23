@@ -12,6 +12,8 @@ Post-Deployment Script Template
 --Accounts Payable
 :r "..\dbo\Views\vyuAPOriginCCDTransaction.sql"
 
+
+
 --General Ledger
 :r "..\dbo\Stored Procedures\uspGLInsertOriginCrossReferenceMapping.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
@@ -21,6 +23,7 @@ Post-Deployment Script Template
 
 --We have to move it here due to schema changes before executing this store procedure
 :r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
+:r "..\dbo\Stored Procedures\uspAPImportVendorLocations.sql"
 
 -- DROP temp table created from PreDeployment script
 IF OBJECT_ID('tempdb..##tblOriginMod') IS NOT NULL DROP TABLE ##tblOriginMod
@@ -115,3 +118,8 @@ GO
 GO
 :r "..\Scripts\CC\uspCCDealerSiteCompanyOwnedMigration.sql"
 GO
+
+-- System Manager
+:r "..\dbo\Stored Procedures\uspSMImportTaxClass.sql"
+:r "..\dbo\Stored Procedures\uspSMImportTaxGroup.sql"
+Go

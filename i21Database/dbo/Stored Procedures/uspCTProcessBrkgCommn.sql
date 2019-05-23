@@ -9,7 +9,8 @@ BEGIN TRY
     DECLARE @ErrMsg							NVARCHAR(MAX),
 			@ysnReceivable					BIT,
 			@dblRcvdPaidAmount				NUMERIC(18,6),
-			@VoucherDetailNonInvContract	[VoucherPayable],
+			@VoucherDetailNonInvContract	VoucherPayable,
+			@voucherPayableTax				VoucherDetailTax,
 			@voucherPODetails				VoucherPODetail,
 			@intEntityId					INT,
 			@strBatchNumber					NVARCHAR(50),
@@ -29,7 +30,13 @@ BEGIN TRY
 			@intCostItemId					INT,
 			@intCostItemLocationId			INT,
 			@intContractSeq					INT,
-			@intContractCostId				INT
+			@intContractCostId				INT,
+			@createdVouchersId				NVARCHAR(MAX)
+	
+	DECLARE @Result AS TABLE
+	(
+		createdVouchersId	NVARCHAR(MAX)
+	)
 
     SELECT  @ysnReceivable			=	    CC.ysnReceivable,
 			@intEntityId			=	    CC.intVendorId,
@@ -83,6 +90,7 @@ BEGIN TRY
 			,intEntityVendorId
 			,strVendorOrderNumber
 			,intShipToId
+			,intTransactionType
 		)
 	   SELECT @intVoucherItemId
 			  ,1
@@ -95,13 +103,18 @@ BEGIN TRY
 			  ,@intEntityId
 			  ,@strBatchNumber
 			  ,@intCompanyLocationId
+			  ,1
+		
+		INSERT INTO	@Result
+		EXEC	[dbo].[uspAPCreateVoucher] 
+				 @voucherPayables		=	 @VoucherDetailNonInvContract
+				,@userId				=	 @intUserId
+				,@voucherPayableTax		=	 @voucherPayableTax
+				,@createdVouchersId		=	 @createdVouchersId OUTPUT
+		
+		SELECT  @intNewId = CAST(Item AS INT) FROM dbo.fnSplitString(@createdVouchersId,',') WHERE Item IS NOT NULL
 
-	   EXEC [dbo].[uspAPCreateVoucher] 
-			 @voucherDetailNonInvContract	=	 @VoucherDetailNonInvContract
-			 ,@userId						=	 @intUserId
-			 ,@billId						=	 @intNewId OUTPUT
-
-		  UPDATE tblCTBrkgCommn SET intVoucherId  = @intNewId	WHERE   intBrkgCommnId = @intBrkgCommnId
+		UPDATE tblCTBrkgCommn SET intVoucherId  = @intNewId	WHERE   intBrkgCommnId = @intBrkgCommnId
     END
     ELSE 
     BEGIN
@@ -110,14 +123,16 @@ BEGIN TRY
 				 strTransactionType,	strType,			  strSourceTransaction,	 strSourceId,				
 				 strPONumber,			intEntityCustomerId,  intCompanyLocationId,	 intCurrencyId,
 				 intItemId,				dblQtyOrdered,		  dblPrice,				 dtmDate,		    
-				 intEntityId,			intInvoiceId,		  intSourceId,			dblQtyShipped
+				 intEntityId,			intInvoiceId,		  intSourceId,			dblQtyShipped,
+				 intContractHeaderId,	intContractDetailId
 			 
 	   )
 
 	   SELECT	 'Invoice',				'Standard',		   'Direct',				@strBatchNumber,
 				 @strBatchNumber,		@intEntityId,		@intCompanyLocationId,  @intCurrencyId,
 				 @intInvoiceItemId,		1,				    @dblRcvdPaidAmount,		GETDATE(),	   
-				 @intEntityId,			0,				    0,						1
+				 @intEntityId,			0,				    0,						1,
+				 @intContractHeaderId,	@intContractDetailId
 
 	   EXEC		[dbo].[uspARProcessInvoices]
 				@InvoiceEntries				=	@InvoiceEntries

@@ -82,11 +82,11 @@ BEGIN
 
 	IF(@strType = 'Remote')
 	BEGIN
-		IF(@strBasis = 'Transfer Cost' OR @strBasis = 'Transfer Price')
+		IF(@strBasis = 'Transfer Cost')
 			BEGIN
 				SET @ysnCheckIndex = 0
 			END
-		ELSE IF(@strBasis = 'Remote Pricing Index')
+		ELSE IF(@strBasis = 'Index')
 			BEGIN
 				SET @ysnCheckIndex = 1
 			END
@@ -99,7 +99,7 @@ BEGIN
 	END
 	ELSE IF(@strType = 'Extended Remote')
 	BEGIN
-		IF(@strBasis = 'Full Retail' OR @strBasis = 'Discounted Price')
+		IF(@strBasis = 'Pump Price Adjustment' OR @strBasis = 'Transfer Cost')
 			BEGIN
 				SET @ysnCheckIndex = 0
 			END
@@ -112,7 +112,7 @@ BEGIN
 	END
 	ELSE IF(@strType = 'Local/Network')
 	BEGIN
-		IF(@strBasis = 'Local Index Retail' OR @strBasis = 'Local Index Cost' OR @strBasis = 'Local Index Fixed')
+		IF(@strBasis = 'Index')
 			BEGIN
 				SET @ysnCheckIndex = 1
 			END

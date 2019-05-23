@@ -29,14 +29,21 @@ RETURNS TABLE AS RETURN
 		,dblTempDiscount =  CAST(CASE WHEN voucher.intTransactionType = 1 
 									THEN 
 									(
-										CASE WHEN voucher.ysnDiscountOverride = 1 THEN voucher.dblDiscount
-											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, voucher.intTermsId, voucher.dblTotal)
+										CASE WHEN voucher.ysnDiscountOverride = 1 AND NULLIF(forPay.intPayScheduleId,0) IS NULL
+												THEN voucher.dblDiscount
+											WHEN forPay.intPayScheduleId > 0
+												THEN forPay.dblTempDiscount
+												--calculate discount base on voucher date to make sure there is a discount
+												--always discount bypasses due date
+											WHEN forPay.ysnPymtCtrlAlwaysDiscount = 1 
+												THEN dbo.fnGetDiscountBasedOnTerm(voucher.dtmDate, voucher.dtmDate, forPay.intTermsId, forPay.dblTotal)
+											ELSE dbo.fnGetDiscountBasedOnTerm(@datePaid, voucher.dtmDate, forPay.intTermsId, forPay.dblTotal)
 										END
 									) 
 							ELSE 0 END AS DECIMAL(18,2))
 		,forPay.dblInterest 
 		,dblTempInterest = CAST(CASE WHEN voucher.intTransactionType = 1 
-								THEN dbo.fnGetInterestBasedOnTerm(voucher.dblTotal, voucher.dtmDate, @datePaid, voucher.intTermsId)
+								THEN dbo.fnGetInterestBasedOnTerm(forPay.dblTotal, voucher.dtmDate, @datePaid, forPay.intTermsId)
 								ELSE 0 END AS DECIMAL(18,2))
 		,forPay.dblAmountDue
 		,forPay.dblPayment
@@ -56,6 +63,7 @@ RETURNS TABLE AS RETURN
 		,forPay.strVendorId
 		,forPay.strCommodityCode
 		,forPay.strTerm
+		,forPay.intTermsId
 		,forPay.strName
 		,forPay.strCheckPayeeName
 		,forPay.ysnDeferredPayment
@@ -67,7 +75,7 @@ RETURNS TABLE AS RETURN
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail
-		ON voucher.intBillId = payDetail.intBillId 
+		ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId

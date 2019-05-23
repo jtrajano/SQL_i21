@@ -39,3 +39,7 @@
 	CONSTRAINT [FK_tblSMActivity_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [UC_tblSMActivity] UNIQUE (strActivityNo)
 )
+GO
+
+CREATE INDEX [IX_tblSMActivity_intTransactionId] ON [dbo].[tblSMActivity] ([intTransactionId])
+GO

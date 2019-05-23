@@ -47,7 +47,7 @@
 				(
 				select
 					proj.intOpportunityId
-					,intAttachment = (select convert(int,count(tblSMAttachment.intAttachmentId)) from tblSMAttachment where tblSMAttachment.strScreen in ('CRM.view.Opportunity','CRM.Opportunity') and ltrim(rtrim(tblSMAttachment.strRecordNo)) = convert(nvarchar(20), proj.intOpportunityId))
+					,intAttachment = (select count(tblSMAttachment.intAttachmentId) from tblSMAttachment where tblSMAttachment.strScreen in ('CRM.view.Opportunity','CRM.Opportunity') and tblSMAttachment.strRecordNo = convert(nvarchar(20), proj.intOpportunityId))
 					,proj.strName
 					,strSalesPipeStatus = pipe.strStatus
 					,proj.dtmLastDescriptionModified
@@ -60,33 +60,19 @@
 					,dblMaintenanceAmmount = sum(qs.dblMaintenanceAmount)
 					,dblOtherAmmount = sum(qs.dblOtherAmount)
 					,dtmLastActivityDate = (
-						select
-							max(tblSMActivity.dtmCreated)
-						from
-							tblSMActivity
-						where
-							tblSMActivity.intTransactionId = (
-								select
-									top 1 tblSMTransaction.intTransactionId 
-								from
-									tblSMTransaction 
-								where
-									tblSMTransaction.intScreenId = (
-										select top 1
-											tblSMScreen.intScreenId
-										from
-											tblSMScreen
-										where
-											tblSMScreen.strScreenId = 'Opportunity'
-											and tblSMScreen.strNamespace = 'CRM.view.Opportunity'
-									)
-									and tblSMTransaction.intRecordId = proj.intOpportunityId
-							)
+						SELECT  MAX(tblSMActivity.dtmCreated) 
+					   FROM tblSMActivity
+					   INNER JOIN tblSMTransaction ON tblSMTransaction.intTransactionId = tblSMActivity.intTransactionId
+					   INNER JOIN tblSMScreen ON tblSMScreen.intScreenId = tblSMTransaction.intScreenId
+					   WHERE tblSMTransaction.intRecordId = proj.intOpportunityId
+					   AND tblSMScreen.strScreenId = 'Opportunity' AND tblSMScreen.strNamespace = 'CRM.view.Opportunity'
 					)
 					,strSalesPerson = (select top 1 e.strName from tblEMEntity e where e.intEntityId = proj.intInternalSalesPerson)
 					,proj.strDescription
-					,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = proj.intCustomerId)
-					,strContactName = (select top 1 strName from tblEMEntity where intEntityId = con.[intEntityId])
+					--,strCustomerName = (select top 1 strName from tblEMEntity where intEntityId = proj.intCustomerId)
+					, strCustomerName = MAX(customer.strName)
+					--,strContactName = (select top 1 strName from tblEMEntity where intEntityId = con.[intEntityId])
+					, strContactName = MAX(con.strName)
 					,strType = (select top 1 strType from tblHDTicketType where intTicketTypeId = typ.intTypeId)
 					,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101) COLLATE Latin1_General_CI_AS
 					,proj.intPercentComplete
@@ -121,6 +107,7 @@
 					left outer join tblEMEntityLocation enloc on enloc.intEntityLocationId = proj.intEntityLocationId
 					left join tblCRMOpportunityQuote oq on oq.intOpportunityId = proj.intOpportunityId
 					left join vyuCRMOpportunityQuoteSummary qs on qs.intSalesOrderId = oq.intSalesOrderId
+					left join tblEMEntity customer on customer.intEntityId = proj.intCustomerId
 				group by
 					proj.intOpportunityId
 					,proj.strName

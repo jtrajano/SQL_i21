@@ -108,7 +108,7 @@ BEGIN TRY
 
 
 
-	IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
+	--IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
 
 	-- EXECUTE INVOICE REPORT SP's--
 	-----------------------------------------------------------
@@ -339,7 +339,7 @@ BEGIN TRY
 	,strTransactionType
 	,strInvoiceReportNumber
 	,strTempInvoiceReportNumber
-	,strMiscellaneous
+	,ISNULL(strMiscellaneous,'')
 	,strName
 	,strCardNumber = CASE WHEN ((select top 1 strNetworkType from tblCFNetwork where strNetwork = cfInvRpt.strNetwork) = 'Voyager')
 					 THEN  
@@ -524,11 +524,12 @@ BEGIN TRY
 											ELSE (CASE	
 													WHEN LOWER(strPrimarySortOptions) = 'card' THEN strDriverPinNumber + ' - ' + strDriverDescription
 													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN strCardNumber + ' - ' + strCardDescription
+													WHEN LOWER(strPrimarySortOptions) = 'driver pin' THEN strCardNumber + ' - ' + strCardDescription
 													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN strDriverPinNumber + ' - ' + strDriverDescription
 												  END)
 										  END)
 
-								  WHEN LOWER(strDetailDisplay) = 'driverpin'
+								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
 									THEN (CASE
 											WHEN ISNULL(strDriverPinNumber,'') != '' THEN strDriverPinNumber + ' - ' + strDriverDescription
 											ELSE (CASE 
@@ -543,24 +544,10 @@ BEGIN TRY
 									THEN 'Card'
 
 								  WHEN LOWER(strDetailDisplay) = 'vehicle'
-									THEN (CASE	
-											WHEN ISNULL(strVehicleNumber,'') != '' THEN 'Vehicle'
-											ELSE (CASE	
-													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 'Driver Pin'
-													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN 'Card'
-													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 'Driver Pin'
-												  END)
-										  END)
+									THEN 'Vehicle'
 
-								  WHEN LOWER(strDetailDisplay) = 'driverpin'
-									THEN (CASE
-											WHEN ISNULL(strDriverPinNumber,'') != '' THEN  'Driver Pin'
-											ELSE (CASE 
-													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 'Vehicle'
-													WHEN LOWER(strPrimarySortOptions) = 'vehicle' THEN 'Card'
-													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 'Vehicle'
-												  END)
-											END)
+								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
+									THEN  'Driver Pin'
 							 END
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
@@ -679,7 +666,7 @@ BEGIN TRY
 			, @strCustomerNumber = @strCustomerNumber		
 			,@intEntityUserId = @intEntityUserId
 			,@ysnReprintInvoice = @ysnReprintInvoice
-
+			,@strUserId = @UserId
 
 		--SELECT '1',* FROM tblARCustomerStatementStagingTable
 
@@ -759,7 +746,7 @@ BEGIN TRY
 		,NULL --strSalespersonName
 		,NULL --strAccountStatusCode
 		,NULL
-		,NULL --strFullAddress
+		,LTRIM(REPLACE(strBillTo,strCustomerName,'')) --strFullAddress
 		,NULL --strStatementFooterComment
 		,strCompanyName
 		,strCompanyAddress
@@ -827,6 +814,8 @@ BEGIN TRY
 		,strTermCode
 		,dblTotalFuelExpensed
 		,dblFeeAmount
+		,strBillTo
+		
 
 		--SELECT '2',* FROM tblARCustomerStatementStagingTable
 
@@ -1110,7 +1099,7 @@ BEGIN TRY
 	--select * from vyuCFCardAccount
 
 
-	IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
+	--IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 
 END TRY 
 BEGIN CATCH
@@ -1126,7 +1115,7 @@ BEGIN CATCH
 		print @CatchErrorSeverity
 		print @CatchErrorState
 
-	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
+	--IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
   --IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
 	--SELECT   
 	--	@CatchErrorMessage = ERROR_MESSAGE(),  

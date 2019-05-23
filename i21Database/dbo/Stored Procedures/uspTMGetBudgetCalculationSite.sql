@@ -38,7 +38,7 @@ BEGIN
 	IF OBJECT_ID('tempdb..#tmpStage1') IS NOT NULL 
 	BEGIN DROP TABLE #tmpStage1 END
 
-	SELECT 
+	SELECT DISTINCT
 		strCustomerNumber = C.strEntityNo
 		,strCustomerName = C.strName
 		,strLocation = D.strLocationName 

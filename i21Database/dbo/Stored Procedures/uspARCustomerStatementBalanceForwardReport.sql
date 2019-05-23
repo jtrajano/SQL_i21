@@ -42,6 +42,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strLocationNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strCompanyLocationIdsLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strDateTo							AS NVARCHAR(50)
 	  , @strDateFrom						AS NVARCHAR(50)
 	  , @query								AS NVARCHAR(MAX)
@@ -74,6 +75,7 @@ DECLARE @temp_aging_table TABLE(
 	,[dblPrepayments]			NUMERIC(18,6)
     ,[dblPrepaids]              NUMERIC(18,6)
 	,[dblTempFuture]			NUMERIC(18,6)
+	,[dblUnInvoiced]			NUMERIC(18,6)
     ,[dtmAsOfDate]              DATETIME
     ,[strSalespersonName]		NVARCHAR(100)
 	,[strSourceTransaction]		NVARCHAR(100)
@@ -282,16 +284,27 @@ FROM (
 	FROM #CUSTOMERS
 	FOR XML PATH ('')
 ) C (intEntityCustomerId)
+
+IF @strLocationNameLocal IS NOT NULL
+	BEGIN
+		SELECT @strCompanyLocationIdsLocal = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(MAX))  + ', '
+			FROM tblSMCompanyLocation
+			WHERE strLocationName = @strLocationNameLocal
+			FOR XML PATH ('')
+		) C (intCompanyLocationId)
+	END
 	
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
-										  , @strCompanyLocation = @strLocationNameLocal
-										  , @strCustomerIds = @strCustomerIdsLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
-										  , @ysnFromBalanceForward = 0
-										  , @dtmBalanceForwardDate = @dtmBalanceForwardDateLocal
-										  , @ysnPrintFromCF = @ysnPrintFromCFLocal
-											, @strUserId = @strUserId
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmDateToLocal
+										  , @dtmBalanceForwardDate		= @dtmBalanceForwardDateLocal
+										  , @intEntityUserId			= @intEntityUserIdLocal										  
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @strUserId					= @strUserId
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
+										  , @ysnFromBalanceForward		= 0										  
+										  , @ysnPrintFromCF				= @ysnPrintFromCFLocal										  
 
 INSERT INTO @temp_aging_table
 SELECT strCustomerName
@@ -313,6 +326,7 @@ SELECT strCustomerName
 	    , dblPrepayments
         , dblPrepaids
 		, 0
+		, 0
         , dtmAsOfDate
         , strSalespersonName
 	    , strSourceTransaction
@@ -320,12 +334,12 @@ FROM tblARCustomerAgingStagingTable
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND strAgingType = 'Summary'
 
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmBalanceForwardDateLocal
-										  , @strCompanyLocation = @strLocationNameLocal											
-										  , @strCustomerIds = @strCustomerIdsLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
-										  , @ysnFromBalanceForward = 1										  
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmBalanceForwardDateLocal
+										  , @intEntityUserId			= @intEntityUserIdLocal
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
+										  , @ysnFromBalanceForward		= 1
 
 INSERT INTO @temp_balanceforward_table
 SELECT strCustomerName
@@ -734,8 +748,9 @@ IF @ysnPrintFromCFLocal = 1
 		SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblFuture = AGINGREPORT.dblFuture - ISNULL(CF.dblTotalFuture, 0)
 		  , AGINGREPORT.dblTempFuture = ISNULL(CF.dblTotalFuture, 0)
+		  , AGINGREPORT.dblUnInvoiced = ISNULL(CFDT.dblUnInvoiced, 0)
 		FROM @temp_aging_table AGINGREPORT
-		INNER JOIN (
+		LEFT JOIN (
 			SELECT intEntityCustomerId
 				 , dblTotalFuture = SUM(dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * dblAmountDue)
 			FROM tblARInvoice WITH (NOLOCK)
@@ -745,14 +760,27 @@ IF @ysnPrintFromCFLocal = 1
 			AND intInvoiceId IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable WHERE strUserId = @strUserId and LOWER(strStatementType) = 'invoice')
 			GROUP BY intEntityCustomerId
 		) CF ON AGINGREPORT.intEntityCustomerId = CF.intEntityCustomerId
-
+		LEFT JOIN (
+			SELECT I.intEntityCustomerId
+				 , dblUnInvoiced = SUM(dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblAmountDue)
+			FROM tblARInvoice I WITH (NOLOCK)
+			INNER JOIN tblCFTransaction CF ON I.strInvoiceNumber = CF.strTransactionId
+			WHERE I.strType = 'CF Tran'
+			AND I.ysnPaid = 0
+			AND I.ysnPosted = 1
+			AND ISNULL(CF.ysnInvoiced, 0) = 0
+			AND I.intInvoiceId NOT IN (SELECT intInvoiceId FROM tblCFInvoiceStagingTable WHERE strUserId = @strUserId and LOWER(strStatementType) = 'invoice')
+			AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+			GROUP BY I.intEntityCustomerId
+		) CFDT ON AGINGREPORT.intEntityCustomerId = CFDT.intEntityCustomerId
+		
 		IF @ysnReprintInvoiceLocal = 0
 			BEGIN
 				UPDATE AGINGREPORT
 				SET AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days + ISNULL(CF.dblTotalFee, 0)
-				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR + ISNULL(CF.dblTotalFee, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblUnInvoiced, 0) + ISNULL(CF.dblTotalFee, 0)
 				FROM @temp_aging_table AGINGREPORT
-				INNER JOIN (
+				LEFT JOIN (
 					SELECT intCustomerId
 						 , dblTotalFee = SUM(ISNULL(dblFeeAmount, 0))
 					FROM dbo.tblCFInvoiceFeeStagingTable WITH (NOLOCK)
@@ -765,7 +793,7 @@ IF @ysnPrintFromCFLocal = 1
 				UPDATE AGINGREPORT
 				SET AGINGREPORT.dblFuture = 0.000000
 				  , AGINGREPORT.dbl0Days = AGINGREPORT.dbl0Days - ISNULL(AGINGREPORT.dblTempFuture, 0)
-				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - ISNULL(AGINGREPORT.dblTempFuture, 0)
+				  , AGINGREPORT.dblTotalAR = AGINGREPORT.dblTotalAR - (ISNULL(AGINGREPORT.dblTempFuture, 0) + ISNULL(AGINGREPORT.dblUnInvoiced, 0))
 				FROM @temp_aging_table AGINGREPORT
 			END
 	END

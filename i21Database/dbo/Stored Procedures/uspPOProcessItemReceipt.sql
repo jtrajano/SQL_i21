@@ -25,10 +25,28 @@ BEGIN
 		RETURN;
 	END
 
-	IF NOT EXISTS(SELECT 1 FROM tblPOPurchaseDetail A
-					INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-					WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') AND intPurchaseId = @poId)
-		AND @receiveNonInventory = 0
+	--CHECK IF ALL QUANTITY ARE RECEIVED
+	IF 
+	(
+		NOT EXISTS
+		(
+			SELECT 1 
+			FROM tblPOPurchaseDetail A
+			INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+			WHERE B.strType IN ('Non-Inventory', 'Finished Good', 'Raw Material') 
+			-- WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') 
+			AND A.dblQtyReceived < A.dblQtyOrdered
+			AND intPurchaseId = @poId
+			AND @receiveNonInventory = 1
+			UNION ALL
+			SELECT 1 
+			FROM tblPOPurchaseDetail A
+			INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+			WHERE B.strType IN ('Inventory') 
+			AND A.dblQtyReceived < A.dblQtyOrdered
+			AND intPurchaseId = @poId
+		)
+	)
 	BEGIN
 		RAISERROR('There is no receivable item on this purchase order.', 16, 1);
 		RETURN;
@@ -158,9 +176,12 @@ BEGIN
 				ON PODetail.intItemId = ItemLocation.intItemId
 				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 				AND PO.intShipToId = ItemLocation.intLocationId
+			INNER JOIN dbo.tblICItem item
+				ON item.intItemId = PODetail.intItemId
 	WHERE	PODetail.intPurchaseId = @poId
 			AND 1 = CASE WHEN dbo.fnIsStockTrackingItem(PODetail.intItemId) = 0 AND @receiveNonInventory = 0 THEN 0 ELSE 1 END
 			AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
+			AND item.strType IN ('Inventory','Non-Inventory','Finished Good','Raw Material')
 	
 	INSERT INTO	@OtherCharges
 	(
@@ -260,25 +281,29 @@ BEGIN
 				,intItemId
 				,intItemLocationId
 				,intItemUOMId
-				,intSubLocationId
+				-- ,intSubLocationId
 				,dblQty
 				,dblUOMQty
 				,intTransactionId
 				,intTransactionDetailId
 				,strTransactionId
 				,intTransactionTypeId
+				,intSubLocationId
+				,intStorageLocationId
 		)
 		SELECT	dtmDate					= PO.dtmDate
 				,intItemId				= POD.intItemId
 				,intItemLocationId		= il.intItemLocationId 
 				,intItemUOMId			= POD.intUnitOfMeasureId  
-				,intSubLocationId		= NULL 
+				-- ,intSubLocationId		= NULL 
 				,dblQty					= -POD.dblQtyOrdered
 				,dblUOMQty				= iu.dblUnitQty
 				,intTransactionId		= PO.intPurchaseId
 				,intTransactionDetailId = POD.intPurchaseDetailId 
 				,strTransactionId		= PO.strPurchaseOrderNumber
 				,intTransactionTypeId	= -1 -- Any value
+				,POD.intSubLocationId
+				,POD.intStorageLocationId
 		FROM	tblPOPurchase PO INNER JOIN tblPOPurchaseDetail POD
 					ON PO.intPurchaseId = POD.intPurchaseId
 				LEFT JOIN tblICItemLocation il

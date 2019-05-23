@@ -37,6 +37,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strStatementFormatLocal			AS NVARCHAR(MAX)	= 'Open Item'
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULL
 	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULL
+	  , @strCompanyLocationIdsLocal			AS NVARCHAR(MAX)	= NULL
 	  , @strDateTo							AS NVARCHAR(50)
 	  , @strDateFrom						AS NVARCHAR(50)
 	  , @query								AS NVARCHAR(MAX)
@@ -215,6 +216,24 @@ IF @ysnEmailOnly IS NOT NULL
 		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
 
+SELECT @strCustomerIdsLocal = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+FROM (
+	SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(MAX))  + ', '
+	FROM #CUSTOMERS
+	FOR XML PATH ('')
+) C (intEntityCustomerId)
+
+IF @strLocationNameLocal IS NOT NULL
+	BEGIN
+		SELECT @strCompanyLocationIdsLocal = LEFT(intCompanyLocationId, LEN(intCompanyLocationId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intCompanyLocationId AS VARCHAR(MAX))  + ', '
+			FROM tblSMCompanyLocation
+			WHERE strLocationName = @strLocationNameLocal
+			FOR XML PATH ('')
+		) C (intCompanyLocationId)
+	END
+
 IF @ysnIncludeWriteOffPaymentLocal = 1
 	BEGIN
 		SELECT TOP 1 @intWriteOffPaymentMethodId = intPaymentMethodID 
@@ -222,11 +241,11 @@ IF @ysnIncludeWriteOffPaymentLocal = 1
 		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
 	END
 
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo = @dtmDateToLocal
-										  , @strCompanyLocation = @strLocationNameLocal
-										  , @strCustomerName = @strCustomerNameLocal
-										  , @ysnIncludeWriteOffPayment = @ysnIncludeWriteOffPaymentLocal
-										  , @intEntityUserId = @intEntityUserIdLocal
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmDateToLocal
+										  , @intEntityUserId			= @intEntityUserIdLocal
+										  , @strCustomerIds				= @strCustomerIdsLocal
+										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
+										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 
 SET @query = CAST('' AS NVARCHAR(MAX)) + '
 SELECT * 

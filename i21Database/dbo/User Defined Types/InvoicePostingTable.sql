@@ -67,6 +67,7 @@
     ,[ysnFromProvisional]                   BIT             NULL
 	,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
+    ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
     ,[intInvoiceDetailId]                   INT             NULL
@@ -84,11 +85,11 @@
     ,[intLicenseAccountId]                  INT             NULL
     ,[intMaintenanceAccountId]              INT             NULL
     ,[intConversionAccountId]               INT             NULL
-    ,[dblQtyShipped]                        NUMERIC(18,6)   NULL	
-    ,[dblUnitQtyShipped]                    NUMERIC(18,6)   NULL
-    ,[dblShipmentNetWt]                     NUMERIC(18,6)   NULL	
-    ,[dblUnitQty]                           NUMERIC(38,20)  NULL
-    ,[dblUnitOnHand]                        NUMERIC(18,6)   NULL
+    ,[dblQtyShipped]                        NUMERIC(38, 20) NULL	
+    ,[dblUnitQtyShipped]                    NUMERIC(38, 20) NULL
+    ,[dblShipmentNetWt]                     NUMERIC(38, 20) NULL	
+    ,[dblUnitQty]                           NUMERIC(38, 20) NULL
+    ,[dblUnitOnHand]                        NUMERIC(38, 20) NULL
     ,[intAllowNegativeInventory]            INT             NULL
     ,[ysnStockTracking]                     BIT             NULL
     ,[intItemLocationId]                    INT             NULL
@@ -123,6 +124,8 @@
     ,[dblBaseMaintenanceAmount]             NUMERIC(18,6)   NULL
     ,[dblMaintenanceGLAmount]               NUMERIC(18,6)   NULL
     ,[dblBaseMaintenanceGLAmount]           NUMERIC(18,6)   NULL
+    ,[dblTaxesAddToCost]					NUMERIC(18,6)   NULL
+	,[dblBaseTaxesAddToCost]				NUMERIC(18,6)   NULL
     ,[ysnTankRequired]                      BIT             NULL
     ,[ysnLeaseBilling]                      BIT             NULL
     ,[intSiteId]                            INT             NULL

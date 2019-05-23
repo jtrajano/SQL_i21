@@ -1,14 +1,14 @@
-﻿CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
+﻿
+CREATE VIEW [dbo].[vyuCFCalculatedInvoice]
 AS
 
 SELECT  
 	 strCustomerNumber,
-	 strUserId,
 	 intCustomerId, 
 	 strTempInvoiceReportNumber, 
 	 dblAccountTotalAmount , 
 	 dblAccountTotalDiscount, 
-	 intTermID,
+	 --intTermID,
 	 dtmInvoiceDate, 
 	 dblFeeTotalAmount, 
 	 dblInvoiceTotal = dblInvoiceTotal + ISNULL(dblTotalFuelExpensed,0), 
@@ -24,8 +24,9 @@ SELECT
 			ELSE CAST(0 AS BIT)
 			END
 			AS ysnEmail,
-	 dblTotalFuelExpensed
-
+	 dblTotalFuelExpensed,
+	 ysnActive,
+	 strUserId
 FROM (
 	SELECT        
 		cfInv.strCustomerNumber,
@@ -34,11 +35,11 @@ FROM (
 		cfInv.strTempInvoiceReportNumber, 
 		cfInv.dblAccountTotalAmount, 
 		cfInv.dblAccountTotalDiscount, 
-		CASE strTransactionType
-			WHEN 'Foreign Sale' THEN NULL
-			ELSE cfInv.intTermID
-			END
-			AS intTermID,
+		--CASE strTransactionType
+		--	WHEN 'Foreign Sale' THEN NULL
+		--	ELSE cfInv.intTermID
+		--	END
+		--	AS intTermID,
 		cfInv.dtmInvoiceDate, 
 		dblFeeTotalAmount = CASE 
 								WHEN LOWER(strStatementType) = 'invoice'
@@ -57,8 +58,11 @@ FROM (
 		cfInv.strEmailDistributionOption, 
 		dblTotalFuelExpensed,
 		cfInv.strStatementType,
-		'Ready' AS strStatus
+		'Ready' AS strStatus,
+		arCust.ysnActive
 	FROM            dbo.tblCFInvoiceStagingTable AS cfInv 
+	INNER JOIN tblARCustomer as arCust
+	ON arCust.intEntityId = cfInv.intCustomerId 
 	LEFT JOIN
 	(SELECT        dblFeeTotalAmount 
 	, intAccountId, strUserId
@@ -66,8 +70,12 @@ FROM (
 	GROUP BY intAccountId, dblFeeTotalAmount, strUserId) AS cfInvFee 
 	ON cfInv.intAccountId = cfInvFee.intAccountId
 	AND cfInv.strUserId  COLLATE Latin1_General_CI_AS = cfInvFee.strUserId) AS outertable
-	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, intTermID, dtmInvoiceDate, dblFeeTotalAmount, 
-	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType
+	
+	GROUP BY intCustomerId, strTempInvoiceReportNumber, dblAccountTotalAmount, dblAccountTotalDiscount, 
+	--intTermID,
+	 dtmInvoiceDate, dblFeeTotalAmount, 
+	dblEligableGallon, strCustomerName, strEmail, strEmailDistributionOption,strCustomerNumber,strUserId,dblInvoiceTotal,strStatus,dblTotalFuelExpensed,strStatementType,ysnActive,
+	strUserId
 GO
 
 

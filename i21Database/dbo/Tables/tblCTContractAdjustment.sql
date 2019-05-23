@@ -18,6 +18,7 @@
 	intLastModifiedById INT,
 	dtmLastModified DATETIME,
 	intItemId int null,
+	intItemUOMId int null,
 	intConcurrencyId INT NOT NULL,
     CONSTRAINT [PK_tblCTContractAdjustment_intAdjustmentId] PRIMARY KEY CLUSTERED ([intAdjustmentId] ASC), 
 	CONSTRAINT [FK_tblCTContractAdjustment_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),

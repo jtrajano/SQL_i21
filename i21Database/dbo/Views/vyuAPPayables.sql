@@ -36,6 +36,37 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 LEFT JOIN dbo.tblAPBillDetail B ON B.intBillId = A.intBillId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
+UNION ALL --VOID VOUCHER DELETED
+SELECT 
+	A.dtmDate	
+	, A.intBillId 
+	, A.strBillId 
+	, 0 AS dblAmountPaid 
+	, CAST(CASE WHEN A.intTransactionType NOT IN (1,14) THEN (B.dblTotal) *  B.dblRate * -1 
+				ELSE (B.dblTotal) * B.dblRate
+		END AS DECIMAL(18,2)) AS dblTotal
+	, CASE WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
+		END * B.dblRate AS dblAmountDue 
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0 
+	, dblPrepaidAmount = 0 
+	, C1.strVendorId 
+	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
+	, A.dtmDueDate
+	, A.ysnPosted 
+	, A.ysnPaid
+	, A.intAccountId
+	, F.strAccountId
+	, EC.strClass
+	-- ,'Bill' AS [Info]
+FROM dbo.tblAPBillArchive A
+LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
+	ON C1.[intEntityId] = A.[intEntityVendorId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
+LEFT JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
 -- GROUP BY  
 -- 	 A.dtmDate
 -- 	,A.intBillId 
@@ -133,7 +164,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 			(
 				--Honor only the discount if full payment, consider only for voucher
 				CASE 
-					WHEN B.dblAmountDue = 0
+					WHEN B.dblAmountDue = 0 AND E.ysnCheckVoid = 0
 					THEN B.dblDiscount 
 				ELSE 0
 				END

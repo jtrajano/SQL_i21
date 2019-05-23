@@ -39,17 +39,17 @@ RETURNS TABLE AS RETURN
 		,[intPurchaseTaxGroupId]					=	NULL
 		,[strMiscDescription]						=	CC.strItemDescription
 		,[dblOrderQty]								=	1
-		,[dblOrderUnitQty]							=	0
-		,[intOrderUOMId]							=	0
-		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
-		,[dblQtyToBillUnitQty]						=	0
-		,[intQtyToBillUOMId]						=	0
-		,[dblCost]									=	0
-		,[dblCostUnitQty]							=	ISNULL(CostUOM.dblUnitQty,1)
-		,[intCostUOMId]								=	CostUOM.intItemUOMId
-		,[dblNetWeight]								=	CAST(0 AS DECIMAL(38,20))--ISNULL(CD.dblNetWeight,0)      
+		,[dblOrderUnitQty]							=	1
+		,[intOrderUOMId]							=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[dblQuantityToBill]						=	1
+		,[dblQtyToBillUnitQty]						=	1
+		,[intQtyToBillUOMId]						=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[dblCost]									=	CC.dblAmount
+		,[dblCostUnitQty]							=	1
+		,[intCostUOMId]								=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[dblNetWeight]								=	1--ISNULL(CD.dblNetWeight,0)      
 		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
-		,[intWeightUOMId]							=	0
+		,[intWeightUOMId]							=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
 		,[dblTax]									=	0
 		,[dblDiscount]								=	0
@@ -63,7 +63,7 @@ RETURNS TABLE AS RETURN
 		,[strBillOfLading]							=	NULL
 		,[ysnReturn]								=	CAST(RT.Item AS BIT)	
 	FROM vyuCTContractCostView CC
-	JOIN tblCTContractDetail CD	ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) OR CC.ysnAccrue = 1)
+	JOIN tblCTContractDetail CD	ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) OR CC.ysnAccrue = 1) AND CC.intConcurrencyId <> ISNULL(CC.intPrevConcurrencyId,0)
 	JOIN tblCTContractHeader CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 	INNER JOIN (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId] 
 	INNER JOIN tblICItem item ON item.intItemId = CC.intItemId 
@@ -94,6 +94,7 @@ RETURNS TABLE AS RETURN
 	) rate
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0 AND
+	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
 	CASE 
 		WHEN @type = 'header' AND CH.intContractHeaderId = @id THEN 1
 		WHEN @type = 'detail' AND CD.intContractDetailId = @id THEN 1

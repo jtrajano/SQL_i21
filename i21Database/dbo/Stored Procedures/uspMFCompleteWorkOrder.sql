@@ -632,6 +632,88 @@ BEGIN TRY
 						OR rs.intSubstituteItemId = @intInputLotItemId
 						)
 			END
+			ELSE
+			BEGIN
+				DECLARE @dblLowerToleranceReqQty NUMERIC(18, 6)
+					,@dblUpperToleranceReqQty NUMERIC(18, 6)
+				DECLARE @strError NVARCHAR(Max)
+					,@strItemNo NVARCHAR(50)
+					,@dblRequiredQty NUMERIC(18, 6)
+
+				SELECT @dblLowerToleranceReqQty = ri.dblCalculatedLowerTolerance * (
+						(
+							CASE 
+								WHEN r.intItemUOMId = @intProduceUnitMeasureId
+									THEN @dblProduceQty
+								ELSE @dblPhysicalCount
+								END
+							) / r.dblQuantity
+						)
+					,@dblUpperToleranceReqQty = ri.dblCalculatedUpperTolerance * (
+						(
+							CASE 
+								WHEN r.intItemUOMId = @intProduceUnitMeasureId
+									THEN @dblProduceQty
+								ELSE @dblPhysicalCount
+								END
+							) / r.dblQuantity
+						)
+					,@dblRequiredQty = ri.dblCalculatedQuantity * (
+						(
+							CASE 
+								WHEN r.intItemUOMId = @intProduceUnitMeasureId
+									THEN @dblProduceQty
+								ELSE @dblPhysicalCount
+								END
+							) / r.dblQuantity
+						)
+				FROM dbo.tblMFRecipeItem ri
+				JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+				LEFT JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+				WHERE r.intItemId = @intItemId
+					AND r.intLocationId = @intLocationId
+					AND r.ysnActive = 1
+					AND (
+						ri.intItemId = @intInputLotItemId
+						OR rs.intSubstituteItemId = @intInputLotItemId
+						)
+
+				IF @dblInputWeight < @dblLowerToleranceReqQty
+					AND @dblRequiredQty <> @dblLowerToleranceReqQty
+				BEGIN
+					SELECT @strItemNo = strItemNo
+					FROM tblICItem
+					WHERE intItemId = @intInputLotItemId
+
+					SELECT @strError = 'System is trying to consume ' + [dbo].[fnRemoveTrailingZeroes](@dblInputWeight) + ' for the item ' + @strItemNo + ' that is less than the lower tolerance qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblLowerToleranceReqQty) + '. It can consume only within the tolerance limits specified at the recipe level.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+
+					RETURN
+				END
+
+				IF @dblInputWeight > @dblUpperToleranceReqQty
+					AND @dblRequiredQty <> @dblUpperToleranceReqQty
+				BEGIN
+					SELECT @strItemNo = strItemNo
+					FROM tblICItem
+					WHERE intItemId = @intInputLotItemId
+
+					SELECT @strError = 'System is trying to consume ' + [dbo].[fnRemoveTrailingZeroes](@dblInputWeight) + ' for the item ' + @strItemNo + ' that is more than the upper tolerance qty of ' + [dbo].[fnRemoveTrailingZeroes](@dblUpperToleranceReqQty) + '. It can consume only within the tolerance limits specified at the recipe level.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+
+					RETURN
+				END
+			END
 
 			SELECT @strInputItemLotTracking = strInventoryTracking
 			FROM dbo.tblICItem

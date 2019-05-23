@@ -237,7 +237,6 @@ IF @@ERROR <> 0 GOTO With_Rollback_Exit
 IF @ysnPost = 1  
 BEGIN  
 	DECLARE @ItemsForAdjust AS ItemCostingTableType  
-
 	-----------------------------------
 	--  Call Quantity Change 
 	-----------------------------------
@@ -284,11 +283,10 @@ BEGIN
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
 						THEN 
 							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
-
 						WHEN Detail.intWeightUOMId IS NULL THEN 
 							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
 						ELSE 
-							ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0)
+							CASE WHEN Item.strLotTracking <> 'No' THEN ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0) ELSE ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) END
 					END
 			,dblUOMQty				= 
 					CASE 
@@ -302,7 +300,7 @@ BEGIN
 						WHEN Detail.intWeightUOMId IS NULL THEN 
 							ItemUOM.dblUnitQty
 						ELSE 
-							WeightUOM.dblUnitQty
+							CASE WHEN Detail.intLotId IS NOT NULL THEN LotWeightUOM.dblUnitQty ELSE WeightUOM.dblUnitQty END
 					END
 			,dblCost				= 
 					COALESCE
@@ -355,8 +353,8 @@ BEGIN
 		LEFT JOIN dbo.tblICItemUOM StockUOM 
 			ON Detail.intItemId = StockUOM.intItemId 
 			AND StockUOM.ysnStockUnit = 1
-		LEFT JOIN dbo.tblICItemUOM WeightUOM
-			ON WeightUOM.intItemUOMId = ItemLot.intWeightUOMId 
+		LEFT JOIN dbo.tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = ItemLot.intWeightUOMId 
+		LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = Detail.intWeightUOMId
 
 	WHERE 
 		Header.intInventoryCountId = @intTransactionId

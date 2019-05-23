@@ -111,6 +111,15 @@ BEGIN TRY
 		BEGIN
 			SELECT @ysnFullyPriced = CASE WHEN @dblLotsUnfixed = 0 THEN 1 ELSE 0 END
 		END
+		ELSE IF @ysnMultiplePriceFixation = 1
+		BEGIN
+			DECLARE @totalQuantity NUMERIC(18,6)
+			SELECT @totalQuantity = SUM(dblQuantity)
+			FROM tblCTContractDetail 
+			WHERE intContractHeaderId = @intContractHeaderId
+
+			SELECT @ysnFullyPriced = CASE WHEN @totalQuantity = @dblTotalPFDetailQuantiy THEN 1 ELSE 0 END
+		END
 		ELSE
 		BEGIN
 			SELECT @ysnFullyPriced = CASE WHEN @dblQuantity = @dblTotalPFDetailQuantiy THEN 1 ELSE 0 END
@@ -153,6 +162,7 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
+			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
@@ -433,7 +443,9 @@ BEGIN TRY
 					CD.intPriceItemUOMId	=	(SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = CD.intItemId AND intUnitMeasureId = @intMarketUnitMeasureId)
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
+			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+			
 
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
@@ -455,6 +467,7 @@ BEGIN TRY
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
+			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			IF	@ysnMultiplePriceFixation = 1
@@ -527,6 +540,7 @@ BEGIN TRY
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
+			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			IF	@ysnMultiplePriceFixation = 1
@@ -550,6 +564,7 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
+			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			IF	@ysnMultiplePriceFixation = 1

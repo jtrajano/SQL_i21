@@ -2,7 +2,7 @@
 	@intInvoiceDetailId		INT,
 	@intEntityId			INT,
 	@intPriceUOMId			INT = NULL,
-	@dblQtyShipped			NUMERIC(18, 6) = NULL,
+	@dblQtyShipped			NUMERIC(38, 20) = NULL,
 	@dblPrice				NUMERIC(18, 6) = NULL
 AS
 
@@ -30,7 +30,7 @@ DECLARE @intInvoiceId				INT = NULL
 	  , @intNewPriceUOMId			INT = NULL
 	  , @ysnPosted					BIT = 0
 	  , @strInvoiceNumber			NVARCHAR(50) = ''
-	  , @dblOldQtyShipped			NUMERIC(18, 6) = 0
+	  , @dblOldQtyShipped			NUMERIC(38, 20) = 0
 	  , @dblOldPrice				NUMERIC(18, 6) = 0
 	  , @dblOldTotal				NUMERIC(18, 6) = 0
 	  , @dblOldItemTermDiscount		NUMERIC(18, 6) = 0

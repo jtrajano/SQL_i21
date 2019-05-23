@@ -30,6 +30,7 @@ DECLARE @intEntityVendorId AS INT
 		,@intShipTo AS INT 
 		,@strVendorRefNo NVARCHAR(50)
 		,@intCurrencyId AS INT 
+		,@intShipFromEntity AS INT
 
 		,@intShipFrom_DebitMemo AS INT
 		,@intReturnValue AS INT
@@ -70,6 +71,7 @@ SELECT	@intEntityVendorId = intEntityVendorId
 		,@intSourceType = r.intSourceType
 		,@strReceiptNumber = r.strReceiptNumber
 		,@dtmReceiptDate = r.dtmReceiptDate
+		,@intShipFromEntity = r.intShipFromEntityId
 FROM	tblICInventoryReceipt r
 WHERE	r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
@@ -129,14 +131,16 @@ BEGIN
 			,[strBillOfLading]					
 			,[ysnReturn]
 			,[dtmVoucherDate]
+			,[intStorageLocationId]
+			,[intSubLocationId]
 	)
 	SELECT 
 		GP.[intEntityVendorId]
 		,GP.[intTransactionType]
 		,GP.[intLocationId]	
-		,[intShipToId] = NULL	
-		,[intShipFromId] = NULL	 		
-		,[intShipFromEntityId] = NULL
+		,[intShipToId] = GP.intLocationId	
+		,[intShipFromId] = GP.intShipFromId	 		
+		,[intShipFromEntityId] = GP.intShipFromEntityId
 		,[intPayToAddressId] = NULL
 		,GP.[intCurrencyId]					
 		,GP.[dtmDate]				
@@ -157,16 +161,16 @@ BEGIN
 		,GP.[intItemId]						
 		,GP.[intPurchaseTaxGroupId]			
 		,GP.[strMiscDescription]				
-		,GP.[dblOrderQty]						
+		, CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblOrderQty]	ELSE GP.dblOrderQty END
 		,[dblOrderUnitQty] = 0.00					
 		,[intOrderUOMId] = NULL	 				
-		,GP.[dblQuantityToBill]			
+		, CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblQuantityToBill]	ELSE GP.[dblQuantityToBill] END	
 		,GP.[dblQtyToBillUnitQty]				
 		,GP.[intQtyToBillUOMId]				
 		,[dblCost] = GP.dblUnitCost							
 		,GP.[dblCostUnitQty]					
 		,GP.[intCostUOMId]						
-		,[dblNetWeight]						
+		,GP.[dblNetWeight]						
 		,[dblWeightUnitQty]					
 		,GP.[intWeightUOMId]					
 		,GP.[intCostCurrencyId]
@@ -182,12 +186,24 @@ BEGIN
 		,GP.[strBillOfLading]					
 		,GP.[ysnReturn]	
 		,GP.dtmDate
+		,GP.intStorageLocationId
+		,GP.intSubLocationId
 	FROM dbo.fnICGeneratePayables (@intReceiptId,	 1) GP
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 		ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
+	INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 	INNER JOIN tblICInventoryReceipt Receipt
 		ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		AND Receipt.intEntityVendorId = GP.intEntityVendorId
+		AND Item.strType <> 'Bundle'
+		AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
+			AND 1 = 
+				CASE 
+					WHEN @intScreenId = @intScreenId_InventoryReceipt AND ReceiptItem.ysnAllowVoucher = 0 THEN 
+						0
+					ELSE 
+						1
+				END 
 
 	END 
 
@@ -238,6 +254,7 @@ BEGIN
 					AND ri.dblBillQty < ri.dblOpenReceive 
 					AND ri.intOwnershipType = @Own
 					AND i.strType <> 'Bundle'
+					AND NOT(@intScreenId = @intScreenId_InventoryReceipt)
 		)
 		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptItemId IS NOT NULL) 
 	) 
@@ -285,9 +302,18 @@ BEGIN
 		SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL
 	)
 	BEGIN 
-		-- Voucher is no longer needed. All items have Voucher. 
-		EXEC uspICRaiseError 80111; 
-		SET @intReturnValue = -80111;
+		IF @billTypeToUse = @type_Voucher
+		BEGIN
+			-- Voucher is no longer needed. All items have Voucher. 
+			EXEC uspICRaiseError 80111; 
+			SET @intReturnValue = -80111;
+		END
+		ELSE
+		BEGIN
+			-- Debit Memo is no longer needed. All items have Debit Memo. 
+			EXEC uspICRaiseError 80110; 
+			SET @intReturnValue = -80110;
+		END
 		GOTO Post_Exit;
 	END 
 

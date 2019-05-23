@@ -20,6 +20,7 @@ BEGIN TRY
 	DECLARE @voucherPayablesData AS VoucherPayable;
 	DECLARE @voucherDetailTaxData AS VoucherDetailTax;
 	DECLARE @APAccount INT;
+	DECLARE @idsCreated NVARCHAR(MAX); 
 	DECLARE @deleted TABLE(intVoucherPayableId INT);
 	DECLARE @voucherIds AS Id;
 	DECLARE @createdVouchers TABLE(
@@ -52,8 +53,8 @@ BEGIN TRY
 	--Voucher Type
 	IF EXISTS(SELECT TOP 1 1
 		FROM tblSMCompanyLocation A
-		INNER JOIN @voucherPayables B ON B.intShipToId = A.intCompanyLocationId
-		AND A.intAPAccount IS NULL AND B.intAPAccount IS NULL AND B.intTransactionType IN (1,14)) 
+		INNER JOIN @voucherPayables B ON B.intLocationId = A.intCompanyLocationId
+		AND A.intAPAccount IS NULL AND B.intAPAccount IS NULL AND B.intTransactionType IN (1,3,14)) 
 	BEGIN
 		SET @error =  'Please setup default AP Account.';
 		IF @throwError = 1
@@ -66,7 +67,7 @@ BEGIN TRY
 	--Prepaid Type
 	IF EXISTS(SELECT TOP 1 1
 		FROM tblSMCompanyLocation A
-		INNER JOIN @voucherPayables B ON B.intShipToId = A.intCompanyLocationId
+		INNER JOIN @voucherPayables B ON B.intLocationId = A.intCompanyLocationId
 		AND A.intPurchaseAdvAccount IS NULL AND B.intAPAccount IS NULL AND B.intTransactionType IN  (2, 13)) 
 	BEGIN
 		SET @error =  'Please setup default Prepaid Account.';
@@ -453,8 +454,11 @@ BEGIN TRY
 	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 	EXEC uspAPUpdateVoucherTotal @voucherIds
 
-	SELECT @createdVouchersId = COALESCE(@createdVouchersId + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+	SELECT @idsCreated = COALESCE(@idsCreated + ',', '') +  CONVERT(VARCHAR(12),intBillId) 
 	FROM @createdVouchers
+	
+	SET @createdVouchersId = @idsCreated 
+	SELECT @createdVouchersId
 	
 	IF @transCount = 0 COMMIT TRANSACTION;
 
@@ -486,10 +490,10 @@ BEGIN CATCH
 	BEGIN
 		ROLLBACK TRANSACTION
 	END
-	ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
-	BEGIN
-		ROLLBACK TRANSACTION  @SavePoint
-	END
+	-- ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
+	-- BEGIN
+	-- 	ROLLBACK TRANSACTION  @SavePoint
+	-- END
 
 	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH

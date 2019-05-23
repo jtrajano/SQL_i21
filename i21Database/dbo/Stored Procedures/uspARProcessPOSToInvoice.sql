@@ -176,7 +176,7 @@ SELECT TOP 1
 	,[intTempDetailIdForTaxes]				= @intPOSId
 	,[dblCurrencyExchangeRate]				= 1.000000
 	,[dblSubCurrencyRate]					= 1.000000
-	,[intSalesAccountId]					= ISNULL(COMPANYLOC.intDiscountAccountId, COMPANYPREF.intDiscountAccountId)
+	,[intSalesAccountId]					= ISNULL(COMPANYLOC.intSalesDiscounts, COMPANYPREF.intDiscountAccountId)
 	,[strPONumber]							= POS.strPONumber
 	,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN COMPANYLOC.intFreightTermId ELSE NULL END
 FROM tblARPOS POS
@@ -185,7 +185,7 @@ OUTER APPLY (
 	FROM tblARCompanyPreference WITH (NOLOCK)
 ) COMPANYPREF
 LEFT JOIN (
-	SELECT intDiscountAccountId
+	SELECT intSalesDiscounts
 	     , intCompanyLocationId
 		 , intFreightTermId
 	FROM tblSMCompanyLocation WITH (NOLOCK)
@@ -345,8 +345,8 @@ BEGIN
 				,dblInvoiceTotal				= IFP.dblInvoiceTotal
 				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal
 				,dblPayment						= ISNULL(POSPAYMENTS.dblAmount, 0)
-				,dblAmountDue					= ISNULL(@dblOnAccountAmount, 0)
-				,dblBaseAmountDue				= ISNULL(@dblOnAccountAmount, 0)
+				,dblAmountDue					= IFP.dblInvoiceTotal
+				,dblBaseAmountDue				= IFP.dblInvoiceTotal
 				,strInvoiceReportNumber			= IFP.strInvoiceNumber
 				,intCurrencyExchangeRateTypeId	= IFP.intCurrencyExchangeRateTypeId
 				,intCurrencyExchangeRateId		= IFP.intCurrencyExchangeRateId

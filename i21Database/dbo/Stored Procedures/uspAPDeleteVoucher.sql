@@ -12,6 +12,18 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+
+	DECLARE @transCount INT;
+	DECLARE @voucherBillDetailIds AS Id;
+	DECLARE @vendorOrderNumber NVARCHAR(100);
+	SET @transCount = @@TRANCOUNT;
+	IF @transCount = 0 BEGIN TRANSACTION
+
+	INSERT INTO @voucherBillDetailIds
+	SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId
+
+	SELECT @vendorOrderNumber = strVendorOrderNumber FROM tblAPBill WHERE intBillId = @intBillId
+
 	DECLARE @UserEntityID INT
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
 	
@@ -22,8 +34,47 @@ BEGIN TRY
 	--WILL REVERT ONCE SCALE WITH CONTRACT FIXATION IS RELATED
 	UPDATE tblCTPriceFixationDetail SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 
+	DELETE FROM tblCTPriceFixationTicket
+	WHERE intPriceFixationTicketId IN 
+	(
+		SELECT pft.intPriceFixationTicketId 
+		FROM tblCTPriceFixationTicket pft 
+		INNER JOIN vyuCTPriceFixationTicket ft ON pft.intInventoryReceiptId = ft.intInventoryReceiptId 
+			AND pft.intPricingId = ft.intPricingId
+		INNER JOIN tblAPBillDetail bd ON ft.intDetailId = bd.intBillDetailId 
+			AND ft.intInventoryShipmentId IS NULL 
+		WHERE bd.intBillId = @intBillId
+	)
+
+	UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
+
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
+
+	UPDATE tblGRSettleStorage SET intBillId = NULL WHERE intBillId = @intBillId
+	
+	--clear original transaction if this is a reversal
+	UPDATE A
+		SET A.intTransactionReversed = NULL
+	FROM tblAPBill A
+	INNER JOIN tblAPBill B
+		ON A.intTransactionReversed = B.intBillId
+	WHERE A.intBillId = @intBillId
+
+	--EXECUTE uspAPUpdateVoucherPayable for deleted.
+	EXEC [dbo].[uspAPUpdateVoucherPayable]
+		@voucherDetailIds = @voucherBillDetailIds,
+		@decrease = 1
+	
+	EXEC [dbo].[uspAPUpdateIntegrationPayableAvailableQty]
+		@billDetailIds = @voucherBillDetailIds,
+		@decrease = 0
+
+	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
+
+	EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
+
+	EXEC uspAPArchiveVoucher @billId = @intBillId
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
@@ -40,7 +91,7 @@ BEGIN TRY
 	DELETE FROM dbo.tblSMTransaction
 	WHERE intRecordId = @intBillId 
 	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
-	
+
 	--Audit Log          
 	EXEC dbo.uspSMAuditLog 
 		 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
@@ -50,6 +101,8 @@ BEGIN TRY
 		,@changeDescription	= ''								-- Description
 		,@fromValue			= ''								-- Previous Value
 		,@toValue			= ''								-- New Value
+
+	IF @transCount = 0 COMMIT TRANSACTION
 
 END TRY
 BEGIN CATCH	

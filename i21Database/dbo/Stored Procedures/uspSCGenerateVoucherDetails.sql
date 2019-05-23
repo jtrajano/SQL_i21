@@ -122,6 +122,7 @@ SELECT
 											THEN contractDetail.intItemUOMId
 											ELSE B.intUnitMeasureId END,
 	[dblUnitQty]					=	ISNULL(contractDetail.dblUnitQty, ABS(ISNULL(ItemUOM.dblUnitQty,0)))
+
 FROM @VoucherDetailReceipt A
 INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 INNER JOIN tblICInventoryReceipt C ON B.intInventoryReceiptId = C.intInventoryReceiptId
@@ -176,7 +177,9 @@ BEGIN /* DIRECT IR */
 			[intShipFromId],
 			[intShipToId],
 			[intEntityVendorId],
-			[strVendorOrderNumber]
+			[strVendorOrderNumber],
+			[intPurchaseTaxGroupId],
+			[dblTax]
 		)
 		SELECT 
 			[intTransactionType]			=   1,
@@ -216,7 +219,9 @@ BEGIN /* DIRECT IR */
 			[intShipFromId]					=   A.intShipFromId,
 			[intShipToId]					=   A.intLocationId,
 			[intEntityVendorId]				=   A.intEntityVendorId,
-			[strVendorOrderNumber]			=   A.strVendorRefNo
+			[strVendorOrderNumber]			=   A.strVendorRefNo,
+			[intPurchaseTaxGroupId]			=	B.intTaxGroupId,
+			[dblTax]						= B.dblTax
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -287,7 +292,9 @@ BEGIN /* PURCHASE CONTRACT */
 			[intShipFromId],
 			[intShipToId],
 			[intEntityVendorId],
-			[strVendorOrderNumber]
+			[strVendorOrderNumber],
+			[intPurchaseTaxGroupId],
+			[dblTax]
 		)
 		SELECT 
 			[intTransactionType]		=	1,
@@ -334,7 +341,9 @@ BEGIN /* PURCHASE CONTRACT */
 			[intShipFromId]				=   A.intShipFromId,
 			[intShipToId]				=  A.intLocationId,
 			[intEntityVendorId]			=  A.intEntityVendorId,
-			[strVendorOrderNumber]		=   A.strVendorRefNo
+			[strVendorOrderNumber]		=   A.strVendorRefNo,
+			[intPurchaseTaxGroupId]		= B.intTaxGroupId,
+			[dblTax]					= B.dblTax
 		FROM tblICInventoryReceipt A
 		INNER JOIN tblICInventoryReceiptItem B
 			ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -407,7 +416,8 @@ BEGIN /* RECEIPT CHARGES */
 		[int1099Category],
 		[intScaleTicketId],
 		[intLocationId],
-		[intEntityVendorId]
+		[intEntityVendorId],
+		[intPurchaseTaxGroupId]
 	)
 	SELECT DISTINCT
 		[intTransactionType]			=	1,
@@ -465,7 +475,8 @@ BEGIN /* RECEIPT CHARGES */
 											END,
 		[intScaleTicketId]				=	CASE WHEN IR.intSourceType = 1 THEN A.intScaleTicketId ELSE NULL END,
 		[intLocationId]					=	IR.intLocationId,
-		[intEntityVendorId]				=   A.intEntityVendorId
+		[intEntityVendorId]				=   A.intEntityVendorId,
+		[intPurchaseTaxGroupId]			= A.intTaxGroupId
 	FROM [vyuICChargesForBilling] A
 	INNER JOIN @VoucherDetailReceiptCharge charges
 		ON A.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
@@ -491,6 +502,7 @@ BEGIN /* RECEIPT CHARGES */
 		SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
 		WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 	) J
+	WHERE A.intEntityVendorId = IR.intEntityVendorId
 
 END
 
@@ -500,10 +512,10 @@ BEGIN /* Direct Inventory */
 		[intAccountId]					,
 		[intItemId]						,
 		[strMiscDescription]			,
-		[intQtyToBillUOMId]			,
-		[dblQuantityToBill]					,
-		[dblQtyToBillUnitQty]					,
-		[dblOrderQty]				,
+		[intQtyToBillUOMId]				,
+		[dblQuantityToBill]				,
+		[dblQtyToBillUnitQty]			,
+		[dblOrderQty]					,
 		[dblDiscount]					,
 		[intCostUOMId]					,
 		[dblCost]						,
@@ -513,32 +525,50 @@ BEGIN /* Direct Inventory */
 		[intLineNo]						,
 		[intContractDetailId]			,
 		[intContractHeaderId]			,
-		[intLoadShipmentDetailId]				,
-		[intLoadShipmentId]						,
-		[intScaleTicketId]
+		[intLoadShipmentDetailId]		,
+		[intLoadShipmentId]				,
+		[intScaleTicketId]				,
+		[intPurchaseTaxGroupId]			,
+		--[dblTax]						,
+		[intEntityVendorId]				,
+		strVendorOrderNumber			,
+		strReference					,
+		strSourceNumber					,
+		intLocationId					,
+		intSubLocationId				,
+		intStorageLocationId			,
+		intItemLocationId				,
+		ysnSubCurrency					,
+		intCurrencyId
+		,ysnStage
 		)
 		SELECT
-		[intTransactionType]			=	1							,
+		[intTransactionType]			=	1,
 		[intAccountId]					=	dbo.[fnGetItemGLAccount](A.intItemId, loc.intItemLocationId, 'AP Clearing'),
-		[intItemId]						=	C.[intItemId],					
+		[intItemId]						=	A.[intItemId],					
 		[strMiscDescription]			=	ISNULL(A.strMiscDescription, C.strDescription),
-		[intUnitOfMeasureId]			=	CASE WHEN ctd.intItemUOMId > 0 
-												THEN ctd.intItemUOMId
-												ELSE A.intUnitOfMeasureId
-											END,
-		[dblQtyOrdered]					=	dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId
-																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
-																			,A.dblQtyReceived),
-		[dblUnitQty]					=	CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
-		[dblQtyReceived]				=	dbo.fnCalculateCostBetweenUOM(A.intUnitOfMeasureId
-																			,CASE WHEN ctd.intItemUOMId > 0 THEN ctd.intItemUOMId ELSE A.intUnitOfMeasureId END
-																			,A.dblQtyReceived),
+		[intQtyToBillUOMId]				=	A.intUnitOfMeasureId
+											-- CASE WHEN ctd.intItemUOMId > 0 
+											-- 	THEN ctd.intItemUOMId
+											-- 	ELSE A.intUnitOfMeasureId
+											-- END,
+		
+		
+		,[dblQuantityToBill]			=	A.dblQtyReceived
+		,[dblQtyToBillUnitQty]			=	ISNULL(A.dblUnitQty,1) --CASE WHEN ctd.intItemUOMId > 0 THEN ctd.dblUnitQty ELSE ISNULL(A.dblUnitQty,1) END,
+		,[dblOrderQty]					=	(CASE WHEN lgDetail.dblQuantity IS NULL
+												THEN
+													A.dblQtyReceived
+												ELSE
+													lgDetail.dblQuantity 
+											END),
 		[dblDiscount]					=	A.[dblDiscount],
-		[intCostUOMId]					=	CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END,
-		[dblCost]						=	dbo.fnCalculateCostBetweenUOM(A.intCostUOMId
-																		,CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END
-																		,ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))),
-		[dblCostUnitQty]				=	CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
+		[intCostUOMId]					=	A.intCostUOMId --CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END,
+		,[dblCost]						=	ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))
+											-- dbo.fnCalculateCostBetweenUOM(A.intCostUOMId
+											-- 							,CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END
+											-- 							,ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))),
+		,[dblCostUnitQty]				=	A.dblCostUnitQty, --CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
 		[int1099Form]					=	(CASE WHEN patron.intEntityId IS NOT NULL 
 														AND C.intItemId > 0
 														AND C.ysn1099Box3 = 1
@@ -559,60 +589,83 @@ BEGIN /* Direct Inventory */
 		[intContractHeaderId]			=	ctd.intContractHeaderId,
 		[intLoadDetailId]				=	A.intLoadDetailId,
 		[intLoadId]						=	lgDetail.intLoadId,
-		[intScaleTicketId]				=	A.[intScaleTicketId]										
+		[intScaleTicketId]				=	A.[intScaleTicketId],
+		[intPurchaseTaxGroupId]			=	A.intTaxGroupId,
+		--[dblTax]						=	B.dblTax,
+		[intEntityVendorId]				=	SC.intEntityId,
+		[strVendorOrderNumber]			=	'TKT-' + SC.strTicketNumber,
+		strReference					=	'TKT-' + SC.strTicketNumber,
+		strSourceNumber					=	SC.strTicketNumber,
+		intLocationId					=	SC.intProcessingLocationId,
+		intSubLocationId				=	SC.intSubLocationId,
+		intStorageLocationId			=   SC.intStorageLocationId,
+		intItemLocationId				=	C.intItemLocationId,
+		ysnSubCurrency					=	0,
+		intCurrencyId					=	SC.intCurrencyId
+		,ysnStage 						= 0
 	FROM @voucherDetailDirect A
-	CROSS APPLY tblAPBill B
-	INNER JOIN tblAPVendor D ON B.intEntityVendorId = D.[intEntityId]
+	INNER JOIN tblSCTicket SC ON A.intScaleTicketId = SC.intTicketId
+	INNER JOIN tblAPVendor D ON SC.intEntityId = D.[intEntityId]
 	INNER JOIN tblEMEntity E ON D.[intEntityId] = E.intEntityId
 	LEFT JOIN vyuCTContractDetailView ctd ON A.intContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblLGLoadDetail lgDetail ON A.intLoadDetailId = lgDetail.intLoadDetailId
-	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND B.intShipToId = C.intLocationId
-	LEFT JOIN tblICItemLocation loc ON loc.intItemId = A.intItemId AND loc.intLocationId = B.intShipToId
-	LEFT JOIN vyuPATEntityPatron patron ON B.intEntityVendorId = patron.intEntityId
+	LEFT JOIN vyuICGetItemStock C ON C.intItemId = A.intItemId AND SC.intProcessingLocationId = C.intLocationId
+	LEFT JOIN tblICItemLocation loc ON loc.intItemId = A.intItemId AND loc.intLocationId = SC.intProcessingLocationId
+	LEFT JOIN vyuPATEntityPatron patron ON SC.intEntityId = patron.intEntityId
 	LEFT JOIN tblAP1099Category F ON E.str1099Type = F.strCategory
+	
 END
 
+
+
 BEGIN /* RESULT */
-	SELECT [intTransactionType],
-	[intItemId],
-	[strMiscDescription],
-	[intInventoryReceiptItemId],
-	[dblQuantityToBill],
-	[dblOrderQty],
-	[dblExchangeRate],
-	[intCurrencyExchangeRateTypeId],
-	[ysnSubCurrency],
-	[intAccountId],
-	[dblCost],
-	[dblOldCost],
-	[dblNetWeight],
-	[dblNetShippedWeight],
-	[dblWeightLoss],
-	[dblFranchiseWeight],
-	[intContractDetailId],
-	[intContractHeaderId],
-	[intQtyToBillUOMId],
-	[intCostUOMId],
-	[intWeightUOMId],
-	[intLineNo],
-	[dblWeightUnitQty],
-	[dblCostUnitQty],
-	[dblQtyToBillUnitQty],
-	[intCurrencyId],
-	[intStorageLocationId],
-	[int1099Form],
-	[int1099Category],
-	[intLoadShipmentDetailId],
-	[strBillOfLading],
-	[intScaleTicketId],
-	[intLocationId],			
-	[intShipFromId],
-	[intShipToId],
-	[intInventoryReceiptChargeId],
-	[intPurchaseDetailId],
-	[dblTax],
-	[intEntityVendorId],
-	[strVendorOrderNumber],
-	[intLoadShipmentId]
+	SELECT	DISTINCT
+			[intTransactionType],
+			[intItemId],
+			[strMiscDescription],
+			[intInventoryReceiptItemId],
+			[dblQuantityToBill],
+			[dblOrderQty],
+			[dblExchangeRate],
+			[intCurrencyExchangeRateTypeId],
+			[ysnSubCurrency],
+			[intAccountId],
+			[dblCost],
+			[dblOldCost],
+			[dblNetWeight],
+			[dblNetShippedWeight],
+			[dblWeightLoss],
+			[dblFranchiseWeight],
+			[intContractDetailId],
+			[intContractHeaderId],
+			[intQtyToBillUOMId],
+			[intCostUOMId],
+			[intWeightUOMId],
+			[intLineNo],
+			[dblWeightUnitQty],
+			[dblCostUnitQty],
+			[dblQtyToBillUnitQty],
+			[intCurrencyId],
+			[intStorageLocationId],
+			[int1099Form],
+			[int1099Category],
+			[intLoadShipmentDetailId],
+			[strBillOfLading],
+			[intScaleTicketId],
+			[intLocationId],			
+			[intShipFromId],
+			[intShipToId],
+			[intInventoryReceiptChargeId],
+			[intPurchaseDetailId],
+			[intPurchaseTaxGroupId],
+			[dblTax],
+			[intEntityVendorId],
+			[strVendorOrderNumber],
+			[intLoadShipmentId],
+			[strReference],
+			[strSourceNumber],
+			[intSubLocationId],
+			[intItemLocationId]
+			,ysnStage
 	FROM @VoucherPayable
 END

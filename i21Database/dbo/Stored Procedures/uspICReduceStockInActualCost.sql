@@ -60,17 +60,33 @@ BEGIN
 				ON i.intItemId = il.intItemId
 				AND il.intItemLocationId = @intItemLocationId
 			OUTER APPLY (
-				SELECT	intInventoryActualCostId = MIN(cb.intInventoryActualCostId) 
-				FROM	tblICInventoryActualCost cb
-				WHERE	cb.strActualCostId = @strActualCostId 
-						AND cb.intItemId = @intItemId
+				SELECT 
+					dblAvailable = SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6))
+				FROM
+					tblICInventoryActualCost cb
+				WHERE
+					cb.intItemId = @intItemId
+					AND cb.intItemLocationId = @intItemLocationId
+					AND cb.intItemUOMId = @intItemUOMId					
+					AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+					AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1			
+					AND cb.strActualCostId = @strActualCostId
+			) cbAvailable
+			OUTER APPLY (
+				SELECT	TOP 1 
+						intInventoryActualCostId
+				FROM	tblICInventoryActualCost cb 
+				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intItemUOMId = @intItemUOMId
+						AND cb.strActualCostId = @strActualCostId
 						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-				HAVING 
-					SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6)) >=  ROUND(@dblQty, 6)
-			) cb 
-
+						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1						
+						AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
+						AND cb.strActualCostId = @strActualCostId
+				ORDER BY cb.dtmDate ASC
+			) cb  
+	
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN 
 		-- Get the available stock in the cost bucket. 
@@ -127,7 +143,7 @@ USING (
 	AND cb.intItemUOMId = Source_Query.intItemUOMId
 	AND (cb.dblStockIn - cb.dblStockOut) > 0 
 	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
-	AND (cb.intInventoryActualCostId = @CostBucketId OR @CostBucketId IS NULL)
+	AND cb.intInventoryActualCostId = ISNULL(@CostBucketId, cb.intInventoryActualCostId)
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 

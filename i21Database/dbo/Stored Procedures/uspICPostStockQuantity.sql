@@ -11,7 +11,8 @@ CREATE PROCEDURE [dbo].[uspICPostStockQuantity]
 	@dblUOMQty AS NUMERIC(38,20),
 	@intLotId AS INT,
 	@intTransactionTypeId AS INT = NULL,
-	@dtmTransactionDate AS DATETIME = NULL
+	@dtmTransactionDate AS DATETIME = NULL,
+	@ysnPost AS BIT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -25,18 +26,12 @@ SET @dblQty = ISNULL(@dblQty, 0)
 SET @dblUOMQty = ISNULL(@dblUOMQty, 0)
 
 ------------------------------------------------------------
--- If item is a Lot, retrieve Weight UOM and Weight Per Qty
+-- Get Variable Defaults
 ------------------------------------------------------------
-BEGIN 
-	DECLARE @dblWeightPerQty AS NUMERIC(38,20)
-			,@intLotWeightUOMId AS INT
-			,@intLotItemUOMId AS INT 
-			,@dblWeightUnitQty AS NUMERIC(38,20) 
-
+BEGIN
 	
 	DECLARE @TransactionType_InventoryReceipt AS INT,
 			@TransactionType_Invoice AS INT;
-
 	
 	SELECT	TOP 1 @TransactionType_InventoryReceipt = intTransactionTypeId
 	FROM	tblICInventoryTransactionType 
@@ -45,6 +40,16 @@ BEGIN
 	SELECT	TOP 1 @TransactionType_Invoice = intTransactionTypeId
 	FROM	tblICInventoryTransactionType 
 	WHERE	strName = 'Invoice';
+
+END
+------------------------------------------------------------
+-- If item is a Lot, retrieve Weight UOM and Weight Per Qty
+------------------------------------------------------------
+BEGIN 
+	DECLARE @dblWeightPerQty AS NUMERIC(38,20)
+			,@intLotWeightUOMId AS INT
+			,@intLotItemUOMId AS INT 
+			,@dblWeightUnitQty AS NUMERIC(38,20) 
 
 	SELECT	@intLotItemUOMId = intItemUOMId
 			,@intLotWeightUOMId = intWeightUOMId
@@ -88,7 +93,11 @@ BEGIN
 									ELSE 
 										ROUND(dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) , 6)
 							END
-					,dtmTransactionDate = @dtmTransactionDate
+					,dtmTransactionDate = CASE 
+											WHEN @ysnPost = 1 
+											THEN @dtmTransactionDate 
+											ELSE [dbo].[fnICGetPreviousTransactionDate](@intItemId, @intItemLocationId, @intSubLocationId, @intStorageLocationId, @intTransactionTypeId) 
+										END
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
 		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -97,17 +106,22 @@ BEGIN
 	WHEN MATCHED THEN 
 		UPDATE 
 		SET		dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
-				,dtmLastPurchaseDate = CASE WHEN @intTransactionTypeId = @TransactionType_InventoryReceipt
-											AND (StockToUpdate.dtmTransactionDate IS NOT NULL AND StockToUpdate.dtmTransactionDate > ISNULL(ItemStock.dtmLastPurchaseDate, '2000-01-01'))
-									THEN StockToUpdate.dtmTransactionDate
-									ELSE ItemStock.dtmLastPurchaseDate
-								END
+				,dtmLastPurchaseDate = CASE 
+											WHEN @intTransactionTypeId = @TransactionType_InventoryReceipt
+												AND ((@ysnPost = 1 AND StockToUpdate.dtmTransactionDate IS NOT NULL 
+													AND StockToUpdate.dtmTransactionDate > ISNULL(ItemStock.dtmLastPurchaseDate, '2000-01-01')) 
+												OR @ysnPost = 0)
+												THEN StockToUpdate.dtmTransactionDate
+											ELSE ItemStock.dtmLastPurchaseDate
+										END
 				,dtmLastSaleDate = CASE 
-								WHEN @intTransactionTypeId = @TransactionType_Invoice
-									AND (StockToUpdate.dtmTransactionDate IS NOT NULL AND StockToUpdate.dtmTransactionDate > ISNULL(ItemStock.dtmLastSaleDate, '2000-01-01'))
-								THEN StockToUpdate.dtmTransactionDate
-								ELSE ItemStock.dtmLastSaleDate
-							END
+										WHEN @intTransactionTypeId = @TransactionType_Invoice
+											AND ((@ysnPost = 1 AND StockToUpdate.dtmTransactionDate IS NOT NULL 
+												AND StockToUpdate.dtmTransactionDate > ISNULL(ItemStock.dtmLastSaleDate, '2000-01-01'))
+											OR @ysnPost = 0)
+											THEN StockToUpdate.dtmTransactionDate
+										ELSE ItemStock.dtmLastSaleDate
+									END
 	-- If none found, insert a new item stock record
 	WHEN NOT MATCHED THEN 
 		INSERT (
@@ -149,7 +163,11 @@ BEGIN
 						,intSubLocationId 
 						,intStorageLocationId 
 						,Qty = ROUND(SUM(Qty), 6)
-						,dtmTransactionDate = @dtmTransactionDate
+						,dtmTransactionDate = CASE 
+											WHEN @ysnPost = 1 
+											THEN @dtmTransactionDate 
+											ELSE [dbo].[fnICGetPreviousTransactionDate](@intItemId, @intItemLocationId, @intSubLocationId, @intStorageLocationId, @intTransactionTypeId) 
+										END
 				FROM (
 
 					-------------------------------------------
@@ -368,13 +386,17 @@ BEGIN
 		UPDATE 
 		SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
 				,dtmLastPurchaseDate = CASE WHEN @intTransactionTypeId = @TransactionType_InventoryReceipt
-												 AND (RawStockData.dtmTransactionDate IS NOT NULL AND RawStockData.dtmTransactionDate > ISNULL(ItemStockUOM.dtmLastPurchaseDate, '2000-01-01'))
-											THEN RawStockData.dtmTransactionDate
+												AND ((@ysnPost = 1 AND RawStockData.dtmTransactionDate IS NOT NULL 
+													AND RawStockData.dtmTransactionDate > ISNULL(ItemStockUOM.dtmLastPurchaseDate, '2000-01-01'))
+												OR @ysnPost = 0)
+												THEN RawStockData.dtmTransactionDate
 											ELSE ItemStockUOM.dtmLastPurchaseDate
 										END
 				,dtmLastSaleDate = CASE 
 										WHEN @intTransactionTypeId = @TransactionType_Invoice
-											AND (RawStockData.dtmTransactionDate IS NOT NULL AND RawStockData.dtmTransactionDate > ISNULL(ItemStockUOM.dtmLastSaleDate, '2000-01-01'))
+											AND ((@ysnPost = 1 AND RawStockData.dtmTransactionDate IS NOT NULL 
+												AND RawStockData.dtmTransactionDate > ISNULL(ItemStockUOM.dtmLastSaleDate, '2000-01-01'))
+											OR @ysnPost = 0)
 										THEN RawStockData.dtmTransactionDate
 										ELSE ItemStockUOM.dtmLastSaleDate
 									END

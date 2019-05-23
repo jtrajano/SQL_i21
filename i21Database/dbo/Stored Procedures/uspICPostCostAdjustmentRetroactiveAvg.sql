@@ -890,7 +890,7 @@ BEGIN
 	DECLARE loopCostAdjustmentLog CURSOR LOCAL FAST_FORWARD
 	FOR 
 	SELECT	
-			dblValue
+			ROUND(ISNULL(dblValue, 0), 2)
 			,strRelatedTransactionId
 			,intRelatedTransactionId
 			,intRelatedTransactionDetailId

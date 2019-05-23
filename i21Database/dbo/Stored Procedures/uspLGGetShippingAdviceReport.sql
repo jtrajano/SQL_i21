@@ -211,6 +211,7 @@ BEGIN
 				isnull(rtrt4.strTranslation,CLocation.strCountry) as strCustomerCountry,
 				CLocation.strState as strCustomerState,
 				CLocation.strZipCode as strCustomerZipCode,
+				strCustomerCityStateZip = CLocation.strCity + ', ' + CLocation.strState + ', ' + CLocation.strZipCode + ',',
 
   				SLEntity.strName as strShippingLine,
 				SLEntity.strEmail as strShippingLineEmail,

@@ -62,7 +62,12 @@ AS
 				intForexRateTypeId,
 				dblForexRate,
 				strChargesLink,
-				intPriceUOMId
+				intPriceUOMId,
+				dblGross,
+				dblTare,
+				dblNet,
+				intSubLocationId,
+				intStorageLocationId
 		)	
 		SELECT	intOrderType			=	1,
 				intSourceType			=	0,
@@ -90,7 +95,12 @@ AS
 				intForexRateTypeId		=	CD.intRateTypeId,
 				dblForexRate			=	CD.dblRate,
 				strChargesLink			=	'CL-' + LTRIM(CD.intContractSeq),
-				intPriceUOMId			=	IU.intItemUOMId
+				intPriceUOMId			=	IU.intItemUOMId,
+				dblGross				=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId, ISNULL(CD.dblBalance,0)	- ISNULL(CD.dblScheduleQty,0)),
+				dblTare					=	0,
+				dblNet					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId, ISNULL(CD.dblBalance,0)	- ISNULL(CD.dblScheduleQty,0)),
+				intSubLocationId		=	CD.intSubLocationId,		
+				intStorageLocationId	=	CD.intStorageLocationId
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId = CD.intContractHeaderId

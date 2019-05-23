@@ -42,7 +42,7 @@ AS
 Select l.strLotNumber,i.strItemNo,i.strDescription,ROUND(dbo.fnRemoveTrailingZeroes(wpl.dblQuantity),3) AS dblQuantity,
 ROUND(CASE WHEN wpl.dblWeightPerUnit=1 THEN null ELSE dbo.fnRemoveTrailingZeroes(wpl.dblPhysicalCount) END,3) AS dblPhysicalCount,
 ROUND(CASE WHEN wpl.dblWeightPerUnit=1 THEN null ELSE dbo.fnRemoveTrailingZeroes(wpl.dblWeightPerUnit) END,3) AS dblWeightPerUnit, 
-w.strWorkOrderNo,w.strSalesOrderNo,wpl.strVesselNo,wpl.dtmCreated
+w.strWorkOrderNo,w.strSalesOrderNo,wpl.strVesselNo,dbo.fnConvertDateToReportDateFormat(wpl.dtmCreated, 1) AS dtmCreated
 From tblMFWorkOrderProducedLot wpl 
 Join tblMFWorkOrder w on wpl.intWorkOrderId=w.intWorkOrderId
 Join tblICItem i on w.intItemId=i.intItemId

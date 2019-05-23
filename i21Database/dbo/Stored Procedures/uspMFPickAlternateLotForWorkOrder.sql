@@ -58,16 +58,21 @@ BEGIN TRY
 		--AND intSubLocationId = @intSubLocationId
 		AND intLocationId = @intLocationId
 
-	SELECT @intAlternateLotId = intLotId
-		,@dblAlternateLotQty = dblQty
-		,@intLotStatusId = intLotStatusId
-		,@intAlternateItemId = intItemId
-		,@dtmAlternateLotExpiryDate = dtmExpiryDate
-		,@intAlternateParentLotId = intParentLotId
-	FROM tblICLot
-	WHERE strLotNumber = @strAlternateLotNo
-		AND intStorageLocationId = @intStorageLocationId
-		AND dblQty > 0
+	SELECT @intAlternateLotId = L.intLotId
+		,@dblAlternateLotQty = L.dblQty
+		,@intLotStatusId = L.intLotStatusId
+		,@intAlternateItemId = L.intItemId
+		,@dtmAlternateLotExpiryDate = L.dtmExpiryDate
+		,@intAlternateParentLotId = L.intParentLotId
+	FROM tblICLot L
+	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	WHERE L.strLotNumber = @strAlternateLotNo
+		AND L.intStorageLocationId = @intStorageLocationId
+		AND L.dblQty > 0
+		AND SL.intRestrictionId NOT IN (
+			SELECT RT.intRestrictionId
+			FROM tblMFInventoryShipmentRestrictionType RT
+			)
 
 	IF ISNULL(@dblAlternateLotQty, 0) <= 0
 	BEGIN

@@ -4,6 +4,8 @@ CREATE FUNCTION [dbo].[fnGRGetBillStorageDetails]
 	,@strPostType NVARCHAR(30)
 	,@intUserId INT
 	,@intEntityId INT = NULL
+	,@intCustomerStorageIdParam INT = NULL
+	,@dblBalanceToAccrue DECIMAL(18,6) = 0
 )
 RETURNS @returnTable TABLE
 (
@@ -78,7 +80,7 @@ BEGIN
 	SELECT 
 		CS.intCustomerStorageId
 		,CS.intStorageScheduleId
-		,CS.dblOpenBalance
+		,CASE WHEN @dblBalanceToAccrue = 0 THEN CS.dblOpenBalance ELSE @dblBalanceToAccrue END
 		,0
 		,0
 		,0
@@ -91,6 +93,7 @@ BEGIN
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 	WHERE CS.dblOpenBalance > 0
 		AND ST.ysnCustomerStorage = 0
+		AND CS.intCustomerStorageId = ISNULL(@intCustomerStorageIdParam,CS.intCustomerStorageId)
 	ORDER BY CS.dtmDeliveryDate
 
 	--SELECT @intBillStorageKey = MIN(intBillStorageKey)

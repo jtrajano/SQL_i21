@@ -74,5 +74,6 @@
 	[dblStateOtherTax]					NUMERIC(18, 6)	NULL DEFAULT 0,
 	[dblStateSalesTax]					NUMERIC(18, 6)	NULL DEFAULT 0,
 	[dblTonnageTax]						NUMERIC(18, 6)	NULL DEFAULT 0,
-	[ysnTaxExempt]						BIT				NULL DEFAULT ((0)),	
+	[ysnTaxExempt]						BIT				NULL DEFAULT ((0)), 
+    [blbCompanyLogo] VARBINARY(MAX) NULL,	
 )

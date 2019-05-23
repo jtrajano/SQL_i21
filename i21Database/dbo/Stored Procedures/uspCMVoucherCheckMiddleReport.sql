@@ -99,7 +99,8 @@ SELECT
 		 CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
-		,strPayee =  Payee.Name +  CASE WHEN Address1.Value is null THEN '' ELSE  (CHAR(13) + Address1.Value) END
+		,strPayee =  Payee.Name 
+		,strPayeeAddress = Address.Value
 		,strAmountInWords = AmtInWords.Val
 		,CHK.strMemo
 		,CHK.strTransactionId
@@ -202,24 +203,20 @@ FROM	dbo.tblCMBankTransaction CHK
 		
 		) Payee
 		OUTER APPLY (
-			SELECT CASE	
+			SELECT 
+				CASE WHEN PYMT.ysnOverrideCheckPayee = 1 THEN 
+					PYMT.strOverridePayee
+				ELSE					
+			CASE	
 				WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
 					dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
 				ELSE 
 					dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
-										
-			END Value
+			END 
+			END
+			Value
 		)Address
-		OUTER APPLY(
-			SELECT CASE 
-				WHEN LEN(Payee.Name) BETWEEN 151 AND 200 THEN -- Payee name reached 3rd line
-					LEFT(Address.Value,50)
-				
-				WHEN LEN(Payee.Name) > 200 THEN '' -- Payee name reached 4th line
-				ELSE
-					Address.Value
-			END Value
-		)Address1
+	
 
 
 WHERE	CHK.intBankAccountId = @intBankAccountId

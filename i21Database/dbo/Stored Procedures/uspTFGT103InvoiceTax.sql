@@ -268,7 +268,7 @@ BEGIN TRY
 		WHERE strTemplateItemId IN ('GT-103-2DGasohol', 'GT-103-2DGasoline') AND tblTFReportingComponent.intReportingComponentId = @RCId
 
 		-- GET MAX intId
-		SELECT @intMaxId = MAX(ISNULL(intId,0)) FROM @TFTransaction	
+		SELECT @intMaxId = ISNULL(MAX(intId), 0) FROM @TFTransaction
 
 		INSERT INTO @TFTransaction(intId
 			, intInvoiceDetailId
@@ -432,7 +432,7 @@ BEGIN TRY
 		)tblTransactions
 
 		-- INVENTORY TRANSFERS USING IC SCREEN --
-		SELECT @intMaxId = MAX(ISNULL(intId,0)) FROM @TFTransaction	
+		SELECT @intMaxId = ISNULL(MAX(intId), 0) FROM @TFTransaction	
 
 		INSERT INTO @TFTransaction(intId
 			, intInvoiceDetailId

@@ -345,6 +345,8 @@ BEGIN
             [intInvoiceId] IN (SELECT [intInvoiceId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
             OR
             [intBillId] IN (SELECT [intBillId] FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit)
+            OR
+            ([intInvoiceId] IS NULL AND [intBillId] IS NULL AND [dblPayment] = @ZeroDecimal)
             )
 
     -- Update the posted flag in the transaction table
@@ -435,6 +437,21 @@ BEGIN
         NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ARID INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId WHERE ARID.intPrepayTypeId > 0 AND ARID.intInvoiceId = B.intInvoiceId AND ARI.intPaymentId = B.[intTransactionId])
         AND ISNULL(B.[ysnInvoicePrepayment],0) = 0	
 		AND B.[ysnPost] = @OneBit	
+
+	--Paid if prepayment
+	UPDATE
+        C
+    SET 
+        C.ysnPaidCPP = 1
+    FROM 
+        #ARPostPaymentDetail B
+    INNER JOIN
+        tblARInvoice C
+            ON B.intInvoiceId = C.intInvoiceId
+    WHERE
+        C.strTransactionType = 'Customer Prepayment'	
+		AND B.[ysnPost] = @OneBit
+
 		
     UPDATE 
         ARPD
@@ -547,34 +564,6 @@ WHERE ISNULL(CUSTOMER.dblCreditLimit, 0) > 0
 --UPDATE CUSTOMER'S BUDGET
 EXEC dbo.uspARUpdateCustomerBudget @tblPaymentsToUpdateBudget = @PaymentIds, @Post = @Post
 
---PROCESS CUSTOMER BUDGET TO ACH
-IF (@Post = 1)
-    BEGIN
-        DECLARE @strPaymentACHIds NVARCHAR(MAX) = NULL
-        DECLARE @intBankAccountId INT = NULL
-
-        SELECT TOP 1 @intBankAccountId = intBankAccountId
-        FROM dbo.tblARPayment P 
-        INNER JOIN @NonZeroPaymentIds PI ON P.intPaymentId = PI.intId
-        WHERE P.ysnApplytoBudget = 1
-            AND P.strPaymentMethod = 'ACH'
-            AND P.intBankAccountId IS NOT NULL
-
-        SELECT @strPaymentACHIds = LEFT(P.intPaymentId, LEN(P.intPaymentId) - 1)
-        FROM (
-            SELECT DISTINCT CAST(P.intPaymentId AS VARCHAR(200))  + ', '
-            FROM dbo.tblARPayment P
-            INNER JOIN @NonZeroPaymentIds PI ON P.intPaymentId = PI.intId
-            WHERE P.ysnApplytoBudget = 1
-                AND P.strPaymentMethod = 'ACH'
-                AND P.intBankAccountId IS NOT NULL
-            FOR XML PATH ('')
-        ) P (intPaymentId)
-
-        IF ISNULL(@strPaymentACHIds, '') <> '' AND @intBankAccountId IS NOT NULL
-            EXEC dbo.uspARProcessACHPayments @strPaymentACHIds, @intBankAccountId, @UserId
-    END
-
 --AUDIT LOG
 DECLARE @IPaymentLog dbo.[AuditLogStagingTable]
 DELETE FROM @IPaymentLog
@@ -682,7 +671,7 @@ ELSE
 			DECLARE @PaymentIdToAddPre int
 			SELECT TOP 1 @PaymentIdToAddPre = [intTransactionId] FROM #ARPostPrePayment
 					
-			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId, Null, 1 
+			EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @BatchId ,@UserId, Null, 1, 1 
 					
 			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToAddPre
 		END				

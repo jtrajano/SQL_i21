@@ -3,16 +3,10 @@ AS
 SELECT TOP 100 PERCENT Convert(INT, ROW_NUMBER() OVER (
 			ORDER BY intLoadId
 			)) AS intKeyColumn
-	,dblClaimableAmount = CASE WHEN ((CASE WHEN ysnSeqSubCurrency = 1
-										THEN dblClaimableWt * dblSeqPriceInWeightUOM / 100
-										ELSE dblClaimableWt * dblSeqPriceInWeightUOM END) < 0)
-								THEN (CASE WHEN ysnSeqSubCurrency = 1
-										THEN dblClaimableWt * dblSeqPriceInWeightUOM / 100
-										ELSE dblClaimableWt * dblSeqPriceInWeightUOM END) * - 1
-								ELSE (CASE WHEN ysnSeqSubCurrency = 1
-										THEN dblClaimableWt * dblSeqPriceInWeightUOM / 100
-										ELSE dblClaimableWt * dblSeqPriceInWeightUOM END)
-								END
+	,dblClaimableAmount = ROUND(CASE WHEN (((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
+								THEN ((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) * - 1
+								ELSE ((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END)
+								END, 2)
 	,*
 FROM 
 	--Inbound/Drop Ship side
@@ -71,7 +65,9 @@ FROM
 		,strSeqPriceUOM = AD.strSeqPriceUOM
 		,intSeqCurrencyId = AD.intSeqCurrencyId
 		,intSeqPriceUOMId = ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
-		,ysnSeqSubCurrency = AD.ysnSeqSubCurrency
+		,intSeqBasisCurrencyId = AD.intSeqBasisCurrencyId
+		,strSeqBasisCurrency = AD.strSeqBasisCurrency 
+		,ysnSeqSubCurrency = AD.ysnSeqBasisSubCurrency
 		,dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), AD.dblSeqPrice)
 		,intItemId = CD.intItemId
 		,intContractDetailId = CD.intContractDetailId
@@ -104,10 +100,12 @@ FROM
 			intContractDetailId = CD.intContractDetailId
 			,intSeqPriceUOMId = ISNULL(CD.intAdjItemUOMId,CD.intPriceItemUOMId)
 			,strSeqPriceUOM = ISNULL(FM.strUnitMeasure, UM.strUnitMeasure)
-			,intSeqCurrencyId = COALESCE(CYXT.intToCurrencyId, CYXF.intFromCurrencyId, MCY.intMainCurrencyId, CY.intCurrencyID)
+			,intSeqCurrencyId = COALESCE(CYXT.intToCurrencyId, CYXF.intFromCurrencyId, MCY.intCurrencyID, CY.intCurrencyID)
 			,strSeqCurrency = COALESCE(CYT.strCurrency, CYF.strCurrency, MCY.strCurrency, CY.strCurrency)
-			,ysnSeqSubCurrency = CY.ysnSubCurrency
-			,dblSeqPrice = CD.dblCashPrice / ISNULL(CY.intCent, 1) * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) ELSE ISNULL(CD.dblRate, 1) END)
+			,intSeqBasisCurrencyId = CY.intCurrencyID
+			,strSeqBasisCurrency = CY.strCurrency
+			,ysnSeqBasisSubCurrency = CY.ysnSubCurrency
+			,dblSeqPrice = CD.dblCashPrice * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) ELSE ISNULL(CD.dblRate, 1) END)
 		FROM tblCTContractDetail CD
 			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intPriceItemUOMId
 			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
@@ -222,7 +220,9 @@ FROM
 		,strSeqPriceUOM = AD.strSeqPriceUOM
 		,intSeqCurrencyId = AD.intSeqCurrencyId
 		,intSeqPriceUOMId = AD.intSeqPriceUOMId
-		,ysnSeqSubCurrency = AD.ysnSeqSubCurrency
+		,intSeqBasisCurrencyId = AD.intSeqBasisCurrencyId
+		,strSeqBasisCurrency = AD.strSeqBasisCurrency 
+		,ysnSeqSubCurrency = AD.ysnSeqBasisSubCurrency
 		,dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), AD.dblSeqPrice)
 		,intItemId = CD.intItemId
 		,intContractDetailId = CD.intContractDetailId
@@ -255,10 +255,12 @@ FROM
 			intContractDetailId = CD.intContractDetailId
 			,intSeqPriceUOMId = ISNULL(CD.intAdjItemUOMId,CD.intPriceItemUOMId)
 			,strSeqPriceUOM = ISNULL(FM.strUnitMeasure, UM.strUnitMeasure)
-			,intSeqCurrencyId = COALESCE(CYXT.intToCurrencyId, CYXF.intFromCurrencyId, MCY.intMainCurrencyId, CY.intCurrencyID)
+			,intSeqCurrencyId = COALESCE(CYXT.intToCurrencyId, CYXF.intFromCurrencyId, MCY.intCurrencyID, CY.intCurrencyID)
 			,strSeqCurrency = COALESCE(CYT.strCurrency, CYF.strCurrency, MCY.strCurrency, CY.strCurrency)
-			,ysnSeqSubCurrency = CY.ysnSubCurrency
-			,dblSeqPrice = CD.dblCashPrice / ISNULL(CY.intCent, 1) * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) ELSE ISNULL(CD.dblRate, 1) END)
+			,intSeqBasisCurrencyId = CY.intCurrencyID
+			,strSeqBasisCurrency = CY.strCurrency
+			,ysnSeqBasisSubCurrency = CY.ysnSubCurrency
+			,dblSeqPrice = CD.dblCashPrice * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) ELSE ISNULL(CD.dblRate, 1) END)
 		FROM tblCTContractDetail CD
 			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intPriceItemUOMId
 			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId

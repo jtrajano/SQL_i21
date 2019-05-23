@@ -60,6 +60,7 @@ INSERT INTO tblCMBankTransaction (
 		,strLink
 		,ysnClr
 		,dtmDateReconciled
+		,intEntityId
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -120,6 +121,7 @@ SELECT
 											ELSE 0
 										END
 		,dtmDateReconciled			=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
+		,intEntityId				=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id) 
 		,intCreatedUserId			=	i.apchk_user_id
 		,dtmCreated					=	dbo.fn_ConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 		,intLastModifiedUserId		=	i.apchk_user_id

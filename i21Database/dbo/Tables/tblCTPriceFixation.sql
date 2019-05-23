@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCTPriceFixation]
 (
 	[intPriceFixationId] INT IDENTITY(1,1) NOT NULL,
-	intPriceContractId INT,
+	[intPriceContractId] INT,
 	[intConcurrencyId] INT NOT NULL,
 	[intContractHeaderId] INT NOT NULL, 
 	[intContractDetailId] INT NULL,

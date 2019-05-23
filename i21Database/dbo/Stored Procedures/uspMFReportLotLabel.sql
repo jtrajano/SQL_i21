@@ -214,7 +214,7 @@ BEGIN TRY
 			,I.strDescription
 			,IRL.strParentLotNumber
 			,IRL.strVendorLotId AS strVendorLotNo
-			,IR.dtmReceiptDate AS dtmDateCreated
+			,dbo.fnConvertDateToReportDateFormat(IR.dtmReceiptDate, 1) AS dtmDateCreated
 			,ISNULL(I.strMaterialSizeCode, '') AS strMaterialSizeCode
 		FROM tblICInventoryReceiptItemLot IRL
 		JOIN @tblMFFinalInventoryReceiptItemLot FIRL ON FIRL.intInventoryReceiptItemLotId = IRL.intInventoryReceiptItemLotId
@@ -249,11 +249,11 @@ BEGIN TRY
 					,i.strDescription
 					,pl.strParentLotNumber
 					,l.strVendorLotNo
-					,(
+					,dbo.fnConvertDateToReportDateFormat((
 						SELECT Min(L1.dtmDateCreated)
 						FROM tblICLot L1
 						WHERE L1.strLotNumber = l.strLotNumber
-						) AS dtmDateCreated
+						), 1) AS dtmDateCreated
 					,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
 				FROM tblICLot l
 				JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
@@ -295,11 +295,11 @@ BEGIN TRY
 					,i.strDescription
 					,pl.strParentLotNumber
 					,l.strVendorLotNo
-					,(
+					,dbo.fnConvertDateToReportDateFormat((
 						SELECT Min(L1.dtmDateCreated)
 						FROM tblICLot L1
 						WHERE L1.strLotNumber = l.strLotNumber
-						) AS dtmDateCreated
+						), 1) AS dtmDateCreated
 					,ISNULL(i.strMaterialSizeCode, '') AS strMaterialSizeCode
 				FROM tblICLot l
 				JOIN dbo.tblICItem i ON i.intItemId = l.intItemId

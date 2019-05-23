@@ -11,6 +11,7 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @tblItemsToUpdate InTransitTableType
+	DECLARE @INVENTORY_INVOICE_TYPE AS INT = 33
 	
 	IF @IsShipped = 0
 		BEGIN
@@ -26,6 +27,7 @@ BEGIN
 				, [strTransactionId]
 				, [intTransactionTypeId]
 				, [intFOBPointId]
+				, [dtmTransactionDate]
 			) 
 			SELECT ID.intItemId
 				 , IL.intItemLocationId
@@ -36,8 +38,9 @@ BEGIN
 				 , ISNULL(ICSI.dblQuantity, ID.[dblQtyShipped])
 				 , I.intInvoiceId
 				 , I.strInvoiceNumber
-				 , 7
+				 , @INVENTORY_INVOICE_TYPE
 				 , fp.intFobPointId
+				 , ISNULL(I.dtmPostDate, I.dtmShipDate)
 			FROM tblARInvoiceDetail ID
 			INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 			INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId

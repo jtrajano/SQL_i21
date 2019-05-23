@@ -111,8 +111,8 @@ FROM	(
 					SET		ysnIsUnposted = 1
 
 				OUTPUT $action, inserted.intInventoryTransactionId, inserted.intTransactionId, inserted.strTransactionId, inserted.intRelatedTransactionId, inserted.strRelatedTransactionId, inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
-WHERE	Changes.Action = 'UPDATE'
+		) AS Changes (action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+WHERE	Changes.action = 'UPDATE'
 ;
 
 UPDATE	CategoryPricing

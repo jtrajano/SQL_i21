@@ -19,6 +19,21 @@ SET @OneDecimal = 1.000000
 DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
 DECLARE @Invoices AS dbo.[InvoiceId]
 
+DECLARE  @InitTranCount				INT
+		,@CurrentTranCount			INT
+		,@Savepoint					NVARCHAR(32)
+		,@CurrentSavepoint			NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+IF @InitTranCount = 0
+	BEGIN TRANSACTION
+ELSE
+	SAVE TRANSACTION @Savepoint
+
+BEGIN TRY
+
 
 --DECLARE @PostData [InvoicePostingTable]
 --INSERT INTO @PostData
@@ -1023,6 +1038,7 @@ INSERT INTO @ItemsFromInvoice
 	([intInvoiceId]
 	,[strInvoiceNumber]
 	,[intEntityCustomerId]
+	,[strTransactionType]
 	,[dtmDate]
 	,[intCurrencyId]
 	,[intCompanyLocationId]
@@ -1070,6 +1086,7 @@ SELECT
 	 [intInvoiceId]					= ID.[intInvoiceId]
 	,[strInvoiceNumber]				= ID.[strInvoiceNumber]
 	,[intEntityCustomerId]			= ID.[intEntityCustomerId]
+	,[strTransactionType]           = ID.[strTransactionType]
 	,[dtmDate]						= ID.[dtmDate]
 	,[intCurrencyId]				= ID.[intCurrencyId]
 	,[intCompanyLocationId]			= ID.[intCompanyLocationId]
@@ -1123,7 +1140,11 @@ LEFT JOIN
 WHERE
 	--ID.[intInventoryShipmentItemId] IS NULL AND
 	ID.[intInventoryShipmentChargeId] IS NULL
-	AND	(ID.strTransactionType <> 'Credit Memo' OR (ID.[ysnIsInvoicePositive] = 0 AND ID.[intInventoryShipmentItemId] IS NOT NULL))
+	AND	(
+		(ID.strTransactionType <> 'Credit Memo' AND ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL)
+		OR
+		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL))
+		)
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 
@@ -1214,6 +1235,38 @@ FROM
 	#ARPostInvoiceHeader
 
 EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+
+
+
+END TRY
+BEGIN CATCH
+    DECLARE @ErrorMerssage NVARCHAR(MAX)
+	SELECT @ErrorMerssage = ERROR_MESSAGE()					
+    IF @InitTranCount = 0
+        IF (XACT_STATE()) <> 0
+			ROLLBACK TRANSACTION
+	ELSE
+		IF (XACT_STATE()) <> 0
+			ROLLBACK TRANSACTION @Savepoint
+												
+	RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
+END CATCH
+
+
+IF @InitTranCount = 0
+	BEGIN
+		IF (XACT_STATE()) = -1
+			ROLLBACK TRANSACTION
+		IF (XACT_STATE()) = 1
+			COMMIT TRANSACTION
+		RETURN 1;
+	END	
+
+
+Post_Exit:
+	RETURN 0;
 
 
 --DECLARE @UserEntityID INT

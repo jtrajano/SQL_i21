@@ -4,7 +4,7 @@
 AS
 
 BEGIN TRY
-
+SET ANSI_WARNINGS OFF
 SET NOCOUNT ON
 		DECLARE @ErrMsg						NVARCHAR(MAX),
 				@XML						NVARCHAR(MAX),
@@ -79,7 +79,7 @@ SET NOCOUNT ON
 			EXEC	uspCTGetTableDataInXML '#tblCTContractHeader',null,@XML OUTPUT							
 			EXEC	uspCTInsertINTOTableFromXML 'tblCTContractHeader',@XML,@intNewContractHeaderId OUTPUT
 
-			SELECT	@ErrMsg = 'Splitted from contract ' + @strSourceContractNumber + ' and sequence ' + LTRIM(@intContractSeq)
+			SELECT	@ErrMsg = 'Split from contract ' + @strSourceContractNumber + ' and sequence ' + LTRIM(@intContractSeq)
 			SELECT	@strStartingNumber = LTRIM(@intNewContractHeaderId)
 			exec uspSMAuditLog 'ContractManagement.view.Contract',@strStartingNumber,@intUserId,@ErrMsg,'small-new-plus'
 
@@ -136,6 +136,13 @@ SET NOCOUNT ON
 			
 			UPDATE	tblCTContractDetail SET intContractStatusId = 3,ysnSplit = 1 WHERE intContractDetailId = @intContractDetailId
 			UPDATE	tblCTContractDetail SET intContractStatusId = 1, intSplitFromId = @intContractDetailId WHERE intContractDetailId = @intNewContractHeaderId
+
+			EXEC uspCTUpdateAdditionalCost @intContractHeaderId
+			IF @intNewContractHeaderId IS NOT NULL
+			BEGIN
+				EXEC uspCTUpdateAdditionalCost @intNewContractHeaderId
+				EXEC uspCTCreateDetailHistory @intNewContractHeaderId,NULL,'Split Sequence And Create New Contract' 
+			END
 
 			SELECT	@intSplitDetailId = MIN(intSplitDetailId) FROM tblEMEntitySplitDetail WHERE intSplitId = @intSplitId AND intSplitDetailId > @intSplitDetailId
 		END

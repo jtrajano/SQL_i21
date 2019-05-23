@@ -93,8 +93,19 @@ END
 COMMIT TRAN
 
 --This will return the newly created Settlement Price
-SELECT FM.strFutMarketName AS Result1,SP.strPricingType AS Result2,SP.dtmPriceDate AS Result3 FROM tblRKFuturesSettlementPrice SP INNER JOIN tblRKFutureMarket FM ON SP.intFutureMarketId = FM.intFutureMarketId WHERE intFutureSettlementPriceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@newlyCreatedIds))
-
+SELECT FM.strFutMarketName AS Result1,SP.strPricingType AS Result2,SP.dtmPriceDate AS Result3,strFutureMonth Result4,'Futures' Result5 
+FROM tblRKFuturesSettlementPrice SP 
+INNER JOIN tblRKFutSettlementPriceMarketMap MM on MM.intFutureSettlementPriceId=SP.intFutureSettlementPriceId
+INNER JOIN tblRKFutureMarket FM ON SP.intFutureMarketId = FM.intFutureMarketId 
+INNER JOIN tblRKFuturesMonth MO on MO.intFutureMonthId=MM.intFutureMonthId
+WHERE MM.intFutureSettlementPriceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@newlyCreatedIds))  
+UNION ALL
+SELECT FM.strFutMarketName AS Result1,SP.strPricingType AS Result2,SP.dtmPriceDate AS Result3,strOptionMonth Result4,'Options' Result5 
+FROM tblRKFuturesSettlementPrice SP 
+INNER JOIN tblRKOptSettlementPriceMarketMap MM on MM.intFutureSettlementPriceId=SP.intFutureSettlementPriceId
+INNER JOIN tblRKFutureMarket FM ON SP.intFutureMarketId = FM.intFutureMarketId 
+INNER JOIN tblRKOptionsMonth MO on MO.intOptionMonthId=MM.intOptionMonthId
+WHERE MM.intFutureSettlementPriceId IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@newlyCreatedIds))   
 
 END TRY
 BEGIN CATCH

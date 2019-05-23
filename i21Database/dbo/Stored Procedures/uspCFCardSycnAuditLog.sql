@@ -166,25 +166,40 @@ BEGIN
 --DROP TABLE #tmpCardNumbers
 	
 
-	SET @jsonData = '{"action":"' + @loopAction + ' via Card Synchronization'  + '","change":"' + @loopAction + ' ' + CONVERT(NVARCHAR(MAX),@count) + ' records' + '","iconCls":"' + @loopIcon +  '"' + ', "keyValue":' +  '"'+ CONVERT(NVARCHAR(MAX),ISNULL(@outerloopPK,'')) + '","children":['+ '{"change":"",' + '"children":[' + @children +'],"iconCls":"small-tree-grid","changeDescription":"Updated Fields"}]}'
-	INSERT INTO tblSMAuditLog (
-			strActionType,
-			strDescription,
-			strJsonData,
-			strRecordNo,
-			strTransactionType,
-			intEntityId,
-			intConcurrencyId,
-			dtmDate
-		) SELECT 
-			@loopAction,
-			'',
-			@jsonData,
-			@loopPK,
-			@screenName,
-			@entityId,
-			1,
-			GETUTCDATE()
+	--SET @jsonData = '{"action":"' + @loopAction + ' via Card Synchronization'  + '","change":"' + @loopAction + ' ' + CONVERT(NVARCHAR(MAX),@count) + ' records' + '","iconCls":"' + @loopIcon +  '"' + ', "keyValue":' +  '"'+ CONVERT(NVARCHAR(MAX),ISNULL(@outerloopPK,'')) + '","children":['+ '{"change":"",' + '"children":[' + @children +'],"iconCls":"small-tree-grid","changeDescription":"Updated Fields"}]}'
+	
+	SET @jsonData = '{"change":"",' + '"children":[' + @children +'],"iconCls":"small-tree-grid","changeDescription":"Updated Fields"}'
+	
+	SET @loopAction = @loopAction + ' via Card Synchronization'
+	
+	exec uspSMAuditLog
+	@screenName				 = @screenName,
+	@keyValue				 = @outerloopPK,
+	@entityId				 = @entityId,
+	@actionType				 = @loopAction,
+	@actionIcon				 = @loopIcon,
+	@changeDescription  	 = 'Updated Fields',
+	@details				 = @jsonData
+
+
+	--INSERT INTO tblSMAuditLog (
+	--		strActionType,
+	--		strDescription,
+	--		strJsonData,
+	--		strRecordNo,
+	--		strTransactionType,
+	--		intEntityId,
+	--		intConcurrencyId,
+	--		dtmDate
+	--	) SELECT 
+	--		@loopAction,
+	--		'',
+	--		@jsonData,
+	--		@loopPK,
+	--		@screenName,
+	--		@entityId,
+	--		1,
+	--		GETUTCDATE()
 
 	DELETE 
 	FROM @tmpCSUDistinctLogs

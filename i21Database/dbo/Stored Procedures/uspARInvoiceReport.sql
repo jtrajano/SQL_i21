@@ -90,11 +90,13 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strTruckDriver
 	 , blbLogo
 	 , strAddonDetailKey
+	 , strBOLNumberDetail
 	 , ysnHasAddOnItem
 	 , intEntityUserId
 	 , strRequestId
 	 , strInvoiceFormat
 	 , blbSignature
+	 , ysnStretchLogo
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -151,7 +153,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotalTax, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotalTax, 0) END
 								  ELSE NULL END
-	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(NONSSTTAX.dblTotalTax, 0) END 
+	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
@@ -171,7 +173,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblDiscount				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									ISNULL(INVOICEDETAIL.dblDiscount, 0) / 100
 								  ELSE NULL END
-	 , dblTotalTax				= dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) ELSE ISNULL(TOTALTAX.dblTotalTax, 0) END
+	 , dblTotalTax				= dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) ELSE ISNULL(TOTALTAX.dblSSTTax, 0) END
 	 , dblPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) ELSE NULL END
 	 , dblItemPrice				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotal, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotal, 0) END
@@ -206,11 +208,13 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strTruckDriver			= INVOICEDETAIL.strTruckName
 	 , blbLogo					= LOGO.blbLogo
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
+	 , strBOLNumberDetail		= INVOICEDETAIL.strBOLNumberDetail
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , blbSignature				= INV.blbSignature
+	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
@@ -239,12 +243,13 @@ INNER JOIN (
 LEFT JOIN (
 	SELECT ID.intInvoiceId
 	     , ID.intInvoiceDetailId
-		 , ID.intCommentTypeId
+		 , ID.intCommentTypeId		 
 		 , dblTotalTax				= CASE WHEN ISNULL(ID.dblComputedGrossPrice, 0) = 0 THEN ID.dblTotalTax ELSE 0 END
 		 , ID.dblContractBalance
 		 , ID.dblQtyShipped
 		 , ID.dblQtyOrdered
 		 , ID.dblDiscount
+		 , ID.dblComputedGrossPrice	
 		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
@@ -271,6 +276,7 @@ LEFT JOIN (
 		 , ID.dblPercentFull
 		 , ID.strAddonDetailKey
 		 , ID.ysnAddonParent
+		 , ID.strBOLNumberDetail
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -386,19 +392,12 @@ OUTER APPLY (
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) ARPREFERENCE
 OUTER APPLY (
-	SELECT dblTotalTax = SUM(dblAdjustedTax)
+	SELECT dblSSTTax 		= SUM(CASE WHEN UPPER(strTaxClass) = 'STATE SALES TAX (SST)' OR dblComputedGrossPrice = 0 THEN dblAdjustedTax ELSE 0 END)
+		 , dblNonSSTTax 	= SUM(CASE WHEN UPPER(strTaxClass) <> 'STATE SALES TAX (SST)' AND dblComputedGrossPrice <> 0 THEN dblAdjustedTax ELSE 0 END)
 	FROM vyuARTaxDetailReport
 	WHERE strTaxTransactionType = 'Invoice'
-	  AND intTransactionId = INV.intInvoiceId
-	  AND UPPER(strTaxClass) = 'STATE SALES TAX (SST)'
+	  AND intTransactionId = INV.intInvoiceId	  
 ) TOTALTAX
-OUTER APPLY (
-	SELECT dblTotalTax = SUM(dblAdjustedTax)
-	FROM vyuARTaxDetailReport
-	WHERE strTaxTransactionType = 'Invoice'
-	  AND intTransactionId = INV.intInvoiceId
-	  AND UPPER(strTaxClass) <> 'STATE SALES TAX (SST)'
-) NONSSTTAX
 OUTER APPLY (
 	SELECT COUNT(*) AS intInvoiceDetailCount
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)

@@ -23,8 +23,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	UPDATE  dtl
 	SET   
-		dtl.[dblQtyOrdered]	  = CAST (CASE WHEN E1.intContractDetailId > 0 AND SD.intContractDetailId > 0 THEN B.dblOrderQty ELSE ISNULL(dtl.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)) END AS DECIMAL(18,2))
-		,dtl.[dblQtyReceived]  = CAST (CASE WHEN E1.intContractDetailId > 0 AND SD.intContractDetailId > 0 THEN dbo.fnCalculateQtyBetweenUOM(ISNULL(E1.intNetWeightUOMId,dtl.intWeightUOMId) , E1.intItemUOMId, dblQtyReceived) ELSE dtl.dblQtyReceived END AS DECIMAL(18,2))
+		dtl.[dblQtyOrdered]	  = CAST (CASE WHEN E1.intContractDetailId > 0 AND SD.intContractDetailId > 0 THEN B.dblOrderQty ELSE ISNULL(dtl.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)) END AS DECIMAL(18,6))
+		,dtl.[dblQtyReceived]  = CAST (CASE WHEN E1.intContractDetailId > 0 AND SD.intContractDetailId > 0 THEN dbo.fnCalculateQtyBetweenUOM(ISNULL(E1.intNetWeightUOMId,dtl.intWeightUOMId) , E1.intItemUOMId, dblQtyReceived) ELSE dtl.dblQtyReceived END AS DECIMAL(18,6))
 	from tblAPBillDetail dtl
 		INNER JOIN tblICInventoryReceiptItem B
 			ON dtl.intInventoryReceiptItemId = B.intInventoryReceiptItemId

@@ -271,6 +271,7 @@ BEGIN TRY
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
 	LEFT JOIN tblSMCompanyLocationSubLocation LDCLSL ON LDCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 	WHERE LC.intLoadId = @intLoadId
+	ORDER BY LC.intSort
 
 	COMMIT TRANSACTION
 END TRY

@@ -1994,11 +1994,11 @@ BEGIN
         ,5
         ,1
         ,0
-        ,'SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember'
+        ,'SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode IN (''PROD_STAGING'',''STAGING'') AND SL.intLocationId=@intLocationId Order by DisplayMember'
 END
 Else
 Begin
-	Update tblMFAttribute Set strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember' Where intAttributeId = 90
+	Update tblMFAttribute Set strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode IN (''PROD_STAGING'',''STAGING'') AND SL.intLocationId=@intLocationId Order by DisplayMember' Where intAttributeId = 90
 End
 GO
 IF NOT EXISTS (

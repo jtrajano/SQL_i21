@@ -21,7 +21,7 @@ RETURNS TABLE AS RETURN
 		,[intSubCurrencyCents]				=	A.intSubCurrencyCents
 		,[intShipViaId]						=	A.intShipViaId
 		,[intTermId]						=	A.intTermsId
-		,[strBillOfLading]					=	NULL
+		,[strBillOfLading]					=	B.strBillOfLading
 		,[intAPAccount]						=	A.intAccountId
 		,[strMiscDescription]				=	B.strMiscDescription
 		,[intItemId]						=	B.intItemId
@@ -44,6 +44,7 @@ RETURNS TABLE AS RETURN
 		,[intInventoryShipmentChargeId]		=	B.intInventoryShipmentChargeId
 		,[intLoadShipmentId]				=	B.intLoadId
 		,[intLoadShipmentDetailId]			=	B.intLoadDetailId
+		,[intLoadShipmentCostId]			=	B.intLoadShipmentCostId
 		,[intPaycheckHeaderId]				=	B.intPaycheckHeaderId
 		,[intCustomerStorageId]				=	B.intCustomerStorageId
 		,[intCCSiteDetailId]				=	B.intCCSiteDetailId
@@ -80,6 +81,7 @@ RETURNS TABLE AS RETURN
 		,[dblFranchiseAmount]				=	B.dblFranchiseAmount
 		,[dblActual]						=	B.dblActual
 		,[dblDifference]					=	B.dblDifference
+		,[ysnStage]							=	B.ysnStage
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
@@ -90,6 +92,7 @@ RETURNS TABLE AS RETURN
 	OR	B.intContractCostId > 0
 	OR	B.intContractDetailId > 0
 	OR	B.intLoadDetailId > 0
+	OR	B.intLoadShipmentCostId > 0
 	OR	B.intCustomerStorageId > 0
 	OR	B.intPaycheckHeaderId > 0
 	OR	B.intBuybackChargeId > 0

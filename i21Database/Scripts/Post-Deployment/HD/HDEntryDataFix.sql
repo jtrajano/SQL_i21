@@ -803,4 +803,69 @@ end
 
 GO
 	PRINT N'End creating Ticket Hours Worked estimated hours.';
+	PRINT N'Start fixing Ticket Watcher.';
+GO
+
+		declare @watcherQueryResult cursor;
+	declare @watcherIntTicketId int;
+	declare @watcherIntUserEntityId int;
+	declare @watcherCnt int;
+	declare @watcherIntTicketWatcherId int;
+
+	begin try
+		set @watcherQueryResult = cursor for
+		select
+			intTicketId
+			,intUserEntityId
+			,cnt
+		from
+			(
+				select
+					intTicketId
+					,intUserEntityId
+					,cnt = count(*)
+				from
+					tblHDTicketWatcher
+				where
+					intTicketId is not null
+				group by
+					intTicketId
+					,intUserEntityId
+			) as rawData
+		where cnt > 1
+
+		OPEN @watcherQueryResult
+		fetch next
+		from
+			@watcherQueryResult
+		into
+			@watcherIntTicketId
+			,@watcherIntUserEntityId
+			,@watcherCnt
+
+		while @@FETCH_STATUS = 0
+		begin
+			set @watcherIntTicketWatcherId = (select top 1 intTicketWatcherId from tblHDTicketWatcher where intTicketId = @watcherIntTicketId and intUserEntityId = @watcherIntUserEntityId);
+
+			delete from tblHDTicketWatcher where intTicketId = @watcherIntTicketId and intUserEntityId = @watcherIntUserEntityId and intTicketWatcherId <> @watcherIntTicketWatcherId;
+
+			fetch next
+			from
+				@watcherQueryResult
+			into
+				@watcherIntTicketId
+				,@watcherIntUserEntityId
+				,@watcherCnt
+		end
+
+		close @watcherQueryResult
+		deallocate @watcherQueryResult
+
+	end try
+	begin catch
+		/*Don't put anything here..*/
+	end catch
+
+GO
+	PRINT N'End fixing Ticket Watcher.';
 GO

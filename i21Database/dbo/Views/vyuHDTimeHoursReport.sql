@@ -30,6 +30,14 @@
 			,e.dblPayment
 			,intInternalProjectManager = i.intEntityId
 			,strInternalProjectManager = i.strName
+			,l.intVersionId
+			,l.strVersionNo
+			,m.intTicketTypeId
+			,m.strType
+			,n.intTicketStatusId
+			,n.strStatus
+			,o.intMilestoneId
+			,o.strMileStone
 		from
 			tblHDTicketHoursWorked a
 			join tblHDTicket b on b.intTicketId = a.intTicketId
@@ -42,4 +50,8 @@
 			left join tblEMEntity i on i.intEntityId = d.intInternalProjectManager
 			left join tblHDModule j on j.intModuleId = b.intModuleId
 			left join tblSMModule k on k.intModuleId = j.intSMModuleId
+			left join tblHDVersion l on l.intVersionId = b.intVersionId
+			left join tblHDTicketType m on m.intTicketTypeId = b.intTicketTypeId
+			left join tblHDTicketStatus n on n.intTicketStatusId = b.intTicketStatusId
+			left join tblHDMilestone o on o.intMilestoneId = b.intMilestoneId
 		where a.intAgentEntityId is not null and a.intAgentEntityId > 0

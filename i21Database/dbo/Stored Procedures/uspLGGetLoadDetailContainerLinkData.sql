@@ -7,6 +7,7 @@ BEGIN
 		,LC.strContainerNumber
 		,LC.strLotNumber
 		,LC.strMarks
+		,LC.intSort
 		,PHeader.strContractNumber AS strPContractNumber
 		,PDetail.intContractSeq AS intPContractSeq
 		,PTP.strPricingType AS strPPricingType

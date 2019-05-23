@@ -29,7 +29,7 @@ AS
 	SELECT TOP 1
 		@intInvoiceId = intInvoiceId
 	FROM tblARPOS
-	WHERE intPOSId = @intOriginalPOSTransactionId
+	WHERE intPOSId = @intPOSId
 
 	SELECT TOP 1
 		@ysnReturned = ysnReturned
@@ -435,6 +435,8 @@ AS
 			SET intInvoiceId = @createdCreditMemoId    
 			WHERE intPOSId = @intPOSId
 
+			DECLARE @strPaymentIds NVARCHAR(MAX) = NULL
+			
 			IF EXISTS(SELECT TOP 1 NULL FROM #POSRETURNPAYMENTS)
 			BEGIN
 				EXEC uspARPOSCreateNegativeCashReceipts 
@@ -442,13 +444,14 @@ AS
 						,@intUserId				= @intEntityId
 						,@intCompanyLocationId	= @intCompanyLocationId
 						,@strErrorMessage		= @strMessage	OUTPUT
+						,@strPaymentIds			= @strPaymentIds	OUTPUT
 			END
 
 			IF(LEN(ISNULL(@strMessage, '')) <= 0)
 			BEGIN
 				UPDATE tblARPOS
 				SET ysnReturn = 1
-				WHERE intPOSId = @intOriginalPOSTransactionId
+				WHERE intPOSId = @intPOSId
 
 				DECLARE @dblCashReturns DECIMAL(18,6) = 0.00000
 				SELECT @dblCashReturns = SUM(dblAmount)
@@ -456,9 +459,21 @@ AS
 				WHERE intPOSId = @intPOSId
 				AND strPaymentMethod IN ('Cash', 'Check')
 
+				--UPDATE POS PAYMENTS REFERENCE
+				UPDATE POSPAYMENT
+				SET intPaymentId = CREATEDPAYMENTS.intPaymentId
+				FROM tblARPOSPayment POSPAYMENT
+				INNER JOIN (
+					SELECT intPaymentId
+						 , strPaymentMethod = CASE WHEN strPaymentMethod = 'Manual Credit Card' THEN 'Credit Card' ELSE strPaymentMethod END
+					FROM tblARPayment P
+					INNER JOIN fnGetRowsFromDelimitedValues(@strPaymentIds) CP ON P.intPaymentId = CP.intID
+				) CREATEDPAYMENTS ON POSPAYMENT.strPaymentMethod = CREATEDPAYMENTS.strPaymentMethod
+				INNER JOIN #POSRETURNPAYMENTS PP ON POSPAYMENT.intPOSPaymentId = PP.intPOSPaymentId
 				
 				UPDATE tblARPOSEndOfDay
-				SET dblCashReturn = ISNULL(dblCashReturn ,0) + ISNULL(@dblCashReturns,0)
+				SET dblCashReturn = ISNULL(dblCashReturn, 0) + ISNULL(@dblCashReturns, 0)
+				  , dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance, 0) - ISNULL(@dblCashReturns, 0)
 				FROM tblARPOSEndOfDay EOD
 				INNER JOIN (
 					SELECT

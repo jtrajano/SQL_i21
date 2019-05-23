@@ -29,6 +29,7 @@ DECLARE @ErrorSeverity	INT
 
 DECLARE @AppliedInvoices TABLE(
 	  intPrepaymentId 					INT
+	, intPrepaymentDetailId				INT
 	, intInvoiceId 						INT
 	, dblAppliedInvoiceDetailAmount 	NUMERIC(18, 6)
 	, dblBaseAppliedInvoiceDetailAmount NUMERIC(18, 6)
@@ -37,11 +38,13 @@ DECLARE @AppliedInvoices TABLE(
 BEGIN TRY
 	INSERT INTO @AppliedInvoices(
 		  intPrepaymentId
+        , intPrepaymentDetailId
 		, intInvoiceId
 		, dblAppliedInvoiceDetailAmount
 		, dblBaseAppliedInvoiceDetailAmount
 	)
 	SELECT intPrepaymentId
+         , intPrepaymentDetailId
 		 , intInvoiceId
 		 , dblAppliedInvoiceDetailAmount
 		 , dblBaseAppliedInvoiceDetailAmount 
@@ -158,7 +161,7 @@ BEGIN TRY
 		SELECT I.intInvoiceId
 			 , intInvoiceDetailId = NULL		 
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
-		WHERE I.strTransactionType = 'Credit Memo'
+		WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment')
 		  AND I.ysnPosted = 1
 		  AND I.ysnPaid = 0
 		  AND I.intEntityCustomerId = @EntityCustomerId
@@ -173,6 +176,7 @@ BEGIN TRY
 		JOIN @AppliedInvoices B
 			ON A.intPrepaymentId = B.intPrepaymentId
 				AND A.intInvoiceId = B.intInvoiceId
+				AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
 		
 END TRY
 BEGIN CATCH	

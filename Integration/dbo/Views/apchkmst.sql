@@ -270,6 +270,7 @@ BEGIN
 					,ysnClr
 					,dtmDateReconciled
 					,strSourceSystem
+					,intEntityId
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
@@ -338,6 +339,7 @@ BEGIN
 													END
 					,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
 					,strSourceSystem			=	i.apchk_src_sys COLLATE Latin1_General_CI_AS
+					,intEntityId				=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
 					,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
 					,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 					,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
@@ -560,6 +562,7 @@ BEGIN
 						,ysnClr
 						,dtmDateReconciled
 						,strSourceSystem
+						,intEntityId
 						,intCreatedUserId
 						,dtmCreated
 						,intLastModifiedUserId
@@ -626,6 +629,7 @@ BEGIN
 														END
 						,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
 						,strSourceSystem			=	i.apchk_src_sys COLLATE Latin1_General_CI_AS
+						,intEntityId				=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
 						,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
 						,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
 						,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)

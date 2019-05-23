@@ -47,6 +47,7 @@ BEGIN
 		,vwcus_budget_amt  = A.agcus_budget_amt    
 		,vwcus_budget_beg_mm = A.agcus_budget_beg_mm    
 		,vwcus_budget_end_mm = A.agcus_budget_end_mm    
+		,vwcus_budget_end_mm_dbl = 0.00
 		,vwcus_active_yn  = A.agcus_active_yn    
 		,vwcus_ar_future  = A.agcus_ar_future    
 		,vwcus_ar_per1   = A.agcus_ar_per1    
@@ -145,6 +146,7 @@ BEGIN
 		,vwcus_budget_amt  = CAST(A.ptcus_budget_amt AS DECIMAL(18,6))    
 		,vwcus_budget_beg_mm = A.ptcus_budget_beg_mm    
 		,vwcus_budget_end_mm = A.ptcus_budget_end_mm    
+		,vwcus_budget_end_mm_dbl = 0.00
 		,vwcus_active_yn  = A.ptcus_active_yn    
 		,vwcus_ar_future  = CAST(0 AS DECIMAL(18,6))
 		,vwcus_ar_per1   = A.ptcus_ar_curr    

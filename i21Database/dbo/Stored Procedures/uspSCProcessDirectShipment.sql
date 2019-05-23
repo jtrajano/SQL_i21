@@ -37,7 +37,8 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intTicketItemUOMId INT
 		,@InventoryShipmentId INT
 		,@dblContractAvailableQty NUMERIC(38, 20)
-		,@intPricingTypeId INT;
+		,@intPricingTypeId INT
+		,@dblNetUnits NUMERIC(18,6) = 0
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
 	BEGIN
@@ -145,15 +146,44 @@ BEGIN TRY
 
 			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
 			BEGIN
-				EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId,@intBillId OUT
+				DECLARE @_strWhereFinalizedWeightIn VARCHAR(MAX)
+				DECLARE @_strWhereFinalizedGradeIn VARCHAR(MAX)
 
-				IF ISNULL(@intContractDetailId,0) != 0
+				SELECT @_strWhereFinalizedWeightIn = strWeightFinalized, @_strWhereFinalizedGradeIn = strGradeFinalized
+				FROM vyuSCTicketScreenView WHERE intTicketId = @intMatchTicketId
+
+				IF ISNULL(@_strWhereFinalizedWeightIn, 'Origin') = 'Destination' OR ISNULL(@_strWhereFinalizedGradeIn, 'Origin') = 'Destination'
 				BEGIN
-					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-					EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
-				END
+					EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
 
-				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUT
+					IF ISNULL(@intContractDetailId,0) != 0
+					BEGIN
+						SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+						EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+					END
+				END
+				DECLARE @dblPricedContractQty AS DECIMAL(18,6)
+
+				SELECT @dblPricedContractQty = ISNULL(SUM(CTP.dblQuantity),0) FROM vyuCTPriceContractFixationDetail CTP
+				INNER JOIN tblCTPriceFixation CPX
+					ON CPX.intPriceFixationId = CTP.intPriceFixationId
+				INNER JOIN tblCTContractDetail CT
+					ON CPX.intContractDetailId = CT.intContractDetailId
+				INNER JOIN tblSCTicket SC
+					ON SC.intContractId = CT.intContractDetailId
+				WHERE  SC.intTicketId = @intTicketId
+
+				IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
+				INNER JOIN tblCTPriceFixation CPX
+					ON CPX.intPriceFixationId = CTP.intPriceFixationId
+				INNER JOIN tblCTContractDetail CT
+					ON CPX.intContractDetailId = CT.intContractDetailId
+				INNER JOIN tblSCTicket SC
+					ON SC.intContractId = CT.intContractDetailId
+				WHERE  SC.intTicketId = @intTicketId))
+				BEGIN
+					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
+				END
 			END
 		END
 		ELSE
@@ -167,12 +197,13 @@ BEGIN TRY
 
 			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
 			BEGIN
-				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId OUT, 1;
-				DECLARE @dblNetUnits NUMERIC(18,6)
+				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId OUTPUT, 0, 1;
 				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
 				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
-				IF(@intInvoiceId IS NOT NULL)
+				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(A.intItemUOMId,@intTicketItemUOMId,dblQtyShipped)) AS DECIMAL(18,6)) FROM tblARInvoiceDetail A
+					INNER JOIN tblICInventoryShipmentItem B on A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
+					WHERE intInvoiceId = @intInvoiceId))
 				BEGIN
 					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits
 				END
@@ -196,6 +227,14 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					DECLARE @dblScheduleQty AS DECIMAL(18,6)
+					SET @dblScheduleQty = @dblContractAvailableQty * -1 
+					EXEC uspCTUpdateScheduleQuantity
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblScheduleQty,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Scale'	
 				END
 				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
 			END
@@ -236,10 +275,40 @@ BEGIN TRY
 				IF ISNULL(@intContractDetailId,0) != 0
 				BEGIN
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+					DECLARE @dblScheduleQuantityToReduce DECIMAL(18,6);
+					SET @dblScheduleQuantityToReduce = @dblContractAvailableQty *-1
+					
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					EXEC uspCTUpdateScheduleQuantity
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Scale'	
 				END
 					
-				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId, @intInvoiceId OUT
+				--EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
+				SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
+				INNER JOIN tblCTPriceFixation CPX
+					ON CPX.intPriceFixationId = CTP.intPriceFixationId
+				INNER JOIN tblCTContractDetail CT
+					ON CPX.intContractDetailId = CT.intContractDetailId
+				INNER JOIN tblSCTicket SC
+					ON SC.intContractId = CT.intContractDetailId
+				WHERE CT.intContractDetailId = @intTicketId
+
+				IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
+				INNER JOIN tblCTPriceFixation CPX
+					ON CPX.intPriceFixationId = CTP.intPriceFixationId
+				INNER JOIN tblCTContractDetail CT
+					ON CPX.intContractDetailId = CT.intContractDetailId
+				INNER JOIN tblSCTicket SC
+					ON SC.intContractId = CT.intContractDetailId
+				WHERE  SC.intTicketId = @intTicketId))
+				BEGIN
+					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
+				END
 			END
 		END
 	END

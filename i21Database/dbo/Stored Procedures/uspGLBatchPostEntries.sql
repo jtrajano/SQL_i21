@@ -122,6 +122,9 @@ BEGIN
 	WHERE strTransactionId NOT IN (select strTransactionId from @FoundErrors)
 END
 ;
+
+EXEC uspGLUpdateTrialBalance @GLEntries
+
 --=====================================================================================================================================
 -- 	UPSERT DATA TO THE SUMMARY TABLE 
 ---------------------------------------------------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 	, @UserId		AS INT			
 	, @NewInvoiceId	AS INT			= NULL OUTPUT	
 	, @PostPrepayment	AS INT		= 0	
+	, @PaidCPP			AS BIT			= 0
 AS
 
 BEGIN
@@ -289,74 +290,73 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemPerformerId					= @ItemPerformerId
 	,@ItemLeaseBilling					= @ItemLeaseBilling
 	,@ItemVirtualMeterReading			= @ItemVirtualMeterReading
+	,@PaidCPP							= @PaidCPP
 	      
 		  
 SET @NewInvoiceId = @NewId	
 
+DECLARE @ysnHasEFTBudget BIT = 0
 
-
-
----Add Prepayment detail
-		IF(ISNULL(@NewInvoiceId, 0) <> 0)
-		BEGIN 
-
-		IF @PostPrepayment = 1
-			BEGIN
-				INSERT INTO [tblARPaymentDetail]
-					([intPaymentId]
-					,[intInvoiceId]
-					,[intBillId]
-					,[strTransactionNumber] 
-					,[intTermId]
-					,[intAccountId]
-					,[dblInvoiceTotal]
-					,[dblBaseInvoiceTotal]
-					,[dblDiscount]
-					,[dblBaseDiscount]
-					,[dblDiscountAvailable]
-					,[dblBaseDiscountAvailable]
-					,[dblInterest]
-					,[dblBaseInterest]
-					,[dblAmountDue]
-					,[dblBaseAmountDue]
-					,[dblPayment]        
-					,[dblBasePayment]        
-					,[strInvoiceReportNumber]
-					,[intConcurrencyId]
-					,[dtmDiscountDate]
-					)
-				SELECT
-					 [intPaymentId]                = @PaymentId
-					,[intInvoiceId]                = ARI.[intInvoiceId] 
-					,[intBillId]                = NULL
-					,[strTransactionNumber]        = ARI.[strInvoiceNumber]
-					,[intTermId]                = ARI.[intTermId] 
-					,[intAccountId]                = ARI.[intAccountId] 
-					,[dblInvoiceTotal]            =  @ItemPrice  
-					,[dblBaseInvoiceTotal]         =  @ItemPrice
-					,[dblDiscount]                
-					,[dblBaseDiscount]            
-					,[dblDiscountAvailable]       
-					,[dblBaseDiscountAvailable]   
-					,[dblInterest]                
-					,[dblBaseInterest]            
-					,[dblAmountDue]                  
-					,[dblBaseAmountDue]              
-					,[dblPayment]                =  @ItemPrice
-					,[dblBasePayment]            =  @ItemPrice  
-					,[strInvoiceReportNumber]    = ''
-					,[intConcurrencyId]            = 0
-					,[dtmDiscountDate]            = NULL
-				FROM    
-					tblARInvoice ARI    
-				WHERE
-					ARI.[intInvoiceId] = @NewInvoiceId
+IF EXISTS (SELECT TOP 1 NULL FROM tblARPaymentDetail WHERE intInvoiceId IS NULL AND intBillId IS NULL AND intPaymentId = @PaymentId)
+	SET @ysnHasEFTBudget = CAST(1 AS BIT)
+	
+---ADD CPP INVOICE TO PAYMENT DETAIL
+IF(ISNULL(@NewInvoiceId, 0) <> 0) AND @PostPrepayment = 1AND @ysnHasEFTBudget = 0
+	BEGIN 
+		INSERT INTO [tblARPaymentDetail]
+			([intPaymentId]
+			,[intInvoiceId]
+			,[intBillId]
+			,[strTransactionNumber] 
+			,[intTermId]
+			,[intAccountId]
+			,[dblInvoiceTotal]
+			,[dblBaseInvoiceTotal]
+			,[dblDiscount]
+			,[dblBaseDiscount]
+			,[dblDiscountAvailable]
+			,[dblBaseDiscountAvailable]
+			,[dblInterest]
+			,[dblBaseInterest]
+			,[dblAmountDue]
+			,[dblBaseAmountDue]
+			,[dblPayment]        
+			,[dblBasePayment]        
+			,[strInvoiceReportNumber]
+			,[intConcurrencyId]
+			,[dtmDiscountDate]
+			)
+		SELECT
+			 [intPaymentId]					= @PaymentId
+			,[intInvoiceId]					= ARI.[intInvoiceId] 
+			,[intBillId]					= NULL
+			,[strTransactionNumber]			= ARI.[strInvoiceNumber]
+			,[intTermId]					= ARI.[intTermId] 
+			,[intAccountId]					= ARI.[intAccountId] 
+			,[dblInvoiceTotal]				= @ItemPrice  
+			,[dblBaseInvoiceTotal]			= @ItemPrice
+			,[dblDiscount]                
+			,[dblBaseDiscount]            
+			,[dblDiscountAvailable]       
+			,[dblBaseDiscountAvailable]   
+			,[dblInterest]                
+			,[dblBaseInterest]            
+			,[dblAmountDue]                  
+			,[dblBaseAmountDue]              
+			,[dblPayment]					= @ItemPrice
+			,[dblBasePayment]				= @ItemPrice  
+			,[strInvoiceReportNumber]		= ''
+			,[intConcurrencyId]				= 0
+			,[dtmDiscountDate]				= NULL
+		FROM    
+			tblARInvoice ARI    
+		WHERE
+			ARI.[intInvoiceId] = @NewInvoiceId
 				
-				UPDATE tblARPayment SET intCurrentStatus = 5, ysnInvoicePrepayment = 1
-				WHERE intPaymentId = @PaymentId
+		UPDATE tblARPayment SET intCurrentStatus = 5, ysnInvoicePrepayment = 1
+		WHERE intPaymentId = @PaymentId
 			
-			END
-		  END
+	END
         
   RETURN @NewId
 

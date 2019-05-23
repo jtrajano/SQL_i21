@@ -4,6 +4,7 @@
 	[strEODNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[dblOpeningBalance] NUMERIC(18,6) NULL,
 	[dblExpectedEndingBalance] NUMERIC(18,6) NULL,
+	[dblCashPaymentReceived] NUMERIC(18,6) NULL,
 	[dblCashReturn] NUMERIC(18,6) NULL,
 	[dblFinalEndingBalance] NUMERIC(18,6) NULL,
 	[intCompanyLocationPOSDrawerId] INT NOT NULL,

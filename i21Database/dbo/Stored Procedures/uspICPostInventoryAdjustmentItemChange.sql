@@ -58,9 +58,28 @@ BEGIN
 					AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL
 				UNION ALL
 				SELECT Detail.intNewItemId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
-					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId					
 				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId) IS NULL
+
+				UNION ALL
+				SELECT Detail.intNewItemId FROM dbo.tblICInventoryAdjustment Header 
+					INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+						ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+					INNER JOIN tblICLot Lot
+						on Detail.intLotId = Lot.intLotId					
+				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
+					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Lot.intWeightUOMId) IS NULL
+
+				UNION ALL
+				SELECT Detail.intNewItemId FROM dbo.tblICInventoryAdjustment Header 
+					INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+						ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+					INNER JOIN tblICLot Lot
+						on Detail.intLotId = Lot.intLotId					
+				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
+					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Lot.intItemUOMId) IS NULL
+
 				) Detail
 	
 		IF @intItemId IS NOT NULL 
@@ -492,11 +511,22 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= -SourceTransaction.dblQty
 			,dblUOMQty				= NewItemUOM.dblUnitQty
-			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
-										dbo.fnGetItemStockUOM(Detail.intNewItemId)
-										,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
-										,ISNULL(Detail.dblNewCost, Detail.dblCost)
-									)
+			,dblCost				= 
+									--dbo.fnCalculateCostBetweenUOM( 
+									--	dbo.fnGetItemStockUOM(Detail.intNewItemId)
+									--	,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
+									--	,ISNULL(Detail.dblNewCost, SourceTransaction.dblCost)
+									--)
+									CASE 
+										WHEN Detail.dblNewCost IS NULL THEN 
+											Detail.dblCost
+										ELSE
+											dbo.fnCalculateCostBetweenUOM ( 
+												dbo.fnGetItemStockUOM(Detail.intNewItemId)
+												,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
+												,Detail.dblNewCost
+											)
+									END
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -506,8 +536,8 @@ BEGIN
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_ItemChange
 			,intLotId				= Detail.intNewLotId
-			,intSubLocationId		= SourceLot.intSubLocationId
-			,intStorageLocationId	= SourceLot.intStorageLocationId
+			,intSubLocationId		= NewLot.intSubLocationId
+			,intStorageLocationId	= NewLot.intStorageLocationId
 
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
@@ -528,6 +558,10 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM NewItemUOM
 				ON NewItemUOM.intItemId = Detail.intNewItemId
 				AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, SourceTransaction.intItemUOMId)
+
+			LEFT JOIN dbo.tblICLot NewLot
+				ON NewLot.intLotId = Detail.intNewLotId
+
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Own

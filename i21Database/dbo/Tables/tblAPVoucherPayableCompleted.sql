@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblAPVoucherPayableCompleted]
 (
 	[intVoucherPayableId]			INT NOT NULL PRIMARY KEY IDENTITY, 
+	[intTransactionType]			INT NOT NULL DEFAULT(0),
     [intEntityVendorId]				INT,
 	[strVendorId]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strName]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -26,6 +27,8 @@
 	[intInventoryShipmentChargeId]	INT NULL,
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
+	[intLoadShipmentCostId]			INT NULL,
+	[intCustomerStorageId]			INT NULL,
 	[intItemId]						INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
@@ -89,5 +92,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayableCompleted_deleteIX]
 								,intInventoryReceiptItemId
 								,intInventoryShipmentItemId
 								,intInventoryShipmentChargeId
-								,intLoadShipmentDetailId ASC);
+								,intCustomerStorageId
+								,intLoadShipmentDetailId 
+								,intLoadShipmentCostId ASC);
 GO

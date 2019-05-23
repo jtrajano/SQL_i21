@@ -1061,21 +1061,11 @@ BEGIN
 	SELECT	
 			intItemId				= si.intItemId
 			,intItemLocationId		= il.intItemLocationId
-			,intItemUOMId = 
-				CASE	WHEN l.intLotId IS NULL THEN 
-							iu.intItemUOMId
-						ELSE
-							lotPackUOM.intItemUOMId
-				END
-			,intLotId				= sil.intLotId
-			,intSubLocationId		= si.intSubLocationId
-			,intStorageLocationId	= si.intStorageLocationId
-			,dblQty	=	
-				CASE	WHEN  l.intLotId IS NULL THEN 
-							-ISNULL(si.dblQuantity, 0) 
-						ELSE
-							-ISNULL(sil.dblQuantityShipped, 0)
-				END	
+			,intItemUOMId			= iu.intItemUOMId
+			,intLotId				= NULL 
+			,intSubLocationId		= NULL 
+			,intStorageLocationId	= NULL 
+			,dblQty					= -ISNULL(si.dblQuantity, 0) 
 			,intTransactionId		= s.intInventoryShipmentId
 			,strTransactionId		= s.strShipmentNumber
 			,intTransactionTypeId	= @INVENTORY_SHIPMENT_TYPE
@@ -1087,12 +1077,12 @@ BEGIN
 				AND il.intLocationId = s.intShipFromLocationId
 			INNER JOIN tblICItemUOM iu 
 				ON iu.intItemUOMId = si.intItemUOMId
-			LEFT JOIN tblICInventoryShipmentItemLot sil
-				ON sil.intInventoryShipmentItemId = si.intInventoryShipmentItemId
-			LEFT JOIN tblICLot l
-				ON l.intLotId = sil.intLotId
-			LEFT JOIN tblICItemUOM lotPackUOM
-				ON lotPackUOM.intItemUOMId = l.intItemUOMId
+			--LEFT JOIN tblICInventoryShipmentItemLot sil
+			--	ON sil.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			--LEFT JOIN tblICLot l
+			--	ON l.intLotId = sil.intLotId
+			--LEFT JOIN tblICItemUOM lotPackUOM
+			--	ON lotPackUOM.intItemUOMId = l.intItemUOMId
 	WHERE   s.intInventoryShipmentId = @intTransactionId
 			AND ISNULL(si.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 

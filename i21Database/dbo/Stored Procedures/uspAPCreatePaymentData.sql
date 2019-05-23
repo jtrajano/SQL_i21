@@ -60,6 +60,7 @@ BEGIN
 	SELECT TOP 1 
 		@functionalCurrency = intDefaultCurrencyId 
 		,@foreignCurrency = CASE WHEN intDefaultCurrencyId != @currency THEN 1 ELSE 0 END
+		,@currency = ISNULL(@currency, intDefaultCurrencyId)
 	FROM tblSMCompanyPreference
 
 	IF @foreignCurrency = 1

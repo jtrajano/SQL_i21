@@ -45,17 +45,30 @@ BEGIN
 		INNER JOIN tblCCVendorDefault ccVendorDefault ON ccVendorDefault.intVendorDefaultId = ccSiteHeader.intVendorDefaultId
 		WHERE ccSiteHeader.intSiteHeaderId = @intSiteHeaderId
 
-		INSERT INTO @Voucher (intTransactionType ,dtmDate, intEntityVendorId, intShipToId, strVendorOrderNumber, intAccountId, intCCSiteDetailId, strMiscDescription, dblCost, dblQuantityToBill)
+		INSERT INTO @Voucher (intTransactionType
+			, dtmDate
+			, intEntityVendorId
+			, intShipToId
+			, intLocationId
+			, strVendorOrderNumber
+			, intAccountId
+			, intCCSiteDetailId
+			, strMiscDescription
+			, dblCost
+			, dblQuantityToBill
+			, ysnStage)
 		SELECT intTransactionType = 3 
 			,dtmDate = @dtmDate
 			,intEntityVendorId = @intVendorId
 			,intShipToId = @intShipTo
+			,intLocationId = @intShipTo
 			,strVendorOrderNumber = @strCcdReference
 			,intAccountId
 			,intSiteDetailId
 			,strItem
 			,SUM(dblCost)
 			,[dblQtyReceived]  = CASE WHEN strItem = 'Company Owned Fees' THEN -1 ELSE 1 END
+			,0
 		FROM (SELECT ccSiteDetail.intSiteDetailId
 				 ,ccItem.strItem
 				 ,(CASE WHEN ccItem.strItem = 'Dealer Sites Net' AND ccSite.strSiteType = 'Dealer Site' THEN ccSite.intAccountId 
@@ -79,8 +92,30 @@ BEGIN
 		GROUP BY  intAccountId, intSiteDetailId, strItem 
 
 		-- 1099K Adjustment
-		INSERT INTO @Voucher1099K (intTransactionType ,dtmDate, intEntityVendorId, intShipToId, strVendorOrderNumber, intAccountId, intCCSiteDetailId, strMiscDescription, dblCost, dblQuantityToBill)
-		SELECT 9, dtmDate, intEntityVendorId, intShipToId, strVendorOrderNumber, intAccountId, intCCSiteDetailId, strMiscDescription, dblCost, dblQuantityToBill 
+		INSERT INTO @Voucher1099K (intTransactionType
+			, dtmDate
+			, intEntityVendorId
+			, intShipToId
+			, strVendorOrderNumber
+			, intAccountId
+			, intLocationId
+			, intCCSiteDetailId
+			, strMiscDescription
+			, dblCost
+			, dblQuantityToBill
+			, ysnStage)
+		SELECT 9
+			, dtmDate
+			, intEntityVendorId
+			, intShipToId
+			, strVendorOrderNumber
+			, intAccountId
+			, intLocationId
+			, intCCSiteDetailId
+			, strMiscDescription
+			, dblCost
+			, dblQuantityToBill
+			, 0 
 		FROM @Voucher WHERE strMiscDescription = 'Dealer Sites Net'
 
 		IF EXISTS(SELECT TOP 1 1 FROM @Voucher)

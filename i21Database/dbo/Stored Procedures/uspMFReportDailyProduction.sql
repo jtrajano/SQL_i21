@@ -105,7 +105,7 @@ BEGIN TRY
 
 	INSERT INTO @tblMFDailyProduction
 	SELECT L.strLotNumber
-		,LT.dtmDate
+		,dbo.fnConvertDateToReportDateFormat(LT.dtmDate, 1)
 		,LT.dtmCreated
 		,LTT.strName
 		,I.strItemNo
@@ -135,7 +135,7 @@ BEGIN TRY
 	UNION
 	
 	SELECT L.strLotNumber
-		,LT.dtmDate
+		,dbo.fnConvertDateToReportDateFormat(LT.dtmDate, 1)
 		,LT.dtmCreated
 		,LTT.strName
 		,I.strItemNo
@@ -165,7 +165,7 @@ BEGIN TRY
 	UNION
 	
 	SELECT L.strLotNumber
-		,A.dtmAdjustmentDate
+		,dbo.fnConvertDateToReportDateFormat(A.dtmAdjustmentDate, 1)
 		,A.dtmAdjustmentDate
 		,LTT.strName
 		,I.strItemNo
@@ -195,7 +195,7 @@ BEGIN TRY
 	UNION
 	
 	SELECT L.strLotNumber
-		,A.dtmAdjustmentDate
+		,dbo.fnConvertDateToReportDateFormat(A.dtmAdjustmentDate, 1)
 		,A.dtmAdjustmentDate
 		,LTT.strName
 		,I.strItemNo

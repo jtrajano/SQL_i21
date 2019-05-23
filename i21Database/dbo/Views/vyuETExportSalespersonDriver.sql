@@ -32,7 +32,7 @@ select
 	a.strZipPostalCode zip,
 	a.strStateProvince [state],
 	a.strCity [city],
-	'' as Authority1,
+	ISNULL(CAST(intTaxGroupId AS NVARCHAR(20)),'') as Authority1,
 	'' as Authority2
 	from tblSMCompanyLocation a
 		join tblETExportFilterLocation b

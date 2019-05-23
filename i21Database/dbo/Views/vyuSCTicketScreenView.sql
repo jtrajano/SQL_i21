@@ -310,8 +310,15 @@
 	LEFT JOIN (
 		SELECT TOP 1 * FROM vyuAPBasisAdvanceTicket
 	) Basis ON Basis.intScaleTicketId = SCT.intTicketId
-	OUTER APPLY(
-		SELECT TOP 1 AP.dblPayment, APD.intScaleTicketId FROM tblAPBillDetail APD
-		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId AND AP.dblPayment > 0
-		WHERE APD.intScaleTicketId = SCT.intTicketId
-	) APPayment 
+	LEFT JOIN (
+		SELECT dblPayment = SUM(ISNULL(AP.dblPayment,0.0)), intScaleTicketId = APD.intScaleTicketId FROM tblAPBillDetail APD
+		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId --AND AP.dblPayment > 0
+		INNER JOIN tblAPPaymentDetail APPayDtl ON AP.intBillId = APPayDtl.intBillId
+		INNER JOIN tblAPPayment APPay ON APPayDtl.intPaymentId = APPay.intPaymentId
+		INNER JOIN tblCMBankTransaction BankTran ON APPay.strPaymentRecordNum = BankTran.strTransactionId
+		WHERE ISNULL(APD.intScaleTicketId,0) <> 0 
+		 AND BankTran.ysnCheckVoid = 0
+		AND APPay.ysnPosted = 1
+		GROUP BY intScaleTicketId
+	) APPayment
+		ON APPayment.intScaleTicketId = SCT.intTicketId

@@ -757,6 +757,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
+    <Build Include="dbo\Functions\fnGetLocationAwareItemGLAccount.sql" />
     <Build Include="dbo\Functions\fnGetNegativeInventoryOption.sql" />
     <Build Include="dbo\Tables\tblICLotStatus.sql" />
     <Build Include="dbo\Views\vyuEntityEFTInformation.sql" />
@@ -1046,7 +1047,6 @@
     <Build Include="dbo\Stored Procedures\uspPOReceived.sql" />
     <Build Include="dbo\Views\vyuCTPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoPrice.sql" />
-    <Build Include="dbo\Tables\tblSTStoreGLAccount.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrderDetail.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrder.sql" />
     <Build Include="dbo\Views\vyuSOSalesOrderSearch.sql" />
@@ -4331,7 +4331,6 @@
     <Build Include="dbo\Stored Procedures\uspTMUpdateSiteGPS.sql" />
     <Build Include="dbo\Stored Procedures\uspETImportBaseEngineeringToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspTMBEExportPrice.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGetBankAccountRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportPaymentCSV.sql" />
     <Build Include="dbo\Views\vyuICTMProductPricing.sql" />
     <Build Include="dbo\Views\vyuTMBEExportPrice.sql" />
@@ -5990,6 +5989,7 @@
     <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
     <Build Include="dbo\Views\vyuBBOpenBuyback.sql" />
     <Build Include="dbo\Tables\tblBBBuybackDetail.sql" />
+    <Build Include="dbo\Views\vyuBBBuybacksProgramInvoices.sql" />
     <Build Include="dbo\Tables\tblBBBuybackCharge.sql" />
     <Build Include="dbo\Tables\tblBBBuyback.sql" />
     <Build Include="dbo\Views\vyuMFStorageUnit.sql" />
@@ -7114,6 +7114,7 @@
     <Build Include="dbo\Stored Procedures\uspARGeneratePaymentGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\IC\14_Add_Inventory_Report_Templates.sql" />
     <None Include="Scripts\Post-Deployment\IC\15_Migrate_Old_Receipt_Totals.sql" />
+    <None Include="Scripts\Post-Deployment\IC\16_Replace_General_Acct_With_Expense_Acct_Non_Inventory.sql" />
     <Build Include="dbo\Functions\fnAPValidateAPAccounts.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetailFormat2.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryTransferReportFormat2.sql" />
@@ -7428,7 +7429,7 @@
     <Build Include="dbo\Stored Procedures\uspSMDoBeforeUserRoleMigration.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDoUserRoleMigration.sql" />
     <Build Include="dbo\Tables\tblAPBillEditField.sql" />
-    <Build Include="dbo\Tables\tblCFMaximaPrinterCardSoftware.sql" />
+    <Build Include="dbo\Tables\tblCFEncodingPrinterSoftware.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAddEmailResultLog.sql" />
     <Build Include="dbo\Tables\tblSMActivityEmailResult.sql" />
@@ -7491,10 +7492,68 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
     <Build Include="dbo\Tables\tblCTAOPComponent.sql" />
     <Build Include="dbo\Views\vyuCTAOPComponent.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Tables\tblSMTermCutoff.sql" />
     <Build Include="dbo\User Defined Types\AROriginTaxCodeTableType.sql" />
     <Build Include="dbo\Views\vyuEMEAExportCustomer.sql" />
+    <Build Include="dbo\Views\vyuAPInboundTaxReport.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherSourceList.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptInboundTaxReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPExportVendorStagingSynergy.sql" />
+    <Build Include="dbo\Tables\tblAPVendorStagingSynergy.sql" />
+    <Build Include="dbo\Tables\tblAPVendorSynergyExported.sql" />
+    <Build Include="dbo\Tables\tblAPVendorContactSynergy.sql" />
+    <Build Include="dbo\Tables\tblAPVendorContactInfoSynergy.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVendorExportTransformSynergy.sql" />
+    <Build Include="dbo\Views\vyuAPVendorSynergy.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVendorExportSynergy.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherInfo.sql" />
+    <Build Include="dbo\Tables\tblCTPriceFixationTicket.sql" />
+    <Build Include="dbo\Views\vyuCTPriceFixationTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetDueDateBasedOnTerm.sql" />
+    <Build Include="dbo\Views\vyuCMAPRemittanceAdviceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSUpdateCashPaymentReceived.sql" />
+    <Build Include="dbo\Views\vyuSCTicketInventoryShipmentReceipt.sql" />
+    <Build Include="dbo\Views\vyuGRBasisSettleStorage.sql" />
+    <Build Include="dbo\Functions\fnARParseReportParameter.sql" />
+    <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
+    <Build Include="dbo\Tables\tblIPSAPAccount.sql" />
+    <Build Include="dbo\Tables\tblIPSAPInternalOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRebuildSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMRecalcBankAccountRegister.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalance.sql" />
+    <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPFixVoucherPayable.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayableCompletedKeyInfo.sql" />
+    <Build Include="dbo\Functions\fnICGetPreviousTransactionDate.sql" />
+    <Build Include="dbo\Functions\fnConvertDateToReportDateFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTicketPayables.sql" />
+    <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
+    <Build Include="dbo\Views\vyuSTPromotionSalesList.sql" />
+    <Build Include="dbo\Views\vyuSTPromotionItemList.sql" />
+    <Build Include="dbo\Views\vyuSTCurrentUserRole.sql" />
+    <Build Include="dbo\Views\vyuRKBrokerList.sql" />
+    <Build Include="dbo\Views\vyuRKBrokerAccountList.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTRefreshContractBalance.sql" />
+    <Build Include="dbo\Views\vyuRKBrokerageAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetBundleComponents2.sql" />
+    <Build Include="dbo\Functions\fnICLotQtyAsOf.sql" />
+    <Build Include="dbo\Views\vyuICInventoryAdjustmentSourceLink.sql" />
+    <Build Include="dbo\Functions\fnDateFromParts.sql" />
+    <Build Include="dbo\Views\vyuHDTimeEntryDailySummary.sql" />
+    <Build Include="dbo\Functions\fnPRRounding.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStockMovementReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGenerateStockMovementReport.sql" />
+    <Build Include="dbo\Views\vyuICGenerateStockMovement.sql" />
+    <Build Include="dbo\Views\vyuSTLocationItems.sql" />
+    <None Include="Scripts\Post-Deployment\IC\17_Inventory_Constraints.sql" />
+    <Build Include="dbo\Functions\fnCTGenerateReceiptDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesForInTransit.sql" />
+    <Build Include="dbo\Functions\fnICGetAddToCostTaxFromInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPArchiveVoucher.sql" />
+    <Build Include="dbo\Tables\tblAPBillArchive.sql" />
+    <Build Include="dbo\Tables\tblAPBillDetailArchive.sql" />
+    <Build Include="dbo\Tables\tblAPBillDetailTaxArchive.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7714,6 +7773,8 @@
     <Build Include="dbo\Functions\fnHDCoalesceEntityResources.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateOffsetField.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePrepayDetailAccount.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateVoucherPayableTranType.sql" />
+    <None Include="Scripts\Post-Deployment\AP\PurgePayableCompleted.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -54,13 +54,13 @@ BEGIN
 		CLOSE @CursorTran
 		DEALLOCATE @CursorTran
 
-		COMMIT
+		COMMIT TRANSACTION
 
 		SELECT @return = intImportMeterReadingId FROM tblMBImportMeterReading WHERE guidImportIdentifier = @guidImportIdentifier
 
 	END TRY
 	BEGIN CATCH
-		ROLLBACK
+		ROLLBACK TRANSACTION
 		SELECT 
 			@ErrorMessage = ERROR_MESSAGE(),
 			@ErrorSeverity = ERROR_SEVERITY(),

@@ -26,26 +26,35 @@ BEGIN TRY
 	
 	BEGIN TRANSACTION
 
-	SELECT @intCompanyLocationId = SH.intCompanyLocationId
-	FROM tblCCSiteHeader SH
-	--LEFT JOIN tblCCVendorDefault VD ON VD.intVendorDefaultId = SH.intVendorDefaultId
-	LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission CL ON SH.intCompanyLocationId = CL.intCompanyLocationId
-	WHERE SH.intSiteHeaderId = @intSiteHeaderId
-		AND CL.intEntityId = @userId
+	SELECT @intCompanyLocationId = SH.intCompanyLocationId FROM tblCCSiteHeader SH WHERE SH.intSiteHeaderId = @intSiteHeaderId
+
+	--SELECT @intCompanyLocationId = SH.intCompanyLocationId
+	--FROM tblCCSiteHeader SH
+	----LEFT JOIN tblCCVendorDefault VD ON VD.intVendorDefaultId = SH.intVendorDefaultId
+	--LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission CL ON SH.intCompanyLocationId = CL.intCompanyLocationId
+	--WHERE SH.intSiteHeaderId = @intSiteHeaderId
+	--	AND CL.intEntityId = @userId
 
 	IF(@intCompanyLocationId IS NULL)
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityUserSecurityId = @userId)
-		BEGIN
-			RAISERROR('Invalid Vendor Company Location Id found!',16,1)
+		RAISERROR('Invalid Vendor Company Location!', 16, 1)
+	END
+	ELSE
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission CL WHERE CL.intEntityId = @userId)
+		BEGIN	
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission CL WHERE CL.intEntityId = @userId AND CL.intCompanyLocationId = @intCompanyLocationId)
+			BEGIN
+				RAISERROR('You dont have permission to post transaction using this location!', 16, 1)
+			END
 		END
 	END
 
-	select @intAPAccount = isnull(intAPAccount,0), @strCompanyLocation = rtrim(ltrim(strLocationName)) from tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId;
-	IF(@intAPAccount = 0)
+	SELECT @intAPAccount = intAPAccount, @strCompanyLocation = rtrim(ltrim(strLocationName)) from tblSMCompanyLocation where intCompanyLocationId = @intCompanyLocationId
+	IF(@intAPAccount IS NULL)
 	BEGIN
-		set @strAPAccountErrorMessage = 'Please setup AP Account for Vendor Company Location (' + @strCompanyLocation + ').';
-		RAISERROR(@strAPAccountErrorMessage,16,1)
+		SET @strAPAccountErrorMessage = 'Please setup AP Account for Vendor Company Location (' + @strCompanyLocation + ').';
+		RAISERROR(@strAPAccountErrorMessage, 16, 1)
 	END
 	
 	-- Validate Total Detail Gross, Fees and Net should equal to Header
@@ -74,7 +83,7 @@ BEGIN TRY
 		,@recap = 0
 		,@success = @success OUTPUT
 		,@errorMessage = @errorMessage OUTPUT
-		,@createdBillId = @billId OUTPUT
+		--,@createdBillId = @billId OUTPUT
 
 	-- AR Transaction and Posting
 	EXEC [dbo].[uspCCTransactionToARInvoice] 

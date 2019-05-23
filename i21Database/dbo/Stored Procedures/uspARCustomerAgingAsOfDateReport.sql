@@ -1,38 +1,36 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCustomerAgingAsOfDateReport]
-	@dtmDateFrom				DATETIME = NULL,
-	@dtmDateTo					DATETIME = NULL,
-	@strSalesperson				NVARCHAR(100) = NULL,
-	@intEntityCustomerId		INT = NULL,
-	@intEntityUserId			INT = NULL,
-	@strSourceTransaction		NVARCHAR(100) = NULL,
-	@strCompanyLocation			NVARCHAR(100) = NULL,
-	@ysnIncludeCredits			BIT = 1,
-	@ysnIncludeWriteOffPayment	BIT = 0,
-	@strCustomerName			NVARCHAR(MAX) = NULL,
-	@strAccountStatusCode		NVARCHAR(100) = NULL,
-	@strCustomerIds				NVARCHAR(MAX) = NULL,
-	@ysnFromBalanceForward		BIT = 0,
-	@ysnPrintFromCF				BIT = 0,
-	@dtmBalanceForwardDate		DATETIME = NULL,
-	@strUserId					AS NVARCHAR(MAX) = NULL
+	  @dtmDateFrom					DATETIME = NULL
+	, @dtmDateTo					DATETIME = NULL
+	, @dtmBalanceForwardDate		DATETIME = NULL
+	, @intEntityUserId				INT = NULL
+	, @strSourceTransaction			NVARCHAR(100) = NULL
+	, @strCustomerIds				NVARCHAR(MAX) = NULL
+	, @strSalespersonIds			NVARCHAR(MAX) = NULL
+	, @strCompanyLocationIds		NVARCHAR(MAX) = NULL
+	, @strAccountStatusIds			NVARCHAR(MAX) = NULL
+	, @strUserId					NVARCHAR(MAX) = NULL
+	, @ysnIncludeCredits			BIT = 1
+	, @ysnIncludeWriteOffPayment	BIT = 0
+	, @ysnFromBalanceForward		BIT = 0
+	, @ysnPrintFromCF				BIT = 0
+	, @ysnExcludeAccountStatus		BIT = 0
 AS
 
 DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 	    @dtmDateToLocal					DATETIME		= NULL,
-	    @strSalespersonLocal			NVARCHAR(100)	= NULL,
-	    @intEntityCustomerIdLocal		INT				= NULL,
 		@intEntityUserIdLocal			INT				= NULL,
-		@strSourceTransactionLocal		NVARCHAR(100)	= NULL,
-		@strCompanyLocationLocal		NVARCHAR(100)	= NULL,
+		@strSourceTransactionLocal		NVARCHAR(100)	= NULL,		
+		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL,
+		@strSalespersonIdsLocal			NVARCHAR(MAX)	= NULL,
+		@strCompanyLocationIdsLocal		NVARCHAR(MAX)	= NULL,
+		@strAccountStatusIdsLocal		NVARCHAR(MAX)	= NULL,
 		@ysnIncludeCreditsLocal			BIT				= 1,
 		@ysnIncludeWriteOffPaymentLocal BIT				= 1,
-		@ysnPrintFromCFLocal			BIT				= 0,
-		@intSalespersonId				INT				= NULL,
-		@intCompanyLocationId			INT				= NULL,
-		@strCustomerNameLocal			NVARCHAR(MAX)	= NULL,
-		@strAccountStatusCodeLocal		NVARCHAR(100)	= NULL,
-		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL
+		@ysnPrintFromCFLocal			BIT				= 0
 
+DECLARE @tblSalesperson TABLE (intSalespersonId INT)
+DECLARE @tblCompanyLocation TABLE (intCompanyLocationId INT)
+DECLARE @tblAccountStatus TABLE (intAccountStatusId INT)
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
 	  , strCustomerNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -42,37 +40,22 @@ DECLARE @tblCustomers TABLE (
 		
 SET @dtmDateFromLocal				= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 SET	@dtmDateToLocal					= ISNULL(@dtmDateTo, GETDATE())
-SET @strSalespersonLocal			= NULLIF(@strSalesperson, '')
-SET @intEntityCustomerIdLocal		= NULLIF(@intEntityCustomerId, 0)
+SET @strSalespersonIdsLocal			= NULLIF(@strSalespersonIds, '')
 SET @intEntityUserIdLocal			= NULLIF(@intEntityUserId, 0)
 SET @strSourceTransactionLocal		= NULLIF(@strSourceTransaction, '')
-SET @strCompanyLocationLocal		= NULLIF(@strCompanyLocation, '')
 SET @ysnIncludeCreditsLocal			= @ysnIncludeCredits
 SET @ysnIncludeWriteOffPaymentLocal	= ISNULL(@ysnIncludeWriteOffPayment, 0)
 SET @ysnPrintFromCFLocal			= ISNULL(@ysnPrintFromCF, 0)
-SET @strCustomerNameLocal			= NULLIF(@strCustomerName, '')
-SET @strAccountStatusCodeLocal		= NULLIF(@strAccountStatusCode, '')
 SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')
+SET @strSalespersonIdsLocal			= NULLIF(@strSalespersonIds, '')
+SET @strCompanyLocationIdsLocal		= NULLIF(@strCompanyLocationIds, '')
+SET @strAccountStatusIdsLocal		= NULLIF(@strAccountStatusIds, '')
 
 SET @dtmDateFromLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmDateToLocal					= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 
-IF ISNULL(@intEntityCustomerIdLocal, 0) <> 0
-	BEGIN
-		INSERT INTO @tblCustomers
-		SELECT TOP 1 C.intEntityId 
-			       , C.strCustomerNumber
-				   , EC.strName
-				   , C.dblCreditLimit
-		FROM tblARCustomer C WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intEntityId
-			     , strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE intEntityId = @intEntityCustomerIdLocal
-		) EC ON C.intEntityId = EC.intEntityId
-	END
-ELSE IF @strCustomerIdsLocal IS NOT NULL
+--CUSTOMER FILTER
+IF @strCustomerIdsLocal IS NOT NULL
 	BEGIN
 		INSERT INTO @tblCustomers
 		SELECT C.intEntityId 
@@ -102,41 +85,53 @@ ELSE
 			SELECT intEntityId
 				 , strName
 			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerNameLocal IS NULL OR strName = @strCustomerNameLocal)
 		) EC ON C.intEntityId = EC.intEntityId
-		OUTER APPLY (
-			SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1)
-			FROM (
-				SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
-				FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
-				INNER JOIN (
-					SELECT intAccountStatusId
-							, strAccountStatusCode
-					FROM dbo.tblARAccountStatus WITH (NOLOCK)
-				) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
-				WHERE CAS.intEntityCustomerId = C.intEntityId
-				FOR XML PATH ('')
-			) SC (strAccountStatusCode)
-		) STATUSCODES
-		WHERE (@strAccountStatusCodeLocal IS NULL OR STATUSCODES.strAccountStatusCode LIKE '%'+ @strAccountStatusCodeLocal +'%')
 	END
 
-IF ISNULL(@strSalespersonLocal, '') <> ''
+--COMPANY LOCATION FILTER
+IF ISNULL(@strCompanyLocationIdsLocal, '') <> ''
 	BEGIN
-		SELECT TOP 1 @intSalespersonId = SP.intEntityId
-		FROM dbo.tblARSalesperson SP WITH (NOLOCK) 
+		INSERT INTO @tblCompanyLocation
+		SELECT CL.intCompanyLocationId
+		FROM dbo.tblSMCompanyLocation CL WITH (NOLOCK) 
 		INNER JOIN (
-			SELECT intEntityId
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strSalespersonLocal IS NULL OR strName = @strSalespersonLocal)
-		) ES ON SP.intEntityId = ES.intEntityId
+			SELECT intID
+			FROM dbo.fnGetRowsFromDelimitedValues(@strCompanyLocationIdsLocal)
+		) COMPANYLOCATION ON CL.intCompanyLocationId = COMPANYLOCATION.intID
+	END
+ELSE
+	BEGIN
+		INSERT INTO @tblCompanyLocation
+		SELECT CL.intCompanyLocationId
+		FROM dbo.tblSMCompanyLocation CL WITH (NOLOCK) 
 	END
 
-IF ISNULL(@strCompanyLocationLocal, '') <> ''
+--ACCOUNT STATUS FILTER
+IF ISNULL(@strAccountStatusIdsLocal, '') <> ''
 	BEGIN
-		SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
-		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-		WHERE (@strCompanyLocationLocal IS NULL OR strLocationName = @strCompanyLocationLocal)
+		INSERT INTO @tblAccountStatus
+		SELECT ACCS.intAccountStatusId
+		FROM dbo.tblARAccountStatus ACCS WITH (NOLOCK) 
+		INNER JOIN (
+			SELECT intID
+			FROM dbo.fnGetRowsFromDelimitedValues(@strAccountStatusIdsLocal)
+		) ACCOUNTSTATUS ON ACCS.intAccountStatusId = ACCOUNTSTATUS.intID
+
+		IF @ysnExcludeAccountStatus = 0
+			BEGIN
+				DELETE CUSTOMERS 
+				FROM @tblCustomers CUSTOMERS
+				LEFT JOIN tblARCustomerAccountStatus CAS ON CUSTOMERS.intEntityCustomerId = CAS.intEntityCustomerId
+				LEFT JOIN @tblAccountStatus ACCSTATUS ON CAS.intAccountStatusId = ACCSTATUS.intAccountStatusId
+				WHERE CAS.intAccountStatusId IS NULL
+			END
+		ELSE 
+			BEGIN
+				DELETE CUSTOMERS 
+				FROM @tblCustomers CUSTOMERS
+				INNER JOIN tblARCustomerAccountStatus CAS ON CUSTOMERS.intEntityCustomerId = CAS.intEntityCustomerId
+				INNER JOIN @tblAccountStatus ACCSTATUS ON CAS.intAccountStatusId = ACCSTATUS.intAccountStatusId
+			END
 	END
 
 IF 1=0 BEGIN
@@ -177,14 +172,13 @@ SELECT intPaymentId
 	 , intPaymentMethodId
 INTO #ARPOSTEDPAYMENT
 FROM dbo.tblARPayment P WITH (NOLOCK)
-INNER JOIN (
-	SELECT intEntityCustomerId
-	FROM @tblCustomers
-) C ON P.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @tblCustomers C ON P.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @tblCompanyLocation CL ON P.intLocationId = CL.intCompanyLocationId
 WHERE ysnPosted = 1
 	AND ysnProcessedToNSF = 0
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
+--WRITE OFF FILTER
 IF (@ysnIncludeWriteOffPaymentLocal = 1)
 	BEGIN
 		IF(OBJECT_ID('tempdb..#WRITEOFFS') IS NOT NULL)
@@ -206,7 +200,9 @@ IF (@ysnIncludeWriteOffPaymentLocal = 1)
 SELECT dblPayment = SUM(dblPayment)
 		, PD.intInvoiceId
 INTO #INVOICETOTALPREPAYMENTS
-FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId AND P.ysnInvoicePrepayment = 0
+FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
+INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
+                             AND P.ysnInvoicePrepayment = 0
 GROUP BY PD.intInvoiceId
 
 --#APPAYMENTDETAILS
@@ -231,6 +227,8 @@ WHERE intInvoiceId IS NOT NULL
 SELECT I.intInvoiceId
 	 , I.intPaymentId
 	 , I.intEntityCustomerId
+	 , I.intEntitySalespersonId
+	 , I.intCompanyLocationId
 	 , I.dtmPostDate
 	 , I.dtmDueDate
 	 , I.strTransactionType
@@ -244,10 +242,8 @@ SELECT I.intInvoiceId
 	 , I.dtmForgiveDate
 INTO #POSTEDINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-INNER JOIN (
-	SELECT intEntityCustomerId
-	FROM @tblCustomers
-) C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE ysnPosted = 1
 	AND ysnCancelled = 0
 	AND strTransactionType <> 'Cash Refund'
@@ -275,9 +271,23 @@ WHERE ysnPosted = 1
 		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 	)
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
-	AND (@intCompanyLocationId IS NULL OR I.intCompanyLocationId = @intCompanyLocationId)
-	AND (@intSalespersonId IS NULL OR intEntitySalespersonId = @intSalespersonId)
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+
+IF ISNULL(@strSalespersonIdsLocal, '') <> ''
+	BEGIN
+		INSERT INTO @tblSalesperson
+		SELECT SP.intEntityId
+		FROM dbo.tblARSalesperson SP WITH (NOLOCK) 
+		INNER JOIN (
+			SELECT intID
+			FROM dbo.fnGetRowsFromDelimitedValues(@strSalespersonIdsLocal)
+		) SALESPERSON ON SP.intEntityId = SALESPERSON.intID
+
+		DELETE INVOICES
+		FROM #POSTEDINVOICES INVOICES
+		LEFT JOIN @tblSalesperson SALESPERSON ON INVOICES.intEntitySalespersonId = SALESPERSON.intSalespersonId
+		WHERE SALESPERSON.intSalespersonId IS NULL 
+	END
 
 IF (@ysnPrintFromCFLocal = 1)
 	BEGIN
@@ -296,6 +306,8 @@ SELECT strDocumentNumber	= ID.strDocumentNumber
 INTO #CASHREFUNDS
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
   AND ISNULL(ID.strDocumentNumber, '') <> ''

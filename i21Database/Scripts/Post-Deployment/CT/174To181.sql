@@ -243,3 +243,47 @@ WHERE CD.strCertifications IS NULL
 
 PRINT('END CT-2826')
 GO
+
+GO
+--To 19.1
+PRINT('CT-3158')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTAOPComponent)
+BEGIN
+	 INSERT INTO tblCTAOPComponent(intAOPDetailId,intBasisItemId,dblCost,intConcurrencyId)
+	 SELECT intAOPDetailId,intBasisItemId,dblCost,1 AS intConcurrencyId 
+	 FROM(
+		 SELECT intAOPDetailId,intBasisItemId,dblCost,1 AS intConcurrencyId 
+		 FROM(
+			SELECT	ROW_NUMBER() OVER (PARTITION BY intAOPId,intItemId ORDER BY intAOPDetailId ASC) intRowNum,
+					intAOPDetailId,intAOPId,intBasisItemId,dblCost,1 AS intConcurrencyId
+			FROM	tblCTAOPDetail
+		)t WHERE	intRowNum = 1
+
+		UNION ALL
+
+		SELECT z.intAOPDetailId,t.intBasisItemId,t.dblCost,1 AS intConcurrencyId 
+		FROM(
+			SELECT ROW_NUMBER() OVER (PARTITION BY intAOPId,intItemId ORDER BY intAOPDetailId ASC) intRowNum,
+			intAOPDetailId,intAOPId,intItemId,intBasisItemId,dblCost,1 AS intConcurrencyId
+			FROM tblCTAOPDetail
+		)t 
+		JOIN( 
+			SELECT * 
+			FROM(
+				SELECT ROW_NUMBER() OVER (PARTITION BY intAOPId,intItemId ORDER BY intAOPDetailId ASC) intRowNum,
+				intAOPDetailId,intAOPId,intItemId,intBasisItemId,dblCost,1 AS intConcurrencyId
+				FROM tblCTAOPDetail
+			)t WHERE  intRowNum = 1
+		)z ON z.intAOPId = t.intAOPId AND z.intItemId = t.intItemId
+		WHERE  t.intRowNum = 2
+	)x
+	ORDER BY intAOPDetailId,intBasisItemId
+
+	IF OBJECT_ID('tblCTAOPDetail_BKP_SchemaChange') IS NULL  									
+		SELECT * INTO tblCTAOPDetail_BKP_SchemaChange FROM tblCTAOPDetail	
+		
+	DELETE FROM tblCTAOPDetail WHERE intAOPDetailId NOT IN (SELECT ISNULL(intAOPDetailId,0) FROM tblCTAOPComponent)							
+
+END
+PRINT('END CT-3158')
+GO

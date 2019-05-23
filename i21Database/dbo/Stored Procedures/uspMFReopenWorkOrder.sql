@@ -265,8 +265,12 @@ BEGIN TRY
 				,0
 		END
 
+		DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
+
 		DELETE
 		FROM dbo.tblMFWorkOrderConsumedLot
+		OUTPUT deleted.intWorkOrderConsumedLotId
+		INTO @tblMFWorkOrderConsumedLot
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND intBatchId = @intBatchId
 			AND intItemId NOT IN (
@@ -287,6 +291,37 @@ BEGIN TRY
 		DELETE
 		FROM dbo.tblMFWorkOrderProducedLotTransaction
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		INSERT INTO tblMFInventoryAdjustment (
+			dtmDate
+			,intTransactionTypeId
+			,intItemId
+			,intSourceLotId
+			,dblQty
+			,intItemUOMId
+			,intUserId
+			,intLocationId
+			,intStorageLocationId
+			,intWorkOrderConsumedLotId
+			,dtmBusinessDate
+			,intBusinessShiftId
+			,intWorkOrderId
+			)
+		SELECT dtmDate
+			,intTransactionTypeId
+			,IA.intItemId
+			,intSourceLotId
+			,- dblQty
+			,intItemUOMId
+			,intUserId
+			,intLocationId
+			,intStorageLocationId
+			,IA.intWorkOrderConsumedLotId
+			,dtmBusinessDate
+			,intBusinessShiftId
+			,intWorkOrderId
+		FROM tblMFInventoryAdjustment IA
+		JOIN @tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
 	END
 
 	SELECT @strAutoCycleCountOnWorkOrderClose = strAttributeValue

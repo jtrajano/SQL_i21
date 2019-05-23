@@ -4,11 +4,13 @@ DECLARE @LayoutTitle NVARCHAR(100)
 	, @FileHeaderId INT = NULL
 	, @DetailId INT = NULL
 
+UPDATE tblSMImportFileHeader SET strLayoutTitle = 'MB - Simmons Format' WHERE strLayoutTitle = 'MB - Simmon Format'
+
 -- BP Format
-SET @LayoutTitle = 'MB - Simmon Format'
+SET @LayoutTitle = 'MB - Simmons Format'
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
-	PRINT ('MB - Simmon Format')
+	PRINT ('MB - Simmons Format')
 
 	INSERT INTO tblSMImportFileHeader (strLayoutTitle
 		, strFileType

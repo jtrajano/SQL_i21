@@ -42,8 +42,8 @@ BEGIN
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
+	LEFT JOIN tblARInvoiceDetailLot InvDetLot ON InvDetLot.intInvoiceDetailId = InvDet.intInvoiceDetailId
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = InvDetLot.intLotId
 	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadDetailContainerLink LDCLink ON LDCLink.intLoadDetailId = ReceiptItem.intSourceId
@@ -77,11 +77,14 @@ BEGIN
 		InvDet.dblPrice,
 		strPrice2Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice,2) AS NUMERIC(18,2))),
 		strPrice4Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice,4) AS NUMERIC(18,4))),
-	    CASE WHEN L.intPurchaseSale = 2 THEN InvDet.dblQtyShipped ELSE LD.dblQuantity END dblQtyShipped,
-		CASE WHEN L.intPurchaseSale = 2 THEN InvDet.dblShipmentGrossWt ELSE LDCL.dblLinkGrossWt END dblShipmentGrossWt,
-		CASE WHEN L.intPurchaseSale = 2 THEN InvDet.dblShipmentTareWt ELSE LDCL.dblLinkTareWt END dblShipmentTareWt,
-		CASE WHEN L.intPurchaseSale = 2 THEN InvDet.dblShipmentNetWt ELSE LDCL.dblLinkNetWt END dblShipmentNetWt,
-		CASE WHEN L.intPurchaseSale = 2 THEN InvDet.dblTotal ELSE ROUND(((InvDet.dblTotal/InvDet.dblShipmentNetWt) * LDCL.dblLinkNetWt),2) END dblTotal,
+	    dblQtyOrdered = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN InvDetLot.dblQuantityShipped ELSE InvDet.dblQtyOrdered END,
+		dblQtyShipped = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN dbo.fnCalculateQtyBetweenUOM(InvDet.intOrderUOMId, InvDet.intPriceUOMId, InvDetLot.dblQuantityShipped) ELSE InvDet.dblQtyShipped END,
+		dblShipmentGrossWt = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN InvDetLot.dblGrossWeight ELSE InvDet.dblShipmentGrossWt END,
+		dblShipmentTareWt = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN InvDetLot.dblTareWeight ELSE InvDet.dblShipmentTareWt END,
+		dblShipmentNetWt = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN (InvDetLot.dblGrossWeight - InvDetLot.dblTareWeight) ELSE InvDet.dblShipmentNetWt END,
+		dblTotal = CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN dbo.fnCalculateQtyBetweenUOM(InvDet.intOrderUOMId, InvDet.intPriceUOMId, InvDetLot.dblQuantityShipped) * InvDet.dblPrice 
+						/ CASE WHEN (PriceCur.ysnSubCurrency = 1)  THEN PriceCur.intCent ELSE 1 END
+					ELSE InvDet.dblTotal END,
 		ISNULL(Inv.dblProvisionalAmount,0) AS dblProvisionalAmount,
 		strInvoiceCurrency = InvCur.strCurrency,
 		strPriceCurrency = PriceCur.strCurrency,
@@ -94,7 +97,7 @@ BEGIN
 		CB.strDescription AS strContractBasisDescription,
 		EM.strName AS strEntityName,
 		CUS.strFLOId,
-		ISNULL(Cont.strContainerNumber,Cont1.strContainerNumber) AS strContainerNumber,
+		Cont.strContainerNumber AS strContainerNumber,
 		Cont.strMarks,
 		Inv.dblInvoiceSubtotal,
 		Inv.dblTax,
@@ -103,9 +106,9 @@ BEGIN
 		intLineCount = @intLineCount,
 		ysnDisplayPIInfo = @ysnDisplayPIInfo,
 		L.strBLNumber,
-		strQtyShippedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(CASE WHEN L.intPurchaseSale = 2 THEN InvDet.dblShipmentNetWt ELSE LDCL.dblLinkNetWt END)) + ' ' + WtUOM.strUnitMeasure + CHAR(13) +
-							LTRIM(dbo.fnRemoveTrailingZeroes(CASE WHEN L.intPurchaseSale = 2 THEN InvDet.dblShipmentTareWt ELSE LDCL.dblLinkTareWt END)) + ' ' + WtUOM.strUnitMeasure + ' Tare' + CHAR(13) +
-							LTRIM(dbo.fnRemoveTrailingZeroes(CASE WHEN L.intPurchaseSale = 2 THEN InvDet.dblQtyShipped ELSE LD.dblQuantity END)) + ' ' + OrWtUOM.strUnitMeasure + CHAR(13) 
+		strQtyShippedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN (InvDetLot.dblGrossWeight - InvDetLot.dblTareWeight) ELSE InvDet.dblShipmentNetWt END)) + ' ' + WtUOM.strUnitMeasure + CHAR(13) +
+							LTRIM(dbo.fnRemoveTrailingZeroes(CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN InvDetLot.dblTareWeight ELSE InvDet.dblShipmentTareWt END)) + ' ' + WtUOM.strUnitMeasure + ' Tare' + CHAR(13) +
+							LTRIM(dbo.fnRemoveTrailingZeroes(CASE WHEN (InvDetLot.intLotId IS NOT NULL) THEN dbo.fnCalculateQtyBetweenUOM(InvDet.intOrderUOMId, InvDet.intPriceUOMId, InvDetLot.dblQuantityShipped) ELSE InvDet.dblQtyShipped END)) + ' ' + OrWtUOM.strUnitMeasure + CHAR(13) 
 	FROM tblARInvoice Inv
 	JOIN vyuCTEntity EN ON EN.intEntityId = Inv.intEntityCustomerId AND strEntityType = 'Customer'
 	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
@@ -125,13 +128,11 @@ BEGIN
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = InvDet.intLoadDetailId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId	
-	LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = LDL.intLotId
-	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
+	LEFT JOIN tblARInvoiceDetailLot InvDetLot ON InvDetLot.intInvoiceDetailId = InvDet.intInvoiceDetailId
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = InvDetLot.intLotId
+	LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intLotId = Lot.intLotId
 	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadContainer Cont ON Cont.intLoadContainerId = ReceiptItem.intContainerId
-	LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-	LEFT JOIN tblLGLoadContainer Cont1 ON Cont1.intLoadContainerId = LDCL.intLoadContainerId
 	LEFT JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 	LEFT JOIN tblARCustomer CUS ON CUS.intEntityId = EM.intEntityId
 	WHERE Inv.intInvoiceId = @intInvoiceId

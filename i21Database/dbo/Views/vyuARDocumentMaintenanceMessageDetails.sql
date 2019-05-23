@@ -3,19 +3,17 @@ AS
 SELECT intDocumentMaintenanceId
 	 , strCode
 	 , strTitle
-	 , strHeader	= ISNULL(Header,'') COLLATE Latin1_General_CI_AS
-	 , strFooter	= ISNULL(Footer,'') COLLATE Latin1_General_CI_AS
+	 , strHeader	= ISNULL(strMessage,'') COLLATE Latin1_General_CI_AS
+	 , strFooter	= ISNULL(strMessageFooter,'') COLLATE Latin1_General_CI_AS
+	 , strMessageHtml
 FROM (
 	SELECT intDocumentMaintenanceId
 		 , strCode
 		 , strTitle
 		 , strHeaderFooter
 		 , strMessage
+		 , strMessageHtml
+		 , strMessageFooter
+		 , strMessageHtmlFooter
 	FROM vyuARDocumentMaintenanceMessage
 ) tblARMessages
-PIVOT (
-	MAX(strMessage)
-	FOR strHeaderFooter
-	IN (Header, Footer)--, strHeaderFooter)
-) AS U
-

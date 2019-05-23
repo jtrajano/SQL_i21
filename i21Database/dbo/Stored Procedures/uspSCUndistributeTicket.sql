@@ -139,7 +139,7 @@ BEGIN TRY
 							UNIQUE ([intInventoryReceiptId])
 						);
 						INSERT INTO #tmpItemReceiptIds(intInventoryReceiptId,strReceiptNumber,ysnPosted) SELECT DISTINCT(intInventoryReceiptId),strReceiptNumber,ysnPosted FROM vyuICGetInventoryReceiptItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
-				
+                
 						DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 						FOR
 						SELECT intInventoryReceiptId,  strReceiptNumber, ysnPosted
@@ -152,6 +152,7 @@ BEGIN TRY
 
 						WHILE @@FETCH_STATUS = 0
 						BEGIN
+
 							IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
 								DROP TABLE #tmpVoucherDetail
 							CREATE TABLE #tmpVoucherDetail (
@@ -161,17 +162,14 @@ BEGIN TRY
 							INSERT INTO #tmpVoucherDetail(intBillId)SELECT DISTINCT(AP.intBillId) FROM tblAPBillDetail AP
 							LEFT JOIN tblICInventoryReceiptItem IC ON IC.intInventoryReceiptItemId = AP.intInventoryReceiptItemId
 							WHERE IC.intInventoryReceiptId = @InventoryReceiptId
-					
+							SELECT @InventoryReceiptId
 							DECLARE voucherCursor CURSOR LOCAL FAST_FORWARD
 							FOR
 							SELECT intBillId FROM #tmpVoucherDetail
-
 							OPEN voucherCursor;
-
 							FETCH NEXT FROM voucherCursor INTO @intBillId;
-
 							WHILE @@FETCH_STATUS = 0
-							BEGIN
+							BEGIN								
 								EXEC [dbo].[uspAPDeletePayment] @intBillId, @intUserId
 								SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
 								IF @ysnPosted = 1
@@ -195,6 +193,11 @@ BEGIN TRY
 									END
 								END
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+								/*
+									uspAPDeleteVoucher removes the payables from Voucher
+									uspICPostInventoryReceipt deletes payable
+								*/
+								--EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 0, @strErrorMessage = @ErrorMessage OUT, @intBillId = DEFAULT
 								FETCH NEXT FROM voucherCursor INTO @intBillId;
 							END
 
@@ -243,8 +246,25 @@ BEGIN TRY
 								BEGIN
 									EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
 									SET @dblMatchDeliveredQuantity = @dblMatchDeliveredQuantity * -1;
-									EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
-									EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
+									/*For Match Ticket */
+									IF(@strMatchTicketStatus = 'O')
+									BEGIN
+										EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
+										EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
+									END
+
+									SELECT @intLoadContractId = intContractId,@dblLoadScheduledUnits = dblNetUnits*-1 FROM tblSCTicket WHERE intTicketId = @intTicketId
+									EXEC uspCTUpdateSequenceBalance @intLoadContractId, @dblLoadScheduledUnits, @intUserId, @intTicketId, 'Scale'
+
+									DECLARE @dblToUpdateQty DECIMAL(18,6)
+									SET @dblToUpdateQty = @dblLoadScheduledUnits *-1
+									EXEC uspCTUpdateScheduleQuantity
+														@intContractDetailId	=	@intLoadContractId,
+														@dblQuantityToUpdate	=	@dblToUpdateQty,
+														@intUserId				=	@intUserId,
+														@intExternalId			=	@intTicketId,
+														@strScreenName			=	'Scale'	
+									
 									UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intLoadId = @intMatchLoadId
 								END
 							END
@@ -374,6 +394,28 @@ BEGIN TRY
 						END
 						IF ISNULL(@intInvoiceId, 0) > 0
 							EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+
+						/* For Direct Out Undistribute */
+						DECLARE @strTicketType VARCHAR(MAX)
+						DECLARE @dblNetUnit DECIMAL(18,6)
+						DECLARE @_intContractDetailId INT
+						SELECT @strTicketType = strTicketType,@dblNetUnit = dblNetUnits*-1,@_intContractDetailId = intContractId FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
+
+						IF(@strTicketType = 'Direct Out')
+						BEGIN
+						SELECT @dblNetUnit
+						
+							EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblNetUnit, @intUserId, @intTicketId, 'Scale'
+							SET @dblNetUnit = @dblNetUnit *-1
+							EXEC uspCTUpdateScheduleQuantity
+												@intContractDetailId	=	@_intContractDetailId,
+												@dblQuantityToUpdate	=	@dblNetUnit,
+												@intUserId				=	@intUserId,
+												@intExternalId			=	@intTicketId,
+												@strScreenName			=	'Scale'	
+												
+						END
+
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
 					END 
 					ELSE

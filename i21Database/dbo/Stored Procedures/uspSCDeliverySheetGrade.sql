@@ -20,7 +20,7 @@ DECLARE @strItemNo AS NVARCHAR(MAX)
 		,@intDiscountScheduleCodeId AS INT
 		,@total AS DECIMAL(38,20)
 		,@counter AS INT;
-CREATE TABLE #DeliverySheetGrade (Item VARCHAR(50),intDiscountScheduleCodeId INT, Amount NUMERIC(38,6),intDecimalPrecision INT,intDeliverySheetId INT)
+CREATE TABLE #DeliverySheetGrade (Item VARCHAR(50),intDiscountScheduleCodeId INT, Amount NUMERIC(38,6),intDecimalPrecision INT,intDeliverySheetId INT,DiscountAmount NUMERIC(38,6))
 
 INSERT INTO #DeliverySheetGrade (Item, intDiscountScheduleCodeId)
 SELECT DISTINCT IC.strItemNo,GR.intDiscountScheduleCodeId FROM tblSCDeliverySheet SCD
@@ -50,13 +50,19 @@ FETCH NEXT FROM intListCursor INTO @strItemNo, @intDiscountScheduleCodeId;
 WHILE @@FETCH_STATUS = 0
 BEGIN
 	
-	UPDATE #DeliverySheetGrade SET Amount = 
-	ISNULL((SELECT SUM(((SCT.dblNetUnits / @total) * QM.dblGradeReading)) FROM 
-	tblSCDeliverySheet SCD
-	INNER JOIN tblSCTicket SCT ON SCT.intDeliverySheetId = SCD.intDeliverySheetId
-	LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = SCD.intDeliverySheetId AND QM.strSourceType = 'Delivery Sheet'
-	WHERE SCD.intDeliverySheetId = @intDeliverySheetId 
-	AND QM.intDiscountScheduleCodeId = @intDiscountScheduleCodeId), 0) WHERE Item = @strItemNo;
+	UPDATE #DeliverySheetGrade 
+	SET Amount = A.dblAmount
+		,DiscountAmount = A.dblDiscountAmount	
+	FROM ( 
+		SELECT dblAmount = ISNULL(SUM(((SCT.dblNetUnits / @total) * QM.dblGradeReading)),0) 
+			,dblDiscountAmount = MAX(QM.dblDiscountAmount)
+		FROM 
+		tblSCDeliverySheet SCD
+		INNER JOIN tblSCTicket SCT ON SCT.intDeliverySheetId = SCD.intDeliverySheetId
+		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = SCD.intDeliverySheetId AND QM.strSourceType = 'Delivery Sheet'
+		WHERE SCD.intDeliverySheetId = @intDeliverySheetId 
+		AND QM.intDiscountScheduleCodeId = @intDiscountScheduleCodeId) A
+	WHERE Item = @strItemNo
 	
 	UPDATE #DeliverySheetGrade SET intDecimalPrecision = (SELECT TOP 1 intCurrencyDecimal FROM tblSMCompanyPreference)
 

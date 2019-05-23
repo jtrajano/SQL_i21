@@ -37,8 +37,8 @@ SELECT
 			ELSE 
 				ItemLocation.strLocationName
 		END
-	,dblRunningQuantity = ISNULL(t.dblQuantityInStockUOM, 0)
-	,dblRunningValue = ISNULL(t.dblValue, 0) 
+	,dblRunningQuantity = ISNULL(ROUND(t.dblQuantityInStockUOM, 6), 0)
+	,dblRunningValue = ISNULL(ROUND(t.dblValue, 6), 0) 
 	,dblRunningLastCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblLastCost, 2), 0)
 	,dblRunningStandardCost = ISNULL(ROUND(dblQuantityInStockUOM * ItemPricing.dblStandardCost, 2),0)
 	,dblRunningAverageCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblAverageCost, 2), 0)
@@ -85,33 +85,14 @@ FROM	tblGLFiscalYearPeriod f
 				,t.intInTransitSourceLocationId
 			FROM 
 				tblICInventoryTransaction t 
-				CROSS APPLY (
-					SELECT TOP 1
-						f.strPeriod
-						,f.intGLFiscalYearPeriodId
-					FROM 
-						tblGLFiscalYearPeriod f	INNER JOIN tblGLCurrentFiscalYear c 
-							ON c.intFiscalYearId = f.intFiscalYearId
-							AND f.ysnOpen = 1 
-						INNER JOIN tblGLFiscalYear y 
-							ON y.intFiscalYearId = f.intFiscalYearId 					
-					WHERE
-						dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
-					ORDER BY 
-						f.dtmEndDate ASC 
-				) fy
-
 			WHERE
-				fy.intGLFiscalYearPeriodId = f.intGLFiscalYearPeriodId
+				dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
 				AND t.intItemId = Item.intItemId
 				AND t.intItemLocationId = Item.intItemLocationId
-				AND t.dblQty <> 0 
 			GROUP BY 
 				t.intItemId
 				,t.intItemLocationId
 				,t.intInTransitSourceLocationId				
-			HAVING 
-				SUM(ISNULL(t.dblQty, 0)) <> 0 
 		) t
 		OUTER APPLY (
 			SELECT TOP 1 

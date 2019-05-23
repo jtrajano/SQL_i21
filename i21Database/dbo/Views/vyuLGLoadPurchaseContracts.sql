@@ -21,7 +21,8 @@ FROM (
 		,Item.intCommodityId
 		,LD.intItemId
 		,CT.intItemUOMId
-		,intSubLocationId = NULL
+		,intSubLocationId = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
+		,intStorageLocationId = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
 		,intLocationId = L.intCompanyLocationId
 		,LD.dblQuantity
 		,dblReceivedQty = 0.0
@@ -68,7 +69,8 @@ FROM (
 				WHERE ysnStockUnit = 1
 					AND ItemUOM.intItemUOMId = CT.intItemUOMId
 				), 0)
-		,strSubLocationName = '' COLLATE Latin1_General_CI_AS
+		,strSubLocationName = ISNULL(LW.strSubLocation, CLSL.strSubLocationName)
+		,strStorageLocationName = ISNULL(LW.strStorageLocation, SL.strName)
 		,intCompanyLocationId = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
 		,CT.dblCashPrice
 		,dbo.fnCTConvertQtyToTargetItemUOM(CT.intItemUOMId, CT.intPriceItemUOMId, CT.dblCashPrice) AS dblCashPriceInQtyUOM
@@ -114,16 +116,22 @@ FROM (
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 	JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CT.intSubLocationId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CT.intStorageLocationId
 	LEFT JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 	LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 	LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = CT.intPriceItemUOMId
 	LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PU.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CT.intCurrencyId
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CT.intCurrencyId
---	LEFT JOIN tblSMCurrency LC ON LC.intCurrencyID = L.intCurrencyId
 	LEFT JOIN tblSMCurrency LCU ON LCU.intCurrencyID = L.intCurrencyId
-	LEFT JOIN (tblICInventoryReceipt receipt INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
-	ON LD.intLoadDetailId = receiptItem.intSourceId AND receipt.intSourceType = 2
+	LEFT JOIN (tblICInventoryReceipt receipt 
+				INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
+				ON LD.intLoadDetailId = receiptItem.intSourceId AND receipt.intSourceType = 2
+	OUTER APPLY (SELECT TOP 1 W.intSubLocationId, W.intStorageLocationId, strSubLocation = CLSL.strSubLocationName, strStorageLocation = SL.strName FROM tblLGLoadWarehouse W
+				LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
+				LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
+				WHERE intLoadId = L.intLoadId) LW
 	WHERE L.ysnPosted = 1 AND L.intPurchaseSale IN (1, 3) 
 		AND (L.intShipmentStatus IN (1,3) OR (L.intPurchaseSale = 3 AND L.intShipmentStatus = 6))
 ) t1

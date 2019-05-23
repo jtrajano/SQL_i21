@@ -229,30 +229,8 @@ BEGIN
 		BEGIN
 			SET @intSalesPersonId = NULL
 		END
-	IF(@intSiteId = 0)
-		BEGIN
-			SELECT TOP 1 @intSiteId = intSiteId 
-						,@intCustomerLocationId = intARLocationId
-						,@intTaxMasterId = intTaxGroupId
-						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
-						,@strSiteType = strSiteType
-						FROM tblCFSite
-						WHERE strSiteNumber = @strSiteId
 
-			IF (@intSiteId = 0)
-			BEGIN 
-				SET @intSiteId = NULL
-			END
-		END
-		ELSE
-		BEGIN
-			SELECT TOP 1 @intCustomerLocationId = intARLocationId
-						,@intTaxMasterId = intTaxGroupId
-						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
-						,@strSiteType = strSiteType
-						FROM tblCFSite
-						WHERE intSiteId = @intSiteId
-		END
+	
 
 	IF(@intNetworkId = 0)
 		BEGIN
@@ -277,6 +255,40 @@ BEGIN
 			,@intNetworkLocation	= intLocationId
 			FROM tblCFNetwork
 			WHERE intNetworkId = @intNetworkId
+		END
+
+	IF(@intSiteId = 0)
+		BEGIN
+			SELECT TOP 1 @intSiteId = intSiteId 
+						,@intCustomerLocationId = intARLocationId
+						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
+						,@strSiteType = strSiteType
+						FROM tblCFSite
+						WHERE strSiteNumber = @strSiteId
+						AND intNetworkId = @intNetworkId
+
+			IF (@intSiteId = 0)
+			BEGIN 
+				SET @intSiteId = NULL
+			END
+		END
+		ELSE
+		BEGIN
+			DECLARE @tempSiteId AS INT = 0
+			SELECT TOP 1 @tempSiteId = intSiteId 
+						,@intCustomerLocationId = intARLocationId
+						,@intTaxMasterId = intTaxGroupId
+						,@ysnSiteAcceptCreditCard = ysnSiteAcceptsMajorCreditCards
+						,@strSiteType = strSiteType
+						FROM tblCFSite
+						WHERE intSiteId = @intSiteId
+						AND intNetworkId = @intNetworkId
+
+			IF (ISNULL(@tempSiteId,0) = 0)
+			BEGIN 
+				SET @intSiteId = NULL
+			END
 		END
 
 	
@@ -1059,6 +1071,12 @@ BEGIN
 	FROM tblCFAccount 
 	WHERE intAccountId = @intAccountId
 
+	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
+	BEGIN
+		SET @strPONumber = ''
+		SELECT TOP 1 @strPONumber = strPurchaseOrderNo FROM tblCFPurchaseOrder WHERE intAccountId = @intAccountId AND  DATEADD(dd, DATEDIFF(dd, 0, dtmExpirationDate), 0) >= DATEADD(dd, DATEDIFF(dd, 0, @dtmTransactionDate), 0) ORDER BY dtmExpirationDate ASC
+	END
+
 
 	IF(@intAccountId IS NOT NULL AND @intAccountId != 0)
 	BEGIN
@@ -1111,7 +1129,7 @@ BEGIN
 
 				SET @intVehicleId =
 				(SELECT TOP 1 intVehicleId
-				FROM @tblCFNumericVehicle
+				FROM @tblCFCharVehicle
 				WHERE strVehicleNumber = @strVehicleId)
 
 			END

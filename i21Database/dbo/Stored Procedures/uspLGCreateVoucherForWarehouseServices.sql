@@ -10,10 +10,6 @@ BEGIN TRY
 	DECLARE @intMinRecord AS INT
 	DECLARE @intMinInventoryReceiptId AS INT
 	DECLARE @intMinItemRecordId AS INT
-	DECLARE @VoucherDetailLoadNonInvAll AS VoucherDetailLoadNonInv
-	DECLARE @VoucherDetailLoadNonInv AS VoucherDetailLoadNonInv
-	DECLARE @voucherDetailReceipt AS VoucherDetailReceipt
-	DECLARE @voucherDetailReceiptCharge AS VoucherDetailReceiptCharge
 	DECLARE @voucherPayable AS VoucherPayable
 	DECLARE @voucherPayableToProcess AS VoucherPayable
 	DECLARE @intItemId INT
@@ -48,6 +44,8 @@ BEGIN TRY
 		,intItemUOMId INT
 		,dblUnitQty DECIMAL(38,20)
 		,dblCostUnitQty DECIMAL(38,20)
+		,intSubLocationId INT
+		,intStorageLocationId INT
 		)
 	DECLARE @distinctVendor TABLE (
 		intRecordId INT Identity(1, 1)
@@ -148,6 +146,8 @@ BEGIN TRY
 		,intItemUOMId
 		,dblUnitQty
 		,dblCostUnitQty
+		,intSubLocationId
+		,intStorageLocationId
 		)
 	SELECT intVendorEntityId = ISNULL(SLCL.intVendorId, WRMH.intVendorEntityId)
 		,intLoadId = L.intLoadId
@@ -156,14 +156,18 @@ BEGIN TRY
 		,intContractDetailId = CD.intContractDetailId
 		,intItemId = Item.intItemId
 		,intAccountId = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,dblQtyReceived = CASE WHEN (WRMD.intCalculateQty = 8) THEN 1 ELSE LWS.dblQuantity END
+		,dblQtyReceived = LWS.dblQuantity
 		,dblCost = LWS.dblUnitRate / CASE WHEN (@ysnSubCurrency = 1) THEN 100 ELSE 1 END
-		,intCostUOMId = NULL
+		,intCostUOMId = LWS.intItemUOMId
 		,intWarehouseServicesId = LWS.intLoadWarehouseServicesId
 		,ysnInventoryCost = Item.ysnInventoryCost
-		,intItemUOMId = LWS.intItemUOMId
-		,dblUnitQty = 1
-		,dblCostUnitQty = 1 
+		,intItemUOMId = CASE WHEN (WRMD.intCalculateQty IN (7, 8)) THEN LWS.intItemUOMId
+							ELSE LD.intWeightItemUOMId END
+		,dblUnitQty = CASE WHEN (WRMD.intCalculateQty IN (7, 8)) THEN CostUOM.dblUnitQty
+							ELSE WeightUOM.dblUnitQty END
+		,dblCostUnitQty = 1
+		,intSubLocationId = LW.intSubLocationId
+		,intStorageLocationId = LW.intStorageLocationId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -182,6 +186,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCompanyLocationSubLocation SLCL ON SLCL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		AND ItemLoc.intLocationId = SLCL.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId 
+	LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = LD.intWeightItemUOMId 
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = LWS.intItemUOMId 
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 		AND LWS.dblActualAmount > 0
@@ -202,9 +207,11 @@ BEGIN TRY
 		,LWS.dblUnitRate
 		,LWS.intItemUOMId
 		,Item.ysnInventoryCost
-		,LD.intItemUOMId
-		,ItemUOM.dblUnitQty
+		,LD.intWeightItemUOMId
 		,CostUOM.dblUnitQty
+		,WeightUOM.dblUnitQty
+		,LW.intSubLocationId
+		,LW.intStorageLocationId
 
 	SELECT @intVendorEntityId = intVendorEntityId
 	FROM @voucherDetailData
@@ -319,7 +326,10 @@ BEGIN TRY
 			,[intSubCurrencyCents]
 			,[intAccountId]
 			,[strBillOfLading]
-			,[ysnReturn])
+			,[ysnReturn]
+			,[ysnStage]
+			,[intSubLocationId]
+			,[intStorageLocationId])
 		SELECT
 			[intEntityVendorId] = VDD.intVendorEntityId
 			,[intTransactionType] = 1
@@ -358,6 +368,9 @@ BEGIN TRY
 			,[intAccountId] = VDD.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
+			,[ysnStage] = CAST(0 AS BIT)
+			,[intSubLocationId] = VDD.intSubLocationId
+			,[intStorageLocationId] = VDD.intStorageLocationId
 		FROM @voucherDetailData VDD
 			INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 			INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
@@ -436,7 +449,9 @@ BEGIN TRY
 				,[intSubCurrencyCents]
 				,[intAccountId]
 				,[strBillOfLading]
-				,[ysnReturn])
+				,[ysnReturn]
+				,[intSubLocationId]
+				,[intStorageLocationId])
 			SELECT
 				[intEntityVendorId] = VDD.intVendorEntityId
 				,[intTransactionType] = 1
@@ -475,6 +490,8 @@ BEGIN TRY
 				,[intAccountId] = VDD.intAccountId
 				,[strBillOfLading] = L.strBLNumber
 				,[ysnReturn] = CAST(0 AS BIT)
+				,[intSubLocationId] = VDD.intSubLocationId
+				,[intStorageLocationId] = VDD.intStorageLocationId
 			FROM @voucherDetailData VDD
 				INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 				INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
@@ -559,7 +576,9 @@ BEGIN TRY
 				,[intSubCurrencyCents]
 				,[intAccountId]
 				,[strBillOfLading]
-				,[ysnReturn])
+				,[ysnReturn]
+				,[intSubLocationId]
+				,[intStorageLocationId])
 			SELECT
 				[intEntityVendorId] = VDD.intVendorEntityId
 				,[intTransactionType] = 1
@@ -599,6 +618,8 @@ BEGIN TRY
 				,[intAccountId] = VDD.intAccountId
 				,[strBillOfLading] = L.strBLNumber
 				,[ysnReturn] = CAST(0 AS BIT)
+				,[intSubLocationId] = VDD.intSubLocationId
+				,[intStorageLocationId] = VDD.intStorageLocationId
 			FROM @voucherDetailData VDD
 				INNER JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 				INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId

@@ -112,33 +112,6 @@ BEGIN TRY
 		END
 		ELSE IF (@intPurchaseSale = 3)
 		BEGIN
-			IF @intPContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
-            BEGIN
-				EXEC uspCTUpdateSequenceBalance @intContractDetailId = @intPContractDetailId
-					,@dblQuantityToUpdate = @dblLoadDetailQty
-					,@intUserId = @UserId
-					,@intExternalId = @intInvoiceDetailId
-					,@strScreenName = 'Invoice'
-			END
-
-			SET @dblInvoicedQty = NUll
-			IF @intSContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
-			BEGIN
-				SELECT @dblInvoicedQty = CASE @Post
-						WHEN 1
-							THEN dblDeliveredQuantity
-						ELSE dblDeliveredQuantity * (- 1)
-						END
-				FROM tblLGLoadDetail
-				WHERE intSContractDetailId = @intSContractDetailId AND intLoadId = @intLoadId
-
-				EXEC uspCTUpdateSequenceBalance @intContractDetailId = @intSContractDetailId
-					,@dblQuantityToUpdate	=	@dblInvoicedQty
-					,@intUserId				=	@UserId
-					,@intExternalId			=	@intInvoiceDetailId
-					,@strScreenName			=	'Invoice' 
-			END
-
 			SET @dblLoadDetailQty = -@dblLoadDetailQty
 			SET @dblInvoicedQty = NUll
             IF @intPContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL

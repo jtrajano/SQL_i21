@@ -163,6 +163,7 @@ BEGIN
 
 		SELECT TOP 1 @strDescription = strCommodityCode
 			, @ysnExchangeTraded = ysnExchangeTraded
+			, @strCommodityCode = strCommodityCode
 		FROM tblICCommodity
 		WHERE intCommodityId = @intCommodityId
 
@@ -697,15 +698,20 @@ BEGIN
 					, intFromCommodityUnitMeasureId
 					, strInventoryType = 'Collateral' COLLATE Latin1_General_CI_AS
 				FROM (
-					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmTransactionDate DESC)
-						, dblTotal = CASE WHEN c.strType = 'Purchase' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((c.dblRemainingQuantity), 0))
-										ELSE - ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((c.dblRemainingQuantity), 0))) END
+					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intCollateralId ORDER BY c.dtmOpenDate DESC)
+						, dblTotal = CASE WHEN c.strType = 'Purchase' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(c.dblOriginalQuantity, 0) - ISNULL(ca.dblAdjustmentAmount, 0))
+										ELSE - ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(c.dblOriginalQuantity, 0) -  ISNULL(ca.dblAdjustmentAmount, 0))) END
 						, intCommodityId = @intCommodityId
 						, co.strCommodityCode
 						, cl.strLocationName
 						, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-						, ysnIncludeInPriceRiskAndCompanyTitled
-					FROM tblRKCollateralHistory c
+					FROM tblRKCollateral c
+					LEFT JOIN (
+						SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
+						WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmAdjustmentDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+						GROUP BY intCollateralId
+
+					) ca on c.intCollateralId = ca.intCollateralId
 					JOIN tblICCommodity co ON co.intCommodityId = c.intCommodityId
 					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
@@ -713,8 +719,8 @@ BEGIN
 					LEFT JOIn tblCTContractDetail det ON ch.intContractDetailId = det.intContractDetailId
 					WHERE c.intCommodityId = @intCommodityId 
 						AND c.intLocationId = ISNULL(@intLocationId, c.intLocationId)
-						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-				) a WHERE a.intRowNum = 1 AND ysnIncludeInPriceRiskAndCompanyTitled = 1
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				) a WHERE a.intRowNum = 1
 			) t GROUP BY strCommodityCode
 				, strLocationName
 				, intCommodityId
@@ -742,6 +748,51 @@ BEGIN
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
 					, 'Company Titled' COLLATE Latin1_General_CI_AS
+				FROM (
+					SELECT intTicketId
+						, strTicketType
+						, strTicketNumber
+						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(dblBalance,0)))
+						, ch.intCompanyLocationId
+						, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, dtmTicketDateTime
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, strCommodityCode
+					FROM #tblGetStorageDetailByDate ch
+					WHERE ch.intCommodityId  = @intCommodityId
+						AND ysnDPOwnedType = 1
+						AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
+					)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				GROUP BY strCommodityCode
+					, strItemNo
+					, strCategory
+					, strLocationName
+					, intCommodityId
+					, intFromCommodityUnitMeasureId
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @InventoryStock(strCommodityCode
+					, strItemNo
+					, strCategory
+					, dblTotal
+					, strLocationName
+					, intCommodityId
+					, intFromCommodityUnitMeasureId
+					, strInventoryType)
+				SELECT strCommodityCode
+					, strItemNo
+					, strCategory
+					, dblTotal = -sum(dblTotal)
+					, strLocationName
+					, intCommodityId
+					, intFromCommodityUnitMeasureId
+					, 'Delayed Pricing' COLLATE Latin1_General_CI_AS
 				FROM (
 					SELECT intTicketId
 						, strTicketType
@@ -912,43 +963,46 @@ BEGIN
 				, strDeliveryDate
 			FROM (
 				SELECT cd.intContractHeaderId
-					, cd.strContractNumber
-					, cd.intCommodityId
-					, cd.strCommodityCode
+					, ch.strContractNumber
+					, ch.intCommodityId
+					, strCommodityCode = @strCommodityCode
 					, strType = 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS
 					, cd.intCompanyLocationId
-					, cd.strLocationName
+					, cl.strLocationName
 					, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
 					, strContractEndMonthNearBy = 'Near By' COLLATE Latin1_General_CI_AS
 					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(v.dblQuantity ,0))
+					, sblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(v.dblQuantity ,0))
 					, intSeqNo = 5
 					, um.strUnitMeasure
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-					, cd.strEntityName
+					, strEntityName = v.strEntity
 					, intOrderId = 5
 					, v.intItemId
 					, v.strItemNo
 					, v.intCategoryId
 					, v.strCategory
 					, cd.intFutureMarketId
-					, cd.strFutMarketName
+					, fm.strFutMarketName
 					, cd.intFutureMonthId
-					, cd.strFutureMonth
-					, strDeliveryDate = dbo.fnRKFormatDate(det.dtmEndDate, 'MMM yyyy')
-					--, strDeliveryDate = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8)
-					--						ELSE RIGHT(CONVERT(VARCHAR(11), CONVERT(DATETIME, REPLACE(cd.strFutureMonth, ' ', ' 1, ')) , 106), 8) END
+					, mnt.strFutureMonth
+					, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
+					, strTicketNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
 				FROM vyuRKGetInventoryValuation v
 				JOIN tblICInventoryReceipt r ON r.strReceiptNumber = v.strTransactionId
-				INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
-				INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT') AND ISNULL(ysnInTransit, 0) = 0
-				INNER JOIN @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
-				JOIN (SELECT intContractDetailId, dtmEndDate FROM tblCTContractDetail) det ON cd.intContractDetailId = det.intContractDetailId
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
-				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
-				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = st.intProcessingLocationId
-				WHERE v.strTransactionType = 'Inventory Receipt' AND cd.intCommodityId = @intCommodityId
-					AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate) AND ISNULL(strTicketStatus, '') <> 'V'
+				INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND ri.intInventoryReceiptItemId = v.intTransactionDetailId AND r.strReceiptType = 'Purchase Contract'
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+				INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 1
+				INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
+				INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
+				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
+				LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
+				LEFT JOIN tblAPBillDetail bd on ch.intContractHeaderId = bd.intContractHeaderId and bd.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+				WHERE v.strTransactionType = 'Inventory Receipt' AND ch.intCommodityId = @intCommodityId
+					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate) 
+					AND bd.intBillId is null --Removed in the list if has a voucher (means already priced)
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			GROUP BY intContractHeaderId
 				, strContractNumber
@@ -972,6 +1026,7 @@ BEGIN
 				, intFutureMonthId
 				, strFutureMonth
 				, strDeliveryDate
+				, strTicketNumber
 		END
 		SELECT @mRowNumber = MIN(intCommodityIdentity)
 		FROM @Commodity
@@ -1204,10 +1259,36 @@ SELECT strCommodityCode
 	, intCommodityId
 	, intFromCommodityUnitMeasureId
 	, intOrderId = 7
+	, 'Delayed Pricing' COLLATE Latin1_General_CI_AS
+	, strInventoryType
+FROM @InventoryStock
+WHERE strInventoryType IN ('Delayed Pricing')
+
+INSERT INTO @List (strCommodityCode
+	, strItemNo
+	, strCategory
+	, dblTotal
+	, strContractEndMonth
+	, strLocationName
+	, intCommodityId
+	, intFromCommodityUnitMeasureId
+	, intOrderId
+	, strType
+	, strInventoryType)
+SELECT strCommodityCode
+	, strItemNo
+	, strCategory
+	, dblTotal
+	, 'Near By' COLLATE Latin1_General_CI_AS
+	, strLocationName
+	, intCommodityId
+	, intFromCommodityUnitMeasureId
+	, intOrderId = 8
 	, 'Company Titled' COLLATE Latin1_General_CI_AS
 	, strInventoryType
 FROM @InventoryStock
 WHERE strInventoryType IN ('Company Titled', 'Collateral')
+
 
 INSERT INTO @List (strCommodityCode
 	, dblTotal
@@ -1259,7 +1340,7 @@ SELECT strCommodityCode
 	, strContractEndMonth
 	, strContractEndMonthNearBy = strContractEndMonth
 	, intContractHeaderId
-FROM @List WHERE intOrderId in(1, 2, 3, 4, 5, 6, 7)
+FROM @List WHERE intOrderId in(1, 2, 3, 4, 5, 6, 7, 8)
 
 INSERT INTO @List (strCommodityCode
 	, intCommodityId
@@ -1626,7 +1707,7 @@ INSERT INTO @List (strCommodityCode,dblTotal,strContractEndMonth,strLocationName
 SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,23 intOrderId,'Net Unpriced Position' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @List where intOrderId in(19, 20, 21, 22)
 
 INSERT INTO @List (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
-SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @List where intOrderId in(1, 2, 5, 6, 7, 19, 20)
+SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @List where intOrderId in(1, 2, 8, 19, 20)
 
 INSERT INTO @List (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
 SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,26 intOrderId,'Price Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @List where intOrderId in(9, 16)
@@ -1872,6 +1953,52 @@ UPDATE @ListFinal SET strContractEndMonthNearBy = CASE
 UPDATE @ListFinal SET strContractEndMonthNearBy = NULL, strFutureMonth = NULL, strDeliveryDate = NULL
 WHERE ISNULL(intContractHeaderId, '') = '' AND ISNULL(strInternalTradeNo, '') = ''
 
+INSERT INTO @ListFinal (strCommodityCode
+	, strContractNumber
+	, intContractHeaderId
+	, strInternalTradeNo
+	, intFutOptTransactionHeaderId
+	, intOrderId
+	, strType
+	, strContractEndMonth
+	, dblTotal
+	, intItemId
+	, strItemNo
+	, intCategoryId
+	, strCategory
+	, intFutureMarketId
+	, strFutMarketName
+	, intFutureMonthId
+	, strFutureMonth
+	, strDeliveryDate
+	, strBrokerTradeNo
+	, strNotes
+	, ysnPreCrush)
+SELECT DISTINCT strCommodityCode
+	, strContractNumber = NULL
+	, intContractHeaderId = NULL
+	, strInternalTradeNo = NULL
+	, intFutOptTransactionHeaderId = NULL
+	, intOrderId
+	, strType
+	, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
+	, NULL
+	, intItemId
+	, strItemNo
+	, intCategoryId
+	, strCategory
+	, intFutureMarketId
+	, strFutMarketName
+	, intFutureMonthId
+	, strFutureMonth
+	, strDeliveryDate
+	, strBrokerTradeNo
+	, strNotes
+	, ysnPreCrush
+FROM @ListFinal
+WHERE intOrderId IS NOT NULL
+
+
 SELECT intSeqNo = intOrderId
 	, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
 	, strCommodityCode
@@ -1905,7 +2032,7 @@ SELECT intSeqNo = intOrderId
 	, strBrokerTradeNo
 	, strNotes
 	, ysnPreCrush
-FROM @ListFinal WHERE (ISNULL(dblTotal, 0) <> 0 OR strType = 'Crush')
-ORDER BY intSeqNo
-	, CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+FROM @ListFinal WHERE ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
+ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+	, intSeqNo
 	, strType

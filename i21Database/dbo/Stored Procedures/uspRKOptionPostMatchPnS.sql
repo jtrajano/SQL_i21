@@ -1,7 +1,6 @@
 ﻿CREATE PROC [dbo].[uspRKOptionPostMatchPnS]
 		@strMatchedRecId nvarchar(Max)
 AS
-
 BEGIN TRY
 	DECLARE @ErrMsg nvarchar(Max) 	
 	DECLARE @intMatchNo int	
@@ -14,24 +13,26 @@ SELECT @intMatchNo=isnull(max(intMatchNo),0)  from tblRKStgOptionMatchPnS
  BEGIN TRANSACTION    
 
 SELECT ROW_NUMBER() OVER (ORDER BY strFutMarketName) + @intMatchNo intMatchNo,dtmMatchDate,strCurrency,strLocationName,
-	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,getdate() dtmPostingDate,@strUserName strUserName into #temp
+	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,getdate() dtmPostingDate,
+	@strUserName strUserName,intCommodityId into #temp
  FROM (
 SELECT 
 dtmMatchDate,
 	strCurrency,
 strLocationName,strAccountNumber,strFutMarketName,strOptionMonth,strMLBook strBook,strMLSubBook strSubBook,
-strName strBrokerName ,sum(dblImpact) dblGrossPnL
+strName strBrokerName ,sum(dblImpact) dblGrossPnL,com.intCommodityId
 FROM vyuRKSOptionMatchedTransaction ft
 JOIN tblSMCurrency c on c.intCurrencyID=CASE WHEN ft.ysnSubCurrency=1 then (select intMainCurrencyId from tblSMCurrency where ysnSubCurrency=1) else intCurrencyId end
+join tblICCommodity com on com.strCommodityCode=ft.strCommodityCode
 WHERE intMatchOptionsPnSId in(
 	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strMatchedRecId, ',')) 
-GROUP BY dtmMatchDate,strCurrency,strLocationName,strFutMarketName,strOptionMonth,strMLBook,strMLSubBook,strName,strAccountNumber)t
+GROUP BY dtmMatchDate,strCurrency,strLocationName,strFutMarketName,strOptionMonth,strMLBook,strMLSubBook,strName,strAccountNumber,com.intCommodityId)t
 
 INSERT INTO [tblRKStgOptionMatchPnS] (intConcurrencyId,intMatchNo,dtmMatchDate,strCurrency,strLocationName,
-	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName,ysnPost)
+	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName,ysnPost,intCommodityId)
 select 1,intMatchNo,dtmMatchDate,strCurrency,strLocationName,
-	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName,1 from #temp
-
+	strFutMarketName,strOptionMonth,strBook,strSubBook,strBrokerName,strAccountNumber,dblGrossPnL,dtmPostingDate,strUserName,1,intCommodityId from #temp
+	
 UPDATE tblRKOptionsMatchPnS
 SET intMatchNo = t2.intMatchNo, ysnPost = 1, dtmPostDate=GetDATE()
 
@@ -64,4 +65,4 @@ BEGIN CATCH
   RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
  END  
    
-END CATCH 
+END CATCH

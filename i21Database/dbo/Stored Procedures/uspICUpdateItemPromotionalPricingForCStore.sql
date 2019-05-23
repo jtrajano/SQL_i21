@@ -145,131 +145,204 @@ END
 IF EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog)
 BEGIN 
 	
-	INSERT INTO tblSMAuditLog(
-			strActionType
-			, strTransactionType
-			, strRecordNo
-			, strDescription
-			, strRoute
-			, strJsonData
-			, dtmDate
-			, intEntityId
-			, intConcurrencyId
-	)
-	-- Add audit logs for Promotional Retail Price
-	SELECT 
-			strActionType = 'Updated'
-			, strTransactionType = 'Inventory.view.Item'
-			, strRecordNo = intItemId
-			, strDescription = ''
-			, strRoute = null 
-			, strJsonData = 
-				dbo.fnFormatMessage(
-					'{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
-					, CAST(intItemId AS NVARCHAR(20)) 
-					, dbo.fnFormatMessage(
-						'{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
-						, 'C-Store updates the Promotional Retail Price'
-						, dblOldUnitAfterDiscount
-						, dblNewUnitAfterDiscount
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-					) 
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-				) 
-			, dtmDate = GETUTCDATE()
-			, intEntityId = @intEntityUserSecurityId 
-			, intConcurrencyId = 1
-	FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
-	WHERE	ISNULL(dblOldUnitAfterDiscount, 0) <> ISNULL(dblNewUnitAfterDiscount, 0)
-	-- Add audit logs for Promotional Begin Date
-	UNION ALL 
-	SELECT 
-			strActionType = 'Updated'
-			, strTransactionType = 'Inventory.view.Item'
-			, strRecordNo = intItemId
-			, strDescription = ''
-			, strRoute = null 
-			, strJsonData = 
-				dbo.fnFormatMessage(
-					'{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
-					, CAST(intItemId AS NVARCHAR(20)) 
-					, dbo.fnFormatMessage(
-						'{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
-						, 'C-Store updates the Promotional Begin Date'
-						, dtmOldBeginDate
-						, dtmNewBeginDate
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-					) 
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-				) 
-			, dtmDate = GETUTCDATE()
-			, intEntityId = @intEntityUserSecurityId 
-			, intConcurrencyId = 1
-	FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
-	WHERE	ISNULL(dtmOldBeginDate, 0) <> ISNULL(dtmNewBeginDate, 0)
-	-- Add audit logs for Promotional End Date
-	UNION ALL 
-	SELECT 
-			strActionType = 'Updated'
-			, strTransactionType = 'Inventory.view.Item'
-			, strRecordNo = intItemId
-			, strDescription = ''
-			, strRoute = null 
-			, strJsonData = 
-				dbo.fnFormatMessage(
-					'{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
-					, CAST(intItemId AS NVARCHAR(20)) 
-					, dbo.fnFormatMessage(
-						'{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
-						, 'C-Store updates the Promotional End Date'
-						, dtmOldEndDate
-						, dtmNewEndDate
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-						, DEFAULT
-					) 
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-					, DEFAULT
-				) 
-			, dtmDate = GETUTCDATE()
-			, intEntityId = @intEntityUserSecurityId 
-			, intConcurrencyId = 1
-	FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
-	WHERE	ISNULL(dtmOldEndDate, 0) <> ISNULL(dtmNewEndDate, 0)
+	--INSERT INTO tblSMAuditLog(
+	--		strActionType
+	--		, strTransactionType
+	--		, strRecordNo
+	--		, strDescription
+	--		, strRoute
+	--		, strJsonData
+	--		, dtmDate
+	--		, intEntityId
+	--		, intConcurrencyId
+	--)
+	---- Add audit logs for Promotional Retail Price
+	--SELECT 
+	--		strActionType = 'Updated'
+	--		, strTransactionType = 'Inventory.view.Item'
+	--		, strRecordNo = intItemId
+	--		, strDescription = ''
+	--		, strRoute = null 
+	--		, strJsonData = 
+	--			dbo.fnFormatMessage(
+	--				'{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
+	--				, CAST(intItemId AS NVARCHAR(20)) 
+	--				, dbo.fnFormatMessage(
+	--					'{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
+	--					, 'C-Store updates the Promotional Retail Price'
+	--					, dblOldUnitAfterDiscount
+	--					, dblNewUnitAfterDiscount
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--				) 
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--			) 
+	--		, dtmDate = GETUTCDATE()
+	--		, intEntityId = @intEntityUserSecurityId 
+	--		, intConcurrencyId = 1
+	--FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+	--WHERE	ISNULL(dblOldUnitAfterDiscount, 0) <> ISNULL(dblNewUnitAfterDiscount, 0)
+	---- Add audit logs for Promotional Begin Date
+	--UNION ALL 
+	--SELECT 
+	--		strActionType = 'Updated'
+	--		, strTransactionType = 'Inventory.view.Item'
+	--		, strRecordNo = intItemId
+	--		, strDescription = ''
+	--		, strRoute = null 
+	--		, strJsonData = 
+	--			dbo.fnFormatMessage(
+	--				'{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
+	--				, CAST(intItemId AS NVARCHAR(20)) 
+	--				, dbo.fnFormatMessage(
+	--					'{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
+	--					, 'C-Store updates the Promotional Begin Date'
+	--					, dtmOldBeginDate
+	--					, dtmNewBeginDate
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--				) 
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--			) 
+	--		, dtmDate = GETUTCDATE()
+	--		, intEntityId = @intEntityUserSecurityId 
+	--		, intConcurrencyId = 1
+	--FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+	--WHERE	ISNULL(dtmOldBeginDate, 0) <> ISNULL(dtmNewBeginDate, 0)
+	---- Add audit logs for Promotional End Date
+	--UNION ALL 
+	--SELECT 
+	--		strActionType = 'Updated'
+	--		, strTransactionType = 'Inventory.view.Item'
+	--		, strRecordNo = intItemId
+	--		, strDescription = ''
+	--		, strRoute = null 
+	--		, strJsonData = 
+	--			dbo.fnFormatMessage(
+	--				'{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
+	--				, CAST(intItemId AS NVARCHAR(20)) 
+	--				, dbo.fnFormatMessage(
+	--					'{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
+	--					, 'C-Store updates the Promotional End Date'
+	--					, dtmOldEndDate
+	--					, dtmNewEndDate
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--					, DEFAULT
+	--				) 
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--				, DEFAULT
+	--			) 
+	--		, dtmDate = GETUTCDATE()
+	--		, intEntityId = @intEntityUserSecurityId 
+	--		, intConcurrencyId = 1
+	--FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+	--WHERE	ISNULL(dtmOldEndDate, 0) <> ISNULL(dtmNewEndDate, 0)
+
+
+	DECLARE @auditLog_strDescription AS NVARCHAR(255) 
+			,@auditLog_actionType AS NVARCHAR(50) = 'Updated'
+			,@auditLog_id AS INT 
+			,@auditLog_Old AS NVARCHAR(255)
+			,@auditLog_New AS NVARCHAR(255)
+
+	DECLARE loopAuditLog CURSOR LOCAL FAST_FORWARD
+	FOR 	
+	SELECT	intItemId
+			,strDescription = 
+				CASE 
+					WHEN ISNULL(dblOldUnitAfterDiscount, 0) <> ISNULL(dblNewUnitAfterDiscount, 0) THEN 
+						'C-Store updates the Promotional Retail Price'
+					WHEN ISNULL(dtmOldBeginDate, 0) <> ISNULL(dtmNewBeginDate, 0) THEN 
+						'C-Store updates the Promotional Begin Date'
+					WHEN ISNULL(dtmOldEndDate, 0) <> ISNULL(dtmNewEndDate, 0) THEN 
+						'C-Store updates the Promotional End Date'
+				END 
+			,strOld = 
+				CASE 
+					WHEN ISNULL(dblOldUnitAfterDiscount, 0) <> ISNULL(dblNewUnitAfterDiscount, 0) THEN 
+						dblOldUnitAfterDiscount
+					WHEN ISNULL(dtmOldBeginDate, 0) <> ISNULL(dtmNewBeginDate, 0) THEN 
+						dtmOldBeginDate
+					WHEN ISNULL(dtmOldEndDate, 0) <> ISNULL(dtmNewEndDate, 0) THEN 
+						dtmOldEndDate
+				END  
+			,strNew = 
+				CASE 
+					WHEN ISNULL(dblOldUnitAfterDiscount, 0) <> ISNULL(dblNewUnitAfterDiscount, 0) THEN 
+						dblNewUnitAfterDiscount
+					WHEN ISNULL(dtmOldBeginDate, 0) <> ISNULL(dtmNewBeginDate, 0) THEN 
+						dtmNewBeginDate
+					WHEN ISNULL(dtmOldEndDate, 0) <> ISNULL(dtmNewEndDate, 0) THEN 
+						dtmNewEndDate
+				END 
+	FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog auditLog
+			LEFT JOIN tblICCategory category_Original
+				ON auditLog.intCategoryId_Original = category_Original.intCategoryId
+			LEFT JOIN tblICCategory category_New
+				ON auditLog.intCategoryId_New = category_New.intCategoryId
+	OPEN loopAuditLog;
+
+	FETCH NEXT FROM loopAuditLog INTO 
+		@auditLog_id
+		,@auditLog_strDescription
+		,@auditLog_Old
+		,@auditLog_New
+	;
+	WHILE @@FETCH_STATUS = 0
+	BEGIN 
+		IF @auditLog_strDescription IS NOT NULL 
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_id
+				,@screenName = 'Inventory.view.Item'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = @auditLog_strDescription
+				,@fromValue = @auditLog_Old
+				,@toValue = @auditLog_New
+		END
+		FETCH NEXT FROM loopAuditLog INTO 
+			@auditLog_id
+			,@auditLog_strDescription
+			,@auditLog_Old
+			,@auditLog_New
+		;
+	END 
+	CLOSE loopAuditLog;
+	DEALLOCATE loopAuditLog;
 END 

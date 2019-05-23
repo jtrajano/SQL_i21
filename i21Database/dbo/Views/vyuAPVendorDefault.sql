@@ -30,6 +30,10 @@ SELECT
 	B.intBillToId,
 	B.ysnPymtCtrlAlwaysDiscount,
 	CASE WHEN B.intBillToId > 0 THEN C2.strCheckPayeeName ELSE C.strCheckPayeeName END AS strPayTo,
+	strCheckPayeeAddress = CASE WHEN B.intBillToId > 0 
+			THEN ISNULL(dbo.fnConvertToFullAddress(C2.strAddress, C2.strCity, C2.strState, C.strZipCode), '')
+			ELSE ISNULL(dbo.fnConvertToFullAddress(C.strAddress, C.strCity, C.strState, C.strZipCode), '')
+		END,
 	intBookId,
 	strBook,
 	intSubBookId,

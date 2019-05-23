@@ -101,7 +101,7 @@ SELECT
 	,@TermId						= [intTermId]
 	,@Date							= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
 	,@DueDate						= NULL	--[dtmDueDate]
-	,@ShipDate						= CAST(GETDATE() AS DATE)
+	,@ShipDate						= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
 	,@PostDate						= NULL	--[dtmPostDate]
 	,@PeriodsToAccrue				= [intPeriodsToAccrue]
 	,@EntitySalespersonId			= [intEntitySalespersonId]

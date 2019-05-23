@@ -54,7 +54,10 @@ BEGIN TRY
 			@intReportLogoWidth			INT,
 			@intFirstHalfNoOfDocuments	INT,
 			@strFirstHalfDocuments		NVARCHAR(MAX),
-			@strSecondHalfDocuments		NVARCHAR(MAX)
+			@strSecondHalfDocuments		NVARCHAR(MAX),
+			@strReportTo				NVARCHAR(MAX),
+			@strOurCommn				NVARCHAR(MAX),
+			@strBrkgCommn				NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -146,7 +149,8 @@ BEGIN TRY
 	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
 	SELECT	@strCommodityCode	=	CM.strCommodityCode,
-			@ysnPrinted			=	CH.ysnPrinted
+			@ysnPrinted			=	CH.ysnPrinted,
+			@strReportTo		=	strReportTo
 	FROM	tblCTContractHeader CH	WITH (NOLOCK)
 	JOIN	tblICCommodity		CM	WITH (NOLOCK) ON	CM.intCommodityId		=	CH.intCommodityId
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
@@ -383,6 +387,34 @@ BEGIN TRY
 										  		FOR XML PATH('')
 										  		), 1, 1, '')
 	END
+	
+	----Commission
+	SELECT  @strOurCommn	= 
+			CASE	WHEN @strReportTo = 'Seller' 
+					THEN	dbo.fnCTChangeNumericScale(dblRate,2) + ' ' + strCurrency + ' / ' + strUOM + ' included, payable by sellers'
+				ELSE	'' 
+			END
+	FROM	vyuCTContractCostView 
+	WHERE	intContractHeaderId = @intContractHeaderId 
+	AND		strParty = 'Vendor'
+
+	SELECT  @strBrkgCommn	=
+			CASE	WHEN strParty = 'Broker' AND @strReportTo = strPaidBy
+						THEN	dbo.fnCTChangeNumericScale(CC.dblRate,2) + ' ' + CC.strCurrency + ' / ' + CC.strUOM + ' included to be paid directly to:' + CHAR(13)+CHAR(10) +
+								LTRIM(RTRIM(EY.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
+								ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+								ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
+								ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
+								ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + CHAR(13)+CHAR(10) +
+								ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',CY.intCountryID,@intLaguageId,'Country',CY.strCountry))) END,'')
+					ELSE	'' 
+			END
+	FROM	vyuCTContractCostView	CC
+	JOIN	vyuCTEntity				EY ON EY.intEntityId = CC.intVendorId AND EY.strEntityType = 'Broker'
+	LEFT	JOIN tblSMCountry		CY ON lower(rtrim(ltrim(CY.strCountry))) = lower(rtrim(ltrim(EY.strEntityCountry)))
+	WHERE	CC.intContractHeaderId = @intContractHeaderId 
+	AND		strParty = 'Broker'
+	--------------------
 
 	SELECT	 intContractHeaderId					= CH.intContractHeaderId
 			,strCaption								= isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' '+@rtContract+':- ' + CH.strContractNumber
@@ -566,13 +598,14 @@ BEGIN TRY
 														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
 														' '+@rtStrPricing1+' ' + SQ.strFixationBy + CASE WHEN dbo.fnCTGetReportLanguage(@intLaguageId) = 'Italian' THEN ' ' ELSE '''s ' END
 														+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
-			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CH.strContractNumber+ISNULL('-' + @ErrMsg , '')		
+			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
+			,striDealHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Sale'), 'Sale') + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
 			,strGABAssociation						=	CASE WHEN CH.intContractTypeId = 1 THEN @rtStrGABAssociation1 ELSE @rtStrGABAssociation3 END
 														+ ' ' + dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+' '+@rtStrGABAssociation2+':'
 			,striDealAssociation					=	@rtStriDealAssociation
 														+ ' ' + dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
 			,strEQTAssociation						=	@rtStrAssociation1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment)+' '+@rtStrAssociation2+'.'
-			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,getdate()),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)), LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + LEFT(DATENAME(YEAR,getdate()),4)
+			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
 			,strGABCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
 			,strCompanyName							=	@strCompanyName
 			,striDealShipment						=	ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH, SQ.dtmStartDate)), DATENAME(MONTH, SQ.dtmStartDate)) +'('+ RIGHT(YEAR(SQ.dtmStartDate), 2)+')'
@@ -589,17 +622,19 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE dbo.fnCTGetTranslation('i21.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry) END,'')
-			,striDealPrice							=	strFutMarketName + ' ' + strFutureMonth + ' ' + LTRIM(dblBasis)+' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+			,striDealPrice							=	strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
 			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Delivery') ELSE dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment') END
 			,strIds									=	@strIds
 			,strType								=	@type
 			,intLaguageId							=	@intLaguageId
 			,intReportLogoHeight					=	ISNULL(@intReportLogoHeight,0)
 			,intReportLogoWidth						=	ISNULL(@intReportLogoWidth,0)
+			,strOurCommn							=	@strOurCommn
+			,strBrkgCommn							=	@strBrkgCommn
 
 	FROM	tblCTContractHeader				CH
 	JOIN	tblICCommodity					CM	WITH (NOLOCK) ON	CM.intCommodityId				=	CH.intCommodityId
-												AND	CH.intContractHeaderId			=	@intContractHeaderId
+												AND	CH.intContractHeaderId			IN	(SELECT Item FROM dbo.fnSplitString(@strIds,','))
 	JOIN	tblCTContractType				TP	WITH (NOLOCK) ON	TP.intContractTypeId			=	CH.intContractTypeId
 	JOIN	vyuCTEntity						EY	WITH (NOLOCK) ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType					=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)

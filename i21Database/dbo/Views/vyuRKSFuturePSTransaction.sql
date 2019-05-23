@@ -36,7 +36,8 @@ FROM (
 			, intFutOptTransactionId
 			, fm.dblContractSize
 			--This filter is to get the correct commission based on date
-			, dblFutCommission = ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 2 THEN 0
+			, dblFutCommission = ISNULL((SELECT TOP 1 (CASE WHEN bc.intFuturesRateType = 2 THEN 
+															isnull(bc.dblFutCommission,0)* 2 / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END
 															ELSE ISNULL(bc.dblFutCommission, 0) / CASE WHEN cur.ysnSubCurrency = 1 THEN cur.intCent ELSE 1 END END) as dblFutCommission
 										FROM tblRKBrokerageCommission bc
 										LEFT JOIN tblSMCurrency cur on cur.intCurrencyID=bc.intFutCurrencyId

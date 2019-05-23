@@ -527,12 +527,12 @@ BEGIN
 		@NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
 		dblAmountPercent = ISNULL(dblAmountPercent,0.00),
-		0.00,
+		dblSalePrice,
 		0.00,
 		strPricingMethod,
-		0.00,
-		0.00,
-		0.00,
+		dblLastCost,
+		dblStandardCost,
+		dblAverageCost,
 		0.00,
 		intSort 
 	FROM tblICItemPricing

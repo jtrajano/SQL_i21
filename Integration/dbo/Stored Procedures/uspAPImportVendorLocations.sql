@@ -2,11 +2,11 @@
 GO
 
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspAPImportVendorLocations')
-	DROP PROCEDURE uspAPImportVendor
+	DROP PROCEDURE uspAPImportVendorLocations
 GO
 
 
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+--IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 EXEC(
 '
@@ -48,8 +48,8 @@ INSERT [dbo].[tblEMEntityLocation]
 SELECT 
 	ENT.intEntityId, 
 	CAST (RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
-				 ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-				 END,'')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR(100)) as NVARCHAR(50)),
+				 ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name))) + '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+				 END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR(100)) as NVARCHAR(50)),
 	dbo.fnTrim(ISNULL(ssvnd_addr_1,'')) + CHAR(10) + dbo.fnTrim(ISNULL(ssvnd_addr_2,'')),
 	ssvnd_city,
 	''United States'' as [strCountry],
@@ -74,8 +74,8 @@ where   ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strTy
 and (
 RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
    ELSE dbo.fnTrim(SUBSTRING(ssvnd_name, DATALENGTH([dbo].[fnGetVendorLastName](ssvnd_name)), DATALENGTH(ssvnd_name)))
-+ ' ' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
-END,'')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation ))
++ '' '' + dbo.fnTrim([dbo].[fnGetVendorLastName](ssvnd_name))
+END,'''')) + ''_'' + CAST(A4GLIdentity AS NVARCHAR) not in (select strLocationName COLLATE Latin1_General_CI_AS  from tblEMEntityLocation ))
 	
 SET @Total = @@ROWCOUNT
 

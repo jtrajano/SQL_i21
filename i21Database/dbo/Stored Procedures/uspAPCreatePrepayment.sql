@@ -231,7 +231,7 @@ BEGIN
 			SELECT 
 				[intPaymentId]	= @paymentId,
 				[intBillId]		= A.intBillId,
-				[intAccountId]	= B.intAccountId,
+				[intAccountId]    = CASE WHEN A.intTransactionType = 2 AND A.ysnPrepayHasPayment = 0 THEN details.intAccountId ELSE A.intAccountId END,
 				[dblDiscount]	= A.dblDiscount,
 				[dblWithheld]	= 0,
 				[dblAmountDue]	= CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)), --handle transaction with prepaid
@@ -239,7 +239,10 @@ BEGIN
 				[dblInterest]	= A.dblInterest,
 				[dblTotal]		= (B.dblTotal + B.dblTax)
 			FROM tblAPBill A
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			CROSS APPLY
+            (
+                SELECT TOP 1 intAccountId, intBillId FROM tblAPBillDetail dtls WHERE dtls.intBillId = A.intBillId
+            ) details
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 		) vouchers
 	GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld

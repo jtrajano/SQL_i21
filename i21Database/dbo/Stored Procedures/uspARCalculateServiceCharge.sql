@@ -12,7 +12,7 @@
 	@serviceChargeDate	DATE,
 	@serviceChargePostDate	DATE,
 	@batchId			NVARCHAR(100) = NULL OUTPUT,
-	@totalAmount		NUMERIC(18,6) = NULL OUTPUT,
+	@totalAmount		NUMERIC(18,6) = 0 OUTPUT,
 	@upToDateCustomer 	BIT = 0,
 	@intEntityUserId	INT = NULL
 AS
@@ -68,13 +68,8 @@ AS
 			RETURN 0
 		END
 
-	IF (@isRecap = 1)
-		BEGIN
-			SET @batchId = CONVERT(NVARCHAR(100), NEWID())
-			SET @totalAmount = @zeroDecimal
-		END
-	ELSE
-		SET @batchId = NULL
+	SET @batchId = CONVERT(NVARCHAR(100), NEWID())
+	SET @totalAmount = @zeroDecimal
 
 	--GET SELECTED CUSTOMERS
 	IF (@customerIds = '')
@@ -190,14 +185,17 @@ AS
 							SET dtmLastServiceCharge = @serviceChargeDate 
 							FROM tblARCustomer C 
 							INNER JOIN (
-								SELECT intEntityCustomerId 
-								FROM tblARCustomerAgingStagingTable
-								WHERE strAgingType = 'Detail'
-								  AND intEntityUserId = @intEntityUserId
-								GROUP BY intEntityCustomerId
+								SELECT intEntityCustomerId
+								FROM tblARCustomerAgingStagingTable 
+								WHERE intEntityUserId = @intEntityUserId 
+								  AND strAgingType = 'Detail'
+								GROUP BY intEntityCustomerId 
+								HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+									OR SUM(ISNULL(dblCredits, 0)) <> 0
+									OR SUM(ISNULL(dblPrepayments, 0)) <> 0
 							) CB ON C.intEntityId = CB.intEntityCustomerId
-							WHERE dtmLastServiceCharge IS NULL 
-							   OR dtmLastServiceCharge < @asOfDate
+							WHERE C.ysnActive = 1
+							  AND (dtmLastServiceCharge IS NULL OR dtmLastServiceCharge < @asOfDate)
 						END
 				END
 		END	
@@ -393,11 +391,6 @@ AS
 										, 0
 									FROM @tblComputedBalances BALANCE
 									WHERE BALANCE.intEntityId = @entityId
-
-									IF ISNULL(@isRecap, 0) = 0
-										BEGIN
-											UPDATE tblARCustomer SET dtmLastServiceCharge = @asOfDate WHERE intEntityId = @entityId
-										END
 								END					
 						END
 
@@ -463,7 +456,16 @@ AS
 								 , intServiceChargeDays 
 							FROM @tempTblTypeServiceCharge 
 							WHERE ISNULL(dblAmountDue, @zeroDecimal) <> @zeroDecimal 
-							  AND ISNULL(dblTotalAmount, @zeroDecimal) <> @zeroDecimal							  
+							  AND ISNULL(dblTotalAmount, @zeroDecimal) <> @zeroDecimal
+							  
+							IF ISNULL(@isRecap, 0) = 0
+								BEGIN
+									UPDATE C
+									SET C.dtmLastServiceCharge = @asOfDate 
+									FROM tblARCustomer C
+									INNER JOIN @tempTblTypeServiceCharge SC ON C.intEntityId = SC.intEntityCustomerId
+									WHERE C.intEntityId = @entityId
+								END
 						END
 					ELSE
 						BEGIN
@@ -474,26 +476,26 @@ AS
 								 , @entityId
 								 , 'Balance As Of: ' + CONVERT(NVARCHAR(50), @asOfDate, 101)
 								 , NULL
-								 , dblAmountDue
+								 , ISNULL(dblAmountDue, 0)
 								 , CASE WHEN ISNULL(@dblMinimumSC, 0) > 
-											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > dblAmountDue
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > ISNULL(dblAmountDue, 0)
 												 THEN 0
-												 ELSE dblTotalAmount
+												 ELSE ISNULL(dblTotalAmount, 0)
 											END
-										THEN @dblMinimumSC 
+										THEN ISNULL(@dblMinimumSC, 0)
 										ELSE 
-											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > dblAmountDue
+											CASE WHEN ISNULL(@dblMinFinanceSC, 0) > ISNULL(dblAmountDue, 0)
 												 THEN 0
-												 ELSE dblTotalAmount
+												 ELSE ISNULL(dblTotalAmount, 0)
 											END
 								   END
 								 , intServiceChargeDays
 							FROM @tempTblTypeServiceCharge 
-							WHERE dblAmountDue > @zeroDecimal 
-							  AND dblTotalAmount > @zeroDecimal
+							WHERE ISNULL(dblAmountDue, 0) > @zeroDecimal 
+							  AND ISNULL(dblTotalAmount, 0) > @zeroDecimal
 						END
 
-					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue <= @dblMinFinanceSC
+					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue < @dblMinFinanceSC
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
 						BEGIN
@@ -510,5 +512,6 @@ AS
 			DELETE FROM #tmpCustomers WHERE intEntityId = @entityId
 		END
 
+	SET @totalAmount = ISNULL(@totalAmount, 0)
 	DROP TABLE #tmpCustomers
 GO

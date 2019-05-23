@@ -1,59 +1,62 @@
 ﻿CREATE FUNCTION [dbo].[fnGetDueDateBasedOnTerm]
 (
-	@TransactionDate		datetime
-	,@TermId				int
+	 @dtmTransactionDate	DATETIME
+	,@intTermId				INT
 )
-RETURNS datetime
+RETURNS DATETIME
 AS
 BEGIN
 
-DECLARE @Type nvarchar(100)
-DECLARE @BalanceDue int, @DayMonthDue int, @DueNextMonth int
-DECLARE @DueDate datetime
+DECLARE @strType			NVARCHAR(100)
+      , @intBalanceDue		INT
+	  , @intDayMonthDue		INT
+	  , @intDueNextMonth	INT
+	  , @dtmDueDate			DATETIME
 
-SELECT 
-	 @Type = strType 
-	,@BalanceDue = ISNULL(intBalanceDue, 0)
-	,@DayMonthDue = ISNULL(intDayofMonthDue, 0)
-	,@DueNextMonth = ISNULL(intDueNextMonth, 0)
-	,@DueDate = ISNULL(dtmDueDate, @TransactionDate)
-FROM
-	tblSMTerm
-WHERE
-	intTermID = @TermId
+SELECT @strType			= strType 
+	 , @intBalanceDue	= ISNULL(intBalanceDue, 0)
+	 , @intDayMonthDue	= ISNULL(intDayofMonthDue, 0)
+	 , @intDueNextMonth = ISNULL(intDueNextMonth, 0)
+	 , @dtmDueDate		= ISNULL(dtmDueDate, @dtmTransactionDate)
+FROM tblSMTerm
+WHERE intTermID = @intTermId
 
-IF (@Type = 'Standard')
+IF (@strType = 'Standard')
 	BEGIN
-		RETURN DATEADD(DAY, @BalanceDue, @TransactionDate);
+		RETURN DATEADD(DAY, @intBalanceDue, @dtmTransactionDate);
 	END	
-ELSE IF (@Type = 'Date Driven')
+ELSE IF (@strType = 'Date Driven')
 	BEGIN
 
-		DECLARE @InvoiceDate	INT,
-				@DaysInDueMonth	INT,
-				@DueDateTemp	DATE,
-				@MToAdd			INT = 1
+		DECLARE @intInvoiceDate		INT
+			  , @intDaysInDueMonth	INT
+			  , @dtmDueDateTemp		DATE
+			  , @intMonthToAdd		INT = 1
+		
+		SELECT TOP 1 @intDayMonthDue	= intCutoff
+				   , @intDueNextMonth	= intCutoff
+		FROM tblSMTermCutoff
+		WHERE intTermId = @intTermId
+		  AND DAY(@dtmTransactionDate) BETWEEN intFromDate AND intToDate
+		  
+        SET @intInvoiceDate = DAY(@dtmTransactionDate)
+        IF @intInvoiceDate > @intDueNextMonth
+            SET @intMonthToAdd = 2
 
-        SET @InvoiceDate = DAY(@TransactionDate)
-        IF @InvoiceDate > @DueNextMonth
-            SET @MToAdd = 2
+        SET @dtmDueDateTemp = DATEADD(MONTH, @intMonthToAdd, @dtmTransactionDate)
+        SET @intDaysInDueMonth = [dbo].[fnGetDaysInMonth](@dtmDueDateTemp)
 
-        SET @DueDateTemp = DATEADD(MONTH, @MToAdd, @TransactionDate)
-        SET @DaysInDueMonth = [dbo].[fnGetDaysInMonth](@DueDateTemp)
-
-        IF @DayMonthDue > @DaysInDueMonth
-            SET @DayMonthDue = @DaysInDueMonth;
-
-				
-        RETURN CAST((CAST(YEAR(@DueDateTemp) AS NVARCHAR(10)) + '-' + CAST(MONTH(@DueDateTemp) AS NVARCHAR(10)) + '-' + CAST(CASE WHEN @DayMonthDue = 0 THEN 1 ELSE @DayMonthDue END  AS NVARCHAR(10))) AS DATE)
+        IF @intDayMonthDue > @intDaysInDueMonth
+            SET @intDayMonthDue = @intDaysInDueMonth;
+							
+        RETURN CAST((CAST(YEAR(@dtmDueDateTemp) AS NVARCHAR(10)) + '-' + CAST(MONTH(@dtmDueDateTemp) AS NVARCHAR(10)) + '-' + CAST(CASE WHEN @intDayMonthDue = 0 THEN 1 ELSE @intDayMonthDue END  AS NVARCHAR(10))) AS DATE)
  
 	END
 ELSE
 	BEGIN
-		RETURN ISNULL(@DueDate, @TransactionDate);		 
+		RETURN ISNULL(@dtmDueDate, @dtmTransactionDate);		 
 	END	
 
-RETURN @TransactionDate;
+RETURN @dtmTransactionDate;
 
 END
-

@@ -65,7 +65,7 @@ Create TABLE #TempCannedPanels
 
 print('/*******************  BEGIN INSERTING drill down canned panels on temporary panel table  *******************/')
 INSERT INTO #TempCannedPanels VALUES (1, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely AG - Inventory Overview Detail', N'Grid', N'', N'iRely AG - Inventory Overview Detail', N'', N'', N'', N'FortBooks', N'None', N'', N'', N'', N'Select agitmmst.agitm_class, agitmmst.agitm_no, agitmmst.agitm_loc_no, agitmmst.agitm_desc, agitmmst.agitm_un_desc, agitmmst.agitm_avg_un_cost, agitmmst.agitm_un_on_hand, agitmmst.agitm_last_un_cost, agitmmst.agitm_pak_desc, agitmmst.agitm_phys_inv_ynbo From agitmmst Where agitmmst.agitm_phys_inv_ynbo = ''Y'' Order By agitm_un_on_hand', N'', N'', N'', N'', N'', N'iRely AG - Inventory Overview Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 45, NULL)
-INSERT INTO #TempCannedPanels VALUES (2, 0, 10, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely Grain - Grain Postion Detail ', N'Grid', N'', N'iRely Grain - Grain Position Detail', N'', N'', N'', N'Ag SQL 13.1', N'None', N'', N'', N'', N'Select gacommst.gacom_desc, gaposmst.gapos_loc_no, gaposmst.gapos_in_house, gaposmst.gapos_offsite, gaposmst.gapos_sls_in_transit From gaposmst Left Join gacommst On gaposmst.gapos_com_cd = gacommst.gacom_com_cd', N'', N'', N'', N'', N'', N'iRely Grain - Grain Postion Detail ', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 19, NULL)
+INSERT INTO #TempCannedPanels VALUES (2, 0, 10, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely Grain - Grain Position Detail', N'Grid', N'', N'iRely Grain - Grain Position Detail', N'', N'', N'', N'Ag SQL 13.1', N'None', N'', N'', N'', N'Select gacommst.gacom_desc, gaposmst.gapos_loc_no, gaposmst.gapos_in_house, gaposmst.gapos_offsite, gaposmst.gapos_sls_in_transit From gaposmst Left Join gacommst On gaposmst.gapos_com_cd = gacommst.gacom_com_cd', N'', N'', N'', N'', N'', N'iRely Grain - Grain Position Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 19, NULL)
 INSERT INTO #TempCannedPanels VALUES (3, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely Petro - Invoice Margins Below 0 - Detail', N'Grid', N'', N'iRely Petro - Invoice Margins Below 0 - Detail', N'', N'', N'', N'i21 PT - Berry Oil ', N'All Dates', N'All Dates', N'ptstmmst.ptstm_rev_dt', N'', N'Select ptstmmst.ptstm_bill_to_cus, ptstm_ivc_no, ptstmmst.ptstm_ship_rev_dt, ptstmmst.ptstm_itm_no, ptstmmst.ptstm_loc_no, ptstmmst.ptstm_class
 , ptstmmst.ptstm_un, ptstmmst.ptstm_un_prc, ptstmmst.ptstm_net, ptstmmst.ptstm_cgs, ptstmmst.ptstm_slsmn_id, ptstmmst.ptstm_pak_desc
 , ptstmmst.ptstm_un_desc, ptstmmst.ptstm_net - ptstmmst.ptstm_cgs As ''Profit Amount'', (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net*100 As ''Profit Percent''
@@ -694,29 +694,33 @@ GROUP BY Month(CONVERT(datetime, CAST(sthssmst.sthss_rev_dt AS CHAR(8)), 101))
 ORDER BY Month(CONVERT(datetime, CAST(sthssmst.sthss_rev_dt AS CHAR(8)), 101))', N'', N'@DATE@', N'', N'', N'Use this line graph to display your monthly sales for any or all stores.
 -C-Store Module-', N'Store - Monthly Sales', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 1, 0, NULL, NULL, N'14.3.3', NULL, 1, 107, NULL)
  
-INSERT INTO #TempCannedPanels VALUES (94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Dashboard - Active Panel Users', N'Grid', N'', N'i21 Dashboard - Active Panel Users', N'', N'', N'', N'AG/Grain - Demo - i21', N'None', N'', N'', N'', N'Select 
+INSERT INTO #TempCannedPanels VALUES (94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Dashboard - Active Panel Users', N'Grid', N'', N'i21 Dashboard - Active Panel Users', N'', N'', N'', N'AG/Grain - Demo - i21', N'None', N'', N'', N'', 
+N'Select 
 	tblDBPanel.strPanelName, 
 	tblDBPanelUser.intUserId, 
-	tblSMUserSecurity.intEntityUserSecurityId, 
+	tblSMUserSecurity.intEntityId,
 	tblSMUserSecurity.strUserName,
 	tblSMUserSecurity.strFullName
 From tblDBPanel
 Inner Join tblDBPanelUser on tblDBPanel.intPanelId = tblDBPanelUser.intPanelId
-Inner Join tblSMUserSecurity on tblDBPanelUser.intUserId = tblSMUserSecurity.intEntityUserSecurityId', N'', N'', N'', N'', N'Lists Users of all i21 Dashboard Active Panels, by Panel Name', N'i21 Dashboard - Active Panel Users', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.7', NULL, 1, 108, NULL)
+Inner Join tblSMUserSecurity on tblDBPanelUser.intUserId = tblSMUserSecurity.intEntityId', 
+N'', N'', N'', N'', N'Lists Users of all i21 Dashboard Active Panels, by Panel Name', N'i21 Dashboard - Active Panel Users', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.7', NULL, 1, 108, NULL)
  
 INSERT INTO #TempCannedPanels VALUES (95, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely AG - Customers Over Credit Limit', N'Grid', N'', N'iRely AG - Customers Over Credit Limit', N'', N'', N'', N'i21 AG - Demo Test', N'None', N'', N'', N'', N'Select agcusmst.agcus_key, agcusmst.agcus_last_name, agcusmst.agcus_first_name, agcusmst.agcus_cred_limit, 
 agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd As ''Total Balance'', agcusmst.agcus_cred_limit-(agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd) As ''Overage'' From agcusmst Where agcusmst.agcus_active_yn = ''Y'' And agcusmst.agcus_last_stmt_bal <> 0 And agcusmst.agcus_cred_limit-(agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd) < 0', N'', N'', N'', N'', N'', N'iRely AG - Customers Over Credit Limit', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1.3', NULL, 1, 86, NULL)
  
 INSERT INTO #TempCannedPanels VALUES (96, 0, 10, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 General Ledger - Chart of Accounts', N'Grid', N'', N'i21 General Ledger - Chart of Accounts', N'Line', N'', N'Chameleon', N'Fort Books - i21', N'None', N'None', N'', N'', N'select strAccountId, strDescription from tblGLAccount', N'', N'', N'', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.1', NULL, 1, 112, NULL)
  
-INSERT INTO #TempCannedPanels VALUES (97, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 AP - Unposted Payables', N'Grid', N'', N'i21 AP - Unposted Payables', N'Line', N'', N'Chameleon', N'Fort Books - i21', N'None', N'None', N'', N'', N'select tblEMEntityCredential.strUserName as Employee, strVendorId as Vendor, tblAPBill.dtmDate as GLDate, tblAPBill.dtmBillDate as BillDate, tblAPBill.dtmDueDate as DueDate, strVendorOrderNumber as InvoiceNumber, tblAPBillDetail.dblTotal as ItemTotal, 
+INSERT INTO #TempCannedPanels VALUES (97, 0, 5, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 AP - Unposted Payables', N'Grid', N'', N'i21 AP - Unposted Payables', N'Line', N'', N'Chameleon', N'Fort Books - i21', N'None', N'None', N'', N'', 
+N'select tblEMEntityCredential.strUserName as Employee, strVendorId as Vendor, tblAPBill.dtmDate as GLDate, tblAPBill.dtmBillDate as BillDate, tblAPBill.dtmDueDate as DueDate, strVendorOrderNumber as InvoiceNumber, tblAPBillDetail.dblTotal as ItemTotal, 
 tblAPBillDetail.strMiscDescription as Item, tblGLAccount.strAccountId as Account, 
 tblGLAccount.strDescription as AccountDesc, dblAmountDue as Due from tblAPBillDetail
 inner join tblAPBill on tblAPBillDetail.intBillId = tblAPBill.intBillId
-inner join tblAPVendor on tblAPBill.intEntityVendorId = tblAPVendor.intEntityVendorId
+inner join tblAPVendor on tblAPBill.intEntityVendorId = tblAPVendor.intEntityId
 inner join tblGLAccount on tblAPBillDetail.intAccountId = tblGLAccount.intAccountId
 inner join tblEMEntityCredential on tblAPBill.intEntityId = tblEMEntityCredential.intEntityId
-where ysnPosted = ''0''', N'', N'', N'', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4.2', NULL, 8, 111, NULL)
+where ysnPosted = ''0''', 
+N'', N'', N'', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.4.2', NULL, 8, 111, NULL)
  
 INSERT INTO #TempCannedPanels VALUES (139, 0, 10, 100, 250, 0, NULL, NULL, NULL, 0, 1, 0, N'Master', N'i21 Tank Mgt - Deliveries for Review', N'Grid', N'', N'i21 Tank Mgt - Deliveries for Review', N'Line', NULL, N'Chameleon', N'i21 Demo', N'None', N'None', NULL, NULL, N'SELECT 
 	vwcusmst.vwcus_key as ''Cust Number'',

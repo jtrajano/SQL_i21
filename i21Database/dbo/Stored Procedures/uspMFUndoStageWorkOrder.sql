@@ -90,13 +90,14 @@ BEGIN TRY
 	FROM dbo.tblICItem
 	WHERE intItemId = @intInputItemId
 
+	SELECT @intItemId = intItemId
+		,@intLocationId = intLocationId
+		,@intManufacturingProcessId = intManufacturingProcessId
+	FROM dbo.tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
 	IF @strInventoryTracking = 'Lot Level'
 	BEGIN
-		SELECT @intItemId = intItemId
-			,@intLocationId = intLocationId
-			,@intManufacturingProcessId = intManufacturingProcessId
-		FROM dbo.tblMFWorkOrder
-		WHERE intWorkOrderId = @intWorkOrderId
 
 		SELECT @intStorageLocationId = ri.intStorageLocationId
 			,@intConsumptionMethodId = intConsumptionMethodId
@@ -273,7 +274,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SELECT @intInventoryTransferId = intInventoryTransferId
+		SELECT @intInventoryTransferId = intInventoryTransferId,@intStorageLocationId=intToStorageLocationId
 		FROM dbo.tblICInventoryTransferDetail
 		WHERE intSourceId = @intWorkOrderInputLotId
 
@@ -370,7 +371,7 @@ BEGIN TRY
 	JOIN tblICItemLocation IL ON IL.intItemId = WI.intItemId
 		AND IL.intLocationId = @intLocationId
 		AND WI.ysnConsumptionReversed = 0
-	JOIN tblICLot L ON L.intLotId = WI.intLotId
+	Left JOIN tblICLot L ON L.intLotId = WI.intLotId
 	WHERE intWorkOrderId = @intWorkOrderId
 	GROUP BY WI.intItemId
 		,IL.intItemLocationId

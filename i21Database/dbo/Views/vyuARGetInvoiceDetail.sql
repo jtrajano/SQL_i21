@@ -187,11 +187,11 @@ LEFT JOIN (
 ) WOUM ON INV.intItemWeightUOMId = WOUM.intItemUOMId
 LEFT JOIN (
 	SELECT intEntityId			= A.intEntityId
-		 , strSalespersonId		= CASE WHEN B.strSalespersonId = '0' THEN A.strEntityNo ELSE B.strSalespersonId END
+		 , strSalespersonId		= CASE WHEN B.strSalespersonId = '' THEN A.strEntityNo ELSE B.strSalespersonId END
 		 , strSalespersonName	= A.strName
 	FROM tblEMEntity A WITH(NOLOCK)
 	JOIN tblARSalesperson B WITH(NOLOCK) ON A.intEntityId = B.intEntityId
-) SPER ON INV.intEntitySalespersonId = SPER.intEntityId
+) SPER ON ISNULL(INV.intEntitySalespersonId, INV.intPerformerId) = SPER.intEntityId
 LEFT JOIN (
 	SELECT intSiteID		= intSiteID
 		 , strSiteNumber	= REPLACE(STR([intSiteNumber], 4), SPACE(1), '0') 
@@ -205,7 +205,7 @@ LEFT JOIN (
 		 , PT.strPricingType				
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH	ON CH.intContractHeaderId	= CD.intContractHeaderId
-							   AND CH.intContractTypeId		= 2
+							   --AND CH.intContractTypeId		= 2
 							   AND CD.intPricingTypeId		NOT IN(4,7)
 	JOIN tblCTPricingType PT ON PT.intPricingTypeId	 =	CD.intPricingTypeId
 ) CT ON INV.intContractDetailId = CT.intContractDetailId

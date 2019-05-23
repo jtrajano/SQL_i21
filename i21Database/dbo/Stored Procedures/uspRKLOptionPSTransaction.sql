@@ -1,11 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKLOptionPSTransaction]
-	@intTypeId INT
+	@intTypeId INT 
 	, @intEntityId INT
 	, @intFutureMarketId INT
 	, @intCommodityId INT
 	, @intOptionMonthId INT
-	, @dblStrike INT
-	, @dtmPositionAsOf DATETIME
+	, @dblStrike NUMERIC(18,6)
+	, @dtmPositionAsOf DATETIME 
 
 AS  
 
@@ -58,7 +58,7 @@ BEGIN TRY
 		, dblPremiumValue = - dblPremiumValue
 		, dblCommission
 		, intFutOptTransactionId
-		, dblNetPremium = ((- dblPremiumValue) + (dblCommission))
+		, dblNetPremium = (dblPremiumValue) + (dblCommission)
 		, dblMarketPremium
 		, dblMarketValue
 		, dblMTM = (CASE WHEN strBuySell = 'B' THEN dblMarketValue - dblPremiumValue ELSE dblPremiumValue - dblMarketValue END)
@@ -89,7 +89,7 @@ BEGIN TRY
 	FROM (
 		SELECT dblOpenLots = (dblTotalLot - dblSelectedLot1 - intExpiredLots - intAssignedLots)
 			, dblSelectedLot = ''
-			, dblPremiumValue = ((dblTotalLot - dblSelectedLot1) * dblContractSize * dblPremium) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
+			, dblPremiumValue = ((dblTotalLot - dblSelectedLot1) * dblContractSize * dblPremium) 
 			, dblMarketValue = ((dblTotalLot - dblSelectedLot1) * dblContractSize * dblMarketPremium) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
 			, dblCommission = (- dblOptCommission * (dblTotalLot - dblSelectedLot1)) / (CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END)
 			, *
@@ -105,7 +105,7 @@ BEGIN TRY
 				, dblSelectedLot1 = ISNULL(sl.dblSelectedLot, 0)
 				, ot.strOptionType
 				, ot.dblStrike
-				, dblPremium = ot.dblPrice
+				, dblPremium = ot.dblPrice / (CASE WHEN c.ysnSubCurrency = 1 THEN c.intCent ELSE 1 END)
 				, fm.dblContractSize
 				, dblOptCommission = ISNULL((select TOP 1 (case when bc.intOptionsRateType = 2 then 0
 															else  isnull(bc.dblOptCommission,0) end) as dblOptCommission
@@ -168,7 +168,7 @@ BEGIN TRY
 			JOIN tblRKBrokerageAccount ba ON ot.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ot.intEntityId
 			LEFT JOIN tblRKBrokerageCommission bc ON bc.intFutureMarketId = ot.intFutureMarketId AND ba.intBrokerageAccountId = bc.intBrokerageAccountId
-			LEFT JOIN tblSMCurrency c ON c.intCurrencyID = bc.intFutCurrencyId
+			LEFT JOIN tblSMCurrency c ON c.intCurrencyID = case when isnull(bc.intOptCurrencyId,0)=0 then fm.intCurrencyId else bc.intOptCurrencyId end
 			LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 			LEFT JOIN tblCTBook b ON b.intBookId = ot.intBookId
 			LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = ot.intSubBookId

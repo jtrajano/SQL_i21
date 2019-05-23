@@ -414,8 +414,54 @@ BEGIN
 			[strInvoiceNumber]	NVARCHAR(MAX)
 		)
 
-		INSERT INTO @tblCFTransactionIds
-		EXEC uspCFOptimizeFiltering @tableName = 'vyuCFInvoiceReport',@field = 'intTransactionId', @guid = @filterGuid
+
+		BEGIN TRY
+			DECLARE @guid NVARCHAR(MAX)
+			DECLARE @tableName NVARCHAR(MAX)
+			DECLARE @field NVARCHAR(MAX)
+			DECLARE @dynamicsql NVARCHAR(MAX)
+			DECLARE @temptable NVARCHAR(MAX)
+
+			SET @guid = @filterGuid
+			SET @tableName = 'vyuCFInvoiceReport'
+			SET @field = 'intTransactionId'
+			SET @temptable = '##'+REPLACE(@guid,'-','')
+
+			IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
+			BEGIN
+				SET @dynamicsql = 'DROP TABLE ' + @temptable
+				EXEC(@dynamicsql)
+			END
+
+			--GET DATA USING CUSTOMER EXECUTE PLAN--
+			--RESULT STORED IN @temptable
+			EXEC uspCFOptimizeFiltering 
+			 @tableName = @tableName
+			,@field = @field
+			,@guid = @guid
+			,@outTable = @temptable
+
+			SET @dynamicsql = 'SELECT ' + @field + ' FROM ' + @temptable
+
+			INSERT INTO @tblCFTransactionIds
+			EXEC(@dynamicsql)
+
+			IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
+			BEGIN
+				SET @dynamicsql = 'DROP TABLE ' + @temptable
+				EXEC(@dynamicsql)
+			END
+		END TRY
+		BEGIN CATCH
+			IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
+			BEGIN
+				SET @dynamicsql = 'DROP TABLE ' + @temptable
+				EXEC(@dynamicsql)
+			END
+		END CATCH 
+
+		--INSERT INTO @tblCFTransactionIds
+		--EXEC uspCFOptimizeFiltering @tableName = 'vyuCFInvoiceReport',@field = 'intTransactionId', @guid = @filterGuid
 
 		DECLARE  @tblCFTempInvoiceReport  TABLE
 		(

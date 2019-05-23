@@ -502,76 +502,61 @@ END
 					)
 				
 		END 
-		
+		/*
 		SELECT @total = COUNT(*) FROM @voucherItems;
 		IF (@total > 0)
 		BEGIN
-		SET @intShipFrom = COALESCE(@intFarmFieldId, @intShipFrom);
-		INSERT INTO @voucherPayable(
-			[intTransactionType],
-			[intItemId],
-			[strMiscDescription],
-			[intInventoryReceiptItemId],
-			[dblQuantityToBill],
-			[dblOrderQty],
-			[dblExchangeRate],
-			[intCurrencyExchangeRateTypeId],
-			[ysnSubCurrency],
-			[intAccountId],
-			[dblCost],
-			[dblOldCost],
-			[dblNetWeight],
-			[dblNetShippedWeight],
-			[dblWeightLoss],
-			[dblFranchiseWeight],
-			[intContractDetailId],
-			[intContractHeaderId],
-			[intQtyToBillUOMId],
-			[intCostUOMId],
-			[intWeightUOMId],
-			[intLineNo],
-			[dblWeightUnitQty],
-			[dblCostUnitQty],
-			[dblQtyToBillUnitQty],
-			[intCurrencyId],
-			[intStorageLocationId],
-			[int1099Form],
-			[int1099Category],
-			[intLoadShipmentDetailId],
-			[strBillOfLading],
-			[intScaleTicketId],
-			[intLocationId],			
-			[intShipFromId],
-			[intShipToId],
-			[intInventoryReceiptChargeId],
-			[intPurchaseDetailId],
-			[dblTax],
-			[intEntityVendorId],
-			[strVendorOrderNumber],
-			[intLoadShipmentId]
-		)
-		EXEC [dbo].[uspSCGenerateVoucherDetails] @voucherItems,@voucherOtherCharges
-
-		IF EXISTS(SELECT NULL FROM @voucherPayable)
-		BEGIN
-			INSERT INTO @voucherTaxDetail(
-			[intVoucherPayableId]
-			,[intTaxGroupId]				
-			,[intTaxCodeId]				
-			,[intTaxClassId]				
-			,[strTaxableByOtherTaxes]	
-			,[strCalculationMethod]		
-			,[dblRate]					
-			,[intAccountId]				
-			,[dblTax]					
-			,[dblAdjustedTax]			
-			,[ysnTaxAdjusted]			
-			,[ysnSeparateOnBill]			
-			,[ysnCheckOffTax]		
-			,[ysnTaxExempt]	
-			,[ysnTaxOnly]
+			SET @intShipFrom = COALESCE(@intFarmFieldId, @intShipFrom);
+			INSERT INTO @voucherPayable(
+				[intTransactionType],
+				[intItemId],
+				[strMiscDescription],
+				[intInventoryReceiptItemId],
+				[dblQuantityToBill],
+				[dblOrderQty],
+				[dblExchangeRate],
+				[intCurrencyExchangeRateTypeId],
+				[ysnSubCurrency],
+				[intAccountId],
+				[dblCost],
+				[dblOldCost],
+				[dblNetWeight],
+				[dblNetShippedWeight],
+				[dblWeightLoss],
+				[dblFranchiseWeight],
+				[intContractDetailId],
+				[intContractHeaderId],
+				[intQtyToBillUOMId],
+				[intCostUOMId],
+				[intWeightUOMId],
+				[intLineNo],
+				[dblWeightUnitQty],
+				[dblCostUnitQty],
+				[dblQtyToBillUnitQty],
+				[intCurrencyId],
+				[intStorageLocationId],
+				[int1099Form],
+				[int1099Category],
+				[intLoadShipmentDetailId],
+				[strBillOfLading],
+				[intScaleTicketId],
+				[intLocationId],			
+				[intShipFromId],
+				[intShipToId],
+				[intInventoryReceiptChargeId],
+				[intPurchaseDetailId],
+				[intPurchaseTaxGroupId],
+				[dblTax],
+				[intEntityVendorId],
+				[strVendorOrderNumber],
+				[intLoadShipmentId]
 			)
-			SELECT	[intVoucherPayableId]
+			EXEC [dbo].[uspSCGenerateVoucherDetails] @voucherItems,@voucherOtherCharges
+
+			IF EXISTS(SELECT NULL FROM @voucherPayable)
+				BEGIN
+					INSERT INTO @voucherTaxDetail(
+					[intVoucherPayableId]
 					,[intTaxGroupId]				
 					,[intTaxCodeId]				
 					,[intTaxClassId]				
@@ -586,14 +571,66 @@ END
 					,[ysnCheckOffTax]		
 					,[ysnTaxExempt]	
 					,[ysnTaxOnly]
-			FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
-			BEGIN /* Create Voucher */
-			EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId OUTPUT
+					)
+					SELECT	[intVoucherPayableId]
+							,[intTaxGroupId]				
+							,[intTaxCodeId]				
+							,[intTaxClassId]				
+							,[strTaxableByOtherTaxes]	
+							,[strCalculationMethod]		
+							,[dblRate]					
+							,[intAccountId]				
+							,[dblTax]					
+							,[dblAdjustedTax]			
+							,[ysnTaxAdjusted]			
+							,[ysnSeparateOnBill]			
+							,[ysnCheckOffTax]		
+							,[ysnTaxExempt]	
+							,[ysnTaxOnly]
+					FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
+					BEGIN 
+						EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable,@voucherPayableTax = @voucherTaxDetail, @userId = @intUserId,@throwError = 1, @error = @ErrorMessage, @createdVouchersId = @intBillId OUTPUT
+					END
+				END
+
+		END
+		*/
+
+		SELECT @total = COUNT(1)
+		FROM	tblICInventoryReceiptItem ri
+		WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
+				AND ri.intOwnershipType = 1
+				AND ISNULL(ri.ysnAllowVoucher,1) = 1
+
+		DECLARE @ysnHasBasisContract INT = 0
+		SELECT @ysnHasBasisContract = CASE WHEN COUNT(DISTINCT intPricingTypeId) > 0 THEN 1 ELSE 0 END FROM tblICInventoryReceiptItem IRI
+		INNER JOIN tblCTContractDetail CT
+			ON CT.intContractDetailId = IRI.intContractDetailId
+		WHERE intInventoryReceiptId = @InventoryReceiptId and CT.intPricingTypeId = 2
+		GROUP BY intInventoryReceiptId
+		IF(@ysnHasBasisContract = 1)
+		BEGIN
+				SELECT @intContractDetailId = MIN(ri.intLineNo)
+				FROM tblICInventoryReceipt r 
+				JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+				WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
 			
-			
-			END
+				WHILE ISNULL(@intContractDetailId,0) > 0
+				BEGIN
+					IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+					BEGIN
+						EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+					END
+					SELECT @intContractDetailId = MIN(ri.intLineNo)
+					FROM tblICInventoryReceipt r 
+					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+					WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+				END
 		END
 
+		IF(@InventoryReceiptId IS NOT NULL AND @total > 0 AND @ysnHasBasisContract = 0)
+		BEGIN
+			EXEC dbo.uspICProcessToBill @intReceiptId = @InventoryReceiptId, @intUserId = @intUserId, @intBillId = @intBillId OUT
 		END
 
 		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1

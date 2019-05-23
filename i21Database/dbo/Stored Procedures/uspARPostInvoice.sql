@@ -24,7 +24,8 @@ AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS OFF
+SET XACT_ABORT ON
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -160,6 +161,7 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnFromProvisional]                   BIT             NULL
     ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
+    ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
     ,[intInvoiceDetailId]                   INT             NULL
@@ -177,11 +179,11 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[intLicenseAccountId]                  INT             NULL
     ,[intMaintenanceAccountId]              INT             NULL
     ,[intConversionAccountId]               INT             NULL
-    ,[dblQtyShipped]                        NUMERIC(18,6)   NULL	
-    ,[dblUnitQtyShipped]                    NUMERIC(18,6)   NULL
-    ,[dblShipmentNetWt]                     NUMERIC(18,6)   NULL	
+    ,[dblQtyShipped]                        NUMERIC(38,20)  NULL	
+    ,[dblUnitQtyShipped]                    NUMERIC(38,20)  NULL
+    ,[dblShipmentNetWt]                     NUMERIC(38,20)  NULL	
     ,[dblUnitQty]                           NUMERIC(38,20)  NULL
-    ,[dblUnitOnHand]                        NUMERIC(18,6)   NULL
+    ,[dblUnitOnHand]                        NUMERIC(38,20)  NULL
     ,[intAllowNegativeInventory]            INT             NULL
     ,[ysnStockTracking]                     BIT             NULL
     ,[intItemLocationId]                    INT             NULL
@@ -216,6 +218,8 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[dblBaseMaintenanceAmount]             NUMERIC(18,6)   NULL
     ,[dblMaintenanceGLAmount]               NUMERIC(18,6)   NULL
     ,[dblBaseMaintenanceGLAmount]           NUMERIC(18,6)   NULL
+	,[dblTaxesAddToCost]					NUMERIC(18,6)   NULL
+	,[dblBaseTaxesAddToCost]				NUMERIC(18,6)   NULL
     ,[ysnTankRequired]                      BIT             NULL
     ,[ysnLeaseBilling]                      BIT             NULL
     ,[intSiteId]                            INT             NULL
@@ -315,6 +319,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnFromProvisional]                   BIT             NULL
     ,[ysnProvisionalWithGL]                 BIT             NULL
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
+    ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 
     ,[intInvoiceDetailId]                   INT             NOT NULL PRIMARY KEY
@@ -332,11 +337,11 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[intLicenseAccountId]                  INT             NULL
     ,[intMaintenanceAccountId]              INT             NULL
     ,[intConversionAccountId]               INT             NULL
-    ,[dblQtyShipped]                        NUMERIC(18,6)   NULL	
-    ,[dblUnitQtyShipped]                    NUMERIC(18,6)   NULL
-    ,[dblShipmentNetWt]                     NUMERIC(18,6)   NULL	
+    ,[dblQtyShipped]                        NUMERIC(38,20)  NULL	
+    ,[dblUnitQtyShipped]                    NUMERIC(38,20)  NULL
+    ,[dblShipmentNetWt]                     NUMERIC(38,20)  NULL	
     ,[dblUnitQty]                           NUMERIC(38,20)  NULL
-    ,[dblUnitOnHand]                        NUMERIC(18,6)   NULL
+    ,[dblUnitOnHand]                        NUMERIC(38,20)  NULL
     ,[intAllowNegativeInventory]            INT             NULL
     ,[ysnStockTracking]                     BIT             NULL
     ,[intItemLocationId]                    INT             NULL
@@ -371,6 +376,8 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[dblBaseMaintenanceAmount]             NUMERIC(18,6)   NULL
     ,[dblMaintenanceGLAmount]               NUMERIC(18,6)   NULL
     ,[dblBaseMaintenanceGLAmount]           NUMERIC(18,6)   NULL
+	,[dblTaxesAddToCost]					NUMERIC(18,6)   NULL
+	,[dblBaseTaxesAddToCost]				NUMERIC(18,6)   NULL
     ,[ysnTankRequired]                      BIT             NULL
     ,[ysnLeaseBilling]                      BIT             NULL
     ,[intSiteId]                            INT             NULL
@@ -647,7 +654,6 @@ IF(@totalInvalid > 0)
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
 				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
 			END					
 
         DELETE FROM #ARInvalidInvoiceData
@@ -690,7 +696,6 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed
 				RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Post_Exit
 			END				
 		GOTO Post_Exit	
 	END
@@ -797,7 +802,7 @@ BEGIN CATCH
 				END	
 		END						
 	IF @raiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)
+        RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
 END CATCH
@@ -1136,7 +1141,6 @@ BEGIN TRY
 	BEGIN
 		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
 		RAISERROR(@ErrorMerssage, 11, 1)							
-		GOTO Post_Exit
 	END					
 
     DELETE FROM #ARInvoiceGLEntries
@@ -1199,7 +1203,7 @@ BEGIN CATCH
 				END	
 		END						
 	IF @raiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)
+        RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
 END CATCH

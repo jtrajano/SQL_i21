@@ -85,6 +85,15 @@ ELSE
 
 		--INSERT TO INVOICE
 		EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, NULL, 0, @NewInvoiceId OUTPUT
+
+		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SOD.intContractDetailId AND SOD.dblQtyOrdered > CTD.dblBalance)
+			BEGIN
+				EXEC dbo.uspARUpdateOverageContracts @intInvoiceId = @NewInvoiceId
+												   , @intScaleUOMId = NULL
+												   , @intUserId = @UserId
+												   , @dblNetWeight = 0
+												   , @ysnFromSalesOrder = 1
+			END
 		
 		IF ISNULL(@NewInvoiceId, 0) > 0
 			EXEC dbo.uspARUpdateGrainOpenBalance @NewInvoiceId, 0, @UserId

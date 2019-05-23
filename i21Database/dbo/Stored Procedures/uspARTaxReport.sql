@@ -302,6 +302,7 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 			, ysnTaxExempt
 			, strFederalTaxId
 			, strStateTaxId
+			, blbCompanyLogo
 		)
 		SELECT intEntityCustomerId			= TAX.intEntityCustomerId
 			, intEntitySalespersonId		= TAX.intEntitySalespersonId
@@ -360,6 +361,7 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 			, ysnTaxExempt					= TAX.ysnTaxExempt
 			, strFederalTaxId				= TAX.strFederalTaxId
 			, strStateTaxId					= TAX.strStateTaxId
+			, blbCompanyLogo				= dbo.fnSMGetCompanyLogo('Header')
 		FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
 		INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
@@ -399,6 +401,7 @@ ELSE
 			, dblStateOtherTax
 			, dblStateSalesTax
 			, dblTonnageTax
+			, blbCompanyLogo
 		)
 		SELECT intEntityCustomerId			= TAX.intEntityCustomerId
 			, strDisplayName				= TAX.strDisplayName
@@ -424,6 +427,7 @@ ELSE
 			, dblStateOtherTax		 		= SUM(CASE WHEN TRT.strType = 'State Other Tax' THEN TAX.dblTaxAmount ELSE 0 END)
 			, dblStateSalesTax		 		= SUM(CASE WHEN TRT.strType = 'State Sales Tax' THEN TAX.dblTaxAmount ELSE 0 END)
 			, dblTonnageTax			 		= SUM(CASE WHEN TRT.strType = 'Tonnage Tax' THEN TAX.dblTaxAmount ELSE 0 END)
+			, blbCompanyLogo				= dbo.fnSMGetCompanyLogo('Header')
 		FROM dbo.vyuARTaxReport TAX WITH (NOLOCK)
 		LEFT JOIN tblSMTaxClass TCLASS ON TAX.intTaxClassId = TCLASS.intTaxClassId
 		LEFT JOIN tblSMTaxReportType TRT ON TCLASS.intTaxReportTypeId = TRT.intTaxReportTypeId

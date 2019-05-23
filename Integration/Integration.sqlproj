@@ -476,7 +476,7 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportVendorLocations.sql" />
-    <None Include="dbo\Stored Procedures\uspARImportTaxGroupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportTaxGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportTaxGroupCustomerLocation.sql" />
   </ItemGroup>
 </Project>

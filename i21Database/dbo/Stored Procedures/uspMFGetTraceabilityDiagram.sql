@@ -20,6 +20,7 @@ DECLARE @intNoOfShipRecordParentCounter INT
 DECLARE @strTransactionName NVARCHAR(50)
 DECLARE @strLotNumber NVARCHAR(MAX)
 Declare @intItemId int
+Declare @strType1 nvarchar(50)
 
 DECLARE @tblTemp AS TABLE (
 	intRecordId INT
@@ -1339,9 +1340,10 @@ BEGIN
 
 			-- Invoice from Shipment
 			BEGIN
+				Select @strType1=''
 				--Get ShipmentId to find if invoice exists
 				IF @intId IS NULL
-					SELECT TOP 1 @intId = intLotId
+					SELECT TOP 1 @intId = intLotId,@strType1=strType
 					FROM @tblNodeData
 					WHERE strType IN (
 							'S'
@@ -1349,7 +1351,7 @@ BEGIN
 							)
 					ORDER BY 1
 				ELSE
-					SELECT TOP 1 @intId = intLotId
+					SELECT TOP 1 @intId = intLotId,@strType1=strType
 					FROM @tblNodeData
 					WHERE intLotId > @intId
 						AND strType IN (
@@ -1358,24 +1360,46 @@ BEGIN
 							)
 
 				--Invoice
-				INSERT INTO @tblData (
-					strTransactionName
-					,intLotId
-					,strLotNumber
-					,strLotAlias
-					,intItemId
-					,strItemNo
-					,strItemDesc
-					,intCategoryId
-					,strCategoryCode
-					,dblQuantity
-					,strUOM
-					,dtmTransactionDate
-					,strCustomer
-					,strType
-					)
-				EXEC uspMFGetTraceabilityInvoiceFromShipment @intId
-
+				if @strType1='S'
+				Begin
+					INSERT INTO @tblData (
+						strTransactionName
+						,intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,strItemNo
+						,strItemDesc
+						,intCategoryId
+						,strCategoryCode
+						,dblQuantity
+						,strUOM
+						,dtmTransactionDate
+						,strCustomer
+						,strType
+						)
+					EXEC uspMFGetTraceabilityInvoiceFromShipment @intId
+				End
+				Else
+				Begin
+					INSERT INTO @tblData (
+						strTransactionName
+						,intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,strItemNo
+						,strItemDesc
+						,intCategoryId
+						,strCategoryCode
+						,dblQuantity
+						,strUOM
+						,dtmTransactionDate
+						,strCustomer
+						,strType
+						)
+					EXEC uspMFGetTraceabilityInvoiceFromOutboundShipment @intId
+				End
 				--update ShipmentId in intParentLotId for Invoice used in getting ParentId in case Invoice exists
 				UPDATE @tblData
 				SET intParentLotId = @intId

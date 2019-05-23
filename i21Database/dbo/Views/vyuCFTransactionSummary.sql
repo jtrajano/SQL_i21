@@ -30,6 +30,7 @@ END) AS strName
 
 ,cfTransaction.strTransactionType
 ,DATEADD(dd, DATEDIFF(dd, 0, cfTransaction.dtmTransactionDate ), 0) as dtmTransactionDate
+,dtmTransactionDate as dtmTransactionDateTime
 ,DATEADD(dd, DATEDIFF(dd, 0, cfTransaction.dtmPostedDate ), 0) as dtmPostedDate
 ,cfTransaction.intTransactionId
 

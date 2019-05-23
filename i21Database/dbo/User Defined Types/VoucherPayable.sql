@@ -71,6 +71,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intInventoryShipmentChargeId]	INT NULL,
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
+	[intLoadShipmentCostId]			INT NULL,
 	[intPaycheckHeaderId]			INT NULL,
 	[intCustomerStorageId]			INT NULL,
 	[intCCSiteDetailId]				INT NULL,
@@ -121,5 +122,6 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	/*1099 Info*/
 	[int1099Form]					INT NULL,
 	[int1099Category]				INT NULL,
-	[dbl1099]						DECIMAL(18,6) NOT NULL DEFAULT(0)
+	[dbl1099]						DECIMAL(18,6) NOT NULL DEFAULT(0),
+	[ysnStage]						BIT DEFAULT(1)
 )

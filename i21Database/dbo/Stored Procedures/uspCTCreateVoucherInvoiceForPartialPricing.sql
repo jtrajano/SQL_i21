@@ -51,6 +51,7 @@ BEGIN TRY
 			@dblTotalBillQty			    NUMERIC(18,6),
 			@dblReceived			        NUMERIC(18,6),
 			@dblQtyToBill			        NUMERIC(18,6),
+			@dblTicketQty			        NUMERIC(18,6),
 			@intUniqueId					INT,
 			@dblFinalPrice					NUMERIC(18,6),
 			@intBillQtyUOMId				INT,
@@ -75,7 +76,10 @@ BEGIN TRY
 			@ysnDestinationWeightsAndGrades	BIT,
 			@strInvoiceNumber				NVARCHAR(100),
 			@strBillId						NVARCHAR(100),
-			@strPostedAPAR					NVARCHAR(MAX)
+			@strPostedAPAR					NVARCHAR(MAX),
+			@intReceiptUniqueId				INT,  
+			@intShipmentUniqueId			INT,
+			@ysnTicketBased					BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -87,11 +91,33 @@ BEGIN TRY
 	
 	DECLARE @tblToProcess TABLE
 	(
-			intUniqueId					INT IDENTITY,
-			intInventoryId				INT,
-			intInventoryItemId			INT,
-			dblQty						NUMERIC(18,6),
-			intPFDetailId				INT
+		intUniqueId					INT IDENTITY,
+		intInventoryId				INT,
+		intInventoryItemId			INT,
+		dblQty						NUMERIC(18,6),
+		intPFDetailId				INT
+	)
+
+	DECLARE @tblReceipt TABLE
+	(
+		intReceiptUniqueId			INT IDENTITY,
+		intInventoryReceiptId		INT,
+		intInventoryReceiptItemId	INT,
+		dblReceived					NUMERIC(26,16),
+		strReceiptNumber			NVARCHAR(50),
+		dblTotalIVForSHQty			NUMERIC(26,16),
+		dblTicketQty				NUMERIC(26,16)
+	)
+
+	DECLARE @tblShipment TABLE
+	(
+		intShipmentUniqueId				INT IDENTITY,
+		intInventoryShipmentId			INT,
+		intInventoryShipmentItemId		INT,
+		dblShipped						NUMERIC(26,16),
+		strShipmentNumber				NVARCHAR(50),
+		dblTotalIVForSHQty				NUMERIC(26,16),
+		ysnDestinationWeightsAndGrades	BIT
 	)
 
 	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
@@ -135,32 +161,67 @@ BEGIN TRY
 
 		IF @intContractTypeId = 1 
 		BEGIN
-			IF OBJECT_ID('tempdb..#tblReceipt') IS NOT NULL  								
-				DROP TABLE #tblReceipt								
+		
+			DELETE FROM @tblReceipt
+							
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixationTicket WHERE intPricingId = @intPriceFixationDetailId)
+			BEGIN
+				INSERT INTO @tblReceipt
+				SELECT  RI.intInventoryReceiptId,
+						RI.intInventoryReceiptItemId,
+						dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
+						IR.strReceiptNumber,
+						(
+							SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
+							FROM	tblAPBillDetail ID 
+							WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
+						) AS dblTotalIVForSHQty,
+						FT.dblQuantity
+				FROM    tblICInventoryReceiptItem   RI
+				JOIN    tblICInventoryReceipt		IR  ON  IR.intInventoryReceiptId		=   RI.intInventoryReceiptId
+														AND IR.strReceiptType				=   'Purchase Contract'
+				JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
+				---- TICKET BASED
+				JOIN	tblCTPriceFixationTicket	FT	ON	FT.intInventoryReceiptId		=	RI.intInventoryReceiptId 
+														AND	FT.intPricingId					=	@intPriceFixationDetailId
+				WHERE	RI.intLineNo	=   @intContractDetailId
+				ORDER BY dblTotalIVForSHQty DESC
 
-			SELECT  RI.intInventoryReceiptId,
-					RI.intInventoryReceiptItemId,
-					dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
-					IR.strReceiptNumber,
-					(
-						SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
-						FROM	tblAPBillDetail ID 
-						WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
-					) AS dblTotalIVForSHQty
-
-			INTO    #tblReceipt
-			FROM    tblICInventoryReceiptItem   RI
-			JOIN    tblICInventoryReceipt		IR  ON  IR.intInventoryReceiptId		=   RI.intInventoryReceiptId
-													AND IR.strReceiptType				=   'Purchase Contract'
-			JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
-			WHERE	RI.intLineNo	=   @intContractDetailId 
-
+				SET @ysnTicketBased = 1
+			END
+			ELSE
+			BEGIN
+				IF @ysnTicketBased = 1 
+				BEGIN
+					SELECT @intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
+					CONTINUE
+				END		
+				INSERT INTO @tblReceipt
+				SELECT  RI.intInventoryReceiptId,
+						RI.intInventoryReceiptItemId,
+						dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
+						IR.strReceiptNumber,
+						(
+							SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
+							FROM	tblAPBillDetail ID 
+							WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
+						) AS dblTotalIVForSHQty,
+						0
+				FROM    tblICInventoryReceiptItem   RI
+				JOIN    tblICInventoryReceipt		IR  ON  IR.intInventoryReceiptId		=   RI.intInventoryReceiptId
+														AND IR.strReceiptType				=   'Purchase Contract'
+				JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
+				WHERE	RI.intLineNo	=  @intContractDetailId
+			END
+			
 			SELECT	@dblRemainingQty = 0
 
-			SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM #tblReceipt
-			 
-			WHILE	ISNULL(@intInventoryReceiptItemId,0) > 0 
+			SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt
+
+			WHILE	ISNULL(@intReceiptUniqueId,0) > 0 
 			BEGIN
+
+				SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM @tblReceipt WHERE intReceiptUniqueId = @intReceiptUniqueId
 
 				SELECT @intPFDetailId = 0
 
@@ -168,8 +229,9 @@ BEGIN TRY
 
 				SELECT	@dblTotalIVForSHQty		= ISNULL(dblTotalIVForSHQty,0),
 						@dblReceived			= dblReceived,
-						@intInventoryReceiptId = intInventoryReceiptId 
-				FROM	#tblReceipt 
+						@intInventoryReceiptId	= intInventoryReceiptId,
+						@dblTicketQty			= dblTicketQty
+				FROM	@tblReceipt 
 				WHERE	intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 				SELECT	@dblTotalIVForPFQty = SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived))
@@ -185,14 +247,14 @@ BEGIN TRY
 				IF @dblTotalIVForPFQty = @dblPriceFxdQty
 				BEGIN
 					SELECT	@dblRemainingQty = 0
-					SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM #tblReceipt WHERE intInventoryReceiptItemId > @intInventoryReceiptItemId
+					SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
 					CONTINUE
 				END
 
 				IF @dblTotalIVForSHQty = @dblReceived AND @dblTotalIVForPFQty > 0
 				BEGIN
 					SELECT	@dblRemainingQty = @dblPriceFxdQty - @dblTotalIVForPFQty
-					SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM #tblReceipt WHERE intInventoryReceiptItemId > @intInventoryReceiptItemId
+					SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
 					CONTINUE
 				END
 
@@ -222,9 +284,9 @@ BEGIN TRY
 					IF @dblTotalIVForSHQty < @dblReceived
 					BEGIN
 						IF(@dblReceived - @dblTotalIVForSHQty) <= @dblPriceFxdQty
-						BEGIN
+						BEGIN							
 							INSERT	INTO @tblToProcess
-							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblReceived - @dblTotalIVForSHQty,@intPriceFixationDetailId
+							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,CASE WHEN @ysnTicketBased = 1 THEN @dblTicketQty ELSE @dblReceived - @dblTotalIVForSHQty END,@intPriceFixationDetailId
 							SELECT	@dblRemainingQty = @dblPriceFxdQty - (@dblReceived - @dblTotalIVForSHQty)
 						END
 						ELSE
@@ -262,6 +324,21 @@ BEGIN TRY
 				    
 						SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
 				    
+						---- CT-3167: HOLD SINCE THE CURRENT IS STILL WORKING
+						--DECLARE @voucherPayablesData VoucherPayable
+						--DELETE FROM @voucherPayablesData
+						--DECLARE @intEntityVendorId INT
+						--SELECT @intEntityVendorId = intEntityVendorId FROM tblAPBill WHERE intBillId = @intBillId
+						--DECLARE @intItemId INT
+						--SELECT	@intItemId = intItemId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+						--INSERT INTO @voucherPayablesData(intBillId, intTransactionType, intInventoryReceiptItemId, dblQuantityToBill, dblCost, intEntityVendorId, intItemId, strMiscDescription, intAccountId, intQtyToBillUOMId)
+						--SELECT	@intBillId, 1, @intInventoryReceiptItemId, @dblQtyToBill, @dblFinalPrice, @intEntityVendorId, @intItemId, 'Soybean Meal - NGMO', 7, 40
+						--EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @throwError = 1
+						--SELECT	TOP 1 @intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId 
+						----AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL 
+						--ORDER BY intBillDetailId DESC
+						---- CT-3167: HOLD SINCE THE CURRENT IS STILL WORKING
+
 						--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
@@ -278,13 +355,35 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
+						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 1 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
 						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
 
 						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
+						
+						DECLARE @total DECIMAL(18,6)
+						SELECT	@intBillDetailId = intBillDetailId, @total = dblQtyReceived FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
 
-						SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
+						UPDATE	tblAPBillDetail SET dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
-						UPDATE	tblAPBillDetail SET dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
+						DECLARE @receiptDetails AS InventoryUpdateBillQty
+						
+						DELETE FROM @receiptDetails
+
+						INSERT INTO @receiptDetails
+						(
+							[intInventoryReceiptItemId],
+							[intInventoryReceiptChargeId],
+							[intInventoryShipmentChargeId],
+							[intSourceTransactionNoId],
+							[strSourceTransactionNo],
+							[intItemId],
+							[intToBillUOMId],
+							[dblToBillQty]
+						)
+						SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intNewBillId, @intBillDetailId, @dblQtyToBill, @total)
+
+						EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 
@@ -302,7 +401,11 @@ BEGIN TRY
 						FROM	tblAPBillDetail BD
 						JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
 						JOIN	tblSCTicket		TK  ON TK.intTicketId =  BD.intScaleTicketId
-						WHERE	BD.intContractDetailId = @intContractDetailId AND BD.intScaleTicketId = @intTicketId AND BL.intTransactionType IN (2, 13)
+						WHERE	BD.intContractDetailId	=	@intContractDetailId 
+						AND		BD.intScaleTicketId		=	@intTicketId 
+						AND		BL.intTransactionType	IN (2, 13)
+						AND		BL.ysnPosted			=	1 
+						AND		BL.ysnPaid				=	0 
 
 						IF EXISTS(SELECT * FROM	@prePayId)
 						BEGIN
@@ -310,12 +413,14 @@ BEGIN TRY
 						END
 
 						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+
+						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 					END
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 				END	
 
-				SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM #tblReceipt WHERE intInventoryReceiptItemId > @intInventoryReceiptItemId
+				SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
 			END
 
 			SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId
@@ -392,34 +497,69 @@ BEGIN TRY
 
 		IF @intContractTypeId = 2 
 		BEGIN
-			IF OBJECT_ID('tempdb..#tblShipment') IS NOT NULL  								
-				DROP TABLE #tblShipment								
 
-			SELECT  RI.intInventoryShipmentId,
-					RI.intInventoryShipmentItemId,
-					dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,RI.dblQuantity) dblShipped,
-					IR.strShipmentNumber,
-					(
-						SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
-						FROM	tblARInvoiceDetail ID 
-						WHERE	intInventoryShipmentItemId = RI.intInventoryShipmentItemId AND intInventoryShipmentChargeId IS NULL
-					) AS dblTotalIVForSHQty,
-					ysnDestinationWeightsAndGrades
+			DELETE FROM @tblShipment
 
-			INTO    #tblShipment
-			FROM    tblICInventoryShipmentItem  RI
-			JOIN    tblICInventoryShipment		IR  ON  IR.intInventoryShipmentId		=   RI.intInventoryShipmentId
-													AND IR.intOrderType					=   1
-			JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixationTicket WHERE intPricingId = @intPriceFixationDetailId)
+			BEGIN
+				INSERT INTO @tblShipment
+				SELECT  RI.intInventoryShipmentId,
+						RI.intInventoryShipmentItemId,
+						dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,RI.dblQuantity) dblShipped,
+						IR.strShipmentNumber,
+						(
+							SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
+							FROM	tblARInvoiceDetail ID 
+							WHERE	intInventoryShipmentItemId = RI.intInventoryShipmentItemId AND intInventoryShipmentChargeId IS NULL
+						) AS dblTotalIVForSHQty,
+						ysnDestinationWeightsAndGrades
+				FROM    tblICInventoryShipmentItem  RI
+				JOIN    tblICInventoryShipment		IR  ON  IR.intInventoryShipmentId		=   RI.intInventoryShipmentId
+														AND IR.intOrderType					=   1
+				JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
+				---- TICKET BASED
+				JOIN	tblCTPriceFixationTicket	FT	ON	FT.intInventoryShipmentId		=	RI.intInventoryShipmentId 
+														AND	FT.intPricingId					=	@intPriceFixationDetailId
+				WHERE	RI.intLineNo	=   @intContractDetailId
+				ORDER BY dblTotalIVForSHQty DESC
 
-			WHERE	RI.intLineNo	=   @intContractDetailId 
+				SET @ysnTicketBased = 1
+			END
+			ELSE
+			BEGIN
+				IF @ysnTicketBased = 1 
+				BEGIN
+					SELECT @intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
+					CONTINUE
+				END				
+
+				INSERT INTO @tblShipment
+				SELECT  RI.intInventoryShipmentId,
+						RI.intInventoryShipmentItemId,
+						dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,RI.dblQuantity) dblShipped,
+						IR.strShipmentNumber,
+						(
+							SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
+							FROM	tblARInvoiceDetail ID 
+							WHERE	intInventoryShipmentItemId = RI.intInventoryShipmentItemId AND intInventoryShipmentChargeId IS NULL
+						) AS dblTotalIVForSHQty,
+						ysnDestinationWeightsAndGrades
+				FROM    tblICInventoryShipmentItem  RI
+				JOIN    tblICInventoryShipment		IR  ON  IR.intInventoryShipmentId		=   RI.intInventoryShipmentId
+														AND IR.intOrderType					=   1
+				JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
+				WHERE	RI.intLineNo	=   @intContractDetailId
+			END
 
 			SELECT	@dblRemainingQty = 0
 
-			SELECT	@intInventoryShipmentItemId = MIN(intInventoryShipmentItemId)  FROM #tblShipment
-			 
-			WHILE	ISNULL(@intInventoryShipmentItemId,0) > 0
+			SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment
+			
+			WHILE	ISNULL(@intShipmentUniqueId,0) > 0
 			BEGIN
+			
+				SELECT	@intInventoryShipmentItemId = MIN(intInventoryShipmentItemId)  FROM @tblShipment WHERE intShipmentUniqueId = @intShipmentUniqueId
+			
 				SELECT @intPFDetailId = 0
 
 				DELETE	FROM @tblToProcess
@@ -428,7 +568,7 @@ BEGIN TRY
 						@dblShipped				= dblShipped,
 						@intInventoryShipmentId = intInventoryShipmentId,
 						@ysnDestinationWeightsAndGrades	=	ysnDestinationWeightsAndGrades
-				FROM	#tblShipment 
+				FROM	@tblShipment 
 				WHERE	intInventoryShipmentItemId = @intInventoryShipmentItemId
 
 				SELECT	@dblTotalIVForPFQty = SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,@intItemUOMId,dblQtyShipped))
@@ -442,7 +582,7 @@ BEGIN TRY
 				BEGIN
 					IF EXISTS(SELECT TOP 1 1 FROM tblSCTicket WHERE ISNULL(ysnDestinationWeightGradePost,0) = 0 AND intInventoryShipmentId = @intInventoryShipmentId)
 					BEGIN
-						SELECT	@intInventoryShipmentItemId = MIN(intInventoryShipmentItemId)  FROM #tblShipment WHERE intInventoryShipmentItemId > @intInventoryShipmentItemId
+						SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment WHERE intShipmentUniqueId > @intShipmentUniqueId
 						CONTINUE
 					END
 				END
@@ -450,14 +590,14 @@ BEGIN TRY
 				IF @dblTotalIVForPFQty = @dblPriceFxdQty
 				BEGIN
 					SELECT	@dblRemainingQty = 0
-					SELECT	@intInventoryShipmentItemId = MIN(intInventoryShipmentItemId)  FROM #tblShipment WHERE intInventoryShipmentItemId > @intInventoryShipmentItemId
+					SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment WHERE intShipmentUniqueId > @intShipmentUniqueId
 					CONTINUE
 				END
 
 				IF @dblTotalIVForSHQty = @dblShipped AND @dblTotalIVForPFQty > 0
 				BEGIN
 					SELECT	@dblRemainingQty = @dblPriceFxdQty - @dblTotalIVForPFQty
-					SELECT	@intInventoryShipmentItemId = MIN(intInventoryShipmentItemId)  FROM #tblShipment WHERE intInventoryShipmentItemId > @intInventoryShipmentItemId
+					SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment WHERE intShipmentUniqueId > @intShipmentUniqueId
 					CONTINUE
 				END
 
@@ -539,6 +679,15 @@ BEGIN TRY
 								,@intContractDetailId	=	@intContractDetailId
 								,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
 				
+						DELETE	AD
+						FROM	tblARInvoiceDetail	AD 
+						JOIN	tblCTContractDetail CD	ON AD.intContractDetailId = CD.intContractDetailId
+						WHERE	AD.intInvoiceId		=	@intNewInvoiceId
+						AND		AD.intInventoryShipmentChargeId IS NULL
+						AND		CD.intPricingTypeId NOT IN (1,6)
+						AND	NOT EXISTS(SELECT 1 FROM tblCTPriceFixation WHERE intContractDetailId = CD.intContractDetailId)
+						AND NOT EXISTS(SELECT * FROM tblARInvoiceDetail WHERE  intContractDetailId = CD.intContractDetailId AND intInvoiceId <> @intNewInvoiceId)
+
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
 
 						EXEC	uspARUpdateInvoiceDetails	
@@ -570,7 +719,7 @@ BEGIN TRY
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 				END
 
-				SELECT	@intInventoryShipmentItemId = MIN(intInventoryShipmentItemId)  FROM #tblShipment WHERE intInventoryShipmentItemId > @intInventoryShipmentItemId
+				SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment WHERE intShipmentUniqueId > @intShipmentUniqueId
 			END
 
 			SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId

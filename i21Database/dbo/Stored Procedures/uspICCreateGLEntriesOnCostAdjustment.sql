@@ -715,8 +715,8 @@ AS
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
-			,NULL--cbLog.intRelatedTransactionId  
-			,NULL--cbLog.strRelatedTransactionId 
+			,t.intRelatedTransactionId --cbLog.intRelatedTransactionId  
+			,t.strRelatedTransactionId --cbLog.strRelatedTransactionId 
 			,t.strBatchId
 			,t.intLotId 
 			,t.intFobPointId
@@ -803,8 +803,8 @@ AS
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
-			,NULL--cbLog.intRelatedTransactionId 
-			,NULL--cbLog.strRelatedTransactionId 
+			,t.intRelatedTransactionId --cbLog.intRelatedTransactionId  
+			,t.strRelatedTransactionId --cbLog.strRelatedTransactionId 
 			,t.strBatchId
 			,t.intLotId 
 			,t.intFobPointId
@@ -891,8 +891,8 @@ AS
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
-			,NULL--cbLog.intRelatedTransactionId 
-			,NULL--cbLog.strRelatedTransactionId 
+			,t.intRelatedTransactionId --cbLog.intRelatedTransactionId  
+			,t.strRelatedTransactionId --cbLog.strRelatedTransactionId 
 			,t.strBatchId
 			,t.intLotId 
 			,t.intFobPointId
@@ -979,8 +979,8 @@ AS
 			,strTransactionForm = ISNULL(TransType.strTransactionForm, t.strTransactionForm) 
 			,t.intInTransitSourceLocationId
 			,i.strItemNo
-			,NULL --cbLog.intRelatedTransactionId  
-			,NULL --cbLog.strRelatedTransactionId
+			,t.intRelatedTransactionId --cbLog.intRelatedTransactionId  
+			,t.strRelatedTransactionId --cbLog.strRelatedTransactionId 
 			,t.strBatchId
 			,t.intLotId 
 			,t.intFobPointId

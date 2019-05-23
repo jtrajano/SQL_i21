@@ -51,6 +51,7 @@ BEGIN TRY
 	DECLARE @intPlannedShiftId INT
 	DECLARE @intTransactionFrom INT
 	DECLARE @dtmBusinessDate DATETIME
+	DECLARE @intSalesRepresentativeId INT
 	DECLARE @tblWO AS TABLE (
 		intRowNo INT IDENTITY
 		,dblQuantity NUMERIC(18, 6)
@@ -153,6 +154,13 @@ BEGIN TRY
 				,1
 				)
 	END
+
+	SELECT TOP 1 @intCustomerId = sh.intEntityCustomerId
+		,@strSalesOrderNo = sh.strSalesOrderNumber
+		,@intSalesRepresentativeId = sh.intEntitySalespersonId
+	FROM tblSOSalesOrder sh
+	JOIN tblSOSalesOrderDetail sd ON sh.intSalesOrderId = sd.intSalesOrderId
+	WHERE sd.intSalesOrderDetailId = @intSalesOrderDetailId
 
 	BEGIN TRAN
 
@@ -416,10 +424,12 @@ BEGIN TRY
 				,dtmReleasedDate
 				,intManufacturingProcessId
 				,intSalesOrderLineItemId
+				,intSalesRepresentativeId
 				,intInvoiceDetailId
 				,intLoadDistributionDetailId
 				,dtmPlannedDate
 				,intPlannedShiftId
+				,intCustomerId
 				,intConcurrencyId
 				,intTransactionFrom
 				)
@@ -448,10 +458,12 @@ BEGIN TRY
 				,@dtmCurrentDate
 				,@intManufacturingProcessId
 				,@intSalesOrderDetailId
+				,@intSalesRepresentativeId
 				,@intInvoiceDetailId
 				,@intLoadDistributionDetailId
 				,@dtmPlannedDate
 				,@intPlannedShiftId
+				,@intCustomerId
 				,1
 				,ISNULL(@intTransactionFrom, 2) --Work Order Planning(2), AutoBlend(5)
 
@@ -471,12 +483,6 @@ BEGIN TRY
 
 	IF @intAttributeTypeId >= 3 --Packaging
 	BEGIN
-		SELECT TOP 1 @intCustomerId = sh.intEntityCustomerId
-			,@strSalesOrderNo = sh.strSalesOrderNumber
-		FROM tblSOSalesOrder sh
-		JOIN tblSOSalesOrderDetail sd ON sh.intSalesOrderId = sd.intSalesOrderId
-		WHERE sd.intSalesOrderDetailId = @intSalesOrderDetailId
-
 		DECLARE @strWOStatusName NVARCHAR(50)
 		DECLARE @intStatusId INT = NULL
 
@@ -615,6 +621,7 @@ BEGIN TRY
 				,intLastModifiedUserId
 				,intManufacturingProcessId
 				,intSalesOrderLineItemId
+				,intSalesRepresentativeId
 				,dtmOrderDate
 				,dtmPlannedDate
 				,intSupervisorId
@@ -646,6 +653,7 @@ BEGIN TRY
 				,@intUserId
 				,@intManufacturingProcessId
 				,@intSalesOrderDetailId
+				,@intSalesRepresentativeId
 				,@dtmCurrentDate
 				,@dtmPlannedDate
 				,@intUserId

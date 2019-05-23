@@ -50,7 +50,7 @@ DECLARE
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT
 	,@intBankAccountId AS INT
-	,@ysnBankAccountIdInactive AS BIT
+	,@ysnBankAccountActive AS BIT
 	,@intCreatedEntityId AS INT
 	,@ysnAllowUserSelfPost AS BIT = 0
 	
@@ -202,15 +202,24 @@ BEGIN
 	-- Check if the bank account is inactive
 	
 	
-	SELECT	@ysnBankAccountIdInactive = 1
-	FROM	tblCMBankAccount
+	DECLARE @GLAccountSetupIsValid INT = 0
+
+	SELECT	@GLAccountSetupIsValid = COUNT(1),	@ysnBankAccountActive=ISNULL(CM.ysnActive,0) & ISNULL(GL.ysnActive,0)
+	FROM	tblCMBankAccount CM JOIN vyuGLAccountDetail GL 
+	ON GL.intAccountId = CM.intGLAccountId
 	WHERE	intBankAccountId = @intBankAccountId
-			AND (ysnActive = 0 OR intGLAccountId IN (SELECT intAccountId FROM tblGLAccount WHERE ysnActive = 0))
+	GROUP BY intBankAccountId, CM.ysnActive, GL.ysnActive
 	
-	IF @ysnBankAccountIdInactive = 1
+	IF @ysnBankAccountActive = 0
 	BEGIN
 		-- 'The bank account is inactive.'
 		RAISERROR('The bank account or its associated GL account is inactive.', 11, 1)
+		GOTO Post_Rollback
+	END
+	
+	IF (@GLAccountSetupIsValid = 0)
+	BEGIN
+	RAISERROR('The GL Account associated with the bank has invalid setup or non existent.', 11, 1)
 		GOTO Post_Rollback
 	END
 	

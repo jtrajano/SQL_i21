@@ -8,6 +8,7 @@
 	strSubBook				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCommodity			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCompanyLocation		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strStorageLocation		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strItem					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	dblVolume				NUMERIC(18, 6) NULL,
 	strVolumeUOM			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,

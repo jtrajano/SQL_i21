@@ -66,8 +66,8 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 		,[strTransferType]          = 'Location to Location'
 		,[intSourceType]            = 1
 		,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
-		,[intFromLocationId]        = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intTransferLocationId ELSE SC.intProcessingLocationId END 
-		,[intToLocationId]          = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intProcessingLocationId ELSE SCS.intLocationId END 
+		,[intFromLocationId]        = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intProcessingLocationId ELSE SCS.intLocationId END 
+		,[intToLocationId]          = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intTransferLocationId ELSE SC.intProcessingLocationId END 
 		,[ysnShipmentRequired]      = CASE WHEN SC.intTicketTypeId = 10 THEN 0 ELSE 1 END
 		,[intStatusId]              = 1
 		,[intShipViaId]             = NULL
@@ -81,10 +81,10 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 		,[dblGrossWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits) ELSE SC.dblGrossUnits END
 		,[dblTareWeight]			= CASE WHEN ISNULL(@lotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink) ELSE CASE WHEN SC.dblShrink > 0 THEN SC.dblShrink ELSE 0 END END
 		,[strNewLotId]              = NULL
-		,[intFromSubLocationId]     = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intSubLocationToId ELSE NULL END
-		,[intToSubLocationId]       = SC.intSubLocationId
-		,[intFromStorageLocationId] = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intStorageLocationToId ELSE NULL END
-		,[intToStorageLocationId]   = SC.intStorageLocationId
+		,[intFromSubLocationId]     = SC.intSubLocationId
+		,[intToSubLocationId]       = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intSubLocationToId ELSE NULL END
+		,[intFromStorageLocationId] = SC.intStorageLocationId
+		,[intToStorageLocationId]   = CASE WHEN SC.intTicketTypeId = 10 THEN SC.intStorageLocationToId ELSE NULL END
 		,[ysnWeights]				= CASE
 										WHEN SC.intWeightId > 0 THEN 1
 										ELSE 0

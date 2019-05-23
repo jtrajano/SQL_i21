@@ -4,6 +4,8 @@
 	This is a utility stored procedure used to fix on-hand stocks. 
 */
 CREATE PROCEDURE [dbo].[uspICFixStockOnHand]
+	@intItemId AS INT = NULL 
+	,@intCategoryId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,9 +16,21 @@ SET ANSI_WARNINGS OFF
 
 UPDATE tblICItemStock
 SET dblUnitOnHand = 0
+FROM 
+	tblICItemStock s INNER JOIN tblICItem i 
+		ON s.intItemId  = i.intItemId
+WHERE 
+	ISNULL(@intItemId, i.intItemId) = i.intItemId
+	AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 
 UPDATE tblICItemStockUOM
 SET dblOnHand = 0 
+FROM 
+	tblICItemStockUOM s INNER JOIN tblICItem i
+		ON s.intItemId = i.intItemId
+WHERE 
+	ISNULL(@intItemId, i.intItemId) = i.intItemId
+	AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 
 -----------------------------------
 -- Update the Item Stock table
@@ -43,14 +57,20 @@ BEGIN
 								END				
 							)
 						
-			FROM	dbo.tblICInventoryTransaction ItemTransactions LEFT JOIN tblICLot Lot
+			FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN tblICItem i
+						ON ItemTransactions.intItemId = i.intItemId 
+					LEFT JOIN tblICLot Lot
 						ON ItemTransactions.intLotId = Lot.intLotId
 					LEFT JOIN tblICItemUOM LotItemUOM
 						ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
 					LEFT JOIN tblICItemUOM WeightUOM
 						ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
-			--WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
-			GROUP BY ItemTransactions.intItemId, ItemTransactions.intItemLocationId
+			WHERE
+				ISNULL(@intItemId, i.intItemId) = i.intItemId
+				AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+			GROUP BY 
+				ItemTransactions.intItemId
+				, ItemTransactions.intItemLocationId
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
 		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -110,10 +130,15 @@ BEGIN
 						,ItemTransactions.intSubLocationId
 						,ItemTransactions.intStorageLocationId
 						,Qty = SUM(ItemTransactions.dblQty)
-				FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN dbo.tblICItemUOM ItemUOM
+				FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN tblICItem i
+							ON ItemTransactions.intItemId = i.intItemId 
+						INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ItemTransactions.intItemUOMId = ItemUOM.intItemUOMId
-				WHERE	--ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
+				WHERE	
 						ItemTransactions.intLotId IS NULL 
+						AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+						AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+
 				GROUP BY ItemTransactions.intItemId, ItemTransactions.intItemUOMId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 		) AS RawStockData
 			ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -176,11 +201,15 @@ BEGIN
 						,ItemTransactions.intSubLocationId
 						,ItemTransactions.intStorageLocationId
 						,Qty = SUM(dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty, ItemTransactions.dblUOMQty))
-				FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN dbo.tblICItemUOM ItemUOM
+				FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN tblICItem i 
+							ON ItemTransactions.intItemId = i.intItemId 						
+						INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ItemTransactions.intItemUOMId = ItemUOM.intItemUOMId
 							AND ISNULL(ItemUOM.ysnStockUnit, 0) = 0 
-				WHERE	--ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
-						ItemTransactions.intLotId IS NULL 
+				WHERE	ItemTransactions.intLotId IS NULL 
+						AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+						AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+
 				GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 		) AS RawStockData
 			ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -248,8 +277,10 @@ BEGIN
 					,intSubLocationId = Lot.intSubLocationId 
 					,intStorageLocationId = Lot.intStorageLocationId
 					,Qty = Lot.dblQty
-			FROM	dbo.tblICLot Lot 
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
+					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 						
 			-- Get the Weight Qty (Lot.intWeightUOMId) 
 			UNION ALL 
@@ -260,9 +291,12 @@ BEGIN
 					,intSubLocationId = Lot.intSubLocationId 
 					,intStorageLocationId = Lot.intStorageLocationId
 					,Qty = Lot.dblWeight
-			FROM	dbo.tblICLot Lot 
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
 					AND Lot.intItemUOMId <> Lot.intWeightUOMId 
+					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+
 
 			-- Convert pack to stock unit. 
 			UNION ALL 
@@ -276,7 +310,8 @@ BEGIN
 								Lot.dblQty
 								,PackUOM.dblUnitQty								
 							) 
-			FROM	dbo.tblICLot Lot INNER JOIN dbo.tblICItemUOM PackUOM 
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
+					INNER JOIN dbo.tblICItemUOM PackUOM 
 						ON PackUOM.intItemUOMId = Lot.intItemUOMId
 					INNER JOIN dbo.tblICItemUOM LotStockUOM 
 						ON LotStockUOM.intItemId = Lot.intItemId
@@ -284,6 +319,9 @@ BEGIN
 						AND LotStockUOM.intItemUOMId <> Lot.intItemUOMId 
 						AND LotStockUOM.intWeightUOMId <> Lot.intWeightUOMId 
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
+					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+
 
 			-- Convert weight to stock unit. 
 			UNION ALL 
@@ -297,7 +335,8 @@ BEGIN
 								Lot.dblWeight
 								,LotWeightUOM.dblUnitQty								
 							) 
-			FROM	dbo.tblICLot Lot INNER JOIN dbo.tblICItemUOM LotWeightUOM 
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
+					INNER JOIN dbo.tblICItemUOM LotWeightUOM 
 						ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
 					INNER JOIN dbo.tblICItemUOM LotStockUOM 
 						ON LotStockUOM.intItemId = Lot.intItemId
@@ -306,6 +345,9 @@ BEGIN
 						AND LotStockUOM.intWeightUOMId <> Lot.intWeightUOMId 
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
 					AND Lot.intItemUOMId <> Lot.intWeightUOMId 
+					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+
 
 			---------------------------------------------
 			-- Lot does NOT have a Weight. 
@@ -319,9 +361,12 @@ BEGIN
 					,intSubLocationId = Lot.intSubLocationId 
 					,intStorageLocationId = Lot.intStorageLocationId
 					,Qty = ISNULL(Lot.dblQty, 0) 
-			FROM	dbo.tblICLot Lot 
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
 			WHERE	Lot.intWeightUOMId IS NULL 
-					
+					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+
+
 			--------------------------------------------------------------------------------------
 			-- and then convert the Pack Qty to stock UOM. 
 			--------------------------------------------------------------------------------------
@@ -333,7 +378,8 @@ BEGIN
 					,intSubLocationId = Lot.intSubLocationId 
 					,intStorageLocationId = Lot.intStorageLocationId
 					,Qty =	dbo.fnCalculateStockUnitQty(Lot.dblQty, LotItemUOM.dblUnitQty) 
-			FROM	dbo.tblICLot Lot INNER JOIN tblICItemUOM LotItemUOM
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
+					INNER JOIN tblICItemUOM LotItemUOM
 						ON Lot.intItemUOMId = LotItemUOM.intItemUOMId			
 					LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
 						ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
@@ -342,6 +388,9 @@ BEGIN
 						AND LotStockUOM.ysnStockUnit = 1
 			WHERE	Lot.intWeightUOMId IS NULL 
 					AND Lot.intItemUOMId <> LotStockUOM.intItemUOMId		
+					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
+					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+
 		) Query
 		GROUP BY intItemId 
 				,intItemUOMId 

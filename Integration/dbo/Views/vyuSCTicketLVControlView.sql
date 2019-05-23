@@ -173,61 +173,60 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					,[strSourceType]
 				)
 				SELECT 
-				LTRIM(RTRIM(SC.strTicketNumber))
-				,SC.intTicketType
-				,SCL.intTicketTypeId
-				,LTRIM(RTRIM(SC.strTicketType))
-				,LTRIM(RTRIM(SC.strInOutFlag))
-				,SC.dtmTicketDateTime
-				,LTRIM(RTRIM(SC.strTicketStatus))
-				,EM.intEntityId
-				,IC.intItemId
-				,ICC.intCommodityId
-				,SM.intCompanyLocationId
-				,SC.dblGrossWeight
-				,SC.dtmGrossDateTime
-				,SC.dblTareWeight
-				,SC.dtmTareDateTime
-				,LTRIM(RTRIM(SC.strTicketComment))
-				,GRDI.intDiscountId
-				,GRDS.intDiscountScheduleId
-				,SC.dblFreightRate
-				,SC.dblTicketFees
-				,SC.ysnFarmerPaysFreight
-				,SMCR.intCurrencyID
-				,LTRIM(RTRIM(SC.strCurrency))
-				,LTRIM(RTRIM(SC.strBinNumber))
-				,LTRIM(RTRIM(SC.strContractNumber))
-				,SC.intContractSequence
-				,LTRIM(RTRIM(SC.strScaleOperatorUser))
-				,LTRIM(RTRIM(SC.strTruckName))
-				,LTRIM(RTRIM(SC.strDriverName))
-				,LTRIM(RTRIM(SC.strCustomerReference))
-				,SC.intAxleCount
-				,SC.ysnDriverOff
-				,SC.ysnGrossManual
-				,SC.ysnTareManual
-				,GRS.intStorageScheduleTypeId
-				,LTRIM(RTRIM(SC.strDistributionOption))
-				,LTRIM(RTRIM(SC.strPitNumber))
-				,SCTP.intTicketPoolId
-				,LTRIM(RTRIM(SC.strSplitNumber))
-				,SCS.intScaleSetupId
-				,SC.dblGrossUnits
-				,SC.dblNetUnits
-				,SC.dblUnitPrice
-				,0
-				,0
-				,SC.intTicketId
-				,ICUOM.dblUnitQty
-				,UOM.intItemUOMId
-				,ICUOM.intItemUOMId
-				,UM.strUnitMeasure
-				,''Per Unit''
-				,SC.strDiscountComment
-				,''LV Control''
+					[strTicketNumber]				= LTRIM(RTRIM(SC.strTicketNumber))
+					,[intTicketType]				= SC.intTicketType
+					,[intTicketTypeId]				= SCL.intTicketTypeId
+					,[strTicketType]				= LTRIM(RTRIM(SC.strTicketType))
+					,[strInOutFlag]					= LTRIM(RTRIM(SC.strInOutFlag))
+					,[dtmTicketDateTime]			= SC.dtmTicketDateTime
+					,[strTicketStatus]				= LTRIM(RTRIM(SC.strTicketStatus))
+					,[intEntityId]					= EM.intEntityId
+					,[intItemId]					= IC.intItemId
+					,[intCommodityId]				= ICC.intCommodityId
+					,[intCompanyLocationId]			= SM.intCompanyLocationId
+					,[dblGrossWeight] 				= SC.dblGrossWeight
+					,[dtmGrossDateTime]				= SC.dtmGrossDateTime
+					,[dblTareWeight]				= SC.dblTareWeight
+					,[dtmTareDateTime]				= SC.dtmTareDateTime
+					,[strTicketComment]				= LTRIM(RTRIM(SC.strTicketComment))
+					,[intDiscountId]				= GRDI.intDiscountId
+					,[intDiscountScheduleId]		= GRDS.intDiscountScheduleId
+					,[dblFreightRate]				= SC.dblFreightRate
+					,[dblTicketFees]				= SC.dblTicketFees
+					,[ysnFarmerPaysFreight]			= SC.ysnFarmerPaysFreight
+					,[intCurrencyId]				= SMCR.intCurrencyID
+					,[strCurrency]					= LTRIM(RTRIM(SC.strCurrency))
+					,[strBinNumber]					= LTRIM(RTRIM(SC.strBinNumber))
+					,[strContractNumber]			= LTRIM(RTRIM(SC.strContractNumber))
+					,[intContractSequence]			= SC.intContractSequence
+					,[strScaleOperatorUser]			= LTRIM(RTRIM(SC.strScaleOperatorUser))
+					,[strTruckName]					= LTRIM(RTRIM(SC.strTruckName))
+					,[strDriverName]				= LTRIM(RTRIM(SC.strDriverName))
+					,[strCustomerReference]			= LTRIM(RTRIM(SC.strCustomerReference))
+					,[intAxleCount]					= SC.intAxleCount
+					,[ysnDriverOff]					= SC.ysnDriverOff
+					,[ysnGrossManual]				= SC.ysnGrossManual
+					,[ysnTareManual]				= SC.ysnTareManual
+					,[intStorageScheduleTypeId]		= GRS.intStorageScheduleTypeId
+					,[strDistributionOption]		= LTRIM(RTRIM(SC.strDistributionOption))
+					,[strPitNumber]					= LTRIM(RTRIM(SC.strPitNumber))
+					,[intTicketPoolId]				= SCTP.intTicketPoolId
+					,[strSplitNumber]				= LTRIM(RTRIM(SC.strSplitNumber))
+					,[intScaleSetupId]				= SCS.intScaleSetupId
+					,[dblGrossUnits]				= SC.dblGrossUnits
+					,[dblNetUnits]					= SC.dblNetUnits
+					,[dblUnitPrice]					= SC.dblUnitPrice
+					,[dblUnitBasis]					= 0
+					,[ysnProcessedData]				= 0
+					,[intOriginTicketId]			= SC.intTicketId
+					,[dblConvertedUOMQty]			= ICUOM.dblUnitQty
+					,[intItemUOMIdFrom]				= UOM.intItemUOMId
+					,[intItemUOMIdTo]				= ICUOM.intItemUOMId
+					,[strItemUOM]					= UM.strUnitMeasure
+					,[strCostMethod]				= ''Per Unit''
+					,[strDiscountComment]			= SC.strDiscountComment
+					,[strSourceType]				= ''LV Control''
 				FROM vyuSCTicketLVControlView SC 
-				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 				LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
 				LEFT JOIN tblICItem IC ON IC.strItemNo = SC.strItemNo
 				LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
@@ -237,7 +236,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
 				LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
 				LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
-				LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUOM = 1
+				LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUnit = 1
 				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
 				LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 				LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
@@ -250,7 +249,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					,gasct_shrk_what AS strShrinkWhat
 					,gasct_shrk_pct AS dblShrinkPercent
 					,intDiscountScheduleCodeId
-					,intOriginTicketId
+					,intTicketId = k.intTicketLVStagingId
 					,''Scale'' AS strSourceType
 					,''Dollar'' strDiscountChargeType 
 					,b.A4GLIdentity

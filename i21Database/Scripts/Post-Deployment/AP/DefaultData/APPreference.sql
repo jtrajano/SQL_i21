@@ -36,9 +36,9 @@ BEGIN
 			EXEC dbo.uspSMAuditLog 
 						 @keyValue			= 1									-- Primary Key Value of the Invoice. 
 						,@screenName		= 'AccountsPayable.view.CompanyPreferenceOption'	-- Screen Namespace
-						,@entityId			= 1									-- Entity Id.
+						,@entityId			= null									-- Entity Id.
 						,@actionType		= 'Added'							-- Action Type
-						,@changeDescription	= 'Check Print Options'			-- Description
+						,@changeDescription	= 'Check Print Options For Accounts Payable Company Preference Option Default Data'			-- Description
 						,@fromValue			= '0'								-- Previous Value
 						,@toValue			= '1'								-- New Value
 		END
@@ -55,9 +55,9 @@ BEGIN
 			EXEC dbo.uspSMAuditLog 
 					 @keyValue			= 1						-- Primary Key Value of the Invoice. 
 					,@screenName		= 'AccountsPayable.view.CompanyPreferenceOption'	-- Screen Namespace
-					,@entityId			= 1									-- Entity Id.
+					,@entityId			= null									-- Entity Id.
 					,@actionType		= 'Updated'							-- Action Type
-					,@changeDescription	= 'Check Print Options'			-- Description
+					,@changeDescription	= 'Check Print Options For Accounts Payable Company Preference Option Default Data'			-- Description
 					,@fromValue			= '0'								-- Previous Value
 					,@toValue			= '1'								-- New Value
 		END		

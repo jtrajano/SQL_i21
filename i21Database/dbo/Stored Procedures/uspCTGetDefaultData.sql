@@ -243,15 +243,10 @@ BEGIN
 
 	IF @strType = 'BrokerageAccount'
 	BEGIN
-		IF (SELECT COUNT(DISTINCT strName) FROM vyuRKGetBrokerByMarket WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3)) = 1
-		BEGIN
-			SELECT @intEntityId = intEntityId, @strEntityName = strName FROM vyuRKGetBrokerByMarket  WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3)
-
-			IF (SELECT COUNT(DISTINCT intBrokerageAccountId) FROM vyuRKGetBrokerByMarket  WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3) AND @intEntityId = intEntityId) = 1
-			BEGIN
-				SELECT @intBrokerageAccountId = intBrokerageAccountId,@strAccountNumber = strAccountNumber FROM vyuRKGetBrokerByMarket  WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3) AND @intEntityId = intEntityId
-			END
-		END
+			SELECT TOP 1 @intEntityId = intEntityId, @strEntityName = strName FROM vyuRKGetBrokerByMarket  WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3) ORDER BY strName
+			
+			SELECT TOP 1 @intBrokerageAccountId = intBrokerageAccountId,@strAccountNumber = strAccountNumber FROM vyuRKGetBrokerByMarket  WHERE intFutureMarketId = @intMarketId AND intCommodityId = @intCommodityId AND intInstrumentTypeId IN (1,3) AND @intEntityId = intEntityId ORDER BY strAccountNumber
+				
 		IF @intEntityId IS NOT NULL
 		BEGIN
 			SELECT @intEntityId,@strEntityName,@intBrokerageAccountId,@strAccountNumber

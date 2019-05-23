@@ -32,6 +32,8 @@ BEGIN
  DECLARE @strDetailType       NVARCHAR(2)      
  DECLARE @strContractNumber      NVARCHAR(50)      
  DECLARE @intContractSequence      INT      
+ DECLARE @intContractDetailId		INT
+ DECLARE @intContractHeaderId		INT
  DECLARE @intImportDDToInvoiceId     INT      
  DECLARE @intCustomerEntityId     INT      
  DECLARE @intDriverEntityId      INT           
@@ -40,7 +42,7 @@ BEGIN
  DECLARE @intSiteId        INT      
  DECLARE @intTaxGroupId       INT        
  DECLARE @LogId         INT      
-       
+  
     
  DECLARE @intLocation INT    
  DECLARE @dblLatitude NUMERIC(18, 6)
@@ -97,8 +99,8 @@ BEGIN
 		,@strComment      = strComment      
 		,@intImportDDToInvoiceId   = intImportDDToInvoiceId      
 		,@strDetailType      = '' --strDetailType not in use as of this writing      
-		,@strContractNumber     = '' --strContractNumber no contract      
-		,@intContractSequence    = NULL --intContractSequence      
+		,@strContractNumber     = strContractNumber 
+		,@intContractSequence    = intContractSequence  --contract detail id (tblCTContractDetail primary key) from TM order export.
 		,@dblLatitude = dblLatitude
 		,@dblLongitude = dblLongitude
 	FROM #tmpDDToInvoice      
@@ -116,11 +118,91 @@ BEGIN
 	--Get Item id      
 	SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)      
     
+	/*Contract Management */    
+	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/    
+	--*note for now no checking. will get whatever what is in the file. no requirements yet in specs.
+	--as of this writing 05222019 the query below only purpose is to check if the contract number, detail id , using the same item Id , still exists
+	SET @intContractDetailId = NULL
+	SET @intContractHeaderId = NULL
+
+	SELECT TOP 1 @intContractDetailId = intContractDetailId
+				,@intContractHeaderId = intContractHeaderId
+	FROM
+		[vyuCTCustomerContract] ARCC
+	WHERE
+		ARCC.[intEntityCustomerId] = @intCustomerEntityId
+		AND ARCC.[intItemId] = @intItemId
+		--AND CAST(@dtmInvoiceDate AS DATE) BETWEEN CAST(ARCC.[dtmStartDate] AS DATE) AND 
+		--									CAST(ISNULL(ARCC.[dtmEndDate], @dtmInvoiceDate) AS DATE) 
+		--*note AND ARCC.[strContractStatus] NOT IN ('Cancelled', 'Unconfirmed', 'Complete') -- for now will no checking. will get whatever what is in the file. no requirements yet in specs.
+		--*note AND (ARCC.[dblAvailableQty] > 0) 
+		AND ARCC.strContractNumber = @strContractNumber
+		AND ARCC.intContractDetailId = @intContractSequence
+	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/    
+
+
 	/*Tank Management */    
 	/*-------------------------------------------------------------------------------------------------------------------------------------------------*/    
-	SET @intSiteId = ( SELECT TOP 1 intSiteID FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID    
-			WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))    
+	--SET @intSiteId = ( SELECT TOP 1 intSiteID FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID    
+	--		WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))    
     
+			DECLARE @intSiteItemTaxId INT
+			DECLARE @intSiteProductId INT
+			DECLARE @dblSiteProductPrice NUMERIC(18,6)
+			SELECT TOP 1 @intSiteId = B.intSiteID
+						,@intSiteItemTaxId = intTaxStateID	
+						,@dblSiteProductPrice = dblPrice
+						,@intSiteProductId = intProduct
+			FROM tblTMCustomer A
+					INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
+					LEFT JOIN tblTMDispatch C ON B.intSiteID = C.intSiteID
+			WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT)
+
+			SET @intTaxGroupId = (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = @strTaxGroup)
+			--Tax Mismatch Checking...
+			IF ISNULL(@intSiteItemTaxId,0) <> ISNULL(@intTaxGroupId,0)
+					BEGIN
+					INSERT INTO @ValidationTableLog (strCustomerNumber ,strInvoiceNumber,strSiteNumber,intLineItem ,strMessage,ysnError)    
+						SELECT strCustomerNumber = @strCustomerNumber     
+							,strInvoiceNumber = @stri21InvoiceNumber    
+							,strSiteNumber = @strSiteNumber     
+							,intLineItem = @intImportDDToInvoiceId     
+							,strMessage = 'Tax Mismatch'    
+							,ysnError = 0
+					END
+		
+			--Get Item id
+			SET @intItemId = (SELECT TOP 1 intItemId FROM tblICItem WHERE strItemNo = @strItemNumber)
+			SET @intItemId = ISNULL(@intItemId,0)
+			--Item Mismatch Checking...
+			IF ISNULL(@intSiteProductId,0) <> ISNULL(@intItemId,0)
+					BEGIN
+						
+						INSERT INTO @ValidationTableLog (strCustomerNumber ,strInvoiceNumber,strSiteNumber,intLineItem ,strMessage,ysnError)    
+						SELECT strCustomerNumber = @strCustomerNumber     
+							,strInvoiceNumber = @stri21InvoiceNumber    
+							,strSiteNumber = @strSiteNumber     
+							,intLineItem = @intImportDDToInvoiceId     
+							,strMessage = 'Product Mismatch'    
+							,ysnError = 0   
+					END
+
+			
+			 SET @dblSiteProductPrice =  (SELECT TOP 1 dblPrice   FROM tblTMDispatch  WHERE intSiteID = @intSiteId)
+			--Price Mismatch Checking...
+			IF ISNULL(@dblPrice,0) <> ISNULL(@dblSiteProductPrice ,0)
+					BEGIN
+						
+						INSERT INTO @ValidationTableLog (strCustomerNumber ,strInvoiceNumber,strSiteNumber,intLineItem ,strMessage,ysnError)    
+						SELECT strCustomerNumber = @strCustomerNumber     
+							,strInvoiceNumber = @stri21InvoiceNumber    
+							,strSiteNumber = @strSiteNumber     
+							,intLineItem = @intImportDDToInvoiceId     
+							,strMessage = 'Price Mismatch'
+							,ysnError = 0   
+						
+					END
+
 	IF(@dblPercentFullAfterDelivery = 0 AND @dblQuantity > 0)    
 	SET @dblPercentFullAfterDelivery = (SELECT TOP 1 dblDefaultFull FROM tblICItem WHERE intItemId = @intItemId)    
 	/*------------------------------------------------------------------------------------------------------------------------------------------------- */    
@@ -342,8 +424,8 @@ BEGIN
        ,[strShipmentNumber]  = NULL      
        ,[intSalesOrderDetailId] = NULL      
        ,[strSalesOrderNumber]  = NULL      
-       ,[intContractHeaderId]  = NULL      
-       ,[intContractDetailId]  = NULL      
+       ,[intContractHeaderId]  = @intContractHeaderId
+       ,[intContractDetailId]  = @intContractDetailId
        ,[intShipmentPurchaseSalesContractId] = NULL      
        ,[intTicketId]    = NULL      
        ,[intTicketHoursWorkedId] = NULL      
@@ -442,7 +524,8 @@ BEGIN
 				,tblICItem.strItemNo AS strItemNumber    
 				,0 AS intLineItem         
 				,'' AS strFileName         
-				,strMessage AS strStatus          
+				--,strMessage AS strStatus          
+				,strMessage  +  STUFF((SELECT ',' + CAST(T2.strMessage AS VARCHAR(100))  FROM @ValidationTableLog T2 WHERE intId = T2.intLineItem AND ysnError = 0 FOR XML PATH('')),1,1,'') AS strStatus				
 				,ISNULL(ysnSuccess,0) AS ysnSuccessful         
 				,ISNULL(tblARInvoiceIntegrationLogDetail.intInvoiceId,0) AS intInvoiceId      
 				,tblARInvoiceIntegrationLogDetail.strTransactionType AS strTransactionType      
@@ -468,6 +551,7 @@ BEGIN
 				,0 AS intInvoiceId      
 				,'' strTransactionType      
 			FROM @ValidationTableLog    
+			WHERE ysnError = 1
    ) ResultTableLog    
   ORDER BY ysnSuccessful,strInvoiceNumber,strItemNumber
   --SELECT * FROM @ResultTableLog    

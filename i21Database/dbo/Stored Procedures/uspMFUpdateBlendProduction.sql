@@ -1,96 +1,157 @@
-﻿CREATE PROCEDURE [dbo].[uspMFUpdateBlendProduction]
-	@intWorkOrderId int,
-	@intStatusId int,
-	@dtmDueDate DateTime,
-	@intExecutionOrder int,
-	@intStorageLocationId int,
-	@intManufacturingCellId int,
-	@strComment nVarchar(Max),
-	@intUserId int
+﻿CREATE PROCEDURE [dbo].[uspMFUpdateBlendProduction] @intWorkOrderId INT
+	,@intStatusId INT
+	,@dtmDueDate DATETIME
+	,@intExecutionOrder INT
+	,@intStorageLocationId INT
+	,@intManufacturingCellId INT
+	,@strComment NVARCHAR(Max)
+	,@intUserId INT
+	,@strReferenceNo nvarchar(50)=NULL
+	,@strLotAlias nvarchar(50)=NULL
+	,@strVesselNo nvarchar(50)=NULL
+	,@dblActualQuantity Numeric(18,6)=NULL
+	,@dblNoOfUnits Numeric(18,6)=NULL
+	,@intNoOfUnitsItemUOMId int=NULL
+	,@dtmPlannedDate Datetime=NULL
 AS
+DECLARE @intCurrentExecutionOrder INT
+DECLARE @dtmCurrentDueDate DATETIME
+DECLARE @intCurrentManufacturingCellId INT
 
-Declare @intCurrentExecutionOrder int
-Declare @dtmCurrentDueDate DateTime
-Declare @intCurrentManufacturingCellId int
+IF @intStorageLocationId = 0
+	SET @intStorageLocationId = NULL
 
-If @intStorageLocationId=0 
-	Set @intStorageLocationId=null
+IF @intStatusId = 9
+BEGIN
+	DECLARE @tblWO AS TABLE (
+		intWOId INT
+		,intExecNo INT
+		)
 
+	SELECT @dtmCurrentDueDate = dtmExpectedDate
+		,@intCurrentExecutionOrder = intExecutionOrder
+		,@intCurrentManufacturingCellId = intManufacturingCellId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
-If @intStatusId=9 
-Begin
-	Declare @tblWO as table
-	(
-		intWOId int,
-		intExecNo int
-	)
-	Select @dtmCurrentDueDate=dtmExpectedDate,@intCurrentExecutionOrder=intExecutionOrder,@intCurrentManufacturingCellId=intManufacturingCellId 
-	From tblMFWorkOrder where intWorkOrderId=@intWorkOrderId
+	IF ISNULL(@intManufacturingCellId, 0) = 0
+		SET @intManufacturingCellId = @intCurrentManufacturingCellId
 
-	if ISNULL(@intManufacturingCellId,0) =0 
-		Set @intManufacturingCellId=@intCurrentManufacturingCellId
+	IF @intCurrentManufacturingCellId <> @intManufacturingCellId
+	BEGIN
+		SELECT @intExecutionOrder = ISNULL(Max(intExecutionOrder), 0) + 1
+		FROM tblMFWorkOrder
+		WHERE Convert(DATE, dtmExpectedDate) = convert(DATE, @dtmDueDate)
+			AND intManufacturingCellId = @intManufacturingCellId
 
-	If @intCurrentManufacturingCellId <> @intManufacturingCellId
-	Begin
-		Select @intExecutionOrder = ISNULL(Max(intExecutionOrder),0) + 1 From 
-		tblMFWorkOrder Where Convert(date,dtmExpectedDate) =convert(date,@dtmDueDate) And intManufacturingCellId=@intManufacturingCellId
+		INSERT INTO @tblWO (
+			intWOId
+			,intExecNo
+			)
+		SELECT intWorkOrderId
+			,intExecutionOrder - 1
+		FROM tblMFWorkOrder
+		WHERE intExecutionOrder > @intCurrentExecutionOrder
+			AND Convert(DATE, dtmExpectedDate) = convert(DATE, @dtmCurrentDueDate)
+			AND intManufacturingCellId = @intCurrentManufacturingCellId
+		ORDER BY intExecutionOrder
+	END
+	ELSE
+	BEGIN
+		IF Convert(DATE, @dtmDueDate) <> convert(DATE, @dtmCurrentDueDate)
+		BEGIN
+			SELECT @intExecutionOrder = ISNULL(Max(intExecutionOrder), 0) + 1
+			FROM tblMFWorkOrder
+			WHERE Convert(DATE, dtmExpectedDate) = convert(DATE, @dtmDueDate)
+				AND intManufacturingCellId = @intCurrentManufacturingCellId
 
-		insert into @tblWO(intWOId,intExecNo)
-		Select intWorkOrderId,intExecutionOrder-1 From tblMFWorkOrder 
-		where intExecutionOrder>@intCurrentExecutionOrder 
-		And Convert(date,dtmExpectedDate) = convert(date,@dtmCurrentDueDate) 
-		And intManufacturingCellId=@intCurrentManufacturingCellId
-		Order by intExecutionOrder
-	End
-	Else
-	Begin
-		If Convert(date,@dtmDueDate) <> convert(date,@dtmCurrentDueDate)
-			Begin
-				Select @intExecutionOrder = ISNULL(Max(intExecutionOrder),0) + 1 From tblMFWorkOrder 
-				Where Convert(date,dtmExpectedDate) =convert(date,@dtmDueDate) And intManufacturingCellId=@intCurrentManufacturingCellId
+			INSERT INTO @tblWO (
+				intWOId
+				,intExecNo
+				)
+			SELECT intWorkOrderId
+				,intExecutionOrder - 1
+			FROM tblMFWorkOrder
+			WHERE intExecutionOrder > @intCurrentExecutionOrder
+				AND Convert(DATE, dtmExpectedDate) = convert(DATE, @dtmCurrentDueDate)
+				AND intManufacturingCellId = @intCurrentManufacturingCellId
+			ORDER BY intExecutionOrder
+		END
+		ELSE
+		BEGIN
+			IF @intExecutionOrder > @intCurrentExecutionOrder
+			BEGIN
+				INSERT INTO @tblWO (
+					intWOId
+					,intExecNo
+					)
+				SELECT intWorkOrderId
+					,intExecutionOrder - 1
+				FROM tblMFWorkOrder
+				WHERE intExecutionOrder > @intCurrentExecutionOrder
+					AND intExecutionOrder <= @intExecutionOrder
+					AND Convert(DATE, dtmExpectedDate) = convert(DATE, @dtmCurrentDueDate)
+					AND intManufacturingCellId = @intCurrentManufacturingCellId
+				ORDER BY intExecutionOrder
+			END
 
-				insert into @tblWO(intWOId,intExecNo)
-				Select intWorkOrderId,intExecutionOrder-1 From tblMFWorkOrder 
-				where intExecutionOrder>@intCurrentExecutionOrder 
-				And Convert(date,dtmExpectedDate) = convert(date,@dtmCurrentDueDate) 
-				And intManufacturingCellId=@intCurrentManufacturingCellId
-				Order by intExecutionOrder
-			End
-		Else
-			Begin
-				If @intExecutionOrder > @intCurrentExecutionOrder
-					Begin
-						insert into @tblWO(intWOId,intExecNo)
-						Select intWorkOrderId,intExecutionOrder-1 From tblMFWorkOrder 
-						where intExecutionOrder>@intCurrentExecutionOrder And intExecutionOrder<=@intExecutionOrder 
-						And Convert(date,dtmExpectedDate) = convert(date,@dtmCurrentDueDate) 
-						And intManufacturingCellId=@intCurrentManufacturingCellId
-						Order by intExecutionOrder
-					End
+			IF @intExecutionOrder < @intCurrentExecutionOrder
+			BEGIN
+				INSERT INTO @tblWO (
+					intWOId
+					,intExecNo
+					)
+				SELECT intWorkOrderId
+					,intExecutionOrder + 1
+				FROM tblMFWorkOrder
+				WHERE intExecutionOrder >= @intExecutionOrder
+					AND intExecutionOrder < @intCurrentExecutionOrder
+					AND Convert(DATE, dtmExpectedDate) = convert(DATE, @dtmCurrentDueDate)
+					AND intManufacturingCellId = @intCurrentManufacturingCellId
+				ORDER BY intExecutionOrder
+			END
+		END
+	END
 
-				If @intExecutionOrder < @intCurrentExecutionOrder
-					Begin
-						insert into @tblWO(intWOId,intExecNo)
-						Select intWorkOrderId,intExecutionOrder+1 From tblMFWorkOrder 
-						where intExecutionOrder>=@intExecutionOrder And intExecutionOrder<@intCurrentExecutionOrder  
-						And Convert(date,dtmExpectedDate) = convert(date,@dtmCurrentDueDate) 
-						And intManufacturingCellId=@intCurrentManufacturingCellId
-						Order by intExecutionOrder
-					End
-		End
-	End
+	UPDATE tblMFWorkOrder
+	SET intStorageLocationId = @intStorageLocationId
+		,intManufacturingCellId = @intManufacturingCellId
+		,strComment = @strComment
+		,dtmExpectedDate = Convert(DATE, @dtmDueDate)
+		,intExecutionOrder = @intExecutionOrder
+		,dtmLastModified = GetDate()
+		,intLastModifiedUserId = @intUserId
+		,strReferenceNo=@strReferenceNo
+		,strLotAlias=@strLotAlias
+		,strVesselNo=@strVesselNo
+		,dblActualQuantity=@dblActualQuantity
+		,dblNoOfUnits=@dblNoOfUnits
+		,intNoOfUnitsItemUOMId=@intNoOfUnitsItemUOMId
+		,dtmPlannedDate=@dtmPlannedDate
+	WHERE intWorkOrderId = @intWorkOrderId
 
-	Update tblMFWorkOrder Set intStorageLocationId=@intStorageLocationId,intManufacturingCellId=@intManufacturingCellId,strComment=@strComment,
-	dtmExpectedDate=Convert(date,@dtmDueDate),intExecutionOrder=@intExecutionOrder,
-	dtmLastModified=GetDate(),intLastModifiedUserId=@intUserId 
-	Where intWorkOrderId=@intWorkOrderId
-
-	If (Select count(1) From @tblWO) > 0
-		Update a Set a.intExecutionOrder=b.intExecNo From tblMFWorkOrder a Join @tblWO b on a.intWorkOrderId=b.intWOId
-End
-Else
-Begin
-	Update tblMFWorkOrder Set intStorageLocationId=@intStorageLocationId,strComment=@strComment,
-	dtmLastModified=GetDate(),intLastModifiedUserId=@intUserId 
-	Where intWorkOrderId=@intWorkOrderId
-End
+	IF (
+			SELECT count(1)
+			FROM @tblWO
+			) > 0
+		UPDATE a
+		SET a.intExecutionOrder = b.intExecNo
+		FROM tblMFWorkOrder a
+		JOIN @tblWO b ON a.intWorkOrderId = b.intWOId
+END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrder
+	SET intStorageLocationId = @intStorageLocationId
+		,strComment = @strComment
+		,dtmLastModified = GetDate()
+		,intLastModifiedUserId = @intUserId
+		,strReferenceNo=@strReferenceNo
+		,strLotAlias=@strLotAlias
+		,strVesselNo=@strVesselNo
+		,dblActualQuantity=@dblActualQuantity
+		,dblNoOfUnits=@dblNoOfUnits
+		,intNoOfUnitsItemUOMId=@intNoOfUnitsItemUOMId
+		,dtmPlannedDate=@dtmPlannedDate
+	WHERE intWorkOrderId = @intWorkOrderId
+END

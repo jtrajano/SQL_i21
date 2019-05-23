@@ -165,7 +165,7 @@ BEGIN
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.[intEntityId]
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-		AND B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) --fully paid
+		-- AND B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) --fully paid
 		AND B.dblInterest <> 0
 		AND B.dblPayment <> 0
 		AND @InterestAccount IS NULL
@@ -326,7 +326,7 @@ BEGIN
 			OUTER APPLY 
 			(
 				SELECT
-					SUM(payDetail.dblPayment) AS dblBillPayment
+					SUM(payDetail.dblPayment + payDetail.dblDiscount - payDetail.dblInterest) AS dblBillPayment
 				FROM tblAPPaymentDetail payDetail
 				WHERE payDetail.intPaymentId IN (SELECT intId FROM @paymentIds)
 				AND payDetail.intBillId = C.intBillId
@@ -334,7 +334,7 @@ BEGIN
 			OUTER APPLY 
 			(
 				SELECT
-					SUM(payDetail.dblPayment) AS dblBillPayment
+					SUM(payDetail.dblPayment + payDetail.dblDiscount - payDetail.dblInterest) AS dblBillPayment
 				FROM tblAPPaymentDetail payDetail
 				WHERE payDetail.intPaymentId IN (SELECT intId FROM @paymentIds)
 				AND payDetail.intInvoiceId = D.intInvoiceId

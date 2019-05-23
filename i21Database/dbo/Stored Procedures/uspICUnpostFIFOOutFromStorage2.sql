@@ -82,7 +82,7 @@ FROM	(
 					, inserted.intTransactionTypeId
 					, inserted.dblQty 
 		) AS Changes (
-			Action
+			action
 			, intInventoryTransactionStorageId
 			, intTransactionId
 			, strTransactionId
@@ -91,7 +91,7 @@ FROM	(
 			, intTransactionTypeId
 			, dblQty 
 		)
-WHERE	Changes.Action = 'UPDATE'
+WHERE	Changes.action = 'UPDATE'
 ;
 
 -- If fifoStorageBucket was from a negative stock, let dblStockIn equal to dblStockOut. 

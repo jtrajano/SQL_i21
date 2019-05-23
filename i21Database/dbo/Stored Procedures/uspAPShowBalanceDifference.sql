@@ -1,7 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPShowBalanceDifference]
+(
+	@dateFrom DATETIME = NULL,
+	@dateTo DATETIME = NULL
+)
 AS
 DECLARE @intPayablesCategory INT, @prepaymentCategory INT;
-
+DECLARE @startDate DATETIME = CASE WHEN @dateFrom IS NULL THEN '1/1/1900' ELSE @dateFrom END
+DECLARE @endDate DATETIME = CASE WHEN @dateTo IS NULL THEN GETDATE() ELSE @dateTo END
+DECLARE @discAccnt INT = (SELECT TOP 1 intPurchaseAdvAccount FROM tblSMCompanyLocation WHERE intPurchaseAdvAccount > 0)
+DECLARE @intAccnt INT = (SELECT TOP 1 intInterestAccountId FROM tblSMCompanyLocation WHERE intInterestAccountId > 0)
 SELECT @intPayablesCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account'
 SELECT @prepaymentCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Vendor Prepayments';
 
@@ -17,13 +24,21 @@ WITH payables (
 		SELECT 
 		intBillId
 		,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
-		FROM (SELECT * FROM dbo.vyuAPPayables) tmpAPPayables 
+		FROM 
+		(
+			SELECT * FROM dbo.vyuAPPayables
+			WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @startDate AND @endDate
+		) tmpAPPayables 
 		GROUP BY intBillId
 		UNION ALL
 		SELECT 
 		intBillId
 		,CAST((SUM(tmpAPPayables2.dblTotal) + SUM(tmpAPPayables2.dblInterest) - SUM(tmpAPPayables2.dblAmountPaid) - SUM(tmpAPPayables2.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
-		FROM (SELECT * FROM dbo.vyuAPPrepaidPayables) tmpAPPayables2 
+		FROM 
+		(
+			SELECT * FROM dbo.vyuAPPrepaidPayables
+			WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @startDate AND @endDate
+		) tmpAPPayables2 
 		GROUP BY intBillId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A
@@ -52,6 +67,7 @@ glPayables (
 			WHERE D.intAccountCategoryId IN (@intPayablesCategory)
 			AND A.ysnIsUnposted = 0
 			AND A.strTransactionForm = 'Bill' AND intJournalLineNo = 1
+			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @startDate AND @endDate
 			GROUP BY A.strTransactionId
 			UNION ALL --PREPAYMENT POSITIVE
 			SELECT
@@ -64,6 +80,7 @@ glPayables (
 			WHERE D.intAccountCategoryId IN (@prepaymentCategory)
 			AND A.ysnIsUnposted = 0
 			AND A.strTransactionForm = 'Bill' AND intJournalLineNo = 1
+			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @startDate AND @endDate
 			GROUP BY A.strTransactionId
 			UNION ALL --PREPAYMENT NEGATIVE
 			SELECT
@@ -76,6 +93,7 @@ glPayables (
 			WHERE D.intAccountCategoryId IN (@prepaymentCategory)
 			AND A.ysnIsUnposted = 0
 			AND A.strTransactionForm = 'Bill' AND intJournalLineNo = 1
+			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @startDate AND @endDate
 			GROUP BY A.strTransactionId
 			--UNION ALL
 			----POSTED TAX
@@ -100,9 +118,10 @@ glPayables (
 			INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 			INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
 			INNER JOIN tblAPBill C ON A.strJournalLineDescription = C.strBillId
-			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
+			WHERE A.intAccountId IN (SELECT TOP 1 intInterestAccountId FROM tblSMCompanyLocation WHERE intInterestAccountId > 0)
 			AND A.ysnIsUnposted = 0
 			AND A.strTransactionForm = 'Payable' AND A.strJournalLineDescription != 'Posted Payment'
+			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @startDate AND @endDate
 			AND EXISTS(
 				SELECT TOP 1 1 FROM tblGLDetail E WHERE E.strTransactionId = A.strTransactionId AND E.strJournalLineDescription = 'Interest'
 			)
@@ -119,6 +138,7 @@ glPayables (
 			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
 			AND A.ysnIsUnposted = 0
 			AND A.strTransactionForm = 'Payable' AND A.strJournalLineDescription != 'Posted Payment'
+			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @startDate AND @endDate
 			GROUP BY A.strJournalLineDescription
 			UNION ALL
 			--POSTED DISCOUNT
@@ -130,9 +150,10 @@ glPayables (
 			INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 			INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
 			INNER JOIN tblAPBill C ON A.strJournalLineDescription = C.strBillId
-			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
+			WHERE A.intAccountId IN (SELECT intPurchaseAdvAccount FROM tblSMCompanyLocation WHERE intPurchaseAdvAccount > 0)
 			AND A.ysnIsUnposted = 0
 			AND A.strTransactionForm = 'Payable' AND A.strJournalLineDescription != 'Posted Payment'
+			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @startDate AND @endDate
 			AND EXISTS(
 				SELECT TOP 1 1 FROM tblGLDetail E WHERE E.strTransactionId = A.strTransactionId AND E.strJournalLineDescription = 'Discount'
 			)

@@ -18,6 +18,7 @@
 	[strComments] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[dblBillableHours] [numeric](18,6) NULL,
 	[ysnSent] [bit] NULL,
+	[intSendByEntityId] [int] NULL,
 	[strJIRAUserName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTimeEntryDailySummary_intTimeEntryDailySummaryId] PRIMARY KEY CLUSTERED ([intTimeEntryDailySummaryId] ASC)

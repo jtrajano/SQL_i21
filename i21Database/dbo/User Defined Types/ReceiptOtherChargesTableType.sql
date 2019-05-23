@@ -14,6 +14,8 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[intShipViaId] INT NULL																-- ShipVia
 	,[intShipFromId] INT NULL																-- The Vendor Location. 
 	,[intCurrencyId] INT NULL																-- The currency id used in a transaction. 	
+	,[strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL						-- Vendor Reference No. 
+	,[intShipFromEntityId] INT NULL 
 
 	-- Other Charges Fields		
 	,[intChargeId] INT NULL																	-- The item id of Other Charge type. 

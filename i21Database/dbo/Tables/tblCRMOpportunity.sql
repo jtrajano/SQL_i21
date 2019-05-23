@@ -518,3 +518,11 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblCRMOpportunity',
     @level2type = N'COLUMN',
     @level2name = N'dtmWinLossDate'
+GO
+
+CREATE INDEX [IX_tblCRMOpportunity_intCustomerId] ON [dbo].[tblCRMOpportunity] ([intCustomerId])
+GO
+
+CREATE INDEX [IX_tblCRMOpportunity_intInternalSalesPerson] ON [dbo].[tblCRMOpportunity] ([intInternalSalesPerson])
+GO
+

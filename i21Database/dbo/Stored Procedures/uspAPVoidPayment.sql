@@ -48,7 +48,8 @@ BEGIN
 	END
 
 	--DO NOT ALLOW TO VOID THE PREPAYMENT PAYMENT IF IT WAS APPLIED ON THE BILLS
-	IF(EXISTS(SELECT 1 FROM tblAPPayment A
+	IF(
+		EXISTS(SELECT 1 FROM tblAPPayment A
 					INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 					INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 					INNER JOIN tblAPAppliedPrepaidAndDebit D ON C.intBillId = D.intTransactionId
@@ -56,7 +57,8 @@ BEGIN
 					WHERE A.intPaymentId IN (SELECT intId FROM @paymentKeys)
 					AND D.dblAmountApplied > 0
 					AND E.ysnPosted = 1
-					AND A.ysnPrepay = 1))
+					AND B.ysnOffset = 0)
+		)
 	BEGIN
 		RAISERROR('Void failed. There are bills that applied this prepayment. Please unpost that first.', 16, 1);
 	END
@@ -325,7 +327,7 @@ BEGIN
 
 	--Unposting Process
 	UPDATE B
-	SET B.dblAmountDue = CASE WHEN A.ysnPrepay = 1 THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
+	SET B.dblAmountDue = CASE WHEN B.ysnOffset = 0 AND C.intTransactionType IN (2, 13) THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
 								ELSE 
 									(CASE WHEN B.dblAmountDue = 0 
 										THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) 
@@ -350,7 +352,7 @@ BEGIN
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
 			C.dblPayment = CASE WHEN (C.dblPayment - B.dblPayment) < 0 THEN 0 ELSE (C.dblPayment - B.dblPayment) END,
-			C.ysnPrepayHasPayment = CASE WHEN A.ysnPrepay = 1 THEN 0 ELSE 1 END
+			C.ysnPrepayHasPayment = CASE WHEN B.ysnOffset = 0 AND C.intTransactionType IN (2,13) THEN 0 ELSE 1 END
 			--C.ysnPosted = CASE WHEN A.ysnPrepay = 1 THEN 0 ELSE 1 END
 	FROM tblAPPayment A
 				INNER JOIN tblAPPaymentDetail B 

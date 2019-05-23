@@ -1,17 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSGLSummary]
 AS
 SELECT intPOSEndOfDayId		= GLSUMMARY.intPOSEndOfDayId
-	 , dblDebit				= GLSUMMARY.dblDebit
-	 , dblCredit			= GLSUMMARY.dblCredit
+	 , dblDebit				= CASE WHEN GLSUMMARY.dblDebit - GLSUMMARY.dblCredit > 0 THEN ABS(GLSUMMARY.dblDebit - GLSUMMARY.dblCredit) ELSE 0 END
+	 , dblCredit			= CASE WHEN GLSUMMARY.dblDebit - GLSUMMARY.dblCredit < 0 THEN ABS(GLSUMMARY.dblDebit - GLSUMMARY.dblCredit) ELSE 0 END
 	 , strAccountId			= GLSUMMARY.strAccountId
 	 , strAccountCategory	= GLSUMMARY.strAccountCategory
 	 , strDescription		= GLSUMMARY.strDescription
 FROM ( 
 	SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
-		 , dblOpeningBalance	= EOD.dblOpeningBalance
-		 , dblEndingBalance		= EOD.dblFinalEndingBalance
-		 , dblDebit				= CASE WHEN SUM(GL.dblDebit) - SUM(GL.dblCredit) <= 0.000000 THEN 0.000000 ELSE SUM(GL.dblDebit) - SUM(GL.dblCredit) END
-		 , dblCredit			= CASE WHEN SUM(GL.dblDebit) - SUM(GL.dblCredit) >= 0.000000 THEN 0.000000 ELSE SUM(GL.dblCredit) - SUM(GL.dblDebit) END
+		 , dblDebit				= SUM(GL.dblDebit)
+		 , dblCredit			= SUM(GL.dblCredit)
 		 , strAccountId			= GLA.strAccountId
 		 , strAccountCategory	= GLA.strAccountCategory
 		 , strDescription		= GLA.strDescription
@@ -26,6 +24,7 @@ FROM (
 		SELECT intInvoiceId
 			 , intPOSLogId
 			 , intPOSId
+			 , ysnReturn
 		FROM dbo.tblARPOS POS WITH (NOLOCK)
 		WHERE intInvoiceId IS NOT NULL
 	) POS ON POSLOG.intPOSLogId = POS.intPOSLogId
@@ -37,8 +36,39 @@ FROM (
 		WHERE strType = 'POS'
 		  AND ysnPosted = 1
 		  AND POS.intInvoiceId = intInvoiceId
-		  AND EOD.ysnClosed = 1
 
+		UNION ALL
+
+		SELECT intTransactionId = intInvoiceId
+			 , strTransactionId = strInvoiceNumber
+			 , strTransaction   = 'Invoice'
+		FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE strType = 'POS'
+		  AND ysnPosted = 1
+		  AND strTransactionType = 'Invoice'
+		  AND POS.intPOSId = intSourceId
+		  AND POS.ysnReturn = 1
+
+		UNION ALL
+
+		SELECT intTransactionId = PAYMENT.intPaymentId
+			 , strTransactionId = PAYMENT.strRecordNumber
+			 , strTransaction   = 'Payment'
+		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		CROSS APPLY (
+			SELECT TOP 1 P.intPaymentId
+					   , P.strRecordNumber
+			FROM dbo.tblARPaymentDetail PD
+			INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+			WHERE PD.intInvoiceId = I.intInvoiceId
+			   AND P.ysnPosted = 1
+		) PAYMENT
+		WHERE I.strType = 'POS'
+		  AND I.ysnPosted = 1
+		  AND I.strTransactionType = 'Invoice'
+		  AND I.intSourceId = POS.intPOSId
+		  AND POS.ysnReturn = 1
+		  
 		UNION ALL
 
 		SELECT intTransactionId = PAYMENT.intPaymentId
@@ -53,15 +83,6 @@ FROM (
 		) PAYMENT ON POSP.intPaymentId = PAYMENT.intPaymentId
 		WHERE POSP.intPOSId = POS.intPOSId
 		  AND POSP.strPaymentMethod <> 'On Account'
-
-		UNION ALL 
-
-		SELECT	intTransactionId = EODT.intPOSEndOfDayId
-				, strTransactionId = EODT.strEODNo
-				, strTransaction = 'EOD'
-		FROM dbo.tblARPOSEndOfDay EODT WITH (NOLOCK)
-		WHERE EODT.ysnClosed = 1 AND EODT.intCashOverShortId IS NOT NULL
-		AND EOD.intPOSEndOfDayId = EODT.intPOSEndOfDayId
 	) TRANSACTIONS
 	INNER JOIN (
 		SELECT intTransactionId
@@ -81,10 +102,7 @@ FROM (
 			 , strDescription
 		FROM dbo.vyuGLAccountDetail WITH (NOLOCK)	
 	) GLA ON GL.intAccountId = GLA.intAccountId
-	WHERE EOD.ysnClosed = 1
 	GROUP BY EOD.intPOSEndOfDayId
-		   , EOD.dblFinalEndingBalance
-		   , EOD.dblOpeningBalance
 		   , GLA.strAccountId
 		   , GLA.strAccountCategory
 		   , GLA.strDescription
@@ -92,8 +110,6 @@ FROM (
 	UNION ALL
 
 	SELECT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
-		 , dblOpeningBalance	= EOD.dblOpeningBalance
-		 , dblEndingBalance		= EOD.dblFinalEndingBalance
 		 , dblDebit				= BTD.dblDebit
 		 , dblCredit			= BTD.dblCredit
 		 , strAccountId			= GLA.strAccountId

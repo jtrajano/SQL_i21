@@ -25,6 +25,7 @@ AS
 			CST.dblRate,
 			dbo.fnRemoveTrailingZeroes(CST.dblRate) + ' ' +CST.strCurrency + '/' + CST.strUOM AS strRateUnit,
 			CST.intUOMId AS intRateUOMId,	   
+			CST.strSymbol,
 		  
 			SEQ.strSequenceNumber,
 			SEQ.dtmContractDate,

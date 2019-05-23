@@ -69,6 +69,8 @@ SELECT Receipt.intInventoryReceiptId
 	, dblTotalGross = ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 4),0)
 	, dblTotalNet =  ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 5),0)
 	, dblGrandTotal =  ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 6),0)
+	, strShipFromEntityId = ShipFromEntity.strVendorId
+	, strShipFromEntity = ShipFromEntity.strName
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
@@ -83,4 +85,5 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId
 	LEFT JOIN tblCTBook Book ON Book.intBookId = Receipt.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Receipt.intSubBookId
+	LEFT JOIN vyuAPVendor ShipFromEntity ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId
 	--LEFT JOIN vyuLGWeightLoss WeightLoss ON WeightLoss.intInventoryReceiptId = Receipt.intInventoryReceiptId

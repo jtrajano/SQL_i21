@@ -144,8 +144,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]                =    ISNULL(NULLIF(Details.dblRate,0),1),--CASE WHEN ForexRateCounter.ysnUniqueForex = 0 THEN ForexRate.dblRate ELSE 0 END,
 		[strRateType]                   =    Details.strCurrencyExchangeRateType,
-		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	Details.strComment + ' ' + D.strName,
+		[strDocument]					=	D.strName + ' - ' + A.strVendorOrderNumber,
+		[strComments]					=	D.strName + ' - ' + Details.strComment,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	Details.dblUnits,
 		[dblSourceUnitDebit]			=	0,
@@ -201,7 +201,7 @@ BEGIN
 						-- 						THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
 						-- 	ELSE R2.dblAdjustedTax
 						-- END 
-				R2.dblAdjustedTax AS dblTotal ,
+				R2.dblAdjustedTax * (CASE WHEN charges.ysnPrice = 1 THEN -1 ELSE 1 END) AS dblTotal ,
 				 R.dblRate  AS dblRate, 
 				 exRates.intCurrencyExchangeRateTypeId,
 				  exRates.strCurrencyExchangeRateType,
@@ -403,8 +403,8 @@ BEGIN
 		[dblReportingRate]				=	0,
 		[dblForeignRate]				=	voucherDetails.dblRate,
 		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
-		[strDocument]					=	A.strVendorOrderNumber,
-		[strComments]					=	D.strName,
+		[strDocument]					=	D.strName + ' - ' + A.strVendorOrderNumber,
+		[strComments]					=	D.strName + ' - ' + voucherDetails.strComment,
 		[intConcurrencyId]				=	1,
 		[dblSourceUnitCredit]			=	0,
 		[dblSourceUnitDebit]			=	ISNULL(voucherDetails.dblTotalUnits,0),
@@ -744,7 +744,7 @@ BEGIN
 		-- 													- CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
 		-- 										END
 		-- 										* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
-		[dblDebit]						=	((SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1))
+		[dblDebit]						=	CAST((SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
 											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -767,7 +767,7 @@ BEGIN
 		[strTransactionType]			=	'Bill',
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
-		[dblDebitForeign]				=	(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)),
+		[dblDebitForeign]				=	CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax) AS DECIMAL(18,2)),
 		--[dblDebitForeign]				=	(CASE WHEN B.dblOldCost IS NOT NULL 
 		--										 THEN  																				
 		--										    CASE WHEN B.dblOldCost = 0 THEN 0 

@@ -195,8 +195,8 @@ BEGIN TRY
 								THEN	@strSummary
 								ELSE	''
 						END,
-			strBuyer = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END,
-			strSeller = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END,
+			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
+			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
 			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
 			strCurrencyExchangeRate = FY.strCurrency + '/' + TY.strCurrency,
@@ -223,7 +223,7 @@ BEGIN TRY
 			strPeriodWithPosition = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106)+CASE WHEN PO.strPosition IS NOT NULL THEN  ' ('+PO.strPosition+') ' ELSE '' END,
 			strLotsFixedLabel = CASE WHEN FLOOR((PF.dblTotalLots-PF.dblLotsFixed))=0 THEN '' ELSE @Lotstobefixed + ' :' END,
 			intLotsUnFixed = LTRIM(FLOOR((PF.dblTotalLots-PF.dblLotsFixed))),
-			dblLotsUnFixed = dbo.fnCTChangeNumericScale(ISNULL(PF.dblTotalLots-PF.dblLotsFixed,0),2),
+			dblLotsUnFixed = dbo.fnCTChangeNumericScale(ISNULL(PF.dblTotalLots-PF.dblLotsFixed,0),0),
 			strTotalDesc = LTRIM(CAST(ROUND(PF.dblPriceWORollArb,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strDifferentialDesc = LTRIM(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,			
 			strFXFinalPriceLabelDesc = CASE WHEN CD.intCurrencyExchangeRateId IS NULL THEN NULL ELSE @FinalPrice + ' :' END,

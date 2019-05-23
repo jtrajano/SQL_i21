@@ -132,5 +132,5 @@ a.*
 FROM Invoices a
 LEFT JOIN tblSMTerm b on a.intTermsId = b.intTermID
 LEFT JOIN tblSMCurrency c ON a.intCurrencyId = c.intCurrencyID
-order by intPaymentDetailId
+order by strInvoice, intPaymentDetailId
 

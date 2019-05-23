@@ -12,11 +12,12 @@ BEGIN TRY
 			@intUniqueId				INT,
 			@intPriceFixationId			INT,
 			@intContractHeaderId		INT,
-			@intContractDetailId		INT,
+			@intContractDetailId		INT,			
 			@intUserId					INT,
 			@strRowState				NVARCHAR(50),
 			@Condition					NVARCHAR(MAX),
 			@intPriceFixationDetailId	INT,
+			@intPriceFixationTicketId	INT,
 			@intFutOptTransactionId		INT,
 			@strAction					NVARCHAR(50) = '',
 			@intFutOptTransactionHeaderId INT = NULL
@@ -29,7 +30,7 @@ BEGIN TRY
 		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTPriceFixation', @Condition, @strXML OUTPUT,null,'intPriceFixationId,intContractHeaderId,intContractDetailId,''Delete'' AS strRowState'
 	END
 
-	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML      
+	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML
 
 	IF OBJECT_ID('tempdb..#ProcessFixation') IS NOT NULL  	
 		DROP TABLE #ProcessFixation	
@@ -50,12 +51,25 @@ BEGIN TRY
 	SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intUniqueId,
 			* 
 	INTO	#ProcessFixationDetail
-	FROM OPENXML(@idoc,'tblCTPriceFixationDetails/tblCTPriceFixationDetail',2)          
+	FROM OPENXML(@idoc,'tblCTPriceFixationDetails/tblCTPriceFixationDetail',2)
 	WITH
 	(
 		intPriceFixationDetailId	INT,
 		strRowState					NVARCHAR(50)
-	)      
+	) 
+	
+	IF OBJECT_ID('tempdb..#ProcessFixationTicket') IS NOT NULL  	
+	DROP TABLE #ProcessFixationTicket
+
+	SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intUniqueId,
+			* 
+	INTO	#ProcessFixationTicket
+	FROM OPENXML(@idoc,'tblCTPriceFixationTickets/tblCTPriceFixationTicket',2)
+	WITH
+	(
+		intPriceFixationTicketId	INT,
+		strRowState					NVARCHAR(50)
+	)     
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
@@ -139,6 +153,30 @@ BEGIN TRY
 		END
 		
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixationDetail WHERE intUniqueId > @intUniqueId
+	END
+
+	SELECT @intUniqueId = NULL
+	SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixationTicket
+
+	WHILE ISNULL(@intUniqueId,0) > 0
+	BEGIN
+		SELECT	@intPriceFixationId			=	NULL,
+				@strRowState				=	NULL,
+				@intPriceFixationTicketId	=	NULL,
+				@intFutOptTransactionId		=	NULL
+
+		SELECT	@intPriceFixationTicketId	=	intPriceFixationTicketId,
+				@strRowState				=	strRowState
+		FROM	#ProcessFixationTicket
+		WHERE	intUniqueId					=	 @intUniqueId
+		
+		IF @strRowState = 'Delete'
+		BEGIN
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
+		END
+				
+		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixationTicket WHERE intUniqueId > @intUniqueId
 	END
 
 END TRY

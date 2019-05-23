@@ -227,6 +227,7 @@ BEGIN
 	WHERE
 		I.[dblQtyShipped] = @ZeroDecimal 
 		AND I.[ysnStockTracking] = @OneBit
+		AND I.[strType] <> 'Tank Delivery'
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -260,7 +261,7 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-	--Inactive Customer
+	--Customer Credit Limit
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
 		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
@@ -268,17 +269,15 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]            = I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Customer credit limit is blank! Only Cash Sale transaction is allowed.'
+		,[strPostingError]		= 'Customer credit limit is either blank or COD! Only Cash Sale transaction is allowed.'
 	FROM 
-		#ARPostInvoiceHeader I                       
+		#ARPostInvoiceHeader I 
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId                      
 	WHERE
 		I.[dblCustomerCreditLimit] IS NULL 
-		AND I.[strTransactionType] != 'Cash'
-		AND I.[strTransactionType] != 'Cash Refund'
-		AND I.[strType] != 'POS'
-
-
-		
+		AND I.[strTransactionType] NOT IN ('Cash', 'Cash Refund')
+		AND I.[strType] != 'POS'	
+		AND ISNULL(INV.[ysnValidCreditCode], 0) = 0
 
 			
 	INSERT INTO #ARInvalidInvoiceData
@@ -657,7 +656,7 @@ BEGIN
 	INNER JOIN tblSMPaymentMethod SM ON INV.intPaymentMethodId = SM.intPaymentMethodID	
 	WHERE SM.strPaymentMethod = 'Check'
 	  AND INV.strTransactionType = 'Cash'
-	  AND ISNULL(INV.strPaymentMethod, '') = ''
+	  AND ISNULL(INV.strPaymentInfo, '') = ''
 
 	--INSERT INTO @returntable(
 	--	 [intInvoiceId]
@@ -1226,6 +1225,32 @@ BEGIN
 		ARIDT.[dblAdjustedTax] <> @ZeroDecimal
 		AND (ISNULL(ISNULL(ARIDT.[intSalesTaxAccountId], SMTC.[intSalesTaxAccountId]), 0) = 0 OR GLA.[intAccountId] IS NULL)
 
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Sales Tax Exempt Account
+	SELECT
+		[intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The Tax Exemption Account of Tax Code - ' + SMTC.[strTaxCode] + ' was not set.'
+	FROM tblARInvoiceDetailTax ARIDT
+	INNER JOIN #ARPostInvoiceDetail I
+			ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]		
+	LEFT OUTER JOIN tblSMTaxCode  SMTC
+			ON ARIDT.[intTaxCodeId] = SMTC.[intTaxCodeId]	
+	WHERE
+		ARIDT.[dblAdjustedTax] <> @ZeroDecimal
+		AND ISNULL(ARIDT.[ysnAddToCost], 0) = 1
+		AND ISNULL(ARIDT.[intSalesTaxExemptionAccountId], 0) = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1440,7 +1465,8 @@ BEGIN
 		vyuARGetItemComponents ARIC
 	INNER JOIN			
 		#ARPostInvoiceDetail I
-			ON ARIC.[intItemId] = I.[intItemId]	
+			ON ARIC.[intItemId] = I.[intItemId]
+			AND ARIC.[intCompanyLocationId] = I.[intCompanyLocationId]
 	INNER JOIN tblICItem ICI
 			ON ARIC.[intComponentItemId] = ICI.[intItemId]
 	LEFT OUTER JOIN  #ARInvoiceItemAccount ARIA
@@ -1538,6 +1564,7 @@ BEGIN
 	INNER JOIN			
 		#ARPostInvoiceDetail I
 			ON ARIC.[intItemId] = I.[intItemId]
+			AND ARIC.[intCompanyLocationId] = I.[intCompanyLocationId]
 	INNER JOIN tblICItem ICI
 			ON ARIC.[intComponentItemId] = ICI.[intItemId]
 	LEFT OUTER JOIN #ARInvoiceItemAccount ARIA
@@ -2322,6 +2349,31 @@ BEGIN
 	WHERE @Recap = @ZeroBit
 	  AND ISNULL(INV.ysnServiceChargeCredit, 0) = @OneBit
 	  AND INV.strTransactionType = 'Credit Memo'
+
+	
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--CREDIT MEMO WITH CASH REFUND
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'You cannot unpost this Credit Memo (' + I.strInvoiceNumber + '). Cash Refund(' + INV.strInvoiceNumber + ') created.'
+	FROM #ARPostInvoiceHeader I
+	LEFT OUTER JOIN tblARInvoice INV 
+         ON I.intInvoiceId = INV.intOriginalInvoiceId
+	WHERE @Recap = @ZeroBit
+	  AND ISNULL(I.[ysnRefundProcessed], 0) = @OneBit
+	  AND I.strTransactionType = 'Credit Memo'
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration

@@ -12,6 +12,7 @@ RETURNS @returntable TABLE
 	strPaymentInfoKey NVARCHAR(MAX),
 	dtmPaymentDateReconciled DATETIME,
 	ysnClr BIT, 
+	dtmClr DATETIME,
     PRIMARY KEY CLUSTERED ([intBillId] ASC)
 )
 AS
@@ -23,34 +24,60 @@ BEGIN
 		A.dtmDatePaid,
 		A.dblPayment,
 		strPaymentInfo		=	STUFF((
-									SELECT ',' + CAST(B.strPaymentRecordNum AS NVARCHAR)
-									FROM tblAPPayment B
-									INNER JOIN tblAPPaymentDetail C
-										ON B.intPaymentId = C.intPaymentId
-									WHERE A.ysnPosted = 1 AND C.intBillId = A.intBillId
+									SELECT ',' + CAST(paymentData.strPaymentRecordNum AS NVARCHAR)
+									FROM
+									(
+										SELECT B.strPaymentRecordNum
+										FROM tblAPPayment B
+										INNER JOIN tblAPPaymentDetail C
+											ON B.intPaymentId = C.intPaymentId
+										WHERE C.intBillId = A.intBillId
+										UNION ALL
+										SELECT B.strPaymentRecordNum
+										FROM tblAPPayment B
+										INNER JOIN tblAPPaymentDetail C
+											ON B.intPaymentId = C.intPaymentId
+										WHERE C.intOrigBillId = A.intBillId AND C.intOrigBillId IS NOT NULL
+									) paymentData
 									FOR XML PATH('')),1,1,''
 								),
 		strPaymentInfoKey	=	STUFF((
-									SELECT ',' + CAST(B.intPaymentId AS NVARCHAR)
-									FROM tblAPPayment B
-									INNER JOIN tblAPPaymentDetail C
-										ON B.intPaymentId = C.intPaymentId
-									WHERE A.ysnPosted = 1 AND C.intBillId = A.intBillId
+									SELECT ',' + CAST(paymentData.intPaymentId AS NVARCHAR)
+									FROM
+									(
+										SELECT B.intPaymentId
+										FROM tblAPPayment B
+										INNER JOIN tblAPPaymentDetail C
+											ON B.intPaymentId = C.intPaymentId
+										WHERE C.intBillId = A.intBillId
+										UNION ALL
+										SELECT B.intPaymentId
+										FROM tblAPPayment B
+										INNER JOIN tblAPPaymentDetail C
+											ON B.intPaymentId = C.intPaymentId
+										WHERE C.intOrigBillId = A.intBillId AND C.intOrigBillId IS NOT NULL
+									) paymentData
 									FOR XML PATH('')),1,1,''
 								),
 		dtmPaymentDateReconciled=	latestPay.dtmDateReconciled,
-		ysnClr =	latestPay.ysnClr
+		ysnClr =	latestPay.ysnClr,
+		dtmClr =	latestPay.dtmClr
 	FROM tblAPBill A
 	OUTER APPLY (
 		SELECT TOP 1
-			D.dtmDateReconciled, D.ysnClr
+			C.intBillId,
+			D.dtmDateReconciled,
+			D.ysnClr,
+			D.dtmClr
 		FROM tblAPPayment B
 		INNER JOIN tblAPPaymentDetail C
 			ON B.intPaymentId = C.intPaymentId
 		INNER JOIN tblCMBankTransaction D
 			ON D.strTransactionId = B.strPaymentRecordNum
-		WHERE A.ysnPosted = 1 AND C.intBillId = A.intBillId
+		WHERE C.intBillId = A.intBillId
 		ORDER BY B.intPaymentId DESC
 	) latestPay
+	WHERE A.ysnPosted = 1
+	ORDER BY A.intBillId DESC
 	RETURN;
 END

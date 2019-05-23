@@ -795,10 +795,13 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			
 				--INSERT into Location
 				--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-				INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-				VALUES (@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
 				DECLARE @EntityLocationId INT
-				SET @EntityLocationId = SCOPE_IDENTITY()
+				IF(@strLocationName IS NOT NULL )
+				BEGIN
+					INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
+					VALUES (@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
+					SET @EntityLocationId = SCOPE_IDENTITY()
+				END
 				--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 					
 				/**INSERT MULTIPLE Location based on the Bill to**/

@@ -687,10 +687,10 @@ BEGIN
 	END 
 END   
 
-DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType
+DECLARE @ItemsToIncreaseInTransitOutBound AS InTransitTableType
 	,@total AS INT;
 
-INSERT INTO @ItemsToIncreaseInTransitInBound (
+INSERT INTO @ItemsToIncreaseInTransitOutBound (
 	[intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -703,39 +703,40 @@ INSERT INTO @ItemsToIncreaseInTransitInBound (
 	,[intTransactionTypeId]
 	,[intFOBPointId]
 	)
-SELECT LD.intItemId
-	,intItemLocationId = (
-		SELECT TOP (1) intItemLocationId
-		FROM tblICItemLocation
-		WHERE intItemId = LD.intItemId
-			AND intLocationId = ISNULL(CT.intCompanyLocationId,LD.intSCompanyLocationId)
-		)
-	,ISNULL(CT.intItemUOMId, --LD.intItemUOMId
-		CASE WHEN LDL.intLotId IS NULL THEN LD.intItemUOMId ELSE LDL.intWeightUOMId END
-	)
-	,LDL.intLotId
-	,ISNULL(LW.intSubLocationId, LOT.intSubLocationId)
-	,LOT.intStorageLocationId
-	,CASE 
-		WHEN @ysnPost = 1
-			THEN --LD.dblQuantity
-				CASE WHEN LDL.intLotId IS NULL THEN LD.dblQuantity ELSE LDL.dblGross END
-		ELSE -- -LD.dblQuantity
-				CASE WHEN LDL.intLotId IS NULL THEN -LD.dblQuantity ELSE -LDL.dblGross END
-		END
-	,LD.intLoadId
-	,CAST(L.strLoadNumber AS VARCHAR(100))
-	,@INVENTORY_SHIPMENT_TYPE
-	,2
+SELECT 
+	[intItemId] = LD.intItemId
+	,[intItemLocationId] = LOC.intItemLocationId
+	,[intItemUOMId] = CASE WHEN LDL.intLotId IS NULL THEN ISNULL(CT.intItemUOMId, LD.intItemUOMId) ELSE LDL.intWeightUOMId END
+	,[intLotId] = LDL.intLotId
+	,[intSubLocationId] = CASE WHEN LDL.intLotId IS NULL THEN ISNULL(LWH.intSubLocationId, LD.intSSubLocationId) ELSE LOT.intSubLocationId END
+	,[intStorageLocationId] = LOT.intStorageLocationId
+	,[dblQty] = CASE WHEN @ysnPost = 1
+					THEN
+						CASE WHEN LDL.intLotId IS NULL THEN LD.dblQuantity ELSE LDL.dblGross END
+					ELSE
+						CASE WHEN LDL.intLotId IS NULL THEN -LD.dblQuantity ELSE -LDL.dblGross END
+					END
+	,[intTransactionId] = LD.intLoadId
+	,[strTransactionId] = CAST(L.strLoadNumber AS VARCHAR(100))
+	,[intTransactionTypeId] = @INVENTORY_SHIPMENT_TYPE
+	,[intFOBPointId] = 2
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGLoadDetailLot LDL ON LD.intLoadDetailId = LDL.intLoadDetailId
 LEFT JOIN tblICLot LOT ON LOT.intLotId = LDL.intLotId
-LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
-LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
-LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = LD.intSContractDetailId
+OUTER APPLY (SELECT TOP 1 intSubLocationId = LW.intSubLocationId 
+				FROM tblLGLoadDetailContainerLink LDCL 
+				LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+				LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+				LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+				WHERE LDCL.intLoadDetailId = LD.intLoadDetailId
+			) LWH
+OUTER APPLY (SELECT TOP (1) intItemLocationId
+				FROM tblICItemLocation
+				WHERE intItemId = LD.intItemId
+					AND intLocationId = ISNULL(CT.intCompanyLocationId,LD.intSCompanyLocationId)
+				) LOC
 WHERE L.intLoadId = @intTransactionId;
 
 SELECT @ysnDirectShip = CASE 
@@ -748,7 +749,7 @@ WHERE intLoadId = @intTransactionId
 
 IF (@ysnDirectShip <> 1)
 BEGIN
-	EXEC dbo.uspICIncreaseInTransitOutBoundQty @ItemsToIncreaseInTransitInBound;
+	EXEC dbo.uspICIncreaseInTransitOutBoundQty @ItemsToIncreaseInTransitOutBound;
 END
 
 --------------------------------------------------------------------------------------------  

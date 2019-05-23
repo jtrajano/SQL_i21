@@ -63,6 +63,7 @@ SELECT
     INV.strBillToCountry,
     INV.ysnPosted,
     INV.ysnPaid,
+	INV.ysnPaidCPP,
     INV.ysnProcessed,
     INV.ysnRecurring,
     INV.ysnForgiven,
@@ -107,6 +108,7 @@ SELECT
 	INV.intSubBookId,
 	INV.strMobileBillingShiftNo,
     INV.ysnRefundProcessed,
+    INV.ysnValidCreditCode,
     INV.ysnServiceChargeCredit,
 	INV.blbSignature,
 	
@@ -152,9 +154,10 @@ SELECT
     strReceiptNumber = ISNULL(POS.strReceiptNumber,POSMixedTransactionCreditMemo.strReceiptNumber),
     strEODNumber = ISNULL(POS.strEODNo,POSMixedTransactionCreditMemo.strEODNo),
 	strEODStatus = CASE WHEN POS.ysnClosed = 1 THEN 'Completed' ELSE 'Open' END,
-	strEODPOSDrawerName = POS.strPOSDrawerName,
+	strEODPOSDrawerName = ISNULL(POS.strPOSDrawerName, POSMixedTransactionCreditMemo.strPOSDrawerName),
 	intCreditLimitReached = CUS.intCreditLimitReached,
-	dtmCreditLimitReached = CUS.dtmCreditLimitReached
+	dtmCreditLimitReached = CUS.dtmCreditLimitReached,
+    ysnFromReturnedInvoice = CASE WHEN ISNULL(RI.intInvoiceId, 0) <> 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM 
 tblARInvoice INV
 JOIN (SELECT intEntityId,					strCustomerNumber, 
@@ -253,9 +256,17 @@ LEFT OUTER JOIN (
          , strEODNo
          , intItemCount
          , dblTotal
+		 , DRAWER.strPOSDrawerName
     FROM dbo.tblARPOS POS WITH (NOLOCK)
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId 
+	INNER JOIN dbo.tblSMCompanyLocationPOSDrawer DRAWER WITH (NOLOCK) ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId 
     WHERE intCreditMemoId IS NOT NULL
 ) POSMixedTransactionCreditMemo ON INV.intInvoiceId = POSMixedTransactionCreditMemo.intCreditMemoId
 AND INV.strType = 'POS'
+OUTER APPLY (
+    SELECT TOP 1 intInvoiceId
+    FROM dbo.tblARInvoice RI WITH (NOLOCK)
+    WHERE RI.strInvoiceNumber = INV.strInvoiceOriginId
+      AND RI.ysnReturned = 1
+) RI

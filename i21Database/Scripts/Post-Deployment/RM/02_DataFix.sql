@@ -256,7 +256,7 @@ BEGIN
 		,'FutOptTransaction'
 		,NULL
 		,FOT.strBuySell
-		,GETDATE()
+		,FOT.dtmTransactionDate
 		,intBookId
 		,intSubBookId
 		,ysnMonthExpired = (SELECT TOP 1 ysnExpired FROM tblRKFuturesMonth a WHERE a.intFutureMonthId = FOT.intFutureMonthId)

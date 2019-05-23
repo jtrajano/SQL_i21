@@ -78,9 +78,9 @@ FROM tblMFInventoryAdjustment IA
 JOIN tblICItem I1 ON I1.intItemId = IA.intItemId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = IA.intItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = IA.intStorageLocationId
-JOIN tblICLot L1 ON L1.intLotId = IA.intSourceLotId
-JOIN tblICParentLot PL ON PL.intParentLotId = L1.intParentLotId
+LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = IA.intStorageLocationId
+LEFT JOIN tblICLot L1 ON L1.intLotId = IA.intSourceLotId
+LEFT JOIN tblICParentLot PL ON PL.intParentLotId = L1.intParentLotId
 LEFT JOIN tblICLot L2 ON L2.intLotId = IA.intDestinationLotId
 LEFT JOIN tblICStorageLocation SL2 ON SL2.intStorageLocationId = IA.intDestinationStorageLocationId
 LEFT JOIN tblICInventoryTransactionType TT ON TT.intTransactionTypeId = IA.intTransactionTypeId

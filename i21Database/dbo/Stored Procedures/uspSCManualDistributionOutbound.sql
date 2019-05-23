@@ -53,7 +53,26 @@ DECLARE @intStorageScheduleId AS INT
 		,@strWhereFinalizedGrade NVARCHAR(20)
 		,@ysnCustomerStorage BIT
 		,@intContractDetailId INT
-		,@ysnPriceFixation BIT = 0;
+		,@ysnPriceFixation BIT = 0
+		,@ysnAllowInvoiceVoucher BIT = 0
+		,@ysnUpdateContractWeightGrade BIT = 0;
+
+SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
+IF (@ysnUpdateContractWeightGrade = 1)
+BEGIN
+	DECLARE @intContractId int;
+	SELECT TOP 1 @intContractId = intTransactionDetailId FROM @LineItem ORDER BY intId ASC
+	
+	UPDATE SC
+	SET  SC.intWeightId = ContractDetail.intWeightId
+		,SC.intGradeId = ContractDetail.intGradeId
+	FROM tblSCTicket SC
+	OUTER APPLY (SELECT TOP 1 CH.* FROM @LineItem LI 
+								INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = LI.intTransactionDetailId 
+								INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				 ORDER BY intId ASC) ContractDetail
+WHERE intTicketId = @intTicketId
+END
 
 SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId
@@ -77,7 +96,7 @@ FROM @LineItem;
 OPEN intListCursor;
 
 		-- Initial fetch attempt
-		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
+		FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId, @ysnAllowInvoiceVoucher;
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
@@ -284,7 +303,7 @@ OPEN intListCursor;
 					END
 			END		   
 			-- Attempt to fetch next row from cursor
-			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId;
+			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits, @ysnIsStorage, @intId, @strDistributionOption, @intStorageScheduleId, @intStorageScheduleTypeId,@ysnAllowInvoiceVoucher;
 		END;
 
 CLOSE intListCursor;
@@ -334,6 +353,8 @@ ELSE
 	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
 	BEGIN
 		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
+		IF @intInvoiceId = 0
+			SET @intInvoiceId = NULL
 	END
 
 	EXEC dbo.uspSMAuditLog 

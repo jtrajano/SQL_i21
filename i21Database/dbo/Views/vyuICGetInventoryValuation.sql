@@ -88,6 +88,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 										AS NVARCHAR(100)
 									)
 		,strEntity					= e.strName		
+		,e.intEntityId
 		,strParentLotNumber			= ParentLot.strParentLotNumber
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId

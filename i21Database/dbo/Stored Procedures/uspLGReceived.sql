@@ -94,41 +94,41 @@ SET ANSI_WARNINGS OFF
 	
 		SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
 
-		INSERT into @ItemsToIncreaseInTransitInBound(
-			[intItemId] 
-			,[intItemLocationId] 
-			,[intItemUOMId] 
-			,[intLotId] 
-			,[intSubLocationId] 
-			,[intStorageLocationId] 
-			,[dblQty] 
-			,[intTransactionId]
-			,[strTransactionId]
-			,[intTransactionTypeId] 		 	
-		)	
-		SELECT 
-			LD.intItemId
-			,IL.intItemLocationId
-			,LD.intItemUOMId
-			,NULL
-			,LD.intPSubLocationId
-			,NULL
-			,- @dblQty
-			,LD.intLoadId
-			,CAST(L.strLoadNumber AS VARCHAR(100))
-			,22
-		FROM tblLGLoadDetail LD	INNER JOIN tblLGLoad L 
-				ON L.intLoadId = LD.intLoadId			
-			LEFT JOIN vyuCTCompactContractDetailView CT --LEFT JOIN vyuCTContractDetailView CT 
-				ON CT.intContractDetailId = LD.intPContractDetailId
-			LEFT JOIN tblICItemLocation IL 
-				ON IL.intLocationId = CT.intCompanyLocationId 
-				AND IL.intItemId = LD.intItemId
-		WHERE LD.intLoadDetailId = @intSourceId;
+		--INSERT into @ItemsToIncreaseInTransitInBound(
+		--	[intItemId] 
+		--	,[intItemLocationId] 
+		--	,[intItemUOMId] 
+		--	,[intLotId] 
+		--	,[intSubLocationId] 
+		--	,[intStorageLocationId] 
+		--	,[dblQty] 
+		--	,[intTransactionId]
+		--	,[strTransactionId]
+		--	,[intTransactionTypeId] 		 	
+		--)	
+		--SELECT 
+		--	LD.intItemId
+		--	,IL.intItemLocationId
+		--	,LD.intItemUOMId
+		--	,NULL
+		--	,LD.intPSubLocationId
+		--	,NULL
+		--	,- @dblQty
+		--	,LD.intLoadId
+		--	,CAST(L.strLoadNumber AS VARCHAR(100))
+		--	,22
+		--FROM tblLGLoadDetail LD	INNER JOIN tblLGLoad L 
+		--		ON L.intLoadId = LD.intLoadId			
+		--	LEFT JOIN vyuCTCompactContractDetailView CT --LEFT JOIN vyuCTContractDetailView CT 
+		--		ON CT.intContractDetailId = LD.intPContractDetailId
+		--	LEFT JOIN tblICItemLocation IL 
+		--		ON IL.intLocationId = CT.intCompanyLocationId 
+		--		AND IL.intItemId = LD.intItemId
+		--WHERE LD.intLoadDetailId = @intSourceId;
 
-		-- Reduce the Inbound In-Transit Qty when posting an IR. 
-		-- Or Increase it back when unposting the IR. 
-		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
+		---- Reduce the Inbound In-Transit Qty when posting an IR. 
+		---- Or Increase it back when unposting the IR. 
+		--EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
 
 		SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
 
@@ -145,6 +145,49 @@ SET ANSI_WARNINGS OFF
 		SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId
 	END
 	
+	-- Reduce the Inbound In-Transit Qty when posting an IR. 
+	-- Or Increase it back when unposting the IR. 
+	BEGIN
+		INSERT into @ItemsToIncreaseInTransitInBound(
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[dblQty] 
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId] 		 	
+		)	
+		SELECT 
+			r.intItemId
+			,r.intItemLocationId
+			,r.intItemUOMId
+			,NULL
+			,LD.intPSubLocationId
+			,NULL
+			,-r.dblQty
+			,LD.intLoadId
+			,CAST(L.strLoadNumber AS VARCHAR(100))
+			,22
+		FROM 
+			@ItemsFromInventoryReceipt r INNER JOIN 
+			(
+				tblLGLoadDetail LD	INNER JOIN tblLGLoad L 
+				ON L.intLoadId = LD.intLoadId			
+			)
+				ON r.intSourceId = LD.intLoadDetailId
+			LEFT JOIN vyuCTCompactContractDetailView CT --LEFT JOIN vyuCTContractDetailView CT 
+				ON CT.intContractDetailId = LD.intPContractDetailId
+			LEFT JOIN tblICItemLocation IL 
+				ON IL.intLocationId = CT.intCompanyLocationId 
+				AND IL.intItemId = LD.intItemId
+
+		-- Reduce the Inbound In-Transit Qty when posting an IR. 
+		-- Or Increase it back when unposting the IR. 
+		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound
+	END
 END TRY
 
 BEGIN CATCH

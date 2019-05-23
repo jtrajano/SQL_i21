@@ -15,17 +15,24 @@ DECLARE @intReturnValue AS INT = 0;
 DECLARE @Ownership_Own AS INT = 1
 		,@Ownership_Storage AS INT = 2
 
-DELETE	m
-FROM	tblICInventoryStockMovement m INNER JOIN tblICItem i
-			ON m.intItemId = i.intItemId
-WHERE	(
-			@strItemNo IS NULL 
-			OR i.strItemNo = @strItemNo
-		)
-		AND (
-			@dtmStartDate IS NULL 
-			OR dbo.fnDateGreaterThanEquals(m.dtmDate, @dtmStartDate) = 1
-		)
+IF @strItemNo IS NULL AND @dtmStartDate IS NULL 
+BEGIN 
+	TRUNCATE TABLE tblICInventoryStockMovement
+END 
+ELSE 
+BEGIN
+	DELETE	m
+	FROM	tblICInventoryStockMovement m INNER JOIN tblICItem i
+				ON m.intItemId = i.intItemId
+	WHERE	(
+				@strItemNo IS NULL 
+				OR i.strItemNo = @strItemNo
+			)
+			AND (
+				@dtmStartDate IS NULL 
+				OR dbo.fnDateGreaterThanEquals(m.dtmDate, @dtmStartDate) = 1
+			)
+END
 
 IF @isPeriodic = 1
 BEGIN 	
@@ -64,17 +71,20 @@ BEGIN
 		,intInventoryTransactionId
 		,intInventoryTransactionStorageId
 		,intOwnershipType
+		,intCommodityId
+		,intCategoryId
+		,intLocationId
 	)
 	SELECT *
 	FROM (
 		SELECT	
-				t.intItemId
+				i.intItemId
 				,t.intItemLocationId
 				,t.intItemUOMId
 				,t.intSubLocationId
 				,t.intStorageLocationId
 				,t.intLotId
-				,t.dtmDate
+				,dtmDate = dbo.fnRemoveTimeOnDate(t.dtmDate)
 				,groupedQty.dblQty
 				,t.dblUOMQty
 				,t.dblCost
@@ -102,7 +112,11 @@ BEGIN
 				,t.intInventoryTransactionId
 				,intInventoryTransactionStorageId = CAST(NULL AS INT)
 				,intOwnershipType = @Ownership_Own 
-		FROM	(
+				,t.intCommodityId
+				,t.intCategoryId
+				,t.intLocationId 
+		FROM	tblICItem i
+				LEFT JOIN (
 					SELECT	
 						dblQty = SUM(t.dblQty)
 						,t.strTransactionId
@@ -115,7 +129,8 @@ BEGIN
 						,t.intLotId 
 						,t.intSubLocationId
 						,t.intStorageLocationId
-					FROM tblICInventoryTransaction t INNER JOIN tblICItem i 
+					FROM 
+						tblICInventoryTransaction t INNER JOIN tblICItem i 
 							ON t.intItemId = i.intItemId 
 					WHERE	
 						t.intInTransitSourceLocationId IS NULL 
@@ -140,9 +155,17 @@ BEGIN
 						,t.intSubLocationId
 						,t.intStorageLocationId				
 				) groupedQty
-				CROSS APPLY (
-					SELECT	TOP 1 *
-					FROM	tblICInventoryTransaction t
+					ON i.intItemId = groupedQty.intItemId
+				OUTER APPLY (
+					SELECT	TOP 1 
+							t.*
+							,il.intLocationId
+							,i.intCommodityId
+					FROM	
+						tblICInventoryTransaction t INNER JOIN tblICItem i 
+								ON t.intItemId = i.intItemId
+						INNER JOIN tblICItemLocation il
+							ON t.intItemLocationId = il.intItemLocationId
 					WHERE	
 						t.strTransactionId = groupedQty.strTransactionId
 						AND t.intTransactionId = groupedQty.intTransactionId
@@ -163,7 +186,7 @@ BEGIN
 				,t.intSubLocationId
 				,t.intStorageLocationId
 				,t.intLotId
-				,t.dtmDate
+				,dtmDate = dbo.fnRemoveTimeOnDate(t.dtmDate) 
 				,groupedQty.dblQty
 				,t.dblUOMQty
 				,t.dblCost
@@ -191,6 +214,9 @@ BEGIN
 				,intInventoryTransactionId = CAST(NULL AS INT) 
 				,t.intInventoryTransactionStorageId 
 				,intOwnershipType = @Ownership_Storage 
+				,t.intCommodityId
+				,t.intCategoryId
+				,t.intLocationId 
 		FROM	(
 					SELECT	
 						dblQty = SUM(t.dblQty)
@@ -229,8 +255,16 @@ BEGIN
 						,t.intStorageLocationId				
 				) groupedQty
 				CROSS APPLY (
-					SELECT	TOP 1 *
-					FROM	tblICInventoryTransactionStorage t
+					SELECT	TOP 1 
+							t.*
+							,il.intLocationId
+							,i.intCommodityId
+							,i.intCategoryId
+					FROM	
+						tblICInventoryTransactionStorage t INNER JOIN tblICItem i 
+							ON t.intItemId = i.intItemId
+						INNER JOIN tblICItemLocation il
+							ON t.intItemLocationId = il.intItemLocationId
 					WHERE	
 						t.strTransactionId = groupedQty.strTransactionId
 						AND t.intTransactionId = groupedQty.intTransactionId
@@ -288,6 +322,9 @@ BEGIN
 		,intInventoryTransactionId
 		,intInventoryTransactionStorageId
 		,intOwnershipType
+		,intCommodityId
+		,intCategoryId
+		,intLocationId
 	)
 	SELECT *
 	FROM (
@@ -298,7 +335,7 @@ BEGIN
 				,t.intSubLocationId
 				,t.intStorageLocationId
 				,t.intLotId
-				,t.dtmDate
+				,dtmDate = dbo.fnRemoveTimeOnDate(t.dtmDate)
 				,groupedQty.dblQty
 				,t.dblUOMQty
 				,t.dblCost
@@ -326,7 +363,11 @@ BEGIN
 				,t.intInventoryTransactionId
 				,intInventoryTransactionStorageId = CAST(NULL AS INT)
 				,intOwnershipType = @Ownership_Own 
-		FROM	(
+				,t.intCommodityId
+				,t.intCategoryId
+				,t.intLocationId 
+		FROM	tblICItem i 
+				LEFT JOIN (
 					SELECT	
 						dblQty = SUM(t.dblQty)
 						,t.strTransactionId
@@ -364,9 +405,17 @@ BEGIN
 						,t.intSubLocationId
 						,t.intStorageLocationId				
 				) groupedQty
-				CROSS APPLY (
-					SELECT	TOP 1 *
-					FROM	tblICInventoryTransaction t
+					ON i.intItemId = groupedQty.intItemId
+				OUTER APPLY (
+					SELECT TOP 1 
+						t.*
+						,il.intLocationId
+						,i.intCommodityId
+					FROM	
+						tblICInventoryTransaction t INNER JOIN tblICItem i 
+								ON t.intItemId = i.intItemId
+						INNER JOIN tblICItemLocation il
+							ON t.intItemLocationId = il.intItemLocationId
 					WHERE	
 						t.strTransactionId = groupedQty.strTransactionId
 						AND t.intTransactionId = groupedQty.intTransactionId
@@ -387,7 +436,7 @@ BEGIN
 				,t.intSubLocationId
 				,t.intStorageLocationId
 				,t.intLotId
-				,t.dtmDate
+				,dtmDate = dbo.fnRemoveTimeOnDate(t.dtmDate)
 				,groupedQty.dblQty
 				,t.dblUOMQty
 				,t.dblCost
@@ -415,6 +464,9 @@ BEGIN
 				,intInventoryTransactionId = CAST(NULL AS INT) 
 				,t.intInventoryTransactionStorageId 
 				,intOwnershipType = @Ownership_Storage 
+				,t.intCommodityId
+				,t.intCategoryId
+				,t.intLocationId 
 		FROM	(
 					SELECT	
 						dblQty = SUM(t.dblQty)
@@ -453,8 +505,16 @@ BEGIN
 						,t.intStorageLocationId				
 				) groupedQty
 				CROSS APPLY (
-					SELECT	TOP 1 *
-					FROM	tblICInventoryTransactionStorage t
+					SELECT	TOP 1 
+						t.*
+						,il.intLocationId
+						,i.intCommodityId
+						,i.intCategoryId							
+					FROM	
+						tblICInventoryTransactionStorage t INNER JOIN tblICItem i
+								ON t.intItemId = i.intItemId
+						INNER JOIN tblICItemLocation il
+							ON t.intItemLocationId = il.intItemLocationId
 					WHERE	
 						t.strTransactionId = groupedQty.strTransactionId
 						AND t.intTransactionId = groupedQty.intTransactionId

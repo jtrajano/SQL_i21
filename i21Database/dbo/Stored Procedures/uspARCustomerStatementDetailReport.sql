@@ -30,6 +30,7 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@datatype					AS NVARCHAR(50)
 		,@strCustomerName			AS NVARCHAR(MAX)
 		,@strCustomerIds			AS NVARCHAR(MAX)
+		,@strCustomerIdsLocal		AS NVARCHAR(MAX)
 		,@ysnEmailOnly				AS BIT
 		
 -- Create a table variable to hold the XML data. 		
@@ -247,7 +248,19 @@ IF @ysnEmailOnly IS NOT NULL
 		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
 
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @strCustomerName = @strCustomerName, @intEntityUserId = @intEntityUserId
+IF ISNULL(@strCustomerName, '') <> '' AND ISNULL(@strCustomerIds, '') = ''
+	BEGIN
+		SELECT @strCustomerIdsLocal = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
+		FROM (
+			SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(MAX))  + ', '
+			FROM #CUSTOMERS
+			FOR XML PATH ('')
+		) C (intEntityCustomerId)
+	END
+
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo			= @dtmDateTo
+										  , @intEntityUserId	= @intEntityUserId
+										  , @strCustomerIds		= @strCustomerIdsLocal
  
 SET @query = CAST('' AS NVARCHAR(MAX)) + '
 SELECT * 

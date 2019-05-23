@@ -47,6 +47,7 @@ FROM (
 		,vendor.strVendorId
 		,commodity.strCommodityCode
 		,term.strTerm
+		,term.intTermID AS intTermsId
 		,entity.strName
 		,payTo.strCheckPayeeName
 		,NULL AS intPayScheduleId
@@ -90,7 +91,7 @@ FROM (
 		,voucher.intEntityVendorId
 		,voucher.intTransactionType
 		,paySched.ysnReadyForPayment
-		,voucher.dtmDueDate
+		,paySched.dtmDueDate
 		,voucher.dtmDate
 		,voucher.dtmBillDate
 		,voucher.intAccountId
@@ -122,6 +123,7 @@ FROM (
 		,vendor.strVendorId
 		,commodity.strCommodityCode
 		,term.strTerm
+		,term.intTermID AS intTermsId
 		,entity.strName
 		,payTo.strCheckPayeeName
 		,paySched.intId AS intPayScheduleId
@@ -141,7 +143,7 @@ FROM (
 	INNER JOIN tblAPVoucherPaymentSchedule paySched
 		ON paySched.intBillId = voucher.intBillId
 	LEFT JOIN tblEMEntityLocation payTo ON voucher.intPayToAddressId = payTo.intEntityLocationId
-	LEFT JOIN tblSMTerm term ON voucher.intTermsId = term.intTermID
+	LEFT JOIN tblSMTerm term ON paySched.intTermsId = term.intTermID
 	LEFT JOIN vyuAPVoucherCommodity commodity ON voucher.intBillId = commodity.intBillId
 	LEFT JOIN tblSMPaymentMethod payMethod ON vendor.intPaymentMethodId = payMethod.intPaymentMethodID
 	LEFT JOIN tblGLAccount glAccount ON glAccount.intAccountId = voucher.intAccountId
@@ -149,5 +151,6 @@ FROM (
 	AND voucher.ysnPaid = 0
 	AND voucher.intTransactionType IN (1)
 	AND voucher.intTransactionReversed IS NULL
-	AND voucher.ysnIsPaymentScheduled = 1
+	AND voucher.ysnIsPaymentScheduled = 1 --AP-7092
+	AND paySched.ysnPaid = 0
 ) forPayment

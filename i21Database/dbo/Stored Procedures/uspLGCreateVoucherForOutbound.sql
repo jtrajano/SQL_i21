@@ -97,7 +97,10 @@ BEGIN TRY
 		,[intSubCurrencyCents]
 		,[intAccountId]
 		,[strBillOfLading]
-		,[ysnReturn])
+		,[ysnReturn]
+		,[ysnStage]
+		,[intSubLocationId]
+		,[intStorageLocationId])
 	SELECT
 		[intEntityVendorId] = ISNULL(SLCL.intVendorId,WRMH.intVendorEntityId)
 		,[intTransactionType] = 1
@@ -143,6 +146,9 @@ BEGIN TRY
 		,[intAccountId] = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
+		,[ysnStage] = CAST(0 AS BIT)
+		,[intSubLocationId] = LW.intSubLocationId
+		,[intStorageLocationId] = LW.intStorageLocationId
 	FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -189,6 +195,8 @@ BEGIN TRY
 		,CUR.intCurrencyID
 		,CUR.ysnSubCurrency
 		,CUR.intCent
+		,LW.intSubLocationId
+		,LW.intStorageLocationId
 	UNION ALL
 	SELECT
 		[intEntityVendorId] = A.intEntityVendorId
@@ -228,6 +236,9 @@ BEGIN TRY
 		,[intAccountId] = apClearing.intAccountId
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
+		,[ysnStage] = CAST(0 AS BIT)
+		,[intSubLocationId] = A.intSubLocationId
+		,[intStorageLocationId] = A.intStorageLocationId
 	FROM vyuLGLoadCostForVendor A
 		JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
@@ -328,7 +339,8 @@ BEGIN TRY
 			,[intSubCurrencyCents]
 			,[intAccountId]
 			,[strBillOfLading]
-			,[ysnReturn])
+			,[ysnReturn]
+			,[ysnStage])
 		SELECT
 			[intEntityVendorId]
 			,[intTransactionType]
@@ -367,6 +379,7 @@ BEGIN TRY
 			,[intAccountId]
 			,[strBillOfLading]
 			,[ysnReturn]
+			,[ysnStage]
 		FROM @voucherPayable
 		WHERE intEntityVendorId = @intVendorEntityId
 

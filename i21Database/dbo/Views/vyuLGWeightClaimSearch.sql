@@ -39,7 +39,7 @@ SELECT
 	strPaidTo = PTEM.strName,
 	strCurrency = SM.strCurrency,
 	strPriceUOM = ItemUOM.strUnitMeasure,
-	AD.ysnSeqSubCurrency,
+	ysnSeqSubCurrency = SM.ysnSubCurrency,
 	dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM((SELECT Top(1) IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId=CD.intItemId AND IU.intUnitMeasureId=WUOM.intUnitMeasureId),AD.intSeqPriceUOMId,AD.dblSeqPrice),
 	AD.dblSeqPrice,
 	WC.ysnPosted,
@@ -73,8 +73,31 @@ JOIN tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId
 JOIN tblLGLoad Load ON Load.intLoadId = WC.intLoadId
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Load.intWeightUnitMeasureId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WD.intContractDetailId
-	CROSS
-	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+JOIN (SELECT
+			intContractDetailId = CD.intContractDetailId
+			,intSeqPriceUOMId = ISNULL(CD.intAdjItemUOMId,CD.intPriceItemUOMId)
+			,strSeqPriceUOM = ISNULL(FM.strUnitMeasure, UM.strUnitMeasure)
+			,intSeqCurrencyId = COALESCE(CYXT.intToCurrencyId, CYXF.intFromCurrencyId, CY.intCurrencyID)
+			,strSeqCurrency = COALESCE(CYT.strCurrency, CYF.strCurrency, CY.strCurrency)
+			,ysnSeqSubCurrency = COALESCE(CYT.ysnSubCurrency, CYF.ysnSubCurrency, CY.ysnSubCurrency)
+			,dblSeqPrice = CD.dblCashPrice / ISNULL(CY.intCent, 1) * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) ELSE ISNULL(CD.dblRate, 1) END)
+		FROM tblCTContractDetail CD
+			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intPriceItemUOMId
+			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+			LEFT JOIN tblICItemUOM FU ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL AND FU.intItemUOMId = CD.intFXPriceUOMId
+			LEFT JOIN tblICUnitMeasure FM ON FM.intUnitMeasureId = FU.intUnitMeasureId
+			LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
+			LEFT JOIN tblSMCurrency MCY ON MCY.intCurrencyID = CY.intMainCurrencyId
+			LEFT JOIN tblSMCurrencyExchangeRate CYXF 
+				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
+				AND CYXF.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
+				AND CYXF.intFromCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
+			LEFT JOIN tblSMCurrency CYF ON CYF.intCurrencyID = CYXF.intFromCurrencyId
+			LEFT JOIN tblSMCurrencyExchangeRate CYXT 
+				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
+				AND CYXT.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
+				AND CYXT.intToCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
+			LEFT JOIN tblSMCurrency CYT ON CYT.intCurrencyID = CYXT.intFromCurrencyId) AD ON AD.intContractDetailId = CD.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 

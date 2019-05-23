@@ -50,6 +50,7 @@ SET NOCOUNT ON
 				intConcurrencyId	=	1,
 				intContractStatusId =	1,
 				intContractSeq		=	@intNextSequence,
+				intSplitId			=	NULL,
 				intContractHeaderId	=	ISNULL(@intNewContractHeaderid, @intContractHeaderId)
 
 		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',null,@XML OUTPUT							

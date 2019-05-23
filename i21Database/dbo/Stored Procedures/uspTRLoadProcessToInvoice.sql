@@ -152,7 +152,7 @@ BEGIN TRY
 		,DD.dblFreightRate
 		,DD.ysnFreightInPrice
 		,intTruckDriverId = CASE WHEN TL.intDriverId IS NULL THEN NULL ELSE TL.intDriverId END
-		,intTruckDriverReferenceId = CASE WHEN SC.intTruckDriverReferenceId IS NULL THEN NULL ELSE SC.intTruckDriverReferenceId END
+		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
 	INTO #tmpSourceTable
@@ -164,7 +164,7 @@ BEGIN TRY
 	LEFT JOIN vyuICGetItemLocation Item ON Item.intItemId = DD.intItemId AND Item.intLocationId = DH.intCompanyLocationId
 	LEFT JOIN tblLGLoad LG ON LG.intLoadId = TL.intLoadId
 	LEFT JOIN vyuICGetItemStock IC ON IC.intItemId = DD.intItemId AND IC.intLocationId = DH.intCompanyLocationId
-	LEFT JOIN tblSCTruckDriverReference SC ON SC.strData = TL.strTractor
+	LEFT JOIN tblSCTruckDriverReference SC ON SC.intTruckDriverReferenceId = TL.intTruckDriverReferenceId
 	LEFT JOIN vyuTRGetLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId AND TR.strReceiptLine IN (
 		SELECT Item 
 		FROM dbo.fnTRSplit(DD.strReceiptLink,','))

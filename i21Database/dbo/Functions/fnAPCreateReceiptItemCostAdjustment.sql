@@ -234,7 +234,9 @@ BEGIN
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
-		INNER JOIN tblGRStorageHistory sh ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId
+		INNER JOIN tblGRStorageHistory sh 
+			ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
+				AND ISNULL(sh.intContractHeaderId,-1) = ISNULL(B.intContractHeaderId,-1)
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
 		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId

@@ -121,7 +121,66 @@ BEGIN
 END
 ELSE
 BEGIN
-	SELECT TOP 1 *
+	SELECT TOP 1 intDPISummaryId
+		, intDPIHeaderId
+		, dtmTransactionDate
+		, dblReceiveIn
+		, dblShipOut
+		, dblAdjustments
+		, dblCount
+		, dblInvoiceQty
+		, dblInventoryBalance = ISNULL(dblInventoryBalance, 0.00)
+		, dblSalesInTransit
+		, strDistributionA
+		, dblAIn
+		, dblAOut
+		, dblANet = ISNULL(dblANet, 0.00)
+		, strDistributionB
+		, dblBIn
+		, dblBOut
+		, dblBNet = ISNULL(dblBNet, 0.00)
+		, strDistributionC
+		, dblCIn
+		, dblCOut
+		, dblCNet = ISNULL(dblCNet, 0.00)
+		, strDistributionD
+		, dblDIn
+		, dblDOut
+		, dblDNet = ISNULL(dblDNet, 0.00)
+		, strDistributionE
+		, dblEIn
+		, dblEOut
+		, dblENet = ISNULL(dblENet, 0.00)
+		, strDistributionF
+		, dblFIn
+		, dblFOut
+		, dblFNet = ISNULL(dblFNet, 0.00)
+		, strDistributionG
+		, dblGIn
+		, dblGOut
+		, dblGNet = ISNULL(dblGNet, 0.00)
+		, strDistributionH
+		, dblHIn
+		, dblHOut
+		, dblHNet = ISNULL(dblHNet, 0.00)
+		, strDistributionI
+		, dblIIn
+		, dblIOut
+		, dblINet = ISNULL(dblINet, 0.00)
+		, strDistributionJ
+		, dblJIn
+		, dblJOut
+		, dblJNet = ISNULL(dblJNet, 0.00)
+		, strDistributionK
+		, dblKIn
+		, dblKOut
+		, dblKNet = ISNULL(dblKNet, 0.00)
+		, dblUnpaidIn
+		, dblUnpaidOut
+		, dblBalance
+		, dblPaidBalance = ISNULL(dblPaidBalance, 0.00)
+		, dblTotalCompanyOwned = ISNULL(dblTotalCompanyOwned, 0.00)
+		, dblUnpaidBalance = ISNULL(dblUnpaidBalance, 0.00)
 		, dtmFrom = @dtmFrom
 		, dtmTo = @dtmTo
 		, Commodity = @Commodity
@@ -130,6 +189,6 @@ BEGIN
 		, License = @License
 	FROM tblRKDPISummary
 	WHERE intDPIHeaderId = @intDPIHeaderId
-		AND dtmTransactionDate >= @dtmFrom
-		AND dtmTransactionDate <= @dtmTo
+		AND (dtmTransactionDate < @dtmFrom OR dtmTransactionDate IS NULL)
+	ORDER BY dtmTransactionDate DESC
 END

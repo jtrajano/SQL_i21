@@ -318,7 +318,9 @@ SELECT *
 FROM (
 	SELECT TOP 1 L.intLoadId
 		,L.dtmScheduledDate
-		,strLoadNumber = CASE WHEN (L.intShipmentType = 1) THEN SI.strLoadNumber ELSE L.strLoadNumber END
+		,L.strLoadNumber
+		,strLSINumber = SI.strLoadNumber
+		,L.intShipmentType
 		,L.intPurchaseSale
 		,L.dtmBLDate
 		,L.dtmDeliveredDate

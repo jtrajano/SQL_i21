@@ -482,6 +482,18 @@ BEGIN TRY
 		DELETE FROM #DistributionDetailTable WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
 	END
 
+	-- Validate the BOL of Receipt and Distribution
+	IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader LH
+		INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = LH.intLoadHeaderId
+		INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+		INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND DD.strReceiptLink = LR.strReceiptLine
+		WHERE LH.intLoadHeaderId = @intLoadHeaderId
+	AND LR.strBillOfLading != DD.strBillOfLading
+	AND DD.ysnBlendedItem = 0)
+	BEGIN
+		RAISERROR('BOL of Receipt and Distribution should be the same!', 16, 1)
+	END
+
 	-- Validate Zero values -- TR-730 & TR-909
 	SELECT DISTINCT strOrigin = CASE WHEN ISNULL(TR.intLoadReceiptId, '') != '' THEN TR.strOrigin ELSE BlendIngredient.strOrigin END
 		, dblCost = CASE WHEN ISNULL(TR.intLoadReceiptId, '') != '' THEN TR.dblUnitCost ELSE BlendIngredient.dblUnitCost END

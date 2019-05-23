@@ -4,7 +4,7 @@
 	[intImportMeterReadingId] INT NOT NULL,
 	[intMeterCustomerId] INT NOT NULL,
     [intMeterNumber] INT NOT NULL,
-	[dtmTransactionDate] DATETIME NOT NULL,
+	[dtmTransactionDate] DATETIME NULL,
     [dblCurrentReading] NUMERIC(18, 6) NULL, 
     [dblCurrentAmount] NUMERIC(18, 6) NULL,
 	[ysnValid] BIT NOT NULL,

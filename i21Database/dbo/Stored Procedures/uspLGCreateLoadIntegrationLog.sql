@@ -324,7 +324,7 @@ BEGIN TRY
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
 			LEFT JOIN tblSMCompanyLocationSubLocation LDCLSL ON LDCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 			WHERE LC.intLoadId = @intLoadId
-			ORDER BY LC.intLoadContainerId
+			ORDER BY LC.intSort
 		END
 		ELSE 
 		BEGIN
@@ -570,7 +570,7 @@ BEGIN TRY
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
 			LEFT JOIN tblSMCompanyLocationSubLocation LDCLSL ON LDCLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
 			WHERE LC.intLoadId = @intLoadId
-			ORDER BY LC.intLoadContainerId
+			ORDER BY LC.intSort
 		END
 	END
 

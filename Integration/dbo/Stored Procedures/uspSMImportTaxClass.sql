@@ -32,6 +32,29 @@ BEGIN
 		strTaxClass nvarchar(100)
 	)
 
+	DECLARE @tax_class_declared table (
+		id			int identity(1,1),
+		strTaxClass nvarchar(100)
+	)
+
+	--===============Declared Tax Groups==========---
+	INSERT INTO @tax_class_declared
+	SELECT 'Federal Excise Tax Gas' union
+	SELECT 'Federal Excise Tax Diesel' union
+	SELECT 'State Excise Tax Gas' union
+	SELECT 'State Excise Tax Diesel' union
+	SELECT 'State Sales Tax' union
+	SELECT 'Prepaid Sales Tax'
+
+
+	DELETE T FROM @tax_class_declared T 
+	WHERE T.strTaxClass IN (
+		SELECT DISTINCT taxD.strTaxClass from @tax_class_declared taxD
+		INNER JOIN tblSMTaxClass taxC
+		ON taxD.strTaxClass COLLATE Latin1_General_CI_AS = taxC.strTaxClass COLLATE Latin1_General_CI_AS 
+	)
+
+
 	IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'aglclmst')
 	BEGIN
 
@@ -84,7 +107,10 @@ BEGIN
 		
 		--1 Time synchronization here
 		PRINT '1 Time tax class Synchronization'
-				
+					
+		INSERT INTO tblSMTaxClass(strTaxClass)
+		SELECT strTaxClass FROM @tax_class_declared
+		
 
 		IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'aglclmst')
 		BEGIN
@@ -125,6 +151,8 @@ BEGIN
 				LEFT join tblSMTaxClass b
 					on a.strTaxClass COLLATE Latin1_General_CI_AS = b.strTaxClass COLLATE Latin1_General_CI_AS 
 			where b.intTaxClassId is null
-		 END		
+		 END	
+		 
+		 SELECT @Total += Count(taxd.id) From @tax_class_declared taxd	
 	 END	
 END

@@ -40,6 +40,7 @@ AS
 		,J.intVendorSetupId 
 		,A.intInvoiceId
 		,strVendorName = P.strName
+		,ysnActive = I.ysnActive
 	FROM tblARInvoiceDetail B
 	INNER JOIN tblARInvoice A
 		ON A.intInvoiceId = B.intInvoiceId
@@ -55,7 +56,7 @@ AS
 		ON A.intEntityCustomerId = G.intEntityId
 	INNER JOIN tblEMEntity H
 		ON G.intEntityId = H.intEntityId
-	INNER JOIN tblVRCustomerXref L
+	LEFT OUTER JOIN tblVRCustomerXref L
 		ON A.intEntityCustomerId = L.intEntityId
 	INNER JOIN tblVRVendorSetup J
 		ON L.intVendorSetupId = J.intVendorSetupId
@@ -96,6 +97,7 @@ AS
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND A.ysnPosted = 1
 		AND A.strTransactionType IN ('Invoice', 'Credit Memo')
-		AND I.ysnActive = 1) A
+		--AND I.ysnActive = 1
+	) A
 
 GO

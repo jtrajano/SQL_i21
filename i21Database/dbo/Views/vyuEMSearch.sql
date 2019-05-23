@@ -7,7 +7,12 @@ SELECT
 		strPhone = CASE WHEN ISNULL(g.strPhone, '') <> '' THEN g.strPhone ELSE EP.strPhone END,
 		e.strAddress,  
 		e.strCity,  
-		e.strState,  
+		e.strState,
+		e.strCountry,
+		t.strTerm,
+		e.strLocationName,
+		e.strPhone as [strPhone1],
+		e.strFax as [strPhone2],
 		e.strZipCode,
 		intWarehouseId = isnull(e.intWarehouseId, -99),
 		Customer,
@@ -69,6 +74,8 @@ SELECT
 			on a.intEntityId = b.intEntityId
 		left join [tblEMEntityLocation] e  
 			on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
+		left join [tblSMTerm] t
+			on (e.intTermsId = t.intTermID)	
 		left join [tblEMEntityToContact] f  
 			on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
 		left join tblEMEntity g  

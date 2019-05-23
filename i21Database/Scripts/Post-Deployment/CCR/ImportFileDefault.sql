@@ -6,6 +6,9 @@ DECLARE @LayoutTitle NVARCHAR(100)
 
 -- BP Format
 SET @LayoutTitle = 'DCC - BP Format'
+
+UPDATE tblSMImportFileHeader SET  strFieldDelimiter = 'Tab' WHERE strLayoutTitle = @LayoutTitle AND strFieldDelimiter = 'Comma'
+
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
 	PRINT ('Deploying DCC - BP Format')
@@ -17,7 +20,7 @@ BEGIN
 		, intConcurrencyId)
 	VALUES (@LayoutTitle
 		, 'Delimiter'
-		, 'Comma'
+		, 'Tab'
 		, 1
 		, 1)
 
@@ -287,7 +290,7 @@ BEGIN
 
 	-- Fee
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Fee', 2, 7, 1)
+	VALUES (@FileHeaderId, 'Fee', 2, 10, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -311,7 +314,7 @@ BEGIN
 	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 6 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Gross'
 
 	-- Fee
-	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 7 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Fee'
+	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 2, intPosition = 10 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Fee'
 
 	-- Net
 	DELETE tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId 

@@ -63,7 +63,7 @@ BEGIN TRY
 		,'Product : '+I.strItemNo AS strItemNo
 		,'Desc : '+I.strDescription AS strDescription
 		,IsNULL(PS.strParameterValue, I.strItemNo) AS strValue
-		,'Date : '+Ltrim(GETDATE()) AS dtmDate
+		,'Date : '+dbo.fnConvertDateToReportDateFormat(GETDATE(), 1) AS dtmDate
 		,'Printed By : '+@strUserName AS strUserName
 	FROM tblMFWorkOrder W
 	JOIN tblICItem I ON W.intItemId = I.intItemId

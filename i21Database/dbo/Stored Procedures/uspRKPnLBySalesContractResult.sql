@@ -90,7 +90,7 @@ DECLARE @dblPricePurchase  numeric(18,6)
 DECLARE @dblConvertedAllocatedQty  numeric(18,6)
 SET @dtmToDate = convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)
 
-SELECT @dblPricePurchase= sum(dblPrice*dblAllocatedQty)/sum(dblAllocatedQty) FROM @PhysicalFuturesResult WHERE strContractType like 'Purchase -%'
+SELECT @dblPricePurchase= sum(dblPrice*dblAllocatedQty)/ case when isnull(sum(dblAllocatedQty),0)=0 then 1 else sum(dblAllocatedQty) end FROM @PhysicalFuturesResult WHERE strContractType like 'Purchase -%'
 
 SELECT @dblAllocatedQty = sum(isnull(sa.dblAllocatedQty, 0))
 	  ,@dblAllocatedQtyUSD = sum(dbo.fnCTConvertQuantityToTargetItemUOM(sa.intItemId, intUnitMeasureId, 3, sa.dblAllocatedQty))	  
@@ -121,7 +121,8 @@ SELECT DISTINCT intContractHeaderId
 	,(sum(dbo.fnCTConvertQuantityToTargetItemUOM(d.intItemId, @intUnitMeasureId, intPriceUomId, dblSaleBasis)) / count(dblSaleBasis)) / CASE WHEN isnull(ysnSubCurrency, 0) = @ysnSubCurrency THEN 1 WHEN isnull(ysnSubCurrency, 0) = 1 THEN 100 ELSE 0.01 END dblBasis
 	,NULL dblAllocatedQty
 	,(SELECT ISNULL(SUM(dblPrice), 0) FROM @PhysicalFuturesResult WHERE strDescription = 'Invoice') 
-		/(	SELECT CASE WHEN count(isnull(dblPrice, 0)) = 0 THEN 1 ELSE count(dblPrice) END	FROM @PhysicalFuturesResult	WHERE strDescription = 'Invoice')
+		/ case when isnull((SELECT CASE WHEN count(isnull(dblPrice, 0)) = 0 THEN 1 ELSE count(dblPrice) END	FROM @PhysicalFuturesResult	WHERE strDescription = 'Invoice'),0)=0 
+		       then 1 else (SELECT CASE WHEN count(isnull(dblPrice, 0)) = 0 THEN 1 ELSE count(dblPrice) END	FROM @PhysicalFuturesResult	WHERE strDescription = 'Invoice') end
 	,(sum(dbo.fnCTConvertQuantityToTargetItemUOM(d.intItemId, 3, intPriceUomId, dblSaleBasis)) / count(dblSaleBasis)) / CASE WHEN isnull(ysnSubCurrency, 0) = 1 THEN 100 ELSE 1 END dblBasisUSD
 	,@strUnitMeasure
 FROM vyuRKPnLGetAllocationDetail d
@@ -152,7 +153,7 @@ SELECT DISTINCT intContractHeaderId
 	,'Purchase' strContractType
 ,(SELECT ISNULL(SUM(dblBooked), 0)	FROM @PhysicalFuturesResult	WHERE strDescription = 'Invoice') dblQty
 ,(SELECT ISNULL(SUM(dblAccounting), 0)		FROM @PhysicalFuturesResult		WHERE strDescription = 'Supp. Invoice')  dblUSD
-	,(sum(dbo.fnCTConvertQuantityToTargetItemUOM(d.intItemId, @intUnitMeasureId, intPriceUomId, dblAllocatedQty * dblBasis)) / sum(dblAllocatedQty)) / CASE WHEN isnull(ysnSubCurrency, 0) = @ysnSubCurrency THEN 1 WHEN isnull(ysnSubCurrency, 0) = 1 THEN 100 ELSE 0.01 END dblBasis
+	,(sum(dbo.fnCTConvertQuantityToTargetItemUOM(d.intItemId, @intUnitMeasureId, intPriceUomId, dblAllocatedQty * dblBasis)) / case when isnull(sum(dblAllocatedQty),0)=0 then 1 else sum(dblAllocatedQty) end) / CASE WHEN isnull(ysnSubCurrency, 0) = @ysnSubCurrency THEN 1 WHEN isnull(ysnSubCurrency, 0) = 1 THEN 100 ELSE 0.01 END dblBasis
 	,@dblAllocatedQty dblAllocatedQty
 	,@dblPricePurchase dblInvoicePrice
 	,(sum(dbo.fnCTConvertQuantityToTargetItemUOM(d.intItemId, 3, intPriceUomId, dblAllocatedQty * dblBasis)) / sum(dblAllocatedQty)) / CASE WHEN isnull(ysnSubCurrency, 0) = 1 THEN 100 ELSE 1 END as dblBasisUSD
@@ -214,10 +215,10 @@ INSERT INTO @Result (
 	,dblAllocatedQty
 	)
 SELECT 'PO Costs'
-	,sum(dblBasis * AllocatedQty) / sum(AllocatedQty) dblBasis
+	,sum(dblBasis * AllocatedQty) / case when isnull(sum(AllocatedQty),0) = 0 then 1 else sum(AllocatedQty) end  dblBasis
 	,@POCostUSD
 	,(@POCostUSD/sum(AllocatedQty)) * case when @ysnSubCurrency = 1 then 100 else 1 end
-	,sum(dblBasis * AllocatedQty)/ sum(AllocatedQty) dblCostUSD
+	,sum(dblBasis * AllocatedQty)/ case when isnull(sum(AllocatedQty),0) = 0 then 1 else sum(AllocatedQty) end  dblCostUSD
 	,@strUnitMeasure,sum(AllocatedQty) AllocatedQty
 FROM (SELECT 
 	max(dblAllocatedQty) AllocatedQty

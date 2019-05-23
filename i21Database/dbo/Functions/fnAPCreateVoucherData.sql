@@ -148,7 +148,7 @@ BEGIN
 									-- 	WHEN B.intTermsId > 0 THEN B.intTermsId --default location
 									-- ELSE vendor.intTermsId END, --vendor
 		[dtmDate]				=	A.dtmDate,
-		[dtmDueDate]			=	ISNULL(A.dtmDueDate, dbo.fnGetDueDateBasedOnTerm(A.dtmDate, termData.intTermID)),
+		[dtmDueDate]			=	dbo.fnGetDueDateBasedOnTerm(A.dtmDate, termData.intTermID),
 		[dtmBillDate]			=	A.dtmVoucherDate,
 		[intAccountId]			=	CASE WHEN A.intAPAccount > 0 THEN A.intAPAccount
 										WHEN A.intTransactionType IN (2, 13)
