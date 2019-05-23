@@ -39,9 +39,7 @@ BEGIN
 		[strSourceTransactionNo]		=	strBillId,
 		[intItemId]						=	B.intItemId,
 		[intToBillUOMId]				=	B.intUnitOfMeasureId,
-		[dblToBillQty]					=	@dblQtyToBill
-		-- Remove with for CT-3243
-		--[dblToBillQty]					=	@dblQtyToBill - @total														
+		[dblToBillQty]					=	@dblQtyToBill - @total
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	WHERE A.intBillId = @intBillId 
