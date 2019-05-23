@@ -1388,7 +1388,7 @@ END
 					WHERE ContractCost.intItemId != @intFreightItemId AND SE.intOrderId IS NOT NULL AND ContractCost.dblRate != 0
 				END
 		END
-	END
+
 	SELECT @checkContract = COUNT(intTransactionDetailId) FROM @Items WHERE intTransactionDetailId > 0;
 	IF(@checkContract > 0)
 		UPDATE @ShipmentStagingTable SET intOrderType = 1
