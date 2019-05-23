@@ -149,7 +149,7 @@ BEGIN TRY
 	LEFT JOIN tblEMEntityLocation VNDL
 		ON VND.intEntityId = VNDL.intEntityId
 			AND VNDL.ysnDefaultLocation = 1
-	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND (ICTran.dblQty >= 0) AND ICTran.intTransactionTypeId = 13
+	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
 	--FROM	tblSCTicket SC 
 	--INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
 	--INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
