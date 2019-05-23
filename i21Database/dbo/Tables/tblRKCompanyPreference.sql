@@ -53,6 +53,8 @@
 	[intUnrealizedLossOnInventoryRatioIOSId] INT NULL,
 	[intUnrealizedGainOnInventoryIntransitIOSId] INT NULL,
 	[intUnrealizedLossOnInventoryIntransitIOSId] INT NULL,
+	[intUnrealizedGainOnInventoryIOSId] INT NULL,
+	[intUnrealizedLossOnInventoryIOSId] INT NULL,
 	[ysnDisplayAllStorage] BIT NULL,
 	[strM2MView] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPreCrush] BIT NULL,
@@ -80,5 +82,7 @@
 	CONSTRAINT [FK_tblRKCompanyPreference_tblGLAccount_intUnrealizedLossOnInventoryCashIOSId] FOREIGN KEY(intUnrealizedLossOnInventoryCashIOSId)REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblGLAccount_intUnrealizedLossOnInventoryRatioIOSId] FOREIGN KEY(intUnrealizedLossOnInventoryRatioIOSId)REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblGLAccount_intUnrealizedGainOnInventoryIntransitIOSId] FOREIGN KEY(intUnrealizedGainOnInventoryIntransitIOSId)REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblRKCompanyPreference_tblGLAccount_intUnrealizedLossOnInventoryIntransitIOSId] FOREIGN KEY(intUnrealizedLossOnInventoryIntransitIOSId)REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+	CONSTRAINT [FK_tblRKCompanyPreference_tblGLAccount_intUnrealizedLossOnInventoryIntransitIOSId] FOREIGN KEY(intUnrealizedLossOnInventoryIntransitIOSId)REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblRKCompanyPreference_tblGLAccount_intUnrealizedGainOnInventoryIOSId] FOREIGN KEY(intUnrealizedGainOnInventoryIOSId)REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblRKCompanyPreference_tblGLAccount_intUnrealizedLossOnInventoryIOSId] FOREIGN KEY(intUnrealizedLossOnInventoryIOSId)REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )

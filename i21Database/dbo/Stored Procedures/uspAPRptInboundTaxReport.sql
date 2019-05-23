@@ -131,13 +131,13 @@ SELECT @strVendorNameFrom = REPLACE(ISNULL([from], ''), '''''', '''')
      , @strVendorNameTo   = REPLACE(ISNULL([to], ''), '''''', '''')
      , @conditionCustomer   = [condition]
   FROM @temp_xml_table
- WHERE [fieldname] = 'strCustomerName'
+ WHERE [fieldname] = 'strVendorName'
 
 SELECT @strVoucherNumberFrom = REPLACE(ISNULL([from], ''), '''''', '''')
      , @strVoucherNumberTo   = REPLACE(ISNULL([to], ''), '''''', '''')
      , @conditionInvoice     = [condition]
   FROM @temp_xml_table
- WHERE [fieldname] = 'strInvoiceNumber'
+ WHERE [fieldname] = 'strBillId'
 
 SELECT @strTypeFrom = REPLACE(ISNULL([from], ''), '''''', '''')
      , @strTypeTo   = REPLACE(ISNULL([to], ''), '''''', '''')
@@ -149,7 +149,7 @@ SELECT @strLocationNameFrom = REPLACE(ISNULL([from], ''), '''''', '''')
      , @strLocationNameTo   = REPLACE(ISNULL([to], ''), '''''', '''')
      , @conditionLocation   = [condition]
   FROM @temp_xml_table
- WHERE [fieldname] = 'strLocationName'
+ WHERE [fieldname] = 'strLocationNumber'
 
 SELECT @strCategoryFrom   = REPLACE(ISNULL([from], ''), '''''', '''')
      , @strCategoryTo     = REPLACE(ISNULL([to], ''), '''''', '''')

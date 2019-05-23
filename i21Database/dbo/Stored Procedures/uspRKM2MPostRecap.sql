@@ -29,6 +29,8 @@ BEGIN
 		, @intUnrealizedLossOnRatioId INT
 		, @intUnrealizedGainOnInventoryRatioIOSId INT
 		, @intUnrealizedLossOnInventoryRatioIOSId INT
+		, @intUnrealizedGainOnInventoryIOSId INT
+		, @intUnrealizedLossOnInventoryIOSId INT
 	SELECT @intUnrealizedGainOnBasisId = intUnrealizedGainOnBasisId
 		, @intUnrealizedGainOnFuturesId = intUnrealizedGainOnFuturesId
 		, @intUnrealizedGainOnCashId = intUnrealizedGainOnCashId
@@ -47,6 +49,8 @@ BEGIN
 		, @intUnrealizedLossOnRatioId = intUnrealizedLossOnRatioId
 		, @intUnrealizedGainOnInventoryRatioIOSId = intUnrealizedGainOnInventoryRatioIOSId
 		, @intUnrealizedLossOnInventoryRatioIOSId = intUnrealizedLossOnInventoryRatioIOSId 
+		, @intUnrealizedGainOnInventoryIOSId = intUnrealizedGainOnInventoryIOSId
+		, @intUnrealizedLossOnInventoryIOSId = intUnrealizedLossOnInventoryIOSId 
 	FROM tblRKCompanyPreference
 	
 	DECLARE @strUnrealizedGainOnBasisId NVARCHAR(50)
@@ -67,6 +71,8 @@ BEGIN
 		, @strUnrealizedLossOnRatioId NVARCHAR(50)
 		, @strUnrealizedGainOnInventoryRatioIOSId NVARCHAR(50)
 		, @strUnrealizedLossOnInventoryRatioIOSId NVARCHAR(50)
+		, @strUnrealizedGainOnInventoryIOSId NVARCHAR(50)
+		, @strUnrealizedLossOnInventoryIOSId NVARCHAR(50)
 
 	SELECT @strUnrealizedGainOnBasisId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnBasisId
 	SELECT @strUnrealizedGainOnFuturesId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnCashId
@@ -86,6 +92,8 @@ BEGIN
 	SELECT @strUnrealizedLossOnRatioId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnRatioId
 	SELECT @strUnrealizedGainOnInventoryRatioIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryRatioIOSId
 	SELECT @strUnrealizedLossOnInventoryRatioIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryRatioIOSId
+	SELECT @strUnrealizedGainOnInventoryIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryIOSId
+	SELECT @strUnrealizedLossOnInventoryIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryIOSId
 
 	DECLARE @dtmGLPostDate DATETIME
 	DECLARE @intCommodityId INT
@@ -617,17 +625,17 @@ BEGIN
 	UNION ALL SELECT @intM2MInquiryId intM2MInquiryId
 		, @dtmGLPostDate AS dtmPostDate
 		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN @intUnrealizedGainOnInventoryIntransitIOSId ELSE @intUnrealizedLossOnInventoryIntransitIOSId END intAccountId
-		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN @strUnrealizedGainOnInventoryBasisIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
+		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN @strUnrealizedGainOnInventoryIntransitIOSId ELSE @strUnrealizedLossOnInventoryIntransitIOSId END strAccountId
 		, CASE WHEN ISNULL(dblResultCash,0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
 		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
 		, CASE WHEN ISNULL(dblOpenQty,0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
 		, CASE WHEN ISNULL(dblOpenQty,0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
-		, 'Mark To Market-Futures Intransit Offset'
+		, 'Mark To Market-Cash Intransit Offset'
 		, @intCurrencyId
 		, @dtmGLPostDate
 		, strContractSeq
 		, intContractDetailId
-		, 'Mark To Market-Futures Intransit Offset'
+		, 'Mark To Market-Cash Intransit Offset'
 		, 'Mark To Market'
 		, 'Risk Management'
 		, 1 
@@ -642,6 +650,68 @@ BEGIN
 	FROM tblRKM2MInquiryTransaction
 	WHERE intM2MInquiryId = @intM2MInquiryId AND strContractOrInventoryType in('In-transit(P)','In-transit(S)')
 		AND strPricingType = 'Cash' AND ISNULL(dblResultCash,0) <> 0
+
+	--Inventory Cash
+	UNION ALL SELECT @intM2MInquiryId intM2MInquiryId
+		, @dtmGLPostDate AS dtmPostDate
+		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN @intUnrealizedGainOnCashId ELSE @intUnrealizedLossOnCashId END intAccountId
+		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN @strUnrealizedGainOnCashId ELSE @strUnrealizedLossOnCashId END strAccountId
+		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
+		, CASE WHEN ISNULL(dblResultCash,0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
+		, CASE WHEN ISNULL(dblOpenQty,0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+		, CASE WHEN ISNULL(dblOpenQty,0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+		, 'Mark To Market-Cash Inventory'
+		, @intCurrencyId
+		, @dtmGLPostDate
+		, strContractSeq = @strRecordName
+		, intContractDetailId = @intM2MInquiryId
+		, 'Mark To Market-Cash Inventory'
+		, 'Mark To Market'
+		, 'Risk Management'
+		, 1
+		, 1
+		, GETDATE()
+		, 0
+		, intEntityId
+		, @strRecordName strRecordName
+		, @intUserId intUserId
+		, @intLocationId intLocationId
+		, @intUnitMeasureId intUnitMeasureId
+	FROM tblRKM2MInquiryTransaction
+	WHERE intM2MInquiryId=@intM2MInquiryId AND strContractOrInventoryType in('Inventory')
+		AND ISNULL(dblResultCash,0) <> 0
+	
+	--Inventory Cash Offset	
+	UNION ALL SELECT @intM2MInquiryId intM2MInquiryId
+		, @dtmGLPostDate AS dtmPostDate
+		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN @intUnrealizedGainOnInventoryIOSId ELSE @intUnrealizedLossOnInventoryIOSId END intAccountId
+		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN @strUnrealizedGainOnInventoryIOSId ELSE @strUnrealizedLossOnInventoryIOSId END strAccountId
+		, CASE WHEN ISNULL(dblResultCash,0) <= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblDebit
+		, CASE WHEN ISNULL(dblResultCash,0) >= 0 THEN 0.0 ELSE ABS(dblResultCash) END dblCredit
+		, CASE WHEN ISNULL(dblOpenQty,0) <= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblDebitUnit
+		, CASE WHEN ISNULL(dblOpenQty,0) >= 0 THEN 0.0 ELSE ABS(dblOpenQty) END dblCreditUnit
+		, 'Mark To Market-Cash Inventory Offset'
+		, @intCurrencyId
+		, @dtmGLPostDate
+		, strContractSeq = @strRecordName
+		, intContractDetailId = @intM2MInquiryId
+		, 'Mark To Market-Cash Inventory Offset'
+		, 'Mark To Market'
+		, 'Risk Management'
+		, 1 
+		, 1
+		, GETDATE()
+		, 0
+		, intEntityId
+		, @strRecordName strRecordName
+		, @intUserId intUserId
+		, @intLocationId intLocationId
+		, @intUnitMeasureId intUnitMeasureId
+	FROM tblRKM2MInquiryTransaction
+	WHERE intM2MInquiryId = @intM2MInquiryId AND strContractOrInventoryType in('Inventory')
+		AND ISNULL(dblResultCash,0) <> 0
+
+
 
 	-- Derivative Transaction
 	INSERT INTO tblRKM2MPostRecap (intM2MInquiryId
@@ -802,7 +872,7 @@ BEGIN
 													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnFuturesId ELSE compPref.intUnrealizedLossOnFuturesId END
 												 WHEN @strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset'
 													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryFuturesIOSId ELSE compPref.intUnrealizedLossOnInventoryFuturesIOSId END
-												 WHEN @strTransactionType = 'Mark To Market-Cash' OR @strTransactionType = 'Mark To Market-Cash Intransit'
+												 WHEN @strTransactionType = 'Mark To Market-Cash' OR @strTransactionType = 'Mark To Market-Cash Intransit' OR @strTransactionType = 'Mark To Market-Cash Inventory'
 													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnCashId ELSE compPref.intUnrealizedLossOnCashId END
 												 WHEN @strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset'
 													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryCashIOSId ELSE compPref.intUnrealizedLossOnInventoryCashIOSId END
@@ -810,6 +880,8 @@ BEGIN
 													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnRatioId ELSE compPref.intUnrealizedLossOnRatioId END
 												 WHEN @strTransactionType = 'Mark To Market-Ratio Offset'
 													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryRatioIOSId ELSE compPref.intUnrealizedLossOnInventoryRatioIOSId END
+												 WHEN @strTransactionType = 'Mark To Market-Cash Inventory Offset'
+													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryIOSId ELSE compPref.intUnrealizedLossOnInventoryIOSId END
 												 ELSE 0 END)
 		FROM tblRKCompanyPreference compPref
 

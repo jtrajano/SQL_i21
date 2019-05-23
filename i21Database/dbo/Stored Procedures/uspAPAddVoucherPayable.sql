@@ -637,7 +637,7 @@ BEGIN
 
 		--UPDATE THE TAX FOR VOUCHER PAYABLE
 		UPDATE A
-			SET A.dblTax = ISNULL(generatedTax.dblTax, 0)
+			SET A.dblTax = ISNULL(generatedTax.dblTax, A.dblTax)
 		FROM tblAPVoucherPayable A
 		OUTER APPLY 
 		(

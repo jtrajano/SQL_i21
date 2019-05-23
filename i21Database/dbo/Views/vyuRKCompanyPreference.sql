@@ -23,6 +23,8 @@ SELECT
 ,GL16.strAccountId strUnrealizedLossOnRatioId
 ,GL17.strAccountId strUnrealizedGainOnInventoryRatioIOSId
 ,GL18.strAccountId strUnrealizedLossOnInventoryRatioIOSId
+,GL19.strAccountId strUnrealizedGainOnInventoryIOSId
+,GL20.strAccountId strUnrealizedLossOnInventoryIOSId
 FROM
 tblRKCompanyPreference A
 LEFT JOIN	tblICUnitMeasure B ON B.intUnitMeasureId = A.intUnitMeasureId
@@ -45,4 +47,6 @@ LEFT JOIN tblGLAccount GL14 ON GL14.intAccountId = A.intUnrealizedLossOnInventor
 LEFT JOIN tblGLAccount GL15 ON GL15.intAccountId = A.intUnrealizedGainOnRatioId
 LEFT JOIN tblGLAccount GL16 ON GL16.intAccountId = A.intUnrealizedLossOnRatioId
 LEFT JOIN tblGLAccount GL17 ON GL17.intAccountId = A.intUnrealizedGainOnInventoryRatioIOSId
-LEFT JOIN tblGLAccount GL18 ON GL18.intAccountId = A.intUnrealizedGainOnInventoryRatioIOSId
+LEFT JOIN tblGLAccount GL18 ON GL18.intAccountId = A.intUnrealizedLossOnInventoryRatioIOSId
+LEFT JOIN tblGLAccount GL19 ON GL19.intAccountId = A.intUnrealizedGainOnInventoryIOSId
+LEFT JOIN tblGLAccount GL20 ON GL20.intAccountId = A.intUnrealizedLossOnInventoryIOSId
