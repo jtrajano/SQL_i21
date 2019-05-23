@@ -25,8 +25,9 @@ IF	EXISTS(select top 1 1 from sys.procedures where name = 'uspCMImportBankTransa
 BEGIN 
 	DROP PROCEDURE uspCMImportBankTransactionsFromOrigin
 
-	EXEC('
-		CREATE PROCEDURE [dbo].[uspCMImportBankTransactionsFromOrigin]
+	EXEC(
+
+		'CREATE PROCEDURE [dbo].[uspCMImportBankTransactionsFromOrigin]
 		AS
 
 		-- Declare the transaction types (constant)
@@ -72,163 +73,280 @@ BEGIN
 					ON tblSMCurrency.intCurrencyID = CAST(tblSMPreferences.strValue AS INT)
 		WHERE	tblSMPreferences.strPreference = ''defaultCurrency''
 
-		-- Insert the record from the origin system to i21. 
-		INSERT INTO tblCMBankTransaction (
-				strTransactionId
-				,intBankTransactionTypeId
-				,intBankAccountId
-				,intCurrencyId
-				,dblExchangeRate
-				,dtmDate
-				,strPayee
-				,intPayeeId
-				,strAddress
-				,strZipCode
-				,strCity
-				,strState
-				,strCountry
-				,dblAmount
-				,strAmountInWords
-				,strMemo
-				,strReferenceNo
-				,dtmCheckPrinted
-				,ysnCheckToBePrinted
-				,ysnCheckVoid
-				,ysnPosted
-				,strLink
-				,ysnClr
-				,dtmDateReconciled
-				,strSourceSystem
-				,intEntityId
-				,intCreatedUserId
-				,dtmCreated
-				,intLastModifiedUserId
-				,dtmLastModified
-				,intConcurrencyId	
+		BEGIN TRY
+
+		DECLARE @tblCMBankTransactionTable TABLE (
+		[strTransactionId] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL ,
+		[intBankTransactionTypeId] [int] NOT NULL,
+		[intBankAccountId] [int] NOT NULL,
+		[intBankLoanId] [int] NULL,
+		[intCurrencyId] [int] NULL,
+		[dblExchangeRate] [decimal](38, 20) NULL,
+		[dtmDate] [datetime] NOT NULL,
+		[strPayee] [nvarchar](300) COLLATE Latin1_General_CI_AS NULL,
+		[intPayeeId] [int] NULL,
+		[strAddress] [nvarchar](65) COLLATE Latin1_General_CI_AS NULL,
+		[strZipCode] [nvarchar](42) COLLATE Latin1_General_CI_AS NULL,
+		[strCity] [nvarchar](85) COLLATE Latin1_General_CI_AS NULL,
+		[strState] [nvarchar](60) COLLATE Latin1_General_CI_AS NULL,
+		[strCountry] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL,
+		[dblAmount] [decimal](18, 6) NOT NULL,
+		[strAmountInWords] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
+		[strMemo] [nvarchar](255) COLLATE Latin1_General_CI_AS NULL,
+		[strReferenceNo] [nvarchar](20) COLLATE Latin1_General_CI_AS  NULL,
+		[dtmCheckPrinted] [datetime] NULL,
+		[ysnCheckToBePrinted] [BIT] NULL,
+		[ysnCheckVoid] [bit] NOT NULL,
+		[ysnPosted] [bit] NOT NULL,
+		[strLink] [nvarchar](50) NULL,
+		[ysnClr] [bit] NOT NULL,
+		[dtmDateReconciled] [datetime] NULL,
+		[strSourceSystem] [nvarchar](2) COLLATE Latin1_General_CI_AS NULL,
+		[intEntityId] [int] NULL,
+		[intCreatedUserId] [int] NULL,
+		[dtmCreated] [datetime] NULL,
+		[intLastModifiedUserId] [int] NULL,
+		[dtmLastModified] [datetime] NULL,
+		[intConcurrencyId] [int] NOT NULL)
+
+		insert into @tblCMBankTransactionTable
+		(
+			[strTransactionId],
+			[intBankTransactionTypeId],
+			[intBankAccountId],
+			[intCurrencyId],
+			[dblExchangeRate],
+			[dtmDate],
+			[strPayee],
+			[intPayeeId],
+			[strAddress],
+			[strZipCode],
+			[strCity],
+			[strState],
+			[strCountry],
+			[dblAmount],
+			[strAmountInWords],
+			[strMemo],
+			[strReferenceNo],
+			[dtmCheckPrinted],
+			[ysnCheckToBePrinted],
+			[ysnCheckVoid],
+			[ysnPosted],
+			[strLink],
+			[ysnClr],
+			[dtmDateReconciled],
+			[strSourceSystem],
+			[intEntityId],
+			[intCreatedUserId],
+			[dtmCreated],
+			[intLastModifiedUserId],
+			[dtmLastModified]
 		)
+
 		SELECT 
-				strTransactionId			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + ''-''
-												+ CAST(i.apchk_rev_dt AS NVARCHAR(10)) + ''-''
-												+ CAST(i.apchk_trx_ind AS NVARCHAR(1)) + ''-''
-												+ CAST(i.apchk_chk_no AS NVARCHAR(8))
-				,intBankTransactionTypeId	=	
-												CASE
-													WHEN i.apchk_chk_amt > 0 THEN 
-														CASE 
-															WHEN LEFT(i.apchk_chk_no, 1) = ''E'' THEN @ORIGIN_EFT
-															WHEN LEFT(i.apchk_chk_no, 1) = ''W'' THEN @ORIGIN_WIRE
-															WHEN i.apchk_trx_ind = ''C'' THEN @ORIGIN_CHECKS
-															ELSE @ORIGIN_WITHDRAWAL
-														END
-													WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
-												END
-				,intBankAccountId			=	f.intBankAccountId
-				,intCurrencyId				=	ISNULL(dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt), @intCurrencyId) 
-				,dblExchangeRate			=	CASE	WHEN i.apchk_currency_rt = 2020202.02020200 THEN 1 
-														ELSE ISNULL(i.apchk_currency_rt, 1)
-												END 
-				,dtmDate					=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
-				,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN '', ''  ELSE '''' END +
-												RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN '', ''  ELSE '''' END +
-												RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN '', ''  ELSE '''' END +
-												RTRIM(LTRIM(ISNULL(i.apchk_payee_3, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_4))) > 0 THEN '', ''  ELSE '''' END +
-												RTRIM(LTRIM(ISNULL(i.apchk_payee_4, '''')))							
-				,intPayeeId					=	NULL
-				,strAddress					=	RTRIM(LTRIM(ISNULL(i.apchk_addr_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_addr_2))) > 0 THEN CHAR(13) ELSE '''' END +
-												RTRIM(LTRIM(ISNULL(i.apchk_addr_2, '''')))
-				,strZipCode					=	RTRIM(LTRIM(i.apchk_zip))
-				,strCity					=	RTRIM(LTRIM(i.apchk_city))
-				,strState					=	RTRIM(LTRIM(i.apchk_st))
-				,strCountry					=	NULL
-				,dblAmount					=	ABS(i.apchk_chk_amt) -- Import as a positive AMOUNT value. 
-				,strAmountInWords			=	dbo.fnConvertNumberToWord(ABS(i.apchk_chk_amt))
-				,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '''' END +
-												RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
-												RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
-				,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no,8)
-				,dtmCheckPrinted			=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
-				,ysnCheckToBePrinted		=	1
-				,ysnCheckVoid				=	CASE
-													WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 1
-													ELSE 0
-												END
+					strTransactionId			=	CAST(i.apchk_cbk_no AS NVARCHAR(2)) + ''-''
+													+ CAST(i.apchk_rev_dt AS NVARCHAR(10)) + ''-''
+													+ CAST(i.apchk_trx_ind AS NVARCHAR(1)) + ''-''
+													+ CAST(i.apchk_chk_no AS NVARCHAR(8))
+					,intBankTransactionTypeId	=	
+													CASE
+														WHEN i.apchk_chk_amt > 0 THEN 
+															CASE 
+																WHEN LEFT(i.apchk_chk_no, 1) = ''E'' THEN @ORIGIN_EFT
+																WHEN LEFT(i.apchk_chk_no, 1) = ''W'' THEN @ORIGIN_WIRE
+																WHEN i.apchk_trx_ind = ''C'' THEN @ORIGIN_CHECKS
+																ELSE @ORIGIN_WITHDRAWAL
+															END
+														WHEN i.apchk_chk_amt < 0 THEN @ORIGIN_DEPOSIT
+													END
+					,intBankAccountId			=	f.intBankAccountId
+					,intCurrencyId				=	ISNULL(dbo.fnGetCurrencyIdFromOriginToi21(i.apchk_currency_cnt), @intCurrencyId) 
+					,dblExchangeRate			=	CASE	WHEN i.apchk_currency_rt = 2020202.02020200 THEN 1 
+															ELSE ISNULL(i.apchk_currency_rt, 1)
+													END 
+					,dtmDate					=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
+					,strPayee					=	RTRIM(LTRIM(ISNULL(i.apchk_name, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_1))) > 0 THEN '', ''  ELSE '''' END +
+													RTRIM(LTRIM(ISNULL(i.apchk_payee_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_2))) > 0 THEN '', ''  ELSE '''' END +
+													RTRIM(LTRIM(ISNULL(i.apchk_payee_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_3))) > 0 THEN '', ''  ELSE '''' END +
+													RTRIM(LTRIM(ISNULL(i.apchk_payee_3, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_payee_4))) > 0 THEN '', ''  ELSE '''' END +
+													RTRIM(LTRIM(ISNULL(i.apchk_payee_4, '''')))							
+					,intPayeeId					=	NULL
+					,strAddress					=	RTRIM(LTRIM(ISNULL(i.apchk_addr_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_addr_2))) > 0 THEN CHAR(13) ELSE '''' END +
+													RTRIM(LTRIM(ISNULL(i.apchk_addr_2, '''')))
+					,strZipCode					=	RTRIM(LTRIM(i.apchk_zip))
+					,strCity					=	RTRIM(LTRIM(i.apchk_city))
+					,strState					=	RTRIM(LTRIM(i.apchk_st))
+					,strCountry					=	NULL
+					,dblAmount					=	ABS(i.apchk_chk_amt) -- Import as a positive AMOUNT value. 
+					,strAmountInWords			=	dbo.fnConvertNumberToWord(ABS(i.apchk_chk_amt))
+					,strMemo					=	RTRIM(LTRIM(ISNULL(i.apchk_comment_1, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_2))) > 0 THEN CHAR(13) ELSE '''' END +
+													RTRIM(LTRIM(ISNULL(i.apchk_comment_2, ''''))) + CASE WHEN LEN(LTRIM(RTRIM(i.apchk_comment_3))) > 0 THEN CHAR(13) ELSE '''' END +
+													RTRIM(LTRIM(ISNULL(i.apchk_comment_3, ''''))) 
+					,strReferenceNo				=	dbo.fnAddZeroPrefixes(i.apchk_chk_no,8)
+					,dtmCheckPrinted			=	ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt))
+					,ysnCheckToBePrinted		=	1
+					,ysnCheckVoid				=	CASE
+														WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 1
+														ELSE 0
+													END
 
-												-- Mark a record as posted if it is not voided. 
-				,ysnPosted					=	CASE
-													WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 0
-													ELSE 1
-												END
+													-- Mark a record as posted if it is not voided. 
+					,ysnPosted					=	CASE
+														WHEN i.apchk_void_ind IN (''C'', ''V'') THEN 0
+														ELSE 1
+													END
 										
-				,strLink					=	CAST(apchk_cbk_no AS NVARCHAR(2)) 
-												+ CAST(apchk_rev_dt AS NVARCHAR(10)) 
-												+ CAST(apchk_trx_ind AS NVARCHAR(1)) 
-												+ CAST(apchk_chk_no AS NVARCHAR(8)) 
-				,ysnClr						=	CASE 
-													WHEN i.apchk_cleared_ind = ''C'' THEN 1
-													ELSE 0
-												END
-				,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
-				,strSourceSystem			=	i.apchk_src_sys COLLATE Latin1_General_CI_AS		
-				,intEntityId				=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
-				,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
-				,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
-				,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
-				,dtmLastModified			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
-				,intConcurrencyId			=	1
-		FROM	dbo.tblCMBankAccount f INNER JOIN apchkmst i
-					ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
-		WHERE	f.intBankAccountId IS NOT NULL
-				AND i.apchk_chk_amt <> 0
-				AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL
-		IF @@ERROR <> 0 GOTO EXIT_INSERT
+					,strLink					=	CAST(apchk_cbk_no AS NVARCHAR(2)) 
+													+ CAST(apchk_rev_dt AS NVARCHAR(10)) 
+													+ CAST(apchk_trx_ind AS NVARCHAR(1)) 
+													+ CAST(apchk_chk_no AS NVARCHAR(8)) 
+					,ysnClr						=	CASE 
+														WHEN i.apchk_cleared_ind = ''C'' THEN 1
+														ELSE 0
+													END
+					,dtmDateReconciled			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_clear_rev_dt)
+					,strSourceSystem			=	i.apchk_src_sys COLLATE Latin1_General_CI_AS		
+					,intEntityId				=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+					,intCreatedUserId			=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+					,dtmCreated					=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_user_rev_dt)
+					,intLastModifiedUserId		=	dbo.fnConvertOriginUserIdtoi21(i.apchk_user_id)
+					,dtmLastModified			=	dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)
+			FROM	dbo.tblCMBankAccount f INNER JOIN apchkmst i
+						ON f.strCbkNo = i.apchk_cbk_no COLLATE Latin1_General_CI_AS  	
+			WHERE	f.intBankAccountId IS NOT NULL
+					AND i.apchk_chk_amt <> 0
+					AND ISNULL(dbo.fnConvertOriginDateToSQLDateTime(i.apchk_gl_rev_dt), dbo.fnConvertOriginDateToSQLDateTime(i.apchk_rev_dt)) IS NOT NULL
 
-		-- Check number audit process: 
-		-- 1 of 2: Update the status of an existing record in the check number audit table. 
-		UPDATE	dbo.tblCMCheckNumberAudit
-		SET		intCheckNoStatus = CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
-				,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN ''Voided from origin.'' ELSE ''Generated from origin.'' END
-				,intTransactionId	= f.intTransactionId
-				,strTransactionId	= f.strTransactionId
-		FROM	dbo.tblCMBankTransaction f INNER JOIN dbo.tblCMCheckNumberAudit a
-					ON a.intBankAccountId = f.intBankAccountId
-					AND a.strCheckNo = f.strReferenceNo
-		WHERE	f.intBankTransactionTypeId = @ORIGIN_CHECKS
-				AND a.intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
-		IF @@ERROR <> 0 GOTO EXIT_INSERT
+			BEGIN TRANSACTION
 
-		-- 2 of 2: Insert a check number record to the audit table if it does not exists. 
-		INSERT INTO dbo.tblCMCheckNumberAudit (
-				intBankAccountId
-				,strCheckNo
-				,intCheckNoStatus
-				,strRemarks
-				,intTransactionId
-				,strTransactionId
-				,intUserId
-				,dtmCreated
-				,dtmCheckPrinted
-		)
-		SELECT	intBankAccountId	= f.intBankAccountId
-				,strCheckNo			= dbo.fnAddZeroPrefixes(f.strReferenceNo,8)	
-				,intCheckNoStatus	= CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
-				,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN ''Voided from origin.'' ELSE ''Generated from origin.'' END
-				,intTransactionId	= f.intTransactionId
-				,strTransactionId	= f.strTransactionId
-				,intUserId			= f.intCreatedUserId
-				,dtmCreated			= GETDATE()
-				,dtmCheckPrinted	= GETDATE()
-		FROM	dbo.tblCMBankTransaction f 
-		WHERE	f.intBankTransactionTypeId = @ORIGIN_CHECKS
-				AND NOT EXISTS (
-					SELECT	TOP 1 1 
-					FROM	tblCMCheckNumberAudit
-					WHERE	intBankAccountId = f.intBankAccountId
-							AND strTransactionId = f.strTransactionId
-							AND strCheckNo = f.strReferenceNo
-				)
-		IF @@ERROR <> 0 GOTO EXIT_INSERT
+			INSERT INTO tblCMBankTransaction (
+					strTransactionId
+					,intBankTransactionTypeId
+					,intBankAccountId
+					,intCurrencyId
+					,dblExchangeRate
+					,dtmDate
+					,strPayee
+					,intPayeeId
+					,strAddress
+					,strZipCode
+					,strCity
+					,strState
+					,strCountry
+					,dblAmount
+					,strAmountInWords
+					,strMemo
+					,strReferenceNo
+					,dtmCheckPrinted
+					,ysnCheckToBePrinted
+					,ysnCheckVoid
+					,ysnPosted
+					,strLink
+					,ysnClr
+					,dtmDateReconciled
+					,strSourceSystem
+					,intEntityId
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+					,intConcurrencyId	
+			)
+			SELECT DISTINCT 
+				A.[strTransactionId],
+				A.[intBankTransactionTypeId],
+				A.[intBankAccountId],
+				A.[intCurrencyId],
+				A.[dblExchangeRate],
+				A.[dtmDate],
+				A.[strPayee],
+				A.[intPayeeId],
+				A.[strAddress],
+				A.[strZipCode],
+				A.[strCity],
+				A.[strState],
+				A.[strCountry],
+				A.[dblAmount],
+				A.[strAmountInWords],
+				A.[strMemo],
+				A.[strReferenceNo],
+				A.[dtmCheckPrinted],
+				A.[ysnCheckToBePrinted],
+				A.[ysnCheckVoid],
+				A.[ysnPosted],
+				A.[strLink],
+				A.[ysnClr],
+				A.[dtmDateReconciled],
+				A.[strSourceSystem],
+				A.[intEntityId],
+				A.[intCreatedUserId],
+				A.[dtmCreated],
+				A.[intLastModifiedUserId],
+				A.[dtmLastModified] ,
+				1
+			FROM @tblCMBankTransactionTable A LEFT JOIN tblCMBankTransaction B on A.strTransactionId = B.strTransactionId
+			WHERE B.strTransactionId IS NULL
 
-		EXIT_INSERT: 	
-	')
+			IF @@ROWCOUNT = 0
+				RAISERROR(''No bank transactions imported from origin'', 16, 1)
+		
+			--IF @@ERROR <> 0 GOTO EXIT_INSERT
+
+			-- Check number audit process: 
+			-- 1 of 2: Update the status of an existing record in the check number audit table. 
+			UPDATE	dbo.tblCMCheckNumberAudit
+			SET		intCheckNoStatus = CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
+					,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN ''Voided from origin.'' ELSE ''Generated from origin.'' END
+					,intTransactionId	= f.intTransactionId
+					,strTransactionId	= f.strTransactionId
+			FROM	dbo.tblCMBankTransaction f INNER JOIN dbo.tblCMCheckNumberAudit a
+						ON a.intBankAccountId = f.intBankAccountId
+						AND a.strCheckNo = f.strReferenceNo
+			WHERE	f.intBankTransactionTypeId = @ORIGIN_CHECKS
+					AND a.intCheckNoStatus = @CHECK_NUMBER_STATUS_UNUSED
+
+			-- 2 of 2: Insert a check number record to the audit table if it does not exists. 
+			INSERT INTO dbo.tblCMCheckNumberAudit (
+					intBankAccountId
+					,strCheckNo
+					,intCheckNoStatus
+					,strRemarks
+					,intTransactionId
+					,strTransactionId
+					,intUserId
+					,dtmCreated
+					,dtmCheckPrinted
+			)
+			SELECT	intBankAccountId	= f.intBankAccountId
+					,strCheckNo			= dbo.fnAddZeroPrefixes(f.strReferenceNo,8)	
+					,intCheckNoStatus	= CASE WHEN f.ysnCheckVoid = 1 THEN @CHECK_NUMBER_STATUS_VOID ELSE @CHECK_NUMBER_STATUS_PRINTED END
+					,strRemarks			= CASE WHEN f.ysnCheckVoid = 1 THEN ''Voided from origin.'' ELSE ''Generated from origin.'' END
+					,intTransactionId	= f.intTransactionId
+					,strTransactionId	= f.strTransactionId
+					,intUserId			= f.intCreatedUserId
+					,dtmCreated			= GETDATE()
+					,dtmCheckPrinted	= GETDATE()
+			FROM	dbo.tblCMBankTransaction f 
+			WHERE	f.intBankTransactionTypeId = @ORIGIN_CHECKS
+					AND NOT EXISTS (
+						SELECT	TOP 1 1 
+						FROM	tblCMCheckNumberAudit
+						WHERE	intBankAccountId = f.intBankAccountId
+								AND strTransactionId = f.strTransactionId
+								AND strCheckNo = f.strReferenceNo
+					)
+			IF @@TRANCOUNT > 0
+				COMMIT TRANSACTION
+
+		END TRY
+		BEGIN CATCH
+				IF @@TRANCOUNT > 0
+					ROLLBACK TRANSACTION
+
+				DECLARE @errorMsg NVARCHAR(200) 
+				SELECT @errorMsg = ERROR_MESSAGE()
+				RAISERROR (@errorMsg,16,1 );  
+		END CATCH'
+	)
 END
 
