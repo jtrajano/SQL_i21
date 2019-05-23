@@ -41,7 +41,7 @@ BEGIN
 	WHERE 
 		t.intItemId = @intItemId
 		AND t.intItemLocationId = @intItemLocation
-		AND (t.intInventoryTransactionId < @intInventoryTransactionId OR @intInventoryTransactionId IS NULL)
+		AND (t.intInventoryTransactionId <= @intInventoryTransactionId OR @intInventoryTransactionId IS NULL)
 		AND t.ysnIsUnposted = 0 
 	ORDER BY 
 		t.intInventoryTransactionId ASC 
@@ -52,15 +52,15 @@ BEGIN
 		,@dblCost 
 
 	WHILE @@FETCH_STATUS = 0 
-	BEGIN
-		SET @dblRunningQty = ISNULL(@dblRunningQty, 0) + @dblQty
-
+	BEGIN	
 		SET @dblMovingAverageCost = dbo.fnCalculateAverageCost(
 			@dblQty
 			,@dblCost
 			,@dblRunningQty
 			,ISNULL(@dblMovingAverageCost, 0) 
 		)
+
+		SET @dblRunningQty = ISNULL(@dblRunningQty, 0) + @dblQty
 
 		FETCH NEXT FROM loopOriginalAverageCost INTO 
 			@dblQty 
