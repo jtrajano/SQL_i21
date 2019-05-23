@@ -183,29 +183,29 @@ BEGIN TRY
 		@intOptionsMatchPnSHeaderId as intOptionsMatchPnSHeaderId
 		, @strExpiredTranNo + ROW_NUMBER() OVER (ORDER BY intFutOptTransactionId) strTranNo
 		, dtmExpiredDate
-		, intLots
+		, dblLots
 		, intFutOptTransactionId
 		, 1 as intConcurrencyId
 	FROM OPENXML(@idoc,'root/Expired', 2)
 	WITH ([dtmExpiredDate]  DATETIME
-		, [intLots] INT
+		, [dblLots] numeric(18,6)
 		, [intFutOptTransactionId] INT)
 	
 	---------------Exercised/Assigned Record Insert ----------------
 	DECLARE @tblExercisedAssignedDetail TABLE (RowNumber INT IDENTITY(1,1)
 		, intFutOptTransactionId INT
-		, intLots INT
+		, dblLots numeric(18,6)
 		, dtmTranDate DATETIME
 		, ysnAssigned BIT)
 	
 	INSERT INTO @tblExercisedAssignedDetail
 	SELECT intFutOptTransactionId
-		, intLots
+		, dblLots
 		, dtmTranDate
 		, ysnAssigned
 	FROM OPENXML(@idoc,'root/ExercisedAssigned', 2)
 	WITH ([intFutOptTransactionId] INT
-		, [intLots] INT
+		, dblLots numeric(18,6)
 		, [dtmTranDate] DATETIME
 		, [ysnAssigned] BIT)
 	
@@ -213,7 +213,7 @@ BEGIN TRY
 		, @intFutOptTransactionId INT
 		, @NewFutOptTransactionId INT
 		, @NewFutOptTransactionHeaderId INT
-		, @intLots INT
+		, @dblLots Numeric(18,6)
 		, @dtmTranDate DATETIME
 		, @intInternalTradeNo INT
 		, @ysnAssigned BIT
@@ -224,7 +224,7 @@ BEGIN TRY
 		DECLARE @intOptionsPnSExercisedAssignedId INT
 		SELECT @strExercisedAssignedNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0) + 1 FROM tblRKOptionsPnSExercisedAssigned
 		SELECT @intFutOptTransactionId = intFutOptTransactionId
-			, @intLots = intLots
+			, @dblLots = dblLots
 			, @dtmTranDate = dtmTranDate
 			, @ysnAssigned = ysnAssigned
 		FROM @tblExercisedAssignedDetail WHERE RowNumber = @mRowNumber
@@ -250,7 +250,7 @@ BEGIN TRY
 		VALUES (@intOptionsMatchPnSHeaderId
 			, @strExercisedAssignedNo
 			, @dtmTranDate
-			, @intLots
+			, @dblLots
 			, @intFutOptTransactionId
 			, @ysnAssigned
 			, 1)
@@ -307,7 +307,7 @@ BEGIN TRY
 			, 'O-' + CONVERT(NVARCHAR(50), @intInternalTradeNo) AS strInternalTradeNo
 			, t.strBrokerTradeNo
 			, t.strBuySell
-			, @intLots AS intLots
+			, @dblLots AS dblLots
 			, om.intFutureMonthId AS intFutureMonthId
 			, t.intOptionMonthId
 			, t.strOptionType
