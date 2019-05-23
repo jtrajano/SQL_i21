@@ -7476,6 +7476,7 @@
     <Build Include="dbo\Functions\fnAPGetPayableKeyInfo.sql" />
     <Build Include="dbo\Functions\fnCTGetReportLanguage.sql" />
     <Build Include="dbo\Views\vyuICGetItemPricingLevel.sql" />
+    <Build Include="dbo\Views\vyuICPriceSearch.sql" />
     <Build Include="dbo\Views\vyuICGetItemSpecialPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitSequenceAndCreateNewContract.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceSourceList.sql" />
