@@ -158,10 +158,23 @@ BEGIN TRY
 					, @intItemLocationId INT
 					, @intCompanyLocationId INT
 					, @intItemUOMId INT
+					, @ysnUpdatedOutdatedStock BIT
 
 			-- Loop here
 			WHILE (SELECT COUNT(*) FROM #ImportCounts) > 0
 				BEGIN
+					
+					DECLARE @intRemainingRecord INT = (SELECT COUNT(intItemId) FROM #ImportCounts)
+					IF(@intRemainingRecord = 1)
+						BEGIN
+							SET @ysnUpdatedOutdatedStock = CAST(1 AS BIT)
+						END
+					ELSE 
+						BEGIN
+							SET @ysnUpdatedOutdatedStock = CAST(0 AS BIT)
+						END
+					
+					
 					-- Get values
 					SELECT TOP 1 
 						@intItemId = Imports.intItemId
@@ -204,7 +217,11 @@ BEGIN TRY
 							@intItemUOMId		= @intItemUOMId,
 							-- Set these to change the storage unit/loc
 							@intStorageLocationId = NULL,
-							@intStorageUnitId	= NULL
+							@intStorageUnitId	= NULL,
+
+							-- Will be responsible to Update Outdated Stocks
+							-- Logic here is to Update Outdated Stocks on the last record of the while loop
+							@ysnUpdatedOutdatedStock = @ysnUpdatedOutdatedStock 
 					END TRY
 					BEGIN CATCH
 						-- Flag Success
