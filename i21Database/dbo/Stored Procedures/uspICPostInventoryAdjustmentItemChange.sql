@@ -45,10 +45,13 @@ BEGIN
 	DECLARE @intLocationId AS INT
 	DECLARE @strLocationName AS NVARCHAR(50)
 
+	DECLARE @intItemUomId AS INT
+	DECLARE @strItemUom AS NVARCHAR(50)
 	BEGIN 
 		SELECT TOP 1 
-				@intItemId = Detail.intItemId			
-		FROM	(SELECT Detail.intItemId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+				@intItemId 		= Detail.intItemId,
+				@intItemUomId 	= Detail.intItemUOMId			
+		FROM	(SELECT Detail.intItemId, intItemUOMId = Detail.intItemUOMId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 				LEFT JOIN dbo.tblICItemUOM ItemUOM
 					ON Detail.intItemUOMId = ItemUOM.intItemUOMId
@@ -56,14 +59,15 @@ BEGIN
 					ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
 				WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 					AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL
+
 				UNION ALL
-				SELECT Detail.intNewItemId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+				SELECT Detail.intNewItemId, intItemUOMId = Detail.intItemUOMId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId					
 				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId) IS NULL
 
 				UNION ALL
-				SELECT Detail.intNewItemId FROM dbo.tblICInventoryAdjustment Header 
+				SELECT Detail.intNewItemId, intItemUOMId = Lot.intWeightUOMId FROM dbo.tblICInventoryAdjustment Header 
 					INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 						ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 					INNER JOIN tblICLot Lot
@@ -72,7 +76,7 @@ BEGIN
 					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Lot.intWeightUOMId) IS NULL
 
 				UNION ALL
-				SELECT Detail.intNewItemId FROM dbo.tblICInventoryAdjustment Header 
+				SELECT Detail.intNewItemId, intItemUOMId = Lot.intItemUOMId FROM dbo.tblICInventoryAdjustment Header 
 					INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 						ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 					INNER JOIN tblICLot Lot
@@ -88,8 +92,19 @@ BEGIN
 			FROM dbo.tblICItem Item 
 			WHERE intItemId = @intItemId		
 
-			-- 'The UOM is missing on {Item}.'
-			EXEC uspICRaiseError 80039, @strItemNo;
+			IF @intItemUomId IS NOT NULL 
+			BEGIN 
+				SELECT @strItemUom = strUnitMeasure
+				FROM dbo.vyuICGetItemUOM Item 
+				WHERE intItemUOMId = @intItemUomId	
+				-- 'The UOM is missing on {Item}.'
+				EXEC uspICRaiseError 80080, @strItemUom, @strItemNo;
+			END
+			ELSE
+			BEGIN
+				EXEC uspICRaiseError 80039, @strItemNo;
+			END
+			
 			RETURN -1
 		END
 
