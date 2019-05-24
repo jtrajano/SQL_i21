@@ -183,7 +183,11 @@ FROM	dbo.tblCMBankTransaction CHK
 			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val
 		)AmtInWords
 		OUTER APPLY(
-			SELECT CASE
+			SELECT
+			CASE WHEN PYMT.ysnOverrideCheckPayee = 1 THEN 
+					PYMT.strOverridePayee
+			ELSE	
+			CASE
 			WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
 				ISNULL(RTRIM(CHK.strPayee) + ' ' + (STUFF( (SELECT DISTINCT ' and ' + strName
                         FROM tblAPVendorLien LIEN
@@ -199,6 +203,7 @@ FROM	dbo.tblCMBankTransaction CHK
                     1, 1, '')),CHK.strPayee)
 			ELSE
 				CHK.strPayee
+			END
 			END Name
 		
 		) Payee
