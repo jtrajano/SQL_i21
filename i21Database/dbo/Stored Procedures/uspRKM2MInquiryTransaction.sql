@@ -2171,6 +2171,7 @@ BEGIN
 		, strFutureMonth
 		, intFutureMonthId
 		, intFutureMarketId
+		, strFutMarketName
 		, dblNotLotTrackedPrice
 		, dblInvFuturePrice
 		, dblInvMarketBasis
