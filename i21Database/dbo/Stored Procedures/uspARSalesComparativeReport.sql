@@ -15,6 +15,7 @@ DECLARE @dtmBeginningDateTo				DATETIME
 	  , @intEntityCustomerId			INT	= NULL
 	  , @strSalesperson					NVARCHAR(100)
 	  , @strCustomerName				NVARCHAR(MAX)
+	  , @strCustomerNumber				NVARCHAR(MAX)
 	  , @strItemNo						NVARCHAR(300)
 	  , @xmlDocumentId					INT
 
@@ -66,6 +67,10 @@ WITH (
 SELECT  @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strName'
+
+SELECT  @strCustomerNumber = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strCustomerNumber'
 
 SELECT  @strSalesperson = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
@@ -135,10 +140,11 @@ SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - 
 FROM vyuARTransactionSummary 
 WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
   AND (@strCustomerName IS NULL OR strCustomerName = @strCustomerName)
+  AND (@strCustomerNumber IS NULL OR strCustomerNumber = @strCustomerNumber)
   AND (@strSalesperson IS NULL OR strSalesPersonName = @strSalesperson)
   AND (@strItemNo IS NULL OR strItemNo = @strItemNo)
 
-UNION
+UNION ALL
 
 SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
      , dtmEndingDate			= CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101)
@@ -169,5 +175,6 @@ SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - 
 FROM vyuARTransactionSummary 
 WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
   AND (@strCustomerName IS NULL OR strCustomerName = @strCustomerName)
+  AND (@strCustomerNumber IS NULL OR strCustomerNumber = @strCustomerNumber)
   AND (@strSalesperson IS NULL OR strSalesPersonName = @strSalesperson)
   AND (@strItemNo IS NULL OR strItemNo = @strItemNo)
