@@ -86,6 +86,7 @@ AS
 				,[intPurchaseTaxGroupId]
 				,[intInvoiceId]
 				,[strSourceNumber]
+				,[strReference]
 				,[intTicketId]
 			)
 			select
@@ -106,6 +107,7 @@ AS
 				,[intPurchaseTaxGroupId] = @intTaxGroupId
 				,[intInvoiceId] = @intInvoiceId
 				,[strSourceNumber] = @strVendorOrderNumber
+				,[strReference] = @strVendorOrderNumber
 				,[intTicketId] = @intTicketId
 
 			exec uspAPCreateVoucher
