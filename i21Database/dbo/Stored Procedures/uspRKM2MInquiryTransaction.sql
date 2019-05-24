@@ -2167,6 +2167,7 @@ BEGIN
 		, strItemNo
 		, intItemId
 		, strLocationName
+		, intCompanyLocationId
 		, strFutureMonth
 		, intFutureMonthId
 		, intFutureMarketId
@@ -2185,6 +2186,7 @@ BEGIN
 			, strItemNo
 			, intItemId
 			, strLocationName
+			, intLocationId
 			, @strSpotMonth strFutureMonth
 			, @intSpotMonthId intFutureMonthId
 			, intFutureMarketId
@@ -2199,6 +2201,7 @@ BEGIN
 			SELECT 
 				'Inventory' as strContractOrInventoryType
 				, s.strLocationName
+				, s.intLocationId
 				, c.strCommodityCode
 				, c.intCommodityId
 				, i.strItemNo
@@ -2266,6 +2269,7 @@ BEGIN
 			, intItemId
 			, PriceSourceUOMId
 			, strLocationName
+			, intLocationId
 			, strFutureMonth
 			, intFutureMonthId
 			, intFutureMarketId
