@@ -31,21 +31,13 @@ BEGIN
 				,dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @intStockUOM, t.dblCost)
 			)
 	FROM 
-		tblICInventoryTransaction t OUTER APPLY 
-		(
-			SELECT TOP 1 
-				cb.* 
-			FROM 
-				tblICInventoryFIFO cb 
-			WHERE
-				t.intItemId = cb.intItemId
-				AND t.intItemLocationId = cb.intItemLocationId
-				AND t.strTransactionId = cb.strTransactionId
-				AND t.intTransactionId = cb.intTransactionId
-				AND t.intTransactionDetailId = cb.intTransactionDetailId
-				AND t.dblQty = cb.dblStockIn
-				AND cb.ysnIsUnposted = 0 
-		) cb
+		tblICInventoryTransaction t LEFT JOIN tblICInventoryFIFO cb 
+			ON t.intItemId = cb.intItemId
+			AND t.intItemLocationId = cb.intItemLocationId
+			AND t.strTransactionId = cb.strTransactionId
+			AND t.intTransactionId = cb.intTransactionId
+			AND t.intTransactionDetailId = cb.intTransactionDetailId
+			AND cb.ysnIsUnposted = 0 
 	WHERE 
 		t.intItemId = @intItemId
 		AND t.intItemLocationId = @intItemLocation
