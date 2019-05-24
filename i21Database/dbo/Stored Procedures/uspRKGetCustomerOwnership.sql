@@ -30,9 +30,9 @@ BEGIN
 	FROM (
 		SELECT dtmDate
 			, strStorageTypeDescription
-			, SUM(ROUND(dblInQty, 2)) dblIn
-			, SUM(ROUND(ISNULL(dblOutQty, 0) + ISNULL(dblSettleUnit, 0), 2)) dblOut
-			, ROUND(SUM(dblInQty), 2) - SUM(ROUND(ISNULL(dblOutQty, 0) + ISNULL(dblSettleUnit, 0), 2)) dblNet
+			, SUM(dblInQty) dblIn
+			, SUM(ISNULL(dblOutQty, 0) + ISNULL(dblSettleUnit, 0)) dblOut
+			, SUM(dblInQty) - SUM(ISNULL(dblOutQty, 0) + ISNULL(dblSettleUnit, 0)) dblNet
 			, intStorageScheduleTypeId
 		FROM (
 			--UNION ALL --Storages

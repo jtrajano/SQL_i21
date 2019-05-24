@@ -373,11 +373,11 @@ BEGIN
 			  , strDescription		= I.strDescription
 			  , intVendorId			= IL.intVendorId
 			  , intQtySold			= (Chk.RefundCount * -1)
-			  , dblCurrentPrice		= ABS(Chk.RefundAmount)
+			  , dblCurrentPrice		= (ABS(Chk.RefundAmount) / Chk.RefundCount)
 			  , dblDiscountAmount	= 0
 			  -- , dblRefundAmount     = Chk.RefundAmount
-			  , dblGrossSales		= (Chk.RefundCount * -1) * ABS(Chk.RefundAmount)
-			  , dblTotalSales		= (Chk.RefundCount * -1) * ABS(Chk.RefundAmount)
+			  , dblGrossSales		= (Chk.RefundCount * -1) * (ABS(Chk.RefundAmount) / Chk.RefundCount)
+			  , dblTotalSales		= (Chk.RefundCount * -1) * (ABS(Chk.RefundAmount) / Chk.RefundCount)
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM @tblTempForCalculation Chk

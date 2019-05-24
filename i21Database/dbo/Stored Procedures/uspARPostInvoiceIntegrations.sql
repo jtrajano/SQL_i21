@@ -1023,6 +1023,7 @@ INSERT INTO @ItemsFromInvoice
 	([intInvoiceId]
 	,[strInvoiceNumber]
 	,[intEntityCustomerId]
+	,[strTransactionType]
 	,[dtmDate]
 	,[intCurrencyId]
 	,[intCompanyLocationId]
@@ -1070,6 +1071,7 @@ SELECT
 	 [intInvoiceId]					= ID.[intInvoiceId]
 	,[strInvoiceNumber]				= ID.[strInvoiceNumber]
 	,[intEntityCustomerId]			= ID.[intEntityCustomerId]
+	,[strTransactionType]           = ID.[strTransactionType]
 	,[dtmDate]						= ID.[dtmDate]
 	,[intCurrencyId]				= ID.[intCurrencyId]
 	,[intCompanyLocationId]			= ID.[intCompanyLocationId]
@@ -1123,7 +1125,11 @@ LEFT JOIN
 WHERE
 	--ID.[intInventoryShipmentItemId] IS NULL AND
 	ID.[intInventoryShipmentChargeId] IS NULL
-	AND	(ID.strTransactionType <> 'Credit Memo' OR (ID.[ysnIsInvoicePositive] = 0 AND ID.[intInventoryShipmentItemId] IS NOT NULL))
+	AND	(
+		(ID.strTransactionType <> 'Credit Memo' AND ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL)
+		OR
+		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL))
+		)
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 

@@ -23,12 +23,15 @@ BEGIN TRY
 	DECLARE @dblSpotBasis DECIMAL(24, 10)
 	DECLARE @dblSpotCashPrice DECIMAL(24, 10)
 
+	DECLARE @intCustomerStorageId INT
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strSettleData
 
 	DECLARE @SettleStorage AS TABLE 
 	(
 		 intSettleStorageKey INT IDENTITY(1, 1)
+		,intCustomerStorageId INT
 		,dblStorageUnits DECIMAL(24, 10)
 		,dblRemainingUnits DECIMAL(24, 10)
 		,dblDiscountUnPaid DECIMAL(24, 10)
@@ -53,18 +56,21 @@ BEGIN TRY
 
 	INSERT INTO @SettleStorage 
 	(
-		 dblStorageUnits
+		intCustomerStorageId
+		,dblStorageUnits
 		,dblRemainingUnits
 		,dblDiscountUnPaid
 	)
 	SELECT 
-	 dblUnits
-	,dblUnits
-	,dblDiscountUnPaid
+		intCustomerStorageId
+		,dblUnits
+		,dblUnits
+		,dblDiscountUnPaid
 	FROM OPENXML(@idoc, 'root/SettleStorage', 2) WITH 
 	(
-	   dblUnits DECIMAL(24, 10)
-	  ,dblDiscountUnPaid DECIMAL(24, 10)
+		intCustomerStorageId INT
+		,dblUnits DECIMAL(24, 10)
+		,dblDiscountUnPaid DECIMAL(24, 10)
 	)
 
 	INSERT INTO @SettleContract 
@@ -111,6 +117,7 @@ BEGIN TRY
 		SELECT 
 			 @dblStorageUnits = dblRemainingUnits
 			,@dblDiscountUnPaid = dblDiscountUnPaid
+			,@intCustomerStorageId = intCustomerStorageId
 		FROM @SettleStorage
 		WHERE intSettleStorageKey = @SettleStorageKey
 
@@ -135,7 +142,7 @@ BEGIN TRY
 					,@intPricingTypeId = intPricingTypeId
 					,@dblContractUnits = dblContractUnits
 					,@dblCashPrice = dblCashPrice
-				FROM @SettleContract
+				FROM @SettleContract				
 				WHERE intSettleContractKey = @SettleContractKey
 
 				IF @dblStorageUnits <= @dblContractUnits
@@ -155,12 +162,29 @@ BEGIN TRY
 						,dblDiscountUnPaid
 					)
 					SELECT 
-						 @SettleStorageKey
-						,@dblStorageUnits
+						@SettleStorageKey
 						,CASE 
-							WHEN @intPricingTypeId = 1 THEN @dblDiscountUnPaid
+							WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblStorageUnits / Discounts.dblOpenBalance) 
+							ELSE @dblStorageUnits 
+						END
+						,CASE 
+							WHEN @intPricingTypeId = 1 OR @intPricingTypeId = 6 THEN Discounts.dblDiscountDue
 							ELSE 0
-						 END
+						END
+					FROM (
+						SELECT 
+							CS.dblGrossQuantity
+							,CS.dblOpenBalance
+							,TD.strCalcMethod
+							,TD.dblDiscountDue
+						FROM tblGRCustomerStorage CS
+						INNER JOIN vyuGRTicketDiscount TD
+							ON TD.intTicketFileId = CS.intCustomerStorageId
+								AND TD.strSourceType = 'Storage'
+						WHERE CS.intCustomerStorageId = @intCustomerStorageId
+							AND TD.dblDiscountDue > 0
+					) Discounts
+					
 
 					BREAK;
 				END
@@ -182,11 +206,27 @@ BEGIN TRY
 					)
 					SELECT 
 						 @SettleStorageKey
-						,@dblContractUnits
 						,CASE 
-							WHEN @intPricingTypeId = 1 THEN @dblDiscountUnPaid
+							WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblContractUnits / Discounts.dblOpenBalance) 
+							ELSE @dblContractUnits 
+						END
+						,CASE 
+							WHEN @intPricingTypeId = 1 OR @intPricingTypeId = 6 THEN Discounts.dblDiscountDue
 							ELSE 0
 						 END
+					FROM (
+						SELECT 
+							CS.dblGrossQuantity
+							,CS.dblOpenBalance
+							,TD.strCalcMethod
+							,TD.dblDiscountDue
+						FROM tblGRCustomerStorage CS
+						INNER JOIN vyuGRTicketDiscount TD
+							ON TD.intTicketFileId = CS.intCustomerStorageId
+								AND TD.strSourceType = 'Storage'
+						WHERE CS.intCustomerStorageId = @intCustomerStorageId
+							AND TD.dblDiscountDue > 0
+					) Discounts
 
 					BREAK;
 				END
@@ -218,8 +258,24 @@ BEGIN TRY
 				)
 				SELECT 
 					 @SettleStorageKey
-					,@dblStorageUnits
-					,@dblDiscountUnPaid
+					,CASE 
+						WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblStorageUnits / Discounts.dblOpenBalance) 
+						ELSE @dblStorageUnits 
+					END
+					,Discounts.dblDiscountDue
+				FROM (
+					SELECT 
+						CS.dblGrossQuantity
+						,CS.dblOpenBalance
+						,TD.strCalcMethod
+						,TD.dblDiscountDue
+					FROM tblGRCustomerStorage CS
+					INNER JOIN vyuGRTicketDiscount TD
+						ON TD.intTicketFileId = CS.intCustomerStorageId
+							AND TD.strSourceType = 'Storage'
+					WHERE CS.intCustomerStorageId = @intCustomerStorageId
+						AND TD.dblDiscountDue > 0
+				) Discounts
 			END
 			ELSE
 			BEGIN
@@ -234,9 +290,25 @@ BEGIN TRY
 					,dblDiscountUnPaid
 				)
 				SELECT 
-					 @SettleStorageKey
-					,@dblSpotUnits
-					,@dblDiscountUnPaid
+					@SettleStorageKey
+					,CASE 
+						WHEN Discounts.strCalcMethod = 3 THEN Discounts.dblGrossQuantity * (@dblSpotUnits / Discounts.dblOpenBalance) 
+						ELSE @dblSpotUnits 
+					END
+					,Discounts.dblDiscountDue
+				FROM (
+					SELECT 
+						CS.dblGrossQuantity
+						,CS.dblOpenBalance
+						,TD.strCalcMethod
+						,TD.dblDiscountDue
+					FROM tblGRCustomerStorage CS
+					INNER JOIN vyuGRTicketDiscount TD
+						ON TD.intTicketFileId = CS.intCustomerStorageId
+							AND TD.strSourceType = 'Storage'
+					WHERE CS.intCustomerStorageId = @intCustomerStorageId
+						AND TD.dblDiscountDue > 0
+				) Discounts
 
 				SET @dblSpotUnits = 0
 			END
@@ -270,4 +342,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 
 END CATCH
-

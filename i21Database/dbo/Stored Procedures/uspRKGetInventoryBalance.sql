@@ -57,7 +57,7 @@ FROM (
 		, (SELECT strCountNo FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId) tranCountNumber
 		, (SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SUM(dblQty)) FROM tblICInventoryCount ia WHERE ia.strCountNo=it.strTransactionId ) dblCountQty
 		, (SELECT top 1 strInvoiceNumber FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  WHERE ia.strInvoiceNumber=it.strTransactionId) tranInvoiceNumber
-		, ROUND((SELECT TOP 1 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SUM(dblQty)) FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  WHERE ia.strInvoiceNumber=it.strTransactionId ),6) dblInvoiceQty
+		, (SELECT TOP 1 dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,SUM(dblQty)) FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId and isnull(ad.strShipmentNumber,'')=''  WHERE ia.strInvoiceNumber=it.strTransactionId ) dblInvoiceQty
 		, 0.0 dblSalesInTransit
 		, 0.0 tranDSInQty
 	FROM tblICInventoryTransaction it 
@@ -137,7 +137,7 @@ FROM (
 		, 0.0 tranDSInQty
 	FROM (
 		SELECT CONVERT(VARCHAR(10),IA.dtmPostedDate,110) dtmDate
-			, round(IAD.dblAdjustByQuantity ,6) dblAdjustmentQty
+			, IAD.dblAdjustByQuantity dblAdjustmentQty
 			, IA.strAdjustmentNo strAdjustmentNo
 			, IA.intInventoryAdjustmentId intInventoryAdjustmentId
 		FROM tblICInventoryAdjustment IA
@@ -244,8 +244,8 @@ FROM (
 		SELECT CONVERT(VARCHAR(10),st.dtmTicketDateTime,110) dtmDate
 			, CASE WHEN strInOutFlag='O' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) ELSE 0 END dblOutQty
 			, r.strShipmentNumber
-			, ROUND(CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on ia.intInvoiceId=ad.intInvoiceId WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 1) THEN 0
-						ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
+			, CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on ia.intInvoiceId=ad.intInvoiceId WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 1) THEN 0
+						ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END dblSalesInTransit
 		FROM tblSCTicket st
 		JOIN tblICItem i on i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		JOIN tblICInventoryShipmentItem ri on ri.intSourceId=st.intTicketId
@@ -275,8 +275,8 @@ FROM (
 		SELECT CONVERT(VARCHAR(10),r.dtmShipDate,110) dtmDate
 			, dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId,ri.dblQuantity) dblOutQty
 			, r.strShipmentNumber
-			, ROUND(CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 1) THEN 0
-						ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
+			, CASE WHEN EXISTS(SELECT TOP 1 * FROM tblARInvoice ia JOIN tblARInvoiceDetail ad on  ia.intInvoiceId=ad.intInvoiceId WHERE ad.intInventoryShipmentItemId=ri.intInventoryShipmentItemId and ia.ysnPosted = 1) THEN 0
+						ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END dblSalesInTransit
 		FROM tblICInventoryShipment r
 		JOIN tblICInventoryShipmentItem ri on ri.intInventoryShipmentId = r.intInventoryShipmentId
 		JOIN tblICItem i on i.intItemId = ri.intItemId AND r.intShipFromLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)

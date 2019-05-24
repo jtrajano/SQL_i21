@@ -494,7 +494,7 @@ BEGIN
 	
 	SELECT * INTO #tempCollateral
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY intCollateralId ORDER BY dtmOpenDate DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intCollateralId ORDER BY c.dtmOpenDate DESC)
 			, c.intCollateralId
 			, cl.strLocationName
 			, ch.intItemId
@@ -506,7 +506,7 @@ BEGIN
 			, strContractNumber
 			, c.dtmOpenDate
 			, dblOriginalQuantity = ISNULL(c.dblOriginalQuantity, 0)
-			, dblRemainingQuantity = ISNULL(c.dblRemainingQuantity, 0)
+			, dblRemainingQuantity = ISNULL(c.dblOriginalQuantity, 0) - ISNULL(ca.dblAdjustmentAmount,0)
 			, c.intCommodityId as intCommodityId
 			, c.intUnitMeasureId
 			, c.intLocationId intCompanyLocationId
@@ -518,12 +518,18 @@ BEGIN
 			, ch.intFutureMonthId
 			, ch.strFutureMonth
 		FROM tblRKCollateral c
+		LEFT JOIN (
+			SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
+			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmAdjustmentDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			GROUP BY intCollateralId
+
+		) ca on c.intCollateralId = ca.intCollateralId
 		JOIN tblICCommodity co ON co.intCommodityId = c.intCommodityId
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 		JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
 		LEFT JOIN @tblGetOpenContractDetail ch ON c.intContractHeaderId = ch.intContractHeaderId AND ch.intContractStatusId <> 3
 		WHERE c.intCommodityId IN (SELECT intCommodity FROM @Commodity)
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 			AND c.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	) a where a.intRowNum = 1
 	
@@ -652,7 +658,7 @@ BEGIN
 					, strInternalTradeNo
 					, intFutOptTransactionHeaderId
 					, 'Net Hedge' COLLATE Latin1_General_CI_AS
-					, strContractType = 'Future' COLLATE Latin1_General_CI_AS
+					, strContractType = strInstrumentType
 					, strLocationName
 					, strFutureMonth
 					, HedgedQty
@@ -684,7 +690,7 @@ BEGIN
 						, strAccountNumber = t.strBroker + '-' + t.strBrokerAccount COLLATE Latin1_General_CI_AS
 						, strTranType = strNewBuySell
 						, ba.intBrokerageAccountId
-						, strInstrumentType = 'Future' COLLATE Latin1_General_CI_AS
+						, strInstrumentType = strInstrumentType
 						, dblNoOfLot = intOpenContract
 						, cu.strCurrency
 						, m.intFutureMarketId
@@ -706,7 +712,7 @@ BEGIN
 						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 						AND ISNULL(t.ysnPreCrush, 0) = 0
 				) t
-				
+
 				-- Option NetHEdge
 				INSERT INTO @tempFinal (strCommodityCode
 					, strInternalTradeNo
@@ -1023,6 +1029,61 @@ BEGIN
 						, intCategoryId
 						, strCategory
 				END
+				ELSE
+				BEGIN
+					INSERT INTO @tempFinal(strCommodityCode
+						, strType
+						, strContractType
+						, dblTotal
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, strCurrency)
+					SELECT @strCommodityCode
+						, strType = 'Price Risk'
+						, strContractType = 'DP'
+						, dblTotal = -SUM(dblTotal)
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, strCurrency = NULL
+					FROM (
+						SELECT intTicketId
+							, strTicketType
+							, strTicketNumber
+							, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(dblBalance,0)))
+							, ch.intCompanyLocationId
+							, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
+							, intCommodityId
+							, strLocationName
+							, intItemId
+							, strItemNo
+							, intCategoryId
+							, strCategory
+						FROM #tblGetStorageDetailByDate ch
+						WHERE ch.intCommodityId  = @intCommodityId
+							AND ysnDPOwnedType = 1
+							AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
+						)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					GROUP BY intTicketId
+						, strTicketType
+						, strTicketNumber
+						, intFromCommodityUnitMeasureId
+						, intCommodityId
+						, strLocationName
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+				END
 
 				--Net Hedge Derivative Entry (Futures AND Options)
 				INSERT INTO @tempFinal(strCommodityCode
@@ -1114,9 +1175,11 @@ BEGIN
 						INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
 						JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 						INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
+						LEFT JOIN tblAPBillDetail bd on ch.intContractHeaderId = bd.intContractHeaderId and bd.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 					WHERE v.strTransactionType = 'Inventory Receipt' AND ch.intCommodityId = @intCommodityId
 					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
 						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+						AND bd.intBillId is null --Removed in the list if has a voucher (means already priced)
 				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				GROUP BY intInventoryReceiptId
 					, strReceiptNumber
@@ -1461,7 +1524,7 @@ BEGIN
 					, strBrokerTradeNo
 					, strNotes
 					, ysnPreCrush
-				FROM @tempFinal WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'DP', 'Sales Basis Deliveries', 'OffSite') AND @ysnExchangeTraded = 1
+				FROM @tempFinal WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral',  'OffSite') AND @ysnExchangeTraded = 1
 				GROUP BY strCommodityCode
 					, strContractType
 					, intContractHeaderId

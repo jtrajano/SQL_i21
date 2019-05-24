@@ -1991,6 +1991,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostStockQuantity.sql" />
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixStorageQty.sql" />
     <Build Include="dbo\Tables\tblICFixLog.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
@@ -7311,13 +7312,16 @@
     <Build Include="dbo\Stored Procedures\uspRKRptDPI.sql" />
     <Build Include="dbo\Views\vyuCMBankAccountRegisterRunningBalanceCount.sql" />
     <Build Include="dbo\Functions\fnICOutstandingInTransitAsOf.sql" />
-    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
     <Build Include="dbo\Functions\fnPRRounding.sql" />
     <Build Include="dbo\Tables\tblSCRemoteXrefDeliverySheet.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersPaymentInfo.sql" />
+    <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
+    <Build Include="dbo\Views\vyuCTBasisDelivery.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
+    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

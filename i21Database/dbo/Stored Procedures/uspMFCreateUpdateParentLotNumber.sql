@@ -133,12 +133,13 @@ BEGIN
 	WHERE intLotId = @intLotId
 
 	IF EXISTS (
-			SELECT 1
+			SELECT strLotNumber,Count(*)
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNumber
-				AND intItemId <> @intItemId
 				AND dblQty > 0
 				AND intLocationId = @intLocationId
+				group by strLotNumber
+				having Count(*)>1
 			)
 		AND @ysnLotNumberUniqueByItem = 1
 	BEGIN

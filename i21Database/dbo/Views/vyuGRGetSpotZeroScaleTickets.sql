@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSpotZeroScaleTickets]
 AS 
-SELECT
+SELECT DISTINCT
 	 intTicketId			= SC.intTicketId
 	,strTicketNumber		= SC.strTicketNumber
 	,strInOutIndicator		= TicketType.strInOutIndicator
@@ -32,6 +32,10 @@ SELECT
 		ON UOM.intItemUOMId = SC.intItemUOMIdTo
 	JOIN tblICUnitMeasure UnitMeasure
 		ON UnitMeasure.intUnitMeasureId = UOM.intUnitMeasureId
+	LEFT JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intSourceId = SC.intTicketId
+	LEFT JOIN tblICInventoryShipmentItem ISI
+		ON ISI.intSourceId = SC.intTicketId
 	LEFT JOIN tblCTWeightGrade Wght
 		ON Wght.intWeightGradeId = SC.intWeightId
 	LEFT JOIN tblCTWeightGrade Grd
@@ -41,4 +45,5 @@ WHERE ISNULL(SC.dblUnitPrice,0) = 0
 	AND SC.intStorageScheduleTypeId IN(-3,-4)	-- Spot,Split
 	AND SC.strTicketStatus = 'C'
 	AND CASE WHEN (lower(Wght.strWhereFinalized) = 'destination' and lower(Grd.strWhereFinalized) = 'destination') THEN SC.ysnDestinationWeightGradePost ELSE 1 END = 1
-
+	AND CASE WHEN TicketType.strInOutIndicator='I' THEN ISNULL(IRI.dblUnitCost,0) ELSE ISNULL(ISI.dblUnitPrice,0) END = 0
+	AND SC.intTicketTypeId != 10

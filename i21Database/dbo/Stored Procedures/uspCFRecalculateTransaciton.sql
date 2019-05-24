@@ -5895,7 +5895,7 @@ BEGIN
 		--SELECT TOP 1 @dblCalculatedPricing = dblCalculatedNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
 
-		IF (ISNULL(@dblCalculatedNetPrice,0) = 0)
+		IF (ISNULL(@dblCalculatedNetPrice,0) <= 0)
 		BEGIN		
 			SET @ysnInvalid = 1
 			--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
@@ -5908,13 +5908,37 @@ BEGIN
 		----SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
 		--SELECT TOP 1 @dblOriginalPricing = dblOriginalNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
-		IF (ISNULL(@dblOriginalNetPrice,0) = 0)
+		IF (ISNULL(@dblOriginalNetPrice,0) <= 0)
 		BEGIN
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
 		END
 
 	END
+	ELSE
+	BEGIN
+
+		IF (ISNULL(@dblCalculatedNetPrice,0) < 0)
+		BEGIN		
+			SET @ysnInvalid = 1
+			--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
+		END
+
+	
+		--DECLARE @dblOriginalPricing NUMERIC(18,6)
+		----SELECT TOP 1 @dblOriginalPricing = dblOriginalAmount FROM @tblTransactionPrice WHERE strTransactionPriceId = 'Net Price'
+		--SELECT TOP 1 @dblOriginalPricing = dblOriginalNetPrice FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+
+		IF (ISNULL(@dblOriginalNetPrice,0) < 0)
+		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
+		END
+
+	END
+
 	---------------------------------------------------
 	--					ZERO PRICING				 --
 	---------------------------------------------------
@@ -6109,6 +6133,9 @@ BEGIN
 			,dblAdjustmentRate		   = ISNULL(@dblAdjustmentRate,0)
 			,dblInventoryCost		   = ISNULL(@dblInventoryCost,0)
 			,dblNetTransferCost		   = ISNULL(@dblNetTransferCost,0)
+			,strPriceProfileId		   = @strPriceProfileId			 
+			,strPriceIndexId		   = @strPriceIndexId			 
+			,strSiteGroup			   = @strSiteGroup		
 			WHERE intTransactionId	   = @intTransactionId
 			---------------------------------------------------------------------------
 			DELETE tblCFTransactionTax WHERE intTransactionId = @intTransactionId

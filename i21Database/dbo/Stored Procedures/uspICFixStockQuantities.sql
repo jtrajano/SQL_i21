@@ -405,3 +405,10 @@ BEGIN
 	EXEC dbo.uspICIncreaseReservedQty
 		@FixStockReservation
 END 
+
+--------------------------------------
+-- Fix the Storage Quantities
+--------------------------------------
+BEGIN 
+	EXEC uspICFixStorageQty
+END 

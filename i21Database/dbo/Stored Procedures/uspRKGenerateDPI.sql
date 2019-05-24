@@ -234,6 +234,7 @@ BEGIN
 				AND i.intCommodityId = @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(i.strType, '') <> 'Other Charge'
 				AND b.intShipToId = ISNULL(@intLocationId, b.intShipToId)
 				AND gs.strStorageTypeCode NOT IN ('CNT', '')
+
 		) t
 	) t2
 	
@@ -326,7 +327,7 @@ BEGIN
 			AND ST.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocations)
 			AND RI.intOwnershipType = 1
 			AND (GST.intStorageScheduleTypeId IN (-2,-3) OR GST.ysnDPOwnedType = NULL)--Contract, Spot and DP
-			AND RI.dblBillQty = 0
+			--AND RI.dblBillQty = 0
 			AND R.intSourceType = 1
 			AND RI.intInventoryReceiptItemId NOT IN (select intInventoryReceiptItemId from tblGRSettleStorage gr 
 					INNER JOIN tblGRSettleStorageTicket grt ON gr.intSettleStorageId = grt.intSettleStorageId

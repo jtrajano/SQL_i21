@@ -7,7 +7,7 @@ SELECT
 	, A.intInvoiceId 
 	, A.strInvoiceNumber 
 	, 0 AS dblAmountPaid 
-	, -A.dblBaseInvoiceTotal AS dblTotal
+	, A.dblBaseInvoiceTotal AS dblTotal
 	, A.dblBaseAmountDue  AS dblAmountDue 
 	, dblWithheld = 0
 	, dblDiscount = 0 
@@ -32,9 +32,7 @@ UNION ALL
 SELECT  A.dtmDatePaid AS dtmDate,    
 	 C.intInvoiceId,   
 	 C.strInvoiceNumber ,
-	 CAST(
-		 	(CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
-						 THEN B.dblPayment * -1 ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
+	 CAST(B.dblPayment * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -63,7 +61,7 @@ LEFT JOIN dbo.tblGLAccount accnt ON B.intAccountId = accnt.intAccountId
 	AND C.ysnPosted = 1
 	AND C.strTransactionType = 'Cash Refund'
 	AND A.ysnPrepay = 0
-UNION
+UNION ALL
 SELECT 
 	A.dtmDate
 	,A.intInvoiceId

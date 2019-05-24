@@ -126,11 +126,10 @@ BEGIN
 		, ISNULL((select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.strAccountNumber='Market risk' and t1.strFutureMonth= t.strFutureMonth),0) dblNetMarketRisk
 		, strFutureMonth
 		, '' as Selection
-	FROM @tblFinalDetail t WHERE (Selection = 'Physical position / Basis risk' or strAccountNumber='Market risk') 
+	FROM @tblFinalDetail t WHERE (Selection = 'Physical position / Basis risk' or strAccountNumber='Market risk')  and strFutureMonth <> 'Previous'
 	GROUP BY strFutureMonth
-	ORDER BY CASE WHEN strFutureMonth ='Previous' THEN '01/01/1900'
-				WHEN strFutureMonth ='Total' THEN '01/01/9999'
-				WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME,REPLACE(strFutureMonth, ' ', ' 1, ')) END
+	ORDER BY CASE WHEN strFutureMonth ='Total' THEN '01/01/9999'
+				  WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME,REPLACE(strFutureMonth, ' ', ' 1, ')) END
 END
 ELSE
 BEGIN
@@ -239,9 +238,8 @@ BEGIN
 		, (select SUM(dblNoOfContract) FROM @tblFinalDetail t1 WHERE t1.PriceStatus='4.Net Position' and t1.strFutureMonth= t.strFutureMonth) dblNetMarketRisk
 		, strFutureMonth
 		, '' as Selection
-	FROM @tblFinalDetail t WHERE PriceStatus in('3.Market coverage','4.Net Position')
+	FROM @tblFinalDetail t WHERE PriceStatus in('3.Market coverage','4.Net Position')  and strFutureMonth <> 'Previous'
 	GROUP BY strFutureMonth
-	ORDER BY CASE WHEN strFutureMonth ='Previous' THEN '01/01/1900'
-				WHEN strFutureMonth ='Total' THEN '01/01/9999'
-				WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME,REPLACE(strFutureMonth, ' ', ' 1, ')) END
+	ORDER BY CASE WHEN strFutureMonth ='Total' THEN '01/01/9999'
+				  WHEN strFutureMonth NOT IN ('Previous', 'Total') THEN CONVERT(DATETIME,REPLACE(strFutureMonth, ' ', ' 1, ')) END
 END

@@ -111,6 +111,15 @@ BEGIN TRY
 		BEGIN
 			SELECT @ysnFullyPriced = CASE WHEN @dblLotsUnfixed = 0 THEN 1 ELSE 0 END
 		END
+		ELSE IF @ysnMultiplePriceFixation = 1
+		BEGIN
+			DECLARE @totalQuantity NUMERIC(18,6)
+			SELECT @totalQuantity = SUM(dblQuantity)
+			FROM tblCTContractDetail 
+			WHERE intContractHeaderId = @intContractHeaderId
+
+			SELECT @ysnFullyPriced = CASE WHEN @totalQuantity = @dblTotalPFDetailQuantiy THEN 1 ELSE 0 END
+		END
 		ELSE
 		BEGIN
 			SELECT @ysnFullyPriced = CASE WHEN @dblQuantity = @dblTotalPFDetailQuantiy THEN 1 ELSE 0 END

@@ -99,7 +99,8 @@ SELECT
 		 CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
 		,CHK.dblAmount
-		,strPayee =  Payee.Name +  CHAR(13) + ISNULL(Address1.Value,'')
+		,strPayee =  Payee.Name 
+		,strPayeeAddress = Address1.Value
 		,strAmountInWords = AmtInWords.Val
 		,CHK.strMemo
 		,CHK.strTransactionId

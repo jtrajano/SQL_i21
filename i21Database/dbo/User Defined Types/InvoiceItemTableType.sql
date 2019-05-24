@@ -9,6 +9,7 @@ CREATE TYPE [dbo].[InvoiceItemTableType] AS TABLE
 		,[intInvoiceId]					INT             NOT NULL
 		,[strInvoiceNumber]				NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL
 		,[intEntityCustomerId]			INT             NOT NULL
+		,[strTransactionType]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS
 		,[dtmDate]						DATETIME        NOT NULL
 		,[intCurrencyId]				INT             NOT NULL
 		,[intCompanyLocationId]			INT             NULL

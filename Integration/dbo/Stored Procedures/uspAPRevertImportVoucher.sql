@@ -128,10 +128,10 @@ BEGIN
 		[apegl_gl_amt]		=	B.[apegl_gl_amt]		,
 		[apegl_gl_un]		=	B.[apegl_gl_un]			
 	FROM tmp_aptrxmstImport A
-	INNER JOIN tmp_apeglmstImport B ON A.intId = B.intHeaderId
+	INNER JOIN tmp_apeglmstImport B ON A.intBackupId = B.intHeaderId
 	WHERE NOT EXISTS
 	(
-		SELECT 1 FROM aptrxmst B WHERE A.aptrx_vnd_no = B.aptrx_vnd_no AND A.aptrx_ivc_no = B.aptrx_ivc_no
+		SELECT 1 FROM apeglmst B WHERE A.aptrx_vnd_no = B.apegl_vnd_no AND A.aptrx_ivc_no = B.apegl_ivc_no
 	)
 
 	--DELETE BACK UP RECORDS FROM tblAPapeglmst

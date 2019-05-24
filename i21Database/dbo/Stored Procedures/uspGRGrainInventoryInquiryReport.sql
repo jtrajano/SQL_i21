@@ -38,6 +38,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH
 DECLARE @intCommodityId INT
 DECLARE @intLocationId INT
 DECLARE @dtmReportDate DATETIME
+DECLARE @strLicensed NVARCHAR(20)
+DECLARE @ysnLicensed BIT
 
 SELECT @dtmReportDate = [from]
 FROM @temp_xml_table
@@ -50,6 +52,10 @@ WHERE [fieldname] = 'intCommodityId'
 SELECT @intLocationId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'intLocationId'
+
+SELECT @strLicensed = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strLicensed'
 
 DECLARE @ReportData TABLE
 (
@@ -145,6 +151,16 @@ DECLARE @tblStorageQuantities TABLE
 SET @dtmReportDate = CASE WHEN @dtmReportDate IS NULL THEN dbo.fnRemoveTimeOnDate(GETDATE()) ELSE @dtmReportDate END
 SET @intCommodityId = CASE WHEN @intCommodityId = 0 THEN NULL ELSE @intCommodityId END
 SET @intLocationId = CASE WHEN @intLocationId = 0 THEN NULL ELSE @intLocationId END
+SET @ysnLicensed =	CASE 
+						WHEN @strLicensed = 'All' THEN NULL
+						WHEN @strLicensed = 'Licensed' THEN 1
+						WHEN @strLicensed = 'Non-Licensed' THEN 0
+					END
+SET @strLicensed =	CASE 
+						WHEN @strLicensed = 'All Storage' THEN NULL
+						WHEN @strLicensed = 'Licensed Storage' THEN 1
+						WHEN @strLicensed = 'Non-Licensed Storage' THEN 0
+					END
 
 DECLARE @dateToday DATETIME
 SET @dateToday = dbo.fnRemoveTimeOnDate(GETDATE())
@@ -153,7 +169,7 @@ SET @dateToday = dbo.fnRemoveTimeOnDate(GETDATE())
 IF (SELECT COUNT(*) FROM tblICStagingDailyStockPosition) = 0
 	OR (SELECT TOP 1 dtmDate FROM tblICStagingDailyStockPosition) <> @dtmReportDate
 BEGIN
-	EXEC uspICGetDailyStockPosition @dtmReportDate, @guid
+	EXEC uspICGetDailyStockPosition @dtmReportDate, @guid	
 END
 
 INSERT INTO @InventoryData
@@ -164,11 +180,14 @@ SELECT
 	,SUM(dblOpeningQty)
 	,strCommodityCode
 	,intCommodityId
-FROM tblICStagingDailyStockPosition
-WHERE intCommodityId = ISNULL(@intCommodityId,intCommodityId)
-	AND intLocationId = ISNULL(@intLocationId,intLocationId)
-GROUP BY strCommodityCode
-	,intCommodityId
+FROM tblICStagingDailyStockPosition DSP
+INNER JOIN tblSMCompanyLocation CL
+	ON CL.intCompanyLocationId = DSP.intLocationId
+WHERE DSP.intCommodityId = ISNULL(@intCommodityId,DSP.intCommodityId)
+	AND DSP.intLocationId = ISNULL(@intLocationId,DSP.intLocationId)
+	AND CL.ysnLicensed = ISNULL(@ysnLicensed,CL.ysnLicensed)
+GROUP BY DSP.strCommodityCode
+	,DSP.intCommodityId
 /*==END==INVENTORY BALANCE==*/
 
 /*==START==GENERATE DPI==*/
@@ -196,7 +215,7 @@ BEGIN
 		,@dtmToTransactionDate = @dateToday
 		,@intCommodityId = @intCommodityId2
 		,@intItemId = NULL
-		,@strPositionIncludes = 'All Storage'
+		,@strPositionIncludes = @strLicensed
 		,@intLocationId = @intLocationId
 		,@GUID = @guid
 		
