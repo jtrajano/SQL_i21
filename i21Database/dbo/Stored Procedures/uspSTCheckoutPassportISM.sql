@@ -449,9 +449,9 @@ BEGIN
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
-										WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice) 
+										WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
 											THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)	-- (Chk.dblAveragePriceWthDiscounts - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
-										WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice) 
+										WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
 											THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)  -- (P.dblSalePrice - Chk.dblAveragePriceWthDiscounts) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 									END
 						END) AS dblAmount
