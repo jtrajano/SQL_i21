@@ -20,4 +20,5 @@
 	LEFT JOIN [tblEMEntityLocation] C ON B.intEntityId = C.intEntityId
 	INNER JOIN tblARSalesperson D ON B.intEntityId = D.intEntityId
 	WHERE D.strType = 'Driver'
+	AND C.ysnDefaultLocation = 1
 	
