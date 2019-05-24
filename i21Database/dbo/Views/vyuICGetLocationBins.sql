@@ -70,6 +70,7 @@ SELECT
 	,dtmLastSaleDate = ItemStockUOM.dtmLastSaleDate
 	,strEntityVendor = VendorEntity.strName
 	,dblAverageUsagePerPeriod = CAST(ISNULL(AvgUsagePerPeriod.dblAvgUsagePerPeriod, 0.00) AS NUMERIC(38, 7))
+	,dblInTransitDirect = ISNULL(ItemStockUOM.dblInTransitDirect, 0)
 FROM	
 	tblICItem Item 
 	LEFT JOIN tblICCategory Category 
@@ -105,6 +106,7 @@ FROM
 				,dblUnitReserved = SUM(ISNULL(dblUnitReserved, 0)) 
 				,dblInTransitInbound = SUM(ISNULL(dblInTransitInbound, 0)) 
 				,dblInTransitOutbound = SUM(ISNULL(dblInTransitOutbound, 0)) 
+				,dblInTransitDirect = SUM(ISNULL(dblInTransitDirect, 0)) 
 				,dblUnitStorage = SUM(ISNULL(dblUnitStorage, 0)) 
 				,dblConsignedPurchase = SUM(ISNULL(dblConsignedPurchase, 0)) 
 				,dblConsignedSale = SUM(ISNULL(dblConsignedSale, 0)) 

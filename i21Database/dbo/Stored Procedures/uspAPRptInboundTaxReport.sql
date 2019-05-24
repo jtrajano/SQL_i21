@@ -273,14 +273,14 @@ IF (@conditionLocation IS NOT NULL AND UPPER(@conditionLocation) = 'BETWEEN' AND
         INSERT INTO @COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
         SELECT intCompanyLocationId, strLocationNumber
           FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-         WHERE strLocationName BETWEEN @strLocationNameFrom AND @strLocationNameTo
+         WHERE strLocationNumber BETWEEN @strLocationNameFrom AND @strLocationNameTo
     END
 ELSE IF (@conditionLocation IS NOT NULL AND ISNULL(@strLocationNameFrom, '') <> '')
     BEGIN
         INSERT INTO @COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
         SELECT intCompanyLocationId, strLocationNumber
           FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-		WHERE strLocationName = @strLocationNameFrom
+		WHERE strLocationNumber = @strLocationNameFrom
     END
 ELSE
     BEGIN
@@ -340,7 +340,7 @@ IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND I
 				 WHEN 12 THEN 'Prepayment Reversal'
 				 WHEN 13 THEN 'Basis Advance'
 				 WHEN 14 THEN 'Deferred Interest'
-				 ELSE 'Invalid Type' END,
+				 ELSE 'Invalid Type' END AS strType,
 				S.strName, I.dtmDate
           FROM dbo.tblAPBill I WITH (NOLOCK)
                LEFT OUTER JOIN (
@@ -368,7 +368,7 @@ ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strVoucherNumberFrom, '') <> 
 				 WHEN 12 THEN 'Prepayment Reversal'
 				 WHEN 13 THEN 'Basis Advance'
 				 WHEN 14 THEN 'Deferred Interest'
-				 ELSE 'Invalid Type' END,
+				 ELSE 'Invalid Type' END AS strType,
 				S.strName, I.dtmDate
           FROM dbo.tblAPBill I WITH (NOLOCK)
                LEFT OUTER JOIN (
@@ -397,7 +397,7 @@ ELSE
 				 WHEN 12 THEN 'Prepayment Reversal'
 				 WHEN 13 THEN 'Basis Advance'
 				 WHEN 14 THEN 'Deferred Interest'
-				 ELSE 'Invalid Type' END,
+				 ELSE 'Invalid Type' END AS strType,
 				S.strName, I.dtmDate
           FROM dbo.tblAPBill I WITH (NOLOCK)
                LEFT OUTER JOIN (

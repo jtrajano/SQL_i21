@@ -438,33 +438,39 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, dblCurrencyExchangeRate
 			, strAddonDetailKey
 			, ysnAddonParent
+			, intStorageLocationId
+			, intSubLocationId
+			, intCompanyLocationSubLocationId
 		)
-		SELECT intInvoiceDetailId			= NULL
-		    , strSourceTransaction			= 'Direct'
-			, strSourceId					= ''
-			, intEntityCustomerId			= ID.intEntityCustomerId
-			, intCompanyLocationId			= ID.intCompanyLocationId
-			, dtmDate						= ID.dtmDate
-			, intEntityId					= ID.intEntityId
-			, intInvoiceId					= @intInvoiceId
-			, intItemId						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemId ELSE IDTOADD.intItemId END
-			, strItemDescription			= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.strItemDescription ELSE ITEM.strDescription END
-			, intOrderUOMId					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intOrderUOMId ELSE NULL END
-			, dblQtyOrdered					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 1 THEN 0 ELSE CASE WHEN IDTOADD.dblPrice <> 0 THEN CTD.dblOriginalQty ELSE IDTOADD.dblQtyShipped END END
-			, intItemUOMId					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemUOMId ELSE IDTOADD.intItemUOMId END
-			, intPriceUOMId					= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intPriceUOMId ELSE IDTOADD.intItemUOMId END
-			, dblQtyShipped					= IDTOADD.dblQtyShipped
-			, dblPrice						= IDTOADD.dblPrice
-			, dblUnitPrice					= IDTOADD.dblPrice
-			, dblContractPriceUOMQty		= IDTOADD.dblQtyShipped
-			, intItemWeightUOMId			= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemWeightUOMId ELSE NULL END
-			, intContractDetailId			= IDTOADD.intContractDetailId
-			, intContractHeaderId			= IDTOADD.intContractHeaderId
-			, intTicketId					= IDTOADD.intTicketId
-			, intTaxGroupId					= ID.intTaxGroupId
-			, dblCurrencyExchangeRate		= ID.dblCurrencyExchangeRate
-			, strAddonDetailKey				= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
-			, ysnAddonParent				= ISNULL(ID.ysnAddonParent, 0)
+		SELECT intInvoiceDetailId				= NULL
+		    , strSourceTransaction				= 'Direct'
+			, strSourceId						= ''
+			, intEntityCustomerId				= ID.intEntityCustomerId
+			, intCompanyLocationId				= ID.intCompanyLocationId
+			, dtmDate							= ID.dtmDate
+			, intEntityId						= ID.intEntityId
+			, intInvoiceId						= @intInvoiceId
+			, intItemId							= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemId ELSE IDTOADD.intItemId END
+			, strItemDescription				= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.strItemDescription ELSE ITEM.strDescription END
+			, intOrderUOMId						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intOrderUOMId ELSE NULL END
+			, dblQtyOrdered						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 1 THEN 0 ELSE CASE WHEN IDTOADD.dblPrice <> 0 THEN CTD.dblOriginalQty ELSE IDTOADD.dblQtyShipped END END
+			, intItemUOMId						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemUOMId ELSE IDTOADD.intItemUOMId END
+			, intPriceUOMId						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intPriceUOMId ELSE IDTOADD.intItemUOMId END
+			, dblQtyShipped						= IDTOADD.dblQtyShipped
+			, dblPrice							= IDTOADD.dblPrice
+			, dblUnitPrice						= IDTOADD.dblPrice
+			, dblContractPriceUOMQty			= IDTOADD.dblQtyShipped
+			, intItemWeightUOMId				= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemWeightUOMId ELSE NULL END
+			, intContractDetailId				= IDTOADD.intContractDetailId
+			, intContractHeaderId				= IDTOADD.intContractHeaderId
+			, intTicketId						= IDTOADD.intTicketId
+			, intTaxGroupId						= ID.intTaxGroupId
+			, dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
+			, strAddonDetailKey					= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
+			, ysnAddonParent					= ISNULL(ID.ysnAddonParent, 0)
+			, intStorageLocationId				= ID.intStorageLocationId
+			, intSubLocationId					= ID.intSubLocationId
+			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
@@ -482,32 +488,35 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 		UNION ALL
 
 		--GET AUTO-ADD, ADD-ON ITEMS
-		SELECT intInvoiceDetailId			= NULL
-		    , strSourceTransaction			= 'Direct'
-			, strSourceId					= ''
-			, intEntityCustomerId			= ID.intEntityCustomerId
-			, intCompanyLocationId			= ID.intCompanyLocationId
-			, dtmDate						= ID.dtmDate
-			, intEntityId					= ID.intEntityId
-			, intInvoiceId					= @intInvoiceId
-			, intItemId						= ADDON.intComponentItemId
-			, strItemDescription			= ADDON.strDescription
-			, intOrderUOMId					= ADDON.intItemUnitMeasureId
-			, dblQtyOrdered					= 0
-			, intItemUOMId					= ADDON.intItemUnitMeasureId
-			, intPriceUOMId					= ADDON.intItemUnitMeasureId
-			, dblQtyShipped					= IDTOADD.dblQtyShipped * ADDON.dblQuantity
-			, dblPrice						= ADDON.dblPrice
-			, dblUnitPrice					= ADDON.dblPrice
-			, dblContractPriceUOMQty		= 0
-			, intItemWeightUOMId			= NULL
-			, intContractDetailId			= NULL
-			, intContractHeaderId			= NULL
-			, intTicketId					= IDTOADD.intTicketId
-			, intTaxGroupId					= ID.intTaxGroupId
-			, dblCurrencyExchangeRate		= ID.dblCurrencyExchangeRate
-			, strAddonDetailKey				= @strAddOnKey
-			, ysnAddonParent				= CAST(0 AS BIT)
+		SELECT intInvoiceDetailId				= NULL
+		    , strSourceTransaction				= 'Direct'
+			, strSourceId						= ''
+			, intEntityCustomerId				= ID.intEntityCustomerId
+			, intCompanyLocationId				= ID.intCompanyLocationId
+			, dtmDate							= ID.dtmDate
+			, intEntityId						= ID.intEntityId
+			, intInvoiceId						= @intInvoiceId
+			, intItemId							= ADDON.intComponentItemId
+			, strItemDescription				= ADDON.strDescription
+			, intOrderUOMId						= ADDON.intItemUnitMeasureId
+			, dblQtyOrdered						= 0
+			, intItemUOMId						= ADDON.intItemUnitMeasureId
+			, intPriceUOMId						= ADDON.intItemUnitMeasureId
+			, dblQtyShipped						= IDTOADD.dblQtyShipped * ADDON.dblQuantity
+			, dblPrice							= ADDON.dblPrice
+			, dblUnitPrice						= ADDON.dblPrice
+			, dblContractPriceUOMQty			= 0
+			, intItemWeightUOMId				= NULL
+			, intContractDetailId				= NULL
+			, intContractHeaderId				= NULL
+			, intTicketId						= IDTOADD.intTicketId
+			, intTaxGroupId						= ID.intTaxGroupId
+			, dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
+			, strAddonDetailKey					= @strAddOnKey
+			, ysnAddonParent					= CAST(0 AS BIT)
+			, intStorageLocationId				= NULL
+			, intSubLocationId					= NULL
+			, intCompanyLocationSubLocationId	= NULL
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
