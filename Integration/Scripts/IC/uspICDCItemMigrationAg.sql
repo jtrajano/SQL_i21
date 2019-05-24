@@ -208,7 +208,7 @@ DECLARE @InsertedItemUOM table( intItemUOMId int);
 INSERT INTO tblICItemUOM
       (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
 OUTPUT INSERTED.intItemUOMId INTO @InsertedItemUOM  
-SELECT intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
+SELECT distinct intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
 FROM (
 		SELECT intItemId , 
 		intUnitMeasureId = U.intUnitMeasureId , 
@@ -246,7 +246,7 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId 
 INSERT INTO tblICItemUOM
       (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
 OUTPUT INSERTED.intItemUOMId INTO @InsertedItemUOM  
-SELECT intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
+SELECT distinct intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
 FROM (
 		select intItemId, 
 			(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'LB') intUnitMeasureId, 
@@ -271,7 +271,7 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId 
 INSERT INTO tblICItemUOM
       (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
 OUTPUT INSERTED.intItemUOMId INTO @InsertedItemUOM  
-SELECT intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
+SELECT distinct intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
 FROM (
 		select I.intItemId, 
 			(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = 	upper(rtrim(agitm_pak_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS) intUnitMeasureId, 
