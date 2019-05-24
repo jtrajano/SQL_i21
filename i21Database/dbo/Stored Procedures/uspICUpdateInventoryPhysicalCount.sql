@@ -24,7 +24,7 @@
 	-- Set these to change the storage unit/loc
 	@intStorageLocationId INT = NULL,
 	@intStorageUnitId INT = NULL,
-	@ysnUpdatedOutdatedStock BIT NULL = 1
+	@ysnUpdatedOutdatedStock BIT = NULL
 AS
 
 DECLARE @intInventoryCountId INT
