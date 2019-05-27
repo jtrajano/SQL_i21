@@ -613,6 +613,7 @@ BEGIN
 
 	-- Intialize #tmpICInventoryTransaction
 	CREATE TABLE #tmpICInventoryTransaction (
+		[sortId] INT NOT NULL IDENTITY, 
 		id INT, 
 		id2 INT, 
 		intSortByQty INT,
@@ -676,7 +677,8 @@ BEGIN
 	BEGIN 	
 		--PRINT 'Rebuilding stock as periodic.'
 		CREATE CLUSTERED INDEX [IX_tmpICInventoryTransaction_Periodic]
-			ON #tmpICInventoryTransaction(dtmDate ASC, id ASC, intSortByQty ASC);
+			--ON #tmpICInventoryTransaction(dtmDate ASC, id ASC, intSortByQty ASC);
+			ON #tmpICInventoryTransaction(sortId ASC);
 
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = 
@@ -806,7 +808,8 @@ BEGIN
 	BEGIN 
 		--PRINT 'Rebuilding stock as perpetual.'
 		CREATE CLUSTERED INDEX [IX_tmpICInventoryTransaction_Perpetual]
-			ON #tmpICInventoryTransaction(id2 ASC, id ASC);
+			--ON #tmpICInventoryTransaction(id2 ASC, id ASC);
+			ON #tmpICInventoryTransaction(sortId ASC);
 
 		INSERT INTO #tmpICInventoryTransaction
 		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
@@ -859,7 +862,7 @@ BEGIN
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
-			intInventoryTransactionId ASC 
+			intInventoryTransactionId ASC,  CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
 
 		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
 			intItemId
@@ -1248,7 +1251,8 @@ BEGIN
 					,@dblCategoryCostValue = dblCategoryCostValue
 					,@dblCategoryRetailValue = dblCategoryRetailValue
 			FROM	#tmpICInventoryTransaction
-			ORDER BY dtmDate ASC, id ASC, intSortByQty ASC
+			--ORDER BY dtmDate ASC, id ASC, intSortByQty ASC
+			ORDER BY sortId ASC
 		END 
 		ELSE 
 		BEGIN 
@@ -1264,7 +1268,8 @@ BEGIN
 					,@dblCategoryCostValue = dblCategoryCostValue
 					,@dblCategoryRetailValue = dblCategoryRetailValue
 			FROM	#tmpICInventoryTransaction
-			ORDER BY id2 ASC, id ASC
+			--ORDER BY id2 ASC, id ASC
+			ORDER BY sortId ASC
 		END 
 
 		-- Run the post routine. 
@@ -3095,8 +3100,9 @@ BEGIN
 						) itemPricing
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
+						AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
-						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
+						AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
@@ -3261,6 +3267,7 @@ BEGIN
 							ON Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
 							AND Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
 							AND InvoiceItems.intInvoiceDetailId = RebuildInvTrans.intTransactionDetailId 
+							AND InvoiceItems.intItemId = i.intItemId 
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
@@ -3283,8 +3290,9 @@ BEGIN
 
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
+						AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
-						AND RebuildInvTrans.intItemId = ISNULL(@intItemId, RebuildInvTrans.intItemId)
+						AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 						AND (
 							1 = 
@@ -3419,8 +3427,7 @@ BEGIN
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
 						INNER JOIN tblICItem item
-							ON item.intItemId = id.intItemId 
-							
+							ON item.intItemId = id.intItemId
 						INNER JOIN #tmpICInventoryTransaction t
 							ON t.intTransactionId = i.intInvoiceId
 							AND t.intTransactionDetailId = id.intInvoiceDetailId 
@@ -3441,8 +3448,9 @@ BEGIN
 							ON ld.intLoadDetailId = id.intLoadDetailId
 							AND l.ysnPosted = 1
 
-				WHERE	i.strInvoiceNumber = @strTransactionId						
-						AND id.intItemId = ISNULL(@intItemId, id.intItemId)
+				WHERE	i.strInvoiceNumber = @strTransactionId
+						AND i.intInvoiceId = @intTransactionId
+						AND item.intItemId = ISNULL(@intItemId, item.intItemId)
 						AND ISNULL(item.intCategoryId, 0) = COALESCE(@intCategoryId, item.intCategoryId, 0)
 						AND (
 							1 = 
