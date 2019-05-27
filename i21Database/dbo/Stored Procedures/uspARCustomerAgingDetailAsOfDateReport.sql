@@ -258,6 +258,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, strInvoiceNumber
 		, strRecordNumber
 		, intInvoiceId
+		, intPaymentId
 		, strBOLNumber
 		, intEntityCustomerId
 		, intEntityUserId
@@ -295,6 +296,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strInvoiceNumber		= AGING.strInvoiceNumber
 	 , strRecordNumber		= AGING.strRecordNumber
 	 , intInvoiceId			= AGING.intInvoiceId
+	 , intPaymentId			= AGING.intPaymentId
 	 , strBOLNumber			= AGING.strBOLNumber
 	 , intEntityCustomerId  = AGING.intEntityCustomerId
 	 , intEntityUserId		= @intEntityUserIdLocal
@@ -328,7 +330,8 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 FROM
 (SELECT A.strInvoiceNumber
      , B.strRecordNumber
-     , A.intInvoiceId	 
+     , A.intInvoiceId
+	 , B.intPaymentId	 
 	 , A.strBOLNumber
 	 , A.intEntityCustomerId
 	 , dblTotalAR			= B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments
@@ -377,6 +380,7 @@ LEFT JOIN
 (SELECT DISTINCT 
 	intEntityCustomerId
   , intInvoiceId
+  , intPaymentId
   , dblAmountPaid
   , dtmDatePaid
   , dblTotalDue		= dblInvoiceTotal - dblAmountPaid
@@ -401,6 +405,7 @@ LEFT JOIN
   			THEN ISNULL((TBL.dblInvoiceTotal), 0) - ISNULL(TBL.dblAmountPaid, 0) ELSE 0 END dbl121Days 
 FROM
 (SELECT I.intInvoiceId
+	  , intPaymentId			= NULL
       , dblAmountPaid			= 0
       , dblInvoiceTotal			= ISNULL(dblInvoiceTotal,0)	  
 	  , I.dtmDueDate
@@ -416,6 +421,7 @@ WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
 UNION ALL
 
 SELECT I.intInvoiceId
+	 , intPaymentId			= P.intPaymentId
      , dblAmountPaid		= 0
      , dblInvoiceTotal		= 0
 	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
@@ -439,6 +445,7 @@ WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 UNION ALL
 
 SELECT I.intInvoiceId
+	 , intPaymentId			= P.intPaymentId
      , dblAmountPaid		= 0
      , dblInvoiceTotal		= 0
 	 , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
@@ -458,6 +465,7 @@ UNION ALL
       
 SELECT DISTINCT
 	I.intInvoiceId
+  , intPaymentId		= PAYMENT.intPaymentId
   , dblAmountPaid		= CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN 0 ELSE ISNULL(PAYMENT.dblTotalPayment, 0) END
   , dblInvoiceTotal		= 0
   , dtmDueDate			= ISNULL(I.dtmDueDate, GETDATE())
@@ -470,6 +478,7 @@ SELECT DISTINCT
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 LEFT JOIN (
 	SELECT PD.intInvoiceId
+		 , P.intPaymentId
 		 , P.strRecordNumber
 		 , P.dtmDatePaid
 		 , dblTotalPayment	= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) + ISNULL(dblWriteOffAmount, 0) - ISNULL(dblInterest, 0)
@@ -479,6 +488,7 @@ LEFT JOIN (
 	UNION ALL 
 
 	SELECT PD.intInvoiceId
+		 , P.intPaymentId
 		 , strRecordNumber	= strPaymentRecordNum
 		 , P.dtmDatePaid
 		 , dblTotalPayment	= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)
