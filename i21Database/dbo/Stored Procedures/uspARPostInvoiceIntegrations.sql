@@ -1234,7 +1234,7 @@ SELECT DISTINCT
 FROM
 	#ARPostInvoiceHeader
 
-EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
 
 
 

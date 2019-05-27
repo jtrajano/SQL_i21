@@ -1520,7 +1520,7 @@ BEGIN TRY
 		IL.[ysnSuccess] = 1 
 		AND IL.[ysnInsert] = 0
 
-	EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
 
 END TRY
 BEGIN CATCH
