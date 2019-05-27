@@ -249,8 +249,8 @@ BEGIN TRY
 									/*For Match Ticket */
 									IF(@strMatchTicketStatus = 'O')
 									BEGIN
-										EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchDeliveredQuantity, @intUserId, @intTicketId, 'Scale'
-										EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
+										EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchDeliveredQuantity, @intUserId, @intMatchTicketId, 'Scale'
+										--EXEC uspCTUpdateScheduleQuantity @intMatchLoadContractId, @dblMatchLoadScheduledUnits, @intUserId, @intLoadDetailId, 'Load Schedule'
 									END
 
 									SELECT @intLoadContractId = intContractId,@dblLoadScheduledUnits = dblNetUnits*-1 FROM tblSCTicket WHERE intTicketId = @intTicketId
