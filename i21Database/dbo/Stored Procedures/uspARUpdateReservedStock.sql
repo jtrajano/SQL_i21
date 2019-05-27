@@ -37,7 +37,7 @@ BEGIN
 		,[intItemLocationId]	= ICGIS.[intItemLocationId]
 		,[intItemUOMId]			= ARID.[intItemUOMId]
 		,[intLotId]				= NULL
-		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
+		,[intSubLocationId]		= ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
 		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
@@ -45,7 +45,7 @@ BEGIN
 		,[intTransactionTypeId]	= @TransactionTypeId
 		,[intOwnershipTypeId]	= @Ownership_Own
 	FROM 
-		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId], [intTicketId]
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId], [intTicketId]
 		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
@@ -89,7 +89,7 @@ BEGIN
 		,[intItemLocationId]	= ICGIS.[intItemLocationId]
 		,[intItemUOMId]			= ICGIS.[intComponentUOMId]
 		,[intLotId]				= NULL
-		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
+		,[intSubLocationId]		= ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
 		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0)  *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
@@ -97,7 +97,7 @@ BEGIN
 		,[intTransactionTypeId]	= @TransactionTypeId
 		,[intOwnershipTypeId]	= @Ownership_Own
 	FROM 
-		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId], [intTicketId]
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId], [intTicketId]
 		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
