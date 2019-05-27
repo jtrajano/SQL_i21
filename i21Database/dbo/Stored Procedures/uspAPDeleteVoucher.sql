@@ -38,6 +38,8 @@ BEGIN TRY
 		ON A.intTransactionReversed = B.intBillId
 	WHERE A.intBillId = @intBillId
 
+	EXEC uspAPArchiveVoucher @billId = @intBillId
+
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
 
