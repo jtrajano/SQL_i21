@@ -110,13 +110,13 @@ IF ISNULL(@strAccountStatusIdsLocal, '') <> ''
 			FROM dbo.fnGetRowsFromDelimitedValues(@strAccountStatusIdsLocal)
 		) ACCOUNTSTATUS ON ACCS.intAccountStatusId = ACCOUNTSTATUS.intID
 
-		IF @ysnExcludeAccountStatus = 0
+		IF ISNULL(@ysnExcludeAccountStatus, 0) = 0
 			BEGIN
 				DELETE CUSTOMERS 
 				FROM @tblCustomers CUSTOMERS
 				LEFT JOIN tblARCustomerAccountStatus CAS ON CUSTOMERS.intEntityCustomerId = CAS.intEntityCustomerId
 				LEFT JOIN @tblAccountStatus ACCSTATUS ON CAS.intAccountStatusId = ACCSTATUS.intAccountStatusId
-				WHERE CAS.intAccountStatusId IS NULL
+				WHERE ACCSTATUS.intAccountStatusId IS NULL
 			END
 		ELSE 
 			BEGIN
