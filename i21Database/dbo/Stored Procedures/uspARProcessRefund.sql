@@ -218,7 +218,7 @@ IF ISNULL(@strCreatedInvoices, '') <> ''
 				SELECT intAccountId	= intAccountId
 					, intInvoiceId	= intInvoiceId
 					, dblDiscount	= 0.00000
-					, dblAmountDue	= 0.00000
+					, dblAmountDue	= dblInvoiceTotal
 					, dblPayment	= dblInvoiceTotal
 					, dblInterest	= 0.00000
 					, dblTotal		= dblInvoiceTotal
