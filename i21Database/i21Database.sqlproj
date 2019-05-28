@@ -7556,6 +7556,7 @@
     <Build Include="dbo\Tables\tblAPBillDetailTaxArchive.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
     <None Include="Scripts\Post-Deployment\TM\Tables\tblTMBudgetCalculationProjection.sql" />
+    <Build Include="dbo\Functions\fnCalculateValuationAverageCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
