@@ -1354,7 +1354,7 @@ SELECT
     ,[intDiscountAccountId]             = @DiscountAccountId
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
-    ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ARID.[intCompanyLocationSubLocationId] END))
+    ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId]) END))
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = ISNULL(ICI.[ysnAutoBlend], @ZeroBit)
     ,[ysnBlended]                       = ISNULL(ARID.[ysnBlended], @ZeroBit)
@@ -1767,7 +1767,7 @@ SELECT
     ,[intDiscountAccountId]             = @DiscountAccountId
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
-    ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ARID.[intCompanyLocationSubLocationId] END))
+    ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId]) END))
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = ISNULL(ICI.[ysnAutoBlend], @ZeroBit)
     ,[ysnBlended]                       = ISNULL(ARID.[ysnBlended], @ZeroBit)
@@ -2106,7 +2106,7 @@ SELECT
     ,[intDiscountAccountId]             = @DiscountAccountId
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
-    ,[intSubLocationId]                 = ARID.[intCompanyLocationSubLocationId]
+    ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = @ZeroBit
     ,[ysnBlended]                       = @ZeroBit
