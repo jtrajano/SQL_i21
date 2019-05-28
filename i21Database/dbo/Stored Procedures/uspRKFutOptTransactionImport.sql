@@ -63,7 +63,7 @@ BEGIN TRY
 				, ti.dblPrice
 				, strReference
 				, strStatus
-				, CONVERT(DATETIME, ti.dtmFilledDate, @ConvertYear) dtmFilledDate
+				, CONVERT(DATETIME, ti.strFilledDate, @ConvertYear) dtmFilledDate
 				, b.intBookId
 				, sb.intSubBookId
 				, CONVERT(DATETIME, dtmCreateDateTime, @ConvertYear) dtmCreateDateTime

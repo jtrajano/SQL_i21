@@ -116,7 +116,7 @@ WHILE @mRowNumber > 0
 			@strOptionMonth = strOptionMonth,
 			@strOptionType = strOptionType,
 			@strStatus = strStatus,
-			@dtmFilledDate = dtmFilledDate,
+			@dtmFilledDate = strFilledDate,
 			@strBook = strBook,
 			@strSubBook = strSubBook,
 			@dtmCreateDateTime = dtmCreateDateTime,
@@ -426,7 +426,7 @@ WHILE @mRowNumber > 0
 		DECLARE @isValidFilledDate BIT = 0
 		BEGIN
 			DECLARE @tempStrDate NVARCHAR(100)
-			SELECT  @tempStrDate = dtmFilledDate 
+			SELECT  @tempStrDate = strFilledDate 
 			FROM tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 
 			EXEC uspRKStringDateValidate @tempStrDate, @isValidFilledDate OUTPUT
@@ -546,12 +546,12 @@ WHILE @mRowNumber > 0
 			   ,[dblPrice]
 			   ,[strReference]
 			   ,[strStatus]
-			   ,[dtmFilledDate]
+			   ,[strFilledDate]
 			   ,[strBook]
 			   ,[strSubBook]
 			   ,[intConcurrencyId]
 			   ,[strErrorMsg]
-			   ,[dtmCreateDateTime])
+			   ,[strCreateDateTime])
 		
 		SELECT 
 				[intFutOptTransactionId]
@@ -573,7 +573,7 @@ WHILE @mRowNumber > 0
 			   ,[dblPrice]
 			   ,[strReference]
 			   ,[strStatus]
-			   ,[dtmFilledDate]
+			   ,[strFilledDate]
 			   ,[strBook]
 			   ,[strSubBook]
 			   ,[intConcurrencyId]
@@ -589,7 +589,7 @@ END
 
 SELECT  intFutOptTransactionErrLogId,intFutOptTransactionId,strName,strAccountNumber,strFutMarketName,strInstrumentType,strCommodityCode,strLocationName,
 		strSalespersonId,strCurrency,strBrokerTradeNo,strBuySell,dblNoOfContract,strFutureMonth,strOptionMonth,strOptionType,dblStrike,dblPrice,strReference,strStatus,
-		dtmFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,  dtmCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog  ORDER BY intFutOptTransactionErrLogId
+		strFilledDate,strBook,strSubBook,intConcurrencyId,strErrorMsg,  strCreateDateTime  FROM tblRKFutOptTransactionImport_ErrLog  ORDER BY intFutOptTransactionErrLogId
 --		WHERE isnull(strName,'') <> '' and isnull(strFutMarketName,'') <> '' and isnull(strInstrumentType,'') <> ''
 --AND isnull(strAccountNumber,'') <> '' and isnull(strCommodityCode,'') <> '' and isnull(strLocationName,'') <> '' and isnull(strSalespersonId,'') <> ''
 
