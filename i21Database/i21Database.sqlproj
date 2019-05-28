@@ -7558,6 +7558,7 @@
     <Build Include="dbo\Tables\tblCTEntityProducerMap.sql" />
     <Build Include="dbo\Views\vyuCTEntityProducerMap.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLoadNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetProducers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

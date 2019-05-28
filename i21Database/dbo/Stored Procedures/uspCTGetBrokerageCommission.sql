@@ -73,9 +73,10 @@ AS
 											AND	SEQ.intContractHeaderId	=	ISNULL(@intContractHeaderId,SEQ.intContractHeaderId)
 											AND	CST.ysnReceivable		=	ISNULL(@ysnReceivable,CST.ysnReceivable)
 		JOIN	tblCTContractHeader		HDR ON	HDR.intContractHeaderId =   CST.intContractHeaderId
-		JOIN	tblEMEntity				SEY ON	SEY.intEntityId			=   HDR.intCounterPartyId
+		
 		JOIN	tblICItem				CIM	ON	CIM.intItemId		    =   CST.intItemId 
 											AND	CIM.strCostType			=   'Commission'
+		LEFT	JOIN	tblEMEntity		SEY ON	SEY.intEntityId			=   HDR.intCounterPartyId
 		LEFT	JOIN
 		(
 				SELECT  intPContractDetailId,
@@ -89,7 +90,7 @@ AS
 				AND	    LO.intPurchaseSale  = 1
 				GROUP BY intPContractDetailId
 		)								LDL ON	LDL.intPContractDetailId =	SEQ.intContractDetailId
-		WHERE	CST.strParty IN ('Customer','Vendor') OR (CST.strParty = ('Broker') AND CST.strPaidBy = 'Company')
+		WHERE	CST.strParty IN ('Customer','Vendor') OR (CST.strParty = ('Broker') AND ISNULL(CST.strPaidBy,'') = CASE WHEN ISNULL(HDR.ysnBrokerage,0) = 1 THEN 'Company' ELSE ISNULL(CST.strPaidBy,'') END)
 	)t
 	WHERE	ISNULL(strStatus,'')	=   ISNULL(@strStatus,ISNULL(strStatus,''))
 	
