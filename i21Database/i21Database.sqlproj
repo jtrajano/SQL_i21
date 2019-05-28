@@ -7326,6 +7326,7 @@
     <Build Include="dbo\Tables\tblAPBillDetailArchive.sql" />
     <Build Include="dbo\Tables\tblAPBillDetailTaxArchive.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
+    <Build Include="dbo\Functions\fnCalculateValuationAverageCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
