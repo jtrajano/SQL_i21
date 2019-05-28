@@ -1515,6 +1515,7 @@ BEGIN
 											WHERE	strTransactionId = @strTransactionId 
 													AND strBatchId = @strBatchId
 													AND intTransactionId = @intTransactionId
+													AND intTransactionTypeId = 8 -- Consume													
 										) 
 										, ICTrans.dblQty
 									) 
