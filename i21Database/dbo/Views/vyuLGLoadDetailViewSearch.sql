@@ -231,6 +231,12 @@ SELECT   L.intLoadId
 		,BO.strBook
 		,L.intSubBookId
 		,SB.strSubBook
+		,strETAPOLReasonCode = ETAPOLRC.strReasonCode
+		,strETSPOLReasonCode = ETSPOLRC.strReasonCode
+		,strETAPODReasonCode = ETAPODRC.strReasonCode
+		,strETAPOLReasonCodeDescription = ETAPOLRC.strReasonCodeDescription
+		,strETSPOLReasonCodeDescription = ETSPOLRC.strReasonCodeDescription
+		,strETAPODReasonCodeDescription = ETAPODRC.strReasonCodeDescription
 FROM tblLGLoadDetail LoadDetail
 JOIN tblLGLoad L ON L.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -278,3 +284,6 @@ LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
 LEFT JOIN tblCTPosition POS ON POS.intPositionId = L.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
+LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
+LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
