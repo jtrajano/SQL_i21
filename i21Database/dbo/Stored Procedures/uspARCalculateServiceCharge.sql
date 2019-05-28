@@ -56,17 +56,21 @@ AS
 			RETURN 0
 		END
 
+	IF ISNULL(@locationId, 0) = 0
+		BEGIN
+			RAISERROR('Please setup your Default Location!', 16, 1) 
+			RETURN 0
+		END
+
+	SELECT TOP 1 @scAccountId = ISNULL(intServiceCharges,@scAccountId) FROM tblSMCompanyLocation WHERE intCompanyLocationId = @locationId
+
 	IF ISNULL(@scAccountId, 0) = 0
 		BEGIN
 			RAISERROR('There is no setup for Service Charge Account in the Company Configuration!', 16, 1) 
 			RETURN 0
 		END
 
-	IF ISNULL(@locationId, 0) = 0
-		BEGIN
-			RAISERROR('Please setup your Default Location!', 16, 1) 
-			RETURN 0
-		END
+
 
 	SET @batchId = CONVERT(NVARCHAR(100), NEWID())
 	SET @totalAmount = @zeroDecimal
