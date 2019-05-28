@@ -7557,6 +7557,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
     <Build Include="dbo\Tables\tblCTEntityProducerMap.sql" />
     <Build Include="dbo\Views\vyuCTEntityProducerMap.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetLoadNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
