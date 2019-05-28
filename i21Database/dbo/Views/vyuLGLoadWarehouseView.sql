@@ -39,11 +39,15 @@ SELECT DISTINCT
 	,intPContractSeq = PCD.intContractSeq
 	,strCommodity = PCMD.strCommodityCode
 	,strContractItem = PICT.strContractItemName
+	,strItemNo = Item.strItemNo
+	,strItemDescription = Item.strDescription
 	,LD.dblQuantity
+	,strItemUOM = UOM.strUnitMeasure
 	,strOrigin = Origin.strDescription
 	,LD.dblGross
 	,LD.dblTare
 	,LD.dblNet
+	,strWeightUOM = WUOM.strUnitMeasure
 	,strServiceContract = WRMH.strServiceContractNo
 	,strShipVia = Hauler.strName
 	,strWarehouse = CLSL.strSubLocationName
@@ -81,7 +85,8 @@ SELECT DISTINCT
 		WHEN 2 THEN 'Ocean Vessel'
 		WHEN 3 THEN 'Rail'
 		END COLLATE Latin1_General_CI_AS
-	  ,BI.strBillId
+	,BI.strBillId
+	,strLSINumber = LSI.strLoadNumber
 FROM tblLGLoadWarehouse LW
 	JOIN tblLGLoad L ON L.intLoadId = LW.intLoadId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
@@ -92,6 +97,8 @@ FROM tblLGLoadWarehouse LW
 	LEFT JOIN tblICCommodity PCMD ON PCH.intCommodityId = PCMD.intCommodityId
 	LEFT JOIN tblICItemContract PICT ON PICT.intItemContractId = PCD.intItemContractId
 	LEFT JOIN tblICItem Item ON Item.intItemId = LD.intItemId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = LD.intWeightItemUOMId
 	LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = WeightUOM.intUnitMeasureId
@@ -103,6 +110,7 @@ FROM tblLGLoadWarehouse LW
 	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
 	LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
 	LEFT JOIN tblAPBill BI ON BI.intBillId = LWS.intBillId
+	LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 	OUTER APPLY (SELECT TOP 1 ysnShowReceivedLoadsInWarehouseTab = ISNULL(ysnShowReceivedLoadsInWarehouseTab,0) FROM tblLGCompanyPreference) CP
 WHERE 
 	(CP.ysnShowReceivedLoadsInWarehouseTab = 0 AND L.intShipmentStatus NOT IN (4, 10) AND L.intShipmentType = 1)

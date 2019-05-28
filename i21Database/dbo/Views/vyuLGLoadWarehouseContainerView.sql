@@ -43,6 +43,7 @@ SELECT DISTINCT
 
 	,strPCompanyLocation = PCL.strLocationName
 	,strPContractNumber = PCH.strContractNumber
+	,strVendor = VEN.strName
 	,intPContractSeq = PCD.intContractSeq
 	,strCommodity = PCMD.strCommodityCode
 	,strContractItem = PICT.strContractItemName
