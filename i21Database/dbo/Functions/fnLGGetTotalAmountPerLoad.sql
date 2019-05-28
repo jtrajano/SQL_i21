@@ -10,6 +10,7 @@ RETURNS @returntable TABLE (
 	,strContainerRateCurrency NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,dblCurrencyExchangeRate NUMERIC(18, 6)
 	,dblBrokerage NUMERIC(18, 6)
+	,dblFreight NUMERIC(18, 6)
 	)
 AS
 BEGIN
@@ -55,15 +56,16 @@ BEGIN
 	WHERE LD.intLoadId = @intLoadId
 
 	INSERT INTO @returntable
-	SELECT SUM(dblTotalAmount) AS dblTotalAmount
-		,SUM(dblTotalQtyInPriceUOM) AS dblTotalQtyInPriceUOM
+	SELECT dblTotalAmount = SUM(dblTotalAmount) 
+		,dblTotalQtyInPriceUOM = SUM(dblTotalQtyInPriceUOM)
 		,intAmountCurrency
 		,strAmountCurrency
-		,ISNULL(@dblTotalCostPerContainer, 0)
-		,ISNULL(@intTotalCostPerContainerCurrency,intAmountCurrency)
-		,ISNULL(@strTotalCostPerContainerCurrency,strAmountCurrency)
-		,ISNULL(dblCurrencyExchangeRate,1)
-		,SUM(dblBrokerage * dblTotalWeightInCTUOM)
+		,dblTotalCostPerContainer = ISNULL(@dblTotalCostPerContainer, 0)
+		,intContainerRateCurrency = ISNULL(@intTotalCostPerContainerCurrency,intAmountCurrency)
+		,strContainerRateCurrency = ISNULL(@strTotalCostPerContainerCurrency,strAmountCurrency)
+		,dblCurrencyExchangeRate = ISNULL(dblCurrencyExchangeRate,1)
+		,dblBrokerage = SUM(dblBrokerage * dblTotalWeightInCTUOM)
+		,dblFreight = SUM(dblFreight * dblTotalWeightInCTUOM)
 	FROM (
 		SELECT dblNet
 			,UM.intUnitMeasureId
@@ -107,14 +109,27 @@ BEGIN
 								WHERE CC.intContractDetailId = CD.intContractDetailId
 									AND I.strCostType = 'Commission'
 							)
+			,dblFreight = (
+								SELECT SUM(CASE 
+											WHEN  BCU.ysnSubCurrency = 1
+												THEN (CC.dblRate / 100)/dbo.fnCTConvertQtyToTargetItemUOM(CC.intItemUOMId, CON.intNetWeightUOMId,1)
+											ELSE (CC.dblRate )/dbo.fnCTConvertQtyToTargetItemUOM(CC.intItemUOMId, CON.intNetWeightUOMId,1)
+											END)
+								FROM tblCTContractCost CC
+								JOIN tblICItem I ON I.intItemId = CC.intItemId
+								JOIN tblCTContractDetail CON ON CON.intContractDetailId = CC.intContractDetailId
+								LEFT JOIN tblSMCurrency BCU ON BCU.intCurrencyID = CC.intCurrencyId
+								WHERE CC.intContractDetailId = CD.intContractDetailId
+									AND I.strCostType = 'Freight'
+							)
 		FROM tblLGLoadDetail LD
-		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
-		JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
-		JOIN tblSMCurrency CU ON CU.intCurrencyID = AD.intSeqCurrencyId
-		LEFT JOIN tblSMCurrency MCU ON MCU.intCurrencyID = CU.intMainCurrencyId
+			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intWeightItemUOMId
+			JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+			CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+			JOIN tblSMCurrency CU ON CU.intCurrencyID = AD.intSeqCurrencyId
+			LEFT JOIN tblSMCurrency MCU ON MCU.intCurrencyID = CU.intMainCurrencyId
 		WHERE LD.intLoadId = @intLoadId
 		) t
 	GROUP BY intAmountCurrency
