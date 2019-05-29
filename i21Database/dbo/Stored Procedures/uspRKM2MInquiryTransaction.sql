@@ -1945,10 +1945,7 @@ FROM (
 			, dblFuturePrice1 as dblFuturePrice
 			, convert(decimal(24,6), case when ISNULL(intCommodityUnitMeasureId,0) = 0 then dblContractOriginalQty
 										else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,dblContractOriginalQty) end)
-				- ISNULL(convert(decimal(24,6), case when ISNULL(intCommodityUnitMeasureId,0) = 0 then InTransQty
-													else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,InTransQty) end),0)
-				- ISNULL(convert(decimal(24,6), case when ISNULL(intCommodityUnitMeasureId,0) = 0 then dblInvoicedQuantity
-													else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,dblInvoicedQuantity) end),0) as dblOpenQty
+				 as dblOpenQty
 		FROM (
 			SELECT cd.intContractHeaderId
 				, cd.intContractDetailId
