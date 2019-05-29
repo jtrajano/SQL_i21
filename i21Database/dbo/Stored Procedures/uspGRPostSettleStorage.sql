@@ -1159,12 +1159,12 @@ BEGIN TRY
 														CASE
 															WHEN a.intItemType = 1 THEN
 																(
-																	SELECT TOP 1 intInventoryReceiptItemId 
-																	FROM tblICInventoryReceiptItem 
-																	WHERE intInventoryReceiptId = (SELECT intInventoryReceiptId 
-																			FROM tblGRStorageHistory 
-																			WHERE intCustomerStorageId = CS.intCustomerStorageId
-																			AND intInventoryReceiptId IS NOT NULL)
+																	SELECT intInventoryReceiptItemId 
+																	FROM tblICInventoryReceiptItem RI
+																	INNER JOIN tblGRStorageHistory SH
+																		ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
+																	WHERE RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
+																		AND SH.intCustomerStorageId = CS.intCustomerStorageId
 																)
 															ELSE NULL
 														END
