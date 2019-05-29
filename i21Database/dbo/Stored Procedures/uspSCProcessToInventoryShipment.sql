@@ -525,6 +525,11 @@ BEGIN TRY
 				END
 	END
 
+
+	SELECT @strWhereFinalizedWeight = strWeightFinalized
+		 , @strWhereFinalizedGrade = strGradeFinalized
+	FROM vyuSCTicketScreenView where intTicketId = @intTicketId
+
 	EXEC dbo.uspSCAddScaleTicketToItemShipment @intTicketId ,@intUserId ,@ItemsForItemShipment ,@intEntityId ,@intOrderId ,@InventoryShipmentId OUTPUT;
 
 	SELECT	@strTransactionId = ship.strShipmentNumber
