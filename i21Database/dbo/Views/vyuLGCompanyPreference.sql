@@ -238,6 +238,9 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnEnableAccrualsForInbound
 	,CP.ysnEnableAccrualsForOutbound
 	,CP.ysnEnableAccrualsForDropShip
+	,CP.ysnMatchItemAllocation
+	,CP.ysnMatchFuturesAllocation
+	,CP.ysnMatchBookAllocation
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
