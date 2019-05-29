@@ -132,25 +132,25 @@ BEGIN
 	FROM tblICLot
 	WHERE intLotId = @intLotId
 
-	IF EXISTS (
-			SELECT strLotNumber,Count(*)
-			FROM tblICLot
-			WHERE strLotNumber = @strLotNumber
-				AND dblQty > 0
-				AND intLocationId = @intLocationId
-				group by strLotNumber
-				having Count(*)>1
-			)
-		AND @ysnLotNumberUniqueByItem = 1
-	BEGIN
-		RAISERROR (
-				'Lot number already exists. Note: Same lot number cannot be used by more than one item.'
-				,16
-				,1
-				)
+	--IF EXISTS (
+	--		SELECT strLotNumber,Count(*)
+	--		FROM tblICLot
+	--		WHERE strLotNumber = @strLotNumber
+	--			AND dblQty > 0
+	--			AND intLocationId = @intLocationId
+	--			group by strLotNumber
+	--			having Count(*)>1
+	--		)
+	--	AND @ysnLotNumberUniqueByItem = 1
+	--BEGIN
+	--	RAISERROR (
+	--			'Lot number already exists. Note: Same lot number cannot be used by more than one item.'
+	--			,16
+	--			,1
+	--			)
 
-		RETURN - 1;
-	END
+	--	RETURN - 1;
+	--END
 
 	IF NOT EXISTS (
 			SELECT 1
