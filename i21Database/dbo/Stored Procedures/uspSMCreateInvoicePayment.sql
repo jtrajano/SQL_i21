@@ -28,11 +28,54 @@ DECLARE @LogId INT
 IF @strAction = 'Add'
 BEGIN
 	DECLARE @intPaymentMethodId		INT = NULL
-	
+		  , @intUndepositedFundId 	INT	= NULL
+		  , @intCompanyLocationId	INT = NULL
+		  , @intBankAccountId		INT = NULL
+		  , @strLocationName		NVARCHAR(100) = NULL
+
+	--GET DEFAULT VALUES
+	SELECT TOP 1 @intCompanyLocationId	= CL.intCompanyLocationId
+			   , @intUndepositedFundId	= CL.intUndepositedFundsId
+			   , @intBankAccountId		= BA.intBankAccountId
+			   , @strLocationName		= CL.strLocationName
+	FROM tblSMCompanyLocation CL
+	LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+	WHERE CL.ysnLocationActive = 1
+
 	SELECT TOP 1 @intPaymentMethodId = intPaymentMethodID
 	FROM tblSMPaymentMethod
 	WHERE strPaymentMethod = 'ACH'
 
+	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0
+		BEGIN
+			SET @intCompanyLocationId	= NULL
+			SET @intUndepositedFundId	= NULL
+			SET @intBankAccountId		= NULL
+
+			SELECT TOP 1 @intCompanyLocationId	= CL.intCompanyLocationId
+					   , @intUndepositedFundId	= CL.intUndepositedFundsId
+					   , @intBankAccountId		= BA.intBankAccountId
+					   , @strLocationName		= CL.strLocationName
+			FROM tblSMCompanyLocation CL
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			WHERE CL.ysnLocationActive = 1
+			  AND ISNULL(BA.intEFTARFileFormatId, 0) <> 0
+
+			IF ISNULL(@intBankAccountId, 0) = 0
+				BEGIN
+					SET @ErrorMessage = 'Location: ' + @strLocationName + ' bank account with ACH file format setup is required for payment with ACH payment method!'
+					RAISERROR(@ErrorMessage, 16, 1);
+					GOTO Exit_Routine
+				END
+		END
+
+	IF ISNULL(@intCompanyLocationId, 0) = 0
+		BEGIN
+			SET @ErrorMessage = 'Company Location is required when creating payment!'
+			RAISERROR(@ErrorMessage, 16, 1);
+			GOTO Exit_Routine
+		END
+		
 	--FOR PAYMENTS WITH INVOICES
 	IF ISNULL(@strInvoiceNumber, '') <> ''
 		BEGIN
@@ -112,7 +155,7 @@ BEGIN
 				, strSourceId					= INVOICE.strInvoiceNumber
 				, intPaymentId					= INVOICE.intPaymentId
 				, intEntityCustomerId			= INVOICE.intEntityCustomerId
-				, intCompanyLocationId			= INVOICE.intCompanyLocationId
+				, intCompanyLocationId			= @intCompanyLocationId
 				, intCurrencyId					= INVOICE.intCurrencyId
 				, dtmDatePaid					= GETDATE()
 				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
@@ -120,7 +163,7 @@ BEGIN
 				, strPaymentInfo				= NULL
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
-				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN BA.intBankAccountId ELSE NULL END
+				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intBankAccountId ELSE NULL END
 				, dblAmountPaid					= ISNULL(PAYMENTS.dblPayment, 0)
 				, ysnPost						= NULL
 				, intEntityId					= @intUserId
@@ -147,8 +190,6 @@ BEGIN
 				, ysnAllowOverpayment			= 0
 				, ysnFromAP						= 0
 			FROM vyuARInvoicesForPayment INVOICE
-			INNER JOIN tblSMCompanyLocation CL ON INVOICE.intCompanyLocationId = CL.intCompanyLocationId
-			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 			CROSS APPLY (
 				SELECT TOP 1 dblPayment		= ISNULL(dblPayment, 0)
 						   , dblDiscount	= ISNULL(dblDiscount, 0)
@@ -161,35 +202,10 @@ BEGIN
 	--FOR PREPAYMENTS
 	ELSE
 		BEGIN
-			DECLARE @intUndepositedFundId 	INT	= NULL
-				  , @intCompanyLocationId	INT = NULL
-				  , @intBankAccountId		INT = NULL
-
-			SELECT TOP 1 @intCompanyLocationId = CL.intCompanyLocationId
-					   , @intUndepositedFundId = CL.intUndepositedFundsId
-					   , @intBankAccountId	   = BA.intBankAccountId
-			FROM tblSMCompanyLocation CL
-			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
-			WHERE CL.ysnLocationActive = 1
-
 			--VALIDATIONS			
 			IF ISNULL(@intEntityCustomerId, 0) = 0
 				BEGIN
 					SET @ErrorMessage = 'Customer is required when creating prepayment!'
-					RAISERROR(@ErrorMessage, 16, 1);
-					GOTO Exit_Routine
-				END
-
-			IF ISNULL(@intCompanyLocationId, 0) = 0
-				BEGIN
-					SET @ErrorMessage = 'Company Location is required when creating prepayment!'
-					RAISERROR(@ErrorMessage, 16, 1);
-					GOTO Exit_Routine
-				END
-
-			IF ISNULL(@intBankAccountId, 0) = 0 AND ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0
-				BEGIN
-					SET @ErrorMessage = 'Bank Account is required for payment with ACH payment method!'
 					RAISERROR(@ErrorMessage, 16, 1);
 					GOTO Exit_Routine
 				END
