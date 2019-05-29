@@ -1440,7 +1440,7 @@ BEGIN TRY
 				SELECT @intTransactionId = intTransactionId
 				FROM tblSMTransaction
 				WHERE intScreenId = @intScreenId
-					AND strTransactionNo = @strShipmentNumber
+					--AND strTransactionNo = @strShipmentNumber
 					AND intRecordId = @intInventoryShipmentId
 
 				IF @intTransactionId IS NULL

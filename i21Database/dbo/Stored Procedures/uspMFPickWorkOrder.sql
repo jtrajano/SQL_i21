@@ -87,6 +87,7 @@ BEGIN TRY
 		,@strCycleCountbasedonRecipeTolerance NVARCHAR(50)
 		,@dblPhysicalCount NUMERIC(18, 6)
 		,@intWorkOrderConsumedLotId INT
+		,@intMainItemId int
 
 	SELECT @intNoOfDecimalPlacesOnConsumption = intNoOfDecimalPlacesOnConsumption
 		,@ysnConsumptionByRatio = ysnConsumptionByRatio
@@ -917,14 +918,15 @@ BEGIN TRY
 
 		INSERT INTO @tblMFWorkOrderInputItem
 		SELECT DISTINCT I.intItemId
-			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (PARTITION BY I.intItemId)
+			,SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (PARTITION BY I.intItemId,WI.intMainItemId)
 			,I.intItemUOMId
-			,(SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (PARTITION BY I.intItemId) / SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (PARTITION BY I.intMainItemId)) * 100
+			,(SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (PARTITION BY I.intItemId,WI.intMainItemId) / SUM(IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(WI.intItemUOMId, I.intItemUOMId, WI.dblQuantity), 0)) OVER (PARTITION BY I.intMainItemId)) * 100
 			,I.intMainItemId
 		FROM @tblICItem I
 		JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intItemId = I.intItemId
 			AND WI.intWorkOrderId = @intWorkOrderId
 			AND WI.ysnConsumptionReversed = 0
+			and I.intMainItemId =WI.intMainItemId 
 
 		DECLARE @tblItem1 TABLE (intItemId INT)
 
@@ -1006,6 +1008,8 @@ BEGIN TRY
 
 		SELECT @dblUpperToleranceReqQty = NULL
 
+		Select @intMainItemId=NULL
+
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
 			,@intRecipeItemUOMId = intItemUOMId
@@ -1015,6 +1019,7 @@ BEGIN TRY
 			,@dblLowerToleranceReqQty = dblLowerToleranceReqQty
 			,@dblUpperToleranceReqQty = dblUpperToleranceReqQty
 			,@intCategoryId = intCategoryId
+			,@intMainItemId=intMainItemId
 		FROM @tblItem
 		WHERE intItemRecordId = @intItemRecordId
 
@@ -2340,6 +2345,7 @@ BEGIN TRY
 								1
 								,3
 								)
+							AND IsNULL(intMainItemId,@intMainItemId)=@intMainItemId
 						)
 				BEGIN
 					SELECT @intCategoryId = intCategoryId
@@ -2366,6 +2372,7 @@ BEGIN TRY
 						,intStageLocationId
 						,dblUpperToleranceQty
 						,dblLowerToleranceQty
+						,intMainItemId
 						)
 					SELECT @intWorkOrderId
 						,@intLotItemId
@@ -2390,6 +2397,7 @@ BEGIN TRY
 						,@intStageLocationId
 						,@dblUpperToleranceReqQty
 						,@dblLowerToleranceReqQty
+						,@intMainItemId
 				END
 				ELSE
 				BEGIN
@@ -2409,6 +2417,7 @@ BEGIN TRY
 							1
 							,3
 							)
+						AND IsNULL(intMainItemId,@intMainItemId)=@intMainItemId
 				END
 
 				UPDATE @tblLot
@@ -2518,6 +2527,7 @@ BEGIN TRY
 								1
 								,3
 								)
+						and IsNULL(intMainItemId,@intMainItemId)=@intMainItemId
 						)
 				BEGIN
 					SELECT @intCategoryId = intCategoryId
@@ -2542,6 +2552,7 @@ BEGIN TRY
 						,intItemTypeId
 						,intMachineId
 						,intStageLocationId
+						,intMainItemId
 						)
 					SELECT @intWorkOrderId
 						,@intLotItemId
@@ -2564,6 +2575,7 @@ BEGIN TRY
 							END
 						,@intMachineId
 						,@intStageLocationId
+						,@intMainItemId
 				END
 				ELSE
 				BEGIN
@@ -2581,6 +2593,7 @@ BEGIN TRY
 							1
 							,3
 							)
+							and IsNULL(intMainItemId,@intMainItemId)=@intMainItemId
 				END
 
 				UPDATE @tblLot
