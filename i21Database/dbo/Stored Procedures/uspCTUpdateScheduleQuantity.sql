@@ -117,7 +117,7 @@ BEGIN TRY
 		BEGIN
 			IF ABS(@dblScheduleQty + @dblQuantityToUpdate) > @dblTolerance
 			BEGIN
-				IF @intContractStatusId = 6 AND @strScreenName = 'Load Schedule'
+				IF @intContractStatusId IN (5,6) AND @strScreenName = 'Load Schedule'
 				BEGIN
 					SET @dblQuantityToUpdate = @dblQuantityToUpdate - (@dblScheduleQty + @dblQuantityToUpdate)
 				END
