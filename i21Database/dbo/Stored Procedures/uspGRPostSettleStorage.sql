@@ -1304,11 +1304,11 @@ BEGIN TRY
 															WHEN a.intItemType = 1 THEN
 																(
 																	SELECT intInventoryReceiptItemId 
-																	FROM tblICInventoryReceiptItem 
-																	WHERE intInventoryReceiptId = (SELECT intInventoryReceiptId 
-																			FROM tblGRStorageHistory 
-																			WHERE intCustomerStorageId = CS.intCustomerStorageId
-																			AND intInventoryReceiptId IS NOT NULL)
+																	FROM tblICInventoryReceiptItem RI
+																	INNER JOIN tblGRStorageHistory SH
+																		ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
+																	WHERE RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
+																		AND SH.intCustomerStorageId = CS.intCustomerStorageId
 																)
 															ELSE NULL
 														END
