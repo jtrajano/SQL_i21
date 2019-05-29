@@ -459,7 +459,8 @@ BEGIN TRY
 	,dblQuantity			
 	,strQuantityUOM			
 	,dblCashPrice			
-	,strPriceUOM			
+	,strPriceUOM	
+	,dblQtyinCommodityStockUOM		
 	,strStockUOM			
 	,dblAvailableQty		
 	,dblAmount
@@ -506,17 +507,18 @@ BEGIN TRY
 	,dblFutures				= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0)),0)
 	,dblBasis				= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(CD.dblBasis,0)),0)
 	,strBasisUOM			= BUOM.strUnitMeasure
-	,dblQuantity = CASE WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, CD.dblQuantity), 0) + ISNULL(BL.dblQuantity, 0) ELSE ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0)) * CD.dblQuantityPerLoad), 0) END - ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, ISNULL(PF.dblQuantity, 0)), 0)
+	,dblQuantity = CASE WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity,0) + ISNULL(BL.dblQuantity, 0) ELSE ISNULL((CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0)) * CD.dblQuantityPerLoad, 0) END - ISNULL( ISNULL(PF.dblQuantity, 0), 0)
 	,strQuantityUOM			= IUM.strUnitMeasure
 	,dblCashPrice			= CASE 
 										WHEN CD.intPricingTypeId IN(1,2) THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)
 										ELSE ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblCashPrice,0)),0)
 							  END											
 	,strPriceUOM			= PUOM.strUnitMeasure
+	,dblQtyinCommodityStockUOM = CASE WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, CD.dblQuantity), 0) + ISNULL(BL.dblQuantity, 0) ELSE ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0)) * CD.dblQuantityPerLoad), 0) END - ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, ISNULL(PF.dblQuantity, 0)), 0)
 	,strStockUOM			= StockUM.strUnitMeasure
 	,dblAvailableQty = CASE WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, CD.dblQuantity), 0) + ISNULL(BL.dblQuantity, 0) ELSE ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0)) * CD.dblQuantityPerLoad), 0) END - ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, ISNULL(PF.dblQuantity, 0)), 0)
 	,dblAmount = (CASE WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, CD.dblQuantity), 0) + ISNULL(BL.dblQuantity, 0) ELSE ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0)) * CD.dblQuantityPerLoad), 0) END - ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId, CD.intItemUOMId, ISNULL(PF.dblQuantity, 0)), 0)) * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId, dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures, 0) + ISNULL(CD.dblBasis, 0)), 0)
-    ,intUnitMeasureId			= CD.intUnitMeasureId
+    ,intUnitMeasureId			= CD.intItemUOMId
 	,intContractStatusId		= CD.intContractStatusId
 	,intCurrencyId				= CD.intCurrencyId
 	,strCurrency				= Cur.strCurrency
@@ -631,7 +633,8 @@ BEGIN TRY
 	,dblQuantity			
 	,strQuantityUOM			
 	,dblCashPrice			
-	,strPriceUOM			
+	,strPriceUOM	
+	,dblQtyinCommodityStockUOM		
 	,strStockUOM			
 	,dblAvailableQty		
 	,dblAmount
@@ -674,10 +677,11 @@ BEGIN TRY
 	,dblFutures				= ISNULL(PF.dblFutures,0)
 	,dblBasis				= ISNULL(PF.dblBasis,0)
 	,strBasisUOM			= BUOM.strUnitMeasure
-	,dblQuantity			= ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)- ISNULL(PF.dblShippedQty,0)) ,0) 
+	,dblQuantity			= ISNULL(PF.dblQuantity,0)- ISNULL(PF.dblShippedQty,0)
 	,strQuantityUOM			= IUM.strUnitMeasure
 	,dblCashPrice			= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
 	,strPriceUOM			=  PUOM.strUnitMeasure
+	,dblQtyinCommodityStockUOM = dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId, ISNULL(PF.dblQuantity,0)- ISNULL(PF.dblShippedQty,0))
 	,strStockUOM			= StockUM.strUnitMeasure
 	,dblAvailableQty		=  ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0)- ISNULL(PF.dblShippedQty,0)) ,0) 
 	,dblAmount				= (
@@ -685,7 +689,7 @@ BEGIN TRY
 							   ) 
 							   * ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblCashPrice,0)),0)
     
-	,intUnitMeasureId			= CD.intUnitMeasureId
+	,intUnitMeasureId			= CD.intItemUOMId
 	,intContractStatusId		= CD.intContractStatusId
 	,intCurrencyId				= CD.intCurrencyId
 	,strCurrency				= Cur.strCurrency
@@ -791,8 +795,8 @@ BEGIN TRY
 
 	UPDATE FR
 	 SET
-	 FR.dblQtyinCommodityStockUOM		 = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblQuantity)
-	,FR.dblFuturesinCommodityStockUOM    = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblFutures)
+	-- FR.dblQtyinCommodityStockUOM		 = dbo.fnICConvertUOMtoStockUnit(FR.intItemId,FR.intUnitMeasureId,FR.dblQuantity)
+	FR.dblFuturesinCommodityStockUOM    = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblFutures)
 	,FR.dblBasisinCommodityStockUOM      = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblBasis)
 	,FR.dblCashPriceinCommodityStockUOM  = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblCashPrice)
 	,FR.dblAmountinCommodityStockUOM     = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblAmount)
