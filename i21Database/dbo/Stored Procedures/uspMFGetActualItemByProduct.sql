@@ -66,6 +66,9 @@ BEGIN
 			,WO.dblProducedQuantity
 			,I.intCategoryId
 			,I.strLotTracking
+			,0 As intMainItemId
+			,'' As strMainItemNo
+			,'' As strMainItemDescription
 		FROM dbo.tblMFWorkOrderRecipe R
 		LEFT JOIN dbo.tblMFWorkOrderRecipeCategory RC ON RC.intRecipeId = R.intRecipeId
 			AND RC.intWorkOrderId = R.intWorkOrderId
@@ -132,6 +135,9 @@ BEGIN
 			,WO.dblProducedQuantity
 			,I.intCategoryId
 			,I.strLotTracking
+			,I1.intItemId As intMainItemId
+			,I1.strItemNo As strMainItemNo
+			,I1.strDescription As strMainItemDescription
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -156,6 +162,7 @@ BEGIN
 		JOIN dbo.tblICItemUOM SIU ON SIU.intItemId = I.intItemId
 			AND SIU.ysnStockUnit = 1
 		JOIN dbo.tblICUnitMeasure SU ON SU.intUnitMeasureId = SIU.intUnitMeasureId
+		JOIN dbo.tblICItem I1 on I1.intItemId=RI.intItemId
 			AND R.intLocationId = @intLocationId
 			AND R.ysnActive = 1
 			AND R.intItemId = @intItemId

@@ -33,6 +33,8 @@ BEGIN
 		,U1.strUserName strLastModifiedUser
 		,CC.dtmLastModified
 		,CC.intConcurrencyId
+		,I1.strItemNo As strMainItemNo
+		,I1.strDescription As strMainItemDescription
 	FROM dbo.tblMFProcessCycleCount CC
 	JOIN dbo.tblMFProcessCycleCountSession CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
 	JOIN dbo.tblICStorageLocation SL1 ON SL1.intStorageLocationId = CC.intProductionStagingLocationId
@@ -40,6 +42,7 @@ BEGIN
 	JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = CC.intCreatedUserId
 	JOIN dbo.tblSMUserSecurity U1 ON U1.[intEntityId] = CC.intCreatedUserId
 	JOIN dbo.tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = SL1.intSubLocationId
+	Left JOIN tblICItem I1 on I1.intItemId=CC.intMainItemId 
 	WHERE CS.intWorkOrderId = @intWorkOrderId
 	ORDER BY CC.intCycleCountId
 END

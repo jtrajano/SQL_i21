@@ -152,6 +152,7 @@ BEGIN TRY
 		,intStorageLocationId INT
 		,ysnSubstituteItem BIT
 		,intItemUOMId INT
+		,intMainItemId INT
 		)
 	DECLARE @tblOutputItem TABLE (
 		intItemRecordKey INT Identity(1, 1)
@@ -251,6 +252,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,ysnSubstituteItem
 		,intItemUOMId
+		,intMainItemId
 		)
 	SELECT ri.intItemId
 		,ri.dblCalculatedQuantity
@@ -268,6 +270,7 @@ BEGIN TRY
 			END
 		,0
 		,ri.intItemUOMId
+		,ri.intItemId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 	WHERE ri.intWorkOrderId = @intWorkOrderId
@@ -293,6 +296,7 @@ BEGIN TRY
 		,intStorageLocationId
 		,ysnSubstituteItem
 		,intItemUOMId
+		,intMainItemId
 		)
 	SELECT rs.intSubstituteItemId
 		,ri.dblCalculatedQuantity
@@ -310,6 +314,7 @@ BEGIN TRY
 			END
 		,1
 		,rs.intItemUOMId
+		,rs.intItemId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
 	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
 		AND rs.intWorkOrderId = ri.intWorkOrderId
@@ -353,65 +358,64 @@ BEGIN TRY
 	FROM tblMFProductionSummary PS
 	JOIN @tblOutputItem O ON O.intItemId = PS.intItemId
 
-	UPDATE tblMFProductionSummary
-	SET dblOpeningConversionQuantity = dblOpeningConversionQuantity + (
-			CASE 
-				WHEN I.ysnScaled = 1
-					THEN ISNULL((
-								SELECT SUM(F.dblOpeningOutputQuantity / (
-											CASE 
-												WHEN F.dblCalculatedQuantity = 0
-													THEN 1
-												ELSE F.dblCalculatedQuantity
-												END
-											))
-								FROM tblMFProductionSummary F
-								WHERE F.dblOpeningOutputQuantity > 0
-									AND F.intWorkOrderId = @intWorkOrderId
-								) * I.dblCalculatedQuantity, 0)
-				ELSE I.dblCalculatedQuantity
-				END
-			)
-		,dblOutputConversionQuantity = dblOutputConversionQuantity + (
-			CASE 
-				WHEN I.ysnScaled = 1
-					THEN ISNULL((
-								SELECT SUM(F.dblOutputQuantity / (
-											CASE 
-												WHEN F.dblCalculatedQuantity = 0
-													THEN 1
-												ELSE F.dblCalculatedQuantity
-												END
-											))
-								FROM tblMFProductionSummary F
-								WHERE F.dblOutputQuantity > 0
-									AND F.intWorkOrderId = @intWorkOrderId
-								) * I.dblCalculatedQuantity, 0)
-				ELSE I.dblCalculatedQuantity
-				END
-			)
-		,dblCountConversionQuantity = dblCountConversionQuantity + (
-			CASE 
-				WHEN I.ysnScaled = 1
-					THEN ISNULL((
-								SELECT SUM(F.dblCountOutputQuantity / (
-											CASE 
-												WHEN F.dblCalculatedQuantity = 0
-													THEN 1
-												ELSE F.dblCalculatedQuantity
-												END
-											))
-								FROM tblMFProductionSummary F
-								WHERE F.dblCountOutputQuantity > 0
-									AND F.intWorkOrderId = @intWorkOrderId
-								) * I.dblCalculatedQuantity, 0)
-				ELSE I.dblCalculatedQuantity
-				END
-			)
-	FROM tblMFProductionSummary S
-	JOIN @tblInputItem I ON I.intItemId = S.intItemId
-	WHERE S.intWorkOrderId = @intWorkOrderId
-
+	--UPDATE tblMFProductionSummary
+	--SET dblOpeningConversionQuantity = dblOpeningConversionQuantity + (
+	--		CASE 
+	--			WHEN I.ysnScaled = 1
+	--				THEN ISNULL((
+	--							SELECT SUM(F.dblOpeningOutputQuantity / (
+	--										CASE 
+	--											WHEN F.dblCalculatedQuantity = 0
+	--												THEN 1
+	--											ELSE F.dblCalculatedQuantity
+	--											END
+	--										))
+	--							FROM tblMFProductionSummary F
+	--							WHERE F.dblOpeningOutputQuantity > 0
+	--								AND F.intWorkOrderId = @intWorkOrderId
+	--							) * I.dblCalculatedQuantity, 0)
+	--			ELSE I.dblCalculatedQuantity
+	--			END
+	--		)
+	--	,dblOutputConversionQuantity = dblOutputConversionQuantity + (
+	--		CASE 
+	--			WHEN I.ysnScaled = 1
+	--				THEN ISNULL((
+	--							SELECT SUM(F.dblOutputQuantity / (
+	--										CASE 
+	--											WHEN F.dblCalculatedQuantity = 0
+	--												THEN 1
+	--											ELSE F.dblCalculatedQuantity
+	--											END
+	--										))
+	--							FROM tblMFProductionSummary F
+	--							WHERE F.dblOutputQuantity > 0
+	--								AND F.intWorkOrderId = @intWorkOrderId
+	--							) * I.dblCalculatedQuantity, 0)
+	--			ELSE I.dblCalculatedQuantity
+	--			END
+	--		)
+	--	,dblCountConversionQuantity = dblCountConversionQuantity + (
+	--		CASE 
+	--			WHEN I.ysnScaled = 1
+	--				THEN ISNULL((
+	--							SELECT SUM(F.dblCountOutputQuantity / (
+	--										CASE 
+	--											WHEN F.dblCalculatedQuantity = 0
+	--												THEN 1
+	--											ELSE F.dblCalculatedQuantity
+	--											END
+	--										))
+	--							FROM tblMFProductionSummary F
+	--							WHERE F.dblCountOutputQuantity > 0
+	--								AND F.intWorkOrderId = @intWorkOrderId
+	--							) * I.dblCalculatedQuantity, 0)
+	--			ELSE I.dblCalculatedQuantity
+	--			END
+	--		)
+	--FROM tblMFProductionSummary S
+	--JOIN @tblInputItem I ON I.intItemId = S.intItemId
+	--WHERE S.intWorkOrderId = @intWorkOrderId
 	UPDATE tblMFProductionSummary
 	SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity) - (dblOpeningQuantity + dblInputQuantity)
 		,dblYieldPercentage = (
@@ -505,9 +509,12 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
+	DECLARE @tblMFProcessedItem TABLE (intItemId INT)
+
+	SELECT @intProductionSummaryId = Min(F.intItemId)
 	FROM tblMFProductionSummary F
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
+		AND IsNULL(F.intMainItemId,I.intMainItemId) = I.intMainItemId
 	WHERE F.intWorkOrderId = @intWorkOrderId
 		AND F.dblYieldQuantity <> 0
 		AND F.intItemTypeId IN (
@@ -526,20 +533,26 @@ BEGIN TRY
 			,@ysnYieldLoss = NULL
 
 		SELECT @intItemId = F.intItemId
-			,@dblYieldQuantity = ABS(F.dblYieldQuantity)
-			,@dblItemYieldQuantity = ABS(F.dblYieldQuantity)
-			,@intStorageLocationId = IsNULL(F.intStageLocationId, I.intStorageLocationId)
+			,@dblYieldQuantity = SUM(ABS(F.dblYieldQuantity))
+			,@dblItemYieldQuantity = SUM(ABS(F.dblYieldQuantity))
+			,@intStorageLocationId = IsNULL(F.intStageLocationId, (Select Top 1 I.intStorageLocationId from @tblInputItem I Where I.intItemId=F.intItemId))
 			,@intMachineId = F.intMachineId
-			,@intYieldItemUOMId = I.intItemUOMId
+			,@intYieldItemUOMId = (Select Top 1 I.intItemUOMId from @tblInputItem I Where I.intItemId=F.intItemId)
 			,@ysnYieldLoss = CASE 
-				WHEN F.dblYieldQuantity < 0
+				WHEN SUM(F.dblYieldQuantity) < 0
 					THEN 1
 				ELSE 0
 				END
 		FROM tblMFProductionSummary F
-		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		WHERE F.intProductionSummaryId = @intProductionSummaryId
+		WHERE F.intItemId = @intProductionSummaryId
 			AND F.dblYieldQuantity < 0
+			AND F.intWorkOrderId = @intWorkOrderId
+		GROUP BY F.intItemId
+			,F.intStageLocationId
+			,F.intMachineId
+
+		INSERT INTO @tblMFProcessedItem
+		SELECT @intItemId
 
 		IF @strInstantConsumption = 'False'
 		BEGIN
@@ -1843,12 +1856,17 @@ BEGIN TRY
 			END
 		END
 
-		SELECT @intProductionSummaryId = Min(intProductionSummaryId)
+		SELECT @intProductionSummaryId = Min(F.intItemId)
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		WHERE intProductionSummaryId > @intProductionSummaryId
+			AND IsNULL(F.intMainItemId,I.intMainItemId)  = I.intMainItemId
+		WHERE F.intItemId > @intProductionSummaryId
 			AND F.intWorkOrderId = @intWorkOrderId
 			AND F.dblYieldQuantity < 0
+			AND I.intItemId NOT IN (
+				SELECT I1.intItemId
+				FROM @tblMFProcessedItem I1
+				)
 	END
 
 	UPDATE dbo.tblMFWorkOrder

@@ -66,6 +66,7 @@ BEGIN TRY
 		,@strWorkOrderNo NVARCHAR(50)
 		,@dtmProductionDate DATETIME
 		,@intDestinationLotId int
+		,@intMainItemId int
 
 	SELECT @strWorkOrderNo = strWorkOrderNo
 	FROM dbo.tblMFWorkOrder
@@ -79,6 +80,7 @@ BEGIN TRY
 		,@intMachineId = intMachineId
 		,@dtmProductionDate = dtmProductionDate
 		,@intDestinationLotId=intDestinationLotId
+		,@intMainItemId=intMainItemId
 	FROM tblMFWorkOrderInputLot
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
@@ -321,6 +323,7 @@ BEGIN TRY
 				THEN IsNULL(@intMachineId, 0)
 			ELSE IsNULL(intMachineId, 0)
 			END
+		AND IsNULL(intMainItemId,IsNULL(@intMainItemId,0))=IsNULL(@intMainItemId,0)
 
 	DELETE
 	FROM tblMFProductionSummary
@@ -332,6 +335,7 @@ BEGIN TRY
 			ELSE IsNULL(intMachineId, 0)
 			END
 		AND dblInputQuantity = 0
+		AND IsNULL(intMainItemId,IsNULL(@intMainItemId,0))=IsNULL(@intMainItemId,0)
 
 	SELECT @intLotId = NULL
 
