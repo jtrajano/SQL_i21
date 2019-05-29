@@ -36,8 +36,6 @@ BEGIN TRY
 				, dblFreightRate = ISNULL(CT.dblRate,SC.dblFreightRate)
                 , intHaulerId = ISNULL(CT.intVendorId,SC.intHaulerId)
                 , ysnFarmerPaysFreight = ISNULL(CT.ysnPrice,SC.ysnFarmerPaysFreight)
-				, intWeightId = CT.intWeightId
-				, intGradeId  = CT.intGradeId
 				FROM tblSCTicket SC 
 				INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
 				OUTER APPLY(
@@ -52,8 +50,6 @@ BEGIN TRY
 					,CTCost.dblRate
 					,CTCost.intVendorId
 					,CTCost.ysnPrice
-					,CTH.intWeightId
-					,CTH.intGradeId
 					FROM tblCTContractDetail CTD 
 					INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 					INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
