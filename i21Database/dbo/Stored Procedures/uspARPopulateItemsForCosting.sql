@@ -64,7 +64,7 @@ SELECT
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]				= CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblQty, 0) ELSE ARID.[dblUnitQty] END
+	,[dblUOMQty]				= CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblUOMQty, 0) ELSE ARID.[dblUnitQty] END
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -91,7 +91,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															, CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblUOMQty, 0) ELSE ARID.[dblUnitQty] END
+															, ARID.[dblUnitQty]
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
@@ -201,7 +201,7 @@ SELECT
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]				= CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblQty, 0) ELSE ARID.[dblUnitQty] END
+	,[dblUOMQty]				= CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblUOMQty, 0) ELSE ARID.[dblUnitQty] END
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -228,7 +228,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															, CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblUOMQty, 0) ELSE ARID.[dblUnitQty] END
+															, ARID.[dblUnitQty]
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
