@@ -200,9 +200,9 @@ BEGIN TRY
 				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
 				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
-				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(A.intItemUOMId,@intTicketItemUOMId,dblQtyShipped)) AS DECIMAL(18,6)) FROM tblARInvoiceDetail A
-					INNER JOIN tblICInventoryShipmentItem B on A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
-					WHERE intInvoiceId = @intInvoiceId))
+				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId,@intTicketItemUOMId,ISI.dblQuantity)) AS DECIMAL(18,6))  FROM tblICInventoryShipment ICIS
+					INNER JOIN tblICInventoryShipmentItem ISI ON ICIS.intInventoryShipmentId = ISI.intInventoryShipmentId
+					WHERE intSourceId = @intTicketId))
 				BEGIN
 					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits
 				END
