@@ -80,14 +80,17 @@ BEGIN
 	END
 
 
+
+
 	IF(@strType = 'Remote')
 	BEGIN
 		IF(@strBasis = 'Transfer Cost')
 			BEGIN
 				SET @ysnCheckIndex = 0
 			END
-		ELSE IF(@strBasis = 'Index')
+		ELSE IF(LOWER(@strBasis) LIKE '%index%')
 			BEGIN
+				SET @strBasis = 'Index'
 				SET @ysnCheckIndex = 1
 			END
 		ELSE
@@ -112,8 +115,9 @@ BEGIN
 	END
 	ELSE IF(@strType = 'Local/Network')
 	BEGIN
-		IF(@strBasis = 'Index')
+		IF(LOWER(@strBasis) LIKE '%index%')
 			BEGIN
+				SET @strBasis = 'Index'
 				SET @ysnCheckIndex = 1
 			END
 		ELSE IF(@strBasis = 'Pump Price Adjustment' OR @strBasis = 'Transfer Cost')
