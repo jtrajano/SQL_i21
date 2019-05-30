@@ -119,9 +119,10 @@ BEGIN
 							 = SP.spprc_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE SP.spprc_itm_no END) 
 			  ,SP.spprc_class	  
-			  ,SP.spprc_basis_ind
+			  ,CASE WHEN SP.spprc_basis_ind = 'V' THEN 'R' ELSE spprc_basis_ind END
 			  ,CASE WHEN SP.spprc_cost_to_use_las = 'L' THEN 'Last'
 					WHEN SP.spprc_cost_to_use_las = 'A' THEN 'Average'
+					WHEN SP.spprc_cost_to_use_las = 'V' THEN 'Vendor'
 					ELSE 'Standard'
 			   END 
 			  ,(CASE WHEN SP.spprc_basis_ind = '1' THEN SP.spprc_factor * -1 ELSE SP.spprc_factor END) 
@@ -185,10 +186,11 @@ BEGIN
 							 = PDV.ptpdv_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE PDV.ptpdv_itm_no END) 
 			  ,PDV.ptpdv_class	  
-			  ,PDV.ptpdv_basis_ind
+			  ,CASE WHEN PDV.ptpdv_basis_ind = 'V' THEN 'R' ELSE PDV.ptpdv_basis_ind END
 			  ,PDV.ptpdv_grp_cus_no
 			  ,CASE WHEN PDV.ptpdv_cost_to_use_las = 'L' THEN 'Last'
 					WHEN PDV.ptpdv_cost_to_use_las = 'A' THEN 'Average'
+					WHEN PDV.ptpdv_cost_to_use_las = 'V' THEN 'Vendor'
 					ELSE 'Standard'
 			   END 
 			  ,(CASE WHEN PDV.ptpdv_basis_ind = '1' THEN PDV.ptpdv_factor * -1 ELSE PDV.ptpdv_factor END) 
