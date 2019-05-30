@@ -7559,6 +7559,7 @@
     <Build Include="dbo\Functions\fnCalculateValuationAverageCost.sql" />
     <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
     <Build Include="dbo\Views\vyuCTBasisDelivery.sql" />
+    <Build Include="dbo\User Defined Types\DestinationShipmentItemLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

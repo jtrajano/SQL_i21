@@ -64,6 +64,10 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, intItemUOMId = ShipmentItem.intItemUOMId
 	, intWeightUOMId = ShipmentItem.intWeightUOMId
 	, strShipQtyUOM = ShipmentItem.strUnitMeasure
+	, dblDestinationQuantityShipped = ShipmentItemLot.dblDestinationQuantityShipped
+	, dblDestinationGrossWeight = ShipmentItemLot.dblDestinationGrossWeight
+	, dblDestinationTareWeight = ShipmentItemLot.dblDestinationTareWeight
+
 FROM tblICInventoryShipmentItemLot ShipmentItemLot
 	LEFT JOIN vyuICGetInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemLot.intInventoryShipmentItemId
 	LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = ShipmentItemLot.intLotId
