@@ -208,7 +208,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= @currentDateTime
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN REPLACE(B.[strSourceType],' ','')
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal','Imported Journal') THEN REPLACE(B.[strSourceType],' ','')
 											ELSE 'GJ' END 
 								
 			,[strJournalLineDescription] = A.[strDescription]
