@@ -14,7 +14,7 @@ DECLARE @intDeviceInterfaceFileId AS INT
 
 BEGIN
        SELECT @intDeviceInterfaceFileId = SD.intDeviceInterfaceFileId from tblSCDeviceInterfaceFile SD
-       WHERE intScaleDeviceId = @intScaleDeviceId
+       WHERE intScaleDeviceId = @intScaleDeviceId AND SD.intDeviceType = @intDeviceType 
        IF @intDeviceInterfaceFileId IS NULL
        BEGIN
               INSERT INTO tblSCDeviceInterfaceFile (intScaleDeviceId, strDeviceData, intDeviceType, intConcurrencyId, dtmScaleTime) 
@@ -25,7 +25,7 @@ BEGIN
        ELSE
        BEGIN
               UPDATE tblSCDeviceInterfaceFile SET strDeviceData = @strDeviceData , dtmScaleTime = GETDATE(), intDeviceType = @intDeviceType
-              WHERE intDeviceInterfaceFileId = @intDeviceInterfaceFileId
+              WHERE intDeviceInterfaceFileId = @intDeviceInterfaceFileId  
 
 			  SET @ReturnValue = @intDeviceInterfaceFileId
        END
