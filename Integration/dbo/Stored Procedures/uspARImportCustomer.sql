@@ -1301,6 +1301,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE	@str1099Form        NVARCHAR (MAX)
 			DECLARE @strFederalTaxId    NVARCHAR (MAX)
 			DECLARE @imgPhoto			varbinary(MAX)
+			DECLARE @strLevel           NVARCHAR (MAX)
+			DECLARE @intCompanyLocationPricingLevelId	INT
 
 			--Contacts
 			DECLARE @intContactId		INT
@@ -1502,6 +1504,30 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					WHERE ptcus_cus_no = @originCustomer
 
 					--INSERT Entity record for Customer
+
+					SELECT TOP 1
+						 @strLevel = xref.pricelevelname
+						,@intCompanyLocationPricingLevelId = xref.intCompanyLocationPricingLevelId
+					FROM 
+					(SELECT origin.pricelevelname
+					,origin.ptcus_cus_no
+					,intCompanyLocationPricingLevelId
+						FROM (SELECT (CASE A.ptcus_prc_level WHEN 1 THEN ptctlmst.pt3cf_prc1 
+							WHEN 2 THEN ptctlmst.pt3cf_prc2 
+							WHEN 3THEN ptctlmst.pt3cf_prc3 
+							END) AS pricelevelname
+						,ptcus_bus_loc_no
+						,ptcus_cus_no
+						FROM ptcusmst A
+						INNER JOIN ptctlmst  ON ptctl_key = 3
+						AND ptcus_prc_level IS NOT NULL
+						AND ptcus_bus_loc_no IS NOT NULL
+						)origin
+					INNER JOIN tblSMCompanyLocation CompL ON origin.ptcus_bus_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = CompL.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS 
+					INNER JOIN tblSMCompanyLocationPricingLevel i21CompLocPrcLvl ON CompL.intCompanyLocationId = i21CompLocPrcLvl.intCompanyLocationId
+						AND origin.pricelevelname COLLATE Latin1_General_CI_AS = i21CompLocPrcLvl.strPricingLevelName COLLATE Latin1_General_CI_AS
+					) xref
+					WHERE @originCustomer COLLATE Latin1_General_CI_AS = xref.ptcus_cus_no COLLATE Latin1_General_CI_AS
 					
 
 					DECLARE @EntityId INT					
@@ -1559,7 +1585,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					[intNoOfPeriods],
 					[dtmBudgetBeginDate],
 					[intTermsId],
-					[intCurrencyId]
+					[intCurrencyId],
+					[strLevel],
+					[intCompanyLocationPricingLevelId]
 					--Grain Tab
 					--[strDPAContract],
 					--[dtmDPADate],
@@ -1603,7 +1631,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					 @intNoOfPeriods,		
 					 @dtmBudgetBeginDate,
 					 @intTermsId,
-					 @intCurrencyId
+					 @intCurrencyId,
+					 @strLevel,
+					 @intCompanyLocationPricingLevelId
 					 --@strDPAContract,
 					 --@dtmDPADate,
 					 --@strGBReceiptNumber,
