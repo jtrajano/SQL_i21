@@ -11,14 +11,20 @@ FROM (
 		, fom.strFutMarketName
 		, ft.dtmTransactionDate
 		, strFutureMonthYear = (LEFT(CONVERT(DATE, '01 ' + fm.strFutureMonth), 7) + ' (' + fm.strFutureMonth + ')') COLLATE Latin1_General_CI_AS
+		, ft.intOptionMonthId
 		, strOptionMonthYear = om.strOptionMonth
 		, ft.strOptionType
+		, ft.intInstrumentTypeId
 		, strInstrumentType = CASE WHEN (ft.[intInstrumentTypeId] = 1) THEN N'Futures'
 								WHEN (ft.[intInstrumentTypeId] = 2) THEN N'Options'
 								WHEN (ft.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
 		, ft.dblStrike
 		, ft.strInternalTradeNo
+		, ft.intEntityId
 		, e.strName
+		, ft.intBrokerageAccountId
+		, ft.intBankAccountId
+		, ft.intBankId
 		, strBrokerageAccount = acc.strAccountNumber
 		, dblGetNoOfContract = CASE WHEN (N'Sell' = ft.[strBuySell]) THEN - (ft.[dblNoOfContract]) ELSE ft.[dblNoOfContract] END
 		, fot.dblContractSize
@@ -27,18 +33,23 @@ FROM (
 		, ft.strBuySell
 		, ft.dblPrice
 		, sc.strCommodityCode
+		, ft.intLocationId
 		, cl.strLocationName
 		, ft.strStatus
+		, ft.intBookId
 		, sb.strBook
+		, ft.intSubBookId
 		, ssb.strSubBook
 		, dtmFilledDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ft.dtmFilledDate, 110), 110)
 		, ft.intCommodityId
 		, strBankName
 		, strBankAccountNo
+		, intSelectedInstrumentTypeId
 		, strSelectedInstrumentType = (CASE WHEN intSelectedInstrumentTypeId = 1 THEN 'Exchange Traded' 
 											WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
 										ELSE 'OTC - Others' END) COLLATE Latin1_General_CI_AS
 		, ft.dtmMaturityDate
+		, ft.intCurrencyId
 		, strCurrencyExchangeRateType
 		, ft.strFromCurrency
 		, ft.strToCurrency
@@ -50,6 +61,8 @@ FROM (
 		, ft.dblSpotRate
 		, ft.ysnLiquidation
 		, ft.ysnSwap	
+		, fm.ysnExpired
+		, ft.intRollingMonthId
 		, strRollingMonth = rm.strFutureMonth
 		, ft.strBrokerTradeNo
 		, ft.ysnPreCrush

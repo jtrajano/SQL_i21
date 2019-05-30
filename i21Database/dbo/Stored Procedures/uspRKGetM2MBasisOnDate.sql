@@ -111,19 +111,6 @@ BEGIN
 	FROM (
 		SELECT DISTINCT CASE WHEN intMarketZoneId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intMarketZoneId) END AS intMarketZoneId FROM @#tempInquiryTransaction
 	) tbl
-
-	SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS AS strItemId
-	INTO #tmpItemId
-	FROM [dbo].[fnSplitString](@strItemIds, ',')
-	SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS AS strPeriodTo
-	INTO #tmpPeriodTo
-	FROM [dbo].[fnSplitString](@strPeriodTos, ',')
-	SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS AS strLocationId
-	INTO #tmpLocationId
-	FROM [dbo].[fnSplitString](@strLocationIds, ',')
-	SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS AS strZoneId
-	INTO #tmpZoneId
-	FROM [dbo].[fnSplitString](@strZoneIds, ',')
 	
 	DECLARE @strEvaluationBy NVARCHAR(50)
 		, @strEvaluationByZone NVARCHAR(50)
@@ -199,10 +186,10 @@ BEGIN
 	WHERE b.intM2MBasisId = @intM2MBasisId
 		AND c.intCommodityId = ISNULL(@intCommodityId, c.intCommodityId)
 		AND b.strPricingType = @strPricingType
-		AND (ISNULL(bd.intItemId, 0) = ISNULL(@strItemIds, ISNULL(bd.intItemId, 0)) OR ISNULL(bd.intItemId, 0) IN (SELECT strItemId FROM #tmpItemId))
-		AND (ISNULL(bd.strPeriodTo, '') = ISNULL(@strPeriodTos, ISNULL(bd.strPeriodTo, '')) OR ISNULL(bd.strPeriodTo, '') IN (SELECT strPeriodTo FROM #tmpPeriodTo))
-		AND (ISNULL(bd.intCompanyLocationId, 0) = ISNULL(ISNULL(@strLocationIds, bd.intCompanyLocationId, 0)) OR ISNULL(bd.intCompanyLocationId, 0) IN (SELECT strLocationId from #tmpLocationId))
-		AND (ISNULL(bd.intMarketZoneId, 0) = ISNULL(@strZoneIds, ISNULL(bd.intMarketZoneId, 0)) OR ISNULL(bd.intMarketZoneId, 0) IN (SELECT strZoneId FROM #tmpZoneId))
+		AND ISNULL(bd.intItemId, 0) IN (SELECT CASE WHEN @strItemIds = '' THEN ISNULL(bd.intItemId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strItemIds, ',')) --added this be able to filter by item (RM-739)
+		AND ISNULL(bd.strPeriodTo, '') IN (SELECT CASE WHEN @strPeriodTos = '' THEN ISNULL(bd.strPeriodTo, '') ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END FROM [dbo].[fnSplitString](@strPeriodTos, ',')) --added this be able to filter by period to (RM-739)
+		AND ISNULL(bd.intCompanyLocationId, 0) IN (SELECT CASE WHEN @strLocationIds = '' THEN ISNULL(bd.intCompanyLocationId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strLocationIds, ',')) --added this be able to filter by item (RM-739)
+		AND ISNULL(bd.intMarketZoneId, 0) IN (SELECT CASE WHEN @strZoneIds = '' THEN ISNULL(bd.intMarketZoneId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strZoneIds, ',')) --added this be able to filter by item (RM-739)
 		OR (bd.strContractInventory = 'Inventory' and b.intM2MBasisId = @intM2MBasisId
 			AND c.intCommodityId = ISNULL(@intCommodityId, c.intCommodityId)
 			AND b.strPricingType = @strPricingType)
@@ -212,9 +199,4 @@ BEGIN
 		, strItemNo
 		, strLocationName
 		, CONVERT(DATETIME, '01 ' + strPeriodTo)
-
-	DROP TABLE #tmpItemId
-	DROP TABLE #tmpLocationId
-	DROP TABLE #tmpPeriodTo
-	DROP TABLE #tmpZoneId
 END

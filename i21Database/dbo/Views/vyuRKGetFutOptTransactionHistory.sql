@@ -14,6 +14,7 @@ SELECT intFutOptTransactionHistoryId
 	, strCurrency
 	, intCommodityId
 	, strCommodity
+	, intEntityId
 	, intBrokerId
 	, strBroker
 	, strBrokerAccount
@@ -47,6 +48,8 @@ SELECT intFutOptTransactionHistoryId
 	, strAction
 	, strNotes
 	, ysnPreCrush
+	, strRollingMonth
+	, intRollingMonthId
 FROM (
 	SELECT intFutOptTransactionHistoryId
 		, History.intFutOptTransactionId
@@ -60,7 +63,8 @@ FROM (
 		, History.strCurrency
 		, Commodity.intCommodityId
 		, History.strCommodity
-		, intBrokerId = BrokerAccount.intEntityId
+		, intEntityId = BrokerAccount.intEntityId
+		, intBrokerId = BrokerAccount.intBrokerageAccountId
 		, History.strBroker
 		, History.strBrokerAccount
 		, History.strTrader
@@ -97,10 +101,13 @@ FROM (
 		, History.strAction
 		, History.strNotes
 		, ysnPreCrush = CAST(History.ysnPreCrush AS BIT)
+		, strRollingMonth = RollMonth.strFutureMonth
+		, intRollingMonthId
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.strFutMarketName = History.strFutureMarket
 	LEFT JOIN tblRKFuturesMonth FutMonth ON FutMonth.strFutureMonth = History.strFutureMonth AND FutMonth.intFutureMarketId = FutMarket.intFutureMarketId
+	LEFT JOIN tblRKFuturesMonth RollMonth ON RollMonth.intFutureMarketId = Trans.intRollingMonthId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.strCommodityCode = History.strCommodity
 	LEFT JOIN tblRKOptionsMonth OptMonth ON OptMonth.strOptionMonth = History.strOptionMonth AND OptMonth.intFutureMarketId = FutMarket.intFutureMarketId
 	LEFT JOIN tblSMCompanyLocation Location ON Location.strLocationName = History.strLocationName

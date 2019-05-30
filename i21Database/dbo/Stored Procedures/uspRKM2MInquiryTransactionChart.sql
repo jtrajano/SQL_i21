@@ -17,26 +17,26 @@ BEGIN
 		, intConcurrencyId INT
 		, intContractHeaderId INT
 		, intContractDetailId INT
-		, strContractOrInventoryType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		, strContractSeq NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		, strEntityName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strContractOrInventoryType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strContractSeq NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intEntityId INT
 		, intFutureMarketId INT
-		, strFutMarketName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strFutMarketName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intFutureMonthId INT
-		, strFutureMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblOpenQty NUMERIC(24, 10)
-		, strCommodityCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intCommodityId INT
 		, intItemId INT
-		, strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		, strOrgin NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		, strPosition NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		, strPeriod NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strOrgin NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strPosition NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strPeriod NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strPriOrNotPriOrParPriced NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strPriOrNotPriOrParPriced NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intPricingTypeId INT
-		, strPricingType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strPricingType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblContractRatio NUMERIC(24, 10)
 		, dblContractBasis NUMERIC(24, 10)
 		, dblFutures NUMERIC(24, 10)

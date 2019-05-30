@@ -226,17 +226,17 @@ BEGIN
 			, strCommodityCode
 			, strContractOrInventoryType
 		
-		DECLARE @UnRelaized AS TABLE (intFutOptTransactionId INT
+		DECLARE @UnRealized AS TABLE (intFutOptTransactionId INT
 			, dblGrossPnL NUMERIC(24, 10)
 			, dblLong NUMERIC(24, 10)
 			, dblShort NUMERIC(24, 10)
 			, dblFutCommission NUMERIC(24, 10)
-			, strFutMarketName NVARCHAR(100)
+			, strFutureMarket NVARCHAR(100)
 			, strFutureMonth NVARCHAR(100)
 			, dtmTradeDate DATETIME
 			, strInternalTradeNo NVARCHAR(100)
-			, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			, strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strBroker NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, strBrokerAccount NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, strBook NVARCHAR(100)
 			, strSubBook NVARCHAR(100)
 			, strSalespersonId NVARCHAR(100)
@@ -264,21 +264,22 @@ BEGIN
 			, dblVariationMargin NUMERIC(24, 10)
 			, dblInitialMargin NUMERIC(24, 10)
 			, LongWaitedPrice NUMERIC(24, 10)
-			, ShortWaitedPrice NUMERIC(24, 10))
+			, ShortWaitedPrice NUMERIC(24, 10)
+			, intSelectedInstrumentTypeId INT)
 		
-		INSERT INTO @UnRelaized (RowNum
+		INSERT INTO @UnRealized (RowNum
 			, strMonthOrder
 			, intFutOptTransactionId
 			, dblGrossPnL
 			, dblLong
 			, dblShort
 			, dblFutCommission
-			, strFutMarketName
+			, strFutureMarket
 			, strFutureMonth
 			, dtmTradeDate
 			, strInternalTradeNo
-			, strName
-			, strAccountNumber
+			, strBroker
+			, strBrokerAccount
 			, strBook
 			, strSubBook
 			, strSalespersonId
@@ -304,7 +305,8 @@ BEGIN
 			, dblVariationMargin
 			, dblInitialMargin
 			, LongWaitedPrice
-			, ShortWaitedPrice)
+			, ShortWaitedPrice
+			, intSelectedInstrumentTypeId)
 		EXEC uspRKUnrealizedPnL @dtmFromDate = '01-01-1900'
 			, @dtmToDate = @dtmTransactionDateUpTo
 			, @intCommodityId = @intCommodityId
@@ -339,7 +341,7 @@ BEGIN
 			SELECT DISTINCT intCommodityId
 				, strCommodityCode
 				, pnl = SUM(dblGrossPnL)
-			FROM @UnRelaized
+			FROM @UnRealized
 			GROUP BY intCommodityId
 				, strCommodityCode
 		) t
