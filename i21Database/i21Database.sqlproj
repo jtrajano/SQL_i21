@@ -7329,6 +7329,7 @@
     <Build Include="dbo\Functions\fnCalculateValuationAverageCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCommodityPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICCommodityPositionDetailReport.sql" />
+    <Build Include="dbo\User Defined Types\DestinationShipmentItemLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
