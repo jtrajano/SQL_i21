@@ -7559,6 +7559,7 @@
     <Build Include="dbo\Views\vyuCTEntityProducerMap.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLoadNo.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetProducers.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1920_UpdateOtherTaxationPointToNone.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

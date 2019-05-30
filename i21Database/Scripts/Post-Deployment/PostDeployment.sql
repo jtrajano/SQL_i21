@@ -86,6 +86,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1830_Encrypt_Merchant_Password.sql
 :r .\SM\1910_MigrateINCOToFreightTerm.sql
 :r .\SM\1910_UpdateVantivToWorldPay.sql
+:r .\SM\1920_UpdateOtherTaxationPointToNone.sql
+
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
