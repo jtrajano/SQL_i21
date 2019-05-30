@@ -13,12 +13,12 @@ DECLARE @intStartingNumberId INT = 0
 DECLARE @intStartingNumber INT = 0
 
 SELECT TOP 1 @intStartingNumberId = intStartingNumberId, @intStartingNumber = intNumber  
-	FROM tblSMStartingNumber 
+	FROM tblSMStartingNumber WITH (NOLOCK)
 	WHERE strTransactionType = 'Sales Receipt'
 
 SELECT @strReceiptNumber = SN.strPrefix + CAST(SN.intNumber AS NVARCHAR) 
-FROM tblARPOS POS
-INNER JOIN tblSMStartingNumber SN 
+FROM tblARPOS POS WITH (NOLOCK)
+INNER JOIN tblSMStartingNumber  SN WITH (NOLOCK)  
 ON POS.strReceiptNumber = SN.strPrefix + CAST(SN.intNumber-1 AS NVARCHAR)
 
 IF((@intStartingNumberId <> 0 AND @strReceiptNumber IS NOT NULL) OR @intStartingNumber = 1)
