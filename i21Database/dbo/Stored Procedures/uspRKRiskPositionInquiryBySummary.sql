@@ -13,6 +13,7 @@
 	@strUomType NVARCHAR(100) = NULL
 AS
 
+
 DECLARE @dtmToDate DATETIME
 
 SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
@@ -1716,7 +1717,7 @@ DECLARE @strAccountNumber NVARCHAR(MAX)
 
 SELECT TOP 1 @strAccountNumber = strAccountNumber
 FROM @ListFinal
-WHERE strGroup = '1.Outright Coverage' AND PriceStatus = '1.Priced / Outright - (Outright position)'
+--WHERE strGroup = '1.Outright Coverage' AND PriceStatus = '1.Priced / Outright - (Outright position)'
 ORDER BY intRowNumber
 
 DECLARE @MonthList AS TABLE (strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS)
@@ -1724,71 +1725,71 @@ DECLARE @MonthList AS TABLE (strFutureMonth NVARCHAR(100) COLLATE Latin1_General
 INSERT INTO @MonthList (strFutureMonth)
 SELECT DISTINCT strFutureMonth
 FROM @ListFinal
-WHERE strGroup = '1.Outright Coverage' AND PriceStatus IN ('1.Priced / Outright - (Outright position)')
+--WHERE strGroup = '1.Outright Coverage' AND PriceStatus IN ('1.Priced / Outright - (Outright position)')
 
-INSERT INTO @MonthOrder (
-	intRowNumber,
-	strGroup,
-	Selection,
-	PriceStatus,
-	strFutureMonth,
-	strAccountNumber,
-	dblNoOfContract,
-	strTradeNo,
-	TransactionDate,
-	TranType,
-	CustVendor,
-	dblNoOfLot,
-	dblQuantity,
-	intOrderByHeading,
-	intContractHeaderId,
-	intFutOptTransactionHeaderId,
-	strProductType,
-	strProductLine,
-	strShipmentPeriod,
-	strLocation,
-	strOrigin,
-	intItemId,
-	strItemNo,
-	strItemDescription,
-	intBookId,
-	strBook,
-	intSubBookId,
-	strSubBook
-	)
-SELECT DISTINCT intRowNumber,
-	'1.Outright Coverage' COLLATE Latin1_General_CI_AS,
-	'Outright Coverage' COLLATE Latin1_General_CI_AS,
-	'1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS,
-	strFutureMonth,
-	@strAccountNumber,
-	NULL,
-	NULL,
-	GETDATE(),
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	strProductType,
-	strProductLine,
-	strShipmentPeriod,
-	strLocation,
-	strOrigin,
-	intItemId,
-	strItemNo,
-	strItemDescription,
-	intBookId,
-	strBook,
-	intSubBookId,
-	strSubBook
-FROM @ListFinal
-WHERE strFutureMonth NOT IN (
-		SELECT DISTINCT strFutureMonth
-		FROM @MonthList
-		)
+--INSERT INTO @MonthOrder (
+--	intRowNumber,
+--	strGroup,
+--	Selection,
+--	PriceStatus,
+--	strFutureMonth,
+--	strAccountNumber,
+--	dblNoOfContract,
+--	strTradeNo,
+--	TransactionDate,
+--	TranType,
+--	CustVendor,
+--	dblNoOfLot,
+--	dblQuantity,
+--	intOrderByHeading,
+--	intContractHeaderId,
+--	intFutOptTransactionHeaderId,
+--	strProductType,
+--	strProductLine,
+--	strShipmentPeriod,
+--	strLocation,
+--	strOrigin,
+--	intItemId,
+--	strItemNo,
+--	strItemDescription,
+--	intBookId,
+--	strBook,
+--	intSubBookId,
+--	strSubBook
+--	)
+--SELECT DISTINCT intRowNumber,
+--	'1.Outright Coverage' COLLATE Latin1_General_CI_AS,
+--	'Outright Coverage' COLLATE Latin1_General_CI_AS,
+--	'1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS,
+--	strFutureMonth,
+--	@strAccountNumber,
+--	NULL,
+--	NULL,
+--	GETDATE(),
+--	NULL,
+--	NULL,
+--	NULL,
+--	NULL,
+--	NULL,
+--	NULL,
+--	NULL,
+--	strProductType,
+--	strProductLine,
+--	strShipmentPeriod,
+--	strLocation,
+--	strOrigin,
+--	intItemId,
+--	strItemNo,
+--	strItemDescription,
+--	intBookId,
+--	strBook,
+--	intSubBookId,
+--	strSubBook
+--FROM @ListFinal
+--WHERE strFutureMonth NOT IN (
+--		SELECT DISTINCT strFutureMonth
+--		FROM @MonthList
+--		)
 
 INSERT INTO @MonthOrder (
 	intRowNumber,
@@ -2018,6 +2019,7 @@ BEGIN
 		intSubBookId,
 		strSubBook
 		)
+
 	SELECT DISTINCT intRowNumber,
 		strGroup,
 		Selection,
@@ -2042,10 +2044,10 @@ BEGIN
 		intItemId = NULL,
 		strItemNo = '',
 		strItemDescription = '',
-		intBookId = NULL,
-		strBook = NULL,
-		intSubBookId = NULL,
-		strSubBook = NULL
+		intBookId = intBookId,
+		strBook = strBook,
+		intSubBookId = intSubBookId,
+		strSubBook = strSubBook
 	FROM @ListFinal a
 	CROSS APPLY (
 		SELECT DISTINCT strFutureMonth
