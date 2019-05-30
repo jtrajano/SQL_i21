@@ -172,7 +172,7 @@ BEGIN TRY
 		,intCostUOMId = V.intPriceItemUOMId
 		,intLoadCostId = V.intLoadCostId
 		,ysnInventoryCost = I.ysnInventoryCost
-		,intItemUOMId = LD.intItemUOMId
+		,intItemUOMId = V.intItemUOMId
 		,dblUnitQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
 		,dblCostUnitQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
 		,intCurrencyId = V.intCurrencyId
@@ -189,7 +189,7 @@ BEGIN TRY
 	JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId
 		AND ItemLoc.intLocationId = CD.intCompanyLocationId
 	JOIN tblICItem I ON I.intItemId = V.intItemId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = V.intItemUOMId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
 	WHERE V.intLoadId = @intLoadId AND V.intBillId IS NULL
 		AND ((V.intLoadCostId IN (SELECT intLoadCostId FROM @loadCosts)) OR (NOT EXISTS (SELECT TOP 1 1 FROM @loadCosts))) 
@@ -205,7 +205,7 @@ BEGIN TRY
 		,LD.intLoadDetailId
 		,V.intLoadCostId
 		,I.ysnInventoryCost
-		,LD.intItemUOMId
+		,V.intItemUOMId
 		,V.intPriceItemUOMId
 		,ItemUOM.dblUnitQty
 		,CostUOM.dblUnitQty
