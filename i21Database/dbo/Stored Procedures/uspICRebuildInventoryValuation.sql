@@ -662,7 +662,8 @@ BEGIN
 		ON #tmpICInventoryTransaction([strBatchId] ASC, [strTransactionId] ASC);
 
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_lookup]
-		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [strTransactionId] ASC, [intItemId] ASC, [intTransactionDetailId] ASC, [intLotId] ASC, [intItemLocationId] ASC);
+		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [intItemId] ASC)
+		INCLUDE (dblQty, intItemLocationId, strTransactionId, intLotId, intTransactionDetailId);
 
 	CREATE TABLE #tmpAutoVarianceBatchesForAVGCosting (
 		intItemId INT
