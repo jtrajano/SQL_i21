@@ -208,6 +208,8 @@ BEGIN
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
 		,L.dblLastCost 
+		,I1.strItemNo As strMainItemNo
+		,I1.strDescription As strMainItemDescription
 	FROM dbo.tblMFWorkOrderInputLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intEnteredItemUOMId
@@ -221,6 +223,7 @@ BEGIN
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId
 	LEFT JOIN @tblMFCustomValue CV ON CV.intWorkOrderInputLotId = W.intWorkOrderInputLotId
+	Left JOIN dbo.tblICItem I1 ON I1.intItemId = W.intMainItemId
 	WHERE intWorkOrderId = @intWorkOrderId
 	
 	UNION
@@ -275,6 +278,8 @@ BEGIN
 		,@strTargetItemNo AS strTargetItemNo
 		,@strTargetDescription AS strTargetDescription
 		,L.dblLastCost 
+		,'' As strMainItemNo
+		,'' As strMainItemDescription
 	FROM dbo.tblMFWorkOrderConsumedLot W
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId

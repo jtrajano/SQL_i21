@@ -14,6 +14,8 @@ CREATE TYPE [dbo].[ReceiptItemLotStagingTable] AS TABLE
 		,[intCurrencyId] INT NULL		
 		,[intSourceType] INT NULL  
 		,[strBillOfLadding] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,[intShipFromEntityId] INT NULL 
 
 		--Following fields are needed to match the Receipt Item
 		,[intItemId] INT NULL	

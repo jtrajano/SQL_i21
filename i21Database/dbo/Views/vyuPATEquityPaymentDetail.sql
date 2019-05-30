@@ -31,3 +31,4 @@ INNER JOIN tblPATRefundRate RR
 	ON RR.intRefundTypeId = EPD.intRefundTypeId
 LEFT JOIN tblAPBill APB
 	ON APB.intBillId = EPS.intBillId
+WHERE EPD.dblEquityPay != 0

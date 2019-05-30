@@ -7476,6 +7476,7 @@
     <Build Include="dbo\Functions\fnAPGetPayableKeyInfo.sql" />
     <Build Include="dbo\Functions\fnCTGetReportLanguage.sql" />
     <Build Include="dbo\Views\vyuICGetItemPricingLevel.sql" />
+    <Build Include="dbo\Views\vyuICPriceSearch.sql" />
     <Build Include="dbo\Views\vyuICGetItemSpecialPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSplitSequenceAndCreateNewContract.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceSourceList.sql" />
@@ -7549,6 +7550,15 @@
     <Build Include="dbo\Functions\fnCTGenerateReceiptDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesForInTransit.sql" />
     <Build Include="dbo\Functions\fnICGetAddToCostTaxFromInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPArchiveVoucher.sql" />
+    <Build Include="dbo\Tables\tblAPBillArchive.sql" />
+    <Build Include="dbo\Tables\tblAPBillDetailArchive.sql" />
+    <Build Include="dbo\Tables\tblAPBillDetailTaxArchive.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Tables\tblTMBudgetCalculationProjection.sql" />
+    <Build Include="dbo\Functions\fnCalculateValuationAverageCost.sql" />
+    <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
+    <Build Include="dbo\Views\vyuCTBasisDelivery.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

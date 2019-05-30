@@ -8,72 +8,81 @@ BEGIN TRY
 	
 	DECLARE	@ErrMsg	NVARCHAR(MAX)
 	
-		DECLARE @temp AS TABLE
-		(
-			[intPriceFixationId] [int] NULL,
-			[intPriceContractId] [int] NULL,
-			[intConcurrencyId] [int] NULL,
-			[intContractHeaderId] [int] NULL,
-			[intContractDetailId] [int] NULL,
-			[intOriginalFutureMarketId] [int] NULL,
-			[intOriginalFutureMonthId] [int] NULL,
-			[dblOriginalBasis] [numeric](18, 6) NULL,
-			[dblTotalLots] [numeric](18, 6) NULL,
-			[dblLotsFixed] [numeric](18, 6) NULL,
-			[intLotsHedged] [int] NULL,
-			[dblPolResult] [numeric](18, 6) NULL,
-			[dblPremiumPoints] [numeric](18, 6) NULL,
-			[ysnAAPrice] [bit] NULL,
-			[ysnSettlementPrice] [bit] NULL,
-			[ysnToBeAgreed] [bit] NULL,
-			[dblSettlementPrice] [numeric](18, 6) NULL,
-			[dblAgreedAmount] [numeric](18, 6) NULL,
-			[intAgreedItemUOMId] [int] NULL,
-			[dblPolPct] [numeric](18, 6) NULL,
-			[dblPriceWORollArb] [numeric](18, 6) NULL,
-			[dblRollArb] [numeric](18, 6) NULL,
-			[dblPolSummary] [numeric](18, 6) NULL,
-			[dblAdditionalCost] [numeric](18, 6) NULL,
-			[dblFinalPrice] [numeric](18, 6) NULL,
-			[intFinalPriceUOMId] [int] NULL,
-			[ysnSplit] [bit] NULL,
-			[dblQuantity] [numeric](18, 6) NULL,
-			[strPriceUOM] [nvarchar](50) NULL,
-			[strItemUOM] [nvarchar](50) NULL,
-			[intItemUOMId] [int] NULL,
-			[intFutureMarketId] [int] NULL,
-			[strFutureMarket] [nvarchar](30) NULL,
-			[intFutureMonthId] [int] NULL,
-			[strFutureMonth] [nvarchar](20) NULL,
-			[intContractSeq] [int] NULL,
-			[strContractType] [nvarchar](50) NULL,
-			[strEntityName] [nvarchar](100) NULL,
-			[strContractNumber] [nvarchar](50) NULL,
-			[dblConvertedBasis] [numeric](18, 6) NULL,
-			[strMarketCurrency] [nvarchar](40) NULL,
-			[strMarketUOM] [nvarchar](50) NULL,
-			[ysnMultiplePriceFixation] [bit] NULL,
-			[intCurrencyId] [int] NULL,
-			[ysnSeqSubCurrency] [bit] NULL,
-			[intMarketCurrencyId] [int] NULL,
-			[ysnMarketSubCurrency] [bit] NULL,
-			[intBasisCurrencyId] [int] NULL,
-			[ysnBasisSubCurrency] BIT NULL,
-			[intBasisCommodityUOMId] [int] NULL,
-			[intDiscountScheduleCodeId] [int] NULL,
-			[strDiscountScheduleCode] [nvarchar](250) NULL,
-			[strPricingType] [nvarchar](100) NULL,
-			[dblRatio] [numeric](18, 6) NULL,
-			[dblAppliedQty] [numeric](18, 6) NULL,
-			strBook  [nvarchar](250) NULL,
-			strSubBook  [nvarchar](250) NULL,
-			intNoOfLoad	INT,
-			dblQuantityPerLoad NUMERIC(18,6)
-		) 
+		--DECLARE @temp AS TABLE
+		--(
+		--	[intPriceFixationId] [int] NULL,
+		--	[intPriceContractId] [int] NULL,
+		--	[intConcurrencyId] [int] NULL,
+		--	[intContractHeaderId] [int] NULL,
+		--	[intContractDetailId] [int] NULL,
+		--	[intOriginalFutureMarketId] [int] NULL,
+		--	[intOriginalFutureMonthId] [int] NULL,
+		--	[dblOriginalBasis] [numeric](18, 6) NULL,
+		--	[dblTotalLots] [numeric](18, 6) NULL,
+		--	[dblLotsFixed] [numeric](18, 6) NULL,
+		--	[intLotsHedged] [int] NULL,
+		--	[dblPolResult] [numeric](18, 6) NULL,
+		--	[dblPremiumPoints] [numeric](18, 6) NULL,
+		--	[ysnAAPrice] [bit] NULL,
+		--	[ysnSettlementPrice] [bit] NULL,
+		--	[ysnToBeAgreed] [bit] NULL,
+		--	[dblSettlementPrice] [numeric](18, 6) NULL,
+		--	[dblAgreedAmount] [numeric](18, 6) NULL,
+		--	[intAgreedItemUOMId] [int] NULL,
+		--	[dblPolPct] [numeric](18, 6) NULL,
+		--	[dblPriceWORollArb] [numeric](18, 6) NULL,
+		--	[dblRollArb] [numeric](18, 6) NULL,
+		--	[dblPolSummary] [numeric](18, 6) NULL,
+		--	[dblAdditionalCost] [numeric](18, 6) NULL,
+		--	[dblFinalPrice] [numeric](18, 6) NULL,
+		--	[intFinalPriceUOMId] [int] NULL,
+		--	[ysnSplit] [bit] NULL,
+		--	[dblQuantity] [numeric](18, 6) NULL,
+		--	[strPriceUOM] [nvarchar](50) NULL,
+		--	[strItemUOM] [nvarchar](50) NULL,
+		--	[intItemUOMId] [int] NULL,
+		--	[intFutureMarketId] [int] NULL,
+		--	[strFutureMarket] [nvarchar](30) NULL,
+		--	[intFutureMonthId] [int] NULL,
+		--	[strFutureMonth] [nvarchar](20) NULL,
+		--	[intContractSeq] [int] NULL,
+		--	[strContractType] [nvarchar](50) NULL,
+		--	[strEntityName] [nvarchar](100) NULL,
+		--	[strContractNumber] [nvarchar](50) NULL,
+		--	[dblConvertedBasis] [numeric](18, 6) NULL,
+		--	[strMarketCurrency] [nvarchar](40) NULL,
+		--	[strMarketUOM] [nvarchar](50) NULL,
+		--	[ysnMultiplePriceFixation] [bit] NULL,
+		--	[intCurrencyId] [int] NULL,
+		--	[ysnSeqSubCurrency] [bit] NULL,
+		--	[intMarketCurrencyId] [int] NULL,
+		--	[ysnMarketSubCurrency] [bit] NULL,
+		--	[intBasisCurrencyId] [int] NULL,
+		--	[ysnBasisSubCurrency] BIT NULL,
+		--	[intBasisCommodityUOMId] [int] NULL,
+		--	[intDiscountScheduleCodeId] [int] NULL,
+		--	[strDiscountScheduleCode] [nvarchar](250) NULL,
+		--	[strPricingType] [nvarchar](100) NULL,
+		--	[dblRatio] [numeric](18, 6) NULL,
+		--	[dblAppliedQty] [numeric](18, 6) NULL,
+		--	strBook  [nvarchar](250) NULL,
+		--	strSubBook  [nvarchar](250) NULL,
+		--	intNoOfLoad	INT,
+		--	dblQuantityPerLoad NUMERIC(18,6)
+		--) 
+
+		IF OBJECT_ID('tempdb..#tblCTPriceFixation') IS NOT NULL  					
+			DROP TABLE #tblCTPriceFixation					
+
+		IF OBJECT_ID('tempdb..#NonMultiPriceFixation') IS NOT NULL  					
+			DROP TABLE #NonMultiPriceFixation					
+
+		IF OBJECT_ID('tempdb..#MultiPriceFixation') IS NOT NULL  					
+			DROP TABLE #MultiPriceFixation					
 
 		SELECT * INTO #tblCTPriceFixation FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId
 
-		INSERT INTO @temp 
+		--INSERT INTO @temp 
 
 		SELECT	PF.intPriceFixationId,
 				PF.intPriceContractId,
@@ -141,7 +150,7 @@ BEGIN TRY
 				CD.intNoOfLoad,
 				CD.dblQuantityPerLoad
 		
-
+		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
@@ -154,7 +163,7 @@ LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.i
 LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 
 
-		INSERT INTO @temp 
+		--INSERT INTO @temp 
 
 		SELECT	PF.intPriceFixationId,
 				PF.intPriceContractId,
@@ -187,16 +196,16 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CH.dblQuantity,
 				PM.strUnitMeasure		AS	strPriceUOM,
 				QM.strUnitMeasure		AS	strItemUOM,
-				NULL,
+				CAST(NULL AS INT)		AS	intItemUOMId,
 				CH.intFutureMarketId,
 				MA.strFutMarketName		AS	strFutureMarket,
 				CH.intFutureMonthId,
 				MO.strFutureMonth,
-				NULL,
+				CAST(NULL AS INT)		AS	intContractSeq,
 				CT.strContractType,
 				EY.strName				AS	strEntityName,
 				CH.strContractNumber,
-				NULL					AS	dblConvertedBasis,
+				CAST(NULL AS NUMERIC(18,6))	AS	dblConvertedBasis,
 				CY.strCurrency			AS	strMarketCurrency,
 				UM.strUnitMeasure		AS	strMarketUOM,
 				CH.ysnMultiplePriceFixation,
@@ -204,9 +213,9 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CD.ysnSubCurrency		AS	ysnSeqSubCurrency,
 				MA.intCurrencyId		AS	intMarketCurrencyId,
 				CY.ysnSubCurrency		AS	ysnMarketSubCurrency,
-				NULL,
-				NULL,
-				NULL,			
+				CAST(NULL AS INT)		AS	intBasisCurrencyId,
+				CAST(NULL AS BIT)		AS	ysnBasisSubCurrency,
+				CAST(NULL AS INT)		AS	intBasisCommodityUOMId,			
 				CD.intDiscountScheduleCodeId,
 				SI.strDescription				AS	strDiscountScheduleCode,
 				CASE WHEN CH.intPricingTypeId = 8 THEN 'Ratio' ELSE CD.strPricingType END AS strPricingType,
@@ -216,7 +225,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				SB.strSubBook,
 				CD.intNoOfLoad,
 				CD.dblQuantityPerLoad
-
+		
+		INTO	#MultiPriceFixation
 		FROM	#tblCTPriceFixation			PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
 		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	CU.intUnitMeasureId
@@ -236,7 +246,9 @@ LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.i
 LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 		WHERE	ISNULL(CH.ysnMultiplePriceFixation,0) = 1
 	
-	SELECT * FROM @temp
+	SELECT * FROM #NonMultiPriceFixation
+	UNION
+	SELECT * FROM #MultiPriceFixation
 
 END TRY
 

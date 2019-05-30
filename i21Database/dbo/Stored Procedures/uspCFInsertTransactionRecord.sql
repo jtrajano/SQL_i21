@@ -1310,6 +1310,13 @@ BEGIN
 				END
 			END
 		END
+		ELSE
+		BEGIN
+			IF(@intVehicleId = 0)
+			BEGIN
+				SET @intVehicleId = NULL
+			END
+		END
 		
 		
 		----------POSTED DATE----------

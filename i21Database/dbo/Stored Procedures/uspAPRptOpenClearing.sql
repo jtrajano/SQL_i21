@@ -122,6 +122,7 @@ SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SET @innerQuery2 = 'SELECT DISTINCT
 						intInventoryReceiptId
+						,0 as intInventoryReceiptItemId
 						,strBillId
 						,intBillId
 						,strVendorIdName
@@ -153,6 +154,7 @@ SET @innerQuery2 = 'SELECT DISTINCT
 
 SET @innerQuery = 'SELECT DISTINCT
 						intInventoryReceiptId
+						,intInventoryReceiptItemId
 						,strBillId
 						,intBillId
 						,strVendorIdName
@@ -303,6 +305,7 @@ SELECT * FROM (
 	SELECT
 	 DISTINCT
 	 tmpAgingSummaryTotal.intInventoryReceiptId
+	,tmpAgingSummaryTotal.intInventoryReceiptItemId
 	,tmpAgingSummaryTotal.dtmReceiptDate
 	,tmpAgingSummaryTotal.strReceiptNumber
 	,tmpAgingSummaryTotal.strBillOfLading
@@ -343,6 +346,7 @@ SELECT * FROM (
 	(
 		SELECT DISTINCT
 		 tmpAPClearables.intInventoryReceiptId
+		,tmpAPClearables.intInventoryReceiptItemId
 		,tmpAPClearables.intBillId
 		,tmpAPClearables.strBillId
 		,tmpAPClearables.strVendorIdName
@@ -375,6 +379,7 @@ SELECT * FROM (
 				 dblQtyToReceive,
 				 dblAmountDue,
 				 intInventoryReceiptId,
+				 intInventoryReceiptItemId,
 				 intBillId, 
 				 dblAmountDue,
 				 strVendorIdName,

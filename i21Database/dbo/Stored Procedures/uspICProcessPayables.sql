@@ -69,8 +69,8 @@ BEGIN
 			,GP.[intTransactionType]
 			,GP.[intLocationId]	
 			,[intShipToId] = NULL	
-			,[intShipFromId] = NULL	 		
-			,[intShipFromEntityId] = NULL
+			,[intShipFromId] = GP.intShipFromId	 		
+			,[intShipFromEntityId] = GP.intShipFromEntityId
 			,[intPayToAddressId] = NULL
 			,GP.[intCurrencyId]					
 			,GP.[dtmDate]				
@@ -124,7 +124,7 @@ BEGIN
 			AND Receipt.intEntityVendorId = GP.intEntityVendorId
 			AND Item.strType <> 'Bundle'
 			AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
-			AND ISNULL(ReceiptItem.ysnAllowVoucher, 0) = 1
+			AND ISNULL(ReceiptItem.ysnAllowVoucher, 1) = 1
 
 		UNION ALL
 		/* To get the unposted Receipt Charges */

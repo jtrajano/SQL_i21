@@ -259,7 +259,6 @@ WITH tmpCashFlowType AS
   SELECT 'Finance', 3, ''
 )
 SELECT * INTO #TempCashFlow FROM tmpCashFlowType
-
 WHILE EXISTS(SELECT 1 FROM #TempCashFlow)
 BEGIN 	
 	SET @BalanceSide = ''
@@ -284,7 +283,7 @@ BEGIN
 		EXEC [dbo].[uspFRDCreateRowCalculation] @intRowDetailId, @intRowDetailId_CY, @intRowId, @intRefNo, @intRefNo_CY, '+', 1	
 
 		--INSERT INTO #tmpRelatedRowsCashFlow (intRefNo, strAction) VALUES (@intRefNo, '+')
-		SET @strRelatedRows =  'SUM(' + @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' + '			
+		SET @strRelatedRows =  'SUM(' + @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + '+'			
 
 	END
 	ELSE IF(@strAccountType = 'Investments')
@@ -328,7 +327,7 @@ BEGIN
 		
 		IF @strRelatedRows = ''
 			BEGIN
-				SET @strRelatedRows = 'SUM(' + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ':'
+				SET @strRelatedRows = 'SUM(' + 'R' + CAST(@intRefNo as NVARCHAR(25)) + '+'
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 			END
@@ -339,7 +338,7 @@ BEGIN
 			END
 		ELSE
 			BEGIN
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ')'
+				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + '+'
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 								
@@ -366,9 +365,13 @@ EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '
 SET @intRefNo = @intRefNo + 1
 SET @intSort = @intSort + 1			
 
-IF(@strRelatedRows like '% + ')
+IF(@strRelatedRows like '%+')
 BEGIN
 	SET @strRelatedRows = SUBSTRING(@strRelatedRows,1,LEN(@strRelatedRows)-1)
+	IF @strRelatedRows LIKE 'SUM(%'
+	BEGIN
+		SET @strRelatedRows = RIGHT(@strRelatedRows,LEN(@strRelatedRows) -4)
+	END
 END
 
 EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Row Calculation', '', '', @strRelatedRows, '', '', 1, 1, 0, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 1, @intSort	

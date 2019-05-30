@@ -83,6 +83,8 @@ RETURNS @table TABLE
 , [ysnReturn]						BIT NULL 
 , [strTaxGroup]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , intShipViaId						INT NULL
+, intShipFromId						INT NULL
+, intShipFromEntityId				INT NULL
 )
 AS
 BEGIN
@@ -218,7 +220,9 @@ SELECT DISTINCT
 	,[intTaxGroupId]							=	B.intTaxGroupId
 	,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 	,[strTaxGroup]								=	TG.strTaxGroup
-	,intShipViaId                                = E.intEntityId
+	,intShipViaId                               =	E.intEntityId
+	,intShipFromId = A.intShipFromId
+	,intShipFromEntityId = A.intShipFromEntityId 
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -406,7 +410,10 @@ SELECT DISTINCT
 		,[intTaxGroupId]							=	A.intTaxGroupId
 		,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 		,[strTaxGroup]								=	TG.strTaxGroup
-		,intShipViaId								=   NULL
+		,intShipViaId								=   NULL 
+		,intShipFromId								=	NULL 
+		,intShipFromEntityId						=	NULL 
+
 FROM [vyuICChargesForBilling] A
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 

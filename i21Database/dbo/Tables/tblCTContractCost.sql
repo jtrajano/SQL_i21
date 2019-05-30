@@ -1,6 +1,7 @@
 CREATE TABLE [dbo].[tblCTContractCost](
 	[intContractCostId]			INT IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId]			INT NOT NULL,
+	[intPrevConcurrencyId]		INT,
 	[intContractDetailId]		INT NOT NULL,
 	[intItemId]					INT NULL,
 	[intVendorId]				INT NULL,

@@ -87,6 +87,8 @@ BEGIN TRY
 			,intInventoryTransferDetailId
 			,intSourceType	
 			,strSourceScreenName
+			,intSort
+			,intShipFromEntityId
 	)	
 	SELECT 
 			strReceiptType				= 'Transfer Order'
@@ -133,12 +135,20 @@ BEGIN TRY
             ,intInventoryTransferDetailId   = ICTD.intInventoryTransferDetailId
             ,intSourceType                  = 1 -- Source type for scale is 1 
             ,strSourceScreenName            = 'Scale Ticket'
+			,intSort						= RANK() OVER( ORDER BY ICTran.dblQty ASC)--RANK() OVER (ORDER BY ICTran.dblQty)
+			,intShipFromEntityId			= SC.intEntityId
 	FROM	tblSCTicket SC 
 	INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
 	INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
 	LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
 	LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
 	WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
+	--FROM	tblSCTicket SC 
+	--INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
+	--INNER JOIN tblSCTicket SCMatch ON SCMatch.intTicketId = SC.intMatchTicketId
+	--LEFT JOIN tblICInventoryTransferDetail ICTD ON ICTD.intInventoryTransferId = SCMatch.intInventoryTransferId
+	--LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
+	--WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges

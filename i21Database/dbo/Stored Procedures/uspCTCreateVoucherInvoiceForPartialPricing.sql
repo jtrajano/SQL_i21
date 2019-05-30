@@ -79,7 +79,10 @@ BEGIN TRY
 			@strPostedAPAR					NVARCHAR(MAX),
 			@intReceiptUniqueId				INT,  
 			@intShipmentUniqueId			INT,
-			@ysnTicketBased					BIT
+			@ysnTicketBased					BIT = 0,
+			@ysnPartialPriced				BIT = 0,
+			@ysnCreateNew					BIT = 0,
+			@receiptDetails					InventoryUpdateBillQty;
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -136,6 +139,16 @@ BEGIN TRY
 	IF	@ysnAllowChangePricing = 1 OR @intPriceFixationId IS NULL
 		RETURN
 
+	SELECT TOP 1 @ysnTicketBased = 1
+	FROM tblCTPriceFixation PF 
+	INNER JOIN tblCTPriceFixationTicket PFT ON PF.intPriceFixationId = PFT.intPriceFixationId
+	WHERE PF.intContractDetailId = @intContractDetailId
+
+	SELECT TOP 1 @ysnPartialPriced = 1 FROM tblCTPriceFixation PF
+	INNER JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
+	INNER JOIN tblCTPriceFixationDetailAPAR APAR ON PFD.intPriceFixationDetailId = APAR.intPriceFixationDetailId
+	WHERE PF.intContractDetailId = @intContractDetailId
+
     SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
 
 	WHILE ISNULL(@intPriceFixationDetailId, 0)  > 0 
@@ -189,7 +202,7 @@ BEGIN TRY
 
 				SET @ysnTicketBased = 1
 			END
-			ELSE
+			ELSE 
 			BEGIN
 				IF @ysnTicketBased = 1 
 				BEGIN
@@ -299,17 +312,30 @@ BEGIN TRY
 				END
 
 				SELECT	@intUniqueId = MIN(intUniqueId)  FROM @tblToProcess 
-			 
+
 				WHILE	ISNULL(@intUniqueId,0) > 0 
 				BEGIN
-					SELECT	@intInventoryReceiptId = intInventoryId,@dblQtyToBill = dblQty,@intInventoryReceiptItemId = intInventoryItemId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId							
+					SELECT	@intInventoryReceiptId = intInventoryId, @dblQtyToBill = dblQty, @intInventoryReceiptItemId = intInventoryItemId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId
 
-					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL)
+					-- Check if need to create new voucher
+					IF @ysnPartialPriced = 1
+					BEGIN
+						IF EXISTS (SELECT TOP 1 1 FROM tblAPBill WHERE ysnPosted = 1 AND intBillId = (SELECT TOP 1 intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId) AND @ysnCreateNew = 0)
+						BEGIN
+							SET @ysnCreateNew = 1
+						END
+						ELSE
+						BEGIN
+							SET @ysnCreateNew = 0
+						END
+					END
+
+					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL AND @ysnCreateNew = 0)
 					BEGIN
 						SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
-				    
+
 						SELECT  @ysnBillPosted = ysnPosted FROM tblAPBill WHERE intBillId = @intBillId
-						
+
 						DELETE	FROM @voucherDetailReceipt
 
 						IF ISNULL(@ysnBillPosted,0) = 1
@@ -348,27 +374,14 @@ BEGIN TRY
 							EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 						END
 
-						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
-						SELECT @intPriceFixationDetailId,@intBillId,@intBillDetailId,1
-
-						--UPDATE	tblCTPriceFixationDetail SET intBillId = @intBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-					END
-					ELSE
-					BEGIN
-						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 1 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
-
-						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
-
-						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
-						
-						DECLARE @total DECIMAL(18,6)
-						SELECT	@intBillDetailId = intBillDetailId, @total = dblQtyReceived FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
-
-						UPDATE	tblAPBillDetail SET dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
-
-						DECLARE @receiptDetails AS InventoryUpdateBillQty
-						
 						DELETE FROM @receiptDetails
+
+						-- DECLARE @dblBillQtyTotal NUMERIC(26,16)
+						-- SELECT @dblBillQtyTotal = SUM(BD.dblQtyReceived)
+						-- FROM tblCTPriceFixationDetailAPAR APAR
+						-- INNER JOIN tblAPBillDetail BD ON APAR.intBillDetailId = BD.intBillDetailId
+						-- WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND BD.intBillId = @intBillId
+						-- GROUP BY BD.intInventoryReceiptItemId
 
 						INSERT INTO @receiptDetails
 						(
@@ -381,9 +394,46 @@ BEGIN TRY
 							[intToBillUOMId],
 							[dblToBillQty]
 						)
-						SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intNewBillId, @intBillDetailId, @dblQtyToBill, @total)
+						SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intBillId, @intBillDetailId, @dblQtyToBill, 0)
 
 						EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
+
+						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
+						SELECT @intPriceFixationDetailId,@intBillId,@intBillDetailId,1
+
+						--UPDATE	tblCTPriceFixationDetail SET intBillId = @intBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+					END
+					ELSE
+					BEGIN
+						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 1 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+												
+						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
+						
+						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
+						
+						DECLARE @total DECIMAL(18,6)
+						SELECT	@intBillDetailId = intBillDetailId, @total = dblQtyReceived FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
+
+						UPDATE	tblAPBillDetail SET dblQtyReceived = @dblQtyToBill, dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
+
+						IF @dblQtyToBill <> @total
+						BEGIN
+							DELETE FROM @receiptDetails
+							INSERT INTO @receiptDetails
+							(
+								[intInventoryReceiptItemId],
+								[intInventoryReceiptChargeId],
+								[intInventoryShipmentChargeId],
+								[intSourceTransactionNoId],
+								[strSourceTransactionNo],
+								[intItemId],
+								[intToBillUOMId],
+								[dblToBillQty]
+							)
+							SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intNewBillId, @intBillDetailId, @dblQtyToBill, @total)
+							
+							EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
+						END
 
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 
@@ -415,6 +465,12 @@ BEGIN TRY
 						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 
 						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+						-- -- Reset create new counter for another voucher
+						-- IF @ysnCreateNew = 1
+						-- BEGIN
+						-- 	SET @ysnCreateNew  = 0
+						-- END
 					END
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId

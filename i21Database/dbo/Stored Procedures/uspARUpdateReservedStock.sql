@@ -37,7 +37,7 @@ BEGIN
 		,[intItemLocationId]	= ICGIS.[intItemLocationId]
 		,[intItemUOMId]			= ARID.[intItemUOMId]
 		,[intLotId]				= NULL
-		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
+		,[intSubLocationId]		= ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
 		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
@@ -45,7 +45,7 @@ BEGIN
 		,[intTransactionTypeId]	= @TransactionTypeId
 		,[intOwnershipTypeId]	= @Ownership_Own
 	FROM 
-		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId]
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId], [intTicketId]
 		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
@@ -59,7 +59,10 @@ BEGIN
 	LEFT OUTER JOIN
 		(SELECT [intItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] FROM vyuICGetItemStock WITH (NOLOCK)) ICGIS
 			ON ARID.[intItemId] = ICGIS.[intItemId] 
-			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
+			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId]
+	LEFT OUTER JOIN
+		vyuSCTicketScreenView SC
+			ON ARID.[intTicketId] = SC.[intTicketId]
 	WHERE 
 		ISNULL(@FromPosting, 0 ) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
@@ -69,6 +72,7 @@ BEGIN
 		AND ARID.[intInventoryShipmentItemId] IS NULL
 		AND ARID.[intLoadDetailId] IS NULL
 		AND ARID.[intLotId] IS NULL
+		AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
 		AND (
 				(
 					ICI.[strType] <> 'Finished Good'
@@ -85,7 +89,7 @@ BEGIN
 		,[intItemLocationId]	= ICGIS.[intItemLocationId]
 		,[intItemUOMId]			= ICGIS.[intComponentUOMId]
 		,[intLotId]				= NULL
-		,[intSubLocationId]		= ARID.[intCompanyLocationSubLocationId]
+		,[intSubLocationId]		= ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
 		,[intStorageLocationId]	= ARID.[intStorageLocationId]
 		,[dblQty]				= ISNULL(ARID.[dblQtyShipped],0) * isnull(ICGIS.dblComponentQuantity,0)  *  (CASE WHEN ISNULL(@Negate, 0) = 1 THEN 0 ELSE 1 END)
 		,[intTransactionId]		= @InvoiceId
@@ -93,7 +97,7 @@ BEGIN
 		,[intTransactionTypeId]	= @TransactionTypeId
 		,[intOwnershipTypeId]	= @Ownership_Own
 	FROM 
-		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId]
+		(SELECT [intInvoiceId], [intItemId], [intInventoryShipmentItemId], [intItemUOMId], [intCompanyLocationSubLocationId], [intSubLocationId], [intStorageLocationId], [dblQtyShipped], [intLotId], [intLoadDetailId], [intTicketId]
 		 FROM tblARInvoiceDetail WITH (NOLOCK)) ARID
 	INNER JOIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
@@ -108,6 +112,9 @@ BEGIN
 		(SELECT [intBundleItemId], [intComponentItemId], [intLocationId], [intItemLocationId], [dblUnitOnHand] = dblStockUnitQty, intComponentUOMId, dblComponentQuantity, dblComponentConvFactor, intStockUOMId FROM vyuICGetBundleItemStock WITH (NOLOCK)) ICGIS
 			ON ARID.[intItemId] = ICGIS.[intBundleItemId] 
 			AND ARI.[intCompanyLocationId] = ICGIS.[intLocationId] 
+	LEFT OUTER JOIN
+		vyuSCTicketScreenView SC
+			ON ARID.[intTicketId] = SC.[intTicketId]
 	WHERE 
 		ISNULL(@FromPosting, 0 ) = 0
 		AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 0
@@ -117,6 +124,7 @@ BEGIN
 		AND ARID.[intInventoryShipmentItemId] IS NULL
 		AND ARID.[intLoadDetailId] IS NULL
 		AND ARID.[intLotId] IS NULL
+		AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
 		AND (
 				(
 					ICI.[strType] <> 'Finished Good'

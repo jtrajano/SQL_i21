@@ -11,7 +11,7 @@ BEGIN TRY
 	DECLARE	 @intBrkgCommnId		INT,
 			 @xmlDocumentId			INT,
 			 @intContractDetailId	INT,
-			 @dblRcvdPaidAmount		NUMERIC(18,6),
+			 @dblRcvdPaidAmount		NUMERIC(18,2),
 			 @strInvoiceNumber		NVARCHAR(50),
 			 @strCurrency			NVARCHAR(50),
 			 @strCity				NVARCHAR(50),
@@ -73,7 +73,7 @@ BEGIN TRY
 	FROM	vyuCTGridBrokerageCommissionDetail
 	WHERE	intBrkgCommnId = @intBrkgCommnId
 	
-	SELECT	@dblRcvdPaidAmount = SUM(dblRcvdPaidAmount) FROM vyuCTGridBrokerageCommissionDetail WHERE intBrkgCommnId = @intBrkgCommnId
+	SELECT	@dblRcvdPaidAmount = ISNULL(SUM(dblRcvdPaidAmount),0) FROM vyuCTGridBrokerageCommissionDetail WHERE intBrkgCommnId = @intBrkgCommnId
 	
 	SELECT	@strInvoiceNumber	=	 IV.strInvoiceNumber 
 	FROM	tblARInvoiceDetail	AD
@@ -84,8 +84,7 @@ BEGIN TRY
 			LTRIM(RTRIM(CH.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + 
-			ISNULL(', '+LTRIM(RTRIM(CH.strEntityCity)),'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + ', ' + CHAR(13)+CHAR(10) + 
+			ISNULL(', '+LTRIM(RTRIM(CH.strEntityCity)),'') + ', ' + CHAR(13)+CHAR(10) + 
 			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
 	FROM	vyuCTEntity CH
 	WHERE   intEntityId =   @intVendorId

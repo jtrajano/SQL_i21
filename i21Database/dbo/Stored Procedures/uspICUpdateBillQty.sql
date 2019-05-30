@@ -110,8 +110,9 @@ BEGIN
 		INNER JOIN tblICInventoryReceiptItem SourceReceiptItem ON SourceReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId AND SourceReceiptItem.intItemId = UpdateTbl.intItemId
 		INNER JOIN tblICItem Item
 			ON Item.intItemId = UpdateTbl.intItemId
-	WHERE (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) > ReceiptItem.dblOpenReceive -- Throw error if Bill Qty is greater than Receipt Qty
-		OR (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
+	WHERE /*(ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) > ReceiptItem.dblOpenReceive -- Throw error if Bill Qty is greater than Receipt Qty
+		OR (ReceiptItem.dblBillQty + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative*/
+		ABS((ReceiptItem.dblBillQty) + (UpdateTbl.dblToBillQty)) > ABS(ReceiptItem.dblOpenReceive)
 		AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
 		AND UpdateTbl.intInventoryReceiptChargeId IS NULL
 

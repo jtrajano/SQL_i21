@@ -8,7 +8,8 @@
 	@ysnInvoiceStatus BIT OUTPUT,
 	@ysnCustomerChargesInvoiceStatus BIT OUTPUT,
 	@strBatchIdForNewPostRecap NVARCHAR(1000) OUTPUT,
-	@strErrorCode NVARCHAR(50) OUTPUT
+	@strErrorCode NVARCHAR(50) OUTPUT,
+	@ysnDebug BIT										=	0
 AS
 BEGIN
 
@@ -1820,12 +1821,11 @@ BEGIN
 
 
 --PRINT 'CUSTOMER CHARGES'
--- TEST
 				----------------------------------------------------------------------
 				--------- CUSTOMER CHARGES @strtblSTCheckoutCustomerCharges01---------
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1020
-				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
+				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0) --AND intProduct IS NOT NULL)
 					BEGIN
 						DECLARE @strtblSTCheckoutCustomerCharges01 AS NVARCHAR(150) = 'tblSTCheckoutCustomerCharges01'
 
@@ -1895,12 +1895,19 @@ BEGIN
 								ON CC.intCheckoutId = CH.intCheckoutId
 							JOIN tblSTStore ST 
 								ON CH.intStoreId = ST.intStoreId
+							JOIN tblICItemUOM STUOM
+								ON ST.intCustomerChargesItemId = STUOM.intItemId
 							JOIN vyuEMEntityCustomerSearch vC 
-								ON CC.intCustomerId = vC.intEntityId
-							LEFT JOIN tblICItemUOM UOM 
-								ON CC.intProduct = UOM.intItemUOMId
+								--ON CC.intCustomerId = vC.intEntityId		
+								ON ST.intCheckoutCustomerId = vC.intEntityId
+							INNER JOIN tblICItemUOM UOM 
+								ON UOM.intItemUOMId = CASE 
+														WHEN CC.intProduct IS NOT NULL
+															THEN CC.intProduct
+														ELSE STUOM.intItemUOMId
+													END
 							LEFT JOIN tblICItem I 
-								ON UOM.intItemId = I.intItemId
+									ON UOM.intItemId = I.intItemId
 							LEFT JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
 								AND ST.intCompanyLocationId = IL.intLocationId
@@ -1917,7 +1924,7 @@ BEGIN
 																					WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																						THEN
 																							CASE
-																								WHEN (CC.dblAmount > 0)
+																								WHEN (CC.dblAmount >= 0)
 																									THEN (ISNULL(CC.dblQuantity, 0) * -1)
 																								WHEN (CC.dblAmount < 0)
 																									THEN (ISNULL(CC.dblQuantity, 0) * -1)
@@ -1930,7 +1937,7 @@ BEGIN
 																					WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																						THEN
 																							CASE
-																								WHEN (CC.dblAmount > 0)
+																								WHEN (CC.dblAmount >= 0)
 																									THEN (ISNULL(CC.dblAmount, 0) * -1)
 																								WHEN (CC.dblAmount < 0)
 																									THEN (ISNULL(CC.dblAmount, 0) * -1)
@@ -2136,7 +2143,7 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																						WHEN (CC.dblAmount >= 0 OR CC.dblAmount < 0)
 																							THEN (CC.dblQuantity * -1)
 																					END
 
@@ -2144,7 +2151,7 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						WHEN (CC.dblAmount >= 0)
 																							THEN (CC.dblQuantity * -1)
 																						WHEN (CC.dblAmount < 0)
 																							THEN (CC.dblQuantity * -1)
@@ -2154,7 +2161,7 @@ BEGIN
 																			WHEN (I.intItemId IS NULL)
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						WHEN (CC.dblAmount >= 0)
 																							THEN -1
 																						WHEN (CC.dblAmount < 0)
 																							THEN 1
@@ -2169,7 +2176,7 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																						WHEN (CC.dblAmount >= 0 OR CC.dblAmount < 0)
 																							THEN CC.dblUnitPrice
 																					END
 
@@ -2177,7 +2184,7 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
+																						WHEN (CC.dblAmount < 0 OR CC.dblAmount >= 0)
 																							THEN ABS(ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)) - ABS(FuelTax.dblAdjustedTax)) / ABS(ISNULL(CC.dblQuantity, 0))
 																					END
 
@@ -2185,7 +2192,7 @@ BEGIN
 																			WHEN (I.intItemId IS NULL)
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						WHEN (CC.dblAmount >= 0)
 																							--THEN CC.dblAmount
 																							THEN ISNULL(CC.dblUnitPrice, 0)			-- TEST01
 																						WHEN (CC.dblAmount < 0)
@@ -2249,11 +2256,17 @@ BEGIN
 									ON CC.intCheckoutId = CH.intCheckoutId
 								JOIN tblSTStore ST 
 									ON CH.intStoreId = ST.intStoreId
+								JOIN tblICItemUOM STUOM
+									ON ST.intCustomerChargesItemId = STUOM.intItemId
 								JOIN vyuEMEntityCustomerSearch vC 
+									-- ON CC.intCustomerId = vC.intEntityId	
 									ON ST.intCheckoutCustomerId = vC.intEntityId
-									--ON CC.intCustomerId = vC.intEntityId -- For separate Customer CHarges Only
-								LEFT JOIN tblICItemUOM UOM 
-									ON CC.intProduct = UOM.intItemUOMId
+								INNER JOIN tblICItemUOM UOM 
+									ON UOM.intItemUOMId = CASE 
+															WHEN CC.intProduct IS NOT NULL
+																THEN CC.intProduct
+															ELSE STUOM.intItemUOMId
+														END
 								LEFT JOIN tblICItem I 
 									ON UOM.intItemId = I.intItemId
 								LEFT JOIN tblICItemLocation IL 
@@ -2281,6 +2294,7 @@ BEGIN
 									AND FuelTax.strSourceTransaction = @strtblSTCheckoutCustomerCharges01
 								WHERE CC.intCheckoutId = @intCheckoutId
 									AND ISNULL(CC.dblAmount, 0) != 0
+
 					END
 				----------------------------------------------------------------------
 				----------------------- END CUSTOMER CHARGES -------------------------
@@ -2530,7 +2544,7 @@ BEGIN
 				----------------------------------------------------------------------
 				--http://jira.irelyserver.com/browse/ST-1019
 				--http://jira.irelyserver.com/browse/ST-1020
-				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0 AND intProduct IS NOT NULL)
+				IF EXISTS(SELECT * FROM tblSTCheckoutCustomerCharges WHERE intCheckoutId = @intCheckoutId AND dblAmount != 0) --AND intProduct IS NOT NULL)
 					BEGIN
 						DECLARE @strtblSTCheckoutCustomerCharges02 AS NVARCHAR(150) = 'tblSTCheckoutCustomerCharges02'
 
@@ -2600,12 +2614,18 @@ BEGIN
 							ON CC.intCheckoutId = CH.intCheckoutId
 						JOIN tblSTStore ST 
 							ON CH.intStoreId = ST.intStoreId
+						JOIN tblICItemUOM STUOM
+							ON ST.intCustomerChargesItemId = STUOM.intItemId
 						JOIN vyuEMEntityCustomerSearch vC 
-							ON CC.intCustomerId = vC.intEntityId
-						LEFT JOIN tblICItemUOM UOM 
-							ON CC.intProduct = UOM.intItemUOMId
+							ON CC.intCustomerId = vC.intEntityId					
+						INNER JOIN tblICItemUOM UOM 
+							ON UOM.intItemUOMId = CASE 
+													WHEN CC.intProduct IS NOT NULL
+														THEN CC.intProduct
+													ELSE STUOM.intItemUOMId
+												END
 						LEFT JOIN tblICItem I 
-							ON UOM.intItemId = I.intItemId
+									ON UOM.intItemId = I.intItemId
 						LEFT JOIN tblICItemLocation IL 
 							ON I.intItemId = IL.intItemId
 							AND ST.intCompanyLocationId = IL.intLocationId
@@ -2621,7 +2641,7 @@ BEGIN
 																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																					THEN
 																						CASE
-																							WHEN (CC.dblAmount > 0)
+																							WHEN (CC.dblAmount >= 0)
 																								THEN ISNULL(CC.dblQuantity, 0)	
 																							WHEN (CC.dblAmount < 0)
 																								THEN (ISNULL(CC.dblQuantity, 0) * -1)
@@ -2773,9 +2793,11 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						-- WHEN (CC.dblAmount > 0)
+																						WHEN (CCMerge.dblAmountSUM >= 0)
 																							THEN 'Invoice'
-																						WHEN (CC.dblAmount < 0)
+																						-- WHEN (CC.dblAmount < 0)
+																						WHEN (CCMerge.dblAmountSUM < 0)
 																							THEN 'Credit Memo'
 																					END
 
@@ -2783,9 +2805,11 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						-- WHEN (CC.dblAmount > 0)
+																						WHEN (CCMerge.dblAmountSUM >= 0)
 																							THEN 'Invoice'
-																						WHEN (CC.dblAmount < 0)
+																						-- WHEN (CC.dblAmount < 0)
+																						WHEN (CCMerge.dblAmountSUM < 0)
 																							THEN 'Credit Memo'
 																					END
 
@@ -2793,9 +2817,11 @@ BEGIN
 																			WHEN (I.intItemId IS NULL)
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						-- WHEN (CC.dblAmount > 0)
+																						WHEN (CCMerge.dblAmountSUM >= 0)
 																							THEN 'Invoice'
-																						WHEN (CC.dblAmount < 0)
+																						-- WHEN (CC.dblAmount < 0)
+																						WHEN (CCMerge.dblAmountSUM < 0)
 																							THEN 'Credit Memo'
 																					END
 																		END
@@ -2821,7 +2847,7 @@ BEGIN
 											,[strPONumber]				= NULL								-- not sure
 											,[strBOLNumber]				= NULL								-- not sure
 
-											,[strComments]				= @strComments + CAST(CC.intInvoice AS NVARCHAR(100)) -- to be able to create reparate Invoices (intCustomerId + intInvoice)
+											,[strComments]				= @strComments + '[' + CAST(CC.intCustomerId AS NVARCHAR(100)) + '][' + CAST(CC.intInvoice AS NVARCHAR(100)) + ']' -- to be able to create reparate Invoices (intCustomerId + intInvoice)
 																															  -- if  row 1 = Customer 1, Invoice = 1234
 																															  -- and row 2 = Customer 2, Invoice = 1234
 																															  -- then create 1 invoice for both
@@ -2870,9 +2896,11 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						-- WHEN (CC.dblAmount >= 0)
+																						WHEN (CCMerge.dblAmountSUM >= 0)
 																							THEN CC.dblQuantity
-																						WHEN (CC.dblAmount < 0)
+																						-- WHEN (CC.dblAmount < 0)
+																						WHEN (CCMerge.dblAmountSUM < 0)
 																							THEN (CC.dblQuantity * -1)
 																					END
 
@@ -2880,9 +2908,11 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						-- WHEN (CC.dblAmount >= 0)
+																						WHEN (CCMerge.dblAmountSUM >= 0)
 																							THEN CC.dblQuantity
-																						WHEN (CC.dblAmount < 0)
+																						-- WHEN (CC.dblAmount < 0)
+																						WHEN (CCMerge.dblAmountSUM < 0)
 																							THEN (CC.dblQuantity * -1)
 																					END
 
@@ -2890,9 +2920,11 @@ BEGIN
 																			WHEN (I.intItemId IS NULL)
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						-- WHEN (CC.dblAmount >= 0)
+																						WHEN (CCMerge.dblAmountSUM >= 0)
 																							THEN 1
-																						WHEN (CC.dblAmount < 0)
+																						-- WHEN (CC.dblAmount < 0)
+																						WHEN (CCMerge.dblAmountSUM < 0)
 																							THEN 1
 																					END
 																		END
@@ -2905,9 +2937,11 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount > 0)
+																						-- WHEN (CC.dblAmount > 0)
+																						WHEN (CCMerge.dblAmountSUM >= 0)
 																							THEN CC.dblUnitPrice
-																						WHEN (CC.dblAmount < 0)
+																						-- WHEN (CC.dblAmount < 0)
+																						WHEN (CCMerge.dblAmountSUM < 0)
 																							THEN CC.dblUnitPrice
 																					END
 
@@ -2915,7 +2949,8 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
+																						-- WHEN (CC.dblAmount < 0 OR CC.dblAmount > 0)
+																						WHEN (CCMerge.dblAmountSUM < 0 OR CCMerge.dblAmountSUM >= 0)
 																							THEN (ABS(ISNULL(CAST(CC.dblAmount AS DECIMAL(18,2)), 0)) - FuelTax.dblAdjustedTax) / ABS(CC.dblQuantity)
 																					END
 
@@ -2974,14 +3009,37 @@ BEGIN
 											--,0
 											--,1
 								FROM tblSTCheckoutCustomerCharges CC
-								JOIN tblSTCheckoutHeader CH 
+
+								-- http://jira.irelyserver.com/browse/ST-1342
+								INNER JOIN 
+								(
+									SELECT SUM(cc.dblAmount) AS dblAmountSUM
+										   , cc.intCheckoutId
+										   , cc.strComment
+										   , cc.intInvoice
+										   , cc.intCustomerId
+									FROM tblSTCheckoutCustomerCharges cc
+									GROUP BY cc.intCheckoutId, cc.strComment, cc.intInvoice, cc.intCustomerId
+								) CCMerge
+									ON CC.intCheckoutId = CCMerge.intCheckoutId
+									AND CC.strComment = CCMerge.strComment
+									AND CC.intInvoice = CCMerge.intInvoice
+									AND CC.intCustomerId = CCMerge.intCustomerId
+
+								INNER JOIN tblSTCheckoutHeader CH 
 									ON CC.intCheckoutId = CH.intCheckoutId
-								JOIN tblSTStore ST 
+								INNER JOIN tblSTStore ST 
 									ON CH.intStoreId = ST.intStoreId
-								JOIN vyuEMEntityCustomerSearch vC 
-									ON CC.intCustomerId = vC.intEntityId
-								LEFT JOIN tblICItemUOM UOM 
-									ON CC.intProduct = UOM.intItemUOMId
+								INNER JOIN tblICItemUOM STUOM
+									ON ST.intCustomerChargesItemId = STUOM.intItemId
+								INNER JOIN vyuEMEntityCustomerSearch vC 
+									ON CC.intCustomerId = vC.intEntityId					
+								INNER JOIN tblICItemUOM UOM 
+									ON UOM.intItemUOMId = CASE 
+															WHEN CC.intProduct IS NOT NULL
+																THEN CC.intProduct
+															ELSE STUOM.intItemUOMId
+														END
 								LEFT JOIN tblICItem I 
 									ON UOM.intItemId = I.intItemId
 								LEFT JOIN tblICItemLocation IL 
@@ -3009,6 +3067,8 @@ BEGIN
 									AND FuelTax.strSourceTransaction = @strtblSTCheckoutCustomerCharges02
 								WHERE CC.intCheckoutId = @intCheckoutId
 									AND ISNULL(CC.dblAmount, 0) != 0
+
+
 					END
 				------------------------------------------------------------------------
 				------------------------- END CUSTOMER CHARGES -------------------------
@@ -3251,7 +3311,29 @@ BEGIN
 											,[ysnRecap]
 										FROM @EntriesForInvoice
 
-										--SELECT * FROM @EntriesForInvoice
+
+
+-- ============================================================================================
+-- [START] TEST TO DEBUG
+-- ============================================================================================
+IF(@ysnDebug = 1)
+	BEGIN
+		SELECT '@EntriesForInvoiceBatchPost-All Items to send to Sales Invoice'
+		       , [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
+			   , strComments
+			   , intEntityCustomerId
+			   , strTransactionType
+			   , dblQtyShipped
+			   , dblPrice
+			   , strItemDescription
+			   , * 
+		FROM @EntriesForInvoiceBatchPost
+	END
+-- ============================================================================================
+-- [END] TEST TO DEBUG
+-- ============================================================================================
+
+
 
 										-------------------------------------------------------------------------------
 										------------------------------- Start Rank ------------------------------------
@@ -3293,6 +3375,32 @@ BEGIN
 												INNER JOIN @tblTempRank Ranking
 													ON Tax.intTempDetailIdForTaxes = Ranking.intTempDetailIdForTaxes											-- Id
 													AND Tax.strSourceTransaction COLLATE SQL_Latin1_General_CP1_CS_AS = Ranking.strSourceTransaction			-- Table
+
+
+-- ============================================================================================
+-- [START] TEST TO DEBUG
+-- ============================================================================================
+IF(@ysnDebug = 1)
+	BEGIN
+		SELECT 'For Items that has Tax'
+
+		SELECT '@LineItemTaxEntries-List of Taxes on Items', intTempDetailIdForTaxes, strSourceTransaction, * 
+		FROM @LineItemTaxEntries
+		WHERE intTempDetailIdForTaxes IS NOT NULL
+			AND strSourceTransaction <> ''
+
+		-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
+		SELECT '@EntriesForInvoiceBatchPost-Items that has Tax Calc'
+		       , [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
+			   , intTempDetailIdForTaxes, strSourceTransaction, strImportFormat, * 
+		FROM @EntriesForInvoiceBatchPost
+		WHERE intTempDetailIdForTaxes IS NOT NULL
+			OR strImportFormat <> ''
+	END
+-- ============================================================================================
+-- [END] TEST TO DEBUG
+-- ============================================================================================
+
 
 												-- Clear values
 												UPDATE @LineItemTaxEntries

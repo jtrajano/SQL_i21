@@ -68,6 +68,7 @@ SELECT
 	, dblReorderPoint = ISNULL(itemLocation.dblReorderPoint, 0)
 	, dblNearingReorderBy = CAST(ISNULL(stockUOM.dblOnHand, 0) - ISNULL(itemLocation.dblReorderPoint, 0) AS NUMERIC(38, 7))
 	, itemUOM.ysnStockUnit
+	, dblInTransitDirect = ISNULL(stockUOM.dblInTransitDirect, 0)
 FROM
 	tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitmeasure
 		ON itemUOM.intUnitMeasureId = unitmeasure.intUnitMeasureId
@@ -93,6 +94,7 @@ FROM
 			,dblOnHand = SUM(stockUOM.dblOnHand) 
 			,dblInTransitInbound = SUM(stockUOM.dblInTransitInbound) 
 			,dblInTransitOutbound = SUM(stockUOM.dblInTransitOutbound) 
+			,dblInTransitDirect = SUM(stockUOM.dblInTransitDirect) 
 			,dblConsignedPurchase = SUM(stockUOM.dblConsignedPurchase) 
 			,dblConsignedSale = SUM(stockUOM.dblConsignedSale) 
 			,dblOrderCommitted = SUM(stockUOM.dblOrderCommitted) 

@@ -116,7 +116,7 @@ BEGIN
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
-				INNER JOIN dbo.tblICItemPricing P 
+				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
 				INNER JOIN dbo.tblSMCompanyLocation CL 
@@ -257,7 +257,7 @@ BEGIN
 						ON I.intItemId = UOM.intItemId
 					INNER JOIN dbo.tblICItemLocation IL 
 						ON IL.intItemId = I.intItemId
-					INNER JOIN dbo.tblICItemPricing P 
+					LEFT JOIN dbo.tblICItemPricing P 
 						ON IL.intItemLocationId = P.intItemLocationId 
 						AND I.intItemId = P.intItemId
 					INNER JOIN dbo.tblSMCompanyLocation CL 
@@ -333,8 +333,9 @@ BEGIN
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
-			INNER JOIN dbo.tblICItemPricing P 
-				ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
+			LEFT JOIN dbo.tblICItemPricing P 
+				ON IL.intItemLocationId = P.intItemLocationId 
+				AND I.intItemId = P.intItemId
 			INNER JOIN dbo.tblSMCompanyLocation CL 
 				ON CL.intCompanyLocationId = IL.intLocationId
 			INNER JOIN dbo.tblSTStore S 
@@ -400,8 +401,9 @@ BEGIN
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
-			INNER JOIN dbo.tblICItemPricing P 
-				ON IL.intItemLocationId = P.intItemLocationId AND I.intItemId = P.intItemId
+			LEFT JOIN dbo.tblICItemPricing P 
+				ON IL.intItemLocationId = P.intItemLocationId 
+				AND I.intItemId = P.intItemId
 			INNER JOIN dbo.tblSMCompanyLocation CL 
 				ON CL.intCompanyLocationId = IL.intLocationId
 			INNER JOIN dbo.tblSTStore S 
@@ -432,17 +434,17 @@ BEGIN
 					 , (CASE 
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
-										WHEN Chk.dblAveragePrice > P.dblSalePrice 
+										WHEN Chk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
 											THEN (Chk.dblAveragePrice)							-- Chk.dblAveragePrice - P.dblSalePrice
-										WHEN Chk.dblAveragePrice < P.dblSalePrice 
+										WHEN Chk.dblAveragePrice < ISNULL(P.dblSalePrice, 0)
 											THEN (Chk.dblAveragePrice)							-- P.dblSalePrice - Chk.dblAveragePrice
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
-										WHEN Chk.dblAveragePriceWthDiscounts > P.dblSalePrice 
-											THEN (Chk.dblAveragePriceWthDiscounts)				-- Chk.dblAveragePriceWthDiscounts - P.dblSalePrice
-										WHEN Chk.dblAveragePriceWthDiscounts < P.dblSalePrice 
-											THEN (Chk.dblAveragePriceWthDiscounts)				-- P.dblSalePrice - Chk.dblAveragePriceWthDiscounts
+										WHEN Chk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+											THEN (Chk.dblAveragePriceWthDiscounts)						-- Chk.dblAveragePriceWthDiscounts - P.dblSalePrice
+										WHEN Chk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+											THEN (Chk.dblAveragePriceWthDiscounts)						-- P.dblSalePrice - Chk.dblAveragePriceWthDiscounts
 									END
 						END) AS dblRetailUnit
 
@@ -450,16 +452,16 @@ BEGIN
 					 , (CASE 
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
-										WHEN Chk.dblAveragePrice > P.dblSalePrice 
+										WHEN Chk.dblAveragePrice > ISNULL(P.dblSalePrice, 0)
 											THEN (Chk.dblAveragePrice * Chk.SalesQuantity)			-- (Chk.dblAveragePrice - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
-										WHEN Chk.dblAveragePrice < P.dblSalePrice 
+										WHEN Chk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
 											THEN (Chk.dblAveragePrice * Chk.SalesQuantity)			-- (P.dblSalePrice - Chk.dblAveragePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
-										WHEN Chk.dblAveragePriceWthDiscounts > P.dblSalePrice 
+										WHEN Chk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
 											THEN (Chk.dblAveragePriceWthDiscounts * Chk.SalesQuantity)	-- (Chk.dblAveragePriceWthDiscounts - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
-										WHEN Chk.dblAveragePriceWthDiscounts < P.dblSalePrice 
+										WHEN Chk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
 											THEN (Chk.dblAveragePriceWthDiscounts * Chk.SalesQuantity)  -- (P.dblSalePrice - Chk.dblAveragePriceWthDiscounts) * ISNULL(CAST(Chk.SalesQuantity as int),0)
 									END
 						END) AS dblAmount
@@ -467,29 +469,29 @@ BEGIN
 					 , (CASE 
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
-										WHEN Chk.dblAveragePrice > P.dblSalePrice 
-											THEN CAST((Chk.dblAveragePrice - P.dblSalePrice) AS DECIMAL(18,6))
-										WHEN Chk.dblAveragePrice < P.dblSalePrice 
-											THEN CAST((P.dblSalePrice - Chk.dblAveragePrice) AS DECIMAL(18,6))
+										WHEN Chk.dblAveragePrice > ISNULL(P.dblSalePrice, 0)
+											THEN CAST((Chk.dblAveragePrice - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
+										WHEN Chk.dblAveragePrice < ISNULL(P.dblSalePrice, 0)
+											THEN CAST((ISNULL(P.dblSalePrice, 0) - Chk.dblAveragePrice) AS DECIMAL(18,6))
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
-										WHEN Chk.dblAveragePriceWthDiscounts > P.dblSalePrice 
-											THEN CAST((Chk.dblAveragePriceWthDiscounts - P.dblSalePrice) AS DECIMAL(18,6))
-										WHEN Chk.dblAveragePriceWthDiscounts < P.dblSalePrice 
-											THEN CAST((P.dblSalePrice - Chk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
+										WHEN Chk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+											THEN CAST((Chk.dblAveragePriceWthDiscounts - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
+										WHEN Chk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0)
+											THEN CAST((ISNULL(P.dblSalePrice, 0) - Chk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
 									END
 						END) AS dblShrink
 					 , (CASE 
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
-										WHEN Chk.dblAveragePrice > P.dblSalePrice THEN 'Mark Up'
-										WHEN Chk.dblAveragePrice < P.dblSalePrice THEN 'Mark Down' 
+										WHEN Chk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
+										WHEN Chk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
-										WHEN Chk.dblAveragePriceWthDiscounts > P.dblSalePrice THEN 'Mark Up'
-										WHEN Chk.dblAveragePriceWthDiscounts < P.dblSalePrice THEN 'Mark Down' 
+										WHEN Chk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
+										WHEN Chk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
 									END
 						END) AS strUpDownNotes
 					 , 1
@@ -512,7 +514,7 @@ BEGIN
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
-				INNER JOIN dbo.tblICItemPricing P 
+				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
 				INNER JOIN dbo.tblSMCompanyLocation CL 

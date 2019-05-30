@@ -33,7 +33,7 @@ AS
 		,tax = case when Cus.ysnApplyPrepaidTax = 1 then 'P' 
 				when Cus.ysnApplySalesTax = 1 then 'Y'
 				else 'N' END COLLATE Latin1_General_CI_AS
-		,TaxGroupId = ISNULL(ShipToLoc.intTaxGroupId,'')    	
+		,TaxGroupId = ISNULL(CAST(ShipToLoc.intTaxGroupId AS NVARCHAR(20)),'')
  	FROM tblEMEntity AS Entity  
 		INNER JOIN tblEMEntityType as EntType
 			ON Entity.intEntityId = EntType.intEntityId and EntType.strType = 'Customer'

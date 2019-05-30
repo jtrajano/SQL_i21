@@ -24,7 +24,8 @@ AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS OFF
+SET XACT_ABORT ON
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -56,13 +57,13 @@ DECLARE  @totalRecords INT = 0
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
---IF ISNULL(@raiseError,0) = 0	
---BEGIN
+IF ISNULL(@raiseError,0) = 0	
+BEGIN
 	IF @InitTranCount = 0
 		BEGIN TRANSACTION
 	ELSE
 		SAVE TRANSACTION @Savepoint
---END
+END
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 
@@ -652,8 +653,7 @@ IF(@totalInvalid > 0)
 		IF @raiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
-				--RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Do_Rollback
+				RAISERROR(@ErrorMerssage, 11, 1)							
 			END					
 
         DELETE FROM #ARInvalidInvoiceData
@@ -695,8 +695,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		IF @raiseError = 1
 			BEGIN
 				SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed
-				--RAISERROR(@ErrorMerssage, 11, 1)							
-				GOTO Do_Rollback
+				RAISERROR(@ErrorMerssage, 11, 1)							
 			END				
 		GOTO Post_Exit	
 	END
@@ -718,7 +717,6 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @userId
 		       ,@BatchIdUsed     = @batchIdUsed OUT
-		       ,@raiseError      = @raiseError
         GOTO Do_Commit
     END
 
@@ -803,7 +801,7 @@ BEGIN CATCH
 				END	
 		END						
 	IF @raiseError = 1
-		GOTO Do_Rollback
+        RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
 END CATCH
@@ -1141,8 +1139,7 @@ BEGIN TRY
 	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
 	BEGIN
 		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
-		--RAISERROR(@ErrorMerssage, 11, 1)							
-		GOTO Do_Rollback
+		RAISERROR(@ErrorMerssage, 11, 1)							
 	END					
 
     DELETE FROM #ARInvoiceGLEntries
@@ -1205,7 +1202,7 @@ BEGIN CATCH
 				END	
 		END						
 	IF @raiseError = 1
-		GOTO Do_Rollback
+        RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
 END CATCH
@@ -1214,8 +1211,8 @@ SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
 
 Do_Commit:
---IF ISNULL(@raiseError,0) = 0
---BEGIN
+IF ISNULL(@raiseError,0) = 0
+BEGIN
 
 	IF @InitTranCount = 0
 		BEGIN
@@ -1231,7 +1228,7 @@ Do_Commit:
 			--IF (XACT_STATE()) = 1
 			--	COMMIT TRANSACTION  @Savepoint
 		END	
---END
+END
 
 	RETURN 1;
 
@@ -1310,8 +1307,8 @@ Do_Commit:
 --	END
 
 Do_Rollback:
-	--IF @raiseError = 0
-	--	BEGIN
+	IF @raiseError = 0
+		BEGIN
 			IF @InitTranCount = 0
 				IF (XACT_STATE()) <> 0
 					ROLLBACK TRANSACTION
@@ -1341,7 +1338,7 @@ Do_Rollback:
 					IF (XACT_STATE()) = -1
 						ROLLBACK TRANSACTION  @CurrentSavepoint
 				END	
-		--END
+		END
 	IF @raiseError = 1
 		RAISERROR(@ErrorMerssage, 11, 1)	
 	    

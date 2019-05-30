@@ -15,6 +15,7 @@
 	,intLastModifiedUserId INT NOT NULL
 	,dtmLastModified DATETIME NOT NULL CONSTRAINT DF_tblMFProcessCycleCount_dtmLastModified DEFAULT(getdate())
 	,intConcurrencyId INT NULL CONSTRAINT DF_tblMFProcessCycleCount_intConcurrencyId DEFAULT((0))
+	,intMainItemId int
 	,CONSTRAINT PK_tblMFProcessCycleCount_intCycleCountId PRIMARY KEY (intCycleCountId)
 	,CONSTRAINT FK_tblMFProcessCycleCount_tblMFProcessCycleCountSession_intCycleCountSessionId FOREIGN KEY (intCycleCountSessionId) REFERENCES dbo.tblMFProcessCycleCountSession(intCycleCountSessionId)
 	,CONSTRAINT FK_tblMFProcessCycleCount_tblMFMachine_intMachineId FOREIGN KEY (intMachineId) REFERENCES dbo.tblMFMachine(intMachineId)

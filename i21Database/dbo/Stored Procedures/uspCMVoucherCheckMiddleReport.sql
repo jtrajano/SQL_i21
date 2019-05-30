@@ -147,9 +147,10 @@ SELECT
 		,blbSecondSignatureDetail = (SELECT TOP 1 blbDetail FROM tblSMSignature WHERE intSignatureId = BNKACCNT.intSecondSignatureId)
 		
 		-- A/P Related fields: 
-		,strVendor = ISNULL(LTRIM(RTRIM(VENDOR.strVendorId)) + ' ', '-- ') + ISNULL(ISNULL(RTRIM(LTRIM(ENTITY.strName)) + ' ', RTRIM(LTRIM(CHK.strPayee))),'-- ') + RTRIM(LTRIM (COMPANY.strCompanyName))
+		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
+		,strVendorName = ISNULL(ENTITY.strName, CHK.strPayee)
 		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
-		,strVendorAddress = CASE	
+			,strVendorAddress = CASE	
 									WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
 										dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
 									ELSE 
@@ -182,7 +183,11 @@ FROM	dbo.tblCMBankTransaction CHK
 			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val
 		)AmtInWords
 		OUTER APPLY(
-			SELECT CASE
+			SELECT
+			CASE WHEN PYMT.ysnOverrideCheckPayee = 1 THEN 
+					PYMT.strOverridePayee
+			ELSE	
+			CASE
 			WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
 				ISNULL(RTRIM(CHK.strPayee) + ' ' + (STUFF( (SELECT DISTINCT ' and ' + strName
                         FROM tblAPVendorLien LIEN
@@ -198,20 +203,15 @@ FROM	dbo.tblCMBankTransaction CHK
                     1, 1, '')),CHK.strPayee)
 			ELSE
 				CHK.strPayee
+			END
 			END Name
 		
 		) Payee
 		OUTER APPLY (
 			SELECT 
-				CASE WHEN PYMT.ysnOverrideCheckPayee = 1 THEN 
-					PYMT.strOverridePayee
-				ELSE					
-			CASE	
-				WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
-					dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
-				ELSE 
-					dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
-			END 
+			CASE	WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  
+			THEN dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
+			ELSE dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
 			END
 			Value
 		)Address

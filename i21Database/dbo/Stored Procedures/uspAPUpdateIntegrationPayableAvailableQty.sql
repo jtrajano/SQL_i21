@@ -169,7 +169,7 @@ SELECT
 	,[dblActual]						
 	,[dblDifference]
 FROM dbo.fnAPCreateVoucherPayableFromDetail(@billDetailIds)
-WHERE ysnStage = 0
+WHERE ysnStage = 1
 
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
@@ -184,10 +184,11 @@ BEGIN --MISC PO ITEM
 	IF @@ROWCOUNT > 0
 	BEGIN
 		DECLARE @voucherPayablesMiscPO AS VoucherPayable;
+		DECLARE @descreasePO BIT = ~@decreaseQty
 		ALTER TABLE #tmpMiscPOPayables DROP COLUMN intVoucherPayableId
 		INSERT INTO @voucherPayablesMiscPO
 		SELECT * FROM #tmpMiscPOPayables
-		EXEC uspPOReceivedMiscItem @voucherPayables = @voucherPayablesMiscPO, @decrease = @decreaseQty
+		EXEC uspPOReceivedMiscItem @voucherPayables = @voucherPayablesMiscPO, @decrease = @descreasePO
 
 		--decrease on order qty for po misc item
 		DECLARE @ItemToUpdateOnOrderQty ItemCostingTableType
@@ -228,16 +229,18 @@ BEGIN --MISC PO ITEM
 			ON A.intItemId = loc.intItemId AND A.intShipToId = loc.intLocationId
 		LEFT JOIN tblICItem C
 			ON B.intItemId = C.intItemId
-		WHERE B.intPurchaseDetailId > 0
+		WHERE 
+			B.intPurchaseDetailId > 0
+		AND B.intInventoryReceiptItemId IS NULL
 		AND (dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
-		AND EXISTS 
-		(
-			--MAKE SURE TO CALL THE SP IF PO MISC ITEM IS ALREADY VOUCHERED
-			SELECT 1
-			FROM tblAPBillDetail B3
-			WHERE B3.intPurchaseDetailId = B.intPurchaseDetailId
-			AND B3.intBillDetailId != B.intBillDetailId
-		)
+		-- AND EXISTS 
+		-- (
+		-- 	--MAKE SURE TO CALL THE SP IF PO MISC ITEM IS ALREADY VOUCHERED
+		-- 	SELECT 1
+		-- 	FROM tblAPBillDetail B3
+		-- 	WHERE B3.intPurchaseDetailId = B.intPurchaseDetailId
+		-- 	AND B3.intBillDetailId != B.intBillDetailId
+		-- )
 		-- Call the stored procedure that updates the on order qty. 
 		IF EXISTS(SELECT 1 FROM @ItemToUpdateOnOrderQty)
 		BEGIN

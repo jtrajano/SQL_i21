@@ -23,7 +23,8 @@
 	@intItemUOMId INT = NULL,
 	-- Set these to change the storage unit/loc
 	@intStorageLocationId INT = NULL,
-	@intStorageUnitId INT = NULL
+	@intStorageUnitId INT = NULL,
+	@ysnUpdatedOutdatedStock BIT = NULL
 AS
 
 DECLARE @intInventoryCountId INT
@@ -268,7 +269,8 @@ BEGIN
 		END
 	END
 
-	EXEC dbo.uspICInventoryCountUpdateOutdatedItemStock @intInventoryCountId
+	IF @ysnUpdatedOutdatedStock = 1
+		EXEC dbo.uspICInventoryCountUpdateOutdatedItemStock @intInventoryCountId
 END
 ELSE
 BEGIN

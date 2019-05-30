@@ -80,6 +80,8 @@ BEGIN TRY
 		,@dblInputWeight2 NUMERIC(18, 6)
 		,@dblRequiredQty NUMERIC(18, 6)
 		,@dblSwapToQty2 NUMERIC(18, 6)
+		,@intMainItemId int
+
 	DECLARE @tblMFSwapto TABLE (
 		intSwapTo INT identity(1, 1)
 		,intWorkOrderId INT
@@ -131,6 +133,7 @@ BEGIN TRY
 		,@ysnNegativeQuantityAllowed = ysnNegativeQuantityAllowed
 		,@ysnExcessConsumptionAllowed = ysnExcessConsumptionAllowed
 		,@dblDefaultResidueQty = dblDefaultResidueQty
+		,@intMainItemId=intMainItemId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLocationId INT
 			,intSubLocationId INT
@@ -155,6 +158,7 @@ BEGIN TRY
 			,ysnNegativeQuantityAllowed BIT
 			,ysnExcessConsumptionAllowed BIT
 			,dblDefaultResidueQty NUMERIC(38, 20)
+			,intMainItemId int
 			)
 
 	IF @dtmActualInputDateTime>GETDATE()
@@ -892,6 +896,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,dblEnteredQty
 		,intEnteredItemUOMId
+		,intMainItemId
 		)
 	SELECT @intWorkOrderId
 		,@intInputItemId
@@ -923,6 +928,7 @@ BEGIN TRY
 		,@intUserId
 		,@dblEnteredQty
 		,@intEnteredItemUOMId
+		,@intMainItemId
 
 	SELECT @intWorkOrderInputLotId = SCOPE_IDENTITY()
 
@@ -1195,6 +1201,7 @@ BEGIN TRY
 					1
 					,3
 					)
+				AND IsNULL(intMainItemId,IsNULL(@intMainItemId,0))=IsNULL(@intMainItemId,0)
 			)
 	BEGIN
 		INSERT INTO tblMFProductionSummary (
@@ -1214,6 +1221,7 @@ BEGIN TRY
 			,intCategoryId
 			,intItemTypeId
 			,intMachineId
+			,intMainItemId
 			)
 		SELECT @intWorkOrderId
 			,@intInputItemId
@@ -1231,6 +1239,7 @@ BEGIN TRY
 			,@intCategoryId
 			,@intItemTypeId
 			,@intMachineId
+			,@intMainItemId
 	END
 	ELSE
 	BEGIN
@@ -1249,6 +1258,7 @@ BEGIN TRY
 				1
 				,3
 				)
+			AND IsNULL(intMainItemId,IsNULL(@intMainItemId,0))=IsNULL(@intMainItemId,0)
 	END
 
 	---************************************

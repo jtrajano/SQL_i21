@@ -1,7 +1,33 @@
 ﻿CREATE VIEW [dbo].[vyuCTSearchPriceContract]
 
 AS 
-	with x as (
+	with CTEGridContractDetail AS
+	(
+		SELECT	CD.intContractDetailId,
+				CD.intContractHeaderId,
+				CH.ysnLoad						AS	ysnLoad,
+				PD.dblQuantityPriceFixed,
+				CD.dblQuantity,
+				CASE	WHEN	CH.ysnLoad = 1
+									THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
+									ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
+						END		AS	dblAppliedQty
+
+		FROM			tblCTContractDetail				CD
+				JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
+	
+		LEFT    JOIN	tblCTPriceFixation				PF	ON	CD.intContractDetailId				=		PF.intContractDetailId		
+		LEFT    JOIN	(
+							SELECT	 intPriceFixationId,
+									 COUNT(intPriceFixationDetailId) intPFDCount,
+									 SUM(dblQuantity) dblQuantityPriceFixed,
+									 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
+							FROM	 tblCTPriceFixationDetail
+							GROUP BY intPriceFixationId
+						)								PD	ON	PD.intPriceFixationId				=		PF.intPriceFixationId
+	),
+	x as 
+	(
 		select
 			intContractHeaderId
 			,ysnLoad = isnull(ysnLoad,convert(bit,0))
@@ -35,7 +61,7 @@ AS
 						end
 				end
 		from
-			vyuCTGridContractDetail
+			CTEGridContractDetail
 	)
 
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY t.intContractHeaderId) AS INT) AS intUniqueId
@@ -390,5 +416,7 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					--,CD.strItemNo,
 					--CD.strItemDescription,
 					--CD.strShortName
-	)t,x
-	where (x.intContractHeaderId = t.intContractHeaderId and x.intContractDetailId = t.intContractDetailId) OR (x.intContractHeaderId = t.intContractHeaderId and t.ysnMultiplePriceFixation = 1 and t.intContractDetailId IS NULL and t.intPriceFixationId IS NULL and t.intPriceContractId IS NULL)
+	)t
+	LEFT JOIN x ON x.intContractHeaderId = t.intContractHeaderId AND ISNULL(t.ysnMultiplePriceFixation,0) = 0
+	where 
+	 ISNULL(t.intContractDetailId,0) = CASE WHEN t.ysnMultiplePriceFixation = 1 THEN ISNULL(t.intContractDetailId,0) ELSE x.intContractDetailId END

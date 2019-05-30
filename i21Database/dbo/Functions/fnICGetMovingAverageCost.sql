@@ -31,17 +31,25 @@ BEGIN
 				,dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @intStockUOM, t.dblCost)
 			)
 	FROM 
-		tblICInventoryTransaction t LEFT JOIN tblICInventoryFIFO cb 
-			ON t.intItemId = cb.intItemId
-			AND t.intItemLocationId = cb.intItemLocationId
-			AND t.strTransactionId = cb.strTransactionId
-			AND t.intTransactionId = cb.intTransactionId
-			AND t.intTransactionDetailId = cb.intTransactionDetailId
-			AND cb.ysnIsUnposted = 0 
+		tblICInventoryTransaction t OUTER APPLY 
+		(
+			SELECT TOP 1 
+				cb.* 
+			FROM 
+				tblICInventoryFIFO cb 
+			WHERE
+				t.intItemId = cb.intItemId
+				AND t.intItemLocationId = cb.intItemLocationId
+				AND t.strTransactionId = cb.strTransactionId
+				AND t.intTransactionId = cb.intTransactionId
+				AND t.intTransactionDetailId = cb.intTransactionDetailId
+				AND t.dblQty = cb.dblStockIn
+				AND cb.ysnIsUnposted = 0 
+		) cb
 	WHERE 
 		t.intItemId = @intItemId
 		AND t.intItemLocationId = @intItemLocation
-		AND (t.intInventoryTransactionId < @intInventoryTransactionId OR @intInventoryTransactionId IS NULL)
+		AND (t.intInventoryTransactionId <= @intInventoryTransactionId OR @intInventoryTransactionId IS NULL)
 		AND t.ysnIsUnposted = 0 
 	ORDER BY 
 		t.intInventoryTransactionId ASC 
@@ -52,15 +60,15 @@ BEGIN
 		,@dblCost 
 
 	WHILE @@FETCH_STATUS = 0 
-	BEGIN
-		SET @dblRunningQty = ISNULL(@dblRunningQty, 0) + @dblQty
-
+	BEGIN	
 		SET @dblMovingAverageCost = dbo.fnCalculateAverageCost(
 			@dblQty
 			,@dblCost
 			,@dblRunningQty
 			,ISNULL(@dblMovingAverageCost, 0) 
 		)
+
+		SET @dblRunningQty = ISNULL(@dblRunningQty, 0) + @dblQty
 
 		FETCH NEXT FROM loopOriginalAverageCost INTO 
 			@dblQty 
