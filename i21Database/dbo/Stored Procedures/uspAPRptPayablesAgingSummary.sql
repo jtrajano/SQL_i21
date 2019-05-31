@@ -366,22 +366,19 @@ SET @query = '
 		,B.[intEntityId] as intEntityVendorId
 		,A.intBillId
 		,A.strBillId
-		,A.strVendorOrderNumber
-		,T.strTerm
-		,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
-		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,A.intAccountId
 		,D.strAccountId
+		,EC.strClass
+		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
+		, '+ @dtmDateFilter +' as dtmDateFilter
 		,tmpAgingSummaryTotal.dblTotal
 		,tmpAgingSummaryTotal.dblAmountPaid
 		,tmpAgingSummaryTotal.dblDiscount
 		,tmpAgingSummaryTotal.dblInterest
 		,tmpAgingSummaryTotal.dblAmountDue
 		,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + '' - '' + isnull(C.strName,'''')) as strVendorIdName 
-		,EC.strClass
-		,(CASE WHEN ' + @ysnFilter + ' = 1 THEN ''As Of'' ELSE ''All Dates'' END ) as strDateDesc
-		, '+ @dtmDateFilter +' as dtmDateFilter
-		,F.strCommodityCode
+		,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
+		,(SELECT TOP 1 dbo.[fnAPFormatAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress
 		,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 THEN 0 
 				ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
 		,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 0
