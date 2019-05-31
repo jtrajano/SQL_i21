@@ -113,6 +113,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\13_GlobalJulianCalendar.sql
 :r .\TM\DefaultData\14_DegreeDayClock.sql
 :r .\TM\Tables\tblTMCOBOLWRITE.sql
+:r .\TM\Tables\tblTMBudgetCalculationProjection.sql
+
 
 ----TM Reports
 :r .\TM\Reports\FieldSelection\DeliveryFill.sql

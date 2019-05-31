@@ -1190,10 +1190,10 @@ BEGIN
 				OR @strPriceMethod = 'Network Cost')
 				BEGIN
 
-					IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
-					BEGIN
-						SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
-					END
+					--IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+					--BEGIN
+					--	SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+					--END
 
 
 					IF(ISNULL(@ysnDisregardTaxExemption,0) = 1)
@@ -2443,10 +2443,10 @@ BEGIN
 				OR @strPriceMethod = 'Network Cost')
 				BEGIN
 
-					IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
-					BEGIN
-						SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
-					END
+					--IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+					--BEGIN
+					--	SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+					--END
 
 					INSERT INTO @tblCFOriginalTax	
 				(
@@ -3107,10 +3107,10 @@ BEGIN
 				OR @ysnBackoutDueToRouding = 1)
 				BEGIN
 
-					IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
-					BEGIN
-						SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
-					END
+					--IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+					--BEGIN
+					--	SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+					--END
 
 					INSERT INTO @tblCFOriginalTax	
 				(
@@ -4044,10 +4044,10 @@ BEGIN
 			BEGIN
 
 					
-				IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
-				BEGIN
-					SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
-				END
+				--IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+				--BEGIN
+				--	SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+				--END
 
 				INSERT INTO @tblCFOriginalTax	
 			(
@@ -4714,10 +4714,10 @@ BEGIN
 			OR @ysnBackoutDueToRouding = 1)
 			BEGIN
 
-				IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
-				BEGIN
-					SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
-				END
+				--IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
+				--BEGIN
+				--	SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+				--END
 
 				INSERT INTO @tblCFOriginalTax	
 				(

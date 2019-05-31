@@ -5,7 +5,6 @@
     ,@PostDate          DATETIME                
     ,@UserId            INT
 	,@BatchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT
-	,@raiseError		AS BIT				= 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -17,13 +16,19 @@ DECLARE  @InitTranCount				INT
 		,@Savepoint					NVARCHAR(32)
 		,@CurrentSavepoint			NVARCHAR(32)
 
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+IF @InitTranCount = 0
+	BEGIN TRANSACTION
+ELSE
+	SAVE TRANSACTION @Savepoint
+
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
---SET @InitTranCount = @@TRANCOUNT
---SET @Savepoint = SUBSTRING(('uspARPostInvoiceRecap' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000
@@ -31,24 +36,8 @@ DECLARE @OneDecimal DECIMAL(18,6)
 SET @OneDecimal = 1.000000
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
-
---DECLARE  @totalRecords INT = 0
---		,@totalInvalid INT = 0
 DECLARE @DelimitedIds VARCHAR(MAX)
 
---IF ISNULL(@raiseError,0) = 0	
---BEGIN
---	IF @InitTranCount = 0
---		BEGIN TRANSACTION 
---	ELSE
---		SAVE TRANSACTION @Savepoint
---END
-
-DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-IF @@TRANCOUNT = 0
-	BEGIN TRANSACTION @TransactionName
-ELSE	 
-	SAVE TRAN @TransactionName
 
 BEGIN TRY
 
@@ -61,6 +50,8 @@ BEGIN TRY
 
 	SET @BatchIdUsed = @BatchId
 
+	EXEC [dbo].[uspARPostItemResevation]
+
 	IF @Post = 1
     EXEC [dbo].[uspARProcessSplitOnInvoicePost]
 			@PostDate        = @PostDate
@@ -72,56 +63,6 @@ BEGIN TRY
 	IF @Post = 1
     EXEC dbo.[uspARUpdateTransactionAccountOnPost]  
 
-END TRY
-BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-	IF @raiseError = 0
-		BEGIN
-			IF @InitTranCount = 0
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION
-			ELSE
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION @Savepoint
-												
-			SET @CurrentTranCount = @@TRANCOUNT
-			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
-			
-			IF @CurrentTranCount = 0
-				BEGIN TRANSACTION
-			ELSE
-				SAVE TRANSACTION @CurrentSavepoint
-            
-			SET @DelimitedIds = ''
-			SELECT
-				@DelimitedIds = COALESCE(@DelimitedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
-			FROM
-				#ARPostInvoiceHeader
-			WHERE
-				[ysnRecap] = 1
-									
-			EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @DelimitedIds
-
-			IF @CurrentTranCount = 0
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION
-					IF (XACT_STATE()) = 1
-						COMMIT TRANSACTION
-				END		
-			ELSE
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION  @CurrentSavepoint
-				END	
-		END						
-	IF @raiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)
-		
-	GOTO Post_Exit
-END CATCH
-
-BEGIN TRY
     IF(OBJECT_ID('tempdb..#ARInvoiceGLEntries') IS NOT NULL)
     BEGIN
         DROP TABLE #ARInvoiceGLEntries
@@ -181,55 +122,6 @@ BEGIN TRY
         ,@PostDate = @PostDate
         ,@BatchId  = @BatchId
         ,@UserId   = @UserId
-
-END TRY
-BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-	IF @raiseError = 0
-		BEGIN
-			IF @InitTranCount = 0
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION
-			ELSE
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION @Savepoint
-												
-			SET @CurrentTranCount = @@TRANCOUNT
-			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
-			
-			IF @CurrentTranCount = 0
-				BEGIN TRANSACTION
-			ELSE
-				SAVE TRANSACTION @CurrentSavepoint
-
-			SET @DelimitedIds = ''
-			SELECT
-				@DelimitedIds = COALESCE(@DelimitedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
-			FROM
-				#ARPostInvoiceHeader
-			WHERE
-				[ysnRecap] = 1
-									
-			EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @DelimitedIds
-									
-			IF @CurrentTranCount = 0
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION
-					IF (XACT_STATE()) = 1
-						COMMIT TRANSACTION
-				END		
-			ELSE
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION  @CurrentSavepoint
-				END	
-		END						
-	IF @raiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)
-		
-	GOTO Post_Exit
-END CATCH
 
 DECLARE @Invoice [InvoicePostingTable]
 INSERT @Invoice
@@ -617,25 +509,39 @@ SELECT
 FROM
     #ARInvoiceGLEntries
 
+END TRY
+BEGIN CATCH
+	SELECT @ErrorMerssage = ERROR_MESSAGE()					
+    IF @InitTranCount = 0
+        IF (XACT_STATE()) <> 0
+			ROLLBACK TRANSACTION
+	ELSE
+		IF (XACT_STATE()) <> 0
+			ROLLBACK TRANSACTION @Savepoint
+												
+	RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
+END CATCH
+
+
+IF @InitTranCount = 0
+	ROLLBACK TRANSACTION
+ELSE
+	ROLLBACK TRANSACTION @Savepoint
+
+
 DECLARE @DefaultCurrencyId                  INT
         ,@DefaultCurrencyExchangeRateTypeId INT
 
 SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 SET @DefaultCurrencyExchangeRateTypeId = (SELECT TOP 1 intAccountsReceivableRateTypeId FROM tblSMMultiCurrency)
 
-ROLLBACK TRAN @TransactionName		
 
 BEGIN TRY	
 
     DELETE FROM tblGLPostRecap WHERE [strBatchId] = @BatchId
-
-	--DELETE GLPR  
-	--FROM
-	--	tblGLPostRecap GLPR
-	--INNER JOIN
-	--	@Invoice I
-	--		ON GLPR.[intTransactionId] = I.[intInvoiceId]
-	--		AND GLPR.[strTransactionId] = I.[strInvoiceNumber]		   	
+	
 		 
 	INSERT INTO tblGLPostRecap(
 		 [strTransactionId]
@@ -727,44 +633,10 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()
-	IF @raiseError = 0
-		BEGIN
-			SET @CurrentTranCount = @@TRANCOUNT
-			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
-			
-			IF @CurrentTranCount = 0
-				BEGIN TRANSACTION
-			ELSE
-				SAVE TRANSACTION @CurrentSavepoint
-
-	SET @DelimitedIds = ''
-	SELECT
-		@DelimitedIds = COALESCE(@DelimitedIds + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
-	FROM
-		#ARPostInvoiceHeader
-	WHERE
-		[ysnRecap] = 1
-
-			EXEC dbo.uspARInsertPostResult @BatchId, 'Invoice', @ErrorMerssage, @DelimitedIds		
-		IF @CurrentTranCount = 0
-			BEGIN
-				IF (XACT_STATE()) = -1
-					ROLLBACK TRANSACTION
-				IF (XACT_STATE()) = 1
-					COMMIT TRANSACTION
-			END		
-		ELSE
-			BEGIN
-				IF (XACT_STATE()) = -1
-					ROLLBACK TRANSACTION  @CurrentSavepoint
-			END
-		END			
-	IF @raiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)
-	GOTO Post_Exit
+	RAISERROR(@ErrorMerssage, 11, 1)
 END CATCH
 
-	RETURN 1;
+RETURN 1;
 
 Post_Exit:
 	RETURN 0;

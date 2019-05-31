@@ -36,6 +36,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 			AND ISNULL(C.intContractCostId,-1) = ISNULL(A.intContractCostId,-1)
 			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+			AND ISNULL(C.intTicketId,-1) = ISNULL(A.intTicketId,-1)
 			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
 			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
 			--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
@@ -55,6 +56,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intContractDetailId,-1) = ISNULL(A.intContractDetailId,-1)
 			AND ISNULL(C.intContractCostId,-1) = ISNULL(A.intContractCostId,-1)
 			AND ISNULL(C.intScaleTicketId,-1) = ISNULL(A.intScaleTicketId,-1)
+			AND ISNULL(C.intTicketId,-1) = ISNULL(A.intTicketId,-1)
 			AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(A.intInventoryReceiptChargeId,-1)
 			AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
 			--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
@@ -101,6 +103,7 @@ SELECT TOP 100 PERCENT
 	,intLoadId							=	A.intLoadShipmentId
 	,intLoadShipmentCostId				=	A.intLoadShipmentCostId
 	,intScaleTicketId					=	A.intScaleTicketId
+	,intTicketId						=	A.intTicketId
 	,intCCSiteDetailId					=	A.intCCSiteDetailId
 	,intInventoryShipmentChargeId		=	A.intInventoryShipmentChargeId
 	,intInvoiceId						=	A.intInvoiceId
@@ -329,6 +332,7 @@ INSERT
 	,intLoadShipmentCostId					
 	,intLoadId							
 	,intScaleTicketId					
+	,intTicketId					
 	,intCCSiteDetailId					
 	,intInventoryShipmentChargeId		
 	,intInvoiceId						
@@ -416,6 +420,7 @@ VALUES
 	,intLoadShipmentCostId				
 	,intLoadId							
 	,intScaleTicketId					
+	,intTicketId					
 	,intCCSiteDetailId					
 	,intInventoryShipmentChargeId		
 	,intInvoiceId						

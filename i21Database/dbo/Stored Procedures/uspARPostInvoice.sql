@@ -717,7 +717,6 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @userId
 		       ,@BatchIdUsed     = @batchIdUsed OUT
-		       ,@raiseError      = @raiseError
         GOTO Do_Commit
     END
 

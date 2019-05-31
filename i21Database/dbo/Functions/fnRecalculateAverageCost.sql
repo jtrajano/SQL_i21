@@ -11,10 +11,15 @@ BEGIN
 			,@dblTotalInventoryValue AS NUMERIC(38, 20) 
 			,@newAverageCost AS NUMERIC(38, 20) 
 	 
-	SELECT	@dblTotalQty = SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty)) 
-			,@dblTotalInventoryValue = SUM(
-					dbo.fnMultiply(dblQty, dblCost)
-					+ ISNULL(dblValue, 0)			
+	SELECT	@dblTotalQty = 
+				ROUND(
+					SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty))
+					, 6
+				) 
+			,@dblTotalInventoryValue = 
+				ROUND(
+					SUM(dbo.fnMultiply(dblQty, dblCost) + ISNULL(dblValue, 0))	
+					,6
 				)
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	intItemId = @intItemId

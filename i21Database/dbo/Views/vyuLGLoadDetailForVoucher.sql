@@ -6,7 +6,7 @@ SELECT
 	,[intLoadDetailId] = LD.intLoadDetailId
 	,[strContractNumber] = CH.strContractNumber
 	,[intContractHeaderId] = CH.intContractHeaderId
-	,[intContractSeqId] = CT.intContractSeq
+	,[intContractSeq] = CT.intContractSeq
 	,[intContractDetailId] = LD.intPContractDetailId
 	,[dblBalance] = CT.dblBalance
 	,[intItemId] = LD.intItemId
@@ -34,7 +34,7 @@ SELECT
 	,[dblForexRate] = CT.dblRate
 	,[strCurrency] = ISNULL(MCY.strCurrency,CY.strCurrency)
 	,[strSubCurrency] = CY.strCurrency
-	,[intCent] = CY.intCent
+	,[intCent] = ISNULL(CY.intCent,1)
 	,[intInventoryReceiptItemId] = receipt.intInventoryReceiptItemId
 	,[ysnPosted] = receipt.ysnPosted
 	,[intStorageLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
@@ -70,7 +70,7 @@ SELECT
 	,[intLoadDetailId] = LD.intLoadDetailId
 	,[strContractNumber] = CH.strContractNumber
 	,[intContractHeaderId] = CH.intContractHeaderId
-	,[intContractSeqId] = CT.intContractSeq
+	,[intContractSeq] = CT.intContractSeq
 	,[intContractDetailId] = CT.intContractDetailId
 	,[dblBalance] = CT.dblBalance
 	,[intItemId] = A.intItemId
@@ -98,7 +98,7 @@ SELECT
 	,[dblForexRate] = 1
 	,[strCurrency] = ISNULL(MCC.strCurrency,CC.strCurrency)
 	,[strSubCurrency] = CC.strCurrency
-	,[intCent] = CC.intCent
+	,[intCent] = ISNULL(CC.intCent,1)
 	,[intInventoryReceiptItemId] = NULL
 	,[ysnPosted] = NULL
 	,[intStorageLocationId] = NULL

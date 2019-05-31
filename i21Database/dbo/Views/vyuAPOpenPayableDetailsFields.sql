@@ -77,10 +77,65 @@ FROM (
 	LEFT JOIN vyuAPVoucherCommodity E ON E.intBillId = tmpAgingSummaryTotal.intBillId
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 	) MainQuery
-
 	UNION ALL
-  
-	SELECT *
+	SELECT
+		A.dtmDate
+		,A.dtmDueDate
+		,B.strVendorId
+		,B.[intEntityId] as intEntityVendorId
+		,A.intInvoiceId
+		,A.strInvoiceNumber
+		,NULL AS strVendorOrderNumber
+		,T.strTerm
+		,(SELECT Top 1 strCompanyName FROM dbo.tblSMCompanySetup) as strCompanyName
+		,A.intAccountId
+		,D.strAccountId
+		,tmpAgingSummaryTotal.dblTotal
+		,tmpAgingSummaryTotal.dblAmountPaid
+		,tmpAgingSummaryTotal.dblDiscount
+		,tmpAgingSummaryTotal.dblInterest
+		,tmpAgingSummaryTotal.dblAmountDue
+		,dbo.fnTrim(ISNULL(B.strVendorId,'') + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+		,NULL AS strReceiptNumber 
+		,NULL AS strTicketNumber
+		,NULL AS strShipmentNumber
+		,NULL AS strContractNumber
+		,NULL AS strLoadNumber
+		,EC.strClass
+		,NULL
+	FROM  
+	(
+		SELECT 
+			intInvoiceId
+			,SUM(tmpAPPayables.dblTotal) AS dblTotal
+			,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
+			,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
+			,SUM(tmpAPPayables.dblInterest) AS dblInterest
+			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+		FROM (
+			SELECT --DISTINCT 
+				intInvoiceId
+				,dblTotal
+				,dblAmountDue
+				,dblAmountPaid
+				,dblDiscount
+				,dblInterest
+				,dtmDate
+			FROM dbo.vyuAPSalesForPayables
+		) tmpAPPayables 
+		GROUP BY intInvoiceId
+	) AS tmpAgingSummaryTotal
+	LEFT JOIN dbo.tblARInvoice A
+	ON A.intInvoiceId = tmpAgingSummaryTotal.intInvoiceId
+	LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+	ON B.[intEntityId] = A.[intEntityCustomerId]
+	LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+	LEFT JOIN dbo.tblSMTerm T ON A.intTermId = T.intTermID
+	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
+	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+	AND D.strAccountCategory = 'AP Account'
+	UNION ALL
+  	SELECT *
 	   FROM (
 		SELECT DISTINCT
 			 NULL AS dtmDate
@@ -131,8 +186,7 @@ FROM (
 		LEFT JOIN dbo.tblLGLoad LG ON LG.intLoadId = APD.intLoadId
 		LEFT JOIN vyuAPVoucherCommodity E ON E.intBillId = tmpAgingSummaryTotal.intBillId
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
-		) MainQuery    
-
+		) MainQuery  
 GO
 
 
