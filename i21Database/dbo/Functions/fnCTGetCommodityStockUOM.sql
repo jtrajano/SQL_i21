@@ -1,5 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCT
-GetCommodityStockUOM]
+﻿CREATE FUNCTION [dbo].[fnCTGetCommodityStockUOM]
 (
 	@commodityId int
 )
