@@ -9,7 +9,7 @@ WITH DETAIL AS(
 		tblGLAccount A,
 		tblGLFiscalYear F 
 	JOIN tblGLFiscalYearPeriod P on F.intFiscalYearId = P.intFiscalYearId
-	WHERE A.intAccountId <> F.intRetainAccount
+	WHERE A.intAccountId <> ISNULL(F.intRetainAccount,0)
 )
 ,ACCOUNTTYPE AS
 (
