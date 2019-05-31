@@ -7328,6 +7328,10 @@
     <Build Include="dbo\Tables\tblAPBillDetailTaxArchive.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
     <Build Include="dbo\Functions\fnCalculateValuationAverageCost.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityUnitMeasure.sql" />
+    <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityStockUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
