@@ -36,13 +36,45 @@ CREATE TRIGGER [dbo].[trgReceiptNumber]
 AS 
 
 DECLARE @ReceiptNumber NVARCHAR(25) = NULL    
+DECLARE @intStartingNumberId INT = 0
+
+DECLARE @inserted TABLE(intPOSId INT, strReceiptNumber NVARCHAR(30))
+DECLARE @posId INT = 0
+
 
 BEGIN
 	SET NOCOUNT ON;
-	Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output    
-	UPDATE tblARPOS      
-	SET strReceiptNumber = @ReceiptNumber      
-	WHERE ISNULL(strReceiptNumber,'') = ''
+	--Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output   
+	
+	INSERT INTO @inserted
+	SELECT intPOSId, strReceiptNumber FROM INSERTED WHERE ISNULL(RTRIM(LTRIM(strReceiptNumber)), '') = '' ORDER BY intPOSId
+
+	
+	WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
+	BEGIN
+		select top 1 @posId = intPOSId from @inserted
+
+		Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output   
+	
+		--SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
+		--FROM tblSMStartingNumber --WITH (NOLOCK)
+		--WHERE strTransactionType = 'Sales Receipt'
+
+	
+		--EXEC uspSMGetStartingNumber @intStartingNumberId, @ReceiptNumber OUT
+	 
+			--UPDATE tblARPOS      
+			--SET strReceiptNumber = @ReceiptNumber      
+			--WHERE ISNULL(strReceiptNumber,'') = ''
+
+			UPDATE tblARPOS     
+			SET strReceiptNumber = @ReceiptNumber      
+			WHERE intPOSId = @posId --ISNULL(strReceiptNumber,'') = ''
+
+			DELETE FROM @inserted where intPOSId = @posId
+	END
+
+	
 
 END
 GO

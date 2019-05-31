@@ -20,6 +20,7 @@ SELECT @strReceiptNumber = SN.strPrefix + CAST(SN.intNumber AS NVARCHAR)
 FROM tblARPOS POS WITH (NOLOCK)
 INNER JOIN tblSMStartingNumber  SN WITH (NOLOCK)  
 ON POS.strReceiptNumber = SN.strPrefix + CAST(SN.intNumber-1 AS NVARCHAR)
+WHERE SN.intStartingNumberId = @intStartingNumberId
 
 IF((@intStartingNumberId <> 0 AND @strReceiptNumber IS NOT NULL) OR @intStartingNumber = 1)
 	EXEC uspSMGetStartingNumber @intStartingNumberId, @strReceiptNumber OUT
