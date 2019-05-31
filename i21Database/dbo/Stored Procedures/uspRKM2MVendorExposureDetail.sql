@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspRKM2MVendorExposureDetail]
+﻿CREATE PROC [dbo].[uspRKM2MVendorExposureDetail]
 	@intM2MBasisId INT = NULL
 	, @intFutureSettlementPriceId INT = NULL
 	, @intQuantityUOMId INT = NULL
@@ -26,66 +26,65 @@ DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
 
 BEGIN TRY
-	DECLARE @tblFinalDetail TABLE (intRowNum INT
-		, intConcurrencyId INT
-		, intContractHeaderId INT
-		, intContractDetailId INT
-		, strContractOrInventoryType NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strContractSeq NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intEntityId INT
-		, intFutureMarketId INT
-		, strFutMarketName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intFutureMonthId INT
-		, strFutureMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, dblOpenQty NUMERIC(24, 10)
-		, strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intCommodityId INT
-		, intItemId INT
-		, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strOrgin NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, intPricingTypeId INT
-		, strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, dblContractRatio NUMERIC(24, 10)
-		, dblContractBasis NUMERIC(24, 10)
-		, dblFutures NUMERIC(24, 10)
-		, dblCash NUMERIC(24, 10)
-		, dblCosts NUMERIC(24, 10)
-		, dblMarketBasis NUMERIC(24, 10)
-		, dblMarketRatio NUMERIC(24, 10)
-		, dblFuturePrice NUMERIC(24, 10)
-		, intContractTypeId INT
-		, dblAdjustedContractPrice NUMERIC(24, 10)
-		, dblCashPrice NUMERIC(24, 10)
-		, dblMarketPrice NUMERIC(24, 10)
-		, dblResultBasis NUMERIC(24, 10)
-		, dblResultCash NUMERIC(24, 10)
-		, dblContractPrice NUMERIC(24, 10)
-		, intQuantityUOMId INT
-		, intCommodityUnitMeasureId INT
-		, intPriceUOMId INT
-		, intCent INT
-		, dtmPlannedAvailabilityDate DATETIME
-		, dblPricedQty NUMERIC(24, 10)
-		, dblUnPricedQty NUMERIC(24, 10)
-		, dblPricedAmount NUMERIC(24, 10)
-		, intMarketZoneId INT
-		, intCompanyLocationId INT
-		, strMarketZoneCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, dblResult NUMERIC(24, 10)
-		, dblMarketFuturesResult NUMERIC(24, 10)
-		, dblResultRatio NUMERIC(24, 10))
-	
+
+	DECLARE @tblFinalDetail TABLE (
+		intRowNum INT
+       ,intConcurrencyId INT
+       ,intContractHeaderId INT
+       ,intContractDetailId INT
+       ,strContractOrInventoryType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strContractSeq NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strEntityName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,intEntityId INT
+       ,intFutureMarketId INT
+       ,strFutMarketName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,intFutureMonthId INT
+       ,strFutureMonth NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,dblOpenQty NUMERIC(24, 10)
+       ,strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,intCommodityId INT
+       ,intItemId INT
+       ,strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strOrgin NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	   ,strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+       ,strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS
+       ,intPricingTypeId INT
+       ,strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	   ,dblContractRatio NUMERIC(24, 10)
+       ,dblContractBasis NUMERIC(24, 10)
+       ,dblFutures NUMERIC(24, 10)
+       ,dblCash NUMERIC(24, 10)
+       ,dblCosts NUMERIC(24, 10)
+       ,dblMarketBasis NUMERIC(24, 10)
+	   ,dblMarketRatio NUMERIC(24, 10)
+       ,dblFuturePrice NUMERIC(24, 10)
+       ,intContractTypeId INT
+       ,dblAdjustedContractPrice NUMERIC(24, 10)
+       ,dblCashPrice NUMERIC(24, 10)
+       ,dblMarketPrice NUMERIC(24, 10)
+       ,dblResultBasis NUMERIC(24, 10)
+       ,dblResultCash NUMERIC(24, 10)
+       ,dblContractPrice NUMERIC(24, 10)
+       ,intQuantityUOMId INT
+       ,intCommodityUnitMeasureId INT
+       ,intPriceUOMId INT
+       ,intCent int
+	   ,dtmPlannedAvailabilityDate datetime
+	   ,dblPricedQty numeric(24,10),dblUnPricedQty numeric(24,10),dblPricedAmount numeric(24,10)
+	   	,intMarketZoneId int  ,intCompanyLocationId int
+	,strMarketZoneCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	,dblResult NUMERIC(24, 10)
+	,dblMarketFuturesResult NUMERIC(24, 10)
+	,dblResultRatio NUMERIC(24, 10))
+
 	INSERT INTO @tblFinalDetail
-	EXEC [uspRKM2MInquiryTransaction] @intM2MBasisId = @intM2MBasisId
-		, @intFutureSettlementPriceId = @intFutureSettlementPriceId
-		, @intQuantityUOMId = @intQuantityUOMId
-		, @intPriceUOMId = @intPriceUOMId
+	EXEC [uspRKM2MInquiryTransaction] @intM2MBasisId  = @intM2MBasisId
+		, @intFutureSettlementPriceId  = @intFutureSettlementPriceId
+		, @intQuantityUOMId  = @intQuantityUOMId
+		, @intPriceUOMId  = @intPriceUOMId
 		, @intCurrencyUOMId = @intCurrencyUOMId
 		, @dtmTransactionDateUpTo = @dtmTransactionDateUpTo
 		, @strRateType = @strRateType
@@ -98,13 +97,13 @@ BEGIN TRY
 		, intProducerId = (CASE WHEN ISNULL(ysnClaimsToProducer, 0) = 1 THEN ch.intProducerId ELSE NULL END)
 	INTO #temp
 	FROM @tblFinalDetail cd
-	JOIN tblCTContractDetail ch ON ch.intContractHeaderId = cd.intContractHeaderId
-	LEFT JOIN tblEMEntity e ON e.intEntityId = ch.intProducerId
-	
+	JOIN tblCTContractDetail ch ON ch.intContractHeaderId=cd.intContractHeaderId
+	LEFT JOIN tblEMEntity e ON e.intEntityId=ch.intProducerId
+
 	DECLARE @tblDerivative TABLE(intRowNum INT
-		, intContractHeaderId INT
-		, strContractSeq NVARCHAR(100)
-		, strEntityName NVARCHAR(100)
+		, intContractHeaderId int
+		, strContractSeq nvarchar(100)
+		, strEntityName nvarchar(100)
 		, dblFixedPurchaseVolume NUMERIC(24, 10)
 		, dblUnfixedPurchaseVolume NUMERIC(24, 10)
 		, dblTotalValume NUMERIC(24, 10)
@@ -121,7 +120,7 @@ BEGIN TRY
 		, dblTotalCommitedValue NUMERIC(24, 10))
 
 	IF (ISNULL(@ysnVendorProducer, 0) = 0)
-	BEGIN
+	BEGIN	
 		INSERT INTO @tblDerivative (intRowNum
 			, intContractHeaderId
 			, strContractSeq
@@ -158,7 +157,7 @@ BEGIN TRY
 			, dblUnPurchaseCashPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPContractBasis ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 			, dblUnfixedPurchaseValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 			, dblTotalCommitedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
-		FROM (
+		FROM(                                  
 			SELECT ch.intContractHeaderId
 				, fd.strContractSeq
 				, fd.strEntityName
@@ -187,17 +186,16 @@ BEGIN TRY
 															, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
 																										, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																										, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))
-			FROM #temp fd
-			JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
-			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
-			JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
-			JOIN tblSMCurrency c ON det.intCurrencyId = c.intCurrencyID
-			JOIN tblAPVendor e ON e.intEntityId = fd.intEntityId
-			LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = e.intRiskUnitOfMeasureId
-			LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
-			WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
-		) t
-		WHERE strEntityName = @strVendorName
+			FROM #temp  fd
+			JOIN tblCTContractDetail det ON fd.intContractDetailId=det.intContractDetailId
+			join tblCTContractHeader ch ON ch.intContractHeaderId=det.intContractHeaderId
+			JOIN tblICItemUOM ic ON det.intPriceItemUOMId=ic.intItemUOMId                                   
+			JOIN tblSMCurrency c ON det.intCurrencyId=c.intCurrencyID
+			JOIN tblAPVendor e ON e.intEntityId=fd.intEntityId
+			LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId=@intCommodityId and cum.intUnitMeasureId=  e.intRiskUnitOfMeasureId
+			LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId=e.intRiskVendorPriceFixationLimitId
+			WHERE strContractOrInventoryType in ('Contract(P)', 'In-transit(P)', 'Inventory (P)')) t
+		WHERE strEntityName = @strVendorName 
 	END
 	ELSE
 	BEGIN
@@ -266,7 +264,7 @@ BEGIN TRY
 														, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
 																									, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																									, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFuturePrice, 0))))
-			FROM #temp fd
+			FROM #temp  fd
 			JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
 			join tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
 			JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId

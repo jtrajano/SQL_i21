@@ -1,6 +1,5 @@
 ﻿CREATE FUNCTION [dbo].[fnRKGetOpenContractHistory] (
-	@dtmFromDate DATETIME
-	, @dtmToDate DATETIME
+	@dtmDateAsOf DATETIME
 	, @intFutOptTransactionId INT)
 
 RETURNS NUMERIC(18, 6)
@@ -11,16 +10,14 @@ BEGIN
 	DECLARE @dblMatchContract NUMERIC(18, 6)
 		, @strBuySell NVARCHAR(10)
 		, @strInstrumentType NVARCHAR(50)
-	SET @dtmFromDate = CAST(FLOOR(CAST(@dtmFromDate AS FLOAT)) AS DATETIME)
-	SET @dtmToDate = CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)
+	SET @dtmDateAsOf = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmDateAsOf, 110), 110)
 	
 	SELECT TOP 1 @strBuySell = strNewBuySell
 		, @strInstrumentType = strInstrumentType
 	FROM vyuRKGetFutOptTransactionHistory
 	WHERE intFutOptTransactionId = @intFutOptTransactionId
-		AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-		AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
-	ORDER BY dtmTransactionDate DESC
+		AND dtmTransactionDate <= DATEADD(MILLISECOND, -2, DATEADD(DAY, 1, CAST(FLOOR(CAST(@dtmDateAsOf AS FLOAT)) AS DATETIME)))
+		ORDER BY dtmTransactionDate DESC
 
 	IF (@strInstrumentType = 'Options')
 	BEGIN
@@ -29,16 +26,14 @@ BEGIN
 			SELECT @dblMatchContract = SUM(mf.dblMatchQty)
 			FROM tblRKOptionsMatchPnS mf
 			WHERE mf.intLFutOptTransactionId = @intFutOptTransactionId
-				AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-				AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+				AND mf.dtmMatchDate <= @dtmDateAsOf
 		END
 		ELSE
 		BEGIN
 			SELECT @dblMatchContract = - SUM(mf.dblMatchQty)
 			FROM tblRKOptionsMatchPnS mf
 			WHERE mf.intSFutOptTransactionId = @intFutOptTransactionId
-				AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-				AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+				AND mf.dtmMatchDate <= @dtmDateAsOf
 		END
 	END
 	ELSE
@@ -48,16 +43,14 @@ BEGIN
 			SELECT @dblMatchContract = SUM(mf.dblMatchQty)
 			FROM tblRKMatchDerivativesHistory mf
 			WHERE mf.intLFutOptTransactionId = @intFutOptTransactionId
-				AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-				AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+				AND mf.dtmMatchDate <= @dtmDateAsOf
 		END
 		ELSE
 		BEGIN
 			SELECT @dblMatchContract = - SUM(mf.dblMatchQty)
 			FROM tblRKMatchDerivativesHistory mf
 			WHERE mf.intSFutOptTransactionId = @intFutOptTransactionId
-				AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-				AND CAST(FLOOR(CAST(mf.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+				AND mf.dtmMatchDate <= @dtmDateAsOf
 		END
 	END
 

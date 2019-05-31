@@ -16,8 +16,10 @@ BEGIN TRY
 	DECLARE @intDefaultWeightUnitMeasureId INT
 	DECLARE @strWeightUOM NVARCHAR(200)
 
-	SELECT @ysnForwardCurveDifferential = ISNULL(ysnEnterForwardCurveForMarketBasisDifferential, 0) FROM tblRKCompanyPreference
-	SELECT @intDefaultWeightUnitMeasureId = ISNULL(intWeightUOMId, 0) FROM tblLGCompanyPreference
+	SELECT @ysnForwardCurveDifferential = ISNULL(ysnEnterForwardCurveForMarketBasisDifferential,0)
+	FROM tblRKCompanyPreference
+	SELECT @intDefaultWeightUnitMeasureId = ISNULL(intWeightUOMId,0)
+	FROM tblLGCompanyPreference
 	SELECT @strWeightUOM = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intDefaultWeightUnitMeasureId
 	
 	IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
@@ -112,21 +114,21 @@ BEGIN TRY
 		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strInternalCompany NVARCHAR(20) COLLATE Latin1_General_CI_AS
 		, dblQuantity NUMERIC(38,20)
-		, intQuantityUOMId INT
-		, intQuantityUnitMeasureId INT
+		, intQuantityUOMId INT							---ItemUOM
+		, intQuantityUnitMeasureId INT							---UnitMeasure
 		, strQuantityUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dblWeight NUMERIC(38,20)
-		, intWeightUOMId INT
-		, intWeightUnitMeasureId INT
+		, intWeightUOMId INT							---ItemUOM
+		, intWeightUnitMeasureId INT							---UnitMeasure
 		, strWeightUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dblBasis NUMERIC(38,20)
-		, intBasisUOMId INT
-		, intBasisUnitMeasureId INT
+		, intBasisUOMId INT							---ItemUOM
+		, intBasisUnitMeasureId INT							---UnitMeasure
 		, strBasisUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dblFutures NUMERIC(38,20)
 		, dblCashPrice NUMERIC(38,20)
-		, intPriceUOMId INT
-		, intPriceUnitMeasureId INT
+		, intPriceUOMId INT							---ItemUOM
+		, intPriceUnitMeasureId INT							---UnitMeasure
 		, strContractPriceUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, intOriginId INT
 		, strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -180,57 +182,41 @@ BEGIN TRY
 		, dblNetM2MPrice NUMERIC(38,20)
 		, dblSettlementPrice NUMERIC(38,20)
 		, intCompanyId INT
-		, strCompanyName NVARCHAR(200) COLLATE Latin1_General_CI_AS)
-	
-	INSERT INTO @tblFutureMonthByMarket (Row_Num
-		, intFutureMarketId
-		, intFutureMonthId)
-	SELECT Row_Num
-		, intFutureMarketId
-		, intFutureMonthId
-	FROM (
+		, strCompanyName NVARCHAR(200) COLLATE Latin1_General_CI_AS);
+		
+	WITH CTE AS (
 		SELECT Row_Number() OVER (PARTITION BY intFutureMarketId ORDER BY intFutureMonthId DESC) AS Row_Num
-			, intFutureMarketId
-			, intFutureMonthId
+			,intFutureMarketId
+			,intFutureMonthId
 		FROM tblRKFuturesMonth 
-		WHERE ysnExpired = 0 AND dtmSpotDate <= GETDATE()	
-	) t1 WHERE Row_Num = 1
-
-	INSERT INTO @tblFutureSettlementMonth (Row_Num
-		, intFutureMarketId
-		, intFutureMonthId)
-	SELECT Row_Num
-		, intFutureMarketId
-		, intFutureMonthId
-	FROM (
-		SELECT ROW_NUMBER() OVER (PARTITION BY intFutureMarketId ORDER BY CONVERT(DATETIME, '01 ' + strFutureMonth) ASC) AS Row_Num
-			, intFutureMarketId
-			, intFutureMonthId
-		FROM tblRKFuturesMonth 
-		WHERE ysnExpired = 0 AND CONVERT(DATETIME, '01 ' + strFutureMonth) > GETDATE()
-	) t2 WHERE Row_Num = 1;
+		WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE())
 	
-	INSERT INTO @tblCurrencyExchange (RowNum
-		, intFromCurrencyId
-		, dblRate)
-	SELECT RowNum
-		, intFromCurrencyId
-		, dblRate
-	FROM (
+	INSERT INTO @tblFutureMonthByMarket(Row_Num,intFutureMarketId,intFutureMonthId)
+	SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE WHERE Row_Num = 1;
+	
+	WITH CTE1 AS (
+		SELECT ROW_NUMBER() OVER (PARTITION BY intFutureMarketId ORDER BY CONVERT(DATETIME,'01 '+strFutureMonth) ASC) AS Row_Num
+			,intFutureMarketId
+			,intFutureMonthId
+		FROM tblRKFuturesMonth 
+		WHERE ysnExpired = 0 AND CONVERT(DATETIME,'01 '+strFutureMonth) > GETDATE())
+	
+	INSERT INTO @tblFutureSettlementMonth (Row_Num,intFutureMarketId,intFutureMonthId)
+	SELECT Row_Num,intFutureMarketId,intFutureMonthId FROM CTE1 WHERE Row_Num = 1;
+	
+	WITH CTE AS (
 		SELECT ROW_NUMBER() OVER(PARTITION BY CERD.intCurrencyExchangeRateId ORDER BY  dtmValidFromDate DESC) AS RowNum
-			, CER.intFromCurrencyId
-			, CERD.dblRate
+			,CER.intFromCurrencyId
+			,CERD.dblRate
 		FROM tblSMCurrencyExchangeRateDetail  CERD 
 		JOIN tblSMCurrencyExchangeRate CER ON CER.intCurrencyExchangeRateId = CERD.intCurrencyExchangeRateId
-		WHERE CER.intToCurrencyId = @intCurrencyUOMId
-	) t3 WHERE RowNum = 1
+		WHERE CER.intToCurrencyId = @intCurrencyUOMId)
+
+	INSERT INTO @tblCurrencyExchange(RowNum,intFromCurrencyId,dblRate)
+	SELECT RowNum,intFromCurrencyId,dblRate FROM CTE WHERE RowNum = 1
 	
-	INSERT INTO @tblPostedLoad(intContractTypeId
-		, intContractDetailId
-		, dblPostedQuantity)
-	SELECT 1 AS intContractTypeId
-		, intContractDetailId = LD.intPContractDetailId
-		, dblPostedQuantity = SUM(LD.dblQuantity)
+	INSERT INTO @tblPostedLoad(intContractTypeId,intContractDetailId,dblPostedQuantity)
+	SELECT 1 AS intContractTypeId,LD.intPContractDetailId intContractDetailId,SUM(LD.dblQuantity) dblPostedQuantity
 	FROM tblLGLoadDetail LD
 	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND ysnPosted = 1 AND L.intShipmentStatus IN (6,3) AND L.intShipmentType = 1
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId

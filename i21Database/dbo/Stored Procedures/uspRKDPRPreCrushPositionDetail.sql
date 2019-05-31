@@ -48,11 +48,11 @@ BEGIN
 	DECLARE @strCommodityCode NVARCHAR(50)
 	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
 		, intCommodity INT)
-	DECLARE @CrushReport BIT = 1
-	--IF (ISNULL(@strPositionBy, '') = 'Delivery Month' OR ISNULL(@strPositionBy, '') = 'Futures Month')
-	--BEGIN
-	--	SET @CrushReport = 1
-	--END
+	DECLARE @CrushReport BIT = 0
+	IF (ISNULL(@strPositionBy, '') = 'Delivery Month' OR ISNULL(@strPositionBy, '') = 'Futures Month')
+	BEGIN
+		SET @CrushReport = 1
+	END
 
 	INSERT INTO @Commodity (intCommodity)
 	SELECT Item Collate Latin1_General_CI_AS
@@ -263,7 +263,7 @@ BEGIN
 			AND   CONVERT(DATETIME, CONVERT(VARCHAR(10), CD.dtmEndDate, 110), 110) = @dtmToDate
 						
 			DECLARE @tblGetOpenFutureByDate TABLE (intFutOptTransactionId INT
-				, dblOpenContract NUMERIC(18,6)
+				, intOpenContract INT
 				, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 				, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 				, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -283,7 +283,7 @@ BEGIN
 				, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 	
 			INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId
-				, dblOpenContract
+				, intOpenContract
 				, strCommodityCode
 				, strInternalTradeNo
 				, strLocationName
@@ -301,26 +301,7 @@ BEGIN
 				, ysnPreCrush
 				, strNotes
 				, strBrokerTradeNo)
-			SELECT intFutOptTransactionId
-				, dblOpenContract
-				, strCommodityCode
-				, strInternalTradeNo
-				, strLocationName
-				, dblContractSize
-				, strFutureMarket
-				, strFutureMonth
-				, strOptionMonth
-				, dblStrike
-				, strOptionType
-				, strInstrumentType
-				, strBrokerAccount
-				, strBroker
-				, strNewBuySell
-				, intFutOptTransactionHeaderId
-				, ysnPreCrush
-				, strNotes
-				, strBrokerTradeNo
-			FROM fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', @dtmToDate, @CrushReport)
+			SELECT * FROM  fnRKGetOpenFutureByDate( @intCommodityId, @dtmToDate, @CrushReport)
 
 			INSERT INTO @List (strCommodityCode
 				, intCommodityId
@@ -1416,7 +1397,7 @@ FROM (
 		, th.intCommodityId
 		, dtmFutureMonthsDate = CASE WHEN CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
 									ELSE LEFT(fm.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END COLLATE Latin1_General_CI_AS
-		, HedgedQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(dblOpenContract, 0) * m.dblContractSize)
+		, HedgedQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(intOpenContract, 0) * m.dblContractSize)
 		, l.strLocationName
 		, strContractEndMonth = CASE WHEN CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
 								ELSE LEFT(fm.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END COLLATE Latin1_General_CI_AS
@@ -1426,7 +1407,7 @@ FROM (
 		, strTranType = strNewBuySell
 		, ba.intBrokerageAccountId
 		, strInstrumentType = oc.strInstrumentType
-		, dblNoOfLot = ISNULL(dblOpenContract, 0)
+		, dblNoOfLot = ISNULL(intOpenContract, 0)
 		, m.intFutureMarketId
 		, oc.strFutureMarket
 		, fm.intFutureMonthId
@@ -1503,7 +1484,7 @@ FROM (
 		, th.intCommodityId
 		, dtmFutureMonthsDate = CASE WHEN CONVERT(DATETIME, '01 ' + om.strOptionMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
 									ELSE LEFT(om.strOptionMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END COLLATE Latin1_General_CI_AS
-		, HedgedQty = dblOpenContract * ISNULL((SELECT TOP 1 dblDelta
+		, HedgedQty = intOpenContract * ISNULL((SELECT TOP 1 dblDelta
 												FROM tblRKFuturesSettlementPrice sp
 												INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
 												WHERE intFutureMarketId = m.intFutureMarketId AND mm.intOptionMonthId = om.intOptionMonthId AND mm.intTypeId = CASE WHEN oc.strOptionType = 'Put' THEN 1 ELSE 2 END
@@ -1517,7 +1498,7 @@ FROM (
 		, strTranType = strNewBuySell
 		, ba.intBrokerageAccountId
 		, strInstrumentType
-		, dblNoOfLot = CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(dblOpenContract, 0) ELSE ISNULL(dblOpenContract, 0) END
+		, dblNoOfLot = CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END
 		, dblDelta = ISNULL((SELECT TOP 1 dblDelta
 							FROM tblRKFuturesSettlementPrice sp
 							INNER JOIN tblRKOptSettlementPriceMarketMap mm ON sp.intFutureSettlementPriceId = mm.intFutureSettlementPriceId
@@ -1599,8 +1580,8 @@ BEGIN
 			, th.intCommodityId
 			, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
 					else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS dtmFutureMonthsDate
-			, dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(dblOpenContract, 0)
-																															ELSE ISNULL(dblOpenContract, 0) END * m.dblContractSize) AS HedgedQty
+			, dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(intOpenContract, 0)
+																															ELSE ISNULL(intOpenContract, 0) END * m.dblContractSize) AS HedgedQty
 			, l.strLocationName
 			, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
 					else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS strFutureMonth
@@ -1609,7 +1590,7 @@ BEGIN
 			, strNewBuySell AS strTranType
 			, ba.intBrokerageAccountId
 			, strInstrumentType
-			, CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(dblOpenContract, 0) ELSE ISNULL(dblOpenContract, 0) END dblNoOfLot
+			, CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(intOpenContract, 0) ELSE ISNULL(intOpenContract, 0) END dblNoOfLot
 			, m.intFutureMarketId
 			, oc.strFutureMarket
 			, fm.intFutureMonthId
