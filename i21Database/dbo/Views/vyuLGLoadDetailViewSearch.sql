@@ -20,15 +20,11 @@ SELECT   L.intLoadId
 		,L.dtmETSPOL
 		,POS.strPosition
 		,POS.strPositionType
-        ,strType = CASE WHEN L.intPurchaseSale = 1 THEN 
-						'Inbound' 
-						ELSE 
-							CASE WHEN L.intPurchaseSale = 2 THEN 
-							'Outbound' 
-							ELSE
-							'Drop Ship'
-							END
-						END COLLATE Latin1_General_CI_AS
+        ,strType = CASE L.intPurchaseSale 
+			WHEN 1 THEN 'Inbound' 
+			WHEN 2 THEN 'Outbound' 
+			WHEN 3 THEN 'Drop Ship'
+			END COLLATE Latin1_General_CI_AS
         ,intGenerateSequence = L.intGenerateSequence
         ,L.dtmScheduledDate
         ,ysnInProgress = IsNull(L.ysnInProgress, 0)
@@ -49,13 +45,10 @@ SELECT   L.intLoadId
 		,L.dtmCancelDispatchMailSent
 		,L.intCompanyLocationId
 		,L.intTransUsedBy
-		,strTransUsedBy = CASE 
-			WHEN L.intTransUsedBy = 1 
-				THEN 'None'
-			WHEN L.intTransUsedBy = 2
-				THEN 'Scale Ticket'
-			WHEN L.intTransUsedBy = 3
-				THEN 'Transport L'
+		,strTransUsedBy = CASE L.intTransUsedBy
+			WHEN 1 THEN 'None'
+			WHEN 2 THEN 'Scale Ticket'
+			WHEN 3 THEN 'Transport Load'
 			END COLLATE Latin1_General_CI_AS
 		,L.intSourceType
 		,L.ysnPosted
@@ -89,7 +82,7 @@ SELECT   L.intLoadId
 		,LoadDetail.strExternalBatchNo
         ,intGenerateReferenceNumber = GLoad.intReferenceNumber
         ,intNumberOfLoads = GLoad.intNumberOfLoads
-		,CASE WHEN L.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END intContractHeaderId
+		,intContractHeaderId = CASE WHEN L.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END 
 		,PHeader.intContractHeaderId AS intPContractHeaderId 
 		,L.ysnLoadBased
 
@@ -122,9 +115,7 @@ SELECT   L.intLoadId
 		,intPContractSeq = PDetail.intContractSeq
 		,strPERPPONumber = PDetail.strERPPONumber
 		,ysnPLoad = PHeader.ysnLoad
-		,ysnBundle = CONVERT(BIT,CASE Item.strType 
-					 WHEN 'Bundle' THEN 1
-					 ELSE 0 END)
+		,ysnBundle = CONVERT(BIT, CASE Item.strType WHEN 'Bundle' THEN 1 ELSE 0 END)
 		,strCustomer = CEN.strName
         ,strShipTo = CEL.strLocationName
 
@@ -147,7 +138,7 @@ SELECT   L.intLoadId
 		,Commodity.strCommodityCode AS strCommodity
 		,Item.strItemNo
 		,Item.strDescription AS strItemDescription
-		,CONVERT(BIT,ISNULL(Item.ysnUseWeighScales,0)) ysnUseWeighScales
+		,ysnUseWeighScales = CONVERT(BIT,ISNULL(Item.ysnUseWeighScales,0)) 
 		,UOM.strUnitMeasure AS strItemUOM
 		,UOM.intUnitMeasureId AS intItemUnitMeasureId
 		,WeightUOM.strUnitMeasure AS strWeightItemUOM
@@ -156,16 +147,10 @@ SELECT   L.intLoadId
         ,strDriver = Driver.strName
 		,strDispatcher = US.strUserName 
         ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 
-								 THEN 
-									CAST(ST.strTicketNumber AS VARCHAR(100))
-								 ELSE 
-									CASE WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
-										THEN 
-											TR.strTransaction
-										ELSE 
-											NULL 
-										END 
-								 END
+									THEN CAST(ST.strTicketNumber AS VARCHAR(100))
+								 WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
+									THEN TR.strTransaction
+								 ELSE NULL END
 		,PLH.intPickLotHeaderId
 		,PLH.strPickLotNumber
 		,ALH.intAllocationHeaderId
@@ -174,50 +159,45 @@ SELECT   L.intLoadId
 		,LSI.strLoadNumber AS strShippingInstructionNo
 		,L.intShipmentType
 		,strShipmentType = CASE L.intShipmentType
-			WHEN 1
-				THEN 'Shipment'
-			WHEN 2
-				THEN 'Shipping Instructions'
-			WHEN 3
-				THEN 'Vessel Nomination'
-			ELSE ''
-			END COLLATE Latin1_General_CI_AS
+			WHEN 1 THEN 'Shipment'
+			WHEN 2 THEN 'Shipping Instructions'
+			WHEN 3 THEN 'Vessel Nomination'
+			ELSE '' END COLLATE Latin1_General_CI_AS
 		,Item.intCommodityId
 		,CA.intCommodityAttributeId
 		,CO.strCountry AS strOrigin
 		,LoadDetail.intNumberOfContainers
 		,strShipmentStatus = CASE L.intShipmentStatus
-			WHEN 1
-				THEN 'Scheduled'
-			WHEN 2
-				THEN 'Dispatched'
-			WHEN 3
-				THEN 'Inbound transit'
-			WHEN 4
-				THEN 'Received'
-			WHEN 5
-				THEN 'Outbound transit'
-			WHEN 6
-				THEN 'Delivered'
-			WHEN 7
-				THEN 'Instruction created'
-			WHEN 8
-				THEN 'Partial Shipment Created'
-			WHEN 9
-				THEN 'Full Shipment Created'
-			WHEN 10
-				THEN 'Cancelled'
-			WHEN 11
-				THEN 'Invoiced'
-			ELSE ''
-			END COLLATE Latin1_General_CI_AS
-		,strTransportationMode = CASE 
-			WHEN L.intTransportationMode = 1 
-				THEN 'Truck'
-			WHEN L.intTransportationMode = 2
-				THEN 'Ocean Vessel'
-			WHEN L.intTransportationMode = 3
-				THEN 'Rail'
+			WHEN 1 THEN 'Scheduled'
+			WHEN 2 THEN 'Dispatched'
+			WHEN 3 THEN 
+				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+						ELSE 'Inbound Transit' END
+			WHEN 4 THEN 'Received'
+			WHEN 5 THEN 
+				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+						ELSE 'Outbound Transit' END
+			WHEN 6 THEN 
+				CASE WHEN (L.intPurchaseSale = 3 AND L.ysnCustomsReleased = 1) THEN 'Customs Released'
+						WHEN (L.intPurchaseSale = 3 AND L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+						WHEN (L.intPurchaseSale = 3 AND L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+						ELSE 'Delivered' END
+			WHEN 7 THEN 
+				CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
+						ELSE 'Shipping Instruction Created' END
+			WHEN 8 THEN 'Partial Shipment Created'
+			WHEN 9 THEN 'Full Shipment Created'
+			WHEN 10 THEN 'Cancelled'
+			WHEN 11 THEN 'Invoiced'
+			ELSE '' END COLLATE Latin1_General_CI_AS
+		,strTransportationMode = CASE L.intTransportationMode
+			WHEN 1 THEN 'Truck'
+			WHEN 2 THEN 'Ocean Vessel'
+			WHEN 3 THEN 'Rail'
 			END COLLATE Latin1_General_CI_AS
 		,strPCompanyLocation = PCL.strLocationName
 		,strSCompanyLocation = SCL.strLocationName
