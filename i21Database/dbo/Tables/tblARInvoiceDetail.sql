@@ -171,3 +171,9 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intInventoryShipmentItemId]
 	ON [dbo].[tblARInvoiceDetail] ([intInventoryShipmentItemId])
 	INCLUDE ([intInvoiceId])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_forStockRebuild]
+	ON [dbo].[tblARInvoiceDetail] (intInvoiceDetailId, intItemId)
+	INCLUDE ([intInvoiceId])
+GO

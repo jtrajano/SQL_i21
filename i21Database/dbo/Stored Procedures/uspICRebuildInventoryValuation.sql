@@ -23,6 +23,7 @@ DECLARE @intItemId AS INT
 		,@intFobPointId AS INT 
 		,@intEntityId AS INT 
 		,@intBackupId INT 
+		,@dtmDate AS DATETIME 
 
 DECLARE @ShipmentPostScenario AS TINYINT = NULL 
 		,@ShipmentPostScenario_FreightBased AS TINYINT = 1
@@ -1251,6 +1252,7 @@ BEGIN
 					,@dblUnitRetail = dblUnitRetail
 					,@dblCategoryCostValue = dblCategoryCostValue
 					,@dblCategoryRetailValue = dblCategoryRetailValue
+					,@dtmDate = dtmDate
 			FROM	#tmpICInventoryTransaction
 			--ORDER BY dtmDate ASC, id ASC, intSortByQty ASC
 			ORDER BY sortId ASC
@@ -1268,6 +1270,7 @@ BEGIN
 					,@dblUnitRetail = dblUnitRetail
 					,@dblCategoryCostValue = dblCategoryCostValue
 					,@dblCategoryRetailValue = dblCategoryRetailValue
+					,@dtmDate = dtmDate
 			FROM	#tmpICInventoryTransaction
 			--ORDER BY id2 ASC, id ASC
 			ORDER BY sortId ASC
@@ -3180,6 +3183,9 @@ BEGIN
 						AND strName IN ('Invoice')
 				) 
 			BEGIN 
+				-- Process the invoice as one batch. 
+				SET @strTransactionId = NULL 
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -3291,8 +3297,8 @@ BEGIN
 						) itemPricing
 
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
-						AND RebuildInvTrans.intTransactionId = @intTransactionId
-						AND RebuildInvTrans.strTransactionId = @strTransactionId
+						--AND RebuildInvTrans.intTransactionId = @intTransactionId
+						--AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
 						AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
@@ -3308,6 +3314,7 @@ BEGIN
 										1
 								END 
 						)
+						AND dbo.fnDateEquals(RebuildInvTrans.dtmDate, @dtmDate) = 1
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				BEGIN 
@@ -3366,6 +3373,7 @@ BEGIN
 						,@intItemId -- This is only used when rebuilding the stocks. 
 						,@strTransactionId -- This is only used when rebuilding the stocks. 
 						,@intCategoryId -- This is only used when rebuilding the stocks. 
+						,@dtmDate
 				END
 						
 				IF @intReturnValue <> 0 
@@ -3450,9 +3458,9 @@ BEGIN
 							ON ld.intLoadDetailId = id.intLoadDetailId
 							AND l.ysnPosted = 1
 
-				WHERE	i.strInvoiceNumber = @strTransactionId
-						AND i.intInvoiceId = @intTransactionId
-						AND item.intItemId = ISNULL(@intItemId, item.intItemId)
+				WHERE	--i.strInvoiceNumber = @strTransactionId
+						--AND i.intInvoiceId = @intTransactionId
+						item.intItemId = ISNULL(@intItemId, item.intItemId)
 						AND ISNULL(item.intCategoryId, 0) = COALESCE(@intCategoryId, item.intCategoryId, 0)
 						AND (
 							1 = 
@@ -3462,6 +3470,7 @@ BEGIN
 								ELSE 0
 							END
 						)
+						AND dbo.fnDateEquals(t.dtmDate, @dtmDate) = 1
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 				BEGIN 
@@ -3516,6 +3525,7 @@ BEGIN
 						,@intItemId -- This is only used when rebuilding the stocks. 
 						,@strTransactionId -- This is only used when rebuilding the stocks. 
 						,@intCategoryId
+						,@dtmDate
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -3523,6 +3533,10 @@ BEGIN
 						GOTO _EXIT_WITH_ERROR
 					END 
 				END 
+								
+				DELETE	FROM #tmpICInventoryTransaction
+				WHERE	strBatchId = @strBatchId						
+						AND dbo.fnDateEquals(dtmDate, @dtmDate) = 1
 			END	
 			
 			-- Repost 'Inventory Receipt/Return'
@@ -4973,8 +4987,7 @@ BEGIN
 		
 		DELETE	FROM #tmpICInventoryTransaction
 		WHERE	strBatchId = @strBatchId
-				--AND intTransactionId = @intTransactionId
-				AND strTransactionId = @strTransactionId
+				AND strTransactionId = @strTransactionId 
 	END 
 END 
 
