@@ -7561,6 +7561,10 @@
     <Build Include="dbo\Stored Procedures\uspCTGetProducers.sql" />
     <None Include="Scripts\Post-Deployment\SM\1920_UpdateOtherTaxationPointToNone.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateDerivative.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityStockUOM.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityUnitMeasure.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
+    <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
