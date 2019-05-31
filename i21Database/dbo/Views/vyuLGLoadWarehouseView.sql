@@ -34,6 +34,12 @@ SELECT DISTINCT
 	,L.dtmETAPOD
 	,L.dtmETAPOL
 	,L.dtmETSPOL
+	,L.ysnArrivedInPort
+	,L.dtmArrivedInPort
+	,L.ysnDocumentsApproved
+	,L.dtmDocumentsApproved
+	,L.ysnCustomsReleased
+	,L.dtmCustomsReleased
 	,strPCompanyLocation = PCL.strLocationName
 	,strPContractNumber = PCH.strContractNumber
 	,intPContractSeq = PCD.intContractSeq

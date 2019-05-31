@@ -18,6 +18,12 @@ SELECT DISTINCT
 	,L.dtmETAPOD
 	,L.dtmETAPOL
 	,L.dtmETSPOL
+	,L.ysnArrivedInPort
+	,L.dtmArrivedInPort
+	,L.ysnDocumentsApproved
+	,L.dtmDocumentsApproved
+	,L.ysnCustomsReleased
+	,L.dtmCustomsReleased
 	,strLSINumber = LSI.strLoadNumber
 
 	,LD.intLoadDetailId

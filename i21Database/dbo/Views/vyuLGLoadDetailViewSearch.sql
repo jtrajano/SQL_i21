@@ -18,6 +18,12 @@ SELECT   L.intLoadId
 		,L.dtmETAPOD
 		,L.dtmETAPOL
 		,L.dtmETSPOL
+		,L.[ysnArrivedInPort]
+		,L.[ysnDocumentsApproved]
+		,L.[ysnCustomsReleased]
+		,L.[dtmArrivedInPort]
+		,L.[dtmDocumentsApproved]
+		,L.[dtmCustomsReleased]
 		,POS.strPosition
 		,POS.strPositionType
         ,strType = CASE L.intPurchaseSale 

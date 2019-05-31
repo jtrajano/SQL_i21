@@ -119,7 +119,9 @@ SELECT L.intLoadId
 	,L.ysnArrivedInPort
 	,L.dtmArrivedInPort
 	,L.ysnDocumentsApproved
+	,L.dtmDocumentsApproved
 	,L.ysnCustomsReleased
+	,L.dtmCustomsReleased
 	,L.intFreightTermId
 	,FT.strFreightTerm
 	,L.intCurrencyId

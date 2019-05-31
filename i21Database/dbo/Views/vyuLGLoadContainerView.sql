@@ -123,7 +123,12 @@ SELECT   L.intLoadId
 	    ,BO.strBook
 	    ,L.intSubBookId
 	    ,SB.strSubBook
-
+		,L.ysnArrivedInPort
+		,L.dtmArrivedInPort
+		,L.ysnDocumentsApproved
+		,L.dtmDocumentsApproved
+		,L.ysnCustomsReleased
+		,L.dtmCustomsReleased
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
