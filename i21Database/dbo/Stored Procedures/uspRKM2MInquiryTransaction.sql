@@ -2028,11 +2028,7 @@ FROM (
 SELECT *
 	, ISNULL(dblContractBasis,0) + (ISNULL(dblFutures,0) * ISNULL(dblContractRatio,1)) as dblContractPrice
 	, convert(decimal(24,6),((ISNULL(dblContractBasis,0)+ISNULL(dblCosts,0))-ISNULL(dblMarketBasis,0))*ISNULL(dblResultBasis1,0)) + convert(decimal(24,6),((ISNULL(dblFutures,0)- ISNULL(dblFuturePrice,0))*ISNULL(dblMarketFuturesResult1,0))) dblResult
-	, CASE WHEN intContractTypeId = 1 THEN 
-			convert(decimal(24,6),( ISNULL(dblMarketBasis,0) - (ISNULL(dblContractBasis,0) + ISNULL(dblCosts,0)))*ISNULL(dblOpenQty,0))
-		ELSE
-			convert(decimal(24,6),((ISNULL(dblContractBasis,0)+ISNULL(dblCosts,0))-ISNULL(dblMarketBasis,0))*ISNULL(dblOpenQty,0))
-	  END dblResultBasis
+	, dblResultBasis = convert(decimal(24,6),( ISNULL(dblMarketBasis,0) - (ISNULL(dblContractBasis,0) + ISNULL(dblCosts,0)))*ISNULL(dblOpenQty,0)) 
 	, CASE WHEN intContractTypeId = 1 THEN 
 		convert(decimal(24,6),((ISNULL(dblFuturePrice,0) - ISNULL(dblFutures,0))*ISNULL(dblOpenQty,0)))
 		ELSE
@@ -2346,17 +2342,13 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 	, strLocationName 
 	, dblResult = case when strPricingType='Cash' then 
 							ROUND(dblResultCash,2) 
-						when intContractTypeId = 1 then
-							ROUND((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty,2)
 						else 
-							ROUND((dblAdjustedContractPrice - dblMarketPrice) * dblOpenQty ,2)
+							ROUND((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty,2)
 				  end
-	, dblMarketFuturesResult = CASE WHEN intContractTypeId = 1 THEN 
-										(dblFuturePrice - dblActualFutures ) * dblOpenQty
-									WHEN strContractOrInventoryType = 'Inventory' THEN
+	, dblMarketFuturesResult = CASE WHEN strContractOrInventoryType = 'Inventory' THEN
 										NULL
 									ELSE
-										 (dblActualFutures - dblFuturePrice) * dblOpenQty
+										 (dblFuturePrice - dblActualFutures ) * dblOpenQty
 									END
 	, dblResultRatio = (CASE WHEN dblContractRatio IS NOT NULL AND dblMarketRatio IS NOT NULL THEN ((dblMarketPrice - dblContractPrice) * dblOpenQty)
 								- ((dblFuturePrice - dblActualFutures) * dblOpenQty) - dblResultBasis
