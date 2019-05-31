@@ -7560,6 +7560,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLoadNo.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetProducers.sql" />
     <None Include="Scripts\Post-Deployment\SM\1920_UpdateOtherTaxationPointToNone.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateDerivative.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
