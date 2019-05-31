@@ -7330,6 +7330,10 @@
     <Build Include="dbo\Stored Procedures\uspICCommodityPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICCommodityPositionDetailReport.sql" />
     <Build Include="dbo\User Defined Types\DestinationShipmentItemLot.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityUnitMeasure.sql" />
+    <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityStockUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
