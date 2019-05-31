@@ -60,7 +60,9 @@ SELECT
 	,[intItemUOMId]				= ARID.[intItemUOMId]
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
-										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
+										WHEN LOT.[intWeightUOMId] IS NULL THEN CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, ARID.intItemUOMId, ARIDL.dblQuantityShipped)
+																			        ELSE ARIDL.[dblQuantityShipped]
+																				END																				
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
@@ -83,13 +85,14 @@ SELECT
 																	)
 																	WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0
 																	THEN (
-																		SELECT SUM(ICIT.[dblCost]) 
+																		SELECT dblCost	= ICIT.[dblCost]
 																		FROM tblICInventoryTransaction ICIT WITH (NOLOCK)
 																		WHERE ICIT.ysnIsUnposted = @ZeroBit
 																		  AND ICIT.intTransactionId = ARRETURN.intInvoiceId
 																		  AND ICIT.strTransactionId = ARRETURN.strInvoiceNumber
+																		  AND (ARIDL.[intLotId] IS NULL OR ARIDL.[intLotId] = ICIT.intLotId)
 																	)
-																	ELSE
+																	ELSE 
 																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @AVERAGECOST THEN 
 																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.intItemUOMId) 
 																				ELSE 
@@ -97,7 +100,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															,ARID.[dblUnitQty]
+															, ARID.[dblUnitQty]
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
@@ -123,7 +126,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
+	(SELECT [intLotId], [intWeightUOMId], [intItemUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
 		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
@@ -132,7 +135,12 @@ LEFT OUTER JOIN
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN 
-	(SELECT [intInvoiceId], [strInvoiceNumber] FROM tblARInvoice WITH (NOLOCK) WHERE ysnReturned = 1 AND ysnPosted = 1 AND strTransactionType = 'Invoice') ARRETURN 
+	(SELECT I.[intInvoiceId]
+	      , I.[strInvoiceNumber]
+	FROM tblARInvoice I WITH (NOLOCK)
+	WHERE I.ysnReturned = 1 
+	  AND I.ysnPosted = 1 
+	  AND I.strTransactionType = 'Invoice') ARRETURN 
 		ON ARID.[intOriginalInvoiceId] = ARRETURN.[intInvoiceId]
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
@@ -187,8 +195,10 @@ SELECT
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
-										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
+	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped]
+										WHEN LOT.[intWeightUOMId] IS NULL THEN CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, ARID.intItemUOMId, ARIDL.dblQuantityShipped)
+																			        ELSE ARIDL.[dblQuantityShipped]
+																				END
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
@@ -211,11 +221,12 @@ SELECT
 																	)
 																	WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0
 																	THEN (
-																		SELECT SUM(ICIT.[dblCost]) 
+																		SELECT dblCost	= ICIT.[dblCost]
 																		FROM tblICInventoryTransaction ICIT WITH (NOLOCK)
 																		WHERE ICIT.ysnIsUnposted = @ZeroBit
 																		  AND ICIT.intTransactionId = ARRETURN.intInvoiceId
 																		  AND ICIT.strTransactionId = ARRETURN.strInvoiceNumber
+																		  AND (ARIDL.[intLotId] IS NULL OR ARIDL.[intLotId] = ICIT.intLotId)
 																	)
 																	ELSE
 																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @AVERAGECOST THEN 
@@ -225,7 +236,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															,ARID.[dblUnitQty]
+															, ARID.[dblUnitQty]
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
@@ -251,7 +262,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
+	(SELECT [intLotId], [intWeightUOMId], [intItemUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
 		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
@@ -260,7 +271,12 @@ LEFT OUTER JOIN
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN 
-	(SELECT [intInvoiceId], [strInvoiceNumber] FROM tblARInvoice WITH (NOLOCK) WHERE ysnReturned = 1 AND ysnPosted = 1 AND strTransactionType = 'Invoice') ARRETURN 
+	(SELECT I.[intInvoiceId]
+	      , I.[strInvoiceNumber] 
+	FROM tblARInvoice I WITH (NOLOCK)	
+	WHERE I.ysnReturned = 1 
+	  AND I.ysnPosted = 1 
+	  AND I.strTransactionType = 'Invoice') ARRETURN 
 		ON ARID.[intOriginalInvoiceId] = ARRETURN.[intInvoiceId]
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
@@ -279,8 +295,7 @@ WHERE
 	AND (ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3) OR ISNULL(ARRETURN.intInvoiceId, 0) <> 0)
 	--AND ((@ForValidation = 1 AND ISNULL(ARID.[strItemType],'') <> 'Finished Good') OR (@ForValidation = 0))
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 
-
+	
 INSERT INTO #ARItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
@@ -362,9 +377,6 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
 		ON LGL.[intLoadId] = ARID.[intLoadId]
-LEFT OUTER JOIN 
-	(SELECT [intInvoiceId] FROM tblARInvoice WITH (NOLOCK) WHERE ysnReturned = 1 AND ysnPosted = 1 AND strTransactionType = 'Invoice') ARRETURN 
-		ON ARID.[intOriginalInvoiceId] = ARRETURN.[intInvoiceId]
 WHERE
 	((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (
@@ -378,6 +390,5 @@ WHERE
 	AND ARID.[strTransactionType] <> 'Debit Memo'
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
-	AND (ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3) OR ISNULL(ARRETURN.intInvoiceId, 0) <> 0)
 
 RETURN 1
