@@ -6,8 +6,8 @@ AS
 		SELECT	CD.intContractDetailId,
 				CD.intContractHeaderId,
 				CH.ysnLoad						AS	ysnLoad,
-				PD.dblQuantityPriceFixed,
-				CD.dblQuantity,
+				dblQuantityPriceFixed = (case when CH.ysnLoad = 1 then (PD.dblQuantityPriceFixed / CD.dblQuantityPerLoad) else PD.dblQuantityPriceFixed end),
+				dblQuantity = (case when CH.ysnLoad = 1 then (CD.dblQuantity / CD.dblQuantityPerLoad) else CD.dblQuantity end),
 				CASE	WHEN	CH.ysnLoad = 1
 									THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
 									ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
