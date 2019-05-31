@@ -33,8 +33,9 @@ BEGIN TRY
 		@ysnMultiplePriceFixation BIT,
 		@strXmlNew  nvarchar(max),
 		@dblNoOfLots numeric(18,6),
-		@intSelectedInstrumentTypeId INT
-    
+		@intSelectedInstrumentTypeId INT,
+		@intHeaderPricingTypeId	INT,
+		@ysnIsHedged BIT = 1
 		
 DECLARE @idoc int
 EXEC sp_xml_preparedocument @idoc OUTPUT, @XML          
@@ -109,6 +110,12 @@ VALUES(1
 		ELSE 'OTC - Others' END)
 SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY() 
 
+SELECT	@ysnMultiplePriceFixation = ysnMultiplePriceFixation,
+		@intHeaderPricingTypeId = intPricingTypeId,
+		@ysnIsHedged = CASE WHEN ISNULL(ysnMultiplePriceFixation,0) = 1 AND intPricingTypeId = 1 THEN  0 ELSE 1 END 
+		FROM tblCTContractHeader 
+		WHERE intContractHeaderId = @intContractHeaderId
+
 IF EXISTS
 (SELECT 1 FROM  tblRKReconciliationBrokerStatementHeader t
 					WHERE t.intFutureMarketId=@intFutureMarketId
@@ -157,7 +164,7 @@ ELSE
 BEGIN
       IF ISNULL(@strInternalTradeNo,'') = ''
       BEGIN
-            SELECT @strInternalTradeNo = strPrefix + LTRIM(intNumber)+'-H' FROM tblSMStartingNumber WHERE intStartingNumberId=45
+            SELECT @strInternalTradeNo = strPrefix + LTRIM(intNumber)+ CASE WHEN @ysnIsHedged = 1 THEN '-H' ELSE '' END FROM tblSMStartingNumber WHERE intStartingNumberId=45
             UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId=45
       END
 
@@ -216,7 +223,7 @@ BEGIN
       
       SET @intFutOptTransactionId = SCOPE_IDENTITY()
 
-	  SELECT @ysnMultiplePriceFixation = ysnMultiplePriceFixation FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+	  
 	  
 	SET @strXml = '<root><Transaction>';
 	IF ISNULL(@ysnMultiplePriceFixation,0) = 1
@@ -225,9 +232,17 @@ BEGIN
 		SET @strXml = @strXml + '<intContractDetailId>'+LTRIM(@intContractDetailId)+'</intContractDetailId>'
 	SET @strXml = @strXml + '<dtmMatchDate>' + LTRIM(GETDATE()) + '</dtmMatchDate>'
 	SET @strXml = @strXml + '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
-	SET @strXml = @strXml + '<dblHedgedLots>'+LTRIM(@dblNoOfContract)+'</dblHedgedLots>'
-	SET @strXml = @strXml + '<dblAssignedLots>0</dblAssignedLots>'
-	SET @strXml = @strXml + '<ysnIsHedged>1</ysnIsHedged>'
+	IF @ysnIsHedged = 1 
+	BEGIN
+		SET @strXml = @strXml + '<dblHedgedLots>'+LTRIM(@dblNoOfContract)+'</dblHedgedLots>'
+		SET @strXml = @strXml + '<dblAssignedLots>0</dblAssignedLots>'
+	END
+	ELSE
+	BEGIN
+		SET @strXml = @strXml + '<dblHedgedLots>0</dblHedgedLots>'
+		SET @strXml = @strXml + '<dblAssignedLots>'+LTRIM(@dblNoOfContract)+'</dblAssignedLots>'
+	END
+	SET @strXml = @strXml + '<ysnIsHedged>'+LTRIM(@ysnIsHedged)+'</ysnIsHedged>'
 	SET @strXml = @strXml + '</Transaction></root>'
 
 
