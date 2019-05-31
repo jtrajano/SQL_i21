@@ -3462,7 +3462,8 @@ BEGIN
 
 				WHERE	--i.strInvoiceNumber = @strTransactionId
 						--AND i.intInvoiceId = @intTransactionId
-						item.intItemId = ISNULL(@intItemId, item.intItemId)
+						t.strBatchId = @strBatchId
+						AND item.intItemId = ISNULL(@intItemId, item.intItemId)
 						AND ISNULL(item.intCategoryId, 0) = COALESCE(@intCategoryId, item.intCategoryId, 0)
 						AND (
 							1 = 
