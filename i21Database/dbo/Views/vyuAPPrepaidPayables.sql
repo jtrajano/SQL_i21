@@ -132,6 +132,7 @@ OUTER APPLY (
 		SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPPayment C ON B.intPaymentId = C.intPaymentId
 		WHERE B.intBillId = A.intBillId AND C.ysnPrepay = 1
 	)
+AND A.ysnOrigin = 1
 UNION ALL
 --NEGATIVE PART
 SELECT
@@ -195,7 +196,7 @@ INNER JOIN tblAPBill B ON A.intTransactionReversed = B.intBillId
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
 	ON C1.[intEntityId] = A.[intEntityVendorId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.tblGLAccount F ON B.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -236,7 +237,7 @@ FROM dbo.tblAPPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -312,7 +313,7 @@ FROM dbo.tblARPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strRecordNumber = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2)
