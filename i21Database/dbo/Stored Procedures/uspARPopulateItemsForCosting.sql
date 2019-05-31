@@ -59,12 +59,14 @@ SELECT
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL OR ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ARID.[dblQtyShipped] 
-										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
+	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
+										WHEN LOT.[intWeightUOMId] IS NULL THEN CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, ARID.intItemUOMId, ARIDL.dblQuantityShipped)
+																			        ELSE ARIDL.[dblQuantityShipped]
+																				END																				
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]				= CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblUOMQty, 0) ELSE ARID.[dblUnitQty] END
+	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -82,7 +84,14 @@ SELECT
 																			AND ICIT.[strTransactionForm] = 'Produce'
 																	)
 																	WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0
-																	THEN ISNULL(ARRETURN.dblCost, 0)
+																	THEN (
+																		SELECT dblCost	= ICIT.[dblCost]
+																		FROM tblICInventoryTransaction ICIT WITH (NOLOCK)
+																		WHERE ICIT.ysnIsUnposted = @ZeroBit
+																		  AND ICIT.intTransactionId = ARRETURN.intInvoiceId
+																		  AND ICIT.strTransactionId = ARRETURN.strInvoiceNumber
+																		  AND (ARIDL.[intLotId] IS NULL OR ARIDL.[intLotId] = ICIT.intLotId)
+																	)
 																	ELSE 
 																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @AVERAGECOST THEN 
 																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.intItemUOMId) 
@@ -117,7 +126,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
+	(SELECT [intLotId], [intWeightUOMId], [intItemUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
 		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
@@ -128,17 +137,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	(SELECT I.[intInvoiceId]
 	      , I.[strInvoiceNumber]
-		  , COST.* 
 	FROM tblARInvoice I WITH (NOLOCK)
-	CROSS APPLY (
-		SELECT dblCost		= SUM(ICIT.[dblCost])
-		     , dblUOMQty	= AVG(ICIT.[dblUOMQty])
-			 , dblQty		= ABS(AVG(ICIT.[dblQty]))
-		FROM tblICInventoryTransaction ICIT WITH (NOLOCK)
-		WHERE ICIT.ysnIsUnposted = @ZeroBit
-			AND ICIT.intTransactionId = I.intInvoiceId
-			AND ICIT.strTransactionId = I.strInvoiceNumber
-	) COST
 	WHERE I.ysnReturned = 1 
 	  AND I.ysnPosted = 1 
 	  AND I.strTransactionType = 'Invoice') ARRETURN 
@@ -196,12 +195,14 @@ SELECT
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL OR ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ARID.[dblQtyShipped]
-										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
+	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped]
+										WHEN LOT.[intWeightUOMId] IS NULL THEN CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(LOT.intItemUOMId, ARID.intItemUOMId, ARIDL.dblQuantityShipped)
+																			        ELSE ARIDL.[dblQuantityShipped]
+																				END
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]				= CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblUOMQty, 0) ELSE ARID.[dblUnitQty] END
+	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -219,7 +220,14 @@ SELECT
 																			AND ICIT.[strTransactionForm] = 'Produce'
 																	)
 																	WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0
-																	THEN ISNULL(ARRETURN.dblCost, 0)
+																	THEN (
+																		SELECT dblCost	= ICIT.[dblCost]
+																		FROM tblICInventoryTransaction ICIT WITH (NOLOCK)
+																		WHERE ICIT.ysnIsUnposted = @ZeroBit
+																		  AND ICIT.intTransactionId = ARRETURN.intInvoiceId
+																		  AND ICIT.strTransactionId = ARRETURN.strInvoiceNumber
+																		  AND (ARIDL.[intLotId] IS NULL OR ARIDL.[intLotId] = ICIT.intLotId)
+																	)
 																	ELSE
 																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @AVERAGECOST THEN 
 																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.intItemUOMId) 
@@ -254,7 +262,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
+	(SELECT [intLotId], [intWeightUOMId], [intItemUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
 		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
@@ -265,17 +273,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	(SELECT I.[intInvoiceId]
 	      , I.[strInvoiceNumber] 
-		  , COST.*
-	FROM tblARInvoice I WITH (NOLOCK)
-	CROSS APPLY (
-		SELECT dblCost		= SUM(ICIT.[dblCost])
-		     , dblUOMQty	= AVG(ICIT.[dblUOMQty])
-			 , dblQty		= ABS(AVG(ICIT.[dblQty]))
-		FROM tblICInventoryTransaction ICIT WITH (NOLOCK)
-		WHERE ICIT.ysnIsUnposted = @ZeroBit
-			AND ICIT.intTransactionId = I.intInvoiceId
-			AND ICIT.strTransactionId = I.strInvoiceNumber
-	) COST
+	FROM tblARInvoice I WITH (NOLOCK)	
 	WHERE I.ysnReturned = 1 
 	  AND I.ysnPosted = 1 
 	  AND I.strTransactionType = 'Invoice') ARRETURN 
