@@ -82,30 +82,32 @@ SELECT   L.intLoadId
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LCIU.strUnitMeasure AS strUnitMeasure
 		,strShipmentStatus = CASE L.intShipmentStatus
-								WHEN 1
-									THEN 'Scheduled'
-								WHEN 2
-									THEN 'Dispatched'
-								WHEN 3
-									THEN 'Inbound transit'
-								WHEN 4
-									THEN 'Received'
-								WHEN 5
-									THEN 'Outbound transit'
-								WHEN 6
-									THEN 'Delivered'
-								WHEN 7
-									THEN 'Instruction created'
-								WHEN 8
-									THEN 'Partial Shipment Created'
-								WHEN 9
-									THEN 'Full Shipment Created'
-								WHEN 10
-									THEN 'Cancelled'
-								WHEN 11
-									THEN 'Invoiced'
-								ELSE ''
-							  END COLLATE Latin1_General_CI_AS
+								WHEN 1 THEN 'Scheduled'
+								WHEN 2 THEN 'Dispatched'
+								WHEN 3 THEN 
+									CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+											WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+											WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+											ELSE 'Inbound Transit' END
+								WHEN 4 THEN 'Received'
+								WHEN 5 THEN 
+									CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+											WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+											WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+											ELSE 'Outbound Transit' END
+								WHEN 6 THEN 
+									CASE WHEN (L.intPurchaseSale = 3 AND L.ysnCustomsReleased = 1) THEN 'Customs Released'
+											WHEN (L.intPurchaseSale = 3 AND L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+											WHEN (L.intPurchaseSale = 3 AND L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+											ELSE 'Delivered' END
+								WHEN 7 THEN 
+									CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
+											ELSE 'Shipping Instruction Created' END
+								WHEN 8 THEN 'Partial Shipment Created'
+								WHEN 9 THEN 'Full Shipment Created'
+								WHEN 10 THEN 'Cancelled'
+								WHEN 11 THEN 'Invoiced'
+								ELSE '' END COLLATE Latin1_General_CI_AS
 		,LDCL.dblReceivedQty AS dblContainerReceivedQty
 		,CAST((CASE WHEN ISNULL(LDCL.dblReceivedQty ,0) = 0 THEN 0 ELSE 1 END) AS BIT) AS  ysnReceived
 		,PDetail.dblCashPrice AS dblPCashPrice

@@ -91,7 +91,12 @@
 [dtmStartDate] DATETIME NULL,
 [dtmEndDate] DATETIME NULL,
 [dtmPlannedAvailabilityDate] DATETIME NULL,
-
+[ysnArrivedInPort] [bit] NULL,
+[ysnDocumentsApproved] [bit] NULL,
+[ysnCustomsReleased] [bit] NULL,
+[dtmArrivedInPort] DATETIME NULL,
+[dtmDocumentsApproved] DATETIME NULL,
+[dtmCustomsReleased] DATETIME NULL,
 [dblDemurrage] NUMERIC(18, 6) NULL,
 [intDemurrageCurrencyId] INT NULL,
 [dblDespatch] NUMERIC(18, 6) NULL,

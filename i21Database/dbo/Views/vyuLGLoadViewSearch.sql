@@ -44,11 +44,25 @@ SELECT L.intLoadId
 	,strShipmentStatus = CASE L.intShipmentStatus
 		WHEN 1 THEN 'Scheduled'
 		WHEN 2 THEN 'Dispatched'
-		WHEN 3 THEN 'Inbound transit'
+		WHEN 3 THEN 
+			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Inbound Transit' END
 		WHEN 4 THEN 'Received'
-		WHEN 5 THEN 'Outbound transit'
-		WHEN 6 THEN 'Delivered'
-		WHEN 7 THEN 'Instruction created'
+		WHEN 5 THEN 
+			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Outbound Transit' END
+		WHEN 6 THEN 
+			CASE WHEN (L.intPurchaseSale = 3 AND L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.intPurchaseSale = 3 AND L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.intPurchaseSale = 3 AND L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Delivered' END
+		WHEN 7 THEN 
+			CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
+					ELSE 'Shipping Instruction Created' END
 		WHEN 8 THEN 'Partial Shipment Created'
 		WHEN 9 THEN 'Full Shipment Created'
 		WHEN 10 THEN 'Cancelled'
@@ -102,6 +116,10 @@ SELECT L.intLoadId
 	,strETAPOLReasonCodeDescription = ETAPOLRC.strReasonCodeDescription
 	,strETSPOLReasonCodeDescription = ETSPOLRC.strReasonCodeDescription
 	,strETAPODReasonCodeDescription = ETAPODRC.strReasonCodeDescription
+	,L.ysnArrivedInPort
+	,L.dtmArrivedInPort
+	,L.ysnDocumentsApproved
+	,L.ysnCustomsReleased
 	,L.intFreightTermId
 	,FT.strFreightTerm
 	,L.intCurrencyId

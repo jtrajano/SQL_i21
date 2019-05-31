@@ -6,161 +6,142 @@ SELECT CH.strContractNumber
 	,Vendor.strName AS strVendorName
 	,Customer.strName AS strCustomerName
 	,I.strItemNo
-	,LOAD.intLoadId
-	,LOAD.intConcurrencyId
-	,LOAD.[strLoadNumber]
-	,LOAD.intPurchaseSale
-	,LOAD.intEquipmentTypeId
-	,LOAD.intHaulerEntityId
-	,LOAD.intTicketId
-	,LOAD.intGenerateLoadId
-	,LOAD.intUserSecurityId
-	,LOAD.intTransportLoadId
-	,LOAD.intLoadHeaderId
-	,LOAD.intDriverEntityId
-	,LOAD.intDispatcherId
-	,LOAD.strExternalLoadNumber
-	,strType = CASE 
-		WHEN LOAD.intPurchaseSale = 1
-			THEN 'Inbound'
-		ELSE CASE 
-				WHEN LOAD.intPurchaseSale = 2
-					THEN 'Outbound'
-				ELSE '''Direct-Ship'''
-				END
+	,L.intLoadId
+	,L.intConcurrencyId
+	,L.[strLoadNumber]
+	,L.intPurchaseSale
+	,L.intEquipmentTypeId
+	,L.intHaulerEntityId
+	,L.intTicketId
+	,L.intGenerateLoadId
+	,L.intUserSecurityId
+	,L.intTransportLoadId
+	,L.intLoadHeaderId
+	,L.intDriverEntityId
+	,L.intDispatcherId
+	,L.strExternalLoadNumber
+	,strType = CASE L.intPurchaseSale
+		WHEN 1 THEN 'Inbound'
+		WHEN 2 THEN 'Outbound'
+		WHEN 3 THEN 'Drop Ship'
+		ELSE '' END COLLATE Latin1_General_CI_AS
+	,strSourceType = CASE L.intSourceType
+		WHEN 1 THEN 'None'
+		WHEN 2 THEN 'Contracts'
+		WHEN 3 THEN 'Orders'
+		WHEN 4 THEN 'Allocations'
+		WHEN 5 THEN 'Picked Lots'
+		WHEN 6 THEN 'Pick Lots'
+		WHEN 7 THEN 'Pick Lots w/o Contract'
 		END COLLATE Latin1_General_CI_AS
-	,strSourceType = CASE 
-		WHEN LOAD.intSourceType = 1
-			THEN 'None'
-		WHEN LOAD.intSourceType = 2
-			THEN 'Contracts'
-		WHEN LOAD.intSourceType = 3
-			THEN 'Orders'
-		WHEN LOAD.intSourceType = 4
-			THEN 'Allocations'
-		WHEN LOAD.intSourceType = 5
-			THEN 'Picked Lots'
-		WHEN LOAD.intSourceType = 6
-			THEN 'Pick Lots'
-		WHEN LOAD.intSourceType = 7
-			THEN 'Pick Lots w/o Contract'
+	,strTransportationMode = CASE L.intTransportationMode
+		WHEN 1 THEN 'Truck'
+		WHEN 2 THEN 'Ocean Vessel'
+		WHEN 3 THEN 'Rail'
 		END COLLATE Latin1_General_CI_AS
-	,strTransportationMode = CASE 
-		WHEN LOAD.intTransportationMode = 1
-			THEN 'Truck'
-		WHEN LOAD.intTransportationMode = 2
-			THEN 'Ocean Vessel'
-		WHEN LOAD.intTransportationMode = 3
-			THEN 'Rail'
-		END COLLATE Latin1_General_CI_AS
-	,LOAD.intTransUsedBy
-	,strTransUsedBy = CASE 
-		WHEN LOAD.intTransUsedBy = 1
-			THEN 'None'
-		WHEN LOAD.intTransUsedBy = 2
-			THEN 'Scale Ticket'
-		WHEN LOAD.intTransUsedBy = 3
-			THEN 'Transport Load'
+	,L.intTransUsedBy
+	,strTransUsedBy = CASE L.intTransUsedBy
+		WHEN 1 THEN 'None'
+		WHEN 2 THEN 'Scale Ticket'
+		WHEN 3 THEN 'Transport Load'
 		END COLLATE Latin1_General_CI_AS
 	,strPosition = P.strPosition
 	,intGenerateReferenceNumber = GLoad.intReferenceNumber
-	,intGenerateSequence = LOAD.intGenerateSequence
+	,intGenerateSequence = L.intGenerateSequence
 	,intNumberOfLoads = GLoad.intNumberOfLoads
 	,strHauler = Hauler.strName
-	,LOAD.dtmScheduledDate
-	,ysnInProgress = IsNull(LOAD.ysnInProgress, 0)
-	,LOAD.dtmDeliveredDate
+	,L.dtmScheduledDate
+	,ysnInProgress = IsNull(L.ysnInProgress, 0)
+	,L.dtmDeliveredDate
 	,strEquipmentType = EQ.strEquipmentType
 	,strDriver = Driver.strName
 	,strDispatcher = US.strUserName
-	,LOAD.strCustomerReference
-	,LOAD.strTruckNo
-	,LOAD.strTrailerNo1
-	,LOAD.strTrailerNo2
-	,LOAD.strTrailerNo3
-	,LOAD.strCarNumber
-	,LOAD.strEmbargoNo
-	,LOAD.strEmbargoPermitNo
-	,LOAD.strComments
-	,ysnDispatched = CASE 
-		WHEN LOAD.ysnDispatched = 1
-			THEN CAST(1 AS BIT)
-		ELSE CAST(0 AS BIT)
-		END
-	,LOAD.dtmDispatchedDate
-	,LOAD.ysnDispatchMailSent
-	,LOAD.dtmDispatchMailSent
-	,LOAD.dtmCancelDispatchMailSent
-	,strShipmentStatus = CASE intShipmentStatus
-		WHEN 1
-			THEN 'Scheduled'
-		WHEN 2
-			THEN 'Dispatched'
-		WHEN 3
-			THEN 'Inbound transit'
-		WHEN 4
-			THEN 'Received'
-		WHEN 5
-			THEN 'Outbound transit'
-		WHEN 6
-			THEN 'Delivered'
-		WHEN 7
-			THEN 'Instruction created'
-		WHEN 8
-			THEN 'Partial Shipment Created'
-		WHEN 9
-			THEN 'Full Shipment Created'
-		WHEN 10
-			THEN 'Cancelled'
-		WHEN 11
-			THEN 'Invoiced'
-		ELSE ''
-		END COLLATE Latin1_General_CI_AS
-	,strCalenderInfo = LOAD.[strLoadNumber] + ' - ' + CASE 
-		WHEN LOAD.intPurchaseSale = 1
-			THEN 'Inbound'
-		ELSE CASE 
-				WHEN LOAD.intPurchaseSale = 2
-					THEN 'Outbound'
-				ELSE '''Direct-Ship'''
-				END
-		END + ' - ' + CASE intShipmentStatus
-		WHEN 1
-			THEN 'Scheduled'
-		WHEN 2
-			THEN 'Dispatched'
-		WHEN 3
-			THEN 'Inbound transit'
-		WHEN 4
-			THEN 'Received'
-		WHEN 5
-			THEN 'Outbound transit'
-		WHEN 6
-			THEN 'Delivered'
-		WHEN 7
-			THEN 'Instruction created'
-		WHEN 8
-			THEN 'Partial Shipment Created'
-		WHEN 9
-			THEN 'Full Shipment Created'
-		WHEN 10
-			THEN 'Cancelled'
-		WHEN 11
-			THEN 'Invoiced'
-		ELSE ''
-		END + CASE 
-		WHEN ISNULL(LOAD.strExternalLoadNumber, '') <> ''
-			THEN ' - ' + '(S) ' + LOAD.strExternalLoadNumber
+	,L.strCustomerReference
+	,L.strTruckNo
+	,L.strTrailerNo1
+	,L.strTrailerNo2
+	,L.strTrailerNo3
+	,L.strCarNumber
+	,L.strEmbargoNo
+	,L.strEmbargoPermitNo
+	,L.strComments
+	,ysnDispatched = CAST(CASE WHEN L.ysnDispatched = 1 THEN 1 ELSE 0 END AS BIT)
+	,L.dtmDispatchedDate
+	,L.ysnDispatchMailSent
+	,L.dtmDispatchMailSent
+	,L.dtmCancelDispatchMailSent
+	,strShipmentStatus = CASE L.intShipmentStatus
+		WHEN 1 THEN 'Scheduled'
+		WHEN 2 THEN 'Dispatched'
+		WHEN 3 THEN 
+			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Inbound Transit' END
+		WHEN 4 THEN 'Received'
+		WHEN 5 THEN 
+			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Outbound Transit' END
+		WHEN 6 THEN 
+			CASE WHEN (L.intPurchaseSale = 3 AND L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.intPurchaseSale = 3 AND L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.intPurchaseSale = 3 AND L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Delivered' END
+		WHEN 7 THEN 
+			CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
+					ELSE 'Shipping Instruction Created' END
+		WHEN 8 THEN 'Partial Shipment Created'
+		WHEN 9 THEN 'Full Shipment Created'
+		WHEN 10 THEN 'Cancelled'
+		WHEN 11 THEN 'Invoiced'
+		ELSE '' END COLLATE Latin1_General_CI_AS
+	,strCalenderInfo = L.[strLoadNumber] + ' - ' + 
+		CASE L.intPurchaseSale
+			WHEN 1 THEN 'Inbound'
+			WHEN 2 THEN 'Outbound'
+			WHEN 3 THEN 'Drop Ship'
+		END + ' - ' + 
+		CASE L.intShipmentStatus
+		WHEN 1 THEN 'Scheduled'
+		WHEN 2 THEN 'Dispatched'
+		WHEN 3 THEN 
+			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Inbound Transit' END
+		WHEN 4 THEN 'Received'
+		WHEN 5 THEN 
+			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Outbound Transit' END
+		WHEN 6 THEN 
+			CASE WHEN (L.intPurchaseSale = 3 AND L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.intPurchaseSale = 3 AND L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.intPurchaseSale = 3 AND L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Delivered' END
+		WHEN 7 THEN 
+			CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
+					ELSE 'Shipping Instruction Created' END
+		WHEN 8 THEN 'Partial Shipment Created'
+		WHEN 9 THEN 'Full Shipment Created'
+		WHEN 10 THEN 'Cancelled'
+		WHEN 11 THEN 'Invoiced'
+		ELSE '' END + 
+		CASE WHEN ISNULL(L.strExternalLoadNumber, '') <> ''
+			THEN ' - ' + '(S) ' + L.strExternalLoadNumber
 		ELSE ''
 		END + CASE 
-		WHEN ISNULL(LOAD.strCustomerReference, '') <> ''
-			THEN ' - ' + '(C) ' + LOAD.strCustomerReference
+		WHEN ISNULL(L.strCustomerReference, '') <> ''
+			THEN ' - ' + '(C) ' + L.strCustomerReference
 		ELSE ''
 		END COLLATE Latin1_General_CI_AS
-	,LOAD.intPositionId
-	,LOAD.[intWeightUnitMeasureId]
+	,L.intPositionId
+	,L.[intWeightUnitMeasureId]
 	,strWeightUnitMeasure = [strUnitMeasure]
-	,ISNULL([strBLNumber], '') AS [strBLNumber]
+	,[strBLNumber] = ISNULL([strBLNumber], '') 
 	,[dtmBLDate]
 	,[strOriginPort]
 	,[strDestinationPort]
@@ -170,7 +151,7 @@ SELECT CH.strContractNumber
 	,[intShippingLineEntityId]
 	,[strShippingLine] = ShippingLine.strName
 	,[strServiceContractNumber]
-	,LOAD.[strPackingDescription]
+	,L.[strPackingDescription]
 	,[strMVessel]
 	,[strMVoyageNumber]
 	,[strFVessel]
@@ -187,8 +168,8 @@ SELECT CH.strContractNumber
 	,[strMarks]
 	,[strMarkingInstructions]
 	,[strShippingMode]
-	,LOAD.[intNumberOfContainers]
-	,LOAD.[intContainerTypeId]
+	,L.[intNumberOfContainers]
+	,L.[intContainerTypeId]
 	,[strContainerType] = CT.strContainerType
 	,[intBLDraftToBeSentId]
 	,[strBLDraftToBeSentType]
@@ -196,8 +177,8 @@ SELECT CH.strContractNumber
 	,[strDocPresentationType]
 	,[strDocPresentationVal] = NP.strName
 	,[intDocPresentationId]
-	,LOAD.[ysnPosted]
-	,LOAD.[dtmPostedDate]
+	,L.[ysnPosted]
+	,L.[dtmPostedDate]
 	,[dtmDocsReceivedDate]
 	,[dtmETAPOL]
 	,[dtmETSPOL]
@@ -219,7 +200,7 @@ SELECT CH.strContractNumber
 	,[dblDischargeRate]
 	,[intDischargeUnitMeasureId]
 	,[strDischargePerUnit]
-	,LOAD.[intTransportationMode]
+	,L.[intTransportationMode]
 	,[intShipmentStatus]
 	,LDOC.intLoadDocumentId
 	,LDOC.intDocumentId
@@ -233,45 +214,45 @@ SELECT CH.strContractNumber
 	,DOC.strDocumentName
 	,LDOC.strDocumentNo
 	,LD.dblQuantity
-	,LOAD.ysnInvoice
-	,LOAD.ysn4cRegistration
-	,LOAD.ysnProvisionalInvoice
-	,LOAD.ysnQuantityFinal
-	,LOAD.intBookId
+	,L.ysnInvoice
+	,L.ysn4cRegistration
+	,L.ysnProvisionalInvoice
+	,L.ysnQuantityFinal
+	,L.intBookId
 	,BO.strBook
-	,LOAD.intSubBookId
+	,L.intSubBookId
 	,SB.strSubBook
-FROM tblLGLoad LOAD
-JOIN tblLGLoadDetail LD ON LOAD.intLoadId = LD.intLoadId
+FROM tblLGLoad L
+JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = (
 		CASE 
-			WHEN LOAD.intPurchaseSale = 1
+			WHEN L.intPurchaseSale = 1
 				THEN LD.intPContractDetailId
 			ELSE LD.intSContractDetailId
 			END
 		)
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem I ON I.intItemId = CD.intItemId
-JOIN tblLGLoadDocuments LDOC ON LDOC.intLoadId = LOAD.intLoadId
+JOIN tblLGLoadDocuments LDOC ON LDOC.intLoadId = L.intLoadId
 JOIN tblICDocument DOC ON DOC.intDocumentId = LDOC.intDocumentId
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
 LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
-LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = LOAD.intWeightUnitMeasureId
-LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = LOAD.intHaulerEntityId
-LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = LOAD.intDriverEntityId
-LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = LOAD.intTerminalEntityId
-LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = LOAD.intShippingLineEntityId
-LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = LOAD.intForwardingAgentEntityId
-LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = LOAD.intInsurerEntityId
-LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = LOAD.intBLDraftToBeSentId
-LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = LOAD.intDocPresentationId
-	AND NP.strEntity = LOAD.strDocPresentationType
-LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = LOAD.intInsuranceCurrencyId
-LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = LOAD.intContainerTypeId
-LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = LOAD.intEquipmentTypeId
-LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = LOAD.intDispatcherId
-LEFT JOIN tblCTPosition P ON LOAD.intPositionId = P.intPositionId
-LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = LOAD.intGenerateLoadId
-LEFT JOIN tblCTBook BO ON BO.intBookId = LOAD.intBookId
-LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = LOAD.intSubBookId
-WHERE LOAD.intShipmentType = 1
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
+LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
+LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
+LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
+LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
+LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
+LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = L.intDocPresentationId
+	AND NP.strEntity = L.strDocPresentationType
+LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
+LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
+LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
+LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = L.intDispatcherId
+LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
+LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
+WHERE L.intShipmentType = 1
