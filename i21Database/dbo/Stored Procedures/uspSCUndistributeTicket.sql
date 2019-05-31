@@ -232,8 +232,9 @@ BEGIN TRY
 						END
 						IF ISNULL(@intMatchTicketId,0) > 0 AND @intTicketType = 6
 						BEGIN 
+							
 							IF @intStorageScheduleTypeId = -6
-							BEGin
+							BEGIN
 								SELECT @intMatchLoadId = LGLD.intLoadId 
 								, @intMatchLoadDetailId = LGLD.intLoadDetailId
 								, @dblMatchDeliveredQuantity = LGLD.dblDeliveredQuantity
@@ -241,7 +242,7 @@ BEGIN TRY
 								, @intMatchLoadContractId = LGLD.intSContractDetailId
 								FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 								WHERE LGL.intTicketId = @intMatchTicketId
-
+								SELECT @intMatchLoadDetailId
 								IF ISNULL(@intMatchLoadDetailId, 0) > 0
 								BEGIN
 									EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
@@ -270,7 +271,23 @@ BEGIN TRY
 							END
 							ELSE IF @intStorageScheduleTypeId = -2
 							BEGIN  
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
+								DECLARE @intMatchContractDetailId AS INT;
+								DECLARE @strDistributionOption AS VARCHAR(MAX);
+								SELECT @intMatchContractDetailId = intContractId, @strDistributionOption = strDistributionOption FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
+								SELECT @intContractDetailId = intContractId, @dblScheduleQty = dblNetUnits *-1 FROM tblSCTicket WHERE intTicketId = @intTicketId
+
+								EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
+								SET @dblScheduleQty = @dblScheduleQty *-1
+
+								IF(@strDistributionOption = 'LOD')
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantity
+															@intContractDetailId	=	@intContractDetailId,
+															@dblQuantityToUpdate	=	@dblScheduleQty,
+															@intUserId				=	@intUserId,
+															@intExternalId			=	@intTicketId,
+															@strScreenName			=	'Scale'	
+								END
 							END
 
 							UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
@@ -399,21 +416,23 @@ BEGIN TRY
 						DECLARE @strTicketType VARCHAR(MAX)
 						DECLARE @dblNetUnit DECIMAL(18,6)
 						DECLARE @_intContractDetailId INT
-						SELECT @strTicketType = strTicketType,@dblNetUnit = dblNetUnits*-1,@_intContractDetailId = intContractId FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
+						DECLARE @_strDistributionOption VARCHAR(MAX)
+						SELECT @strTicketType = strTicketType,@dblNetUnit = dblNetUnits*-1,@_intContractDetailId = intContractId, @_strDistributionOption  = strDistributionOption FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
 						IF(@strTicketType = 'Direct Out')
 						BEGIN
-						SELECT @dblNetUnit
-						
+													
 							EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblNetUnit, @intUserId, @intTicketId, 'Scale'
 							SET @dblNetUnit = @dblNetUnit *-1
-							EXEC uspCTUpdateScheduleQuantity
-												@intContractDetailId	=	@_intContractDetailId,
-												@dblQuantityToUpdate	=	@dblNetUnit,
-												@intUserId				=	@intUserId,
-												@intExternalId			=	@intTicketId,
-												@strScreenName			=	'Scale'	
-												
+							IF(@_strDistributionOption = 'LOD')
+							BEGIN
+								EXEC uspCTUpdateScheduleQuantity
+													@intContractDetailId	=	@_intContractDetailId,
+													@dblQuantityToUpdate	=	@dblNetUnit,
+													@intUserId				=	@intUserId,
+													@intExternalId			=	@intTicketId,
+													@strScreenName			=	'Scale'													
+							END
 						END
 
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
