@@ -18,7 +18,7 @@ GO
 CREATE INDEX [IX_tblTRLoadBlendIngredient_intLoadDistributionDetailId] ON [dbo].[tblTRLoadBlendIngredient] ([intLoadDistributionDetailId])
 GO
 
---CREATE INDEX [IX_tblTRLoadBlendIngredient_strReceiptLink] ON [dbo].[tblTRLoadBlendIngredient] ([strReceiptLink])
---GO
+CREATE INDEX [IX_tblTRLoadBlendIngredient_strReceiptLink] ON [dbo].[tblTRLoadBlendIngredient] ([strReceiptLink])
+GO
 
 

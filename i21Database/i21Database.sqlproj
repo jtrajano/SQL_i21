@@ -7569,6 +7569,7 @@
     <Build Include="dbo\Views\vyuTRLoadReceiptInfo.sql" />
     <Build Include="dbo\Views\vyuTRLoadDistributionHeaderInfo.sql" />
     <Build Include="dbo\Views\vyuTRLoadDistributionDetailInfo.sql" />
+	<Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
