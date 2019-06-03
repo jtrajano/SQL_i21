@@ -26,6 +26,10 @@
 	[intLastModifiedUserId] [int] NOT NULL,
 	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFRecipe_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFRecipe_intConcurrencyId] DEFAULT 0, 
+	[dtmValidFrom] DATETIME NULL,
+	[dtmValidTo] DATETIME NULL,
+	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+
     CONSTRAINT [PK_tblMFRecipe_intRecipeId] PRIMARY KEY ([intRecipeId]), 
     CONSTRAINT [FK_tblMFRecipe_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFRecipe_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
