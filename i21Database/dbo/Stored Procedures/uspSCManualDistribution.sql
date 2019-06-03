@@ -332,22 +332,22 @@ END
 	INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 	WHERE SC.intTicketId = @intTicketId
 
-	SELECT @intContractDetailId = MIN(ri.intLineNo)
-	FROM tblICInventoryReceipt r 
-	JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
+	--SELECT @intContractDetailId = MIN(ri.intLineNo)
+	--FROM tblICInventoryReceipt r 
+	--JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	--WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
  
-	WHILE ISNULL(@intContractDetailId,0) > 0
-	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-		BEGIN
-			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-		END
-		SELECT @intContractDetailId = MIN(ri.intLineNo)
-		FROM tblICInventoryReceipt r 
-		JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
-	END
+	--WHILE ISNULL(@intContractDetailId,0) > 0
+	--BEGIN
+	--	IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+	--	BEGIN
+	--		EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+	--	END
+	--	SELECT @intContractDetailId = MIN(ri.intLineNo)
+	--	FROM tblICInventoryReceipt r 
+	--	JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	--	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+	--END
 	
 	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
 	IF @intLotType != 0
