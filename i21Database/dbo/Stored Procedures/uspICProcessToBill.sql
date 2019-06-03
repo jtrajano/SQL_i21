@@ -49,6 +49,7 @@ BEGIN
 				AND r.intInventoryReceiptId = @intReceiptId
 				AND cd.intPricingTypeId = 2 -- 2 is Basis. 
 				AND ISNULL(cd.dblFutures, 0) = 0
+				AND ISNULL(ri.ysnAllowVoucher, 1) = 1
 
 		IF @invalidItemId IS NOT NULL 
 		BEGIN 
