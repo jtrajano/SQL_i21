@@ -22,3 +22,13 @@
 	CONSTRAINT [FK_tblTRLoadDistributionDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
 	CONSTRAINT [FK_tblTRLoadDistributionDetail_tblLGLoadDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES [dbo].[tblLGLoadDetail] ([intLoadDetailId])
 )
+GO
+
+CREATE INDEX [IX_tblTRLoadDistributionDetail_intLoadDistributionHeaderId] ON [dbo].[tblTRLoadDistributionDetail] ([intLoadDistributionHeaderId] ASC)
+GO 
+
+--CREATE INDEX [IX_tblTRLoadDistributionDetail_strReceiptLink] ON [dbo].[tblTRLoadDistributionDetail] ([strReceiptLink] ASC)
+--GO 
+
+CREATE INDEX [IX_tblTRLoadDistributionDetail_intItemId] ON [dbo].[tblTRLoadDistributionDetail] ([intItemId] ASC)
+GO 

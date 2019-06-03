@@ -27,3 +27,8 @@
 	CONSTRAINT [FK_tblTRLoadHeader_tblICItem_intItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 
 )
+GO
+
+CREATE INDEX [IX_tblTRLoadHeader_dtmLoadDateTime] ON [dbo].[tblTRLoadHeader] ([dtmLoadDateTime])
+GO
+
