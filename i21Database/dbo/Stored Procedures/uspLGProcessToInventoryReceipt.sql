@@ -490,7 +490,7 @@ BEGIN TRY
 			,ISNULL(LDCL.dblLinkGrossWt, ISNULL(LC.dblGrossWt, LD.dblGross))
 			,ISNULL(LDCL.dblLinkTareWt, ISNULL(LC.dblTareWt, LD.dblTare))
 			,LC.strContainerNumber
-			,ISNULL(LC.intLoadContainerId,0)
+			,LC.intLoadContainerId
 			,LC.strMarks
 			,@strLotCondition
 			,LD.intVendorEntityId
@@ -1036,7 +1036,7 @@ BEGIN TRY
 			,ISNULL(LDCL.dblLinkGrossWt, ISNULL(LC.dblGrossWt, LD.dblGross))
 			,ISNULL(LDCL.dblLinkTareWt, ISNULL(LC.dblTareWt, LD.dblTare))
 			,LC.strContainerNumber
-			,ISNULL(LC.intLoadContainerId,0)
+			,LC.intLoadContainerId
 			,LC.strMarks
 			,@strLotCondition
 			,LD.intVendorEntityId
