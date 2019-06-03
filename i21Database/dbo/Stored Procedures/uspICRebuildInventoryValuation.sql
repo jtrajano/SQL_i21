@@ -306,6 +306,54 @@ BEGIN
 			AND InvTrans.intItemId = ISNULL(@intItemId, intItemId) 
 END 
 
+-- Remove the cost adjustment logs if it is posted within the date range. 
+BEGIN 
+	DELETE	cbLog
+	FROM	tblICInventoryLot cb INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+			INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog
+				ON cbLog.intInventoryLotId = cb.intInventoryLotId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+
+	DELETE	cbLog
+	FROM	tblICInventoryFIFO cb INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+			INNER JOIN tblICInventoryFIFOCostAdjustmentLog cbLog
+				ON cbLog.intInventoryFIFOId = cb.intInventoryFIFOId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+
+	DELETE	cbLog
+	FROM	tblICInventoryLIFO cb INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+			INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog
+				ON cbLog.intInventoryLIFOId = cb.intInventoryLIFOId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+
+	DELETE	cbLog
+	FROM	tblICInventoryActualCost cb INNER JOIN tblICItem i
+				ON cb.intItemId = i.intItemId
+			INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog
+				ON cbLog.intInventoryActualCostId = cb.intInventoryActualCostId
+	WHERE	dbo.fnDateGreaterThanEquals(
+				CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
+				, @dtmStartDate
+			) = 1 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+END 
+
+
 -- Remove the cost buckets if it is posted within the date range. 
 BEGIN 
 	DELETE	FROM tblICInventoryLot 
