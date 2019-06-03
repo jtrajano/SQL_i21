@@ -587,9 +587,6 @@ CREATE TABLE #ARItemsForStorageCosting
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
 
 
-IF @Recap = 0
-	EXEC [dbo].[uspARPostItemResevation]
-
 	EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
          @Post     = @Post
         ,@Recap    = @Recap
@@ -642,13 +639,7 @@ IF(@totalInvalid > 0)
 		FROM #ARItemsForStorageCosting A
 		INNER JOIN #ARInvalidInvoiceData B
 			ON A.[intTransactionId] = B.[intInvoiceId]
-				
-		IF @RaiseError = 1
-			BEGIN
-				SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
-				RAISERROR(@ErrorMerssage, 11, 1)							
-			END	
-			
+							
         DELETE FROM #ARInvalidInvoiceData
 					
 	END
@@ -702,6 +693,9 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 	
 
 BEGIN TRY
+
+	IF @Recap = 0
+		EXEC [dbo].[uspARPostItemResevation]
 
 	IF @Recap = 1
     BEGIN
