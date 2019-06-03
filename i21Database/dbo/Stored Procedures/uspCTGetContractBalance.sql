@@ -475,7 +475,8 @@ BEGIN TRY
 	,dtmContractDate
 	,dtmSeqEndDate			
 	,strFutMarketName			
-	,strCategory 								
+	,strCategory
+	,strPricingStatus 								
 	)				
 	SELECT *
 	FROM (
@@ -541,6 +542,7 @@ BEGIN TRY
 	,dtmSeqEndDate			= CD.dtmEndDate
 	,strFutMarketName		= FM.strFutMarketName
 	,strCategory			= Category.strCategoryCode
+	,strPricingStatus		= CASE WHEN ISNULL(PF.dblQuantity, 0) = 0 THEN 'Unpriced' ELSE 'Partially Priced' END 
 	
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractStatus					CS	ON CS.intContractStatusId			=	CD.intContractStatusId
@@ -614,6 +616,7 @@ BEGIN TRY
 							  END
 	   ,intFutureMarketId = SH.intFutureMarketId
 	   ,intFutureMonthId  = SH.intFutureMonthId
+	   ,strPricingStatus =  SH.strPricingStatus
 	FROM tblCTContractBalance FR 
 	JOIN @tblChange tblChange ON tblChange.intContractDetailId = FR.intContractDetailId
 	JOIN tblCTSequenceHistory SH ON SH.intSequenceHistoryId = tblChange.intSequenceHistoryId
@@ -670,7 +673,8 @@ BEGIN TRY
 	,dtmContractDate
 	,dtmSeqEndDate			
 	,strFutMarketName			
-	,strCategory 				
+	,strCategory
+	,strPricingStatus 				
 	)
 	SELECT DISTINCT
      intContractTypeId		= CH.intContractTypeId
@@ -724,6 +728,7 @@ BEGIN TRY
 	,dtmSeqEndDate				= CD.dtmEndDate
 	,strFutMarketName			= FM.strFutMarketName
 	,strCategory 				= Category.strCategoryCode
+	,strPricingStatus			= 'Priced'
 	FROM tblCTContractDetail					CD	
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
