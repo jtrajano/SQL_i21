@@ -23,6 +23,7 @@
 	[strPONumber]		   NVARCHAR(25)    COLLATE Latin1_General_CI_AS NULL,
 	[strComment]	       NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS NULL,
 	[ysnTaxExempt]		   BIT			   NULL,
+	[ysnPaid]			   BIT			   CONSTRAINT [DF_tblARPOS_ysnPaid] DEFAULT ((0)) NOT NULL,
     [intOriginalPOSTransactionId] INT NULL, 
     CONSTRAINT [PK_tblARPOS] PRIMARY KEY CLUSTERED ([intPOSId] ASC),
 	CONSTRAINT [FK_tblARPOSLog] FOREIGN KEY ([intPOSLogId]) REFERENCES [dbo].[tblARPOSLog] ([intPOSLogId])
