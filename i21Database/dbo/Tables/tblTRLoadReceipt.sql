@@ -50,6 +50,9 @@ GO
 CREATE INDEX [IX_tblTRLoadReceipt_intInventoryTransferId] ON [dbo].[tblTRLoadReceipt] ([intInventoryTransferId] ASC)
 GO 
 
+CREATE INDEX [IX_tblTRLoadReceipt_intItemId] ON [dbo].[tblTRLoadReceipt] ([intItemId] ASC)
+GO 
+
 
 
 

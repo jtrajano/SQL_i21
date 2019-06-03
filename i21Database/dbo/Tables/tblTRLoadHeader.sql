@@ -32,3 +32,12 @@ GO
 CREATE INDEX [IX_tblTRLoadHeader_dtmLoadDateTime] ON [dbo].[tblTRLoadHeader] ([dtmLoadDateTime])
 GO
 
+CREATE INDEX [IX_tblTRLoadHeader_intShipViaId] ON [dbo].[tblTRLoadHeader] ([intShipViaId])
+GO
+
+CREATE INDEX [IX_tblTRLoadHeader_intSellerId] ON [dbo].[tblTRLoadHeader] ([intSellerId])
+GO
+
+CREATE INDEX [IX_tblTRLoadHeader_intDriverId] ON [dbo].[tblTRLoadHeader] ([intDriverId])
+GO
+
