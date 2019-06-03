@@ -518,7 +518,7 @@ BEGIN
 					,strTicketNumber = SI.strSourceNumber
 					,intTicketId = SI.intSourceId
 					,dtmTicketDateTime = InTran.dtmDate
-					,intCompanyLocationId = InTran.intItemLocationId
+					,intCompanyLocationId = Inv.intLocationId
 					,strLocationName = SI.strShipFromLocation
 					,strUOM = InTran.strUnitMeasure
 					,Inv.intEntityId
