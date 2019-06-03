@@ -136,7 +136,7 @@ BEGIN TRANSACTION
 		,strPrintTimeStamp
 		,strInvoiceReportNumber
 		,strTempInvoiceReportNumber
-		,intInvoiceId
+		,0
 		,intConcurrencyId
 		,strForeignCardId
 		,ysnDuplicate
