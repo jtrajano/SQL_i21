@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCommodityPositionReport]
 	
 	@ysnGetHeader	bit  = 0,
-	@dtmDate		date = null
+	@dtmDate		date = null,
+	@strLocationName nvarchar(max) = ''
 as
 begin
 	DECLARE @Columns VARCHAR(MAX)
@@ -16,7 +17,18 @@ begin
 	
 	DECLARE @sql AS NVARCHAR(MAX)
 	DECLARE @top as nvarchar(20)
-	
+	declare @location_filter as nvarchar(max)
+
+	if isnull(@strLocationName, '') <> ''
+	begin
+		set @location_filter = ' and intCompanyLocationId in ( '  + @strLocationName + ' ) '		
+	end
+	else
+	begin
+		set @location_filter = ''
+	end
+
+
 	set @top = ''
 	set @dtmDate = isnull(@dtmDate, getdate())
 
@@ -53,7 +65,7 @@ begin
 				 t
 				on t.intItemId = i.intItemId
 				and t.intItemLocationId = il.intItemLocationId 
-		WHERE t.dtmDate <= ''' + cast(@dtmDate as nvarchar) + '''
+		WHERE t.dtmDate <= ''' + cast(@dtmDate as nvarchar) + ''''  + @location_filter + '
 
 	) AS s	
 	/*outer apply (
@@ -96,8 +108,7 @@ begin
 	--WHERE 
 	--	[Canola] IS NOT NULL 	
 	ORDER BY strLocationName 
-	'
-	
+	'	
 	EXEC(@sql) 
 	
 end

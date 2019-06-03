@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCommodityPositionDetailReport]	
 	@ysnGetHeader	bit  = 0,
-	@dtmDate		date = null
+	@dtmDate		date = null,
+	@strLocationName nvarchar(max) = ''
 as
 begin
 	DECLARE @Columns VARCHAR(MAX)
@@ -19,7 +20,17 @@ begin
 	set @top = ''
 	set @dtmDate = isnull(@dtmDate, getdate())
 
-	
+	declare @location_filter as nvarchar(max)
+
+	if isnull(@strLocationName, '') <> ''
+	begin
+		set @location_filter = ' where intLocationId in ( '  + @strLocationName + ' ) '		
+	end
+	else
+	begin
+		set @location_filter = ''
+	end
+
 	if @ysnGetHeader= 1
 	begin
 		set @top = ' top 1'
@@ -58,7 +69,8 @@ begin
 				join tblICItem Item
 					on ItemStockUOM.intItemId = Item.intItemId			
 				JOIN tblICStorageLocation sl
-					ON sl.intStorageLocationId = ItemStockUOM.intStorageLocationId					
+					ON sl.intStorageLocationId = ItemStockUOM.intStorageLocationId
+			' + @location_filter + '					
 			GROUP BY sl.intLocationId	
 		) b
 	'
