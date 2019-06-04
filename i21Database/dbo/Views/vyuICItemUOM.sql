@@ -25,6 +25,8 @@ SELECT
 		, CAST(uom.dblVolume AS NUMERIC(37, 18)) dblVolume
 		, uom.strUpcCode
 		, uom.strLongUPCCode
+		, item.strStatus
+		, item.strLotTracking
 FROM	vyuICGetItemUOM uom
 		LEFT OUTER JOIN tblICItem item ON item.intItemId = uom.intItemId
 		LEFT OUTER JOIN tblICCommodity com ON com.intCommodityId = item.intCommodityId

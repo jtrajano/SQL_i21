@@ -35,7 +35,12 @@ SELECT
 	dblStandardCost = ISNULL(ItemPricing.dblStandardCost * ItemUOM.dblUnitQty, 0),
 	dblAverageCost = ISNULL(ItemPricing.dblAverageCost * ItemUOM.dblUnitQty, 0),
 	dblEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ItemUOM.dblUnitQty, 0),
-	ItemPricing.intSort
+	ItemPricing.intSort,
+	Item.strType,
+	Item.strLotTracking,
+	Item.strCommodityCode AS strCommodity,
+	Item.strCategoryCode AS strCategory,
+	Item.strStatus
 FROM vyuICGetItemStock Item
 LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = Item.intVendorId
 LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId and ItemPricing.intItemLocationId = Item.intItemLocationId
