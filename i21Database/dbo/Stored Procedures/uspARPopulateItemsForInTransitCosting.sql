@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspARPopulateItemsForInTransitCosting]
+﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForInTransitCosting]
 
 AS
 SET QUOTED_IDENTIFIER OFF  
