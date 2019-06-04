@@ -91,5 +91,15 @@ BEGIN
 		END
 
 	END
+	ELSE IF  @strTable = 'tblEMEntityLocation'
+		SELECT @strDisplayField = strLocationName from tblEMEntityLocation WHERE intEntityLocationId = @intId
+
+	ELSE IF @strTable = 'tblSMCurrencyExchangeRate'
+		SELECT	@strDisplayField = 'From ' + FY.strCurrency + ' To ' + TY.strCurrency
+		FROM	tblSMCurrencyExchangeRate		ER	
+		JOIN	tblSMCurrency					FY	ON	FY.intCurrencyID					=		ER.intFromCurrencyId			
+		JOIN	tblSMCurrency					TY	ON	TY.intCurrencyID					=		ER.intToCurrencyId	
+		WHERE	intCurrencyExchangeRateId	=	@intId
+
 	RETURN @strDisplayField;
 END
