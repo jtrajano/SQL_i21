@@ -418,7 +418,7 @@ BEGIN
 					,intEntityCustomerId			= INV.intEntityCustomerId
 					,intCompanyLocationId			= INV.intCompanyLocationId
 					,intCurrencyId					= INV.intCurrencyId
-					,dtmDatePaid					= GETDATE()
+					,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 					,intPaymentMethodId				= @cashPaymentMethodId
 					,strPaymentMethod				= 'Debit Memos and Payments'
 					,strPaymentInfo					= ''
@@ -455,7 +455,7 @@ BEGIN
 					,intEntityCustomerId			= CM.intEntityCustomerId
 					,intCompanyLocationId			= CM.intCompanyLocationId
 					,intCurrencyId					= CM.intCurrencyId
-					,dtmDatePaid					= GETDATE()
+					,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 					,intPaymentMethodId				= @cashPaymentMethodId
 					,strPaymentMethod				= 'Debit Memos and Payments'
 					,strPaymentInfo					= ''
@@ -602,7 +602,7 @@ BEGIN
 							,intEntityCustomerId			= INV.intEntityCustomerId
 							,intCompanyLocationId			= INV.intCompanyLocationId
 							,intCurrencyId					= INV.intCurrencyId
-							,dtmDatePaid					= GETDATE()
+							,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 							,intPaymentMethodId				= PM.intPaymentMethodID
 							,strPaymentMethod				= PM.strPaymentMethod
 							,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check', 'Debit Card', 'Manual Credit Card') THEN strReferenceNo ELSE NULL END
