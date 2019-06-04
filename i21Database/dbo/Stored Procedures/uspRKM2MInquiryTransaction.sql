@@ -1101,7 +1101,8 @@ FROM (
 			, (ISNULL(convert(decimal(24,6),case when ISNULL(intCommodityUnitMeasureId,0) = 0 then dblOpenQty1 else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,ISNULL(dblOpenQty1,0))end),0))
 				-(ISNULL(convert(decimal(24,6),case when ISNULL(intCommodityUnitMeasureId,0) = 0 then dblInvoicedQuantity else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,ISNULL(dblInvoicedQuantity,0))end),0)) as dblOpenQty
 		FROM (
-			SELECT DISTINCT cd.intContractHeaderId
+			SELECT 
+				  cd.intContractHeaderId
 				, cd.intContractDetailId
                 , 'In-transit' + '(S)' as strContractOrInventoryType
                 , strContractSeq = ch.strContractNumber + '-' + CONVERT(nvarchar,cd.intContractSeq)
@@ -1221,7 +1222,8 @@ FROM (
 			JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
 
 			UNION ALL
-			SELECT DISTINCT intContractHeaderId = NULL
+			SELECT 
+				  intContractHeaderId = NULL
 				, intContractDetailId = NULL
                 , 'In-transit' + '(S)' as strContractOrInventoryType
                 , strContractSeq = it.strTransactionId  
