@@ -7565,13 +7565,14 @@
     <Build Include="dbo\Functions\fnCTGetCommodityUnitMeasure.sql" />
     <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
     <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
-	<Build Include="dbo\Views\vyuTRLoadHeaderInfo.sql" />
+    <Build Include="dbo\Views\vyuTRLoadHeaderInfo.sql" />
     <Build Include="dbo\Views\vyuTRLoadReceiptInfo.sql" />
     <Build Include="dbo\Views\vyuTRLoadDistributionHeaderInfo.sql" />
     <Build Include="dbo\Views\vyuTRLoadDistributionDetailInfo.sql" />
-	<Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
+    <Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
     <Build Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
     <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
+    <Build Include="Scripts\Post-Deployment\IC\18_Set_Commodity_Market_To_Market_Default_Data.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
