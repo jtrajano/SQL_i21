@@ -61,5 +61,6 @@
     [intCompanySetupId] INT NOT NULL,
 	[intMultiCurrencyId] INT NULL,
     [intPDFExportLimit] INT NOT NULL DEFAULT(10000),
+	[ysnInterCompany] BIT NULL DEFAULT(0),
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
