@@ -433,6 +433,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intPaymentId]
 							,[intSplitId]
 							,[intLoadDistributionHeaderId]
+							,[intLoadId]
 							,[strActualCostId]
 							,[intShipmentId]
 							,[intTransactionId]
@@ -521,6 +522,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intPaymentId]				= NULL
 							,[intSplitId]				= NULL
 							,[intLoadDistributionHeaderId]	= NULL
+							,[intLoadId]				= NULL
 							,[strActualCostId]			= NULL
 							,[intShipmentId]			= NULL
 							,[intTransactionId]			= NULL
@@ -634,6 +636,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,@LineItemTaxEntries = @TaxDetails
 							,@UserId			 = @EntityId
 		 					,@GroupingOption	 = 11
+							,@FromImportTransactionCSV = 1
 							,@RaiseError		 = 1
 							,@ErrorMessage		 = @ErrorMessage OUTPUT
 							,@CreatedIvoices	 = @CreatedIvoices OUTPUT
