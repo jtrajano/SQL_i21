@@ -111,6 +111,7 @@ BEGIN TRY
 		JOIN	tblCTWeightGrade			G	ON	G.intWeightGradeId	=	T.intGradeId
 		JOIN	tblICInventoryShipmentItem	S	ON	S.intSourceId		=	I.intTicketId
 												AND S.intLineNo IS NOT NULL
+												AND I.intContractDetailId	=	S.intLineNo
 		WHERE	I.intTicketId IS NOT NULL AND (W.strWhereFinalized	= 'Destination' 
 											OR G.strWhereFinalized	= 'Destination')
 		AND		I.intContractDetailId IS NOT NULL
