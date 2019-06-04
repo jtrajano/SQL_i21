@@ -189,18 +189,18 @@ BEGIN TRY
 		,ISNULL(@intReportLogoHeight, 0) AS intReportLogoHeight
 		,ISNULL(@intReportLogoWidth, 0) AS intReportLogoWidth
 		,(
-			LTRIM(RTRIM(E.strEntityName)) + ', ' + CHAR(13) + CHAR(10) + ISNULL(LTRIM(RTRIM(E.strEntityAddress)), '') + ', ' + CHAR(13) + CHAR(10) + ISNULL(LTRIM(RTRIM(E.strEntityCity)), '') + ISNULL(', ' + CASE 
-					WHEN LTRIM(RTRIM(E.strEntityState)) = ''
-						THEN NULL
-					ELSE LTRIM(RTRIM(E.strEntityState))
-					END, '') + ISNULL(', ' + CASE 
+			LTRIM(RTRIM(E.strEntityName)) + ', ' + CHAR(13) + CHAR(10) + ISNULL(LTRIM(RTRIM(E.strEntityAddress)), '') + ', ' + CHAR(13) + CHAR(10) + ISNULL('' + CASE 
 					WHEN LTRIM(RTRIM(E.strEntityZipCode)) = ''
 						THEN NULL
 					ELSE LTRIM(RTRIM(E.strEntityZipCode))
 					END, '') + ISNULL(', ' + CASE 
+					WHEN LTRIM(RTRIM(E.strEntityCity)) = ''
+						THEN NULL
+					ELSE LTRIM(RTRIM(E.strEntityCity))
+					END, '') + ISNULL(', ' + CASE 
 					WHEN LTRIM(RTRIM(E.strEntityCountry)) = ''
 						THEN NULL
-					ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country', rtc10.intCountryID, @intLanguageId, 'Country', rtc10.strCountry)))
+					ELSE CHAR(13) + CHAR(10) + LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country', rtc10.intCountryID, @intLanguageId, 'Country', rtc10.strCountry)))
 					END, '')
 			) AS strOtherPartyAddress
 		,ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY, @dtmSampleReceivedDate), 2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLanguageId, DATENAME(MONTH, @dtmSampleReceivedDate)), DATENAME(MONTH, @dtmSampleReceivedDate)) + ' ' + LEFT(DATENAME(YEAR, @dtmSampleReceivedDate), 4) AS strCompanyCityAndDate
@@ -233,16 +233,22 @@ BEGIN TRY
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN vyuCTEntity E ON E.intEntityId = S.intEntityId
+		AND E.strEntityType = 'Customer'
 	LEFT JOIN tblSMCountry rtc10 ON lower(rtrim(ltrim(rtc10.strCountry))) = lower(rtrim(ltrim(E.strEntityCountry)))
 	LEFT JOIN tblQMSampleDetail SD ON SD.intSampleId = S.intSampleId
 		AND SD.intAttributeId = ISNULL(@intAttributeId, 0)
 	LEFT JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = S.intRepresentingUOMId
 	LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 	LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
+	
+	EXEC sp_xml_removedocument @xmlDocumentId
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = 'uspQMReportSampleGAB - ' + ERROR_MESSAGE()
+
+	IF @xmlDocumentId <> 0
+		EXEC sp_xml_removedocument @xmlDocumentId
 
 	RAISERROR (
 			@ErrMsg
