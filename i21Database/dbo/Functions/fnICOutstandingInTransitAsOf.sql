@@ -44,13 +44,21 @@ FROM
 				- isnull(t.totalOut, 0) 
 			,cbt.intInTransitSourceLocationId
 		FROM	
-			tblICInventoryActualCost cb INNER JOIN tblICInventoryTransaction cbt
-				ON cbt.strTransactionId = cb.strTransactionId
-				AND cbt.intItemId = cb.intItemId
-				AND cbt.intItemLocationId = cb.intItemLocationId
-				AND cbt.intItemUOMId = cb.intItemUOMId
-				AND cbt.dblQty = cb.dblStockIn
-				AND cbt.ysnIsUnposted = 0 				
+			tblICInventoryActualCost cb CROSS APPLY (
+				SELECT TOP 1 
+					cbt.*
+				FROM 
+					tblICInventoryTransaction cbt
+				WHERE	
+					cbt.strTransactionId = cb.strTransactionId
+					AND cbt.intItemId = cb.intItemId
+					AND cbt.intItemLocationId = cb.intItemLocationId
+					AND cbt.intItemUOMId = cb.intItemUOMId
+					AND cbt.intTransactionDetailId = cb.intTransactionDetailId
+					AND cbt.dblQty = cb.dblStockIn
+					AND cbt.dblCost = cb.dblCost
+					AND cbt.ysnIsUnposted = 0 	
+			) cbt
 			INNER JOIN tblICItemLocation il
 				ON cb.intItemLocationId = il.intItemLocationId
 				AND il.intLocationId IS NULL 
@@ -113,14 +121,22 @@ FROM
 				- isnull(t.totalOut, 0) 
 			,cbt.intInTransitSourceLocationId
 		FROM	
-			tblICInventoryLot cb inner join tblICInventoryTransaction cbt
-				ON cbt.strTransactionId = cb.strTransactionId
-				AND cbt.intItemId = cb.intItemId
-				AND cbt.intItemLocationId = cb.intItemLocationId
-				AND cbt.intItemUOMId = cb.intItemUOMId
-				AND cbt.intLotId = cb.intLotId
-				AND cbt.dblQty = cb.dblStockIn
-				AND cbt.ysnIsUnposted = 0 				
+			tblICInventoryLot cb CROSS APPLY (
+				SELECT TOP 1 
+					cbt.*
+				FROM 
+					tblICInventoryTransaction cbt
+				WHERE	
+					cbt.strTransactionId = cb.strTransactionId
+					AND cbt.intItemId = cb.intItemId
+					AND cbt.intItemLocationId = cb.intItemLocationId
+					AND cbt.intItemUOMId = cb.intItemUOMId
+					AND cbt.intTransactionDetailId = cb.intTransactionDetailId
+					AND cbt.intLotId = cb.intLotId
+					AND cbt.dblQty = cb.dblStockIn
+					AND cbt.dblCost = cb.dblCost
+					AND cbt.ysnIsUnposted = 0 				
+			) cbt
 			INNER JOIN tblICItemLocation il
 				ON cb.intItemLocationId = il.intItemLocationId
 				AND il.intLocationId IS NULL 
