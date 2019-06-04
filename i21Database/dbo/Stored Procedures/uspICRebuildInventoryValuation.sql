@@ -4295,6 +4295,49 @@ BEGIN
 						GOTO _EXIT_WITH_ERROR
 					END 	
 
+					-- Fix the decimal discrepancy. 
+					IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)					
+					BEGIN 												
+						UPDATE t
+						SET t.dblValue = -discrepancy.dblValue
+						FROM (
+								SELECT 
+									dblValue = SUM(ROUND(t.dblQty * t.dblCost + t.dblValue, 2)) 
+									,t.intItemId
+									,t.intTransactionId
+									,t.intTransactionDetailId
+								FROM 
+									@ItemsToPost owned INNER JOIN tblICInventoryTransaction t
+										ON t.strTransactionId = owned.strTransactionId
+										AND t.strBatchId = @strBatchId
+										AND t.intTransactionId = owned.intTransactionId									
+										AND t.intTransactionDetailId = owned.intTransactionDetailId
+										AND t.intItemId = owned.intItemId																
+								GROUP BY 
+									t.intItemId
+									,t.intTransactionId
+									,t.intTransactionDetailId
+								HAVING 
+									SUM(ROUND(t.dblQty * t.dblCost + t.dblValue, 2)) <> 0
+									AND ABS(SUM(ROUND(t.dblQty * t.dblCost + t.dblValue, 2))) BETWEEN 0.01 AND 0.05
+							) discrepancy
+							CROSS APPLY (
+								SELECT TOP 1 
+									*
+								FROM 
+									tblICInventoryTransaction t
+								WHERE 
+									t.intItemId = discrepancy.intItemId
+									AND t.intTransactionId = discrepancy.intTransactionId
+									AND t.intTransactionDetailId = discrepancy.intTransactionDetailId
+									AND t.dblQty > 0
+								ORDER BY
+									t.intInventoryTransactionId DESC 
+							) lastRecord
+							INNER JOIN tblICInventoryTransaction t
+								ON t.intInventoryTransactionId = lastRecord.intInventoryTransactionId
+					END 
+
 					SET @intReturnValue = NULL 
 					INSERT INTO @GLEntries (
 							[dtmDate] 
