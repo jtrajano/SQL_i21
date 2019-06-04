@@ -152,7 +152,8 @@ BEGIN TRY
 
 						WHILE @@FETCH_STATUS = 0
 						BEGIN
-
+							DECLARE @_intIRVendorId INT
+							SELECT @_intIRVendorId = intEntityVendorId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @InventoryReceiptId
 							IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
 								DROP TABLE #tmpVoucherDetail
 							CREATE TABLE #tmpVoucherDetail (
@@ -192,7 +193,7 @@ BEGIN TRY
 										RETURN;
 									END
 								END
-								
+
 								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 								/*
@@ -205,10 +206,46 @@ BEGIN TRY
 
 							CLOSE voucherCursor  
 							DEALLOCATE voucherCursor
+							
 							IF ISNULL(@ysnIRPosted, 0) = 1
 								EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 							EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
+
+							/* CURSOR for Split Contract*/
+							DECLARE @intEntityVendorId AS INT
+							DECLARE @strDistributionOption AS VARCHAR(MAX)
+							DECLARE @cursor_intContractDetailId INT
+							DECLARE @cursor_dblScheduleQty DECIMAL(18,6)
+							DECLARE @cursor_intInventoryReceiptId INT
+							
+							DECLARE splitCursor CURSOR LOCAL FAST_FORWARD
+							FOR
+							SELECT SCC.intContractDetailId ,SCC.intEntityId,SCC.dblScheduleQty,SPL.strDistributionOption FROM tblSCTicketSplit SPL
+							INNER JOIN tblSCTicketContractUsed SCC 
+								ON SCC.intTicketId = SCC.intTicketId
+							WHERE SPL.intTicketId = @intTicketId and SCC.intTicketId = @intTicketId and SPL.intCustomerId = SCC.intEntityId and SPL.intCustomerId = @_intIRVendorId
+
+							OPEN splitCursor;
+
+							FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @strDistributionOption;
+							WHILE @@FETCH_STATUS = 0
+							BEGIN
+								IF(@strDistributionOption = 'CNT')
+									BEGIN		
+
+									SET @cursor_dblScheduleQty = @cursor_dblScheduleQty *-1
+									EXEC uspCTUpdateScheduleQuantity @intContractDetailId=@cursor_intContractDetailId,@dblQuantityToUpdate=@cursor_dblScheduleQty,@intUserId=@intUserId,@intExternalId=@intTicketId, @strScreenName= 'Scale'	
+										
+									END
+
+								FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @strDistributionOption;
+							END
+
+							CLOSE splitCursor  
+							DEALLOCATE splitCursor 
+
+							/* END CURSOR for Split Contract*/
 
 							FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId, @ysnIRPosted;
 						END
@@ -274,14 +311,14 @@ BEGIN TRY
 							ELSE IF @intStorageScheduleTypeId = -2
 							BEGIN  
 								DECLARE @intMatchContractDetailId AS INT;
-								DECLARE @strDistributionOption AS VARCHAR(MAX);
-								SELECT @intMatchContractDetailId = intContractId, @strDistributionOption = strDistributionOption FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
+								DECLARE @__strDistributionOption AS VARCHAR(MAX);
+								SELECT @intMatchContractDetailId = intContractId, @__strDistributionOption  = strDistributionOption FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 								SELECT @intContractDetailId = intContractId, @dblScheduleQty = dblNetUnits *-1 FROM tblSCTicket WHERE intTicketId = @intTicketId
 
 								EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
 								SET @dblScheduleQty = @dblScheduleQty *-1
 
-								IF(@strDistributionOption = 'LOD')
+								IF(@__strDistributionOption  = 'LOD')
 								BEGIN
 									EXEC uspCTUpdateScheduleQuantity
 															@intContractDetailId	=	@intContractDetailId,
@@ -290,6 +327,8 @@ BEGIN TRY
 															@intExternalId			=	@intTicketId,
 															@strScreenName			=	'Scale'	
 								END
+								ELSE
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
 							END
 
 							UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
