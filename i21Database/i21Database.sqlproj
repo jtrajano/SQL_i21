@@ -7571,6 +7571,7 @@
     <Build Include="dbo\Views\vyuTRLoadDistributionDetailInfo.sql" />
 	<Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
     <Build Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
+    <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
