@@ -71,7 +71,7 @@ BEGIN
 				,intEntityCustomerId			= IFP.intEntityCustomerId
 				,intCompanyLocationId			= IFP.intCompanyLocationId
 				,intCurrencyId					= IFP.intCurrencyId
-				,dtmDatePaid					= GETDATE()
+				,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
 				,strPaymentInfo					= CASE WHEN POSPAYMENT.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN strReferenceNo ELSE NULL END
