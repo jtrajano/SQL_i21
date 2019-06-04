@@ -3,8 +3,8 @@ AS
 SELECT CH.strContractNumber
 	,CH.intContractHeaderId
 	,CD.intContractSeq
-	,Vendor.strName AS strVendorName
-	,Customer.strName AS strCustomerName
+	,strVendorName = Vendor.strName 
+	,strCustomerName = Customer.strName
 	,I.strItemNo
 	,L.intLoadId
 	,L.intConcurrencyId
@@ -211,6 +211,8 @@ SELECT CH.strContractNumber
 	,LDOC.dtmSentDate
 	,LDOC.ysnReceived
 	,LDOC.dtmReceivedDate
+	,LDOC.ysnReceivedCopy
+	,LDOC.dtmCopyReceivedDate
 	,DOC.strDocumentName
 	,LDOC.strDocumentNo
 	,LD.dblQuantity
