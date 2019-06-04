@@ -47,7 +47,7 @@ begin
 			com.strCommodityCode
 			,cl.intCompanyLocationId
 			,cl.strLocationName 
-			, dblQty = dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty)
+			, dblQty = ROUND(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty), ISNULL(com.intDecimalDPR,2))
 			, dtmDate = ''' + cast(@dtmDate as nvarchar) + '''
 		FROM 
 			tblICItem i inner join tblICItemLocation il
@@ -58,9 +58,9 @@ begin
 				on com.intCommodityId = i.intCommodityId
 			inner join 
 				(
-					select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate from tblICInventoryTransaction t
+					select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate from tblICInventoryTransaction t where t.ysnIsUnposted = 0
 						union all
-					select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate from tblICInventoryTransactionStorage t					
+					select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate from tblICInventoryTransactionStorage t where t.ysnIsUnposted = 0					
 				)			
 				 t
 				on t.intItemId = i.intItemId

@@ -20,8 +20,9 @@ begin
 	set @top = ''
 	set @dtmDate = isnull(@dtmDate, getdate())
 
-	declare @location_filter as nvarchar(max)
+	declare @location_filter as nvarchar(max)	
 
+	set @strLocationName = isnull(@strLocationName, '')
 	if isnull(@strLocationName, '') <> ''
 	begin
 		set @location_filter = ' where intLocationId in ( '  + @strLocationName + ' ) '		
@@ -39,39 +40,79 @@ begin
 		select intLocationId = 1, Capacity = 0, PercentFull = 0
 		return 
 	end
+
+	--Capacity
+	--PercentFull
+	--' + @location_filter + '
 	SET @sql = 
 	'
 	
 	SELECT ' + @top + ' * 
 	FROM (
-		SELECT		
-			sl.intLocationId				
-			,Capacity = SUM(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0))				
-			,PercentFull = 
-					CASE 
-						WHEN SUM(round(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0), 2)) <> 0 THEN 
-							dbo.fnMultiply (
-								round(dbo.fnDivide(
-									(
-										SUM(round(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0), 2))
-										- SUM(ISNULL(dblOnHand, 0)) 
-										- SUM(ISNULL(dblUnitStorage, 0))
-									)
-									, SUM(round(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0), 2))
-								), 2)
-								, 100
-							)
-						ELSE 
-							NULL 
-					END
-				
-			FROM	tblICItemStockUOM ItemStockUOM 
-				join tblICItem Item
-					on ItemStockUOM.intItemId = Item.intItemId			
-				JOIN tblICStorageLocation sl
-					ON sl.intStorageLocationId = ItemStockUOM.intStorageLocationId
-			' + @location_filter + '					
-			GROUP BY sl.intLocationId	
+			select 
+				total_capacity.intLocationId,
+				Capacity = dblTotalCapacityPerLocation,
+				PercentFull = round(dbo.fnMultiply( 
+					round(dbo.fnDivide( 
+						dblTotalStockPerLocation,
+						dblTotalCapacityPerLocation
+					), 4)
+					, 100
+				), 2) 
+			
+			from 
+
+			(					
+				select 
+						sum(
+							isnull(dbo.fnICConvertUOMtoStockUnit(Item.intItemId, ItemStockUOM.intItemUOMId, dblQty), 0) 
+						) as dblTotalStockPerLocation, 
+						il.intLocationId
+				FROM	
+					(
+						select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate, intStorageLocationId from tblICInventoryTransaction t where t.ysnIsUnposted = 0
+							union all
+						select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate, intStorageLocationId from tblICInventoryTransactionStorage t where t.ysnIsUnposted = 0					
+					)	as ItemStockUOM	
+
+
+					join tblICItem as Item
+						on ItemStockUOM.intItemId = Item.intItemId
+					join tblICItemLocation as il
+						on il.intItemLocationId = ItemStockUOM.intItemLocationId
+					where ItemStockUOM.intStorageLocationId is not null 
+						'
+						+
+							case when @strLocationName <> '' then ' and il.intLocationId in ( ' + @strLocationName + ' )'
+							else
+									''
+							end
+						+
+						'
+					group by il.intLocationId
+			) as current_stock
+
+			join 
+			(
+				select sum(isnull(sl.dblEffectiveDepth,1) * isnull(sl.dblUnitPerFoot,1))  as dblTotalCapacityPerLocation
+						,il.intLocationId
+					from tblICItemLocation as il
+						join tblICStorageLocation as sl
+							on il.intLocationId  = sl.intLocationId
+					'
+					+
+						case when @strLocationName <> '' then ' where il.intLocationId in ( ' + @strLocationName + ' )'
+						else
+								''
+						end
+					+
+					'
+					group by il.intLocationId
+			) as total_capacity
+				on total_capacity.intLocationId = current_stock.intLocationId
+					and total_capacity.dblTotalCapacityPerLocation <> 0
+			
+
 		) b
 	'
 	
