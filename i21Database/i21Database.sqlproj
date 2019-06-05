@@ -7565,6 +7565,8 @@
     <Build Include="dbo\Functions\fnCTGetCommodityUnitMeasure.sql" />
     <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
     <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutCashiers.sql" />
+    <Build Include="dbo\Tables\tblSTCashier.sql" />
     <Build Include="dbo\Views\vyuTRLoadHeaderInfo.sql" />
     <Build Include="dbo\Views\vyuTRLoadReceiptInfo.sql" />
     <Build Include="dbo\Views\vyuTRLoadDistributionHeaderInfo.sql" />
