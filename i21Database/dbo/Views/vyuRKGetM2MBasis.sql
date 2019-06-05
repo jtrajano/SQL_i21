@@ -99,7 +99,7 @@ LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 WHERE cd.intPricingTypeId = 5 AND cd.intContractStatusId <> 3
 
-UNION SELECT DISTINCT strCommodityCode
+UNION SELECT DISTINCT iis.strCommodityCode
 	, iis.strItemNo
 	, strDestination = NULL
 	, strFutMarketName
@@ -115,8 +115,8 @@ UNION SELECT DISTINCT strCommodityCode
 	, dblBasisOrDiscount = 0
 	, dblRatio = 0
 	, strUnitMeasure = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN ct.strUOM ELSE strFMUOM END)
-	, ct.intCommodityId
-	, ct.intItemId
+	, iis.intCommodityId
+	, iis.intItemId
 	, intOriginId = iis.intOriginId
 	, ct.intFutureMarketId
 	, ct.intFutureMonthId
@@ -130,10 +130,22 @@ UNION SELECT DISTINCT strCommodityCode
 	, iis.strMarketValuation
 	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
 FROM (
-	SELECT *
-	FROM vyuRKGetInventoryTransaction
+	SELECT 
+		 it.intItemId
+		,it.strItemNo
+		,it.strLocationName
+		,it.intLocationId
+		,it.strCurrency
+		,it.intCurrencyId
+		,it.strMarketValuation
+		,it.intOriginId
+		,c.intCommodityId
+		,c.strCommodityCode
+	FROM vyuRKGetInventoryTransaction it
+	INNER JOIN tblICItem i ON it.intItemId = i.intItemId
+	INNER JOIN tblICCommodity c on i.intCommodityId =  c.intCommodityId
 	WHERE dblQuantity > 0
-		AND strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN strLotTracking ELSE 'No' END)) iis
+		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN it.strLotTracking ELSE 'No' END)) iis
 LEFT JOIN (
 	SELECT DISTINCT cd.intItemId
 		, cd.intCompanyLocationId
