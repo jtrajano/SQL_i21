@@ -139,6 +139,7 @@ FROM (
 		,it.intCurrencyId
 		,it.strMarketValuation
 		,it.intOriginId
+		,it.ysnLicensed
 		,c.intCommodityId
 		,c.strCommodityCode
 	FROM vyuRKGetInventoryTransaction it
