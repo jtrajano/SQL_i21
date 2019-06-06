@@ -1,5 +1,6 @@
-﻿CREATE PROC [dbo].[uspRKRptRiskPositionInquiryBySummary] @xmlParam NVARCHAR(MAX)
+﻿CREATE PROC [dbo].[uspRKRptRiskPositionInquiryByNetPosition] @xmlParam NVARCHAR(MAX)
 AS
+
 DECLARE @idoc INT,
 	@intCommodityId INTEGER,
 	@intCompanyLocationId INTEGER,
@@ -132,8 +133,7 @@ BEGIN
 		0 intOrderByHeading,
 		'' strBook,
 		'' strSubBook,
-		0 ysnSubTotalByBook,
-		'' xmlParam
+		0 ysnSubTotalByBook
 END
 
 SELECT TOP 1 @strCommodityCodeH = strCommodityCode
@@ -451,9 +451,9 @@ BEGIN
 				case when isnull(strBook,'')='' then '(blank)' else strBook end END strBook,
 			case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strSubBook,'')='' then '(blank)' else strSubBook end END strSubBook
-			,@ysnSubTotalByBook ysnSubTotalByBook, @xmlParam xmlParam
+			,@ysnSubTotalByBook ysnSubTotalByBook
 		FROM #temp1
-		WHERE strGroup = '1.Outright Coverage' AND dblNoOfContract <> 0 and Selection <> '5.Total - Market coverage'
+		WHERE strGroup = '1.Outright Coverage' AND dblNoOfContract <> 0 and Selection = '5.Total - Market coverage'
 
 	ELSE IF @strReportName = 'Futures Required'
 		SELECT intRowNumber,
@@ -479,13 +479,13 @@ BEGIN
 				case when isnull(strBook,'')='' then '(blank)' else strBook end END strBook,
 				case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strSubBook,'')='' then '(blank)' else strSubBook end END strSubBook
-				,@ysnSubTotalByBook ysnSubTotalByBook, @xmlParam xmlParam
+				,@ysnSubTotalByBook ysnSubTotalByBook
 		FROM #temp1
-		WHERE strGroup = '2.Futures Required' AND dblNoOfContract <> 0 and Selection <> '6.Total - Net Position'
+		WHERE strGroup = '2.Futures Required' AND dblNoOfContract <> 0 and Selection = '6.Total - Net Position'
 	ELSE
 	
 		SELECT intRowNumber,
-			strGroup,
+			replace(replace(strGroup, '2.', ''),'1.','') strGroup ,
 			Selection,
 			PriceStatus,
 			strFutureMonth,
@@ -507,7 +507,7 @@ BEGIN
 				case when isnull(strBook,'')='' then '(blank)' else strBook end END strBook,
 				case when isnull(@ysnSubTotalByBook,0) = 0 then '(blank)' else 
 				case when isnull(strSubBook,'')='' then '(blank)' else strSubBook end END strSubBook
-				,@ysnSubTotalByBook ysnSubTotalByBook, @xmlParam xmlParam
+				,@ysnSubTotalByBook ysnSubTotalByBook
 		FROM #temp1
-		WHERE dblNoOfContract <> 0 and Selection not in( '6.Total - Net Position','5.Total - Market coverage')
+		WHERE dblNoOfContract <> 0 and Selection  in( '6.Total - Net Position','5.Total - Market coverage')
 END
