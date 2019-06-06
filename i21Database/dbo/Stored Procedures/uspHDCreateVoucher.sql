@@ -81,6 +81,7 @@ AS
 				,[intItemId]
 				,[strMiscDescription]
 				,[dblOrderQty]
+				,[dblQuantityToBill]
 				,[dblDiscount]
 				,[dblCost]
 				,[intPurchaseTaxGroupId]
@@ -102,6 +103,7 @@ AS
 				,[intItemId] = @intItemId
 				,[strMiscDescription] = @strMiscDescription
 				,[dblOrderQty] = @dblQtyReceived
+				,[dblQuantityToBill] = @dblQtyReceived
 				,[dblDiscount] = @dblDiscount
 				,[dblCost] = @dblCost
 				,[intPurchaseTaxGroupId] = @intTaxGroupId
