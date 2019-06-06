@@ -7334,6 +7334,9 @@
     <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
     <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
     <Build Include="dbo\Functions\fnCTGetCommodityStockUOM.sql" />
+    <Build Include="dbo\Tables\tblARPOSBatchProcessLog.sql" />
+    <Build Include="dbo\Views\vyuARPOSBatchProcessSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSBatchProcess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
