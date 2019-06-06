@@ -16,7 +16,7 @@ SELECT S.intSampleId
 	,SH.strLoadNumber
 	,S.strLotNumber
 	,SS.strStatus
-	,DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), S.dtmSampleReceivedDate) AS dtmSampleReceivedDate
+	,S.dtmSampleReceivedDate
 	,S.strSampleNote
 	,E.strName AS strPartyName
 	,S.strRefNo
@@ -31,9 +31,9 @@ SELECT S.intSampleId
 	,UM1.strUnitMeasure AS strRepresentingUOM
 	,S.strMarks
 	,CS.strSubLocationName
-	,DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), S.dtmTestingStartDate) AS dtmTestingStartDate
-	,DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), S.dtmTestingEndDate) AS dtmTestingEndDate
-	,DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), S.dtmSamplingEndDate) AS dtmSamplingEndDate
+	,S.dtmTestingStartDate
+	,S.dtmTestingEndDate
+	,S.dtmSamplingEndDate
 	,S.intContractDetailId
 	,ST.intSampleTypeId
 	,CH.intContractHeaderId
