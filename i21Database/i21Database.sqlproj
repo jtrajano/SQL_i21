@@ -7565,6 +7565,9 @@
     <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
     <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
     <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSBatchProcess.sql" />
+    <Build Include="dbo\Tables\tblARPOSBatchProcessLog.sql" />
+    <Build Include="dbo\Views\vyuARPOSBatchProcessSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
