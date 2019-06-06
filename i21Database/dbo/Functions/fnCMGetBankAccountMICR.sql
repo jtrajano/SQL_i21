@@ -86,10 +86,10 @@ DECLARE @strCurrency AS NVARCHAR(50)
 SELECT @strCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
 
 --Add Routing Prefix and Suffix
-SET @strRoutingNumber = @strMICRRoutingPrefix + @strRoutingNumber + @strMICRRoutingSuffix
+SET @strRoutingNumber = ISNULL(@strMICRRoutingPrefix,'') + ISNULL(@strRoutingNumber,'') + ISNULL(@strMICRRoutingSuffix,'')
 
 --Add Bank Account Prefix and Suffix
-SET @strAccountNumber = @strMICRBankAccountPrefix + @strAccountNumber + @strMICRBankAccountSuffix
+SET @strAccountNumber = ISNULL(@strMICRBankAccountPrefix,'') + @strAccountNumber + ISNULL(@strMICRBankAccountSuffix,'')
 
 SET @strCheckNumber = LTRIM(RTRIM(@strCheckNumber))
 
