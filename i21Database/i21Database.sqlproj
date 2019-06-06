@@ -7561,6 +7561,7 @@
     <Build Include="dbo\Views\vyuCTBasisDelivery.sql" />
     <Build Include="dbo\User Defined Types\DestinationShipmentItemLot.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryByNetPosition.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
