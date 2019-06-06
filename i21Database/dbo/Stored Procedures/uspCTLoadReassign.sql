@@ -3,6 +3,11 @@
 		@intRecipientId	INT
 AS
 BEGIN
+	DECLARE @ysnMultiplePriceFixation	BIT,
+			@intDonorContractHeaderId	INT
+
+	SELECT	@ysnMultiplePriceFixation = ysnMultiplePriceFixation,@intDonorContractHeaderId = intContractHeaderId FROM vyuCTContractSequence WHERE intContractDetailId = @intDonorId
+
 	--Detail
 	SELECT	CH.intEntityId,			
 			CD.intContractDetailId,	
@@ -32,49 +37,51 @@ BEGIN
 			0 AS intConcurrencyId
 			---------
 
-	FROM	tblCTContractDetail	CD
-	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
-	JOIn	tblEMEntity			EY	ON	EY.intEntityId			=	CH.intEntityId				LEFT
-	JOIN	tblRKFutureMarket	MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId		LEFT
-	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId			LEFT
-	JOIN	tblICItemUOM		PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId		LEFT
-	JOIN	tblICUnitMeasure	PM	ON	PM.intUnitMeasureId		=	PU.intUnitMeasureId			LEFT
-	JOIN	tblICItemUOM		QU	ON	QU.intItemUOMId			=	CD.intItemUOMId				LEFT
-	JOIN	tblICUnitMeasure	QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId			LEFT
-	JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId	=	CD.intContractDetailId		LEFT
-	JOIN	(
-				SELECT		intPriceFixationId,SUM(dblQuantity) dblQuantity 
-				FROM		tblCTPriceFixationDetail
-				GROUP BY	intPriceFixationId
-			)					PD	ON	PD.intPriceFixationId	=	PF.intPriceFixationId		LEFT
-	JOIN	(
-				SELECT		intContractDetailId,SUM(dblHedgedLots)dblHedgedLots
-				FROM		tblRKAssignFuturesToContractSummary	
-				GROUP BY	intContractDetailId
-			)					SY	ON	SY.intContractDetailId	=	CD.intContractDetailId		LEFT
-	JOIN	(
-				SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty,MIN(intPUnitMeasureId) intAllocationUOMId
-				FROM		tblLGAllocationDetail 
-				Group By	intPContractDetailId
-			)					PA	ON	PA.intPContractDetailId		=	CD.intContractDetailId	LEFT	
-	JOIN	(
-				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty,MIN(intPUnitMeasureId) intAllocationUOMId
-				FROM		tblLGAllocationDetail 
-				Group By	intSContractDetailId
-			)					SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId	LEFT
-	JOIN	(
-				SELECT	BD.intContractDetailId,COUNT(*) intCount
-				FROM	tblAPBillDetail	BD
-				JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
-				WHERE	BD.intBillId	=	BL.intBillId AND 
-						BL.intTransactionType <> 2
-				GROUP	BY BD.intContractDetailId
-			)					BL	ON	BL.intContractDetailId		=	CD.intContractDetailId	LEFT
-	JOIN	(
-				SELECT	AD.intContractDetailId,COUNT(*) intCount
-				FROM	tblARInvoiceDetail	AD
-				GROUP	BY AD.intContractDetailId
-			)					ID	ON	ID.intContractDetailId		=	CD.intContractDetailId
+		FROM	tblCTContractDetail	CD
+		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
+		JOIn	tblEMEntity			EY	ON	EY.intEntityId			=	CH.intEntityId				
+LEFT	JOIN	tblRKFutureMarket	MA	ON	MA.intFutureMarketId	=	CD.intFutureMarketId		
+LEFT	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId			
+LEFT	JOIN	tblICItemUOM		PU	ON	PU.intItemUOMId			=	CD.intPriceItemUOMId		
+LEFT	JOIN	tblICUnitMeasure	PM	ON	PM.intUnitMeasureId		=	PU.intUnitMeasureId			
+LEFT	JOIN	tblICItemUOM		QU	ON	QU.intItemUOMId			=	CD.intItemUOMId				
+LEFT	JOIN	tblICUnitMeasure	QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId			
+LEFT	JOIN	tblCTPriceFixation	PF	ON	ISNULL(PF.intContractDetailId,0)	=	CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN 0 ELSE CD.intContractDetailId END		
+										AND	ISNULL(PF.intContractHeaderId,0)	=	CH.intContractHeaderId	
+LEFT	JOIN	(
+					SELECT		intPriceFixationId,SUM(dblQuantity) dblQuantity 
+					FROM		tblCTPriceFixationDetail
+					GROUP BY	intPriceFixationId
+				)					PD	ON	PD.intPriceFixationId	=	PF.intPriceFixationId		
+LEFT	JOIN	(
+					SELECT		intContractHeaderId,intContractDetailId,SUM(dblHedgedLots)dblHedgedLots
+					FROM		tblRKAssignFuturesToContractSummary	
+					GROUP BY	intContractHeaderId,intContractDetailId
+				)					SY	ON	ISNULL(SY.intContractDetailId,0)	=	CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN 0 ELSE CD.intContractDetailId END		
+										AND	ISNULL(SY.intContractHeaderId,0)	=	CH.intContractHeaderId			
+LEFT	JOIN	(
+					SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty,MIN(intPUnitMeasureId) intAllocationUOMId
+					FROM		tblLGAllocationDetail 
+					GROUP By	intPContractDetailId
+				)					PA	ON	PA.intPContractDetailId		=	CD.intContractDetailId		
+LEFT	JOIN	(
+					SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty,MIN(intPUnitMeasureId) intAllocationUOMId
+					FROM		tblLGAllocationDetail 
+					GROUP By	intSContractDetailId
+				)					SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId	
+LEFT	JOIN	(
+					SELECT	BD.intContractDetailId,COUNT(*) intCount
+					FROM	tblAPBillDetail	BD
+					JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
+					WHERE	BD.intBillId	=	BL.intBillId AND 
+							BL.intTransactionType <> 2
+					GROUP	BY BD.intContractDetailId
+				)					BL	ON	BL.intContractDetailId		=	CD.intContractDetailId	
+LEFT	JOIN	(
+					SELECT	AD.intContractDetailId,COUNT(*) intCount
+					FROM	tblARInvoiceDetail	AD
+					GROUP	BY AD.intContractDetailId
+				)					ID	ON	ID.intContractDetailId		=	CD.intContractDetailId
 	WHERE	CD.intContractDetailId	IN(@intDonorId,@intRecipientId)
 	
 	--Pricing
@@ -104,7 +111,8 @@ BEGIN
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=		PD.intFutureMonthId		LEFT
 	JOIN	tblICCommodityUnitMeasure	PU	ON	PU.intCommodityUnitMeasureId	=		PF.intFinalPriceUOMId	LEFT
 	JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId				=		PU.intUnitMeasureId	
-	WHERE	PF.intContractDetailId	=	@intDonorId
+	WHERE	ISNULL(PF.intContractDetailId,0)	=	CASE WHEN @ysnMultiplePriceFixation = 1 THEN 0 ELSE @intDonorId END
+	AND		ISNULL(PF.intContractHeaderId,0)	=	@intDonorContractHeaderId		
 
 	--Futures
 
@@ -134,7 +142,8 @@ BEGIN
 	JOIN	tblRKFuturesMonth					MO	ON	MO.intFutureMonthId			=	FO.intFutureMonthId			
 	JOIN	tblICUnitMeasure					UM	ON	UM.intUnitMeasureId			=	MA.intUnitMeasureId		LEFT
 	JOIN	tblCTPriceFixationDetail			PD	ON	PD.intFutOptTransactionId	=	SY.intFutOptTransactionId
-	WHERE	SY.intContractDetailId	=	@intDonorId
+	WHERE	ISNULL(SY.intContractDetailId,0)	=	CASE WHEN @ysnMultiplePriceFixation = 1 THEN 0 ELSE @intDonorId END
+	AND		ISNULL(SY.intContractHeaderId,0)	=	@intDonorContractHeaderId		
 
 	--Allocations
 
@@ -219,30 +228,32 @@ BEGIN
 			0 AS intConcurrencyId
 			---------
 			
-	FROM	tblCTContractDetail	CD
-	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
-	JOIN	tblICItemUOM		QU	ON	QU.intItemUOMId			=	CD.intItemUOMId				LEFT
-	JOIN	tblICUnitMeasure	QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId			LEFT
-	JOIN	tblCTPriceFixation	PF	ON	PF.intContractDetailId	=	CD.intContractDetailId		LEFT
-	JOIN	(
-				SELECT		intPriceFixationId,SUM(dblQuantity) dblQuantity 
-				FROM		tblCTPriceFixationDetail
-				GROUP BY	intPriceFixationId
-			)					PD	ON	PD.intPriceFixationId	=	PF.intPriceFixationId		LEFT
-	JOIN	(
-				SELECT		intContractDetailId,SUM(ISNULL(dblHedgedLots,0) + ISNULL(dblAssignedLots,0))dblFuturesLot
-				FROM		tblRKAssignFuturesToContractSummary	
-				GROUP BY	intContractDetailId
-			)					SY	ON	SY.intContractDetailId	=	CD.intContractDetailId		LEFT
-	JOIN	(
-				SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty
-				FROM		tblLGAllocationDetail 
-				Group By	intPContractDetailId
-			)					PA	ON	PA.intPContractDetailId		=	CD.intContractDetailId	LEFT	
-	JOIN	(
-				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty
-				FROM		tblLGAllocationDetail 
-				Group By	intSContractDetailId
-			)					SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId
+		FROM	tblCTContractDetail	CD
+		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
+		JOIN	tblICItemUOM		QU	ON	QU.intItemUOMId			=	CD.intItemUOMId				
+LEFT	JOIN	tblICUnitMeasure	QM	ON	QM.intUnitMeasureId		=	QU.intUnitMeasureId			
+LEFT	JOIN	tblCTPriceFixation	PF	ON	ISNULL(PF.intContractDetailId,0)	=	CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN 0 ELSE CD.intContractDetailId END		
+										AND	ISNULL(PF.intContractHeaderId,0)	=	CH.intContractHeaderId
+LEFT	JOIN	(
+					SELECT		intPriceFixationId,SUM(dblQuantity) dblQuantity 
+					FROM		tblCTPriceFixationDetail
+					GROUP BY	intPriceFixationId
+				)					PD	ON	PD.intPriceFixationId	=	PF.intPriceFixationId		
+LEFT	JOIN	(
+					SELECT		intContractHeaderId,intContractDetailId,SUM(ISNULL(dblHedgedLots,0) + ISNULL(dblAssignedLots,0))dblFuturesLot
+					FROM		tblRKAssignFuturesToContractSummary	
+					GROUP BY	intContractHeaderId,intContractDetailId
+				)					SY	ON	ISNULL(SY.intContractDetailId,0)	=	CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN 0 ELSE CD.intContractDetailId END		
+										AND	ISNULL(SY.intContractHeaderId,0)	=	CH.intContractHeaderId
+LEFT	JOIN	(
+					SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty
+					FROM		tblLGAllocationDetail 
+					Group By	intPContractDetailId
+				)					PA	ON	PA.intPContractDetailId		=	CD.intContractDetailId		
+LEFT	JOIN	(
+					SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty
+					FROM		tblLGAllocationDetail 
+					Group By	intSContractDetailId
+				)					SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId
 	WHERE	CD.intContractDetailId	IN	(@intDonorId,@intRecipientId)
 END

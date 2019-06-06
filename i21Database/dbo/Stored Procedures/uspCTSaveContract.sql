@@ -59,7 +59,8 @@ BEGIN TRY
 			@intHeaderPricingTypeId		=	intPricingTypeId,
 			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0),
 			@intProducerId				=	intProducerId,
-			@strCustomerContract		=	CH.strCustomerContract
+			@strCustomerContract		=	CH.strCustomerContract,
+			@dblHeaderNoOfLots			=	CH.dblNoOfLots
 	FROM	tblCTContractHeader CH
 	LEFT JOIN tblCTPosition		PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId		=	@intContractHeaderId
