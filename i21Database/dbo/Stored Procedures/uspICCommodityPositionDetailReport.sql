@@ -80,7 +80,7 @@ begin
 						on ItemStockUOM.intItemId = Item.intItemId
 					join tblICItemLocation as il
 						on il.intItemLocationId = ItemStockUOM.intItemLocationId
-					where ItemStockUOM.intStorageLocationId is not null 
+					where ItemStockUOM.dtmDate <= ''' + cast(@dtmDate as nvarchar) + ''' AND ItemStockUOM.intStorageLocationId is not null 
 						'
 						+
 							case when @strLocationName <> '' then ' and il.intLocationId in ( ' + @strLocationName + ' )'
