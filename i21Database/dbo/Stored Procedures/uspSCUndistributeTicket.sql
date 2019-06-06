@@ -588,7 +588,8 @@ BEGIN TRY
 					,@finalShrinkUnits		NUMERIC(38,20)
 					,@strShrinkWhat			NVARCHAR(40)
 					,@currencyDecimal		INT;
-				SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+				-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+				SET @currencyDecimal = 20
 				SELECT @intId = MIN(intInventoryReceiptItemId) 
 				FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale'
 				WHILE ISNULL(@intId,0) > 0
