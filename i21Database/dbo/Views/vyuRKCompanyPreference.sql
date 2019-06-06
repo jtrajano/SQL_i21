@@ -1,33 +1,41 @@
 ﻿CREATE VIEW vyuRKCompanyPreference
+
 AS
-SELECT 
- A.* ,
- B.strUnitMeasure,
- C.strInterfaceSystem,
- D.strCurrency
-,GL1.strAccountId strUnrealizedGainOnBasisId
-,GL2.strAccountId strUnrealizedGainOnFuturesId
-,GL3.strAccountId strUnrealizedGainOnCashId
-,GL4.strAccountId strUnrealizedLossOnBasisId
-,GL5.strAccountId strUnrealizedLossOnFuturesId
-,GL6.strAccountId strUnrealizedLossOnCashId
-,GL7.strAccountId strUnrealizedGainOnInventoryBasisIOSId
-,GL8.strAccountId strUnrealizedGainOnInventoryFuturesIOSId
-,GL9.strAccountId strUnrealizedGainOnInventoryCashIOSId
-,GL10.strAccountId strUnrealizedLossOnInventoryBasisIOSId
-,GL11.strAccountId strUnrealizedLossOnInventoryFuturesIOSId
-,GL12.strAccountId strUnrealizedLossOnInventoryCashIOSId
-,GL13.strAccountId strUnrealizedGainOnInventoryIntransitIOSId
-,GL14.strAccountId strUnrealizedLossOnInventoryIntransitIOSId
-,GL15.strAccountId strUnrealizedGainOnRatioId
-,GL16.strAccountId strUnrealizedLossOnRatioId
-,GL17.strAccountId strUnrealizedGainOnInventoryRatioIOSId
-,GL18.strAccountId strUnrealizedLossOnInventoryRatioIOSId
-,GL19.strAccountId strUnrealizedGainOnInventoryIOSId
-,GL20.strAccountId strUnrealizedLossOnInventoryIOSId
-FROM
-tblRKCompanyPreference A
-LEFT JOIN	tblICUnitMeasure B ON B.intUnitMeasureId = A.intUnitMeasureId
+
+SELECT A.* 
+	, B.strUnitMeasure
+	, C.strInterfaceSystem
+	, D.strCurrency
+	, GL1.strAccountId strUnrealizedGainOnBasisId
+	, GL2.strAccountId strUnrealizedGainOnFuturesId
+	, GL3.strAccountId strUnrealizedGainOnCashId
+	, GL4.strAccountId strUnrealizedLossOnBasisId
+	, GL5.strAccountId strUnrealizedLossOnFuturesId
+	, GL6.strAccountId strUnrealizedLossOnCashId
+	, GL7.strAccountId strUnrealizedGainOnInventoryBasisIOSId
+	, GL8.strAccountId strUnrealizedGainOnInventoryFuturesIOSId
+	, GL9.strAccountId strUnrealizedGainOnInventoryCashIOSId
+	, GL10.strAccountId strUnrealizedLossOnInventoryBasisIOSId
+	, GL11.strAccountId strUnrealizedLossOnInventoryFuturesIOSId
+	, GL12.strAccountId strUnrealizedLossOnInventoryCashIOSId
+	, GL13.strAccountId strUnrealizedGainOnInventoryIntransitIOSId
+	, GL14.strAccountId strUnrealizedLossOnInventoryIntransitIOSId
+	, GL15.strAccountId strUnrealizedGainOnRatioId
+	, GL16.strAccountId strUnrealizedLossOnRatioId
+	, GL17.strAccountId strUnrealizedGainOnInventoryRatioIOSId
+	, GL18.strAccountId strUnrealizedLossOnInventoryRatioIOSId
+	, GL19.strAccountId strUnrealizedGainOnInventoryIOSId
+	, GL20.strAccountId strUnrealizedLossOnInventoryIOSId
+	, strDefaultInstrument = CASE WHEN intDefaultInstrumentId = 1 THEN 'Exchange Traded'
+								WHEN intDefaultInstrumentId = 2 THEN 'OTC'
+								WHEN intDefaultInstrumentId = 3 THEN 'OTC - Others' END
+	, strDefaultInstrumentType = CASE WHEN intDefaultInstrumentTypeId = 1 THEN 'Futures'
+									WHEN intDefaultInstrumentTypeId = 2 THEN 'Options'
+									WHEN intDefaultInstrumentTypeId = 3 THEN 'Currency Contract' END
+	, strPostToGL = CASE WHEN intPostToGLId = 1 THEN 'Company Configurations'
+						WHEN intPostToGLId = 2 THEN 'Commodity GL' END
+FROM tblRKCompanyPreference A
+LEFT JOIN tblICUnitMeasure B ON B.intUnitMeasureId = A.intUnitMeasureId
 LEFT JOIN tblRKInterfaceSystem C ON C.intInterfaceSystemId = A.intInterfaceSystemId
 LEFT JOIN tblSMCurrency D ON D.intCurrencyID = A.intCurrencyId
 LEFT JOIN tblGLAccount GL1 ON GL1.intAccountId = A.intUnrealizedGainOnBasisId
