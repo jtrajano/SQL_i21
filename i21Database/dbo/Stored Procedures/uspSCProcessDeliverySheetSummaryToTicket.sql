@@ -34,7 +34,8 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@intBillId					INT
 
 BEGIN TRY
-	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+	SET @currencyDecimal = 20
 	DECLARE @splitTable TABLE(
 		[intTicketId] INT NOT NULL, 
 		[intEntityId] INT NOT NULL, 
