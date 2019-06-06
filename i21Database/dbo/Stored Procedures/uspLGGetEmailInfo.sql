@@ -173,7 +173,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('ShippingAdvice','ShippingAdvice2','ShippingAdvice3'))
+	ELSE IF (@strReportName IN ('ShippingAdvice','ShippingAdvice2','ShippingAdvice3','ShippingAdvice4'))
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 				@intPurchaseSaleId = intPurchaseSale

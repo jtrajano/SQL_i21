@@ -33,6 +33,7 @@ SELECT
 	,strPurchaseContractNumber = PCH.strContractNumber
 	,intPContractSeq = PCT.intContractSeq
 	,strPContractNumber = Cast(PCH.strContractNumber AS VARCHAR(100)) + '/' + Cast(PCT.intContractSeq AS VARCHAR(100))
+	,strPERPPONumber = PCT.strERPPONumber
 	,intPItemId = PCT.intItemId
 	,strPItemUOM = U1.strUnitMeasure
 	,strPItemNo = IM.strItemNo
@@ -72,6 +73,7 @@ SELECT
 	,intSContractSeq = SCT.intContractSeq
 	,strSContractNumber = Cast(SCH.strContractNumber as VarChar(100)) + '/' + Cast(SCT.intContractSeq as VarChar(100))
 	,strSCustomerRefNo = SCH.strCustomerContract
+	,strSERPPONumber = SCT.strERPPONumber
 	,intSItemId = SCT.intItemId
 	,strSItemUOM = U3.strUnitMeasure
 	,strSItemNo = SIM.strItemNo

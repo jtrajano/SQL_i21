@@ -8,67 +8,49 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnDropShip
 	,CP.ysnContainersRequired
 	,CP.intDefaultShipmentTransType
-	,CASE CP.intDefaultShipmentTransType
-		WHEN 1
-			THEN 'Inbound'
-		WHEN 2
-			THEN 'Outbound'
-		WHEN 3
-			THEN 'Drop Ship'
-		END COLLATE Latin1_General_CI_AS AS strDefaultShipmentTransType
+	,strDefaultShipmentTransType = CASE CP.intDefaultShipmentTransType
+		WHEN 1 THEN 'Inbound'
+		WHEN 2 THEN 'Outbound'
+		WHEN 3 THEN 'Drop Ship'
+		END COLLATE Latin1_General_CI_AS
 	,CP.intDefaultShipmentSourceType
-	,CASE CP.intDefaultShipmentSourceType
-		WHEN 1
-			THEN 'None'
-		WHEN 2
-			THEN 'Contracts'
-		WHEN 3
-			THEN 'Orders'
-		END COLLATE Latin1_General_CI_AS AS strDefaultShipmentSourceType
+	,strDefaultShipmentSourceType = CASE CP.intDefaultShipmentSourceType
+		WHEN 1 THEN 'None'
+		WHEN 2 THEN 'Contracts'
+		WHEN 3 THEN 'Orders'
+		END COLLATE Latin1_General_CI_AS
 	,CP.intCreateShipmentDefaultSourceType
-	,CASE CP.intCreateShipmentDefaultSourceType
-		WHEN 2
-			THEN 'Contracts'
-		WHEN 5
-			THEN 'Picked Lots'
-		WHEN 6
-			THEN 'Pick Lots'
-		END COLLATE Latin1_General_CI_AS AS strCreateShipmentDefaultSourceType
+	,strCreateShipmentDefaultSourceType = CASE CP.intCreateShipmentDefaultSourceType
+		WHEN 2 THEN 'Contracts'
+		WHEN 5 THEN 'Picked Lots'
+		WHEN 6 THEN 'Pick Lots'
+		END COLLATE Latin1_General_CI_AS
 	,CP.intDefaultTransportationMode
-	,CASE CP.intDefaultTransportationMode
-		WHEN 1
-			THEN 'Truck'
-		WHEN 2
-			THEN 'Ocean Vessel'
-		END COLLATE Latin1_General_CI_AS AS strDefaultTransportationMode
+	,strDefaultTransportationMode = CASE CP.intDefaultTransportationMode
+		WHEN 1 THEN 'Truck'
+		WHEN 2 THEN 'Ocean Vessel'
+		WHEN 3 THEN 'Rail'
+		END COLLATE Latin1_General_CI_AS
 	,CP.intDefaultPositionId
 	,PO.strPosition
 	,PO.strPositionType
 	,CP.intDefaultFreightTermId
 	,FT.strFreightTerm AS strDefaultFreightTerm
 	,CP.intDefaultLeastCostSourceType
-	,CASE CP.intDefaultLeastCostSourceType
-		WHEN 1
-			THEN 'LG Loads - Outbound'
-		WHEN 2
-			THEN 'TM Orders'
-		WHEN 3
-			THEN 'LG Loads - Inbound'
-		WHEN 4
-			THEN 'TM Sites'
-		WHEN 5
-			THEN 'Entities'
-		END COLLATE Latin1_General_CI_AS AS strDefaultLeastCostSourceType
+	,strDefaultLeastCostSourceType = CASE CP.intDefaultLeastCostSourceType
+		WHEN 1 THEN 'LG Loads - Outbound'
+		WHEN 2 THEN 'TM Orders'
+		WHEN 3 THEN 'LG Loads - Inbound'
+		WHEN 4 THEN 'TM Sites'
+		WHEN 5 THEN 'Entities'
+		END COLLATE Latin1_General_CI_AS
 	,CP.strALKMapKey
 	,CP.intTransUsedBy
-	,CASE CP.intTransUsedBy
-		WHEN 1
-			THEN 'None'
-		WHEN 2
-			THEN 'Scale Ticket'
-		WHEN 3
-			THEN 'Transport Load'
-		END COLLATE Latin1_General_CI_AS AS strTransUsedBy
+	,strTransUsedBy = CASE CP.intTransUsedBy
+		WHEN 1 THEN 'None'
+		WHEN 2 THEN 'Scale Ticket'
+		WHEN 3 THEN 'Transport Load'
+		END COLLATE Latin1_General_CI_AS
 	,CP.ysnAlertApprovedQty
 	,CP.ysnUpdateVesselInfo
 	,CP.ysnValidateExternalPONo
@@ -90,97 +72,56 @@ SELECT CP.intCompanyPreferenceId
 	,CP.intDefaultSurchargeItemId
 	,strSurchargeItem = SI.strItemNo
 	,CP.intDefaultShipmentType
-	,CASE CP.intDefaultShipmentType
-		WHEN 1
-			THEN 'Shipment'
-		WHEN 2
-			THEN 'Shipping Instructions'
-		END COLLATE Latin1_General_CI_AS strDefaultShipmentType
+	,strDefaultShipmentType = CASE CP.intDefaultShipmentType
+		WHEN 1 THEN 'Shipment'
+		WHEN 2 THEN 'Shipping Instructions'
+		END COLLATE Latin1_General_CI_AS 
 	,CP.intCompanyLocationId
 	,CL.strLocationName AS strCompanyLocationName
 	,CP.intShippingInstructionReportFormat
-	,CASE CP.intShippingInstructionReportFormat
-		WHEN 1
-			THEN 'Shipping Instruction Report Format - 1'
-		WHEN 2
-			THEN 'Shipping Instruction Report Format - 2'
-		WHEN 3
-			THEN 'Shipping Instruction Report Format - 3'
-		WHEN 4
-			THEN 'Shipping Instruction Report Format - 4'
-		END COLLATE Latin1_General_CI_AS AS strShippingInstructionReportFormat
+	,strShippingInstructionReportFormat = CASE WHEN CP.intShippingInstructionReportFormat IS NOT NULL 
+		THEN 'Shipping Instruction Report Format - ' + CAST(CP.intShippingInstructionReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intDeliveryOrderReportFormat
-	,CASE CP.intDeliveryOrderReportFormat
-		WHEN 1
-			THEN 'Delivery Order Report Format - 1'
-		WHEN 2
-			THEN 'Delivery Order Report Format - 2'
-		END COLLATE Latin1_General_CI_AS strDeliveryOrderReportFormat
+	,strDeliveryOrderReportFormat = CASE WHEN CP.intDeliveryOrderReportFormat IS NOT NULL 
+		THEN 'Delivery Order Report Format - ' + CAST(CP.intDeliveryOrderReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intInStoreLetterReportFormat
-	,CASE CP.intInStoreLetterReportFormat
-		WHEN 1
-			THEN 'In-Store Letter Report Format - 1'
-		WHEN 2
-			THEN 'In-Store Letter Report Format - 2'
-		WHEN 3
-			THEN 'In-Store Letter Report Format - 3'
-		END COLLATE Latin1_General_CI_AS strInStoreLetterReportFormat
+	,strInStoreLetterReportFormat = CASE WHEN CP.intInStoreLetterReportFormat IS NOT NULL 
+		THEN 'In-Store Letter Report Format - ' + CAST(CP.intInStoreLetterReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intShippingAdviceReportFormat
-	,CASE CP.intShippingAdviceReportFormat
-		WHEN 1
-			THEN 'Shipping Advice Report Format - 1'
-		WHEN 2
-			THEN 'Shipping Advice Report Format - 2'
-		WHEN 3
-			THEN 'Shipping Advice Report Format - 3'
-		END COLLATE Latin1_General_CI_AS strShippingAdviceReportFormat
+	,strShippingAdviceReportFormat = CASE WHEN CP.intShippingAdviceReportFormat IS NOT NULL 
+		THEN 'Shipping Advice Report Format - ' + CAST(CP.intShippingAdviceReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intInsuranceLetterReportFormat
-	,CASE CP.intInsuranceLetterReportFormat
-		WHEN 1
-			THEN 'Insurance Letter Report Format - 1'
-		WHEN 2
-			THEN ''
-		END COLLATE Latin1_General_CI_AS strInsuranceLetterReportFormat
+	,strInsuranceLetterReportFormat = CASE WHEN CP.intInsuranceLetterReportFormat IS NOT NULL 
+		THEN 'Insurance Letter Report Format - ' + CAST(CP.intInsuranceLetterReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intCarrierShipmentOrderReportFormat
-	,CASE CP.intCarrierShipmentOrderReportFormat
-		WHEN 1
-			THEN 'Carrier Shipment Order Report Format - 1'
-		WHEN 2
-			THEN ''
-		END COLLATE Latin1_General_CI_AS strCarrierShipmentOrderReportFormat
+	,strCarrierShipmentOrderReportFormat = CASE WHEN CP.intCarrierShipmentOrderReportFormat IS NOT NULL 
+		THEN 'Carrier Shipment Order Report Format - ' + CAST(CP.intCarrierShipmentOrderReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intDebitNoteReportFormat
-	,CASE CP.intDebitNoteReportFormat
-		WHEN 1
-			THEN 'Debit Note Report Format - 1'
-		WHEN 2
-			THEN 'Debit Note Report Format - 2'
-		END COLLATE Latin1_General_CI_AS strDebitNoteReportFormat
+	,strDebitNoteReportFormat = CASE WHEN CP.intDebitNoteReportFormat IS NOT NULL 
+		THEN 'Debit Note Report Format - ' + CAST(CP.intDebitNoteReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intCreditNoteReportFormat
-	,CASE CP.intCreditNoteReportFormat
-		WHEN 1
-			THEN 'Credit Note Report Format - 1'
-		WHEN 2
-			THEN 'Credit Note Report Format - 2'
-		END COLLATE Latin1_General_CI_AS strCreditNoteReportFormat
+	,strCreditNoteReportFormat = CASE WHEN CP.intCreditNoteReportFormat IS NOT NULL 
+		THEN 'Credit Note Report Format - ' + CAST(CP.intCreditNoteReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intOrganicDeclarationReportFormat
-	,CASE CP.intOrganicDeclarationReportFormat
-		WHEN 1
-			THEN 'Organic Declaration Report Format - 1'
-		WHEN 2
-			THEN ''
-		END COLLATE Latin1_General_CI_AS strOrganicDeclarationReportFormat
+	,strOrganicDeclarationReportFormat = CASE WHEN CP.intOrganicDeclarationReportFormat IS NOT NULL 
+		THEN 'Organic Declaration Report Format - ' + CAST(CP.intOrganicDeclarationReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intPreArrivalNotificationReportFormat
-	,CASE CP.intPreArrivalNotificationReportFormat
-		WHEN 1
-			THEN 'Pre Arrival Notification Report Format - 1'
-		END COLLATE Latin1_General_CI_AS strPreArrivalNotificationReportFormat
+	,strPreArrivalNotificationReportFormat = CASE WHEN CP.intPreArrivalNotificationReportFormat IS NOT NULL 
+		THEN 'Pre Arrival Notification Report Format - ' + CAST(CP.intPreArrivalNotificationReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.intBOLReportFormat
-	,CASE CP.intBOLReportFormat
-		WHEN 1
-			THEN 'BOL Report Format - 1'
-		WHEN 2
-			THEN ''
-		END COLLATE Latin1_General_CI_AS strBOLReportFormat
+	,strBOLReportFormat = CASE WHEN CP.intBOLReportFormat IS NOT NULL 
+		THEN 'BOL Report Format - ' + CAST(CP.intBOLReportFormat AS NVARCHAR(10)) 
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CP.strSignature
 	,CP.ysnContractSlspnOnEmail
 	,CP.ysnHighwayOnly
@@ -189,48 +130,33 @@ SELECT CP.intCompanyPreferenceId
 	,CP.intRoutingType
 	,CP.intHazMatType
 	,CP.intRouteOptimizationType
-	,CASE CP.intVehicleType
-		WHEN 0
-			THEN 'Truck'
-		WHEN 1
-			THEN 'Light Truck'
-		WHEN 2
-			THEN 'Automobile'
-		END COLLATE Latin1_General_CI_AS strVehicleType
-	,CASE CP.intRoutingType
-		WHEN 0
-			THEN 'Practical'
-		WHEN 1
-			THEN 'Shortest'
-		END COLLATE Latin1_General_CI_AS strRoutingType
-	,CASE CP.intHazMatType
-		WHEN 0
-			THEN 'None'
-		WHEN 1
-			THEN 'General'
-		WHEN 2
-			THEN 'Caustic'
-		WHEN 3
-			THEN 'Explosives'
-		WHEN 4
-			THEN 'Flammable'
-		WHEN 5
-			THEN 'Inhalants'
-		WHEN 6
-			THEN 'Radioactive'
-		END COLLATE Latin1_General_CI_AS strHazMatType
-	,CASE CP.intRouteOptimizationType
-		WHEN 0
-			THEN 'None'
-		WHEN 1
-			THEN 'Optimize All Stops'
-		WHEN 2
-			THEN 'Optimize Intermediate Stops'
-		END COLLATE Latin1_General_CI_AS strRouteOptimizationType
-	,CAST(ISNULL(ysnUpdateCompanyLocation,0) AS BIT) ysnUpdateCompanyLocation
-	,CAST(ISNULL(ysnLoadContainerTypeByOrigin,0) AS BIT) ysnLoadContainerTypeByOrigin
-	,CAST(ISNULL(ysnRestrictIncreaseSeqQty,0) AS BIT) ysnRestrictIncreaseSeqQty
-	,ISNULL(CP.intNumberOfDecimalPlaces,4) intNumberOfDecimalPlaces
+	,strVehicleType = CASE CP.intVehicleType
+		WHEN 0 THEN 'Truck'
+		WHEN 1 THEN 'Light Truck'
+		WHEN 2 THEN 'Automobile'
+		END COLLATE Latin1_General_CI_AS 
+	,strRoutingType = CASE CP.intRoutingType
+		WHEN 0 THEN 'Practical'
+		WHEN 1 THEN 'Shortest'
+		END COLLATE Latin1_General_CI_AS 
+	,strHazMatType = CASE CP.intHazMatType
+		WHEN 0 THEN 'None'
+		WHEN 1 THEN 'General'
+		WHEN 2 THEN 'Caustic'
+		WHEN 3 THEN 'Explosives'
+		WHEN 4 THEN 'Flammable'
+		WHEN 5 THEN 'Inhalants'
+		WHEN 6 THEN 'Radioactive'
+		END COLLATE Latin1_General_CI_AS 
+	,strRouteOptimizationType = CASE CP.intRouteOptimizationType
+		WHEN 0 THEN 'None'
+		WHEN 1 THEN 'Optimize All Stops'
+		WHEN 2 THEN 'Optimize Intermediate Stops'
+		END COLLATE Latin1_General_CI_AS 
+	,ysnUpdateCompanyLocation = CAST(ISNULL(ysnUpdateCompanyLocation,0) AS BIT) 
+	,ysnLoadContainerTypeByOrigin = CAST(ISNULL(ysnLoadContainerTypeByOrigin,0) AS BIT)
+	,ysnRestrictIncreaseSeqQty = CAST(ISNULL(ysnRestrictIncreaseSeqQty,0) AS BIT)
+	,intNumberOfDecimalPlaces = ISNULL(CP.intNumberOfDecimalPlaces,4) 
 	,CP.ysnFullHeaderLogo
 	,CP.ysnContainerNoUnique
 	,CP.intReportLogoHeight
