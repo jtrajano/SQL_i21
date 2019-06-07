@@ -333,50 +333,50 @@ BEGIN
 			AND ScaleSetup.intFreightItemId = RC.[intChargeId]
 	WHERE SST.intSettleStorageId = @intSettleStorageId	
 
-    UNION
+  --   UNION
 
-	SELECT
-		 intItemId							= IC.intItemId
-		,[strItemNo]						= IC.strItemNo		
-		,[intEntityVendorId]				= @intEntityVendorId	
-		,[intCurrencyId]  					= @intCurrencyId
-		,[intCostCurrencyId]  				= @intCurrencyId
-		,[intChargeId]						= ContractCost.intItemId
-		,[intForexRateTypeId]				= NULL
-		,[dblForexRate]						= NULL
-		,[ysnInventoryCost]					= CASE 
-												WHEN ISNULL(ContractCost.ysnPrice,0) = 1 THEN 0 
-												ELSE IC.ysnInventoryCost 
-											END
-		,[strCostMethod]					= ContractCost.strCostMethod
-		,[dblRate]							= ISNULL(ContractCost.dblRate,@dblFreightRate)
-		,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
-		,[dblAmount]						= ROUND (((RE.dblUnits / SSV.dblOriginalBalance) * ISNULL(ContractCost.dblRate,@dblFreightRate)), 2)
-		,[intContractDetailId]				= RE.intContractDetailId
-		,[ysnAccrue]						= CASE 
-												WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 
-												ELSE 0 
-											END
-		,[ysnPrice]							= CASE 
-												WHEN @ysnIsStorage = 0 THEN ContractCost.ysnPrice 
-												ELSE 0 
-											END
-		,[intTicketDiscountId]				= NULL
-		,[intContractCostId]				= ContractCost.intContractCostId
-		,[dblUnits]							= RE.dblUnits
-	FROM tblCTContractCost ContractCost
-	JOIN tblGRSettleContract RE 
-		ON RE.intContractDetailId = ContractCost.intContractDetailId
-	JOIN tblGRSettleStorageTicket SST 
-		ON SST.intSettleStorageId = RE.intSettleStorageId
-	JOIN vyuGRStorageSearchView SSV 
-		ON SSV.intCustomerStorageId = SST.intCustomerStorageId
-	JOIN tblICItem IC 
-		ON IC.intItemId = ContractCost.intItemId
-	WHERE  ContractCost.intItemId != @intFreightItemId 
-		AND RE.intContractDetailId IS NOT NULL  
-		AND ContractCost.dblRate != 0 
-		AND SST.intSettleStorageId = @intSettleStorageId
+	-- SELECT
+	-- 	 intItemId							= IC.intItemId
+	-- 	,[strItemNo]						= IC.strItemNo		
+	-- 	,[intEntityVendorId]				= @intEntityVendorId	
+	-- 	,[intCurrencyId]  					= @intCurrencyId
+	-- 	,[intCostCurrencyId]  				= @intCurrencyId
+	-- 	,[intChargeId]						= ContractCost.intItemId
+	-- 	,[intForexRateTypeId]				= NULL
+	-- 	,[dblForexRate]						= NULL
+	-- 	,[ysnInventoryCost]					= CASE 
+	-- 											WHEN ISNULL(ContractCost.ysnPrice,0) = 1 THEN 0 
+	-- 											ELSE IC.ysnInventoryCost 
+	-- 										END
+	-- 	,[strCostMethod]					= ContractCost.strCostMethod
+	-- 	,[dblRate]							= ISNULL(ContractCost.dblRate,@dblFreightRate)
+	-- 	,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
+	-- 	,[dblAmount]						= ROUND (((RE.dblUnits / SSV.dblOriginalBalance) * ISNULL(ContractCost.dblRate,@dblFreightRate)), 2)
+	-- 	,[intContractDetailId]				= RE.intContractDetailId
+	-- 	,[ysnAccrue]						= CASE 
+	-- 											WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 
+	-- 											ELSE 0 
+	-- 										END
+	-- 	,[ysnPrice]							= CASE 
+	-- 											WHEN @ysnIsStorage = 0 THEN ContractCost.ysnPrice 
+	-- 											ELSE 0 
+	-- 										END
+	-- 	,[intTicketDiscountId]				= NULL
+	-- 	,[intContractCostId]				= ContractCost.intContractCostId
+	-- 	,[dblUnits]							= RE.dblUnits
+	-- FROM tblCTContractCost ContractCost
+	-- JOIN tblGRSettleContract RE 
+	-- 	ON RE.intContractDetailId = ContractCost.intContractDetailId
+	-- JOIN tblGRSettleStorageTicket SST 
+	-- 	ON SST.intSettleStorageId = RE.intSettleStorageId
+	-- JOIN vyuGRStorageSearchView SSV 
+	-- 	ON SSV.intCustomerStorageId = SST.intCustomerStorageId
+	-- JOIN tblICItem IC 
+	-- 	ON IC.intItemId = ContractCost.intItemId
+	-- WHERE  ContractCost.intItemId != @intFreightItemId 
+	-- 	AND RE.intContractDetailId IS NOT NULL  
+	-- 	AND ContractCost.dblRate != 0 
+	-- 	AND SST.intSettleStorageId = @intSettleStorageId
 	
 	----Storage Charge
     
