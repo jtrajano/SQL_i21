@@ -1,4 +1,4 @@
-﻿
+﻿GO
 
 PRINT ('*****BEGIN CHECKING For IC - Set Commodity Market to market default data*****')
 if not exists (select top 1 1 from tblEMEntityPreferences where strPreference = 'For IC - Set Commodity Market to market default data')

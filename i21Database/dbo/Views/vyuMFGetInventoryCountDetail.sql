@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuMFGetInventoryCountDetail
 AS
 SELECT IC.dtmCountDate AS [Count Date]
-	,strCountNo AS [Count No]
+	,IC.strCountNo AS [Count No]
 	,ICD.strItemNo AS [Item No]
 	,ICD.strItemDescription AS [Item Desc]
 	,ICD.strCategory [Category]
