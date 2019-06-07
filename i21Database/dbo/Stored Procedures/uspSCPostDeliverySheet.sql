@@ -80,7 +80,8 @@ DECLARE @processTicket TABLE(
 BEGIN TRY
 	SET @dblTempSplitQty = @dblNetUnits;
 
-	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+	SET @currencyDecimal = 20
 
 	INSERT INTO @splitTable(
 		[intEntityId]

@@ -127,7 +127,7 @@ BEGIN
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 1
-	INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId
+	INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL
 	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId

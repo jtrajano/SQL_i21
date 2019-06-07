@@ -7319,19 +7319,25 @@
     <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
     <Build Include="dbo\Views\vyuCTBasisDelivery.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql" />
-    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPArchiveVoucher.sql" />
     <Build Include="dbo\Tables\tblAPBillArchive.sql" />
     <Build Include="dbo\Tables\tblAPBillDetailArchive.sql" />
     <Build Include="dbo\Tables\tblAPBillDetailTaxArchive.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
     <Build Include="dbo\Functions\fnCalculateValuationAverageCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCommodityPositionReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCommodityPositionDetailReport.sql" />
+    <Build Include="dbo\User Defined Types\DestinationShipmentItemLot.sql" />
     <Build Include="dbo\Functions\fnCTGetCommodityUnitMeasure.sql" />
     <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
     <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
     <Build Include="dbo\Functions\fnCTGetCommodityStockUOM.sql" />
+    <Build Include="dbo\Tables\tblARPOSBatchProcessLog.sql" />
+    <Build Include="dbo\Views\vyuARPOSBatchProcessSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSBatchProcess.sql" />
+    <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
