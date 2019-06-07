@@ -1242,7 +1242,19 @@ BEGIN TRY
 				INNER JOIN tblGRCustomerStorage CS
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
 				WHERE a.intItemType = 3
-		     
+		    
+				DECLARE @ysnDPOwnedType AS BIT = 0
+
+				SELECT TOP 1 @ysnDPOwnedType = ISNULL(ST.ysnDPOwnedType,0) 
+				FROM @SettleVoucherCreate A
+				JOIN tblGRSettleStorageTicket SST 
+					ON SST.intCustomerStorageId = A.intCustomerStorageId
+				LEFT JOIN tblGRCustomerStorage CS
+					ON CS.intCustomerStorageId = A.intCustomerStorageId
+				JOIN tblGRStorageType ST
+					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				WHERE SST.intSettleStorageId = @intSettleStorageId
+
 			 IF EXISTS(SELECT 1 FROM @SettleVoucherCreate WHERE ISNULL(dblCashPrice,0) <> 0 AND ISNULL(dblUnits,0) <> 0 )
 			 BEGIN
 				--Inventory Item and Discounts
@@ -1268,7 +1280,7 @@ BEGIN TRY
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
-					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@ItemLocationId, CASE WHEN (a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType = 2 THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
+					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@ItemLocationId, CASE WHEN ((a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType = 2) AND @ysnDPOwnedType = 0 THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
 					,[dblQtyReceived]			= CASE 
 													WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 													ELSE a.dblUnits 
@@ -1332,19 +1344,7 @@ BEGIN TRY
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
 				ORDER BY SST.intSettleStorageTicketId
-					,a.intItemType				
-
-				DECLARE @ysnDPOwnedType AS BIT = 0
-
-				SELECT TOP 1 @ysnDPOwnedType = ISNULL(ST.ysnDPOwnedType,0) 
-				FROM @SettleVoucherCreate A
-				JOIN tblGRSettleStorageTicket SST 
-					ON SST.intCustomerStorageId = A.intCustomerStorageId
-				LEFT JOIN tblGRCustomerStorage CS
-					ON CS.intCustomerStorageId = A.intCustomerStorageId
-				JOIN tblGRStorageType ST
-					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				WHERE SST.intSettleStorageId = @intSettleStorageId
+					,a.intItemType
 
 				IF(@ysnDPOwnedType = 0)
 				BEGIN
