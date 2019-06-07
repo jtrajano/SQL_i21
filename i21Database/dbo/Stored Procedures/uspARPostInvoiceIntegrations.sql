@@ -1086,7 +1086,7 @@ SELECT
 	,[strItemNo]					= ID.[strItemNo]
 	,[strItemDescription]			= ID.[strItemDescription]			
 	,[intItemUOMId]					= ID.[intItemUOMId]					
-	,[dblQtyShipped]				= ID.[dblQtyShipped] * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
+	,[dblQtyShipped]				= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 THEN 1 ELSE ID.[dblQtyShipped] END * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
 	,[dblDiscount]					= ID.[dblDiscount]					
 	,[dblPrice]						= ID.[dblPrice]						
 	,[dblTotal]						= ID.[dblTotal]						
@@ -1115,14 +1115,6 @@ JOIN
 LEFT JOIN
 	tblCTContractHeader CH
 		ON CD.intContractHeaderId = CH.intContractHeaderId
-LEFT OUTER JOIN (
-	SELECT I.[intInvoiceId]
-	      , I.[strInvoiceNumber]
-	FROM tblARInvoice I WITH (NOLOCK)
-	WHERE I.ysnReturned = 1 
-	  AND I.ysnPosted = 1 
-	  AND I.strTransactionType = 'Invoice'
-	) ARRETURN ON ID.[intOriginalInvoiceId] = ARRETURN.[intInvoiceId]
 WHERE
 	ID.[intInventoryShipmentChargeId] IS NULL
 	AND	(
@@ -1132,7 +1124,6 @@ WHERE
 		)
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
-	AND ISNULL(ARRETURN.intInvoiceId, 0) = 0
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 
