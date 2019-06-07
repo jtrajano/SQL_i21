@@ -10,7 +10,7 @@
 	[dtmAmendmentDate] DATETIME,
 	[dtmValidFrom] DATETIME,
 	[dtmValidTo] DATETIME,
-	[strOrigin] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strOwner] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strFreightClause] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL, 
 
