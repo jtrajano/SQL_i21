@@ -2,7 +2,8 @@
 	
 	@ysnGetHeader	bit  = 0,
 	@dtmDate		date = null,
-	@strLocationName nvarchar(max) = ''
+	@strLocationName nvarchar(max) = '',
+	@ysnLocationLicensed bit = null
 as
 begin
 	DECLARE @Columns VARCHAR(MAX)
@@ -18,6 +19,7 @@ begin
 	DECLARE @sql AS NVARCHAR(MAX)
 	DECLARE @top as nvarchar(20)
 	declare @location_filter as nvarchar(max)
+	declare @licensed_filter as nvarchar(100)
 
 	if isnull(@strLocationName, '') <> ''
 	begin
@@ -28,6 +30,12 @@ begin
 		set @location_filter = ''
 	end
 
+	set @licensed_filter = ' '
+
+	if(@ysnLocationLicensed is not null)
+	begin
+		set @licensed_filter = ' and ysnLicensed = ' + cast(@ysnLocationLicensed as nvarchar) + ' '
+	end
 
 	set @top = ''
 	set @dtmDate = isnull(@dtmDate, getdate())
@@ -37,6 +45,7 @@ begin
 	begin
 		set @top = ' top 1'
 		set @dtmDate = getdate()
+		set @licensed_filter = ''
 	end
 	SET @sql = 
 	'
@@ -49,11 +58,12 @@ begin
 			,cl.strLocationName 
 			, dblQty = ROUND(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty), ISNULL(com.intDecimalDPR,2))
 			, dtmDate = ''' + cast(@dtmDate as nvarchar) + '''
+			, ysnLicensed = cl.ysnLicensed
 		FROM 
 			tblICItem i inner join tblICItemLocation il
 				on i.intItemId = il.intItemId
 			inner join tblSMCompanyLocation cl
-				on cl.intCompanyLocationId = il.intLocationId
+				on cl.intCompanyLocationId = il.intLocationId ' + @licensed_filter + '
 			inner join tblICCommodity com
 				on com.intCommodityId = i.intCommodityId
 			inner join 
