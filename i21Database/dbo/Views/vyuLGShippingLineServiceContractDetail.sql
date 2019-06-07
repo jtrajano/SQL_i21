@@ -20,4 +20,4 @@ FROM
 tblLGShippingLineServiceContractDetail SLSCD
 JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
 JOIN tblEMEntity E ON E.intEntityId = SLSC.intEntityId
-LEFT JOIN tblICCommodityAttribute OG ON OG.intCommodityAttributeId = SLSCD.intOriginIdl
+LEFT JOIN tblICCommodityAttribute OG ON OG.intCommodityAttributeId = SLSCD.intOriginId
