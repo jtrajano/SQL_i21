@@ -152,6 +152,7 @@ SELECT -- Load Header
 		L.[intShippingLineEntityId],
 		[strShippingLine] =  ShippingLine.strName,
 		L.[strServiceContractNumber],
+		strServiceContractOwner = SLSC.strOwner,
 		L.[strPackingDescription],
 		L.[strMVessel],
 		L.[strMVoyageNumber],
@@ -249,3 +250,6 @@ LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = L.intDispatcherId
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblLGLoad LOADSI ON LOADSI.intLoadId = L.intLoadShippingInstructionId
+OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
+			 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
+			 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC

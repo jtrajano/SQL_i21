@@ -7581,6 +7581,7 @@
     <Build Include="dbo\Tables\tblARPOSBatchProcessLog.sql" />
     <Build Include="dbo\Views\vyuARPOSBatchProcessSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryByNetPosition.sql" />
+    <Build Include="dbo\Views\vyuLGShippingLineServiceContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
