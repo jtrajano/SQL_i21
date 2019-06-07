@@ -35,6 +35,7 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 				END) COLLATE Latin1_General_CI_AS,
 
 
+    InvCountDetail.dblNewCost,
 
 	InvCountDetail.intItemLocationId,
 	Location.strLocationName,

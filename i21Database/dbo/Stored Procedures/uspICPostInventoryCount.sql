@@ -305,6 +305,10 @@ BEGIN
 			,dblCost				= 
 					COALESCE
 						(
+						case when (Detail.dblPhysicalCount > Detail.dblSystemCount and isnull(Detail.dblNewCost,0) > 0) 
+                            then Detail.dblNewCost 
+                        else NULL end,
+
 						Detail.dblLastCost
 						, dbo.fnCalculateCostBetweenUOM(
 							StockUOM.intItemUOMId
