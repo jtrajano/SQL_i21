@@ -16,6 +16,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intShipViaId] [int] NULL,
 	
 	[intItemContractId] INT NULL,
+	[intItemBundleId] INT NULL,
 	[intItemId] [int] NULL,
 	[strItemSpecification] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intCategoryId] INT NULL,

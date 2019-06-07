@@ -48,6 +48,7 @@ AS
 			IC.strGrade AS strQualityApproval,
 			U4.strUnitMeasure				AS	strWeightUOM,
 			IM.strItemNo,		
+			IB.strItemNo					AS	strBundleItemNo,		
 			IM.strShortName					AS	strItemShortName,		
 			IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						
@@ -115,6 +116,7 @@ AS
 	JOIN	tblCTSubBook					SK	ON	SK.intSubBookId				=	CD.intSubBookId				LEFT
 
 	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				LEFT	
+	JOIN	tblICItem						IB	ON	IB.intItemId				=	CD.intItemBundleId			LEFT	
 	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				LEFT
 	JOIN	tblICUnitMeasure				U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			LEFT
 	JOIN	tblICItemUOM					PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		LEFT
