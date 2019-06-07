@@ -152,30 +152,32 @@ BEGIN TRY
 			FROM tblTRQuoteDetail QD
 			LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = QD.intSupplyPointId
 			WHERE intQuoteHeaderId = @QuoteId
-	
-			DECLARE @LineItems LineItemTaxDetailStagingTable
-				, @QuoteDetailId INT
-				, @QuoteHeaderId INT
-				, @ItemId INT
-				, @TerminalId INT
-				, @SupplyPointId INT
-				, @ShipViaId INT
-				, @TaxGroupId INT
-				, @ShipToLocationId INT
-				, @SpecialPriceId INT
-				, @RackPrice NUMERIC(18,6) = 0
-				, @DeviationAmount NUMERIC(18,6) = 0
-				, @FreightRate NUMERIC(18,6) = 0
-				, @SurchargeRate NUMERIC(18,6) = 0
-				, @QuotePrice NUMERIC(18,6) = 0
-				, @Margin NUMERIC(18,6) = 0
-				, @QtyOrdered NUMERIC(18,6) = 0
-				, @ExtProfit NUMERIC(18,6) = 0
-				, @Tax NUMERIC(18,6) = 0
-				, @ZipCode NVARCHAR(20)		
 			
 			WHILE EXISTS (SELECT TOP 1 1 FROM #tmpQuoteDetail)
 			BEGIN
+
+				DECLARE @LineItems LineItemTaxDetailStagingTable
+					, @QuoteDetailId INT = NULL
+					, @QuoteHeaderId INT = NULL
+					, @ItemId INT = NULL
+					, @TerminalId INT = NULL
+					, @SupplyPointId INT = NULL
+					, @ShipViaId INT = NULL
+					, @TaxGroupId INT = NULL
+					, @ShipToLocationId INT = NULL
+					, @SpecialPriceId INT = NULL
+					, @RackPrice NUMERIC(18,6) = 0
+					, @DeviationAmount NUMERIC(18,6) = 0
+					, @FreightRate NUMERIC(18,6) = 0
+					, @SurchargeRate NUMERIC(18,6) = 0
+					, @QuotePrice NUMERIC(18,6) = 0
+					, @Margin NUMERIC(18,6) = 0
+					, @QtyOrdered NUMERIC(18,6) = 0
+					, @ExtProfit NUMERIC(18,6) = 0
+					, @Tax NUMERIC(18,6) = 0
+					, @ZipCode NVARCHAR(20)	= NULL
+					, @ItemUOMId INT = NULL	
+
 				SELECT TOP 1 @QuoteDetailId = intQuoteDetailId
 					, @QuoteHeaderId = intQuoteHeaderId
 					, @ItemId = intItemId
@@ -195,6 +197,8 @@ BEGIN TRY
 					, @Tax = dblTax
 					, @ZipCode = strZipCode
 				FROM #tmpQuoteDetail
+
+				SET @ItemUOMId = [dbo].[fnGetItemStockUOM](@ItemId)
 				
 				SELECT @RackPrice = ISNULL(tblPatch.dblRackPrice, ISNULL(tblTRQuoteDetail.dblRackPrice, 0.000000))
 					, @DeviationAmount = ISNULL(tblPatch.dblDeviation, 0.000000)
@@ -270,7 +274,7 @@ BEGIN TRY
 					, NULL
 					, 0
 					, 0
-					, NULL	--intItemUOMId
+					, @ItemUOMId	--intItemUOMId
 					, NULL  --@CFSiteId
 					, 0		--@IsDeliver
 					, 0     --@IsCFQuote
