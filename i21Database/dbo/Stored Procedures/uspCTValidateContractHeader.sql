@@ -51,6 +51,7 @@ BEGIN TRY
 			@ysnUniqueEntityReference	BIT
 
 	SELECT	@ysnUniqueEntityReference = ysnUniqueEntityReference FROM tblCTCompanyPreference
+	--SELECT	@XML	=	dbo.[fnCTRemoveStringXMLTag](@XML,'strAmendmentLog')
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -364,6 +365,10 @@ BEGIN TRY
 	END
 	IF @RowState = 'Modified'
 	BEGIN
+		SELECT	@ysnMultiplePriceFixation	=	ISNULL(@ysnMultiplePriceFixation,ysnMultiplePriceFixation)
+		FROM	tblCTContractHeader
+		WHERE	intContractHeaderId	=	@intContractHeaderId
+
 		IF @ysnMultiplePriceFixation = 1
 		BEGIN
 			SELECT @dblLotsFixed = dblLotsFixed FROM tblCTPriceFixation WHERE intContractHeaderId = @intContractHeaderId
