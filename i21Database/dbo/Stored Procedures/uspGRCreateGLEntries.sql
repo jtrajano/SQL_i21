@@ -90,7 +90,7 @@ BEGIN
 		,@intCurrencyId			= CS.intCurrencyId
 		,@InventoryItemId		= CS.intItemId  
 		,@dblUnits				= SST.dblUnits
-		,@dblGrossUnits			= CS.dblGrossQuantity * (SST.dblUnits / CS.dblOpenBalance)
+		,@dblGrossUnits			= CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance)
 	FROM tblGRCustomerStorage CS 
 	JOIN tblGRSettleStorageTicket SST 
 		ON  SST.intCustomerStorageId = CS.intCustomerStorageId
