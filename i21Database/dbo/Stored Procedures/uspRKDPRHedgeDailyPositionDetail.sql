@@ -31,11 +31,11 @@ BEGIN
 		, @ysnPreCrush = ISNULL(ysnPreCrush, 0)
 	FROM tblRKCompanyPreference
 
-	DECLARE @CrushReport BIT = 0
-	IF (ISNULL(@strPositionBy, '') = 'Delivery Month' OR ISNULL(@strPositionBy, '') = 'Futures Month')
-	BEGIN
-		SET @CrushReport = 1
-	END
+	DECLARE @CrushReport BIT = 1
+	--IF (ISNULL(@strPositionBy, '') = 'Delivery Month' OR ISNULL(@strPositionBy, '') = 'Futures Month')
+	--BEGIN
+	--	SET @CrushReport = 1
+	--END
 	
 	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
 		, intCommodity INT)
@@ -322,7 +322,26 @@ BEGIN
 			, ysnPreCrush
 			, strNotes
 			, strBrokerTradeNo)
-		SELECT * FROM fnRKGetOpenFutureByDate( @tempCommId, @dtmToDate, @CrushReport)
+		SELECT intFutOptTransactionId
+			, dblOpenContract
+			, strCommodityCode
+			, strInternalTradeNo
+			, strLocationName
+			, dblContractSize
+			, strFutureMarket
+			, strFutureMonth
+			, strOptionMonth
+			, dblStrike
+			, strOptionType
+			, strInstrumentType
+			, strBrokerAccount
+			, strBroker
+			, strNewBuySell
+			, intFutOptTransactionHeaderId
+			, ysnPreCrush
+			, strNotes
+			, strBrokerTradeNo
+		FROM fnRKGetOpenFutureByDate( @tempCommId, '1/1/1900', @dtmToDate, @CrushReport)
 
 		DELETE FROM #tempCommodity WHERE intCommodity = @tempCommId
 	END
