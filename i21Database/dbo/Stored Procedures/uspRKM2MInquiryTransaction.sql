@@ -1014,7 +1014,7 @@ INSERT INTO @tblFinalDetail (intContractHeaderId
     , dblNoOfLots
     , dblLotsFixed
     , dblPriceWORollArb)
-SELECT DISTINCT intContractHeaderId
+SELECT intContractHeaderId
 	, intContractDetailId
 	, strContractOrInventoryType
 	, strContractSeq
@@ -2361,7 +2361,7 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 								NULL
 							ELSE 0 END)
 FROM (
-	SELECT DISTINCT intConcurrencyId = 0
+	SELECT intConcurrencyId = 0
 		, intContractHeaderId
 		, intContractDetailId
 		, strContractOrInventoryType
@@ -2537,7 +2537,7 @@ FROM (
 	) t
 	WHERE dblOpenQty <> 0 and intContractHeaderId is not NULL 
 	
-	UNION ALL SELECT DISTINCT intConcurrencyId = 0
+	UNION ALL SELECT intConcurrencyId = 0
 		, intContractHeaderId
 		, intContractDetailId
 		, strContractOrInventoryType
