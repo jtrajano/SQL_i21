@@ -206,7 +206,8 @@ DECLARE @tblGetOpenContractDetail TABLE (intRowNum INT
 	, strEntityName NVARCHAR(100)
 	, strCustomerContract NVARCHAR(100)
 	, intFutureMarketId INT
-	, intFutureMonthId INT)
+	, intFutureMonthId INT
+	, strPricingStatus NVARCHAR(50))
 
 INSERT INTO @tblGetOpenContractDetail (intRowNum
 	, strCommodityCode
@@ -234,7 +235,8 @@ INSERT INTO @tblGetOpenContractDetail (intRowNum
 	, strEntityName
 	, strCustomerContract
 	, intFutureMarketId
-	, intFutureMonthId)
+	, intFutureMonthId
+	, strPricingStatus)
 SELECT 
 	ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC) intRowNum
 	,strCommodityCode
@@ -263,6 +265,7 @@ SELECT
 	,strCustomerContract = ''
 	,intFutureMarketId
 	,intFutureMonthId
+	,strPricingStatus
 FROM tblCTContractBalance where CONVERT(DATETIME,CONVERT(VARCHAR, dtmEndDate, 101),101) = @dtmTransactionDateUpTo and intCommodityId = @intCommodityId
 
 SELECT *
@@ -424,7 +427,7 @@ SELECT DISTINCT CH.intCommodityUOMId intCommodityUnitMeasureId
 	, CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) AS ysnSubCurrency
 	, CD.intCompanyLocationId
 	, MO.ysnExpired
-	, strPricingStatus
+	, OCD.strPricingStatus
 	, CA.strDescription as strOrgin
 	, ISNULL(ysnMultiplePriceFixation,0) as ysnMultiplePriceFixation
 	, FM.intUnitMeasureId intMarketUOMId
@@ -1098,7 +1101,8 @@ FROM (
 			, (ISNULL(convert(decimal(24,6),case when ISNULL(intCommodityUnitMeasureId,0) = 0 then dblOpenQty1 else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,ISNULL(dblOpenQty1,0))end),0))
 				-(ISNULL(convert(decimal(24,6),case when ISNULL(intCommodityUnitMeasureId,0) = 0 then dblInvoicedQuantity else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,ISNULL(dblInvoicedQuantity,0))end),0)) as dblOpenQty
 		FROM (
-			SELECT DISTINCT cd.intContractHeaderId
+			SELECT 
+				  cd.intContractHeaderId
 				, cd.intContractDetailId
                 , 'In-transit' + '(S)' as strContractOrInventoryType
                 , strContractSeq = ch.strContractNumber + '-' + CONVERT(nvarchar,cd.intContractSeq)
@@ -1218,7 +1222,8 @@ FROM (
 			JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
 
 			UNION ALL
-			SELECT DISTINCT intContractHeaderId = NULL
+			SELECT 
+				  intContractHeaderId = NULL
 				, intContractDetailId = NULL
                 , 'In-transit' + '(S)' as strContractOrInventoryType
                 , strContractSeq = it.strTransactionId  

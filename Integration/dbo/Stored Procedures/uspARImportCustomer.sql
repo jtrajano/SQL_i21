@@ -1730,8 +1730,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					END
 
 					--INSERT into Location
-					INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation], [strOriginLinkCustomer])
-					VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault, @originCustomer)
+					INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strCheckPayeeName], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation], [strOriginLinkCustomer])
+					VALUES								(@EntityId,@strName, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault, @originCustomer)
 
 					DECLARE @EntityLocationId INT
 					SET @EntityLocationId = SCOPE_IDENTITY()
@@ -1739,6 +1739,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					--INSERT MULTIPLE Location based on the Bill to
 					INSERT [dbo].[tblEMEntityLocation]    
 							([intEntityId], 
+							 [strCheckPayeeName],
 							 [strLocationName], 
 							 [strAddress], 
 							 [strCity], 
@@ -1753,6 +1754,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 							 [strOriginLinkCustomer])
 							select 				
 										@EntityId, 
+										CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN ptcus_last_name + ptcus_first_name WHEN ptcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))  END,
 										(RTRIM (CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN 
 												   ptcus_last_name + ptcus_first_name 
 											  WHEN ptcus_co_per_ind_cp = ''P'' THEN 
@@ -1778,6 +1780,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					--INSERT BILL TO ADDRESS LOCATIONS (ptadrmst)
 						INSERT [dbo].[tblEMEntityLocation]	
 							([intEntityId],
+							 [strCheckPayeeName],
 							 [strLocationName],
 							 [strAddress],
 							 [strCity], 
@@ -1791,6 +1794,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 							 [ysnDefaultLocation])
 						SELECT 
 							 @EntityId,
+							 CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN ptcus_last_name + ptcus_first_name WHEN ptcus_co_per_ind_cp = ''P'' THEN RTRIM(LTRIM(ptcus_last_name)) + '', '' + RTRIM(LTRIM(ptcus_first_name))  END,
 							 ISNULL(LTRIM(RTRIM( ptcus_cus_no)),'''')+ '' BILL TO'',
 							 ISNULL(LTRIM(RTRIM(ptadr_addr)),'''') + CHAR(10) + ISNULL(LTRIM(RTRIM(ptadr_addr2)),''''),
 							 LTRIM(RTRIM(ptadr_city)),

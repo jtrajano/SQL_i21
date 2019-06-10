@@ -7560,6 +7560,15 @@
     <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
     <Build Include="dbo\Views\vyuCTBasisDelivery.sql" />
     <Build Include="dbo\User Defined Types\DestinationShipmentItemLot.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityStockUOM.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityUnitMeasure.sql" />
+    <Build Include="dbo\Functions\fnCTGetCommodityUOM.sql" />
+    <Build Include="dbo\Functions\fnCTConvertCostToTargetCommodityUOM.sql" />
+    <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPOSBatchProcess.sql" />
+    <Build Include="dbo\Tables\tblARPOSBatchProcessLog.sql" />
+    <Build Include="dbo\Views\vyuARPOSBatchProcessSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryByNetPosition.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryByNetPosition.sql" />
   </ItemGroup>

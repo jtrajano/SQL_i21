@@ -84,7 +84,7 @@ BEGIN
 		SO.[intSalesOrderId] = @SalesOrderId
 		AND SO.[strTransactionType] = 'Order'
 		AND SOSOD.[intSalesOrderDetailId] NOT IN (SELECT [intTransactionDetailId] FROM tblARTransactionDetail WHERE [intTransactionId] = @SalesOrderId)
-		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0
+		AND (ISNULL(ICI.[ysnListBundleSeparately],0) = 0 OR ICI.strBundleType = 'Kit')
 		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')
 		AND ICI.strBundleType <> 'Option'
 
@@ -126,7 +126,7 @@ BEGIN
 		SO.[intSalesOrderId] = @SalesOrderId
 		AND SO.[strTransactionType] = 'Order'
 		AND SOSOD.[intItemId] <> ARTD.[intItemId]
-		AND ISNULL(ICI.[ysnListBundleSeparately],0) = 0	
+		AND (ISNULL(ICI.[ysnListBundleSeparately],0) = 0 OR ICI.strBundleType = 'Kit')
 		AND ARGIC.[strType] IN ('Bundle') -- ('Bundle', 'Finished Good')
 		AND ICI.strBundleType <> 'Option'
 

@@ -129,7 +129,7 @@ SELECT
 	,[intItemUOMId]							= DETAILS.intItemUOMId
 	,[dblQtyShipped]						= ABS(DETAILS.dblQuantity)
 	,[dblDiscount]							= 0
-	,[dblPrice]								= (DETAILS.dblExtendedPrice / DETAILS.dblQuantity)
+	,[dblPrice]								= ABS((DETAILS.dblExtendedPrice / DETAILS.dblQuantity))
 	,[ysnRefreshPrice]						= 0
 	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt, 0) = 0 THEN 1 ELSE 0 END
 	,[ysnClearDetailTaxes]					= 1
@@ -166,7 +166,7 @@ SELECT TOP 1
 	,[intItemUOMId]							= NULL
 	,[dblQtyShipped]						= 1.000000
 	,[dblDiscount]							= NULL
-	,[dblPrice]								= POS.dblDiscount * -1
+	,[dblPrice]								= ABS(POS.dblDiscount)
 	,[ysnRefreshPrice]						= 0
 	,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt, 0) = 0 THEN 1 ELSE 0 END
 	,[ysnClearDetailTaxes]					= 1
@@ -232,7 +232,8 @@ IF ISNULL(@ErrorMessage, '') = ''
 			
 		
 		UPDATE tblARPOS
-		SET ysnReturn = 1, intInvoiceId = @createdCreditMemoId
+		SET ysnReturn = 1
+		  , intCreditMemoId = @createdCreditMemoId
 		WHERE intPOSId = @intPOSId
 		
 		--UPDATE tblARInvoice

@@ -1,4 +1,6 @@
-﻿CREATE FUNCTION [dbo].[fnCTGetBasisDelivery]
+﻿-- ANY CHANGES APPLIED HERE MUST BE APPLIED ALSO IN fnCTGetBasisDeliveryAboveR2 POST SCRIPT
+
+CREATE FUNCTION [dbo].[fnCTGetBasisDelivery]
 (
 	@dtmDate DATE = NULL
 )
@@ -275,24 +277,24 @@ BEGIN
 	,T.strCommodityCode	
 	,ISNULL(T.dtmDate, CD.dtmCreated)
 	,dblQuantity = ISNULL(T.dblQuantity, 0)
-	,dblRunningBalance = CASE WHEN T.strTransactionType = 'Voucher' OR T.strTransactionType = 'Invoice'  THEN CD.dblQuantity + SUM(T.dblQuantity) OVER (PARTITION BY T.intContractDetailId, T.strTransactionType ORDER BY T.dtmDate ASC)
-								ELSE SUM(T.dblQuantity) OVER (PARTITION BY T.intContractDetailId, T.strTransactionType ORDER BY T.dtmDate ASC)
-								END
-	---- ORIGINAL APPROACH WITH PERFOMANCE HIT
-	--,dblRunningBalance = CASE 
-	--						WHEN T.strTransactionType = 'Voucher' 
-	--							THEN CD.dblQuantity + 
-	--							(SELECT ISNULL(SUM(dblQuantity),0)
-	--								FROM @TemporaryTable TIR
-	--								WHERE TIR.dtmDate <= T.dtmDate
-	--								AND TIR.intContractDetailId = CD.intContractDetailId
-	--								AND TIR.strTransactionType = 'Voucher')
-	--						ELSE (SELECT ISNULL(SUM(dblQuantity),0) -- Inventory Receipt
-	--								FROM @TemporaryTable TIR
-	--								WHERE TIR.dtmDate <= T.dtmDate
-	--								AND TIR.intContractDetailId = CD.intContractDetailId
-	--								AND TIR.strTransactionType = 'Inventory Receipt')
-	--						END
+	--,dblRunningBalance = CASE WHEN T.strTransactionType = 'Voucher' OR T.strTransactionType = 'Invoice'  THEN CD.dblQuantity + SUM(T.dblQuantity) OVER (PARTITION BY T.intContractDetailId, T.strTransactionType ORDER BY T.dtmDate ASC)
+	--							ELSE SUM(T.dblQuantity) OVER (PARTITION BY T.intContractDetailId, T.strTransactionType ORDER BY T.dtmDate ASC)
+	--							END
+	-- ORIGINAL APPROACH WITH PERFOMANCE HIT FOR R2 ONLY
+	,dblRunningBalance = CASE 
+							WHEN T.strTransactionType = 'Voucher' 
+								THEN CD.dblQuantity + 
+								(SELECT ISNULL(SUM(dblQuantity),0)
+									FROM @TemporaryTable TIR
+									WHERE TIR.dtmDate <= T.dtmDate
+									AND TIR.intContractDetailId = CD.intContractDetailId
+									AND TIR.strTransactionType = 'Voucher')
+							ELSE (SELECT ISNULL(SUM(dblQuantity),0) -- Inventory Receipt
+									FROM @TemporaryTable TIR
+									WHERE TIR.dtmDate <= T.dtmDate
+									AND TIR.intContractDetailId = CD.intContractDetailId
+									AND TIR.strTransactionType = 'Inventory Receipt')
+							END
 	FROM tblCTContractDetail CD
 	INNER JOIN @TemporaryTable T ON CD.intContractDetailId = T.intContractDetailId
 

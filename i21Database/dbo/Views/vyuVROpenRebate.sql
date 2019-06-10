@@ -8,9 +8,10 @@ FROM (
 	SELECT
 		intRowId = CAST(ROW_NUMBER() OVER(ORDER BY invoice.intInvoiceId) AS INT)
 		, strVendorNumber = vendor.strVendorId
+		, strVendorName = entity.strName
 		, program.strProgram
 		, customer.strCustomerNumber
-		, customerXref.strVendorCustomer
+		, strVendorCustomer = entityCustomer.strName
 		, invoice.strInvoiceNumber
 		, invoice.strBOLNumber
 		, invoice.dtmDate
@@ -34,18 +35,19 @@ FROM (
 		, program.intProgramId
 		, strRebateBy = ISNULL(programItem.strRebateBy, programCategory.strRebateBy)
 		, companyLocation.strLocationName
-		, vendorSetup.intVendorSetupId
+		, intVendorSetupId = program.intVendorSetupId
 		, invoice.intInvoiceId
-		, strVendorName = entity.strName
 		, program.ysnActive
 	FROM tblARInvoiceDetail invoiceDetail
 		INNER JOIN tblARInvoice invoice ON invoice.intInvoiceId = invoiceDetail.intInvoiceId
 		INNER JOIN tblICItem item ON item.intItemId = invoiceDetail.intItemId
 		INNER JOIN tblICCategory category ON category.intCategoryId = item.intCategoryId
 		LEFT OUTER JOIN tblARCustomer customer ON customer.intEntityId = invoice.intEntityCustomerId
-		LEFT OUTER JOIN tblVRVendorSetup vendorSetup ON vendorSetup.intEntityId = customer.intEntityId
-		LEFT OUTER JOIN tblVRProgram program ON program.intVendorSetupId = vendorSetup.intVendorSetupId
-		LEFT OUTER JOIN tblVRCustomerXref customerXref ON customerXref.intEntityId = invoice.intEntityCustomerId
+		LEFT OUTER JOIN tblEMEntity entityCustomer ON entityCustomer.intEntityId = customer.intEntityId
+		--LEFT OUTER JOIN tblVRCustomerXref customerXref ON customerXref.intEntityId = invoice.intEntityCustomerId
+		LEFT OUTER JOIN tblVRProgramCustomer programCustomer ON programCustomer.intEntityId = invoice.intEntityCustomerId
+		LEFT OUTER JOIN tblVRProgram program ON program.intProgramId = programCustomer.intProgramId
+		LEFT OUTER JOIN tblVRVendorSetup vendorSetup ON vendorSetup.intVendorSetupId = program.intVendorSetupId
 		LEFT OUTER JOIN (
 			SELECT
 				pi.*, uom.intItemUOMId
@@ -75,3 +77,6 @@ FROM (
 ) openRebates
 WHERE openRebates.strProgram IS NOT NULL
 	AND openRebates.dblRebateRate <> 0
+
+
+	

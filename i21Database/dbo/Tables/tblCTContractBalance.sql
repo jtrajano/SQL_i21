@@ -50,4 +50,5 @@
 	,dtmSeqEndDate						DATETIME	
 	,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 )

@@ -23,6 +23,7 @@
 	[strPONumber]		   NVARCHAR(25)    COLLATE Latin1_General_CI_AS NULL,
 	[strComment]	       NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS NULL,
 	[ysnTaxExempt]		   BIT			   NULL,
+	[ysnPaid]			   BIT			   CONSTRAINT [DF_tblARPOS_ysnPaid] DEFAULT ((0)) NOT NULL,
     [intOriginalPOSTransactionId] INT NULL, 
     CONSTRAINT [PK_tblARPOS] PRIMARY KEY CLUSTERED ([intPOSId] ASC),
 	CONSTRAINT [FK_tblARPOSLog] FOREIGN KEY ([intPOSLogId]) REFERENCES [dbo].[tblARPOSLog] ([intPOSLogId])
@@ -36,13 +37,45 @@ CREATE TRIGGER [dbo].[trgReceiptNumber]
 AS 
 
 DECLARE @ReceiptNumber NVARCHAR(25) = NULL    
+DECLARE @intStartingNumberId INT = 0
+
+DECLARE @inserted TABLE(intPOSId INT, strReceiptNumber NVARCHAR(30))
+DECLARE @posId INT = 0
+
 
 BEGIN
 	SET NOCOUNT ON;
-	Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output    
-	UPDATE tblARPOS      
-	SET strReceiptNumber = @ReceiptNumber      
-	WHERE ISNULL(strReceiptNumber,'') = ''
+	--Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output   
+	
+	INSERT INTO @inserted
+	SELECT intPOSId, strReceiptNumber FROM INSERTED WHERE ISNULL(RTRIM(LTRIM(strReceiptNumber)), '') = '' ORDER BY intPOSId
+
+	
+	WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
+	BEGIN
+		select top 1 @posId = intPOSId from @inserted
+
+		Exec uspARGetReceiptNumber @strReceiptNumber = @ReceiptNumber output   
+	
+		--SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
+		--FROM tblSMStartingNumber --WITH (NOLOCK)
+		--WHERE strTransactionType = 'Sales Receipt'
+
+	
+		--EXEC uspSMGetStartingNumber @intStartingNumberId, @ReceiptNumber OUT
+	 
+			--UPDATE tblARPOS      
+			--SET strReceiptNumber = @ReceiptNumber      
+			--WHERE ISNULL(strReceiptNumber,'') = ''
+
+			UPDATE tblARPOS     
+			SET strReceiptNumber = @ReceiptNumber      
+			WHERE intPOSId = @posId --ISNULL(strReceiptNumber,'') = ''
+
+			DELETE FROM @inserted where intPOSId = @posId
+	END
+
+	
 
 END
 GO

@@ -23,7 +23,7 @@ SELECT intPOSId					= POS.intPOSId
 	 , dblARBalance				= CUSTOMER.dblARBalance
 	 , ysnHold					= POS.ysnHold
 	 , ysnReturn				= POS.ysnReturn
-	 , ysnPaid					= ISNULL(INV.ysnPaid, 0)
+	 , ysnPaid					= POS.ysnPaid
 	 , ysnTaxExempt				= ISNULL(POS.ysnTaxExempt,0)
 FROM dbo.tblARPOS POS WITH (NOLOCK)
 INNER JOIN (
@@ -42,11 +42,6 @@ INNER JOIN (
 		 , strBillToZipCode
 	FROM dbo.vyuARCustomerSearch WITH (NOLOCK)
 ) CUSTOMER ON POS.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-LEFT JOIN (
-	SELECT intInvoiceId
-	     , ysnPaid
-	FROM dbo.tblARInvoice
-) INV ON INV.intInvoiceId = POS.intInvoiceId
 INNER JOIN (
 	SELECT intEntityId
 		 , strName
