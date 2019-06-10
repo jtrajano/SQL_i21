@@ -184,10 +184,11 @@ BEGIN --MISC PO ITEM
 	IF @@ROWCOUNT > 0
 	BEGIN
 		DECLARE @voucherPayablesMiscPO AS VoucherPayable;
+		DECLARE @descreasePO BIT = ~@decreaseQty
 		ALTER TABLE #tmpMiscPOPayables DROP COLUMN intVoucherPayableId
 		INSERT INTO @voucherPayablesMiscPO
 		SELECT * FROM #tmpMiscPOPayables
-		EXEC uspPOReceivedMiscItem @voucherPayables = @voucherPayablesMiscPO, @decrease = @decreaseQty
+		EXEC uspPOReceivedMiscItem @voucherPayables = @voucherPayablesMiscPO, @decrease = @descreasePO
 
 		--decrease on order qty for po misc item
 		DECLARE @ItemToUpdateOnOrderQty ItemCostingTableType

@@ -1153,6 +1153,35 @@ BEGIN
 	WHERE intRowNumber IN (4)
 END
 
+IF (ISNULL(@intBookId, 0) = 0)
+BEGIN
+		INSERT INTO @ListFinal (
+			intRowNumber,
+			strGroup,
+			Selection,
+			PriceStatus,
+			strFutureMonth,
+			dblNoOfContract,
+			dblNoOfLot,
+			dblQuantity,
+			strBook,
+			strSubBook,
+			strAccountNumber	
+			)
+		SELECT 6 intRowNumber,
+			strGroup,
+			'5.Total - Market coverage' Selection,
+			'Total' PriceStatus,
+			strFutureMonth,
+			sum(dblNoOfContract) dblNoOfContract ,
+			sum(dblNoOfLot) dblNoOfLot,
+			sum(dblQuantity) dblQuantity
+			,'Total - Market coverage' strBook
+			,'Total' strSubBook
+			,'Total'    strAccountNumber
+		FROM @ListFinal where intRowNumber = 4 
+		group by strGroup,strFutureMonth
+END
 ---- Futures Required
 INSERT INTO @ListFinal (
 	intRowNumber,
@@ -1213,7 +1242,7 @@ SELECT intRowNumber,
 	intSubBookId,
 	strSubBook
 FROM (
-	SELECT DISTINCT 6 intRowNumber,
+	SELECT DISTINCT 7 intRowNumber,
 		'2.Futures Required' COLLATE Latin1_General_CI_AS strGroup,
 		'Futures Required' COLLATE Latin1_General_CI_AS Selection,
 		'1.Unpriced - (Balance to be Priced)' COLLATE Latin1_General_CI_AS PriceStatus,
@@ -1263,7 +1292,7 @@ INSERT INTO @ListFinal (
 	intContractHeaderId,
 	intFutOptTransactionHeaderId
 	)
-SELECT DISTINCT 7 intRowNumber,
+SELECT DISTINCT 8 intRowNumber,
 	'2.Futures Required' COLLATE Latin1_General_CI_AS,
 	'Futures Required' COLLATE Latin1_General_CI_AS AS Selection,
 	'2.To Purchase' COLLATE Latin1_General_CI_AS AS PriceStatus,
@@ -1315,7 +1344,7 @@ INSERT INTO @ListFinal (
 	intSubBookId,
 	strSubBook
 	)
-SELECT 8 intRowNumber,
+SELECT 9 intRowNumber,
 	'2.Futures Required' COLLATE Latin1_General_CI_AS,
 	'Futures Required' COLLATE Latin1_General_CI_AS Selection,
 	'3.Terminal position' COLLATE Latin1_General_CI_AS PriceStatus,
@@ -1370,7 +1399,7 @@ INSERT INTO @ListFinal (
 	intSubBookId,
 	strSubBook
 	)
-SELECT 9 intRowNumber,
+SELECT 10 intRowNumber,
 	'2.Futures Required' COLLATE Latin1_General_CI_AS,
 	'Futures Required' COLLATE Latin1_General_CI_AS Selection,
 	'4.Net Position' COLLATE Latin1_General_CI_AS PriceStatus,
@@ -1413,7 +1442,7 @@ FROM (
 		intSubBookId,
 		strSubBook
 	FROM @ListFinal
-	WHERE intRowNumber IN (6, 7)
+	WHERE intRowNumber IN (7, 8)
 	GROUP BY strFutureMonth,
 		strProductType,
 		strProductLine,
@@ -1450,7 +1479,7 @@ FROM (
 		intSubBookId,
 		strSubBook
 	FROM @ListFinal
-	WHERE intRowNumber IN (8)
+	WHERE intRowNumber IN (9)
 	GROUP BY strFutureMonth,
 		strProductType,
 		strProductLine,
@@ -1501,7 +1530,7 @@ INSERT INTO @ListFinal (
 	intSubBookId,
 	strSubBook
 	)
-SELECT 10 intRowNumber,
+SELECT 11 intRowNumber,
 	'2.Futures Required' COLLATE Latin1_General_CI_AS,
 	Selection,
 	PriceStatus,
@@ -1569,7 +1598,7 @@ INSERT INTO @ListFinal (
 	intSubBookId,
 	strSubBook
 	)
-SELECT 11,
+SELECT 12,
 	strGroup,
 	Selection,
 	PriceStatus,
@@ -1634,7 +1663,7 @@ INSERT INTO @ListFinal (
 	intSubBookId,
 	strSubBook
 	)
-SELECT 11 intRowNumber,
+SELECT 12 intRowNumber,
 	strGroup,
 	Selection,
 	PriceStatus,
@@ -1681,6 +1710,36 @@ GROUP BY strGroup,
 	intSubBookId,
 	strSubBook
 
+IF (ISNULL(@intBookId, 0) = 0)
+BEGIN
+		INSERT INTO @ListFinal (
+			intRowNumber,
+			strGroup,
+			Selection,
+			PriceStatus,
+			strFutureMonth,
+			dblNoOfContract,
+			dblNoOfLot,
+			dblQuantity,
+			strBook,
+			strSubBook,
+			strAccountNumber	
+			)
+		SELECT 6 intRowNumber,
+			strGroup,
+			'6.Total - Net Position' Selection,
+			'Total' PriceStatus,
+			strFutureMonth,
+			sum(dblNoOfContract) dblNoOfContract ,
+			sum(dblNoOfLot) dblNoOfLot,
+			sum(dblQuantity) dblQuantity
+			,'Total - Net Position' strBook
+			,'Total' strSubBook
+			,'Total' strAccountNumber
+		FROM @ListFinal WHERE intRowNumber in (10,12) and PriceStatus='4.Net Position'
+		group by strGroup,strFutureMonth
+END
+
 DECLARE @MonthOrder AS TABLE (
 	intRowNumber1 INT identity(1, 1),
 	intRowNumber INT,
@@ -1716,7 +1775,7 @@ DECLARE @strAccountNumber NVARCHAR(MAX)
 
 SELECT TOP 1 @strAccountNumber = strAccountNumber
 FROM @ListFinal
-WHERE strGroup = '1.Outright Coverage' AND PriceStatus = '1.Priced / Outright - (Outright position)'
+--WHERE strGroup = '1.Outright Coverage' AND PriceStatus = '1.Priced / Outright - (Outright position)'
 ORDER BY intRowNumber
 
 DECLARE @MonthList AS TABLE (strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS)
@@ -1724,71 +1783,71 @@ DECLARE @MonthList AS TABLE (strFutureMonth NVARCHAR(100) COLLATE Latin1_General
 INSERT INTO @MonthList (strFutureMonth)
 SELECT DISTINCT strFutureMonth
 FROM @ListFinal
-WHERE strGroup = '1.Outright Coverage' AND PriceStatus IN ('1.Priced / Outright - (Outright position)')
+--WHERE strGroup = '1.Outright Coverage' AND PriceStatus IN ('1.Priced / Outright - (Outright position)')
 
-INSERT INTO @MonthOrder (
-	intRowNumber,
-	strGroup,
-	Selection,
-	PriceStatus,
-	strFutureMonth,
-	strAccountNumber,
-	dblNoOfContract,
-	strTradeNo,
-	TransactionDate,
-	TranType,
-	CustVendor,
-	dblNoOfLot,
-	dblQuantity,
-	intOrderByHeading,
-	intContractHeaderId,
-	intFutOptTransactionHeaderId,
-	strProductType,
-	strProductLine,
-	strShipmentPeriod,
-	strLocation,
-	strOrigin,
-	intItemId,
-	strItemNo,
-	strItemDescription,
-	intBookId,
-	strBook,
-	intSubBookId,
-	strSubBook
-	)
-SELECT DISTINCT intRowNumber,
-	'1.Outright Coverage' COLLATE Latin1_General_CI_AS,
-	'Outright Coverage' COLLATE Latin1_General_CI_AS,
-	'1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS,
-	strFutureMonth,
-	@strAccountNumber,
-	NULL,
-	NULL,
-	GETDATE(),
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	strProductType,
-	strProductLine,
-	strShipmentPeriod,
-	strLocation,
-	strOrigin,
-	intItemId,
-	strItemNo,
-	strItemDescription,
-	intBookId,
-	strBook,
-	intSubBookId,
-	strSubBook
-FROM @ListFinal
-WHERE strFutureMonth NOT IN (
-		SELECT DISTINCT strFutureMonth
-		FROM @MonthList
-		)
+--INSERT INTO @MonthOrder (
+--	intRowNumber,
+--	strGroup,
+--	Selection,
+--	PriceStatus,
+--	strFutureMonth,
+--	strAccountNumber,
+--	dblNoOfContract,
+--	strTradeNo,
+--	TransactionDate,
+--	TranType,
+--	CustVendor,
+--	dblNoOfLot,
+--	dblQuantity,
+--	intOrderByHeading,
+--	intContractHeaderId,
+--	intFutOptTransactionHeaderId,
+--	strProductType,
+--	strProductLine,
+--	strShipmentPeriod,
+--	strLocation,
+--	strOrigin,
+--	intItemId,
+--	strItemNo,
+--	strItemDescription,
+--	intBookId,
+--	strBook,
+--	intSubBookId,
+--	strSubBook
+--	)
+--SELECT DISTINCT intRowNumber,
+--	'1.Outright Coverage' COLLATE Latin1_General_CI_AS,
+--	'Outright Coverage' COLLATE Latin1_General_CI_AS,
+--	'1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS,
+--	strFutureMonth,
+--	@strAccountNumber,
+--	NULL,
+--	NULL,
+--	GETDATE(),
+--	NULL,
+--	NULL,
+--	NULL,
+--	NULL,
+--	NULL,
+--	NULL,
+--	NULL,
+--	strProductType,
+--	strProductLine,
+--	strShipmentPeriod,
+--	strLocation,
+--	strOrigin,
+--	intItemId,
+--	strItemNo,
+--	strItemDescription,
+--	intBookId,
+--	strBook,
+--	intSubBookId,
+--	strSubBook
+--FROM @ListFinal
+--WHERE strFutureMonth NOT IN (
+--		SELECT DISTINCT strFutureMonth
+--		FROM @MonthList
+--		)
 
 INSERT INTO @MonthOrder (
 	intRowNumber,
@@ -2018,6 +2077,7 @@ BEGIN
 		intSubBookId,
 		strSubBook
 		)
+
 	SELECT DISTINCT intRowNumber,
 		strGroup,
 		Selection,
@@ -2042,10 +2102,10 @@ BEGIN
 		intItemId = NULL,
 		strItemNo = '',
 		strItemDescription = '',
-		intBookId = NULL,
-		strBook = NULL,
-		intSubBookId = NULL,
-		strSubBook = NULL
+		intBookId = intBookId,
+		strBook = strBook,
+		intSubBookId = intSubBookId,
+		strSubBook = strSubBook
 	FROM @ListFinal a
 	CROSS APPLY (
 		SELECT DISTINCT strFutureMonth

@@ -193,7 +193,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,NULL AS strCategoryCode--CG.strCategoryCode --CG. is not in use
 				,dbo.[fnCTGetSeqDisplayField](CD.intDestinationCityId,'tblSMCity') strDestinationCity--DY.strCity AS strDestinationCity
 				,IY.strCurrency AS strInvoiceCurrency
-				,'From ' + FY.strCurrency + ' To ' + TY.strCurrency AS strExchangeRate
+				,dbo.[fnCTGetSeqDisplayField](CD.intCurrencyExchangeRateId,'tblSMCurrencyExchangeRate') AS strExchangeRate
 				,PG.strName AS strPurchasingGroup
 				,dbo.[fnCTGetSeqDisplayField](CD.intFXPriceUOMId,'tblICItemUOM') strFXPriceUOM--FM.strUnitMeasure AS strFXPriceUOM
 				,RT.strCurrencyExchangeRateType
@@ -277,9 +277,9 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 
 		LEFT    JOIN	tblSMCurrency					IY	ON	IY.intCurrencyID					=		CD.intInvoiceCurrencyId		--strInvoiceCurrency
 		LEFT    JOIN	tblSMCurrency					MY	ON	MY.intCurrencyID					=		MA.intCurrencyId			--strMarketCurrency
-		LEFT    JOIN	tblSMCurrencyExchangeRate		ER	ON	ER.intCurrencyExchangeRateId		=		CD.intCurrencyExchangeRateId--strExchangeRate
-		LEFT    JOIN	tblSMCurrency					FY	ON	FY.intCurrencyID					=		ER.intFromCurrencyId			
-		LEFT    JOIN	tblSMCurrency					TY	ON	TY.intCurrencyID					=		ER.intToCurrencyId	
+		--LEFT    JOIN	tblSMCurrencyExchangeRate		ER	ON	ER.intCurrencyExchangeRateId		=		CD.intCurrencyExchangeRateId--strExchangeRate
+		--LEFT    JOIN	tblSMCurrency					FY	ON	FY.intCurrencyID					=		ER.intFromCurrencyId			
+		--LEFT    JOIN	tblSMCurrency					TY	ON	TY.intCurrencyID					=		ER.intToCurrencyId	
 		LEFT    JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=		CD.intRateTypeId
 		LEFT    JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId					=		CD.intFreightTermId			--strFreightTerm
 		LEFT	JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId				=		CD.intPurchasingGroupId		--strPurchasingGroup
