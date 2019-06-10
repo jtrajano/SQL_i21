@@ -1,36 +1,38 @@
 ﻿CREATE VIEW [dbo].[vyuARPOSEndOfDayReport]
 AS 
 SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
-	 , intEntityUserId		= EOD.intEntityId
-	 , intCompanyLocationId	= CL.intCompanyLocationId
-	 , dtmLogin				= EOD.dtmOpen
-	 , dtmLogout			= EOD.dtmClose
-	 , ysnClosed			= EOD.ysnClosed
-	 , strStatus			= (CASE WHEN EOD.ysnClosed = 0 THEN 'Open' ELSE 'Closed' END) COLLATE Latin1_General_CI_AS
-	 , strLocation			= CL.strLocationName
-	 , strUserName			= EC.strUserName
-	 , strStore				= ISNULL(STORE.strDescription, '')
-	 , SubTotal				= ISNULL(POS.dblSubTotal, 0)
-	 , Shipping				= ISNULL(POS.dblShipping, 0)
-	 , Discount				= ISNULL(POS.dblDiscount, 0)
-	 , Tax					= ISNULL(POS.dblTax, 0)
-	 , Total				= ISNULL(POS.dblTotal, 0)
-	 , NumberOfSales		= ISNULL(POS.intTotalSales, 0)
-	 , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)--ISNULL(EOD.dblOpeningBalance, 0) + ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)
-	 , dblOpeningBalance	= ISNULL(EOD.dblOpeningBalance, 0)
-	 , Cash					= ISNULL(PAYMENT.dblCashAmount, 0)
-	 , CashCount			= ISNULL(PAYMENT.intCashCount, 0)
-	 , [Check]				= ISNULL(PAYMENT.dblCheckAmount, 0)
-	 , CheckCount			= ISNULL(PAYMENT.intCheckCount, 0)
-	 , CreditCard			= ISNULL(PAYMENT.dblCreditCardAmount, 0)
-	 , CrediCardCount		= ISNULL(PAYMENT.intCreditCardCount, 0)
-	 , DebitCard			= ISNULL(PAYMENT.dblDebitCardAmount, 0)
-	 , DebitCardCount		= ISNULL(PAYMENT.intDebitCardCount, 0)
-	 , OnAccount			= ISNULL(PAYMENT.dblOnAccountAmount, 0)
-	 , OnAccountCount		= ISNULL(PAYMENT.intOnAccountCount, 0)
-	 , dblCashReturn		= ISNULL(EOD.dblCashReturn,0)
-	 , dblCashSales			= ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)
-	 , intReturnCount		= ISNULL(CASHRETURN.intReturnCount,0)
+			  , intEntityUserId			= EOD.intEntityId
+			  , intCompanyLocationId	= CL.intCompanyLocationId
+			  , dtmLogin				= EOD.dtmOpen
+			  , dtmLogout				= EOD.dtmClose
+			  , ysnClosed				= EOD.ysnClosed
+			  , strStatus				= (CASE WHEN EOD.ysnClosed = 0 THEN 'Open' ELSE 'Closed' END) COLLATE Latin1_General_CI_AS
+			  , strLocation				= CL.strLocationName
+			  , strUserName				= EC.strUserName
+			  , strStore				= ISNULL(STORE.strDescription, '')
+			  , SubTotal				= ISNULL(POS.dblSubTotal, 0)
+			  , Shipping				= ISNULL(POS.dblShipping, 0)
+			  , Discount				= ISNULL(POS.dblDiscount, 0)
+			  , Tax						= ISNULL(POS.dblTax, 0)
+			  , Total					= ISNULL(POS.dblTotal, 0)
+			  , NumberOfSales			= ISNULL(POS.intTotalSales, 0)
+			  , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)
+			  , dblOpeningBalance		= ISNULL(EOD.dblOpeningBalance, 0)
+			  , Cash					= ISNULL(PAYMENT.dblCashAmount, 0)
+			  , CashCount				= ISNULL(PAYMENT.intCashCount, 0)
+			  , [Check]					= ISNULL(PAYMENT.dblCheckAmount, 0)
+			  , CheckCount				= ISNULL(PAYMENT.intCheckCount, 0)
+			  , CreditCard				= ISNULL(PAYMENT.dblCreditCardAmount, 0)
+			  , CrediCardCount			= ISNULL(PAYMENT.intCreditCardCount, 0)
+			  , DebitCard				= ISNULL(PAYMENT.dblDebitCardAmount, 0)
+			  , DebitCardCount			= ISNULL(PAYMENT.intDebitCardCount, 0)
+			  , OnAccount				= ISNULL(PAYMENT.dblOnAccountAmount, 0)
+			  , OnAccountCount			= ISNULL(PAYMENT.intOnAccountCount, 0)
+			  , dblCashReturn			= ISNULL(EOD.dblCashReturn,0)
+			  , dblCashSales			= ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)
+			  , intReturnCount			= ISNULL(CASHRETURN.intReturnCount,0)
+			  , dblCashPaymentReceived	= ISNULL(EOD.dblCashPaymentReceived, 0)
+			  , dblDrawerBalance		= ISNULL(EOD.dblExpectedEndingBalance, 0) + ISNULL(EOD.dblCashPaymentReceived, 0)
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
