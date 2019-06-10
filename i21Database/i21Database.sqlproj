@@ -7583,6 +7583,7 @@
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryByNetPosition.sql" />
     <Build Include="dbo\Views\vyuLGShippingLineServiceContractDetail.sql" />
     <Build Include="dbo\Functions\fnCTRemoveStringXMLTag.sql" />
+    <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
