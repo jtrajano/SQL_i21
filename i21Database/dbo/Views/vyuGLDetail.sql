@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuGLDetail]
 AS
-        SELECT 
+                SELECT 
 		A.intGLDetailId,
 		A.intAccountId,
 		A.dtmDate,
@@ -57,8 +57,8 @@ AS
         ISNULL(dblSourceUnitDebit,0) dblSourceUnitDebit,
         ISNULL(dblSourceUnitCredit,0) dblSourceUnitCredit,
 		F.strUserName COLLATE Latin1_General_CI_AS strSourceEntity,
-		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId
-
+		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId,
+		strVendor = CASE WHEN strModuleName='Accounts Payable'  THEN AP.strVendor ELSE '' END
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
@@ -77,7 +77,14 @@ AS
 	  OUTER APPLY(
 		SELECT TOP 1 strName strUserName FROM [tblEMEntity] WHERE intEntityId = A.intSourceEntityId
 	 )F
-	 
+	 OUTER APPLY
+	 (
+			SELECT TOP 1 V.strName strVendor FROM (
+				SELECT strBillId TransId ,intEntityVendorId from dbo.tblAPBill  	UNION 
+				SELECT strPaymentRecordNum TransId, intEntityVendorId FROM tblAPPayment 
+			) C  
+			INNER JOIN vyuAPVendor V ON V.intEntityId = C.intEntityVendorId
+			--INNER JOIN tblEMEntity ET ON ET.intEntityId = C.intEntityVendorId
+			WHERE C.TransId = A.strTransactionId
+	 )AP
 GO
-
-
