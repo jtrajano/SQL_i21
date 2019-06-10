@@ -102,7 +102,7 @@ SELECT	TOP 1
 		,@dtmDate = dtmDate
 		,@dblAmount = dblAmount
 		,@dblShortAmount = dblShortAmount
-		,@dblTotalAmount = ISNULL(dblAmount, 0) + ISNULL(dblShortAmount,0)
+		,@dblTotalAmount = ISNULL(dblAmount, 0) +  ROUND(ISNULL(dblShortAmount,0) * CASE WHEN dblExchangeRate <> 1 THEN dblExchangeRate ELSE 1 END, 2)
 		,@intShortGLAccountId = intShortGLAccountId
 		,@ysnTransactionPostedFlag = ysnPosted
 		,@ysnTransactionClearedFlag = ysnClr
@@ -335,9 +335,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN A.dblAmount ELSE A.dblAmount * A.dblExchangeRate END 
+			,[dblDebit]				= dblAmount
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN 0 ELSE A.dblAmount END
+			,[dblDebitForeign]		= dblAmountForeign
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -409,10 +409,10 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
-			,[dblDebit]				= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN B.dblDebit ELSE B.dblDebit * B.dblExchangeRate END
-			,[dblCredit]			= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN B.dblCredit ELSE B.dblCredit * B.dblExchangeRate END
-			,[dblDebitForeign]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 0 ELSE B.dblDebit END
-			,[dblCreditForeign]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 0 ELSE B.dblCredit END
+			,[dblDebit]				= dblDebit
+			,[dblCredit]			= dblCredit
+			,[dblDebitForeign]		= dblDebitForeign
+			,[dblCreditForeign]		= dblCreditForeign
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
