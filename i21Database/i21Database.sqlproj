@@ -7346,6 +7346,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetInHouse.sql" />
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
+    <Build Include="dbo\Tables\tblICStagingCommodityActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCommodityActivity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
