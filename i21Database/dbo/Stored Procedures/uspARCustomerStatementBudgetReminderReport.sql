@@ -37,8 +37,9 @@ DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @strCustomerNameLocal				AS NVARCHAR(MAX)	= NULLIF(@strCustomerName, '')
 	  , @strCustomerIdsLocal				AS NVARCHAR(MAX)	= NULLIF(@strCustomerIds, '')
 	  , @strCompanyLocationIdsLocal			AS NVARCHAR(MAX)
-	  , @strCompanyName						AS NVARCHAR(MAX)
-	  , @strCompanyAddress					AS NVARCHAR(MAX)
+	  , @strCompanyName						AS NVARCHAR(MAX)	= NULL
+	  , @strCompanyAddress					AS NVARCHAR(MAX)	= NULL
+	  , @blbLogo							AS VARBINARY(MAX)	= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULLIF(@intEntityUserId, 0)
 	  , @intCompanyLocationId				AS INT				= NULL
 
@@ -47,6 +48,7 @@ SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDat
 SET @dtmBalanceForwardDateLocal	= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmBalanceForwardDateLocal)))
 SET @dtmDateFromLocal			= DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
 
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = dbo.fnARFormatCustomerAddress(strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
@@ -694,7 +696,7 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, dblBudgetNowDue			= SR.dblBudgetNowDue
 	, dblBudgetPastDue			= SR.dblBudgetPastDue
 	, ysnStatementCreditLimit	= SR.ysnStatementCreditLimit
-	, blbLogo					= dbo.fnSMGetCompanyLogo('Header')
+	, blbLogo					= @blbLogo
 FROM #STATEMENTREPORT SR
 
 IF @ysnPrintCreditBalanceLocal = 0
