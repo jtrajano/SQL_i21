@@ -385,6 +385,18 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				InsurLocation.strState as strInsurerState,
 				InsurLocation.strZipCode as strInsurerZipCode,
 
+				Shipper.strName as strShipper,
+				Shipper.strEmail as strShipperEmail,
+				Shipper.strFax as strShipperFax,
+				Shipper.strPhone as strShipperPhone,
+				Shipper.strMobile as strShipperMobile,
+				Shipper.strWebsite as strShipperWebsite,
+				SpLocation.strAddress as strShipperAddress,
+				SpLocation.strCity as strShipperCity,
+				SpLocation.strCountry as strShipperCountry,
+				SpLocation.strState as strShipperState,
+				SpLocation.strZipCode as strShipperZipCode,
+
 				WH.strSubLocationName as strWarehouse,
 				WH.strSubLocationDescription as strWarehouseDescription,
 				WH.strAddress as strWarehouseAddress,
@@ -993,7 +1005,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblEMEntity TerminalEntity ON TerminalEntity.intEntityId = L.intTerminalEntityId
 		LEFT JOIN	[tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
 		LEFT JOIN	tblEMEntity InsurEntity ON InsurEntity.intEntityId = L.intInsurerEntityId
-		LEFT JOIN	[tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId
+		LEFT JOIN	[tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId	
+		LEFT JOIN	tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
+		LEFT JOIN	[tblEMEntityLocation] SpLocation ON SpLocation.intEntityId = Shipper.intEntityId and SpLocation.intEntityLocationId = Shipper.intDefaultLocationId
 		LEFT JOIN	tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 		LEFT JOIN	tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN	tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId

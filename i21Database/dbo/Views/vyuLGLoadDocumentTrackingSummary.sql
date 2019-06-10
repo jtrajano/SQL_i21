@@ -4,18 +4,18 @@ SELECT DT.strContractNumber
 	,intContractSeq
 	,DT.strLoadNumber
 	,strVendorName
-	,E.strName AS strProducer
+	,strProducer = E.strName
 	,DT.dtmScheduledDate
-	,DT.dtmETAPOD AS dtmETAPODSA
-	,SI.dtmETAPOD AS dtmETAPODSI
+	,dtmETAPODSA = DT.dtmETAPOD
+	,dtmETAPODSI = SI.dtmETAPOD
 	,intDaysToETAPOD
-	,(
+	,intDocsCount = (
 		SELECT COUNT(*)
 		FROM vyuLGLoadDocumentTracking T
 		JOIN tblLGLoad LO ON LO.intLoadId = T.intLoadId
 		WHERE T.intContractHeaderId = DT.intContractHeaderId AND LO.intShipmentType = 1 AND L.intLoadId = LO.intLoadId
-		) intDocsCount
-	,(
+		) 
+	,intReceivedDocsCount = (
 		SELECT COUNT(*)
 		FROM vyuLGLoadDocumentTracking T
 		JOIN tblLGLoad LO ON LO.intLoadId = T.intLoadId
@@ -23,30 +23,22 @@ SELECT DT.strContractNumber
 			AND LO.intShipmentType = 1
 			AND ISNULL(T.ysnReceived, 0) = 1
 			AND L.intLoadId = LO.intLoadId
-		) intReceivedDocsCount
-	,(SELECT MAX(dtmStartDate) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dtmStartDate
-	,(SELECT MAX(dtmEndDate) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dtmEndDate
-	,CASE 
-		WHEN (
-				SELECT COUNT(*)
-				FROM vyuLGLoadDocumentTracking T
-				JOIN tblLGLoad L ON L.intLoadId = T.intLoadId
-				WHERE T.intContractHeaderId = DT.intContractHeaderId
-					AND L.intShipmentType = 1
-				) = (
-				SELECT COUNT(*)
-				FROM vyuLGLoadDocumentTracking T
-				JOIN tblLGLoad L ON L.intLoadId = T.intLoadId
-				WHERE T.intContractHeaderId = DT.intContractHeaderId
-					AND L.intShipmentType = 1
-					AND ISNULL(T.ysnReceived, 0) = 1
-				)
-			THEN 'Y'
-		ELSE 'N'
-		END COLLATE Latin1_General_CI_AS strDocumentsReceived
+		) 
+	,intReceivedCopyDocsCount = (
+		SELECT COUNT(*)
+		FROM vyuLGLoadDocumentTracking T
+		JOIN tblLGLoad LO ON LO.intLoadId = T.intLoadId
+		WHERE T.intContractHeaderId = DT.intContractHeaderId
+			AND LO.intShipmentType = 1
+			AND ISNULL(T.ysnReceivedCopy, 0) = 1
+			AND L.intLoadId = LO.intLoadId
+		) 
+	,dtmStartDate = (SELECT MAX(dtmStartDate) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId)
+	,dtmEndDate = (SELECT MAX(dtmEndDate) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId)
+	,strDocumentsReceived = CASE WHEN (ISNULL(L.ysnDocumentsReceived, 0) = 1) THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS 
 	,DT.dblQuantity
 	,DT.ysnInvoice
-	,CASE WHEN ISNULL(DT.ysnInvoice,0) = 0 THEN 'No' ELSE 'Yes' END COLLATE Latin1_General_CI_AS strInvoice
+	,strInvoice = CASE WHEN ISNULL(DT.ysnInvoice,0) = 0 THEN 'No' ELSE 'Yes' END COLLATE Latin1_General_CI_AS
 	,L.intBookId
 	,BO.strBook
 	,L.intSubBookId
@@ -70,6 +62,7 @@ GROUP BY DT.strContractNumber
 	,DT.dtmETAPOD
 	,SI.dtmETAPOD
 	,L.intLoadId
+	,L.ysnDocumentsReceived
 	,DT.dblQuantity
 	,DT.ysnInvoice
 	,intDaysToETAPOD

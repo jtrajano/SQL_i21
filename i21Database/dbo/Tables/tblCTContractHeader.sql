@@ -79,6 +79,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	intCompanyId INT,
 	intContractHeaderRefId INT,
 	strReportTo [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
+	intBrokerId INT,
+	intBrokerageAccountId INT
 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber],[intEntityId],[intCommodityId]), 
@@ -114,7 +116,10 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 
 	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY (intFutureMarketId) REFERENCES tblRKFutureMarket(intFutureMarketId),
 	CONSTRAINT [FK_tblCTContractHeader_tblRKFutureMonth_intFutureMonthId] FOREIGN KEY (intFutureMonthId) REFERENCES tblRKFuturesMonth(intFutureMonthId),
-	CONSTRAINT [FK_tblCTContractHeader_tblSMCountry_intCountryId] FOREIGN KEY (intCountryId) REFERENCES tblSMCountry(intCountryID)
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCountry_intCountryId] FOREIGN KEY (intCountryId) REFERENCES tblSMCountry(intCountryID),
+	CONSTRAINT [FK_tblCTContractHeader_tblEMEntity_intBrokerId_intEntityId] FOREIGN KEY ([intBrokerId]) REFERENCES tblEMEntity([intEntityId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId])
+
 )
 
 GO

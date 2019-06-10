@@ -13,6 +13,7 @@ SELECT
 	,Alloc.strPurchaseContractNumber
 	,Alloc.strPContractNumber
 	,Alloc.intPContractSeq
+	,Alloc.strPERPPONumber
 	,Alloc.dblPAllocatedQty
 	,dblGrossWt = (LD.dblGross / LD.dblQuantity) * Alloc.dblPAllocatedQty
 	,dblTareWt = (LD.dblTare / LD.dblQuantity) * Alloc.dblPAllocatedQty
@@ -33,6 +34,7 @@ SELECT
 	,Alloc.strSalesContractNumber
 	,Alloc.strSCustomerRefNo
 	,Alloc.intSContractSeq
+	,Alloc.strSERPPONumber
 	,Alloc.strBuyer
 	,Alloc.strSItemNo
 	,Alloc.strSItemDescription

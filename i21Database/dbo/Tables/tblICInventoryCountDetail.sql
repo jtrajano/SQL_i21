@@ -31,6 +31,7 @@
     [intEntityUserSecurityId] INT NOT NULL, 
     [ysnFetched] BIT NULL,
     [intSort] INT NULL, 
+    [dblNewCost] NUMERIC(38, 20) NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)),
     [dtmDateCreated] DATETIME NULL,
     [dtmDateModified] DATETIME NULL,

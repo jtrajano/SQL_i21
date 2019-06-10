@@ -20,3 +20,10 @@
 	CONSTRAINT [FK_tblTRLoadDistributionHeader_tblARSalesperson_intEntitySalespersonId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblARSalesperson] (intEntityId),
 	CONSTRAINT [FK_tblTRLoadDistributionHeader_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])			
 )
+GO
+
+CREATE INDEX [IX_tblTRLoadDistributionHeader_intLoadHeaderId] ON [dbo].[tblTRLoadDistributionHeader] ([intLoadHeaderId] ASC)
+GO 
+
+CREATE INDEX [IX_tblTRLoadDistributionHeader_intCompanyLocationId] ON [dbo].[tblTRLoadDistributionHeader] ([intCompanyLocationId] ASC)
+GO 

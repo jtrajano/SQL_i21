@@ -35,6 +35,7 @@ BEGIN
 		, dblPrice
 		, ISNULL(dblValue,0) as dblValue
 		, intPriceFixationId
+		, dblFutures
 	INTO #tmpReportDetail
 	FROM (
 		--=========================================
@@ -63,6 +64,7 @@ BEGIN
 			, dbo.fnCTConvertQtyToTargetItemUOM((select top 1 intItemUOMId from tblICItemUOM where intItemId = ITM.intItemId and intUnitMeasureId = ISNULL(@intPriceUOMId, 0)),CD.intItemUOMId, ISNULL(CD.dblCashPrice,0)) AS dblPrice
 			, CD.dblTotalCost as dblValue
 			, PF.intPriceFixationId
+			, dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(CD.dblFutures,0)) dblFutures
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
@@ -70,13 +72,14 @@ BEGIN
 		LEFT JOIN tblCTPriceFixation PF ON CD.intContractDetailId = PF.intContractDetailId
 		LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId
 		LEFT JOIN tblRKFuturesMonth FMo ON CD.intFutureMonthId = FMo.intFutureMonthId
+		LEFT JOIN tblRKFutureMarket FM ON CD.intFutureMarketId = FM.intFutureMarketId
 		INNER JOIN tblICItemUOM UOM ON CD.intItemUOMId = UOM.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		WHERE CH.intPricingTypeId = 1 --Priced
 			AND PF.intPriceFixationId IS NULL
 			AND CD.intFutureMarketId = ISNULL(@intFutureMarketId, CD.intFutureMarketId)
 			AND CH.intCommodityId = ISNULL(@intCommodityId, CH.intCommodityId)
-			AND CD.intCurrencyId = ISNULL(@intCurrencyId, CD.intCurrencyId)
+			--AND CD.intCurrencyId = ISNULL(@intCurrencyId, CD.intCurrencyId)
 
 		--=========================================
 		-- Price Fixations
@@ -104,6 +107,7 @@ BEGIN
 			, dbo.fnCTConvertQtyToTargetItemUOM((select top 1 intItemUOMId from tblICItemUOM where intItemId = ITM.intItemId and intUnitMeasureId = ISNULL(@intPriceUOMId, 0)),CD.intItemUOMId, ISNULL(PFD.dblFixationPrice,0)) AS dblPrice
 			, PFD.dblFixationPrice * PFD.dblQuantity AS dblValue
 			, PF.intPriceFixationId
+			, dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(CD.dblFutures,0)) dblFutures
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
@@ -112,12 +116,13 @@ BEGIN
 		LEFT JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
 		LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId
 		LEFT JOIN tblRKFuturesMonth FMo ON CD.intFutureMonthId = FMo.intFutureMonthId
+		LEFT JOIN tblRKFutureMarket FM ON CD.intFutureMarketId = FM.intFutureMarketId
 		INNER JOIN tblICItemUOM UOM ON CD.intItemUOMId = UOM.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM ON UOM.intUnitMeasureId = UM.intUnitMeasureId
 		WHERE PF.intPriceFixationId IS NOT NULL
 			AND CD.intFutureMarketId = ISNULL(@intFutureMarketId, CD.intFutureMarketId)
 			AND CH.intCommodityId = ISNULL(@intCommodityId, CH.intCommodityId)
-			AND CD.intCurrencyId = ISNULL(@intCurrencyId, CD.intCurrencyId)
+			--AND CD.intCurrencyId = ISNULL(@intCurrencyId, CD.intCurrencyId)
 
 		--===================
 		-- Future Trades
@@ -144,13 +149,14 @@ BEGIN
 			, dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(DD.dblPrice,0)) AS dblPrice 
 			, (ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * DD.dblPrice AS strValue
 			, null AS intPriceFixationId
+			, dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(DD.dblPrice,0)) dblFutures
 		FROM tblRKFutOptTransactionHeader DH
 		INNER JOIN tblRKFutOptTransaction DD ON DH.intFutOptTransactionHeaderId = DD.intFutOptTransactionHeaderId
 		INNER JOIN tblRKFutureMarket FM ON DD.intFutureMarketId = FM.intFutureMarketId
 		INNER JOIN tblICUnitMeasure UM ON FM.intUnitMeasureId = UM.intUnitMeasureId
 		WHERE  DD.intFutureMarketId = ISNULL(@intFutureMarketId, DD.intFutureMarketId)
 		AND DD.intCommodityId = ISNULL(@intCommodityId, DD.intCommodityId)
-		AND DD.intCurrencyId = ISNULL(@intCurrencyId, DD.intCurrencyId)
+		--AND DD.intCurrencyId = ISNULL(@intCurrencyId, DD.intCurrencyId)
 	) tbl
 
 	IF @strFilterBy = 'Transaction Date'

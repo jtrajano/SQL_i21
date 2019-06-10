@@ -53,7 +53,6 @@ FROM (
 			, ot.strBrokerTradeNo strLBrokerTradeNo
 			, ot1.strBrokerTradeNo strSBrokerTradeNo
 			, fm.dblContractSize dblContractSize
-			,0 as intConcurrencyId
 			, psd.dblFutCommission
 			, c.intCurrencyID as intCurrencyId
 			, c.strCurrency
@@ -61,6 +60,7 @@ FROM (
 			, strMainCurrency = CASE WHEN c.ysnSubCurrency = 0 THEN c.strCurrency ELSE MainCurrency.strCurrency END
 			, c.intCent
 			, c.ysnSubCurrency
+			,psd.intConcurrencyId
 		FROM tblRKMatchFuturesPSHeader psh
 		JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId
 		JOIN tblRKFutOptTransaction ot on psd.intLFutOptTransactionId= ot.intFutOptTransactionId

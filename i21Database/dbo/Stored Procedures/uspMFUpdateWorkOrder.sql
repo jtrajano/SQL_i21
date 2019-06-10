@@ -43,6 +43,7 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@dtmPrevPlannedDate DATETIME
 		,@intSalesOrderLineItemId INT
+		,@intLoadId INT
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -81,6 +82,7 @@ BEGIN TRY
 		,@ysnIngredientAvailable = ysnIngredientAvailable
 		,@intDepartmentId = intDepartmentId
 		,@intSalesOrderLineItemId = intSalesOrderLineItemId
+		,@intLoadId = intLoadId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
@@ -112,6 +114,7 @@ BEGIN TRY
 			,ysnIngredientAvailable BIT
 			,intDepartmentId INT
 			,intSalesOrderLineItemId INT
+			,intLoadId INT
 			)
 
 	IF EXISTS (
@@ -222,6 +225,7 @@ BEGIN TRY
 		,intCustomerId = @intCustomerId
 		,ysnIngredientAvailable = @ysnIngredientAvailable
 		,intDepartmentId = @intDepartmentId
+		,intLoadId = @intLoadId
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId = @intConcurrencyId

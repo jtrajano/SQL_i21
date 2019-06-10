@@ -50,6 +50,7 @@ BEGIN TRY
 		,intRowNo INT IDENTITY(1, 1)
 		,strInventoryTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,ysnInputItem BIT
+		,intMainItemId int
 		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -655,6 +656,7 @@ BEGIN TRY
 			,dtmActualInputDateTime
 			,strInventoryTracking
 			,ysnInputItem
+			,intMainItemId
 			)
 		SELECT Cont.intContainerId
 			,Cont.strContainerId
@@ -738,6 +740,7 @@ BEGIN TRY
 			,GETDATE() AS dtmActualInputDateTime
 			,I.strInventoryTracking
 			,CONVERT(BIT, 1) AS ysnInputItem
+			,I.intItemId
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -789,6 +792,7 @@ BEGIN TRY
 			,dtmActualInputDateTime
 			,strInventoryTracking
 			,ysnInputItem
+			,intMainItemId
 			)
 		SELECT Cont.intContainerId
 			,Cont.strContainerId
@@ -872,6 +876,7 @@ BEGIN TRY
 			,GETDATE() AS dtmActualInputDateTime
 			,I.strInventoryTracking
 			,CONVERT(BIT, 0) AS ysnInputItem
+			,rs.intItemId 
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -928,6 +933,7 @@ BEGIN TRY
 			,dtmActualInputDateTime
 			,strInventoryTracking
 			,ysnInputItem
+			,intMainItemId
 			)
 		SELECT Cont.intContainerId
 			,Cont.strContainerId
@@ -1011,6 +1017,7 @@ BEGIN TRY
 			,GETDATE() AS dtmActualInputDateTime
 			,I.strInventoryTracking
 			,CONVERT(BIT, 1) AS ysnInputItem
+			,ri.intItemId 
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.intWorkOrderId = ri.intWorkOrderId
@@ -1228,6 +1235,7 @@ BEGIN TRY
 							,dtmActualInputDateTime
 							,strInventoryTracking
 							,ysnInputItem
+							,intMainItemId
 							)
 						SELECT Cont.intContainerId
 							,Cont.strContainerId
@@ -1251,6 +1259,7 @@ BEGIN TRY
 							,GETDATE() AS dtmActualInputDateTime
 							,I.strInventoryTracking
 							,CONVERT(BIT, 0) AS ysnInputItem
+							,@intInputItemId
 						FROM dbo.tblICItem I
 						JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 						JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
@@ -1293,6 +1302,7 @@ BEGIN TRY
 							,dtmActualInputDateTime
 							,strInventoryTracking
 							,ysnInputItem
+							,intMainItemId
 							)
 						SELECT Cont.intContainerId
 							,Cont.strContainerId
@@ -1316,6 +1326,7 @@ BEGIN TRY
 							,GETDATE() AS dtmActualInputDateTime
 							,I.strInventoryTracking
 							,CONVERT(BIT, 0) AS ysnInputItem
+							,@intInputItemId
 						FROM dbo.tblICItem I
 						JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 						JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
@@ -1638,6 +1649,7 @@ BEGIN TRY
 		,WC.dtmActualInputDateTime
 		,WC.intRowNo
 		,IsNULL(PL.dblQty, WC.dblInputQuantity) dblReadingQuantity
+		,WC.intMainItemId
 	FROM #tblMFConsumptionDetail WC
 	LEFT JOIN @tblMFPickLots PL ON PL.intItemId = WC.intInputItemId
 	LEFT JOIN tblICLot L ON L.intLotId = IsNULL(PL.intLotId, WC.intInputLotId)

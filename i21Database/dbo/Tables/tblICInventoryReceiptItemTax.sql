@@ -17,7 +17,7 @@ Type the overview for the table here.
 		[intTaxGroupId] INT NULL,
 		[intTaxCodeId] INT NULL,
 		[intTaxClassId] INT NULL,	
-		[strTaxableByOtherTaxes] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[strTaxableByOtherTaxes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 		[strCalculationMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[dblRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblTax] NUMERIC(18, 6) NULL DEFAULT ((0)),

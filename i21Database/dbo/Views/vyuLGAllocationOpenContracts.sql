@@ -1,56 +1,63 @@
 CREATE VIEW vyuLGAllocationOpenContracts
 AS
-	SELECT 	CD.intContractDetailId, 
-			CD.intContractHeaderId, 
-			CD.intContractSeq,
-			Item.intOriginId, 
-			Country.strCountry as strItemOrigin,
-			Country.intCountryID,
-			CD.intItemId, 					
-			Item.strItemNo,
-			Item.strDescription as strItemDescription,
-			intContractBasisId = CH.intFreightTermId,
-			CB.strContractBasis	AS strINCOTerm,
-			CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance ELSE CD.dblQuantity END as dblDetailQuantity,
-			CD.intUnitMeasureId,
-			UOM.strUnitMeasure,
-			UOM.strUnitType,
-			CD.intPricingTypeId intPricingType,
-			CD.dblBasis,
-			Curr.strCurrency AS strBasisCurrency,
-			CD.dtmStartDate,
-			CD.dtmEndDate,
-			IsNull(CD.dblAllocatedQty, 0) AS dblAllocatedQuantity,
-			IsNull(CD.dblReservedQty, 0) AS dblReservedQuantity,
-			CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance ELSE CD.dblQuantity END - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblReservedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0) AS dblOpenQuantity,
-			CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance ELSE CD.dblQuantity END - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0) AS dblUnAllocatedQuantity,
-			CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance ELSE CD.dblQuantity END - IsNull(CD.dblReservedQty, 0) AS dblUnReservedQuantity,
-
-			CH.intContractTypeId intPurchaseSale,
-			CH.intEntityId,
-			EN.strEntityName as strName,
-			EN.intDefaultLocationId as intEntityLocationId,
-			CH.strContractNumber,
-			CH.dtmContractDate,
-			CH.intCommodityId,
-			CD.intItemUOMId,
-			CD.intCompanyLocationId,
-			CASE WHEN CH.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END COLLATE Latin1_General_CI_AS AS strPurchaseSale,
-			Comm.strDescription as strCommodity,
-			CL.strLocationName,
-			CAST(CASE WHEN CD.intContractStatusId IN (1,4,5,6) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
-			PT.strPricingType,
-			CD.dblCashPrice,
-			CD.dblAdjustment,
-			CD.dblScheduleQty,
-			CD.dblBalance,
-			CD.strItemSpecification,
-			CD.intBookId,
-			BO.strBook,
-			CD.intSubBookId, 
-			SB.strSubBook
-
-	FROM tblCTContractDetail CD
+SELECT 	
+	CD.intContractDetailId
+	,CD.intContractHeaderId
+	,CD.intContractSeq
+	,Item.intOriginId
+	,strItemOrigin = Country.strCountry
+	,Country.intCountryID
+	,CD.intItemId				
+	,Item.strItemNo
+	,strItemDescription = Item.strDescription
+	,ysnBundle = CAST(CASE WHEN (Item.strType = 'Bundle') THEN 1 ELSE 0 END AS BIT)
+	,intContractBasisId = CH.intFreightTermId
+	,strINCOTerm = CB.strContractBasis
+	,dblDetailQuantity = CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance ELSE CD.dblQuantity END
+	,CD.intUnitMeasureId
+	,UOM.strUnitMeasure
+	,UOM.strUnitType
+	,intPricingType = CD.intPricingTypeId
+	,CD.dblBasis
+	,strBasisCurrency = Curr.strCurrency
+	,CD.dtmStartDate
+	,CD.dtmEndDate
+	,dblAllocatedQuantity = IsNull(CD.dblAllocatedQty, 0)
+	,dblReservedQuantity = IsNull(CD.dblReservedQty, 0)
+	,dblOpenQuantity = CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance 
+							ELSE CD.dblQuantity END - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblReservedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0)
+	,dblUnAllocatedQuantity = CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance 
+								ELSE CD.dblQuantity END - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0)
+	,dblUnReservedQuantity = CASE WHEN CD.intContractStatusId = 6 THEN CD.dblQuantity - CD.dblBalance 
+								ELSE CD.dblQuantity END - IsNull(CD.dblReservedQty, 0)
+	,intPurchaseSale = CH.intContractTypeId
+	,CH.intEntityId
+	,strName = EN.strEntityName
+	,intEntityLocationId = EN.intDefaultLocationId
+	,CH.strContractNumber
+	,CH.dtmContractDate
+	,CH.intCommodityId
+	,CD.intItemUOMId
+	,CD.intCompanyLocationId
+	,strPurchaseSale = CASE WHEN CH.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END COLLATE Latin1_General_CI_AS
+	,strCommodity = Comm.strDescription
+	,CL.strLocationName
+	,ysnAllowedToShow = CAST(CASE WHEN CD.intContractStatusId IN (1,4,5,6) THEN 1 ELSE 0 END AS BIT)
+	,PT.strPricingType
+	,CD.dblCashPrice
+	,CD.dblAdjustment
+	,CD.dblScheduleQty
+	,CD.dblBalance
+	,CD.strItemSpecification
+	,CD.intBookId
+	,BO.strBook
+	,CD.intSubBookId
+	,SB.strSubBook
+	,CD.intFutureMarketId
+	,strFutureMarket = FMKT.strFutMarketName
+	,CD.intFutureMonthId
+	,FMTH.strFutureMonth
+FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= CD.intCompanyLocationId
 	JOIN vyuCTEntity EN ON EN.intEntityId = CH.intEntityId AND EN.strEntityType	= (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
@@ -65,4 +72,6 @@ AS
 	LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = CH.intCommodityId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
-	WHERE CD.dblQuantity - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0) > 0.0
+	LEFT JOIN tblRKFutureMarket FMKT ON FMKT.intFutureMarketId = CD.intFutureMarketId
+	LEFT JOIN tblRKFuturesMonth FMTH ON FMTH.intFutureMonthId = CD.intFutureMonthId
+WHERE CD.dblQuantity - IsNull(CD.dblAllocatedQty, 0) - IsNull(CD.dblAllocationAdjQty, 0) > 0.0

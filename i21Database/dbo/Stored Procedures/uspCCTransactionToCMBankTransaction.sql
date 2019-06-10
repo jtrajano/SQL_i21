@@ -76,8 +76,10 @@ BEGIN
 		[dtmDate] = dtmDate,
 		intBankAccountId,
 		[strDescription] = strItem, 
-		[dblDebit] = SUM(ISNULL(dblDebit,0)),
-		[dblCredit] = SUM(ISNULL(dblCredit,0)),
+		--[dblDebit] = SUM(ISNULL(dblDebit,0)),
+		--[dblCredit] = SUM(ISNULL(dblCredit,0)),
+		[dblDebit] = round(SUM(ISNULL(dblDebit,0)),2),
+		[dblCredit] = round(SUM(ISNULL(dblCredit,0)),2),
 		[intEntityId] = @userId
 	FROM (
 	SELECT ccSiteHeader.intSiteHeaderId

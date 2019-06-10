@@ -1235,7 +1235,7 @@ BEGIN TRY
 						SELECT *
 						FROM [tblSMTransaction]
 						WHERE [intScreenId] = @intScreenId
-							AND [strTransactionNo] = @strReceiptNumber
+							--AND [strTransactionNo] = @strReceiptNumber
 							AND [intRecordId] = @intInventoryReceiptId
 						)
 				BEGIN
@@ -1259,7 +1259,7 @@ BEGIN TRY
 					SELECT @intTransactionId = intTransactionId
 					FROM [tblSMTransaction]
 					WHERE [intScreenId] = @intScreenId
-						AND [strTransactionNo] = @strReceiptNumber
+						--AND [strTransactionNo] = @strReceiptNumber
 						AND [intRecordId] = @intInventoryReceiptId
 				END
 

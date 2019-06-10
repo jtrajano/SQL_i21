@@ -11,7 +11,10 @@ BEGIN
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ErrorMessage NVARCHAR(250)
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice WHERE intLoadId = @intLoadId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice WHERE intLoadId = @intLoadId 
+				AND intInvoiceId NOT IN (SELECT intInvoiceId FROM tblLGWeightClaimDetail WCD 
+										INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
+										WHERE WC.intLoadId = @intLoadId))
 	BEGIN
 		SELECT TOP 1
 			@strInvoiceNumber		= ARI.[strInvoiceNumber]
@@ -19,6 +22,9 @@ BEGIN
 		FROM tblARInvoice ARI
 		JOIN tblLGLoad L ON L.intLoadId = ARI.intLoadId
 		WHERE ARI.intLoadId = @intLoadId 
+			AND intInvoiceId NOT IN (SELECT intInvoiceId FROM tblLGWeightClaimDetail WCD 
+									 INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
+									 WHERE WC.intLoadId = @intLoadId)
 
 		SET @ErrorMessage = 'Invoice(' + @strInvoiceNumber + ') was already created for ' + @strLoadNumber;
 

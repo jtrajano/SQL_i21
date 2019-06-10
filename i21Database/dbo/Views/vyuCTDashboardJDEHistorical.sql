@@ -107,6 +107,12 @@ SELECT 	 SQ.intContractDetailId
 		,LV.strBookingReference
 		,LV.intLoadId
 		,LV.dtmDeadlineCargo
+		,LV.strETAPOLReasonCode 
+		,LV.strETSPOLReasonCode
+		,LV.strETAPODReasonCode
+		,LV.strETAPOLReasonCodeDescription
+		,LV.strETSPOLReasonCodeDescription
+		,LV.strETAPODReasonCodeDescription
 		,CASE 	WHEN ISNULL(LV.ysnDocsReceived, 0) = 0 	
 				THEN 'N'
 				ELSE 'Y' 

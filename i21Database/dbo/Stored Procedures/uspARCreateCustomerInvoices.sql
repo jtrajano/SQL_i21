@@ -2323,7 +2323,7 @@ BEGIN TRY
 		[ysnSuccess] = 1 
 		AND [ysnInsert] = 1
 
-	EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
 
 END TRY
 BEGIN CATCH

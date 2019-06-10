@@ -35,11 +35,24 @@
 )
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblTRLoadReceipt_intLoadHeaderId] ON [dbo].[tblTRLoadReceipt]
-(
-	[intLoadHeaderId] ASC
-)
-INCLUDE ( 	
-	intLoadReceiptId
-) 
+CREATE INDEX [IX_tblTRLoadReceipt_intLoadHeaderId] ON [dbo].[tblTRLoadReceipt] ([intLoadHeaderId] ASC)
 GO 
+
+CREATE INDEX [IX_tblTRLoadReceipt_strReceiptLine] ON [dbo].[tblTRLoadReceipt] ([strReceiptLine] ASC)
+GO 
+
+CREATE INDEX [IX_tblTRLoadReceipt_intCompanyLocationId] ON [dbo].[tblTRLoadReceipt] ([intCompanyLocationId] ASC)
+GO 
+
+CREATE INDEX [IX_tblTRLoadReceipt_intInventoryReceiptId] ON [dbo].[tblTRLoadReceipt] ([intInventoryReceiptId] ASC)
+GO 
+
+CREATE INDEX [IX_tblTRLoadReceipt_intInventoryTransferId] ON [dbo].[tblTRLoadReceipt] ([intInventoryTransferId] ASC)
+GO 
+
+CREATE INDEX [IX_tblTRLoadReceipt_intItemId] ON [dbo].[tblTRLoadReceipt] ([intItemId] ASC)
+GO 
+
+
+
+

@@ -85,7 +85,7 @@ BEGIN
 	SET @ErrMsg = ' Future Market is required.'
 END
 
-IF (SELECT COUNT(*) FROM (SELECT DISTINCT (LTRIM(RTRIM(dtmPriceDate))) dtmPriceDate FROM tblRKSettlementPriceImport where strFutureMarket=@strFutureMarket)t) > 1							
+IF (SELECT COUNT(*) FROM (SELECT DISTINCT (LTRIM(RTRIM(strPriceDate))) dtmPriceDate FROM tblRKSettlementPriceImport where strFutureMarket=@strFutureMarket)t) > 1							
 BEGIN
 	IF NOT EXISTS(SELECT * FROM tblRKSettlementPriceImport_ErrLog where strErrorMsg='There are two or more Date/Time combination for Futures Market: ' + @strFutureMarket)
 	BEGIN
@@ -119,7 +119,7 @@ BEGIN
 END
 
 BEGIN TRY	
-	SELECT  @dtmPriceDate=convert(datetime,dtmPriceDate,@ConvertYear) 
+	SELECT  @dtmPriceDate=convert(datetime,strPriceDate,@ConvertYear) 
 	FROM tblRKSettlementPriceImport WHERE intImportSettlementPriceId = @mRowNumber
 
 END TRY
@@ -175,7 +175,7 @@ END
 	BEGIN
 			INSERT INTO tblRKSettlementPriceImport_ErrLog(
 				intImportSettlementPriceId
-				,dtmPriceDate
+				,strPriceDate
 				,strFutureMarket
 				,strInstrumentType
 				,strFutureMonth
@@ -192,7 +192,7 @@ END
 				,intConcurrencyId)
 			SELECT 
 				intImportSettlementPriceId
-				,dtmPriceDate
+				,strPriceDate
 				,strFutureMarket
 				,strInstrumentType
 				,strFutureMonth
@@ -215,7 +215,7 @@ END
 
 		INSERT INTO tblRKSettlementPriceImport_ErrLog(
 					intImportSettlementPriceId
-					,dtmPriceDate
+					,strPriceDate
 					,strFutureMarket
 					,strInstrumentType
 					,strFutureMonth
@@ -232,7 +232,7 @@ END
 					,intConcurrencyId)
 				SELECT 
 					intImportSettlementPriceId
-					,dtmPriceDate
+					,strPriceDate
 					,strFutureMarket
 					,strInstrumentType
 					,strFutureMonth
@@ -255,7 +255,7 @@ END
 SELECT @mRowNumber = MIN(intImportSettlementPriceId) FROM tblRKSettlementPriceImport	WHERE intImportSettlementPriceId > @mRowNumber
 END
 
-SELECT  intImportSettlementPriceErrLogId,intImportSettlementPriceId,dtmPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle, dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,
+SELECT  intImportSettlementPriceErrLogId,intImportSettlementPriceId,strPriceDate,strFutureMarket,strInstrumentType,strFutureMonth,dblLastSettle, dblLow,dblHigh,strFutComments,strOptionMonth,dblStrike,strType,
 		dblSettle,dblDelta,strErrorMsg,intConcurrencyId  FROM tblRKSettlementPriceImport_ErrLog ORDER BY intImportSettlementPriceId
 
 DELETE FROM tblRKSettlementPriceImport_ErrLog

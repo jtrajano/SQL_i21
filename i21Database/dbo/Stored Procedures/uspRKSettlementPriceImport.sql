@@ -44,7 +44,7 @@ WHILE @mRowNumber > 0
 	SELECT @strMarket=strFutureMarket from #temp where intRowNum=@mRowNumber
 
 	
-	SELECT @strMarket=ltrim(rtrim(strFutureMarket)),@strSettlementDate=CONVERT(DATETIME,dtmPriceDate,@ConvertYear) FROM tblRKSettlementPriceImport where strFutureMarket=@strMarket
+	SELECT @strMarket=ltrim(rtrim(strFutureMarket)),@strSettlementDate=CONVERT(DATETIME,strPriceDate,@ConvertYear) FROM tblRKSettlementPriceImport where strFutureMarket=@strMarket
 	SELECT @intFutureMarketId=intFutureMarketId from tblRKFutureMarket where strFutMarketName=@strMarket
 
 

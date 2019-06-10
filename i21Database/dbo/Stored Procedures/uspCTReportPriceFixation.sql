@@ -134,6 +134,7 @@ BEGIN TRY
 
 	SELECT	 DISTINCT 
 			PF.intPriceFixationId,
+			PF.intContractHeaderId,
 			lblReferenceX = CASE WHEN CH.intContractTypeId = 1 THEN 'Buyers Ref.' ELSE 'Seller Ref.' END,
 			lblReferenceY = CASE WHEN CH.intContractTypeId = 2 THEN 'Buyers Ref.' ELSE 'Seller Ref.' END,
 			CH.strContractNumber,
@@ -142,8 +143,8 @@ BEGIN TRY
 			strDescription = isnull(rtrt.strTranslation,IM.strDescription),
 			strQuantity = dbo.fnRemoveTrailingZeroes(CD.dblQuantity)+ ' ' + isnull(rtrt2.strTranslation,UM.strUnitMeasure) ,
 			--strPeriod = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106) ,
-			strPeriod = datename(dd,dtmStartDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,dtmStartDate)),datename(mm,dtmStartDate)) + ' ' + datename(yyyy,dtmStartDate) + ' - ' + datename(dd,dtmEndDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,dtmEndDate)),datename(mm,dtmEndDate)) + ' ' + datename(yyyy,dtmEndDate),
-			strAtlasPeriod = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' to ' + CONVERT(NVARCHAR(50),dtmEndDate,106) ,
+			strPeriod = datename(dd,CD.dtmStartDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,CD.dtmStartDate)),datename(mm,CD.dtmStartDate)) + ' ' + datename(yyyy,CD.dtmStartDate) + ' - ' + datename(dd,CD.dtmEndDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,datename(mm,CD.dtmEndDate)),datename(mm,CD.dtmEndDate)) + ' ' + datename(yyyy,CD.dtmEndDate),
+			strAtlasPeriod = CONVERT(NVARCHAR(50),CD.dtmStartDate,106) + ' to ' + CONVERT(NVARCHAR(50),CD.dtmEndDate,106) ,
 			strStatus = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	@strStatus1
 								ELSE	@strStatus2
@@ -220,7 +221,7 @@ BEGIN TRY
 											ELSE CASE WHEN @IntNoOFUniFormNetWeightUOM=1 THEN ISNULL(LTRIM(dbo.fnRemoveTrailingZeroes(@TotalNetQuantity)),'')+ ' '+ ISNULL(isnull(rtrt4.strTranslation,U7.strUnitMeasure),'') ELSE '' END
 									END
 								END,
-			strPeriodWithPosition = CONVERT(NVARCHAR(50),dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),dtmEndDate,106)+CASE WHEN PO.strPosition IS NOT NULL THEN  ' ('+PO.strPosition+') ' ELSE '' END,
+			strPeriodWithPosition = CONVERT(NVARCHAR(50),CD.dtmStartDate,106) + ' - ' + CONVERT(NVARCHAR(50),CD.dtmEndDate,106)+CASE WHEN PO.strPosition IS NOT NULL THEN  ' ('+PO.strPosition+') ' ELSE '' END,
 			strLotsFixedLabel = CASE WHEN FLOOR((PF.dblTotalLots-PF.dblLotsFixed))=0 THEN '' ELSE @Lotstobefixed + ' :' END,
 			intLotsUnFixed = LTRIM(FLOOR((PF.dblTotalLots-PF.dblLotsFixed))),
 			dblLotsUnFixed = dbo.fnCTChangeNumericScale(ISNULL(PF.dblTotalLots-PF.dblLotsFixed,0),0),
@@ -252,24 +253,14 @@ BEGIN TRY
 			dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY')  AS strBasisComponent,
 			CD.strERPPONumber,
 			CD.dblRatio,
-			CD.strContractCompanyName,
-			CD.strContractPrintSignOff
+			CL.strContractCompanyName,
+			CL.strContractPrintSignOff
 		   ,dtmContractDate						= CH.dtmContractDate
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
-	JOIN	(
-				SELECT	ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractDetailId ASC) intRowNum,
-				CD.* ,
-				CL.strContractCompanyName,
-				CL.strContractPrintSignOff
-				FROM	tblCTContractDetail		CD	
-				JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId	=	CD.intCompanyLocationId
-
-			)							CD	ON	CD.intContractHeaderId			=	CH.intContractHeaderId
-											AND	CD.intContractDetailId			=	CASE	WHEN	PF.intContractDetailId IS NOT NULL 
-																							THEN	PF.intContractDetailId 
-																							ELSE	CD.intContractDetailId 
-																					END		
+	CROSS	APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) SQ
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	SQ.intContractDetailId
+	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId			=	CD.intCompanyLocationId
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
 	JOIN	vyuCTEntity					EC	ON	EC.intEntityId					=	CH.intCounterPartyId  

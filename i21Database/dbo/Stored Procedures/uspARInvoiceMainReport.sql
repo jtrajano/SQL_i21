@@ -181,13 +181,13 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 	END
 
 INSERT INTO @MCPINVOICES
-SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP')
+SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat = 'Format 1 - MCP' OR (strType = 'Transport Delivery' AND strInvoiceFormat = 'Format 2 - Honstein')
 
 IF EXISTS (SELECT TOP 1 NULL FROM @MCPINVOICES)
 	EXEC dbo.[uspARInvoiceMCPReport] @MCPINVOICES, @intEntityUserId, @strRequestId
 
 INSERT INTO @STANDARDINVOICES
-SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP')
+SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 2 - Honstein')
 
 IF EXISTS (SELECT TOP 1 NULL FROM @STANDARDINVOICES)
 	EXEC dbo.[uspARInvoiceReport] @STANDARDINVOICES, @intEntityUserId, @strRequestId

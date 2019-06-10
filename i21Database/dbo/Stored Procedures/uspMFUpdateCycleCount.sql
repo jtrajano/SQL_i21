@@ -34,17 +34,20 @@ BEGIN TRY
 		intItemId INT
 		,intMachineId INT
 		,dblQuantity NUMERIC(38, 20)
+		,intMainItemId int
 		)
 
 	INSERT INTO @tblMFProcessCycleCount
 	SELECT intItemId
 		,PCCM.intMachineId
 		,SUM(dblQuantity)
+		,intMainItemId
 	FROM tblMFProcessCycleCount PCC
 	LEFT JOIN tblMFProcessCycleCountMachine PCCM ON PCCM.intCycleCountId = PCC.intCycleCountId
 	WHERE intCycleCountSessionId = @intCycleCountSessionId
 	GROUP BY PCC.intItemId
 		,PCCM.intMachineId
+		,PCC.intMainItemId
 
 	UPDATE tblMFProductionSummary
 	SET dblCountQuantity = CASE 
@@ -71,6 +74,7 @@ BEGIN TRY
 			,3
 			)
 		AND PS.intMachineId IS NOT NULL
+		AND IsNULL(PS.intMainItemId,0) =IsNULL(CC.intMainItemId,0) 
 
 	UPDATE tblMFProductionSummary
 	SET dblCountQuantity = CASE 
@@ -96,6 +100,7 @@ BEGIN TRY
 			,3
 			)
 		AND PS.intMachineId IS NULL
+	AND IsNULL(PS.intMainItemId,0) =IsNULL(CC.intMainItemId,0) 
 
 	--INSERT INTO dbo.tblMFProductionSummary (
 	--	intWorkOrderId

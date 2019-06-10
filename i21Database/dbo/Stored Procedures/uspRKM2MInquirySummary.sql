@@ -219,7 +219,8 @@ DECLARE @UnRelaized AS TABLE (
 	dblVariationMargin NUMERIC(24, 10),
 	dblInitialMargin NUMERIC(24, 10),
 	LongWaitedPrice NUMERIC(24, 10),
-	ShortWaitedPrice NUMERIC(24, 10)
+	ShortWaitedPrice NUMERIC(24, 10),
+	intSelectedInstrumentTypeId INT
 	)
 	INSERT INTO @UnRelaized (
 	RowNum,
@@ -260,7 +261,8 @@ DECLARE @UnRelaized AS TABLE (
 	dblVariationMargin,
 	dblInitialMargin,
 	LongWaitedPrice,
-	ShortWaitedPrice
+	ShortWaitedPrice,
+	intSelectedInstrumentTypeId
 	)
 
 exec uspRKUnrealizedPnL  @dtmFromDate ='01-01-1900',

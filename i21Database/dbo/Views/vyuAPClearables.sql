@@ -7,6 +7,7 @@ SELECT	DISTINCT
 			 dtmReceiptDate
 			,strReceiptNumber
 			,receiptItem.intInventoryReceiptId
+			,receiptItem.intInventoryReceiptItemId
 			,strBillOfLading	
 			,strOrderNumber
 			,ISNULL(dtmLastVoucherDate,dtmReceiptDate) AS dtmDate
@@ -107,6 +108,7 @@ SELECT	DISTINCT
 			 dtmReceiptDate
 			,strReceiptNumber
 			,receiptItem.intInventoryReceiptId
+			,receiptItem.intInventoryReceiptItemId
 			,strBillOfLading	
 			,strOrderNumber
 			,dtmReceiptDate AS dtmDate
@@ -197,6 +199,7 @@ SELECT DISTINCT
 	  Receipt.dtmReceiptDate
 	, Receipt.strReceiptNumber
 	, Receipt.intInventoryReceiptId
+	, 0 as intInventoryReceiptItemId
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = Bill.dtmDate
@@ -283,6 +286,7 @@ SELECT DISTINCT
 	  Receipt.dtmReceiptDate
 	, Receipt.strReceiptNumber
 	, Receipt.intInventoryReceiptId
+	, 0 AS intInventoryReceiptItemId
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = Receipt.dtmReceiptDate
@@ -368,6 +372,7 @@ SELECT DISTINCT
 	  Receipt.dtmReceiptDate
 	, Receipt.strReceiptNumber
 	, Receipt.intInventoryReceiptId
+	, 0 AS intInventoryReceiptItemId
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = CASE WHEN Bill.ysnPosted IS NOT NULL OR Bill.ysnPosted = 1
@@ -453,6 +458,7 @@ SELECT DISTINCT
 	  Receipt.dtmReceiptDate
 	, Receipt.strReceiptNumber
 	, Receipt.intInventoryReceiptId
+	, 0 AS intInventoryReceiptItemId
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = Receipt.dtmReceiptDate
@@ -538,6 +544,7 @@ SELECT DISTINCT
 	  Receipt.dtmReceiptDate
 	, Receipt.strReceiptNumber
 	, Receipt.intInventoryReceiptId
+	, 0 AS intInventoryReceiptItemId
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, Bill.dtmDate 
@@ -623,6 +630,7 @@ SELECT DISTINCT
 	  Receipt.dtmReceiptDate
 	, Receipt.strReceiptNumber
 	, Receipt.intInventoryReceiptId
+	, 0 AS intInventoryReceiptItemId
 	, Receipt.strBillOfLading
 	, '' AS strOrderNumber
 	, Receipt.dtmReceiptDate as dtmDate
@@ -708,6 +716,7 @@ SELECT DISTINCT
 	  dtmReceiptDate = Shipment.dtmShipDate
 	, strReceiptNumber = Shipment.strShipmentNumber 
 	, intInventoryReceiptId = Shipment.intInventoryShipmentId
+	, 0 AS intInventoryReceiptItemId
 	, NULL AS strBillOfLading
 	, '' AS strOrderNumber
 	, dtmDate = CASE WHEN Bill.dblQtyReceived <> 0 AND Bill.ysnPosted = 1 THEN Bill.dtmDate ELSE NULL END 
@@ -789,6 +798,7 @@ UNION ALL
 		dtmReceiptDate = V.dtmProcessDate
 		,strReceiptNumber = V.strLoadNumber
 		,intInventoryReceiptId = V.intLoadId
+		, 0 AS intInventoryReceiptItemId
 		,strBillOfLading = NULL
 		,strOrderNumber = NULL
 		,dtmDate = Bill.dtmDate

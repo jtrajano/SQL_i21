@@ -56,13 +56,16 @@ FROM (
 			, ot.intCurrencyExchangeRateTypeId
 			, dtmCreateDateTime = CASE WHEN ISNULL(ot.dtmCreateDateTime, '') = '' THEN ot.dtmTransactionDate ELSE ot.dtmCreateDateTime END
 			, ot.strBrokerTradeNo
+			, m.strFutureMonth
 		FROM tblRKFutOptTransaction ot
 		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 		JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
+		JOIN tblRKFuturesMonth m on m.intFutureMonthId=ot.intFutureMonthId
 		LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
-		LEFT JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId =1
+		LEFT JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId AND ba.intEntityId = ot.intEntityId  
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
-		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId and intSelectedInstrumentTypeId=1
+		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId
+		where intSelectedInstrumentTypeId in(1,3) and  ot.intInstrumentTypeId = 1
 	)t
 )t1  --where dblBalanceLot > 0  
   
@@ -115,6 +118,7 @@ FROM (
 			, ot.intCurrencyExchangeRateTypeId
 			, dtmCreateDateTime = CASE WHEN ISNULL(ot.dtmCreateDateTime, '') = '' THEN ot.dtmTransactionDate ELSE ot.dtmCreateDateTime END
 			, ot.strBrokerTradeNo
+			, strFutureMonth = null
 		FROM tblRKFutOptTransaction ot
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId

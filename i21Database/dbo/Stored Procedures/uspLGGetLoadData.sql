@@ -47,7 +47,8 @@ BEGIN
 				,FT.strFobPoint
 				,CU.strCurrency
 				,CONT.strContainerType
-				,ShippingLine.strName AS strShippingLine			
+				,ShippingLine.strName AS strShippingLine
+				,SLSC.strOwner AS strServiceContractOwner
 				,Terminal.strName AS strTerminal
 				,ForwardingAgent.strName AS strForwardingAgent
 				,Insurer.strName AS strInsurer
@@ -100,6 +101,9 @@ BEGIN
 			LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 			LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
+			OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
+						 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
+						 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC
 			WHERE L.intLoadId IN (
 					SELECT *
 					FROM dbo.fnSplitString(@strLoadId, ',')
@@ -141,7 +145,8 @@ BEGIN
 			,FT.strFobPoint
 			,CU.strCurrency
 			,CONT.strContainerType
-			,ShippingLine.strName AS strShippingLine			
+			,ShippingLine.strName AS strShippingLine		
+			,SLSC.strOwner AS strServiceContractOwner	
 			,Terminal.strName AS strTerminal
 			,ForwardingAgent.strName AS strForwardingAgent
 			,Insurer.strName AS strInsurer
@@ -191,6 +196,9 @@ BEGIN
 		LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 		LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
+		OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
+					 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
+					 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC
 		WHERE L.strLoadNumber COLLATE Latin1_General_CI_AS IN (
 				SELECT *
 				FROM dbo.fnSplitString(@strLoadNumber, ',')

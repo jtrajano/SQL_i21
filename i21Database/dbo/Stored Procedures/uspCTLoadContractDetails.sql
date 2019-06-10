@@ -153,6 +153,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,dbo.[fnCTGetSeqDisplayField](CD.intDiscountTypeId,'tblCTDiscountType') strDiscountType
 				,dbo.[fnCTGetSeqDisplayField](CD.intDiscountId,'tblGRDiscountId') strDiscountId
 				,IC.strContractItemName
+				,IB.strItemNo as strBundleItemNo
 				,dbo.[fnCTGetSeqDisplayField](CD.intNetWeightUOMId,'tblICItemUOM') strNetWeightUOM--WM.strUnitMeasure strNetWeightUOM
 				,dbo.[fnCTGetSeqDisplayField](CD.intPriceItemUOMId,'tblICItemUOM') strPriceUOM--PM.strUnitMeasure strPriceUOM
 				,dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId,'Origin') strOrigin--ISNULL(RY.strCountry, OG.strCountry) AS strOrigin
@@ -262,6 +263,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		LEFT    JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId					=		CD.intPricingTypeId			--strPricingType
 		LEFT    JOIN	tblICItem						IM	ON	IM.intItemId						=		CD.intItemId				--strItemNo
 		LEFT    JOIN	tblICItemContract				IC	ON	IC.intItemContractId				=		CD.intItemContractId		--strContractItemName
+		LEFT    JOIN	tblICItem						IB	ON	IB.intItemId						=		CD.intItemBundleId			--strBundleItemNo
 
 	
 		LEFT    JOIN	tblRKFutureMarket				MA	ON	MA.intFutureMarketId				=		CD.intFutureMarketId		--strFutureMarket

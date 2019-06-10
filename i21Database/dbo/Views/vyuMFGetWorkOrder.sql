@@ -95,6 +95,7 @@ SELECT C.intManufacturingCellId
 		,W.dtmActualProductionEndDate
 		,SO.strSalesOrderNumber
 		,E.strName AS strSalesRepresentative
+		,L.strLoadNumber
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
@@ -130,3 +131,4 @@ LEFT JOIN tblMFWorkOrderStatus WS1 ON WS1.intStatusId = W.intCountStatusId
 LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = W.intSalesOrderLineItemId
 LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 LEFT JOIN tblEMEntity E ON E.intEntityId = SO.intEntitySalespersonId
+LEFT JOIN tblLGLoad L ON L.intLoadId = W.intLoadId

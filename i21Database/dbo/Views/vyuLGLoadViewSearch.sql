@@ -12,36 +12,23 @@ SELECT L.intLoadId
 	,L.dtmETAPOL
 	,L.dtmETSPOL
 	,strSourceType = CASE L.intSourceType
-		WHEN 1
-			THEN 'None'
-		WHEN 2
-			THEN 'Contracts'
-		WHEN 3
-			THEN 'Orders'
-		WHEN 4
-			THEN 'Allocations'
-		WHEN 5
-			THEN 'Picked Lots'
-		WHEN 6
-			THEN 'Pick Lots'
-		WHEN 7
-			THEN 'Pick Lots w/o Contract'
+		WHEN 1 THEN 'None'
+		WHEN 2 THEN 'Contracts'
+		WHEN 3 THEN 'Orders'
+		WHEN 4 THEN 'Allocations'
+		WHEN 5 THEN 'Picked Lots'
+		WHEN 6 THEN 'Pick Lots'
+		WHEN 7 THEN 'Pick Lots w/o Contract'
 		END COLLATE Latin1_General_CI_AS
 	,strType = CASE L.intPurchaseSale
-		WHEN 1
-			THEN 'Inbound'
-		WHEN 2
-			THEN 'Outbound'
-		WHEN 3
-			THEN 'Drop Ship'
+		WHEN 1 THEN 'Inbound'
+		WHEN 2 THEN 'Outbound'
+		WHEN 3 THEN 'Drop Ship'
 		END COLLATE Latin1_General_CI_AS
 	,strTransportationMode = CASE L.intTransportationMode
-		WHEN 1 
-			THEN 'Truck'
-		WHEN 2
-			THEN 'Ocean Vessel'
-		WHEN 3
-			THEN 'Rail'
+		WHEN 1 THEN 'Truck'
+		WHEN 2 THEN 'Ocean Vessel'
+		WHEN 3 THEN 'Rail'
 		END COLLATE Latin1_General_CI_AS
 	,intGenerateReferenceNumber = GL.intReferenceNumber
 	,L.intGenerateSequence
@@ -50,39 +37,37 @@ SELECT L.intLoadId
 	,L.dtmScheduledDate
 	,strHauler = Hauler.strName
 	,strDriver = Driver.strName
-	,ysnDispatched = CASE 
-		WHEN L.ysnDispatched = 1
-			THEN CAST(1 AS BIT)
-		ELSE CAST(0 AS BIT)
-		END
+	,ysnDispatched = CASE WHEN L.ysnDispatched = 1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	,strPosition = P.strPosition
 	,strPositionType = P.strPositionType
 	,strWeightUnitMeasure = UM.strUnitMeasure
 	,strShipmentStatus = CASE L.intShipmentStatus
-		WHEN 1
-			THEN 'Scheduled'
-		WHEN 2
-			THEN 'Dispatched'
-		WHEN 3
-			THEN 'Inbound transit'
-		WHEN 4
-			THEN 'Received'
-		WHEN 5
-			THEN 'Outbound transit'
-		WHEN 6
-			THEN 'Delivered'
-		WHEN 7
-			THEN 'Instruction created'
-		WHEN 8
-			THEN 'Partial Shipment Created'
-		WHEN 9
-			THEN 'Full Shipment Created'
-		WHEN 10
-			THEN 'Cancelled'
-		WHEN 11
-			THEN 'Invoiced'
-		ELSE ''
-		END COLLATE Latin1_General_CI_AS
+		WHEN 1 THEN 'Scheduled'
+		WHEN 2 THEN 'Dispatched'
+		WHEN 3 THEN 
+			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Inbound Transit' END
+		WHEN 4 THEN 'Received'
+		WHEN 5 THEN 
+			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Outbound Transit' END
+		WHEN 6 THEN 
+			CASE WHEN (L.intPurchaseSale = 3 AND L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.intPurchaseSale = 3 AND L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+					WHEN (L.intPurchaseSale = 3 AND L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Delivered' END
+		WHEN 7 THEN 
+			CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
+					ELSE 'Shipping Instruction Created' END
+		WHEN 8 THEN 'Partial Shipment Created'
+		WHEN 9 THEN 'Full Shipment Created'
+		WHEN 10 THEN 'Cancelled'
+		WHEN 11 THEN 'Invoiced'
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,strEquipmentType = EQ.strEquipmentType
     ,L.strTrailerNo1
     ,L.strTrailerNo2
@@ -94,24 +79,12 @@ SELECT L.intLoadId
 	,L.ysnPosted
     ,ysnInProgress = ISNULL(L.ysnInProgress, 0)
 	,strTransUsedBy = CASE L.intTransUsedBy
-						WHEN 2
-							THEN 'Scale'
-						WHEN 3
-							THEN 'Transport Load'
-						ELSE
-							'None'
-						END COLLATE Latin1_General_CI_AS
-    ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 
-								THEN 
-								CAST(ST.strTicketNumber AS VARCHAR(100))
-								ELSE 
-									CASE WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
-										THEN 
-											TR.strTransaction
-										ELSE 
-											NULL 
-										END 
-								END
+		WHEN 2 THEN 'Scale'
+		WHEN 3 THEN 'Transport Load'
+		ELSE 'None' END COLLATE Latin1_General_CI_AS
+    ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 THEN CAST(ST.strTicketNumber AS VARCHAR(100))
+							WHEN IsNull(L.intLoadHeaderId, 0) <> 0 THEN TR.strTransaction
+							ELSE NULL END 
 	,L.dtmDeliveredDate
 	,L.dtmDispatchedDate
 	,L.ysnDispatchMailSent
@@ -121,29 +94,34 @@ SELECT L.intLoadId
 	,L.intShipmentType
 	,LSI.strLoadNumber AS strShippingInstructionNo
 	,strShipmentType = CASE L.intShipmentType
-		WHEN 1
-			THEN 'Shipment'
-		WHEN 2
-			THEN 'Shipping Instructions'
-		WHEN 3
-			THEN 'Vessel Nomination'
-		ELSE ''
-		END COLLATE Latin1_General_CI_AS
+		WHEN 1 THEN 'Shipment'
+		WHEN 2 THEN 'Shipping Instructions'
+		WHEN 3 THEN 'Vessel Nomination'
+		ELSE '' END COLLATE Latin1_General_CI_AS
 	,CT.strContainerType
-	,ForwardingAgent.strName AS strForwardingAgent
-	,ShippingLine.strName AS strShippingLine
-	,Insurer.strName AS strInsurer
-	,Terminal.strName AS strTerminal
-	,BLDraftToBeSent.strName AS strBLDraftToBeSent
-	,DocPresentation.strName AS strDocPresentationVal
-	,Currency.strCurrency AS strInsuranceCurrency
-	,DemurrangeCurrency.strCurrency AS strDemurrangeCurrency
-	,DespatchCurrency.strCurrency AS strDespatchCurrency
-	,LoadingUnitMeasure.strUnitMeasure AS strLoadingUnitMeasure
-	,DischargeUnitMeasure.strUnitMeasure AS strDischargeUnitMeasure
-	,ETAPOLRC.strReasonCodeDescription AS strETAPOLReasonCode
-	,ETSPOLRC.strReasonCodeDescription AS strETSPOLReasonCode
-	,ETAPODRC.strReasonCodeDescription AS strETAPODReasonCode
+	,strForwardingAgent = ForwardingAgent.strName
+	,strShippingLine = ShippingLine.strName
+	,strInsurer = Insurer.strName
+	,strTerminal = Terminal.strName
+	,strBLDraftToBeSent = BLDraftToBeSent.strName
+	,strDocPresentationVal = DocPresentation.strName
+	,strInsuranceCurrency = Currency.strCurrency
+	,strDemurrangeCurrency = DemurrangeCurrency.strCurrency
+	,strDespatchCurrency = DespatchCurrency.strCurrency
+	,strLoadingUnitMeasure = LoadingUnitMeasure.strUnitMeasure
+	,strDischargeUnitMeasure = DischargeUnitMeasure.strUnitMeasure
+	,strETAPOLReasonCode = ETAPOLRC.strReasonCode
+	,strETSPOLReasonCode = ETSPOLRC.strReasonCode
+	,strETAPODReasonCode = ETAPODRC.strReasonCode
+	,strETAPOLReasonCodeDescription = ETAPOLRC.strReasonCodeDescription
+	,strETSPOLReasonCodeDescription = ETSPOLRC.strReasonCodeDescription
+	,strETAPODReasonCodeDescription = ETAPODRC.strReasonCodeDescription
+	,L.ysnArrivedInPort
+	,L.dtmArrivedInPort
+	,L.ysnDocumentsApproved
+	,L.dtmDocumentsApproved
+	,L.ysnCustomsReleased
+	,L.dtmCustomsReleased
 	,L.intFreightTermId
 	,FT.strFreightTerm
 	,L.intCurrencyId

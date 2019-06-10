@@ -24,6 +24,10 @@ SET
 	[ysnImpactInventory] = CAST(1 AS BIT)
 WHERE
 	[ysnImpactInventory] IS NULL AND [ysnPosted] = CAST(0 AS BIT)
+
+UPDATE tblARPOS
+SET ysnPaid = CAST(1 AS BIT)
+WHERE ISNULL(ysnHold, 0) <> 1
 			
 GO
 print('/*******************  END Update  Invoice From Provisional  *******************/')

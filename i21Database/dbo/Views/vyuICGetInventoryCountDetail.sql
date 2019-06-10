@@ -10,6 +10,33 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	ysnLotWeightsRequired = CAST((CASE WHEN [dbo].[fnGetItemLotType](Item.intItemId) != 0 THEN ISNULL(Item.ysnLotWeightsRequired, CAST(0 AS BIT)) ELSE 0 END) AS BIT),
 	Item.intCategoryId,
 	strCategory = Category.strCategoryCode,
+	
+	InvCount.intCommodityId,
+	strCommodity = Commodity.strCommodityCode,
+	
+	InvCount.dtmCountDate,
+	InvCount.strCountNo,
+	InvCount.strDescription,
+	InvCount.ysnIncludeZeroOnHand,
+	InvCount.ysnIncludeOnHand,
+	InvCount.ysnScannedCountEntry,
+	InvCount.ysnCountByLots,
+	InvCount.strCountBy,
+	InvCount.ysnCountByPallets,
+	InvCount.ysnRecountMismatch,
+	InvCount.ysnExternal,
+	--InvCount.ysnRecount,
+	InvCount.intRecountReferenceId,
+	InvCount.intStatus,	
+	strStatus = (CASE WHEN InvCount.intStatus = 1 THEN 'Open'
+					WHEN InvCount.intStatus = 2 THEN 'Count Sheet Printed'
+					WHEN InvCount.intStatus = 3 THEN 'Inventory Locked'
+					WHEN InvCount.intStatus = 4 THEN 'Closed'
+				END) COLLATE Latin1_General_CI_AS,
+
+
+    InvCountDetail.dblNewCost,
+
 	InvCountDetail.intItemLocationId,
 	Location.strLocationName,
 	InvCountDetail.intSubLocationId,
@@ -70,3 +97,4 @@ FROM tblICInventoryCountDetail InvCountDetail
 	LEFT JOIN tblICItemUOM ItemStockUOM ON ItemStockUOM.intItemUOMId = InvCountDetail.intStockUOMId
 	LEFT JOIN tblICUnitMeasure StockUOM ON StockUOM.intUnitMeasureId = ItemStockUOM.intUnitMeasureId
 	LEFT JOIN tblSMUserSecurity UserSecurity ON UserSecurity.[intEntityId] = InvCountDetail.intEntityUserSecurityId
+	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = InvCount.intCommodityId

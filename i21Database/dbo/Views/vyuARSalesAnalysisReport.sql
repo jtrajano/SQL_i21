@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesAnalysisReport]
 AS
 SELECT strRecordNumber			= SAR.strRecordNumber
+	  , strInvoiceOriginId		= SAR.strInvoiceOriginId
+      , intSourceId				= SAR.intSourceId
 	  , intTransactionId		= SAR.intTransactionId
 	  , intAccountId			= SAR.intAccountId
 	  , dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0)
@@ -11,7 +13,7 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 	  , intManufacturerId		= IC.intManufacturerId
 	  , intBrandId				= IC.intBrandId
 	  , intCommodityId			= IC.intCommodityId
-	  , intCategoryId			= IC.intCategoryId
+	  , intCategoryId			= IC.intCategoryId	  
 	  , intEntitySalespersonId	= SAR.intEntitySalespersonId
 	  , intTicketId				= SAR.intTicketId
 	  , strTransactionType		= SAR.strTransactionType
@@ -79,6 +81,7 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 	 , strBrandName				= ICB.strBrandName
 	 , strCommodityName			= ICC.strCommodityCode
 	 , strCategoryName			= CAT.strCategoryCode
+	 , strCategoryDescription	= CAT.strDescription
      , strCustomerName			= E.strName
 	 , strSalespersonName		= ESP.strName
 	 , strBillTo				= RTRIM(SAR.strBillToLocationName)
@@ -102,7 +105,9 @@ FROM
 (
 	--INVOICE/NORMAL ITEMS
 	SELECT strRecordNumber			= ARI.strInvoiceNumber
-		, intTransactionId			= ARI.intInvoiceId
+		, strInvoiceOriginId		= ARI.strInvoiceOriginId
+		, intSourceId				= ARI.intSourceId
+		, intTransactionId			= ARI.intInvoiceId		
 		, intEntityCustomerId		= ARI.intEntityCustomerId
 		, intAccountId				= ARI.intAccountId
 		, intItemId					= ARID.intItemId
@@ -229,6 +234,8 @@ FROM
 
 	--INVOICE/BUNDLE ITEM TYPE
 	SELECT strRecordNumber			= ARI.strInvoiceNumber
+		, strInvoiceOriginId		= ARI.strInvoiceOriginId
+		, intSourceId				= ARI.intSourceId
 		, intTransactionId			= ARI.intInvoiceId
 		, intEntityCustomerId		= ARI.intEntityCustomerId
 		, intAccountId				= ARI.intAccountId
@@ -346,6 +353,8 @@ FROM
 
 	--SALES ORDER/NON-SOFTWARE ITEMS
 	SELECT strRecordNumber				= SO.strSalesOrderNumber
+	    , strInvoiceOriginId			= NULL
+		, intSourceId					= NULL
 		, intTransactionId				= SO.intSalesOrderId
 		, intEntityCustomerId			= SO.intEntityCustomerId
 		, intAccountId					= SO.intAccountId
@@ -478,6 +487,8 @@ FROM
 
 	--INVOICE/SOFTWARE ITEMS/LICENSE MAINTENANCE TYPE
 	SELECT strRecordNumber			= ARI.strInvoiceNumber
+		, strInvoiceOriginId		= ARI.strInvoiceOriginId
+		, intSourceId				= ARI.intSourceId
 		, intTransactionId			= ARI.intInvoiceId
 		, intEntityCustomerId		= ARI.intEntityCustomerId
 		, intAccountId				= ARI.intAccountId
@@ -596,6 +607,8 @@ FROM
 
 	--SALES ORDER/SOFTWARE ITEMS/LICENSE MAINTENANCE TYPE
 	SELECT strRecordNumber				= SO.strSalesOrderNumber
+	    , strInvoiceOriginId			= NULL
+		, intSourceId					= NULL
 		, intTransactionId				= SO.intSalesOrderId
 		, intEntityCustomerId			= SO.intEntityCustomerId
 		, intAccountId					= SO.intAccountId
@@ -723,6 +736,8 @@ FROM
 
 	--INVOICE/SOFTWARE ITEMS/MAINTENANCE TYPE
 	SELECT strRecordNumber			= ARI.strInvoiceNumber
+	    , strInvoiceOriginId		= ARI.strInvoiceOriginId
+		, intSourceId				= ARI.intSourceId
 		, intTransactionId			= ARI.intInvoiceId
 		, intEntityCustomerId		= ARI.intEntityCustomerId
 		, intAccountId				= ARI.intAccountId
@@ -840,6 +855,8 @@ FROM
 
 	--SALES ORDER/SOFTWARE ITEMS/MAINTENANCE TYPE
 	SELECT strRecordNumber				= SO.strSalesOrderNumber
+	    , strInvoiceOriginId			= NULL
+		, intSourceId					= NULL
 		, intTransactionId				= SO.intSalesOrderId
 		, intEntityCustomerId			= SO.intEntityCustomerId
 		, intAccountId					= SO.intAccountId
@@ -967,6 +984,8 @@ FROM
 
 	--INVOICE/SOFTWARE ITEMS/NO MAINTENANCE TYPE
 	SELECT strRecordNumber			= ARI.strInvoiceNumber
+	    , strInvoiceOriginId		= ARI.strInvoiceOriginId
+		, intSourceId				= ARI.intSourceId
 		, intTransactionId			= ARI.intInvoiceId
 		, intEntityCustomerId		= ARI.intEntityCustomerId
 		, intAccountId				= ARI.intAccountId

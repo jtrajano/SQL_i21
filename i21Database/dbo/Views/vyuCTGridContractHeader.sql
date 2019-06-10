@@ -78,7 +78,9 @@ AS
 			CH.intCompanyId,
 			CH.intContractHeaderRefId,
 			CH.strReportTo,
-			
+			CH.intBrokerId,
+			CH.intBrokerageAccountId,
+
 			NM.intPriceFixationId,
 			NM.intPriceContractId,
 			NM.ysnSpreadAvailable,
@@ -135,7 +137,9 @@ AS
 			CH.intNoOfLoad - (SELECT SUM(dblBalanceLoad) FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId) AS dblLoadsDelivered,
 			NM.strBook,
 			NM.strSubBook,
-			NM.strMarketMainCurrency
+			NM.strMarketMainCurrency,
+			NM.strBroker,
+			NM.strBrokerAccount
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId

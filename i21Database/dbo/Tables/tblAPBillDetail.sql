@@ -26,6 +26,7 @@
 	[intLoadShipmentCostId]    INT             NULL,
 	[intLoadId]    INT             NULL,
 	[intScaleTicketId]    INT             NULL,
+	[intTicketId]    INT             NULL,
 	[intCCSiteDetailId]    INT             NULL,
 	[intPrepayTypeId]    INT             NULL,
 	[intPrepayTransactionId]    INT             NULL,
@@ -102,6 +103,7 @@
 	CONSTRAINT [FK_tblAPBillDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES tblLGLoadDetail([intLoadDetailId]),
 	CONSTRAINT [FK_tblAPBillDetail_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
 	CONSTRAINT [FK_tblAPBillDetail_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES tblARInvoice([intInvoiceId]),
+	CONSTRAINT [FK_tblAPBillDetail_tblHDTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES tblHDTicket([intTicketId]),
 ) ON [PRIMARY];
 
 

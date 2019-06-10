@@ -13,6 +13,8 @@ AS
 			DO.intCommodityId,
 			DO.ysnStandard,
 			CO.strCommodityCode,
-			CO.strDescription AS strCommodityDesc
+			CO.strDescription AS strCommodityDesc,
+			DO.intCertificationId
+
 	FROM	tblICDocument	DO
 	JOIN	tblICCommodity	CO	ON	CO.intCommodityId	=	DO.intCommodityId

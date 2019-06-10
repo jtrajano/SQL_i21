@@ -518,7 +518,7 @@ BEGIN
 					,strTicketNumber = SI.strSourceNumber
 					,intTicketId = SI.intSourceId
 					,dtmTicketDateTime = InTran.dtmDate
-					,intCompanyLocationId = InTran.intItemLocationId
+					,intCompanyLocationId = Inv.intLocationId
 					,strLocationName = SI.strShipFromLocation
 					,strUOM = InTran.strUnitMeasure
 					,Inv.intEntityId
@@ -1568,7 +1568,7 @@ BEGIN
 				INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
-				LEFT JOIN tblAPBillDetail bd on ch.intContractHeaderId = bd.intContractHeaderId and bd.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+				LEFT JOIN tblAPBillDetail bd on ch.intContractHeaderId = bd.intContractHeaderId and bd.intInventoryReceiptItemId = ri.intInventoryReceiptItemId and bd.intInventoryReceiptChargeId IS NULL
 				WHERE v.strTransactionType = 'Inventory Receipt' AND ch.intCommodityId = @intCommodityId
 					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate) 

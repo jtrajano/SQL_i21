@@ -24,6 +24,7 @@ AS
 			PF.[dblTotalLots],
 			PF.[dblLotsFixed],
 			IC.strContractItemName,
+			IB.strItemNo AS strBundleItemNo,
 			WM.strUnitMeasure strNetWeightUOM,
 			PM.strUnitMeasure strPriceUOM,
 			ISNULL(RY.strCountry,OG.strCountry) AS strOrigin,
@@ -131,6 +132,7 @@ AS
 	LEFT    JOIN	tblICUnitMeasure				YM	ON	YM.intUnitMeasureId					=		YU.intUnitMeasureId			--strUOM
 	LEFT    JOIN	tblICItem						IM	ON	IM.intItemId						=		CD.intItemId				--strItemNo
 	LEFT    JOIN	tblICItemContract				IC	ON	IC.intItemContractId				=		CD.intItemContractId		--strContractItemName
+	LEFT    JOIN	tblICItem						IB	ON	IB.intItemId						=		CD.intItemBundleId			--strBundleItemNo
 	LEFT    JOIN	tblICItemUOM					QU	ON	QU.intItemUOMId						=		CD.intItemUOMId				
 	LEFT    JOIN	tblICUnitMeasure				QM	ON	QM.intUnitMeasureId					=		QU.intUnitMeasureId			--strUOM
 	LEFT    JOIN	tblICItemUOM					WU	ON	WU.intItemUOMId						=		CD.intNetWeightUOMId		

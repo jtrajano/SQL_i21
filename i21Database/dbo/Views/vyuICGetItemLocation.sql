@@ -11,6 +11,8 @@ SELECT ItemLocation.intItemLocationId
 	, ItemCategory.strCategoryCode
 	, ItemManufacturer.strManufacturer
 	, ItemBrand.strBrandName
+	, Item.strLotTracking
+	, Item.strStatus
 	, ItemLocation.intLocationId
 	, Location.strLocationName
 	, Location.strLocationType

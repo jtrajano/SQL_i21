@@ -48,7 +48,8 @@ BEGIN TRY
 			@intItemId						INT,
 			@dblRecipientQty				NUMERIC(18,6),
 			@dblDonorQty					NUMERIC(18,6),
-			@dblDonorNoOfLots				NUMERIC(18,6)
+			@dblDonorNoOfLots				NUMERIC(18,6),
+			@ysnMultiplePriceFixation		BIT
 
 	SELECT @intContractTypeId = intContractTypeId FROM tblCTReassign WHERE intReassignId = @intReassignId
 
@@ -91,16 +92,29 @@ BEGIN TRY
 			@intDonorId				=	RE.intDonorId,
 			@intDonorHeaderId		=	DD.intContractHeaderId,
 			@dblRecipientBasis		=	DR.dblBasis,
-			@dblRecipientNoOfLots	=	DR.dblNoOfLots,
+			@dblRecipientNoOfLots	=	CASE	WHEN	DR.ysnMultiplePriceFixation = 1
+												THEN	(SELECT dblNoOfLots FROM tblCTContractHeader WHERE intContractHeaderId = DR.intContractHeaderId) 
+												ELSE	DR.dblNoOfLots
+										END,
 			@intRecipientBookId		=	DR.intBookId,
 			@intRecipientSubBookId	=	DR.intSubBookId,
-			@dblRecipientQty		=	DR.dblQuantity,
-			@dblDonorQty			=	DD.dblQuantity,
-			@dblDonorNoOfLots		=	DD.dblNoOfLots
+			@dblRecipientQty		=	CASE	WHEN	DR.ysnMultiplePriceFixation = 1
+												THEN	(SELECT dblQuantity FROM tblCTContractHeader WHERE intContractHeaderId = DR.intContractHeaderId) 
+												ELSE	DR.dblQuantity
+										END,
+			@dblDonorQty			=	CASE	WHEN	DD.ysnMultiplePriceFixation = 1
+												THEN	(SELECT dblQuantity FROM tblCTContractHeader WHERE intContractHeaderId = DD.intContractHeaderId) 
+												ELSE	DD.dblQuantity
+										END,
+			@dblDonorNoOfLots		=	CASE	WHEN	DD.ysnMultiplePriceFixation = 1
+												THEN	(SELECT dblNoOfLots FROM tblCTContractHeader WHERE intContractHeaderId = DD.intContractHeaderId) 
+												ELSE	DD.dblQuantity
+										END,
+			@ysnMultiplePriceFixation	=	DD.ysnMultiplePriceFixation
 
-	FROM	tblCTReassign		RE
-	JOIN	tblCTContractDetail	DR	ON	DR.intContractDetailId	=	RE.intRecipientId
-	JOIN	tblCTContractDetail DD	ON	DD.intContractDetailId	=	RE.intDonorId
+	FROM	tblCTReassign			RE
+	JOIN	vyuCTContractSequence	DR	ON	DR.intContractDetailId	=	RE.intRecipientId
+	JOIN	vyuCTContractSequence	DD	ON	DD.intContractDetailId	=	RE.intDonorId
 	WHERE	RE.intReassignId	=	@intReassignId
 	
 	INSERT	INTO @tblPricing
@@ -318,7 +332,10 @@ BEGIN TRY
 
 	UPDATE	tblCTPriceFixation 
 	SET		intLotsHedged = @intLotsHedged,
-			dblTotalLots = (SELECT dblNoOfLots FROM tblCTContractDetail WHERE intContractDetailId = @intDonorId)  
+			dblTotalLots =	CASE	WHEN @ysnMultiplePriceFixation = 1
+								THEN	(SELECT dblNoOfLots FROM tblCTContractHeader WHERE intContractHeaderId = @intDonorHeaderId)  
+								ELSE	(SELECT dblNoOfLots FROM tblCTContractDetail WHERE intContractDetailId = @intDonorId)  
+							END	
 	WHERE intPriceFixationId = @intPriceFixationId
 
 	UPDATE	PF

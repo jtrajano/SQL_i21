@@ -460,7 +460,10 @@ BEGIN TRY
 			,[intOrderUOMId] = ISNULL(LGD.intItemUOMId, SC.intItemUOMIdTo)
 			,[intItemUOMId]  = ISNULL(CTD.intItemUOMId,SC.intItemUOMIdTo)
 			,[dblQtyOrdered] = ISNULL(LGD.dblQuantity, SC.dblNetUnits)
-			,[dblQtyShipped] = dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,CTD.intItemUOMId,SC.dblNetUnits)
+			,[dblQtyShipped] = (CASE WHEN CTD.intItemUOMId IS NULL
+									THEN SC.dblNetUnits 
+									ELSE (SELECT dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,CTD.intItemUOMId,SC.dblNetUnits))
+								END)
 			,[dblDiscount] = 0
 			,[dblPrice] = SC.dblUnitPrice + dblUnitBasis
 			,[ysnRefreshPrice] = 0
@@ -732,6 +735,7 @@ BEGIN TRY
 	END
 
 	SELECT @recCount = COUNT(*) FROM @invoiceIntegrationStagingTable;
+	
 	IF ISNULL(@recCount,0) > 0
 	BEGIN
 		EXEC [dbo].[uspARProcessInvoices] 

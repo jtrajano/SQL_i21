@@ -13,6 +13,7 @@
 	,@strNewLotAlias NVARCHAR(50) = NULL
 	,@strNewVendorLotNumber NVARCHAR(50) = NULL
 	,@dtmNewDueDate DATETIME=NULL
+	,@intLoadId INT = NULL
 AS
 BEGIN TRY
 	DECLARE @intTransactionCount INT

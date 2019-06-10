@@ -86,6 +86,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1830_Encrypt_Merchant_Password.sql
 :r .\SM\1910_MigrateINCOToFreightTerm.sql
 :r .\SM\1910_UpdateVantivToWorldPay.sql
+:r .\SM\1920_UpdateOtherTaxationPointToNone.sql
+
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -111,6 +113,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\13_GlobalJulianCalendar.sql
 :r .\TM\DefaultData\14_DegreeDayClock.sql
 :r .\TM\Tables\tblTMCOBOLWRITE.sql
+:r .\TM\Tables\tblTMBudgetCalculationProjection.sql
+
 
 ----TM Reports
 :r .\TM\Reports\FieldSelection\DeliveryFill.sql
@@ -318,6 +322,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\14_Add_Inventory_Report_Templates.sql 
 :r .\IC\15_Migrate_Old_Receipt_Totals.sql 
 :r .\IC\17_Inventory_Constraints.sql
+:r .\IC\18_Set_Commodity_Market_To_Market_Default_Data.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -348,6 +353,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\172To173.sql
 :R .\CT\174To181.sql
 :R .\CT\ExcelAndTableColumnMap.sql
+:R .\CT\fnCTGetBasisDeliveryAboveR2.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql

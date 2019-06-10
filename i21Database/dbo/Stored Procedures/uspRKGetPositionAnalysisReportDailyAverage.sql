@@ -148,7 +148,7 @@ BEGIN
 	WHERE dtmTransactionDate ' + @dateFilter +
 		' AND intFutureMarketId = '+ CASE WHEN @intFutureMarketId IS NULL THEN 'intFutureMarketId' ELSE CAST(@intFutureMarketId AS NVARCHAR(10)) END +'
 		AND intCommodityId = '+ CASE WHEN @intCommodityId IS NULL THEN 'intCommodityId' ELSE CAST(@intCommodityId AS NVARCHAR(10)) END +'
-		AND intCurrencyId = '+ CASE WHEN @intCurrencyId IS NULL THEN 'intCurrencyId' ELSE CAST(@intCurrencyId AS NVARCHAR(10)) END+'
+		
 	GROUP BY 
 	 dtmTransactionDate
 	,intFutureMarketId
@@ -275,7 +275,6 @@ BEGIN
 	WHERE dtmEntryDate ' + @dateFilter +
 		' AND intFutureMarketId = '+ CASE WHEN @intFutureMarketId IS NULL THEN 'intFutureMarketId' ELSE CAST(@intFutureMarketId AS NVARCHAR(10)) END +'
 		AND intCommodityId = '+ CASE WHEN @intCommodityId IS NULL THEN 'intCommodityId' ELSE CAST(@intCommodityId AS NVARCHAR(10)) END +'
-		AND intCurrencyId = '+ CASE WHEN @intCurrencyId IS NULL THEN 'intCurrencyId' ELSE CAST(@intCurrencyId AS NVARCHAR(10)) END+'
 	GROUP BY 
 	 dtmEntryDate
 	,intFutureMarketId
@@ -284,5 +283,3 @@ BEGIN
 
 	EXEC(@queryHeader + @query1 + @query2 + @query3)
 END
-
-

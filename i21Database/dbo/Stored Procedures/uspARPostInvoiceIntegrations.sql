@@ -1048,24 +1048,15 @@ INSERT INTO @ItemsFromInvoice
 	,[intItemId]
 	,[strItemNo]
 	,[strItemDescription]
-	--,[intSCInvoiceId]
-	--,[strSCInvoiceNumber]
 	,[intItemUOMId]
-	--,[dblQtyOrdered]
 	,[dblQtyShipped]
 	,[dblDiscount]
 	,[dblPrice]
-	--,[dblTotalTax]
 	,[dblTotal]
 	,[intServiceChargeAccountId]
 	,[intInventoryShipmentItemId]
 	,[intSalesOrderDetailId]
 	,[intSiteId]
-	--,[strBillingBy]
-	--,[dblPercentFull]
-	--,[dblNewMeterReading]
-	--,[dblPreviousMeterReading]
-	--,[dblConversionFactor]
 	,[intPerformerId]
 	,[intContractHeaderId]
 	,[strContractNumber]
@@ -1076,9 +1067,7 @@ INSERT INTO @ItemsFromInvoice
 	,[dblLicenseAmount]
 	,[intContractDetailId]
 	,[intTicketId]
-	--,[intTicketHoursWorkedId]
 	,[intCustomerStorageId]
-	--,[intSiteDetailId]
 	,[intLoadDetailId]
 	,[ysnLeaseBilling])
 SELECT
@@ -1096,24 +1085,15 @@ SELECT
 	,[intItemId]					= ID.[intItemId]		
 	,[strItemNo]					= ID.[strItemNo]
 	,[strItemDescription]			= ID.[strItemDescription]			
-	--,[intSCInvoiceId]				= ID.[intSCInvoiceId]				
-	--,[strSCInvoiceNumber]			= ID.[strSCInvoiceNumber]			
 	,[intItemUOMId]					= ID.[intItemUOMId]					
-	--,[dblQtyOrdered]				= ID.[dblQtyOrdered]				
-	,[dblQtyShipped]				= ID.[dblQtyShipped] * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
+	,[dblQtyShipped]				= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 THEN 1 ELSE ID.[dblQtyShipped] END * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
 	,[dblDiscount]					= ID.[dblDiscount]					
 	,[dblPrice]						= ID.[dblPrice]						
-	--,[dblTotalTax]					= ID.[dblTotalTax]					
 	,[dblTotal]						= ID.[dblTotal]						
 	,[intServiceChargeAccountId]	= ID.[intServiceChargeAccountId]	
 	,[intInventoryShipmentItemId]	= ID.[intInventoryShipmentItemId]	
 	,[intSalesOrderDetailId]		= ID.[intSalesOrderDetailId]
 	,[intSiteId]					= ID.[intSiteId]					
-	--,[strBillingBy]                 = ID.[strBillingBy]                 
-	--,[dblPercentFull]				= ID.[dblPercentFull]				
-	--,[dblNewMeterReading]			= ID.[dblNewMeterReading]			
-	--,[dblPreviousMeterReading]		= ID.[dblPreviousMeterReading]		
-	--,[dblConversionFactor]			= ID.[dblConversionFactor]			
 	,[intPerformerId]				= ID.[intPerformerId]				
 	,[intContractHeaderId]			= ID.[intContractHeaderId]
 	,[strContractNumber]			= CH.[strContractNumber]
@@ -1124,9 +1104,7 @@ SELECT
 	,[dblLicenseAmount]             = ID.[dblLicenseAmount]             
 	,[intContractDetailId]			= ID.[intContractDetailId]			
 	,[intTicketId]					= ID.[intTicketId]
-	--,[intTicketHoursWorkedId]		= ID.[intTicketHoursWorkedId]
 	,[intCustomerStorageId]			= ID.[intCustomerStorageId]
-	--,[intSiteDetailId]				= ID.[intSiteDetailId]
 	,[intLoadDetailId]				= ID.[intLoadDetailId]
 	,[ysnLeaseBilling]				= ID.[ysnLeaseBilling]				
 FROM
@@ -1138,7 +1116,6 @@ LEFT JOIN
 	tblCTContractHeader CH
 		ON CD.intContractHeaderId = CH.intContractHeaderId
 WHERE
-	--ID.[intInventoryShipmentItemId] IS NULL AND
 	ID.[intInventoryShipmentChargeId] IS NULL
 	AND	(
 		(ID.strTransactionType <> 'Credit Memo' AND ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL)
@@ -1234,7 +1211,7 @@ SELECT DISTINCT
 FROM
 	#ARPostInvoiceHeader
 
-EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
 
 
 

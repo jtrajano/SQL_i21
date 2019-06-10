@@ -22,7 +22,8 @@ AS
 			IM.strCostType,
 			CR.dblEstimatedYieldRate,
 			IM.ysnInventoryCost,
-			IM.ysnBasisContract
+			IM.ysnBasisContract,
+			BI.intItemId AS	intBundleId
 
 	FROM	tblICItem				IM
 	JOIN	tblICItemLocation		IL	ON	IL.intItemId				=	IM.intItemId		LEFT
@@ -31,5 +32,6 @@ AS
 	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intOriginId
 										AND	CA.strType					=	'Origin'			LEFT
 	JOIN	tblSMCountry			OG	ON	OG.intCountryID				=	CA.intCountryID		LEFT
-	JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId
+	JOIN	tblSMPurchasingGroup	PG	ON	PG.intPurchasingGroupId		=	CA.intPurchasingGroupId		LEFT 
+	JOIN	vyuICGetBundleItem		BI	ON	BI.intBundleItemId			=	IM.intItemId
 	WHERE	IM.strType IN ('Inventory','Finished Good','Raw Material','Bundle')

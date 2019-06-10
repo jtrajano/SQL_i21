@@ -13,3 +13,12 @@
     CONSTRAINT [FK_tblTRLoadBlendIngredient_tblTRLoadDistributionDetail] FOREIGN KEY ([intLoadDistributionDetailId]) REFERENCES [tblTRLoadDistributionDetail]([intLoadDistributionDetailId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblTRLoadBlendIngredient_tblMFRecipeItem] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId])
 )
+GO
+
+CREATE INDEX [IX_tblTRLoadBlendIngredient_intLoadDistributionDetailId] ON [dbo].[tblTRLoadBlendIngredient] ([intLoadDistributionDetailId])
+GO
+
+CREATE INDEX [IX_tblTRLoadBlendIngredient_strReceiptLink] ON [dbo].[tblTRLoadBlendIngredient] ([strReceiptLink])
+GO
+
+

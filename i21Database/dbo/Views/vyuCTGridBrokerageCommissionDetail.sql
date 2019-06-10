@@ -54,7 +54,8 @@ AS
     JOIN	vyuCTContractCostView	CST ON	CST.intContractCostId   =   BCD.intContractCostId	
     JOIN	vyuCTContractSequence	SEQ ON	SEQ.intContractDetailId =   CST.intContractDetailId
     JOIN	tblCTContractHeader		HDR ON	HDR.intContractHeaderId =   CST.intContractHeaderId
-    JOIN	tblEMEntity				SEY ON	SEY.intEntityId			=   HDR.intCounterPartyId
+    
 	JOIN tblCTBrkgCommn BC ON BC.intBrkgCommnId = BCD.intBrkgCommnId
+	LEFT JOIN	tblEMEntity				SEY ON	SEY.intEntityId			=   HDR.intCounterPartyId
 	LEFT JOIN tblAPBill VCHR ON BC.intVoucherId = VCHR.intBillId
 	LEFT JOIN tblARInvoice INVC ON BC.intInvoiceId = INVC.intInvoiceId
