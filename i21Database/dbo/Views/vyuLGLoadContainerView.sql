@@ -26,6 +26,7 @@ SELECT   L.intLoadId
 		,LC.dblTareWt
 		,LC.dblTotalCost
 		,LC.dblUnitCost
+		,LC.dtmUnloading
 		,LC.dtmCustoms
 		,LC.dtmFDA
 		,LC.dtmFreight

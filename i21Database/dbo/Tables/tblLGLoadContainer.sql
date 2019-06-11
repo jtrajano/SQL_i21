@@ -18,6 +18,7 @@
 [strMarks] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strOtherMarks] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [ysnRejected] [bit] NULL,
+[dtmUnloading] DATETIME NULL,
 
 [dtmCustoms] DATETIME NULL,
 [ysnCustomsHold] [bit] NULL,
