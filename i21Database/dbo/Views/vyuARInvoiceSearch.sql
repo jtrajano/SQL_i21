@@ -71,13 +71,14 @@ SELECT
 									  END
 	,ysnMailSent					= isnull(EMAILSTATUS.ysnMailSent, 0)--CASE WHEN ISNULL(EMAILSTATUS.intTransactionCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
 	,strStatus						= CASE WHEN EMAILSETUP.ysnHasEmailSetup = 1 THEN 'Ready' ELSE 'Email not Configured.' END COLLATE Latin1_General_CI_AS
-	,dtmForgiveDate					=I.dtmForgiveDate
-	,strSalesOrderNumber			=SO.strSalesOrderNumber
-	,intBookId						=I.intBookId
-	,intSubBookId					=I.intSubBookId
-	,strBook						=BOOK.strBook
-	,strSubBook						=SUBBOOK.strSubBook
-	,blbSignature					=I.blbSignature
+	,dtmForgiveDate					= I.dtmForgiveDate
+	,strSalesOrderNumber			= SO.strSalesOrderNumber
+	,intBookId						= I.intBookId
+	,intSubBookId					= I.intSubBookId
+	,strBook						= BOOK.strBook
+	,strSubBook						= SUBBOOK.strSubBook
+	,blbSignature					= I.blbSignature
+	,intTicketId					= SCALETICKETID.intTicketId
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -177,24 +178,15 @@ OUTER APPLY (
 	SELECT TOP 1 strName
 			   , strEmail
 			   , intEntityId 
-	--FROM dbo.vyuEMEntityContact WITH (NOLOCK) 
 	FROM dbo.tblEMEntity WITH (NOLOCK) 
 	WHERE I.intEntityContactId = intEntityId
 ) EC
 OUTER APPLY (
-	--SELECT intEmailSetupCount = COUNT(intCustomerEntityId) 
-	--FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
-	--WHERE intCustomerEntityId = I.intEntityCustomerId 
-	--  AND ISNULL(strEmail, '') <> '' 
-	--  AND strEmailDistributionOption LIKE '%' + I.strTransactionType + '%'
-	select --intEmailSetupCount  = count(a.intEntityId),
-		ysnHasEmailSetup = CASE WHEN  count(a.intEntityId)  > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
-		from 
-		tblEMEntityToContact a 
-			join tblEMEntity b 
-				on a.intEntityContactId = b.intEntityId 
-		where a.intEntityId = I.intEntityCustomerId 
-		and (b.strEmail is not null and isnull(b.strEmail, '') <> '' )	
+	SELECT ysnHasEmailSetup = CASE WHEN COUNT(ETC.intEntityId)  > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	FROM tblEMEntityToContact ETC WITH (NOLOCK)
+	INNER JOIN tblEMEntity EM WITH (NOLOCK) ON ETC.intEntityContactId = EM.intEntityId 
+	WHERE ETC.intEntityId = I.intEntityCustomerId 
+	  AND ISNULL(EM.strEmail, '') <> ''
 	  AND strEmailDistributionOption LIKE '%' + I.strTransactionType + '%'
 ) EMAILSETUP
 LEFT OUTER JOIN (
@@ -202,30 +194,22 @@ LEFT OUTER JOIN (
 		 , strSalesOrderNumber
 	FROM dbo.tblSOSalesOrder  
 ) SO ON I.intSalesOrderId = SO.intSalesOrderId 
-left join (
-	SELECT 		
-		--intTransactionCount = COUNT(SMA.intTransactionId),
-		id = SMT.intRecordId ,
-		ysnMailSent = CASE WHEN COUNT(SMA.intTransactionId) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
-	FROM (select intRecordId, intTransactionId, intScreenId from tblSMTransaction WITH (NOLOCK)) SMT 
-	INNER JOIN (select intScreenId from tblSMScreen where strScreenName = 'Invoice' )SC ON SMT.intScreenId = SC.intScreenId
-	INNER JOIN (select intTransactionId, strType, strStatus from tblSMActivity WITH (NOLOCK) where strType = 'Email' and strStatus = 'Sent') SMA on SMA.intTransactionId = SMT.intTransactionId 
+LEFT JOIN (
+	SELECT intRecordId	= SMT.intRecordId 
+	     , ysnMailSent	= CASE WHEN COUNT(SMA.intTransactionId) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT)  END 
+	FROM tblSMTransaction SMT WITH (NOLOCK)
+	INNER JOIN tblSMScreen SC WITH (NOLOCK) ON SMT.intScreenId = SC.intScreenId
+	INNER JOIN tblSMActivity SMA WITH (NOLOCK) ON SMA.intTransactionId = SMT.intTransactionId 
+	WHERE SC.strScreenName = 'Invoice'
+	  AND SMA.strType = 'Email' 
+	  AND SMA.strStatus = 'Sent'
 	GROUP by SMT.intRecordId
-
-	--SELECT intTransactionCount = COUNT(SMA.intTransactionId) 
-	--FROM tblSMTransaction SMT 
-	--INNER JOIN tblSMActivity SMA on SMA.intTransactionId = SMT.intTransactionId 
-	--WHERE SMT.intRecordId = I.intInvoiceId 
-	--  AND SMA.strType = 'Email' 
-	--  AND SMA.strStatus = 'Sent'
-	--  and SMT.intScreenId = 48
-) EMAILSTATUS
-	on I.intInvoiceId = EMAILSTATUS.id
+) EMAILSTATUS ON I.intInvoiceId = EMAILSTATUS.intRecordId
 OUTER APPLY (
 	SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(T.strTicketNumber AS VARCHAR(200))  + ', '
-		FROM (select intTicketId, intInvoiceId from dbo.tblARInvoiceDetail WITH(NOLOCK) where intTicketId is not null ) ID 		
+		FROM (SELECT intTicketId, intInvoiceId FROM dbo.tblARInvoiceDetail WITH(NOLOCK) WHERE intTicketId IS NOT NULL) ID 		
 		INNER JOIN (
 			SELECT intTicketId
 				 , strTicketNumber 
@@ -240,7 +224,7 @@ OUTER APPLY (
 	SELECT strCustomerReferences = LEFT(strCustomerReference, LEN(strCustomerReference) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
 		SELECT CAST(T.strCustomerReference AS VARCHAR(200))  + ', '
-		FROM (select intTicketId, intInvoiceId from dbo.tblARInvoiceDetail WITH(NOLOCK) where intTicketId is not null ) ID 		
+		FROM (SELECT intTicketId, intInvoiceId FROM dbo.tblARInvoiceDetail WITH(NOLOCK) WHERE intTicketId IS NOT NULL) ID 		
 		INNER JOIN (
 			SELECT intTicketId
 				 , strCustomerReference 
@@ -252,6 +236,11 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
-
+OUTER APPLY (
+	SELECT TOP 1 intTicketId
+	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+	WHERE ID.intInvoiceId = I.intInvoiceId
+	  AND ID.intTicketId IS NOT NULL
+) SCALETICKETID
 
 GO
