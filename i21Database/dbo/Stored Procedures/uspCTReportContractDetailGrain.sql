@@ -6,8 +6,9 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intContractDetailId INT
+	DECLARE @ErrMsg					NVARCHAR(MAX),
+			@intContractDetailId	INT,
+			@intDecimalDPR			INT = 0
     
 	DECLARE @ContractDetailGrain AS TABLE 
 	(
@@ -29,9 +30,12 @@ BEGIN TRY
 		,strCommodityCode					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strTerm							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strFutureMonthZee					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strQuantity						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strPrice							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strPriceZee						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strQuantityRoth					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strQuantityZee						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strPriceRoth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	)
 
@@ -39,6 +43,11 @@ BEGIN TRY
 	SELECT @intContractDetailId = MIN(intContractDetailId)
 	FROM    vyuCTContractDetailView DV
 	WHERE	intContractHeaderId	=	@intContractHeaderId ORDER BY MIN(intContractSeq)
+
+	SELECT	@intDecimalDPR = ISNULL(CO.intDecimalDPR ,0)
+	FROM	tblCTContractHeader CH
+	JOIN	tblICCommodity		CO ON CO.intCommodityId = CH.intCommodityId
+	WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 
 	WHILE @intContractDetailId > 0
 	BEGIN
@@ -62,9 +71,12 @@ BEGIN TRY
 				,strCommodityCode			
 				,strTerm
 				,strFutureMonth
+				,strFutureMonthZee
 				,strQuantity
 				,strPrice
+				,strPriceZee
 				,strQuantityRoth
+				,strQuantityZee
 				,strPriceRoth
 			)
 			 SELECT 
@@ -93,6 +105,7 @@ BEGIN TRY
 							               END	
 			,strTerm					 = strTerm
 			,strFutureMonth				 = REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')
+			,strFutureMonthZee			 = CASE	WHEN intPricingTypeId = 1 THEN '' ELSE REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') END
 			,strQuantity				 = convert(nvarchar(30),dblDetailQuantity) + ' ' + strItemUOM
 			,strPrice					 = convert(nvarchar(30),(CASE	
 													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
@@ -100,7 +113,15 @@ BEGIN TRY
 													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,4))
 													ELSE 0
 										   END)) + ' ' + strPriceUOM + ' ' + strCurrency
+			,strPriceZee				 = CASE	
+													WHEN intPricingTypeId IN (1,6)	THEN	dbo.fnCTChangeNumericScale(ISNULL(dblCashPrice,0),@intDecimalDPR)
+													WHEN intPricingTypeId = 2		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblBasis,0),@intDecimalDPR)
+													WHEN intPricingTypeId = 3		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblFutures,0),@intDecimalDPR)
+													ELSE '0'
+											END
+											+ ' ' + strPriceUOM + ' ' + strCurrency
 			,strQuantityRoth			 = convert(nvarchar(30),CAST(ISNULL(dblDetailQuantity,0) AS DECIMAL(24,2))) + ' ' + strItemUOM
+			,strQuantityZee				 = REPLACE(CONVERT(VARCHAR,CONVERT(MONEY,dblDetailQuantity),1), '.00','') + ' ' + strItemUOM
 			,strPriceRoth				 = convert(nvarchar(30),(CASE	
 													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,2))
 													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,2))
@@ -133,7 +154,9 @@ BEGIN TRY
 				,strTerm					
 				,strQuantity
 				,strPrice
+				,strPriceZee
 				,strQuantityRoth
+				,strQuantityZee
 				,strPriceRoth
 			)
 			SELECT 
@@ -183,7 +206,22 @@ BEGIN TRY
 												WHEN CC.strCostMethod = 'Per Unit' THEN UM.strUnitMeasure+' '+ISNULL(Currency.strCurrency,'')										
 												WHEN CC.strCostMethod = 'Amount'   THEN ISNULL(Currency.strCurrency,'')
 											  END)
+			,strPriceZee				 = (CASE	
+											WHEN CC.strCostMethod IN('Per Unit','Gross Unit') 
+												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' per '										
+											
+											WHEN CC.strCostMethod = 'Amount'   
+												THEN '$ '+LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' '
+											
+											WHEN CC.strCostMethod = 'Percentage'   
+												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' %'
+											END) + ' ' +
+											  (CASE	
+												WHEN CC.strCostMethod = 'Per Unit' THEN UM.strUnitMeasure+' '+ISNULL(Currency.strCurrency,'')										
+												WHEN CC.strCostMethod = 'Amount'   THEN ISNULL(Currency.strCurrency,'')
+											  END)
 			,strQuantityRoth			 = Item.strItemNo
+			,strQuantityZee				= Item.strItemNo
 			,strPriceRoth				 = (CASE	
 											WHEN CC.strCostMethod IN('Per Unit','Gross Unit') 
 												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' per '										

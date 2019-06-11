@@ -36,7 +36,7 @@ AS
 			NM.strPricingLevelName,			NM.strPricingType,				NM.strLoadCategoryUnitMeasure,				
 			NM.strINCOLocationType,			NM.strContractPlan,				CE.strName AS strCreatedBy,
 			NM.strTermCode,					NM.strCropYear,					UE.strName AS strLastModifiedBy,					
-																			PE.strName AS strCounterPartyName,
+			SY.strName	AS	strSalesperson,									PE.strName AS strCounterPartyName,
 																			NM.strFreightTerm,
 								
 			CASE WHEN NM.strINCOLocationType = 'City' THEN NM.strINCOLocation ELSE NM.strSubLocationName	END	AS	strINCOLocation,
@@ -55,13 +55,14 @@ AS
 																WHEN CH.intContractTypeId <> 1 AND EY.strEntityType = 'Customer' THEN 1 
 																ELSE 0
 															END
-														) LEFT
-	JOIN	tblARSalesperson					SP	ON	SP.intEntityId						=		CH.intSalespersonId					LEFT
-	JOIN	tblCTApprovalBasis					AB	ON	AB.intApprovalBasisId				=		CH.intApprovalBasisId				LEFT
-	JOIN	tblEMEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
-	JOIN	tblEMEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
-	JOIN	tblEMEntity							PE	ON	PE.intEntityId						=		CH.intCounterPartyId				LEFT
-	JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
-	JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					
+														) 
+LEFT	JOIN	tblARSalesperson					SP	ON	SP.intEntityId						=		CH.intSalespersonId					
+LEFT	JOIN	tblEMEntity							SY	ON	SY.intEntityId						=		CH.intSalespersonId
+LEFT	JOIN	tblCTApprovalBasis					AB	ON	AB.intApprovalBasisId				=		CH.intApprovalBasisId				
+LEFT	JOIN	tblEMEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					
+LEFT	JOIN	tblEMEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				
+LEFT	JOIN	tblEMEntity							PE	ON	PE.intEntityId						=		CH.intCounterPartyId				
+LEFT	JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				
+LEFT	JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					
 	
 				

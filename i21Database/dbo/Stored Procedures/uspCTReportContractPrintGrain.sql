@@ -18,7 +18,8 @@ BEGIN TRY
 			@strZip					NVARCHAR(500),
 			@strCountry				NVARCHAR(500),
 			@intContractHeaderId	NVARCHAR(MAX),
-			@xmlDocumentId			INT 
+			@xmlDocumentId			INT,
+			@intDecimalDPR			INT
 			
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -103,6 +104,8 @@ BEGIN TRY
 					WHEN	CH.intContractTypeId  =	2
 					THEN	'BUYER'
 			END		AS	strD,
+			CH.strSalesperson,
+			(SELECT TOP 1 Sig.blbDetail FROM tblSMSignature Sig  WITH (NOLOCK) WHERE Sig.intEntityId=CH.intSalespersonId) SalespersonSignature,
 			TX.strText,
 			CH.strContractBasis +
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strINCOLocation)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strINCOLocation)) END,'') + 
