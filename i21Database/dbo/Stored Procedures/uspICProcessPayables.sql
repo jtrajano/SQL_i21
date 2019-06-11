@@ -125,6 +125,10 @@ BEGIN
 			AND Item.strType <> 'Bundle'
 			AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
 			AND ISNULL(ReceiptItem.ysnAllowVoucher, 1) = 1
+		INNER JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = Receipt.intFreightTermId
+		WHERE Receipt.intSourceType <> 2 OR (
+			Receipt.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin'
+		)
 
 		UNION ALL
 		/* To get the unposted Receipt Charges */
@@ -215,10 +219,13 @@ BEGIN
 		) ComputedChargesLink
 
 		OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
+		LEFT OUTER JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = Receipt.intFreightTermId
 		WHERE Receipt.intInventoryReceiptId = @intReceiptId
 			AND Receipt.ysnPosted = 0
 			AND ReceiptCharge.intEntityVendorId IS NOT NULL
-	
+			AND (Receipt.intSourceType <> 2 OR (
+				Receipt.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin'
+			))
 	END
 	
 	/* Get Shipment Charges */
