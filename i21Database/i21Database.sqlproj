@@ -7584,7 +7584,12 @@
     <Build Include="dbo\Views\vyuLGShippingLineServiceContractDetail.sql" />
     <Build Include="dbo\Functions\fnCTRemoveStringXMLTag.sql" />
     <Build Include="dbo\Functions\fnCTGetBasisDelivery.sql" />
-	<Build Include="dbo\Views\vyuSTRegister.sql" />
+    <Build Include="dbo\Views\vyuSTRegister.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderDepartment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderPLU.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderFPHose.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
