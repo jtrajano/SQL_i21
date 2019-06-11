@@ -632,6 +632,7 @@ BEGIN
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
 				AND ysnInTransit = 0
 				AND s.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND s.strTransactionType <> 'Inventory Count'
 
 			--=============================
 			-- Transfer
