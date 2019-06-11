@@ -8,6 +8,33 @@
 RETURNS NUMERIC(38,20)
 AS 
 BEGIN 
+
+declare @dblUnitQuantityFrom numeric(38,20) = 0.00;
+declare @dblUnitQuantityTo numeric(38,20) = 0.00;
+
+set @dblUnitQuantityFrom = (select (@dblQty * dblUnitQty) from tblICCommodityUnitMeasure where intCommodityId = @intCommodityId and intUnitMeasureId = @IntFromUnitMeasureId);
+set @dblUnitQuantityTo = (select case when isnull(dblUnitQty,0) = 0 then 0 else (@dblUnitQuantityFrom / dblUnitQty) end from tblICCommodityUnitMeasure where intCommodityId = @intCommodityId and intUnitMeasureId = @intToUnitMeasureId);
+
+if (@dblUnitQuantityTo = 0)
+begin
+	set @dblUnitQuantityTo = null;
+end
+
+return @dblUnitQuantityTo;
+
+END
+
+/*
+CREATE FUNCTION [dbo].[fnCTConvertQtyToTargetCommodityUOM]
+(
+	@intCommodityId INT,
+	@IntFromUnitMeasureId INT,
+	@intToUnitMeasureId INT,
+	@dblQty NUMERIC(38,20)
+)
+RETURNS NUMERIC(38,20)
+AS 
+BEGIN 
 	DECLARE	@result AS NUMERIC(38,20),
 			@intItemUOMIdFrom INT,
 			@intItemUOMIdTo INT,
@@ -42,3 +69,4 @@ BEGIN
 
 	RETURN @result;	
 END
+*/
