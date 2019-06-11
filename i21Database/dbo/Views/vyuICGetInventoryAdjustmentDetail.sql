@@ -86,6 +86,10 @@ SELECT
 	, Category.strDescription strCategory
 	, Category.intCategoryId
 	, Commodity.intCommodityId
+	, Adj.strTicketNumber
+	, Adj.strInvoiceNumber
+	, Adj.strShipmentNumber
+	, Adj.strReceiptNumber
 FROM tblICInventoryAdjustmentDetail AdjDetail
 LEFT JOIN vyuICGetInventoryAdjustment Adj ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation NewLocation ON NewLocation.intCompanyLocationId = AdjDetail.intNewLocationId

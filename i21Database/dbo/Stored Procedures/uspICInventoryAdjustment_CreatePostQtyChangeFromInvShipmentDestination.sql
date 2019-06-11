@@ -36,6 +36,11 @@ DECLARE @strShipmentNumber AS NVARCHAR(50)
 		,@intInventoryAdjustmentId AS INT 
 		,@strDescription AS NVARCHAR(1000)
 		
+		,@intInventoryReceiptId AS INT
+		,@intTicketId AS INT
+		,@intInvoiceId AS INT
+		,@IntegrationId AS InventoryAdjustmentIntegrationId
+
 DECLARE	@ErrorMessage NVARCHAR(4000)
 		,@ErrorSeverity INT
 		,@ErrorState INT 
@@ -87,6 +92,8 @@ BEGIN
 				, CASE WHEN @ysnPost = 1 THEN (si.dblQuantity - ISNULL(si.dblDestinationQuantity, 0)) ELSE -(si.dblQuantity - ISNULL(si.dblDestinationQuantity, 0)) END 
 			) 
 			, si.intOwnershipType
+			, sc.intTicketId
+			, inv.intInvoiceId
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
 				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN tblICItem i 
@@ -103,6 +110,12 @@ BEGIN
 				AND il.intLocationId = s.intShipFromLocationId 
 			LEFT JOIN tblICInventoryTransactionType [tt]
 				ON [tt].strName = 'Inventory Shipment'
+			left join tblSCTicket as sc
+				on s.intSourceType = 1 and si.intSourceId = sc.intTicketId and sc.intInventoryShipmentId = s.intInventoryShipmentId
+			outer apply (
+				select top 1 a.intInvoiceId from tblARInvoiceDetail as a					
+					where a.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			) as inv
 			OUTER APPLY (
 				SELECT	TOP 1 
 						t.intItemUOMId 
@@ -140,11 +153,18 @@ BEGIN
 			,@intItemUOMId  
 			,@intSourceTransactionTypeId
 			,@dblAdjustByQuantity
-			,@intOwnershipType
+			,@intOwnershipType			
+			,@intTicketId
+			,@intInvoiceId
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 		BEGIN TRY 
+			declare @temp_integration_table as InventoryAdjustmentIntegrationId
+
+			insert into @temp_integration_table(intInventoryShipmentId, intTicketId, intInvoiceId)
+			select @intInventoryShipmentId, @intTicketId, @intInvoiceId
+
 			EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 				-- Parameters for filtering:
 				@intItemId 
@@ -167,6 +187,7 @@ BEGIN
 				,@intInventoryAdjustmentId OUTPUT
 				,DEFAULT
 				,@ysnPost
+				,@temp_integration_table
 		END TRY 
 		BEGIN CATCH
 			SELECT 
@@ -198,7 +219,9 @@ BEGIN
 				,@intItemUOMId  
 				,@intSourceTransactionTypeId
 				,@dblAdjustByQuantity
-				,@intOwnershipType
+				,@intOwnershipType			
+				,@intTicketId
+				,@intInvoiceId
 	END
 
 	GOTO _EndLoop

@@ -33,6 +33,10 @@ SELECT
 	, Adj.intConcurrencyId
 	, Link.strTransactionFrom
 	, Link.strSource
+	, Link.strTicketNumber
+	, Link.strInvoiceNumber
+	, Link.strShipmentNumber
+	, Link.strReceiptNumber
 FROM tblICInventoryAdjustment Adj
 LEFT JOIN vyuICInventoryAdjustmentSourceLink Link
 	on Link.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId

@@ -18,6 +18,7 @@
 	,@intInventoryAdjustmentId AS INT OUTPUT
 	,@strDescription AS NVARCHAR(1000) = NULL 
 	,@ysnPost BIT = 1
+	,@InventoryAdjustmentIntegrationId as InventoryAdjustmentIntegrationId READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -43,6 +44,18 @@ DECLARE @TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
 DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@strAdjustmentNo AS NVARCHAR(40)
 		,@intLotId AS INT 
+
+DECLARE @intInventoryShipmentId AS INT,
+	@intInventoryReceiptId AS INT,
+	@intTicketId AS INT,
+	@intInvoiceId AS INT
+
+SELECT TOP 1 
+	@intInventoryShipmentId = intInventoryShipmentId,
+	@intInventoryReceiptId = intInventoryReceiptId,
+	@intTicketId = intTicketId,
+	@intInvoiceId = intInvoiceId
+FROM @InventoryAdjustmentIntegrationId
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- VALIDATIONS
@@ -158,6 +171,11 @@ BEGIN
 			,dtmUnpostedDate
 			,intSourceId
 			,intSourceTransactionTypeId
+
+			,intInventoryShipmentId
+			,intInventoryReceiptId
+			,intTicketId
+			,intInvoiceId
 	)
 	SELECT	intLocationId				= @intLocationId
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
@@ -173,6 +191,11 @@ BEGIN
 			,intSourceTransactionId		= @intSourceId
 			,intSourceTransactionTypeId = @intSourceTransactionTypeId
 
+
+			,intInventoryShipmentId		= @intInventoryShipmentId
+			,intInventoryReceiptId		= @intInventoryReceiptId
+			,intTicketId				= @intTicketId
+			,intInvoiceId				= @intInvoiceId
 	SELECT @intInventoryAdjustmentId = SCOPE_IDENTITY();
 END
 
