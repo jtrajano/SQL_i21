@@ -86,6 +86,7 @@ SELECT   L.intLoadId
 		,LoadDetail.ysnPrintLoadDirections
 		,LoadDetail.strExternalShipmentItemNumber
 		,LoadDetail.strExternalBatchNo
+		,strSampleStatus = SS.strStatus
         ,intGenerateReferenceNumber = GLoad.intReferenceNumber
         ,intNumberOfLoads = GLoad.intNumberOfLoads
 		,intContractHeaderId = CASE WHEN L.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END 
@@ -273,3 +274,6 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
 LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
 LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
+OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved', 'Rejected')) THEN 'Sample Sent' ELSE SS.strStatus END
+				FROM tblQMSample S JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+				WHERE S.intLoadDetailId = LoadDetail.intLoadDetailId) SS
