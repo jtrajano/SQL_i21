@@ -59,6 +59,7 @@ SELECT
 	intContractHeaderId = PCT.intContractHeaderId,
 	strContractNumber = PCH.strContractNumber,
 	strContractBasis = CB.strContractBasis,
+	strTerm = TRM.strTerm,
 	strPricingType = PT.strPricingType,
 	intContractSeq = PCT.intContractSeq,
 	strPContractNumber = CAST(PCH.strContractNumber as VARCHAR(100)) + '/' + CAST(PCT.intContractSeq AS VARCHAR(100)),
@@ -75,6 +76,7 @@ SELECT
 	strOrigin = CYO.strDescription,
 	strGrade = CYG.strDescription,
 	strLotTracking = IM.strLotTracking,
+	strBundleItemNo = BNDL.strItemNo,
 	strItemUOM = U1.strUnitMeasure,
 	dblPurchaseContractOriginalQty = PCT.dblQuantity,
 	strPurchaseContractOriginalUOM = U3.strUnitMeasure,
@@ -207,8 +209,10 @@ LEFT JOIN tblICItem	IM ON IM.intItemId = PCT.intItemId
 LEFT JOIN tblICCommodity CY ON CY.intCommodityId = PCH.intCommodityId
 LEFT JOIN tblICCommodityAttribute CYO ON CYO.intCommodityAttributeId = IM.intOriginId
 LEFT JOIN tblICCommodityAttribute CYG ON CYG.intCommodityAttributeId = IM.intGradeId
+LEFT JOIN tblICItem BNDL ON BNDL.intItemId = PCT.intItemBundleId
 LEFT JOIN tblCTPosition PO ON PO.intPositionId = PCH.intPositionId
 LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = PCH.intFreightTermId
+LEFT JOIN tblSMTerm TRM ON TRM.intTermID = PCH.intTermId
 LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = PCH.intPricingTypeId
 LEFT JOIN tblSMCurrency	CUR ON CUR.intCurrencyID = PCT.intCurrencyId
 LEFT JOIN tblSMCurrency	BCUR ON BCUR.intCurrencyID = PCT.intBasisCurrencyId

@@ -27,6 +27,7 @@ FROM (
        ,strItemUOM = UOM.strUnitMeasure
        ,strItemUOMType = UOM.strUnitType
        ,dblItemUOMConv = ItemUOM.dblUnitQty
+	   ,strBundleItemNo = Bundle.strItemNo
        ,strLotNumber = Lot.strLotNumber
        ,intSubLocationId = Lot.intSubLocationId
        ,strSubLocationName = SubLocation.strSubLocationName
@@ -66,6 +67,7 @@ FROM (
        ,strVessel = Lot.strVessel
 	   ,strDestinationCity = L.strDestinationCity
 	   ,dtmETAPOL = L.dtmETAPOL
+	   ,dtmETSPOL = L.dtmETSPOL
 	   ,dtmETAPOD = L.dtmETAPOD
        ,strReceiptNumber = Lot.strReceiptNumber
        ,strMarkings = LC.strMarks
@@ -86,15 +88,19 @@ FROM (
        ,intSourceId = ReceiptItem.intSourceId
        ,strContractNumber = CTHeader.strContractNumber
 	   ,strContractBasis = CB.strContractBasis
+	   ,strTerm = Term.strTerm
 	   ,strPricingType = PT.strPricingType
        ,intContractDetailId = CTDetail.intContractDetailId
        ,intContractSeq = CTDetail.intContractSeq
+	   ,dtmStartDate = CTDetail.dtmStartDate
+	   ,dtmEndDate = CTDetail.dtmEndDate
        ,dblOriginalQty = CTDetail.dblQuantity
 	   ,strOriginalQtyUOM = UOM2.strUnitMeasure
        ,dblAllocatedQty = IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0)
        ,dblReservedQty = IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
 	   ,strContainerNumber = LC.strContainerNumber
        ,strBLNumber = L.strBLNumber
+	   ,dtmBLDate = L.dtmBLDate
        ,strVendor = EY.strName 
        ,strLoadNumber = L.strLoadNumber
        ,dtmPostedDate = L.dtmPostedDate
@@ -140,6 +146,7 @@ FROM (
 		LEFT JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId AND ET.strType = (CASE WHEN CTHeader.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)  
 		LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId
+		LEFT JOIN tblICItem Bundle ON Bundle.intItemId = CTDetail.intItemBundleId
 		LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = Lot.intLocationId
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lot.intItemUOMId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -152,6 +159,7 @@ FROM (
 		LEFT JOIN tblSMCountry OG ON OG.intCountryID = CA.intCountryID
 		LEFT JOIN tblICCommodityAttribute CG ON	CG.intCommodityAttributeId = Item.intGradeId AND CG.strType = 'Grade'
 		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CTHeader.intFreightTermId
+		LEFT JOIN tblSMTerm Term ON Term.intTermID = CTHeader.intTermId
 		LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CTHeader.intPricingTypeId
 		LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
 		LEFT JOIN tblCTBook BO ON BO.intBookId = CTDetail.intBookId
