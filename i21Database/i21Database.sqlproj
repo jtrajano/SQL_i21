@@ -7648,6 +7648,12 @@
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForNegativeStockVariance.sql" />
     <Build Include="dbo\Index\IX_tblGLTrialBalance_intGLFiscalYearPeriodId.sql" />
     <Build Include="dbo\Views\vyuCTContractApproverView.sql" />
+    <Build Include="dbo\Views\vyuAPForClearing.sql" />
+    <Build Include="dbo\Views\vyuAPLoadClearing.sql" />
+    <Build Include="dbo\Views\vyuAPLoadCostClearing.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptChargeClearing.sql" />
+    <Build Include="dbo\Views\vyuAPREceiptClearing.sql" />
+    <Build Include="dbo\Views\vyuAPShipmentChargeClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
