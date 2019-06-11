@@ -47,7 +47,10 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @queryRunningBalanceBudget			AS NVARCHAR(MAX)	= ''
 	  , @intWriteOffPaymentMethodId			AS INT				= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULL
-		, @ysnStretchLogo							AS BIT	= 0
+	  , @ysnStretchLogo						AS BIT				= 0
+	  , @blbLogo							AS VARBINARY(MAX)	= NULL
+	  , @strCompanyName						AS NVARCHAR(500)	= NULL
+	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 
 DECLARE @temp_statement_table TABLE(
 	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -70,9 +73,7 @@ DECLARE @temp_statement_table TABLE(
 	,[strTicketNumbers]				NVARCHAR(MAX)
 	,[strLocationName]				NVARCHAR(100)
 	,[strFullAddress]				NVARCHAR(MAX)
-	,[strStatementFooterComment]	NVARCHAR(MAX)	
-	,[strCompanyName]				NVARCHAR(MAX)
-	,[strCompanyAddress]			NVARCHAR(MAX)
+	,[strStatementFooterComment]	NVARCHAR(MAX)		
 	,[dblARBalance]					NUMERIC(18,6)
 	,[ysnStatementCreditLimit]		BIT
     ,[intPaymentId]					INT
@@ -90,10 +91,12 @@ BEGIN
     DROP TABLE #CUSTOMERS
 END
 
-SELECT intEntityCustomerId	= intEntityId
-	 , strCustomerNumber	= CAST(strCustomerNumber COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
-	 , strCustomerName		= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
-	 , strStatementFormat	= CAST(strStatementFormat COLLATE Latin1_General_CI_AS AS NVARCHAR(100))
+SELECT intEntityCustomerId			= intEntityId
+	 , strCustomerNumber			= CAST(strCustomerNumber COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , strCustomerName				= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
+	 , strStatementFormat			= CAST(strStatementFormat COLLATE Latin1_General_CI_AS AS NVARCHAR(100))
+	 , strFullAddress				= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(MAX))
+	 , strStatementFooterComment	= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(MAX))
 	 , dblCreditLimit
 	 , dblARBalance
 INTO #CUSTOMERS
@@ -120,10 +123,14 @@ SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo
 FROM tblARCompanyPreference WITH (NOLOCK)
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+SELECT TOP 1 @strCompanyName = strCompanyName
+		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblARBalance)
 		SELECT TOP 1 intEntityCustomerId    = C.intEntityId 
 				   , strCustomerNumber      = C.strCustomerNumber
 				   , strCustomerName        = EC.strName
@@ -142,7 +149,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 	END
 ELSE IF @strCustomerIdsLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblARBalance)
 		SELECT intEntityCustomerId  = C.intEntityId 
 		     , strCustomerNumber    = C.strCustomerNumber
 		     , strCustomerName      = EC.strName
@@ -164,7 +171,7 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 	END
 ELSE
 	BEGIN
-		INSERT INTO #CUSTOMERS
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblARBalance)
 		SELECT intEntityCustomerId  = C.intEntityId 
 			 , strCustomerNumber	= C.strCustomerNumber
 			 , strCustomerName      = EC.strName
@@ -247,6 +254,12 @@ EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmDateToLocal
 										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
 										  , @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPaymentLocal										  
 
+UPDATE C
+SET strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> 'Running Balance' THEN CS.strBillToLocationName ELSE NULL END, CS.strBillToAddress, CS.strBillToCity, CS.strBillToState, CS.strBillToZipCode, CS.strBillToCountry, NULL, NULL)
+  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, C.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
+FROM #CUSTOMERS C
+INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
+
 SET @query = CAST('' AS NVARCHAR(MAX)) + '
 SELECT * 
 FROM (
@@ -272,10 +285,8 @@ FROM (
 		 , dblCreditLimit				= C.dblCreditLimit		 
 		 , strTicketNumbers				= I.strTicketNumbers
 		 , strLocationName				= CL.strLocationName
-		 , strFullAddress				= [dbo].fnARFormatCustomerAddress(NULL, NULL, CASE WHEN C.strStatementFormat <> ''Running Balance'' THEN C.strBillToLocationName ELSE NULL END, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, NULL)
-		 , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, I.intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
-		 , strCompanyName				= COMPANY.strCompanyName
-		 , strCompanyAddress			= COMPANY.strCompanyAddress
+		 , strFullAddress				= CUST.strFullAddress 
+		 , strStatementFooterComment	= CUST.strStatementFooterComment
 		 , dblARBalance					= C.dblARBalance
 		 , ysnStatementCreditLimit		= ysnStatementCreditLimit
 		 , intPaymentId 				= PCREDITS.intPaymentId
@@ -378,11 +389,6 @@ FROM (
 			 , strLocationName
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
 	) CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-	OUTER APPLY (
-		SELECT TOP 1 strCompanyName
-				   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, '''', '''', strAddress, strCity, strState, strZip, strCountry, '''', NULL) 
-		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-	) COMPANY
 ) MainQuery'
  
 IF ISNULL(@filter,'') != ''
@@ -416,10 +422,8 @@ IF @ysnIncludeBudgetLocal = 1
 				  , dblCreditLimit				= C.dblCreditLimit
 				  , strTicketNumbers			= NULL
 				  , strLocationName				= NULL
-				  , strFullAddress				= NULL
-				  , strStatementFooterComment	= NULL
-				  , strCompanyName				= NULL
-				  , strCompanyAddress			= NULL
+				  , strFullAddress				= C.strFullAddress
+				  , strStatementFooterComment	= C.strStatementFooterComment
 				  , dblARBalance				= C.dblARBalance
 				  , ysnStatementCreditLimit		= CUST.ysnStatementCreditLimit
 				  , intPaymentId				= NULL
@@ -446,21 +450,12 @@ IF @ysnIncludeBudgetLocal = 1
 		IF EXISTS(SELECT TOP 1 NULL FROM @temp_statement_table WHERE strTransactionType = 'Customer Budget')
 			BEGIN
 				UPDATE STATEMENTS
-				SET strCompanyAddress			= COMPLETESTATEMENTS.strCompanyAddress
-				  , strCompanyName				= COMPLETESTATEMENTS.strCompanyName
-				  , strStatementFooterComment	= COMPLETESTATEMENTS.strStatementFooterComment
-				  , strLocationName				= COMPLETESTATEMENTS.strLocationName
-				  , strFullAddress				= COMPLETESTATEMENTS.strFullAddress
+				SET strLocationName				= COMPLETESTATEMENTS.strLocationName
 				FROM @temp_statement_table STATEMENTS
 				OUTER APPLY (
-					SELECT TOP 1 strCompanyAddress
-							   , strCompanyName
-							   , strStatementFooterComment
-							   , strLocationName
-							   , strFullAddress
+					SELECT TOP 1 strLocationName
 					FROM @temp_statement_table
-					WHERE intEntityCustomerId = STATEMENTS.intEntityCustomerId
-					  AND strCompanyAddress IS NOT NULL AND strCompanyName IS NOT NULL
+					WHERE intEntityCustomerId = STATEMENTS.intEntityCustomerId					  
 				) COMPLETESTATEMENTS
 				WHERE strTransactionType = 'Customer Budget'
 			END
@@ -559,8 +554,6 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dblCreditLimit
 	, strFullAddress
 	, strStatementFooterComment
-	, strCompanyName
-	, strCompanyAddress
 	, ysnStatementCreditLimit
 	, strTicketNumbers
 	, dblCreditAvailable
@@ -573,8 +566,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dbl91Days
 	, dblCredits
 	, dblPrepayments
-	, dtmAsOfDate
-	, blbLogo
+	, dtmAsOfDate	
 	, intEntityUserId
 	, strStatementFormat	
 )
@@ -590,7 +582,6 @@ SELECT MAINREPORT.*
 	 , dblCredits			= ISNULL(AGINGREPORT.dblCredits, 0)
 	 , dblPrepayments		= ISNULL(AGINGREPORT.dblPrepayments, 0)
 	 , dtmAsOfDate			= @dtmDateToLocal
-	 , blbLogo				= dbo.fnSMGetCompanyLogo('Header')
 	 , intEntityUserId		= @intEntityUserIdLocal
 	 , strStatementFormat	= @strStatementFormatLocal
 FROM (
@@ -613,8 +604,6 @@ FROM (
 		 , STATEMENTREPORT.dblCreditLimit	  
 		 , STATEMENTREPORT.strFullAddress
 		 , STATEMENTREPORT.strStatementFooterComment	  
-		 , STATEMENTREPORT.strCompanyName
-		 , STATEMENTREPORT.strCompanyAddress
 		 , STATEMENTREPORT.ysnStatementCreditLimit
 		 , STATEMENTREPORT.strTicketNumbers
 	FROM @temp_statement_table AS STATEMENTREPORT
@@ -642,8 +631,6 @@ FROM (
 		 , STATEMENTREPORT.dblCreditLimit	  
 		 , STATEMENTREPORT.strFullAddress
 		 , STATEMENTREPORT.strStatementFooterComment	  
-		 , STATEMENTREPORT.strCompanyName
-		 , STATEMENTREPORT.strCompanyAddress
 		 , STATEMENTREPORT.ysnStatementCreditLimit
 		 , STATEMENTREPORT.strTicketNumbers
 	FROM @temp_statement_table AS STATEMENTREPORT
@@ -663,9 +650,7 @@ FROM (
 			, STATEMENTREPORT.strBOLNumber
 			, STATEMENTREPORT.dblCreditLimit	  
 			, STATEMENTREPORT.strFullAddress
-			, STATEMENTREPORT.strStatementFooterComment	  
-			, STATEMENTREPORT.strCompanyName
-			, STATEMENTREPORT.strCompanyAddress
+			, STATEMENTREPORT.strStatementFooterComment
 			, STATEMENTREPORT.ysnStatementCreditLimit
 			, STATEMENTREPORT.intEntityCustomerId
 			, STATEMENTREPORT.strTicketNumbers
@@ -677,14 +662,13 @@ LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 
 UPDATE tblARCustomerStatementStagingTable
-SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
+SET strComment			= dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
+  , blbLogo				= @blbLogo
+  , strCompanyName		= @strCompanyName
+  , strCompanyAddress	= @strCompanyAddress
+  , ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
 WHERE intEntityUserId = @intEntityUserIdLocal
   AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
-
-UPDATE tblARCustomerStatementStagingTable
-SET ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
-WHERE intEntityUserId = @intEntityUserIdLocal
-	AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN

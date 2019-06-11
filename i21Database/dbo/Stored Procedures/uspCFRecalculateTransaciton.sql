@@ -6161,6 +6161,32 @@ BEGIN
 		DECLARE @dblLocalIndexRetailGrossPriceZeroQty NUMERIC(18,6)
 		SET @dblLocalIndexRetailGrossPriceZeroQty = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
 
+
+		IF(@ysnReRunCalcTax = 0)
+			BEGIN
+				SET @dblPrice = @dblLocalIndexRetailGrossPriceZeroQty
+				------CLEAN TAX TABLE--------
+				DELETE FROM @tblCFOriginalTax				
+				DELETE FROM @tblCFCalculatedTax				
+				DELETE FROM @tblCFTransactionTax			
+				DELETE FROM @tblCFBackoutTax				
+				DELETE FROM @tblCFRemoteTax					
+
+				DELETE FROM @tblCFOriginalTaxZeroQuantity				
+				DELETE FROM @tblCFCalculatedTaxZeroQuantity				
+				DELETE FROM @tblCFTransactionTaxZeroQuantity			
+				DELETE FROM @tblCFBackoutTaxZeroQuantity		
+				
+				DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
+				DELETE FROM @tblCFCalculatedTaxExempt						
+
+				DELETE FROM @LineItemTaxDetailStagingTable
+
+				SET @ysnReRunCalcTax = 1
+				GOTO TAXCOMPUTATION
+			END
+		
+
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
 			SELECT @dblLocalIndexRetailGrossPrice = dbo.fnCFForceRounding(@dblLocalIndexRetailGrossPrice)
