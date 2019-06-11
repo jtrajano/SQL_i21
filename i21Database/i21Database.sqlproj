@@ -7344,6 +7344,7 @@
     <Build Include="dbo\Views\vyuAPShipmentChargeClearing.sql" />
     <Build Include="dbo\Views\vyuAPLoadClearing.sql" />
     <Build Include="dbo\Views\vyuAPLoadCostClearing.sql" />
+    <Build Include="dbo\Views\vyuAPGrainClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
