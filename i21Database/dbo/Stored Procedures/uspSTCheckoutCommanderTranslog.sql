@@ -42,6 +42,23 @@ BEGIN
 		-- End Validate if Translog xml file matches the Mapping on i21   
 		-- ==================================================================================================================
 
+
+
+
+
+		-- ==================================================================================================================
+		-- [START] Custom create temp table from xml file
+		-- ==================================================================================================================
+
+		-- ==================================================================================================================
+		-- [END] Custom create temp table from xml file
+		-- ==================================================================================================================
+
+
+
+
+
+
 		DECLARE @intTableRowCount AS INT = 0
 
 		SELECT @intTableRowCount = COUNT(*) 
@@ -90,68 +107,67 @@ BEGIN
 
 					SET @intCountRows = 0
 					SET @strStatusMsg = 'No Department setup on selected Store. Need to setup for rebate.'
-
-					GOTO ExitWithCommit
 				END
 			-- ==================================================================================================================  
 			-- END - Validate if Store has department setup for rebate 
 			-- ==================================================================================================================
 
 
-			-------------------------------------------START GET Department
-			--// Get Department Id from Store
-			DECLARE @strDepartments AS NVARCHAR(MAX)
+			-- http://jira.irelyserver.com/browse/ST-991
+			---------------------------------------------START GET Department
+			----// Get Department Id from Store
+			--DECLARE @strDepartments AS NVARCHAR(MAX)
 
 
-			SELECT @strDepartments = strDepartment 
-			FROM tblSTStore
-			WHERE intStoreId = @intStoreId
+			--SELECT @strDepartments = strDepartment 
+			--FROM tblSTStore
+			--WHERE intStoreId = @intStoreId
 
-			IF(@strDepartments = '')
-			BEGIN
-				SET @intCountRows = 0
-				SET @strStatusMsg = 'Store does not have setup for Tobacco Department'
-				RETURN
-			END
+			--IF(@strDepartments = '')
+			--BEGIN
+			--	SET @intCountRows = 0
+			--	SET @strStatusMsg = 'Store does not have setup for Tobacco Department'
+			--	RETURN
+			--END
 
-			--// Create Temp table
-			DECLARE @TempTableDepartments TABLE 
-			(
-				strDepartment NVARCHAR(100)
-			)
+			----// Create Temp table
+			--DECLARE @TempTableDepartments TABLE 
+			--(
+			--	strDepartment NVARCHAR(100)
+			--)
 
-			--// Create dynamic sqlQuery
-			DECLARE @strDynamicQuery as NVARCHAR(MAX)
-			SET @strDynamicQuery = 'SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (' + @strDepartments + ')'
+			----// Create dynamic sqlQuery
+			--DECLARE @strDynamicQuery as NVARCHAR(MAX)
+			--SET @strDynamicQuery = 'SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (' + @strDepartments + ')'
 
-			--// Insert to tempTable
-			INSERT @TempTableDepartments
-			EXEC (@strDynamicQuery)
+			----// Insert to tempTable
+			--INSERT @TempTableDepartments
+			--EXEC (@strDynamicQuery)
 
-			IF NOT EXISTS (SELECT * FROM @TempTableDepartments)
-			BEGIN
-				SET @intCountRows = 0
-				SET @strStatusMsg = 'Tobacco department does not exist'
-				RETURN
-			END
-			-------------------------------------------END GET Department
+			--IF NOT EXISTS (SELECT * FROM @TempTableDepartments)
+			--BEGIN
+			--	SET @intCountRows = 0
+			--	SET @strStatusMsg = 'Tobacco department does not exist'
+			--	RETURN
+			--END
+			---------------------------------------------END GET Department
 
 
 
-			-- Check if department exist in XML file
-			IF NOT EXISTS(SELECT COUNT(c.trHeadertermMsgSN) 
-					      FROM #tempCheckoutInsert c 
-			              WHERE c.trLinetrlDept IN (
-												SELECT strDepartment FROM @TempTableDepartments
-											 ) 
-							AND (c.transtype = 'sale' 
-							OR c.transtype = 'network sale') 
-						  GROUP BY c.trHeadertermMsgSN)
-			BEGIN
-				SET @intCountRows = 0
-				SET @strStatusMsg = 'Store department does not exists in register file'
-				RETURN
-			END
+			---- Check if department exist in XML file
+			--IF NOT EXISTS(SELECT COUNT(c.trHeadertermMsgSN) 
+			--		      FROM #tempCheckoutInsert c 
+			--              WHERE c.trLinetrlDept IN (
+			--									SELECT strDepartment FROM @TempTableDepartments
+			--								 ) 
+			--				AND (c.transtype = 'sale' 
+			--				OR c.transtype = 'network sale') 
+			--			  GROUP BY c.trHeadertermMsgSN)
+			--BEGIN
+			--	SET @intCountRows = 0
+			--	SET @strStatusMsg = 'Store department does not exists in register file'
+			--	RETURN
+			--END
 
 
 
@@ -165,10 +181,10 @@ BEGIN
 					(
 						SELECT c.trHeadertermMsgSN as termMsgSN
 						FROM #tempCheckoutInsert c
-						WHERE c.trLinetrlDept IN (
-													SELECT strDepartment FROM @TempTableDepartments
-												 ) 
-							AND (c.transtype = 'sale' 
+						--WHERE c.trLinetrlDept IN (
+						--							SELECT strDepartment FROM @TempTableDepartments
+						--						 ) 
+							WHERE (c.transtype = 'sale' 
 							OR c.transtype = 'network sale')
 							AND c.trHeaderdate != ''
 						GROUP BY c.trHeadertermMsgSN
@@ -178,12 +194,12 @@ BEGIN
 						SELECT * 
 							FROM dbo.tblSTTranslogRebates TR
 							WHERE TR.dtmDate = CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
-							AND TR.intTermMsgSNterm = chk.termMsgSNterm
-							AND TR.intTermMsgSN = chk.trHeadertermMsgSN 
-							AND TR.intTrTickNumPosNum = chk.cashierposNum 
-							AND TR.intTrTickNumTrSeq  = chk.trTickNumtrSeq
-							AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
-							AND TR.intStoreNumber = chk.trHeaderstoreNumber
+								AND TR.intTermMsgSNterm = chk.termMsgSNterm
+								AND TR.intTermMsgSN = chk.trHeadertermMsgSN 
+								AND TR.intTrTickNumPosNum = chk.cashierposNum 
+								AND TR.intTrTickNumTrSeq  = chk.trTickNumtrSeq
+								AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
+								AND TR.intStoreNumber = chk.trHeaderstoreNumber
 					)
 					AND chk.trHeaderdate != ''
 				END
@@ -191,10 +207,10 @@ BEGIN
 				BEGIN
 					SELECT @intCountRows = COUNT(c.trHeadertermMsgSN)
 					FROM #tempCheckoutInsert c 
-					WHERE c.trLinetrlDept IN (
-												SELECT strDepartment FROM @TempTableDepartments
-											 ) 
-						AND (c.transtype = 'sale' 
+					--WHERE c.trLinetrlDept IN (
+					--							SELECT strDepartment FROM @TempTableDepartments
+					--						 ) 
+						WHERE (c.transtype = 'sale' 
 						OR c.transtype = 'network sale')
 						AND c.trHeaderdate != ''
 					GROUP BY c.trHeadertermMsgSN
@@ -204,384 +220,421 @@ BEGIN
 			--PRINT 'Rows count: ' + Cast(@intCountRows as nvarchar(50))
 
 
-
 			IF(@intCountRows > 0)
-			BEGIN
-				INSERT INTO dbo.tblSTTranslogRebates 
-				(
-					[dtmOpenedTime]
-				   ,[dtmClosedTime]
-				   ,[dblInsideSales]
-				   ,[dblInsideGrand]
-				   ,[dblOutsideSales]
-				   ,[dblOutsideGrand]
-				   ,[dblOverallSales]
-				   ,[dblOverallGrand]
+				BEGIN
 
-				   ,[strTransType]
-				   ,[strTransRecalled]
-				   ,[strTransRollback]
-				   ,[strTransFuelPrepayCompletion]
-				   ,[strTermMsgSNtype]
-				   ,[intTermMsgSNterm]
+					INSERT INTO dbo.tblSTTranslogRebates 
+					(
+						[dtmOpenedTime],
+						[dtmClosedTime],
+						[dblInsideSales],
+						[dblInsideGrand],
+						[dblOutsideSales],
+						[dblOutsideGrand],
+						[dblOverallSales],
+						[dblOverallGrand],
 
-				   ,[intScanTransactionId]
+						[strTransType],
+						[strTransRecalled],
+						[strTransRollback],
+						[strTransFuelPrepayCompletion],
 
-				   ,[intTermMsgSN]
-				   ,[intPeriodLevel]
-				   ,[intPeriodSeq]
-				   ,[strPeriodName]
-				   ,[dtmDate]
-				   ,[intDuration]
-				   ,[intTill]
-				   ,[intCashierSysId]
-				   ,[intCashierEmpNum]
-				   ,[intCashierPosNum]
-				   ,[intCashierPeriod]
-				   ,[intCashierDrawer]
-				   ,[strCashier]     
-				   ,[intOriginalCashierSysid]
-				   ,[intOriginalCashierEmpNum]
-				   ,[intOriginalCashierPosNum]
-				   ,[intOriginalCashierPeriod]
-				   ,[intOriginalCashierDrawer]
-				   ,[strOriginalCashier]
-				   ,[intStoreNumber]
-				   ,[dblCoinDispensed]
-				   ,[strPopDiscTran]
-				   ,[strTrFuelOnlyCst]
-				   ,[intTrTickNumPosNum] --
-				   ,[intTrTickNumTrSeq]  --
-				   ,[dblTrValueTrTotNoTax]
-				   ,[dblTrValueTrTotWTax]
-				   ,[dblTrValueTrTotTax]
-				   ,[strTrCurrTotLocale]
-				   ,[dblTrCurrTot]
-				   ,[dblTrSTotalizer]
-				   ,[dblTrGTotalizer]
-				   ,[strCustDOB]
-				   ,[dblRecallAmt]
-				   ,[intTaxAmtsTaxAmtSysid]
-				   ,[strTaxAmtsTaxAmtCat]
-				   ,[dblTaxAmtsTaxAmt]
-				   ,[intTaxAmtsTaxRateSysid]
-				   ,[strTaxAmtsTaxRateCat]
-				   ,[dblTaxAmtsTaxRate]
-				   ,[intTaxAmtsTaxNetSysid]
-				   ,[strTaxAmtsTaxNetCat]
-				   ,[dblTaxAmtsTaxNet]
-				   ,[intTaxAmtsTaxAttributeSysid]
-				   ,[strTaxAmtsTaxAttributeCat]
-				   ,[dblTaxAmtsTaxAttribute]
-				   ,[dblTrFstmpTrFstmpTot]
-				   ,[dblTrFstmpTrFstmpTax]
-				   ,[dblTrFstmpTrFstmpChg]
-				   ,[dblTrFstmpTrFstmpTnd]
-				   ,[dblTrCshBkAmtMop]
-				   ,[dblTrCshBkAmtCat]
-				   ,[dblTrCshBkAmt]
-				   --,[intTrExNetProdTrENPPcode]
-				   --,[dblTrExNetProdTrENPAmount]
-				   ,[strTrLoyaltyProgramProgramID]
-				   ,[dblTrLoyaltyProgramTrloSubTotal]
-				   ,[dblTrLoyaltyProgramTrloAutoDisc]
-				   ,[dblTrLoyaltyProgramTrloCustDisc]
-				   ,[strTrLoyaltyProgramTrloAccount]
-				   ,[strTrLoyaltyProgramTrloEntryMeth]
-				   ,[strTrLoyaltyProgramTrloAuthReply]
-				   ,[strTrLineType]
-				   ,[strTrLineUnsettled]
-				   ,[intTrlDeptNumber]
-				   ,[strTrlDeptType]
-				   ,[strTrlDept]
-				   ,[strTrlNetwCode]
-				   ,[dblTrlQty]
-				   ,[dblTrlSign]
-				   ,[dblTrlSellUnitPrice]
-				   ,[dblTrlUnitPrice]
-				   ,[dblTrlLineTot]
-				   ,[strTrlDesc]
-				   ,[strTrlUPC]
-				   ,[strTrlModifier]
-				   ,[strTrlUPCEntryType]
-				   ,[strTrlCatNumber]
-				   ,[strTrlCat]
-				   ,[intTrlTaxesTrlTaxSysid]
-				   ,[strTrlTaxesTrlTaxCat]
-				   ,[intTrlTaxesTrlTaxReverse]
-				   ,[dblTrlTaxesTrlTax]
-				   ,[intTrlTaxesTrlRateSysid]
+						[intScanTransactionId],
 
-				   ,[strTrlTaxesTrlRateCat]
-				   ,[dblTrlTaxesTrlRate]
-				   ,[strTrlFlagsTrlPLU]
-				   ,[strTrlFlagsTrlUpdPluCust]
-				   ,[strTrlFlagsTrlUpdDepCust]
-				   ,[strTrlFlagsTrlCatCust]
-				   ,[strTrlFlagsTrlFuelSale]
-				   ,[strTrlFlagsTrlMatch]
-				   ,[strTrlFlagsTrlBdayVerif]
-				   ,[intTrlMatchLineTrlMatchNumber]
-				   ,[strTrlMatchLineTrlMatchName]
-				   ,[dblTrlMatchLineTrlMatchQuantity]
-				   ,[dblTrlMatchLineTrlMatchPrice]
-				   ,[intTrlMatchLineTrlMatchMixes]
-				   ,[dblTrlMatchLineTrlPromoAmount]
-				   ,[strTrlMatchLineTrlPromotionIDPromoType]
-				   ,[strTrlMatchLineTrlPromotionID]
-				   ,[strTrPaylineType]
-				   ,[intTrPaylineSysid]
-				   ,[strTrPaylineLocale]
-				   --,[intTrpPaycodeMop]
-				   --,[intTrpPaycodeCat]
-				   ,[strTrPaylineNacstendercode]
-				   ,[strTrPaylineNacstendersubcode]
-				   ,[strTrpPaycode]
-				   ,[dblTrpAmt]
-				   ,[strTrpCardInfoTrpcAccount]
-				   ,[intTrpCardInfoTrpcCCNameProdSysid]
-				   ,[strTrpCardInfoTrpcCCName]
-				   ,[strTrpCardInfoTrpcHostID]
-				   ,[strTrpCardInfoTrpcAuthCode]
-				   ,[strTrpCardInfoTrpcAuthSrc]
-				   ,[strTrpCardInfoTrpcTicket]
-				   ,[strTrpCardInfoTrpcEntryMeth]
-				   ,[strTrpCardInfoTrpcBatchNr]
-				   ,[strTrpCardInfoTrpcSeqNr]
-				   ,[dtmTrpCardInfoTrpcAuthDateTime]
-				   ,[strTrpCardInfoTrpcRefNum]
-				   ,[strTrpCardInfoMerchInfoTrpcmMerchID]
-				   ,[strTrpCardInfoMerchInfoTrpcmTermID]
+						[intTermMsgSN],
+						[strTermMsgSNtype],
+						[intTermMsgSNterm],
+						[intTrTickNumPosNum],
+						[intTrTickNumTrSeq],
+						[intTrUniqueSN],                        -- NEW 
+						[strPeriodNameHOUR],             		-- Modified 
+						[intPeriodNameHOURSeq],                 -- Modified 
+						[intPeriodNameHOURLevel],	            -- Modified 
+						[strPeriodNameSHIFT],                   -- Modified 
+						[intPeriodNameSHIFTSeq],                -- Modified 
+						[intPeriodNameSHIFTLevel],              -- Modified 
+						[strPeriodNameDAILY],                   -- Modified 
+						[intPeriodNameDAILYSeq],                -- Modified 
+						[intPeriodNameDAILYLevel],              -- Modified 
+						[dtmDate],
+						[intDuration],
+						[intTill],
+						[strCashier],
+						[intCashierPeriod],
+						[intCashierPosNum],
+						[intCashierEmpNum],
+						[intCashierSysId],
+						[intCashierDrawer], 
+						[strOriginalCashier],
+						[intOriginalCashierPeriod],
+						[intOriginalCashierPosNum],
+						[intOriginalCashierEmpNum],
+						[intOriginalCashierSysid],
+						[intOriginalCashierDrawer],
+						[intStoreNumber],
+						[strTrFuelOnlyCst],
+						[strPopDiscTran],
+						[dblCoinDispensed],
+						[dblTrValueTrTotNoTax],
+						[dblTrValueTrTotWTax],
+						[dblTrValueTrTotTax],
+						[dblTaxAmtsTaxAmt],
+						[intTaxAmtsTaxAmtSysid],
+						[strTaxAmtsTaxAmtCat],
+						[dblTaxAmtsTaxRate],
+						[intTaxAmtsTaxRateSysid],
+						[strTaxAmtsTaxRateCat],
+						[dblTaxAmtsTaxNet],
+						[intTaxAmtsTaxNetSysid],
+						[strTaxAmtsTaxNetCat],
+						[dblTaxAmtsTaxAttribute],
+						[intTaxAmtsTaxAttributeSysid],
+						[strTaxAmtsTaxAttributeCat],
+						[dblTrCurrTot],
+						[strTrCurrTotLocale],	
+						[dblTrSTotalizer],
+						[dblTrGTotalizer],
+						[dblTrFstmpTrFstmpTot],
+						[dblTrFstmpTrFstmpTax],
+						[dblTrFstmpTrFstmpChg],
+						[dblTrFstmpTrFstmpTnd],
+						[strTrLoyaltyProgramProgramID],
+						[dblTrLoyaltyProgramTrloSubTotal],
+						[dblTrLoyaltyProgramTrloAutoDisc],
+						[dblTrLoyaltyProgramTrloCustDisc],
+						[strTrLoyaltyProgramTrloAccount],
+						[strTrLoyaltyProgramTrloEntryMeth],
+						[strTrLoyaltyProgramTrloAuthReply],
+						[dblTrCshBkAmt],
+						[dblTrCshBkAmtMop],
+						[dblTrCshBkAmtCat],
+						[strCustDOB],
+						[dblRecallAmt],
+						[intTrExNetProdTrENPPcode],
+						[dblTrExNetProdTrENPAmount],
+						[dblTrExNetProdTrENPItemCnt],                      -- NEW
+						[strTrLineType],
+						[ysnTrLineDuplicate],                              -- NEW
+						[strTrLineUnsettled],
+						[dblTrlTaxesTrlTax],
+						[intTrlTaxesTrlTaxSysid],
+						[strTrlTaxesTrlTaxCat],
+						[intTrlTaxesTrlTaxReverse],
+						[dblTrlTaxesTrlRate],
+						[intTrlTaxesTrlRateSysid],
+						[strTrlTaxesTrlRateCat],
+						[strTrlFlagsTrlBdayVerif],
+						[strTrlFlagsTrlFstmp],                             -- NEW
+						[strTrlFlagsTrlPLU],
+						[strTrlFlagsTrlUpdPluCust],
+						[strTrlFlagsTrlUpdDepCust],
+						[strTrlFlagsTrlCatCust],
+						[strTrlFlagsTrlFuelSale],
+						[strTrlFlagsTrlMatch],
+						[strTrlDept],
+						[strTrlDeptType],
+						[intTrlDeptNumber],
+						[strTrlCat],                     				  -- trLine type="preFuel"
+						[strTrlCatNumber],               				  -- trLine type="preFuel"
+						[strTrlNetwCode],
+						[dblTrlQty],
+						[dblTrlSign],
+						[dblTrlSellUnitPrice],
+						[dblTrlUnitPrice],
+						[dblTrlLineTot],
+						[strTrlDesc],
+						[strTrlUPC],
+						[strTrlModifier],
+						[strTrlUPCEntryType],
+						[strTrPaylineType],
+						[intTrPaylineSysid],
+						[strTrPaylineLocale],
+						[strTrpPaycode],
+						[intTrpPaycodeCat],
+						[intTrpPaycodeMop],
+						[strTrPaylineNacstendersubcode],
+						[strTrPaylineNacstendercode],
+						[dblTrpAmt],
+						[strTrpCardInfoTrpcAccount],
+						[strTrpCardInfoTrpcCCName],
+						[intTrpCardInfoTrpcCCNameProdSysid],
+						[strTrpCardInfoTrpcHostID],
+						[strTrpCardInfoTrpcAuthCode],
+						[strTrpCardInfoTrpcAuthSrc],
+						[strTrpCardInfoTrpcTicket],
+						[strTrpCardInfoTrpcEntryMeth],
+						[strTrpCardInfoTrpcBatchNr],
+						[strTrpCardInfoTrpcSeqNr],
+						[dtmTrpCardInfoTrpcAuthDateTime],
+						[strTrpCardInfoTrpcRefNum],
+						[strTrpCardInfoMerchInfoTrpcmMerchID],
+						[strTrpCardInfoMerchInfoTrpcmTermID],	
+						[strTrlMatchLineTrlMatchName] ,
+						[dblTrlMatchLineTrlMatchQuantity],
+						[dblTrlMatchLineTrlMatchPrice],
+						[intTrlMatchLineTrlMatchMixes],
+						[dblTrlMatchLineTrlPromoAmount],
+						[strTrlMatchLineTrlPromotionID],
+						[strTrlMatchLineTrlPromotionIDPromoType],
+						[intTrlMatchLineTrlMatchNumber],
 
-				   ,[intStoreId]
-				   ,[intCheckoutId]
-				   ,[ysnSubmitted]
-				   ,[ysnPMMSubmitted]
-				   ,[ysnRJRSubmitted]
-				   ,[intConcurrencyId] --142
-				)
-				SELECT 	
-					(CASE WHEN chk.transSetopenedTime = '' THEN NULL ELSE left(REPLACE(chk.transSetopenedTime, 'T', ' '), len(chk.transSetopenedTime) - 6) END)
-					, (CASE WHEN chk.transSetclosedTime = '' THEN NULL ELSE left(REPLACE(chk.transSetclosedTime, 'T', ' '), len(chk.transSetclosedTime) - 6) END)
-					, (CASE WHEN chk.startTotalsinsideSales = '' THEN NULL ELSE chk.startTotalsinsideSales END)
-					, (CASE WHEN chk.startTotalsinsideGrand = '' THEN NULL ELSE chk.startTotalsinsideGrand END)
-					, (CASE WHEN chk.startTotalsoutsideSales = '' THEN NULL ELSE chk.startTotalsoutsideSales END)
-					, (CASE WHEN chk.startTotalsoutsideGrand = '' THEN NULL ELSE chk.startTotalsoutsideGrand END)
-					, (CASE WHEN chk.startTotalsoverallSales = '' THEN NULL ELSE chk.startTotalsoverallSales END)
-					, (CASE WHEN chk.startTotalsoverallGrand = '' THEN NULL ELSE chk.startTotalsoverallGrand END)
+						[intStoreId],
+						[intCheckoutId],
+						[ysnSubmitted],
+						[ysnPMMSubmitted],
+						[ysnRJRSubmitted],
+						[intConcurrencyId]
+					)
+					SELECT 	
+						-- transSet
+						[dtmOpenedTime]								= (CASE WHEN chk.transSetopenedTime = '' THEN NULL ELSE left(REPLACE(chk.transSetopenedTime, 'T', ' '), len(chk.transSetopenedTime) - 6) END),
+						[dtmClosedTime]								= (CASE WHEN chk.transSetclosedTime = '' THEN NULL ELSE left(REPLACE(chk.transSetclosedTime, 'T', ' '), len(chk.transSetclosedTime) - 6) END),
+						[dblInsideSales]							= (CASE WHEN chk.startTotalsinsideSales = '' THEN NULL ELSE chk.startTotalsinsideSales END),
+						[dblInsideGrand]							= (CASE WHEN chk.startTotalsinsideGrand = '' THEN NULL ELSE chk.startTotalsinsideGrand END),
+						[dblOutsideSales]							= (CASE WHEN chk.startTotalsoutsideSales = '' THEN NULL ELSE chk.startTotalsoutsideSales END),
+						[dblOutsideGrand]							= (CASE WHEN chk.startTotalsoutsideGrand = '' THEN NULL ELSE chk.startTotalsoutsideGrand END),
+						[dblOverallSales]							= (CASE WHEN chk.startTotalsoverallSales = '' THEN NULL ELSE chk.startTotalsoverallSales END),
+						[dblOverallGrand]							= (CASE WHEN chk.startTotalsoverallGrand = '' THEN NULL ELSE chk.startTotalsoverallGrand END),
 
-					, NULLIF(chk.transtype, '')
-					, NULLIF(chk.transrecalled, '')
-					, NULLIF(chk.transrollback, '')
-					, NULLIF(chk.transfuelPrepayCompletion, '')
-					, NULLIF(chk.termMsgSNtype, '')
-					, NULLIF(chk.termMsgSNterm, '')
+						-- trans
+						[strTransType]								= NULLIF(chk.transtype, ''),
+						[strTransRecalled]							= NULLIF(chk.transrecalled, ''),
+						[strTransRollback]							= NULLIF(chk.transrollback, ''),
+						[strTransFuelPrepayCompletion]				= NULLIF(chk.transfuelPrepayCompletion, ''),
 
-					, NULLIF(ROW_NUMBER() OVER(PARTITION BY CAST(chk.trHeadertermMsgSN AS BIGINT), chk.trPaylinetrpPaycode ORDER BY CAST(chk.intRowCount AS INT)), '') AS intScanTransactionId
+						-- auto generated
+						[intScanTransactionId]						= NULLIF(ROW_NUMBER() OVER(PARTITION BY CAST(chk.trHeadertermMsgSN AS BIGINT), chk.trPaylinetrpPaycode ORDER BY CAST(chk.intRowCount AS INT)), ''),
 
-					, NULLIF(chk.trHeadertermMsgSN, '')
-					, NULLIF(chk.periodlevel, '')
-					, NULLIF(chk.periodseq, '')
-					, NULLIF(chk.periodname, '')
-					, (CASE WHEN chk.trHeaderdate = '' THEN NULL ELSE left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) END)
-					, NULLIF(chk.trHeaderduration, '')
-					, NULLIF(chk.trHeadertill, '')
-					, NULLIF(chk.cashiersysid, '')
-					, NULLIF(chk.cashierempNum, '')
-					, NULLIF(chk.cashierposNum, '')
-					, NULLIF(chk.cashierperiod, '')
-					, NULLIF(chk.cashierdrawer, '')
-					, NULLIF(chk.trHeadercashier, '')
-					, NULLIF(chk.originalCashiersysid, '')
-					, NULLIF(chk.originalCashierempNum, '')
-					, NULLIF(chk.originalCashierposNum, '')
-					, NULLIF(chk.originalCashierperiod, '')
-					, NULLIF(chk.originalCashierdrawer, '')
-					, CONVERT(NVARCHAR(100), ISNULL(NULLIF(chk.trHeaderoriginalCashier, ''), NULL))
-					, CONVERT(BIGINT, ISNULL(NULLIF(chk.trHeaderstoreNumber, ''), NULL))
-					, CONVERT(DECIMAL(18, 2), ISNULL(NULLIF(chk.trHeadercoinDispensed, ''), NULL))
-					, NULLIF(chk.trHeaderpopDiscTran, '')
-					, NULLIF(chk.trHeadertrFuelOnlyCst, '')
-					, NULLIF(chk.trTickNumposNum, '')
-					, NULLIF(chk.trTickNumtrSeq, '')
-					, NULLIF(chk.trValuetrTotNoTax, '')
-					, NULLIF(chk.trValuetrTotWTax, '')
-					, NULLIF(chk.trValuetrTotTax, '')
-					, NULLIF(chk.trCurrTotlocale, '')
-					, NULLIF(chk.trValuetrCurrTot, '')
-					, NULLIF(chk.trValuetrSTotalizer, '')
-					, NULLIF(chk.trValuetrGTotalizer, '')
-					, NULLIF(chk.trValuecustDOB, '')
-					, NULLIF(chk.trValuerecallAmt, '')
-					, NULLIF(chk.taxAmtsysid, '')
-					, NULLIF(chk.taxAmtcat, '')
-					, NULLIF(chk.taxAmtstaxAmt, '')
-					, NULLIF(chk.taxRatesysid, '')
-					, NULLIF(chk.taxRatecat, '')
-					, NULLIF(chk.taxAmtstaxRate, '')
-					, NULLIF(chk.taxNetsysid, '')
-					, NULLIF(chk.taxNetcat, '')
-					, NULLIF(chk.taxAmtstaxNet, '')
-					, NULLIF(chk.taxAttributesysid, '')
-					, NULLIF(chk.taxAttributecat, '')
-					, NULLIF(chk.taxAmtstaxAttribute, '')
-					, NULLIF(chk.trFstmptrFstmpTot, '')
-					, NULLIF(chk.trFstmptrFstmpTax, '')
-					, NULLIF(chk.trFstmptrFstmpChg, '')
-					, NULLIF(chk.trFstmptrFstmpTnd, '')
-					, NULLIF(chk.trCshBkAmtmop, '')
-					, NULLIF(chk.trCshBkAmtcat, '')
-					, NULLIF(chk.trCshBktrCshBkAmt, '')
-					--, NULLIF(chk.trENPPcode, '')
-					--, NULLIF(chk.trENPAmount, '')
-					, NULLIF(chk.trLoyaltyProgramprogramID, '')
-					, NULLIF(chk.trLoyaltyProgramtrloSubTotal, '')
-					, NULLIF(chk.trLoyaltyProgramtrloAutoDisc, '')
-					, NULLIF(chk.trLoyaltyProgramtrloCustDisc, '')
-					, NULLIF(chk.trLoyaltyProgramtrloAccount, '')
-					, NULLIF(chk.trLoyaltyProgramtrloEntryMeth, '')
-					, NULLIF(chk.trLoyaltyProgramtrloAuthReply, '')
-					, NULLIF(chk.trLinetype, '')
-					, NULLIF(chk.trLineunsettled, '')
-					, NULLIF(chk.trlDeptnumber, '')
-					, NULLIF(chk.trlDepttype, '')
-					, NULLIF(chk.trLinetrlDept, '')
-					, NULLIF(chk.trLinetrlNetwCode, '')
-					, NULLIF(chk.trLinetrlQty, '')
-					, NULLIF(chk.trLinetrlSign, '')
-					, NULLIF(chk.trLinetrlSellUnit, '')
-					, NULLIF(chk.trLinetrlUnitPrice, '')
-					, NULLIF(chk.trLinetrlLineTot, '')
-					, NULLIF(chk.trLinetrlDesc, '')
-					, NULLIF(chk.trLinetrlUPC, '')
-					, NULLIF(chk.trLinetrlModifier, '')
-					, NULLIF(chk.trLinetrlUPCEntry, '')
-					, NULLIF(chk.trlCatnumber, '')
-					, NULLIF(chk.trLinetrlCat, '')
-					, NULLIF(chk.trlTaxsysid, '')
-					, NULLIF(chk.trlTaxcat, '')
-					, NULLIF(chk.trlTaxreverse, '')
-					, NULLIF(chk.trlTaxestrlTax, '')
-					, NULLIF(chk.trlRatesysid, '')
+						-- trHeader
+						[intTermMsgSN]								= NULLIF(chk.trHeadertermMsgSN, ''),
+						[strTermMsgSNtype]							= NULLIF(chk.termMsgSNtype, ''),
+						[intTermMsgSNterm]							= NULLIF(chk.termMsgSNterm, ''),
+						[intTrTickNumPosNum]						= NULLIF(chk.trTickNumposNum, ''),
+						[intTrTickNumTrSeq]							= NULLIF(chk.trTickNumtrSeq, ''),
+						[intTrUniqueSN]								= NULLIF(chk.trHeadertrUniqueSN, ''),                   -- NEW 
+						[strPeriodNameHOUR]							= NULLIF(chk.periodname, ''),             				-- Modified 
+						[intPeriodNameHOURSeq]						= NULLIF(chk.periodseq, ''),							-- Modified 
+						[intPeriodNameHOURLevel]					= NULLIF(chk.periodlevel, ''),							-- Modified 
+						[strPeriodNameSHIFT]						= NULL,                   -- Modified 
+						[intPeriodNameSHIFTSeq]						= NULL,                -- Modified 
+						[intPeriodNameSHIFTLevel]					= NULL,              -- Modified 
+						[strPeriodNameDAILY]						= NULL,                  -- Modified 
+						[intPeriodNameDAILYSeq]						= NULL,                -- Modified 
+						[intPeriodNameDAILYLevel]					= NULL,              -- Modified 
+						[dtmDate]									= (CASE WHEN chk.trHeaderdate = '' THEN NULL ELSE left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) END),
+						[intDuration]								= NULLIF(chk.trHeaderduration, ''),
+						[intTill]									= NULLIF(chk.trHeadertill, ''),
+						[strCashier]								= NULLIF(chk.trHeadercashier, ''),
+						[intCashierPeriod]							= NULLIF(chk.cashierperiod, ''),
+						[intCashierPosNum]							= NULLIF(chk.cashierposNum, ''),
+						[intCashierEmpNum]							= NULLIF(chk.cashierempNum, ''),
+						[intCashierSysId]							= NULLIF(chk.cashiersysid, ''),
+						[intCashierDrawer]							= NULLIF(chk.cashierdrawer, ''), 
+						[strOriginalCashier]						= CONVERT(NVARCHAR(100), ISNULL(NULLIF(chk.trHeaderoriginalCashier, ''), NULL)),
+						[intOriginalCashierPeriod]					= NULLIF(chk.originalCashierperiod, ''),
+						[intOriginalCashierPosNum]					= NULLIF(chk.originalCashierposNum, ''),
+						[intOriginalCashierEmpNum]					= NULLIF(chk.originalCashierempNum, ''),
+						[intOriginalCashierSysid]					= NULLIF(chk.originalCashiersysid, ''),
+						[intOriginalCashierDrawer]					= NULLIF(chk.originalCashierdrawer, ''),
+						[intStoreNumber]							= CONVERT(BIGINT, ISNULL(NULLIF(chk.trHeaderstoreNumber, ''), NULL)),
+						[strTrFuelOnlyCst]							= NULLIF(chk.trHeadertrFuelOnlyCst, ''),
+						[strPopDiscTran]							= NULLIF(chk.trHeaderpopDiscTran, ''),
+						[dblCoinDispensed]							= CONVERT(DECIMAL(18, 2), ISNULL(NULLIF(chk.trHeadercoinDispensed, ''), NULL)),
 
-					, NULLIF(chk.trlRatecat, '')
-					, NULLIF(chk.trlTaxestrlRate, '')
-					, NULLIF(chk.trlFlagstrlPLU, '')
-					, NULLIF(chk.trlFlagstrlUpdPluCust, '')
-					, NULLIF(chk.trlFlagstrlUpdDepCust, '')
-					, NULLIF(chk.trlFlagstrlCatCust, '')
-					, NULLIF(chk.trlFlagstrlFuelSale, '')
-					, NULLIF(chk.trlFlagstrlMatch, '')
-					, NULLIF(chk.trlFlagstrlBdayVerif, '')
-					, NULLIF(chk.trlMatchLinetrlMatchNumber, '')
-					, NULLIF(chk.trlMatchLinetrlMatchName, '')
-					, NULLIF(chk.trlMatchLinetrlMatchQuantity, '')
-					, NULLIF(chk.trlMatchLinetrlMatchPrice, '')
-					, NULLIF(chk.trlMatchLinetrlMatchMixes, '')
-					, NULLIF(chk.trlMatchLinetrlPromoAmount, '')
-					, NULLIF(chk.trlPromotionIDpromotype, '')
-					, NULLIF(chk.trlMatchLinetrlPromotionID, '')
-					, NULLIF(chk.trPaylinetype, '')
-					, NULLIF(chk.trPaylinesysid, '')
-					, NULLIF(chk.trPaylinelocale, '')
-					--, NULLIF(chk.trpPaycodemop, '')
-					--, NULLIF(chk.trpPaycodecat, '')
-					, NULLIF(chk.trpPaycodenacstendercode, '')
-					, NULLIF(chk.trpPaycodenacstendersubcode, '')
-					, NULLIF(chk.trPaylinetrpPaycode, '')
-					, NULLIF(chk.trPaylinetrpAmt, '')
-					, NULLIF(chk.trpCardInfotrpcAccount, '')
-					, NULLIF(chk.trpcCCNameprodSysid, '')
-					, NULLIF(chk.trpCardInfotrpcCCName, '')
-					, NULLIF(chk.trpCardInfotrpcHostID, '')
-					, NULLIF(chk.trpCardInfotrpcAuthCode, '')
-					, NULLIF(chk.trpCardInfotrpcAuthSrc, '')
-					, NULLIF(chk.trpCardInfotrpcTicket, '')
-					, NULLIF(chk.trpCardInfotrpcEntryMeth, '')
-					, NULLIF(chk.trpCardInfotrpcBatchNr, '')
-					, NULLIF(chk.trpCardInfotrpcSeqNr, '')
-					, (CASE WHEN chk.trpCardInfotrpcAuthDateTime = '' THEN NULL ELSE left(REPLACE(chk.trpCardInfotrpcAuthDateTime, 'T', ' '), len(chk.trpCardInfotrpcAuthDateTime) - 6) END) --NULLIF(chk.trpcAuthDateTime, '')
-					, NULLIF(chk.trpCardInfotrpcRefNum, '')
-					, NULLIF(chk.trpcMerchInfotrpcmMerchID, '')
-					, NULLIF(chk.trpcMerchInfotrpcmTermID, '')
+						-- trValue
+						[dblTrValueTrTotNoTax]						= NULLIF(chk.trValuetrTotNoTax, ''),
+						[dblTrValueTrTotWTax]						= NULLIF(chk.trValuetrTotWTax, ''),
+						[dblTrValueTrTotTax]						= NULLIF(chk.trValuetrTotTax, ''),
+						[dblTaxAmtsTaxAmt]							= NULLIF(chk.taxAmtstaxAmt, ''),
+						[intTaxAmtsTaxAmtSysid]						= NULLIF(chk.taxAmtsysid, ''),
+						[strTaxAmtsTaxAmtCat]						= NULLIF(chk.taxAmtcat, ''),
+						[dblTaxAmtsTaxRate]							= NULLIF(chk.taxAmtstaxRate, ''),
+						[intTaxAmtsTaxRateSysid]					= NULLIF(chk.taxRatesysid, ''),
+						[strTaxAmtsTaxRateCat]						= NULLIF(chk.taxRatecat, ''),
+						[dblTaxAmtsTaxNet]							= NULLIF(chk.taxAmtstaxNet, ''),
+						[intTaxAmtsTaxNetSysid]						= NULLIF(chk.taxNetsysid, ''),
+						[strTaxAmtsTaxNetCat]						= NULLIF(chk.taxNetcat, ''),
+						[dblTaxAmtsTaxAttribute]					= NULLIF(chk.taxAmtstaxAttribute, ''),
+						[intTaxAmtsTaxAttributeSysid]				= NULLIF(chk.taxAttributesysid, ''),
+						[strTaxAmtsTaxAttributeCat]					= NULLIF(chk.taxAttributecat, ''),
+						[dblTrCurrTot]								= NULLIF(chk.trValuetrCurrTot, ''),
+						[strTrCurrTotLocale]						= NULLIF(chk.trCurrTotlocale, ''),	
+						[dblTrSTotalizer]							= NULLIF(chk.trValuetrSTotalizer, ''),
+						[dblTrGTotalizer]							= NULLIF(chk.trValuetrGTotalizer, ''),
+						[dblTrFstmpTrFstmpTot]						= NULLIF(chk.trFstmptrFstmpTot, ''),
+						[dblTrFstmpTrFstmpTax]						= NULLIF(chk.trFstmptrFstmpTax, ''),
+						[dblTrFstmpTrFstmpChg]						= NULLIF(chk.trFstmptrFstmpChg, ''),
+						[dblTrFstmpTrFstmpTnd]						= NULLIF(chk.trFstmptrFstmpTnd, ''),
 
-					, @intStoreId
-					, @intCheckoutId
-					, 0
-					, 0
-					, 0
-					, 0
-				FROM #tempCheckoutInsert chk
-				JOIN
-				(
-					SELECT c.trHeadertermMsgSN as termMsgSN
-					FROM #tempCheckoutInsert c
-					WHERE c.trLinetrlDept IN (
-												SELECT strDepartment FROM @TempTableDepartments
-											 )
-						AND (c.transtype = 'sale' 
-						OR c.transtype = 'network sale')
-						AND c.trHeaderdate != ''
-					GROUP BY c.trHeadertermMsgSN
-				) x ON x.termMsgSN = chk.trHeadertermMsgSN
-				WHERE NOT EXISTS
-				(
-					SELECT * 
-					FROM dbo.tblSTTranslogRebates TR
-					WHERE TR.dtmDate = CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
-						AND TR.intTermMsgSNterm = chk.termMsgSNterm
-						AND TR.intTermMsgSN = chk.trHeadertermMsgSN 
-						AND TR.intTrTickNumPosNum = chk.cashierposNum 
-						AND TR.intTrTickNumTrSeq  = chk.trTickNumtrSeq
-						AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
-						AND TR.intStoreNumber = chk.storeNumberlocale
-				)
-				ORDER BY chk.trHeadertermMsgSN, chk.intRowCount ASC
+						-- trLoyalty
+						[strTrLoyaltyProgramProgramID]				= NULLIF(chk.trLoyaltyProgramprogramID, ''),
+						[dblTrLoyaltyProgramTrloSubTotal]			= NULLIF(chk.trLoyaltyProgramtrloSubTotal, ''),
+						[dblTrLoyaltyProgramTrloAutoDisc]			= NULLIF(chk.trLoyaltyProgramtrloAutoDisc, ''),
+						[dblTrLoyaltyProgramTrloCustDisc]			= NULLIF(chk.trLoyaltyProgramtrloCustDisc, ''),
+						[strTrLoyaltyProgramTrloAccount]			= NULLIF(chk.trLoyaltyProgramtrloAccount, ''),
+						[strTrLoyaltyProgramTrloEntryMeth]			= NULLIF(chk.trLoyaltyProgramtrloEntryMeth, ''),
+						[strTrLoyaltyProgramTrloAuthReply]			= NULLIF(chk.trLoyaltyProgramtrloAuthReply, ''),
 
-				SET @strStatusMsg = 'Success'
-				GOTO ExitWithCommit
-			END
+						-- trCshBk
+						[dblTrCshBkAmt]								= NULLIF(chk.trCshBktrCshBkAmt, ''),
+						[dblTrCshBkAmtMop]							= NULLIF(chk.trCshBkAmtmop, ''),
+						[dblTrCshBkAmtCat]							= NULLIF(chk.trCshBkAmtcat, ''),
+						[strCustDOB]								= NULLIF(chk.trValuecustDOB, ''),
+						[dblRecallAmt]								= NULLIF(chk.trValuerecallAmt, ''),
+
+						-- trExNetProds
+						[intTrExNetProdTrENPPcode]					= NULLIF(chk.trExNetProdtrENPPcode, ''),							--***--
+						[dblTrExNetProdTrENPAmount]					= NULLIF(chk.trExNetProdtrENPAmount, ''),						--***--
+						[dblTrExNetProdTrENPItemCnt]				= NULLIF(chk.trExNetProdtrENPItemCnt, ''),                      -- NEW
+
+						-- trLines
+						[strTrLineType]								= NULLIF(chk.trLinetype, ''),
+						[ysnTrLineDuplicate]						= CASE WHEN NULLIF(chk.trLineduplicate, '') = 'true' THEN 1 ELSE 0 END,           -- NEW
+						[strTrLineUnsettled]						= NULLIF(chk.trLineunsettled, ''),
+						[dblTrlTaxesTrlTax]							= NULLIF(chk.trlTaxestrlTax, ''),
+						[intTrlTaxesTrlTaxSysid]					= NULLIF(chk.trlTaxsysid, ''),
+						[strTrlTaxesTrlTaxCat]						= NULLIF(chk.trlTaxcat, ''),
+						[intTrlTaxesTrlTaxReverse]					= NULLIF(chk.trlTaxreverse, ''),
+						[dblTrlTaxesTrlRate]						= NULLIF(chk.trlTaxestrlRate, ''),
+						[intTrlTaxesTrlRateSysid]					= NULLIF(chk.trlRatesysid, ''),
+						[strTrlTaxesTrlRateCat]						= NULLIF(chk.trlRatecat, ''),
+						-- trlFlags
+						[strTrlFlagsTrlBdayVerif]					= NULLIF(chk.trlFlagstrlBdayVerif, '') ,
+						[strTrlFlagsTrlFstmp]                       = NULL,														-- NEW
+						[strTrlFlagsTrlPLU]							= NULLIF(chk.trlFlagstrlPLU, ''),
+						[strTrlFlagsTrlUpdPluCust]					= NULLIF(chk.trlFlagstrlUpdPluCust, ''),
+						[strTrlFlagsTrlUpdDepCust]					= NULLIF(chk.trlFlagstrlUpdDepCust, ''),
+						[strTrlFlagsTrlCatCust]						= NULLIF(chk.trlFlagstrlCatCust, ''),
+						[strTrlFlagsTrlFuelSale]					= NULLIF(chk.trlFlagstrlFuelSale, ''),
+						[strTrlFlagsTrlMatch]						= NULLIF(chk.trlFlagstrlMatch, ''),
+						[strTrlDept]								= NULLIF(chk.trLinetrlDept, ''),
+						[strTrlDeptType]							= NULLIF(chk.trlDepttype, ''),
+						[intTrlDeptNumber]							= NULLIF(chk.trlDeptnumber, ''),
+						[strTrlCat]									= NULLIF(chk.trLinetrlCat, ''),                 				      -- trLine type="preFuel"
+						[strTrlCatNumber]							= NULLIF(chk.trlCatnumber, ''),               				  -- trLine type="preFuel"
+						[strTrlNetwCode]							= NULLIF(chk.trLinetrlNetwCode, ''),
+						[dblTrlQty]									= NULLIF(chk.trLinetrlQty, ''),
+						[dblTrlSign]								= NULLIF(chk.trLinetrlSign, ''),
+						[dblTrlSellUnitPrice]						= NULLIF(chk.trLinetrlSellUnit, ''),
+						[dblTrlUnitPrice]							= NULLIF(chk.trLinetrlUnitPrice, ''),
+						[dblTrlLineTot]								= NULLIF(chk.trLinetrlLineTot, ''),
+						[strTrlDesc]								= NULLIF(chk.trLinetrlDesc, ''),
+						[strTrlUPC]									= NULLIF(chk.trLinetrlUPC, ''),
+						[strTrlModifier]							= NULLIF(chk.trLinetrlModifier, ''),
+						[strTrlUPCEntryType]						= NULLIF(chk.trLinetrlUPCEntry, ''),
+
+						-- trPaylines
+						[strTrPaylineType]							= NULLIF(chk.trPaylinetype, ''),
+						[intTrPaylineSysid]							= NULLIF(chk.trPaylinesysid, ''),
+						[strTrPaylineLocale]						= NULLIF(chk.trPaylinelocale, ''),
+						[strTrpPaycode]								= NULLIF(chk.trPaylinetrpPaycode, ''),
+						[intTrpPaycodeCat]							= NULLIF(chk.trpPaycodecat, ''),			--***--
+						[intTrpPaycodeMop]							= NULLIF(chk.trpPaycodemop, ''),			--***--
+						[strTrPaylineNacstendersubcode]				= NULLIF(chk.trpPaycodenacstendersubcode, ''),
+						[strTrPaylineNacstendercode]				= NULLIF(chk.trpPaycodenacstendercode, ''),
+						[dblTrpAmt]									= NULLIF(chk.trPaylinetrpAmt, ''),
+						[strTrpCardInfoTrpcAccount]					= NULLIF(chk.trpCardInfotrpcAccount, ''),
+						[strTrpCardInfoTrpcCCName]					= NULLIF(chk.trpCardInfotrpcCCName, ''),
+						[intTrpCardInfoTrpcCCNameProdSysid]			= NULLIF(chk.trpcCCNamesysid, ''),					-- NULLIF(chk.trpcCCNameprodSysid, ''),
+						[strTrpCardInfoTrpcHostID]					= NULLIF(chk.trpCardInfotrpcHostID, ''),
+						[strTrpCardInfoTrpcAuthCode]				= NULLIF(chk.trpCardInfotrpcAuthCode, ''),
+						[strTrpCardInfoTrpcAuthSrc]					= NULLIF(chk.trpCardInfotrpcAuthSrc, ''),
+						[strTrpCardInfoTrpcTicket]					= NULLIF(chk.trpCardInfotrpcTicket, ''),
+						[strTrpCardInfoTrpcEntryMeth]				= NULLIF(chk.trpCardInfotrpcEntryMeth, ''),
+						[strTrpCardInfoTrpcBatchNr]					= NULLIF(chk.trpCardInfotrpcBatchNr, ''),
+						[strTrpCardInfoTrpcSeqNr]					= NULLIF(chk.trpCardInfotrpcSeqNr, ''),
+						[dtmTrpCardInfoTrpcAuthDateTime]			= (CASE WHEN chk.trpCardInfotrpcAuthDateTime = '' THEN NULL ELSE left(REPLACE(chk.trpCardInfotrpcAuthDateTime, 'T', ' '), len(chk.trpCardInfotrpcAuthDateTime) - 6) END),
+						[strTrpCardInfoTrpcRefNum]					= NULLIF(chk.trpCardInfotrpcRefNum, ''),
+						-- trpcMerchInfo
+						[strTrpCardInfoMerchInfoTrpcmMerchID] = NULLIF(chk.trpcMerchInfotrpcmMerchID, ''),
+						[strTrpCardInfoMerchInfoTrpcmTermID] = NULLIF(chk.trpcMerchInfotrpcmTermID, ''),
+						-- trlMixMatches
+						[strTrlMatchLineTrlMatchName] = NULLIF(chk.trlMatchLinetrlMatchName, ''),
+						[dblTrlMatchLineTrlMatchQuantity] = NULLIF(chk.trlMatchLinetrlMatchQuantity, ''),
+						[dblTrlMatchLineTrlMatchPrice] = NULLIF(chk.trlMatchLinetrlMatchPrice, ''),
+						[intTrlMatchLineTrlMatchMixes] = NULLIF(chk.trlMatchLinetrlMatchMixes, ''),
+						[dblTrlMatchLineTrlPromoAmount] = NULLIF(chk.trlMatchLinetrlPromoAmount, ''),
+						[strTrlMatchLineTrlPromotionID] = NULLIF(chk.trlMatchLinetrlPromotionID, ''),
+						[strTrlMatchLineTrlPromotionIDPromoType] = NULLIF(chk.trlPromotionIDpromotype, ''),
+						[intTrlMatchLineTrlMatchNumber] = NULLIF(chk.trlMatchLinetrlMatchNumber, ''),      -- LAST 
+
+						[intStoreId] = @intStoreId,
+						[intCheckoutId] = @intCheckoutId,
+						[ysnSubmitted] = 0,
+						[ysnPMMSubmitted] = 0,
+						[ysnRJRSubmitted] = 0,
+						[intConcurrencyId] = 0
+					FROM #tempCheckoutInsert chk
+					JOIN
+					(
+						SELECT c.trHeadertermMsgSN as termMsgSN
+						FROM #tempCheckoutInsert c
+						--WHERE c.trLinetrlDept IN (
+						--							SELECT strDepartment FROM @TempTableDepartments
+						--						 )
+							WHERE (c.transtype = 'sale' 
+							OR c.transtype = 'network sale')
+							AND c.trHeaderdate != ''
+						GROUP BY c.trHeadertermMsgSN
+					) x ON x.termMsgSN = chk.trHeadertermMsgSN
+					WHERE NOT EXISTS
+					(
+						SELECT * 
+						FROM dbo.tblSTTranslogRebates TR
+						WHERE TR.dtmDate = CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
+							AND TR.intTermMsgSNterm = chk.termMsgSNterm
+							AND TR.intTermMsgSN = chk.trHeadertermMsgSN 
+							AND TR.intTrTickNumPosNum = chk.cashierposNum 
+							AND TR.intTrTickNumTrSeq  = chk.trTickNumtrSeq
+							AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
+							AND TR.intStoreNumber = chk.trHeaderstoreNumber
+					)
+					ORDER BY chk.trHeadertermMsgSN, chk.intRowCount ASC
+
+					SET @strStatusMsg = 'Success'
+					GOTO ExitWithCommit
+				END
 			ELSE IF(@intCountRows = 0)
+				BEGIN
+					SET @strStatusMsg = 'Transaction Log file is already been exported.'
+					SET @intCountRows = 0
+
+					-- ================================================================================================================== 
+					-- START - Insert message if Transaction Log is already been exported
+					-- ================================================================================================================== 
+					INSERT INTO tblSTCheckoutErrorLogs 
+					(
+							strErrorType
+							, strErrorMessage 
+							, strRegisterTag
+							, strRegisterTagValue
+							, intCheckoutId
+							, intConcurrencyId
+					)
+					VALUES
+					(
+							'Transaction Log'
+							, @strStatusMsg
+							, ''
+							, ''
+							, @intCheckoutId
+							, 1
+					)
+
+					GOTO ExitWithCommit
+					-- ==================================================================================================================  
+					-- END - Insert message if Transaction Log is already been exported
+					-- ==================================================================================================================
+
+					GOTO ExitWithCommit
+				END
+			END
+		ELSE IF(@intTableRowCount = 0)
 			BEGIN
-				SET @strStatusMsg = 'Transaction Log file is already been exported.'
+				SET @strStatusMsg = 'Selected register file is empty'
 				SET @intCountRows = 0
-
-				-- ================================================================================================================== 
-				-- START - Insert message if Transaction Log is already been exported
-				-- ================================================================================================================== 
-				INSERT INTO tblSTCheckoutErrorLogs 
-				(
-						strErrorType
-						, strErrorMessage 
-						, strRegisterTag
-						, strRegisterTagValue
-						, intCheckoutId
-						, intConcurrencyId
-				)
-				VALUES
-				(
-						'Transaction Log'
-						, @strStatusMsg
-						, ''
-						, ''
-						, @intCheckoutId
-						, 1
-				)
-
-				GOTO ExitWithCommit
-				-- ==================================================================================================================  
-				-- END - Insert message if Transaction Log is already been exported
-				-- ==================================================================================================================
-
 				GOTO ExitWithCommit
 			END
-		END
-		ELSE IF(@intTableRowCount = 0)
-		BEGIN
-			SET @strStatusMsg = 'Selected register file is empty'
-			SET @intCountRows = 0
-			GOTO ExitWithCommit
-		END
 
 	END TRY
 

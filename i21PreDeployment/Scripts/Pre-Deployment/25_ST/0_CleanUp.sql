@@ -313,4 +313,21 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTSto
 			')
 	END
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Rename Commander - Trans Log to Commander - Transaction Log Rebates
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Commander - Trans Log') 
+	BEGIN
+		PRINT(N'Renaming Commander - Trans Log	to	Commander - Transaction Log Rebate')
+		EXEC('
+				UPDATE tblSMImportFileHeader
+				SET strLayoutTitle = ''Commander - Transaction Log Rebate''
+				WHERE strLayoutTitle = ''Commander - Trans Log''
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Rename Commander - Trans Log to Commander - Transaction Log Rebates
+----------------------------------------------------------------------------------------------------------------------------------
+
 PRINT('ST Cleanup - End')
