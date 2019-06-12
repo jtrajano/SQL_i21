@@ -7591,6 +7591,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderPLU.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderFPHose.sql" />
     <Build Include="dbo\User Defined Types\InventoryAdjustmentIntegrationId.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUploadAttachments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
