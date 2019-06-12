@@ -2271,7 +2271,7 @@ BEGIN
 			, intToPriceUOM
 			, PriceSourceUOMId
 			,intCurrencyId,dblCashOrFuture
-	)t2 WHERE ISNULL(dblOpenQty,0) > 0
+	)t2 WHERE ISNULL(dblOpenQty,0) <> 0
 END
 
 DECLARE @strM2MCurrency NVARCHAR(20)
