@@ -38,6 +38,7 @@ SELECT DISTINCT
 	,strHauler = Hauler.strName
 	,strItemNo = Item.strItemNo
 	,strItemDescription = Item.strDescription
+	,strBundleItemNo = Bundle.strItemNo
 	,strLotTracking = Item.strLotTracking
 	,dblQuantity = LD.dblQuantity
 	,strItemUOM = UOM.strUnitMeasure
@@ -151,6 +152,7 @@ LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEnt
 LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LD.intVendorEntityId
 LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
+LEFT JOIN tblICItem Bundle ON Bundle.intItemId = PCD.intItemBundleId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = Item.intOriginId

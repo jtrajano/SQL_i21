@@ -61,6 +61,7 @@ SELECT   L.intLoadId
 
 		,Item.strDescription AS strItemDescription
 		,Item.strItemNo
+		,strBundleItemNo = ISNULL(PBundle.strItemNo, SBundle.strItemNo)
 		,Item.strLotTracking
 
 		,strCustomerFax = CEN.strFax
@@ -143,6 +144,8 @@ LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPCo
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
 LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
+LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId
+LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId
 LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
 LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId

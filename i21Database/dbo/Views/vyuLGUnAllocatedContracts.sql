@@ -31,6 +31,7 @@ FROM (
 		,CD.strVessel
 		,IM.strItemNo
 		,IM.strDescription AS strItemDescription
+		,strBundleItemNo = BI.strItemNo
 		,CL.strLocationName
 		,CS.strContractStatus
 		,(
@@ -96,6 +97,7 @@ FROM (
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
 	LEFT JOIN tblICItemContract ICI ON ICI.intItemId = IM.intItemId
 		AND CD.intItemContractId = ICI.intItemContractId
+	LEFT JOIN tblICItem BI ON BI.intItemId = CD.intItemBundleId
 	LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
 			CASE 
 				WHEN ISNULL(ICI.intCountryId, 0) = 0
@@ -149,6 +151,7 @@ FROM (
 		,CD.strVessel
 		,IM.strItemNo
 		,IM.strDescription
+		,BI.strItemNo
 		,U1.strUnitMeasure
 		,CL.strLocationName
 		,CS.strContractStatus

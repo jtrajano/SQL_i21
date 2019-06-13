@@ -40,6 +40,7 @@ SELECT
 	,strPItemDescription = IM.strDescription 
 	,strPItemOrigin = PCA.strDescription
 	,strPProductType = PTP.strDescription
+	,strPBundleItemNo = PBI.strItemNo
 	,dblPDetailQuantity = PCT.dblQuantity
 	,dtmPContractDate = PCH.dtmContractDate
 	,dblPBalance = PCT.dblBalance
@@ -81,6 +82,7 @@ SELECT
 	,strSItemDescriptionSpecification = SIM.strDescription + ' - ' + ISNULL(SCT.strItemSpecification,'')
 	,strSItemOrigin = SCA.strDescription
 	,strSProductType = PTS.strDescription
+	,strSBundleItemNo = SBI.strItemNo
 	,dblSDetailQuantity = SCT.dblQuantity
 	,dtmSContractDate = SCH.dtmContractDate
 	,dblSBalance = SCT.dblBalance
@@ -126,6 +128,7 @@ LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItem IM ON IM.intItemId = PCT.intItemId
 LEFT JOIN tblICCommodityAttribute PTP ON PTP.intCommodityAttributeId = IM.intProductTypeId AND PTP.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute PCA ON PCA.intCommodityAttributeId = IM.intOriginId AND PCA.strType = 'Origin'
+LEFT JOIN tblICItem PBI ON PBI.intItemId = PCT.intItemBundleId
 LEFT JOIN tblSMCountry PCO ON PCO.intCountryID = PCA.intCountryID
 LEFT JOIN tblSMFreightTerms PCB ON PCB.intFreightTermId = PCH.intFreightTermId
 LEFT JOIN tblCTContractStatus PCS ON PCS.intContractStatusId = PCT.intContractStatusId
@@ -140,6 +143,7 @@ LEFT JOIN tblICItemUOM PPU ON PPU.intItemUOMId = PCT.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PPU.intUnitMeasureId
 LEFT JOIN tblCTPricingType PPT ON PPT.intPricingTypeId = PCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate PFR ON PFR.intFreightRateId = PCT.intFreightRateId
+
 LEFT JOIN tblCTContractDetail SCT ON SCT.intContractDetailId = ALD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHeaderId
 LEFT JOIN tblICItemUOM SIU ON SIU.intItemUOMId = SCT.intItemUOMId
@@ -147,6 +151,7 @@ LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = SIU.intUnitMeasureId
 LEFT JOIN tblICItem SIM ON SIM.intItemId = SCT.intItemId
 LEFT JOIN tblICCommodityAttribute PTS ON PTS.intCommodityAttributeId = SIM.intProductTypeId AND PTS.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute SCA ON SCA.intCommodityAttributeId = SIM.intOriginId AND SCA.strType = 'Origin'
+LEFT JOIN tblICItem SBI ON PBI.intItemId = SCT.intItemBundleId
 LEFT JOIN tblSMCountry SCO ON SCO.intCountryID = SCA.intCountryID
 LEFT JOIN tblSMFreightTerms SCB ON SCB.intFreightTermId = SCH.intFreightTermId
 LEFT JOIN tblCTContractStatus SCS ON SCS.intContractStatusId = SCT.intContractStatusId
