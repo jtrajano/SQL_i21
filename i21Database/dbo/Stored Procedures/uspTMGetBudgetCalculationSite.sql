@@ -74,7 +74,8 @@ BEGIN
 		,intEntityCustomerId = C.intEntityId
 		,A.intLocationId
 		,intSiteItemId = A.intProduct
-		,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(G.dblBudgetAmount,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+		--,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(G.dblBudgetAmount,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+		,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(K.dblMonthlyBudget,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 		,A.intFillMethodId
 		--,dblPrice = 
 		--,dblEstimatedBudget = 
