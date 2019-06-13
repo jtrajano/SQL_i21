@@ -905,7 +905,7 @@ FROM (
 SELECT *
 INTO #tempIntransit
 FROM (
-	SELECT intLineNo = (SELECT TOP 1 intLineNo FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentItemId = InTran.intTransactionDetailId AND intOrderId IS NOT NULL)
+	SELECT intLineNo = (SELECT TOP 1 intLineNo FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentItemId = InTran.intTransactionDetailId AND intOrderId IS NOT NULL AND InTran.strTransactionId NOT LIKE 'LS-%')
 		, dblBalanceToInvoice = SUM(dblInTransitQty)
 		, InTran.intItemId
 		, InTran.strItemNo
@@ -1014,7 +1014,7 @@ INSERT INTO @tblFinalDetail (intContractHeaderId
     , dblNoOfLots
     , dblLotsFixed
     , dblPriceWORollArb)
-SELECT DISTINCT intContractHeaderId
+SELECT intContractHeaderId
 	, intContractDetailId
 	, strContractOrInventoryType
 	, strContractSeq
@@ -2271,7 +2271,7 @@ BEGIN
 			, intToPriceUOM
 			, PriceSourceUOMId
 			,intCurrencyId,dblCashOrFuture
-	)t2 WHERE ISNULL(dblOpenQty,0) > 0
+	)t2 WHERE ISNULL(dblOpenQty,0) <> 0
 END
 
 DECLARE @strM2MCurrency NVARCHAR(20)
@@ -2361,7 +2361,7 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 								NULL
 							ELSE 0 END)
 FROM (
-	SELECT DISTINCT intConcurrencyId = 0
+	SELECT intConcurrencyId = 0
 		, intContractHeaderId
 		, intContractDetailId
 		, strContractOrInventoryType
@@ -2537,7 +2537,7 @@ FROM (
 	) t
 	WHERE dblOpenQty <> 0 and intContractHeaderId is not NULL 
 	
-	UNION ALL SELECT DISTINCT intConcurrencyId = 0
+	UNION ALL SELECT intConcurrencyId = 0
 		, intContractHeaderId
 		, intContractDetailId
 		, strContractOrInventoryType

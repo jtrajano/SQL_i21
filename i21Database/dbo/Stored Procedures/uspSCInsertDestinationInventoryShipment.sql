@@ -42,7 +42,8 @@ BEGIN TRY
 	SELECT @dblQuantity = SUM(dblQuantity) FROM tblICInventoryShipmentItem ICSI 
 	LEFT JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 	WHERE ICSI.intSourceId = @intTicketId AND intSourceType = 1
-	SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+	SET @currencyDecimal = 20
 
 -- Insert the Inventory Shipment detail items 
 	SELECT @intFreightItemId = SCSetup.intFreightItemId

@@ -51,7 +51,8 @@ DECLARE @storageHistoryData				AS StorageHistoryStagingTable
 		,@strFeesCostMethod				NVARCHAR(40);
 
 BEGIN TRY
-		SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+		-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+		SET @currencyDecimal = 20
 		IF @strInOutFlag = 'I'
 			BEGIN
 				SELECT TOP 1 @strFeesCostMethod = ICFee.strCostMethod, @strFreightCostMethod = SC.strCostMethod  FROM tblSCTicket SC

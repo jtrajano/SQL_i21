@@ -10,6 +10,7 @@ WITH cte as (
 		,IM.strDescription
 		,IM.strItemNo
 		,QM.dblGradeReading
+		,CS.intCustomerStorageId
 	FROM tblQMTicketDiscount QM
 	INNER JOIN tblGRDiscountScheduleCode DSC
 		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
@@ -24,6 +25,37 @@ WITH cte as (
 	inner JOIN tblSMCompanyLocation CL
 		ON CL.intCompanyLocationId = CS.intCompanyLocationId
 	WHERE QM.strSourceType = 'Storage'
+	UNION
+	SELECT 
+		DS.intCommodityId
+		,CO.strCommodityCode
+		,CS.intCompanyLocationId
+		,CL.strLocationName
+		,dblSubTotal = CS.dblOpenBalance
+		,IM.strDescription
+		,IM.strItemNo
+		,QM.dblGradeReading
+		,CS.intCustomerStorageId
+	FROM tblQMTicketDiscount QM
+	INNER JOIN tblGRDiscountScheduleCode DSC
+		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+	INNER JOIN tblSCTicket SC
+		ON SC.intTicketId = QM.intTicketId
+	INNER JOIN tblSCDeliverySheet SCDS
+		ON SCDS.intDeliverySheetId = SC.intDeliverySheetId
+	INNER JOIN tblGRStorageHistory SH
+		ON SC.intDeliverySheetId = SH.intDeliverySheetId and SH.strType = 'From Delivery Sheet'
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = SH.intCustomerStorageId 
+	INNER JOIN tblICItem IM
+		ON DSC.intItemId = IM.intItemId
+	INNER JOIN tblGRDiscountSchedule DS
+		ON DS.intDiscountScheduleId = DSC.intDiscountScheduleId
+	INNER JOIN tblICCommodity CO
+		ON CO.intCommodityId = DS.intCommodityId
+	inner JOIN tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = CS.intCompanyLocationId
+	WHERE SCDS.ysnPost = 0  
 ) ,
 cte1 as (
 	SELECT

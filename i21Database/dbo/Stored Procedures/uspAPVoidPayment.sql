@@ -338,7 +338,7 @@ BEGIN
 		INNER JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblAPBill C
-			ON B.intBillId = ISNULL(B.intOrigBillId, C.intBillId)
+			ON C.intBillId = ISNULL(B.intOrigBillId, C.intBillId)
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	UPDATE B
@@ -373,7 +373,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C
-						ON B.intBillId = ISNULL(B.intOrigBillId, C.intBillId)
+						ON C.intBillId = ISNULL(B.intOrigBillId, C.intBillId)
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--UPDATE INVOICES

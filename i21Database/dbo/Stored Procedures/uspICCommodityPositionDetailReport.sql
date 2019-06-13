@@ -80,7 +80,7 @@ begin
 						on ItemStockUOM.intItemId = Item.intItemId
 					join tblICItemLocation as il
 						on il.intItemLocationId = ItemStockUOM.intItemLocationId
-					where ItemStockUOM.intStorageLocationId is not null 
+					where ItemStockUOM.dtmDate <= ''' + cast(@dtmDate as nvarchar) + ''' AND ItemStockUOM.intStorageLocationId is not null 
 						'
 						+
 							case when @strLocationName <> '' then ' and il.intLocationId in ( ' + @strLocationName + ' )'
@@ -95,19 +95,17 @@ begin
 			join 
 			(
 				select sum(isnull(sl.dblEffectiveDepth,1) * isnull(sl.dblUnitPerFoot,1))  as dblTotalCapacityPerLocation
-						,il.intLocationId
-					from tblICItemLocation as il
-						join tblICStorageLocation as sl
-							on il.intLocationId  = sl.intLocationId
+						,sl.intLocationId as intLocationId
+					from tblICStorageLocation sl
 					'
 					+
-						case when @strLocationName <> '' then ' where il.intLocationId in ( ' + @strLocationName + ' )'
+						case when @strLocationName <> '' then ' where sl.intLocationId in ( ' + @strLocationName + ' )'
 						else
 								''
 						end
 					+
 					'
-					group by il.intLocationId
+					group by sl.intLocationId
 			) as total_capacity
 				on total_capacity.intLocationId = current_stock.intLocationId
 					and total_capacity.dblTotalCapacityPerLocation <> 0
