@@ -246,7 +246,27 @@ BEGIN
         , ysnPreCrush
         , strNotes
         , strBrokerTradeNo)
-	SELECT * FROM  fnRKGetOpenFutureByDate((SELECT TOP 1 intCommodity FROM @Commodity), @dtmToDate, @CrushReport)
+	SELECT 
+		intFutOptTransactionId
+		, dblOpenContract
+		, strCommodityCode
+		, strInternalTradeNo
+		, strLocationName
+		, dblContractSize
+		, strFutureMarket
+		, strFutureMonth
+		, strOptionMonth
+		, dblStrike
+		, strOptionType
+		, strInstrumentType
+		, strBrokerAccount
+		, strBroker
+		, strNewBuySell
+		, intFutOptTransactionHeaderId
+		, ysnPreCrush
+		, strNotes
+		, strBrokerTradeNo 
+	FROM  fnRKGetOpenFutureByDate((SELECT TOP 1 intCommodity FROM @Commodity),'1/1/1900', @dtmToDate, @CrushReport)
 
 
 	DECLARE @tblGetStorageDetailByDate TABLE (intRowNum int
