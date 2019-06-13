@@ -10,7 +10,7 @@
 		strSource = c.strDeliverySheetNumber,
 
 		strTicketNumber = Sc.strTicketNumber,
-		strInvoiceNumber = case when a.intInvoiceId is null then inv_backup.strInvoiceNumber else Inv.strInvoiceNumber end,
+		strInvoiceNumber = Inv.strInvoiceNumber,
 		strShipmentNumber = invs.strShipmentNumber,
 		strReceiptNumber = irs.strReceiptNumber		
 
@@ -28,14 +28,7 @@
 	LEFT JOIN tblICInventoryShipment as invs
 		on a.intInventoryShipmentId = invs.intInventoryShipmentId
 	LEFT JOIN tblICInventoryShipmentItem as invsi
-		on invsi.intInventoryShipmentId = invs.intInventoryShipmentId
-	LEFT JOIN (
-			select distinct c.strInvoiceNumber, a.intInventoryShipmentItemId from tblARInvoiceDetail as a				
-				join tblARInvoice as c
-					on c.intInvoiceId = a.intInvoiceId				
-				where a.intInventoryShipmentItemId is not null
-	) as inv_backup
-		on inv_backup.intInventoryShipmentItemId= invsi.intInventoryShipmentItemId
+		on invsi.intInventoryShipmentId = invs.intInventoryShipmentId	
 	LEFT JOIN tblICInventoryReceipt as irs
 		on a.intInventoryReceiptId = irs.intInventoryReceiptId
 
