@@ -577,8 +577,6 @@ CREATE TABLE #ARItemsForStorageCosting
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
 
 
---IF @Post = 1
-	EXEC [dbo].[uspARPostItemResevation]
 
 	EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
          @Post     = @Post
@@ -694,6 +692,9 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 	
 
 BEGIN TRY
+
+	IF @Recap = 0
+		EXEC [dbo].[uspARPostItemResevation]
 
 	IF @Recap = 1
     BEGIN
