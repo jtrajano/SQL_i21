@@ -52,7 +52,7 @@ GO
 	AND A.strTransactionId = B.strBillId
 	AND ISNULL(A.strDocument,'') = ''
 
-	UPDATE A SET A.strCode = B.strSourceType FROM tblGLDetail A
+	UPDATE A SET A.strCode = LTRIM(RTRIM(B.strSourceType)) FROM tblGLDetail A
 	JOIN tblGLJournal B ON A.strTransactionId = B.strJournalId
 	WHERE A.strCode <> B.strSourceType
 
