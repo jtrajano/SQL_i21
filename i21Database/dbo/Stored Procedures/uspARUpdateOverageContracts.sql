@@ -43,7 +43,6 @@ CREATE TABLE #INVOICEDETAILSTOADD (
 	, dblQtyShipped					NUMERIC(18, 6) NOT NULL
 	, dblPrice						NUMERIC(18, 6) NOT NULL
 	, ysnCharge						BIT NULL
-	, intInventoryShipmentItemId	INT NULL
 )
 
 --GET INVOICES WITH CONTRACTS AND OVERAGED CONVERT ITEM QTY WITH CONTRACTS TO SCALE UOM (BUSHELS USUALLY)
@@ -376,7 +375,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				--ADD INVOICE DETAIL LINE WITHOUT CONTRACT AND INVENTORY SHIPMENT LINK
 				IF @dblQtyOverAged > 0
 					BEGIN
-						INSERT INTO #INVOICEDETAILSTOADD (intInvoiceDetailId, intContractDetailId, intContractHeaderId, intTicketId, intItemId, intItemUOMId, dblQtyShipped, dblPrice, ysnCharge, intInventoryShipmentItemId)
+						INSERT INTO #INVOICEDETAILSTOADD (intInvoiceDetailId, intContractDetailId, intContractHeaderId, intTicketId, intItemId, intItemUOMId, dblQtyShipped, dblPrice, ysnCharge)
 						SELECT intInvoiceDetailId	= @intInvoiceDetailId
 						     , intContractDetailId	= NULL
 							 , intContractHeaderId	= NULL
@@ -386,7 +385,6 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 							 , dblQtyShipped		= @dblQtyOverAged
 							 , dblPrice				= 0
 							 , ysnCharge			= CAST(0 AS BIT)
-							 , intInventoryShipmentItemId = @intInventoryShipmentItemId
 
 						INSERT INTO #INVOICEDETAILSTOADD (intInvoiceDetailId, intContractDetailId, intContractHeaderId, intTicketId, intItemId, intItemUOMId, dblQtyShipped, dblPrice, ysnCharge)
 						SELECT intInvoiceDetailId	= @intInvoiceDetailId
@@ -443,7 +441,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intStorageLocationId
 			, intSubLocationId
 			, intCompanyLocationSubLocationId
-			, intInventoryShipmentItemId
 		)
 		SELECT intInvoiceDetailId				= NULL
 		    , strSourceTransaction				= 'Direct'
@@ -474,7 +471,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intStorageLocationId				= ID.intStorageLocationId
 			, intSubLocationId					= ID.intSubLocationId
 			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
-			, intInventoryShipmentItemId		= IDTOADD.intInventoryShipmentItemId
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
