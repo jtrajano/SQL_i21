@@ -121,6 +121,35 @@
 		,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 		,DS.strSplitDescription
 		,DS.intDeliverySheetId
+		,CASE WHEN DS.ysnPost = 0 
+			THEN SUBSTRING((
+					SELECT ','+ ICI2.strItemNo + '=' + CONVERT(varchar,QMD2.dblGradeReading) FROM tblSCDeliverySheet DSS2
+					INNER JOIN tblSCTicket SC2
+						ON DSS2.intDeliverySheetId = SC2.intDeliverySheetId
+					INNER JOIN tblQMTicketDiscount QMD2
+						ON QMD2.intTicketId = SC2.intTicketId and QMD2.strSourceType = 'Scale'
+					INNER JOIN tblGRDiscountScheduleCode DSC2
+						ON QMD2.intDiscountScheduleCodeId = DSC2.intDiscountScheduleCodeId
+					INNER JOIN tblICItem ICI2
+						ON ICI2.intItemId = DSC2.intItemId
+					WHERE QMD2.dblGradeReading > 0 and SC2.intTicketId = SC.intTicketId
+					FOR XML PATH('')
+				),2,1000) 
+			ELSE SUBSTRING((
+					SELECT ','+ ICI2.strItemNo + '=' + CONVERT(varchar,QMD2.dblGradeReading) FROM tblSCDeliverySheet DSS2
+					INNER JOIN tblSCTicket SC2
+						ON DSS2.intDeliverySheetId = SC2.intDeliverySheetId
+					INNER JOIN tblQMTicketDiscount QMD2
+						ON QMD2.intTicketFileId = DSS2.intDeliverySheetId and QMD2.strSourceType = 'Delivery Sheet'
+					INNER JOIN tblGRDiscountScheduleCode DSC2
+						ON QMD2.intDiscountScheduleCodeId = DSC2.intDiscountScheduleCodeId
+					INNER JOIN tblICItem ICI2
+						ON ICI2.intItemId = DSC2.intItemId
+					WHERE QMD2.dblGradeReading > 0 and SC2.intTicketId = SC.intTicketId
+					FOR XML PATH('')
+				),2,1000)
+		END strGradeReading
+		,1 ysnDisplayGradeReading
 	FROM tblSCDeliverySheet DS
 	INNER JOIN tblSCDeliverySheetSplit DSS
 		ON DS.intDeliverySheetId = DSS.intDeliverySheetId
