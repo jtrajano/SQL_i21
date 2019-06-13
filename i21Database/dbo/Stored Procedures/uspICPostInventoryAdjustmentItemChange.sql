@@ -59,13 +59,14 @@ BEGIN
 					ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
 				WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 					AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL
+					AND ItemUOM.intItemUOMId IS NOT NULL
 
 				UNION ALL
 				SELECT Detail.intNewItemId, intItemUOMId = Detail.intItemUOMId FROM dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId					
 				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId) IS NULL
-
+					AND Detail.intItemUOMId IS NOT NULL
 				UNION ALL
 				SELECT Detail.intNewItemId, intItemUOMId = Lot.intWeightUOMId FROM dbo.tblICInventoryAdjustment Header 
 					INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
@@ -74,6 +75,7 @@ BEGIN
 						on Detail.intLotId = Lot.intLotId					
 				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Lot.intWeightUOMId) IS NULL
+					AND Lot.intWeightUOMId IS NOT NULL
 
 				UNION ALL
 				SELECT Detail.intNewItemId, intItemUOMId = Lot.intItemUOMId FROM dbo.tblICInventoryAdjustment Header 
@@ -83,6 +85,7 @@ BEGIN
 						on Detail.intLotId = Lot.intLotId					
 				WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 					AND dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Lot.intItemUOMId) IS NULL
+					AND Lot.intItemUOMId IS NOT NULL
 
 				) Detail
 	
