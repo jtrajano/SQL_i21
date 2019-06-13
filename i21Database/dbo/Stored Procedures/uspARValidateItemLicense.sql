@@ -124,7 +124,7 @@ select distinct e.intItemId, -9, intEntityCustomerId, e.strItemNo,
 stuff((
 			select ', ' + coalesce(ltrim(rtrim(f.strCode)), '') 
 				from #ITEMSTOVALIDATE f
-						where f.strItemNo= e.strItemNo  and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate ) and ysnRequiredForApplication = 1
+						where f.strItemNo= e.strItemNo  and (@dtmDate  BETWEEN dtmBeginDate AND dtmEndDate ) and ysnRequiredForApplication = 1
 for xml path('') ), 1, 1, '') as strCode
 , ''
 , 1
@@ -133,9 +133,9 @@ for xml path('') ), 1, 1, '') as strCode
 , dateadd(day,-10, @dtmDate)
 , 1
 from #ITEMSTOVALIDATE e 
-	where isnull(e.intEntityCustomerId,0) > 0 and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate ) and ysnRequiredForApplication = 1
+	where isnull(e.intEntityCustomerId,0) > 0 and (@dtmDate BETWEEN dtmBeginDate AND dtmEndDate ) and ysnRequiredForApplication = 1
 
-delete from #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) > 0 and (@dtmDate NOT BETWEEN dtmBeginDate AND dtmEndDate ) and appflag is null and ysnRequiredForApplication = 1
+delete from #ITEMSTOVALIDATE where isnull(intEntityCustomerId,0) > 0 and (@dtmDate  BETWEEN dtmBeginDate AND dtmEndDate ) and appflag is null and ysnRequiredForApplication = 1
 
 
 update #ITEMSTOVALIDATE  set uq = newId()
