@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFUnReservePickListBySalesOrder] @intSalesOrderId INT
+	,@ysnPosted AS BIT = 0
 AS
 DECLARE @tblTransaction TABLE (intTransactionId INT)
 DECLARE @intTransactionId INT
@@ -28,7 +29,7 @@ BEGIN
 	BEGIN
 		EXEC dbo.uspICPostStockReservation @intTransactionId
 			,34
-			,0
+			,@ysnPosted
 
 		SELECT @intTransactionId = MIN(intTransactionId)
 		FROM @tblTransaction
