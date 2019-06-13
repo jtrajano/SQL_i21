@@ -5,6 +5,7 @@
 	,@intLoadDistributionDetailId INT = NULL
 	,@ysnRecap BIT = 0
     ,@strBatchId NVARCHAR(50)='' OUT
+	,@ysnAutoBlend BIT=0
 )
 AS
 BEGIN TRY
@@ -325,10 +326,12 @@ BEGIN TRY
 
 		-- Update intWorkOrderId in XML variable
 		SELECT @strXml = REPLACE(@strXml, '<intWorkOrderId>0</intWorkOrderId>', '<intWorkOrderId>' + CONVERT(VARCHAR, @intWorkOrderId) + '</intWorkOrderId>')
-
-		--Consume Lots
-		EXEC [uspMFEndBlendSheet] @strXml,@ysnRecap,''
+		
 	END
+
+	--Consume Lots
+	If @ysnAutoBlend=0
+	EXEC [uspMFEndBlendSheet] @strXml,@ysnRecap,''
 
 	IF @strLotTracking = 'No'
 	BEGIN
