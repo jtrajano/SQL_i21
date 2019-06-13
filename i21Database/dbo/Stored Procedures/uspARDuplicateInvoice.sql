@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARDuplicateInvoice]
 	 @InvoiceId			INT
 	,@InvoiceDate		DATETIME		= NULL
+	,@PostDate			DATETIME		= NULL
 	,@UserId			INT				= NULL
 	,@NewInvoiceNumber	NVARCHAR(25)	= NULL	OUTPUT
 	,@NewInvoiceId		INT				= NULL	OUTPUT
@@ -27,7 +28,8 @@ DECLARE @CurrentErrorMessage NVARCHAR(250)
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARDuplicateInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
-
+SET @InvoiceDate = CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
+SET @PostDate = ISNULL(@PostDate, @InvoiceDate)
 		
 SET @ZeroDecimal = 0.000000
 
@@ -53,7 +55,6 @@ DECLARE	 @OriginalInvoiceId			INT
 		,@Date						DATETIME
 		,@DueDate					DATETIME
 		,@ShipDate					DATETIME
-		,@PostDate					DATETIME
 		,@PeriodsToAccrue			INT
 		,@EntitySalespersonId		INT
 		,@FreightTermId				INT
@@ -99,10 +100,9 @@ SELECT
 	,@CompanyLocationId				= [intCompanyLocationId]
 	,@CurrencyId					= [intCurrencyId]
 	,@TermId						= [intTermId]
-	,@Date							= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
-	,@DueDate						= NULL	--[dtmDueDate]
-	,@ShipDate						= CAST(ISNULL(@InvoiceDate, GETDATE()) AS DATE)
-	,@PostDate						= NULL	--[dtmPostDate]
+	,@Date							= @InvoiceDate
+	,@DueDate						= NULL
+	,@ShipDate						= @InvoiceDate
 	,@PeriodsToAccrue				= [intPeriodsToAccrue]
 	,@EntitySalespersonId			= [intEntitySalespersonId]
 	,@FreightTermId					= [intFreightTermId]
@@ -115,10 +115,8 @@ SELECT
 												THEN [strComments]
 										   WHEN @IsCancel = 1
 												THEN 'Invoice Cancelled: ' + [strInvoiceNumber] 
-										ELSE /*CASE WHEN strTransactionType <> 'Credit Memo' 
-												THEN [strComments]  + ' DUP: ' + [strInvoiceNumber]  
-											ELSE [strComments] END*/
-										[strComments]
+										ELSE 
+											[strComments]
 									  END
 	,@FooterComments				= [strFooterComments]
 	,@ShipToLocationId				= [intShipToLocationId]
@@ -148,46 +146,6 @@ FROM
 	tblARInvoice
 WHERE
 	[intInvoiceId] = @InvoiceId
-	/*
-	IF @TransactionType NOT IN ('Credit Memo') 
-	BEGIN
-		DECLARE @NewDocumentId INT
-		EXEC uspSMDuplicateDocumentMaintenance @intDocumentMaintenanceId, @NewDocumentId OUTPUT
-		IF(@NewDocumentId > 0)
-		BEGIN
-			SET @intDocumentMaintenanceId = @NewDocumentId
-			--should we move this to its own procedure
-			DECLARE @DocumentMaintenanceTable TABLE(
-				intDocumentMaintenanceMessageId		INT,
-				strCurrentMessage					NVARCHAR(MAX)
-			)
-
-			
-			INSERT INTO @DocumentMaintenanceTable(intDocumentMaintenanceMessageId, strCurrentMessage)
-			SELECT 
-					intDocumentMaintenanceMessageId,
-					CAST(CAST(blbMessage AS VARCHAR(MAX)) AS NVARCHAR(MAX)) + CASE WHEN strHeaderFooter = 'Header' THEN ' DUP: ' + @InvoiceNumber ELSE '' END
-				FROM tblSMDocumentMaintenanceMessage
-					WHERE intDocumentMaintenanceId = @NewDocumentId AND strHeaderFooter = 'Header'
-
-			DECLARE @CurrentDocumentMaintenanceMessageId INT
-			DECLARE @CurrentMessage NVARCHAR(MAX)
-			WHILE EXISTS(SELECT TOP 1 1 FROM @DocumentMaintenanceTable)
-			BEGIN
-				SELECT TOP 1  
-					@CurrentDocumentMaintenanceMessageId = intDocumentMaintenanceMessageId
-					,@CurrentMessage = strCurrentMessage
-				FROM @DocumentMaintenanceTable
-
-				EXEC uspSMEditDocumentMessage @CurrentDocumentMaintenanceMessageId,  @CurrentMessage
-
-				DELETE FROM @DocumentMaintenanceTable WHERE intDocumentMaintenanceMessageId = @CurrentDocumentMaintenanceMessageId
-				
-			END
-
-		END
-	END
-	*/
 
 --VALIDATE INVOICE TYPES
 IF @TransactionType NOT IN ('Invoice', 'Credit Memo') AND @Type NOT IN ('Standard', 'Credit Memo')
@@ -319,45 +277,6 @@ IF @IsCancel = 0
 				RETURN 0;
 			END
 	END
-
-----VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Inventory Shipment
---IF EXISTS(	SELECT 
---				NULL
---			FROM
---				tblARInvoiceDetail ARID
---			INNER JOIN
---				tblICInventoryShipmentItem ICISI 
---					ON ARID.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId
---			WHERE 
---				ARID.intInvoiceId = @InvoiceId
---				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, ICISI.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(ICISI.dblQuantity, @ZeroDecimal))
---	BEGIN
---		IF ISNULL(@RaiseError,0) = 0
---			ROLLBACK TRANSACTION		
---		IF ISNULL(@RaiseError,0) = 1
---			RAISERROR(120039, 16, 1)
---		RETURN 0;
---	END
-
-----VALIDATE INVOICES THAT WILL EXCEED SHIPPED QTY - Sales Order
---IF EXISTS(	SELECT
---				NULL 
---			FROM
---				tblARInvoiceDetail ARID
---			INNER JOIN
---				tblSOSalesOrderDetail SOSOD 
---					ON ARID.intSalesOrderDetailId = SOSOD.intSalesOrderDetailId
---					AND ARID.intInventoryShipmentItemId IS NULL
---			WHERE
---				ARID.intInvoiceId = @InvoiceId
---				AND ISNULL(dbo.fnCalculateQtyBetweenUOM(ARID.intItemUOMId, SOSOD.intItemUOMId, ARID.dblQtyShipped),0) > ISNULL(SOSOD.dblQtyOrdered - SOSOD.dblQtyShipped, @ZeroDecimal))
---	BEGIN
---		IF ISNULL(@RaiseError,0) = 0
---			ROLLBACK TRANSACTION		
---		IF ISNULL(@RaiseError,0) = 1
---			RAISERROR(120040, 16, 1)
---		RETURN 0;
---	END
 
 IF @IsCancel = 1
 	SET @TransactionType = 'Credit Memo'
