@@ -273,7 +273,7 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     			strSourceId, strSourceType)
     			SELECT @intCompanyId, @strJournalId,@postdate
     				,@headerDescription
-    				,GETDATE(), @intCurrencyId,@intUserId, ''Imported Journal'',''General Journal'',0,@glije_src_no,@glije_src_sys
+    				,GETDATE(), @intCurrencyId,@intUserId, ''Imported Journal'',''General Journal'',0,LTRIM(RTRIM(@glije_src_no)),LTRIM(RTRIM(@glije_src_sys))
 
     			SELECT @intJournalId = @@IDENTITY
     			SET @journalCount = @journalCount +1
