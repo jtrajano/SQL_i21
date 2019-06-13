@@ -7600,6 +7600,7 @@
     <Build Include="dbo\Views\vyuRKGetDailyAveragePrice.sql" />
     <Build Include="dbo\Views\vyuRKGetDailyAveragePriceDetailTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDailyAveragePrice.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
