@@ -68,6 +68,7 @@ WHERE
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
+AND receipt.ysnPosted = 1
 UNION ALL
 --Vouchers for receipt items
 SELECT
