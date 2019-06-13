@@ -54,11 +54,23 @@ BEGIN
 			,[intLotStatusId]			= Detail.intLotStatusId
 			,[intOwnershipType]			= 1
 			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
-			,[strTransactionId]			= Header.strAdjustmentNo
-			,[intWeightUOMId]           = Detail.intWeightUOMId
-			,[dblWeightQty]             = Detail.dblWeight
-			,[dblGrossWeight]           = Detail.dblWeight
-			,[dblWeightPerQty]          = Detail.dblWeightPerQty
+			,[strTransactionId]			= Header.strAdjustmentNo 
+			,[intWeightUOMId]           = case when 
+													isnull(Detail.strNewLotNumber, '') <> '' and 
+													intNewWeightUOMId is null and
+													Detail.intLotId is null then Detail.intItemUOMId else Detail.intNewWeightUOMId end
+			,[dblWeightQty]             = case when 
+													isnull(Detail.strNewLotNumber, '') <> '' and 
+													dblWeight  is null and 
+													Detail.intLotId is null then Detail.dblNewWeight else Detail.dblWeight end
+			,[dblGrossWeight]           = case when 
+													isnull(Detail.strNewLotNumber, '') <> '' and 
+													dblWeight  is null and 
+													Detail.intLotId is null then Detail.dblNewWeight else Detail.dblWeight end
+			,[dblWeightPerQty]          = case when 
+													isnull(Detail.strNewLotNumber, '') <> '' and 
+													dblWeightPerQty is null and 
+													Detail.intLotId is null then Detail.dblNewWeightPerQty else Detail.dblWeightPerQty end
 	FROM tblICInventoryAdjustment Header
 		INNER JOIN tblICInventoryAdjustmentDetail Detail ON Detail.intInventoryAdjustmentId = Header.intInventoryAdjustmentId
 		LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Detail.intItemId

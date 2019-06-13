@@ -146,6 +146,7 @@ SELECT -- Load Header
 		L.[dtmBLDate],
 		L.[strOriginPort],
 		L.[strDestinationPort],
+		intLeadTime = ISNULL(DPort.intLeadTime, 0),
 		L.[strDestinationCity],
 		L.[intTerminalEntityId],
 		[strTerminal] =  Terminal.strName,
@@ -250,6 +251,8 @@ LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = L.intDispatcherId
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblLGLoad LOADSI ON LOADSI.intLoadId = L.intLoadShippingInstructionId
+OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
+						 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
 			 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
 			 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC

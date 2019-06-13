@@ -8,6 +8,7 @@ BEGIN TRY
 	DECLARE @intLoadLogId INT
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @dtmCurrentETAPOD DATETIME
+	DECLARE @intLeadTime INT
 	DECLARE @dtmCurrentPlannedAvailabilityDate DATETIME
 	DECLARE @dtmMaxETAPOD DATETIME
 	DECLARE @dtmCurrentETSPOL DATETIME
@@ -35,10 +36,13 @@ BEGIN TRY
 		   @dtmCurrentETSPOL = dtmETSPOL,
 		   @strETAPODReasonCode = PODRC.strReasonCodeDescription,
 		   @strETSPOLReasonCode = POLRC.strReasonCodeDescription,
-		   @intShipmentStatus = L.intShipmentStatus
+		   @intShipmentStatus = L.intShipmentStatus,
+		   @intLeadTime = ISNULL(DPort.intLeadTime, 0)
 	FROM tblLGLoad L
 	LEFT JOIN tblLGReasonCode PODRC ON PODRC.intReasonCodeId = L.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode POLRC ON POLRC.intReasonCodeId = L.intETSPOLReasonCodeId
+	OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
+				WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 	WHERE intLoadId = @intLoadId
 
 	IF(ISNULL(@intShipmentStatus,0) IN (4,10) AND @strRowState <> 'Delete')
@@ -696,13 +700,24 @@ BEGIN TRY
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 
-				UPDATE tblLGLoad SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET dtmPlannedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) WHERE intLoadId = @intLoadId
+
+				--UPDATE L 
+				--SET dtmPlannedAvailabilityDate = DATEADD(DD, ISNULL(DPort.intLeadTime, 0), @dtmCurrentETAPOD) 
+				--FROM tblLGLoad L
+				--OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
+				--			 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
+				--WHERE intLoadId = @intLoadId
 
 				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId AND intShipmentStatus <> 10)
 				BEGIN
 					IF ((@dtmCurrentETAPOD IS NOT NULL) AND (ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,'')))
 					BEGIN
-						UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD, intConcurrencyId = intConcurrencyId + 1  WHERE intContractDetailId = @intContractDetailId 
+						UPDATE tblCTContractDetail 
+						SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD
+							,dtmUpdatedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) 
+						,intConcurrencyId = intConcurrencyId + 1 
+						WHERE intContractDetailId = @intContractDetailId 
 
 						EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
 													@intApprovedById =  @intApprovedById, 

@@ -50,7 +50,8 @@ BEGIN TRY
 			@intHeaderPricingTypeId		INT,
 			@intProducerId				INT,
 			@strCertificationName		NVARCHAR(MAX),
-			@strCustomerContract		NVARCHAR(100)
+			@strCustomerContract		NVARCHAR(100),
+			@intContractTypeId			INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
@@ -60,12 +61,13 @@ BEGIN TRY
 			@intNoOfDays				=	ISNULL(PO.intNoOfDays,0),
 			@intProducerId				=	intProducerId,
 			@strCustomerContract		=	CH.strCustomerContract,
-			@dblHeaderNoOfLots			=	CH.dblNoOfLots
+			@dblHeaderNoOfLots			=	CH.dblNoOfLots,
+			@intContractTypeId			=	CH.intContractTypeId
 	FROM	tblCTContractHeader CH
 	LEFT JOIN tblCTPosition		PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId		=	@intContractHeaderId
 
-	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = ysnBasisComponent from tblCTCompanyPreference
+	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
