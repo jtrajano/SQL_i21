@@ -14,6 +14,7 @@ SELECT intPOSLogId			= POSLOG.intPOSLogId
 	 , dtmPOSDate			= POS.dtmDate
 	 , ysnProcessed			= CASE WHEN (POS.intInvoiceId IS NULL AND POS.intCreditMemoId IS NULL) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 FROM tblARPOS POS
+INNER JOIN tblARCustomer C ON POS.intEntityCustomerId = C.intEntityId
 INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 INNER JOIN tblARPOSEndOfDay EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 LEFT JOIN tblARInvoice I ON POS.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1 AND I.strType = 'POS' AND I.strTransactionType = 'Invoice'
