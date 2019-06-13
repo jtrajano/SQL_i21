@@ -40,8 +40,7 @@ FROM
 				cb.dblStockIn - isnull(t.totalOut, 0) 
 			-- In-Transit Qty converted to stock UOM
 			,dblInTransitQtyInStockUOM =
-				dbo.fnCalculateQtyBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblStockIn)
-				- isnull(t.totalOut, 0) 
+				dbo.fnCalculateQtyBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblStockIn - isnull(t.totalOut, 0))				 
 			,cbt.intInTransitSourceLocationId
 		FROM	
 			tblICInventoryActualCost cb CROSS APPLY (
