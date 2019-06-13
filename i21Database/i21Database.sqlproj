@@ -7596,7 +7596,7 @@
     <Build Include="dbo\Tables\tblRKDailyAveragePrice.sql" />
     <Build Include="dbo\Tables\tblRKDailyAveragePriceDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetDailyAveragePriceDetail.sql" />
-    <Build Include="dbo\Tables\tblRKDailyAveragePriceTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKDailyAveragePriceDetailTransaction.sql" />
     <Build Include="dbo\Views\vyuRKGetDailyAveragePrice.sql" />
     <Build Include="dbo\Views\vyuRKGetDailyAveragePriceDetailTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDailyAveragePrice.sql" />

@@ -2,7 +2,7 @@
 
 AS
 
-SELECT Detail.intDailyAveragePriceId
+SELECT Header.intDailyAveragePriceId
 	, Header.strAverageNo
 	, Header.dtmDate
 	, Header.intBookId

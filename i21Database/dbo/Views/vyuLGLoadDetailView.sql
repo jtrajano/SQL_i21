@@ -1,282 +1,258 @@
-CREATE VIEW vyuLGLoadDetailViewSearch
+CREATE VIEW vyuLGLoadDetailView
 AS
-SELECT   L.intLoadId
-		,L.intConcurrencyId
-		,L.[strLoadNumber]
-		,L.intPurchaseSale
-		,L.intEquipmentTypeId
-		,L.intHaulerEntityId
-		,L.intTicketId
-		,L.intGenerateLoadId
-		,L.intUserSecurityId
-		,L.intTransportLoadId
-		,L.intLoadHeaderId
-		,L.intDriverEntityId
-		,L.intDispatcherId
-        ,L.strExternalLoadNumber
-		,L.strExternalShipmentNumber
-		,L.dtmETAPOD
-		,L.dtmETAPOL
-		,L.dtmETSPOL
-		,L.[ysnArrivedInPort]
-		,L.[ysnDocumentsApproved]
-		,L.[ysnCustomsReleased]
-		,L.[dtmArrivedInPort]
-		,L.[dtmDocumentsApproved]
-		,L.[dtmCustomsReleased]
-		,POS.strPosition
-		,POS.strPositionType
-        ,strType = CASE L.intPurchaseSale 
-			WHEN 1 THEN 'Inbound' 
-			WHEN 2 THEN 'Outbound' 
-			WHEN 3 THEN 'Drop Ship'
-			END COLLATE Latin1_General_CI_AS
-        ,intGenerateSequence = L.intGenerateSequence
-        ,L.dtmScheduledDate
-        ,ysnInProgress = IsNull(L.ysnInProgress, 0)
-        ,L.dtmDeliveredDate
-        ,L.strCustomerReference
-        ,L.strTruckNo
-        ,L.strTrailerNo1
-        ,L.strTrailerNo2
-        ,L.strTrailerNo3
-        ,L.strCarNumber
-        ,L.strEmbargoNo
-        ,L.strEmbargoPermitNo
-        ,L.strComments
-        ,ysnDispatched = CASE WHEN L.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
-		,L.dtmDispatchedDate
-		,L.ysnDispatchMailSent
-		,L.dtmDispatchMailSent
-		,L.dtmCancelDispatchMailSent
-		,L.intCompanyLocationId
-		,L.intTransUsedBy
-		,strTransUsedBy = CASE L.intTransUsedBy
-			WHEN 1 THEN 'None'
-			WHEN 2 THEN 'Scale Ticket'
-			WHEN 3 THEN 'Transport Load'
-			END COLLATE Latin1_General_CI_AS
-		,L.intSourceType
-		,L.ysnPosted
-		,LoadDetail.intLoadDetailId
-		,LoadDetail.intItemId
-		,LoadDetail.dblQuantity
-		,LoadDetail.intItemUOMId
-		,LoadDetail.dblGross
-		,LoadDetail.dblTare
-		,LoadDetail.dblNet
-		,LoadDetail.intWeightItemUOMId
-		,LoadDetail.dblDeliveredQuantity
-		,LoadDetail.dblDeliveredGross
-		,LoadDetail.dblDeliveredTare
-		,LoadDetail.dblDeliveredNet
-		,LoadDetail.intVendorEntityId
-		,LoadDetail.intVendorEntityLocationId
-		,LoadDetail.intPContractDetailId
-		,LoadDetail.intPCompanyLocationId
-		,LoadDetail.intCustomerEntityId
-		,LoadDetail.intCustomerEntityLocationId
-		,LoadDetail.intSContractDetailId
-		,LoadDetail.intSCompanyLocationId
-		,LoadDetail.strScheduleInfoMsg
-		,LoadDetail.ysnUpdateScheduleInfo
-		,LoadDetail.ysnPrintScheduleInfo
-		,LoadDetail.strLoadDirectionMsg
-		,LoadDetail.ysnUpdateLoadDirections
-		,LoadDetail.ysnPrintLoadDirections
-		,LoadDetail.strExternalShipmentItemNumber
-		,LoadDetail.strExternalBatchNo
-		,strSampleStatus = SS.strStatus
-        ,intGenerateReferenceNumber = GLoad.intReferenceNumber
-        ,intNumberOfLoads = GLoad.intNumberOfLoads
-		,intContractHeaderId = CASE WHEN L.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END 
-		,PHeader.intContractHeaderId AS intPContractHeaderId 
-		,L.ysnLoadBased
+SELECT LoadDetail.intLoadDetailId
+	, LoadDetail.intItemId
+	, Item.strItemNo
+	, Item.strDescription AS strItemDescription
+	, LoadDetail.dblQuantity
+	, LoadDetail.intItemUOMId
+	, strItemUOM = UOM.strUnitMeasure
+	, LoadDetail.dblGross
+	, LoadDetail.dblTare
+	, LoadDetail.dblNet
+	, LoadDetail.intWeightItemUOMId
+	, LoadDetail.dblDeliveredQuantity
+	, LoadDetail.dblDeliveredGross
+	, LoadDetail.dblDeliveredTare
+	, LoadDetail.dblDeliveredNet
+	, LoadDetail.intPSubLocationId
+	, PCLSL.strSubLocationName AS strPSubLocationName
+	, SCLSL.strSubLocationName AS strSSubLocationName
+	, strWeightItemUOM = WeightUOM.strUnitMeasure
+	, LoadDetail.intVendorEntityId
+	, dblItemUOMCF = ItemUOM.dblUnitQty
+	, intContractTypeId = CASE WHEN Load.intPurchaseSale IN (1,3) THEN 1 ELSE 2 END
+
+-- Vendor Info
+	, strVendor = VEN.strName
+	, LoadDetail.intVendorEntityLocationId
+	, strShipFrom = VEL.strLocationName
+	, strShipFromAddress = VEL.strAddress
+	, strShipFromCity = VEL.strCity
+	, strShipFromCountry = VEL.strCountry
+	, strShipFromState = VEL.strState
+	, strShipFromZipCode = VEL.strZipCode
+	, strVendorNo = VEN.strEntityNo
+	, strVendorEmail = VEN.strEmail
+	, strVendorFax = VEN.strFax
+	, strVendorMobile = VEN.strMobile
+	, strVendorPhone = VEN.strPhone
+	, LoadDetail.intPContractDetailId
+	, intPContractHeaderId = PDetail.intContractHeaderId
+	, intPCommodityId = PHeader.intCommodityId
+	, strPContractNumber = PHeader.strContractNumber
+	, intPContractSeq = PDetail.intContractSeq
+	, intPLifeTime = IM.intLifeTime
+	, strPLifeTimeType = IM.strLifeTimeType
+	, strVendorContract = PHeader.strCustomerContract
+	, dblPCashPrice = AD.dblSeqPrice
+	, strPCostUOM = AD.strSeqPriceUOM
+	, intPCostUOMId = AD.intSeqPriceUOMId
+	, dblPCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = PDetail.intPriceItemUOMId),0)
+	, ysnPLoad = PHeader.ysnLoad
+	, dblPQuantityPerLoad = PDetail.dblQuantityPerLoad
+	, intPNoOfLoads = PDetail.intNoOfLoad
+	, intPStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId),0)
+	, strPStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId)
+	, strPStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId)
+	, dblPStockUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = PDetail.intItemUOMId),0)
+	, strPCurrency = AD.strSeqCurrency
+	, strPMainCurrency = CY.strCurrency
+	, ysnPSubCurrency = AD.ysnSeqSubCurrency
+	, dblPMainCashPrice = PDetail.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END
+	, dblPFranchise = CASE WHEN PWG.dblFranchise > 0 THEN PWG.dblFranchise / 100 ELSE 0 END
 
 -- Inbound Company Location
-        ,strPLocationName = PCL.strLocationName
-		,strPLocationAddress = PCL.strAddress
-		,strPLocationCity = PCL.strCity
-		,strPLocationCountry = PCL.strCountry
-		,strPLocationState = PCL.strStateProvince
-		,strPLocationZipCode = PCL.strZipPostalCode
-		,strPLocationMail = PCL.strEmail
-		,strPLocationFax = PCL.strFax
-		,strPLocationPhone = PCL.strPhone
-		,PCLSL.strSubLocationName AS strPSubLocationName
-		,SCLSL.strSubLocationName AS strSSubLocationName
-        ,strVendor = VEN.strName
-        ,strShipFrom = VEL.strLocationName
-		,strShipFromAddress = VEL.strAddress
-		,strShipFromCity = VEL.strCity
-		,strShipFromCountry = VEL.strCountry
-		,strShipFromState = VEL.strState
-		,strShipFromZipCode = VEL.strZipCode
-		,strVendorNo = VEN.strEntityNo
-		,strVendorEmail = VEN.strEmail
-		,strVendorFax = VEN.strFax
-		,strVendorMobile = VEN.strMobile
-		,strVendorPhone = VEN.strPhone
+	, LoadDetail.intPCompanyLocationId
+	, strPLocationName = PCL.strLocationName
+	, strPLocationAddress = PCL.strAddress
+	, strPLocationCity = PCL.strCity
+	, strPLocationCountry = PCL.strCountry
+	, strPLocationState = PCL.strStateProvince
+	, strPLocationZipCode = PCL.strZipPostalCode
+	, strPLocationMail = PCL.strEmail
+	, strPLocationFax = PCL.strFax
+	, strPLocationPhone = PCL.strPhone
 
-		,strPContractNumber = PHeader.strContractNumber
-		,intPContractSeq = PDetail.intContractSeq
-		,strPERPPONumber = PDetail.strERPPONumber
-		,ysnPLoad = PHeader.ysnLoad
-		,ysnBundle = CONVERT(BIT, CASE Item.strType WHEN 'Bundle' THEN 1 ELSE 0 END)
-		,strCustomer = CEN.strName
-        ,strShipTo = CEL.strLocationName
+-- Customer Info
+	, LoadDetail.intCustomerEntityId
+	, strCustomer = CEN.strName
+	, LoadDetail.intCustomerEntityLocationId
+	, strShipTo = CEL.strLocationName
+	, strShipToAddress = CEL.strAddress
+	, strShipToCity = CEL.strCity
+	, strShipToCountry = CEL.strCountry
+	, strShipToState = CEL.strState
+	, strShipToZipCode = CEL.strZipCode
+	, strCustomerNo = CEN.strEntityNo
+	, strCustomerEmail = CEN.strEmail
+	, strCustomerFax = CEN.strFax
+	, strCustomerMobile = CEN.strMobile
+	, strCustomerPhone = CEN.strPhone
+	, LoadDetail.intSContractDetailId
+	, intSContractHeaderId = SDetail.intContractHeaderId
+	, strSContractNumber = SHeader.strContractNumber
+	, intSContractSeq = SDetail.intContractSeq
+	, intSCommodityId = SHeader.intCommodityId
+	, intSLifeTime = IMS.intLifeTime
+	, strSLifeTimeType = IMS.strLifeTimeType
+	, strCustomerContract = SHeader.strCustomerContract
+	, dblSCashPrice = ADS.dblSeqPrice
+	, strSCostUOM = ADS.strSeqPriceUOM
+	, intSCostUOMId = SDetail.intPriceItemUOMId
+	, dblSCostUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = SDetail.intPriceItemUOMId),0)
+	, ysnSLoad = SHeader.ysnLoad
+	, dblSQuantityPerLoad = SDetail.dblQuantityPerLoad
+	, intSNoOfLoads = SDetail.intNoOfLoad
+	, intSStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId),0)
+	, strSStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId)
+	, strSStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId)
+	, dblSStockUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = SDetail.intItemUOMId),0)
+	, strSCurrency = CUS.strCurrency
+	, strSMainCurrency = CUS.strCurrency
+	, ysnSSubCurrency = ADS.ysnSeqSubCurrency
+	, dblSMainCashPrice = SDetail.dblCashPrice / CASE WHEN ISNULL(CUS.intCent,0) = 0 THEN 1 ELSE CUS.intCent END
+	, dblSFranchise = CASE WHEN SWG.dblFranchise > 0 THEN SWG.dblFranchise / 100 ELSE 0 END
 
-		,intSContractHeaderId = SHeader.intContractHeaderId
-        ,strSContractNumber = SHeader.strContractNumber
-        ,intSContractSeq = SDetail.intContractSeq
-		,strSERPPONumber = SDetail.strERPPONumber
-		,ysnSLoad = SHeader.ysnLoad
+-- Outbound Company Location
+	, LoadDetail.intSCompanyLocationId
+	, strSLocationName = SCL.strLocationName
+	, strSLocationAddress = SCL.strAddress
+	, strSLocationCity = SCL.strCity
+	, strSLocationCountry = SCL.strCountry
+	, strSLocationState = SCL.strStateProvince
+	, strSLocationZipCode = SCL.strZipPostalCode
+	, strSLocationMail = SCL.strEmail
+	, strSLocationFax = SCL.strFax
+	, strSLocationPhone = SCL.strPhone
 
-        ,strSLocationName = SCL.strLocationName
-		,strSLocationAddress = SCL.strAddress
-		,strSLocationCity = SCL.strCity
-		,strSLocationCountry = SCL.strCountry
-		,strSLocationState = SCL.strStateProvince
-		,strSLocationZipCode = SCL.strZipPostalCode
-		,strSLocationMail = SCL.strEmail
-		,strSLocationFax = SCL.strFax
-		,strSLocationPhone = SCL.strPhone
+-- Schedule, Load Directions
+	, LoadDetail.strScheduleInfoMsg
+	, LoadDetail.ysnUpdateScheduleInfo
+	, LoadDetail.ysnPrintScheduleInfo
+	, LoadDetail.strLoadDirectionMsg
+	, LoadDetail.ysnUpdateLoadDirections
+	, LoadDetail.ysnPrintLoadDirections
+	, Item.strLotTracking
 
-		,Commodity.strCommodityCode AS strCommodity
-		,Item.strItemNo
-		,Item.strDescription AS strItemDescription
-		,strBundleItemNo = ISNULL(PBundle.strItemNo, SBundle.strItemNo)
-		,ysnUseWeighScales = CONVERT(BIT,ISNULL(Item.ysnUseWeighScales,0)) 
-		,UOM.strUnitMeasure AS strItemUOM
-		,UOM.intUnitMeasureId AS intItemUnitMeasureId
-		,WeightUOM.strUnitMeasure AS strWeightItemUOM
-        ,strEquipmentType = EQ.strEquipmentType
-        ,strHauler = Hauler.strName
-        ,strDriver = Driver.strName
-		,strDispatcher = US.strUserName 
-        ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 
-									THEN CAST(ST.strTicketNumber AS VARCHAR(100))
-								 WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
-									THEN TR.strTransaction
-								 ELSE NULL END
-		,PLH.intPickLotHeaderId
-		,PLH.strPickLotNumber
-		,ALH.intAllocationHeaderId
-		,ALH.strAllocationNumber
-		,L.intLoadShippingInstructionId
-		,LSI.strLoadNumber AS strShippingInstructionNo
-		,L.intShipmentType
-		,strShipmentType = CASE L.intShipmentType
-			WHEN 1 THEN 'Shipment'
-			WHEN 2 THEN 'Shipping Instructions'
-			WHEN 3 THEN 'Vessel Nomination'
-			ELSE '' END COLLATE Latin1_General_CI_AS
-		,Item.intCommodityId
-		,CA.intCommodityAttributeId
-		,CO.strCountry AS strOrigin
-		,LoadDetail.intNumberOfContainers
-		,strShipmentStatus = CASE L.intShipmentStatus
-			WHEN 1 THEN 'Scheduled'
-			WHEN 2 THEN 'Dispatched'
-			WHEN 3 THEN 
-				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Inbound Transit' END
-			WHEN 4 THEN 'Received'
-			WHEN 5 THEN 
-				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Outbound Transit' END
-			WHEN 6 THEN 
-				CASE WHEN (L.intPurchaseSale = 3 AND L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.intPurchaseSale = 3 AND L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.intPurchaseSale = 3 AND L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Delivered' END
-			WHEN 7 THEN 
-				CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
-						ELSE 'Shipping Instruction Created' END
-			WHEN 8 THEN 'Partial Shipment Created'
-			WHEN 9 THEN 'Full Shipment Created'
-			WHEN 10 THEN 'Cancelled'
-			WHEN 11 THEN 'Invoiced'
-			ELSE '' END COLLATE Latin1_General_CI_AS
-		,strTransportationMode = CASE L.intTransportationMode
-			WHEN 1 THEN 'Truck'
-			WHEN 2 THEN 'Ocean Vessel'
-			WHEN 3 THEN 'Rail'
-			END COLLATE Latin1_General_CI_AS
-		,strPCompanyLocation = PCL.strLocationName
-		,strSCompanyLocation = SCL.strLocationName
-		,ICI.strContractItemNo
-		,ICI.strContractItemName
-		,PDetail.intPricingTypeId AS intPPricingTypeId
-		,PTP.strPricingType AS strPPricingType
-		,SDetail.intPricingTypeId AS intSPricingTypeId
-		,PTS.strPricingType AS strSPricingType
-		,L.intBookId
-		,BO.strBook
-		,L.intSubBookId
-		,SB.strSubBook
-		,strETAPOLReasonCode = ETAPOLRC.strReasonCode
-		,strETSPOLReasonCode = ETSPOLRC.strReasonCode
-		,strETAPODReasonCode = ETAPODRC.strReasonCode
-		,strETAPOLReasonCodeDescription = ETAPOLRC.strReasonCodeDescription
-		,strETSPOLReasonCodeDescription = ETSPOLRC.strReasonCodeDescription
-		,strETAPODReasonCodeDescription = ETAPODRC.strReasonCodeDescription
+-- Load Header
+	, Load.intLoadId
+	, Load.intConcurrencyId
+	, Load.strLoadNumber
+	, Load.intPurchaseSale
+	, Load.intEquipmentTypeId
+	, Load.intHaulerEntityId
+	, Load.intTicketId
+	, Load.intGenerateLoadId
+	, Load.intUserSecurityId
+	, Load.intTransportLoadId
+	, Load.intLoadHeaderId
+	, Load.intDriverEntityId
+	, Load.intDispatcherId
+	, Load.strExternalLoadNumber
+	, strType = CASE WHEN Load.intPurchaseSale = 1 THEN 'Inbound'
+					ELSE CASE WHEN Load.intPurchaseSale = 2 THEN 'Outbound' 
+							ELSE 'Drop Ship' END END COLLATE Latin1_General_CI_AS
+	, intGenerateReferenceNumber = GLoad.intReferenceNumber
+	, intGenerateSequence = Load.intGenerateSequence
+	, intNumberOfLoads = GLoad.intNumberOfLoads
+	, strHauler = Hauler.strName
+	, Load.dtmScheduledDate
+	, ysnInProgress = IsNull(Load.ysnInProgress, 0)
+	, strScaleTicketNo = CASE WHEN IsNull(Load.intTicketId, 0) <> 0 THEN CAST(ST.strTicketNumber AS VARCHAR(100))
+								ELSE CASE WHEN IsNull(Load.intLoadHeaderId, 0) <> 0 THEN TR.strTransaction
+											ELSE NULL END END
+	, Load.dtmDeliveredDate
+	, strEquipmentType = EQ.strEquipmentType
+	, strDriver = Driver.strName
+	, strDispatcher = US.strUserName
+	, Load.strCustomerReference
+	, Load.strTruckNo
+	, Load.strTrailerNo1
+	, Load.strTrailerNo2
+	, Load.strTrailerNo3
+	, Load.strCarNumber
+	, Load.strEmbargoNo
+	, Load.strEmbargoPermitNo
+	, Load.strComments
+	, ysnDispatched = CASE WHEN Load.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
+	, Load.dtmDispatchedDate
+	, Load.ysnDispatchMailSent
+	, Load.dtmDispatchMailSent
+	, Load.dtmCancelDispatchMailSent
+	, Load.intCompanyLocationId
+	, Load.intTransUsedBy
+	, strTransUsedBy = CASE WHEN Load.intTransUsedBy = 1 THEN 'None'
+							WHEN Load.intTransUsedBy = 2 THEN 'Scale Ticket'
+							WHEN Load.intTransUsedBy = 3 THEN 'Transport Load' END COLLATE Latin1_General_CI_AS
+	, Load.intSourceType
+	, Load.ysnPosted
+	, intInboundTaxGroupId = VendorTax.intTaxGroupId
+	, strInboundTaxGroup = VendorTax.strTaxGroup
+	, intOutboundTaxGroupId = CustomerTax.intTaxGroupId
+	, strOutboundTaxGroup = CustomerTax.strTaxGroup
+	, strZipCode = VEL.strZipCode
+	, strInboundPricingType = PPricingType.strPricingType
+	, strOutboundPricingType = SPricingType.strPricingType
+	, dblInboundAdjustment = ISNULL(PDetail.dblAdjustment, 0.000000)
+	, dblOutboundAdjustment = ISNULL(SDetail.dblAdjustment, 0.000000)
+	, strInboundIndexType = PIndex.strIndexType
+	, strOutboundIndexType = SIndex.strIndexType
+	, intInboundIndexRackPriceSupplyPointId = CASE WHEN ISNULL(PIndex.strIndexType, 0) = 'Fixed'
+													THEN ISNULL(PSP.intRackPriceSupplyPointId, PSP.intSupplyPointId)
+												WHEN ISNULL(PIndex.strIndexType, 0) != 'Fixed'
+													THEN NULL
+												END
+	, intOutboundIndexRackPriceSupplyPointId  = CASE WHEN ISNULL(SIndex.strIndexType, 0) = 'Fixed'
+														THEN ISNULL(SSP.intRackPriceSupplyPointId, SSP.intSupplyPointId)
+													WHEN ISNULL(SIndex.strIndexType, 0) != 'Fixed'
+														THEN NULL
+													END
+	, LoadDetail.intNumberOfContainers
+	, strDetailVendorReference = LoadDetail.strVendorReference 
+	, strDetailCustomerReference = LoadDetail.strCustomerReference
+
 FROM tblLGLoadDetail LoadDetail
-JOIN tblLGLoad L ON L.intLoadId = LoadDetail.intLoadId
-LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
-LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
-LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId
-LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LoadDetail.intVendorEntityId
-LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LoadDetail.intVendorEntityLocationId
-LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LoadDetail.intCustomerEntityId
-LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
-LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LoadDetail.intPContractDetailId
-LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
-LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LoadDetail.intSContractDetailId
-LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
+JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
-LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
-LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
-LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId
-LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId
-LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
-LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
-LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
-LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
-LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
-LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
-LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
-LEFT JOIN tblSMUserSecurity US ON US.[intEntityId]	= L.intDispatcherId
-LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId = LoadDetail.intPickLotDetailId
-LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
-LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LoadDetail.intAllocationDetailId
-LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId	
-LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
-LEFT JOIN tblICItemContract ICI ON ICI.intItemId = Item.intItemId
-	AND PDetail.intItemContractId = ICI.intItemContractId
-LEFT JOIN tblSMCountry CO ON CO.intCountryID = (
-		CASE 
-			WHEN ISNULL(ICI.intCountryId, 0) = 0
-				THEN ISNULL(CA.intCountryID, 0)
-			ELSE ICI.intCountryId
-			END
-		)
-LEFT JOIN tblCTPosition POS ON POS.intPositionId = L.intPositionId
-LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
-LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
-LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
-LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
-LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
-OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved', 'Rejected')) THEN 'Sample Sent' ELSE SS.strStatus END
-				FROM tblQMSample S JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-				WHERE S.intLoadDetailId = LoadDetail.intLoadDetailId) SS
+LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
+LEFT JOIN tblSMCompanyLocation PCL ON PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
+LEFT JOIN tblSMCompanyLocation SCL ON SCL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
+LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LoadDetail.intVendorEntityId
+LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LoadDetail.intVendorEntityLocationId
+LEFT JOIN tblSMTaxGroup VendorTax ON VendorTax.intTaxGroupId = VEL.intTaxGroupId
+LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LoadDetail.intCustomerEntityId
+LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
+LEFT JOIN tblSMTaxGroup CustomerTax ON CustomerTax.intTaxGroupId = CEL.intTaxGroupId
+LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = Load.intHaulerEntityId
+LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
+LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LoadDetail.intPContractDetailId
+LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
+LEFT JOIN tblCTPricingType PPricingType ON PPricingType.intPricingTypeId = PDetail.intPricingTypeId
+LEFT JOIN tblCTIndex PIndex ON PIndex.intIndexId = PDetail.intIndexId
+LEFT JOIN tblTRSupplyPoint PSP ON PSP.intEntityVendorId = PIndex.intVendorId AND PSP.intEntityLocationId = PIndex.intVendorLocationId
+LEFT JOIN tblICItem	IM ON IM.intItemId = PDetail.intItemId
+CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(PDetail.intContractDetailId) AD
+LEFT JOIN tblSMCurrency	CU ON CU.intCurrencyID = PDetail.intCurrencyId			
+LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId		
+LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LoadDetail.intSContractDetailId
+LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
+LEFT JOIN tblCTPricingType SPricingType ON SPricingType.intPricingTypeId = SDetail.intPricingTypeId
+LEFT JOIN tblCTIndex SIndex ON SIndex.intIndexId = SDetail.intIndexId
+LEFT JOIN tblTRSupplyPoint SSP ON SSP.intEntityVendorId = SIndex.intVendorId AND SSP.intEntityLocationId = SIndex.intVendorLocationId
+LEFT JOIN tblICItem	IMS ON IMS.intItemId = SDetail.intItemId
+CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(SDetail.intContractDetailId) ADS
+LEFT JOIN tblSMCurrency	CUS ON CUS.intCurrencyID = SDetail.intCurrencyId			
+LEFT JOIN tblSMCurrency	CYS ON CYS.intCurrencyID = CUS.intMainCurrencyId		
+LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
+LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = Load.intLoadHeaderId
+LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
+LEFT JOIN tblSMUserSecurity US ON US.intEntityId	= Load.intDispatcherId
+LEFT JOIN tblCTWeightGrade PWG ON PWG.intWeightGradeId = PHeader.intWeightId
+LEFT JOIN tblCTWeightGrade SWG ON SWG.intWeightGradeId = SHeader.intWeightId
+LEFT JOIN tblSMCompanyLocationSubLocation PCLSL ON PCLSL.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SCLSL ON SCLSL.intCompanyLocationSubLocationId = LoadDetail.intSSubLocationId

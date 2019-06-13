@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblRKDailyAveragePriceTransaction]
+﻿CREATE TABLE [dbo].[tblRKDailyAveragePriceDetailTransaction]
 (
 	[intDailyAveragePriceDetailTransactionId] INT NOT NULL IDENTITY, 
     [intDailyAveragePriceDetailId] INT NOT NULL, 

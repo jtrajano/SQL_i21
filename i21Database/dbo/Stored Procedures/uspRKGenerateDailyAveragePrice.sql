@@ -175,9 +175,9 @@ BEGIN
 				, dblNoOfLots
 			FROM (
 				SELECT intDailyAveragePriceDetailId
-					, dblPriceByLots = SUM((CASE WHEN strBuySell = 'Buy' THEN dblPrice ELSE 0 END) * dblOpenContract)
-					, dblOpenContract = SUM((CASE WHEN strBuySell = 'Buy' THEN dblOpenContract ELSE 0 END))
-					, dblNoOfLots = SUM(dblOpenContract)				
+					, dblPriceByLots = SUM((CASE WHEN strBuySell = 'Buy' THEN dblPrice ELSE 0 END) * dblNoOfContract)
+					, dblOpenContract = SUM((CASE WHEN strBuySell = 'Buy' THEN dblNoOfContract ELSE 0 END))
+					, dblNoOfLots = SUM(dblNoOfContract)				
 				FROM tblRKDailyAveragePriceTransaction
 				WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
 					AND strInstrumentType = 'Futures'
