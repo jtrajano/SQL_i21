@@ -20,6 +20,7 @@ SELECT
 	,B.intPCompanyLocationId AS intLocationId
 	,compLoc.strLocationName
 	,CAST((CASE WHEN receiptItem.intInventoryReceiptItemId > 0 THEN 0 ELSE 1 END) AS BIT) ysnAllowVoucher --allow voucher if there is no receipt
+	,intAccountId = dbo.fnGetItemGLAccount(B.intItemId, B.intPCompanyLocationId, 'AP Clearing') 
 FROM tblLGLoad A
 INNER JOIN tblLGLoadDetail B
 	ON A.intLoadId = B.intLoadId
@@ -62,6 +63,7 @@ SELECT
     ,bill.intShipToId
     ,compLoc.strLocationName
     ,CAST((CASE WHEN ri.intInventoryReceiptItemId > 0 THEN 0 ELSE 1 END) AS BIT) ysnAllowVoucher --allow voucher if there is no receipt
+	,billDetail.intAccountId
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
     ON bill.intBillId = billDetail.intBillId
