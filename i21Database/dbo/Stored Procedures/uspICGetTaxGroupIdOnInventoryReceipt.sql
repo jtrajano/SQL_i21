@@ -17,7 +17,7 @@ BEGIN
 	FROM	tblICInventoryReceipt r 
 			CROSS APPLY (
 				SELECT id = dbo.fnGetTaxGroupIdForVendor(
-					r.intEntityVendorId -- @VendorId
+					ISNULL(r.intShipFromEntityId, r.intEntityVendorId) -- @VendorId
 					,r.intLocationId	--,@CompanyLocationId
 					,NULL				--,@ItemId
 					,r.intShipFromId	--,@VendorLocationId

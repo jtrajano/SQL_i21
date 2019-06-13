@@ -49,3 +49,5 @@ WHERE ISNULL(SC.dblUnitPrice,0) = 0
 	AND ISNULL(SC.dblUnitBasis,0) = 0
 	AND ISNULL(SC.dblUnitBasis,0) = 0
 	AND SC.intTicketTypeId != 10
+	AND SC.ysnDestinationWeightGradePost = 1
+

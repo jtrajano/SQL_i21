@@ -31,6 +31,8 @@ BEGIN TRY
 		,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strQuantity						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strPrice							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strQuantityRoth					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strPriceRoth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	)
 
 	
@@ -62,6 +64,8 @@ BEGIN TRY
 				,strFutureMonth
 				,strQuantity
 				,strPrice
+				,strQuantityRoth
+				,strPriceRoth
 			)
 			 SELECT 
 			 strItemNo					 = strItemNo
@@ -96,7 +100,14 @@ BEGIN TRY
 													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,4))
 													ELSE 0
 										   END)) + ' ' + strPriceUOM + ' ' + strCurrency
-			
+			,strQuantityRoth			 = convert(nvarchar(30),CAST(ISNULL(dblDetailQuantity,0) AS DECIMAL(24,2))) + ' ' + strItemUOM
+			,strPriceRoth				 = convert(nvarchar(30),(CASE	
+													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,2))
+													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,2))
+													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,2))
+													ELSE 0
+										   END)) --+ ' ' + strPriceUOM 
+										   + ' ' + strCurrency
 			FROM	vyuCTContractDetailView DV
 			LEFT JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId = DV.intFutureMonthId
 
@@ -122,6 +133,8 @@ BEGIN TRY
 				,strTerm					
 				,strQuantity
 				,strPrice
+				,strQuantityRoth
+				,strPriceRoth
 			)
 			SELECT 
 			 strItemNo			= 'Other Charges'
@@ -165,6 +178,21 @@ BEGIN TRY
 											
 											WHEN CC.strCostMethod = 'Percentage'   
 												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' %'
+											END) + ' ' +
+											  (CASE	
+												WHEN CC.strCostMethod = 'Per Unit' THEN UM.strUnitMeasure+' '+ISNULL(Currency.strCurrency,'')										
+												WHEN CC.strCostMethod = 'Amount'   THEN ISNULL(Currency.strCurrency,'')
+											  END)
+			,strQuantityRoth			 = Item.strItemNo
+			,strPriceRoth				 = (CASE	
+											WHEN CC.strCostMethod IN('Per Unit','Gross Unit') 
+												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' per '										
+											
+											WHEN CC.strCostMethod = 'Amount'   
+												THEN '$ '+LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' '
+											
+											WHEN CC.strCostMethod = 'Percentage'   
+												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' %'
 											END) + ' ' +
 											  (CASE	
 												WHEN CC.strCostMethod = 'Per Unit' THEN UM.strUnitMeasure+' '+ISNULL(Currency.strCurrency,'')										

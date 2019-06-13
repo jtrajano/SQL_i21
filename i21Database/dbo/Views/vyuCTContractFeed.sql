@@ -25,7 +25,7 @@ AS
 				CD.dblNetWeight,				CD.strNetWeightUOM,			VE.strVendorAccountNum,	AE.intEntityId					AS intSubmittedById,
 				CH.strTermCode,					CD.strContractItemNo,		CD.strContractItemName,	AE.strName						AS strSubmittedBy,
 				CD.strERPItemNumber,			CD.strERPBatchNumber,		CD.intContractStatusId,	ISNULL(AE.strExternalERPId,UE.strExternalERPId)			AS strSubmittedByNo,
-				OG.strCountry	AS strOrigin,
+				ISNULL(RY.strCountry, OG.strCountry) AS strOrigin,
 				CASE	WHEN	CD.intPricingTypeId = 1 THEN	
 								CASE	WHEN	PT.strDescription LIKE '%Arabica%'
 										THEN	dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,LB.intUnitMeasureId,PU.intUnitMeasureId,CD.dblFutures)*100
@@ -86,4 +86,5 @@ AS
 	LEFT JOIN	tblAPVendor	VE	ON	VE.intEntityId	=	CH.intEntityId							
 	LEFT JOIN	tblSMCity	LP	ON	LP.intCityId	=	DL.intLoadingPortId
 	LEFT JOIN	tblEMEntity	PR	ON	PR.intEntityId	=	DL.intProducerId
-
+	LEFT JOIN tblICItemContract IC ON IC.intItemContractId = DL.intItemContractId
+	LEFT JOIN tblSMCountry RY ON RY.intCountryID = IC.intCountryId

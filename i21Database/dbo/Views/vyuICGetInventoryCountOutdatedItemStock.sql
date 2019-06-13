@@ -52,7 +52,7 @@ FROM
 										, ItemPricing.dblLastCost
 									)
 								WHEN Item.strLotTracking != 'No' THEN
-									dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))
+									ISNULL(ItemLot.dblLastCost, dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost))
 								ELSE
 									dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost)
 							END END, 0),
@@ -163,4 +163,5 @@ GROUP BY x.intInventoryCountId
 	, x.dblNewCost
 	, x.intLotId
 	, x.strLotNo
-HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
+-- HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
+HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0))

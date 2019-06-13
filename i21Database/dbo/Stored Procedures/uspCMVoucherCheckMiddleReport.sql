@@ -147,16 +147,8 @@ SELECT
 		,blbSecondSignatureDetail = (SELECT TOP 1 blbDetail FROM tblSMSignature WHERE intSignatureId = BNKACCNT.intSecondSignatureId)
 		
 		-- A/P Related fields: 
-		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
-		,strVendorName = ISNULL(ENTITY.strName, CHK.strPayee)
+		,strVendor = ISNULL(LTRIM(RTRIM(VENDOR.strVendorId)) + ' ', '-- ') + ISNULL(ISNULL(RTRIM(LTRIM(ENTITY.strName)) + ' ', RTRIM(LTRIM(CHK.strPayee))),'-- ') + RTRIM(LTRIM (COMPANY.strCompanyName))
 		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
-			,strVendorAddress = CASE	
-									WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  THEN 
-										dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
-									ELSE 
-										dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
-										
-							END
 		-- Used to change the sub-report during runtime. 
 		,CHK.intBankTransactionTypeId
 		--Use to display the MICR
@@ -188,19 +180,22 @@ FROM	dbo.tblCMBankTransaction CHK
 					PYMT.strOverridePayee
 			ELSE	
 			CASE
-			WHEN (SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 THEN
-				ISNULL(RTRIM(CHK.strPayee) + ' ' + (STUFF( (SELECT DISTINCT ' and ' + strName
+			WHEN	(SELECT COUNT(intEntityLienId) FROM tblAPVendorLien L WHERE intEntityVendorId = VENDOR.[intEntityId]) > 0 AND ISNULL(PYMT.ysnOverrideLien, 0) = 0 
+			THEN
+				ISNULL(RTRIM(CHK.strPayee) + ' ' + 
+					(STUFF((SELECT DISTINCT ' and ' + strName
                         FROM tblAPVendorLien LIEN
 						INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
-						WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 AND CHK.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
-						AND LIEN.intCommodityId IN (SELECT intCommodityId FROM
-													tblAPPayment Pay 
-													INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
-													INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
-													WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
-                        --ORDER BY intEntityVendorLienId
-                        FOR XML PATH('')), 
-                    1, 1, '')),CHK.strPayee)
+						WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 
+						AND CHK.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+						AND LIEN.intCommodityId IN (
+							SELECT intCommodityId 
+							FROM tblAPPayment Pay 
+							INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+							INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+							WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)FOR XML PATH(''))
+					,1, 1, ''))
+				,CHK.strPayee)
 			ELSE
 				CHK.strPayee
 			END

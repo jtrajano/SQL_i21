@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
+﻿CREATE PROCEDURE [dbo].[uspCFRecalculateTransaciton] 
 
  @ProductId				INT							
 ,@CardId				INT	
@@ -1202,7 +1201,7 @@ BEGIN
 					END
 					ELSE
 					BEGIN
-						IF(LOWER(@strPriceBasis) = 'transfer cost')
+						IF(LOWER(@strPriceBasis) = 'transfer cost' or LOWER(@strPriceMethod) = 'import file price')
 						BEGIN
 							INSERT INTO @tblCFCalculatedTaxExempt	
 							(   
@@ -1468,7 +1467,7 @@ BEGIN
 						END
 					END
 				
-					IF(LOWER(@strPriceBasis) = 'transfer cost')
+					IF(LOWER(@strPriceBasis) = 'transfer cost' or LOWER(@strPriceMethod) = 'import file price')
 					BEGIN
 						INSERT INTO @tblCFCalculatedTax	
 					(   
@@ -2577,7 +2576,7 @@ BEGIN
 
 					IF(ISNULL(@ysnDisregardTaxExemption,0) = 0)
 					BEGIN
-						IF(LOWER(@strPriceBasis) = 'transfer cost')
+						IF(LOWER(@strPriceBasis) = 'transfer cost' or LOWER(@strPriceMethod) = 'import file price')
 						BEGIN
 							INSERT INTO @tblCFCalculatedTaxExempt	
 							(   
@@ -2843,7 +2842,7 @@ BEGIN
 						END
 					END
 				
-					IF(LOWER(@strPriceBasis) = 'transfer cost')
+					IF(LOWER(@strPriceBasis) = 'transfer cost' or LOWER(@strPriceMethod) = 'import file price')
 					BEGIN
 						INSERT INTO @tblCFCalculatedTax	
 					(   
@@ -4177,7 +4176,7 @@ BEGIN
 			)
 				
 					
-				IF(LOWER(@strPriceBasis) = 'transfer cost')
+				IF(LOWER(@strPriceBasis) = 'transfer cost' or LOWER(@strPriceMethod) = 'import file price')
 				BEGIN
 					INSERT INTO @tblCFCalculatedTax	
 					(
@@ -4440,7 +4439,7 @@ BEGIN
 
 				IF(ISNULL(@ysnDisregardTaxExemption,0) = 0)
 				BEGIN
-					IF(LOWER(@strPriceBasis) = 'transfer cost')
+					IF(LOWER(@strPriceBasis) = 'transfer cost' or LOWER(@strPriceMethod) = 'import file price')
 					BEGIN
 						INSERT INTO @tblCFCalculatedTaxExempt	
 					(
@@ -6026,7 +6025,6 @@ BEGIN
 
 
 	-------------------ZERO QTY TAX CALC------------------------
-	
 
 	SET @dblGrossTransferCost = ISNULL(@dblTransferCost,0)
 	SET @dblNetTransferCost = ISNULL(@dblGrossTransferCost,0) - (ISNULL(@totalOriginalTax,0) / ISNULL(@dblQuantity,0))
@@ -6055,24 +6053,45 @@ BEGIN
 	OR @strPriceMethod = 'Origin History')
 		BEGIN
 
-			
-			SET @dblImportFileGrossPrice =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
+		
+			IF(@ysnReRunCalcTax = 0)
+			BEGIN
+				SET @dblPrice = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0)
+				------CLEAN TAX TABLE--------
+				DELETE FROM @tblCFOriginalTax				
+				DELETE FROM @tblCFCalculatedTax				
+				DELETE FROM @tblCFTransactionTax			
+				DELETE FROM @tblCFBackoutTax				
+				DELETE FROM @tblCFRemoteTax					
+
+				DELETE FROM @tblCFOriginalTaxZeroQuantity				
+				DELETE FROM @tblCFCalculatedTaxZeroQuantity				
+				DELETE FROM @tblCFTransactionTaxZeroQuantity			
+				DELETE FROM @tblCFBackoutTaxZeroQuantity		
+				
+				DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
+				DELETE FROM @tblCFCalculatedTaxExempt						
+
+				DELETE FROM @LineItemTaxDetailStagingTable
+
+				SET @ysnReRunCalcTax = 1
+				GOTO TAXCOMPUTATION
+			END
 
 			DECLARE @dblImportFileGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblImportFileGrossPriceZeroQty =  ROUND (Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTaxZeroQuantity,0) / @dblZeroQuantity),6),6)
+			SET @dblImportFileGrossPriceZeroQty = ROUND(ISNULL(@dblPrice,0) + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6), 6)
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
-				SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
 				SELECT @dblImportFileGrossPriceZeroQty = dbo.fnCFForceRounding(@dblImportFileGrossPriceZeroQty)
 			END
 
 
 			SET @dblCalculatedGrossPrice	 = @dblImportFileGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 = @dblOriginalPrice
-			SET @dblCalculatedNetPrice		 = ROUND(((Round((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			SET @dblCalculatedNetPrice		 = ROUND(((Round((@dblImportFileGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 			SET @dblOriginalNetPrice		 = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
-			SET @dblCalculatedTotalPrice	 = ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+			SET @dblCalculatedTotalPrice	 = ROUND((@dblImportFileGrossPriceZeroQty * @dblQuantity),2)
 			SET @dblOriginalTotalPrice		 = ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 			SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
@@ -6160,6 +6179,32 @@ BEGIN
 
 		DECLARE @dblLocalIndexRetailGrossPriceZeroQty NUMERIC(18,6)
 		SET @dblLocalIndexRetailGrossPriceZeroQty = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+
+
+		IF(@ysnReRunCalcTax = 0)
+			BEGIN
+				SET @dblPrice = @dblLocalIndexRetailGrossPriceZeroQty
+				------CLEAN TAX TABLE--------
+				DELETE FROM @tblCFOriginalTax				
+				DELETE FROM @tblCFCalculatedTax				
+				DELETE FROM @tblCFTransactionTax			
+				DELETE FROM @tblCFBackoutTax				
+				DELETE FROM @tblCFRemoteTax					
+
+				DELETE FROM @tblCFOriginalTaxZeroQuantity				
+				DELETE FROM @tblCFCalculatedTaxZeroQuantity				
+				DELETE FROM @tblCFTransactionTaxZeroQuantity			
+				DELETE FROM @tblCFBackoutTaxZeroQuantity		
+				
+				DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
+				DELETE FROM @tblCFCalculatedTaxExempt						
+
+				DELETE FROM @LineItemTaxDetailStagingTable
+
+				SET @ysnReRunCalcTax = 1
+				GOTO TAXCOMPUTATION
+			END
+		
 
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN

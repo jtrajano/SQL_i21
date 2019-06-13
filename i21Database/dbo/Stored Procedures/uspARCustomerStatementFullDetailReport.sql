@@ -40,6 +40,9 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULL
 	  , @query								AS NVARCHAR(MAX)	= NULL
 	  , @queryRunningBalance				AS NVARCHAR(MAX)	= NULL
+	  , @blbLogo							AS VARBINARY(MAX)	= NULL
+	  , @strCompanyName						AS NVARCHAR(500)	= NULL
+	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 
 SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -56,6 +59,11 @@ SET @strCustomerNameLocal				= NULLIF(@strCustomerName, '')
 SET @strCustomerIdsLocal				= NULLIF(@strCustomerIds, '')
 SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 SET @dtmBalanceForwardDateLocal			= DATEADD(DAYOFYEAR, -1, @dtmDateFromLocal)
+
+SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+SELECT TOP 1 @strCompanyName = strCompanyName
+		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 IF (@@version NOT LIKE '%2008%')
 	BEGIN
@@ -92,10 +100,11 @@ BEGIN
 	DROP TABLE #COMPANYLOCATIONS
 END
 
-SELECT intEntityCustomerId	= intEntityId
-INTO #CUSTOMERS
-FROM tblARCustomer
-WHERE 1 = 0
+CREATE TABLE #CUSTOMERS (
+	  intEntityCustomerId		INT NOT NULL	
+	, strFullAddress			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	, strStatementFooterComment	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+)
 
 SELECT intPaymentMethodID
 INTO #WRITEOFFSPAYMENTMETHODS 
@@ -109,7 +118,7 @@ WHERE @strLocationName IS NULL OR @strLocationName = strLocationName
 
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS
+		INSERT INTO #CUSTOMERS (intEntityCustomerId)
 		SELECT TOP 1 intEntityCustomerId    = C.intEntityId 
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
@@ -122,7 +131,7 @@ IF @strCustomerNumberLocal IS NOT NULL
 	END
 ELSE IF @strCustomerIdsLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS
+		INSERT INTO #CUSTOMERS (intEntityCustomerId)
 		SELECT intEntityCustomerId  = C.intEntityId 
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
@@ -138,7 +147,7 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 	END
 ELSE
 	BEGIN
-		INSERT INTO #CUSTOMERS
+		INSERT INTO #CUSTOMERS (intEntityCustomerId)
 		SELECT intEntityCustomerId  = C.intEntityId 
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
@@ -233,6 +242,13 @@ UPDATE #AGINGSUMMARY
 SET dblTotalAR = dblTotalAR - ISNULL(dblFuture, 0) 
   , dblFuture = 0.000000
 
+--UPDATE CUSTOMERS ADDRESS AND FOOTER COMMENT
+UPDATE C
+SET strFullAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strBillToAddress, strBillToCity, strBillToState, strBillToZipCode, strBillToCountry, NULL, NULL)
+  , strStatementFooterComment= dbo.fnARGetDefaultComment(NULL, CS.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
+FROM #CUSTOMERS C
+INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
+
 --STATEMENT TRANSACTIONS
 SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , intInvoiceId				= TRANSACTIONS.intInvoiceId
@@ -250,7 +266,9 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , strType					= CAST(TRANSACTIONS.strType COLLATE Latin1_General_CI_AS AS NVARCHAR (200))
 	 , strPONumber				= TRANSACTIONS.strPONumber
 	 , strItemNo				= TRANSACTIONS.strItemNo
-	 , strItemDescription		= TRANSACTIONS.strItemDescription	 
+	 , strItemDescription		= TRANSACTIONS.strItemDescription
+	 , strFullAddress			= CUST.strFullAddress
+	 , strStatementFooterComment = CUST.strStatementFooterComment
 INTO #STATEMENTREPORT
 FROM vyuARCustomerSearch C
 INNER JOIN #CUSTOMERS CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
@@ -377,6 +395,8 @@ IF @ysnIncludeBudgetLocal = 1
 			 , strPONumber				= NULL
 			 , strItemNo				= NULL
 			 , strItemDescription		= 'Budget due for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
+			 , strFullAddress			= C.strFullAddress
+			 , strStatementFooterComment = C.strStatementFooterComment
 		FROM tblARCustomerBudget CB
 		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN (
@@ -407,6 +427,8 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , strPONumber				= NULL
 	 , strItemNo				= NULL
 	 , strItemDescription		= 'BEGINNING BALANCE'
+	 , strFullAddress			= C.strFullAddress
+	 , strStatementFooterComment = C.strStatementFooterComment
 FROM #CUSTOMERS C
 LEFT JOIN #BEGINNINGBALANCE BB ON C.intEntityCustomerId = BB.intEntityCustomerId
 
@@ -447,8 +469,6 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strTransactionType
 	, strFullAddress
 	, strStatementFooterComment
-	, strCompanyName
-	, strCompanyAddress
 	, strStatementFormat
 	, dblQuantity
 	, dblInvoiceDetailTotal
@@ -464,7 +484,6 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dbl91Days
 	, dblCredits
 	, dblPrepayments
-	, blbLogo
 )
 SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType))
     , intEntityCustomerId		= STATEMENTREPORT.intEntityCustomerId
@@ -485,10 +504,8 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 										ELSE STATEMENTREPORT.strItemDescription
 								  END
 	, strTransactionType		= STATEMENTREPORT.strTransactionType
-	, strFullAddress			= CUSTOMER.strFullAddress
-	, strStatementFooterComment = CUSTOMER.strStatementFooterComment
-	, strCompanyName			= COMPANY.strCompanyName
-	, strCompanyAddress			= COMPANY.strCompanyAddress
+	, strFullAddress			= STATEMENTREPORT.strFullAddress
+	, strStatementFooterComment = STATEMENTREPORT.strStatementFooterComment
 	, strStatementFormat		= ''Full Details - No Card Lock''
 	, dblQuantity				= STATEMENTREPORT.dblQuantity
 	, dblInvoiceDetailTotal		= STATEMENTREPORT.dblInvoiceDetailTotal
@@ -509,26 +526,24 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, dbl91Days					= ISNULL(AGING.dbl91Days, 0.000000)
 	, dblCredits				= ISNULL(AGING.dblCredits, 0.000000)
 	, dblPrepayments			= ISNULL(AGING.dblPrepayments, 0.000000)
-	, blbLogo					= dbo.fnSMGetCompanyLogo(''Header'')
 FROM #STATEMENTREPORT STATEMENTREPORT
 INNER JOIN (
 	SELECT intEntityCustomerId
 		 , strCustomerNumber
 		 , strName
-		 , strAccountNumber
-		 , strFullAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strBillToAddress, strBillToCity, strBillToState, strBillToZipCode, strBillToCountry, NULL, NULL)
-		 , strStatementFooterComment= dbo.fnARGetDefaultComment(NULL, intEntityCustomerId, ''Statement Report'', NULL, ''Footer'', NULL, 1)
+		 , strAccountNumber		 
 	FROM vyuARCustomerSearch
 ) CUSTOMER ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-LEFT JOIN #AGINGSUMMARY AGING ON STATEMENTREPORT.intEntityCustomerId = AGING.intEntityCustomerId
-OUTER APPLY (
-	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
-	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY
+LEFT JOIN #AGINGSUMMARY AGING ON STATEMENTREPORT.intEntityCustomerId = AGING.intEntityCustomerId	
 ORDER BY STATEMENTREPORT.dtmDate'
 
 EXEC sp_executesql @query
+
+UPDATE tblARCustomerStatementStagingTable
+SET blbLogo				= @blbLogo
+  , strCompanyName		= @strCompanyName
+  , strCompanyAddress	= @strCompanyAddress
+WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Full Details - No Card Lock' 
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN

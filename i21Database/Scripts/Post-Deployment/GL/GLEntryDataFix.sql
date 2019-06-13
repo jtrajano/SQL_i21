@@ -52,6 +52,10 @@ GO
 	AND A.strTransactionId = B.strBillId
 	AND ISNULL(A.strDocument,'') = ''
 
+	UPDATE A SET A.strCode = LTRIM(RTRIM(B.strSourceType)) FROM tblGLDetail A
+	JOIN tblGLJournal B ON A.strTransactionId = B.strJournalId
+	WHERE A.strCode <> B.strSourceType
+
 	--FOR MULTICOMPANY
 	DECLARE @intMultCompanyId INT
 	SELECT TOP 1 @intMultCompanyId = C.intMultiCompanyId FROM 
