@@ -47,6 +47,7 @@ BEGIN
 				,FT.strFobPoint
 				,CU.strCurrency
 				,CONT.strContainerType
+				,intLeadTime = ISNULL(DPort.intLeadTime, 0)
 				,ShippingLine.strName AS strShippingLine
 				,SLSC.strOwner AS strServiceContractOwner
 				,Terminal.strName AS strTerminal
@@ -101,6 +102,8 @@ BEGIN
 			LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 			LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
+			OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
+						 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 			OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
 						 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
 						 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC
@@ -145,6 +148,7 @@ BEGIN
 			,FT.strFobPoint
 			,CU.strCurrency
 			,CONT.strContainerType
+			,intLeadTime = ISNULL(DPort.intLeadTime, 0)
 			,ShippingLine.strName AS strShippingLine		
 			,SLSC.strOwner AS strServiceContractOwner	
 			,Terminal.strName AS strTerminal
@@ -196,6 +200,8 @@ BEGIN
 		LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 		LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
+		OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
+					 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 		OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
 					 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
 					 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC
