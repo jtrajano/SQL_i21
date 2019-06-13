@@ -340,7 +340,7 @@ WHILE @mRowNumber > 0
 					SET @ErrMsg = @ErrMsg + ' Invalid Futures Month, format should be in mmm-yy (Jan-18).'
 				END
 
-				ELSE IF @strInstrumentType = 'Futures' AND EXISTS(SELECT * FROM tblRKFuturesMonth WHERE strFutureMonth = REPLACE(@strFutureMonth,'-',' ')) AND 
+				ELSE IF @strInstrumentType = 'Futures' AND 
 					NOT EXISTS(SELECT 1
 						FROM tblRKFutOptTransactionImport ti
 						JOIN tblRKFutureMarket fm on fm.strFutMarketName=ti.strFutMarketName 
