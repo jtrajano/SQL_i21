@@ -75,7 +75,7 @@ SELECT DISTINCT
 			ELSE CAST(0 AS BIT)
 		END*/
 	, strEntityType = CASE WHEN entityType.Prospect = 1 THEN 'Prospect' ELSE 'Customer' END COLLATE Latin1_General_CI_AS
-FROM tblARCustomer CUSTOMER
+FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntity entityToSalesperson ON CUSTOMER.intSalespersonId = entityToSalesperson.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
