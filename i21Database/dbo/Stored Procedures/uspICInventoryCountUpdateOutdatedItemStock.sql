@@ -3,7 +3,7 @@ AS
 
 UPDATE cd
 SET cd.dblSystemCount = os.dblNewOnHand,
-	cd.dblLastCost = os.dblNewCost,
+	-- cd.dblLastCost = os.dblNewCost,
 	cd.dblWeightQty = os.dblNewWeightQty,
 	cd.dblNetQty = os.dblNewWeightQty
 FROM tblICInventoryCountDetail cd
