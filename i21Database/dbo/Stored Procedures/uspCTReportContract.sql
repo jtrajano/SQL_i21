@@ -57,7 +57,9 @@ BEGIN TRY
 			@strSecondHalfDocuments		NVARCHAR(MAX),
 			@strReportTo				NVARCHAR(MAX),
 			@strOurCommn				NVARCHAR(MAX),
-			@strBrkgCommn				NVARCHAR(MAX)
+			@strBrkgCommn				NVARCHAR(MAX),
+			@strApplicableLaw			NVARCHAR(MAX),
+			@strGeneralCondition		NVARCHAR(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -245,6 +247,18 @@ BEGIN TRY
 	FROM	tblCTContractHeader CH WITH (NOLOCK)						
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
+	SELECT	@strApplicableLaw = dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
+	FROM	tblCTContractCondition	CD  WITH (NOLOCK)
+	JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
+	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	AND		UPPER(DM.strConditionName)	=	'APPLICABLE LAW'
+
+	SELECT	@strGeneralCondition = dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
+	FROM	tblCTContractCondition	CD  WITH (NOLOCK)
+	JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
+	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+	AND		UPPER(DM.strConditionName)	=	'GENERAL CONDITION'
+
 	IF EXISTS
 	(
 				SELECT	TOP 1 1 
@@ -431,8 +445,8 @@ BEGIN TRY
 			,strSellerRefNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 			,strContractNumber						= CH.strContractNumber
 			,strCustomerContract					= CH.strCustomerContract
-			,strContractBasis						= CB.strContractBasis
-			,strContractBasisDesc					= CB.strContractBasis+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
+			,strContractBasis						= CB.strFreightTerm
+			,strContractBasisDesc					= CB.strFreightTerm+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
 			,strCityWarehouse						= CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
 			,strLocationName						= SQ.strLocationName			
 			,strCropYear							= CY.strCropYear
@@ -521,12 +535,12 @@ BEGIN TRY
 			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks + ' :'				ELSE NULL END
 			,lblAtlasPrintableRemarks				= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks			ELSE NULL END
 			,lblAtlasPrintableRemarksColon			= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN ':'				ELSE NULL END
-			,lblContractBasis						= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtPriceBasis + ' :'					ELSE NULL END
-			,lblIncoTerms							= CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN 'Incoterms :'					ELSE NULL END
+			,lblContractBasis						= CASE WHEN ISNULL(CB.strFreightTerm,'') <>''		   THEN @rtPriceBasis + ' :'					ELSE NULL END
+			,lblIncoTerms							= CASE WHEN ISNULL(CB.strFreightTerm,'') <>''		   THEN 'Incoterms :'					ELSE NULL END
 			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers + ' :'						ELSE NULL END
 			,lblAtlasContractText					= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers						ELSE NULL END
 			,lblAtlasContractTextColon				= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN ':'						ELSE NULL END
-			,lblCondition						    = CASE WHEN ISNULL(CB.strContractBasis,'') <>''		   THEN @rtCondition + ' :'					ELSE NULL END
+			,lblCondition						    = CASE WHEN ISNULL(CB.strFreightTerm,'') <>''		   THEN @rtCondition + ' :'					ELSE NULL END
 			,lblAtlasProducer						= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN @rtProducer + ' :'					ELSE NULL END
 			,lblProducer							= CASE WHEN ISNULL(PR.strName,'') <>''				   THEN @rtShipper + ' :'						ELSE NULL END
 			,lblLoadingPoint						= CASE WHEN ISNULL(SQ.strLoadingPointName,'') <>''     THEN SQ.srtLoadingPoint + ' :'		ELSE NULL END
@@ -582,7 +596,7 @@ BEGIN TRY
 													  	  ELSE NULL END
 													  END 
 			,strDetailAmendedColumns				= @strDetailAmendedColumns
-		    ,strINCOTermWithWeight					=	dbo.fnCTGetTranslation('ContractManagement.view.INCOShipTerm',CB.intContractBasisId,@intLaguageId,'Contract Basis',CB.strContractBasis) + ISNULL(', ' + dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W1.intWeightGradeId,@intLaguageId,'Name',W1.strWeightGradeDesc),'')
+		    ,strINCOTermWithWeight					=	dbo.fnCTGetTranslation('ContractManagement.view.INCOShipTerm',CB.intFreightTermId,@intLaguageId,'Contract Basis',CB.strFreightTerm) + ISNULL(', ' + dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W1.intWeightGradeId,@intLaguageId,'Name',W1.strWeightGradeDesc),'')
 			,strQuantityWithUOM						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) + ' ' + ISNULL(SQ.strNoOfContainerAndType, '')
 			,strItemDescWithSpec					=	SQ.strItemDescWithSpec
 			,strStartAndEndDate						=	SQ.strStartAndEndDate
@@ -631,6 +645,24 @@ BEGIN TRY
 			,intReportLogoWidth						=	ISNULL(@intReportLogoWidth,0)
 			,strOurCommn							=	@strOurCommn
 			,strBrkgCommn							=	@strBrkgCommn
+			,strItemDescription						=	strItemDescription
+			,strStraussQuantity						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) + ' ' + ISNULL(SQ.strPackingDescription, '')
+			,strItemBundleNo						=	SQ.strItemBundleNo
+			,strStraussPrice						=	CASE WHEN SQ.intPricingTypeId = 2 THEN 
+															'Price to be fixed basis ' + strFutMarketName + ' ' + 
+															strFutureMonthYear + CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +
+															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblBasis,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
+														ELSE	
+															'Priced ' + strFutMarketName + ' ' + 
+															strFutureMonthYear + ' ' +
+															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
+														END
+			,strStraussCondition					=	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + strDestinationPointName + ' ' + W1.strWeightGradeDesc
+			,strStraussApplicableLaw				=	@strApplicableLaw
+			,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
+			,strStrussOtherCondition				=	W2.strWeightGradeDesc +  CHAR(13)+CHAR(10) + @strGeneralCondition
+			,strStraussShipment						=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
+			,intContractTypeId						=	CH.intContractTypeId
 
 	FROM	tblCTContractHeader				CH
 	JOIN	tblICCommodity					CM	WITH (NOLOCK) ON	CM.intCommodityId				=	CH.intCommodityId
@@ -660,7 +692,7 @@ BEGIN TRY
 		INNER JOIN tblICUnitMeasure e ON e.intUnitMeasureId = c.intUnitMeasureId
 	)										EB ON EB.intContractHeaderId = CH.intContractHeaderId											
 	LEFT JOIN	tblCTCropYear				CY	WITH (NOLOCK) ON	CY.intCropYearId				=	CH.intCropYearId			
-	LEFT JOIN	tblCTContractBasis			CB	WITH (NOLOCK) ON	CB.intContractBasisId			=	CH.intContractBasisId		
+	LEFT JOIN	tblSMFreightTerms			CB	WITH (NOLOCK) ON	CB.intFreightTermId				=	CH.intFreightTermId		
 	LEFT JOIN	tblCTWeightGrade			W1	WITH (NOLOCK) ON	W1.intWeightGradeId				=	CH.intWeightId				
 	LEFT JOIN	tblCTWeightGrade			W2	WITH (NOLOCK) ON	W2.intWeightGradeId				=	CH.intGradeId				
 	LEFT JOIN	tblCTContractText			TX	WITH (NOLOCK) ON	TX.intContractTextId			=	CH.intContractTextId		
@@ -696,6 +728,7 @@ BEGIN TRY
 							CD.strERPPONumber,
 							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots,
 							dbo.fnCTGetTranslation('Inventory.view.Item',IM.intItemId,@intLaguageId,'Description',IM.strDescription) + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
+							dbo.fnCTGetTranslation('Inventory.view.Item',IM.intItemId,@intLaguageId,'Description',IM.strDescription) strItemDescription,
 							--CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
 							LEFT(DATENAME(DAY,CD.dtmStartDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)), LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + ' ' + LEFT(DATENAME(YEAR,CD.dtmStartDate),4) + ' - ' + LEFT(DATENAME(DAy,CD.dtmEndDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)), LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + ' ' + LEFT(DATENAME(YEAR,CD.dtmEndDate),4) AS strStartAndEndDate,
 							LTRIM(CD.intNumberOfContainers) + ' x ' + dbo.fnCTGetTranslation('Logistics.view.ContainerType',CT.intContainerTypeId,@intLaguageId,'Container Type',CT.strContainerType) AS strNoOfContainerAndType,
@@ -709,7 +742,9 @@ BEGIN TRY
 							CD.dtmStartDate,
 							dbo.fnCTGetTranslation('RiskManagement.view.FuturesTradingMonths',CD.intFutureMonthId,@intLaguageId,'Future Trading Month',MO.strFutureMonth) strFutureMonth,
 							BC.strCurrency AS strBasisCurrency,
-							dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',BM.intUnitMeasureId,@intLaguageId,'Name',BM.strUnitMeasure) strBasisUnitMeasure
+							dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',BM.intUnitMeasureId,@intLaguageId,'Name',BM.strUnitMeasure) strBasisUnitMeasure,
+							BI.strItemNo strItemBundleNo,
+							CD.dblCashPrice
 
 				FROM		tblCTContractDetail		CD  WITH (NOLOCK)
 				JOIN		tblICItem				IM	WITH (NOLOCK) ON	IM.intItemId				=	CD.intItemId
@@ -725,8 +760,9 @@ BEGIN TRY
 				LEFT JOIN	tblCTPriceFixation		PF	WITH (NOLOCK) ON	PF.intContractDetailId		=	CD.intContractDetailId		
 				LEFT JOIN	tblICItemUOM			IU	WITH (NOLOCK) ON	IU.intItemUOMId				=	CD.intPriceItemUOMId		
 				LEFT JOIN	tblICUnitMeasure		UM	WITH (NOLOCK) ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
-				LEFT JOIN   tblICItemUOM			BU	WITH (NOLOCK) ON  BU.intItemUOMId				=	CD.intBasisUOMId
-				LEFT JOIN   tblICUnitMeasure		BM	WITH (NOLOCK) ON  BM.intUnitMeasureId			=	BU.intUnitMeasureId
+				LEFT JOIN   tblICItemUOM			BU	WITH (NOLOCK) ON	BU.intItemUOMId				=	CD.intBasisUOMId
+				LEFT JOIN   tblICUnitMeasure		BM	WITH (NOLOCK) ON	BM.intUnitMeasureId			=	BU.intUnitMeasureId
+				LEFT JOIN	tblICItem				BI	WITH (NOLOCK) ON	BI.intItemId				=	CD.intItemBundleId
 
 			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
 														AND SQ.intRowNum = 1
