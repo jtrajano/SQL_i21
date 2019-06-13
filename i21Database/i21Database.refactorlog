@@ -7364,4 +7364,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnBasisComponentPurchase" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="62e05984-43b5-4256-ac99-718b55e42a73" ChangeDateTime="06/07/2019 06:07:15">
+    <Property Name="ElementName" Value="[dbo].[tblRKDailyAveragePrice].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDailyAveragePrice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDailyAveragePriceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5b62d699-0294-45fb-849c-d332b15ced51" ChangeDateTime="06/07/2019 06:11:20">
+    <Property Name="ElementName" Value="[dbo].[tblRKAverageDailyPriceDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKAverageDailyPriceDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAverageDailyPriceDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9030a1fa-2bf0-499f-be04-ffcb3c6d1e1f" ChangeDateTime="06/13/2019 06:22:25">
+    <Property Name="ElementName" Value="[dbo].[tblRKDailyAveragePriceTransaction].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDailyAveragePriceTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDailyAveragePriceDetailTransactionId" />
+  </Operation>
 </Operations>
