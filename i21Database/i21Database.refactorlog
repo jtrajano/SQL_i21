@@ -7357,4 +7357,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[vyuETExportTankManagementEventHistory]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="5e16e6cd-07ca-4875-b062-a57a2da37e35" ChangeDateTime="06/11/2019 07:36:05">
+    <Property Name="ElementName" Value="[dbo].[tblCTCompanyPreference].[ysnBasisComponent]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnBasisComponentPurchase" />
+  </Operation>
 </Operations>
