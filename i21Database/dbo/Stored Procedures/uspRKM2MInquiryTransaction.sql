@@ -906,7 +906,7 @@ FROM (
 SELECT *
 INTO #tempIntransit
 FROM (
-	SELECT intLineNo = (SELECT TOP 1 intLineNo FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentItemId = InTran.intTransactionDetailId AND intOrderId IS NOT NULL)
+	SELECT intLineNo = (SELECT TOP 1 intLineNo FROM vyuICGetInventoryShipmentItem WHERE intInventoryShipmentItemId = InTran.intTransactionDetailId AND intOrderId IS NOT NULL AND InTran.strTransactionId NOT LIKE 'LS-%')
 		, dblBalanceToInvoice = SUM(dblInTransitQty)
 		, InTran.intItemId
 		, InTran.strItemNo
