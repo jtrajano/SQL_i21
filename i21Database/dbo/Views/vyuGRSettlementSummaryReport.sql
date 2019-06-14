@@ -70,34 +70,22 @@ FROM
 											WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN VendorPrepayment.dblVendorPrepayment
 											ELSE NULL 
 										END
-		,lblVendorPrepayment			= CASE 
-											WHEN ISNULL(VendorPrepayment.dblVendorPrepayment, 0) <> 0 THEN 'Vendor Prepay'
-											ELSE NULL 
-										END COLLATE Latin1_General_CI_AS
+		,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
 		,dblCustomerPrepayment			= CASE 
 											WHEN ISNULL(Invoice.dblPayment, 0) <> 0 THEN Invoice.dblPayment
 											ELSE NULL 
 										END
-		,lblCustomerPrepayment			= CASE 
-											WHEN ISNULL(Invoice.dblPayment, 0) <> 0 THEN 'Customer Prepay'
-											ELSE NULL 
-										END COLLATE Latin1_General_CI_AS
+		,lblCustomerPrepayment			= 'Customer Prepay' COLLATE Latin1_General_CI_AS
 		,dblGradeFactorTax				= CASE 
 											WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax, 0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
 											ELSE NULL 
 										END
-		,lblFactorTax					= CASE 
-											WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax, 0) <> 0 THEN 'Factor Tax'
-											ELSE NULL 
-										END COLLATE Latin1_General_CI_AS
+		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepaymentSubTotal	= CASE 
 											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblTotals
 											ELSE NULL 
 										END
-		,lblPartialPrepayment			= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN 'Partial Payment Adj'
-											ELSE NULL 
-										END COLLATE Latin1_General_CI_AS
+		,lblPartialPrepayment			= 'Partial Payment Adj' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepayment		  = CASE 
 											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment - PartialPayment.dblTotals 
 											ELSE NULL 
@@ -235,34 +223,22 @@ FROM
 											WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment
 											ELSE NULL 
 										END 
-		,lblVendorPrepayment			= CASE 
-											WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay'
-											ELSE NULL 
-										END COLLATE Latin1_General_CI_AS
+		,lblVendorPrepayment			= 'Vendor Prepay' COLLATE Latin1_General_CI_AS
 		,dblCustomerPrepayment			= CASE 
 											WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN Invoice.dblPayment 
 											ELSE NULL 
 										END 
-		,lblCustomerPrepayment			= CASE 
-											WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay'
-											ELSE NULL 
-										END COLLATE Latin1_General_CI_AS
+		,lblCustomerPrepayment			=  'Customer Prepay' COLLATE Latin1_General_CI_AS
 		,dblGradeFactorTax				= CASE 
 											WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
 											ELSE NULL 
 										END 
-		,lblFactorTax					= CASE 
-											WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax'
-											ELSE NULL 
-										END COLLATE Latin1_General_CI_AS
+		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepaymentSubTotal	= CASE 
 											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals
 											ELSE NULL 
 										END
-		,lblPartialPrepayment			= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
-											ELSE NULL 
-										END COLLATE Latin1_General_CI_AS
+		,lblPartialPrepayment			= 'Partial Payment Adj' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepayment			= CASE 
 											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals 
 											ELSE NULL 
