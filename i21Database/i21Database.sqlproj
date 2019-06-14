@@ -7345,6 +7345,7 @@
     <Build Include="dbo\Views\vyuAPLoadClearing.sql" />
     <Build Include="dbo\Views\vyuAPLoadCostClearing.sql" />
     <Build Include="dbo\Views\vyuAPGrainClearing.sql" />
+    <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
