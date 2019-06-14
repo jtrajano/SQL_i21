@@ -24,7 +24,7 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , ysnAllowMultipleUser			= DRAWER.ysnAllowMultipleUser
 	 , dblTotalCashReceipt          = EOD.dblExpectedEndingBalance
 	 , dblCashReceived				= ISNULL(EOD.dblCashPaymentReceived,0.000000)
-FROM tblARPOSEndOfDay EOD
+FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN tblSMCompanyLocationPOSDrawer DRAWER ON  EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 INNER JOIN (
 	SELECT
@@ -43,7 +43,7 @@ INNER JOIN (
 		intPOSLogId
 		, intEntityId
 		, intPOSEndOfDayId
-	FROM tblARPOSLog
+	FROM tblARPOSLog WITH (NOLOCK)
 ) POSLOG ON EOD.intPOSEndOfDayId = POSLOG.intPOSEndOfDayId
 INNER JOIN (
 	SELECT 
