@@ -27,7 +27,7 @@ DECLARE @intTicketItemUOMId INT
 DECLARE @intUnitMeasureId INT
 DECLARE @strTransactionId NVARCHAR(40) = NULL
 DECLARE @InventoryReceiptId AS INT
-DECLARE @dblUnits AS DECIMAL (13,3)
+DECLARE @dblUnits AS DECIMAL (38,20)
 DECLARE @intStorageEntityId AS INT
 DECLARE @intStorageCommodityId AS INT
 DECLARE @intStorageTypeId AS INT
@@ -42,7 +42,7 @@ DECLARE @intCommodityId AS INT
 DECLARE @matchStorageType AS INT
 DECLARE @ysnIsStorage AS INT
 DECLARE @strLotTracking NVARCHAR(4000)
-DECLARE @dblAvailableGrainOpenBalance DECIMAL(24, 10)
+DECLARE @dblAvailableGrainOpenBalance DECIMAL(38, 20)
 
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
