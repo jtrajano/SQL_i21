@@ -100,8 +100,8 @@ SELECT
     ,0 AS dblVoucherQty
 	,0
 	,0
-	,CS.intCompanyLocationId
-	,CL.strLocationName
+	-- ,CS.intCompanyLocationId
+	-- ,CL.strLocationName
 	,GD.intAccountId
 	,AD.strDescription
 FROM tblGRCustomerStorage CS
@@ -141,8 +141,8 @@ SELECT
     ,0 AS dblVoucherQty
 	,0
 	,0
-	,CS.intCompanyLocationId
-	,CL.strLocationName
+	-- ,CS.intCompanyLocationId
+	-- ,CL.strLocationName
 	,GD.intAccountId
 	,AD.strDescription
 FROM tblQMTicketDiscount QM
