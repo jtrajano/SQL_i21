@@ -15,6 +15,8 @@
 	[dtmLockedDate]			DATETIME											NULL,
 	[intLockedBy]			[int]												NULL,
 	[intCurrencyId]			[int]												NULL,
+	[strName]				[nvarchar](200) COLLATE Latin1_General_CI_AS		NULL,
+	[strDescription]		[nvarchar](MAX) COLLATE Latin1_General_CI_AS		NULL,
 	[intConcurrencyId]		[int]												NOT NULL DEFAULT ((1)), 
     CONSTRAINT [FK_tblSMTransaction_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]),
     CONSTRAINT [PK_tblSMTransaction] PRIMARY KEY ([intTransactionId]), 
