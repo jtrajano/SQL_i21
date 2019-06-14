@@ -165,7 +165,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
+	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 THEN ARID.dblQtyShipped ELSE ICS.[dblQuantity] END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
