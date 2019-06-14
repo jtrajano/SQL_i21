@@ -140,8 +140,6 @@ WHERE
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 	AND ARID.[strItemType] <> 'Finished Good'
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) =
-
 
 INSERT INTO #ARItemsForCosting
 	([intItemId]
@@ -255,9 +253,7 @@ WHERE
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
-	--AND ((@ForValidation = 1 AND ISNULL(ARID.[strItemType],'') <> 'Finished Good') OR (@ForValidation = 0))
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) = 
 
 INSERT INTO #ARItemsForCosting
 	([intItemId]

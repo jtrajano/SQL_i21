@@ -7570,6 +7570,7 @@
     <Build Include="dbo\Views\vyuARPOSBatchProcessSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryByNetPosition.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
+    <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryByNetPosition.sql" />
   </ItemGroup>
   <ItemGroup>

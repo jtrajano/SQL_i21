@@ -1017,6 +1017,7 @@ BEGIN TRY
 			,@intLoadDistributionDetailId = @intLoadDistributionDetailId
 			,@intLotId = @intBlendLotId OUT
 			,@strLotNumber = @strLotNumber OUT
+			,@ysnAutoBlend=1
 			
 		If @strOrderType='LOAD DISTRIBUTION'
 		Begin
