@@ -28,6 +28,8 @@ tblSMLog.intEntityId,
 case when tblSMTransaction.strTransactionNo is null then CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX))
 else tblSMTransaction.strTransactionNo end as 'strReference',
 tblSMTransaction.dtmDate as 'dtmTransactionDate',
+tblSMTransaction.strName as 'strAuditName',
+tblSMTransaction.strDescription as 'strAuditDescription',
 strEntityType
 FROM (select 
 		intLogId, 
