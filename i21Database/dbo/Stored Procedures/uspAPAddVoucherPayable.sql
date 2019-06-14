@@ -17,7 +17,7 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @insertedData TABLE(intOldPayableId INT, intNewPayableId INT);
-DECLARE @taxGenerated TABLE(intVoucherPayableId INT, dblTax DECIMAL(18,6));
+DECLARE @taxGenerated TABLE(intVoucherPayableId INT, intTaxGroupId INT, dblTax DECIMAL(18,6));
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPAddVoucherPayable';
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
@@ -489,6 +489,15 @@ BEGIN
 		ON B.intOldPayableId = A.intVoucherPayableId
 	INNER JOIN @voucherPayable payables
 		ON A.intVoucherPayableId = payables.intVoucherPayableId
+
+	--IF THERE IS TAX DATA PROVIDED, MAKE SURE TO USE THAT AS TAX GROUP ID
+	UPDATE A
+		SET A.intPurchaseTaxGroupId = C.intTaxGroupId
+	FROM tblAPVoucherPayable A
+	INNER JOIN @insertedData B
+		ON A.intVoucherPayableId = B.intNewPayableId
+	INNER JOIN tblAPVoucherPayableTaxStaging C
+		ON B.intNewPayableId = C.intVoucherPayableId
 		
 	--IF NO TAX PROVIDED, WE WILL GENERATE TAX AND WILL USE TAX ACCOUNT
 	DECLARE @ParamTable AS TABLE
@@ -632,19 +641,23 @@ BEGIN
 		)
 		OUTPUT
 			inserted.intVoucherPayableId,
+			inserted.intTaxGroupId,
 			inserted.dblTax
 		INTO @taxGenerated;
 
 		--UPDATE THE TAX FOR VOUCHER PAYABLE
 		UPDATE A
-			SET A.dblTax = ISNULL(generatedTax.dblTax, A.dblTax)
+			SET A.dblTax = ISNULL(generatedTax.dblTax, A.dblTax), A.intPurchaseTaxGroupId = generatedTax.intTaxGroupId
 		FROM tblAPVoucherPayable A
+		INNER JOIN @insertedData B
+			ON A.intVoucherPayableId = B.intNewPayableId
 		OUTER APPLY 
 		(
 			SELECT 
-				SUM(C.dblTax) dblTax 
+				SUM(C.dblTax) dblTax, C.intTaxGroupId 
 			FROM @taxGenerated C
 			WHERE A.intVoucherPayableId = C.intVoucherPayableId
+			GROUP BY C.intTaxGroupId
 		) generatedTax
 	END
 END
