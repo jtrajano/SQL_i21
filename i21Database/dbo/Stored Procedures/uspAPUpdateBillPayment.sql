@@ -23,11 +23,14 @@ BEGIN
 	WHERE C.intPaymentId IN (SELECT intId FROM @paymentIds)
 
 	UPDATE tblAPBill
-		SET tblAPBill.dblAmountDue = C.dblAmountDue + 
+		SET 
+			@amountDue 	= C.dblAmountDue + 
 									(
 										ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment)
 									+ 	ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount)
-									), 
+									- 	ISNULL(payDetails.dblInterest, 0)
+									),
+			tblAPBill.dblAmountDue = @amountDue, 
 			tblAPBill.ysnPaid = 0,
 			tblAPBill.dblPayment = C.dblPayment - 
 									(
@@ -36,16 +39,34 @@ BEGIN
 									),
 			tblAPBill.dtmDatePaid = NULL,
 			tblAPBill.dblDiscount = ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount),
+			tblAPBill.dblInterest = C.dblInterest - ISNULL(payDetails.dblInterest,0),
+			tblAPBill.dtmInterestDate = ISNULL(latestPay.dtmDatePaid, NULL),
 			tblAPBill.dblWithheld = 0
 	FROM tblAPPayment A
 	INNER JOIN tblAPPaymentDetail A2 
 		ON A.intPaymentId = A2.intPaymentId
 	INNER JOIN tblAPBill C
 		ON A2.intBillId = C.intBillId
-	OUTER APPLY (
+	OUTER APPLY
+	(
+		SELECT
+		TOP 1
+			pay.dtmDatePaid
+		FROM tblAPPaymentDetail payDetail
+		INNER JOIN tblAPPayment pay
+			ON pay.intPaymentId = payDetail.intPaymentId
+		WHERE 
+			pay.intPaymentId != A.intPaymentId
+		AND payDetail.intBillId = C.intBillId
+		AND pay.ysnPosted = 1
+		ORDER BY pay.dtmDatePaid DESC	
+	) latestPay
+	OUTER APPLY 
+	(
 		SELECT 
 			SUM(B.dblPayment) dblPayment,
 			SUM(B.dblDiscount) dblDiscount,
+			SUM(B.dblInterest) dblInterest,
 			MIN(B.dblAmountDue) dblAmountDue,
 			B.intBillId 
 		FROM tblAPPaymentDetail B 
@@ -80,7 +101,12 @@ BEGIN
 
 	UPDATE tblAPBill
 		SET 
-			@amountDue = C.dblAmountDue - (ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment) + ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount)),
+			@amountDue = C.dblAmountDue 
+						- (
+							ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment) 
+						+ 	ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount)
+						- 	ISNULL(payDetails.dblInterest, 0)
+						),
 			tblAPBill.dblAmountDue = @amountDue,
 			tblAPBill.ysnPaid = (CASE WHEN @amountDue = 0 THEN 1 ELSE 0 END),
 			tblAPBill.dtmDatePaid = (CASE WHEN @amountDue = 0 THEN A.dtmDatePaid ELSE NULL END),
@@ -95,12 +121,14 @@ BEGIN
 												ELSE 0 END
 											)
 										END),
-			tblAPBill.dblInterest = (CASE WHEN A2.dblAmountDue = 0 THEN ISNULL(payDetails.dblInterest,0) 
-									ELSE 
-										CASE WHEN C.intTransactionType = 1 
-											THEN dbo.fnGetInterestBasedOnTerm(@amountDue, C.dtmDate, A.dtmDatePaid, C.intTermsId) 
-										ELSE 0 END
-									END),
+			tblAPBill.dblInterest = ISNULL(payDetails.dblInterest,0), --WHEN POSTING PAYMENT, THE INTEREST SHOULD ALWAYS BE PART OF THE PAYMENT, PARTIAL OR FULL
+									-- (CASE WHEN A2.dblAmountDue = 0 THEN ISNULL(payDetails.dblInterest,0) 
+									-- ELSE 
+									-- 	CASE WHEN C.intTransactionType = 1 
+									-- 		THEN dbo.fnGetInterestBasedOnTerm(@amountDue, C.dtmDate, A.dtmDatePaid, C.intTermsId) 
+									-- 	ELSE 0 END
+									-- END),
+			tblAPBill.dtmInterestDate = CASE WHEN ISNULL(payDetails.dblInterest,0) > 0 THEN A.dtmDatePaid ELSE NULL END,
 			tblAPBill.dblPayment = (C.dblPayment + ISNULL(paySchedDetails.dblPayment, payDetails.dblPayment)) --Include the first payment (if there is) + the current amount paid
 									+ ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount) 
 									- ISNULL(payDetails.dblInterest,0) 

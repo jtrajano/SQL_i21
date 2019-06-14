@@ -42,8 +42,10 @@ RETURNS TABLE AS RETURN
 									) 
 							ELSE 0 END AS DECIMAL(18,2))
 		,forPay.dblInterest 
-		,dblTempInterest = CAST(CASE WHEN voucher.intTransactionType = 1 
-								THEN dbo.fnGetInterestBasedOnTerm(forPay.dblTotal, voucher.dtmDate, @datePaid, forPay.intTermsId)
+		,dblTempInterest = CAST(CASE WHEN voucher.intTransactionType = 1 AND
+											(voucher.dtmInterestDate IS NULL OR @datePaid > voucher.dtmInterestDate)
+								THEN
+									dbo.fnGetInterestBasedOnTerm(forPay.dblAmountDue, voucher.dtmDate, @datePaid, voucher.dtmInterestDate, forPay.intTermsId)
 								ELSE 0 END AS DECIMAL(18,2))
 		,forPay.dblAmountDue
 		,forPay.dblPayment
