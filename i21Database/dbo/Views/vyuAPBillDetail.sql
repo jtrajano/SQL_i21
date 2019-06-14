@@ -38,12 +38,15 @@ SELECT
 	C.strDescription AS strItemDescription,
 	H.strAccountId,
 	B.dbl1099,
+	B.int1099Form,
 	CASE B.int1099Form WHEN 0 THEN 'NONE'
 		WHEN 1 THEN '1099 MISC'
 		WHEN 2 THEN '1099 INT'
 		WHEN 3 THEN '1099 B'
 		WHEN 4 THEN '1099 PATR'
-		ELSE 'NONE' END COLLATE Latin1_General_CI_AS  AS str1099Form,
+		WHEN 5 THEN '1099 DIV'
+		ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form,
+	B.int1099Category,
 	CASE WHEN D.int1099CategoryId IS NULL THEN 'NONE' ELSE D.strCategory END AS str1099Category,
 	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup,
 	IR.strReceiptNumber,
