@@ -4,19 +4,20 @@
 		@strURL	NVARCHAR(MAX)
 AS 
 BEGIN
-	DECLARE @strNumber		NVARCHAR(100),
-			@intEntityId	INT,
-			@strEntityName	NVARCHAR(200),
-			@body			NVARCHAR(MAX) = '',
-			@Subject		NVARCHAR(MAX) = '',
-			@Filter			NVARCHAR(MAX) = '',
-			@strIds			NVARCHAR(MAX),
-			@intUniqueId	INT,
-			@Id				INT,
-			@routeScreen	NVARCHAR(50),
-			@intSalespersonId INT,
-			@strDefaultContractReport NVARCHAR(50),
-			@strThanks		NVARCHAR(MAX) = 'Thank you for your business.'
+	DECLARE @strNumber					NVARCHAR(100),
+			@intEntityId				INT,
+			@strEntityName				NVARCHAR(200),
+			@body						NVARCHAR(MAX) = '',
+			@Subject					NVARCHAR(MAX) = '',
+			@Filter						NVARCHAR(MAX) = '',
+			@strIds						NVARCHAR(MAX),
+			@intUniqueId				INT,
+			@Id							INT,
+			@routeScreen				NVARCHAR(50),
+			@intSalespersonId			INT,
+			@strDefaultContractReport	NVARCHAR(50),
+			@strCustomerContract		NVARCHAR(50),
+			@strThanks					NVARCHAR(MAX) = 'Thank you for your business.'
 
 	SELECT @strDefaultContractReport = strDefaultContractReport FROM tblCTCompanyPreference
 
@@ -30,6 +31,12 @@ BEGIN
 	)
 
 	IF @strMailType = 'Contract'
+	BEGIN
+		SET @routeScreen = 'Contract'
+		INSERT INTO @loop
+		SELECT intContractHeaderId,intEntityId,strContractNumber,intSalespersonId FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
+	END
+	ELSE IF @strMailType = 'Sample Instruction'
 	BEGIN
 		SET @routeScreen = 'Contract'
 		INSERT INTO @loop
@@ -80,6 +87,12 @@ BEGIN
 
 	SET @Subject = @strMailType + ' - ' + @strNumber
 
+	IF @strMailType = 'Sample Instruction'
+	BEGIN
+		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Sample Instruction - Your ref. no. ' + @strCustomerContract
+	END
+
 	IF	@strDefaultContractReport	=	'ContractJDE' AND @strMailType = 'Price Contract'
 	BEGIN
 		SET @strMailType = 'Price Fixation'
@@ -89,14 +102,23 @@ BEGIN
 	SET @body +='<!DOCTYPE html>'
 	SET @body +='<html>'
 	SET @body +='<body>Dear <strong>'+@strEntityName+'</strong>, <br><br>'
-	SET @body +='Please use the link below to open your ' + LOWER(@strMailType) + '. <br><br>'
-	
-	SELECT @intUniqueId = MIN(intUniqueId) FROM @loop
-	WHILE ISNULL(@intUniqueId,0) > 0
+
+	IF @strMailType <> 'Sample Instruction'
 	BEGIN
-		SELECT	@Id = Id,@strNumber = strNumber FROM @loop WHERE intUniqueId = @intUniqueId
-		SELECT  @body += '<p><a href="'+@strURL+'#/CT/'+@routeScreen+'?routeId='+LTRIM(@Id)+'">'+@strMailType+' - '+@strNumber+'</a></p>'
-		SELECT	@intUniqueId = MIN(intUniqueId) FROM @loop WHERE intUniqueId > @intUniqueId
+		SET @body +='Please use the link below to open your ' + LOWER(@strMailType) + '. <br><br>'
+	
+		SELECT @intUniqueId = MIN(intUniqueId) FROM @loop
+		WHILE ISNULL(@intUniqueId,0) > 0
+		BEGIN
+			SELECT	@Id = Id,@strNumber = strNumber FROM @loop WHERE intUniqueId = @intUniqueId
+			SELECT  @body += '<p><a href="'+@strURL+'#/CT/'+@routeScreen+'?routeId='+LTRIM(@Id)+'">'+@strMailType+' - '+@strNumber+'</a></p>'
+			SELECT	@intUniqueId = MIN(intUniqueId) FROM @loop WHERE intUniqueId > @intUniqueId
+		END
+	END
+	
+	IF @strMailType = 'Sample Instruction'
+	BEGIN
+		SELECT  @body += 'please find attached the sample instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
 	END
 
 	SET @body += '<br>'

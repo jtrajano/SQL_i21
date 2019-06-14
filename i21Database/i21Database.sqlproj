@@ -7602,6 +7602,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateDailyAveragePrice.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportSampleInstruction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
