@@ -25,6 +25,7 @@ DECLARE @intPaycheckId INT
 		,@DIRECT_DEPOSIT INT = 23
 		,@BankTransactionTable BankTransactionTable
 		,@BankTransactionDetail BankTransactionDetailTable
+		,@dblGross AS NUMERIC(18,6)
 
 /* Get Paycheck Details */
 SELECT @intPaycheckId = intPaycheckId
@@ -35,6 +36,7 @@ SELECT @intPaycheckId = intPaycheckId
 	  ,@intBankAccountId = intBankAccountId
 	  ,@ysnPaycheckPosted = ysnPosted
 	  ,@intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END
+	  ,@dblGross = dblGross
 FROM tblPRPaycheck 
 WHERE strPaycheckId = @strPaycheckId
 
@@ -902,9 +904,13 @@ END
 -- Check if amount is zero. 
 IF @dblAmount <= 0 AND @ysnPost = 1 AND @ysnRecap = 0
 BEGIN 
-	-- Cannot post a zero-value transaction.
-	RAISERROR('Cannot post a zero-value transaction.', 11, 1)
-	GOTO Post_Rollback
+	IF (@dblAmount < 0 OR (@dblAmount = 0 AND  @dblGross <= 0) )
+	
+	BEGIN
+		-- Cannot post a zero-value transaction.
+		RAISERROR('Cannot post a zero-value transaction.', 11, 1)
+		GOTO Post_Rollback
+	END	
 END 
 
 -- Check if transaction is under check printing. 
