@@ -7338,6 +7338,7 @@
     <Build Include="dbo\User Defined Types\InventoryUpdateBillQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateBillQty.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryInTransit.sql" />
+    <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
