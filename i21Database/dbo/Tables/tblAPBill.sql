@@ -29,6 +29,7 @@
     [dtmDatePaid]          DATETIME        NULL ,
 	[dtmApprovalDate]       DATETIME        NULL ,
     [dtmDiscountDate]      DATETIME        NULL,
+	[dtmInterestDate]      DATETIME        NULL,
 	[dtmDeferredInterestDate]      DATETIME        NULL,
 	[dtmInterestAccruedThru]      DATETIME        NULL,
     [intUserId]            INT             NULL,
