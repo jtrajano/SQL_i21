@@ -180,17 +180,40 @@ BEGIN
 		--// END CHECK if stores has address
 
 
+
 		--// START CHECK if Stores has department
-		IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strDepartment = '' OR strDepartment IS NULL))
-		BEGIN
-			SELECT @strStatusMsg = COALESCE(@strStatusMsg + ',','') + strDescription FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strDepartment = '' OR strDepartment IS NULL)
-			SET @strCSVHeader = ''
-			SET @intVendorAccountNumber = 0
-			SET @strStatusMsg = @strStatusMsg + ' does not have department'
+		IF EXISTS(SELECT TOP 1 1 
+					FROM tblSTStore ST 
+					LEFT JOIN tblSTStoreRebates Rebate
+						ON ST.intStoreId = Rebate.intStoreId
+					WHERE ST.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+						AND Rebate.intStoreId IS NULL)
+			BEGIN
+				SELECT @strStatusMsg = COALESCE(@strStatusMsg + ',','') + ST.strDescription 
+				FROM tblSTStore ST 
+				LEFT JOIN tblSTStoreRebates Rebate
+					ON ST.intStoreId = Rebate.intStoreId
+				WHERE ST.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+					AND Rebate.intStoreId IS NULL
+				
+				SET @strCSVHeader = ''
+				SET @intVendorAccountNumber = 0
+				SET @strStatusMsg = @strStatusMsg + ' does not have department'
 			
-			RETURN
-		END
+				RETURN
+			END
+
+		--IF EXISTS(SELECT * FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strDepartment = '' OR strDepartment IS NULL))
+		--	BEGIN
+		--		SELECT @strStatusMsg = COALESCE(@strStatusMsg + ',','') + strDescription FROM tblSTStore WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND (strDepartment = '' OR strDepartment IS NULL)
+		--		SET @strCSVHeader = ''
+		--		SET @intVendorAccountNumber = 0
+		--		SET @strStatusMsg = @strStatusMsg + ' does not have department'
+			
+		--		RETURN
+		--	END
 		--// START CHECK if Stores has department
+
 
 
 		DECLARE @Delimiter CHAR(1)
@@ -336,12 +359,17 @@ BEGIN
 									) TRR 
 									WHERE TRR.rn = 1	
 							) TR
-							JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-							JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
-							JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
-							LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
-									AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-									--AND TR.strTrpPaycode IN ('Change', 'CREDIT') ST-680
+							JOIN tblSTStore ST 
+								ON ST.intStoreId = TR.intStoreId
+							JOIN tblEMEntity EM 
+								ON EM.intEntityId = @intVendorId
+							JOIN tblAPVendor APV 
+								ON APV.intEntityId = EM.intEntityId
+							-- CROSS APPLY dbo.fnSTRebateDepartment(@strStoreIdList) Rebate
+							LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
+								ON TR.strTrlUPC = CRP.strLongUPCCode 
+								AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
+								--AND TR.strTrpPaycode IN ('Change', 'CREDIT') ST-680
 							LEFT JOIN
 							(
 								SELECT [intID] 
@@ -349,10 +377,11 @@ BEGIN
 								GROUP BY [intID]
 							) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 							WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
-							AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
-							AND TR.ysnPMMSubmitted = CAST(0 AS BIT)
-							AND TR.strTrpPaycode != 'Change' --ST-680
-							AND TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
+								AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
+								AND TR.ysnPMMSubmitted = CAST(0 AS BIT)
+								AND TR.strTrpPaycode != 'Change' --ST-680
+								AND TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
+								-- AND TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
 
 							-- Check if has record
@@ -541,7 +570,8 @@ BEGIN
 									WHERE TRR.rn = 1		
 									AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
 								) TR
-								JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
+								JOIN tblSTStore ST 
+									ON ST.intStoreId = TR.intStoreId
 								LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
 									ON (TR.strTrlUPC = CRP.strLongUPCCode OR TR.strTrlUPC = CRP.intLongUpcCode)
 									AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
@@ -551,9 +581,10 @@ BEGIN
 									FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
 									GROUP BY [intID]
 								) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
-								WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
-								AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
-								AND TR.ysnRJRSubmitted = CAST(0 AS BIT)
+								WHERE TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
+								    --TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
+									AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
+									AND TR.ysnRJRSubmitted = CAST(0 AS BIT)
 
 								-- Check if has record
 								IF EXISTS(select * from @tblTempRJR)

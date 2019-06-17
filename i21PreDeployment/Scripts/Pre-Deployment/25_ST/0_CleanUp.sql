@@ -1,4 +1,5 @@
-﻿PRINT('ST Cleanup - Start')
+﻿PRINT('')
+PRINT('*** ST Cleanup - Start ***')
 
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Handheld Scanner Clean Up
@@ -330,4 +331,15 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Comm
 -- End: Rename Commander - Trans Log to Commander - Transaction Log Rebates
 ----------------------------------------------------------------------------------------------------------------------------------
 
-PRINT('ST Cleanup - End')
+
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTRetailAccount') 
+	BEGIN
+		PRINT(N'Drop table tblSTRetailAccount')
+		EXEC('
+				DROP TABLE tblSTRetailAccount
+			')
+	END
+
+PRINT('*** ST Cleanup - End ***')
+PRINT('')

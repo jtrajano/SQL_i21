@@ -6102,7 +6102,6 @@
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDefaultFutureMarketInfoByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI940.sql" />
-    <Build Include="dbo\Tables\tblSTRetailAccount.sql" />
     <Build Include="dbo\Functions\fnSTRebateDepartment.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRebatePreviewSubmission.sql" />
     <None Include="Scripts\Post-Deployment\CT\174To181.sql" />
@@ -7603,6 +7602,7 @@
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportSampleInstruction.sql" />
+    <Build Include="dbo\Tables\tblSTStoreRebates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
