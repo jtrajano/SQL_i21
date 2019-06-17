@@ -10,6 +10,7 @@ SELECT Detail.intDailyAveragePriceDetailId
 	, Header.strBook
 	, Header.intSubBookId
 	, Header.strSubBook
+	, Header.ysnPosted
     , Detail.intFutureMarketId
 	, strFutureMarket = Market.strFutMarketName
     , Detail.intCommodityId

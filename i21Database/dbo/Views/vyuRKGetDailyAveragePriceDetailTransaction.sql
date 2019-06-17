@@ -11,6 +11,7 @@ SELECT Trans.intDailyAveragePriceDetailTransactionId
 	, Detail.strBook
 	, Detail.intSubBookId
 	, Detail.strSubBook
+	, Detail.ysnPosted
     , Detail.intFutureMarketId
 	, Detail.strFutureMarket
     , Detail.intCommodityId

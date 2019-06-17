@@ -18,7 +18,7 @@ GO
 	--    EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteCalculateMonthlyInterest')
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote Report' AND strModuleName = 'Transports' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Transports') AND strCommand = N'AccountsReceivable.view.BatchPrinting') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Entity Producer Map' AND strModuleName = 'Contract Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.EntityProducerMap') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cashier Report' AND strModuleName = 'Store' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Report' AND strModuleName = 'Store') AND strCommand = N'Store.view.CashierReport') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Average Price' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Derivative' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.DailyAveragePrice') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3412,6 +3412,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Basis Ent
 	VALUES (N'Basis Entry', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Basis Entry', N'Derivative', N'Screen', N'RiskManagement.view.BasisEntry?showSearch=true', N'small-menu-derivative', 0, 0, 0, 1, 7, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'RiskManagement.view.BasisEntry?showSearch=true' WHERE strMenuName = 'Basis Entry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Average Price' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Daily Average Price', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Daily Average Price', N'Derivative', N'Screen', N'RiskManagement.view.DailyAveragePrice?showSearch=true', N'small-menu-derivative', 0, 0, 0, 1, 8, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'RiskManagement.view.DailyAveragePrice?showSearch=true' WHERE strMenuName = 'Daily Average Price' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Consolidated Profit/Loss' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
