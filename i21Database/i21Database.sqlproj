@@ -7603,6 +7603,7 @@
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportSampleInstruction.sql" />
     <Build Include="dbo\Tables\tblSTStoreRebates.sql" />
+    <Build Include="dbo\Tables\tblCTIntrCompApproval.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
