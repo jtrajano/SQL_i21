@@ -1,4 +1,5 @@
-﻿PRINT('ST Cleanup - Start')
+﻿PRINT('')
+PRINT('*** ST Cleanup - Start ***')
 
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Handheld Scanner Clean Up
@@ -313,4 +314,32 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTSto
 			')
 	END
 
-PRINT('ST Cleanup - End')
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Rename Commander - Trans Log to Commander - Transaction Log Rebates
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Commander - Trans Log') 
+	BEGIN
+		PRINT(N'Renaming Commander - Trans Log	to	Commander - Transaction Log Rebate')
+		EXEC('
+				UPDATE tblSMImportFileHeader
+				SET strLayoutTitle = ''Commander - Transaction Log Rebate''
+				WHERE strLayoutTitle = ''Commander - Trans Log''
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Rename Commander - Trans Log to Commander - Transaction Log Rebates
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTRetailAccount') 
+	BEGIN
+		PRINT(N'Drop table tblSTRetailAccount')
+		EXEC('
+				DROP TABLE tblSTRetailAccount
+			')
+	END
+
+PRINT('*** ST Cleanup - End ***')
+PRINT('')

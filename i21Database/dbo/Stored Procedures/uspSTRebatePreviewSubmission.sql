@@ -224,10 +224,11 @@ BEGIN
 					GROUP BY [intID]
 				) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 				WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
-				AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
-				AND TR.ysnPMMSubmitted = 0
-				AND TR.strTrpPaycode != 'Change' --ST-680
-				AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
+					AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
+					AND TR.ysnPMMSubmitted = 0
+					AND TR.strTrpPaycode != 'Change' --ST-680
+					AND TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
+					-- AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
 				DELETE FROM @tempTable
 				INSERT INTO @tempTable
@@ -380,7 +381,8 @@ BEGIN
 						FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
 						GROUP BY [intID]
 					) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
-					WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
+					WHERE TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
+					-- WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
 				--SELECT * FROM @tblTempRJR RJ
 				
