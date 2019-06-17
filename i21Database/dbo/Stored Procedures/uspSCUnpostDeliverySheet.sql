@@ -186,6 +186,8 @@ BEGIN TRY
 							,@ysnDistribute = 1
 							,@newBalance = @newBalance OUT
 
+					EXEC uspGRDeleteStorageHistory @strSourceType = 'StorageAdjustment' ,@IntSourceKey = @intCustomerStorageId
+
 					FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId;
 				END
 				CLOSE splitCursor;  
