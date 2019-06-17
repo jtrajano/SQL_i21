@@ -271,7 +271,8 @@ BEGIN
 												(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END) )
 											END
 											)
-					,dblCurrentBudget = ISNULL(G.dblBudgetAmount,0.0)
+					--,dblCurrentBudget = ISNULL(G.dblBudgetAmount,0.0)
+					,dblCurrentBudget = ISNULL(K.dblMonthlyBudget,0.0)
 				INTO #tmpStage1
 				FROM tblTMSite A
 				INNER JOIN tblTMCustomer B
