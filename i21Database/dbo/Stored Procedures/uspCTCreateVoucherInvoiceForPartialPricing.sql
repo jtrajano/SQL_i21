@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateVoucherInvoiceForPartialPricing]
 		
 	@intContractDetailId	INT,
-	@intUserId				INT = NULL
+	@intUserId				INT = NULL,
+	@ysnDoUpdateCost		BIT = 0
 	
 AS
 
@@ -13,6 +14,7 @@ BEGIN TRY
 			@strReceiptNumber				NVARCHAR(50),
 			@intLastModifiedById			INT,
 			@intInventoryReceiptId			INT,
+			@intSourceTicketId				INT,
 			@intPricingTypeId				INT,
 			@intContractHeaderId			INT,
 			@ysnOnceApproved				BIT,
@@ -306,6 +308,7 @@ BEGIN TRY
 
 				SELECT	@intUniqueId = MIN(intUniqueId)  FROM @tblToProcess 
 			 
+				IF EXISTS (SELECT TOP 1 1 FROM @tblToProcess)
 				WHILE	ISNULL(@intUniqueId,0) > 0 
 				BEGIN
 					SELECT	@intInventoryReceiptId = intInventoryId, @dblQtyToBill = dblQty, @intInventoryReceiptItemId = intInventoryItemId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId	
@@ -450,8 +453,37 @@ BEGIN TRY
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 				END	
+				ELSE
+					IF(@ysnDoUpdateCost = 1)
+					BEGIN
+						IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL)
+						BEGIN 
+							SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+				    
+							SELECT  @ysnBillPosted = ysnPosted FROM tblAPBill WHERE intBillId = @intBillId
+													
 
-				SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
+							SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
+							IF ISNULL(@ysnBillPosted,0) = 1
+							BEGIN
+								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+							END
+							SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
+				    
+							--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
+
+							EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+
+							IF ISNULL(@ysnBillPosted,0) = 1
+							BEGIN
+								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+							END
+
+
+						END
+					END
+				
+				SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM #tblReceipt WHERE intInventoryReceiptItemId > @intInventoryReceiptItemId
 			END
 
 			SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId
