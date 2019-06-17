@@ -209,6 +209,7 @@ BEGIN
 		,intCreatedByUserId
 		,intContractHeaderId
 		,intContractDetailId
+		,strActualCostId
 	)
 	SELECT	intInventoryReceiptId = @intInventoryReturnId
 			,ri.intLineNo
@@ -287,6 +288,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,intContractHeaderId			= ri.intContractHeaderId
 			,intContractDetailId			= ri.intContractDetailId
+			,ri.strActualCostId
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			LEFT JOIN tblICItemLocation il

@@ -152,7 +152,7 @@ BEGIN
 		,[intSubLocationId] 				=	E2.intSubLocationId
 		,[intStorageLocationId] 			=	E2.intStorageLocationId
 		,[ysnIsStorage] 					=	0
-		,[strActualCostId] 					=	E1.strActualCostId
+		,[strActualCostId] 					=	E2.strActualCostId
 		,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
 		,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
 		,[strSourceTransactionId] 			=	E1.strReceiptNumber
