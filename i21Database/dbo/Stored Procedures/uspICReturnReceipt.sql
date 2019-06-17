@@ -199,6 +199,7 @@ BEGIN
 		,intSourceInventoryReceiptItemId
 		,intForexRateTypeId
 		,dblForexRate
+		,strActualCostId
 	)
 	SELECT	intInventoryReceiptId = @intInventoryReturnId
 			,ri.intLineNo
@@ -273,6 +274,7 @@ BEGIN
 			,intSourceInventoryReceiptItemId = ri.intInventoryReceiptItemId 
 			,ri.intForexRateTypeId
 			,ri.dblForexRate
+			,ri.strActualCostId
 	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 				ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			LEFT JOIN tblICItemLocation il
