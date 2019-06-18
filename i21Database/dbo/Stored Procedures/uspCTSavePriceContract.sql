@@ -156,7 +156,7 @@ BEGIN TRY
 
 		IF ISNULL(@intContractDetailId,0) > 0 
 		BEGIN
-			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1
 		END
 
 		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId

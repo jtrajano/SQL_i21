@@ -79,10 +79,7 @@ BEGIN
 			-- ================================================================================================================== 
 			-- START - Validate if Store has department setup for rebate
 			-- ================================================================================================================== 
-			IF EXISTS(SELECT TOP 1 1 
-			          FROM tblSTStore
-				      WHERE intStoreId = @intStoreId
-						AND (strDepartment = '' OR strDepartment IS NULL))
+			IF EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
 				BEGIN
 
 					INSERT INTO tblSTCheckoutErrorLogs 
@@ -94,20 +91,47 @@ BEGIN
 						, intCheckoutId
 						, intConcurrencyId
 					)
-					SELECT DISTINCT
+					SELECT
 						'Transaction Log' AS strErrorType
 						, 'No Department setup on selected Store. Need to setup for rebate.' AS strErrorMessage
 						, '' AS strRegisterTag
 						, '' AS strRegisterTagValue
 						, @intCheckoutId AS intCheckoutId
 						, 1 AS intConcurrencyId
-					FROM tblSTStore ST
-					WHERE ST.intStoreId = @intStoreId
-						AND (ST.strDepartment = '' OR ST.strDepartment IS NULL)
 
 					SET @intCountRows = 0
 					SET @strStatusMsg = 'No Department setup on selected Store. Need to setup for rebate.'
 				END
+
+			--IF EXISTS(SELECT TOP 1 1 
+			--          FROM tblSTStore
+			--	      WHERE intStoreId = @intStoreId
+			--			AND (strDepartment = '' OR strDepartment IS NULL))
+			--	BEGIN
+
+			--		INSERT INTO tblSTCheckoutErrorLogs 
+			--		(
+			--			strErrorType
+			--			, strErrorMessage 
+			--			, strRegisterTag
+			--			, strRegisterTagValue
+			--			, intCheckoutId
+			--			, intConcurrencyId
+			--		)
+			--		SELECT DISTINCT
+			--			'Transaction Log' AS strErrorType
+			--			, 'No Department setup on selected Store. Need to setup for rebate.' AS strErrorMessage
+			--			, '' AS strRegisterTag
+			--			, '' AS strRegisterTagValue
+			--			, @intCheckoutId AS intCheckoutId
+			--			, 1 AS intConcurrencyId
+			--		FROM tblSTStore ST
+			--		WHERE ST.intStoreId = @intStoreId
+			--			AND (ST.strDepartment = '' OR ST.strDepartment IS NULL)
+
+			--		SET @intCountRows = 0
+			--		SET @strStatusMsg = 'No Department setup on selected Store. Need to setup for rebate.'
+			--	END
 			-- ==================================================================================================================  
 			-- END - Validate if Store has department setup for rebate 
 			-- ==================================================================================================================

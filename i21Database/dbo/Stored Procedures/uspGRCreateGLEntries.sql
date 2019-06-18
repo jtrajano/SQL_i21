@@ -233,7 +233,7 @@ BEGIN
 	JOIN tblICItem IC 
 		ON IC.intItemId = GR.intItemId
 	WHERE RE.intSettleStorageId = @intSettleStorageId 
-			AND ISNULL(QM.dblDiscountAmount,0) <> ISNULL(QM.dblDiscountPaid,0)
+			AND ISNULL(QM.dblDiscountDue,0) <> ISNULL(QM.dblDiscountPaid,0)
 	
 	UNION
 
@@ -287,7 +287,7 @@ BEGIN
 	JOIN tblICItem IC 
 		ON IC.intItemId = GR.intItemId
 	WHERE SST.intSettleStorageId = @intSettleStorageId 
-		  AND ISNULL(QM.dblDiscountAmount,0) <> ISNULL(QM.dblDiscountPaid,0)
+		  AND ISNULL(QM.dblDiscountDue,0) <> ISNULL(QM.dblDiscountPaid,0)
 		  AND SS.dblSpotUnits > 0
 
 	UNION

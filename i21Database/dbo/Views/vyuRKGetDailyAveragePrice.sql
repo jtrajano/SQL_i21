@@ -9,6 +9,7 @@ SELECT Header.intDailyAveragePriceId
 	, Book.strBook
 	, Header.intSubBookId
 	, SubBook.strSubBook
+	, ysnPosted = ISNULL(Header.ysnPosted, 0)
 FROM tblRKDailyAveragePrice Header
 LEFT JOIN tblCTBook Book ON Book.intBookId = Header.intBookId
 LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Header.intSubBookId

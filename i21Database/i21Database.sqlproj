@@ -4295,6 +4295,7 @@
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnICGetScaleTicketIdForShipmentCharge.sql" />
     <Build Include="dbo\Views\vyuICShipmentChargesForBilling.sql" />
+    <Build Include="dbo\Views\vyuICShipmentChargesPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspICSaveReceiptInspection.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateTableReceiptInspection.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPnLBySalesContractResult.sql" />
@@ -6102,7 +6103,6 @@
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI943.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetDefaultFutureMarketInfoByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspMFErrorNotificationEDI940.sql" />
-    <Build Include="dbo\Tables\tblSTRetailAccount.sql" />
     <Build Include="dbo\Functions\fnSTRebateDepartment.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRebatePreviewSubmission.sql" />
     <None Include="Scripts\Post-Deployment\CT\174To181.sql" />
@@ -7604,6 +7604,8 @@
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportSampleInstruction.sql" />
     <Build Include="dbo\Functions\fnCTGetShipmentStatus.sql" />
+    <Build Include="dbo\Tables\tblSTStoreRebates.sql" />
+    <Build Include="dbo\Tables\tblCTIntrCompApproval.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

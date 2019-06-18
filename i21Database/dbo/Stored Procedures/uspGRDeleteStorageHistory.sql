@@ -7,7 +7,7 @@ BEGIN TRY
 	
 	    IF  @strSourceType = 'InventoryShipment'
 		BEGIN
-			DELETE FROM tblGRStorageHistory Where intInventoryShipmentId=@IntSourceKey 
+			DELETE FROM tblGRStorageHistory Where intInventoryShipmentId=@IntSourceKey			
 		END
 		IF  @strSourceType = 'Voucher'
 		BEGIN
@@ -121,8 +121,14 @@ BEGIN TRY
 
 			DELETE FROM tblGRStorageHistory WHERE intInvoiceId = @IntSourceKey 
 
-		END 
-
+		END		
+		--DELETE ALL Storage related Adjustment in HISTORY
+		IF @strSourceType = 'StorageAdjustment'
+		BEGIN
+			DELETE FROM tblGRStorageHistory 
+			WHERE intCustomerStorageId = @IntSourceKey
+				AND strPaidDescription LIKE '%Adj'
+		END
 END TRY
 BEGIN CATCH
 	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0

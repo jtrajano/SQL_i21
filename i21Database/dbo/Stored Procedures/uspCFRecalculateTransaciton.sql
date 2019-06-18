@@ -906,6 +906,31 @@ BEGIN
 	DECLARE @intLoopTaxClassID				INT
 	DECLARE @DisregardExemptionSetup		BIT
 
+
+	
+	------CLEAN TAX TABLE--------
+	DELETE FROM @tblCFOriginalTax				
+	DELETE FROM @tblCFCalculatedTax				
+	DELETE FROM @tblCFTransactionTax			
+	DELETE FROM @tblCFBackoutTax				
+	DELETE FROM @tblCFRemoteTax
+	DELETE FROM @tblCFRemoteOriginalTax
+	DELETE FROM @tblCFRemoteCalculatedTax		
+
+	DELETE FROM @tblCFOriginalTaxZeroQuantity				
+	DELETE FROM @tblCFCalculatedTaxZeroQuantity				
+	DELETE FROM @tblCFTransactionTaxZeroQuantity			
+	DELETE FROM @tblCFBackoutTaxZeroQuantity		
+				
+	DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
+	DELETE FROM @tblCFCalculatedTaxExempt						
+
+	DELETE FROM @LineItemTaxDetailStagingTable
+	SET @strTaxCodes = NULL
+	------CLEAN TAX TABLE--------
+	
+
+
 	DECLARE @ysnDisregardTaxExemption		BIT = 1
 	DECLARE @strSiteApplyExemption		NVARCHAR(5)
 	DECLARE @strNetworkApplyExemption	NVARCHAR(5)
@@ -6057,23 +6082,6 @@ BEGIN
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				SET @dblPrice = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0)
-				------CLEAN TAX TABLE--------
-				DELETE FROM @tblCFOriginalTax				
-				DELETE FROM @tblCFCalculatedTax				
-				DELETE FROM @tblCFTransactionTax			
-				DELETE FROM @tblCFBackoutTax				
-				DELETE FROM @tblCFRemoteTax					
-
-				DELETE FROM @tblCFOriginalTaxZeroQuantity				
-				DELETE FROM @tblCFCalculatedTaxZeroQuantity				
-				DELETE FROM @tblCFTransactionTaxZeroQuantity			
-				DELETE FROM @tblCFBackoutTaxZeroQuantity		
-				
-				DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
-				DELETE FROM @tblCFCalculatedTaxExempt						
-
-				DELETE FROM @LineItemTaxDetailStagingTable
-
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
@@ -6180,6 +6188,15 @@ BEGIN
 		DECLARE @dblLocalIndexRetailGrossPriceZeroQty NUMERIC(18,6)
 		SET @dblLocalIndexRetailGrossPriceZeroQty = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
 
+
+		IF(@ysnReRunCalcTax = 0)
+			BEGIN
+				SET @dblPrice = @dblLocalIndexRetailGrossPriceZeroQty
+				SET @ysnReRunCalcTax = 1
+				GOTO TAXCOMPUTATION
+			END
+		
+
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
 			SELECT @dblLocalIndexRetailGrossPrice = dbo.fnCFForceRounding(@dblLocalIndexRetailGrossPrice)
@@ -6200,6 +6217,7 @@ BEGIN
 
 	
 	END
+	
 	ELSE IF (LOWER(@strPriceBasis) = 'index fixed')
 		BEGIN
 
@@ -6224,6 +6242,7 @@ BEGIN
 		
 
 	END
+	
 	ELSE IF (CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0)
 		BEGIN
 		IF (@strTransactionType = 'Extended Remote' OR @strTransactionType = 'Local/Network')
@@ -6234,6 +6253,14 @@ BEGIN
 
 			DECLARE @dblPumpPriceAdjustmentGrossPriceZeroQty NUMERIC(18,6)
 			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = Round(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+
+
+			IF(@ysnReRunCalcTax = 0)
+			BEGIN
+				SET @dblPrice = @dblPumpPriceAdjustmentGrossPriceZeroQty
+				SET @ysnReRunCalcTax = 1
+				GOTO TAXCOMPUTATION
+			END
 
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
@@ -6264,23 +6291,6 @@ BEGIN
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				SET @dblPrice = ISNULL(@dblNetTransferCostZeroQuantity,0) + ISNULL(@dblAdjustments,0)
-				------CLEAN TAX TABLE--------
-				DELETE FROM @tblCFOriginalTax				
-				DELETE FROM @tblCFCalculatedTax				
-				DELETE FROM @tblCFTransactionTax			
-				DELETE FROM @tblCFBackoutTax				
-				DELETE FROM @tblCFRemoteTax					
-
-				DELETE FROM @tblCFOriginalTaxZeroQuantity				
-				DELETE FROM @tblCFCalculatedTaxZeroQuantity				
-				DELETE FROM @tblCFTransactionTaxZeroQuantity			
-				DELETE FROM @tblCFBackoutTaxZeroQuantity		
-				
-				DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
-				DELETE FROM @tblCFCalculatedTaxExempt						
-
-				DELETE FROM @LineItemTaxDetailStagingTable
-
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
@@ -6313,26 +6323,8 @@ BEGIN
 
 				SELECT @dblPrice = dbo.fnCFForceRounding((@dblPrice + (@totalCalculatedTaxZeroQuantity / @dblQuantity)))
 				SET @ysnBackoutDueToRouding  = 1
+				SET @ysnReRunCalcTax = 1
 				SET @ysnForceRounding = 0
-
-				------CLEAN TAX TABLE--------
-				 DELETE FROM @tblCFOriginalTax				
-				 DELETE FROM @tblCFCalculatedTax				
-				 DELETE FROM @tblCFTransactionTax			
-				 DELETE FROM @tblCFBackoutTax				
-				 DELETE FROM @tblCFRemoteTax					
-
-				 DELETE FROM @tblCFOriginalTaxZeroQuantity				
-				 DELETE FROM @tblCFCalculatedTaxZeroQuantity				
-				 DELETE FROM @tblCFTransactionTaxZeroQuantity			
-				 DELETE FROM @tblCFBackoutTaxZeroQuantity		
-				 
-				 DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
-				 DELETE FROM @tblCFCalculatedTaxExempt				
-
-				 DELETE FROM @LineItemTaxDetailStagingTable
-
-
 				GOTO TAXCOMPUTATION
 			END
 			ELSE
@@ -6354,34 +6346,7 @@ BEGIN
 	END
 
 
-	IF(ISNULL(@dblSpecialTax,0) > 0 
-	AND ( LOWER(@strPriceBasis) = 'index retail' OR LOWER(@strPriceBasis) = 'pump price adjustment' ) 
-	 )
-	BEGIN
-		IF(@ysnReRunCalcTax = 0)
-		BEGIN
-			------CLEAN TAX TABLE--------
-			DELETE FROM @tblCFOriginalTax				
-			DELETE FROM @tblCFCalculatedTax				
-			DELETE FROM @tblCFTransactionTax			
-			DELETE FROM @tblCFBackoutTax				
-			DELETE FROM @tblCFRemoteTax					
-
-			DELETE FROM @tblCFOriginalTaxZeroQuantity				
-			DELETE FROM @tblCFCalculatedTaxZeroQuantity				
-			DELETE FROM @tblCFTransactionTaxZeroQuantity			
-			DELETE FROM @tblCFBackoutTaxZeroQuantity		
-
-			DELETE FROM @tblCFCalculatedTaxExemptZeroQuantity				
-			DELETE FROM @tblCFCalculatedTaxExempt						
-
-			DELETE FROM @LineItemTaxDetailStagingTable
-
-			SET @ysnReRunCalcTax = 1 
-			SET @dblPrice = @dblPrice +  ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6)
-			GOTO TAXCOMPUTATION
-		END
-	END
+	
 
 	
 	---------------------------------------------------
