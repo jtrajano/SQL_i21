@@ -201,8 +201,24 @@ BEGIN
 				--------------------------------------
 				BEGIN 
 					UPDATE	Lot 
-					SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-							,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
+					SET		Lot.dblQty = dbo.fnCalculateLotQty(
+									Lot.intItemUOMId
+									, @intItemUOMId
+									, Lot.dblQty
+									, Lot.dblWeight
+									, @QtyOffset--@dblQty
+									, Lot.dblWeightPerQty
+								)
+							,Lot.dblWeight = 
+								dbo.fnCalculateLotWeight(
+									Lot.intItemUOMId
+									, Lot.intWeightUOMId
+									, @intItemUOMId
+									, Lot.dblWeight
+									, @QtyOffset--@dblQty
+									, Lot
+									.dblWeightPerQty
+								)
 					FROM	dbo.tblICLot Lot
 					WHERE	Lot.intItemLocationId = @intItemLocationId
 							AND Lot.intLotId = @intLotId
