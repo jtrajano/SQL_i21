@@ -51,7 +51,7 @@ BEGIN TRY
 		FROM tblCTContractAcknowledgementStage
 		WHERE intContractAcknowledgementStageId = @intContractAcknowledgementStageId
 
-		IF @strTransactionType = 'Sales Contract'
+		IF @strTransactionType = 'Sales Contract' or @strTransactionType = 'Purchase Contract'
 		BEGIN
 			
 			
@@ -175,12 +175,12 @@ BEGIN TRY
 				---UPDATE Feed Status in Acknowledgement
 				UPDATE tblCTContractAcknowledgementStage
 				SET strFeedStatus = 'Ack Processed'
-				WHERE intContractAcknowledgementStageId = intContractAcknowledgementStageId
+				WHERE intContractAcknowledgementStageId = @intContractAcknowledgementStageId
 		END
 
 		SELECT @intContractAcknowledgementStageId = MIN(intContractAcknowledgementStageId)
 		FROM tblCTContractAcknowledgementStage
-		WHERE intContractAcknowledgementStageId > intContractAcknowledgementStageId
+		WHERE intContractAcknowledgementStageId > @intContractAcknowledgementStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''
 	END

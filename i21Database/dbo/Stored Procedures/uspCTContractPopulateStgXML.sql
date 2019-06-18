@@ -1,34 +1,35 @@
-﻿CREATE PROCEDURE [dbo].[uspCTContractPopulateStgXML]
-	 @ContractHeaderId INT
+﻿CREATE PROCEDURE [dbo].[uspCTContractPopulateStgXML] @ContractHeaderId INT
 	,@intToEntityId INT
 	,@intCompanyLocationId INT
 	,@strToTransactionType NVARCHAR(100)
 	,@intToCompanyId INT
 	,@strRowState NVARCHAR(100)
+	,@ysnReplication BIT = 1
+	,@intToBookId int=NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE 
-		 @ErrMsg				 NVARCHAR(MAX)
-		,@strContractNumber		 NVARCHAR(100)
-		,@strHeaderXML			 NVARCHAR(MAX)
-		,@strHeaderCondition	 NVARCHAR(MAX)
-		,@strDetailXML			 NVARCHAR(MAX)
+	DECLARE @ErrMsg NVARCHAR(MAX)
+		,@strContractNumber NVARCHAR(100)
+		,@strHeaderXML NVARCHAR(MAX)
+		,@strHeaderCondition NVARCHAR(MAX)
+		,@strDetailXML NVARCHAR(MAX)
 		,@strContractDetailAllId NVARCHAR(MAX)
-		,@strCostXML			 NVARCHAR(MAX)
-		,@strDocumentXML		 NVARCHAR(MAX)
-		,@strConditionXML		 NVARCHAR(MAX)
-		,@strCertificationXML	 NVARCHAR(MAX)
-		,@strCostCondition		 NVARCHAR(MAX)
-		,@intContractStageId	 INT
-		,@intMultiCompanyId		 INT
+		,@strCostXML NVARCHAR(MAX)
+		,@strDocumentXML NVARCHAR(MAX)
+		,@strConditionXML NVARCHAR(MAX)
+		,@strCertificationXML NVARCHAR(MAX)
+		,@strCostCondition NVARCHAR(MAX)
+		,@intContractStageId INT
+		,@intMultiCompanyId INT
+		,@strObjectName NVARCHAR(50)
 
 	SET @intContractStageId = NULL
-	SET @strContractNumber  = NULL
-	SET @strHeaderXML		= NULL
+	SET @strContractNumber = NULL
+	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
-	SET @strDetailXML		= NULL
+	SET @strDetailXML = NULL
 
 	SELECT @strContractNumber = strContractNumber
 	FROM tblCTContractHeader
@@ -37,40 +38,33 @@ BEGIN TRY
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@ContractHeaderId)
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 
-		'tblCTContractHeader'
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblCTContractHeader'
+	ELSE
+		SELECT @strObjectName = 'vyuCTContractHeaderView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition
 		,@strHeaderXML OUTPUT
 		,NULL
 		,NULL
 
-	INSERT INTO tblCTContractStage 
-	(
-		intContractHeaderId
-		,strContractNumber
-		,strHeaderXML
-		,strRowState
-	)
-	SELECT 
-		 intContractHeaderId = @ContractHeaderId
-		,strContractNumber   = @strContractNumber
-		,strHeaderXML        = @strHeaderXML
-		,strRowState		 = @strRowState
-
 	SET @intContractStageId = SCOPE_IDENTITY();
-	---------------------------------------------Detail------------------------------------------
-	SET @strDetailXML = NULL
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 
-		'tblCTContractDetail'
+	---------------------------------------------Detail------------------------------------------
+	SELECT @strDetailXML = NULL
+		,@strObjectName = NULL
+
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblCTContractDetail'
+	ELSE
+		SELECT @strObjectName = 'vyuCTContractDetailView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition
 		,@strDetailXML OUTPUT
 		,NULL
 		,NULL
-
-	UPDATE tblCTContractStage
-	SET strDetailXML = ISNULL(strDetailXML, '') + @strDetailXML
-	WHERE intContractStageId = @intContractStageId
 
 	---------------------------------------------Cost-----------------------------------------------
 	SET @strCostXML = NULL
@@ -85,71 +79,106 @@ BEGIN TRY
 
 	SELECT @strCostCondition = 'intContractDetailId IN (' + LTRIM(@strContractDetailAllId) + ')'
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 
-		'tblCTContractCost'
+	SELECT @strObjectName = NULL
+
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblCTContractCost'
+	ELSE
+		SELECT @strObjectName = 'vyuCTContractCostView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strCostCondition
 		,@strCostXML OUTPUT
 		,NULL
 		,NULL
 
-	UPDATE tblCTContractStage
-	SET strCostXML = ISNULL(strCostXML, '') + @strCostXML
-	WHERE intContractStageId = @intContractStageId
-
 	-------------------------------------------------------------Document----------------------------------------
 	SELECT @strDocumentXML = NULL
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 
-		'tblCTContractDocument'
+	SELECT @strObjectName = NULL
+
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblCTContractDocument'
+	ELSE
+		SELECT @strObjectName = 'vyuCTContractDocumentView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition
 		,@strDocumentXML OUTPUT
 		,NULL
 		,NULL
 
-	UPDATE tblCTContractStage
-	SET strDocumentXML = ISNULL(strDocumentXML, '') + @strDocumentXML
-	WHERE intContractStageId = @intContractStageId
 	-------------------------------------------------------------Condition----------------------------------------
 	SELECT @strConditionXML = NULL
-	
-	EXEC [dbo].[uspCTGetTableDataInXML] 
-		'tblCTContractCondition'
+
+	SELECT @strObjectName = NULL
+
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblCTContractCondition'
+	ELSE
+		SELECT @strObjectName = 'vyuCTContractConditionView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition
 		,@strConditionXML OUTPUT
 		,NULL
 		,NULL
 
-	UPDATE tblCTContractStage
-	SET strConditionXML = ISNULL(strConditionXML, '') + @strConditionXML
-	WHERE intContractStageId = @intContractStageId
-
 	-------------------------------------------------------------Certification----------------------------------------
 	SELECT @strCertificationXML = NULL
-	
-	EXEC [dbo].[uspCTGetTableDataInXML] 
-		'tblCTContractCertification'
+
+	SELECT @strObjectName = NULL
+
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblCTContractCertification'
+	ELSE
+		SELECT @strObjectName = 'vyuCTContractCertification'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strCostCondition
 		,@strCertificationXML OUTPUT
 		,NULL
 		,NULL
 
-	UPDATE tblCTContractStage
-	SET strCertificationXML = ISNULL(strCertificationXML, '') + @strCertificationXML
-	WHERE intContractStageId = @intContractStageId
-
-
-	UPDATE  tblCTContractStage
-	SET		intEntityId			 = @intToEntityId
-		   ,intCompanyLocationId = @intCompanyLocationId
-		   ,strTransactionType   = @strToTransactionType
-		   ,intMultiCompanyId    = @intToCompanyId
-	WHERE  intContractStageId    = @intContractStageId
-
+	INSERT INTO tblCTContractStage (
+		intContractHeaderId
+		,strContractNumber
+		,strHeaderXML
+		,strRowState
+		,strDetailXML
+		,strCostXML
+		,strDocumentXML
+		,strConditionXML
+		,strCertificationXML
+		,intEntityId
+		,intCompanyLocationId
+		,strTransactionType
+		,intMultiCompanyId
+		,intToBookId
+		)
+	SELECT intContractHeaderId = @ContractHeaderId
+		,strContractNumber = @strContractNumber
+		,strHeaderXML = @strHeaderXML
+		,strRowState = @strRowState
+		,strDetailXML = @strDetailXML
+		,strCostXML = @strCostXML
+		,strDocumentXML = @strDocumentXML
+		,strConditionXML = @strConditionXML
+		,strCertificationXML = @strCertificationXML
+		,intEntityId = @intToEntityId
+		,intCompanyLocationId = @intCompanyLocationId
+		,strTransactionType = @strToTransactionType
+		,intMultiCompanyId = @intToCompanyId
+		,intToBookId=@intToBookId
 END TRY
 
 BEGIN CATCH
-
 	SET @ErrMsg = ERROR_MESSAGE()
-	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
 END CATCH
