@@ -319,6 +319,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTSto
 -- Start: Rename Commander - Trans Log to Commander - Transaction Log Rebates
 ----------------------------------------------------------------------------------------------------------------------------------
 IF EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Commander - Trans Log') 
+	AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Commander - Transaction Log Rebate')
 	BEGIN
 		PRINT(N'Renaming Commander - Trans Log	to	Commander - Transaction Log Rebate')
 		EXEC('
