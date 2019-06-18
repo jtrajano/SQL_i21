@@ -80,7 +80,8 @@ BEGIN
 	SELECT 
 		CS.intCustomerStorageId
 		,CS.intStorageScheduleId
-		,CASE WHEN @dblBalanceToAccrue = 0 THEN CS.dblOpenBalance ELSE @dblBalanceToAccrue END
+		--,CASE WHEN @dblBalanceToAccrue = 0 THEN CS.dblOpenBalance ELSE @dblBalanceToAccrue END
+		,CS.dblOpenBalance
 		,0
 		,0
 		,0
@@ -93,7 +94,7 @@ BEGIN
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 	WHERE CS.dblOpenBalance > 0
 		AND ST.ysnCustomerStorage = 0
-		AND CS.intCustomerStorageId = ISNULL(@intCustomerStorageIdParam,CS.intCustomerStorageId)
+		--AND CS.intCustomerStorageId = ISNULL(@intCustomerStorageIdParam,CS.intCustomerStorageId)
 	ORDER BY CS.dtmDeliveryDate
 
 	--SELECT @intBillStorageKey = MIN(intBillStorageKey)
