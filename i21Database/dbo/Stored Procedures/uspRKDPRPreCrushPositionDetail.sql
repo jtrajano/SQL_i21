@@ -145,6 +145,7 @@ BEGIN
 		, strInventoryType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intPricingTypeId int)
 
+
 	DECLARE @mRowNumber INT
 	DECLARE @intCommodityId1 INT
 	DECLARE @strDescription NVARCHAR(50)
@@ -173,6 +174,66 @@ BEGIN
 
 		IF @intCommodityId > 0
 		BEGIN
+
+			IF OBJECT_ID('tempdb..#tblGetSalesIntransitWOPickLot') IS NOT NULL
+				DROP TABLE #tblGetSalesIntransitWOPickLot
+			--=============================
+			-- Sales In Transit w/o Pick Lot
+			--=============================
+			SELECT strShipmentNumber
+				, intInventoryShipmentId
+				, strContractNumber
+				, intContractHeaderId
+				, intCompanyLocationId
+				, strLocationName
+				, dblBalanceToInvoice 
+				, intEntityId
+				, strCustomerReference 
+				, dtmTicketDateTime
+				, intTicketId
+				, strTicketNumber
+				, intCommodityId
+				, intItemId
+				, strItemNo
+				, strCategory
+				, intCategoryId
+				, strContractEndMonth
+				, strFutureMonth
+				, strDeliveryDate
+			INTO #tblGetSalesIntransitWOPickLot
+			FROM(
+				SELECT 
+					 strShipmentNumber = InTran.strTransactionId
+					,intInventoryShipmentId = InTran.intTransactionId
+					,strContractNumber = SI.strOrderNumber + '-' + CONVERT(NVARCHAR, SI.intContractSeq) COLLATE Latin1_General_CI_AS 
+					,intContractHeaderId = SI.intOrderId 
+					,strTicketNumber = SI.strSourceNumber
+					,intTicketId = SI.intSourceId
+					,dtmTicketDateTime = InTran.dtmDate
+					,intCompanyLocationId = InTran.intItemLocationId
+					,strLocationName = SI.strShipFromLocation
+					,strUOM = InTran.strUnitMeasure
+					,Inv.intEntityId
+					,strCustomerReference = SI.strCustomerName
+					,Com.intCommodityId
+					,Itm.intItemId
+					,Itm.strItemNo
+					,strCategory = Cat.strCategoryCode
+					,Cat.intCategoryId
+					,dblBalanceToInvoice = InTran.dblInTransitQty
+					,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), InTran.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
+					,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblCTContractDetail cd INNER JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId =  fmnt.intFutureMonthId WHERE intContractHeaderId = SI.intLineNo)
+					,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
+				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToDate) InTran
+					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+					INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
+					INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
+					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
+					LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+					AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END				
+			)t
+
 			DECLARE @tblGetOpenContractDetail TABLE (intRowNum INT
 				, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 				, intCommodityId INT
@@ -745,6 +806,7 @@ BEGIN
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
+	
 			
 			--=========================================
 			-- Includes DP based on Company Preference
@@ -840,6 +902,8 @@ BEGIN
 					, intFromCommodityUnitMeasureId
 			END
 
+
+
 			INSERT INTO @FinalList(intContractHeaderId
 				, strContractNumber
 				, intCommodityId
@@ -933,7 +997,8 @@ BEGIN
 					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
 					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
 			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				
+			
+						
 			INSERT INTO @FinalList(intContractHeaderId
 				, strContractNumber
 				, intCommodityId
@@ -1046,6 +1111,76 @@ BEGIN
 				, strFutureMonth
 				, strDeliveryDate
 				, strTicketNumber
+
+			IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference) = 1)
+				BEGIN
+			INSERT INTO @InventoryStock(strCommodityCode
+										, dblTotal
+										, strLocationName
+										, intCommodityId
+										, intFromCommodityUnitMeasureId
+										, strInventoryType)
+
+					SELECT 
+						  strCommodityCode
+						, dblTotal = SUM(dblTotal)
+						, strLocationName
+						, @intCommodityId
+						, intFromCommodityUnitMeasureId
+						, strInventoryType = 'Purchase In-Transit' COLLATE Latin1_General_CI_AS
+					FROM (
+						SELECT i.intUnitMeasureId
+							, dblTotal = ISNULL(i.dblPurchaseContractShippedQty, 0)
+							, i.strLocationName
+							, i.intItemId
+							, i.strItemNo
+							, i.intCompanyLocationId, 
+							c.strCommodityCode,
+							c.intCommodityId,
+							intFromCommodityUnitMeasureId= @intCommodityUnitMeasureId
+						FROM vyuRKPurchaseIntransitView i
+						join tblICCommodity c on i.intCommodityId=c.intCommodityId
+						WHERE i.intCommodityId = @intCommodityId
+							AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
+							AND i.intPurchaseSale = 1 -- 1.Purchase 2. Sales
+							AND i.intEntityId = ISNULL(@intVendorId, i.intEntityId)					
+					) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					GROUP BY strCommodityCode
+					, strLocationName
+					, intCommodityId
+					, intFromCommodityUnitMeasureId
+
+				INSERT INTO @InventoryStock(strCommodityCode
+										, dblTotal
+										, strLocationName
+										, intCommodityId
+										, intFromCommodityUnitMeasureId
+										, strInventoryType)
+					SELECT 
+						  strCommodityCode
+						, dblTotal = SUM(dblTotal)
+						, strLocationName
+						, intCommodityId
+						, intFromCommodityUnitMeasureId
+						, strInventoryType = 'Sales In-Transit' COLLATE Latin1_General_CI_AS
+					FROM (
+						SELECT intFromCommodityUnitMeasureId= @intCommodityUnitMeasureId
+							, dblTotal = dblBalanceToInvoice
+							, i.strLocationName
+							, i.intCompanyLocationId
+							,c.strCommodityCode,
+							c.intCommodityId
+						FROM #tblGetSalesIntransitWOPickLot i						
+						join tblICCommodity c on i.intCommodityId=c.intCommodityId
+						WHERE i.intCommodityId = @intCommodityId
+					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
+					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @FinalList WHERE strType = 'Sales Basis Deliveries')			
+					) t GROUP BY strCommodityCode
+					, strLocationName
+					, intCommodityId
+					, intFromCommodityUnitMeasureId				
+
+				END
 		END
 		SELECT @mRowNumber = MIN(intCommodityIdentity)
 		FROM @Commodity
@@ -1306,7 +1441,7 @@ SELECT strCommodityCode
 	, 'Company Titled' COLLATE Latin1_General_CI_AS
 	, strInventoryType
 FROM @InventoryStock
-WHERE strInventoryType IN ('Company Titled', 'Collateral')
+WHERE strInventoryType IN ('Company Titled', 'Collateral','Purchase In-Transit','Sales In-Transit')
 
 
 INSERT INTO @List (strCommodityCode

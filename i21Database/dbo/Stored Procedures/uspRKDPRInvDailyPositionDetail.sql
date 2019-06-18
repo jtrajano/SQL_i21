@@ -2235,6 +2235,96 @@ BEGIN
 				, strTicketType
 				, strTicketNumber
 			FROM @Final WHERE strSeqHeader = 'In-House' AND strType = 'On-Hold'
+
+	--=========================================
+	-- Includes intransit based on Company Preference
+	--========================================
+
+IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference) = 1)
+			BEGIN
+				INSERT INTO @Final(intSeqId
+				, strSeqHeader
+				, strCommodityCode
+				, strType
+				, dblTotal
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, strShipmentNumber
+				, intInventoryShipmentId
+				, strCustomerReference
+				, intContractHeaderId
+				, strContractNumber
+				, intCommodityId
+				, intFromCommodityUnitMeasureId
+				, intCompanyLocationId
+				, dtmTicketDateTime
+				, intTicketId
+				, strTicketNumber
+				, strContractEndMonth
+				, strFutureMonth
+				, strDeliveryDate)
+			SELECT intSeqId = 15
+				, 'Company Titled Stock' COLLATE Latin1_General_CI_AS
+				, @strCommodityCode
+		        ,'Sales In-Transit' COLLATE Latin1_General_CI_AS
+				, dblTotal
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, strShipmentNumber
+				, intInventoryShipmentId
+				, strCustomerReference
+				, intContractHeaderId
+				, strContractNumber
+				, @intCommodityId
+				, @intCommodityUnitMeasureId
+				, intCompanyLocationId
+				, dtmTicketDateTime
+				, intTicketId
+				, strTicketNumber
+				, strContractEndMonth
+				, strFutureMonth
+				, strDeliveryDate
+			FROM @Final WHERE strSeqHeader = 'Sales In-Transit' AND strType = 'Sales In-Transit'
+
+		INSERT INTO @Final(intSeqId
+				, strSeqHeader
+				, strCommodityCode
+				, strType
+				, dblTotal
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, intContractHeaderId
+				, strContractNumber
+				, intCommodityId
+				, intFromCommodityUnitMeasureId
+				, strContractEndMonth)
+		select    intSeqId = 15
+				, 'Company Titled Stock' COLLATE Latin1_General_CI_AS
+				, @strCommodityCode
+				, strType = 'Purchase In-Transit' COLLATE Latin1_General_CI_AS
+				, dblTotal
+				, strLocationName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, intContractHeaderId
+				, strContractNumber
+				, @intCommodityId
+				, @intCommodityUnitMeasureId
+				, strContractEndMonth
+		FROM @Final WHERE strSeqHeader = 'Purchase In-Transit' AND strType = 'Purchase In-Transit'
+---------------- end
+			END
 		
 			DECLARE @intUnitMeasureId INT
 				, @strUnitMeasure NVARCHAR(250)
