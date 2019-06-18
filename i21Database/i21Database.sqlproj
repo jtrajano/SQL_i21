@@ -6624,6 +6624,7 @@
     <None Include="Scripts\Post-Deployment\GR\2_ScaleTrigger.sql" />
     <None Include="Scripts\Post-Deployment\LG\2_DataFixes.sql" />
     <None Include="Scripts\Post-Deployment\TM\6_SyncStartingNumberAndDispatchId.sql" />
+    <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
