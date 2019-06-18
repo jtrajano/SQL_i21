@@ -30,7 +30,8 @@ AS
 			,CP.strSignature
 			,CP.strDefPackingDescription
 			,CP.intDefContractStatusId
-			,CP.ysnBasisComponent
+			,CP.ysnBasisComponentPurchase
+			,CP.ysnBasisComponentSales
 			,CP.strAmendmentFields
 			,CP.ysnOutGoingContractFeed
 			,CP.ysnAlwaysMultiPrice
@@ -66,6 +67,8 @@ AS
 			,CP.ysnReduceScheduleByLogisticsLoad
 			,CP.ysnUniqueEntityReference
 			,CP.ysnAllowBasisComponentToAccrue
+			,CP.ysnAutoCreateDerivative
+			,CP.ysnEnableItemContracts
 			,strCleanCostUOM = U1.strUnitMeasure
 			,strCleanCostCurrency = C1.strCurrency
 			,strDefContractStatus = CS.strContractStatus
