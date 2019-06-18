@@ -4,7 +4,7 @@ AS
 SELECT
 	ISNULL(C.intVendorId, B.intCustomerEntityId) AS intEntityVendorId
 	,A.dtmPostedDate AS dtmDate
-	,A.strLoadNumber
+	,A.strLoadNumber AS strTransactionNumber
 	,A.intLoadId
 	,NULL AS intBillId
     ,NULL AS strBillId
@@ -21,7 +21,7 @@ SELECT
 	,B.intSCompanyLocationId AS intLocationId
 	,compLoc.strLocationName
 	,CAST((CASE WHEN receiptItem.intInventoryReceiptItemId > 0 THEN 0 ELSE 1 END) AS BIT) ysnAllowVoucher --allow voucher if there is no receipt
-	,intAccountId = GL.intAccountId
+	,GL.strAccountId
 FROM tblLGLoad A
 INNER JOIN tblLGLoadDetail B
 	ON A.intLoadId = B.intLoadId
@@ -29,7 +29,7 @@ INNER JOIN tblLGLoadCost C
 	ON A.intLoadId = C.intLoadId
 INNER JOIN tblSMCompanyLocation compLoc
     ON B.intSCompanyLocationId = compLoc.intCompanyLocationId
-CROSS APPLY (SELECT TOP 1 GLD.intAccountId FROM tblGLDetail GLD
+CROSS APPLY (SELECT TOP 1 GLD.intAccountId, GLA.strAccountId FROM tblGLDetail GLD
 				INNER JOIN tblGLAccount GLA ON GLA.intAccountId = GLD.intAccountId
 				INNER JOIN tblGLAccountGroup GLAG ON GLAG.intAccountGroupId = GLA.intAccountGroupId
 				INNER JOIN tblGLAccountCategory GLAC ON GLAC.intAccountCategoryId = GLAG.intAccountCategoryId
@@ -73,7 +73,7 @@ SELECT
 	,bill.intShipToId AS intLocationId
 	,compLoc.strLocationName
 	,1 --allow voucher if there is no receipt
-	,billDetail.intAccountId
+	,accnt.strAccountId
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
@@ -81,4 +81,6 @@ INNER JOIN (tblLGLoadDetail C INNER JOIN tblLGLoad D ON C.intLoadId = D.intLoadI
 	ON billDetail.intLoadDetailId = C.intLoadDetailId AND billDetail.intItemId = E.intItemId
 INNER JOIN tblSMCompanyLocation compLoc
     ON bill.intShipToId = compLoc.intCompanyLocationId
+INNER JOIN tblGLAccount accnt
+    ON accnt.intAccountId = billDetail.intAccountId
 WHERE bill.ysnPosted = 1

@@ -54,6 +54,7 @@ SELECT
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,CAST(CASE WHEN receiptItem.intOwnershipType = 2 THEN 0 ELSE 1 END AS BIT) AS ysnAllowVoucher
+    ,APClearing.intAccountId
 FROM tblICInventoryReceipt receipt 
 INNER JOIN tblICInventoryReceiptItem receiptItem
 	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
@@ -61,6 +62,27 @@ INNER JOIN tblSMCompanyLocation compLoc
     ON receipt.intLocationId = compLoc.intCompanyLocationId
 LEFT JOIN tblSMFreightTerms ft
     ON ft.intFreightTermId = receipt.intFreightTermId
+OUTER APPLY (
+	SELECT TOP 1
+		ga.strAccountId
+		,ga.intAccountId
+	FROM 
+		tblICInventoryTransaction t INNER JOIN tblGLDetail gd
+			ON t.strTransactionId = gd.strTransactionId
+			AND t.strBatchId = gd.strBatchId
+			AND t.intInventoryTransactionId = gd.intJournalLineNo
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = gd.intAccountId
+		INNER JOIN tblGLAccountGroup ag
+			ON ag.intAccountGroupId = ga.intAccountGroupId
+	WHERE
+		t.strTransactionId = receipt.strReceiptNumber
+		AND t.intTransactionId = receipt.intInventoryReceiptId
+		AND t.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+		AND t.intItemId = receiptItem.intItemId
+		AND ag.strAccountType = 'Liability'
+		AND t.ysnIsUnposted = 0 
+) APClearing
 WHERE 
     receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 --DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
@@ -149,6 +171,7 @@ SELECT
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,CAST(1 AS BIT) ysnAllowVoucher
+    ,billDetail.intAccountId
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
     ON bill.intBillId = billDetail.intBillId

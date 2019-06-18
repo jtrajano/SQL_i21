@@ -7349,6 +7349,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetInHouse.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
+    <Build Include="dbo\Views\vyuAPClearingFilterData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

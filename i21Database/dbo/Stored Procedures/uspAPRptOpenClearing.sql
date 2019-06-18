@@ -19,6 +19,8 @@ DECLARE @query NVARCHAR(MAX),
 DECLARE @dateFrom DATETIME = NULL;  
 DECLARE @dateTo DATETIME = NULL;  
 DECLARE @dtmDateTo DATETIME = NULL;  
+DECLARE @transactNumber NVARCHAR(100) = NULL;
+DECLARE @transactNumberTo NVARCHAR(100) = NULL;
 DECLARE @total NUMERIC(18,6),  
   @amountDue NUMERIC(18,6),   
   @amountPad NUMERIC(18,6);  
@@ -28,6 +30,9 @@ DECLARE @condition NVARCHAR(20)
 DECLARE @id INT   
 DECLARE @strBillId NVARCHAR(50)   
 DECLARE @strAccountId NVARCHAR(50)   
+DECLARE @strAccountIdTo NVARCHAR(50) 
+DECLARE @location NVARCHAR(50)   
+DECLARE @locationTo NVARCHAR(50)  
 DECLARE @strVendorIdName NVARCHAR(150)   
 DECLARE @strVendorId NVARCHAR(50)  
 DECLARE @strReceiptNumber NVARCHAR(50)  
@@ -242,7 +247,44 @@ BEGIN
 END  
   
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'  
-DELETE FROM @temp_xml_table  where [condition] = 'Dummy'  
+DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
+
+SELECT @transactNumber = [from], @transactNumberTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strTransactionNumber';  
+IF @transactNumber IS NOT NULL
+BEGIN
+  IF @condition = 'Equal To'  
+  BEGIN   
+    SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL THEN ' AND strTransactionNumber = ''' + @transactNumber + ''''   
+    ELSE ' WHERE strTransactionNumber = ''' + @transactNumber + '''' END   
+  END
+  ELSE
+  BEGIN
+    SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL   
+            THEN ' AND strTransactionNumber BETWEEN ''' + @transactNumber + ''' AND '''  + @transactNumberTo + ''''   
+          ELSE ' WHERE strTransactionNumber BETWEEN ''' + @transactNumber + ''' AND '''  + @transactNumberTo + ''''   
+          END
+  END
+END
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strTransactionNumber'  
+
+SELECT @strAccountId = [from], @strAccountIdTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';  
+IF @strAccountId IS NOT NULL
+BEGIN
+  IF @condition = 'Equal To'  
+  BEGIN   
+    SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL THEN ' AND strAccountId = ''' + @strAccountId + ''''   
+    ELSE ' WHERE strAccountId = ''' + @strAccountId + '''' END   
+  END
+  ELSE
+  BEGIN
+    SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL   
+            THEN ' AND strAccountId BETWEEN ''' + @strAccountId + ''' AND '''  + @strAccountIdTo + ''''   
+          ELSE ' WHERE strAccountId BETWEEN ''' + @strAccountId + ''' AND '''  + @strAccountIdTo + ''''   
+          END
+  END
+END
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'  
+
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)  
 BEGIN  
  SELECT @id = id,   
@@ -328,7 +370,7 @@ SET @cteQuery = N';WITH forClearing
      SELECT  
       dtmDate  
       ,intEntityVendorId  
-      ,strReceiptNumber  
+      ,strTransactionNumber  
       ,intInventoryReceiptId  
       ,intInventoryReceiptItemId  
       ,intItemId  
@@ -350,7 +392,7 @@ SET @cteQuery = N';WITH forClearing
      SELECT  
       dtmDate  
       ,intEntityVendorId  
-      ,strReceiptNumber  
+      ,strTransactionNumber  
       ,intInventoryReceiptId  
       ,intInventoryReceiptChargeId  
       ,intItemId  
@@ -372,7 +414,7 @@ SET @cteQuery = N';WITH forClearing
      SELECT  
       dtmDate  
       ,intEntityVendorId  
-      ,strShipmentNumber  
+      ,strTransactionNumber  
       ,intInventoryShipmentId  
       ,intInventoryShipmentChargeId  
       ,intItemId  
@@ -394,7 +436,7 @@ SET @cteQuery = N';WITH forClearing
 	SELECT  
       dtmDate  
       ,intEntityVendorId  
-      ,strLoadNumber  
+      ,strTransactionNumber  
       ,intLoadId  
       ,intLoadDetailId  
       ,intItemId  
@@ -416,7 +458,7 @@ SET @cteQuery = N';WITH forClearing
 	SELECT  
       dtmDate  
       ,intEntityVendorId  
-      ,strLoadNumber  
+      ,strTransactionNumber  
       ,intLoadId  
       ,intLoadDetailId  
       ,intItemId  
@@ -440,7 +482,7 @@ BEGIN
     (  
      SELECT  
       dtmDate  
-      ,strReceiptNumber  
+      ,strTransactionNumber  
       ,intEntityVendorId  
       ,intInventoryReceiptId  
       ,intInventoryReceiptItemId  
@@ -461,7 +503,7 @@ BEGIN
     (  
      SELECT  
       dtmDate  
-      ,strReceiptNumber  
+      ,strTransactionNumber  
       ,intEntityVendorId  
       ,intInventoryReceiptId  
       ,intInventoryReceiptChargeId  
@@ -483,7 +525,7 @@ BEGIN
      SELECT  
       dtmDate  
       ,intEntityVendorId  
-      ,strShipmentNumber  
+      ,strTransactionNumber  
       ,intInventoryShipmentId  
       ,intInventoryShipmentChargeId  
       ,intItemId  
@@ -504,7 +546,7 @@ BEGIN
      SELECT  
       dtmDate  
       ,intEntityVendorId  
-      ,strLoadNumber  
+      ,strTransactionNumber  
       ,intLoadId  
       ,intLoadDetailId  
       ,intItemId  
@@ -525,7 +567,7 @@ BEGIN
      SELECT  
       dtmDate  
       ,intEntityVendorId  
-      ,strLoadNumber  
+      ,strTransactionNumber  
       ,intLoadId  
       ,intLoadDetailId  
       ,intItemId  
@@ -655,6 +697,7 @@ SELECT * FROM (
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
   ,ISNULL(vendor.strVendorId,'''') + '' '' + ISNULL(entity.strName,'''') as strVendorIdName   
+  
   ,tmpAPOpenClearing.strLocationName
   ,tmpAPOpenClearing.dblReceiptQty AS dblQtyToReceive  
   ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
@@ -669,7 +712,7 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
-   ,B.strReceiptNumber  
+   ,B.strTransactionNumber  
    ,B.intInventoryReceiptId  
    ,B.intInventoryReceiptItemId  
    ,B.dblReceiptTotal  
@@ -682,7 +725,7 @@ SELECT * FROM (
   FROM forClearing B  
   GROUP BY   
    intEntityVendorId  
-   ,strReceiptNumber  
+   ,strTransactionNumber  
    ,intInventoryReceiptId  
    ,intInventoryReceiptItemId  
    ,intItemId  
@@ -791,7 +834,7 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
-   ,B.strReceiptNumber  
+   ,B.strTransactionNumber  
    ,B.intInventoryReceiptId  
    ,B.intInventoryReceiptChargeId  
    ,B.dblReceiptChargeTotal  
@@ -804,7 +847,7 @@ SELECT * FROM (
   FROM chargesForClearing B  
   GROUP BY   
    intEntityVendorId  
-   ,strReceiptNumber  
+   ,strTransactionNumber  
    ,intInventoryReceiptId  
    ,intInventoryReceiptChargeId  
    ,intItemId  
@@ -912,7 +955,7 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
-   ,B.strShipmentNumber  
+   ,B.strTransactionNumber  
    ,B.intInventoryShipmentId  
    ,B.intInventoryShipmentChargeId  
    ,B.dblReceiptChargeTotal  
@@ -925,7 +968,7 @@ SELECT * FROM (
   FROM shipmentChargesForClearing B  
   GROUP BY   
    intEntityVendorId  
-   ,strShipmentNumber  
+   ,strTransactionNumber  
    ,intInventoryShipmentId  
    ,intInventoryShipmentChargeId  
    ,intItemId  
@@ -1033,7 +1076,7 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
-   ,B.strLoadNumber  
+   ,B.strTransactionNumber  
    ,B.intLoadDetailId  
    ,B.intLoadId  
    ,B.dblLoadDetailTotal  
@@ -1047,7 +1090,7 @@ SELECT * FROM (
   FROM loadForClearing B  
   GROUP BY   
    intEntityVendorId  
-   ,strLoadNumber  
+   ,strTransactionNumber  
    ,intLoadId  
    ,intLoadDetailId  
    ,intItemId  
@@ -1155,7 +1198,7 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
-   ,B.strLoadNumber  
+   ,B.strTransactionNumber  
    ,B.intLoadDetailId  
    ,B.intLoadId  
    ,B.dblLoadCostDetailTotal  
@@ -1169,7 +1212,7 @@ SELECT * FROM (
   FROM loadCostForClearing B  
   GROUP BY   
    intEntityVendorId  
-   ,strLoadNumber  
+   ,strTransactionNumber  
    ,intLoadId  
    ,intLoadDetailId  
    ,intItemId  
