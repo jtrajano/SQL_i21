@@ -8,6 +8,7 @@ RETURNS @TempTableDepartments TABLE
 	, intCategoryId INT NULL
 	, strCategoryCode NVARCHAR(30) NULL
 	, strCategoryDescription NVARCHAR(150) NULL
+	, ysnTobacco BIT DEFAULT(0)
 )
 AS 
 BEGIN
@@ -23,6 +24,7 @@ BEGIN
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription
+				, ysnTobacco
 			)
 			SELECT 
 				strStatus							= 1
@@ -32,6 +34,7 @@ BEGIN
 				, intCategoryId						= Category.intCategoryId
 				, strCategoryCode					= Category.strCategoryCode
 				, strCategoryDescription			= Category.strDescription
+				, ysnTobacco						= Rebates.ysnTobacco
 			FROM tblSTStoreRebates Rebates
 			INNER JOIN tblSTStore Store
 				ON Rebates.intStoreId = Store.intStoreId
@@ -56,6 +59,7 @@ BEGIN
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription
+				, ysnTobacco
 			)
 			VALUES 
 			(
@@ -66,6 +70,7 @@ BEGIN
 				, NULL
 				, NULL
 				, NULL
+				, 0
 			)
 
 			RETURN
