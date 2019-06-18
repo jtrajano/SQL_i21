@@ -1,16 +1,17 @@
 ﻿CREATE VIEW [dbo].[vyuTRGetLoadReceiptToBlendIngredient]
 	AS
 
-SELECT DISTINCT TT.strTransaction
-	, TT.intLoadHeaderId
-	, RR.intLoadReceiptId
-	, RR.intItemId
-	, HH.strDestination
-	, dblQty = BI.dblQuantity
-FROM tblTRLoadHeader TT
-LEFT JOIN tblTRLoadReceipt RR ON TT.intLoadHeaderId = RR.intLoadHeaderId
-LEFT JOIN tblTRLoadDistributionHeader HH on HH.intLoadHeaderId = TT.intLoadHeaderId
-LEFT JOIN tblTRLoadDistributionDetail HD on HD.intLoadDistributionHeaderId = HH.intLoadDistributionHeaderId
-LEFT JOIN vyuTRGetLoadBlendIngredient BI ON BI.intLoadDistributionDetailId = HD.intLoadDistributionDetailId
-WHERE RR.strOrigin = 'Terminal'
-	AND BI.intIngredientItemId = RR.intItemId
+SELECT DISTINCT LH.strTransaction 
+	, LH.intLoadHeaderId
+	, LR.intLoadReceiptId
+	, LR.intItemId
+	, DH.strDestination
+	, BI.dblQuantity
+FROM vyuTRGetLoadBlendIngredient BI 
+INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionDetailId = BI.intLoadDistributionDetailId
+INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId
+INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = DH.intLoadHeaderId 
+WHERE LR.strOrigin = 'Terminal'
+	AND LR.strReceiptLine = BI.strReceiptLink
+	AND DD.ysnBlendedItem = 1
