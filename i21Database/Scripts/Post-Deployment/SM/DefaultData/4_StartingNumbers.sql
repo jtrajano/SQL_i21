@@ -1383,6 +1383,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Currency Exposure' and strModule = 'Risk Management')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 143
+			,[strTransactionType]	= N'Daily Average Price'
+			,[strPrefix]			= N'DAP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Daily Average Price' and strModule = 'Risk Management')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 

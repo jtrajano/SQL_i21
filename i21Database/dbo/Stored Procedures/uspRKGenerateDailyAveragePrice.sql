@@ -12,6 +12,7 @@ BEGIN
 	DECLARE @intDailyAveragePriceId INT
 		, @strAverageNo NVARCHAR(50)
 		, @dtmDate DATETIME = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+		, @intRowId INT
 		, @bookId INT
 		, @subBookId INT
 
@@ -19,14 +20,19 @@ BEGIN
 	INTO #tmpDerivatives
 	FROM dbo.fnRKGetOpenFutureByDate(NULL, '1/1/1900', @dtmDate, 1)
 
-	SELECT DISTINCT intBookId
-		, intSubBookId
+	SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY intBookId ORDER BY intBookId DESC)
+		, *
 	INTO #BookSubBook
-	FROM #tmpDerivatives
-
+	FROM (
+		SELECT DISTINCT intBookId
+			, intSubBookId
+		
+		FROM #tmpDerivatives
+	) tbl
+	
 	WHILE EXISTS (SELECT TOP 1 1 FROM #BookSubBook)
 	BEGIN
-		SELECT TOP 1 @bookId = intBookId, @subBookId = intSubBookId FROM #BookSubBook
+		SELECT TOP 1 @intRowId = intRowId, @bookId = intBookId, @subBookId = intSubBookId FROM #BookSubBook
 
 		EXEC uspSMGetStartingNumber @intStartingNumberId = 143
 			, @strID = @strAverageNo OUTPUT
@@ -68,10 +74,11 @@ BEGIN
 			, dblNetLongAvg = 0.00
 			, intEntityId
 		FROM #tmpDerivatives
-		WHERE intBookId = ISNULL(@bookId, intBookId)
-			AND intSubBookId = ISNULL(@subBookId, intSubBookId)
+		WHERE ISNULL(intBookId, 0) = ISNULL(@bookId, ISNULL(intBookId, 0))
+			AND ISNULL(intSubBookId, 0) = ISNULL(@subBookId, ISNULL(intSubBookId, 0))
+			AND ISNULL(intFutureMarketId, 0) <> 0
 
-		INSERT INTO tblRKDailyAveragePriceTransaction(intDailyAveragePriceDetailId
+		INSERT INTO tblRKDailyAveragePriceDetailTransaction(intDailyAveragePriceDetailId
 			, dtmTransactionDate
 			, strEntity
 			, dblCommission
@@ -115,30 +122,30 @@ BEGIN
 			, ysnPreCrush)
 		SELECT Detail.intDailyAveragePriceDetailId
 			, Trans.dtmTransactionDate
-			, Trans.strEntity
-			, Trans.dblCommission
-			, Trans.strBrokerageCommission
+			, strEntity = Trans.strName
+			, 0
+			, NULL
 			, Trans.strInstrumentType
-			, Trans.strLocation
-			, Trans.strTrader
-			, Trans.strCurrency
+			, strLocation= Trans.strLocationName
+			, strTrader = Trans.strBrokerageAccount
+			, NULL
 			, Trans.strInternalTradeNo
 			, Trans.strBrokerTradeNo
 			, Trans.strBuySell
 			, Trans.dblOpenContract
-			, Trans.strOptionMonth
+			, Trans.strOptionMonthYear
 			, Trans.strOptionType
 			, Trans.dblStrike
 			, Trans.dblPrice
-			, Trans.strReference
+			, NULL
 			, Trans.strStatus
 			, Trans.dtmFilledDate
-			, Trans.strReserveForFix
-			, Trans.ysnOffset
-			, Trans.strBank
-			, Trans.strBankAccount
-			, Trans.strContractNo
-			, Trans.strContractSequenceNo
+			, NULL
+			, NULL
+			, Trans.strBankName
+			, Trans.strBankAccountNo
+			, Trans.strContractNumber
+			, Trans.strSequenceNo
 			, Trans.strSelectedInstrumentType
 			, Trans.strFromCurrency
 			, Trans.strToCurrency
@@ -156,8 +163,8 @@ BEGIN
 			, Trans.ysnFreezed
 			, Trans.ysnPreCrush
 		FROM vyuRKGetDailyAveragePriceDetail Detail
-		JOIN #tmpDerivatives Derivative ON Derivative.intBookId = ISNULL(@bookId, Derivative.intBookId)
-			AND Derivative.intSubBookId = ISNULL(@subBookId, Derivative.intSubBookId)
+		JOIN #tmpDerivatives Derivative ON ISNULL(Derivative.intBookId, 0) = ISNULL(@bookId, ISNULL(Derivative.intBookId, 0))
+			AND ISNULL(Derivative.intSubBookId, 0) = ISNULL(@subBookId, ISNULL(Derivative.intSubBookId, 0))
 			AND Derivative.intFutureMarketId = Detail.intFutureMarketId
 			AND Derivative.intCommodityId = Detail.intCommodityId
 			AND Derivative.intFutureMonthId = Detail.intFutureMonthId
@@ -171,14 +178,14 @@ BEGIN
 			, dblNoOfLots = tblPatch.dblNoOfLots
 		FROM (
 			SELECT intDailyAveragePriceDetailId
-				, dblAvgLongPrice = dblPriceByLots / dblOpenContract
+				, dblAvgLongPrice = CASE WHEN ISNULL(dblOpenContract, 0) <> 0 THEN dblPriceByLots / dblOpenContract ELSE 0 END
 				, dblNoOfLots
 			FROM (
 				SELECT intDailyAveragePriceDetailId
 					, dblPriceByLots = SUM((CASE WHEN strBuySell = 'Buy' THEN dblPrice ELSE 0 END) * dblNoOfContract)
 					, dblOpenContract = SUM((CASE WHEN strBuySell = 'Buy' THEN dblNoOfContract ELSE 0 END))
 					, dblNoOfLots = SUM(dblNoOfContract)				
-				FROM tblRKDailyAveragePriceTransaction
+				FROM tblRKDailyAveragePriceDetailTransaction
 				WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
 					AND strInstrumentType = 'Futures'
 				GROUP BY intDailyAveragePriceDetailId
@@ -186,7 +193,7 @@ BEGIN
 		) tblPatch
 		WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId
 
-		DELETE FROM #BookSubBook WHERE intBookId = ISNULL(@bookId, intBookId) AND intSubBookId = ISNULL(@subBookId, intSubBookId)
+		DELETE FROM #BookSubBook WHERE intRowId = @intRowId
 	END
 
 	DROP TABLE #BookSubBook

@@ -71,6 +71,11 @@ FROM (
 		, strNotes = ft.strReference
 		, ft.intFutureMarketId
 		, ft.intFutureMonthId
+		, Contract.strContractNumber
+		, strSequenceNo = CAST(ContractDetail.intContractSeq AS NVARCHAR(50))
+		, ft.strRefSwapTradeNo
+		, ft.dtmCreateDateTime
+		, ft.ysnFreezed
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN tblRKFuturesMonth AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
@@ -87,5 +92,7 @@ LEFT OUTER JOIN tblSMCompanyLocation AS cl ON ft.[intLocationId] = cl.[intCompan
 LEFT OUTER JOIN tblCMBank AS b ON ft.[intBankId] = b.[intBankId]
 LEFT OUTER JOIN tblCMBankAccount AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
 LEFT OUTER JOIN tblSMCurrencyExchangeRateType AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ft.intContractHeaderId
+LEFT OUTER JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = ft.intContractDetailId
 )t 
 ORDER BY intFutOptTransactionId ASC
