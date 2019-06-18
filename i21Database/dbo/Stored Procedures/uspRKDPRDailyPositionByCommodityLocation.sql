@@ -57,11 +57,11 @@ FROM (
 		, intCommodityId
 		, f.strLocationName
 		, l.intCompanyLocationId intLocationId
-		, (SELECT distinct sum(dblTotal) dblInHouse FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='In-House' and t.intCommodityId=f.intCommodityId and  t.strLocationName=f.strLocationName  ) dblInHouse
-		, (SELECT distinct  sum(dblTotal) dblCompanyTitled FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Company Titled Stock' and t.intCommodityId=f.intCommodityId and t.strLocationName=f.strLocationName ) dblCompanyTitled
-		, (SELECT distinct sum(dblTotal) dblCaseExposure FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Price Risk'  and t.intCommodityId=f.intCommodityId and t.strLocationName=f.strLocationName ) dblCaseExposure
-		, (SELECT distinct sum(dblTotal) dblBasisExposure FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Basis Risk' and t.intCommodityId=f.intCommodityId and t.strLocationName=f.strLocationName  ) dblBasisExposure
-		, (SELECT distinct sum(dblTotal) dblAvailForSale FROM @FinalTable t WHERE ROUND(dblTotal,0) <> 0 AND strSeqHeader='Avail for Spot Sale' and t.intCommodityId=f.intCommodityId and t.strLocationName=f.strLocationName ) dblAvailForSale
+		, (SELECT distinct sum(dblTotal) dblInHouse FROM @FinalTable t WHERE ROUND(dblTotal,2) <> 0 AND strSeqHeader='In-House' and t.intCommodityId=f.intCommodityId and  t.strLocationName=f.strLocationName  ) dblInHouse
+		, (SELECT distinct  sum(dblTotal) dblCompanyTitled FROM @FinalTable t WHERE ROUND(dblTotal,2) <> 0 AND strSeqHeader='Company Titled Stock' and t.intCommodityId=f.intCommodityId and t.strLocationName=f.strLocationName ) dblCompanyTitled
+		, (SELECT distinct sum(dblTotal) dblCaseExposure FROM @FinalTable t WHERE ROUND(dblTotal,2) <> 0 AND strSeqHeader='Price Risk'  and t.intCommodityId=f.intCommodityId and t.strLocationName=f.strLocationName ) dblCaseExposure
+		, (SELECT distinct sum(dblTotal) dblBasisExposure FROM @FinalTable t WHERE ROUND(dblTotal,2) <> 0 AND strSeqHeader='Basis Risk' and t.intCommodityId=f.intCommodityId and t.strLocationName=f.strLocationName  ) dblBasisExposure
+		, (SELECT distinct sum(dblTotal) dblAvailForSale FROM @FinalTable t WHERE ROUND(dblTotal,2) <> 0 AND strSeqHeader='Avail for Spot Sale' and t.intCommodityId=f.intCommodityId and t.strLocationName=f.strLocationName ) dblAvailForSale
 	FROM @FinalTable f
 	join tblSMCompanyLocation l on f.strLocationName=l.strLocationName
 ) t

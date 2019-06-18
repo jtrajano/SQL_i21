@@ -632,7 +632,6 @@ BEGIN
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
 				AND ysnInTransit = 0
 				AND s.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				AND s.strTransactionType <> 'Inventory Count'
 
 			--=============================
 			-- Transfer
@@ -2184,7 +2183,6 @@ BEGIN
 					WHERE ch.intCommodityId  = @intCommodityId
 						AND ysnDPOwnedType = 1
 						AND ch.intCompanyLocationId = ISNULL(@intLocationId, ch.intCompanyLocationId)
-						AND ch.intTransactionTypeId <> 9
 					)t 	WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				GROUP BY intTicketId
 					, strTicketType

@@ -7346,6 +7346,8 @@
     <Build Include="dbo\Views\vyuAPLoadCostClearing.sql" />
     <Build Include="dbo\Views\vyuAPGrainClearing.sql" />
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetInHouse.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCompanyTitled.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
