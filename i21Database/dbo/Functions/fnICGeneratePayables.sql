@@ -256,6 +256,7 @@ FROM tblICInventoryReceipt A
 	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblICItemUOM ctOrderUOM ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure ctUOM ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
+	INNER JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = A.intFreightTermId
 	LEFT JOIN vyuPODetails po ON po.intPurchaseId = B.intOrderId
 		AND po.intPurchaseDetailId = B.intLineNo
 		AND A.strReceiptType = 'Purchase Order'
@@ -301,6 +302,10 @@ WHERE
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType != 2
 	AND A.intInventoryReceiptId = @intReceiptId
+	AND C.strType <> 'Bundle'
+	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
+	AND ISNULL(B.ysnAllowVoucher, 1) = 1
+	AND (A.intSourceType <> 2 OR (A.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin'))
 	ORDER BY B.intInventoryReceiptItemId ASC 
 
 
