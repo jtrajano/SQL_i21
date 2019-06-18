@@ -33,10 +33,13 @@ BEGIN
 				, strCategoryCode					= Category.strCategoryCode
 				, strCategoryDescription			= Category.strDescription
 			FROM tblSTStoreRebates Rebates
+			INNER JOIN tblSTStore Store
+				ON Rebates.intStoreId = Store.intStoreId
 			INNER JOIN tblICCategory Category
 				ON Rebates.intCategoryId = Category.intCategoryId
 			INNER JOIN tblICCategoryLocation CatLoc
 				ON Category.intCategoryId = CatLoc.intCategoryId
+				AND Store.intCompanyLocationId = CatLoc.intLocationId
 			WHERE Rebates.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 
 			RETURN
