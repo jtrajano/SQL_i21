@@ -116,19 +116,19 @@ BEGIN
 			,GP.[strBillOfLading]					
 			,GP.[ysnReturn]	 
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost) GP
-			INNER JOIN tblICInventoryReceiptItem ReceiptItem 
-			ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
-		INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
-		INNER JOIN tblICInventoryReceipt Receipt
-			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-			AND Receipt.intEntityVendorId = GP.intEntityVendorId
-			AND Item.strType <> 'Bundle'
-			AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
-			AND ISNULL(ReceiptItem.ysnAllowVoucher, 1) = 1
-		INNER JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = Receipt.intFreightTermId
-		WHERE Receipt.intSourceType <> 2 OR (
-			Receipt.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin'
-		)
+		--	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
+		--	ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
+		--INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
+		--INNER JOIN tblICInventoryReceipt Receipt
+		--	ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		--	AND Receipt.intEntityVendorId = GP.intEntityVendorId
+		--	AND Item.strType <> 'Bundle'
+		--	AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
+		--	AND ISNULL(ReceiptItem.ysnAllowVoucher, 1) = 1
+		--INNER JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = Receipt.intFreightTermId
+		--WHERE Receipt.intSourceType <> 2 OR (
+		--	Receipt.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin'
+		--)
 
 		UNION ALL
 		/* To get the unposted Receipt Charges */
