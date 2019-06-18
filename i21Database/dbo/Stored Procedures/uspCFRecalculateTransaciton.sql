@@ -6217,6 +6217,7 @@ BEGIN
 
 	
 	END
+	
 	ELSE IF (LOWER(@strPriceBasis) = 'index fixed')
 		BEGIN
 
@@ -6241,6 +6242,7 @@ BEGIN
 		
 
 	END
+	
 	ELSE IF (CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0)
 		BEGIN
 		IF (@strTransactionType = 'Extended Remote' OR @strTransactionType = 'Local/Network')
@@ -6251,6 +6253,14 @@ BEGIN
 
 			DECLARE @dblPumpPriceAdjustmentGrossPriceZeroQty NUMERIC(18,6)
 			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = Round(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+
+
+			IF(@ysnReRunCalcTax = 0)
+			BEGIN
+				SET @dblPrice = @dblPumpPriceAdjustmentGrossPriceZeroQty
+				SET @ysnReRunCalcTax = 1
+				GOTO TAXCOMPUTATION
+			END
 
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
@@ -6336,17 +6346,7 @@ BEGIN
 	END
 
 
-	IF(ISNULL(@dblSpecialTax,0) > 0 
-	AND ( LOWER(@strPriceBasis) = 'index retail' OR LOWER(@strPriceBasis) = 'pump price adjustment' ) 
-	 )
-	BEGIN
-		IF(@ysnReRunCalcTax = 0)
-		BEGIN
-			SET @ysnReRunCalcTax = 1 
-			SET @dblPrice = @dblPrice +  ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6)
-			GOTO TAXCOMPUTATION
-		END
-	END
+	
 
 	
 	---------------------------------------------------
