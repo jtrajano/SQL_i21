@@ -8,6 +8,7 @@ RETURNS @TempTableDepartments TABLE
 	, intCategoryId INT NULL
 	, strCategoryCode NVARCHAR(30) NULL
 	, strCategoryDescription NVARCHAR(150) NULL
+	, ysnTobacco BIT DEFAULT(0)
 )
 AS 
 BEGIN
@@ -23,6 +24,7 @@ BEGIN
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription
+				, ysnTobacco
 			)
 			SELECT 
 				strStatus							= 1
@@ -32,11 +34,15 @@ BEGIN
 				, intCategoryId						= Category.intCategoryId
 				, strCategoryCode					= Category.strCategoryCode
 				, strCategoryDescription			= Category.strDescription
+				, ysnTobacco						= Rebates.ysnTobacco
 			FROM tblSTStoreRebates Rebates
+			INNER JOIN tblSTStore Store
+				ON Rebates.intStoreId = Store.intStoreId
 			INNER JOIN tblICCategory Category
 				ON Rebates.intCategoryId = Category.intCategoryId
 			INNER JOIN tblICCategoryLocation CatLoc
 				ON Category.intCategoryId = CatLoc.intCategoryId
+				AND Store.intCompanyLocationId = CatLoc.intLocationId
 			WHERE Rebates.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 
 			RETURN
@@ -53,6 +59,7 @@ BEGIN
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription
+				, ysnTobacco
 			)
 			VALUES 
 			(
@@ -63,6 +70,7 @@ BEGIN
 				, NULL
 				, NULL
 				, NULL
+				, 0
 			)
 
 			RETURN
