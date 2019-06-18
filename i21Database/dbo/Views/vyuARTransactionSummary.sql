@@ -29,4 +29,5 @@ SELECT  intYear 					= YEAR(SAR.dtmDate)
 	  , dtmBeginDate				= '' COLLATE Latin1_General_CI_AS
 	  , dtmEndingDate 				= '' COLLATE Latin1_General_CI_AS
 	  , dblCost 					= SAR.dblTotalCost
+	  , strAccountStatusCode		= SAR.strAccountStatusCode
 FROM vyuARSalesAnalysisReport SAR

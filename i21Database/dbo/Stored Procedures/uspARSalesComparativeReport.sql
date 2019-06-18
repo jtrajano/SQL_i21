@@ -14,9 +14,13 @@ DECLARE @dtmBeginningDateTo				DATETIME
       , @dtmEndingDateFrom				DATETIME
 	  , @intEntityCustomerId			INT	= NULL
 	  , @strSalesperson					NVARCHAR(100)
-	  , @strCustomerName				NVARCHAR(MAX)
+	  , @strName						NVARCHAR(MAX)
 	  , @strCustomerNumber				NVARCHAR(MAX)
+	  , @strAccountStatusCode			NVARCHAR(MAX)
+	  , @strCategoryCode				NVARCHAR(300)
 	  , @strItemNo						NVARCHAR(300)
+	  , @strLocationName				NVARCHAR(300)
+	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
 
 DECLARE @temp_xml_table TABLE (
@@ -64,7 +68,7 @@ WITH (
 
 
 -- Gather the variables values from the xml table.
-SELECT  @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT  @strName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strName'
 
@@ -76,9 +80,25 @@ SELECT  @strSalesperson = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strSalespersonName'
 
+SELECT  @strCategoryCode = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strCategoryCode'
+
 SELECT  @strItemNo = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strItemNo'
+
+SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strAccountStatusCode'
+
+SELECT  @strLocationName = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strLocationName'
+
+SELECT  @intCompanyLocationId = intCompanyLocationId
+FROM	tblSMCompanyLocation
+WHERE	strLocationName = @strLocationName
 
 SELECT  @dtmBeginningDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmBeginningDateTo = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
@@ -111,7 +131,9 @@ IF @dtmEndingDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmEndingDateFrom = CAST(-53690 AS DATETIME)
 
-SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
+
+
+      SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
      , dtmEndingDate			= CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) 
 	 , dtmTransactionDate		= dtmTransactionDate
 	 , dtmTransactionDateEnding	= dtmTransactionDateEnding
@@ -139,10 +161,13 @@ SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - 
 	 , dblEndQuantity 			= 0
 FROM vyuARTransactionSummary 
 WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
-  AND (@strCustomerName IS NULL OR strCustomerName = @strCustomerName)
+  AND (@strName IS NULL OR strName = @strName)
   AND (@strCustomerNumber IS NULL OR strCustomerNumber = @strCustomerNumber)
   AND (@strSalesperson IS NULL OR strSalesPersonName = @strSalesperson)
+  AND (@strCategoryCode IS NULL OR strCategoryCode = @strCategoryCode)
   AND (@strItemNo IS NULL OR strItemNo = @strItemNo)
+  AND (@strAccountStatusCode IS NULL OR strAccountStatusCode = @strAccountStatusCode)
+  AND (@intCompanyLocationId IS NULL OR intCompanyLocationId = @intCompanyLocationId)
 
 UNION ALL
 
@@ -174,7 +199,10 @@ SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - 
 	 , dblEndQuantity			= dblQuantity 
 FROM vyuARTransactionSummary 
 WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
-  AND (@strCustomerName IS NULL OR strCustomerName = @strCustomerName)
+  AND (@strName IS NULL OR strName = @strName)
   AND (@strCustomerNumber IS NULL OR strCustomerNumber = @strCustomerNumber)
   AND (@strSalesperson IS NULL OR strSalesPersonName = @strSalesperson)
+  AND (@strCategoryCode IS NULL OR strCategoryCode = @strCategoryCode)
   AND (@strItemNo IS NULL OR strItemNo = @strItemNo)
+  AND (@strAccountStatusCode IS NULL OR strAccountStatusCode = @strAccountStatusCode)
+  AND (@intCompanyLocationId IS NULL OR intCompanyLocationId = @intCompanyLocationId)
