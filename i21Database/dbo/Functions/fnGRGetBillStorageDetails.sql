@@ -4,8 +4,8 @@ CREATE FUNCTION [dbo].[fnGRGetBillStorageDetails]
 	,@strPostType NVARCHAR(30)
 	,@intUserId INT
 	,@intEntityId INT = NULL
-	,@intCustomerStorageIdParam INT = NULL
-	,@dblBalanceToAccrue DECIMAL(18,6) = 0
+	--,@intCustomerStorageIdParam INT = NULL
+	--,@dblBalanceToAccrue DECIMAL(18,6) = 0
 )
 RETURNS @returnTable TABLE
 (
