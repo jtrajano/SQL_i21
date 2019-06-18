@@ -53,7 +53,13 @@ FROM	tblICInventoryShipment Shipment
 					,ShipmentCost = ShipmentBasedOnInventoryTransaction.dblShipmentCost
 					,ShipmentItemTotal = d.dblQuantity * ShipmentBasedOnInventoryTransaction.dblShipmentCost
 					,InvoiceItemTotal = ISNULL(InvoicedItem.dblQuantity, 0) * ShipmentBasedOnInventoryTransaction.dblShipmentCost
-					,OpenQty = CASE WHEN FreightTerm.strFobPoint = 'Origin' THEN CAST(0.00 AS NUMERIC(18,6)) ELSE d.dblQuantity - ISNULL(InvoicedItem.dblQuantity, 0) END
+					,OpenQty = 					
+						CASE 
+							-- Note: Partial Invoice is no longer supported by AR. 
+							-- So if a shipment has an invoice, shipment is considered to be fully-invoiced. 
+							WHEN InvoicedItem.dblQuantity IS NOT NULL THEN 0 
+							ELSE d.dblQuantity 
+						END 
 					,d.intInventoryShipmentItemId
 					,dblItemsReceivable = (d.dblQuantity - ISNULL(InvoicedItem.dblQuantity, 0)) * ShipmentBasedOnInventoryTransaction.dblShipmentCost
 			FROM	tblICInventoryShipmentItem d 

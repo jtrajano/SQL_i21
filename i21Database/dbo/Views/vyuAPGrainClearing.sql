@@ -18,9 +18,9 @@ SELECT
 	,SS.dblSettleUnits AS dblSettleStorageQty
 	,GD.intAccountId
 	,AD.strDescription
-	,CS.intCompanyLocationId
-	,CL.strLocationName
-	,CAST(0 AS BIT) ysnAllowVoucher
+	-- ,CS.intCompanyLocationId
+	-- ,CL.strLocationName
+	-- ,CAST(0 AS BIT) ysnAllowVoucher
 FROM tblGRCustomerStorage CS
 INNER JOIN tblICItem IM
 	ON IM.intItemId = CS.intItemId
@@ -69,9 +69,9 @@ SELECT
 	,SS.dblSettleUnits AS dblSettleStorageQty
 	,glAccnt.intAccountId
 	,glAccnt.strDescription
-	,bill.intShipToId AS intLocationId
-	,compLoc.strLocationName
-	,0
+	-- ,bill.intShipToId AS intLocationId
+	-- ,compLoc.strLocationName
+	-- ,0
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
@@ -100,8 +100,8 @@ SELECT
     ,0 AS dblVoucherQty
 	,0
 	,0
-	,CS.intCompanyLocationId
-	,CL.strLocationName
+	-- ,CS.intCompanyLocationId
+	-- ,CL.strLocationName
 	,GD.intAccountId
 	,AD.strDescription
 FROM tblGRCustomerStorage CS
@@ -141,8 +141,8 @@ SELECT
     ,0 AS dblVoucherQty
 	,0
 	,0
-	,CS.intCompanyLocationId
-	,CL.strLocationName
+	-- ,CS.intCompanyLocationId
+	-- ,CL.strLocationName
 	,GD.intAccountId
 	,AD.strDescription
 FROM tblQMTicketDiscount QM

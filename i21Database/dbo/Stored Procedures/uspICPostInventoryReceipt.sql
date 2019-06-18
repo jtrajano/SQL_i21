@@ -730,7 +730,7 @@ BEGIN
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = DetailItem.intSubLocationId --ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
-				,strActualCostId = Header.strActualCostId
+				,strActualCostId = DetailItem.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate

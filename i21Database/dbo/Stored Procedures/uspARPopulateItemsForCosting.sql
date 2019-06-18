@@ -64,7 +64,7 @@ SELECT
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]				= CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblUOMQty, 0) ELSE ARID.[dblUnitQty] END
+	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -81,9 +81,7 @@ SELECT
 																			AND ICIT.[ysnIsUnposted] = @ZeroBit
 																			AND ICIT.[strTransactionForm] = 'Produce'
 																	)
-																	WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0
-																	THEN ISNULL(ARRETURN.dblCost, 0)
-																	ELSE 
+																	ELSE
 																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @AVERAGECOST THEN 
 																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.intItemUOMId) 
 																				ELSE 
@@ -91,7 +89,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															, ARID.[dblUnitQty]
+															,ARID.[dblUnitQty]
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
@@ -125,24 +123,6 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
-LEFT OUTER JOIN 
-	(SELECT I.[intInvoiceId]
-	      , I.[strInvoiceNumber]
-		  , COST.* 
-	FROM tblARInvoice I WITH (NOLOCK)
-	CROSS APPLY (
-		SELECT dblCost		= SUM(ICIT.[dblCost])
-		     , dblUOMQty	= AVG(ICIT.[dblUOMQty])
-			 , dblQty		= ABS(AVG(ICIT.[dblQty]))
-		FROM tblICInventoryTransaction ICIT WITH (NOLOCK)
-		WHERE ICIT.ysnIsUnposted = @ZeroBit
-			AND ICIT.intTransactionId = I.intInvoiceId
-			AND ICIT.strTransactionId = I.strInvoiceNumber
-	) COST
-	WHERE I.ysnReturned = 1 
-	  AND I.ysnPosted = 1 
-	  AND I.strTransactionType = 'Invoice') ARRETURN 
-		ON ARID.[intOriginalInvoiceId] = ARRETURN.[intInvoiceId]
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
@@ -157,11 +137,9 @@ WHERE
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
-	AND (ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3) OR ISNULL(ARRETURN.intInvoiceId, 0) <> 0)
+	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 	AND ARID.[strItemType] <> 'Finished Good'
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	--AND NOT(ARI.[intLoadDistributionHeaderId] IS NOT NULL AND ISNULL(ARID.[dblPrice], @ZeroDecimal) =
-
 
 INSERT INTO #ARItemsForCosting
 	([intItemId]
@@ -201,7 +179,7 @@ SELECT
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]				= CASE WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0 THEN ISNULL(ARRETURN.dblUOMQty, 0) ELSE ARID.[dblUnitQty] END
+	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -218,8 +196,6 @@ SELECT
 																			AND ICIT.[ysnIsUnposted] = @ZeroBit
 																			AND ICIT.[strTransactionForm] = 'Produce'
 																	)
-																	WHEN ARID.[strTransactionType] = 'Credit Memo' AND ISNULL(ARRETURN.intInvoiceId, 0) <> 0
-																	THEN ISNULL(ARRETURN.dblCost, 0)
 																	ELSE
 																		CASE	WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @AVERAGECOST THEN 
 																					dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.intItemUOMId) 
@@ -228,7 +204,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															, ARID.[dblUnitQty]
+															,ARID.[dblUnitQty]
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
@@ -262,24 +238,6 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
-LEFT OUTER JOIN 
-	(SELECT I.[intInvoiceId]
-	      , I.[strInvoiceNumber] 
-		  , COST.*
-	FROM tblARInvoice I WITH (NOLOCK)
-	CROSS APPLY (
-		SELECT dblCost		= SUM(ICIT.[dblCost])
-		     , dblUOMQty	= AVG(ICIT.[dblUOMQty])
-			 , dblQty		= ABS(AVG(ICIT.[dblQty]))
-		FROM tblICInventoryTransaction ICIT WITH (NOLOCK)
-		WHERE ICIT.ysnIsUnposted = @ZeroBit
-			AND ICIT.intTransactionId = I.intInvoiceId
-			AND ICIT.strTransactionId = I.strInvoiceNumber
-	) COST
-	WHERE I.ysnReturned = 1 
-	  AND I.ysnPosted = 1 
-	  AND I.strTransactionType = 'Invoice') ARRETURN 
-		ON ARID.[intOriginalInvoiceId] = ARRETURN.[intInvoiceId]
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
@@ -294,10 +252,9 @@ WHERE
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
-	AND (ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3) OR ISNULL(ARRETURN.intInvoiceId, 0) <> 0)
-	--AND ((@ForValidation = 1 AND ISNULL(ARID.[strItemType],'') <> 'Finished Good') OR (@ForValidation = 0))
+	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	
+
 INSERT INTO #ARItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
@@ -378,7 +335,7 @@ LEFT OUTER JOIN
 		AND ARID.[intCompanyLocationId] = IST.[intLocationId]	
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
-		ON LGL.[intLoadId] = ARID.[intLoadId]
+		ON LGL.[intLoadId] = ARID.[intLoadId]				 				 
 WHERE
 	((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (
@@ -392,5 +349,6 @@ WHERE
 	AND ARID.[strTransactionType] <> 'Debit Memo'
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
+	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
 
 RETURN 1

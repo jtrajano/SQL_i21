@@ -54,37 +54,4 @@ BEGIN
     DELETE FROM @InvoiceIds WHERE [intHeaderId] = @InvoiceId
 END
 
-DELETE FROM @InvoiceIds
-INSERT INTO @InvoiceIds
-    ([intHeaderId]
-    ,[ysnPost])
-SELECT DISTINCT
-     [intHeaderId]  = SO.[intSalesOrderId]
-	,[ysnPost]      = ARID.[ysnPost]
-FROM
-    #ARPostInvoiceDetail ARID
-INNER JOIN
-    tblSOSalesOrderDetail SOD
-		ON ARID.[intSalesOrderDetailId] = SOD.[intSalesOrderDetailId]
-		AND ARID.[intInventoryShipmentItemId] IS NULL
-INNER JOIN
-	tblSOSalesOrder SO
-		ON SOD.[intSalesOrderId] = SO.[intSalesOrderId]
-INNER JOIN
-	tblMFPickList PL
-		ON SO.[intSalesOrderId] = PL.[intSalesOrderId]
-
-
-WHILE EXISTS(SELECT NULL FROM @InvoiceIds)
-BEGIN
-    DECLARE @OrderId INT, @PostPL BIT
-    SELECT TOP 1 @OrderId = [intHeaderId], @PostPL = [ysnPost] FROM @InvoiceIds
-
-    EXEC    [dbo].[uspMFUnReservePickListBySalesOrder]
-                 @intSalesOrderId = @OrderId
-				 --,@ysnPosted	  = @PostPL
-
-    DELETE FROM @InvoiceIds WHERE [intHeaderId] = @OrderId
-END
-
 RETURN 0

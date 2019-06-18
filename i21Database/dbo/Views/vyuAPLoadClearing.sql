@@ -20,12 +20,18 @@ SELECT
 	,B.intPCompanyLocationId AS intLocationId
 	,compLoc.strLocationName
 	,CAST((CASE WHEN receiptItem.intInventoryReceiptItemId > 0 THEN 0 ELSE 1 END) AS BIT) ysnAllowVoucher --allow voucher if there is no receipt
-	,intAccountId = dbo.fnGetItemGLAccount(B.intItemId, B.intPCompanyLocationId, 'AP Clearing') 
+	,intAccountId = GL.intAccountId
 FROM tblLGLoad A
 INNER JOIN tblLGLoadDetail B
 	ON A.intLoadId = B.intLoadId
 INNER JOIN tblSMCompanyLocation compLoc
     ON B.intPCompanyLocationId = compLoc.intCompanyLocationId
+CROSS APPLY (SELECT TOP 1 GLD.intAccountId FROM tblGLDetail GLD
+				INNER JOIN tblGLAccount GLA ON GLA.intAccountId = GLD.intAccountId
+				INNER JOIN tblGLAccountGroup GLAG ON GLAG.intAccountGroupId = GLA.intAccountGroupId
+				INNER JOIN tblGLAccountCategory GLAC ON GLAC.intAccountCategoryId = GLAG.intAccountCategoryId
+			WHERE intTransactionId = A.intLoadId AND strTransactionId = A.strLoadNumber AND ysnIsUnposted = 0
+				AND strCode IN ('LG', 'IC') AND GLAC.strAccountCategory = 'AP Clearing') GL
 LEFT JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt
 				ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId AND receipt.intSourceType = 2 AND receipt.ysnPosted = 1)
 	ON receiptItem.intSourceId = B.intLoadDetailId
