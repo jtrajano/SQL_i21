@@ -4,9 +4,9 @@ AS
 --BILL ysnPrice = 1/Charge Entity  
 SELECT  
     Receipt.intEntityVendorId AS intEntityVendorId  
- ,Receipt.dtmReceiptDate AS dtmDate  
- ,Receipt.strReceiptNumber  
- ,Receipt.intInventoryReceiptId  
+    ,Receipt.dtmReceiptDate AS dtmDate  
+    ,Receipt.strReceiptNumber  
+    ,Receipt.intInventoryReceiptId  
     ,NULL AS intBillId  
     ,NULL AS strBillId  
     ,NULL AS intBillDetailId  
@@ -20,11 +20,26 @@ SELECT
     ,Receipt.intLocationId  
     ,compLoc.strLocationName  
     ,CAST(1 AS BIT) ysnAllowVoucher  
+    ,APClearing.intAccountId
 FROM tblICInventoryReceiptCharge ReceiptCharge  
 INNER JOIN tblICInventoryReceipt Receipt   
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId   
 INNER JOIN tblSMCompanyLocation compLoc  
     ON Receipt.intLocationId = compLoc.intCompanyLocationId  
+OUTER APPLY (
+	SELECT TOP 1
+		ga.strAccountId
+		,ga.intAccountId
+	FROM 
+		tblGLDetail gd INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = gd.intAccountId
+		INNER JOIN tblGLAccountGroup ag
+			ON ag.intAccountGroupId = ga.intAccountGroupId
+	WHERE
+		gd.strTransactionId = Receipt.strReceiptNumber
+		AND ag.strAccountType = 'Liability'
+		AND gd.ysnIsUnposted = 0 
+) APClearing
 WHERE   
     Receipt.ysnPosted = 1    
 AND ReceiptCharge.ysnPrice = 1  
@@ -32,9 +47,9 @@ UNION ALL
 --BILL ysnAccrue = 1/There is a vendor selected, This includes the third party  
 SELECT  
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId  
- ,Receipt.dtmReceiptDate AS dtmDate  
- ,Receipt.strReceiptNumber  
- ,Receipt.intInventoryReceiptId  
+    ,Receipt.dtmReceiptDate AS dtmDate  
+    ,Receipt.strReceiptNumber  
+    ,Receipt.intInventoryReceiptId  
     ,NULL AS intBillId  
     ,NULL AS strBillId  
     ,NULL AS intBillDetailId  
@@ -47,13 +62,28 @@ SELECT
     ,Receipt.intLocationId  
     ,compLoc.strLocationName  
     ,CAST(1 AS BIT) ysnAllowVoucher  
+    ,APClearing.intAccountId
 FROM tblICInventoryReceiptCharge ReceiptCharge  
 INNER JOIN tblICInventoryReceipt Receipt   
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId   
         AND ReceiptCharge.ysnAccrue = 1   
         AND ReceiptCharge.ysnPrice = 0  
 INNER JOIN tblSMCompanyLocation compLoc  
-    ON Receipt.intLocationId = compLoc.intCompanyLocationId  
+    ON Receipt.intLocationId = compLoc.intCompanyLocationId 
+OUTER APPLY (
+	SELECT TOP 1
+		ga.strAccountId
+		,ga.intAccountId
+	FROM 
+		tblGLDetail gd INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = gd.intAccountId
+		INNER JOIN tblGLAccountGroup ag
+			ON ag.intAccountGroupId = ga.intAccountGroupId
+	WHERE
+		gd.strTransactionId = Receipt.strReceiptNumber
+		AND ag.strAccountType = 'Liability'
+		AND gd.ysnIsUnposted = 0 
+) APClearing
 WHERE   
     Receipt.ysnPosted = 1    
 AND ReceiptCharge.ysnAccrue = 1  
@@ -88,6 +118,7 @@ SELECT
     ,receipt.intLocationId  
     ,compLoc.strLocationName  
     ,CAST(1 AS BIT) ysnAllowVoucher  
+    ,billDetail.intAccountId
 FROM tblAPBill bill  
 INNER JOIN tblAPBillDetail billDetail  
     ON bill.intBillId = billDetail.intBillId  
