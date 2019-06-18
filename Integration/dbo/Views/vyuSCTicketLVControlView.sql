@@ -189,8 +189,8 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				,SC.dblTareWeight
 				,SC.dtmTareDateTime
 				,LTRIM(RTRIM(SC.strTicketComment))
-				,GRDI.intDiscountId
-				,GRDS.intDiscountScheduleId
+				,GRDS.intDiscountScheduleId -- GRDI.intDiscountId (not being used)
+				,GRDS.intDiscountScheduleId -- consider review for redundancy. 
 				,SC.dblFreightRate
 				,SC.dblTicketFees
 				,SC.ysnFarmerPaysFreight
@@ -218,7 +218,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				,SC.dblUnitPrice
 				,0
 				,0
-				,SC.intTicketId
+				,IR.A4GLIdentity  intOriginTicketId
 				,ICUOM.dblUnitQty
 				,UOM.intItemUOMId
 				,ICUOM.intItemUOMId
@@ -229,7 +229,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				FROM vyuSCTicketLVControlView SC 
 				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 				LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
-				LEFT JOIN tblICItem IC ON IC.strItemNo = SC.strItemNo
+				LEFT JOIN tblICItem IC ON IC.strItemNo =  IR.gasct_itm_no COLLATE Latin1_General_CI_AS
 				LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
 				LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
 				LEFT JOIN tblGRDiscountId GRDI ON GRDI.strDiscountId = SC.strDiscountId
@@ -237,23 +237,24 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
 				LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
 				LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
-				LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUOM = 1
+				LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUnit = 1
 				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
 				LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 				LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
 				LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 
-				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId)	
+				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)	
 				SELECT 
 				DISTINCT 
 					gasct_reading AS dblGradeReading
 					,gasct_shrk_what AS strShrinkWhat
 					,gasct_shrk_pct AS dblShrinkPercent
-					,intDiscountScheduleCodeId
-					,intOriginTicketId
+					,c.intDiscountScheduleCodeId
+					,k.intTicketLVStagingId -- intOriginTicketId
 					,''Scale'' AS strSourceType
 					,''Dollar'' strDiscountChargeType 
 					,b.A4GLIdentity
+					,DCode.intShrinkCalculationOptionId
 				FROM (
 						SELECT	
 							gasct_disc_cd_1		gasct_disc_cd,
@@ -350,7 +351,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
 				INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 				INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
+				INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
 				INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
+				INNER JOIN INSERTED IR  ON k.intOriginTicketId= IR.A4GLIdentity
 				WHERE b.gasct_disc_cd is not null
 			END
 		')
