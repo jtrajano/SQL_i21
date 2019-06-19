@@ -20,6 +20,7 @@ DECLARE @dtmBeginningDateTo				DATETIME
 	  , @strCategoryCode				NVARCHAR(300)
 	  , @strItemNo						NVARCHAR(300)
 	  , @strLocationName				NVARCHAR(300)
+	  , @strSource						NVARCHAR(300)
 	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
 
@@ -92,6 +93,11 @@ SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strAccountStatusCode'
 
+SELECT  @strSource = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strSource'
+
+
 SELECT  @strLocationName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strLocationName'
@@ -131,7 +137,34 @@ IF @dtmEndingDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmEndingDateFrom = CAST(-53690 AS DATETIME)
 
-
+SELECT 
+	   dtmBeginDate				= MIN(CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) )
+     , dtmEndingDate			= MIN(CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) )
+	 , dtmTransactionDate		= MIN(dtmTransactionDate)
+	 , dtmTransactionDateEnding	= MIN(dtmTransactionDateEnding)
+	 , intYear					= MIN(intYear)
+	 , intMonth					= MIN(intMonth)
+	 , intEntityCustomerId		= MIN(intEntityCustomerId)
+	 , intCompanyLocationId		= MIN(intCompanyLocationId)
+	 , strName					= strName
+	 , strCustomerName			= MIN(strCustomerName)
+	 , strCustomerNumber		= MIN(strCustomerNumber)
+	 , intSourceId				= MIN(intSourceId)
+	 , strInvoiceOriginId		= MIN(strInvoiceOriginId)
+	 , intItemId				= MIN(intItemId)
+	 , strItemNo				= strItemNo
+	 , strDescription			= MIN(strDescription)
+	 , intCategoryId			= MIN(intCategoryId)
+	 , strCategoryCode			= MIN(strCategoryCode)
+	 , strCategoryDescription	= MIN(strCategoryDescription)
+	 , strSalesPersonEntityNo	= MIN(strSalesPersonEntityNo)
+	 , strSalesPersonName		= MIN(strSalesPersonName)
+	 , intSalesPersonId			= MIN(intSalesPersonId)
+	 , dblBeginSalesAmount		= SUM(dblBeginSalesAmount)
+	 , dblBeginQuantity			= SUM(dblBeginQuantity)
+	 , dblEndSalesAmount		= 0
+	 , dblEndQuantity 			= 0
+ FROM (
 
       SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
      , dtmEndingDate			= CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) 
@@ -168,6 +201,7 @@ WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
   AND (@strItemNo IS NULL OR strItemNo = @strItemNo)
   AND (@strAccountStatusCode IS NULL OR strAccountStatusCode = @strAccountStatusCode)
   AND (@intCompanyLocationId IS NULL OR intCompanyLocationId = @intCompanyLocationId)
+  AND (@strSource IS NULL OR strSource = @strSource)
 
 UNION ALL
 
@@ -206,3 +240,6 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
   AND (@strItemNo IS NULL OR strItemNo = @strItemNo)
   AND (@strAccountStatusCode IS NULL OR strAccountStatusCode = @strAccountStatusCode)
   AND (@intCompanyLocationId IS NULL OR intCompanyLocationId = @intCompanyLocationId)
+  AND (@strSource IS NULL OR strSource = @strSource)
+  ) SUMMARY
+  Group By strName, strCustomerNumber, strItemNo 
