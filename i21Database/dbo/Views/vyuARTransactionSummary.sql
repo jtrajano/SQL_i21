@@ -31,4 +31,5 @@ SELECT  intYear 					= YEAR(SAR.dtmDate)
 	  , dblCost 					= SAR.dblTotalCost
 	  , strAccountStatusCode		= SAR.strAccountStatusCode
 	  , strSource					= SAR.strType
+	  , strLocationName				= strLocationName
 FROM vyuARSalesAnalysisReport SAR
