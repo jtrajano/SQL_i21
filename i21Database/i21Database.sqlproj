@@ -7575,6 +7575,7 @@
     <None Include="Scripts\Post-Deployment\SM\1910_EntityUserDatafix_Transaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateICAmountVsGLAmount.sql" />
     <Build Include="dbo\Functions\fnAPGetCheckPayee.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
