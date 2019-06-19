@@ -1393,6 +1393,17 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Daily Average Price' and strModule = 'Risk Management')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 144
+			,[strTransactionType]	= N'Item Contract'
+			,[strPrefix]			= N'ITM-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Item Contract' and strModule = 'Contract Management')
+
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
