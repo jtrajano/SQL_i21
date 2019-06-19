@@ -7573,6 +7573,7 @@
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRptRiskPositionInquiryByNetPosition.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_EntityUserDatafix_Transaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
