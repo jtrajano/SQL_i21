@@ -152,18 +152,18 @@ SELECT DISTINCT WC.intWeightClaimId
 	,blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo')
 	,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 	,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
-	,WCD.dblFromNet
-	,WCD.dblToNet
+	,dblFromNet = ISNULL(WCD.dblFromNet, 0)
+	,dblToNet = ISNULL(WCD.dblToNet, 0)
 	,dblWeightDifference = (ISNULL(WCD.dblFromNet,0) - ISNULL(WCD.dblToNet,0))
 	,strUnitMeasure = isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure)
 	,strUnitMeasureSymbol = WUOM.strSymbol
 	,strWeightInfo = LTRIM(dbo.fnRemoveTrailingZeroes(WCD.dblFromNet)) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure)
-	,LD.dblGross
-	,LD.dblTare
-	,LD.dblNet
+	,dblGross = ISNULL(LD.dblGross, 0)
+	,dblTare = ISNULL(LD.dblTare, 0)
+	,dblNet = ISNULL(LD.dblNet, 0)
 	,strLoadWeightUnitMeasure = isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure)
-	,WCD.dblFranchise
-	,WCD.dblFranchiseWt
+	,dblFranchise = ISNULL(WCD.dblFranchise, 0)
+	,dblFranchiseWt = ISNULL(WCD.dblFranchiseWt, 0)
 	,dblClaimableWt = ABS(WCD.dblClaimableWt)
 	,WCD.dblUnitPrice
 	,WCD.intCurrencyId
