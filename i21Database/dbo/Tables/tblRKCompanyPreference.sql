@@ -65,6 +65,7 @@
 	[intDefaultInstrumentTypeId] INT NULL,
 	[ysnDefaultTraderLoggedUser] BIT NULL DEFAULT((0)),
 	[intPostToGLId] INT NULL DEFAULT ((0)),
+	[ysnIncludeDerivatives] BIT NULL DEFAULT((0)),
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
     CONSTRAINT [FK_tblRKCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
