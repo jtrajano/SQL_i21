@@ -98,7 +98,7 @@ BEGIN TRY
 	--Cost UOM in contract
 	DECLARE @intContractUOMId INT
 	DECLARE @dblCostUnitQty DECIMAL(24, 10)
-	DECLARE @ysnExchangeTraded BIT
+
 	--get the original value of Spot Units before settlement
 	DECLARE @origdblSpotUnits DECIMAL(24, 10) 
 
@@ -225,7 +225,6 @@ BEGIN TRY
 			,@strItemNo 		= Item.strItemNo
 			,@ItemLocationId	= IL.intItemLocationId
 			,@strCommodityCode	= Com.strCommodityCode
-			,@ysnExchangeTraded = Com.ysnExchangeTraded
 		FROM tblICItem Item
 		JOIN tblICCommodity Com 
 			ON Com.intCommodityId = Item.intCommodityId
@@ -344,7 +343,7 @@ BEGIN TRY
 
 			IF EXISTS(SELECT TOP 1 1 FROM @SettleContract WHERE strPricingType <> 'Cash')
 			BEGIN
-				IF @intFutureMarketId = 0 AND @ysnExchangeTraded = 1
+				IF @intFutureMarketId = 0
 				BEGIN
 					SET @ErrMsg = 'There is no <b>Futures Market</b> setup yet in Risk Management for <b>' + @strCommodityCode + '</b> commodity.'
 					RAISERROR(@ErrMsg,16,1,1)
@@ -999,7 +998,7 @@ BEGIN TRY
 												  END			
 					,dblUOMQty					=  @dblUOMQty
 					,dblCost					=  CASE 
-														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+														WHEN @intFutureMarketId = 0 THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
@@ -1059,7 +1058,7 @@ BEGIN TRY
 												  END
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= CASE 
-														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+														WHEN @intFutureMarketId = 0 THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END
 					,dblSalesPrice				= 0.00
