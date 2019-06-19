@@ -7606,6 +7606,7 @@
     <Build Include="dbo\Tables\tblSTStoreRebates.sql" />
     <Build Include="dbo\Tables\tblCTIntrCompApproval.sql" />
     <Build Include="dbo\Views\vyuCTContractConditionView.sql" />
+    <Build Include="dbo\Views\vyuSTDepartmentProfitSummaryReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
