@@ -69,6 +69,8 @@ AS
 			,CP.ysnAllowBasisComponentToAccrue
 			,CP.ysnAutoCreateDerivative
 			,CP.ysnEnableItemContracts
+			,CP.ysnUpdatedAvailabilityPurchase
+			,CP.ysnUpdatedAvailabilitySales
 			,strCleanCostUOM = U1.strUnitMeasure
 			,strCleanCostCurrency = C1.strCurrency
 			,strDefContractStatus = CS.strContractStatus
