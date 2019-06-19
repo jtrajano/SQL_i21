@@ -7610,6 +7610,9 @@
     <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
     <Build Include="dbo\Functions\fnRKRollToNearby.sql" />
     <Build Include="dbo\Views\vyuARContractFinancialStatus.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_EntityUserDatafix_Transaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateICAmountVsGLAmount.sql" />
+    <Build Include="dbo\Functions\fnAPGetCheckPayee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

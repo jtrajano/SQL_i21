@@ -460,5 +460,13 @@ BEGIN
 	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
 	AND A.ysnPaid = 0
 
+
+	UPDATE P  -- updates the strPayee which is displayed in pay voucher details screen
+	SET strPayee = dbo.fnAPGetCheckPayee(P.strPaymentRecordNum, P.dtmDatePaid , P.intEntityVendorId, P.intPayToAddressId)
+	FROM tblAPPayment P JOIN tblAPPaymentDetail PD
+	ON  PD.intPaymentId = P.intPaymentId
+	JOIN tblAPBill B on PD.intBillId = B.intBillId
+	JOIN #tmpBillsId C ON C.intID = B.intBillId
+
 	 SET @createdPaymentId = @paymentId
 END
