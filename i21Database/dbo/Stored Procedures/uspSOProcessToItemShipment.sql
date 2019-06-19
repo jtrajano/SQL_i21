@@ -98,6 +98,7 @@ IF @Unship = 1
 
 					WHILE @@FETCH_STATUS = 0 
 					BEGIN
+						EXEC dbo.uspSOUpdateReservedStock @SalesOrderId, 0
 						EXEC dbo.uspICUnshipInventoryItem @intInventoryShipmentId, @UserId
 						EXEC dbo.uspSOUpdateOrderShipmentStatus @intInventoryShipmentId, 'Inventory', 1
 
@@ -254,38 +255,38 @@ ELSE
 			, intStorageScheduleTypeId		= SODETAIL.intStorageScheduleTypeId
 			, intForexRateTypeId			= SODETAIL.intCurrencyExchangeRateTypeId
 			, dblForexRate					= SODETAIL.dblCurrencyExchangeRate
-	FROM dbo.tblSOSalesOrder SO	
-	INNER JOIN dbo.tblSOSalesOrderDetail SODETAIL 
-		ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
-	INNER JOIN tblICItem ITEM
-		ON ITEM.intItemId = SODETAIL.intItemId 
-		AND ((ITEM.strType <> 'Bundle' AND dbo.fnIsStockTrackingItem(SODETAIL.intItemId) = 1) 
-		  OR (ITEM.strType = 'Bundle' AND ISNULL(ITEM.strBundleType, 'Kit') = 'Kit'))
-		AND  CASE WHEN (ITEM.strType = 'Bundle') THEN 
+		FROM dbo.tblSOSalesOrder SO	
+		INNER JOIN dbo.tblSOSalesOrderDetail SODETAIL 
+			ON SO.intSalesOrderId = SODETAIL.intSalesOrderId
+		INNER JOIN tblICItem ITEM
+			ON ITEM.intItemId = SODETAIL.intItemId 
+			AND ((ITEM.strType <> 'Bundle' AND dbo.fnIsStockTrackingItem(SODETAIL.intItemId) = 1) 
+			OR (ITEM.strType = 'Bundle' AND ISNULL(ITEM.strBundleType, 'Kit') = 'Kit'))
+			AND  CASE WHEN (ITEM.strType = 'Bundle') THEN 
 				CASE WHEN ISNULL(ITEM.ysnListBundleSeparately, 0) = 0 THEN 1 ELSE 0 END
 			 ELSE 1 END = 1
-	INNER JOIN dbo.tblICItemUOM ITEMUOM 
-		ON ITEMUOM.intItemId = SODETAIL.intItemId 
-		AND ITEMUOM.intItemUOMId = SODETAIL.intItemUOMId 
-	INNER JOIN dbo.tblICItemLocation ITEMLOCATION 
-		ON ITEMLOCATION.intItemId = SODETAIL.intItemId 
-		AND SO.intCompanyLocationId = ITEMLOCATION.intLocationId
-	LEFT JOIN tblSMCompanyLocationSubLocation SUBLOCATION
-		ON SUBLOCATION.intCompanyLocationId = ITEMLOCATION.intLocationId
-		AND SUBLOCATION.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId				
-	LEFT JOIN dbo.tblICStorageLocation STORAGELOCATION 
-		ON STORAGELOCATION.intLocationId = ITEMLOCATION.intLocationId
-		AND STORAGELOCATION.intSubLocationId = SUBLOCATION.intCompanyLocationSubLocationId
-		AND STORAGELOCATION.intStorageLocationId = SODETAIL.intStorageLocationId	
-	OUTER APPLY (
-		SELECT intSalesOrderDetailId
-				, dblQtyShipped = SUM(dblQtyShipped)
-		FROM dbo.tblARInvoiceDetail ID
-		WHERE ID.intSalesOrderDetailId = SODETAIL.intSalesOrderDetailId
-		GROUP BY ID.intSalesOrderDetailId
-	) INVOICEDETAIL
-	WHERE SO.intSalesOrderId = @SalesOrderId
-	  AND (SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)) > 0
+		INNER JOIN dbo.tblICItemUOM ITEMUOM 
+			ON ITEMUOM.intItemId = SODETAIL.intItemId 
+			AND ITEMUOM.intItemUOMId = SODETAIL.intItemUOMId 
+		INNER JOIN dbo.tblICItemLocation ITEMLOCATION 
+			ON ITEMLOCATION.intItemId = SODETAIL.intItemId 
+			AND SO.intCompanyLocationId = ITEMLOCATION.intLocationId
+		LEFT JOIN tblSMCompanyLocationSubLocation SUBLOCATION
+			ON SUBLOCATION.intCompanyLocationId = ITEMLOCATION.intLocationId
+			AND SUBLOCATION.intCompanyLocationSubLocationId = SODETAIL.intSubLocationId				
+		LEFT JOIN dbo.tblICStorageLocation STORAGELOCATION 
+			ON STORAGELOCATION.intLocationId = ITEMLOCATION.intLocationId
+			AND STORAGELOCATION.intSubLocationId = SUBLOCATION.intCompanyLocationSubLocationId
+			AND STORAGELOCATION.intStorageLocationId = SODETAIL.intStorageLocationId	
+		OUTER APPLY (
+			SELECT intSalesOrderDetailId
+					, dblQtyShipped = SUM(dblQtyShipped)
+			FROM dbo.tblARInvoiceDetail ID
+			WHERE ID.intSalesOrderDetailId = SODETAIL.intSalesOrderDetailId
+			GROUP BY ID.intSalesOrderDetailId
+		) INVOICEDETAIL
+		WHERE SO.intSalesOrderId = @SalesOrderId
+		  AND (SODETAIL.dblQtyOrdered - ISNULL(INVOICEDETAIL.dblQtyShipped, SODETAIL.dblQtyShipped)) > 0
 
 		INSERT INTO @Charges(
 			  intOrderType
@@ -350,8 +351,12 @@ ELSE
 			CREATE TABLE #tmpAddItemShipmentResult (
 				intInventoryShipmentId INT
 			)
-		END 
+		END
 
+		--POST RESERVATION FOR PICK LIST
+		EXEC dbo.uspSOUpdateReservedStock @SalesOrderId, 1
+
+		--PROCESS TO INVENTORY SHIPMENT
 		EXEC @intReturn = dbo.uspICAddItemShipment @Items		= @Items
 												 , @Charges		= @Charges
 												 , @Lots		= @Lots
