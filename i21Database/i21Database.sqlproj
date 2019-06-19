@@ -7348,6 +7348,7 @@
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetInHouse.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyTitled.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

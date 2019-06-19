@@ -75,6 +75,8 @@ ELSE
 			WHERE intEntityId = @intEntityCustomerId
 		END
 
+		--POST RESERVATION FOR PICK LIST
+		EXEC dbo.uspSOUpdateReservedStock @SalesOrderId, 1
 
 		--INSERT TO INVOICE
 		EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, NULL, 0, @NewInvoiceId OUTPUT
