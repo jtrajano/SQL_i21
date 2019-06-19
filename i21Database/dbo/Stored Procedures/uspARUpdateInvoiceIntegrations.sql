@@ -10,15 +10,17 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
   
-DECLARE @intInvoiceId			INT
+DECLARE @intInvoiceId			INT	  
 	  , @intUserId				INT
 	  , @intOriginalInvoiceId	INT
+	  , @intSalesOrderId		INT
 	  , @strTransactionType		NVARCHAR(25)
 	  	  
 SET @intInvoiceId = @InvoiceId
 SET @intUserId = @UserId
 
 SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
+		   , @intSalesOrderId = intSalesOrderId
 		   , @strTransactionType = strTransactionType
 FROM tblARInvoice 
 WHERE intInvoiceId = @InvoiceId
@@ -32,6 +34,9 @@ IF @ForDelete = 1
 	BEGIN
 		IF @strTransactionType IN ('Credit Memo', 'Credit Note') AND @intOriginalInvoiceId IS NOT NULL
 			UPDATE tblARInvoice SET ysnCancelled = 0 WHERE intInvoiceId = @intOriginalInvoiceId
+
+		IF ISNULL(@intSalesOrderId, 0) <> 0
+			EXEC dbo.uspSOUpdateReservedStock @intSalesOrderId, 0
 	END
 ELSE
 	BEGIN
