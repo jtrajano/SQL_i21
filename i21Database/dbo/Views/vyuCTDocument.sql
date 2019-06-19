@@ -2,6 +2,10 @@
 	
 AS 
 	SELECT	DO.intDocumentId,
+			DO.intBookId,
+			DO.intSubBookId,
+			BK.strBook,
+			SBK.strSubBook,
 			DO.strDocumentName,
 			DO.strDescription,
 			DO.intDocumentType,
@@ -17,4 +21,6 @@ AS
 			DO.intCertificationId
 
 	FROM	tblICDocument	DO
-	JOIN	tblICCommodity	CO	ON	CO.intCommodityId	=	DO.intCommodityId
+	JOIN	tblICCommodity	CO	ON	CO.intCommodityId	=	DO.intCommodityId	LEFT 
+	JOIN	tblCTBook		BK	ON	DO.intBookId		=	BK.intBookId		LEFT 
+	JOIN	tblCTSubBook	SBK	ON	DO.intSubBookId		=	SBK.intSubBookId
