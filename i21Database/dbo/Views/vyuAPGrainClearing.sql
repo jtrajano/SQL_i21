@@ -29,5 +29,5 @@ INNER JOIN tblGRSettleStorageTicket SST
 INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SST.intCustomerStorageId
 WHERE GD.strTransactionId LIKE 'STR-%'
-	AND GD.strTransactionForm = 'Storage Settlement'
 	AND SS.intBillId IS NULL
+	AND GD.strCode IN ('STR','IC')
