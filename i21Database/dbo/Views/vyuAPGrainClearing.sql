@@ -16,8 +16,8 @@ SELECT
 	,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
 	,SS.dblSettleUnits AS dblSettleStorageQty
 	,GD.intAccountId
-	,AD.strDescription
-	,GD.strDescription
+	,strAccountDescription = AD.strDescription
+	,strGLDescription = GD.strDescription
 FROM vyuGLDetail GD
 INNER JOIN vyuGLAccountDetail AD
 	ON AD.intAccountId = GD.intAccountId
