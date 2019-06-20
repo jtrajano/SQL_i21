@@ -1888,7 +1888,7 @@ BEGIN TRY
 	
 	-----------------------------------------------------Settlement Price Updation--------------------------------------------
 	UPDATE CD
-	SET	   CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,dbo.fnCTGetLastSettlementPrice(CD.intFutureMarketId,SM.intFutureMonthId))        
+	SET	   CD.dblSettlementPrice = ISNULL(SP.dblSettlementPrice,dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId,SM.intFutureMonthId))        
 	
 	FROM   @tblUnRealizedPNL CD
 	LEFT JOIN   @tblSettlementPrice	SP ON SP.intFutureMarketId = CD.intFutureMarketId AND SP.intFutureMonthId = CD.intFutureMonthId

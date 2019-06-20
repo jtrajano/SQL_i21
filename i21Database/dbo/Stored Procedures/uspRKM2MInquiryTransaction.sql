@@ -20,7 +20,7 @@ DECLARE @ysnIncludeInventoryM2M BIT
 DECLARE @ysnEnterForwardCurveForMarketBasisDifferential BIT
 DECLARE @ysnCanadianCustomer BIT
 DECLARE @intDefaultCurrencyId int
-DECLARE @ysnM2MAllowExpiredMonth BIT = 0
+DECLARE @intMarkExpiredMonthPositionId INT
 
 SELECT @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
 
@@ -28,7 +28,7 @@ SELECT TOP 1 @ysnIncludeBasisDifferentialsInResults = ysnIncludeBasisDifferentia
 	, @ysnEnterForwardCurveForMarketBasisDifferential = ysnEnterForwardCurveForMarketBasisDifferential
 	, @ysnIncludeInventoryM2M = ysnIncludeInventoryM2M
 	, @ysnCanadianCustomer = ISNULL(ysnCanadianCustomer, 0)
-	, @ysnM2MAllowExpiredMonth = ysnM2MAllowExpiredMonth
+	, @intMarkExpiredMonthPositionId = ISNULL(intMarkExpiredMonthPositionId, 1)
 FROM tblRKCompanyPreference
 
 SELECT TOP 1 @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
@@ -501,7 +501,7 @@ DECLARE @tblGetSettlementPrice TABLE (dblLastSettle NUMERIC(24,10)
 	, intFutureMonthId INT
 	, intFutureMarketId INT)
 
-IF (@ysnM2MAllowExpiredMonth = 1)
+IF (@intMarkExpiredMonthPositionId = 2)
 BEGIN
 	INSERT INTO @tblGetSettlementPrice
 	SELECT dblLastSettle

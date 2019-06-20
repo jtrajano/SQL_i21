@@ -59,7 +59,7 @@
 	[strM2MView] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPreCrush] BIT NULL,
 	[ysnHideNetPayableAndReceivable] BIT NULL,
-	[ysnM2MAllowExpiredMonth] BIT DEFAULT((0)) NULL,
+	[intMarkExpiredMonthPositionId] INT NULL DEFAULT((1)),
 	[ysnSubTotalByBook] BIT DEFAULT((0)) NULL,
 	[intDefaultInstrumentId] INT NULL,
 	[intDefaultInstrumentTypeId] INT NULL,
