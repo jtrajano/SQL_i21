@@ -21,6 +21,7 @@ SELECT
 	,B.intSCompanyLocationId AS intLocationId
 	,compLoc.strLocationName
 	,CAST((CASE WHEN receiptItem.intInventoryReceiptItemId > 0 THEN 0 ELSE 1 END) AS BIT) ysnAllowVoucher --allow voucher if there is no receipt
+	,GL.intAccountId
 	,GL.strAccountId
 FROM tblLGLoad A
 INNER JOIN tblLGLoadDetail B
@@ -73,6 +74,7 @@ SELECT
 	,bill.intShipToId AS intLocationId
 	,compLoc.strLocationName
 	,1 --allow voucher if there is no receipt
+	,accnt.intAccountId
 	,accnt.strAccountId
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
