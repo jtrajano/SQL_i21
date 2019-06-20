@@ -78,7 +78,7 @@ WHERE	r.ysnPosted = 1
 
 BEGIN 
 	-- Assemble the voucher items 
-	BEGIN 
+	BEGIN 		
 		INSERT INTO @voucherItems(
 			[intEntityVendorId]			
 			,[intTransactionType]		
@@ -189,21 +189,6 @@ BEGIN
 		,GP.intStorageLocationId
 		,GP.intSubLocationId
 	FROM dbo.fnICGeneratePayables (@intReceiptId,	 1) GP
-	INNER JOIN tblICInventoryReceiptItem ReceiptItem 
-		ON ReceiptItem.intInventoryReceiptItemId = GP.intInventoryReceiptItemId
-	INNER JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
-	INNER JOIN tblICInventoryReceipt Receipt
-		ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-		AND Receipt.intEntityVendorId = GP.intEntityVendorId
-		AND Item.strType <> 'Bundle'
-		AND ISNULL(Receipt.strReceiptType, '') <> 'Transfer Order'
-			AND 1 = 
-				CASE 
-					WHEN @intScreenId = @intScreenId_InventoryReceipt AND ReceiptItem.ysnAllowVoucher = 0 THEN 
-						0
-					ELSE 
-						1
-				END 
 
 	END 
 
@@ -244,53 +229,11 @@ BEGIN
 		FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
 	END
 
-	-- Check if we can convert the IR Items to Voucher
-	IF (
-		EXISTS (
-			SELECT	TOP 1 1 
-			FROM	tblICInventoryReceiptItem ri INNER JOIN tblICItem i
-						ON ri.intItemId = i.intItemId
-			WHERE	ri.intInventoryReceiptId = @intReceiptId
-					AND ri.dblBillQty < ri.dblOpenReceive 
-					AND ri.intOwnershipType = @Own
-					AND i.strType <> 'Bundle'
-					AND NOT(@intScreenId = @intScreenId_InventoryReceipt)
-		)
-		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptItemId IS NOT NULL) 
-	) 
-	BEGIN 
-		-- 'The items in {Receipt Number} are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
-		EXEC uspICRaiseError 80226, @strReceiptNumber; 
-		RETURN -80226; 
-	END 
-
-	-- Check if we can convert the IR Other Charges to Voucher
-	IF (
-		EXISTS (
-			SELECT	TOP 1 1 
-			FROM	tblICInventoryReceiptCharge rc INNER JOIN tblICInventoryReceipt r
-						ON rc.intInventoryReceiptId = r.intInventoryReceiptId
-			WHERE	rc.intInventoryReceiptId = @intReceiptId
-					AND 
-					(
-						(
-							rc.ysnPrice = 1
-							AND ISNULL(-rc.dblAmountPriced, 0) < rc.dblAmount
-						)
-						OR (
-							rc.ysnAccrue = 1 
-							AND r.intEntityVendorId = ISNULL(rc.intEntityVendorId, r.intEntityVendorId) 
-							AND ISNULL(rc.dblAmountBilled, 0) < rc.dblAmount
-						)
-					)
-		)
-		AND NOT EXISTS (SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL) 
-	) 
-	BEGIN 
-		-- 'The other charges in {Receipt Number} are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
-		EXEC uspICRaiseError 80227, @strReceiptNumber; 
-		RETURN -80227; 
-	END 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherItems) AND @intScreenId = @intScreenId_InventoryReceipt
+	BEGIN
+		EXEC uspICRaiseError 80226, @strReceiptNumber;
+		RETURN -80226; 	
+	END
 
 	-- Check if we can convert the IR to Voucher
 	IF NOT EXISTS (
@@ -320,21 +263,6 @@ BEGIN
 	-- Call the AP sp to convert the IR to Voucher. 
 	BEGIN 
 		DECLARE @throwedError AS NVARCHAR(1000);
-
-		--EXEC [dbo].[uspAPCreateBillData]
-		--	@userId = @intEntityUserSecurityId
-		--	,@vendorId = @intEntityVendorId
-		--	,@type = @billTypeToUse
-		--	,@voucherDetailReceipt = @voucherItems
-		--	,@voucherDetailReceiptCharge = @voucherOtherCharges
-		--	,@shipTo = @intShipTo
-		--	,@shipFrom = @intShipFrom
-		--	,@vendorOrderNumber = @strVendorRefNo
-		--	,@currencyId = @intCurrencyId
-		--	,@throwError = 0
-		--	,@error = @throwedError OUTPUT
-		--	,@billId = @intBillId OUTPUT
-		--	,@voucherDate = @dtmReceiptDate
 
 		EXEC [dbo].[uspAPCreateVoucher]
 			@voucherPayables = @voucherItems
