@@ -28,6 +28,7 @@ BEGIN TRY
 			@SecondApprovalId       INT,
 			@FirstApprovalSign      VARBINARY(MAX),
 			@SecondApprovalSign     VARBINARY(MAX),
+			@InterCompApprovalSign  VARBINARY(MAX),
 			@IsFullApproved         BIT = 0,
 			@ysnFairtrade			BIT = 0,
 			@ysnFeedOnApproval		BIT = 0,
@@ -170,16 +171,21 @@ BEGIN TRY
     SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId AND ISNULL(intApproverGroupId,0) <> @intApproverGroupId ORDER BY intApprovalId
 
-	SELECT @FirstApprovalSign =  Sig.blbDetail 
-								 FROM tblSMSignature Sig  WITH (NOLOCK)
-								 --JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
-								 WHERE Sig.intEntityId=@FirstApprovalId
+	SELECT	@FirstApprovalSign =  Sig.blbDetail 
+	FROM	tblSMSignature Sig  WITH (NOLOCK)
+	WHERE	Sig.intEntityId=@FirstApprovalId
 
-	SELECT @SecondApprovalSign =Sig.blbDetail 
-								FROM tblSMSignature Sig  WITH (NOLOCK)
-								--JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
-								WHERE Sig.intEntityId=@SecondApprovalId
-	
+	SELECT	@SecondApprovalSign =Sig.blbDetail 
+	FROM	tblSMSignature Sig  WITH (NOLOCK)
+	WHERE	Sig.intEntityId=@SecondApprovalId
+
+	SELECT	@InterCompApprovalSign =Sig.blbDetail 
+	FROM	tblCTIntrCompApproval	IA
+	JOIN	tblSMUserSecurity		US	ON	US.strUserName	=	IA.strUserName	
+	JOIN	tblSMSignature			Sig	ON	US.intEntityId	=	Sig.intEntityId
+	WHERE	IA.intContractHeaderId	=	@intContractHeaderId
+	AND		IA.strScreen	=	'Contract'
+
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strAddress)) END,
 			@strCounty		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(isnull(rtrt9.strTranslation,tblSMCompanySetup.strCountry))) END,
@@ -578,6 +584,7 @@ BEGIN TRY
 			,strApprovalText					    = @strApprovalText
 			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
 			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
+			,InterCompApprovalSign					= @InterCompApprovalSign
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
 			,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN @rtPricing + ' :'		ELSE NULL END
