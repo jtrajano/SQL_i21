@@ -206,7 +206,7 @@ SET @innerQuery =
      ,dblReceiptQty  
      ,intLocationId  
      ,strLocationName  
-    FROM vyuAPForClearing  
+    FROM vyuAPReceiptClearing  
     ';  
   
 IF @dateFrom IS NOT NULL  
@@ -383,7 +383,7 @@ SET @cteQuery = N';WITH forClearing
       ,dblReceiptQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPForClearing  
+     FROM vyuAPReceiptClearing  
      ' + @innerQueryFilter + '  
     ),  
     chargesForClearing  
@@ -496,7 +496,7 @@ BEGIN
       ,dblReceiptQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPForClearing  
+     FROM vyuAPReceiptClearing  
     ),  
     chargesForClearing  
     AS  
