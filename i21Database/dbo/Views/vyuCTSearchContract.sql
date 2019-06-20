@@ -80,7 +80,8 @@ AS
 			CH.intFreightTermId,
 			CH.strFreightTerm,
 			CH.strExternalEntity,
-			CH.strExternalContractNumber
+			CH.strExternalContractNumber,
+			CH.ysnReceivedSignedFixationLetter
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN

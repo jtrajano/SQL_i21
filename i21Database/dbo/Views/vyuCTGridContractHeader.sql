@@ -141,7 +141,8 @@ AS
 			NM.strSubBook,
 			NM.strMarketMainCurrency,
 			NM.strBroker,
-			NM.strBrokerAccount
+			NM.strBrokerAccount,
+			CH.ysnReceivedSignedFixationLetter
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
