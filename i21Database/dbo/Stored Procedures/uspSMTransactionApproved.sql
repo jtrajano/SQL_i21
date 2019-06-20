@@ -122,5 +122,17 @@ BEGIN
 		RETURN
 	END
 
-	RETURN
+	IF @type = 'ContractManagement.view.PriceContracts'
+	BEGIN
+		BEGIN TRY
+			UPDATE [tblCTSMTransactionApprovedLog] SET ysnOnceApproved = @ysnOnceApproved WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
+			EXEC uspCTSavePriceContract @intPriceContractId = @recordId,@strXML = '',@ysnApprove = 1
+			UPDATE [tblCTSMTransactionApprovedLog] SET strErrMsg = 'Success' WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
+		END TRY
+		BEGIN CATCH
+			UPDATE [tblCTSMTransactionApprovedLog] SET strErrMsg = ERROR_MESSAGE() WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
+		END CATCH
+		RETURN
+	END
+
 END
