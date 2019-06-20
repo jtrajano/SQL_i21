@@ -171,3 +171,37 @@ GROUP BY
 	,C.strName
 	,compLoc.strLocationName
 HAVING (loadCost.dblLoadCostDetailQty - SUM(loadCost.dblVoucherQty)) != 0
+UNION
+SELECT  DISTINCT
+	settleStorage.dtmDate
+	,settleStorage.strTransactionNumber
+	,item.strItemNo
+	,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+	,settleStorage.strAccountId
+	,compLoc.strLocationName
+FROM
+(
+	SELECT
+		*
+	FROM vyuAPGrainClearing
+) settleStorage
+LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+		ON B.[intEntityId] = settleStorage.[intEntityVendorId]
+INNER JOIN tblSMCompanyLocation compLoc
+		ON settleStorage.intLocationId = compLoc.intCompanyLocationId
+INNER JOIN tblICItem item
+	ON item.intItemId = settleStorage.intItemId
+GROUP BY
+	settleStorage.intEntityVendorId
+	,item.strItemNo
+	,settleStorage.intLocationId
+	,settleStorage.strTransactionNumber
+	,settleStorage.dblSettleStorageQty
+	,settleStorage.dtmDate
+	,settleStorage.strAccountId
+	,settleStorage.strTransactionNumber
+	,B.strVendorId
+	,C.strEntityNo
+	,C.strName
+	,compLoc.strLocationName
+HAVING (settleStorage.dblSettleStorageQty - SUM(settleStorage.dblVoucherQty)) != 0
