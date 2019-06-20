@@ -72,7 +72,11 @@ SELECT	CH.intContractHeaderId,
 		SB.strSubBook,
 		
 		FT.intFreightTermId,
-		FT.strFreightTerm
+		FT.strFreightTerm,
+
+		CH.strExternalEntity,
+		CH.strExternalContractNumber,
+		CH.ysnReceivedSignedFixationLetter
 
 FROM	tblCTContractHeader					CH	
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
