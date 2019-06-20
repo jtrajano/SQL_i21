@@ -41,7 +41,7 @@ LEFT JOIN(SELECT intYear = YEAR(PC.dtmPayDate)
 	AND TOR.intTypeTimeOffId = PAYCHECK.intTypeTimeoffId
 	AND PAYCHECK.intYear = YEAR(TOR.dtmDateTo)  
 WHERE TOR.ysnPostedToCalendar = 1 
-	AND TOR.dtmDateTo <= PAYCHECK.dtmPayDate
+	--AND TOR.dtmDateTo <= PAYCHECK.dtmPayDate
 GROUP BY YEAR(dtmDateTo)
 	,TOR.intEntityEmployeeId
 	,TOR.intTypeTimeOffId
