@@ -114,7 +114,7 @@ BEGIN TRY
 	FROM tblSCTicket SC 
 	LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intSourceId = SC.intTicketId
 	LEFT JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
-	WHERE SC.intTicketId = @intTicketId AND ICS.intSourceType = 1
+	WHERE SC.intTicketId = @intTicketId AND ICS.intSourceType = 1 AND ISNULL(ICSI.ysnAllowInvoice,1)  = 1 
 
 	INSERT INTO @DestinationItems (
 		[intItemId] 
