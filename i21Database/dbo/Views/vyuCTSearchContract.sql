@@ -78,7 +78,9 @@ AS
 			CH.strBook,
 			CH.strSubBook,
 			CH.intFreightTermId,
-			CH.strFreightTerm
+			CH.strFreightTerm,
+			CH.strExternalEntity,
+			CH.strExternalContractNumber
 
 	FROM	[vyuCTSearchContractHeader] CH	LEFT
 	JOIN
