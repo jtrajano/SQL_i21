@@ -80,6 +80,7 @@ BEGIN
 					, b.intStorageScheduleTypeId
 					, strFutureMonth = '' COLLATE Latin1_General_CI_AS
 					, gh.dtmHistoryDate
+					, gh.intSettleStorageId
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -149,7 +150,8 @@ BEGIN
 					, strShipmentNumber = ISNULL((SELECT strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = gh.intInventoryShipmentId), '')
 					, b.intStorageScheduleTypeId
 					, strFutureMonth = '' COLLATE Latin1_General_CI_AS
-					,gh.dtmHistoryDate
+					, gh.dtmHistoryDate
+					, gh.intSettleStorageId
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -286,6 +288,9 @@ BEGIN
 		, strType nvarchar(100) COLLATE Latin1_General_CI_AS
 		, strInventoryType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intPricingTypeId int
+		, strTransactionType NVARCHAR(50)
+		, intTransactionId INT
+		, intTransactionDetailId INT
 		, dtmDate DATETIME)
 
 
@@ -298,7 +303,10 @@ BEGIN
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
-				, dtmDate)
+				, dtmDate
+				, strTransactionType
+				, intTransactionId
+				, intTransactionDetailId)
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
@@ -308,6 +316,9 @@ BEGIN
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
 				, dtmDate
+				, strTransactionType
+				, intTransactionId
+				, intTransactionDetailId
 			FROM (
 				SELECT strCommodityCode
 					, i.strItemNo
@@ -318,6 +329,9 @@ BEGIN
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
 					, s.dtmDate
+					, s.strTransactionType
+					, s.intTransactionId
+					, s.intTransactionDetailId
 				FROM vyuRKGetInventoryValuation s
 				JOIN tblICItem i ON i.intItemId = s.intItemId
 				JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
@@ -541,7 +555,276 @@ BEGIN
 
 			END
 
+
+			--========================
+			-- Get Company Ownership
+			--=========================
+			DECLARE @CompanyOwnershipRaw AS TABLE (
+					dtmDate  DATE  NULL
+					,dblUnpaidIncrease  NUMERIC(18,6)
+					,dblUnpaidDecrease  NUMERIC(18,6)
+					,dblUnpaidBalance  NUMERIC(18,6)
+					,dblPaidBalance  NUMERIC(18,6)
+					,strTransactionId NVARCHAR(50)
+			)
+
+			INSERT INTO @CompanyOwnershipRaw(
+				dtmDate
+				,dblUnpaidIncrease
+				,dblUnpaidDecrease
+				,dblUnpaidBalance
+				,dblPaidBalance
+				,strTransactionId
+			)
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = dblQtyReceived
+				,dblUnpaidDecrease = dblPartialPaidQty
+				,dblUnpaidBalance = dblQtyReceived - dblPartialPaidQty
+				,dblPaidBalance = dblPartialPaidQty
+				,strTransactionId = strBillId
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,BD.dblQtyReceived
+					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
+					,B.strBillId
+				from @InventoryStock Inv
+				inner join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId 
+						AND BD.intInventoryReceiptChargeId IS NULL
+				inner join tblAPBill B on BD.intBillId = B.intBillId
+				where Inv.strTransactionType = 'Inventory Receipt'
+			) t
+			UNION ALL
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = dblQtyReceived
+				,dblUnpaidDecrease = dblPartialPaidQty
+				,dblUnpaidBalance = dblQtyReceived - dblPartialPaidQty
+				,dblPaidBalance = dblPartialPaidQty
+				,strTransactionId = strBillId
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,BD.dblQtyReceived
+					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
+					,B.strBillId
+				from @InventoryStock Inv
+				inner join tblGRSettleStorage SS ON Inv.intTransactionId = SS.intSettleStorageId
+				inner join tblAPBill B on SS.intBillId = B.intBillId
+				inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
+						AND BD.intItemId = SS.intItemId
+				where Inv.strTransactionType = 'Storage Settlement'
+			) t
+
+			UNION ALL --INVENTORY SHIPMENT WITH INVOICE
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblQtyShipped
+				,strTransactionId = strInvoiceNumber
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyShipped = ID.dblQtyShipped * -1
+					,I.strInvoiceNumber
+				from @InventoryStock Inv
+				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
+				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
+						AND ID.intInventoryShipmentChargeId IS NULL
+				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
+				where Inv.strTransactionType = 'Inventory Shipment'
+					AND I.ysnPosted = 1
+					AND S.intSourceType = 1
+						
+			) t
+				
+			UNION ALL --INVENTORY SHIPMENT W/O INVOICE
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblQtyShipped
+				,strTransactionId = strShipmentNumber
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyShipped = Inv.dblTotal
+					,S.strShipmentNumber
+				from @InventoryStock Inv
+				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
+				inner join vyuICShipmentInvoice SI on Inv.intTransactionDetailId = SI.intInventoryShipmentItemId
+				where Inv.strTransactionType = 'Inventory Shipment'
+					AND S.ysnPosted = 1
+					AND S.intSourceType = 1
+					and SI.strInvoiceNumber IS NULL
+			) t
+
+			UNION ALL --DIRECT INVOICE
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblQtyShipped
+				,strTransactionId = strInvoiceNumber
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),I.dtmPostDate, 110), 110)
+					,dblQtyShipped = Inv.dblTotal
+					,I.strInvoiceNumber
+				from @InventoryStock Inv
+				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInvoiceDetailId 
+						AND ID.intInventoryShipmentChargeId IS NULL
+				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
+				where Inv.strTransactionType IN( 'Invoice','Cash')
+					AND I.ysnPosted = 1
+						
+			) t
+
+				
+			UNION ALL --CREDIT MEMO
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblQtyShipped
+				,strTransactionId = strInvoiceNumber
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyShipped = Inv.dblTotal
+					,I.strInvoiceNumber
+				from @InventoryStock Inv
+				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInvoiceDetailId 
+				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
+				where Inv.strTransactionType = 'Credit Memo'
+					AND I.ysnPosted = 1
+						
+			) t
+
+			UNION ALL --INVENTORY COUNT
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblQtyShipped
+				,strTransactionId = strCountNo
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyShipped = Inv.dblTotal
+					,I.strCountNo
+				from @InventoryStock Inv
+				inner join tblICInventoryCountDetail ID on Inv.intTransactionDetailId = ID.intInventoryCountDetailId 
+				inner join tblICInventoryCount I on ID.intInventoryCountId = I.intInventoryCountId
+				where Inv.strTransactionType = 'Inventory Count'
+					AND I.ysnPosted = 1
+						
+			) t
+
+			UNION ALL--INVENTORY ADJUSTMENT
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblQtyShipped
+				,strTransactionId = strAdjustmentNo
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyShipped = Inv.dblTotal
+					,I.strAdjustmentNo
+				from @InventoryStock Inv
+				inner join tblICInventoryAdjustmentDetail ID on Inv.intTransactionDetailId = ID.intInventoryAdjustmentDetailId 
+				inner join tblICInventoryAdjustment I on ID.intInventoryAdjustmentId = I.intInventoryAdjustmentId
+				where Inv.strTransactionType LIKE 'Inventory Adjustment -%'
+					AND I.ysnPosted = 1
+					AND I.intSourceTransactionTypeId IS NULL
+						
+			) t
+
 			
+
+			If ((SELECT TOP 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=0)
+			BEGIN
+				INSERT INTO @CompanyOwnershipRaw(
+					dtmDate
+					,dblUnpaidIncrease
+					,dblUnpaidDecrease
+					,dblUnpaidBalance
+					,dblPaidBalance
+					,strTransactionId
+				)
+				SELECT
+					dtmDate
+					,dblUnpaidIncrease = 0
+					,dblUnpaidDecrease = 0
+					,dblUnpaidBalance = 0
+					,dblPaidBalance = -dblBalance 
+					,strTransactionId = strTicketNumber
+				FROM (
+					select 
+						dtmDate  = CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+						,dblBalance = SUM(dblBalance)
+						,strTicketNumber
+					from #tblGetStorageDetailByDate
+					where intStorageTypeId = 2 --DP
+					and intSettleStorageId is not null
+					group by
+						CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+						,strTicketNumber
+						,strTicketType
+				) t
+
+				UNION ALL --DP that are Settle and Reverse Settle 
+				SELECT
+					dtmDate
+					,dblUnpaidIncrease = 0
+					,dblUnpaidDecrease = 0
+					,dblUnpaidBalance = 0
+					,dblPaidBalance = dblBalance * -1
+					,strTransactionId = strTicketNumber
+				FROM (
+					select 
+						dtmDate  = CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+						,dblBalance = SUM(dblBalance)
+						,strTicketNumber
+					from #tblGetStorageDetailByDate
+					where intStorageTypeId = 2 --DP
+						and intSettleStorageId is null
+						and strTicketType = 'Settle Storage'
+					group by
+						CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+						,strTicketNumber
+						,strTicketType
+				) t
+
+			END 
+
+
+
+			SELECT * 
+			INTO #tempCompanyOwnership
+			FROM (
+				SELECT 
+					dtmDate
+					,dblUnpaidIncrease = SUM(dblUnpaidIncrease)
+					,dblUnpaidDecrease = SUM(dblUnpaidDecrease)
+					,dblUnpaidBalance = SUM(dblUnpaidBalance)
+					,dblPaidBalance = SUM(dblPaidBalance)
+				FROM @CompanyOwnershipRaw
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
+				GROUP BY
+					dtmDate
+			) t
+
 			--Create the temp table for the date range
 			;WITH N1 (N) AS (
 				SELECT 1 FROM (
@@ -598,11 +881,21 @@ BEGIN
 			End
 
 
-			SELECT * FROM @Result
+			SELECT 
+				r.dtmDate
+				,co.dblUnpaidIncrease
+				,co.dblUnpaidDecrease
+				,co.dblUnpaidBalance
+				,co.dblPaidBalance
+				,r.dblCompanyTitled
+			FROM @Result r
+			FULL JOIN #tempCompanyOwnership co ON r.dtmDate = co.dtmDate
 
 			drop table #LicensedLocation
 			drop table #tblGetStorageDetailByDate
 			drop table #tempDateRange
+			drop table #tblGetSalesIntransitWOPickLot
+			drop table #tempCompanyOwnership
 
 
 END

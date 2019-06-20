@@ -763,6 +763,10 @@ BEGIN
 
 	DECLARE @CompanyTitleByDate AS TABLE (
 			dtmDate  DATE  NULL
+			,dblUnpaidIncrease  NUMERIC(18,6)
+			,dblUnpaidDecrease  NUMERIC(18,6)
+			,dblUnpaidBalance  NUMERIC(18,6)
+			,dblPaidBalance  NUMERIC(18,6)
 			,dblCompanyTitled  NUMERIC(18,6)
 	)
 
@@ -816,6 +820,10 @@ BEGIN
 	
 	INSERT INTO @CompanyTitleByDate(
 		dtmDate
+		,dblUnpaidIncrease
+		,dblUnpaidDecrease
+		,dblUnpaidBalance 
+		,dblPaidBalance
 		,dblCompanyTitled
 	)
 	EXEC uspRKGetCompanyTitled @dtmFromTransactionDate = @dtmFromTransactionDate
@@ -1071,12 +1079,12 @@ BEGIN
 			, [dblKIn]
 			, [dblKOut]
 			, [dblKNet] = (SELECT SUM(dblKNet) FROM tblRKDailyPositionForCustomer AS T2 WHERE ISNULL(T2.dtmDate,'01/01/1900') <= ISNULL(list.dtmDate,'01/01/1900'))
-			, dblUnpaidIn = 0
-			, dblUnpaidOut = 0
-			, dblBalance = 0
-			, dblPaidBalance = 0
+			, dblUnpaidIn = ct.dblUnpaidIncrease
+			, dblUnpaidOut = ct.dblUnpaidDecrease
+			, dblBalance = ct.dblUnpaidBalance
+			, dblPaidBalance = ct.dblPaidBalance
 			, dblTotalCompanyOwned = ct.dblCompanyTitled
-			, dblUnpaidBalance = 0
+			, dblUnpaidBalance = ct.dblUnpaidBalance
 		FROM #final list
 		FULL JOIN tblRKDailyPositionForCustomer t ON ISNULL(t.dtmDate,'1900-01-01')=ISNULL(list.dtmDate,'1900-01-01')
 		FULL JOIN @CompanyTitleByDate ct ON ISNULL(ct.dtmDate,'1900-01-01')=ISNULL(list.dtmDate,'1900-01-01')
