@@ -508,7 +508,7 @@ BEGIN TRY
 						END
 					END
 				
-				SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM #tblReceipt WHERE intInventoryReceiptItemId > @intInventoryReceiptItemId
+				SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM @tblReceipt WHERE intInventoryReceiptItemId > @intInventoryReceiptItemId
 			END
 
 			SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId
