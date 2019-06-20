@@ -43,7 +43,9 @@ RETURNS @FinalResult TABLE (intFutOptTransactionId INT
 	, intRollingMonthId INT
 	, strRollingMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, dtmFilledDate DATETIME)
+	, dtmFilledDate DATETIME
+	,intTraderId INT
+	,strSalespersonId NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 
 AS 
 
@@ -96,6 +98,8 @@ BEGIN
 		, strRollingMonth
 		, strName
 		, dtmFilledDate
+		,intTraderId
+		,strSalespersonId
 	)
 	SELECT DISTINCT intFutOptTransactionId
 		, dtmTransactionDate
@@ -136,6 +140,8 @@ BEGIN
 		, strRollingMonth
 		, strName
 		, dtmFilledDate
+		, intTraderId
+		, strSalespersonId
 	FROM (
 		SELECT ROW_NUMBER() OVER (PARTITION BY intFutOptTransactionId ORDER BY dtmTransactionDate DESC) intRowNum
 			, *
@@ -183,6 +189,8 @@ BEGIN
 				, FOT.strRollingMonth
 				, FOT.strName
 				, FOT.dtmFilledDate
+				, FOT.intTraderId
+				, FOT.strSalespersonId
 			FROM tblRKFutOptTransactionHeader FOTH
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			OUTER APPLY (
@@ -250,6 +258,8 @@ BEGIN
 				, FOT.strRollingMonth
 				, FOT.strName
 				, FOT.dtmFilledDate
+				, FOT.intTraderId
+				, FOT.strSalespersonId
 			FROM tblRKFutOptTransactionHeader FOTH
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			OUTER APPLY (
@@ -318,6 +328,8 @@ BEGIN
 				, strRollingMonth
 				, strBroker
 				, dtmFilledDate
+				, intTraderId
+				, strSalespersonId
 			FROM (
 				SELECT * FROM (
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum

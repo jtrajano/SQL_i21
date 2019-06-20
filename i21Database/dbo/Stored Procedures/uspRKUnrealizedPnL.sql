@@ -133,7 +133,7 @@ BEGIN
 					, ot.strBrokerAccount
 					, ot.strBook
 					, ot.strSubBook
-					, ot.strBrokerTradeNo strSalespersonId
+					, ot.strSalespersonId
 					, ot.strCommodityCode
 					, ot.strLocationName
 					, dblOriginalQty = ot.dblOpenContract
