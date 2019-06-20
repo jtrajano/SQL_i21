@@ -7637,6 +7637,7 @@
     <Build Include="dbo\Views\vyuAPREceiptClearing.sql" />
     <Build Include="dbo\Views\vyuAPShipmentChargeClearing.sql" />
     <Build Include="dbo\Views\vyuAPClearingFilterData.sql" />
+    <Build Include="dbo\Views\vyuAPGrainClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
