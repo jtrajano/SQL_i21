@@ -5,6 +5,7 @@
 	,@strBatchId			NVARCHAR(40) = NULL 
 	,@intUserId				INT		= NULL 
 	,@intEntityId			INT		= NULL
+	,@ysnCMScreen			BIT		= 0
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
 AS
@@ -273,13 +274,26 @@ BEGIN
 		END
 	END 
 
+
 	-- Check if amount is zero. 
 	IF @dblAmount = 0 AND @ysnPost = 1
-	BEGIN 
-	-- Cannot post a zero-value transaction.
-	RAISERROR('Cannot post a zero-value transaction.', 11, 1)
-	GOTO Post_Rollback
-END 
+		BEGIN 
+		-- Cannot post a zero-value transaction.
+		RAISERROR('Cannot post a zero-value transaction.', 11, 1)
+		GOTO Post_Rollback
+	END 
+
+	IF @ysnCMScreen = 1 AND @ysnPost =0
+	BEGIN
+	
+		DECLARE @ccrTransId NVARCHAR(20) = ''
+		SELECT TOP 1  @ccrTransId = strCcdReference FROM tblCCSiteHeader CC JOIN tblCMBankTransaction CM ON CM.intTransactionId = CC.intCMBankTransactionId AND @strTransactionId = CM.strTransactionId
+			IF (ISNULL(@ccrTransId, '') <> '')
+			BEGIN
+				RAISERROR('Unposting Not Allowed. Please unpost Dealer Credit Card %s', 11, 1, @ccrTransId)
+				GOTO Post_Rollback		
+			END
+	END
 END
 
 --=====================================================================================================================================
