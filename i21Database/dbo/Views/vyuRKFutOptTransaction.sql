@@ -71,8 +71,11 @@ FROM (
 		, strNotes = ft.strReference
 		, ft.intFutureMarketId
 		, ft.intFutureMonthId
+		, ft.intTraderId
+		, sp.strName strSalespersonId
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
+LEFT OUTER JOIN tblEMEntity sp ON sp.intEntityId = ft.intTraderId
 LEFT OUTER JOIN tblRKFuturesMonth AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
 LEFT OUTER JOIN tblRKFuturesMonth AS rm ON ft.[intRollingMonthId] = rm.[intFutureMonthId]
 LEFT OUTER JOIN tblRKOptionsMonth AS om ON ft.[intOptionMonthId] = om.[intOptionMonthId]
