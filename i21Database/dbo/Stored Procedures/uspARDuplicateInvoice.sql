@@ -383,7 +383,7 @@ BEGIN CATCH
 				ROLLBACK TRANSACTION @Savepoint
 	END
 
-	SET @ErrorMessage = @CurrentErrorMessage
+	SET @ErrorMessage = ERROR_MESSAGE()
 	IF ISNULL(@RaiseError,0) = 1
 		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
