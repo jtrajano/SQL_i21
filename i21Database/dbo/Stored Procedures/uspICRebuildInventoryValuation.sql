@@ -776,6 +776,7 @@ BEGIN
 				SELECT DISTINCT 
 					t.intItemId
 					,t.intItemLocationId
+					,[dtmStartOfMonth] = dbo.[fnDateFromParts](YEAR(t.dtmDate), MONTH(t.dtmDate), 1)
 					,[dtmEndOfMonth] = DATEADD(d, -1, DATEADD(m, 1,dbo.[fnDateFromParts](YEAR(t.dtmDate), MONTH(t.dtmDate), 1))) 
 				FROM 
 					#tmpICInventoryTransaction t 
@@ -800,7 +801,8 @@ BEGIN
 							WHEN t2.dblValue <> 0 AND t2.intTransactionTypeId = 26 THEN 1
 							ELSE 0 
 						END 
-					AND dbo.fnDateEquals(t2.dtmDate, t.[dtmEndOfMonth]) = 1
+					AND dbo.fnDateGreaterThanEquals(t2.dtmDate, t.[dtmStartOfMonth]) = 1
+					AND dbo.fnDateLessThanEquals(t2.dtmDate, t.[dtmEndOfMonth]) = 1
 				ORDER BY
 					t2.dtmDate DESC, t2.id DESC, t2.intSortByQty DESC
 			) t2
