@@ -80,6 +80,8 @@ AS
 			CH.strReportTo,
 			CH.intBrokerId,
 			CH.intBrokerageAccountId,
+			CH.strExternalEntity,
+			CH.strExternalContractNumber,
 
 			NM.intPriceFixationId,
 			NM.intPriceContractId,
