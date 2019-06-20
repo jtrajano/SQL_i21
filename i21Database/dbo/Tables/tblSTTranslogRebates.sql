@@ -162,7 +162,8 @@
 	[ysnPMMSubmitted] BIT NOT NULL DEFAULT ((0)),
 	[ysnRJRSubmitted] BIT NOT NULL DEFAULT ((0)),
 	[intConcurrencyId] int NOT NULL,
-	CONSTRAINT [PK_tblSTTranslogRebates] PRIMARY KEY ([intTranslogId])
+	CONSTRAINT [PK_tblSTTranslogRebates] PRIMARY KEY ([intTranslogId]),
+	CONSTRAINT [FK_tblSTTranslogRebates_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [tblSTCheckoutHeader]([intCheckoutId]) ON DELETE CASCADE,
 	--CONSTRAINT [PK_tblSTTranslogRebates] PRIMARY KEY NONCLUSTERED ([intTranslogId])
 )
 Go
