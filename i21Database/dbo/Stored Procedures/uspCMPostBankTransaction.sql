@@ -192,6 +192,20 @@ BEGIN
 	GOTO Post_Rollback
 END 
 
+IF @ysnCMScreen = 1
+BEGIN
+	DECLARE @ccrTransId NVARCHAR(20) = ''
+	SELECT TOP 1  @ccrTransId = strCcdReference FROM tblCCSiteHeader CC JOIN tblCMBankTransaction CM ON CM.intTransactionId = CC.intCMBankTransactionId AND @strTransactionId = CM.strTransactionId
+	IF (ISNULL(@ccrTransId, '') <> '')
+	BEGIN
+		IF @ysnPost = 0
+			RAISERROR('Unposting Not Allowed. Please unpost Dealer Credit Card %s', 11, 1, @ccrTransId)
+		ELSE
+			RAISERROR('Posting Not Allowed. Please post Dealer Credit Card %s', 11, 1, @ccrTransId)
+		GOTO Post_Rollback		
+	END
+END
+
 
 IF @ysnRecap = 0
 BEGIN
@@ -283,17 +297,6 @@ BEGIN
 		GOTO Post_Rollback
 	END 
 
-	IF @ysnCMScreen = 1 AND @ysnPost =0
-	BEGIN
-	
-		DECLARE @ccrTransId NVARCHAR(20) = ''
-		SELECT TOP 1  @ccrTransId = strCcdReference FROM tblCCSiteHeader CC JOIN tblCMBankTransaction CM ON CM.intTransactionId = CC.intCMBankTransactionId AND @strTransactionId = CM.strTransactionId
-			IF (ISNULL(@ccrTransId, '') <> '')
-			BEGIN
-				RAISERROR('Unposting Not Allowed. Please unpost Dealer Credit Card %s', 11, 1, @ccrTransId)
-				GOTO Post_Rollback		
-			END
-	END
 END
 
 --=====================================================================================================================================
