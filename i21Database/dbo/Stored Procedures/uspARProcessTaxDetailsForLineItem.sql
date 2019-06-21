@@ -244,24 +244,26 @@ BEGIN TRY
 	UPDATE
 		ARIDT
 	SET
-		 ARIDT.[intTaxGroupId]			= EFP.[intTaxGroupId]
-		,ARIDT.[intTaxCodeId]			= EFP.[intTaxCodeId]
-		,ARIDT.[intTaxClassId]			= EFP.[intTaxClassId]
-		,ARIDT.[strTaxableByOtherTaxes]	= EFP.[strTaxableByOtherTaxes]
-		,ARIDT.[strCalculationMethod]	= EFP.[strCalculationMethod]
-		,ARIDT.[dblRate]				= ISNULL(EFP.[dblRate], @ZeroDecimal)
-		,ARIDT.[dblBaseRate]			= ISNULL(EFP.[dblBaseRate], ISNULL(EFP.[dblRate], @ZeroDecimal))
-		,ARIDT.[intSalesTaxAccountId]	= EFP.[intTaxAccountId]
-		,ARIDT.[dblTax]					= EFP.[dblTax]
-		,ARIDT.[dblAdjustedTax]			= EFP.[dblAdjustedTax]
-		,ARIDT.[dblBaseAdjustedTax]		= [dbo].fnRoundBanker(ISNULL(EFP.[dblAdjustedTax], @ZeroDecimal) * ISNULL(ARID.[dblCurrencyExchangeRate], 1), [dbo].[fnARGetDefaultDecimal]())
-		,ARIDT.[ysnTaxAdjusted]			= EFP.[ysnTaxAdjusted]
-		,ARIDT.[ysnSeparateOnInvoice]	= EFP.[ysnSeparateOnInvoice]
-		,ARIDT.[ysnCheckoffTax]			= EFP.[ysnCheckoffTax]
-		,ARIDT.[ysnTaxExempt]			= EFP.[ysnTaxExempt]
-		,ARIDT.[ysnInvalidSetup]		= EFP.[ysnInvalidSetup]
-		,ARIDT.[strNotes]				= EFP.[strNotes]
-		,ARIDT.[intConcurrencyId]		= ARIDT.[intConcurrencyId] + 1
+		 ARIDT.[intTaxGroupId]					= EFP.[intTaxGroupId]
+		,ARIDT.[intTaxCodeId]					= EFP.[intTaxCodeId]
+		,ARIDT.[intTaxClassId]					= EFP.[intTaxClassId]
+		,ARIDT.[strTaxableByOtherTaxes]			= EFP.[strTaxableByOtherTaxes]
+		,ARIDT.[strCalculationMethod]			= EFP.[strCalculationMethod]
+		,ARIDT.[dblRate]						= ISNULL(EFP.[dblRate], @ZeroDecimal)
+		,ARIDT.[dblBaseRate]					= ISNULL(EFP.[dblBaseRate], ISNULL(EFP.[dblRate], @ZeroDecimal))
+		,ARIDT.[intSalesTaxAccountId]			= EFP.[intTaxAccountId]
+		,ARIDT.[dblTax]							= EFP.[dblTax]
+		,ARIDT.[dblAdjustedTax]					= EFP.[dblAdjustedTax]
+		,ARIDT.[dblBaseAdjustedTax]				= [dbo].fnRoundBanker(ISNULL(EFP.[dblAdjustedTax], @ZeroDecimal) * ISNULL(ARID.[dblCurrencyExchangeRate], 1), [dbo].[fnARGetDefaultDecimal]())
+		,ARIDT.[ysnTaxAdjusted]					= EFP.[ysnTaxAdjusted]
+		,ARIDT.[ysnSeparateOnInvoice]			= EFP.[ysnSeparateOnInvoice]
+		,ARIDT.[ysnCheckoffTax]					= EFP.[ysnCheckoffTax]
+		,ARIDT.[ysnTaxExempt]					= EFP.[ysnTaxExempt]
+		,ARIDT.[ysnInvalidSetup]				= EFP.[ysnInvalidSetup]
+		,ARIDT.[strNotes]						= EFP.[strNotes]
+		,ARIDT.[intConcurrencyId]				= ARIDT.[intConcurrencyId] + 1
+		,ARIDT.[ysnAddToCost]					= ISNULL(SMTC.[ysnAddToCost], 0)
+		,ARIDT.[intSalesTaxExemptionAccountId] 	= SMTC.[intSalesTaxExemptionAccountId]
 	FROM
 		tblARInvoiceDetailTax ARIDT
 	INNER JOIN
