@@ -50,6 +50,9 @@ SELECT intFutOptTransactionHistoryId
 	, ysnPreCrush
 	, strRollingMonth
 	, intRollingMonthId
+	, intTraderId
+	, strSalespersonId
+	
 FROM (
 	SELECT intFutOptTransactionHistoryId
 		, History.intFutOptTransactionId
@@ -103,6 +106,8 @@ FROM (
 		, ysnPreCrush = CAST(History.ysnPreCrush AS BIT)
 		, strRollingMonth = RollMonth.strFutureMonth
 		, intRollingMonthId
+		, Entity1.intEntityId intTraderId
+		, History.strTrader strSalespersonId
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.strFutMarketName = History.strFutureMarket
@@ -116,5 +121,6 @@ FROM (
 	LEFT JOIN tblSMCurrency Currency ON Currency.strCurrency = History.strCurrency
 	LEFT JOIN tblRKBrokerageAccount BrokerAccount ON BrokerAccount.strAccountNumber = History.strBrokerAccount
 	LEFT JOIN tblEMEntity Entity ON Entity.strName = History.strBroker AND Entity.intEntityId = BrokerAccount.intEntityId
+	LEFT JOIN tblEMEntity Entity1 ON Entity1.strName = History.strTrader 
 	WHERE ISNULL(History.strAction, '') <> ''
 ) t

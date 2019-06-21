@@ -255,6 +255,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,dblShipmentQuantity = Shipment.dblQuantity
 				,dblBillQty          = Bill.dblQuantity
 				,ISNULL(OL.ysnOpenLoad,0)	AS ysnOpenLoad
+				,CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnContractAllocated
 
 		FROM			ContractDetail					CD
 				JOIN    CTE1							CT	ON CT.intContractDetailId				=		CD.intContractDetailId
@@ -291,6 +292,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		LEFT   JOIN     @tblShipment				Shipment ON Shipment.intContractDetailId        =       CD.intContractDetailId
 		LEFT   JOIN     @tblBill						Bill ON Bill.intContractDetailId			=       CD.intContractDetailId
 		LEFT   JOIN     @OpenLoad						OL	ON OL.intContractDetailId				=       CD.intContractDetailId
+		LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intPContractDetailId = CD.intContractDetailId
 	)t ORDER BY intContractSeq
 
 END TRY

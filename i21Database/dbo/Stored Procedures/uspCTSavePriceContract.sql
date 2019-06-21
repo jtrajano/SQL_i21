@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTSavePriceContract]
 	
 	@intPriceContractId INT,
-	@strXML				NVARCHAR(MAX)
+	@strXML				NVARCHAR(MAX),
+	@ysnApprove			BIT = 0
 	
 AS
 
@@ -37,11 +38,22 @@ BEGIN TRY
 			@dtmFixationDate			DATETIME,
 			@ysnFreezed					BIT,
 			@ysnAA						BIT,
-			@intFutOptTransactionHeaderId INT = NULL
+			@intFutOptTransactionHeaderId INT = NULL,
+			@intScreenId		INT,
+			@intTransactionId			INT,
+			@ysnOnceApproved			INT = 0
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
 	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId	
+
+	SELECT	@intScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+	SELECT  @intTransactionId	=	intTransactionId,@ysnOnceApproved = ysnOnceApproved FROM tblSMTransaction WHERE intRecordId = @intPriceContractId AND intScreenId = @intScreenId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intUserId AND intScreenId = @intScreenId) AND @ysnApprove = 0
+	BEGIN
+		RETURN
+	END
 
 	WHILE ISNULL(@intPriceFixationId,0) > 0
 	BEGIN

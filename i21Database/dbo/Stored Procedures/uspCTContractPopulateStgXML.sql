@@ -21,6 +21,7 @@ BEGIN TRY
 		,@strConditionXML NVARCHAR(MAX)
 		,@strCertificationXML NVARCHAR(MAX)
 		,@strCostCondition NVARCHAR(MAX)
+		,@strApproverXML  NVARCHAR(MAX)
 		,@intContractStageId INT
 		,@intMultiCompanyId INT
 		,@strObjectName NVARCHAR(50)
@@ -140,6 +141,19 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+			---------------------------------------------Approver------------------------------------------
+	SELECT @strApproverXML = NULL
+		,@strObjectName = NULL
+
+
+		SELECT @strObjectName = 'vyuCTContractApproverView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strHeaderCondition
+		,@strApproverXML OUTPUT
+		,NULL
+		,NULL
+
 	INSERT INTO tblCTContractStage (
 		intContractHeaderId
 		,strContractNumber
@@ -155,6 +169,7 @@ BEGIN TRY
 		,strTransactionType
 		,intMultiCompanyId
 		,intToBookId
+		,strApproverXML
 		)
 	SELECT intContractHeaderId = @ContractHeaderId
 		,strContractNumber = @strContractNumber
@@ -170,6 +185,7 @@ BEGIN TRY
 		,strTransactionType = @strToTransactionType
 		,intMultiCompanyId = @intToCompanyId
 		,intToBookId=@intToBookId
+		,strApproverXML=@strApproverXML
 END TRY
 
 BEGIN CATCH

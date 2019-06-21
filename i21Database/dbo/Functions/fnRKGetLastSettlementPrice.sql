@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCTGetLastSettlementPrice]
+﻿CREATE FUNCTION [dbo].[fnRKGetLastSettlementPrice]
 (
 	@intFutureMarketId	INT,
 	@intFuturesMonthId	INT

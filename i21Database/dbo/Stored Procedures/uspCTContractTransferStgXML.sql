@@ -10,7 +10,7 @@ BEGIN TRY
 	FROM tblCTContractStage
 	WHERE intMultiCompanyId = @intToCompanyId AND ISNULL(strFeedStatus, '') = ''
 
-	UPDATE tblCTContractStage SET strFeedStatus='Awt Ack' WHERE intMultiCompanyId = @intToCompanyId
+	UPDATE tblCTContractStage SET strFeedStatus='Awt Ack' WHERE intMultiCompanyId = @intToCompanyId AND ISNULL(strFeedStatus, '') = ''
 
 END TRY
 

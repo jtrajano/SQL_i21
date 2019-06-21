@@ -34,6 +34,9 @@ SELECT A.*
 									WHEN intDefaultInstrumentTypeId = 3 THEN 'Currency Contract' END
 	, strPostToGL = CASE WHEN intPostToGLId = 1 THEN 'Company Configurations'
 						WHEN intPostToGLId = 2 THEN 'Commodity GL' END
+	, strMarkExpiredMonthPosition = CASE WHEN intMarkExpiredMonthPositionId = 1 THEN 'Validate Expired'
+								WHEN intMarkExpiredMonthPositionId = 2 THEN 'Spot Month'
+								WHEN intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END
 FROM tblRKCompanyPreference A
 LEFT JOIN tblICUnitMeasure B ON B.intUnitMeasureId = A.intUnitMeasureId
 LEFT JOIN tblRKInterfaceSystem C ON C.intInterfaceSystemId = A.intInterfaceSystemId

@@ -165,7 +165,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 THEN ARID.dblQtyShipped ELSE ICS.[dblQuantity] END
+	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND ISNULL(ICS.intDestinationWeightId, 0) = 0 THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -190,8 +190,8 @@ INNER JOIN (
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
 		 , ICISI.[intInventoryShipmentItemId]
-		 , ICISI.intChildItemLinkId
-		 , ICISI.dblQuantity  
+		 , ICISI.[intChildItemLinkId]
+		 , ICISI.[intDestinationWeightId]
 	FROM tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 ) ICS ON ICS.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]

@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTInterCompanyContract] @ContractHeaderId INT
+	,@strRowState NVARCHAR(50) = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -11,6 +12,7 @@ BEGIN TRY
 	DECLARE @strUpdate NVARCHAR(100)
 	DECLARE @strToTransactionType NVARCHAR(100)
 		,@intToBookId INT
+		,@strDelete nvarchar(50)
 
 	IF EXISTS (
 			SELECT 1
@@ -88,6 +90,7 @@ BEGIN TRY
 			,@intToEntityId = TC.intEntityId
 			,@strInsert = TC.strInsert
 			,@strUpdate = TC.strUpdate
+			,@strDelete = TC.strDelete
 			,@strToTransactionType = TT1.strTransactionType
 			,@intCompanyLocationId = TC.intCompanyLocationId
 			,@intToBookId = TC.intToBookId
@@ -122,7 +125,11 @@ BEGIN TRY
 					,0
 					,@intToBookId
 			END
-			ELSE IF EXISTS (
+		END
+
+		IF @strInsert = 'Update'
+		BEGIN
+			IF EXISTS (
 					SELECT 1
 					FROM tblCTContractHeader
 					WHERE intContractHeaderId = @ContractHeaderId
@@ -138,6 +145,18 @@ BEGIN TRY
 					,0
 					,@intToBookId
 			END
+		END
+
+		IF @strRowState = 'Delete'
+		BEGIN
+			EXEC uspCTContractPopulateStgXML @ContractHeaderId
+				,@intToEntityId
+				,@intCompanyLocationId
+				,@strToTransactionType
+				,@intToCompanyId
+				,'Modified'
+				,0
+				,@intToBookId
 		END
 	END
 END TRY

@@ -14,12 +14,12 @@
 AS
 
 BEGIN
-	DECLARE @ysnM2MAllowExpiredMonth BIT = 0
+	DECLARE @intMarkExpiredMonthPositionId INT
 	DECLARE @dtmSettlemntPriceDate DATETIME
-	SELECT @ysnM2MAllowExpiredMonth = ysnM2MAllowExpiredMonth FROM tblRKCompanyPreference
+	SELECT @intMarkExpiredMonthPositionId = ISNULL(intMarkExpiredMonthPositionId, 1) FROM tblRKCompanyPreference
 	SELECT @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
 	
-	IF(@ysnM2MAllowExpiredMonth = 1)
+	IF(@intMarkExpiredMonthPositionId = 2)
 	BEGIN
 		SELECT CONVERT(INT, intRowNum) as intRowNum
 			, intFutureMarketId

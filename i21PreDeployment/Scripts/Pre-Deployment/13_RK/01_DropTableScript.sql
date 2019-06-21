@@ -295,5 +295,20 @@ BEGIN
          EXEC sp_rename 'tblRKOptionsPnSExercisedAssigned.intLots', 'dblLots', 'COLUMN'
     END
 END
+
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKCompanyPreference]') AND type IN (N'U'))
+BEGIN
+	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnM2MAllowExpiredMonth')
+	BEGIN
+		IF NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'intMarkExpiredMonthPositionId')
+		BEGIN
+			EXEC('ALTER TABLE tblRKCompanyPreference ADD intMarkExpiredMonthPositionId INT')
+		END
+
+		EXEC('UPDATE tblRKCompanyPreference SET intMarkExpiredMonthPositionId = CASE WHEN ISNULL(ysnM2MAllowExpiredMonth, 0) = 0 THEN 1 ELSE 2 END')
+	END
+END
+
 GO

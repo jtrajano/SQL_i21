@@ -113,7 +113,7 @@ BEGIN TRY
 			 SELECT 
 			 intCustomerStorageId	= SST.intCustomerStorageId
 			,intItemId				= SS.intItemId
-			,[intAccountId]			= NULL
+			,[intAccountId]			= [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 			,[dblQuantityToBill]	= CASE WHEN SST.dblUnits <= SC.dblUnits THEN ROUND(SST.dblUnits,2) ELSE ROUND(SC.dblUnits,2) END
 			,[strMiscDescription]	= Item.[strItemNo]
 			,[dblCost]				= @dblCashPrice
@@ -134,6 +134,7 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageId = SC.intSettleStorageId AND SST.intSettleStorageId = SS.intSettleStorageId
 			JOIN tblGRCustomerStorage     CS  ON CS.intCustomerStorageId = SST.intCustomerStorageId
 			JOIN tblICItem Item ON Item.intItemId = SS.intItemId
+			JOIN tblICItemLocation as ItemLoc on ItemLoc.intItemId = Item.intItemId and ItemLoc.intLocationId = CS.intCompanyLocationId
 			WHERE SC.intContractDetailId	= @intBasisContractDetailId
 			AND SS.intSettleStorageId   = @intSettleStorageId
 			AND SS.intParentSettleStorageId IS NOT NULL
@@ -182,7 +183,7 @@ BEGIN TRY
 			SELECT 
 			 [intCustomerStorageId]   = SS.[intCustomerStorageId]
 			,[intItemId]			  = SS.[intItemId]
-			,[intAccountId]			  = NULL
+			,[intAccountId]			  = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 			,[dblQuantityToBill]		  = SS.dblStorageUnits
 			,[strMiscDescription]	  = Item.[strItemNo]
 			,[dblCost]				  = SS.dblDiscountUnPaid
@@ -201,7 +202,9 @@ BEGIN TRY
 			FROM
 			@SettleDiscountForContract SS
 			JOIN tblICItem Item ON Item.intItemId = SS.intItemId
-			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = SS.intSettleStorageTicketId
+			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = SS.intSettleStorageTicketId		
+			JOIN tblGRCustomerStorage     CS  ON CS.intCustomerStorageId = SST.intCustomerStorageId	
+			JOIN tblICItemLocation as ItemLoc on ItemLoc.intItemId = Item.intItemId and ItemLoc.intLocationId = CS.intCompanyLocationId
 			WHERE intContractDetailId = @intBasisContractDetailId AND SST.intSettleStorageId = @intSettleStorageId
 			
 			UPDATE @voucherDetailStorage SET dblQuantityToBill = dblQuantityToBill* -1 WHERE ISNULL(dblCost,0) < 0

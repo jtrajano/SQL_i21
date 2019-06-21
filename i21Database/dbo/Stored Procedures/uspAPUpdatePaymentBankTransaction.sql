@@ -79,9 +79,7 @@ BEGIN
 		[dblExchangeRate] = A.dblExchangeRate,
 		[dtmDate] = A.dtmDatePaid,
 		[strPayee] = CASE WHEN A.ysnOverrideCheckPayee = 1 THEN A.strOverridePayee
-						ELSE ISNULL(A.strPayee, 
-									ISNULL(E.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityId))
-							)
+						ELSE ISNULL(E.strCheckPayeeName, (SELECT TOP 1 strName FROM tblEMEntity WHERE intEntityId = B.intEntityId))
 						END,
 		[intPayeeId] = B.intEntityId,
 		[strAddress] = E.strAddress,
