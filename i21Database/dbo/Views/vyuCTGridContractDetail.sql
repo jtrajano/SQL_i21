@@ -102,6 +102,7 @@ AS
 			BM.strUnitMeasure				AS	strBasisUOM,
 			VM.strUnitMeasure				AS	strConvertedUOM,
 			CH.ysnLoad						AS	ysnLoad,
+			CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS ysnContractAllocated,
 			ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') AS strShipmentStatus,
 			CASE 
 				WHEN CH.intContractTypeId = 1 THEN
@@ -111,7 +112,7 @@ AS
 						ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
 					END
 				ELSE 'Sales Status'
-			END AS strFinancialStatus
+			END AS strFinancialStatus			
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
@@ -238,3 +239,4 @@ AS
 	OUTER	APPLY	dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
 	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	LEFT	JOIN	tblAPBillDetail						BD ON	BD.intContractDetailId = CD.intContractDetailId
+	LEFT	JOIN	tblLGAllocationDetail		AD		ON AD.intPContractDetailId = CD.intContractDetailId

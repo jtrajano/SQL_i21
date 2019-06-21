@@ -78,6 +78,7 @@ AS
 			,strDefSalesperson = EY.strName
 			,strVoucherItem = VI.strItemNo
 			,strInvoiceItem = II.strItemNo
+			,CP.ysnAllocationMandatoryPurchase			
 			,PC.strPriceCalculationType
 			,strDefStorageSchedule = SR.strScheduleDescription
 			,CP.ysnDocumentByBookAndSubBook
