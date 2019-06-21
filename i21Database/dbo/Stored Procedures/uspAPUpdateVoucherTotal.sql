@@ -24,7 +24,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	--UPDATE DETAIL TOTAL
 	UPDATE A
 		SET --A.dblTotal = CAST((A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)) AS DECIMAL (18,2)) 
-			[dblTotal]					=	CASE WHEN C.intTransactionType = 11
+			[dblTotal]					=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL--C.intTransactionType = 11
 											THEN 
 												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN
@@ -50,7 +50,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 													END)
 												END),0)
 											END,	
-			[dblClaimAmount]			=	CASE WHEN C.intTransactionType = 11 
+			[dblClaimAmount]			=	CASE WHEN WC.intWeightClaimDetailId IS NOT NULL --C.intTransactionType = 11 
 											THEN 
 												ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 												THEN
@@ -64,6 +64,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	INNER JOIN tblAPBill C ON A.intBillId = C.intBillId
 	LEFT JOIN tblICInventoryReceiptCharge D ON D.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+	LEFT JOIN tblLGWeightClaimDetail WC ON WC.intBillId = C.intBillId
 
 	--UPDATE PAYMENT
 	UPDATE A
