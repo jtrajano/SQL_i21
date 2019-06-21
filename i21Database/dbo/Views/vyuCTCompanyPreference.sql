@@ -69,6 +69,8 @@ AS
 			,CP.ysnAutoCreateDerivative
 			,CP.ysnEnableItemContracts
 			,CP.ysnDocumentByBookAndSubBook
+			,CP.ysnAllocationMandatoryPurchase
+			,CP.ysnAllocationMandatorySales
 			,U1.strUnitMeasure		AS	strCleanCostUOM
 			,C1.strCurrency			AS	strCleanCostCurrency
 			,CS.strContractStatus	AS	strDefContractStatus

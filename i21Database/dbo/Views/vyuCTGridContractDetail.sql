@@ -98,7 +98,8 @@ AS
 			CC.ysnSubCurrency				AS	ysnConvertedSubCurrency,
 			BM.strUnitMeasure				AS	strBasisUOM,
 			VM.strUnitMeasure				AS	strConvertedUOM,
-			CH.ysnLoad						AS	ysnLoad
+			CH.ysnLoad						AS	ysnLoad,
+			CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS ysnContractAllocated
 
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
@@ -224,3 +225,4 @@ AS
 					FROM tblLGLoadDetail
 				)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
 	OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
+	LEFT	JOIN	tblLGAllocationDetail		AD		ON AD.intPContractDetailId = CD.intContractDetailId
