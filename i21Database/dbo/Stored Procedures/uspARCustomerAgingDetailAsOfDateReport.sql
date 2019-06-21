@@ -148,6 +148,11 @@ BEGIN
 	DROP TABLE #CASHREFUNDS
 END
 
+IF(OBJECT_ID('tempdb..#CASHRETURNS') IS NOT NULL)
+BEGIN
+	DROP TABLE #CASHRETURNS
+END
+
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -232,7 +237,23 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
   AND ISNULL(ID.strDocumentNumber, '') <> ''
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-GROUP BY ID.strDocumentNumber	
+GROUP BY ID.strDocumentNumber
+
+--#CASHRETURNS
+SELECT intInvoiceId
+	 , intOriginalInvoiceId
+	 , dblInvoiceTotal
+	 , strInvoiceOriginId
+	 , strInvoiceNumber
+	 , dtmPostDate
+INTO #CASHRETURNS	 
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+WHERE ysnPosted = 1
+  AND ysnRefundProcessed = 1
+  AND strTransactionType = 'Credit Memo'
+  AND intOriginalInvoiceId IS NOT NULL
+  AND ISNULL(strInvoiceOriginId, '') <> ''
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
@@ -500,7 +521,15 @@ LEFT JOIN (
 		FROM dbo.tblAPPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	) P ON PD.intPaymentId = P.intPaymentId	
+	) P ON PD.intPaymentId = P.intPaymentId
+
+	UNION ALL
+
+	SELECT intInvoiceId			= intOriginalInvoiceId		
+		 , strRecordNumber		= strInvoiceNumber
+		 , dtmDatePaid			= dtmPostDate
+		 , dblTotalPayment		= dblInvoiceTotal
+	FROM #CASHRETURNS	
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
  
