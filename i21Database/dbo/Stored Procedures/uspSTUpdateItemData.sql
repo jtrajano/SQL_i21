@@ -1,10 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdateItemData]
 		-- Add the parameters for the stored procedure here
-		@XML varchar(max),
+		@XML VARCHAR(MAX),
+		@ysnRecap BIT = 1,
+		@strGuid NVARCHAR(100) = '',
 		@strResultMsg NVARCHAR(1000) OUTPUT
 	AS
 BEGIN TRY
 	    
+		BEGIN TRANSACTION
+
 		DECLARE @ErrMsg					   NVARCHAR(MAX),
 				@idoc					   INT,
 				@strCompanyLocationId 	   NVARCHAR(MAX),
@@ -12,7 +16,7 @@ BEGIN TRY
 				@strCategoryId             NVARCHAR(MAX),
 				@strFamilyId			   NVARCHAR(MAX),
 				@strClassId                NVARCHAR(MAX),
-				@intUpcCode                INT,
+				@intItemUOMId              INT, -- @intUpcCode                INT,
 				@strDescription            NVARCHAR(250),
 				@dblPriceBetween1          DECIMAL (18,6),
 				@dblPriceBetween2          DECIMAL (18,6),
@@ -54,7 +58,7 @@ BEGIN TRY
 				@intNewGLSalesAccount      INT,
 				--@intNewGLVarianceAccount      INT,
 				@strYsnPreview             NVARCHAR(1),
-				@currentUserId			   INT
+				@intCurrentEntityUserId	   INT
 		SET @strResultMsg = 'success'
 
 	                  
@@ -66,8 +70,8 @@ BEGIN TRY
 				@strCategoryId        =   Category,
 				@strFamilyId          =   Family,
 				@strClassId           =   Class,
-				@intUpcCode         =   UPCCode,
-				@strDescription     =   ItmDescription,
+				@intItemUOMId         =   intItemUOMId, --UPCCode,
+				@strDescription       =   ItmDescription,
 
 				@dblPriceBetween1   =   PriceBetween1,
 				@dblPriceBetween2   =   PriceBetween2,
@@ -109,7 +113,7 @@ BEGIN TRY
 			    @intNewGLSalesAccount     = NewGLSalesAccount,
 			    --@NewGLVarianceAccount  = NewGLVarianceAccount,
 				@strYsnPreview     = ysnPreview,
-		        @currentUserId   =   currentUserId
+		        @intCurrentEntityUserId   =   currentUserId
 		
 		FROM	OPENXML(@idoc, 'root',2)
 		WITH
@@ -119,7 +123,7 @@ BEGIN TRY
 				Category                  NVARCHAR(MAX),
 				Family                    NVARCHAR(MAX),
 				Class                     NVARCHAR(MAX),
-				UPCCode                   INT,
+				intItemUOMId              INT,
 				ItmDescription            NVARCHAR(250),
 
 				PriceBetween1             DECIMAL (18,6),
@@ -310,25 +314,27 @@ BEGIN TRY
 				,strCategoryCode_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				,strCountCode_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				, strCategoryId_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				-- Modified Fields
 				,strCategoryCode_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				,strCountCode_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				, strCategoryId_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 		)
 
-		-- ITEM ACCOUNT
-		DECLARE @tblItemAccountForCStore TABLE (
-				intItemId INT
-				, intItemAccountId INT		
-				, intAccountCategoryId INT 
-				, strAction NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
-				-- Original Fields	
-				, strAccountId_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
-				, intAccountId_Original INT NULL	
-				-- Modified Fields	
-				, strAccountId_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
-				, intAccountId_New INT NULL	
-		)
+		---- ITEM ACCOUNT
+		--DECLARE @tblItemAccountForCStore TABLE (
+		--		intItemId INT
+		--		, intItemAccountId INT		
+		--		, intAccountCategoryId INT 
+		--		, strAction NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
+		--		-- Original Fields	
+		--		, strAccountId_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
+		--		, intAccountId_Original INT NULL	
+		--		-- Modified Fields	
+		--		, strAccountId_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL	
+		--		, intAccountId_New INT NULL	
+		--)
 
 		-- ITEM LOCATION
 		DECLARE @tblItemLocationForCStore TABLE (
@@ -356,20 +362,21 @@ BEGIN TRY
 				,strCountedDaily_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strCounted_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strCountBySINo_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intFamilyId_Original INT NULL 
+				
 				,strFamilyId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intClassId_Original INT NULL 
+				,strFamily_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strClassId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intProductCodeId_Original INT NULL 
+				,strClass_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strProductCodeId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intVendorId_Original INT NULL 
+				,strProductCode_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strVendorId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strVendor_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strMinimumAge_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strMinOrder_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strSuggestedQty_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,intCountGroupId_Original INT NULL 
-				,intStorageLocationId_Original INT NULL 
 				,strStorageLocationId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strStorageLocation_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,dblReorderPoint_Original NUMERIC(18, 6) NULL
 				,strDescription_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				-- Modified Fields
@@ -394,20 +401,21 @@ BEGIN TRY
 				,strCountedDaily_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strCounted_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strCountBySINo_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
-				,intFamilyId_New INT NULL 
-				,strFamilyId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intClassId_New INT NULL 
+				
+				,strFamilyId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strFamily_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strClassId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intProductCodeId_New INT NULL 
-				,strProductCodeId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intVendorId_New INT NULL 
+				,strClass_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strProductCodeId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strProductCode_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strVendorId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strVendor_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strMinimumAge_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strMinOrder_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strSuggestedQty_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,intCountGroupId_New INT NULL 
-				,intStorageLocationId_New INT NULL 
 				,strStorageLocationId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strStorageLocation_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,dblReorderPoint_New NUMERIC(18, 6) NULL
 				,strDescription_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 		)
@@ -478,7 +486,7 @@ BEGIN TRY
 															WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' THEN strLongUPCCode ELSE strUpcCode
 													   END AS strUpcCode
 												FROM tblICItemUOM 
-												WHERE intItemUOMId = @intUpcCode
+												WHERE intItemUOMId = @intItemUOMId
 											  )
 
 		BEGIN 
@@ -494,24 +502,24 @@ BEGIN TRY
 					,@strCountCode = @strNewCountCode
 					,@strItemDescription = NULL
 
-					,@intEntityUserSecurityId = @currentUserId
+					,@intEntityUserSecurityId = @intCurrentEntityUserId
 		END
 
 
-		BEGIN 
-			-- Item Account
-			EXEC [dbo].[uspICUpdateItemAccountForCStore]
-				-- filter params
-				@strUpcCode = @strUpcCode 
-				,@strDescription = @strDescription 
-				,@dblRetailPriceFrom = NULL
-				,@dblRetailPriceTo = NULL 
-				-- update params
-				,@intGLAccountCOGS = @intNewGLPurchaseAccount		-- If 'Cost of Goods'
-				,@intGLAccountSalesRevenue = @intNewGLSalesAccount	-- If 'Sales Account'
+		--BEGIN 
+		--	-- Item Account
+		--	EXEC [dbo].[uspICUpdateItemAccountForCStore]
+		--		-- filter params
+		--		@strUpcCode = @strUpcCode 
+		--		,@strDescription = @strDescription 
+		--		,@dblRetailPriceFrom = NULL
+		--		,@dblRetailPriceTo = NULL 
+		--		-- update params
+		--		,@intGLAccountCOGS = @intNewGLPurchaseAccount		-- If 'Cost of Goods'
+		--		,@intGLAccountSalesRevenue = @intNewGLSalesAccount	-- If 'Sales Account'
 
-				,@intEntityUserSecurityId = @currentUserId
-		END
+		--		,@intEntityUserSecurityId = @intCurrentEntityUserId
+		--END
 
 
 		BEGIN 
@@ -562,7 +570,7 @@ BEGIN TRY
 				,@ysnSaleable = @ysnSaleable 
 				,@ysnIdRequiredLiquor = @ysnIdRequiredLiquor 
 				,@ysnIdRequiredCigarette = @ysnIdRequiredCigarette 
-				,@ysnPromotionalItem = @ysnPromotionalItem 
+				,@ysnPromotionalItem = @ysnPromotionalItem
 				,@ysnPrePriced = @ysnPrePriced 
 				,@ysnApplyBlueLaw1 = @ysnApplyBlueLaw1 
 				,@ysnApplyBlueLaw2 = @ysnApplyBlueLaw2 
@@ -581,7 +589,7 @@ BEGIN TRY
 				,@dblReorderPoint = NULL
 				,@strItemLocationDescription = NULL 
 
-				,@intEntityUserSecurityId = @currentUserId
+				,@intEntityUserSecurityId = @intCurrentEntityUserId
 		END
 
 
@@ -597,21 +605,25 @@ BEGIN TRY
 			,strCategoryCode_Original
 			,strCountCode_Original
 			,strDescription_Original
+			, strCategoryId_Original
 			-- Modified Fields
 			,strCategoryCode_New 
 			,strCountCode_New 
 			,strDescription_New
+			, strCategoryId_New
 		)
-		SELECT  
+		SELECT DISTINCT
 			I.intItemId
 			-- Original Fields
-			, CatOld.strCategoryCode AS strCategoryCode_Original
-			, [Changes].strCountCode_Original
-			, [Changes].strDescription_Original
+			, ISNULL(CatOld.strCategoryCode, '') AS strCategoryCode_Original
+			, ISNULL([Changes].strCountCode_Original, '')
+			, ISNULL([Changes].strDescription_Original, '')
+			, ISNULL(CAST([Changes].intCategoryId_Original AS NVARCHAR(50)), '')
 			-- Modified Fields
-			, CatNew.strCategoryCode AS  strCategoryCode_New
-			, [Changes].strCountCode_New
-			, [Changes].strDescription_New
+			, ISNULL(CatNew.strCategoryCode, '') AS  strCategoryCode_New
+			, ISNULL([Changes].strCountCode_New, '')
+			, ISNULL([Changes].strDescription_New, '')
+			, ISNULL(CAST([Changes].intCategoryId_New AS NVARCHAR(50)), '')
 		FROM #tmpUpdateItemForCStore_itemAuditLog [Changes]
 		INNER JOIN tblICCategory CatOld 
 			ON [Changes].intCategoryId_Original = CatOld.intCategoryId
@@ -626,52 +638,64 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation CL 
 			ON IL.intLocationId = CL.intCompanyLocationId
 
+---- TEST
+--SELECT '#tmpUpdateItemForCStore_itemAuditLog', * FROM #tmpUpdateItemForCStore_itemAuditLog
+--SELECT '@tblUpdateItemForCStore', intItemId, strCategoryId_Original, strCountCode_Original, strDescription_Original, strCategoryCode_Original 
+--				-- Modified Fields
+--				,strCategoryId_New
+--				,strCountCode_New
+--				,strDescription_New
+--				,strCategoryCode_New  
+--				FROM @tblUpdateItemForCStore
 
-		-- ITEM ACCOUNT
-		INSERT INTO @tblItemAccountForCStore
-		(
-				intItemId 
-				, intItemAccountId 		
-				, intAccountCategoryId  
-				, strAction
-				-- Original Fields	
-				, strAccountId_Original	
-				, intAccountId_Original
-				-- Modified Fields	
-				, strAccountId_New
-				, intAccountId_New
-		)
-		SELECT 
-			I.intItemId
-			, IA.intItemAccountId
-			, AC.intAccountCategoryId
-			, ''
-			-- Original Fields
-			, GL_Old.strAccountId
-			, GL_Old.intAccountId
-			-- Modified Fields
-			, GL_New.strAccountId
-			, GL_New.intAccountId
-		FROM #tmpUpdateItemAccountForCStore_itemAuditLog [Changes]
-		INNER JOIN tblICItem I 
-			ON [Changes].intItemId = I.intItemId
-		INNER JOIN tblICItemAccount IA 
-			ON [Changes].intItemAccountId = IA.intItemAccountId
-		INNER JOIN tblGLAccountCategory AC 
-			ON IA.intAccountCategoryId = AC.intAccountCategoryId
-		INNER JOIN tblGLAccount GL_Old 
-			ON [Changes].intAccountId_Original = GL_Old.intAccountId
-		INNER JOIN tblGLAccount GL_New 
-			ON [Changes].intAccountId_New = GL_New.intAccountId
-		INNER JOIN tblICItemLocation IL 
-			ON I.intItemId = IL.intItemId 
-		INNER JOIN tblICItemUOM UOM 
-			ON IL.intItemId = UOM.intItemId
-		INNER JOIN tblSMCompanyLocation CL 
-			ON IL.intLocationId = CL.intCompanyLocationId
+
+
+		---- ITEM ACCOUNT
+		--INSERT INTO @tblItemAccountForCStore
+		--(
+		--		intItemId 
+		--		, intItemAccountId 		
+		--		, intAccountCategoryId  
+		--		, strAction
+		--		-- Original Fields	
+		--		, strAccountId_Original	
+		--		, intAccountId_Original
+		--		-- Modified Fields	
+		--		, strAccountId_New
+		--		, intAccountId_New
+		--)
+		--SELECT 
+		--	I.intItemId
+		--	, IA.intItemAccountId
+		--	, AC.intAccountCategoryId
+		--	, ''
+		--	-- Original Fields
+		--	, GL_Old.strAccountId
+		--	, GL_Old.intAccountId
+		--	-- Modified Fields
+		--	, GL_New.strAccountId
+		--	, GL_New.intAccountId
+		--FROM #tmpUpdateItemAccountForCStore_itemAuditLog [Changes]
+		--INNER JOIN tblICItem I 
+		--	ON [Changes].intItemId = I.intItemId
+		--INNER JOIN tblICItemAccount IA 
+		--	ON [Changes].intItemAccountId = IA.intItemAccountId
+		--INNER JOIN tblGLAccountCategory AC 
+		--	ON IA.intAccountCategoryId = AC.intAccountCategoryId
+		--INNER JOIN tblGLAccount GL_Old 
+		--	ON [Changes].intAccountId_Original = GL_Old.intAccountId
+		--INNER JOIN tblGLAccount GL_New 
+		--	ON [Changes].intAccountId_New = GL_New.intAccountId
+		--INNER JOIN tblICItemLocation IL 
+		--	ON I.intItemId = IL.intItemId 
+		--INNER JOIN tblICItemUOM UOM 
+		--	ON IL.intItemId = UOM.intItemId
+		--INNER JOIN tblSMCompanyLocation CL 
+		--	ON IL.intLocationId = CL.intCompanyLocationId
 
 
 		-- ITEM LOCATION
+
 		INSERT INTO @tblItemLocationForCStore
 		(
 				intItemId 
@@ -698,18 +722,20 @@ BEGIN TRY
 				,strCountedDaily_Original
 				,strCounted_Original
 				,strCountBySINo_Original
-				,intFamilyId_Original
+				
 				,strFamilyId_Original
-				,intClassId_Original
+				,strFamily_Original
 				,strClassId_Original
-				,intProductCodeId_Original
+				,strClass_Original
 				,strProductCodeId_Original
-				,intVendorId_Original
+				,strProductCode_Original
 				,strVendorId_Original
+				,strVendor_Original
 				,strMinimumAge_Original
 				,strMinOrder_Original
 				,strSuggestedQty_Original
 				,strStorageLocationId_Original
+				,strStorageLocation_Original
 				-- Modified Fields
 				,strTaxFlag1_New
 				,strTaxFlag2_New
@@ -732,18 +758,20 @@ BEGIN TRY
 				,strCountedDaily_New
 				,strCounted_New
 				,strCountBySINo_New
-				,intFamilyId_New
+				
 				,strFamilyId_New
-				,intClassId_New
+				,strFamily_New
 				,strClassId_New
-				,intProductCodeId_New
+				,strClass_New
 				,strProductCodeId_New
-				,intVendorId_New
+				,strProductCode_New
 				,strVendorId_New
+				,strVendor_New
 				,strMinimumAge_New
 				,strMinOrder_New
 				,strSuggestedQty_New
 				,strStorageLocationId_New
+				,strStorageLocation_New
 		)
 		SELECT 
 			I.intItemId
@@ -803,22 +831,23 @@ BEGIN TRY
 			, CASE 
 					WHEN [Changes].ysnCountedDaily_Original = 1 THEN 'true' ELSE 'false'
 			  END
-			, strCounted_Original
+			, ISNULL(strCounted_Original, '')
 			, CASE 
 					WHEN [Changes].ysnCountBySINo_Original = 1 THEN 'true' ELSE 'false'
 			  END
-			, CAST([Changes].intFamilyId_Original AS NVARCHAR(1000))
-			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_Original), '')
-			, CAST([Changes].intClassId_Original AS NVARCHAR(1000))
-			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intClassId_Original), '')
-			, [Changes].intProductCodeId_Original
-			, ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intProductCodeId_Original), '')
-			, [Changes].intVendorId_Original
-			, ISNULL((SELECT strName FROM tblEMEntity WHERE intEntityId = [Changes].intVendorId_Original), '')
+			, strFamilyId_Original			= ISNULL(CAST([Changes].intFamilyId_Original AS NVARCHAR(1000)), '')
+			, strFamily_Original			= ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_Original), '')
+			, strClassId_Original			= ISNULL(CAST([Changes].intClassId_Original AS NVARCHAR(1000)), '')
+			, strClass_Original				= ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intClassId_Original), '')
+			, strProductCodeId_Original		= ISNULL(CAST([Changes].intProductCodeId_Original AS NVARCHAR(150)), '')
+			, strProductCode_Original		= ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intProductCodeId_Original), '')
+			, strVendorId_Original			= ISNULL(CAST([Changes].intVendorId_Original AS NVARCHAR(50)), '')
+			, strVendor_Original			= ISNULL((SELECT strName FROM tblEMEntity WHERE intEntityId = [Changes].intVendorId_Original), '')
 			, CAST((ISNULL([Changes].intMinimumAge_Original, '')) AS NVARCHAR(1000))--ISNULL((, '')
 			, ISNULL(CAST([Changes].dblMinOrder_Original AS NVARCHAR(1000)), '')
 			, ISNULL(CAST([Changes].dblSuggestedQty_Original AS NVARCHAR(1000)), '')
-			, ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_Original), '')
+			, strStorageLocationId_Original = CAST([Changes].intStorageLocationId_Original AS NVARCHAR(50))
+			, strStorageLocation_Original	= ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_Original), '')
 
 
 			-- Modified Fields
@@ -875,22 +904,23 @@ BEGIN TRY
 			, CASE 
 					WHEN [Changes].ysnCountedDaily_New = 1 THEN 'true' ELSE 'false'
 			  END
-			,strCounted_New
+			,ISNULL(strCounted_New, '')
 			, CASE 
 					WHEN [Changes].ysnCountBySINo_New = 1 THEN 'true' ELSE 'false'
 			  END
-			, CAST([Changes].intFamilyId_New AS NVARCHAR(1000))
-			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_New), '')
-			, CAST([Changes].intClassId_New AS NVARCHAR(1000))
-			, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intClassId_New), '')
-			, [Changes].intProductCodeId_New
-			, ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intProductCodeId_New), '')
-			, [Changes].intVendorId_New
-			, ISNULL((SELECT strName FROM tblEMEntity WHERE intEntityId = [Changes].intVendorId_New), '')
+			, strFamilyId_New				= CAST([Changes].intFamilyId_New AS NVARCHAR(1000))
+			, strFamily_New					= ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_New), '')
+			, strClassId_New				= CAST([Changes].intClassId_New AS NVARCHAR(1000))
+			, strClass_New					= ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intClassId_New), '')
+			, strProductCodeId_New			= CAST([Changes].intProductCodeId_New AS NVARCHAR(150))
+			, strProductCode_New			= ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intProductCodeId_New), '')
+			, strVendorId_New				= CAST([Changes].intVendorId_New AS NVARCHAR(50))
+			, strVendor_New					= ISNULL((SELECT strName FROM tblEMEntity WHERE intEntityId = [Changes].intVendorId_New), '')
 			, CAST((ISNULL([Changes].intMinimumAge_New, '')) AS NVARCHAR(1000))
 			, ISNULL(CAST([Changes].dblMinOrder_New AS NVARCHAR(1000)), '')
 			, ISNULL(CAST([Changes].dblSuggestedQty_New AS NVARCHAR(1000)), '')
-			, ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_New), '')
+			, strStorageLocationId_New		= CAST([Changes].intStorageLocationId_New AS NVARCHAR(50))
+			, strStorageLocation_New		= ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_New), '')
 
 		FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
 		INNER JOIN tblICItem I 
@@ -916,15 +946,26 @@ BEGIN TRY
 	
 		-- Handle preview using Table variable
 		DECLARE @tblPreview TABLE (
-			intCompanyLocationId INT
+			strTableName NVARCHAR(150)
+			, strTableColumnName NVARCHAR(150)
+			, strTableColumnDataType NVARCHAR(50)
+			, intPrimaryKeyId INT NOT NULL
+			, intParentId INT NULL
+			, intChildId INT NULL
+			, intCurrentEntityUserId INT NOT NULL
+			, intItemId INT NULL
+			, intItemUOMId INT NULL
+			, intItemLocationId INT NULL
+
+			, intCompanyLocationId INT
 			, strLocation NVARCHAR(250)
 			, strUpc NVARCHAR(50)
 			, strItemDescription NVARCHAR(250)
 			, strChangeDescription NVARCHAR(100)
-			, strOldData NVARCHAR(MAX)
-			, strNewData NVARCHAR(MAX)
-			, intParentId INT
-			, intChildId INT
+			, strPreviewOldData NVARCHAR(MAX)
+			, strPreviewNewData NVARCHAR(MAX)
+			, ysnPreview BIT DEFAULT(1)
+			, ysnForRevert BIT DEFAULT(0)
 		)
 
 
@@ -932,46 +973,86 @@ BEGIN TRY
 		-- ITEM Preview
 		DECLARE @strCategoryCode_New AS NVARCHAR(50) = (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = @intNewCategory)
 		INSERT INTO @tblPreview (
-			intCompanyLocationId
+			strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, intPrimaryKeyId
+			, intParentId
+			, intChildId
+			, intCurrentEntityUserId
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+
+			, intCompanyLocationId
 			, strLocation
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
-			, strOldData
-			, strNewData 
-			, intParentId
-			, intChildId
+			, strPreviewOldData
+			, strPreviewNewData
+			, ysnPreview
+			, ysnForRevert
 		)
-		SELECT	CL.intCompanyLocationId
-				,CL.strLocationName
-				,CASE
-					  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
-				END
-				,I.strDescription
-				,CASE
-					WHEN [Changes].oldColumnName = 'strCategoryCode_Original' THEN 'Category'
-					WHEN [Changes].oldColumnName = 'strCountCode_Original' THEN 'Count Code'
-					WHEN [Changes].oldColumnName = 'strDescription_Original' THEN 'Description'
-				 END
-				,[Changes].strOldData
-				,[Changes].strNewData
-				,[Changes].intItemId 
-				,[Changes].intItemId
+		SELECT	
+				strTableName												=	N'tblICItem'
+				, strTableColumnName										= CASE
+																				WHEN [Changes].oldColumnName	= 'strCategoryId_Original' THEN 'intCategoryId'
+																				WHEN [Changes].oldColumnName	= 'strCategoryCode_Original' THEN 'strCategoryCode'
+																				WHEN [Changes].oldColumnName	= 'strCountCode_Original' THEN 'strCountCode'
+																				WHEN [Changes].oldColumnName	= 'strDescription_Original' THEN 'strDescription'
+																			 END 
+				, strTableColumnDataType									= CASE
+																				WHEN [Changes].oldColumnName	= 'strCategoryId_Original' THEN 'INT'
+																				WHEN [Changes].oldColumnName	= 'strCategoryCode_Original' THEN 'NVARCHAR(50)'
+																				WHEN [Changes].oldColumnName	= 'strCountCode_Original' THEN 'NVARCHAR(50)'
+																				WHEN [Changes].oldColumnName	= 'strDescription_Original' THEN 'NVARCHAR(250)'
+																			 END
+				, intPrimaryKeyId											= [Changes].intItemId
+				, intParentId												= NULL
+				, intChildId												= NULL
+				, intCurrentEntityUserId									= @intCurrentEntityUserId
+				, intItemId													= I.intItemId
+				, intItemUOMId												= UOM.strLongUPCCode
+				, intItemLocationId											= IL.intItemLocationId
+
+
+				, intCompanyLocationId										= CL.intCompanyLocationId
+				, strLocation												= CL.strLocationName
+				, strUpc													= CASE
+																				  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
+																			END
+				, strItemDescription										= I.strDescription
+				, strChangeDescription										= CASE
+																				WHEN [Changes].oldColumnName = 'strCategoryId_Original' THEN 'Category Id'
+																				WHEN [Changes].oldColumnName = 'strCategoryCode_Original' THEN 'Category'
+																				WHEN [Changes].oldColumnName = 'strCountCode_Original' THEN 'Count Code'
+																				WHEN [Changes].oldColumnName = 'strDescription_Original' THEN 'Description'
+																			 END
+				, strPreviewOldData											= [Changes].strOldData
+				, strPreviewNewData											= [Changes].strNewData
+				, ysnPreview												= CASE
+																					WHEN [Changes].oldColumnName IN('strCategoryCode_Original', 'strCountCode_Original', 'strDescription_Original') THEN 1
+																					ELSE 0
+																			END 
+		        , ysnForRevert												= CASE
+																					WHEN [Changes].oldColumnName IN('strCategoryId_Original', 'strCountCode_Original', 'strDescription_Original') THEN 1
+																					ELSE 0
+																			END 
 		FROM 
 		(
 			SELECT DISTINCT intItemId, oldColumnName, strOldData, strNewData
 			FROM @tblUpdateItemForCStore
 			unpivot
 			(
-				strOldData for oldColumnName in (strCategoryCode_Original, strCountCode_Original, strDescription_Original)
+				strOldData for oldColumnName in (strCategoryCode_Original, strCountCode_Original, strDescription_Original, strCategoryId_Original)
 			) o
 			unpivot
 			(
-				strNewData for newColumnName in (strCategoryCode_New, strCountCode_New, strDescription_New)
+				strNewData for newColumnName in (strCategoryCode_New, strCountCode_New, strDescription_New, strCategoryId_New)
 			) n
 			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
 		) [Changes]
-		--FROM #tmpUpdateItemForCStore_itemAuditLog [Changes]
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
 		INNER JOIN tblICItemLocation IL 
@@ -987,136 +1068,249 @@ BEGIN TRY
 			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 		)
+
+
+
+
+
+		---- ITEM ACCOUNT Preview
+		--INSERT INTO @tblPreview (
+		--	strTableName
+		--	, strTableColumnName
+		--	--, strTableColumnDataType
+		--	, intPrimaryKeyId
+		--	, intParentId
+		--	, intChildId
+		--	, intCurrentEntityUserId
+
+		--	, intCompanyLocationId
+		--	, strLocation
+		--	, strUpc
+		--	, strItemDescription
+		--	, strChangeDescription
+		--	, strPreviewOldData
+		--	, strPreviewNewData
+		--)
+		--SELECT	
+		--		N'tblICItemAccount'
+		--		, REPLACE([Changes].oldColumnName, '_Original', '')
+		--		, [Changes].intItemAccountId
+		--		, [Changes].intItemId
+		--		, NULL
+		--		, @intCurrentEntityUserId
+
+		--        , CL.intCompanyLocationId
+		--		, CL.strLocationName
+		--		, CASE
+		--			  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
+		--		END
+		--		, I.strDescription
+		--		, AC.strAccountCategory
+		--		, [Changes].strOldData
+		--		, [Changes].strNewData
+		----FROM #tmpUpdateItemAccountForCStore_itemAuditLog [Changes]
+		--FROM 
+		--(
+		--	SELECT DISTINCT intItemId,intItemAccountId,intAccountId_Original,intAccountId_New, oldColumnName, strOldData, strNewData
+		--	FROM @tblItemAccountForCStore
+		--	unpivot
+		--	(
+		--		strOldData for oldColumnName in (strAccountId_Original)
+		--	) o
+		--	unpivot
+		--	(
+		--		strNewData for newColumnName in (strAccountId_New)
+		--	) n
+		--	WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
+		--) [Changes]
+		--INNER JOIN tblICItem I 
+		--	ON [Changes].intItemId = I.intItemId
+		--INNER JOIN tblICItemAccount IA 
+		--	ON [Changes].intItemAccountId = IA.intItemAccountId
+		--INNER JOIN tblGLAccountCategory AC 
+		--	ON IA.intAccountCategoryId = AC.intAccountCategoryId
+		--INNER JOIN tblGLAccount GL_Old 
+		--	ON [Changes].intAccountId_Original = GL_Old.intAccountId
+		--INNER JOIN tblGLAccount GL_New 
+		--	ON [Changes].intAccountId_New = GL_New.intAccountId
+		--INNER JOIN tblICItemLocation IL 
+		--	ON I.intItemId = IL.intItemId 
+		--INNER JOIN tblICItemUOM UOM 
+		--	ON IL.intItemId = UOM.intItemId
+		--INNER JOIN tblSMCompanyLocation CL 
+		--	ON IL.intLocationId = CL.intCompanyLocationId
+		--WHERE 
+		--(
+		--	NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
+		--	OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+		--)
 		--AND 
 		--(
-		--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-		--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+		--	-- http://jira.irelyserver.com/browse/ST-846 
+		--	NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+		--	OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 		--)
 
 
 
 
-		-- ITEM ACCOUNT Preview
-		INSERT INTO @tblPreview (
-			intCompanyLocationId
-			, strLocation
-			, strUpc
-			, strItemDescription
-			, strChangeDescription
-			, strOldData
-			, strNewData
-			, intParentId
-			, intChildId
-		)
-		SELECT	CL.intCompanyLocationId
-				,CL.strLocationName
-				,CASE
-					  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
-				END
-				,I.strDescription
-				,AC.strAccountCategory
-				,[Changes].strOldData
-				,[Changes].strNewData
-				,[Changes].intItemId 
-				,[Changes].intItemAccountId
-		--FROM #tmpUpdateItemAccountForCStore_itemAuditLog [Changes]
-		FROM 
-		(
-			SELECT DISTINCT intItemId,intItemAccountId,intAccountId_Original,intAccountId_New, oldColumnName, strOldData, strNewData
-			FROM @tblItemAccountForCStore
-			unpivot
-			(
-				strOldData for oldColumnName in (strAccountId_Original)
-			) o
-			unpivot
-			(
-				strNewData for newColumnName in (strAccountId_New)
-			) n
-			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
-		) [Changes]
-		INNER JOIN tblICItem I 
-			ON [Changes].intItemId = I.intItemId
-		INNER JOIN tblICItemAccount IA 
-			ON [Changes].intItemAccountId = IA.intItemAccountId
-		INNER JOIN tblGLAccountCategory AC 
-			ON IA.intAccountCategoryId = AC.intAccountCategoryId
-		INNER JOIN tblGLAccount GL_Old 
-			ON [Changes].intAccountId_Original = GL_Old.intAccountId
-		INNER JOIN tblGLAccount GL_New 
-			ON [Changes].intAccountId_New = GL_New.intAccountId
-		INNER JOIN tblICItemLocation IL 
-			ON I.intItemId = IL.intItemId 
-		INNER JOIN tblICItemUOM UOM 
-			ON IL.intItemId = UOM.intItemId
-		INNER JOIN tblSMCompanyLocation CL 
-			ON IL.intLocationId = CL.intCompanyLocationId
-		WHERE 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
-			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-		)
-		AND 
-		(
-			-- http://jira.irelyserver.com/browse/ST-846 
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
-		)
-
-
-
-
 		-- ITEM LOCATION Preview
+
+
+
+
 		INSERT INTO @tblPreview (
-			intCompanyLocationId
+			strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, intPrimaryKeyId
+			, intParentId
+			, intChildId
+			, intCurrentEntityUserId
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+
+			, intCompanyLocationId
 			, strLocation
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
-			, strOldData
-			, strNewData
-			, intParentId
-			, intChildId
+			, strPreviewOldData
+			, strPreviewNewData
+			, ysnPreview
+			, ysnForRevert
 		)
-		SELECT	CL.intCompanyLocationId
-				,CL.strLocationName
-				,CASE
-					  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
-				END
-				,I.strDescription
-				,CASE
-					WHEN [Changes].oldColumnName = 'strTaxFlag1_Original' THEN 'Tax Flag 1'
-					WHEN [Changes].oldColumnName = 'strTaxFlag2_Original' THEN 'Tax Flag 2'
-					WHEN [Changes].oldColumnName = 'strTaxFlag3_Original' THEN 'Tax Flag 3'
-					WHEN [Changes].oldColumnName = 'strTaxFlag4_Original' THEN 'Tax Flag 4'
-					WHEN [Changes].oldColumnName = 'strDepositRequired_Original' THEN 'Deposit Required'
-					WHEN [Changes].oldColumnName = 'strDepositPLUId_Original' THEN 'Deposit PLU'
-					WHEN [Changes].oldColumnName = 'strQuantityRequired_Original' THEN 'Quantity Required' 
-					WHEN [Changes].oldColumnName = 'strScaleItem_Original' THEN 'Scale Item' 
-					WHEN [Changes].oldColumnName = 'strFoodStampable_Original' THEN 'Stampable' 
-					WHEN [Changes].oldColumnName = 'strReturnable_Original' THEN 'Returnable' 
-					WHEN [Changes].oldColumnName = 'strSaleable_Original' THEN 'Saleable'
-					WHEN [Changes].oldColumnName = 'strIdRequiredLiquor_Original' THEN 'Required Liquor' 
-					WHEN [Changes].oldColumnName = 'strIdRequiredCigarette_Original' THEN 'Required Cigarette' 
-					WHEN [Changes].oldColumnName = 'strPromotionalItem_Original' THEN 'Promotional Item'
-					WHEN [Changes].oldColumnName = 'strPrePriced_Original' THEN 'Pre Priced'
-					WHEN [Changes].oldColumnName = 'strApplyBlueLaw1_Original' THEN 'Apply Blue Law 1'
-					WHEN [Changes].oldColumnName = 'strApplyBlueLaw2_Original' THEN 'Apply Blue Law 2'
-					WHEN [Changes].oldColumnName = 'strCountedDaily_Original' THEN 'Counted Daily' 
-					WHEN [Changes].oldColumnName = 'strCounted_Original' THEN 'Counted'
-					WHEN [Changes].oldColumnName = 'strCountBySINo_Original' THEN 'Count by SI No'
-					WHEN [Changes].oldColumnName = 'strFamilyId_Original' THEN 'Family'
-					WHEN [Changes].oldColumnName = 'strClassId_Original' THEN 'Class'
-					WHEN [Changes].oldColumnName = 'strProductCodeId_Original' THEN 'Product Code'
-					WHEN [Changes].oldColumnName = 'strVendorId_Original' THEN 'Vendor' 
-					WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'Minimum Age' 
-					WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'Minimum Order' 
-					WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'Suggested Quantity' 
-					WHEN [Changes].oldColumnName = 'strStorageLocationId_Original' THEN 'Storage Location'
-				 END
-				,[Changes].strOldData
-				,[Changes].strNewData
-				,[Changes].intItemId 
-				,[Changes].intItemLocationId
+		SELECT	
+		        strTableName												= N'tblICItemLocation'
+				, strTableColumnName										= CASE
+																				WHEN [Changes].oldColumnName = 'strTaxFlag1_Original' THEN 'ysnTaxFlag1'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag2_Original' THEN 'ysnTaxFlag2'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag3_Original' THEN 'ysnTaxFlag3'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag4_Original' THEN 'ysnTaxFlag4'
+																				WHEN [Changes].oldColumnName = 'strDepositRequired_Original' THEN 'ysnDepositRequired'
+																				WHEN [Changes].oldColumnName = 'strDepositPLUId_Original' THEN 'intDepositPLUId'
+																				WHEN [Changes].oldColumnName = 'strQuantityRequired_Original' THEN 'ysnQuantityRequired' 
+																				WHEN [Changes].oldColumnName = 'strScaleItem_Original' THEN 'ysnScaleItem' 
+																				WHEN [Changes].oldColumnName = 'strFoodStampable_Original' THEN 'ysnFoodStampable' 
+																				WHEN [Changes].oldColumnName = 'strReturnable_Original' THEN 'ysnReturnable' 
+																				WHEN [Changes].oldColumnName = 'strSaleable_Original' THEN 'ysnSaleable'
+																				WHEN [Changes].oldColumnName = 'strIdRequiredLiquor_Original' THEN 'ysnIdRequiredLiquor' 
+																				WHEN [Changes].oldColumnName = 'strIdRequiredCigarette_Original' THEN 'ysnIdRequiredCigarette' 
+																				WHEN [Changes].oldColumnName = 'strPromotionalItem_Original' THEN 'ysnPromotionalItem'
+																				WHEN [Changes].oldColumnName = 'strPrePriced_Original' THEN 'ysnPrePriced'
+																				WHEN [Changes].oldColumnName = 'strApplyBlueLaw1_Original' THEN 'ysnApplyBlueLaw1'
+																				WHEN [Changes].oldColumnName = 'strApplyBlueLaw2_Original' THEN 'ysnApplyBlueLaw2'
+																				WHEN [Changes].oldColumnName = 'strCountedDaily_Original' THEN 'ysnCountedDaily' 
+																				WHEN [Changes].oldColumnName = 'strCounted_Original' THEN 'strCounted'
+																				WHEN [Changes].oldColumnName = 'strCountBySINo_Original' THEN 'ysnCountBySINo'
+
+																				WHEN [Changes].oldColumnName = 'strFamilyId_Original' THEN 'intFamilyId'
+																				WHEN [Changes].oldColumnName = 'strFamily_Original' THEN 'strFamily'
+																				WHEN [Changes].oldColumnName = 'strClassId_Original' THEN 'intClassId'
+																				WHEN [Changes].oldColumnName = 'strClass_Original' THEN 'strClass'
+																				WHEN [Changes].oldColumnName = 'strProductCodeId_Original' THEN 'intProductCodeId'
+																				WHEN [Changes].oldColumnName = 'strProductCode_Original' THEN 'strProductCode'
+																				WHEN [Changes].oldColumnName = 'strVendorId_Original' THEN 'intVendorId' 
+																				WHEN [Changes].oldColumnName = 'strVendor_Original' THEN 'strVendor' 
+																				WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'intMinimumAge' 
+																				WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'dblMinOrder' 
+																				WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'dblSuggestedQty' 
+																				WHEN [Changes].oldColumnName = 'strStorageLocationId_Original' THEN 'intStorageLocationId'
+																				WHEN [Changes].oldColumnName = 'strStorageLocation_Original' THEN 'strStorageLocation'
+																			 END
+				, strTableColumnDataType										= CASE
+																				WHEN [Changes].oldColumnName = 'strTaxFlag1_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag2_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag3_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag4_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strDepositRequired_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strDepositPLUId_Original' THEN 'INT'
+																				WHEN [Changes].oldColumnName = 'strQuantityRequired_Original' THEN 'BIT' 
+																				WHEN [Changes].oldColumnName = 'strScaleItem_Original' THEN 'BIT' 
+																				WHEN [Changes].oldColumnName = 'strFoodStampable_Original' THEN 'BIT' 
+																				WHEN [Changes].oldColumnName = 'strReturnable_Original' THEN 'BIT' 
+																				WHEN [Changes].oldColumnName = 'strSaleable_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strIdRequiredLiquor_Original' THEN 'BIT' 
+																				WHEN [Changes].oldColumnName = 'strIdRequiredCigarette_Original' THEN 'BIT' 
+																				WHEN [Changes].oldColumnName = 'strPromotionalItem_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strPrePriced_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strApplyBlueLaw1_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strApplyBlueLaw2_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strCountedDaily_Original' THEN 'BIT' 
+																				WHEN [Changes].oldColumnName = 'strCounted_Original' THEN 'BIT'
+																				WHEN [Changes].oldColumnName = 'strCountBySINo_Original' THEN 'BIT'
+
+																				WHEN [Changes].oldColumnName = 'strFamilyId_Original' THEN 'INT'
+																				WHEN [Changes].oldColumnName = 'strFamily_Original' THEN 'NVARCHAR(150)'
+																				WHEN [Changes].oldColumnName = 'strClassId_Original' THEN 'INT'
+																				WHEN [Changes].oldColumnName = 'strClass_Original' THEN 'NVARCHAR(150)'
+																				WHEN [Changes].oldColumnName = 'strProductCodeId_Original' THEN 'INT'
+																				WHEN [Changes].oldColumnName = 'strProductCode_Original' THEN 'NVARCHAR(150)'
+																				WHEN [Changes].oldColumnName = 'strVendorId_Original' THEN 'INT' 
+																				WHEN [Changes].oldColumnName = 'strVendor_Original' THEN 'NVARCHAR(150)'
+																				WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'INT' 
+																				WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'NUMERIC(18, 10)' 
+																				WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'NUMERIC(18, 10)' 
+																				WHEN [Changes].oldColumnName = 'strStorageLocationId_Original' THEN 'INT'
+																				WHEN [Changes].oldColumnName = 'strStorageLocation_Original' THEN 'NVARCHAR(150)'
+																			 END
+				, intPrimaryKeyId											= [Changes].intItemLocationId
+				, intParentId												= [Changes].intItemId
+				, intChildId												= NULL
+				, intCurrentEntityUserId									= @intCurrentEntityUserId
+				, intItemId													= I.intItemId
+				, intItemUOMId												= UOM.strLongUPCCode
+				, intItemLocationId											= IL.intItemLocationId
+
+
+		        , intCompanyLocationId										= CL.intCompanyLocationId
+				, strLocation												= CL.strLocationName
+				, strUpc													= CASE
+																				  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
+																			END
+				, strItemDescription										= I.strDescription
+				, strChangeDescription										= CASE
+																				WHEN [Changes].oldColumnName = 'strTaxFlag1_Original' THEN 'Tax Flag 1'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag2_Original' THEN 'Tax Flag 2'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag3_Original' THEN 'Tax Flag 3'
+																				WHEN [Changes].oldColumnName = 'strTaxFlag4_Original' THEN 'Tax Flag 4'
+																				WHEN [Changes].oldColumnName = 'strDepositRequired_Original' THEN 'Deposit Required'
+																				WHEN [Changes].oldColumnName = 'strDepositPLUId_Original' THEN 'Deposit PLU'
+																				WHEN [Changes].oldColumnName = 'strQuantityRequired_Original' THEN 'Quantity Required' 
+																				WHEN [Changes].oldColumnName = 'strScaleItem_Original' THEN 'Scale Item' 
+																				WHEN [Changes].oldColumnName = 'strFoodStampable_Original' THEN 'Stampable' 
+																				WHEN [Changes].oldColumnName = 'strReturnable_Original' THEN 'Returnable' 
+																				WHEN [Changes].oldColumnName = 'strSaleable_Original' THEN 'Saleable'
+																				WHEN [Changes].oldColumnName = 'strIdRequiredLiquor_Original' THEN 'Required Liquor' 
+																				WHEN [Changes].oldColumnName = 'strIdRequiredCigarette_Original' THEN 'Required Cigarette' 
+																				WHEN [Changes].oldColumnName = 'strPromotionalItem_Original' THEN 'Promotional Item'
+																				WHEN [Changes].oldColumnName = 'strPrePriced_Original' THEN 'Pre Priced'
+																				WHEN [Changes].oldColumnName = 'strApplyBlueLaw1_Original' THEN 'Apply Blue Law 1'
+																				WHEN [Changes].oldColumnName = 'strApplyBlueLaw2_Original' THEN 'Apply Blue Law 2'
+																				WHEN [Changes].oldColumnName = 'strCountedDaily_Original' THEN 'Counted Daily' 
+																				WHEN [Changes].oldColumnName = 'strCounted_Original' THEN 'Counted'
+																				WHEN [Changes].oldColumnName = 'strCountBySINo_Original' THEN 'Count by SI No'
+
+																				WHEN [Changes].oldColumnName = 'strFamily_Original' THEN 'Family'
+																				WHEN [Changes].oldColumnName = 'strClass_Original' THEN 'Class'
+																				WHEN [Changes].oldColumnName = 'strProductCode_Original' THEN 'Product Code'
+																				WHEN [Changes].oldColumnName = 'strVendor_Original' THEN 'Vendor' 
+																				WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'Minimum Age' 
+																				WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'Minimum Order' 
+																				WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'Suggested Quantity' 
+																				WHEN [Changes].oldColumnName = 'strStorageLocation_Original' THEN 'Storage Location'
+																			 END
+				, strPreviewOldData											= [Changes].strOldData
+				, strPreviewNewData											= [Changes].strNewData
+				, ysnPreview												= CASE
+																					WHEN [Changes].oldColumnName IN('strFamilyId_Original', 'strClassId_Original', 'strProductCodeId_Original', 'strVendorId_Original', 'strStorageLocationId_Original') THEN 0
+																					ELSE 1
+																			END 
+		        , ysnForRevert												= CASE
+																					WHEN [Changes].oldColumnName IN('strFamily_Original', 'strClass_Original', 'strProductCode_Original', 'strVendor_Original', 'strStorageLocation_Original') THEN 0
+																					ELSE 1
+																			END
 		FROM 
 		(
 			SELECT DISTINCT intItemId,intItemLocationId, oldColumnName, strOldData, strNewData
@@ -1124,16 +1318,20 @@ BEGIN TRY
 			unpivot
 			(
 				strOldData for oldColumnName in (strTaxFlag1_Original, strTaxFlag2_Original, strTaxFlag3_Original, strTaxFlag4_Original, strDepositRequired_Original, strDepositPLUId_Original, strQuantityRequired_Original, strScaleItem_Original, strFoodStampable_Original
-				                                 ,strReturnable_Original, strSaleable_Original, strIdRequiredLiquor_Original,strIdRequiredCigarette_Original, strPromotionalItem_Original, strPrePriced_Original, strApplyBlueLaw1_Original, strApplyBlueLaw2_Original
-												 , strCountedDaily_Original, strCounted_Original, strCountBySINo_Original, strFamilyId_Original, strClassId_Original, strProductCodeId_Original, strVendorId_Original, strMinimumAge_Original, strMinOrder_Original
-												 , strSuggestedQty_Original, strStorageLocationId_Original)
+				                                 , strReturnable_Original, strSaleable_Original, strIdRequiredLiquor_Original,strIdRequiredCigarette_Original, strPromotionalItem_Original, strPrePriced_Original, strApplyBlueLaw1_Original, strApplyBlueLaw2_Original
+												 , strCountedDaily_Original, strCounted_Original, strCountBySINo_Original, strFamily_Original, strClass_Original, strProductCode_Original, strVendor_Original, strMinimumAge_Original, strMinOrder_Original
+												 , strSuggestedQty_Original, strStorageLocation_Original
+												 
+												 , strFamilyId_Original, strClassId_Original, strProductCodeId_Original, strVendorId_Original, strStorageLocationId_Original)
 			) o
 			unpivot
 			(
 				strNewData for newColumnName in (strTaxFlag1_New, strTaxFlag2_New, strTaxFlag3_New, strTaxFlag4_New, strDepositRequired_New, strDepositPLUId_New, strQuantityRequired_New, strScaleItem_New, strFoodStampable_New
-				                                 ,strReturnable_New, strSaleable_New, strIdRequiredLiquor_New,strIdRequiredCigarette_New, strPromotionalItem_New, strPrePriced_New, strApplyBlueLaw1_New, strApplyBlueLaw2_New
-												 , strCountedDaily_New, strCounted_New, strCountBySINo_New, strFamilyId_New,strClassId_New, strProductCodeId_New, strVendorId_New, strMinimumAge_New, strMinOrder_New
-												 ,strSuggestedQty_New, strStorageLocationId_New)
+				                                 , strReturnable_New, strSaleable_New, strIdRequiredLiquor_New,strIdRequiredCigarette_New, strPromotionalItem_New, strPrePriced_New, strApplyBlueLaw1_New, strApplyBlueLaw2_New
+												 , strCountedDaily_New, strCounted_New, strCountBySINo_New, strFamily_New,strClass_New, strProductCode_New, strVendor_New, strMinimumAge_New, strMinOrder_New
+												 , strSuggestedQty_New, strStorageLocation_New
+												 
+												 , strFamilyId_New, strClassId_New, strProductCodeId_New, strVendorId_New, strStorageLocationId_New)
 			) n
 			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
 		) [Changes]
@@ -1166,13 +1364,26 @@ BEGIN TRY
 		AND 
 		(
 			-- http://jira.irelyserver.com/browse/ST-846 
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intUpcCode AND intItemUOMId = UOM.intItemUOMId) 		
+			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 		)
 		
-		--AND P.dblSalePrice >= @dblPriceBetween1
-		--AND P.
+		
+		-- ===================================================================================
+		-- [START] - Insert value to tblSTUpdateItemDataRevertHolder
+		-- ===================================================================================
+		IF(@ysnRecap = 0)
+			BEGIN
+				IF EXISTS(SELECT TOP 1 1 FROM @tblPreview WHERE ysnForRevert = 1)
+					BEGIN
+						DECLARE @intMassUpdatedRowCount AS INT = (SELECT COUNT(ysnForRevert) FROM @tblPreview WHERE ysnForRevert = 1)
 
+
+					END
+			END
+		-- ===================================================================================
+		-- [END] - Insert value to tblSTUpdateItemDataRevertHolder
+		-- ===================================================================================
 
 
 
@@ -1180,7 +1391,10 @@ BEGIN TRY
 	   ---------------------------------------------------------------------------------------
 	   ----------------------------- START Query Preview -------------------------------------
 	   ---------------------------------------------------------------------------------------
-	   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+	   DELETE FROM @tblPreview WHERE ISNULL(strPreviewOldData, '') = ISNULL(strPreviewNewData, '')
+
+-- TEST
+SELECT DISTINCT * FROM @tblPreview
 
 	   -- Query Preview display
 	   SELECT DISTINCT 
@@ -1188,9 +1402,10 @@ BEGIN TRY
 			  , strUpc
 			  , strItemDescription
 			  , strChangeDescription
-			  , strOldData
-			  , strNewData
+			  , strPreviewOldData AS strOldData
+			  , strPreviewNewData AS strNewData
 	   FROM @tblPreview
+	   WHERE ysnPreview = 1
 	   ORDER BY strItemDescription, strChangeDescription ASC
     
 	   DELETE FROM @tblPreview
@@ -1225,12 +1440,87 @@ BEGIN TRY
 				DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
 		END
 
+
+
+
+
+
+
+		IF(@ysnRecap = 1)
+			BEGIN
+				GOTO ExitWithRollback
+
+				-- INSERT TO PREVIEW TABLE
+				INSERT INTO tblSTUpdateItemDataPreview
+				(
+					strGuid,
+					strLocation,
+					strUpc,
+					strDescription,
+					strChangeDescription,
+					strOldData,
+					strNewData,
+
+					intItemId,
+					intItemUOMId,
+					intItemLocationId,
+					intTableIdentityId,
+					strTableName,
+					strColumnName,
+					strColumnDataType,
+					intConcurrencyId
+				)
+				SELECT DISTINCT 
+					@strGuid
+					, strLocation
+					, strUpc
+					, strItemDescription
+					, strChangeDescription
+					, strPreviewOldData
+					, strPreviewNewData
+
+					, intItemId
+					, intItemUOMId
+					, intItemLocationId
+					, intPrimaryKeyId
+					, strTableName
+					, strTableColumnName
+					, strTableColumnDataType
+					, 1
+				FROM @tblPreview
+				WHERE ysnPreview = 1
+				ORDER BY strItemDescription, strChangeDescription ASC
+			END
+		ELSE
+			BEGIN
+				GOTO ExitWithCommit
+			END
+
 END TRY
 
-BEGIN CATCH       
+BEGIN CATCH      
+	
 	 SET @ErrMsg = ERROR_MESSAGE()     
 	 --SET @strResultMsg = ERROR_MESSAGE()
 	 SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE() --+ '<\BR>' + 
 	 IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
-	 --RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
+	 --RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
+	 
+	 GOTO ExitWithRollback
 END CATCH
+
+
+
+ExitWithCommit:
+	COMMIT TRANSACTION
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION 
+		END
+	
+		
+ExitPost:

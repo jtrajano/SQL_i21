@@ -774,13 +774,13 @@ BEGIN TRY
 				SELECT  
 					I.intItemId
 					-- Original Fields
-					, CatOld.strCategoryCode AS strCategoryCode_Original
-					, [Changes].strCountCode_Original
-					, [Changes].strDescription_Original
+					, ISNULL(CatOld.strCategoryCode, '') AS strCategoryCode_Original
+					, ISNULL([Changes].strCountCode_Original, '')
+					, ISNULL([Changes].strDescription_Original, '')
 					-- Modified Fields
-					, CatNew.strCategoryCode AS  strCategoryCode_New
-					, [Changes].strCountCode_New
-					, [Changes].strDescription_New
+					, ISNULL(CatNew.strCategoryCode, '') AS  strCategoryCode_New
+					, ISNULL([Changes].strCountCode_New, '')
+					, ISNULL([Changes].strDescription_New, '')
 				FROM #tmpUpdateItemForCStore_itemAuditLog [Changes]
 				INNER JOIN tblICCategory CatOld 
 					ON [Changes].intCategoryId_Original = CatOld.intCategoryId
@@ -972,7 +972,7 @@ BEGIN TRY
 					, CASE 
 							WHEN [Changes].ysnCountedDaily_Original = 1 THEN 'true' ELSE 'false'
 					  END
-					, strCounted_Original
+					, ISNULL(strCounted_Original, '')
 					, CASE 
 							WHEN [Changes].ysnCountBySINo_Original = 1 THEN 'true' ELSE 'false'
 					  END
@@ -982,7 +982,7 @@ BEGIN TRY
 					, ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intClassId_Original), '')
 					, [Changes].intProductCodeId_Original
 					, ISNULL((SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = [Changes].intProductCodeId_Original), '')
-					, [Changes].intVendorId_Original
+					, ISNULL([Changes].intVendorId_Original, '')
 					, ISNULL((SELECT strName FROM tblEMEntity WHERE intEntityId = [Changes].intVendorId_Original), '')
 					, CAST((ISNULL([Changes].intMinimumAge_Original, '')) AS NVARCHAR(1000))--ISNULL((, '')
 					, ISNULL(CAST([Changes].dblMinOrder_Original AS NVARCHAR(1000)), '')
@@ -1044,7 +1044,7 @@ BEGIN TRY
 					, CASE 
 							WHEN [Changes].ysnCountedDaily_New = 1 THEN 'true' ELSE 'false'
 					  END
-					,strCounted_New
+					,ISNULL(strCounted_New, '')
 					, CASE 
 							WHEN [Changes].ysnCountBySINo_New = 1 THEN 'true' ELSE 'false'
 					  END
