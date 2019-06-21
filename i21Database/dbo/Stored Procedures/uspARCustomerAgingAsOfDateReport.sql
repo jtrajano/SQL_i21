@@ -169,6 +169,11 @@ BEGIN
 	DROP TABLE #CASHREFUNDS
 END
 
+IF(OBJECT_ID('tempdb..#CASHRETURNS') IS NOT NULL)
+BEGIN
+	DROP TABLE #CASHRETURNS
+END
+
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -249,7 +254,7 @@ INNER JOIN (
 	FROM @tblCustomers
 ) C ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE ysnPosted = 1
-	AND ysnCancelled = 0
+	AND ysnCancelled = 0	
 	AND strTransactionType <> 'Cash Refund'
 	AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.intAccountId IN (
@@ -301,6 +306,20 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND ISNULL(ID.strDocumentNumber, '') <> ''
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 GROUP BY ID.strDocumentNumber
+
+--#CASHRETURNS
+SELECT intInvoiceId
+	 , intOriginalInvoiceId
+	 , dblInvoiceTotal
+	 , strInvoiceOriginId
+INTO #CASHRETURNS	 
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+WHERE ysnPosted = 1
+  AND ysnRefundProcessed = 1
+  AND strTransactionType = 'Credit Memo'
+  AND intOriginalInvoiceId IS NOT NULL
+  AND ISNULL(strInvoiceOriginId, '') <> ''
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 --REMOVE SERVICE CHARGE THAT WAS ALREADY CAUGHT IN BALANCE FORWARD
 IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
@@ -501,6 +520,12 @@ LEFT JOIN (
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	) P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY PD.intInvoiceId
+
+	UNION ALL
+
+	SELECT intInvoiceId			= intOriginalInvoiceId
+		 , dblTotalPayment		= dblInvoiceTotal
+	FROM #CASHRETURNS
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
