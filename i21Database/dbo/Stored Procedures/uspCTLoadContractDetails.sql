@@ -167,7 +167,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 							WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
 							ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
 						END
-					ELSE 'Sales Status'
+					ELSE FS.strFinancialStatus
 				END AS strFinancialStatus
 				,MA.strFutMarketName AS strFutureMarket
 				,REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') strFutureMonth
@@ -303,6 +303,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		LEFT   JOIN     @tblBill						Bill ON Bill.intContractDetailId			=       CD.intContractDetailId
 		LEFT   JOIN     @OpenLoad						OL	ON OL.intContractDetailId				=       CD.intContractDetailId
 		OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
+		OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 		LEFT	JOIN	tblAPBillDetail					BD	ON	BD.intContractDetailId				=		CD.intContractDetailId
 		LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intPContractDetailId = CD.intContractDetailId
 	)t ORDER BY intContractSeq

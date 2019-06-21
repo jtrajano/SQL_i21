@@ -7614,6 +7614,7 @@
     <Build Include="dbo\Views\vyuCTContractConditionView.sql" />
     <Build Include="dbo\Views\vyuSTDepartmentProfitSummaryReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
+    <Build Include="dbo\Functions\fnCTGetFinancialStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

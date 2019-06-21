@@ -95,7 +95,7 @@ AS
 						WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
 						ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
 					END
-				ELSE 'Sales Status'
+				ELSE FS.strFinancialStatus
 			END AS strFinancialStatus,
 
 			IX.strIndex,						
@@ -182,4 +182,5 @@ AS
 			)								SY	ON	SY.intContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN tblCTContractInvoice				CI	ON	CI.intContractDetailId		=	CD.intContractDetailId
 	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
+	OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 	LEFT	JOIN	tblAPBillDetail			BD	ON	BD.intContractDetailId		=	CD.intContractDetailId
