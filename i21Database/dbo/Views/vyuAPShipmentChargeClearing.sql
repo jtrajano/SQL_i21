@@ -5,7 +5,7 @@ AS
 SELECT DISTINCT  
     Shipment.dtmShipDate AS dtmDate  
     ,Shipment.intEntityCustomerId AS intEntityVendorId  
-    ,Shipment.strShipmentNumber   
+    ,Shipment.strShipmentNumber   AS strTransactionNumber
     ,Shipment.intInventoryShipmentId  
     ,NULL AS intBillId  
     ,NULL AS strBillId  
@@ -20,6 +20,7 @@ SELECT DISTINCT
     ,compLoc.strLocationName  
     ,CAST(1 AS BIT) ysnAllowVoucher  
     ,APClearing.intAccountId
+	,APClearing.strAccountId
 FROM dbo.tblICInventoryShipmentCharge ShipmentCharge  
 INNER JOIN tblICInventoryShipment Shipment   
  ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId  
@@ -70,7 +71,8 @@ SELECT
     ,Shipment.intShipFromLocationId  
     ,compLoc.strLocationName  
     ,CAST(1 AS BIT) ysnAllowVoucher  
-    ,billDetail.intAccountId
+    ,APClearing.intAccountId
+	,APClearing.strAccountId
 FROM tblAPBill bill  
 INNER JOIN tblAPBillDetail billDetail  
     ON bill.intBillId = billDetail.intBillId  
@@ -80,6 +82,20 @@ INNER JOIN tblICInventoryShipment Shipment
     ON Shipment.intInventoryShipmentId  = ShipmentCharge.intInventoryShipmentId  
 INNER JOIN tblSMCompanyLocation compLoc  
     ON Shipment.intShipFromLocationId = compLoc.intCompanyLocationId  
+OUTER APPLY (
+	SELECT TOP 1
+		ga.strAccountId
+		,ga.intAccountId
+	FROM 
+		tblGLDetail gd INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = gd.intAccountId
+		INNER JOIN tblGLAccountGroup ag
+			ON ag.intAccountGroupId = ga.intAccountGroupId
+	WHERE
+		gd.strTransactionId = Shipment.strShipmentNumber
+		AND ag.strAccountType = 'Liability'
+		AND gd.ysnIsUnposted = 0 
+) APClearing
 WHERE   
     billDetail.intInventoryShipmentChargeId IS NOT NULL  
 AND bill.ysnPosted = 1
