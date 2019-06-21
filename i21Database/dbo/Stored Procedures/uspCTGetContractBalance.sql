@@ -2013,7 +2013,7 @@ BEGIN TRY
 
 	DELETE 
 	FROM @TempContractBalance
-	WHERE strType <> 'Basis' AND dblQuantity <= 0 AND dtmEndDate = @dtmEndDate
+	WHERE dblQuantity <= 0 AND dtmEndDate = @dtmEndDate
 
 
 	INSERT INTO tblCTContractBalance --WITH (TABLOCK)
