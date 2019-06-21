@@ -2672,6 +2672,99 @@ BEGIN
 							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
 							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
+					IF NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPost) 
+					BEGIN 
+						INSERT INTO @ItemsToPost (
+								intItemId
+								,intItemLocationId 
+								,intItemUOMId  
+								,dtmDate  
+								,dblQty  
+								,dblUOMQty  
+								,dblCost  
+								,dblSalesPrice  
+								,intCurrencyId  
+								,dblExchangeRate  
+								,intTransactionId  
+								,intTransactionDetailId  
+								,strTransactionId  
+								,intTransactionTypeId  
+								,intLotId 
+								,intSubLocationId
+								,intStorageLocationId	
+								,strActualCostId 
+								,intForexRateTypeId
+								,dblForexRate
+								,intCostingMethod
+						)
+						SELECT 	AdjDetail.intNewItemId
+								,NewItemLocation.intItemLocationId
+								,intItemUOMId = 
+										NewItemUOM.intItemUOMId									
+								,Adj.dtmAdjustmentDate
+								,dblQty = 
+										-FromStock.dblQty
+								,dblUOMQty = 
+										NewItemUOM.dblUnitQty
+								,dblCost = 
+										CASE 
+											WHEN AdjDetail.dblNewCost IS NULL THEN 
+												FromStock.dblCost
+											ELSE
+												dbo.fnCalculateCostBetweenUOM( 
+													dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
+													,dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
+													,AdjDetail.dblNewCost
+												)
+										END
+								,dblSalesPrice			= 0
+								,intCurrencyId			= NULL 
+								,dblExchangeRate		= 1
+								,intTransactionId		= Adj.intInventoryAdjustmentId
+								,intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
+								,strTransactionId		= Adj.strAdjustmentNo
+								,intTransactionTypeId	= @intTransactionTypeId
+								,intLotId				= AdjDetail.intNewLotId
+								,intSubLocationId		= ISNULL(NewLot.intSubLocationId, AdjDetail.intNewSubLocationId)
+								,intStorageLocationId	= ISNULL(NewLot.intStorageLocationId, AdjDetail.intNewStorageLocationId)
+								,strActualCostId		= FromStock.strActualCostId 
+								,intForexRateTypeId		= NULL
+								,dblForexRate			= 1 
+								,intCostingMethod		= FromStock.intCostingMethod
+						FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+									ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
+
+								INNER JOIN tblICItem i 
+									ON i.intItemId = AdjDetail.intNewItemId 
+
+								INNER JOIN dbo.tblICItemLocation NewItemLocation 
+									ON NewItemLocation.intLocationId = Adj.intLocationId 
+									AND NewItemLocation.intItemId = AdjDetail.intNewItemId
+
+								INNER JOIN dbo.tblICInventoryTransaction FromStock 
+									ON 
+									ISNULL(FromStock.intLotId,0) = ISNULL(AdjDetail.intLotId,0) 
+									AND FromStock.intTransactionId = Adj.intInventoryAdjustmentId 
+									AND FromStock.strTransactionId = Adj.strAdjustmentNo
+									AND FromStock.intTransactionDetailId = AdjDetail.intInventoryAdjustmentDetailId
+									AND FromStock.dblQty < 0
+							
+								LEFT JOIN dbo.tblICItemUOM NewItemUOM
+									ON NewItemUOM.intItemId = AdjDetail.intNewItemId
+									AND NewItemUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId (
+										AdjDetail.intNewItemId
+										, FromStock.intItemUOMId
+									)
+								
+								LEFT JOIN tblICLot NewLot
+									ON NewLot.intLotId = AdjDetail.intNewLotId
+
+						WHERE	Adj.strAdjustmentNo = @strTransactionId
+								AND FromStock.strBatchId = @strBatchId
+								AND AdjDetail.intNewItemId = ISNULL(@intItemId, AdjDetail.intNewItemId)
+								AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+					END
+
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
 						,@strAccountToCounterInventory
