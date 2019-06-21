@@ -139,26 +139,30 @@ BEGIN TRY
 		,[ysnTaxExempt]
 		,[ysnInvalidSetup]
 		,[strNotes]
+		,[ysnAddToCost]
+		,[intSalesTaxExemptionAccountId]
 		,[intConcurrencyId])
 	SELECT
-		 intInvoiceDetailId		= @InvoiceDetailId
-		,intTaxGroupId			= @TaxGroupId
-		,intTaxCodeId			= @TaxCodeId
-		,intTaxClassId			= CASE WHEN ISNULL(@TaxClassId,0) <> 0 THEN @TaxClassId ELSE [intTaxClassId] END
-		,strTaxableByOtherTaxes	= CASE WHEN ISNULL(@TaxableByOtherTaxes,'') <> '' THEN ISNULL(@TaxableByOtherTaxes,'') ELSE ISNULL([strTaxableByOtherTaxes],'') END
-		,strCalculationMethod	= CASE WHEN ISNULL(@CalculationMethod,'') <> '' THEN @CalculationMethod ELSE TRD.[strCalculationMethod] END
-		,dblRate				= CASE WHEN ISNULL(@Rate,0) <> 0 THEN @Rate ELSE TRD.dblRate END
-		,dblBaseRate			= CASE WHEN ISNULL(@BaseRate,0) <> 0 THEN @BaseRate ELSE (CASE WHEN @CurrencyExchangeRate = 1.000000 THEN TRD.dblRate ELSE TRD.dblBaseRate END) END
-		,intSalesTaxAccountId	= CASE WHEN ISNULL(@SalesTaxAccountId,0) <> 0 THEN @SalesTaxAccountId ELSE intSalesTaxAccountId END
-		,dblTax					= ISNULL(@Tax, @ZeroDecimal)
-		,dblAdjustedTax			= ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal))
-		,dblBaseAdjustedTax		= [dbo].fnRoundBanker(ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal)) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
-		,ysnTaxAdjusted			= CASE WHEN ISNULL(@TaxAdjusted, 0) = 1 THEN ISNULL(@TaxAdjusted, 0) ELSE (CASE WHEN ISNULL(@Tax, @ZeroDecimal) <> ISNULL(@AdjustedTax,0) THEN 1 ELSE 0 END) END
-		,ysnSeparateOnInvoice	= ISNULL(@SeparateOnInvoice, 0)
-		,ysnCheckoffTax			= ISNULL(@CheckoffTax, [ysnCheckoffTax])
-		,ysnTaxExempt			= ISNULL(@TaxExempt, 0)
-		,[ysnInvalidSetup]		= ISNULL(@InvalidSetup, 0)
-		,strNotes				= @Notes
+		 intInvoiceDetailId				= @InvoiceDetailId
+		,intTaxGroupId					= @TaxGroupId
+		,intTaxCodeId					= @TaxCodeId
+		,intTaxClassId					= CASE WHEN ISNULL(@TaxClassId,0) <> 0 THEN @TaxClassId ELSE [intTaxClassId] END
+		,strTaxableByOtherTaxes			= CASE WHEN ISNULL(@TaxableByOtherTaxes,'') <> '' THEN ISNULL(@TaxableByOtherTaxes,'') ELSE ISNULL([strTaxableByOtherTaxes],'') END
+		,strCalculationMethod			= CASE WHEN ISNULL(@CalculationMethod,'') <> '' THEN @CalculationMethod ELSE TRD.[strCalculationMethod] END
+		,dblRate						= CASE WHEN ISNULL(@Rate,0) <> 0 THEN @Rate ELSE TRD.dblRate END
+		,dblBaseRate					= CASE WHEN ISNULL(@BaseRate,0) <> 0 THEN @BaseRate ELSE (CASE WHEN @CurrencyExchangeRate = 1.000000 THEN TRD.dblRate ELSE TRD.dblBaseRate END) END
+		,intSalesTaxAccountId			= CASE WHEN ISNULL(@SalesTaxAccountId,0) <> 0 THEN @SalesTaxAccountId ELSE intSalesTaxAccountId END
+		,dblTax							= ISNULL(@Tax, @ZeroDecimal)
+		,dblAdjustedTax					= ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal))
+		,dblBaseAdjustedTax				= [dbo].fnRoundBanker(ISNULL(@AdjustedTax, ISNULL(@Tax, @ZeroDecimal)) * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
+		,ysnTaxAdjusted					= CASE WHEN ISNULL(@TaxAdjusted, 0) = 1 THEN ISNULL(@TaxAdjusted, 0) ELSE (CASE WHEN ISNULL(@Tax, @ZeroDecimal) <> ISNULL(@AdjustedTax,0) THEN 1 ELSE 0 END) END
+		,ysnSeparateOnInvoice			= ISNULL(@SeparateOnInvoice, 0)
+		,ysnCheckoffTax					= ISNULL(@CheckoffTax, [ysnCheckoffTax])
+		,ysnTaxExempt					= ISNULL(@TaxExempt, 0)
+		,[ysnInvalidSetup]				= ISNULL(@InvalidSetup, 0)
+		,strNotes						= @Notes
+		,ysnAddToCost					= ysnAddToCost
+		,intSalesTaxExemptionAccountId	= intSalesTaxExemptionAccountId
 		,1
 	FROM
 		tblSMTaxCode

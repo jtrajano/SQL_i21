@@ -1249,8 +1249,8 @@ BEGIN
 			ON ARIDT.[intTaxCodeId] = SMTC.[intTaxCodeId]	
 	WHERE
 		ARIDT.[dblAdjustedTax] <> @ZeroDecimal
-		AND ISNULL(ARIDT.[ysnAddToCost], 0) = 1
-		AND ISNULL(ARIDT.[intSalesTaxExemptionAccountId], 0) = 0
+		AND ISNULL(SMTC.[ysnAddToCost], 0) = 1
+		AND ISNULL(SMTC.[intSalesTaxExemptionAccountId], 0) = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
