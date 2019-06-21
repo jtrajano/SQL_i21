@@ -7351,7 +7351,6 @@
     <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
     <Build Include="dbo\Views\vyuAPClearingFilterData.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearing.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPRefreshClearing.sql" />
     <Build Include="dbo\Tables\tblAPForClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForClearing.sql" />
   </ItemGroup>
