@@ -12,6 +12,8 @@ SELECT
 	,B.intLoadDetailId
 	,C.intLoadCostId
 	,B.intItemId
+	,B.intItemUOMId  AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
 	,C.dblAmount AS dblLoadCostDetailTotal
@@ -39,6 +41,12 @@ CROSS APPLY (SELECT TOP 1 GLD.intAccountId, GLA.strAccountId FROM tblGLDetail GL
 LEFT JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt
 			ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId AND receipt.intSourceType = 2)
 ON receiptItem.intSourceId = B.intLoadDetailId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = B.intItemUOMId
 WHERE 
 	A.ysnPosted = 1 
 AND A.intPurchaseSale = 2 --Outbound type is the only type that have AP Clearing for cost, this is also driven by company config
@@ -55,6 +63,8 @@ SELECT
 	,C.intLoadDetailId
 	,E.intLoadCostId
 	,billDetail.intItemId
+	,C.intItemUOMId  AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM 
 	,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
@@ -85,4 +95,10 @@ INNER JOIN tblSMCompanyLocation compLoc
     ON bill.intShipToId = compLoc.intCompanyLocationId
 INNER JOIN tblGLAccount accnt
     ON accnt.intAccountId = billDetail.intAccountId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = C.intItemUOMId
 WHERE bill.ysnPosted = 1

@@ -13,6 +13,8 @@ SELECT
 	,B.intLoadDetailId
 	,receiptItem.intInventoryReceiptItemId
 	,B.intItemId
+    ,B.intItemUOMId  AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
 	,B.dblAmount AS dblLoadDetailTotal
@@ -36,6 +38,12 @@ CROSS APPLY (SELECT TOP 1 GLD.intAccountId, GLA.strAccountId FROM tblGLDetail GL
 LEFT JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt
 				ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId AND receipt.intSourceType = 2 AND receipt.ysnPosted = 1)
 	ON receiptItem.intSourceId = B.intLoadDetailId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = B.intItemUOMId
 WHERE 
 	A.ysnPosted = 1 
 AND A.intPurchaseSale IN (1,3) --Inbound/Drop Ship load shipment type only have AP Clearing GL Entries.
@@ -53,6 +61,8 @@ SELECT
     ,billDetail.intLoadDetailId
 	,ri.intInventoryReceiptItemId
     ,billDetail.intItemId
+    ,ld.intItemUOMId  AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM 
     ,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal
     ,CASE 
         WHEN billDetail.intWeightUOMId IS NULL THEN 
@@ -85,6 +95,12 @@ INNER JOIN tblGLAccount accnt
     ON accnt.intAccountId = billDetail.intAccountId
 LEFT JOIN tblICInventoryReceiptItem ri
 	ON billDetail.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = ld.intItemUOMId
 WHERE 
     billDetail.intLoadDetailId IS NOT NULL
 AND bill.ysnPosted = 1

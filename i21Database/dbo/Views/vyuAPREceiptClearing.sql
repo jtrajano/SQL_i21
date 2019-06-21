@@ -12,6 +12,8 @@ SELECT
     ,NULL AS intBillDetailId
     ,receiptItem.intInventoryReceiptItemId
     ,receiptItem.intItemId
+    ,ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId) AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM
     ,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
     ,ROUND(
@@ -63,6 +65,12 @@ INNER JOIN tblSMCompanyLocation compLoc
     ON receipt.intLocationId = compLoc.intCompanyLocationId
 LEFT JOIN tblSMFreightTerms ft
     ON ft.intFreightTermId = receipt.intFreightTermId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
 OUTER APPLY (
 	SELECT TOP 1
 		ga.strAccountId
@@ -105,6 +113,8 @@ SELECT
     ,billDetail.intBillDetailId
     ,billDetail.intInventoryReceiptItemId
     ,billDetail.intItemId
+    ,ISNULL(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId) AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM
     ,--billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
     ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
             THEN (CASE 
@@ -186,6 +196,12 @@ INNER JOIN tblSMCompanyLocation compLoc
     ON receipt.intLocationId = compLoc.intCompanyLocationId
 LEFT JOIN tblSMFreightTerms ft
     ON ft.intFreightTermId = receipt.intFreightTermId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
 OUTER APPLY (
 	SELECT TOP 1
 		ga.strAccountId
@@ -207,7 +223,6 @@ OUTER APPLY (
 		AND ag.strAccountType = 'Liability'
 		AND t.ysnIsUnposted = 0 
 ) APClearing
-
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
 AND billDetail.intInventoryReceiptChargeId IS NULL
