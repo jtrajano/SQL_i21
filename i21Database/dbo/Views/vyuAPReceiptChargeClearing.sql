@@ -11,7 +11,9 @@ SELECT
     ,NULL AS strBillId    
     ,NULL AS intBillDetailId    
     ,ReceiptCharge.intInventoryReceiptChargeId    
-    ,ReceiptCharge.intChargeId AS intItemId    
+    ,ReceiptCharge.intChargeId AS intItemId   
+    ,ReceiptCharge.intCostUOMId  AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM 
     ,0 AS dblVoucherTotal    
     ,0 AS dblVoucherQty    
     ,CAST((ISNULL(dblAmount * -1,0) --multiple the amount to reverse if ysnPrice = 1    
@@ -26,7 +28,13 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt     
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId     
 INNER JOIN tblSMCompanyLocation compLoc    
-    ON Receipt.intLocationId = compLoc.intCompanyLocationId    
+    ON Receipt.intLocationId = compLoc.intCompanyLocationId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId  
 OUTER APPLY (  
  SELECT TOP 1  
   ga.strAccountId  
@@ -55,7 +63,9 @@ SELECT
     ,NULL AS strBillId    
     ,NULL AS intBillDetailId    
     ,ReceiptCharge.intInventoryReceiptChargeId    
-    ,ReceiptCharge.intChargeId AS intItemId    
+    ,ReceiptCharge.intChargeId AS intItemId  
+    ,ReceiptCharge.intCostUOMId  AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM   
     ,0 AS dblVoucherTotal    
     ,0 AS dblVoucherQty    
     ,CAST((ISNULL(dblAmount,0) + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal    
@@ -71,7 +81,13 @@ INNER JOIN tblICInventoryReceipt Receipt
         AND ReceiptCharge.ysnAccrue = 1     
         AND ReceiptCharge.ysnPrice = 0    
 INNER JOIN tblSMCompanyLocation compLoc    
-    ON Receipt.intLocationId = compLoc.intCompanyLocationId    
+    ON Receipt.intLocationId = compLoc.intCompanyLocationId   
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId   
 OUTER APPLY (  
  SELECT TOP 1  
   ga.strAccountId  
@@ -100,7 +116,10 @@ SELECT
     ,NULL AS intBillId    
     ,NULL AS strBillId    
     ,NULL AS intBillDetailId    
-    ,ReceiptCharge.intInventoryReceiptChargeId        ,ReceiptCharge.intChargeId AS intItemId    
+    ,ReceiptCharge.intInventoryReceiptChargeId        
+    ,ReceiptCharge.intChargeId AS intItemId    
+    ,ReceiptCharge.intCostUOMId  AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM   
     ,0 AS dblVoucherTotal    
     ,0 AS dblVoucherQty    
     ,CAST((ISNULL(dblAmount,0) + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal    
@@ -116,7 +135,13 @@ INNER JOIN tblICInventoryReceipt Receipt
         AND ReceiptCharge.ysnAccrue = 1     
         AND ReceiptCharge.ysnPrice = 0    
 INNER JOIN tblSMCompanyLocation compLoc    
-    ON Receipt.intLocationId = compLoc.intCompanyLocationId    
+    ON Receipt.intLocationId = compLoc.intCompanyLocationId  
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId   
 OUTER APPLY (  
  SELECT TOP 1  
   ga.strAccountId  
@@ -148,6 +173,8 @@ SELECT
     ,billDetail.intBillDetailId    
     ,billDetail.intInventoryReceiptChargeId    
     ,billDetail.intItemId    
+    ,billDetail.intUnitOfMeasureId AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM
     ,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal    
     ,CASE     
         WHEN billDetail.intWeightUOMId IS NULL THEN     
@@ -177,7 +204,13 @@ INNER JOIN tblICInventoryReceiptCharge receiptCharge
 INNER JOIN tblICInventoryReceipt receipt    
     ON receipt.intInventoryReceiptId  = receiptCharge.intInventoryReceiptId    
 INNER JOIN tblSMCompanyLocation compLoc    
-    ON receipt.intLocationId = compLoc.intCompanyLocationId    
+    ON receipt.intLocationId = compLoc.intCompanyLocationId  
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
 OUTER APPLY (  
  SELECT TOP 1  
   ga.strAccountId  
