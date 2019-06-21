@@ -799,7 +799,7 @@ BEGIN
 					from #tblGetStorageDetailByDate
 					where intStorageTypeId = 2 --DP
 						and intSettleStorageId is null
-						and strTicketType = 'Settle Storage'
+						and strTicketType IN( 'Settle Storage','Customer/Maintain Storage')
 					group by
 						CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
 						,strTicketNumber
