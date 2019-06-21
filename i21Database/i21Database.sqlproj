@@ -7331,7 +7331,10 @@
     <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryPhysicalCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICCleanupStrayItemLocationTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCleanupOrphanTransactionsByUom.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCleanupOrphanTransactionsByItem.sql" />
     <Build Include="dbo\Views\vyuICItemLocationTransactions.sql" />
+    <Build Include="dbo\Views\vyuICTransactionsByItemUom.sql" />
     <Build Include="dbo\Views\vyuAPClearablesOnly.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailDelete.sql" />
