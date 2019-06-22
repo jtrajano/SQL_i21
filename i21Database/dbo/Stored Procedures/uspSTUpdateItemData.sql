@@ -1581,7 +1581,8 @@ BEGIN TRY
 							[strItemDescription],
 							[strChangeDescription],
 							[strPreviewOldData],
-							[strPreviewNewData]
+							[strPreviewNewData],
+							[intConcurrencyId]
 						)
 						SELECT 
 							[strTableName]				= strTableName,
@@ -1604,7 +1605,8 @@ BEGIN TRY
 							[strItemDescription]		= strItemDescription,
 							[strChangeDescription]		= strChangeDescription,
 							[strPreviewOldData]			= strPreviewOldData,
-							[strPreviewNewData]			= strPreviewNewData
+							[strPreviewNewData]			= strPreviewNewData,
+							[intConcurrencyId]			= 1
 						FROM @tblPreview 
 						WHERE ysnForRevert = 1
 					END
