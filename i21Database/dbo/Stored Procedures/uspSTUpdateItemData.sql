@@ -57,7 +57,7 @@ BEGIN TRY
 				@intNewGLPurchaseAccount   INT,
 				@intNewGLSalesAccount      INT,
 				--@intNewGLVarianceAccount      INT,
-				@strYsnPreview             NVARCHAR(1),
+				--@strYsnPreview             NVARCHAR(1),
 				@intCurrentEntityUserId	   INT
 		SET @strResultMsg = 'success'
 
@@ -111,8 +111,8 @@ BEGIN TRY
 				@intNewBinLocation      = NewBinLocation,
 				@intNewGLPurchaseAccount  = NewGLPurchaseAccount,
 			    @intNewGLSalesAccount     = NewGLSalesAccount,
-			    --@NewGLVarianceAccount  = NewGLVarianceAccount,
-				@strYsnPreview     = ysnPreview,
+			    -- @NewGLVarianceAccount  = NewGLVarianceAccount,
+				-- @strYsnPreview     = ysnPreview,
 		        @intCurrentEntityUserId   =   currentUserId
 		
 		FROM	OPENXML(@idoc, 'root',2)
@@ -1407,38 +1407,11 @@ SELECT DISTINCT * FROM @tblPreview
 	   FROM @tblPreview
 	   WHERE ysnPreview = 1
 	   ORDER BY strItemDescription, strChangeDescription ASC
-    
-	   DELETE FROM @tblPreview
 	   ---------------------------------------------------------------------------------------
 	   ----------------------------- END Query Preview ---------------------------------------
 	   ---------------------------------------------------------------------------------------
 
-	   -- Clean up 
-		BEGIN
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Location 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Vendor 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Category 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Family 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Class 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemAccountForCStore_itemAuditLog 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-		END
+	   
 
 
 
@@ -1448,7 +1421,11 @@ SELECT DISTINCT * FROM @tblPreview
 
 		IF(@ysnRecap = 1)
 			BEGIN
-				GOTO ExitWithRollback
+				
+				IF @@TRANCOUNT > 0
+					BEGIN
+						ROLLBACK TRANSACTION 
+					END
 
 				-- INSERT TO PREVIEW TABLE
 				INSERT INTO tblSTUpdateItemDataPreview
@@ -1490,12 +1467,45 @@ SELECT DISTINCT * FROM @tblPreview
 				FROM @tblPreview
 				WHERE ysnPreview = 1
 				ORDER BY strItemDescription, strChangeDescription ASC
+
+				GOTO ExitPost
 			END
 		ELSE
 			BEGIN
 				GOTO ExitWithCommit
 			END
 
+
+		-- Clean up 
+		BEGIN
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Location 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Vendor 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Category 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Family 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Class 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemAccountForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+
+
+		END
+		
+		DELETE FROM @tblPreview
 END TRY
 
 BEGIN CATCH      
