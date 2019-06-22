@@ -1,13 +1,34 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdateItemData]
 		-- Add the parameters for the stored procedure here
 		@XML VARCHAR(MAX),
-		@ysnRecap BIT = 1,
-		@strGuid NVARCHAR(100) = '',
+		@ysnRecap BIT,
+		@strGuid UNIQUEIDENTIFIER,
 		@strResultMsg NVARCHAR(1000) OUTPUT
 	AS
 BEGIN TRY
 	    
 		BEGIN TRANSACTION
+
+
+
+		---- TEST
+		---- ==================================================================================
+		---- [START] - Create table for logging proccess
+		---- ==================================================================================
+		--DECLARE @tblErrorLogger TABLE (
+		--	strStatus NVARCHAR(1000),
+		--	dtmDateTime DATETIME
+		--)
+		--INSERT INTO @tblErrorLogger(strStatus, dtmDateTime)
+		--VALUES('01', GETDATE())
+
+		--INSERT INTO @tblErrorLogger(strStatus, dtmDateTime)
+		--VALUES(@XML, GETDATE())
+		---- ==================================================================================
+		---- [END] - Create table for logging proccess
+		---- ==================================================================================
+
+		
 
 		DECLARE @ErrMsg					   NVARCHAR(MAX),
 				@idoc					   INT,
@@ -171,6 +192,8 @@ BEGIN TRY
 		-- Insert statements for procedure here
 
 
+
+
 		-- Create the temp table used for filtering. 
 		BEGIN
 			
@@ -199,6 +222,7 @@ BEGIN TRY
 					intClassId INT 
 				)
 		END 
+
 
 
 		-- Item Audit Log
@@ -489,7 +513,9 @@ BEGIN TRY
 												WHERE intItemUOMId = @intItemUOMId
 											  )
 
-		BEGIN 
+
+										
+		BEGIN TRY
 
 			-- Item Update
 			EXEC [dbo].[uspICUpdateItemForCStore]
@@ -503,7 +529,10 @@ BEGIN TRY
 					,@strItemDescription = NULL
 
 					,@intEntityUserSecurityId = @intCurrentEntityUserId
-		END
+		END TRY
+		BEGIN CATCH
+			SELECT 'uspICUpdateItemForCStore', ERROR_MESSAGE()
+		END CATCH
 
 
 		--BEGIN 
@@ -522,7 +551,8 @@ BEGIN TRY
 		--END
 
 
-		BEGIN 
+
+		BEGIN TRY
 			-- Item Location
 
 			DECLARE @ysnTaxFlag1 AS BIT = CAST(@strTaxFlag1ysn AS BIT)
@@ -590,7 +620,10 @@ BEGIN TRY
 				,@strItemLocationDescription = NULL 
 
 				,@intEntityUserSecurityId = @intCurrentEntityUserId
-		END
+		END TRY
+		BEGIN CATCH
+			SELECT 'uspICUpdateItemLocationForCStore', ERROR_MESSAGE()
+		END CATCH
 
 
 
@@ -638,15 +671,23 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation CL 
 			ON IL.intLocationId = CL.intCompanyLocationId
 
----- TEST
---SELECT '#tmpUpdateItemForCStore_itemAuditLog', * FROM #tmpUpdateItemForCStore_itemAuditLog
---SELECT '@tblUpdateItemForCStore', intItemId, strCategoryId_Original, strCountCode_Original, strDescription_Original, strCategoryCode_Original 
---				-- Modified Fields
---				,strCategoryId_New
---				,strCountCode_New
---				,strDescription_New
---				,strCategoryCode_New  
---				FROM @tblUpdateItemForCStore
+		---- TEST
+		--IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_itemAuditLog)
+		--	BEGIN
+		--		SELECT '#tmpUpdateItemForCStore_itemAuditLog', * FROM #tmpUpdateItemForCStore_itemAuditLog
+
+
+		--		INSERT INTO @tblErrorLogger(strStatus, dtmDateTime)
+		--		VALUES('#tmpUpdateItemForCStore_itemAuditLog has records', GETDATE())
+		--	END
+		--ELSE
+		--	BEGIN
+		--		SELECT '#tmpUpdateItemForCStore_itemAuditLog has no records'
+
+		--		INSERT INTO @tblErrorLogger(strStatus, dtmDateTime)
+		--		VALUES('#tmpUpdateItemForCStore_itemAuditLog has NO records', GETDATE())
+		--	END
+
 
 
 
@@ -695,7 +736,6 @@ BEGIN TRY
 
 
 		-- ITEM LOCATION
-
 		INSERT INTO @tblItemLocationForCStore
 		(
 				intItemId 
@@ -773,7 +813,7 @@ BEGIN TRY
 				,strStorageLocationId_New
 				,strStorageLocation_New
 		)
-		SELECT 
+		SELECT DISTINCT
 			I.intItemId
 			, IL.intItemLocationId
 
@@ -921,7 +961,6 @@ BEGIN TRY
 			, ISNULL(CAST([Changes].dblSuggestedQty_New AS NVARCHAR(1000)), '')
 			, strStorageLocationId_New		= CAST([Changes].intStorageLocationId_New AS NVARCHAR(50))
 			, strStorageLocation_New		= ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_New), '')
-
 		FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
@@ -929,14 +968,27 @@ BEGIN TRY
 			ON I.intItemId = IL.intItemId
 			AND [Changes].intItemLocationId = IL.intItemLocationId
 
-		--JOIN 
-		--(
-		--	SELECT TOP 1 UOMM.strUpcCode, ILL.intItemId, ILL.intLocationId, ILL.intItemLocationId, ILL.intDepositPLUId, ILL.intFamilyId
-		--	FROM tblICItemLocation ILL
-		--	JOIN tblICItemUOM UOMM ON ILL.intDepositPLUId = UOMM.intItemUOMId
-		--) IL ON I.intItemId = IL.intItemId 
-		--JOIN tblICItemUOM UOM ON IL.intItemId = UOM.intItemId
-		--JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
+
+
+
+		---- TEST
+		--SELECT 'CAST(@strTaxFlag1ysn AS BIT)', CAST(@strTaxFlag1ysn AS BIT)
+		--IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog)
+		--	BEGIN
+		--		SELECT '#tmpUpdateItemLocationForCStore_itemLocationAuditLog', * FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog
+
+		--		INSERT INTO @tblErrorLogger(strStatus, dtmDateTime)
+		--		VALUES('#tmpUpdateItemLocationForCStore_itemLocationAuditLog has records', GETDATE())
+		--	END
+		--ELSE
+		--	BEGIN
+
+		--		SELECT '#tmpUpdateItemLocationForCStore_itemLocationAuditLog has no records'
+
+		--		INSERT INTO @tblErrorLogger(strStatus, dtmDateTime)
+		--		VALUES('#tmpUpdateItemLocationForCStore_itemLocationAuditLog has records', GETDATE())
+
+		--	END
 		---------------------------------------------------------------
 		------ END Insert to temp Table handle all Data types ---------
 		---------------------------------------------------------------
@@ -994,7 +1046,7 @@ BEGIN TRY
 			, ysnPreview
 			, ysnForRevert
 		)
-		SELECT	
+		SELECT	DISTINCT
 				strTableName												=	N'tblICItem'
 				, strTableColumnName										= CASE
 																				WHEN [Changes].oldColumnName	= 'strCategoryId_Original' THEN 'intCategoryId'
@@ -1181,7 +1233,7 @@ BEGIN TRY
 			, ysnPreview
 			, ysnForRevert
 		)
-		SELECT	
+		SELECT	DISTINCT
 		        strTableName												= N'tblICItemLocation'
 				, strTableColumnName										= CASE
 																				WHEN [Changes].oldColumnName = 'strTaxFlag1_Original' THEN 'ysnTaxFlag1'
@@ -1368,34 +1420,67 @@ BEGIN TRY
 			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
 		)
 		
+
+
+
+
+
+
+
+
+
+
+
+		 -- ===================================================================================
+		 -- [START] - Insert value to tblSTUpdateItemDataRevertHolder
+		 -- ===================================================================================
+
+		 -- ===================================================================================
+		 -- [END] - Insert value to tblSTUpdateItemDataRevertHolder
+		 -- ===================================================================================
+
 		
-		-- ===================================================================================
-		-- [START] - Insert value to tblSTUpdateItemDataRevertHolder
-		-- ===================================================================================
-		IF(@ysnRecap = 0)
-			BEGIN
-				IF EXISTS(SELECT TOP 1 1 FROM @tblPreview WHERE ysnForRevert = 1)
-					BEGIN
-						DECLARE @intMassUpdatedRowCount AS INT = (SELECT COUNT(ysnForRevert) FROM @tblPreview WHERE ysnForRevert = 1)
+		
+		-- Remove values
+		DELETE FROM @tblPreview WHERE ISNULL(strPreviewOldData, '') = ISNULL(strPreviewNewData, '')
 
 
-					END
-			END
-		-- ===================================================================================
-		-- [END] - Insert value to tblSTUpdateItemDataRevertHolder
-		-- ===================================================================================
 
 
+		-- Clean up 
+		BEGIN
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Location 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Vendor 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Category 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Family 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Class 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemAccountForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+
+
+		END
+		
 
 
 	   ---------------------------------------------------------------------------------------
 	   ----------------------------- START Query Preview -------------------------------------
 	   ---------------------------------------------------------------------------------------
-	   DELETE FROM @tblPreview WHERE ISNULL(strPreviewOldData, '') = ISNULL(strPreviewNewData, '')
-
--- TEST
-SELECT DISTINCT * FROM @tblPreview
-
 	   -- Query Preview display
 	   SELECT DISTINCT 
 	          strLocation
@@ -1410,16 +1495,10 @@ SELECT DISTINCT * FROM @tblPreview
 	   ---------------------------------------------------------------------------------------
 	   ----------------------------- END Query Preview ---------------------------------------
 	   ---------------------------------------------------------------------------------------
-
-	   
-
+		
 
 
-
-
-
-
-		IF(@ysnRecap = 1)
+	   IF(@ysnRecap = 1)
 			BEGIN
 				
 				IF @@TRANCOUNT > 0
@@ -1468,44 +1547,74 @@ SELECT DISTINCT * FROM @tblPreview
 				WHERE ysnPreview = 1
 				ORDER BY strItemDescription, strChangeDescription ASC
 
+				DELETE FROM @tblPreview
+
 				GOTO ExitPost
 			END
-		ELSE
+		ELSE IF(@ysnRecap = 0)
 			BEGIN
+				
+				IF EXISTS(SELECT TOP 1 1 FROM @tblPreview WHERE ysnForRevert = 1)
+					BEGIN
+						DECLARE @intMassUpdatedRowCount AS INT = (SELECT COUNT(ysnForRevert) FROM @tblPreview WHERE ysnForRevert = 1)
+						DECLARE @dtmDateTimeMassUpdate AS DATETIME = GETUTCDATE()
+
+						INSERT INTO tblSTUpdateItemDataRevertHolder
+						(
+							[strTableName],
+							[strTableColumnName],
+							[strTableColumnDataType],
+							[intPrimaryKeyId],
+							[intParentId],
+							[intChildId],
+							[intCurrentEntityUserId],
+							[intItemId],
+							[intItemUOMId],
+							[intItemLocationId],
+
+							[dtmDateTime],
+							[intMassUpdatedRowCount],
+
+							[intCompanyLocationId],
+							[strLocation],
+							[strUpc],
+							[strItemDescription],
+							[strChangeDescription],
+							[strPreviewOldData],
+							[strPreviewNewData]
+						)
+						SELECT 
+							[strTableName]				= strTableName,
+							[strTableColumnName]		= strTableColumnName,
+							[strTableColumnDataType]	= strTableColumnDataType,
+							[intPrimaryKeyId]			= intPrimaryKeyId,
+							[intParentId]				= intParentId,
+							[intChildId]				= intChildId,
+							[intCurrentEntityUserId]	= intCurrentEntityUserId,
+							[intItemId]					= intItemId,
+							[intItemUOMId]				= intItemUOMId,
+							[intItemLocationId]			= intItemLocationId,
+
+							[dtmDateTime]				= @dtmDateTimeMassUpdate,
+							[intMassUpdatedRowCount]	= @intMassUpdatedRowCount,
+
+							[intCompanyLocationId]		= intCompanyLocationId,
+							[strLocation]				= strLocation,
+							[strUpc]					= strUpc,
+							[strItemDescription]		= strItemDescription,
+							[strChangeDescription]		= strChangeDescription,
+							[strPreviewOldData]			= strPreviewOldData,
+							[strPreviewNewData]			= strPreviewNewData
+						FROM @tblPreview 
+						WHERE ysnForRevert = 1
+					END
+
+				DELETE FROM @tblPreview
+
 				GOTO ExitWithCommit
 			END
 
 
-		-- Clean up 
-		BEGIN
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Location 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Vendor 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Category 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Family 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Class 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemAccountForCStore_itemAuditLog 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-
-
-		END
-		
-		DELETE FROM @tblPreview
 END TRY
 
 BEGIN CATCH      
@@ -1534,3 +1643,12 @@ ExitWithRollback:
 	
 		
 ExitPost:
+	----TEST
+	--IF EXISTS(SELECT TOP 1 1 FROM @tblErrorLogger)
+	--	BEGIN
+	--		INSERT INTO CopierDB.dbo.tblTestSP(strValueOne, strValueTwo)
+	--		SELECT
+	--			strStatus
+	--			, CAST(dtmDateTime AS NVARCHAR(50))
+	--		FROM @tblErrorLogger
+	--	END
