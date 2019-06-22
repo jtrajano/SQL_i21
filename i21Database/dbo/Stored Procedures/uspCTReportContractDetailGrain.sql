@@ -39,7 +39,6 @@ BEGIN TRY
 		,strPriceRoth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	)
 
-	
 	SELECT @intContractDetailId = MIN(intContractDetailId)
 	FROM    vyuCTContractDetailView DV
 	WHERE	intContractHeaderId	=	@intContractHeaderId ORDER BY MIN(intContractSeq)
@@ -224,17 +223,18 @@ BEGIN TRY
 			,strQuantityZee				= Item.strItemNo
 			,strPriceRoth				 = (CASE	
 											WHEN CC.strCostMethod IN('Per Unit','Gross Unit') 
-												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' per '										
+												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) + ' ' --' per '
 											
 											WHEN CC.strCostMethod = 'Amount'   
-												THEN '$ '+LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' '
+												THEN '$ ' +LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) + ' '
 											
 											WHEN CC.strCostMethod = 'Percentage'   
-												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) +' %'
+												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) + ' %'
 											END) + ' ' +
 											  (CASE	
-												WHEN CC.strCostMethod = 'Per Unit' THEN UM.strUnitMeasure+' '+ISNULL(Currency.strCurrency,'')										
+												WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(Currency.strCurrency,'')--UM.strUnitMeasure + ' ' + ISNULL(Currency.strCurrency,'')
 												WHEN CC.strCostMethod = 'Amount'   THEN ISNULL(Currency.strCurrency,'')
+												ELSE ''
 											  END)
 			FROM		tblCTContractCost			CC
 			JOIN		tblCTContractDetail			CD	      ON CD.intContractDetailId  = CC.intContractDetailId
@@ -242,12 +242,12 @@ BEGIN TRY
 			JOIN		tblCTContractHeader			CH        ON CH.intContractHeaderId  = CD.intContractHeaderId
 			JOIN		tblICCommodity				CY	      ON CY.intCommodityId		 = CH.intCommodityId
 			JOIN		tblICItem				    Item      ON Item.intItemId			 = CC.intItemId
-			JOIN		tblICItemUOM				UOM	      ON UOM.intItemUOMId		 = CC.intItemUOMId
-			JOIN		tblICUnitMeasure			UM        ON UM.intUnitMeasureId	 = UOM.intUnitMeasureId
+			LEFT JOIN		tblICItemUOM				UOM	      ON UOM.intItemUOMId		 = CC.intItemUOMId
+			LEFT JOIN		tblICUnitMeasure			UM        ON UM.intUnitMeasureId	 = UOM.intUnitMeasureId
 			LEFT JOIN   tblSMCurrency				Currency  ON Currency.intCurrencyID  = CC.intCurrencyId
 			LEFT JOIN	tblICItemUOM				QU        ON QU.intItemUOMId		 = CD.intItemUOMId	
 			LEFT JOIN	tblICItemUOM				CM        ON CM.intUnitMeasureId	 = UOM.intUnitMeasureId 
-															 AND CM.intItemId =	CD.intItemId 
+																AND CM.intItemId =	CD.intItemId 
 															 			
 			WHERE CD.intContractDetailId	=	@intContractDetailId AND CC.ysnPrice = 1
 
@@ -261,7 +261,7 @@ BEGIN TRY
 													SELECT MAX (intContractDetailGrainKey) 
 													FROM @ContractDetailGrain
 													WHERE intContractDetailId	=	@intContractDetailId
-											   ) 
+											   )
 
 	  SELECT @intContractDetailId = MIN(intContractDetailId)
 	  FROM    vyuCTContractDetailView DV
