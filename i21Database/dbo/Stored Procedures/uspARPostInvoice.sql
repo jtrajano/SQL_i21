@@ -619,6 +619,7 @@ IF(@totalInvalid > 0)
 			#ARInvalidInvoiceData
 
 		SET @invalidCount = @totalInvalid
+		SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
 
 		--DELETE Invalid Transaction From temp table
 		DELETE A
@@ -684,7 +685,9 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 
 		IF @raiseError = 1
 			BEGIN
-				SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed
+				IF ISNULL(@batchIdUsed, '') <> ''
+					SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed
+
 				RAISERROR(@ErrorMerssage, 11, 1)							
 			END				
 		GOTO Post_Exit	
