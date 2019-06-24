@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspICCleanupOrphanTransactionsByItem] (@intItemId INT)
 AS
 BEGIN
-	DELETE FROM tblICItemUOM WHERE intItemId = @intItemId
+	
     DELETE FROM tblICItemSpecialPricing WHERE intItemId = @intItemId
     DELETE FROM tblICItemPricingLevel WHERE intItemId = @intItemId
     DELETE FROM tblICItemPricing WHERE intItemId = @intItemId
@@ -27,4 +27,5 @@ BEGIN
 	DELETE FROM tblICInventoryTransaction WHERE intItemId = @intItemId
 	DELETE FROM tblICItemStock WHERE intItemId = @intItemId
     DELETE FROM tblICItemLocation WHERE intItemId = @intItemId
+	DELETE FROM tblICItemUOM WHERE intItemId = @intItemId
 END
