@@ -966,10 +966,10 @@ BEGIN
 					left join tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
 					where 
 						Inv.strTransactionType = 'Inventory Receipt'
-						AND ISNULL(CS.intStorageTypeId,0) = 2  --Not DP
+						AND ISNULL(CS.intStorageTypeId,0) = 2  
 				) t
 				UNION ALL
-				SELECT --DIRECT INVENTORY RECEIPT W/O VOUCHER
+				SELECT --INVENTORY RECEIPT W/O VOUCHER
 					dtmDate
 					,dblUnpaidIncrease = dblTotal
 					,dblUnpaidDecrease = 0
@@ -991,6 +991,32 @@ BEGIN
 						AND IRV.intBillId IS NULL
 						AND IR.intSourceType = 1
 				) t
+
+				UNION ALL
+				SELECT --INVENTORY RECEIPT PARTIALLY VOUCHERD
+					dtmDate
+					,dblUnpaidIncrease = ROUND(dblTotal,2)
+					,dblUnpaidDecrease = 0
+					,dblUnpaidBalance = ROUND(dblTotal,2)
+					,dblPaidBalance = 0
+					,strTransactionId = strReceiptNumber
+					,intTransactionId
+					,''
+				FROM (
+					select 
+							dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+						,dblTotal = Inv.dblTotal - IRI.dblBillQty
+						,IR.strReceiptNumber
+						,Inv.intTransactionId
+						,intBillId = (select top 1 intBillId from vyuICGetInventoryReceiptVoucher where intInventoryReceiptItemId = Inv.intTransactionDetailId )
+					from @InventoryStock Inv
+					inner join tblICInventoryReceipt IR on Inv.intTransactionId = IR.intInventoryReceiptId
+					inner join tblICInventoryReceiptItem IRI on Inv.intTransactionDetailId = IRI.intInventoryReceiptItemId
+					where Inv.strTransactionType = 'Inventory Receipt'
+						AND Inv.dblTotal <> dblBillQty
+						AND IR.intSourceType = 1
+				) t
+				WHERE intBillId IS NOT NULL
 			END
 
 
