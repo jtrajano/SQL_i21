@@ -20,11 +20,11 @@ DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION;
 
 --RECEIPT ITEM
-IF @intInventoryReceiptItemId > 0 AND @intInventoryReceiptChargeId IS NULL
-BEGIN
-	DECLARE @voucherDetailReceiptItem AS voucherDetailReceiptItem
+--IF @intInventoryReceiptItemId > 0 AND @intInventoryReceiptChargeId IS NULL
+--BEGIN
+--	DECLARE @voucherDetailReceiptItem AS voucherDetailReceiptItem
 	
-END
+--END
 
 IF @transCount = 0 COMMIT TRANSACTION;
 
