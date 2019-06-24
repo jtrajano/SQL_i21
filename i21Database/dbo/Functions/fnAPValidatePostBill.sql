@@ -150,6 +150,26 @@ BEGIN
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
 			A.intAccountId IS NULL AND A.intAccountId = 0
 
+		--Detail Account Missing
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT DISTINCT
+			CASE WHEN B.intItemId IS NULL THEN ISNULL('Account '+ expenseAccount.strAccount + ' is required for this item.', 'There is no GL expese account setup.') ELSE  'Account ' + apClearing.strAccountId + ' is required for this item.' END,
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			16
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
+			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
+			LEFT JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intShipToId																															
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(B.intItemId, loc.intItemLocationId, 'AP Clearing') itemAccnt
+			OUTER APPLY (
+				SELECT strAccountId + ' '+ strAccountCategory as strAccount FROM vyuGLAccountDetail where intAccountId = D1.intGLAccountExpenseId
+			) expenseAccount
+			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+		WHERE   A.intTransactionType IN (1) and B.intAccountId IS NULL AND  A.intBillId IN (SELECT [intBillId] FROM @tmpBills)	
+
 		--For Approved
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
@@ -261,6 +281,19 @@ BEGIN
 			INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 		AND A.dtmDate < C2.dtmReceiptDate
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		-- SELECT
+		-- 	'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',
+		-- 	'Bill',
+		-- 	A.strBillId,
+		-- 	A.intBillId,
+		-- 	13
+		-- FROM tblAPBill A 
+		-- 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		-- 	INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
+		-- 	INNER JOIN tblICItem D ON C.intItemId = D.intItemId
+		-- WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		-- AND (C.dblBillQty + (CASE WHEN A.intTransactionType != 1 THEN B.dblQtyReceived * -1 ELSE B.dblQtyReceived END)) > C.dblOpenReceive
 
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		-- SELECT

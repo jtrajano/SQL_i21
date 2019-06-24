@@ -258,6 +258,12 @@ SET strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, CS.strBillToLo
 FROM #CUSTOMERS C
 INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
 
+UPDATE C
+SET strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, CS.strBillToLocationName, CS.strBillToAddress, CS.strBillToCity, CS.strBillToState, CS.strBillToZipCode, CS.strBillToCountry, NULL, NULL)
+  , strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, C.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
+FROM #CUSTOMERS C
+INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
+
 SET @query = CAST('' AS NVARCHAR(MAX)) + 
 'SELECT * 
 FROM (

@@ -158,6 +158,7 @@
 	   ,SO.strSalesOrderNumber
 	   ,IC.strItemNo AS strItemNumber
 	   --,EMDriver.strName AS strDriverName
+     ,SCT.dtmImportedDate
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
