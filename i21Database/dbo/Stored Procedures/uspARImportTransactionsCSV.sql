@@ -725,7 +725,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[strBillToZipCode]
 							,[strShipToCountry]
 							,[strBillToCountry])
-						SELECT @OriginId
+						SELECT NULL
 							, @EntityCustomerId
 							, @Date
 							, @DueDate
@@ -748,7 +748,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							, 'Open'
 							, @DefaultAccountId
 							, @BOLNumber
-							, @OriginId
+							, NULL
 							, @FreightTermId
 							, @UserEntityId
 							, @shipToId
