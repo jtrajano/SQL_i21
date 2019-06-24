@@ -19,7 +19,7 @@ SELECT
 									END COLLATE Latin1_General_CI_AS as strTransaction
 	,intEntityId				  	= CS.intEntityId
 	,strName					  	= E.strName  
-	,strStorageTicketNumber		  	= CS.strStorageTicketNumber
+	,strStorageTicketNumber		  = CASE WHEN CS.ysnTransferStorage = 1 THEN TS.strTransferStorageTicket ELSE CS.strStorageTicketNumber END
 	,intStorageTypeId			  	= CS.intStorageTypeId
 	,strStorageTypeDescription	  	= ST.strStorageTypeDescription
 	,intCommodityId				  	= CS.intCommodityId
@@ -77,6 +77,9 @@ SELECT
 										WHEN CS.ysnTransferStorage = 1 OR CS.intTicketId IS NOT NULL OR DeliverySheet.ysnPost = 1 THEN 'Posted'
 										ELSE 'Open'
 									END
+	,TSR.intSourceCustomerStorageId
+	,CS.ysnTransferStorage
+	,strStorageTransactionNumber = CASE WHEN CS.ysnTransferStorage = 1 THEN CS.strStorageTicketNumber ELSE TS.strTransferStorageTicket END
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
@@ -120,4 +123,6 @@ LEFT JOIN (
 		tblGRTransferStorageSplit TSS
 		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = TSS.intTransferStorageId
-	) ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
+		LEFT JOIN tblGRTransferStorageReference TSR
+			ON TSR.intTransferStorageSplitId  = TSS.intTransferStorageSplitId
+	) ON ISNULL(TSR.intToCustomerStorageId,TSS.intTransferToCustomerStorageId) = CS.intCustomerStorageId
