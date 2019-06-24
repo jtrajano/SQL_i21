@@ -341,14 +341,14 @@ BEGIN TRY
 		DECLARE @tblUpdateItemForCStore TABLE (
 				intItemId INT
 				-- Original Fields
-				,strCategoryCode_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
-				,strCountCode_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
-				,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				, strCategoryCode_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				, strCountCode_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				, strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				, strCategoryId_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				-- Modified Fields
-				,strCategoryCode_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
-				,strCountCode_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
-				,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				, strCategoryCode_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				, strCountCode_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+				, strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 				, strCategoryId_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 		)
 
@@ -541,8 +541,6 @@ BEGIN TRY
 
 
 		BEGIN TRY
-			-- Item Location
-
 			DECLARE @ysnTaxFlag1 AS BIT = CAST(@strTaxFlag1ysn AS BIT)
 			DECLARE @ysnTaxFlag2 AS BIT = CAST(@strTaxFlag2ysn AS BIT)
 			DECLARE @ysnTaxFlag3 AS BIT = CAST(@strTaxFlag3ysn AS BIT)
@@ -566,7 +564,7 @@ BEGIN TRY
 			DECLARE @intClassId AS INT = CAST(@intNewClass AS INT)
 			DECLARE @intVendorId AS INT = CAST(@intNewVendor AS INT)
 
-
+			-- Item Location
 			EXEC [dbo].[uspICUpdateItemLocationForCStore]
 			    -- filter params
 				@strUpcCode = @strUpcCode 
@@ -650,14 +648,14 @@ BEGIN TRY
 		(
 			intItemId 
 			-- Original Fields
-			,strCategoryCode_Original
-			,strCountCode_Original
-			,strDescription_Original
+			, strCategoryCode_Original
+			, strCountCode_Original
+			, strDescription_Original
 			, strCategoryId_Original
 			-- Modified Fields
-			,strCategoryCode_New 
-			,strCountCode_New 
-			,strDescription_New
+			, strCategoryCode_New 
+			, strCountCode_New 
+			, strDescription_New
 			, strCategoryId_New
 		)
 		SELECT DISTINCT
@@ -1025,6 +1023,7 @@ BEGIN TRY
 			, intItemUOMId INT NULL
 			, intItemLocationId INT NULL
 
+			, dtmDateModified DATETIME NOT NULL
 			, intCompanyLocationId INT
 			, strLocation NVARCHAR(250)
 			, strUpc NVARCHAR(50)
@@ -1138,6 +1137,7 @@ BEGIN TRY
 			, intItemUOMId
 			, intItemLocationId
 
+			, dtmDateModified
 			, intCompanyLocationId
 			, strLocation
 			, strUpc
@@ -1231,6 +1231,11 @@ BEGIN TRY
 				, intItemLocationId											= IL.intItemLocationId
 
 
+				, dtmDateModified											= CASE 
+																				WHEN IL.dtmDateModified IS NULL 
+																					THEN GETUTCDATE()
+																				ELSE IL.dtmDateModified
+																			END
 		        , intCompanyLocationId										= CL.intCompanyLocationId
 				, strLocation												= CL.strLocationName
 				, strUpc													= CASE
@@ -1356,6 +1361,7 @@ BEGIN TRY
 			, intItemUOMId
 			, intItemLocationId
 
+			, dtmDateModified
 			, intCompanyLocationId
 			, strLocation
 			, strUpc
@@ -1389,6 +1395,11 @@ BEGIN TRY
 				, intItemLocationId											= IL.intItemLocationId
 
 
+				, dtmDateModified											= CASE 
+																				WHEN I.dtmDateModified IS NULL 
+																					THEN GETUTCDATE()
+																				ELSE I.dtmDateModified
+																			END
 				, intCompanyLocationId										= CL.intCompanyLocationId
 				, strLocation												= CL.strLocationName
 				, strUpc													= CASE
@@ -1606,6 +1617,7 @@ BEGIN TRY
 							[intItemId],
 							[intItemUOMId],
 							[intItemLocationId],
+							[dtmDateModified],
 							[intCompanyLocationId],
 							[strLocation],
 							[strUpc],
@@ -1626,6 +1638,7 @@ BEGIN TRY
 							[intItemId]					= intItemId,
 							[intItemUOMId]				= intItemUOMId,
 							[intItemLocationId]			= intItemLocationId,
+							[dtmDateModified]			= dtmDateModified,
 							[intCompanyLocationId]		= intCompanyLocationId,
 							[strLocation]				= strLocation,
 							[strUpc]					= strUpc,
