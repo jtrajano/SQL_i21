@@ -112,14 +112,17 @@ BEGIN
 					, intTicketId = (CASE WHEN gh.intTransactionTypeId = 1 THEN gh.intTicketId
 										WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
 										WHEN gh.intTransactionTypeId = 3 THEN gh.intTransferStorageId
+										WHEN gh.intTransactionTypeId = 9 THEN gh.intInventoryAdjustmentId
 										ELSE gh.intCustomerStorageId END)
 					, strTicketType = (CASE WHEN gh.intTransactionTypeId = 1 THEN 'Scale Storage'
 										WHEN gh.intTransactionTypeId = 4 THEN 'Settle Storage'
 										WHEN gh.intTransactionTypeId = 3 THEN 'Transfer Storage'
+										WHEN gh.intTransactionTypeId = 9 THEN 'Storage Adjustment'
 										ELSE 'Customer/Maintain Storage' END) COLLATE Latin1_General_CI_AS
 					, strTicketNumber = (CASE WHEN gh.intTransactionTypeId = 1 THEN t.strTicketNumber
 										WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
 										WHEN gh.intTransactionTypeId = 3 THEN gh.strTransferTicket
+										WHEN gh.intTransactionTypeId = 9 THEN gh.strTransactionId
 										ELSE a.strStorageTicketNumber END)
 					, gh.intInventoryReceiptId
 					, gh.intInventoryShipmentId
@@ -185,14 +188,17 @@ BEGIN
 					, intTicketId = (CASE WHEN gh.intTransactionTypeId = 1 THEN gh.intTicketId
 										WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
 										WHEN gh.intTransactionTypeId = 3 THEN gh.intTransferStorageId
+										WHEN gh.intTransactionTypeId = 9 THEN gh.intInventoryAdjustmentId
 										ELSE gh.intCustomerStorageId END)
 					, strTicketType = (CASE WHEN gh.intTransactionTypeId = 1 THEN 'Scale Storage'
 										WHEN gh.intTransactionTypeId = 4 THEN 'Settle Storage'
 										WHEN gh.intTransactionTypeId = 3 THEN 'Transfer Storage'
+										WHEN gh.intTransactionTypeId = 9 THEN  'Storage Adjustment'
 										ELSE 'Customer/Maintain Storage' END) COLLATE Latin1_General_CI_AS
 					, strTicketNumber = (CASE WHEN gh.intTransactionTypeId = 1 THEN NULL
 										WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
 										WHEN gh.intTransactionTypeId = 3 THEN gh.strTransferTicket
+										WHEN gh.intTransactionTypeId = 9 THEN gh.strTransactionId
 										ELSE a.strStorageTicketNumber END)
 					, intInventoryReceiptId = (CASE WHEN gh.strType = 'From Inventory Adjustment' THEN gh.intInventoryAdjustmentId ELSE gh.intInventoryReceiptId END)
 					, gh.intInventoryShipmentId
@@ -276,44 +282,91 @@ BEGIN
 				, dtmDate datetime
 				, dblTotal NUMERIC(18,6)
 				, strTransactionType NVARCHAR(50)
+				, strTransactionId NVARCHAR(50)
+				, intTransactionId INT
+				, strDistribution NVARCHAR(10)
 				)
 
 			INSERT INTO @tblResult (
 				dtmDate
 				,dblTotal
 				,strTransactionType
+				,strTransactionId
+				,intTransactionId
+				,strDistribution
 			)
 			SELECT 
 				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)
 				,dblTotal
-				,strTransactionType 
-			FROM #invQty
+				,strTransactionType
+				,strTransactionId 
+				,intTransactionId
+				,strDistributionOption 
+			FROM #invQty Inv
+			WHERE Inv.strTransactionType <> 'Storage Settlement'
+			
+			UNION ALL
+			SELECT 
+				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)
+				,dblTotal
+				,strTransactionType
+				,strTransactionId 
+				,intTransactionId
+				,ST.strStorageTypeCode 
+			FROM #invQty Inv
+			inner join vyuGRSettleStorageTicketNotMapped SS ON Inv.intTransactionId = SS.intSettleStorageId
+			left join tblGRStorageType ST ON SS.intStorageTypeId = ST.intStorageScheduleTypeId
+			WHERE Inv.strTransactionType = 'Storage Settlement'
+			
 
 			INSERT INTO @tblResult (
 				dtmDate
 				,dblTotal
 				,strTransactionType
+				,strTransactionId
+				,intTransactionId
+				,strDistribution
 			)
 			SELECT 
 				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)
 				,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblBalance)
 				,'Storage'
-			FROM #tblGetStorageDetailByDate
-			WHERE intCommodityId = @intCommodityId
-					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
-					AND ysnDPOwnedType <> 1 AND strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
-					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				,strTransactionId = CASE WHEN strTicketType IN( 'Scale Storage','Customer/Maintain Storage','Storage Adjustment') THEN 
+						CASE WHEN strReceiptNumber <> '' THEN strReceiptNumber ELSE strShipmentNumber END
+					WHEN strTicketType = 'Settle Storage' THEN
+						strTicketNumber
+					END
+				,intTransactionId = CASE WHEN strTicketType IN( 'Scale Storage','Customer/Maintain Storage','Storage Adjustment') THEN 
+						ISNULL(intInventoryReceiptId,intInventoryShipmentId)
+					WHEN strTicketType = 'Settle Storage' THEN
+						BD.intTicketId
+					END
+				,ST.strStorageTypeCode 
+			FROM #tblGetStorageDetailByDate BD
+			left join tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
+			left join tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
+			WHERE BD.intCommodityId = @intCommodityId
+					AND BD.intCompanyLocationId = ISNULL(@intLocationId, BD.intCompanyLocationId)
+					AND BD.ysnDPOwnedType <> 1 AND BD.strOwnedPhysicalStock <> 'Company' --Remove DP type storage in in-house. Stock already increases in IR.
+					AND BD.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 			INSERT INTO @tblResult (
 				dtmDate
 				,dblTotal
 				,strTransactionType
+				,strTransactionId
+				,intTransactionId
+				,strDistribution
 			)
 			SELECT 
 				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110), 110)
 				,dblTotal
 				,'On Hold' 
+				,strTicketNumber
+				,intTicketId
+				,'HLD'
 			FROM #tempOnHold
+
 
 			DECLARE @tblResultInventory TABLE (Id INT identity(1,1)
 				, dtmDate datetime
@@ -323,6 +376,9 @@ BEGIN
 				, dblInventoryCount NUMERIC(18,6)
 				, dblSalesInTransit NUMERIC(18,6)
 				, dblBalanceInv NUMERIC(18,6)
+				, strTransactionId NVARCHAR(50)
+				, intTransactionId INT
+				, strDistribution NVARCHAR(10)
 				)
 
 			
@@ -348,12 +404,7 @@ BEGIN
 			
 			Declare @date date
 
-			insert into @tblBalanceInvByDate(
-					dtmDate
-					,dblBalanceInv
-				)
-				select NULL,sum(dblTotal) from @tblResult WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(day,-1,@dtmFromTransactionDate))
-
+			
 			While (Select Count(*) From #tempDateRange) > 0
 			Begin
 
@@ -372,212 +423,422 @@ BEGIN
 
 
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInvIn)
-			SELECT dtmDate, dblTotal FROM (
-
+			INSERT INTO @tblResultInventory(
+				 dtmDate
+				, dblInvIn
+				, strTransactionId
+				, intTransactionId
+				, strDistribution)
+			SELECT 
+				  dtmDate
+				, dblTotal
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
 					, dblTotal = SUM(ISNULL(dblTotal, 0))
-				FROM #invQty
+					, strTransactionId
+					, intTransactionId
+					, strDistribution
+				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Receipt')
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t 
+			WHERE dblTotal <> 0
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInvIn)
-			SELECT dtmDate, dblTotal FROM (
-
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvIn
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
 					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType IN ('Storage Settlement')
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t 
 			
-			INSERT INTO @tblResultInventory(dtmDate, dblInvIn)
-			SELECT dtmDate, dblTotal FROM (
-
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvIn
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
 					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType IN ('Credit Memo')
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t 
 		
 		
-			INSERT INTO @tblResultInventory(dtmDate, dblInvIn)
-			SELECT dtmDate, dblTotal FROM (
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvIn
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
 					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Transfer')
 				AND dblTotal > 0
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInvOut)
-			SELECT dtmDate, dblTotal FROM (
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvOut
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 	
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
 					, dblTotal = SUM(ABS(ISNULL(dblTotal, 0)))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Transfer')
 				AND dblTotal < 0
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInvIn)
-			SELECT dtmDate, dblTotal FROM (
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvIn
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					 dtmDate  
 					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType = 'On Hold'
 				AND dblTotal  > 0
 				GROUP By
 					dtmDate
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInvOut)
-			SELECT dtmDate, dblTotal FROM (
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvOut
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					 dtmDate 
 					, dblTotal = SUM(ABS(ISNULL(dblTotal, 0)))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType = 'On Hold' 
 				AND dblTotal < 0
 				GROUP By
 					dtmDate
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
 
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInvOut)
-			SELECT dtmDate, dblTotal FROM (
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvOut
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, ABS(dblTotal)
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
-					, dblTotal = SUM(ABS(ISNULL(dblTotal, 0)))
+					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Shipment')
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
+			WHERE dblTotal <> 0
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInvOut)
-			SELECT dtmDate, dblTotal FROM (
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvOut
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
 					, dblTotal = SUM(ABS(ISNULL(dblTotal, 0)))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType IN ('Invoice', 'Cash')
 				AND dblTotal < 0
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
 
 
-			INSERT INTO @tblResultInventory(dtmDate, dblAdjustments)
-			SELECT dtmDate, dblTotal FROM (
-
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblAdjustments
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
 					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType LIKE 'Inventory Adjustment -%'
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInventoryCount)
-			SELECT dtmDate, dblTotal FROM (
-
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInventoryCount
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT
 					dtmDate 
-					, strTransactionType
 					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType IN('Inventory Count')
 				GROUP By
 					dtmDate
-					, strTransactionType
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
 
 
-			INSERT INTO @tblResultInventory(dtmDate, dblInvIn)
-			SELECT dtmDate, dblTotal FROM (
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvIn
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT 
 					dtmDate 
 					,dblTotal =  sum(dblTotal)
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult s
 				WHERE strTransactionType = 'Storage'
 					AND dblTotal > 0
 				GROUP BY
 					dtmDate
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
 
 			
-			INSERT INTO @tblResultInventory(dtmDate, dblInvOut)
-			SELECT dtmDate, dblTotal FROM (
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvOut
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
 				SELECT 
 					dtmDate 
 					,dblTotal =  sum(ABS(dblTotal))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 				FROM @tblResult s
 				WHERE strTransactionType = 'Storage'
 					AND dblTotal < 0
 				GROUP BY
 					dtmDate
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
 			) t
+
 
 			--==============================
 			-- FINAL SELECT
 			--===============================
-		
+			SELECT * FROM (
 			SELECT 
 				r.dtmDate
 				, ri.dblInvIn
 				, ri.dblInvOut
 				, ri.dblAdjustments
 				, ri.dblInventoryCount
-				, dblBalanceInv 
-			FROM (
-				select 
-					dtmDate
-					,dblInvIn = sum(isnull(dblInvIn,0))
-					,dblInvOut = sum(isnull(dblInvOut,0))
-					,dblAdjustments = sum(isnull(dblAdjustments,0)) 
-					,dblInventoryCount = sum(isnull(dblInventoryCount,0)) 
-			
-				from @tblResultInventory 
-				where dtmDate between CONVERT(datetime, @dtmFromTransactionDate) and CONVERT(datetime, @dtmToTransactionDate)
-				group by
-					dtmDate
-			) ri
+				, ri.strTransactionId
+				, ri.intTransactionId
+				, ri.strDistribution
+				, r.dblBalanceInv 
+			FROM @tblResultInventory ri
 			FULL join @tblBalanceInvByDate r on ri.dtmDate = r.dtmDate
-			ORDER BY r.dtmDate
+			
 
-
+			UNION ALL--Insert Company Title Beginning Balance
+			SELECT
+				NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+				sum(dblTotal) 
+			FROM @tblResult WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(day,-1,@dtmFromTransactionDate))
+			) t
+			WHERE dblBalanceInv IS NOT NULL 
 
 
 	drop table #LicensedLocation
@@ -586,3 +847,5 @@ BEGIN
 	drop table #tempOnHold
 	drop table #tempDateRange
 END
+
+
