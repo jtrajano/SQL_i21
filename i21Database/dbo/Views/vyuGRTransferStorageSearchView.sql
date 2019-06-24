@@ -29,6 +29,7 @@ SELECT
 	,ysnPosted						= SourceTransfer.ysnPosted
 	,intUserId						= SourceTransfer.intUserId
 	,strUserName					= SourceTransfer.strUserName
+	,intSourceCustomerStorageId
 FROM (
 		SELECT
 			 TS.intTransferStorageId
@@ -82,6 +83,7 @@ INNER JOIN (
 			,STSplit.strStorageTypeDescription
 			,dblOriginalUnits			= TSplit.dblUnits
 			,dblSplitPercent			= TSplit.dblSplitPercent
+			,intSourceCustomerStorageId
 		FROM tblGRTransferStorageSplit TSplit
 		INNER JOIN tblEMEntity EMSplit
 			ON EMSplit.intEntityId = TSplit.intEntityId
@@ -89,5 +91,7 @@ INNER JOIN (
 			ON CLSplit.intCompanyLocationId = TSplit.intCompanyLocationId
 		INNER JOIN tblGRStorageType STSplit
 			ON STSplit.intStorageScheduleTypeId = TSplit.intStorageTypeId
+		LEFT JOIN tblGRTransferStorageReference TSR
+			ON TSR.intTransferStorageSplitId  = TSplit.intTransferStorageSplitId 
 	) SplitTransfer 
-		ON SourceTransfer.intTransferStorageId = SplitTransfer.intTransferStorageId
+		ON SourceTransfer.intTransferStorageId = SplitTransfer.intTransferStorageId AND CASE WHEN (SplitTransfer.intSourceCustomerStorageId IS NOT NULL) THEN CASE WHEN SplitTransfer.intSourceCustomerStorageId = SourceTransfer.intCustomerStorageId THEN 1 ELSE 0 END ELSE  1 END = 1
