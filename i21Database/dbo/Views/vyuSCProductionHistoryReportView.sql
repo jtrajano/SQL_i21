@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSCProductionHistoryReportView]
-	AS SELECT SC.intTicketId, (CASE WHEN
+	AS 	
+	SELECT DISTINCT SC.intTicketId, (CASE WHEN
     SC.strTicketStatus = 'O' THEN 'OPEN' WHEN
     SC.strTicketStatus = 'A' THEN 'PRINTED' WHEN
     SC.strTicketStatus = 'C' THEN 'COMPLETED' WHEN
@@ -51,7 +52,8 @@
 	SC.strLoadNumber,
 	SC.intLoadLocationId,
 	SC.strPitNumber,
-	SC.strFarmNumber,
+	EFM.strFarmNumber,
+	EFM.strFarmDescription,
 	SC.strFieldNumber,
 	SC.strDiscountComment,
 	SC.intCommodityId,
@@ -104,14 +106,13 @@
 	tblSMCompanySetup.strCompanyPhone,
 	tblSMCompanySetup.strCompanyCity,
 	tblSMCompanySetup.strCompanyCountry,
-	ReceiptItem.intInventoryReceiptId,
-	ReceiptItem.intInventoryReceiptItemId,
-	ReceiptItem.strReceiptNumber,
-	ReceiptItem.dblGross,
-	ReceiptItem.dblShrinkage,
-	ReceiptItem.dblNet,
-	(ReceiptItem.dblNet / SC.dblNetUnits * (SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2)) AS dblLineGrossWeight,
-	((ReceiptItem.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) AS dblLineNetWeight,
+	--ReceiptItem.intInventoryReceiptId,
+	----ReceiptItem.intInventoryReceiptItemId,
+	--ReceiptItem.strReceiptNumber,
+	SC.dblGrossUnits dblGross,
+	SC.dblNetUnits dblNet,
+	(SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2) AS dblLineGrossWeight,
+	(SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2) AS dblLineNetWeight,
 	tblGRDiscountId.strDiscountId,
 	ISNULL(Voucher.dtmDate, ReceiptItem.dtmReceiptDate) AS dtmReceiptDate,
 	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
@@ -129,6 +130,7 @@
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
   LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
   LEFT JOIN vyuSCGradeReadingReport QM ON QM.intTicketId = SC.intTicketId AND QM.ysnDryingDiscount = 1
+  LEFT JOIN tblEMEntityFarm EFM ON EFM.intFarmFieldId = SC.intFarmFieldId
   OUTER APPLY(
 	SELECT strCompanyName
 		,strAddress AS strCompanyAddress

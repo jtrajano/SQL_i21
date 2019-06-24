@@ -826,6 +826,7 @@ FROM
 	) rate
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
 	WHERE		RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0
+	AND NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId)
 	UNION ALL
 
 	--ysnPrice = 1

@@ -22,6 +22,7 @@
 	[ysnExport] BIT NULL DEFAULT (0),
 	[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),  
+	[dtmImportedDate] DATETIME NULL, 
     CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

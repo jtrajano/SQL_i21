@@ -304,7 +304,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId,
 			[dblQtyOrdered]					=	voucherDetailReceipt.dblQtyReceived,
 			[dblQtyReceived]				=	voucherDetailReceipt.dblQtyReceived,
-			[dblRate]						=	ISNULL(B.dblForexRate,1),
+			[dblRate]						=	ISNULL(NULLIF(B.dblForexRate,0),1),
 			[intCurrencyExchangeRateTypeId]	=	B.intForexRateTypeId,
 			[ysnSubCurrency]				=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 			[intTaxGroupId]					=	B.intTaxGroupId,
@@ -452,7 +452,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
-			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
+			[dblForexRate]				=	ISNULL(NULLIF(B.dblForexRate,0),1),
 			[intForexRateTypeId]		=	B.intForexRateTypeId,
 			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 			[intTaxGroupId]				=	B.intTaxGroupId,
@@ -614,7 +614,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intPODetailId]				=	(CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END),
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
-			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
+			[dblForexRate]				=	ISNULL(NULLIF(B.dblForexRate,0),1),
 			[intForexRateTypeId]		=	B.intForexRateTypeId,
 			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 			[intTaxGroupId]				=	B.intTaxGroupId,
@@ -779,7 +779,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 			[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
 			[dblQtyOrdered]				=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
 			[dblQtyReceived]			=	ISNULL(voucherDetailReceipt.dblQtyReceived, ABS(B.dblOpenReceive - B.dblBillQty)),
-			[dblForexRate]				=	ISNULL(B.dblForexRate,1),
+			[dblForexRate]				=	ISNULL(NULLIF(B.dblForexRate,0),1),
 			[intForexRateTypeId]		=	B.intForexRateTypeId,
 			[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END,
 			[intTaxGroupId]				=	B.intTaxGroupId,
@@ -1040,8 +1040,18 @@ IF @transCount = 0 BEGIN TRANSACTION
 	IF  EXISTS (SELECT 1 FROM tblAPBillDetail where intBillDetailId  IN (SELECT intBillDetailId FROM @detailCreated) and intContractDetailId > 0)
 	BEGIN
 		DECLARE @voucherDetailId INT
-		SELECT  @voucherDetailId = intBillDetailId FROM @detailCreated 		
-		EXEC [uspAPUpdateQty] @voucherDetailId
+		DECLARE curr CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+			SELECT  intBillDetailId FROM @detailCreated 
+		OPEN curr
+		FETCH NEXT FROM curr INTO @voucherDetailId
+		WHILE @@FETCH_STATUS = 0	
+		BEGIN	
+			EXEC [uspAPUpdateQty] @voucherDetailId
+			FETCH NEXT FROM curr INTO @voucherDetailId
+		END
+		CLOSE curr
+		DEALLOCATE curr
 	END
 
 IF @transCount = 0 COMMIT TRANSACTION
