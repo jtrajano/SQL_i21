@@ -53,7 +53,8 @@ SELECT
 	,SUM(ISNULL(TW.dblSubTotal,0)) dblSubTotalByLocation
 	,TW.strDiscountCode strDiscountCode
 	from cte1 TW
-GROUP BY TW.strReadingRange
+GROUP BY TW.intCompanyLocationId
+		,TW.strReadingRange
 		,TW.strCommodityCode
 		,TW.strLocationName
 		,TW.dtmDeliveryYear
