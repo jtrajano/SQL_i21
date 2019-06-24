@@ -306,6 +306,10 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpd
 
 
 
+
+-- ===============================================================================================================================
+-- [START] Drop tables
+-- ===============================================================================================================================
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreGLAccount') 
 	BEGIN
 		PRINT(N'Drop table tblSTStoreGLAccount')
@@ -313,6 +317,20 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTSto
 				DROP TABLE tblSTStoreGLAccount
 			')
 	END
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateItemDataRevertHolder') 
+	BEGIN
+		PRINT(N'Drop table tblSTUpdateItemDataRevertHolder')
+		EXEC('
+				DROP TABLE tblSTUpdateItemDataRevertHolder
+			')
+	END
+-- ===============================================================================================================================
+-- [START] Drop tables
+-- ===============================================================================================================================
+
+
+
 
 
 ----------------------------------------------------------------------------------------------------------------------------------

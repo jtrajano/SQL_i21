@@ -9,7 +9,13 @@ BEGIN TRY
 	    
 		BEGIN TRANSACTION
 
+		-- String holders
+		DECLARE @strTRUE AS NVARCHAR(6) = 'true'
+		DECLARE @strFALSE AS NVARCHAR(6) = 'false'
 
+
+		DECLARE @dtmDateTimeModifiedFrom AS DATETIME
+		DECLARE @dtmDateTimeModifiedTo AS DATETIME
 
 		---- TEST
 		---- ==================================================================================
@@ -513,27 +519,9 @@ BEGIN TRY
 												WHERE intItemUOMId = @intItemUOMId
 											  )
 
-
+		-- MARK START UPDATE
+		SET @dtmDateTimeModifiedFrom = GETUTCDATE()
 										
-		BEGIN TRY
-
-			-- Item Update
-			EXEC [dbo].[uspICUpdateItemForCStore]
-					@strUpcCode = @strUpcCode 
-					,@strDescription = @strDescription 
-					,@dblRetailPriceFrom = NULL  
-					,@dblRetailPriceTo = NULL 
-
-					,@intCategoryId = @intNewCategory
-					,@strCountCode = @strNewCountCode
-					,@strItemDescription = NULL
-
-					,@intEntityUserSecurityId = @intCurrentEntityUserId
-		END TRY
-		BEGIN CATCH
-			SELECT 'uspICUpdateItemForCStore', ERROR_MESSAGE()
-		END CATCH
-
 
 		--BEGIN 
 		--	-- Item Account
@@ -585,7 +573,7 @@ BEGIN TRY
 				,@strDescription = @strDescription 
 				,@dblRetailPriceFrom = @dblPriceBetween1  
 				,@dblRetailPriceTo =  @dblPriceBetween2 
-				,@intItemLocationId = NULL 
+				,@intItemLocationId = NULL                -- *** SET VALUE TO UPDATE SPECIFIC RECORD ***
 				-- update params 
 				,@ysnTaxFlag1 = @ysnTaxFlag1
 				,@ysnTaxFlag2 = @ysnTaxFlag2
@@ -625,6 +613,33 @@ BEGIN TRY
 			SELECT 'uspICUpdateItemLocationForCStore', ERROR_MESSAGE()
 		END CATCH
 
+
+
+
+		BEGIN TRY
+			-- Item Update
+			EXEC [dbo].[uspICUpdateItemForCStore]
+					@strUpcCode = @strUpcCode 
+					,@strDescription = @strDescription 
+					,@dblRetailPriceFrom = NULL  
+					,@dblRetailPriceTo = NULL 
+					,@intItemId = NULL						-- *** SET VALUE TO UPDATE SPECIFIC RECORD ***
+
+					,@intCategoryId = @intNewCategory
+					,@strCountCode = @strNewCountCode
+					,@strItemDescription = NULL
+
+					,@intEntityUserSecurityId = @intCurrentEntityUserId
+		END TRY
+		BEGIN CATCH
+			SELECT 'uspICUpdateItemForCStore', ERROR_MESSAGE()
+		END CATCH
+
+
+
+
+		-- MARK END UPDATE
+		SET @dtmDateTimeModifiedTo = GETUTCDATE()
 
 
 		---------------------------------------------------------------
@@ -819,61 +834,61 @@ BEGIN TRY
 
 			-- Original Fields
 			, CASE 
-					WHEN [Changes].ysnTaxFlag1_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnTaxFlag1_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnTaxFlag2_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnTaxFlag2_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnTaxFlag3_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnTaxFlag3_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnTaxFlag4_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnTaxFlag4_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnDepositRequired_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnDepositRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CAST([Changes].intDepositPLUId_Original AS NVARCHAR(1000))
 			, ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
 			, CASE 
-					WHEN [Changes].ysnQuantityRequired_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnQuantityRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnScaleItem_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnScaleItem_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnFoodStampable_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnFoodStampable_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnReturnable_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnReturnable_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnSaleable_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnSaleable_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnIdRequiredLiquor_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnIdRequiredLiquor_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnIdRequiredCigarette_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnIdRequiredCigarette_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnPromotionalItem_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnPromotionalItem_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnPrePriced_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnPrePriced_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnApplyBlueLaw1_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnApplyBlueLaw1_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnApplyBlueLaw2_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnApplyBlueLaw2_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnCountedDaily_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnCountedDaily_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, ISNULL(strCounted_Original, '')
 			, CASE 
-					WHEN [Changes].ysnCountBySINo_Original = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnCountBySINo_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, strFamilyId_Original			= ISNULL(CAST([Changes].intFamilyId_Original AS NVARCHAR(1000)), '')
 			, strFamily_Original			= ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_Original), '')
@@ -892,61 +907,61 @@ BEGIN TRY
 
 			-- Modified Fields
 			, CASE 
-					WHEN [Changes].ysnTaxFlag1_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnTaxFlag1_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnTaxFlag2_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnTaxFlag2_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnTaxFlag3_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnTaxFlag3_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnTaxFlag4_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnTaxFlag4_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnDepositRequired_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnDepositRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CAST([Changes].intDepositPLUId_New AS NVARCHAR(1000))
 			, ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
 			, CASE 
-					WHEN [Changes].ysnQuantityRequired_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnQuantityRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnScaleItem_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnScaleItem_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnFoodStampable_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnFoodStampable_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnReturnable_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnReturnable_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnSaleable_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnSaleable_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnIdRequiredLiquor_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnIdRequiredLiquor_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnIdRequiredCigarette_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnIdRequiredCigarette_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnPromotionalItem_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnPromotionalItem_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnPrePriced_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnPrePriced_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnApplyBlueLaw1_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnApplyBlueLaw1_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnApplyBlueLaw2_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnApplyBlueLaw2_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, CASE 
-					WHEN [Changes].ysnCountedDaily_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnCountedDaily_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			,ISNULL(strCounted_New, '')
 			, CASE 
-					WHEN [Changes].ysnCountBySINo_New = 1 THEN 'true' ELSE 'false'
+					WHEN [Changes].ysnCountBySINo_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, strFamilyId_New				= CAST([Changes].intFamilyId_New AS NVARCHAR(1000))
 			, strFamily_New					= ISNULL((SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = [Changes].intFamilyId_New), '')
@@ -995,6 +1010,7 @@ BEGIN TRY
 
 
 
+
 	
 		-- Handle preview using Table variable
 		DECLARE @tblPreview TABLE (
@@ -1018,107 +1034,6 @@ BEGIN TRY
 			, strPreviewNewData NVARCHAR(MAX)
 			, ysnPreview BIT DEFAULT(1)
 			, ysnForRevert BIT DEFAULT(0)
-		)
-
-
-
-		-- ITEM Preview
-		DECLARE @strCategoryCode_New AS NVARCHAR(50) = (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = @intNewCategory)
-		INSERT INTO @tblPreview (
-			strTableName
-			, strTableColumnName
-			, strTableColumnDataType
-			, intPrimaryKeyId
-			, intParentId
-			, intChildId
-			, intCurrentEntityUserId
-			, intItemId
-			, intItemUOMId
-			, intItemLocationId
-
-			, intCompanyLocationId
-			, strLocation
-			, strUpc
-			, strItemDescription
-			, strChangeDescription
-			, strPreviewOldData
-			, strPreviewNewData
-			, ysnPreview
-			, ysnForRevert
-		)
-		SELECT	DISTINCT
-				strTableName												=	N'tblICItem'
-				, strTableColumnName										= CASE
-																				WHEN [Changes].oldColumnName	= 'strCategoryId_Original' THEN 'intCategoryId'
-																				WHEN [Changes].oldColumnName	= 'strCategoryCode_Original' THEN 'strCategoryCode'
-																				WHEN [Changes].oldColumnName	= 'strCountCode_Original' THEN 'strCountCode'
-																				WHEN [Changes].oldColumnName	= 'strDescription_Original' THEN 'strDescription'
-																			 END 
-				, strTableColumnDataType									= CASE
-																				WHEN [Changes].oldColumnName	= 'strCategoryId_Original' THEN 'INT'
-																				WHEN [Changes].oldColumnName	= 'strCategoryCode_Original' THEN 'NVARCHAR(50)'
-																				WHEN [Changes].oldColumnName	= 'strCountCode_Original' THEN 'NVARCHAR(50)'
-																				WHEN [Changes].oldColumnName	= 'strDescription_Original' THEN 'NVARCHAR(250)'
-																			 END
-				, intPrimaryKeyId											= [Changes].intItemId
-				, intParentId												= NULL
-				, intChildId												= NULL
-				, intCurrentEntityUserId									= @intCurrentEntityUserId
-				, intItemId													= I.intItemId
-				, intItemUOMId												= UOM.strLongUPCCode
-				, intItemLocationId											= IL.intItemLocationId
-
-
-				, intCompanyLocationId										= CL.intCompanyLocationId
-				, strLocation												= CL.strLocationName
-				, strUpc													= CASE
-																				  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
-																			END
-				, strItemDescription										= I.strDescription
-				, strChangeDescription										= CASE
-																				WHEN [Changes].oldColumnName = 'strCategoryId_Original' THEN 'Category Id'
-																				WHEN [Changes].oldColumnName = 'strCategoryCode_Original' THEN 'Category'
-																				WHEN [Changes].oldColumnName = 'strCountCode_Original' THEN 'Count Code'
-																				WHEN [Changes].oldColumnName = 'strDescription_Original' THEN 'Description'
-																			 END
-				, strPreviewOldData											= [Changes].strOldData
-				, strPreviewNewData											= [Changes].strNewData
-				, ysnPreview												= CASE
-																					WHEN [Changes].oldColumnName IN('strCategoryCode_Original', 'strCountCode_Original', 'strDescription_Original') THEN 1
-																					ELSE 0
-																			END 
-		        , ysnForRevert												= CASE
-																					WHEN [Changes].oldColumnName IN('strCategoryId_Original', 'strCountCode_Original', 'strDescription_Original') THEN 1
-																					ELSE 0
-																			END 
-		FROM 
-		(
-			SELECT DISTINCT intItemId, oldColumnName, strOldData, strNewData
-			FROM @tblUpdateItemForCStore
-			unpivot
-			(
-				strOldData for oldColumnName in (strCategoryCode_Original, strCountCode_Original, strDescription_Original, strCategoryId_Original)
-			) o
-			unpivot
-			(
-				strNewData for newColumnName in (strCategoryCode_New, strCountCode_New, strDescription_New, strCategoryId_New)
-			) n
-			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
-		) [Changes]
-		INNER JOIN tblICItem I 
-			ON [Changes].intItemId = I.intItemId
-		INNER JOIN tblICItemLocation IL 
-			ON I.intItemId = IL.intItemId 
-		INNER JOIN tblICItemUOM UOM 
-			ON IL.intItemId = UOM.intItemId
-		INNER JOIN tblSMCompanyLocation CL 
-			ON IL.intLocationId = CL.intCompanyLocationId
-		INNER JOIN tblICCategory Cat 
-			ON I.intCategoryId = Cat.intCategoryId
-		WHERE 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
-			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
 		)
 
 
@@ -1312,7 +1227,7 @@ BEGIN TRY
 				, intChildId												= NULL
 				, intCurrentEntityUserId									= @intCurrentEntityUserId
 				, intItemId													= I.intItemId
-				, intItemUOMId												= UOM.strLongUPCCode
+				, intItemUOMId												= UOM.intItemUOMId
 				, intItemLocationId											= IL.intItemLocationId
 
 
@@ -1426,19 +1341,112 @@ BEGIN TRY
 
 
 
+		-- ITEM Preview
+		DECLARE @strCategoryCode_New AS NVARCHAR(50) = (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = @intNewCategory)
+
+		INSERT INTO @tblPreview (
+			strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, intPrimaryKeyId
+			, intParentId
+			, intChildId
+			, intCurrentEntityUserId
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+
+			, intCompanyLocationId
+			, strLocation
+			, strUpc
+			, strItemDescription
+			, strChangeDescription
+			, strPreviewOldData
+			, strPreviewNewData
+			, ysnPreview
+			, ysnForRevert
+		)
+		SELECT	DISTINCT
+				strTableName												=	N'tblICItem'
+				, strTableColumnName										= CASE
+																				WHEN [Changes].oldColumnName	= 'strCategoryId_Original' THEN 'intCategoryId'
+																				WHEN [Changes].oldColumnName	= 'strCategoryCode_Original' THEN 'strCategoryCode'
+																				WHEN [Changes].oldColumnName	= 'strCountCode_Original' THEN 'strCountCode'
+																				WHEN [Changes].oldColumnName	= 'strDescription_Original' THEN 'strDescription'
+																			 END 
+				, strTableColumnDataType									= CASE
+																				WHEN [Changes].oldColumnName	= 'strCategoryId_Original' THEN 'INT'
+																				WHEN [Changes].oldColumnName	= 'strCategoryCode_Original' THEN 'NVARCHAR(50)'
+																				WHEN [Changes].oldColumnName	= 'strCountCode_Original' THEN 'NVARCHAR(50)'
+																				WHEN [Changes].oldColumnName	= 'strDescription_Original' THEN 'NVARCHAR(250)'
+																			 END
+				, intPrimaryKeyId											= [Changes].intItemId
+				, intParentId												= NULL
+				, intChildId												= NULL
+				, intCurrentEntityUserId									= @intCurrentEntityUserId
+				, intItemId													= I.intItemId
+				, intItemUOMId												= UOM.intItemUOMId
+				, intItemLocationId											= IL.intItemLocationId
+
+
+				, intCompanyLocationId										= CL.intCompanyLocationId
+				, strLocation												= CL.strLocationName
+				, strUpc													= CASE
+																				  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
+																			END
+				, strItemDescription										= I.strDescription
+				, strChangeDescription										= CASE
+																				WHEN [Changes].oldColumnName = 'strCategoryId_Original' THEN 'Category Id'
+																				WHEN [Changes].oldColumnName = 'strCategoryCode_Original' THEN 'Category'
+																				WHEN [Changes].oldColumnName = 'strCountCode_Original' THEN 'Count Code'
+																				WHEN [Changes].oldColumnName = 'strDescription_Original' THEN 'Description'
+																			 END
+				, strPreviewOldData											= [Changes].strOldData
+				, strPreviewNewData											= [Changes].strNewData
+				, ysnPreview												= CASE
+																					WHEN [Changes].oldColumnName IN('strCategoryCode_Original', 'strCountCode_Original', 'strDescription_Original') THEN 1
+																					ELSE 0
+																			END 
+		        , ysnForRevert												= CASE
+																					WHEN [Changes].oldColumnName IN('strCategoryId_Original', 'strCountCode_Original', 'strDescription_Original') THEN 1
+																					ELSE 0
+																			END 
+		FROM 
+		(
+			SELECT DISTINCT intItemId, oldColumnName, strOldData, strNewData
+			FROM @tblUpdateItemForCStore
+			unpivot
+			(
+				strOldData for oldColumnName in (strCategoryCode_Original, strCountCode_Original, strDescription_Original, strCategoryId_Original)
+			) o
+			unpivot
+			(
+				strNewData for newColumnName in (strCategoryCode_New, strCountCode_New, strDescription_New, strCategoryId_New)
+			) n
+			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
+		) [Changes]
+		INNER JOIN tblICItem I 
+			ON [Changes].intItemId = I.intItemId
+		INNER JOIN tblICItemLocation IL 
+			ON I.intItemId = IL.intItemId 
+		INNER JOIN tblICItemUOM UOM 
+			ON IL.intItemId = UOM.intItemId
+		INNER JOIN tblSMCompanyLocation CL 
+			ON IL.intLocationId = CL.intCompanyLocationId
+		INNER JOIN tblICCategory Cat 
+			ON I.intCategoryId = Cat.intCategoryId
+		WHERE 
+		(
+			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
+			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+		)
 
 
 
 
 
-		 -- ===================================================================================
-		 -- [START] - Insert value to tblSTUpdateItemDataRevertHolder
-		 -- ===================================================================================
 
-		 -- ===================================================================================
-		 -- [END] - Insert value to tblSTUpdateItemDataRevertHolder
-		 -- ===================================================================================
-
+		
 		
 		
 		-- Remove values
@@ -1547,8 +1555,10 @@ BEGIN TRY
 				WHERE ysnPreview = 1
 				ORDER BY strItemDescription, strChangeDescription ASC
 
+				-- Remove records
 				DELETE FROM @tblPreview
 
+				-- Exit
 				GOTO ExitPost
 			END
 		ELSE IF(@ysnRecap = 0)
@@ -1557,62 +1567,86 @@ BEGIN TRY
 				IF EXISTS(SELECT TOP 1 1 FROM @tblPreview WHERE ysnForRevert = 1)
 					BEGIN
 						DECLARE @intMassUpdatedRowCount AS INT = (SELECT COUNT(ysnForRevert) FROM @tblPreview WHERE ysnForRevert = 1)
-						DECLARE @dtmDateTimeMassUpdate AS DATETIME = GETUTCDATE()
 
-						INSERT INTO tblSTUpdateItemDataRevertHolder
+						-- ===================================================================================
+					    -- [START] - Insert value to tblSTUpdateItemDataRevertHolder
+						-- ===================================================================================
+						
+						DECLARE @intNewRevertHolderId AS INT
+
+						-- Insert to header
+						INSERT INTO tblSTRevertHolder
 						(
+							[intEntityId],
+							[dtmDateTimeModifiedFrom],
+							[dtmDateTimeModifiedTo],
+							[intMassUpdatedRowCount],
+							[intConcurrencyId]
+						)
+						SELECT 
+							[intEntityId]				= @intCurrentEntityUserId,
+							[dtmDateTimeModifiedFrom]	= @dtmDateTimeModifiedFrom,
+							[dtmDateTimeModifiedTo]		= @dtmDateTimeModifiedTo,
+							[intMassUpdatedRowCount]	= @intMassUpdatedRowCount,
+							[intConcurrencyId]			= 1
+
+
+						SET @intNewRevertHolderId = SCOPE_IDENTITY()
+
+						-- Insert to detail
+						INSERT INTO tblSTRevertHolderDetail
+						(
+							[intRevertHolderId],
 							[strTableName],
 							[strTableColumnName],
 							[strTableColumnDataType],
 							[intPrimaryKeyId],
 							[intParentId],
 							[intChildId],
-							[intCurrentEntityUserId],
 							[intItemId],
 							[intItemUOMId],
 							[intItemLocationId],
-
-							[dtmDateTime],
-							[intMassUpdatedRowCount],
-
 							[intCompanyLocationId],
 							[strLocation],
 							[strUpc],
 							[strItemDescription],
 							[strChangeDescription],
-							[strPreviewOldData],
-							[strPreviewNewData],
+							[strOldData],
+							[strNewData],
 							[intConcurrencyId]
 						)
 						SELECT 
+							[intRevertHolderId]			= @intNewRevertHolderId,
 							[strTableName]				= strTableName,
 							[strTableColumnName]		= strTableColumnName,
 							[strTableColumnDataType]	= strTableColumnDataType,
 							[intPrimaryKeyId]			= intPrimaryKeyId,
 							[intParentId]				= intParentId,
 							[intChildId]				= intChildId,
-							[intCurrentEntityUserId]	= intCurrentEntityUserId,
 							[intItemId]					= intItemId,
 							[intItemUOMId]				= intItemUOMId,
 							[intItemLocationId]			= intItemLocationId,
-
-							[dtmDateTime]				= @dtmDateTimeMassUpdate,
-							[intMassUpdatedRowCount]	= @intMassUpdatedRowCount,
-
 							[intCompanyLocationId]		= intCompanyLocationId,
 							[strLocation]				= strLocation,
 							[strUpc]					= strUpc,
 							[strItemDescription]		= strItemDescription,
 							[strChangeDescription]		= strChangeDescription,
-							[strPreviewOldData]			= strPreviewOldData,
-							[strPreviewNewData]			= strPreviewNewData,
+							[strOldData]				= strPreviewOldData,
+							[strNewData]				= strPreviewNewData,
 							[intConcurrencyId]			= 1
 						FROM @tblPreview 
 						WHERE ysnForRevert = 1
+						-- ===================================================================================
+						-- [END] - Insert value to tblSTUpdateItemDataRevertHolder
+						-- ===================================================================================
+						
 					END
 
+
+				-- Remove records
 				DELETE FROM @tblPreview
 
+				-- Commit transaction
 				GOTO ExitWithCommit
 			END
 
