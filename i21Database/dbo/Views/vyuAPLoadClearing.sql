@@ -17,7 +17,7 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,B.dblAmount AS dblLoadDetailTotal
+	,ISNULL(B.dblAmount,0) AS dblLoadDetailTotal
 	,CASE WHEN B.dblNet != 0 THEN B.dblNet ELSE B.dblQuantity END AS dblLoadDetailQty
 	,B.intPCompanyLocationId AS intLocationId
 	,compLoc.strLocationName
@@ -29,12 +29,10 @@ INNER JOIN tblLGLoadDetail B
 	ON A.intLoadId = B.intLoadId
 INNER JOIN tblSMCompanyLocation compLoc
     ON B.intPCompanyLocationId = compLoc.intCompanyLocationId
-CROSS APPLY (SELECT TOP 1 GLD.intAccountId, GLA.strAccountId FROM tblGLDetail GLD
-				INNER JOIN tblGLAccount GLA ON GLA.intAccountId = GLD.intAccountId
-				INNER JOIN tblGLAccountGroup GLAG ON GLAG.intAccountGroupId = GLA.intAccountGroupId
-				INNER JOIN tblGLAccountCategory GLAC ON GLAC.intAccountCategoryId = GLAG.intAccountCategoryId
+CROSS APPLY (SELECT TOP 1 GLD.intAccountId, GLAcc.strAccountId FROM tblGLDetail GLD
+				INNER JOIN vyuGLAccountDetail GLAcc ON GLD.intAccountId = GLAcc.intAccountId
 			WHERE intTransactionId = A.intLoadId AND strTransactionId = A.strLoadNumber AND ysnIsUnposted = 0
-				AND strCode IN ('LG', 'IC') AND GLAC.strAccountCategory = 'AP Clearing') GL
+				AND GLD.strCode IN ('LG', 'IC') AND GLAcc.strAccountCategory = 'AP Clearing') GL
 LEFT JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt
 				ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId AND receipt.intSourceType = 2 AND receipt.ysnPosted = 1)
 	ON receiptItem.intSourceId = B.intLoadDetailId
@@ -75,7 +73,7 @@ SELECT
                     ISNULL(billDetail.dblNetWeight, 0) 
             END
     END AS dblVoucherQty
-    ,ld.dblAmount AS dblLoadDetailTotal
+    ,ISNULL(ld.dblAmount,0) AS dblLoadDetailTotal
 	,CASE WHEN ld.dblNet != 0 THEN ld.dblNet ELSE ld.dblQuantity END AS dblLoadDetailQty
     ,bill.intShipToId
     ,compLoc.strLocationName
@@ -88,7 +86,7 @@ INNER JOIN tblAPBillDetail billDetail
 INNER JOIN tblSMCompanyLocation compLoc
     ON bill.intShipToId = compLoc.intCompanyLocationId
 INNER JOIN tblLGLoadDetail ld
-    ON billDetail.intLoadDetailId = ld.intLoadDetailId
+    ON billDetail.intLoadDetailId = ld.intLoadDetailId AND billDetail.intItemId = ld.intItemId
 INNER JOIN tblLGLoad l
 	ON ld.intLoadId = l.intLoadId
 INNER JOIN tblGLAccount accnt

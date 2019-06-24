@@ -120,7 +120,7 @@ INNER JOIN tblAPBillDetail billDetail
 INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
-			ON SST.intSettleStorageId = SS.intSettleStorageId)
+			ON SST.intSettleStorageId = SS.intSettleStorageId AND SS.intParentSettleStorageId IS NOT NULL)
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = CS.intItemId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
@@ -152,7 +152,7 @@ SELECT
 	,0
 	,CS.intCompanyLocationId
 	,CL.strLocationName
-	,1
+	,0
 	,GD.intAccountId
 	,AD.strDescription
 FROM tblGRCustomerStorage CS
@@ -221,7 +221,7 @@ INNER JOIN tblAPBillDetail billDetail
 INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
-			ON SST.intSettleStorageId = SS.intSettleStorageId
+			ON SST.intSettleStorageId = SS.intSettleStorageId AND SS.intParentSettleStorageId IS NOT NULL
 		INNER JOIN tblICCommodity CO
 			ON CO.intCommodityId = CS.intCommodityId
 		INNER JOIN tblICItem IM
@@ -259,7 +259,7 @@ SELECT
 	,0
 	,CS.intCompanyLocationId
 	,CL.strLocationName
-	,1
+	,0
 	,GD.intAccountId
 	,AD.strDescription
 FROM tblQMTicketDiscount QM
