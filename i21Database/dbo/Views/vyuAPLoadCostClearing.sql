@@ -32,12 +32,10 @@ INNER JOIN tblLGLoadCost C
 	ON A.intLoadId = C.intLoadId
 INNER JOIN tblSMCompanyLocation compLoc
     ON B.intSCompanyLocationId = compLoc.intCompanyLocationId
-CROSS APPLY (SELECT TOP 1 GLD.intAccountId, GLA.strAccountId FROM tblGLDetail GLD
-				INNER JOIN tblGLAccount GLA ON GLA.intAccountId = GLD.intAccountId
-				INNER JOIN tblGLAccountGroup GLAG ON GLAG.intAccountGroupId = GLA.intAccountGroupId
-				INNER JOIN tblGLAccountCategory GLAC ON GLAC.intAccountCategoryId = GLAG.intAccountCategoryId
+CROSS APPLY (SELECT TOP 1 GLD.intAccountId, GLAcc.strAccountId FROM tblGLDetail GLD
+				INNER JOIN vyuGLAccountDetail GLAcc ON GLD.intAccountId = GLAcc.intAccountId
 			WHERE intTransactionId = A.intLoadId AND strTransactionId = A.strLoadNumber AND ysnIsUnposted = 0
-				AND strCode IN ('LG', 'IC') AND GLAC.strAccountCategory = 'AP Clearing') GL
+				AND GLD.strCode IN ('LG', 'IC') AND GLAcc.strAccountCategory = 'AP Clearing') GL
 LEFT JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt
 			ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId AND receipt.intSourceType = 2)
 ON receiptItem.intSourceId = B.intLoadDetailId
