@@ -127,7 +127,7 @@ BEGIN
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 1
-	INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL
+	INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL  and BD.intInventoryReceiptItemId is not null
 	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
@@ -230,7 +230,7 @@ BEGIN
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 2
-	INNER JOIN tblARInvoiceDetail ID ON ID.intContractDetailId  = CD.intContractDetailId
+	INNER JOIN tblARInvoiceDetail ID ON ID.intContractDetailId  = CD.intContractDetailId AND ID.intInventoryShipmentItemId is not null
 	INNER JOIN tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
