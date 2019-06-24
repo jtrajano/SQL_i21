@@ -7618,6 +7618,17 @@
     <Build Include="dbo\Functions\fnAPGetCheckPayee.sql" />
     <Build Include="dbo\Tables\tblSTRevertHolder.sql" />
     <Build Include="dbo\Tables\tblSTRevertHolderDetail.sql" />
+    <Build Include="dbo\Tables\tblQMSampleStage.sql" />
+    <Build Include="dbo\Tables\tblQMSampleAcknowledgementStage.sql" />
+    <Build Include="dbo\Views\vyuQMSampleHeaderView.sql" />
+    <Build Include="dbo\Views\vyuQMSampleTestResultView.sql" />
+    <Build Include="dbo\Views\vyuQMSampleDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleProcessAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSamplePopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMInterCompanySample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

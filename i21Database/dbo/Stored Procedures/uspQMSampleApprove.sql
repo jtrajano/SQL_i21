@@ -634,6 +634,8 @@ BEGIN TRY
 			,@toValue = ''
 	END
 
+	EXEC uspQMInterCompanySample @intSampleId
+
 	EXEC sp_xml_removedocument @idoc
 
 	COMMIT TRAN

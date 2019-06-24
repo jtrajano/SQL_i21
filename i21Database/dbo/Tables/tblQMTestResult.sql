@@ -36,6 +36,7 @@
 	[strIsMandatory] NVARCHAR(20) COLLATE Latin1_General_CI_AS DEFAULT 'No', 
 	[intPropertyItemId] INT, 
 	dtmPropertyValueCreated DATETIME, 
+	intTestResultRefId INT,
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMTestResult_dtmCreated] DEFAULT GetDate(),
