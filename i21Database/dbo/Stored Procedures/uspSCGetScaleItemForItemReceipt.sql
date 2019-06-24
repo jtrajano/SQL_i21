@@ -27,7 +27,7 @@ BEGIN TRY
 						,intItemUOMId = ItemUOM.intItemUOMId
 						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 						,dblQty = LI.dblUnitsDistributed 
-						,dblUOMQty = ScaleTicket.dblScheduleQty
+						,dblUOMQty = ISNULL(ScaleTicket.dblScheduleQty,0.0)
 						,dblCost = LI.dblCost
 						,dblSalesPrice = 0
 						,intCurrencyId = ISNULL(LI.intCurrencyId,ScaleTicket.intCurrencyId)
