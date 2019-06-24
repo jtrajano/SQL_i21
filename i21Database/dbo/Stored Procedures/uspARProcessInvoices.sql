@@ -2394,7 +2394,7 @@ BEGIN TRY
 		ISNULL([ysnForInsert],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceId],0) <> 0
-		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnPost],0) = 0
 		AND ISNULL([ysnRecap],0) <> 1	
 		
 	SELECT 
@@ -2442,11 +2442,11 @@ BEGIN TRY
 		ISNULL([ysnForInsert],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceId],0) <> 0
-		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnPost],0) = 0
 		AND ISNULL([ysnRecap],0) = 1	
 
 	SELECT
-		@IdsForPosting = COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
+		@IdsForPosting =  COALESCE(@IdsForPosting + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250))
 	FROM
 		@TempInvoiceIdTable
 		
@@ -2512,7 +2512,7 @@ BEGIN TRY
 		ISNULL([ysnForUpdate],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceId],0) <> 0
-		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnPost],0) = 0
 		AND ISNULL([ysnRecap],0) <> 1	
 
 	SELECT
@@ -2562,7 +2562,7 @@ BEGIN TRY
 		ISNULL([ysnForUpdate],0) = 1
 		AND ISNULL([ysnProcessed],0) = 1
 		AND ISNULL([intInvoiceId],0) <> 0
-		AND ISNULL([ysnPost],0) = 1
+		AND ISNULL([ysnPost],0) = 0
 		AND ISNULL([ysnRecap],0) = 1
 
 	SELECT
