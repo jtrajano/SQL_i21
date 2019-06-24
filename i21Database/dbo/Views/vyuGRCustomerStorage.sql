@@ -71,3 +71,5 @@ LEFT JOIN tblGRDiscountSchedule DS
 	ON CS.intDiscountScheduleId = DS.intDiscountScheduleId
 LEFT JOIN tblSCDeliverySheet DeliverySheet
 	ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
+LEFT JOIN tblGRTransferStorageReference TSR
+	ON TSR.intToCustomerStorageId = CS.intCustomerStorageId

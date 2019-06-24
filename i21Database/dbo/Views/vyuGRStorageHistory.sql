@@ -87,7 +87,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	,strUserName						= US.strUserName	
 	,strType							= SH.strType
 	,dblUnits							= CASE
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN -(TSplit.dblUnits)
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN  -(ISNULL(TSR.dblUnitQty,TSplit.dblUnits))
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN CS.dblOriginalBalance
 											ELSE SH.dblUnits
 	 									END
@@ -143,3 +143,5 @@ LEFT JOIN vyuGRTransferStorageSourceSplit TSource
 	ON TSource.intTransferStorageId = SH.intTransferStorageId
 LEFT JOIN vyuGRTransferStorageSplit TSplit
 	ON TSplit.intTransferStorageId = SH.intTransferStorageId
+LEFT JOIN tblGRTransferStorageReference TSR
+	ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
