@@ -473,6 +473,28 @@ SET @cteQuery = N';WITH forClearing
       ,strLocationName  
      FROM vyuAPLoadCostClearing  
      ' + @innerQueryFilter + '  
+    ),  
+    grainClearing  
+    AS  
+    (  
+	SELECT  
+      dtmDate  
+      ,intEntityVendorId  
+      ,strTransactionNumber  
+      ,intSettleStorageId  
+      ,intCustomerStorageId  
+      ,intItemId  
+      ,intBillId  
+      ,strBillId  
+      ,intBillDetailId  
+      ,dblVoucherTotal  
+      ,dblVoucherQty  
+      ,dblSettleStorageAmount  
+      ,dblSettleStorageQty  
+      ,intLocationId  
+      ,strLocationName  
+     FROM vyuAPGrainClearing  
+     ' + @innerQueryFilter + '  
     )';  
 END  
 ELSE  
@@ -581,6 +603,27 @@ BEGIN
       ,intLocationId  
       ,strLocationName  
      FROM vyuAPLoadCostClearing   
+    ),
+    grainClearing
+    AS
+    (
+      SELECT  
+      dtmDate  
+      ,intEntityVendorId  
+      ,strTransactionNumber  
+      ,intSettleStorageId  
+      ,intCustomerStorageId  
+      ,intItemId  
+      ,intBillId  
+      ,strBillId  
+      ,intBillDetailId  
+      ,dblVoucherTotal  
+      ,dblVoucherQty  
+      ,dblSettleStorageAmount  
+      ,dblSettleStorageQty  
+      ,intLocationId  
+      ,strLocationName  
+     FROM vyuAPGrainClearing  
     )';  
 END  
   
@@ -685,14 +728,12 @@ SELECT * FROM (
 SET @query = @cteQuery + N'  
 SELECT * FROM (   
  SELECT  
-  tmpAPOpenClearing.intInventoryReceiptId  
-  ,r.dtmReceiptDate  
-  ,r.strReceiptNumber  
+  r.strReceiptNumber  
   ,r.strBillOfLading  
   ,'''' AS strOrderNumber  
-  ,vouchersDate.strVoucherDate AS dtmBillDate  
-  ,vouchers.strVoucherIds AS strBillId  
-  ,vouchersTerm.strVoucherTerm AS strTerm  
+  -- ,vouchersDate.strVoucherDate AS dtmBillDate  
+  -- ,vouchers.strVoucherIds AS strBillId  
+  -- ,vouchersTerm.strVoucherTerm AS strTerm  
   ,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
@@ -712,25 +753,21 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
+   ,B.intInventoryReceiptItemId
    ,B.strTransactionNumber  
-   ,B.intInventoryReceiptId  
-   ,B.intInventoryReceiptItemId  
-   ,B.dblReceiptTotal  
-   ,B.dblReceiptQty  
+   ,SUM(B.dblReceiptTotal) AS dblReceiptTotal
+   ,SUM(B.dblReceiptQty) AS dblReceiptQty
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(B.dblReceiptQty  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,ABS(SUM(B.dblReceiptQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
    ,B.intLocationId  
    ,B.strLocationName
   FROM forClearing B  
   GROUP BY   
    intEntityVendorId  
+   ,intInventoryReceiptItemId
    ,strTransactionNumber  
-   ,intInventoryReceiptId  
-   ,intInventoryReceiptItemId  
    ,intItemId  
-   ,dblReceiptTotal  
-   ,dblReceiptQty  
    ,intLocationId  
    ,strLocationName
  ) tmpAPOpenClearing  
@@ -742,80 +779,16 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- OUTER APPLY  
- (  
-  SELECT strVoucherIds =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + b.strBillId  
-        FROM forClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId  
-        GROUP BY b.strBillId  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchers  
- OUTER APPLY  
- (  
-  SELECT strVoucherDate =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + CONVERT(VARCHAR, b.dtmDate, 1)  
-        FROM forClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId  
-        GROUP BY b.dtmDate  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersDate  
- OUTER APPLY  
- (  
-  SELECT strVoucherTerm =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + c.strTerm  
-        FROM forClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        INNER JOIN tblSMTerm c  
-         ON b.intTermsId = c.intTermID  
-        WHERE a.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId  
-        GROUP BY c.strTerm  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersTerm  
  WHERE tmpAPOpenClearing.dblClearingQty != 0  
  UNION ALL  
  --CHARGES  
  SELECT  
-  tmpAPOpenClearing.intInventoryReceiptId  
-  ,r.dtmReceiptDate  
-  ,r.strReceiptNumber  
+  r.strReceiptNumber  
   ,r.strBillOfLading  
   ,'''' AS strOrderNumber  
-  ,vouchersDate.strVoucherDate AS dtmBillDate  
-  ,vouchers.strVoucherIds AS strBillId  
-  ,vouchersTerm.strVoucherTerm AS strTerm  
+  -- ,vouchersDate.strVoucherDate AS dtmBillDate  
+  -- ,vouchers.strVoucherIds AS strBillId  
+  -- ,vouchersTerm.strVoucherTerm AS strTerm  
   ,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
@@ -834,25 +807,21 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
+   ,B.intInventoryReceiptChargeId
    ,B.strTransactionNumber  
-   ,B.intInventoryReceiptId  
-   ,B.intInventoryReceiptChargeId  
-   ,B.dblReceiptChargeTotal  
-   ,B.dblReceiptChargeQty  
+   ,SUM(B.dblReceiptChargeTotal) AS dblReceiptChargeTotal
+   ,SUM(B.dblReceiptChargeQty) AS dblReceiptChargeQty  
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(B.dblReceiptChargeQty  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,ABS(SUM(B.dblReceiptChargeQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
    ,B.intLocationId  
    ,B.strLocationName
   FROM chargesForClearing B  
   GROUP BY   
    intEntityVendorId  
+   ,intInventoryReceiptChargeId
    ,strTransactionNumber  
-   ,intInventoryReceiptId  
-   ,intInventoryReceiptChargeId  
    ,intItemId  
-   ,dblReceiptChargeTotal  
-   ,dblReceiptChargeQty  
    ,intLocationId  
    ,strLocationName
  ) tmpAPOpenClearing  
@@ -863,80 +832,16 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- OUTER APPLY  
- (  
-  SELECT strVoucherIds =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + b.strBillId  
-        FROM chargesForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intInventoryReceiptChargeId = tmpAPOpenClearing.intInventoryReceiptChargeId  
-        GROUP BY b.strBillId  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchers  
- OUTER APPLY  
- (  
-  SELECT strVoucherDate =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + CONVERT(VARCHAR, b.dtmDate, 1)  
-        FROM chargesForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intInventoryReceiptChargeId = tmpAPOpenClearing.intInventoryReceiptChargeId  
-        GROUP BY b.dtmDate  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersDate  
- OUTER APPLY  
- (  
-  SELECT strVoucherTerm =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + c.strTerm  
-        FROM chargesForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        INNER JOIN tblSMTerm c  
-         ON b.intTermsId = c.intTermID  
-        WHERE a.intInventoryReceiptChargeId = tmpAPOpenClearing.intInventoryReceiptChargeId  
-        GROUP BY c.strTerm  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersTerm  
  WHERE tmpAPOpenClearing.dblClearingQty != 0  
  UNION ALL  
  --SHIPMENT CHARGES  
  SELECT  
-  tmpAPOpenClearing.intInventoryShipmentId  
-  ,r.dtmShipDate  
-  ,r.strShipmentNumber  
+  r.strShipmentNumber  
   ,r.strBOLNumber  
   ,'''' AS strOrderNumber  
-  ,vouchersDate.strVoucherDate AS dtmBillDate  
-  ,vouchers.strVoucherIds AS strBillId  
-  ,vouchersTerm.strVoucherTerm AS strTerm  
+  -- ,vouchersDate.strVoucherDate AS dtmBillDate  
+  -- ,vouchers.strVoucherIds AS strBillId  
+  -- ,vouchersTerm.strVoucherTerm AS strTerm  
   ,CASE WHEN DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,r.dtmShipDate,GETDATE()),0) END AS intAging  
@@ -955,25 +860,21 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
+   ,B.intInventoryShipmentChargeId
    ,B.strTransactionNumber  
-   ,B.intInventoryShipmentId  
-   ,B.intInventoryShipmentChargeId  
-   ,B.dblReceiptChargeTotal  
-   ,B.dblReceiptChargeQty  
+   ,SUM(B.dblReceiptChargeTotal) AS   dblReceiptChargeTotal
+   ,SUM(B.dblReceiptChargeQty) AS dblReceiptChargeQty
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(B.dblReceiptChargeQty  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,ABS(SUM(B.dblReceiptChargeQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
    ,B.intLocationId  
    ,B.strLocationName
   FROM shipmentChargesForClearing B  
   GROUP BY   
    intEntityVendorId  
+   ,intInventoryShipmentChargeId
    ,strTransactionNumber  
-   ,intInventoryShipmentId  
-   ,intInventoryShipmentChargeId  
    ,intItemId  
-   ,dblReceiptChargeTotal  
-   ,dblReceiptChargeQty  
    ,intLocationId  
    ,strLocationName
  ) tmpAPOpenClearing  
@@ -984,80 +885,16 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- OUTER APPLY  
- (  
-  SELECT strVoucherIds =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + b.strBillId  
-        FROM shipmentChargesForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intInventoryShipmentChargeId = tmpAPOpenClearing.intInventoryShipmentChargeId  
-        GROUP BY b.strBillId  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchers  
- OUTER APPLY  
- (  
-  SELECT strVoucherDate =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + CONVERT(VARCHAR, b.dtmDate, 1)  
-        FROM shipmentChargesForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intInventoryShipmentChargeId = tmpAPOpenClearing.intInventoryShipmentChargeId  
-        GROUP BY b.dtmDate  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersDate  
- OUTER APPLY  
- (  
-  SELECT strVoucherTerm =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + c.strTerm  
-        FROM shipmentChargesForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        INNER JOIN tblSMTerm c  
-         ON b.intTermsId = c.intTermID  
-        WHERE a.intInventoryShipmentChargeId = tmpAPOpenClearing.intInventoryShipmentChargeId  
-        GROUP BY c.strTerm  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersTerm  
- WHERE tmpAPOpenClearing.dblClearingQty != 0  
+  WHERE tmpAPOpenClearing.dblClearingQty != 0  
  UNION ALL
  --LOAD TRANSACTION ITEM
  SELECT  
-  tmpAPOpenClearing.intLoadId  
-  ,load.dtmPostedDate  
-  ,load.strLoadNumber  
+  load.strLoadNumber  
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
-  ,vouchersDate.strVoucherDate AS dtmBillDate  
-  ,vouchers.strVoucherIds AS strBillId  
-  ,vouchersTerm.strVoucherTerm AS strTerm  
+  -- ,vouchersDate.strVoucherDate AS dtmBillDate  
+  -- ,vouchers.strVoucherIds AS strBillId  
+  -- ,vouchersTerm.strVoucherTerm AS strTerm  
   ,CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE()),0) END AS intAging  
@@ -1076,26 +913,21 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
+   ,B.intLoadDetailId
    ,B.strTransactionNumber  
-   ,B.intLoadDetailId  
-   ,B.intLoadId  
-   ,B.dblLoadDetailTotal  
-   ,B.intItemId
-   ,B.dblLoadDetailQty  
+   ,SUM(B.dblLoadDetailTotal) AS dblLoadDetailTotal
+   ,SUM(B.dblLoadDetailQty)  AS dblLoadDetailQty
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(B.dblLoadDetailQty  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,ABS(SUM(B.dblLoadDetailQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
    ,B.intLocationId  
    ,B.strLocationName
   FROM loadForClearing B  
   GROUP BY   
    intEntityVendorId  
+   ,intLoadDetailId
    ,strTransactionNumber  
-   ,intLoadId  
-   ,intLoadDetailId  
    ,intItemId  
-   ,dblLoadDetailTotal  
-   ,dblLoadDetailQty  
    ,intLocationId  
    ,strLocationName
  ) tmpAPOpenClearing  
@@ -1106,80 +938,16 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- OUTER APPLY  
- (  
-  SELECT strVoucherIds =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + b.strBillId  
-        FROM loadForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
-        GROUP BY b.strBillId  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchers  
- OUTER APPLY  
- (  
-  SELECT strVoucherDate =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + CONVERT(VARCHAR, b.dtmDate, 1)  
-        FROM loadForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
-        GROUP BY b.dtmDate  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersDate  
- OUTER APPLY  
- (  
-  SELECT strVoucherTerm =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + c.strTerm  
-        FROM loadForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        INNER JOIN tblSMTerm c  
-         ON b.intTermsId = c.intTermID  
-        WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
-        GROUP BY c.strTerm  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersTerm  
  WHERE tmpAPOpenClearing.dblClearingQty != 0  
  UNION ALL
  --LOAD COST TRANSACTION ITEM
  SELECT  
-  tmpAPOpenClearing.intLoadId  
-  ,load.dtmPostedDate  
-  ,load.strLoadNumber  
+  load.strLoadNumber  
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
-  ,vouchersDate.strVoucherDate AS dtmBillDate  
-  ,vouchers.strVoucherIds AS strBillId  
-  ,vouchersTerm.strVoucherTerm AS strTerm  
+  -- ,vouchersDate.strVoucherDate AS dtmBillDate  
+  -- ,vouchers.strVoucherIds AS strBillId  
+  -- ,vouchersTerm.strVoucherTerm AS strTerm  
   ,CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE()),0) END AS intAging  
@@ -1198,26 +966,21 @@ SELECT * FROM (
  (  
   SELECT  
    B.intEntityVendorId  
+   ,B.intLoadDetailId
    ,B.strTransactionNumber  
-   ,B.intLoadDetailId  
-   ,B.intLoadId  
-   ,B.dblLoadCostDetailTotal  
-   ,B.intItemId
-   ,B.dblLoadCostDetailQty  
+   ,SUM(B.dblLoadCostDetailTotal) AS   dblLoadCostDetailTotal
+   ,SUM(B.dblLoadCostDetailQty) AS dblLoadCostDetailQty  
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(B.dblLoadCostDetailQty  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,ABS(SUM(B.dblLoadCostDetailQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
    ,B.intLocationId  
    ,B.strLocationName
   FROM loadCostForClearing B  
   GROUP BY   
    intEntityVendorId  
+   ,intLoadDetailId
    ,strTransactionNumber  
-   ,intLoadId  
-   ,intLoadDetailId  
    ,intItemId  
-   ,dblLoadCostDetailTotal  
-   ,dblLoadCostDetailQty  
    ,intLocationId  
    ,strLocationName
  ) tmpAPOpenClearing  
@@ -1228,68 +991,123 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- OUTER APPLY  
+ WHERE tmpAPOpenClearing.dblClearingQty != 0 
+--  OUTER APPLY  
+--  (  
+--   SELECT strVoucherIds =   
+--     LTRIM(  
+--      STUFF(  
+--        (  
+--         SELECT  '', '' + b.strBillId  
+--         FROM loadCostForClearing a  
+--         INNER JOIN tblAPBill b  
+--          ON b.intBillId = a.intBillId  
+--         WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
+--         GROUP BY b.strBillId  
+--         FOR xml path('''')  
+--        )  
+--       , 1  
+--       , 1  
+--       , ''''  
+--      )  
+--     )  
+--  ) vouchers  
+--  OUTER APPLY  
+--  (  
+--   SELECT strVoucherDate =   
+--     LTRIM(  
+--      STUFF(  
+--        (  
+--         SELECT  '', '' + CONVERT(VARCHAR, b.dtmDate, 1)  
+--         FROM loadCostForClearing a  
+--         INNER JOIN tblAPBill b  
+--          ON b.intBillId = a.intBillId  
+--         WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
+--         GROUP BY b.dtmDate  
+--         FOR xml path('''')  
+--        )  
+--       , 1  
+--       , 1  
+--       , ''''  
+--      )  
+--     )  
+--  ) vouchersDate  
+--  OUTER APPLY  
+--  (  
+--   SELECT strVoucherTerm =   
+--     LTRIM(  
+--      STUFF(  
+--        (  
+--         SELECT  '', '' + c.strTerm  
+--         FROM loadCostForClearing a  
+--         INNER JOIN tblAPBill b  
+--          ON b.intBillId = a.intBillId  
+--         INNER JOIN tblSMTerm c  
+--          ON b.intTermsId = c.intTermID  
+--         WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
+--         GROUP BY c.strTerm  
+--         FOR xml path('''')  
+--        )  
+--       , 1  
+--       , 1  
+--       , ''''  
+--      )  
+--     )  
+--  ) vouchersTerm  
+  UNION ALL 
+ --SETTLE STORAGE
+ SELECT  
+  SS.strStorageTicket  
+  ,NULL strBillOfLading  
+  ,'''' AS strOrderNumber  
+  -- ,vouchersDate.strVoucherDate AS dtmBillDate  
+  -- ,vouchers.strVoucherIds AS strBillId  
+  -- ,vouchersTerm.strVoucherTerm AS strTerm  
+  ,CASE WHEN DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())<=0   
+   THEN 0  
+  ELSE ISNULL(DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE()),0) END AS intAging  
+  ,ISNULL(vendor.strVendorId,'''') + '' '' + ISNULL(entity.strName,'''') as strVendorIdName   
+  ,tmpAPOpenClearing.strLocationName  
+  ,tmpAPOpenClearing.dblSettleStorageQty AS dblQtyToReceive  
+  ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
+  ,tmpAPOpenClearing.dblSettleStorageAmount AS dblTotal  
+  ,tmpAPOpenClearing.dblVoucherTotal AS dblVoucherAmount  
+  ,tmpAPOpenClearing.dblClearingQty AS dblQtyToVoucher  
+  ,tmpAPOpenClearing.dblSettleStorageAmount - tmpAPOpenClearing.dblVoucherTotal AS dblAmountToVoucher  
+  ,GETDATE() as dtmCurrentDate  
+  ,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) AS strCompanyAddress  
+  ,compSetup.strCompanyName  
+ FROM    
  (  
-  SELECT strVoucherIds =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + b.strBillId  
-        FROM loadCostForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
-        GROUP BY b.strBillId  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchers  
- OUTER APPLY  
- (  
-  SELECT strVoucherDate =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + CONVERT(VARCHAR, b.dtmDate, 1)  
-        FROM loadCostForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
-        GROUP BY b.dtmDate  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersDate  
- OUTER APPLY  
- (  
-  SELECT strVoucherTerm =   
-    LTRIM(  
-     STUFF(  
-       (  
-        SELECT  '', '' + c.strTerm  
-        FROM loadCostForClearing a  
-        INNER JOIN tblAPBill b  
-         ON b.intBillId = a.intBillId  
-        INNER JOIN tblSMTerm c  
-         ON b.intTermsId = c.intTermID  
-        WHERE a.intLoadDetailId = tmpAPOpenClearing.intLoadDetailId AND a.intItemId = tmpAPOpenClearing.intItemId
-        GROUP BY c.strTerm  
-        FOR xml path('''')  
-       )  
-      , 1  
-      , 1  
-      , ''''  
-     )  
-    )  
- ) vouchersTerm  
+  SELECT  
+   B.intEntityVendorId  
+   ,B.intSettleStorageId
+   ,B.strTransactionNumber  
+   ,SUM(B.dblSettleStorageAmount) AS   dblSettleStorageAmount
+   ,SUM(B.dblSettleStorageQty) AS dblSettleStorageQty  
+   ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
+   ,SUM(B.dblVoucherQty) AS dblVoucherQty  
+   ,ABS(SUM(B.dblSettleStorageQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,B.intLocationId  
+   ,B.strLocationName
+  FROM grainClearing B  
+  GROUP BY   
+   intEntityVendorId  
+   ,intSettleStorageId
+   ,strTransactionNumber  
+   ,intItemId  
+   ,intLocationId  
+   ,strLocationName
+ ) tmpAPOpenClearing  
+INNER JOIN tblGRSettleStorage SS
+	ON tmpAPOpenClearing.intSettleStorageId = SS.intSettleStorageId
+		AND SS.intParentSettleStorageId IS NOT NULL
+ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST 
+	          ON SST.intCustomerStorageId = CS.intCustomerStorageId)
+      ON SST.intSettleStorageId = SS.intSettleStorageId
+  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
+  ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
+ CROSS APPLY tblSMCompanySetup compSetup  
  WHERE tmpAPOpenClearing.dblClearingQty != 0  
 ) MainQuery '  
   
