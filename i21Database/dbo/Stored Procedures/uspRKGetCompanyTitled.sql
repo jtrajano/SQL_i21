@@ -605,7 +605,7 @@ BEGIN
 				,dblUnpaidBalance = dblQtyReceived - dblPartialPaidQty
 				,dblPaidBalance = dblPartialPaidQty
 				,strTransactionId = strBillId
-				,intTransactionId
+				,intTransactionId = intBillId
 				,strDistribution
 			FROM (
 				select
@@ -613,7 +613,7 @@ BEGIN
 					,BD.dblQtyReceived
 					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
 					,B.strBillId
-					,Inv.intTransactionId
+					,B.intBillId
 					,strDistribution =  ISNULL(ST.strStorageTypeCode,'SPT')
 				from @InventoryStock Inv
 				inner join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId 
@@ -656,7 +656,7 @@ BEGIN
 				,dblUnpaidBalance = dblQtyReceived - dblPartialPaidQty
 				,dblPaidBalance = dblPartialPaidQty
 				,strTransactionId = strBillId
-				,intTransactionId
+				,intTransactionId = intBillId
 				,strDistribution
 			FROM (
 				select
@@ -664,7 +664,7 @@ BEGIN
 					,BD.dblQtyReceived
 					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
 					,B.strBillId
-					,Inv.intTransactionId
+					,B.intBillId
 					,strDistribution =  ST.strStorageTypeCode
 				from @InventoryStock Inv
 				inner join tblGRSettleStorage SS ON Inv.intTransactionId = SS.intSettleStorageId
@@ -982,7 +982,7 @@ BEGIN
 					,dblUnpaidBalance = dblQtyReceived - dblPartialPaidQty
 					,dblPaidBalance = dblPartialPaidQty
 					,strTransactionId = strBillId
-					,intTransactionId
+					,intTransactionId = intBillId
 					,strDistribution
 				FROM (
 					select
@@ -990,7 +990,7 @@ BEGIN
 						,BD.dblQtyReceived
 						,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
 						,B.strBillId
-						,Inv.intTransactionId
+						,B.intBillId
 						,strDistribution =  ISNULL(ST.strStorageTypeCode,'SPT')
 					from @InventoryStock Inv
 					inner join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId 

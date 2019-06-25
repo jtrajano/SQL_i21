@@ -149,13 +149,15 @@ BEGIN
 		, strDistribution
 		, dblUnpaidIn
 		, dblUnpaidOut
-		, strReceiptNumber)
+		, strReceiptNumber
+		, intReceiptId)
 	SELECT @intDPIHeaderId
 		,dtmDate
 		,strDistribution
 		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
 		,dblOut = CASE WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END
 		,strTransactionId
+		,intTransactionId
 	FROM @CompanyTitle
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
 		AND intTransactionId IS NOT NULL
