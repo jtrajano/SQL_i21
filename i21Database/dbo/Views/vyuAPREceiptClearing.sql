@@ -143,43 +143,45 @@ SELECT
                     ISNULL(billDetail.dblNetWeight, 0) 
             END
     END AS dblVoucherQty
-    ,ROUND(
-        CASE	
-            WHEN receiptItem.intWeightUOMId IS NULL THEN 
-                ISNULL(receiptItem.dblOpenReceive, 0) 
-            ELSE 
-                CASE 
-                    WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-                        ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
-                    ELSE 
-                        CASE WHEN intSourceType = 2 
-                            THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
-                        ELSE ISNULL(receiptItem.dblNet, 0) 
-                        END
-                END 
-        END
-        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
-        * (
-            CASE 
-                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
-                    1 / ISNULL(receipt.intSubCurrencyCents, 1) 
-                ELSE 
-                    1 
-            END 
-        )
-        , 2
-    ) AS dblReceiptTotal
-    ,CASE	
-        WHEN receiptItem.intWeightUOMId IS NULL THEN 
-            ISNULL(receiptItem.dblOpenReceive, 0) 
-        ELSE 
-            CASE 
-                WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-                    ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, ISNULL(receiptItem.dblOpenReceive, 0)), 0)
-                ELSE 
-                    ISNULL(receiptItem.dblNet, 0) 
-            END 
-    END AS dblReceiptQty
+    ,0 AS dblReceiptTotal
+    ,0 AS dblReceiptQty
+    -- ,ROUND(
+    --     CASE	
+    --         WHEN receiptItem.intWeightUOMId IS NULL THEN 
+    --             ISNULL(receiptItem.dblOpenReceive, 0) 
+    --         ELSE 
+    --             CASE 
+    --                 WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
+    --                     ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
+    --                 ELSE 
+    --                     CASE WHEN intSourceType = 2 
+    --                         THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
+    --                     ELSE ISNULL(receiptItem.dblNet, 0) 
+    --                     END
+    --             END 
+    --     END
+    --     * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
+    --     * (
+    --         CASE 
+    --             WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
+    --                 1 / ISNULL(receipt.intSubCurrencyCents, 1) 
+    --             ELSE 
+    --                 1 
+    --         END 
+    --     )
+    --     , 2
+    -- ) AS dblReceiptTotal
+    -- ,CASE	
+    --     WHEN receiptItem.intWeightUOMId IS NULL THEN 
+    --         ISNULL(receiptItem.dblOpenReceive, 0) 
+    --     ELSE 
+    --         CASE 
+    --             WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
+    --                 ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, ISNULL(receiptItem.dblOpenReceive, 0)), 0)
+    --             ELSE 
+    --                 ISNULL(receiptItem.dblNet, 0) 
+    --         END 
+    -- END AS dblReceiptQty
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,CAST(1 AS BIT) ysnAllowVoucher
