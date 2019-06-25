@@ -418,10 +418,29 @@
 	--==========================		
 	DECLARE @intARAccountId 			INT = NULL
 		  , @intServiceChargeAccountId	INT = NULL
+		  , @CompanyLocationNoAccount	VARCHAR(MAX) = NULL
 		  , @strCompanyLocation 		NVARCHAR(200) = NULL
 	SELECT TOP 1 @intARAccountId = intARAccountId
 			   , @intServiceChargeAccountId = intServiceChargeAccountId
 	FROM tblARCompanyPreference
+
+	--Get Companylocation with NULL GL account for prepayment
+	SELECT TOP 1 @CompanyLocationNoAccount = LOC.strLocationName
+			FROM ptcrdmst CRD
+			INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = ptcrd_cus_no COLLATE Latin1_General_CI_AS
+			LEFT JOIN tblARInvoice Inv 
+				ON LTRIM(RTRIM(CRD.ptcrd_invc_no))+'_'+CONVERT(CHAR(3),CRD.ptcrd_seq_no) COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+				AND Inv.[dtmDate] = CONVERT(DATE, CAST(CRD.ptcrd_rev_dt AS CHAR(12)), 112)
+				AND ISNULL(Inv.[ysnImportedFromOrigin],0) = 1 AND ISNULL(Inv.[ysnImportedAsPosted],0) = 1 AND Inv.strTransactionType = 'Customer Prepayment'
+			INNER JOIN tblSMCompanyLocation LOC ON strLocationNumber  COLLATE Latin1_General_CI_AS = CRD.ptcrd_loc_no COLLATE Latin1_General_CI_AS
+			LEFT OUTER JOIN [tblSMPaymentMethod] PM	ON CRD.ptcrd_pay_type COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+			WHERE Inv.strInvoiceNumber IS NULL 
+			AND Cus.ysnActive = 1 
+			AND  CRD.ptcrd_type IN ( 'P','U') 
+			AND ROUND(ISNULL((ptcrd_amt-ptcrd_amt_used), 0), [dbo].[fnARGetDefaultDecimal]()) <> 0 --[dblAmountDue] NOT EQUAL TO ZERO
+			AND [dbo].[fnARGetInvoiceTypeAccount]('Customer Prepayment', LOC.intCompanyLocationId) IS NULL
+    
+	
 
 	--AR ACCOUNT
 	IF ISNULL(@intARAccountId, 0) <> 0
@@ -532,6 +551,41 @@
 				,@key 
 				RETURN;	
 			END
+
+
+			IF(@CompanyLocationNoAccount IS  NULL)
+			BEGIN
+				SET @Sucess = 1
+			END
+			IF(@CompanyLocationNoAccount IS NOT NULL)
+			BEGIN
+				SET @Sucess = 0
+				
+				SET @Message =@key 
+
+				DECLARE @ErrorMessage Varchar(Max) = 'Customer Prepayment General Ledger Account Missing in Company Location for ' + @CompanyLocationNoAccount + '.'
+	
+			INSERT INTO tblARImportInvoiceLog
+			(
+				[strData],
+				[strDataType], 
+				[strDescription], 
+				[intEntityId], 
+				[dtmDate],
+				[strLogKey]
+			)
+			SELECT 'Customer Prepayment General Ledger Account Missing in Company Location. ' + @CompanyLocationNoAccount
+				, 'Missing GL Account'
+				,@ErrorMessage
+				,@UserId
+				,@logDate
+				,@key 
+				RETURN;	
+			END
+
+			
+
+
 		 END
 
 GO
