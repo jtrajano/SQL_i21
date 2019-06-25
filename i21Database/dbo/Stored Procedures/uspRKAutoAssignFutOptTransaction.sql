@@ -80,10 +80,11 @@ BEGIN
 								GETDATE(),@intLFutOptTransactionId,dblMatchQty,0,0,null FROM tblRKMatchFuturesPSDetail ps  
 							JOIN tblRKAssignFuturesToContractSummary s on ps.intSFutOptTransactionId=intFutOptTransactionId   
 							WHERE intMatchFuturesPSHeaderId= @intMatchFuturesPSHeaderId  and intLFutOptTransactionId=@intLFutOptTransactionId  
-							AND s.intContractHeaderId    
-							IN(SELECT   intContractHeaderId   
-								FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intSFutOptTransactionId)  
-								AND ISNULL(s.intContractHeaderId,0)  <> 0
+							AND s.intFutOptTransactionId  = @intSFutOptTransactionId  
+                                  --  AND s.intContractHeaderId    
+                                  --not  IN(SELECT   intContractHeaderId   
+                                  --              FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intSFutOptTransactionId)  
+                                                AND ISNULL(s.intContractHeaderId,0)  <> 0
                              
 							END
 							ELSE
