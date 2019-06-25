@@ -75,10 +75,12 @@ SELECT
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
 		END AS dblVoucherQty
-	,E.dblAmount AS dblLoadCostDetailTotal
-	,CASE WHEN E.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE 
-		(CASE WHEN C.dblNet > 0 THEN C.dblNet ELSE C.dblQuantity END)
-	 END AS dblLoadCostDetailQty
+	,0 AS dblLoadCostDetailTotal
+	,0 AS dblLoadCostDetailQty
+	-- ,E.dblAmount AS dblLoadCostDetailTotal
+	-- ,CASE WHEN E.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE 
+	-- 	(CASE WHEN C.dblNet > 0 THEN C.dblNet ELSE C.dblQuantity END)
+	--  END AS dblLoadCostDetailQty
 	,bill.intShipToId AS intLocationId
 	,compLoc.strLocationName
 	,1 --allow voucher if there is no receipt
