@@ -57,7 +57,7 @@ AS
 				MY.strCurrency	AS	strMainCurrency,
 				CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
-						WHEN	CC.strCostMethod = 'Amount'		THEN
+						WHEN	CC.strCostMethod = 'Amount' OR CC.strCostMethod = 'Per Container' THEN
 							CC.dblRate
 						WHEN	CC.strCostMethod = 'Percentage' THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
