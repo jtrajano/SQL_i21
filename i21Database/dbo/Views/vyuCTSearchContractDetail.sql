@@ -86,6 +86,18 @@ AS
 			IM.strLotTracking,				
 			SL.strName						AS	strStorageLocationName,		
 			CS.strContractStatus,			
+
+			ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') AS strShipmentStatus,
+			CASE 
+				WHEN CH.intContractTypeId = 1 THEN
+					CASE 
+						WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
+						WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
+						ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
+					END
+				ELSE FS.strFinancialStatus
+			END AS strFinancialStatus,
+
 			IX.strIndex,						
 			VR.strVendorId,					
 			RV.dblReservedQuantity,											
@@ -169,3 +181,6 @@ AS
 				GROUP BY	intContractDetailId
 			)								SY	ON	SY.intContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN tblCTContractInvoice				CI	ON	CI.intContractDetailId		=	CD.intContractDetailId
+	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
+	OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
+	LEFT	JOIN	tblAPBillDetail			BD	ON	BD.intContractDetailId		=	CD.intContractDetailId

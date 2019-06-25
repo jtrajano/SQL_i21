@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuCTSearchContract]
 
 AS	
-	SELECT	CH.intContractHeaderId,				
+	SELECT	CH.intContractHeaderId,
+			CH.intContractTypeId,
 			CH.dtmContractDate,				
 			CH.strEntityName		AS strCustomerVendor,
 			CH.strContractType,					

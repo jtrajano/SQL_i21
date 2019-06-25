@@ -99,8 +99,17 @@ AS
 			BM.strUnitMeasure				AS	strBasisUOM,
 			VM.strUnitMeasure				AS	strConvertedUOM,
 			CH.ysnLoad						AS	ysnLoad,
-			CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS ysnContractAllocated
-
+			CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS ysnContractAllocated,
+			ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') AS strShipmentStatus,
+			CASE 
+				WHEN CH.intContractTypeId = 1 THEN
+					CASE 
+						WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
+						WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
+						ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
+					END
+				ELSE FS.strFinancialStatus
+			END AS strFinancialStatus			
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
@@ -224,5 +233,8 @@ AS
 					SELECT ROW_NUMBER() OVER (PARTITION BY ISNULL(intPContractDetailId,intSContractDetailId) ORDER BY intLoadDetailId DESC) intRowNum,ISNULL(intPContractDetailId,intSContractDetailId)intContractDetailId,intLoadDetailId 
 					FROM tblLGLoadDetail
 				)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
-	OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
+	OUTER	APPLY	dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
+	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
+	OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
+	LEFT	JOIN	tblAPBillDetail						BD ON	BD.intContractDetailId = CD.intContractDetailId
 	LEFT	JOIN	tblLGAllocationDetail		AD		ON AD.intPContractDetailId = CD.intContractDetailId

@@ -159,6 +159,16 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId,'Origin') strOrigin--ISNULL(RY.strCountry, OG.strCountry) AS strOrigin
 				,dbo.[fnCTGetSeqDisplayField](CD.intIndexId,'tblCTIndex') strIndex--IX.strIndex
 				,CS.strContractStatus
+				,ISNULL(NULLIF(LD.strShipmentStatus, ''), 'Open') AS strShipmentStatus
+				,CASE 
+					WHEN CH.intContractTypeId = 1 THEN
+						CASE 
+							WHEN CD.ysnFinalPNL = 1 THEN 'Final P&L Created'
+							WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
+							ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
+						END
+					ELSE FS.strFinancialStatus
+				END AS strFinancialStatus
 				,MA.strFutMarketName AS strFutureMarket
 				,REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') strFutureMonth
 				,dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, CM.intItemUOMId, 1) AS dblConversionFactor
@@ -292,6 +302,9 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		LEFT   JOIN     @tblShipment				Shipment ON Shipment.intContractDetailId        =       CD.intContractDetailId
 		LEFT   JOIN     @tblBill						Bill ON Bill.intContractDetailId			=       CD.intContractDetailId
 		LEFT   JOIN     @OpenLoad						OL	ON OL.intContractDetailId				=       CD.intContractDetailId
+		OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
+		OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
+		LEFT	JOIN	tblAPBillDetail					BD	ON	BD.intContractDetailId				=		CD.intContractDetailId
 		LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intPContractDetailId = CD.intContractDetailId
 	)t ORDER BY intContractSeq
 

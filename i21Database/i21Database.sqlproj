@@ -7606,6 +7606,7 @@
     <Build Include="dbo\Views\vyuAPPayablesAgingDeleted.sql" />
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportSampleInstruction.sql" />
+    <Build Include="dbo\Functions\fnCTGetShipmentStatus.sql" />
     <Build Include="dbo\Tables\tblSTStoreRebates.sql" />
     <Build Include="dbo\Tables\tblCTIntrCompApproval.sql" />
     <Build Include="dbo\Views\vyuCTContractConditionView.sql" />
@@ -7635,6 +7636,7 @@
     <Build Include="dbo\Tables\tblLGStandardAdjustment.sql" />
     <Build Include="dbo\Views\vyuSTSearchRevertHolderDetail.sql" />
     <Build Include="dbo\Views\vyuLGContractVsMarketDifferentialAnalysis.sql" />
+    <Build Include="dbo\Functions\fnCTGetFinancialStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
