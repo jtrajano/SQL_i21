@@ -7630,6 +7630,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSamplePopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMInterCompanySample.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRevertMassPricebookChanges.sql" />
+    <Build Include="dbo\Views\vyuSTSearchRevertHolder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
