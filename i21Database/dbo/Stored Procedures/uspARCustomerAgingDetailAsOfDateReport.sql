@@ -533,7 +533,8 @@ LEFT JOIN (
 
 	UNION ALL
 
-	SELECT intInvoiceId			= intOriginalInvoiceId		
+	SELECT intInvoiceId			= intOriginalInvoiceId
+	     , intPaymentId			= NULL
 		 , strRecordNumber		= strInvoiceNumber
 		 , dtmDatePaid			= dtmPostDate
 		 , dblTotalPayment		= dblInvoiceTotal
