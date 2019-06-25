@@ -48,7 +48,7 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
+	,CAST((SS.dblNetSettlement - SS.dblStorageDue - SS.dblDiscountsDue) AS DECIMAL(18,2)) AS dblSettleStorageAmount
 	,SS.dblSettleUnits AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
@@ -67,7 +67,7 @@ INNER JOIN tblGRSettleStorageTicket SST
 INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
-		AND SS.dblSettleUnits = 0
+		--AND SS.dblSettleUnits = 0 --OPEN STORAGE ONLY , THIS IS THE ONLY SETTLE STORAGE THAT DO NOT CREATE VOUCHER IMMEDIATELEY
 INNER JOIN vyuGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
@@ -115,7 +115,7 @@ SELECT
 	,compLoc.strLocationName
 	,0
 	,glAccnt.intAccountId
-	,glAccnt.strDescription
+	,glAccnt.strAccountId
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
@@ -156,7 +156,7 @@ SELECT
 	,CL.strLocationName
 	,0
 	,GD.intAccountId
-	,AD.strDescription
+	,AD.strAccountId
 FROM tblGRCustomerStorage CS
 INNER JOIN tblICCommodity CO
 	ON CO.intCommodityId = CS.intCommodityId
@@ -218,7 +218,7 @@ SELECT
 	,compLoc.strLocationName
 	,0
 	,glAccnt.intAccountId
-	,glAccnt.strDescription
+	,glAccnt.strAccountId
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
@@ -267,13 +267,13 @@ SELECT
 		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 	END
 	,CASE WHEN QM.strCalcMethod = 3 
-		THEN SS.dblSettleUnits --(CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 
+		THEN (CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 
 	ELSE SST.dblUnits END
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
 	,GD.intAccountId
-	,AD.strDescription
+	,AD.strAccountId
 FROM tblQMTicketDiscount QM
 INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
@@ -345,7 +345,7 @@ SELECT
 	,compLoc.strLocationName
 	,0
 	,glAccnt.intAccountId
-	,glAccnt.strDescription
+	,glAccnt.strAccountId
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
