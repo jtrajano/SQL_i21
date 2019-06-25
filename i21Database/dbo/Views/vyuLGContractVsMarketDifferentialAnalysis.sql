@@ -25,6 +25,11 @@ SELECT
 	,intDays = DATEDIFF(DD, PCH.dtmContractDate, SCH.dtmContractDate)
 	,dblSBasis = SCD.dblBasis
 	,strSBasisUOM = BUM.strUnitMeasure
+	,intUnitMeasureId = UM.intUnitMeasureId
+	,intCompanyLocationId = PCD.intCompanyLocationId
+	,intCommodityId = PCH.intCommodityId
+	,intAllocationDetailId = ALD.intAllocationDetailId
+	,intConcurrencyId = ALD.intConcurrencyId
 FROM
 	tblLGAllocationDetail ALD
 	INNER JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = ALD.intPContractDetailId
