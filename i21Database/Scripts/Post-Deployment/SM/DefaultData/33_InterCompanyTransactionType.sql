@@ -50,7 +50,10 @@
 	INSERT INTO tblSMInterCompanyTransactionType(strTransactionType) VALUES('Purchase Invoice')
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMInterCompanyTransactionType WHERE strTransactionType = 'Sales Invoice')
-	INSERT INTO tblSMInterCompanyTransactionType(strTransactionType) VALUES('Sales Invoice')	
+	INSERT INTO tblSMInterCompanyTransactionType(strTransactionType) VALUES('Sales Invoice')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMInterCompanyTransactionType WHERE strTransactionType = 'Quality Sample')
+	INSERT INTO tblSMInterCompanyTransactionType(strTransactionType) VALUES('Quality Sample')	
 	
 	PRINT N'END INTER-COMPANY TRANSACTION TYPE'
 GO

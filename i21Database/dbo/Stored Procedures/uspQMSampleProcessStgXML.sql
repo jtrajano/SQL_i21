@@ -510,21 +510,21 @@ BEGIN TRY
 						)
 			END
 
-			IF @strPartyName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblEMEntity E
-					WHERE E.strName = @strPartyName
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Party ' + @strPartyName + ' is not available.'
+			--IF @strPartyName IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblEMEntity E
+			--		WHERE E.strName = @strPartyName
+			--		)
+			--BEGIN
+			--	SELECT @strErrorMessage = 'Party ' + @strPartyName + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strErrorMessage
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			IF @strTestedByName IS NOT NULL
 				AND NOT EXISTS (
@@ -937,9 +937,9 @@ BEGIN TRY
 			FROM tblICLotStatus t
 			WHERE t.strSecondaryStatus = @strLotStatus
 
-			SELECT @intEntityId = t.intEntityId
-			FROM tblEMEntity t
-			WHERE t.strName = @strPartyName
+			--SELECT @intEntityId = t.intEntityId
+			--FROM tblEMEntity t
+			--WHERE t.strName = @strPartyName
 
 			SELECT @intTestedById = t.intEntityId
 			FROM tblEMEntity t
@@ -1069,7 +1069,9 @@ BEGIN TRY
 			IF @intContractDetailRefId IS NOT NULL
 			BEGIN
 				SELECT @intContractDetailId = t.intContractDetailId
+					,@intEntityId = CH.intEntityId
 				FROM tblCTContractDetail t
+				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = t.intContractHeaderId
 				WHERE t.intContractDetailId = @intContractDetailRefId
 			END
 

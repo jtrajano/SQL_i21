@@ -19,8 +19,8 @@ BEGIN TRY
 			FROM tblSMInterCompanyTransactionConfiguration TC
 			JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 			JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
-			WHERE TT.strTransactionType = 'Sales Contract'
-				AND TT1.strTransactionType = 'Purchase Contract'
+			WHERE TT.strTransactionType = 'Quality Sample'
+				AND TT1.strTransactionType = 'Quality Sample'
 			)
 	BEGIN
 		SELECT @intToCompanyId = TC.intToCompanyId
@@ -35,8 +35,8 @@ BEGIN TRY
 		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
 		JOIN tblQMSample S ON S.intCompanyId = TC.intFromCompanyId
-			AND S.intBookId = TC.intFromBookId
-		WHERE TT.strTransactionType = 'Sales Contract'
+			AND S.intBookId = TC.intToBookId
+		WHERE TT.strTransactionType = 'Quality Sample'
 			AND S.intSampleId = @intSampleId
 
 		IF @strInsert = 'Insert'

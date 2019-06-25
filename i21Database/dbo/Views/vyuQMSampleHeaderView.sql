@@ -96,7 +96,6 @@ SELECT S.intSampleId
 	,SS1.strSecondaryStatus AS strPreviousSampleStatus
 	,I.strItemNo
 	,IC.strContractItemName
-	--,CH.intContractHeaderRefId
 	,CD.intContractDetailRefId
 	,LS.strSecondaryStatus AS strLotStatus
 	,E.strName AS strPartyName
@@ -133,8 +132,9 @@ LEFT JOIN tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN tblICItem I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
 LEFT JOIN tblICInventoryShipment INVS ON INVS.intInventoryShipmentId = S.intInventoryShipmentId
-LEFT JOIN tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContractDetailId
-LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblLGAllocationDetail AD ON AD.intPContractDetailId = S.intContractDetailId
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intSContractDetailId
+LEFT JOIN tblCTContractDetail CD1 ON CD1.intContractDetailId = S.intContractDetailId
 LEFT JOIN tblLGLoad L ON L.intLoadId = S.intLoadId
 LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = S.intLoadDetailId
 LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = S.intLoadContainerId
