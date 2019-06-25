@@ -286,7 +286,8 @@ BEGIN
 					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
 					LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
 				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToTransactionDate)
-					--AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END				
+					--AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END	
+					AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)			
 			)t
 
 
@@ -831,6 +832,30 @@ BEGIN
 						
 			) t
 
+			UNION ALL--INVENTORY TRANSFER
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblQtyShipped
+				,strTransactionId = strTransferNo
+				,intTransactionId
+				,'IT'
+			FROM (
+				select
+					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyShipped = Inv.dblTotal
+					,I.strTransferNo
+					,Inv.intTransactionId
+				from @InventoryStock Inv
+				inner join tblICInventoryTransferDetail ID on Inv.intTransactionDetailId = ID.intInventoryTransferDetailId 
+				inner join tblICInventoryTransfer I on ID.intInventoryTransferId = I.intInventoryTransferId
+				where Inv.strTransactionType = 'Inventory Transfer'
+					AND I.ysnPosted = 1
+						
+			) t
+
 			
 
 			
@@ -862,6 +887,7 @@ BEGIN
 						,dblBalance = SUM(dblBalance)
 						,strVoucher
 						,intTransactionId = intStorageHistoryId
+						,intCompanyLocationId
 					from #tblGetStorageDetailByDate
 					where intStorageTypeId = 2 --DP
 					and intSettleStorageId is not null
@@ -870,7 +896,9 @@ BEGIN
 						,strVoucher
 						,intStorageHistoryId
 						,strTicketType
+						,intCompanyLocationId
 				) t
+				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 				UNION ALL--INVENTORY ADJUSTMENT FROM STORAGE
 				SELECT
@@ -888,6 +916,7 @@ BEGIN
 						,dblBalance = SUM(dblBalance)
 						,strTicketNumber
 						,intTransactionId = intTicketId
+						,intCompanyLocationId
 					from #tblGetStorageDetailByDate
 					where intStorageTypeId = 2 --DP
 						and intTicketId is not null
@@ -897,8 +926,10 @@ BEGIN
 						,strTicketNumber
 						,intTicketId
 						,strTicketType
+						,intCompanyLocationId
 						
 				) t
+				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 				UNION ALL --DP that are Settle and Reverse Settle 
 				SELECT
@@ -916,6 +947,7 @@ BEGIN
 						,dblBalance = SUM(dblBalance)
 						,strTicketNumber
 						,intTicketId
+						,intCompanyLocationId
 					from #tblGetStorageDetailByDate
 					where intStorageTypeId = 2 --DP
 						and intSettleStorageId is null
@@ -925,7 +957,9 @@ BEGIN
 						,strTicketNumber
 						,intTicketId
 						,strTicketType
+						,intCompanyLocationId
 				)t
+				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 			END 
 			ELSE
@@ -1094,14 +1128,13 @@ BEGIN
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(day,-1,@dtmFromTransactionDate))
 			) t
 			WHERE dblCompanyTitled IS NOT NULL 
-			
-			
 
 			--=========================================================================
 
 			drop table #LicensedLocation
 			drop table #tblGetStorageDetailByDate
 			drop table #tblGetSalesIntransitWOPickLot
+			drop table #tempDateRange
 
 
 END

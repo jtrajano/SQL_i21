@@ -153,7 +153,7 @@ BEGIN
 	SELECT @intDPIHeaderId
 		,dtmDate
 		,strDistribution
-		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
+		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
 		,dblOut = CASE WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END
 		,strTransactionId
 	FROM @CompanyTitle
