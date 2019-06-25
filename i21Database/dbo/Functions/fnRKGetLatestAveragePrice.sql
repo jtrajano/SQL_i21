@@ -17,7 +17,7 @@ BEGIN
 		AND intFutureMonthId = @FutureMonthId
 		AND intCommodityId = @CommodityId
 		AND ISNULL(intBookId, 0) = ISNULL(@BookId, ISNULL(intBookId, 0))
-		AND ISNULL(intSubBookId, 0) = ISNULL(@BookId, ISNULL(intSubBookId, 0))
+		AND ISNULL(intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(intSubBookId, 0))
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(@Date AS FLOAT)) AS DATETIME)
 
 	RETURN @LatestAvePrice
