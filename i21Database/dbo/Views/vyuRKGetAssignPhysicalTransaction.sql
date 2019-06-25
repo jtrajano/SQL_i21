@@ -20,7 +20,7 @@ FROM (
 			, dblWeights = ISNULL(CD.dblNetWeight, 0.00)
 			, M.strFutMarketName
 			, MO.strFutureMonth
-			, dblNoOfLots = ISNULL(CONVERT(INT, CD.dblNoOfLots), 0)
+			, dblNoOfLots = ISNULL(CD.dblNoOfLots, 0)
 			, dblHedgedLots = ISNULL((SELECT SUM(AD.dblHedgedLots)
 									FROM tblRKAssignFuturesToContractSummary AD
 									GROUP BY AD.intContractDetailId
@@ -63,7 +63,7 @@ FROM (
 			, dblWeights = 0.00
 			, M.strFutMarketName
 			, MO.strFutureMonth
-			, dblNoOfLots = ISNULL(CONVERT(INT, CH.dblNoOfLots), 0)
+			, dblNoOfLots = ISNULL(CH.dblNoOfLots, 0)
 			, dblHedgedLots = ISNULL((SELECT SUM(AD.dblHedgedLots)
 									FROM tblRKAssignFuturesToContractSummary AD
 									GROUP BY AD.intContractHeaderId
