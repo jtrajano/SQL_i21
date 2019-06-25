@@ -211,6 +211,8 @@ BEGIN
 END  
 ELSE IF @intInventoryShipmentChargeId > 0  
 BEGIN
+	DECLARE @isVendor BIT = 1;
+
 	CREATE TABLE #tmpBillId (
 		[intBillId] [INT] PRIMARY KEY,
 		[intInventoryShipmentId] [INT],
@@ -223,8 +225,19 @@ BEGIN
 
 	SELECT 
 		@shipmentId = A.intInventoryShipmentId
+		,@isVendor = CASE WHEN C.intEntityId IS NULL THEN 0 ELSE 1 END
 	FROM tblICInventoryShipmentCharge A
+	INNER JOIN tblICInventoryShipment B
+		ON A.intInventoryShipmentId = B.intInventoryShipmentId
+	LEFT JOIN tblAPVendor C
+		ON B.intEntityCustomerId = C.intEntityId
 	WHERE A.intInventoryShipmentChargeId = @intInventoryShipmentChargeId
+
+	IF @isVendor = 0
+	BEGIN
+		RAISERROR('Customer is not configured as vendor type.', 16, 1);
+		RETURN;
+	END
 
 	INSERT INTO #tmpBillId
 	EXEC dbo.[uspAPCreateBillFromShipmentCharge] 
@@ -258,9 +271,9 @@ BEGIN CATCH
 	SET @ErrorLine     = ERROR_LINE()  
 	SET @ErrorProc     = ERROR_PROCEDURE()  
 
-	SET @ErrorMessage  = 'Error creating voucher.' + CHAR(13) +   
-	'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) +   
-	' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage  
+	-- SET @ErrorMessage  = 'Error creating voucher.' + CHAR(13) +   
+	-- 'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) +   
+	-- ' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage  
 
 	IF (XACT_STATE()) = -1  
 	BEGIN  
