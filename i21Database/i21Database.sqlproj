@@ -7629,6 +7629,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSamplePopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMInterCompanySample.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTRevertMassPricebookChanges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
