@@ -19,7 +19,7 @@ BEGIN
 	SELECT @intMarkExpiredMonthPositionId = ISNULL(intMarkExpiredMonthPositionId, 1) FROM tblRKCompanyPreference
 	SELECT @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
 	
-	IF(@intMarkExpiredMonthPositionId = 2)
+	IF (@intMarkExpiredMonthPositionId = 2 OR @intMarkExpiredMonthPositionId = 3)
 	BEGIN
 		SELECT CONVERT(INT, intRowNum) as intRowNum
 			, intFutureMarketId

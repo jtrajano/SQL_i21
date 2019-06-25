@@ -39,6 +39,7 @@
 	[dblPricedQty] NUMERIC(24, 6) NULL,
 	[dblUnPricedQty] NUMERIC(24, 6) NULL,
 	[dblPricedAmount] NUMERIC(24, 6) NULL,
+	[dblSpread] NUMERIC(24, 6) NULL,
 	[intCompanyLocationId] int NULL,
 	[intMarketZoneId] int NULL,
     CONSTRAINT [PK_tblRKM2MInquiryTransaction_intM2MInquiryTransactionId] PRIMARY KEY (intM2MInquiryTransactionId),

@@ -1,4 +1,4 @@
-﻿ CREATE PROCEDURE [dbo].[uspRKInsertM2MInquiryDetails]
+﻿CREATE PROCEDURE [dbo].[uspRKInsertM2MInquiryDetails]
 	@intM2MBasisId INT
 	, @intFutureSettlementPriceId INT
 	, @intQuantityUOMId INT
@@ -29,7 +29,7 @@ BEGIN
 		SET @intMarketZoneId = NULL
 	END
 
-	DECLARE @#tempInquiryTransaction TABLE (intRowNum INT
+	DECLARE @tempInquiryTransaction TABLE (intRowNum INT
 		, intConcurrencyId INT
 		, intContractHeaderId INT
 		, intContractDetailId INT
@@ -84,7 +84,7 @@ BEGIN
 		, dblMarketFuturesResult NUMERIC(24, 10)
 		, dblResultRatio NUMERIC(24, 10))
 	
-	INSERT INTO @#tempInquiryTransaction
+	INSERT INTO @tempInquiryTransaction
 	EXEC uspRKM2MInquiryTransaction @intM2MBasisId = @intM2MBasisId
 		, @intFutureSettlementPriceId = @intFutureSettlementPriceId
 		, @intQuantityUOMId = @intQuantityUOMId
@@ -139,48 +139,53 @@ BEGIN
 		, dblUnPricedQty
 		, dblPricedAmount
 		, intCompanyLocationId
-		, intMarketZoneId)
+		, intMarketZoneId
+		, dblSpread)
 	SELECT 1
 		, @intM2MInquiryId
-		, strContractOrInventoryType
-		, strContractSeq
-		, intEntityId
-		, intFutureMarketId
-		, intFutureMonthId
-		, dblOpenQty
-		, intCommodityId
-		, intItemId
+		, tmp.strContractOrInventoryType
+		, tmp.strContractSeq
+		, tmp.intEntityId
+		, tmp.intFutureMarketId
+		, tmp.intFutureMonthId
+		, tmp.dblOpenQty
+		, tmp.intCommodityId
+		, tmp.intItemId
 		, NULL
-		, strPosition
-		, strPeriod
-		, strPriOrNotPriOrParPriced
-		, strPricingType
-		, dblContractBasis
-		, dblContractRatio
-		, dblFutures
-		, dblCash
-		, dblContractPrice
-		, dblCosts
-		, dblAdjustedContractPrice
-		, dblMarketBasis
-		, dblMarketRatio
-		, dblFuturePrice
+		, tmp.strPosition
+		, tmp.strPeriod
+		, tmp.strPriOrNotPriOrParPriced
+		, tmp.strPricingType
+		, tmp.dblContractBasis
+		, tmp.dblContractRatio
+		, tmp.dblFutures
+		, tmp.dblCash
+		, tmp.dblContractPrice
+		, tmp.dblCosts
+		, tmp.dblAdjustedContractPrice
+		, tmp.dblMarketBasis
+		, tmp.dblMarketRatio
+		, tmp.dblFuturePrice
 		, NULL
-		, dblMarketPrice
-		, dblResult
-		, dblResultBasis
-		, dblResultRatio
-		, dblMarketFuturesResult
-		, dblResultCash
-		, intContractHeaderId
-		, dtmPlannedAvailabilityDate
-		, intContractDetailId
-		, dblPricedQty
-		, dblUnPricedQty
-		, dblPricedAmount
-		, intCompanyLocationId
+		, tmp.dblMarketPrice
+		, tmp.dblResult
+		, CASE WHEN rk.ysnExpired = 1 THEN tmp.dblResultBasis - ISNULL(rk.dblSpread, 0) ELSE tmp.dblResultBasis END
+		, tmp.dblResultRatio
+		, CASE WHEN rk.ysnExpired = 1 THEN tmp.dblMarketFuturesResult + ISNULL(rk.dblSpread, 0) ELSE tmp.dblMarketFuturesResult END
+		, tmp.dblResultCash
+		, tmp.intContractHeaderId
+		, tmp.dtmPlannedAvailabilityDate
+		, tmp.intContractDetailId
+		, tmp.dblPricedQty
+		, tmp.dblUnPricedQty
+		, tmp.dblPricedAmount
+		, tmp.intCompanyLocationId
 		, NULL
-	FROM @#tempInquiryTransaction
+		, rk.dblSpread
+	FROM @tempInquiryTransaction tmp
+	CROSS APPLY dbo.fnRKRollToNearby(intContractDetailId, intFutureMarketId, intFutureMonthId, dblFuturePrice) rk
+	WHERE rk.intContractDetailId = tmp.intContractDetailId
+		AND rk.intFutureMonthId = tmp.intFutureMonthId
 	
 	--================================================================
 	--Insert Basis Detail
@@ -193,22 +198,22 @@ BEGIN
 	--Get the unique items from transactions
 	SELECT @strItemIds = COALESCE(@strItemIds + ',', '') + ISNULL(intItemId, '')
 	FROM (
-		SELECT DISTINCT CASE WHEN intItemId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intItemId) END as intItemId FROM @#tempInquiryTransaction
+		SELECT DISTINCT CASE WHEN intItemId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intItemId) END as intItemId FROM @tempInquiryTransaction
 	) tbl
 	
 	SELECT @strPeriodTos = COALESCE(@strPeriodTos + ',', '') + CONVERT(NVARCHAR(50),strPeriodTo)
 	FROM (
-		SELECT DISTINCT strPeriodTo FROM @#tempInquiryTransaction
+		SELECT DISTINCT strPeriodTo FROM @tempInquiryTransaction
 	) tbl
 	
 	SELECT @strLocationIds = COALESCE(@strLocationIds + ',', '') + ISNULL(intCompanyLocationId, '')
 	FROM (
-		SELECT DISTINCT CASE WHEN intCompanyLocationId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intCompanyLocationId) END as intCompanyLocationId FROM @#tempInquiryTransaction
+		SELECT DISTINCT CASE WHEN intCompanyLocationId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intCompanyLocationId) END as intCompanyLocationId FROM @tempInquiryTransaction
 	) tbl
 	
 	SELECT @strZoneIds = COALESCE(@strZoneIds + ',', '') + ISNULL(intMarketZoneId, '')
 	FROM (
-		SELECT DISTINCT CASE WHEN intMarketZoneId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intMarketZoneId) END as intMarketZoneId FROM @#tempInquiryTransaction
+		SELECT DISTINCT CASE WHEN intMarketZoneId = NULL THEN '' ELSE CONVERT(NVARCHAR(50),intMarketZoneId) END as intMarketZoneId FROM @tempInquiryTransaction
 	) tbl
 	
 	DECLARE @strEvaluationBy NVARCHAR(50)
@@ -375,7 +380,7 @@ BEGIN
 	
 	SELECT @strFutureMonthIds = COALESCE(@strFutureMonthIds + ',', '') + ISNULL(intFutureMonthId, '')
 	FROM (
-		SELECT DISTINCT CASE WHEN intFutureMonthId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intFutureMonthId) END as intFutureMonthId FROM @#tempInquiryTransaction
+		SELECT DISTINCT CASE WHEN intFutureMonthId = NULL THEN '' ELSE CONVERT(NVARCHAR(50), intFutureMonthId) END as intFutureMonthId FROM @tempInquiryTransaction
 	) tbl
 	
 	DECLARE @#tempInquirySettlementPriceDetail TABLE (intRowNum INT
