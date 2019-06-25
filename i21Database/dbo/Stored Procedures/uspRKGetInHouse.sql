@@ -330,15 +330,15 @@ BEGIN
 			SELECT 
 				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)
 				,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblBalance)
-				,'Storage'
+				,strTicketType
 				,strTransactionId = CASE WHEN strTicketType IN( 'Scale Storage','Customer/Maintain Storage','Storage Adjustment') THEN 
 						CASE WHEN strReceiptNumber <> '' THEN strReceiptNumber ELSE strShipmentNumber END
-					WHEN strTicketType = 'Settle Storage' THEN
+					WHEN strTicketType IN( 'Settle Storage', 'Transfer Storage') THEN
 						strTicketNumber
 					END
 				,intTransactionId = CASE WHEN strTicketType IN( 'Scale Storage','Customer/Maintain Storage','Storage Adjustment') THEN 
 						ISNULL(intInventoryReceiptId,intInventoryShipmentId)
-					WHEN strTicketType = 'Settle Storage' THEN
+					WHEN strTicketType IN( 'Settle Storage', 'Transfer Storage')THEN
 						BD.intTicketId
 					END
 				,ST.strStorageTypeCode 
@@ -712,7 +712,7 @@ BEGIN
 					, dblTotal = SUM(ISNULL(dblTotal, 0))
 					, strTransactionId
 					, intTransactionId
-					, strDistribution 
+					, strDistribution  = CASE WHEN ISNULL(strDistribution,'') <> '' THEN strDistribution ELSE 'ADJ' END
 				FROM @tblResult
 				WHERE strTransactionType LIKE 'Inventory Adjustment -%'
 				GROUP By
@@ -773,7 +773,7 @@ BEGIN
 					, intTransactionId
 					, strDistribution 
 				FROM @tblResult s
-				WHERE strTransactionType = 'Storage'
+				WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
 					AND dblTotal > 0
 				GROUP BY
 					dtmDate
@@ -795,7 +795,7 @@ BEGIN
 				, dblTotal 
 				, strTransactionId
 				, intTransactionId
-				, strDistribution 
+				, strDistribution
 			FROM (
 				SELECT 
 					dtmDate 
@@ -804,13 +804,38 @@ BEGIN
 					, intTransactionId
 					, strDistribution 
 				FROM @tblResult s
-				WHERE strTransactionType = 'Storage'
+				WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
 					AND dblTotal < 0
 				GROUP BY
 					dtmDate
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+			) t
+
+
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblAdjustments
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
+				SELECT 
+					dtmDate 
+					,dblTotal =  dblTotal
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
+				FROM @tblResult s
+				WHERE strTransactionType IN ( 'Storage Adjustment')
 			) t
 
 
