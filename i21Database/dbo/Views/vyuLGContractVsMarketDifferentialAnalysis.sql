@@ -28,6 +28,8 @@ SELECT
 	,intUnitMeasureId = UM.intUnitMeasureId
 	,intCompanyLocationId = PCD.intCompanyLocationId
 	,intCommodityId = PCH.intCommodityId
+	,intAllocationDetailId = ALD.intAllocationDetailId
+	,intConcurrencyId = ALD.intConcurrencyId
 FROM
 	tblLGAllocationDetail ALD
 	INNER JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = ALD.intPContractDetailId
