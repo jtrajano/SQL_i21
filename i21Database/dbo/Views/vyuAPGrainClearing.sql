@@ -107,8 +107,10 @@ SELECT
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
 		END AS dblVoucherQty
-	,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,SS.dblSettleUnits AS dblSettleStorageQty
+	,0 AS dblSettleStorageAmount
+	,0 AS dblSettleStorageQty
+	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
+	-- ,SS.dblSettleUnits AS dblSettleStorageQty
 	,bill.intShipToId AS intLocationId
 	,compLoc.strLocationName
 	,0
@@ -148,8 +150,8 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,0
-	,0
+	,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
+	,CASE WHEN IM.strCostMethod != 'Per Unit' THEN -1 ELSE -SS.dblSettleUnits END
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
@@ -208,8 +210,10 @@ SELECT
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
 		END AS dblVoucherQty
-	,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,SS.dblSettleUnits AS dblSettleStorageQty
+	,0 AS dblSettleStorageAmount
+	,0 AS dblSettleStorageQty
+	-- ,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
+	-- ,CASE WHEN IM.strCostMethod != 'Per Unit' THEN -1 ELSE -SS.dblSettleUnits END AS dblSettleStorageQty
 	,bill.intShipToId AS intLocationId
 	,compLoc.strLocationName
 	,0
@@ -255,8 +259,16 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,0
-	,0
+	,CASE
+		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 
+		THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) * -1)
+		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END))
+		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+	END
+	,CASE WHEN QM.strCalcMethod = 3 
+		THEN SS.dblSettleUnits --(CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 
+	ELSE SST.dblUnits END
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
@@ -280,6 +292,10 @@ INNER JOIN tblGRSettleStorageTicket SST
 INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
+LEFT JOIN tblGRSettleContract SC
+		ON SC.intSettleStorageId = SS.intSettleStorageId
+	LEFT JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = SC.intContractDetailId
 INNER JOIN vyuGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
@@ -321,8 +337,10 @@ SELECT
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
 		END AS dblVoucherQty
-	,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,SS.dblSettleUnits AS dblSettleStorageQty
+	,0 AS dblSettleStorageAmount
+	,0 AS dblSettleStorageQty
+	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
+	-- ,SS.dblSettleUnits AS dblSettleStorageQty
 	,bill.intShipToId AS intLocationId
 	,compLoc.strLocationName
 	,0

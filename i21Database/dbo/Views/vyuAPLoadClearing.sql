@@ -73,8 +73,10 @@ SELECT
                     ISNULL(billDetail.dblNetWeight, 0) 
             END
     END AS dblVoucherQty
-    ,ISNULL(ld.dblAmount,0) AS dblLoadDetailTotal
-	,CASE WHEN ld.dblNet != 0 THEN ld.dblNet ELSE ld.dblQuantity END AS dblLoadDetailQty
+    ,0 AS dblLoadDetailTotal
+    ,0 AS dblLoadDetailQty
+    -- ,ISNULL(ld.dblAmount,0) AS dblLoadDetailTotal
+	-- ,CASE WHEN ld.dblNet != 0 THEN ld.dblNet ELSE ld.dblQuantity END AS dblLoadDetailQty
     ,bill.intShipToId
     ,compLoc.strLocationName
     ,CAST((CASE WHEN ri.intInventoryReceiptItemId > 0 THEN 0 ELSE 1 END) AS BIT) ysnAllowVoucher --allow voucher if there is no receipt
