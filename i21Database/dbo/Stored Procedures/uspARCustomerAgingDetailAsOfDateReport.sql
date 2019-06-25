@@ -32,7 +32,13 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@intSalespersonId			INT = NULL,
 		@strCustomerIdsLocal		NVARCHAR(MAX)	= NULL,
 		@intEntityUserIdLocal		INT = NULL,
-		@intGracePeriodLocal		INT = 0
+		@intGracePeriodLocal		INT = 0,
+		@strCompanyName             NVARCHAR(100)   = NULL,
+        @strCompanyAddress          NVARCHAR(500)   = NULL
+
+SELECT TOP 1 @strCompanyName = strCompanyName
+           , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -279,6 +285,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, intEntityUserId
 		, dblCreditLimit
 		, dblTotalAR
+		, dblTotalCustomerAR
 		, dblFuture
 		, dbl0Days
 		, dbl10Days
@@ -315,6 +322,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , intEntityUserId		= @intEntityUserIdLocal
 	 , dblCreditLimit		= CUSTOMER.dblCreditLimit
 	 , dblTotalAR			= AGING.dblTotalAR
+	 , dblTotalCustomerAR	= AGING.dblTotalAR
 	 , dblFuture			= AGING.dblFuture
 	 , dbl0Days				= AGING.dbl0Days
 	 , dbl10Days			= AGING.dbl10Days
@@ -336,8 +344,8 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , intCompanyLocationId	= AGING.intCompanyLocationId
 	 , strSourceTransaction	= @strSourceTransactionLocal
 	 , strType				= AGING.strType
-	 , strCompanyName		= COMPANY.strCompanyName
-	 , strCompanyAddress	= COMPANY.strCompanyAddress
+	 , strCompanyName		= @strCompanyName
+	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Detail'
 FROM
 (SELECT A.strInvoiceNumber
@@ -522,8 +530,3 @@ AND A.intInvoiceId		 = B.intInvoiceId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-OUTER APPLY (
-	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
-	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY

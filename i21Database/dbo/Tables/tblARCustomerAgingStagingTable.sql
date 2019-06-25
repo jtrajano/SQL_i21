@@ -38,5 +38,5 @@
     [dblCredits]				NUMERIC(18, 6) NULL, 
     [dblPrepayments]			NUMERIC(18, 6) NULL, 
     [dblPrepaids]				NUMERIC(18, 6) NULL,
-    [dblTotalCustomerAR] [numeric](18, 6) NULL 
+    [dblTotalCustomerAR]        NUMERIC(18, 6) NULL 
 )
