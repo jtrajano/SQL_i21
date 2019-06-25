@@ -1,194 +1,642 @@
-﻿CREATE VIEW [dbo].[vyuAPForClearing]
+CREATE VIEW [dbo].[vyuAPForClearing]
 AS 
 
---Receipt item,
-SELECT	
-    receipt.intEntityVendorId
-    ,receipt.dtmReceiptDate AS dtmDate
-    ,receipt.strReceiptNumber
-    ,receipt.intInventoryReceiptId
-    ,NULL AS intBillId
-    ,NULL AS strBillId
-    ,NULL AS intBillDetailId
-    ,receiptItem.intInventoryReceiptItemId
-    ,receiptItem.intItemId
-    ,0 AS dblVoucherTotal
-    ,0 AS dblVoucherQty
-    ,ROUND(
-        CASE	
-            WHEN receiptItem.intWeightUOMId IS NULL THEN 
-                ISNULL(receiptItem.dblOpenReceive, 0) 
-            ELSE 
-                CASE 
-                    WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-                        ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
-                    ELSE 
-                        CASE WHEN intSourceType = 2 
-                            THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
-                        ELSE ISNULL(receiptItem.dblNet, 0) 
-                        END
-                END 
-        END
-        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
-        * (
-            CASE 
-                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
-                    1 / ISNULL(receipt.intSubCurrencyCents, 1) 
-                ELSE 
-                    1 
-            END 
-        )
-        , 2
-    ) AS dblReceiptTotal
-    ,CASE	
-        WHEN receiptItem.intWeightUOMId IS NULL THEN 
-            ISNULL(receiptItem.dblOpenReceive, 0) 
-        ELSE 
-            CASE 
-                WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-                    ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, ISNULL(receiptItem.dblOpenReceive, 0)), 0)
-                ELSE 
-                    ISNULL(receiptItem.dblNet, 0) 
-            END 
-    END AS dblReceiptQty
-    ,receipt.intLocationId
-    ,compLoc.strLocationName
-    ,CAST(CASE WHEN receiptItem.intOwnershipType = 2 THEN 0 ELSE 1 END AS BIT) AS ysnAllowVoucher
-    ,APClearing.intAccountId
-FROM tblICInventoryReceipt receipt 
-INNER JOIN tblICInventoryReceiptItem receiptItem
-	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-INNER JOIN tblSMCompanyLocation compLoc
-    ON receipt.intLocationId = compLoc.intCompanyLocationId
-LEFT JOIN tblSMFreightTerms ft
-    ON ft.intFreightTermId = receipt.intFreightTermId
-OUTER APPLY (
-	SELECT TOP 1
-		ga.strAccountId
-		,ga.intAccountId
-	FROM 
-		tblICInventoryTransaction t INNER JOIN tblGLDetail gd
-			ON t.strTransactionId = gd.strTransactionId
-			AND t.strBatchId = gd.strBatchId
-			AND t.intInventoryTransactionId = gd.intJournalLineNo
-		INNER JOIN tblGLAccount ga
-			ON ga.intAccountId = gd.intAccountId
-		INNER JOIN tblGLAccountGroup ag
-			ON ag.intAccountGroupId = ga.intAccountGroupId
-	WHERE
-		t.strTransactionId = receipt.strReceiptNumber
-		AND t.intTransactionId = receipt.intInventoryReceiptId
-		AND t.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-		AND t.intItemId = receiptItem.intItemId
-		AND ag.strAccountType = 'Liability'
-		AND t.ysnIsUnposted = 0 
-) APClearing
-WHERE 
-    receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
---DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
---CLEARING FOR THIS IS ALREADY PART OF vyuAPLoadClearing
-AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
-AND receipt.strReceiptType != 'Transfer Order'
-AND receiptItem.intOwnershipType != 2
-AND receipt.ysnPosted = 1
-UNION ALL
---Vouchers for receipt items
 SELECT
-    bill.intEntityVendorId
-    ,bill.dtmDate AS dtmDate
-    ,receipt.strReceiptNumber
-    ,receipt.intInventoryReceiptId
-    ,bill.intBillId
-    ,bill.strBillId
-    ,billDetail.intBillDetailId
-    ,billDetail.intInventoryReceiptItemId
-    ,billDetail.intItemId
-    ,--billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
-    ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
-            THEN (CASE 
-                    WHEN billDetail.intWeightUOMId > 0 
-                        THEN CAST(receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1)  * billDetail.dblNetWeight * billDetail.dblWeightUnitQty / ISNULL(billDetail.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
-                    WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
-                        THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  * (billDetail.dblUnitQty/ ISNULL(billDetail.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-                    ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
-                END)
-            ELSE (CASE 
-                    WHEN billDetail.intWeightUOMId > 0 --CHECK IF SUB-CURRENCY
-                        THEN CAST(receiptItem.dblUnitCost  * billDetail.dblNetWeight * billDetail.dblWeightUnitQty / ISNULL(billDetail.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
-                    WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
-                        THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost)  * (billDetail.dblUnitQty/ ISNULL(billDetail.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-                    ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
-                END)
-            END),0)	AS dblVoucherTotal
-    ,CASE 
-        WHEN billDetail.intWeightUOMId IS NULL THEN 
-            ISNULL(billDetail.dblQtyReceived, 0) 
-        ELSE 
-            CASE 
-                WHEN ISNULL(billDetail.dblNetWeight, 0) = 0 THEN 
-                    ISNULL(dbo.fnCalculateQtyBetweenUOM(billDetail.intUnitOfMeasureId, billDetail.intWeightUOMId, ISNULL(billDetail.dblQtyReceived, 0)), 0)
-                ELSE 
-                    ISNULL(billDetail.dblNetWeight, 0) 
-            END
-    END AS dblVoucherQty
-    ,ROUND(
-        CASE	
-            WHEN receiptItem.intWeightUOMId IS NULL THEN 
-                ISNULL(receiptItem.dblOpenReceive, 0) 
-            ELSE 
-                CASE 
-                    WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-                        ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
-                    ELSE 
-                        CASE WHEN intSourceType = 2 
-                            THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
-                        ELSE ISNULL(receiptItem.dblNet, 0) 
-                        END
-                END 
-        END
-        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
-        * (
-            CASE 
-                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
-                    1 / ISNULL(receipt.intSubCurrencyCents, 1) 
-                ELSE 
-                    1 
-            END 
-        )
-        , 2
-    ) AS dblReceiptTotal
-    ,CASE	
-        WHEN receiptItem.intWeightUOMId IS NULL THEN 
-            ISNULL(receiptItem.dblOpenReceive, 0) 
-        ELSE 
-            CASE 
-                WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-                    ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, ISNULL(receiptItem.dblOpenReceive, 0)), 0)
-                ELSE 
-                    ISNULL(receiptItem.dblNet, 0) 
-            END 
-    END AS dblReceiptQty
-    ,receipt.intLocationId
-    ,compLoc.strLocationName
-    ,CAST(1 AS BIT) ysnAllowVoucher
-    ,billDetail.intAccountId
-FROM tblAPBill bill
-INNER JOIN tblAPBillDetail billDetail
-    ON bill.intBillId = billDetail.intBillId
-INNER JOIN tblICInventoryReceiptItem receiptItem
-    ON billDetail.intInventoryReceiptItemId  = receiptItem.intInventoryReceiptItemId
-INNER JOIN tblICInventoryReceipt receipt
-    ON receipt.intInventoryReceiptId  = receiptItem.intInventoryReceiptId
-INNER JOIN tblSMCompanyLocation compLoc
-    ON receipt.intLocationId = compLoc.intCompanyLocationId
-LEFT JOIN tblSMFreightTerms ft
-    ON ft.intFreightTermId = receipt.intFreightTermId
-WHERE 
-    billDetail.intInventoryReceiptItemId IS NOT NULL
-AND billDetail.intInventoryReceiptChargeId IS NULL
-AND bill.ysnPosted = 1 --voucher should be posted in 18.3
-AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
-AND receipt.strReceiptType != 'Transfer Order'
-AND receiptItem.intOwnershipType != 2
+    CAST(ROW_NUMBER() OVER(ORDER BY dtmDate DESC) AS INT) AS intClearingId
+    ,clearingData.*
+FROM 
+(
+    --Receipt Item
+    SELECT
+        A.*
+        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN A.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) AS strVoucherIds
+        ,vouchersInfo.strFilter
+        ,1 AS intClearingType
+    FROM 
+    (
+        SELECT
+            receiptItems.intEntityVendorId
+            ,r.dtmReceiptDate AS dtmDate
+            ,receiptItems.strTransactionNumber
+            ,receiptItems.intInventoryReceiptItemId
+            ,NULL AS intInventoryReceiptChargeId
+            ,NULL AS intInventoryShipmentChargeId
+            ,NULL AS intLoadDetailId
+            ,NULL AS intLoadCostId
+            ,NULL AS intCustomerStorageId
+            ,SUM(receiptItems.dblReceiptQty) AS dblReceiptQty
+            ,SUM(receiptItems.dblReceiptTotal) AS dblReceiptTotal
+            ,(SUM(receiptItems.dblReceiptQty) - SUM(receiptItems.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(receiptItems.dblVoucherQty) AS dblVoucherQty
+            ,item.strItemNo
+            ,item.intItemId
+            ,receiptItems.intItemUOMId
+            ,receiptItems.strUOM
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,receiptItems.strAccountId
+            ,receiptItems.intAccountId
+            ,receiptItems.intLocationId
+            ,compLoc.strLocationName
+            ,CAST(receiptItems.ysnAllowVoucher AS BIT) AS ysnAllowVoucher
+        FROM 
+        (
+            SELECT
+                *
+            FROM vyuAPReceiptClearing
+        ) receiptItems
+        INNER JOIN tblICInventoryReceipt r
+            ON receiptItems.intInventoryReceiptId = r.intInventoryReceiptId
+        LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+                ON B.[intEntityId] = receiptItems.[intEntityVendorId]
+        INNER JOIN tblSMCompanyLocation compLoc
+                ON receiptItems.intLocationId = compLoc.intCompanyLocationId
+        INNER JOIN tblICItem item
+            ON item.intItemId = receiptItems.intItemId
+        GROUP BY
+            r.dtmReceiptDate
+            ,receiptItems.intEntityVendorId
+            ,receiptItems.intInventoryReceiptItemId
+            -- ,receiptItems.dblReceiptQty
+            -- ,receiptItems.dblReceiptTotal
+            ,item.strItemNo
+            ,item.intItemId
+            ,receiptItems.intItemUOMId
+            ,receiptItems.strUOM
+            ,receiptItems.intLocationId
+            ,receiptItems.strTransactionNumber
+            ,receiptItems.intAccountId
+            ,receiptItems.strAccountId
+            ,receiptItems.strTransactionNumber
+            ,B.strVendorId
+            ,C.strEntityNo
+            ,C.strName
+            ,compLoc.strLocationName
+            ,receiptItems.ysnAllowVoucher
+        HAVING (SUM(receiptItems.dblReceiptQty) - SUM(receiptItems.dblVoucherQty)) != 0
+    ) A
+    OUTER APPLY 
+    (
+        SELECT strVoucherIds = 
+            LTRIM(
+                STUFF(
+                        (
+                            SELECT  ', ' + b.strBillId
+                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+                                        ON b.intBillId = bd.intBillId
+                            WHERE	bd.intInventoryReceiptItemId = A.intInventoryReceiptItemId AND bd.intItemId = A.intItemId
+                                    AND b.ysnPosted =1 
+                            GROUP BY b.strBillId
+                            FOR xml path('')
+                        )
+                    , 1
+                    , 1
+                    , ''
+                ) 
+            )
+            , strFilter = ''
+            -- LTRIM(
+			-- 		STUFF(
+			-- 				' ' + (
+			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+			-- 								ON b.intBillId = bd.intBillId
+			-- 					WHERE	bd.intInventoryReceiptItemId = A.intInventoryReceiptItemId
+			-- 							AND bd.intInventoryReceiptChargeId IS NULL 
+			-- 							AND b.ysnPosted = 1
+			-- 					GROUP BY b.intBillId
+			-- 					FOR xml path('')
+			-- 				)
+			-- 			, 1
+			-- 			, 1
+			-- 			, ''
+			-- 		)
+            -- )
+    ) vouchersInfo 
+    UNION ALL
+    SELECT
+        B.*
+        ,ISNULL(vouchersInfo.strVoucherIds, 'New Voucher') AS strVoucherIds
+        ,vouchersInfo.strFilter
+        ,2 AS intClearingType
+    FROM
+    (
+        SELECT
+            receiptChargeItems.intEntityVendorId
+            ,r.dtmReceiptDate AS dtmDate
+            ,receiptChargeItems.strTransactionNumber
+            ,NULL AS intInventoryReceiptItemId
+            ,receiptChargeItems.intInventoryReceiptChargeId
+            ,NULL AS intInventoryShipmentChargeId
+            ,NULL AS intLoadDetailId
+            ,NULL AS intLoadCostId
+            ,NULL AS intCustomerStorageId
+            ,SUM(receiptChargeItems.dblReceiptChargeQty) AS dblReceiptChargeQty
+            ,SUM(receiptChargeItems.dblReceiptChargeTotal) AS dblReceiptChargeTotal
+            ,(SUM(receiptChargeItems.dblReceiptChargeQty) - SUM(receiptChargeItems.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(receiptChargeItems.dblVoucherQty) AS dblVoucherQty
+            ,item.strItemNo
+            ,item.intItemId
+            ,receiptChargeItems.intItemUOMId
+            ,receiptChargeItems.strUOM
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,receiptChargeItems.strAccountId
+            ,receiptChargeItems.intAccountId
+            ,receiptChargeItems.intLocationId
+            ,compLoc.strLocationName
+            ,CAST(receiptChargeItems.ysnAllowVoucher AS BIT) AS ysnAllowVoucher
+        FROM
+        (
+            SELECT
+                *
+            FROM vyuAPReceiptChargeClearing
+        ) receiptChargeItems
+        INNER JOIN tblICInventoryReceipt r
+            ON receiptChargeItems.intInventoryReceiptId = r.intInventoryReceiptId
+        LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+                ON B.[intEntityId] = receiptChargeItems.[intEntityVendorId]
+        INNER JOIN tblSMCompanyLocation compLoc
+                ON receiptChargeItems.intLocationId = compLoc.intCompanyLocationId
+        INNER JOIN tblICItem item
+            ON item.intItemId = receiptChargeItems.intItemId
+        GROUP BY
+            r.dtmReceiptDate
+            ,receiptChargeItems.intEntityVendorId
+            ,receiptChargeItems.intInventoryReceiptChargeId
+            -- ,receiptChargeItems.dblReceiptChargeQty
+            -- ,receiptChargeItems.dblReceiptChargeTotal
+            ,item.strItemNo
+            ,item.intItemId
+            ,receiptChargeItems.intItemUOMId
+            ,receiptChargeItems.strUOM
+            ,receiptChargeItems.intLocationId
+            ,receiptChargeItems.strTransactionNumber
+            ,receiptChargeItems.intAccountId
+            ,receiptChargeItems.strAccountId
+            ,receiptChargeItems.strTransactionNumber
+            ,B.strVendorId
+            ,C.strEntityNo
+            ,C.strName
+            ,compLoc.strLocationName
+            ,receiptChargeItems.ysnAllowVoucher
+        HAVING (SUM(receiptChargeItems.dblReceiptChargeQty) - SUM(receiptChargeItems.dblVoucherQty)) != 0
+    ) B
+    OUTER APPLY 
+    (
+        SELECT strVoucherIds = 
+            LTRIM(
+                STUFF(
+                        (
+                            SELECT  ', ' + b.strBillId
+                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+                                        ON b.intBillId = bd.intBillId
+                            WHERE	bd.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId AND bd.intItemId = B.intItemId
+                                    AND b.ysnPosted =1 
+                            GROUP BY b.strBillId
+                            FOR xml path('')
+                        )
+                    , 1
+                    , 1
+                    , ''
+                )
+            )
+            , strFilter = ''
+            -- LTRIM(
+			-- 		STUFF(
+			-- 				' ' + (
+			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+			-- 								ON b.intBillId = bd.intBillId
+			-- 					WHERE	bd.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId AND bd.intItemId = B.intItemId 
+			-- 							AND b.ysnPosted = 1
+			-- 					GROUP BY b.intBillId
+			-- 					FOR xml path('')
+			-- 				)
+			-- 			, 1
+			-- 			, 1
+			-- 			, ''
+			-- 		)
+            -- )
+    ) vouchersInfo 
+    UNION ALL--SHIPMENT CHARGE
+    SELECT
+        C.*
+        ,ISNULL(vouchersInfo.strVoucherIds, 'New Voucher') AS strVoucherIds
+        ,vouchersInfo.strFilter
+        ,3 AS intClearingType
+    FROM
+    (
+        SELECT
+            shipmentCharges.intEntityVendorId
+            ,r.dtmShipDate AS dtmDate
+            ,shipmentCharges.strTransactionNumber
+            ,NULL AS intInventoryReceiptItemId
+            ,NULL AS intInventoryReceiptChargeId
+            ,shipmentCharges.intInventoryShipmentChargeId
+            ,NULL AS intLoadDetailId
+            ,NULL AS intLoadCostId
+            ,NULL AS intCustomerStorageId 
+            ,SUM(shipmentCharges.dblReceiptChargeQty) AS dblReceiptChargeQty
+            ,SUM(shipmentCharges.dblReceiptChargeTotal) AS dblReceiptChargeTotal
+            ,(SUM(shipmentCharges.dblReceiptChargeQty) - SUM(shipmentCharges.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(shipmentCharges.dblVoucherQty) AS dblVoucherQty
+            ,item.strItemNo
+            ,item.intItemId
+            ,shipmentCharges.intItemUOMId
+            ,shipmentCharges.strUOM
+            ,dbo.fnTrim(ISNULL(B.strCustomerNumber, C.strEntityNo) + ' - ' + isnull(C.strName,'')) AS strVendorIdName 
+            ,shipmentCharges.strAccountId
+            ,shipmentCharges.intAccountId
+            ,shipmentCharges.intLocationId
+            ,compLoc.strLocationName
+            ,CAST(shipmentCharges.ysnAllowVoucher AS BIT) AS ysnAllowVoucher
+        FROM
+        (
+        	SELECT
+        		*
+        	FROM vyuAPShipmentChargeClearing
+        ) shipmentCharges
+        INNER JOIN tblICInventoryShipment r
+            ON shipmentCharges.intInventoryShipmentId = r.intInventoryShipmentId
+        LEFT JOIN (dbo.tblARCustomer B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+        		ON B.[intEntityId] = shipmentCharges.[intEntityVendorId]
+        INNER JOIN tblSMCompanyLocation compLoc
+        		ON shipmentCharges.intLocationId = compLoc.intCompanyLocationId
+        INNER JOIN tblICItem item
+        	ON item.intItemId = shipmentCharges.intItemId
+        GROUP BY
+        	shipmentCharges.intEntityVendorId
+        	,item.strItemNo
+            ,item.intItemId
+            ,shipmentCharges.intItemUOMId
+            ,shipmentCharges.strUOM
+        	,shipmentCharges.intLocationId
+        	,shipmentCharges.strTransactionNumber
+        	-- ,shipmentCharges.dblReceiptChargeQty
+            -- ,shipmentCharges.dblReceiptChargeTotal
+        	,r.dtmShipDate
+            ,shipmentCharges.intAccountId
+        	,shipmentCharges.strAccountId
+        	,shipmentCharges.intInventoryShipmentChargeId
+        	,B.strCustomerNumber
+        	,C.strEntityNo
+        	,C.strName
+        	,compLoc.strLocationName
+            ,shipmentCharges.ysnAllowVoucher
+        HAVING (SUM(shipmentCharges.dblReceiptChargeQty) - SUM(shipmentCharges.dblVoucherQty)) != 0
+    ) C
+    OUTER APPLY 
+    (
+        SELECT strVoucherIds = 
+            LTRIM(
+                STUFF(
+                        (
+                            SELECT  ', ' + b.strBillId
+                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+                                        ON b.intBillId = bd.intBillId
+                            WHERE	bd.intInventoryShipmentChargeId = C.intInventoryShipmentChargeId AND bd.intItemId = C.intItemId
+                                    AND b.ysnPosted =1 
+                            GROUP BY b.strBillId
+                            FOR xml path('')
+                        )
+                    , 1
+                    , 1
+                    , ''
+                )
+            )
+            , strFilter = ''
+            -- LTRIM(
+			-- 		STUFF(
+			-- 				' ' + (
+			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+			-- 								ON b.intBillId = bd.intBillId
+			-- 					WHERE	bd.intInventoryShipmentChargeId = C.intInventoryShipmentChargeId AND bd.intItemId = C.intItemId
+			-- 							AND b.ysnPosted = 1
+			-- 					GROUP BY b.intBillId
+			-- 					FOR xml path('')
+			-- 				)
+			-- 			, 1
+			-- 			, 1
+			-- 			, ''
+			-- 		)
+            -- )
+    ) vouchersInfo 
+    UNION ALL--LOAD TRANSACTION
+    SELECT
+        D.*
+        ,ISNULL(vouchersInfo.strVoucherIds, 'New Voucher') AS strVoucherIds
+        ,vouchersInfo.strFilter
+        ,4 AS intClearingType
+    FROM
+    (
+        SELECT
+            loadTran.intEntityVendorId
+            ,r.dtmPostedDate
+            ,loadTran.strTransactionNumber
+            ,NULL AS intInventoryReceiptItemId
+            ,NULL AS intInventoryReceiptChargeId
+            ,NULL AS intInventoryShipmentChargeId
+            ,loadTran.intLoadDetailId
+            ,NULL AS intLoadCostId
+            ,NULL AS intCustomerStorageId
+            ,SUM(loadTran.dblLoadDetailQty) AS dblLoadDetailQty
+            ,SUM(loadTran.dblLoadDetailTotal) AS dblLoadDetailTotal
+            ,(SUM(loadTran.dblLoadDetailQty) - SUM(loadTran.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(loadTran.dblVoucherQty) AS dblVoucherQty
+            ,item.strItemNo
+            ,item.intItemId
+            ,loadTran.intItemUOMId
+            ,loadTran.strUOM
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,loadTran.strAccountId
+            ,loadTran.intAccountId
+            ,loadTran.intLocationId
+            ,compLoc.strLocationName
+            ,CAST(loadTran.ysnAllowVoucher AS BIT) AS ysnAllowVoucher
+        FROM
+        (
+            SELECT
+                *
+            FROM vyuAPLoadClearing
+        ) loadTran
+        INNER JOIN tblLGLoad r
+            ON r.intLoadId = loadTran.intLoadId
+        LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+                ON B.[intEntityId] = loadTran.[intEntityVendorId]
+        INNER JOIN tblSMCompanyLocation compLoc
+                ON loadTran.intLocationId = compLoc.intCompanyLocationId
+        INNER JOIN tblICItem item
+            ON item.intItemId = loadTran.intItemId
+        GROUP BY
+            r.dtmPostedDate
+            ,loadTran.intEntityVendorId
+            ,item.intItemId
+            ,item.strItemNo
+            ,loadTran.intItemUOMId
+            ,loadTran.strUOM
+            ,loadTran.intLocationId
+            ,loadTran.intLoadDetailId
+            ,loadTran.strTransactionNumber
+            -- ,loadTran.dblLoadDetailQty
+            -- ,loadTran.dblLoadDetailTotal
+            ,loadTran.intAccountId
+            ,loadTran.strAccountId
+            ,loadTran.strTransactionNumber
+            ,B.strVendorId
+            ,C.strEntityNo
+            ,C.strName
+            ,compLoc.strLocationName
+            ,loadTran.ysnAllowVoucher
+        HAVING (SUM(loadTran.dblLoadDetailQty) - SUM(loadTran.dblVoucherQty)) != 0
+    ) D
+    OUTER APPLY 
+    (
+        SELECT strVoucherIds = 
+            LTRIM(
+                STUFF(
+                        (
+                            SELECT  ', ' + b.strBillId
+                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+                                        ON b.intBillId = bd.intBillId
+                            WHERE	bd.intLoadDetailId = D.intLoadDetailId AND bd.intItemId = D.intItemId
+                                    AND b.ysnPosted =1 
+                            GROUP BY b.strBillId
+                            FOR xml path('')
+                        )
+                    , 1
+                    , 1
+                    , ''
+                )
+            )
+            , strFilter = ''
+            -- LTRIM(
+			-- 		STUFF(
+			-- 				' ' + (
+			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+			-- 								ON b.intBillId = bd.intBillId
+			-- 					WHERE	bd.intLoadDetailId = D.intLoadDetailId AND bd.intItemId = D.intItemId
+			-- 							AND b.ysnPosted = 1
+			-- 					GROUP BY b.intBillId
+			-- 					FOR xml path('')
+			-- 				)
+			-- 			, 1
+			-- 			, 1
+			-- 			, ''
+			-- 		)
+            -- )
+    ) vouchersInfo 
+    UNION ALL --LOAD COST
+    SELECT
+        E.*
+        ,ISNULL(vouchersInfo.strVoucherIds, 'New Voucher') AS strVoucherIds
+        ,vouchersInfo.strFilter
+        ,5 AS intClearingType
+    FROM
+    (
+        SELECT
+            loadCost.intEntityVendorId
+            ,r.dtmPostedDate
+            ,loadCost.strTransactionNumber
+            ,NULL AS intInventoryReceiptItemId
+            ,NULL AS intInventoryReceiptChargeId
+            ,NULL AS intInventoryShipmentChargeId
+            ,loadCost.intLoadDetailId
+            ,loadCost.intLoadCostId
+            ,NULL AS intCustomerStorageId
+            ,SUM(loadCost.dblLoadCostDetailQty) AS dblLoadCostDetailQty
+            ,SUM(loadCost.dblLoadCostDetailTotal) AS dblLoadCostDetailTotal
+            ,(SUM(loadCost.dblLoadCostDetailQty) - SUM(loadCost.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(loadCost.dblVoucherQty) AS dblVoucherQty
+            ,item.strItemNo
+            ,item.intItemId
+            ,loadCost.intItemUOMId
+            ,loadCost.strUOM
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,loadCost.strAccountId
+            ,loadCost.intAccountId
+            ,loadCost.intLocationId
+            ,compLoc.strLocationName
+            ,CAST(loadCost.ysnAllowVoucher AS BIT) AS ysnAllowVoucher
+        FROM
+        (
+            SELECT
+                *
+            FROM vyuAPLoadCostClearing
+        ) loadCost
+        INNER JOIN tblLGLoad r
+            ON r.intLoadId = loadCost.intLoadId
+        LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+                ON B.[intEntityId] = loadCost.[intEntityVendorId]
+        INNER JOIN tblSMCompanyLocation compLoc
+                ON loadCost.intLocationId = compLoc.intCompanyLocationId
+        INNER JOIN tblICItem item
+            ON item.intItemId = loadCost.intItemId
+        GROUP BY
+            r.dtmPostedDate
+            ,loadCost.intEntityVendorId
+            ,item.intItemId
+            ,item.strItemNo
+            ,loadCost.intItemUOMId
+            ,loadCost.strUOM
+            ,loadCost.intLocationId
+            ,loadCost.intLoadDetailId
+            ,loadCost.intLoadCostId
+            ,loadCost.strTransactionNumber
+            -- ,loadCost.dblLoadCostDetailQty
+            -- ,loadCost.dblLoadCostDetailTotal
+            ,loadCost.intAccountId
+            ,loadCost.strAccountId
+            ,loadCost.strTransactionNumber
+            ,B.strVendorId
+            ,C.strEntityNo
+            ,C.strName
+            ,compLoc.strLocationName
+            ,loadCost.ysnAllowVoucher
+        HAVING (SUM(loadCost.dblLoadCostDetailQty) - SUM(loadCost.dblVoucherQty)) != 0
+    ) E
+    OUTER APPLY 
+    (
+        SELECT strVoucherIds = 
+            LTRIM(
+                STUFF(
+                        (
+                            SELECT  ', ' + b.strBillId
+                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+                                        ON b.intBillId = bd.intBillId
+                            WHERE	bd.intLoadDetailId = E.intLoadDetailId AND bd.intItemId = E.intItemId
+                                    AND b.ysnPosted =1 
+                            GROUP BY b.strBillId
+                            FOR xml path('')
+                        )
+                    , 1
+                    , 1
+                    , ''
+                )
+            )
+             , strFilter = ''
+            -- LTRIM(
+			-- 		STUFF(
+			-- 				' ' + (
+			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+			-- 								ON b.intBillId = bd.intBillId
+			-- 					WHERE	bd.intLoadDetailId = E.intLoadDetailId AND bd.intItemId = E.intItemId
+			-- 							AND b.ysnPosted = 1
+			-- 					GROUP BY b.intBillId
+			-- 					FOR xml path('')
+			-- 				)
+			-- 			, 1
+			-- 			, 1
+			-- 			, ''
+			-- 		)
+            -- )
+    ) vouchersInfo 
+    UNION ALL --SETTLE STORAGE
+    SELECT
+        F.*
+        ,ISNULL(vouchersInfo.strVoucherIds, NULL) AS strVoucherIds
+        ,vouchersInfo.strFilter
+        ,6 AS intClearingType
+    FROM
+    (
+        SELECT
+            settleStorage.intEntityVendorId
+            ,r.dtmDeliveryDate
+            ,settleStorage.strTransactionNumber
+            ,NULL AS intInventoryReceiptItemId
+            ,NULL AS intInventoryReceiptChargeId
+            ,NULL AS intInventoryShipmentChargeId
+            ,NULL AS intLoadDetailId
+            ,NULL AS intLoadCostId
+            ,settleStorage.intCustomerStorageId
+            ,SUM(settleStorage.dblSettleStorageQty) AS dblSettleStorageQty
+            ,SUM(settleStorage.dblSettleStorageAmount) AS dblSettleStorageAmount
+            ,(SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(settleStorage.dblVoucherQty) AS dblVoucherQty
+            ,item.strItemNo
+            ,item.intItemId
+            ,settleStorage.intItemUOMId
+            ,settleStorage.strUOM
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,settleStorage.strAccountId
+            ,settleStorage.intAccountId
+            ,settleStorage.intLocationId
+            ,compLoc.strLocationName
+            ,CAST(settleStorage.ysnAllowVoucher AS BIT) AS ysnAllowVoucher
+        FROM
+        (
+            SELECT
+                *
+            FROM vyuAPGrainClearing
+        ) settleStorage
+        INNER JOIN tblGRCustomerStorage r
+            ON r.intCustomerStorageId = settleStorage.intCustomerStorageId
+        LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+                ON B.[intEntityId] = settleStorage.[intEntityVendorId]
+        INNER JOIN tblSMCompanyLocation compLoc
+                ON settleStorage.intLocationId = compLoc.intCompanyLocationId
+        INNER JOIN tblICItem item
+            ON item.intItemId = settleStorage.intItemId
+        GROUP BY
+            r.dtmDeliveryDate
+            ,settleStorage.intEntityVendorId
+            ,item.intItemId
+            ,item.strItemNo
+            ,settleStorage.intItemUOMId
+            ,settleStorage.strUOM
+            ,settleStorage.intLocationId
+            ,settleStorage.intCustomerStorageId
+            ,settleStorage.strTransactionNumber
+            -- ,settleStorage.dblSettleStorageQty
+            -- ,settleStorage.dblSettleStorageAmount
+            ,settleStorage.intAccountId
+            ,settleStorage.strAccountId
+            ,settleStorage.strTransactionNumber
+            ,B.strVendorId
+            ,C.strEntityNo
+            ,C.strName
+            ,compLoc.strLocationName
+            ,settleStorage.ysnAllowVoucher
+        HAVING (SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) != 0
+    ) F
+    OUTER APPLY 
+    (
+        SELECT strVoucherIds = 
+            LTRIM(
+                STUFF(
+                        (
+                            SELECT  ', ' + b.strBillId
+                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+                                        ON b.intBillId = bd.intBillId
+                            WHERE	bd.intCustomerStorageId = F.intCustomerStorageId AND bd.intItemId = F.intItemId
+                                    AND b.ysnPosted =1 
+                            GROUP BY b.strBillId
+                            FOR xml path('')
+                        )
+                    , 1
+                    , 1
+                    , ''
+                )
+            )
+             , strFilter = ''
+            -- LTRIM(
+			-- 		STUFF(
+			-- 				' ' + (
+			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+			-- 								ON b.intBillId = bd.intBillId
+			-- 					WHERE	bd.intCustomerStorageId = F.intCustomerStorageId AND bd.intItemId = F.intItemId
+			-- 							AND b.ysnPosted = 1
+			-- 					GROUP BY b.intBillId
+			-- 					FOR xml path('')
+			-- 				)
+			-- 			, 1
+			-- 			, 1
+			-- 			, ''
+			-- 		)
+            -- )
+    ) vouchersInfo 
+) clearingData
 GO
 
