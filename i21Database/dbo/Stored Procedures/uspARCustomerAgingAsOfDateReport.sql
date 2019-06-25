@@ -31,7 +31,13 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@intCompanyLocationId			INT				= NULL,
 		@strCustomerNameLocal			NVARCHAR(MAX)	= NULL,
 		@strAccountStatusCodeLocal		NVARCHAR(100)	= NULL,
-		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL
+		@strCustomerIdsLocal			NVARCHAR(MAX)	= NULL,
+        @strCompanyName                 NVARCHAR(100)   = NULL,
+        @strCompanyAddress              NVARCHAR(500)   = NULL
+
+SELECT TOP 1 @strCompanyName = strCompanyName
+           , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -336,6 +342,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , intEntityUserId
 	 , dblCreditLimit
 	 , dblTotalAR
+	 , dblTotalCustomerAR
 	 , dblFuture
 	 , dbl0Days
 	 , dbl10Days
@@ -362,6 +369,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , intEntityUserId		= @intEntityUserIdLocal
 	 , dblCreditLimit		= CUSTOMER.dblCreditLimit
 	 , dblTotalAR			= AGING.dblTotalAR
+	 , dblTotalCustomerAR	= AGING.dblTotalAR
 	 , dblFuture			= AGING.dblFuture
 	 , dbl0Days				= AGING.dbl0Days
 	 , dbl10Days            = AGING.dbl10Days
@@ -377,8 +385,8 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , dtmAsOfDate          = @dtmDateToLocal
 	 , strSalespersonName   = 'strSalespersonName'
 	 , strSourceTransaction	= @strSourceTransactionLocal
-	 , strCompanyName		= COMPANY.strCompanyName
-	 , strCompanyAddress	= COMPANY.strCompanyAddress
+	 , strCompanyName		= @strCompanyName
+	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Summary'
 FROM
 (SELECT A.intEntityCustomerId
@@ -537,9 +545,4 @@ AND A.intInvoiceId		 = B.intInvoiceId
 
 GROUP BY A.intEntityCustomerId) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-OUTER APPLY (
-	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
-	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY
 ORDER BY strCustomerName
