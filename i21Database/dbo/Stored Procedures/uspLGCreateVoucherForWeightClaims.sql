@@ -261,7 +261,7 @@ BEGIN TRY
 
 	DECLARE @xmlVoucherIds XML
 	DECLARE @createVoucherIds NVARCHAR(MAX)
-	DECLARE @voucherIds TABLE (intBillId INT)
+	DECLARE @voucherIds AS Id
 
 	WHILE ISNULL(@intMinRecord, 0) <> 0
 	BEGIN
@@ -387,13 +387,15 @@ BEGIN TRY
 		SET @xmlVoucherIds = CAST('<A>'+ REPLACE(@createVoucherIds, ',', '</A><A>')+ '</A>' AS XML)
 
 		INSERT INTO @voucherIds 
-			(intBillId) 
+			(intId) 
 		SELECT 
 			RTRIM(LTRIM(T.value('.', 'INT'))) AS intBillId
 		FROM @xmlVoucherIds.nodes('/A') AS X(T) 
 		WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 
-		SELECT TOP 1 @intBillId = intBillId FROM @voucherIds
+		EXEC uspAPUpdateVoucherTotal @voucherIds
+
+		SELECT TOP 1 @intBillId = intId FROM @voucherIds
 
 		IF (@total = @intCount)
 		BEGIN
