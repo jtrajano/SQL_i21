@@ -7632,6 +7632,7 @@
     <Build Include="dbo\Stored Procedures\uspSTRevertMassPricebookChanges.sql" />
     <Build Include="dbo\Views\vyuSTSearchRevertHolder.sql" />
     <Build Include="dbo\Functions\fnRKGetLatestAveragePrice.sql" />
+    <Build Include="dbo\Tables\tblLGStandardAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
