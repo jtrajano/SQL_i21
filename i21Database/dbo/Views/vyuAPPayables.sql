@@ -164,7 +164,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 			(
 				--Honor only the discount if full payment, consider only for voucher
 				CASE 
-					WHEN B.dblAmountDue = 0 AND E.ysnCheckVoid = 0
+					WHEN B.dblAmountDue = 0 AND ISNULL(E.ysnCheckVoid,0) = 0
 					THEN B.dblDiscount 
 				ELSE 0
 				END
