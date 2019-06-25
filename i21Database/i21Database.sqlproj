@@ -7615,6 +7615,7 @@
     <Build Include="dbo\Views\vyuSTDepartmentProfitSummaryReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
     <Build Include="dbo\Functions\fnCTGetFinancialStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteBasisUnAccruedPayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

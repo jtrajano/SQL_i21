@@ -31,6 +31,7 @@ INSERT INTO @voucherPayables(
 	,[intContractHeaderId]
 	,[intContractDetailId]
 	,[intContractSeqId]
+	,[intContractCostId]
 	,[intScaleTicketId]
 	,[intInventoryReceiptItemId]
 	,[intInventoryReceiptChargeId]
@@ -66,10 +67,14 @@ INSERT INTO @voucherPayables(
 	,[strBillOfLading]			
 	,[ysnReturn]						
 )
-SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type);
+SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type, 1);
 
 IF NOT EXISTS(SELECT * FROM @voucherPayables)
-BEGIN
+BEGIN	
+	IF @type = 'header' AND @remove = 0
+	BEGIN
+		EXEC uspCTDeleteBasisUnAccruedPayable @id
+	END	
 	RETURN
 END
 
@@ -81,6 +86,12 @@ ELSE
 BEGIN
 	EXEC uspAPRemoveVoucherPayable @voucherPayables, DEFAULT, DEFAULT
 END
+
+IF @type = 'header' AND @remove = 0
+BEGIN
+	EXEC uspCTDeleteBasisUnAccruedPayable @id
+END
+
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,

@@ -28,7 +28,7 @@ AS
 			MY.strCurrency		AS	strMainCurrency,
 			ISNULL(V.strFLOId,U.strFLOId) AS strFLOId,
 			S.intContainerTypeId,
-			S.dblTotalCostPerContainer
+			ISNULL(S.dblTotalCostPerContainer,0) AS dblTotalCostPerContainer
 
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
