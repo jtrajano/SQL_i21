@@ -7634,6 +7634,7 @@
     <Build Include="dbo\Functions\fnRKGetLatestAveragePrice.sql" />
     <Build Include="dbo\Tables\tblLGStandardAdjustment.sql" />
     <Build Include="dbo\Views\vyuSTSearchRevertHolderDetail.sql" />
+    <Build Include="dbo\Views\vyuLGContractVsMarketDifferentialAnalysis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
