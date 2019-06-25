@@ -1,10 +1,10 @@
-﻿CREATE VIEW [dbo].[vyuAPShipmentChargeClearing]  
+CREATE VIEW [dbo].[vyuAPShipmentChargeClearing]  
 AS   
   
 --Shipment Charges  
 SELECT DISTINCT  
     Shipment.dtmShipDate AS dtmDate  
-    ,Shipment.intEntityCustomerId AS intEntityVendorId  
+    ,ISNULL(ShipmentCharge.intEntityVendorId, Shipment.intEntityCustomerId) AS intEntityVendorId  
     ,Shipment.strShipmentNumber   AS strTransactionNumber
     ,Shipment.intInventoryShipmentId  
     ,NULL AS intBillId  
@@ -12,6 +12,8 @@ SELECT DISTINCT
     ,NULL AS intBillDetailId  
     ,ShipmentCharge.intInventoryShipmentChargeId  
     ,ShipmentCharge.intChargeId  AS intItemId
+    ,ShipmentCharge.intCostUOMId  AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM 
     ,0 AS dblVoucherTotal  
     ,0 AS dblVoucherQty  
     ,CAST((ISNULL(dblAmount,0) + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal  
@@ -26,6 +28,12 @@ INNER JOIN tblICInventoryShipment Shipment
  ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId  
 INNER JOIN tblSMCompanyLocation compLoc  
     ON Shipment.intShipFromLocationId = compLoc.intCompanyLocationId  
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = ShipmentCharge.intCostUOMId
 OUTER APPLY (
 	SELECT TOP 1
 		ga.strAccountId
@@ -52,6 +60,8 @@ SELECT
     ,billDetail.intBillDetailId  
     ,billDetail.intInventoryShipmentChargeId  
     ,billDetail.intItemId  
+    ,billDetail.intUnitOfMeasureId AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM
     ,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal  
     ,CASE   
         WHEN billDetail.intWeightUOMId IS NULL THEN   
@@ -64,10 +74,12 @@ SELECT
                     ISNULL(billDetail.dblNetWeight, 0)   
             END  
     END AS dblVoucherQty  
-    ,((ShipmentCharge.dblAmount) * (CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -1 ELSE 1 END))  
-         + ShipmentCharge.dblTax AS dblReceiptChargeTotal  
-    ,ShipmentCharge.dblQuantity   
-        * (CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -1 ELSE 1 END) AS dblReceiptChargeQty  
+    ,0 AS dblReceiptChargeTotal
+    ,0 AS dblReceiptChargeQty
+    -- ,((ShipmentCharge.dblAmount) * (CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -1 ELSE 1 END))  
+    --      + ShipmentCharge.dblTax AS dblReceiptChargeTotal  
+    -- ,ShipmentCharge.dblQuantity   
+    --     * (CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -1 ELSE 1 END) AS dblReceiptChargeQty  
     ,Shipment.intShipFromLocationId  
     ,compLoc.strLocationName  
     ,CAST(1 AS BIT) ysnAllowVoucher  
@@ -82,6 +94,12 @@ INNER JOIN tblICInventoryShipment Shipment
     ON Shipment.intInventoryShipmentId  = ShipmentCharge.intInventoryShipmentId  
 INNER JOIN tblSMCompanyLocation compLoc  
     ON Shipment.intShipFromLocationId = compLoc.intCompanyLocationId  
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
 OUTER APPLY (
 	SELECT TOP 1
 		ga.strAccountId

@@ -187,10 +187,12 @@ SELECT
                     ISNULL(billDetail.dblNetWeight, 0)     
             END    
     END AS dblVoucherQty    
-    ,((receiptCharge.dblAmount) * (CASE WHEN receiptCharge.ysnPrice = 1 THEN -1 ELSE 1 END))    
-         + receiptCharge.dblTax AS dblReceiptChargeTotal    
-    ,receiptCharge.dblQuantity     
-        * (CASE WHEN receiptCharge.ysnPrice = 1 THEN -1 ELSE 1 END) AS dblReceiptChargeQty    
+    ,0 AS dblReceiptChargeTotal
+    ,0 AS dblReceiptChargeQty
+    -- ,((receiptCharge.dblAmount) * (CASE WHEN receiptCharge.ysnPrice = 1 THEN -1 ELSE 1 END))  
+    --      + receiptCharge.dblTax AS dblReceiptChargeTotal  
+    -- ,receiptCharge.dblQuantity   
+    --     * (CASE WHEN receiptCharge.ysnPrice = 1 THEN -1 ELSE 1 END) AS dblReceiptChargeQty   
     ,receipt.intLocationId    
     ,compLoc.strLocationName    
     ,CAST(1 AS BIT) ysnAllowVoucher   
