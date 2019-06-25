@@ -112,37 +112,37 @@ BEGIN
 	WHERE	intItemUOMId = @NewStockItemUOMId
 
 	-- Remove the CK_ItemUOMId_IS_NOT_USED constraint. 
-	IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_ItemUOMId_IS_NOT_USED' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
-	BEGIN 
-		EXEC ('
-			ALTER TABLE tblICItemUOM
-			DROP CONSTRAINT CK_ItemUOMId_IS_NOT_USED		
-		')
-	END
+	--IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_ItemUOMId_IS_NOT_USED' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
+	--BEGIN 
+	--	EXEC ('
+	--		ALTER TABLE tblICItemUOM
+	--		DROP CONSTRAINT CK_ItemUOMId_IS_NOT_USED		
+	--	')
+	--END
 
-	UPDATE	ItemUOM
-	SET		dblUnitQty = 
-					CASE	WHEN (dblUnitQty > @dblNewStockUnit_UnitQty OR dblUnitQty = 1) AND @dblNewStockUnit_UnitQty <> 0 THEN  
-								dbo.fnDivide(dblUnitQty, @dblNewStockUnit_UnitQty) 
-							WHEN (dblUnitQty < @dblNewStockUnit_UnitQty) AND dblUnitQty <> 1 AND @dblNewStockUnit_UnitQty <> 0 THEN 
-								dbo.fnDivide(dblUnitQty, @dblNewStockUnit_UnitQty) 
-							WHEN dblUnitQty = @dblNewStockUnit_UnitQty THEN  
-								1
-							ELSE 
-								dbo.fnMultiply(dblUnitQty, @dblNewStockUnit_UnitQty) 
-					END 
-	FROM	dbo.tblICItemUOM ItemUOM
-	WHERE	intItemId = @intItemId
+	--UPDATE	ItemUOM
+	--SET		dblUnitQty = 
+	--				CASE	WHEN (dblUnitQty > @dblNewStockUnit_UnitQty OR dblUnitQty = 1) AND @dblNewStockUnit_UnitQty <> 0 THEN  
+	--							dbo.fnDivide(dblUnitQty, @dblNewStockUnit_UnitQty) 
+	--						WHEN (dblUnitQty < @dblNewStockUnit_UnitQty) AND dblUnitQty <> 1 AND @dblNewStockUnit_UnitQty <> 0 THEN 
+	--							dbo.fnDivide(dblUnitQty, @dblNewStockUnit_UnitQty) 
+	--						WHEN dblUnitQty = @dblNewStockUnit_UnitQty THEN  
+	--							1
+	--						ELSE 
+	--							dbo.fnMultiply(dblUnitQty, @dblNewStockUnit_UnitQty) 
+	--				END 
+	--FROM	dbo.tblICItemUOM ItemUOM
+	--WHERE	intItemId = @intItemId
 
-	-- Re-enable the CK_ItemUOMId_IS_NOT_USED constraint. 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_ItemUOMId_IS_NOT_USED' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
-	BEGIN 
-		EXEC ('
-			ALTER TABLE tblICItemUOM
-			WITH NOCHECK ADD CONSTRAINT CK_ItemUOMId_IS_NOT_USED
-			CHECK (dbo.fnICCheckItemUOMIdIsNotUsed(intItemId, intItemUOMId, intUnitMeasureId, dblUnitQty) = 1)		
-		')
-	END
+	---- Re-enable the CK_ItemUOMId_IS_NOT_USED constraint. 
+	--IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_ItemUOMId_IS_NOT_USED' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
+	--BEGIN 
+	--	EXEC ('
+	--		ALTER TABLE tblICItemUOM
+	--		WITH NOCHECK ADD CONSTRAINT CK_ItemUOMId_IS_NOT_USED
+	--		CHECK (dbo.fnICCheckItemUOMIdIsNotUsed(intItemId, intItemUOMId, intUnitMeasureId, dblUnitQty) = 1)		
+	--	')
+	--END
 END 
 
 -- Update the inventory stock
@@ -270,18 +270,18 @@ BEGIN
 END 
 
 -- Update the flag for the new Stock UOM.
-BEGIN 
-	UPDATE	iUOM
-	SET		ysnStockUnit = 0 
-	FROM	tblICItemUOM iUOM
-	WHERE	iUOM.intItemId = @intItemId
+--BEGIN 
+	--UPDATE	iUOM
+	--SET		ysnStockUnit = 0 
+	--FROM	tblICItemUOM iUOM
+	--WHERE	iUOM.intItemId = @intItemId
 
-	UPDATE	iUOM
-	SET		ysnStockUnit = 1
-	FROM	dbo.tblICItemUOM iUOM
-	WHERE	iUOM.intItemId = @intItemId
-			AND iUOM.intItemUOMId = @NewStockItemUOMId 
-END 
+	--UPDATE	iUOM
+	--SET		ysnStockUnit = 1
+	--FROM	dbo.tblICItemUOM iUOM
+	--WHERE	iUOM.intItemId = @intItemId
+	--		AND iUOM.intItemUOMId = @NewStockItemUOMId 
+--END 
 
 -- Create an Audit Log
 BEGIN 
