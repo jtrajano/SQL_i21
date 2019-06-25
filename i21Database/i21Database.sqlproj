@@ -7637,6 +7637,8 @@
     <Build Include="dbo\Views\vyuSTSearchRevertHolderDetail.sql" />
     <Build Include="dbo\Views\vyuLGContractVsMarketDifferentialAnalysis.sql" />
     <Build Include="dbo\Functions\fnCTGetFinancialStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTPurchaseVSSalesVarianceReport.sql" />
+    <Build Include="dbo\Tables\tblSTPurchaseVSSalesVarianceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
