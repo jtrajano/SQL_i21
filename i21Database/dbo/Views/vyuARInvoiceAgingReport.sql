@@ -61,6 +61,8 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 WHERE ysnPosted = 1
 	AND ysnPaid = 0
 	AND ysnCancelled = 0
+	AND ysnReturned = 0
+	AND strTransactionType <> 'Cash Refund'
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
 	
@@ -112,6 +114,8 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 WHERE ysnPosted = 1
 	AND ysnPaid = 0
 	AND ysnCancelled = 0
+	AND ysnReturned = 0
+	AND strTransactionType <> 'Cash Refund'
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
 	AND strTransactionType IN ('Invoice', 'Debit Memo')
@@ -128,7 +132,7 @@ SELECT I.strInvoiceNumber
 	  , dblInterest			= 0
 	  , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	  , I.intEntityCustomerId
-	  , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+	  , dblAvailableCredit	= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0) - ISNULL(CR.dblRefundTotal, 0)
 	  , dblPrepayments		= 0
 	  , strType				= I.strType
 FROM dbo.tblARInvoice I WITH (NOLOCK)
@@ -163,9 +167,21 @@ LEFT JOIN (
 	WHERE ysnApplied = 1
 	GROUP BY intPrepaymentId
 ) PC ON I.intInvoiceId = PC.intPrepaymentId
+LEFT JOIN (
+	SELECT strDocumentNumber	= ID.strDocumentNumber
+		 , dblRefundTotal		= SUM(I.dblInvoiceTotal) 
+	FROM tblARInvoiceDetail ID
+	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+	WHERE I.strTransactionType = 'Cash Refund'
+	AND I.ysnPosted = 1
+	AND ISNULL(ID.strDocumentNumber, '') <> ''
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
+	GROUP BY ID.strDocumentNumber
+) CR ON I.strInvoiceNumber = CR.strDocumentNumber
 WHERE ysnPosted = 1
     AND ysnPaid = 0
 	AND ysnCancelled = 0
+	AND strTransactionType <> 'Cash Refund'
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
 	AND strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
@@ -183,7 +199,7 @@ SELECT I.strInvoiceNumber
 	  , dtmDueDate			= ISNULL(P.dtmDatePaid, I.dtmDueDate)
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit	= 0
-	  , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0)
+	  , dblPrepayments		= ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(PC.dblAppliedInvoiceAmount, 0) - ISNULL(CR.dblRefundTotal, 0)
 	  , strType				= I.strType
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
@@ -216,10 +232,22 @@ LEFT JOIN (
 	FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK) 
 	WHERE ysnApplied = 1
 	GROUP BY intPrepaymentId
-) PC ON I.intInvoiceId = PC.intPrepaymentId 
+) PC ON I.intInvoiceId = PC.intPrepaymentId
+LEFT JOIN (
+	SELECT strDocumentNumber	= ID.strDocumentNumber
+		 , dblRefundTotal		= SUM(I.dblInvoiceTotal) 
+	FROM tblARInvoiceDetail ID
+	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+	WHERE I.strTransactionType = 'Cash Refund'
+	AND I.ysnPosted = 1
+	AND ISNULL(ID.strDocumentNumber, '') <> ''
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
+	GROUP BY ID.strDocumentNumber
+) CR ON I.strInvoiceNumber = CR.strDocumentNumber  
 WHERE ysnPosted = 1
     AND ysnPaid = 0
 	AND ysnCancelled = 0
+	AND strTransactionType <> 'Cash Refund'
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()
 	AND strTransactionType = 'Customer Prepayment'
@@ -280,10 +308,24 @@ LEFT JOIN (
 	WHERE ysnApplied = 1
 	GROUP BY PC.intInvoiceId
 
+	UNION ALL
+
+	SELECT intOriginalInvoiceId
+		 , dblInvoiceTotal
+	FROM dbo.tblARInvoice I WITH (NOLOCK)
+	WHERE ysnPosted = 1
+	AND ysnRefundProcessed = 1
+	AND strTransactionType = 'Credit Memo'
+	AND intOriginalInvoiceId IS NOT NULL
+	AND ISNULL(strInvoiceOriginId, '') <> ''
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) <= GETDATE()
+
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE ysnPosted = 1
     AND ysnPaid = 0
 	AND ysnCancelled = 0
+	AND ysnReturned = 0
+	AND strTransactionType <> 'Cash Refund'
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= GETDATE()	
  ) AS TBL) AS B   
@@ -349,6 +391,7 @@ LEFT JOIN (
 	FROM dbo.tblARInvoice WITH (NOLOCK)
 	WHERE ysnCancelled = 0 
 	  AND ysnPosted = 1
+	  AND strTransactionType <> 'Cash Refund'
 ) INVOICE ON AGING.intInvoiceId = INVOICE.intInvoiceId 
 LEFT JOIN (
 	SELECT intEntityId

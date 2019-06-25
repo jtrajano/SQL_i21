@@ -26,6 +26,8 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strSalespersonIdsLocal		NVARCHAR(MAX) = NULL,		
 		@strCompanyLocationIdsLocal NVARCHAR(MAX) = NULL,
 		@strAccountStatusIdsLocal	NVARCHAR(MAX) = NULL,
+		@strCompanyName				NVARCHAR(100) = NULL,
+		@strCompanyAddress			NVARCHAR(500) = NULL,
 		@intEntityUserIdLocal		INT = NULL,
 		@intGracePeriodLocal		INT = 0
 
@@ -49,6 +51,10 @@ SET @strCompanyLocationIdsLocal	= NULLIF(@strCompanyLocationIds, '')
 SET @strAccountStatusIdsLocal	= NULLIF(@strAccountStatusIds, '')
 SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
 SET @intGracePeriodLocal		= ISNULL(@intGracePeriod, 0)
+
+SELECT TOP 1 @strCompanyName	= strCompanyName
+		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	BEGIN
@@ -285,6 +291,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, intEntityUserId
 		, dblCreditLimit
 		, dblTotalAR
+		, dblTotalCustomerAR
 		, dblFuture
 		, dbl0Days
 		, dbl10Days
@@ -323,6 +330,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , intEntityUserId		= @intEntityUserIdLocal
 	 , dblCreditLimit		= CUSTOMER.dblCreditLimit
 	 , dblTotalAR			= AGING.dblTotalAR
+	 , dblTotalCustomerAR	= AGING.dblTotalAR
 	 , dblFuture			= AGING.dblFuture
 	 , dbl0Days				= AGING.dbl0Days
 	 , dbl10Days			= AGING.dbl10Days
@@ -345,8 +353,8 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strSourceTransaction	= @strSourceTransactionLocal
 	 , strType				= AGING.strType
 	 , strTransactionType	= AGING.strTransactionType
-	 , strCompanyName		= COMPANY.strCompanyName
-	 , strCompanyAddress	= COMPANY.strCompanyAddress
+	 , strCompanyName		= @strCompanyName
+	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Detail'
 FROM
 (SELECT A.strInvoiceNumber
@@ -541,8 +549,3 @@ AND A.intInvoiceId		 = B.intInvoiceId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-OUTER APPLY (
-	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
-	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY
