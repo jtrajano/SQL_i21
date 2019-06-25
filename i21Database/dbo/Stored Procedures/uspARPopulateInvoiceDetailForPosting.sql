@@ -2142,8 +2142,8 @@ INNER JOIN (
          , intInvoiceDetailId      = ID.intInvoiceDetailId
     FROM #ARPostInvoiceDetail ID
     CROSS APPLY (
-        SELECT dblTaxesAddToCost        = [dbo].fnRoundBanker(IDT.dblRate * ID.dblQtyShipped, [dbo].[fnARGetDefaultDecimal]())
-            , dblBaseTaxesAddToCost    = [dbo].fnRoundBanker(IDT.dblRate * ID.dblQtyShipped * ISNULL(ID.dblCurrencyExchangeRate, 1), [dbo].[fnARGetDefaultDecimal]())
+        SELECT dblTaxesAddToCost        = ISNULL(dblAdjustedTax, 0)
+            , dblBaseTaxesAddToCost     = ISNULL(dblBaseAdjustedTax, 0)
         FROM tblARInvoiceDetailTax IDT
         INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
         WHERE TC.ysnAddToCost = 1
