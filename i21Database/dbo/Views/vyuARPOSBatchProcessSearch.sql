@@ -18,7 +18,7 @@ INNER JOIN tblARCustomer C ON POS.intEntityCustomerId = C.intEntityId
 INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 INNER JOIN tblARPOSEndOfDay EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 LEFT JOIN tblARInvoice I ON POS.intInvoiceId = I.intInvoiceId AND I.ysnPosted = 1 AND I.strType = 'POS' AND I.strTransactionType = 'Invoice'
-LEFT JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND I.ysnPosted = 1 AND I.strType = 'POS' AND I.strTransactionType = 'Credit Memo'
+LEFT JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.ysnPosted = 1 AND CM.strType = 'POS' AND CM.strTransactionType = 'Credit Memo'
 LEFT JOIN tblARPOSBatchProcessLog BP ON POS.intPOSId = BP.intPOSId
 OUTER APPLY (
 	SELECT strPaymentNumbers = LEFT(strRecordNumber, LEN(strRecordNumber) - 1)
