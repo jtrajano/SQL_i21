@@ -94,7 +94,7 @@ BEGIN
 				,strNotes						= @strNotes
 			FROM #POSRETURNPAYMENTS POSPAYMENT
 			INNER JOIN tblARPOS POS ON POSPAYMENT.intPOSId = POS.intPOSId
-			INNER JOIN vyuARInvoicesForPayment IFP ON POS.intInvoiceId = IFP.intInvoiceId
+			INNER JOIN vyuARInvoicesForPayment IFP ON POS.intCreditMemoId = IFP.intInvoiceId
 			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
 			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 			CROSS APPLY (
