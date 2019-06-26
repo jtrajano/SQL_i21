@@ -27,7 +27,9 @@ FROM
             ,SUM(receiptItems.dblReceiptQty) AS dblReceiptQty
             ,SUM(receiptItems.dblReceiptTotal) AS dblReceiptTotal
             ,(SUM(receiptItems.dblReceiptQty) - SUM(receiptItems.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(receiptItems.dblVoucherTotal) AS dblVoucherTotal
             ,SUM(receiptItems.dblVoucherQty) AS dblVoucherQty
+            ,(SUM(receiptItems.dblReceiptTotal) - SUM(receiptItems.dblVoucherTotal)) AS dblUnclearedAmount
             ,item.strItemNo
             ,item.intItemId
             ,receiptItems.intItemUOMId
@@ -133,7 +135,9 @@ FROM
             ,SUM(receiptChargeItems.dblReceiptChargeQty) AS dblReceiptChargeQty
             ,SUM(receiptChargeItems.dblReceiptChargeTotal) AS dblReceiptChargeTotal
             ,(SUM(receiptChargeItems.dblReceiptChargeQty) - SUM(receiptChargeItems.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(receiptChargeItems.dblVoucherTotal) AS dblVoucherTotal
             ,SUM(receiptChargeItems.dblVoucherQty) AS dblVoucherQty
+            ,(SUM(receiptChargeItems.dblReceiptChargeTotal) - SUM(receiptChargeItems.dblVoucherTotal)) AS dblUnclearedAmount
             ,item.strItemNo
             ,item.intItemId
             ,receiptChargeItems.intItemUOMId
@@ -238,7 +242,9 @@ FROM
             ,SUM(shipmentCharges.dblReceiptChargeQty) AS dblReceiptChargeQty
             ,SUM(shipmentCharges.dblReceiptChargeTotal) AS dblReceiptChargeTotal
             ,(SUM(shipmentCharges.dblReceiptChargeQty) - SUM(shipmentCharges.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(shipmentCharges.dblVoucherTotal) AS dblVoucherTotal
             ,SUM(shipmentCharges.dblVoucherQty) AS dblVoucherQty
+            ,(SUM(shipmentCharges.dblReceiptChargeTotal) - SUM(shipmentCharges.dblVoucherTotal)) AS dblUnclearedAmount
             ,item.strItemNo
             ,item.intItemId
             ,shipmentCharges.intItemUOMId
@@ -342,7 +348,9 @@ FROM
             ,SUM(loadTran.dblLoadDetailQty) AS dblLoadDetailQty
             ,SUM(loadTran.dblLoadDetailTotal) AS dblLoadDetailTotal
             ,(SUM(loadTran.dblLoadDetailQty) - SUM(loadTran.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(loadTran.dblVoucherTotal) AS dblVoucherTotal
             ,SUM(loadTran.dblVoucherQty) AS dblVoucherQty
+            ,(SUM(loadTran.dblLoadDetailTotal) - SUM(loadTran.dblVoucherTotal)) AS dblUnclearedAmount
             ,item.strItemNo
             ,item.intItemId
             ,loadTran.intItemUOMId
@@ -447,7 +455,9 @@ FROM
             ,SUM(loadCost.dblLoadCostDetailQty) AS dblLoadCostDetailQty
             ,SUM(loadCost.dblLoadCostDetailTotal) AS dblLoadCostDetailTotal
             ,(SUM(loadCost.dblLoadCostDetailQty) - SUM(loadCost.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(loadCost.dblVoucherTotal) AS dblVoucherTotal
             ,SUM(loadCost.dblVoucherQty) AS dblVoucherQty
+            ,(SUM(loadCost.dblLoadCostDetailTotal) - SUM(loadCost.dblVoucherTotal)) AS dblUnclearedAmount
             ,item.strItemNo
             ,item.intItemId
             ,loadCost.intItemUOMId
@@ -553,7 +563,9 @@ FROM
             ,SUM(settleStorage.dblSettleStorageQty) AS dblSettleStorageQty
             ,SUM(settleStorage.dblSettleStorageAmount) AS dblSettleStorageAmount
             ,(SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(settleStorage.dblVoucherTotal) AS dblVoucherTotal
             ,SUM(settleStorage.dblVoucherQty) AS dblVoucherQty
+            ,(SUM(settleStorage.dblSettleStorageAmount) - SUM(settleStorage.dblVoucherTotal)) AS dblUnclearedAmount
             ,item.strItemNo
             ,item.intItemId
             ,settleStorage.intItemUOMId
