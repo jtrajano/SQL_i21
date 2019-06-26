@@ -41,7 +41,7 @@ SELECT
 	,dblTax							= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblTax, 0)  ELSE  ISNULL(I.dblTax, 0) * -1 END
 	,intPaymentMethodId				= I.intPaymentMethodId
 	,intCompanyLocationId			= I.intCompanyLocationId
-	,strComments					= REPLACE(REPLACE(REPLACE(dbo.fnEliminateHTMLTags(I.strComments, 0), '<p>', ''), '</p>',' '), '&nbsp;', ' ') COLLATE Latin1_General_CI_AS
+	,strComments					= dbo.fnStripHtml(I.strComments)
 	,intCurrencyId					= I.intCurrencyId
 	,strLocationName				= L.strLocationName
 	,strPaymentMethod				= P.strPaymentMethod
