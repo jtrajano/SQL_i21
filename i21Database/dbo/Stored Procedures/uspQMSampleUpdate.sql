@@ -577,7 +577,7 @@ BEGIN TRY
 			,@ysnBulkChange = 0
 	END
 
-	EXEC uspQMInterCompanySample @intSampleId
+	EXEC uspQMInterCompanyPreStageSample @intSampleId
 
 	COMMIT TRAN
 END TRY

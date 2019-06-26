@@ -1203,3 +1203,9 @@ UPDATE tblQMCompanyPreference
 SET ysnAllowReversalSampleEntry = 0
 WHERE ysnAllowReversalSampleEntry IS NULL
 GO
+
+GO
+UPDATE tblQMSample
+SET ysnParent = 1
+WHERE ysnParent IS NULL
+GO

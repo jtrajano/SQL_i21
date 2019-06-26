@@ -622,7 +622,7 @@ BEGIN TRY
 			,@toValue = ''
 	END
 
-	EXEC uspQMInterCompanySample @intSampleId
+	EXEC uspQMInterCompanyPreStageSample @intSampleId
 
 	EXEC sp_xml_removedocument @idoc
 

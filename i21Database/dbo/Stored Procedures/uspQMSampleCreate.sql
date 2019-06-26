@@ -713,7 +713,7 @@ BEGIN TRY
 			,@ysnBulkChange = 0
 	END
 
-	EXEC uspQMInterCompanySample @intSampleId
+	EXEC uspQMInterCompanyPreStageSample @intSampleId
 
 	EXEC sp_xml_removedocument @idoc
 

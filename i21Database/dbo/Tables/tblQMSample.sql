@@ -67,6 +67,7 @@
 	strSentBy NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	intSentById INT,
 	intSampleRefId INT,
+	ysnParent BIT CONSTRAINT [DF_tblQMSample_ysnParent] DEFAULT 1,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),

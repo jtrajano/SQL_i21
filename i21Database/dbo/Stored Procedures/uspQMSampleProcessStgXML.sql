@@ -95,6 +95,7 @@ BEGIN TRY
 		,@intCreatedUserId INT
 		,@intLastModifiedUserId INT
 		,@dtmLastModified DATETIME
+		,@ysnParent BIT
 	DECLARE @intSampleDetailId INT
 		,@strAttributeName NVARCHAR(50)
 		,@strListItemName NVARCHAR(50)
@@ -206,6 +207,7 @@ BEGIN TRY
 				,@strCreatedUser = NULL
 				,@strLastModifiedUser = NULL
 				,@dtmLastModified = NULL
+				,@ysnParent = NULL
 
 			SELECT @strSampleTypeName = strSampleTypeName
 				,@strProductValue = strProductValue
@@ -239,6 +241,7 @@ BEGIN TRY
 				,@strCreatedUser = strCreatedUser
 				,@strLastModifiedUser = strLastModifiedUser
 				,@dtmLastModified = dtmLastModified
+				,@ysnParent = ysnParent
 			FROM OPENXML(@idoc, 'vyuQMSampleHeaderViews/vyuQMSampleHeaderView', 2) WITH (
 					strSampleTypeName NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strProductValue NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -272,6 +275,7 @@ BEGIN TRY
 					,strCreatedUser NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strLastModifiedUser NVARCHAR(100) Collate Latin1_General_CI_AS
 					,dtmLastModified DATETIME
+					,ysnParent BIT
 					) x
 
 			IF @strSampleTypeName IS NOT NULL
@@ -799,6 +803,23 @@ BEGIN TRY
 						,16
 						,1
 						)
+
+				-- Destination to Source validation for contract
+				IF @ysnParent = 0
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblLGAllocationDetail t
+							WHERE t.intSContractDetailId = @intContractDetailRefId
+							)
+						SELECT @strErrorMessage = 'Contract Seq ' + @intContractDetailRefId + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
 			END
 
 			IF @intLoadDetailContainerLinkRefId IS NOT NULL
@@ -1040,6 +1061,13 @@ BEGIN TRY
 				SELECT @intProductValueId = t.intContractDetailId
 				FROM tblCTContractDetail t
 				WHERE t.intContractDetailId = @strProductValue
+
+				IF @ysnParent = 0
+				BEGIN
+					SELECT @intProductValueId = t.intPContractDetailId
+					FROM tblLGAllocationDetail t
+					WHERE t.intSContractDetailId = @intContractDetailRefId
+				END
 			END
 			ELSE IF @intProductTypeId = 9
 			BEGIN
@@ -1073,6 +1101,16 @@ BEGIN TRY
 				FROM tblCTContractDetail t
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = t.intContractHeaderId
 				WHERE t.intContractDetailId = @intContractDetailRefId
+
+				IF @ysnParent = 0
+				BEGIN
+					SELECT @intContractDetailId = t.intPContractDetailId
+						,@intEntityId = CH.intEntityId
+					FROM tblLGAllocationDetail t
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId = t.intPContractDetailId
+					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+					WHERE t.intSContractDetailId = @intContractDetailRefId
+				END
 			END
 
 			IF @intLoadDetailContainerLinkRefId IS NOT NULL
@@ -1199,6 +1237,7 @@ BEGIN TRY
 					,strSentBy
 					,intSentById
 					,intSampleRefId
+					,ysnParent
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
@@ -1261,7 +1300,8 @@ BEGIN TRY
 					,strForwardingAgentRef
 					,strSentBy
 					,@intSentById
-					,intSampleRefId
+					,@intSampleRefId
+					,0
 					,@intCreatedUserId
 					,dtmCreated
 					,@intLastModifiedUserId

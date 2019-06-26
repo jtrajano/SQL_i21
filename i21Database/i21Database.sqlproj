@@ -7630,7 +7630,6 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleTransferAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSamplePopulateStgXML.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMInterCompanySample.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRevertMassPricebookChanges.sql" />
     <Build Include="dbo\Views\vyuSTSearchRevertHolder.sql" />
     <Build Include="dbo\Functions\fnRKGetLatestAveragePrice.sql" />
@@ -7640,6 +7639,9 @@
     <Build Include="dbo\Functions\fnCTGetFinancialStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSTPurchaseVSSalesVarianceReport.sql" />
     <Build Include="dbo\Tables\tblSTPurchaseVSSalesVarianceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMInterCompanyStageSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMInterCompanyPreStageSample.sql" />
+    <Build Include="dbo\Tables\tblQMSamplePreStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

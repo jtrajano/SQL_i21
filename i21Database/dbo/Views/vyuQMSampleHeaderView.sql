@@ -67,6 +67,7 @@ SELECT S.intSampleId
 	,S.strSentBy
 	,S.intSentById
 	,S.intSampleRefId
+	,S.ysnParent
 	,S.intCreatedUserId
 	,S.dtmCreated
 	,S.intLastModifiedUserId
@@ -82,7 +83,11 @@ SELECT S.intSampleId
 		WHEN S.intProductTypeId = 6
 			THEN S.strLotNumber
 		WHEN S.intProductTypeId = 8
-			THEN LTRIM(CD.intContractDetailRefId)
+			THEN CASE 
+					WHEN S.ysnParent = 1
+						THEN LTRIM(CD.intContractDetailRefId)
+					ELSE LTRIM(CD1.intContractDetailRefId)
+					END
 		WHEN S.intProductTypeId = 9
 			THEN LTRIM(LCL.intLoadDetailContainerLinkRefId)
 		WHEN S.intProductTypeId = 10
@@ -96,7 +101,11 @@ SELECT S.intSampleId
 	,SS1.strSecondaryStatus AS strPreviousSampleStatus
 	,I.strItemNo
 	,IC.strContractItemName
-	,CD.intContractDetailRefId
+	,CASE 
+		WHEN S.ysnParent = 1
+			THEN CD.intContractDetailRefId
+		ELSE CD1.intContractDetailRefId
+		END AS intContractDetailRefId
 	,LS.strSecondaryStatus AS strLotStatus
 	,E.strName AS strPartyName
 	,E3.strName AS strTestedByName
@@ -149,7 +158,6 @@ LEFT JOIN tblSMCompanyLocationSubLocation CS ON CS.intCompanyLocationSubLocation
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = S.intStorageLocationId
 LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
-LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
 LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblEMEntity E3 ON E3.intEntityId = S.intTestedById
