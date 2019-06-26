@@ -189,6 +189,7 @@ BEGIN
 					AND ISNULL(ot.intBrokerageAccountId, 0) = ISNULL(@intBrokerageAccountId, ISNULL(ot.intBrokerageAccountId, 0))
 					AND ISNULL(ot.intFutureMonthId, 0) = ISNULL(@intFutureMonthId, ISNULL(ot.intFutureMonthId, 0))
 					AND ot.strNewBuySell = ISNULL(@strBuySell, ot.strNewBuySell)
+					AND ot.intInstrumentTypeId = 1
 			) t1
 		) t1
 	) t1
