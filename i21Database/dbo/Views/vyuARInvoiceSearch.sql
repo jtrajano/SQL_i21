@@ -37,7 +37,7 @@ SELECT
 	,dblTax							= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(I.dblTax, 0)  ELSE  ISNULL(I.dblTax, 0) * -1 END
 	,intPaymentMethodId				= I.intPaymentMethodId
 	,intCompanyLocationId			= I.intCompanyLocationId
-	,strComments					= I.strComments
+	,strComments					= dbo.fnStripHtml(I.strComments)
 	,intCurrencyId					= I.intCurrencyId
 	,strLocationName				= L.strLocationName
 	,strPaymentMethod				= P.strPaymentMethod
