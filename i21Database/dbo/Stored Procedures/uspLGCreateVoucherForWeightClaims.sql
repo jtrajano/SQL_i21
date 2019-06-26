@@ -393,8 +393,6 @@ BEGIN TRY
 		FROM @xmlVoucherIds.nodes('/A') AS X(T) 
 		WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 
-		EXEC uspAPUpdateVoucherTotal @voucherIds
-
 		SELECT TOP 1 @intBillId = intId FROM @voucherIds
 
 		IF (@total = @intCount)
@@ -409,6 +407,8 @@ BEGIN TRY
 			SET intBillId = @intBillId
 			WHERE intWeightClaimDetailId = @intWeightClaimDetailId
 		END
+
+		EXEC uspAPUpdateVoucherTotal @voucherIds
 
 		IF (ISNULL(@intWeightClaimDetailId,0) <> 0)
 			SET @strBillId = ISNULL(@strBillId,'') + CONVERT(NVARCHAR,ISNULL(@intBillId,0))
