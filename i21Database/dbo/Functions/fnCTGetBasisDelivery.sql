@@ -40,7 +40,8 @@ BEGIN
 		strCommodityCode		NVARCHAR(50),
 		dtmDate					DATETIME,
 		dblQuantity				NUMERIC(38,20),
-		strTransactionType		NVARCHAR(20)
+		strTransactionType		NVARCHAR(20),
+		intTimeE				BIGINT
 	)
 
 	-- INVENTORY RECEIPT
@@ -57,7 +58,8 @@ BEGIN
 		,strCommodityCode	
 		,dtmDate				
 		,dblQuantity			
-		,strTransactionType				
+		,strTransactionType
+		,intTimeE				
 	)
 	SELECT CH.intContractHeaderId
 	,CD.intContractDetailId
@@ -71,6 +73,7 @@ BEGIN
 	,InvTran.dtmDate
 	,SUM(ReceiptItem.dblOpenReceive)
 	,'Inventory Receipt'
+	,(CAST(replace(convert(varchar, InvTran.dtmDate,101),'/','') + replace(convert(varchar, InvTran.dtmDate,108),':','')AS BIGINT)	+ CAST(Receipt.intInventoryReceiptId AS bigint))
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 1
@@ -110,7 +113,8 @@ BEGIN
 		,strCommodityCode	
 		,dtmDate				
 		,dblQuantity			
-		,strTransactionType				
+		,strTransactionType
+		,intTimeE				
 	)
 	SELECT CH.intContractHeaderId
 	,CD.intContractDetailId
@@ -124,10 +128,12 @@ BEGIN
 	,B.dtmDateCreated
 	,SUM(BD.dblQtyReceived) * -1
 	,'Voucher'
+	,CAST(replace(convert(varchar, B.dtmDateCreated,101),'/','') + replace(convert(varchar, B.dtmDateCreated,108),':','') AS BIGINT)	+  CAST(BD.intBillDetailId AS BIGINT)
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 1
 	INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL  and BD.intInventoryReceiptItemId is not null
+		AND BD.intItemId = CD.intItemId
 	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
@@ -159,6 +165,7 @@ BEGIN
 		,dtmDate				
 		,dblQuantity			
 		,strTransactionType				
+		,intTimeE
 	)	
 	SELECT CH.intContractHeaderId
 	,CD.intContractDetailId
@@ -172,6 +179,7 @@ BEGIN
 	,InvTran.dtmDate
 	,dblQuantity = SUM(ISNULL(ShipmentItem.dblQuantity,0))
 	,'Inventory Shipment'
+	,CAST(replace(convert(varchar, InvTran.dtmDate,101),'/','') + replace(convert(varchar, InvTran.dtmDate,108),':','')	 AS BIGINT) + CAST( Shipment.intInventoryShipmentId AS BIGINT)
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
 		AND intContractTypeId = 2
@@ -214,6 +222,7 @@ BEGIN
 		,dtmDate				
 		,dblQuantity			
 		,strTransactionType				
+		,intTimeE
 	)	
 	SELECT CH.intContractHeaderId
 	,CD.intContractDetailId
@@ -227,10 +236,12 @@ BEGIN
 	,I.dtmDate
 	,SUM(ID.dblQtyShipped) * -1
 	,'Invoice'
+	,CAST(replace(convert(varchar, I.dtmDate,101),'/','') + replace(convert(varchar, I.dtmDate,108),':','')	AS BIGINT) + CAST(ID.intInvoiceDetailId AS BIGINT)
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 2
-	INNER JOIN tblARInvoiceDetail ID ON ID.intContractDetailId  = CD.intContractDetailId AND ID.intInventoryShipmentItemId is not null
+	INNER JOIN tblARInvoiceDetail ID ON ID.intContractDetailId  = CD.intContractDetailId AND ID.intInventoryShipmentItemId is not null	
+		AND ID.intItemId = CD.intItemId
 	INNER JOIN tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
@@ -281,7 +292,16 @@ BEGIN
 	--							ELSE SUM(T.dblQuantity) OVER (PARTITION BY T.intContractDetailId, T.strTransactionType ORDER BY T.dtmDate ASC)
 	--							END
 	-- ORIGINAL APPROACH WITH PERFOMANCE HIT FOR R2 ONLY
-	,dblRunningBalance = CASE 
+	,dblRunningBalance = RunningBalanceSource.dblSumValue
+	/*,dblRunningBalance =  (SELECT ISNULL(SUM(dblQuantity),0)
+									FROM @TemporaryTable TIR
+									WHERE 
+									TIR.dtmDate <= T.dtmDate and 
+									TIR.intTransactionKey < T.intTransactionKey AND 
+									TIR.intContractDetailId = CD.intContractDetailId AND 
+									TIR.strTransactionType in ('Voucher', 'Inventory Receipt')
+									)*/
+							/*CASE 
 							WHEN T.strTransactionType = 'Voucher' 
 								THEN CD.dblQuantity + 
 								(SELECT ISNULL(SUM(dblQuantity),0)
@@ -294,9 +314,20 @@ BEGIN
 									WHERE TIR.dtmDate <= T.dtmDate
 									AND TIR.intContractDetailId = CD.intContractDetailId
 									AND TIR.strTransactionType = 'Inventory Receipt')
-							END
+							END*/
 	FROM tblCTContractDetail CD
 	INNER JOIN @TemporaryTable T ON CD.intContractDetailId = T.intContractDetailId
+	outer apply (
+
+		(SELECT ISNULL(SUM(dblQuantity),0) as dblSumValue
+									FROM @TemporaryTable TIR
+									WHERE 
+									TIR.dtmDate <= T.dtmDate and 
+									TIR.intTransactionKey < T.intTransactionKey AND 
+									TIR.intContractDetailId = CD.intContractDetailId AND 
+									TIR.strTransactionType in ('Voucher', 'Inventory Receipt')
+									)
+	) as RunningBalanceSource
 
 	-- TEMPORARY SOLUTION
 	IF @dtmDate IS NOT NULL
