@@ -1865,6 +1865,7 @@
     <Build Include="dbo\Tables\tblEMEntityFarm.sql" />
     <Build Include="dbo\Views\vyuICGetCompactItem.sql" />
     <Build Include="dbo\Views\vyuICGetItemUOMByType.sql" />
+    <Build Include="dbo\Views\vyuICTransactionsByItemUom.sql" />
     <Build Include="dbo\Tables\tblICCompanyPreference.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTransferVoid.sql" />
