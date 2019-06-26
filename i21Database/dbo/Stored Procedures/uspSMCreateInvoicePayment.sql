@@ -165,7 +165,7 @@ BEGIN
 				, intAccountId					= INVOICE.intAccountId
 				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intBankAccountId ELSE NULL END
 				, dblAmountPaid					= ISNULL(PAYMENTS.dblPayment, 0)
-				, ysnPost						= NULL
+				, ysnPost						= CASE WHEN ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 				, intInvoiceId					= INVOICE.intInvoiceId
 				, strTransactionType			= INVOICE.strTransactionType
@@ -246,7 +246,7 @@ BEGIN
 				, intAccountId					= @intUndepositedFundId
 				, intBankAccountId				= @intBankAccountId
 				, dblAmountPaid					= @dblPayment
-				, ysnPost						= 0
+				, ysnPost						= CASE WHEN ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 			FROM vyuARCustomerSearch C			
 			WHERE intEntityId = @intEntityCustomerId
