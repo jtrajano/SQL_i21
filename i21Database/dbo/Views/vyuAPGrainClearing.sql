@@ -171,12 +171,12 @@ INNER JOIN tblGRSettleStorageTicket SST
 INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
-INNER JOIN vyuGLDetail GD
+INNER JOIN tblGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
-		AND GD.strCode = 'STR'
 		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
 		AND GD.ysnIsUnposted = 0
+		--AND GD.strCode = 'STR'
 INNER JOIN vyuGLAccountDetail AD
 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN 
@@ -283,8 +283,8 @@ INNER JOIN tblICItem IM
 	ON DSC.intItemId = IM.intItemId
 INNER JOIN tblGRDiscountSchedule DS
 	ON DS.intDiscountScheduleId = DSC.intDiscountScheduleId
-INNER JOIN tblICCommodity CO
-	ON CO.intCommodityId = DS.intCommodityId
+-- INNER JOIN tblICCommodity CO
+-- 	ON CO.intCommodityId = DS.intCommodityId
 INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = CS.intCompanyLocationId
 INNER JOIN tblGRSettleStorageTicket SST
@@ -292,26 +292,27 @@ INNER JOIN tblGRSettleStorageTicket SST
 INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
-LEFT JOIN tblGRSettleContract SC
-		ON SC.intSettleStorageId = SS.intSettleStorageId
-	LEFT JOIN tblCTContractDetail CD
-		ON CD.intContractDetailId = SC.intContractDetailId
-INNER JOIN vyuGLDetail GD
+INNER JOIN tblGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
-		AND GD.strCode = 'STR'
+		--AND GD.strCode = 'STR'
 		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
 		AND GD.ysnIsUnposted = 0
 INNER JOIN vyuGLAccountDetail AD
 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+LEFT JOIN tblGRSettleContract SC
+		ON SC.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = SC.intContractDetailId
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE QM.strSourceType = 'Storage' 
-	AND QM.dblDiscountDue <> 0
+WHERE 
+	QM.strSourceType = 'Storage' 
+AND QM.dblDiscountDue <> 0
 UNION ALL
 SELECT
 	bill.intEntityVendorId
