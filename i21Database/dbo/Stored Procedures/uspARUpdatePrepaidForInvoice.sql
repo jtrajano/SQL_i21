@@ -71,8 +71,10 @@ BEGIN TRY
 	SELECT TOP 1 @intContractDetailId = intContractDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ysnRestricted = 1 AND intContractDetailId IS NOT NULL
 	SELECT TOP 1 @intItemId = intItemId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ysnRestricted = 1 AND intContractDetailId IS NULL
 
-	DECLARE @RestrictedItems TABLE(intItemId INT)	
+	DECLARE @RestrictedItems	TABLE(intItemId INT)
+	DECLARE @AppliedContracts	TABLE(intContractDetailId INT, intInvoiceDetailId INT, intInvoiceId INT)
 
+	--GET RESTRICTED ITEMS
 	INSERT INTO @RestrictedItems(intItemId)
 	SELECT ID.intItemId FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN (
@@ -98,6 +100,20 @@ BEGIN TRY
 	WHERE I.intInvoiceId  = @InvoiceId
 	AND I.intEntityCustomerId = @EntityCustomerId
 	AND ID.intItemId IS NOT NULL
+
+	--GET APPLIED CONTRACTS
+	INSERT INTO @AppliedContracts(intContractDetailId, intInvoiceDetailId, intInvoiceId)
+	SELECT ID.intContractDetailId
+		 , ID.intInvoiceDetailId
+		 , ID.intInvoiceId
+	FROM tblARPrepaidAndCredit PC
+	INNER JOIN tblARInvoice I ON PC.intInvoiceId = I.intInvoiceId
+	INNER JOIN tblARInvoiceDetail ID ON PC.intPrepaymentDetailId = ID.intInvoiceDetailId
+	WHERE ID.intContractHeaderId IS NOT NULL
+	  AND ID.intContractDetailId IS NOT NULL
+	  AND I.intEntityCustomerId = @EntityCustomerId
+	  AND PC.ysnApplied = 1
+	  AND I.intInvoiceId <> @InvoiceId
 
 	INSERT INTO tblARPrepaidAndCredit
 		([intInvoiceId]
@@ -167,16 +183,20 @@ BEGIN TRY
 		  AND I.intEntityCustomerId = @EntityCustomerId
 		  AND I.intInvoiceId <> @InvoiceId
 	) I
-
+	
+	DELETE PC
+	FROM tblARPrepaidAndCredit PC
+	INNER JOIN @AppliedContracts AC ON PC.intPrepaymentDetailId = AC.intInvoiceDetailId AND PC.intPrepaymentId = AC.intInvoiceId
+	WHERE PC.intInvoiceId = @InvoiceId
+		
 	UPDATE A 
 	SET ysnApplied = 1
-	  , dblAppliedInvoiceDetailAmount = B.dblAppliedInvoiceDetailAmount
+	  , dblAppliedInvoiceDetailAmount		= B.dblAppliedInvoiceDetailAmount
 	  , dblBaseAppliedInvoiceDetailAmount	= B.dblBaseAppliedInvoiceDetailAmount
 	FROM tblARPrepaidAndCredit A
-		JOIN @AppliedInvoices B
-			ON A.intPrepaymentId = B.intPrepaymentId
-				AND A.intInvoiceId = B.intInvoiceId
-				AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
+	INNER JOIN @AppliedInvoices B ON A.intPrepaymentId = B.intPrepaymentId
+								 AND A.intInvoiceId = B.intInvoiceId
+								 AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
 		
 END TRY
 BEGIN CATCH	
