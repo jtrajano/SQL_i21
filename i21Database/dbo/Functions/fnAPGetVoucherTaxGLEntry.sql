@@ -26,6 +26,8 @@ RETURNS TABLE AS RETURN
 		ON B.intBillDetailId = D.intBillDetailId
 	LEFT JOIN tblICInventoryReceiptCharge charges
 		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+	LEFT JOIN tblICInventoryReceiptItem receiptItem
+		ON receiptItem.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt receipts
 		ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
