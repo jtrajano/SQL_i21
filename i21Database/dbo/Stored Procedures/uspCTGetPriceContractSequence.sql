@@ -77,7 +77,9 @@ BEGIN TRY
 				CD.strBook,
 				CD.strSubBook,
 				CD.intNoOfLoad,
-				CD.dblQuantityPerLoad
+				CD.dblQuantityPerLoad,
+				CD.intBookId,	
+				CD.intSubBookId	
 
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -133,7 +135,9 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				BK.strBook,
 				SB.strSubBook,
 				CD.intNoOfLoad,
-				CD.dblQuantityPerLoad
+				CD.dblQuantityPerLoad,
+				CH.intBookId,	
+				CH.intSubBookId	
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId

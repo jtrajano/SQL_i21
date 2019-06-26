@@ -148,7 +148,9 @@ BEGIN TRY
 				CD.strBook,
 				CD.strSubBook,
 				CD.intNoOfLoad,
-				CD.dblQuantityPerLoad
+				CD.dblQuantityPerLoad,
+				CD.intBookId,	
+				CD.intSubBookId	
 		
 		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
@@ -224,8 +226,10 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				BK.strBook,
 				SB.strSubBook,
 				CD.intNoOfLoad,
-				CD.dblQuantityPerLoad
-		
+				CD.dblQuantityPerLoad,
+				CH.intBookId,	
+				CH.intSubBookId	
+
 		INTO	#MultiPriceFixation
 		FROM	#tblCTPriceFixation			PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
