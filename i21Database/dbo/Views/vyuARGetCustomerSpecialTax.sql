@@ -32,7 +32,7 @@ LEFT JOIN (
 	SELECT intCategoryId
 		 , strCategoryCode
 	FROM dbo.tblICCategory
-) ITEMCATEGORY ON ITEM.intCategoryId = ITEMCATEGORY.intCategoryId
+) ITEMCATEGORY ON ST.intCategoryId = ITEMCATEGORY.intCategoryId
 LEFT JOIN (
 	SELECT intEntityLocationId
 		 , strLocationName
