@@ -114,11 +114,11 @@ BEGIN
 			, LongWaitedPrice = (dblLong * dblPrice)
 			, ShortWaitedPrice = (dblShort * dblPrice)
 		FROM (
-			SELECT GrossPnL1 = (ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0)) * dblContractSize / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
-				, dblLong = ISNULL((Long1 - MatchLong), 0)
-				, dblShort = ISNULL(Sell1 - MatchShort, 0)
-				, dblFutCommission2 = CONVERT(INT, ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0)) * - dblFutCommission1 / CASE WHEN ComSubCurrency = 1 THEN ComCent ELSE 1 END
-				, dblNet = ISNULL((Long1 - MatchLong), 0) - ISNULL(Sell1 - MatchShort, 0)
+			SELECT GrossPnL1 = (ISNULL(Long1, 0) - ISNULL(Sell1, 0)) * dblContractSize / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
+				, dblLong = ISNULL(Long1, 0)
+				, dblShort = ISNULL(Sell1, 0)
+				, dblFutCommission2 = ISNULL(Long1, 0) - ISNULL(Sell1, 0) * - dblFutCommission1 / CASE WHEN ComSubCurrency = 1 THEN ComCent ELSE 1 END
+				, dblNet = ISNULL(Long1, 0) - ISNULL(Sell1, 0)
 				, *
 			FROM (
 				SELECT intFutOptTransactionId
