@@ -391,6 +391,7 @@ BEGIN
 		, intTransactionId
 		, strDistribution
 		, dblBalanceInv
+		, dblSalesInTransit
 		)
 	EXEC uspRKGetInHouse @dtmFromTransactionDate = @dtmFromTransactionDate
 		, @dtmToTransactionDate = @dtmToTransactionDate
@@ -427,6 +428,7 @@ BEGIN
 			,dblAdjustments
 			,dblInventoryCount
 			,dblBalanceInv
+			,dblSalesInTransit
 		)
 		SELECT DISTINCT
 			CO.dtmDate
@@ -435,6 +437,7 @@ BEGIN
 			,CO.dblAdjustments
 			,CO.dblInventoryCount
 			,CT.dblBalanceInv 
+			,CT.dblSalesInTransit
 		FROM InHouse CO
 		FULL JOIN @InHouse CT ON CO.dtmDate = CT.dtmDate
 		ORDER BY CO.dtmDate

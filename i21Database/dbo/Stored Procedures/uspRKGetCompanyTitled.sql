@@ -685,14 +685,14 @@ BEGIN
 				,dblUnpaidBalance = 0
 				,dblPaidBalance = dblQtyShipped
 				,strTransactionId = strInvoiceNumber
-				,intTransactionId
+				,intTransactionId = intInvoiceId
 				,strDistribution
 			FROM (
 				select
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,dblQtyShipped = ID.dblQtyShipped * -1
 					,I.strInvoiceNumber
-					,Inv.intTransactionId
+					,I.intInvoiceId
 					,strDistribution = TV.strDistributionOption
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
@@ -701,7 +701,6 @@ BEGIN
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
 				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Shipment'
-					AND I.ysnPosted = 1
 					AND S.intSourceType = 1
 						
 			) t
@@ -725,7 +724,7 @@ BEGIN
 					,strDistribution = TV.strDistributionOption
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
-				inner join vyuICShipmentInvoice SI on Inv.intTransactionDetailId = SI.intInventoryShipmentItemId
+				left join vyuICShipmentInvoice SI on Inv.intTransactionDetailId = SI.intInventoryShipmentItemId
 				left join vyuSCTicketView TV on Inv.intSourceId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Shipment'
 					AND S.ysnPosted = 1
@@ -741,14 +740,14 @@ BEGIN
 				,dblUnpaidBalance = 0
 				,dblPaidBalance = dblQtyShipped
 				,strTransactionId = strInvoiceNumber
-				,intTransactionId
+				,intTransactionId = intInvoiceId
 				,''
 			FROM (
 				select
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),I.dtmPostDate, 110), 110)
 					,dblQtyShipped = Inv.dblTotal
 					,I.strInvoiceNumber
-					,Inv.intTransactionId
+					,I.intInvoiceId
 				from @InventoryStock Inv
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInvoiceDetailId 
 						AND ID.intInventoryShipmentChargeId IS NULL
@@ -767,14 +766,14 @@ BEGIN
 				,dblUnpaidBalance = 0
 				,dblPaidBalance = dblQtyShipped
 				,strTransactionId = strInvoiceNumber
-				,intTransactionId
+				,intTransactionId = intInvoiceId
 				,'CM'
 			FROM (
 				select
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,dblQtyShipped = Inv.dblTotal
 					,I.strInvoiceNumber
-					,Inv.intTransactionId
+					,I.intInvoiceId
 				from @InventoryStock Inv
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInvoiceDetailId 
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId

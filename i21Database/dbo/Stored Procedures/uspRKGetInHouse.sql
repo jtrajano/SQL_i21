@@ -276,7 +276,83 @@ BEGIN
 					AND ISNULL(strTicketStatus,'') = 'H'
 			) t WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			AND t.intSeqId = 1
-		
+
+
+			--=============================
+			-- Sales In Transit w/o Pick Lot
+			--=============================
+			SELECT strShipmentNumber
+				, intInventoryShipmentId
+				, strContractNumber
+				, intContractHeaderId
+				, intCompanyLocationId
+				, strLocationName
+				, dblBalanceToInvoice 
+				, intEntityId
+				, strCustomerReference 
+				, dtmTicketDateTime
+				, intTicketId
+				, strTicketNumber
+				, intCommodityId
+				, intItemId
+				, strItemNo
+				, strCategory
+				, intCategoryId
+				, strContractEndMonth
+				, strFutureMonth
+				, strDeliveryDate
+			INTO #tblGetSalesIntransitWOPickLot
+			FROM(
+				SELECT 
+					 strShipmentNumber = InTran.strTransactionId
+					,intInventoryShipmentId = InTran.intTransactionId
+					,strContractNumber = SI.strOrderNumber + '-' + CONVERT(NVARCHAR, SI.intContractSeq) COLLATE Latin1_General_CI_AS 
+					,intContractHeaderId = SI.intOrderId 
+					,strTicketNumber = SI.strSourceNumber
+					,intTicketId = SI.intSourceId
+					,dtmTicketDateTime = InTran.dtmDate
+					,intCompanyLocationId = InTran.intItemLocationId
+					,strLocationName = SI.strShipFromLocation
+					,strUOM = InTran.strUnitMeasure
+					,Inv.intEntityId
+					,strCustomerReference = SI.strCustomerName
+					,Com.intCommodityId
+					,Itm.intItemId
+					,Itm.strItemNo
+					,strCategory = Cat.strCategoryCode
+					,Cat.intCategoryId
+					,dblBalanceToInvoice = InTran.dblInTransitQty
+					,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), InTran.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
+					,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblCTContractDetail cd INNER JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId =  fmnt.intFutureMonthId WHERE intContractHeaderId = SI.intLineNo)
+					,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
+				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
+					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+					INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
+					INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
+					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
+					LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToTransactionDate)
+					AND Itm.intItemId = ISNULL(@intItemId, Itm.intItemId)
+					--AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+				
+			)t
+			
+			DECLARE @tblResultInTransit TABLE (Id INT identity(1,1)
+				, dtmDate datetime
+				, dblSalesInTransit NUMERIC(18,6)
+				)
+			
+			INSERT INTO @tblResultInTransit(
+				dtmDate
+				,dblSalesInTransit
+			)
+			SELECT 
+				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110), 110)
+				,SUM(dblBalanceToInvoice)
+			FROM #tblGetSalesIntransitWOPickLot
+			GROUP BY
+				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110), 110)
+
 			
 			DECLARE @tblResult TABLE (Id INT identity(1,1)
 				, dtmDate datetime
@@ -367,7 +443,7 @@ BEGIN
 				,'HLD'
 			FROM #tempOnHold
 
-
+			
 			DECLARE @tblResultInventory TABLE (Id INT identity(1,1)
 				, dtmDate datetime
 				, dblInvIn NUMERIC(18,6)
@@ -853,14 +929,17 @@ BEGIN
 				, ri.intTransactionId
 				, ri.strDistribution
 				, r.dblBalanceInv 
+				, it.dblSalesInTransit
 			FROM @tblResultInventory ri
 			FULL join @tblBalanceInvByDate r on ri.dtmDate = r.dtmDate
+			FULL join @tblResultInTransit it on ri.dtmDate = it.dtmDate
 			
 
 			UNION ALL--Insert Company Title Beginning Balance
 			SELECT
 				NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
-				sum(dblTotal) 
+				sum(dblTotal)
+				,NULL 
 			FROM @tblResult WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(day,-1,@dtmFromTransactionDate))
 			) t
 			WHERE dblBalanceInv IS NOT NULL 
@@ -870,6 +949,7 @@ BEGIN
 	drop table #invQty
 	drop table #tblGetStorageDetailByDate
 	drop table #tempOnHold
+	drop table #tblGetSalesIntransitWOPickLot
 	drop table #tempDateRange
 END
 
