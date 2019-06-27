@@ -87,6 +87,7 @@ BEGIN
 					, gh.dtmHistoryDate
 					, gh.intSettleStorageId
 					, gh.strVoucher
+					, gh.intBillId
 					, gh.intStorageHistoryId
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
@@ -163,6 +164,7 @@ BEGIN
 					, gh.dtmHistoryDate
 					, gh.intSettleStorageId
 					, gh.strVoucher
+					, gh.intBillId
 					, gh.intStorageHistoryId
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
@@ -570,6 +572,7 @@ BEGIN
 				, intFromCommodityUnitMeasureId
 				, dtmDate				
 
+				drop table #tblSalesBasisDeliveries
 			END
 
 
@@ -612,21 +615,22 @@ BEGIN
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,BD.dblQtyReceived
 					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
-					,B.strBillId
+					,B.strBillId 
 					,B.intBillId
-					,strDistribution =  ISNULL(ST.strStorageTypeCode,'SPT')
+					,strDistribution =  ISNULL(ST.strStorageTypeCode,ISNULL(TV.strDistributionOption, 'SPT'))
 				from @InventoryStock Inv
 				inner join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId 
 						AND BD.intInventoryReceiptChargeId IS NULL
 				inner join tblAPBill B on BD.intBillId = B.intBillId
 				left join tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
 				left join tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
+				left join vyuSCTicketView TV on BD.intScaleTicketId = TV.intTicketId
 				where 
 					Inv.strTransactionType = 'Inventory Receipt'
-					AND ISNULL(CS.intStorageTypeId,0) <>  2 --Not DP
+					AND ISNULL(CS.intStorageTypeId,0) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
 			) t
 			UNION ALL
-			SELECT --DIRECT INVENTORY RECEIPT W/O VOUCHER
+			SELECT --INVENTORY RECEIPT W/O VOUCHER
 				dtmDate
 				,dblUnpaidIncrease = dblTotal
 				,dblUnpaidDecrease = 0
@@ -634,19 +638,22 @@ BEGIN
 				,dblPaidBalance = 0
 				,strTransactionId = strReceiptNumber
 				,intTransactionId
-				,''
+				,strDistribution = strDistributionOption 
 			FROM (
 				select
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,Inv.dblTotal
-					,IRV.strReceiptNumber
+					,IR.strReceiptNumber
 					,Inv.intTransactionId
+					,TV.strDistributionOption
 				from @InventoryStock Inv
 				inner join tblICInventoryReceipt IR on Inv.intTransactionId = IR.intInventoryReceiptId
-				inner join vyuICGetInventoryReceiptVoucher IRV on Inv.intTransactionDetailId = IRV.intInventoryReceiptItemId
+				inner join tblICInventoryReceiptItem IRI on Inv.intTransactionDetailId = IRI.intInventoryReceiptItemId
+				left join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId and BD.intInventoryReceiptChargeId IS NULL
+				left join vyuSCTicketView TV on IRI.intSourceId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Receipt'
-					AND IRV.intBillId IS NULL
-					AND IR.intSourceType = 0
+					AND BD.intBillDetailId IS NULL
+					--AND IR.intSourceType = 0
 			) t
 			UNION ALL
 			SELECT
@@ -701,7 +708,7 @@ BEGIN
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
 				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Shipment'
-					AND S.intSourceType = 1
+					--AND S.intSourceType = 1
 						
 			) t
 				
@@ -714,23 +721,24 @@ BEGIN
 				,dblPaidBalance = dblQtyShipped
 				,strTransactionId = strShipmentNumber
 				,intTransactionId
-				,strDistribution
+				,strDistribution 
 			FROM (
 				select
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,dblQtyShipped = Inv.dblTotal
 					,S.strShipmentNumber
 					,Inv.intTransactionId
-					,strDistribution = TV.strDistributionOption
+					,strDistribution = ISNULL(TV.strDistributionOption,'IS')
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
-				left join vyuICShipmentInvoice SI on Inv.intTransactionDetailId = SI.intInventoryShipmentItemId
+				left join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
+						AND ID.intInventoryShipmentChargeId IS NULL
+				left join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
 				left join vyuSCTicketView TV on Inv.intSourceId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Shipment'
-					AND S.ysnPosted = 1
-					AND S.intSourceType = 1
-					and SI.strInvoiceNumber IS NULL
+					and ID.intInvoiceDetailId IS NULL
 			) t
+
 
 			UNION ALL --DIRECT INVOICE
 			SELECT
@@ -882,16 +890,17 @@ BEGIN
 					,'DP'
 				FROM (
 					select 
-						dtmDate  = CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+						dtmDate  = CONVERT(DATETIME, CONVERT(VARCHAR(10),B.dtmDate, 110), 110)
 						,dblBalance = SUM(dblBalance)
 						,strVoucher
 						,intTransactionId = intStorageHistoryId
 						,intCompanyLocationId
-					from #tblGetStorageDetailByDate
+					from #tblGetStorageDetailByDate SD
+					inner join tblAPBill B on SD.intBillId = B.intBillId
 					where intStorageTypeId = 2 --DP
 					and intSettleStorageId is not null
 					group by
-						CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+						CONVERT(DATETIME, CONVERT(VARCHAR(10),B.dtmDate, 110), 110)
 						,strVoucher
 						,intStorageHistoryId
 						,strTicketType
@@ -947,7 +956,7 @@ BEGIN
 						,strTicketNumber
 						,intTicketId
 						,intCompanyLocationId
-					from #tblGetStorageDetailByDate
+					from #tblGetStorageDetailByDate 
 					where intStorageTypeId = 2 --DP
 						and intSettleStorageId is null
 						and strTicketType IN( 'Settle Storage')
@@ -974,58 +983,6 @@ BEGIN
 					,intTransactionId
 					,strDistribution
 				)
-				SELECT --INVENTORY RECEIPT WITH VOUCHER
-					dtmDate
-					,dblUnpaidIncrease = dblQtyReceived
-					,dblUnpaidDecrease = dblPartialPaidQty
-					,dblUnpaidBalance = dblQtyReceived - dblPartialPaidQty
-					,dblPaidBalance = dblPartialPaidQty
-					,strTransactionId = strBillId
-					,intTransactionId = intBillId
-					,strDistribution
-				FROM (
-					select
-						 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
-						,BD.dblQtyReceived
-						,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
-						,B.strBillId
-						,B.intBillId
-						,strDistribution =  ISNULL(ST.strStorageTypeCode,'SPT')
-					from @InventoryStock Inv
-					inner join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId 
-							AND BD.intInventoryReceiptChargeId IS NULL
-					inner join tblAPBill B on BD.intBillId = B.intBillId
-					left join tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
-					left join tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
-					where 
-						Inv.strTransactionType = 'Inventory Receipt'
-						AND ISNULL(CS.intStorageTypeId,0) = 2  
-				) t
-				UNION ALL
-				SELECT --INVENTORY RECEIPT W/O VOUCHER
-					dtmDate
-					,dblUnpaidIncrease = dblTotal
-					,dblUnpaidDecrease = 0
-					,dblUnpaidBalance = dblTotal
-					,dblPaidBalance = 0
-					,strTransactionId = strReceiptNumber
-					,intTransactionId
-					,''
-				FROM (
-					select
-						 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
-						,Inv.dblTotal
-						,IRV.strReceiptNumber
-						,Inv.intTransactionId
-					from @InventoryStock Inv
-					inner join tblICInventoryReceipt IR on Inv.intTransactionId = IR.intInventoryReceiptId
-					inner join vyuICGetInventoryReceiptVoucher IRV on Inv.intTransactionDetailId = IRV.intInventoryReceiptItemId
-					where Inv.strTransactionType = 'Inventory Receipt'
-						AND IRV.intBillId IS NULL
-						AND IR.intSourceType = 1
-				) t
-
-				UNION ALL
 				SELECT --INVENTORY RECEIPT PARTIALLY VOUCHERD
 					dtmDate
 					,dblUnpaidIncrease = ROUND(dblTotal,2)
@@ -1050,8 +1007,10 @@ BEGIN
 						AND IR.intSourceType = 1
 				) t
 				WHERE intBillId IS NOT NULL
+
 			END
 
+	
 
 			--============================ RETURN =============================
 
@@ -1129,6 +1088,7 @@ BEGIN
 			WHERE dblCompanyTitled IS NOT NULL 
 
 			--=========================================================================
+
 
 			drop table #LicensedLocation
 			drop table #tblGetStorageDetailByDate
