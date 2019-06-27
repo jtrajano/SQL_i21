@@ -109,10 +109,11 @@ SELECT	Query.intItemId
 FROM @UnitTrans Query
 
 -- Get Accounts from PO
-MERGE INTO @GLAccounts AS target
+MERGE INTO @GLAccounts AS [target]
 USING
 (
 	SELECT
+		DISTINCT 
 		  t.intItemId
 		, t.intItemLocationId
 		, intAccountId = dbo.fnGetLocationAwareItemGLAccount(ap.intAccountId, ISNULL(@intContraNonInventory_ItemLocationId, t.intItemLocationId), @AccountCategory_OtherChargeExpense)
@@ -136,12 +137,48 @@ USING
 		AND i.strType = 'Non-Inventory'
 		AND t.strTransactionForm = 'Inventory Receipt'
 		AND ap.intAccountId IS NOT NULL
-) AS source (intItemId, intItemLocationId, intAccountId, intContraNonInventoryId, intTransactionTypeId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
-	ON target.intItemId = source.intItemId AND target.intItemLocationId = source.intItemLocationId AND target.intNonInventoryId = source.intAccountId AND target.intTransactionTypeId = source.intTransactionTypeId
-WHEN MATCHED THEN UPDATE SET intNonInventoryId = source.intAccountId, intTransactionTypeId = source.intTransactionTypeId, intOrder = 0
+) AS [source] (
+	intItemId
+	, intItemLocationId
+	, intAccountId
+	, intContraNonInventoryId
+	, intTransactionTypeId
+	, strNonInventoryAccountCategory
+	, strContraNonInventoryAccountCategory
+	, intOrder
+)
+	ON [target].intItemId = [source].intItemId 
+	AND [target].intItemLocationId = [source].intItemLocationId 
+	AND [target].intNonInventoryId = [source].intAccountId 
+	AND [target].intTransactionTypeId = [source].intTransactionTypeId
+
+WHEN MATCHED THEN 
+	UPDATE SET intNonInventoryId = [source].intAccountId
+	, intTransactionTypeId = [source].intTransactionTypeId
+	, intOrder = 0
 WHEN NOT MATCHED BY target THEN
-INSERT (intPOId, intNonInventoryId, intItemId, intItemLocationId, intTransactionTypeId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
-VALUES(source.intAccountId, source.intAccountId, source.intItemId, source.intItemLocationId, source.intTransactionTypeId, source.intContraNonInventoryId, source.strNonInventoryAccountCategory, source.strContraNonInventoryAccountCategory, source.intOrder);
+INSERT (
+	intPOId
+	, intNonInventoryId
+	, intItemId
+	, intItemLocationId
+	, intTransactionTypeId
+	, intContraNonInventoryId
+	, strNonInventoryAccountCategory
+	, strContraNonInventoryAccountCategory
+	, intOrder
+)
+VALUES(
+	[source].intAccountId
+	, [source].intAccountId
+	, [source].intItemId
+	, [source].intItemLocationId
+	, [source].intTransactionTypeId
+	, [source].intContraNonInventoryId
+	, [source].strNonInventoryAccountCategory
+	, [source].strContraNonInventoryAccountCategory
+	, [source].intOrder
+);
 
 DECLARE @NonStockGLAccounts AS TABLE
 (
