@@ -7628,6 +7628,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateICAmountVsGLAmount.sql" />
     <Build Include="dbo\Functions\fnAPGetCheckPayee.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForNegativeStockVariance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
