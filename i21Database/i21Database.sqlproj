@@ -7642,6 +7642,9 @@
     <Build Include="dbo\Stored Procedures\uspQMInterCompanyStageSample.sql" />
     <Build Include="dbo\Stored Procedures\uspQMInterCompanyPreStageSample.sql" />
     <Build Include="dbo\Tables\tblQMSamplePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessShipmentXML.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailContainerLinkView.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDocumentView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

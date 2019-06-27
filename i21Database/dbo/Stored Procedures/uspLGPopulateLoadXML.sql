@@ -1,10 +1,10 @@
-﻿CREATE PROCEDURE uspLGPopulateLoadXML
-	@intLoadId INT,
-	@strToTransactionType NVARCHAR(100),
-	@intToCompanyId INT,
-	@strRowState NVARCHAR(100),
-	@intToCompanyLocationId INT = NULL,
-	@intToBookId INT = NULL
+﻿CREATE PROCEDURE uspLGPopulateLoadXML @intLoadId INT
+	,@strToTransactionType NVARCHAR(100)
+	,@intToCompanyId INT
+	,@strRowState NVARCHAR(100)
+	,@intToCompanyLocationId INT = NULL
+	,@intToBookId INT = NULL
+	,@ysnReplication BIT = 1
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -49,37 +49,29 @@ BEGIN TRY
 	DECLARE @strLoadContainerId NVARCHAR(100)
 	DECLARE @strLoadWarehouseId NVARCHAR(100)
 	DECLARE @intSourceType INT
+		,@strObjectName NVARCHAR(50)
 
-	SELECT @strLoadNumber = strLoadNumber,
-		   @intSourceType = intSourceType
+	SELECT @strLoadNumber = strLoadNumber
+		,@intSourceType = intSourceType
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
 	IF (@intSourceType = 7)
-		Return;
+		RETURN;
 
 	---HEADER
 	SELECT @strLoadCondition = 'intLoadId = ' + LTRIM(@intLoadId)
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoad'
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoad'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadCondition
 		,@strLoadXML OUTPUT
 		,NULL
 		,NULL
-
-	-- LOAD HEADER TABLE
-	INSERT INTO tblLGIntrCompLogisticsStg (
-		intLoadId
-		,strLoadNumber
-		,strLoad
-		,strRowState
-		)
-	SELECT @intLoadId
-		,@strLoadNumber
-		,@strLoadXML
-		,@strRowState
-
-	SET @intScopeIdentityId = SCOPE_IDENTITY()
 
 	-- LOAD DETAIL AND LOAD DETAIL LOT TABLE
 	SET @strLoadDetailCondition = NULL
@@ -87,15 +79,16 @@ BEGIN TRY
 
 	SELECT @strLoadDetailCondition = 'intLoadId = ' + LTRIM(@intLoadId)
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadDetail'
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoadDetail'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadDetailView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadDetailCondition
 		,@strLoadDetailXML OUTPUT
 		,NULL
 		,NULL
-
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strLoadDetail = ISNULL(strLoadDetail, '') + @strLoadDetailXML
-	WHERE intId = @intScopeIdentityId
 
 	SET @strLoadDetailLotCondition = NULL
 	SET @strLoadDetailLotXML = NULL
@@ -104,17 +97,18 @@ BEGIN TRY
 	FROM tblLGLoadDetail
 	WHERE intLoadId = @intLoadId
 
-	--SELECT @strLoadDetailLotCondition = 'intLoadDetailId IN (' + LTRIM(@strLoadDetailId) + ')'
+	SELECT @strLoadDetailLotCondition = 'intLoadDetailId IN (' + LTRIM(@strLoadDetailId) + ')'
 
-	--EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadDetailLot'
-	--	,@strLoadDetailLotCondition
-	--	,@strLoadDetailLotXML OUTPUT
-	--	,NULL
-	--	,NULL
+		IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoadDetailLot'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadDetailLotsView'
 
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strLoadDetailLot = ISNULL(strLoadDetailLot, '') + @strLoadDetailLotXML
-	WHERE intId = @intScopeIdentityId
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLoadDetailLotCondition
+		,@strLoadDetailLotXML OUTPUT
+		,NULL
+		,NULL
 
 	-- LOAD DOCUMENT TABLE
 	SET @strLoadDocumentCondition = NULL
@@ -122,15 +116,16 @@ BEGIN TRY
 
 	SELECT @strLoadDocumentCondition = 'intLoadId = ' + LTRIM(@intLoadId)
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadDocuments'
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoadDocuments'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadDocumentTrackingSummary'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadDocumentCondition
 		,@strLoadDocumentXML OUTPUT
 		,NULL
 		,NULL
-
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strLoadDocument = ISNULL(strLoadDocument, '') + @strLoadDocumentXML
-	WHERE intId = @intScopeIdentityId
 
 	-- LOAD NOTIFY PARTY TABLE
 	SET @strLoadNotifyPartyCondition = NULL
@@ -138,15 +133,16 @@ BEGIN TRY
 
 	SELECT @strLoadNotifyPartyCondition = 'intLoadId = ' + LTRIM(@intLoadId)
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadNotifyParties'
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoadNotifyParties'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadNotifyPartiesNotMapped'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadNotifyPartyCondition
 		,@strLoadNotifyPartyXML OUTPUT
 		,NULL
 		,NULL
-
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strLoadNotifyParty = ISNULL(strLoadNotifyParty, '') + @strLoadNotifyPartyXML
-	WHERE intId = @intScopeIdentityId
 
 	-- LOAD CONTAINER
 	SET @strLoadContainerCondition = NULL
@@ -154,15 +150,16 @@ BEGIN TRY
 
 	SELECT @strLoadContainerCondition = 'intLoadId = ' + LTRIM(@intLoadId)
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadContainer'
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoadContainer'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadContainerView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadContainerCondition
 		,@strLoadContainerXML OUTPUT
 		,NULL
 		,NULL
-
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strLoadContainer = ISNULL(strLoadContainer, '') + @strLoadContainerXML
-	WHERE intId = @intScopeIdentityId
 
 	SELECT @intLoadContainerId = MIN(intLoadContainerId)
 	FROM tblLGLoadContainer
@@ -177,35 +174,38 @@ BEGIN TRY
 	SET @strLoadDetailContainerLinkCondition = NULL
 	SET @strLoadDetailContainerLinkXML = NULL
 
-	IF (ISNULL(@strLoadContainerId,'') <> '')
+	IF (ISNULL(@strLoadContainerId, '') <> '')
 	BEGIN
 		SELECT @strLoadDetailContainerLinkCondition = 'intLoadContainerId IN (' + LTRIM(@strLoadContainerId) + ')'
 
-		EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadDetailContainerLink'
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblLGLoadDetailContainerLink'
+		ELSE
+			SELECT @strObjectName = 'vyuLGLoadDetailContainerLinkView'
+
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 			,@strLoadDetailContainerLinkCondition
 			,@strLoadDetailContainerLinkXML OUTPUT
 			,NULL
 			,NULL
-
-		UPDATE tblLGIntrCompLogisticsStg
-		SET strLoadDetailContainerLink = ISNULL(strLoadDetailContainerLink, '') + @strLoadDetailContainerLinkXML
-		WHERE intId = @intScopeIdentityId
 	END
+
 	-- LOAD WAREHOUSE
 	SET @strLoadWarehouseCondition = NULL
 	SET @strLoadWarehouseXML = NULL
 
 	SELECT @strLoadWarehouseCondition = 'intLoadId = ' + LTRIM(@intLoadId)
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadWarehouse'
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoadWarehouse'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadWarehouseView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadWarehouseCondition
 		,@strLoadWarehouseXML OUTPUT
 		,NULL
 		,NULL
-
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strLoadWarehouse = ISNULL(strLoadWarehouse, '') + @strLoadWarehouseXML
-	WHERE intId = @intScopeIdentityId
 
 	SELECT @strLoadWarehouseId = COALESCE(@strLoadWarehouseId + ',', '') + CAST(intLoadWarehouseId AS VARCHAR(1000))
 	FROM tblLGLoadWarehouse
@@ -215,38 +215,48 @@ BEGIN TRY
 	SET @strLoadWarehouseServicesCondition = NULL
 	SET @strLoadWarehouseServicesXML = NULL
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadWarehouseServices WHERE intLoadWarehouseId IN (@strLoadWarehouseId))
+	IF EXISTS (
+			SELECT TOP 1 1
+			FROM tblLGLoadWarehouseServices
+			WHERE intLoadWarehouseId IN (@strLoadWarehouseId)
+			)
 	BEGIN
 		SELECT @strLoadWarehouseServicesCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
 
-		EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadWarehouseServices'
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblLGLoadWarehouseServices'
+		ELSE
+			SELECT @strObjectName = 'vyuLGLoadWarehouseServices'
+
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 			,@strLoadWarehouseServicesCondition
 			,@strLoadWarehouseServicesXML OUTPUT
 			,NULL
 			,NULL
-
-		UPDATE tblLGIntrCompLogisticsStg
-		SET strLoadWarehouseServices = ISNULL(strLoadWarehouseServices, '') + @strLoadWarehouseServicesXML
-		WHERE intId = @intScopeIdentityId
 	END
 
 	-- WAREHOUSE CONTAINER TABLE
 	SET @strLoadWarehouseContainerCondition = NULL
 	SET @strLoadWarehouseContainerXML = NULL
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadWarehouseContainer WHERE intLoadWarehouseId IN (@strLoadWarehouseId))
+	IF EXISTS (
+			SELECT TOP 1 1
+			FROM tblLGLoadWarehouseContainer
+			WHERE intLoadWarehouseId IN (@strLoadWarehouseId)
+			)
 	BEGIN
 		SELECT @strLoadWarehouseContainerCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
 
-		EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadWarehouseContainer'
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblLGLoadWarehouseContainer'
+		ELSE
+			SELECT @strObjectName = 'vyuLGLoadWarehouseContainerView'
+
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 			,@strLoadWarehouseContainerCondition
 			,@strLoadWarehouseContainerXML OUTPUT
 			,NULL
 			,NULL
-
-		UPDATE tblLGIntrCompLogisticsStg
-		SET strLoadWarehouseContainer = ISNULL(strLoadWarehouseContainer, '') + @strLoadWarehouseContainerXML
-		WHERE intId = @intScopeIdentityId
 	END
 
 	-- LOAD COST TABLE
@@ -255,15 +265,16 @@ BEGIN TRY
 
 	SELECT @strLoadCostCondition = 'intLoadId = ' + LTRIM(@intLoadId)
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadCost'
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoadCost'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadCostView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadCostCondition
 		,@strLoadCostXML OUTPUT
 		,NULL
 		,NULL
-
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strLoadCost = ISNULL(strLoadCost, '') + @strLoadCostXML
-	WHERE intId = @intScopeIdentityId
 
 	-- LOAD STORAGE COST TABLE
 	SET @strLoadStorageCostCondition = NULL
@@ -271,28 +282,67 @@ BEGIN TRY
 
 	SELECT @strLoadStorageCostCondition = 'intLoadId = ' + LTRIM(@intLoadId)
 
+	IF @ysnReplication = 1
+		SELECT @strObjectName = 'tblLGLoadStorageCost'
+	ELSE
+		SELECT @strObjectName = 'vyuLGLoadStorageCostView'
+
 	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadStorageCost'
 		,@strLoadStorageCostCondition
 		,@strLoadStorageCostXML OUTPUT
 		,NULL
 		,NULL
 
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strLoadStorageCost = ISNULL(strLoadStorageCost, '') + @strLoadStorageCostXML
-	WHERE intId = @intScopeIdentityId
-
-
-	UPDATE tblLGIntrCompLogisticsStg
-	SET strTransactionType = @strToTransactionType,
-		intMultiCompanyId = @intToCompanyId,
-		intToCompanyLocationId = @intToCompanyLocationId,
-		intToBookId = @intToBookId
-	WHERE intId = @intScopeIdentityId
-
+	-- LOAD HEADER TABLE
+	INSERT INTO tblLGIntrCompLogisticsStg (
+		intLoadId
+		,strLoadNumber
+		,strLoad
+		,strRowState
+		,strLoadDetail
+		,strLoadDetailLot
+		,strLoadDocument
+		,strLoadNotifyParty
+		,strLoadContainer
+		,strLoadDetailContainerLink
+		,strLoadWarehouse
+		,strLoadWarehouseServices
+		,strLoadWarehouseContainer
+		,strLoadCost
+		,strLoadStorageCost
+		,strTransactionType
+		,intMultiCompanyId
+		,intToCompanyLocationId
+		,intToBookId
+		)
+	SELECT @intLoadId
+		,@strLoadNumber
+		,@strLoadXML
+		,@strRowState
+		,@strLoadDetailXML
+		,@strLoadDetailLotXML
+		,@strLoadDocumentXML
+		,@strLoadNotifyPartyXML
+		,@strLoadContainerXML
+		,@strLoadDetailContainerLinkXML
+		,@strLoadWarehouseXML
+		,@strLoadWarehouseServicesXML
+		,@strLoadWarehouseContainerXML
+		,@strLoadCostXML
+		,@strLoadStorageCostXML
+		,@strToTransactionType
+		,@intToCompanyId
+		,@intToCompanyLocationId
+		,@intToBookId
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
 END CATCH
