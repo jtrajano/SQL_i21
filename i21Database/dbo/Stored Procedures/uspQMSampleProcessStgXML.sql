@@ -31,6 +31,7 @@ BEGIN TRY
 		,@intSampleRefId INT
 		,@intNewSampleId INT
 		,@intToBookId INT
+		,@strFromBook NVARCHAR(100)
 	DECLARE @strErrorMessage NVARCHAR(MAX)
 		,@strSampleTypeName NVARCHAR(50)
 		,@strProductValue NVARCHAR(100)
@@ -144,6 +145,7 @@ BEGIN TRY
 		SET @intCompanyLocationId = NULL
 		SET @strTransactionType = NULL
 		SET @intToBookId = NULL
+		SET @strFromBook = NULL
 
 		SELECT @intSampleId = intSampleId
 			,@strSampleNumber = strSampleNumber
@@ -2090,6 +2092,45 @@ BEGIN TRY
 			UPDATE tblQMSampleStage
 			SET strFeedStatus = 'Processed'
 			WHERE intSampleStageId = @intSampleStageId
+
+			IF (@intNewSampleId > 0)
+			BEGIN
+				DECLARE @StrDescription AS NVARCHAR(MAX)
+
+				SELECT @strFromBook = B.strBook
+				FROM tblSMInterCompanyTransactionConfiguration TC
+				JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+					AND TT.strTransactionType = 'Quality Sample'
+					AND TC.intToBookId = @intToBookId
+				JOIN tblCTBook B ON B.intBookId = TC.intFromBookId
+
+				IF @strRowState = 'Added'
+				BEGIN
+					SELECT @StrDescription = 'Created from ' + @strFromBook + ': ' + @strSampleNumber
+
+					EXEC uspSMAuditLog @keyValue = @intNewSampleId
+						,@screenName = 'Quality.view.QualitySample'
+						,@entityId = @intLastModifiedUserId
+						,@actionType = 'Created'
+						,@actionIcon = 'small-new-plus'
+						,@changeDescription = @StrDescription
+						,@fromValue = ''
+						,@toValue = @strNewSampleNumber
+				END
+				ELSE IF @strRowState = 'Modified'
+				BEGIN
+					SELECT @StrDescription = 'Updated from ' + @strFromBook + ': ' + @strSampleNumber
+
+					EXEC uspSMAuditLog @keyValue = @intNewSampleId
+						,@screenName = 'Quality.view.QualitySample'
+						,@entityId = @intLastModifiedUserId
+						,@actionType = 'Updated'
+						,@actionIcon = 'small-tree-modified'
+						,@changeDescription = @StrDescription
+						,@fromValue = ''
+						,@toValue = @strNewSampleNumber
+				END
+			END
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION
