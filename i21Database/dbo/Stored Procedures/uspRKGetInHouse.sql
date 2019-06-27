@@ -278,82 +278,6 @@ BEGIN
 			AND t.intSeqId = 1
 
 
-			--=============================
-			-- Sales In Transit w/o Pick Lot
-			--=============================
-			SELECT strShipmentNumber
-				, intInventoryShipmentId
-				, strContractNumber
-				, intContractHeaderId
-				, intCompanyLocationId
-				, strLocationName
-				, dblBalanceToInvoice 
-				, intEntityId
-				, strCustomerReference 
-				, dtmTicketDateTime
-				, intTicketId
-				, strTicketNumber
-				, intCommodityId
-				, intItemId
-				, strItemNo
-				, strCategory
-				, intCategoryId
-				, strContractEndMonth
-				, strFutureMonth
-				, strDeliveryDate
-			INTO #tblGetSalesIntransitWOPickLot
-			FROM(
-				SELECT 
-					 strShipmentNumber = InTran.strTransactionId
-					,intInventoryShipmentId = InTran.intTransactionId
-					,strContractNumber = SI.strOrderNumber + '-' + CONVERT(NVARCHAR, SI.intContractSeq) COLLATE Latin1_General_CI_AS 
-					,intContractHeaderId = SI.intOrderId 
-					,strTicketNumber = SI.strSourceNumber
-					,intTicketId = SI.intSourceId
-					,dtmTicketDateTime = InTran.dtmDate
-					,intCompanyLocationId = InTran.intItemLocationId
-					,strLocationName = SI.strShipFromLocation
-					,strUOM = InTran.strUnitMeasure
-					,Inv.intEntityId
-					,strCustomerReference = SI.strCustomerName
-					,Com.intCommodityId
-					,Itm.intItemId
-					,Itm.strItemNo
-					,strCategory = Cat.strCategoryCode
-					,Cat.intCategoryId
-					,dblBalanceToInvoice = InTran.dblInTransitQty
-					,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), InTran.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
-					,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblCTContractDetail cd INNER JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId =  fmnt.intFutureMonthId WHERE intContractHeaderId = SI.intLineNo)
-					,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
-				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
-					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
-					INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
-					INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
-					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
-					LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
-				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToTransactionDate)
-					AND Itm.intItemId = ISNULL(@intItemId, Itm.intItemId)
-					--AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
-				
-			)t
-			
-			DECLARE @tblResultInTransit TABLE (Id INT identity(1,1)
-				, dtmDate datetime
-				, dblSalesInTransit NUMERIC(18,6)
-				)
-			
-			INSERT INTO @tblResultInTransit(
-				dtmDate
-				,dblSalesInTransit
-			)
-			SELECT 
-				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110), 110)
-				,SUM(dblBalanceToInvoice)
-			FROM #tblGetSalesIntransitWOPickLot
-			GROUP BY
-				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110), 110)
-
-			
 			DECLARE @tblResult TABLE (Id INT identity(1,1)
 				, dtmDate datetime
 				, dblTotal NUMERIC(18,6)
@@ -476,10 +400,11 @@ BEGIN
 			declare @tblBalanceInvByDate as table (
 				dtmDate  DATE  NULL
 				,dblBalanceInv  NUMERIC(18,6)
+				,dblSalesInTransit NUMERIC(18,6)
 			)
 			
 			Declare @date date
-
+			DECLARE @dblSalesInTransitAsOf  NUMERIC(18,6)
 			
 			While (Select Count(*) From #tempDateRange) > 0
 			Begin
@@ -491,6 +416,16 @@ BEGIN
 					,dblBalanceInv
 				)
 				select @date,sum(dblTotal) from @tblResult WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
+					
+				SELECT 
+				@dblSalesInTransitAsOf = SUM(dblInTransitQty)
+				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @date) InTran
+				WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)	
+				AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+
+				update @tblBalanceInvByDate
+				set dblSalesInTransit = @dblSalesInTransitAsOf
+				where dtmDate = @date
 			
 
 				Delete #tempDateRange Where Date = @date
@@ -929,10 +864,9 @@ BEGIN
 				, ri.intTransactionId
 				, ri.strDistribution
 				, r.dblBalanceInv 
-				, it.dblSalesInTransit
+				, r.dblSalesInTransit
 			FROM @tblResultInventory ri
 			FULL join @tblBalanceInvByDate r on ri.dtmDate = r.dtmDate
-			FULL join @tblResultInTransit it on ri.dtmDate = it.dtmDate
 			
 
 			UNION ALL--Insert Company Title Beginning Balance
@@ -949,7 +883,6 @@ BEGIN
 	drop table #invQty
 	drop table #tblGetStorageDetailByDate
 	drop table #tempOnHold
-	drop table #tblGetSalesIntransitWOPickLot
 	drop table #tempDateRange
 END
 
