@@ -74,7 +74,9 @@ FROM
             ,C.strName
             ,compLoc.strLocationName
             ,receiptItems.ysnAllowVoucher
-        HAVING (SUM(receiptItems.dblReceiptQty) - SUM(receiptItems.dblVoucherQty)) != 0
+        -- HAVING 
+        --     (SUM(receiptItems.dblReceiptQty) - SUM(receiptItems.dblVoucherQty)) != 0 
+        -- OR  (SUM(receiptItems.dblReceiptTotal) - SUM(receiptItems.dblVoucherTotal)) != 0
     ) A
     OUTER APPLY 
     (
@@ -114,6 +116,9 @@ FROM
 			-- 		)
             -- )
     ) vouchersInfo 
+    WHERE 
+        (A.dblReceiptQty - A.dblVoucherQty) != 0 
+    OR  (A.dblReceiptTotal - A.dblVoucherTotal) != 0
     UNION ALL
     SELECT
         B.*
@@ -182,7 +187,9 @@ FROM
             ,C.strName
             ,compLoc.strLocationName
             ,receiptChargeItems.ysnAllowVoucher
-        HAVING (SUM(receiptChargeItems.dblReceiptChargeQty) - SUM(receiptChargeItems.dblVoucherQty)) != 0
+        -- HAVING 
+        --     (SUM(receiptChargeItems.dblReceiptChargeQty) - SUM(receiptChargeItems.dblVoucherQty)) != 0
+        -- OR  (SUM(receiptChargeItems.dblReceiptChargeTotal) - SUM(receiptChargeItems.dblVoucherTotal)) != 0
     ) B
     OUTER APPLY 
     (
@@ -221,6 +228,9 @@ FROM
 			-- 		)
             -- )
     ) vouchersInfo 
+    WHERE 
+        (dblUnclearedQty) != 0
+    OR  (dblUnclearedAmount) != 0
     UNION ALL--SHIPMENT CHARGE
     SELECT
         C.*
@@ -288,7 +298,9 @@ FROM
         	,C.strName
         	,compLoc.strLocationName
             ,shipmentCharges.ysnAllowVoucher
-        HAVING (SUM(shipmentCharges.dblReceiptChargeQty) - SUM(shipmentCharges.dblVoucherQty)) != 0
+        -- HAVING 
+        --     (SUM(shipmentCharges.dblReceiptChargeQty) - SUM(shipmentCharges.dblVoucherQty)) != 0
+        -- OR  (SUM(shipmentCharges.dblReceiptChargeTotal) - SUM(shipmentCharges.dblVoucherTotal)) != 0
     ) C
     OUTER APPLY 
     (
@@ -327,6 +339,9 @@ FROM
 			-- 		)
             -- )
     ) vouchersInfo 
+    WHERE 
+        (dblUnclearedQty) != 0
+    OR  (dblUnclearedAmount) != 0
     UNION ALL--LOAD TRANSACTION
     SELECT
         D.*
@@ -395,7 +410,9 @@ FROM
             ,C.strName
             ,compLoc.strLocationName
             ,loadTran.ysnAllowVoucher
-        HAVING (SUM(loadTran.dblLoadDetailQty) - SUM(loadTran.dblVoucherQty)) != 0
+        -- HAVING 
+        --     (SUM(loadTran.dblLoadDetailQty) - SUM(loadTran.dblVoucherQty)) != 0
+        -- OR  (SUM(loadTran.dblLoadDetailTotal) - SUM(loadTran.dblVoucherTotal)) != 0
     ) D
     OUTER APPLY 
     (
@@ -434,6 +451,9 @@ FROM
 			-- 		)
             -- )
     ) vouchersInfo 
+    WHERE 
+        (dblUnclearedQty) != 0
+    OR  (dblUnclearedAmount) != 0
     UNION ALL --LOAD COST
     SELECT
         E.*
@@ -503,7 +523,9 @@ FROM
             ,C.strName
             ,compLoc.strLocationName
             ,loadCost.ysnAllowVoucher
-        HAVING (SUM(loadCost.dblLoadCostDetailQty) - SUM(loadCost.dblVoucherQty)) != 0
+        -- HAVING 
+        --     (SUM(loadCost.dblLoadCostDetailQty) - SUM(loadCost.dblVoucherQty)) != 0
+        -- OR  (SUM(loadCost.dblLoadCostDetailTotal) - SUM(loadCost.dblVoucherTotal)) != 0
     ) E
     OUTER APPLY 
     (
@@ -542,6 +564,9 @@ FROM
 			-- 		)
             -- )
     ) vouchersInfo 
+    WHERE 
+        (dblUnclearedQty) != 0
+    OR  (dblUnclearedAmount) != 0
     UNION ALL --SETTLE STORAGE
     SELECT
         F.*
@@ -610,7 +635,9 @@ FROM
             ,C.strName
             ,compLoc.strLocationName
             ,settleStorage.ysnAllowVoucher
-        HAVING (SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) != 0
+        -- HAVING 
+        --     (SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) != 0
+        -- OR  (SUM(settleStorage.dblSettleStorageAmount) - SUM(settleStorage.dblVoucherTotal)) != 0
     ) F
     OUTER APPLY 
     (
@@ -649,6 +676,9 @@ FROM
 			-- 		)
             -- )
     ) vouchersInfo 
+    WHERE 
+        (dblUnclearedQty) != 0
+    OR  (dblUnclearedAmount) != 0
 ) clearingData
 GO
 
