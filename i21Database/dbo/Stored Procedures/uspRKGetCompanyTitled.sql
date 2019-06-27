@@ -415,7 +415,7 @@ BEGIN
 				left join vyuSCTicketView TV on BD.intScaleTicketId = TV.intTicketId
 				where 
 					Inv.strTransactionType = 'Inventory Receipt'
-					AND ISNULL(CS.intStorageTypeId,0) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
+					AND ISNULL(CS.intStorageTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
 			) t
 			UNION ALL
 			SELECT --INVENTORY RECEIPT W/O VOUCHER
@@ -441,6 +441,7 @@ BEGIN
 				left join vyuSCTicketView TV on IRI.intSourceId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Receipt'
 					AND BD.intBillDetailId IS NULL
+					AND ISNULL(TV.strDistributionOption,'NULL') <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '' ELSE 'DP' END
 					--AND IR.intSourceType = 0
 			) t
 			UNION ALL
@@ -696,36 +697,36 @@ BEGIN
 				) t
 				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
-				UNION ALL--INVENTORY ADJUSTMENT FROM STORAGE
-				SELECT
-					dtmDate
-					,dblUnpaidIncrease = 0
-					,dblUnpaidDecrease = 0
-					,dblUnpaidBalance = 0
-					,dblPaidBalance = dblBalance *-1
-					,strTransactionId = strTicketNumber
-					,intTransactionId
-					,'ADJ'
-				FROM (
-					select 
-						dtmDate  = CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
-						,dblBalance = SUM(dblBalance)
-						,strTicketNumber
-						,intTransactionId = intTicketId
-						,intCompanyLocationId
-					from #tblGetStorageDetailByDate
-					where intStorageTypeId = 2 --DP
-						and intTicketId is not null
-						and strTicketType IN ('Storage Adjustment')
-					group by  
-						CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
-						,strTicketNumber
-						,intTicketId
-						,strTicketType
-						,intCompanyLocationId
+				--UNION ALL--INVENTORY ADJUSTMENT FROM STORAGE
+				--SELECT
+				--	dtmDate
+				--	,dblUnpaidIncrease = 0
+				--	,dblUnpaidDecrease = 0
+				--	,dblUnpaidBalance = 0
+				--	,dblPaidBalance = dblBalance *-1
+				--	,strTransactionId = strTicketNumber
+				--	,intTransactionId
+				--	,'ADJ'
+				--FROM (
+				--	select 
+				--		dtmDate  = CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+				--		,dblBalance = SUM(dblBalance)
+				--		,strTicketNumber
+				--		,intTransactionId = intTicketId
+				--		,intCompanyLocationId
+				--	from #tblGetStorageDetailByDate
+				--	where intStorageTypeId = 2 --DP
+				--		and intTicketId is not null
+				--		and strTicketType IN ('Storage Adjustment')
+				--	group by  
+				--		CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+				--		,strTicketNumber
+				--		,intTicketId
+				--		,strTicketType
+				--		,intCompanyLocationId
 						
-				) t
-				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				--) t
+				--WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 				UNION ALL --DP that are Settle and Reverse Settle 
 				SELECT
@@ -795,6 +796,37 @@ BEGIN
 						AND IR.intSourceType = 1
 				) t
 				WHERE intBillId IS NOT NULL
+
+				UNION ALL--INVENTORY ADJUSTMENT FROM STORAGE
+				SELECT
+					dtmDate
+					,dblUnpaidIncrease = 0
+					,dblUnpaidDecrease = 0
+					,dblUnpaidBalance = 0
+					,dblPaidBalance = dblBalance 
+					,strTransactionId = strTicketNumber
+					,intTransactionId
+					,'ADJ'
+				FROM (
+					select 
+						dtmDate  = CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+						,dblBalance = SUM(dblBalance)
+						,strTicketNumber
+						,intTransactionId = intTicketId
+						,intCompanyLocationId
+					from #tblGetStorageDetailByDate
+					where intStorageTypeId = 2 --DP
+						and intTicketId is not null
+						and strTicketType IN ('Storage Adjustment')
+					group by  
+						CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
+						,strTicketNumber
+						,intTicketId
+						,strTicketType
+						,intCompanyLocationId
+						
+				) t
+				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 			END
 
@@ -889,7 +921,6 @@ BEGIN
 			WHERE dblCompanyTitled IS NOT NULL 
 
 			--=========================================================================
-
 
 			drop table #LicensedLocation
 			drop table #tblGetStorageDetailByDate
