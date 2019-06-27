@@ -306,13 +306,15 @@ BEGIN TRY
 							FROM tblICItem t
 							WHERE t.strItemNo = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Item ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE IF @intProductTypeId = 3
 				BEGIN
@@ -321,13 +323,15 @@ BEGIN TRY
 							FROM tblICInventoryReceipt t
 							WHERE t.strReceiptNumber = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Inv Receipt ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE IF @intProductTypeId = 4
 				BEGIN
@@ -336,13 +340,15 @@ BEGIN TRY
 							FROM tblICInventoryShipment t
 							WHERE t.strShipmentNumber = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Inv Shipment ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE IF @intProductTypeId = 6
 				BEGIN
@@ -351,13 +357,15 @@ BEGIN TRY
 							FROM tblICLot t
 							WHERE t.strLotNumber = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Lot ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE IF @intProductTypeId = 8
 				BEGIN
@@ -366,13 +374,15 @@ BEGIN TRY
 							FROM tblCTContractDetail t
 							WHERE t.intContractDetailId = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Contract ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE IF @intProductTypeId = 9
 				BEGIN
@@ -381,13 +391,15 @@ BEGIN TRY
 							FROM tblLGLoadDetailContainerLink t
 							WHERE t.intLoadDetailContainerLinkId = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Load Container ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE IF @intProductTypeId = 10
 				BEGIN
@@ -396,13 +408,15 @@ BEGIN TRY
 							FROM tblLGLoadDetail t
 							WHERE t.intLoadDetailId = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Load Shipment ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE IF @intProductTypeId = 11
 				BEGIN
@@ -411,13 +425,15 @@ BEGIN TRY
 							FROM tblICParentLot t
 							WHERE t.strParentLotNumber = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Parent Lot ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE IF @intProductTypeId = 12
 				BEGIN
@@ -426,13 +442,15 @@ BEGIN TRY
 							FROM tblMFWorkOrder t
 							WHERE t.strWorkOrderNo = @strProductValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Product Work Order ' + @strProductValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 			END
 
@@ -524,14 +542,12 @@ BEGIN TRY
 			--		)
 			--BEGIN
 			--	SELECT @strErrorMessage = 'Party ' + @strPartyName + ' is not available.'
-
 			--	RAISERROR (
 			--			@strErrorMessage
 			--			,16
 			--			,1
 			--			)
 			--END
-
 			IF @strTestedByName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
@@ -766,13 +782,15 @@ BEGIN TRY
 							FROM tblSMCompanyLocation CL
 							WHERE CL.strLocationName = @strSentByValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Sent By Location ' + @strSentByValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 				ELSE
 				BEGIN
@@ -781,13 +799,15 @@ BEGIN TRY
 							FROM tblEMEntity E
 							WHERE E.strName = @strSentByValue
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Sent By Name ' + @strSentByValue + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 			END
 
@@ -798,13 +818,15 @@ BEGIN TRY
 						FROM tblCTContractDetail t
 						WHERE t.intContractDetailId = @intContractDetailRefId
 						)
+				BEGIN
 					SELECT @strErrorMessage = 'Contract Seq ' + @intContractDetailRefId + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
 
 				-- Destination to Source validation for contract
 				IF @ysnParent = 0
@@ -814,13 +836,15 @@ BEGIN TRY
 							FROM tblLGAllocationDetail t
 							WHERE t.intSContractDetailId = @intContractDetailRefId
 							)
+					BEGIN
 						SELECT @strErrorMessage = 'Contract Seq ' + @intContractDetailRefId + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 			END
 
@@ -831,13 +855,15 @@ BEGIN TRY
 						FROM tblLGLoadDetailContainerLink t
 						WHERE t.intLoadDetailContainerLinkId = @intLoadDetailContainerLinkRefId
 						)
+				BEGIN
 					SELECT @strErrorMessage = 'Load Container ' + @intLoadDetailContainerLinkRefId + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
 			END
 
 			IF @intLoadDetailRefId IS NOT NULL
@@ -847,13 +873,15 @@ BEGIN TRY
 						FROM tblLGLoadDetail t
 						WHERE t.intLoadDetailId = @intLoadDetailRefId
 						)
+				BEGIN
 					SELECT @strErrorMessage = 'Load Shipment ' + @intLoadDetailRefId + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
 			END
 
 			IF @strCountry IS NOT NULL
@@ -963,7 +991,6 @@ BEGIN TRY
 			--SELECT @intEntityId = t.intEntityId
 			--FROM tblEMEntity t
 			--WHERE t.strName = @strPartyName
-
 			SELECT @intTestedById = t.intEntityId
 			FROM tblEMEntity t
 			WHERE t.strName = @strTestedByName
@@ -1248,7 +1275,7 @@ BEGIN TRY
 				SELECT 1 intConcurrencyId
 					,@intSampleTypeId
 					,@strNewSampleNumber
-					,strSampleRefNo
+					,@strSampleNumber
 					,@intProductTypeId
 					,@intProductValueId
 					,@intSampleStatusId
@@ -1309,8 +1336,7 @@ BEGIN TRY
 					,@intLastModifiedUserId
 					,@dtmLastModified
 				FROM OPENXML(@idoc, 'vyuQMSampleHeaderViews/vyuQMSampleHeaderView', 2) WITH (
-						strSampleRefNo NVARCHAR(30)
-						,ysnIsContractCompleted BIT
+						ysnIsContractCompleted BIT
 						,strShipmentNumber NVARCHAR(30)
 						,strLotNumber NVARCHAR(50)
 						,strSampleNote NVARCHAR(512)
@@ -2044,7 +2070,7 @@ BEGIN TRY
 					FROM @tblQMTestResult
 					)
 
-			EXEC sp_xml_removedocument @idoc
+			--EXEC sp_xml_removedocument @idoc
 
 			SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intNewSampleId)
 

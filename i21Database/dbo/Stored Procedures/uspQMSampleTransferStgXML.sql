@@ -10,7 +10,7 @@ BEGIN TRY
 	WHERE intMultiCompanyId = @intToCompanyId
 		AND ISNULL(strFeedStatus, '') = ''
 
-	UPDATE tblCTContractStage
+	UPDATE tblQMSampleStage
 	SET strFeedStatus = 'Awt Ack'
 	WHERE intMultiCompanyId = @intToCompanyId
 		AND ISNULL(strFeedStatus, '') = ''
