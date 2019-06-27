@@ -173,9 +173,9 @@ IF ISNULL(@Comment, '') = ''
 					@strTransactionType = @TransactionType,
 					@strType = @Type,
 					@strHeaderComment = @Comment OUTPUT,
-					@DocumentMaintenanceId = @DocumentMaintenanceId
+					@DocumentMaintenanceId = @DocumentMaintenanceId,
+					@intDocumentUsedId = @DocumentMaintenanceId OUTPUT
 	END
-
 IF ISNULL(@FooterComment, '') = ''
 	BEGIN
 		EXEC	[dbo].[uspARGetDefaultComment]
