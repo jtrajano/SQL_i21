@@ -77,7 +77,8 @@ BEGIN TRY
 			@ysnDestinationWeightsAndGrades	BIT,
 			@strInvoiceNumber				NVARCHAR(100),
 			@strBillId						NVARCHAR(100),
-			@strPostedAPAR					NVARCHAR(MAX)
+			@strPostedAPAR					NVARCHAR(MAX),
+			@ysnLoad						BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -99,7 +100,8 @@ BEGIN TRY
 	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
 	SELECT	@intEntityId		=	intEntityId,
-			@intContractTypeId	=	intContractTypeId
+			@intContractTypeId	=	intContractTypeId,
+			@ysnLoad			=	ysnLoad
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId = @intContractHeaderId
 
@@ -515,7 +517,11 @@ BEGIN TRY
 					AND		intPriceFixationDetailId < @intPriceFixationDetailId
 
 					IF @dblRemainingQty <= @dblShipped
-					BEGIN						
+					BEGIN					
+						IF @ysnLoad = 1
+						BEGIN
+							SET @dblRemainingQty = @dblShipped
+						END	
 						INSERT	INTO @tblToProcess
 						SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblRemainingQty,@intPriceFixationDetailId
 
