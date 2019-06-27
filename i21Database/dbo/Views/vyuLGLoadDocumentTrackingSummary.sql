@@ -1,6 +1,8 @@
 ﻿CREATE VIEW vyuLGLoadDocumentTrackingSummary 
 AS
-SELECT DT.strContractNumber
+SELECT
+	intKeyColumn = Convert(INT, ROW_NUMBER() OVER (ORDER BY L.intLoadId))
+	,DT.strContractNumber
 	,intContractSeq
 	,DT.strLoadNumber
 	,strVendorName
