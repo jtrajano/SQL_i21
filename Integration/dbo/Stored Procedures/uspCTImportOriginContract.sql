@@ -122,7 +122,8 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				,ysnProvisional
 				,intCreatedById
 				,dtmCreated
-				,intConcurrencyId)
+				,intConcurrencyId
+				,dtmSigned)
 
 		SELECT	TY.intContractTypeId,
 				CV.intEntityId,
@@ -145,7 +146,8 @@ IF @ysnGA = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				CAST(CASE WHEN gacnt_prov_cnt_yn = 'Y' THEN 1 ELSE 0 END AS BIT) AS ysnProvisional,
 				@UserId,-- AS intCreatedById
 				CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(gacnt_user_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(gacnt_user_rev_dt,'19000101') END,8)) dtmCreated,
-				1
+				1,
+				CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(gacnt_beg_ship_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(gacnt_beg_ship_rev_dt,'19000101') END,8)) dtmSigned
 		FROM	gacntmst							CT
 		JOIN	tblCTContractType			TY	ON	TY.strContractType	=	CASE	WHEN gacnt_pur_sls_ind IN ('1','P') THEN 'Purchase'  ELSE 'Sale' END
 		JOIN	tblCTPricingType			PT	ON	PT.strPricingType	=	CASE	WHEN LTRIM(RTRIM(ISNULL(gacnt_pbhcu_ind,''))) = ''	 THEN 'DP (Priced Later)' 
@@ -447,7 +449,8 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				,ysnProvisional
 				,intCreatedById
 				,dtmCreated
-				,intConcurrencyId)
+				,intConcurrencyId
+				,dtmSigned)
 			SELECT	TY.intContractTypeId,
 					C.intEntityId,
 					(select intCommodityId from tblICCommodity CM 
@@ -475,7 +478,8 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 					0 AS ysnProvisional,
 					1 AS intCreatedById,
 					CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(agcnt_cnt_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(agcnt_cnt_rev_dt,'19000101') END,8)) dtmCreated,
-					1 as intConcurrencyId
+					1 as intConcurrencyId,
+					CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(agcnt_beg_ship_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(agcnt_beg_ship_rev_dt,'19000101') END,8)) dtmSigned
 			FROM	agcntmst					CT
 			JOIN	tblCTContractType			TY	ON	TY.strContractType	=	'Sale' 
 			JOIN	tblCTPricingType			PT	ON	PT.strPricingType	=	'Cash'
@@ -510,7 +514,10 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				,intRailGradeId
 				,intCreatedById
 				,dtmCreated
-				,intConcurrencyId)		
+				,intConcurrencyId
+				,intCurrencyId
+				,intBasisCurrencyId
+				,intPriceItemUOMId)		
 		SELECT	CH.intContractHeaderId,
 				CASE WHEN agcnt_un_bal = 0 THEN 5 ELSE 1 END AS intContractStatusId,
 				CL.intCompanyLocationId,
@@ -535,7 +542,10 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 				null as intRailGradeId,
 				1 AS intCreatedById,
 				CONVERT(DATETIME, LEFT(CASE WHEN ISNULL(agcnt_cnt_rev_dt,'19000101') = '0' THEN '19000101' ELSE ISNULL(agcnt_cnt_rev_dt,'19000101') END,8)) dtmCreated,
-				1 as intConcurrencyId
+				1 as intConcurrencyId,
+				@defaultCurrencyId,
+				@defaultCurrencyId,				
+				IU.intItemUOMId as intPriceItemUOMId
 		FROM	agcntmst				CT
 		JOIN	tblCTContractHeader		CH	ON	LTRIM(RTRIM(strContractNumber)) collate Latin1_General_CI_AS = LTRIM(RtRIM(agcnt_cnt_no))+'_'+CAST(agcnt_line_no AS CHAR (3))
 		JOIN	tblCTPricingType		PT	ON	PT.strPricingType	=	'Cash'
@@ -548,6 +558,3 @@ IF @ysnAG = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TAB
 		left JOIN	tblICItemUOM		IU	ON	IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = CU.intUnitMeasureId  AND CH.intContractHeaderId > @MaxContractId
 		where agcnt_un_bal > 0 AND agcnt_itm_or_cls <> '*'
 END
-
-
-GO
