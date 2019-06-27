@@ -12,7 +12,7 @@ DECLARE @query NVARCHAR(MAX),
   @cteQuery NVARCHAR(MAX),  
   @oldQuery NVARCHAR(MAX),   
   @oldInnerQuery NVARCHAR(MAX),   
-     @innerQuery NVARCHAR(MAX),   
+  @innerQuery NVARCHAR(MAX),   
   @innerQuery2 NVARCHAR(MAX),   
   @innerQueryFilter NVARCHAR(MAX) = '', --initialized so it would work with concatenation event without filtering provided   
   @filter NVARCHAR(MAX) = '';  
@@ -362,7 +362,7 @@ END
   SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@strTerm, @condition, @from, @to, @join, null, null, @datatype)        
  END    
   
-IF @innerQueryFilter IS NOT NULL  
+IF NULLIF(@innerQueryFilter,'') IS NOT NULL  
 BEGIN  
 SET @cteQuery = N';WITH forClearing  
     AS  
@@ -737,8 +737,7 @@ SELECT * FROM (
   ,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
-  ,ISNULL(vendor.strVendorId,'''') + '' '' + ISNULL(entity.strName,'''') as strVendorIdName   
-  
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName  
   ,tmpAPOpenClearing.strLocationName
   ,tmpAPOpenClearing.dblReceiptQty AS dblQtyToReceive  
   ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
@@ -759,7 +758,8 @@ SELECT * FROM (
    ,SUM(B.dblReceiptQty) AS dblReceiptQty
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(SUM(B.dblReceiptQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,SUM(B.dblReceiptQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty 
+   ,SUM(B.dblReceiptTotal) - SUM(B.dblVoucherTotal) AS dblClearingAmount 
    ,B.intLocationId  
    ,B.strLocationName
   FROM forClearing B  
@@ -770,6 +770,7 @@ SELECT * FROM (
    ,intItemId  
    ,intLocationId  
    ,strLocationName
+  --HAVING (SUM(B.dblReceiptQty) - SUM(B.dblVoucherQty)) != 0 OR (SUM(B.dblReceiptTotal) - SUM(B.dblVoucherTotal)) != 0
  ) tmpAPOpenClearing  
   -- ON A.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId  
  INNER JOIN tblICInventoryReceiptItem ri  
@@ -778,9 +779,11 @@ SELECT * FROM (
   ON r.intInventoryReceiptId = ri.intInventoryReceiptId  
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
- CROSS APPLY tblSMCompanySetup compSetup  
- WHERE tmpAPOpenClearing.dblClearingQty != 0  
- UNION ALL  
+ CROSS APPLY tblSMCompanySetup compSetup 
+ WHERE 
+      (dblClearingQty) != 0 
+  OR  (dblClearingAmount) != 0 
+  UNION ALL  
  --CHARGES  
  SELECT  
   r.strReceiptNumber  
@@ -792,7 +795,7 @@ SELECT * FROM (
   ,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
-  ,ISNULL(vendor.strVendorId,'''') + '' '' + ISNULL(entity.strName,'''') as strVendorIdName   
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
   ,tmpAPOpenClearing.strLocationName  
   ,tmpAPOpenClearing.dblReceiptChargeQty AS dblQtyToReceive  
   ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
@@ -813,7 +816,8 @@ SELECT * FROM (
    ,SUM(B.dblReceiptChargeQty) AS dblReceiptChargeQty  
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(SUM(B.dblReceiptChargeQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,SUM(B.dblReceiptChargeQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
+   ,SUM(B.dblReceiptChargeTotal) - SUM(B.dblVoucherTotal) AS dblClearingAmount
    ,B.intLocationId  
    ,B.strLocationName
   FROM chargesForClearing B  
@@ -824,6 +828,9 @@ SELECT * FROM (
    ,intItemId  
    ,intLocationId  
    ,strLocationName
+  --  HAVING 
+  --       (SUM(B.dblReceiptChargeQty) - SUM(B.dblVoucherQty)) != 0
+  --   OR  (SUM(B.dblReceiptChargeTotal) - SUM(B.dblVoucherTotal)) != 0
  ) tmpAPOpenClearing  
  INNER JOIN tblICInventoryReceiptCharge rc  
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
@@ -832,7 +839,9 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- WHERE tmpAPOpenClearing.dblClearingQty != 0  
+ WHERE 
+      (dblClearingQty) != 0 
+  OR  (dblClearingAmount) != 0  
  UNION ALL  
  --SHIPMENT CHARGES  
  SELECT  
@@ -845,7 +854,7 @@ SELECT * FROM (
   ,CASE WHEN DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,r.dtmShipDate,GETDATE()),0) END AS intAging  
-  ,ISNULL(vendor.strVendorId,'''') + '' '' + ISNULL(entity.strName,'''') as strVendorIdName   
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
   ,tmpAPOpenClearing.strLocationName 
   ,tmpAPOpenClearing.dblReceiptChargeQty AS dblQtyToReceive  
   ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
@@ -866,7 +875,8 @@ SELECT * FROM (
    ,SUM(B.dblReceiptChargeQty) AS dblReceiptChargeQty
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(SUM(B.dblReceiptChargeQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,SUM(B.dblReceiptChargeQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
+   ,SUM(B.dblReceiptChargeTotal) - SUM(B.dblVoucherTotal) AS dblClearingAmount
    ,B.intLocationId  
    ,B.strLocationName
   FROM shipmentChargesForClearing B  
@@ -877,6 +887,9 @@ SELECT * FROM (
    ,intItemId  
    ,intLocationId  
    ,strLocationName
+  --  HAVING 
+  --       (SUM(B.dblReceiptChargeQty) - SUM(B.dblVoucherQty)) != 0
+  --   OR  (SUM(B.dblReceiptChargeTotal) - SUM(B.dblVoucherTotal)) != 0
  ) tmpAPOpenClearing  
  INNER JOIN tblICInventoryShipmentCharge rc  
   ON tmpAPOpenClearing.intInventoryShipmentChargeId = rc.intInventoryShipmentChargeId  
@@ -885,7 +898,9 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
-  WHERE tmpAPOpenClearing.dblClearingQty != 0  
+  WHERE 
+      (dblClearingQty) != 0 
+  OR  (dblClearingAmount) != 0  
  UNION ALL
  --LOAD TRANSACTION ITEM
  SELECT  
@@ -898,7 +913,7 @@ SELECT * FROM (
   ,CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE()),0) END AS intAging  
-  ,ISNULL(vendor.strVendorId,'''') + '' '' + ISNULL(entity.strName,'''') as strVendorIdName   
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
   ,tmpAPOpenClearing.strLocationName 
   ,tmpAPOpenClearing.dblLoadDetailQty AS dblQtyToReceive  
   ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
@@ -919,7 +934,8 @@ SELECT * FROM (
    ,SUM(B.dblLoadDetailQty)  AS dblLoadDetailQty
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(SUM(B.dblLoadDetailQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,SUM(B.dblLoadDetailQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
+   ,SUM(B.dblLoadDetailTotal) - SUM(B.dblVoucherTotal) AS dblClearingAmount
    ,B.intLocationId  
    ,B.strLocationName
   FROM loadForClearing B  
@@ -930,6 +946,9 @@ SELECT * FROM (
    ,intItemId  
    ,intLocationId  
    ,strLocationName
+  --  HAVING 
+  --       (SUM(B.dblLoadDetailQty) - SUM(B.dblVoucherQty)) != 0
+  --   OR  (SUM(B.dblLoadDetailTotal) - SUM(B.dblVoucherTotal)) != 0
  ) tmpAPOpenClearing  
  INNER JOIN tblLGLoadDetail loadDetail
   ON tmpAPOpenClearing.intLoadDetailId = loadDetail.intLoadDetailId  
@@ -938,7 +957,9 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- WHERE tmpAPOpenClearing.dblClearingQty != 0  
+ WHERE 
+      (dblClearingQty) != 0 
+  OR  (dblClearingAmount) != 0 
  UNION ALL
  --LOAD COST TRANSACTION ITEM
  SELECT  
@@ -951,7 +972,7 @@ SELECT * FROM (
   ,CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE()),0) END AS intAging  
-  ,ISNULL(vendor.strVendorId,'''') + '' '' + ISNULL(entity.strName,'''') as strVendorIdName   
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
   ,tmpAPOpenClearing.strLocationName  
   ,tmpAPOpenClearing.dblLoadCostDetailQty AS dblQtyToReceive  
   ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
@@ -972,7 +993,8 @@ SELECT * FROM (
    ,SUM(B.dblLoadCostDetailQty) AS dblLoadCostDetailQty  
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(SUM(B.dblLoadCostDetailQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,SUM(B.dblLoadCostDetailQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty
+   ,SUM(B.dblLoadCostDetailTotal) - SUM(B.dblVoucherTotal)  AS dblClearingAmount
    ,B.intLocationId  
    ,B.strLocationName
   FROM loadCostForClearing B  
@@ -983,6 +1005,9 @@ SELECT * FROM (
    ,intItemId  
    ,intLocationId  
    ,strLocationName
+  --  HAVING 
+  --       (SUM(B.dblLoadCostDetailQty) - SUM(B.dblVoucherQty)) != 0
+  --   OR  (SUM(B.dblLoadCostDetailTotal) - SUM(B.dblVoucherTotal)) != 0
  ) tmpAPOpenClearing  
  INNER JOIN tblLGLoadDetail loadDetail
   ON tmpAPOpenClearing.intLoadDetailId = loadDetail.intLoadDetailId  
@@ -991,7 +1016,9 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- WHERE tmpAPOpenClearing.dblClearingQty != 0 
+ WHERE 
+      (dblClearingQty) != 0 
+  OR  (dblClearingAmount) != 0  
 --  OUTER APPLY  
 --  (  
 --   SELECT strVoucherIds =   
@@ -1066,7 +1093,7 @@ SELECT * FROM (
   ,CASE WHEN DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())<=0   
    THEN 0  
   ELSE ISNULL(DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE()),0) END AS intAging  
-  ,ISNULL(vendor.strVendorId,'''') + '' '' + ISNULL(entity.strName,'''') as strVendorIdName   
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
   ,tmpAPOpenClearing.strLocationName  
   ,tmpAPOpenClearing.dblSettleStorageQty AS dblQtyToReceive  
   ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
@@ -1087,7 +1114,8 @@ SELECT * FROM (
    ,SUM(B.dblSettleStorageQty) AS dblSettleStorageQty  
    ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
    ,SUM(B.dblVoucherQty) AS dblVoucherQty  
-   ,ABS(SUM(B.dblSettleStorageQty)  -  SUM(B.dblVoucherQty)) AS dblClearingQty  
+   ,SUM(B.dblSettleStorageQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
+   ,SUM(B.dblSettleStorageAmount) - SUM(B.dblVoucherTotal) AS dblClearingAmount
    ,B.intLocationId  
    ,B.strLocationName
   FROM grainClearing B  
@@ -1098,6 +1126,9 @@ SELECT * FROM (
    ,intItemId  
    ,intLocationId  
    ,strLocationName
+  --  HAVING 
+  --     (SUM(B.dblSettleStorageQty) - SUM(B.dblVoucherQty)) != 0
+  -- OR  (SUM(B.dblSettleStorageAmount) - SUM(B.dblVoucherTotal)) != 0
  ) tmpAPOpenClearing  
 INNER JOIN tblGRSettleStorage SS
 	ON tmpAPOpenClearing.intSettleStorageId = SS.intSettleStorageId
@@ -1108,12 +1139,14 @@ INNER JOIN tblGRSettleStorage SS
   INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- WHERE tmpAPOpenClearing.dblClearingQty != 0  
+ WHERE 
+      (dblClearingQty) != 0 
+  OR  (dblClearingAmount) != 0   
 ) MainQuery '  
   
 --SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');  
   
-IF ISNULL(@filter,'') != ''  
+IF NULLIF(@filter,'') IS NOT NULL
 BEGIN  
  SET @query = @query + ' WHERE ' + @filter  
 END  

@@ -272,8 +272,8 @@ SELECT
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
-	,GD.intAccountId
-	,AD.strAccountId
+	,GLDetail.intAccountId
+	,GLDetail.strAccountId
 FROM tblQMTicketDiscount QM
 INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
@@ -292,24 +292,31 @@ INNER JOIN tblGRSettleStorageTicket SST
 INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
-INNER JOIN tblGLDetail GD
-	ON GD.strTransactionId = SS.strStorageTicket
-		AND GD.intTransactionId = SS.intSettleStorageId
-		--AND GD.strCode = 'STR'
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
-		AND GD.ysnIsUnposted = 0
-INNER JOIN vyuGLAccountDetail AD
-	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+		AND SS.ysnPosted = 1
 LEFT JOIN tblGRSettleContract SC
 		ON SC.intSettleStorageId = SS.intSettleStorageId
+--SETTLE FOR BASIS CONTRACT IS THE ONLY TRANSACTION THAT SHOULD SHOW ON CLEARING TAB
+--BUT WE WILL INCLUDE THE OTHERS FOR NOW TO IDENTIFY THE DATA ISSUES ON AP CLEARING
 LEFT JOIN tblCTContractDetail CD
-		ON CD.intContractDetailId = SC.intContractDetailId
+		ON CD.intContractDetailId = SC.intContractDetailId 
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+OUTER APPLY
+(
+	SELECT GD.intAccountId, AD.strAccountId
+	FROM tblGLDetail GD
+	INNER JOIN vyuGLAccountDetail AD
+		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+	WHERE GD.strTransactionId = SS.strStorageTicket
+		AND GD.intTransactionId = SS.intSettleStorageId
+		AND GD.strCode = 'STR'
+		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+		AND GD.ysnIsUnposted = 0
+) GLDetail
 WHERE 
 	QM.strSourceType = 'Storage' 
 AND QM.dblDiscountDue <> 0
