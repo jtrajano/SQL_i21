@@ -20,5 +20,5 @@
 	[strNewData]							NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]						INT				NULL DEFAULT ((0))
     CONSTRAINT [PK_tblSTRevertHolderDetail] PRIMARY KEY CLUSTERED ([intRevertHolderDetailId] ASC),
-	CONSTRAINT [FK_tblSTRevertHolderDetail_tblSTRevertHolder] FOREIGN KEY ([intRevertHolderId]) REFERENCES [tblSTRevertHolder]([intRevertHolderId]), 
+	CONSTRAINT [FK_tblSTRevertHolderDetail_tblSTRevertHolder] FOREIGN KEY ([intRevertHolderId]) REFERENCES [tblSTRevertHolder]([intRevertHolderId]) ON DELETE CASCADE, 
 );
