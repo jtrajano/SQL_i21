@@ -269,6 +269,7 @@
 :r "..\dbo\Stored Procedures\uspCTImportContract.sql"
 :r "..\dbo\Stored Procedures\uspCTImportContractPlanPt.sql"
 :r "..\dbo\Stored Procedures\uspCTImportContractText.sql"
+:r "..\dbo\Stored Procedures\uspCTImportOriginContract.sql"
 
 --MANUFACTURING RECIPE
 :r "..\dbo\Stored Procedures\uspMFImportRecipe.sql" 
