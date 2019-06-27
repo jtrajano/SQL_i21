@@ -2645,7 +2645,7 @@ BEGIN
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 
 							INNER JOIN tblICItem i 
-								ON i.intItemId = AdjDetail.intItemId 
+								ON i.intItemId = AdjDetail.intNewItemId 
 
 							INNER JOIN dbo.tblICItemLocation NewItemLocation 
 								ON NewItemLocation.intLocationId = Adj.intLocationId 
@@ -2671,7 +2671,7 @@ BEGIN
 
 					WHERE	Adj.strAdjustmentNo = @strTransactionId
 							AND FromStock.strBatchId = @strBatchId
-							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
+							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intNewItemId)
 							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					IF NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPost) 
