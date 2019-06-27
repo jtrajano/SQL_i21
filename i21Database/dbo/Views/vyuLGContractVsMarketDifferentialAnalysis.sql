@@ -1,9 +1,9 @@
-﻿CREATE VIEW [dbo].[vyuLGContractVsMarketDifferentialAnalysis]
+﻿CREATE VIEW vyuLGContractVsMarketDifferentialAnalysis
 AS
 SELECT
 	strMonthYr = SFM.strFutureMonth
 	,strPContractNumber = PCH.strContractNumber
-	,dtmPContractNumber = PCH.dtmContractDate
+	,dtmPContractDate = PCH.dtmContractDate
 	,strVendor = VEN.strName
 	,strPBasis = PCD.dblBasis
 	,strPINCO = FT.strFreightTerm
@@ -19,6 +19,7 @@ SELECT
 				 + ISNULL(PTADJ.dblRate, 0) + ISNULL(PKADJ.dblRate, 0)  
 				 + ISNULL(FTADJ.dblRate, 0) + ISNULL(CFADJ.dblRate, 0)
 	,strSContractNumber = SCH.strContractNumber
+	,dtmSContractDate = SCH.dtmContractDate
 	,strCustomer = CUS.strName
 	,dblQty = SCH.dblQuantity
 	,strUOM = UM.strUnitMeasure
