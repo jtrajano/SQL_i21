@@ -82,7 +82,7 @@
 				,(CAST(replace(convert(varchar, InvTran.dtmDate,101),''/'','''') + replace(convert(varchar, InvTran.dtmDate,108),'':'','''')AS BIGINT)	+ CAST(Receipt.intInventoryReceiptId AS bigint))
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					AND CH.intContractTypeId = 1
+					AND CH.intContractTypeId = 1 AND CH.intPricingTypeId = 2
 				INNER JOIN tblICInventoryReceiptItem ReceiptItem ON CD.intContractDetailId = ReceiptItem.intLineNo
 				INNER JOIN tblICInventoryReceipt Receipt ON Receipt.strReceiptType = ''Purchase Contract''
 					AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
@@ -137,7 +137,7 @@
 				,CAST(replace(convert(varchar, B.dtmDateCreated,101),''/'','''') + replace(convert(varchar, B.dtmDateCreated,108),'':'','''') AS BIGINT)	+  CAST(BD.intBillDetailId AS BIGINT)
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					AND CH.intContractTypeId = 1
+					AND CH.intContractTypeId = 1 AND CH.intPricingTypeId = 2
 				INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL  and BD.intInventoryReceiptItemId is not null
 					AND BD.intItemId = CD.intItemId
 				INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
@@ -188,7 +188,7 @@
 				,CAST(replace(convert(varchar, InvTran.dtmDate,101),''/'','''') + replace(convert(varchar, InvTran.dtmDate,108),'':'','''')	 AS BIGINT) + CAST( Shipment.intInventoryShipmentId AS BIGINT)
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
-					AND intContractTypeId = 2
+					AND intContractTypeId = 2 AND CH.intPricingTypeId = 2
 				INNER JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intLineNo = CD.intContractDetailId
 					AND CH.intContractHeaderId = ShipmentItem.intOrderId
 				INNER JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId	
@@ -245,7 +245,7 @@
 				,CAST(replace(convert(varchar, I.dtmDate,101),''/'','''') + replace(convert(varchar, I.dtmDate,108),'':'','''')	AS BIGINT) + CAST(ID.intInvoiceDetailId AS BIGINT)
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					AND CH.intContractTypeId = 2
+					AND CH.intContractTypeId = 2 AND CH.intPricingTypeId = 2
 				INNER JOIN tblARInvoiceDetail ID ON ID.intContractDetailId  = CD.intContractDetailId AND ID.intInventoryShipmentItemId is not null	
 					AND ID.intItemId = CD.intItemId
 				INNER JOIN tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
