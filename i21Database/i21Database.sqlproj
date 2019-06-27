@@ -7115,7 +7115,6 @@
     <Build Include="dbo\Stored Procedures\uspARGeneratePaymentGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\IC\14_Add_Inventory_Report_Templates.sql" />
     <None Include="Scripts\Post-Deployment\IC\15_Migrate_Old_Receipt_Totals.sql" />
-    <None Include="Scripts\Post-Deployment\IC\16_StockUnitConversions.sql" />
     <None Include="Scripts\Post-Deployment\IC\16_Replace_General_Acct_With_Expense_Acct_Non_Inventory.sql" />
     <Build Include="dbo\Functions\fnAPValidateAPAccounts.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetailFormat2.sql" />
