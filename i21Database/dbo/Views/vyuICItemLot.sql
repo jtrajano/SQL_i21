@@ -17,12 +17,12 @@ SELECT
 	, strStorageLocation = stLoc.strName
 	, strParentLotNumber = ParentLot.strParentLotNumber
 	, strLotNumber = lot.strLotNumber
-	, dblQty = lot.dblQty
-	, dblWeight = lot.dblWeight
+	, dblQty = CONVERT(NUMERIC(30, 15), lot.dblQty)
+	, dblWeight = CONVERT(NUMERIC(30, 15), lot.dblWeight)
 	, strItemUOM = uom.strUnitMeasure
-	, dblItemUnitQty = iuom.dblUnitQty
-	, dblWeightPerQty = lot.dblWeightPerQty
-	, dblLastCost = lot.dblLastCost
+	, dblItemUnitQty = CONVERT(NUMERIC(30, 15), iuom.dblUnitQty)
+	, dblWeightPerQty = CONVERT(NUMERIC(30, 15), lot.dblWeightPerQty)
+	, dblLastCost = CONVERT(NUMERIC(30, 15), lot.dblLastCost)
 	, intLotId = lot.intLotId
 	, strWeightUOM = weightUOM.strUnitMeasure
 	, strCostUOM = costUOM.strUnitMeasure
