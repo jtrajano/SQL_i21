@@ -6,6 +6,7 @@
 	[intSort]					INT             NOT NULL,
 	[intDocumentTypeId]			INT             NULL,
 	[intDocumentFolderParentId]	INT             NULL,
+	[ysnInterCompany]				BIT			NULL 	DEFAULT(0),
     [intConcurrencyId]			INT				NOT NULL,
 	CONSTRAINT [FK_tblSMDocumentSourceFolder_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [dbo].[tblSMScreen] ([intScreenId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMDocumentSourceFolder_tblSMDocumentType] FOREIGN KEY ([intDocumentTypeId]) REFERENCES [dbo].[tblSMDocumentType] ([intDocumentTypeId]),
