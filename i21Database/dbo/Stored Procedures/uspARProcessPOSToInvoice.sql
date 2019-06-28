@@ -201,6 +201,7 @@ EXEC [dbo].[uspARProcessInvoices] @InvoiceEntries		= @EntriesForInvoice
 								, @RaiseError			= 1
 								, @ErrorMessage			= @ErrorMessage OUTPUT
 								, @CreatedIvoices		= @CreatedIvoices OUTPUT
+								, @FromProcessPOS		= 1
 
 IF ISNULL(@ErrorMessage, '') = ''
 	BEGIN
