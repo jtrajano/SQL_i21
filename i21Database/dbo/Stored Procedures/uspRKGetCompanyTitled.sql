@@ -418,7 +418,7 @@ BEGIN
 					AND ISNULL(CS.intStorageTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
 			) t
 			UNION ALL
-			SELECT --INVENTORY RECEIPT W/O VOUCHER
+			SELECT --INVENTORY RECEIPT W/O VOUCHER (NOT DELIVERY SHEET)
 				dtmDate
 				,dblUnpaidIncrease = dblTotal
 				,dblUnpaidDecrease = 0
@@ -442,7 +442,36 @@ BEGIN
 				where Inv.strTransactionType = 'Inventory Receipt'
 					AND BD.intBillDetailId IS NULL
 					AND ISNULL(TV.strDistributionOption,'NULL') <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '' ELSE 'DP' END
-					--AND IR.intSourceType = 0
+					AND TV.intDeliverySheetId IS NULL
+			) t
+			UNION ALL
+			SELECT --INVENTORY RECEIPT W/O VOUCHER (DELIVERY SHEET)
+				dtmDate
+				,dblUnpaidIncrease = dblTotal
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = dblTotal
+				,dblPaidBalance = 0
+				,strTransactionId = strReceiptNumber
+				,intTransactionId
+				,strDistribution = strStorageTypeCode 
+			FROM (
+				select
+					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,Inv.dblTotal
+					,IR.strReceiptNumber
+					,Inv.intTransactionId
+					,ST.strStorageTypeCode
+				from @InventoryStock Inv
+				inner join tblICInventoryReceipt IR on Inv.intTransactionId = IR.intInventoryReceiptId
+				inner join tblICInventoryReceiptItem IRI on Inv.intTransactionDetailId = IRI.intInventoryReceiptItemId
+				inner join tblGRStorageHistory SH on SH.intInventoryReceiptId = IR.intInventoryReceiptId
+				inner join tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
+				inner join tblGRStorageType ST on ST.intStorageScheduleTypeId = CS.intStorageTypeId 
+				left join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId and BD.intInventoryReceiptChargeId IS NULL
+				where Inv.strTransactionType = 'Inventory Receipt'
+					AND BD.intBillDetailId IS NULL
+					AND ISNULL(ST.intStorageScheduleTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
+					AND CS.intDeliverySheetId IS NOT NULL
 			) t
 			UNION ALL
 			SELECT
@@ -696,37 +725,6 @@ BEGIN
 						,intCompanyLocationId
 				) t
 				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-
-				--UNION ALL--INVENTORY ADJUSTMENT FROM STORAGE
-				--SELECT
-				--	dtmDate
-				--	,dblUnpaidIncrease = 0
-				--	,dblUnpaidDecrease = 0
-				--	,dblUnpaidBalance = 0
-				--	,dblPaidBalance = dblBalance *-1
-				--	,strTransactionId = strTicketNumber
-				--	,intTransactionId
-				--	,'ADJ'
-				--FROM (
-				--	select 
-				--		dtmDate  = CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
-				--		,dblBalance = SUM(dblBalance)
-				--		,strTicketNumber
-				--		,intTransactionId = intTicketId
-				--		,intCompanyLocationId
-				--	from #tblGetStorageDetailByDate
-				--	where intStorageTypeId = 2 --DP
-				--		and intTicketId is not null
-				--		and strTicketType IN ('Storage Adjustment')
-				--	group by  
-				--		CONVERT(DATETIME, CONVERT(VARCHAR(10),dtmHistoryDate, 110), 110)
-				--		,strTicketNumber
-				--		,intTicketId
-				--		,strTicketType
-				--		,intCompanyLocationId
-						
-				--) t
-				--WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 				UNION ALL --DP that are Settle and Reverse Settle 
 				SELECT
