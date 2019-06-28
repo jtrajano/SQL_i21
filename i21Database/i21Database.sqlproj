@@ -7661,6 +7661,12 @@
     <Build Include="dbo\Tables\tblAPForClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetInHouse.sql" />
+    <Build Include="dbo\Tables\tblCTItemContractHeaderCategory.sql" />
+    <Build Include="dbo\Tables\tblCTItemContractHeader.sql" />
+    <Build Include="dbo\Tables\tblCTItemContractDetail.sql" />
+    <Build Include="dbo\Views\vyuCTItemContractDetail.sql" />
+    <Build Include="dbo\Views\vyuCTItemContractHeader.sql" />
+    <Build Include="dbo\Views\vyuCTItemContractHeaderCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
