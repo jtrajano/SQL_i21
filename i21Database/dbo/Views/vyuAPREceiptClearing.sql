@@ -41,7 +41,16 @@ SELECT
             END 
         )
         , 2
-    ) AS dblReceiptTotal
+    ) 
+    *
+    (
+        CASE
+        WHEN receipt.strReceiptType = 'Inventory Return'
+        THEN -1
+        ELSE 1
+        END
+    )
+    AS dblReceiptTotal
     ,CASE	
         WHEN receiptItem.intWeightUOMId IS NULL THEN 
             ISNULL(receiptItem.dblOpenReceive, 0) 
@@ -52,7 +61,16 @@ SELECT
                 ELSE 
                     ISNULL(receiptItem.dblNet, 0) 
             END 
-    END AS dblReceiptQty
+    END 
+    *
+    (
+        CASE
+        WHEN receipt.strReceiptType = 'Inventory Return'
+        THEN -1
+        ELSE 1
+        END
+    )
+    AS dblReceiptQty
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,CAST(CASE WHEN receiptItem.intOwnershipType = 2 THEN 0 ELSE 1 END AS BIT) AS ysnAllowVoucher
@@ -131,7 +149,16 @@ SELECT
                         THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost)  * (billDetail.dblUnitQty/ ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
                     ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
                 END)
-            END),0)	AS dblVoucherTotal
+            END),0)	
+    *
+    (
+        CASE 
+        WHEN bill.intTransactionType = 3
+        THEN -1
+        ELSE 1
+        END
+    )
+    AS dblVoucherTotal
     ,CASE 
         WHEN billDetail.intWeightUOMId IS NULL THEN 
             ISNULL(billDetail.dblQtyReceived, 0) 
@@ -142,7 +169,16 @@ SELECT
                 ELSE 
                     ISNULL(billDetail.dblNetWeight, 0) 
             END
-    END AS dblVoucherQty
+    END 
+    *
+    (
+        CASE 
+        WHEN bill.intTransactionType = 3
+        THEN -1
+        ELSE 1
+        END
+    )
+    AS dblVoucherQty
     ,0 AS dblReceiptTotal
     ,0 AS dblReceiptQty
     -- ,ROUND(
