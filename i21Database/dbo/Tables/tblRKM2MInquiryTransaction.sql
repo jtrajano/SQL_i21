@@ -39,6 +39,8 @@
 	[dblPricedQty] NUMERIC(24, 6) NULL,
 	[dblUnPricedQty] NUMERIC(24, 6) NULL,
 	[dblPricedAmount] NUMERIC(24, 6) NULL,
+	[intSpreadMonthId] INT NULL,
+	[dblSpreadMonthPrice] NUMERIC(24, 6) NULL,
 	[dblSpread] NUMERIC(24, 6) NULL,
 	[intCompanyLocationId] int NULL,
 	[intMarketZoneId] int NULL,

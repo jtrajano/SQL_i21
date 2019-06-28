@@ -82,7 +82,11 @@ BEGIN
 		, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, dblResult NUMERIC(24, 10)
 		, dblMarketFuturesResult NUMERIC(24, 10)
-		, dblResultRatio NUMERIC(24, 10))
+		, dblResultRatio NUMERIC(24, 10)
+		, intSpreadMonthId INT
+		, strSpreadMonth NVARCHAR(50)
+		, dblSpreadMonthPrice NUMERIC(24, 20)
+		, dblSpread NUMERIC(24, 10))
 	
 	INSERT INTO @tempInquiryTransaction
 	EXEC uspRKM2MInquiryTransaction @intM2MBasisId = @intM2MBasisId
@@ -140,6 +144,8 @@ BEGIN
 		, dblPricedAmount
 		, intCompanyLocationId
 		, intMarketZoneId
+		, intSpreadMonthId
+		, dblSpreadMonthPrice
 		, dblSpread)
 	SELECT 1
 		, @intM2MInquiryId
@@ -169,9 +175,9 @@ BEGIN
 		, NULL
 		, tmp.dblMarketPrice
 		, tmp.dblResult
-		, CASE WHEN rk.ysnExpired = 1 THEN tmp.dblResultBasis - ISNULL(rk.dblSpread, 0) ELSE tmp.dblResultBasis END
+		, tmp.dblResultBasis
 		, tmp.dblResultRatio
-		, CASE WHEN rk.ysnExpired = 1 THEN tmp.dblMarketFuturesResult + ISNULL(rk.dblSpread, 0) ELSE tmp.dblMarketFuturesResult END
+		, tmp.dblMarketFuturesResult
 		, tmp.dblResultCash
 		, tmp.intContractHeaderId
 		, tmp.dtmPlannedAvailabilityDate
@@ -181,11 +187,10 @@ BEGIN
 		, tmp.dblPricedAmount
 		, tmp.intCompanyLocationId
 		, NULL
-		, rk.dblSpread
+		, tmp.intSpreadMonthId
+		, tmp.dblSpreadMonthPrice
+		, tmp.dblSpread
 	FROM @tempInquiryTransaction tmp
-	CROSS APPLY dbo.fnRKRollToNearby(intContractDetailId, intFutureMarketId, intFutureMonthId, dblFuturePrice) rk
-	WHERE rk.intContractDetailId = tmp.intContractDetailId
-		AND rk.intFutureMonthId = tmp.intFutureMonthId
 	
 	--================================================================
 	--Insert Basis Detail

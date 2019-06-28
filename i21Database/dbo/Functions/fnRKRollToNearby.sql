@@ -12,6 +12,7 @@ RETURNS @Result TABLE
 	, dblFuturePrice NUMERIC(18, 6)
 	, ysnExpired INT
 	, intNearByFutureMonthId INT
+	, strNearByFutureMonth NVARCHAR(50)
 	, dblNearByFuturePrice NUMERIC(18, 6)
 	, dblSpread NUMERIC(18, 6)
 )
@@ -19,6 +20,7 @@ AS
 BEGIN
 	DECLARE @ysnExpired BIT = 1
 		, @intNearByFutureMonthId INT
+		, @strNearByFutureMonth NVARCHAR(50)
 		, @intNearByFutureMarketId INT
 		, @dblNearByFuturePrice NUMERIC(18, 6)
 		, @dblSpread NUMERIC(18, 6)
@@ -33,10 +35,12 @@ BEGIN
 	BEGIN
 		SELECT TOP 1 @intNearByFutureMonthId = intFutureMonthId
 			, @intNearByFutureMarketId = intFutureMarketId
+			, @strNearByFutureMonth = strFutureMonth
 		FROM (
 			SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY intFutureMarketId, intFutureMonthId ORDER BY dtmFutureMonthsDate)
 				, intFutureMonthId
 				, intFutureMarketId
+				, strFutureMonth
 			FROM tblRKFuturesMonth
 			WHERE intFutureMonthId <> @intFutureMonthId
 				AND intFutureMarketId = @intFutureMarketId
@@ -52,6 +56,7 @@ BEGIN
 			, dblFuturePrice
 			, ysnExpired
 			, intNearByFutureMonthId
+			, strNearByFutureMonth
 			, dblNearByFuturePrice
 			, dblSpread)
 		SELECT @intContractDetailId
@@ -59,6 +64,7 @@ BEGIN
 			, @dblFuturePrice
 			, @ysnExpired
 			, @intNearByFutureMonthId
+			, @strNearByFutureMonth
 			, @dblNearByFuturePrice
 			, @dblSpread
 	END
@@ -69,12 +75,14 @@ BEGIN
 			, dblFuturePrice
 			, ysnExpired
 			, intNearByFutureMonthId
+			, strNearByFutureMonth
 			, dblNearByFuturePrice
 			, dblSpread)
 		SELECT @intContractDetailId
 			, @intFutureMonthId
 			, @dblFuturePrice
 			, 0
+			, NULL
 			, NULL
 			, NULL
 			, NULL

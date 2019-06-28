@@ -101,7 +101,11 @@ BEGIN
 			, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, dblResult NUMERIC(24, 10)
 			, dblMarketFuturesResult NUMERIC(24, 10)
-			, dblResultRatio NUMERIC(24, 10))
+			, dblResultRatio NUMERIC(24, 10)
+			, intSpreadMonthId INT
+			, strSpreadMonth NVARCHAR(50)
+			, dblSpreadMonthPrice NUMERIC(24, 20)
+			, dblSpread NUMERIC(24, 10))
 		
 		INSERT INTO @#tempInquiryTransaction
 		EXEC uspRKM2MInquiryTransaction @intM2MBasisId = @intM2MBasisId
