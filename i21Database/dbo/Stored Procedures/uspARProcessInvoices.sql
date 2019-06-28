@@ -37,6 +37,7 @@
 	,@UnPostedExistingCount			INT								= 0				OUTPUT
 	,@BatchIdForExistingUnPostRecap	NVARCHAR(50)					= NULL			OUTPUT
 	,@RecapUnPostedExistingCount	INT								= 0				OUTPUT
+	,@FromProcessPOS				BIT								= 0
 AS
 
 BEGIN
@@ -755,6 +756,7 @@ BEGIN
             ,@ItemAddonDetailKey            = @ItemAddonDetailKey
             ,@ItemAddonParent               = @ItemAddonParent
             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+			,@FromBatchProcessPOS			= @FromProcessPOS
 			
 	
 		IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0

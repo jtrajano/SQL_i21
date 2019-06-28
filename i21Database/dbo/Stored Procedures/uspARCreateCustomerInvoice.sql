@@ -139,6 +139,7 @@
 	,@ItemAddonParent				BIT				= NULL
 	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
 	,@PaidCPP						BIT				= 0
+	,@FromBatchProcessPOS			BIT				= 0
 AS
 
 BEGIN
@@ -539,7 +540,9 @@ BEGIN TRY
 		,[ysnPosted]					= (CASE WHEN @TransactionType IN ('Overpayment', 'Customer Prepayment') 
 													THEN @Posted 
 												WHEN (@TransactionType IN ('Invoice') AND @ImportedFromOrigin = 1) 
-													THEN  1 
+													THEN  1
+												WHEN (@TransactionType IN ('Invoice') AND @FromBatchProcessPOS = 1) 
+													THEN  @Posted 
 												ELSE 0 END)
 		,[ysnImportedFromOrigin]		= ISNULL(@ImportedFromOrigin, 0)
 		,[ysnImportedAsPosted]			= ISNULL(@ImportedAsPosted, 0)
