@@ -884,7 +884,7 @@ BEGIN TRY
 			IF @intContractDetailRefId IS NULL
 				AND @intOrgContractDetailId IS NOT NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Contract Seq Ref ' + @intOrgContractDetailId + ' is not available.'
+				SELECT @strErrorMessage = 'Contract Seq Ref ' + LTRIM(@intOrgContractDetailId) + ' is not available.'
 
 				RAISERROR (
 						@strErrorMessage
@@ -901,7 +901,7 @@ BEGIN TRY
 						WHERE t.intContractDetailId = @intContractDetailRefId
 						)
 				BEGIN
-					SELECT @strErrorMessage = 'Contract Seq ' + @intContractDetailRefId + ' is not available.'
+					SELECT @strErrorMessage = 'Contract Seq ' + LTRIM(@intContractDetailRefId) + ' is not available.'
 
 					RAISERROR (
 							@strErrorMessage
@@ -919,7 +919,7 @@ BEGIN TRY
 							WHERE t.intSContractDetailId = @intContractDetailRefId
 							)
 					BEGIN
-						SELECT @strErrorMessage = 'Contract Seq ' + @intContractDetailRefId + ' is not available.'
+						SELECT @strErrorMessage = 'Contract Seq ' + LTRIM(@intContractDetailRefId) + ' is not available.'
 
 						RAISERROR (
 								@strErrorMessage
@@ -933,7 +933,7 @@ BEGIN TRY
 			IF @intLoadDetailContainerLinkRefId IS NULL
 				AND @intOrgLoadDetailContainerLinkId IS NOT NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Container Ref ' + @intOrgLoadDetailContainerLinkId + ' is not available.'
+				SELECT @strErrorMessage = 'Container Ref ' + LTRIM(@intOrgLoadDetailContainerLinkId) + ' is not available.'
 
 				RAISERROR (
 						@strErrorMessage
@@ -950,7 +950,7 @@ BEGIN TRY
 						WHERE t.intLoadDetailContainerLinkId = @intLoadDetailContainerLinkRefId
 						)
 				BEGIN
-					SELECT @strErrorMessage = 'Load Container ' + @intLoadDetailContainerLinkRefId + ' is not available.'
+					SELECT @strErrorMessage = 'Load Container ' + LTRIM(@intLoadDetailContainerLinkRefId) + ' is not available.'
 
 					RAISERROR (
 							@strErrorMessage
@@ -963,7 +963,7 @@ BEGIN TRY
 			IF @intLoadDetailRefId IS NULL
 				AND @intOrgLoadDetailId IS NOT NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Load Shipment Ref ' + @intOrgLoadDetailId + ' is not available.'
+				SELECT @strErrorMessage = 'Load Shipment Ref ' + LTRIM(@intOrgLoadDetailId) + ' is not available.'
 
 				RAISERROR (
 						@strErrorMessage
@@ -980,7 +980,7 @@ BEGIN TRY
 						WHERE t.intLoadDetailId = @intLoadDetailRefId
 						)
 				BEGIN
-					SELECT @strErrorMessage = 'Load Shipment ' + @intLoadDetailRefId + ' is not available.'
+					SELECT @strErrorMessage = 'Load Shipment ' + LTRIM(@intLoadDetailRefId) + ' is not available.'
 
 					RAISERROR (
 							@strErrorMessage
@@ -1994,8 +1994,10 @@ BEGIN TRY
 					SELECT @intPropertyValidityPeriodId = intPropertyValidityPeriodId
 					FROM tblQMPropertyValidityPeriod
 					WHERE intPropertyId = @intPropertyId
-						AND dtmValidFrom = @dtmValidFrom
-						AND dtmValidTo = @dtmValidTo
+						AND DATEPART(mm, dtmValidFrom) = DATEPART(mm, @dtmValidFrom)
+						AND DATEPART(dd, dtmValidFrom) = DATEPART(dd, @dtmValidFrom)
+						AND DATEPART(mm, dtmValidTo) = DATEPART(mm, @dtmValidTo)
+						AND DATEPART(dd, dtmValidTo) = DATEPART(dd, @dtmValidTo)
 				END
 
 				-- intProductId should fill only for creation
@@ -2049,8 +2051,10 @@ BEGIN TRY
 						AND PP.intTestId = @intTestId
 						AND PP.intPropertyId = @intPropertyId
 					JOIN tblQMProductPropertyValidityPeriod PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
-						AND dtmValidFrom = @dtmValidFrom
-						AND dtmValidTo = @dtmValidTo
+						AND DATEPART(mm, dtmValidFrom) = DATEPART(mm, @dtmValidFrom)
+						AND DATEPART(dd, dtmValidFrom) = DATEPART(dd, @dtmValidFrom)
+						AND DATEPART(mm, dtmValidTo) = DATEPART(mm, @dtmValidTo)
+						AND DATEPART(dd, dtmValidTo) = DATEPART(dd, @dtmValidTo)
 				END
 
 				IF @intProductPropertyValidityPeriodId IS NULL
