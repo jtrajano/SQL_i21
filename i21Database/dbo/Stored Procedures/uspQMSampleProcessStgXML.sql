@@ -63,6 +63,9 @@ BEGIN TRY
 		,@strCountry NVARCHAR(50)
 		,@strCreatedUser NVARCHAR(100)
 		,@strLastModifiedUser NVARCHAR(100)
+		,@intOrgContractDetailId INT
+		,@intOrgLoadDetailContainerLinkId INT
+		,@intOrgLoadDetailId INT
 	DECLARE @intSampleTypeId INT
 		,@intProductTypeId INT
 		,@intProductValueId INT
@@ -210,6 +213,9 @@ BEGIN TRY
 				,@strLastModifiedUser = NULL
 				,@dtmLastModified = NULL
 				,@ysnParent = NULL
+				,@intOrgContractDetailId = NULL
+				,@intOrgLoadDetailContainerLinkId = NULL
+				,@intOrgLoadDetailId = NULL
 
 			SELECT @strSampleTypeName = strSampleTypeName
 				,@strProductValue = strProductValue
@@ -244,6 +250,9 @@ BEGIN TRY
 				,@strLastModifiedUser = strLastModifiedUser
 				,@dtmLastModified = dtmLastModified
 				,@ysnParent = ysnParent
+				,@intOrgContractDetailId = intContractDetailId
+				,@intOrgLoadDetailContainerLinkId = intLoadDetailContainerLinkId
+				,@intOrgLoadDetailId = intLoadDetailId
 			FROM OPENXML(@idoc, 'vyuQMSampleHeaderViews/vyuQMSampleHeaderView', 2) WITH (
 					strSampleTypeName NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strProductValue NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -278,6 +287,9 @@ BEGIN TRY
 					,strLastModifiedUser NVARCHAR(100) Collate Latin1_General_CI_AS
 					,dtmLastModified DATETIME
 					,ysnParent BIT
+					,intContractDetailId INT
+					,intLoadDetailContainerLinkId INT
+					,intLoadDetailId INT
 					) x
 
 			IF @strSampleTypeName IS NOT NULL
@@ -534,25 +546,37 @@ BEGIN TRY
 						)
 			END
 
-			--IF @strPartyName IS NOT NULL
-			--	AND NOT EXISTS (
-			--		SELECT 1
-			--		FROM tblEMEntity E
-			--		WHERE E.strName = @strPartyName
-			--		)
-			--BEGIN
-			--	SELECT @strErrorMessage = 'Party ' + @strPartyName + ' is not available.'
-			--	RAISERROR (
-			--			@strErrorMessage
-			--			,16
-			--			,1
-			--			)
-			--END
+			IF @intContractDetailRefId IS NULL
+				AND @strPartyName IS NOT NULL
+				AND NOT EXISTS (
+					SELECT 1
+					FROM tblEMEntity t
+					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+					WHERE ET.strType IN (
+							'Vendor'
+							,'Customer'
+							)
+						AND t.strName = @strPartyName
+						AND t.strEntityNo <> ''
+					)
+			BEGIN
+				SELECT @strErrorMessage = 'Party ' + @strPartyName + ' is not available.'
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+
 			IF @strTestedByName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblEMEntity E
-					WHERE E.strName = @strTestedByName
+					FROM tblEMEntity t
+					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+					WHERE ET.strType = 'User'
+						AND t.strName = @strTestedByName
+						AND t.strEntityNo <> ''
 					)
 			BEGIN
 				SELECT @strErrorMessage = 'Tested By ' + @strTestedByName + ' is not available.'
@@ -759,8 +783,11 @@ BEGIN TRY
 			IF @strForwardingAgentName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblEMEntity E
-					WHERE E.strName = @strForwardingAgentName
+					FROM tblEMEntity t
+					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+					WHERE ET.strType = 'Forwarding Agent'
+						AND t.strName = @strForwardingAgentName
+						AND t.strEntityNo <> ''
 					)
 			BEGIN
 				SELECT @strErrorMessage = 'Forwarding Agent ' + @strForwardingAgentName + ' is not available.'
@@ -792,15 +819,18 @@ BEGIN TRY
 								)
 					END
 				END
-				ELSE
+				ELSE IF @strSentBy = 'Forwarding Agent'
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblEMEntity E
-							WHERE E.strName = @strSentByValue
+							FROM tblEMEntity t
+							JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+							WHERE ET.strType = 'Forwarding Agent'
+								AND t.strName = @strSentByValue
+								AND t.strEntityNo <> ''
 							)
 					BEGIN
-						SELECT @strErrorMessage = 'Sent By Name ' + @strSentByValue + ' is not available.'
+						SELECT @strErrorMessage = 'Sent By Agent ' + @strSentByValue + ' is not available.'
 
 						RAISERROR (
 								@strErrorMessage
@@ -809,6 +839,58 @@ BEGIN TRY
 								)
 					END
 				END
+				ELSE IF @strSentBy = 'Seller'
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntity t
+							JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+							WHERE ET.strType = 'Vendor'
+								AND t.strName = @strSentByValue
+								AND t.strEntityNo <> ''
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Sent By Seller ' + @strSentByValue + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+				END
+				ELSE IF @strSentBy = 'Users'
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntity t
+							JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+							WHERE ET.strType = 'User'
+								AND t.strName = @strSentByValue
+								AND t.strEntityNo <> ''
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Sent By User ' + @strSentByValue + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+				END
+			END
+
+			IF @intContractDetailRefId IS NULL
+				AND @intOrgContractDetailId IS NOT NULL
+			BEGIN
+				SELECT @strErrorMessage = 'Contract Seq Ref ' + @intOrgContractDetailId + ' is not available.'
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
 			END
 
 			IF @intContractDetailRefId IS NOT NULL
@@ -848,6 +930,18 @@ BEGIN TRY
 				END
 			END
 
+			IF @intLoadDetailContainerLinkRefId IS NULL
+				AND @intOrgLoadDetailContainerLinkId IS NOT NULL
+			BEGIN
+				SELECT @strErrorMessage = 'Container Ref ' + @intOrgLoadDetailContainerLinkId + ' is not available.'
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+
 			IF @intLoadDetailContainerLinkRefId IS NOT NULL
 			BEGIN
 				IF NOT EXISTS (
@@ -864,6 +958,18 @@ BEGIN TRY
 							,1
 							)
 				END
+			END
+
+			IF @intLoadDetailRefId IS NULL
+				AND @intOrgLoadDetailId IS NOT NULL
+			BEGIN
+				SELECT @strErrorMessage = 'Load Shipment Ref ' + @intOrgLoadDetailId + ' is not available.'
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
 			END
 
 			IF @intLoadDetailRefId IS NOT NULL
@@ -903,8 +1009,11 @@ BEGIN TRY
 			IF @strCreatedUser IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblEMEntity E
-					WHERE E.strName = @strCreatedUser
+					FROM tblEMEntity t
+					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+					WHERE ET.strType = 'User'
+						AND t.strName = @strCreatedUser
+						AND t.strEntityNo <> ''
 					)
 			BEGIN
 				SELECT @strErrorMessage = 'Created By ' + @strCreatedUser + ' is not available.'
@@ -919,8 +1028,11 @@ BEGIN TRY
 			IF @strLastModifiedUser IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblEMEntity E
-					WHERE E.strName = @strLastModifiedUser
+					FROM tblEMEntity t
+					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+					WHERE ET.strType = 'User'
+						AND t.strName = @strLastModifiedUser
+						AND t.strEntityNo <> ''
 					)
 			BEGIN
 				SELECT @strErrorMessage = 'Last Modified By ' + @strLastModifiedUser + ' is not available.'
@@ -988,12 +1100,22 @@ BEGIN TRY
 			FROM tblICLotStatus t
 			WHERE t.strSecondaryStatus = @strLotStatus
 
-			--SELECT @intEntityId = t.intEntityId
-			--FROM tblEMEntity t
-			--WHERE t.strName = @strPartyName
+			SELECT @intEntityId = t.intEntityId
+			FROM tblEMEntity t
+			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			WHERE ET.strType IN (
+					'Vendor'
+					,'Customer'
+					)
+				AND t.strName = @strPartyName
+				AND t.strEntityNo <> ''
+
 			SELECT @intTestedById = t.intEntityId
 			FROM tblEMEntity t
-			WHERE t.strName = @strTestedByName
+			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			WHERE ET.strType = 'User'
+				AND t.strName = @strTestedByName
+				AND t.strEntityNo <> ''
 
 			SELECT @intSampleUOMId = t.intUnitMeasureId
 			FROM tblICUnitMeasure t
@@ -1045,7 +1167,10 @@ BEGIN TRY
 
 			SELECT @intForwardingAgentId = t.intEntityId
 			FROM tblEMEntity t
-			WHERE t.strName = @strForwardingAgentName
+			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			WHERE ET.strType = 'Forwarding Agent'
+				AND t.strName = @strForwardingAgentName
+				AND t.strEntityNo <> ''
 
 			IF @strSentBy = 'Self'
 			BEGIN
@@ -1053,11 +1178,32 @@ BEGIN TRY
 				FROM tblSMCompanyLocation t
 				WHERE t.strLocationName = @strSentByValue
 			END
-			ELSE
+			ELSE IF @strSentBy = 'Forwarding Agent'
 			BEGIN
 				SELECT @intSentById = t.intEntityId
 				FROM tblEMEntity t
-				WHERE t.strName = @strSentByValue
+				JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+				WHERE ET.strType = 'Forwarding Agent'
+					AND t.strName = @strSentByValue
+					AND t.strEntityNo <> ''
+			END
+			ELSE IF @strSentBy = 'Seller'
+			BEGIN
+				SELECT @intSentById = t.intEntityId
+				FROM tblEMEntity t
+				JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+				WHERE ET.strType = 'Vendor'
+					AND t.strName = @strSentByValue
+					AND t.strEntityNo <> ''
+			END
+			ELSE IF @strSentBy = 'Users'
+			BEGIN
+				SELECT @intSentById = t.intEntityId
+				FROM tblEMEntity t
+				JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+				WHERE ET.strType = 'User'
+					AND t.strName = @strSentByValue
+					AND t.strEntityNo <> ''
 			END
 
 			IF @intProductTypeId = 2
@@ -1164,11 +1310,17 @@ BEGIN TRY
 
 			SELECT @intCreatedUserId = t.intEntityId
 			FROM tblEMEntity t
-			WHERE t.strName = @strCreatedUser
+			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			WHERE ET.strType = 'User'
+				AND t.strName = @strCreatedUser
+				AND t.strEntityNo <> ''
 
 			SELECT @intLastModifiedUserId = t.intEntityId
 			FROM tblEMEntity t
-			WHERE t.strName = @strLastModifiedUser
+			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			WHERE ET.strType = 'User'
+				AND t.strName = @strLastModifiedUser
+				AND t.strEntityNo <> ''
 
 			IF @strRowState <> 'Delete'
 			BEGIN
@@ -1372,7 +1524,7 @@ BEGIN TRY
 				UPDATE tblQMSample
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intSampleTypeId = @intSampleTypeId
-					,strSampleRefNo = x.strSampleRefNo
+					,strSampleRefNo = @strSampleNumber
 					,intProductTypeId = @intProductTypeId
 					,intProductValueId = @intProductValueId
 					,intSampleStatusId = @intSampleStatusId
@@ -1425,8 +1577,7 @@ BEGIN TRY
 					,intLastModifiedUserId = @intLastModifiedUserId
 					,dtmLastModified = @dtmLastModified
 				FROM OPENXML(@idoc, 'vyuQMSampleHeaderViews/vyuQMSampleHeaderView', 2) WITH (
-						strSampleRefNo NVARCHAR(30)
-						,ysnIsContractCompleted BIT
+						ysnIsContractCompleted BIT
 						,strShipmentNumber NVARCHAR(30)
 						,strLotNumber NVARCHAR(50)
 						,strSampleNote NVARCHAR(512)
@@ -2071,7 +2222,6 @@ BEGIN TRY
 					)
 
 			--EXEC sp_xml_removedocument @idoc
-
 			SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intNewSampleId)
 
 			EXEC uspCTGetTableDataInXML 'tblQMSample'
