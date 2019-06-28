@@ -450,13 +450,14 @@ FROM [vyuICChargesForBilling] A
         SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
         WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
     ) J
-WHERE 
+WHERE
+	A.ysnPrice = 1 AND A.intEntityVendorId IS NOT NULL AND
 	A.intInventoryReceiptId = @intReceiptId AND (
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
-		AND (1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END) OR   --EXLCUDE ALL BASIS
-		( 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId 
-						AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
-				ELSE 1 END)
+		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
+		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 	)
 RETURN
 END
+
+GO
