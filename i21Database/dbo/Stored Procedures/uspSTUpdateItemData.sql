@@ -683,6 +683,7 @@ BEGIN TRY
 			ON IL.intItemId = UOM.intItemId
 		INNER JOIN tblSMCompanyLocation CL 
 			ON IL.intLocationId = CL.intCompanyLocationId
+		WHERE UOM.ysnStockUnit = 1
 
 		---- TEST
 		--IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_itemAuditLog)
@@ -1121,10 +1122,6 @@ BEGIN TRY
 
 
 		-- ITEM LOCATION Preview
-
-
-
-
 		INSERT INTO @tblPreview (
 			strTableName
 			, strTableColumnName
@@ -1315,7 +1312,7 @@ BEGIN TRY
 			ON I.intItemId = IL.intItemId 
 			AND [Changes].intItemLocationId = IL.intItemLocationId
 		JOIN tblICItemUOM UOM
-			ON IL.intItemId = UOM.intItemId
+			ON I.intItemId = UOM.intItemId
 		JOIN tblSMCompanyLocation CL 
 			ON IL.intLocationId = CL.intCompanyLocationId
 		WHERE 	 
@@ -1323,22 +1320,23 @@ BEGIN TRY
 			@dblPriceBetween1 IS NULL 
 			OR ISNULL(P.dblSalePrice, 0) >= @dblPriceBetween1
 		)
-		AND 
-		(
-			@dblPriceBetween2 IS NULL 
-			OR ISNULL(P.dblSalePrice, 0) <= @dblPriceBetween2
-		)
-		AND
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
-			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-		)
-		AND 
-		(
-			-- http://jira.irelyserver.com/browse/ST-846 
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
-		)
+			AND 
+			(
+				@dblPriceBetween2 IS NULL 
+				OR ISNULL(P.dblSalePrice, 0) <= @dblPriceBetween2
+			)
+			AND
+			(
+				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
+				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+			)
+			AND 
+			(
+				-- http://jira.irelyserver.com/browse/ST-846 
+				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
+			)
+			AND UOM.ysnStockUnit = 1
 		
 
 
@@ -1392,7 +1390,7 @@ BEGIN TRY
 				, intCurrentEntityUserId									= @intCurrentEntityUserId
 				, intItemId													= I.intItemId
 				, intItemUOMId												= UOM.intItemUOMId
-				, intItemLocationId											= IL.intItemLocationId
+				, intItemLocationId											= NULL --IL.intItemLocationId
 
 
 				, dtmDateModified											= CASE 
@@ -1400,8 +1398,8 @@ BEGIN TRY
 																					THEN GETUTCDATE()
 																				ELSE I.dtmDateModified
 																			END
-				, intCompanyLocationId										= CL.intCompanyLocationId
-				, strLocation												= CL.strLocationName
+				, intCompanyLocationId										= NULL --CL.intCompanyLocationId
+				, strLocation												= NULL --CL.strLocationName
 				, strUpc													= CASE
 																				  WHEN UOM.strLongUPCCode IS NOT NULL AND UOM.strLongUPCCode != '' THEN UOM.strLongUPCCode ELSE UOM.strUpcCode
 																			END
@@ -1438,20 +1436,20 @@ BEGIN TRY
 		) [Changes]
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
-		INNER JOIN tblICItemLocation IL 
-			ON I.intItemId = IL.intItemId 
+		--INNER JOIN tblICItemLocation IL 
+		--	ON I.intItemId = IL.intItemId 
 		INNER JOIN tblICItemUOM UOM 
-			ON IL.intItemId = UOM.intItemId
-		INNER JOIN tblSMCompanyLocation CL 
-			ON IL.intLocationId = CL.intCompanyLocationId
+			ON I.intItemId = UOM.intItemId
+		--INNER JOIN tblSMCompanyLocation CL 
+		--	ON IL.intLocationId = CL.intCompanyLocationId
 		INNER JOIN tblICCategory Cat 
 			ON I.intCategoryId = Cat.intCategoryId
-		WHERE 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
-			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-		)
-
+		--WHERE 
+		--(
+		--	NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
+		--	OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+		--)
+		WHERE UOM.ysnStockUnit = 1
 
 
 

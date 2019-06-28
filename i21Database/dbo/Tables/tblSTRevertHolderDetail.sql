@@ -11,7 +11,7 @@
 	[intItemUOMId]							INT				NULL,
 	[intItemLocationId]						INT				NULL,
 	[dtmDateModified]						DATETIME		NOT NULL,
-	[intCompanyLocationId]					INT				NOT NULL,
+	[intCompanyLocationId]					INT				NULL,
 	[strLocation]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS NULL,
 	[strUpc]								NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL,
 	[strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS NULL,

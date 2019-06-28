@@ -15,21 +15,21 @@ SELECT DISTINCT
 	, RHD.strChangeDescription
 	, RHD.strOldData
 	, RHD.strNewData
-	, Item_New.strItemNo
-	, Item_New.strDescription AS strItemDescription
+	, Item.strItemNo
+	, Item.strDescription AS strItemDescription
 	, Uom.strLongUPCCode
 	, CompanyLoc.strLocationName
 	, RHD.intConcurrencyId
 	, strPreviewNewData = CASE
 							WHEN RHD.strTableColumnName IN ('intCategoryId')
-								THEN Category_New.strCategoryCode
+								THEN Category.strCategoryCode
 							WHEN RHD.strTableColumnName IN ('strCountCode')
-								THEN Item_New.strCountCode
+								THEN Item.strCountCode
 
 							--WHEN RHD.strTableColumnName IN ('intDepositPLUId')
 							--	THEN
 							WHEN RHD.strTableColumnName = 'strCounted'
-								THEN ItemLoc_New.strCounted
+								THEN ItemLoc.strCounted
 							WHEN RHD.strTableColumnName = 'intFamilyId'
 								THEN ISNULL(SubCatFamily_New.strSubcategoryId, '')
 							WHEN RHD.strTableColumnName = 'intClassId'
@@ -39,16 +39,50 @@ SELECT DISTINCT
 							WHEN RHD.strTableColumnName = 'intVendorId'
 								THEN ISNULL(Entity_New.strName, '')
 							WHEN RHD.strTableColumnName = 'intMinimumAge'
-								THEN CAST(ItemLoc_New.intMinimumAge AS NVARCHAR(50))
+								THEN CAST(ItemLoc.intMinimumAge AS NVARCHAR(50))
 							WHEN RHD.strTableColumnName = 'dblMinOrder'
-								THEN CAST(ItemLoc_New.dblMinOrder AS NVARCHAR(50))
+								THEN CAST(ItemLoc.dblMinOrder AS NVARCHAR(50))
 							WHEN RHD.strTableColumnName = 'dblSuggestedQty'
-								THEN CAST(ItemLoc_New.dblSuggestedQty AS NVARCHAR(50))
+								THEN CAST(ItemLoc.dblSuggestedQty AS NVARCHAR(50))
 							WHEN RHD.strTableColumnName = 'intStorageLocationId'
 								THEN StorageLoc_New.strName
 
-							WHEN RHD.strNewData = 'true' THEN 'Yes'
-							WHEN RHD.strNewData = 'false' THEN 'No'
+							WHEN RHD.strTableColumnName = 'ysnTaxFlag1'
+								THEN CASE WHEN ItemLoc.ysnTaxFlag1 = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnTaxFlag2'
+								THEN CASE WHEN ItemLoc.ysnTaxFlag2 = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnTaxFlag3'
+								THEN CASE WHEN ItemLoc.ysnTaxFlag3 = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnTaxFlag4'
+								THEN CASE WHEN ItemLoc.ysnTaxFlag4 = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnDepositRequired'
+								THEN CASE WHEN ItemLoc.ysnDepositRequired = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnQuantityRequired'
+								THEN CASE WHEN ItemLoc.ysnQuantityRequired = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnScaleItem'
+								THEN CASE WHEN ItemLoc.ysnScaleItem = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnFoodStampable'
+								THEN CASE WHEN ItemLoc.ysnFoodStampable = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnReturnable'
+								THEN CASE WHEN ItemLoc.ysnReturnable = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnSaleable'
+								THEN CASE WHEN ItemLoc.ysnSaleable = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnIdRequiredLiquor'
+								THEN CASE WHEN ItemLoc.ysnIdRequiredLiquor = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnIdRequiredCigarette'
+								THEN CASE WHEN ItemLoc.ysnIdRequiredCigarette = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnPromotionalItem'
+								THEN CASE WHEN ItemLoc.ysnPromotionalItem = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnPrePriced'
+								THEN CASE WHEN ItemLoc.ysnPrePriced = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnApplyBlueLaw1'
+								THEN CASE WHEN ItemLoc.ysnApplyBlueLaw1 = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnApplyBlueLaw2'
+								THEN CASE WHEN ItemLoc.ysnApplyBlueLaw2 = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnCountedDaily'
+								THEN CASE WHEN ItemLoc.ysnCountedDaily = 1 THEN 'Yes' ELSE 'No' END
+							WHEN RHD.strTableColumnName = 'ysnCountBySINo'
+								THEN CASE WHEN ItemLoc.ysnCountBySINo = 1 THEN 'Yes' ELSE 'No' END
 
 							ELSE RHD.strNewData
 						END
@@ -85,32 +119,33 @@ SELECT DISTINCT
 							ELSE RHD.strOldData
 						END
 FROM tblSTRevertHolderDetail RHD
-INNER JOIN tblICItem Item_New
-	ON RHD.intItemId = Item_New.intItemId
-INNER JOIN tblICCategory Category_New
-	ON Item_New.intCategoryId = Category_New.intCategoryId
-INNER JOIN tblICItemUOM Uom
-	ON RHD.intItemUOMId = Uom.intItemUOMId
-INNER JOIN tblICItemLocation ItemLoc_New
-	ON RHD.intItemLocationId = ItemLoc_New.intItemLocationId
-INNER JOIN tblSMCompanyLocation CompanyLoc
-	ON RHD.intCompanyLocationId = CompanyLoc.intCompanyLocationId
 
--- New Data
+-- NEW DATA
+INNER JOIN tblICItem Item
+	ON RHD.intItemId = Item.intItemId
+INNER JOIN tblICCategory Category
+	ON Item.intCategoryId = Category.intCategoryId
+LEFT JOIN tblICItemLocation ItemLoc
+	ON RHD.intItemLocationId = ItemLoc.intItemLocationId
+LEFT JOIN tblICItemUOM Uom
+	ON Item.intItemId = Uom.intItemId
+LEFT JOIN tblSMCompanyLocation CompanyLoc
+	ON ItemLoc.intLocationId = CompanyLoc.intCompanyLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_New
-	ON ItemLoc_New.intFamilyId = SubCatFamily_New.intSubcategoryId
+	ON ItemLoc.intFamilyId = SubCatFamily_New.intSubcategoryId
 LEFT JOIN tblSTSubcategory SubCatClass_New
-	ON ItemLoc_New.intClassId = SubCatClass_New.intSubcategoryId
+	ON ItemLoc.intClassId = SubCatClass_New.intSubcategoryId
 LEFT JOIN tblSTSubcategoryRegProd ProductCode_New
-	ON ItemLoc_New.intProductCodeId = ProductCode_New.intRegProdId
+	ON ItemLoc.intProductCodeId = ProductCode_New.intRegProdId
 LEFT JOIN tblAPVendor Vendor_New
-	ON ItemLoc_New.intVendorId = Vendor_New.intEntityId
+	ON ItemLoc.intVendorId = Vendor_New.intEntityId
 LEFT JOIN tblEMEntity Entity_New
 	ON Vendor_New.intEntityId = Entity_New.intEntityId
 LEFT JOIN tblICStorageLocation StorageLoc_New
-	ON ItemLoc_New.intStorageLocationId = StorageLoc_New.intStorageLocationId
+	ON ItemLoc.intStorageLocationId = StorageLoc_New.intStorageLocationId
 
----- Old Data
+
+-- OLD DATA
 LEFT JOIN
 (
 	SELECT * FROM
@@ -131,8 +166,6 @@ LEFT JOIN
 	ON OldItemValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
 LEFT JOIN tblICCategory Category_Old
 	ON OldItemValue.intCategoryId = Category_Old.intCategoryId
-
-
 LEFT JOIN
 (
 	SELECT * FROM
@@ -144,16 +177,10 @@ LEFT JOIN
 				  , d.strTableColumnName
 				  , d.strOldData
 		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('ysnTaxFlag1','ysnTaxFlag2', 'ysnTaxFlag3', 'ysnTaxFlag4', 'ysnDepositRequired', 'intDepositPLUId', 'ysnQuantityRequired', 'ysnScaleItem', 'ysnFoodStampable',
-														'ysnReturnable', 'ysnSaleable', 'ysnIdRequiredLiquor', 'ysnIdRequiredCigarette', 'ysnPromotionalItem', 'ysnPrePriced', 'ysnApplyBlueLaw1', 'ysnApplyBlueLaw2',
-														'ysnCountedDaily', 'strCounted', 'ysnCountBySINo', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intVendorId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 
-														'intStorageLocationId')
+		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intVendorId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId')
 	) src
 	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (ysnTaxFlag1,ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnDepositRequired, intDepositPLUId, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable,
-														ysnReturnable, ysnSaleable, ysnIdRequiredLiquor, ysnIdRequiredCigarette, ysnPromotionalItem, ysnPrePriced, ysnApplyBlueLaw1, ysnApplyBlueLaw2,
-														ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, 
-														intStorageLocationId)
+			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId)
 	) piv
 ) OldItemLocValue
 	ON OldItemLocValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
@@ -172,3 +199,12 @@ LEFT JOIN tblEMEntity Entity_Old
 LEFT JOIN tblICStorageLocation StorageLoc_Old
 	ON ItemLoc_Old.intStorageLocationId = StorageLoc_Old.intStorageLocationId
 
+--WHERE Uom.ysnStockUnit = 1
+
+--WHERE RHD.intRevertHolderId = 9
+--	AND RHD.intRevertHolderDetailId = 996
+
+--SELECT * FROM tblSTRevertHolderDetail
+--WHERE intRevertHolderId = 9
+--SELECT ysnTaxFlag1, * FROM tblICItemLocation
+--WHERE intItemLocationId = 15099
