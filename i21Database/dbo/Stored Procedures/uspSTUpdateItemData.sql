@@ -1265,6 +1265,7 @@ BEGIN TRY
 																				WHEN [Changes].oldColumnName = 'strClass_Original' THEN 'Class'
 																				WHEN [Changes].oldColumnName = 'strProductCode_Original' THEN 'Product Code'
 																				WHEN [Changes].oldColumnName = 'strVendor_Original' THEN 'Vendor' 
+																				WHEN [Changes].oldColumnName = 'strVendorId_Original' THEN 'Vendor' 
 																				WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'Minimum Age' 
 																				WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'Minimum Order' 
 																				WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'Suggested Quantity' 

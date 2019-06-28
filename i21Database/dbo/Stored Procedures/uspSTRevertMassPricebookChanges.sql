@@ -468,7 +468,7 @@ PRINT '04'
 									@intFamilyId				= temp.intFamilyId,
 									@intClassId					= temp.intClassId,
 									@intProductCodeId			= temp.intProductCodeId,
-									@intVendorId				= temp.intVendorId,
+									@intVendorId				= CASE WHEN temp.intVendorId = 0 OR temp.intVendorId = '' THEN NULL ELSE temp.intVendorId END,
 									@intMinimumAge				= temp.intMinimumAge,
 									@dblMinOrder				= temp.dblMinOrder,
 									@dblSuggestedQty			= temp.dblSuggestedQty,

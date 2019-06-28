@@ -103,13 +103,17 @@ SELECT DISTINCT
 							WHEN RHD.strTableColumnName = 'intProductCodeId'
 								THEN ISNULL(ProductCode_Old.strRegProdCode, '')
 							WHEN RHD.strTableColumnName = 'intVendorId'
-								THEN ISNULL(Entity_Old.strName, '')
+								--THEN ISNULL(Entity_Old.strName, '')
+								THEN CASE WHEN ItemLoc_Old.intVendorId IS NULL THEN '' ELSE ISNULL(Entity_Old.strName, '') END
 							WHEN RHD.strTableColumnName = 'intMinimumAge'
-								THEN CAST(ItemLoc_Old.intMinimumAge AS NVARCHAR(50))
+								--THEN CAST(ItemLoc_Old.intMinimumAge AS NVARCHAR(50))
+								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'dblMinOrder'
-								THEN CAST(ItemLoc_Old.dblMinOrder AS NVARCHAR(50))
+								--THEN CAST(ItemLoc_Old.dblMinOrder AS NVARCHAR(50))
+								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'dblSuggestedQty'
-								THEN CAST(ItemLoc_Old.dblSuggestedQty AS NVARCHAR(50))
+								--THEN CAST(ItemLoc_Old.dblSuggestedQty AS NVARCHAR(50))
+								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'intStorageLocationId'
 								THEN StorageLoc_Old.strName
 
@@ -177,12 +181,30 @@ LEFT JOIN
 				  , d.strTableColumnName
 				  , d.strOldData
 		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intVendorId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId')
+		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId')
 	) src
 	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId)
+			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId)
 	) piv
 ) OldItemLocValue
+	ON OldItemLocValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
+LEFT JOIN
+(
+	SELECT * FROM
+	(
+		SELECT DISTINCT
+		          d.intRevertHolderDetailId
+				  , d.intItemLocationId
+				  , d.intItemId
+				  , d.strTableColumnName
+				  , d.strOldData
+		FROM tblSTRevertHolderDetail d
+		WHERE d.strTableColumnName IN ('intVendorId')
+	) src
+	PIVOT (
+			MAX(strOldData) FOR strTableColumnName IN (intVendorId)
+	) piv
+) OldItemLocVendorValue
 	ON OldItemLocValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
 LEFT JOIN tblICItemLocation ItemLoc_Old
 	ON OldItemLocValue.intItemLocationId = ItemLoc_Old.intItemLocationId
