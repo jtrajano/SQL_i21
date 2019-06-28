@@ -104,7 +104,7 @@ SELECT DISTINCT
 								THEN ISNULL(ProductCode_Old.strRegProdCode, '')
 							WHEN RHD.strTableColumnName = 'intVendorId'
 								--THEN ISNULL(Entity_Old.strName, '')
-								THEN CASE WHEN ItemLoc_Old.intVendorId IS NULL THEN '' ELSE ISNULL(Entity_Old.strName, '') END
+								THEN CASE WHEN Vendor_Old.intEntityId IS NULL THEN '' ELSE ISNULL(Entity_Old.strName, '') END
 							WHEN RHD.strTableColumnName = 'intMinimumAge'
 								--THEN CAST(ItemLoc_Old.intMinimumAge AS NVARCHAR(50))
 								THEN RHD.strOldData
@@ -205,7 +205,11 @@ LEFT JOIN
 			MAX(strOldData) FOR strTableColumnName IN (intVendorId)
 	) piv
 ) OldItemLocVendorValue
-	ON OldItemLocValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
+	ON OldItemLocVendorValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
+LEFT JOIN tblAPVendor Vendor_Old
+	ON OldItemLocVendorValue.intVendorId = Vendor_Old.intEntityId
+LEFT JOIN tblEMEntity Entity_Old
+	ON OldItemLocVendorValue.intVendorId = Entity_Old.intEntityId
 LEFT JOIN tblICItemLocation ItemLoc_Old
 	ON OldItemLocValue.intItemLocationId = ItemLoc_Old.intItemLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_Old
@@ -214,19 +218,9 @@ LEFT JOIN tblSTSubcategory SubCatClass_Old
 	ON ItemLoc_Old.intClassId = SubCatClass_Old.intSubcategoryId
 LEFT JOIN tblSTSubcategoryRegProd ProductCode_Old
 	ON ItemLoc_Old.intProductCodeId = ProductCode_Old.intRegProdId
-LEFT JOIN tblAPVendor Vendor_Old
-	ON ItemLoc_Old.intVendorId = Vendor_Old.intEntityId
-LEFT JOIN tblEMEntity Entity_Old
-	ON Vendor_Old.intEntityId = Entity_Old.intEntityId
+
 LEFT JOIN tblICStorageLocation StorageLoc_Old
 	ON ItemLoc_Old.intStorageLocationId = StorageLoc_Old.intStorageLocationId
 
---WHERE Uom.ysnStockUnit = 1
 
---WHERE RHD.intRevertHolderId = 9
---	AND RHD.intRevertHolderDetailId = 996
-
---SELECT * FROM tblSTRevertHolderDetail
---WHERE intRevertHolderId = 9
---SELECT ysnTaxFlag1, * FROM tblICItemLocation
---WHERE intItemLocationId = 15099
+--WHERE RHD.strTableColumnName = 'intVendorId'
