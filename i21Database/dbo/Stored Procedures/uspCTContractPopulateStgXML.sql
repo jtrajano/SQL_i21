@@ -146,7 +146,7 @@ BEGIN TRY
 		,@strObjectName = NULL
 
 
-		SELECT @strObjectName = 'vyuCTContractApproverView'
+	SELECT @strObjectName = 'vyuCTContractApproverView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition

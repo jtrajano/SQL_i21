@@ -98,7 +98,7 @@ BEGIN TRY
 		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
 		JOIN tblCTContractHeader CH ON CH.intCompanyId = TC.intFromCompanyId
-			AND CH.intBookId = TC.intFromBookId
+			AND CH.intBookId = TC.intToBookId
 		WHERE TT.strTransactionType = 'Sales Contract'
 			AND CH.intContractHeaderId = @ContractHeaderId
 

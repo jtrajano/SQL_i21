@@ -804,7 +804,7 @@ BEGIN TRY
 						SELECT *
 						FROM tblCTContractText CT
 						WHERE CT.strTextCode = @strTextCode
-						)
+						) and @strTextCode<>''
 				BEGIN
 					INSERT INTO tblCTContractText (
 						strTextCode
@@ -2831,7 +2831,7 @@ BEGIN TRY
 		FROM tblCTContractStage
 		WHERE intContractStageId > @intContractStageId
 			AND ISNULL(strFeedStatus, '') = ''
-			AND strRowState = 'Added'
+			--AND strRowState = 'Added'
 	END
 END TRY
 

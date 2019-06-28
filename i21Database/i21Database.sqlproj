@@ -7647,6 +7647,7 @@
     <Build Include="dbo\Views\vyuLGLoadDocumentView.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForNegativeStockVariance.sql" />
     <Build Include="dbo\Index\IX_tblGLTrialBalance_intGLFiscalYearPeriodId.sql" />
+    <Build Include="dbo\Views\vyuCTContractApproverView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
