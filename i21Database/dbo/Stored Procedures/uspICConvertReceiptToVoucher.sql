@@ -141,7 +141,7 @@ BEGIN
 		,[intShipToId] = GP.intLocationId	
 		,[intShipFromId] = GP.intShipFromId	 		
 		,[intShipFromEntityId] = GP.intShipFromEntityId
-		,[intPayToAddressId] = NULL
+		,[intPayToAddressId] = GP.intShipFromId
 		,GP.[intCurrencyId]					
 		,GP.[dtmDate]				
 		,GP.[strVendorOrderNumber]		
@@ -188,7 +188,7 @@ BEGIN
 		,GP.dtmDate
 		,GP.intStorageLocationId
 		,GP.intSubLocationId
-	FROM dbo.fnICGeneratePayablesForVoucher (@intReceiptId,	 1) GP
+	FROM dbo.fnICGeneratePayables (@intReceiptId,	 1) GP
 
 	END 
 
@@ -229,36 +229,36 @@ BEGIN
 		FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
 	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherItems) AND @intScreenId = @intScreenId_InventoryReceipt
-	BEGIN
-		EXEC uspICRaiseError 80226, @strReceiptNumber;
-		RETURN -80226; 	
-	END
+	--IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherItems) AND @intScreenId = @intScreenId_InventoryReceipt
+	--BEGIN
+	--	EXEC uspICRaiseError 80226, @strReceiptNumber;
+	--	RETURN -80226; 	
+	--END
 
-	-- Check if we can convert the IR to Voucher
-	IF NOT EXISTS (
-		SELECT	TOP 1 1 
-		FROM	tblICInventoryReceiptItem ri INNER JOIN @voucherItems vi
-					ON ri.intInventoryReceiptItemId = vi.intInventoryReceiptItemId
-		WHERE	ISNULL(ri.dblOpenReceive, 0) <> ISNULL(ri.dblBillQty, 0)
-	) AND NOT EXISTS (
-		SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL
-	)
-	BEGIN 
-		IF @billTypeToUse = @type_Voucher
-		BEGIN
-			-- Voucher is no longer needed. All items have Voucher. 
-			EXEC uspICRaiseError 80111; 
-			SET @intReturnValue = -80111;
-		END
-		ELSE
-		BEGIN
-			-- Debit Memo is no longer needed. All items have Debit Memo. 
-			EXEC uspICRaiseError 80110; 
-			SET @intReturnValue = -80110;
-		END
-		GOTO Post_Exit;
-	END 
+	---- Check if we can convert the IR to Voucher
+	--IF NOT EXISTS (
+	--	SELECT	TOP 1 1 
+	--	FROM	tblICInventoryReceiptItem ri INNER JOIN @voucherItems vi
+	--				ON ri.intInventoryReceiptItemId = vi.intInventoryReceiptItemId
+	--	WHERE	ISNULL(ri.dblOpenReceive, 0) <> ISNULL(ri.dblBillQty, 0)
+	--) AND NOT EXISTS (
+	--	SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL
+	--)
+	--BEGIN 
+	--	IF @billTypeToUse = @type_Voucher
+	--	BEGIN
+	--		-- Voucher is no longer needed. All items have Voucher. 
+	--		EXEC uspICRaiseError 80111; 
+	--		SET @intReturnValue = -80111;
+	--	END
+	--	ELSE
+	--	BEGIN
+	--		-- Debit Memo is no longer needed. All items have Debit Memo. 
+	--		EXEC uspICRaiseError 80110; 
+	--		SET @intReturnValue = -80110;
+	--	END
+	--	GOTO Post_Exit;
+	--END 
 
 	-- Call the AP sp to convert the IR to Voucher. 
 	BEGIN 
@@ -271,6 +271,22 @@ BEGIN
 			,@throwError = 0
 			,@error = @throwedError OUTPUT
 			,@createdVouchersId = @intBillId OUTPUT
+
+		IF @intBillId IS NULL AND @intScreenId = @intScreenId_InventoryReceipt
+		BEGIN
+			IF @billTypeToUse = @type_Voucher
+			BEGIN
+				RAISERROR('You cannot voucher this receipt.', 11, 1)
+				RETURN -11
+			END
+			ELSE
+			BEGIN
+				-- Debit Memo is no longer needed. All items have Debit Memo. 
+				RAISERROR('You cannot convert this to debit memo.', 11, 1)
+				RETURN -11
+			END
+			GOTO Post_Exit;
+		END
 
 		IF(@throwedError <> '')
 		BEGIN

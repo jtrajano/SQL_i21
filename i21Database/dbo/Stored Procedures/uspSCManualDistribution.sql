@@ -632,7 +632,7 @@ END
 
 		IF(@InventoryReceiptId IS NOT NULL AND @total > 0 AND @ysnHasBasisContract = 0 OR (@ysnHasUnpriced = 1 AND @ysnHasBasisContract <> 0))
 		BEGIN
-			EXEC dbo.uspICProcessToBill @intReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@intScreenId = 1, @intBillId = @intBillId OUT
+			EXEC dbo.uspICProcessToBill @intReceiptId = @InventoryReceiptId, @intUserId = @intUserId, @intBillId = @intBillId OUT
 		END
 
 		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
