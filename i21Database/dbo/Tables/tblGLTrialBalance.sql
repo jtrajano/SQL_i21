@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblGLTrialBalance](
 	[intTrialBalanceId] [int] IDENTITY(1,1) NOT NULL,
 	[intAccountId] [int] NOT NULL,
+	[strTransaction][nvarchar(40)] NULL,
 	[MTDBalance] [numeric](38, 6) NULL,
 	[YTDBalance] [numeric](38, 6) NULL,
 	[intGLFiscalYearPeriodId] [int] NULL,
