@@ -156,28 +156,30 @@ SET @ysnLicensed =	CASE
 						WHEN @strLicensed = 'Licensed' THEN 1
 						WHEN @strLicensed = 'Non-Licensed' THEN 0
 					END
-SET @strLicensed =	CASE 
-						WHEN @strLicensed = 'All Storage' THEN NULL
-						WHEN @strLicensed = 'Licensed Storage' THEN 1
-						WHEN @strLicensed = 'Non-Licensed Storage' THEN 0
-					END
-
+--SET @strLicensed =	CASE 
+--						WHEN @strLicensed = 'All Storage' THEN NULL
+--						WHEN @strLicensed = 'Licensed Storage' THEN 1
+--						WHEN @strLicensed = 'Non-Licensed Storage' THEN 0
+--					END
+SET @strLicensed = @strLicensed + ' Storage'
 DECLARE @dateToday DATETIME
 SET @dateToday = dbo.fnRemoveTimeOnDate(GETDATE())
 
 /*==START==INVENTORY BALANCE==*/
-IF (SELECT COUNT(*) FROM tblICStagingDailyStockPosition) = 0
-	OR (SELECT TOP 1 dtmDate FROM tblICStagingDailyStockPosition) <> @dtmReportDate
-BEGIN
+--IF (SELECT COUNT(*) FROM tblICStagingDailyStockPosition) = 0
+--	OR (SELECT TOP 1 dtmDate FROM tblICStagingDailyStockPosition) <> @dtmReportDate
+--BEGIN
 	EXEC uspICGetDailyStockPosition @dtmReportDate, @guid	
-END
+--END
+
+
 
 INSERT INTO @InventoryData
 SELECT 
 	1
 	,'INVENTORY BALANCE' AS label
 	,'' AS [Sign]
-	,SUM(dblOpeningQty)
+	,SUM(ISNULL(dblOpeningQty,0))
 	,strCommodityCode
 	,intCommodityId
 FROM tblICStagingDailyStockPosition DSP
@@ -185,7 +187,8 @@ INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = DSP.intLocationId
 WHERE DSP.intCommodityId = ISNULL(@intCommodityId,DSP.intCommodityId)
 	AND DSP.intLocationId = ISNULL(@intLocationId,DSP.intLocationId)
-	AND CL.ysnLicensed = ISNULL(@ysnLicensed,CL.ysnLicensed)
+	AND ISNULL(ysnLicensed, 0) = CASE WHEN @strLicensed = 'Licensed Storage' THEN 1 WHEN @strLicensed = 'Non-Licensed Storage' THEN 0 ELSE ISNULL(ysnLicensed, 0) END
+	AND dtmDate = @dtmReportDate
 GROUP BY DSP.strCommodityCode
 	,DSP.intCommodityId
 /*==END==INVENTORY BALANCE==*/
@@ -209,16 +212,16 @@ BEGIN
 		@intCommodityId2	= intCommodityId
 		,@strCommodityCode	= strCommodityCode
 	FROM @tblCommodities
-
+	DECLARE @_strLicensedForRKDPI VARCHAR(MAX) = CASE WHEN @strLicensed = 'Non-Licensed Storage' THEN 'Non-licensed Storage' ELSE @strLicensed END
 	EXEC uspRKGenerateDPI
 		@dtmFromTransactionDate = @dtmReportDate
 		,@dtmToTransactionDate = @dateToday
 		,@intCommodityId = @intCommodityId2
 		,@intItemId = NULL
-		,@strPositionIncludes = @strLicensed
+		,@strPositionIncludes = @_strLicensedForRKDPI
 		,@intLocationId = @intLocationId
 		,@GUID = @guid
-		
+	
 	INSERT INTO @tblStorageQuantitiesMain
 	SELECT 
 		@intCommodityId2
@@ -233,7 +236,7 @@ BEGIN
 	FROM tblRKDPISummary A
 	INNER JOIN tblRKDPIHeader B
 		ON B.intDPIHeaderId = A.intDPIHeaderId
-	WHERE B.imgReportId = @guid	
+	WHERE B.imgReportId = @guid	and dtmTransactionDate = @dtmReportDate
 
 	DELETE FROM @tblCommodities WHERE intCommodityId = @intCommodityId2
 END
@@ -265,7 +268,7 @@ BEGIN
 		2
 		,'RECEIVED'
 		,'+'
-		,CASE WHEN dblReceiveIn = 0 THEN NULL ELSE dblReceiveIn END
+		,CASE WHEN dblReceiveIn = 0 THEN 0.00000 ELSE dblReceiveIn END
 		,@strCommodityCode
 		,@intCommodityId2
 	FROM (
@@ -281,7 +284,7 @@ BEGIN
 		3
 		,'SHIPPED'
 		,'-'
-		,CASE WHEN dblShipOut = 0 THEN NULL ELSE dblShipOut END
+		,CASE WHEN dblShipOut = 0 THEN 0.000000 ELSE dblShipOut END
 		,@strCommodityCode
 		,@intCommodityId2
 	FROM (
