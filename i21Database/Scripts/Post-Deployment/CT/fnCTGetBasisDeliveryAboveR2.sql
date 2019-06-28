@@ -19,12 +19,22 @@
 				intTransactionId		INT,
 				strTransactionType		NVARCHAR(20),
 				intEntityId				INT,
+				intCommodityId			INT,
+				intItemId				INT,
+				intCompanyLocationId	INT,
+				intFutureMarketId		INT,
+				intFutureMonthId		INT,
+				intCurrencyId			INT,
+				dtmEndDate				DATETIME,
 				-- Display Values
 				strContractType			NVARCHAR(20),
 				strContractNumber		NVARCHAR(50),
 				intContractSeq			INT,
+				strTransactionId		NVARCHAR(50),
 				strCustomerVendor		NVARCHAR(150),
 				strCommodityCode		NVARCHAR(50),
+				strItemNo				NVARCHAR(50),  
+				strCompanyLocation		NVARCHAR(150),
 				dtmDate					DATETIME,
 				dblQuantity				NUMERIC(38,20),
 				dblRunningBalance		NUMERIC(38,20)	
@@ -38,12 +48,14 @@
 					intContractHeaderId		INT,  
 					intContractDetailId		INT,        
 					intTransactionId		INT,
+					strTransactionId		NVARCHAR(50), 
 					strContractType			NVARCHAR(20),
 					strContractNumber		NVARCHAR(50),
 					intContractSeq			INT,
 					intEntityId				INT,
 					strEntityName			NVARCHAR(150),
 					strCommodityCode		NVARCHAR(50),
+					intCommodityId			INT,
 					dtmDate					DATETIME,
 					dblQuantity				NUMERIC(38,20),
 					strTransactionType		NVARCHAR(20),
@@ -53,29 +65,33 @@
 				-- INVENTORY RECEIPT
 				INSERT INTO @TemporaryTable
 				(
-					intContractHeaderId	
-					,intContractDetailId	
-					,intTransactionId	
-					,strContractType		
-					,strContractNumber	
-					,intContractSeq	
-					,intEntityId
-					,strEntityName		
-					,strCommodityCode	
-					,dtmDate				
-					,dblQuantity			
-					,strTransactionType
-					,intTimeE				
+					intContractHeaderId   
+					 ,intContractDetailId   
+					 ,intTransactionId
+					 ,strTransactionId   
+					 ,strContractType    
+					 ,strContractNumber   
+					 ,intContractSeq   
+					 ,intEntityId  
+					 ,strEntityName    
+					 ,strCommodityCode   
+					 ,intCommodityId
+					 ,dtmDate      
+					 ,dblQuantity     
+					 ,strTransactionType  
+					 ,intTimeE      		
 				)
 				SELECT CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Receipt.intInventoryReceiptId
+				,Receipt.strReceiptNumber
 				,CT.strContractType
 				,CH.strContractNumber
 				,CD.intContractSeq
 				,E.intEntityId
 				,E.strEntityName
 				,C.strCommodityCode
+				,C.intCommodityId
 				,InvTran.dtmDate
 				,SUM(ReceiptItem.dblOpenReceive)
 				,''Inventory Receipt''
@@ -97,12 +113,14 @@
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Receipt.intInventoryReceiptId
+				,Receipt.strReceiptNumber
 				,CT.strContractType
 				,CH.strContractNumber
 				,CD.intContractSeq
 				,E.intEntityId
 				,E.strEntityName
 				,C.strCommodityCode
+				,C.intCommodityId
 				,InvTran.dtmDate
 
 				-- VOUCHER
@@ -111,12 +129,14 @@
 					intContractHeaderId	
 					,intContractDetailId	
 					,intTransactionId	
+					,strTransactionId   
 					,strContractType		
 					,strContractNumber	
 					,intContractSeq	
 					,intEntityId
 					,strEntityName		
-					,strCommodityCode	
+					,strCommodityCode
+					,intCommodityId	
 					,dtmDate				
 					,dblQuantity			
 					,strTransactionType
@@ -125,12 +145,14 @@
 				SELECT CH.intContractHeaderId
 				,CD.intContractDetailId
 				,BD.intBillDetailId
+				,B.strBillId
 				,CT.strContractType
 				,CH.strContractNumber
 				,CD.intContractSeq
 				,E.intEntityId
 				,E.strEntityName
 				,C.strCommodityCode
+				,C.intCommodityId
 				,B.dtmDateCreated
 				,SUM(BD.dblQtyReceived) * -1
 				,''Voucher''
@@ -148,12 +170,14 @@
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,BD.intBillDetailId
+				,B.strBillId
 				,CT.strContractType
 				,CH.strContractNumber
 				,CD.intContractSeq
 				,E.intEntityId
 				,E.strEntityName
 				,C.strCommodityCode
+				,C.intCommodityId
 				,B.dtmDateCreated
 
 				-- INVENTORY SHIPMENT
@@ -161,13 +185,15 @@
 				(
 					intContractHeaderId	
 					,intContractDetailId	
-					,intTransactionId	
+					,intTransactionId
+					,strTransactionId 	
 					,strContractType		
 					,strContractNumber	
 					,intContractSeq		
 					,intEntityId
 					,strEntityName		
-					,strCommodityCode	
+					,strCommodityCode
+					,intCommodityId	
 					,dtmDate				
 					,dblQuantity			
 					,strTransactionType				
@@ -176,12 +202,14 @@
 				SELECT CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Shipment.intInventoryShipmentId
+				,Shipment.strShipmentNumber
 				,CT.strContractType
 				,CH.strContractNumber
 				,CD.intContractSeq
 				,E.intEntityId
 				,E.strEntityName
 				,C.strCommodityCode
+				,C.intCommodityId
 				,InvTran.dtmDate
 				,dblQuantity = SUM(ISNULL(ShipmentItem.dblQuantity,0))
 				,''Inventory Shipment''
@@ -205,12 +233,14 @@
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Shipment.intInventoryShipmentId
+				,Shipment.strShipmentNumber
 				,CT.strContractType
 				,CH.strContractNumber
 				,CD.intContractSeq
 				,E.intEntityId
 				,E.strEntityName
 				,C.strCommodityCode
+				,C.intCommodityId
 				,InvTran.dtmDate
 
 				-- INVOICE
@@ -218,13 +248,15 @@
 				(
 					intContractHeaderId	
 					,intContractDetailId	
-					,intTransactionId	
+					,intTransactionId
+					,strTransactionId 	
 					,strContractType		
 					,strContractNumber	
 					,intContractSeq		
 					,intEntityId
 					,strEntityName		
-					,strCommodityCode	
+					,strCommodityCode
+					,intCommodityId	
 					,dtmDate				
 					,dblQuantity			
 					,strTransactionType				
@@ -233,12 +265,14 @@
 				SELECT CH.intContractHeaderId
 				,CD.intContractDetailId
 				,ID.intInvoiceDetailId
+				,I.strInvoiceNumber
 				,CT.strContractType
 				,CH.strContractNumber
 				,CD.intContractSeq
 				,E.intEntityId
 				,E.strEntityName
 				,C.strCommodityCode
+				,C.intCommodityId
 				,I.dtmDate
 				,SUM(ID.dblQtyShipped) * -1
 				,''Invoice''
@@ -256,12 +290,14 @@
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,ID.intInvoiceDetailId
+				,I.strInvoiceNumber
 				,CT.strContractType
 				,CH.strContractNumber
 				,CD.intContractSeq
 				,E.intEntityId
 				,E.strEntityName
 				,C.strCommodityCode
+				,C.intCommodityId
 				,I.dtmDate
 
 				-- RESULT TABLE
@@ -270,6 +306,7 @@
 					intContractHeaderId
 					,intContractDetailId
 					,intTransactionId
+					,strTransactionId
 					,strTransactionType
 					,intEntityId
 					,strContractType
@@ -277,6 +314,15 @@
 					,intContractSeq		
 					,strCustomerVendor
 					,strCommodityCode
+					,intCommodityId
+					,strItemNo
+					,intItemId
+					,strCompanyLocation
+					,intCompanyLocationId
+					,dtmEndDate
+					,intFutureMarketId
+					,intFutureMonthId
+					,intCurrencyId
 					,dtmDate
 					,dblQuantity
 					,dblRunningBalance
@@ -285,13 +331,23 @@
 				T.intContractHeaderId
 				,T.intContractDetailId
 				,T.intTransactionId
+				,T.strTransactionId  
 				,T.strTransactionType
 				,T.intEntityId
 				,T.strContractType
 				,T.strContractNumber
 				,T.intContractSeq	
 				,T.strEntityName
-				,T.strCommodityCode	
+				,T.strCommodityCode
+				,T.intCommodityId
+				,I.strItemNo
+				,I.intItemId
+				,CL.strLocationName
+				,CL.intCompanyLocationId
+				,CD.dtmEndDate
+				,CD.intFutureMarketId
+				,CD.intFutureMonthId
+				,CD.intCurrencyId	
 				,ISNULL(T.dtmDate, CD.dtmCreated)
 				,dblQuantity = ISNULL(T.dblQuantity, 0)
 				,dblRunningBalance = SUM(isnull(T.dblQuantity,0)) OVER (PARTITION BY T.intContractDetailId, T.strContractType ORDER BY T.intTimeE ASC)
@@ -315,6 +371,8 @@
 				--						END
 				FROM tblCTContractDetail CD
 				INNER JOIN @TemporaryTable T ON CD.intContractDetailId = T.intContractDetailId
+				INNER JOIN tblICItem I ON I.intItemId = CD.intItemId
+				INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 
 				-- TEMPORARY SOLUTION
 				IF @dtmDate IS NOT NULL
