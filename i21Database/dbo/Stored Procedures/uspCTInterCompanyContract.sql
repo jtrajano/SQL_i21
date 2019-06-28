@@ -127,7 +127,7 @@ BEGIN TRY
 			END
 		END
 
-		IF @strInsert = 'Update'
+		IF @strUpdate = 'Update'
 		BEGIN
 			IF EXISTS (
 					SELECT 1

@@ -2581,12 +2581,12 @@ BEGIN TRY
 						SELECT *
 						FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
 						LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
-						WHERE PR.strName IS NULL
+						WHERE PR.strName IS NULL and x.strProducer is not null
 						)
 				BEGIN
 					SELECT @strErrorMessage = 'Producer ' + x.strProducer + ' is not available.'
 					FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
-					LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
+					LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer and x.strProducer is not null
 					WHERE PR.strName IS NULL
 
 					RAISERROR (
