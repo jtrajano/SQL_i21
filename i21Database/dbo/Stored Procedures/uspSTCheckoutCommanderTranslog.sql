@@ -13,57 +13,82 @@ BEGIN
 		BEGIN
 			--Get StoreId
 			DECLARE @intStoreId int
-			SELECT @intStoreId = intStoreId FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId
+			SELECT @intStoreId = intStoreId 
+			FROM tblSTCheckoutHeader 
+			WHERE intCheckoutId = @intCheckoutId
 
 			-------------------------------------------START GET Department
-			--// Get Department Id from Store
-			DECLARE @strDepartments AS NVARCHAR(MAX)
-			SELECT @strDepartments = strDepartment 
-			FROM tblSTStore
-			WHERE intStoreId = @intStoreId
+			----// Get Department Id from Store
+			--DECLARE @strDepartments AS NVARCHAR(MAX)
+			--SELECT @strDepartments = strDepartment 
+			--FROM tblSTStore
+			--WHERE intStoreId = @intStoreId
 
-			IF(@strDepartments = '')
+			--IF(@strDepartments = '')
+			--BEGIN
+			--	SET @intCountRows = 0
+			--	SET @strStatusMsg = 'Store does not have setup for Tobacco Department'
+			--	RETURN
+			--END
+
+
+			--// Create Temp table
+			DECLARE @TempTableDepartments TABLE 
+			(
+			    intRegisterDepartmentId INT
+				, strCategoryCode NVARCHAR(100)
+			)
+
+			INSERT INTO @TempTableDepartments
+			(
+				intRegisterDepartmentId
+				, strCategoryCode
+			)
+			SELECT 
+				CatLoc.intRegisterDepartmentId
+				, Category.strCategoryCode
+			FROM tblSTStoreRebates Rebates
+			INNER JOIN tblSTStore Store
+				ON Rebates.intStoreId = Store.intStoreId
+			INNER JOIN tblICCategory Category
+				ON Rebates.intCategoryId = Category.intCategoryId
+			INNER JOIN tblICCategoryLocation CatLoc
+				ON Category.intCategoryId = CatLoc.intCategoryId
+				AND Store.intCompanyLocationId = CatLoc.intLocationId
+			WHERE Store.intStoreId = @intStoreId
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM @TempTableDepartments)
 			BEGIN
 				SET @intCountRows = 0
 				SET @strStatusMsg = 'Store does not have setup for Tobacco Department'
 				RETURN
 			END
 
-			--// Create Temp table
-			DECLARE @TempTableDepartments TABLE 
-			(
-				strDepartment NVARCHAR(100)
-			)
+			----// Create dynamic sqlQuery
+			--DECLARE @strDynamicQuery as NVARCHAR(MAX)
+			--SET @strDynamicQuery = 'SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (' + @strDepartments + ')'
 
-			--// Create dynamic sqlQuery
-			DECLARE @strDynamicQuery as NVARCHAR(MAX)
-			SET @strDynamicQuery = 'SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (' + @strDepartments + ')'
+			----// Insert to tempTable
+			--INSERT @TempTableDepartments
+			--EXEC (@strDynamicQuery)
 
-			--// Insert to tempTable
-			INSERT @TempTableDepartments
-			EXEC (@strDynamicQuery)
-
-			IF NOT EXISTS (SELECT * FROM @TempTableDepartments)
-			BEGIN
-				SET @intCountRows = 0
-				SET @strStatusMsg = 'Tobacco department does not exist'
-				RETURN
-			END
+			--IF NOT EXISTS (SELECT * FROM @TempTableDepartments)
+			--BEGIN
+			--	SET @intCountRows = 0
+			--	SET @strStatusMsg = 'Tobacco department does not exist'
+			--	RETURN
+			--END
 			-------------------------------------------END GET Department
-
-
 
 			-- Check if department exist in XML file
 			IF NOT EXISTS(SELECT COUNT(c.termMsgSN) FROM #tempCheckoutInsert c 
-			              WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
+			              WHERE c.TrlDeptNumber IN (SELECT intRegisterDepartmentId FROM @TempTableDepartments) 
 			              AND (c.transtype = 'sale' OR c.transtype = 'network sale') GROUP BY c.termMsgSN)
 			BEGIN
 				SET @intCountRows = 0
 				SET @strStatusMsg = 'Store department does not exists in register file'
 				RETURN
 			END
-
-
 
 			-- Check if has records
 			IF EXISTS(SELECT COUNT(intTranslogId) FROM tblSTTranslogRebates)
@@ -75,7 +100,7 @@ BEGIN
 					(
 						SELECT c.termMsgSN as termMsgSN
 						FROM #tempCheckoutInsert c
-						WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
+						WHERE c.TrlDeptNumber IN (SELECT intRegisterDepartmentId FROM @TempTableDepartments) 
 						AND (c.transtype = 'sale' OR c.transtype = 'network sale')
 						AND c.date != ''
 						GROUP BY c.termMsgSN
@@ -98,15 +123,13 @@ BEGIN
 				BEGIN
 					SELECT @intCountRows = COUNT(c.termMsgSN)
 					FROM #tempCheckoutInsert c 
-					WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments) 
+					WHERE c.TrlDeptNumber IN (SELECT intRegisterDepartmentId FROM @TempTableDepartments) 
 					AND (c.transtype = 'sale' OR c.transtype = 'network sale')
 					AND c.date != ''
 					GROUP BY c.termMsgSN
 				END
 
 			--PRINT 'Rows count: ' + Cast(@intCountRows as nvarchar(50))
-
-
 
 			IF(@intCountRows > 0)
 			BEGIN
@@ -420,7 +443,7 @@ BEGIN
 					SELECT c.termMsgSN as termMsgSN
 					FROM #tempCheckoutInsert c
 					--WHERE c.trlDept = 'CIGARETTES' 
-					WHERE c.trlDept IN (SELECT strDepartment FROM @TempTableDepartments)
+					WHERE c.TrlDeptNumber IN (SELECT intRegisterDepartmentId FROM @TempTableDepartments)
 					AND (c.transtype = 'sale' OR c.transtype = 'network sale')
 					AND c.date != ''
 					GROUP BY c.termMsgSN

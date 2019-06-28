@@ -78,8 +78,6 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
         @strInOutFlag        NVARCHAR(4),
         @dblQuantity         NUMERIC(12,4),
         @strAdjustmentNo     NVARCHAR(50);
-		
-
 BEGIN TRY
 		IF @strDistributionOption = 'LOD' AND  @intLoadId IS NULL
 		BEGIN

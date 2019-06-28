@@ -292,6 +292,18 @@ LEFT JOIN (
 	WHERE ysnApplied = 1
 	GROUP BY PC.intInvoiceId
 
+	UNION ALL
+
+	SELECT intOriginalInvoiceId
+		 , dblInvoiceTotal
+	FROM dbo.tblARInvoice I WITH (NOLOCK)
+	WHERE ysnPosted = 1
+	AND ysnRefundProcessed = 1
+	AND strTransactionType = 'Credit Memo'
+	AND intOriginalInvoiceId IS NOT NULL
+	AND ISNULL(strInvoiceOriginId, '') <> ''
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmPostDate))) <= GETDATE()
+
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 AND I.intAccountId IN (
 		SELECT A.intAccountId

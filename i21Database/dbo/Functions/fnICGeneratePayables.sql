@@ -256,7 +256,7 @@ FROM tblICInventoryReceipt A
 	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblICItemUOM ctOrderUOM ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure ctUOM ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
-	INNER JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = A.intFreightTermId
+	LEFT JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = A.intFreightTermId
 	LEFT JOIN vyuPODetails po ON po.intPurchaseId = B.intOrderId
 		AND po.intPurchaseDetailId = B.intLineNo
 		AND A.strReceiptType = 'Purchase Order'

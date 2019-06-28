@@ -38,15 +38,18 @@ SELECT
 	C.strDescription AS strItemDescription,
 	H.strAccountId,
 	B.dbl1099,
+	B.int1099Form,
 	CASE B.int1099Form WHEN 0 THEN 'NONE'
 		WHEN 1 THEN '1099 MISC'
 		WHEN 2 THEN '1099 INT'
 		WHEN 3 THEN '1099 B'
 		WHEN 4 THEN '1099 PATR'
-		ELSE 'NONE' END COLLATE Latin1_General_CI_AS  AS str1099Form,
+		WHEN 5 THEN '1099 DIV'
+		ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form,
+	B.int1099Category,
 	CASE WHEN D.int1099CategoryId IS NULL THEN 'NONE' ELSE D.strCategory END AS str1099Category,
 	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup,
-	IR.strReceiptNumber,
+	CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL THEN  ISS.strShipmentNumber ELSE  IR.strReceiptNumber END as strReceiptNumber,
 	ISNULL(IR.intInventoryReceiptId,0) AS intInventoryReceiptId,
 	SC.strTicketNumber,
 	CH.strContractNumber,
@@ -144,5 +147,9 @@ LEFT JOIN dbo.tblSMPurchasingGroup PG
 	ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 LEFT JOIN tblCTContractBasis CB
 	ON CB.intContractBasisId = CH.intContractBasisId
- LEFT JOIN vyuICGetReceiptItemSource ICS 
+LEFT JOIN vyuICGetReceiptItemSource ICS 
      ON ICS.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId AND ICS.strSourceType = 'Inbound Shipment'   
+LEFT JOIN tblICInventoryShipmentCharge ISC 
+	ON ISC.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
+LEFT JOIN tblICInventoryShipment ISS 
+	ON ISC.intInventoryShipmentId = ISS.intInventoryShipmentId

@@ -65,8 +65,7 @@ SET @strZipCode = LTRIM(RTRIM(ISNULL(@strZipCode, '')))
 IF (@strFixAddress + @strCity + @strState + @strZipCode) <> '' 
 BEGIN 
 	RETURN	RTRIM(LTRIM(
-				@strFixAddress
-				+ @LINE_BREAK 
+				CASE WHEN @strFixAddress<> '' THEN @strFixAddress + @LINE_BREAK  ELSE '' END
 				+ @strCity
 				+ CASE WHEN @strState <> '' THEN @COMMA ELSE '' END 
 				+ @strState

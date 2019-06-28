@@ -26,6 +26,8 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strSalespersonIdsLocal		NVARCHAR(MAX) = NULL,		
 		@strCompanyLocationIdsLocal NVARCHAR(MAX) = NULL,
 		@strAccountStatusIdsLocal	NVARCHAR(MAX) = NULL,
+		@strCompanyName				NVARCHAR(100) = NULL,
+		@strCompanyAddress			NVARCHAR(500) = NULL,
 		@intEntityUserIdLocal		INT = NULL,
 		@intGracePeriodLocal		INT = 0
 
@@ -49,6 +51,10 @@ SET @strCompanyLocationIdsLocal	= NULLIF(@strCompanyLocationIds, '')
 SET @strAccountStatusIdsLocal	= NULLIF(@strAccountStatusIds, '')
 SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
 SET @intGracePeriodLocal		= ISNULL(@intGracePeriod, 0)
+
+SELECT TOP 1 @strCompanyName	= strCompanyName
+		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 IF ISNULL(@strCustomerIdsLocal, '') <> ''
 	BEGIN
@@ -148,6 +154,11 @@ BEGIN
 	DROP TABLE #CASHREFUNDS
 END
 
+IF(OBJECT_ID('tempdb..#CASHRETURNS') IS NOT NULL)
+BEGIN
+	DROP TABLE #CASHRETURNS
+END
+
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -232,7 +243,23 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
   AND ISNULL(ID.strDocumentNumber, '') <> ''
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-GROUP BY ID.strDocumentNumber	
+GROUP BY ID.strDocumentNumber
+
+--#CASHRETURNS
+SELECT intInvoiceId
+	 , intOriginalInvoiceId
+	 , dblInvoiceTotal
+	 , strInvoiceOriginId
+	 , strInvoiceNumber
+	 , dtmPostDate
+INTO #CASHRETURNS	 
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+WHERE ysnPosted = 1
+  AND ysnRefundProcessed = 1
+  AND strTransactionType = 'Credit Memo'
+  AND intOriginalInvoiceId IS NOT NULL
+  AND ISNULL(strInvoiceOriginId, '') <> ''
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
@@ -264,6 +291,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 		, intEntityUserId
 		, dblCreditLimit
 		, dblTotalAR
+		, dblTotalCustomerAR
 		, dblFuture
 		, dbl0Days
 		, dbl10Days
@@ -302,6 +330,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , intEntityUserId		= @intEntityUserIdLocal
 	 , dblCreditLimit		= CUSTOMER.dblCreditLimit
 	 , dblTotalAR			= AGING.dblTotalAR
+	 , dblTotalCustomerAR	= AGING.dblTotalAR
 	 , dblFuture			= AGING.dblFuture
 	 , dbl0Days				= AGING.dbl0Days
 	 , dbl10Days			= AGING.dbl10Days
@@ -324,8 +353,8 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strSourceTransaction	= @strSourceTransactionLocal
 	 , strType				= AGING.strType
 	 , strTransactionType	= AGING.strTransactionType
-	 , strCompanyName		= COMPANY.strCompanyName
-	 , strCompanyAddress	= COMPANY.strCompanyAddress
+	 , strCompanyName		= @strCompanyName
+	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Detail'
 FROM
 (SELECT A.strInvoiceNumber
@@ -500,7 +529,16 @@ LEFT JOIN (
 		FROM dbo.tblAPPayment WITH (NOLOCK)
 		WHERE ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	) P ON PD.intPaymentId = P.intPaymentId	
+	) P ON PD.intPaymentId = P.intPaymentId
+
+	UNION ALL
+
+	SELECT intInvoiceId			= intOriginalInvoiceId
+		 , intPaymentId			= NULL		
+		 , strRecordNumber		= strInvoiceNumber
+		 , dtmDatePaid			= dtmPostDate
+		 , dblTotalPayment		= dblInvoiceTotal
+	FROM #CASHRETURNS	
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
  
@@ -512,8 +550,3 @@ AND A.intInvoiceId		 = B.intInvoiceId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-OUTER APPLY (
-	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
-	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY

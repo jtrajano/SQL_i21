@@ -478,5 +478,6 @@
     <None Include="dbo\Stored Procedures\uspAPImportVendorLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportTaxGroupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportTaxGroupCustomerLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
   </ItemGroup>
 </Project>

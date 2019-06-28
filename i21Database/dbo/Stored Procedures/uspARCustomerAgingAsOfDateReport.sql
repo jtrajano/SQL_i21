@@ -24,6 +24,8 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@strSalespersonIdsLocal			NVARCHAR(MAX)	= NULL,
 		@strCompanyLocationIdsLocal		NVARCHAR(MAX)	= NULL,
 		@strAccountStatusIdsLocal		NVARCHAR(MAX)	= NULL,
+		@strCompanyName					NVARCHAR(100)	= NULL,
+		@strCompanyAddress				NVARCHAR(500)	= NULL,
 		@ysnIncludeCreditsLocal			BIT				= 1,
 		@ysnIncludeWriteOffPaymentLocal BIT				= 1,
 		@ysnPrintFromCFLocal			BIT				= 0
@@ -53,6 +55,10 @@ SET @strAccountStatusIdsLocal		= NULLIF(@strAccountStatusIds, '')
 
 SET @dtmDateFromLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmDateToLocal					= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
+
+SELECT TOP 1 @strCompanyName	= strCompanyName
+		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 --CUSTOMER FILTER
 IF @strCustomerIdsLocal IS NOT NULL
@@ -164,6 +170,11 @@ BEGIN
 	DROP TABLE #CASHREFUNDS
 END
 
+IF(OBJECT_ID('tempdb..#CASHRETURNS') IS NOT NULL)
+BEGIN
+	DROP TABLE #CASHRETURNS
+END
+
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -245,7 +256,7 @@ FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE ysnPosted = 1
-	AND ysnCancelled = 0
+	AND ysnCancelled = 0	
 	AND strTransactionType <> 'Cash Refund'
 	AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.intAccountId IN (
@@ -314,6 +325,20 @@ WHERE I.strTransactionType = 'Cash Refund'
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 GROUP BY ID.strDocumentNumber
 
+--#CASHRETURNS
+SELECT intInvoiceId
+	 , intOriginalInvoiceId
+	 , dblInvoiceTotal
+	 , strInvoiceOriginId
+INTO #CASHRETURNS	 
+FROM dbo.tblARInvoice I WITH (NOLOCK)
+WHERE ysnPosted = 1
+  AND ysnRefundProcessed = 1
+  AND strTransactionType = 'Credit Memo'
+  AND intOriginalInvoiceId IS NOT NULL
+  AND ISNULL(strInvoiceOriginId, '') <> ''
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+
 --REMOVE SERVICE CHARGE THAT WAS ALREADY CAUGHT IN BALANCE FORWARD
 IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
 BEGIN
@@ -329,6 +354,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , intEntityUserId
 	 , dblCreditLimit
 	 , dblTotalAR
+	 , dblTotalCustomerAR
 	 , dblFuture
 	 , dbl0Days
 	 , dbl10Days
@@ -355,6 +381,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , intEntityUserId		= @intEntityUserIdLocal
 	 , dblCreditLimit		= CUSTOMER.dblCreditLimit
 	 , dblTotalAR			= AGING.dblTotalAR
+	 , dblTotalCustomerAR	= AGING.dblTotalAR
 	 , dblFuture			= AGING.dblFuture
 	 , dbl0Days				= AGING.dbl0Days
 	 , dbl10Days            = AGING.dbl10Days
@@ -370,8 +397,8 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , dtmAsOfDate          = @dtmDateToLocal
 	 , strSalespersonName   = 'strSalespersonName'
 	 , strSourceTransaction	= @strSourceTransactionLocal
-	 , strCompanyName		= COMPANY.strCompanyName
-	 , strCompanyAddress	= COMPANY.strCompanyAddress
+	 , strCompanyName		= @strCompanyName
+	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Summary'
 FROM
 (SELECT A.intEntityCustomerId
@@ -513,6 +540,12 @@ LEFT JOIN (
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	) P ON PD.intPaymentId = P.intPaymentId
 	GROUP BY PD.intInvoiceId
+
+	UNION ALL
+
+	SELECT intInvoiceId			= intOriginalInvoiceId
+		 , dblTotalPayment		= dblInvoiceTotal
+	FROM #CASHRETURNS
 ) PAYMENT ON I.intInvoiceId = PAYMENT.intInvoiceId
 WHERE ((@ysnIncludeCreditsLocal = 0 AND strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) OR (@ysnIncludeCreditsLocal = 1))
 
@@ -523,10 +556,5 @@ A.intEntityCustomerId	 = B.intEntityCustomerId
 AND A.intInvoiceId		 = B.intInvoiceId
 
 GROUP BY A.intEntityCustomerId) AS AGING
-INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-OUTER APPLY (
-	SELECT TOP 1 strCompanyName
-			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
-	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY
+INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId	
 ORDER BY strCustomerName

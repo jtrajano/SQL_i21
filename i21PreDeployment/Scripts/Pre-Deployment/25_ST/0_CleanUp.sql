@@ -1,4 +1,5 @@
-﻿PRINT('ST Cleanup - Start')
+﻿PRINT('')
+PRINT('*** ST Cleanup - Start ***')
 
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Handheld Scanner Clean Up
@@ -313,4 +314,51 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTSto
 			')
 	END
 
-PRINT('ST Cleanup - End')
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Rename Commander - Trans Log to Commander - Transaction Log Rebates
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Commander - Trans Log') 
+	AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'Commander - Transaction Log Rebate')
+	BEGIN
+		PRINT(N'Renaming Commander - Trans Log	to	Commander - Transaction Log Rebate')
+		EXEC('
+				UPDATE tblSMImportFileHeader
+				SET strLayoutTitle = ''Commander - Transaction Log Rebate''
+				WHERE strLayoutTitle = ''Commander - Trans Log''
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Rename Commander - Trans Log to Commander - Transaction Log Rebates
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTRetailAccount') 
+	BEGIN
+		PRINT(N'Drop table tblSTRetailAccount')
+		EXEC('
+				DROP TABLE tblSTRetailAccount
+			')
+	END
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Remove records from tblSTTranslogRebates if intCheckoutId is not Existing on tblSTCheckoutHeader
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTTranslogRebates') 
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblSTTranslogRebates WHERE intCheckoutId NOT IN (SELECT intCheckoutId FROM tblSTCheckoutHeader))
+			BEGIN
+				PRINT(N'There are transaction logs that has no Checkout existing. Removing transaction logs...')
+				EXEC('
+						DELETE FROM tblSTTranslogRebates WHERE intCheckoutId NOT IN (SELECT intCheckoutId FROM tblSTCheckoutHeader)
+					')
+			END
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Remove records from tblSTTranslogRebates if intCheckoutId is not Existing on tblSTCheckoutHeader
+----------------------------------------------------------------------------------------------------------------------------------
+
+PRINT('*** ST Cleanup - End ***')
+PRINT('')

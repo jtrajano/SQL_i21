@@ -418,9 +418,10 @@ AS
 				SELECT intID
 				FROM fnGetRowsFromDelimitedValues(@createdCreditMemo)
 			)CI ON I.intInvoiceId = CI.intID
-
+			
 			UPDATE tblARInvoice
 			SET ysnReturned = 1
+			  , ysnRefundProcessed = 1
 			WHERE intInvoiceId = @intInvoiceId
 
 			SELECT TOP 1

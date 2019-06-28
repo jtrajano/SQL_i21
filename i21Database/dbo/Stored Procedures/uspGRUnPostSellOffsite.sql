@@ -40,7 +40,8 @@ BEGIN TRY
 
 	DELETE FROM tblGRSellOffsite WHERE intSellOffsiteId=@intSellOffsiteId
 	DELETE FROM tblGRStorageHistory WHERE intInvoiceId=@intInvoiceId
-	DELETE FROM tblARInvoice WHERE intInvoiceId=@intInvoiceId
+	
+	EXEC uspARDeleteInvoice @intInvoiceId, @UserId
 
 END TRY
 

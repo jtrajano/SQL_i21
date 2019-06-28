@@ -114,7 +114,7 @@ BEGIN
 		[intTermsId] 				=	(SELECT intTermsId FROM vyuAPVendorDefault WHERE intEntityId = @vendorId),
 		--[intShipViaId]				=	NULL,
 		[intShipFromId]				=	NULLIF(Terms.intEntityLocationId,0),
-		[intShipFromEntityId]		=	NULLIF(Terms.intEntityLocationId,0),
+		[intShipFromEntityId]		=	@vendorId,
 		[intShipToId]				=	A.intLocationId,
 		[dtmDate] 					=	GETDATE(),
 		[dtmDateCreated] 			=	GETDATE(),

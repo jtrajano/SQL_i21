@@ -11,10 +11,10 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF
 
-IF @RaiseError = 1
+--IF @RaiseError = 1
 	SET XACT_ABORT ON
 
-IF ISNULL(@RaiseError,0) = 0
+--IF ISNULL(@RaiseError,0) = 0
 	BEGIN TRANSACTION
 
 DECLARE @ZeroDecimal NUMERIC(18, 6)
@@ -380,6 +380,7 @@ EXEC [dbo].[uspARProcessInvoices]
 			SET @ErrorMessage = @CurrentErrorMessage;
 			IF ISNULL(@RaiseError,0) = 1
 				RAISERROR(@ErrorMessage, 16, 1);
+				ROLLBACK TRANSACTION
 			RETURN 0;
 		END
 
@@ -389,7 +390,10 @@ BEGIN CATCH
 		ROLLBACK TRANSACTION
 	SET @ErrorMessage = ERROR_MESSAGE();
 	IF ISNULL(@RaiseError,0) = 1
-		RAISERROR(@ErrorMessage, 16, 1);
+		BEGIN
+			RAISERROR(@ErrorMessage, 16, 1);
+			ROLLBACK TRANSACTION
+		END
 	RETURN 0;
 END CATCH
 		
@@ -401,8 +405,8 @@ SET ysnReturned = 1
   , dblBaseDiscountAvailable = @ZeroDecimal
 WHERE intInvoiceId = @InvoiceId
 
-IF ISNULL(@RaiseError,0) = 0
-BEGIN
+--IF ISNULL(@RaiseError,0) = 0
+--BEGIN
 	COMMIT TRANSACTION 
 	RETURN 1;
-END
+--END

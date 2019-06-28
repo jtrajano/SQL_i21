@@ -100,6 +100,11 @@ BEGIN
 	DROP TABLE #COMPANYLOCATIONS
 END
 
+IF(OBJECT_ID('tempdb..#SORTEDCUSTOMER') IS NOT NULL)
+BEGIN
+	DROP TABLE #SORTEDCUSTOMER
+END
+
 CREATE TABLE #CUSTOMERS (
 	  intEntityCustomerId		INT NOT NULL	
 	, strFullAddress			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
@@ -310,7 +315,7 @@ LEFT JOIN (
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.strTransactionType NOT IN ('Customer Prepayment', 'Overpayment')
 	AND I.strType NOT IN ('CF Tran', 'CF Invoice')
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 	UNION ALL
 
@@ -336,7 +341,7 @@ LEFT JOIN (
 	AND I.ysnRejected = 0
 	AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
 	AND I.strType <> 'CF Tran'
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	
 	UNION ALL
 
@@ -539,6 +544,24 @@ ORDER BY STATEMENTREPORT.dtmDate'
 
 EXEC sp_executesql @query
 
+--SORTING BY CUSTOMER NUMBER
+SELECT DISTINCT strCustomerNumber 
+			  , strAlpha	= CASE WHEN PATINDEX('%[0-9]%', strCustomerNumber) > 0 THEN LEFT(strCustomerNumber, PATINDEX('%[0-9]%', strCustomerNumber)-1) ELSE strCustomerNumber END
+			  , intNumeric	= CASE WHEN PATINDEX('%[0-9]%', strCustomerNumber) > 0 THEN CONVERT(INT, SUBSTRING(strCustomerNumber, PATINDEX('%[0-9]%', strCustomerNumber), LEN(strCustomerNumber))) ELSE 0 END
+INTO #SORTEDCUSTOMER
+FROM tblARCustomerStatementStagingTable
+WHERE intEntityUserId = @intEntityUserIdLocal 
+	AND strStatementFormat = 'Full Details - No Card Lock' 
+ORDER BY CASE WHEN PATINDEX('%[0-9]%', strCustomerNumber) > 0 THEN LEFT(strCustomerNumber, PATINDEX('%[0-9]%', strCustomerNumber)-1) ELSE strCustomerNumber END
+	   , CASE WHEN PATINDEX('%[0-9]%', strCustomerNumber) > 0 THEN CONVERT(INT, SUBSTRING(strCustomerNumber, PATINDEX('%[0-9]%', strCustomerNumber), LEN(strCustomerNumber))) ELSE 0 END
+
+UPDATE STAGING
+SET strCustomerNumberAlpha		= strAlpha
+  , intCustomerNumberNumeric	= intNumeric
+FROM tblARCustomerStatementStagingTable STAGING
+INNER JOIN #SORTEDCUSTOMER SORTED ON STAGING.strCustomerNumber = SORTED.strCustomerNumber
+
+--COMPANY DETAILS
 UPDATE tblARCustomerStatementStagingTable
 SET blbLogo				= @blbLogo
   , strCompanyName		= @strCompanyName

@@ -103,10 +103,16 @@ BEGIN TRY
 		,[strDistributionOption]		= SDS.strDistributionOption
 		,[intStorageScheduleId]			= SDS.intStorageScheduleRuleId
 		,[intShipFromEntityId]			= SCD.intEntityId
-		,[intShipFrom]					= ISNULL(SCD.intFarmFieldId,EM.intEntityLocationId)
+		,[intShipFrom]					= COALESCE(SCD.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)
 	FROM tblSCDeliverySheetSplit SDS
 	INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SDS.intDeliverySheetId
-	LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = SCD.intEntityId AND EM.ysnDefaultLocation = 1
+	LEFT JOIN tblEMEntityLocation FRM
+		ON SCD.intFarmFieldId = FRM.intEntityLocationId
+	LEFT JOIN tblAPVendor VND
+		ON SCD.intEntityId = VND.intEntityId
+	LEFT JOIN tblEMEntityLocation VNDL
+		ON VND.intEntityId = VNDL.intEntityId
+			AND VNDL.ysnDefaultLocation = 1
 	WHERE SDS.intDeliverySheetId = @intDeliverySheetId
 	
 	DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId, intStorageScheduleTypeId, intShipFromEntityId, intShipFrom FROM @splitTable

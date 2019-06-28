@@ -95,9 +95,9 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 		RETURN 0;
 	END	
 
-IF ISNULL(@ItemConversionAccountId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM vyuGLAccountDetail WHERE [strAccountCategory] = 'General' AND [strAccountType] = 'Asset' AND [intAccountId] = @ItemConversionAccountId)
+IF ISNULL(@ItemConversionAccountId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM vyuGLAccountDetail WHERE ([strAccountCategory] = 'General' OR [strAccountCategory] = 'Sales Account' ) AND ([strAccountType] = 'Asset' OR [strAccountGroup] = 'Sales') AND [intAccountId] = @ItemConversionAccountId)
 	BEGIN
-		SET @ErrorMessage = 'Invalid Conversion Account Id! Must be of type ''Asset'' and of category ''General'''
+		SET @ErrorMessage = 'Invalid Conversion Account Id! Must be of type ''Asset'' and of category ''General'' or of type ''Sales'' and of category ''Sales Account'' '
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;

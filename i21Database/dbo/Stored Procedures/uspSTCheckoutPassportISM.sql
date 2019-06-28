@@ -174,14 +174,14 @@ BEGIN
 			CAST(ActualSalesPrice AS DECIMAL(18,6)),
 			POSCode,
 			CASE 
-				WHEN ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) = 0
+				WHEN CAST(SalesQuantity AS INT) = 0
 					THEN 0
-				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) ,0) , 0)  /  CAST(SalesQuantity AS INT)
 			END AS dblAveragePrice,
 			CASE 
-				WHEN ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) ) = 0
+				WHEN CAST(SalesQuantity AS INT) = 0
 					THEN 0
-				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(RefundAmount AS DECIMAL(18, 6)) + CAST(DiscountAmount AS DECIMAL(18, 6)) + CAST(PromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(SalesQuantity AS INT) - CAST(RefundCount AS INT) )
+				ELSE ISNULL( NULLIF( CAST(SalesAmount AS DECIMAL(18, 6)) + CAST(DiscountAmount AS DECIMAL(18, 6)) + CAST(PromotionAmount AS DECIMAL(18, 6)) ,0) , 0)  /  CAST(SalesQuantity AS INT)
 			END AS dblAveragePriceWthDiscounts
 		FROM #tempCheckoutInsert
 		-- ==================================================================================================================

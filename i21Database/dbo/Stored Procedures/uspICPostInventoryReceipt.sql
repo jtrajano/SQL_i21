@@ -197,10 +197,9 @@ BEGIN
 	-- Do not allow unpost if Bill has been created for the inventory receipt
 	IF @ysnPost = 0 AND @ysnRecap = 0 
 	BEGIN 
-
-		SELECT	TOP 1 
-				@strBillNumber = Bill.strBillId
-		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+		SELECT	TOP 1 @strBillNumber = Bill.strBillId
+		FROM dbo.tblICInventoryReceipt Receipt
+		INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN dbo.tblAPBillDetail BillItems
 					ON BillItems.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -569,7 +568,6 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
-				,strActualCostId
 				,intInTransitSourceLocationId
 				,intForexRateTypeId
 				,dblForexRate
@@ -743,7 +741,6 @@ BEGIN
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = DetailItem.intSubLocationId --ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
 				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
-				,strActualCostId = Header.strActualCostId
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate

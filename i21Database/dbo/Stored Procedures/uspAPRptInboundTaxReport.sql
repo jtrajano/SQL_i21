@@ -327,6 +327,7 @@ DECLARE @VOUCHERS AS TABLE
 
 IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND ISNULL(@strVoucherNumberFrom, '') <> '')
     BEGIN
+		PRINT 'V1';
         INSERT INTO @VOUCHERS([intBillId], strBillId, [strType], strName, [dtmDate])
         SELECT I.intBillId, 
 			   I.strBillId, 
@@ -350,11 +351,12 @@ IF (@conditionInvoice IS NOT NULL AND UPPER(@conditionInvoice) = 'BETWEEN' AND I
                                                  ON SP.intEntityId = E.intEntityId
                                ) S ON I.intEntityId = S.intEntityId
          WHERE I.strBillId BETWEEN @strVoucherNumberFrom AND @strVoucherNumberTo
-           AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+           AND CONVERT(VARCHAR(10), I.dtmDate, 111) BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
     END
 ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strVoucherNumberFrom, '') <> '')
     BEGIN
+		PRINT 'V2';
         INSERT INTO @VOUCHERS([intBillId], strBillId, [strType], strName, [dtmDate])
         SELECT I.intBillId, 
 			   I.strBillId, 
@@ -373,12 +375,12 @@ ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strVoucherNumberFrom, '') <> 
           FROM dbo.tblAPBill I WITH (NOLOCK)
                LEFT OUTER JOIN (
                                SELECT SP.intEntityId, E.strName
-                                 FROM tblARSalesperson SP WITH (NOLOCK)
+                                 FROM tblAPVendor SP WITH (NOLOCK)
                                       INNER JOIN tblEMEntity E
                                                  ON SP.intEntityId = E.intEntityId
                                ) S ON I.intEntityVendorId = S.intEntityId
          WHERE I.strBillId = @strVoucherNumberFrom
-           AND I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+           AND CONVERT(VARCHAR(10), I.dtmDate, 111) BETWEEN @dtmDateFrom AND @dtmDateTo
            AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
            --AND I.dblTax <> 0.000000
     END
@@ -398,16 +400,17 @@ ELSE
 				 WHEN 13 THEN 'Basis Advance'
 				 WHEN 14 THEN 'Deferred Interest'
 				 ELSE 'Invalid Type' END,
-				S.strName, I.dtmDate
+				S.strName, 
+				I.dtmDate
           FROM dbo.tblAPBill I WITH (NOLOCK)
                LEFT OUTER JOIN (
                                SELECT SP.intEntityId, E.strName
-                                 FROM tblARSalesperson SP WITH (NOLOCK)
+                                 FROM tblAPVendor SP WITH (NOLOCK)
                                       INNER JOIN tblEMEntity E
                                                  ON SP.intEntityId = E.intEntityId
                                ) S ON I.intEntityVendorId = S.intEntityId
-         WHERE I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-           AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
+         WHERE CONVERT(VARCHAR(10), I.dtmDate, 111) BETWEEN @dtmDateFrom AND @dtmDateTo
+          -- AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
            --AND I.dblTax <> 0.000000
     END
 
