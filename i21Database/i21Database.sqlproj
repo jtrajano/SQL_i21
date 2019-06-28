@@ -7629,6 +7629,7 @@
     <Build Include="dbo\Functions\fnAPGetCheckPayee.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateReservedStock.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForNegativeStockVariance.sql" />
+    <Build Include="dbo\Index\IX_tblGLTrialBalance_intGLFiscalYearPeriodId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
