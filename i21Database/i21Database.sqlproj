@@ -7644,6 +7644,7 @@
     <Build Include="dbo\Tables\tblAPForClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetInHouse.sql" />
+    <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
