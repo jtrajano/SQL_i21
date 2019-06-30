@@ -7687,6 +7687,7 @@
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerSettleStorage.sql" />
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerPatronage.sql" />
     <Build Include="dbo\Views\vyuRKGetFuturesVsUnfixedSaleContract.sql" />
+    <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
