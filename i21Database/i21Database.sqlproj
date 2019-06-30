@@ -7653,6 +7653,7 @@
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerLoad.sql" />
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerSettleStorage.sql" />
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerPatronage.sql" />
+    <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
