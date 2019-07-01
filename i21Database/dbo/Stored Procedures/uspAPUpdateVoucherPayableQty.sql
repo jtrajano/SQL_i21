@@ -577,9 +577,6 @@ ELSE SAVE TRAN @SavePoint
 			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(D.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(D.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
-			AND B.intEntityVendorId = D.intEntityVendorId 
-			AND B.intLocationId = D.intLocationId 
-			
 		) AS SourceData
 		ON (1=0)
 		WHEN NOT MATCHED THEN
