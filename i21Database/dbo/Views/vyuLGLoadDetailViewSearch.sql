@@ -145,6 +145,7 @@ SELECT   L.intLoadId
 		,Commodity.strCommodityCode AS strCommodity
 		,Item.strItemNo
 		,Item.strDescription AS strItemDescription
+		,strBundleItemNo = ISNULL(PBundle.strItemNo, SBundle.strItemNo)
 		,ysnUseWeighScales = CONVERT(BIT,ISNULL(Item.ysnUseWeighScales,0)) 
 		,UOM.strUnitMeasure AS strItemUOM
 		,UOM.intUnitMeasureId AS intItemUnitMeasureId
@@ -246,6 +247,8 @@ LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureI
 LEFT JOIN tblICItemUOM WeightItemUOM ON WeightItemUOM.intItemUOMId = LoadDetail.intWeightItemUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = WeightItemUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
+LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId  
+LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId  
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
