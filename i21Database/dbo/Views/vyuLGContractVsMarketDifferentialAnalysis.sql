@@ -2,6 +2,7 @@
 AS
 SELECT
 	strMonthYr = SFM.strFutureMonth
+	,dtmFutureMonthsDate = SFM.dtmFutureMonthsDate
 	,strPContractNumber = PCH.strContractNumber
 	,dtmPContractDate = PCH.dtmContractDate
 	,strVendor = VEN.strName
