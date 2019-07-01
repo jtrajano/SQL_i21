@@ -19,14 +19,14 @@ BEGIN
 	SELECT *
 	INTO #tmpDerivatives
 	FROM dbo.fnRKGetOpenFutureByDate(NULL, '1/1/1900', @dtmDate, 1)
+	WHERE intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKDailyAveragePriceDetailTransaction)
 
 	SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY intBookId ORDER BY intBookId DESC)
 		, *
 	INTO #BookSubBook
 	FROM (
 		SELECT DISTINCT intBookId
-			, intSubBookId
-		
+			, intSubBookId		
 		FROM #tmpDerivatives
 	) tbl
 	
@@ -79,6 +79,7 @@ BEGIN
 			AND ISNULL(intFutureMarketId, 0) <> 0
 
 		INSERT INTO tblRKDailyAveragePriceDetailTransaction(intDailyAveragePriceDetailId
+			, strTransactionType
 			, dtmTransactionDate
 			, strEntity
 			, dblCommission
@@ -121,6 +122,7 @@ BEGIN
 			, ysnFreezed
 			, ysnPreCrush)
 		SELECT Detail.intDailyAveragePriceDetailId
+			, 'FutOptTransaction'
 			, Trans.dtmTransactionDate
 			, strEntity = Trans.strName
 			, 0

@@ -2,6 +2,9 @@
 (
 	[intDailyAveragePriceDetailTransactionId] INT NOT NULL IDENTITY, 
     [intDailyAveragePriceDetailId] INT NOT NULL, 
+	[strTransactionType] NVARCHAR(50),
+	[intFutOptTransactionId] INT NULL,
+	[intRefDailyAveragePriceDetailId] INT NULL,
 	[dtmTransactionDate] DATETIME NOT NULL, 
     [strEntity] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [dblCommission] NUMERIC(18,6) DEFAULT (0),

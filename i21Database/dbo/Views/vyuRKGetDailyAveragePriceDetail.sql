@@ -25,6 +25,7 @@ SELECT Detail.intDailyAveragePriceDetailId
     , Detail.intBrokerId
 	, Broker.strBrokerName
     , Detail.intConcurrencyId
+	, Month.ysnExpired
 FROM tblRKDailyAveragePriceDetail Detail
 LEFT JOIN vyuRKGetDailyAveragePrice Header ON Header.intDailyAveragePriceId = Detail.intDailyAveragePriceId
 LEFT JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = Detail.intFutureMarketId
