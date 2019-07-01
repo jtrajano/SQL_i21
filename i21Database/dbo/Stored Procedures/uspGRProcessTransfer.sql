@@ -126,7 +126,7 @@ BEGIN
 			[intCustomerStorageId]	= SourceSplit.intSourceCustomerStorageId
 			,[intTransferStorageId]	= SourceSplit.intTransferStorageId
 			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= -(SourceSplit.dblDeductedUnits)
+			,[dblUnits]				= -(SourceSplit.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100))
 			,[dtmHistoryDate]		= GETDATE()
 			,[intUserId]			= @intUserId
 			,[ysnPost]				= 1
@@ -136,8 +136,11 @@ BEGIN
 		FROM tblGRTransferStorageSourceSplit SourceSplit
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = SourceSplit.intContractDetailId
+		INNER JOIN tblGRTransferStorage TS
+			ON TS.intTransferStorageId = SourceSplit.intTransferStorageId
+		INNER JOIN tblGRTransferStorageSplit TransferStorageSplit
+			ON TransferStorageSplit.intTransferStorageId = SourceSplit.intTransferStorageId	
 		WHERE SourceSplit.intTransferStorageId = @intTransferStorageId	
-
 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId		
 		----END----TRANSACTIONS FOR THE SOURCE---------
