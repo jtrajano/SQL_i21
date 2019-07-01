@@ -849,7 +849,7 @@ BEGIN
 					, intCommodityUnitMeasureId = NULL
 					, BD.intCommodityId
 					, strLocationName = BD.strCompanyLocation
-					, BD.strCurrency
+					, cur.strCurrency
 				FROM dbo.fnCTGetBasisDelivery(@dtmToDate) BD
 					INNER JOIN tblRKFutureMarket fm ON BD.intFutureMarketId = fm.intFutureMarketId
 					INNER JOIN tblRKFuturesMonth mnt ON BD.intFutureMonthId = mnt.intFutureMonthId
@@ -874,13 +874,13 @@ BEGIN
                 SELECT @strCommodityCode
                     , 'Price Risk' COLLATE Latin1_General_CI_AS [strType]
                     , 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS strContractType
-                    , dblTotal = dblTotal
+                    , dblTotal = BD.dblQuantity
                     , intInventoryShipmentId = BD.intTransactionId
                     , strShipmentNumber = BD.strTransactionId
                     , intCommodityUnitMeasureId = NULL
                     , BD.intCommodityId
                     , strLocationName = BD.strCompanyLocation
-                    , BD.strCurrency
+                    , cur.strCurrency
                 FROM dbo.fnCTGetBasisDelivery(@dtmToDate) BD
 					INNER JOIN tblRKFutureMarket fm ON BD.intFutureMarketId = fm.intFutureMarketId
 					INNER JOIN tblRKFuturesMonth mnt ON BD.intFutureMonthId = mnt.intFutureMonthId
