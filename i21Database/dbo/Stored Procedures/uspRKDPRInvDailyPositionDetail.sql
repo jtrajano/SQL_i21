@@ -1768,6 +1768,7 @@ BEGIN
 				, strCategory
 				, strShipmentNumber
 				, intInventoryShipmentId
+				, strCustomerName
 				, strCustomerReference
 				, intContractHeaderId
 				, strContractNumber
@@ -1792,6 +1793,7 @@ BEGIN
 				, strCategory
 				, strShipmentNumber
 				, intInventoryShipmentId
+				, strCustomerReference
 				, strCustomerReference
 				, intContractHeaderId
 				, strContractNumber
