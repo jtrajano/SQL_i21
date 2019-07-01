@@ -144,9 +144,9 @@ SELECT
 	,[strTransactionNumber]				=	A.strBillId
 	,[intTermId]						=	A.intTermsId
 	,[ysnApplyTermDiscount]				=	0
-	,[dblDiscount]						=	0
+	,[dblDiscount]						=	A.dblTempDiscount
 	,[dblDiscountAvailable]				=	0
-	,[dblInterest]						=	0
+	,[dblInterest]						=	A.dblTempInterest
 	,[dblPayment]						=	A.dblTempPayment
 	,[strInvoiceReportNumber]			=	NULL
 	,[intCurrencyExchangeRateTypeId]	=	CASE WHEN @defaultCurrency != A.intCurrencyId THEN @rateType ELSE NULL END
