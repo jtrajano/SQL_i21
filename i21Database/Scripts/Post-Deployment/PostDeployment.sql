@@ -87,6 +87,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_MigrateINCOToFreightTerm.sql
 :r .\SM\1910_UpdateVantivToWorldPay.sql
 :r .\SM\1920_UpdateOtherTaxationPointToNone.sql
+:r .\SM\1910_EntityUserDatafix_Transaction.sql
+
 
 
 -- Canned Report
