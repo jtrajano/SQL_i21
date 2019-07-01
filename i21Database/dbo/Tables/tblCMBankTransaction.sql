@@ -60,10 +60,12 @@
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblCMBankTransaction_intBankAccountId]
-    ON [dbo].[tblCMBankTransaction]([intBankAccountId] ASC);
-
-
+CREATE NONCLUSTERED INDEX [IX_tblCMBankTransaction_intBankAccountId] ON [dbo].[tblCMBankTransaction]
+(
+	[intBankAccountId] ASC,
+	[dblAmount] ASC,
+	[strReferenceNo] ASC
+)
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCMBankTransaction_intCurrencyId]
     ON [dbo].[tblCMBankTransaction]([intCurrencyId] ASC);
