@@ -27,12 +27,12 @@ SELECT DISTINCT TOP 100 PERCENT
 										END
 	,intCustomerStorageId				= SH.intCustomerStorageId
 	,intTransferCustomerStorageId		= CASE 
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN TSplit.intTransferToCustomerStorageId
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN CASE WHEN CSTO.intCustomerStorageId IS NOT NULL THEN CSTO.intCustomerStorageId ELSE  TSplit.intTransferToCustomerStorageId END
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN TSource.intSourceCustomerStorageId
 											ELSE NULL
 										END
 	,strStorageTicket					= CASE 
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN TSplit.strStorageTicketNumber
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN CASE WHEN CSTO.intCustomerStorageId IS NOT NULL THEN CSTO.strStorageTicketNumber ELSE TSplit.strStorageTicketNumber END
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN TSource.strStorageTicketNumber
 											ELSE CS.strStorageTicketNumber
 										END
@@ -87,7 +87,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	,strUserName						= US.strUserName	
 	,strType							= SH.strType
 	,dblUnits							= CASE
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN  -(ISNULL(TSR.dblUnitQty,TSplit.dblUnits))
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN   -(ISNULL(TSR.dblUnitQty,TSplit.dblUnits)) 
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN CS.dblOriginalBalance
 											ELSE SH.dblUnits
 	 									END
@@ -143,5 +143,21 @@ LEFT JOIN vyuGRTransferStorageSourceSplit TSource
 	ON TSource.intTransferStorageId = SH.intTransferStorageId
 LEFT JOIN vyuGRTransferStorageSplit TSplit
 	ON TSplit.intTransferStorageId = SH.intTransferStorageId
-LEFT JOIN tblGRTransferStorageReference TSR
-	ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
+LEFT JOIN (tblGRTransferStorageReference TSR
+	JOIN tblGRCustomerStorage CSFRM
+		ON CSFRM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+	JOIN tblGRCustomerStorage CSTO
+		ON CSTO.intCustomerStorageId = TSR.intToCustomerStorageId) 
+ON CASE WHEN SH.strType = 'From Transfer' 
+	    THEN 
+			 CASE WHEN TSR.intToCustomerStorageId  = CS.intCustomerStorageId THEN 0 
+				  ELSE 0 
+			 END 
+	    ELSE 
+			 CASE WHEN CSFRM.intCustomerStorageId = CS.intCustomerStorageId  AND CSTO.intCustomerStorageId = TSplit.intTransferToCustomerStorageId THEN 1 				  
+				  WHEN CSFRM.intCustomerStorageId = CS.intCustomerStorageId AND TSR.intTransferStorageSplitId = TSplit.intTransferStorageSplitId THEN  1
+				  ELSE 0 
+
+			 END 
+   END 
+	=1
