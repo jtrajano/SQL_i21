@@ -81,7 +81,7 @@ INNER JOIN (
 			,CLSplit.strLocationName
 			,TSplit.intStorageTypeId
 			,STSplit.strStorageTypeDescription
-			,dblOriginalUnits			= TSplit.dblUnits
+			,dblOriginalUnits			= ISNULL(TSR.dblUnitQty,TSplit.dblUnits)
 			,dblSplitPercent			= TSplit.dblSplitPercent
 			,intSourceCustomerStorageId
 		FROM tblGRTransferStorageSplit TSplit
