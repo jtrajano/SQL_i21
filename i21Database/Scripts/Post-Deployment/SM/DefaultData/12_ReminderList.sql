@@ -355,7 +355,10 @@ GO
 														dtmStartDate
 												FROM tblSMActivity A LEFT OUTER JOIN tblSMActivityAttendee B
 													ON A.intActivityId = B.intActivityId AND B.intEntityId = {0}
-												WHERE ysnRemind = 1 AND (intCreatedBy = {0} OR intAssignedTo = {0}) AND (ysnDismiss = 0 OR ysnDismiss IS NULL) AND
+												WHERE ysnRemind = 1 AND 
+													(intCreatedBy = {0} OR intAssignedTo = {0}) AND 
+													(ysnDismiss = 0 OR ysnDismiss IS NULL) AND
+													strStatus != ''Closed'' AND strStatus != ''Complete'' AND
 														CASE WHEN strReminder = ''0 minutes'' THEN dtmStartDate
 															 WHEN strReminder = ''5 minutes'' THEN DATEADD(MINUTE, -5, dtmStartDate)
 															 WHEN strReminder = ''10 minutes'' THEN DATEADD(MINUTE, -10, dtmStartDate)
@@ -394,7 +397,10 @@ GO
 														dtmStartDate
 												FROM tblSMActivity A LEFT OUTER JOIN tblSMActivityAttendee B
 													ON A.intActivityId = B.intActivityId AND B.intEntityId = {0}
-												WHERE ysnRemind = 1 AND (intCreatedBy = {0} OR intAssignedTo = {0}) AND (ysnDismiss = 0 OR ysnDismiss IS NULL) AND
+												WHERE ysnRemind = 1 AND 
+													(intCreatedBy = {0} OR intAssignedTo = {0}) AND 
+													(ysnDismiss = 0 OR ysnDismiss IS NULL) AND
+													strStatus != ''Closed'' AND strStatus != ''Complete'' AND
 														CASE WHEN strReminder = ''0 minutes'' THEN dtmStartDate
 															 WHEN strReminder = ''5 minutes'' THEN DATEADD(MINUTE, -5, dtmStartDate)
 															 WHEN strReminder = ''10 minutes'' THEN DATEADD(MINUTE, -10, dtmStartDate)
