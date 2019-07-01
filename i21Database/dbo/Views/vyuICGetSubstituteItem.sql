@@ -13,6 +13,7 @@ SELECT	ItemSubstitute.intItemSubstituteId
 		,ItemSubstitute.dtmEndDate
 		,ItemSubstitute.intItemUOMId
 		,UOM.strUnitMeasure
+		,ItemSubstitute.intConcurrencyId
 FROM	tblICItemSubstitute ItemSubstitute
 		LEFT JOIN tblICItem Item ON Item.intItemId = ItemSubstitute.intItemId
 		LEFT JOIN tblICItem SubstituteComponent ON SubstituteComponent.intItemId = ItemSubstitute.intSubstituteItemId
