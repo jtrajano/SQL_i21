@@ -1079,10 +1079,12 @@ BEGIN
 
 
 				-- RE COMPUTE TAX > FOR CFN NETWORK ONLY
-				IF(@strNetworkType = 'CFN')
+				IF(@strNetworkType = 'CFN' AND ISNULL(@intTaxGroupId,0) = 0)
 				BEGIN
 					UPDATE @tblCFRemoteTax 
 					SET dblAdjustedTax = dblRate , dblTax = dblRate
+					
+					--SELECT  '@tblCFRemoteTax',* FROM @tblCFRemoteTax --TEMP ME--
 				END
 				
 				-- RE COMPUTE TAX > UPDATE TAXES FROM EXISTING TRANSACTION 
@@ -2286,8 +2288,30 @@ BEGIN
 
 
 				-- RE COMPUTE TAX > FOR CFN NETWORK ONLY
-				IF(@strNetworkType = 'CFN')
+				IF(@strNetworkType = 'CFN' AND ISNULL(@intTaxGroupId,0) = 0)
 				BEGIN
+
+
+					UPDATE @tblCFCalculatedTaxExemptZeroQuantity
+					SET dblTax = (ISNULL(li.dblTax,0) / @dblQuantity) * @dblZeroQuantity,
+						dblAdjustedTax =  (ISNULL(li.dblAdjustedTax,0) / @dblQuantity) * @dblZeroQuantity
+					FROM @tblCFCalculatedTaxExemptZeroQuantity AS ot
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ot.intTaxGroupId			= li.intTaxGroupId
+					AND ot.intTaxCodeId		= li.intTaxCodeId
+					AND ot.intTaxClassId	= li.intTaxClassId
+					AND ot.dblRate			= li.dblRate
+
+					UPDATE @tblCFCalculatedTaxExempt
+					SET dblTax = li.dblTax,
+						dblAdjustedTax = li.dblAdjustedTax
+					FROM @tblCFCalculatedTaxExempt AS ot
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ot.intTaxGroupId			= li.intTaxGroupId
+					AND ot.intTaxCodeId		= li.intTaxCodeId
+					AND ot.intTaxClassId	= li.intTaxClassId
+					AND ot.dblRate			= li.dblRate
+
 					UPDATE @tblCFOriginalTax 
 					SET dblTax = li.dblTax,
 						dblAdjustedTax = li.dblAdjustedTax
@@ -2301,6 +2325,7 @@ BEGIN
 					WHERE ISNULL(ot.ysnTaxExempt,0) = 0
 					AND ISNULL(ot.ysnInvalidSetup,0) = 0
 
+
 					UPDATE @tblCFCalculatedTax 
 					SET dblTax = li.dblTax,
 						dblAdjustedTax = li.dblAdjustedTax
@@ -2312,6 +2337,11 @@ BEGIN
 					AND ct.dblRate			= li.dblRate
 					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
 					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+
+
+					--SELECT  '@tblCFOriginalTax',* FROM @tblCFOriginalTax --TEMP ME--
+					--SELECT  '@tblCFCalculatedTax',* FROM @tblCFCalculatedTax --TEMP ME--
+					
 				END
 
 				
@@ -5998,6 +6028,8 @@ BEGIN
 	DECLARE @totalCalculatedTax					NUMERIC(18,6) = 0
 	DECLARE @totalOriginalTax					NUMERIC(18,6) = 0
 	DECLARE @totalCalculatedTaxExempt			NUMERIC(18,6) = 0
+
+	--SELECT '@totalCalculatedTaxExempt','@tblCFTransactionTax', * FROM @tblCFTransactionTax -- TEMP ME --
 	
 
 	SELECT 
@@ -6006,6 +6038,8 @@ BEGIN
 	FROM
 	@tblCFTransactionTax
 	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+
+	--SELECT '@tblCFCalculatedTaxExempt', * FROM @tblCFCalculatedTaxExempt -- TEMP ME --
 
 	SELECT 
 	 @totalCalculatedTaxExempt = ISNULL(SUM([dbo].fnRoundBanker(cftx.dblTax,2)),0)
@@ -6022,8 +6056,9 @@ BEGIN
 	DECLARE @totalCalculatedTaxZeroQuantity					NUMERIC(18,6) = 0
 	DECLARE @totalCalculatedTaxExemptZeroQuantity			NUMERIC(18,6) = 0
 
+	
 	SELECT 
-	 @totalCalculatedTaxExemptZeroQuantity = ISNULL(SUM(cftx.dblTax),0)
+	 @totalCalculatedTaxExemptZeroQuantity = ISNULL(SUM(cftx.dblTax),0) 
 	FROM
 	@tblCFTransactionTaxZeroQuantity as cft
 	INNER JOIN @tblCFCalculatedTaxExemptZeroQuantity as cftx
@@ -6254,6 +6289,10 @@ BEGIN
 	
 	ELSE IF (CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0)
 		BEGIN
+
+		DECLARE @dblPPAPrice100kQty NUMERIC(18,6)
+		DECLARE @dblPPAPriceQty NUMERIC(18,6)
+
 		IF (@strTransactionType = 'Extended Remote' OR @strTransactionType = 'Local/Network')
 		BEGIN
 
@@ -6266,9 +6305,15 @@ BEGIN
 
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
-				SET @dblPrice = @dblPumpPriceAdjustmentGrossPriceZeroQty
+				SET @dblPPAPrice100kQty = @dblPumpPriceAdjustmentGrossPriceZeroQty
+				SET @dblPPAPriceQty = @dblPumpPriceAdjustmentGrossPrice
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
+			END
+			ELSE
+			BEGIN
+				SET @dblPumpPriceAdjustmentGrossPrice = @dblPPAPriceQty
+				SET @dblPumpPriceAdjustmentGrossPriceZeroQty  = @dblPPAPrice100kQty
 			END
 
 
@@ -7465,6 +7510,8 @@ BEGIN
 	
 	IF(@strNetworkType = 'CFN' AND ISNULL(@IsImporting,0) = 1 AND ISNULL(@intTaxGroupId,0) = 0)
 	BEGIN
+
+	--SELECT '@tblCFTransactionTax',@dblCalculatedNetPrice,* FROM @tblCFTransactionTax --TEMP ME--
 					
 		UPDATE @tblCFTransactionTax 
 		SET dblRate = CASE 
@@ -7472,6 +7519,9 @@ BEGIN
 		THEN ISNULL(dblRate,0) / (@dblQuantity * @dblCalculatedNetPrice)
 		ELSE ISNULL(dblRate,0) / ISNULL(@dblQuantity,0)
 		END
+
+
+		--SELECT '@tblCFTransactionTax',* FROM @tblCFTransactionTax --TEMP ME--
 
 	END
 
