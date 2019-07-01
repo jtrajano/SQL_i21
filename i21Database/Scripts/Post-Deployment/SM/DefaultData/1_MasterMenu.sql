@@ -19,7 +19,8 @@ GO
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote Report' AND strModuleName = 'Transports' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Transports') AND strCommand = N'AccountsReceivable.view.BatchPrinting') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Entity Producer Map' AND strModuleName = 'Contract Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.EntityProducerMap') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Average Price' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Derivative' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.DailyAveragePrice') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Vs Sale Variance' AND strModuleName = 'Store' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Vs Sale Variance' AND strModuleName = 'Store') AND strCommand = N'Store.view.PurchaseVsVarianceReport') 
+	-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Vs Sale Variance' AND strModuleName = 'Store' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Vs Sale Variance' AND strModuleName = 'Store') AND strCommand = N'Store.view.PurchaseVsVarianceReport') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics') AND strCommand = N'Logistics.view.ContractVsMarketDifferential') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3885,6 +3886,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unallocat
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Logistics.view.UnallocatedInventoryReport?showSearch=true' WHERE strMenuName = 'Unallocated Inventory and Open Contracts' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
+    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+    VALUES (N'Contract vs Market Differential Analysis', N'Logistics', @LogisticsReportParentMenuId, N'Contract vs Market Differential Analysis', N'Report', N'Screen', N'Logistics.view.ContractVsMarketDifferential', N'small-menu-report', 0, 0, 0, 1, 7, 1)
+ELSE
+    UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Logistics.view.ContractVsMarketDifferential' WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Allocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
