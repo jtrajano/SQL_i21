@@ -844,7 +844,7 @@ BEGIN
 					, 'Price Risk' COLLATE Latin1_General_CI_AS [strType]
 					, 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS strContractType
 					, dblTotal = - BD.dblQuantity
-					, intInventoryReceiptId = BD.intTransactioId
+					, intInventoryReceiptId = BD.intTransactionId
 					, strReceiptNumber = BD.strTransactionId
 					, intCommodityUnitMeasureId = NULL
 					, BD.intCommodityId
