@@ -146,6 +146,8 @@ USING (
 					SUM(
 						dbo.fnCalculateQtyBetweenUOM (
 							CASE 
+								WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId = l.intItemUOMId THEN 
+									l.intItemUOMId 
 								WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId IS NOT NULL THEN 
 									l.intWeightUOMId
 								WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId IS NULL THEN 
@@ -155,6 +157,8 @@ USING (
 							END
 							,StockUOM.intItemUOMId
 							,CASE 
+								WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId = l.intItemUOMId THEN 
+									r.dblQty
 								WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId IS NOT NULL THEN 
 									dbo.fnMultiply(r.dblQty,l.dblWeightPerQty) -- convert the pack to weight 
 								WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId IS NULL THEN 
@@ -192,7 +196,7 @@ USING (
 						CASE 
 							WHEN r.intItemUOMId = l.intItemUOMId THEN 
 								r.dblQty 
-							WHEN r.intItemUOMId = l.intWeightUOMId THEN 
+							WHEN r.intItemUOMId = l.intWeightUOMId AND l.intItemUOMId <> l.intWeightUOMId THEN 
 								dbo.fnDivide(r.dblQty, l.dblWeightPerQty) -- Convert the wgt to pack qty. 
 						END 						
 					) 
@@ -242,6 +246,7 @@ USING (
 		WHERE	r.intLotId IS NOT NULL 
 				AND l.intWeightUOMId IS NOT NULL 
 				AND l.intWeightUOMId <> StockUOM.intItemUOMId 
+				AND l.intWeightUOMId <> l.intItemUOMId 
 		GROUP BY r.intItemId
 				, r.intItemLocationId
 				, l.intWeightUOMId
