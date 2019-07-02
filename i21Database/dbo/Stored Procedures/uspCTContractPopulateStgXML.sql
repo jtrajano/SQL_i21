@@ -59,7 +59,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblCTContractDetail'
 	ELSE
-		SELECT @strObjectName = 'vyuCTContractDetailView'
+		SELECT @strObjectName = 'vyuIPContractDetailView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition

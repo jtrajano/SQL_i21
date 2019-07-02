@@ -121,6 +121,42 @@ BEGIN TRY
 		,@strDestinationCity NVARCHAR(50)
 		,@strStorageLocationName NVARCHAR(50)
 		,@strSubLocationName NVARCHAR(50)
+		,@strVesselStorageLocationName NVARCHAR(50)
+		,@strVesselSubLocationName NVARCHAR(50)
+		,@strShippingTerm NVARCHAR(64)
+		,@strShippingLine NVARCHAR(100)
+		,@strShipper NVARCHAR(100)
+		,@intShippingLineId INT
+		,@intShipperId INT
+		,@intShipToEntityId INT
+		,@intShipToId INT
+		,@strShipToName NVARCHAR(100)
+		,@strShipToLocationName NVARCHAR(50)
+		,@intPurchasingGroupId INT
+		,@strPurchasingGroupName NVARCHAR(150)
+		,@strInvoiceCurrency NVARCHAR(40)
+		,@strFXPriceUOM NVARCHAR(50)
+		,@intInvoiceCurrencyId INT
+		,@intFXPriceUOMId INT
+		,@intFXPriceItemUOMId INT
+		,@strFromCurrency NVARCHAR(40)
+		,@strToCurrency NVARCHAR(40)
+		,@intCurrencyExchangeRateId INT
+		,@intToCurrencyId INT
+		,@intFromCurrencyId INT
+		,@strCurrencyExchangeRateType NVARCHAR(20)
+		,@intCurrencyExchangeRateTypeId INT
+		,@strShipVia NVARCHAR(100)
+		,@intShipViaId INT
+		,@strProducer NVARCHAR(100)
+		,@intProducerId INT
+		,@strUOM NVARCHAR(50)
+		,@strVendorName NVARCHAR(50)
+		--,@strCurrencyExchangeRateType NVARCHAR(50)
+		,@intContractCostId INT
+		,@intVendorId INT
+	--,@intCurrencyExchangeRateTypeId INT
+	DECLARE @tblCTContractCost TABLE (intContractCostId INT)
 
 	SELECT @intContractStageId = MIN(intContractStageId)
 	FROM tblCTContractStage
@@ -804,7 +840,8 @@ BEGIN TRY
 						SELECT *
 						FROM tblCTContractText CT
 						WHERE CT.strTextCode = @strTextCode
-						) and @strTextCode<>''
+						)
+					AND @strTextCode <> ''
 				BEGIN
 					INSERT INTO tblCTContractText (
 						strTextCode
@@ -1111,7 +1148,7 @@ BEGIN TRY
 
 				INSERT INTO @tblCTContractDetail (intContractSeq)
 				SELECT intContractSeq
-				FROM OPENXML(@idoc, 'vyuCTContractDetailViews/vyuCTContractDetailView', 2) WITH (intContractSeq INT)
+				FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (intContractSeq INT)
 
 				SELECT @intContractSeq = MIN(intContractSeq)
 				FROM @tblCTContractDetail
@@ -1133,6 +1170,21 @@ BEGIN TRY
 						,@strDestinationCity = NULL
 						,@strStorageLocationName = NULL
 						,@strSubLocationName = NULL
+						,@strVesselStorageLocationName = NULL
+						,@strVesselSubLocationName = NULL
+						,@strShippingTerm = NULL
+						,@strShippingLine = NULL
+						,@strShipper = NULL
+						,@strShipToName = NULL
+						,@strShipToLocationName = NULL
+						,@strPurchasingGroupName = NULL
+						,@strInvoiceCurrency = NULL
+						,@strFXPriceUOM = NULL
+						,@strFromCurrency = NULL
+						,@strToCurrency = NULL
+						,@strCurrencyExchangeRateType = NULL
+						,@strShipVia = NULL
+						,@strProducer = NULL
 
 					SELECT @strPricingType = strPricingType
 						,@strFutMarketName = strFutMarketName
@@ -1147,9 +1199,24 @@ BEGIN TRY
 						,@strLoadingPoint = strLoadingPoint
 						,@strDestinationPoint = strDestinationPoint
 						,@strDestinationCity = strDestinationCity
-						,@strStorageLocationName = strStorageLocationName
-						,@strSubLocationName = strSubLocationName
-					FROM OPENXML(@idoc, 'vyuCTContractDetailViews/vyuCTContractDetailView', 2) WITH (
+						--,@strStorageLocationName = strStorageLocationName
+						--,@strSubLocationName = strSubLocationName
+						,@strVesselStorageLocationName = strVesselStorageLocationName
+						,@strVesselSubLocationName = strVesselSubLocationName
+						,@strShippingTerm = strShippingTerm
+						,@strShippingLine = strShippingLine
+						,@strShipper = strShipper
+						,@strShipToName = strShipToName
+						,@strShipToLocationName = strShipToLocationName
+						,@strPurchasingGroupName = strPurchasingGroupName
+						,@strInvoiceCurrency = strInvoiceCurrency
+						,@strFXPriceUOM = strFXPriceUOM
+						,@strFromCurrency = strFromCurrency
+						,@strToCurrency = strToCurrency
+						,@strCurrencyExchangeRateType = strCurrencyExchangeRateType
+						,@strShipVia = strShipVia
+						,@strProducer = strProducer
+					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							strPricingType NVARCHAR(100) Collate Latin1_General_CI_AS
 							,strFutMarketName NVARCHAR(30) Collate Latin1_General_CI_AS
 							,strFutureMonth NVARCHAR(20) Collate Latin1_General_CI_AS
@@ -1164,8 +1231,23 @@ BEGIN TRY
 							,strLoadingPoint NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strDestinationPoint NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strDestinationCity NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strStorageLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strSubLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strStorageLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strSubLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strVesselStorageLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strVesselSubLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strShippingTerm NVARCHAR(64) Collate Latin1_General_CI_AS
+							,strShippingLine NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strShipper NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strShipToName NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strShipToLocationName NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strPurchasingGroupName NVARCHAR(150) Collate Latin1_General_CI_AS
+							,strInvoiceCurrency NVARCHAR(40) Collate Latin1_General_CI_AS
+							,strFXPriceUOM NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strFromCurrency NVARCHAR(40) Collate Latin1_General_CI_AS
+							,strToCurrency NVARCHAR(40) Collate Latin1_General_CI_AS
+							,strCurrencyExchangeRateType NVARCHAR(20) Collate Latin1_General_CI_AS
+							,strShipVia NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strProducer NVARCHAR(100) Collate Latin1_General_CI_AS
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -1361,14 +1443,42 @@ BEGIN TRY
 								)
 					END
 
-					IF @strStorageLocationName IS NOT NULL
+					--IF @strStorageLocationName IS NOT NULL
+					--	AND NOT EXISTS (
+					--		SELECT 1
+					--		FROM tblICStorageLocation SL
+					--		WHERE SL.strName = @strStorageLocationName
+					--		)
+					--BEGIN
+					--	SELECT @strErrorMessage = 'Storage Location Name ' + @strStorageLocationName + ' is not available.'
+					--	RAISERROR (
+					--			@strErrorMessage
+					--			,16
+					--			,1
+					--			)
+					--END
+					--IF @strSubLocationName IS NOT NULL
+					--	AND NOT EXISTS (
+					--		SELECT 1
+					--		FROM tblSMCompanyLocationSubLocation SB
+					--		WHERE SB.strSubLocationName = @strSubLocationName
+					--		)
+					--BEGIN
+					--	SELECT @strErrorMessage = 'Sub Location Name ' + @strSubLocationName + ' is not available.'
+					--	RAISERROR (
+					--			@strErrorMessage
+					--			,16
+					--			,1
+					--			)
+					--END
+					IF @strVesselStorageLocationName IS NOT NULL
 						AND NOT EXISTS (
 							SELECT 1
 							FROM tblICStorageLocation SL
-							WHERE SL.strName = @strStorageLocationName
+							WHERE SL.strName = @strVesselStorageLocationName
 							)
 					BEGIN
-						SELECT @strErrorMessage = 'Storage Location Name ' + @strStorageLocationName + ' is not available.'
+						SELECT @strErrorMessage = 'Storage Location Name ' + @strVesselStorageLocationName + ' is not available.'
 
 						RAISERROR (
 								@strErrorMessage
@@ -1377,14 +1487,210 @@ BEGIN TRY
 								)
 					END
 
-					IF @strSubLocationName IS NOT NULL
+					IF @strVesselSubLocationName IS NOT NULL
 						AND NOT EXISTS (
 							SELECT 1
 							FROM tblSMCompanyLocationSubLocation SB
-							WHERE SB.strSubLocationName = @strSubLocationName
+							WHERE SB.strSubLocationName = @strVesselSubLocationName
 							)
 					BEGIN
-						SELECT @strErrorMessage = 'Sub Location Name ' + @strSubLocationName + ' is not available.'
+						SELECT @strErrorMessage = 'Sub Location Name ' + @strVesselSubLocationName + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					IF @strShippingLine IS NOT NULL
+						AND NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntity ShippingLine
+							JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
+								AND ET.strType = 'Shipping Line'
+							WHERE ShippingLine.strName = @strShippingLine
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Shipping Line ' + @strShippingLine + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					IF @strShipper IS NOT NULL
+						AND NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntity ShippingLine
+							JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
+								AND ET.strType IN (
+									'Vendor'
+									,'Futures Broker'
+									)
+							WHERE ShippingLine.strName = @strShipper
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Shipper ' + @strShipper + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intShipToEntityId = NULL
+
+					SELECT @intShipToId = NULL
+
+					SELECT @intPurchasingGroupId = NULL
+
+					SELECT @intShipToEntityId = Customer.intEntityId
+					FROM tblEMEntity Customer
+					JOIN tblEMEntityType ET ON ET.intEntityId = Customer.intEntityId
+						AND ET.strType = 'Customer'
+					WHERE Customer.strName = @strShipToName
+
+					SELECT @intShipToId = intEntityLocationId
+					FROM tblEMEntityLocation
+					WHERE strLocationName = @strShipToLocationName
+						AND intEntityId = @intShipToEntityId
+
+					IF @strShipToLocationName IS NOT NULL
+						AND @intShipToId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Ship To ' + @strShipToLocationName + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intPurchasingGroupId = intPurchasingGroupId
+					FROM tblSMPurchasingGroup
+					WHERE strName = @strPurchasingGroupName
+
+					IF @strPurchasingGroupName IS NOT NULL
+						AND @intPurchasingGroupId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Purchasing Group ' + @strPurchasingGroupName + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intShipViaId = NULL
+
+					SELECT @intShipViaId = intEntityId
+					FROM tblEMEntity
+					WHERE strName = @strShipVia
+
+					IF @strShipVia IS NOT NULL
+						AND @intShipViaId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Ship Via ' + @strShipVia + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intInvoiceCurrencyId = NULL
+
+					SELECT @intInvoiceCurrencyId = intCurrencyID
+					FROM tblSMCurrency
+					WHERE strCurrency = @strInvoiceCurrency
+
+					IF @strInvoiceCurrency IS NOT NULL
+						AND @intInvoiceCurrencyId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Invoice Currency ' + @strInvoiceCurrency + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intFromCurrencyId = NULL
+
+					SELECT @intFromCurrencyId = intCurrencyID
+					FROM tblSMCurrency
+					WHERE strCurrency = @strFromCurrency
+
+					IF @strFromCurrency IS NOT NULL
+						AND @intFromCurrencyId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Currency ' + @strFromCurrency + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intToCurrencyId = NULL
+
+					SELECT @intToCurrencyId = intCurrencyID
+					FROM tblSMCurrency
+					WHERE strCurrency = @strToCurrency
+
+					IF @strToCurrency IS NOT NULL
+						AND @intToCurrencyId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Currency ' + @strToCurrency + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intCurrencyExchangeRateId = NULL
+
+					SELECT @intCurrencyExchangeRateId = intCurrencyExchangeRateId
+					FROM tblSMCurrencyExchangeRate
+					WHERE intFromCurrencyId = @intFromCurrencyId
+						AND intToCurrencyId = @intToCurrencyId
+
+					IF @strFromCurrency IS NOT NULL
+						AND @strToCurrency IS NOT NULL
+						AND @intCurrencyExchangeRateId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Currency pair from ' + @strFromCurrency + ' to ' + @strToCurrency + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intProducerId = NULL
+
+					SELECT @intProducerId = Producer.intEntityId
+					FROM tblEMEntity Producer
+					JOIN tblEMEntityType ET ON ET.intEntityId = Producer.intEntityId
+						AND ET.strType = 'Producer'
+					WHERE Producer.strName = @strProducer
+
+					IF @strProducer IS NOT NULL
+						AND @intProducerId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Producer ' + @strProducer + ' is not available.'
 
 						RAISERROR (
 								@strErrorMessage
@@ -1427,6 +1733,10 @@ BEGIN TRY
 
 					SELECT @intCompanyLocationSubLocationId = NULL
 
+					SELECT @intShippingLineId = NULL
+
+					SELECT @intShipperId = NULL
+
 					SELECT @intItemId = intItemId
 					FROM tblICItem I
 					WHERE I.strItemNo = @strItemNo
@@ -1439,6 +1749,49 @@ BEGIN TRY
 					FROM tblICItemUOM IU
 					WHERE IU.intItemId = @intItemId
 						AND IU.intUnitMeasureId = @intUnitMeasureId
+
+					SELECT @intFXPriceUOMId = NULL
+
+					SELECT @intFXPriceUOMId = intUnitMeasureId
+					FROM tblICUnitMeasure
+					WHERE strUnitMeasure = @strFXPriceUOM
+
+					SELECT @intFXPriceItemUOMId = NULL
+
+					SELECT @intFXPriceItemUOMId = intItemUOMId
+					FROM tblICItemUOM
+					WHERE intItemId = @intItemId
+						AND intUnitMeasureId = @intFXPriceUOMId
+
+					IF @strFXPriceUOM IS NOT NULL
+						AND @intFXPriceItemUOMId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'FX Price UOM ' + @strFXPriceUOM + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intCurrencyExchangeRateTypeId = NULL
+
+					SELECT @intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
+					FROM tblSMCurrencyExchangeRateType
+					WHERE strCurrencyExchangeRateType = @strCurrencyExchangeRateType
+
+					IF @strCurrencyExchangeRateType IS NOT NULL
+						AND @intCurrencyExchangeRateTypeId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Rate Type ' + @strCurrencyExchangeRateType + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 
 					SELECT @intStorageScheduleRuleId = intStorageScheduleRuleId
 					FROM tblGRStorageScheduleRule SR
@@ -1491,11 +1844,26 @@ BEGIN TRY
 
 					SELECT @intStorageLocationId = intStorageLocationId
 					FROM tblICStorageLocation SL
-					WHERE SL.strName = @strStorageLocationName
+					WHERE SL.strName = @strVesselStorageLocationName
 
 					SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
 					FROM tblSMCompanyLocationSubLocation SB
-					WHERE SB.strSubLocationName = @strSubLocationName
+					WHERE SB.strSubLocationName = @strVesselSubLocationName
+
+					SELECT @intShippingLineId = ShippingLine.intEntityId
+					FROM tblEMEntity ShippingLine
+					JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
+						AND ET.strType = 'Shipping Line'
+					WHERE ShippingLine.strName = @strShippingLine
+
+					SELECT @intShipperId = Shipper.intEntityId
+					FROM tblEMEntity Shipper
+					JOIN tblEMEntityType ET ON ET.intEntityId = Shipper.intEntityId
+						AND ET.strType IN (
+							'Vendor'
+							,'Futures Broker'
+							)
+					WHERE Shipper.strName = @strShipper
 
 					INSERT INTO #tmpContractDetail (
 						intContractHeaderId
@@ -1530,7 +1898,7 @@ BEGIN TRY
 						,intContractDetailRefId
 						,intFreightTermId
 						,strItemSpecification
-							,intDiscountTypeId
+						,intDiscountTypeId
 						,intBookId
 						,intLoadingPortId
 						,intDestinationPortId
@@ -1551,6 +1919,32 @@ BEGIN TRY
 						,intNumberOfContainers
 						,strPackingDescription
 						,dblYield
+						,intShippingLineId
+						,intShipperId
+						,strShippingTerm
+						,dblNoOfLots
+						,intShipToId
+						,intPurchasingGroupId
+						,intInvoiceCurrencyId
+						,dtmFXValidFrom
+						,dtmFXValidTo
+						,dblRate
+						,dblFXPrice
+						,ysnUseFXPrice
+						,intFXPriceUOMId
+						,strFXRemarks
+						,dblAssumedFX
+						,intCurrencyExchangeRateId
+						,intRateTypeId
+						,ysnInvoice
+						,ysnProvisionalInvoice
+						,ysnQuantityFinal
+						,ysnClaimsToProducer
+						,ysnRiskToProducer
+						,ysnBackToBack
+						,intProducerId
+						,intShipViaId
+						,strInvoiceNo
 						)
 					SELECT @intNewContractHeaderId
 						,@intItemId
@@ -1594,7 +1988,7 @@ BEGIN TRY
 						,strDestinationPointType
 						,@intStorageLocationId
 						,@intCompanyLocationSubLocationId
-						,x.strGrade
+						,x.strItemGrade
 						,x.strGarden
 						,x.intUnitsPerLayer
 						,x.intLayersPerPallet
@@ -1605,7 +1999,33 @@ BEGIN TRY
 						,x.intNumberOfContainers
 						,x.strPackingDescription
 						,x.dblYield
-					FROM OPENXML(@idoc, 'vyuCTContractDetailViews/vyuCTContractDetailView', 2) WITH (
+						,@intShippingLineId
+						,@intShipperId
+						,strShippingTerm
+						,x.dblNoOfLots
+						,@intShipToId
+						,@intPurchasingGroupId
+						,@intInvoiceCurrencyId
+						,x.dtmFXValidFrom
+						,x.dtmFXValidTo
+						,x.dblRate
+						,x.dblFXPrice
+						,x.ysnUseFXPrice
+						,@intFXPriceItemUOMId
+						,x.strFXRemarks
+						,x.dblAssumedFX
+						,x.intCurrencyExchangeRateId
+						,@intCurrencyExchangeRateTypeId
+						,ysnInvoice
+						,ysnProvisionalInvoice
+						,ysnQuantityFinal
+						,ysnClaimsToProducer
+						,ysnRiskToProducer
+						,ysnBackToBack
+						,@intProducerId
+						,@intShipViaId
+						,x.strInvoiceNo
+					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 							,dtmContractDate DATETIME
 							,dblHeaderQuantity NUMERIC(18, 6)
@@ -1649,10 +2069,10 @@ BEGIN TRY
 							,strVessel NVARCHAR(64) Collate Latin1_General_CI_AS
 							,strLoadingPointType NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strDestinationPointType NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strStorageLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strSubLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strStorageLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strSubLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strGarden NVARCHAR(128) Collate Latin1_General_CI_AS
-							,strGrade NVARCHAR(128) Collate Latin1_General_CI_AS
+							,strItemGrade NVARCHAR(128) Collate Latin1_General_CI_AS
 							,intUnitsPerLayer INT
 							,intLayersPerPallet INT
 							,dtmEventStartDate DATETIME
@@ -1662,6 +2082,25 @@ BEGIN TRY
 							,intNumberOfContainers INT
 							,strPackingDescription NVARCHAR(100) Collate Latin1_General_CI_AS
 							,dblYield NUMERIC(18, 6)
+							,strShippingTerm NVARCHAR(64) Collate Latin1_General_CI_AS
+							,dblNoOfLots NUMERIC(18, 6)
+							--,intInvoiceCurrencyId
+							,dtmFXValidFrom DATETIME
+							,dtmFXValidTo DATETIME
+							,dblRate NUMERIC(18, 6)
+							,dblFXPrice NUMERIC(18, 6)
+							,ysnUseFXPrice BIT
+							--,intFXPriceUOMId
+							,strFXRemarks NVARCHAR(64) Collate Latin1_General_CI_AS
+							,dblAssumedFX NUMERIC(18, 6)
+							,intCurrencyExchangeRateId INT
+							,ysnInvoice BIT
+							,ysnProvisionalInvoice BIT
+							,ysnQuantityFinal BIT
+							,ysnClaimsToProducer BIT
+							,ysnRiskToProducer BIT
+							,ysnBackToBack BIT
+							,strInvoiceNo NVARCHAR(100) Collate Latin1_General_CI_AS
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -2103,11 +2542,11 @@ BEGIN TRY
 							,intLoadingPortId = CD1.intLoadingPortId
 							,strDestinationPointType = CD1.strDestinationPointType
 							,intDestinationPortId = CD1.intDestinationPortId
-							,strShippingTerm = CD1.strShippingTerm
-							,intShippingLineId = CD1.intShippingLineId
+							--,strShippingTerm = CD1.strShippingTerm
+							--,intShippingLineId = CD1.intShippingLineId
 							,strVessel = CD1.strVessel
 							,intDestinationCityId = CD1.intDestinationCityId
-							,intShipperId = CD1.intShipperId
+							--,intShipperId = CD1.intShipperId
 							,strRemark = CD1.strRemark
 							,intSubLocationId = CD1.intSubLocationId
 							,intStorageLocationId = CD1.intStorageLocationId
@@ -2160,6 +2599,9 @@ BEGIN TRY
 							,ysnStockSale = CD1.ysnStockSale
 							,strCertifications = CD1.strCertifications
 							,ysnSplit = CD1.ysnSplit
+							,intShippingLineId = CD1.intShippingLineId
+							,intShipperId = CD1.intShipperId
+							,strShippingTerm = CD1.strShippingTerm
 						FROM tblCTContractDetail CD
 						JOIN #tmpContractDetail CD1 ON CD.intContractSeq = CD1.intContractSeq
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
@@ -2186,13 +2628,8 @@ BEGIN TRY
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strCostXML
 
-				DECLARE @strUOM NVARCHAR(50)
-					,@strVendorName NVARCHAR(50)
-					,@strCurrencyExchangeRateType NVARCHAR(50)
-					,@intContractCostId INT
-					,@intVendorId INT
-					,@intCurrencyExchangeRateTypeId INT
-				DECLARE @tblCTContractCost TABLE (intContractCostId INT)
+				DELETE
+				FROM @tblCTContractCost
 
 				INSERT INTO @tblCTContractCost (intContractCostId)
 				SELECT intContractCostId
@@ -2223,6 +2660,21 @@ BEGIN TRY
 							,intContractCostId INT
 							) CC
 					WHERE intContractCostId = @intContractCostId
+
+					SELECT @intItemId = NULL
+
+					SELECT @intUnitMeasureId = NULL
+
+					SELECT @intItemUOMId = NULL
+
+					SELECT @intCurrencyID = NULL
+
+					--SELECT @intMainCurrencyID = intCurrencyID
+					--FROM tblSMCurrency MY
+					--WHERE MY.intCurrencyID = @intMainCurrencyId
+					SELECT @intVendorId = NULL
+
+					SELECT @intCurrencyExchangeRateTypeId = NULL
 
 					SELECT @intItemId = intItemId
 					FROM tblICItem IM
@@ -2581,12 +3033,14 @@ BEGIN TRY
 						SELECT *
 						FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
 						LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
-						WHERE PR.strName IS NULL and x.strProducer is not null
+						WHERE PR.strName IS NULL
+							AND x.strProducer IS NOT NULL
 						)
 				BEGIN
 					SELECT @strErrorMessage = 'Producer ' + x.strProducer + ' is not available.'
 					FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
-					LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer and x.strProducer is not null
+					LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
+						AND x.strProducer IS NOT NULL
 					WHERE PR.strName IS NULL
 
 					RAISERROR (

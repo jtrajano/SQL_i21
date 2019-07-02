@@ -7674,6 +7674,7 @@
     <Build Include="dbo\Functions\fnTRValidateQuote.sql" />
     <Build Include="dbo\Tables\tblSMInterCompany.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyMapping.sql" />
+    <Build Include="dbo\Views\vyuIPContractDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
