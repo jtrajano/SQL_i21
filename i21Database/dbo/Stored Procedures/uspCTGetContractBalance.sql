@@ -804,12 +804,12 @@ BEGIN TRY
 	,dblCashPrice			= ISNULL(PF.dblCashPrice,0)
 	,dblCashPriceinCommodityStockUOM = ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,CH.intCommodityUOMId, ISNULL(PF.dblCashPrice,0)),0)
 	,strPriceUOM			=  PUOM.strUnitMeasure
-	,dblQtyinCommodityStockUOM = ISNULL(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId, (ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0))), 0)
+	,dblQtyinCommodityStockUOM = ISNULL(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId, (ISNULL(PF.dblQuantity,0) - ISNULL(dbo.fnCTConvertUOMtoUnit(CD.intItemId,CD.intItemUOMId,PF.dblShippedQty) ,0))), 0)
 	,strStockUOM			= dbo.fnCTGetCommodityUOM(C1.intUnitMeasureId)
 	,dblAvailableQty		=  ISNULL(dbo.fnICConvertUOMtoStockUnit(CD.intItemId,CD.intItemUOMId,ISNULL(PF.dblQuantity,0) - ISNULL(dbo.fnCTConvertUOMtoUnit(CD.intItemId,CD.intItemUOMId,PF.dblShippedQty) ,0)) ,0) 
 	,dblAmount				= (ISNULL(PF.dblQuantity,0) - ISNULL(dbo.fnCTConvertUOMtoUnit(CD.intItemId,CD.intItemUOMId,PF.dblShippedQty) ,0)) * (ISNULL(PF.dblCashPrice,0))
 	,dblAmountinCommodityStockUOM = -- This is dblQtyinCommodityStockUOM
-									ISNULL(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId, (ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0))), 0)
+									ISNULL(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId, (ISNULL(PF.dblQuantity,0) - ISNULL(dbo.fnCTConvertUOMtoUnit(CD.intItemId,CD.intItemUOMId,PF.dblShippedQty) ,0))), 0)
 									* --dblCashPriceinCommodityStockUOM
 									ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intUnitMeasureId,CH.intCommodityUOMId, ISNULL(PF.dblCashPrice,0)),0)
 	,intUnitMeasureId			= CD.intItemUOMId
