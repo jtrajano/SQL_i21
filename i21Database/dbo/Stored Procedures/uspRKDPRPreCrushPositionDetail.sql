@@ -785,6 +785,7 @@ BEGIN
 						, co.strCommodityCode
 						, cl.strLocationName
 						, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+						, ysnIncludeInPriceRiskAndCompanyTitled
 					FROM tblRKCollateral c
 					LEFT JOIN (
 						SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
@@ -800,7 +801,7 @@ BEGIN
 					WHERE c.intCommodityId = @intCommodityId 
 						AND c.intLocationId = ISNULL(@intLocationId, c.intLocationId)
 						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-				) a WHERE a.intRowNum = 1
+				) a WHERE a.intRowNum = 1 AND ysnIncludeInPriceRiskAndCompanyTitled = 1
 			) t GROUP BY strCommodityCode
 				, strLocationName
 				, intCommodityId
