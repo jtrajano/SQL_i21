@@ -41,6 +41,7 @@
 [ysnValidateExternalShipmentNo] [bit] NULL,
 [ysnETAMandatory] [bit] NULL,
 [ysnPOETAFeedToERP] [bit] NULL,
+[ysnFeedETAToUpdatedAvailabilityDate] [bit] NULL,
 [strSignature] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [ysnContractSlspnOnEmail] BIT,
 [ysnShowContainersInWarehouseTab] BIT,

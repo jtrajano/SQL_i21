@@ -56,6 +56,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnValidateExternalPONo
 	,CP.ysnETAMandatory
 	,CP.ysnPOETAFeedToERP
+	,CP.ysnFeedETAToUpdatedAvailabilityDate
 	--,CP.ysnContractSlspnOnEmail
 	--,CP.strSignature
 	,CP.strCarrierShipmentStandardText
