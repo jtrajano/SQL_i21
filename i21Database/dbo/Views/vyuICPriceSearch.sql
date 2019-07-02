@@ -7,7 +7,7 @@ AS
 		,strItemNo,strLocationName,strLocationType,strLongUPCCode,strLotTracking,strName,strPricingMethod,strPricingType,strPromotionType,strStatus,strType,strUPC
 		,strUnitMeasure,strUnitType,strUpcCode,strVendorId,strVendorName,ysnAllowPurchase,ysnAllowSale,ysnStockUnit
 	FROM (
-		SELECT 'Item Pricing' strPricingCategory,
+		SELECT 'Item Pricing' COLLATE Latin1_General_CI_AS strPricingCategory,
 			dblAccumulatedAmount = NULL, dblAccumulatedQty = NULL, dblAmountPercent, dblAverageCost, dblDiscount = NULL, dblDiscountThruAmount = NULL, dblDiscountThruQty = NULL, dblDiscountedPrice = NULL
 		, dblEndMonthCost, dblLastCost, dblMSRPPrice, dblSalePrice, dblStandardCost, dblUnit = NULL, dblUnitAfterDiscount = NULL, dblUnitQty, dtmBeginDate = NULL
 		, dtmEndDate = NULL, intCategoryId = NULL, intCommodityId = NULL, intConcurrencyId = NULL, intCurrencyId = NULL, intDecimalPlaces, intEntityVendorId = NULL, intItemId, intItemLocationId
@@ -20,7 +20,7 @@ AS
 
 	UNION ALL
 
-		SELECT 'Vendor Pricing' strPricingCategory,
+		SELECT 'Vendor Pricing' COLLATE Latin1_General_CI_AS strPricingCategory ,
 			dblAccumulatedAmount  = NULL, dblAccumulatedQty  = NULL, dblAmountPercent  = NULL, dblAverageCost  = NULL, dblDiscount  = NULL, dblDiscountThruAmount  = NULL, dblDiscountThruQty  = NULL
 		, dblDiscountedPrice = NULL, dblEndMonthCost = NULL, dblLastCost = NULL, dblMSRPPrice = NULL, dblSalePrice = NULL, dblStandardCost = NULL, dblUnit
 		, dblUnitAfterDiscount = NULL, dblUnitQty = NULL, dtmBeginDate
@@ -33,7 +33,7 @@ AS
 
 	UNION ALL
 
-		SELECT 'Pricing Level' strPricingCategory,
+		SELECT 'Pricing Level' COLLATE Latin1_General_CI_AS strPricingCategory ,
 			dblAccumulatedAmount = NULL, dblAccumulatedQty = NULL, dblAmountPercent = NULL, dblAverageCost = NULL, dblDiscount = NULL, dblDiscountThruAmount = NULL, dblDiscountThruQty
 			 = NULL, dblDiscountedPrice = NULL, dblEndMonthCost = NULL, dblLastCost = NULL, dblMSRPPrice = NULL, dblSalePrice = NULL, dblStandardCost = NULL, dblUnit, dblUnitAfterDiscount = NULL
 			, dblUnitQty = NULL, dtmBeginDate = NULL, dtmEndDate = NULL, intCategoryId, intCommodityId, intConcurrencyId, intCurrencyId, intDecimalPlaces = NULL
@@ -46,7 +46,7 @@ AS
 
 	UNION ALL
 
-		SELECT 'Special Pricing' strPricingCategory,
+		SELECT 'Special Pricing' COLLATE Latin1_General_CI_AS strPricingCategory,
 			dblAccumulatedAmount, dblAccumulatedQty, dblAmountPercent = NULL, dblAverageCost = NULL, dblDiscount, dblDiscountThruAmount, dblDiscountThruQty
 			, dblDiscountedPrice, dblEndMonthCost = NULL, dblLastCost = NULL, dblMSRPPrice = NULL, dblSalePrice = NULL, dblStandardCost = NULL, dblUnit
 			, dblUnitAfterDiscount, dblUnitQty = NULL, dtmBeginDate, dtmEndDate, intCategoryId, intCommodityId, intConcurrencyId, intCurrencyId
