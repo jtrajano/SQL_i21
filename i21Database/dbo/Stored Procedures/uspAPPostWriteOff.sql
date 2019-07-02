@@ -173,6 +173,11 @@ BEGIN
 	    strRateType FROM dbo.fnAPReverseGLEntries(@Ids, 'Payable', DEFAULT, @userId, @batchId)
 END
 
+UPDATE GL SET intSourceEntityId = PAY.intEntityVendorId
+FROM @GLEntries GL
+JOIN tblAPPayment PAY
+ON GL.strTransactionId = PAY.strPaymentRecordNum
+
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------

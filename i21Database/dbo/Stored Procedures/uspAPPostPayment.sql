@@ -575,6 +575,12 @@ BEGIN
 	END
 END
 
+-- Get the vendor id to intSourceEntityId
+UPDATE GL SET intSourceEntityId = PAY.intEntityVendorId
+FROM @GLEntries GL
+JOIN tblAPPayment PAY
+ON GL.strTransactionId = PAY.strPaymentRecordNum
+
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------

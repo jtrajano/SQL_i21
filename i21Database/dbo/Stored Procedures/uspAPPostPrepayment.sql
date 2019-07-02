@@ -191,6 +191,12 @@ BEGIN
 	    strRateType FROM dbo.fnAPReverseGLEntries(@Ids, 'Payable', DEFAULT, @userId, @batchId)
 END
 
+-- Get the vendor id to intSourceEntityId
+UPDATE GL SET intSourceEntityId = PAY.intEntityVendorId
+FROM @GLEntries GL
+JOIN tblAPPayment PAY
+ON GL.strTransactionId = PAY.strPaymentRecordNum
+
 --START TRANSACTION AFTER DATA ANALYSIS https://technet.microsoft.com/en-us/library/ms187484(v=sql.105).aspx
 SET @transCount = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION

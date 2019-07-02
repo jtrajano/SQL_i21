@@ -1013,6 +1013,13 @@ BEGIN
 		SET @totalRecords = @totalRecords - @failedAdjustment;
 	END
 END
+
+-- Get the vendor id to intSourceEntityId
+UPDATE GL SET intSourceEntityId = BL.intEntityVendorId
+FROM @GLEntries GL
+JOIN tblAPBill BL
+ON GL.strTransactionId = BL.strBillId
+
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------

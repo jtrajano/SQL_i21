@@ -219,6 +219,12 @@ BEGIN
 	) AND A.ysnIsUnposted = 0
 END
 
+-- Get the vendor id to intSourceEntityId
+UPDATE GL SET intSourceEntityId = BL.intEntityVendorId
+FROM @GLEntries GL
+JOIN tblAPBill BL
+ON GL.strTransactionId = BL.strBillId
+
 IF @recap = 0
 BEGIN
 
