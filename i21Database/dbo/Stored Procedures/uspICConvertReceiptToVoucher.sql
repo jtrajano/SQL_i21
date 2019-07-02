@@ -141,7 +141,7 @@ BEGIN
 		,[intShipToId] = GP.intLocationId	
 		,[intShipFromId] = GP.intShipFromId	 		
 		,[intShipFromEntityId] = GP.intShipFromEntityId
-		,[intPayToAddressId] = GP.intShipFromId
+		,[intPayToAddressId] = GP.intLocationId
 		,GP.[intCurrencyId]					
 		,GP.[dtmDate]				
 		,GP.[strVendorOrderNumber]		
