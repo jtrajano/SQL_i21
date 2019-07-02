@@ -212,22 +212,26 @@ END
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Rename tblSTStoreAppUploadHistory
 ----------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreAppUploadHistory') 
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreAppUploadHistory') 
 	BEGIN
-		PRINT('Rename tblSTStoreAppUploadHistory to tblSTStoreAppHistoryReports')
-		EXEC('
-				EXEC sp_rename ''dbo.tblSTStoreAppUploadHistory'', ''tblSTStoreAppHistoryReports''
-			')
+		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreAppHistoryReports')
+			BEGIN
+				PRINT('Rename tblSTStoreAppUploadHistory to tblSTStoreAppHistoryReports')
+				EXEC('
+						EXEC sp_rename ''dbo.tblSTStoreAppUploadHistory'', ''tblSTStoreAppHistoryReports''
+					')
 
-		PRINT('Rename tblSTStoreAppHistoryReports.stri21FolderPath to tblSTStoreAppHistoryReports.strServerFolderPath')
-		EXEC('
-				EXEC sp_rename ''tblSTStoreAppHistoryReports.stri21FolderPath'' , ''strServerFolderPath'', ''COLUMN''
-			')
+				PRINT('Rename tblSTStoreAppHistoryReports.stri21FolderPath to tblSTStoreAppHistoryReports.strServerFolderPath')
+				EXEC('
+						EXEC sp_rename ''tblSTStoreAppHistoryReports.stri21FolderPath'' , ''strServerFolderPath'', ''COLUMN''
+					')
 
-		PRINT('Rename tblSTStoreAppHistoryReports.stri21ConvertedFilename to tblSTStoreAppHistoryReports.strServerFilename')
-		EXEC('
-				EXEC sp_rename ''tblSTStoreAppHistoryReports.stri21ConvertedFilename'' , ''strServerFilename'', ''COLUMN''
-			')
+				PRINT('Rename tblSTStoreAppHistoryReports.stri21ConvertedFilename to tblSTStoreAppHistoryReports.strServerFilename')
+				EXEC('
+						EXEC sp_rename ''tblSTStoreAppHistoryReports.stri21ConvertedFilename'' , ''strServerFilename'', ''COLUMN''
+					')
+			END
 
 	END
 ----------------------------------------------------------------------------------------------------------------------------------
@@ -240,7 +244,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTSto
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: tblSTCheckoutMarkUpDowns Clean Up
 ----------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTCheckoutMarkUpDowns') 
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTCheckoutMarkUpDowns') 
 	BEGIN
 		EXEC('
 				IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMarkUpDowns
@@ -268,7 +272,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTChe
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Preview and Report table Clean Up 
 ----------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateItemDataPreview') 
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateItemDataPreview') 
 	BEGIN
 		PRINT(N'Remove all records from tblSTUpdateItemDataPreview')
 		EXEC('
@@ -276,7 +280,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpd
 			')
 	END
 
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateItemPricingPreview') 
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateItemPricingPreview') 
 	BEGIN
 		PRINT(N'Remove all records from tblSTUpdateItemPricingPreview')
 		EXEC('
@@ -284,7 +288,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpd
 			')
 	END
 
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateRebateOrDiscountPreview') 
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateRebateOrDiscountPreview') 
 	BEGIN
 		PRINT(N'Remove all records from tblSTUpdateRebateOrDiscountPreview')
 		EXEC('
@@ -292,7 +296,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpd
 			')
 	END
 	
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateRegisterItemReport') 
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpdateRegisterItemReport') 
 	BEGIN
 		PRINT(N'Remove all records from tblSTUpdateRegisterItemReport')
 		EXEC('
@@ -310,7 +314,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTUpd
 -- ===============================================================================================================================
 -- [START] Drop tables
 -- ===============================================================================================================================
-IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreGLAccount') 
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTStoreGLAccount') 
 	BEGIN
 		PRINT(N'Drop table tblSTStoreGLAccount')
 		EXEC('
