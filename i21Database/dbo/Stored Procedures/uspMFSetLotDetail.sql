@@ -12,7 +12,7 @@
 	,@ysnBulkChange BIT = 0
 	,@strNewLotAlias NVARCHAR(50) = NULL
 	,@strNewVendorLotNumber NVARCHAR(50) = NULL
-	,@dtmNewDueDate DATETIME=NULL
+	,@dtmNewDueDate DATETIME = NULL
 	,@intLoadId INT = NULL
 AS
 BEGIN TRY
@@ -60,7 +60,8 @@ BEGIN TRY
 			,@ysnBulkChange = @ysnBulkChange
 			,@strNewLotAlias = @strNewLotAlias
 			,@strNewVendorLotNumber = @strNewVendorLotNumber
-			,@dtmNewDueDate=@dtmNewDueDate
+			,@dtmNewDueDate = @dtmNewDueDate
+			,@intLoadId = @intLoadId
 
 		SELECT @intLotId = Min(intLotId)
 		FROM @tblMFLot

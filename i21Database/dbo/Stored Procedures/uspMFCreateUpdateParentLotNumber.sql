@@ -52,6 +52,7 @@ BEGIN
 		,@intManufacturingProcessId INT
 		,@ysnLotNumberUniqueByItem BIT
 		,@ysnIRCorrection BIT
+		,@intLoadId INT
 	DECLARE @tblICLot TABLE (intLotId INT)
 
 	SELECT @strLifeTimeType = strLifeTimeType
@@ -148,10 +149,8 @@ BEGIN
 	--			,16
 	--			,1
 	--			)
-
 	--	RETURN - 1;
 	--END
-
 	IF NOT EXISTS (
 			SELECT 1
 			FROM tblICLot
@@ -315,6 +314,7 @@ BEGIN
 			,@ysnPickAllowed = ysnPickAllowed
 			,@intWorkOrderId = intWorkOrderId
 			,@intManufacturingProcessId = intManufacturingProcessId
+			,@intLoadId = intLoadId
 		FROM tblMFLotInventory LI
 		WHERE LI.intLotId = @intSplitFromLotId
 
@@ -391,6 +391,7 @@ BEGIN
 			,ysnPickAllowed
 			,intWorkOrderId
 			,intManufacturingProcessId
+			,intLoadId
 			)
 		SELECT @intLotId
 			,@intBondStatusId
@@ -404,6 +405,7 @@ BEGIN
 			,IsNULL(@ysnPickAllowed, 1)
 			,@intWorkOrderId
 			,@intManufacturingProcessId
+			,@intLoadId
 	END
 	ELSE
 	BEGIN

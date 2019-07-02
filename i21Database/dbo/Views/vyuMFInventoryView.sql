@@ -2,7 +2,11 @@
 AS
 SELECT l.intLotId
 	,l.strLotNumber
-	,Case When CP.ysnCostEnabled =1 Then dbo.fnGetLotUnitCost(l.intLotId) Else l.dblLastCost End AS dblLastCost
+	,CASE 
+		WHEN CP.ysnCostEnabled = 1
+			THEN dbo.fnGetLotUnitCost(l.intLotId)
+		ELSE l.dblLastCost
+		END AS dblLastCost
 	,l.dtmDateCreated
 	,l.dtmExpiryDate
 	,l.strLotAlias
@@ -38,11 +42,18 @@ SELECT l.intLotId
 	,l.ysnProduced
 	,l.ysnStorage
 	,l.intOwnershipType
-	,strOwnershipType = (CASE WHEN l.intOwnershipType = 1 THEN 'Own'
-						WHEN l.intOwnershipType = 2 THEN 'Storage'
-						WHEN l.intOwnershipType = 3 THEN 'Consigned Purchase'
-						WHEN l.intOwnershipType = 4 THEN 'Consigned Sale'
-						END) COLLATE Latin1_General_CI_AS
+	,strOwnershipType = (
+		CASE 
+			WHEN l.intOwnershipType = 1
+				THEN 'Own'
+			WHEN l.intOwnershipType = 2
+				THEN 'Storage'
+			WHEN l.intOwnershipType = 3
+				THEN 'Consigned Purchase'
+			WHEN l.intOwnershipType = 4
+				THEN 'Consigned Sale'
+			END
+		) COLLATE Latin1_General_CI_AS
 	,l.intGradeId
 	,l.intCreatedUserId
 	,l.intConcurrencyId
@@ -151,13 +162,13 @@ LEFT JOIN tblMFLotInventory LI ON LI.intLotId = l.intLotId
 LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = l.intItemOwnerId
 LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
 LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
-Left JOIN tblEMEntity e3 on e3.intEntityId=l.intProducerId
+LEFT JOIN tblEMEntity e3 ON e3.intEntityId = l.intProducerId
 LEFT JOIN tblMFReportCategory RC ON RC.intCategoryId = ic.intCategoryId
 LEFT JOIN tblMFReportCategoryByCustomer RCC ON RCC.intCategoryId = ic.intCategoryId
 	AND RCC.intReportType = 1
 LEFT JOIN tblMFReportCategoryByCustomer RCC1 ON RCC1.intCategoryId = ic.intCategoryId
 	AND RCC1.intReportType = 2
 LEFT JOIN tblMFManufacturingProcess mp ON LI.intManufacturingProcessId = mp.intManufacturingProcessId
-Left JOIN tblMFCompanyPreference CP on 1=1
+LEFT JOIN tblMFCompanyPreference CP ON 1 = 1
 LEFT JOIN tblMFWorkOrder W ON W.intWorkOrderId = LI.intWorkOrderId
-LEFT JOIN tblLGLoad LO ON LO.intLoadId = W.intLoadId
+LEFT JOIN tblLGLoad LO ON LO.intLoadId = LI.intLoadId

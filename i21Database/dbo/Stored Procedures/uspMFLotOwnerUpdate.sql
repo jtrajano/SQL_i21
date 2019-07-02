@@ -12,7 +12,8 @@
 	,@ysnBulkChange BIT = 0
 	,@strNewLotAlias NVARCHAR(50) = NULL
 	,@strNewVendorLotNumber NVARCHAR(50) = NULL
-	,@dtmNewDueDate DATETime=NULL
+	,@dtmNewDueDate DATETIME = NULL
+	,@intLoadId INT = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -41,7 +42,8 @@ BEGIN TRY
 		,@strDescription NVARCHAR(MAX)
 		,@strLotAlias NVARCHAR(50)
 		,@strVendorLotNumber NVARCHAR(50)
-		,@dtmOldDueDate datetime
+		,@dtmOldDueDate DATETIME
+		,@intOldLoadId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -240,7 +242,8 @@ BEGIN TRY
 		-- Vendor & Warehouse ref no update
 		SELECT @strOldVendorRefNo = strVendorRefNo
 			,@strOldWarehouseRefNo = strWarehouseRefNo
-			,@dtmOldDueDate=dtmDueDate
+			,@dtmOldDueDate = dtmDueDate
+			,@intOldLoadId = intLoadId
 		FROM tblMFLotInventory
 		WHERE intLotId = @intLotId
 
@@ -276,6 +279,13 @@ BEGIN TRY
 			END
 		END
 
+		IF ISNULL(@intOldLoadId, 0) <> ISNULL(@intLoadId, 0)
+		BEGIN
+			UPDATE tblMFLotInventory
+			SET intLoadId = @intLoadId
+			WHERE intLotId = @intLotId
+		END
+
 		-- Container No & Notes(Remarks) update
 		SELECT @strOldNotes = strNotes
 			,@strOldContainerNo = strContainerNo
@@ -284,21 +294,18 @@ BEGIN TRY
 
 		IF ISNULL(@strOldNotes, '') <> ISNULL(@strNotes, '')
 		BEGIN
-			EXEC uspICUpdateLotInfo
-				@strField = 'strNotes',
-				@strValue = @strNotes,
-				@intSecurityUserId = @intUserId,
-				@intLotId =@intLotId
+			EXEC uspICUpdateLotInfo @strField = 'strNotes'
+				,@strValue = @strNotes
+				,@intSecurityUserId = @intUserId
+				,@intLotId = @intLotId
 		END
 
 		IF ISNULL(@strOldContainerNo, '') <> ISNULL(@strContainerNo, '')
 		BEGIN
-			EXEC uspICUpdateLotInfo
-				@strField = 'strContainerNo',
-				@strValue = @strContainerNo,
-				@intSecurityUserId = @intUserId,
-				@intLotId = @intLotId
-
+			EXEC uspICUpdateLotInfo @strField = 'strContainerNo'
+				,@strValue = @strContainerNo
+				,@intSecurityUserId = @intUserId
+				,@intLotId = @intLotId
 		END
 
 		IF IsNULL(@strLotAlias, '') <> IsNULL(@strNewLotAlias, '')
@@ -322,6 +329,7 @@ BEGIN TRY
 				,@dtmDate = NULL
 				,@ysnBulkChange = 0
 		END
+
 		IF IsNULL(@dtmOldDueDate, '1900-01-01') <> IsNULL(@dtmNewDueDate, '1900-01-01')
 		BEGIN
 			EXEC dbo.uspMFSetLotDueDate @intLotId = @intLotId

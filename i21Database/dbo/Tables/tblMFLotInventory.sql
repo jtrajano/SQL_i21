@@ -16,7 +16,8 @@
 	,intCompanyId INT NULL
 	,intWorkOrderId int
 	,intManufacturingProcessId int
-	CONSTRAINT [PK_tblMFLotInventory] PRIMARY KEY ([intLotInventoryId]), 
+	,intLoadId int
+	,CONSTRAINT [PK_tblMFLotInventory] PRIMARY KEY ([intLotInventoryId]), 
 	CONSTRAINT [AK_tblMFLotInventory_intLotId] UNIQUE ([intLotId]), 
 	CONSTRAINT [FK_tblMFLotInventory_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFLotInventory_tblICItemOwner] FOREIGN KEY ([intItemOwnerId]) REFERENCES [tblICItemOwner]([intItemOwnerId])

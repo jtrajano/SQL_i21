@@ -54,6 +54,7 @@ BEGIN
 		,@strPickLot NVARCHAR(50)
 		,@ysnLotWeightsRequired BIT
 		,@ysnConcatenateParentLotonProduction BIT
+		,@intLoadId INT
 
 	SELECT @dtmCreated = Getdate()
 
@@ -101,6 +102,7 @@ BEGIN
 		SELECT @intShiftId = NULL
 
 	SELECT @intProductId = intItemId
+		,@intLoadId = intLoadId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -229,7 +231,12 @@ BEGIN
 				END
 			)
 		,intStatusId = @intStatusId
-		,intStorageLocationId = Case When intItemId = @intItemId and intStorageLocationId is null Then @intStorageLocationId Else intStorageLocationId End
+		,intStorageLocationId = CASE 
+			WHEN intItemId = @intItemId
+				AND intStorageLocationId IS NULL
+				THEN @intStorageLocationId
+			ELSE intStorageLocationId
+			END
 		,intActualShiftId = @intBusinessShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -310,8 +317,8 @@ BEGIN
 	FROM dbo.tblMFManufacturingProcess
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 
-	SELECT @ysnConcatenateParentLotonProduction=ysnConcatenateParentLotonProduction
-		FROM tblMFCompanyPreference
+	SELECT @ysnConcatenateParentLotonProduction = ysnConcatenateParentLotonProduction
+	FROM tblMFCompanyPreference
 
 	IF @intAttributeTypeId = 2
 		OR @ysnPostProduction = 1
@@ -321,7 +328,8 @@ BEGIN
 				FROM tblICLot L
 				WHERE L.strLotNumber = @strLotNumber
 					AND L.dblQty > 0
-				) and @ysnConcatenateParentLotonProduction=1
+				)
+			AND @ysnConcatenateParentLotonProduction = 1
 		BEGIN
 			SELECT @intParentLotId1 = intParentLotId
 			FROM tblICLot
@@ -358,10 +366,12 @@ BEGIN
 		IF @ysnProducedQtyByUnitCount IS NULL
 			SELECT @ysnProducedQtyByUnitCount = 0
 
-		IF (@ysnProducedQtyByUnitCount = 1
-			OR @intProduceUOMKey IS NULL
-			OR @intProduceUOMKey = 0
-			OR @intPhysicalItemUOMId=@intProduceUOMKey)
+		IF (
+				@ysnProducedQtyByUnitCount = 1
+				OR @intProduceUOMKey IS NULL
+				OR @intProduceUOMKey = 0
+				OR @intPhysicalItemUOMId = @intProduceUOMKey
+				)
 		BEGIN
 			SELECT @dblUnitQty = 0
 
@@ -415,13 +425,15 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-
 		IF @ysnProducedQtyByUnitCount IS NULL
 			SELECT @ysnProducedQtyByUnitCount = 0
 
-		IF (@ysnProducedQtyByUnitCount = 1
-			OR @intProduceUOMKey IS NULL
-			OR @intProduceUOMKey = 0 OR @intPhysicalItemUOMId=@intProduceUOMKey)
+		IF (
+				@ysnProducedQtyByUnitCount = 1
+				OR @intProduceUOMKey IS NULL
+				OR @intProduceUOMKey = 0
+				OR @intPhysicalItemUOMId = @intProduceUOMKey
+				)
 		BEGIN
 			SELECT @dblUnitQty = 0
 
@@ -506,6 +518,7 @@ BEGIN
 
 	UPDATE tblMFLotInventory
 	SET dblTareWeight = @dblTareWeight
+		,intLoadId = @intLoadId
 	WHERE intLotId = @intLotId
 
 	IF @intSpecialPalletLotId IS NOT NULL
@@ -644,6 +657,7 @@ BEGIN
 		SET ysnPickAllowed = 0
 		WHERE intLotId = @intLotId
 	END
+
 	UPDATE tblMFLotInventory
 	SET ysnPickAllowed = CASE 
 			WHEN @strPickLot = 'True'
@@ -651,29 +665,29 @@ BEGIN
 			ELSE 1
 			END
 		,intWorkOrderId = @intWorkOrderId
-		,intManufacturingProcessId=@intManufacturingProcessId
+		,intManufacturingProcessId = @intManufacturingProcessId
 	WHERE intLotId = @intLotId
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmProductionDate
-			,@intTransactionTypeId = 9
-			,@intItemId = @intItemId
-			,@intSourceLotId = @intLotId
-			,@intDestinationLotId = NULL
-			,@dblQty = @dblPhysicalCount
-			,@intItemUOMId = @intPhysicalItemUOMId
-			,@intOldItemId = NULL
-			,@dtmOldExpiryDate = NULL
-			,@dtmNewExpiryDate = NULL
-			,@intOldLotStatusId = NULL
-			,@intNewLotStatusId = NULL
-			,@intUserId = @intUserId
-			,@strNote = @strComment
-			,@strReason = NULL
-			,@intLocationId = @intLocationId
-			,@intInventoryAdjustmentId = NULL
-			,@intStorageLocationId  = @intStorageLocationId
-			,@intDestinationStorageLocationId  = NULL
-			,@intWorkOrderInputLotId  = NULL
-			,@intWorkOrderProducedLotId  = @intWorkOrderProducedLotId
-			,@intWorkOrderId  = @intWorkOrderId
+		,@intTransactionTypeId = 9
+		,@intItemId = @intItemId
+		,@intSourceLotId = @intLotId
+		,@intDestinationLotId = NULL
+		,@dblQty = @dblPhysicalCount
+		,@intItemUOMId = @intPhysicalItemUOMId
+		,@intOldItemId = NULL
+		,@dtmOldExpiryDate = NULL
+		,@dtmNewExpiryDate = NULL
+		,@intOldLotStatusId = NULL
+		,@intNewLotStatusId = NULL
+		,@intUserId = @intUserId
+		,@strNote = @strComment
+		,@strReason = NULL
+		,@intLocationId = @intLocationId
+		,@intInventoryAdjustmentId = NULL
+		,@intStorageLocationId = @intStorageLocationId
+		,@intDestinationStorageLocationId = NULL
+		,@intWorkOrderInputLotId = NULL
+		,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+		,@intWorkOrderId = @intWorkOrderId
 END
