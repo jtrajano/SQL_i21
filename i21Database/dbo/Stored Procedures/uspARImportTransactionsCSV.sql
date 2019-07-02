@@ -528,7 +528,15 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intTransactionId]			= NULL
 							,[intEntityId]				= @EntityId
 							,[ysnResetDetails]			= 1
-							,[ysnPost]					= case when isnull(@ysnOrigin, 0) = 1 then null  else CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END end
+							,[ysnPost]					= CASE WHEN isnull(@ysnOrigin, 0) = 1 
+															THEN NULL
+															ELSE  
+																CASE WHEN @TransactionType IN ('Customer Prepayment', 'Overpayment') THEN 0
+																ELSE CASE WHEN @PostDate IS NULL THEN 0 
+																	 ELSE 1 
+															    END
+															END
+														  END 
 							,[ysnImportedFromOrigin]	= CASE WHEN @ysnOrigin = 1 THEN 1 ELSE 0 END
 							,[ysnImportedAsPosted]		= CASE WHEN @ysnOrigin = 1 THEN 1 ELSE 0 END
 							,[intInvoiceDetailId]		= NULL
