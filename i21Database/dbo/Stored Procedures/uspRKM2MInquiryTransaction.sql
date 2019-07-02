@@ -421,8 +421,8 @@ SELECT DISTINCT CH.intCommodityUOMId intCommodityUnitMeasureId
 	, IM.intOriginId
 	, IM.strLotTracking
 	, case when isnull(ysnMultiplePriceFixation,0)=1 then CH.dblNoOfLots else  CD.dblNoOfLots end dblNoOfLots
-	, PF.dblLotsFixed
-	, PF.dblPriceWORollArb
+	, dblLotsFixed = NULL --PF.dblLotsFixed
+	, dblPriceWORollArb = NULL --PF.dblPriceWORollArb
 	, CH.dblNoOfLots dblHeaderNoOfLots
 	, CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) AS ysnSubCurrency
 	, CD.intCompanyLocationId
@@ -433,24 +433,25 @@ SELECT DISTINCT CH.intCommodityUOMId intCommodityUnitMeasureId
 	, FM.intUnitMeasureId intMarketUOMId
 	, FM.intCurrencyId intMarketCurrencyId
 	, dblInvoicedQty AS dblInvoicedQuantity
-	, ISNULL(CASE WHEN CD.intPricingTypeId = 1 and PF.intPriceFixationId is NULL then CD.dblQuantity else PF.dblQuantity end,0) dblPricedQty
-	, ISNULL(CASE WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NOT NULL THEN ISNULL(CD.dblQuantity,0)-ISNULL(PF.dblQuantity ,0)
-				WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NULL then ISNULL(CD.dblQuantity,0)
-				ELSE 0 end,0) dblUnPricedQty
-	, ISNULL(CASE WHEN CD.intPricingTypeId =1 and PF.intPriceFixationId is NULL then CD.dblCashPrice else PF.dblFinalPrice end,0) dblPricedAmount
+	, dblPricedQty = NULL --ISNULL(CASE WHEN CD.intPricingTypeId = 1 and PF.intPriceFixationId is NULL then CD.dblQuantity else PF.dblQuantity end,0) dblPricedQty
+	,dblUnPricedQty = NULL
+	--, ISNULL(CASE WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NOT NULL THEN ISNULL(CD.dblQuantity,0)-ISNULL(PF.dblQuantity ,0)
+	--			WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NULL then ISNULL(CD.dblQuantity,0)
+	--			ELSE 0 end,0) dblUnPricedQty
+	, dblPricedAmount = NULL --ISNULL(CASE WHEN CD.intPricingTypeId =1 and PF.intPriceFixationId is NULL then CD.dblCashPrice else PF.dblFinalPrice end,0) dblPricedAmount
 	, MZ.strMarketZoneCode
 FROM tblCTContractHeader CH
 INNER JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
 INNER JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
 INNER JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId
-INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId not in(2,3,6)
+INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId--AND CD.intContractStatusId not in(2,3,6)
 INNER JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 INNER JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 INNER JOIN tblICItemUOM PU ON PU.intItemUOMId = CD.intPriceItemUOMId
-INNER JOIN #tblPriceFixationDetail PF ON PF.intContractDetailId = CD.intContractDetailId
+--INNER JOIN #tblPriceFixationDetail PF ON PF.intContractDetailId = CD.intContractDetailId
 LEFT JOIN @tblGetOpenContractDetail OCD ON CD.intContractDetailId = OCD.intContractDetailId
 LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CD.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId
@@ -458,10 +459,10 @@ LEFT JOIN tblCTPosition PO ON PO.intPositionId = CH.intPositionId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
 LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = CD.intMarketZoneId
 WHERE CH.intCommodityId = @intCommodityId
-	AND CD.dblQuantity > ISNULL(CD.dblInvoicedQty,0)
+	--AND CD.dblQuantity > ISNULL(CD.dblInvoicedQty,0)
 	AND CL.intCompanyLocationId = ISNULL(@intLocationId, CL.intCompanyLocationId)
 	AND ISNULL(CD.intMarketZoneId, 0) = ISNULL(@intMarketZoneId, ISNULL(CD.intMarketZoneId, 0))
-	AND CD.intContractStatusId not in(2,3,6) 
+	--AND CD.intContractStatusId not in(2,3,6) 
 	AND CONVERT(DATETIME,CONVERT(VARCHAR, OCD.dtmContractDate, 101),101) <= @dtmTransactionDateUpTo
 
 SELECT intContractDetailId
