@@ -6216,20 +6216,30 @@ BEGIN
 	END
 	ELSE IF (LOWER(@strPriceBasis) = 'index retail' )
 		BEGIN
-
+		DECLARE @dblPrice100kQty NUMERIC(18,6)
+		DECLARE @dblPriceQty NUMERIC(18,6)
 		DECLARE @dblLocalIndexRetailGrossPrice NUMERIC(18,6)
-		SET @dblLocalIndexRetailGrossPrice = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
-
 		DECLARE @dblLocalIndexRetailGrossPriceZeroQty NUMERIC(18,6)
-		SET @dblLocalIndexRetailGrossPriceZeroQty = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
-
+		
 
 		IF(@ysnReRunCalcTax = 0)
 			BEGIN
-				SET @dblPrice = @dblLocalIndexRetailGrossPriceZeroQty
+				
+				SET @dblLocalIndexRetailGrossPrice = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+				SET @dblLocalIndexRetailGrossPriceZeroQty = Round((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+
+				SET @dblPrice100kQty = @dblLocalIndexRetailGrossPriceZeroQty
+				SET @dblPriceQty = @dblLocalIndexRetailGrossPrice
+				SET @dblPrice = @dblLocalIndexRetailGrossPrice
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
+			ELSE
+			BEGIN
+				SET @dblLocalIndexRetailGrossPrice = @dblPriceQty
+				SET @dblLocalIndexRetailGrossPriceZeroQty  = @dblPrice100kQty
+			END
+
 		
 
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
@@ -6280,7 +6290,7 @@ BEGIN
 	
 	ELSE IF (CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0)
 		BEGIN
-
+		
 		DECLARE @dblPPAPrice100kQty NUMERIC(18,6)
 		DECLARE @dblPPAPriceQty NUMERIC(18,6)
 
@@ -6298,6 +6308,7 @@ BEGIN
 			BEGIN
 				SET @dblPPAPrice100kQty = @dblPumpPriceAdjustmentGrossPriceZeroQty
 				SET @dblPPAPriceQty = @dblPumpPriceAdjustmentGrossPrice
+				SET @dblPrice = @dblPumpPriceAdjustmentGrossPrice
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
