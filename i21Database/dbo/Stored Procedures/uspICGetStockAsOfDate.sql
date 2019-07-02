@@ -89,7 +89,7 @@ WHERE
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = t.intSubLocationId)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = t.intStorageLocationId)
 	--AND (@intLotId IS NULL OR @intLotId = t.intLotId)
-	AND (@strLotNumber IS NULL OR Lot.strLotNumber LIKE @strLotNumber + '%')
+	AND (@strLotNumber IS NULL OR Lot.strLotNumber LIKE @strLotNumber + '%' COLLATE Latin1_General_CI_AS)
 	AND @intOwnershipType = 1
 	
 -- Get the stock that is Customer-Owned (aka Storage)
@@ -127,7 +127,7 @@ WHERE
 	AND (@intSubLocationId IS NULL OR  @intSubLocationId = t.intSubLocationId)
 	AND (@intStorageLocationId IS NULL OR  @intStorageLocationId = t.intStorageLocationId)
 	--AND (@intLotId IS NULL OR @intLotId = t.intLotId)
-	AND (@strLotNumber IS NULL OR Lot.strLotNumber LIKE @strLotNumber + '%')
+	AND (@strLotNumber IS NULL OR Lot.strLotNumber LIKE @strLotNumber + '%' COLLATE Latin1_General_CI_AS)
 	AND @intOwnershipType = 2
 
 -- Return the result back. 
