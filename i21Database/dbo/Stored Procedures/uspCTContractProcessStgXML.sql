@@ -156,6 +156,8 @@ BEGIN TRY
 		,@intContractCostId INT
 		,@intVendorId INT
 	--,@intCurrencyExchangeRateTypeId INT
+	,@strCountry nvarchar(100),@intCountryId int
+
 	DECLARE @tblCTContractCost TABLE (intContractCostId INT)
 
 	SELECT @intContractStageId = MIN(intContractStageId)
@@ -489,6 +491,7 @@ BEGIN TRY
 					,@strInvoiceType = NULL
 					,@strArbitration = NULL
 					,@strTextCode = NULL
+					,@strCountry=NULL
 
 				SELECT @strSalespersonId = strSalespersonId
 					,@strCommodityCode = strCommodityCode
@@ -506,6 +509,7 @@ BEGIN TRY
 					,@strInvoiceType = strInvoiceType
 					,@strArbitration = strArbitration
 					,@strTextCode = strTextCode
+					,@strCountry=strCountry
 				FROM OPENXML(@idoc, 'vyuCTContractHeaderViews/vyuCTContractHeaderView', 2) WITH (
 						strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -523,6 +527,7 @@ BEGIN TRY
 						,strInvoiceType NVARCHAR(30) Collate Latin1_General_CI_AS
 						,strArbitration NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strTextCode NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strCountry NVARCHAR(100) Collate Latin1_General_CI_AS
 						) x
 
 				IF @strCommodityCode IS NOT NULL
@@ -728,6 +733,21 @@ BEGIN TRY
 						)
 				BEGIN
 					SELECT @strErrorMessage = 'City ' + @strArbitration + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+				SELECT @intCountryId=NULL
+				SELECT @intCountryId=intCountryID
+						FROM tblSMCountry C
+						WHERE C.strCountry = @strCountry
+
+						If @strCountry is not null and @intCountryId is null
+						BEGIN
+					SELECT @strErrorMessage = 'Country ' + @strCountry + ' is not available.'
 
 					RAISERROR (
 							@strErrorMessage
@@ -944,6 +964,7 @@ BEGIN TRY
 					,intAssociationId
 					,intInvoiceTypeId
 					,intArbitrationId
+					,intCountryId
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1000,6 +1021,7 @@ BEGIN TRY
 					,@intAssociationId
 					,@intInvoiceTypeId
 					,@intCityId
+					,@intCountryId
 				FROM OPENXML(@idoc, 'vyuCTContractHeaderViews/vyuCTContractHeaderView', 2) WITH (
 						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,dtmContractDate DATETIME
@@ -1127,6 +1149,7 @@ BEGIN TRY
 						,CH.intAssociationId = CH1.intAssociationId
 						,CH.intInvoiceTypeId = CH1.intInvoiceTypeId
 						,CH.intArbitrationId = CH1.intArbitrationId
+						,CH.intCountryId = CH1.intCountryId
 					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
