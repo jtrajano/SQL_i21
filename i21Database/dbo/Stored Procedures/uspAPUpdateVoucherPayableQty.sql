@@ -110,6 +110,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 		AND NOT EXISTS(
 			SELECT TOP 1 1
@@ -124,6 +125,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
+				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 	BEGIN
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
@@ -155,6 +157,7 @@ ELSE SAVE TRAN @SavePoint
 			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
+			AND ISNULL(C.intItemId,-1) = ISNULL(B.intItemId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A
@@ -258,6 +261,7 @@ ELSE SAVE TRAN @SavePoint
 				--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
+				AND ISNULL(C.intItemId,-1) = ISNULL(B.intItemId,-1)
 			--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 			AND B.dblQuantityToBill = 0
 		) AS SourceData
@@ -577,6 +581,7 @@ ELSE SAVE TRAN @SavePoint
 			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(D.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(D.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
+			AND ISNULL(D.intItemId,-1) = ISNULL(B.intItemId,-1)
 		) AS SourceData
 		ON (1=0)
 		WHEN NOT MATCHED THEN
@@ -811,6 +816,7 @@ ELSE SAVE TRAN @SavePoint
 			--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
+			AND ISNULL(C.intItemId,-1) = ISNULL(B.intItemId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A

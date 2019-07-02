@@ -37,6 +37,7 @@ BEGIN
 			AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1))
 	BEGIN
 		IF @transCount = 0
