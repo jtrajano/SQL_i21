@@ -20,7 +20,7 @@ BEGIN
 		, dblNoOfLots)
 	SELECT TOP 1 intDailyAveragePriceDetailId
 		, dblNetLongAvg
-		, dblNoOfLots
+		, dblNoOfLots - (SELECT ISNULL(SUM(ISNULL(dblNoOfLots, 0)), 0) FROM tblCTPriceFixationDetail CT WHERE CT.intDailyAveragePriceDetailId = vyuRKGetDailyAveragePriceDetail.intDailyAveragePriceDetailId)
 	FROM vyuRKGetDailyAveragePriceDetail
 	WHERE intFutureMarketId = @FutureMarketId
 		AND intFutureMonthId = @FutureMonthId
