@@ -7671,6 +7671,7 @@
     <Build Include="dbo\Views\vyuCTItemContractDetail.sql" />
     <Build Include="dbo\Views\vyuCTItemContractHeader.sql" />
     <Build Include="dbo\Views\vyuCTItemContractHeaderCategory.sql" />
+	<Build Include="dbo\Functions\fnTRValidateQuote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
