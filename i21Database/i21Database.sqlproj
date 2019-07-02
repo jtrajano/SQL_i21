@@ -6372,6 +6372,7 @@
     <Build Include="dbo\Views\vyuARGetInvoice.sql" />
     <Build Include="dbo\Views\vyuSOGetSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemRunningStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetAdjustmentItemRunningStock.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCompanyLocationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInTransitDirect.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyTransactionType.sql" />
