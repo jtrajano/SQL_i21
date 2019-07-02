@@ -12,7 +12,7 @@ RETURNS TABLE AS RETURN
 			voucher.intBillId
 			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
-			,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
+			,1 AS intPaymentId --DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
 			,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0))
 					OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempPayment
 			,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempWithheld ELSE voucher.dblTempWithheld END), 0))
@@ -31,7 +31,7 @@ RETURNS TABLE AS RETURN
 			voucher.intBillId
 			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
-			,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
+			,2 --DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
 			,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0))
 					OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempPayment
 			,SUM(ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) THEN -voucher.dblTempWithheld ELSE voucher.dblTempWithheld END), 0))
@@ -51,7 +51,7 @@ RETURNS TABLE AS RETURN
 			voucher.intBillId
 			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
-			,ROW_NUMBER() OVER(ORDER BY voucher.intEntityVendorId DESC) AS intPaymentId
+			,3 --ROW_NUMBER() OVER(ORDER BY voucher.intEntityVendorId DESC) AS intPaymentId
 			,ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) 
 					THEN -voucher.dblTempPayment ELSE voucher.dblTempPayment END), 0) AS dblTempPayment
 			,ISNULL((CASE WHEN voucher.intTransactionType NOT IN (1, 14) 
