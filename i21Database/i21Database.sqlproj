@@ -7644,6 +7644,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetInHouse.sql" />
     <Build Include="dbo\Functions\fnTRValidateQuote.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetailLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
