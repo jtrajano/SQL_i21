@@ -6230,6 +6230,7 @@ BEGIN
 
 				SET @dblPrice100kQty = @dblLocalIndexRetailGrossPriceZeroQty
 				SET @dblPriceQty = @dblLocalIndexRetailGrossPrice
+				SET @dblPrice = @dblLocalIndexRetailGrossPrice
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
@@ -6250,7 +6251,7 @@ BEGIN
 		
 		SET @dblCalculatedGrossPrice	 =	  @dblLocalIndexRetailGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 =	  @dblOriginalPrice
-		SET @dblCalculatedNetPrice		 =	  Round((Round((@dblLocalIndexRetailGrossPriceZeroQty * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
+		SET @dblCalculatedNetPrice		 =	  Round((Round((@dblLocalIndexRetailGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 		SET @dblOriginalNetPrice		 =	  Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
 		SET @dblCalculatedTotalPrice	 =	  ROUND((@dblLocalIndexRetailGrossPrice * @dblQuantity),2)
 		SET @dblOriginalTotalPrice		 =	  ROUND(@dblOriginalPrice * @dblQuantity,2)
@@ -6289,7 +6290,7 @@ BEGIN
 	
 	ELSE IF (CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0)
 		BEGIN
-
+		
 		DECLARE @dblPPAPrice100kQty NUMERIC(18,6)
 		DECLARE @dblPPAPriceQty NUMERIC(18,6)
 
@@ -6307,6 +6308,7 @@ BEGIN
 			BEGIN
 				SET @dblPPAPrice100kQty = @dblPumpPriceAdjustmentGrossPriceZeroQty
 				SET @dblPPAPriceQty = @dblPumpPriceAdjustmentGrossPrice
+				SET @dblPrice = @dblPumpPriceAdjustmentGrossPrice
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
