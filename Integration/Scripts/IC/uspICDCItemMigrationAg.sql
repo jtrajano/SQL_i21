@@ -293,10 +293,14 @@ FROM (
 ) a
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
 
-INSERT INTO tblICItemUomUpc(intItemUOMId,
+DECLARE @upc TABLE (intItemUOMId INT,
+strUpcCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL ,
+strLongUpcCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL)
+
+INSERT INTO @upc(intItemUOMId,
 strUpcCode,
 strLongUpcCode)
-SELECT A.intItemUOMId
+SELECT DISTINCT A.intItemUOMId
 , NULL
 , CASE WHEN AgUPC.UpcDupCount > 1 THEN
 	AGItemUPC + '_Dup_' + CAST(I.intItemId as NVARCHAR(50)) 
@@ -320,6 +324,9 @@ INNER JOIN (
 ON agUPCmst.agupc_upc_cd COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(AgUPC.AGItemUPC) COLLATE SQL_Latin1_General_CP1_CS_AS
 WHERE ISNUMERIC(agUPCmst.agupc_upc_cd) = 1 AND LEN(LTRIM(RTRIM(agUPCmst.agupc_upc_cd))) >= 11
 
+INSERT INTO tblICItemUomUpc(intItemUOMId, strUpcCode, strLongUpcCode)
+SELECT intItemUOMId, strUpcCode, strLongUpcCode FROM @upc
+WHERE NOT EXISTS(SELECT * FROM tblICItemUomUpc u WHERE u.strLongUpcCode = strLongUpcCode AND u.intItemUOMId = intItemUOMId)
 
 --set stock unit to No for Non Inventory Items
 update iu set ysnStockUnit = 0
@@ -331,8 +338,17 @@ where i.strType not in ('Inventory', 'Raw Material', 'Finished Good')
 -- ItemLocation data migration from ptlocmst/agitmmst origin tables to tblICItemLocation i21 table 
 -- Section 3
 --------------------------------------------------------------------------------------------------------------------------------------------
+DECLARE @Loc TABLE (intItemId INT
+	,intLocationId INT
+	,intVendorId INT NULL
+	,intCostingMethod INT NULL
+	,intIssueUOMId INT NULL
+	,intReceiveUOMId INT NULL
+	,intAllowNegativeInventory INT NULL
+	,intConcurrencyId INT NULL
+	,dblReorderPoint NUMERIC(38, 20))
 
-INSERT INTO [dbo].[tblICItemLocation] (
+INSERT INTO @Loc (
 	intItemId
 	,intLocationId
 	,intVendorId
@@ -343,7 +359,7 @@ INSERT INTO [dbo].[tblICItemLocation] (
 	,intConcurrencyId
 	,dblReorderPoint
 	) 
-SELECT intItemId
+SELECT DISTINCT intItemId
 	,intCompanyLocationId
 	,intEntityId
 	,intCostingMethod
@@ -369,7 +385,25 @@ SELECT
 	 LEFT JOIN tblICItemUOM AS uom ON (uom.intItemId) = (inv.intItemId) and uom.ysnStockUnit = 1
 	 WHERE itm.agitm_phys_inv_ynbo <> 'O'
 ) a
-WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemId = a.intItemId AND intLocationId = a.intCompanyLocationId)
+--WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemId = a.intItemId AND intLocationId = a.intCompanyLocationId)
+
+INSERT INTO tblICItemLocation(intItemId
+	,intLocationId, intConcurrencyId)
+SELECT DISTINCT intItemId
+	,intLocationId
+	,1
+FROM @Loc a
+WHERE NOT EXISTS(SELECT * FROM tblICItemLocation WHERE intItemId = a.intItemId AND intLocationId = a.intLocationId)
+
+UPDATE a
+SET  intVendorId = l.intVendorId
+	,intCostingMethod = l.intCostingMethod
+	,intIssueUOMId = l.intIssueUOMId
+	,intReceiveUOMId = l.intReceiveUOMId
+	,intAllowNegativeInventory = l.intAllowNegativeInventory
+	,dblReorderPoint = l.dblReorderPoint
+FROM @Loc l
+	INNER JOIN tblICItemLocation a ON l.intItemId = a.intItemId AND l.intLocationId = a.intItemLocationId
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- ItemPricing data migration from agitmmst origin table to tblICItemPricing i21 table 
