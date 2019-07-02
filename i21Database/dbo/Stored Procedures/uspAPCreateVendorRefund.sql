@@ -35,18 +35,22 @@ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBi
 SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
 
 IF OBJECT_ID('tempdb..#tmpVouchersForPay') IS NOT NULL DROP TABLE #tmpVouchersForPay
-CREATE TABLE #tmpVouchersForPay(intBillId INT, intPaymentId INT, dblAmountPaid DECIMAL(18,2));
+CREATE TABLE #tmpVouchersForPay
+(
+	intBillId INT, intPaymentId INT, intEntityVendorId INT, dblAmountPaid DECIMAL(18,2)
+);
 
 INSERT INTO @ids
 SELECT intID FROM #tmpBillsId
 
 INSERT INTO #tmpVouchersForPay
 SELECT
-	intBillId
-	,intPaymentId
-	,ABS(dblTempPayment)
+	payVouchers.intBillId
+	,payVouchers.intPaymentId
+	,payVouchers.intEntityVendorId
+	,ABS(payVouchers.dblTempPayment) 
 FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) payVouchers
-WHERE dblTempPayment < 0
+WHERE payVouchers.dblTempPayment < 0
 
 IF NOT EXISTS(SELECT 1 FROM #tmpVouchersForPay)
 BEGIN
@@ -79,6 +83,7 @@ INSERT INTO @paymentDetail(
 	,[intBankAccountId]
 	,[intWriteOffAccountId]
 	,[dblAmountPaid]
+	,[dblAmountDue]
 	,[strPaymentOriginalId]
 	,[ysnUseOriginalIdAsPaymentNumber]
 	,[ysnApplytoBudget]
@@ -108,7 +113,7 @@ INSERT INTO @paymentDetail(
 	,[ysnFromAP]
 )
 SELECT
-	[intId]								=	payVouchers.intPaymentId
+	[intId]								=	RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId)
 	,[strSourceTransaction]				=	'Voucher'
 	,[intSourceId]						=	A.intBillId
 	,[strSourceId]						=	A.strBillId
@@ -125,6 +130,8 @@ SELECT
 	,[intBankAccountId]					=	@bankAccountId
 	,[intWriteOffAccountId]				=	NULL
 	,[dblAmountPaid]					=	payVouchers.dblAmountPaid
+	,[dblAmountDue]						=	(A.dblTotal - A.dblTempDiscount + A.dblTempInterest)
+											- (A.dblTempPayment)
 	,[strPaymentOriginalId]				=	NULL
 	,[ysnUseOriginalIdAsPaymentNumber]	=	0
 	,[ysnApplytoBudget]					=	0
@@ -168,7 +175,7 @@ OUTER APPLY (
 
 IF @transCount = 0 BEGIN TRANSACTION
 
-EXEC uspARProcessPayments @PaymentEntries = @paymentDetail, @UserId = @userId, @GroupingOption = 1, @RaiseError = 1, @ErrorMessage = @error OUTPUT, @LogId = @log OUTPUT
+EXEC uspARProcessPayments @PaymentEntries = @paymentDetail, @UserId = @userId, @GroupingOption = 0, @RaiseError = 1, @ErrorMessage = @error OUTPUT, @LogId = @log OUTPUT
 
 IF @error IS NOT NULL
 BEGIN
@@ -186,10 +193,10 @@ SELECT @totalPaymentCreated = COUNT(*) FROM @paymentIds
 
 IF @totalPaymentCreated > 0
 BEGIN
-	UPDATE A
-		SET A.strReceivePaymentType = 'Vendor Refund'
-	FROM tblARPayment A
-	INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
+	--UPDATE A
+	--	SET A.strReceivePaymentType = 'Vendor Refund'
+	--FROM tblARPayment A
+	--INNER JOIN @paymentIds B ON A.intPaymentId = B.intId
 
 	SELECT
 		@paymentCreated = COALESCE(@paymentCreated + ',', '') +  CONVERT(VARCHAR(12),intId)
