@@ -2281,7 +2281,7 @@ BEGIN
 				JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
 				JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intQuantityUOMId
 				JOIN tblICCommodityUnitMeasure cu2 ON cu2.intCommodityId = c.intCommodityId AND cu2.intUnitMeasureId = @intPriceUOMId
-				JOIN tblICCommodityUnitMeasure cu1 ON cu1.intCommodityId = c.intCommodityId AND ISNULL(cu1.ysnStockUOM, 0) = 1
+				JOIN tblICCommodityUnitMeasure cu1 on cu1.intCommodityId = c.intCommodityId and cu1.ysnStockUnit = 1
 				LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
 				LEFT JOIN tblICItemPricing p ON i.intItemId = p.intItemId AND s.intItemLocationId = p.intItemLocationId
 				WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity, 0) <> 0
