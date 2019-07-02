@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspMFRepostCostAdjustment @strCostAdjustmentBatchId AS NVARCHAR(50)
+﻿CREATE PROCEDURE uspMFRepostCostAdjustment 
+	@strCostAdjustmentBatchId AS NVARCHAR(50)
 	,@intEntityUserSecurityId AS INT
 AS
 BEGIN TRY
@@ -30,6 +31,8 @@ BEGIN TRY
 		,@intWOItemUOMId INT
 		,@intUnitMeasureId INT
 		,@dtmProductionDate datetime
+		,@dblInputCostRounded NUMERIC(38, 20)
+		,@dblNewCostRounded NUMERIC(38, 20)
 
 	DECLARE @tblMFConsumedLot TABLE (
 		intWorkOrderConsumedLotId INT identity(1, 1)
@@ -73,11 +76,7 @@ BEGIN TRY
 
 	IF @strInstantConsumption = 'False'
 	BEGIN
-		--SELECT @intTransactionId = intBatchId
-		--	,@strConsumeBatchId = strBatchId
-		--FROM tblMFWorkOrderConsumedLot
-		--WHERE intWorkOrderId = @intWorkOrderId
-		--SELECT @dblInputCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strConsumeBatchId)
+
 		SELECT @dblInputCost = SUM([dbo].[fnMFGetTotalStockValueFromTransactionBatch](DT.intBatchId, DT.strBatchId))
 		FROM (
 			SELECT DISTINCT intBatchId
@@ -85,10 +84,19 @@ BEGIN TRY
 			FROM tblMFWorkOrderConsumedLot
 			WHERE intWorkOrderId = @intWorkOrderId
 			) AS DT
+
+		SELECT @dblInputCostRounded = SUM([dbo].[fnGetTotalStockValueFromTransactionBatch](DT.intBatchId, DT.strBatchId))
+		FROM (
+			SELECT DISTINCT intBatchId
+				,strBatchId
+			FROM tblMFWorkOrderConsumedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+			) AS DT
+
 	END
 	ELSE
 	BEGIN
-		SELECT @dblInputCost = 0
+		SELECT @dblInputCost = 0, @dblInputCostRounded = 0 
 
 		INSERT INTO @tblMFConsumedLot (
 			intBatchId
@@ -115,8 +123,10 @@ BEGIN TRY
 			WHERE intWorkOrderConsumedLotId = @intWorkOrderConsumedLotId
 
 			SELECT @dblInputCost = @dblInputCost + ISNULL([dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strConsumeBatchId), 0)
+			SELECT @dblInputCostRounded = @dblInputCostRounded + ISNULL([dbo].[fnGetTotalStockValueFromTransactionBatch](@intTransactionId, @strConsumeBatchId), 0)
 
 			SELECT @dblValue = SUM(CAST(dbo.fnMultiply(A.dblQty, A.dblCost) + ISNULL(A.dblValue, 0) AS NUMERIC(18, 6)))
+				,@dblInputCostRounded = @dblInputCostRounded + ISNULL(SUM(ROUND(dbo.fnMultiply(A.dblQty, A.dblCost) + ISNULL(A.dblValue, 0), 2)) ,0)
 			FROM [dbo].[tblICInventoryTransaction] A
 			WHERE A.intTransactionId = @intTransactionId
 				AND A.strTransactionId = @strConsumeBatchId
@@ -130,16 +140,13 @@ BEGIN TRY
 		END
 	END
 
+	-- Get the other charges
 	SELECT @dblOtherCharges = SUM(dblOtherCharges)
 	FROM tblMFWorkOrderProducedLot
 	WHERE intWorkOrderId = @intWorkOrderId
 		AND ysnProductionReversed = 0
 
-	IF @dblOtherCharges IS NOT NULL
-	BEGIN
-		SELECT @dblInputCost = abs(@dblInputCost) + @dblOtherCharges
-	END
-
+	-- Get the produced qty
 	SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
 	FROM dbo.tblMFWorkOrderProducedLot WP
 	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
@@ -154,8 +161,10 @@ BEGIN TRY
 				AND intWorkOrderId = @intWorkOrderId
 			)
 
+	-- Compute the Cost Adjustment value
 	SET @dblNewCost = ABS(@dblInputCost) + ISNULL(@dblOtherCharges, 0)
-	SET @dblNewUnitCost = abs(@dblInputCost) / @dblProduceQty
+	SET @dblNewCostRounded = ABS(@dblInputCostRounded) + ISNULL(@dblOtherCharges, 0)
+	SET @dblNewUnitCost = ABS(@dblInputCost) / @dblProduceQty
 
 	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 		,@intItemId = NULL
@@ -295,6 +304,29 @@ BEGIN TRY
 
 	DELETE
 	FROM @GLEntries
+
+	-- Check for discrepancy. 
+	-- If found, apply the discrepancy towards cost adjustment with the highest value. 
+	BEGIN 
+		DECLARE @discrepancy AS NUMERIC(18,6)
+				,@totalAdj AS NUMERIC(18, 6)		
+		
+		SELECT @totalAdj = SUM(adj.dblNewValue) 
+		FROM @adjustedEntries adj
+
+		IF	ISNULL(@totalAdj, 0) <> 0
+			AND ISNULL(@dblNewCostRounded, 0) <> 0 
+			AND @totalAdj <> @dblNewCostRounded
+		BEGIN 
+			WITH UpdateTopAdjustment AS (
+				SELECT TOP 1 adj.* 
+				FROM @adjustedEntries adj
+				ORDER BY adj.dblNewValue DESC 				
+			)
+			UPDATE UpdateTopAdjustment
+			SET dblNewValue = dblNewValue + (@dblNewCostRounded - @totalAdj) 
+		END
+	END 
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
