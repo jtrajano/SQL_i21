@@ -73,35 +73,35 @@ BEGIN
 
 	--INSERT POSITIVE TRANSACTION (INVOICE)
 	INSERT INTO @EntriesForInvoice(
-	 [strTransactionType]
-	,[strType]
-	,[strSourceTransaction]
-	,[intSourceId]
-	,[strSourceId]
-	,[intEntityCustomerId]
-	,[intCompanyLocationId]
-	,[intCurrencyId]
-	,[dtmDate]
-	,[dtmShipDate]
-	,[strComments]
-	,[intEntityId]
-	,[ysnPost]
-	,[intItemId]
-	,[ysnInventory]
-	,[strItemDescription]
-	,[intItemUOMId]
-	,[dblQtyShipped]
-	,[dblDiscount]
-	,[dblPrice]
-	,[ysnRefreshPrice]
-	,[ysnRecomputeTax]
-	,[ysnClearDetailTaxes]					
-	,[intTempDetailIdForTaxes]
-	,[dblCurrencyExchangeRate]
-	,[dblSubCurrencyRate]
-	,[intSalesAccountId]
-	,[strPONumber]
-	,[intFreightTermId]
+		 [strTransactionType]
+		,[strType]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intCurrencyId]
+		,[dtmDate]
+		,[dtmShipDate]
+		,[strComments]
+		,[intEntityId]
+		,[ysnPost]
+		,[intItemId]
+		,[ysnInventory]
+		,[strItemDescription]
+		,[intItemUOMId]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblPrice]
+		,[ysnRefreshPrice]
+		,[ysnRecomputeTax]
+		,[ysnClearDetailTaxes]					
+		,[intTempDetailIdForTaxes]
+		,[dblCurrencyExchangeRate]
+		,[dblSubCurrencyRate]
+		,[intSalesAccountId]
+		,[strPONumber]
+		,[intFreightTermId]
 	)
 	SELECT
 		 [strTransactionType]					= 'Invoice'
@@ -188,35 +188,35 @@ BEGIN
 
 	--INSERT NEGATIVE TRANSACTION (CREDIT MEMO)
 	INSERT INTO @EntriesForInvoice(
-	 [strTransactionType]
-	,[strType]
-	,[strSourceTransaction]
-	,[intSourceId]
-	,[strSourceId]
-	,[intEntityCustomerId]
-	,[intCompanyLocationId]
-	,[intCurrencyId]
-	,[dtmDate]
-	,[dtmShipDate]
-	,[strComments]
-	,[intEntityId]
-	,[ysnPost]
-	,[intItemId]
-	,[ysnInventory]
-	,[strItemDescription]
-	,[intItemUOMId]
-	,[dblQtyShipped]
-	,[dblDiscount]
-	,[dblPrice]
-	,[ysnRefreshPrice]
-	,[ysnRecomputeTax]
-	,[ysnClearDetailTaxes]					
-	,[intTempDetailIdForTaxes]
-	,[dblCurrencyExchangeRate]
-	,[dblSubCurrencyRate]
-	,[intSalesAccountId]
-	,[strPONumber]
-	,[intFreightTermId]
+		 [strTransactionType]
+		,[strType]
+		,[strSourceTransaction]
+		,[intSourceId]
+		,[strSourceId]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intCurrencyId]
+		,[dtmDate]
+		,[dtmShipDate]
+		,[strComments]
+		,[intEntityId]
+		,[ysnPost]
+		,[intItemId]
+		,[ysnInventory]
+		,[strItemDescription]
+		,[intItemUOMId]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblPrice]
+		,[ysnRefreshPrice]
+		,[ysnRecomputeTax]
+		,[ysnClearDetailTaxes]					
+		,[intTempDetailIdForTaxes]
+		,[dblCurrencyExchangeRate]
+		,[dblSubCurrencyRate]
+		,[intSalesAccountId]
+		,[strPONumber]
+		,[intFreightTermId]
 	)
 	SELECT
 		 [strTransactionType]					= 'Credit Memo'
@@ -308,7 +308,7 @@ BEGIN
 							, @RaiseError			= 1
 							, @ErrorMessage			= @ErrorMessage OUTPUT
 							, @CreatedIvoices		= @CreatedInvoices OUTPUT
-
+								
 	IF (ISNULL(@ErrorMessage,'')='')
 	BEGIN
 		COMMIT TRANSACTION
@@ -345,13 +345,12 @@ BEGIN
 			WHERE strPaymentMethod = 'Cash'
 					
 			UPDATE tblARInvoice
-			SET  ysnReturned = 1				
+			SET ysnReturned = 1				
 			WHERE intInvoiceId = @intNewCreditMemoId
 
 			UPDATE tblARPOS
-			SET
-				intInvoiceId = @intNewInvoiceId
-				,intCreditMemoId = @intNewCreditMemoId
+			SET intInvoiceId = @intNewInvoiceId
+			  , intCreditMemoId = @intNewCreditMemoId
 			WHERE intPOSId = @intPOSId
 			
 			DECLARE @EntriesForExchange		PaymentIntegrationStagingTable
@@ -361,39 +360,38 @@ BEGIN
 
 			--CREATE RCV WITH INVOICE & CREDIT MEMO AS DETAILS
 			IF (ISNULL(@intNewInvoiceId,0) <> 0 AND ISNULL(@intNewCreditMemoId, 0) <> 0)
-			BEGIN
-			
+			BEGIN			
 				INSERT INTO @EntriesForExchange(
-				--Header
-				 intId
-				,strSourceTransaction
-				,intSourceId
-				,strSourceId
-				,intEntityCustomerId
-				,intCompanyLocationId
-				,intCurrencyId
-				,dtmDatePaid
-				,intPaymentMethodId
-				,strPaymentMethod
-				,strPaymentInfo
-				,intBankAccountId
-				,dblAmountPaid
-				,intEntityId
-				,ysnPost
-				,strNotes
-			--Detail
-				,intInvoiceId
-				,strTransactionType
-				,strTransactionNumber
-				,intTermId
-				,intInvoiceAccountId
-				,dblInvoiceTotal
-				,dblBaseInvoiceTotal
-				,dblPayment
-				,strInvoiceReportNumber
-				,intCurrencyExchangeRateTypeId
-				,intCurrencyExchangeRateId
-				,dblCurrencyExchangeRate
+					--Header
+					 intId
+					,strSourceTransaction
+					,intSourceId
+					,strSourceId
+					,intEntityCustomerId
+					,intCompanyLocationId
+					,intCurrencyId
+					,dtmDatePaid
+					,intPaymentMethodId
+					,strPaymentMethod
+					,strPaymentInfo
+					,intBankAccountId
+					,dblAmountPaid
+					,intEntityId
+					,ysnPost
+					,strNotes
+					--Detail
+					,intInvoiceId
+					,strTransactionType
+					,strTransactionNumber
+					,intTermId
+					,intInvoiceAccountId
+					,dblInvoiceTotal
+					,dblBaseInvoiceTotal
+					,dblPayment
+					,strInvoiceReportNumber
+					,intCurrencyExchangeRateTypeId
+					,intCurrencyExchangeRateId
+					,dblCurrencyExchangeRate
 				)
 				SELECT 
 				--Header
@@ -431,9 +429,11 @@ BEGIN
 				INNER JOIN tblSMCompanyLocation CL ON INV.intCompanyLocationId = CL.intCompanyLocationId
 				LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
 				WHERE INV.intInvoiceId = @intNewInvoiceId
+
 				UNION
+
 				SELECT 
-				--Header
+					--Header
 					 intId							= @intPOSId
 					,strSourceTransaction			= 'Direct'
 					,intSourceId					= CM.intInvoiceId
@@ -450,7 +450,7 @@ BEGIN
 					,intEntityId					= @intEntityUserId
 					,ysnPost						= 1
 					,strNotes						= 'POS Exchange Item Transaction'
-				--Detail
+					--Detail
 					,intInvoiceId					= CM.intInvoiceId
 					,strTransactionType				= CM.strTransactionType
 					,strTransactionNumber			= CM.strInvoiceNumber
@@ -480,17 +480,16 @@ BEGIN
 					DROP TABLE #MIXEDPOSPAYMENTS
 				END
 
-				SELECT
-						intPOSId			= intPOSId
-					   ,intPOSPaymentId		= intPOSPaymentId
-					   ,strPaymentMethod	= CASE WHEN strPaymentMethod = 'Credit Card' THEN 'Manual Credit Card' ELSE strPaymentMethod END
-					   ,strReferenceNo		= strReferenceNo
-					   ,dblAmount			= dblAmount
-					   ,ysnComputed			= CAST (0 AS BIT)
+				SELECT intPOSId			= intPOSId
+					 , intPOSPaymentId	= intPOSPaymentId
+					 , strPaymentMethod	= CASE WHEN strPaymentMethod = 'Credit Card' THEN 'Manual Credit Card' ELSE strPaymentMethod END
+					 , strReferenceNo	= strReferenceNo
+					 , dblAmount		= dblAmount
+					 , ysnComputed		= CAST (0 AS BIT)
 				INTO #MIXEDPOSPAYMENTS
 				FROM tblARPOSPayment WITH (NOLOCK)
 				WHERE intPOSId = @intPOSId
-					AND ISNULL(strPaymentMethod,'') <> 'On Account'
+				  AND ISNULL(strPaymentMethod,'') <> 'On Account'
 
 				SELECT @dblTotalAmountPaid = SUM(dblAmount)
 				FROM #MIXEDPOSPAYMENTS
@@ -538,8 +537,7 @@ BEGIN
 
 				--CREATE PAYMENTS FOR AMOUNT DUE
 				IF(EXISTS(SELECT TOP 1 NULL FROM #MIXEDPOSPAYMENTS))
-				BEGIN
-				
+				BEGIN				
 					DECLARE @EntriesForAmountDuePayment		PaymentIntegrationStagingTable
 
 					SELECT @dblOnAccountAmount = SUM(dblAmount)
@@ -565,7 +563,7 @@ BEGIN
 						,intEntityId
 						,ysnPost
 						,strNotes
-					--Detail
+						--Detail
 						,intInvoiceId
 						,strTransactionType
 						,strTransactionNumber
@@ -578,60 +576,60 @@ BEGIN
 						,intCurrencyExchangeRateTypeId
 						,intCurrencyExchangeRateId
 						,dblCurrencyExchangeRate
-						)
-						SELECT 
-						--Header
-							 intId							= POSPAYMENTS.intPOSPaymentId
-							,strSourceTransaction			= 'Direct'
-							,intSourceId					= INV.intInvoiceId
-							,strSourceId					= INV.strInvoiceNumber
-							,intEntityCustomerId			= INV.intEntityCustomerId
-							,intCompanyLocationId			= INV.intCompanyLocationId
-							,intCurrencyId					= INV.intCurrencyId
-							,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
-							,intPaymentMethodId				= PM.intPaymentMethodID
-							,strPaymentMethod				= PM.strPaymentMethod
-							,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check', 'Debit Card', 'Manual Credit Card') THEN strReferenceNo ELSE NULL END
-							,intBankAccountId				= BA.intBankAccountId
-							,dblAmountPaid					= ISNULL(POSPAYMENTS.dblAmount,0)
-							,intEntityId					= @intEntityUserId
-							,ysnPost						= 1
-							,strNotes						= 'POS Settle Amount Due of Exchange Transaction'
-						--Detail
-							,intInvoiceId					= INV.intInvoiceId
-							,strTransactionType				= INV.strTransactionType
-							,strTransactionNumber			= INV.strInvoiceNumber
-							,intTermId						= INV.intTermId
-							,intInvoiceAccountId			= INV.intAccountId
-							,dblInvoiceTotal				= INV.dblInvoiceTotal
-							,dblBaseInvoiceTotal			= INV.dblBaseInvoiceTotal
-							,dblPayment						= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN ABS(ISNULL(POSPAYMENTS.dblAmount,0)) * -1 ELSE ISNULL(POSPAYMENTS.dblAmount,0) END
-							,strInvoiceReportNumber			= INV.strInvoiceNumber
-							,intCurrencyExchangeRateTypeId	= INV.intCurrencyExchangeRateTypeId
-							,intCurrencyExchangeRateId		= INV.intCurrencyExchangeRateId
-							,dblCurrencyExchangeRate		= INV.dblCurrencyExchangeRate
-						FROM #MIXEDPOSPAYMENTS POSPAYMENTS
-						INNER JOIN tblARPOS	POS ON POSPAYMENTS.intPOSId = POS.intPOSId
-						INNER JOIN vyuARInvoicesForPayment INV ON (--IF RETURN IS GREATER THAN PAYMENT THEN GET CREDITMEMO
-																		CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal
-																		THEN POS.intCreditMemoId
-																		ELSE POS.intInvoiceId
-																		END
-																	 ) = INV.intInvoiceId
-						INNER JOIN tblSMCompanyLocation CL ON INV.intCompanyLocationId = CL.intCompanyLocationId
-						LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
-						CROSS APPLY(
-							SELECT TOP 1 intPaymentMethodID
-										,strPaymentMethod
-							FROM tblSMPaymentMethod WITH (NOLOCK)
-							WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod = 'Debit Card') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
-						)PM
-						WHERE INV.intInvoiceId = (--IF RETURN IS GREATER THAN PAYMENT THEN GET CREDITMEMO
-													CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal
-													THEN @intNewCreditMemoId
-													ELSE @intNewInvoiceId
-													END
-												 )
+					)
+					SELECT 
+					--Header
+						 intId							= POSPAYMENTS.intPOSPaymentId
+						,strSourceTransaction			= 'Direct'
+						,intSourceId					= INV.intInvoiceId
+						,strSourceId					= INV.strInvoiceNumber
+						,intEntityCustomerId			= INV.intEntityCustomerId
+						,intCompanyLocationId			= INV.intCompanyLocationId
+						,intCurrencyId					= INV.intCurrencyId
+						,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+						,intPaymentMethodId				= PM.intPaymentMethodID
+						,strPaymentMethod				= PM.strPaymentMethod
+						,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check', 'Debit Card', 'Manual Credit Card') THEN strReferenceNo ELSE NULL END
+						,intBankAccountId				= BA.intBankAccountId
+						,dblAmountPaid					= ISNULL(POSPAYMENTS.dblAmount,0)
+						,intEntityId					= @intEntityUserId
+						,ysnPost						= 1
+						,strNotes						= 'POS Settle Amount Due of Exchange Transaction'
+					--Detail
+						,intInvoiceId					= INV.intInvoiceId
+						,strTransactionType				= INV.strTransactionType
+						,strTransactionNumber			= INV.strInvoiceNumber
+						,intTermId						= INV.intTermId
+						,intInvoiceAccountId			= INV.intAccountId
+						,dblInvoiceTotal				= INV.dblInvoiceTotal
+						,dblBaseInvoiceTotal			= INV.dblBaseInvoiceTotal
+						,dblPayment						= CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal THEN ABS(ISNULL(POSPAYMENTS.dblAmount,0)) * -1 ELSE ISNULL(POSPAYMENTS.dblAmount,0) END
+						,strInvoiceReportNumber			= INV.strInvoiceNumber
+						,intCurrencyExchangeRateTypeId	= INV.intCurrencyExchangeRateTypeId
+						,intCurrencyExchangeRateId		= INV.intCurrencyExchangeRateId
+						,dblCurrencyExchangeRate		= INV.dblCurrencyExchangeRate
+					FROM #MIXEDPOSPAYMENTS POSPAYMENTS
+					INNER JOIN tblARPOS	POS ON POSPAYMENTS.intPOSId = POS.intPOSId
+					INNER JOIN vyuARInvoicesForPayment INV ON (--IF RETURN IS GREATER THAN PAYMENT THEN GET CREDITMEMO
+																	CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal
+																	THEN POS.intCreditMemoId
+																	ELSE POS.intInvoiceId
+																	END
+																	) = INV.intInvoiceId
+					INNER JOIN tblSMCompanyLocation CL ON INV.intCompanyLocationId = CL.intCompanyLocationId
+					LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+					CROSS APPLY(
+						SELECT TOP 1 intPaymentMethodID
+									,strPaymentMethod
+						FROM tblSMPaymentMethod WITH (NOLOCK)
+						WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod = 'Debit Card') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
+					)PM
+					WHERE INV.intInvoiceId = (--IF RETURN IS GREATER THAN PAYMENT THEN GET CREDITMEMO
+												CASE WHEN ABS(@dblCreditMemoTotal) > @dblInvoiceTotal
+												THEN @intNewCreditMemoId
+												ELSE @intNewInvoiceId
+												END
+												)
 												 
 				IF (ISNULL(ABS(@dblCreditMemoTotal), 0) - ISNULL(@dblInvoiceTotal, 0)) <> 0
 					BEGIN
