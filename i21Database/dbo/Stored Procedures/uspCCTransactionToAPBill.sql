@@ -272,10 +272,18 @@ BEGIN
 					,@success = @success OUTPUT
 			END
 
-			-- DELETE AP
-			EXEC [dbo].[uspAPDeleteVoucher]
-				@intBillId = @intBillId
-				,@UserId = @userId
+			IF(@success = 1)
+			BEGIN
+				-- DELETE AP
+				EXEC [dbo].[uspAPDeleteVoucher]
+					@intBillId = @intBillId
+					,@UserId = @userId
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @errorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @intBillId
+				RAISERROR(@errorMessage,16,1)
+			END
 			
 			FETCH NEXT FROM @CursorTran INTO @intBillId, @intTransactionType
 		END
