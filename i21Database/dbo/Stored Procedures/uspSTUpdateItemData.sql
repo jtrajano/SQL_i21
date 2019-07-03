@@ -47,6 +47,7 @@ BEGIN TRY
 				@strDescription            NVARCHAR(250),
 				@dblPriceBetween1          DECIMAL (18,6),
 				@dblPriceBetween2          DECIMAL (18,6),
+
 				@strTaxFlag1ysn            NVARCHAR(1),
 				@strTaxFlag2ysn            NVARCHAR(1),
 				@strTaxFlag3ysn            NVARCHAR(1),
@@ -376,8 +377,8 @@ BEGIN TRY
 				,strTaxFlag3_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strTaxFlag4_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strDepositRequired_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intDepositPLUId_Original INT NULL 
-				,strDepositPLUId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strDepositPLUId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
+				,strDepositPLU_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strQuantityRequired_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strScaleItem_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strFoodStampable_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
@@ -416,8 +417,8 @@ BEGIN TRY
 				,strTaxFlag3_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strTaxFlag4_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strDepositRequired_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,intDepositPLUId_New INT NULL 
 				,strDepositPLUId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				,strDepositPLU_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strQuantityRequired_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strScaleItem_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL 
 				,strFoodStampable_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
@@ -805,8 +806,8 @@ BEGIN TRY
 				,strTaxFlag3_Original
 				,strTaxFlag4_Original
 				,strDepositRequired_Original
-				,intDepositPLUId_Original
-				,strDepositPLUId_Original
+				,strDepositPLUId_Original			-- PLU ID
+				,strDepositPLU_Original				-- PLU UpcCode
 				,strQuantityRequired_Original
 				,strScaleItem_Original
 				,strFoodStampable_Original
@@ -844,8 +845,8 @@ BEGIN TRY
 				,strTaxFlag3_New
 				,strTaxFlag4_New
 				,strDepositRequired_New
-				,intDepositPLUId_New
-				,strDepositPLUId_New
+				,strDepositPLUId_New			-- PLU ID			
+				,strDepositPLU_New				-- PLU UpcCode
 				,strQuantityRequired_New
 				,strScaleItem_New
 				,strFoodStampable_New
@@ -897,8 +898,8 @@ BEGIN TRY
 			, CASE 
 					WHEN [Changes].ysnDepositRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
-			, CAST([Changes].intDepositPLUId_Original AS NVARCHAR(1000))
-			, ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
+			, strDepositPLUId_Original			= [Changes].intDepositPLUId_Original
+			, strDepositPLU_Original			= ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
 			, CASE 
 					WHEN [Changes].ysnQuantityRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
@@ -972,8 +973,8 @@ BEGIN TRY
 			, CASE 
 					WHEN [Changes].ysnDepositRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
-			, CAST([Changes].intDepositPLUId_New AS NVARCHAR(1000))
-			, ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
+			, strDepositPLUId_New			= [Changes].intDepositPLUId_New
+			, strDepositPLU_New				= ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
 			, CASE 
 					WHEN [Changes].ysnQuantityRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
@@ -1041,7 +1042,11 @@ BEGIN TRY
 			ON [Changes].intCountGroupId_New = CountGroup_New.intCountGroupId
 
 
+--TEST
+SELECT 'start', * FROM @tblItemLocationForCStore
+
 		-- Clear NULL values
+		-- Count Group
 		UPDATE @tblItemLocationForCStore
 		SET strCountGroupId_New = ''
 		WHERE strCountGroupId_New IS NULL
@@ -1050,7 +1055,17 @@ BEGIN TRY
 		SET strCountGroupId_Original = ''
 		WHERE strCountGroupId_Original IS NULL
 
+		-- Deposit PLU
+		UPDATE @tblItemLocationForCStore
+		SET strDepositPLUId_Original = ''
+		WHERE strDepositPLUId_Original IS NULL
 
+		UPDATE @tblItemLocationForCStore
+		SET strDepositPLUId_New = ''
+		WHERE strDepositPLUId_New IS NULL
+
+--TEST
+SELECT 'end', * FROM @tblItemLocationForCStore
 
 		---- TEST
 		--SELECT 'CAST(@strTaxFlag1ysn AS BIT)', CAST(@strTaxFlag1ysn AS BIT)
@@ -1221,6 +1236,7 @@ BEGIN TRY
 																				WHEN [Changes].oldColumnName = 'strTaxFlag4_Original' THEN 'ysnTaxFlag4'
 																				WHEN [Changes].oldColumnName = 'strDepositRequired_Original' THEN 'ysnDepositRequired'
 																				WHEN [Changes].oldColumnName = 'strDepositPLUId_Original' THEN 'intDepositPLUId'
+																				WHEN [Changes].oldColumnName = 'strDepositPLU_Original' THEN 'strDepositPLU'
 																				WHEN [Changes].oldColumnName = 'strQuantityRequired_Original' THEN 'ysnQuantityRequired' 
 																				WHEN [Changes].oldColumnName = 'strScaleItem_Original' THEN 'ysnScaleItem' 
 																				WHEN [Changes].oldColumnName = 'strFoodStampable_Original' THEN 'ysnFoodStampable' 
@@ -1259,6 +1275,7 @@ BEGIN TRY
 																				WHEN [Changes].oldColumnName = 'strTaxFlag4_Original' THEN 'BIT'
 																				WHEN [Changes].oldColumnName = 'strDepositRequired_Original' THEN 'BIT'
 																				WHEN [Changes].oldColumnName = 'strDepositPLUId_Original' THEN 'INT'
+																				WHEN [Changes].oldColumnName = 'strDepositPLU_Original' THEN 'NVARCHAR(50)'
 																				WHEN [Changes].oldColumnName = 'strQuantityRequired_Original' THEN 'BIT' 
 																				WHEN [Changes].oldColumnName = 'strScaleItem_Original' THEN 'BIT' 
 																				WHEN [Changes].oldColumnName = 'strFoodStampable_Original' THEN 'BIT' 
@@ -1317,6 +1334,7 @@ BEGIN TRY
 																				WHEN [Changes].oldColumnName = 'strTaxFlag4_Original' THEN 'Tax Flag 4'
 																				WHEN [Changes].oldColumnName = 'strDepositRequired_Original' THEN 'Deposit Required'
 																				WHEN [Changes].oldColumnName = 'strDepositPLUId_Original' THEN 'Deposit PLU'
+																				WHEN [Changes].oldColumnName = 'strDepositPLU_Original' THEN 'Deposit PLU'
 																				WHEN [Changes].oldColumnName = 'strQuantityRequired_Original' THEN 'Quantity Required' 
 																				WHEN [Changes].oldColumnName = 'strScaleItem_Original' THEN 'Scale Item' 
 																				WHEN [Changes].oldColumnName = 'strFoodStampable_Original' THEN 'Stampable' 
@@ -1351,11 +1369,11 @@ BEGIN TRY
 				, strPreviewOldData											= [Changes].strOldData
 				, strPreviewNewData											= [Changes].strNewData
 				, ysnPreview												= CASE
-																					WHEN [Changes].oldColumnName IN('strFamilyId_Original', 'strClassId_Original', 'strProductCodeId_Original', 'strVendorId_Original', 'strStorageLocationId_Original', 'strCountGroupId_Original') THEN 0
+																					WHEN [Changes].oldColumnName IN('strFamilyId_Original', 'strClassId_Original', 'strProductCodeId_Original', 'strVendorId_Original', 'strStorageLocationId_Original', 'strCountGroupId_Original', 'strDepositPLUId_Original') THEN 0
 																					ELSE 1
 																			END 
 		        , ysnForRevert												= CASE
-																					WHEN [Changes].oldColumnName IN('strFamily_Original', 'strClass_Original', 'strProductCode_Original', 'strVendor_Original', 'strStorageLocation_Original', 'strCountGroup_Original') THEN 0
+																					WHEN [Changes].oldColumnName IN('strFamily_Original', 'strClass_Original', 'strProductCode_Original', 'strVendor_Original', 'strStorageLocation_Original', 'strCountGroup_Original', 'strDepositPLU_Original') THEN 0
 																					ELSE 1
 																			END
 		FROM 
@@ -1364,21 +1382,21 @@ BEGIN TRY
 			FROM @tblItemLocationForCStore
 			unpivot
 			(
-				strOldData for oldColumnName in (strTaxFlag1_Original, strTaxFlag2_Original, strTaxFlag3_Original, strTaxFlag4_Original, strDepositRequired_Original, strDepositPLUId_Original, strQuantityRequired_Original, strScaleItem_Original, strFoodStampable_Original
+				strOldData for oldColumnName in (strTaxFlag1_Original, strTaxFlag2_Original, strTaxFlag3_Original, strTaxFlag4_Original, strDepositRequired_Original, strDepositPLU_Original, strQuantityRequired_Original, strScaleItem_Original, strFoodStampable_Original
 				                                 , strReturnable_Original, strSaleable_Original, strIdRequiredLiquor_Original,strIdRequiredCigarette_Original, strPromotionalItem_Original, strPrePriced_Original, strApplyBlueLaw1_Original, strApplyBlueLaw2_Original
 												 , strCountedDaily_Original, strCounted_Original, strCountBySINo_Original, strFamily_Original, strClass_Original, strProductCode_Original, strVendor_Original, strMinimumAge_Original, strMinOrder_Original
 												 , strSuggestedQty_Original, strStorageLocation_Original, strCountGroup_Original
 												 
-												 , strFamilyId_Original, strClassId_Original, strProductCodeId_Original, strVendorId_Original, strStorageLocationId_Original, strCountGroupId_Original)
+												 , strFamilyId_Original, strClassId_Original, strProductCodeId_Original, strVendorId_Original, strStorageLocationId_Original, strCountGroupId_Original, strDepositPLUId_Original)
 			) o
 			unpivot
 			(
-				strNewData for newColumnName in (strTaxFlag1_New, strTaxFlag2_New, strTaxFlag3_New, strTaxFlag4_New, strDepositRequired_New, strDepositPLUId_New, strQuantityRequired_New, strScaleItem_New, strFoodStampable_New
+				strNewData for newColumnName in (strTaxFlag1_New, strTaxFlag2_New, strTaxFlag3_New, strTaxFlag4_New, strDepositRequired_New, strDepositPLU_New, strQuantityRequired_New, strScaleItem_New, strFoodStampable_New
 				                                 , strReturnable_New, strSaleable_New, strIdRequiredLiquor_New,strIdRequiredCigarette_New, strPromotionalItem_New, strPrePriced_New, strApplyBlueLaw1_New, strApplyBlueLaw2_New
 												 , strCountedDaily_New, strCounted_New, strCountBySINo_New, strFamily_New,strClass_New, strProductCode_New, strVendor_New, strMinimumAge_New, strMinOrder_New
 												 , strSuggestedQty_New, strStorageLocation_New, strCountGroup_New
 												 
-												 , strFamilyId_New, strClassId_New, strProductCodeId_New, strVendorId_New, strStorageLocationId_New, strCountGroupId_New)
+												 , strFamilyId_New, strClassId_New, strProductCodeId_New, strVendorId_New, strStorageLocationId_New, strCountGroupId_New, strDepositPLUId_New)
 			) n
 			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')
 		) [Changes]
@@ -1565,6 +1583,9 @@ BEGIN TRY
 	   ---------------------------------------------------------------------------------------
 		
 
+----TEST
+--SELECT *
+--FROM @tblPreview
 
 
 	   IF(@ysnRecap = 1)
@@ -1647,7 +1668,7 @@ BEGIN TRY
 							BEGIN
 								SET @strFilterCriteria = @strFilterCriteria + '<p><b>Location</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<pre>	*' + CompanyLoc.strLocationName + '</pre>'
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p>&emsp;' + CompanyLoc.strLocationName + '</p>'
 								FROM #tmpUpdateItemForCStore_Location tempLoc
 								INNER JOIN tblSMCompanyLocation CompanyLoc
 									ON tempLoc.intLocationId = CompanyLoc.intCompanyLocationId
@@ -1706,12 +1727,83 @@ BEGIN TRY
 							END
 						-- SELECT @strLottedItem = LEFT(@strLottedItem, LEN(@strLottedItem)-1)
 						-- ===================================================================================
-						-- [ENDl] Filter Criteria
+						-- [END] Filter Criteria
 						-- ===================================================================================
 
 
 
-						-- Update Values
+
+
+						-- ===================================================================================
+						-- [START] Update Values
+						-- ===================================================================================
+						-- ID's
+						--IF EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intDepositPLU)
+						--	BEGIN
+						--		DECLARE @strDepositPLUUpcCode AS NVARCHAR(100) = (SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = @intDepositPLU)
+						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Deposit PLU:</b>&emsp; ' + @strDepositPLUUpcCode + ' +</p>'
+						--	END
+
+						--IF EXISTS (SELECT TOP 1 1 FROM tblSTSubcategory WHERE intSubcategoryId = @intNewFamily AND strSubcategoryType = 'F')
+						--	BEGIN
+						--		DECLARE @strFamily AS NVARCHAR(100) = (SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = @intNewFamily AND strSubcategoryType = 'F')
+						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Family:</b>&emsp; ' + @strFamily + ' +</p>'
+						--	END
+
+						--IF EXISTS (SELECT TOP 1 1 FROM tblSTSubcategory WHERE intSubcategoryId = @intNewClass AND strSubcategoryType = 'C')
+						--	BEGIN
+						--		DECLARE @strClass AS NVARCHAR(100) = (SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = @intNewClass AND strSubcategoryType = 'C')
+						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Class:</b>&emsp; ' + @strClass + ' +</p>'
+						--	END
+
+						--IF EXISTS (SELECT TOP 1 1 FROM tblSTSubcategoryRegProd WHERE intRegProdId = @intNewProductCode)
+						--	BEGIN
+						--		DECLARE @strProductCode AS NVARCHAR(100) = (SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = @intNewProductCode)
+						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Product Code:</b>&emsp; ' + @strProductCode + ' +</p>'
+						--	END
+
+						--IF EXISTS (SELECT TOP 1 1 FROM tblICCategory WHERE intCategoryId = @intNewCategory)
+						--	BEGIN
+						--		DECLARE @strCategoryCode AS NVARCHAR(100) = (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = @intNewCategory)
+						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Category:</b>&emsp; ' + @strCategoryCode + ' +</p>'
+						--	END
+
+						--IF EXISTS (SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @intNewVendor)
+						--	BEGIN
+						--		DECLARE @strVendorName AS NVARCHAR(100) = (SELECT strName FROM tblEMEntity WHERE intEntityId = @intNewVendor)
+						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Vendor:</b>&emsp; ' + @strVendorName + ' +</p>'
+						--	END
+
+						--IF EXISTS (SELECT TOP 1 1 FROM tblICCountGroup WHERE intCountGroupId = @intNewInventoryGroup)
+						--	BEGIN
+						--		DECLARE @strCountGroup AS NVARCHAR(100) = (SELECT strCountGroup FROM tblICCountGroup WHERE intCountGroupId = @intNewInventoryGroup)
+						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Count Group:</b>&emsp; ' + @strCountGroup + ' +</p>'
+						--	END
+
+						--IF EXISTS (SELECT TOP 1 1 FROM tblICStorageLocation WHERE intStorageLocationId = @intNewBinLocation)
+						--	BEGIN
+						--		DECLARE @strStorageLocationName AS NVARCHAR(100) = (SELECT strName FROM tblICStorageLocation WHERE intStorageLocationId = @intNewBinLocation)
+						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Storage Location:</b>&emsp; ' + @strStorageLocationName + ' +</p>'
+						--	END
+
+
+						-- BIT's
+						SELECT @strUpdateValues = @strUpdateValues + '<p><b>' + strChangeDescription + ':</b>&emsp; ' + strPreviewNewData + '</p>'
+						FROM 
+						(
+							SELECT DISTINCT
+								strChangeDescription
+								, strPreviewNewData
+							FROM @tblPreview
+							WHERE ysnPreview = 1
+						) A
+						
+						-- ===================================================================================
+						-- [END] Update Values
+						-- ===================================================================================
+
+
+
 
 
 						-- Insert to header
@@ -1731,7 +1823,7 @@ BEGIN TRY
 							[dtmDateTimeModifiedTo]		= @dtmDateTimeModifiedTo,
 							[intMassUpdatedRowCount]	= @intMassUpdatedRowCount,
 							[strOriginalFilterCriteria]	= @strFilterCriteria,
-							[strOriginalUpdateValues]	= '',
+							[strOriginalUpdateValues]	= @strUpdateValues,
 							[intConcurrencyId]			= 1
 
 
