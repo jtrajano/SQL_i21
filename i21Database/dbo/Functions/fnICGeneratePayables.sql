@@ -585,7 +585,8 @@ OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceipt
 WHERE Receipt.intInventoryReceiptId = @intReceiptId
 	AND Receipt.ysnPosted = 0
 	AND ReceiptCharge.intEntityVendorId IS NOT NULL
-
+	AND (ReceiptCharge.ysnPrice = 1 OR ReceiptCharge.intEntityVendorId IS NOT NULL)
+	AND ISNULL(ReceiptCharge.ysnAllowVoucher, 1) = 1
 
 RETURN
 END
