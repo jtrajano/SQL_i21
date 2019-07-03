@@ -10,12 +10,14 @@ BEGIN TRY
 	DECLARE @dtmCurrentETAPOD DATETIME
 	DECLARE @intLeadTime INT
 	DECLARE @dtmCurrentPlannedAvailabilityDate DATETIME
+	DECLARE @dtmCurrentUpdatedAvailabilityDate DATETIME
 	DECLARE @dtmMaxETAPOD DATETIME
 	DECLARE @dtmCurrentETSPOL DATETIME
 	DECLARE @dtmMaxETSPOL DATETIME
 	DECLARE @strETAPODReasonCode NVARCHAR(MAX)
 	DECLARE @strETSPOLReasonCode NVARCHAR(MAX)
 	DECLARE @ysnPOETAFeedToERP BIT
+	DECLARE @ysnFeedETAToUpdatedAvailabilityDate BIT
 	DECLARE @intMinLoadDetailRecordId INT
 	DECLARE @intLoadDetailId INT
 	DECLARE @intContractDetailId INT
@@ -51,6 +53,7 @@ BEGIN TRY
 	END	
 
 	SELECT @ysnPOETAFeedToERP = ysnPOETAFeedToERP
+		,@ysnFeedETAToUpdatedAvailabilityDate = ysnFeedETAToUpdatedAvailabilityDate
 	FROM tblLGCompanyPreference
 	
 	INSERT INTO @tblLoadDetail (
@@ -671,7 +674,7 @@ BEGIN TRY
 	END
 
 
-	IF (ISNULL(@ysnPOETAFeedToERP,0) = 1)
+	IF (ISNULL(@ysnPOETAFeedToERP,0) = 1 OR ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1)
 	BEGIN
 		IF (@dtmCurrentETAPOD IS NOT NULL AND @strRowState <> 'Delete')
 		BEGIN
@@ -694,34 +697,51 @@ BEGIN TRY
 				SELECT TOP 1 @intApprovedById = intApprovedById
 				FROM tblCTApprovedContract
 				WHERE intContractDetailId = @intContractDetailId
-				ORDER BY 1 DESC
+				ORDER BY intApprovedContractId DESC
 
 				SELECT @dtmCurrentPlannedAvailabilityDate = dtmPlannedAvailabilityDate
+					,@dtmCurrentUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 
 				UPDATE tblLGLoad SET dtmPlannedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) WHERE intLoadId = @intLoadId
 
-				--UPDATE L 
-				--SET dtmPlannedAvailabilityDate = DATEADD(DD, ISNULL(DPort.intLeadTime, 0), @dtmCurrentETAPOD) 
-				--FROM tblLGLoad L
-				--OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
-				--			 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
-				--WHERE intLoadId = @intLoadId
+				DECLARE @ysnIsETAUpdated BIT = 0
 
 				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId AND intShipmentStatus <> 10)
 				BEGIN
-					IF ((@dtmCurrentETAPOD IS NOT NULL) AND (ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,'')))
+					IF ((@dtmCurrentETAPOD IS NOT NULL))
 					BEGIN
-						UPDATE tblCTContractDetail 
-						SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD
-							,dtmUpdatedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) 
-						,intConcurrencyId = intConcurrencyId + 1 
-						WHERE intContractDetailId = @intContractDetailId 
+						IF (ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,''))
+						BEGIN
+							UPDATE tblCTContractDetail 
+							SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD
+								,intConcurrencyId = intConcurrencyId + 1 
+							WHERE intContractDetailId = @intContractDetailId 
 
-						EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
-													@intApprovedById =  @intApprovedById, 
-													@intContractDetailId = @intContractDetailId
+							EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
+								@intApprovedById =  @intApprovedById, 
+								@intContractDetailId = @intContractDetailId
+
+							SELECT @ysnIsETAUpdated = 1
+						END
+
+						IF (ISNULL(DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD),'') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
+						BEGIN
+							UPDATE tblCTContractDetail 
+							SET dtmUpdatedAvailabilityDate = CASE WHEN (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) THEN DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
+																ELSE dtmUpdatedAvailabilityDate END
+							WHERE intContractDetailId = @intContractDetailId 
+
+							SELECT @ysnIsETAUpdated = 1
+						END
+						
+						IF (@ysnIsETAUpdated = 1) 
+						BEGIN
+							UPDATE tblCTContractDetail 
+							SET intConcurrencyId = intConcurrencyId + 1 
+							WHERE intContractDetailId = @intContractDetailId 
+						END
 					END
 				END
 
