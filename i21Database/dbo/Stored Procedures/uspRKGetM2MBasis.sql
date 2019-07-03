@@ -52,7 +52,9 @@ BEGIN TRY
 		, intUnitMeasureId  INT
 		, intConcurrencyId INT
 		, strMarketValuation NVARCHAR(250) COLLATE Latin1_General_CI_AS
-		, ysnLicensed BIT)
+		, ysnLicensed BIT
+		, intBoardMonthId INT
+		, strBoardMonth NVARCHAR(50))
 	
 	IF (@strEvaluationBy = 'Commodity')
 	BEGIN
@@ -90,6 +92,8 @@ BEGIN TRY
 				, intConcurrencyId
 				, strMarketValuation = ISNULL(strMarketValuation, '')
 				, ysnLicensed
+				, intBoardMonthId
+				, strBoardMonth
 			FROM vyuRKGetM2MBasis WHERE strContractInventory <> 'Inventory'
 		END
 		ELSE IF (@ysnIncludeInventoryM2M = 1)
@@ -126,6 +130,8 @@ BEGIN TRY
 				, intConcurrencyId
 				, strMarketValuation = ISNULL(strMarketValuation, '') 
 				, ysnLicensed
+				, intBoardMonthId
+				, strBoardMonth
 			FROM vyuRKGetM2MBasis
 		END
 		
@@ -184,6 +190,8 @@ BEGIN TRY
 				, intConcurrencyId
 				, strMarketValuation = ISNULL(strMarketValuation, '')
 				, ysnLicensed
+				, intBoardMonthId
+				, strBoardMonth
 			FROM vyuRKGetM2MBasis WHERE strContractInventory <> 'Inventory'
 		END
 		ELSE IF (@ysnIncludeInventoryM2M = 1)
@@ -220,6 +228,8 @@ BEGIN TRY
 				, intConcurrencyId
 				, strMarketValuation = ISNULL(strMarketValuation, '')
 				, ysnLicensed
+				, intBoardMonthId
+				, strBoardMonth
 			FROM vyuRKGetM2MBasis
 		END
 		

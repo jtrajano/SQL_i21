@@ -32,6 +32,8 @@ SELECT DISTINCT strCommodityCode
 	, intConcurrencyId = 0
 	, i.strMarketValuation
 	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
+	, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
+	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -48,6 +50,7 @@ LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
+CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
 WHERE dblBalance > 0 AND cd.intPricingTypeId <> 5 AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT strCommodityCode
@@ -80,6 +83,8 @@ UNION SELECT DISTINCT strCommodityCode
 	, intConcurrencyId = 0
 	, i.strMarketValuation
 	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
+	, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
+	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail  cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -97,6 +102,7 @@ LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
+CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
 WHERE cd.intPricingTypeId = 5 AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
@@ -129,19 +135,20 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, intConcurrencyId = 0
 	, iis.strMarketValuation
 	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
+	, ct.intBoardMonthId
+	, ct.strBoardMonth
 FROM (
-	SELECT 
-		 it.intItemId
-		,it.strItemNo
-		,it.strLocationName
-		,it.intLocationId
-		,it.strCurrency
-		,it.intCurrencyId
-		,it.strMarketValuation
-		,it.intOriginId
-		,it.ysnLicensed
-		,c.intCommodityId
-		,c.strCommodityCode
+	SELECT it.intItemId
+		, it.strItemNo
+		, it.strLocationName
+		, it.intLocationId
+		, it.strCurrency
+		, it.intCurrencyId
+		, it.strMarketValuation
+		, it.intOriginId
+		, it.ysnLicensed
+		, c.intCommodityId
+		, c.strCommodityCode
 	FROM vyuRKGetInventoryTransaction it
 	INNER JOIN tblICItem i ON it.intItemId = i.intItemId
 	INNER JOIN tblICCommodity c on i.intCommodityId =  c.intCommodityId
@@ -170,6 +177,8 @@ LEFT JOIN (
 		, strFMUOM = mum.strUnitMeasure
 		, intUOMId = um.intUnitMeasureId
 		, strUOM = um.strUnitMeasure
+		, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
+		, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fmon.strFutureMonth ELSE NULL END
 	FROM tblCTContractDetail cd
 	JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 	JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -183,5 +192,6 @@ LEFT JOIN (
 	LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
+	CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
 ) ct ON iis.intItemId = ct.intItemId
 	
