@@ -21,12 +21,13 @@ INTO #REGULARTRANS
 FROM tblARPOS POS
 INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 INNER JOIN tblARPOSEndOfDay EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
-LEFT JOIN (
-	SELECT TOP 1 intPOSId
-	FROM tblARPOSDetail
-	WHERE dblQuantity < 0
-	GROUP BY intPOSId
-) NEGQTY ON POS.intPOSId = NEGQTY.intPOSId
+OUTER APPLY (
+	SELECT TOP 1 POSD.intPOSId
+	FROM tblARPOSDetail POSD
+	WHERE POSD.dblQuantity < 0 
+	  AND POSD.intPOSId = POS.intPOSId
+	GROUP BY intPOSId	
+) NEGQTY
 WHERE POS.ysnReturn = 0
   AND POS.ysnHold = 0
   AND POS.intInvoiceId IS NULL
@@ -48,8 +49,7 @@ INTO #RETURNEDTRANS
 FROM tblARPOS POS
 INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 INNER JOIN tblARPOSEndOfDay EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
-WHERE POS.ysnReturn = 1
-  AND POS.intOriginalPOSTransactionId IS NOT NULL
+WHERE ((POS.ysnReturn = 1 AND POS.intOriginalPOSTransactionId IS NOT NULL) OR (POS.ysnReturn = 0 AND POS.intItemCount = 0))
   AND POS.ysnHold = 0
   AND POS.intInvoiceId IS NULL
   AND POS.intCreditMemoId IS NULL
@@ -76,6 +76,13 @@ CROSS APPLY (
 	  AND POSD.intPOSId = POS.intPOSId
 	GROUP BY intPOSId	
 ) NEGQTY
+CROSS APPLY (
+	SELECT TOP 1 POSD.intPOSId
+	FROM tblARPOSDetail POSD
+	WHERE POSD.dblQuantity > 0 
+	  AND POSD.intPOSId = POS.intPOSId
+	GROUP BY intPOSId	
+) POSQTY
 WHERE POS.ysnReturn = 0
   AND POS.ysnHold = 0
   AND POS.intInvoiceId IS NULL
