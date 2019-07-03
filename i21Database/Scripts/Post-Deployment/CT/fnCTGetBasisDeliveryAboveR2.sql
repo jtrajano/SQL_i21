@@ -35,7 +35,7 @@
 				strCommodityCode		NVARCHAR(50),
 				strItemNo				NVARCHAR(50),  
 				strCompanyLocation		NVARCHAR(150),
-				dtmDate					DATETIME,
+				dtmDate					DATE,
 				dblQuantity				NUMERIC(38,20),
 				dblRunningBalance		NUMERIC(38,20)	
 			)
