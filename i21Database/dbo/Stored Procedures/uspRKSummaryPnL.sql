@@ -241,7 +241,9 @@ BEGIN
 		, strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, dblTotal NUMERIC(24, 10)
 		, ysnExpired BIT
-		, dtmTradeDate DATETIME)
+		, dtmTradeDate DATETIME
+		, strBook NVARCHAR(50)
+		, strSubBook NVARCHAR(50))
 	
 	INSERT INTO @Summary (intFutureMarketId
 		, intFutureMonthId
@@ -262,7 +264,9 @@ BEGIN
 		, strAccountNumber
 		, dblTotal
 		, ysnExpired
-		, dtmTradeDate)
+		, dtmTradeDate
+		, strBook
+		, strSubBook)
 	SELECT intFutureMarketId
 		, intFutureMonthId
 		, strFutMarketName
@@ -283,6 +287,8 @@ BEGIN
 		, dblTotal = dblUnrealized + dblRealized
 		, ysnExpired
 		, dtmTradeDate
+		, strBook
+		, strSubBook
 	FROM (
 		SELECT intFutureMarketId
 			, intFutureMonthId
@@ -303,6 +309,8 @@ BEGIN
 			, strAccountNumber
 			, ysnExpired
 			, dtmTradeDate
+			, strBook
+			, strSubBook
 		FROM (
 			SELECT dblGrossPnL
 				, dblGrossPnLRealized = 0
@@ -326,6 +334,8 @@ BEGIN
 				, strName
 				, strAccountNumber
 				, ysnExpired
+				, strBook
+				, strSubBook
 			FROM @UnRelaized
 			
 			UNION ALL SELECT 0 AS dblGrossPnL
@@ -350,6 +360,8 @@ BEGIN
 				, t.strName
 				, t.strAccountNumber
 				, ysnExpired = ISNULL(t.ysnExpired, 0)
+				, strBook
+				, strSubBook
 			FROM @Relaized t
 		) t
 		GROUP BY intFutureMonthId
@@ -360,6 +372,8 @@ BEGIN
 			, strAccountNumber
 			, ysnExpired
 			, dtmTradeDate
+			, strBook
+			, strSubBook
 	) t
 	
 	SELECT intFutureMarketId
@@ -378,11 +392,11 @@ BEGIN
 		, dblRealized = SUM(dblRealized)
 		, dblVariationMargin = SUM(dblVariationMargin)
 		, strName
-		, '' strAccountNumber
+		, strAccountNumber
 		, dblTotal = SUM(dblTotal)
 		, dblInitialMargin = SUM(dblInitialMargin)
-		, '' strBook
-		, '' strSubBook
+		, strBook
+		, strSubBook
 		, ysnExpired
 	FROM (
 		SELECT intFutureMarketId
@@ -408,6 +422,8 @@ BEGIN
 											WHEN dblContractMargin >= dblMaxAmount THEN dblMaxAmount
 											ELSE dblContractMargin END END)
 			, ysnExpired
+			, strBook
+			, strSubBook
 		FROM (
 			SELECT *
 				, ((dblNet * ISNULL(dblPrice, 0) * dblContractSize) * dblPercenatage) / 100 AS dblContractMargin
@@ -448,5 +464,8 @@ BEGIN
 		, strFutureMonth
 		, strName
 		, ysnExpired
+		, strAccountNumber
+		, strBook
+		, strSubBook
 	ORDER BY CONVERT(DATETIME, '01 ' + strFutureMonth) ASC
 END
