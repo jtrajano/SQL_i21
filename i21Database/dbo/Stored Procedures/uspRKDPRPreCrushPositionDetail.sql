@@ -917,10 +917,10 @@ BEGIN
 				, strContractEndMonthNearBy = 'Near By' COLLATE Latin1_General_CI_AS
 				, dblTotal = BD.dblQuantity
 				, intSeqId = BD.intContractSeq
-				, strUnitMeasure = 6
+				, strUnitMeasure = NULL
 				, intFromCommodityUnitMeasureId = NULL
 				, strEntityName = BD.strCustomerVendor
-				, intOrderId = NULL
+				, intOrderId = 6
 				, BD.intItemId
 				, BD.strItemNo
 				, cat.strCategoryCode
