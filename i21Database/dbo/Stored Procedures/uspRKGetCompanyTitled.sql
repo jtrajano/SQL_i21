@@ -865,15 +865,15 @@ BEGIN
 
 				Select Top 1 @date = Date From #tempDateRange
 
-
-				IF @ysnIncludeInTransitInCompanyTitled = 1
-				BEGIN
-					SELECT 
-					@dblSalesInTransitAsOf = SUM(dblInTransitQty)
-					FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @date) InTran
-					WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)	
-					AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				END
+				--Comment it out based on discussion in this jira RM-3032
+				--IF @ysnIncludeInTransitInCompanyTitled = 1
+				--BEGIN
+				--	SELECT 
+				--	@dblSalesInTransitAsOf = SUM(dblInTransitQty)
+				--	FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @date) InTran
+				--	WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)	
+				--	AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				--END
 
 
 
@@ -883,7 +883,7 @@ BEGIN
 				)
 				SELECT 
 					@date
-					,sum(dblTotal) + isnull(@dblSalesInTransitAsOf,0)
+					,sum(dblTotal) --+ isnull(@dblSalesInTransitAsOf,0)
 				FROM @InventoryStock 
 				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
 			
