@@ -281,7 +281,7 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				SELECT TOP 1 @errorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @intBillId
+				SELECT TOP 1 @errorMessage = strMessage FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
 				RAISERROR(@errorMessage,16,1)
 			END
 			
