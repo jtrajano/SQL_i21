@@ -5,19 +5,21 @@ AS
 	SELECT	*
 	FROM	(
 				SELECT	
+						CH.strContractNumber,
 						IC.strItemNo,
 						IC.strDescription,
 						UM.strUnitMeasure,
 						TG.strTaxGroup,
 						CS.strContractStatus,
-						CH.*						
+						CD.*						
 
-					FROM	tblCTItemContractDetail				CH	
+					FROM	tblCTItemContractDetail				CD	
 				
-					JOIN	tblICItem							IC	ON	IC.intItemId						=		CH.intItemId							
-			LEFT	JOIN	tblICUnitMeasure					UM	ON	UM.intUnitMeasureId					=		CH.intItemUOMId
-			LEFT	JOIN	tblSMTaxGroup						TG	ON	TG.intTaxGroupId					=		CH.intTaxGroupId
-			LEFT	JOIN	tblCTContractStatus					CS	ON	CS.intContractStatusId				=		CH.intContractStatusId
+					JOIN	tblCTItemContractHeader				CH	ON	CH.intItemContractHeaderId			=		CD.intItemContractHeaderId	
+			LEFT	JOIN	tblICItem							IC	ON	IC.intItemId						=		CD.intItemId
+			LEFT	JOIN	tblICUnitMeasure					UM	ON	UM.intUnitMeasureId					=		CD.intItemUOMId
+			LEFT	JOIN	tblSMTaxGroup						TG	ON	TG.intTaxGroupId					=		CD.intTaxGroupId
+			LEFT	JOIN	tblCTContractStatus					CS	ON	CS.intContractStatusId				=		CD.intContractStatusId
 			
 
 			) tblX
