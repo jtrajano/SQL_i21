@@ -50,7 +50,7 @@ BEGIN
 		strEntityName			NVARCHAR(150),
 		strCommodityCode		NVARCHAR(50),
 		intCommodityId			INT,
-		dtmDate					DATETIME,
+		dtmDate					DATE,
 		dblQuantity				NUMERIC(38,20),
 		strTransactionType		NVARCHAR(20),
 		intTimeE				BIGINT
