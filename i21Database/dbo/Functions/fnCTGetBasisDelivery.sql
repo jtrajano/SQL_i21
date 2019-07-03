@@ -205,7 +205,7 @@ BEGIN
 	,C.strCommodityCode
 	,C.intCommodityId
 	,InvTran.dtmDate
-	,dblQuantity = SUM(ISNULL(ShipmentItem.dblQuantity,0))
+	,dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
 	,'Inventory Shipment'
 	,CAST(replace(convert(varchar, InvTran.dtmDate,101),'/','') + replace(convert(varchar, InvTran.dtmDate,108),':','')	 AS BIGINT) + CAST( Shipment.intInventoryShipmentId AS BIGINT)
 	FROM tblCTContractDetail CD
