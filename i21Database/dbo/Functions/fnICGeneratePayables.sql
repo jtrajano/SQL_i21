@@ -459,35 +459,35 @@ WHERE
 	)
 
 -- Get the unposted other charges used to remove them from payables table
-UNION 
+UNION ALL
 
 SELECT 
-	[intEntityVendorId]							=	VoucherPayable.intEntityVendorId
+	[intEntityVendorId]							=	ReceiptCharge.intEntityVendorId
 	,[intTransactionType]						=	CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
 	,[dtmDate]									=	Receipt.dtmReceiptDate
 	,[strReference]								=	Receipt.strVendorRefNo
 	,[strSourceNumber]							=	Receipt.strReceiptNumber
-	,[strVendorOrderNumber]						=	NULL
+	,[strVendorOrderNumber]						=	Receipt.strReceiptNumber
 	,[strPurchaseOrderNumber]					=	NULL
-	,[intPurchaseDetailId]						=	NULL
+	,[intPurchaseDetailId]						=	ReceiptCharge.intContractDetailId
 	,[intItemId]								=	vReceiptCharge.intChargeId
 	,[strMiscDescription]						=	NULL			
 	,[strItemNo]								=	vReceiptCharge.[strItemNo]					
 	,[strDescription]							=	vReceiptCharge.strItemDescription				
 	,[intPurchaseTaxGroupId]					=	NULL
-	,[dblOrderQty]								=	VoucherPayable.dblOrderQty
+	,[dblOrderQty]								=	ISNULL(VoucherPayable.dblOrderQty, 0.00)
 	,[dblPOOpenReceive]							=	NULL
 	,[dblOpenReceive]							=	NULL
-	,[dblQuantityToBill]						=	VoucherPayable.[dblQuantityToBill]			
-	,[dblQtyToBillUnitQty]						=	VoucherPayable.[dblQtyToBillUnitQty]			
-	,[intQtyToBillUOMId]						=	VoucherPayable.[intQtyToBillUOMId]			
-	,[dblQuantityBilled]						=	VoucherPayable.[dblQuantityBilled]			
+	,[dblQuantityToBill]						=	ISNULL(VoucherPayable.[dblQuantityToBill], 0)
+	,[dblQtyToBillUnitQty]						=	ISNULL(VoucherPayable.[dblQtyToBillUnitQty], 0)		
+	,[intQtyToBillUOMId]						=	ISNULL(VoucherPayable.[intQtyToBillUOMId], 0)			
+	,[dblQuantityBilled]						=	ISNULL(VoucherPayable.[dblQuantityBilled], 0)			
 	,[intLineNo]								=	NULL				
 	,[intInventoryReceiptItemId]				=	ISNULL(ChargesLink.intInventoryReceiptItemId, ISNULL(ComputedChargesLink.intInventoryReceiptItemId, VoucherPayable.intInventoryReceiptItemId)) 
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.[intInventoryReceiptChargeId]	
 	,[intContractChargeId]						=	NULL		
-	,[dblUnitCost]								=	VoucherPayable.dblCostUnitQty
-	,[dblDiscount]								=	VoucherPayable.[dblDiscount]					
+	,[dblUnitCost]								=	ISNULL(VoucherPayable.dblCostUnitQty, 0)
+	,[dblDiscount]								=	ISNULL(VoucherPayable.[dblDiscount], 0)
 	,[dblTax]									=	ReceiptCharge.[dblTax]																		
 	,[dblRate]									=	ReceiptCharge.dblRate						
 	,[strRateType]								=	VoucherPayable.[strRateType]					
@@ -507,20 +507,20 @@ SELECT
 	,[intContractHeaderId]						=	ReceiptCharge.intContractId
 	,[intContractDetailId]						=	ReceiptCharge.[intContractDetailId]
 	,[intContractSequence]						=	vReceiptCharge.intContractSeq
-	,[intScaleTicketId]							=	VoucherPayable.[intScaleTicketId]
-	,[strScaleTicketNumber]						=	VoucherPayable.[strScaleTicketNumber]
+	,[intScaleTicketId]							=	ScaleTicket.intScaleTicketId
+	,[strScaleTicketNumber]						=	ScaleTicket.strScaleTicketNumber
 	,[intShipmentId]							=	Receipt.intShipmentId
 	,[intLoadDetailId]							=	VoucherPayable.intLoadShipmentDetailId
 	,[intUnitMeasureId]							=	ReceiptCharge.intCostUOMId
 	,[strUOM]									=	VoucherPayable.strQtyToBillUOM
 	,[intWeightUOMId]							=	VoucherPayable.intWeightUOMId
 	,[intCostUOMId]								=	VoucherPayable.[intCostUOMId]
-	,[dblNetWeight]								=	VoucherPayable.[dblNetWeight]
+	,[dblNetWeight]								=	ISNULL(VoucherPayable.[dblNetWeight], 0)
 	,[strCostUOM]								=	VoucherPayable.[strCostUOM]
 	,[strgrossNetUOM]							=	VoucherPayable.strWeightUOM
-	,[dblWeightUnitQty]							=	VoucherPayable.[dblWeightUnitQty]
-	,[dblCostUnitQty]							=	VoucherPayable.[dblCostUnitQty]
-	,[dblUnitQty]								=	VoucherPayable.dblOrderUnitQty
+	,[dblWeightUnitQty]							=	ISNULL(VoucherPayable.[dblWeightUnitQty], 0)
+	,[dblCostUnitQty]							=	ISNULL(VoucherPayable.[dblCostUnitQty], 0)
+	,[dblUnitQty]								=	0
 	,[intCurrencyId]							=	VoucherPayable.[intCurrencyId]										
 	,[strCurrency]								=	VoucherPayable.[strCurrency]												
 	,[intCostCurrencyId]						=	VoucherPayable.[intCostCurrencyId]
@@ -532,11 +532,11 @@ SELECT
 	,[strSubLocationName]						=	VoucherPayable.[strSubLocationName]			
 	,[intStorageLocationId]						=	VoucherPayable.[intStorageLocationId]			
 	,[strStorageLocationName]					=	VoucherPayable.[strStorageLocationName]		
-	,[dblNetShippedWeight]						=	NULL
-	,[dblWeightLoss]							=	NULL	
-	,[dblFranchiseWeight]						=	NULL	
-	,[dblClaimAmount]							=	NULL	
-	,[intLocationId]							=	VoucherPayable.[intLocationId]				
+	,[dblNetShippedWeight]						=	0
+	,[dblWeightLoss]							=	0	
+	,[dblFranchiseWeight]						=	0	
+	,[dblClaimAmount]							=	0	
+	,[intLocationId]							=	Receipt.[intLocationId]				
 	,[strReceiptLocation]						= 	VoucherPayable.strLocationName
 	,[intInventoryShipmentItemId]				=   VoucherPayable.[intInventoryShipmentItemId]	
 	,[intInventoryShipmentChargeId]				=	VoucherPayable.[intInventoryShipmentChargeId]
@@ -585,6 +585,7 @@ OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceipt
 WHERE Receipt.intInventoryReceiptId = @intReceiptId
 	AND Receipt.ysnPosted = 0
 	AND ReceiptCharge.intEntityVendorId IS NOT NULL
+
 
 RETURN
 END
