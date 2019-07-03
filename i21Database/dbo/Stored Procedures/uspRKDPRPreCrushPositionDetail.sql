@@ -210,7 +210,7 @@ BEGIN
 					,strTicketNumber = SI.strSourceNumber
 					,intTicketId = SI.intSourceId
 					,dtmTicketDateTime = InTran.dtmDate
-					,intCompanyLocationId = InTran.intItemLocationId
+					,intCompanyLocationId = Inv.intLocationId
 					,strLocationName = SI.strShipFromLocation
 					,strUOM = InTran.strUnitMeasure
 					,Inv.intEntityId
@@ -1075,8 +1075,7 @@ BEGIN
 						FROM #tblGetSalesIntransitWOPickLot i						
 						join tblICCommodity c on i.intCommodityId=c.intCommodityId
 						WHERE i.intCommodityId = @intCommodityId
-					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
-					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @FinalList WHERE strType = 'Sales Basis Deliveries')			
+					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)		
 					) t GROUP BY strCommodityCode
 					, strLocationName
 					, intCommodityId
