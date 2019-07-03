@@ -115,6 +115,11 @@ BEGIN TRY
 		UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post WHERE intSiteHeaderId = @intSiteHeaderId
 	END
 
+	IF(@success = 0)
+	BEGIN
+		RAISERROR(@errorMessage,16,1)
+	END
+
 	COMMIT TRANSACTION
 
 END TRY
