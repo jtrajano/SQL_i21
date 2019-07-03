@@ -151,7 +151,8 @@ PRINT '03'
 							ON temp.intItemId = Item.intItemId
 						ORDER BY temp.intItemId ASC
 
-		
+
+
 						-- UPDATE ITEM
 						EXEC [dbo].[uspICUpdateItemForCStore]
 							 @strUpcCode				= NULL 
@@ -212,6 +213,12 @@ PRINT '03'
 
 
 
+
+
+
+
+
+
 --TEST
 PRINT '04'	
 
@@ -229,7 +236,8 @@ PRINT '04'
 				-- =========================================================================
 				-- [START] - Revert ITEM LOCATION
 				-- =========================================================================
-
+--TEST
+PRINT '05 - 01'	
 				-- Create
 				DECLARE @tempITEMLOCATION TABLE (
 						intItemLocationId			INT		NOT NULL,
@@ -262,6 +270,13 @@ PRINT '04'
 						dblSuggestedQty				NUMERIC(18, 6) NULL,
 						intStorageLocationId		INT		NULL
 				)
+
+--TEST
+PRINT '05 - 02'	
+	
+
+--TEST
+PRINT '05 - 03'	
 
 
 				-- Insert
@@ -304,7 +319,7 @@ PRINT '04'
 					ysnTaxFlag3				= piv.ysnTaxFlag3,
 					ysnTaxFlag4				= piv.ysnTaxFlag4,
 					ysnDepositRequired		= piv.ysnDepositRequired,
-					intDepositPLUId			= piv.intDepositPLUId,
+					intDepositPLUId			= CASE WHEN piv.intDepositPLUId = '' THEN NULL ELSE piv.intDepositPLUId END,
 					ysnQuantityRequired		= piv.ysnQuantityRequired,	
 					ysnScaleItem			= piv.ysnScaleItem,
 					ysnFoodStampable		= piv.ysnFoodStampable,
@@ -319,14 +334,14 @@ PRINT '04'
 					ysnCountedDaily			= piv.ysnCountedDaily,
 					strCounted				= piv.strCounted,
 					ysnCountBySINo			= piv.ysnCountBySINo,
-					intFamilyId				= piv.intFamilyId,
-					intClassId				= piv.intClassId,
-					intProductCodeId		= piv.intProductCodeId,
-					intVendorId				= piv.intVendorId,
-					intMinimumAge			= piv.intMinimumAge,
-					dblMinOrder				= piv.dblMinOrder,
-					dblSuggestedQty			= piv.dblSuggestedQty,
-					intStorageLocationId	= piv.intStorageLocationId
+					intFamilyId				= CASE WHEN piv.intFamilyId = '' THEN NULL ELSE piv.intFamilyId END, --piv.intFamilyId,
+					intClassId				= CASE WHEN piv.intClassId = '' THEN NULL ELSE piv.intClassId END, --piv.intClassId,
+					intProductCodeId		= CASE WHEN piv.intProductCodeId = '' THEN NULL ELSE piv.intProductCodeId END, --piv.intProductCodeId,
+					intVendorId				= CASE WHEN piv.intVendorId = '' THEN NULL ELSE piv.intVendorId END, --piv.intVendorId,
+					intMinimumAge			= CASE WHEN piv.intMinimumAge = '' THEN NULL ELSE piv.intMinimumAge END, -- piv.intMinimumAge,
+					dblMinOrder				= CASE WHEN piv.dblMinOrder = '' THEN NULL ELSE piv.dblMinOrder END, -- piv.dblMinOrder,
+					dblSuggestedQty			= CASE WHEN piv.dblSuggestedQty = '' THEN NULL ELSE piv.dblSuggestedQty END, -- piv.dblSuggestedQty,
+					intStorageLocationId	= CASE WHEN piv.intStorageLocationId = '' THEN NULL ELSE piv.intStorageLocationId END --piv.intStorageLocationId
 				FROM (
 					SELECT detail.intItemLocationId
 						 , detail.strTableColumnName
@@ -346,9 +361,15 @@ PRINT '04'
 
 
 
+--TEST
+PRINT '05 - 04'	
+
 				-- Record row count
 				SET @intRevertItemLocationRecords = (SELECT COUNT(intItemLocationId) FROM @tempITEMLOCATION)
 
+--TEST
+PRINT '05 - 05'	
+SELECT '@intRevertItemLocationRecords', @intRevertItemLocationRecords
 
 				-----------------------------------------------------------------------------
 				-- [START] - ITEM DEBUG MODE
@@ -406,6 +427,8 @@ PRINT '04'
 				-----------------------------------------------------------------------------
 
 
+--TEST
+PRINT '05 - 06'	
 
 				-- LOOP ITEM LOCATIONS's
 				WHILE EXISTS(SELECT TOP 1 1 FROM @tempITEMLOCATION)
@@ -450,7 +473,7 @@ PRINT '04'
 									@ysnTaxFlag3				= ISNULL(temp.ysnTaxFlag3, ItemLoc.ysnTaxFlag3),
 									@ysnTaxFlag4				= ISNULL(temp.ysnTaxFlag4, ItemLoc.ysnTaxFlag4),
 									@ysnDepositRequired			= ISNULL(temp.ysnDepositRequired, ItemLoc.ysnDepositRequired),
-									@intDepositPLUId			= temp.intDepositPLUId,
+									@intDepositPLUId			= CASE WHEN temp.intDepositPLUId IS NULL THEN ItemLoc.intDepositPLUId ELSE temp.intDepositPLUId END,
 									@ysnQuantityRequired		= ISNULL(temp.ysnQuantityRequired, ItemLoc.ysnQuantityRequired),
 									@ysnScaleItem				= ISNULL(temp.ysnScaleItem, ItemLoc.ysnScaleItem),
 									@ysnFoodStampable			= ISNULL(temp.ysnFoodStampable, ItemLoc.ysnFoodStampable),
@@ -465,14 +488,14 @@ PRINT '04'
 									@ysnCountedDaily			= ISNULL(temp.ysnCountedDaily, ItemLoc.ysnCountedDaily),
 									@strCounted					= temp.strCounted,
 									@ysnCountBySINo				= ISNULL(temp.ysnCountBySINo, ItemLoc.ysnCountBySINo),
-									@intFamilyId				= temp.intFamilyId,
-									@intClassId					= temp.intClassId,
-									@intProductCodeId			= temp.intProductCodeId,
-									@intVendorId				= CASE WHEN temp.intVendorId = 0 OR temp.intVendorId = '' THEN NULL ELSE temp.intVendorId END,
+									@intFamilyId				= CASE WHEN temp.intFamilyId IS NULL THEN ItemLoc.intFamilyId ELSE temp.intFamilyId END, -- temp.intFamilyId,
+									@intClassId					= CASE WHEN temp.intClassId IS NULL THEN ItemLoc.intClassId ELSE temp.intClassId END, -- temp.intClassId,
+									@intProductCodeId			= CASE WHEN temp.intProductCodeId IS NULL THEN ItemLoc.intProductCodeId ELSE temp.intProductCodeId END, -- temp.intProductCodeId,
+									@intVendorId				= CASE WHEN temp.intVendorId IS NULL THEN ItemLoc.intVendorId ELSE temp.intVendorId END, -- temp.intVendorId,
 									@intMinimumAge				= temp.intMinimumAge,
 									@dblMinOrder				= temp.dblMinOrder,
 									@dblSuggestedQty			= temp.dblSuggestedQty,
-									@intStorageLocationId		= temp.intStorageLocationId
+									@intStorageLocationId		= CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
 						FROM @tempITEMLOCATION temp
 						INNER JOIN tblICItemLocation ItemLoc
 							ON temp.intItemLocationId = ItemLoc.intItemLocationId
@@ -598,12 +621,12 @@ PRINT '04'
 
 
 --TEST
-PRINT '05'				
+PRINT '06'				
 
 
 
 --TEST
-SELECT @intRevertItemRecords, @intRevertItemLocationRecords
+-- SELECT @intRevertItemRecords, @intRevertItemLocationRecords
 
 				DECLARE @intAllRevertedRecordsCount INT = @intRevertItemRecords + @intRevertItemLocationRecords
 				DECLARE @strAllRevertedRecordsCount NVARCHAR(500) = CAST(@intAllRevertedRecordsCount AS NVARCHAR(500))
