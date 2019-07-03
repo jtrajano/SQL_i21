@@ -786,7 +786,7 @@ BEGIN
 					JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 					LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = t.strBrokerAccount
 					JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId = @intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
-					INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
+					INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId
 					WHERE th.intCommodityId = @intCommodityId
 						AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
 						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
@@ -859,7 +859,7 @@ BEGIN
 				JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 				JOIN tblRKOptionsMonth om ON om.strOptionMonth = t.strOptionMonth
 				INNER JOIN tblRKBrokerageAccount ba ON t.strBrokerAccount = ba.strAccountNumber
-				INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
+				INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId
 				WHERE th.intCommodityId = @intCommodityId
 					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
@@ -949,7 +949,7 @@ BEGIN
 						LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
 						JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c) AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 						LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cuc1.intUnitMeasureId
-						INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId AND fm.ysnExpired = 0
+						INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId
 						WHERE th.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
 							AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
 							AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
