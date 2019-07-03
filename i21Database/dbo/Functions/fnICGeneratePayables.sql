@@ -457,6 +457,135 @@ WHERE
 		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
 		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 	)
+
+-- Get the unposted other charges used to remove them from payables table
+UNION 
+
+SELECT 
+	[intEntityVendorId]							=	VoucherPayable.intEntityVendorId
+	,[intTransactionType]						=	CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
+	,[dtmDate]									=	Receipt.dtmReceiptDate
+	,[strReference]								=	Receipt.strVendorRefNo
+	,[strSourceNumber]							=	Receipt.strReceiptNumber
+	,[strVendorOrderNumber]						=	NULL
+	,[strPurchaseOrderNumber]					=	NULL
+	,[intPurchaseDetailId]						=	NULL
+	,[intItemId]								=	vReceiptCharge.intChargeId
+	,[strMiscDescription]						=	NULL			
+	,[strItemNo]								=	vReceiptCharge.[strItemNo]					
+	,[strDescription]							=	vReceiptCharge.strItemDescription				
+	,[intPurchaseTaxGroupId]					=	NULL
+	,[dblOrderQty]								=	VoucherPayable.dblOrderQty
+	,[dblPOOpenReceive]							=	NULL
+	,[dblOpenReceive]							=	NULL
+	,[dblQuantityToBill]						=	VoucherPayable.[dblQuantityToBill]			
+	,[dblQtyToBillUnitQty]						=	VoucherPayable.[dblQtyToBillUnitQty]			
+	,[intQtyToBillUOMId]						=	VoucherPayable.[intQtyToBillUOMId]			
+	,[dblQuantityBilled]						=	VoucherPayable.[dblQuantityBilled]			
+	,[intLineNo]								=	NULL				
+	,[intInventoryReceiptItemId]				=	ISNULL(ChargesLink.intInventoryReceiptItemId, ISNULL(ComputedChargesLink.intInventoryReceiptItemId, VoucherPayable.intInventoryReceiptItemId)) 
+	,[intInventoryReceiptChargeId]				=	ReceiptCharge.[intInventoryReceiptChargeId]	
+	,[intContractChargeId]						=	NULL		
+	,[dblUnitCost]								=	VoucherPayable.dblCostUnitQty
+	,[dblDiscount]								=	VoucherPayable.[dblDiscount]					
+	,[dblTax]									=	ReceiptCharge.[dblTax]																		
+	,[dblRate]									=	ReceiptCharge.dblRate						
+	,[strRateType]								=	VoucherPayable.[strRateType]					
+	,[intCurrencyExchangeRateTypeId]			=	ReceiptCharge.intForexRateTypeId
+	,[ysnSubCurrency]							=	ReceiptCharge.[ysnSubCurrency]					
+	,[intSubCurrencyCents]						=	ReceiptCharge.intCent
+	,[intAccountId]								=	VoucherPayable.intAccountId
+	,[strAccountId]								=	VoucherPayable.strAccountId
+	,[strAccountDesc]							=	VoucherPayable.strAccountDesc
+	,[strName]									=	VoucherPayable.strName
+	,[strVendorId]								=	VoucherPayable.strVendorId
+	,[strShipVia]								=	VoucherPayable.strShipVia
+	,[strTerm]									=	VoucherPayable.strTerm
+	,[intTermId]								=	VoucherPayable.intTermId
+	,[strContractNumber]						=	VoucherPayable.strContractNumber
+	,[strBillOfLading]							=	Receipt.[strBillOfLading]
+	,[intContractHeaderId]						=	ReceiptCharge.intContractId
+	,[intContractDetailId]						=	ReceiptCharge.[intContractDetailId]
+	,[intContractSequence]						=	vReceiptCharge.intContractSeq
+	,[intScaleTicketId]							=	VoucherPayable.[intScaleTicketId]
+	,[strScaleTicketNumber]						=	VoucherPayable.[strScaleTicketNumber]
+	,[intShipmentId]							=	Receipt.intShipmentId
+	,[intLoadDetailId]							=	VoucherPayable.intLoadShipmentDetailId
+	,[intUnitMeasureId]							=	ReceiptCharge.intCostUOMId
+	,[strUOM]									=	VoucherPayable.strQtyToBillUOM
+	,[intWeightUOMId]							=	VoucherPayable.intWeightUOMId
+	,[intCostUOMId]								=	VoucherPayable.[intCostUOMId]
+	,[dblNetWeight]								=	VoucherPayable.[dblNetWeight]
+	,[strCostUOM]								=	VoucherPayable.[strCostUOM]
+	,[strgrossNetUOM]							=	VoucherPayable.strWeightUOM
+	,[dblWeightUnitQty]							=	VoucherPayable.[dblWeightUnitQty]
+	,[dblCostUnitQty]							=	VoucherPayable.[dblCostUnitQty]
+	,[dblUnitQty]								=	VoucherPayable.dblOrderUnitQty
+	,[intCurrencyId]							=	VoucherPayable.[intCurrencyId]										
+	,[strCurrency]								=	VoucherPayable.[strCurrency]												
+	,[intCostCurrencyId]						=	VoucherPayable.[intCostCurrencyId]
+	,[strCostCurrency]							=	VoucherPayable.[strCostCurrency]				
+	,[strVendorLocation]						=	VoucherPayable.strLocationName			
+	,[str1099Form]								=	VoucherPayable.[str1099Form]														
+	,[str1099Type]								=	VoucherPayable.[str1099Type]																
+	,[intSubLocationId]							=	VoucherPayable.[intSubLocationId]				
+	,[strSubLocationName]						=	VoucherPayable.[strSubLocationName]			
+	,[intStorageLocationId]						=	VoucherPayable.[intStorageLocationId]			
+	,[strStorageLocationName]					=	VoucherPayable.[strStorageLocationName]		
+	,[dblNetShippedWeight]						=	NULL
+	,[dblWeightLoss]							=	NULL	
+	,[dblFranchiseWeight]						=	NULL	
+	,[dblClaimAmount]							=	NULL	
+	,[intLocationId]							=	VoucherPayable.[intLocationId]				
+	,[strReceiptLocation]						= 	VoucherPayable.strLocationName
+	,[intInventoryShipmentItemId]				=   VoucherPayable.[intInventoryShipmentItemId]	
+	,[intInventoryShipmentChargeId]				=	VoucherPayable.[intInventoryShipmentChargeId]
+	,[intTaxGroupId]							=	vReceiptCharge.intTaxGroupId
+	,[ysnReturn]								=	VoucherPayable.[ysnReturn]
+	,[strTaxGroup]								=	VoucherPayable.[strTaxGroup]		
+	,intShipViaId								=   VoucherPayable.intShipViaId		
+	,intShipFromId								=	NULL
+	,intShipFromEntityId						=	NULL
+FROM tblICInventoryReceiptCharge ReceiptCharge 
+INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+INNER JOIN vyuICGetInventoryReceiptCharge vReceiptCharge
+	ON ReceiptCharge.intInventoryReceiptChargeId = vReceiptCharge.intInventoryReceiptChargeId
+LEFT JOIN tblAPVoucherPayable VoucherPayable ON VoucherPayable.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+	OUTER APPLY (
+	SELECT	A.intInventoryReceiptItemId
+			,A.intOwnershipType
+			,c = COUNT(1) 
+	FROM	tblICInventoryReceiptItem A		
+	WHERE	A.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+			AND A.strChargesLink = ReceiptCharge.strChargesLink
+	GROUP BY A.intInventoryReceiptItemId
+			,A.intOwnershipType
+	HAVING	COUNT(1) = 1 
+
+) ChargesLink  
+
+OUTER APPLY (
+	SELECT	A.intInventoryReceiptChargeId				
+			,c = COUNT(1) 
+	FROM	tblICInventoryReceiptChargePerItem A 
+	WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+	GROUP BY 
+			A.intInventoryReceiptChargeId
+	HAVING	COUNT(1) = 1 
+
+) ChargesPerItem 
+
+OUTER APPLY (
+	SELECT	B.intInventoryReceiptItemId
+	FROM	tblICInventoryReceiptChargePerItem B
+	WHERE	B.intInventoryReceiptChargeId = ChargesPerItem.intInventoryReceiptChargeId
+) ComputedChargesLink
+
+OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
+WHERE Receipt.intInventoryReceiptId = @intReceiptId
+	AND Receipt.ysnPosted = 0
+	AND ReceiptCharge.intEntityVendorId IS NOT NULL
+
 RETURN
 END
 
