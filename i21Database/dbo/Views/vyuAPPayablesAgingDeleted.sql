@@ -118,3 +118,66 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
 	AND C.ysnPosted = 0
 	AND C.intTransactionType NOT IN (2, 12, 13)
 	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
+UNION ALL --THIS WILL REMOVE THE DELETED DATA WHEN THERE IS NO DATE FILTER
+SELECT 
+	A.dtmDateCreated --USE THE DATE CREATED FOR THE NEGATIVE SO REMOVE THE DELETED DATA WHEN NO DATE FILTER PROVIDED
+	, A.intBillId 
+	, A.strBillId 
+	, 0 AS dblAmountPaid 
+	, CAST(CASE WHEN A.intTransactionType NOT IN (1,14) THEN (B.dblTotal) *  B.dblRate * -1 
+				ELSE (B.dblTotal) * B.dblRate
+		END AS DECIMAL(18,2)) * -1 AS dblTotal
+	, CASE WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
+		END * B.dblRate * -1 AS dblAmountDue 
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0 
+	, dblPrepaidAmount = 0 
+	, C1.strVendorId 
+	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
+	, A.dtmDueDate
+	, A.ysnPosted 
+	, A.ysnPaid
+	, A.intAccountId
+	, F.strAccountId
+	, EC.strClass
+	-- ,'Bill' AS [Info]
+FROM dbo.tblAPBillArchive A
+LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
+	ON C1.[intEntityId] = A.[intEntityVendorId]
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
+LEFT JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
+UNION ALL --Taxes, Separate the tax and use the detail tax to match with GL calculation
+SELECT 
+	A.dtmDateCreated	
+	, A.intBillId 
+	, A.strBillId 
+	, 0 AS dblAmountPaid 
+	, CAST(CASE WHEN A.intTransactionType NOT IN (1,14) THEN ISNULL(B.dblTax, 0) *  B.dblRate * -1 
+				ELSE ISNULL(B.dblTax, 0) * B.dblRate
+		END AS DECIMAL(18,2)) * -1 AS dblTotal
+	, CASE WHEN A.intTransactionType NOT IN (1,14) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue
+		END * B.dblRate * -1 AS dblAmountDue 
+	, dblWithheld = 0
+	, dblDiscount = 0 
+	, dblInterest = 0 
+	, dblPrepaidAmount = 0
+	, C1.strVendorId 
+	, isnull(C1.strVendorId,'') + ' - ' + isnull(C2.strName,'') as strVendorIdName 
+	, A.dtmDueDate
+	, A.ysnPosted 
+	, A.ysnPaid
+	, A.intAccountId
+	, F.strAccountId
+	, EC.strClass
+	-- ,'Taxes' AS [Info]
+FROM dbo.tblAPBillArchive A
+INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
+	ON C1.[intEntityId] = A.[intEntityVendorId]
+INNER JOIN dbo.tblAPBillDetailArchive B ON B.intBillId = A.intBillId
+LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+--INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
+LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
+WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0 AND B.dblTax != 0
