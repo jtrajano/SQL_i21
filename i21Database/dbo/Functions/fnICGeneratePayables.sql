@@ -451,7 +451,7 @@ FROM [vyuICChargesForBilling] A
         WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
     ) J
 WHERE
-	A.ysnPrice = 1 AND A.intEntityVendorId IS NOT NULL AND
+	(A.ysnPrice = 1 OR A.intEntityVendorId IS NOT NULL) AND
 	A.intInventoryReceiptId = @intReceiptId AND (
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
 		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
