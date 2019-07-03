@@ -7,7 +7,7 @@ SELECT intInvoiceDetailId			= IDL.intInvoiceDetailId
 	 , intCreatedByUserId			= IDL.intCreatedByUserId
 	 , intModifiedByUserId			= IDL.intModifiedByUserId
 	 , intConcurrencyId				= IDL.intConcurrencyId
-	 , intWeightUOMId				= CASE WHEN ISNULL(LSLOT.intLoadDetailId, 0) <> 0 THEN LSLOT.intWeightUOMId ELSE ICLOT.intWeightUOMId END
+	 , intWeightUOMId				= CASE WHEN ISNULL(ID.intLoadDetailId, 0) <> 0 THEN LG.intWeightUnitMeasureId ELSE ICLOT.intWeightUOMId END
 	 , dblQuantityShipped			= IDL.dblQuantityShipped
 	 , dblGrossWeight				= IDL.dblGrossWeight
 	 , dblTareWeight				= IDL.dblTareWeight
@@ -16,11 +16,13 @@ SELECT intInvoiceDetailId			= IDL.intInvoiceDetailId
 	 , strLotNumber					= ICLOT.strLotNumber
 	 , strWarehouseCargoNumber		= IDL.strWarehouseCargoNumber
 	 , strItemUOM					= ICLOT.strItemUOM
-	 , strWeightUOM					= CASE WHEN ISNULL(LSLOT.intLoadDetailId, 0) <> 0 THEN LSLOT.strWeightUnitMeasure ELSE ICLOT.strWeightUOM END
+	 , strWeightUOM					= CASE WHEN ISNULL(ID.intLoadDetailId, 0) <> 0 THEN UM.strUnitMeasure ELSE ICLOT.strWeightUOM END
 	 , strStorageLocation			= ICLOT.strStorageLocation
 	 , dtmDateCreated				= IDL.dtmDateCreated
 	 , dtmDateModified				= IDL.dtmDateModified
 FROM tblARInvoiceDetailLot IDL
 INNER JOIN tblARInvoiceDetail ID ON IDL.intInvoiceDetailId = ID.intInvoiceDetailId
+INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId 
 INNER JOIN vyuICGetLot ICLOT ON IDL.intLotId = ICLOT.intLotId
-LEFT JOIN vyuLGLoadDetailLotsView LSLOT ON IDL.intLotId = LSLOT.intLotId AND ID.intLoadDetailId = LSLOT.intLoadDetailId
+LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
+LEFT JOIN tblICUnitMeasure UM ON LG.intWeightUnitMeasureId = UM.intUnitMeasureId
