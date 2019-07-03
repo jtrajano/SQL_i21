@@ -85,36 +85,46 @@ BEGIN TRY
 		,@errorMessage = @errorMessage OUTPUT
 		--,@createdBillId = @billId OUTPUT
 
-	-- AR Transaction and Posting
-	EXEC [dbo].[uspCCTransactionToARInvoice] 
-		@intSiteHeaderId = @intSiteHeaderId
-		,@UserId = @userId
-		,@Post	= @post
-		,@Recap = 0
-		,@CreatedIvoices = @InvoicesId OUTPUT
-		,@success = @success OUTPUT
-		,@ErrorMessage = @errorMessage OUTPUT
+	
+	IF(@success = 1)
+	BEGIN
+		-- AR Transaction and Posting
+		EXEC [dbo].[uspCCTransactionToARInvoice] 
+			@intSiteHeaderId = @intSiteHeaderId
+			,@UserId = @userId
+			,@Post	= @post
+			,@Recap = 0
+			,@CreatedIvoices = @InvoicesId OUTPUT
+			,@success = @success OUTPUT
+			,@ErrorMessage = @errorMessage OUTPUT
+	END
 
-	-- CM Transaction and Posting
-	EXEC [dbo].[uspCCTransactionToCMBankTransaction]
-		@intSiteHeaderId = @intSiteHeaderId
-		,@userId = @userId
-		,@post	= @post
-		,@recap = 0
-		,@success = @success OUTPUT
-		,@errorMessage = @errorMessage OUTPUT
-		,@createdBankTransactionId = @bankTransactionId OUTPUT
+	IF(@success = 1)
+	BEGIN
+		-- CM Transaction and Posting
+		EXEC [dbo].[uspCCTransactionToCMBankTransaction]
+			@intSiteHeaderId = @intSiteHeaderId
+			,@userId = @userId
+			,@post	= @post
+			,@recap = 0
+			,@success = @success OUTPUT
+			,@errorMessage = @errorMessage OUTPUT
+			,@createdBankTransactionId = @bankTransactionId OUTPUT
+	END
 
 	-- SET Posted Flag
-	IF(@post = 1)
+	IF(@success = 1)
 	BEGIN
-		UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post, intCMBankTransactionId = @bankTransactionId WHERE intSiteHeaderId = @intSiteHeaderId
+		IF(@post = 1)
+		BEGIN
+			UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post, intCMBankTransactionId = @bankTransactionId WHERE intSiteHeaderId = @intSiteHeaderId
+		END
+		ELSE IF(@post = 0)
+		BEGIN
+			UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post WHERE intSiteHeaderId = @intSiteHeaderId
+		END
 	END
-	ELSE IF(@post = 0)
-	BEGIN
-		UPDATE [dbo].[tblCCSiteHeader] SET ysnPosted = @post WHERE intSiteHeaderId = @intSiteHeaderId
-	END
-
+	
 	IF(@success = 0)
 	BEGIN
 		RAISERROR(@errorMessage,16,1)
