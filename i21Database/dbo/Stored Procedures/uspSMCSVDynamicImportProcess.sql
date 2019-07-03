@@ -111,11 +111,11 @@ BEGIN
 		select 
 			@requiredValue = COALESCE(@requiredValue + ', ', '') + RTRIM(LTRIM(B.strDisplayName))		
 			from tblSMCSVDynamicImportParameter B
-				join @Header C
+				left join @Header C
 					on B.strDisplayName = C.sv
-				join @Value D
+				left join @Value D
 					on D.id = C.id
-		where B.ysnRequired = 1 and D.sv = '' and B.intCSVDynamicImportId = @ImportId
+		where B.ysnRequired = 1 and (D.sv = '' or C.sv IS NULL) and B.intCSVDynamicImportId = @ImportId
 	
 
 		--SELECT @requiredValue
