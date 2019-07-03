@@ -45,7 +45,8 @@ a.dtmDate,
 ISNULL(c.strCode,'')  COLLATE Latin1_General_CI_AS strCode,
 ISNULL(c.strBatchId,'')  COLLATE Latin1_General_CI_AS strBatchId,
 a.strTransactionId  COLLATE Latin1_General_CI_AS strTransactionId,
-ISNULL(c.intEntityId,0)intEntityId,
+ISNULL(c.intEntityId,0) intEntityId,
+ISNULL(c.intSourceEntityId,0) intSourceEntityId,
 ISNULL(c.strDescription,'')  COLLATE Latin1_General_CI_AS strDescription,
 a.dblDebit,
 a.dblCredit,
@@ -57,7 +58,8 @@ a.dblCreditForeign,
 ISNULL(c.strReference,'') COLLATE Latin1_General_CI_AS strReference,
 ISNULL(c.strDocument,'') COLLATE Latin1_General_CI_AS strDocument,
 ISNULL(c.strComments,'') COLLATE Latin1_General_CI_AS strComments,
-ISNULL(c.strUserName,'') COLLATE Latin1_General_CI_AS strUserName
+ISNULL(c.strUserName,'') COLLATE Latin1_General_CI_AS strUserName,
+ISNULL(c.strSourceEntity,'') COLLATE Latin1_General_CI_AS strSourceEntity
 FROM u a LEFT JOIN
 vyuGLDetail c ON a.intGLDetailId = c.intGLDetailId
 GO
