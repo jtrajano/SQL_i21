@@ -1728,7 +1728,6 @@ BEGIN
 				FROM #tblGetSalesIntransitWOPickLot i
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
-					AND i.intInventoryShipmentId NOT IN (SELECT intInventoryShipmentId FROM @Final WHERE strSeqHeader = 'Sales Basis Deliveries')
 					)t
 
 			--Company Title from Inventory Valuation
