@@ -26,8 +26,8 @@ SELECT DISTINCT
 							WHEN RHD.strTableColumnName IN ('strCountCode')
 								THEN Item.strCountCode
 
-							--WHEN RHD.strTableColumnName IN ('intDepositPLUId')
-							--	THEN
+							WHEN RHD.strTableColumnName IN ('intDepositPLUId')
+								THEN Uom_New.strUpcCode
 							WHEN RHD.strTableColumnName = 'strCounted'
 								THEN ItemLoc.strCounted
 							WHEN RHD.strTableColumnName = 'intFamilyId'
@@ -46,6 +46,8 @@ SELECT DISTINCT
 								THEN CAST(ItemLoc.dblSuggestedQty AS NVARCHAR(50))
 							WHEN RHD.strTableColumnName = 'intStorageLocationId'
 								THEN StorageLoc_New.strName
+							WHEN RHD.strTableColumnName = 'intCountGroupId'
+								THEN CountGroup_New.strCountGroup
 
 							WHEN RHD.strTableColumnName = 'ysnTaxFlag1'
 								THEN CASE WHEN ItemLoc.ysnTaxFlag1 = 1 THEN 'Yes' ELSE 'No' END
@@ -92,8 +94,8 @@ SELECT DISTINCT
 							WHEN RHD.strTableColumnName IN ('strCountCode')
 								THEN OldItemValue.strCountCode
 
-							--WHEN RHD.strTableColumnName IN ('intDepositPLUId')
-							--	THEN
+							WHEN RHD.strTableColumnName IN ('intDepositPLUId')
+								THEN Uom_Old.strUpcCode
 							WHEN RHD.strTableColumnName = 'strCounted'
 								THEN ItemLoc_Old.strCounted
 							WHEN RHD.strTableColumnName = 'intFamilyId'
@@ -147,6 +149,10 @@ LEFT JOIN tblEMEntity Entity_New
 	ON Vendor_New.intEntityId = Entity_New.intEntityId
 LEFT JOIN tblICStorageLocation StorageLoc_New
 	ON ItemLoc.intStorageLocationId = StorageLoc_New.intStorageLocationId
+LEFT JOIN tblICCountGroup CountGroup_New
+	ON ItemLoc.intCountGroupId = CountGroup_New.intCountGroupId
+LEFT JOIN tblICItemUOM Uom_New
+	ON ItemLoc.intDepositPLUId = Uom_New.intItemUOMId
 
 
 -- OLD DATA
@@ -181,10 +187,10 @@ LEFT JOIN
 				  , d.strTableColumnName
 				  , d.strOldData
 		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId')
+		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId', 'intCountGroupId')
 	) src
 	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId)
+			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId, intCountGroupId)
 	) piv
 ) OldItemLocValue
 	ON OldItemLocValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
@@ -213,14 +219,16 @@ LEFT JOIN tblEMEntity Entity_Old
 LEFT JOIN tblICItemLocation ItemLoc_Old
 	ON OldItemLocValue.intItemLocationId = ItemLoc_Old.intItemLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_Old
-	ON ItemLoc_Old.intFamilyId = SubCatFamily_Old.intSubcategoryId
+	ON OldItemLocValue.intFamilyId = SubCatFamily_Old.intSubcategoryId
 LEFT JOIN tblSTSubcategory SubCatClass_Old
-	ON ItemLoc_Old.intClassId = SubCatClass_Old.intSubcategoryId
+	ON OldItemLocValue.intClassId = SubCatClass_Old.intSubcategoryId
 LEFT JOIN tblSTSubcategoryRegProd ProductCode_Old
-	ON ItemLoc_Old.intProductCodeId = ProductCode_Old.intRegProdId
-
+	ON OldItemLocValue.intProductCodeId = ProductCode_Old.intRegProdId
 LEFT JOIN tblICStorageLocation StorageLoc_Old
-	ON ItemLoc_Old.intStorageLocationId = StorageLoc_Old.intStorageLocationId
-
+	ON OldItemLocValue.intStorageLocationId = StorageLoc_Old.intStorageLocationId
+LEFT JOIN tblICCountGroup CountGroup_Old
+	ON OldItemLocValue.intCountGroupId = CountGroup_Old.intCountGroupId
+LEFT JOIN tblICItemUOM Uom_Old
+	ON OldItemLocValue.intDepositPLUId = Uom_Old.intItemUOMId
 
 --WHERE RHD.strTableColumnName = 'intVendorId'
