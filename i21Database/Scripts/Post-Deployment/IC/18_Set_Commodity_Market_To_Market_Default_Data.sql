@@ -5,7 +5,7 @@ if not exists (select top 1 1 from tblEMEntityPreferences where strPreference = 
 begin
 	PRINT ('*****RUNNING For IC - Set Commodity Market to market default data*****')
 	
-	UPDATE tblICCommodity set ysnMarketToMarket = 1 where ysnMarketToMarket is null
+	UPDATE tblICCommodity set ysnMarkToMarket = 1 where ysnMarkToMarket is null
 
 	INSERT INTO tblEMEntityPreferences(strPreference,strValue)
 	select 'For IC - Set Commodity Market to market default data', '1'
