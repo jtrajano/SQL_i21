@@ -27,6 +27,15 @@ SELECT
 	,intDays = DATEDIFF(DD, PCH.dtmContractDate, SCH.dtmContractDate)
 	,dblSBasis = SCD.dblBasis
 	,strSBasisUOM = BUM.strUnitMeasure
+	,dblBasisAmount = ABS((ISNULL(PCD.dblBasis, 0) + ISNULL(MB.dblBasisOrDiscount, 0)
+					 + ISNULL(PTADJ.dblRate, 0) + ISNULL(PKADJ.dblRate, 0)  
+					 + ISNULL(FTADJ.dblRate, 0) + ISNULL(CFADJ.dblRate, 0))
+					 * CASE	WHEN ISNULL(WUOM.dblUnitQty, 0) = 0 OR ISNULL(BUOM.dblUnitQty, 0) = 0 THEN NULL 			
+							WHEN WUOM.dblUnitQty = BUOM.dblUnitQty THEN SCD.dblNetWeight				
+							ELSE ((SCD.dblNetWeight * WUOM.dblUnitQty) / BUOM.dblUnitQty) END  
+					 / CASE WHEN (SCUR.ysnSubCurrency = 1) THEN SCUR.intCent ELSE 1 END)
+	,intCurrencyId = ISNULL(SCUR.intMainCurrencyId, SCUR.intCurrencyID)
+	,strCurrency = ISNULL(SMCUR.strCurrency, SCUR.strCurrency)
 	,intUnitMeasureId = UM.intUnitMeasureId
 	,intCompanyLocationId = PCD.intCompanyLocationId
 	,intCommodityId = PCH.intCommodityId
@@ -49,6 +58,9 @@ FROM
 	LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CM.intUnitMeasureId 
 	LEFT JOIN tblICItemUOM BUOM ON BUOM.intItemUOMId = SCD.intBasisUOMId
 	LEFT JOIN tblICUnitMeasure BUM ON BUM.intUnitMeasureId = BUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = SCD.intNetWeightUOMId
+	LEFT JOIN tblSMCurrency SCUR ON SCUR.intCurrencyID = SCD.intBasisCurrencyId
+	LEFT JOIN tblSMCurrency SMCUR ON SMCUR.intCurrencyID = SCUR.intMainCurrencyId
 	OUTER APPLY (SELECT TOP 1 dblBasisOrDiscount FROM tblRKM2MBasisDetail MTMBD
 					INNER JOIN tblRKM2MBasis MTMB ON MTMB.intM2MBasisId = MTMBD.intM2MBasisId
 				 WHERE PCH.intCommodityId = MTMBD.intCommodityId
