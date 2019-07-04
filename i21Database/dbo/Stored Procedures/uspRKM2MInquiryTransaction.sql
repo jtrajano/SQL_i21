@@ -212,7 +212,8 @@ BEGIN
 		, strEntityName NVARCHAR(100)
 		, strCustomerContract NVARCHAR(100)
 		, intFutureMarketId INT
-		, intFutureMonthId INT)
+		, intFutureMonthId INT
+		, strPricingStatus NVARCHAR(50))
 
 	INSERT INTO @tblGetOpenContractDetail (intRowNum
 		, strCommodityCode
@@ -240,7 +241,8 @@ BEGIN
 		, strEntityName
 		, strCustomerContract
 		, intFutureMarketId
-		, intFutureMonthId)
+		, intFutureMonthId
+		, strPricingStatus)
 	SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC) intRowNum
 		, strCommodityCode
 		, intCommodityId
@@ -268,6 +270,7 @@ BEGIN
 		, strCustomerContract = ''
 		, intFutureMarketId
 		, intFutureMonthId
+		, strPricingStatus
 	FROM tblCTContractBalance where CONVERT(DATETIME, CONVERT(VARCHAR, dtmEndDate, 101),101) = @dtmTransactionDateUpTo AND intCommodityId = @intCommodityId
 
 	SELECT *
