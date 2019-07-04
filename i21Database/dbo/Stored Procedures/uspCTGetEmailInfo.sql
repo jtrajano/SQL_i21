@@ -30,6 +30,12 @@ BEGIN
 		intSalespersonId INT
 	)
 
+	IF @strMailType = 'Item Contract'
+	BEGIN
+		SET @routeScreen = 'ItemContract'
+		INSERT INTO @loop
+		SELECT intItemContractHeaderId,intEntityId,strContractNumber,intSalespersonId FROM tblCTItemContractHeader WHERE intItemContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
+	END
 	IF @strMailType = 'Contract'
 	BEGIN
 		SET @routeScreen = 'Contract'

@@ -30,6 +30,9 @@ CREATE TABLE [dbo].[tblCTItemContractHeader](
 	[intLineOfBusinessId]				[int] NULL,
 	[dtmDueDate]						[datetime] NULL,
 
+
+	[ysnMailSent]						[bit] NOT NULL DEFAULT ((0)),
+
 	--[intShipToLocationId]				[int] NULL,
 	--[strShipToLocationName]				[nvarchar](50) NULL,
 	--[strShipToAddress]					[nvarchar](MAX) NULL,
