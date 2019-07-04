@@ -304,6 +304,14 @@ AS
 						@intExternalId			=	@intInventoryReceiptItemId,
 						@strScreenName			=	'Inventory Receipt'
 
+				update
+					tblCTContractDetail
+					set
+						dblScheduleLoad = (CASE WHEN @ysnLoad = 1 THEN @dblQty ELSE 0.00 END)
+						,dblScheduleQty = (CASE WHEN @ysnLoad = 0 THEN @dblQty ELSE 0.00 END)
+				where
+					intContractDetailId = @intContractDetailId;
+
 				SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId) 
 				FROM	tblICInventoryReceiptItem
 				WHERE	intInventoryReceiptId = @intInventoryReceiptId	AND
