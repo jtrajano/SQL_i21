@@ -21,7 +21,7 @@ BEGIN
 
 	IF(@type = 1)
 	BEGIN
-		INSERT INTO @returnTable
+		INSERT INTO @returntable
 		SELECT	'This voucher was created from Dealer Credit Card - <strong>'+ A.strCcdReference +'</strong>. Unpost it from there.',
 				'Voucher',
 				D.strBillId,
