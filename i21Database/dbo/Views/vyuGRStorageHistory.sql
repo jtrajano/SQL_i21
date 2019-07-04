@@ -28,12 +28,12 @@ SELECT DISTINCT TOP 100 PERCENT
 	,intCustomerStorageId				= SH.intCustomerStorageId
 	,intTransferCustomerStorageId		= CASE 
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN CASE WHEN CSTO.intCustomerStorageId IS NOT NULL THEN CSTO.intCustomerStorageId ELSE  TSplit.intTransferToCustomerStorageId END
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN TSource.intSourceCustomerStorageId
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN CASE WHEN CSFRM.intCustomerStorageId IS NOT NULL THEN CSFRM.intCustomerStorageId ELSE TSource.intSourceCustomerStorageId END
 											ELSE NULL
 										END
 	,strStorageTicket					= CASE 
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN CASE WHEN CSTO.intCustomerStorageId IS NOT NULL THEN CSTO.strStorageTicketNumber ELSE TSplit.strStorageTicketNumber END
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN TSource.strStorageTicketNumber
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN CASE WHEN CSFRM.intCustomerStorageId IS NOT NULL THEN CSFRM.strStorageTicketNumber ELSE TSource.strStorageTicketNumber END
 											ELSE CS.strStorageTicketNumber
 										END
 	,intTicketId						= CASE 
@@ -150,12 +150,15 @@ LEFT JOIN (tblGRTransferStorageReference TSR
 		ON CSTO.intCustomerStorageId = TSR.intToCustomerStorageId) 
 ON CASE WHEN SH.strType = 'From Transfer' 
 	    THEN 
-			 CASE WHEN TSR.intToCustomerStorageId  = CS.intCustomerStorageId THEN 0 
+			  CASE WHEN TSR.intToCustomerStorageId  = CS.intCustomerStorageId AND CSTO.intCustomerStorageId = CS.intCustomerStorageId  THEN 1
+				  WHEN TSR.intToCustomerStorageId  = CS.intCustomerStorageId AND CSFRM.intCustomerStorageId = CS.intCustomerStorageId  THEN 1
+				  WHEN TSR.intToCustomerStorageId  = CS.intCustomerStorageId THEN 0 
 				  ELSE 0 
 			 END 
 	    ELSE 
 			 CASE WHEN CSFRM.intCustomerStorageId = CS.intCustomerStorageId  AND CSTO.intCustomerStorageId = TSplit.intTransferToCustomerStorageId THEN 1 				  
 				  WHEN CSFRM.intCustomerStorageId = CS.intCustomerStorageId AND TSR.intTransferStorageSplitId = TSplit.intTransferStorageSplitId THEN  1
+				  WHEN CSFRM.intCustomerStorageId = CS.intCustomerStorageId THEN 0
 				  ELSE 0 
 
 			 END 
