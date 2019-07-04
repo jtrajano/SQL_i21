@@ -7677,6 +7677,15 @@
     <Build Include="dbo\Views\vyuIPContractDetailView.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyTransferLog.sql" />
     <Build Include="dbo\Views\vyuSTStoreOnUserRole.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetailLot.sql" />
+    <Build Include="dbo\Functions\fnCCValidateAssociatedTransaction.sql" />
+    <Build Include="dbo\Views\vyuAPPatClearing.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerReceiptItem.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerReceiptCharge.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerShipmentCharge.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerLoad.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerSettleStorage.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerPatronage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

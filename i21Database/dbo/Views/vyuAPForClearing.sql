@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuAPForClearing]
 AS 
 
-SELECT
+SELECT TOP 100 PERCENT
     CAST(ROW_NUMBER() OVER(ORDER BY dtmDate DESC) AS INT) AS intClearingId
     ,clearingData.*
 FROM 
@@ -10,7 +10,7 @@ FROM
     SELECT
         A.*
         ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN A.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) AS strVoucherIds
-        ,vouchersInfo.strFilter
+        -- ,vouchersInfo.strFilter
         ,1 AS intClearingType
     FROM 
     (
@@ -24,6 +24,7 @@ FROM
             ,NULL AS intLoadDetailId
             ,NULL AS intLoadCostId
             ,NULL AS intCustomerStorageId
+            ,NULL AS intRefundId
             ,SUM(receiptItems.dblReceiptQty) AS dblReceiptQty
             ,SUM(receiptItems.dblReceiptTotal) AS dblReceiptTotal
             ,(SUM(receiptItems.dblReceiptQty) - SUM(receiptItems.dblVoucherQty)) AS dblUnclearedQty
@@ -78,44 +79,45 @@ FROM
         --     (SUM(receiptItems.dblReceiptQty) - SUM(receiptItems.dblVoucherQty)) != 0 
         -- OR  (SUM(receiptItems.dblReceiptTotal) - SUM(receiptItems.dblVoucherTotal)) != 0
     ) A
-    OUTER APPLY 
-    (
-        SELECT strVoucherIds = 
-            LTRIM(
-                STUFF(
-                        (
-                            SELECT  ', ' + b.strBillId
-                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-                                        ON b.intBillId = bd.intBillId
-                            WHERE	bd.intInventoryReceiptItemId = A.intInventoryReceiptItemId AND bd.intItemId = A.intItemId
-                                    AND b.ysnPosted =1 
-                            GROUP BY b.strBillId
-                            FOR xml path('')
-                        )
-                    , 1
-                    , 1
-                    , ''
-                ) 
-            )
-            , strFilter = ''
-            -- LTRIM(
-			-- 		STUFF(
-			-- 				' ' + (
-			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
-			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-			-- 								ON b.intBillId = bd.intBillId
-			-- 					WHERE	bd.intInventoryReceiptItemId = A.intInventoryReceiptItemId
-			-- 							AND bd.intInventoryReceiptChargeId IS NULL 
-			-- 							AND b.ysnPosted = 1
-			-- 					GROUP BY b.intBillId
-			-- 					FOR xml path('')
-			-- 				)
-			-- 			, 1
-			-- 			, 1
-			-- 			, ''
-			-- 		)
-            -- )
-    ) vouchersInfo 
+    OUTER APPLY dbo.fnAPGetVouchersCSVPerReceiptItem(A.intInventoryReceiptItemId, A.intItemId) vouchersInfo
+    -- OUTER APPLY 
+    -- (
+    --     SELECT strVoucherIds = 
+    --         LTRIM(
+    --             STUFF(
+    --                     (
+    --                         SELECT  ', ' + b.strBillId
+    --                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+    --                                     ON b.intBillId = bd.intBillId
+    --                         WHERE	bd.intInventoryReceiptItemId = A.intInventoryReceiptItemId AND bd.intItemId = A.intItemId
+    --                                 AND b.ysnPosted =1 
+    --                         GROUP BY b.strBillId
+    --                         FOR xml path('')
+    --                     )
+    --                 , 1
+    --                 , 1
+    --                 , ''
+    --             ) 
+    --         )
+    --         , strFilter = ''
+    --         -- LTRIM(
+	-- 		-- 		STUFF(
+	-- 		-- 				' ' + (
+	-- 		-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+	-- 		-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+	-- 		-- 								ON b.intBillId = bd.intBillId
+	-- 		-- 					WHERE	bd.intInventoryReceiptItemId = A.intInventoryReceiptItemId
+	-- 		-- 							AND bd.intInventoryReceiptChargeId IS NULL 
+	-- 		-- 							AND b.ysnPosted = 1
+	-- 		-- 					GROUP BY b.intBillId
+	-- 		-- 					FOR xml path('')
+	-- 		-- 				)
+	-- 		-- 			, 1
+	-- 		-- 			, 1
+	-- 		-- 			, ''
+	-- 		-- 		)
+    --         -- )
+    -- ) vouchersInfo 
     WHERE 
         (A.dblReceiptQty - A.dblVoucherQty) != 0 
     OR  (A.dblReceiptTotal - A.dblVoucherTotal) != 0
@@ -123,7 +125,7 @@ FROM
     SELECT
         B.*
         ,ISNULL(vouchersInfo.strVoucherIds, 'New Voucher') AS strVoucherIds
-        ,vouchersInfo.strFilter
+        --,vouchersInfo.strFilter
         ,2 AS intClearingType
     FROM
     (
@@ -137,6 +139,7 @@ FROM
             ,NULL AS intLoadDetailId
             ,NULL AS intLoadCostId
             ,NULL AS intCustomerStorageId
+            ,NULL AS intRefundId
             ,SUM(receiptChargeItems.dblReceiptChargeQty) AS dblReceiptChargeQty
             ,SUM(receiptChargeItems.dblReceiptChargeTotal) AS dblReceiptChargeTotal
             ,(SUM(receiptChargeItems.dblReceiptChargeQty) - SUM(receiptChargeItems.dblVoucherQty)) AS dblUnclearedQty
@@ -191,43 +194,44 @@ FROM
         --     (SUM(receiptChargeItems.dblReceiptChargeQty) - SUM(receiptChargeItems.dblVoucherQty)) != 0
         -- OR  (SUM(receiptChargeItems.dblReceiptChargeTotal) - SUM(receiptChargeItems.dblVoucherTotal)) != 0
     ) B
-    OUTER APPLY 
-    (
-        SELECT strVoucherIds = 
-            LTRIM(
-                STUFF(
-                        (
-                            SELECT  ', ' + b.strBillId
-                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-                                        ON b.intBillId = bd.intBillId
-                            WHERE	bd.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId AND bd.intItemId = B.intItemId
-                                    AND b.ysnPosted =1 
-                            GROUP BY b.strBillId
-                            FOR xml path('')
-                        )
-                    , 1
-                    , 1
-                    , ''
-                )
-            )
-            , strFilter = ''
-            -- LTRIM(
-			-- 		STUFF(
-			-- 				' ' + (
-			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
-			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-			-- 								ON b.intBillId = bd.intBillId
-			-- 					WHERE	bd.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId AND bd.intItemId = B.intItemId 
-			-- 							AND b.ysnPosted = 1
-			-- 					GROUP BY b.intBillId
-			-- 					FOR xml path('')
-			-- 				)
-			-- 			, 1
-			-- 			, 1
-			-- 			, ''
-			-- 		)
-            -- )
-    ) vouchersInfo 
+    OUTER APPLY dbo.fnAPGetVouchersCSVPerReceiptCharge(B.intInventoryReceiptChargeId, B.intItemId) vouchersInfo
+    -- OUTER APPLY 
+    -- (
+    --     SELECT strVoucherIds = 
+    --         LTRIM(
+    --             STUFF(
+    --                     (
+    --                         SELECT  ', ' + b.strBillId
+    --                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+    --                                     ON b.intBillId = bd.intBillId
+    --                         WHERE	bd.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId AND bd.intItemId = B.intItemId
+    --                                 AND b.ysnPosted =1 
+    --                         GROUP BY b.strBillId
+    --                         FOR xml path('')
+    --                     )
+    --                 , 1
+    --                 , 1
+    --                 , ''
+    --             )
+    --         )
+    --         , strFilter = ''
+    --         -- LTRIM(
+	-- 		-- 		STUFF(
+	-- 		-- 				' ' + (
+	-- 		-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+	-- 		-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+	-- 		-- 								ON b.intBillId = bd.intBillId
+	-- 		-- 					WHERE	bd.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId AND bd.intItemId = B.intItemId 
+	-- 		-- 							AND b.ysnPosted = 1
+	-- 		-- 					GROUP BY b.intBillId
+	-- 		-- 					FOR xml path('')
+	-- 		-- 				)
+	-- 		-- 			, 1
+	-- 		-- 			, 1
+	-- 		-- 			, ''
+	-- 		-- 		)
+    --         -- )
+    -- ) vouchersInfo 
     WHERE 
         (dblUnclearedQty) != 0
     OR  (dblUnclearedAmount) != 0
@@ -235,7 +239,7 @@ FROM
     SELECT
         C.*
         ,ISNULL(vouchersInfo.strVoucherIds, 'New Voucher') AS strVoucherIds
-        ,vouchersInfo.strFilter
+        --,vouchersInfo.strFilter
         ,3 AS intClearingType
     FROM
     (
@@ -249,6 +253,7 @@ FROM
             ,NULL AS intLoadDetailId
             ,NULL AS intLoadCostId
             ,NULL AS intCustomerStorageId 
+            ,NULL AS intRefundId
             ,SUM(shipmentCharges.dblReceiptChargeQty) AS dblReceiptChargeQty
             ,SUM(shipmentCharges.dblReceiptChargeTotal) AS dblReceiptChargeTotal
             ,(SUM(shipmentCharges.dblReceiptChargeQty) - SUM(shipmentCharges.dblVoucherQty)) AS dblUnclearedQty
@@ -302,43 +307,44 @@ FROM
         --     (SUM(shipmentCharges.dblReceiptChargeQty) - SUM(shipmentCharges.dblVoucherQty)) != 0
         -- OR  (SUM(shipmentCharges.dblReceiptChargeTotal) - SUM(shipmentCharges.dblVoucherTotal)) != 0
     ) C
-    OUTER APPLY 
-    (
-        SELECT strVoucherIds = 
-            LTRIM(
-                STUFF(
-                        (
-                            SELECT  ', ' + b.strBillId
-                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-                                        ON b.intBillId = bd.intBillId
-                            WHERE	bd.intInventoryShipmentChargeId = C.intInventoryShipmentChargeId AND bd.intItemId = C.intItemId
-                                    AND b.ysnPosted =1 
-                            GROUP BY b.strBillId
-                            FOR xml path('')
-                        )
-                    , 1
-                    , 1
-                    , ''
-                )
-            )
-            , strFilter = ''
-            -- LTRIM(
-			-- 		STUFF(
-			-- 				' ' + (
-			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
-			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-			-- 								ON b.intBillId = bd.intBillId
-			-- 					WHERE	bd.intInventoryShipmentChargeId = C.intInventoryShipmentChargeId AND bd.intItemId = C.intItemId
-			-- 							AND b.ysnPosted = 1
-			-- 					GROUP BY b.intBillId
-			-- 					FOR xml path('')
-			-- 				)
-			-- 			, 1
-			-- 			, 1
-			-- 			, ''
-			-- 		)
-            -- )
-    ) vouchersInfo 
+    OUTER APPLY dbo.[fnAPGetVouchersCSVPerShipmentCharge](C.intInventoryShipmentChargeId, C.intItemId) vouchersInfo
+    -- OUTER APPLY 
+    -- (
+    --     SELECT strVoucherIds = 
+    --         LTRIM(
+    --             STUFF(
+    --                     (
+    --                         SELECT  ', ' + b.strBillId
+    --                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+    --                                     ON b.intBillId = bd.intBillId
+    --                         WHERE	bd.intInventoryShipmentChargeId = C.intInventoryShipmentChargeId AND bd.intItemId = C.intItemId
+    --                                 AND b.ysnPosted =1 
+    --                         GROUP BY b.strBillId
+    --                         FOR xml path('')
+    --                     )
+    --                 , 1
+    --                 , 1
+    --                 , ''
+    --             )
+    --         )
+    --         , strFilter = ''
+    --         -- LTRIM(
+	-- 		-- 		STUFF(
+	-- 		-- 				' ' + (
+	-- 		-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+	-- 		-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+	-- 		-- 								ON b.intBillId = bd.intBillId
+	-- 		-- 					WHERE	bd.intInventoryShipmentChargeId = C.intInventoryShipmentChargeId AND bd.intItemId = C.intItemId
+	-- 		-- 							AND b.ysnPosted = 1
+	-- 		-- 					GROUP BY b.intBillId
+	-- 		-- 					FOR xml path('')
+	-- 		-- 				)
+	-- 		-- 			, 1
+	-- 		-- 			, 1
+	-- 		-- 			, ''
+	-- 		-- 		)
+    --         -- )
+    -- ) vouchersInfo 
     WHERE 
         (dblUnclearedQty) != 0
     OR  (dblUnclearedAmount) != 0
@@ -346,7 +352,7 @@ FROM
     SELECT
         D.*
         ,ISNULL(vouchersInfo.strVoucherIds, 'New Voucher') AS strVoucherIds
-        ,vouchersInfo.strFilter
+        --,vouchersInfo.strFilter
         ,4 AS intClearingType
     FROM
     (
@@ -360,6 +366,7 @@ FROM
             ,loadTran.intLoadDetailId
             ,NULL AS intLoadCostId
             ,NULL AS intCustomerStorageId
+            ,NULL AS intRefundId
             ,SUM(loadTran.dblLoadDetailQty) AS dblLoadDetailQty
             ,SUM(loadTran.dblLoadDetailTotal) AS dblLoadDetailTotal
             ,(SUM(loadTran.dblLoadDetailQty) - SUM(loadTran.dblVoucherQty)) AS dblUnclearedQty
@@ -414,43 +421,44 @@ FROM
         --     (SUM(loadTran.dblLoadDetailQty) - SUM(loadTran.dblVoucherQty)) != 0
         -- OR  (SUM(loadTran.dblLoadDetailTotal) - SUM(loadTran.dblVoucherTotal)) != 0
     ) D
-    OUTER APPLY 
-    (
-        SELECT strVoucherIds = 
-            LTRIM(
-                STUFF(
-                        (
-                            SELECT  ', ' + b.strBillId
-                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-                                        ON b.intBillId = bd.intBillId
-                            WHERE	bd.intLoadDetailId = D.intLoadDetailId AND bd.intItemId = D.intItemId
-                                    AND b.ysnPosted =1 
-                            GROUP BY b.strBillId
-                            FOR xml path('')
-                        )
-                    , 1
-                    , 1
-                    , ''
-                )
-            )
-            , strFilter = ''
-            -- LTRIM(
-			-- 		STUFF(
-			-- 				' ' + (
-			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
-			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-			-- 								ON b.intBillId = bd.intBillId
-			-- 					WHERE	bd.intLoadDetailId = D.intLoadDetailId AND bd.intItemId = D.intItemId
-			-- 							AND b.ysnPosted = 1
-			-- 					GROUP BY b.intBillId
-			-- 					FOR xml path('')
-			-- 				)
-			-- 			, 1
-			-- 			, 1
-			-- 			, ''
-			-- 		)
-            -- )
-    ) vouchersInfo 
+    OUTER APPLY dbo.[fnAPGetVouchersCSVPerLoad](D.intLoadDetailId, D.intItemId) vouchersInfo
+    -- OUTER APPLY 
+    -- (
+    --     SELECT strVoucherIds = 
+    --         LTRIM(
+    --             STUFF(
+    --                     (
+    --                         SELECT  ', ' + b.strBillId
+    --                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+    --                                     ON b.intBillId = bd.intBillId
+    --                         WHERE	bd.intLoadDetailId = D.intLoadDetailId AND bd.intItemId = D.intItemId
+    --                                 AND b.ysnPosted =1 
+    --                         GROUP BY b.strBillId
+    --                         FOR xml path('')
+    --                     )
+    --                 , 1
+    --                 , 1
+    --                 , ''
+    --             )
+    --         )
+    --         , strFilter = ''
+    --         -- LTRIM(
+	-- 		-- 		STUFF(
+	-- 		-- 				' ' + (
+	-- 		-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+	-- 		-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+	-- 		-- 								ON b.intBillId = bd.intBillId
+	-- 		-- 					WHERE	bd.intLoadDetailId = D.intLoadDetailId AND bd.intItemId = D.intItemId
+	-- 		-- 							AND b.ysnPosted = 1
+	-- 		-- 					GROUP BY b.intBillId
+	-- 		-- 					FOR xml path('')
+	-- 		-- 				)
+	-- 		-- 			, 1
+	-- 		-- 			, 1
+	-- 		-- 			, ''
+	-- 		-- 		)
+    --         -- )
+    -- ) vouchersInfo 
     WHERE 
         (dblUnclearedQty) != 0
     OR  (dblUnclearedAmount) != 0
@@ -458,7 +466,7 @@ FROM
     SELECT
         E.*
         ,ISNULL(vouchersInfo.strVoucherIds, 'New Voucher') AS strVoucherIds
-        ,vouchersInfo.strFilter
+        --,vouchersInfo.strFilter
         ,5 AS intClearingType
     FROM
     (
@@ -472,6 +480,7 @@ FROM
             ,loadCost.intLoadDetailId
             ,loadCost.intLoadCostId
             ,NULL AS intCustomerStorageId
+            ,NULL AS intRefundId
             ,SUM(loadCost.dblLoadCostDetailQty) AS dblLoadCostDetailQty
             ,SUM(loadCost.dblLoadCostDetailTotal) AS dblLoadCostDetailTotal
             ,(SUM(loadCost.dblLoadCostDetailQty) - SUM(loadCost.dblVoucherQty)) AS dblUnclearedQty
@@ -527,43 +536,44 @@ FROM
         --     (SUM(loadCost.dblLoadCostDetailQty) - SUM(loadCost.dblVoucherQty)) != 0
         -- OR  (SUM(loadCost.dblLoadCostDetailTotal) - SUM(loadCost.dblVoucherTotal)) != 0
     ) E
-    OUTER APPLY 
-    (
-        SELECT strVoucherIds = 
-            LTRIM(
-                STUFF(
-                        (
-                            SELECT  ', ' + b.strBillId
-                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-                                        ON b.intBillId = bd.intBillId
-                            WHERE	bd.intLoadDetailId = E.intLoadDetailId AND bd.intItemId = E.intItemId
-                                    AND b.ysnPosted =1 
-                            GROUP BY b.strBillId
-                            FOR xml path('')
-                        )
-                    , 1
-                    , 1
-                    , ''
-                )
-            )
-             , strFilter = ''
-            -- LTRIM(
-			-- 		STUFF(
-			-- 				' ' + (
-			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
-			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-			-- 								ON b.intBillId = bd.intBillId
-			-- 					WHERE	bd.intLoadDetailId = E.intLoadDetailId AND bd.intItemId = E.intItemId
-			-- 							AND b.ysnPosted = 1
-			-- 					GROUP BY b.intBillId
-			-- 					FOR xml path('')
-			-- 				)
-			-- 			, 1
-			-- 			, 1
-			-- 			, ''
-			-- 		)
-            -- )
-    ) vouchersInfo 
+    OUTER APPLY dbo.[fnAPGetVouchersCSVPerLoad](E.intLoadDetailId, E.intItemId) vouchersInfo
+    -- OUTER APPLY 
+    -- (
+    --     SELECT strVoucherIds = 
+    --         LTRIM(
+    --             STUFF(
+    --                     (
+    --                         SELECT  ', ' + b.strBillId
+    --                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+    --                                     ON b.intBillId = bd.intBillId
+    --                         WHERE	bd.intLoadDetailId = E.intLoadDetailId AND bd.intItemId = E.intItemId
+    --                                 AND b.ysnPosted =1 
+    --                         GROUP BY b.strBillId
+    --                         FOR xml path('')
+    --                     )
+    --                 , 1
+    --                 , 1
+    --                 , ''
+    --             )
+    --         )
+    --          , strFilter = ''
+    --         -- LTRIM(
+	-- 		-- 		STUFF(
+	-- 		-- 				' ' + (
+	-- 		-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+	-- 		-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+	-- 		-- 								ON b.intBillId = bd.intBillId
+	-- 		-- 					WHERE	bd.intLoadDetailId = E.intLoadDetailId AND bd.intItemId = E.intItemId
+	-- 		-- 							AND b.ysnPosted = 1
+	-- 		-- 					GROUP BY b.intBillId
+	-- 		-- 					FOR xml path('')
+	-- 		-- 				)
+	-- 		-- 			, 1
+	-- 		-- 			, 1
+	-- 		-- 			, ''
+	-- 		-- 		)
+    --         -- )
+    -- ) vouchersInfo 
     WHERE 
         (dblUnclearedQty) != 0
     OR  (dblUnclearedAmount) != 0
@@ -571,7 +581,7 @@ FROM
     SELECT
         F.*
         ,ISNULL(vouchersInfo.strVoucherIds, NULL) AS strVoucherIds
-        ,vouchersInfo.strFilter
+        --,vouchersInfo.strFilter
         ,6 AS intClearingType
     FROM
     (
@@ -585,6 +595,7 @@ FROM
             ,NULL AS intLoadDetailId
             ,NULL AS intLoadCostId
             ,settleStorage.intCustomerStorageId
+            ,NULL AS intRefundId
             ,SUM(settleStorage.dblSettleStorageQty) AS dblSettleStorageQty
             ,SUM(settleStorage.dblSettleStorageAmount) AS dblSettleStorageAmount
             ,(SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) AS dblUnclearedQty
@@ -639,46 +650,142 @@ FROM
         --     (SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) != 0
         -- OR  (SUM(settleStorage.dblSettleStorageAmount) - SUM(settleStorage.dblVoucherTotal)) != 0
     ) F
-    OUTER APPLY 
+    OUTER APPLY dbo.[fnAPGetVouchersCSVPerSettleStorage](F.intCustomerStorageId, F.intItemId) vouchersInfo
+    -- OUTER APPLY 
+    -- (
+    --     SELECT strVoucherIds = 
+    --         LTRIM(
+    --             STUFF(
+    --                     (
+    --                         SELECT  ', ' + b.strBillId
+    --                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+    --                                     ON b.intBillId = bd.intBillId
+    --                         WHERE	bd.intCustomerStorageId = F.intCustomerStorageId AND bd.intItemId = F.intItemId
+    --                                 AND b.ysnPosted =1 
+    --                         GROUP BY b.strBillId
+    --                         FOR xml path('')
+    --                     )
+    --                 , 1
+    --                 , 1
+    --                 , ''
+    --             )
+    --         )
+    --          , strFilter = ''
+    --         -- LTRIM(
+	-- 		-- 		STUFF(
+	-- 		-- 				' ' + (
+	-- 		-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
+	-- 		-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
+	-- 		-- 								ON b.intBillId = bd.intBillId
+	-- 		-- 					WHERE	bd.intCustomerStorageId = F.intCustomerStorageId AND bd.intItemId = F.intItemId
+	-- 		-- 							AND b.ysnPosted = 1
+	-- 		-- 					GROUP BY b.intBillId
+	-- 		-- 					FOR xml path('')
+	-- 		-- 				)
+	-- 		-- 			, 1
+	-- 		-- 			, 1
+	-- 		-- 			, ''
+	-- 		-- 		)
+    --         -- )
+    -- ) vouchersInfo 
+    WHERE 
+        (dblUnclearedQty) != 0
+    OR  (dblUnclearedAmount) != 0
+    UNION ALL --PATRONAGE
+    SELECT
+        G.*
+        ,ISNULL(vouchersInfo.strVoucherIds, NULL) AS strVoucherIds
+        --,vouchersInfo.strFilter
+        ,7 AS intClearingType
+    FROM
     (
-        SELECT strVoucherIds = 
-            LTRIM(
-                STUFF(
-                        (
-                            SELECT  ', ' + b.strBillId
-                            FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-                                        ON b.intBillId = bd.intBillId
-                            WHERE	bd.intCustomerStorageId = F.intCustomerStorageId AND bd.intItemId = F.intItemId
-                                    AND b.ysnPosted =1 
-                            GROUP BY b.strBillId
-                            FOR xml path('')
-                        )
-                    , 1
-                    , 1
-                    , ''
-                )
-            )
-             , strFilter = ''
-            -- LTRIM(
-			-- 		STUFF(
-			-- 				' ' + (
-			-- 					SELECT  CONVERT(NVARCHAR(50), b.intBillId) + '|^|'
-			-- 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
-			-- 								ON b.intBillId = bd.intBillId
-			-- 					WHERE	bd.intCustomerStorageId = F.intCustomerStorageId AND bd.intItemId = F.intItemId
-			-- 							AND b.ysnPosted = 1
-			-- 					GROUP BY b.intBillId
-			-- 					FOR xml path('')
-			-- 				)
-			-- 			, 1
-			-- 			, 1
-			-- 			, ''
-			-- 		)
-            -- )
-    ) vouchersInfo 
+        SELECT
+            pat.intEntityVendorId
+            ,refund.dtmRefundDate
+            ,pat.strTransactionNumber
+            ,NULL AS intInventoryReceiptItemId
+            ,NULL AS intInventoryReceiptChargeId
+            ,NULL AS intInventoryShipmentChargeId
+            ,NULL AS intLoadDetailId
+            ,NULL AS intLoadCostId
+            ,NULL AS intCustomerStorageId
+            ,pat.intRefundCustomerId
+            ,SUM(pat.dblRefundQty) AS dblRefundQty
+            ,SUM(pat.dblRefundTotal) AS dblRefundTotal
+            ,(SUM(pat.dblRefundQty) - SUM(pat.dblVoucherQty)) AS dblUnclearedQty
+            ,SUM(pat.dblVoucherTotal) AS dblVoucherTotal
+            ,SUM(pat.dblVoucherQty) AS dblVoucherQty
+            ,(SUM(pat.dblRefundTotal) - SUM(pat.dblVoucherTotal)) AS dblUnclearedAmount
+            ,NULL AS strItemNo
+            ,NULL AS intItemId
+            ,NULL AS intItemUOMId
+            ,NULL AS strUOM
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,pat.strAccountId
+            ,pat.intAccountId
+            ,NULL AS intLocationId
+            ,NULL AS strLocationName
+            ,CAST(pat.ysnAllowVoucher AS BIT) AS ysnAllowVoucher
+        FROM
+        (
+            SELECT
+                *
+            FROM vyuAPPatClearing
+        ) pat
+        INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity 
+                        ON refund.intRefundId = refundEntity.intRefundId)
+                ON refundEntity.intRefundCustomerId = pat.intRefundCustomerId
+        LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+                ON B.[intEntityId] = pat.[intEntityVendorId]
+        -- LEFT JOIN tblSMCompanyLocation compLoc
+        --         ON pat.intLocationId = compLoc.intCompanyLocationId
+        -- LEFT JOIN tblICItem item
+        --     ON item.intItemId = pat.intItemId
+        GROUP BY
+            refund.dtmRefundDate
+            ,pat.intEntityVendorId
+            -- ,item.intItemId
+            -- ,item.strItemNo
+            -- ,pat.intItemUOMId
+            -- ,pat.strUOM
+            -- ,pat.intLocationId
+            ,pat.intRefundCustomerId
+            ,pat.strTransactionNumber
+            ,pat.intAccountId
+            ,pat.strAccountId
+            ,pat.strTransactionNumber
+            ,B.strVendorId
+            ,C.strEntityNo
+            ,C.strName
+            -- ,compLoc.strLocationName
+            ,pat.ysnAllowVoucher
+    ) G
+    OUTER APPLY dbo.[fnAPGetVouchersCSVPerPatronage](G.intRefundCustomerId, G.intItemId) vouchersInfo
+    -- OUTER APPLY 
+    -- (
+    --     SELECT strVoucherIds = 
+    --         LTRIM(
+    --             STUFF(
+    --                     (
+    --                         SELECT  ', ' + b.strBillId
+    --                         FROM	tblAPBill b INNER JOIN tblPATRefundCustomer refundBill
+    --                                     ON b.intBillId = refundBill.intBillId
+    --                         WHERE	refundBill.intRefundCustomerId = G.intRefundCustomerId
+    --                                 AND b.ysnPosted =1 AND refundBill.ysnEligibleRefund = 1
+    --                         GROUP BY b.strBillId
+    --                         FOR xml path('')
+    --                     )
+    --                 , 1
+    --                 , 1
+    --                 , ''
+    --             )
+    --         )
+    --          , strFilter = ''
+    -- ) vouchersInfo 
     WHERE 
         (dblUnclearedQty) != 0
     OR  (dblUnclearedAmount) != 0
 ) clearingData
+ORDER BY dtmDate DESC
 GO
 
