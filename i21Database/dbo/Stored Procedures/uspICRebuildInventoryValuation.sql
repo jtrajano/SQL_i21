@@ -3561,7 +3561,7 @@ BEGIN
 							1 = 
 							CASE 
 								WHEN t.intInTransitSourceLocationId IS NOT NULL THEN 1
-								WHEN @ysnRebuildShipmentAndInvoiceAsInTransit  = 1 AND t.intInTransitSourceLocationId IS NULL THEN 1
+								WHEN @ysnRebuildShipmentAndInvoiceAsInTransit  = 1 AND ISNULL(id.intInventoryShipmentItemId, id.intLoadDetailId) IS NOT NULL THEN 1
 								ELSE 0
 							END
 						)
