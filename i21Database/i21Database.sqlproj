@@ -7898,6 +7898,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherPayableTranType.sql" />
     <None Include="Scripts\Post-Deployment\AP\PurgePayableCompleted.sql" />
     <Build Include="dbo\Views\vyuARGetInvoiceDetailLot.sql" />
+	<Build Include="dbo\Functions\fnCCValidateAssociatedTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
