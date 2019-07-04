@@ -204,25 +204,57 @@ BEGIN TRY
 		-- Create the temp table used for filtering. 
 		BEGIN
 			
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL  
-				CREATE TABLE #tmpUpdateItemForCStore_Location (
-					intLocationId INT 
-				)
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL 
+				BEGIN
+
+					CREATE TABLE #tmpUpdateItemForCStore_Location (
+						intLocationId INT 
+					)
+				END
+			ELSE
+				BEGIN
+					DELETE FROM #tmpUpdateItemForCStore_Location
+				END
+
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NULL  
-				CREATE TABLE #tmpUpdateItemForCStore_Vendor (
-					intVendorId INT 
-				)
+				BEGIN
+
+					CREATE TABLE #tmpUpdateItemForCStore_Vendor (
+						intVendorId INT 
+					)
+				END
+			ELSE
+				BEGIN
+					DELETE FROM #tmpUpdateItemForCStore_Vendor
+				END
+
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NULL  
-				CREATE TABLE #tmpUpdateItemForCStore_Category (
-					intCategoryId INT 
-				)
+				BEGIN
+
+					CREATE TABLE #tmpUpdateItemForCStore_Category (
+						intCategoryId INT 
+					)
+				END
+			ELSE
+				BEGIN
+					DELETE FROM #tmpUpdateItemForCStore_Category
+				END
+
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NULL  
-				CREATE TABLE #tmpUpdateItemForCStore_Family (
-					intFamilyId INT 
-				)
+				BEGIN
+
+					CREATE TABLE #tmpUpdateItemForCStore_Family (
+						intFamilyId INT 
+					)
+				END
+			ELSE
+				BEGIN
+					DELETE FROM #tmpUpdateItemForCStore_Family
+				END
+
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NULL  
 				CREATE TABLE #tmpUpdateItemForCStore_Class (
@@ -1042,8 +1074,7 @@ BEGIN TRY
 			ON [Changes].intCountGroupId_New = CountGroup_New.intCountGroupId
 
 
---TEST
-SELECT 'start', * FROM @tblItemLocationForCStore
+
 
 		-- Clear NULL values
 		-- Count Group
@@ -1064,8 +1095,7 @@ SELECT 'start', * FROM @tblItemLocationForCStore
 		SET strDepositPLUId_New = ''
 		WHERE strDepositPLUId_New IS NULL
 
---TEST
-SELECT 'end', * FROM @tblItemLocationForCStore
+
 
 		---- TEST
 		--SELECT 'CAST(@strTaxFlag1ysn AS BIT)', CAST(@strTaxFlag1ysn AS BIT)
@@ -1564,28 +1594,26 @@ SELECT 'end', * FROM @tblItemLocationForCStore
 		
 
 
-	   ---------------------------------------------------------------------------------------
-	   ----------------------------- START Query Preview -------------------------------------
-	   ---------------------------------------------------------------------------------------
-	   -- Query Preview display
-	   SELECT DISTINCT 
-	          strLocation
-			  , strUpc
-			  , strItemDescription
-			  , strChangeDescription
-			  , strPreviewOldData AS strOldData
-			  , strPreviewNewData AS strNewData
-	   FROM @tblPreview
-	   WHERE ysnPreview = 1
-	   ORDER BY strItemDescription, strChangeDescription ASC
-	   ---------------------------------------------------------------------------------------
-	   ----------------------------- END Query Preview ---------------------------------------
-	   ---------------------------------------------------------------------------------------
+	   ---- Handle Returned Table
+	   -----------------------------------------------------------------------------------------
+	   ------------------------------- START Query Preview -------------------------------------
+	   -----------------------------------------------------------------------------------------
+	   ---- Query Preview display
+	   --SELECT DISTINCT 
+	   --       strLocation
+			 -- , strUpc
+			 -- , strItemDescription
+			 -- , strChangeDescription
+			 -- , strPreviewOldData AS strOldData
+			 -- , strPreviewNewData AS strNewData
+	   --FROM @tblPreview
+	   --WHERE ysnPreview = 1
+	   --ORDER BY strItemDescription, strChangeDescription ASC
+	   -----------------------------------------------------------------------------------------
+	   ------------------------------- END Query Preview ---------------------------------------
+	   -----------------------------------------------------------------------------------------
 		
 
-----TEST
---SELECT *
---FROM @tblPreview
 
 
 	   IF(@ysnRecap = 1)
@@ -1638,12 +1666,13 @@ SELECT 'end', * FROM @tblItemLocationForCStore
 				ORDER BY strItemDescription, strChangeDescription ASC
 
 				-- Remove records
-				DELETE FROM @tblPreview
+				--DELETE FROM @tblPreview
 
-				-- Exit
-				GOTO ExitPost
+				---- Exit
+				--GOTO ExitPost
+
 			END
-		ELSE IF(@ysnRecap = 0)
+	   ELSE IF(@ysnRecap = 0)
 			BEGIN
 				
 				IF EXISTS(SELECT TOP 1 1 FROM @tblPreview WHERE ysnForRevert = 1)
@@ -1737,57 +1766,6 @@ SELECT 'end', * FROM @tblItemLocationForCStore
 						-- ===================================================================================
 						-- [START] Update Values
 						-- ===================================================================================
-						-- ID's
-						--IF EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intDepositPLU)
-						--	BEGIN
-						--		DECLARE @strDepositPLUUpcCode AS NVARCHAR(100) = (SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = @intDepositPLU)
-						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Deposit PLU:</b>&emsp; ' + @strDepositPLUUpcCode + ' +</p>'
-						--	END
-
-						--IF EXISTS (SELECT TOP 1 1 FROM tblSTSubcategory WHERE intSubcategoryId = @intNewFamily AND strSubcategoryType = 'F')
-						--	BEGIN
-						--		DECLARE @strFamily AS NVARCHAR(100) = (SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = @intNewFamily AND strSubcategoryType = 'F')
-						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Family:</b>&emsp; ' + @strFamily + ' +</p>'
-						--	END
-
-						--IF EXISTS (SELECT TOP 1 1 FROM tblSTSubcategory WHERE intSubcategoryId = @intNewClass AND strSubcategoryType = 'C')
-						--	BEGIN
-						--		DECLARE @strClass AS NVARCHAR(100) = (SELECT strSubcategoryId FROM tblSTSubcategory WHERE intSubcategoryId = @intNewClass AND strSubcategoryType = 'C')
-						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Class:</b>&emsp; ' + @strClass + ' +</p>'
-						--	END
-
-						--IF EXISTS (SELECT TOP 1 1 FROM tblSTSubcategoryRegProd WHERE intRegProdId = @intNewProductCode)
-						--	BEGIN
-						--		DECLARE @strProductCode AS NVARCHAR(100) = (SELECT strRegProdCode FROM tblSTSubcategoryRegProd WHERE intRegProdId = @intNewProductCode)
-						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Product Code:</b>&emsp; ' + @strProductCode + ' +</p>'
-						--	END
-
-						--IF EXISTS (SELECT TOP 1 1 FROM tblICCategory WHERE intCategoryId = @intNewCategory)
-						--	BEGIN
-						--		DECLARE @strCategoryCode AS NVARCHAR(100) = (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId = @intNewCategory)
-						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Category:</b>&emsp; ' + @strCategoryCode + ' +</p>'
-						--	END
-
-						--IF EXISTS (SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @intNewVendor)
-						--	BEGIN
-						--		DECLARE @strVendorName AS NVARCHAR(100) = (SELECT strName FROM tblEMEntity WHERE intEntityId = @intNewVendor)
-						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Vendor:</b>&emsp; ' + @strVendorName + ' +</p>'
-						--	END
-
-						--IF EXISTS (SELECT TOP 1 1 FROM tblICCountGroup WHERE intCountGroupId = @intNewInventoryGroup)
-						--	BEGIN
-						--		DECLARE @strCountGroup AS NVARCHAR(100) = (SELECT strCountGroup FROM tblICCountGroup WHERE intCountGroupId = @intNewInventoryGroup)
-						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Count Group:</b>&emsp; ' + @strCountGroup + ' +</p>'
-						--	END
-
-						--IF EXISTS (SELECT TOP 1 1 FROM tblICStorageLocation WHERE intStorageLocationId = @intNewBinLocation)
-						--	BEGIN
-						--		DECLARE @strStorageLocationName AS NVARCHAR(100) = (SELECT strName FROM tblICStorageLocation WHERE intStorageLocationId = @intNewBinLocation)
-						--		SET @strUpdateValues = @strUpdateValues + '<p><b>Storage Location:</b>&emsp; ' + @strStorageLocationName + ' +</p>'
-						--	END
-
-
-						-- BIT's
 						SELECT @strUpdateValues = @strUpdateValues + '<p><b>' + strChangeDescription + ':</b>&emsp; ' + strPreviewNewData + '</p>'
 						FROM 
 						(
@@ -1883,11 +1861,83 @@ SELECT 'end', * FROM @tblItemLocationForCStore
 
 
 				-- Remove records
-				DELETE FROM @tblPreview
+				--DELETE FROM @tblPreview
 
 				-- Commit transaction
-				GOTO ExitWithCommit
+				--GOTO ExitWithCommit
+
+				
 			END
+
+
+
+	   -- Clean up 
+		BEGIN
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Location 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Vendor 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Category 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Family 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NOT NULL 
+				DROP TABLE #tmpUpdateItemForCStore_Class 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemAccountForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+		END
+
+
+	   
+	   -- Handle Returned Table
+	   ---------------------------------------------------------------------------------------
+	   ----------------------------- START Query Preview -------------------------------------
+	   ---------------------------------------------------------------------------------------
+	   -- Query Preview display
+	   SELECT DISTINCT 
+	          strLocation
+			  , strUpc
+			  , strItemDescription
+			  , strChangeDescription
+			  , strPreviewOldData AS strOldData
+			  , strPreviewNewData AS strNewData
+	   FROM @tblPreview
+	   WHERE ysnPreview = 1
+	   ORDER BY strItemDescription, strChangeDescription ASC
+	   ---------------------------------------------------------------------------------------
+	   ----------------------------- END Query Preview ---------------------------------------
+	   ---------------------------------------------------------------------------------------
+
+		-- Remove records
+		DELETE FROM @tblPreview
+	   
+
+	   -- Handle Returned Table
+	   IF(@ysnRecap = 1)
+		BEGIN
+			-- Exit
+			GOTO ExitPost
+		END
+	   ELSE IF(@ysnRecap = 0)
+		BEGIN
+			-- Commit transaction
+			GOTO ExitWithCommit
+
+			----TEST
+			--GOTO ExitWithRollback
+		END
+
 
 
 END TRY
@@ -1918,31 +1968,3 @@ ExitWithRollback:
 	
 		
 ExitPost:
-	-- Clean up 
-		BEGIN
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemForCStore_Location 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NOT NULL 
-				DROP TABLE #tmpUpdateItemForCStore_Vendor 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Category') IS NOT NULL 
-				DROP TABLE #tmpUpdateItemForCStore_Category 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NOT NULL 
-				DROP TABLE #tmpUpdateItemForCStore_Family 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NOT NULL 
-				DROP TABLE #tmpUpdateItemForCStore_Class 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemAccountForCStore_itemAuditLog 
-
-			IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-
-
-		END

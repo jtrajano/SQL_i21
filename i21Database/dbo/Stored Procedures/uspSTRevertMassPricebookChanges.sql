@@ -10,8 +10,7 @@ BEGIN TRY
 	    
 		
 
---TEST
-PRINT '01'
+
 
 		IF NOT EXISTS(
 						SELECT TOP 1 1 FROM vyuSTSearchRevertHolderDetail detail
@@ -26,8 +25,7 @@ PRINT '01'
 				GOTO ExitPost
 			END
 
---TEST
-PRINT '02'
+
 
 		SET @strResultMsg = ''    
 		SET @ysnSuccess = CAST(1 AS BIT)
@@ -35,8 +33,7 @@ PRINT '02'
 		DECLARE @intRevertItemRecords INT = 0
 		DECLARE @intRevertItemLocationRecords INT = 0
 
---TEST
-PRINT '03'
+
 
 		
 		
@@ -47,7 +44,7 @@ PRINT '03'
 		IF EXISTS(
 					SELECT TOP 1 1 FROM vyuSTSearchRevertHolderDetail detail
 					WHERE detail.strTableName = N'tblICItem' 
-						AND intRevertHolderId = @intRevertHolderId
+						AND detail.intRevertHolderId = @intRevertHolderId
 						AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
 						AND detail.strPreviewOldData != detail.strPreviewNewData
 				 )
@@ -57,12 +54,14 @@ PRINT '03'
 				-- [START] - Revert ITEM
 				-- =========================================================================
 
+
 				-- Create
 				DECLARE @tempITEM TABLE (
 						intItemId			INT NULL
 						, intCategoryId		INT NULL
 						, strCountCode		NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL
 				)
+
 
 
 				-- Insert
@@ -82,6 +81,7 @@ PRINT '03'
 						 , detail.strOldData
 					FROM vyuSTSearchRevertHolderDetail detail
 					WHERE detail.strTableName = N'tblICItem'
+						AND detail.intRevertHolderId = @intRevertHolderId
 						AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
 						AND detail.strPreviewOldData != detail.strPreviewNewData
 				) src
@@ -90,8 +90,17 @@ PRINT '03'
 				) piv
 
 
+
 				-- Record row count
-				SET @intRevertItemRecords = (SELECT COUNT(intItemId) FROM @tempITEM)
+				SET @intRevertItemRecords = (
+												SELECT COUNT(detail.intItemId) FROM vyuSTSearchRevertHolderDetail detail
+												WHERE detail.strTableName = N'tblICItem' 
+													AND detail.intRevertHolderId = @intRevertHolderId
+													AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+													AND detail.strPreviewOldData != detail.strPreviewNewData
+											 )
+
+--SELECT '@intRevertItemRecords', @intRevertItemRecords
 
 
 				-----------------------------------------------------------------------------
@@ -175,29 +184,29 @@ PRINT '03'
 
 
 
-					-----------------------------------------------------------------------------
-					-- [START] - ITEM DEBUG MODE
-					-----------------------------------------------------------------------------
-					IF (@ysnDebug = 1)
-						BEGIN
-							SELECT DISTINCT 
-							     'tblICItem - After Update'
-								 , Item.intItemId
-								 , Item.strItemNo
-								 , Item.strDescription
-								 , Item.intCategoryId
-								 , Item.strCountCode
-							FROM tblICItem Item
-							INNER JOIN vyuSTSearchRevertHolderDetail detail
-								ON Item.intItemId = detail.intItemId	
-							WHERE detail.strTableName = N'tblICItem'
-								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-								AND detail.strPreviewOldData != detail.strPreviewNewData
-							ORDER BY Item.intItemId ASC
-						END
-					-----------------------------------------------------------------------------
-					-- [END] - ITEM DEBUG MODE
-					-----------------------------------------------------------------------------
+				-----------------------------------------------------------------------------
+				-- [START] - ITEM DEBUG MODE
+				-----------------------------------------------------------------------------
+				IF (@ysnDebug = 1)
+					BEGIN
+						SELECT DISTINCT 
+							    'tblICItem - After Update'
+								, Item.intItemId
+								, Item.strItemNo
+								, Item.strDescription
+								, Item.intCategoryId
+								, Item.strCountCode
+						FROM tblICItem Item
+						INNER JOIN vyuSTSearchRevertHolderDetail detail
+							ON Item.intItemId = detail.intItemId	
+						WHERE detail.strTableName = N'tblICItem'
+							AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+							AND detail.strPreviewOldData != detail.strPreviewNewData
+						ORDER BY Item.intItemId ASC
+					END
+				-----------------------------------------------------------------------------
+				-- [END] - ITEM DEBUG MODE
+				-----------------------------------------------------------------------------
 
 
 
@@ -218,9 +227,7 @@ PRINT '03'
 
 
 
-
---TEST
-PRINT '04'	
+	
 
 		-- ITEM LOCATION
 		IF EXISTS(
@@ -236,8 +243,7 @@ PRINT '04'
 				-- =========================================================================
 				-- [START] - Revert ITEM LOCATION
 				-- =========================================================================
---TEST
-PRINT '05 - 01'	
+	
 				-- Create
 				DECLARE @tempITEMLOCATION TABLE (
 						intItemLocationId			INT		NOT NULL,
@@ -271,12 +277,7 @@ PRINT '05 - 01'
 						intStorageLocationId		INT		NULL
 				)
 
---TEST
-PRINT '05 - 02'	
-	
 
---TEST
-PRINT '05 - 03'	
 
 
 				-- Insert
@@ -361,15 +362,21 @@ PRINT '05 - 03'
 
 
 
---TEST
-PRINT '05 - 04'	
+
 
 				-- Record row count
-				SET @intRevertItemLocationRecords = (SELECT COUNT(intItemLocationId) FROM @tempITEMLOCATION)
+				-- SET @intRevertItemLocationRecords = (SELECT COUNT(intItemLocationId) FROM @tempITEMLOCATION)
+				SET @intRevertItemLocationRecords = (
+														SELECT COUNT(detail.intItemLocationId)
+														FROM vyuSTSearchRevertHolderDetail detail
+														WHERE detail.strTableName = N'tblICItemLocation' 
+															AND detail.intRevertHolderId = @intRevertHolderId
+															AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+															AND detail.strPreviewOldData != detail.strPreviewNewData
+													 )
 
---TEST
-PRINT '05 - 05'	
-SELECT '@intRevertItemLocationRecords', @intRevertItemLocationRecords
+	
+--SELECT '@intRevertItemLocationRecords', @intRevertItemLocationRecords
 
 				-----------------------------------------------------------------------------
 				-- [START] - ITEM DEBUG MODE
@@ -427,8 +434,7 @@ SELECT '@intRevertItemLocationRecords', @intRevertItemLocationRecords
 				-----------------------------------------------------------------------------
 
 
---TEST
-PRINT '05 - 06'	
+
 
 				-- LOOP ITEM LOCATIONS's
 				WHILE EXISTS(SELECT TOP 1 1 FROM @tempITEMLOCATION)
@@ -619,17 +625,14 @@ PRINT '05 - 06'
 			END
 
 
-
---TEST
-PRINT '06'				
+			
 
 
 
---TEST
--- SELECT @intRevertItemRecords, @intRevertItemLocationRecords
+		DECLARE @intAllRevertedRecordsCount INT = 0
+		SET @intAllRevertedRecordsCount = @intRevertItemRecords + @intRevertItemLocationRecords
 
-				DECLARE @intAllRevertedRecordsCount INT = @intRevertItemRecords + @intRevertItemLocationRecords
-				DECLARE @strAllRevertedRecordsCount NVARCHAR(500) = CAST(@intAllRevertedRecordsCount AS NVARCHAR(500))
+		DECLARE @strAllRevertedRecordsCount NVARCHAR(500) = CAST(@intAllRevertedRecordsCount AS NVARCHAR(500))
 
 		IF(@ysnDebug = 0)
 			BEGIN
@@ -638,6 +641,7 @@ PRINT '06'
 			END
 		ELSE IF(@ysnDebug = 1)
 			BEGIN
+				PRINT 'Successfully reverted ' + @strAllRevertedRecordsCount + ' records.'
 				PRINT 'Will Rollback and exit'
 				GOTO ExitWithRollback
 			END

@@ -21,12 +21,12 @@ SELECT DISTINCT
 	, CompanyLoc.strLocationName
 	, RHD.intConcurrencyId
 	, strPreviewNewData = CASE
-							WHEN RHD.strTableColumnName IN ('intCategoryId')
+							WHEN RHD.strTableColumnName = 'intCategoryId'
 								THEN Category.strCategoryCode
-							WHEN RHD.strTableColumnName IN ('strCountCode')
+							WHEN RHD.strTableColumnName = 'strCountCode'
 								THEN Item.strCountCode
 
-							WHEN RHD.strTableColumnName IN ('intDepositPLUId')
+							WHEN RHD.strTableColumnName = 'intDepositPLUId'
 								THEN Uom_New.strUpcCode
 							WHEN RHD.strTableColumnName = 'strCounted'
 								THEN ItemLoc.strCounted
@@ -89,15 +89,15 @@ SELECT DISTINCT
 							ELSE RHD.strNewData
 						END
 	, strPreviewOldData = CASE
-							WHEN RHD.strTableColumnName IN ('intCategoryId')
+							WHEN RHD.strTableColumnName = 'intCategoryId'
 								THEN Category_Old.strCategoryCode
-							WHEN RHD.strTableColumnName IN ('strCountCode')
+							WHEN RHD.strTableColumnName = 'strCountCode'
 								THEN OldItemValue.strCountCode
 
-							WHEN RHD.strTableColumnName IN ('intDepositPLUId')
+							WHEN RHD.strTableColumnName = 'intDepositPLUId'
 								THEN Uom_Old.strUpcCode
 							WHEN RHD.strTableColumnName = 'strCounted'
-								THEN ItemLoc_Old.strCounted
+								THEN OldItemLocValue.strCounted
 							WHEN RHD.strTableColumnName = 'intFamilyId'
 								THEN ISNULL(SubCatFamily_Old.strSubcategoryId, '')
 							WHEN RHD.strTableColumnName = 'intClassId'
@@ -105,16 +105,12 @@ SELECT DISTINCT
 							WHEN RHD.strTableColumnName = 'intProductCodeId'
 								THEN ISNULL(ProductCode_Old.strRegProdCode, '')
 							WHEN RHD.strTableColumnName = 'intVendorId'
-								--THEN ISNULL(Entity_Old.strName, '')
-								THEN CASE WHEN Vendor_Old.intEntityId IS NULL THEN '' ELSE ISNULL(Entity_Old.strName, '') END
+								THEN CASE WHEN Entity_Old.intEntityId IS NULL THEN '' ELSE ISNULL(Entity_Old.strName, '') END
 							WHEN RHD.strTableColumnName = 'intMinimumAge'
-								--THEN CAST(ItemLoc_Old.intMinimumAge AS NVARCHAR(50))
 								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'dblMinOrder'
-								--THEN CAST(ItemLoc_Old.dblMinOrder AS NVARCHAR(50))
 								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'dblSuggestedQty'
-								--THEN CAST(ItemLoc_Old.dblSuggestedQty AS NVARCHAR(50))
 								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'intStorageLocationId'
 								THEN StorageLoc_Old.strName
@@ -155,7 +151,7 @@ LEFT JOIN tblICItemUOM Uom_New
 	ON ItemLoc.intDepositPLUId = Uom_New.intItemUOMId
 
 
--- OLD DATA
+-- OLD DATA tblICItem
 LEFT JOIN
 (
 	SELECT * FROM
@@ -176,6 +172,8 @@ LEFT JOIN
 	ON OldItemValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
 LEFT JOIN tblICCategory Category_Old
 	ON OldItemValue.intCategoryId = Category_Old.intCategoryId
+
+-- OLD DATA tblICItemLocation
 LEFT JOIN
 (
 	SELECT * FROM
@@ -187,35 +185,35 @@ LEFT JOIN
 				  , d.strTableColumnName
 				  , d.strOldData
 		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId', 'intCountGroupId')
+		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId', 'intCountGroupId', 'intVendorId')
 	) src
 	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId, intCountGroupId)
+			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId, intCountGroupId, intVendorId)
 	) piv
 ) OldItemLocValue
 	ON OldItemLocValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
-LEFT JOIN
-(
-	SELECT * FROM
-	(
-		SELECT DISTINCT
-		          d.intRevertHolderDetailId
-				  , d.intItemLocationId
-				  , d.intItemId
-				  , d.strTableColumnName
-				  , d.strOldData
-		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('intVendorId')
-	) src
-	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (intVendorId)
-	) piv
-) OldItemLocVendorValue
-	ON OldItemLocVendorValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
-LEFT JOIN tblAPVendor Vendor_Old
-	ON OldItemLocVendorValue.intVendorId = Vendor_Old.intEntityId
+--LEFT JOIN
+--(
+--	SELECT * FROM
+--	(
+--		SELECT DISTINCT
+--		          d.intRevertHolderDetailId
+--				  , d.intItemLocationId
+--				  , d.intItemId
+--				  , d.strTableColumnName
+--				  , d.strOldData
+--		FROM tblSTRevertHolderDetail d
+--		WHERE d.strTableColumnName IN ('intVendorId')
+--	) src
+--	PIVOT (
+--			MAX(strOldData) FOR strTableColumnName IN (intVendorId)
+--	) piv
+--) OldItemLocVendorValue
+--	ON OldItemLocVendorValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
+--LEFT JOIN tblAPVendor Vendor_Old
+--	ON OldItemLocValue.intVendorId = Vendor_Old.intEntityId
 LEFT JOIN tblEMEntity Entity_Old
-	ON OldItemLocVendorValue.intVendorId = Entity_Old.intEntityId
+	ON OldItemLocValue.intVendorId = Entity_Old.intEntityId
 LEFT JOIN tblICItemLocation ItemLoc_Old
 	ON OldItemLocValue.intItemLocationId = ItemLoc_Old.intItemLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_Old
@@ -230,5 +228,3 @@ LEFT JOIN tblICCountGroup CountGroup_Old
 	ON OldItemLocValue.intCountGroupId = CountGroup_Old.intCountGroupId
 LEFT JOIN tblICItemUOM Uom_Old
 	ON OldItemLocValue.intDepositPLUId = Uom_Old.intItemUOMId
-
---WHERE RHD.strTableColumnName = 'intVendorId'
