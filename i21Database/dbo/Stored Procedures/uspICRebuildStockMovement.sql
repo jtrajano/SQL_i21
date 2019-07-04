@@ -112,8 +112,8 @@ BEGIN
 				,t.intInventoryTransactionId
 				,intInventoryTransactionStorageId = CAST(NULL AS INT)
 				,intOwnershipType = @Ownership_Own 
-				,t.intCommodityId
-				,t.intCategoryId
+				,t.intItemCommodityId
+				,t.intItemCategoryId
 				,t.intLocationId 
 		FROM	tblICItem i
 				LEFT JOIN (
@@ -160,7 +160,8 @@ BEGIN
 					SELECT	TOP 1 
 							t.*
 							,il.intLocationId
-							,i.intCommodityId
+							,intItemCommodityId = i.intCommodityId
+							,intItemCategoryId = i.intCategoryId
 					FROM	
 						tblICInventoryTransaction t INNER JOIN tblICItem i 
 								ON t.intItemId = i.intItemId
