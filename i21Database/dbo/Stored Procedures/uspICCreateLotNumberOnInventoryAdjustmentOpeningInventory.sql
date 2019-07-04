@@ -74,13 +74,13 @@ BEGIN
 			,[intSubLocationId]			= Detail.intNewSubLocationId
 			,[intStorageLocationId]		= Detail.intNewStorageLocationId
 			,[dblQty]					= Detail.dblNewQuantity
-			,[dblGrossWeight]			= Detail.dblNewWeight
-			,[dblWeight]				= Detail.dblNewWeight
-			,[intWeightUOMId]			= ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId)
+			,[dblGrossWeight]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN Detail.dblNewWeight ELSE 0 END
+			,[dblWeight]				= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN Detail.dblNewWeight ELSE 0 END
+			,[intWeightUOMId]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId) ELSE NULL END
 			,[strReceiptNumber]			= Header.strAdjustmentNo
 			,[intOwnershipType]			= Detail.intOwnershipType
 			,[intDetailId]				= Detail.intInventoryAdjustmentDetailId
-			,[dblWeightPerQty]			= dbo.fnCalculateWeightUnitQty(Detail.dblNewQuantity, Detail.dblNewWeight) 
+			,[dblWeightPerQty]			= CASE WHEN Detail.intNewWeightUOMId IS NOT NULL THEN dbo.fnCalculateWeightUnitQty(Detail.dblNewQuantity, Detail.dblNewWeight) ELSE NULL END
 			,[strTransactionId]			= Header.strAdjustmentNo
 			,[strSourceTransactionId]	= Header.strAdjustmentNo
 			,[intSourceTransactionTypeId]= @INVENTORY_ADJUSTMENT_OpeningInventory
@@ -95,12 +95,13 @@ BEGIN
 				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 		AND Item.strLotTracking != 'No'
+		AND NULLIF(Detail.strNewLotNumber, '') IS NOT NULL
 END 
 
 -- Call the common stored procedure that will create or update the lot master table
 BEGIN 
 	DECLARE @intErrorFoundOnCreateUpdateLotNumber AS INT
-
+	
 	EXEC @intErrorFoundOnCreateUpdateLotNumber = dbo.uspICCreateUpdateLotNumber 
 		@ItemsThatNeedLotId
 		,@intEntityUserSecurityId
