@@ -175,6 +175,14 @@ BEGIN
 	FROM @voucherPayables A
 	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 	CROSS APPLY dbo.fnAPValidateVoucherPayableQty(@voucherPayables) C
+	UNION ALL
+	SELECT
+		strError
+		,strTransactionType
+		,strTransactionNo
+		,intTransactionId
+		,26
+	FROM dbo.fnCCValidateAssociatedTransaction(@billIds, 4, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
