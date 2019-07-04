@@ -114,8 +114,7 @@ BEGIN TRY
 	FROM tblSCTicket SC 
 	LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intSourceId = SC.intTicketId
 	LEFT JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
-	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ICSI.intLineNo
-	WHERE SC.intTicketId = @intTicketId AND ICS.intSourceType = 1 AND CASE WHEN CTD.intPricingTypeId = 2 THEN 1 ELSE CASE WHEN ISNULL(ICSI.ysnAllowInvoice,1) = 1 THEN 1 ELSE 0 END END = 1 
+	WHERE SC.intTicketId = @intTicketId AND ICS.intSourceType = 1 AND ISNULL(ICSI.ysnAllowInvoice,1)  = 1 
 
 	INSERT INTO @DestinationItems (
 		[intItemId] 
