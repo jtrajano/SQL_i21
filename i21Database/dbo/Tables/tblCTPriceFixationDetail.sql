@@ -36,6 +36,7 @@
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
 	intDailyAveragePriceDetailId	INT,
+	[dblHedgeNoOfLots]				NUMERIC(18,6) NOT NULL,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),

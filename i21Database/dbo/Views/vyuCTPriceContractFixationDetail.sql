@@ -40,7 +40,8 @@ AS
 			EY.strName			AS strBroker,
 			BA.strAccountNumber AS strBrokerAccount,
 			TR.ysnFreezed,
-			CD.dblRatio
+			CD.dblRatio,
+			FD.dblHedgeNoOfLots AS dblHedgeNoOfLots
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
