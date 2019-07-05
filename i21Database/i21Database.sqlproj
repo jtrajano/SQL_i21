@@ -7690,6 +7690,7 @@
     <Build Include="dbo\Functions\fnCMGetReconGridResult.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankReconDebitCreditValues.sql" />
     <Build Include="dbo\Stored Procedures\uspLGContractVsMarketDifferentialAnalysis.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGetBankReconReportDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
