@@ -10,11 +10,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-UPDATE	dbo.tblICStockReservation
-SET		ysnPosted = @ysnPosted
-WHERE	intTransactionId = @intTransactionId
-		AND intInventoryTransactionType = @intTransactionTypeId
-
 -- If posted, reduce the reserved qty. 
 IF @ysnPosted = 1 
 BEGIN 
@@ -46,10 +41,14 @@ BEGIN
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
 			AND @intTransactionTypeId = @intTransactionTypeId
+			AND ysnPosted = 0 
 
 	-- Call this SP to decrease the reserved qty. 
-	EXEC dbo.uspICIncreaseReservedQty
-		@ReservationToClear
+	IF EXISTS (SELECT TOP 1 1 FROM @ReservationToClear) 
+	BEGIN 
+		EXEC dbo.uspICIncreaseReservedQty
+			@ReservationToClear
+	END 
 END 
 
 -- If unposted, increase the reserved qty. 
@@ -83,8 +82,14 @@ BEGIN
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
 			AND @intTransactionTypeId = @intTransactionTypeId
+			AND ysnPosted = 1
 
 	-- Call this SP to decrease the reserved qty. 
 	EXEC dbo.uspICIncreaseReservedQty
 		@ReservationToRestore
 END 
+
+UPDATE	dbo.tblICStockReservation
+SET		ysnPosted = @ysnPosted
+WHERE	intTransactionId = @intTransactionId
+		AND intInventoryTransactionType = @intTransactionTypeId
