@@ -7688,6 +7688,8 @@
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerPatronage.sql" />
     <Build Include="dbo\Views\vyuRKGetFuturesVsUnfixedSaleContract.sql" />
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
+    <Build Include="dbo\Functions\fnCMGetReconGridResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGetBankReconDebitCreditValues.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
