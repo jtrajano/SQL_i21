@@ -7639,7 +7639,6 @@
     <Build Include="dbo\Functions\fnRKGetLatestAveragePrice.sql" />
     <Build Include="dbo\Tables\tblLGStandardAdjustment.sql" />
     <Build Include="dbo\Views\vyuSTSearchRevertHolderDetail.sql" />
-    <Build Include="dbo\Views\vyuLGContractVsMarketDifferentialAnalysis.sql" />
     <Build Include="dbo\Functions\fnCTGetFinancialStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSTPurchaseVSSalesVarianceReport.sql" />
     <Build Include="dbo\Tables\tblSTPurchaseVSSalesVarianceReport.sql" />
@@ -7690,6 +7689,7 @@
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
     <Build Include="dbo\Functions\fnCMGetReconGridResult.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankReconDebitCreditValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGContractVsMarketDifferentialAnalysis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
