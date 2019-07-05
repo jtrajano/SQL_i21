@@ -7699,6 +7699,9 @@
     <Build Include="dbo\Views\vyuIPPriceContract.sql" />
     <Build Include="dbo\Tables\tblCTPriceContractPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessPreStagePriceContract.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeLosses.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeInputItem.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeLosses.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
