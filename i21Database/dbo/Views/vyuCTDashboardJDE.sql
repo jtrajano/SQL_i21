@@ -129,6 +129,7 @@ SELECT 	 SQ.intContractDetailId
 		,CD.dtmUpdatedAvailabilityDate
 		,SQ.strLocationName
 		,CH.dtmContractDate
+		,BIM.strItemNo AS strBundleItemNo
 
 	FROM 		vyuCTContractSequence			 	SQ	WITH (NOLOCK)		
 	JOIN 		tblCTContractDetail				 	CD	WITH (NOLOCK) ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId IN(1,2,4)
@@ -171,3 +172,4 @@ SELECT 	 SQ.intContractDetailId
 	)										 		LG				  ON	LG.intPContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN	vyuCTLoadView						LV	WITH (NOLOCK) ON	LV.intContractDetailId				=	CD.intContractDetailId
 	LEFT JOIN	vyuCTQualityApprovedRejected		QA	WITH (NOLOCK) ON	QA.intContractDetailId				=	CD.intContractDetailId
+	LEFT JOIN	tblICItem							BIM WITH (NOLOCK) ON	BIM.intItemId						=	CD.intItemBundleId

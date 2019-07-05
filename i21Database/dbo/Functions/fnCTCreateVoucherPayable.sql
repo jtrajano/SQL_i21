@@ -1,7 +1,8 @@
 ﻿CREATE FUNCTION [dbo].[fnCTCreateVoucherPayable]
 (
 	@id INT,
-	@type NVARCHAR(10)
+	@type NVARCHAR(10),
+	@accrue BIT = 1
 )
 RETURNS TABLE AS RETURN
 (
@@ -10,6 +11,7 @@ RETURNS TABLE AS RETURN
 		[intEntityVendorId]							=	CASE  
 															WHEN CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) THEN CH.intEntityId
 															WHEN CC.ysnAccrue = 1 THEN CC.intVendorId
+															ELSE payable.intEntityVendorId
 														END
 		,[intTransactionType]						=	1 --voucher
 		,[intLocationId]							=	NULL --Contract doesn't have location
@@ -29,6 +31,7 @@ RETURNS TABLE AS RETURN
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
 		,[intContractSequence]						=	CD.intContractSeq
+		,[intContractCostId]						=	CC.intContractCostId
 		,[intScaleTicketId]							=	NULL
 		,[intInventoryReceiptItemId]				=	NULL
 		,[intInventoryReceiptChargeId]				=	NULL
@@ -72,7 +75,8 @@ RETURNS TABLE AS RETURN
 			END
 		) AND CC.intConcurrencyId <> ISNULL(CC.intPrevConcurrencyId,0)
 	JOIN tblCTContractHeader CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-	INNER JOIN (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId] 
+	LEFT JOIN (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId] 
+
 	INNER JOIN tblICItem item ON item.intItemId = CC.intItemId 
 	CROSS APPLY tblSMCompanyPreference compPref
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
@@ -100,7 +104,17 @@ RETURNS TABLE AS RETURN
 		ORDER BY G1.dtmValidFromDate DESC
 	) rate
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
-	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0 AND
+	-- FOR REVIEW
+	OUTER APPLY 
+	(
+		SELECT TOP 1 intEntityVendorId 
+		FROM tblAPVoucherPayable
+		WHERE CASE 
+			WHEN @type = 'cost' AND intContractCostId = @id THEN 1
+			ELSE 0
+		END = 1
+	) payable
+	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnAccrue = @accrue AND --CC.ysnBasis = 0 AND
 	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
 	CASE 
 		WHEN @type = 'header' AND CH.intContractHeaderId = @id THEN 1

@@ -66,21 +66,24 @@ AS
 			,CP.ysnDisableLocationValidation
 			,CP.ysnReduceScheduleByLogisticsLoad
 			,CP.ysnUniqueEntityReference
+			,CP.ysnAllowBasisComponentToAccrue
 			,CP.ysnAutoCreateDerivative
 			,CP.ysnEnableItemContracts
 			,CP.ysnDocumentByBookAndSubBook
+			,CP.ysnUpdatedAvailabilityPurchase
+			,CP.ysnUpdatedAvailabilitySales
+			,strCleanCostUOM = U1.strUnitMeasure
+			,strCleanCostCurrency = C1.strCurrency
+			,strDefContractStatus = CS.strContractStatus
+			,strDefContainerType = CT.strContainerType
+			,strDefSalesperson = EY.strName
+			,strVoucherItem = VI.strItemNo
+			,strInvoiceItem = II.strItemNo
 			,CP.ysnAllocationMandatoryPurchase
 			,CP.ysnAllocationMandatorySales
-			,U1.strUnitMeasure		AS	strCleanCostUOM
-			,C1.strCurrency			AS	strCleanCostCurrency
-			,CS.strContractStatus	AS	strDefContractStatus
-			,CT.strContainerType	AS	strDefContainerType
-			,EY.strName				AS	strDefSalesperson
-			,VI.strItemNo			AS	strVoucherItem
-			,II.strItemNo			AS	strInvoiceItem
 			,PC.strPriceCalculationType
-			,SR.strScheduleDescription	AS	strDefStorageSchedule
-			,CP.ysnMultiplePriceFixation AS ysnMultiplePriceFixation
+			,strDefStorageSchedule = SR.strScheduleDescription
+			,ysnMultiplePriceFixation = CP.ysnMultiplePriceFixation
 	FROM	tblCTCompanyPreference		CP LEFT
 	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId		LEFT
 	JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId	LEFT
@@ -91,4 +94,3 @@ AS
 	JOIN	tblICItem					II	ON	II.intItemId				=	CP.intInvoiceItemId			LEFT
 	JOIN	tblCTPriceCalculationType	PC	ON	PC.intPriceCalculationTypeId=	CP.intPriceCalculationTypeId	LEFT    
 	JOIN	tblGRStorageScheduleRule	SR	ON	SR.intStorageScheduleRuleId	=	CP.intDefStorageSchedule
-
