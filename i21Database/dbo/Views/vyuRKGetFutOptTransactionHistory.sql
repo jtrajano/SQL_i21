@@ -122,5 +122,7 @@ FROM (
 	LEFT JOIN tblRKBrokerageAccount BrokerAccount ON BrokerAccount.strAccountNumber = History.strBrokerAccount
 	LEFT JOIN tblEMEntity Entity ON Entity.strName = History.strBroker AND Entity.intEntityId = BrokerAccount.intEntityId
 	LEFT JOIN tblEMEntity Entity1 ON Entity1.strName = History.strTrader 
+	LEFT JOIN tblEMEntityType ET1 ON ET1.intEntityId = Entity1.intEntityId
 	WHERE ISNULL(History.strAction, '') <> ''
+		AND ET1.strType = 'Salesperson'
 ) t
