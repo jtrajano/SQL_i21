@@ -149,16 +149,18 @@ BEGIN
 												LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = bc.intFutCurrencyId
 												WHERE bc.intFutureMarketId = ot.intFutureMarketId
 													AND bc.intBrokerageAccountId = ot.intBrokerageAccountId AND @dtmToDate BETWEEN bc.dtmEffectiveDate AND ISNULL(bc.dtmEndDate, GETDATE())), 0)
-					, MatchLong = ISNULL((SELECT SUM(dblMatchQty)
-											FROM tblRKMatchFuturesPSDetail psd
-											JOIN tblRKMatchFuturesPSHeader h ON psd.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
-											WHERE psd.intLFutOptTransactionId = ot.intFutOptTransactionId
-												AND h.strType = 'Realize' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), h.dtmMatchDate, 110), 110) <= @dtmToDate), 0)
-					, MatchShort = ISNULL((SELECT SUM(dblMatchQty)
-											FROM tblRKMatchFuturesPSDetail psd
-											JOIN tblRKMatchFuturesPSHeader h ON psd.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
-											WHERE psd.intSFutOptTransactionId = ot.intFutOptTransactionId
-												AND h.strType = 'Realize' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), h.dtmMatchDate, 110), 110) <= @dtmToDate), 0)
+					--, MatchLong = ISNULL((SELECT SUM(dblMatchQty)
+					--						FROM tblRKMatchFuturesPSDetail psd
+					--						JOIN tblRKMatchFuturesPSHeader h ON psd.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
+					--						WHERE psd.intLFutOptTransactionId = ot.intFutOptTransactionId
+					--							AND h.strType = 'Realize' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), h.dtmMatchDate, 110), 110) <= @dtmToDate), 0)
+					--, MatchShort = ISNULL((SELECT SUM(dblMatchQty)
+					--						FROM tblRKMatchFuturesPSDetail psd
+					--						JOIN tblRKMatchFuturesPSHeader h ON psd.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
+					--						WHERE psd.intSFutOptTransactionId = ot.intFutOptTransactionId
+					--							AND h.strType = 'Realize' AND CONVERT(DATETIME, CONVERT(VARCHAR(10), h.dtmMatchDate, 110), 110) <= @dtmToDate), 0)
+					, MatchLong = CASE WHEN strInstrumentType = 'Buy' THEN 0 ELSE dblMatchContract END
+					, MatchShort = CASE WHEN strInstrumentType = 'Sell' THEN 0 ELSE dblMatchContract END
 					, intCurrencyId = c.intCurrencyID
 					, c.intCent
 					, c.ysnSubCurrency
