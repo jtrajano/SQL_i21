@@ -5,6 +5,7 @@
 )
 RETURNS TABLE AS RETURN
 (
+
 	SELECT	DISTINCT
 		[intEntityVendorId]							=	CASE  
 															WHEN CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) THEN CH.intEntityId
@@ -62,8 +63,14 @@ RETURNS TABLE AS RETURN
 		,[intTermId]								=	CC.intTermId	
 		,[strBillOfLading]							=	NULL
 		,[ysnReturn]								=	CAST(RT.Item AS BIT)	
-	FROM vyuCTContractCostView CC
-	JOIN tblCTContractDetail CD	ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) OR CC.ysnAccrue = 1) AND CC.intConcurrencyId <> ISNULL(CC.intPrevConcurrencyId,0)
+	FROM vyuCTContractCostView CC	
+	CROSS APPLY ( select ysnMultiplePriceFixation from tblCTCompanyPreference ) CPT
+	JOIN tblCTContractDetail CD	ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) 
+			OR CC.ysnAccrue = CASE 
+				WHEN ISNULL(CPT.ysnMultiplePriceFixation,0) = 0 THEN 1 
+				ELSE CC.ysnAccrue 
+			END
+		) AND CC.intConcurrencyId <> ISNULL(CC.intPrevConcurrencyId,0)
 	JOIN tblCTContractHeader CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 	INNER JOIN (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId] 
 	INNER JOIN tblICItem item ON item.intItemId = CC.intItemId 
