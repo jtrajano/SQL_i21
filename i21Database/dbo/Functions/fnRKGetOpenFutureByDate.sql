@@ -44,8 +44,10 @@ RETURNS @FinalResult TABLE (intFutOptTransactionId INT
 	, strRollingMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, dtmFilledDate DATETIME
-	,intTraderId INT
-	,strSalespersonId NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+	, intTraderId INT
+	, strSalespersonId NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dblMatchContract NUMERIC(18, 6))
+
 
 AS 
 
@@ -109,8 +111,9 @@ BEGIN
 		, strRollingMonth
 		, strName
 		, dtmFilledDate
-		,intTraderId
-		,strSalespersonId
+		, intTraderId
+		, strSalespersonId
+		, dblMatchContract
 	)
 	SELECT DISTINCT intFutOptTransactionId
 		, dtmTransactionDate
@@ -153,6 +156,7 @@ BEGIN
 		, dtmFilledDate
 		, intTraderId
 		, strSalespersonId
+		, dblMatchContract
 	FROM (
 		SELECT ROW_NUMBER() OVER (PARTITION BY intFutOptTransactionId ORDER BY dtmTransactionDate DESC) intRowNum
 			, *
@@ -202,6 +206,7 @@ BEGIN
 				, FOT.dtmFilledDate
 				, FOT.intTraderId
 				, FOT.strSalespersonId
+				, dblMatchContract
 			FROM tblRKFutOptTransactionHeader FOTH
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			OUTER APPLY (
@@ -209,6 +214,7 @@ BEGIN
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 						, History.*
 						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
+						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
@@ -272,6 +278,7 @@ BEGIN
 				, FOT.dtmFilledDate
 				, FOT.intTraderId
 				, FOT.strSalespersonId
+				, dblMatchContract
 			FROM tblRKFutOptTransactionHeader FOTH
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			OUTER APPLY (
@@ -279,6 +286,7 @@ BEGIN
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 						, History.*
 						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
+						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History 
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
@@ -343,11 +351,13 @@ BEGIN
 				, dtmFilledDate
 				, intTraderId
 				, strSalespersonId
+				, dblMatchContract
 			FROM (
 				SELECT * FROM (
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 						, History.*
 						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
+						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History 
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = History.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
