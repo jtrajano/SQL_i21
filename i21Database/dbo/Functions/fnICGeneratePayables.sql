@@ -1,4 +1,4 @@
-CREATE FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT)
+ALTER FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT)
 RETURNS @table TABLE
 (
   [intEntityVendorId]			    INT NULL 
@@ -85,6 +85,7 @@ RETURNS @table TABLE
 , intShipViaId						INT NULL
 , intShipFromId						INT NULL
 , intShipFromEntityId				INT NULL
+, intPayToAddressId					INT NULL
 )
 AS
 BEGIN
@@ -223,6 +224,7 @@ SELECT DISTINCT
 	,intShipViaId                               =	E.intEntityId
 	,intShipFromId = A.intShipFromId
 	,intShipFromEntityId = A.intShipFromEntityId 
+	,intPaytoAddressId = payToAddress.intEntityLocationId
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -256,7 +258,10 @@ FROM tblICInventoryReceipt A
 	LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 	LEFT JOIN tblICItemUOM ctOrderUOM ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure ctUOM ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
-	INNER JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = A.intFreightTermId
+	LEFT JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = A.intFreightTermId
+	LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = A.intEntityVendorId
+	LEFT OUTER JOIN tblEMEntityLocation payToAddress ON payToAddress.intEntityId = payToVendor.intEntityId
+		AND payToAddress.ysnDefaultLocation = 1
 	LEFT JOIN vyuPODetails po ON po.intPurchaseId = B.intOrderId
 		AND po.intPurchaseDetailId = B.intLineNo
 		AND A.strReceiptType = 'Purchase Order'
@@ -418,7 +423,7 @@ SELECT DISTINCT
 		,intShipViaId								=   NULL 
 		,intShipFromId								=	NULL 
 		,intShipFromEntityId						=	NULL 
-
+		,intPaytoAddressId							=	payToAddress.intEntityLocationId
 FROM [vyuICChargesForBilling] A
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
@@ -432,6 +437,9 @@ FROM [vyuICChargesForBilling] A
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = A.intContractHeaderId      
 	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = A.intTaxGroupId
+	LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = A.intEntityVendorId
+	LEFT OUTER JOIN tblEMEntityLocation payToAddress ON payToAddress.intEntityId = payToVendor.intEntityId
+		AND payToAddress.ysnDefaultLocation = 1
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -451,7 +459,7 @@ FROM [vyuICChargesForBilling] A
         WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
     ) J
 WHERE
-	A.ysnPrice = 1 AND A.intEntityVendorId IS NOT NULL AND
+	(A.ysnPrice = 1 OR A.intEntityVendorId IS NOT NULL) AND
 	A.intInventoryReceiptId = @intReceiptId AND (
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
 		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
@@ -546,10 +554,14 @@ SELECT
 	,intShipViaId								=   VoucherPayable.intShipViaId		
 	,intShipFromId								=	NULL
 	,intShipFromEntityId						=	NULL
+	,intPaytoAddressId							=	NULL
 FROM tblICInventoryReceiptCharge ReceiptCharge 
 INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 INNER JOIN vyuICGetInventoryReceiptCharge vReceiptCharge
 	ON ReceiptCharge.intInventoryReceiptChargeId = vReceiptCharge.intInventoryReceiptChargeId
+LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = Receipt.intEntityVendorId
+LEFT OUTER JOIN tblEMEntityLocation payToAddress ON payToAddress.intEntityId = payToVendor.intEntityId
+	AND payToAddress.ysnDefaultLocation = 1
 LEFT JOIN tblAPVoucherPayable VoucherPayable ON VoucherPayable.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 	OUTER APPLY (
 	SELECT	A.intInventoryReceiptItemId
