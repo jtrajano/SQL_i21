@@ -1071,7 +1071,7 @@ BEGIN
 						,intTicketId = SI.intSourceId
 						,dtmTicketDateTime = InTran.dtmDate
 						,intCompanyLocationId = Inv.intLocationId
-						,strLocationName = SI.strShipFromLocation
+						,strLocationName = Inv.strLocationName
 						,strUOM = InTran.strUnitMeasure
 						,Inv.intEntityId
 						,strCustomerReference = SI.strCustomerName
