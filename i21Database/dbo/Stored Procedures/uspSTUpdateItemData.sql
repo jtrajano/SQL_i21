@@ -211,10 +211,6 @@ BEGIN TRY
 						intLocationId INT 
 					)
 				END
-			ELSE
-				BEGIN
-					DELETE FROM #tmpUpdateItemForCStore_Location
-				END
 
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Vendor') IS NULL  
@@ -223,10 +219,6 @@ BEGIN TRY
 					CREATE TABLE #tmpUpdateItemForCStore_Vendor (
 						intVendorId INT 
 					)
-				END
-			ELSE
-				BEGIN
-					DELETE FROM #tmpUpdateItemForCStore_Vendor
 				END
 
 
@@ -237,10 +229,6 @@ BEGIN TRY
 						intCategoryId INT 
 					)
 				END
-			ELSE
-				BEGIN
-					DELETE FROM #tmpUpdateItemForCStore_Category
-				END
 
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Family') IS NULL  
@@ -249,10 +237,6 @@ BEGIN TRY
 					CREATE TABLE #tmpUpdateItemForCStore_Family (
 						intFamilyId INT 
 					)
-				END
-			ELSE
-				BEGIN
-					DELETE FROM #tmpUpdateItemForCStore_Family
 				END
 
 
@@ -1692,12 +1676,12 @@ BEGIN TRY
 						-- ===================================================================================
 						-- [START] Filter Criteria
 						-- ===================================================================================
-						-- '<p><b>Location</b></p><p>&emsp;Brookwood</p> <p>&emsp;Royville</p><p><b>Category</b></p><p>&emsp;7-Pop/Energy</p><p>&emsp;13-Beer/Wine</p><p><b>Family</b></p><p>&emsp;Mike Sells</p>'
+						-- '<p id="p2"><b>Location</b></p><p id="p2">&emsp;Brookwood</p> <p id="p2">&emsp;Royville</p><p id="p2"><b>Category</b></p><p id="p2">&emsp;7-Pop/Energy</p><p id="p2">&emsp;13-Beer/Wine</p><p id="p2"><b>Family</b></p><p id="p2">&emsp;Mike Sells</p>'
 						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
 							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p><b>Location</b></p>'
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Location</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p>&emsp;' + CompanyLoc.strLocationName + '</p>'
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + CompanyLoc.strLocationName + '</p>'
 								FROM #tmpUpdateItemForCStore_Location tempLoc
 								INNER JOIN tblSMCompanyLocation CompanyLoc
 									ON tempLoc.intLocationId = CompanyLoc.intCompanyLocationId
@@ -1707,9 +1691,9 @@ BEGIN TRY
 						
 						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Vendor)
 							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p><b>Vendor</b></p>'
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Vendor</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p>&emsp;' + EntityVendor.strName + '</p>'
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + EntityVendor.strName + '</p>'
 								FROM #tmpUpdateItemForCStore_Vendor tempVendor
 								INNER JOIN tblEMEntity EntityVendor
 									ON tempVendor.intVendorId = EntityVendor.intEntityId
@@ -1719,9 +1703,9 @@ BEGIN TRY
 
 						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Category)
 							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p><b>Category</b></p>'
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Category</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p>&emsp;' + Category.strCategoryCode + '</p>'
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + Category.strCategoryCode + '</p>'
 								FROM #tmpUpdateItemForCStore_Category tempCategory
 								INNER JOIN tblICCategory Category
 									ON tempCategory.intCategoryId = Category.intCategoryId
@@ -1731,9 +1715,9 @@ BEGIN TRY
 
 						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Family)
 							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p><b>Family</b></p>'
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Family</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p>&emsp;' + SubFamily.strSubcategoryId + '</p>'
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubFamily.strSubcategoryId + '</p>'
 								FROM #tmpUpdateItemForCStore_Family tempFamily
 								INNER JOIN tblSTSubcategory SubFamily
 									ON tempFamily.intFamilyId = SubFamily.intSubcategoryId
@@ -1744,9 +1728,9 @@ BEGIN TRY
 
 						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Class)
 							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p><b>Class</b></p>'
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Class</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p>&emsp;' + SubClass.strSubcategoryId + '</p>'
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubClass.strSubcategoryId + '</p>'
 								FROM #tmpUpdateItemForCStore_Class tempClass
 								INNER JOIN tblSTSubcategory SubClass
 									ON tempClass.intClassId = SubClass.intSubcategoryId
@@ -1766,7 +1750,7 @@ BEGIN TRY
 						-- ===================================================================================
 						-- [START] Update Values
 						-- ===================================================================================
-						SELECT @strUpdateValues = @strUpdateValues + '<p><b>' + strChangeDescription + ':</b>&emsp; ' + strPreviewNewData + '</p>'
+						SELECT @strUpdateValues = @strUpdateValues + '<p id="p2"><b>' + strChangeDescription + ':</b>&emsp; ' + strPreviewNewData + '</p>'
 						FROM 
 						(
 							SELECT DISTINCT
@@ -1791,6 +1775,7 @@ BEGIN TRY
 							[dtmDateTimeModifiedFrom],
 							[dtmDateTimeModifiedTo],
 							[intMassUpdatedRowCount],
+							[intRevertType],
 							[strOriginalFilterCriteria],
 							[strOriginalUpdateValues],
 							[intConcurrencyId]
@@ -1800,6 +1785,7 @@ BEGIN TRY
 							[dtmDateTimeModifiedFrom]	= @dtmDateTimeModifiedFrom,
 							[dtmDateTimeModifiedTo]		= @dtmDateTimeModifiedTo,
 							[intMassUpdatedRowCount]	= @intMassUpdatedRowCount,
+							[intRevertType]				= 1,						-- *** Note: 1=Update Item Data,	2=Update Item Pricing
 							[strOriginalFilterCriteria]	= @strFilterCriteria,
 							[strOriginalUpdateValues]	= @strUpdateValues,
 							[intConcurrencyId]			= 1
