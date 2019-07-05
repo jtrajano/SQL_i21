@@ -49,7 +49,7 @@ FROM (
 		,term.strTerm
 		,term.intTermID AS intTermsId
 		,entity.strName
-		,payTo.strCheckPayeeName
+		,payTo.strLocationName AS strCheckPayeeName
 		,NULL AS intPayScheduleId
 		,CAST(CASE WHEN voucher.intTransactionType = 14 THEN 1 ELSE 0 END AS BIT) AS ysnDeferredPayment
 		,ysnPastDue = dbo.fnIsDiscountPastDue(voucher.intTermsId, GETDATE(), voucher.dtmDate)
@@ -125,7 +125,7 @@ FROM (
 		,term.strTerm
 		,term.intTermID AS intTermsId
 		,entity.strName
-		,payTo.strCheckPayeeName
+		,payTo.strLocationName AS strCheckPayeeName
 		,paySched.intId AS intPayScheduleId
 		,CAST(0 AS BIT)
 		,ysnPastDue = dbo.fnIsDiscountPastDue(paySched.intTermsId, GETDATE(), voucher.dtmDate)
