@@ -59,6 +59,17 @@ BEGIN
 	FROM tblICCommodity
 	WHERE intCommodityId = @intCommodityId
 
+	;WITH MatchDerivatives (
+		intFutOptTransactionId
+		, strInstrumentType
+		, strBuySell
+		, dblMatchContract
+	)
+	AS (
+		SELECT *
+		FROM dbo.[fnRKGetOpenContractHistory](@dtmFromDate, @dtmToDate)
+	)
+
 	INSERT INTO @FinalResult(intFutOptTransactionId
 		, dtmTransactionDate
 		, dblOpenContract
@@ -196,9 +207,10 @@ BEGIN
 			OUTER APPLY (
 				SELECT * FROM (
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
-						, *
-						, dblOpenContract = History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmFromDate, @dtmToDate, History.intFutOptTransactionId), 0)
-					FROM vyuRKGetFutOptTransactionHistory History 
+						, History.*
+						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
+					FROM vyuRKGetFutOptTransactionHistory History
+					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
 						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
@@ -265,9 +277,10 @@ BEGIN
 			OUTER APPLY (
 				SELECT * FROM (
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
-						, *
-						, dblOpenContract = History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmFromDate, @dtmToDate, History.intFutOptTransactionId), 0)
+						, History.*
+						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History 
+					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
 						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
@@ -333,9 +346,10 @@ BEGIN
 			FROM (
 				SELECT * FROM (
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
-						, *
-						, dblOpenContract = History.dblNewNoOfContract - ISNULL([dbo].[fnRKGetOpenContractHistory](@dtmFromDate, @dtmToDate, History.intFutOptTransactionId), 0)
+						, History.*
+						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History 
+					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = History.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
 						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
 						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
