@@ -39,7 +39,7 @@ BEGIN TRY
 		FROM tblCTPriceContractAcknowledgementStage
 		WHERE intPriceContractAcknowledgementStageId = @intPriceContractAcknowledgementStageId
 
-		IF @strTransactionType = 'Sales Price Fixation'
+		IF @strTransactionType = 'Sales Price Fixation' 
 		BEGIN
 			-------------------------PriceContract-----------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceContractXML
@@ -111,9 +111,72 @@ BEGIN TRY
 			WHERE intPriceContractAcknowledgementStageId = intPriceContractAcknowledgementStageId
 		END
 
+		IF @strTransactionType = 'Purchase Price Fixation' 
+		BEGIN
+			-------------------------PriceContract-----------------------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceContractXML
+
+			SELECT @intPriceContractId = intPriceContractId
+				,@intPriceContractRefId = intPriceContractRefId
+			FROM OPENXML(@idoc, 'vyuIPPriceContractAcks/vyuIPPriceContractAck', 2) WITH (
+					intPriceContractId INT
+					,intPriceContractRefId INT
+					)
+			
+			UPDATE tblCTPriceContract
+			SET intPriceContractRefId = @intPriceContractId
+			WHERE intPriceContractId = @intPriceContractRefId
+				AND intPriceContractRefId IS NULL
+
+			---------------------------------------------PriceFixation------------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceFixationXML
+
+			UPDATE PriceFixation
+			SET PriceFixation.intPriceFixationRefId = XMLDetail.intPriceFixationId
+			FROM OPENXML(@idoc, 'vyuIPPriceFixationAcks/vyuIPPriceFixationAck', 2) WITH (
+					intPriceFixationId INT
+					,intPriceFixationRefId INT
+					) XMLDetail
+			JOIN tblCTPriceFixation PriceFixation ON PriceFixation.intPriceFixationId = XMLDetail.intPriceFixationRefId
+			WHERE PriceFixation.intPriceContractId = @intPriceContractRefId
+				AND PriceFixation.intPriceFixationRefId IS NULL
+
+			---------------------------------------------PriceFixationDetail-----------------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceFixationDetailXML
+
+			UPDATE PFD
+			SET PFD.intPriceFixationDetailRefId = XMLCost.intPriceFixationDetailId
+			FROM OPENXML(@idoc, 'vyuIPPriceFixationDetailAcks/vyuIPPriceFixationDetailAck', 2) WITH 
+			(
+					intPriceFixationDetailId INT
+					,intPriceFixationDetailRefId INT
+					,intPriceFixationId INT
+			) XMLCost
+			JOIN tblCTPriceFixationDetail PFD ON PFD.intPriceFixationDetailId = XMLCost.intPriceFixationDetailRefId
+			WHERE PFD.intPriceFixationDetailRefId IS NULL
+
+			
+
+			---UPDATE Feed Status in Staging
+			UPDATE tblCTPriceContractStage
+			SET strFeedStatus = 'Ack Rcvd'
+				,strMessage = 'Success'
+			WHERE intPriceContractId = @intPriceContractRefId
+				AND strFeedStatus = 'Awt Ack'
+
+			---UPDATE Feed Status in Acknowledgement
+			UPDATE tblCTPriceContractAcknowledgementStage
+			SET strFeedStatus = 'Ack Processed'
+			WHERE intPriceContractAcknowledgementStageId = intPriceContractAcknowledgementStageId
+		END
+
 		SELECT @intPriceContractAcknowledgementStageId = MIN(intPriceContractAcknowledgementStageId)
 		FROM tblCTPriceContractAcknowledgementStage
-		WHERE intPriceContractAcknowledgementStageId > intPriceContractAcknowledgementStageId
+		WHERE intPriceContractAcknowledgementStageId > @intPriceContractAcknowledgementStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''
 	END

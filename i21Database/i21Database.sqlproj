@@ -7691,6 +7691,14 @@
     <Build Include="dbo\Stored Procedures\uspCMGetBankReconDebitCreditValues.sql" />
     <Build Include="dbo\Stored Procedures\uspLGContractVsMarketDifferentialAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGetBankReconReportDetail.sql" />
+    <Build Include="dbo\Views\vyuIPPriceContractAck.sql" />
+    <Build Include="dbo\Views\vyuIPPriceFixationAck.sql" />
+    <Build Include="dbo\Views\vyuIPPriceFixationDetailAck.sql" />
+    <Build Include="dbo\Views\vyuIPPriceFixationDetail.sql" />
+    <Build Include="dbo\Views\vyuIPPriceFixation.sql" />
+    <Build Include="dbo\Views\vyuIPPriceContract.sql" />
+    <Build Include="dbo\Tables\tblCTPriceContractPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPreStagePriceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
