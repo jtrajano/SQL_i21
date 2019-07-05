@@ -42,7 +42,7 @@ SELECT
 	,ysnHasEmailSetup		= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrency			= SMC.strCurrency
 	,strCurrencyDescription	= SMC.strDescription
-	,strComments			= SO.strComments
+	,strComments			= dbo.fnStripHtml(SO.strComments)
 	,strStatus				=  CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email not Configured' END	
 	,strSalesOrderOriginId  =  SO.strSalesOrderOriginId
 	,strBillToLocationName	= SO.strBillToLocationName
