@@ -40,6 +40,8 @@ FROM	tblAPBill bill INNER JOIN tblAPBillDetail billDetail
 WHERE 
 	bill.ysnPosted = 1
 AND billDetail.intInventoryReceiptItemId IS NOT NULL
+AND billDetail.intInventoryReceiptItemId = @intId
+AND billDetail.intItemId = @intItemId
 GROUP BY billDetail.intInventoryReceiptItemId, billDetail.intItemId
 
 RETURN;
