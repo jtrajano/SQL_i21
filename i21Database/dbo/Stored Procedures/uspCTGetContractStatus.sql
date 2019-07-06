@@ -21,12 +21,15 @@ BEGIN TRY
 
 	IF	@intContractStatusId	=	1 --Open
 	BEGIN
-		IF	@dblAppliedQty > 0 
+		DECLARE @shortCloseId INT
+		SELECT @shortCloseId = CASE WHEN dbo.fnCTGetSequenceReceiptReturnTotal(@intContractDetailId) = @dblQuantity THEN 6 ELSE 0 END
+
+		IF @dblAppliedQty > 0 
 			SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,6)
 		ELSE IF @dblScheduleQty > 0
-			SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,3)
+			SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,@shortCloseId,3)
 		ELSE
-			SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,2,3)
+			SELECT * FROM tblCTContractStatus WHERE intContractStatusId IN (@intContractStatusId,@shortCloseId,2,3)
 	END
 	ELSE IF	@intContractStatusId	=	2 --Unconfirmed
 	BEGIN
