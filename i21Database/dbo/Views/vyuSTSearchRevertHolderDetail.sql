@@ -10,6 +10,8 @@ SELECT DISTINCT
 	, RHD.intItemId
 	, RHD.intItemUOMId
 	, RHD.intItemLocationId
+	, RHD.intItemPricingId
+	, RHD.intItemSpecialPricingId
 	, RHD.intCompanyLocationId
 	, RHD.dtmDateModified
 	, RHD.strChangeDescription

@@ -340,27 +340,29 @@ PRINT '09'
 	BEGIN
 		-- Handle preview using Table variable
 		DECLARE @tblPreview TABLE (
-			strTableName NVARCHAR(150)
-			, strTableColumnName NVARCHAR(150)
-			, strTableColumnDataType NVARCHAR(50)
-			, intPrimaryKeyId INT NOT NULL
-			, intParentId INT NULL
-			, intChildId INT NULL
-			, intCurrentEntityUserId INT NOT NULL
-			, intItemId INT NULL
-			, intItemUOMId INT NULL
-			, intItemLocationId INT NULL
+			strTableName				NVARCHAR(150)
+			, strTableColumnName		NVARCHAR(150)
+			, strTableColumnDataType	NVARCHAR(50)
+			, intPrimaryKeyId			INT NOT NULL
+			, intParentId				INT NULL
+			, intChildId				INT NULL
+			, intCurrentEntityUserId	INT NOT NULL
+			, intItemId					INT NULL
+			, intItemUOMId				INT NULL
+			, intItemLocationId			INT NULL
+			, intItemPricingId			INT NULL
+			, intItemSpecialPricingId	INT NULL
 
-			, dtmDateModified DATETIME NOT NULL
-			, intCompanyLocationId INT
-			, strLocation NVARCHAR(250)
-			, strUpc NVARCHAR(50)
-			, strItemDescription NVARCHAR(250)
-			, strChangeDescription NVARCHAR(100)
-			, strPreviewOldData NVARCHAR(MAX)
-			, strPreviewNewData NVARCHAR(MAX)
-			, ysnPreview BIT DEFAULT(1)
-			, ysnForRevert BIT DEFAULT(0)
+			, dtmDateModified			DATETIME NOT NULL
+			, intCompanyLocationId		INT
+			, strLocation				NVARCHAR(250)
+			, strUpc					NVARCHAR(50)
+			, strItemDescription		NVARCHAR(250)
+			, strChangeDescription		NVARCHAR(100)
+			, strPreviewOldData			NVARCHAR(MAX)
+			, strPreviewNewData			NVARCHAR(MAX)
+			, ysnPreview				BIT DEFAULT(1)
+			, ysnForRevert				BIT DEFAULT(0)
 		)
 
 
@@ -377,6 +379,8 @@ PRINT '09'
 			, intItemId
 			, intItemUOMId
 			, intItemLocationId
+			, intItemPricingId
+			, intItemSpecialPricingId
 
 			, dtmDateModified
 			, intCompanyLocationId
@@ -408,6 +412,8 @@ PRINT '09'
 				, intItemId						= I.intItemId
 				, intItemUOMId					= UOM.intItemUOMId
 				, intItemLocationId				= IL.intItemLocationId 
+				, intItemPricingId				= IP.intItemPricingId
+				, intItemSpecialPricingId		= NULL
 
 				, dtmDateModified				= IP.dtmDateModified
 				, intCompanyLocationId			= CL.intCompanyLocationId
@@ -487,6 +493,8 @@ PRINT '09'
 			, intItemId
 			, intItemUOMId
 			, intItemLocationId
+			, intItemPricingId
+			, intItemSpecialPricingId
 
 			, dtmDateModified
 			, intCompanyLocationId
@@ -518,6 +526,8 @@ PRINT '09'
 			, intItemId					= I.intItemId
 			, intItemUOMId				= UOM.intItemUOMId
 			, intItemLocationId			= IL.intItemLocationId
+			, intItemPricingId			= NULL
+			, intItemSpecialPricingId	= ISP.intItemSpecialPricingId
 
 			, dtmDateModified			= ISP.dtmDateModified
 			, intCompanyLocationId		= CL.intCompanyLocationId
@@ -843,25 +853,25 @@ PRINT '09'
 
 	-- Clean up 
 	BEGIN
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL  
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NOT NULL  
 			DROP TABLE #tmpUpdateItemPricingForCStore_Location 
 
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Vendor') IS NULL  
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Vendor') IS NOT NULL  
 			DROP TABLE #tmpUpdateItemPricingForCStore_Vendor 
 
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NULL  
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NOT NULL   
 			DROP TABLE #tmpUpdateItemPricingForCStore_Category 
 
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NULL  
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NOT NULL  
 			DROP TABLE #tmpUpdateItemPricingForCStore_Family 
 
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NULL  
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NOT NULL  
 			DROP TABLE #tmpUpdateItemPricingForCStore_Class 
 
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL   
 			DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
 
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL  
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL   
 			DROP TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
 	END
 

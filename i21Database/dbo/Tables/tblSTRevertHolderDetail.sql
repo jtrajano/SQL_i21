@@ -10,6 +10,8 @@
 	[intItemId]								INT				NULL,
 	[intItemUOMId]							INT				NULL,
 	[intItemLocationId]						INT				NULL,
+	[intItemPricingId]						INT				NULL,
+	[intItemSpecialPricingId]				INT				NULL,
 	[dtmDateModified]						DATETIME		NOT NULL,
 	[intCompanyLocationId]					INT				NULL,
 	[strLocation]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS NULL,
