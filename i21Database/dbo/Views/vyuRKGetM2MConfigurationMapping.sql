@@ -9,6 +9,7 @@ SELECT c.intM2MConfigurationId
 	, ft.strFreightTerm
 	, c.intConcurrencyId
 	, strAdjustmentType
+	, strContractType
 FROM tblRKM2MConfiguration c
 JOIN tblICItem i on c.intItemId = i.intItemId
 JOIN tblSMFreightTerms ft on ft.intFreightTermId = c.intFreightTermId
