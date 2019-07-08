@@ -8,6 +8,10 @@
 	AS
 BEGIN TRY
 	    
+		
+
+
+
 		IF NOT EXISTS(
 						SELECT TOP 1 1 FROM vyuSTSearchRevertHolderDetail detail
 						WHERE detail.intRevertHolderId = @intRevertHolderId
@@ -15,17 +19,19 @@ BEGIN TRY
 							AND detail.strPreviewOldData != detail.strPreviewNewData
 					 )
 			BEGIN 
-				SET @ysnSuccess	= 0;
+				SET @ysnSuccess	= 0
 				SET @strResultMsg = 'There are no records to revert.' 
 
 				GOTO ExitPost
 			END
 
+		BEGIN TRANSACTION
+
 
 		SET @strResultMsg = ''    
 		SET @ysnSuccess = CAST(1 AS BIT)
 
-		DECLARE @intRevertType AS INT = (SELECT intRevertType FROM tblSTRevertHolder WHERE intRevertHolderId = @intRevertHolderId)
+		DECLARE @intRevertType AS INT = (SELECT TOP 1 intRevertType FROM tblSTRevertHolder WHERE intRevertHolderId = @intRevertHolderId)
 
 		DECLARE @intRevertItemRecords INT = 0
 		DECLARE @intRevertItemLocationRecords INT = 0
@@ -35,8 +41,7 @@ BEGIN TRY
 		
 		
 
-		BEGIN TRANSACTION
-
+		
 
 		IF(@intRevertType = 1)
 			BEGIN
@@ -627,17 +632,6 @@ BEGIN TRY
 		ELSE IF(@intRevertType = 2)
 			BEGIN
 				
-				-- ADD TABLE FILTER
-				BEGIN
-					IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL 
-						BEGIN
-							CREATE TABLE #tmpUpdateItemPricingForCStore_Location (
-								intLocationId INT 
-							)
-						END
-				END
-
-
 				-- ITEM PRICING
 				-- ==================================================================================================================================================
 				-- [START] - Revert ITEM PRICING
@@ -738,7 +732,7 @@ BEGIN TRY
 										ON ItemPricing.intItemPricingId = detail.intItemPricingId	
 									WHERE detail.strTableName = N'tblICItemPricing'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										AND detail.strPreviewOldData != detail.strPreviewNewData
+										-- AND detail.strPreviewOldData != detail.strPreviewNewData
 									ORDER BY ItemPricing.intItemPricingId ASC
 								END
 							-----------------------------------------------------------------------------
@@ -807,18 +801,6 @@ BEGIN TRY
 									ORDER BY temp.intItemPricingId ASC
 										
 
-									-- Remove Location filter values
-									DELETE FROM #tmpUpdateItemPricingForCStore_Location
-
-									-- Add filter location values
-									IF(@intCompanyLocationId IS NOT NULL AND @intCompanyLocationId >= 1)
-										BEGIN
-											INSERT INTO #tmpUpdateItemPricingForCStore_Location (
-												intLocationId
-											)
-											SELECT @intCompanyLocationId
-										END
-
 
 									-- UPDATE ITEM PRICING
 									EXEC [dbo].[uspICUpdateItemPricingForCStore]
@@ -826,6 +808,7 @@ BEGIN TRY
 											@strUpcCode					= @strUpcCode 
 											,@strDescription			= @strItemDescription 
 											,@intItemId					= @intItemId 
+											,@intItemPricingId			= @intItemPricingId 
 
 											-- update params
 											,@dblStandardCost			= @dblStandardCost 
@@ -864,7 +847,7 @@ BEGIN TRY
 										ON ItemPricing.intItemPricingId = detail.intItemPricingId	
 									WHERE detail.strTableName = N'tblICItemPricing'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										AND detail.strPreviewOldData != detail.strPreviewNewData
+										-- AND detail.strPreviewOldData != detail.strPreviewNewData
 									ORDER BY ItemPricing.intItemPricingId ASC
 								END
 							-----------------------------------------------------------------------------
@@ -892,7 +875,8 @@ BEGIN TRY
 								AND detail.strPreviewOldData != detail.strPreviewNewData
 						 )
 					BEGIN
-						
+	
+
 							-- Create
 							DECLARE @tempITEMSPECIALPRICING TABLE (
 										intItemSpecialPricingId		INT NOT NULL
@@ -948,7 +932,6 @@ BEGIN TRY
 								MAX(strOldData) FOR strTableColumnName IN (dblUnitAfterDiscount, dtmBeginDate, dtmEndDate)
 							) piv
 
-
 							-- Count records
 							SET @intRevertItemSpecialPricingRecords = (
 																		SELECT COUNT(detail.intItemLocationId)
@@ -983,13 +966,12 @@ BEGIN TRY
 										ON ItemSpecialPricing.intItemSpecialPricingId = detail.intItemSpecialPricingId	
 									WHERE detail.strTableName = N'tblICItemSpecialPricing'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										AND detail.strPreviewOldData != detail.strPreviewNewData
+										-- AND detail.strPreviewOldData != detail.strPreviewNewData
 									ORDER BY ItemSpecialPricing.intItemSpecialPricingId ASC
 								END
 							-----------------------------------------------------------------------------
 							-- [END] - ITEM SPECIAL PRICING DEBUG MODE
 							-----------------------------------------------------------------------------
-
 
 
 
@@ -1035,32 +1017,21 @@ BEGIN TRY
 									ORDER BY temp.intItemSpecialPricingId ASC
 										
 
-									-- Remove Location filter values
-									DELETE FROM #tmpUpdateItemPricingForCStore_Location
-
-									-- Add filter location values
-									IF(@intCompanyLocationId IS NOT NULL AND @intCompanyLocationId >= 1)
-										BEGIN
-											INSERT INTO #tmpUpdateItemPricingForCStore_Location (
-												intLocationId
-											)
-											SELECT @intCompanyLocationId
-										END
-
 
 									-- UPDATE ITEM PECIAL PRICING
 									EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 											@dblPromotionalSalesPrice	= @dblUnitAfterDiscount 
 											, @dtmBeginDate				= @dtmBeginDate 
 											, @dtmEndDate 				= @dtmEndDate 
+											, @intItemSpecialPricingId  = @intItemSpecialPricingId
 											, @intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
-			
+	
+
 									-- Remove
 									DELETE FROM @tempITEMSPECIALPRICING WHERE intItemSpecialPricingId = @intItemSpecialPricingId
 		
 								END
-
 
 
 
@@ -1069,8 +1040,6 @@ BEGIN TRY
 							-----------------------------------------------------------------------------
 							IF (@ysnDebug = 1)
 								BEGIN
-									SELECT 'tblICItemSpecialPricing temp table', * FROM @tempITEMSPECIALPRICING
-
 									SELECT DISTINCT
 										   'tblICItemSpecialPricing - After Update'
 										     , Item.strItemNo
@@ -1086,7 +1055,7 @@ BEGIN TRY
 										ON ItemSpecialPricing.intItemSpecialPricingId = detail.intItemSpecialPricingId	
 									WHERE detail.strTableName = N'tblICItemSpecialPricing'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										AND detail.strPreviewOldData != detail.strPreviewNewData
+										--AND detail.strPreviewOldData != detail.strPreviewNewData
 									ORDER BY ItemSpecialPricing.intItemSpecialPricingId ASC
 								END
 							-----------------------------------------------------------------------------
@@ -1098,17 +1067,9 @@ BEGIN TRY
 				-- [END] - Revert ITEM SPECIAL PRICING
 				-- ==================================================================================================================================================
 
-
-
-				-- CLEAN UP TABLE FILTER
-				BEGIN
-					IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NOT NULL  
-						DROP TABLE #tmpUpdateItemPricingForCStore_Location 
-				END
 			END
 		
 		
-
 
 
 
