@@ -245,6 +245,9 @@ BEGIN
 		WHEN @msgId = 80229 THEN 'Zero cost is not allowed in "%s" location of item "%s".'
 		WHEN @msgId = 80230 THEN 'Only items of type "Inventory", "Raw Material", "Finished Good" and "Non-Inventory" can be received.'
 		WHEN @msgId = 80231 THEN 'There are multiple stock units set up for the item. Only 1 stock unit must be allowed. Go to Inventory -> Items -> Unit of Measure to fix it.'
+		WHEN @msgId = 80232 THEN 'Inventory and GL mismatch in %s. Discrepancy of %f in %s does not match with %s. Cannot %s.'
+		WHEN @msgId = 80233 THEN 'Inventory and GL mismatch for %s. Discrepancy of %f is found for %s.'
+		
 	END 
 
 	RETURN @msg
