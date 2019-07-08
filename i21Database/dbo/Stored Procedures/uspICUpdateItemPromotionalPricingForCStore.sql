@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 	@dblPromotionalSalesPrice AS NUMERIC(38, 20) = NULL 
 	,@dtmBeginDate AS DATETIME = NULL 
 	,@dtmEndDate AS DATETIME = NULL 
+	,@intItemSpecialPricingId AS INT = NULL 
 	,@intEntityUserSecurityId AS INT 
 AS
 
@@ -86,7 +87,9 @@ BEGIN
 									ON itemSpecialPricing.intItemLocationId = il.intItemLocationId 
 								INNER JOIN tblICItem i
 									ON i.intItemId = itemSpecialPricing.intItemId 
-						WHERE	(
+						WHERE	
+								itemSpecialPricing.intItemSpecialPricingId = ISNULL(@intItemSpecialPricingId, itemSpecialPricing.intItemSpecialPricingId)
+								AND (
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = il.intLocationId) 			
 								)
