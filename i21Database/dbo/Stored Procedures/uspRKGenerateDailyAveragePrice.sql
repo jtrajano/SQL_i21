@@ -65,7 +65,7 @@ BEGIN
 		, strFutureMarket
 		, intFutureMonthId
 		, strFutureMonth)
-	SELECT DISTINCT intRowId = ROW_NUMBER() OVER (PARTITION BY Book.intBookId, SubBook.intSubBookId, FM.intFutureMarketId, FM.intFutureMonthId ORDER BY Book.intBookId, SubBook.intSubBookId, FM.intFutureMarketId, FM.intFutureMonthId DESC)
+	SELECT DISTINCT intRowId = ROW_NUMBER() OVER (ORDER BY Book.intBookId, SubBook.intSubBookId, FM.intFutureMarketId, FM.intFutureMonthId DESC)
 		, Book.intBookId
 		, Book.strBook
 		, SubBook.intSubBookId
@@ -242,7 +242,7 @@ BEGIN
 		DELETE FROM @Categories WHERE intRowId = @intRowId
 	END
 
-	SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY intBookId ORDER BY intBookId DESC)
+	SELECT intRowId = ROW_NUMBER() OVER (ORDER BY intBookId DESC)
 		, *
 	INTO #BookSubBook
 	FROM (
