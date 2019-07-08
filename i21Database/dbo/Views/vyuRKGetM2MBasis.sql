@@ -135,8 +135,8 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, intConcurrencyId = 0
 	, iis.strMarketValuation
 	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
-	, ct.intBoardMonthId
-	, ct.strBoardMonth
+	, intBoardMonthId = NULL
+	, strBoardMonth = NULL
 FROM (
 	SELECT it.intItemId
 		, it.strItemNo
@@ -177,8 +177,6 @@ LEFT JOIN (
 		, strFMUOM = mum.strUnitMeasure
 		, intUOMId = um.intUnitMeasureId
 		, strUOM = um.strUnitMeasure
-		, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
-		, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fmon.strFutureMonth ELSE NULL END
 	FROM tblCTContractDetail cd
 	JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 	JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -192,6 +190,5 @@ LEFT JOIN (
 	LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
-	CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
 ) ct ON iis.intItemId = ct.intItemId
 	
