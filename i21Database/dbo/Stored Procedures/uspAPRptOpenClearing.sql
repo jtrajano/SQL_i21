@@ -778,6 +778,7 @@ SELECT * FROM (
   ,NULL AS intInventoryShipmentChargeId
   ,NULL AS intLoadDetailId
   ,NULL AS intCustomerStorageId
+  ,NULL AS intRefundCustomerId
   ,r.strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -842,6 +843,7 @@ SELECT * FROM (
   ,NULL AS intInventoryShipmentChargeId
   ,NULL AS intLoadDetailId
   ,NULL AS intCustomerStorageId
+  ,NULL AS intRefundCustomerId
   ,r.strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -907,6 +909,7 @@ SELECT * FROM (
   ,rc.intInventoryShipmentChargeId
   ,NULL AS intLoadDetailId
   ,NULL AS intSettleStorageId
+  ,NULL AS intRefundCustomerId
   ,r.strBOLNumber  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -972,6 +975,7 @@ SELECT * FROM (
   ,NULL AS intInventoryShipmentChargeId
   ,loadDetail.intLoadDetailId
   ,NULL AS intSettleStorageId
+  ,NULL AS intRefundCustomerId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -1037,6 +1041,7 @@ SELECT * FROM (
   ,NULL AS intInventoryShipmentChargeId
   ,loadDetail.intLoadDetailId
   ,NULL AS intSettleStorageId
+  ,NULL AS intRefundCustomerId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -1164,6 +1169,7 @@ SELECT * FROM (
   ,NULL AS intInventoryShipmentChargeId
   ,NULL AS intLoadDetailId
   ,SS.intSettleStorageId 
+  ,NULL AS intRefundCustomerId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -1225,6 +1231,13 @@ INNER JOIN tblGRSettleStorage SS
  --PATRONAGE
  SELECT  
   refund.strRefundNo
+  ,refund.dtmRefundDate
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intSettleStorageId 
+  ,refundEntity.intRefundCustomerId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   ,CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=0   
