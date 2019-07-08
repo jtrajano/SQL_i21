@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuGLDetail]
 AS
-                SELECT 
+        SELECT 
 		A.intGLDetailId,
 		A.intAccountId,
 		A.dtmDate,
@@ -50,7 +50,6 @@ AS
 		E.intEntityId,
 		A.strComments COLLATE Latin1_General_CI_AS strComments,
 		U.strUOMCode COLLATE Latin1_General_CI_AS strUOMCode, 
-
         Loc.strLocationName COLLATE Latin1_General_CI_AS strLocationName,
         ICUOM.strUnitMeasure COLLATE Latin1_General_CI_AS strSourceUOMId,
         ICCom.strCommodityCode COLLATE Latin1_General_CI_AS strCommodityCode,
@@ -58,8 +57,7 @@ AS
         ISNULL(dblSourceUnitCredit,0) dblSourceUnitCredit,
 		F.strUserName COLLATE Latin1_General_CI_AS strSourceEntity,
 		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId,
-		strVendor = CASE WHEN strModuleName='Accounts Payable'  THEN AP.strVendor ELSE '' END,
-		A.intSourceEntityId
+		AP.strVendorId COLLATE Latin1_General_CI_AS strVendorId
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
@@ -78,14 +76,8 @@ AS
 	  OUTER APPLY(
 		SELECT TOP 1 strName strUserName FROM [tblEMEntity] WHERE intEntityId = A.intSourceEntityId
 	 )F
-	 OUTER APPLY
-	 (
-			SELECT TOP 1 V.strName strVendor FROM (
-				SELECT strBillId TransId ,intEntityVendorId from dbo.tblAPBill  	UNION 
-				SELECT strPaymentRecordNum TransId, intEntityVendorId FROM tblAPPayment 
-			) C  
-			INNER JOIN vyuAPVendor V ON V.intEntityId = C.intEntityVendorId
-			--INNER JOIN tblEMEntity ET ON ET.intEntityId = C.intEntityVendorId
-			WHERE C.TransId = A.strTransactionId
+	 OUTER APPLY (
+		SELECT TOP 1 strVendorId from tblAPVendor WHERE intEntityId = A.intSourceEntityId
+		AND A.strModuleName = 'Accounts Payable'
 	 )AP
 GO

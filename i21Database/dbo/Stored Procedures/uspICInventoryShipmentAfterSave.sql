@@ -35,8 +35,8 @@ DECLARE @Id INT = NULL,
 		@intSalesOrderDetailId		INT = NULL,
 		@intFromItemUOMId			INT = NULL,
 		@intToItemUOMId				INT = NULL,
-		@dblQty						NUMERIC(18, 6) = 0
-
+		@dblQty						NUMERIC(18, 6) = 0,
+		@intSalesOrderId			INT = NULL
 
 -- Validate
 BEGIN  
@@ -309,6 +309,7 @@ BEGIN
 		intKeyId					INT IDENTITY,
 		intInventoryShipmentItemId	INT,
 		intSalesOrderDetailId		INT,
+		intSalesOrderId				INT,
 		intItemUOMId				INT,
 		dblQty						NUMERIC(12,4)	
 	)
@@ -316,6 +317,7 @@ BEGIN
 	INSERT INTO @tblSalesOrderToProcess(
 		intInventoryShipmentItemId
 		,intSalesOrderDetailId
+		,intSalesOrderId
 		,intItemUOMId
 		,dblQty
 	)
@@ -323,6 +325,7 @@ BEGIN
 	-- Changed Quantity/UOM
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,currentSnapshot.intLineNo
+			,SalesOrderDetail.intSalesOrderId
 			,currentSnapshot.intItemUOMId
 			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, (CASE WHEN @ForDelete = 1 THEN currentSnapshot.dblQuantity ELSE (currentSnapshot.dblQuantity - previousSnapshot.dblQuantity) END))
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
@@ -339,6 +342,7 @@ BEGIN
 	UNION ALL 
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,currentSnapshot.intLineNo
+			,SalesOrderDetail.intSalesOrderId
 			,currentSnapshot.intItemUOMId
 			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, previousSnapshot.intItemUOMId, currentSnapshot.dblQuantity)
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
@@ -355,6 +359,7 @@ BEGIN
 	UNION ALL
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,previousSnapshot.intLineNo
+			,SalesOrderDetail.intSalesOrderId
 			,previousSnapshot.intItemUOMId
 			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
@@ -370,6 +375,7 @@ BEGIN
 	UNION ALL
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,previousSnapshot.intLineNo
+			,SalesOrderDetail.intSalesOrderId
 			,previousSnapshot.intItemUOMId
 			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN #tmpLogShipmentItems previousSnapshot
@@ -384,6 +390,7 @@ BEGIN
 	UNION ALL	
 	SELECT	previousSnapshot.intInventoryShipmentItemId
 			,previousSnapshot.intLineNo
+			,SalesOrderDetail.intSalesOrderId
 			,previousSnapshot.intItemUOMId
 			,dbo.fnCalculateQtyBetweenUOM(previousSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, (-previousSnapshot.dblQuantity))
 	FROM	#tmpLogShipmentItems previousSnapshot INNER JOIN tblSOSalesOrderDetail SalesOrderDetail
@@ -395,6 +402,7 @@ BEGIN
 	UNION ALL
 	SELECT	currentSnapshot.intInventoryShipmentItemId
 			,currentSnapshot.intLineNo
+			,SalesOrderDetail.intSalesOrderId
 			,currentSnapshot.intItemUOMId
 			,dbo.fnCalculateQtyBetweenUOM(currentSnapshot.intItemUOMId, SalesOrderDetail.intItemUOMId, currentSnapshot.dblQuantity)
 	FROM	#tmpShipmentItems currentSnapshot INNER JOIN tblSOSalesOrderDetail SalesOrderDetail
@@ -444,6 +452,72 @@ BEGIN
 
 	CLOSE loopItemsForContractScheduleQuantity;
 	DEALLOCATE loopItemsForContractScheduleQuantity;
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-- Call MFG sp to post the Pick List reservation. 
+	-----------------------------------------------------------------------------------------------------------------------------
+	-- Iterate and process records
+	DECLARE loopForPickListReservation CURSOR LOCAL FAST_FORWARD
+	FOR 
+	SELECT	DISTINCT 
+			intSalesOrderId
+	FROM	@tblSalesOrderToProcess
+	WHERE	ISNULL(dblQty, 0) <> 0 
+
+	OPEN loopForPickListReservation;
+		
+	-- Initial fetch attempt
+	FETCH NEXT FROM loopForPickListReservation INTO 
+		@intSalesOrderId
+	;
+
+	-- Start of the loop 
+	WHILE @@FETCH_STATUS = 0
+	BEGIN 		
+	   	-- Post the Pick/List reservation. 
+		IF EXISTS (
+			SELECT TOP 1 1
+			FROM 
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si 
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+			WHERE
+				s.intInventoryShipmentId = @ShipmentId
+				AND s.intOrderType = @ShipmentType_SalesOrder
+				AND si.intOrderId = @intSalesOrderId
+				AND si.intLineNo IS NOT NULL 		
+		)
+		BEGIN
+			
+			EXEC [dbo].[uspMFUnReservePickListBySalesOrder]
+				  @intSalesOrderId	= @intSalesOrderId
+				, @ysnPosted = 1
+		END 
+
+		-- Unpost the Pick/List reservation because the sales order are delete from all the Shipment. 
+		ELSE IF NOT EXISTS (
+			SELECT TOP 1 1
+			FROM 
+				tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si 
+					ON s.intInventoryShipmentId = si.intInventoryShipmentId
+			WHERE
+				s.intOrderType = @ShipmentType_SalesOrder
+				AND si.intOrderId = @intSalesOrderId
+				AND si.intLineNo IS NOT NULL 
+		)
+		BEGIN 			
+			EXEC [dbo].[uspMFUnReservePickListBySalesOrder]
+				  @intSalesOrderId	= @intSalesOrderId
+				, @ysnPosted = 0
+		END 
+
+		-- Attempt to fetch the next row from cursor. 
+		FETCH NEXT FROM loopForPickListReservation INTO 
+			@intSalesOrderId
+	END;
+	-- End of the loop
+
+	CLOSE loopForPickListReservation;
+	DEALLOCATE loopForPickListReservation;
 END 
 
 -- Do the stock reservation 

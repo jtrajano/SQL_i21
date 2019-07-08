@@ -272,6 +272,28 @@ SET @cteQuery = N';WITH forClearing
       ,strLocationName  
      FROM vyuAPGrainClearing  
      ' + @innerQueryFilter + '  
+    ),  
+    patClearing  
+    AS  
+    (  
+	SELECT  
+      dtmDate  
+      ,intEntityVendorId  
+      ,strTransactionNumber  
+      ,intRefundId  
+      ,intRefundCustomerId  
+      ,intItemId  
+      ,intBillId  
+      ,strBillId  
+      ,intBillDetailId  
+      ,dblVoucherTotal  
+      ,dblVoucherQty  
+      ,dblRefundTotal  
+      ,dblRefundQty  
+      ,intLocationId  
+      ,strLocationName  
+     FROM vyuAPPatClearing  
+     ' + @innerQueryFilter + '  
     )';  
 END  
 ELSE  
@@ -401,6 +423,27 @@ BEGIN
       ,intLocationId  
       ,strLocationName  
      FROM vyuAPGrainClearing  
+    ),
+    patClearing
+    AS
+    (
+      SELECT  
+      dtmDate  
+      ,intEntityVendorId  
+      ,strTransactionNumber  
+      ,intRefundId  
+      ,intRefundCustomerId  
+      ,intItemId  
+      ,intBillId  
+      ,strBillId  
+      ,intBillDetailId  
+      ,dblVoucherTotal  
+      ,dblVoucherQty  
+      ,dblRefundTotal  
+      ,dblRefundQty  
+      ,intLocationId  
+      ,strLocationName  
+     FROM vyuAPPatClearing 
     )';  
 END 
 
@@ -550,7 +593,7 @@ FROM
   ON tmpAPOpenClearing.intInventoryReceiptItemId = ri.intInventoryReceiptItemId  
  INNER JOIN tblICInventoryReceipt r  
   ON r.intInventoryReceiptId = ri.intInventoryReceiptId  
-  WHERE tmpAPOpenClearing.dblClearingQty != 0 OR tmpAPOpenClearing.dblClearingAmount != 0  
+  WHERE (tmpAPOpenClearing.dblClearingQty != 0 OR tmpAPOpenClearing.dblClearingAmount != 0 )
  GROUP BY r.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL  
  --CHARGES  
@@ -593,7 +636,7 @@ FROM
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
  INNER JOIN tblICInventoryReceipt r  
   ON r.intInventoryReceiptId = rc.intInventoryReceiptId  
-  WHERE tmpAPOpenClearing.dblClearingQty != 0  AND tmpAPOpenClearing.dblClearingAmount != 0  
+  WHERE (tmpAPOpenClearing.dblClearingQty != 0  OR tmpAPOpenClearing.dblClearingAmount != 0)  
   GROUP BY r.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL  
  --SHIPMENT CHARGES  
@@ -630,7 +673,7 @@ FROM
   ON tmpAPOpenClearing.intInventoryShipmentChargeId = rc.intInventoryShipmentChargeId  
  INNER JOIN tblICInventoryShipment r  
   ON r.intInventoryShipmentId = rc.intInventoryShipmentId  
-  WHERE tmpAPOpenClearing.dblClearingQty != 0  AND tmpAPOpenClearing.dblClearingAmount != 0  
+  WHERE (tmpAPOpenClearing.dblClearingQty != 0  OR tmpAPOpenClearing.dblClearingAmount != 0)  
   GROUP BY r.dtmShipDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL
  --LOAD TRANSACTION ITEM
@@ -667,7 +710,7 @@ FROM
   ON tmpAPOpenClearing.intLoadDetailId = loadDetail.intLoadDetailId  
  INNER JOIN tblLGLoad load  
   ON load.intLoadId = loadDetail.intLoadId  
- WHERE tmpAPOpenClearing.dblClearingQty != 0 AND tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE (tmpAPOpenClearing.dblClearingQty != 0 OR tmpAPOpenClearing.dblClearingAmount != 0  )
  GROUP BY load.dtmPostedDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL
  --LOAD COST TRANSACTION ITEM
@@ -704,7 +747,7 @@ FROM
   ON tmpAPOpenClearing.intLoadDetailId = loadDetail.intLoadDetailId  
  INNER JOIN tblLGLoad load  
   ON load.intLoadId = loadDetail.intLoadId  
- WHERE tmpAPOpenClearing.dblClearingQty != 0 AND tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE (tmpAPOpenClearing.dblClearingQty != 0 OR tmpAPOpenClearing.dblClearingAmount != 0  )
  GROUP BY load.dtmPostedDate, tmpAPOpenClearing.intEntityVendorId
   UNION ALL 
  --SETTLE STORAGE
@@ -743,8 +786,44 @@ INNER JOIN tblGRSettleStorage SS
  INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST 
 	          ON SST.intCustomerStorageId = CS.intCustomerStorageId)
       ON SST.intSettleStorageId = SS.intSettleStorageId
- WHERE tmpAPOpenClearing.dblClearingQty != 0  AND tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE (tmpAPOpenClearing.dblClearingQty != 0  OR tmpAPOpenClearing.dblClearingAmount != 0  )
  GROUP BY CS.dtmDeliveryDate, tmpAPOpenClearing.intEntityVendorId
+ UNION ALL 
+ --PATRONAGE
+ SELECT  
+ tmpAPOpenClearing.intEntityVendorId
+  ,	CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())>0 AND DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=30 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
+		ELSE 0 
+	END AS dbl1, 
+	CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())>30 AND DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=60
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl30, 
+	CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())>60 AND DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=90 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl60,
+	CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())>90  
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) ELSE 0 
+	END AS dbl90
+ FROM    
+ (  
+  SELECT  
+   B.intEntityVendorId  
+   ,B.intRefundCustomerId
+   ,SUM(B.dblRefundQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
+   ,SUM(B.dblRefundTotal)  -  SUM(B.dblVoucherTotal) AS dblClearingAmount  
+  FROM patClearing B  
+  GROUP BY   
+   intEntityVendorId  
+   ,intRefundCustomerId
+ ) tmpAPOpenClearing  
+INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity 
+                        ON refund.intRefundId = refundEntity.intRefundId)
+                ON refundEntity.intRefundCustomerId = tmpAPOpenClearing.intRefundCustomerId
+ WHERE (tmpAPOpenClearing.dblClearingQty != 0  OR tmpAPOpenClearing.dblClearingAmount != 0  )
+ GROUP BY refund.dtmRefundDate, tmpAPOpenClearing.intEntityVendorId  
 ) resultData 
 INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON resultData.intEntityVendorId = vendor.intEntityId  

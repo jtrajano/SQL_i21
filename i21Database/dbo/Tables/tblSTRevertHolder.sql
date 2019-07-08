@@ -5,6 +5,7 @@
 	[dtmDateTimeModifiedFrom]			DATETIME		NOT NULL,
 	[dtmDateTimeModifiedTo]				DATETIME		NOT NULL,
 	[intMassUpdatedRowCount]			INT				NOT NULL,
+	[intRevertType]						INT				NOT NULL,			-- *** Note: 1=Update Item Data,	2=Update Item Pricing
 	[strOriginalFilterCriteria]			NVARCHAR(MAX)	NULL,
 	[strOriginalUpdateValues]			NVARCHAR(MAX)	NULL,
     [intConcurrencyId]					INT				NULL DEFAULT ((0))

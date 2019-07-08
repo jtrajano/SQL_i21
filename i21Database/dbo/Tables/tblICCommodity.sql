@@ -40,7 +40,7 @@ Type the overview for the table here.
 		[intAdjustInventoryTransfer] INT NULL,
 		[intCompanyId] INT NULL, 
 		[intLineOfBusinessId] INT NULL, 
-		[ysnMarketToMarket] BIT NULL DEFAULT((1)),
+		[ysnMarkToMarket] BIT NULL DEFAULT((1)),
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[dtmDateCreated] DATETIME NULL,
 		[dtmDateModified] DATETIME NULL,

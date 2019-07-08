@@ -312,3 +312,15 @@ BEGIN
 END
 
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKM2MConfiguration]') AND type IN (N'U'))
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'strContractType')
+	BEGIN
+		EXEC('ALTER TABLE tblRKM2MConfiguration ADD strContractType NVARCHAR(20)')
+	END
+
+	EXEC('UPDATE tblRKM2MConfiguration SET strContractType = ''Both''')
+END
+
+GO

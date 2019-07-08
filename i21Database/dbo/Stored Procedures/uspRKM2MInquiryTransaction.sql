@@ -212,7 +212,8 @@ BEGIN
 		, strEntityName NVARCHAR(100)
 		, strCustomerContract NVARCHAR(100)
 		, intFutureMarketId INT
-		, intFutureMonthId INT)
+		, intFutureMonthId INT
+		, strPricingStatus NVARCHAR(50))
 
 	INSERT INTO @tblGetOpenContractDetail (intRowNum
 		, strCommodityCode
@@ -240,7 +241,8 @@ BEGIN
 		, strEntityName
 		, strCustomerContract
 		, intFutureMarketId
-		, intFutureMonthId)
+		, intFutureMonthId
+		, strPricingStatus)
 	SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmContractDate DESC) intRowNum
 		, strCommodityCode
 		, intCommodityId
@@ -268,6 +270,7 @@ BEGIN
 		, strCustomerContract = ''
 		, intFutureMarketId
 		, intFutureMonthId
+		, strPricingStatus
 	FROM tblCTContractBalance where CONVERT(DATETIME, CONVERT(VARCHAR, dtmEndDate, 101),101) = @dtmTransactionDateUpTo AND intCommodityId = @intCommodityId
 
 	SELECT *
@@ -470,11 +473,13 @@ BEGIN
 	INTO #tblContractCost
 	FROM ( 
 		SELECT dblCosts = dbo.fnRKGetCurrencyConvertion(CASE WHEN ISNULL(CU.ysnSubCurrency, 0) = 1 THEN CU.intMainCurrencyId ELSE dc.intCurrencyId END, @intCurrencyUOMId)
-						* CASE WHEN strAdjustmentType = 'Add' THEN ABS(CASE WHEN dc.strCostMethod ='Amount' THEN SUM(dc.dblRate)
-																			ELSE SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END)
-								WHEN strAdjustmentType = 'Reduce' THEN CASE WHEN dc.strCostMethod ='Amount' THEN SUM(dc.dblRate)
-																			ELSE - SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END
-																			ELSE 0 END
+						* (CASE WHEN (M2M.strContractType = 'Both') OR (M2M.strContractType = 'Purchase' AND cd.strContractType = 'Purchase') OR (M2M.strContractType = 'Sale' AND cd.strContractType = 'Sale')
+									THEN (CASE WHEN strAdjustmentType = 'Add' THEN ABS(CASE WHEN dc.strCostMethod ='Amount' THEN SUM(dc.dblRate)
+																							ELSE SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END)
+												WHEN strAdjustmentType = 'Reduce' THEN CASE WHEN dc.strCostMethod ='Amount' THEN SUM(dc.dblRate)
+																							ELSE - SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu.intCommodityUnitMeasureId, cu1.intCommodityUnitMeasureId, ISNULL(dc.dblRate, 0))) END
+												ELSE 0 END)
+								ELSE 0 END)
 			, strAdjustmentType
 			, dc.intContractDetailId
 			, a = cu.intCommodityUnitMeasureId
@@ -495,6 +500,8 @@ BEGIN
 			, CU.ysnSubCurrency
 			, CU.intMainCurrencyId
 			, dc.intCurrencyId
+			, M2M.strContractType
+			, cd.strContractType
 	) t
 	GROUP BY intContractDetailId
 	

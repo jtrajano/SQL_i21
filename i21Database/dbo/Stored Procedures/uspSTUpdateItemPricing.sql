@@ -1,10 +1,20 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdateItemPricing]
-	@XML varchar(max)
+	@XML VARCHAR(MAX)
+	, @ysnRecap BIT
+	, @strGuid UNIQUEIDENTIFIER
 	, @strEntityIds AS NVARCHAR(MAX) OUTPUT
+	, @strResultMsg NVARCHAR(1000) OUTPUT
 AS
 BEGIN TRY
+	
+	BEGIN TRANSACTION
+
+
 
 	SET @strEntityIds = ''
+
+	DECLARE @dtmDateTimeModifiedFrom AS DATETIME
+	DECLARE @dtmDateTimeModifiedTo AS DATETIME
 
 	DECLARE @ErrMsg				NVARCHAR(MAX),
 	        @idoc				INT,
@@ -26,9 +36,14 @@ BEGIN TRY
 			@ysnPreview			NVARCHAR(1),
 			@currentUserId		INT
 		
-	                  
+--TEST
+PRINT '01'
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
-	
+
+--TEST
+PRINT '02'
+
 	SELECT	
 			@Location		 =	 Location,
             @Vendor          =   Vendor,
@@ -72,27 +87,70 @@ BEGIN TRY
     -- Insert statements for procedure here
 
 
+--TEST
+PRINT '03'
+
+
 	-- Create the filter tables
 	BEGIN
-		CREATE TABLE #tmpUpdateItemPricingForCStore_Location (
-			intLocationId INT 
-		)
+		--CREATE TABLE #tmpUpdateItemPricingForCStore_Location (
+		--	intLocationId INT 
+		--)
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemPricingForCStore_Location (
+					intLocationId INT 
+				)
+			END
 
-		CREATE TABLE #tmpUpdateItemPricingForCStore_Vendor (
-			intVendorId INT 
-		)
 
-		CREATE TABLE #tmpUpdateItemPricingForCStore_Category (
-			intCategoryId INT 
-		)
+		--CREATE TABLE #tmpUpdateItemPricingForCStore_Vendor (
+		--	intVendorId INT 
+		--)
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Vendor') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemPricingForCStore_Vendor (
+					intVendorId INT 
+				)
+			END
 
-		CREATE TABLE #tmpUpdateItemPricingForCStore_Family (
-			intFamilyId INT 
-		)
 
-		CREATE TABLE #tmpUpdateItemPricingForCStore_Class (
-			intClassId INT 
-		)
+		--CREATE TABLE #tmpUpdateItemPricingForCStore_Category (
+		--	intCategoryId INT 
+		--)
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemPricingForCStore_Category (
+					intCategoryId INT 
+				)
+			END
+
+
+		--CREATE TABLE #tmpUpdateItemPricingForCStore_Family (
+		--	intFamilyId INT 
+		--)
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemPricingForCStore_Family (
+					intFamilyId INT 
+				)
+			END
+
+
+		--CREATE TABLE #tmpUpdateItemPricingForCStore_Class (
+		--	intClassId INT 
+		--)
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NULL 
+			BEGIN
+				CREATE TABLE #tmpUpdateItemPricingForCStore_Class (
+					intClassId INT 
+				)
+			END
+
+
+--TEST
+PRINT '04'
+
 
 		-- Create the temp table for the audit log. 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NULL  
@@ -122,6 +180,12 @@ BEGIN TRY
 			)
 		;
 	END
+
+
+
+--TEST
+PRINT '05'
+
 
 
 	-- Add the filter records
@@ -179,6 +243,16 @@ BEGIN TRY
 
 
 
+--TEST
+PRINT '06'
+
+
+
+	-- MARK START UPDATE
+	SET @dtmDateTimeModifiedFrom = GETUTCDATE()
+
+
+
 	-- Get strUpcCode
 	DECLARE @strUpcCode AS NVARCHAR(20) = (
 											SELECT CASE
@@ -193,14 +267,32 @@ BEGIN TRY
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
 
 
-	-- ITEM PRICING
-	EXEC [uspICUpdateItemPricingForCStore]
-		  @strUpcCode = @strUpcCode
-		, @strDescription = @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
-		, @intItemId = NULL
-		, @dblStandardCost = @dblStandardCostConv
-		, @dblRetailPrice = @dblRetailPriceConv
-		, @intEntityUserSecurityId = @intCurrentUserIdConv
+
+--TEST
+PRINT '07'
+
+
+	BEGIN TRY
+		-- ITEM PRICING
+		EXEC [uspICUpdateItemPricingForCStore]
+			  @strUpcCode = @strUpcCode
+			, @strDescription = @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
+			, @intItemId = NULL
+			, @dblStandardCost = @dblStandardCostConv
+			, @dblRetailPrice = @dblRetailPriceConv
+			, @intEntityUserSecurityId = @intCurrentUserIdConv
+	END TRY
+	BEGIN CATCH
+		SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
+		SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
+
+		GOTO ExitWithRollback 
+	END CATCH
+
+
+
+--TEST
+PRINT '08'
 
 
 
@@ -208,12 +300,37 @@ BEGIN TRY
 	DECLARE @dtmSalesStartingDateConv AS DATE = CAST(@SalesStartDate AS DATE)
 	DECLARE @dtmSalesEndingDateConv AS DATE = CAST(@SalesEndDate AS DATE)
 
-	-- ITEM SPECIAL PRICING
-	EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
-		 @dblPromotionalSalesPrice = @dblSalesPriceConv 
-		,@dtmBeginDate = @dtmSalesStartingDateConv
-		,@dtmEndDate = @dtmSalesEndingDateConv 
-		,@intEntityUserSecurityId = @intCurrentUserIdConv
+	BEGIN TRY
+		-- ITEM SPECIAL PRICING
+		EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
+			 @dblPromotionalSalesPrice = @dblSalesPriceConv 
+			,@dtmBeginDate = @dtmSalesStartingDateConv
+			,@dtmEndDate = @dtmSalesEndingDateConv 
+			,@intEntityUserSecurityId = @intCurrentUserIdConv
+	END TRY
+	BEGIN CATCH
+		SELECT 'uspICUpdateItemPromotionalPricingForCStore', ERROR_MESSAGE()
+		SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
+
+		GOTO ExitWithRollback 
+	END CATCH
+
+
+--TEST
+PRINT '09'
+
+
+
+	IF(@ysnRecap = 1)
+		BEGIN
+			SELECT '#tmpUpdateItemPricingForCStore_ItemPricingAuditLog', * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+			SELECT '#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog', * FROm #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog
+		END
+
+
+	-- MARK END UPDATE
+	SET @dtmDateTimeModifiedTo = GETUTCDATE()
+
 
 
 	
@@ -223,44 +340,95 @@ BEGIN TRY
 	BEGIN
 		-- Handle preview using Table variable
 		DECLARE @tblPreview TABLE (
-			intCompanyLocationId INT
-			, strLocation NVARCHAR(250)
-			, strUpc NVARCHAR(50)
-			, strItemDescription NVARCHAR(250)
-			, strChangeDescription NVARCHAR(100)
-			, strOldData NVARCHAR(MAX)
-			, strNewData NVARCHAR(MAX)
-			, intParentId INT
-			, intChildId INT
+			strTableName				NVARCHAR(150)
+			, strTableColumnName		NVARCHAR(150)
+			, strTableColumnDataType	NVARCHAR(50)
+			, intPrimaryKeyId			INT NOT NULL
+			, intParentId				INT NULL
+			, intChildId				INT NULL
+			, intCurrentEntityUserId	INT NOT NULL
+			, intItemId					INT NULL
+			, intItemUOMId				INT NULL
+			, intItemLocationId			INT NULL
+			, intItemPricingId			INT NULL
+			, intItemSpecialPricingId	INT NULL
+
+			, dtmDateModified			DATETIME NOT NULL
+			, intCompanyLocationId		INT
+			, strLocation				NVARCHAR(250)
+			, strUpc					NVARCHAR(50)
+			, strItemDescription		NVARCHAR(250)
+			, strChangeDescription		NVARCHAR(100)
+			, strPreviewOldData			NVARCHAR(MAX)
+			, strPreviewNewData			NVARCHAR(MAX)
+			, ysnPreview				BIT DEFAULT(1)
+			, ysnForRevert				BIT DEFAULT(0)
 		)
 
 
 
 		-- ITEM PRICING
 		INSERT INTO @tblPreview (
-			intCompanyLocationId
+			strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, intPrimaryKeyId
+			, intParentId
+			, intChildId
+			, intCurrentEntityUserId
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+			, intItemPricingId
+			, intItemSpecialPricingId
+
+			, dtmDateModified
+			, intCompanyLocationId
 			, strLocation
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
-			, strOldData
-			, strNewData
-			, intParentId
-			, intChildId
+			, strPreviewOldData
+			, strPreviewNewData
+			, ysnPreview
+			, ysnForRevert
 		)
-		SELECT	CL.intCompanyLocationId
-				,CL.strLocationName
-				,UOM.strLongUPCCode
-				,I.strDescription
-				,CASE
-					WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
-					WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Sale Price'
-					WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
-				END
-				,[Changes].strOldData
-				,[Changes].strNewData
-				,[Changes].intItemId 
-				,[Changes].intItemPricingId
+		SELECT	DISTINCT
+				strTableName					= N'tblICItemPricing'
+				, strTableColumnName			= CASE
+													WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'dblStandardCost'
+													WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'dblSalePrice'
+													WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'dblLastCost'
+												END
+				, strTableColumnDataType		= CASE
+													WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'NUMERIC(38, 20)'
+													WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'NUMERIC(38, 20)'
+													WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'NUMERIC(38, 20)'
+												END
+				, intPrimaryKeyId				= [Changes].intItemPricingId
+				, intParentId					= I.intItemId
+				, intChildId					= NULL
+				, intCurrentEntityUserId		= @currentUserId
+				, intItemId						= I.intItemId
+				, intItemUOMId					= UOM.intItemUOMId
+				, intItemLocationId				= IL.intItemLocationId 
+				, intItemPricingId				= IP.intItemPricingId
+				, intItemSpecialPricingId		= NULL
+
+				, dtmDateModified				= IP.dtmDateModified
+				, intCompanyLocationId			= CL.intCompanyLocationId
+				, strLocation					= CL.strLocationName
+				, strUpc						= UOM.strLongUPCCode
+				, strItemDescription			= I.strDescription
+				, strChangeDescription			= CASE
+													WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
+													WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Sale Price'
+													WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
+												END
+				, strPreviewOldData				= [Changes].strOldData
+				, strPreviewNewData				= [Changes].strNewData
+				, ysnPreview					= 1
+				, ysnForRevert					= 1
 		FROM 
 		(
 			SELECT DISTINCT intItemId, intItemPricingId, oldColumnName, strOldData, strNewData
@@ -298,42 +466,83 @@ BEGIN TRY
 		INNER JOIN tblSMCompanyLocation CL 
 			ON IL.intLocationId = CL.intCompanyLocationId
 		WHERE 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
-			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-		)
-		AND 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
-		)
+			(
+				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+			)
+			AND 
+			(
+				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
+			)
+			AND UOM.ysnStockUnit = 1
+
+
+
 
 
 		-- ITEM SPECIAL PRICING
 		INSERT INTO @tblPreview (
-			intCompanyLocationId
+			strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, intPrimaryKeyId
+			, intParentId
+			, intChildId
+			, intCurrentEntityUserId
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+			, intItemPricingId
+			, intItemSpecialPricingId
+
+			, dtmDateModified
+			, intCompanyLocationId
 			, strLocation
 			, strUpc
 			, strItemDescription
 			, strChangeDescription
-			, strOldData
-			, strNewData
-			, intParentId
-			, intChildId
+			, strPreviewOldData
+			, strPreviewNewData
+			, ysnPreview
+			, ysnForRevert
 		)
-		SELECT	CL.intCompanyLocationId
-				,CL.strLocationName
-				,UOM.strLongUPCCode
-				,I.strDescription
-				,CASE
-					WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'Unit After Discount'
-					WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
-					WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
-				END
-				,[Changes].strOldData
-				,[Changes].strNewData
-				,[Changes].intItemId 
-				,[Changes].intItemSpecialPricingId
+		SELECT DISTINCT 
+			strTableName				= N'tblICItemSpecialPricing'
+			, strTableColumnName		= CASE
+											WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'dblUnitAfterDiscount'
+											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'dtmBeginDate'
+											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'dtmEndDate'
+										END
+			, strTableColumnDataType	= CASE
+											WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'NUMERIC(18, 6)'
+											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'DATETIME'
+											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'DATETIME'
+										END
+			, intPrimaryKeyId			= ISP.intItemSpecialPricingId
+			, intParentId				= I.intItemId
+			, intChildId				= NULL
+			, intCurrentEntityUserId	= @currentUserId
+			, intItemId					= I.intItemId
+			, intItemUOMId				= UOM.intItemUOMId
+			, intItemLocationId			= IL.intItemLocationId
+			, intItemPricingId			= NULL
+			, intItemSpecialPricingId	= ISP.intItemSpecialPricingId
+
+			, dtmDateModified			= ISP.dtmDateModified
+			, intCompanyLocationId		= CL.intCompanyLocationId
+			, strLocation				= CL.strLocationName
+			, strUpc					= UOM.strLongUPCCode
+			, strItemDescription		= I.strDescription
+			, strChangeDescription		= CASE
+											WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'Unit After Discount'
+											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
+											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
+										END
+			, strPreviewOldData			= [Changes].strOldData
+			, strPreviewNewData			= [Changes].strNewData
+			, ysnPreview				= 1
+			, ysnForRevert				= 1
 		FROM 
 		(
 			SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData
@@ -362,82 +571,379 @@ BEGIN TRY
 		) [Changes]
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
-		INNER JOIN tblICItemSpecialPricing IP 
-			ON [Changes].intItemSpecialPricingId = IP.intItemSpecialPricingId
+		INNER JOIN tblICItemSpecialPricing ISP 
+			ON [Changes].intItemSpecialPricingId = ISP.intItemSpecialPricingId
 		INNER JOIN tblICItemUOM UOM 
-			ON IP.intItemId = UOM.intItemId
+			ON ISP.intItemId = UOM.intItemId
 		INNER JOIN tblICItemLocation IL 
-			ON IP.intItemLocationId = IL.intItemLocationId 
-			AND [Changes].intItemId = IL.intItemId
+			ON ISP.intItemLocationId = IL.intItemLocationId 
+			AND I.intItemId = IL.intItemId
 		INNER JOIN tblSMCompanyLocation CL 
 			ON IL.intLocationId = CL.intCompanyLocationId
 		WHERE 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
-			OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
-		)
-		AND 
-		(
-			NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
-			OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
-		)
-
-
-
-	   DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
+			(
+				NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+				OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = CL.intCompanyLocationId) 			
+			)
+			AND 
+			(
+				NOT EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId)
+				OR EXISTS (SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intItemUOMId AND intItemUOMId = UOM.intItemUOMId) 		
+			)
+			AND UOM.ysnStockUnit = 1
 	END
+
+
+
+	DELETE FROM @tblPreview WHERE ISNULL(strPreviewOldData, '') = ISNULL(strPreviewNewData, '')
+
+
+
+	 IF(@ysnRecap = 1)
+		BEGIN
+				
+			IF @@TRANCOUNT > 0
+				BEGIN
+					ROLLBACK TRANSACTION 
+				END
+
+			-- INSERT TO PREVIEW TABLE
+			INSERT INTO tblSTUpdateItemPricingPreview
+			(
+				strGuid,
+				strLocation,
+				strUpc,
+				strDescription,
+				strChangeDescription,
+				strOldData,
+				strNewData,
+
+				intItemId,
+				intItemUOMId,
+				intItemLocationId,
+				intTableIdentityId,
+				strTableName,
+				strColumnName,
+				strColumnDataType,
+				intConcurrencyId
+			)
+			SELECT DISTINCT 
+				@strGuid
+				, strLocation
+			 	, strUpc
+				, strItemDescription
+				, strChangeDescription
+				, strPreviewOldData
+				, strPreviewNewData
+
+				, intItemId
+				, intItemUOMId
+				, intItemLocationId
+				, intPrimaryKeyId
+				, strTableName
+				, strTableColumnName
+				, strTableColumnDataType
+				, 1
+			FROM @tblPreview
+			WHERE ysnPreview = 1
+			ORDER BY strItemDescription, strChangeDescription ASC
+
+		END
+	 ELSE IF(@ysnRecap = 0)
+		BEGIN
+				
+			IF EXISTS(SELECT TOP 1 1 FROM @tblPreview WHERE ysnForRevert = 1)
+				BEGIN
+					DECLARE @intMassUpdatedRowCount AS INT = (SELECT COUNT(ysnForRevert) FROM @tblPreview WHERE ysnForRevert = 1)
+
+					-- ===================================================================================
+					-- [START] - Insert value to tblSTUpdateItemDataRevertHolder
+					-- ===================================================================================
+						
+					DECLARE @intNewRevertHolderId AS INT,
+							@strFilterCriteria AS NVARCHAR(MAX) = '',
+							@strUpdateValues AS NVARCHAR(MAX) = ''
+
+
+
+					-- ===================================================================================
+					-- [START] Filter Criteria
+					-- ===================================================================================
+					-- '<p id="p2"><b>Location</b></p><p id="p2">&emsp;Brookwood</p> <p id="p2">&emsp;Royville</p><p id="p2"><b>Category</b></p><p id="p2">&emsp;7-Pop/Energy</p><p id="p2">&emsp;13-Beer/Wine</p><p id="p2"><b>Family</b></p><p id="p2">&emsp;Mike Sells</p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+							BEGIN
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Location</b></p>'
+								
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + CompanyLoc.strLocationName + '</p>'
+								FROM #tmpUpdateItemPricingForCStore_Location tempLoc
+								INNER JOIN tblSMCompanyLocation CompanyLoc
+									ON tempLoc.intLocationId = CompanyLoc.intCompanyLocationId
+
+								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+							END
+						
+						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Vendor)
+							BEGIN
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Vendor</b></p>'
+								
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + EntityVendor.strName + '</p>'
+								FROM #tmpUpdateItemPricingForCStore_Vendor tempVendor
+								INNER JOIN tblEMEntity EntityVendor
+									ON tempVendor.intVendorId = EntityVendor.intEntityId
+
+								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+							END
+
+						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category)
+							BEGIN
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Category</b></p>'
+								
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + Category.strCategoryCode + '</p>'
+								FROM #tmpUpdateItemPricingForCStore_Category tempCategory
+								INNER JOIN tblICCategory Category
+									ON tempCategory.intCategoryId = Category.intCategoryId
+
+								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+							END
+
+						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family)
+							BEGIN
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Family</b></p>'
+								
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubFamily.strSubcategoryId + '</p>'
+								FROM #tmpUpdateItemPricingForCStore_Family tempFamily
+								INNER JOIN tblSTSubcategory SubFamily
+									ON tempFamily.intFamilyId = SubFamily.intSubcategoryId
+								WHERE SubFamily.strSubcategoryType = 'F'
+
+								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+							END
+
+						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
+							BEGIN
+								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Class</b></p>'
+								
+								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubClass.strSubcategoryId + '</p>'
+								FROM #tmpUpdateItemPricingForCStore_Class tempClass
+								INNER JOIN tblSTSubcategory SubClass
+									ON tempClass.intClassId = SubClass.intSubcategoryId
+								WHERE SubClass.strSubcategoryType = 'C'
+
+								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+							END
+						-- SELECT @strLottedItem = LEFT(@strLottedItem, LEN(@strLottedItem)-1)
+						-- ===================================================================================
+						-- [END] Filter Criteria
+						-- ===================================================================================
+
+
+
+
+
+						-- ===================================================================================
+						-- [START] Update Values
+						-- ===================================================================================
+						SELECT @strUpdateValues = @strUpdateValues + '<p id="p2"><b>' + strChangeDescription + ':</b>&emsp; ' + strPreviewNewData + '</p>'
+						FROM 
+						(
+							SELECT DISTINCT
+								strChangeDescription
+								, strPreviewNewData
+							FROM @tblPreview
+							WHERE ysnPreview = 1
+						) A
+						
+						-- ===================================================================================
+						-- [END] Update Values
+						-- ===================================================================================
+
+
+
+
+
+						-- Insert to header
+						INSERT INTO tblSTRevertHolder
+						(
+							[intEntityId],
+							[dtmDateTimeModifiedFrom],
+							[dtmDateTimeModifiedTo],
+							[intMassUpdatedRowCount],
+							[intRevertType],
+							[strOriginalFilterCriteria],
+							[strOriginalUpdateValues],
+							[intConcurrencyId]
+						)
+						SELECT 
+							[intEntityId]				= @currentUserId,
+							[dtmDateTimeModifiedFrom]	= @dtmDateTimeModifiedFrom,
+							[dtmDateTimeModifiedTo]		= @dtmDateTimeModifiedTo,
+							[intMassUpdatedRowCount]	= @intMassUpdatedRowCount,
+							[intRevertType]				= 2,						-- *** Note: 1=Update Item Data,	2=Update Item Pricing
+							[strOriginalFilterCriteria]	= @strFilterCriteria,
+							[strOriginalUpdateValues]	= @strUpdateValues,
+							[intConcurrencyId]			= 1
+
+
+						SET @intNewRevertHolderId = SCOPE_IDENTITY()
+
+						-- Insert to detail
+						INSERT INTO tblSTRevertHolderDetail
+						(
+							[intRevertHolderId],
+							[strTableName],
+							[strTableColumnName],
+							[strTableColumnDataType],
+							[intPrimaryKeyId],
+							[intParentId],
+							[intChildId],
+							[intItemId],
+							[intItemUOMId],
+							[intItemLocationId],
+							[dtmDateModified],
+							[intCompanyLocationId],
+							[strLocation],
+							[strUpc],
+							[strItemDescription],
+							[strChangeDescription],
+							[strOldData],
+							[strNewData],
+							[intConcurrencyId]
+						)
+						SELECT 
+							[intRevertHolderId]			= @intNewRevertHolderId,
+							[strTableName]				= strTableName,
+							[strTableColumnName]		= strTableColumnName,
+							[strTableColumnDataType]	= strTableColumnDataType,
+							[intPrimaryKeyId]			= intPrimaryKeyId,
+							[intParentId]				= intParentId,
+							[intChildId]				= intChildId,
+							[intItemId]					= intItemId,
+							[intItemUOMId]				= intItemUOMId,
+							[intItemLocationId]			= intItemLocationId,
+							[dtmDateModified]			= dtmDateModified,
+							[intCompanyLocationId]		= intCompanyLocationId,
+							[strLocation]				= strLocation,
+							[strUpc]					= strUpc,
+							[strItemDescription]		= strItemDescription,
+							[strChangeDescription]		= strChangeDescription,
+							[strOldData]				= CASE
+															WHEN strTableColumnDataType = 'DATETIME'
+																THEN CAST(CONVERT(VARCHAR(10), CAST(strPreviewOldData AS DATETIME), 101) AS NVARCHAR(10))
+															ELSE strPreviewOldData
+														END,
+							[strNewData]				= CASE
+															WHEN strTableColumnDataType = 'DATETIME'
+																THEN CAST(CONVERT(VARCHAR(10), CAST(strPreviewNewData AS DATETIME), 101) AS NVARCHAR(10))
+															ELSE strPreviewOldData
+														END,
+							--[strOldData]				= strPreviewOldData,
+							--[strNewData]				= strPreviewNewData,
+							[intConcurrencyId]			= 1
+						FROM @tblPreview 
+						WHERE ysnForRevert = 1
+						-- ===================================================================================
+						-- [END] - Insert value to tblSTUpdateItemDataRevertHolder
+						-- ===================================================================================
+						
+					END
+
+			END
+
+	
+
+	-- Clean up 
+	BEGIN
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Location 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Vendor') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Vendor 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NOT NULL   
+			DROP TABLE #tmpUpdateItemPricingForCStore_Category 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Family 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NOT NULL  
+			DROP TABLE #tmpUpdateItemPricingForCStore_Class 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL   
+			DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+
+		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL   
+			DROP TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+	END
+
 
 
 
 	---------------------------------------------------------------------------------------
 	----------------------------- START Query Preview -------------------------------------
 	---------------------------------------------------------------------------------------
-	DELETE FROM @tblPreview WHERE ISNULL(strOldData, '') = ISNULL(strNewData, '')
-
 	-- Query Preview display
 	SELECT DISTINCT 
 	          strLocation
 			  , strUpc
 			  , strItemDescription
 			  , strChangeDescription
-			  , strOldData
-			  , strNewData
+			  , strPreviewOldData AS strOldData
+			  , strPreviewNewData AS strNewData
 	FROM @tblPreview
+	WHERE ysnPreview = 1
 	ORDER BY strItemDescription, strChangeDescription ASC
-    
-	DELETE FROM @tblPreview
+   
 	---------------------------------------------------------------------------------------
 	----------------------------- END Query Preview ---------------------------------------
 	---------------------------------------------------------------------------------------
 
 
-	-- Clean up 
-	BEGIN
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL  
-			DROP TABLE #tmpUpdateItemPricingForCStore_Location 
+	
+	-- Remove records
+	DELETE FROM @tblPreview
+	   
 
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Vendor') IS NULL  
-			DROP TABLE #tmpUpdateItemPricingForCStore_Vendor 
+	-- Handle Returned Table
+	IF(@ysnRecap = 1)
+		BEGIN
+			-- Exit
+			GOTO ExitPost
+		END
+	ELSE IF(@ysnRecap = 0)
+		BEGIN
+			-- Commit transaction
+			GOTO ExitWithCommit
 
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NULL  
-			DROP TABLE #tmpUpdateItemPricingForCStore_Category 
-
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NULL  
-			DROP TABLE #tmpUpdateItemPricingForCStore_Family 
-
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NULL  
-			DROP TABLE #tmpUpdateItemPricingForCStore_Class 
-
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
-			DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
-
-		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL  
-			DROP TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+			----TEST
+			--GOTO ExitWithRollback
 	END
+
 
 END TRY
 
-BEGIN CATCH  
-	SET @ErrMsg = ERROR_MESSAGE()  
-	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')         
+BEGIN CATCH      
+	
+	 SET @ErrMsg = ERROR_MESSAGE()     
+	 --SET @strResultMsg = ERROR_MESSAGE()
+	 SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE() --+ '<\BR>' + 
+	 IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
+	 --RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')  
+	 
+	 GOTO ExitWithRollback
 END CATCH
+
+
+
+ExitWithCommit:
+	COMMIT TRANSACTION
+	GOTO ExitPost
+	
+
+ExitWithRollback:
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION 
+		END
+	
+		
+ExitPost:

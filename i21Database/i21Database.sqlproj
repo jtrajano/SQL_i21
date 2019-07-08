@@ -7639,7 +7639,6 @@
     <Build Include="dbo\Functions\fnRKGetLatestAveragePrice.sql" />
     <Build Include="dbo\Tables\tblLGStandardAdjustment.sql" />
     <Build Include="dbo\Views\vyuSTSearchRevertHolderDetail.sql" />
-    <Build Include="dbo\Views\vyuLGContractVsMarketDifferentialAnalysis.sql" />
     <Build Include="dbo\Functions\fnCTGetFinancialStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSTPurchaseVSSalesVarianceReport.sql" />
     <Build Include="dbo\Tables\tblSTPurchaseVSSalesVarianceReport.sql" />
@@ -7679,6 +7678,39 @@
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyCopyMessagingDetails.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyTransferLogForComment.sql">
     <Build Include="dbo\Tables\tblSMInterCompanyTransferLog.sql" />
+    <Build Include="dbo\Views\vyuSTStoreOnUserRole.sql" />
+    <Build Include="dbo\Views\vyuARGetInvoiceDetailLot.sql" />
+    <Build Include="dbo\Functions\fnCCValidateAssociatedTransaction.sql" />
+    <Build Include="dbo\Views\vyuAPPatClearing.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerReceiptItem.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerReceiptCharge.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerShipmentCharge.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerLoad.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerSettleStorage.sql" />
+    <Build Include="dbo\Functions\fnAPGetVouchersCSVPerPatronage.sql" />
+    <Build Include="dbo\Views\vyuRKGetFuturesVsUnfixedSaleContract.sql" />
+    <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
+    <Build Include="dbo\Functions\fnCMGetReconGridResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGetBankReconDebitCreditValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGContractVsMarketDifferentialAnalysis.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGetBankReconReportDetail.sql" />
+    <Build Include="dbo\Views\vyuIPPriceContractAck.sql" />
+    <Build Include="dbo\Views\vyuIPPriceFixationAck.sql" />
+    <Build Include="dbo\Views\vyuIPPriceFixationDetailAck.sql" />
+    <Build Include="dbo\Views\vyuIPPriceFixationDetail.sql" />
+    <Build Include="dbo\Views\vyuIPPriceFixation.sql" />
+    <Build Include="dbo\Views\vyuIPPriceContract.sql" />
+    <Build Include="dbo\Tables\tblCTPriceContractPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPreStagePriceContract.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeLosses.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeInputItem.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipeLosses.sql" />
+    <Build Include="dbo\Functions\fnCTGetSequenceReceiptReturnTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteBasisUnAccruedPayable.sql" />
+    <Build Include="dbo\Views\vyuTRLoadBatchPostList.sql" />
+    <Build Include="dbo\Views\vyuSTPricebookMasterItemPricing.sql" />
+    <Build Include="dbo\Views\vyuSTPricebookMasterItemLocation.sql" />
+    <Build Include="dbo\Views\vyuSTPricebookMasterItemVendorXref.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7901,6 +7933,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherPayableTranType.sql" />
     <None Include="Scripts\Post-Deployment\AP\PurgePayableCompleted.sql" />
     <Build Include="dbo\Views\vyuARGetInvoiceDetailLot.sql" />
+    <Build Include="dbo\Functions\fnCCValidateAssociatedTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

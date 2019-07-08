@@ -33,6 +33,10 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblCTContractHeader SET ysnMailSent = 1 WHERE intContractHeaderId = @intId
 		END
+		IF @strScreenName = 'ContractManagement.view.ItemContract'
+		BEGIN
+			UPDATE tblCTItemContractHeader SET ysnMailSent = 1 WHERE intItemContractHeaderId = @intId
+		END
 		DELETE FROM @ids WHERE intId = @intId 
 		SELECT @intId = MIN(intId) FROM @ids
 	END

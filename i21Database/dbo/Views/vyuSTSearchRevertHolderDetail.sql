@@ -10,6 +10,8 @@ SELECT DISTINCT
 	, RHD.intItemId
 	, RHD.intItemUOMId
 	, RHD.intItemLocationId
+	, RHD.intItemPricingId
+	, RHD.intItemSpecialPricingId
 	, RHD.intCompanyLocationId
 	, RHD.dtmDateModified
 	, RHD.strChangeDescription
@@ -21,12 +23,12 @@ SELECT DISTINCT
 	, CompanyLoc.strLocationName
 	, RHD.intConcurrencyId
 	, strPreviewNewData = CASE
-							WHEN RHD.strTableColumnName IN ('intCategoryId')
+							WHEN RHD.strTableColumnName = 'intCategoryId'
 								THEN Category.strCategoryCode
-							WHEN RHD.strTableColumnName IN ('strCountCode')
+							WHEN RHD.strTableColumnName = 'strCountCode'
 								THEN Item.strCountCode
 
-							WHEN RHD.strTableColumnName IN ('intDepositPLUId')
+							WHEN RHD.strTableColumnName = 'intDepositPLUId'
 								THEN Uom_New.strUpcCode
 							WHEN RHD.strTableColumnName = 'strCounted'
 								THEN ItemLoc.strCounted
@@ -48,6 +50,20 @@ SELECT DISTINCT
 								THEN StorageLoc_New.strName
 							WHEN RHD.strTableColumnName = 'intCountGroupId'
 								THEN CountGroup_New.strCountGroup
+
+							WHEN RHD.strTableColumnName = 'dblSalePrice'
+								THEN CAST(ItemPricing_New.dblSalePrice AS NVARCHAR(50))
+							WHEN RHD.strTableColumnName = 'dblStandardCost'
+								THEN CAST(ItemPricing_New.dblStandardCost AS NVARCHAR(50))
+							WHEN RHD.strTableColumnName = 'dblLastCost'
+								THEN CAST(ItemPricing_New.dblLastCost AS NVARCHAR(50))
+								
+							WHEN RHD.strTableColumnName = 'dblUnitAfterDiscount'
+								THEN CAST(ItemSpecialPricing_New.dblUnitAfterDiscount AS NVARCHAR(50))
+							WHEN RHD.strTableColumnName = 'dtmBeginDate'
+								THEN CONVERT(VARCHAR(10), CAST(ItemSpecialPricing_New.dtmBeginDate AS DATE), 101) --CAST(ItemSpecialPricing_New.dtmBeginDate AS NVARCHAR(20))
+							WHEN RHD.strTableColumnName = 'dtmEndDate'
+								THEN CONVERT(VARCHAR(10), CAST(ItemSpecialPricing_New.dtmEndDate AS DATE), 101) --CAST(ItemSpecialPricing_New.dtmEndDate AS NVARCHAR(20))
 
 							WHEN RHD.strTableColumnName = 'ysnTaxFlag1'
 								THEN CASE WHEN ItemLoc.ysnTaxFlag1 = 1 THEN 'Yes' ELSE 'No' END
@@ -87,17 +103,31 @@ SELECT DISTINCT
 								THEN CASE WHEN ItemLoc.ysnCountBySINo = 1 THEN 'Yes' ELSE 'No' END
 
 							ELSE RHD.strNewData
-						END
-	, strPreviewOldData = CASE
-							WHEN RHD.strTableColumnName IN ('intCategoryId')
+					END
+, strPreviewOldData = CASE
+							WHEN RHD.strTableColumnName = 'intCategoryId'
 								THEN Category_Old.strCategoryCode
-							WHEN RHD.strTableColumnName IN ('strCountCode')
+							WHEN RHD.strTableColumnName = 'strCountCode'
 								THEN OldItemValue.strCountCode
 
-							WHEN RHD.strTableColumnName IN ('intDepositPLUId')
+							WHEN RHD.strTableColumnName = 'dblSalePrice'
+								THEN CAST(ItemPricing_Old.dblSalePrice AS NVARCHAR(50))
+							WHEN RHD.strTableColumnName = 'dblStandardCost'
+								THEN CAST(ItemPricing_Old.dblStandardCost AS NVARCHAR(50))
+							WHEN RHD.strTableColumnName = 'dblLastCost'
+								THEN CAST(ItemPricing_Old.dblLastCost AS NVARCHAR(50))
+
+							WHEN RHD.strTableColumnName = 'dblUnitAfterDiscount'
+								THEN CAST(ItemSpecialPricing_Old.dblUnitAfterDiscount AS NVARCHAR(50))
+							--WHEN RHD.strTableColumnName = 'dtmBeginDate'
+							--	THEN CONVERT(VARCHAR(10), CAST(ItemSpecialPricing_Old.dtmBeginDate AS DATE), 101) -- CAST(ItemSpecialPricing_Old.dtmBeginDate AS NVARCHAR(20))
+							--WHEN RHD.strTableColumnName = 'dtmEndDate'
+							--	THEN CONVERT(VARCHAR(10), CAST(ItemSpecialPricing_Old.dtmEndDate AS DATE), 101) -- CAST(ItemSpecialPricing_Old.dtmEndDate AS NVARCHAR(20))
+
+							WHEN RHD.strTableColumnName = 'intDepositPLUId'
 								THEN Uom_Old.strUpcCode
 							WHEN RHD.strTableColumnName = 'strCounted'
-								THEN ItemLoc_Old.strCounted
+								THEN OldItemLocValue.strCounted
 							WHEN RHD.strTableColumnName = 'intFamilyId'
 								THEN ISNULL(SubCatFamily_Old.strSubcategoryId, '')
 							WHEN RHD.strTableColumnName = 'intClassId'
@@ -105,16 +135,12 @@ SELECT DISTINCT
 							WHEN RHD.strTableColumnName = 'intProductCodeId'
 								THEN ISNULL(ProductCode_Old.strRegProdCode, '')
 							WHEN RHD.strTableColumnName = 'intVendorId'
-								--THEN ISNULL(Entity_Old.strName, '')
-								THEN CASE WHEN Vendor_Old.intEntityId IS NULL THEN '' ELSE ISNULL(Entity_Old.strName, '') END
+								THEN CASE WHEN Entity_Old.intEntityId IS NULL THEN '' ELSE ISNULL(Entity_Old.strName, '') END
 							WHEN RHD.strTableColumnName = 'intMinimumAge'
-								--THEN CAST(ItemLoc_Old.intMinimumAge AS NVARCHAR(50))
 								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'dblMinOrder'
-								--THEN CAST(ItemLoc_Old.dblMinOrder AS NVARCHAR(50))
 								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'dblSuggestedQty'
-								--THEN CAST(ItemLoc_Old.dblSuggestedQty AS NVARCHAR(50))
 								THEN RHD.strOldData
 							WHEN RHD.strTableColumnName = 'intStorageLocationId'
 								THEN StorageLoc_Old.strName
@@ -153,9 +179,12 @@ LEFT JOIN tblICCountGroup CountGroup_New
 	ON ItemLoc.intCountGroupId = CountGroup_New.intCountGroupId
 LEFT JOIN tblICItemUOM Uom_New
 	ON ItemLoc.intDepositPLUId = Uom_New.intItemUOMId
+LEFT JOIN tblICItemPricing ItemPricing_New
+	ON RHD.intItemPricingId = ItemPricing_New.intItemPricingId
+LEFT JOIN tblICItemSpecialPricing ItemSpecialPricing_New
+	ON RHD.intItemSpecialPricingId = ItemSpecialPricing_New.intItemSpecialPricingId
 
-
--- OLD DATA
+-- OLD DATA tblICItem
 LEFT JOIN
 (
 	SELECT * FROM
@@ -176,6 +205,8 @@ LEFT JOIN
 	ON OldItemValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
 LEFT JOIN tblICCategory Category_Old
 	ON OldItemValue.intCategoryId = Category_Old.intCategoryId
+
+-- OLD DATA tblICItemLocation
 LEFT JOIN
 (
 	SELECT * FROM
@@ -187,35 +218,16 @@ LEFT JOIN
 				  , d.strTableColumnName
 				  , d.strOldData
 		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId', 'intCountGroupId')
+		WHERE d.strTableColumnName IN ('intDepositPLUId', 'strCounted', 'intFamilyId', 'intClassId', 'intProductCodeId', 'intMinimumAge', 'dblMinOrder', 'dblSuggestedQty', 'intStorageLocationId', 'intCountGroupId', 'intVendorId')
 	) src
 	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId, intCountGroupId)
+			MAX(strOldData) FOR strTableColumnName IN (intDepositPLUId, strCounted, intFamilyId, intClassId, intProductCodeId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId, intCountGroupId, intVendorId)
 	) piv
 ) OldItemLocValue
 	ON OldItemLocValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
-LEFT JOIN
-(
-	SELECT * FROM
-	(
-		SELECT DISTINCT
-		          d.intRevertHolderDetailId
-				  , d.intItemLocationId
-				  , d.intItemId
-				  , d.strTableColumnName
-				  , d.strOldData
-		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('intVendorId')
-	) src
-	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (intVendorId)
-	) piv
-) OldItemLocVendorValue
-	ON OldItemLocVendorValue.intRevertHolderDetailId = RHD.intRevertHolderDetailId
-LEFT JOIN tblAPVendor Vendor_Old
-	ON OldItemLocVendorValue.intVendorId = Vendor_Old.intEntityId
+--	ON OldItemLocValue.intVendorId = Vendor_Old.intEntityId
 LEFT JOIN tblEMEntity Entity_Old
-	ON OldItemLocVendorValue.intVendorId = Entity_Old.intEntityId
+	ON OldItemLocValue.intVendorId = Entity_Old.intEntityId
 LEFT JOIN tblICItemLocation ItemLoc_Old
 	ON OldItemLocValue.intItemLocationId = ItemLoc_Old.intItemLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_Old
@@ -231,4 +243,46 @@ LEFT JOIN tblICCountGroup CountGroup_Old
 LEFT JOIN tblICItemUOM Uom_Old
 	ON OldItemLocValue.intDepositPLUId = Uom_Old.intItemUOMId
 
---WHERE RHD.strTableColumnName = 'intVendorId'
+-- OLD DATA tblICItemPricing
+LEFT JOIN
+(
+	SELECT * FROM
+	(
+		SELECT DISTINCT
+		          d.intRevertHolderDetailId
+				  , d.intItemPricingId
+				  , d.intItemId
+				  , d.strTableColumnName
+				  , d.strOldData
+		FROM tblSTRevertHolderDetail d
+		WHERE d.strTableColumnName IN ('dblSalePrice', 'dblStandardCost', 'dblLastCost')
+	) src
+	PIVOT (
+			MAX(strOldData) FOR strTableColumnName IN (dblSalePrice, dblStandardCost, dblLastCost)
+	) piv
+) OldItemPricing
+	ON OldItemPricing.intRevertHolderDetailId = RHD.intRevertHolderDetailId
+LEFT JOIN tblICItemPricing ItemPricing_Old
+	ON OldItemPricing.intItemPricingId = ItemPricing_Old.intItemPricingId
+
+-- OLD DATA tblICItemSpecialPricing
+LEFT JOIN
+(
+	SELECT * FROM
+	(
+		SELECT DISTINCT
+		          d.intRevertHolderDetailId
+				  , d.intItemSpecialPricingId
+				  , d.intItemId
+				  , d.strTableColumnName
+				  , d.strOldData
+		FROM tblSTRevertHolderDetail d
+		WHERE d.strTableColumnName IN ('dblUnitAfterDiscount', 'dtmBeginDate', 'dtmEndDate')
+	) src
+	PIVOT (
+			MAX(strOldData) FOR strTableColumnName IN (dblSalePrice, dblStandardCost, dblLastCost)
+	) piv
+) OldItemSpecialPricing
+	ON OldItemSpecialPricing.intRevertHolderDetailId = RHD.intRevertHolderDetailId
+LEFT JOIN tblICItemSpecialPricing ItemSpecialPricing_Old
+	ON OldItemSpecialPricing.intItemSpecialPricingId = ItemSpecialPricing_Old.intItemSpecialPricingId

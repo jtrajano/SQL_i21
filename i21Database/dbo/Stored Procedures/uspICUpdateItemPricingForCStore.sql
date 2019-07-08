@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[uspICUpdateItemPricingForCStore]
 	@strUpcCode AS NVARCHAR(50) = NULL 
 	,@strDescription AS NVARCHAR(250) = NULL 
 	,@intItemId AS INT = NULL 
+	,@intItemPricingId AS INT = NULL 
 	-- update params
 	,@dblStandardCost AS NUMERIC(38, 20) = NULL 
 	,@dblRetailPrice AS NUMERIC(38, 20) = NULL 
@@ -89,11 +90,13 @@ BEGIN
 						SELECT	ItemPricing.intItemPricingId
 						FROM	tblICItemPricing ItemPricing INNER JOIN tblICItemLocation il
 									ON ItemPricing.intItemLocationId = il.intItemLocationId 
-									AND il.intLocationId IS NOT NULL 
+									AND il.intLocationId IS NOT NULL 									
 								INNER JOIN tblICItem i
-									ON i.intItemId = ItemPricing.intItemId 
-									AND i.intItemId = ISNULL(@intItemId, i.intItemId)
-						WHERE	(
+									ON i.intItemId = ItemPricing.intItemId 									
+						WHERE	
+								ItemPricing.intItemPricingId = ISNULL(@intItemPricingId, ItemPricing.intItemPricingId) 
+								AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+								AND (
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location WHERE intLocationId = il.intLocationId) 			
 								)

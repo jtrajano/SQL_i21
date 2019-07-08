@@ -1,29 +1,34 @@
-﻿CREATE PROC [dbo].[uspRKCurrencyExposureForOTC]
-	 @intCommodityId int
+﻿CREATE PROCEDURE [dbo].[uspRKCurrencyExposureForOTC]
+	@intCommodityId INT
+
 AS
 
 BEGIN
-	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY strInternalTradeNo)) as intRowNum
+	SELECT intRowNum = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY strInternalTradeNo))
 		, strInternalTradeNo
-		,t.dtmTransactionDate dtmFilledDate
+		, dtmFilledDate = t.dtmTransactionDate
 		, strBuySell
 		, b.intBankId
 		, strBankName
 		, dtmMaturityDate
 		, rt.intCurrencyExchangeRateTypeId
 		, rt.strCurrencyExchangeRateType
-		, case when strBuySell = 'Buy' then dblContractAmount else -dblContractAmount end dblContractAmount
+		, dblContractAmount = CASE WHEN strBuySell = 'Buy' THEN dblContractAmount ELSE - dblContractAmount END
 		, dblExchangeRate
-		, strFromCurrency strExchangeFromCurrency
-		, case when strBuySell = 'Buy' then -dblMatchAmount else dblMatchAmount end dblMatchAmount
-		, strToCurrency strMatchedFromCurrency	
+		, strExchangeFromCurrency = strFromCurrency
+		, dblMatchAmount = CASE WHEN strBuySell = 'Buy' THEN - dblMatchAmount ELSE dblMatchAmount END
+		, strMatchedFromCurrency = strToCurrency
 		, mc.strCompanyName
-		, 1 as intConcurrencyId,intFutOptTransactionId, c.intCurrencyID intExchangeRateCurrencyId, c.intCurrencyID intAmountCurrencyId,mc.intMultiCompanyId intCompanyId
+		, intConcurrencyId = 1
+		, intFutOptTransactionId
+		, intExchangeRateCurrencyId = c.intCurrencyID
+		, intAmountCurrencyId = c.intCurrencyID
+		, intCompanyId = mc.intMultiCompanyId
 	FROM tblRKFutOptTransaction ft
-	JOIN tblRKFutOptTransactionHeader  t on ft.intFutOptTransactionHeaderId=t.intFutOptTransactionHeaderId
-	JOIN tblCMBank b on b.intBankId=ft.intBankId AND ft.intSelectedInstrumentTypeId=2
-	JOIN tblSMCurrencyExchangeRateType rt on rt.intCurrencyExchangeRateTypeId=ft.intCurrencyExchangeRateTypeId
-	JOIN tblSMCurrency c on c.strCurrency =ft.strFromCurrency
-	LEFT JOIN tblSMMultiCompany mc on mc.intMultiCompanyId=t.intCompanyId
-	WHERE ft.intCommodityId=@intCommodityId and isnull(ft.ysnLiquidation,0) =0 
+	JOIN tblRKFutOptTransactionHeader t ON ft.intFutOptTransactionHeaderId = t.intFutOptTransactionHeaderId
+	JOIN tblCMBank b ON b.intBankId = ft.intBankId AND ft.intSelectedInstrumentTypeId = 2
+	JOIN tblSMCurrencyExchangeRateType rt ON rt.intCurrencyExchangeRateTypeId = ft.intCurrencyExchangeRateTypeId
+	JOIN tblSMCurrency c ON c.strCurrency = ft.strFromCurrency
+	LEFT JOIN tblSMMultiCompany mc ON mc.intMultiCompanyId = t.intCompanyId
+	WHERE ft.intCommodityId = @intCommodityId AND ISNULL(ft.ysnLiquidation, 0) = 0
 END

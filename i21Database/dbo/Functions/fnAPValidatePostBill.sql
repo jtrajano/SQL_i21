@@ -150,6 +150,21 @@ BEGIN
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
 			A.intAccountId IS NULL AND A.intAccountId = 0
 
+		--Detail Account Missing
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT DISTINCT
+			'Account is missing for item ' + ISNULL(item.strItemNo, B.strMiscDescription) '.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			16
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			LEFT JOIN tblICItem item ON B.intItemId = item.intItemId
+		WHERE 
+			A.intBillId IN (SELECT [intBillId] FROM @tmpBills)	
+		AND	B.intAccountId IS NULL 
+
 		--For Approved
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT

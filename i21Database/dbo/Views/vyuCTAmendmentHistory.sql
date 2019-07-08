@@ -23,6 +23,7 @@ SELECT
 	,ysnSigned						=  SAL.ysnSigned
 	,dtmSigned					    =  SAL.dtmSigned
 	,strSalesPerson					=  CS.strSalesPersonName
+	,intConcurrencyId				=  SAL.intConcurrencyId
 FROM tblCTSequenceAmendmentLog	   SAL
 JOIN tblCTContractHeader		   CH  ON CH.intContractHeaderId     = SAL.intContractHeaderId
 JOIN tblEMEntity				   EY  ON EY.intEntityId		     = CH.intEntityId

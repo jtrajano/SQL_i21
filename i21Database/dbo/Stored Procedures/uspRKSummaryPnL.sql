@@ -392,11 +392,8 @@ BEGIN
 		, dblRealized = SUM(dblRealized)
 		, dblVariationMargin = SUM(dblVariationMargin)
 		, strName
-		, strAccountNumber
 		, dblTotal = SUM(dblTotal)
 		, dblInitialMargin = SUM(dblInitialMargin)
-		, strBook
-		, strSubBook
 		, ysnExpired
 	FROM (
 		SELECT intFutureMarketId
@@ -415,15 +412,12 @@ BEGIN
 			, dblRealized
 			, dblVariationMargin
 			, strName
-			, strAccountNumber
 			, dblTotal
 			, dblInitialMargin = (CASE WHEN ISNULL(dblPerFutureContract, 0) > 0 THEN dblPerFutureContract * dblNet
 									ELSE CASE WHEN dblContractMargin <= dblMinAmount THEN dblMinAmount
 											WHEN dblContractMargin >= dblMaxAmount THEN dblMaxAmount
 											ELSE dblContractMargin END END)
 			, ysnExpired
-			, strBook
-			, strSubBook
 		FROM (
 			SELECT *
 				, ((dblNet * ISNULL(dblPrice, 0) * dblContractSize) * dblPercenatage) / 100 AS dblContractMargin
@@ -464,8 +458,5 @@ BEGIN
 		, strFutureMonth
 		, strName
 		, ysnExpired
-		, strAccountNumber
-		, strBook
-		, strSubBook
 	ORDER BY CONVERT(DATETIME, '01 ' + strFutureMonth) ASC
 END

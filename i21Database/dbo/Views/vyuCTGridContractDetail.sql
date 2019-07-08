@@ -1,6 +1,6 @@
 ﻿CREATE VIEW dbo.vyuCTGridContractDetail
 AS
-	SELECT	CD.*,
+	SELECT	DISTINCT CD.*,
 
 			CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) dblAvailableQty,
 			CD.intContractStatusId intCurrentContractStatusId,

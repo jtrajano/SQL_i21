@@ -66,10 +66,10 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= Detail.intNewWeightUOMId 
+			,intItemUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intNewItemUOMId)
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= Detail.dblNewWeight
-			,dblUOMQty				= WeightUOM.dblUnitQty	
+			,dblQty					= ISNULL(Detail.dblNewWeight, 0)
+			,dblUOMQty				= ISNULL(WeightUOM.dblUnitQty, 0)
 			,dblCost				= ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 

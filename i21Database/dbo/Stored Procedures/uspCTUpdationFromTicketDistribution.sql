@@ -281,7 +281,8 @@ BEGIN TRY
 			BREAK
 		END
 
-		IF @ysnLoad = 1 AND @intStorageScheduleTypeId = -6
+		/*Fixes for CT-3365 always accept ticket if contract is load base and with remaining load balance*/
+		IF @ysnLoad = 1-- AND @intStorageScheduleTypeId = -6
 		BEGIN
 			IF @dblBalanceLoad > 0
 			BEGIN
