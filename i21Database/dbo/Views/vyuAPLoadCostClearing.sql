@@ -11,8 +11,8 @@ SELECT
     ,NULL AS intBillDetailId
 	,B.intLoadDetailId
 	,C.intLoadCostId
-	,B.intItemId
-	,B.intItemUOMId  AS intItemUOMId
+	,C.intItemId
+	,C.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
