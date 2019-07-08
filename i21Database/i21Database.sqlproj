@@ -7704,6 +7704,7 @@
     <Build Include="dbo\Views\vyuMFGetRecipeLosses.sql" />
     <Build Include="dbo\Functions\fnCTGetSequenceReceiptReturnTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteBasisUnAccruedPayable.sql" />
+    <Build Include="dbo\Views\vyuTRLoadBatchPostList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
