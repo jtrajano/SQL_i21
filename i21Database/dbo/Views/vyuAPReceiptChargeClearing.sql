@@ -79,7 +79,6 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt     
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId     
         AND ReceiptCharge.ysnAccrue = 1     
-        AND ReceiptCharge.ysnPrice = 0    
 INNER JOIN tblSMCompanyLocation compLoc    
     ON Receipt.intLocationId = compLoc.intCompanyLocationId   
 LEFT JOIN 
@@ -133,7 +132,6 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt     
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId     
         AND ReceiptCharge.ysnAccrue = 1     
-        AND ReceiptCharge.ysnPrice = 0    
 INNER JOIN tblSMCompanyLocation compLoc    
     ON Receipt.intLocationId = compLoc.intCompanyLocationId  
 LEFT JOIN 
