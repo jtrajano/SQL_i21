@@ -134,7 +134,7 @@ SELECT
 	,[dblAmountPaid]					=	payVouchers.dblAmountPaid
 	,[dblAmountDue]						=	(A.dblTotal - A.dblTempDiscount + A.dblTempInterest)
 											- (A.dblTempPayment)
-	,[strPaymentOriginalId]				=	NULL
+	,[strPaymentOriginalId]				=	'Payment Origin Id ' + CAST(RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId) AS NVARCHAR(100))
 	,[ysnUseOriginalIdAsPaymentNumber]	=	0
 	,[ysnApplytoBudget]					=	0
 	,[ysnApplyOnAccount]				=	0
@@ -177,7 +177,7 @@ OUTER APPLY (
 
 IF @transCount = 0 BEGIN TRANSACTION
 
-EXEC uspARProcessPayments @PaymentEntries = @paymentDetail, @UserId = @userId, @GroupingOption = 0, @RaiseError = 1, @ErrorMessage = @error OUTPUT, @LogId = @log OUTPUT
+EXEC uspARProcessPayments @PaymentEntries = @paymentDetail, @UserId = @userId, @GroupingOption = 8, @RaiseError = 1, @ErrorMessage = @error OUTPUT, @LogId = @log OUTPUT
 
 IF @error IS NOT NULL
 BEGIN
