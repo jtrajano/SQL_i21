@@ -771,7 +771,13 @@ SELECT * FROM (
 SET @query = @cteQuery + N'  
 SELECT * FROM (   
  SELECT  
-  r.strReceiptNumber  
+  r.strReceiptNumber
+  ,r.dtmReceiptDate
+  ,ri.intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intCustomerStorageId
   ,r.strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -830,6 +836,12 @@ SELECT * FROM (
  --CHARGES  
  SELECT  
   r.strReceiptNumber  
+  ,r.dtmReceiptDate
+  ,NULL AS intInventoryReceiptItemId
+  ,rc.intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intCustomerStorageId
   ,r.strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -888,7 +900,13 @@ SELECT * FROM (
  UNION ALL  
  --SHIPMENT CHARGES  
  SELECT  
-  r.strShipmentNumber  
+  r.strShipmentNumber 
+  ,r.dtmShipDate 
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,rc.intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intSettleStorageId
   ,r.strBOLNumber  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -948,6 +966,12 @@ SELECT * FROM (
  --LOAD TRANSACTION ITEM
  SELECT  
   load.strLoadNumber  
+  ,load.dtmPostedDate
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,loadDetail.intLoadDetailId
+  ,NULL AS intSettleStorageId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -1007,6 +1031,12 @@ SELECT * FROM (
  --LOAD COST TRANSACTION ITEM
  SELECT  
   load.strLoadNumber  
+  ,load.dtmPostedDate
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,loadDetail.intLoadDetailId
+  ,NULL AS intSettleStorageId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -1127,7 +1157,13 @@ SELECT * FROM (
   UNION ALL 
  --SETTLE STORAGE
  SELECT  
-  SS.strStorageTicket  
+  SS.strStorageTicket 
+  ,CS.dtmDeliveryDate
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,SS.intSettleStorageId 
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
