@@ -356,6 +356,35 @@ BEGIN TRY
 
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
+				UPDATE @temp_xml_table SET strTicketStatus = 'O' WHERE strTicketStatus = 'C'
+
+				----------------------------------------------------------------
+				---Get all existing tickets
+				INSERT INTO @existingTicketTable
+				SELECT A.intTicketId
+				FROM @temp_xml_table A
+				WHERE EXISTS(	SELECT TOP 1 1 
+								FROM tblSCTicket B
+								WHERE A.[intTicketPoolId] = B.[intTicketPoolId]
+									AND A.[intTicketType] = B.[intTicketType]
+									AND A.[strInOutFlag] = B.[strInOutFlag]
+									AND A.[strTicketNumber] = B.[strTicketNumber]
+									--AND A.[intEntityId] = B.[intEntityId]
+									AND A.[intProcessingLocationId] = B.[intProcessingLocationId]
+							  )
+				--------------------------------------------------------------
+
+
+				----------------------------------------
+				--get all records that will be inserted
+				SELECT 
+					*
+				INTO #insertedTicket
+				FROM @temp_xml_table SCT
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE SCT.intTicketId = ERT.intTicketId)
+				----------------------------------------------
+
+
 				INSERT INTO tblSCTicket (
 					[strTicketStatus]
 					,[strTicketNumber] 
@@ -609,8 +638,62 @@ BEGIN TRY
 					,[ysnReadyToTransfer]
 					,[ysnExport] 
 					,1
-				FROM @temp_xml_table	
+					,dtmImportedDate = GETDATE()
+				FROM #insertedTicket SCT
+				LEFT JOIN (
+					SELECT DS.intDeliverySheetId,SCD.intDeliverySheetId AS dsId,SCD.intEntityId FROM @temp_xml_deliverysheet_sc SCD
+					INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber
+				) DS ON DS.dsId = SCT.intDeliverySheetId 
+				ORDER BY SCT.strTicketNumber ASC
 				
+				------------------------------------------------------------------------------------------------------
+				----Schedule Contract Quantity
+				------------------------------------------------------------------------------------------------------
+				BEGIN
+					SELECT 
+						A.intTicketId
+						,A.intContractId
+						,A.intEntityScaleOperatorId
+						,A.dblNetUnits
+						,intItemUOMIdTo
+					INTO #newTicketWithContract
+					FROM  tblSCTicket A
+					WHERE EXISTS(	SELECT TOP 1 1 
+									FROM #insertedTicket B
+									WHERE A.[intTicketPoolId] = B.[intTicketPoolId]
+										AND A.[intTicketType] = B.[intTicketType]
+										AND A.[strInOutFlag] = B.[strInOutFlag]
+										AND A.[strTicketNumber] = B.[strTicketNumber]
+										--AND A.[intEntityId] = B.[intEntityId]
+										AND A.[intProcessingLocationId] = B.[intProcessingLocationId]
+								)
+						AND intContractId IS NOT NULL 
+						AND intContractId > 0
+
+					DECLARE @_intTicketId INT
+					DECLARE @_intContractId INT
+					DECLARE	@_intEntityScaleOperatorId INT
+					DECLARE @_dblNetUnits NUMERIC (18,6)
+					DECLARE	@_intItemUOMId INT
+
+					WHILE EXISTS (SELECT TOP 1 1 FROM #newTicketWithContract)
+					BEGIN
+						SELECT TOP 1
+							@_intTicketId					= intTicketId
+							,@_intContractId				= intContractId
+							,@_intEntityScaleOperatorId		= intEntityScaleOperatorId
+							,@_dblNetUnits					= dblNetUnits
+							,@_intItemUOMId					= intItemUOMIdTo
+						FROM #newTicketWithContract
+
+						EXEC uspCTUpdateScheduleQuantityUsingUOM @_intContractId,@_dblNetUnits,@_intEntityScaleOperatorId,@_intTicketId,'Scale',@_intItemUOMId	
+
+						DELETE FROM #newTicketWithContract WHERE intTicketId = @_intTicketId
+					END
+				END
+				------------------------------------------------------------------------------------------------------
+				------------------------------------------------------------------------------------------------------
+
 				INSERT INTO tblQMTicketDiscount
 				(
 					[dblGradeReading]
