@@ -19,32 +19,45 @@ SET ANSI_WARNINGS OFF
 
 BEGIN
 	
-	DECLARE @UserEntityId INT
-	SET @UserEntityId = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intEntityId = @UserId), @UserId)
+	DECLARE @UserEntityId INT = NULL
+	DECLARE @intId INT = NULL
+	DECLARE @tmpData TABLE (
+		intId INT NOT NULL,
+		PRIMARY KEY CLUSTERED (intId)
+	)
 
-	SELECT DISTINCT RecordKey = intLoadHeaderId INTO #tmpLoads FROM tblTRLoadHeader WHERE ysnPosted = 0
+	SET @UserEntityId = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intEntityId = @UserId), @UserId)
 
 	IF @TransactionId != 'ALL'
 	BEGIN
-		DELETE FROM #tmpLoads WHERE RecordKey NOT IN (SELECT Item FROM [fnSplitStringWithTrim](@TransactionId,',') )
+		INSERT INTO @tmpData 
+		SELECT DISTINCT intLoadHeaderId FROM tblTRLoadHeader WHERE ysnPosted = 0
+		AND intLoadHeaderId IN (SELECT Item FROM [fnSplitStringWithTrim](@TransactionId,',') )
 	END
 
-	DECLARE @intRecordKey INT
-
+	DECLARE CursorTran CURSOR FOR
+	SELECT intLoadHeaderId
+		FROM tblTRLoadHeader  
+		WHERE ysnPosted = 0	AND 1=1
+	
 	SET @SuccessfulCount = 0
 
-	WHILE EXISTS(SELECT 1 FROM #tmpLoads)
-	BEGIN
-		SELECT TOP 1 @intRecordKey = RecordKey FROM #tmpLoads
+	OPEN CursorTran 
+	FETCH NEXT FROM CursorTran INTO @intId  
 
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
 		EXEC [uspTRLoadPosting]
-			 @intLoadHeaderId = @intRecordKey
+			 @intLoadHeaderId = @intId
 			,@intUserId = @UserId
 			,@ysnRecap = @Recap
 			,@ysnPostOrUnPost = @Post
 
-		DELETE FROM #tmpLoads WHERE RecordKey = @intRecordKey
-	END
+		SET @SuccessfulCount = @SuccessfulCount + 1;
 
-	DROP TABLE #tmpLoads
+		FETCH NEXT FROM CursorTran INTO @intId  
+	END
+	CLOSE CursorTran
+	DEALLOCATE CursorTran
+
 END
