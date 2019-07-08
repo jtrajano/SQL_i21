@@ -7705,6 +7705,9 @@
     <Build Include="dbo\Functions\fnCTGetSequenceReceiptReturnTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteBasisUnAccruedPayable.sql" />
     <Build Include="dbo\Views\vyuTRLoadBatchPostList.sql" />
+    <Build Include="dbo\Views\vyuSTPricebookMasterItemPricing.sql" />
+    <Build Include="dbo\Views\vyuSTPricebookMasterItemLocation.sql" />
+    <Build Include="dbo\Views\vyuSTPricebookMasterItemVendorXref.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
