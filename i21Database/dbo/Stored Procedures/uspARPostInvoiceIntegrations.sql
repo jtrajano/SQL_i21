@@ -718,11 +718,19 @@ SELECT
 FROM #ARPostInvoiceDetail ID
 INNER JOIN tblCTContractDetail CD ON ID.[intContractDetailId] = CD.[intContractDetailId]	
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+OUTER APPLY (
+	SELECT TOP 1 intInvoiceId 
+	FROM tblARInvoice I
+	WHERE I.strTransactionType = 'Invoice'
+	  AND I.ysnReturned = 1
+	  AND ID.strInvoiceOriginId = I.strInvoiceNumber
+	  AND ID.intOriginalInvoiceId = I.intInvoiceId
+) RI
 WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND	(
 		(ID.strTransactionType <> 'Credit Memo' AND ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL)
 		OR
-		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL))
+		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
 		)
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
