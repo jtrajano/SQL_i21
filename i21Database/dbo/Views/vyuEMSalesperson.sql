@@ -3,7 +3,7 @@ as
 select 
 	b.[intEntityId],
 	strSalespersonId = case when b.strSalespersonId = '' then a.strEntityNo else b.strSalespersonId end ,
-	a.strName as strSalespersonName,
+	strSalespersonName = a.strName,
 	a.strName,
 	b.strType,	
 	d.strTitle,
