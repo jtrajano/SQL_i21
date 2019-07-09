@@ -188,7 +188,7 @@ BEGIN
 		,GP.dtmDate
 		,GP.intStorageLocationId
 		,GP.intSubLocationId
-	FROM dbo.fnICGeneratePayables (@intReceiptId,	 1) GP
+	FROM dbo.fnICGeneratePayablesForVoucher (@intReceiptId,	 1) GP
 
 	END 
 

@@ -1,4 +1,9 @@
-CREATE FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT)
+/*
+    This is used to generate payables for converting receipt to voucher.
+    Normally used to exclude third-party vendors from the payables table.
+    Used by uspICConvertReceiptToVoucher
+*/
+CREATE FUNCTION dbo.fnICGeneratePayablesForVoucher (@intReceiptId INT, @ysnPosted BIT)
 RETURNS @table TABLE
 (
   [intEntityVendorId]			    INT NULL 
@@ -459,7 +464,7 @@ FROM [vyuICChargesForBilling] A
         WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
     ) J
 WHERE
-	((A.ysnPrice = 1 AND A.intEntityVendorId = IR.intEntityVendorId) OR A.intEntityVendorId = IR.intEntityVendorId OR A.intEntityVendorId IS NOT NULL)
+	((A.ysnPrice = 1 AND A.intEntityVendorId = IR.intEntityVendorId) OR A.intEntityVendorId = IR.intEntityVendorId)
 	AND A.intInventoryReceiptId = @intReceiptId AND (
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
 		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
