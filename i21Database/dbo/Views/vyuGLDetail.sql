@@ -57,7 +57,8 @@ AS
         ISNULL(dblSourceUnitCredit,0) dblSourceUnitCredit,
 		F.strUserName COLLATE Latin1_General_CI_AS strSourceEntity,
 		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId,
-		AP.strVendorId COLLATE Latin1_General_CI_AS strVendorId
+		AP.strVendorId COLLATE Latin1_General_CI_AS strVendorId,
+        A.intSourceEntityId
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
