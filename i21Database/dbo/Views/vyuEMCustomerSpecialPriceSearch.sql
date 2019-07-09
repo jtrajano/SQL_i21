@@ -2,6 +2,7 @@
 	AS 
 
 	select 
+		special_price.intEntityCustomerId [intEntityId],
 		special_price.intEntityCustomerId,
 		strCustomerLocation = cus_location.strLocationName,
 		special_price.strPriceBasis,
