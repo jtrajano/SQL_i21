@@ -148,7 +148,7 @@ SELECT
 																					 ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
 																					 END) 
 																		  END)
-												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()) * (CASE WHEN RFP.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
 										   END)
 		
 	----,[dblBaseDiscount]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
@@ -289,7 +289,7 @@ SELECT
 																					 ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
 																					 END) 
 																		  END)
-												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()) * (CASE WHEN RFP.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
 										   END)
 		
 	----,[dblBaseDiscount]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
