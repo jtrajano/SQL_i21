@@ -891,7 +891,7 @@ BEGIN TRY
 					,SCT.[dblTicketFees] 
 					,SCT.[intCurrencyId] 
 					,SCT.[dblCurrencyRate] 
-					,SCT.[strTicketComment] 
+					,ISNULL(SCT.[strTicketComment],'')
 					,SCT.[strCustomerReference] 
 					,SCT.[ysnTicketPrinted]
 					,SCT.[ysnPlantTicketPrinted]
@@ -1151,7 +1151,7 @@ BEGIN TRY
 					,SC.dblTicketFees 							= SCT.dblTicketFees  
 					,SC.intCurrencyId 							= SCT.intCurrencyId  
 					,SC.dblCurrencyRate 						= SCT.dblCurrencyRate  
-					,SC.strTicketComment 						= SCT.strTicketComment  
+					,SC.strTicketComment 						= ISNULL(SCT.strTicketComment,'')
 					,SC.strCustomerReference 					= SCT.strCustomerReference  
 					,SC.ysnTicketPrinted 						= SCT.ysnTicketPrinted
 					,SC.ysnPlantTicketPrinted 					= SCT.ysnPlantTicketPrinted
