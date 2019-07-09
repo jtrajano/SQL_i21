@@ -11,6 +11,7 @@ SELECT DISTINCT
 	 , intLocationId			= TRANSACTIONS.intCompanyLocationId
 	 , strPaymentMethod			= TRANSACTIONS.strPaymentMethod
 	 , intEntityEnteredById		= TRANSACTIONS.intEntityId
+	 , intCurrencyId			= TRANSACTIONS.intCurrencyId
 	 , strEntityEnteredBy		= ENTEREDBY.strName
 	 , strPaymentSource			= TRANSACTIONS.strPaymentSource
 	 , strEODNumber				= TRANSACTIONS.strEODNumber
@@ -18,13 +19,14 @@ SELECT DISTINCT
 	 , ysnCompleted				= TRANSACTIONS.ysnCompleted
 FROM (
 	SELECT strSourceTransactionId	= PAYMENT.strRecordNumber
-		 , intSourceTransactionId	= PAYMENT.intPaymentId
+		 , intSourceTransactionId	= PAYMENT.intPaymentId		 
 		 , dtmDate					= PAYMENT.dtmDatePaid
 		 , dblAmount				= CASE WHEN (ISNULL(PAYMENT.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('Prepay')) THEN PAYMENT.dblAmountPaid *-1 ELSE PAYMENT.dblAmountPaid END
 		 , intBankAccountId			= PAYMENT.intBankAccountId
 		 , intEntityCustomerId		= PAYMENT.intEntityCustomerId
 		 , intCompanyLocationId		= PAYMENT.intLocationId
 		 , intEntityId				= PAYMENT.intEntityId
+		 , intCurrencyId			= PAYMENT.intCurrencyId
 		 , strPaymentMethod			= SMPM.strPaymentMethod
 		 , strPaymentSource			= CASE WHEN POSEOD.strEODNo IS NULL THEN 'Manual Entry' ELSE 'POS' END COLLATE Latin1_General_CI_AS
 		 , strEODNumber				= POSEOD.strEODNo
@@ -57,7 +59,8 @@ FROM (
 		 , intBankAccountId			= NULL
 		 , intEntityCustomerId		= INVOICE.intEntityCustomerId
 		 , intCompanyLocationId		= INVOICE.intCompanyLocationId
-		 , intEntityId				= INVOICE.intEntityId		 		
+		 , intEntityId				= INVOICE.intEntityId
+		 , intCurrencyId			= INVOICE.intCurrencyId
 		 , strPaymentMethod			= SMPM.strPaymentMethod		
 		 , strPaymentSource			= NULL
 		 , strEODNumber				= NULL
@@ -85,6 +88,7 @@ FROM (
 		 , intEntityCustomerId		= EOD.intEntityId
 		 , intLocationId			= DRAWER.intCompanyLocationId	
 		 , intEntityId				= EOD.intEntityId
+		 , intCurrencyId			= EOD.intCurrencyId
 		 , strPaymentMethod			= 'Cash' COLLATE Latin1_General_CI_AS
 		 , strPaymentSource			= 'POS' COLLATE Latin1_General_CI_AS
 		 , strEODNumber				= EOD.strEODNo
