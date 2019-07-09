@@ -89,10 +89,15 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
-OUTER APPLY (
-	SELECT TOP 1
+LEFT JOIN (
+	SELECT 
+		--TOP 1
 		ga.strAccountId
 		,ga.intAccountId
+		,t.strTransactionId
+		,t.intTransactionDetailId
+		,t.intTransactionId
+		,t.intItemId
 	FROM 
 		tblICInventoryTransaction t INNER JOIN tblGLDetail gd
 			ON t.strTransactionId = gd.strTransactionId
@@ -100,17 +105,22 @@ OUTER APPLY (
 			AND t.intInventoryTransactionId = gd.intJournalLineNo
 		INNER JOIN tblGLAccount ga
 			ON ga.intAccountId = gd.intAccountId
-		INNER JOIN tblGLAccountGroup ag
-			ON ag.intAccountGroupId = ga.intAccountGroupId
+		INNER JOIN vyuGLAccountDetail ad
+			ON ga.intAccountId = ad.intAccountId
 	WHERE
-		t.strTransactionId = receipt.strReceiptNumber
-		AND t.intTransactionId = receipt.intInventoryReceiptId
-		AND t.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-		AND t.intItemId = receiptItem.intItemId
-		AND ag.strAccountType = 'Liability'
+		--t.strTransactionId = receipt.strReceiptNumber
+		--AND t.intTransactionId = receipt.intInventoryReceiptId
+		--AND t.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+		--AND t.intItemId = receiptItem.intItemId
+		--AND ag.strAccountType = 'Liability'
+		--AND t.ysnIsUnposted = 0 
+			ad.intAccountCategoryId = 45
 		AND t.ysnIsUnposted = 0 
 ) APClearing
-
+	ON		APClearing.strTransactionId = receipt.strReceiptNumber
+		AND APClearing.intTransactionId = receipt.intInventoryReceiptId
+		AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+		AND APClearing.intItemId = receiptItem.intItemId
 WHERE 
     receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 --DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
@@ -240,10 +250,16 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
-OUTER APPLY (
-	SELECT TOP 1
+--OUTER APPLY (
+LEFT JOIN (
+	SELECT 
+		--TOP 1
 		ga.strAccountId
 		,ga.intAccountId
+		,t.strTransactionId
+		,t.intTransactionDetailId
+		,t.intTransactionId
+		,t.intItemId
 	FROM 
 		tblICInventoryTransaction t INNER JOIN tblGLDetail gd
 			ON t.strTransactionId = gd.strTransactionId
@@ -251,16 +267,22 @@ OUTER APPLY (
 			AND t.intInventoryTransactionId = gd.intJournalLineNo
 		INNER JOIN tblGLAccount ga
 			ON ga.intAccountId = gd.intAccountId
-		INNER JOIN tblGLAccountGroup ag
-			ON ag.intAccountGroupId = ga.intAccountGroupId
+		INNER JOIN vyuGLAccountDetail ad
+			ON ga.intAccountId = ad.intAccountId
 	WHERE
-		t.strTransactionId = receipt.strReceiptNumber
-		AND t.intTransactionId = receipt.intInventoryReceiptId
-		AND t.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-		AND t.intItemId = receiptItem.intItemId
-		AND ag.strAccountType = 'Liability'
+		--t.strTransactionId = receipt.strReceiptNumber
+		--AND t.intTransactionId = receipt.intInventoryReceiptId
+		--AND t.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+		--AND t.intItemId = receiptItem.intItemId
+		--ag.strAccountType = 'Liability'
+		--AND 
+		ad.intAccountCategoryId = 45
 		AND t.ysnIsUnposted = 0 
 ) APClearing
+	ON		APClearing.strTransactionId = receipt.strReceiptNumber
+		AND APClearing.intTransactionId = receipt.intInventoryReceiptId
+		AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+		AND APClearing.intItemId = receiptItem.intItemId
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
 AND billDetail.intInventoryReceiptChargeId IS NULL
@@ -268,6 +290,7 @@ AND bill.ysnPosted = 1 --voucher should be posted in 18.3
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
+
 
 GO
 
