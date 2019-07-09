@@ -146,9 +146,9 @@ SELECT
 																					 ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
 																					 END) 
 																		  END)
-												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()) * (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 										   END)	
-	,[dblDiscountAvailable]				= [dbo].fnRoundBanker(ISNULL(RFP.[dblDiscountAvailable],@ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	,[dblDiscountAvailable]				= [dbo].fnRoundBanker(ISNULL(RFP.[dblDiscountAvailable],@ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 	,[dblWriteOffAmount]				= ABS([dbo].fnRoundBanker(ISNULL(PE.[dblWriteOffAmount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
 										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL
 												THEN dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType])
@@ -266,9 +266,9 @@ SELECT
 																					 ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
 																					 END) 
 																		  END)
-												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]())
+												ELSE [dbo].fnRoundBanker(ISNULL(PE.[dblDiscount], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()) * (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 										   END)		
-	,[dblDiscountAvailable]				= [dbo].fnRoundBanker(ISNULL(RFP.[dblDiscountAvailable],@ZeroDecimal), [dbo].[fnARGetDefaultDecimal]())
+	,[dblDiscountAvailable]				= [dbo].fnRoundBanker(ISNULL(RFP.[dblDiscountAvailable],@ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) * (CASE WHEN RFP.[strTransactionType] IN ('Voucher','Deferred Interest') THEN -1.000000 ELSE 1.000000 END)
 	,[dblWriteOffAmount]				= @ZeroDecimal
 	,[dblInterest]						= ABS([dbo].fnRoundBanker(ISNULL(PE.[dblInterest], @ZeroDecimal),[dbo].[fnARGetDefaultDecimal]()))
 										* (CASE WHEN RFP.[intInvoiceId] IS NOT NULL AND dbo.fnARGetInvoiceAmountMultiplier(RFP.[strTransactionType]) = -1.000000
