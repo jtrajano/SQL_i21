@@ -361,6 +361,7 @@ PRINT '09'
 			, strChangeDescription		NVARCHAR(100)
 			, strPreviewOldData			NVARCHAR(MAX)
 			, strPreviewNewData			NVARCHAR(MAX)
+			, strOldDataPreview			NVARCHAR(MAX)
 			, ysnPreview				BIT DEFAULT(1)
 			, ysnForRevert				BIT DEFAULT(0)
 		)
@@ -390,6 +391,7 @@ PRINT '09'
 			, strChangeDescription
 			, strPreviewOldData
 			, strPreviewNewData
+			, strOldDataPreview
 			, ysnPreview
 			, ysnForRevert
 		)
@@ -427,6 +429,8 @@ PRINT '09'
 												END
 				, strPreviewOldData				= [Changes].strOldData
 				, strPreviewNewData				= [Changes].strNewData
+				, strOldDataPreview				= [Changes].strOldData
+
 				, ysnPreview					= 1
 				, ysnForRevert					= 1
 		FROM 
@@ -504,6 +508,7 @@ PRINT '09'
 			, strChangeDescription
 			, strPreviewOldData
 			, strPreviewNewData
+			, strOldDataPreview
 			, ysnPreview
 			, ysnForRevert
 		)
@@ -541,6 +546,7 @@ PRINT '09'
 										END
 			, strPreviewOldData			= [Changes].strOldData
 			, strPreviewNewData			= [Changes].strNewData
+			, strOldDataPreview			= [Changes].strOldData
 			, ysnPreview				= 1
 			, ysnForRevert				= 1
 		FROM 
@@ -807,6 +813,7 @@ PRINT '09'
 							[strChangeDescription],
 							[strOldData],
 							[strNewData],
+							[strPreviewOldData],
 							[intConcurrencyId]
 						)
 						SELECT 
@@ -836,6 +843,7 @@ PRINT '09'
 																THEN CAST(CONVERT(VARCHAR(10), CAST(strPreviewNewData AS DATETIME), 101) AS NVARCHAR(10))
 															ELSE strPreviewOldData
 														END,
+							[strPreviewOldData]			= strOldDataPreview,
 							--[strOldData]				= strPreviewOldData,
 							--[strNewData]				= strPreviewNewData,
 							[intConcurrencyId]			= 1

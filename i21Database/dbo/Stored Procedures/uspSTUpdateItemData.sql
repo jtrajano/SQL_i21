@@ -1919,7 +1919,7 @@ BEGIN TRY
 							[strChangeDescription],
 							[strOldData],
 							[strNewData],
-							[strOldDataPreview],
+							[strPreviewOldData],
 							[intConcurrencyId]
 						)
 						SELECT 
@@ -1941,7 +1941,7 @@ BEGIN TRY
 							[strChangeDescription]		= strChangeDescription,
 							[strOldData]				= strPreviewOldData,
 							[strNewData]				= strPreviewNewData,
-							[strOldDataPreview]			= strOldDataPreview,
+							[strPreviewOldData]			= strOldDataPreview,
 							[intConcurrencyId]			= 1
 						FROM @tblPreview 
 						WHERE ysnForRevert = 1

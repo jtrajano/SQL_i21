@@ -106,7 +106,7 @@ BEGIN TRY
 															AND detail.strPreviewOldData != detail.strPreviewNewData
 													 )
 
---SELECT '@intRevertItemRecords', @intRevertItemRecords
+
 
 
 						-----------------------------------------------------------------------------
@@ -181,7 +181,29 @@ BEGIN TRY
 									 ,@strItemDescription		= NULL
 									 ,@intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
-			
+								
+
+
+								--UPDATE tbl
+								--SET tbl.strPreviewOldData = CASE
+								--								WHEN tbl.strTableColumnName = N'intCategoryId'
+								--									THEN Category.strCategoryCode
+								--								WHEN tbl.strTableColumnName = N'strCountCode'
+								--									THEN tbl.strOldData
+								--								ELSE 
+								--									tbl.strPreviewOldData
+								--							END
+								--FROM tblSTRevertHolderDetail tbl
+								--INNER JOIN tblICItem Item
+								--	ON tbl.intItemId = Item.intItemId
+								--INNER JOIN tblICCategory Category
+								--	ON Item.intCategoryId = Category.intCategoryId 
+								--WHERE tbl.intRevertHolderId = @intRevertHolderId
+								--	AND tbl.strTableName = N'tblICItem'
+								--	AND tbl.strTableColumnName IN (N'intCategoryId', N'strCountCode')
+								--	AND tbl.intItemId = @intItemId
+
+
 								-- Remove
 								DELETE FROM @tempITEM WHERE intItemId = @intItemId
 		
@@ -555,7 +577,48 @@ BEGIN TRY
 
 										,@intEntityUserSecurityId					= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
-			
+
+
+
+								--UPDATE tbl
+								--SET tbl.strPreviewOldData = CASE
+								--								WHEN tbl.strTableColumnName = N'intDepositPLUId'
+								--									THEN ISNULL(Uom.strUpcCode, '')
+								--								WHEN tbl.strTableColumnName = N'intFamilyId'
+								--									THEN ISNULL(Family.strSubcategoryId, '')
+								--								WHEN tbl.strTableColumnName = N'intClassId'
+								--									THEN ISNULL(Class.strSubcategoryId, '')
+								--								WHEN tbl.strTableColumnName = N'intProductCodeId'
+								--									THEN ISNULL(ProductCode.strRegProdCode, '')
+								--								WHEN tbl.strTableColumnName = N'intVendorId'
+								--									THEN ISNULL(Vendor.strName, '')
+								--								WHEN tbl.strTableColumnName = N'intCountGroupId'
+								--									THEN ISNULL(CountGroup.strCountGroup, '')
+								--								ELSE 
+								--									tbl.strPreviewOldData
+								--							END
+								--FROM tblSTRevertHolderDetail tbl
+								--INNER JOIN tblICItemLocation ItemLoc
+								--	ON tbl.intItemLocationId = ItemLoc.intItemLocationId 
+								--LEFT JOIN tblICItemUOM Uom
+								--	ON ItemLoc.intDepositPLUId = Uom.intItemUOMId
+								--LEFT JOIN tblSTSubcategory Family
+								--	ON ItemLoc.intFamilyId = Family.intSubcategoryId
+								--LEFT JOIN tblSTSubcategory Class
+								--	ON ItemLoc.intClassId = Class.intSubcategoryId
+								--LEFT JOIN tblSTSubcategoryRegProd ProductCode
+								--	ON ItemLoc.intProductCodeId = ProductCode.intRegProdId
+								--LEFT JOIN tblEMEntity Vendor
+								--	ON ItemLoc.intVendorId = Vendor.intEntityId
+								--LEFT JOIN tblICCountGroup CountGroup
+								--	ON ItemLoc.intCountGroupId = CountGroup.intCountGroupId
+								--WHERE tbl.intRevertHolderId = @intRevertHolderId
+								--	AND tbl.strTableName = N'tblICItemLocation'
+								--	AND tbl.strTableColumnName IN (N'intDepositPLUId', N'intFamilyId', N'intClassId', N'intProductCodeId', N'intVendorId', N'intCountGroupId')
+								--	AND tbl.intItemLocationId = @intItemLocationId
+
+
+
 								-- Remove
 								DELETE FROM @tempITEMLOCATION WHERE intItemLocationId = @intItemLocationId
 		
