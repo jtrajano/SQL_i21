@@ -1,12 +1,10 @@
 ﻿CREATE TABLE tblSMInterCompanyTransferLog
 (
- [intInterCompanyTransferLogId] int identity(1,1),
- [strType] nvarchar(100) collate Latin1_General_CI_AS  null,
- [strTableName] nvarchar(200) collate Latin1_General_CI_AS null,
- [intSourceRecordId] int null,
- [intDestinationRecordId] int null,
- [intDestinationTransactionId] int null,
- [intDestinationCompanyId] int null,
- CONSTRAINT [PK_tblSMInterCompanyTransferLog] PRIMARY KEY CLUSTERED ([intInterCompanyTransferLogId] ASC) ,
+ [intInterCompanyTransferLogId] INT IDENTITY(1,1),
+ [intSourceRecordId] INT NULL,
+ [intDestinationRecordId] INT NULL,
+ [dtmDateCreated]  DATETIME NULL,
+ [intDestinationCompanyId] INT NULL,
+ CONSTRAINT [PK_tblSMInterCompanyTransferLog] PRIMARY KEY CLUSTERED ([intInterCompanyTransferLogId] ASC),
  CONSTRAINT [FK_dbo.tblSMInterCompanyTransferLog_tblSMInterCompany] FOREIGN KEY ([intDestinationCompanyId]) REFERENCES [tblSMInterCompany](intInterCompanyId)
 )
