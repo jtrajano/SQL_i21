@@ -1,7 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuSTStoreOnUserRole]
 AS
 SELECT DISTINCT 
-     Store.intStoreId
+	 CAST(ROW_NUMBER() over(order by Perm.intEntityUserSecurityId desc) AS INT) intId
+	 , Perm.intEntityUserSecurityId
+     , Store.intStoreId
 	 , Store.intStoreNo
 	 , Store.strDescription   
 
@@ -60,6 +62,9 @@ LEFT JOIN tblSTRegister R
 	ON Store.intRegisterId = R.intRegisterId
 JOIN tblSMCompanyLocation CL
 	ON Store.intCompanyLocationId = CL.intCompanyLocationId
+
+
+--WHERE USec.intEntityId = 1
 
 --CREATE VIEW [dbo].[vyuSTStoreOnUserRole]
 --AS
