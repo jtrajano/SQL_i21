@@ -72,7 +72,8 @@ BEGIN TRY
 				,[strBOLNumber]
 				,[intSplitId]
 				,[dblTotalWeight]
-				, [intOpportunityId])
+				, [intOpportunityId]
+				,[intFreightTermId])
 			SELECT 
 				[strSalesOrderNumber]
 				,[intEntityCustomerId]
@@ -120,6 +121,7 @@ BEGIN TRY
 				,[intSplitId]
 				,[dblTotalWeight]
 				,[intOpportunityId]
+				,[intFreightTermId]
 			FROM tblSOSalesOrder
 			WHERE intSalesOrderId = @SalesOrderId
 
