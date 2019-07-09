@@ -741,6 +741,7 @@ BEGIN
 					join tblICCommodity c on i.intCommodityId=c.intCommodityId
 					WHERE i.intCommodityId = @intCommodityId
 						AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)	
+						AND i.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				)t 	
 				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				GROUP BY intItemId,intCommodityId,strLocationName,intCompanyLocationId

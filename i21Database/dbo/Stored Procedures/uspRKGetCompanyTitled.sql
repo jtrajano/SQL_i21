@@ -871,8 +871,10 @@ BEGIN
 					SELECT 
 					@dblSalesInTransitAsOf = SUM(dblInTransitQty)
 					FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @date) InTran
+						INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
 					WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)	
-					AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+						AND Inv.intLocationId = ISNULL(@intLocationId, Inv.intLocationId) 
+						AND Inv.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				END
 
 
