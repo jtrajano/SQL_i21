@@ -1,3 +1,6 @@
+/*
+	Used to generate payables to match the existing records in the payables table which are then marked for deletion.
+*/
 CREATE FUNCTION dbo.fnICGeneratePayablesForRemoval (@intReceiptId INT, @ysnPosted BIT)
 RETURNS @table TABLE
 (
@@ -470,7 +473,7 @@ WHERE
 UNION ALL
 
 SELECT 
-	[intEntityVendorId]							=	Receipt.intEntityVendorId
+	[intEntityVendorId]							=	ISNULL(VoucherPayable.intEntityVendorId, ReceiptCharge.intEntityVendorId)
 	,[intTransactionType]						=	CASE WHEN Receipt.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
 	,[dtmDate]									=	Receipt.dtmReceiptDate
 	,[strReference]								=	Receipt.strVendorRefNo
@@ -595,7 +598,7 @@ OUTER APPLY (
 
 OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 WHERE Receipt.intInventoryReceiptId = @intReceiptId
-	AND ((ReceiptCharge.ysnPrice = 1 AND ISNULL(VoucherPayable.intEntityVendorId, ReceiptCharge.intEntityVendorId) = Receipt.intEntityVendorId) OR ISNULL(VoucherPayable.intEntityVendorId, ReceiptCharge.intEntityVendorId) = Receipt.intEntityVendorId)
+	AND ((ReceiptCharge.ysnPrice = 1 AND ISNULL(VoucherPayable.intEntityVendorId, ReceiptCharge.intEntityVendorId) = Receipt.intEntityVendorId) OR ISNULL(VoucherPayable.intEntityVendorId, ReceiptCharge.intEntityVendorId) = Receipt.intEntityVendorId OR ISNULL(VoucherPayable.intEntityVendorId, ReceiptCharge.intEntityVendorId) IS NOT NULL)
 
 RETURN
 END
