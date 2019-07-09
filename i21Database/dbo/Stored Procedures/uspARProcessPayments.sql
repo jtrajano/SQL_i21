@@ -404,6 +404,7 @@ BEGIN
 			,[dblDiscountAvailable]
 			,[dblInterest]
 			,[dblPayment]
+			,[dblAmountDue]
 			,[strInvoiceReportNumber]
 			,[intCurrencyExchangeRateTypeId]
 			,[intCurrencyExchangeRateId]
@@ -456,6 +457,7 @@ BEGIN
 			,[dblDiscountAvailable]					= ITG.[dblDiscountAvailable]
 			,[dblInterest]							= ITG.[dblInterest]
 			,[dblPayment]							= ITG.[dblPayment]
+			,[dblAmountDue]							= CASE WHEN ITG.[ysnFromAP] = 1 THEN ITG.[dblAmountDue] ELSE NULL END
 			,[strInvoiceReportNumber]				= ITG.[strInvoiceReportNumber]
 			,[intCurrencyExchangeRateTypeId]		= ITG.[intCurrencyExchangeRateTypeId]
 			,[intCurrencyExchangeRateId]			= ITG.[intCurrencyExchangeRateId]
