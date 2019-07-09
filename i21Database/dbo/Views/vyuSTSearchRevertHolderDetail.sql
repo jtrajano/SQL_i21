@@ -95,7 +95,7 @@ SELECT --DISTINCT
 											THEN CASE WHEN ItemLoc.ysnCountBySINo = 1 THEN 'Yes' ELSE 'No' END
 
 										ELSE 
-											RHD.strNewData
+											ISNULL(RHD.strNewData, '')
 									END			
 									
 
@@ -116,11 +116,11 @@ SELECT --DISTINCT
 										THEN CONVERT(VARCHAR(10), CAST(ItemSpecialPricing_New.dtmEndDate AS DATE), 101) -- CAST(ItemSpecialPricing_Old.dtmEndDate AS NVARCHAR(20))
 
 									ELSE 
-										RHD.strNewData
+										ISNULL(RHD.strNewData, '')
 								END
 
 							ELSE  
-								RHD.strNewData
+								ISNULL(RHD.strNewData, '')
 					END
 	, strPreviewOldData	= CASE
 								
