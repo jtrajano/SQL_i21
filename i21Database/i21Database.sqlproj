@@ -7713,6 +7713,7 @@
     <Build Include="dbo\Views\vyuSTPricebookMasterItemLocation.sql" />
     <Build Include="dbo\Views\vyuSTPricebookMasterItemVendorXref.sql" />
     <Build Include="dbo\Functions\fnCMGetBankReconDebitCreditValues.sql" />
+    <None Include="Scripts\Post-Deployment\CT\PariallyToPartially.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

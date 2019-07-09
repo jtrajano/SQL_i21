@@ -180,7 +180,7 @@ BEGIN TRY
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN	 'Fully Priced' 
 					WHEN	ISNULL(CD.dblNoOfLots,0) = ISNULL(PF.dblLotsFixed,0) AND CD.intPricingTypeId NOT IN (2,8)	   THEN	 'Fully Priced' 
 					WHEN	ISNULL(CD.dblNoOfLots,0) - ISNULL(PF.dblLotsFixed,0) > 0 
-							AND PF.intPriceFixationId IS NOT NULL THEN	 'Parially Priced'
+							AND PF.intPriceFixationId IS NOT NULL THEN	 'Partially Priced'
 					ELSE	'Unpriced'
 			END
 		    ,intContractBasisId   = CH.intContractBasisId

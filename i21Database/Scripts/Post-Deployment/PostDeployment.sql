@@ -356,6 +356,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\174To181.sql
 :R .\CT\ExcelAndTableColumnMap.sql
 :R .\CT\fnCTGetBasisDeliveryAboveR2.sql
+:R .\CT\PariallyToPartially.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
