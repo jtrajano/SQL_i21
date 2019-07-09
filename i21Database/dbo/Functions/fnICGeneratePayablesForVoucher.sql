@@ -1,3 +1,8 @@
+/*
+    This is used to generate payables for converting receipt to voucher.
+    Normally used to exclude third-party vendors from the payables table.
+    Used by uspICConvertReceiptToVoucher
+*/
 CREATE FUNCTION dbo.fnICGeneratePayablesForVoucher (@intReceiptId INT, @ysnPosted BIT)
 RETURNS @table TABLE
 (
@@ -85,6 +90,7 @@ RETURNS @table TABLE
 , intShipViaId						INT NULL
 , intShipFromId						INT NULL
 , intShipFromEntityId				INT NULL
+, intPayToAddressId					INT NULL
 )
 AS
 BEGIN
@@ -223,6 +229,7 @@ SELECT DISTINCT
 	,intShipViaId                               =	E.intEntityId
 	,intShipFromId = A.intShipFromId
 	,intShipFromEntityId = A.intShipFromEntityId 
+	,intPaytoAddressId = payToAddress.intEntityLocationId
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -257,6 +264,9 @@ FROM tblICInventoryReceipt A
 	LEFT JOIN tblICItemUOM ctOrderUOM ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure ctUOM ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
 	LEFT JOIN tblSMFreightTerms FreightTerms ON FreightTerms.intFreightTermId = A.intFreightTermId
+	LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = A.intEntityVendorId
+	LEFT OUTER JOIN tblEMEntityLocation payToAddress ON payToAddress.intEntityId = payToVendor.intEntityId
+		AND payToAddress.ysnDefaultLocation = 1
 	LEFT JOIN vyuPODetails po ON po.intPurchaseId = B.intOrderId
 		AND po.intPurchaseDetailId = B.intLineNo
 		AND A.strReceiptType = 'Purchase Order'
@@ -418,7 +428,7 @@ SELECT DISTINCT
 		,intShipViaId								=   NULL 
 		,intShipFromId								=	NULL 
 		,intShipFromEntityId						=	NULL 
-
+		,intPaytoAddressId							=	payToAddress.intEntityLocationId
 FROM [vyuICChargesForBilling] A
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
@@ -432,6 +442,9 @@ FROM [vyuICChargesForBilling] A
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = A.intContractHeaderId      
 	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = A.intTaxGroupId
+	LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = A.intEntityVendorId
+	LEFT OUTER JOIN tblEMEntityLocation payToAddress ON payToAddress.intEntityId = payToVendor.intEntityId
+		AND payToAddress.ysnDefaultLocation = 1
 	OUTER APPLY
 	(
 		SELECT TOP 1 ysnCheckoffTax FROM tblICInventoryReceiptChargeTax IRCT
@@ -450,13 +463,14 @@ FROM [vyuICChargesForBilling] A
         SELECT TOP 1 intInventoryReceiptItemId FROM [vyuICChargesForBilling] B
         WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
     ) J
-WHERE 
-	A.intInventoryReceiptId = @intReceiptId AND (
+WHERE
+	((A.ysnPrice = 1 AND A.intEntityVendorId = IR.intEntityVendorId) OR A.intEntityVendorId = IR.intEntityVendorId)
+	AND A.intInventoryReceiptId = @intReceiptId AND (
 		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
-		AND (1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END) OR   --EXLCUDE ALL BASIS
-		( 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId 
-						AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0--EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
-				ELSE 1 END)
+		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
+		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 	)
 RETURN
 END
+
+GO

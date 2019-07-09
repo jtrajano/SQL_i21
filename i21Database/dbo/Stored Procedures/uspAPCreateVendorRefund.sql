@@ -35,18 +35,22 @@ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBi
 SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
 
 IF OBJECT_ID('tempdb..#tmpVouchersForPay') IS NOT NULL DROP TABLE #tmpVouchersForPay
-CREATE TABLE #tmpVouchersForPay(intBillId INT, intPaymentId INT, dblAmountPaid DECIMAL(18,2));
+CREATE TABLE #tmpVouchersForPay
+(
+	intBillId INT, intPaymentId INT, intEntityVendorId INT, dblAmountPaid DECIMAL(18,2)
+);
 
 INSERT INTO @ids
 SELECT intID FROM #tmpBillsId
 
 INSERT INTO #tmpVouchersForPay
 SELECT
-	intBillId
-	,intPaymentId
-	,ABS(dblTempPayment)
+	payVouchers.intBillId
+	,payVouchers.intPaymentId
+	,payVouchers.intEntityVendorId
+	,ABS(payVouchers.dblTempPayment) 
 FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) payVouchers
-WHERE dblTempPayment < 0
+WHERE payVouchers.dblTempPayment < 0
 
 IF NOT EXISTS(SELECT 1 FROM #tmpVouchersForPay)
 BEGIN
@@ -80,6 +84,7 @@ INSERT INTO @paymentDetail(
 	,[intBankAccountId]
 	,[intWriteOffAccountId]
 	,[dblAmountPaid]
+	,[dblAmountDue]
 	,[strPaymentOriginalId]
 	,[ysnUseOriginalIdAsPaymentNumber]
 	,[ysnApplytoBudget]
@@ -109,7 +114,7 @@ INSERT INTO @paymentDetail(
 	,[ysnFromAP]
 )
 SELECT
-	[intId]								=	payVouchers.intPaymentId
+	[intId]								=	RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId)
 	,[strSourceTransaction]				=	'Voucher'
 	,[strReceivePaymentType]			=	'Vendor Refund'
 	,[intSourceId]						=	A.intBillId
@@ -127,7 +132,9 @@ SELECT
 	,[intBankAccountId]					=	@bankAccountId
 	,[intWriteOffAccountId]				=	NULL
 	,[dblAmountPaid]					=	payVouchers.dblAmountPaid
-	,[strPaymentOriginalId]				=	NULL
+	,[dblAmountDue]						=	(A.dblTotal - A.dblTempDiscount + A.dblTempInterest)
+											- (A.dblTempPayment)
+	,[strPaymentOriginalId]				=	'Payment Origin Id ' + CAST(RANK() OVER(ORDER BY payVouchers.intPaymentId, payVouchers.intEntityVendorId) AS NVARCHAR(100))
 	,[ysnUseOriginalIdAsPaymentNumber]	=	0
 	,[ysnApplytoBudget]					=	0
 	,[ysnApplyOnAccount]				=	0
@@ -170,7 +177,7 @@ OUTER APPLY (
 
 IF @transCount = 0 BEGIN TRANSACTION
 
-EXEC uspARProcessPayments @PaymentEntries = @paymentDetail, @UserId = @userId, @GroupingOption = 1, @RaiseError = 1, @ErrorMessage = @error OUTPUT, @LogId = @log OUTPUT
+EXEC uspARProcessPayments @PaymentEntries = @paymentDetail, @UserId = @userId, @GroupingOption = 8, @RaiseError = 1, @ErrorMessage = @error OUTPUT, @LogId = @log OUTPUT
 
 IF @error IS NOT NULL
 BEGIN

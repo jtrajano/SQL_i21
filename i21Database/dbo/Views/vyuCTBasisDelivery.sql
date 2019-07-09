@@ -14,4 +14,5 @@ SELECT intUniqueId
 ,dtmDate
 ,dblQuantity
 ,dblRunningBalance
+,ysnOpenGetBasisDelivery
 FROM [dbo].[fnCTGetBasisDelivery](NULL)

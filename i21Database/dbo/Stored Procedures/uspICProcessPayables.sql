@@ -11,9 +11,8 @@ BEGIN
 
 	IF(@intReceiptId IS NOT NULL)
 	BEGIN
-
 		INSERT INTO @voucherPayable(
-			[intEntityVendorId]			
+			 [intEntityVendorId]			
 			,[intTransactionType]		
 			,[intLocationId]	
 			,[intShipToId]	
@@ -117,7 +116,7 @@ BEGIN
 			,GP.[ysnReturn]	 
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost) GP
 	END
-
+	
 	/* Get Shipment Charges */
 	IF(@intShipmentId IS NOT NULL)
 	BEGIN
@@ -276,6 +275,111 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
+		DECLARE @voucherPayableForRemoval VoucherPayable
+		INSERT INTO @voucherPayableForRemoval(
+			 [intEntityVendorId]			
+			,[intTransactionType]		
+			,[intLocationId]	
+			,[intShipToId]	
+			,[intShipFromId]			
+			,[intShipFromEntityId]
+			,[intPayToAddressId]
+			,[intCurrencyId]					
+			,[dtmDate]				
+			,[strVendorOrderNumber]			
+			,[strReference]						
+			,[strSourceNumber]					
+			,[intPurchaseDetailId]				
+			,[intContractHeaderId]				
+			,[intContractDetailId]				
+			,[intContractSeqId]					
+			,[intScaleTicketId]					
+			,[intInventoryReceiptItemId]		
+			,[intInventoryReceiptChargeId]		
+			,[intInventoryShipmentItemId]		
+			,[intInventoryShipmentChargeId]		
+			,[intLoadShipmentId]				
+			,[intLoadShipmentDetailId]			
+			,[intItemId]						
+			,[intPurchaseTaxGroupId]			
+			,[strMiscDescription]				
+			,[dblOrderQty]						
+			,[dblOrderUnitQty]					
+			,[intOrderUOMId]					
+			,[dblQuantityToBill]				
+			,[dblQtyToBillUnitQty]				
+			,[intQtyToBillUOMId]				
+			,[dblCost]							
+			,[dblCostUnitQty]					
+			,[intCostUOMId]						
+			,[dblNetWeight]						
+			,[dblWeightUnitQty]					
+			,[intWeightUOMId]					
+			,[intCostCurrencyId]
+			,[dblTax]							
+			,[dblDiscount]
+			,[intCurrencyExchangeRateTypeId]	
+			,[dblExchangeRate]					
+			,[ysnSubCurrency]					
+			,[intSubCurrencyCents]				
+			,[intAccountId]						
+			,[intShipViaId]						
+			,[intTermId]						
+			,[strBillOfLading]					
+			,[ysnReturn]		
+		)
+		SELECT 
+			 GP.[intEntityVendorId]			
+			,GP.[intTransactionType]
+			,GP.[intLocationId]	
+			,[intShipToId] = GP.intShipFromId	
+			,[intShipFromId] = GP.intShipFromId	 		
+			,[intShipFromEntityId] = GP.intShipFromEntityId
+			,[intPayToAddressId] = GP.intPayToAddressId
+			,GP.[intCurrencyId]					
+			,GP.[dtmDate]				
+			,GP.[strVendorOrderNumber]		
+			,GP.[strReference]						
+			,GP.[strSourceNumber]					
+			,GP.[intPurchaseDetailId]				
+			,GP.[intContractHeaderId]				
+			,GP.[intContractDetailId]				
+			,[intContractSeqId]	= GP.intContractSequence				
+			,GP.[intScaleTicketId]					
+			,GP.[intInventoryReceiptItemId]		
+			,GP.[intInventoryReceiptChargeId]		
+			,GP.[intInventoryShipmentItemId]		
+			,GP.[intInventoryShipmentChargeId]		
+			,[intLoadShipmentId] = NULL				
+			,[intLoadShipmentDetailId] = NULL			
+			,GP.[intItemId]						
+			,GP.[intPurchaseTaxGroupId]			
+			,GP.[strMiscDescription]				
+			,GP.[dblOrderQty]						
+			,[dblOrderUnitQty] = 0.00					
+			,[intOrderUOMId] = NULL	 				
+			,GP.[dblQuantityToBill]				
+			,GP.[dblQtyToBillUnitQty]				
+			,GP.[intQtyToBillUOMId]				
+			,[dblCost] = GP.dblUnitCost							
+			,GP.[dblCostUnitQty]					
+			,GP.[intCostUOMId]						
+			,GP.[dblNetWeight]						
+			,GP.[dblWeightUnitQty]					
+			,GP.[intWeightUOMId]					
+			,GP.[intCostCurrencyId]
+			,GP.[dblTax]							
+			,GP.[dblDiscount]
+			,GP.[intCurrencyExchangeRateTypeId]	
+			,[dblExchangeRate] = GP.dblRate					
+			,GP.[ysnSubCurrency]					
+			,GP.[intSubCurrencyCents]				
+			,GP.[intAccountId]						
+			,GP.[intShipViaId]						
+			,GP.[intTermId]						
+			,GP.[strBillOfLading]					
+			,GP.[ysnReturn]	 
+		FROM dbo.fnICGeneratePayablesForRemoval (@intReceiptId, @ysnPost) GP
+		EXEC dbo.uspAPRemoveVoucherPayable @voucherPayableForRemoval
 	END
 END

@@ -107,7 +107,7 @@ UNION SELECT DISTINCT
 	strEODNumber,
 	strEODDrawer = strDrawerName ,		
     ysnEODComplete = ysnCompleted ,
-	p.intCurrencyId
+	v.intCurrencyId
 FROM vyuARUndepositedPayment v
 
 LEFT JOIN tblARPayment p on p.strRecordNumber = v.strSourceTransactionId

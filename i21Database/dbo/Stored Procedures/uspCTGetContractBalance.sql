@@ -69,7 +69,8 @@ BEGIN TRY
 			dblQuantity				NUMERIC(38,20),
 			dblAllocatedQuantity	NUMERIC(38,20),
 			intNoOfLoad				INT,
-			intSourceId				INT
+			intSourceId				INT,
+			strType					NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 	)
 
 	DECLARE @PriceFixation TABLE 
@@ -89,6 +90,60 @@ BEGIN TRY
 	)
 
 	DECLARE @TempContractBalance TABLE(
+		 intContractBalanceId				INT
+		,intContractTypeId					INT	
+		,intEntityId						INT
+		,intCommodityId						INT
+		,dtmEndDate							DATETIME
+		,intCompanyLocationId				INT
+		,intFutureMarketId					INT
+		,intFutureMonthId					INT
+		,intContractHeaderId				INT
+		,strType							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intContractDetailId				INT	
+		,strDate							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
+		,strContractType					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strCommodityCode					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strCommodity						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intItemId							INT
+		,strItemNo							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strLocationName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strCustomer						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strContract						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strPricingType						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strContractDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strShipMethod						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strShipmentPeriod					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,dblFutures							NUMERIC(38,20)
+		,dblBasis							NUMERIC(38,20)
+		,strBasisUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblQuantity						NUMERIC(38,20)
+		,strQuantityUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblCashPrice						NUMERIC(38,20)
+		,strPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strStockUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblAvailableQty					NUMERIC(38,20)
+		,dblAmount							NUMERIC(38,20)
+		,dblQtyinCommodityStockUOM			NUMERIC(38,20)
+		,dblFuturesinCommodityStockUOM		NUMERIC(38,20)
+		,dblBasisinCommodityStockUOM		NUMERIC(38,20)
+		,dblCashPriceinCommodityStockUOM	NUMERIC(38,20)
+		,dblAmountinCommodityStockUOM		NUMERIC(38,20)
+		,intPricingTypeId					INT
+		,strPricingTypeDesc					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intUnitMeasureId					INT
+		,intContractStatusId				INT
+		,intCurrencyId						INT
+		,strCurrency						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dtmContractDate					DATETIME
+		,dtmSeqEndDate						DATETIME	
+		,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	)
+
+	DECLARE @TempPriceFixation TABLE(
 		 intContractBalanceId				INT
 		,intContractTypeId					INT	
 		,intEntityId						INT
@@ -169,7 +224,8 @@ BEGIN TRY
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
 	   ,intNoOfLoad
-	   ,intSourceId	  
+	   ,intSourceId
+	   ,strType
 	  )
 	   SELECT 
 	   CH.intContractTypeId 
@@ -185,6 +241,7 @@ BEGIN TRY
 	  ,0
 	  ,COUNT(DISTINCT Shipment.intInventoryShipmentId)
 	  ,Shipment.intInventoryShipmentId	  
+	  ,'Inventory Shipment'
 	   FROM tblICInventoryTransaction InvTran
 	   JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = InvTran.intTransactionId AND Shipment.intOrderType = 1
 	   JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentId = InvTran.intTransactionId
@@ -215,7 +272,8 @@ BEGIN TRY
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
 	   ,intNoOfLoad
-	   ,intSourceId	  
+	   ,intSourceId
+	   ,strType
 	  )
 	  SELECT 
 	   CH.intContractTypeId 
@@ -226,7 +284,8 @@ BEGIN TRY
 	  ,SUM(InvTran.dblQty * - 1) AS dblQuantity
 	  ,0
 	  ,COUNT(DISTINCT Invoice.intInvoiceId)
-	  ,Invoice.intInvoiceId	  
+	  ,Invoice.intInvoiceId
+	  ,'Invoice'
 	   FROM tblICInventoryTransaction InvTran
 	   JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvTran.intTransactionId 
 	   JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceId = InvTran.intTransactionId
@@ -258,7 +317,8 @@ BEGIN TRY
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
 	   ,intNoOfLoad
-	   ,intSourceId			
+	   ,intSourceId
+	   ,strType
 	  )
 	  SELECT 
 	   CH.intContractTypeId 
@@ -269,7 +329,8 @@ BEGIN TRY
 	  ,SUM(InvTran.dblQty)*-1 dblQuantity
 	  ,0
 	  ,COUNT(DISTINCT LD.intLoadId)
-	  , LD.intLoadId
+	  ,LD.intLoadId
+	  ,'Outbound Shipment'
 	  FROM tblICInventoryTransaction InvTran
 	  JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId
 	  JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -293,7 +354,8 @@ BEGIN TRY
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
 	   ,intNoOfLoad
-	   ,intSourceId			
+	   ,intSourceId
+	   ,strType
 	  )
 	  SELECT 
 	   CH.intContractTypeId 
@@ -305,6 +367,7 @@ BEGIN TRY
 	  ,0
 	  ,COUNT(DISTINCT Receipt.intInventoryReceiptId)
 	  ,Receipt.intInventoryReceiptId
+	  ,'Inventory Receipt'
 	  FROM tblICInventoryTransaction InvTran
 	  JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = InvTran.intTransactionId
 	  	AND strReceiptType = 'Purchase Contract'
@@ -332,7 +395,8 @@ BEGIN TRY
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
 	   ,intNoOfLoad
-	   ,intSourceId			
+	   ,intSourceId
+	   ,strType
 	  )
 	SELECT 
 		 CH.intContractTypeId		
@@ -344,6 +408,7 @@ BEGIN TRY
 		,0
 		,COUNT(DISTINCT SS.intSettleStorageId)
 		,SS.intSettleStorageId
+		,'Storage'
 		FROM tblGRSettleContract SC
 		JOIN tblGRSettleStorage  SS ON SS.intSettleStorageId = SC.intSettleStorageId
 		JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
@@ -365,7 +430,8 @@ BEGIN TRY
 	   ,dblQuantity
 	   ,dblAllocatedQuantity
 	   ,intNoOfLoad
-	   ,intSourceId			
+	   ,intSourceId
+	   ,strType
 	  )
 	SELECT
 		CH.intContractTypeId 
@@ -377,6 +443,7 @@ BEGIN TRY
 		,0
 		,COUNT(DISTINCT IB.intImportBalanceId)
 		,IB.intImportBalanceId
+		,'Import Balance'
 	FROM tblCTImportBalance IB
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = IB.intContractHeaderId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = IB.intContractDetailId
@@ -1812,7 +1879,7 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM	PriceUOM  ON PriceUOM.intItemUOMId = SH.intPriceItemUOMId
 	WHERE FR.dtmEndDate = @dtmEndDate
 
-	INSERT INTO @TempContractBalance
+	INSERT INTO @TempPriceFixation
 	( 
      intContractTypeId		
 	,intEntityId			
@@ -1960,6 +2027,152 @@ BEGIN TRY
 														ELSE	   dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
 												   END
 
+	-- AVERAGE AND REMOVE USED PRICE FIXATION
+	INSERT INTO @TempContractBalance
+	( 
+		 intContractTypeId		
+		,intEntityId			
+		,intCommodityId
+		,dtmEndDate				
+		,intCompanyLocationId	
+		,intFutureMarketId      
+		,intFutureMonthId
+		,intContractHeaderId	
+		,strType				
+		,intContractDetailId	
+		,strDate				
+		,strContractType	
+		,strCommodityCode		
+		,strCommodity			
+		,intItemId				
+		,strItemNo		
+		,strLocationName		
+		,strCustomer			
+		,strContract			
+		,strPricingType
+		,strPricingTypeDesc			
+		,strContractDate		
+		,strShipMethod			
+		,strShipmentPeriod		
+		,strFutureMonth			
+		,dblFutures			
+		,dblFuturesinCommodityStockUOM
+		,dblBasis
+		,dblBasisinCommodityStockUOM
+		,strBasisUOM			
+		,dblQuantity			
+		,strQuantityUOM			
+		,dblCashPrice		
+		,dblCashPriceinCommodityStockUOM
+		,strPriceUOM	
+		,dblQtyinCommodityStockUOM		
+		,strStockUOM			
+		,dblAvailableQty		
+		,dblAmount
+		,dblAmountinCommodityStockUOM
+		,intUnitMeasureId			
+		,intContractStatusId
+		,intCurrencyId		
+		,strCurrency				
+		,dtmContractDate
+		,dtmSeqEndDate			
+		,strFutMarketName			
+		,strCategory
+		,strPricingStatus 				
+	)
+	SELECT intContractTypeId
+		,intEntityId
+		,intCommodityId
+		,dtmEndDate
+		,intCompanyLocationId
+		,intFutureMarketId
+		,intFutureMonthId
+		,intContractHeaderId
+		,strType
+		,intContractDetailId
+		,strDate
+		,strContractType
+		,strCommodityCode
+		,strCommodity
+		,intItemId
+		,strItemNo
+		,strLocationName
+		,strCustomer
+		,strContract
+		,strPricingType
+		,strPricingTypeDesc
+		,strContractDate
+		,strShipMethod
+		,strShipmentPeriod
+		,strFutureMonth
+		,AVG(dblFutures)
+		,AVG(dblFuturesinCommodityStockUOM)
+		,dblBasis
+		,dblBasisinCommodityStockUOM
+		,strBasisUOM
+		,SUM(dblQuantity)
+		,strQuantityUOM
+		,AVG(dblCashPrice)
+		,AVG(dblCashPriceinCommodityStockUOM)
+		,strPriceUOM
+		,SUM(dblQtyinCommodityStockUOM)
+		,strStockUOM
+		,dblAvailableQty
+		,AVG(dblAmount)
+		,AVG(dblAmountinCommodityStockUOM)
+		,intUnitMeasureId
+		,intContractStatusId
+		,intCurrencyId
+		,strCurrency
+		,dtmContractDate
+		,dtmSeqEndDate
+		,strFutMarketName
+		,strCategory
+		,strPricingStatus
+	FROM @TempPriceFixation
+	WHERE dblQuantity > 0
+	GROUP BY intContractTypeId
+		,intEntityId
+		,intCommodityId
+		,dtmEndDate
+		,intCompanyLocationId
+		,intFutureMarketId
+		,intFutureMonthId
+		,intContractHeaderId
+		,strType
+		,intContractDetailId
+		,strDate
+		,strContractType
+		,strCommodityCode
+		,strCommodity
+		,intItemId
+		,strItemNo
+		,strLocationName
+		,strCustomer
+		,strContract
+		,strPricingType
+		,strPricingTypeDesc
+		,strContractDate
+		,strShipMethod
+		,strShipmentPeriod
+		,strFutureMonth
+		,dblBasis
+		,dblBasisinCommodityStockUOM
+		,strBasisUOM
+		,strQuantityUOM
+		,strPriceUOM		
+		,strStockUOM
+		,dblAvailableQty
+		,intUnitMeasureId
+		,intContractStatusId
+		,intCurrencyId
+		,strCurrency
+		,dtmContractDate
+		,dtmSeqEndDate
+		,strFutMarketName
+		,strCategory
+		,strPricingStatus
+
 	--UPDATE tblCTContractBalance 
 	--SET dblAmount = ISNULL(dblAvailableQty,0) * (ISNULL(dblFutures,0)+ISNULL(dblBasis,0))
 	--WHERE dtmEndDate = @dtmEndDate
@@ -2029,9 +2242,9 @@ BEGIN TRY
 	--	AND ItemStockUOM.ysnStockUnit = 1
 	--WHERE FR.dtmEndDate = @dtmEndDate
 
-	DELETE 
-	FROM @TempContractBalance
-	WHERE dblQuantity <= 0 AND dtmEndDate = @dtmEndDate
+	--DELETE 
+	--FROM @TempContractBalance
+	--WHERE dblQuantity <= 0 AND dtmEndDate = @dtmEndDate
 
 
 	INSERT INTO tblCTContractBalance --WITH (TABLOCK)
