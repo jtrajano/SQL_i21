@@ -2,8 +2,12 @@
 	@xmlParam1 NVARCHAR(MAX) = NULL,
 	@xmlParam2  NVARCHAR(MAX) = NULL,
 	@xmlParam3  NVARCHAR(MAX) = NULL,
+	@xmlParamDS  NVARCHAR(MAX) = NULL,
+	@xmlParamDSS  NVARCHAR(MAX) = NULL,
 	@ysnDeliverySheet BIT,
-	@ysnUpdateData BIT = 0
+	@ysnUpdateData BIT = 0,
+	@intRemoteLocationId INT = NULL,
+	@xmlParamDSXref NVARCHAR(MAX) = NULL 
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -11,6 +15,10 @@ BEGIN TRY
 			@Columns NVARCHAR(MAX),
 			@InsertColumns NVARCHAR(MAX),
 			@ValueColumns NVARCHAR(MAX);
+	
+	DECLARE @ysnRemote BIT = 0
+
+	SELECT TOP 1 @ysnRemote = ISNULL(ysnIsRemote,0) FROM tblGRCompanyPreference
 
 	IF LTRIM(RTRIM(@xmlParam1)) = ''
 		SET @xmlParam1 = NULL
@@ -18,8 +26,38 @@ BEGIN TRY
 		SET @xmlParam2 = NULL
 	IF LTRIM(RTRIM(@xmlParam3)) = ''
 		SET @xmlParam3 = NULL
-
+	IF LTRIM(RTRIM(@xmlParamDS)) = ''
+		SET @xmlParamDS = NULL
+	IF LTRIM(RTRIM(@xmlParamDS)) = ''
+		SET @xmlParamDSS = NULL
+	IF  LTRIM(RTRIM(@xmlParamDSXref)) = ''
+		SET @xmlParamDSXref = NULL
 	
+	----------------------------------------------------------------------------------------
+	--DELIVERY SHEET X Reference
+	----------------------------------------------------------------------------------------
+
+	DECLARE @deliverysheet_xref TABLE 
+	(
+		[intMainId] INT NULL,
+		[intRemoteId] INT NULL, 
+		[intLocationId] INT NOT NULL 
+	)
+	EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParamDSXref
+
+	INSERT INTO @deliverysheet_xref
+	SELECT *
+	FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblSCRemoteXrefDeliverySheet', 2) WITH 
+	(
+		[intMainId] INT,
+		[intRemoteId] INT, 
+		[intRemoteLocationId] INT 
+	)
+
+	----------------------------------------------------------------------------------------
+	----------------------------------------------------------------------------------------
+
+
 		IF @ysnDeliverySheet = 0
 		BEGIN
 			--SCALE TICKET
@@ -354,6 +392,283 @@ BEGIN TRY
 				[intStorageScheduleId] INT
 			)
 
+			---Final Insert/Update to table
+			DECLARE @existingTicketTable TABLE 
+			(
+				intTicketId INT NOT NULL
+			)
+
+			IF LTRIM(RTRIM(@xmlParamDS)) != ''
+			BEGIN
+				--DELIVERY SHEET
+				DECLARE @temp_xml_deliverysheet_sc TABLE 
+				(
+					[intDeliverySheetId] INT NOT NULL,
+					[intEntityId] INT NOT NULL, 
+					[intCompanyLocationId] INT NOT NULL, 
+					[intItemId] INT NULL, 
+					[intDiscountId] INT NULL, 
+					[strDeliverySheetNumber] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+					[dtmDeliverySheetDate] DATETIME NULL DEFAULT GETDATE(), 
+					[intCurrencyId] INT NULL,
+					[intTicketTypeId] INT NULL, 
+					[intSplitId] INT NULL, 
+					[strSplitDescription] NVARCHAR(255) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '',
+					[intFarmFieldId] INT NULL,
+					[dblGross] NUMERIC(38, 20) NULL DEFAULT ((0)),
+					[dblShrink] NUMERIC(38, 20) NULL DEFAULT ((0)),
+					[dblNet] NUMERIC(38, 20) NULL DEFAULT ((0)),
+					[intStorageScheduleRuleId] INT NULL, 
+					[intCompanyId] INT NULL,
+					[ysnPost] BIT NULL DEFAULT (0),
+					[ysnLockSummaryGrid] BIT NULL DEFAULT (0),
+					[ysnExport] BIT NULL DEFAULT (0),
+					[strCountyProducer] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+				)
+				EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParamDS
+
+				INSERT INTO @temp_xml_deliverysheet_sc
+				SELECT *
+				FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblSCDeliverySheet', 2) WITH 
+				(
+					[intDeliverySheetId] INT,
+					[intEntityId] INT, 
+					[intCompanyLocationId] INT, 
+					[intItemId] INT, 
+					[intDiscountId] INT, 
+					[strDeliverySheetNumber] NVARCHAR(MAX),
+					[dtmDeliverySheetDate] DATETIME, 
+					[intCurrencyId] INT,
+					[intTicketTypeId] INT, 
+					[intSplitId] INT, 
+					[strSplitDescription] NVARCHAR(255),
+					[intFarmFieldId] INT,
+					[dblGross] NUMERIC(38, 20),
+					[dblShrink] NUMERIC(38, 20),
+					[dblNet] NUMERIC(38, 20),
+					[intStorageScheduleRuleId] INT, 
+					[intCompanyId] INT,
+					[ysnPost] BIT,
+					[ysnLockSummaryGrid] BIT,
+					[ysnExport] BIT,
+					[strCountyProducer] NVARCHAR(MAX)
+				)
+
+				--DELIVERY SHEET DISCOUNT
+				DECLARE @temp_xml_qmdstable_sc TABLE 
+				(
+					[intTicketDiscountId] INT NOT NULL,
+					[dblGradeReading] DECIMAL(24, 10) NULL, 
+					[strCalcMethod] NVARCHAR COLLATE Latin1_General_CI_AS NULL,
+					[strShrinkWhat] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+					[dblShrinkPercent] DECIMAL(24, 10) NULL,  
+					[dblDiscountAmount] DECIMAL(24, 10) NULL,
+					[dblDiscountDue] DECIMAL(24, 10) NULL,
+					[dblDiscountPaid] DECIMAL(24, 10) NULL,
+					[ysnGraderAutoEntry] BIT NULL, 
+					[intDiscountScheduleCodeId] INT NULL,
+					[dtmDiscountPaidDate] DATETIME NULL, 	 
+					[intTicketId] INT NULL, 
+					[intTicketFileId] INT NULL, 
+					[strSourceType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
+					[intSort] INT NULL ,
+					[strDiscountChargeType] NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL
+				)
+				EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParam2
+
+				INSERT INTO @temp_xml_qmdstable_sc
+				SELECT *
+				FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblQMTicketDiscount', 2) WITH 
+				(
+					[intTicketDiscountId] INT,
+					[dblGradeReading] DECIMAL(24, 10),
+					[strCalcMethod] NVARCHAR,
+					[strShrinkWhat] NVARCHAR(50), 
+					[dblShrinkPercent] DECIMAL(24, 10),  
+					[dblDiscountAmount] DECIMAL(24, 10),
+					[dblDiscountDue] DECIMAL(24, 10),
+					[dblDiscountPaid] DECIMAL(24, 10),
+					[ysnGraderAutoEntry] BIT, 
+					[intDiscountScheduleCodeId] INT,
+					[dtmDiscountPaidDate] DATETIME, 	 
+					[intTicketId] INT, 
+					[intTicketFileId] INT, 
+					[strSourceType] NVARCHAR(30),
+					[intSort] INT,
+					[strDiscountChargeType] NVARCHAR(30)
+				)
+
+				--DELIVERY SHEET SUMMARY
+				DECLARE @temp_xml_splitdstable_sc TABLE 
+				(
+					[intDeliveySheetSplitId] INT NOT NULL,
+					[intDeliverySheetId] INT NOT NULL, 
+					[intEntityId] INT NOT NULL, 
+					[dblSplitPercent] DECIMAL(18, 6) NOT NULL, 
+					[intStorageScheduleTypeId] INT NULL,
+					[strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
+					[intStorageScheduleRuleId] INT NULL
+				)
+				EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT,@xmlParamDSS
+		
+				INSERT INTO @temp_xml_splitdstable_sc
+				SELECT *
+				FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblSCDeliverySheetSplit', 2) WITH 
+				(
+					[intDeliverySheetSplitId] INT, 
+					[intDeliverySheetId] INT,
+					[intEntityId] INT, 
+					[dblSplitPercent] DECIMAL(18, 6), 
+					[intStorageScheduleTypeId] INT,
+					[strDistributionOption] NVARCHAR(3),
+					[intStorageScheduleRuleId] INT
+				)
+
+				INSERT INTO tblSCDeliverySheet (
+					[intEntityId]
+					,[intCompanyLocationId]
+					,[intItemId]
+					,[intDiscountId]
+					,[strDeliverySheetNumber]
+					,[dtmDeliverySheetDate]
+					,[intCurrencyId]
+					,[intTicketTypeId]
+					,[intSplitId]
+					,[strSplitDescription]
+					,[intFarmFieldId]
+					,[dblGross]
+					,[dblShrink]
+					,[dblNet]
+					,[intStorageScheduleRuleId]
+					,[intCompanyId]
+					,[ysnPost]
+					,[ysnLockSummaryGrid]
+					,[ysnExport]
+					,[strCountyProducer]
+					,[intConcurrencyId]
+					,dtmImportedDate
+				)
+				SELECT  
+					[intEntityId]							= SCD.intEntityId
+					,[intCompanyLocationId]					= SCD.intCompanyLocationId
+					,[intItemId]							= SCD.intItemId
+					,[intDiscountId]						= SCD.intDiscountId
+					,[strDeliverySheetNumber]				= SCD.strDeliverySheetNumber
+					,[dtmDeliverySheetDate]					= SCD.dtmDeliverySheetDate
+					,[intCurrencyId]						= SCD.intCurrencyId
+					,[intTicketTypeId]						= SCD.intTicketTypeId
+					,[intSplitId]							= SCD.intSplitId
+					,[strSplitDescription]					= SCD.strSplitDescription
+					,[intFarmFieldId]						= SCD.intFarmFieldId
+					,[dblGross]								= SCD.dblGross
+					,[dblShrink]							= SCD.dblShrink
+					,[dblNet]								= SCD.dblNet
+					,[intStorageScheduleRuleId]				= SCD.intStorageScheduleRuleId
+					,[intCompanyId]							= SCD.intCompanyId
+					,[ysnPost]								= SCD.ysnPost
+					,[ysnLockSummaryGrid]					= SCD.ysnLockSummaryGrid
+					,[ysnExport]							= SCD.ysnExport
+					,[strCountyProducer]					= SCD.strCountyProducer
+					,[intConcurrencyId]						= 1
+					,dtmImportedDate						= GETDATE()
+				FROM @temp_xml_deliverysheet_sc SCD
+				LEFT JOIN tblSCDeliverySheet DSDestination ON DSDestination.strDeliverySheetNumber = SCD.strDeliverySheetNumber
+				WHERE DSDestination.strDeliverySheetNumber IS NULL
+
+				----------------------------------------------------------------------------------------------------------------------
+				---   Construct the cross reference for the delivery sheet
+				----------------------------------------------------------------------------------------------------------------------
+
+				IF(@ysnRemote = 0)
+				BEGIN
+					INSERT INTO tblSCRemoteXrefDeliverySheet (
+						intMainId
+						,intRemoteId
+						,intRemoteLocationId
+					)
+					SELECT
+						intMainId					= MDS.intDeliverySheetId
+						,intRemoteId				= RDS.intDeliverySheetId
+						,intRemoteLocationId		= @intRemoteLocationId
+					FROM @temp_xml_deliverysheet_sc RDS
+					INNER JOIN tblSCDeliverySheet MDS 
+						ON MDS.strDeliverySheetNumber = RDS.strDeliverySheetNumber
+					LEFT JOIN tblSCRemoteXrefDeliverySheet XREF
+						ON XREF.intRemoteId = RDS.intDeliverySheetId
+							AND XREF.intMainId = MDS.intDeliverySheetId
+							AND XREF.intRemoteLocationId = @intRemoteLocationId
+					WHERE XREF.intRemoteXrefDeliverySheetId IS NULL
+				END
+				----------------------------------------------------------------------------------------------------------------------
+				----------------------------------------------------------------------------------------------------------------------
+
+
+				INSERT INTO tblQMTicketDiscount
+				(
+					[dblGradeReading]
+					,[strCalcMethod]
+					,[strShrinkWhat] 
+					,[dblShrinkPercent]
+					,[dblDiscountAmount]
+					,[dblDiscountDue]
+					,[dblDiscountPaid]
+					,[ysnGraderAutoEntry] 
+					,[intDiscountScheduleCodeId]
+					,[dtmDiscountPaidDate] 	 
+					,[intTicketId]
+					,[intTicketFileId]
+					,[strSourceType]
+					,[intSort]
+					,[strDiscountChargeType]
+					,[intConcurrencyId]
+				)
+				SELECT  
+					[dblGradeReading]					= QM.dblGradeReading
+					,[strCalcMethod]					= QM.strCalcMethod			
+					,[strShrinkWhat]					= QM.strShrinkWhat 
+					,[dblShrinkPercent]					= QM.dblShrinkPercent
+					,[dblDiscountAmount]				= QM.dblDiscountAmount
+					,[dblDiscountDue]					= QM.dblDiscountDue
+					,[dblDiscountPaid]					= QM.dblDiscountPaid
+					,[ysnGraderAutoEntry] 				= QM.ysnGraderAutoEntry
+					,[intDiscountScheduleCodeId]		= QM.intDiscountScheduleCodeId
+					,[dtmDiscountPaidDate] 	 			= QM.dtmDiscountPaidDate
+					,[intTicketId]						= NULL
+					,[intTicketFileId]					= SCD.intDeliverySheetId
+					,[strSourceType]					= QM.strSourceType
+					,[intSort]							= QM.intSort
+					,[strDiscountChargeType]			= QM.strDiscountChargeType
+					,[intConcurrencyId]					= 1
+				FROM @temp_xml_qmdstable_sc QM
+				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
+				LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+				WHERE DS.strDeliverySheetNumber IS NULL
+
+				INSERT INTO tblSCDeliverySheetSplit(
+					[intDeliverySheetId],
+					[intEntityId], 
+					[dblSplitPercent], 
+					[intStorageScheduleTypeId],
+					[strDistributionOption],
+					[intStorageScheduleRuleId],
+					[intConcurrencyId]
+				)
+				SELECT 
+					[intDeliverySheetId]			= DS.intDeliverySheetId 
+					,[intEntityId]					= SCDS.intEntityId 
+					,[dblSplitPercent]				= SCDS.dblSplitPercent 
+					,[intStorageScheduleTypeId]		= SCDS.intStorageScheduleTypeId
+					,[strDistributionOption]		= SCDS.strDistributionOption
+					,[intStorageScheduleRuleId]		= SCDS.intStorageScheduleRuleId
+					,[intConcurrencyId]				= 1
+				FROM @temp_xml_splitdstable_sc SCDS
+				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
+				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+				OUTER APPLY(
+					SELECT intDeliverySheetSplitId FROM tblSCDeliverySheetSplit WHERE intDeliverySheetId = DS.intDeliverySheetId
+				) DSS
+				WHERE DSS.intDeliverySheetSplitId IS NULL
+			END
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
 				UPDATE @temp_xml_table SET strTicketStatus = 'O' WHERE strTicketStatus = 'C'
@@ -511,132 +826,133 @@ BEGIN TRY
 					,[ysnReadyToTransfer]
 					,[ysnExport] 
 					,[intConcurrencyId]
+					,dtmImportedDate						
 				)
 				SELECT 
-					[strTicketStatus]
-					,[strTicketNumber] 
-					,[intScaleSetupId]
-					,[intTicketPoolId]
-					,[intTicketLocationId] 
-					,[intTicketType] 
-					,[strInOutFlag]
-					,[dtmTicketDateTime]
-					,[dtmTicketTransferDateTime]
-					,[dtmTicketVoidDateTime]
-					,[intProcessingLocationId] 
-					,[intTransferLocationId]
-					,[strScaleOperatorUser] 
-					,[intEntityScaleOperatorId] 
-					,[strTruckName] 
-					,[strDriverName] 
-					,[ysnDriverOff]
-					,[ysnSplitWeightTicket]
-					,[ysnGrossManual]
-					,[ysnGross1Manual]
-					,[ysnGross2Manual]
-					,[dblGrossWeight] 
-					,[dblGrossWeight1] 
-					,[dblGrossWeight2] 
-					,[dblGrossWeightOriginal] 
-					,[dblGrossWeightSplit1] 
-					,[dblGrossWeightSplit2] 
-					,[dtmGrossDateTime]
-					,[dtmGrossDateTime1]
-					,[dtmGrossDateTime2]
-					,[intGrossUserId] 
-					,[ysnTareManual]
-					,[ysnTare1Manual]
-					,[ysnTare2Manual]
-					,[dblTareWeight] 
-					,[dblTareWeight1] 
-					,[dblTareWeight2] 
-					,[dblTareWeightOriginal] 
-					,[dblTareWeightSplit1] 
-					,[dblTareWeightSplit2] 
-					,[dtmTareDateTime]
-					,[dtmTareDateTime1]
-					,[dtmTareDateTime2]
-					,[intTareUserId] 
-					,[dblGrossUnits] 
-					,[dblShrink]
-					,[dblNetUnits] 
-					,[strItemUOM]
-					,[intCustomerId] 
-					,[intSplitId] 
-					,[strDistributionOption] 
-					,[intDiscountSchedule] 
-					,[strDiscountLocation] 
-					,[dtmDeferDate]
-					,[strContractNumber] 
-					,[intContractSequence] 
-					,[strContractLocation] 
-					,[dblUnitPrice] 
-					,[dblUnitBasis] 
-					,[dblTicketFees] 
-					,[intCurrencyId] 
-					,[dblCurrencyRate] 
-					,[strTicketComment] 
-					,[strCustomerReference] 
-					,[ysnTicketPrinted]
-					,[ysnPlantTicketPrinted]
-					,[ysnGradingTagPrinted]
-					,[intHaulerId] 
-					,[intFreightCarrierId] 
-					,[dblFreightRate] 
-					,[ysnFarmerPaysFreight]
-					,[ysnCusVenPaysFees]
-					,[strLoadNumber] 
-					,[intLoadLocationId] 
-					,[intAxleCount] 
-					,[strPitNumber] 
-					,[intGradingFactor] 
-					,[strVarietyType] 
-					,[strFarmNumber] 
-					,[strFieldNumber] 
-					,[strDiscountComment]
-					,[intCommodityId]
-					,[intDiscountId]
-					,[intContractId]
-					,[intContractCostId]
-					,[intDiscountLocationId]
-					,[intItemId]
-					,[intEntityId]
-					,[intLoadId]
-					,[intMatchTicketId]
-					,[intSubLocationId]
-					,[intStorageLocationId]
-					,[intSubLocationToId]
-					,[intStorageLocationToId]
-					,[intFarmFieldId]
-					,[intDistributionMethod] 
-					,[intSplitInvoiceOption] 
-					,[intDriverEntityId]
-					,[intStorageScheduleId]
-					,[dblNetWeightDestination] 
-					,[ysnHasGeneratedTicketNumber]
-					,[dblScheduleQty]
-					,[dblConvertedUOMQty]
-					,[dblContractCostConvertedUOM]
-					,[intItemUOMIdFrom] 
-					,[intItemUOMIdTo]
-					,[intTicketTypeId]
-					,[intStorageScheduleTypeId]
-					,[strFreightSettlement]
-					,[strCostMethod]
-					,[intGradeId]
-					,[intWeightId]
-					,[intDeliverySheetId]
-					,[intCommodityAttributeId]
-					,[strElevatorReceiptNumber]
-					,[ysnRailCar]
-					,[intLotId] 
-					,[strLotNumber]
-					,[intSalesOrderId] 
-					,[strPlateNumber]
-					,[blbPlateNumber]
-					,[ysnDestinationWeightGradePost]
-					,[ysnReadyToTransfer]
-					,[ysnExport] 
+					SCT.[strTicketStatus]
+					,SCT.[strTicketNumber] 
+					,SCT.[intScaleSetupId]
+					,SCT.[intTicketPoolId]
+					,SCT.[intTicketLocationId] 
+					,SCT.[intTicketType] 
+					,SCT.[strInOutFlag]
+					,SCT.[dtmTicketDateTime]
+					,SCT.[dtmTicketTransferDateTime]
+					,SCT.[dtmTicketVoidDateTime]
+					,SCT.[intProcessingLocationId] 
+					,SCT.[intTransferLocationId]
+					,SCT.[strScaleOperatorUser] 
+					,SCT.[intEntityScaleOperatorId] 
+					,SCT.[strTruckName] 
+					,SCT.[strDriverName] 
+					,SCT.[ysnDriverOff]
+					,SCT.[ysnSplitWeightTicket]
+					,SCT.[ysnGrossManual]
+					,SCT.[ysnGross1Manual]
+					,SCT.[ysnGross2Manual]
+					,SCT.[dblGrossWeight] 
+					,SCT.[dblGrossWeight1] 
+					,SCT.[dblGrossWeight2] 
+					,SCT.[dblGrossWeightOriginal] 
+					,SCT.[dblGrossWeightSplit1] 
+					,SCT.[dblGrossWeightSplit2] 
+					,SCT.[dtmGrossDateTime]
+					,SCT.[dtmGrossDateTime1]
+					,SCT.[dtmGrossDateTime2]
+					,SCT.[intGrossUserId] 
+					,SCT.[ysnTareManual]
+					,SCT.[ysnTare1Manual]
+					,SCT.[ysnTare2Manual]
+					,SCT.[dblTareWeight] 
+					,SCT.[dblTareWeight1] 
+					,SCT.[dblTareWeight2] 
+					,SCT.[dblTareWeightOriginal] 
+					,SCT.[dblTareWeightSplit1] 
+					,SCT.[dblTareWeightSplit2] 
+					,SCT.[dtmTareDateTime]
+					,SCT.[dtmTareDateTime1]
+					,SCT.[dtmTareDateTime2]
+					,SCT.[intTareUserId] 
+					,SCT.[dblGrossUnits] 
+					,SCT.[dblShrink]
+					,SCT.[dblNetUnits] 
+					,SCT.[strItemUOM]
+					,SCT.[intCustomerId] 
+					,SCT.[intSplitId] 
+					,SCT.[strDistributionOption] 
+					,SCT.[intDiscountSchedule] 
+					,SCT.[strDiscountLocation] 
+					,SCT.[dtmDeferDate]
+					,SCT.[strContractNumber] 
+					,SCT.[intContractSequence] 
+					,SCT.[strContractLocation] 
+					,SCT.[dblUnitPrice] 
+					,SCT.[dblUnitBasis] 
+					,SCT.[dblTicketFees] 
+					,SCT.[intCurrencyId] 
+					,SCT.[dblCurrencyRate] 
+					,ISNULL(SCT.[strTicketComment],'')
+					,SCT.[strCustomerReference] 
+					,SCT.[ysnTicketPrinted]
+					,SCT.[ysnPlantTicketPrinted]
+					,SCT.[ysnGradingTagPrinted]
+					,SCT.[intHaulerId] 
+					,SCT.[intFreightCarrierId] 
+					,SCT.[dblFreightRate] 
+					,SCT.[ysnFarmerPaysFreight]
+					,SCT.[ysnCusVenPaysFees]
+					,SCT.[strLoadNumber] 
+					,SCT.[intLoadLocationId] 
+					,SCT.[intAxleCount] 
+					,SCT.[strPitNumber] 
+					,SCT.[intGradingFactor] 
+					,SCT.[strVarietyType] 
+					,SCT.[strFarmNumber] 
+					,SCT.[strFieldNumber] 
+					,SCT.[strDiscountComment]
+					,SCT.[intCommodityId]
+					,SCT.[intDiscountId]
+					,SCT.[intContractId]
+					,SCT.[intContractCostId]
+					,SCT.[intDiscountLocationId]
+					,SCT.[intItemId]
+					,SCT.[intEntityId]
+					,SCT.[intLoadId]
+					,SCT.[intMatchTicketId]
+					,SCT.[intSubLocationId]
+					,SCT.[intStorageLocationId]
+					,SCT.[intSubLocationToId]
+					,SCT.[intStorageLocationToId]
+					,SCT.[intFarmFieldId]
+					,SCT.[intDistributionMethod] 
+					,SCT.[intSplitInvoiceOption] 
+					,SCT.[intDriverEntityId]
+					,SCT.[intStorageScheduleId]
+					,SCT.[dblNetWeightDestination] 
+					,SCT.[ysnHasGeneratedTicketNumber]
+					,SCT.[dblScheduleQty]
+					,SCT.[dblConvertedUOMQty]
+					,SCT.[dblContractCostConvertedUOM]
+					,SCT.[intItemUOMIdFrom] 
+					,SCT.[intItemUOMIdTo]
+					,SCT.[intTicketTypeId]
+					,SCT.[intStorageScheduleTypeId]
+					,SCT.[strFreightSettlement]
+					,SCT.[strCostMethod]
+					,SCT.[intGradeId]
+					,SCT.[intWeightId]
+					,DS.[intDeliverySheetId]
+					,SCT.[intCommodityAttributeId]
+					,SCT.[strElevatorReceiptNumber]
+					,SCT.[ysnRailCar]
+					,SCT.[intLotId] 
+					,SCT.[strLotNumber]
+					,SCT.[intSalesOrderId] 
+					,SCT.[strPlateNumber]
+					,SCT.[blbPlateNumber]
+					,SCT.[ysnDestinationWeightGradePost]
+					,SCT.[ysnReadyToTransfer]
+					,SCT.[ysnExport] 
 					,1
 					,dtmImportedDate = GETDATE()
 				FROM #insertedTicket SCT
@@ -766,9 +1082,12 @@ BEGIN TRY
 				AND SC.strInOutFlag = SCT.strInOutFlag
 				--AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE SCS.intTicketId = ERT.intTicketId)
 			END
 			ELSE
 			BEGIN
+				SELECT 'UPDATE TICKET'
+
 				UPDATE SC SET
 					SC.strTicketStatus							= SCT.strTicketStatus 
 					,SC.strTicketNumber							= SCT.strTicketNumber 
@@ -832,7 +1151,7 @@ BEGIN TRY
 					,SC.dblTicketFees 							= SCT.dblTicketFees  
 					,SC.intCurrencyId 							= SCT.intCurrencyId  
 					,SC.dblCurrencyRate 						= SCT.dblCurrencyRate  
-					,SC.strTicketComment 						= SCT.strTicketComment  
+					,SC.strTicketComment 						= ISNULL(SCT.strTicketComment,'')
 					,SC.strCustomerReference 					= SCT.strCustomerReference  
 					,SC.ysnTicketPrinted 						= SCT.ysnTicketPrinted
 					,SC.ysnPlantTicketPrinted 					= SCT.ysnPlantTicketPrinted
@@ -882,7 +1201,7 @@ BEGIN TRY
 					,SC.strCostMethod  							= SCT.strCostMethod
 					,SC.intGradeId  							= SCT.intGradeId
 					,SC.intWeightId  							= SCT.intWeightId
-					,SC.intDeliverySheetId  					= SCT.intDeliverySheetId
+					,SC.intDeliverySheetId  					= DSXREF.intRemoteId
 					,SC.intCommodityAttributeId  				= SCT.intCommodityAttributeId
 					,SC.strElevatorReceiptNumber  				= SCT.strElevatorReceiptNumber
 					,SC.ysnRailCar  							= SCT.ysnRailCar
@@ -895,12 +1214,16 @@ BEGIN TRY
 					,SC.ysnReadyToTransfer  					= SCT.ysnReadyToTransfer
 					,SC.ysnExport  								= SCT.ysnExport 
 				FROM tblSCTicket SC
-				INNER JOIN @temp_xml_table SCT ON SC.strTicketNumber = SCT.strTicketNumber 
-				AND SC.intTicketPoolId = SCT.intTicketPoolId
-				AND SC.intTicketType = SCT.intTicketType
-				AND SC.strInOutFlag = SCT.strInOutFlag
-				AND SC.intEntityId = SCT.intEntityId
-				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
+				INNER JOIN @temp_xml_table SCT 
+					ON SC.strTicketNumber = SCT.strTicketNumber 
+						AND SC.intTicketPoolId = SCT.intTicketPoolId
+						AND SC.intTicketType = SCT.intTicketType
+						AND SC.strInOutFlag = SCT.strInOutFlag
+						AND SC.intEntityId = SCT.intEntityId
+						AND SC.intProcessingLocationId = SCT.intProcessingLocationId
+				LEFT JOIN @deliverysheet_xref DSXREF
+					ON SCT.intDeliverySheetId = DSXREF.intMainId
+						AND DSXREF.intLocationId = @intRemoteLocationId
 				
 				UPDATE QM SET 
 					QM.dblGradeReading					= QMT.dblGradeReading
@@ -1002,6 +1325,9 @@ BEGIN TRY
 				[strCountyProducer] NVARCHAR(MAX)
 			)
 
+		
+
+
 			--DELIVERY SHEET DISCOUNT
 			DECLARE @temp_xml_qmdstable TABLE 
 			(
@@ -1049,7 +1375,7 @@ BEGIN TRY
 			--DELIVERY SHEET SUMMARY
 			DECLARE @temp_xml_splitdstable TABLE 
 			(
-				[intDeliveySheetSplitId] INT NOT NULL,
+				[intDeliverySheetSplitId] INT NOT NULL,
 				[intDeliverySheetId] INT NOT NULL, 
 				[intEntityId] INT NOT NULL, 
 				[dblSplitPercent] DECIMAL(18, 6) NOT NULL, 
@@ -1063,7 +1389,7 @@ BEGIN TRY
 			SELECT *
 			FROM OPENXML(@xmlDocumentId, 'DocumentElement/tblSCDeliverySheetSplit', 2) WITH 
 			(
-				[intDeliveySheetSplitId] INT, 
+				[intDeliverySheetSplitId] INT, 
 				[intDeliverySheetId] INT,
 				[intEntityId] INT, 
 				[dblSplitPercent] DECIMAL(18, 6), 
@@ -1096,6 +1422,7 @@ BEGIN TRY
 					,[ysnExport]
 					,[strCountyProducer]
 					,[intConcurrencyId]
+					,dtmImportedDate
 				)
 				SELECT  
 					[intEntityId]							= SCD.intEntityId
@@ -1119,7 +1446,36 @@ BEGIN TRY
 					,[ysnExport]							= SCD.ysnExport
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
-				FROM @temp_xml_deliverysheet SCD
+					,dtmImportedDate						= GETDATE()
+				FROM @temp_xml_deliverysheet SCD ORDER BY strDeliverySheetNumber ASC
+
+
+				----------------------------------------------------------------------------------------------------------------------
+				---  Construct the cross reference for the delivery sheet
+				----------------------------------------------------------------------------------------------------------------------
+				IF(@ysnRemote = 0)
+				BEGIN
+					INSERT INTO tblSCRemoteXrefDeliverySheet (
+						intMainId
+						,intRemoteId
+						,intRemoteLocationId
+					)
+					SELECT
+						intMainId					= MDS.intDeliverySheetId
+						,intRemoteId				= RDS.intDeliverySheetId
+						,intRemoteLocationId		= @intRemoteLocationId
+					FROM @temp_xml_deliverysheet RDS
+					INNER JOIN tblSCDeliverySheet MDS 
+						ON MDS.strDeliverySheetNumber = RDS.strDeliverySheetNumber
+					LEFT JOIN tblSCRemoteXrefDeliverySheet XREF
+						ON XREF.intRemoteId = RDS.intDeliverySheetId
+							AND XREF.intMainId = MDS.intDeliverySheetId
+							AND XREF.intRemoteLocationId = @intRemoteLocationId
+					WHERE XREF.intRemoteXrefDeliverySheetId IS NULL
+				END
+				----------------------------------------------------------------------------------------------------------------------
+				----------------------------------------------------------------------------------------------------------------------
+
 
 				INSERT INTO tblQMTicketDiscount
 				(
@@ -1270,6 +1626,7 @@ BEGIN TRY
 					,[ysnExport]
 					,[strCountyProducer]
 					,[intConcurrencyId]
+					,dtmImportedDate
 				)
 				SELECT  
 					[intEntityId]							= SCD.intEntityId
@@ -1293,9 +1650,36 @@ BEGIN TRY
 					,[ysnExport]							= 1
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
+					,dtmImportedDate						= GETDATE()
 				FROM @temp_xml_deliverysheet  SCD
 				LEFT JOIN tblSCDeliverySheet DSDestination ON DSDestination.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				WHERE DSDestination.strDeliverySheetNumber IS NULL
+
+				----------------------------------------------------------------------------------------------------------------------
+				---  Construct the cross reference for the delivery sheet
+				----------------------------------------------------------------------------------------------------------------------
+				IF(@ysnRemote = 0)
+				BEGIN
+					INSERT INTO tblSCRemoteXrefDeliverySheet (
+						intMainId
+						,intRemoteId
+						,intRemoteLocationId
+					)
+					SELECT
+						intMainId					= MDS.intDeliverySheetId
+						,intRemoteId				= RDS.intDeliverySheetId
+						,intRemoteLocationId		= @intRemoteLocationId
+					FROM @temp_xml_deliverysheet RDS
+					INNER JOIN tblSCDeliverySheet MDS 
+						ON MDS.strDeliverySheetNumber = RDS.strDeliverySheetNumber
+					LEFT JOIN tblSCRemoteXrefDeliverySheet XREF
+						ON XREF.intRemoteId = RDS.intDeliverySheetId
+							AND XREF.intMainId = MDS.intDeliverySheetId
+							AND XREF.intRemoteLocationId = @intRemoteLocationId
+					WHERE XREF.intRemoteXrefDeliverySheetId IS NULL
+				END
+				----------------------------------------------------------------------------------------------------------------------
+				----------------------------------------------------------------------------------------------------------------------
 
 				INSERT INTO tblQMTicketDiscount
 				(
