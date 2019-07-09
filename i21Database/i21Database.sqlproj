@@ -7678,7 +7678,7 @@
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyValidateRecordsForMessaging.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyCopyMessagingDetails.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyTransferLogForComment.sql" />
-    <Build Include="dbo\Tables\tblSMInterCompanyTransferLog.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyTransferLogForDMS.sql" />
     <Build Include="dbo\Views\vyuSTStoreOnUserRole.sql" />
     <Build Include="dbo\Views\vyuARGetInvoiceDetailLot.sql" />
     <Build Include="dbo\Functions\fnCCValidateAssociatedTransaction.sql" />
@@ -7714,6 +7714,9 @@
     <Build Include="dbo\Views\vyuSTPricebookMasterItemVendorXref.sql" />
     <Build Include="dbo\Functions\fnCMGetBankReconDebitCreditValues.sql" />
     <None Include="Scripts\Post-Deployment\CT\PariallyToPartially.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInterCompanyUpdateMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInterCompanyCopyRecords.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCopyInterCompanyDMSRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
