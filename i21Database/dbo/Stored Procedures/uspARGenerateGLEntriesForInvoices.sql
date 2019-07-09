@@ -107,7 +107,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceHeader I
@@ -219,7 +219,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceHeader I
@@ -327,7 +327,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceHeader I
@@ -437,7 +437,7 @@ SELECT
    ,[dblSourceUnitDebit]           = NULL
    ,[dblSourceUnitCredit]          = NULL
    ,[intCommodityId]               = NULL
-   ,[intSourceEntityId]            = NULL
+   ,[intSourceEntityId]            = I.[intEntityCustomerId]
    ,[ysnRebuild]                   = NULL
 FROM
    (
@@ -550,7 +550,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceHeader I
@@ -643,7 +643,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM #ARPostInvoiceDetail I
 WHERE I.[intPeriodsToAccrue] <= 1
@@ -749,7 +749,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceDetail I
@@ -853,7 +853,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceDetail I
@@ -950,7 +950,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceDetail I
@@ -1046,7 +1046,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceDetail I
@@ -1147,7 +1147,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceDetail I
@@ -1246,7 +1246,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceDetail I
@@ -1344,7 +1344,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceDetail I
@@ -1440,7 +1440,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceHeader I
@@ -1550,7 +1550,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM (
     SELECT IDT.[intTaxCodeId]
@@ -1672,7 +1672,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM (
     SELECT IDT.[intTaxCodeId]
@@ -1775,7 +1775,7 @@ SELECT
     ,[dblSourceUnitDebit]           = NULL
     ,[dblSourceUnitCredit]          = NULL
     ,[intCommodityId]               = NULL
-    ,[intSourceEntityId]            = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
     ,[ysnRebuild]                   = NULL
 FROM
     #ARPostInvoiceDetail I

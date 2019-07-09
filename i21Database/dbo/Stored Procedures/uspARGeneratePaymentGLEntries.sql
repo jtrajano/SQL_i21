@@ -108,7 +108,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentHeader P
@@ -200,7 +200,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentHeader P
@@ -295,7 +295,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentHeader P
@@ -390,7 +390,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
@@ -486,7 +486,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
@@ -580,7 +580,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
@@ -676,7 +676,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
@@ -785,7 +785,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
@@ -880,7 +880,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
@@ -976,7 +976,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
@@ -1070,7 +1070,7 @@ BEGIN
 		,[dblSourceUnitDebit]           = NULL
 		,[dblSourceUnitCredit]          = NULL
 		,[intCommodityId]               = NULL
-		,[intSourceEntityId]            = NULL
+		,[intSourceEntityId]            = P.[intEntityCustomerId]
 		,[ysnRebuild]                   = NULL
 	FROM
 		#ARPostPaymentDetail P
