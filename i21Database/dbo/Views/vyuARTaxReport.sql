@@ -29,7 +29,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTaxAmount				= DETAIL.dblAdjustedTax * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblNonTaxable    		= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000 AND (DETAIL.ysnTaxExempt = 1 OR (DETAIL.ysnTaxExempt = 0 AND ISNULL(DETAIL.dblTotalAdjustedTax, 0.000000) = 0.000000)) 
+									ELSE (CASE WHEN DETAIL.dblAdjustedTax = 0.000000 --AND (DETAIL.ysnTaxExempt = 1 OR (DETAIL.ysnTaxExempt = 0 AND ISNULL(DETAIL.dblTotalAdjustedTax, 0.000000) = 0.000000)) 
 												THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 												ELSE 0.000000 
 											END) 
