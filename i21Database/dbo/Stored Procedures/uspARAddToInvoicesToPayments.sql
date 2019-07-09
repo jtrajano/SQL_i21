@@ -133,7 +133,7 @@ SELECT
 																					 ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
 																					 END) 
 																		  END)
-																	ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
+																	ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
 															   END), [dbo].[fnARGetDefaultDecimal]())
 	,[dblBaseDiscount]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
 	                                                                THEN (CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) = -1 
@@ -143,7 +143,7 @@ SELECT
 																						  ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
 																					 END) 
 																		 END)
-																	ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) 
+																	ELSE ISNULL(PE.[dblDiscount], @ZeroDecimal) * (CASE WHEN APB.[strTransactionType] IN ('Voucher', 'Deferred Interest') THEN -1 ELSE 1 END)
 																END), [dbo].[fnARGetDefaultDecimal]())
 	,[dblDiscountAvailable]				= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
 																	THEN ARI.[dblDiscountAvailable] 
@@ -171,11 +171,11 @@ SELECT
 															   END), [dbo].[fnARGetDefaultDecimal]())
 	,[dblAmountDue]						= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
 																	THEN ISNULL(ARI.[dblAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) 
-																	ELSE ISNULL(APB.[dblAmountDue], @ZeroDecimal)
+																	ELSE ISNULL(ISNULL(PE.[dblAmountDue], APB.[dblAmountDue]), @ZeroDecimal)
 															   END), [dbo].[fnARGetDefaultDecimal]())
 	,[dblBaseAmountDue]					= [dbo].fnRoundBanker((CASE WHEN ISNULL(PE.[ysnFromAP], 0) = 0 
 																	THEN ISNULL(ARI.[dblBaseAmountDue], @ZeroDecimal) * dbo.fnARGetInvoiceAmountMultiplier(ARI.[strTransactionType]) 
-																	ELSE ISNULL(APB.[dblBaseAmountDue], @ZeroDecimal) 
+																	ELSE ISNULL(ISNULL(PE.[dblAmountDue], APB.[dblBaseAmountDue]), @ZeroDecimal)
 															   END), [dbo].[fnARGetDefaultDecimal]())
 	,[strInvoiceReportNumber]			= PE.[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]	= PE.[intCurrencyExchangeRateTypeId]
