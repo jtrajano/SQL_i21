@@ -96,6 +96,13 @@ IF @dtmStatementDate IS NOT NULL
 --IF @intBankAccountIdFrom > @intBankAccountIdTo
 --	SET @intBankAccountIdTo = @intBankAccountIdFrom
 
+;WITH DEBIT_CREDIT AS(
+	SELECT 
+	strDescription,
+	totalAmount
+	FROM 
+	[dbo].[fnCMGetBankReconDebitCreditValues] (@intBankAccountId, @dtmStatementDate, 2)
+)
 SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dtmStatementDate				= @dtmStatementDate
 		,strCbkNo						= BankAccnt.strCbkNo
@@ -104,11 +111,11 @@ SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dblGLBalance					= [dbo].[fnGetBankGLBalance](BankAccnt.intBankAccountId, @dtmStatementDate) 
 		,dblBankAccountBalance			= [dbo].[fnCMGetBankBalance](BankAccnt.intBankAccountId, @dtmStatementDate,0)
 		,dblPriorReconEndingBalance		= [dbo].[fnGetBankBeginningBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblClearedPayments				= [dbo].[fnGetClearedPayments](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblClearedDeposits				= [dbo].[fnGetClearedDeposits](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblClearedPayments				= ClearedPayment.totalAmount
+		,dblClearedDeposits				= ClearedDeposit.totalAmount
 		,dblBankStatementEndingBalance	= [dbo].[fnGetBankCurrentEndingBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblUnclearedPayments			= [dbo].[fnGetUnclearedPayments](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblUnclearedDeposits			= [dbo].[fnGetUnclearedDeposits](BankAccnt.intBankAccountId, @dtmStatementDate)
+		,dblUnclearedPayments			= UnClearedPayment.totalAmount
+		,dblUnclearedDeposits			= UnClearedDeposit.totalAmount
 		,strCompanyName
 FROM	dbo.tblCMBankAccount BankAccnt INNER JOIN dbo.tblCMBank Bank
 			ON BankAccnt.intBankId = Bank.intBankId
@@ -116,5 +123,17 @@ FROM	dbo.tblCMBankAccount BankAccnt INNER JOIN dbo.tblCMBank Bank
 			ON BankAccnt.intGLAccountId = GL.intAccountId
 		LEFT JOIN tblSMCompanySetup COMPANY 
 			ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+OUTER APPLY (
+	SELECT totalAmount FROM DEBIT_CREDIT WHERE strDescription = 'PaymentClearedNotVoid'
+)ClearedPayment
+OUTER APPLY (
+	SELECT totalAmount FROM DEBIT_CREDIT WHERE strDescription = 'DepositClearedNotVoid'
+)ClearedDeposit
+OUTER APPLY (
+	SELECT totalAmount FROM DEBIT_CREDIT WHERE strDescription = 'PaymentNotClearedNotVoid'
+)UnClearedPayment
+OUTER APPLY (
+	SELECT totalAmount FROM DEBIT_CREDIT WHERE strDescription = 'DepositNotClearedNotVoid'
+)UnClearedDeposit
 WHERE	BankAccnt.intBankAccountId = @intBankAccountId
 		AND @dtmStatementDate IS NOT NULL

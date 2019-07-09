@@ -7711,6 +7711,7 @@
     <Build Include="dbo\Views\vyuSTPricebookMasterItemPricing.sql" />
     <Build Include="dbo\Views\vyuSTPricebookMasterItemLocation.sql" />
     <Build Include="dbo\Views\vyuSTPricebookMasterItemVendorXref.sql" />
+    <Build Include="dbo\Functions\fnCMGetBankReconDebitCreditValues.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
