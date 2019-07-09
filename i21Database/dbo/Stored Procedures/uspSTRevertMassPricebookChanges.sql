@@ -481,7 +481,7 @@ BEGIN TRY
 											@ysnTaxFlag3				= ISNULL(temp.ysnTaxFlag3, ItemLoc.ysnTaxFlag3),
 											@ysnTaxFlag4				= ISNULL(temp.ysnTaxFlag4, ItemLoc.ysnTaxFlag4),
 											@ysnDepositRequired			= ISNULL(temp.ysnDepositRequired, ItemLoc.ysnDepositRequired),
-											@intDepositPLUId			= CASE WHEN temp.intDepositPLUId IS NULL THEN ItemLoc.intDepositPLUId ELSE temp.intDepositPLUId END,
+											@intDepositPLUId			= ISNULL(temp.intDepositPLUId, ItemLoc.intDepositPLUId), -- CASE WHEN temp.intDepositPLUId IS NULL THEN ItemLoc.intDepositPLUId ELSE temp.intDepositPLUId END,
 											@ysnQuantityRequired		= ISNULL(temp.ysnQuantityRequired, ItemLoc.ysnQuantityRequired),
 											@ysnScaleItem				= ISNULL(temp.ysnScaleItem, ItemLoc.ysnScaleItem),
 											@ysnFoodStampable			= ISNULL(temp.ysnFoodStampable, ItemLoc.ysnFoodStampable),
@@ -494,22 +494,24 @@ BEGIN TRY
 											@ysnApplyBlueLaw1			= ISNULL(temp.ysnApplyBlueLaw1, ItemLoc.ysnApplyBlueLaw1),
 											@ysnApplyBlueLaw2			= ISNULL(temp.ysnApplyBlueLaw2, ItemLoc.ysnApplyBlueLaw2),
 											@ysnCountedDaily			= ISNULL(temp.ysnCountedDaily, ItemLoc.ysnCountedDaily),
-											@strCounted					= temp.strCounted,
+											@strCounted					= ISNULL(temp.strCounted, ItemLoc.strCounted),
 											@ysnCountBySINo				= ISNULL(temp.ysnCountBySINo, ItemLoc.ysnCountBySINo),
-											@intFamilyId				= CASE WHEN temp.intFamilyId IS NULL THEN ItemLoc.intFamilyId ELSE temp.intFamilyId END, -- temp.intFamilyId,
-											@intClassId					= CASE WHEN temp.intClassId IS NULL THEN ItemLoc.intClassId ELSE temp.intClassId END, -- temp.intClassId,
-											@intProductCodeId			= CASE WHEN temp.intProductCodeId IS NULL THEN ItemLoc.intProductCodeId ELSE temp.intProductCodeId END, -- temp.intProductCodeId,
-											@intVendorId				= CASE WHEN temp.intVendorId IS NULL THEN ItemLoc.intVendorId ELSE temp.intVendorId END, -- temp.intVendorId,
-											@intMinimumAge				= temp.intMinimumAge,
-											@dblMinOrder				= temp.dblMinOrder,
-											@dblSuggestedQty			= temp.dblSuggestedQty,
-											@intStorageLocationId		= CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
+											@intFamilyId				= ISNULL(temp.intFamilyId, ItemLoc.intFamilyId), -- CASE WHEN temp.intFamilyId IS NULL THEN ItemLoc.intFamilyId ELSE temp.intFamilyId END, -- temp.intFamilyId,
+											@intClassId					= ISNULL(temp.intClassId, ItemLoc.intClassId), -- CASE WHEN temp.intClassId IS NULL THEN ItemLoc.intClassId ELSE temp.intClassId END, -- temp.intClassId,
+											@intProductCodeId			= ISNULL(temp.intProductCodeId, ItemLoc.intProductCodeId), -- CASE WHEN temp.intProductCodeId IS NULL THEN ItemLoc.intProductCodeId ELSE temp.intProductCodeId END, -- temp.intProductCodeId,
+											@intVendorId				= ISNULL(temp.intVendorId, ItemLoc.intVendorId), -- CASE WHEN temp.intVendorId IS NULL THEN ItemLoc.intVendorId ELSE temp.intVendorId END, -- temp.intVendorId,
+											@intMinimumAge				= ISNULL(temp.intMinimumAge, ItemLoc.intMinimumAge),
+											@dblMinOrder				= ISNULL(temp.dblMinOrder, ItemLoc.dblMinOrder),
+											@dblSuggestedQty			= ISNULL(temp.dblSuggestedQty, ItemLoc.dblSuggestedQty),
+											@intStorageLocationId		= ISNULL(temp.intStorageLocationId, ItemLoc.intStorageLocationId) -- CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
 								FROM @tempITEMLOCATION temp
 								INNER JOIN tblICItemLocation ItemLoc
 									ON temp.intItemLocationId = ItemLoc.intItemLocationId
 								ORDER BY temp.intItemLocationId ASC
 
-		
+
+
+
 								-- UPDATE ITEM LOCATION
 								EXEC [dbo].[uspICUpdateItemLocationForCStore]
 										-- filter params
@@ -1084,14 +1086,25 @@ BEGIN TRY
 
 		DECLARE @strAllRevertedRecordsCount NVARCHAR(500) = CAST(@intAllRevertedRecordsCount AS NVARCHAR(500))
 
-		IF(@ysnDebug = 0)
+		-- RECORDs
+		IF(@strAllRevertedRecordsCount = 1)
+			BEGIN
+				SET @strResultMsg = 'Successfully reverted ' + @strAllRevertedRecordsCount + ' record.'
+			END
+		ELSE IF(@strAllRevertedRecordsCount > 1)
 			BEGIN
 				SET @strResultMsg = 'Successfully reverted ' + @strAllRevertedRecordsCount + ' records.'
+			END
+
+
+
+		IF(@ysnDebug = 0)
+			BEGIN
 				GOTO ExitWithCommit
 			END
 		ELSE IF(@ysnDebug = 1)
 			BEGIN
-				PRINT 'Successfully reverted ' + @strAllRevertedRecordsCount + ' records.'
+				PRINT @strResultMsg
 				PRINT 'Will Rollback and exit'
 				GOTO ExitWithRollback
 			END

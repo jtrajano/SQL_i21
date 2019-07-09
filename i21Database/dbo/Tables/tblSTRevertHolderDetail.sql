@@ -19,6 +19,7 @@
 	[strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS NULL,
 	[strChangeDescription]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[strOldData]							NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL,
+	[strOldDataPreview]						NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL,
 	[strNewData]							NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]						INT				NULL DEFAULT ((0))
     CONSTRAINT [PK_tblSTRevertHolderDetail] PRIMARY KEY CLUSTERED ([intRevertHolderDetailId] ASC),

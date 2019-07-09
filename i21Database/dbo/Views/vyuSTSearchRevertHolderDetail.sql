@@ -110,15 +110,15 @@ SELECT DISTINCT
 							WHEN RHD.strTableColumnName = 'strCountCode'
 								THEN OldItemValue.strCountCode
 
-							WHEN RHD.strTableColumnName = 'dblSalePrice'
-								THEN CAST(ItemPricing_Old.dblSalePrice AS NVARCHAR(50))
-							WHEN RHD.strTableColumnName = 'dblStandardCost'
-								THEN CAST(ItemPricing_Old.dblStandardCost AS NVARCHAR(50))
-							WHEN RHD.strTableColumnName = 'dblLastCost'
-								THEN CAST(ItemPricing_Old.dblLastCost AS NVARCHAR(50))
+							--WHEN RHD.strTableColumnName = 'dblSalePrice'
+							--	THEN CAST(ItemPricing_Old.dblSalePrice AS NVARCHAR(50))
+							--WHEN RHD.strTableColumnName = 'dblStandardCost'
+							--	THEN CAST(ItemPricing_Old.dblStandardCost AS NVARCHAR(50))
+							--WHEN RHD.strTableColumnName = 'dblLastCost'
+							--	THEN CAST(ItemPricing_Old.dblLastCost AS NVARCHAR(50))
 
-							WHEN RHD.strTableColumnName = 'dblUnitAfterDiscount'
-								THEN CAST(ItemSpecialPricing_Old.dblUnitAfterDiscount AS NVARCHAR(50))
+							--WHEN RHD.strTableColumnName = 'dblUnitAfterDiscount'
+							--	THEN CAST(ItemSpecialPricing_Old.dblUnitAfterDiscount AS NVARCHAR(50))
 							--WHEN RHD.strTableColumnName = 'dtmBeginDate'
 							--	THEN CONVERT(VARCHAR(10), CAST(ItemSpecialPricing_Old.dtmBeginDate AS DATE), 101) -- CAST(ItemSpecialPricing_Old.dtmBeginDate AS NVARCHAR(20))
 							--WHEN RHD.strTableColumnName = 'dtmEndDate'
@@ -148,6 +148,7 @@ SELECT DISTINCT
 							WHEN RHD.strOldData = 'true' THEN 'Yes'
 							WHEN RHD.strOldData = 'false' THEN 'No'
 
+							-- Else will handle these columns: 'dblUnitAfterDiscount', 'dtmBeginDate', 'dtmEndDate'
 							ELSE RHD.strOldData
 						END
 FROM tblSTRevertHolderDetail RHD
@@ -243,46 +244,46 @@ LEFT JOIN tblICCountGroup CountGroup_Old
 LEFT JOIN tblICItemUOM Uom_Old
 	ON OldItemLocValue.intDepositPLUId = Uom_Old.intItemUOMId
 
--- OLD DATA tblICItemPricing
-LEFT JOIN
-(
-	SELECT * FROM
-	(
-		SELECT DISTINCT
-		          d.intRevertHolderDetailId
-				  , d.intItemPricingId
-				  , d.intItemId
-				  , d.strTableColumnName
-				  , d.strOldData
-		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('dblSalePrice', 'dblStandardCost', 'dblLastCost')
-	) src
-	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (dblSalePrice, dblStandardCost, dblLastCost)
-	) piv
-) OldItemPricing
-	ON OldItemPricing.intRevertHolderDetailId = RHD.intRevertHolderDetailId
-LEFT JOIN tblICItemPricing ItemPricing_Old
-	ON OldItemPricing.intItemPricingId = ItemPricing_Old.intItemPricingId
+---- OLD DATA tblICItemPricing
+--LEFT JOIN
+--(
+--	SELECT * FROM
+--	(
+--		SELECT DISTINCT
+--		          d.intRevertHolderDetailId
+--				  , d.intItemPricingId
+--				  , d.intItemId
+--				  , d.strTableColumnName
+--				  , d.strOldData
+--		FROM tblSTRevertHolderDetail d
+--		WHERE d.strTableColumnName IN ('dblSalePrice', 'dblStandardCost', 'dblLastCost')
+--	) src
+--	PIVOT (
+--			MAX(strOldData) FOR strTableColumnName IN (dblSalePrice, dblStandardCost, dblLastCost)
+--	) piv
+--) OldItemPricing
+--	ON OldItemPricing.intRevertHolderDetailId = RHD.intRevertHolderDetailId
+--LEFT JOIN tblICItemPricing ItemPricing_Old
+--	ON OldItemPricing.intItemPricingId = ItemPricing_Old.intItemPricingId
 
--- OLD DATA tblICItemSpecialPricing
-LEFT JOIN
-(
-	SELECT * FROM
-	(
-		SELECT DISTINCT
-		          d.intRevertHolderDetailId
-				  , d.intItemSpecialPricingId
-				  , d.intItemId
-				  , d.strTableColumnName
-				  , d.strOldData
-		FROM tblSTRevertHolderDetail d
-		WHERE d.strTableColumnName IN ('dblUnitAfterDiscount', 'dtmBeginDate', 'dtmEndDate')
-	) src
-	PIVOT (
-			MAX(strOldData) FOR strTableColumnName IN (dblSalePrice, dblStandardCost, dblLastCost)
-	) piv
-) OldItemSpecialPricing
-	ON OldItemSpecialPricing.intRevertHolderDetailId = RHD.intRevertHolderDetailId
-LEFT JOIN tblICItemSpecialPricing ItemSpecialPricing_Old
-	ON OldItemSpecialPricing.intItemSpecialPricingId = ItemSpecialPricing_Old.intItemSpecialPricingId
+---- OLD DATA tblICItemSpecialPricing
+--LEFT JOIN
+--(
+--	SELECT * FROM
+--	(
+--		SELECT DISTINCT
+--		          d.intRevertHolderDetailId
+--				  , d.intItemSpecialPricingId
+--				  , d.intItemId
+--				  , d.strTableColumnName
+--				  , d.strOldData
+--		FROM tblSTRevertHolderDetail d
+--		WHERE d.strTableColumnName IN ('dblUnitAfterDiscount', 'dtmBeginDate', 'dtmEndDate')
+--	) src
+--	PIVOT (
+--			MAX(strOldData) FOR strTableColumnName IN (dblSalePrice, dblStandardCost, dblLastCost)
+--	) piv
+--) OldItemSpecialPricing
+--	ON OldItemSpecialPricing.intRevertHolderDetailId = RHD.intRevertHolderDetailId
+--LEFT JOIN tblICItemSpecialPricing ItemSpecialPricing_Old
+--	ON OldItemSpecialPricing.intItemSpecialPricingId = ItemSpecialPricing_Old.intItemSpecialPricingId
