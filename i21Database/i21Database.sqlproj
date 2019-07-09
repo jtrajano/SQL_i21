@@ -7654,6 +7654,7 @@
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerSettleStorage.sql" />
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerPatronage.sql" />
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
+    <None Include="Scripts\Post-Deployment\CT\PariallyToPartially.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
