@@ -7722,6 +7722,7 @@
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyCopyRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCopyInterCompanyDMSRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspSTDuplicateStore.sql" />
+    <Build Include="dbo\User Defined Types\StoreItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
