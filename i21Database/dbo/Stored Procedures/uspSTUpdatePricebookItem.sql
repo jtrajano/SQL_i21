@@ -374,7 +374,7 @@ BEGIN TRY
 						,@intCountGroupId			= NULL
 						,@intStorageLocationId		= NULL
 						,@dblReorderPoint			= NULL 
-						,@strItemLocationDescription = @strPosDescription 
+						,@strItemLocationDescription = @strPOSDescription 
 
 						,@intEntityUserSecurityId = @intEntityId
 
