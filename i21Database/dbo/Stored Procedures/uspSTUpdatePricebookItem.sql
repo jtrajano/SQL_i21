@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdatePricebookItem]
 	@intItemId							INT				
-	, @strDescription					NVARCHAR(250)	NULL
-	, @intCategoryId					INT				NULL
+	, @strDescription					NVARCHAR(250)
+	, @intCategoryId					INT				
 
-	, @intFamilyId						INT				NULL
-	, @intClassId						INT				NULL
-	, @intVendorId						INT				NULL
-	, @strPOSDescription				NVARCHAR(250)	NULL
+	, @intFamilyId						INT				
+	, @intClassId						INT				
+	, @intVendorId						INT				
+	, @strPOSDescription				NVARCHAR(250)	
 
 	, @strVendorProduct					NVARCHAR(100)
 
@@ -33,13 +33,13 @@ BEGIN
 		PRINT 'Commented'
 
 		SET @ysnResultSuccess = 1
-		SET @strResultMessage = ''
+		SET @strResultMessage = 'Success'
 
 	END TRY
 
 	BEGIN CATCH
-		--SET @ysnResultSuccess = 0
-		--SET @strResultMessage = ERROR_MESSAGE()  
+		SET @ysnResultSuccess = 0
+		SET @strResultMessage = ERROR_MESSAGE()  
 	END CATCH
 END
 
