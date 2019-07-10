@@ -32,7 +32,7 @@ AS
                 THEN 'Posted'
                 ELSE 'Audit Record '
             END COLLATE Latin1_General_CI_AS strStatus,
-        E.strUserName COLLATE Latin1_General_CI_AS strUserName,
+        EM.strName COLLATE Latin1_General_CI_AS strUserName,
         A.strTransactionId COLLATE Latin1_General_CI_AS strTransactionId,
         A.strTransactionType COLLATE Latin1_General_CI_AS strTransactionType,
         A.strTransactionForm COLLATE Latin1_General_CI_AS strTransactionForm,
@@ -47,7 +47,7 @@ AS
 		A.strDocument COLLATE Latin1_General_CI_AS strDocument,
 		A.ysnIsUnposted,
 		A.intTransactionId,
-		E.intEntityId,
+		EM.intEntityId,
 		A.strComments COLLATE Latin1_General_CI_AS strComments,
 		U.strUOMCode COLLATE Latin1_General_CI_AS strUOMCode, 
         Loc.strLocationName COLLATE Latin1_General_CI_AS strLocationName,
@@ -55,9 +55,9 @@ AS
         ICCom.strCommodityCode COLLATE Latin1_General_CI_AS strCommodityCode,
         ISNULL(dblSourceUnitDebit,0) dblSourceUnitDebit,
         ISNULL(dblSourceUnitCredit,0) dblSourceUnitCredit,
-		F.strUserName COLLATE Latin1_General_CI_AS strSourceEntity,
+		SE.strName COLLATE Latin1_General_CI_AS strSourceEntity,
 		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId,
-		AP.strVendorId COLLATE Latin1_General_CI_AS strVendorId,
+		SE.strEntityNo COLLATE Latin1_General_CI_AS strSourceEntityNo,
         A.intSourceEntityId
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
@@ -65,20 +65,14 @@ AS
      LEFT JOIN tblSMCompanyLocation Loc ON A.intSourceLocationId = Loc.intCompanyLocationId
      LEFT JOIN tblICUnitMeasure ICUOM ON ICUOM.intUnitMeasureId = A.intSourceUOMId
      LEFT JOIN tblICCommodity ICCom ON ICCom.intCommodityId = A.intCommodityId
+     LEFT JOIN tblEMEntity EM ON EM.intEntityId = A.intEntityId
 	 OUTER APPLY (
 		SELECT TOP 1 dblLbsPerUnit,strUOMCode FROM tblGLAccountUnit WHERE intAccountUnitId = B.intAccountUnitId
 	 )U
 	 OUTER APPLY(
-		SELECT TOP 1 intEntityId,strName strUserName FROM [tblEMEntity] WHERE intEntityId = A.intEntityId
-	 )E
-	 OUTER APPLY(
 		SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = A.intCurrencyId
 	 )D
-	  OUTER APPLY(
-		SELECT TOP 1 strName strUserName FROM [tblEMEntity] WHERE intEntityId = A.intSourceEntityId
-	 )F
 	 OUTER APPLY (
-		SELECT TOP 1 strVendorId from tblAPVendor WHERE intEntityId = A.intSourceEntityId
-		AND A.strModuleName = 'Accounts Payable'
-	 )AP
+		SELECT TOP 1 strName, strEntityNo  from tblEMEntity  WHERE intEntityId = A.intSourceEntityId
+	 )SE
 GO
