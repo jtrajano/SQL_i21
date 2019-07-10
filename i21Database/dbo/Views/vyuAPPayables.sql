@@ -190,7 +190,7 @@ FROM dbo.tblAPPayment  A
  INNER JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
  LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId		
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
@@ -349,7 +349,7 @@ FROM dbo.tblARPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strRecordNumber = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType NOT IN (2)
