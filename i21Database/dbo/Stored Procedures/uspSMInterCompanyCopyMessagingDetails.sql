@@ -52,6 +52,18 @@ BEGIN
 			[intActivitySourceId]	[int] NULL
 		)
 
+		IF OBJECT_ID('tempdb..#TempActivityAttendee') IS NOT NULL
+			DROP TABLE #TempActivityAttendee
+
+		CREATE TABLE #TempActivityAttendee
+		(
+			[intActivityAttendeeId]		INT,
+			[intActivityId]				INT,
+			[intEntityId]				INT,
+			[ysnAddCalendarEvent]		BIT
+
+		)
+
 		IF OBJECT_ID('tempdb..#TempComment') IS NOT NULL
 			DROP TABLE #TempComment
 
@@ -70,6 +82,25 @@ BEGIN
 			[intActivityId]		INT NULL
 		)
 
+		IF OBJECT_ID('tempdb..#TempNotification') IS NOT NULL
+			DROP TABLE #TempNotification
+
+		CREATE TABLE #TempNotification
+		(
+			[intNotificationId] INT              NOT NULL,	
+			[intCommentId]      INT              NULL,
+			[intActivityId]     INT              NULL,
+			[strTitle]			NVARCHAR(255)	 COLLATE Latin1_General_CI_AS NULL,
+			[strAction]         NVARCHAR(255)    COLLATE Latin1_General_CI_AS NULL,
+			[strType]           NVARCHAR(255)    COLLATE Latin1_General_CI_AS NULL,
+			[strRoute]          NVARCHAR(MAX)    COLLATE Latin1_General_CI_AS NULL,
+			[ysnSent]			BIT				 DEFAULT ((0)) NULL,	
+			[ysnSeen]			BIT				 DEFAULT ((0)) NULL, 
+			[ysnRead]           BIT              DEFAULT ((0)) NULL,
+			[intFromEntityId]	INT				 NULL, 
+			[intToEntityId]     INT              NULL,
+		)
+
 		IF OBJECT_ID('tempdb..#TempTransferLog') IS NOT NULL
 			DROP TABLE #TempTransferLog
 
@@ -79,18 +110,6 @@ BEGIN
 			[intSourceRecordId]							INT,
 			[intDestinationRecordId]					INT,
 			[intDestinationCompanyId]					INT NULL --TODO
-
-		)
-	
-		IF OBJECT_ID('tempdb..#TempActivityAttendee') IS NOT NULL
-			DROP TABLE #TempActivityAttendee
-
-		CREATE TABLE #TempActivityAttendee
-		(
-			[intActivityAttendeeId]		INT,
-			[intActivityId]				INT,
-			[intEntityId]				INT,
-			[ysnAddCalendarEvent]		BIT
 
 		)
 
@@ -128,7 +147,8 @@ BEGIN
 		WHERE (
 			b.intTransactionId = @intSourceTransactionId AND
 			c.intTransactionId = @intDestinationTransactionId AND
-			a.intDestinationCompanyId = @intDestinationCompanyId AND
+			--a.intDestinationCompanyId = @intDestinationCompanyId AND
+			ISNULL(a.intDestinationCompanyId, 0) = ISNULL(@intDestinationCompanyId, 0) AND
 			a.strTable = 'tblSMActivity'
 		)
 
@@ -139,9 +159,10 @@ BEGIN
 		INNER JOIN tblSMActivity b ON a.intSourceRecordId = b.intActivityId
 		INNER JOIN tblSMActivity c ON a.intDestinationRecordId = c.intActivityId
 		WHERE (
-			c.intTransactionId = @intSourceTransactionId AND
 			b.intTransactionId = @intDestinationTransactionId AND
-			a.intDestinationCompanyId = @intDestinationCompanyId AND
+			c.intTransactionId = @intSourceTransactionId AND
+			--a.intDestinationCompanyId = @intDestinationCompanyId AND
+			ISNULL(a.intDestinationCompanyId, 0) = ISNULL(@intDestinationCompanyId, 0) AND
 			a.strTable = 'tblSMActivity'
 		)
 
@@ -156,7 +177,7 @@ BEGIN
 			[ysnRemind], [strReminder], [strStatus], [strPriority], [strCategory], [intAssignedTo], [strActivityNo], [strRelatedTo], [strRecordNo], [strLocation], [strDetails], [strShowTimeAs],
 			[ysnPrivate], [ysnPublic], [dtmCreated], [dtmModified], [intCreatedBy], [strImageId], [strMessageType], [strFilter], [ysnDismiss], [intActivitySourceId]
 		FROM tblSMActivity
-		WHERE intTransactionId = @intSourceTransactionId AND 
+		WHERE intTransactionId = @intSourceTransactionId AND strType = 'Comment' AND
 		intActivityId NOT IN (
 			SELECT intSourceRecordId FROM #TempTransferLog
 		)
@@ -180,7 +201,12 @@ BEGIN
 			FROM #TempActivity
 					
 			SET @intNewActivityId = SCOPE_IDENTITY()
-			SELECT @strNewActivityNo = strActivityNo FROM tblSMActivity WHERE intActivityId = @intNewActivityId
+
+			---STARTING NUMBERS--
+			SELECT @strNewActivityNo = strPrefix + CONVERT(VARCHAR, intNumber) FROM tblSMStartingNumber WHERE strTransactionType = 'Activity' AND strModule = 'System Manager';
+			UPDATE tblSMActivity SET strActivityNo = @strNewActivityNo WHERE intActivityId = @intNewActivityId
+			UPDATE tblSMStartingNumber SET intNumber = intNumber+1 WHERE strTransactionType = 'Activity' and strModule = 'System Manager'
+			---END STARTING NUMBERS--
 
 			INSERT INTO tblSMInterCompanyTransferLogForComment (
 				[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
@@ -198,7 +224,7 @@ BEGIN
 			--copy attendee through looping
 			WHILE EXISTS(SELECT 1 FROM #TempActivityAttendee)
 			BEGIN
-				SELECT TOP 1 @intActivityAttendeeId = intActivityAttendee FROM #TempActivityAttendee
+				SELECT TOP 1 @intActivityAttendeeId = intActivityAttendeeId FROM #TempActivityAttendee
 						
 				INSERT INTO tblSMActivityAttendee(
 					[intActivityId], [intEntityId], [ysnAddCalendarEvent]
@@ -315,7 +341,8 @@ BEGIN
 			WHERE (
 				b.intActivityId = @intSourceActivityId AND
 				c.intActivityId = @intDestinationActivityId AND
-				a.intDestinationCompanyId = @intDestinationCompanyId AND
+				--a.intDestinationCompanyId = @intDestinationCompanyId AND
+				ISNULL(a.intDestinationCompanyId, 0) = ISNULL(@intDestinationCompanyId, 0) AND
 				a.strTable = 'tblSMActivityAttendee'
 			)
 
@@ -328,7 +355,8 @@ BEGIN
 			WHERE (
 				c.intActivityId = @intSourceActivityId AND
 				b.intActivityId = @intDestinationActivityId AND
-				a.intDestinationCompanyId = @intDestinationCompanyId AND
+				--a.intDestinationCompanyId = @intDestinationCompanyId AND
+				ISNULL(a.intDestinationCompanyId, 0) = ISNULL(@intDestinationCompanyId, 0) AND
 				a.strTable = 'tblSMActivityAttendee'
 			)
 
@@ -345,7 +373,7 @@ BEGIN
 			--copy attendee through looping
 			WHILE EXISTS(SELECT 1 FROM #TempActivityAttendee)
 			BEGIN
-				SELECT TOP 1 @intActivityAttendeeId = intActivityAttendeeI FROM #TempActivityAttendee
+				SELECT TOP 1 @intActivityAttendeeId = intActivityAttendeeId FROM #TempActivityAttendee
 						
 				INSERT INTO tblSMActivityAttendee(
 					[intActivityId], [intEntityId], [ysnAddCalendarEvent]
@@ -375,7 +403,8 @@ BEGIN
 			WHERE (
 				b.intActivityId = @intSourceActivityId AND
 				c.intActivityId = @intDestinationActivityId AND
-				a.intDestinationCompanyId = @intDestinationCompanyId AND
+				--a.intDestinationCompanyId = @intDestinationCompanyId AND
+				ISNULL(a.intDestinationCompanyId, 0) = ISNULL(@intDestinationCompanyId, 0) AND
 				a.strTable = 'tblSMComment'
 			)
 
@@ -388,7 +417,8 @@ BEGIN
 			WHERE (
 				c.intActivityId = @intSourceActivityId AND
 				b.intActivityId = @intDestinationActivityId AND
-				a.intDestinationCompanyId = @intDestinationCompanyId AND
+				--a.intDestinationCompanyId = @intDestinationCompanyId AND
+				ISNULL(a.intDestinationCompanyId, 0) = ISNULL(@intDestinationCompanyId, 0) AND
 				a.strTable = 'tblSMComment'
 			)
 

@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[tblSMComment] (
 	[intEntityId]		INT NULL,
 	[intTransactionId]	INT NULL,
 	[intActivityId]		INT NULL,
-	[intConcurrencyId]	INT NOT NULL,
+	[intConcurrencyId]	INT NOT NULL DEFAULT 1,
     CONSTRAINT [PK_tblSMComment] PRIMARY KEY CLUSTERED ([intCommentId] ASC),
 	CONSTRAINT [FK_tblSMComment_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]), 
 	CONSTRAINT [FK_tblSMComment_tblSMActivity] FOREIGN KEY ([intActivityId]) REFERENCES [tblSMActivity]([intActivityId]) ON DELETE CASCADE
