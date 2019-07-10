@@ -7723,6 +7723,11 @@
     <Build Include="dbo\Stored Procedures\uspSMCopyInterCompanyDMSRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspSTDuplicateStore.sql" />
     <Build Include="dbo\User Defined Types\StoreItemPricing.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeLossesImportError.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeLossesImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRecipeLossesImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRecipeLossesImportValidate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRecipeLossesImportErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
