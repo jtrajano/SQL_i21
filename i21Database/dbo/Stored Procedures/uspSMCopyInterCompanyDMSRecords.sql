@@ -1,60 +1,21 @@
 ﻿CREATE PROCEDURE uspSMCopyInterCompanyDMSRecords
-@intInterCompanyMappingId INT 
+@currentTransId INT, 
+@referenceTransId INT,
+@referenceCompanyId INT
 
-AS
+as
 begin
 
-declare @mapping table
-(
-[intMappingId] int  NOT NULL PRIMARY KEY IDENTITY(1,1),
- [intInterCompanyMappingId] INT,
- [intCurrentTransactionId] INT,
-  [intReferenceTransactionId] INT,
- [intReferenceCompanyId] INT
+	IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL) 
+				DROP TABLE #exclusionTable
 
-)
-			
-DECLARE @intTransactionId INT = (SELECT TOP 1 intCurrentTransactionId FROM tblSMInterCompanyMapping WHERE intInterCompanyMappingId = @intInterCompanyMappingId)
+	CREATE TABLE #exclusionTable
+	(
+		[intSourceRecordId] INT
+	)
 
-IF (ISNULL(@intTransactionId,0) = 0)
-	begin
-		PRINT 'Transaction Id cannot be null'
-		RETURN;
-	end
-
-
-	/************ REVERSE ***********/
-	insert into @mapping
-		select intInterCompanyMappingId, 
-		intCurrentTransactionId, 
-		intReferenceTransactionId, 
-		intReferenceCompanyId 
-		from tblSMInterCompanyMapping where intCurrentTransactionId = @intTransactionId and ISNULL(intReferenceCompanyId,'') = '' --select only null intercompanyId means same db and baliktaran
-
-
-	insert into @mapping (intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId)
-		select 
-			intInterCompanyMappingId, 
-			intReferenceTransactionId, --interchange
-			intCurrentTransactionId, --interchange
-			intReferenceCompanyId 
-		from tblSMInterCompanyMapping 
-		where intCurrentTransactionId = @intTransactionId and isnull(intReferenceCompanyId,'') = '' --select only null intercompanyId means same db and baliktaran
-		
-		--if not exists insert single entry only /
-		if(not exists(select top 1 1 from @mapping))
-			begin
-				insert into @mapping
-					select intInterCompanyMappingId, 
-					intCurrentTransactionId, 
-					intReferenceTransactionId, 
-					intReferenceCompanyId 
-					from tblSMInterCompanyMapping where intCurrentTransactionId = @intTransactionId
-			end
-	/******* end reverse *******/
-
-		declare @dmsTable table
-		(
+	declare @dmsTable table
+	(
 			[intDocumentId] int,
 			[strName] nvarchar(max),
 			[intDocumentSourceFolderId] int,
@@ -63,47 +24,23 @@ IF (ISNULL(@intTransactionId,0) = 0)
 			[intSize] int,
 			[strType] nvarchar(max),
 			[intUploadId] int
-		)
+	)
 
-		
-		IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL) 
-				DROP TABLE #exclusionTable
 
-		CREATE TABLE #exclusionTable
-		(
-			[intSourceRecordId] INT
-		)
+	declare @dbName nvarchar(200) = (SELECT DB_NAME())
+	declare @exclusionSQL nvarchar(max) = N'';
 
-	while(exists(select top 1 1 from @mapping))
+	 IF(ISNULL(@referenceCompanyId,'') <> '')
 		begin
-			declare @referenceTransId INT
-			declare @currentTransId INT 
-			declare @referenceCompanyId INT
-			declare @interCompanyMappingId int
-			declare @intMappingId INT
-	
-			select top 1
-			    @intMappingId = intMappingId,
-				@interCompanyMappingId = intInterCompanyMappingId,
-				@currentTransId = intCurrentTransactionId,
-		 		@referenceTransId = intReferenceTransactionId,
-				@referenceCompanyId = intReferenceCompanyId
-		    from @mapping 
-
-			declare @dbName nvarchar(200) = (SELECT DB_NAME())
-			declare @exclusionSQL nvarchar(max) = N'';
-
-		    IF(ISNULL(@referenceCompanyId,'') <> '')
-				begin
-					set @dbName = (select top 1 strDatabaseName from tblSMInterCompany where intInterCompanyId = @referenceCompanyId)
-				end
+			set @dbName = (select top 1 strDatabaseName from tblSMInterCompany where intInterCompanyId = @referenceCompanyId)
+		end
 
 
 		delete from #exclusionTable
 
-			--validation#1
+		--validation#1
 		set @exclusionSQL =	'insert into #exclusionTable
-			select A.intSourceRecordId from tblSMInterCompanyTransferLog A 
+			select A.intSourceRecordId from tblSMInterCompanyTransferLogForDMS A 
 			inner join tblSMDocument B on B.intDocumentId = A.intSourceRecordId
 			inner join [@dbname].[dbo].[tblSMDocument] C on C.intDocumentId = A.intDestinationRecordId
 			where (
@@ -114,7 +51,7 @@ IF (ISNULL(@intTransactionId,0) = 0)
 		
 			--validation#2
 			insert into #exclusionTable
-			select A.intDestinationRecordId from tblSMInterCompanyTransferLog A
+			select A.intDestinationRecordId from tblSMInterCompanyTransferLogForDMS A
 			inner join tblSMDocument B on B.intDocumentId = A.intSourceRecordId
 			inner join [@dbname].[dbo].[tblSMDocument] C on C.intDocumentId = A.intDestinationRecordId
 			  
@@ -129,9 +66,7 @@ IF (ISNULL(@intTransactionId,0) = 0)
 
 			 exec sp_executesql @exclusionSQL
 
-
-
-			delete from @dmsTable
+			 delete from @dmsTable
 
 			--insert those not in existing logs
 			insert into @dmsTable
@@ -140,10 +75,7 @@ IF (ISNULL(@intTransactionId,0) = 0)
 			(
 				select  intSourceRecordId from #exclusionTable
 			) 
-			
 
-
-			--if source and dest is same db
 			while(exists(select top 1 1 from @dmsTable))
 				begin
 					declare @intDocumentId int;
@@ -157,12 +89,8 @@ IF (ISNULL(@intTransactionId,0) = 0)
 
 					declare @smUploadSQL nvarchar(max) = N''
 					declare @smDocumentSQL nvarchar(max) = N''
-				--	declare @dbName nvarchar(200) = (SELECT DB_NAME())
 					declare @intNewUploadId INT
 					declare @intNewDocumentId INT
-					
-
-					--set dbname
 					
 
 					select top 1 @intDocumentId = intDocumentId,
@@ -204,17 +132,6 @@ IF (ISNULL(@intTransactionId,0) = 0)
 
 				 delete from @dmsTable where intDocumentId = @intDocumentId
 				end
-		
 
 
-		--delete mapping entry
-		delete from @mapping where intMappingId = @intMappingId
-	end
-
-
-END
-
-
-
-
-
+end
