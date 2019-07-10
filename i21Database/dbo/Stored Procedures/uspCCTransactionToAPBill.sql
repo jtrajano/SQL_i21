@@ -145,7 +145,7 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SET success = 1
+			SET @success = 1
 		END
 
 			--DECLARE @voucherDetailCC AS VoucherDetailCC
