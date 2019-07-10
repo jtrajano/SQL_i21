@@ -20,6 +20,7 @@ BEGIN TRY
 				@intTicketTypeId				INT = NULL,
 			    @intTicketType					INT = NULL,
 			    @strInOutFlag					NVARCHAR(MAX) = NULL,
+				@strTransactionType				NVARCHAR(100) = NULL,
 				@dblQty							NUMERIC(18,6),
 				@dblConvertedQty				NUMERIC(18,6),
 				@ErrMsg							NVARCHAR(MAX),
@@ -53,7 +54,8 @@ BEGIN TRY
 		dblQty						NUMERIC(18,6),
 		ysnDestWtGrd				BIT,
 		dblShippedQty				NUMERIC(18,6),
-		intShippedQtyUOMId			INT	
+		intShippedQtyUOMId			INT,
+		strTransactionType			NVARCHAR(100) COLLATE Latin1_General_CI_AS    NULL
 	)
 
 	INSERT INTO @tblToProcess(
@@ -62,7 +64,8 @@ BEGIN TRY
 		,[intContractHeaderId]
 		,[intItemUOMId]
 		,[dblQty]
-		,[intTicketId])
+		,[intTicketId]
+		,[strTransactionType])
 	SELECT
 		 I.[intInvoiceDetailId]
 		,I.[intContractDetailId]
@@ -70,15 +73,11 @@ BEGIN TRY
 		,I.[intItemUOMId]
 		,I.[dblQtyShipped]
 		,I.[intTicketId]
+		,I.[strTransactionType]
 	FROM
 		@ItemsFromInvoice I
 	WHERE
-		I.intContractDetailId IS NOT NULL
-		-- AND	( --ALREADY ADDED THIS FILTER ON uspARPostInvoiceIntegrations
-		-- 	(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND I.[intLoadDetailId] IS  NULL)
-		-- 	OR
-		-- 	(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL))
-		-- 	)
+		I.intContractDetailId IS NOT NULL		
 		AND ISNULL(I.[intTransactionId],0) = 0
 		AND intTicketId IS NULL
 
@@ -95,6 +94,7 @@ BEGIN TRY
 				,[ysnDestWtGrd]
 				,[dblShippedQty]
 				,[intShippedQtyUOMId]
+				,[strTransactionType]
 		)
 		SELECT	 I.[intInvoiceDetailId]
 				,I.[intContractDetailId]
@@ -103,8 +103,9 @@ BEGIN TRY
 				,I.[dblQtyShipped]
 				,I.[intTicketId]
 				,1
-				,S.dblQuantity
-				,S.intItemUOMId
+				,S.[dblQuantity]
+				,S.[intItemUOMId]
+				,I.[strTransactionType]
 		FROM	@ItemsFromInvoice	I
 		JOIN	tblSCTicket					T	ON	T.intTicketId		=	I.intTicketId
 		JOIN	tblCTWeightGrade			W	ON	W.intWeightGradeId	=	T.intWeightId
@@ -132,6 +133,7 @@ BEGIN TRY
 				@intTicketTypeId				=	NULL,
 				@intTicketType					=   NULL,
 				@strInOutFlag					=   NULL,
+				@strTransactionType				=	NULL,
 				@ysnDestWtGrd					=	NULL,
 				@dblShippedQty					=	NULL,
 				@intShippedQtyUOMId				=	NULL
@@ -143,6 +145,7 @@ BEGIN TRY
 				@ysnDestWtGrd					=	P.[ysnDestWtGrd],
 				@dblShippedQty					=	P.[dblShippedQty],
 				@intShippedQtyUOMId				=	P.[intShippedQtyUOMId],
+				@strTransactionType				=   P.[strTransactionType],
 
 				@intTicketId					=   T.[intTicketId],
 				@intTicketTypeId				=   T.[intTicketTypeId], --SELECT * FROM tblSCListTicketTypes
@@ -180,10 +183,6 @@ BEGIN TRY
 				SET	@ReduceBalance	=	0
 				
 		END
-		-- IF ISNULL(@dblConvertedQty,0) = 0
-		-- BEGIN
-		-- 	RAISERROR('UOM does not exist.',16,1)
-		-- END
 		
 		SELECT	@dblSchQuantityToUpdate = - @dblConvertedQty
 					
@@ -209,12 +208,15 @@ BEGIN TRY
 							@strScreenName			=	'Invoice' 
 				END
 				
-				EXEC	uspCTUpdateScheduleQuantity
-						@intContractDetailId	=	@intContractDetailId,
-						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-						@intUserId				=	@intUserId,
-						@intExternalId			=	@intInvoiceDetailId,
-						@strScreenName			=	'Invoice' 
+				IF ISNULL(@strTransactionType, '') <> 'Credit Memo'
+				BEGIN
+					EXEC	uspCTUpdateScheduleQuantity
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInvoiceDetailId,
+							@strScreenName			=	'Invoice' 
+					END
 		END
 
 		IF @ysnDestWtGrd = 1
