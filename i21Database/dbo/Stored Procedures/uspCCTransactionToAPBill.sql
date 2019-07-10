@@ -142,7 +142,10 @@ BEGIN
 				,@error = @errorMessage OUTPUT
 				,@createdVouchersId = @created1099KVouchersId OUTPUT
 			END
-
+		END
+		ELSE
+		BEGIN
+			SET success = 1
 		END
 
 			--DECLARE @voucherDetailCC AS VoucherDetailCC
@@ -257,6 +260,10 @@ BEGIN
 		GROUP BY C.intBillId, D.intTransactionType
 
 		OPEN @CursorTran
+		IF (@@CURSOR_ROWS = 0)
+		BEGIN
+			SET @success = 1
+		END
 		FETCH NEXT FROM @CursorTran INTO @intBillId, @intTransactionType
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
