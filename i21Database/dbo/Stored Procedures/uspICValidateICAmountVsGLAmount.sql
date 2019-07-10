@@ -35,7 +35,7 @@ BEGIN
 			,strBatchId
 			,dblICAmount
 			,intAccountId  
-			,strItemDescription 
+			--,strItemDescription 
 		)
 		SELECT	
 			[strTransactionType] = ty.strName
@@ -46,7 +46,7 @@ BEGIN
 					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
 			,[intAccountId] = glAccount.intAccountId
-			,[strItemDescription] = i.strDescription
+			--,[strItemDescription] = i.strDescription
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -73,7 +73,7 @@ BEGIN
 			,t.strTransactionId
 			,t.strBatchId
 			,glAccount.intAccountId
-			,i.strDescription
+			--,i.strDescription
 	END 
 	ELSE 
 	BEGIN 
