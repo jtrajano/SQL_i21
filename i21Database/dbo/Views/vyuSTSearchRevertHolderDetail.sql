@@ -27,15 +27,15 @@ SELECT --DISTINCT
 								THEN CASE
 										-- tblICItem
 										WHEN RHD.strTableColumnName = 'intCategoryId'
-											THEN Category.strCategoryCode
+											THEN ISNULL(Category.strCategoryCode, '')
 										WHEN RHD.strTableColumnName = 'strCountCode'
-											THEN Item.strCountCode
+											THEN ISNULL(Item.strCountCode, '')
 
 										-- tblICItemLocation
 										WHEN RHD.strTableColumnName = 'intDepositPLUId'
-											THEN Uom_New.strUpcCode
+											THEN ISNULL(Uom_New.strUpcCode, '')
 										WHEN RHD.strTableColumnName = 'strCounted'
-											THEN ItemLoc.strCounted
+											THEN ISNULL(ItemLoc.strCounted, '')
 										WHEN RHD.strTableColumnName = 'intFamilyId'
 											THEN ISNULL(SubCatFamily_New.strSubcategoryId, '')
 										WHEN RHD.strTableColumnName = 'intClassId'
@@ -51,9 +51,9 @@ SELECT --DISTINCT
 										WHEN RHD.strTableColumnName = 'dblSuggestedQty'
 											THEN CAST(ItemLoc.dblSuggestedQty AS NVARCHAR(50))
 										WHEN RHD.strTableColumnName = 'intStorageLocationId'
-											THEN StorageLoc_New.strName
+											THEN ISNULL(StorageLoc_New.strName, '')
 										WHEN RHD.strTableColumnName = 'intCountGroupId'
-											THEN CountGroup_New.strCountGroup
+											THEN ISNULL(CountGroup_New.strCountGroup, '')
 
 										WHEN RHD.strTableColumnName = 'ysnTaxFlag1'
 											THEN CASE WHEN ItemLoc.ysnTaxFlag1 = 1 THEN 'Yes' ELSE 'No' END
@@ -123,11 +123,12 @@ SELECT --DISTINCT
 								ISNULL(RHD.strNewData, '')
 					END
 	, strPreviewOldData	= CASE
-								
+								WHEN RHD.strTableColumnDataType = 'DATETIME'
+									THEN CONVERT(VARCHAR(10), CAST(RHD.strOldData AS DATE), 101)
 								WHEN RHD.strOldData = 'true' THEN 'Yes'
 								WHEN RHD.strOldData = 'false' THEN 'No'
 								ELSE
-									RHD.strPreviewOldData
+									ISNULL(RHD.strPreviewOldData, RHD.strOldData)
 						END
 --, strPreviewOldData = CASE
 --							WHEN RHD.strTableColumnName = 'intCategoryId'

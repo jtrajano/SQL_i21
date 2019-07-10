@@ -298,7 +298,8 @@ BEGIN TRY
 								intMinimumAge				INT		NULL,
 								dblMinOrder					NUMERIC(18, 6) NULL,
 								dblSuggestedQty				NUMERIC(18, 6) NULL,
-								intStorageLocationId		INT		NULL
+								intStorageLocationId		INT		NULL,
+								intCountGroupId				INT		NULL
 						)
 
 
@@ -335,7 +336,8 @@ BEGIN TRY
 							intMinimumAge,
 							dblMinOrder,
 							dblSuggestedQty,
-							intStorageLocationId
+							intStorageLocationId,
+							intCountGroupId
 						)
 						SELECT DISTINCT
 							intItemLocationId		= piv.intItemLocationId,
@@ -366,7 +368,8 @@ BEGIN TRY
 							intMinimumAge			= CASE WHEN piv.intMinimumAge = '' THEN NULL ELSE piv.intMinimumAge END, -- piv.intMinimumAge,
 							dblMinOrder				= CASE WHEN piv.dblMinOrder = '' THEN NULL ELSE piv.dblMinOrder END, -- piv.dblMinOrder,
 							dblSuggestedQty			= CASE WHEN piv.dblSuggestedQty = '' THEN NULL ELSE piv.dblSuggestedQty END, -- piv.dblSuggestedQty,
-							intStorageLocationId	= CASE WHEN piv.intStorageLocationId = '' THEN NULL ELSE piv.intStorageLocationId END --piv.intStorageLocationId
+							intStorageLocationId	= CASE WHEN piv.intStorageLocationId = '' THEN NULL ELSE piv.intStorageLocationId END, --piv.intStorageLocationId
+							intCountGroupId			= CASE WHEN piv.intCountGroupId = '' THEN NULL ELSE piv.intCountGroupId END --piv.intStorageLocationId
 						FROM (
 							SELECT detail.intItemLocationId
 								 , detail.strTableColumnName
@@ -381,7 +384,8 @@ BEGIN TRY
 						PIVOT (
 							MAX(strOldData) FOR strTableColumnName IN (ysnTaxFlag1,ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnDepositRequired, intDepositPLUId, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable,
 																		ysnReturnable, ysnSaleable, ysnIdRequiredLiquor, ysnIdRequiredCigarette, ysnPromotionalItem, ysnPrePriced, ysnApplyBlueLaw1, ysnApplyBlueLaw2,
-																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, intStorageLocationId)
+																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, 
+																		intStorageLocationId, intCountGroupId)
 						) piv
 
 
@@ -442,7 +446,8 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
-									 ItemLoc.intStorageLocationId
+									 ItemLoc.intStorageLocationId,
+									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc
 								INNER JOIN vyuSTSearchRevertHolderDetail detail
 									ON ItemLoc.intItemLocationId = detail.intItemLocationId	
@@ -492,8 +497,8 @@ BEGIN TRY
 											@intMinimumAge				INT,
 											@dblMinOrder				NUMERIC(18, 6),
 											@dblSuggestedQty			NUMERIC(18, 6),
-											@intStorageLocationId		INT
-				
+											@intStorageLocationId		INT,
+											@intCountGroupId			INT
 				
 
 								SELECT TOP 1 
@@ -525,7 +530,8 @@ BEGIN TRY
 											@intMinimumAge				= ISNULL(temp.intMinimumAge, ItemLoc.intMinimumAge),
 											@dblMinOrder				= ISNULL(temp.dblMinOrder, ItemLoc.dblMinOrder),
 											@dblSuggestedQty			= ISNULL(temp.dblSuggestedQty, ItemLoc.dblSuggestedQty),
-											@intStorageLocationId		= ISNULL(temp.intStorageLocationId, ItemLoc.intStorageLocationId) -- CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
+											@intStorageLocationId		= ISNULL(temp.intStorageLocationId, ItemLoc.intStorageLocationId), -- CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
+											@intCountGroupId			= ISNULL(temp.intCountGroupId, ItemLoc.intCountGroupId)
 								FROM @tempITEMLOCATION temp
 								INNER JOIN tblICItemLocation ItemLoc
 									ON temp.intItemLocationId = ItemLoc.intItemLocationId
@@ -570,7 +576,7 @@ BEGIN TRY
 										,@intMinimumAge								= @intMinimumAge 
 										,@dblMinOrder								= @dblMinOrder 
 										,@dblSuggestedQty							= @dblSuggestedQty
-										,@intCountGroupId							=  NULL
+										,@intCountGroupId							= @intCountGroupId
 										,@intStorageLocationId						= @intStorageLocationId 
 										,@dblReorderPoint							= NULL
 										,@strItemLocationDescription				= NULL 
@@ -665,7 +671,8 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
-									 ItemLoc.intStorageLocationId
+									 ItemLoc.intStorageLocationId,
+									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc
 								INNER JOIN vyuSTSearchRevertHolderDetail detail
 									ON ItemLoc.intItemLocationId = detail.intItemLocationId	
