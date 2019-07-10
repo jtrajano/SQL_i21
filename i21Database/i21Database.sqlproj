@@ -7713,6 +7713,10 @@
     <Build Include="dbo\Views\vyuSTPricebookMasterItemLocation.sql" />
     <Build Include="dbo\Views\vyuSTPricebookMasterItemVendorXref.sql" />
     <Build Include="dbo\Functions\fnCMGetBankReconDebitCreditValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MBasisImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MBasisValidate.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasisImport_ErrLog.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasisImport.sql" />
     <None Include="Scripts\Post-Deployment\CT\PariallyToPartially.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyUpdateMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyCopyRecords.sql" />
