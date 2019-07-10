@@ -22,7 +22,7 @@ SELECT
 	 , B.dblNetWeight
 	 , B.dblVolume
 	 , B.dblWeight
-	 , B.dblDiscount
+	 , (B.dblDiscount / 100) * B.dblTotal AS dblDiscount
 	 , B.dblCost
 	 , B.dblTotal
 	 , B.dblTax
