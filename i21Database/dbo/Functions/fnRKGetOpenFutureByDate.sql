@@ -88,6 +88,7 @@ BEGIN
 		, intOptionMonthId
 		, strOptionMonth
 		, dblStrike
+		, dblPrice
 		, strOptionType
 		, intSelectedInstrumentTypeId
 		, intInstrumentTypeId
@@ -131,6 +132,7 @@ BEGIN
 		, intOptionMonthId
 		, strOptionMonth
 		, dblStrike
+		, dblPrice
 		, strOptionType
 		, intSelectedInstrumentTypeId
 		, intInstrumentTypeId
@@ -181,6 +183,7 @@ BEGIN
 				, FOT.intOptionMonthId
 				, strOptionMonth = FOT.strOptionMonthYear
 				, FOT.dblStrike
+				, FOT.dblPrice
 				, FOT.strOptionType
 				, FOT.intSelectedInstrumentTypeId
 				, FOT.intInstrumentTypeId
@@ -253,6 +256,7 @@ BEGIN
 				, FOT.intOptionMonthId
 				, FOT.strOptionMonthYear AS strOptionMonth
 				, FOT.dblStrike
+				, FOT.dblPrice
 				, FOT.strOptionType
 				, FOT.intSelectedInstrumentTypeId
 				, FOT.intInstrumentTypeId
@@ -322,6 +326,7 @@ BEGIN
 				, intOptionMonthId
 				, History.strOptionMonth
 				, History.dblStrike
+				, History.dblPrice
 				, History.strOptionType
 				, intSelectedInstrumentTypeId = CASE WHEN strSelectedInstrumentType = 'Exchange Traded' THEN 1
 													WHEN strSelectedInstrumentType = 'OTC' THEN 2
