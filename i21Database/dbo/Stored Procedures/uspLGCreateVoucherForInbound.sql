@@ -146,7 +146,7 @@ BEGIN TRY
 		,[dblQuantityToBill] = LD.dblQuantity
 		,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 		,[intQtyToBillUOMId] = LD.intItemUOMId
-		,[dblCost] = ISNULL(AD.dblSeqPrice, 0)
+		,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.dblSeqPrice, 0) ELSE LD.dblUnitPrice END)
 		,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 		,[intCostUOMId] = AD.intSeqPriceUOMId
 		,[dblNetWeight] = ISNULL(LD.dblNet,0)
