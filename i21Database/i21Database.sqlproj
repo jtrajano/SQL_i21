@@ -7733,6 +7733,10 @@
     <Build Include="dbo\Tables\tblSTLotteryGame.sql" />
     <Build Include="dbo\Views\vyuSTItemPricingAndUOM.sql" />
     <Build Include="dbo\Views\vyuSTItemPricingStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCommodityActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCommodityPositionDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCommodityPositionReport.sql" />
+    <Build Include="dbo\Tables\tblICStagingCommodityActivity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
