@@ -23,6 +23,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, 1 AS intCount
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBillArchive A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -54,6 +55,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, 2 AS intCount
 	-- ,'Taxes' AS [Info]
 FROM dbo.tblAPBillArchive A
 INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -65,16 +67,16 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0 AND B.dblTax != 0
 UNION ALL   
 SELECT  A.dtmDatePaid AS dtmDate,    
-	 C.intBillId,   
-	 C.strBillId ,
-	 CAST(
-		 	(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment > 0
+	C.intBillId,   
+	C.strBillId ,
+	CAST(
+			(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment > 0
 				THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId <> 122 OR E.intBankTransactionTypeId IS NULL)
-						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
+						THEN B.dblPayment * -1 ELSE B.dblPayment END)
 				WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116  OR E.intBankTransactionTypeId = 19  OR E.intBankTransactionTypeId = 122)
 					THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
 				ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
-	 dblTotal = 0 
+	dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
 	, CAST(CASE 
@@ -104,17 +106,18 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, 3 AS intCount
 	-- ,'Payment' AS [Info]
 FROM dbo.tblAPPayment  A
- LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
- LEFT JOIN dbo.tblAPBillArchive C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
- LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
- 	ON A.[intEntityVendorId] = D.[intEntityId]
+LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+LEFT JOIN dbo.tblAPBillArchive C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
+LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
- WHERE A.ysnPosted = 1  
+WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 0
 	AND C.intTransactionType NOT IN (2, 12, 13)
 	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
@@ -141,6 +144,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, 4 AS intCount
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBillArchive A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -172,6 +176,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, 5 AS intCount
 	-- ,'Taxes' AS [Info]
 FROM dbo.tblAPBillArchive A
 INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
