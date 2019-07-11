@@ -16,7 +16,7 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 BEGIN TRY
-	IF NOT EXISTS(SELECT intContractDetailId FROM tblSCTicketContractUsed WHERE intTicketId = @intTicketId AND intContractDetailId = @intContractDetailId)
+	IF NOT EXISTS(SELECT intContractDetailId FROM tblSCTicketContractUsed WHERE intTicketId = @intTicketId AND intContractDetailId = @intContractDetailId AND intEntityId = @intEntityId)
 	BEGIN
 		INSERT INTO tblSCTicketContractUsed (intTicketId,intContractDetailId,dblScheduleQty,intEntityId)
 		VALUES(@intTicketId,@intContractDetailId,@dblScheduleQty,@intEntityId)
