@@ -24,7 +24,7 @@ BEGIN
 						THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmDate, C.intTermsId, (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest))
 					ELSE 0 END,
 		@interest = CASE WHEN C.intTransactionType = 1
-						THEN dbo.fnGetInterestBasedOnTerm((C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest), C.dtmDate, A.dtmDatePaid, C.intTermsId)
+						THEN dbo.fnGetInterestBasedOnTerm((C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest), C.dtmDate, A.dtmDatePaid, NULL, C.intTermsId)
 					ELSE 0 END,
 		tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
 												THEN CAST((B.dblDiscount + B.dblPayment - B.dblInterest) AS DECIMAL(18,2))
