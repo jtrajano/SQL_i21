@@ -678,9 +678,10 @@ SELECT
 FROM #ARPostInvoiceDetail ID
 INNER JOIN tblCTContractDetail CD ON ID.[intContractDetailId] = CD.[intContractDetailId]	
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+LEFT JOIN tblICInventoryShipmentItem ISI ON ID.[intInventoryShipmentItemId] = ISI.[intInventoryShipmentItemId]
 WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND	(
-		(ID.strTransactionType <> 'Credit Memo' AND ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL)
+		(ID.strTransactionType <> 'Credit Memo' AND ((ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL) OR (ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL)))
 		OR
 		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL))
 		)
