@@ -370,7 +370,8 @@ BEGIN
 				,vwcus_bus_loc_no = ''''
 				,vwcus_cred_limit = ISNULL(Cus.dblCreditLimit,0.0)
 				,vwcus_last_stmt_bal = ISNULL(CI.dblLastStatement,0.0)
-				,vwcus_budget_amt_due  = ISNULL(CI.dblBudgetAmount,0.0)
+				--,vwcus_budget_amt_due  = ISNULL(CI.dblBudgetAmount,0.0)
+				,vwcus_budget_amt_due  = ISNULL(Cus.dblMonthlyBudget,0.0) 
 				,vwcus_cred_ppd  = CAST(ISNULL(CI.dblPrepaids,0.0) AS NUMERIC(18,6))
 				,vwcus_ytd_srvchr = 0.0 
 				,vwcus_last_pymt = ISNULL(CI.dblLastPayment,0.0)
