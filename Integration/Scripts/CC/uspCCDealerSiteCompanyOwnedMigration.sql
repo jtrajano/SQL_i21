@@ -144,7 +144,7 @@ BEGIN
 					,0
 					,@intClearingAccountId
 					,@intFeeExpenceAccountId
-					,CASE WHEN @strPostNetToArCustomer = 'G' THEN 1 ELSE 0 END
+					,CASE WHEN @strPostNetToArCustomer = 'N' THEN 1 ELSE 0 END
 					,@strMerchantCategory
 					,@strTransactionType
 					,0
@@ -180,7 +180,7 @@ BEGIN
 					,0
 					,@intClearingAccountId
 					,@intFeeExpenceAccountId
-					,CASE WHEN @strPostNetToArCustomer = 'G' THEN 1 ELSE 0 END
+					,CASE WHEN @strPostNetToArCustomer = 'N' THEN 1 ELSE 0 END
 					,@strMerchantCategory
 					,@strTransactionType
 					,1
