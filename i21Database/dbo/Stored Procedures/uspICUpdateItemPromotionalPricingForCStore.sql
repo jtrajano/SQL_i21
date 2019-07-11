@@ -314,10 +314,6 @@ BEGIN
 						dtmNewEndDate
 				END 
 	FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog auditLog
-			LEFT JOIN tblICCategory category_Original
-				ON auditLog.intCategoryId_Original = category_Original.intCategoryId
-			LEFT JOIN tblICCategory category_New
-				ON auditLog.intCategoryId_New = category_New.intCategoryId
 	OPEN loopAuditLog;
 
 	FETCH NEXT FROM loopAuditLog INTO 
