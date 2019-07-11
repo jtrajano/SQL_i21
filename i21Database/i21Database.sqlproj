@@ -7656,6 +7656,8 @@
     <Build Include="dbo\Functions\fnAPGetVouchersCSVPerPatronage.sql" />
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
     <None Include="Scripts\Post-Deployment\CT\PariallyToPartially.sql" />
+    <Build Include="dbo\Tables\tblICStagingCommodityActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCommodityActivity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
