@@ -152,7 +152,8 @@ BEGIN TRY
 
 						WHILE @@FETCH_STATUS = 0
 						BEGIN
-
+							DECLARE @_intIRVendorId INT
+							SELECT @_intIRVendorId = intEntityVendorId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @InventoryReceiptId
 							IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
 								DROP TABLE #tmpVoucherDetail
 							CREATE TABLE #tmpVoucherDetail (
@@ -192,6 +193,8 @@ BEGIN TRY
 										RETURN;
 									END
 								END
+
+								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 								/*
 									uspAPDeleteVoucher removes the payables from Voucher
@@ -203,10 +206,46 @@ BEGIN TRY
 
 							CLOSE voucherCursor  
 							DEALLOCATE voucherCursor
+							
 							IF ISNULL(@ysnIRPosted, 0) = 1
 								EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 							EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
+
+							/* CURSOR for Split Contract*/
+							DECLARE @intEntityVendorId AS INT
+							DECLARE @strDistributionOption AS VARCHAR(MAX)
+							DECLARE @cursor_intContractDetailId INT
+							DECLARE @cursor_dblScheduleQty DECIMAL(18,6)
+							DECLARE @cursor_intInventoryReceiptId INT
+							
+							DECLARE splitCursor CURSOR LOCAL FAST_FORWARD
+							FOR
+							SELECT SCC.intContractDetailId ,SCC.intEntityId,SCC.dblScheduleQty,SPL.strDistributionOption FROM tblSCTicketSplit SPL
+							INNER JOIN tblSCTicketContractUsed SCC 
+								ON SCC.intTicketId = SCC.intTicketId
+							WHERE SPL.intTicketId = @intTicketId and SCC.intTicketId = @intTicketId and SPL.intCustomerId = SCC.intEntityId and SPL.intCustomerId = @_intIRVendorId
+
+							OPEN splitCursor;
+
+							FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @strDistributionOption;
+							WHILE @@FETCH_STATUS = 0
+							BEGIN
+								IF(@strDistributionOption = 'CNT')
+									BEGIN		
+
+									SET @cursor_dblScheduleQty = @cursor_dblScheduleQty *-1
+									EXEC uspCTUpdateScheduleQuantity @intContractDetailId=@cursor_intContractDetailId,@dblQuantityToUpdate=@cursor_dblScheduleQty,@intUserId=@intUserId,@intExternalId=@intTicketId, @strScreenName= 'Scale'	
+										
+									END
+
+								FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @strDistributionOption;
+							END
+
+							CLOSE splitCursor  
+							DEALLOCATE splitCursor 
+
+							/* END CURSOR for Split Contract*/
 
 							FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId, @ysnIRPosted;
 						END
@@ -232,8 +271,9 @@ BEGIN TRY
 						END
 						IF ISNULL(@intMatchTicketId,0) > 0 AND @intTicketType = 6
 						BEGIN 
+							
 							IF @intStorageScheduleTypeId = -6
-							BEGin
+							BEGIN
 								SELECT @intMatchLoadId = LGLD.intLoadId 
 								, @intMatchLoadDetailId = LGLD.intLoadDetailId
 								, @dblMatchDeliveredQuantity = LGLD.dblDeliveredQuantity
@@ -241,7 +281,7 @@ BEGIN TRY
 								, @intMatchLoadContractId = LGLD.intSContractDetailId
 								FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
 								WHERE LGL.intTicketId = @intMatchTicketId
-
+								SELECT @intMatchLoadDetailId
 								IF ISNULL(@intMatchLoadDetailId, 0) > 0
 								BEGIN
 									EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
@@ -270,7 +310,25 @@ BEGIN TRY
 							END
 							ELSE IF @intStorageScheduleTypeId = -2
 							BEGIN  
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
+								DECLARE @intMatchContractDetailId AS INT;
+								DECLARE @__strDistributionOption AS VARCHAR(MAX);
+								SELECT @intMatchContractDetailId = intContractId, @__strDistributionOption  = strDistributionOption FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
+								SELECT @intContractDetailId = intContractId, @dblScheduleQty = dblNetUnits *-1 FROM tblSCTicket WHERE intTicketId = @intTicketId
+
+								EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
+								SET @dblScheduleQty = @dblScheduleQty *-1
+
+								IF(@__strDistributionOption  = 'LOD')
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantity
+															@intContractDetailId	=	@intContractDetailId,
+															@dblQuantityToUpdate	=	@dblScheduleQty,
+															@intUserId				=	@intUserId,
+															@intExternalId			=	@intTicketId,
+															@strScreenName			=	'Scale'	
+								END
+								ELSE
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
 							END
 
 							UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
@@ -291,7 +349,10 @@ BEGIN TRY
 							,@success = @success OUTPUT
 						END
 						IF ISNULL(@intBillId, 0) > 0
-							EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+							BEGIN							
+								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
+								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+							END
 						UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
 						DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 						DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
@@ -399,21 +460,23 @@ BEGIN TRY
 						DECLARE @strTicketType VARCHAR(MAX)
 						DECLARE @dblNetUnit DECIMAL(18,6)
 						DECLARE @_intContractDetailId INT
-						SELECT @strTicketType = strTicketType,@dblNetUnit = dblNetUnits*-1,@_intContractDetailId = intContractId FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
+						DECLARE @_strDistributionOption VARCHAR(MAX)
+						SELECT @strTicketType = strTicketType,@dblNetUnit = dblNetUnits*-1,@_intContractDetailId = intContractId, @_strDistributionOption  = strDistributionOption FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
 						IF(@strTicketType = 'Direct Out')
 						BEGIN
-						SELECT @dblNetUnit
-						
+													
 							EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblNetUnit, @intUserId, @intTicketId, 'Scale'
 							SET @dblNetUnit = @dblNetUnit *-1
-							EXEC uspCTUpdateScheduleQuantity
-												@intContractDetailId	=	@_intContractDetailId,
-												@dblQuantityToUpdate	=	@dblNetUnit,
-												@intUserId				=	@intUserId,
-												@intExternalId			=	@intTicketId,
-												@strScreenName			=	'Scale'	
-												
+							IF(@_strDistributionOption = 'LOD')
+							BEGIN
+								EXEC uspCTUpdateScheduleQuantity
+													@intContractDetailId	=	@_intContractDetailId,
+													@dblQuantityToUpdate	=	@dblNetUnit,
+													@intUserId				=	@intUserId,
+													@intExternalId			=	@intTicketId,
+													@strScreenName			=	'Scale'													
+							END
 						END
 
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
@@ -525,7 +588,8 @@ BEGIN TRY
 					,@finalShrinkUnits		NUMERIC(38,20)
 					,@strShrinkWhat			NVARCHAR(40)
 					,@currencyDecimal		INT;
-				SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+				-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
+				SET @currencyDecimal = 20
 				SELECT @intId = MIN(intInventoryReceiptItemId) 
 				FROM vyuICGetInventoryReceiptItem where intSourceId = @intTicketId and strSourceType = 'Scale'
 				WHILE ISNULL(@intId,0) > 0

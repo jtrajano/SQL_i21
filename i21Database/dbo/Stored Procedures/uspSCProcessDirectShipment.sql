@@ -39,6 +39,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@dblContractAvailableQty NUMERIC(38, 20)
 		,@intPricingTypeId INT
 		,@dblNetUnits NUMERIC(18,6) = 0
+		,@intDirectLoadId INT
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
 	BEGIN
@@ -201,9 +202,9 @@ BEGIN TRY
 				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
 				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
-				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(A.intItemUOMId,@intTicketItemUOMId,dblQtyShipped)) AS DECIMAL(18,6)) FROM tblARInvoiceDetail A
-					INNER JOIN tblICInventoryShipmentItem B on A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
-					WHERE intInvoiceId = @intInvoiceId))
+				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId,@intTicketItemUOMId,ISI.dblQuantity)) AS DECIMAL(18,6))  FROM tblICInventoryShipment ICIS
+					INNER JOIN tblICInventoryShipmentItem ISI ON ICIS.intInventoryShipmentId = ISI.intInventoryShipmentId
+					WHERE intSourceId = @intTicketId))
 				BEGIN
 					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits
 				END
@@ -217,6 +218,7 @@ BEGIN TRY
 			,@intContractDetailId = intContractId
 			,@intTicketItemUOMId = intItemUOMIdTo
 			,@dblContractUnits = dblNetUnits
+			,@intDirectLoadId = intLoadId
 		FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
 		IF @strInOutFlag = 'I'
@@ -226,6 +228,17 @@ BEGIN TRY
 				IF ISNULL(@intContractDetailId,0) != 0
 				BEGIN
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+					
+					IF(ISNULL(@intDirectLoadId,0) = 0)
+					BEGIN
+						EXEC uspCTUpdateScheduleQuantity
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblContractAvailableQty,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Scale'	
+					END
+
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
 					DECLARE @dblScheduleQty AS DECIMAL(18,6)
 					SET @dblScheduleQty = @dblContractAvailableQty * -1 
@@ -279,6 +292,17 @@ BEGIN TRY
 					DECLARE @dblScheduleQuantityToReduce DECIMAL(18,6);
 					SET @dblScheduleQuantityToReduce = @dblContractAvailableQty *-1
 					
+					IF(ISNULL(@intDirectLoadId,0) = 0)
+					BEGIN
+						EXEC uspCTUpdateScheduleQuantity
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblContractAvailableQty,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Scale'	
+					END
+
+
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
 					EXEC uspCTUpdateScheduleQuantity
 									@intContractDetailId	=	@intContractDetailId,
