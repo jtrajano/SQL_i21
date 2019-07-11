@@ -10,4 +10,10 @@ BEGIN
 	UPDATE tblCTSequenceHistory set strPricingStatus = 'Partially Priced' WHERE strPricingStatus = 'Parially Priced'
 END
 GO
+
+IF EXISTS(SELECT strPriOrNotPriOrParPriced FROM tblRKM2MInquiryTransaction where strPriOrNotPriOrParPriced = 'Parially Priced')
+BEGIN
+	UPDATE tblRKM2MInquiryTransaction set strPriOrNotPriOrParPriced = 'Partially Priced' WHERE strPriOrNotPriOrParPriced = 'Parially Priced'
+END
+GO
 Print 'END Update pricing status from Parially Priced to Partially Priced'
