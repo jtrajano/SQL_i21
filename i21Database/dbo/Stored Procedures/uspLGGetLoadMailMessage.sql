@@ -92,7 +92,7 @@ BEGIN
 
 		@strDriver = Driver.strName,
 		@dtmDispatchedDate = L.dtmDispatchedDate,
-		@strDispatcher = Dispatcher.strFullName,
+		@strDispatcher = CASE WHEN Dispatcher.strFullName = '' OR Dispatcher.strFullName = NULL THEN DispatcherEntity.strName ELSE  Dispatcher.strFullName END,
 		@strTrailerNo1 = L.strTrailerNo1,
 		@strTrailerNo2 = L.strTrailerNo2,
 		@strTrailerNo3 = L.strTrailerNo3,
@@ -102,6 +102,7 @@ BEGIN
 	LEFT JOIN		tblEMEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
 	LEFT JOIN		tblEMEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
 	LEFT JOIN		tblSMUserSecurity	Dispatcher On				Dispatcher.[intEntityId] = L.intDispatcherId
+	LEFT JOIN		tblEMEntity				DispatcherEntity	On			DispatcherEntity.intEntityId = L.intDispatcherId
 	WHERE L.[strLoadNumber] = @strLoadNumber
 
 	Insert into @LoadDetailTable
