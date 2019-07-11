@@ -122,6 +122,28 @@ IF ISNULL(@intInvoiceIdTo, 0) = 0
 IF ISNULL(@intInvoiceIdFrom, 0) = 0
 	SET @intInvoiceIdFrom = (SELECT MIN(intInvoiceId) FROM dbo.tblARInvoice)
 
+DECLARE @strInvoiceReportName			NVARCHAR(100) = NULL
+	  , @strTankDeliveryInvoiceFormat	NVARCHAR(100) = NULL
+	  , @strTransportsInvoiceFormat		NVARCHAR(100) = NULL
+	  , @strGrainInvoiceFormat			NVARCHAR(100) = NULL
+	  , @strMeterBillingInvoiceFormat	NVARCHAR(100) = NULL
+	  , @ysnStretchLogo					BIT = 0
+
+SELECT TOP 1 @strInvoiceReportName			= ISNULL(strInvoiceReportName, 'Standard')
+		   , @strTankDeliveryInvoiceFormat	= ISNULL(strTankDeliveryInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strTransportsInvoiceFormat	= ISNULL(strTransportsInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strGrainInvoiceFormat			= ISNULL(strGrainInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strMeterBillingInvoiceFormat	= ISNULL(strMeterBillingInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @ysnStretchLogo				= ISNULL(ysnStretchLogo, 0)
+FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+
+SET @strInvoiceReportName = ISNULL(@strInvoiceReportName, 'Standard')
+SET @strTankDeliveryInvoiceFormat = ISNULL(@strTankDeliveryInvoiceFormat, 'Standard')
+SET @strTransportsInvoiceFormat = ISNULL(@strTransportsInvoiceFormat, 'Standard')
+SET @strGrainInvoiceFormat = ISNULL(@strGrainInvoiceFormat, 'Standard')
+SET @strMeterBillingInvoiceFormat = ISNULL(@strMeterBillingInvoiceFormat, 'Standard')
+SET @ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
+
 --GET INVOICES WITH FILTERS
 INSERT INTO @INVOICETABLE (
 	intInvoiceId
@@ -135,33 +157,22 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , intEntityUserId		= @intEntityUserId
 	 , strRequestId			= @strRequestId
 	 , strType				= INVOICE.strType
-	 , ysnStretchLogo		= ISNULL(COMPANYPREFERENCE.ysnStretchLogo, 0)
+	 , ysnStretchLogo		= @ysnStretchLogo
 	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
-	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN ISNULL(COMPANYPREFERENCE.strGrainInvoiceFormat, 'Standard')
+	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN @strGrainInvoiceFormat
 											 ELSE CASE WHEN INVOICE.strTransactionType <> 'Credit Memo' THEN 
-															CASE WHEN ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard') = 'Format 3 - Swink' THEN 'Meter Billing'
-																  ELSE ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard') 
+															CASE WHEN @strInvoiceReportName = 'Format 3 - Swink' THEN 'Meter Billing'
+																  ELSE @strInvoiceReportName
 															END
 													   ELSE 'Meter Billing'
 												  END
 										END
-								   WHEN INVOICE.strType IN ('Tank Delivery') THEN ISNULL(COMPANYPREFERENCE.strTankDeliveryInvoiceFormat, 'Standard')
-								   WHEN INVOICE.strType IN ('Transport Delivery') THEN ISNULL(COMPANYPREFERENCE.strTransportsInvoiceFormat, 'Standard')
-								   WHEN INVOICE.strType IN ('Meter Billing') THEN ISNULL(COMPANYPREFERENCE.strMeterBillingInvoiceFormat, 'Standard')
-								   ELSE ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard')
+								   WHEN INVOICE.strType IN ('Tank Delivery') THEN @strTankDeliveryInvoiceFormat
+								   WHEN INVOICE.strType IN ('Transport Delivery') THEN @strTransportsInvoiceFormat
+								   WHEN INVOICE.strType IN ('Meter Billing') THEN @strMeterBillingInvoiceFormat
+								   ELSE @strInvoiceReportName
 							   END								
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
-OUTER APPLY (
-	SELECT TOP 1 strReportGroupName
-			   , strInvoiceReportName
-			   , strCreditMemoReportName
-			   , strTankDeliveryInvoiceFormat
-			   , strTransportsInvoiceFormat
-			   , strGrainInvoiceFormat
-			   , strMeterBillingInvoiceFormat
-			   , ysnStretchLogo
-	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
-) COMPANYPREFERENCE
 OUTER APPLY (
 	SELECT TOP 1 intTicketId
 	FROM dbo.tblARInvoiceDetail DETAIL
