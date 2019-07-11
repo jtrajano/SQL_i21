@@ -6,6 +6,7 @@
 	
 AS
 
+
 BEGIN TRY
 	--return
 	DECLARE @ErrMsg							NVARCHAR(MAX),
@@ -83,7 +84,11 @@ BEGIN TRY
 			@intShipmentUniqueId			INT,
 			@ysnTicketBased					BIT = 0,
 			@receiptDetails					InventoryUpdateBillQty,
-			@ysnLoad						BIT
+			@ysnLoad						BIT,
+			@dblPriceLoadQty				NUMERIC(18, 6),
+			@dblPriceFixationLoadApplied	NUMERIC(18, 6),
+			@dblInventoryItemLoadApplied	NUMERIC(18, 6),
+			@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6)
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -110,7 +115,8 @@ BEGIN TRY
 		dblReceived					NUMERIC(26,16),
 		strReceiptNumber			NVARCHAR(50),
 		dblTotalIVForSHQty			NUMERIC(26,16),
-		dblTicketQty				NUMERIC(26,16)
+		dblTicketQty				NUMERIC(26,16),
+		dblInventoryItemLoad		NUMERIC(18,6)
 	)
 
 	DECLARE @tblShipment TABLE
@@ -121,7 +127,8 @@ BEGIN TRY
 		dblShipped						NUMERIC(26,16),
 		strShipmentNumber				NVARCHAR(50),
 		dblTotalIVForSHQty				NUMERIC(26,16),
-		ysnDestinationWeightsAndGrades	BIT
+		ysnDestinationWeightsAndGrades	BIT,
+		dblInventoryShipmentItemLoad	NUMERIC(18, 6)
 	)
 
 	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
@@ -150,7 +157,7 @@ BEGIN TRY
 
 	WHILE ISNULL(@intPriceFixationDetailId, 0)  > 0 
 	BEGIN
-
+		
 		--SELECT	@intBillId = NULL, @intBillDetailId = NULL, @intInvoiceId = NULL, @intInvoiceDetailId = NULL
 
 		SELECT	@dblPriceFixedQty	=	FD.dblQuantity,
@@ -159,7 +166,9 @@ BEGIN TRY
 				@intBillDetailId	=	FD.intBillDetailId, 
 				--@intInvoiceId		=	FD.intInvoiceId, 
 				--@intInvoiceDetailId =	FD.intInvoiceDetailId, 
-				@dblFinalPrice		=	[dbo].[fnCTConvertToSeqFXCurrency](PF.intContractDetailId,PC.intFinalCurrencyId,IU.intItemUOMId,FD.dblFinalPrice)
+				@dblFinalPrice		=	[dbo].[fnCTConvertToSeqFXCurrency](PF.intContractDetailId,PC.intFinalCurrencyId,IU.intItemUOMId,FD.dblFinalPrice),
+				@dblPriceLoadQty	=	FD.dblLoadPriced,
+				@dblPriceFixationLoadApplied =	isnull(FD.dblLoadApplied, 0)
 		FROM	tblCTPriceFixationDetail	FD
 		JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
 		JOIN	tblCTPriceContract			PC	ON	PC.intPriceContractId			=	PF.intPriceContractId
@@ -186,7 +195,8 @@ BEGIN TRY
 							FROM	tblAPBillDetail ID 
 							WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
 						) AS dblTotalIVForSHQty,
-						FT.dblQuantity
+						FT.dblQuantity,
+						RI.intLoadReceive
 				FROM    tblICInventoryReceiptItem   RI
 				JOIN    tblICInventoryReceipt		IR  ON  IR.intInventoryReceiptId		=   RI.intInventoryReceiptId
 														AND IR.strReceiptType				=   'Purchase Contract'
@@ -216,18 +226,25 @@ BEGIN TRY
 							FROM	tblAPBillDetail ID 
 							WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
 						) AS dblTotalIVForSHQty,
-						0
+						0,
+						RI.intLoadReceive
 				FROM    tblICInventoryReceiptItem   RI
 				JOIN    tblICInventoryReceipt		IR  ON  IR.intInventoryReceiptId		=   RI.intInventoryReceiptId
 														AND IR.strReceiptType				=   'Purchase Contract'
 				JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
-				WHERE	RI.intLineNo	=  @intContractDetailId
+				WHERE	RI.intLineNo	=  @intContractDetailId 
+					AND (@ysnLoad = 0 or RI.dblBillQty <> dblOpenReceive) -- Mon Pogi
 			END
 			
 			SELECT	@dblRemainingQty = 0
 
 			SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt
-
+			
+			
+			/*select 'mon is super awesome',* from tblICInventoryReceiptItem as a 
+				join @tblReceipt as b
+					on a.intInventoryReceiptItemId = b.intInventoryReceiptItemId
+			*/
 			WHILE	ISNULL(@intReceiptUniqueId,0) > 0 
 			BEGIN
 
@@ -240,7 +257,8 @@ BEGIN TRY
 				SELECT	@dblTotalIVForSHQty		= ISNULL(dblTotalIVForSHQty,0),
 						@dblReceived			= dblReceived,
 						@intInventoryReceiptId	= intInventoryReceiptId,
-						@dblTicketQty			= dblTicketQty
+						@dblTicketQty			= dblTicketQty,
+						@dblInventoryItemLoadApplied = dblInventoryItemLoad
 				FROM	@tblReceipt 
 				WHERE	intInventoryReceiptItemId = @intInventoryReceiptItemId
 
@@ -251,9 +269,21 @@ BEGIN TRY
 
 				SELECT	@dblTotalIVForPFQty = ISNULL(@dblTotalIVForPFQty,0)
 
-				SELECT	@strVendorOrderNumber = strTicketNumber, @intTicketId = intTicketId FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
-				SELECT	@strVendorOrderNumber = ISNULL(strPrefix,'') + @strVendorOrderNumber FROM tblSMStartingNumber WHERE strTransactionType = 'Ticket Management' AND strModule = 'Ticket Management'
+				SELECT	@strVendorOrderNumber = strTicketNumber, @intTicketId = intTicketId 
+					FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
 
+				SELECT	@strVendorOrderNumber = ISNULL(strPrefix,'') + @strVendorOrderNumber 
+					FROM tblSMStartingNumber WHERE strTransactionType = 'Ticket Management' AND strModule = 'Ticket Management'
+
+				
+				if @ysnLoad = 1
+				begin
+					if @dblPriceLoadQty = @dblPriceFixationLoadApplied
+					begin
+						SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
+						CONTINUE
+					end
+				end
 				IF @dblTotalIVForPFQty = @dblPriceFxdQty
 				BEGIN
 					SELECT	@dblRemainingQty = 0
@@ -268,48 +298,62 @@ BEGIN TRY
 					CONTINUE
 				END
 
-				IF @dblRemainingQty > 0
-				BEGIN
-					SELECT	@intPFDetailId = MAX(intPriceFixationDetailId) 
-					FROM	tblCTPriceFixationDetail 
-					WHERE	intPriceFixationId = @intPriceFixationId 
-					AND		intPriceFixationDetailId < @intPriceFixationDetailId
-
-					IF @dblRemainingQty <= @dblReceived
-					BEGIN						
-						INSERT	INTO @tblToProcess
-						SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblRemainingQty,@intPriceFixationDetailId
-
-						SELECT	@dblRemainingQty = 0
-					END
-					ELSE
+				
+				if @ysnLoad = 1
+				begin
+					INSERT	INTO @tblToProcess
+					SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblShipped,@intPriceFixationDetailId
+				end 
+				else
+				begin
+					IF @dblRemainingQty > 0
 					BEGIN
-						INSERT	INTO @tblToProcess
-						SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblReceived,@intPriceFixationDetailId
-						SELECT	@dblRemainingQty = @dblRemainingQty - @dblReceived
-					END
-				END
-				ELSE
-				BEGIN
-					IF @dblTotalIVForSHQty < @dblReceived
-					BEGIN
-						IF(@dblReceived - @dblTotalIVForSHQty) <= @dblPriceFxdQty
-						BEGIN							
+						SELECT	@intPFDetailId = MAX(intPriceFixationDetailId) 
+						FROM	tblCTPriceFixationDetail 
+						WHERE	intPriceFixationId = @intPriceFixationId 
+						AND		intPriceFixationDetailId < @intPriceFixationDetailId
+
+						IF @dblRemainingQty <= @dblReceived
+						BEGIN						
 							INSERT	INTO @tblToProcess
-							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,CASE WHEN @ysnTicketBased = 1 THEN @dblTicketQty ELSE @dblReceived - @dblTotalIVForSHQty END,@intPriceFixationDetailId
-							SELECT	@dblRemainingQty = @dblPriceFxdQty - (@dblReceived - @dblTotalIVForSHQty)
+							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblRemainingQty,@intPriceFixationDetailId
+
+							SELECT	@dblRemainingQty = 0
 						END
 						ELSE
 						BEGIN
 							INSERT	INTO @tblToProcess
-							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblPriceFxdQty,@intPriceFixationDetailId
-							SELECT	@dblRemainingQty = 0
+							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblReceived,@intPriceFixationDetailId
+							SELECT	@dblRemainingQty = @dblRemainingQty - @dblReceived
 						END
 					END
-				END
+					ELSE
+					BEGIN
+						IF @dblTotalIVForSHQty < @dblReceived
+						BEGIN
+							IF(@dblReceived - @dblTotalIVForSHQty) <= @dblPriceFxdQty
+							BEGIN							
+								INSERT	INTO @tblToProcess
+								SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,CASE WHEN @ysnTicketBased = 1 THEN @dblTicketQty ELSE @dblReceived - @dblTotalIVForSHQty END,@intPriceFixationDetailId
+								SELECT	@dblRemainingQty = @dblPriceFxdQty - (@dblReceived - @dblTotalIVForSHQty)
+							END
+							ELSE
+							BEGIN
+								INSERT	INTO @tblToProcess
+								SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblPriceFxdQty,@intPriceFixationDetailId
+								SELECT	@dblRemainingQty = 0
+							END
+						END
+					END
+				end
+
+
+				
 
 				SELECT	@intUniqueId = MIN(intUniqueId)  FROM @tblToProcess 
-			 
+				
+				/*select 'mon is awesome to process', * from @tblToProcess*/
+
 				IF EXISTS (SELECT TOP 1 1 FROM @tblToProcess)
 				WHILE	ISNULL(@intUniqueId,0) > 0 
 				BEGIN
@@ -385,7 +429,14 @@ BEGIN TRY
 
 						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
 						SELECT @intPriceFixationDetailId,@intBillId,@intBillDetailId,1
-
+						
+						--if @ysnLoad = 1
+						--begin
+						--	--Update the load applied and priced
+						--	update tblCTPriceFixationDetail 
+						--		set dblLoadApplied = isnull(dblLoadApplied, 0) + @dblInventoryItemLoadApplied  
+						--	where intPriceFixationDetailId = @intPriceFixationDetailId
+						--end
 						--UPDATE	tblCTPriceFixationDetail SET intBillId = @intBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 					END
 					ELSE
@@ -451,6 +502,21 @@ BEGIN TRY
 						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 
 						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+						-- -- Reset create new counter for another voucher
+						-- IF @ysnCreateNew = 1
+						-- BEGIN
+						-- 	SET @ysnCreateNew  = 0
+						-- END
+
+						if @ysnLoad = 1
+						begin
+							--Update the load applied and priced
+							update tblCTPriceFixationDetail 
+								set dblLoadApplied = isnull(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied  
+							where intPriceFixationDetailId = @intPriceFixationDetailId
+						end
+
 					END
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
@@ -578,7 +644,8 @@ BEGIN TRY
 							FROM	tblARInvoiceDetail ID 
 							WHERE	intInventoryShipmentItemId = RI.intInventoryShipmentItemId AND intInventoryShipmentChargeId IS NULL
 						) AS dblTotalIVForSHQty,
-						ysnDestinationWeightsAndGrades
+						ysnDestinationWeightsAndGrades,
+						intLoadShipped
 				FROM    tblICInventoryShipmentItem  RI
 				JOIN    tblICInventoryShipment		IR  ON  IR.intInventoryShipmentId		=   RI.intInventoryShipmentId
 														AND IR.intOrderType					=   1
@@ -609,12 +676,14 @@ BEGIN TRY
 							FROM	tblARInvoiceDetail ID 
 							WHERE	intInventoryShipmentItemId = RI.intInventoryShipmentItemId AND intInventoryShipmentChargeId IS NULL
 						) AS dblTotalIVForSHQty,
-						ysnDestinationWeightsAndGrades
+						ysnDestinationWeightsAndGrades,
+						intLoadShipped
 				FROM    tblICInventoryShipmentItem  RI
 				JOIN    tblICInventoryShipment		IR  ON  IR.intInventoryShipmentId		=   RI.intInventoryShipmentId
 														AND IR.intOrderType					=   1
 				JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
-				WHERE	RI.intLineNo	=   @intContractDetailId
+				WHERE	RI.intLineNo	=   @intContractDetailId					
+					--AND (@ysnLoad = 0 or RI.dblBillQty <> dblOpenReceive)
 			END
 
 			SELECT	@dblRemainingQty = 0
@@ -633,7 +702,8 @@ BEGIN TRY
 				SELECT	@dblTotalIVForSHQty		= ISNULL(dblTotalIVForSHQty,0),
 						@dblShipped				= dblShipped,
 						@intInventoryShipmentId = intInventoryShipmentId,
-						@ysnDestinationWeightsAndGrades	=	ysnDestinationWeightsAndGrades
+						@ysnDestinationWeightsAndGrades	=	ysnDestinationWeightsAndGrades,
+						@dblInventoryShipmentItemLoadApplied = dblInventoryShipmentItemLoad
 				FROM	@tblShipment 
 				WHERE	intInventoryShipmentItemId = @intInventoryShipmentItemId
 
@@ -653,6 +723,16 @@ BEGIN TRY
 					END
 				END
 
+				if @ysnLoad = 1
+				begin
+					if @dblPriceLoadQty = @dblPriceFixationLoadApplied
+					begin
+						SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment WHERE intShipmentUniqueId > @intShipmentUniqueId
+						CONTINUE
+					end
+				end
+
+
 				IF @dblTotalIVForPFQty = @dblPriceFxdQty
 				BEGIN
 					SELECT	@dblRemainingQty = 0
@@ -667,49 +747,58 @@ BEGIN TRY
 					CONTINUE
 				END
 
-				IF @dblRemainingQty > 0
-				BEGIN
-					SELECT	@intPFDetailId = MAX(intPriceFixationDetailId) 
-					FROM	tblCTPriceFixationDetail 
-					WHERE	intPriceFixationId = @intPriceFixationId 
-					AND		intPriceFixationDetailId < @intPriceFixationDetailId
-
-					IF @dblRemainingQty <= @dblShipped
-					BEGIN					
-						IF @ysnLoad = 1
-						BEGIN
-							SET @dblRemainingQty = @dblShipped
-						END	
-						INSERT	INTO @tblToProcess
-						SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblRemainingQty,@intPriceFixationDetailId
-
-						SELECT	@dblRemainingQty = 0
-					END
-					ELSE
+				if @ysnLoad = 1
+                begin
+                    INSERT    INTO @tblToProcess
+                    SELECT    @intInventoryShipmentId,@intInventoryShipmentItemId,@dblShipped,@intPriceFixationDetailId    
+                end 
+                else
+                begin
+					IF @dblRemainingQty > 0
 					BEGIN
-						INSERT	INTO @tblToProcess
-						SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblShipped,@intPriceFixationDetailId
-						SELECT	@dblRemainingQty = @dblRemainingQty - @dblShipped
-					END
-				END
-				ELSE
-				BEGIN
-					IF @dblTotalIVForSHQty < @dblShipped
-					BEGIN
-						IF(@dblShipped - @dblTotalIVForSHQty) <= @dblPriceFxdQty
-						BEGIN
+						SELECT	@intPFDetailId = MAX(intPriceFixationDetailId) 
+						FROM	tblCTPriceFixationDetail 
+						WHERE	intPriceFixationId = @intPriceFixationId 
+						AND		intPriceFixationDetailId < @intPriceFixationDetailId
+
+						IF @dblRemainingQty <= @dblShipped
+						BEGIN					
+							IF @ysnLoad = 1
+							BEGIN
+								SET @dblRemainingQty = @dblShipped
+							END	
 							INSERT	INTO @tblToProcess
-							SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblShipped - @dblTotalIVForSHQty,@intPriceFixationDetailId
-							SELECT	@dblRemainingQty = @dblPriceFxdQty - (@dblShipped - @dblTotalIVForSHQty)
+							SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblRemainingQty,@intPriceFixationDetailId
+
+							SELECT	@dblRemainingQty = 0
 						END
 						ELSE
 						BEGIN
 							INSERT	INTO @tblToProcess
-							SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblPriceFxdQty,@intPriceFixationDetailId
-							SELECT	@dblRemainingQty = 0
+							SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblShipped,@intPriceFixationDetailId
+							SELECT	@dblRemainingQty = @dblRemainingQty - @dblShipped
 						END
 					END
-				END
+					ELSE
+					BEGIN
+						IF @dblTotalIVForSHQty < @dblShipped
+						BEGIN
+							IF(@dblShipped - @dblTotalIVForSHQty) <= @dblPriceFxdQty
+							BEGIN
+								INSERT	INTO @tblToProcess
+								SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblShipped - @dblTotalIVForSHQty,@intPriceFixationDetailId
+								SELECT	@dblRemainingQty = @dblPriceFxdQty - (@dblShipped - @dblTotalIVForSHQty)
+							END
+							ELSE
+							BEGIN
+								INSERT	INTO @tblToProcess
+								SELECT	@intInventoryShipmentId,@intInventoryShipmentItemId,@dblPriceFxdQty,@intPriceFixationDetailId
+								SELECT	@dblRemainingQty = 0
+							END
+						END
+					END
+				end
+				
 
 				SELECT	@intUniqueId = MIN(intUniqueId)  FROM @tblToProcess 
 			 
@@ -787,6 +876,14 @@ BEGIN TRY
 						SELECT @intPFDetailId,@intNewInvoiceId,@intInvoiceDetailId,1
 					
 						--UPDATE	tblCTPriceFixationDetail SET intInvoiceId = @intNewInvoiceId,intInvoiceDetailId = @intInvoiceDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+						if @ysnLoad = 1
+						begin
+							--Update the load applied and priced
+							update tblCTPriceFixationDetail 
+								set dblLoadApplied = isnull(dblLoadApplied, 0)  + @dblInventoryShipmentItemLoadApplied  
+							where intPriceFixationDetailId = @intPriceFixationDetailId
+						end						
+
 					END
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
@@ -886,4 +983,5 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
+
 GO

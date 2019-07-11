@@ -37,6 +37,8 @@
 	intInvoiceDetailId				INT,
 	intDailyAveragePriceDetailId	INT,
 	[dblHedgeNoOfLots]				NUMERIC(18,6) NULL,
+	--This is to track the used pricing for load
+	[dblLoadApplied]				NUMERIC(18,6) NULL,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),
