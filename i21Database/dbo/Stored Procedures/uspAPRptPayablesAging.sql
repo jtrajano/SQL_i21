@@ -540,6 +540,7 @@ SET @query = '
 					+ @deletedQuery +
 				') tmpAPPayables 
 			GROUP BY intBillId
+			HAVING SUM(DISTINCT intCount) > 1
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBillArchive A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId
