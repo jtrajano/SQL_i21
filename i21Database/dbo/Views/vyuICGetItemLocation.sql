@@ -54,7 +54,7 @@ SELECT ItemLocation.intItemLocationId
 	, MixMatch.strPromoItemListId
 	, ItemLocation.ysnDepositRequired
 	, ItemLocation.intDepositPLUId
-	, strDepositPLU = DepositPLU.strUpcCode
+	, strDepositPLU = DepositPLU.strLongUPCCode
 	, ItemLocation.intBottleDepositNo
 	, ItemLocation.ysnSaleable
 	, ItemLocation.ysnQuantityRequired
