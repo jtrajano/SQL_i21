@@ -238,8 +238,8 @@ BEGIN
 				DECLARE @tblItemPricing TABLE (
 					intItemPricingId		INT
 					, intItemId				INT
-					, dblStandardCost		DECIMAL(18,6)
-					, dblLastCost			DECIMAL(18,6)
+					, dblStandardCost		NUMERIC(38,20)
+					, dblLastCost			NUMERIC(38,20)
 				)
 			END
 
@@ -818,24 +818,38 @@ BEGIN
 							--SET @strResultMessage = @strResultMessage + ', Update Pricing: Inserted to @tblItemPricing'
 
 							DECLARE @intLoopItemPricingId AS INT
-									, @dblLoopStandardCost AS DECIMAL(18,6)
-									, @dblLoopLastCost AS DECIMAL(18,6)
+							        , @intLoopItemId AS INT
+									, @dblLoopStandardCost AS NUMERIC(38,20)
+									, @dblLoopLastCost AS NUMERIC(38,20)
 
 
 						
+							--EXEC [uspICUpdateItemPricingForCStore]
+							--				-- filter params
+							--				@strUpcCode					= NULL 
+							--				, @strDescription			= NULL 
+							--				, @intItemId				= 89 
+							--				, @intItemPricingId			= 7412 
+
+							--				-- update params
+							--				, @dblStandardCost			= 0.979 
+							--				, @dblRetailPrice			= NULL 
+							--				, @dblLastCost				= 0.08333
+							--				, @intEntityUserSecurityId	= @intEntityId
 
 							WHILE EXISTS(SELECT TOP 1 1 FROM @tblItemPricing)
 								BEGIN
 						
 									SELECT TOP 1
-										@intLoopItemPricingId	= intItemPricingId
-										, @dblLoopStandardCost	= dblStandardCost
-										, @dblLoopLastCost		= dblLastCost
-									FROM @tblItemPricing
+										@intLoopItemPricingId	= temp.intItemPricingId
+										, @intLoopItemId		= temp.intItemId
+										, @dblLoopStandardCost	= CAST(temp.dblStandardCost AS NUMERIC(38, 20))
+										, @dblLoopLastCost		= CAST(temp.dblLastCost AS NUMERIC(38, 20))
+									FROM @tblItemPricing temp
 
 
 									-- ITEM PRICING
-									BEGIN TRY
+									
 										-- ===============================================
 										-- [START] - PREVIEW IF DEBUG (ITEM PRICING)
 										-- ===============================================
@@ -860,20 +874,35 @@ BEGIN
 										-- [END] - PREVIEW IF DEBUG (ITEM PRICING)
 										-- ===============================================
 
+										BEGIN TRY
 
-										EXEC [uspICUpdateItemPricingForCStore]
-											-- filter params
-											@strUpcCode					= NULL 
-											, @strDescription			= NULL 
-											, @intItemId				= NULL 
-											, @intItemPricingId			= @intLoopItemPricingId 
+											----TEST
+											--SET @strResultMessage = @strResultMessage + '  @intLoopItemPricingId: ' + CAST(@intLoopItemPricingId AS NVARCHAR(50))
+											--SET @strResultMessage = @strResultMessage + '  @intLoopItemId: ' + CAST(@intLoopItemId AS NVARCHAR(50))
 
-											-- update params
-											, @dblStandardCost			= @dblLoopStandardCost 
-											, @dblRetailPrice			= NULL 
-											, @dblLastCost				= @dblLoopLastCost
-											, @intEntityUserSecurityId	= @intEntityId
+											EXEC [uspICUpdateItemPricingForCStore]
+												-- filter params
+												@strUpcCode					= NULL 
+												, @strDescription			= NULL 
+												, @intItemId				= @intItemId 
+												, @intItemPricingId			= @intLoopItemPricingId 
 
+												-- update params
+												, @dblStandardCost			= @dblLoopStandardCost 
+												, @dblRetailPrice			= NULL 
+												, @dblLastCost				= @dblLoopLastCost
+												, @intEntityUserSecurityId	= @intEntityId
+
+											-- Remove
+											DELETE FROM @tblItemPricing WHERE intItemPricingId = @intLoopItemPricingId
+
+										END TRY
+										BEGIN CATCH
+											SET @ysnResultSuccess = 0
+											SET @strResultMessage = 'Error updating Item Pricing: ' + ERROR_MESSAGE()  
+
+											GOTO ExitWithRollback
+										END CATCH
 										----TEST
 										--SET @strResultMessage = @strResultMessage + ', Update Pricing: @intLoopItemPricingId:' + CAST(@intLoopItemPricingId AS NVARCHAR(50)) 
 										--                                                                 + '@dblLoopStandardCost: ' + CAST(@dblLoopStandardCost AS NVARCHAR(50)) 
@@ -998,16 +1027,9 @@ BEGIN
 											-- ===============================================
 										END
 
-									END TRY
-									BEGIN CATCH
-										SET @ysnResultSuccess = 0
-										SET @strResultMessage = 'Error updating Item Pricing: ' + ERROR_MESSAGE()  
+									
 
-										GOTO ExitWithRollback
-									END CATCH
-
-									-- Remove
-									DELETE FROM @tblItemPricing WHERE intItemPricingId = @intLoopItemPricingId
+									
 
 								END
 						END 
@@ -1166,7 +1188,7 @@ ExitWithRollback:
 
 		
 ExitPost:
-		---- TESTINTO CopierDB.dbo.tblTestSP
+		---- TEST
 		--INSERT INTO CopierDB.dbo.tblTestSP(strValueOne, strValueTwo)
 		--VALUES('@strResultMessage', @strResultMessage)
 
