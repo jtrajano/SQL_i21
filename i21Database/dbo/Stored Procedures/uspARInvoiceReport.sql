@@ -51,6 +51,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , intInvoiceDetailId
 	 , dblContractBalance
 	 , strContractNumber
+	 , strContractNoSeq
 	 , strItem
 	 , strItemDescription
 	 , strUnitMeasure
@@ -85,9 +86,13 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblPercentFull
 	 , strEntityContract
 	 , strTicketNumber
+	 , strTicketNumberDate
 	 , strCustomerReference
 	 , strLoadNumber
 	 , strTruckDriver
+	 , strTrailer
+	 , strSeals
+	 , strLotNumber
 	 , blbLogo
 	 , strAddonDetailKey
 	 , strBOLNumberDetail
@@ -160,7 +165,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblContractBalance		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									CASE WHEN INVOICEDETAIL.dblContractBalance = 0 THEN INVOICEDETAIL.dblBalance ELSE INVOICEDETAIL.dblContractBalance END
 								  ELSE NULL END
-	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END				
+	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END
+	 , strContractNoSeq			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber + ' - ' + CAST(INVOICEDETAIL.intContractSeq AS NVARCHAR(100)) ELSE NULL END
 	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
@@ -203,9 +209,13 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
 	 , strCustomerContract		= INVOICEDETAIL.strCustomerContract
 	 , strTicketNumber 			= INVOICEDETAIL.strTicketNumber
+	 , strTicketNumberDate		= INVOICEDETAIL.strTicketNumberDate
 	 , strCustomerReference		= INVOICEDETAIL.strCustomerReference
 	 , strLoadNumber			= INVOICEDETAIL.strLoadNumber
 	 , strTruckDriver			= INVOICEDETAIL.strTruckName
+	 , strTrailer				= INVOICEDETAIL.strCustomerReference
+	 , strSeals					= ''
+	 , strLotNumber				= INVOICEDETAIL.strLotNumber
 	 , blbLogo					= LOGO.blbLogo
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , strBOLNumberDetail		= INVOICEDETAIL.strBOLNumberDetail
@@ -241,42 +251,45 @@ INNER JOIN (
 	FROM dbo.tblSMTerm WITH (NOLOCK)
 ) TERM ON INV.intTermId = TERM.intTermID
 LEFT JOIN (
-	SELECT ID.intInvoiceId
-	     , ID.intInvoiceDetailId
-		 , ID.intCommentTypeId		 
+	SELECT intInvoiceId				= ID.intInvoiceId
+	     , intInvoiceDetailId		= ID.intInvoiceDetailId
+		 , intCommentTypeId			= ID.intCommentTypeId
 		 , dblTotalTax				= CASE WHEN ISNULL(ID.dblComputedGrossPrice, 0) = 0 THEN ID.dblTotalTax ELSE 0 END
-		 , ID.dblContractBalance
-		 , ID.dblQtyShipped
-		 , ID.dblQtyOrdered
-		 , ID.dblDiscount
-		 , ID.dblComputedGrossPrice	
+		 , dblContractBalance		= ID.dblContractBalance
+		 , dblQtyShipped			= ID.dblQtyShipped
+		 , dblQtyOrdered			= ID.dblQtyOrdered
+		 , dblDiscount				= ID.dblDiscount
+		 , dblComputedGrossPrice	= ID.dblComputedGrossPrice	
 		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
-		 , ID.dblTotal
-		 , ID.strVFDDocumentNumber
-		 , ID.strSCInvoiceNumber
-		 , UOM.strUnitMeasure
-		 , CONTRACTS.dblBalance
-		 , CONTRACTS.strContractNumber
-		 , CONTRACTS.strCustomerContract
-		 , ITEM.strItemNo
-		 , ITEM.strInvoiceComments
-		 , strItemType			= ITEM.strType
-		 , strItemDescription	= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
-		 , SO.strBOLNumber
-		 , ITEM.ysnListBundleSeparately
-		 , RECIPE.intRecipeId
-		 , RECIPE.intOneLinePrintId
-		 , [SITE].intSiteID
-		 , [SITE].strSiteNumber
-		 , [SITE].dblEstimatedPercentLeft
-		 , SCALE.strTicketNumber
-		 , SCALE.strCustomerReference
-		 , SCALE.strLoadNumber
-		 , SCALE.strTruckName
-		 , ID.dblPercentFull
-		 , ID.strAddonDetailKey
-		 , ID.ysnAddonParent
-		 , ID.strBOLNumberDetail
+		 , dblTotal					= ID.dblTotal
+		 , strVFDDocumentNumber		= ID.strVFDDocumentNumber
+		 , strSCInvoiceNumber		= ID.strSCInvoiceNumber
+		 , strUnitMeasure			= UOM.strUnitMeasure
+		 , intContractSeq			= CONTRACTS.intContractSeq
+		 , dblBalance				= CONTRACTS.dblBalance
+		 , strContractNumber		= CONTRACTS.strContractNumber
+		 , strCustomerContract		= CONTRACTS.strCustomerContract
+		 , strItemNo				= ITEM.strItemNo
+		 , strInvoiceComments		= ITEM.strInvoiceComments
+		 , strItemType				= ITEM.strType
+		 , strItemDescription		= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
+		 , strBOLNumber				= SO.strBOLNumber
+		 , ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
+		 , intRecipeId				= RECIPE.intRecipeId
+		 , intOneLinePrintId		= RECIPE.intOneLinePrintId
+		 , intSiteID				= [SITE].intSiteID
+		 , strSiteNumber			= [SITE].strSiteNumber
+		 , dblEstimatedPercentLeft	= [SITE].dblEstimatedPercentLeft
+		 , strTicketNumber			= SCALE.strTicketNumber
+		 , strTicketNumberDate		= SCALE.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SCALE.dtmTicketDateTime, 101) 
+		 , strCustomerReference		= SCALE.strCustomerReference		 
+		 , strLoadNumber			= ISNULL(LGLOAD.strLoadNumber, SCALE.strLoadNumber)
+		 , strTruckName				= SCALE.strTruckName
+		 , dblPercentFull			= ID.dblPercentFull
+		 , strAddonDetailKey		= ID.strAddonDetailKey
+		 , ysnAddonParent			= ID.ysnAddonParent
+		 , strBOLNumberDetail		= ID.strBOLNumberDetail
+		 , strLotNumber				= LOT.strLotNumber
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -305,8 +318,9 @@ LEFT JOIN (
 		FROM dbo.tblSOSalesOrder WITH (NOLOCK)
 	) SO ON SOD.intSalesOrderId = SO.intSalesOrderId	
 	LEFT JOIN (
-		SELECT CH.intContractHeaderId
+		SELECT CH.intContractHeaderId			 
 			 , CD.intContractDetailId
+			 , CD.intContractSeq
 			 , CD.dblBalance
 			 , strContractNumber
 			 , strCustomerContract
@@ -314,6 +328,7 @@ LEFT JOIN (
 		LEFT JOIN (
 			SELECT intContractHeaderId
 				 , intContractDetailId
+				 , intContractSeq
 				 , dblBalance
 			FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		) CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -335,9 +350,21 @@ LEFT JOIN (
 			 , SC.strCustomerReference
 			 , SC.strTruckName
 			 , LG.strLoadNumber
+			 , SC.dtmTicketDateTime
 		FROM dbo.tblSCTicket SC WITH (NOLOCK)
 		LEFT JOIN dbo.tblLGLoad LG ON SC.intLoadId = LG.intLoadId
 	) SCALE ON ID.intTicketId = SCALE.intTicketId
+	LEFT JOIN (
+		SELECT LD.intLoadDetailId
+			 , L.strLoadNumber
+		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
+		INNER JOIN dbo.tblLGLoad L ON LD.intLoadId = L.intLoadId
+	) LGLOAD ON ID.intLoadDetailId = LGLOAD.intLoadDetailId
+	LEFT JOIN (
+		SELECT intLotId
+			 , strLotNumber
+		FROM dbo.tblICLot WITH (NOLOCK)
+	) LOT ON ID.intLotId = LOT.intLotId
 	LEFT JOIN (
 		SELECT intTransactionId
 			 , intTransactionDetailId
