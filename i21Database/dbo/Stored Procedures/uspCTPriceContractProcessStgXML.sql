@@ -52,7 +52,7 @@ BEGIN TRY
 		,@intBrokerageAccountId INT
 		,@intPriceItemUOMId INT
 		,@intPriceUnitMeasureId INT
-		,@stPriceItemUOM NVARCHAR(50)
+		,@strPriceItemUOM NVARCHAR(50)
 	DECLARE @intNewPriceContractId INT
 		,@strFinalPriceUOM NVARCHAR(50)
 		,@strAgreedItemUOM NVARCHAR(50)
@@ -479,7 +479,11 @@ BEGIN TRY
 			UPDATE tblCTPriceContractAcknowledgementStage
 			SET strAckPriceFixationDetailXML = @strAckPriceFixationDetailXML
 			WHERE intPriceContractAcknowledgementStageId = @intPriceContractAcknowledgementStageId
-				-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+			-----------------------------------------------------------------------------------------------------------------------------------------------------
+			UPDATE tblCTPriceContractStage
+			SET strFeedStatus = 'Processed'
+			WHERE intPriceContractStageId = @intPriceContractStageId
 		END
 
 		IF @strTransactionType = 'Purchase Price Fixation'
@@ -596,7 +600,8 @@ BEGIN TRY
 
 				SELECT @intNewPriceContractId = NULL
 
-				SELECT @intNewPriceContractId = intPriceContractId,@strNewPriceContractNo=strPriceContractNo
+				SELECT @intNewPriceContractId = intPriceContractId
+					,@strNewPriceContractNo = strPriceContractNo
 				FROM tblCTPriceContract
 				WHERE intPriceContractRefId = @intPriceContractId
 
@@ -665,15 +670,21 @@ BEGIN TRY
 					SELECT @strFinalPriceUOM = NULL
 						,@strAgreedItemUOM = NULL
 						,@strCommodityCode = NULL
+						,@strFutMarketName = NULL
+						,@strFutureMonth = NULL
 
 					SELECT @strFinalPriceUOM = strFinalPriceUOM
 						,@strAgreedItemUOM = strAgreedItemUOM
 						,@strCommodityCode = strCommodityCode
+						,@strFutMarketName = strFutMarketName
+						,@strFutureMonth = strFutureMonth
 					FROM OPENXML(@idoc, 'vyuIPPriceFixations/vyuIPPriceFixation', 2) WITH (
 							strFinalPriceUOM NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strAgreedItemUOM NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
 							,intPriceFixationId INT
+							,strFutMarketName NVARCHAR(30) Collate Latin1_General_CI_AS
+							,strFutureMonth NVARCHAR(20) Collate Latin1_General_CI_AS
 							)
 					WHERE intPriceFixationId = @intPriceFixationId
 
@@ -743,6 +754,53 @@ BEGIN TRY
 					WHERE intUnitMeasureId = @intAgreedItemUOMId
 						AND intCommodityId = @intCommodityId
 
+					IF NOT EXISTS (
+							SELECT *
+							FROM OPENXML(@idoc, 'vyuIPPriceFixations/vyuIPPriceFixation', 2) WITH (intContractHeaderId INT) x
+							JOIN tblCTContractHeader CH ON x.intContractHeaderId = CH.intContractHeaderRefId
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Contract is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intFutureMarketId = intFutureMarketId
+					FROM tblRKFutureMarket FM
+					WHERE FM.strFutMarketName = @strFutMarketName
+
+					IF @strFutMarketName IS NOT NULL
+						AND @intFutureMarketId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Future Market Name ' + @strFutMarketName + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intFutureMonthId = MO.intFutureMonthId
+					FROM tblRKFuturesMonth MO
+					WHERE MO.strFutureMonth = @strFutureMonth
+
+					IF @strFutureMonth IS NOT NULL
+						AND @intFutureMonthId IS NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Future Month ' + @strFutureMonth + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
 					DELETE PF
 					FROM tblCTPriceFixation PF
 					WHERE PF.intPriceContractId = @intPriceContractId
@@ -763,8 +821,8 @@ BEGIN TRY
 							,intConcurrencyId
 							,intContractHeaderId
 							,intContractDetailId
-							--,intOriginalFutureMarketId
-							--,intOriginalFutureMonthId
+							,intOriginalFutureMarketId
+							,intOriginalFutureMonthId
 							,dblOriginalBasis
 							,dblTotalLots
 							,dblLotsFixed
@@ -803,8 +861,8 @@ BEGIN TRY
 								FROM tblCTContractDetail CD
 								WHERE CD.intContractDetailRefId = x.intContractDetailId
 								) AS intContractDetailId
-							--,intOriginalFutureMarketId
-							--,intOriginalFutureMonthId
+							,@intFutureMarketId
+							,@intFutureMonthId
 							,dblOriginalBasis
 							,dblTotalLots
 							,dblLotsFixed
@@ -980,6 +1038,7 @@ BEGIN TRY
 						,@strHedgeFutureMonth = strHedgeFutureMonth
 						,@strBroker = strBroker
 						,@strAccountNumber = strAccountNumber
+						,@strPriceItemUOM=strPriceItemUOM
 					FROM OPENXML(@idoc, 'vyuIPPriceFixationDetails/vyuIPPriceFixationDetail', 2) WITH (
 							strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strQtyItemUOM NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -1033,12 +1092,12 @@ BEGIN TRY
 
 					SELECT @intPriceUnitMeasureId = intUnitMeasureId
 					FROM tblICUnitMeasure UM
-					WHERE UM.strUnitMeasure = @stPriceItemUOM
+					WHERE UM.strUnitMeasure = @strPriceItemUOM
 
-					IF @stPriceItemUOM IS NOT NULL
+					IF @strPriceItemUOM IS NOT NULL
 						AND @intPriceUnitMeasureId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Price UOM ' + @stPriceItemUOM + ' is not available.'
+						SELECT @strErrorMessage = 'Price UOM ' + @strPriceItemUOM + ' is not available.'
 
 						RAISERROR (
 								@strErrorMessage
@@ -1046,6 +1105,8 @@ BEGIN TRY
 								,1
 								)
 					END
+
+					SELECT @intFutureMarketId = NULL
 
 					SELECT @intFutureMarketId = intFutureMarketId
 					FROM tblRKFutureMarket FM
@@ -1062,6 +1123,8 @@ BEGIN TRY
 								,1
 								)
 					END
+
+					SELECT @intFutureMonthId = NULL
 
 					SELECT @intFutureMonthId = MO.intFutureMonthId
 					FROM tblRKFuturesMonth MO
@@ -1132,10 +1195,9 @@ BEGIN TRY
 					WHERE IU.intItemId = @intItemId
 						AND IU.intUnitMeasureId = @intUnitMeasureId
 
-					SELECT @intPriceItemUOMId = IU.intItemUOMId
-					FROM tblICItemUOM IU
-					WHERE IU.intItemId = @intItemId
-						AND IU.intUnitMeasureId = @intPriceUnitMeasureId
+					SELECT @intPriceItemUOMId = CUM.intCommodityUnitMeasureId
+					FROM tblICCommodityUnitMeasure CUM
+					WHERE CUM.intUnitMeasureId = @intPriceUnitMeasureId
 
 					IF NOT EXISTS (
 							SELECT *
@@ -1182,7 +1244,7 @@ BEGIN TRY
 							)
 						SELECT (
 								SELECT PF.intPriceFixationId
-								FROM tblCTContractPriceFixation PF
+								FROM tblCTPriceFixation PF
 								WHERE PF.intPriceFixationRefId = x.intPriceFixationId
 								)
 							,x.intNumber
@@ -1252,7 +1314,10 @@ BEGIN TRY
 								,intInvoiceId INT
 								,intInvoiceDetailId INT
 								,intDailyAveragePriceDetailId INT
-								)
+								,dblPolRefPrice NUMERIC(18, 6)
+								,dblPolPremium NUMERIC(18, 6)
+								,dblCashPrice NUMERIC(18, 6)
+								) x
 						WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 					END
 					ELSE
@@ -1260,7 +1325,7 @@ BEGIN TRY
 						UPDATE tblCTPriceFixationDetail
 						SET intPriceFixationId = (
 								SELECT PF.intPriceFixationId
-								FROM tblCTContractPriceFixation PF
+								FROM tblCTPriceFixation PF
 								WHERE PF.intPriceFixationRefId = x.intPriceFixationId
 								)
 							,intNumber = x.intNumber
@@ -1331,6 +1396,9 @@ BEGIN TRY
 								,intInvoiceId INT
 								,intInvoiceDetailId INT
 								,intDailyAveragePriceDetailId INT
+								,dblPolRefPrice NUMERIC(18, 6)
+								,dblPolPremium NUMERIC(18, 6)
+								,dblCashPrice NUMERIC(18, 6)
 								) x ON x.intPriceFixationDetailId = PFD.intPriceFixationDetailRefId
 						WHERE x.intPriceFixationDetailId = @intPriceFixationDetailId
 					END
@@ -1393,6 +1461,10 @@ BEGIN TRY
 					,@strAckPriceFixationXML
 					,@strAckPriceFixationDetailXML
 
+				UPDATE tblCTPriceContractStage
+				SET strFeedStatus = 'Processed'
+				WHERE intPriceContractStageId = @intPriceContractStageId
+
 				IF @intTransactionCount = 0
 					COMMIT TRANSACTION
 			END TRY
@@ -1413,10 +1485,6 @@ BEGIN TRY
 				WHERE intPriceContractStageId = @intPriceContractStageId
 			END CATCH
 		END
-
-		UPDATE tblCTPriceContractStage
-		SET strFeedStatus = 'Processed'
-		WHERE intPriceContractStageId = @intPriceContractStageId
 
 		SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
 		FROM tblCTPriceContractStage

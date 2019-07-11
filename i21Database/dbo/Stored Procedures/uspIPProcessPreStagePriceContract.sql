@@ -50,6 +50,7 @@ BEGIN TRY
 				,@strToTransactionType
 				,@intToCompanyId
 				,'Added'
+				,0
 		END
 		ELSE IF EXISTS (
 				SELECT 1
@@ -64,6 +65,7 @@ BEGIN TRY
 				,@strToTransactionType
 				,@intToCompanyId
 				,'Modified'
+				,0
 		END
 		ELSE IF NOT EXISTS (
 				SELECT 1
@@ -78,7 +80,12 @@ BEGIN TRY
 				,@strToTransactionType
 				,@intToCompanyId
 				,'Delete'
+				,0
 		END
+
+		UPDATE tblCTPriceContractPreStage
+		SET strFeedStatus = 'Processed'
+		WHERE intPriceContractPreStageId = @intPriceContractPreStageId
 
 		SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
 		FROM tblCTPriceContractPreStage
@@ -97,4 +104,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-

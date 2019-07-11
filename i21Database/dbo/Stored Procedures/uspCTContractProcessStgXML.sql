@@ -965,6 +965,7 @@ BEGIN TRY
 					,intInvoiceTypeId
 					,intArbitrationId
 					,intCountryId
+					,ysnReceivedSignedFixationLetter
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1022,6 +1023,7 @@ BEGIN TRY
 					,@intInvoiceTypeId
 					,@intCityId
 					,@intCountryId
+					,IsNULL(ysnReceivedSignedFixationLetter,0)
 				FROM OPENXML(@idoc, 'vyuCTContractHeaderViews/vyuCTContractHeaderView', 2) WITH (
 						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,dtmContractDate DATETIME
@@ -1069,6 +1071,7 @@ BEGIN TRY
 						,strAssociationName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strInvoiceType NVARCHAR(30) Collate Latin1_General_CI_AS
 						,strArbitration NVARCHAR(50) Collate Latin1_General_CI_AS
+						,ysnReceivedSignedFixationLetter BIT
 						) x
 
 				EXEC uspCTGetTableDataInXML '#tmpContractHeader'
@@ -1968,6 +1971,8 @@ BEGIN TRY
 						,intProducerId
 						,intShipViaId
 						,strInvoiceNo
+						,ysnProvisionalPNL
+						,ysnFinalPNL
 						)
 					SELECT @intNewContractHeaderId
 						,@intItemId
@@ -2048,6 +2053,8 @@ BEGIN TRY
 						,@intProducerId
 						,@intShipViaId
 						,x.strInvoiceNo
+						,IsNULL(ysnProvisionalPNL,0)
+						,IsNULL(ysnFinalPNL,0)
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 							,dtmContractDate DATETIME
@@ -2124,6 +2131,8 @@ BEGIN TRY
 							,ysnRiskToProducer BIT
 							,ysnBackToBack BIT
 							,strInvoiceNo NVARCHAR(100) Collate Latin1_General_CI_AS
+							,ysnProvisionalPNL BIT
+							,ysnFinalPNL BIT
 							) x
 					WHERE intContractSeq = @intContractSeq
 
