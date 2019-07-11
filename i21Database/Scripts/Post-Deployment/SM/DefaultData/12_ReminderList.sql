@@ -1384,3 +1384,60 @@ ELSE
 		WHERE [strReminder] = N'Update' AND [strType] = N'Register'
 	END
 GO
+
+
+
+
+
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Pre-shipment Sample not yet approved' AND [strType] = N'Contract')
+BEGIN
+	INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])
+	SELECT [strReminder]        =        N'Pre-shipment Sample not yet approved',
+			[strType]        	=        N'Contract',
+			[strMessage]		=        N'{0} {1} {2} sample not yet approved',
+			[strQuery]  		=        N'	SELECT	DISTINCT CH.intContractHeaderId , SM.intSampleId
+												FROM	tblCTContractHeader CH	CROSS	
+												JOIN	tblCTEvent			EV	
+												JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+												JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
+												JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+												JOIN	tblQMSample as SM
+														on CD.intContractDetailId = SM.intContractDetailId
+												JOIN	tblQMSampleType as SMT
+														on SM.intSampleTypeId = SMT.intSampleTypeId
+															and SMT.strSampleTypeName = ''Pre-shipment Sample''
+												JOIN	tblQMSampleStatus as SMS
+														on SMS.intSampleStatusId = SM.intSampleStatusId
+															and SMS. strStatus <> ''Approved''
+												LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
+												WHERE	ER.intEntityId = {0}
+												GROUP BY CH.intContractHeaderId, SM.intSampleId',
+			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Sample not approved', 
+			[intSort]            =        19
+END
+ELSE
+BEGIN
+	UPDATE [tblSMReminderList]
+	SET	[strMessage]		=        N'{0} {1} {2} sample not yet approved',
+		[strQuery]  		=        N'	SELECT	DISTINCT CH.intContractHeaderId , SM.intSampleId
+												FROM	tblCTContractHeader CH	CROSS	
+												JOIN	tblCTEvent			EV	
+												JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+												JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
+												JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+												JOIN	tblQMSample as SM
+														on CD.intContractDetailId = SM.intContractDetailId
+												JOIN	tblQMSampleType as SMT
+														on SM.intSampleTypeId = SMT.intSampleTypeId
+															and SMT.strSampleTypeName = ''Pre-shipment Sample''
+												JOIN	tblQMSampleStatus as SMS
+														on SMS.intSampleStatusId = SM.intSampleStatusId
+															and SMS. strStatus <> ''Approved''
+												LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
+												WHERE	ER.intEntityId = {0}
+												GROUP BY CH.intContractHeaderId, SM.intSampleId'
+	WHERE [strReminder] = N'Pre-shipment Sample not yet approved' AND [strType] = N'Contract' 
+END
+
+GO

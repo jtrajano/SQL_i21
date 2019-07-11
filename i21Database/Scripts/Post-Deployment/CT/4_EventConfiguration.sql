@@ -338,6 +338,42 @@ Result: {Result}'
 END
 GO
 
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblCTEvent WHERE strEventName = 'Pre-shipment Sample not yet approved')
+BEGIN
+	INSERT INTO tblCTEvent (
+		[strEventName]
+		,[strEventDescription]
+		,[intActionId]
+		,[strAlertType]
+		,[strNotificationType]
+		,[ysnSummarized]
+		,[ysnActive]
+		,[intDaysToRemind]
+		,[strReminderCondition]
+		,[intAlertFrequency]
+		,[strSubject]
+		,[strMessage]
+		,[intConcurrencyId]
+		)
+	VALUES (
+		'Pre-shipment Sample not yet approved'
+		,'Pre-shipment Sample not yet approved'
+		,NULL
+		,'Event'
+		,'Both'
+		,0
+		,1
+		,1
+		,''
+		,NULL
+		,'Sample No: {SampleNumber}'
+		,'Name: {PropertyName}
+Value: {Value}
+Result: {Result}'
+		,1
+		)
+END
+GO
 GO
 	INSERT	INTO tblCTEvent 
 	(
@@ -346,21 +382,24 @@ GO
 	)
 	SELECT	CASE	WHEN	strReminder =  'Unconfirmed'		THEN	'Unconfirmed contract'
 					WHEN	strReminder =  'Empty'				THEN	'Contract without a sequence'
-					WHEN	strReminder =  'Unsigned'			THEN	'Unsubmitted Contract Alert'
-					WHEN	strReminder =  'Unsubmitted'		THEN	'Unsigned Contract Alert' 
+					WHEN	strReminder =  'Unsubmitted'			THEN	'Unsubmitted Contract Alert'
+					WHEN	strReminder =  'Unsigned'		THEN	'Unsigned Contract Alert' 
 					WHEN	strReminder =  'Mail Not Sent For'	THEN	'Approved Contract Mail Not Sent'
+					WHEN	strReminder =  'Pre-shipment Sample not yet approved'	THEN	'Pre-shipment Sample not yet approved'
 			END,
 			CASE	WHEN	strReminder =  'Unconfirmed'		THEN	'Unconfirmed contract'
 					WHEN	strReminder =  'Empty'				THEN	'Contract without a sequence'
-					WHEN	strReminder =  'Unsigned'			THEN	'Unsubmitted Contract Alert'
-					WHEN	strReminder =  'Unsubmitted'		THEN	'Unsigned Contract Alert' 
+					WHEN	strReminder =  'Unsubmitted'			THEN	'Unsubmitted Contract Alert'
+					WHEN	strReminder =  'Unsigned'		THEN	'Unsigned Contract Alert' 
 					WHEN	strReminder =  'Mail Not Sent For'	THEN	'Approved Contract Mail Not Sent'
+					WHEN	strReminder =  'Pre-shipment Sample not yet approved'	THEN	'Pre-shipment Sample not yet approved'
 			END,
 			CASE	WHEN	strReminder =  'Unconfirmed'		THEN	1
 					WHEN	strReminder =  'Empty'				THEN	2
 					WHEN	strReminder =  'Unsigned'			THEN	NULL
 					WHEN	strReminder =  'Unsubmitted'		THEN	NULL
 					WHEN	strReminder =  'Mail Not Sent For'	THEN	NULL
+					WHEN	strReminder =  'Pre-shipment Sample not yet approved' THEN	NULL
 			END,
 			'Event','Screen',0,1,0,'',NULL,'','',1
 	FROM	tblSMReminderList 
@@ -372,6 +411,7 @@ GO
 										WHEN	strEventName =	'Unsubmitted Contract Alert'		THEN	'Unsubmitted'
 										WHEN	strEventName =  'Unsigned Contract Alert'			THEN	'Unsigned'
 										WHEN	strEventName =  'Approved Contract Mail Not Sent'	THEN	'Mail Not Sent For'
+										WHEN	strEventName =  'Pre-shipment Sample not yet approved'	THEN	'Pre-shipment Sample not yet approved'
 								END,'') 
 				FROM tblCTEvent
 			)

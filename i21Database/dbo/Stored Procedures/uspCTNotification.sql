@@ -155,6 +155,35 @@ BEGIN TRY
 	LEFT	JOIN	vyuCTEventRecipientFilter	RF	ON	RF.intEntityId			=	'+LTRIM(@intUserId)+' AND RF.strNotificationType = ''Approved Not Sent'' 
 												'
 	END
+	ELSE IF @strNotificationType = 'Pre-shipment Sample not yet approved'
+	BEGIN
+		SELECT @SQL += '		
+			SELECT	DISTINCT CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
+					CH.dblQuantity,					CH.dblFutures,				CH.dblBasis,					CH.dblCashPrice,
+					CH.dblScheduleQty,				CH.dblNoOfLots,				CH.strItemNo,					CH.strPricingType,
+					CH.strFutMarketName,			CH.strItemUOM,				CH.strLocationName,				CH.strPriceUOM,
+					CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
+					CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
+					CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				''Approved Not Sent'' AS strNotificationType,
+					CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
+					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
+					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
+					CH.strContractItemNo,
+					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
+					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo		
+
+			FROM	vyuCTNotificationHeader CH
+			JOIN	tblQMSample as SM
+					on CH.intContractDetailId = SM.intContractDetailId
+			JOIN	tblQMSampleType as SMT
+					on SM.intSampleTypeId = SMT.intSampleTypeId
+						and SMT.strSampleTypeName = ''Pre-shipment Sample''
+			JOIN	tblQMSampleStatus as SMS
+					on SMS.intSampleStatusId = SM.intSampleStatusId
+						and SMS. strStatus <> ''Approved''
+	LEFT	JOIN	vyuCTEventRecipientFilter	RF	ON	RF.intEntityId			=	'+LTRIM(@intUserId)+' AND RF.strNotificationType = ''Pre-shipment sample not yet approved'' 
+												'
+	END
 
 	SELECT @SQL = @SQL + ')t WHERE ISNULL(intContractStatusId,1) <> 3  AND '+@strFilterCriteria+' )d'
 	

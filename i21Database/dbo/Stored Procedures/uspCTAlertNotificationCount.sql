@@ -28,13 +28,17 @@ BEGIN TRY
 	INSERT INTO @NotificationCount
 	EXEC  [uspCTNotification] 'Approved Not Sent',@intEntityId,1
 
+	INSERT INTO @NotificationCount
+	EXEC  [uspCTNotification] 'Pre-shipment Sample not yet approved', @intEntityId,1
+
 	UPDATE @NotificationCount SET strNotificationCount = 'int'+REPLACE(strNotificationCount,' ','')+'Count',intCount = ISNULL(intCount,0)
 
 	SELECT  ISNULL(intUnsubmittedCount,0)		AS intUnsubmittedCount,
 			ISNULL(intEmptyCount,0)				AS intEmptyCount,
 			ISNULL(intUnconfirmedCount,0)		AS intUnconfirmedCount,
 			ISNULL(intApprovedNotSentCount,0)	AS intApprovedNotSentCount,
-			ISNULL(intUnsignedCount,0)			AS intUnsignedCount
+			ISNULL(intUnsignedCount,0)			AS intUnsignedCount,
+			ISNULL(intPreshipmentNotYetApproved,0)			AS intPreshipmentNotYetApproved
 	FROM
 	@NotificationCount
 	PIVOT
@@ -45,7 +49,8 @@ BEGIN TRY
 			intEmptyCount,
 			intUnconfirmedCount,
 			intApprovedNotSentCount,
-			intUnsignedCount
+			intUnsignedCount,
+			intPreshipmentNotYetApproved
 		)
 	)g
 
