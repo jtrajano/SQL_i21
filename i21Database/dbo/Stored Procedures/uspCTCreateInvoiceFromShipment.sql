@@ -330,10 +330,8 @@ SELECT
 FROM
     tblICInventoryShipment ICIS
 INNER JOIN
-	tblICInventoryShipmentItem ICISI on ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId and ICISI.intLineNo = @intContractDetailId
-INNER JOIN
     vyuARShippedItems ARSI
-        ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId] and ARSI.intContractDetailId = ICISI.intLineNo
+        ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId]
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ARSI.intContractDetailId 
 WHERE
 ICIS.[intInventoryShipmentId] = @ShipmentId

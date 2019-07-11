@@ -602,20 +602,17 @@ BEGIN TRY
 
 						SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
 
-						  if (isnull(@intInvoiceDetailId,0) > 0)
-						  begin
-							  EXEC uspARUpdateInvoiceDetails   
-								@intInvoiceDetailId = @intInvoiceDetailId,  
-								@intEntityId  = @intUserId,   
-								@dblQtyShipped  = @dblQtyToInvoice  
-  
-							  EXEC uspARUpdateInvoicePrice   
-								@InvoiceId   = @intNewInvoiceId  
-								,@InvoiceDetailId = @intInvoiceDetailId  
-								,@Price    = @dblFinalPrice  
-								,@ContractPrice  = @dblFinalPrice  
-								,@UserId   = @intUserId  
-						  end
+						EXEC	uspARUpdateInvoiceDetails	
+								@intInvoiceDetailId	=	@intInvoiceDetailId,
+								@intEntityId		=	@intUserId, 
+								@dblQtyShipped		=	@dblQtyToInvoice
+
+						EXEC	uspARUpdateInvoicePrice 
+								@InvoiceId			=	@intNewInvoiceId
+								,@InvoiceDetailId	=	@intInvoiceDetailId
+								,@Price				=	@dblFinalPrice
+								,@ContractPrice		=	@dblFinalPrice
+								,@UserId			=	@intUserId
 						
 						/*CT-2672
 						EXEC	uspARPostInvoice
