@@ -41,7 +41,8 @@ AS
 			BA.strAccountNumber AS strBrokerAccount,
 			TR.ysnFreezed,
 			CD.dblRatio,
-			FD.dblHedgeNoOfLots AS dblHedgeNoOfLots
+			FD.dblHedgeNoOfLots AS dblHedgeNoOfLots,
+			FD.intDailyAveragePriceDetailId as  intDailyAveragePriceDetailId
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
