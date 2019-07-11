@@ -7728,6 +7728,8 @@
     <Build Include="dbo\Stored Procedures\uspMFRecipeLossesImport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecipeLossesImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecipeLossesImportErrors.sql" />
+    <Build Include="dbo\Views\vyuCTItemContractReportDollar.sql" />
+    <Build Include="dbo\Views\vyuCTItemContractReportPrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
