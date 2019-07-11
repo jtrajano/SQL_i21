@@ -734,8 +734,16 @@ BEGIN
 												ELSE 0
 										  END
 
-				-- Allow update on the following fields if dblQty is zero.  
-				,dblWeightPerQty		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 														
+				-- Allow update on the following fields if dblQty is zero 
+				,dblWeightPerQty		=	CASE	
+													-- Allow the wgt per qty to change if qty is zero or negative (if negative stock is allowed)
+													WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 														
+														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN
+																	CASE WHEN LotToUpdate.intWeightUOMId = LotToUpdate.intItemUOMId THEN 1 ELSE
+																	dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) END
+																ELSE 0 
+														END 
+													WHEN ISNULL(LotMaster.dblQty, 0) < 0 AND LotToUpdate.dblQty > 0 THEN 														
 														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN
 																	CASE WHEN LotToUpdate.intWeightUOMId = LotToUpdate.intItemUOMId THEN 1 ELSE
 																	dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) END
