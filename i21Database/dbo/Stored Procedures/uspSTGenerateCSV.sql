@@ -4,6 +4,7 @@
 	@dtmBeginningDate datetime,
 	@dtmEndingDate datetime,
 	@intCsvFormat INT,
+	@ysnResubmit BIT,
 	@strStatusMsg NVARCHAR(1000) OUTPUT,
 	@strCSVHeader NVARCHAR(MAX) OUTPUT,
 	@intVendorAccountNumber INT OUTPUT
@@ -222,7 +223,7 @@ BEGIN
 		-- PM Morris
 		IF(@intCsvFormat = 0)
 			BEGIN
-				IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnPMMSubmitted = 0)
+				IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate)
 					BEGIN
 
 						--START tblSTstgRebatesPMMorris
@@ -360,7 +361,13 @@ BEGIN
 										FROM tblSTTranslogRebates
 										WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 									) TRR 
-									WHERE TRR.rn = 1	
+									WHERE TRR.rn = 1
+										AND TRR.ysnPMMSubmitted = CASE
+															WHEN @ysnResubmit = CAST(0 AS BIT)
+																THEN CAST(0 AS BIT)
+															WHEN @ysnResubmit = CAST(1 AS BIT)
+																THEN TRR.ysnPMMSubmitted
+														END
 							) TR
 							INNER JOIN tblSTStore ST 
 								ON ST.intStoreId = TR.intStoreId
@@ -380,7 +387,6 @@ BEGIN
 							-- OUTER APPLY [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) RebateTobacco
 							WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
 								AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
-								AND TR.ysnPMMSubmitted = CAST(0 AS BIT)
 								AND TR.strTrpPaycode != 'Change' --ST-680
 								AND TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
 								-- AND RebateTobacco.ysnTobacco = 1
@@ -402,7 +408,7 @@ BEGIN
 			END
 		ELSE IF(@intCsvFormat = 1)
 			BEGIN
-				IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate AND ysnRJRSubmitted = 0)
+				IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate)
 					BEGIN
 
 						-- START tblSTstgRebatesRJReynolds
@@ -611,7 +617,13 @@ BEGIN
 										FROM tblSTTranslogRebates
 									) TRR 
 									WHERE TRR.rn = 1		
-									AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
+										AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
+										AND TRR.ysnRJRSubmitted = CASE
+																WHEN @ysnResubmit = CAST(0 AS BIT)
+																	THEN CAST(0 AS BIT)
+																WHEN @ysnResubmit = CAST(1 AS BIT)
+																	THEN TRR.ysnRJRSubmitted
+															END
 								) TR
 								JOIN tblSTStore ST 
 									ON ST.intStoreId = TR.intStoreId
@@ -627,7 +639,7 @@ BEGIN
 								WHERE TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
 								    --TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 									AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
-									AND TR.ysnRJRSubmitted = CAST(0 AS BIT)
+									
 
 								-- Check if has record
 								IF EXISTS(select * from @tblTempRJR)
@@ -656,7 +668,12 @@ BEGIN
 									WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 									AND CAST(dtmDate as DATE) >= @dtmBeginningDate
 									AND CAST(dtmDate as DATE) <= @dtmEndingDate
-									AND ysnPMMSubmitted = 0
+									AND ysnPMMSubmitted = CASE
+																WHEN @ysnResubmit = CAST(0 AS BIT)
+																	THEN CAST(0 AS BIT)
+																WHEN @ysnResubmit = CAST(1 AS BIT)
+																	THEN ysnPMMSubmitted
+															END
 								--END mark ysnPMMSubmitted = 1 (mark as submitted)	
 							END
 					END
@@ -670,7 +687,12 @@ BEGIN
 								WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 								AND CAST(dtmDate as DATE) >= @dtmBeginningDate
 								AND CAST(dtmDate as DATE) <= @dtmEndingDate
-								AND ysnRJRSubmitted = 0
+								AND ysnRJRSubmitted = CASE
+																WHEN @ysnResubmit = CAST(0 AS BIT)
+																	THEN CAST(0 AS BIT)
+																WHEN @ysnResubmit = CAST(1 AS BIT)
+																	THEN ysnRJRSubmitted
+															END
 							--END mark ysnRJRSubmitted = 1 (mark as submitted)	
 						END
 					END

@@ -16,6 +16,17 @@ BEGIN
 	DECLARE @errorCode INT
 	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries, @ysnPost
 	IF @errorCode > 0	RETURN @errorCode
+	
+	EXEC  @errorCode = dbo.uspICValidateICAmountVsGLAmount 
+			@strTransactionId = NULL 
+			,@strTransactionType = NULL 
+			,@dtmDateFrom = NULL 
+			,@dtmDateTo = NULL 
+			,@ysnThrowError = 1
+			,@GLEntries = @GLEntries
+			,@ysnPost = @ysnPost
+
+	IF @errorCode > 0	RETURN @errorCode
 END 
 ;
 --=====================================================================================================================================

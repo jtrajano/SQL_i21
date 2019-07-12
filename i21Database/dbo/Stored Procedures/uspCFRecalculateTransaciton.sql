@@ -991,7 +991,7 @@ BEGIN
 					FROM tblCFTransactionTax
 					WHERE intTransactionId = @intTransactionId
 
-					IF(@IsImporting = 0)
+					IF(@IsImporting = 0 OR ISNULL(@TaxState,'') = '')
 					BEGIN
 						--GET TAX STATE FROM SITE
 						SET @TaxState = (SELECT TOP 1 strTaxState from tblCFSite where intSiteId = @intSiteId)

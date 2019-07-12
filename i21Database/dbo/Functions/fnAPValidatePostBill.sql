@@ -153,22 +153,17 @@ BEGIN
 		--Detail Account Missing
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT DISTINCT
-			CASE WHEN B.intItemId IS NULL THEN ISNULL('Account '+ expenseAccount.strAccount + ' is required for this item.', 'There is no GL expese account setup.') ELSE  'Account ' + apClearing.strAccountId + ' is required for this item.' END,
+			'Account is missing for item ' + ISNULL(item.strItemNo, B.strMiscDescription) '.',
 			'Bill',
 			A.strBillId,
 			A.intBillId,
 			16
 		FROM tblAPBill A 
 			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
-			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
-			LEFT JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intShipToId																															
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(B.intItemId, loc.intItemLocationId, 'AP Clearing') itemAccnt
-			OUTER APPLY (
-				SELECT strAccountId + ' '+ strAccountCategory as strAccount FROM vyuGLAccountDetail where intAccountId = D1.intGLAccountExpenseId
-			) expenseAccount
-			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
-		WHERE   A.intTransactionType IN (1) and B.intAccountId IS NULL AND  A.intBillId IN (SELECT [intBillId] FROM @tmpBills)	
+			LEFT JOIN tblICItem item ON B.intItemId = item.intItemId
+		WHERE 
+			A.intBillId IN (SELECT [intBillId] FROM @tmpBills)	
+		AND	B.intAccountId IS NULL 
 
 		--For Approved
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)

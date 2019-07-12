@@ -35,9 +35,10 @@
 				strCommodityCode		NVARCHAR(50),
 				strItemNo				NVARCHAR(50),  
 				strCompanyLocation		NVARCHAR(150),
-				dtmDate					DATETIME,
+				dtmDate					DATE,
 				dblQuantity				NUMERIC(38,20),
-				dblRunningBalance		NUMERIC(38,20)	
+				dblRunningBalance		NUMERIC(38,20),
+				ysnOpenGetBasisDelivery	bit DEFAULT(0)
 			)
 			AS
 			BEGIN
@@ -374,6 +375,14 @@
 				INNER JOIN tblICItem I ON I.intItemId = CD.intItemId
 				INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 
+
+				update a set ysnOpenGetBasisDelivery = 1 FROM 
+					@Transaction a
+						join (select intContractHeaderId
+					from @Transaction
+					group by intContractHeaderId 
+					having(sum(dblQuantity) > 0)) b
+						on a.intContractHeaderId = b.intContractHeaderId
 				-- TEMPORARY SOLUTION
 				IF @dtmDate IS NOT NULL
 				BEGIN

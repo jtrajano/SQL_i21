@@ -495,6 +495,28 @@ SET @cteQuery = N';WITH forClearing
       ,strLocationName  
      FROM vyuAPGrainClearing  
      ' + @innerQueryFilter + '  
+    ),  
+    patClearing  
+    AS  
+    (  
+	SELECT  
+      dtmDate  
+      ,intEntityVendorId  
+      ,strTransactionNumber  
+      ,intRefundId  
+      ,intRefundCustomerId  
+      ,intItemId  
+      ,intBillId  
+      ,strBillId  
+      ,intBillDetailId  
+      ,dblVoucherTotal  
+      ,dblVoucherQty  
+      ,dblRefundTotal  
+      ,dblRefundQty  
+      ,intLocationId  
+      ,strLocationName  
+     FROM vyuAPPatClearing  
+     ' + @innerQueryFilter + '  
     )';  
 END  
 ELSE  
@@ -624,6 +646,27 @@ BEGIN
       ,intLocationId  
       ,strLocationName  
      FROM vyuAPGrainClearing  
+    ),
+    patClearing  
+    AS  
+    (  
+	SELECT  
+      dtmDate  
+      ,intEntityVendorId  
+      ,strTransactionNumber  
+      ,intRefundId  
+      ,intRefundCustomerId  
+      ,intItemId  
+      ,intBillId  
+      ,strBillId  
+      ,intBillDetailId  
+      ,dblVoucherTotal  
+      ,dblVoucherQty  
+      ,dblRefundTotal  
+      ,dblRefundQty  
+      ,intLocationId  
+      ,strLocationName  
+     FROM vyuAPPatClearing 
     )';  
 END  
   
@@ -728,7 +771,14 @@ SELECT * FROM (
 SET @query = @cteQuery + N'  
 SELECT * FROM (   
  SELECT  
-  r.strReceiptNumber  
+  r.strReceiptNumber
+  ,r.dtmReceiptDate
+  ,ri.intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intCustomerStorageId
+  ,NULL AS intRefundCustomerId
   ,r.strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -787,6 +837,13 @@ SELECT * FROM (
  --CHARGES  
  SELECT  
   r.strReceiptNumber  
+  ,r.dtmReceiptDate
+  ,NULL AS intInventoryReceiptItemId
+  ,rc.intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intCustomerStorageId
+  ,NULL AS intRefundCustomerId
   ,r.strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -845,7 +902,14 @@ SELECT * FROM (
  UNION ALL  
  --SHIPMENT CHARGES  
  SELECT  
-  r.strShipmentNumber  
+  r.strShipmentNumber 
+  ,r.dtmShipDate 
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,rc.intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intSettleStorageId
+  ,NULL AS intRefundCustomerId
   ,r.strBOLNumber  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -905,6 +969,13 @@ SELECT * FROM (
  --LOAD TRANSACTION ITEM
  SELECT  
   load.strLoadNumber  
+  ,load.dtmPostedDate
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,loadDetail.intLoadDetailId
+  ,NULL AS intSettleStorageId
+  ,NULL AS intRefundCustomerId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -964,6 +1035,13 @@ SELECT * FROM (
  --LOAD COST TRANSACTION ITEM
  SELECT  
   load.strLoadNumber  
+  ,load.dtmPostedDate
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,loadDetail.intLoadDetailId
+  ,NULL AS intSettleStorageId
+  ,NULL AS intRefundCustomerId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -1084,7 +1162,14 @@ SELECT * FROM (
   UNION ALL 
  --SETTLE STORAGE
  SELECT  
-  SS.strStorageTicket  
+  SS.strStorageTicket 
+  ,CS.dtmDeliveryDate
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,SS.intSettleStorageId 
+  ,NULL AS intRefundCustomerId
   ,NULL strBillOfLading  
   ,'''' AS strOrderNumber  
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
@@ -1142,6 +1227,68 @@ INNER JOIN tblGRSettleStorage SS
  WHERE 
       (dblClearingQty) != 0 
   OR  (dblClearingAmount) != 0   
+   UNION ALL 
+ --PATRONAGE
+ SELECT  
+  refund.strRefundNo
+  ,refund.dtmRefundDate
+  ,NULL AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intSettleStorageId 
+  ,refundEntity.intRefundCustomerId
+  ,NULL strBillOfLading  
+  ,'''' AS strOrderNumber  
+  ,CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=0   
+   THEN 0  
+  ELSE ISNULL(DATEDIFF(dayofyear,dtmRefundDate,GETDATE()),0) END AS intAging  
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
+  ,tmpAPOpenClearing.strLocationName  
+  ,tmpAPOpenClearing.dblRefundQty AS dblQtyToReceive  
+  ,tmpAPOpenClearing.dblVoucherQty AS dblQtyVouchered  
+  ,tmpAPOpenClearing.dblRefundTotal AS dblTotal  
+  ,tmpAPOpenClearing.dblVoucherTotal AS dblVoucherAmount  
+  ,tmpAPOpenClearing.dblClearingQty AS dblQtyToVoucher  
+  ,tmpAPOpenClearing.dblRefundTotal - tmpAPOpenClearing.dblVoucherTotal AS dblAmountToVoucher  
+  ,GETDATE() as dtmCurrentDate  
+  ,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) AS strCompanyAddress  
+  ,compSetup.strCompanyName  
+ FROM    
+ (  
+  SELECT  
+   B.intEntityVendorId  
+   ,B.intRefundCustomerId
+   ,B.strTransactionNumber  
+   ,SUM(B.dblRefundTotal) AS   dblRefundTotal
+   ,SUM(B.dblRefundQty) AS dblRefundQty  
+   ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
+   ,SUM(B.dblVoucherQty) AS dblVoucherQty  
+   ,SUM(B.dblRefundQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
+   ,SUM(B.dblRefundTotal) - SUM(B.dblVoucherTotal) AS dblClearingAmount
+   ,NULL intLocationId  
+   ,NULL strLocationName
+  FROM patClearing B  
+  GROUP BY   
+   intEntityVendorId  
+   ,intRefundCustomerId
+   ,strTransactionNumber  
+  --  ,intItemId  
+  --  ,intLocationId  
+  --  ,strLocationName
+  --  HAVING 
+  --     (SUM(B.dblSettleStorageQty) - SUM(B.dblVoucherQty)) != 0
+  -- OR  (SUM(B.dblSettleStorageAmount) - SUM(B.dblVoucherTotal)) != 0
+ ) tmpAPOpenClearing  
+INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity 
+                        ON refund.intRefundId = refundEntity.intRefundId)
+                ON refundEntity.intRefundCustomerId = tmpAPOpenClearing.intRefundCustomerId
+  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
+  ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
+ CROSS APPLY tblSMCompanySetup compSetup  
+ WHERE 
+      (dblClearingQty) != 0 
+  OR  (dblClearingAmount) != 0  
 ) MainQuery '  
   
 --SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');  

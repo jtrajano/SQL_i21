@@ -29,10 +29,24 @@ INNER JOIN tblLGLoadDetail B
 	ON A.intLoadId = B.intLoadId
 INNER JOIN tblSMCompanyLocation compLoc
     ON B.intPCompanyLocationId = compLoc.intCompanyLocationId
-CROSS APPLY (SELECT TOP 1 GLD.intAccountId, GLAcc.strAccountId FROM tblGLDetail GLD
-				INNER JOIN vyuGLAccountDetail GLAcc ON GLD.intAccountId = GLAcc.intAccountId
-			WHERE intTransactionId = A.intLoadId AND strTransactionId = A.strLoadNumber AND ysnIsUnposted = 0
-				AND GLD.strCode IN ('LG', 'IC') AND GLAcc.strAccountCategory = 'AP Clearing') GL
+INNER JOIN
+(
+    SELECT 
+        GLD.intAccountId
+        ,GLAcc.strAccountId 
+        ,GLD.intTransactionId
+        ,GLD.strTransactionId
+        ,GLD.intJournalLineNo
+    FROM tblGLDetail GLD
+    INNER JOIN vyuGLAccountDetail GLAcc ON GLD.intAccountId = GLAcc.intAccountId
+    WHERE 
+        ysnIsUnposted = 0
+    AND GLD.strCode IN ('LG') AND GLAcc.intAccountCategoryId = 45
+) GL
+    ON
+        GL.intTransactionId = A.intLoadId 
+    AND GL.strTransactionId = A.strLoadNumber
+    AND GL.intJournalLineNo = B.intLoadDetailId
 LEFT JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt
 				ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId AND receipt.intSourceType = 2 AND receipt.ysnPosted = 1)
 	ON receiptItem.intSourceId = B.intLoadDetailId

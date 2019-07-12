@@ -25,6 +25,9 @@ DECLARE @vendorId INT;
 DECLARE @locationId INT;
 DECLARE @resetData BIT = @reset;
 DECLARE @requireApproval BIT = 0;
+DECLARE @currencyId INT;
+DECLARE @Total NUMERIC (18, 6);
+DECLARE @DueDate DATE;
 
 --DUPLICATING tblAPBill
 IF OBJECT_ID('tempdb..#tmpDuplicateBill') IS NOT NULL DROP TABLE #tmpDuplicateBill
@@ -288,8 +291,11 @@ INSERT INTO tblAPBillDetailTax
 SELECT * FROM #tmpDuplicateBillDetailTaxes
 
 SELECT
-	@vendorId = intEntityVendorId
-	,@locationId = intShipToId
+	@vendorId = A.intEntityVendorId
+	,@locationId = A.intShipToId
+	,@currencyId = A.intCurrencyId
+	,@Total = A.dblTotal
+	,@DueDate = A.dtmDueDate
 FROM tblAPBill A
 WHERE A.intBillId = @billCreatedId
 
@@ -298,7 +304,7 @@ EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
 	@transactionEntityId = @vendorId,
 	@currentUserEntityId = @userId,
 	@locationId = @locationId,
-	@amount = 0,
+	@amount = @Total,
 	@requireApproval = @requireApproval OUTPUT
 
 IF @requireApproval = 1
@@ -309,7 +315,9 @@ BEGIN
 		@transactionNo = @generatedBillRecordId,
 		@transactionEntityId = @vendorId,
 		@currentUserEntityId = @userId,
-		@amount = 0
+		@amount = @Total, 
+		@dueDate = @DueDate,
+		@currencyId = @currencyId
 END
 
 IF @transCount = 0 COMMIT TRANSACTION

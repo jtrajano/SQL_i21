@@ -166,6 +166,7 @@ SET @deletedQuery = 'SELECT --DISTINCT
 					,dblDiscount
 					,dblInterest
 					,dtmDate
+					,intCount
 				  FROM dbo.vyuAPPayablesAgingDeleted'
 
 SET @prepaidInnerQuery = 'SELECT --DISTINCT 
@@ -273,6 +274,12 @@ BEGIN
 										ELSE ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
 										END
 		SET @prepaidInnerQuery = @prepaidInnerQuery + 
+										CASE 
+										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
+										THEN ' AND strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										ELSE ' WHERE strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
+										END
+		SET @arQuery = @arQuery + 
 										CASE 
 										WHEN @dtmDate IS NOT NULL OR @dateFrom IS NOT NULL
 										THEN ' AND strAccountId = ''' + CONVERT(VARCHAR(50), @strAccountId, 110) + ''''
@@ -534,6 +541,7 @@ SET @query = '
 					+ @deletedQuery +
 				') tmpAPPayables 
 			GROUP BY intBillId
+			HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBillArchive A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId

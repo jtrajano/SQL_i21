@@ -22,6 +22,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , dtmLastActivityDate		= CUSTOMER.dtmLastActivityDate
 	 , dblCreditLimit			= ISNULL(CUSTOMER.dblCreditLimit, 0)
 	 , dblARBalance				= ISNULL(CUSTOMER.dblARBalance, 0)
+	 , dblMonthlyBudget			= ISNULL(CUSTOMER.dblMonthlyBudget, 0)
 	 , ysnIncludeEntityName		= CUSTOMER.ysnIncludeEntityName
 	 , ysnPORequired			= CUSTOMER.ysnPORequired
 	 , ysnStatementCreditLimit	= CUSTOMER.ysnStatementCreditLimit
@@ -86,6 +87,7 @@ INNER JOIN (
 		 , dtmLastActivityDate
 		 , dblCreditLimit
 		 , dblARBalance
+		 , dblMonthlyBudget
 		 , ysnIncludeEntityName
 		 , ysnStatementCreditLimit
 		 , ysnPORequired

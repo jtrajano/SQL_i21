@@ -67,7 +67,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,dblRunningQtyBalance		= CAST(0 AS NUMERIC(38, 20))
 		,dblCost					= ISNULL(t.dblCost, 0)
 		,dblBeginningBalance		= CAST(0 AS NUMERIC(38, 20))
-		,dblValue					= ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0) -- Remove the rounding
+		,dblValue					= ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0) 
+		,dblValueRounded			= ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2) 
 		,dblRunningBalance			= CAST(0 AS NUMERIC(38, 20))
 		,t.strBatchId
 		,CostingMethod.strCostingMethod

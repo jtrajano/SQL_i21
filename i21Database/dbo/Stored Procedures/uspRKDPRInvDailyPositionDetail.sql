@@ -1670,6 +1670,7 @@ BEGIN
 				, strCategory
 				, strShipmentNumber
 				, intInventoryShipmentId
+				, strCustomerName
 				, strCustomerReference
 				, intContractHeaderId
 				, strContractNumber
@@ -1694,6 +1695,7 @@ BEGIN
 				, strCategory
 				, strShipmentNumber
 				, intInventoryShipmentId
+				, strCustomerReference
 				, strCustomerReference
 				, intContractHeaderId
 				, strContractNumber
@@ -1728,6 +1730,7 @@ BEGIN
 				FROM #tblGetSalesIntransitWOPickLot i
 				WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)
+					AND i.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					)t
 
 			--Company Title from Inventory Valuation

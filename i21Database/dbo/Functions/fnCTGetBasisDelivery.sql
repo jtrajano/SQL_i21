@@ -11,7 +11,7 @@ RETURNS @Transaction TABLE
 	intContractHeaderId		INT,  
 	intContractDetailId		INT,        
 	intTransactionId		INT,
-	strTransactionType		NVARCHAR(20),
+	strTransactionType		NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	intEntityId				INT,
 	intCommodityId			INT,
 	intItemId				INT,
@@ -21,17 +21,18 @@ RETURNS @Transaction TABLE
 	intCurrencyId			INT,
 	dtmEndDate				DATETIME,
 	-- Display Values
-	strContractType			NVARCHAR(20),
-	strContractNumber		NVARCHAR(50),
+	strContractType			NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+	strContractNumber		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intContractSeq			INT,
-	strTransactionId		NVARCHAR(50),
-	strCustomerVendor		NVARCHAR(150),
-	strCommodityCode		NVARCHAR(50),
-	strItemNo				NVARCHAR(50),  
-    strCompanyLocation		NVARCHAR(150), 
+	strTransactionId		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strCustomerVendor		NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	strCommodityCode		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strItemNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
+    strCompanyLocation		NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
 	dtmDate					DATETIME,
 	dblQuantity				NUMERIC(38,20),
-	dblRunningBalance		NUMERIC(38,20)	
+	dblRunningBalance		NUMERIC(38,20),
+	ysnOpenGetBasisDelivery	bit DEFAULT(0)
 )
 AS
 BEGIN
@@ -42,17 +43,17 @@ BEGIN
 		intContractHeaderId		INT,  
 		intContractDetailId		INT,        
 		intTransactionId		INT,
-		strTransactionId		NVARCHAR(50),
-		strContractType			NVARCHAR(20),
-		strContractNumber		NVARCHAR(50),
+		strTransactionId		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		strContractType			NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+		strContractNumber		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		intContractSeq			INT,
 		intEntityId				INT,
-		strEntityName			NVARCHAR(150),
-		strCommodityCode		NVARCHAR(50),
+		strEntityName			NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+		strCommodityCode		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		intCommodityId			INT,
-		dtmDate					DATETIME,
+		dtmDate					DATE,
 		dblQuantity				NUMERIC(38,20),
-		strTransactionType		NVARCHAR(20),
+		strTransactionType		NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 		intTimeE				BIGINT
 	)
 
@@ -387,6 +388,14 @@ BEGIN
 									)
 	) as RunningBalanceSource
 
+
+	update a set ysnOpenGetBasisDelivery = 1 FROM 
+		@Transaction a
+			join (select intContractHeaderId
+		from @Transaction
+		group by intContractHeaderId 
+		having(sum(dblQuantity) > 0)) b
+			on a.intContractHeaderId = b.intContractHeaderId
 	-- TEMPORARY SOLUTION
 	IF @dtmDate IS NOT NULL
 	BEGIN

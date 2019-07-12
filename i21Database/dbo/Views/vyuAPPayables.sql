@@ -190,7 +190,7 @@ FROM dbo.tblAPPayment  A
  INNER JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
  LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId		
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
@@ -329,8 +329,8 @@ SELECT A.dtmDatePaid AS dtmDate,
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = 0
-	, CASE WHEN C.intTransactionType NOT IN (1,2,14) AND abs(B.dblDiscount) > 0 THEN B.dblDiscount * -1 ELSE B.dblDiscount END AS dblDiscount
-	, CASE WHEN C.intTransactionType NOT IN (1,2,14) AND abs(B.dblInterest) > 0 THEN B.dblInterest * -1 ELSE B.dblInterest END AS dblInterest 
+	, CASE WHEN C.intTransactionType NOT IN (1,2,14) AND B.dblDiscount > 0 THEN B.dblDiscount * -1 ELSE ABS(B.dblDiscount) END AS dblDiscount
+	, CASE WHEN C.intTransactionType NOT IN (1,2,14) AND B.dblInterest > 0 THEN B.dblInterest * -1 ELSE ABS(B.dblInterest) END AS dblInterest 
 	, dblPrepaidAmount = 0 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
@@ -349,7 +349,7 @@ FROM dbo.tblARPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strRecordNumber = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType NOT IN (2)

@@ -1582,6 +1582,7 @@ BEGIN
 						FROM #tblGetSalesIntransitWOPickLot i
 						WHERE i.intCommodityId = @intCommodityId
 					AND i.intCompanyLocationId = ISNULL(@intLocationId, i.intCompanyLocationId)		
+					AND i.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					) t 
 
 				END
