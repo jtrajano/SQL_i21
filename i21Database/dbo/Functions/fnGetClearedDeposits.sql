@@ -30,6 +30,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@PAYCHECK AS INT = 21
 
 		,@returnBalance AS NUMERIC(18,6)
+		,@LastReconDate AS DATETIME
 		
 SELECT	@returnBalance = SUM(ISNULL(dblAmount, 0))
 FROM	[dbo].[tblCMBankTransaction]
@@ -53,6 +54,10 @@ WHERE	ysnPosted = 1
 		AND strLink NOT IN ( --This is to improved the query by not using fnIsDespositEntry
 					SELECT strLink FROM [dbo].[fnGetDepositEntry]()
 			)
+		AND 1 = CASE 
+			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 
+			ELSE 1 
+			END --CM-1143
 
 RETURN ISNULL(@returnBalance, 0)
 
