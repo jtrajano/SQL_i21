@@ -26,7 +26,6 @@ GROUP BY
 	,item.strItemNo
 	,receiptItems.intLocationId
 	,receiptItems.strTransactionNumber
-	,receiptItems.dblReceiptQty
 	,receiptItems.dtmDate
 	,receiptItems.strAccountId
 	,receiptItems.strTransactionNumber
@@ -34,7 +33,9 @@ GROUP BY
 	,C.strEntityNo
 	,C.strName
 	,compLoc.strLocationName
-HAVING (receiptItems.dblReceiptQty - SUM(receiptItems.dblVoucherQty)) != 0
+HAVING 
+	(SUM(receiptItems.dblReceiptQty) - SUM(receiptItems.dblVoucherQty)) != 0
+OR	(SUM(receiptItems.dblReceiptTotal) - SUM(receiptItems.dblVoucherTotal)) != 0
 UNION --RECEIPT CHARGES, USE 'UNION' TO REMOVE DUPLICATES ON REPORT FILTER
 SELECT  DISTINCT
 	receiptChargeItems.dtmDate
@@ -60,7 +61,6 @@ GROUP BY
 	,item.strItemNo
 	,receiptChargeItems.intLocationId
 	,receiptChargeItems.strTransactionNumber
-	,receiptChargeItems.dblReceiptChargeQty
 	,receiptChargeItems.dtmDate
 	,receiptChargeItems.strAccountId
 	,receiptChargeItems.strTransactionNumber
@@ -68,7 +68,9 @@ GROUP BY
 	,C.strEntityNo
 	,C.strName
 	,compLoc.strLocationName
-HAVING (receiptChargeItems.dblReceiptChargeQty - SUM(receiptChargeItems.dblVoucherQty)) != 0
+HAVING 
+	(SUM(receiptChargeItems.dblReceiptChargeQty) - SUM(receiptChargeItems.dblVoucherQty)) != 0
+OR	(SUM(receiptChargeItems.dblReceiptChargeTotal) - SUM(receiptChargeItems.dblVoucherTotal)) != 0
 UNION --SHIPMENT CHARGE
 SELECT  DISTINCT
 	shipmentCharges.dtmDate
@@ -94,7 +96,6 @@ GROUP BY
 	,item.strItemNo
 	,shipmentCharges.intLocationId
 	,shipmentCharges.strTransactionNumber
-	,shipmentCharges.dblReceiptChargeQty
 	,shipmentCharges.dtmDate
 	,shipmentCharges.strAccountId
 	,shipmentCharges.strTransactionNumber
@@ -102,7 +103,9 @@ GROUP BY
 	,C.strEntityNo
 	,C.strName
 	,compLoc.strLocationName
-HAVING (shipmentCharges.dblReceiptChargeQty - SUM(shipmentCharges.dblVoucherQty)) != 0
+HAVING 
+	(SUM(shipmentCharges.dblReceiptChargeQty) - SUM(shipmentCharges.dblVoucherQty)) != 0
+OR	(SUM(shipmentCharges.dblReceiptChargeTotal) - SUM(shipmentCharges.dblVoucherTotal)) != 0
 UNION --LOAD TRANSACTION
 SELECT  DISTINCT
 	loadTran.dtmDate
@@ -128,7 +131,6 @@ GROUP BY
 	,item.strItemNo
 	,loadTran.intLocationId
 	,loadTran.strTransactionNumber
-	,loadTran.dblLoadDetailQty
 	,loadTran.dtmDate
 	,loadTran.strAccountId
 	,loadTran.strTransactionNumber
@@ -136,7 +138,9 @@ GROUP BY
 	,C.strEntityNo
 	,C.strName
 	,compLoc.strLocationName
-HAVING (loadTran.dblLoadDetailQty - SUM(loadTran.dblVoucherQty)) != 0
+HAVING 
+	(SUM(loadTran.dblLoadDetailQty) - SUM(loadTran.dblVoucherQty)) != 0
+OR	(SUM(loadTran.dblLoadDetailTotal) - SUM(loadTran.dblVoucherTotal)) != 0
 UNION
 SELECT  DISTINCT
 	loadCost.dtmDate
@@ -170,4 +174,41 @@ GROUP BY
 	,C.strEntityNo
 	,C.strName
 	,compLoc.strLocationName
-HAVING (loadCost.dblLoadCostDetailQty - SUM(loadCost.dblVoucherQty)) != 0
+HAVING 
+	(SUM(loadCost.dblLoadCostDetailQty) - SUM(loadCost.dblVoucherQty)) != 0
+OR	(SUM(loadCost.dblLoadCostDetailTotal) - SUM(loadCost.dblVoucherTotal)) != 0
+UNION
+SELECT  DISTINCT
+	settleStorage.dtmDate
+	,settleStorage.strTransactionNumber
+	,item.strItemNo
+	,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+	,settleStorage.strAccountId
+	,compLoc.strLocationName
+FROM
+(
+	SELECT
+		*
+	FROM vyuAPGrainClearing
+) settleStorage
+LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+		ON B.[intEntityId] = settleStorage.[intEntityVendorId]
+INNER JOIN tblSMCompanyLocation compLoc
+		ON settleStorage.intLocationId = compLoc.intCompanyLocationId
+INNER JOIN tblICItem item
+	ON item.intItemId = settleStorage.intItemId
+GROUP BY
+	settleStorage.intEntityVendorId
+	,item.strItemNo
+	,settleStorage.intLocationId
+	,settleStorage.strTransactionNumber
+	,settleStorage.dtmDate
+	,settleStorage.strAccountId
+	,settleStorage.strTransactionNumber
+	,B.strVendorId
+	,C.strEntityNo
+	,C.strName
+	,compLoc.strLocationName
+HAVING 
+	(SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) != 0
+OR	(SUM(settleStorage.dblSettleStorageAmount) - SUM(settleStorage.dblVoucherTotal)) != 0

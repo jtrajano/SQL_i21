@@ -49,7 +49,7 @@ SELECT
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
 	,CAST((SS.dblNetSettlement - SS.dblStorageDue - SS.dblDiscountsDue) AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,SS.dblSettleUnits AS dblSettleStorageQty
+	,CASE WHEN SS.dblSettleUnits != 0 THEN  SS.dblSettleUnits ELSE SS.dblUnpaidUnits END AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
@@ -151,7 +151,7 @@ SELECT
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
 	,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,CASE WHEN IM.strCostMethod != 'Per Unit' THEN -1 ELSE -SS.dblSettleUnits END
+	,CASE WHEN SS.dblSettleUnits != 0 THEN  -SS.dblSettleUnits ELSE -SS.dblUnpaidUnits END
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
