@@ -7737,6 +7737,7 @@
     <Build Include="dbo\Stored Procedures\uspICCommodityPositionDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICCommodityPositionReport.sql" />
     <Build Include="dbo\Tables\tblICStagingCommodityActivity.sql" />
+    <Build Include="dbo\Views\vyuCTBookItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
