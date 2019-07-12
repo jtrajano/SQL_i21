@@ -161,8 +161,25 @@ BEGIN TRY
 			,strOldValue        = AH.strOldValue
 			,strNewValue	    = AH.strNewValue
 			,strE			    = @strCompanyName
-			,strF		        = AH.strEntityName	
+			,strF		        = AH.strEntityName
+			,blbSalesPersonP	= CASE
+										WHEN	AH.intContractTypeId  =	1	THEN	NULL
+										WHEN	AH.intContractTypeId  =	2   THEN	ES.blbFile
+								  END
+			,blbSalesPersonS	= CASE
+										WHEN	AH.intContractTypeId  =	1	THEN	ES.blbFile
+										WHEN	AH.intContractTypeId  =	2   THEN	NULL
+								  END
+			,strSalesPersonP	= CASE
+										WHEN	AH.intContractTypeId  =	1	THEN	'|' + @strCompanyName
+										WHEN	AH.intContractTypeId  =	2   THEN	AH.strSalesPerson + '|' + @strCompanyName
+								  END
+			,strSalesPersonS	= CASE
+										WHEN	AH.intContractTypeId  =	1	THEN	AH.strSalesPerson + '|' + AH.strEntityName
+										WHEN	AH.intContractTypeId  =	2   THEN	'|' + AH.strEntityName
+								  END
 			,blbHeaderLogo		= dbo.fnSMGetCompanyLogo('Header')
+			,intSalesPersonId
 
 	FROM	vyuCTAmendmentHistory AH
 	JOIN tblCTContractHeader					CH ON CH.intContractHeaderId = AH.intContractHeaderId
@@ -181,6 +198,12 @@ BEGIN TRY
 	JOIN @tblSequenceHistoryId tblSequenceHistory ON tblSequenceHistory.intSequenceAmendmentLogId = AH.intSequenceAmendmentLogId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = AH.intContractDetailId
 	LEFT JOIN tblCTContractText	  TX ON	TX.intContractTextId   = CH.intContractTextId
+	LEFT JOIN 
+	(
+		SELECT a.intEntityId, b.blbFile
+		FROM tblARSalesperson a
+		INNER JOIN tblSMUpload b on a.intAttachmentSignatureId = b.intAttachmentId
+	) ES ON AH.intSalesPersonId = ES.intEntityId
 
 END TRY
 

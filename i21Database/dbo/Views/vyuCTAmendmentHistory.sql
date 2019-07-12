@@ -22,6 +22,7 @@ SELECT
 	,strAmendmentNumber		        =  SAL.strAmendmentNumber
 	,ysnSigned						=  SAL.ysnSigned
 	,dtmSigned					    =  SAL.dtmSigned
+	,intSalesPersonId				=  CH.intSalespersonId
 	,strSalesPerson					=  CS.strName
 	,intConcurrencyId				=  SAL.intConcurrencyId
 FROM tblCTSequenceAmendmentLog	   SAL
