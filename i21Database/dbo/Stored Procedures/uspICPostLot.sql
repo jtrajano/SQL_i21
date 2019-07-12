@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostLot]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20)
 	,@dblUnitRetail NUMERIC(38, 20)
+	,@intSourceEntityId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -227,6 +228,7 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate			
 					,@dblUnitRetail = @dblUnitRetail
+					,@intSourceEntityId = @intSourceEntityId
 					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -353,6 +355,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate			
 				,@dblUnitRetail = @dblUnitRetail
+				,@intSourceEntityId = @intSourceEntityId
 				,@dtmCreated = @dtmCreated OUTPUT 
 				
 		IF @intReturnValue < 0 RETURN @intReturnValue;	
@@ -448,6 +451,7 @@ BEGIN
 							,@dblForexRate = @dblForexRate
 							,@dblUnitRetail = @dblUnitRetail
 							,@strDescription = @strDescription
+							,@intSourceEntityId = @intSourceEntityId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -554,6 +558,7 @@ BEGIN
 					,@dblForexRate = @dblForexRate			
 					,@dblUnitRetail = 0
 					,@dblCategoryRetailValue = @CategoryRetailValue
+					,@intSourceEntityId = @intSourceEntityId
 					,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;

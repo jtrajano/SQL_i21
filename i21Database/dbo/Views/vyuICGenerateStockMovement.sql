@@ -41,6 +41,7 @@ SELECT *
 				,t.intCommodityId
 				,t.intCategoryId
 				,t.intLocationId 
+				,t.intSourceEntityId
 		FROM	tblICItem i
 				LEFT JOIN (
 					SELECT	
@@ -135,6 +136,7 @@ SELECT *
 				,t.intCommodityId
 				,t.intCategoryId
 				,t.intLocationId 
+				,t.intSourceEntityId
 		FROM	(
 					SELECT	
 						dblQty = SUM(t.dblQty)

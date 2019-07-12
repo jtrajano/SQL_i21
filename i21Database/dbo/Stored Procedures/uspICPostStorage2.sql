@@ -49,6 +49,7 @@ DECLARE @intId AS INT
 		,@strActualCostId AS NVARCHAR(50)
 		,@intForexRateTypeId AS INT
 		,@dblForexRate NUMERIC(38, 20)
+		,@intSourceEntityId INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -106,6 +107,7 @@ SELECT  intId
 		,strActualCostId
 		,intForexRateTypeId
 		,dblForexRate
+		,intSourceEntityId
 FROM	@ItemsToStorage
 
 OPEN loopItems;
@@ -133,6 +135,7 @@ FETCH NEXT FROM loopItems INTO
 	,@strActualCostId
 	,@intForexRateTypeId
 	,@dblForexRate
+	,@intSourceEntityId
 	;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -188,6 +191,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intSourceEntityId
 
 		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
@@ -217,6 +221,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intSourceEntityId
 
 		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
@@ -247,6 +252,7 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intSourceEntityId
 
 		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
@@ -291,6 +297,7 @@ BEGIN
 		,@strActualCostId 
 		,@intForexRateTypeId
 		,@dblForexRate
+		,@intSourceEntityId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop

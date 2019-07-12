@@ -135,6 +135,7 @@ BEGIN TRY
 		,[dblReportingRate]
 		,[dblForeignRate]
 		,[strRateType]
+		,[intSourceEntityId]
 	)
 	EXEC dbo.uspICUnpostCosting @intBatchId
 		,@strWorkOrderNo

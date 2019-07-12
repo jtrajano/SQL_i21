@@ -68,7 +68,9 @@ INSERT INTO @GLPost
     ,[dblSourceUnitCredit]
     ,[intCommodityId]
     ,[intSourceEntityId]
-    ,[ysnRebuild])
+    ,[ysnRebuild]
+	,[intSourceEntityId]
+)
 SELECT
      [dtmDate]
     ,[strBatchId]
@@ -113,6 +115,7 @@ SELECT
     ,[intCommodityId]
     ,[intSourceEntityId]
     ,[ysnRebuild]
+	,[intSourceEntityId]
 FROM
 	#ARInvoiceGLEntries
 

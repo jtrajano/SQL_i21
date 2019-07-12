@@ -261,6 +261,7 @@ BEGIN
 			,[intInTransitSourceLocationId]
 			,[intForexRateTypeId]
 			,[dblForexRate]
+			,[intSourceEntityId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -296,6 +297,7 @@ BEGIN
 			,[intInTransitSourceLocationId]			= ActualTransaction.intInTransitSourceLocationId
 			,[intForexRateTypeId]					= ActualTransaction.intForexRateTypeId
 			,[dblForexRate]							= ActualTransaction.dblForexRate
+			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
@@ -325,6 +327,7 @@ BEGIN
 		,[dtmCreated] 
 		,[intCreatedEntityId] 
 		,[intConcurrencyId] 
+		,[intSourceEntityId]					
 	)
 	SELECT	[intItemId]					= ActualTransaction.intItemId
 			,[intLotId]					= ActualTransaction.intLotId
@@ -346,6 +349,7 @@ BEGIN
 			,[dtmCreated]				= GETDATE()
 			,[intCreatedEntityId]			= @intEntityUserSecurityId
 			,[intConcurrencyId]			= 1
+			,[intSourceEntityId]		= ActualTransaction.intSourceEntityId
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 				AND ActualTransaction.intLotId IS NOT NULL 

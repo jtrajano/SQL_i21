@@ -665,6 +665,7 @@ BEGIN
 		,[dblReportingRate]	
 		,[dblForeignRate]
 		,[strRateType]
+		,[intSourceEntityId]
 	)	
 	-------------------------------------------------------------------------------------------
 	-- Cost billed by: None
@@ -692,7 +693,7 @@ BEGIN
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= InventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -706,6 +707,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
+			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
 	FROM	InventoryCostCharges  
 			INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
@@ -751,7 +753,7 @@ BEGIN
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= InventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -765,6 +767,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
+			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
 	FROM	InventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -816,7 +819,7 @@ BEGIN
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= InventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -830,6 +833,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
+			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
 	FROM	InventoryCostCharges INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -872,7 +876,7 @@ BEGIN
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptChargeId--InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= InventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -886,6 +890,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
+			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
 	FROM	InventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -950,7 +955,7 @@ BEGIN
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= InventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -964,6 +969,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
+			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
 	FROM	InventoryCostCharges INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -1006,7 +1012,7 @@ BEGIN
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptChargeId--InventoryCostCharges.intInventoryReceiptItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= InventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
 			,intTransactionId			= InventoryCostCharges.intTransactionId
 			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
@@ -1020,6 +1026,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
+			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
 	FROM	InventoryCostCharges INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -1154,6 +1161,7 @@ BEGIN
 		,[dblReportingRate]	
 		,[dblForeignRate]
 		,[strRateType]
+		,[intSourceEntityId]
 	)	
 
 	-------------------------------------------------------------------------------------------
@@ -1182,7 +1190,7 @@ BEGIN
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1196,6 +1204,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1240,7 +1249,7 @@ BEGIN
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1254,6 +1263,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1305,7 +1315,7 @@ BEGIN
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1319,6 +1329,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1361,7 +1372,7 @@ BEGIN
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1375,6 +1386,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1425,7 +1437,7 @@ BEGIN
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1439,6 +1451,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1480,7 +1493,7 @@ BEGIN
 			,intJournalLineNo			= NonInventoryCostCharges.intInventoryReceiptChargeId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= NonInventoryCostCharges.intEntityVendorId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
 			,intTransactionId			= NonInventoryCostCharges.intTransactionId
 			,strTransactionType			= NonInventoryCostCharges.strInventoryTransactionTypeName
@@ -1494,6 +1507,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
+			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1547,6 +1561,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 	FROM	@ChargesGLEntries
 END
 

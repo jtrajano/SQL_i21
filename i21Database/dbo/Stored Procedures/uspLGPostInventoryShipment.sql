@@ -373,6 +373,7 @@ BEGIN
 				,[dblReportingRate]
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 				)
 			EXEC @intReturnValue = dbo.uspICPostCosting @ItemsForPost
 				,@strBatchId
@@ -415,6 +416,7 @@ BEGIN
 				,[dblReportingRate]
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 				)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntries @strBatchId
 				,NULL
@@ -448,6 +450,7 @@ BEGIN
 			,intInTransitSourceLocationId
 			,intForexRateTypeId
 			,dblForexRate
+			,intSourceEntityId
 			)
 		SELECT [intItemId]
 			,[intItemLocationId]
@@ -472,6 +475,7 @@ BEGIN
 			,[intInTransitSourceLocationId] = t.intItemLocationId
 			,[intForexRateTypeId] = t.intForexRateTypeId
 			,[dblForexRate] = t.dblForexRate
+			,t.intSourceEntityId
 		FROM tblICInventoryTransaction t
 		WHERE t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0
@@ -518,6 +522,7 @@ BEGIN
 				,[dblCreditReport]
 				,[dblReportingRate]
 				,[dblForeignRate]
+				,[intSourceEntityId]
 				)
 			EXEC @intReturnValue = dbo.uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
 				,@strBatchId = @strBatchId
@@ -571,6 +576,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId

@@ -168,6 +168,7 @@ BEGIN
 		,dblForexRate 
 		,strRateType
 		,strItemNo
+		,intSourceEntityId
 	)
 	AS 
 	(
@@ -194,6 +195,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 0)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intSourceEntityId					= Receipt.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -247,6 +249,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 0)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intSourceEntityId					= Receipt.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -299,6 +302,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 0)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
+				,intSourceEntityId					= ReceiptCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -356,6 +360,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType 
+			,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 	FROM	ForGLEntries_CTE LEFT JOIN dbo.tblGLAccount GLAccount 
 				ON GLAccount.intAccountId = ForGLEntries_CTE.intPurchaseTaxAccountId
 			CROSS APPLY dbo.fnGetDebitFunctional(
@@ -407,6 +412,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType 
+			,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 	FROM	ForGLEntries_CTE INNER JOIN @GLAccounts InventoryAccounts
 				ON ForGLEntries_CTE.intItemId = InventoryAccounts.intItemId
 				AND ForGLEntries_CTE.intItemLocationId = InventoryAccounts.intItemLocationId

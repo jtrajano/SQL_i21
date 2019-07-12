@@ -332,6 +332,7 @@ BEGIN
 			,[dblCategoryRetailValue]
 			,[intCategoryId]
 			,[strActualCostId]
+			,[intSourceEntityId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -373,6 +374,7 @@ BEGIN
 			,[dblCategoryRetailValue]				= -ActualTransaction.dblCategoryRetailValue
 			,[intCategoryId]						= ActualTransaction.intCategoryId 
 			,[strActualCostId]						= ActualTransaction.strActualCostId
+			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
@@ -403,6 +405,7 @@ BEGIN
 		,[intCreatedEntityId] 
 		,[intConcurrencyId] 
 		,[intCompanyId]
+		,[intSourceEntityId]
 	)
 	SELECT	[intItemId]					= ActualTransaction.intItemId
 			,[intLotId]					= ActualTransaction.intLotId
@@ -425,6 +428,7 @@ BEGIN
 			,[intCreatedEntityId]		= @intEntityUserSecurityId
 			,[intConcurrencyId]			= 1
 			,[intCompanyId]				= ActualTransaction.intCompanyId
+			,[intSourceEntityId]		= ActualTransaction.intSourceEntityId
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 				AND ActualTransaction.intLotId IS NOT NULL 
@@ -831,6 +835,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT 
 		t.intItemId
@@ -870,6 +875,7 @@ BEGIN
 		,t.intCommodityId
 		,t.intCategoryId
 		,t.intLocationId
+		,t.intSourceEntityId
 	FROM	#tmpInventoryTransactionStockToReverse tmp INNER JOIN dbo.tblICInventoryStockMovement t
 				ON tmp.intInventoryTransactionId = t.intInventoryTransactionId 
 		

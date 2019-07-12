@@ -659,6 +659,7 @@ WITH ForGLEntries_CTE (
 	,intInventoryCostAdjustmentTypeId
 	,intOtherChargeItemId
 	,ysnFixInventoryRoundingDiscrepancy 
+	,intSourceEntityId
 )
 AS
 (
@@ -686,6 +687,7 @@ AS
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -724,6 +726,7 @@ AS
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -774,6 +777,7 @@ AS
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -812,6 +816,7 @@ AS
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -862,6 +867,7 @@ AS
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -900,6 +906,7 @@ AS
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -950,6 +957,7 @@ AS
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -988,6 +996,7 @@ AS
 			,cbLog.intInventoryCostAdjustmentTypeId
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -1038,6 +1047,7 @@ AS
 			,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 			,intOtherChargeItemId = NULL 
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -1078,6 +1088,7 @@ INSERT INTO @GLEntries (
 	,dblCreditReport
 	,dblReportingRate
 	,dblForeignRate
+	,intSourceEntityId
 )
 
 /*-----------------------------------------------------------------------------------
@@ -1111,7 +1122,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
-		,intEntityId				= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -1124,6 +1135,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId 
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1174,6 +1186,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1225,6 +1238,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @OtherChargeGLAccounts GLAccounts
 			ON ForGLEntries_CTE.intOtherChargeItemId = GLAccounts.intItemId		
@@ -1287,6 +1301,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1335,7 +1350,8 @@ SELECT
 		,dblCreditForeign			= NULL 
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
-		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,dblForeignRate				= ForGLEntries_CTE.dblForexRate
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1377,7 +1393,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
-		,intEntityId				= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -1390,6 +1406,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1438,6 +1455,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1492,6 +1510,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1527,7 +1546,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
-		,intEntityId				= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -1540,6 +1559,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1594,6 +1614,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1642,6 +1663,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1689,7 +1711,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
-		,intEntityId				= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -1702,6 +1724,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1756,6 +1779,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1792,7 +1816,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
-		,intEntityId				= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -1805,6 +1829,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1859,6 +1884,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1896,7 +1922,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= CASE WHEN ISNULL(@ysnPost, 0) = 1 THEN 0 ELSE 1 END 
 		,intUserId					= @intEntityUserSecurityId
-		,intEntityId				= @intEntityUserSecurityId 
+		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -1909,6 +1935,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1956,6 +1983,7 @@ BEGIN
 		,intInventoryCostAdjustmentTypeId
 		,intOtherChargeItemId
 		,ysnFixInventoryRoundingDiscrepancy 
+		,intSourceEntityId
 	)
 	AS
 	(
@@ -1987,6 +2015,7 @@ BEGIN
 				,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
+				,t.intSourceEntityId
 		FROM	dbo.tblICInventoryTransactionType TransType
 				CROSS APPLY (
 					SELECT	cbLog.strRelatedTransactionId 
@@ -2073,6 +2102,7 @@ BEGIN
 				,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
+				,t.intSourceEntityId
 		FROM	dbo.tblICInventoryTransactionType TransType
 				CROSS APPLY (
 					SELECT	cbLog.strRelatedTransactionId 
@@ -2159,6 +2189,7 @@ BEGIN
 				,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
+				,t.intSourceEntityId
 		FROM	dbo.tblICInventoryTransactionType TransType
 				CROSS APPLY (
 					SELECT	cbLog.strRelatedTransactionId 
@@ -2242,6 +2273,7 @@ BEGIN
 				,intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_Auto_Variance
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
+				,t.intSourceEntityId
 		FROM	dbo.tblICInventoryTransactionType TransType
 				CROSS APPLY (
 					SELECT	cbLog.strRelatedTransactionId 
@@ -2328,6 +2360,7 @@ BEGIN
 		,dblCreditReport
 		,dblReportingRate
 		,dblForeignRate
+		,intSourceEntityId
 	)
 	SELECT	
 			dtmDate						= DecimalDiscrepancy.dtmDate
@@ -2366,6 +2399,7 @@ BEGIN
 			,dblCreditReport			= NULL 
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= DecimalDiscrepancy.dblForexRate 
+			,intSourceEntityId			= DecimalDiscrepancy.intSourceEntityId
 	FROM	DecimalDiscrepancy 
 			INNER JOIN @GLAccounts GLAccounts
 				ON DecimalDiscrepancy.intItemId = GLAccounts.intItemId
@@ -2424,6 +2458,7 @@ BEGIN
 			,dblCreditReport
 			,dblReportingRate
 			,dblForeignRate	
+			,intSourceEntityId
 		)
 		SELECT	TOP 1 
 				dtmDate
@@ -2456,7 +2491,8 @@ BEGIN
 				,dblCreditForeign
 				,dblCreditReport
 				,dblReportingRate
-				,dblForeignRate					 
+				,dblForeignRate
+				,intSourceEntityId
 		FROM	@GLEntries glEntries
 				CROSS APPLY dbo.fnGetDebit(@discrepancy) Debit
 				CROSS APPLY dbo.fnGetCredit(@discrepancy) Credit	
@@ -2501,6 +2537,7 @@ SELECT
 		,dblCreditReport
 		,dblReportingRate
 		,dblForeignRate 
+		,intSourceEntityId
 FROM	@GLEntries
 
 IF @ysnPost = 0 

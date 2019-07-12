@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostLotStorage]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20)
+	,@intSourceEntityId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -182,6 +183,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@intSourceEntityId = @intSourceEntityId
 					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -308,7 +310,8 @@ BEGIN
 				,@intCostingMethod = @LOTCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 				,@intForexRateTypeId = @intForexRateTypeId
-				,@dblForexRate = @dblForexRate			
+				,@dblForexRate = @dblForexRate
+				,@intSourceEntityId = @intSourceEntityId
 				,@dtmCreated = @dtmCreated OUTPUT 		
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -402,6 +405,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
+							,@intSourceEntityId = @intSourceEntityId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;

@@ -646,6 +646,7 @@ BEGIN
 					,[dblReportingRate]
 					,[dblForeignRate]
 					,[strRateType]
+					,[intSourceEntityId]
 			)			
 			EXEC @intReturnId = dbo.uspICCreateGLEntries
 				@strBatchId

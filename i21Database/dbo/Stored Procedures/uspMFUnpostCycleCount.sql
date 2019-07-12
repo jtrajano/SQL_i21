@@ -294,6 +294,7 @@ BEGIN TRY
 			,dblCreditReport
 			,dblReportingRate
 			,dblForeignRate
+			,intSourceEntityId
 			)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @intUserId
@@ -393,6 +394,7 @@ BEGIN TRY
 			,[dblReportingRate]
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 			)
 		EXEC dbo.uspICUnpostCosting @intTransactionId
 			,@strAdjustmentNo
@@ -460,6 +462,7 @@ BEGIN TRY
 			,[dblReportingRate]
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 			)
 		EXEC dbo.uspICUnpostCosting @intBatchId
 			,@strWorkOrderNo
@@ -633,6 +636,7 @@ BEGIN TRY
 				,[dblReportingRate]
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 				)
 			EXEC dbo.uspICPostCosting @ItemsForPost
 				,@strBatchId

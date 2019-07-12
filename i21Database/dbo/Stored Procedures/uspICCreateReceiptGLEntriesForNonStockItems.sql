@@ -361,6 +361,7 @@ WITH ForGLEntries_CTE (
 	,strRateType
 	,dblLineTotal
 	,ysnPO
+	,intSourceEntityId
 )
 AS 
 (
@@ -399,7 +400,8 @@ AS
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
 					)						
-			, ysnPO = CAST(0 AS BIT)
+			,ysnPO = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM dbo.tblICInventoryTransaction t 
 		INNER JOIN dbo.tblICInventoryTransactionType TransType ON t.intTransactionTypeId = TransType.intTransactionTypeId
 		INNER JOIN tblICItem i ON i.intItemId = t.intItemId
@@ -480,7 +482,8 @@ AS
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
 					)						
-			, ysnPO = CAST(1 AS BIT)
+			,ysnPO = CAST(1 AS BIT)
+			,t.intSourceEntityId
 	FROM dbo.tblICInventoryTransaction t 
 		INNER JOIN dbo.tblICInventoryTransactionType TransType ON t.intTransactionTypeId = TransType.intTransactionTypeId
 		INNER JOIN tblICItem i ON i.intItemId = t.intItemId
@@ -624,6 +627,7 @@ AS
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,dblLineTotal = NULL 
 			,ysnPO = CAST(0 AS BIT)
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t 
 			INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TransType.intTransactionTypeId = t.intTransactionTypeId
@@ -711,7 +715,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intEntityUserSecurityId 
-		,intEntityId				= NULL
+		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -725,6 +729,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId 
 FROM	ForGLEntries_CTE  
 		INNER JOIN @NonStockGLAccounts GLAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
@@ -784,7 +789,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intEntityUserSecurityId 
-		,intEntityId				= NULL
+		,intEntityId				= @intEntityUserSecurityId
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -798,6 +803,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @NonStockGLAccounts GLAccounts ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ISNULL(ForGLEntries_CTE.intInTransitSourceLocationId, ForGLEntries_CTE.intItemLocationId) = GLAccounts.intItemLocationId

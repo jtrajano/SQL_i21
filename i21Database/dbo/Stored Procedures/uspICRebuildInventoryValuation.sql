@@ -657,6 +657,7 @@ BEGIN
 		[dblUnitRetail] NUMERIC(38, 20) NULL,
 		[dblCategoryCostValue] NUMERIC(38, 20) NULL, 
 		[dblCategoryRetailValue] NUMERIC(38, 20) NULL, 
+		[intSourceEntityId] INT NULL
 	)
 
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_delete]
@@ -740,6 +741,7 @@ BEGIN
 				,dblUnitRetail
 				,dblCategoryCostValue
 				,dblCategoryRetailValue
+				,intSourceEntityId
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
@@ -864,6 +866,7 @@ BEGIN
 				,dblUnitRetail
 				,dblCategoryCostValue
 				,dblCategoryRetailValue
+				,intSourceEntityId
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
@@ -1398,6 +1401,7 @@ BEGIN
 						,intForexRateTypeId
 						,dblForexRate
 						,intCostingMethod
+						,intSourceEntityId
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -1425,6 +1429,7 @@ BEGIN
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
+						,ICTrans.intSourceEntityId
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemUOM StockUOM
 							ON StockUOM.intItemId = ICTrans.intItemId
 							AND StockUOM.ysnStockUnit = 1						
@@ -1503,6 +1508,7 @@ BEGIN
 						,intForexRateTypeId
 						,dblForexRate
 						,intCostingMethod
+						,intSourceEntityId
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -1543,6 +1549,7 @@ BEGIN
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
+						,ICTrans.intSourceEntityId
 				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
@@ -1604,6 +1611,7 @@ BEGIN
 						,intForexRateTypeId
 						,dblForexRate
 						,intCostingMethod
+						,intSourceEntityId
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -1631,6 +1639,7 @@ BEGIN
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
+						,ICTrans.intSourceEntityId
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN dbo.tblICInventoryTransfer Header
 							ON ICTrans.strTransactionId = Header.strTransferNo				
 						INNER JOIN dbo.tblICInventoryTransferDetail Detail
@@ -1691,6 +1700,7 @@ BEGIN
 						,[intSourceTransactionDetailId]
 						,[intFobPointId]
 						,[intInTransitSourceLocationId]
+						,[intSourceEntityId]
 					)
 					SELECT 	
 							[intItemId] = t.intItemId
@@ -1714,6 +1724,7 @@ BEGIN
 							,[intTransactionDetailId] = t.intTransactionDetailId
 							,[intFobPointId] = t.intFobPointId
 							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+							,[intSourceEntityId] = t.intSourceEntityId 
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN tblICItem i 
@@ -1863,6 +1874,7 @@ BEGIN
 							,[dblReportingRate]
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntries
 						@strBatchId 
@@ -1919,6 +1931,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[intSourceEntityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting
 						@strBatchId 
@@ -1969,6 +1982,7 @@ BEGIN
 							,[dblReportingRate]
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntries
 						@strBatchId 
@@ -2026,6 +2040,7 @@ BEGIN
 							,[dblReportingRate]
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForNegativeStockVariance
 						@strBatchId 
@@ -3016,6 +3031,7 @@ BEGIN
 						,[dblReportingRate]
 						,[dblForeignRate]
 						,[strRateType]
+						,[intSourceEntityId]
 				)			
 				EXEC @intReturnValue = dbo.uspICCreateGLEntries
 					@strBatchId 
@@ -3131,6 +3147,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[intSourceEntityId]
 					)
 					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 						@strBatchId
@@ -3521,6 +3538,7 @@ BEGIN
 							,[dblReportingRate]
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntries
 						@strBatchId 
@@ -3675,6 +3693,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[intSourceEntityId]
 					)
 					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 						@strBatchId
@@ -4051,6 +4070,7 @@ BEGIN
 							,[dblCreditReport]
 							,[dblReportingRate]
 							,[dblForeignRate]
+							,[intSourceEntityId]
 						)
 						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
 							@strBatchId
@@ -4194,6 +4214,7 @@ BEGIN
 							,[dblCreditReport]
 							,[dblReportingRate]
 							,[dblForeignRate]
+							,[intSourceEntityId]
 						)
 						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
 							@strBatchId
@@ -4420,6 +4441,7 @@ BEGIN
 							,[dblReportingRate]
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntries
 						@strBatchId 
@@ -4634,6 +4656,7 @@ BEGIN
 						,[dblReportingRate]
 						,[dblForeignRate]
 						,[strRateType]
+						,[intSourceEntityId]
 				)			
 				EXEC @intReturnValue = dbo.uspICCreateGLEntries
 					@strBatchId 
@@ -4747,6 +4770,7 @@ BEGIN
 						,[dblCreditReport]
 						,[dblReportingRate]
 						,[dblForeignRate]
+						,[intSourceEntityId]
 				)
 				EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 					@strBatchId
@@ -4999,6 +5023,7 @@ BEGIN
 						,[dblReportingRate]
 						,[dblForeignRate]
 						,[strRateType]
+						,[intSourceEntityId]
 				)			
 				EXEC @intReturnValue = dbo.uspICCreateGLEntries
 					@strBatchId 

@@ -34,6 +34,7 @@
 	,@dblUnitRetail NUMERIC(38,20) = NULL  
 	,@dblCategoryCostValue NUMERIC(38,20) = NULL  
 	,@dblCategoryRetailValue NUMERIC(38,20) = NULL  
+	,@intSourceEntityId INT = NULL  
 	,@dtmCreated DATETIME = NULL OUTPUT 
 AS
 
@@ -106,6 +107,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[dblCategoryCostValue]
 		,[dblCategoryRetailValue]
 		,[intCategoryId]
+		,[intSourceEntityId]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -145,6 +147,7 @@ SELECT	[intItemId]							= @intItemId
 		,[dblCategoryCostValue]				= @dblCategoryCostValue
 		,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
 		,[intCategoryId]					= i.intCategoryId
+		,[intSourceEntityId]				= @intSourceEntityId
 FROM	tblICItem i 
 WHERE	i.intItemId = @intItemId
 		AND @intItemId IS NOT NULL
@@ -173,6 +176,7 @@ BEGIN
 		,@intTransactionTypeId 
 		,@strTransactionForm 
 		,@intEntityUserSecurityId 
+		,@intSourceEntityId
 		,NULL  
 END
 

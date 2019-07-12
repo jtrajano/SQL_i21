@@ -111,6 +111,7 @@ BEGIN TRY
 			,[dblReportingRate]
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 		)
 		EXEC uspICUnpostCosting @intBatchId
 			,@strShiftActivityNo

@@ -231,6 +231,7 @@ BEGIN TRY
 				,[dblCreditReport]
 				,[dblReportingRate]
 				,[dblForeignRate]
+				,[intSourceEntityId]
 				)
 			EXEC @intReturnValue = dbo.uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
 				,@strBatchId = @strBatchIdUsed
@@ -298,6 +299,7 @@ BEGIN TRY
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 					@intLoadId

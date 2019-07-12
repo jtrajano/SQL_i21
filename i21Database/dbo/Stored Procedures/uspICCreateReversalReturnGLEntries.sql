@@ -128,7 +128,7 @@ BEGIN
 			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= GLEntries.intEntityId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= GLEntries.strTransactionId
 			,intTransactionId			= GLEntries.intTransactionId
 			,strTransactionType			= GLEntries.strTransactionType
@@ -141,7 +141,8 @@ BEGIN
 			,dblCreditReport			= GLEntries.dblCreditReport
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
-			,strRateType				= currencyRateType.strCurrencyExchangeRateType			
+			,strRateType				= currencyRateType.strCurrencyExchangeRateType		
+			,intSourceEntityId			= GLEntries.intSourceEntityId
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
                 ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				AND GLEntries.intTransactionId = Reversal.intTransactionId
@@ -175,7 +176,7 @@ BEGIN
 			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= GLEntries.strTransactionId
 			,intTransactionId			= GLEntries.intTransactionId
 			,strTransactionType			= GLEntries.strTransactionType
@@ -189,6 +190,7 @@ BEGIN
 			,dblReportingRate			= GLEntries.dblReportingRate
 			,dblForeignRate				= GLEntries.dblForeignRate
 			,strRateType				= currencyRateType.strCurrencyExchangeRateType
+			,intSourceEntityId			= GLEntries.intSourceEntityId
 	FROM	tblGLDetail GLEntries INNER JOIN (	
 				tblICInventoryTransaction Reversal INNER JOIN tblICInventoryReturned rtn
 					ON Reversal.intInventoryTransactionId = rtn.intInventoryTransactionId
@@ -228,7 +230,7 @@ BEGIN
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AccountCategory_Auto_Negative
@@ -242,6 +244,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NULL 
 			,strRateType				= NULL 
+			,intSourceEntityId			= ItemTransactions.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
@@ -277,7 +280,7 @@ BEGIN
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
 			,ysnIsUnposted				= 1
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= NULL 
+			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AccountCategory_Auto_Negative
@@ -291,6 +294,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NULL 
 			,strRateType				= NULL 
+			,intSourceEntityId			= ItemTransactions.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId

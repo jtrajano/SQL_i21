@@ -111,7 +111,7 @@ BEGIN
 		,dblForexRate 
 		,strRateType
 		,strItemNo
-		,intEntityId
+		,intSourceEntityId
 	)
 	AS 
 	(
@@ -141,7 +141,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
-				,intEntityId						= Shipment.intEntityCustomerId
+				,intSourceEntityId					= Shipment.intEntityCustomerId
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 					ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -188,7 +188,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
-				,intEntityId						= ShipmentCharge.intEntityVendorId
+				,intSourceEntityId					= ShipmentCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 					ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -232,7 +232,7 @@ BEGIN
 			,intJournalLineNo			= ForGLEntries_CTE.intShipmentItemTaxId
 			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= ForGLEntries_CTE.intEntityId
+			,intEntityId				= ForGLEntries_CTE.intSourceEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -254,6 +254,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType 
+			,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 	FROM	ForGLEntries_CTE LEFT JOIN dbo.tblGLAccount GLAccount 
 				ON GLAccount.intAccountId = ForGLEntries_CTE.intPurchaseTaxAccountId
 			CROSS APPLY dbo.fnGetDebitFunctional(
@@ -291,7 +292,7 @@ BEGIN
 			,intJournalLineNo			= ForGLEntries_CTE.intShipmentItemTaxId
 			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= ForGLEntries_CTE.intEntityId
+			,intEntityId				= ForGLEntries_CTE.intSourceEntityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -313,6 +314,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType 
+			,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 	FROM	ForGLEntries_CTE INNER JOIN @GLAccounts InventoryAccounts
 				ON ForGLEntries_CTE.intItemId = InventoryAccounts.intItemId
 				AND ForGLEntries_CTE.intItemLocationId = InventoryAccounts.intItemLocationId

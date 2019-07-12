@@ -281,7 +281,9 @@ BEGIN
         ,[dblCreditReport]
         ,[dblReportingRate]
         ,[dblForeignRate]
-        ,[strRateType])
+        ,[strRateType]
+		,[intSourceEntityId]
+	)
     EXEC dbo.uspICPostCosting  
          @ItemsForPost  
         ,@BatchId  
@@ -379,7 +381,9 @@ BEGIN
         ,[dblCreditForeign]
         ,[dblCreditReport]
         ,[dblReportingRate]
-        ,[dblForeignRate])
+        ,[dblForeignRate]
+		,[intSourceEntityId]
+	)
 	EXEC dbo.uspICPostInTransitCosting  
          @InTransitItems  
         ,@BatchId  
@@ -483,7 +487,9 @@ BEGIN
         ,[dblCreditForeign]
         ,[dblCreditReport]
         ,[dblReportingRate]
-        ,[dblForeignRate])
+        ,[dblForeignRate]
+		,[intSourceEntityId]
+	)
     EXEC dbo.uspICPostStorage  
              @StorageItemsForPost  
             ,@BatchId  		

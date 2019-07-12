@@ -501,6 +501,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 			@intTransactionId
@@ -536,6 +537,7 @@ BEGIN
 				,intInTransitSourceLocationId
 				,intForexRateTypeId
 				,dblForexRate
+				,intSourceEntityId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -695,6 +697,7 @@ BEGIN
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
+				,intSourceEntityId = Header.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -774,6 +777,7 @@ BEGIN
 					,intInTransitSourceLocationId
 					,intForexRateTypeId
 					,dblForexRate
+					,intSourceEntityId
 			)
 			SELECT 
 					intItemId  
@@ -797,6 +801,7 @@ BEGIN
 					,intInTransitSourceLocationId
 					,intForexRateTypeId
 					,dblForexRate
+					,intSourceEntityId
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 		
@@ -851,6 +856,7 @@ BEGIN
 						,[dblReportingRate]	
 						,[dblForeignRate]
 						,[strRateType]
+						,[intSourceEntityId]
 				)
 				EXEC	@intReturnValue = uspICCreateReturnGLEntries
 						@strBatchId 
@@ -1124,6 +1130,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 		)	
 		EXEC dbo.uspICPostInventoryReceiptTaxes 
 			@intTransactionId
@@ -1187,6 +1194,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostReturnCosting
 				@intTransactionId
@@ -1242,6 +1250,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 			)	
 			EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 				@intTransactionId
@@ -1288,6 +1297,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId
@@ -1329,9 +1339,20 @@ END
 IF @ysnRecap = 1
 BEGIN 
 	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspGLPostRecap 
+
+	-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
+	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN 
+		EXEC dbo.uspGLPostRecap 
 			@GLEntries
 			,@intEntityUserSecurityId
+	END 
+	ELSE 
+	BEGIN 
+		-- Post preview is not available. Financials are only booked for company-owned stocks.
+		EXEC uspICRaiseError 80185; 
+	END 
+
 	COMMIT TRAN @TransactionName
 END 
 
@@ -1360,10 +1381,6 @@ BEGIN
 
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
-		UPDATE @GLEntries
-		SET intEntityId = @intEntityVendorId
-		WHERE intEntityId IS NULL 
-
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 
 	

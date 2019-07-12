@@ -30,6 +30,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLot]
 	,@ysnUpdateItemCostAndPrice AS BIT = 0 
 	,@intLotId AS INT = NULL 
 	,@IsEscalate AS BIT = 0 
+	,@intSourceEntityId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -170,6 +171,7 @@ BEGIN
 			,[intFobPointId] TINYINT NULL 
 			,[intInTransitSourceLocationId] INT NULL 
 			,[dblNewAverageCost] NUMERIC(38,20) NULL
+			,[intSourceEntityId] INT NULL
 		)
 	END 
 END 
@@ -904,6 +906,7 @@ BEGIN
 			,@intForexRateTypeId					= NULL
 			,@dblForexRate							= 1
 			,@strDescription						= @strDescription	
+			,@intSourceEntityId						= @intSourceEntityId
 
 		-- Update ysnIsUnposted flag. 
 		BEGIN 
@@ -1002,6 +1005,7 @@ BEGIN
 			,@intForexRateTypeId					= NULL
 			,@dblForexRate							= 1
 			,@strDescription						= @strDescription	
+			,@intSourceEntityId						= @intSourceEntityId
 
 		-- Update ysnIsUnposted flag. 
 		BEGIN 

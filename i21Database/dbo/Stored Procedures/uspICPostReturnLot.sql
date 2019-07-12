@@ -25,7 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostReturnLot]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20)
-
+	,@intSourceEntityId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -175,6 +175,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 						,@intForexRateTypeId = @intForexRateTypeId
 						,@dblForexRate = @dblForexRate
+						,@intSourceEntityId = @intSourceEntityId
 						,@dtmCreated = @dtmCreated OUTPUT 
 
 				IF @intReturnValue < 0 GOTO _Exit_With_Error

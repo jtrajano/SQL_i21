@@ -28,6 +28,7 @@
 	,@intForexRateTypeId INT = NULL
 	,@dblForexRate NUMERIC(38, 20) = 1
 	,@strDescription NVARCHAR(255) = NULL 
+	,@intSourceEntityId INT = NULL 
 	,@dtmCreated DATETIME = NULL OUTPUT 
 AS
 
@@ -73,6 +74,7 @@ INSERT INTO dbo.tblICInventoryTransactionStorage (
 		,[dblForexRate]
 		,[ysnIsUnposted]
 		,[dtmCreated]
+		,[intSourceEntityId]
 )
 SELECT	[intItemId]								= @intItemId
 		,[intItemLocationId]					= @intItemLocationId
@@ -105,6 +107,7 @@ SELECT	[intItemId]								= @intItemId
 		,[dblForexRate]							= @dblForexRate
 		,[ysnIsUnposted]						= 0
 		,[dtmCreated]							= @dtmCreated
+		,[intSourceEntityId]					= @intSourceEntityId
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
@@ -142,5 +145,6 @@ BEGIN
 		,@strTransactionForm
 		,@intEntityUserSecurityId 
 		,NULL -- @SourceCostBucketStorageId 
+		,@intSourceEntityId	
 		,NULL 
 END

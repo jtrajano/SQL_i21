@@ -30,6 +30,7 @@ CREATE PROCEDURE [dbo].[uspICPostCategory]
 	,@dblForexRate NUMERIC(38, 20) 
 	,@dblAdjustCostValue AS NUMERIC(38,20)
 	,@dblAdjustRetailValue AS NUMERIC(38,20)	
+	,@intSourceEntityId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -237,6 +238,7 @@ BEGIN
 		,@dblUnitRetail = @dblUnitRetail
 		,@dblCategoryCostValue = @dblCostValue
 		,@dblCategoryRetailValue = @dblRetailValue 
+		,@intSourceEntityId = @intSourceEntityId 
 		,@dtmCreated = @dtmCreated OUTPUT 
 END 
 

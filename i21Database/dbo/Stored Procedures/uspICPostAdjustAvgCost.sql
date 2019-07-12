@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostAdjustAvgCost]
 	,@intFobPointId AS TINYINT = NULL
 	,@intInTransitSourceLocationId AS INT = NULL  
 	,@ysnPost AS BIT = 1 
+	,@intSourceEntityId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -158,6 +159,7 @@ BEGIN
 			,[intFobPointId] TINYINT NULL 
 			,[intInTransitSourceLocationId] INT NULL 
 			,[dblNewAverageCost] NUMERIC(38,20) NULL
+			,[intSourceEntityId] INT NULL
 		)
 	END 
 END 
@@ -420,6 +422,7 @@ BEGIN
 					,[intRelatedInventoryTransactionId]
 					,[intFobPointId]
 					,[intInTransitSourceLocationId]
+					,[intSourceEntityId] 
 			)
 			SELECT 
 					[intItemId]						= t.intItemId
@@ -445,6 +448,7 @@ BEGIN
 					,[intRelatedInventoryTransactionId] = t.intInventoryTransactionId	
 					,[intFobPointId]				= t.intFobPointId
 					,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
+					,[intSourceEntityId]			= t.intSourceEntityId
 			FROM	dbo.tblICInventoryTransaction t
 			WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
 
@@ -571,6 +575,7 @@ BEGIN
 		,@intForexRateTypeId					= NULL
 		,@dblForexRate							= 1
 		,@strDescription						= @strDescription	
+		,@intSourceEntityId						= @intSourceEntityId
 		,@dtmCreated							= @dtmCreated OUTPUT 
 
 		UPDATE	tblICInventoryTransaction 

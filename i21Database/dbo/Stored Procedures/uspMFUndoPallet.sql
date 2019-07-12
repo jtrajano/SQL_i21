@@ -474,6 +474,7 @@ BEGIN TRY
 		,[dblReportingRate]
 		,[dblForeignRate]
 		,[strRateType]
+		,[intSourceEntityId]
 		)
 	EXEC dbo.uspICUnpostCosting @intTransactionId
 		,@strTransactionId
@@ -669,6 +670,7 @@ BEGIN TRY
 			,[dblReportingRate]
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 			)
 		EXEC dbo.uspICUnpostCosting @intBatchId
 			,@strTransactionId

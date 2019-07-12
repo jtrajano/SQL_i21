@@ -340,7 +340,8 @@ BEGIN
 				,dblCreditForeign			
 				,dblCreditReport			
 				,dblReportingRate			
-				,dblForeignRate						
+				,dblForeignRate				
+				,intSourceEntityId
 			)
 			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 				@strBatchId = @strBatchId
