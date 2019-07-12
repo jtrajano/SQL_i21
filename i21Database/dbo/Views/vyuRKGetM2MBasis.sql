@@ -32,6 +32,8 @@ SELECT DISTINCT strCommodityCode
 	, intConcurrencyId = 0
 	, i.strMarketValuation
 	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
+	, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
+	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -48,6 +50,7 @@ LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
+CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
 WHERE dblBalance > 0 AND cd.intPricingTypeId <> 5 AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT strCommodityCode
@@ -80,6 +83,8 @@ UNION SELECT DISTINCT strCommodityCode
 	, intConcurrencyId = 0
 	, i.strMarketValuation
 	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
+	, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
+	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail  cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -97,6 +102,7 @@ LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
+CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
 WHERE cd.intPricingTypeId = 5 AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
@@ -114,7 +120,7 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, dblCashOrFuture = 0
 	, dblBasisOrDiscount = 0
 	, dblRatio = 0
-	, strUnitMeasure = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN ct.strUOM ELSE strFMUOM END)
+	, strUnitMeasure = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN (CASE WHEN ISNULL(ct.strUOM, '') = '' THEN strStockUOM ELSE ct.strUOM END) ELSE strFMUOM END)
 	, iis.intCommodityId
 	, iis.intItemId
 	, intOriginId = iis.intOriginId
@@ -125,26 +131,31 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, intCurrencyId = (CASE WHEN ISNULL(intFMCurrencyId,'') = '' THEN iis.intCurrencyId ELSE intFMCurrencyId END)
 	, ct.intPricingTypeId
 	, ct.intContractTypeId
-	, intUnitMeasureId = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN intUOMId ELSE intFMUOMId END)
+	, intUnitMeasureId = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN (CASE WHEN ISNULL(intUOMId, '') = '' THEN intStockUOMId ELSE intUOMId END) ELSE intFMUOMId END)
 	, intConcurrencyId = 0
 	, iis.strMarketValuation
 	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
+	, intBoardMonthId = NULL
+	, strBoardMonth = NULL
 FROM (
-	SELECT 
-		 it.intItemId
-		,it.strItemNo
-		,it.strLocationName
-		,it.intLocationId
-		,it.strCurrency
-		,it.intCurrencyId
-		,it.strMarketValuation
-		,it.intOriginId
-		,it.ysnLicensed
-		,c.intCommodityId
-		,c.strCommodityCode
+	SELECT it.intItemId
+		, it.strItemNo
+		, it.strLocationName
+		, it.intLocationId
+		, it.strCurrency
+		, it.intCurrencyId
+		, it.strMarketValuation
+		, it.intOriginId
+		, it.ysnLicensed
+		, c.intCommodityId
+		, c.strCommodityCode
+		, intStockUOMId = UOM.intUnitMeasureId
+		, strStockUOM = UOM.strUnitMeasure
 	FROM vyuRKGetInventoryTransaction it
 	INNER JOIN tblICItem i ON it.intItemId = i.intItemId
 	INNER JOIN tblICCommodity c on i.intCommodityId =  c.intCommodityId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = i.intItemId AND ItemUOM.ysnStockUnit = 1
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE dblQuantity > 0
 		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN it.strLotTracking ELSE 'No' END)) iis
 LEFT JOIN (
@@ -184,4 +195,3 @@ LEFT JOIN (
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 ) ct ON iis.intItemId = ct.intItemId
-	
