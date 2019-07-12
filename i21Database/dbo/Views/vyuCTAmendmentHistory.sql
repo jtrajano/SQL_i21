@@ -22,7 +22,7 @@ SELECT
 	,strAmendmentNumber		        =  SAL.strAmendmentNumber
 	,ysnSigned						=  SAL.ysnSigned
 	,dtmSigned					    =  SAL.dtmSigned
-	,strSalesPerson					=  CS.strSalesPersonName
+	,strSalesPerson					=  CS.strName
 	,intConcurrencyId				=  SAL.intConcurrencyId
 FROM tblCTSequenceAmendmentLog	   SAL
 JOIN tblCTContractHeader		   CH  ON CH.intContractHeaderId     = SAL.intContractHeaderId
@@ -32,4 +32,4 @@ JOIN tblCTAmendmentApproval        AMP ON AMP.intAmendmentApprovalId = SAL.intAm
 LEFT JOIN tblCTContractDetail	   CD  ON CD.intContractDetailId     = SAL.intContractDetailId
 LEFT JOIN tblICCommodity	       CO  ON CO.intCommodityId			 = CH.intCommodityId
 LEFT JOIN tblSMCompanyLocation	   CL  ON CL.intCompanyLocationId    = CD.intCompanyLocationId
-LEFT JOIN vyuARCustomerSearch	   CS  ON CS.intEntityCustomerId	 = CH.intEntityId
+LEFT JOIN vyuEMEntity			   CS  ON CS.intEntityId	 		= CH.intSalespersonId
