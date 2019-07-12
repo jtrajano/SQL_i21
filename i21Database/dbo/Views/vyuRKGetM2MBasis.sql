@@ -32,8 +32,6 @@ SELECT DISTINCT strCommodityCode
 	, intConcurrencyId = 0
 	, i.strMarketValuation
 	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
-	, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
-	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -50,7 +48,6 @@ LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
-CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
 WHERE dblBalance > 0 AND cd.intPricingTypeId <> 5 AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT strCommodityCode
@@ -83,8 +80,6 @@ UNION SELECT DISTINCT strCommodityCode
 	, intConcurrencyId = 0
 	, i.strMarketValuation
 	, ysnLicensed = ISNULL(cl.ysnLicensed, 0)
-	, intBoardMonthId = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN cd.intFutureMonthId ELSE NULL END
-	, strBoardMonth = CASE WHEN CP.ysnUseBoardMonth <> 0 THEN fm1.strFutureMonth ELSE NULL END
 FROM tblCTContractHeader ch
 JOIN tblCTContractDetail  cd ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = ch.intContractTypeId
@@ -102,7 +97,6 @@ LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
-CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
 WHERE cd.intPricingTypeId = 5 AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
@@ -135,8 +129,6 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, intConcurrencyId = 0
 	, iis.strMarketValuation
 	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
-	, intBoardMonthId = NULL
-	, strBoardMonth = NULL
 FROM (
 	SELECT it.intItemId
 		, it.strItemNo
