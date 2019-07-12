@@ -98,7 +98,7 @@ BEGIN TRY
 													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,4))
 													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,4))
 													ELSE 0
-										   END)) + ' ' + strPriceUOM + ' ' + strCurrency
+										   END)) + ' per ' + strPriceUOM + ' ' + strCurrency
 			,strQuantityRoth			 = convert(nvarchar(30),CAST(ISNULL(dblDetailQuantity,0) AS DECIMAL(24,2))) + ' ' + strItemUOM
 			,strPriceRoth				 = convert(nvarchar(30),(CASE	
 													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,2))
