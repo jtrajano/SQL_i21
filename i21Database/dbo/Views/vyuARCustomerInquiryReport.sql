@@ -27,7 +27,7 @@ SELECT
 , dblUnappliedCredits		= CAR.dblCredits
 , dblPrepaids				= CAR.dblPrepaids + CAR.dblPrepayments
 , dblFuture					= CAR.dblFuture
-, dblBudgetAmount			= ISNULL(dbo.fnARGetCustomerBudget(CAR.intEntityCustomerId, GETDATE()), 0.000000) 
+, dblBudgetAmount			= CUSTOMER.dblMonthlyBudget
 , dtmBudgetMonth			= BUDGETMONTH.dtmBudgetDate
 , dblThru					= 0.000000
 , dblPendingInvoice			= ISNULL(PENDINGINVOICE.dblPendingInvoice, 0)
@@ -53,6 +53,7 @@ CROSS APPLY (
 		 , CC.strPhone
 		 , CC.strInternalNotes
 		 , CC.strEmail
+		 , C.dblMonthlyBudget
 	FROM dbo.vyuARCustomerSearch C WITH (NOLOCK)
 		LEFT JOIN (SELECT intEntityId
 		                , strPhone
