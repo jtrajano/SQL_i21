@@ -15,7 +15,8 @@ SELECT
 	tblICItemPricing.dblLastCost,
 	tblICItemPricing.dblAverageCost,
 	tblICItemPricing.dblStandardCost,
-	tblICItemPricing.dblSalePrice
+	tblICItemPricing.dblSalePrice,
+	strItemNoAndDescription = ISNULL(tblICItem.strItemNo,'') + '-' + ISNULL(tblICItem.strDescription,'')
 FROM tblICItemPricing
 INNER JOIN tblICItemLocation
 	ON tblICItemPricing.intItemLocationId = tblICItemLocation.intItemLocationId
