@@ -120,7 +120,7 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, dblCashOrFuture = 0
 	, dblBasisOrDiscount = 0
 	, dblRatio = 0
-	, strUnitMeasure = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN ct.strUOM ELSE strFMUOM END)
+	, strUnitMeasure = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN (CASE WHEN ISNULL(ct.strUOM, '') = '' THEN strStockUOM ELSE ct.strUOM END) ELSE strFMUOM END)
 	, iis.intCommodityId
 	, iis.intItemId
 	, intOriginId = iis.intOriginId
@@ -131,7 +131,7 @@ UNION SELECT DISTINCT iis.strCommodityCode
 	, intCurrencyId = (CASE WHEN ISNULL(intFMCurrencyId,'') = '' THEN iis.intCurrencyId ELSE intFMCurrencyId END)
 	, ct.intPricingTypeId
 	, ct.intContractTypeId
-	, intUnitMeasureId = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN intUOMId ELSE intFMUOMId END)
+	, intUnitMeasureId = (CASE WHEN ISNULL(strFMUOM,'') = '' THEN (CASE WHEN ISNULL(intUOMId, '') = '' THEN intStockUOMId ELSE intUOMId END) ELSE intFMUOMId END)
 	, intConcurrencyId = 0
 	, iis.strMarketValuation
 	, ysnLicensed = ISNULL(iis.ysnLicensed, 0)
@@ -149,9 +149,13 @@ FROM (
 		, it.ysnLicensed
 		, c.intCommodityId
 		, c.strCommodityCode
+		, intStockUOMId = UOM.intUnitMeasureId
+		, strStockUOM = UOM.strUnitMeasure
 	FROM vyuRKGetInventoryTransaction it
 	INNER JOIN tblICItem i ON it.intItemId = i.intItemId
 	INNER JOIN tblICCommodity c on i.intCommodityId =  c.intCommodityId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = i.intItemId AND ItemUOM.ysnStockUnit = 1
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE dblQuantity > 0
 		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN it.strLotTracking ELSE 'No' END)) iis
 LEFT JOIN (
@@ -191,4 +195,3 @@ LEFT JOIN (
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 ) ct ON iis.intItemId = ct.intItemId
-	
