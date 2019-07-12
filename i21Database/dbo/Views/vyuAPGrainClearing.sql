@@ -48,8 +48,8 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,CAST((SS.dblNetSettlement - SS.dblStorageDue - SS.dblDiscountsDue) AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,CASE WHEN SS.dblSettleUnits != 0 THEN  SS.dblSettleUnits ELSE SS.dblUnpaidUnits END AS dblSettleStorageQty
+	,CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2)) AS dblSettleStorageAmount
+	,SS.dblSettleUnits AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
