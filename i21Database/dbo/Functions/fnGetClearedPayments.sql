@@ -32,6 +32,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ACH AS INT = 22
 		,@DIRECT_DEPOSIT AS INT = 23
 		,@returnBalance AS NUMERIC(18,6)
+		,@LastReconDate AS DATETIME
+
 		
 SELECT	@returnBalance = SUM(ABS(ISNULL(dblAmount, 0)))
 FROM	tblCMBankTransaction 
@@ -52,6 +54,10 @@ WHERE	ysnPosted = 1
 			intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
 			OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
+		AND 1 = CASE 
+			WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL THEN 0 
+			ELSE 1 
+			END --CM-1143
 
 RETURN ISNULL(@returnBalance, 0)
 
