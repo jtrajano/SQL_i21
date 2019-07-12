@@ -68,6 +68,8 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , intRecipeId
 	 , intOneLinePrintId
 	 , strInvoiceComments
+	 , strPaymentComments
+	 , strCustomerComments
 	 , strItemType
 	 , dblTotalWeight
 	 , strVFDDocumentNumber
@@ -77,7 +79,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , ysnHasProvisional
 	 , strProvisional
 	 , dblTotalProvisional
-	 , strCustomerComments
 	 , ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately
 	 , strTicketNumbers
@@ -88,6 +89,8 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strTicketNumber
 	 , strTicketNumberDate
 	 , strCustomerReference
+	 , strSalesReference
+	 , strPurchaseReference
 	 , strLoadNumber
 	 , strTruckDriver
 	 , strTrailer
@@ -191,6 +194,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , intRecipeId				= INVOICEDETAIL.intRecipeId
 	 , intOneLinePrintId		= ISNULL(INVOICEDETAIL.intOneLinePrintId, 1)
 	 , strInvoiceComments		= INVOICEDETAIL.strInvoiceComments
+	 , strPaymentComments		= [LOCATION].strInvoiceComments
+	 , strCustomerComments		= CUSTOMERCOMMENTS.strCustomerComments
 	 , strItemType				= INVOICEDETAIL.strItemType
 	 , dblTotalWeight			= ISNULL(INV.dblTotalWeight, 0)
 	 , strVFDDocumentNumber		= INVOICEDETAIL.strVFDDocumentNumber
@@ -199,8 +204,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnHasVFDDrugItem        = CASE WHEN (ISNULL(VFDDRUGITEM.intVFDDrugItemCount, 0)) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , ysnHasProvisional		= CASE WHEN (ISNULL(PROVISIONAL.strProvisionalDescription, '')) <> '' THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , strProvisional			= PROVISIONAL.strProvisionalDescription
-	 , dblTotalProvisional		= PROVISIONAL.dblProvisionalTotal
-	 , strCustomerComments		= CUSTOMERCOMMENTS.strCustomerComments
+	 , dblTotalProvisional		= PROVISIONAL.dblProvisionalTotal	 
 	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
@@ -211,6 +215,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strTicketNumber 			= INVOICEDETAIL.strTicketNumber
 	 , strTicketNumberDate		= INVOICEDETAIL.strTicketNumberDate
 	 , strCustomerReference		= INVOICEDETAIL.strCustomerReference
+	 , strSalesReference		= INVOICEDETAIL.strSalesReference
+	 , strPurchaseReference		= INVOICEDETAIL.strPurchaseReference
 	 , strLoadNumber			= INVOICEDETAIL.strLoadNumber
 	 , strTruckDriver			= INVOICEDETAIL.strTruckName
 	 , strTrailer				= INVOICEDETAIL.strCustomerReference
@@ -243,8 +249,9 @@ INNER JOIN (
 		 , strStateProvince
 		 , strZipPostalCode
 		 , strCountry
+		 , strInvoiceComments
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) LOCATION ON INV.intCompanyLocationId = [LOCATION].intCompanyLocationId
+) [LOCATION] ON INV.intCompanyLocationId = [LOCATION].intCompanyLocationId
 INNER JOIN (
 	SELECT intTermID
 		 , strTerm
@@ -282,7 +289,9 @@ LEFT JOIN (
 		 , dblEstimatedPercentLeft	= [SITE].dblEstimatedPercentLeft
 		 , strTicketNumber			= SCALE.strTicketNumber
 		 , strTicketNumberDate		= SCALE.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SCALE.dtmTicketDateTime, 101) 
-		 , strCustomerReference		= SCALE.strCustomerReference		 
+		 , strCustomerReference		= SCALE.strCustomerReference
+		 , strSalesReference		= ISNULL(LGLOAD.strCustomerReference, CONTRACTS.strCustomerContract)
+	 	 , strPurchaseReference		= LGLOAD.strExternalLoadNumber
 		 , strLoadNumber			= ISNULL(LGLOAD.strLoadNumber, SCALE.strLoadNumber)
 		 , strTruckName				= SCALE.strTruckName
 		 , dblPercentFull			= ID.dblPercentFull
@@ -357,6 +366,8 @@ LEFT JOIN (
 	LEFT JOIN (
 		SELECT LD.intLoadDetailId
 			 , L.strLoadNumber
+			 , L.strCustomerReference
+			 , L.strExternalLoadNumber
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
 		INNER JOIN dbo.tblLGLoad L ON LD.intLoadId = L.intLoadId
 	) LGLOAD ON ID.intLoadDetailId = LGLOAD.intLoadDetailId
