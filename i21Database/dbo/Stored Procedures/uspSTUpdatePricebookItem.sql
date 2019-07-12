@@ -21,6 +21,7 @@
 AS
 BEGIN
 
+	SET ANSI_WARNINGS OFF
 	set nocount on;
     declare @InitTranCount INT;
     SET @InitTranCount = @@TRANCOUNT
@@ -59,6 +60,7 @@ BEGIN
 			--				+ ' - @strPOSDescription: ' + ISNULL(@strPOSDescription, 'NULL')
 			--				+ ' - @intVendorId: ' + ISNULL(CAST(@intVendorId AS NVARCHAR(50)), 'NULL')
 			--				+ ' - @strVendorProduct: ' + ISNULL(@strVendorProduct, 'NULL')
+			--				+ ' - @strGuid: ' + ISNULL(CAST(@strGuid AS NVARCHAR(100)), 'NULL')
 
 
 			DECLARE @intRecordsCount AS INT = 0
@@ -1131,22 +1133,26 @@ END
 ExitWithCommit:
 	--COMMIT TRANSACTION
 	
+	--IF @InitTranCount = 0
+	--	BEGIN
+	--		IF ((XACT_STATE()) <> 0)
+	--		BEGIN
+	--			SET @strResultMessage = @strResultMessage + '. COMMIT TRANSACTION'
+	--			COMMIT TRANSACTION
+	--		END
+	--	END
+			
+	--ELSE
+	--	BEGIN
+	--		IF ((XACT_STATE()) <> 0)
+	--			BEGIN
+	--				SET @strResultMessage = @strResultMessage + '. COMMIT TRANSACTION @Savepoint'
+	--				COMMIT TRANSACTION @Savepoint
+	--			END
+	--	END
 	IF @InitTranCount = 0
 		BEGIN
-			IF ((XACT_STATE()) <> 0)
-			BEGIN
-				SET @strResultMessage = @strResultMessage + '. COMMIT TRANSACTION'
-				COMMIT TRANSACTION
-			END
-		END
-			
-	ELSE
-		BEGIN
-			IF ((XACT_STATE()) <> 0)
-				BEGIN
-					SET @strResultMessage = @strResultMessage + '. COMMIT TRANSACTION @Savepoint'
-					COMMIT TRANSACTION @Savepoint
-				END
+			COMMIT TRANSACTION
 		END
 
 	GOTO ExitPost
