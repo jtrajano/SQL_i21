@@ -15,7 +15,8 @@ GO
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Intercompany Transaction Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager') AND strCommand = N'i21.view.InterCompanyTransactionConfiguration')
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Note Adjustment Type' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteAdjustmentType') OR
 	   EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Note Description' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteDescription') OR
-	   EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteCalculateMonthlyInterest')
+	   EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteCalculateMonthlyInterest') OR
+	   EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
 	
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
@@ -285,8 +286,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (137, N'Market Zone', N'System Manager', 131, N'Market Zone', N'Maintenance', N'Screen', N'AccountsReceivable.view.MarketZone', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)		
 		/* WILL BE RENAME FROM Statement Footer Messages TO COMMENT MAINTENANCE */
-		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (138, N'Comment Maintenance', N'Accounts Receivable', 131, N'Comment Maintenance', N'Maintenance', N'Screen', N'AccountsReceivable.view.StatementFooterMessage', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
+		-- INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+		-- VALUES (138, N'Comment Maintenance', N'Accounts Receivable', 131, N'Comment Maintenance', N'Maintenance', N'Screen', N'AccountsReceivable.view.StatementFooterMessage', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (139, N'Service Charges', N'Accounts Receivable', 131, N'Service Charges', N'Maintenance', N'Screen', N'AccountsReceivable.view.ServiceCharge?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2410,6 +2411,8 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivables' AND strModul
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Note Adjustment Type' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Note Description' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = N'Accounts Receivable' AND intParentMenuID = @AccountsReceivableMaintenanceParentMenuId
+
 
 
 /* END OF DELETING */
