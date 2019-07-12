@@ -15,12 +15,14 @@ A.intBillId
 ,ContactEntity.strName AS strContactName
 ,ContactEntity.strEmail AS strContactEmail
 ,strDateLocation = TranLoc.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 106)
+,strLocationName = TranLoc.strLocationName
 ,Bank.strBankName
 ,BankAccount.strBankAccountHolder
 ,BankAccount.strIBAN
 ,BankAccount.strSWIFT
 ,Term.strTerm
 ,A.strRemarks
+,A.dtmDate
 ,A.dtmDueDate--CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
 ,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
 FROM tblAPBill A 
