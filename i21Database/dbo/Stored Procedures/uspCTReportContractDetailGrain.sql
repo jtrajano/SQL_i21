@@ -111,7 +111,7 @@ BEGIN TRY
 													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,4))
 													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,4))
 													ELSE 0
-										   END)) + ' ' + strPriceUOM + ' ' + strCurrency
+										   END)) + ' per ' + strPriceUOM + ' ' + strCurrency
 			,strPriceZee				 = CASE	
 													WHEN intPricingTypeId IN (1,6)	THEN	dbo.fnCTChangeNumericScale(ISNULL(dblCashPrice,0),@intDecimalDPR)
 													WHEN intPricingTypeId = 2		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblBasis,0),@intDecimalDPR)
