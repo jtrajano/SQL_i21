@@ -13,6 +13,7 @@
 	, @UDTItemPricing StoreItemPricing	READONLY
 
 	, @intEntityId						INT
+	, @strGuid							UNIQUEIDENTIFIER
 	, @ysnDebug							BIT
 	, @ysnPreview						BIT
 	, @ysnResultSuccess					BIT				OUTPUT
@@ -47,6 +48,17 @@ BEGIN
 					--VALUES('TRAN', 'SAVE TRANSACTION')
 				END
 				
+			----TEST
+			--DECLARE @strParameters AS NVARCHAR(500) = ''
+			--SET @strParameters = '@intItemId: ' + CAST(@intItemId AS NVARCHAR(50))
+			--				+ ' - @strDescription: ' + ISNULL(@strDescription, 'NULL')
+			--				+ ' - @intCategoryId: ' + ISNULL(CAST(@intCategoryId AS NVARCHAR(50)), 'NULL')
+			--				+ ' - @intFamilyId: ' + ISNULL(CAST(@intFamilyId AS NVARCHAR(50)), 'NULL')
+			--				+ ' - @intClassId: ' + ISNULL(CAST(@intClassId AS NVARCHAR(50)), 'NULL')
+			--				+ ' - @intVendorId: ' + ISNULL(CAST(@intVendorId AS NVARCHAR(50)), 'NULL')
+			--				+ ' - @strPOSDescription: ' + ISNULL(@strPOSDescription, 'NULL')
+			--				+ ' - @intVendorId: ' + ISNULL(CAST(@intVendorId AS NVARCHAR(50)), 'NULL')
+			--				+ ' - @strVendorProduct: ' + ISNULL(@strVendorProduct, 'NULL')
 
 
 			DECLARE @intRecordsCount AS INT = 0
@@ -577,11 +589,11 @@ BEGIN
 								) t
 								unpivot
 								(
-									strOldData for oldColumnName in (strFamilyId_Original, strClassId_Original, strDescription_Original)
+									strOldData for oldColumnName in (strFamilyId_Original, strClassId_Original, strDescription_Original, strVendor_Original)
 								) o
 								unpivot
 								(
-									strNewData for newColumnName in (strFamilyId_New, strClassId_New, strDescription_New)
+									strNewData for newColumnName in (strFamilyId_New, strClassId_New, strDescription_New, strVendor_New)
 								) n
 								WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
 		
@@ -823,19 +835,7 @@ BEGIN
 									, @dblLoopLastCost AS NUMERIC(38,20)
 
 
-						
-							--EXEC [uspICUpdateItemPricingForCStore]
-							--				-- filter params
-							--				@strUpcCode					= NULL 
-							--				, @strDescription			= NULL 
-							--				, @intItemId				= 89 
-							--				, @intItemPricingId			= 7412 
 
-							--				-- update params
-							--				, @dblStandardCost			= 0.979 
-							--				, @dblRetailPrice			= NULL 
-							--				, @dblLastCost				= 0.08333
-							--				, @intEntityUserSecurityId	= @intEntityId
 
 							WHILE EXISTS(SELECT TOP 1 1 FROM @tblItemPricing)
 								BEGIN
@@ -967,8 +967,8 @@ BEGIN
 														WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
 														WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
 													END
-													,ISNULL([Changes].strOldData, '')
-													,ISNULL([Changes].strNewData, '')
+													,[Changes].strOldData
+													,[Changes].strNewData
 													,[Changes].intItemId 
 													,[Changes].intItemId
 											FROM 
@@ -1132,22 +1132,22 @@ ExitWithCommit:
 	--COMMIT TRANSACTION
 	
 	IF @InitTranCount = 0
+		BEGIN
+			IF ((XACT_STATE()) <> 0)
 			BEGIN
-				IF ((XACT_STATE()) <> 0)
-				BEGIN
-					SET @strResultMessage = @strResultMessage + '. COMMIT TRANSACTION'
-					COMMIT TRANSACTION
-				END
+				SET @strResultMessage = @strResultMessage + '. COMMIT TRANSACTION'
+				COMMIT TRANSACTION
 			END
+		END
 			
-		ELSE
-			BEGIN
-				IF ((XACT_STATE()) <> 0)
-					BEGIN
-						SET @strResultMessage = @strResultMessage + '. COMMIT TRANSACTION @Savepoint'
-						COMMIT TRANSACTION @Savepoint
-					END
-			END
+	ELSE
+		BEGIN
+			IF ((XACT_STATE()) <> 0)
+				BEGIN
+					SET @strResultMessage = @strResultMessage + '. COMMIT TRANSACTION @Savepoint'
+					COMMIT TRANSACTION @Savepoint
+				END
+		END
 
 	GOTO ExitPost
 	
@@ -1188,9 +1188,60 @@ ExitWithRollback:
 
 		
 ExitPost:
+		IF(@ysnPreview = 1)
+			BEGIN
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTUpdateItemDataPreview WHERE strGuid = @strGuid)
+					BEGIN
+						
+						-- INSERT TO PREVIEW TABLE
+						INSERT INTO tblSTUpdateItemDataPreview
+						(
+							strGuid,
+							strLocation,
+							strUpc,
+							strDescription,
+							strChangeDescription,
+							strOldData,
+							strNewData,
+
+							--intItemId,
+							--intItemUOMId,
+							--intItemLocationId,
+							--intTableIdentityId,
+							--strTableName,
+							--strColumnName,
+							--strColumnDataType,
+							intConcurrencyId
+						)
+						SELECT DISTINCT 
+							strGuid					=	@strGuid
+							, strLocation			=	ISNULL(strLocation, '')
+							, strUpc				=	ISNULL(strUpc, '')
+							, strDescription		=	ISNULL(strItemDescription, '')
+							, strChangeDescription	=	ISNULL(strChangeDescription, '')
+							, strOldData			=	ISNULL(strOldData, '')
+							, strNewData			=	ISNULL(strNewData, '')
+
+							--, intItemId
+							--, intItemUOMId
+							--, intItemLocationId
+							--, intPrimaryKeyId
+							--, strTableName
+							--, strTableColumnName
+							--, strTableColumnDataType
+							, intConcurrencyId		=	1
+						FROM @tblPreview
+						WHERE ISNULL(strNewData, '') != ISNULL(strOldData, '')
+						ORDER BY strLocation, strUpc ASC
+
+					END
+			END
+
 		---- TEST
 		--INSERT INTO CopierDB.dbo.tblTestSP(strValueOne, strValueTwo)
-		--VALUES('@strResultMessage', @strResultMessage)
+		--VALUES('@strResultMessage', @strResultMessage) 
+		--INSERT INTO CopierDB.dbo.tblTestSP(strValueOne, strValueTwo)
+		--VALUES('@strParameters', @strParameters)
 
 		--DECLARE @intRow AS INT = (SELECT COUNT(intItemId) FROM @UDTItemPricing)
 		--DECLARE @strRow AS NVARCHAR(50) = CAST(@intRow AS NVARCHAR(50))
