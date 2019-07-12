@@ -257,6 +257,7 @@ BEGIN
 		, [intLoadId]				INT
 		, [ysnFromProvisional]		BIT
 		, [ysnProvisionalWithGL]	BIT
+		, [ysnFromReturn]			BIT
 	)
 
 	INSERT INTO @IdsP(
@@ -264,12 +265,22 @@ BEGIN
 		, [intLoadId]
 		, [ysnFromProvisional]
 		, [ysnProvisionalWithGL]
+		, [ysnFromReturn]
 	)
-	SELECT [intInvoiceId]
-		 , [intLoadId]
-		 , [ysnFromProvisional]
-		 , [ysnProvisionalWithGL] 
-	FROM #ARPostInvoiceHeader
+	SELECT [intInvoiceId]			= I.[intInvoiceId]
+		 , [intLoadId]				= I.[intLoadId]
+		 , [ysnFromProvisional]		= I.[ysnFromProvisional]
+		 , [ysnProvisionalWithGL]	= I.[ysnProvisionalWithGL]
+		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	FROM #ARPostInvoiceHeader I
+	OUTER APPLY (
+		SELECT TOP 1 intInvoiceId 
+		FROM tblARInvoice I
+		WHERE I.strTransactionType = 'Invoice'
+		AND I.ysnReturned = 1
+		AND ID.strInvoiceOriginId = I.strInvoiceNumber
+		AND ID.intOriginalInvoiceId = I.intInvoiceId
+	) RI
 
 	SELECT @strId = COALESCE(@strId + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250)) FROM @IdsP
 
@@ -289,15 +300,17 @@ BEGIN
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsP)
 	BEGIN
-		DECLARE @InvoiceIDP INT
-		DECLARE @LoadIDP INT
-        DECLARE @FromProvisionalP BIT
-        DECLARE @ProvisionalWithGLP BIT
-		
-		SELECT TOP 1 @InvoiceIDP		= [intInvoiceId]
-				   , @LoadIDP			= [intLoadId]
-				   , @FromProvisionalP	= [ysnFromProvisional]
-				   , @ProvisionalWithGLP = [ysnProvisionalWithGL] 
+		DECLARE @InvoiceIDP 		INT
+			  , @LoadIDP 			INT
+        	  , @FromProvisionalP 	BIT
+        	  , @ProvisionalWithGLP BIT
+			  , @ysnFromReturnP 	BIT
+
+		SELECT TOP 1 @InvoiceIDP			= [intInvoiceId]
+				   , @LoadIDP				= [intLoadId]
+				   , @FromProvisionalP		= [ysnFromProvisional]
+				   , @ProvisionalWithGLP 	= [ysnProvisionalWithGL]
+				   , @ysnFromReturnP		= [ysnFromReturn]
 		FROM @IdsP 
 		ORDER BY [intInvoiceId]
 		
@@ -310,7 +323,7 @@ BEGIN
 		--IN TRANSIT OUTBOUND QTY
 		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDP, 1, 0
 
-		--IN TRANSIT DIRECTY QTY
+		--IN TRANSIT DIRECT QTY
 		EXEC dbo.[uspARUpdateInTransitDirect] @InvoiceIDP, 1
 
 		--LOAD SHIPMENT
@@ -319,6 +332,13 @@ BEGIN
 														  , @Post		= 1
 														  , @LoadId		= @LoadIDP
 														  , @UserId		= @UserId
+		
+		--CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+		IF ISNULL(@ysnFromReturnP, 0) = 0 AND @LoadIDP IS NOT NULL
+			EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
+											 , @ysnCancel				 = 1
+											 , @intEntityUserSecurityId  = @UserId
+											 , @intShipmentType			 = 1
 
 		DELETE FROM @IdsP WHERE [intInvoiceId] = @InvoiceIDP
 	END
@@ -553,6 +573,7 @@ BEGIN
 		, [intLoadId]				INT
 		, [ysnFromProvisional]		BIT
 		, [ysnProvisionalWithGL]	BIT
+		, [ysnFromReturn]			BIT
 	)
 
 	INSERT INTO @IdsU (
@@ -560,12 +581,23 @@ BEGIN
 		, [intLoadId]
 		, [ysnFromProvisional]
 		, [ysnProvisionalWithGL]
+		, [ysnFromReturn]
 	)
-	SELECT [intInvoiceId]
-		 , [intLoadId]
-		 , [ysnFromProvisional]
-		 , [ysnProvisionalWithGL] 
-	FROM #ARPostInvoiceHeader
+	SELECT [intInvoiceId]			= I.[intInvoiceId]
+		 , [intLoadId]				= I.[intLoadId]
+		 , [ysnFromProvisional]		= I.[ysnFromProvisional]
+		 , [ysnProvisionalWithGL] 	= I.[ysnProvisionalWithGL]
+		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	FROM #ARPostInvoiceHeader I
+	OUTER APPLY (
+		SELECT TOP 1 intInvoiceId 
+		FROM tblARInvoice I
+		WHERE I.strTransactionType = 'Invoice'
+		AND I.ysnReturned = 1
+		AND ID.strInvoiceOriginId = I.strInvoiceNumber
+		AND ID.intOriginalInvoiceId = I.intInvoiceId
+	) RI
+
 
 	SELECT @strIdU = COALESCE(@strIdU + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250)) FROM @IdsU
 
@@ -588,11 +620,13 @@ BEGIN
 			  , @LoadIDU				INT
 			  , @FromProvisionalU		BIT
 			  , @ProvisionalWithGLU		BIT
+			  , @ysnFromReturnU			BIT
 
-		SELECT TOP 1 @InvoiceIDU		= [intInvoiceId]
-				   , @LoadIDU			= [intLoadId]
-				   , @FromProvisionalU	= [ysnFromProvisional]
-				   , @ProvisionalWithGLU = [ysnProvisionalWithGL] 
+		SELECT TOP 1 @InvoiceIDU			= [intInvoiceId]
+				   , @LoadIDU				= [intLoadId]
+				   , @FromProvisionalU		= [ysnFromProvisional]
+				   , @ProvisionalWithGLU 	= [ysnProvisionalWithGL]
+				   , @ysnFromReturnU		= [ysnFromReturn]
 		FROM @IdsU 
 		ORDER BY [intInvoiceId]
 		
@@ -614,6 +648,13 @@ BEGIN
 														  , @Post		= 0
 														  , @LoadId		= @LoadIDU
 														  , @UserId		= @UserId
+
+		--CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+		IF ISNULL(@ysnFromReturnU, 0) = 0 AND @LoadIDU IS NOT NULL
+			EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
+											 , @ysnCancel				 = 0
+											 , @intEntityUserSecurityId  = @UserId
+											 , @intShipmentType			 = 1
 
 		DELETE FROM @IdsU WHERE [intInvoiceId] = @InvoiceIDU
 	END
