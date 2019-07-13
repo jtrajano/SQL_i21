@@ -7741,6 +7741,7 @@
     <Build Include="dbo\Tables\tblSTCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSetExcessUserToDisabled.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCopyItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTItemContractReportItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
