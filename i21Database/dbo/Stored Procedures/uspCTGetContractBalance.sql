@@ -215,60 +215,52 @@ BEGIN TRY
 	DELETE FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate
 
 	INSERT INTO @Shipment
-	(
-	intContractTypeId
-	,intContractHeaderId	
-	,intContractDetailId	
-	,dtmDate	
-	,dtmEndDate			
-	,dblQuantity
-	,dblAllocatedQuantity
-	,intNoOfLoad
-	,intSourceId
-	,strType
-	)
-	SELECT 
-	CH.intContractTypeId 
-	,CH.intContractHeaderId
-	,CD.intContractDetailId
-	,InvTran.dtmDate	  
-	,@dtmEndDate AS dtmEndDate
-	,dblQuantity = CASE
-					WHEN ISNULL(INV.ysnPosted, 0) = 1 AND CH.intWeightId = 2 THEN SUM(ShipmentItem.dblDestinationNet * 1)
-					ELSE SUM(InvTran.dblQty * - 1) 
-					END
-	,0
-	,COUNT(DISTINCT Shipment.intInventoryShipmentId)
-	,Shipment.intInventoryShipmentId	  
-	,'Inventory Shipment'
-	FROM tblICInventoryTransaction InvTran
-
-	JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = InvTran.intTransactionId AND Shipment.intOrderType = 1
-	JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentId = InvTran.intTransactionId
-	AND Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-	AND ShipmentItem.intInventoryShipmentItemId = InvTran.intTransactionDetailId
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo 
-	AND CD.intContractHeaderId = CH.intContractHeaderId
-	LEFT JOIN 
-	(
-		SELECT ID.intInventoryShipmentItemId, IV.ysnPosted
-		FROM tblARInvoice IV
-		INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
-	) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId 
-	WHERE InvTran.strTransactionForm = 'Inventory Shipment'
-	AND InvTran.ysnIsUnposted = 0
-	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
-	AND intContractTypeId = 2
-	AND InvTran.intInTransitSourceLocationId IS NULL
-	GROUP BY 
-	    CH.intContractTypeId
-	,CH.intContractHeaderId
-	,CD.intContractDetailId
-	,InvTran.dtmDate
-	,Shipment.intInventoryShipmentId
-	,INV.ysnPosted
-	,CH.intWeightId
+	  (
+	    intContractTypeId
+	   ,intContractHeaderId	
+	   ,intContractDetailId	
+	   ,dtmDate	
+	   ,dtmEndDate			
+	   ,dblQuantity
+	   ,dblAllocatedQuantity
+	   ,intNoOfLoad
+	   ,intSourceId
+	   ,strType
+	  )
+	   SELECT 
+	   CH.intContractTypeId 
+	  ,CH.intContractHeaderId
+	  ,CD.intContractDetailId
+	  ,InvTran.dtmDate	  
+	  ,@dtmEndDate AS dtmEndDate
+	  ,dblQuantity = CASE
+					 	WHEN SUM(ISNULL(ShipmentItem.dblDestinationNet, 0)) = 0 OR SUM(ShipmentItem.dblDestinationNet * 1) > SUM(CD.dblQuantity)
+					 		THEN SUM(InvTran.dblQty * - 1) 
+					 	ELSE SUM(ShipmentItem.dblDestinationNet * 1)
+					 END
+	  ,0
+	  ,COUNT(DISTINCT Shipment.intInventoryShipmentId)
+	  ,Shipment.intInventoryShipmentId	  
+	  ,'Inventory Shipment'
+	   FROM tblICInventoryTransaction InvTran
+	   JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = InvTran.intTransactionId AND Shipment.intOrderType = 1
+	   JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentId = InvTran.intTransactionId
+	   AND Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+	   AND ShipmentItem.intInventoryShipmentItemId = InvTran.intTransactionDetailId
+	   JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
+	   JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo 
+	   AND CD.intContractHeaderId = CH.intContractHeaderId
+	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'
+	   	AND InvTran.ysnIsUnposted = 0
+	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
+	   	AND intContractTypeId = 2
+	   	AND InvTran.intInTransitSourceLocationId IS NULL
+	   GROUP BY 
+	     CH.intContractTypeId
+		,CH.intContractHeaderId
+	   	,CD.intContractDetailId
+		,InvTran.dtmDate
+		,Shipment.intInventoryShipmentId
 		
 	INSERT INTO @Shipment
 	  (
@@ -790,7 +782,7 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM	PriceUOM  ON PriceUOM.intItemUOMId = SH.intPriceItemUOMId
 	WHERE FR.dtmEndDate = @dtmEndDate
 
-	INSERT INTO @TempContractBalance
+	INSERT INTO @TempPriceFixation
 	( 
      intContractTypeId		
 	,intEntityId			
@@ -938,6 +930,151 @@ BEGIN TRY
 														WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate		  
 														ELSE	   dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
 												   END
+
+	-- AVERAGE AND REMOVE USED PRICE FIXATION
+	INSERT INTO @TempContractBalance
+	( 
+		 intContractTypeId		
+		,intEntityId			
+		,intCommodityId
+		,dtmEndDate				
+		,intCompanyLocationId	
+		,intFutureMarketId      
+		,intFutureMonthId
+		,intContractHeaderId	
+		,strType				
+		,intContractDetailId	
+		,strDate				
+		,strContractType	
+		,strCommodityCode		
+		,strCommodity			
+		,intItemId				
+		,strItemNo		
+		,strLocationName		
+		,strCustomer			
+		,strContract			
+		,strPricingType
+		,strPricingTypeDesc			
+		,strContractDate		
+		,strShipMethod			
+		,strShipmentPeriod		
+		,strFutureMonth			
+		,dblFutures			
+		,dblFuturesinCommodityStockUOM
+		,dblBasis
+		,dblBasisinCommodityStockUOM
+		,strBasisUOM			
+		,dblQuantity			
+		,strQuantityUOM			
+		,dblCashPrice		
+		,dblCashPriceinCommodityStockUOM
+		,strPriceUOM	
+		,dblQtyinCommodityStockUOM		
+		,strStockUOM			
+		,dblAvailableQty		
+		,dblAmount
+		,dblAmountinCommodityStockUOM
+		,intUnitMeasureId			
+		,intContractStatusId
+		,intCurrencyId		
+		,strCurrency				
+		,dtmContractDate
+		,dtmSeqEndDate			
+		,strFutMarketName			
+		,strCategory
+		,strPricingStatus 				
+	)
+	SELECT intContractTypeId
+		,intEntityId
+		,intCommodityId
+		,dtmEndDate
+		,intCompanyLocationId
+		,intFutureMarketId
+		,intFutureMonthId
+		,intContractHeaderId
+		,strType
+		,intContractDetailId
+		,strDate
+		,strContractType
+		,strCommodityCode
+		,strCommodity
+		,intItemId
+		,strItemNo
+		,strLocationName
+		,strCustomer
+		,strContract
+		,strPricingType
+		,strPricingTypeDesc
+		,strContractDate
+		,strShipMethod
+		,strShipmentPeriod
+		,strFutureMonth
+		,AVG(dblFutures)
+		,AVG(dblFuturesinCommodityStockUOM)
+		,dblBasis
+		,dblBasisinCommodityStockUOM
+		,strBasisUOM
+		,SUM(dblQuantity)
+		,strQuantityUOM
+		,AVG(dblCashPrice)
+		,AVG(dblCashPriceinCommodityStockUOM)
+		,strPriceUOM
+		,SUM(dblQtyinCommodityStockUOM)
+		,strStockUOM
+		,SUM(dblAvailableQty)
+		,AVG(dblAmount)
+		,AVG(dblAmountinCommodityStockUOM)
+		,intUnitMeasureId
+		,intContractStatusId
+		,intCurrencyId
+		,strCurrency
+		,dtmContractDate
+		,dtmSeqEndDate
+		,strFutMarketName
+		,strCategory
+		,strPricingStatus
+	FROM @TempPriceFixation
+	WHERE dblQuantity > 0
+	GROUP BY intContractTypeId
+		,intEntityId
+		,intCommodityId
+		,dtmEndDate
+		,intCompanyLocationId
+		,intFutureMarketId
+		,intFutureMonthId
+		,intContractHeaderId
+		,strType
+		,intContractDetailId
+		,strDate
+		,strContractType
+		,strCommodityCode
+		,strCommodity
+		,intItemId
+		,strItemNo
+		,strLocationName
+		,strCustomer
+		,strContract
+		,strPricingType
+		,strPricingTypeDesc
+		,strContractDate
+		,strShipMethod
+		,strShipmentPeriod
+		,strFutureMonth
+		,dblBasis
+		,dblBasisinCommodityStockUOM
+		,strBasisUOM
+		,strQuantityUOM
+		,strPriceUOM		
+		,strStockUOM
+		,intUnitMeasureId
+		,intContractStatusId
+		,intCurrencyId
+		,strCurrency
+		,dtmContractDate
+		,dtmSeqEndDate
+		,strFutMarketName
+		,strCategory
+		,strPricingStatus
 
 	--UPDATE tblCTContractBalance 
 	--SET dblAmount = ISNULL(dblAvailableQty,0) * (ISNULL(dblFutures,0)+ISNULL(dblBasis,0))
