@@ -119,7 +119,7 @@ BEGIN
 		BEGIN
 			IF(@ysnDebug = 1)
 				BEGIN
-					SELECT 'Item Pricing Copy To', * FROM @tblItemPricing_To
+					SELECT 'Item Pricing Copy To', * FROM @tblItemPricing_TO
 				END
 		END
 		-- ===============================================
