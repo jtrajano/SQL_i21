@@ -27,10 +27,11 @@ SELECT
 		,dblQtyOrdered			=	DMDetails.dblQtyOrdered
 		,dblQtyReceived			=	CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
 		,dblCost				=	DMDetails.dblCost
-		,dblSubTotal			=	DM.dblTotal - DM.dblTax + DM.dblDiscount - DM.dblInterest
+		,dblDetailTotal			=	DMDetails.dblTotal
 		,dblDiscount			=	DMDetails.dblDiscount
+		,dblDetailTax			=	DMDetails.dblTax
 		,dblTax					=	DM.dblTax
-		,dblTotal				=	DMDetails.dblTotal
+		,dblTotal				=	DM.dblTotal
 		,dblPayment				=	DM.dblPayment
 		,dblNetShippedWeight	=	0 --DMDetails.dblNetShippedWeight
 		,dblWeightLoss			=	0 --dblWeightLoss
@@ -39,13 +40,11 @@ SELECT
 		,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
 		,strPONumber			=	CASE 
-									WHEN DMDetails.intContractDetailId > 0 
-									THEN ContractHeader.strContractNumber
 									WHEN DMDetails.intPurchaseDetailId > 0
 									THEN po.strPurchaseOrderNumber
 									ELSE NULL END
 		,strContainerNumber		=	LCointainer.strContainerNumber
-		,strShipVia		=	shipVia.strShipVia
+		,strShipVia				=	shipVia.strShipVia
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
