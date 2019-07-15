@@ -7,7 +7,7 @@ SELECT DISTINCT
 	0 AS dblAmount,
 	'' COLLATE Latin1_General_CI_AS AS strVendorInvoiceNumber, 
 	LH.intSellerId AS intEntityVendorId, 
-	NULL AS intEntityId,
+	CASE WHEN LH.intUserId IS NULL THEN (SELECT TOP 1 intEntityId FROM tblSMUserSecurity) ELSE LH.intUserId END AS intEntityId,
 	LH.dtmLoadDateTime AS dtmDate,
 	''  COLLATE Latin1_General_CI_AS AS strDescription, 
 	NULL AS intCompanyLocationId,
