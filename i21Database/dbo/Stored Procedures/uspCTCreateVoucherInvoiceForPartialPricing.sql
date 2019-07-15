@@ -90,7 +90,8 @@ BEGIN TRY
 			@dblPriceLoadQty				NUMERIC(18, 6),
 			@dblPriceFixationLoadApplied	NUMERIC(18, 6),
 			@dblInventoryItemLoadApplied	NUMERIC(18, 6),
-			@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6)
+			@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6),
+			@intShipmentInvoiceDetailId		INT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -130,7 +131,8 @@ BEGIN TRY
 		strShipmentNumber				NVARCHAR(50),
 		dblTotalIVForSHQty				NUMERIC(26,16),
 		ysnDestinationWeightsAndGrades	BIT,
-		dblInventoryShipmentItemLoad	NUMERIC(18, 6)
+		dblInventoryShipmentItemLoad	NUMERIC(18, 6),
+		intInvoiceDetailId				INT NULL
 	)
 
 	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
@@ -664,7 +666,8 @@ BEGIN TRY
 							WHERE	intInventoryShipmentItemId = RI.intInventoryShipmentItemId AND intInventoryShipmentChargeId IS NULL
 						) AS dblTotalIVForSHQty,
 						ysnDestinationWeightsAndGrades,
-						intLoadShipped
+						intLoadShipped,
+						NULL
 				FROM    tblICInventoryShipmentItem  RI
 				JOIN    tblICInventoryShipment		IR  ON  IR.intInventoryShipmentId		=   RI.intInventoryShipmentId
 														AND IR.intOrderType					=   1
@@ -696,11 +699,18 @@ BEGIN TRY
 							WHERE	intInventoryShipmentItemId = RI.intInventoryShipmentItemId AND intInventoryShipmentChargeId IS NULL
 						) AS dblTotalIVForSHQty,
 						ysnDestinationWeightsAndGrades,
-						intLoadShipped
+						intLoadShipped,
+						ARD.intInvoiceDetailId
 				FROM    tblICInventoryShipmentItem  RI
 				JOIN    tblICInventoryShipment		IR  ON  IR.intInventoryShipmentId		=   RI.intInventoryShipmentId
 														AND IR.intOrderType					=   1
 				JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
+				OUTER APPLY ( select top 1 intInvoiceDetailId 
+								from tblARInvoiceDetail ARD 
+									where ARD.intContractDetailId = CD.intContractDetailId 
+									and ARD.intInventoryShipmentChargeId is null
+								) ARD
+					
 				WHERE	RI.intLineNo	=   @intContractDetailId					
 					--AND (@ysnLoad = 0 or RI.dblBillQty <> dblOpenReceive)
 			END
@@ -722,7 +732,8 @@ BEGIN TRY
 						@dblShipped				= dblShipped,
 						@intInventoryShipmentId = intInventoryShipmentId,
 						@ysnDestinationWeightsAndGrades	=	ysnDestinationWeightsAndGrades,
-						@dblInventoryShipmentItemLoadApplied = dblInventoryShipmentItemLoad
+						@dblInventoryShipmentItemLoadApplied = dblInventoryShipmentItemLoad,
+						@intShipmentInvoiceDetailId = intInvoiceDetailId
 				FROM	@tblShipment 
 				WHERE	intInventoryShipmentItemId = @intInventoryShipmentItemId
 
@@ -745,6 +756,12 @@ BEGIN TRY
 				if @ysnLoad = 1
 				begin
 					if @dblPriceLoadQty = @dblPriceFixationLoadApplied
+					begin
+						SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment WHERE intShipmentUniqueId > @intShipmentUniqueId
+						CONTINUE
+					end
+
+					if @intShipmentInvoiceDetailId is not null
 					begin
 						SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment WHERE intShipmentUniqueId > @intShipmentUniqueId
 						CONTINUE
