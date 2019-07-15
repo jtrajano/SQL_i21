@@ -689,6 +689,7 @@ BEGIN TRY
 				OUTER APPLY ( select top 1 intInvoiceDetailId 
 								from tblARInvoiceDetail ARD 
 									where ARD.intContractDetailId = CD.intContractDetailId 
+									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
 									and ARD.intInventoryShipmentChargeId is null
 								) ARD
 					
