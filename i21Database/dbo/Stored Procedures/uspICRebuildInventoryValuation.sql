@@ -4039,7 +4039,7 @@ BEGIN
 						)
 						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
 							@strBatchId
-							,'Inventory'
+							,NULL--'Inventory'
 							,@intEntityUserSecurityId
 							,@strGLDescription
 							,@receiptLocationId

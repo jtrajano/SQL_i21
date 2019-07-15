@@ -244,7 +244,7 @@ BEGIN
 END
 
 -- Else, return the result of the comparison 
-ELSE 
+ELSE IF @ysnThrowError = 0 
 BEGIN 
 	SELECT 
 		strTransactionType
