@@ -275,11 +275,11 @@ BEGIN
 	FROM #ARPostInvoiceHeader I
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
-		FROM tblARInvoice I
-		WHERE I.strTransactionType = 'Invoice'
-		AND I.ysnReturned = 1
-		AND ID.strInvoiceOriginId = I.strInvoiceNumber
-		AND ID.intOriginalInvoiceId = I.intInvoiceId
+		FROM tblARInvoice RET
+		WHERE RET.strTransactionType = 'Invoice'
+		AND RET.ysnReturned = 1
+		AND I.strInvoiceOriginId = RET.strInvoiceNumber
+		AND I.intOriginalInvoiceId = RET.intInvoiceId
 	) RI
 
 	SELECT @strId = COALESCE(@strId + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250)) FROM @IdsP
@@ -591,11 +591,11 @@ BEGIN
 	FROM #ARPostInvoiceHeader I
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
-		FROM tblARInvoice I
-		WHERE I.strTransactionType = 'Invoice'
-		AND I.ysnReturned = 1
-		AND ID.strInvoiceOriginId = I.strInvoiceNumber
-		AND ID.intOriginalInvoiceId = I.intInvoiceId
+		FROM tblARInvoice RET
+		WHERE RET.strTransactionType = 'Invoice'
+		AND RET.ysnReturned = 1
+		AND I.strInvoiceOriginId = RET.strInvoiceNumber
+		AND I.intOriginalInvoiceId = RET.intInvoiceId
 	) RI
 
 
