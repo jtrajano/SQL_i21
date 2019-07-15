@@ -113,7 +113,8 @@ BEGIN TRY
 		,strPricingType						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strContractDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strShipMethod						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-		,strShipmentPeriod					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strShipmentPeriod					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strDeliveryMonth					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,dblFutures							NUMERIC(38,20)
 		,dblBasis							NUMERIC(38,20)
@@ -168,6 +169,7 @@ BEGIN TRY
 		,strContractDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strShipMethod						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strShipmentPeriod					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strDeliveryMonth					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,dblFutures							NUMERIC(38,20)
 		,dblBasis							NUMERIC(38,20)
@@ -576,7 +578,8 @@ BEGIN TRY
 	,strContractDate		
 	,strShipMethod			
 	,strShipmentPeriod		
-	,strFutureMonth			
+	,strDeliveryMonth
+	,strFutureMonth
 	,dblFutures	
 	,dblFuturesinCommodityStockUOM
 	,dblBasis	
@@ -631,7 +634,8 @@ BEGIN TRY
 	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
 								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
-	,strFutureMonth			= LEFT(DATENAME(MONTH, CD.dtmEndDate), 3) + ' ' + RIGHT(DATENAME(YEAR, CD.dtmEndDate),2)
+	,strDeliveryMonth		= LEFT(DATENAME(MONTH, CD.dtmEndDate), 3) + ' ' + RIGHT(DATENAME(YEAR, CD.dtmEndDate),2)
+	,strFutureMonth			= FH.strFutureMonth
 	,dblFutures				= CASE WHEN CD.intPricingTypeId = 1 THEN ISNULL(CD.dblFutures,0) ELSE NULL END
 	,dblFuturesinCommodityStockUOM	= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0)),0)
 	,dblBasis				= ISNULL(CD.dblBasis,0)
@@ -748,6 +752,7 @@ BEGIN TRY
 	LEFT JOIN	tblSMFreightTerms			FT		  ON FT.intFreightTermId			=	CD.intFreightTermId
 	LEFT JOIN   tblSMCurrency						Cur ON Cur.intCurrencyID			=	CD.intCurrencyId
 	LEFT JOIN	tblRKFutureMarket				FM	ON FM.intFutureMarketId				=	CD.intFutureMarketId
+	LEFT JOIN	tblRKFuturesMonth				FH	ON FH.intFutureMonthId				=	CD.intFutureMonthId
 	
 	WHERE
 	CS.strContractStatus not in ('Complete')
@@ -817,7 +822,8 @@ BEGIN TRY
 	,strContractDate		
 	,strShipMethod			
 	,strShipmentPeriod		
-	,strFutureMonth			
+	,strDeliveryMonth
+	,strFutureMonth
 	,dblFutures			
 	,dblFuturesinCommodityStockUOM
 	,dblBasis
@@ -869,7 +875,8 @@ BEGIN TRY
 	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
 								  + LTRIM(DATEPART(mm,CD.dtmEndDate))   + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))	
-	,strFutureMonth			= LEFT(DATENAME(MONTH, CD.dtmEndDate), 3) + ' ' + RIGHT(DATENAME(YEAR, CD.dtmEndDate),2)
+	,strDeliveryMonth		= LEFT(DATENAME(MONTH, CD.dtmEndDate), 3) + ' ' + RIGHT(DATENAME(YEAR, CD.dtmEndDate),2)
+	,strFutureMonth			= FH.strFutureMonth
 	,dblFutures				= ISNULL(PF.dblFutures,0)
 	,dblFuturesinCommodityStockUOM	= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblFutures,0)),0)
 	,dblBasis				= ISNULL(PF.dblBasis,0)
@@ -932,6 +939,7 @@ BEGIN TRY
 	LEFT JOIN	tblSMFreightTerms			FT		  ON	FT.intFreightTermId			=	CD.intFreightTermId
 	LEFT JOIN   tblSMCurrency				Cur		  ON	Cur.intCurrencyID			=	CD.intCurrencyId
 	LEFT JOIN	tblRKFutureMarket			FM		  ON	FM.intFutureMarketId		=	CD.intFutureMarketId
+	LEFT JOIN	tblRKFuturesMonth			FH		  ON	FH.intFutureMonthId			=	CD.intFutureMonthId
 	
 	WHERE
 	CDS.strContractStatus not in ('Complete')
@@ -967,7 +975,8 @@ BEGIN TRY
 		,strContractDate		
 		,strShipMethod			
 		,strShipmentPeriod		
-		,strFutureMonth			
+		,strDeliveryMonth
+		,strFutureMonth
 		,dblFutures			
 		,dblFuturesinCommodityStockUOM
 		,dblBasis
@@ -1017,6 +1026,7 @@ BEGIN TRY
 		,strContractDate
 		,strShipMethod
 		,strShipmentPeriod
+		,strDeliveryMonth
 		,strFutureMonth
 		,AVG(dblFutures)
 		,AVG(dblFuturesinCommodityStockUOM)
@@ -1068,6 +1078,7 @@ BEGIN TRY
 		,strContractDate
 		,strShipMethod
 		,strShipmentPeriod
+		,strDeliveryMonth
 		,strFutureMonth
 		,dblBasis
 		,dblBasisinCommodityStockUOM
@@ -1186,7 +1197,8 @@ BEGIN TRY
 	,strContractDate		
 	,strShipMethod			
 	,strShipmentPeriod		
-	,strFutureMonth			
+	,strDeliveryMonth
+	,strFutureMonth
 	,dblFutures	
 	,dblFuturesinCommodityStockUOM
 	,dblBasis	
@@ -1238,7 +1250,8 @@ BEGIN TRY
 	,strContractDate		
 	,strShipMethod			
 	,strShipmentPeriod		
-	,strFutureMonth			
+	,strDeliveryMonth
+	,strFutureMonth
 	,dblFutures	
 	,dblFuturesinCommodityStockUOM
 	,dblBasis	
@@ -1294,6 +1307,7 @@ BEGIN TRY
 	,strShipmentPeriod		
 	,intFutureMarketId      
 	,intFutureMonthId       
+	,strDeliveryMonth
 	,strFutureMonth			
 	,dblFutures						  = CAST (dblFutures AS NUMERIC(18,6))
 	,dblBasis						  = CAST (dblBasis AS NUMERIC(18,6))	
