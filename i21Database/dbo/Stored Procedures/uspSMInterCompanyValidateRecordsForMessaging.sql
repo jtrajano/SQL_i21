@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE uspSMInterCompanyValidateRecordsForMessaging
 @intInterCompanyMappingId INT,
-@ysnCheckSiblings BIT = 1
+@intFromCompanyMappingId INT = NULL,
+@strFinishedTransactionId NVARCHAR(MAX) = ',',
+@strUpdatedTransactionId NVARCHAR(MAX) = '' OUTPUT
 AS
 BEGIN
 	--START CREATE TEMPOPARY TABLES
@@ -37,60 +39,93 @@ BEGIN
 		
 	IF ISNULL(@intCurrentTransactionId, 0) <> 0 AND ISNULL(@intReferenceTransactionId, 0) <> 0
 	BEGIN
-		--SAME DATABASE
-		IF ISNULL(@intReferenceCompanyId, 0) = 0
+		--CHECK IF THE CURRENT and REFERENCE transactionId is already executed
+		IF CHARINDEX(',' + CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) > 0 AND
+		   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) > 0
 		BEGIN
-			PRINT('------COPY RECORDS IN THE SAME DATABASE-------')
-				
-			--A <-> B
-			EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intCurrentTransactionId, @intReferenceTransactionId
-			EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intReferenceTransactionId, @intCurrentTransactionId
-
+			RETURN 1
+		END
+		ELSE
+		BEGIN
 			
-			--FETCH other records for InterCompanyMapping in the current database--
-			IF @ysnCheckSiblings = 1
+		
+			--SAME DATABASE
+			IF ISNULL(@intReferenceCompanyId, 0) = 0
 			BEGIN
-				--Check if current reference is a source OR a reference in the current database / C <-> B, need to check B <-> A
-				INSERT INTO #TempInterCompanyMapping(intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId)
-				SELECT intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId
-				FROM tblSMInterCompanyMapping
-				WHERE intInterCompanyMappingId <> @intInterCompanyMappingId AND
-				(
-					intCurrentTransactionId = @intReferenceTransactionId OR 
-					intReferenceTransactionId = @intReferenceTransactionId
-				)
-				AND intReferenceCompanyId IS NULL
-
-				--Check if current reference is a source and reference transaction is in the other database
-				INSERT INTO #TempInterCompanyMapping(intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId)
-				SELECT intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId
-				FROM tblSMInterCompanyMapping
-				WHERE intInterCompanyMappingId <> @intInterCompanyMappingId AND
-				intCurrentTransactionId = @intReferenceTransactionId
-				AND intReferenceCompanyId IS NOT NULL
-
-				DECLARE TempInterCompanyMapping_Cursor CURSOR LOCAL STATIC FORWARD_ONLY FOR
-				SELECT intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId 
-				FROM #TempInterCompanyMapping
+				--PRINT('------COPY RECORDS IN THE SAME DATABASE-------')
 				
-				OPEN TempInterCompanyMapping_Cursor
+				--A <-> B
+				EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intCurrentTransactionId, @intReferenceTransactionId
+				EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intReferenceTransactionId, @intCurrentTransactionId
 
-				FETCH NEXT FROM TempInterCompanyMapping_Cursor into @intInterCompanyMappingIdToUse, @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId;
-				WHILE @@FETCH_STATUS = 0
+			END
+			ELSE
+			BEGIN
+				--PRINT('------COPY RECORDS TO THE OTHER DATABASE-------')
+
+				EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId
+			END
+
+			SELECT @intCurrentCompanyId = intInterCompanyId FROM tblSMInterCompany WHERE UPPER(strDatabaseName) = UPPER(DB_NAME()) AND UPPER(strServerName) = UPPER(@@SERVERNAME);
+
+			SET @strFinishedTransactionId = @strFinishedTransactionId + 
+											CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',' + 
+											CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',';
+
+			--FETCH other records for InterCompanyMapping in the current database--
+			--PRINT('------CHECK RECORDS TO THE tblSMInterCompanyMapping-------')
+
+			--Check if current/reference is a source OR a reference in the current database / C <-> B, need to check B <-> A
+			INSERT INTO #TempInterCompanyMapping(intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId)
+			SELECT intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId
+			FROM tblSMInterCompanyMapping
+			WHERE intInterCompanyMappingId <> @intInterCompanyMappingId AND
+			(
+				intCurrentTransactionId = @intReferenceTransactionId OR intReferenceTransactionId = @intReferenceTransactionId OR
+				intCurrentTransactionId = @intCurrentTransactionId OR intReferenceTransactionId = @intCurrentTransactionId
+			)
+			AND
+			(
+				ISNULL(intReferenceCompanyId, 0) = 0 OR
+				ISNULL(intReferenceCompanyId, 0) = @intCurrentCompanyId
+			)
+
+			--Check if current/reference is a source transaction in the current database which is the reference transaction id is in the other database
+			INSERT INTO #TempInterCompanyMapping(intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId)
+			SELECT intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId
+			FROM tblSMInterCompanyMapping
+			WHERE intInterCompanyMappingId <> @intInterCompanyMappingId AND
+			(
+				intCurrentTransactionId = @intReferenceTransactionId OR intCurrentTransactionId = @intCurrentTransactionId
+			)
+			AND 
+			(
+				ISNULL(intReferenceCompanyId, 0) <> 0 AND 
+				ISNULL(intReferenceCompanyId, 0) <> @intCurrentCompanyId
+			)
+
+			DECLARE TempInterCompanyMapping_Cursor CURSOR LOCAL STATIC FORWARD_ONLY FOR
+			SELECT intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId 
+			FROM #TempInterCompanyMapping
+				
+			OPEN TempInterCompanyMapping_Cursor
+
+			FETCH NEXT FROM TempInterCompanyMapping_Cursor into @intInterCompanyMappingIdToUse, @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId;
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+				
+				--RUN ONLY IF CURRENT DATABASE IS VALID
+				IF ISNULL(@intCurrentCompanyId, 0) <> 0
 				BEGIN
 					IF ISNULL(@intReferenceCompanyId, 0) = 0
+					--CURRENT DATABASE
 					BEGIN
-						EXEC dbo.[uspSMInterCompanyValidateRecordsForMessaging] @intInterCompanyMappingIdToUse, 0
+						EXEC dbo.[uspSMInterCompanyValidateRecordsForMessaging] @intInterCompanyMappingIdToUse, @intCurrentCompanyId, @strFinishedTransactionId, @strUpdatedTransactionId = @strFinishedTransactionId OUTPUT;
 					END
 					ELSE
+					--OTHER DATABASE
 					BEGIN
-						PRINT('------EXECUTE [uspSMInterCompanyValidateRecordsForMessaging] IN THE OTHER DATABASE-------')
-						
-						SELECT 
-							@intCurrentCompanyId = intInterCompanyId 
-						FROM tblSMInterCompany 
-						WHERE strDatabaseName = DB_NAME() AND strServerName = @@SERVERNAME;
-
+						--PRINT('------EXECUTE [uspSMInterCompanyValidateRecordsForMessaging] IN THE OTHER DATABASE-------')
 						--ALL tblSMInterCompany in each databases should have the same primary keys, but to be sure, lets get the intInterCompanyId based on the server and database name
 						SELECT 
 							@strReferenceServerName = strServerName, 
@@ -98,18 +133,23 @@ BEGIN
 						FROM tblSMInterCompany 
 						WHERE intInterCompanyId = @intReferenceCompanyId;
 
-						IF @@SERVERNAME = @strReferenceServerName
+						IF UPPER(@@SERVERNAME) = UPPER(@strReferenceServerName)
 						BEGIN
 							SET @intReferenceActualInterCompanyId = 0;
 							DECLARE @ParamDefinition NVARCHAR(250) = N'@paramOut INT OUTPUT';
 							SET @sql = N'SELECT @paramOut = intInterCompanyId FROM ' + @strReferenceDatabaseName + '.dbo.[tblSMInterCompany]
-										 WHERE strServerName = ' + @strReferenceServerName + ' AND strDatabaseName = ' + @strReferenceDatabaseName;
+											WHERE UPPER(strServerName) = UPPER(''' + @strReferenceServerName + ''') AND UPPER(strDatabaseName) = UPPER(''' + @strReferenceDatabaseName + ''')';
 
 							EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intReferenceActualInterCompanyId OUTPUT;
 
+						
+						
 							--company id in the other database should be equal in the current databae
-							IF ISNULL(@intReferenceActualInterCompanyId, 0) = @intReferenceCompanyId
+							--do not invoke the sp in the destination database if it is the db that invoked this sp
+							IF ISNULL(@intReferenceActualInterCompanyId, 0) = @intReferenceCompanyId AND 
+							   (ISNULL(@intFromCompanyMappingId, 0) <> 0 AND ISNULL(@intFromCompanyMappingId, 0) <> @intReferenceCompanyId)
 							BEGIN
+
 								SET @intInterCompanyMappingIdToUse = 0;
 								--Get the mapping id in tblSMInterCompanyMapping table in the other database
 								SET @sql = N'
@@ -123,7 +163,7 @@ BEGIN
 								--execute the sp with the key and 1 parameters in the other database.
 								IF ISNULL(@intInterCompanyMappingIdToUse, 0) <> 0
 								BEGIN
-									SET @sql = N'EXEC ' + @strReferenceDatabaseName + 'dbo.[uspSMInterCompanyValidateRecordsForMessaging] ' + CONVERT(VARCHAR, @intInterCompanyMappingIdToUse) + ', 1';
+									SET @sql = N'EXEC ' + @strReferenceDatabaseName + 'dbo.[uspSMInterCompanyValidateRecordsForMessaging] ' + CONVERT(VARCHAR, @intInterCompanyMappingIdToUse) + ', ' + CONVERT(VARCHAR, @intCurrentCompanyId);
 									EXEC sp_executesql @sql;
 								END
 							END
@@ -134,19 +174,14 @@ BEGIN
 						END
 
 					END
-					FETCH NEXT FROM TempInterCompanyMapping_Cursor into @intInterCompanyMappingIdToUse, @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId;
 				END
-				CLOSE TempInterCompanyMapping_Cursor
-				DEALLOCATE TempInterCompanyMapping_Cursor
+				FETCH NEXT FROM TempInterCompanyMapping_Cursor into @intInterCompanyMappingIdToUse, @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId;
 			END
+			CLOSE TempInterCompanyMapping_Cursor
+			DEALLOCATE TempInterCompanyMapping_Cursor
+			
 
-		END
-		ELSE
-		BEGIN
-			--TODO
-			PRINT('------COPY RECORDS TO THE OTHER DATABASE-------')
-			--EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intCurrentTransactionId, @intReferenceTransactionId
-
+			SET @strUpdatedTransactionId = @strFinishedTransactionId;
 		END
 	END
 
