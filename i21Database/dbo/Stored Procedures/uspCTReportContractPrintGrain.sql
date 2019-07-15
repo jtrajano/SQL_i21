@@ -114,6 +114,7 @@ BEGIN TRY
 			CH.strTerm
 		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref :' ELSE 'Customer Ref :' END
 		   ,strCustomerContract					=   ISNULL(CH.strCustomerContract,'')
+		   ,CH.strFreightTerm
 
 	FROM	vyuCTContractHeaderView CH
 	LEFT
