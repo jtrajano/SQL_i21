@@ -42,8 +42,8 @@ BEGIN TRY
 		,@intMaxYear INT
 		,@intMinimumDemandMonth INT
 		,@intMaximumDemandMonth INT
-		,@intMonthDiff int
-			,@strDemandImportDateTimeFormat NVARCHAR(50)
+		,@intMonthDiff INT
+		,@strDemandImportDateTimeFormat NVARCHAR(50)
 		,@intConvertYear INT
 	DECLARE @tblMFDemandHeaderImport TABLE (
 		intDemandHeaderImportId INT NOT NULL IDENTITY
@@ -67,9 +67,9 @@ BEGIN TRY
 		,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 		)
 
-	SELECT @strDemandImportDateTimeFormat = IsNULL(strDemandImportDateTimeFormat,'MM DD YYYY HH:MI')
-		,@intMinimumDemandMonth = IsNULL(intMinimumDemandMonth,12)
-		,@intMaximumDemandMonth = IsNULL(intMaximumDemandMonth,12)
+	SELECT @strDemandImportDateTimeFormat = IsNULL(strDemandImportDateTimeFormat, 'MM DD YYYY HH:MI')
+		,@intMinimumDemandMonth = IsNULL(intMinimumDemandMonth, 12)
+		,@intMaximumDemandMonth = IsNULL(intMaximumDemandMonth, 12)
 	FROM tblMFCompanyPreference
 
 	SELECT @dtmMinDemandDate = MIN(dtmDemandDate)
@@ -83,16 +83,24 @@ BEGIN TRY
 
 	IF @intMinYear <> @intMaxYear
 	BEGIN
-		SELECT @intMaxMonth + 12
+		SELECT @intMaxMonth=@intMaxMonth + 12
 	END
 
 	SELECT @intMonthDiff = @intMaxMonth - @intMinMonth + 1
 
-	if not( @intMinimumDemandMonth<=@intMonthDiff and @intMaximumDemandMonth>=@intMinimumDemandMonth)
-	Begin
-		Raiserror('Demand date is not between minimum and maximum month.',16,1)
-		Return
-	End
+	IF NOT (
+			@intMinimumDemandMonth <= @intMonthDiff
+			AND @intMaximumDemandMonth >= @intMinimumDemandMonth
+			)
+	BEGIN
+		RAISERROR (
+				'Demand date is not between minimum and maximum month.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	SELECT @intConvertYear = 101
 
@@ -106,6 +114,8 @@ BEGIN TRY
 			OR @strDemandImportDateTimeFormat = 'YYYY DD MM HH:MI'
 			)
 		SELECT @intConvertYear = 103
+
+	Begin Transaction
 
 	INSERT INTO @tblMFDemandHeaderImport (
 		strDemandNo
@@ -204,6 +214,7 @@ BEGIN TRY
 			,strUnitMeasure
 			,strLocationName
 		FROM tblMFDemandImport
+		Where strDemandName = @strDemandName
 		GROUP BY strDemandName
 			,strItemNo
 			,strSubstituteItemNo

@@ -43,8 +43,8 @@ BEGIN TRY
 		,@intMaxYear INT
 		,@intMinimumDemandMonth INT
 		,@intMaximumDemandMonth INT
-		,@intMonthDiff int
-		,@dblDemandGrowthPerc  NUMERIC(18,6)
+		,@intMonthDiff INT
+		,@dblDemandGrowthPerc NUMERIC(18, 6)
 	DECLARE @tblMFDemandHeaderImport TABLE (
 		intDemandHeaderImportId INT NOT NULL IDENTITY
 		,intConcurrencyId INT NULL
@@ -67,10 +67,10 @@ BEGIN TRY
 		,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 		)
 
-	SELECT @strDemandImportDateTimeFormat = IsNULL(strDemandImportDateTimeFormat,'MM DD YYYY HH:MI')
-		,@intMinimumDemandMonth = IsNULL(intMinimumDemandMonth,12)
-		,@intMaximumDemandMonth = IsNULL(intMaximumDemandMonth,12)
-		,@dblDemandGrowthPerc=IsNULL(dblDemandGrowthPerc,0)
+	SELECT @strDemandImportDateTimeFormat = IsNULL(strDemandImportDateTimeFormat, 'MM DD YYYY HH:MI')
+		,@intMinimumDemandMonth = IsNULL(intMinimumDemandMonth, 12)
+		,@intMaximumDemandMonth = IsNULL(intMaximumDemandMonth, 12)
+		,@dblDemandGrowthPerc = IsNULL(dblDemandGrowthPerc, 0)
 	FROM tblMFCompanyPreference
 
 	SELECT @dtmMinDemandDate = MIN(dtmDemandDate)
@@ -101,6 +101,8 @@ BEGIN TRY
 			OR @strDemandImportDateTimeFormat = 'YYYY DD MM HH:MI'
 			)
 		SELECT @intConvertYear = 103
+
+	BEGIN TRANSACTION
 
 	INSERT INTO @tblMFDemandHeaderImport (
 		strDemandNo
@@ -212,6 +214,7 @@ BEGIN TRY
 			,strUnitMeasure
 			,strLocationName
 		FROM tblMFDemandImport
+		WHERE strDemandName = @strDemandName
 		GROUP BY strDemandName
 			,strItemNo
 			,strSubstituteItemNo
@@ -273,6 +276,7 @@ BEGIN TRY
 			FROM tblMFDemandDetail
 			WHERE intDemandHeaderId = @intDemandHeaderId
 				AND intItemId = @intItemId
+				AND dtmDemandDate = @dtmDemandDate
 
 			IF @intDemandDetailId IS NULL
 			BEGIN
@@ -318,27 +322,30 @@ BEGIN TRY
 		WHERE intDemandHeaderImportId > @intDemandHeaderImportId
 	END
 
-	INSERT INTO tblMFDemandDetail (
-		intConcurrencyId
-		,intDemandHeaderId
-		,intItemId
-		,intSubstituteItemId
-		,dtmDemandDate
-		,dblQuantity
-		,intItemUOMId
-		,intCompanyLocationId
-		)
-	SELECT 1 AS intConcurrencyId
-		,@intDemandHeaderId
-		,intItemId
-		,intSubstituteItemId
-		,dtmDemandDate
-		,dblQuantity+(dblQuantity*@dblDemandGrowthPerc/100)
-		,intItemUOMId
-		,intLocationId
-	FROM tblMFDemandDetail
-	WHERE dtmDemandDate BETWEEN DATEADD(YY,-1,DATEADD(mm, DATEDIFF(mm, 0, @dtmMaxDemandDate) + 1, 0))
-			AND DATEADD(YY,-1,DATEADD(MM, 12 - @intMonthDiff, @dtmMaxDemandDate))
+	IF @intMonthDiff <> 12
+	BEGIN
+		INSERT INTO tblMFDemandDetail (
+			intConcurrencyId
+			,intDemandHeaderId
+			,intItemId
+			,intSubstituteItemId
+			,dtmDemandDate
+			,dblQuantity
+			,intItemUOMId
+			,intCompanyLocationId
+			)
+		SELECT 1 AS intConcurrencyId
+			,@intDemandHeaderId
+			,intItemId
+			,intSubstituteItemId
+			,DATEADD(YY, 1, dtmDemandDate)
+			,dblQuantity + (dblQuantity * @dblDemandGrowthPerc / 100)
+			,intItemUOMId
+			,intCompanyLocationId
+		FROM tblMFDemandDetail
+		WHERE dtmDemandDate BETWEEN DATEADD(YY, - 1, DATEADD(mm, DATEDIFF(mm, 0, @dtmMaxDemandDate) + 1, 0))
+				AND DATEADD(YY, - 1, DATEADD(MM, 12 - @intMonthDiff, @dtmMaxDemandDate))
+	END
 
 	DELETE
 	FROM tblMFDemandImport
