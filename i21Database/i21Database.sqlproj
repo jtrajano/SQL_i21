@@ -7348,6 +7348,16 @@
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
     <Build Include="dbo\Tables\tblICStagingCommodityActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCommodityActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForClearing.sql" />
+    <Build Include="dbo\Tables\tblAPForClearing.sql" />
+    <Build Include="dbo\Views\vyuAPClearingFilterData.sql" />
+    <Build Include="dbo\Views\vyuAPForClearing.sql" />
+    <Build Include="dbo\Views\vyuAPGrainClearing.sql" />
+    <Build Include="dbo\Views\vyuAPLoadClearing.sql" />
+    <Build Include="dbo\Views\vyuAPLoadCostClearing.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptChargeClearing.sql" />
+    <Build Include="dbo\Views\vyuAPREceiptClearing.sql" />
+    <Build Include="dbo\Views\vyuAPShipmentChargeClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
