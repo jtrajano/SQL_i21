@@ -45,13 +45,17 @@ BEGIN TRY
 		[intConcurrencyId] INT NULL
 	);
 	DECLARE @processTicket TABLE(
-		[intTicketId] INT
+		cntId INT IDENTITY(1,1)
+		,[intTicketId] INT
 		,[intDeliverySheetId] INT
 		,[intEntityId] INT
 		,[dblNetUnits] NUMERIC(38,20)
 		,[dblFreight] NUMERIC(38,20) NULL
 		,[dblFees] NUMERIC(38,20) NULL
 	)
+	DECLARE @TicketCurrentRowCount INT
+	DECLARE @TicketRowMaxCount INT
+
 	INSERT INTO @processTicket(
 		[intTicketId]
 		,[intDeliverySheetId]
@@ -69,14 +73,35 @@ BEGIN TRY
 		,[dblFees]				= dblTicketFees
 	FROM tblSCTicket 
 	WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
+
+
+	SET @TicketCurrentRowCount = 1
+	SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
+
+	WHILE (@TicketCurrentRowCount <= @TicketRowMaxCount)
+	BEGIN
+		SELECT TOP 1 @intTicketId = intTicketId 
+		FROM @processTicket
+		WHERE cntId = @TicketCurrentRowCount
+
+		EXEC [dbo].[uspSCUndistributeTicket] @intTicketId, @intUserId, @intEntityId, 'I', 0, 0, 1	
+		UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
+	
+		SET @TicketCurrentRowCount = @TicketCurrentRowCount + 1
+	END
+
+	UPDATE tblGRCustomerStorage
+	SET dblOriginalBalance = 0 
+		,dblOpenBalance = 0
+	WHERE intDeliverySheetId = @intDeliverySheetId
+
+
 	DECLARE ticketCursor CURSOR FOR SELECT intTicketId,intEntityId,dblNetUnits FROM @processTicket  
 	OPEN ticketCursor;  
 	FETCH NEXT FROM ticketCursor INTO @intTicketId, @intEntityId, @dblNetUnits;  
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN  
 		SET @dblTempSplitQty = @dblNetUnits;
-		EXEC [dbo].[uspSCUndistributeTicket] @intTicketId, @intUserId, @intEntityId, 'I', 0, 0, 1
-		UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
 		DELETE FROM tblSCTicketSplit WHERE intTicketId = @intTicketId
 		
 		DELETE FROM @splitTable
