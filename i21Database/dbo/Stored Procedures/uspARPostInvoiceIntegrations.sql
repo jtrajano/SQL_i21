@@ -765,7 +765,7 @@ OUTER APPLY (
 	FROM tblARInvoice I
 	WHERE I.strTransactionType = 'Invoice'
 	  AND I.ysnReturned = 1
-	  AND ID.strInvoiceOriginId COLLATE Latin1_General_CI_AS  = I.strInvoiceNumber COLLATE Latin1_General_CI_AS 
+	  AND ID.strInvoiceOriginId = I.strInvoiceNumber
 	  AND ID.intOriginalInvoiceId = I.intInvoiceId
 ) RI
 WHERE ID.[intInventoryShipmentChargeId] IS NULL
