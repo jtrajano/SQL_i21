@@ -83,7 +83,7 @@ BEGIN TRY
 
 	IF @intMinYear <> @intMaxYear
 	BEGIN
-		SELECT @intMaxMonth=@intMaxMonth + 12
+		SELECT @intMaxMonth = @intMaxMonth + 12
 	END
 
 	SELECT @intMonthDiff = @intMaxMonth - @intMinMonth + 1
@@ -115,7 +115,7 @@ BEGIN TRY
 			)
 		SELECT @intConvertYear = 103
 
-	Begin Transaction
+	BEGIN TRANSACTION
 
 	INSERT INTO @tblMFDemandHeaderImport (
 		strDemandNo
@@ -214,7 +214,7 @@ BEGIN TRY
 			,strUnitMeasure
 			,strLocationName
 		FROM tblMFDemandImport
-		Where strDemandName = @strDemandName
+		WHERE strDemandName = @strDemandName
 		GROUP BY strDemandName
 			,strItemNo
 			,strSubstituteItemNo
@@ -297,19 +297,19 @@ BEGIN TRY
 
 			IF @strErrorMessage <> ''
 			BEGIN
+				SELECT @intDemandImportId = NULL
+
+				SELECT @intDemandImportId = intDemandImportId
+				FROM tblMFDemandImport
+				WHERE strDemandName = @strDemandName
+					AND strItemNo = @strItemNo
+
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblMFDemandImportError
 						WHERE intDemandImportId = @intDemandImportId
 						)
 				BEGIN
-					SELECT @intDemandImportId = NULL
-
-					SELECT @intDemandImportId = intDemandImportId
-					FROM tblMFDemandImport
-					WHERE strDemandName = @strDemandName
-						AND strItemNo = @strItemNo
-
 					INSERT INTO tblMFDemandImportError (
 						intDemandImportId
 						,intConcurrencyId
