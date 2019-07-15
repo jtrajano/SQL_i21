@@ -102,27 +102,31 @@ BEGIN TRY
 					,[dblCostUnitQty]
 					,[dblUnitQty]
 					,[dblNetWeight]
+					,[intInventoryReceiptItemId]
 				)
 				--Inventory Item
 				SELECT 
-					 [intScaleTicketId]    = SpotTicket.intTicketId
-					,[intItemId]           = @intItemId
-					,[intAccountId]        = NULL
-					,[dblQtyReceived]      = ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,@intItemUOMId,dblUnits),2)--SpotTicket.dblUnits
-					,[strMiscDescription]  = Item.strItemNo
-					,[dblCost]			   = @dblCashPrice
-					,[intContractHeaderId] = NULL
-					,[intContractDetailId] = NULL
-					,[intUnitOfMeasureId]  = @intItemUOMId--SC.intItemUOMIdTo
-					,[dblWeightUnitQty]	   = 1
-					,[dblCostUnitQty]      = 1
-					,[dblUnitQty]	       = 1
-					,[dblNetWeight]        = 0
+					 [intScaleTicketId]    		 = SpotTicket.intTicketId
+					,[intItemId]           		 = @intItemId
+					,[intAccountId]        		 = NULL
+					,[dblQtyReceived]      		 = ROUND(dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,@intItemUOMId,dblUnits),2)--SpotTicket.dblUnits
+					,[strMiscDescription]  		 = Item.strItemNo
+					,[dblCost]			   		 = @dblCashPrice
+					,[intContractHeaderId]   	 = NULL
+					,[intContractDetailId] 		 = NULL
+					,[intUnitOfMeasureId]  		 = @intItemUOMId--SC.intItemUOMIdTo
+					,[dblWeightUnitQty]	     	 = 1
+					,[dblCostUnitQty]       	 = 1
+					,[dblUnitQty]	        	 = 1
+					,[dblNetWeight]        		 = 0
+					,[intInventoryReceiptItemId] = IRI.intInventoryReceiptItemId
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC 
 					ON SC.intTicketId = SpotTicket.intTicketId
 				JOIN tblICItem Item 
 					ON Item.intItemId = SC.intItemId
+				LEFT JOIN tblICInventoryReceiptItem IRI
+					ON IRI.intSourceId = SC.intTicketId and IRI.intItemId = Item.intItemId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
 					AND SpotTicket.intEntityId = @intEntityId
 				
