@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspEMEACustomerExport]
+﻿CREATE PROCEDURE [dbo].[uspEMEACustomerExport]
 	@dtmFrom	date,
 	@dtmTo		date
 AS

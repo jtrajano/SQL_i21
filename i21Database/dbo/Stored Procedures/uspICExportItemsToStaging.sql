@@ -1,4 +1,4 @@
-alter PROCEDURE [dbo].[uspICExportItemsToStaging]
+CREATE PROCEDURE [dbo].[uspICExportItemsToStaging]
 	@dtmDate DATETIME = NULL,
 	@ysnIncludeDetails BIT = 1
 AS
