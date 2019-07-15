@@ -10,7 +10,7 @@
 GO
 
 
-CREATE UNIQUE NONCLUSTERED INDEX [tblCFFactorTaxGroupXRef_UniqueCustomerState]
-    ON [dbo].[tblCFFactorTaxGroupXRef]([intCustomerId] ASC, [strState] ASC);
+CREATE UNIQUE NONCLUSTERED INDEX [tblCFFactorTaxGroupXRef_UniqueCustomerStateCategory]
+    ON [dbo].[tblCFFactorTaxGroupXRef]([intCustomerId] ASC, [strState] ASC,  [intCategoryId] ASC);
 GO
 
