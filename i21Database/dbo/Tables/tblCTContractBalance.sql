@@ -24,6 +24,7 @@
 	,strContractDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strShipMethod						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strShipmentPeriod					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+	,strDeliveryMonth					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,dblFutures							NUMERIC(38,20)
 	,dblBasis							NUMERIC(38,20)
