@@ -36,7 +36,7 @@ BEGIN
 
 	INSERT INTO @GLEntriesNoError
 	SELECT * FROM @GLEntries 
-	WHERE strTransactionid 
+	WHERE strTransactionId 
 	NOT IN (SELECT strTransactionId FROM @FoundErrors)
 
 	EXEC uspGLBookEntries @GLEntriesNoError, @ysnPost, 1
