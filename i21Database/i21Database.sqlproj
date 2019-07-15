@@ -7742,6 +7742,7 @@
     <Build Include="dbo\Stored Procedures\uspSMSetExcessUserToDisabled.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCopyItemPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspCTItemContractReportItem.sql" />
+    <Build Include="dbo\Tables\tblTRPostResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
