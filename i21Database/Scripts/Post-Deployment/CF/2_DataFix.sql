@@ -63,4 +63,9 @@ BEGIN
 		ON [dbo].[tblCFCard]([intNetworkId] ASC, [strCardNumber] ASC) WITH (FILLFACTOR = 70);
 	END
 END
-	
+
+
+IF EXISTS(SELECT * FROM sys.indexes WHERE name = 'tblCFFactorTaxGroupXRef_UniqueCustomerState' AND object_id = OBJECT_ID('tblCFFactorTaxGroupXRef'))
+BEGIN
+	DROP INDEX tblCFFactorTaxGroupXRef_UniqueCustomerState ON tblCFFactorTaxGroupXRef;
+END
