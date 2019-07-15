@@ -1,7 +1,9 @@
-CREATE PROCEDURE [dbo].[uspICExportItemsToStaging]
+alter PROCEDURE [dbo].[uspICExportItemsToStaging]
 	@dtmDate DATETIME = NULL,
 	@ysnIncludeDetails BIT = 1
 AS
+
+SET @dtmDate = DATEADD(MI, DATEDIFF(MI, GETDATE(),  GETUTCDATE()), @dtmDate)
 
 DECLARE @Items TABLE(
 	intItemId INT, 
@@ -25,6 +27,7 @@ DECLARE @Items TABLE(
 	dtmDateModified DATETIME NULL,
 	dtmDate DATETIME
 )
+
 
 INSERT INTO @Items
 SELECT
