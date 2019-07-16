@@ -934,69 +934,6 @@ BEGIN TRY
         ,@BatchId  = @batchIdUsed
         ,@UserId   = @userId
 
-	--IF @recap = 0
-	--	BEGIN
-	--		BEGIN TRY
-	--			DECLARE @FinalGLEntries AS RecapTableType
-	--			DELETE FROM @FinalGLEntries
-
-	--			IF EXISTS ( SELECT TOP 1 1 FROM @FinalGLEntries)
-
-	--				DECLARE @InvalidGLEntries AS TABLE
-	--				(strTransactionId	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	--				,strText			NVARCHAR(150)  COLLATE Latin1_General_CI_AS NULL
-	--				,intErrorCode		INT
-	--				,strModuleName		NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL)
-
-	--				INSERT INTO @InvalidGLEntries
-	--					(strTransactionId
-	--					,strText
-	--					,intErrorCode
-	--					,strModuleName)
-	--				SELECT DISTINCT
-	--					strTransactionId
-	--					,strText
-	--					,intErrorCode
-	--					,strModuleName
-	--				FROM
-	--					[dbo].[fnGetGLEntriesErrors](@GLEntries)
-
-	--				SET @invalidCount = @invalidCount + ISNULL((SELECT COUNT(strTransactionId) FROM @InvalidGLEntries), 0)
-
-	--				INSERT INTO 
-	--						tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-	--					SELECT DISTINCT
-	--							strError				= IGLE.strText
-	--						,strTransactionType		= GLE.strTransactionType 
-	--						,strTransactionId		= IGLE.strTransactionId
-	--						,strBatchNumber			= GLE.strBatchId
-	--						,intTransactionId		= GLE.intTransactionId 
-	--					FROM
-	--						@InvalidGLEntries IGLE
-	--					LEFT OUTER JOIN
-	--						@GLEntries GLE
-	--							ON IGLE.strTransactionId = GLE.strTransactionId
-					
-
-	--				DELETE FROM @GLEntries
-	--				WHERE
-	--					strTransactionId IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
-
-	--				DELETE FROM @PostInvoiceData
-	--				WHERE
-	--					strInvoiceNumber IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
-
-	--				EXEC	dbo.uspGLBookEntries
-	--								@GLEntries		= @FinalGLEntries
-	--							,@ysnPost		= @post
-	--							,@XACT_ABORT_ON = @raiseError
-	--		END TRY
-	--		BEGIN CATCH
-	--			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-	--			GOTO Do_Rollback
-	--		END CATCH
-	--	END	
-
 	INSERT INTO @GLEntries
 		([dtmDate]
 		,[strBatchId]
