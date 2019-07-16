@@ -10,6 +10,23 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @blbLogo 			VARBINARY (MAX) = NULL
+      , @blbStretchedLogo 	VARBINARY (MAX) = NULL
+
+SELECT TOP 1 @blbLogo = U.blbFile 
+FROM tblSMUpload U
+INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+  AND A.strComment = 'Header'
+
+SELECT TOP 1 @blbStretchedLogo = U.blbFile 
+FROM tblSMUpload U
+INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+  AND A.strComment = 'Stretched Header'
+
+SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
+
 DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat <> 'Format 1 - MCP'
 INSERT INTO tblARInvoiceReportStagingTable (
 	   intInvoiceId
@@ -206,7 +223,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strCustomerReference		= INVOICEDETAIL.strCustomerReference
 	 , strLoadNumber			= INVOICEDETAIL.strLoadNumber
 	 , strTruckDriver			= INVOICEDETAIL.strTruckName
-	 , blbLogo					= LOGO.blbLogo
+	 , blbLogo					= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , strBOLNumberDetail		= INVOICEDETAIL.strBOLNumberDetail
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
@@ -234,7 +251,7 @@ INNER JOIN (
 		 , strZipPostalCode
 		 , strCountry
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-) LOCATION ON INV.intCompanyLocationId = [LOCATION].intCompanyLocationId
+) [LOCATION] ON INV.intCompanyLocationId = [LOCATION].intCompanyLocationId
 INNER JOIN (
 	SELECT intTermID
 		 , strTerm
@@ -458,11 +475,6 @@ LEFT JOIN(
 	FROM dbo.tblARInvoiceDetail WITH(NOLOCK)
 	WHERE  ysnAddonParent = 0
 ) ADDON ON INV.intInvoiceId = ADDON.intInvoiceId AND ADDON.strAddonDetailKey =  INVOICEDETAIL.strAddonDetailKey
-OUTER APPLY (
-	SELECT blbLogo = blbFile 
-	FROM tblSMUpload 
-	WHERE intAttachmentId = (SELECT TOP 1 intAttachmentId FROM tblSMAttachment WHERE strScreen = 'SystemManager.CompanyPreference' AND strComment = 'Header' ORDER BY intAttachmentId DESC)
-) LOGO
 OUTER APPLY (
 	SELECT strCustomerComments = LEFT(strMessage, LEN(strMessage) - 1)
 	FROM (

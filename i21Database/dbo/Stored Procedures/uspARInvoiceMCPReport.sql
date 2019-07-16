@@ -10,6 +10,23 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @blbLogo 			VARBINARY (MAX) = NULL
+      , @blbStretchedLogo 	VARBINARY (MAX) = NULL
+
+SELECT TOP 1 @blbLogo = U.blbFile 
+FROM tblSMUpload U
+INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+  AND A.strComment = 'Header'
+
+SELECT TOP 1 @blbStretchedLogo = U.blbFile 
+FROM tblSMUpload U
+INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+  AND A.strComment = 'Stretched Header'
+
+SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
+
 DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 1 - MCP'
 INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
@@ -120,7 +137,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 									THEN CONSUMPTIONSITE.strLocationName
 	   								  	ELSE REPLACE(dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0), 'Origin:', '')
 								  END
-	 , blbLogo					= LOGO.blbLogo
+	 , blbLogo					= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
@@ -266,8 +283,3 @@ OUTER APPLY (
 	WHERE DETAIL.intInvoiceId = INV.intInvoiceId
 		AND DETAIL.intTicketId IS NOT NULL
 ) TICKETDETAILS
-OUTER APPLY (
-	SELECT blbLogo = blbFile 
-	FROM tblSMUpload 
-	WHERE intAttachmentId = (SELECT TOP 1 intAttachmentId FROM tblSMAttachment WHERE strScreen = 'SystemManager.CompanyPreference' AND strComment = 'Header' ORDER BY intAttachmentId DESC)
-) LOGO
