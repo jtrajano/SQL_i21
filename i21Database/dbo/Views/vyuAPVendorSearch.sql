@@ -71,7 +71,9 @@ SELECT
 	left join tblSMApprovalList f
 		on f.intApprovalListId = a.intApprovalListId
 	left join tblSMTerm g
-		on g.intTermID = e.intTermsId
+		on g.intTermID = a.intTermsId --WILL GET THE DEFAULT TERM VALUE OF THE VENDOR
+	left join tblSMTerm g2
+		on g2.intTermID = e.intTermsId --WILL GET THE DEFAULT TERM VALUE OF THE LOCATION
 	left join tblSMTaxCode h
 		on h.intTaxCodeId = a.intTaxCodeId
 	left join tblSMPaymentMethod i

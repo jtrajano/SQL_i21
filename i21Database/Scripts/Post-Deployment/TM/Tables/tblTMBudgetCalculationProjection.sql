@@ -3,11 +3,12 @@ GO
 PRINT 'START ALTERING tblTMBudgetCalculationProjection'
 GO
 
-IF NOT EXISTS(SELECT COUNT(1) 
+IF (0 = (SELECT COUNT(1) 
     FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
     WHERE CONSTRAINT_NAME='tblTMBudgetCalculationProjection_Unique_intClockId'  
-)
+))
 BEGIN
+	PRINT 'STARTED ALTERING tblTMBudgetCalculationProjection'
 
 	--VERIFY DUPLICATES > 
 	SELECT intClockId AS DUPLICATE_CLOCK_ID FROM tblTMBudgetCalculationProjection GROUP BY intClockId HAVING COUNT(1) > 1 
@@ -43,7 +44,7 @@ BEGIN
 	ADD CONSTRAINT tblTMBudgetCalculationProjection_Unique_intClockId UNIQUE (intClockId);
 	SELECT 'END ADD UNIQUE CONTRAINTS' AS PROCESS
 
-
+	PRINT 'ENDED ALTERING tblTMBudgetCalculationProjection'
 END
 
 

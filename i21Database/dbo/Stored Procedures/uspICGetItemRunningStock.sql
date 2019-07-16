@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICGetItemRunningStock]
+CREATE PROCEDURE [dbo].[uspICGetItemRunningStock]
 	@intItemId AS INT,
 	@intLocationId AS INT,
 	@intSubLocationId AS INT = NULL,

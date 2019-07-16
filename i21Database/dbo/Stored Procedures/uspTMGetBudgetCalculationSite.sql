@@ -74,7 +74,8 @@ BEGIN
 		,intEntityCustomerId = C.intEntityId
 		,A.intLocationId
 		,intSiteItemId = A.intProduct
-		,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(G.dblBudgetAmount,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+		--,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(G.dblBudgetAmount,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+		,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(K.dblMonthlyBudget,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 		,A.intFillMethodId
 		--,dblPrice = 
 		--,dblEstimatedBudget = 
@@ -89,7 +90,8 @@ BEGIN
 									(30 * ISNULL(@intNumberOfMonthsInBudget,0) * (CASE WHEN MONTH(GETDATE()) >= E.intBeginSummerMonth AND  MONTH(GETDATE()) < E.intBeginWinterMonth THEN ISNULL(A.dblSummerDailyUse,0) ELSE ISNULL(A.dblWinterDailyUse,0.0) END) )
 								END
 								)
-		,dblCurrentBudget = ISNULL(G.dblBudgetAmount,0.0)
+		--,dblCurrentBudget = ISNULL(G.dblBudgetAmount,0.0)
+		,dblCurrentBudget = ISNULL(K.dblMonthlyBudget,0.0)
 	INTO #tmpStage1
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
