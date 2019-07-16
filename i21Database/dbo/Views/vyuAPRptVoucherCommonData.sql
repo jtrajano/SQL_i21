@@ -20,6 +20,7 @@ A.intBillId
 ,strLocationName = TranLoc.strLocationName
 ,Bank.strBankName
 ,BankAccount.strBankAccountHolder
+,dbo.fnAPMaskBankAccountNos(dbo.fnAESDecryptASym(BankAccount.strBankAccountNo)) AS strBankAccountNo
 ,BankAccount.strIBAN
 ,BankAccount.strSWIFT
 ,Term.strTerm
