@@ -222,9 +222,9 @@ FROM
 ) patClearing
 LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
 		ON B.[intEntityId] = patClearing.[intEntityVendorId]
-INNER JOIN tblSMCompanyLocation compLoc
+LEFT JOIN tblSMCompanyLocation compLoc
 		ON patClearing.intLocationId = compLoc.intCompanyLocationId
-INNER JOIN tblICItem item
+LEFT JOIN tblICItem item
 	ON item.intItemId = patClearing.intItemId
 GROUP BY
 	patClearing.intEntityVendorId
@@ -238,5 +238,5 @@ GROUP BY
 	,C.strName
 	,compLoc.strLocationName
 HAVING 
-	(SUM(patClearing.dblRefundTotal) - SUM(patClearing.dblVoucherQty)) != 0
+	(SUM(patClearing.dblRefundQty) - SUM(patClearing.dblVoucherQty)) != 0
 OR	(SUM(patClearing.dblRefundTotal) - SUM(patClearing.dblVoucherTotal)) != 0
