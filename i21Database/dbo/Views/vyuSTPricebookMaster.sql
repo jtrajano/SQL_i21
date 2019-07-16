@@ -19,7 +19,11 @@ SELECT DISTINCT
 	, Pricing.dblLastCost
 	, Pricing.dblStandardCost
 	, Pricing.dblAverageCost
-	--, Pricing.dblGrossMargin
+	, CASE
+		WHEN Pricing.dblSalePrice > 0
+			THEN (Pricing.dblSalePrice - Pricing.dblLastCost) / Pricing.dblSalePrice
+		ELSE 0
+	END AS dblGrossMargin
 
 	-- Item Location
 	, ItemLoc.intItemLocationId
