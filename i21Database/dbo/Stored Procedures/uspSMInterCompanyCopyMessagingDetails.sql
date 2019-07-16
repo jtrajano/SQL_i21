@@ -362,7 +362,7 @@ BEGIN
 				INSERT INTO tblSMInterCompanyTransferLogForComment (
 					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
 				)
-				VALUES ('tblSMComment', @intCommentId, @intNewCommentId, NULL)
+				VALUES ('tblSMComment', @intCommentId, @intNewCommentId, @intDestinationCompanyId)
 
 				----------------------------------------ACTIVITY COMMENTS NOTIFICATION----------------------------------------
 				--copy all notification for this comment, greater than one, due to we can mention any user
@@ -448,6 +448,8 @@ BEGIN
 			--	SELECT ysnPublic FROM tblSMActivity WHERE intActivityId = @intSourceActivityId
 			--)
 			--WHERE intActivityId = @intDestinationActivityId
+
+			--ALWAYS UPDATE  SUBJECT AND PUBLIC
 			SET @sql = N'
 				UPDATE ' + @strDestinationDatabaseName + '.dbo.[tblSMActivity] SET 
 				strSubject = (
@@ -497,8 +499,8 @@ BEGIN
 				INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMActivityAttendee] b ON a.intSourceRecordId = b.intActivityAttendeeId
 				INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee] c ON a.intDestinationRecordId = c.intActivityAttendeeId
 				WHERE (
-					b.intActivityId = ' + CONVERT(VARCHAR, @intSourceTransactionId) + ' AND
-					c.intActivityId = ' + CONVERT(VARCHAR, @intDestinationTransactionId) + ' AND
+					b.intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + ' AND
+					c.intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId) + ' AND
 					ISNULL(a.intDestinationCompanyId, 0) = ' + CONVERT(VARCHAR, ISNULL(@intDestinationCompanyId, 0)) + ' AND
 					a.strTable = ''tblSMActivityAttendee''
 				)
@@ -513,8 +515,8 @@ BEGIN
 				INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee] b ON a.intSourceRecordId = b.intActivityAttendeeId
 				INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMActivityAttendee] c ON a.intDestinationRecordId = c.intActivityAttendeeId
 				WHERE (
-					b.intActivityId = ' + CONVERT(VARCHAR, @intDestinationTransactionId) + ' AND
-					c.intActivityId = ' + CONVERT(VARCHAR, @intSourceTransactionId) + ' AND
+					b.intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId) + ' AND
+					c.intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + ' AND
 					ISNULL(a.intDestinationCompanyId, 0) = ' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ' AND
 					a.strTable = ''tblSMActivityAttendee''
 				)
@@ -663,7 +665,7 @@ BEGIN
 				INSERT INTO tblSMInterCompanyTransferLogForComment (
 					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
 				)
-				VALUES ('tblSMComment', @intCommentId, @intNewCommentId, NULL)
+				VALUES ('tblSMComment', @intCommentId, @intNewCommentId, @intDestinationCompanyId)
 
 				----------------------------------------ACTIVITY COMMENTS NOTIFICATION----------------------------------------
 				--copy all notification for this comment, greater than one, due to we can mention any user

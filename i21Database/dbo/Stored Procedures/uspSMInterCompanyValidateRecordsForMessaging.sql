@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspSMInterCompanyValidateRecordsForMessaging
 @intInterCompanyMappingId INT,
-@intFromCompanyMappingId INT = NULL,
+@intInvokedFromInterCompanyId INT = NULL,
 @strFinishedTransactionId NVARCHAR(MAX) = ',',
 @strUpdatedTransactionId NVARCHAR(MAX) = '' OUTPUT
 AS
@@ -39,41 +39,50 @@ BEGIN
 		
 	IF ISNULL(@intCurrentTransactionId, 0) <> 0 AND ISNULL(@intReferenceTransactionId, 0) <> 0
 	BEGIN
-		--CHECK IF THE CURRENT and REFERENCE transactionId is already executed
-		IF CHARINDEX(',' + CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) > 0 AND
-		   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) > 0
+		SELECT @intCurrentCompanyId = intInterCompanyId FROM tblSMInterCompany WHERE UPPER(strDatabaseName) = UPPER(DB_NAME()) AND UPPER(strServerName) = UPPER(@@SERVERNAME);
+
+		--CHECK IF THE CURRENT and REFERENCE transactionId is already executed for current database
+		IF CHARINDEX(',' + CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',', @strFinishedTransactionId) > 0 AND
+		   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',', @strFinishedTransactionId) > 0 AND
+		   (ISNULL(@intReferenceCompanyId, 0) = 0 OR (ISNULL(@intReferenceCompanyId, 0) <> 0 AND ISNULL(@intReferenceCompanyId, 0) <> @intCurrentCompanyId))
 		BEGIN
 			RETURN 1
 		END
 		ELSE
 		BEGIN
-			
-		
 			--SAME DATABASE
 			IF ISNULL(@intReferenceCompanyId, 0) = 0
-			BEGIN
-				--PRINT('------COPY RECORDS IN THE SAME DATABASE-------')
-				
+			BEGIN				
 				--A <-> B
 				EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intCurrentTransactionId, @intReferenceTransactionId
 				EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intReferenceTransactionId, @intCurrentTransactionId
 
+				SET @strFinishedTransactionId = @strFinishedTransactionId + 
+											CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 
+											CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',';
 			END
 			ELSE
 			BEGIN
-				--PRINT('------COPY RECORDS TO THE OTHER DATABASE-------')
+				--CHECK IF THE CURRENT and REFERENCE transactionId is already executed in the other database
+				IF CHARINDEX(',' + CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',', @strFinishedTransactionId) = 0 AND
+				   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) = 0 AND
+				   (ISNULL(@intReferenceCompanyId, 0) <> 0 AND ISNULL(@intReferenceCompanyId, 0) <> @intCurrentCompanyId)
+				BEGIN
+					EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId
 
-				EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId
+					SET @strFinishedTransactionId = @strFinishedTransactionId + 
+												CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 
+												CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',';
+
+					--we need to invoke the sp in the reference database to copy the files from intReferenceTransactionId to its siblings
+					INSERT INTO #TempInterCompanyMapping(intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId) 
+					VALUES (@intInterCompanyMappingIdToUse, @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId)
+				END
 			END
 
-			SELECT @intCurrentCompanyId = intInterCompanyId FROM tblSMInterCompany WHERE UPPER(strDatabaseName) = UPPER(DB_NAME()) AND UPPER(strServerName) = UPPER(@@SERVERNAME);
-
-			SET @strFinishedTransactionId = @strFinishedTransactionId + 
-											CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',' + 
-											CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',';
-
-			--FETCH other records for InterCompanyMapping in the current database--
-			--PRINT('------CHECK RECORDS TO THE tblSMInterCompanyMapping-------')
+			
+			--CHECK SIBLINGS--
+			--FETCH other records for InterCompanyMapping in the CURRENT database--
 
 			--Check if current/reference is a source OR a reference in the current database / C <-> B, need to check B <-> A
 			INSERT INTO #TempInterCompanyMapping(intInterCompanyMappingId, intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId)
@@ -114,19 +123,20 @@ BEGIN
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 				
-				--RUN ONLY IF CURRENT DATABASE IS VALID
+				--RUN ONLY IF THE CURRENT DATABASE IS VALID
 				IF ISNULL(@intCurrentCompanyId, 0) <> 0
 				BEGIN
-					IF ISNULL(@intReferenceCompanyId, 0) = 0
-					--CURRENT DATABASE
+					
+					--1: COPY THE SOURCE FILES TO DESTINATION
+					EXEC dbo.[uspSMInterCompanyValidateRecordsForMessaging] @intInterCompanyMappingIdToUse, @intCurrentCompanyId, @strFinishedTransactionId, @strUpdatedTransactionId = @strFinishedTransactionId OUTPUT;
+					
+
+					--2: INVOKE THE OTHER DATABASE SP TO COPY THE FILES TO ITS SIBLINGS
+					IF ISNULL(@intReferenceCompanyId, 0) <> 0
 					BEGIN
-						EXEC dbo.[uspSMInterCompanyValidateRecordsForMessaging] @intInterCompanyMappingIdToUse, @intCurrentCompanyId, @strFinishedTransactionId, @strUpdatedTransactionId = @strFinishedTransactionId OUTPUT;
-					END
-					ELSE
-					--OTHER DATABASE
-					BEGIN
-						--PRINT('------EXECUTE [uspSMInterCompanyValidateRecordsForMessaging] IN THE OTHER DATABASE-------')
-						--ALL tblSMInterCompany in each databases should have the same primary keys, but to be sure, lets get the intInterCompanyId based on the server and database name
+
+						----EXECUTE [uspSMInterCompanyValidateRecordsForMessaging] IN THE OTHER DATABASE
+						----ALL tblSMInterCompany in each databases should have the same primary keys, but to be sure, lets get the intInterCompanyId based on the server and database name
 						SELECT 
 							@strReferenceServerName = strServerName, 
 							@strReferenceDatabaseName = strDatabaseName 
@@ -141,13 +151,12 @@ BEGIN
 											WHERE UPPER(strServerName) = UPPER(''' + @strReferenceServerName + ''') AND UPPER(strDatabaseName) = UPPER(''' + @strReferenceDatabaseName + ''')';
 
 							EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intReferenceActualInterCompanyId OUTPUT;
-
-						
 						
 							--company id in the other database should be equal in the current databae
 							--do not invoke the sp in the destination database if it is the db that invoked this sp
-							IF ISNULL(@intReferenceActualInterCompanyId, 0) = @intReferenceCompanyId AND 
-							   (ISNULL(@intFromCompanyMappingId, 0) <> 0 AND ISNULL(@intFromCompanyMappingId, 0) <> @intReferenceCompanyId)
+							IF ISNULL(@intReferenceActualInterCompanyId, 0) = @intReferenceCompanyId AND (
+								ISNULL(@intInvokedFromInterCompanyId, 0) = 0 OR 
+								(ISNULL(@intInvokedFromInterCompanyId, 0) <> 0 AND ISNULL(@intInvokedFromInterCompanyId, 0) <> @intReferenceCompanyId))
 							BEGIN
 
 								SET @intInterCompanyMappingIdToUse = 0;
@@ -160,10 +169,13 @@ BEGIN
 
 								EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intInterCompanyMappingIdToUse OUTPUT;
 								
-								--execute the sp with the key and 1 parameters in the other database.
+								--execute the sp in the other database.
 								IF ISNULL(@intInterCompanyMappingIdToUse, 0) <> 0
 								BEGIN
-									SET @sql = N'EXEC ' + @strReferenceDatabaseName + 'dbo.[uspSMInterCompanyValidateRecordsForMessaging] ' + CONVERT(VARCHAR, @intInterCompanyMappingIdToUse) + ', ' + CONVERT(VARCHAR, @intCurrentCompanyId);
+									SET @sql = N'EXEC ' + @strReferenceDatabaseName + '.dbo.[uspSMInterCompanyValidateRecordsForMessaging] ' + 
+														 CONVERT(VARCHAR, @intInterCompanyMappingIdToUse) + ', ' +
+														 CONVERT(VARCHAR, @intCurrentCompanyId) + ', ''' +
+														 CONVERT(VARCHAR, @strFinishedTransactionId) + ''''
 									EXEC sp_executesql @sql;
 								END
 							END
