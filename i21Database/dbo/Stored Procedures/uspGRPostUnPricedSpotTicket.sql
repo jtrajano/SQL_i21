@@ -146,6 +146,7 @@ BEGIN TRY
 					,[dblCostUnitQty]      = 1
 					,[dblUnitQty]          = 1
 					,[dblNetWeight]        = 0
+					,[intInventoryReceiptItemId] = NULL
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC 
 					ON SC.intTicketId = SpotTicket.intTicketId
@@ -178,6 +179,7 @@ BEGIN TRY
 					,[dblCostUnitQty]      = 1
 					,[dblUnitQty]          = 1
 					,[dblNetWeight]		   = 0
+					,[intInventoryReceiptItemId] = NULL
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC 
 					ON SC.intTicketId = SpotTicket.intTicketId
@@ -727,4 +729,3 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
-
