@@ -178,9 +178,8 @@ BEGIN TRY
 	  ,InvTran.dtmDate	  
 	  ,@dtmEndDate AS dtmEndDate
 	  ,dblQuantity = CASE
-					 	WHEN SUM(ISNULL(ShipmentItem.dblDestinationNet, 0)) = 0 OR SUM(ShipmentItem.dblDestinationNet * 1) > SUM(CD.dblQuantity)
-					 		THEN SUM(InvTran.dblQty * - 1) 
-					 	ELSE SUM(ShipmentItem.dblDestinationNet * 1)
+			 			WHEN ISNULL(INV.ysnPosted, 0) = 1 AND CH.intWeightId = 2 THEN SUM(ShipmentItem.dblDestinationNet * 1)
+			 			ELSE SUM(InvTran.dblQty * - 1) 
 					 END
 	  ,0
 	  ,COUNT(DISTINCT Shipment.intInventoryShipmentId)
@@ -193,7 +192,13 @@ BEGIN TRY
 	   JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
 	   JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo 
 	   AND CD.intContractHeaderId = CH.intContractHeaderId
-	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'
+	   LEFT JOIN 
+	   (
+			SELECT ID.intInventoryShipmentItemId, IV.ysnPosted
+			FROM tblARInvoice IV
+			INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+	   ) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId	   
+	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'	   
 	   	AND InvTran.ysnIsUnposted = 0
 	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND intContractTypeId = 2
@@ -204,6 +209,8 @@ BEGIN TRY
 	   	,CD.intContractDetailId
 		,InvTran.dtmDate
 		,Shipment.intInventoryShipmentId
+		,INV.ysnPosted
+		,CH.intWeightId
 		
 	INSERT INTO @Shipment
 	  (
