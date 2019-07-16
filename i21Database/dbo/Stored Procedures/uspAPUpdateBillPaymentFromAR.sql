@@ -30,15 +30,15 @@ SET ANSI_WARNINGS OFF
 UPDATE C
 SET 
 	C.dblAmountDue = CASE WHEN @post = 1 
-						THEN C.dblAmountDue - (ABS(B.dblPayment) + ABS(B.dblInterest) - ABS(B.dblDiscount))--(C.dblTotal + C.dblInterest) - (C.dblPayment + C.dblDiscount),
-						ELSE C.dblAmountDue + (ABS(B.dblPayment) + ABS(B.dblInterest) - ABS(B.dblDiscount))
+						THEN C.dblAmountDue - (ABS(B.dblPayment) - ABS(B.dblInterest) + ABS(B.dblDiscount))--(C.dblTotal + C.dblInterest) - (C.dblPayment + C.dblDiscount),
+						ELSE C.dblAmountDue + (ABS(B.dblPayment) - ABS(B.dblInterest) + ABS(B.dblDiscount))
 					END,
-	C.ysnPaid = CASE WHEN @post = 1 AND C.dblAmountDue - (ABS(B.dblPayment) + ABS(B.dblInterest) - ABS(B.dblDiscount)) = 0 THEN 1 ELSE 0 END,
+	C.ysnPaid = CASE WHEN @post = 1 AND C.dblAmountDue - (ABS(B.dblPayment) - ABS(B.dblInterest) + ABS(B.dblDiscount)) = 0 THEN 1 ELSE 0 END,
 	C.dblPayment = CASE WHEN @post = 1
-						THEN C.dblPayment + (ABS(B.dblPayment) + ABS(B.dblInterest) - ABS(B.dblDiscount))
-						ELSE C.dblPayment - (ABS(B.dblPayment) + ABS(B.dblInterest) - ABS(B.dblDiscount))
+						THEN C.dblPayment + (ABS(B.dblPayment) - ABS(B.dblInterest) + ABS(B.dblDiscount))
+						ELSE C.dblPayment - (ABS(B.dblPayment) - ABS(B.dblInterest) + ABS(B.dblDiscount))
 					END,
-	C.dtmDatePaid = CASE WHEN @post = 1 AND C.dblAmountDue - (ABS(B.dblPayment) + ABS(B.dblInterest) - ABS(B.dblDiscount)) = 0 
+	C.dtmDatePaid = CASE WHEN @post = 1 AND C.dblAmountDue - (ABS(B.dblPayment) - ABS(B.dblInterest) + ABS(B.dblDiscount)) = 0 
 					THEN A.dtmDatePaid
 					ELSE NULL 
 					END
