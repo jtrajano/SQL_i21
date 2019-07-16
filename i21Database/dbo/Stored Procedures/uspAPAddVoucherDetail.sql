@@ -208,7 +208,7 @@ SELECT TOP 100 PERCENT
 											END
 	,dblRate							=	CASE WHEN A.intCurrencyId != compPref.intDefaultCurrencyId
 												THEN (
-													CASE WHEN A.dblExchangeRate != 0 THEN A.dblExchangeRate --use the value we recieved for exchange rate if valid
+													CASE WHEN A.dblExchangeRate != 0 THEN ISNULL(NULLIF(A.dblExchangeRate,0),1) --use the value we recieved for exchange rate if valid
 													ELSE defaultExchangeRate.dblExchangeRate
 													END
 												)
