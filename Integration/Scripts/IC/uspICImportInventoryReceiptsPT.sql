@@ -71,7 +71,8 @@ BEGIN
 			   ,[intEntityId]
 			   ,[intConcurrencyId]
 			   ,strReceiptOriginId
-			   ,ysnOrigin)
+			   ,ysnOrigin
+			   ,dtmDateCreated)
 			SELECT
 					'Direct'--[strReceiptType]
 					,0--[intSourceType]
@@ -101,6 +102,7 @@ BEGIN
 					,0--[intConcurrencyId]
 					,PHS.ptphs_ord_no--strReceiptOriginId
 					,0
+					,GETUTCDATE()
 			FROM ptphsmst PHS
 			LEFT JOIN tblICInventoryReceipt Inv ON PHS.ptphs_ord_no COLLATE Latin1_General_CI_AS = Inv.strReceiptOriginId COLLATE Latin1_General_CI_AS
 			INNER JOIN tblAPVendor Vnd ON  strVendorId COLLATE Latin1_General_CI_AS = PHS.ptphs_vnd_no COLLATE Latin1_General_CI_AS

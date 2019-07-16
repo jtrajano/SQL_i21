@@ -166,7 +166,9 @@ BEGIN
 		strCostType,
 		intM2MComputationId,
 		ysnUseWeighScales ,
-		intTonnageTaxUOMId, ysnLotWeightsRequired)
+		intTonnageTaxUOMId, 
+		ysnLotWeightsRequired, 
+		dtmDateCreated)
 	SELECT @NewItemNo,
 		strType,
 		strDescription,
@@ -302,7 +304,8 @@ BEGIN
 		intM2MComputationId,
 		ysnUseWeighScales ,
 		intTonnageTaxUOMId,
-		ysnLotWeightsRequired = CASE WHEN strLotTracking = 'No' THEN 0 ELSE ysnLotWeightsRequired END
+		ysnLotWeightsRequired = CASE WHEN strLotTracking = 'No' THEN 0 ELSE ysnLotWeightsRequired END,
+		GETUTCDATE()
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
