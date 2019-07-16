@@ -7835,6 +7835,14 @@
     <Build Include="dbo\Views\vyuCTBookItem.sql" />
     <Build Include="dbo\Tables\tblSTCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSetExcessUserToDisabled.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCopyItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTItemContractReportItem.sql" />
+    <Build Include="dbo\Tables\tblTRPostResult.sql" />
+    <Build Include="dbo\Tables\tblMFDemandImport.sql" />
+    <Build Include="dbo\Tables\tblMFDemandImportError.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFImportDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetDemandError.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

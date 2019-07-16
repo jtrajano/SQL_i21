@@ -1,5 +1,4 @@
-﻿
-CREATE VIEW [dbo].[vyuICGetInventoryTransfer]
+﻿CREATE VIEW [dbo].[vyuICGetInventoryTransfer]
 	AS 
 
 SELECT intInventoryTransferId
@@ -26,9 +25,12 @@ SELECT intInventoryTransferId
 	, UserEntity.strName
 	, InvTransfer.intSort
 	, InvTransfer.intConcurrencyId
+	, ShipVia.strShipVia
+	, InvTransfer.intShipViaId
 FROM tblICInventoryTransfer InvTransfer
 	LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = InvTransfer.intTransferredById
 	LEFT JOIN tblSMCompanyLocation FromLocation ON FromLocation.intCompanyLocationId = InvTransfer.intFromLocationId
 	LEFT JOIN tblSMCompanyLocation ToLocation ON ToLocation.intCompanyLocationId = InvTransfer.intToLocationId
 	LEFT JOIN tblICStatus InvStatus ON InvStatus.intStatusId = InvTransfer.intStatusId
 	LEFT JOIN tblEMEntity UserEntity ON UserEntity.intEntityId = InvTransfer.intEntityId
+	LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = InvTransfer.intShipViaId

@@ -3,6 +3,8 @@ CREATE PROCEDURE [dbo].[uspICExportItemsToStaging]
 	@ysnIncludeDetails BIT = 1
 AS
 
+SET @dtmDate = DATEADD(MI, DATEDIFF(MI, GETDATE(),  GETUTCDATE()), @dtmDate)
+
 DECLARE @Items TABLE(
 	intItemId INT, 
 	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
@@ -25,6 +27,7 @@ DECLARE @Items TABLE(
 	dtmDateModified DATETIME NULL,
 	dtmDate DATETIME
 )
+
 
 INSERT INTO @Items
 SELECT

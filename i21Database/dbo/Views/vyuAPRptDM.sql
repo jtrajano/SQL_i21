@@ -9,7 +9,7 @@ SELECT
 										THEN ItemContract.strContractItemName
 										ELSE ISNULL(Item.strDescription,'')
 									END
-		,strItemNo				=	Item.strItemNo
+		,strItemNo				=	ISNULL(Item.strItemNo, DMDetails.strMiscDescription)
 		,strBillOfLading		=	Receipt.strBillOfLading
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
 		,strAccountId			=	DetailAccount.strAccountId
@@ -24,16 +24,27 @@ SELECT
 		,strCostUOM				=	CASE WHEN DMDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
 		,strLPlant				=	LPlant.strSubLocationName
 		,intContractSeqId		=	ContractDetail.intContractSeq
+		,dblQtyOrdered			=	DMDetails.dblQtyOrdered
 		,dblQtyReceived			=	CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
 		,dblCost				=	DMDetails.dblCost
-		,dblTotal				=	DMDetails.dblTotal
+		,dblDetailTotal			=	DMDetails.dblTotal
+		,dblDiscount			=	DMDetails.dblDiscount
+		,dblDetailTax			=	DMDetails.dblTax
+		,dblTax					=	DM.dblTax
+		,dblTotal				=	DM.dblTotal
+		,dblPayment				=	DM.dblPayment
 		,dblNetShippedWeight	=	0 --DMDetails.dblNetShippedWeight
 		,dblWeightLoss			=	0 --dblWeightLoss
 		,dblLandedWeight		=	0 --CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
 		,dblFranchiseWeight		=	0 --DMDetails.dblFranchiseWeight
 		,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
 		,strERPPONumber			=	ContractDetail.strERPPONumber
+		,strPONumber			=	CASE 
+									WHEN DMDetails.intPurchaseDetailId > 0
+									THEN po.strPurchaseOrderNumber
+									ELSE NULL END
 		,strContainerNumber		=	LCointainer.strContainerNumber
+		,strShipVia				=	shipVia.strShipVia
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -50,7 +61,11 @@ SELECT
 			ON DMDetails.intCostUOMId = ItemCostUOM.intItemUOMId
 	LEFT JOIN tblICItemContract ItemContract INNER JOIN tblSMCountry ItemOriginCountry ON ItemContract.intCountryId = ItemOriginCountry.intCountryID
 			ON ContractDetail.intItemContractId = ItemContract.intItemContractId
+	LEFT JOIN (tblPOPurchaseDetail poDetail INNER JOIN tblPOPurchase po ON po.intPurchaseId = poDetail.intPurchaseId)
+			ON poDetail.intPurchaseDetailId = DMDetails.intPurchaseDetailId
 	LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
 	LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
+	LEFT JOIN tblSMShipVia shipVia
+			ON shipVia.intEntityId = DM.intShipViaId
 	WHERE DM.intTransactionType = 3

@@ -58,6 +58,8 @@ SELECT
 												END 
 												AS BIT
 											)
+	,FT.strFreightTerm
+	,CD.dtmEndDate
 FROM tblCTContractDetail CD
 CROSS JOIN tblCTCompanyPreference CP	
 JOIN tblSMCompanyLocation CL 
@@ -77,4 +79,6 @@ LEFT JOIN tblICItem Item
 LEFT JOIN tblICItemUOM ItemUOM
 	ON ItemUOM.intItemId = Item.intItemId
 		AND ItemUOM.ysnStockUnit = 1
+LEFT JOIN tblSMFreightTerms FT
+	ON FT.intFreightTermId = ISNULL(CD.intFreightTermId,CH.intFreightTermId)
 CROSS APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

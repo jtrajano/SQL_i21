@@ -35,7 +35,7 @@ DECLARE @intReportLogoHeight INT, @intReportLogoWidth INT;
 IF LTRIM(RTRIM(@xmlParam)) = '' 
 BEGIN
 --SET @xmlParam = NULL 
-	SELECT * FROM [vyuAPRptWeightClaimDM] WHERE intBillId = 0 --RETURN NOTHING TO RETURN SCHEMA
+	SELECT * FROM [vyuAPRptDM] WHERE intBillId = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 -- Create a table variable to hold the XML data. 		

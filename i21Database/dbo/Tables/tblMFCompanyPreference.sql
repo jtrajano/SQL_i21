@@ -78,5 +78,9 @@
 	ysnWorkOrderPlannedDateByBusinessDate BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnWorkOrderPlannedDateByBusinessDate] DEFAULT 1,
 	ysnConcatenateParentLotonProduction BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnConcatenateParentLotonProduction] DEFAULT 0,
 	ysnEnableInventoryAsOfDateBySnapshot BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnEnableInventoryAsOfDateBySnapshot] DEFAULT 0,
-    CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
+    strDemandImportDateTimeFormat nvarchar(50) COLLATE Latin1_General_CI_AS,
+	intMinimumDemandMonth INT,
+	intMaximumDemandMonth INT,
+	dblDemandGrowthPerc NUMERIC(18,6),
+	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

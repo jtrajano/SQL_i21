@@ -130,7 +130,7 @@ BEGIN TRY
 	SELECT	
 		[intItemId]						= SC.intItemId 
 		,[intItemLocationId]			= ICIL.intItemLocationId
-		,[dblDestinationQty]			= SC.dblQty
+		,[dblDestinationQty]			= SC.dblQty --CASE WHEN SCT.dblNetUnits > @dblQuantity THEN CASE WHEN SCT.dblNetUnits > (CD.dblScheduleQty + CD.dblAvailableQty) THEN CD.dblOriginalQty ELSE SC.dblQty END ELSE SC.dblQty END
 		,[intSourceId]					= 1
 		,[intInventoryShipmentId]		= SC.intTransactionHeaderId
 		,[intInventoryShipmentItemId]	= SC.intTransactionDetailId
