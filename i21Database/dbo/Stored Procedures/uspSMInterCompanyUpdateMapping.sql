@@ -7,6 +7,7 @@ AS
 
 BEGIN
 
+DECLARE @intInterCompanyMappingId INT;
 
 /*** Validations *****/
 if(isnull(@currentTransactionId,'') = '' and isnull(@referenceTransactionId,'') = '')										
@@ -44,12 +45,17 @@ begin try
 				end
 		end
 
-	/****
-		TODO: Call SP#2
-		pass @scope_identity(), @type = DMS/comment,
-	*****/
+		SET @intInterCompanyMappingId = SCOPE_IDENTITY()
 
 		commit tran
+
+
+		IF ISNULL(@intInterCompanyMappingId, 0) <> 0
+		BEGIN
+			EXEC dbo.[uspSMInterCompanyCopyRecords] @intInterCompanyMappingId, 'DMS';
+			EXEC dbo.[uspSMInterCompanyCopyRecords] @intInterCompanyMappingId, 'COMMENT';
+		END
+
 	end try
 		begin catch
 			if @@TRANCOUNT > 0
