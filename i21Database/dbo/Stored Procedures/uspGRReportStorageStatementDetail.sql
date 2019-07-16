@@ -8,7 +8,6 @@
 AS
 
 BEGIN TRY
-	
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @strStorageType NVARCHAR(100)
 	DECLARE @dblThereAfterCharge NUMERIC(18,10)
@@ -18,13 +17,19 @@ BEGIN TRY
 	DECLARE @strPrefix NVARCHAR(100)
 	DECLARE @intNumber INT
 	DECLARE @intUnitMeasureId INT
+	DECLARE @strCurrency VARCHAR(100)
+	DECLARE @strRate VARCHAR(100)
 
 	SELECT @strStorageType = strStorageTypeDescription 
 	FROM tblGRStorageType 
 	WHERE intStorageScheduleTypeId = @intStorageTypeId	
 	
-	SELECT @dblThereAfterCharge = ISNULL(dblStorageRate,0) 
-	FROM tblGRStorageSchedulePeriod 
+	SELECT @dblThereAfterCharge = ISNULL(dblStorageRate,0), @strCurrency = CC.strCurrency, @strRate = strStorageRate
+	FROM tblGRStorageSchedulePeriod SSP
+	INNER JOIN tblGRStorageScheduleRule SR
+		ON SR.intStorageScheduleRuleId = SSP.intStorageScheduleRule
+	INNER JOIN tblSMCurrency CC 
+		ON CC.intCurrencyID = SR.intCurrencyID
 	WHERE intStorageScheduleRule = @intStorageScheduleId 
 		AND strPeriodType='Thereafter'
 
@@ -46,6 +51,11 @@ BEGIN TRY
 	FROM tblSMStartingNumber 
 	WHERE [strTransactionType] = N'Storage Statement FormNo'
 
+	IF NOT EXISTS(SELECT * FROM tblGRStorageStatement WHERE strFormNumber = @strFormNumber)
+	BEGIN
+		SET @strFormNumber = NULL;
+	END
+
 	IF ISNULL(@strFormNumber,'') = ''
 	BEGIN
 		SELECT	CS.intCustomerStorageId,
@@ -62,7 +72,11 @@ BEGIN TRY
 			@strStorageType AS strStorageType,
 			dbo.fnRemoveTrailingZeroes(@dblThereAfterCharge) AS dblCharges,
 			CONVERT(NVARCHAR,@dtmTerminationOfReceipt,101) AS dtmTerminationOfReceipt,
-			'Dry ' + UOM.strUnitMeasure AS strDryUOM
+			'Dry ' + UOM.strUnitMeasure AS strDryUOM,
+			CONVERT(NVARCHAR,@dtmTerminationOfReceipt + 1,101)dtmThereaferStart,
+			UOM.strUnitMeasure,
+			@strCurrency strCurrency,
+			@strRate strStorageRate
 		FROM tblGRCustomerStorage CS
 		JOIN tblICCommodity COM 
 			ON COM.intCommodityId = CS.intCommodityId
@@ -92,7 +106,6 @@ BEGIN TRY
 
 	IF @strType = 'Print'
 	BEGIN
-
 			INSERT INTO [dbo].[tblGRStorageStatement]
 			(	
 				[strFormNumber],
@@ -210,10 +223,22 @@ BEGIN TRY
 			ST.strStorageType AS strStorageType,
 			dbo.fnRemoveTrailingZeroes(dblCharges) AS dblCharges,
 			CONVERT(NVARCHAR,dtmTerminationOfReceipt,101) AS dtmTerminationOfReceipt,
-			('Dry ' + (SELECT strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = ST.intUnitMeasureId)) AS strDryUOM
+			('Dry ' + strUnitMeasure) AS strDryUOM,
+			CONVERT(NVARCHAR,dtmTerminationOfReceipt + 1,101) dtmThereaferStart,
+			UOM.strUnitMeasure,
+			strCurrency,
+			strStorageRate
 		FROM tblGRStorageStatement ST
 		JOIN tblGRCustomerStorage CS 
 			ON CS.intCustomerStorageId = ST.intCustomerStorageId 
+		JOIN tblICUnitMeasure UOM
+			ON UOM.intUnitMeasureId = ST.intUnitMeasureId
+		JOIN tblGRStorageSchedulePeriod SP
+			ON SP.intStorageScheduleRule = CS.intStorageScheduleId
+		JOIN tblGRStorageScheduleRule SR
+			ON SP.intStorageScheduleRule = SP.intStorageScheduleRule
+		JOIN tblSMCurrency CC
+			ON CC.intCurrencyID = SP.intConcurrencyId
 		WHERE ST.strFormNumber = @strFormNumber
 		ORDER BY intStorageStatementId
 	END
