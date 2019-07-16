@@ -45,6 +45,8 @@ BEGIN
 		,strNewOwnerName NVARCHAR(100)
 		,dtmNewDueDate DATETIME
 		,dtmOldDueDate DATETIME
+		,strOldLoadNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewLoadNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	CREATE TABLE #tempLotHistoryFinal (
@@ -85,6 +87,8 @@ BEGIN
 		,strNewOwnerName NVARCHAR(100)
 		,dtmNewDueDate DATETIME
 		,dtmOldDueDate DATETIME
+		,strOldLoadNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewLoadNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	DECLARE @dblPrimaryQty NUMERIC(38, 20)
@@ -195,8 +199,10 @@ BEGIN
 		,ilt.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
-		,NULL AS dtmNewDueDate 
+		,NULL AS dtmNewDueDate
 		,NULL AS dtmOldDueDate
+		,NULL AS strNewLoadNo
+		,NULL AS strOldLoadNo
 	FROM tblICLot l
 	JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -224,7 +230,7 @@ BEGIN
 	LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
 	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 	WHERE l.intLotId = @intLotId
-	and ilt.intTransactionTypeId<>26
+		AND ilt.intTransactionTypeId <> 26
 
 	INSERT INTO #tempLotHistory
 	SELECT ilt.dtmCreated AS dtmDateTime
@@ -314,8 +320,10 @@ BEGIN
 		,ilt.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
-		,NULL As dtmNewDueDate
-		,NULL As dtmOldDueDate
+		,NULL AS dtmNewDueDate
+		,NULL AS dtmOldDueDate
+		,NULL AS strNewLoadNo
+		,NULL AS strOldLoadNo
 	FROM tblICLot l
 	JOIN tblICInventoryTransactionStorage ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -482,8 +490,10 @@ BEGIN
 			,ilt.dtmDate AS dtmTransactionDate
 			,NULL AS strOldOwnerName
 			,NULL AS strNewOwnerName
-			,NULL As dtmNewDueDate
-			,NULL As dtmOldDueDate
+			,NULL AS dtmNewDueDate
+			,NULL AS dtmOldDueDate
+			,NULL AS strNewLoadNo
+			,NULL AS strOldLoadNo
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -511,7 +521,7 @@ BEGIN
 		LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
 		LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 		WHERE l.intLotId = @intLotId1
-		and ilt.intTransactionTypeId<>26
+			AND ilt.intTransactionTypeId <> 26
 			AND ilt.intInventoryTransactionId < @intInventoryTransactionId
 
 		SELECT @intSplitFromLotId = NULL
@@ -572,8 +582,10 @@ BEGIN
 		,ia.dtmAdjustmentDate AS dtmTransactionDate
 		,e1.strEntityNo + ' - ' + e1.strName AS strOldOwnerName
 		,e2.strEntityNo + ' - ' + e2.strName AS strNewOwnerName
-		,NULL As dtmNewDueDate
-		,NULL As dtmOldDueDate
+		,NULL AS dtmNewDueDate
+		,NULL AS dtmOldDueDate
+		,NULL AS strNewLoadNo
+		,NULL AS strOldLoadNo
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
@@ -644,8 +656,10 @@ BEGIN
 		,IA.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
-		,IA.dtmNewDueDate As dtmNewDueDate
-		,IA.dtmOldDueDate As dtmOldDueDate
+		,IA.dtmNewDueDate AS dtmNewDueDate
+		,IA.dtmOldDueDate AS dtmOldDueDate
+		,IA.strNewLoadNo AS strNewLoadNo
+		,IA.strOldLoadNo AS strOldLoadNo
 	FROM tblMFInventoryAdjustment IA
 	JOIN tblICLot L ON L.intLotId = IA.intSourceLotId
 	JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -659,9 +673,12 @@ BEGIN
 	LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = IA.intUserId
 	WHERE L.intLotId = @intLotId
 		AND (
-			IA.intTransactionTypeId = 101
-			OR IA.intTransactionTypeId = 102
-			OR IA.intTransactionTypeId = 103
+			IA.intTransactionTypeId IN (
+				101
+				,102
+				,103
+				,105
+				)
 			)
 
 	INSERT INTO #tempLotHistoryFinal (
@@ -701,6 +718,8 @@ BEGIN
 		,strNewOwnerName
 		,dtmNewDueDate
 		,dtmOldDueDate
+		,strNewLoadNo
+		,strOldLoadNo
 		)
 	SELECT dtmDateTime
 		,strLotNo
@@ -738,6 +757,8 @@ BEGIN
 		,strNewOwnerName
 		,dtmNewDueDate
 		,dtmOldDueDate
+		,strNewLoadNo
+		,strOldLoadNo
 	FROM #tempLotHistory LH
 	ORDER BY LH.dtmDateTime ASC
 

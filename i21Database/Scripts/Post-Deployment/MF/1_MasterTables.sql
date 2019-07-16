@@ -3738,3 +3738,17 @@ GO
 GO
 UPDATE tblMFItemChangeMap SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 105
+		) --Load No
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 105
+		,0
+		,0
+END
+GO

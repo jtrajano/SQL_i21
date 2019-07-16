@@ -44,6 +44,8 @@ BEGIN TRY
 		,@strVendorLotNumber NVARCHAR(50)
 		,@dtmOldDueDate DATETIME
 		,@intOldLoadId INT
+		,@strOldLoadNo NVARCHAR(50)
+		,@strNewLoadNo NVARCHAR(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -284,6 +286,40 @@ BEGIN TRY
 			UPDATE tblMFLotInventory
 			SET intLoadId = @intLoadId
 			WHERE intLotId = @intLotId
+
+			SELECT @strOldLoadNo = strLoadNumber
+			FROM tblLGLoad
+			WHERE intLoadId = @intOldLoadId
+
+			SELECT @strNewLoadNo = strLoadNumber
+			FROM tblLGLoad
+			WHERE intLoadId = @intLoadId
+
+			EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
+				,@intTransactionTypeId = 105
+				,@intItemId = @intItemId
+				,@intSourceLotId = @intLotId
+				,@intDestinationLotId = NULL
+				,@dblQty = NULL
+				,@intItemUOMId = NULL
+				,@intOldItemId = NULL
+				,@dtmOldExpiryDate = NULL
+				,@dtmNewExpiryDate = NULL
+				,@intOldLotStatusId = NULL
+				,@intNewLotStatusId = NULL
+				,@intUserId = @intUserId
+				,@strNote = @strNotes
+				,@strReason = @strReasonCode
+				,@intLocationId = @intLocationId
+				,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,@strOldLotAlias = NULL
+				,@strNewLotAlias = NULL
+				,@strOldVendorLotNumber = NULL
+				,@strNewVendorLotNumber = NULL
+				,@dtmOldDueDate = NULL
+				,@dtmNewDueDate = NULL
+				,@strOldLoadNo = @strOldLoadNo
+				,@strNewLoadNo = @strNewLoadNo
 		END
 
 		-- Container No & Notes(Remarks) update

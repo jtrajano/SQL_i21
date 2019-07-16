@@ -30,6 +30,8 @@
 	,@intWorkOrderProducedLotId INT = NULL
 	,@intWorkOrderId INT = NULL
 	,@intWorkOrderConsumedLotId INT=NULL
+	,@strOldLoadNo nvarchar(50)= NULL
+	,@strNewLoadNo nvarchar(50)= NULL
 	)
 AS
 BEGIN TRY
@@ -90,6 +92,8 @@ BEGIN TRY
 		,intWorkOrderProducedLotId
 		,intWorkOrderId
 		,intWorkOrderConsumedLotId
+		,strOldLoadNo
+		,strNewLoadNo
 		)
 	SELECT @dtmDate
 		,@intTransactionTypeId
@@ -124,6 +128,8 @@ BEGIN TRY
 		,@intWorkOrderProducedLotId
 		,@intWorkOrderId
 		,@intWorkOrderConsumedLotId
+		,@strOldLoadNo
+		,@strNewLoadNo
 
 	Update tblMFLotInventory
 	Set dtmLastMoveDate =@dtmDate

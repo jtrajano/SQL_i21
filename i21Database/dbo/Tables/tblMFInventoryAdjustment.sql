@@ -35,6 +35,8 @@
 	,intWorkOrderId INT 
 	,intWorkOrderConsumedLotId INT
 	,dtmDateCreated Datetime CONSTRAINT DF_tblMFInventoryAdjustment_dtmDateCreated Default (GETDATE())
+	,strOldLoadNo nvarchar(50) COLLATE Latin1_General_CI_AS
+	,strNewLoadNo nvarchar(50) COLLATE Latin1_General_CI_AS
 	,CONSTRAINT PK_tblMFInventoryAdjustment PRIMARY KEY (intAdjustmentId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intOldItemId FOREIGN KEY (intOldItemId) REFERENCES tblICItem(intItemId)
